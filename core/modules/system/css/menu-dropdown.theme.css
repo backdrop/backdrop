@@ -10,10 +10,10 @@
   margin: 0;
   padding: 0;
 }
-.menu-dropdown a,
-.menu-dropdown a:hover,
-.menu-dropdown a:focus,
-.menu-dropdown a:active {
+.js .menu-dropdown a,
+.js .menu-dropdown a:hover,
+.js .menu-dropdown a:focus,
+.js .menu-dropdown a:active {
   /* make room for the toggle button (sub indicator) */
   padding-right: 58px;
   font-weight: normal;
@@ -48,14 +48,14 @@
   content: '-';
 }
 
-@media (min-width: 768px) {
+@media (min-width: 48em) {
   /* Switch to desktop layout
   -----------------------------------------------
      These transform the menu tree from
      collapsible to desktop (navbar + dropdowns)
   -----------------------------------------------*/
   /* start... (it's not recommended editing these rules) */
-  .menu-dropdown ul {
+  .js .menu-dropdown ul {
     position: absolute;
     width: 12em;
     top: 1em;
@@ -166,7 +166,8 @@
   .menu-dropdown span.scroll-down:hover {
     background: #eeeeee;
   }
-  .menu-dropdown span.scroll-up-arrow, .menu-dropdown span.scroll-down-arrow {
+  .menu-dropdown span.scroll-up-arrow,
+  .menu-dropdown span.scroll-down-arrow {
     position: absolute;
     top: 0;
     left: 50%;

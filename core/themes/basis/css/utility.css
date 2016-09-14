@@ -1,4 +1,72 @@
 /**
+ * @file
+ * CSS Utility (single purpose) classes
+ */
+
+/**
+ * Font related overrides
+ */
+.color-inverse {
+  color: #fff;
+}
+
+.font-size-xxxxlarge {
+  font-size: 2.625rem;
+}
+
+.font-size-xxxlarge {
+  font-size: 2.25rem;
+}
+
+.font-size-xxlarge {
+  font-size: 1.8125rem;
+}
+
+.font-size-xlarge {
+  font-size: 1.625rem;
+}
+
+.font-size-large {
+  font-size: 1.4375rem;
+}
+
+.font-size-medium {
+  font-size: 1.25rem;
+}
+
+.font-size-normal {
+  font-size: 1rem;
+}
+
+.font-size-small {
+  font-size: 0.875rem;
+}
+
+.font-size-xsmall {
+  font-size: 0.75rem;
+}
+
+.font-weight-bold {
+  font-weight: 600;
+}
+
+.font-weight-normal {
+  font-weight: 400;
+}
+
+.font-weight-light {
+  font-weight: 200;
+}
+
+.font-style-italic {
+  font-style: italic;
+}
+
+.font-style-normal {
+  font-style: normal;
+}
+
+/**
  * Custom utility classes
  */
 .disable-text-select {

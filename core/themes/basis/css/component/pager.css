@@ -20,6 +20,16 @@ ul.pager {
   clear: both;
 }
 
+.no-flexbox .pager-first,
+.no-flexbox .pager-previous,
+.no-flexbox .pager-ellipsis,
+.no-flexbox .pager-current,
+.no-flexbox .pager-next,
+.no-flexbox .pager-last,
+.no-flexbox .pager-item {
+  float: left;
+}
+
 .pager-item,
 .pager-ellipsis {
   display: none;
@@ -31,6 +41,7 @@ ul.pager {
     display: block;
   }
 }
+
 .pager-first,
 .pager-previous,
 .pager-ellipsis,
@@ -42,19 +53,82 @@ ul.pager {
   margin: 0;
 }
 
-.no-flexbox .pager-first,
-.no-flexbox .pager-previous,
-.no-flexbox .pager-ellipsis,
-.no-flexbox .pager-current,
-.no-flexbox .pager-next,
-.no-flexbox .pager-last,
-.no-flexbox .pager-item {
-  float: left;
-}
-
 .pager-ellipsis {
   padding-left: 0;
   padding-right: 0;
+}
+
+.pager-first a,
+.pager-previous a,
+.pager-next a,
+.pager-last a {
+  position: relative;
+  display: block;
+  text-indent: -9999em;
+  overflow: hidden;
+  width: 2.5em;
+}
+
+.pager-first a:before,
+.pager-first a:after,
+.pager-previous a:before,
+.pager-next a:before,
+.pager-last a:before,
+.pager-last a:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  width: 0.5em;
+  height: 0.5em;
+  border: 0.125rem solid #fff;
+  -webkit-transform: translate(-50%, -50%) rotate(45deg);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.pager-first a:before,
+.pager-first a:after,
+.pager-previous a:before {
+  border-top-width: 0;
+  border-right-width: 0;
+}
+
+.pager-last a:before,
+.pager-last a:after,
+.pager-next a:before {
+  border-bottom-width: 0;
+  border-left-width: 0;
+}
+
+.pager-first a:before,
+.pager-last a:before {
+  margin-left: -0.1875rem;
+}
+
+.pager-last a:after,
+.pager-first a:after {
+  margin-left: 0.1875rem;
+}
+
+@media (min-width: 48em) {
+  .pager-first a,
+  .pager-previous a,
+  .pager-next a,
+  .pager-last a {
+    text-indent: 0;
+    overflow: visible;
+    width: auto;
+  }
+
+  .pager-first a:before,
+  .pager-first a:after,
+  .pager-previous a:before,
+  .pager-next a:before,
+  .pager-last a:before,
+  .pager-last a:after {
+    display: none;
+  }
 }
 
 .pager-first a,

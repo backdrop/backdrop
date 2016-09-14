@@ -163,6 +163,10 @@ fieldset .fieldset-legend {
   color: #edf8ff;
 }
 
+.l-header a:active {
+  background: #114a75;
+}
+
 .block-system-header {
   /* Helps center .header-identity-wrapper on smaller screens */
   text-align: center;
@@ -284,34 +288,116 @@ fieldset .fieldset-legend {
 }
 
 .l-header .menu,
-.l-header .leaf {
+.l-header .menu > li {
   text-align: left;
 }
 
-.l-header .leaf,
-.header-menu li {
+.l-header .menu > li {
   font-size: 1em;
 }
 
 @media (min-width: 34em) {
-  .l-header .leaf,
-  .header-menu li {
+  .l-header .menu > li {
     font-size: 1.125em;
   }
 }
 
 @media (min-width: 62em) {
-  .l-header .leaf,
-  .header-menu li {
+  .l-header .menu > li {
     font-size: 1.375em;
   }
 }
 
-.l-header .leaf a,
-.header-menu a {
-  display: block;
-  padding: 0.75em 1em;
+/**
+ * Responsive menu styles
+ */
+.menu-dropdown ul {
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom-color: #20252e;
 }
+
+.js .menu-dropdown > li {
+  border-bottom-color: #114a75;
+}
+
+.menu-dropdown a.disabled {
+  color: #bbbbbb;
+}
+
+@media (min-width: 48em) {
+  .menu-dropdown a.disabled {
+    color: #bbbbbb;
+  }
+
+  .js .menu-dropdown ul ul {
+    border-left-color: #20252e;
+  }
+
+  .js .menu-dropdown > li:hover {
+    background-color: #114a75;
+  }
+
+  .js .menu-dropdown > li.has-children > a:hover,
+  .js .menu-dropdown > li.has-children > a:focus {
+    background-color: #114a75;
+  }
+
+  .menu-dropdown a span.sub-arrow {
+    border-color-top: #fff;
+  }
+
+  .menu-dropdown ul {
+    background: #20252e;
+  }
+
+  .menu-dropdown ul a,
+  .menu-dropdown ul a:hover,
+  .menu-dropdown ul a:focus,
+  .menu-dropdown ul a:active,
+  .menu-dropdown ul a.highlighted {
+    color: #fff;
+  }
+
+  .menu-dropdown ul a:hover,
+  .menu-dropdown ul a:focus,
+  .menu-dropdown ul a:active,
+  .menu-dropdown ul a.highlighted {
+    background: #114a75;
+  }
+
+  .menu-dropdown ul a.disabled {
+    background: #fff;
+    color: #cccccc;
+  }
+
+  .menu-dropdown ul a span.sub-arrow {
+    border-color-left: #fff;
+  }
+
+  .menu-dropdown span.scroll-up,
+  .menu-dropdown span.scroll-down {
+    background: #fff;
+  }
+
+  .menu-dropdown span.scroll-up:hover,
+  .menu-dropdown span.scroll-down:hover {
+    background: #eeeeee;
+  }
+
+  .menu-dropdown span.scroll-up-arrow,
+  .menu-dropdown span.scroll-down-arrow {
+    border-color-bottom: #fff;
+  }
+
+  .menu-dropdown span.scroll-down-arrow {
+    border-color-top: #fff;
+  }
+
+  [dir="rtl"] .menu-dropdown span.sub-arrow {
+    border-color-right: #fff;
+  }
+}
+
 
 /**
  * Footer styles
@@ -333,6 +419,29 @@ fieldset .fieldset-legend {
 
 .l-footer .block-system-powered-by a:hover {
   text-decoration: underline;
+}
+
+.drop-lounging {
+  position: relative;
+  width: 10.3125em;
+}
+
+.drop-lounging:before {
+  content: '';
+  position: absolute;
+  top: -0.5em;
+  left: 50%;
+  left: calc(50% + 1.25em);
+  display: block;
+  box-sizing: content-box;
+  width: 100%;
+  height: 0;
+  margin: 0;
+  padding: 0 0 52%;
+  -webkit-transform: translate(-50%, -82%);
+  transform: translate(-50%, -82%);
+  background: url("../images/drop-lounging.png") no-repeat;
+  background-size: 100% auto;
 }
 
 /**
@@ -687,6 +796,16 @@ ul.action-links a {
   background: #20252e;
 }
 
+.pager-first a:before,
+.pager-first a:after,
+.pager-previous a:before,
+.pager-next a:before,
+.pager-last a:before,
+.pager-last a:after {
+  /* Mobile chevron color */
+  border-color: #fff;
+}
+
 /**
  * Progress Bar
  * See system module
@@ -926,3 +1045,68 @@ ul.secondary li a:active {
 .responsive-tabs-mobile-header-padder {
   background: #586172;
 }
+
+/**
+ * Font related override utility classes
+ */
+.color-inverse {
+  color: #fff;
+}
+
+.font-size-xxxxlarge {
+  font-size: 2.625rem;
+}
+
+.font-size-xxxlarge {
+  font-size: 2.25rem;
+}
+
+.font-size-xxlarge {
+  font-size: 1.8125rem;
+}
+
+.font-size-xlarge {
+  font-size: 1.625rem;
+  font-weight: 400;
+}
+
+.font-size-large {
+  font-size: 1.4375rem;
+}
+
+.font-size-medium {
+  font-size: 1.25rem;
+}
+
+.font-size-normal {
+  font-size: 1rem;
+}
+
+.font-size-small {
+  font-size: 0.875rem;
+}
+
+.font-size-xsmall {
+  font-size: 0.75rem;
+}
+
+.font-weight-bold {
+  font-weight: 600;
+}
+
+.font-weight-normal {
+  font-weight: 400;
+}
+
+.font-weight-light {
+  font-weight: 200;
+}
+
+.font-style-italic {
+  font-style: italic;
+}
+
+.font-style-normal {
+  font-style: normal;
+}
+
