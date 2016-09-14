@@ -48,6 +48,9 @@ class BookTestCase extends BackdropWebTestCase {
     $this->book_author = $this->backdropCreateUser(array('create new books', 'create book content', 'edit own book content', 'add content to books'));
     $this->web_user = $this->backdropCreateUser(array('node test view'));
     $this->admin_user = $this->backdropCreateUser(array('create new books', 'create book content', 'edit own book content', 'add content to books', 'administer layouts', 'administer permissions', 'administer book outlines', 'node test view'));
+
+    // Disable default path patterns for nodes.
+    config_set('path.settings', 'node_pattern', '');
   }
 
   /**

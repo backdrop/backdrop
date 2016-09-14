@@ -466,6 +466,7 @@ class TokenNodeTestCase extends TokenTestHelper {
     $node_title = $this->randomName();
     $node_edit = array(
       'title' => $node_title,
+      'path[auto]' => FALSE,
       'path[alias]' => 'content/source-node',
       'field_tags[und]' => 'foo, bar',
       'field_image[und][0][fid]' => $file->fid,
@@ -505,7 +506,7 @@ class TokenNodeTestCase extends TokenTestHelper {
       'source' => $source_node->title,
       'source:nid' => $source_node->nid,
       'log' => '',
-      'url:path' => "node/{$translated_node->nid}",
+      'url:path' => $translated_node->path['alias'],
       'url:absolute' => url("node/{$translated_node->nid}", array('absolute' => TRUE)),
       'url:relative' => url("node/{$translated_node->nid}", array('absolute' => FALSE)),
       'url:unaliased:path' => "node/{$translated_node->nid}",
@@ -519,7 +520,7 @@ class TokenNodeTestCase extends TokenTestHelper {
       'type' => 'post',
       'type-name' => 'Post',
       'tnid' => $source_node->nid,
-      'url:alias' => "node/{$translated_node->nid}",
+      'url:alias' => $translated_node->path['alias'],
     );
     $this->assertTokens('node', array('node' => $translated_node), $tokens);
   }
@@ -598,7 +599,7 @@ class TokenMenuTestCase extends TokenTestHelper {
       'menu-link:title' => 'Node link',
       'menu-link:menu' => 'Primary navigation',
       'menu-link:url' => url('node/' . $node->nid, array('absolute' => TRUE)),
-      'menu-link:url:path' => 'node/' . $node->nid,
+      'menu-link:url:path' => $node->path['alias'],
       'menu-link:edit-url' => url("admin/structure/menu/item/{$node->menu['mlid']}/edit", array('absolute' => TRUE)),
       'menu-link:parent' => 'Parent link',
       'menu-link:parent:mlid' => $node->menu['plid'],
