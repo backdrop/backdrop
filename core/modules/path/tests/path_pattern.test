@@ -546,7 +546,6 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertNoFieldById('edit-path-auto');
     $this->assertFieldByName('path[alias]', '');
-    $this->assertNoEntityAlias('node', $node);
 
     // Set the page pattern to use only tokens so we can test the checkbox
     // behavior if none of the tokens have a value currently.
