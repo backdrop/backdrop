@@ -13,6 +13,9 @@ class RedirectTestHelper extends BackdropWebTestCase {
     $modules[] = 'path';
     $modules[] = 'redirect';
     parent::setUp($modules);
+
+    // Disable default path patterns for nodes.
+    config_set('path.settings', 'node_pattern', '');
   }
 
   protected function assertRedirect($redirect) {

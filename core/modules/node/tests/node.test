@@ -921,6 +921,10 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
     parent::setUp('node_access_test');
     node_access_rebuild();
     state_set('node_access_test_private', TRUE);
+
+    // Disable default path patterns for nodes.
+    config_set('path.settings', 'node_pattern', '');
+    config_set('path.settings', 'node_post_pattern', '');
   }
 
   /**
@@ -1522,6 +1526,10 @@ class NodeAdminTestCase extends BackdropWebTestCase {
     $this->base_user_1 = $this->backdropCreateUser(array('access content overview'));
     $this->base_user_2 = $this->backdropCreateUser(array('access content overview', 'view own unpublished content'));
     $this->base_user_3 = $this->backdropCreateUser(array('access content overview', 'bypass node access'));
+
+    // Disable default path patterns for nodes.
+    config_set('path.settings', 'node_pattern', '');
+    config_set('path.settings', 'node_post_pattern', '');
   }
 
   /**

@@ -553,6 +553,10 @@ class PathHooksTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp(array('node', 'path', 'path_test'));
+    // Disable default path patterns for nodes.
+    config_set('path.settings', 'node_pattern', '');
+    config_set('path.settings', 'node_post_pattern', '');
+
     $this->backdropCreateContentType(array(
       'type' => 'page',
       'name' => 'Page',
