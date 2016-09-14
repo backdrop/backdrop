@@ -91,7 +91,7 @@ function layout_menu() {
   ) + $base;
 
   $items['admin/structure/layouts/reorder'] = array(
-    'title' => 'List',
+    'title' => 'Reorder',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_reorder_form'),
     'type' => MENU_CALLBACK,
@@ -106,7 +106,7 @@ function layout_menu() {
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore'] = array(
-    'title' => 'Edit layout',
+    'title' => 'Manage blocks',
     'title callback' => 'layout_page_title',
     'title arguments' => array(4),
     'page callback' => 'backdrop_get_form',
@@ -114,16 +114,32 @@ function layout_menu() {
     'type' => MENU_NORMAL_ITEM,
   ) + $base;
 
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/structure/layouts/manage/%layout_tempstore/edit'] = array(
-    'title' => 'Edit layout',
+    'page callback' => 'backdrop_goto',
+    'page arguments' => array('admin/structure/layouts/manage/%layout_tempstore/blocks'),
+    'access arguments' => array('administer layouts'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/structure/layouts/manage/%layout_tempstore/blocks'] = array(
+    'title' => 'Manage blocks',
     'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 0,
   ) + $base;
 
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/structure/layouts/manage/%layout_tempstore/settings'] = array(
-    'title' => 'Settings',
+    'page callback' => 'backdrop_goto',
+    'page arguments' => array('admin/structure/layouts/manage/%layout_tempstore/configure'),
+    'access arguments' => array('administer layouts'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/structure/layouts/manage/%layout_tempstore/configure'] = array(
+    'title' => 'Configure layout',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_settings_form', 4),
     'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/add-block/%/%'] = array(
@@ -682,7 +698,7 @@ function layout_autoload_info() {
  * Implements hook_contextual_links_view_alter()
  */
 function layout_contextual_links_view_alter(&$element, $items) {
-  // Convert the link to configure blocks to use a shortened URL that lands the
+  // Convert the link to manage blocks to use a shortened URL that lands the
   // user on the overall layout edit screen with a modal opened, instead of the
   // path to the block edit page itself.
   $links = &$element['#links'];
