@@ -75,6 +75,7 @@ class PathTestCase extends BackdropWebTestCase {
     // Change alias to one containing "exotic" characters.
     $pid = $this->getPID($edit['alias']);
 
+    
     $previous = $edit['alias'];
     $edit['alias'] = "- ._~!$'\"()*@[]?&+%#,;=:" . // "Special" ASCII characters.
       "%23%25%26%2B%2F%3F" . // Characters that look like a percent-escaped string.
