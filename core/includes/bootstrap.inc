@@ -2025,7 +2025,7 @@ function request_uri() {
  * @param $type
  *   The category to which this message belongs.
  * @param $func
- *   The function or method deprecated.  Usually, __FUNCTION__ or __METHOD__.
+ *   The function or method deprecated. Usually, __FUNCTION__ or __METHOD__.
  * @param $link
  *   A link to associate with the message.
  *
@@ -2112,21 +2112,31 @@ function watchdog_exception($type, Exception $exception, $message = NULL, $varia
 /**
  * Check if logging is enabled for a given severity level.
  *
- * @param  $severity
+ * @param int $severity
+ *   One of the WATCHDOG_* severity constants.
+ *
  * @return TRUE if enabled, FALSE otherwise.
+ *
+ * @since 1.5.0
+ *
+ * @see watchdog_severity_levels()
  */
 function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
+  try {
+    $enabled_severity_levels = config('system.core')->get('watchdog_enabled_severity_levels');
+  }
+  catch (Exception $e) {
+    $enabled_severity_levels = NULL;
+  }
 
-  $wesl = config('system.core')->get('watchdog_enabled_severity_levels');
-
-  // CMI should make this unnecessary, but we can be called *before* system.core
-  // is installed when we're running an update script.
-  if ($wesl === NULL) {
-    $wesl = array(0, 1, 2, 3, 4, 5, 6);
+  // This may be called before system.core, such as when running update.php or
+  // the initial installation. As such we provide the defaults if needed.
+  if (!isset($enabled_severity_levels)) {
+    $enabled_severity_levels = array(0, 1, 2, 3, 4, 5, 6);
   }
 
   // Return TRUE if the severity level is enabled.
-  return in_array($severity, $wesl);
+  return in_array($severity, $enabled_severity_levels);
 }
 
 /**

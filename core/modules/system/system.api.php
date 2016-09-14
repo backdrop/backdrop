@@ -1839,14 +1839,14 @@ function hook_watchdog(array $log_entry) {
   global $base_url, $language;
 
   $severity_list = array(
-    WATCHDOG_EMERGENCY     => t('Emergency'),
-    WATCHDOG_ALERT     => t('Alert'),
-    WATCHDOG_CRITICAL     => t('Critical'),
-    WATCHDOG_ERROR       => t('Error'),
-    WATCHDOG_WARNING   => t('Warning'),
-    WATCHDOG_NOTICE    => t('Notice'),
-    WATCHDOG_INFO      => t('Info'),
-    WATCHDOG_DEBUG     => t('Debug'),
+    WATCHDOG_EMERGENCY  => t('Emergency'),
+    WATCHDOG_ALERT      => t('Alert'),
+    WATCHDOG_CRITICAL   => t('Critical'),
+    WATCHDOG_ERROR      => t('Error'),
+    WATCHDOG_WARNING    => t('Warning'),
+    WATCHDOG_NOTICE     => t('Notice'),
+    WATCHDOG_INFO       => t('Info'),
+    WATCHDOG_DEBUG      => t('Debug'),
     WATCHDOG_DEPRECATED => t('Deprecated Use'),
   );
 

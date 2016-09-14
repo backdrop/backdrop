@@ -689,9 +689,11 @@ function backdrop_encode_path($path) {
  * A wrapper function for deprecated menu entries redirecting to their new path.
  *
  * @see backdrop_goto()
+ *
+ * @since 1.5.0
  */
 function backdrop_goto_deprecated($path = '', array $options = array(), $http_response_code = 302) {
-  watchdog('system', 'The path %path has been deprecated and will be removed in the next major release of Backdrop', array('%path' => $path), WATCHDOG_DEPRECATED);
+  watchdog('system', 'The path %path has been deprecated and will be removed in the next major release of Backdrop. This path was called from %referrer. It is recommended to remove it from any existing links.', array('%path' => $path, '%referrer' => $_SERVER['referer']), WATCHDOG_DEPRECATED);
   backdrop_goto($path, $options, $http_response_code);
 }
 
@@ -5539,7 +5541,7 @@ function backdrop_json_deliver($page_callback_result) {
     $output = $page_callback_result;
   }
 
-  if (!is_null($output)) {
+  if (isset($output)) {
     backdrop_json_output($page_callback_result);
   }
 
