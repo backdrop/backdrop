@@ -333,7 +333,7 @@ ul.primary li:last-child a {
  * Secondary admin tabs
  */
 ul.secondary {
-  font-size: 0.8125em;
+  font-size: 0.875em;
   font-weight: bold;
   padding: 16px 23px 6px;
   margin: 0 -20px 0;
@@ -346,11 +346,17 @@ ul.secondary {
 ul.secondary li {
   display: inline-block;
   margin: 0 5px 10px;
+  padding: 0;
 }
 ul.secondary li a {
   display: block;
-  border: 2px solid #e3e2e2;
-  color: #444B53;
+  border: 0;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  background: #ddd;
+  color: #000;
+  font-weight: normal;
   transition:
     background-color 0.6s ease,
     color 0.6s ease;
@@ -360,15 +366,16 @@ ul.secondary li a:hover,
 ul.secondary li.active a,
 ul.secondary li.active a.active {
   padding: .36em 1em;
-  -webkit-border-radius: 1.45em;
-  -moz-border-radius: 1.45em;
-  border-radius: 1.45em;
 }
-ul.secondary li a:hover,
-ul.secondary li.active a,
-ul.secondary li.active a.active {
+ul.secondary li a:hover {
   color: #000;
-  background: #e3e2e2;
+  background: #c5c5c3;
+}
+ul.secondary li.active a,
+ul.secondary li.active a:hover,
+ul.secondary li.active a.active {
+  color: #fff;
+  background: #666;
 }
 
 /**
