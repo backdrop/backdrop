@@ -1651,8 +1651,10 @@ class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
  * Tests for verifying that taxonomy pages use the correct theme.
  */
 class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
-    parent::setUp();
+    parent::setUp('taxonomy');
 
     // Make sure we are using distinct default and administrative themes for
     // the duration of these tests.

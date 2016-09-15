@@ -348,4 +348,9 @@ function standard_install() {
     ->execute();
   config_set('system.core', 'admin_theme', 'seven');
   config_set('system.core', 'node_admin_theme', '1');
+
+  // Enable the page cache and aggregation.
+  config_set('system.core', 'preprocess_css', '1');
+  config_set('system.core', 'preprocess_js', '1');
+  config_set('system.core', 'cache', '1');
 }
