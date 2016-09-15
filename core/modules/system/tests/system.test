@@ -4,10 +4,13 @@
  * Tests for system.module.
  */
 
+// Include class WatchdogTestCase from Simpletest.
+require_once BACKDROP_ROOT . '/core/modules/simpletest/tests/bootstrap.test';
+
 /**
  * Helper class for module test cases.
  */
-class ModuleTestCase extends BackdropWebTestCase {
+class ModuleTestCase extends WatchdogTestCase {
   protected $admin_user;
 
   function setUp() {
@@ -88,40 +91,6 @@ class ModuleTestCase extends BackdropWebTestCase {
       }
       $this->assertEqual(module_exists($module), $enabled, format_string($message, array('@module' => $module)));
     }
-  }
-
-  /**
-   * Verify a log entry was entered for a module's status change.
-   * Called in the same way of the expected original watchdog() execution.
-   *
-   * @param $type
-   *   The category to which this message belongs.
-   * @param $message
-   *   The message to store in the log. Keep $message translatable
-   *   by not concatenating dynamic values into it! Variables in the
-   *   message should be added by using placeholder strings alongside
-   *   the variables argument to declare the value of the placeholders.
-   *   See t() for documentation on how $message and $variables interact.
-   * @param $variables
-   *   Array of variables to replace in the message on display or
-   *   NULL if message is already translated or not possible to
-   *   translate.
-   * @param $severity
-   *   The severity of the message, as per RFC 3164.
-   * @param $link
-   *   A link to associate with the message.
-   */
-  function assertLogMessage($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE, $link = '') {
-    $count = db_select('watchdog', 'w')
-      ->condition('type', $type)
-      ->condition('message', $message)
-      ->condition('variables', serialize($variables))
-      ->condition('severity', $severity)
-      ->condition('link', $link)
-      ->countQuery()
-      ->execute()
-      ->fetchField();
-    $this->assertTrue($count > 0, format_string('watchdog table contains @count rows for @message', array('@count' => $count, '@message' => $message)));
   }
 }
 
@@ -844,7 +813,7 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
 
     $this->backdropGet('admin');
     $this->assertText($node->title, 'Found the custom 403 page');
-    $this->assertText(t('User login'), 'Blocks are shown on the custom 403 page');
+    $this->assertText('Powered by Backdrop CMS', 'Blocks are shown on the custom 403 page');
 
     // Log back in and remove the custom 403 page.
     $this->backdropLogin($this->admin_user);
@@ -856,7 +825,7 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin');
     $this->assertText(t('Access denied'), 'Found the default 403 page');
     $this->assertResponse(403);
-    $this->assertText(t('User login'), 'Blocks are shown on the default 403 page');
+    $this->assertText('Powered by Backdrop CMS', 'Blocks are shown on the default 403 page');
 
     // Log back in, set the custom 403 page to /user and remove the block
     $this->backdropLogin($this->admin_user);
@@ -1410,7 +1379,7 @@ class PageTitleFiltering extends BackdropWebTestCase {
     $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
 
     // Load frontpage.
-    $this->backdropGet('');
+    $this->backdropGet('<front>');
 
     // Test the title.
     $this->assertNoRaw($title, 'Check for the unfiltered version of the title.');
@@ -1445,6 +1414,7 @@ class FrontPageTestCase extends BackdropWebTestCase {
   function testBackdropIsFrontPage() {
     $this->backdropGet('');
     $this->assertText(t('On front page.'), 'Path is the front page.');
+    config_set('system.core', 'site_frontpage', 'node');
     $this->backdropGet('node');
     $this->assertText(t('On front page.'), 'Path is the front page.');
     $this->backdropGet($this->node_path);
@@ -1582,6 +1552,8 @@ class SystemMainContentFallback extends BackdropWebTestCase {
   function testMainContentFallback() {
     // Disable the layout module.
     module_disable(array('layout'));
+    // Remove the old layout path from the menu.
+    menu_rebuild();
     $this->assertFalse(module_exists('layout'), 'Layout module disabled.');
 
     // At this point, no region is filled and fallback should be triggered.
@@ -2391,14 +2363,14 @@ class SystemAuthorizeCase extends BackdropWebTestCase {
  * Test the handling of requests containing 'index.php'.
  */
 class SystemIndexPhpTest extends BackdropWebTestCase {
-  function setUp() {
-    parent::setUp();
-  }
 
   /**
    * Test index.php handling.
    */
   function testIndexPhpHandling() {
+    $this->backdropGet('<front>');
+    $this->assertResponse(200, 'Make sure the front page returns a valid page.');
+
     $index_php = $GLOBALS['base_url'] . '/index.php';
 
     $this->backdropGet($index_php, array('external' => TRUE));
@@ -2639,7 +2611,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
 
     // Save the layout and return to the front page.
     $this->backdropPost(NULL, array(), t('Save layout'));
-    $this->backdropGet('<front>');
+    $this->backdropGet('user');
 
     // Verify menu links. By default the main menu should only show first-level
     // links
@@ -2661,7 +2633,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
 
     // Save the layout and return to the front page.
     $this->backdropPost(NULL, array(), t('Save layout'));
-    $this->backdropGet('<front>');
+    $this->backdropGet('user');
 
     // Verify level 3 links are shown, but not level 4.
     $this->assertLink($item1['link_title']);
@@ -2679,7 +2651,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
 
     // Save the layout and return to the front page.
     $this->backdropPost(NULL, array(), t('Save layout'));
-    $this->backdropGet('<front>');
+    $this->backdropGet('user');
 
     // Verify level 5 links are shown.
     $this->assertLink($item5['link_title']);
@@ -2693,9 +2665,8 @@ class MenuBlockTestCase extends BackdropWebTestCase {
 
     // Save the layout and return to the front page.
     $this->backdropPost(NULL, array(), t('Save layout'));
-    $this->backdropGet('<front>');
+    $this->backdropGet('user');
     $this->assertNoLink($item1['link_title']);
-
 
     // Go to the level 2 node and verify the menu links are shown.
     $this->backdropGet('node/' . $node1->nid);
@@ -2716,7 +2687,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
    * @param string $menu_name Menu name.
    * @return array Menu link created.
    */
-  function addMenuLink($menu_name, $plid = 0, $link = '<front>') {
+  function addMenuLink($menu_name, $plid = 0, $link = 'user') {
     // View add menu link page.
     $this->backdropGet("admin/structure/menu/manage/$menu_name/add");
     $this->assertResponse(200);

@@ -181,14 +181,6 @@ function ckeditor_ckeditor_plugins() {
       'label' => t('Redo'),
       'image_rtl' => $image_prefix . '/redo-rtl.png',
     ),
-    'Anchor' => array(
-      'image_rtl' => $image_prefix . '/anchor-rtl.png',
-      'label' => t('Anchor'),
-      'required_html' => array(array(
-        'tags' => array('a'),
-        'attributes' => array('href', 'title', 'name', 'id'),
-      )),
-    ),
     'Superscript' => array(
       'label' => t('Superscript'),
       'required_html' => array(array('tags' => array('sup'))),

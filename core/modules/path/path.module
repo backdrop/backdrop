@@ -82,35 +82,41 @@ function path_menu() {
     'weight' => 0,
     'file' => 'path.admin.inc',
   );
+  $items['admin/config/search/path/bulk-update'] = array(
+    'title' => 'URL alias bulk actions',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('path_bulk_update_form'),
+    'access arguments' => array('administer url aliases'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 5,
+    'file' => 'path.admin.inc',
+  );
   $items['admin/config/search/path/patterns/settings'] = array(
     'title' => 'URL alias pattern settings',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_patterns_settings_form'),
     'access arguments' => array('administer path patterns'),
     'type' => MENU_LOCAL_TASK,
-    'weight' => 5,
-    'file' => 'path.admin.inc',
-  );
-  $items['admin/config/search/path/bulk-update'] = array(
-    'title' => 'Bulk generate',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('path_bulk_update_form'),
-    'access arguments' => array('administer url aliases'),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 30,
-    'file' => 'path.admin.inc',
-  );
-  $items['admin/config/search/path/bulk-delete'] = array(
-    'title' => 'Delete URL aliases',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('path_admin_bulk_delete'),
-    'access arguments' => array('administer url aliases'),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 40,
+    'weight' => 10,
     'file' => 'path.admin.inc',
   );
 
   return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function path_theme() {
+  $base = array(
+    'file' => 'path.admin.inc',
+  );
+
+  return array(
+    'path_bulk_update_form' => array(
+      'render element' => 'form',
+    ) + $base,
+  );
 }
 
 /**

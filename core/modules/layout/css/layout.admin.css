@@ -11,6 +11,12 @@
 #layout-list tr.disabled td {
   color: #999;
 }
+#layout-list td:last-child {
+  min-width: 160px;
+}
+#layout-list th.layout-operations {
+  text-align: center;
+}
 
 @media (min-width: 768px) {
   #layout-list span.priority-low {
@@ -278,16 +284,16 @@
 /* Remove the drop shadow indicating this item is movable */
 .layout-content-form .page-title .layout-editor-block {
   box-shadow: none;
-  border: 1px solid #e9e8e8;
+  background-color: #e9e8e8;
   padding: 0.4em 1em;
 }
 .layout-content-form .page-title .layout-editor-block-title {
-  background: transparent;
+  background-color: transparent;
   padding: 0;
 }
-.layout-content-form .page-title .layout-editor-block-content {
-  border: 0;
-  padding: 0;
+.layout-content-form .page-title .layout-editor-block-title .description {
+  padding: 0 0.8em;
+  font-size: 90%;
 }
 
 /* Layout Misc */

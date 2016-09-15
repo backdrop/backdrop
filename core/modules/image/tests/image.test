@@ -35,6 +35,10 @@ class ImageFieldTestCase extends BackdropWebTestCase {
     parent::setUp('image');
     $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer content types', 'administer fields', 'administer nodes', 'create post content', 'edit any post content', 'delete any post content', 'administer image styles'));
     $this->backdropLogin($this->admin_user);
+
+    // Disable default path patterns for nodes.
+    config_set('path.settings', 'node_pattern', '');
+    config_set('path.settings', 'node_post_pattern', '');
   }
 
   /**

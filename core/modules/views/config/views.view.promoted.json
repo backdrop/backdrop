@@ -1,12 +1,13 @@
 {
-    "_config_name": "views.view.frontpage",
-    "name": "frontpage",
-    "description": "Emulates the default Backdrop front page; you may set the default home page path to this view to make it your front page.",
+    "_config_name": "views.view.promoted",
+    "name": "promoted",
+    "description": "Provides a list of promoted content. Used by default on the front page.",
     "module": "views",
+    "storage": 4,
     "tag": "default",
-    "disabled": true,
+    "disabled": false,
     "base_table": "node",
-    "human_name": "Front page",
+    "human_name": "Promoted content",
     "core": 0,
     "display": {
         "default": {
@@ -72,18 +73,33 @@
                             "operator": false
                         }
                     }
+                },
+                "empty": {
+                    "area": {
+                        "id": "area",
+                        "table": "views",
+                        "field": "area",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "label": "",
+                        "empty": true,
+                        "content": "<p>No content has been promoted yet.</p>\n",
+                        "format": "filtered_html",
+                        "tokenize": 0
+                    }
                 }
             }
         },
-        "page": {
-            "display_title": "Page",
-            "display_plugin": "page",
+        "block": {
+            "display_title": "Block",
+            "display_plugin": "block",
             "display_options": {
                 "query": {
                     "type": "views_query",
                     "options": []
                 },
-                "path": "frontpage"
+                "block_description": "Promoted content"
             }
         },
         "feed": {
@@ -106,9 +122,14 @@
                 "path": "rss.xml",
                 "displays": {
                     "default": "default",
-                    "page": "page"
+                    "block": "block"
                 },
-                "sitename_title": "1"
+                "sitename_title": "1",
+                "row_options": {
+                    "relationship": "none",
+                    "item_length": "rss",
+                    "links": 0
+                }
             }
         }
     }

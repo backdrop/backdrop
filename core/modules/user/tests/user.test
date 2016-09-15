@@ -1688,6 +1688,11 @@ class UserBlocksUnitTests extends BackdropWebTestCase {
     // Create a user with some permission that anonymous users lack.
     $user = $this->backdropCreateUser(array('administer permissions'));
 
+    // Add the block to the default layout.
+    $layout = layout_load('default');
+    $layout->addBlock('user', 'login', 'sidebar');
+    $layout->save();
+
     // Log in using the block.
     $edit = array();
     $edit['name'] = $user->name;

@@ -645,18 +645,19 @@ class NodeBlockTestCase extends BackdropWebTestCase {
    * Tests that the "Syndicate" block is shown when enabled.
    */
   function testSyndicateBlock() {
-    $layout = layout_load('default');
+    $layout = layout_load('home');
     $layout->addBlock('node', 'syndicate', 'footer');
     $layout->save();
 
     $syndicate_selector = '//*[contains(@class,"block-node-syndicate")]//a[contains(@class,"feed-icon")]';
-    $this->backdropGet('node');
+
+    $this->backdropGet('<front>');
     $elements = $this->xpath($syndicate_selector);
-    $this->assertEqual(count($elements), 1, 'Syndicate block found on /node.');
+    $this->assertEqual(count($elements), 1, 'Syndicate block found on front page.');
 
     $this->backdropGet('user');
     $elements = $this->xpath($syndicate_selector);
-    $this->assertEqual(count($elements), 1, 'Syndicate block not shown on /user.');
+    $this->assertEqual(count($elements), 0, 'Syndicate block not shown on /user.');
   }
 }
 
@@ -920,6 +921,10 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
     parent::setUp('node_access_test');
     node_access_rebuild();
     state_set('node_access_test_private', TRUE);
+
+    // Disable default path patterns for nodes.
+    config_set('path.settings', 'node_pattern', '');
+    config_set('path.settings', 'node_post_pattern', '');
   }
 
   /**
@@ -1521,6 +1526,10 @@ class NodeAdminTestCase extends BackdropWebTestCase {
     $this->base_user_1 = $this->backdropCreateUser(array('access content overview'));
     $this->base_user_2 = $this->backdropCreateUser(array('access content overview', 'view own unpublished content'));
     $this->base_user_3 = $this->backdropCreateUser(array('access content overview', 'bypass node access'));
+
+    // Disable default path patterns for nodes.
+    config_set('path.settings', 'node_pattern', '');
+    config_set('path.settings', 'node_post_pattern', '');
   }
 
   /**
@@ -1761,18 +1770,15 @@ class NodeFrontPageCallback extends BackdropWebTestCase {
     $node = $this->backdropCreateNode($settings);
     $edit['site_frontpage'] = 'node/' . $node->nid;
     $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
-    $this->backdropGet("node/$node->nid");
-    $this->assertResponse(200);
-    $this->backdropGet('node');
-    $this->assertNoText(t('No front page content has been created yet.'), 'Confirmed /node is not the frontpage.');
+    $this->backdropGet('<front>');
+    $this->assertNoText(t('No content has been promoted yet.'), 'Confirmed /home is not the frontpage.');
     $this->assertText($node->title);
 
     // Set back to default front page.
-    $edit['site_frontpage'] = 'node';
+    $edit['site_frontpage'] = 'home';
     $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
     $this->backdropGet('<front>');
-    $current_path = current_path();
-    $this->assertEqual('node', $current_path, "Default /node front page restored.");
+    $this->assertText(t('No content has been promoted yet.'), "Default /home front page restored.");
   }
 }
 
@@ -1800,8 +1806,8 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     ));
 
     // Set the block to a region to confirm block is available.
-    $layout = layout_load('default');
-    $block = $layout->addBlock('node', 'recent', 'sidebar');
+    $layout = layout_load('home');
+    $block = $layout->addBlock('node', 'recent', 'content');
 
     // Set block title and variables.
     $block_title = $this->randomName();
@@ -1844,6 +1850,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
 
     // Test that only the 2 latest nodes are shown.
     $this->backdropLogin($this->web_user);
+    $this->backdropGet('');
     $this->assertNoText($node1->title, t('Node not found in block.'));
     $this->assertText($node2->title, t('Node found in block.'));
     $this->assertText($node3->title, t('Node found in block.'));
@@ -1891,7 +1898,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
     // Add a condition to specify only the post type should have this layout.
-    $this->backdropPost('admin/structure/layouts/manage/post_layout/settings', array(), t('Add visibility condition'));
+    $this->backdropPost('admin/structure/layouts/manage/post_layout/configure', array(), t('Add visibility condition'));
     $this->backdropPost(NULL, array('condition' => 'node_type'), t('Load condition'));
     $this->backdropPost(NULL, array('bundles[post]' => 1), t('Add visibility condition'));
     $this->backdropPost(NULL, array(), t('Save layout'));
@@ -1956,7 +1963,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     // Test that the full node is shown.
     $this->assertText('This is the middle');
     $this->assertText('This is the end');
-    
+
     // Read more text not found.
     $this->assertNoText('Read more');
 
@@ -1988,7 +1995,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     // Test that the full node is not shown.
     $this->assertText('This is the middle');
     $this->assertNoText('This is the end');
-    
+
     // Read more text now found.
     $this->assertText('Read more');
   }

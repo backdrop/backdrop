@@ -104,34 +104,34 @@ function _layout_get_operations(Layout $layout) {
   $links = array();
   if ($layout->disabled && !$layout->isDefault()) {
     $links['enable'] = array(
-      'title' => t('Enable'),
+      'title' => t('Enable Layout'),
       'href' => 'admin/structure/layouts/manage/' . $layout->name . '/enable',
       'query' => array('token' => backdrop_get_token('layout-' . $layout->name)),
     );
   }
   $links['edit'] = array(
-    'title' => t('Edit'),
+    'title' => t('Manage blocks'),
     'href' => 'admin/structure/layouts/manage/' . $layout->name,
   );
   $links['settings'] = array(
-    'title' => t('Settings'),
-    'href' => 'admin/structure/layouts/manage/' . $layout->name . '/settings',
+    'title' => t('Configure Layout'),
+    'href' => 'admin/structure/layouts/manage/' . $layout->name . '/configure',
   );
   if (!$layout->isDefault()) {
     $links['clone'] = array(
-      'title' => t('Clone'),
+      'title' => t('Clone Layout'),
       'href' => 'admin/structure/layouts/manage/' . $layout->name . '/clone',
     );
     if (!$layout->disabled) {
       $links['disable'] = array(
-        'title' => t('Disable'),
+        'title' => t('Disable Layout'),
         'href' => 'admin/structure/layouts/manage/' . $layout->name . '/disable',
         'query' => array('token' => backdrop_get_token('layout-' . $layout->name)),
       );
     }
     if ($layout->storage === LAYOUT_STORAGE_NORMAL) {
       $links['delete'] = array(
-        'title' => t('Delete'),
+        'title' => t('Delete Layout'),
         'href' => 'admin/structure/layouts/manage/' . $layout->name . '/delete',
       );
     }
@@ -139,7 +139,7 @@ function _layout_get_operations(Layout $layout) {
 
   if ($layout->storage === LAYOUT_STORAGE_OVERRIDE) {
     $links['revert'] = array(
-      'title' => t('Revert'),
+      'title' => t('Revert Layout'),
       'href' => 'admin/structure/layouts/manage/' . $layout->name . '/delete',
     );
   }
@@ -892,7 +892,6 @@ function layout_content_form_submit($form, &$form_state) {
     }
     $layout->content = $new_content;
     $layout->positions = $new_positions;
-    $form_state['redirect'] = 'admin/structure/layouts';
   }
 
   // Save title settings.
@@ -1568,7 +1567,7 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
     $handler = isset($block->conditions[$condition_id]) ? $block->conditions[$condition_id] : NULL;
   }
   else {
-    $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/settings';
+    $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/configure';
     if ($is_new_condition) {
       $form['#title'] = t('Add visibility condition for "@title" layout', array('@title' => $layout->title));
       $help = t('Add a new visibility condition to limit the situations in which this layout will apply.');
@@ -1821,7 +1820,7 @@ function layout_condition_add_form_submit($form, &$form_state) {
     $form_state['ajax_rebuild_form'] = 'layout_settings_form';
     $form_state['ajax_rebuild_args'] = array($layout);
     $form_state['ajax_update'] = array('conditions');
-    $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/settings';
+    $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/configure';
   }
 }
 
@@ -2023,10 +2022,10 @@ function layout_clone_form_submit($form, &$form_state) {
 
   // Redirect to the full settings form.
   $form_state['redirect'] = array(
-    'admin/structure/layouts/manage/' . $layout->name . '/settings',
+    'admin/structure/layouts/manage/' . $layout->name . '/configure',
     array('query' => array('destination' => 'admin/structure/layouts/manage/' . $layout->name)),
   );
-  backdrop_set_message(t('Cloned layout @title created. You may now update the cloned settings.', array('@title' => $layout->title)));
+  backdrop_set_message(t('Cloned layout @title created. You may now configure the cloned layout.', array('@title' => $layout->title)));
 }
 
 /**
@@ -2831,7 +2830,7 @@ function layout_block_list() {
  *   block deltas are not required to be unique.
  *
  * @return array
- *   An array of block usage instances keyed by block module, delta, layout 
+ *   An array of block usage instances keyed by block module, delta, layout
  *   machine_name, and position. Each instance is a block object with an
  *   additional key for the layout name.
  */

@@ -578,7 +578,7 @@ EOF;
  *   EntityFieldQuery to retrieve a list of entity IDs loadable by
  *   this function.
  *
- * @return array
+ * @return File[]
  *   An array of file entities, indexed by fid.
  *
  * @see hook_file_load()
@@ -687,7 +687,7 @@ function file_usage_add(File $file, $module, $type, $id, $count = 1) {
     ->expression('count', 'count + :count', array(':count' => $count))
     ->execute();
 
-  // Make sure that a used file is permament.
+  // Make sure that a used file is permanent.
   if ($file->status != FILE_STATUS_PERMANENT) {
     $file->status = FILE_STATUS_PERMANENT;
     $file->save();
