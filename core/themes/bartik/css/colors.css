@@ -18,20 +18,37 @@ body {
   background-image: -webkit-linear-gradient(top, #000000 0%, #000001 100%);
   background-image: linear-gradient(top, #000000 0%, #000001 100%);
 }
-.l-header ul.menu li a {
+.l-header ul.menu > li > a {
   color: #e3e3e3;
 }
-.l-header ul.menu li a.active,
-.l-header ul.menu li.active-trail a {
-  color: #fefeff;
+.l-header ul.menu-dropdown a {
+  color: #3b3b3b;
 }
+
+/* Style the colors of the dropdown to match the header if no-tabs. */
+.l-header .no-tabs ul.menu a {
+  color: #e3e3e3;
+}
+.l-header .no-tabs .menu-dropdown a span.sub-arrow {
+  border-color: #e3e3e3 transparent transparent transparent;
+}
+.l-header .no-tabs .menu-dropdown ul a span.sub-arrow {
+  border-color: transparent transparent transparent #e3e3e3; /* RTL */
+}
+[dir="rtl"] .l-header  .no-tabs .menu-dropdown ul a span.sub-arrow {
+  border-color: transparent #e3e3e3 transparent transparent;
+}
+.l-header .no-tabs ul.menu-dropdown ul {
+  background-color: #000001;
+}
+
 input {
   color: #3b3b3b;
 }
-.tabs ul.primary li a.active {
+.tabs ul.primary > li > a.active {
   background-color: #ffffff;
 }
-.tabs ul.primary li.active a {
+.tabs ul.primary > li.active > a {
   background-color: #ffffff;
   border-bottom: 1px solid #ffffff;
 }

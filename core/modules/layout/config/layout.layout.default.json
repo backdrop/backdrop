@@ -70,9 +70,11 @@
           "title_display": "none",
           "title": "",
           "style": "default",
-          "block_settings": [
-            
-          ],
+          "block_settings": {
+            "style": "dropdown",
+            "level": 1,
+            "depth": 0
+          },
           "contexts": [
             
           ]

@@ -2557,7 +2557,6 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $this->doMenuBlockTests('main-menu', 'Primary navigation');
   }
 
-
   /**
    * Test Menu Block functionality with custom menu.
    */
@@ -2596,7 +2595,11 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $item6 = $this->addMenuLink($menu_name, 0, 'node/' . $node5->nid);
 
     $this->backdropGet('admin/structure/layouts/manage/default');
+    // Remove the default main-menu block to prevent mixed up checks.
     $this->clickLink(t('Remove'), 1);
+    // Remove the breadcrumb prevent mixed up checks.
+    $this->clickLink(t('Remove'), 1);
+    // Add a block to the sidebar (the fourth region).
     $this->clickLink(t('Add block'), 3);
     $this->clickLink($menu_title);
     $edit = array();
@@ -2614,7 +2617,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $this->backdropGet('user');
 
     // Verify menu links. By default the main menu should only show first-level
-    // links
+    // links.
     $this->assertLink($item1['link_title']);
     $this->assertLink($item6['link_title']);
     if ($menu_name == 'main-menu') {
@@ -2677,6 +2680,39 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $this->assertNoLink($item6['link_title']);
     $this->assertLink($item2['link_title']);
     $this->assertLink($item3['link_title']);
+
+    // All above tests have been done using the default "hierarchical" style.
+    // Switch to the "top-only" style and check available links.
+    $edit = array(
+      'block_settings[style]' => 'top_only',
+    );
+    $this->backdropPost($block_edit_url, $edit, t('Save block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Verify only top level links are shown even when on a 3rd-level link.
+    $this->backdropGet($item3['link_path']);
+    $this->assertLink($item1['link_title']);
+    $this->assertLink($item6['link_title']);
+    $this->assertNoLink($item2['link_title']);
+    $this->assertNoLink($item3['link_title']);
+    $this->assertNoLink($item4['link_title']);
+    $this->assertNoLink($item5['link_title']);
+
+    // Switch to the "dropdown" style and check that all links are expanded, even
+    // though each individual link is not expanded.
+    $edit = array(
+      'block_settings[style]' => 'dropdown',
+    );
+    $this->backdropPost($block_edit_url, $edit, t('Save block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet($item2['link_path']);
+    $this->assertLink($item1['link_title']);
+    $this->assertLink($item2['link_title']);
+    $this->assertLink($item3['link_title']);
+    $this->assertLink($item4['link_title']);
+    $this->assertLink($item5['link_title']);
+    $this->assertLink($item6['link_title']);
   }
 
   /**
