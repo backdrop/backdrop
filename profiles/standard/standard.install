@@ -160,14 +160,14 @@ function standard_install() {
     node_add_body_field($type);
   }
 
-  // Create an initial Hello World node to welcome users on install.
+  // Create an initial post to welcome users on install.
   $post = new Node(
     array(
-      'title' => st('Your first article!'),
+      'title' => st('Your first post!'),
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('This is your first article, edit it or delete it.'),
+            'value' => st('This is your first post, edit it or delete it.'),
           ),
         ),
       ),
@@ -179,7 +179,7 @@ function standard_install() {
   );
   $post->save();
 
-  // Create an initial Hello World node to welcome users on install.
+  // Create an "About page" node.
   $page = new Node(
     array(
       'title' => st('About page'),
@@ -192,16 +192,16 @@ function standard_install() {
       ),
       'uid' => 1,
       'status' => 1,
-      'promote' => 1,
+      'promote' => 0,
       'type' => 'page',
     )
   );
   $page->save();
 
-  // Create a Home link in the main menu.
+  // Create an "About page" link in the main menu.
   $item = array(
     'link_title' => st('About page'),
-    'link_path' => $page->path['alias'],
+    'link_path' => 'node/' . $page->nid,
     'menu_name' => 'main-menu',
     'weight' => 1,
   );
