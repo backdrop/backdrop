@@ -925,6 +925,10 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
     parent::setUp('node_access_test');
     node_access_rebuild();
     state_set('node_access_test_private', TRUE);
+
+    // Disable default path patterns for nodes.
+    config_set('path.settings', 'node_pattern', '');
+    config_set('path.settings', 'node_post_pattern', '');
   }
 
   /**
@@ -1526,6 +1530,10 @@ class NodeAdminTestCase extends BackdropWebTestCase {
     $this->base_user_1 = $this->backdropCreateUser(array('access content overview'));
     $this->base_user_2 = $this->backdropCreateUser(array('access content overview', 'view own unpublished content'));
     $this->base_user_3 = $this->backdropCreateUser(array('access content overview', 'bypass node access'));
+
+    // Disable default path patterns for nodes.
+    config_set('path.settings', 'node_pattern', '');
+    config_set('path.settings', 'node_post_pattern', '');
   }
 
   /**
@@ -1899,7 +1907,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
     // Add a condition to specify only the post type should have this layout.
-    $this->backdropPost('admin/structure/layouts/manage/post_layout/settings', array(), t('Add visibility condition'));
+    $this->backdropPost('admin/structure/layouts/manage/post_layout/configure', array(), t('Add visibility condition'));
     $this->backdropPost(NULL, array('condition' => 'node_type'), t('Load condition'));
     $this->backdropPost(NULL, array('bundles[post]' => 1), t('Add visibility condition'));
     $this->backdropPost(NULL, array(), t('Save layout'));

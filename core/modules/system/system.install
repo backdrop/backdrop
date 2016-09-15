@@ -2916,9 +2916,18 @@ function system_update_1056() {
 }
 
 /**
- * Clarify state "menu_expanded" as "menus_containing_expanded_items".
+ * Add default for watchdog_enabled_severity_levels.
  */
 function system_update_1057() {
+  $config = config('system.core');
+  $config->set('watchdog_enabled_severity_levels', array(0, 1, 2, 3, 4, 5, 6));
+  $config->save();
+}
+
+/**
+ * Clarify state "menu_expanded" as "menus_containing_expanded_items".
+ */
+function system_update_1058() {
   state_set('menus_containing_expanded_items', state_get('menu_expanded'));
   state_del('menu_expanded');
 }

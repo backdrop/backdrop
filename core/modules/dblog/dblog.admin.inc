@@ -28,6 +28,7 @@ function dblog_overview() {
     WATCHDOG_CRITICAL      => 'dblog-critical',
     WATCHDOG_ALERT     => 'dblog-alert',
     WATCHDOG_EMERGENCY     => 'dblog-emergency',
+    WATCHDOG_DEPRECATED => 'dblog-deprecated',
   );
 
   $build['dblog_filter_form'] = backdrop_get_form('dblog_filter_form');

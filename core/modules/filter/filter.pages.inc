@@ -87,6 +87,9 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     $form_state['storage']['dialog_selector'] = $form_state['input']['dialogOptions']['target'];
   }
 
+  // Record if image uploading is requested by the calling element.
+  $element_supports_uploads = !isset($form_state['input']['dialogOptions']['uploads']) || (bool) $form_state['input']['dialogOptions']['uploads'];
+
   // Pull in any default values set by the editor.
   $values = array();
   if (isset($form_state['input']['editor_object'])) {
@@ -137,7 +140,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     ),
     '#parents' => array('fid'),
     '#weight' => -10,
-    '#access' => $upload_settings['status'] && user_access('upload editor images'),
+    '#access' => $element_supports_uploads && $upload_settings['status'] && user_access('upload editor images'),
   );
 
   // Use a "textfield" rather than "url" to allow relative paths.

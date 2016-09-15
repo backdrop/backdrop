@@ -686,6 +686,18 @@ function backdrop_encode_path($path) {
 }
 
 /**
+ * A wrapper function for deprecated menu entries redirecting to their new path.
+ *
+ * @see backdrop_goto()
+ *
+ * @since 1.5.0
+ */
+function backdrop_goto_deprecated($path = '', array $options = array(), $http_response_code = 302) {
+  watchdog('system', 'The path %path has been deprecated and will be removed in the next major release of Backdrop. This path was called from %referrer. It is recommended to remove it from any existing links.', array('%path' => $path, '%referrer' => $_SERVER['HTTP_REFERER']), WATCHDOG_DEPRECATED);
+  backdrop_goto($path, $options, $http_response_code);
+}
+
+/**
  * Sends the user to a different page.
  *
  * This issues an on-site HTTP redirect. The function makes sure the redirected
@@ -5529,7 +5541,7 @@ function backdrop_json_deliver($page_callback_result) {
     $output = $page_callback_result;
   }
 
-  if (!is_null($output)) {
+  if (isset($output)) {
     backdrop_json_output($page_callback_result);
   }
 
@@ -5681,6 +5693,7 @@ function _backdrop_bootstrap_full() {
  * @deprecated since 1.3.0
  */
 function backdrop_page_set_cache() {
+  watchdog_deprecated_function('common', __FUNCTION__);
   $cache = FALSE;
   if (backdrop_page_is_cacheable()) {
     $page_content = ob_get_clean();
@@ -8136,6 +8149,7 @@ function watchdog_severity_levels() {
     WATCHDOG_NOTICE  => t('notice'),
     WATCHDOG_INFO    => t('info'),
     WATCHDOG_DEBUG   => t('debug'),
+    WATCHDOG_DEPRECATED => t('deprecated'),
   );
 }
 

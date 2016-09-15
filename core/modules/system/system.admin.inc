@@ -2094,6 +2094,7 @@ function system_site_maintenance_mode_submit($form, &$form_state) {
     backdrop_set_message(t('The site is now in maintenance mode. Only users with the "Access site in maintenance mode" permission will be able to access the site.'), 'warning');
   }
   elseif ($form['maintenance_mode']['#default_value'] != $form_state['values']['maintenance_mode']) {
+    backdrop_get_messages();
     backdrop_set_message(t('The site is no longer in maintenance mode.'));
   }
   else {

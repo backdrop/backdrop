@@ -895,7 +895,7 @@ function system_menu() {
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/clean-urls'] = array(
-    'page callback' => 'backdrop_goto',
+    'page callback' => 'backdrop_goto_deprecated',
     'page arguments' => array('admin/config/search/urls'),
     'access arguments' => array('access administration pages'),
     'type' => MENU_CALLBACK,
@@ -3506,6 +3506,7 @@ function system_time_zones($blank = NULL) {
  * @deprecated since 1.3.1
  */
 function system_check_http_request() {
+   watchdog_deprecated_function('system', __FUNCTION__);
   // Try to get the content of the front page via backdrop_http_request().
   $result = backdrop_http_request(url('', array('absolute' => TRUE)), array('max_redirects' => 0, 'timeout' => 10));
   // We only care that we get a http response - this means that Backdrop

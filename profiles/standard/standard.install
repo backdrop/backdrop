@@ -163,6 +163,7 @@ function standard_install() {
   // Add default alias for page content types.
   config('path.settings')
     ->set('node_page_pattern', '[node:title]')
+    ->set('node_post_pattern', 'posts/[node:title]')
     ->save();
 
   // Enable user picture support and set the default to a square thumbnail option.
@@ -323,6 +324,16 @@ function standard_install() {
     'link_title' => st('Home'),
     'link_path' => '<front>',
     'menu_name' => 'main-menu',
+    'weight' => -1,
+  );
+  menu_link_save($item);
+
+  // Create a login link in the account menu.
+  $item = array(
+    'link_title' => st('Login'),
+    'link_path' => 'user/login',
+    'menu_name' => 'user-menu',
+    'weight' => -1,
   );
   menu_link_save($item);
 
