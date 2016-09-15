@@ -35,6 +35,7 @@
   height: 100%;
   height: calc(100% + 0.125em);
   margin: 0;
+  border: 0;
   outline: none;
 }
 

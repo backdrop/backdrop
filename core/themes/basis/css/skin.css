@@ -612,9 +612,12 @@ input.form-submit:active {
 .button,
 input.form-submit,
 input.button-primary,
-button.button-primary {
+button.button-primary,
+.ui-state-default,
+.ui-widget-content .ui-state-default,
+.ui-widget-header .ui-state-default {
   color: white;
-  background-color: #0074bd;
+  background: #0074bd;
 }
 
 input.button-primary:hover,
