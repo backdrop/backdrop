@@ -8,6 +8,7 @@ stylesheets[all][] = css/base.css
 stylesheets[all][] = css/layout.css
 stylesheets[all][] = css/component/small-text-components.css
 stylesheets[all][] = css/component/l-header.css
+stylesheets[all][] = css/component/l-footer.css
 stylesheets[all][] = css/component/menu-dropdown.css
 stylesheets[all][] = css/component/breadcrumb.css
 stylesheets[all][] = css/component/backdrop-form.css
