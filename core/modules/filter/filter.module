@@ -228,7 +228,7 @@ function filter_config_data_validate(Config $config, array $config_info) {
  * @param $format_id
  *   The format ID.
  *
- * @return
+ * @return stdClass
  *   A fully-populated text format object, if the requested format exists and
  *   is enabled. If the format does not exist, or exists in the database but
  *   has been marked as disabled, FALSE is returned.
@@ -679,7 +679,7 @@ function filter_modules_disabled($modules) {
  *   account will be returned. All formats will be returned otherwise. Defaults
  *   to NULL.
  *
- * @return array
+ * @return stdClass[]
  *   An array of text format objects, keyed by the format ID and ordered by
  *   weight.
  *
