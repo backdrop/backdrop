@@ -1021,7 +1021,7 @@ function taxonomy_autoload_info() {
  *   EntityFieldQuery to retrieve a list of entity IDs loadable by
  *   this function.
  *
- * @return
+ * @return TaxonomyTerm[]
  *   An array of taxonomy term entities, indexed by tid. When no results are
  *   found, an empty array is returned.
  */

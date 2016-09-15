@@ -1215,6 +1215,9 @@ function node_permission() {
     'view own unpublished content' => array(
       'title' => t('View own unpublished content'),
     ),
+    'view any unpublished content' => array(
+      'title' => t('View any unpublished content'),
+    ),
     'view revisions' => array(
       'title' => t('View content revisions'),
     ),
@@ -1943,11 +1946,15 @@ function node_block_configure($delta = '', $settings = array()) {
 function node_get_recent($number = 10) {
   $query = db_select('node', 'n');
 
-  if (!user_access('bypass node access')) {
-    // If the user is able to view their own unpublished nodes, allow them
-    // to see these in addition to published nodes. Check that they actually
-    // have some unpublished nodes to view before adding the condition.
-    if (user_access('view own unpublished content') && $own_unpublished = db_query('SELECT nid FROM {node} WHERE uid = :uid AND status = :status', array(':uid' => $GLOBALS['user']->uid, ':status' => NODE_NOT_PUBLISHED))->fetchCol()) {
+  if (!user_access('bypass node access') && !user_access('view any unpublished content')) {
+    // If the user is able to view unpublished nodes, allow them to see these
+    // in addition to published nodes. Check that they actually have some
+    // unpublished nodes to view before adding the condition.
+    // Note: this query still ignores unpublished by type permissions.
+    // See: https://github.com/backdrop/backdrop-issues/issues/146.
+    $own_unpublished = db_query('SELECT nid FROM {node} WHERE uid = :uid AND status = :status',
+     array(':uid' => $GLOBALS['user']->uid, ':status' => NODE_NOT_PUBLISHED))->fetchCol();
+    if (user_access('view own unpublished content') && $own_unpublished) {
       $query->condition(db_or()
         ->condition('n.status', NODE_PUBLISHED)
         ->condition('n.nid', $own_unpublished, 'IN')
@@ -2487,6 +2494,12 @@ function node_access($op, $node, $account = NULL) {
     return FALSE;
   }
   elseif (in_array(NODE_ACCESS_ALLOW, $access, TRUE)) {
+    $rights[$account->uid][$cid][$op] = TRUE;
+    return TRUE;
+  }
+
+  // Check if user can view any unpublished nodes.
+  if ($op == 'view' && !$node->status && user_access('view any unpublished content', $account) && $account->uid != 0) {
     $rights[$account->uid][$cid][$op] = TRUE;
     return TRUE;
   }
