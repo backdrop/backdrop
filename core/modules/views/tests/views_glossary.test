@@ -13,6 +13,9 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 class ViewsGlossaryTestCase extends ViewsSqlTest {
   public function setUp() {
     parent::setUp('views', 'views_test');
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
   }
 
   /**

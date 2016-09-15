@@ -32,6 +32,9 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
     parent::setUp();
     $web_user = $this->backdropCreateUser(array('create post content', 'create page content'));
     $this->backdropLogin($web_user);
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
   }
 
   /**
@@ -58,7 +61,7 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
     $this->assertTrue($count == 2, format_string('@count nodes loaded.', array('@count' => $count)));
 
     // Load nodes by nid. Nodes 1, 2 and 4 will be loaded.
-    $nodes = node_load_multiple(array(1, 2, 4));
+    $nodes = node_load_multiple(array(3, 4, 6));
     $count = count($nodes);
     $this->assertTrue(count($nodes) == 3, format_string('@count nodes loaded', array('@count' => $count)));
     $this->assertTrue(isset($nodes[$node1->nid]), 'Node is correctly keyed in the array');
@@ -69,7 +72,7 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
     }
 
     // Load nodes by nid, where type = post. Nodes 1, 2 and 3 will be loaded.
-    $nodes = node_load_multiple(array(1, 2, 3, 4), array('type' => 'post'));
+    $nodes = node_load_multiple(array(3, 4, 5, 6), array('type' => 'post'));
     $count = count($nodes);
     $this->assertTrue($count == 3, format_string('@count nodes loaded', array('@count' => $count)));
     $this->assertEqual($nodes[$node1->nid]->title, $node1->title, 'Node successfully loaded.');
@@ -79,7 +82,7 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
 
     // Now that all nodes have been loaded into the static cache, ensure that
     // they are loaded correctly again when a condition is passed.
-    $nodes = node_load_multiple(array(1, 2, 3, 4), array('type' => 'post'));
+    $nodes = node_load_multiple(array(3, 4, 5, 6), array('type' => 'post'));
     $count = count($nodes);
     $this->assertTrue($count == 3, format_string('@count nodes loaded.', array('@count' => $count)));
     $this->assertEqual($nodes[$node1->nid]->title, $node1->title, 'Node successfully loaded');
@@ -88,7 +91,7 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
     $this->assertFalse(isset($nodes[$node4->nid]), 'Node was not loaded');
 
     // Load nodes by nid, where type = post and promote = 0.
-    $nodes = node_load_multiple(array(1, 2, 3, 4), array('type' => 'post', 'promote' => 0));
+    $nodes = node_load_multiple(array(3, 4, 5, 6), array('type' => 'post', 'promote' => 0));
     $count = count($nodes);
     $this->assertTrue($count == 1, format_string('@count node loaded', array('@count' => $count)));
     $this->assertEqual($nodes[$node3->nid]->title, $node3->title, 'Node successfully loaded.');
@@ -101,6 +104,9 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
 class NodeLoadHooksTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('node_test');
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
   }
 
   /**
@@ -525,7 +531,7 @@ class NodeCreationTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/page', $edit, t('Save'));
 
     // Check that the user was redirected to the home page.
-    $this->assertText(t('Welcome to Backdrop'), 'The user is redirected to the home page.');
+    $this->assertText(t('This is your first post, edit it or delete it'), 'The user is redirected to the home page.');
   }
 }
 
@@ -1443,6 +1449,9 @@ class NodeTypeTestCase extends BackdropWebTestCase {
    * without content present.
    */
   function testNodeTypeHasContent() {
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
+
     // Test node type to assert no content has been created.
     $this->assertFalse(node_type_has_content('post'), 'The post node type has no content associated with it.');
 
@@ -1835,7 +1844,7 @@ class NodeFrontPageCallback extends BackdropWebTestCase {
     $edit['site_frontpage'] = 'home';
     $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
     $this->backdropGet('<front>');
-    $this->assertText(t('No content has been promoted yet.'), "Default /home front page restored.");
+    $this->assertText(t('This is your first post, edit it or delete it.'), "Default /home front page restored.");
   }
 }
 
@@ -1849,6 +1858,9 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     // Create users and test node.
     $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer nodes', 'administer blocks', 'administer layouts'));
     $this->web_user = $this->backdropCreateUser(array('access content', 'create post content'));
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
   }
 
   /**
@@ -2097,6 +2109,10 @@ class NodeQueryAlter extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp('node_access_test');
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
+
     node_access_rebuild();
 
     // Create some content.
