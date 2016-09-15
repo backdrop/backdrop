@@ -135,7 +135,7 @@
 
 [dir="rtl"] .l-header .menu > li,
 [dir="rtl"] .header-menu li {
-  float: left;
+  float: right;
 }
 
 .l-header .menu a,

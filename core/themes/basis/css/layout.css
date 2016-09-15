@@ -13,43 +13,5 @@
 }
 
 .layout .l-messages {
-  margin: 2rem 0;
-}
-
-.l-footer {
-  margin: 1.5rem 0 0;
-}
-
-/**
- * Powered by Backdrop Block
- */
-.l-footer .block-system-powered-by a {
-  text-decoration: none;
-}
-
-.l-footer .block-system-powered-by a:hover {
-  text-decoration: underline;
-}
-
-.drop-lounging {
-  position: relative;
-  width: 10.3125em;
-}
-
-.drop-lounging:before {
-  content: '';
-  position: absolute;
-  top: -0.5em;
-  left: 50%;
-  left: calc(50% + 1.25em);
-  display: block;
-  box-sizing: content-box;
-  width: 100%;
-  height: 0;
-  margin: 0;
-  padding: 0 0 52%;
-  -webkit-transform: translate(-50%, -82%);
-  transform: translate(-50%, -82%);
-  background: url("../images/drop-lounging.png") no-repeat;
-  background-size: 100% auto;
+  margin: 0 0 2rem;
 }
