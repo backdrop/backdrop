@@ -163,6 +163,7 @@ function standard_install() {
   // Add default alias for page content types.
   config('path.settings')
     ->set('node_page_pattern', '[node:title]')
+    ->set('node_post_pattern', 'posts/[node:title]')
     ->save();
 
   // Enable user picture support and set the default to a square thumbnail option.
