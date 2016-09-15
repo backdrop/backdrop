@@ -26,10 +26,5 @@
       <?php print $content; ?>
     </main>
   </div>
-
-  <footer role="contentinfo">
-    <?php print $footer; ?>
-  </footer>
-
   </body>
 </html>
