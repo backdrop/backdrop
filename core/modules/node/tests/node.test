@@ -725,10 +725,13 @@ class NodePostSettingsTestCase extends BackdropWebTestCase {
  * sitewide RSS feed at rss.xml.
  */
 class NodeRSSContentTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     // Enable dummy module that implements hook_node_view.
     parent::setUp('node_test');
 
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
     // Use bypass node access permission here, because the test class uses
     // hook_grants_alter() to deny access to everyone on node_access
     // queries.
@@ -783,6 +786,8 @@ class NodeRSSContentTestCase extends BackdropWebTestCase {
  * @todo Cover hook_node_access in a separate test class.
  */
 class NodeAccessUnitTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * Asserts node_access() correctly grants or denies access.
    */
@@ -795,6 +800,11 @@ class NodeAccessUnitTest extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp();
+
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
+
     // Clear permissions for authenticated users.
     $role = user_role_load(BACKDROP_AUTHENTICATED_ROLE);
     $role->permissions = array();
@@ -832,6 +842,12 @@ class NodeAccessUnitTest extends BackdropWebTestCase {
     $this->assertNodeAccess(array('view' => TRUE, 'update' => FALSE), $node4, $web_user4);
     $this->assertNodeAccess(array('view' => FALSE), $node4, $web_user5);
 
+    // User can 'view all unpublished content'.
+    $web_user6 = $this->backdropCreateUser(array('access content', 'view any unpublished content'));
+    $this->assertNodeAccess(array('view' => TRUE, 'update' => FALSE), $node4, $web_user6);
+    $node5 = $this->backdropCreateNode(array('status' => 0, 'uid' => $web_user5->uid));
+    $this->assertNodeAccess(array('view' => TRUE, 'update' => FALSE), $node5, $web_user6);
+
     // Tests the default access provided for a published node.
     $node5 = $this->backdropCreateNode();
     $this->assertNodeAccess(array('view' => TRUE, 'update' => FALSE, 'delete' => FALSE), $node5, $web_user3);
@@ -842,18 +858,24 @@ class NodeAccessUnitTest extends BackdropWebTestCase {
  * Tests hook_node_access_records() functionality.
  */
 class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     // Enable dummy module that implements hook_node_grants(),
     // hook_node_access_records(), hook_node_grants_alter() and
     // hook_node_access_records_alter().
     parent::setUp('node_test');
+
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
   }
 
   /**
    * Creates a node and tests the creation of node access rules.
    */
   function testNodeAccessRecords() {
-    // Create an post node.
+    // Create a post node.
     $node1 = $this->backdropCreateNode(array('type' => 'post'));
     $this->assertTrue(node_load($node1->nid), 'Post node created.');
 
@@ -1063,8 +1085,11 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
  * Tests node save related functionality, including import-save.
  */
 class NodeSaveTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('node_test');
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
     // Create a user that is allowed to post; we'll use this to test the submission.
     $web_user = $this->backdropCreateUser(array('create post content'));
     $this->backdropLogin($web_user);
@@ -1510,18 +1535,30 @@ class NodeAccessRebuildTestCase extends BackdropWebTestCase {
  * Tests node administration page functionality.
  */
 class NodeAdminTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp();
+
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
 
     // Remove the "view own unpublished content" permission which is set
     // by default for authenticated users so we can test this permission
     // correctly.
     user_role_revoke_permissions(BACKDROP_AUTHENTICATED_ROLE, array('view own unpublished content'));
 
-    $this->admin_user = $this->backdropCreateUser(array('access administration pages', 'access content overview', 'administer nodes', 'bypass node access'));
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'access content overview',
+      'administer nodes',
+      'bypass node access',
+    ));
     $this->base_user_1 = $this->backdropCreateUser(array('access content overview'));
     $this->base_user_2 = $this->backdropCreateUser(array('access content overview', 'view own unpublished content'));
     $this->base_user_3 = $this->backdropCreateUser(array('access content overview', 'bypass node access'));
+    $this->base_user_4 = $this->backdropCreateUser(array('access content overview', 'view any unpublished content'));
   }
 
   /**
@@ -1666,6 +1703,17 @@ class NodeAdminTestCase extends BackdropWebTestCase {
       $this->assertLinkByHref('node/' . $node->nid);
       $this->assertLinkByHref('node/' . $node->nid . '/edit');
       $this->assertLinkByHref('node/' . $node->nid . '/delete');
+    }
+
+    // Verify 'view any unpubished content' allows view but not edit or delete.
+    $this->backdropLogout();
+    $this->backdropLogin($this->base_user_4);
+    $this->backdropGet('admin/content');
+    $this->assertResponse(200);
+    foreach ($nodes as $node) {
+      $this->assertLinkByHref('node/' . $node->nid);
+      $this->assertNoLinkByHref('node/' . $node->nid . '/edit');
+      $this->assertNoLinkByHref('node/' . $node->nid . '/delete');
     }
   }
 }
