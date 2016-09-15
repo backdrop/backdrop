@@ -343,7 +343,7 @@ class Block extends LayoutHandler {
     }
     return TRUE;
   }
-  
+
   /**
    * Allows an array of "child blocks" for display in the "Add Block" dialog.
    *

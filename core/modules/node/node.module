@@ -1866,8 +1866,8 @@ function node_block_info() {
     'description' => t('A list of recently published content.'),
   );
   $blocks['content'] = array(
-    'info' => t('Content block'),
-    'description' => t('Displays a node in a block.'),
+    'info' => t('Existing content'),
+    'description' => t('Embed existing node content as a block onto other pages'),
     'class' => 'NodeBlock',
   );
 
