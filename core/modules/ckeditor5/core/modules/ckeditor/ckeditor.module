@@ -18,23 +18,23 @@ function ckeditor_editor_info() {
         array(
           array(
             'name' => 'Formatting',
-            'items' => array('Bold', 'Italic'),
-          ),
-          array(
-            'name' => 'Linking',
-            'items' => array('BackdropLink', 'BackdropUnlink'),
-          ),
-          array(
-            'name' => 'Alignment',
-            'items' => array('JustifyLeft', 'JustifyCenter', 'JustifyRight'),
+            'items' => array('Bold', 'Italic', 'Blockquote', 'Format'),
           ),
           array(
             'name' => 'Lists',
             'items' => array('BulletedList', 'NumberedList'),
           ),
           array(
+            'name' => 'Alignment',
+            'items' => array('JustifyLeft', 'JustifyCenter', 'JustifyRight'),
+          ),
+          array(
+            'name' => 'Linking',
+            'items' => array('BackdropLink', 'BackdropUnlink'),
+          ),
+          array(
             'name' => 'Media',
-            'items' => array('Blockquote', 'BackdropImage'),
+            'items' => array('BackdropImage'),
           ),
           array(
             'name' => 'Tools',
