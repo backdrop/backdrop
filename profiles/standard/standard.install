@@ -201,7 +201,7 @@ function standard_install() {
   // Create an "About page" link in the main menu.
   $item = array(
     'link_title' => st('About page'),
-    'link_path' => 'node/' . $page->nid,
+    'link_path' => 'about-page',
     'menu_name' => 'main-menu',
     'weight' => 1,
   );

@@ -32,6 +32,9 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
     parent::setUp();
     $web_user = $this->backdropCreateUser(array('create post content', 'create page content'));
     $this->backdropLogin($web_user);
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
   }
 
   /**
@@ -101,6 +104,9 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
 class NodeLoadHooksTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('node_test');
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
   }
 
   /**
@@ -525,7 +531,7 @@ class NodeCreationTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/page', $edit, t('Save'));
 
     // Check that the user was redirected to the home page.
-    $this->assertText(t('Welcome to Backdrop'), 'The user is redirected to the home page.');
+    $this->assertText(t('This is your first post, edit it or delete it'), 'The user is redirected to the home page.');
   }
 }
 
@@ -1831,7 +1837,7 @@ class NodeFrontPageCallback extends BackdropWebTestCase {
     $edit['site_frontpage'] = 'home';
     $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
     $this->backdropGet('<front>');
-    $this->assertText(t('No content has been promoted yet.'), "Default /home front page restored.");
+    $this->assertText(t('This is your first article, edit it or delete it.'), "Default /home front page restored.");
   }
 }
 
@@ -1845,6 +1851,9 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     // Create users and test node.
     $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer nodes', 'administer blocks', 'administer layouts'));
     $this->web_user = $this->backdropCreateUser(array('access content', 'create post content'));
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
   }
 
   /**
@@ -2093,6 +2102,10 @@ class NodeQueryAlter extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp('node_access_test');
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
+
     node_access_rebuild();
 
     // Create some content.
