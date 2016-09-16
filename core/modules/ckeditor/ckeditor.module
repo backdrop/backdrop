@@ -479,6 +479,7 @@ function ckeditor_get_settings($format, $existing_settings) {
     'entities' => FALSE,
     'indentClasses' => array('indent1', 'indent2', 'indent3'),
     'justifyClasses' => array('text-align-left', 'text-align-center', 'text-align-right', 'text-align-justify'),
+    'coreStyles_strike' => array('element' => 'del'),
     'coreStyles_underline' => array('element' => 'span', 'attributes' => array('class' => 'underline')),
     //'format_tags' => implode(';', $format->editor_settings['format_list']),
     'language' => isset($language->language) ? $language->language : '',
