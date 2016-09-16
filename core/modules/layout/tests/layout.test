@@ -1692,7 +1692,8 @@ class LayoutBlockTextTest extends BackdropWebTestCase {
     $file_info['status'] = 0;
     $file = new File($file_info);
     $file->save();
-    $file_info['attributes']['data-file-id'] = $file->fid;
+    $fid = $file->fid;
+    $file_info['attributes']['data-file-id'] = $fid;
     $image_string = theme('image', $file_info);
 
     $this->backdropGet('admin/structure/layouts/manage/default/add-block/editor/sidebar');
@@ -1716,9 +1717,10 @@ class LayoutBlockTextTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Check that a file usage was recorded for the file within the block.
-    $file = file_load($file->fid);
+    entity_get_controller('file')->resetCache();
+    $file = file_load($fid);
     $references = file_usage_list($file);
-    $this->assertEqual($references['file']['file'][$file->fid], 1, 'File usage recorded for the file within the block.');
+    $this->assertEqual($references['file']['file'][$fid], 1, 'File usage recorded for the file within the block.');
     $this->assertEqual($file->status, 1, 'File has been marked permanent by its file usage.');
 
     // Visit the front-end and check the block is displayed.
@@ -1735,9 +1737,10 @@ class LayoutBlockTextTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Check the file usage is left in place.
-    $file = file_load($file->fid);
+    entity_get_controller('file')->resetCache();
+    $file = file_load($fid);
     $references = file_usage_list($file);
-    $this->assertEqual($references['file']['file'][$file->fid], 1, 'File usage is unaffected by removing the block from the layout.');
+    $this->assertEqual($references['file']['file'][$fid], 1, 'File usage is unaffected by removing the block from the layout.');
     $this->assertEqual($file->status, 1, 'File still exists and is marked as permanent after removing the block from the layout.');
   }
 }
