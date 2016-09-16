@@ -489,6 +489,6 @@ class TextTranslationTestCase extends BackdropWebTestCase {
     $this->backdropGet("node/$node->nid/translate");
     $this->clickLink(t('Add translation'));
     $this->assertNoText($body[0], format_string('The body field with delta @delta is hidden.', array('@delta' => 0)));
-    $this->assertText($body[1], format_string('The body field with delta @delta is shown.', array('@delta' => 1)));
+    $this->assertText($body[1], format_string('The body field with delta @delta is shown.', array('@delta' => 3)));
   }
 }

@@ -771,15 +771,15 @@ class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
     $this->backdropGet('node/' . $node->nid);
     $this->assertRaw('<!-- THEME DEBUG -->', 'Theme debug markup found in theme output when debug is enabled.');
     $this->assertRaw("CALL: theme('node')", 'Theme call information found.');
-    $this->assertRaw('x node--1' . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   * node' . $extension, 'Suggested template files found in order and node ID specific template shown as current template.');
-    $template_filename = $templates['node__1']['path'] . '/' . $templates['node__1']['template'] . $extension;
+    $this->assertRaw('x node--3' . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   * node' . $extension, 'Suggested template files found in order and node ID specific template shown as current template.');
+    $template_filename = $templates['node__3']['path'] . '/' . $templates['node__3']['template'] . $extension;
     $this->assertRaw("BEGIN OUTPUT from '$template_filename'", 'Full path to current template file found.');
 
     // Create another node and make sure the template suggestions shown in the
     // debug markup are correct.
     $node2 = $this->backdropCreateNode();
     $this->backdropGet('node/' . $node2->nid);
-    $this->assertRaw('* node--2' . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   x node' . $extension, 'Suggested template files found in order and base template shown as current template.');
+    $this->assertRaw('* node--4' . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   x node' . $extension, 'Suggested template files found in order and base template shown as current template.');
 
     // Create another node and make sure the template suggestions shown in the
     // debug markup are correct.
@@ -788,7 +788,7 @@ class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
     $build += node_view($node3);
     $output = backdrop_render($build);
     $this->assertTrue(strpos($output, "CALL: theme('node__foo__bar')") !== FALSE, 'Theme call information found.');
-    $this->assertTrue(strpos($output, '* node--foo--bar' . $extension . PHP_EOL . '   * node--foo' . $extension . PHP_EOL . '   * node--3' . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   x node' . $extension) !== FALSE, 'Suggested template files found in order and base template shown as current template.');
+    $this->assertTrue(strpos($output, '* node--foo--bar' . $extension . PHP_EOL . '   * node--foo' . $extension . PHP_EOL . '   * node--5' . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   x node' . $extension) !== FALSE, 'Suggested template files found in order and base template shown as current template.');
 
     // Disable theme debug.
     config_set('system.core', 'theme_debug', FALSE);

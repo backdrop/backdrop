@@ -15,9 +15,6 @@ class NodeViewsRevisionRelationsTestCase extends ViewsSqlTest {
    * Create a node with revision and rest result count for both views.
    */
   public function testNodeRevisionRelationship() {
-    // Delete the two default nodes.
-    node_delete_multiple(array(1, 2));
-
     $node = $this->backdropCreateNode();
     // Create revision of the node.
     $node_revision = clone $node;
