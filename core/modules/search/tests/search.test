@@ -1334,6 +1334,9 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
     $this->search_user = $this->backdropCreateUser(array('search content', 'administer search', 'administer nodes', 'bypass node access', 'access user profiles', 'administer users', 'administer blocks'));
     $this->backdropLogin($this->search_user);
 
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
+
     // Add a single piece of content and index it.
     $node = $this->backdropCreateNode();
     $this->search_node = $node;

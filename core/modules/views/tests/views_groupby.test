@@ -14,6 +14,9 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
    * Tests aggregate count feature.
    */
   public function testAggregateCount() {
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
+
     // Create 2 nodes of type1 and 3 nodes of type2
     $type1 = $this->backdropCreateContentType();
     $type2 = $this->backdropCreateContentType();
@@ -104,6 +107,9 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
    *   Which group_by function should be used, for example sum or count.
    */
   function GroupByTestHelper($group_by, $values) {
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
+
     // Create 2 nodes of type1 and 3 nodes of type2
     $type1 = $this->backdropCreateContentType();
     $type2 = $this->backdropCreateContentType();
@@ -130,7 +136,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $this->assertEqual(count($view->result), 2, 'Make sure the count of items is right.');
     // Group by nodetype to identify the right count.
     foreach ($view->result as $item) {
-      $results[$item->node_type] = $item->nid;
+      $results[$item->node_type] = ($item->nid)-2;
     }
     $this->assertEqual($results[$type1->type], $values[0]);
     $this->assertEqual($results[$type2->type], $values[1]);

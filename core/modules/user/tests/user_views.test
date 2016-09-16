@@ -17,6 +17,9 @@ class UserViewsTestCase extends ViewsSqlTest {
   protected function setUp() {
     parent::setUp();
 
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
+
     $this->users[] = $this->backdropCreateUser();
     $this->users[] = user_load(1);
     $this->nodes[] = $this->backdropCreateNode(array('uid' => $this->users[0]->uid));
