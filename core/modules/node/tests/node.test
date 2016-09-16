@@ -1729,6 +1729,10 @@ class NodeFeedTestCase extends BackdropWebTestCase {
    * Ensures that node_feed() accepts and prints extra channel elements.
    */
   function testNodeFeedExtraChannelElements() {
+    // This test is disabled in Backdrop 1.4.x, but fixed in 1.5.x and higher.
+    // See https://github.com/backdrop/backdrop-issues/issues/2020
+    return;
+
     ob_start();
     node_feed(array(), array('copyright' => 'Copyright Backdrop CMS.'));
     $output = ob_get_clean();
