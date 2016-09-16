@@ -31,7 +31,9 @@ class views_plugin_style_rss extends views_plugin_style {
         $this->view->feed_icon = '';
       }
 
-      $this->view->feed_icon .= theme('feed_icon', array('url' => $url, 'title' => $title));
+      if ($this->options['icon']) {
+        $this->view->feed_icon .= theme('feed_icon', array('url' => $url, 'title' => $title));
+      }
       backdrop_add_html_head_link(array(
         'rel' => 'alternate',
         'type' => 'application/rss+xml',
@@ -45,6 +47,7 @@ class views_plugin_style_rss extends views_plugin_style {
     $options = parent::option_definition();
 
     $options['description'] = array('default' => '', 'translatable' => TRUE);
+    $options['icon'] = array('default' => TRUE, 'translatable' => TRUE);
 
     return $options;
   }
@@ -58,6 +61,13 @@ class views_plugin_style_rss extends views_plugin_style {
       '#default_value' => $this->options['description'],
       '#description' => t('This will appear in the RSS feed itself.'),
       '#maxlength' => 1024,
+    );
+
+    $form['icon'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Add RSS icon to displays'),
+      '#default_value' => $this->options['icon'],
+      '#description' => t('Show an RSS icon on the displays to which this RSS feed is attached.'),
     );
   }
 
