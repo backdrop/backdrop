@@ -1843,11 +1843,17 @@ class NodeFrontPageCallback extends BackdropWebTestCase {
  * Functional tests for the node module blocks.
  */
 class NodeBlockFunctionalTest extends BackdropWebTestCase {
+
   function setUp() {
     parent::setUp('node', 'block');
 
     // Create users and test node.
-    $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer nodes', 'administer blocks', 'administer layouts'));
+    $this->admin_user = $this->backdropCreateUser(array(
+      'administer content types',
+      'administer nodes',
+      'administer blocks',
+      'administer layouts',
+    ));
     $this->web_user = $this->backdropCreateUser(array('access content', 'create post content'));
   }
 
@@ -1975,7 +1981,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
   }
 
   /**
-   * Tests the content block.
+   * Tests the Existing content block.
    */
   function testNodeBlock() {
     $this->backdropLogin($this->admin_user);
@@ -1994,10 +2000,10 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->backdropGet('node/' . $node1->nid);
     $this->assertNoText($node2->title, t('Node 2 title not found on Node 1.'));
 
-    // Add a Content Block with default settings.
+    // Add a Existing content block with default settings.
     $this->backdropGet('admin/structure/layouts/manage/default');
     $this->clickLink(t('Add block'), 3);
-    $this->clickLink(t('Content block'));
+    $this->clickLink(t('Existing content'));
     $edit = array(
       'nid' => $node2->nid,
       'leave_node_title' => TRUE,
@@ -2012,10 +2018,9 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet('node/' . $node1->nid);
 
-    // Check that $node2 appears on $node1 path twice (as block title and as
-    // node title.
+    // Check that the title for $node2 only appears once on the page.
     $elements = $this->xpath('//*[text()="' . $node2->title . '"]');
-    $this->assertEqual(count($elements), 2, 'The node title appears twice on the page.');
+    $this->assertEqual(count($elements), 1, 'The node title appears only once on the page.');
 
     // Test that the full node is shown.
     $this->assertText('This is the middle');
@@ -2028,7 +2033,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $elements = $this->xpath("//h2[contains(@class, :class)]//a[contains(@href, :href)]", array(':class' => 'block-title', ':href' => strtolower($node2->title)));
     $this->assertEqual(count($elements), 1, 'The block title is linked to the node');
 
-    // Make several changes to the Content Block settings.
+    // Make several changes to the Existing content block settings.
     $edit = array(
       'leave_node_title' => FALSE,
       'link_node_title' => FALSE,

@@ -647,9 +647,19 @@ function node_revision_delete_confirm_submit($form, &$form_state) {
  * @param string $string
  *   The string that will be searched.
  */
-function node_autocomplete($string = "") {
+function node_autocomplete($string = '') {
   $matches = array();
   if ($string) {
+    if (is_numeric($string)) {
+      $result = db_select('node')
+        ->fields('node', array('nid', 'title'))
+        ->condition('nid', $string)
+        ->addTag('node_access')
+        ->execute();
+      foreach ($result as $node) {
+        $matches[$node->title . " [$node->nid]"] = check_plain($node->title) . ' [' .$node->nid . ']';
+      }
+    }
     $result = db_select('node')
       ->fields('node', array('nid', 'title'))
       ->condition('title', db_like($string) . '%', 'LIKE')
@@ -657,7 +667,7 @@ function node_autocomplete($string = "") {
       ->range(0, 10)
       ->execute();
     foreach ($result as $node) {
-      $matches[$node->title . " [$node->nid]"] = check_plain($node->title);
+      $matches[$node->title . " [$node->nid]"] = check_plain($node->title) . ' [' .$node->nid . ']';
     }
   }
 

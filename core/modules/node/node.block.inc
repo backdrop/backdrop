@@ -1,20 +1,18 @@
 <?php
-
 /**
- * NodeBlock extends Block
- *  
- * This class allows us to display a particular node in a block.
+ * @file
+ * A class that displays a particular node in a block.
  */
 class NodeBlock extends Block {
   /**
    *  Sets title text on draggable block panel in Layout builder.
    */
   function getAdminTitle() {
-    return t('Content block');
+    return t('Existing content');
   }
 
   /**
-   * Return a preview for this block.
+   * Returns a preview for this block.
    */
   function getAdminPreview() {
     return t('Displays content of node ID: @nid', array('@nid' => $this->settings['nid']));
@@ -85,16 +83,61 @@ class NodeBlock extends Block {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
-    $form['title_display']['title_display']['#options'][LAYOUT_TITLE_DEFAULT] = t('Use node title');
+    $form['title_display']['title_display']['#options'][LAYOUT_TITLE_DEFAULT] = t('Use content title');
     $form['title_display']['title_display']['#weight'] = -50;
     $settings = $this->settings;
 
+    $form['link_node_title'] = array(
+      '#type' => 'checkbox',
+      '#default_value' => !empty($settings['link_node_title']),
+      '#title' => t('Link block title to full-page display of embedded content.'),
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="title_display"]' => array('value' => LAYOUT_TITLE_NONE),
+        ),
+      ),
+    );
+
+    $form['leave_node_title'] = array(
+      '#type' => 'checkbox',
+      '#default_value' => !empty($settings['leave_node_title']),
+      '#title' => t('Show the content title inside of the block.'),
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="title_display"]' => array('value' => LAYOUT_TITLE_DEFAULT),
+        ),
+      ),
+    );
+
+    $nid_default = '';
+    if (!empty($settings['nid'])) {
+      $title = db_query("SELECT title FROM {node} WHERE nid = :nid", array(':nid' => $settings['nid']))->fetchField();
+      $nid_default = $title . ' [' . $settings['nid'] . ']';
+    }
+
     $form['nid'] = array(
-      '#title' => t('Enter the title or NID of a node'),
+      '#title' => t('Content title or ID'),
       '#type' => 'textfield',
       '#maxlength' => 512,
-      '#default_value' => !empty($settings['nid']) ? $settings['nid'] : NULL,
+      '#default_value' => $nid_default,
       '#autocomplete_path' => 'node/autocomplete',
+    );
+
+    $entity = entity_get_info('node');
+    $view_mode_options = array();
+    foreach ($entity['view modes'] as $mode => $option) {
+      $view_mode_options[$mode] = $option['label'];
+    }
+    // Remove view-modes that do not make sense for block display.
+    unset($view_mode_options['rss']);
+    unset($view_mode_options['search_index']);
+    unset($view_mode_options['search_result']);
+
+    $form['view_mode'] = array(
+      '#title' => t('View mode'),
+      '#type' => 'select',
+      '#options' => $view_mode_options,
+      '#default_value' => isset($settings['view_mode']) ? $settings['view_mode'] : 'full',
     );
 
     $form['display_submitted'] = array(
@@ -103,43 +146,10 @@ class NodeBlock extends Block {
       '#title' => t('Show author and date information'),
     );
 
-    $form['leave_node_title'] = array(
-      '#type' => 'checkbox',
-      '#default_value' => !empty($settings['leave_node_title']),
-      '#title' => t('Show node title in block content'),
-      '#description' => t('This may cause the node title to appear twice. Select "none" for the block title type if using this option.'),
-    );
-
-    $form['link_node_title'] = array(
-      '#type' => 'checkbox',
-      '#default_value' => !empty($settings['link_node_title']),
-      '#title' => t('Link the block title to the node'),
-      '#description' => t('Check this box if you would like the block title to link to the node.'),
-      '#states' => array(
-        'invisible' => array(
-          ':input[name="title_display"]' => array('value' => LAYOUT_TITLE_NONE),
-          ':input[name="leave_node_title"]' => array('checked' => FALSE),
-        ),
-      ),
-    );
-
     $form['links'] = array(
       '#type' => 'checkbox',
       '#default_value' => !empty($settings['links']),
-      '#title' => t('Include node links for "add comment", "read more" etc.'),
-    );
-
-    $entity = entity_get_info('node');
-    $view_mode_options = array();
-    foreach ($entity['view modes'] as $mode => $option) {
-      $view_mode_options[$mode] = $option['label'];
-    }
-
-    $form['view_mode'] = array(
-      '#title' => t('View mode'),
-      '#type' => 'select',
-      '#options' => $view_mode_options,
-      '#default_value' => isset($settings['view_mode']) ? $settings['view_mode'] : 'full',
+      '#title' => t('Include the links "add comment", "read more" etc.'),
     );
   }
 
@@ -163,6 +173,15 @@ class NodeBlock extends Block {
    */
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
+
+    // Clean up after form states.
+    if ($form_state['values']['title_display'] == LAYOUT_TITLE_DEFAULT) {
+      $form_state['values']['leave_node_title'] = FALSE;
+    }
+    elseif ($form_state['values']['title_display'] == LAYOUT_TITLE_NONE) {
+      $form_state['values']['link_node_title'] = FALSE;
+    }
+
     $this->settings['nid'] = (int) $form_state['values']['nid'];
     $this->settings['links'] = (bool) $form_state['values']['links'];
     $this->settings['leave_node_title'] = (bool) $form_state['values']['leave_node_title'];
