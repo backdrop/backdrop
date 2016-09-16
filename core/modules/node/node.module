@@ -1665,6 +1665,8 @@ function node_menu() {
     'title' => 'RSS feed',
     'page callback' => 'node_feed',
     'access arguments' => array('access content'),
+    // Prevent Layout from affecting our markup by specifying delivery callback.
+    'delivery callback' => 'backdrop_deliver_html_page',
     'type' => MENU_CALLBACK,
     // Pass a FALSE and array argument to ensure that additional path components
     // are not passed to node_feed().

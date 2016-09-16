@@ -734,6 +734,7 @@ class NodeRSSContentTestCase extends BackdropWebTestCase {
   function setUp() {
     // Enable dummy module that implements hook_node_view.
     parent::setUp('node_test');
+    module_disable(array('views'));
 
     $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
     // Use bypass node access permission here, because the test class uses
@@ -755,6 +756,9 @@ class NodeRSSContentTestCase extends BackdropWebTestCase {
     // Check that content added in 'rss' view mode appear in RSS feed.
     $rss_only_content = t('Extra data that should appear only in the RSS feed for node !nid.', array('!nid' => $node->nid));
     $this->assertText($rss_only_content, 'Node content designated for RSS appear in RSS feed.');
+
+    // Check that it renders just the xml of the feed not the html.
+    $this->assertNoRaw('<!DOCTYPE html>', 'Node content in the feed is just XML not HTML.');
 
     // Check that content added in view modes other than 'rss' doesn't
     // appear in RSS feed.
