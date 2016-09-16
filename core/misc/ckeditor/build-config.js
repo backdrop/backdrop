@@ -59,7 +59,7 @@ var CKBUILDER_CONFIG = {
 		'node_modules',
 		'package.json',
 		'README.md',
-		'tests'
+		'tests',
 		// Parts of CKEditor that we consciously don't ship with Backdrop.
 		'adapters',
 		'config.js',
