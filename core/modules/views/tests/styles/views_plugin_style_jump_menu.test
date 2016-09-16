@@ -21,6 +21,10 @@ class ViewsPluginStyleJumpMenuTest extends ViewsSqlTest {
 
   public function setUp() {
     parent::setUp();
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
+
     $this->nodes = array();
     $this->nodes['page'][] = $this->backdropCreateNode(array('type' => 'page'));
     $this->nodes['page'][] = $this->backdropCreateNode(array('type' => 'page'));

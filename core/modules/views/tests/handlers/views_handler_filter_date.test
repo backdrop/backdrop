@@ -13,6 +13,10 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 class ViewsHandlerFilterDateTest extends ViewsSqlTest {
   function setUp() {
     parent::setUp();
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
+
     // Add some basic test nodes.
     $this->nodes = array();
     $this->nodes[] = $this->backdropCreateNode(array('created' => 100000));

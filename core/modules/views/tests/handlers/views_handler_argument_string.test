@@ -14,6 +14,10 @@ class ViewsHandlerArgumentStringTest extends ViewsSqlTest {
    * Tests the glossary feature.
    */
   function testGlossary() {
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
+
     // Setup some nodes, one with a, two with b and three with c.
     $counter = 1;
     foreach (array('a', 'b', 'c') as $char) {
