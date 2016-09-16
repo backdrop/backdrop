@@ -16,11 +16,11 @@ function user_views_data() {
 
   // Define the base group of this table. Fields that don't
   // have a group defined will go into this field by default.
-  $data['users']['table']['group']  = t('User');
+  $data['users']['table']['group']  = t('User account');
 
   $data['users']['table']['base'] = array(
     'field' => 'uid',
-    'title' => t('User'),
+    'title' => t('User account'),
     'help' => t('Users who have created accounts on your site.'),
     'access query tag' => 'user_access',
   );
@@ -45,7 +45,7 @@ function user_views_data() {
   // uid
   $data['users']['uid'] = array(
     'title' => t('Uid'),
-    'help' => t('The user ID'), // The help that appears on the UI,
+    'help' => t('The user account ID.'), // The help that appears on the UI,
     'field' => array(
       'handler' => 'views_handler_field_user',
       'click sortable' => TRUE,
@@ -63,7 +63,7 @@ function user_views_data() {
     ),
     'relationship' => array(
       'title' => t('Content authored'),
-      'help' => t('Relate content to the user who created it. This relationship will create one record for each content item created by the user.'),
+      'help' => t('Relate content to the user account of its creator. This relationship will create one record for each content item created by the user account.'),
       'handler' => 'views_handler_relationship',
       'base' => 'node',
       'base field' => 'uid',
@@ -74,10 +74,10 @@ function user_views_data() {
 
   // uid_raw
   $data['users']['uid_raw'] = array(
-    'help' => t('The raw numeric user ID.'),
+    'help' => t('The raw numeric user account ID.'),
     'real field' => 'uid',
     'filter' => array(
-      'title' => t('The user ID'),
+      'title' => t('The user account ID'),
       'handler' => 'views_handler_filter_numeric',
     ),
   );
@@ -87,7 +87,7 @@ function user_views_data() {
     'relationship' => array(
       'title' => t('Representative node'),
       'label'  => t('Representative node'),
-      'help' => t('Obtains a single representative node for each user, according to a chosen sort criterion.'),
+      'help' => t('Obtains a single representative node for each user account, according to a chosen sort criterion.'),
       'handler' => 'views_handler_relationship_groupwise_max',
       'relationship field' => 'uid',
       'outer field' => 'users.uid',
@@ -102,7 +102,7 @@ function user_views_data() {
   $data['users']['uid_current'] = array(
     'real field' => 'uid',
     'title' => t('Current'),
-    'help' => t('Filter the view to the currently logged in user.'),
+    'help' => t('Filter the view to the currently logged in user account.'),
     'filter' => array(
       'handler' => 'views_handler_filter_user_current',
       'type' => 'yes-no',
@@ -111,8 +111,8 @@ function user_views_data() {
 
   // name
   $data['users']['name'] = array(
-    'title' => t('Name'), // The item it appears as on the UI,
-    'help' => t('The user or author name.'), // The help that appears on the UI,
+    'title' => t('Username'), // The item it appears as on the UI,
+    'help' => t('The username for the user account or author.'), // The help that appears on the UI,
     'field' => array(
       'handler' => 'views_handler_field_user_name',
       'click sortable' => TRUE,
@@ -126,7 +126,7 @@ function user_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_string',
       'title' => t('Name (raw)'),
-      'help' => t('The user or author name. This filter does not check if the user exists and allows partial matching. Does not utilize autocomplete.')
+      'help' => t('The username for the user account or author. This filter does not check if the user account exists and allows partial matching. Does not utilize autocomplete.')
     ),
   );
 
@@ -134,7 +134,7 @@ function user_views_data() {
   // Note that this field implements field level access control.
   $data['users']['mail'] = array(
     'title' => t('E-mail'), // The item it appears as on the UI,
-    'help' => t('Email address for a given user. This field is normally not shown to users, so be cautious when using it.'), // The help that appears on the UI,
+    'help' => t('Email address for a given user account. This field is normally not disclosed, so be cautious when using it.'), // The help that appears on the UI,
     'field' => array(
       'handler' => 'views_handler_field_user_mail',
       'click sortable' => TRUE,
@@ -153,7 +153,7 @@ function user_views_data() {
   // language
   $data['users']['language'] = array(
     'title' => t('Language'), // The item it appears as on the UI,
-    'help' => t('Language of the user'),
+    'help' => t('The language for the user account.'),
     'field' => array(
       'handler' => 'views_handler_field_user_language',
       'click sortable' => TRUE,
@@ -173,7 +173,7 @@ function user_views_data() {
   $data['users']['picture_fid']['moved to'] = array('users', 'picture');
   $data['users']['picture'] = array(
     'title' => t('Picture'),
-    'help' => t("The user's picture, if allowed."), // The help that appears on the UI,
+    'help' => t("The user account picture, if allowed."), // The help that appears on the UI,
     // Information for displaying the uid
     'field' => array(
       'handler' => 'views_handler_field_user_picture',
@@ -184,7 +184,7 @@ function user_views_data() {
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
-      'label' => t('Has Avatar'),
+      'label' => t('Has avatar'),
       'type' => 'yes-no',
     ),
   );
@@ -193,7 +193,7 @@ function user_views_data() {
   $data['users']['view_user'] = array(
     'field' => array(
       'title' => t('Link'),
-      'help' => t('Provide a simple link to the user.'),
+      'help' => t('Provide a simple link to the user account.'),
       'handler' => 'views_handler_field_user_link',
     ),
   );
@@ -201,7 +201,7 @@ function user_views_data() {
   // created field
   $data['users']['created'] = array(
     'title' => t('Created date'), // The item it appears as on the UI,
-    'help' => t('The date the user was created.'), // The help that appears on the UI,
+    'help' => t('The date the user account was created.'), // The help that appears on the UI,
     'field' => array(
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
@@ -272,7 +272,7 @@ function user_views_data() {
   // access field
   $data['users']['access'] = array(
     'title' => t('Last access'), // The item it appears as on the UI,
-    'help' => t("The user's last access date."), // The help that appears on the UI,
+    'help' => t("The user account's last access date."), // The help that appears on the UI,
     'field' => array(
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
@@ -288,7 +288,7 @@ function user_views_data() {
   // login field
   $data['users']['login'] = array(
     'title' => t('Last login'), // The item it appears as on the UI,
-    'help' => t("The user's last login date."), // The help that appears on the UI,
+    'help' => t("The user account's last login date."), // The help that appears on the UI,
     'field' => array(
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
@@ -304,7 +304,7 @@ function user_views_data() {
   // active status
   $data['users']['status'] = array(
     'title' => t('Active'), // The item it appears as on the UI,
-    'help' => t('Whether a user is active or blocked.'), // The help that appears on the UI,
+    'help' => t('Whether a user account is active or blocked.'), // The help that appears on the UI,
      // Information for displaying a title as a field
     'field' => array(
       'handler' => 'views_handler_field_boolean',
@@ -326,7 +326,7 @@ function user_views_data() {
   // log field
   $data['users']['signature'] = array(
     'title' => t('Signature'), // The item it appears as on the UI,
-    'help' => t("The user's signature."), // The help that appears on the UI,
+    'help' => t("The user account's signature."), // The help that appears on the UI,
      // Information for displaying a title as a field
     'field' => array(
       'handler' => 'views_handler_field_markup',
@@ -340,7 +340,7 @@ function user_views_data() {
   $data['users']['edit_node'] = array(
     'field' => array(
       'title' => t('Edit link'),
-      'help' => t('Provide a simple link to edit the user.'),
+      'help' => t('Provide a simple link to edit the user account.'),
       'handler' => 'views_handler_field_user_link_edit',
     ),
   );
@@ -348,14 +348,14 @@ function user_views_data() {
   $data['users']['cancel_node'] = array(
     'field' => array(
       'title' => t('Cancel link'),
-      'help' => t('Provide a simple link to cancel the user.'),
+      'help' => t('Provide a simple link to cancel the user account.'),
       'handler' => 'views_handler_field_user_link_cancel',
     ),
   );
 
   $data['users']['data'] = array(
     'title' => t('Data'),
-    'help' => t('Provide serialized data of the user'),
+    'help' => t('Provide serialized data of the user account'),
     'field' => array(
       'handler' => 'views_handler_field_serialized',
     ),
@@ -363,7 +363,7 @@ function user_views_data() {
 
   $data['users']['bulk_form'] = array(
     'title' => t('Bulk operations'),
-    'help' => t('Provides a checkbox on each row and a form for executing bulk actions on users.'),
+    'help' => t('Provides a checkbox on each row and a form for executing bulk actions on user accounts.'),
     'real field' => 'uid',
     'field' => array(
       'handler' => 'views_handler_field_bulk_form',
@@ -374,7 +374,7 @@ function user_views_data() {
   // ----------------------------------------------------------------------
   // users_roles table
 
-  $data['users_roles']['table']['group']  = t('User');
+  $data['users_roles']['table']['group']  = t('User account');
 
   // Explain how this table joins to others.
   $data['users_roles']['table']['join'] = array(
@@ -398,7 +398,7 @@ function user_views_data() {
 
   $data['users_roles']['role'] = array(
     'title' => t('Roles'),
-    'help' => t('Roles that a user belongs to.'),
+    'help' => t('Roles that a user account has been assigned.'),
     'field' => array(
       'handler' => 'views_handler_field_user_roles',
       'no group by' => TRUE,
@@ -418,7 +418,7 @@ function user_views_data() {
 
   $data['users_roles']['permissions'] = array(
     'title' => t('Permissions'),
-    'help' => t('The user permissions.'),
+    'help' => t('The user account permissions.'),
     'real field' => 'role',
     'field' => array(
       'handler' => 'views_handler_field_user_permissions',
@@ -440,8 +440,8 @@ function user_views_plugins() {
     'module' => 'views', // This just tells our themes are elsewhere.
     'row' => array(
       'user' => array(
-        'title' => t('User'),
-        'help' => t('Display the user with standard user view.'),
+        'title' => t('User accounts'),
+        'help' => t('Display the user acounts with standard user account view.'),
         'handler' => 'views_plugin_row_user_view',
         'base' => array('users'), // only works with 'users' as base.
         'uses options' => TRUE,
@@ -451,19 +451,19 @@ function user_views_plugins() {
     ),
     'argument default' => array(
       'user' => array(
-        'title' => t('User ID from URL'),
+        'title' => t('User account ID from URL'),
         'handler' => 'views_plugin_argument_default_user',
         'path' => backdrop_get_path('module', 'views') . '/modules/user', // not necessary for most modules
       ),
       'current_user' => array(
-        'title' => t('User ID from logged in user'),
+        'title' => t('User account ID from logged in person'),
         'handler' => 'views_plugin_argument_default_current_user',
         'path' => backdrop_get_path('module', 'views') . '/modules/user', // not necessary for most modules
       ),
     ),
     'argument validator' => array(
       'user' => array(
-        'title' => t('User'),
+        'title' => t('User account'),
         'handler' => 'views_plugin_argument_validate_user',
         'path' => backdrop_get_path('module', 'views') . '/modules/user', // not necessary for most modules
       ),

@@ -725,7 +725,7 @@ function views_ui_views_ui_wizards() {
       'file' => 'views_ui_users_views_wizard.php',
       'class' => 'ViewsUiUsersViewsWizard',
     ),
-    'title' => t('Users'),
+    'title' => t('User accounts'),
     'filters' => array(
       'status' => array(
         'value' => '1',
