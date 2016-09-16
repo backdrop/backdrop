@@ -566,6 +566,8 @@ class ModuleVersionTestCase extends ModuleTestCase {
 }
 
 class CronRunTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp(array('common_test', 'common_test_cron_helper'));
   }
@@ -718,6 +720,8 @@ class CronRunTestCase extends BackdropWebTestCase {
  * Test execution of the cron queue.
  */
 class CronQueueTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp(array('common_test', 'common_test_cron_helper', 'cron_queue_test'));
   }
@@ -786,6 +790,9 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
 
     // Create an administrative user.
     $this->admin_user = $this->backdropCreateUser(array('access administration pages', 'administer site configuration', 'administer blocks'));
+
+    // Disable caching.
+    config_set('system.core', 'cache', '0');
   }
 
   function testAccessDenied() {

@@ -681,6 +681,9 @@ class SearchCommentTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('comment', 'search');
 
+    // Disable cache.
+    config_set('system.core', 'cache', '0');
+
     // Create and log in an administrative user having access to the Full HTML
     // text format.
     $full_html_format = filter_format_load('full_html');

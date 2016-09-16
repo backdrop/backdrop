@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for the theme API.
@@ -746,10 +745,11 @@ class ThemeDatetime extends BackdropWebTestCase {
  * Tests for theme debug markup.
  */
 class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
-
   function setUp() {
     parent::setUp('theme_test', 'node');
     theme_enable(array('test_theme'));
+    // Disable cache.
+    config_set('system.core', 'cache', '0');
   }
 
   /**

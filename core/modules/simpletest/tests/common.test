@@ -1198,6 +1198,7 @@ class CommonBackdropGotoTestCase extends BackdropWebTestCase {
  * Tests for the JavaScript system.
  */
 class CommonJavaScriptTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
   /**
    * Store configured value for JavaScript preprocessing.
    */
@@ -1640,6 +1641,8 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
  * Tests for backdrop_render().
  */
 class CommonBackdropRenderTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('common_test');
   }

@@ -8,6 +8,9 @@
 class SessionTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('session_test');
+
+    // Disable the cache.
+    config_set('system.core', 'cache', '0');
   }
 
   /**
