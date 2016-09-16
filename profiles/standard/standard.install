@@ -174,6 +174,53 @@ function standard_install() {
     ->set('user_picture_style', 'thumbnail')
     ->save();
 
+  // Create an initial post to welcome users on install.
+  $post = new Node(
+    array(
+      'title' => st('Your first post!'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('This is your first post! You may edit or delete it.'),
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 1,
+      'type' => 'post',
+    )
+  );
+  $post->save();
+
+  // Create an "About" page node.
+  $page = new Node(
+    array(
+      'title' => st('About'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('This is static page. You may edit or delete it.'),
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 0,
+      'type' => 'page',
+    )
+  );
+  $page->save();
+
+  // Create an "About" link in the main menu.
+  $item = array(
+    'link_path' => 'node/' . $page->nid,
+    'link_title' => 'About',
+    'weight' => 1,
+  );
+  menu_link_save($item);
+
+
   // Allow visitor account creation with administrative approval.
   config_set('system.core', 'user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
 

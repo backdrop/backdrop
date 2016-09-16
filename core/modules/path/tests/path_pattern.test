@@ -906,7 +906,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'operations[operation]' => 'generate',
     );
     $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
-    $this->assertText('Generated 18 URL aliases.'); // 10 nodes + 6 terms + 2 users.
+    $this->assertText('Generated 20 URL aliases.'); // 12 nodes + 6 terms + 2 users.
 
     // Check that aliases have actually been created.
     foreach ($this->nodes as $node) {

@@ -28,9 +28,17 @@ class NodeWebTestCase extends BackdropWebTestCase {
  * Tests the node_load_multiple() function.
  */
 class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp();
-    $web_user = $this->backdropCreateUser(array('create post content', 'create page content'));
+
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
+
+    // Create and login web user.
+    $web_user = $this->backdropCreateUser(array('create post content', 'create page content', 'access content'));
     $this->backdropLogin($web_user);
   }
 
@@ -99,8 +107,13 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
  * Tests for the hooks invoked during node_load().
  */
 class NodeLoadHooksTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('node_test');
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
   }
 
   /**
@@ -525,7 +538,7 @@ class NodeCreationTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/page', $edit, t('Save'));
 
     // Check that the user was redirected to the home page.
-    $this->assertText(t('Welcome to Backdrop'), 'The user is redirected to the home page.');
+    $this->assertText(t('This is your first post! You may edit or delete it.'), 'The user is redirected to the home page.');
   }
 }
 
@@ -1443,6 +1456,9 @@ class NodeTypeTestCase extends BackdropWebTestCase {
    * without content present.
    */
   function testNodeTypeHasContent() {
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
+
     // Test node type to assert no content has been created.
     $this->assertFalse(node_type_has_content('post'), 'The post node type has no content associated with it.');
 
@@ -1835,7 +1851,7 @@ class NodeFrontPageCallback extends BackdropWebTestCase {
     $edit['site_frontpage'] = 'home';
     $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
     $this->backdropGet('<front>');
-    $this->assertText(t('No content has been promoted yet.'), "Default /home front page restored.");
+    $this->assertText(t('This is your first post! You may edit or delete it.'), "Default /home front page restored.");
   }
 }
 
@@ -1855,6 +1871,9 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
       'administer layouts',
     ));
     $this->web_user = $this->backdropCreateUser(array('access content', 'create post content'));
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
   }
 
   /**
@@ -2086,6 +2105,8 @@ class NodeBuildContent extends BackdropWebTestCase {
  * Tests node_query_node_access_alter().
  */
 class NodeQueryAlter extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * User with permission to view content.
    *
@@ -2102,6 +2123,7 @@ class NodeQueryAlter extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp('node_access_test');
+
     node_access_rebuild();
 
     // Create some content.
