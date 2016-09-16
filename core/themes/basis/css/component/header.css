@@ -19,6 +19,9 @@
   display: table;
   clear: both;
 }
+.header-identity-wrapper strong {
+  font-weight: inherit;
+}
 
 @media (min-width: 48em) {
   .header-identity-wrapper {
