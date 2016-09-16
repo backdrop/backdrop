@@ -10,13 +10,12 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests aggregate functionality of views, for example count.
  */
 class ViewsQueryGroupByTest extends ViewsSqlTest {
+  protected $profile = 'testing';
+
   /**
    * Tests aggregate count feature.
    */
   public function testAggregateCount() {
-    // Delete the two default nodes.
-    node_delete_multiple(array(1, 2));
-
     // Create 2 nodes of type1 and 3 nodes of type2
     $type1 = $this->backdropCreateContentType();
     $type2 = $this->backdropCreateContentType();
@@ -50,9 +49,6 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $this->assertEqual($types[$type1->type], 4);
     $this->assertEqual($types[$type2->type], 3);
   }
-
-  //public function testAggregateSum() {
-  //}
 
   public function viewsAggregateCountView() {
     $view = new view;
@@ -98,7 +94,6 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $handler->display->display_options['arguments']['type']['default_argument_type'] = 'fixed';
     $handler->display->display_options['arguments']['type']['summary']['format'] = 'default_summary';
 
-
     return $view;
   }
 
@@ -107,9 +102,6 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
    *   Which group_by function should be used, for example sum or count.
    */
   function GroupByTestHelper($group_by, $values) {
-    // Delete the two default nodes.
-    node_delete_multiple(array(1, 2));
-
     // Create 2 nodes of type1 and 3 nodes of type2
     $type1 = $this->backdropCreateContentType();
     $type2 = $this->backdropCreateContentType();
@@ -136,7 +128,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $this->assertEqual(count($view->result), 2, 'Make sure the count of items is right.');
     // Group by nodetype to identify the right count.
     foreach ($view->result as $item) {
-      $results[$item->node_type] = ($item->nid)-2;
+      $results[$item->node_type] = $item->nid;
     }
     $this->assertEqual($results[$type1->type], $values[0]);
     $this->assertEqual($results[$type2->type], $values[1]);

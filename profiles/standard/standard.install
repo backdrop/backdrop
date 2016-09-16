@@ -160,53 +160,6 @@ function standard_install() {
     node_add_body_field($type);
   }
 
-  // Create an initial post to welcome users on install.
-  $post = new Node(
-    array(
-      'title' => st('Your first post!'),
-      'body' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => st('This is your first post, edit it or delete it.'),
-          ),
-        ),
-      ),
-      'uid' => 1,
-      'status' => 1,
-      'promote' => 1,
-      'type' => 'post',
-    )
-  );
-  $post->save();
-
-  // Create an "About page" node.
-  $page = new Node(
-    array(
-      'title' => st('About page'),
-      'body' => array(
-        LANGUAGE_NONE => array(
-          array(
-            'value' => st('This is static page, edit it or delete it.'),
-          ),
-        ),
-      ),
-      'uid' => 1,
-      'status' => 1,
-      'promote' => 0,
-      'type' => 'page',
-    )
-  );
-  $page->save();
-
-  // Create an "About page" link in the main menu.
-  $item = array(
-    'link_title' => st('About page'),
-    'link_path' => 'about-page',
-    'menu_name' => 'main-menu',
-    'weight' => 1,
-  );
-  menu_link_save($item);
-
   // Add default alias for page content types.
   config('path.settings')
     ->set('node_page_pattern', '[node:title]')
@@ -220,6 +173,53 @@ function standard_install() {
     ->set('user_picture_file_size', '800')
     ->set('user_picture_style', 'thumbnail')
     ->save();
+
+  // Create an initial post to welcome users on install.
+  $post = new Node(
+    array(
+      'title' => st('Your first post!'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('This is your first post! You may edit or delete it.'),
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 1,
+      'type' => 'post',
+    )
+  );
+  $post->save();
+
+  // Create an "About" page node.
+  $page = new Node(
+    array(
+      'title' => st('About'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('This is static page. You may edit or delete it.'),
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 0,
+      'type' => 'page',
+    )
+  );
+  $page->save();
+
+  // Create an "About" link in the main menu.
+  $item = array(
+    'link_path' => 'node/' . $page->nid,
+    'link_title' => 'About',
+    'weight' => 1,
+  );
+  menu_link_save($item);
+
 
   // Allow visitor account creation with administrative approval.
   config_set('system.core', 'user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);

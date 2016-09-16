@@ -11,14 +11,13 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests basic user module integration into views.
  */
 class UserViewsTestCase extends ViewsSqlTest {
+  protected $profile = 'testing';
+
   var $users = array();
   var $nodes = array();
 
   protected function setUp() {
     parent::setUp();
-
-    // Delete the two default nodes.
-    node_delete_multiple(array(1, 2));
 
     $this->users[] = $this->backdropCreateUser();
     $this->users[] = user_load(1);

@@ -467,6 +467,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
       'langcode' => 'en',
     );
     $this->backdropPost('node/add/post', $edit, t('Save'));
+    $node = $this->backdropGetNodeByTitle($title);
 
     // Populate the body field: the first item gets the "Full HTML" input
     // format, the second one "Filtered HTML".
@@ -477,7 +478,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
         "body[$langcode][$delta][value]" => $value,
         "body[$langcode][$delta][format]" => array_shift($formats),
       );
-      $this->backdropPost('node/1/edit', $edit, t('Save'));
+      $this->backdropPost("node/$node->nid/edit", $edit, t('Save'));
       $this->assertText($body[$delta], format_string('The body field with delta @delta has been saved.', array('@delta' => $delta)));
     }
 
@@ -485,7 +486,6 @@ class TextTranslationTestCase extends BackdropWebTestCase {
     $this->backdropLogin($this->translator);
 
     // Translate the post in french.
-    $node = $this->backdropGetNodeByTitle($title);
     $this->backdropGet("node/$node->nid/translate");
     $this->clickLink(t('Add translation'));
     $this->assertNoText($body[0], format_string('The body field with delta @delta is hidden.', array('@delta' => 0)));

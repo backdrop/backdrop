@@ -10,6 +10,8 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests the core views_handler_argument_string handler.
  */
 class ViewsHandlerArgumentStringTest extends ViewsSqlTest {
+  protected $profile = 'testing';
+
   /**
    * Tests the glossary feature.
    */
@@ -32,13 +34,13 @@ class ViewsHandlerArgumentStringTest extends ViewsSqlTest {
     $count_field = 'nid';
     foreach ($view->result as &$row) {
       if (strpos($row->node_title, 'a') === 0) {
-        $this->assertEqual(3, $row->{$count_field});
+        $this->assertEqual(1, $row->{$count_field});
       }
       if (strpos($row->node_title, 'b') === 0) {
-        $this->assertEqual(4, $row->{$count_field});
+        $this->assertEqual(2, $row->{$count_field});
       }
       if (strpos($row->node_title, 'c') === 0) {
-        $this->assertEqual(5, $row->{$count_field});
+        $this->assertEqual(3, $row->{$count_field});
       }
     }
   }

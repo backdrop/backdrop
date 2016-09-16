@@ -11,11 +11,10 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests the core views_handler_filter_date handler.
  */
 class ViewsHandlerFilterDateTest extends ViewsSqlTest {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp();
-
-    // Delete the two default nodes.
-    node_delete_multiple(array(1, 2));
 
     // Add some basic test nodes.
     $this->nodes = array();
