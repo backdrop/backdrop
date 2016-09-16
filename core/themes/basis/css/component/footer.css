@@ -58,13 +58,13 @@
 
 .drop-lounging {
   position: relative;
-  width: 8em;
+  width: 7em;
 }
 
 .drop-lounging:before {
   content: '';
   position: absolute;
-  top: -0.5em;
+  top: -0.75em;
   left: 50%;
   left: calc(50% + 1.25em);
   display: none; /* Default hidden unless certain criteria are met */
