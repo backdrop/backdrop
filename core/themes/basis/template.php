@@ -1,7 +1,13 @@
 <?php
+/**
+ * @file
+ * Basis preprocess functions and theme function overrides.
+ */
 
 /**
  * Implements hook_preprocess_page().
+ *
+ * @see maintenance_page.tpl.php
  */
 function basis_preprocess_page(&$variables) {
   $node = menu_get_object();
@@ -23,6 +29,8 @@ function basis_preprocess_page(&$variables) {
 
 /**
  * Implements template_preprocess_page().
+ *
+ * @see layout.tpl.php
  */
 function basis_preprocess_layout(&$variables) {
   if ($variables['is_front']) {
@@ -32,6 +40,8 @@ function basis_preprocess_layout(&$variables) {
 
 /**
  * Implements template_preprocess_header().
+ *
+ * @see header.tpl.php
  */
 function basis_preprocess_header(&$variables) {
   $logo = $variables['logo'];
@@ -56,6 +66,8 @@ function basis_preprocess_header(&$variables) {
 }
 /**
  * Implements hook_preprocess_menu_local_tasks().
+ *
+ * @see theme_menu_local_tasks().
  */
 function basis_preprocess_menu_local_tasks(&$variables) {
   $theme_path = backdrop_get_path('theme', 'basis');
@@ -64,6 +76,8 @@ function basis_preprocess_menu_local_tasks(&$variables) {
 
 /**
  * Implements hook_preprocess_fieldset().
+ *
+ * @see theme_fieldset().
  */
 function basis_preprocess_fieldset(&$variables) {
   $theme_path = backdrop_get_path('theme', 'basis');
@@ -72,6 +86,8 @@ function basis_preprocess_fieldset(&$variables) {
 
 /**
  * Implements hook_preprocess_vertical_tabs().
+ *
+ * @see theme_vertical_tabs().
  */
 function basis_preprocess_vertical_tabs(&$variables) {
   $theme_path = backdrop_get_path('theme', 'basis');
@@ -80,6 +96,8 @@ function basis_preprocess_vertical_tabs(&$variables) {
 
 /**
  * Implements template_preprocess_block().
+ *
+ * @see block.tpl.php
  */
 function basis_preprocess_block(&$variables) {
   $theme_path = backdrop_get_path('theme', 'basis');
@@ -94,6 +112,8 @@ function basis_preprocess_block(&$variables) {
  * Overrides theme_breadcrumb().
  *
  * Removes &raquo; from markup.
+ *
+ * @see theme_breadcrumb().
  */
 function basis_breadcrumb($variables) {
   $breadcrumb = $variables['breadcrumb'];
