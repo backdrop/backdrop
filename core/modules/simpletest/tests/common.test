@@ -3094,6 +3094,117 @@ class CommonBackdropAddFeedTestCase extends BackdropWebTestCase {
 }
 
 /**
+ * Test that backdrop_sort() works correctly.
+ */
+class CommonBackdropSortUnitTest extends BackdropUnitTestCase {
+
+  /**
+   * Array to use for testing.
+   *
+   * @var array
+   */
+  protected $test_array;
+
+  function setUp() {
+    parent::setUp();
+
+    $this->test_array = array(
+      'breadcrumb' => array(
+        'info' => 'Breadcrumb',
+        'weight' => 1,
+        'description' => 'The current page breadcrumb trail.',
+        'render last' => TRUE,
+      ),
+      'main-menu' => array(
+        'info' => 'Primary navigation',
+        'weight' => 1,
+        'description' => 'A hierarchical list of links for the Primary navigation.',
+      ),
+      'recent' => array(
+        'info' => 'Recent content',
+        'weight' => 3,
+        'description' => 'A list of recently published content.',
+      ),
+      'content' => array(
+        'info' => 'Content block',
+        'weight' => 1,
+        'description' => 'Displays a node in a block.',
+        'class' => 'NodeBlock',
+      ),
+      'form' => array(
+        'info' => 'Search form',
+        'weight' => -2,
+        'description' => 'The search form for searching site content.',
+      ),
+      'custom_block' => array(
+        'info' => 'Add a custom block',
+        'weight' => -1,
+        'description' => 'A basic block for adding custom text.',
+        'class' => 'BlockText',
+      ),
+    );
+  }
+
+  /**
+   * Tests backdrop_sort().
+   */
+  public function testBackdropSort() {
+    $expected = array(
+      'form',
+      'custom_block',
+      'content',
+      'breadcrumb',
+      'main-menu',
+      'recent',
+    );
+
+    // Sort by a single numeric key.
+    backdrop_sort($this->test_array, array('weight' => SORT_NUMERIC));
+    $this->assertIdentical(array_keys($this->test_array), $expected);
+
+    // Sort by direction.
+    backdrop_sort($this->test_array, array('weight' => SORT_NUMERIC), SORT_DESC);
+    $this->assertIdentical(array_keys($this->test_array), array_reverse($expected));
+
+    $expected = array(
+      'custom_block',
+      'main-menu',
+      'recent',
+      'content',
+      'breadcrumb',
+      'form',
+    );
+
+    // Sort by a single string key.
+    backdrop_sort($this->test_array, array('description' => SORT_STRING));
+    $this->assertIdentical(array_keys($this->test_array), $expected);
+
+    // Sort by direction.
+    backdrop_sort($this->test_array, array('description' => SORT_STRING), SORT_DESC);
+    $this->assertIdentical(array_keys($this->test_array), array_reverse($expected));
+
+    $expected = array(
+      'form',
+      'custom_block',
+      'breadcrumb',
+      'content',
+      'main-menu',
+      'recent',
+    );
+
+    // Sort by numeric and string keys.
+    backdrop_sort($this->test_array, array('weight' => SORT_NUMERIC, 'info' => SORT_STRING));
+    $this->assertIdentical(array_keys($this->test_array), $expected);
+
+    // Sort by direction.
+    backdrop_sort($this->test_array, array('weight' => SORT_NUMERIC, 'info' => SORT_STRING), SORT_DESC);
+    $this->assertIdentical(array_keys($this->test_array), array_reverse($expected));
+
+  }
+
+}
+
+/**
  * Test array diff functions.
  */
 class ArrayDiffUnitTest extends BackdropUnitTestCase {
