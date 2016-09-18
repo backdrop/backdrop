@@ -1469,6 +1469,7 @@ function layout_block_configure_ajax_update($form, $form_state) {
 
   // Update the messages area.
   if ($message = layout_locked_message($layout, 'layout')) {
+    backdrop_get_messages();
     backdrop_set_message($message, 'warning');
   }
   $commands[] = ajax_command_remove('#messages');
