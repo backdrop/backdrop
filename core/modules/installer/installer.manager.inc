@@ -277,6 +277,12 @@ function installer_manager_update_form($form, $form_state = array(), $context) {
       '#weight' => 120,
     );
   }
+  
+  // Inform user if theme_debug is enabled.
+  $theme_debug_enabled = config_get('system.core', 'theme_debug');
+  if ($theme_debug_enabled && $context == 'theme') {
+    backdrop_set_message(t('Theme debugging is enabled. See the <a href="@theme_debug">Status report</a> page for more info.', array('@theme_debug' => base_path() . 'admin/reports/status')), 'warning');
+  }
 
   return $form;
 }

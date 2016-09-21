@@ -844,6 +844,12 @@ function installer_browser_filters_form($form, &$form_state, $type) {
       '#value' => t('Clear'),
     );
   }
+  
+  // Inform user if theme_debug is enabled.
+  $theme_debug_enabled = config_get('system.core', 'theme_debug');
+  if ($theme_debug_enabled && $type == 'theme') {
+    backdrop_set_message(t('Theme debugging is enabled. See the <a href="@theme_debug">Status report</a> page for more info.', array('@theme_debug' => base_path() . 'admin/reports/status')), 'warning');
+  }
 
   return $form;
 }
