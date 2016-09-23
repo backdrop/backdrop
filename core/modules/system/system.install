@@ -2933,6 +2933,27 @@ function system_update_1058() {
 }
 
 /**
+ * Set home page menu to render as a drop-down menu.
+ */
+function system_update_1059() {
+  $config = config('layout.layout.home');
+  // Only apply this update if the config file already exists.
+  if (!$config->isNew()) {
+    $content = $config->get('content');
+    foreach ($content as $uuid => $block_info) {
+      // If the main menu block is present and no style is set, set to dropdown.
+      if ($block_info['plugin'] == 'system:main-menu' && empty($block_info['data']['settings']['block_settings']['style'])) {
+        $content[$uuid]['data']['settings']['block_settings']['style'] = 'dropdown';
+        $content[$uuid]['data']['settings']['block_settings']['level'] = 1;
+        $content[$uuid]['data']['settings']['block_settings']['depth'] = 0;
+      }
+    }
+    $config->set('content', $content);
+    $config->save();
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
