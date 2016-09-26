@@ -117,7 +117,7 @@ function standard_install() {
     array(
       'type' => 'page',
       'name' => st('Page'),
-      'description' => st("Add a page for static content, such as an 'About us' page."),
+      'description' => st("Add a page with static content, like the 'About' page."),
       'settings' => array(
         'status_default' => TRUE,
         'promote_enabled' => FALSE,
