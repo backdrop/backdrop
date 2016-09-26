@@ -200,7 +200,7 @@ function standard_install() {
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('This is static page. You may edit or delete it.'),
+            'value' => st('This is a page with static content. You may edit or delete it.'),
           ),
         ),
       ),
