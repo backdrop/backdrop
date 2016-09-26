@@ -1727,8 +1727,8 @@ function layout_modules_uninstalled($modules) {
 function layout_get_title_description(Layout $layout) {
   $options = array(
     LAYOUT_TITLE_DEFAULT => t('Default page title'),
-    LAYOUT_TITLE_CUSTOM => t('Custom page title'),
-    LAYOUT_TITLE_BLOCK => t('Title copied from block'),
+    LAYOUT_TITLE_CUSTOM => t('Custom page title:'),
+    LAYOUT_TITLE_BLOCK => t('Title copied from the'),
     LAYOUT_TITLE_NONE => t('No title'),
   );
   $source = $layout->settings['title_display'];
@@ -1741,7 +1741,7 @@ function layout_get_title_description(Layout $layout) {
     if (!empty($layout->settings['title_block'])) {
       $uuid = $layout->settings['title_block'];
       $title_block = $layout->content[$uuid];
-      $description .= ' <em>' . $all_blocks[$title_block->module][$title_block->delta]['info'] . '</em>';
+      $description .= ' <em>' . $all_blocks[$title_block->module][$title_block->delta]['info'] . '</em>' . ' block';
     }
   }
 
