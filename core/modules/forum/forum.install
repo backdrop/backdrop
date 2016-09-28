@@ -1,0 +1,288 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for the Forum module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function forum_install() {
+  // Set the weight of the forum.module to 1 so it is loaded after the taxonomy.module.
+  db_update('system')
+    ->fields(array('weight' => 1))
+    ->condition('name', 'forum')
+    ->execute();
+
+  _forum_install_type_create();
+
+  // Set a default path pattern for forum nodes.
+  if (module_exists('path')) {
+    $config = config('path.settings');
+    $config->set('node_forum_pattern', 'thread/[node:title]');
+
+    $config->save();
+  }
+}
+
+/**
+ * Implements hook_enable().
+ */
+function forum_enable() {
+  // If we enable forum at the same time as taxonomy we need to call
+  // field_associate_fields() as otherwise the field won't be enabled until
+  // hook modules_enabled is called which takes place after hook_enable events.
+  field_associate_fields('taxonomy');
+  // Create the forum vocabulary if it does not exist.
+
+  $vocabulary = taxonomy_vocabulary_load(config_get('forum.settings', 'forum_nav_vocabulary'));
+  if (!$vocabulary) {
+    $vocabulary = new TaxonomyVocabulary(array(
+      'name' => t('Forums'),
+      'machine_name' => 'forums',
+      'description' => t('Forum navigation vocabulary'),
+      'hierarchy' => 1,
+      'module' => 'forum',
+      'weight' => -10,
+    ));
+    taxonomy_vocabulary_save($vocabulary);
+  }
+
+  // Create the 'taxonomy_forums' field if it doesn't already exist.
+  if (!field_info_field('taxonomy_forums')) {
+    $field = array(
+      'field_name' => 'taxonomy_forums',
+      'type' => 'taxonomy_term_reference',
+      'settings' => array(
+        'allowed_values' => array(
+          array(
+            'vocabulary' => $vocabulary->machine_name,
+            'parent' => 0,
+          ),
+        ),
+      ),
+    );
+    field_create_field($field);
+
+    // Create a default forum so forum posts can be created.
+    $term = entity_create('taxonomy_term', array(
+      'name' => t('General discussion'),
+      'description' => '',
+      'parent' => array(0),
+      'vocabulary' => $vocabulary->machine_name,
+      ));
+    taxonomy_term_save($term);
+
+    // Create the instance on the bundle.
+    $instance = array(
+      'field_name' => 'taxonomy_forums',
+      'entity_type' => 'node',
+      'label' => $vocabulary->name,
+      'bundle' => 'forum',
+      'required' => TRUE,
+      'widget' => array(
+        'type' => 'options_select',
+      ),
+      'display' => array(
+        'default' => array(
+          'type' => 'taxonomy_term_reference_link',
+         'weight' => 10,
+        ),
+        'teaser' => array(
+          'type' => 'taxonomy_term_reference_link',
+         'weight' => 10,
+        ),
+      ),
+    );
+    field_create_instance($instance);
+  }
+
+}
+
+/**
+ * Creates the forum content type.
+ */
+function _forum_install_type_create() {
+  // Create an additional node type.
+  $forum_node_type = array(
+    'type' => 'forum',
+    'name' => t('Forum topic'),
+    'base' => 'forum',
+    'description' => t('A <em>forum topic</em> starts a new discussion thread within a forum.'),
+    'custom' => 0,
+    'modified' => 0,
+    'locked' => 1,
+    'is_new' => TRUE,
+    'settings' => array(
+      'promote_enabled' => FALSE,
+    ),
+  );
+
+  $forum_node_type = node_type_set_defaults($forum_node_type);
+  node_type_save($forum_node_type);
+  node_add_body_field($forum_node_type);
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function forum_uninstall() {
+  // Load the dependent Taxonomy module, in case it has been disabled.
+  backdrop_load('module', 'taxonomy');
+
+  field_delete_field('taxonomy_forums');
+  // Purge field data now to allow taxonomy module to be uninstalled
+  // if this is the only field remaining.
+  field_purge_batch(10);
+}
+
+/**
+ * Implements hook_schema().
+ */
+function forum_schema() {
+  $schema['forum'] = array(
+    'description' => 'Stores the relationship of nodes to forum terms.',
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The {node}.nid of the node.',
+      ),
+      'vid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Primary Key: The {node}.vid of the node.',
+      ),
+      'tid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The {taxonomy_term_data}.tid of the forum term assigned to the node.',
+      ),
+    ),
+    'indexes' => array(
+      'forum_topic' => array('nid', 'tid'),
+      'tid' => array('tid'),
+    ),
+    'primary key' => array('vid'),
+    'foreign keys' => array(
+      'forum_node' => array(
+        'table' => 'node',
+        'columns' => array(
+          'nid' => 'nid',
+          'vid' => 'vid',
+        ),
+      ),
+    ),
+  );
+
+  $schema['forum_index'] = array(
+    'description' => 'Maintains denormalized information about node/term relationships.',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'The {node}.nid this record tracks.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'title' => array(
+        'description' => 'The title of this node, always treated as non-markup plain text.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'tid' => array(
+         'description' => 'The term ID.',
+         'type' => 'int',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+         'default' => 0,
+      ),
+      'sticky' => array(
+        'description' => 'Boolean indicating whether the node is sticky.',
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => 0,
+        'size' => 'tiny',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the node was created.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default'=> 0,
+      ),
+      'last_comment_timestamp' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The Unix timestamp of the last comment that was posted within this node, from {comment}.timestamp.',
+      ),
+      'comment_count' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'The total number of comments on this node.',
+      ),
+    ),
+    'indexes' => array(
+      'forum_topics' => array('nid', 'tid', 'sticky', 'last_comment_timestamp'),
+      'created' => array('created'),
+      'last_comment_timestamp' => array('last_comment_timestamp'),
+    ),
+    'foreign keys' => array(
+      'tracked_node' => array(
+        'table' => 'node',
+        'columns' => array('nid' => 'nid'),
+      ),
+      'term' => array(
+        'table' => 'taxonomy_term_data',
+        'columns' => array(
+          'tid' => 'tid',
+        ),
+      ),
+    ),
+  );
+
+  return $schema;
+}
+
+function forum_update_1000() {
+  $config = config('forum.settings');
+  $config->set('forum_nav_vocabulary', update_variable_get('forum_nav_vocabulary', ''));
+  $config->set('forum_containers', update_variable_get('forum_containers', array()));
+  $config->set('forum_hot_topic', update_variable_get('forum_hot_topic',15));
+  $config->set('forum_per_page', update_variable_get('forum_per_page',25));
+  $config->set('forum_order', update_variable_get('forum_order',1));
+  $config->set('forum_block_num_active', update_variable_get('forum_block_num_active',5));
+  $config->set('forum_block_num_new', update_variable_get('forum_block_num_new',5));
+  $config->save();
+
+  update_variable_del('forum_containers');
+  update_variable_del('forum_hot_topic');
+  update_variable_del('forum_per_page');
+  update_variable_del('forum_order');
+  update_variable_del('forum_block_num_active');
+  update_variable_del('forum_block_num_new');
+  update_variable_del('node_options_forum');
+}
+
+function forum_update_1001() {
+  // Delete the container settings.
+  $config = config('forum.settings');
+  $config->clear('forum_containers');
+  $config->save();
+}
+
+function forum_update_last_removed() {
+  return 7005;
+}

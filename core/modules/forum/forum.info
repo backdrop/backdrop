@@ -1,0 +1,15 @@
+name = Forum
+description = Provides discussion forums.
+type = module
+
+dependencies[] = taxonomy
+dependencies[] = comment
+dependencies[] = views_term_hierarchy
+
+package = Forum
+
+version = 1.x-2.x
+backdrop = 1.x
+
+configure = admin/structure/forum
+stylesheets[all][] = forum.css
