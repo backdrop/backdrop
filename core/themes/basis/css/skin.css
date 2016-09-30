@@ -6,7 +6,12 @@
  */
 body {
   font-family: 'Open Sans', Helvetica, Arial, sans-serif;
-  font-size: 16px;
+  /**
+   * Default font size for site should be set on body element in rem units.
+   * This is better for some accessibility technologies. Although it's not true
+   * under all circumstances, think of 1rem as being equal to 16px.
+   */
+  font-size: 1rem;
   line-height: 1.6;
   background: #fff;
 }
