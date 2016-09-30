@@ -40,13 +40,18 @@ class BlockTestCase extends BackdropWebTestCase {
     $file_info['attributes']['data-file-id'] = $file->fid;
     $image_string = theme('image', $file_info);
 
+    // Load the form and check that file uploads are enabled on the body field.
+    $this->backdropGet('admin/structure/block/add');
+    $element = $this->xpath('//textarea[@name="body[value]"][@data-editor-uploads="true"]');
+    $this->assertEqual(count($element), 1, 'Editor upload attribute found on the body field for a custom block.');
+
     // Add a new custom block by filling out the input form on the admin/structure/block/add page.
     $custom_block = array();
     $custom_block['info'] = $this->randomName(8);
     $custom_block['delta'] = strtolower($this->randomName(8));
     $custom_block['title'] = $this->randomName(8);
     $custom_block['body[value]'] = $this->randomName(32) . $image_string;
-    $this->backdropPost('admin/structure/block/add', $custom_block, 'Save block');
+    $this->backdropPost(NULL, $custom_block, 'Save block');
 
     // Confirm that the custom block has been created, and then find its config file
     $this->assertText(t('The block has been created.'), 'Custom block successfully created.');
