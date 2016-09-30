@@ -1423,7 +1423,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
 
     // Block 1: Add a hero block with no image to the content area.
     $this->clickLink(t('Add block'), 2);
-    $this->clickLink(t('Add a hero block'));
+    $this->clickLink(t('Hero block'));
     $edit = array(
       'title' => $hero_title_1,
       'content[value]' => $hero_content_1,
@@ -1432,7 +1432,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
 
     // Block 2: Add a hero block with only content and an image.
     $this->clickLink(t('Add block'), 2);
-    $this->clickLink(t('Add a hero block'));
+    $this->clickLink(t('Hero block'));
     $edit = array(
       'content[value]' => $hero_content_2,
       'files[image]' => $good_realpath_filename,
@@ -1441,7 +1441,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
 
     // Block 3: Add a hero block with only an image.
     $this->clickLink(t('Add block'), 2);
-    $this->clickLink(t('Add a hero block'));
+    $this->clickLink(t('Hero block'));
 
     // Confirm a too-small background image fails validation.
     $edit = array(
