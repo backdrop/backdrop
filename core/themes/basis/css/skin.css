@@ -487,15 +487,17 @@ abbr.tabledrag-changed {
 
 /**
  * Status messages
+ * Uncomment background-image styles to override, URL will need to be
+ * updated to work in a sub-theme.
  */
-/* Neutral / Good status message colors */
+/* Neutral or Good status message colors */
 .status {
   color: #234600;
   background-color: #E9EEBC;
 }
 
 div.status:before {
-  background-image: url(../../../misc/message-24-ok.png);
+  /* background-image: url(../../../misc/message-24-ok.png); */
   background-color: #CFDE56;
 }
 
@@ -506,7 +508,7 @@ div.status:before {
 }
 
 div.warning:before {
-  background-image: url(../../../misc/message-24-warning.png);
+  /* background-image: url(../../../misc/message-24-warning.png); */
   background-color: #FCE400;
 }
 
@@ -517,39 +519,43 @@ div.warning:before {
 }
 
 div.error:before {
-  background-image: url(../../../misc/message-24-error.png);
+  /* background-image: url(../../../misc/message-24-error.png); */
   background-color: #EE3D23;
 }
 
 /* Desktop size icons */
 @media only screen and (min-width: 34em) {
   div.status:before {
-    background-image: url(../../../misc/message-32-ok.png);
+    /* background-image: url(../../../misc/message-32-ok.png); */
   }
 
   div.warning:before {
-    background-image: url(../../../misc/message-32-warning.png);
+    /* background-image: url(../../../misc/message-32-warning.png); */
   }
 
   div.error:before {
-    background-image: url(../../../misc/message-32-error.png);
+    /* background-image: url(../../../misc/message-32-error.png); */
   }
 }
 
-/* SVG overrides */
+/**
+ * SVG overrides for status messages
+ * Using linear-gradient so the style only applies to browsers that can render
+ * SVGs.
+ */
 div.status:before {
-  background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg);
-  background-image: linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg);
+  /* background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg); */
+  /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg); */
 }
 
 div.warning:before {
-  background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg);
-  background-image: linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg);
+  /* background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg); */
+  /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg); */
 }
 
 div.error:before {
-  background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-error.svg);
-  background-image: linear-gradient(transparent, transparent), url(../../../misc/message-error.svg);
+  /* background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-error.svg); */
+  /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-error.svg); */
 }
 
 /**

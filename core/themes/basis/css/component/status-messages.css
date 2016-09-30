@@ -56,6 +56,7 @@
     background-size: 2em;
   }
 }
+
 [dir="rtl"] .messages:before {
   left: auto;
   right: 0;
@@ -65,4 +66,54 @@
 .messages .item-list ul {
   margin-bottom: 0;
   margin-left: 0;
+}
+
+/* Images originate in here instead of skin to avoid breaking in sub-themes */
+div.status:before {
+  background-image: url(../../../misc/message-24-ok.png);
+}
+
+/* Warning status message */
+div.warning:before {
+  background-image: url(../../../misc/message-24-warning.png);
+}
+
+/* Error status message */
+div.error:before {
+  background-image: url(../../../misc/message-24-error.png);
+}
+
+/* Desktop size icons */
+@media only screen and (min-width: 34em) {
+  div.status:before {
+    background-image: url(../../../misc/message-32-ok.png);
+  }
+
+  div.warning:before {
+    background-image: url(../../../misc/message-32-warning.png);
+  }
+
+  div.error:before {
+    background-image: url(../../../misc/message-32-error.png);
+  }
+}
+
+/**
+ * SVG overrides for status messages
+ * Using linear-gradient so the style only applies to browsers that can render
+ * SVGs.
+ */
+div.status:before {
+  background-image: -webkit-linear-gradient(transparent, transparent), url(../../../../misc/message-ok.svg);
+  background-image: linear-gradient(transparent, transparent), url(../../../../misc/message-ok.svg);
+}
+
+div.warning:before {
+  background-image: -webkit-linear-gradient(transparent, transparent), url(../../../../misc/message-warning.svg);
+  background-image: linear-gradient(transparent, transparent), url(../../../../misc/message-warning.svg);
+}
+
+div.error:before {
+  background-image: -webkit-linear-gradient(transparent, transparent), url(../../../../misc/message-error.svg);
+  background-image: linear-gradient(transparent, transparent), url(../../../../misc/message-error.svg);
 }
