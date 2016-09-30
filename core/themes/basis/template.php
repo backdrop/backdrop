@@ -106,6 +106,11 @@ function basis_preprocess_block(&$variables) {
   if ($variables['block']->delta === 'hero') {
     backdrop_add_css($theme_path . '/css/component/hero.css', array('group' => CSS_THEME));
   }
+
+  // Add a container class to the breadcrumb block.
+  if ($variables['block']->delta === 'breadcrumb') {
+    $variables['classes'][] = 'container';
+  }
 }
 
 /**
