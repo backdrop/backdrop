@@ -72,7 +72,8 @@
 }
 
 .block-hero .block-title {
-  margin: 0 0 0.2em;
+  margin-top: 0;
+  margin-bottom: 0.2em;
   padding: 0;
   font-weight: 200;
   line-height: 1.2;
