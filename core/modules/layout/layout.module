@@ -1745,6 +1745,6 @@ function layout_get_title_description(Layout $layout) {
       $description = t('No title');
       break;
   }
-  
+
   return $description;
 }
