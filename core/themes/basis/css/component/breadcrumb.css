@@ -37,7 +37,7 @@
   width: 2em;
   height: 2em;
   border: 0.0625rem solid #20252e;
-  border-width: 0.0625rem 0.0625rem 0 0;
+  border-width: 0.125rem 0.125rem 0 0;
   -webkit-transform:
     translate(0, -50%)
     rotate(45deg);
