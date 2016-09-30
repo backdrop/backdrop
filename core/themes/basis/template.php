@@ -64,49 +64,6 @@ function basis_preprocess_header(&$variables) {
     $variables['logo_attributes'] = $logo_attributes;
   }
 }
-/**
- * Implements hook_preprocess_menu_local_tasks().
- *
- * @see theme_menu_local_tasks().
- */
-function basis_preprocess_menu_local_tasks(&$variables) {
-  $theme_path = backdrop_get_path('theme', 'basis');
-  backdrop_add_css($theme_path . '/css/component/admin-tabs.css', array('group' => CSS_THEME));
-}
-
-/**
- * Implements hook_preprocess_fieldset().
- *
- * @see theme_fieldset().
- */
-function basis_preprocess_fieldset(&$variables) {
-  $theme_path = backdrop_get_path('theme', 'basis');
-  backdrop_add_css($theme_path . '/css/component/fieldset.css', array('group' => CSS_THEME));
-}
-
-/**
- * Implements hook_preprocess_vertical_tabs().
- *
- * @see theme_vertical_tabs().
- */
-function basis_preprocess_vertical_tabs(&$variables) {
-  $theme_path = backdrop_get_path('theme', 'basis');
-  backdrop_add_css($theme_path . '/css/component/vertical-tabs.css', array('group' => CSS_THEME));
-}
-
-/**
- * Implements template_preprocess_block().
- *
- * @see block.tpl.php
- */
-function basis_preprocess_block(&$variables) {
-  $theme_path = backdrop_get_path('theme', 'basis');
-
-  // Add component CSS if there's a hero on the page.
-  if ($variables['block']->delta === 'hero') {
-    backdrop_add_css($theme_path . '/css/component/hero.css', array('group' => CSS_THEME));
-  }
-}
 
 /**
  * Overrides theme_breadcrumb().
