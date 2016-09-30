@@ -991,6 +991,10 @@ function installer_manager_archive_extract($file, $directory) {
   }
 
   $archiver->extract($directory);
+
+  // Clear the file stat cache to ensure PHP picks up the new files.
+  clearstatcache();
+
   return $archiver;
 }
 
