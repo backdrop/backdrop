@@ -441,17 +441,18 @@ fieldset .fieldset-legend {
  * Breadcrumb
  */
 .breadcrumb {
-  background: #586172;
+  background: #dee2ea;
 }
 
-.breadcrumb li a {
-  color: #fff;
+.breadcrumb a {
+  color: #000;
 }
 
 /* Arrow color */
 .breadcrumb li:after {
-  border-color: #20252e;
+  border-color: #fff;
 }
+
 
 /**
  * Tabledrag
