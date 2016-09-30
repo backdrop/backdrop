@@ -516,7 +516,7 @@ function path_patterns_settings_form($form) {
     }
   }
   else {
-    $description .= ' ' . t('Considering enabling the Redirect module on the <a href="!url">modules page</a> to create redirects when your aliases change.', array('admin/modules'));
+    $description .= ' ' . t('Considering enabling the Redirect module on the <a href="!url">modules page</a> to create redirects when your aliases change.', array('!url' => url('admin/modules')));
   }
   $form['update_action'] = array(
     '#type' => 'radios',
