@@ -88,10 +88,6 @@ function config_get($config_file, $option = NULL) {
  *   may contain periods to indicate levels within the config file.
  * @param mixed $value
  *   The value to save into the config file.
- *
- * @return mixed
- *   The contents of the requested config option. Returns NULL if the specified
- *   option was not found in the file at all.
  */
 function config_set($config_file, $option, $value) {
   $config = config($config_file);
@@ -99,6 +95,26 @@ function config_set($config_file, $option, $value) {
   $config->save();
 }
 
+/**
+ * A shortcut function to set and save multiple values in a config file.
+ *
+ * Note that this function immediately writes the config file to disk and clears
+ * associated caches related to the new config.  Unlike config_set() which would
+ * need to be called once per value, this function updates all the values and
+ * then saves the object.
+ *
+ * @param string $config_file
+ *   The name of the configuration object to retrieve. The name corresponds to
+ *   an JSON configuration file. For @code config(book.admin) @endcode, the
+ *   config object returned will contain the contents of book.admin.json.
+ * @param array $options
+ *   A keyed array of configuration option names mapping their values.
+ */
+function config_set_multiple($config_file, $options) {
+  $config = config($config_file);
+  $config->setMultiple($options);
+  $config->save();
+}
 
 /**
  * Returns the path of a configuration directory.
@@ -571,6 +587,22 @@ class Config {
     }
     $this->validated = FALSE;
 
+    return $this;
+  }
+
+  /**
+   * Sets multiple values in this configuration object.
+   *
+   * @param array $options
+   *   A keyed array of identifiers mapping to the associated values.
+   *
+   * @return Config
+   *   The configuration object.
+   */
+  public function setMultiple($options) {
+    foreach ($options as $key => $value) {
+      $this->set($key, $value);
+    }
     return $this;
   }
 

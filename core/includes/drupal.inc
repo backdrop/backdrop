@@ -2521,7 +2521,6 @@ function node_types_rebuild() {
  * configuration using the config system. See config(), config_set(), and
  * config_get() for information on saving into configuration.
  *
- * @deprecated since 1.0.0
  */
 function system_settings_form($form) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
@@ -2550,20 +2549,69 @@ function system_settings_form($form) {
  * forms, developers should create separate submit handlers for each form
  * to save the settings into various configuration files as needed.
  *
- * @deprecated since 1.0.0
  */
 function system_settings_form_submit($form, &$form_state) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   form_state_values_clean($form_state);
 
-  foreach ($form_state['values'] as $key => $value) {
-    if (is_array($value) && isset($form_state['values']['array_filter'])) {
-      $value = array_keys(array_filter($value));
+  if (!empty($form['#config'])) {
+    $configs = array();
+    backdrop_sort_form_values_by_config($form, $form_state, $configs, $form['#config']);
+    foreach ($configs as $bucket => $data) {
+      config_set_multiple($bucket, $data);
     }
-    variable_set($key, $value);
+  }
+  else {
+    watchdog('form', 'Backdrop 2.0 and later will require forms using system_settings_form() to set $form[\'#config\'].', array(), WATCHDOG_DEPRECATED);
+    foreach ($form_state['values'] as $key => $value) {
+      if (is_array($value) && isset($form_state['values']['array_filter'])) {
+        $value = array_keys(array_filter($value));
+      }
+      variable_set($key, $value);
+    }
   }
 
   backdrop_set_message(t('The configuration options have been saved.'));
+}
+
+/**
+ * Sorts the $form_state['values'] array into CMI buckets by $form['#config'].
+ *
+ * This function recursively searches the form to assign values from
+ * $form_state['values'] into specific CMI buckets.  The top of $form must
+ * contain a $form['#config'] entry with the name of the default CMI bucket
+ * to use.  If an element contains its own $form['#config'] entry, that CMI
+ * bucket name will be used for that element and any child elements in the
+ * form.
+ *
+ * @param  $form
+ *   An associative array containing the structure of a portion of the form.
+ * @param  &$form_state
+ *   A keyed array containing the current state of the form.
+ * @param  &$configs
+ *   A keyed array that will contain the form values sorted by CMI bucket when
+ *   the function returns.
+ * @param  $inherited_bucket
+ *   The name of the bucket to use if $form['#config'] is not set.
+ * @return none
+ */
+function backdrop_sort_form_values_by_config($form, &$form_state, &$configs, $inherited_bucket) {
+  foreach ($form as $key => $form_fragment) {
+    // Skip form metadata
+    if ($key[0] == '#') {
+      continue;
+    }
+    // Specific elements or groups of elements can specify a bucket.
+    $bucket = empty($form_fragment['#config']) ? $inherited_bucket : $form_fragment['#config'];
+    // Save this element, if the value is present.
+    if (array_key_exists($key, $form_state['values'])) {
+      $configs[$bucket][$key] = $form_state['values'][$key];
+    }
+    // Decend into subgroups
+    if (is_array($form_fragment)) {
+      backdrop_sort_form_values_by_config($form_fragment, $form_state, $configs, $bucket);
+    }
+  }
 }
 
 /**
