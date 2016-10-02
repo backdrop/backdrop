@@ -34,7 +34,6 @@
 @media (min-width: 62em) {
   .block-hero {
     /* Remove full width styles on larger screens */
-    position: static;
     left: auto;
     width: 100%;
     -webkit-transform: none;
