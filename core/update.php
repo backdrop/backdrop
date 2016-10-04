@@ -310,7 +310,7 @@ function update_info_page() {
   $output .= "</ol>\n";
   $output .= "<p>When you have performed the above steps you may proceed.</p>\n";
   $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
-  $output .= '<form method="post" action="' . $form_action . '"><p><input type="submit" value="Continue" class="form-submit" /></p></form>';
+  $output .= '<form method="post" action="' . $form_action . '"><p><input type="submit" value="Continue" class="form-submit button-primary" /></p></form>';
   $output .= "\n";
   return $output;
 }
