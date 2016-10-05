@@ -599,9 +599,11 @@ function user_admin_role($form, &$form_state, $role) {
  */
 function user_admin_role_submit($form, &$form_state) {
   $role = $form_state['role'];
+  $old_role = $role->label;
   $role->label = $form_state['values']['label'];
   user_role_save($role);
-  backdrop_set_message(t('The %role role has been renamed.', array('%role' => $role->label)));
+  $new_role = $role->label;
+  backdrop_set_message(t('The %old_role role has been renamed to %new_role.', array('%old_role' => $old_role, '%new_role' => $new_role)));
   $form_state['redirect'] = 'admin/config/people/roles';
 }
 
@@ -613,7 +615,7 @@ function user_admin_role_delete_confirm($form, &$form_state, $role) {
     '#type' => 'value',
     '#value' => $role->name,
   );
-  return confirm_form($form, t('Are you sure you want to delete the role %role ?', array('%role' => $role->label)), 'admin/people/roles', t('This action cannot be undone.'), t('Delete'));
+  return confirm_form($form, t('Are you sure you want to delete the %role role?', array('%role' => $role->label)), 'admin/people/roles', t('This action cannot be undone.'), t('Delete'));
 }
 
 /**
