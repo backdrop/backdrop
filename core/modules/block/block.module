@@ -213,6 +213,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#title' => t('Block content'),
     '#default_value' => $edit['body']['value'],
     '#format' => $edit['body']['format'],
+    '#editor_uploads' => TRUE,
     '#rows' => 8,
     '#required' => TRUE,
     '#weight' => -17,
