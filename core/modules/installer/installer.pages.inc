@@ -718,7 +718,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         '#type' => 'link',
         '#name' => 'cancel',
         '#title' => t('Finish without enabling'),
-        '#href' => 'admin/install/reset/module/all',
+        '#href' => 'admin/installer/reset/module/all',
         '#options' => array(),
       );
     }
@@ -729,7 +729,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         '#type' => 'link',
         '#name' => 'cancel',
         '#title' => t('Cancel'),
-        '#href' => 'admin/install/reset/module/all',
+        '#href' => 'admin/installer/reset/module/all',
         '#options' => array(),
       );
       $form['missing'] = array(
