@@ -86,7 +86,7 @@ function authorize_filetransfer_form($form, &$form_state) {
     $form['connection_settings']['authorize_filetransfer_default']['#options'][$name] = $backend['title'];
     $form['connection_settings'][$name] = array(
       '#type' => 'container',
-      '#attributes' => array('class' => array("filetransfer-$name", 'filetransfer')),
+      '#attributes' => array('class' => array("filetransfer-$name", 'filetransfer', 'form-wrapper')),
       '#states' => array(
         'visible' => array(
           'select[name="connection_settings[authorize_filetransfer_default]"]' => array('value' => $name),
