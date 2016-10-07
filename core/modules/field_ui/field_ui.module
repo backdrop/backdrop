@@ -322,18 +322,23 @@ function field_ui_inactive_instances($entity_type, $bundle_name = NULL) {
 /**
  * Implements hook_form_FORM_ID_alter().
  *
- * Adds a button 'Save and add fields' to the 'Create content type' form.
+ * Adds a button 'Save and add fields' to the 'Add content type' form.
  *
  * @see node_type_form()
  * @see field_ui_form_node_type_form_submit()
  */
 function field_ui_form_node_type_form_alter(&$form, $form_state) {
-  // We want to display the button only on add page.
+  // Display the button only on the 'Add content type' page.
   if (empty($form['#node_type']->type)) {
-    $form['actions']['save_continue'] = array(
+    $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Save and add fields'),
       '#weight' => 45,
+    );
+    $form['actions']['save'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save content type'),
+      '#weight' => 55,
     );
     $form['#submit'][] = 'field_ui_form_node_type_form_submit';
   }
@@ -345,7 +350,7 @@ function field_ui_form_node_type_form_alter(&$form, $form_state) {
  * @see field_ui_form_node_type_form_alter()
  */
 function field_ui_form_node_type_form_submit($form, &$form_state) {
-  if ($form_state['triggering_element']['#parents'][0] === 'save_continue') {
+  if ($form_state['triggering_element']['#parents'][0] === 'submit') {
     $form_state['redirect'] = _field_ui_bundle_admin_path('node', $form_state['values']['type']) .'/fields';
   }
 }
