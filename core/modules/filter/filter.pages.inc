@@ -250,7 +250,12 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
   if (!empty($form_state['values']['fid'])) {
     $fid = $form_state['values']['fid'];
     $file = file_load($fid);
-    $form_state['values']['attributes']['src'] = file_create_url($file->uri);
+
+    // Try to make a local path if possible for better portability.
+    $url = file_create_url($file->uri);
+    $url = str_replace($GLOBALS['base_url'], '', $url);
+
+    $form_state['values']['attributes']['src'] = $url;
     $form_state['values']['attributes']['data-file-id'] = $fid;
     unset($form_state['values']['fid']);
   }
