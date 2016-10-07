@@ -60,10 +60,8 @@ class ModuleUpdater extends Updater {
    */
   public function postInstallTasks() {
     return array(
-      l(t('Manually install another module'), 'admin/modules/install'),
-      l(t('Enable newly added modules'), 'admin/modules/project-browser/install/enable'),
-      l(t('Browse projects'), 'admin/modules/project-browser'),
-      l(t('Module list'), 'modules'),
+      l(t('Enable newly added modules'), 'admin/modules'),
+      l(t('Browse more modules'), 'admin/modules/install'),
     );
   }
 
@@ -122,7 +120,7 @@ class ThemeUpdater extends Updater {
   public function postInstallTasks() {
     return array(
       l(t('Enable newly added themes'), 'admin/appearance'),
-      l(t('Browse projects'), 'admin/modules/project-browser'),
+      l(t('Browse more themes'), 'admin/appearance/install'),
     );
   }
 }
@@ -174,7 +172,7 @@ class LayoutUpdater extends Updater {
   public function postInstallTasks() {
     return array(
       l(t('Use newly added layouts'), 'admin/structure/layouts'),
-      l(t('Browse projects'), 'admin/modules/project-browser'),
+      l(t('Browse more layouts'), 'admin/structure/layouts/install'),
     );
   }
 }

@@ -435,15 +435,15 @@ function installer_manager_update_ready_form_submit($form, &$form_state) {
     $projects = $_SESSION['installer_manager_update_projects'];
     unset($_SESSION['installer_manager_update_projects']);
 
-    $project_real_location = NULL;
+    $project_realpath = NULL;
     foreach ($projects as $project => $url) {
       $project_location = $directory . '/' . $project;
       $updater = Updater::factory($project_location);
-      $project_real_location = backdrop_realpath($project_location);
+      $project_realpath = backdrop_realpath($project_location);
       $updates[] = array(
         'project' => $project,
         'updater_name' => get_class($updater),
-        'local_url' => $project_real_location,
+        'local_url' => $project_realpath,
       );
     }
 
@@ -452,7 +452,7 @@ function installer_manager_update_ready_form_submit($form, &$form_state) {
     // code, there's no need to prompt for FTP/SSH credentials. Instead, we
     // instantiate a FileTransferLocal and invoke installer_authorize_run_update()
     // directly.
-    if (fileowner($project_real_location) == fileowner(conf_path())) {
+    if (fileowner($project_realpath) == fileowner(conf_path())) {
       module_load_include('inc', 'installer', 'installer.authorize');
       $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
       installer_authorize_run_update($filetransfer, $updates);
@@ -543,8 +543,6 @@ function installer_manager_install_form($form, &$form_state) {
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
-    // Todo: need this so errors reload in dialog, but it stops the form from
-    // continuing.
     '#ajax' => array(
       'callback' => 'installer_manager_install_modal_callback',
     ),
@@ -572,7 +570,12 @@ function installer_manager_install_modal_callback($form, $form_state) {
     $commands[] = ajax_command_open_modal_dialog($title, $html, array('width' => 700, 'dialogClass' => 'layout-dialog'));
   }
   elseif (!empty($form_state['redirect'])) {
-    $url = url($form_state['redirect'], array('absolute' => true));
+    if (is_array($form_state['redirect'])) {
+      $url = call_user_func_array('url', $form_state['redirect']);
+    }
+    else {
+      $url = url($form_state['redirect'], array('absolute' => TRUE));
+    }
     $commands[] = ajax_command_redirect($url);
   }
 
@@ -752,14 +755,12 @@ function installer_manager_install_form_submit($form, &$form_state) {
     $form_state['redirect'] = 'admin/installer/install/select_versions';
   }
   else {
-    $field = 'project_url';
-
     $return = installer_manager_download_project($form_state['values']['project_url']);
     if (empty($return['success'])) {
-      form_set_error($field, $return['message']);
+      form_set_error('project_url', $return['message']);
     }
-    elseif ($return['redirect']) {
-      $form_state['redirect'] = system_authorized_get_url();
+    if (!empty($return['redirect'])) {
+      $form_state['redirect'] = $return['redirect'];
     }
   }
 }
@@ -886,22 +887,19 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
     );
   }
 
-  $project_real_location = backdrop_realpath($project_location);
+  $project_realpath = backdrop_realpath($project_location);
+  $updater_name = get_class($updater);
 
-  $arguments = array(
-    'project' => $project,
-    'updater_name' => get_class($updater),
-    'local_url' => $project_real_location,
-  );
-
-  if (fileowner($project_real_location) == fileowner(conf_path())) {
+  // If the permissions of the downloaded file match those of the settings.php
+  // directory, go ahead and install the module directly.
+  if (fileowner($project_realpath) == fileowner(conf_path())) {
     module_load_include('inc', 'installer', 'installer.authorize');
     $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
 
     if ($is_installer) {
       // Initialize some variables in the Batch API $context array.
       /* @var Updater $updater */
-      $updater = new $arguments['updater_name']($project_real_location);
+      $updater = new $updater_name($project_realpath);
 
       try {
         if ($updater->isInstalled()) {
@@ -920,9 +918,21 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
       }
     }
     else {
-      call_user_func_array('installer_authorize_run_install', array_merge(array($filetransfer), $arguments));
+      // Start the batch process to install the module but suppress redirecting
+      // to authorize.php, return the redirect instead.
+      $redirect_callback = backdrop_is_ajax() ? FALSE : 'backdrop_goto';
+      installer_authorize_run_install($filetransfer, $project, $updater_name, $project_realpath, $redirect_callback);
+
+      // Assemble the authorize.php path and go to it to complete the batch.
+      $batch = &batch_get();
+      return array(
+        'success' => TRUE,
+        'redirect' => array($batch['url'], array('query' => array('op' => 'start', 'id' => $batch['id']))),
+      );
     }
   }
+  // If permissions differ, redirect to authorize.php to copy the file as a
+  // different system user.
   else {
     if ($is_installer) {
       return array(
@@ -931,9 +941,11 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
       );
     }
     else {
-      system_authorized_init('installer_authorize_run_install', backdrop_get_path('module', 'installer') . '/installer.authorize.inc', $arguments, t('Update manager'));
+      $path = backdrop_get_path('module', 'installer') . '/installer.authorize.inc';
+      system_authorized_init('installer_authorize_run_install', $path, array($project, $updater_name, $project_realpath), t('Update manager'));
       return array(
-        'redirect' => TRUE,
+        'success' => TRUE,
+        'redirect' => system_authorized_get_url(),
       );
     }
   }

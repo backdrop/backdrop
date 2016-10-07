@@ -2077,10 +2077,10 @@ function system_authorized_run($callback, $file, $arguments = array(), $page_tit
  *
  * @see batch_process()
  */
-function system_authorized_batch_process() {
+function system_authorized_batch_process($redirect_callback = 'backdrop_goto') {
   $finish_url = system_authorized_get_url();
   $process_url = system_authorized_batch_processing_url();
-  batch_process($finish_url, $process_url);
+  batch_process($finish_url, $process_url, $redirect_callback);
 }
 
 /**
