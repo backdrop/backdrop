@@ -288,7 +288,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
 
   $form['actions'] = array('#type' => 'actions');
   // If this is a new content type, add a 'Save and add fields' button.
-  if ($type->module === 'node' && empty($type->type)) {
+  if ($type->module === 'node' && empty($type->type && module_exists('field_ui'))) {
     $form['actions']['add_fields'] = array(
       '#type' => 'submit',
       '#value' => t('Save and add fields'),
