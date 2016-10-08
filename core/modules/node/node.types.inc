@@ -287,6 +287,16 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
 
   $form['actions'] = array('#type' => 'actions');
+
+  if ($type->module === 'node' && empty($type->type)) {
+    $form['actions']['add_fields'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save and add fields'),
+      '#weight' => 35,
+      
+    );
+  }
+
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save content type'),
@@ -400,7 +410,13 @@ function node_type_form_submit($form, &$form_state) {
     watchdog('node', 'Added content type %name.', array('%name' => $type->name), WATCHDOG_NOTICE, l(t('view'), 'admin/structure/types'));
   }
 
-  $form_state['redirect'] = 'admin/structure/types';
+  if ($form_state['triggering_element']['#parents'][0] === 'add_fields') {
+    $form_state['redirect'] = _field_ui_bundle_admin_path('node', $form_state['values']['type']) .'/fields';
+  }
+  else {
+    $form_state['redirect'] = 'admin/structure/types';
+  }
+
   return;
 }
 
