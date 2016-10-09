@@ -287,12 +287,27 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
 
   $form['actions'] = array('#type' => 'actions');
+  // If this is a new content type and the Field UI module is enabled, add a
+  // 'Save and add fields' button.
+  if ($type->module === 'node' && empty($type->type) && module_exists('field_ui')) {
+    $form['actions']['save_continue'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save and add fields'),
+      '#weight' => 35,
+    );
+  }
+
+  // The 'Save content type' button is added unconditionally to both the 'Add
+  // content type' page as well as the 'Configure' page for existing content
+  // types.
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save content type'),
     '#weight' => 40,
   );
 
+  // If this is a 'Configure' page for an existing content type, add a 'Delete
+  // content type' button. 
   if ($type->module === 'node' && !empty($type->type)) {
     $form['actions']['delete'] = array(
       '#type' => 'submit',
@@ -303,6 +318,18 @@ function node_type_form($form, &$form_state, $type = NULL) {
       '#submit' => array('node_type_form_delete'),
     );
   }
+
+  $path = 'admin/structure/types';
+  $options = array();
+  $options['attributes']['class'][] = 'form-cancel';
+
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $path,
+    '#options' => $options,
+    '#weight' => 50,
+  );
 
   return $form;
 }
@@ -400,7 +427,19 @@ function node_type_form_submit($form, &$form_state) {
     watchdog('node', 'Added content type %name.', array('%name' => $type->name), WATCHDOG_NOTICE, l(t('view'), 'admin/structure/types'));
   }
 
-  $form_state['redirect'] = 'admin/structure/types';
+  // If the form submittion was triggered by the 'Save and add fields' button
+  // available only on the 'Add content type' page, redirect to the 'Manage
+  // fields' page for the newly-created content type.
+  if ($form_state['triggering_element']['#parents'][0] === 'add_fields') {
+    $form_state['redirect'] = _field_ui_bundle_admin_path('node', $form_state['values']['type']) .'/fields';
+  }
+  // If the form submittion was triggered by the 'Save content type' button
+  // available when creating new content types as well as when editing existing
+  // ones, then redirect to the 'Content types' page.
+  else {
+    $form_state['redirect'] = 'admin/structure/types';
+  }
+
   return;
 }
 
