@@ -431,10 +431,11 @@ function update_config_defaults($modules, &$context) {
   foreach ($modules as $module_name => $module_data) {
     config_update_default_config($module_name);
   }
+  $module_keys = array_keys($modules);
   $context['message'] = t('Updated default settings for @count, including @module_name.',
     array(
       '@count' => format_plural(count($modules), '1 module', '@count modules'),
-      '@module_name' => end(array_keys($modules)),
+      '@module_name' => end($module_keys),
     )
   );
 }
