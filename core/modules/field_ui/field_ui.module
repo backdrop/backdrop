@@ -334,7 +334,6 @@ function field_ui_form_node_type_form_alter(&$form, $form_state) {
       '#type' => 'submit',
       '#value' => t('Save and add fields'),
       '#weight' => 35,
-      '#attributes' => array('class' => array('button-primary')),
     );
     $form['#submit'][] = 'field_ui_form_node_type_form_submit';
   }
