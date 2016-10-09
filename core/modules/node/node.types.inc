@@ -290,7 +290,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
   // If this is a new content type and the Field UI module is enabled, add a
   // 'Save and add fields' button.
   if ($type->module === 'node' && empty($type->type) && module_exists('field_ui')) {
-    $form['actions']['add_fields'] = array(
+    $form['actions']['save_continue'] = array(
       '#type' => 'submit',
       '#value' => t('Save and add fields'),
       '#weight' => 35,
@@ -318,6 +318,18 @@ function node_type_form($form, &$form_state, $type = NULL) {
       '#submit' => array('node_type_form_delete'),
     );
   }
+
+  $path = 'admin/structure/types';
+  $options = array();
+  $options['attributes']['class'][] = 'form-cancel';
+
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $path,
+    '#options' => $options,
+    '#weight' => 50,
+  );
 
   return $form;
 }
