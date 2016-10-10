@@ -33,8 +33,7 @@ function config($config_file, $type = 'active') {
   $loaded_configs = &$backdrop_static_fast['loaded_configs'];
 
   if (!isset($loaded_configs[$type][$config_file])) {
-    $directory = config_get_config_directory($type);
-    $storage = new ConfigFileStorage($directory);
+    $storage = config_get_config_storage($type);
     $config = new Config($config_file, $storage);
     $config->load();
     $cache = $config->get('_config_static');
@@ -147,8 +146,7 @@ function config_get_config_directory($type = 'active') {
  *   An array containing matching configuration object names.
  */
 function config_get_names_with_prefix($prefix, $type = 'active') {
-  $directory = config_get_config_directory($type);
-  $storage = new ConfigFileStorage($directory);
+  $storage = config_get_config_storage($type);
   return $storage->listAll($prefix);
 }
 
@@ -164,8 +162,7 @@ function config_get_names_with_prefix($prefix, $type = 'active') {
  *   An array containing matching configuration objects.
  */
 function config_load_multiple($names, $type = 'active') {
-  $directory = config_get_config_directory($type);
-  $storage = new ConfigFileStorage($directory);
+  $storage = config_get_config_storage($type);
   return $storage->readMultiple($names);
 }
 
@@ -221,6 +218,21 @@ function config_uninstall_config($module, $config_name = NULL) {
       }
     }
   }
+}
+
+/**
+ * Get the storage object for the specified configuration type
+ *
+ * @param string $type
+ *   (optional) The type of config directory to return. Backdrop core provides
+ *   'active' and 'staging'. Defaults to 'active'.
+ *
+ * @return Config
+ *   A ConfigStorageInterface object managing the specified configuration type.
+ */
+function config_get_config_storage($type = 'active') {
+  $directory = config_get_config_directory($type);
+  return new ConfigFileStorage($directory);
 }
 
 /**
@@ -839,6 +851,19 @@ interface ConfigStorageInterface {
    */
   public function deleteAll($prefix = '');
 
+  /**
+   * Import an archive of configuration files into the config storage managed
+   * by this object.
+   *
+   * @param string $file_uri
+   *   The URI of the file to import.
+   *
+   * @throws ConfigStorageException
+   *
+   * @return bool
+   *   TRUE on success, FALSE otherwise.
+   */
+  public function importArchive($file_uri);
 }
 
 /**
@@ -1018,5 +1043,22 @@ class ConfigFileStorage implements ConfigStorageInterface {
     }
 
     return $success;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function importArchive($file_uri) {
+    $realpath = backdrop_realpath($file_uri);
+
+    try {
+      $archiver = new ArchiverTar($realpath);
+      $archiver->extract($this->directory, $archiver->listContents());
+    }
+    catch (\Exception $e) {
+      watchdog('config', 'Could not extract the archive @uri: @error', array('@uri' => $file_uri, '@error' => $e->getMessage()), WATCHDOG_ERROR);
+      throw new ConfigStorageException($e->getMessage(), 0, $e);
+    }
+    return TRUE;
   }
 }
