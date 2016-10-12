@@ -706,6 +706,7 @@ function backdrop_install_config_directories() {
     // itself. But if it somehow fails anyway, the installation cannot proceed.
     // Bail out using a similar error message as in system_requirements().
     $config_directory = config_get_config_directory($config_type);
+    $config_storage = config_get_config_storage($config_type);
     if (!file_prepare_directory($config_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
       throw new Exception(format_string('The directory %directory could not be created or could not be made writable. To proceed with the installation, either create the directory and modify its permissions manually or ensure that the installer has the permissions to create it automatically. For more information, see the <a href="@handbook_url">Installation Instructions</a> page.', array(
         '%directory' => $config_directory,
@@ -715,7 +716,7 @@ function backdrop_install_config_directories() {
 
     // Check that the directories are entirely empty. Disallowing installation
     // over existing config directories.
-    if (count(file_scan_directory($config_directory, '/.*/')) > 0) {
+    if (count($config_storage->listAll()) > 0) {
       throw new Exception(format_string('The directory %directory must be completely empty to proceed with installation.', array(
         '%directory' => $config_directory,
       )));
