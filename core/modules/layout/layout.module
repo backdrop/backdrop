@@ -1725,24 +1725,25 @@ function layout_modules_uninstalled($modules) {
  *   Description of title source.
  */
 function layout_get_title_description(Layout $layout) {
-  $options = array(
-    LAYOUT_TITLE_DEFAULT => t('Default page title'),
-    LAYOUT_TITLE_CUSTOM => t('Custom page title'),
-    LAYOUT_TITLE_BLOCK => t('Title copied from block'),
-    LAYOUT_TITLE_NONE => t('No title'),
-  );
   $source = $layout->settings['title_display'];
-  $description = $options[$source];
-  if ($layout->settings['title_display'] == LAYOUT_TITLE_CUSTOM) {
-    $description .= ' <em>' . check_plain($layout->settings['title']) . '</em>';
-  }
-  elseif ($layout->settings['title_display'] == LAYOUT_TITLE_BLOCK) {
-    $all_blocks = layout_get_block_info();
-    if (!empty($layout->settings['title_block'])) {
-      $uuid = $layout->settings['title_block'];
-      $title_block = $layout->content[$uuid];
-      $description .= ' <em>' . $all_blocks[$title_block->module][$title_block->delta]['info'] . '</em>';
-    }
+  switch ($source) {
+    case LAYOUT_TITLE_DEFAULT:
+      $description = t('Default page title');
+      break;
+    case LAYOUT_TITLE_CUSTOM:
+      $description = t('Custom page title: %title', array('%title' => $layout->settings['title']));
+      break;
+    case LAYOUT_TITLE_BLOCK:
+      $all_blocks = layout_get_block_info();
+      if (!empty($layout->settings['title_block'])) {
+        $uuid = $layout->settings['title_block'];
+        $title_block = $layout->content[$uuid];
+        $description = t('Title copied from the %block block', array('%block' => $all_blocks[$title_block->module][$title_block->delta]['info']));
+      }
+      break;
+    case LAYOUT_TITLE_NONE:
+      $description = t('No title');
+      break;
   }
 
   return $description;

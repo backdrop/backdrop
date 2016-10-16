@@ -2530,8 +2530,8 @@ function layout_ajax_form_save_title_dialog($form, $form_state) {
   }
   else {
     // Rebuild the title area description.
-    $description = '<div class="layout-editor-block-content">' . layout_get_title_description($layout) . '</div>';
-    $commands[] = ajax_command_replace("#layout-editor-title .layout-editor-block-content", $description);
+    $description = '<span class="description">' . layout_get_title_description($layout) . '</span>';
+    $commands[] = ajax_command_replace("#layout-editor-title .description", $description);
 
     // Clear out previous messages.
     if ($message = layout_locked_message($layout, 'layout')) {
