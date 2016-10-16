@@ -2104,6 +2104,8 @@ function field_ui_field_edit_form_submit($form, &$form_state) {
   $instance = array_merge($instance_source, $instance);
   field_update_instance($instance);
 
+  cache('admin_bar')->flush();
+
   backdrop_set_message(t('Saved %label configuration.', array('%label' => $instance['label'])));
 
   $form_state['redirect'] = field_ui_next_destination($instance['entity_type'], $instance['bundle']);
