@@ -1724,6 +1724,7 @@ function field_ui_field_delete_form_submit($form, &$form_state) {
 
   if (!empty($bundle) && $field && !$field['locked'] && $form_values['confirm']) {
     field_delete_instance($instance);
+    cache('admin_bar')->flush();
     backdrop_set_message(t('The field %field has been deleted from the %type content type.', array('%field' => $instance['label'], '%type' => $bundle_label)));
   }
   else {
