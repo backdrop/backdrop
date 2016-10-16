@@ -304,7 +304,20 @@ function node_type_form($form, &$form_state, $type = NULL) {
     );
   }
 
+  $path = 'admin/structure/types';
+  $options = array();
+  $options['attributes']['class'][] = 'form-cancel';
+
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $path,
+    '#options' => $options,
+    '#weight' => 50,
+  );
+
   return $form;
+
 }
 
 /**

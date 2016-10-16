@@ -322,18 +322,18 @@ function field_ui_inactive_instances($entity_type, $bundle_name = NULL) {
 /**
  * Implements hook_form_FORM_ID_alter().
  *
- * Adds a button 'Save and add fields' to the 'Create content type' form.
+ * Adds a button 'Save and add fields' to the 'Add content type' form.
  *
  * @see node_type_form()
  * @see field_ui_form_node_type_form_submit()
  */
 function field_ui_form_node_type_form_alter(&$form, $form_state) {
-  // We want to display the button only on add page.
+  // Display the button only on the 'Add content type' page.
   if (empty($form['#node_type']->type)) {
     $form['actions']['save_continue'] = array(
       '#type' => 'submit',
       '#value' => t('Save and add fields'),
-      '#weight' => 45,
+      '#weight' => 35,
     );
     $form['#submit'][] = 'field_ui_form_node_type_form_submit';
   }
