@@ -14,4 +14,4 @@ The breakpoints are:
 * `(min-width: 75em)` - About `1200px`
 
 ## CSS documentation
-See (README.md in css directory)[css/README.md].
+See [README.md in css directory](css/README.md).
