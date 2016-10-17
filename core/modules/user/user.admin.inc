@@ -553,7 +553,7 @@ function user_admin_roles_add_submit($form, &$form_state) {
     'label' => $form_state['values']['label'],
   );
   user_role_save($role);
-  backdrop_set_message(t('The role has been added.'));
+  backdrop_set_message(t('The %role role has been added.', array('%role' => $role->label)));
   $form_state['redirect'] = 'admin/config/people/roles';
 }
 
@@ -604,9 +604,11 @@ function user_admin_role($form, &$form_state, $role) {
  */
 function user_admin_role_submit($form, &$form_state) {
   $role = $form_state['role'];
+  $old_role = $role->label;
   $role->label = $form_state['values']['label'];
   user_role_save($role);
-  backdrop_set_message(t('The role has been renamed.'));
+  $new_role = $role->label;
+  backdrop_set_message(t('The %old_role role has been renamed to %new_role.', array('%old_role' => $old_role, '%new_role' => $new_role)));
   $form_state['redirect'] = 'admin/config/people/roles';
 }
 
@@ -618,15 +620,16 @@ function user_admin_role_delete_confirm($form, &$form_state, $role) {
     '#type' => 'value',
     '#value' => $role->name,
   );
-  return confirm_form($form, t('Are you sure you want to delete the role %name ?', array('%name' => $role->label)), 'admin/config/people/roles', t('This action cannot be undone.'), t('Delete'));
+  return confirm_form($form, t('Are you sure you want to delete the %role role?', array('%role' => $role->label)), 'admin/config/people/roles', t('This action cannot be undone.'), t('Delete'));
 }
 
 /**
  * Form submit handler for user_admin_role_delete_confirm().
  */
 function user_admin_role_delete_confirm_submit($form, &$form_state) {
-  user_role_delete($form_state['values']['role_name']);
-  backdrop_set_message(t('The role has been deleted.'));
+  $role = $form_state['values']['role_name'];
+  user_role_delete($role);
+  backdrop_set_message(t('The %role role has been deleted.', array('%role' => $role)));
   $form_state['redirect'] = 'admin/config/people/roles';
 }
 

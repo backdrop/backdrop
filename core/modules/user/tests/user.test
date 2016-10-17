@@ -2071,7 +2071,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     $role_name = '123';
     $edit = array('name' => $role_name, 'label' => $role_name);
     $this->backdropPost('admin/config/people/roles', $edit, t('Add role'));
-    $this->assertText(t('The role has been added.'), 'The role has been added.');
+    $this->assertText(t('The 123 role has been added.'), 'The role has been added.');
     backdrop_static_reset('user_roles');
     $role = user_role_load($role_name);
     $this->assertTrue(is_object($role), 'The role was successfully loaded from config.');
@@ -2085,7 +2085,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     $new_label = '456';
     $edit = array('label' => $new_label);
     $this->backdropPost("admin/config/people/roles/edit/$role_name", $edit, t('Save role'));
-    $this->assertText(t('The role has been renamed.'), 'The role has been renamed.');
+    $this->assertText(t('The 123 role has been renamed to 456.'), 'The role has been renamed.');
     backdrop_static_reset('user_roles');
     $role = user_role_load($role_name);
     $this->assertFalse($role->label === $old_label, 'The role has had its label changed.');
@@ -2119,7 +2119,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     $role_name = 'administrator';
     $role = user_role_load($role_name);
     $this->backdropPost("admin/config/people/roles/delete/$role_name", array(), t('Delete'));
-    $this->assertText(t('The role has been deleted.'), 'The role has been deleted');
+    $this->assertText(t('The administrator role has been deleted.'), 'The role has been deleted');
     $this->assertNoLinkByHref("admin/config/people/roles/edit/$role_name", 'Role edit link removed.');
     backdrop_static_reset('user_roles');
     $this->assertFalse(user_role_load($role_name), 'A deleted role can no longer be loaded.');
