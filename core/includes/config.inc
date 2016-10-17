@@ -1045,6 +1045,11 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
     }
     $this->table = $matches[3];
     $this->database = $matches[2] ? $matches[2] : 'default';
+
+    // Bootstrap the database if it is not yet available.
+    if (!function_exists('db_query') || backdrop_get_bootstrap_phase() < BACKDROP_BOOTSTRAP_DATABASE) {
+      backdrop_bootstrap(BACKDROP_BOOTSTRAP_DATABASE, FALSE);
+    }
   }
 
   /**
