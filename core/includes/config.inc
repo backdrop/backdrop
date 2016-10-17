@@ -1056,11 +1056,22 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
   /**
    * Create the database table it does not already exist.
    *
-   * @return bool TRUE on success, FALSE otherwise.
+   * @return bool
+   *   TRUE on success, FALSE in case of an error.
+   *
+   * @throws ConfigStorageException
    */
   public function initializeStorage() {
     if (!db_table_exists($this->table, array('target' => $this->database))) {
-      db_create_table($this->table, $this->schema($this->table));
+      try {
+        db_create_table($this->table, $this->schema($this->table));
+      }
+      catch (\Exception $e) {
+        throw new ConfigStorageException(format_string('The database table %table could not be created: @error', array(
+          '%table' => $config_directory,
+          '@error' => $e->getMessage(),
+        )), 0, $e);
+      }
     }
     return TRUE;
   }
