@@ -1027,7 +1027,8 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    * Constructs a new ConfigDatabaseStorage controller.
    *
    * @param string $dburl
-   *   A URL that references a backdrop connection (optional) and table.  If
+   *   A URL that references a backdrop connection (optional) and table. The
+   *   string has a format of db:/<database connection>/<database table>. If
    *   no database connection is specified, then the 'default' connection is
    *   used.
    *
