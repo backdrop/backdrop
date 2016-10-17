@@ -698,6 +698,20 @@ class Config {
 interface ConfigStorageInterface {
 
   /**
+   * Perform any steps needed to create and initialize the storage.  This may
+   * include creating directories or database tables, and initializing data
+   * structures.
+   *
+   * This function does not re-initialize already initialized storage.
+   *
+   * @return bool
+   *   TRUE on success, FALSE in case of an error.
+   *
+   * @throws ConfigStorageException
+   */
+  public function initializeStorage();
+
+  /**
    * Returns whether a configuration object exists.
    *
    * @param string $name
@@ -886,6 +900,23 @@ class ConfigFileStorage implements ConfigStorageInterface {
    */
   public function __construct($directory) {
     $this->directory = $directory;
+  }
+
+  /**
+   * Create a configuration directory, if it does not already exist, and ensure
+   * it is writable by the site.
+   *
+   * @return bool
+   *   TRUE on success, FALSE in case of an error.
+   *
+   * @throws ConfigStorageException
+   */
+  public function initializeStorage() {
+    if (!file_prepare_directory($this->directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+      throw new ConfigStorageException(format_string('The directory %directory could not be created or could not be made writable. ', array(
+      '%directory' => $config_directory,
+    )));
+    }
   }
 
   /**
