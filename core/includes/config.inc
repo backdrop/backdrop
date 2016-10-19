@@ -1283,6 +1283,30 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
     }
     return TRUE;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function exportArchive($archive_file_uri) {
+    $tmp_config_dir_path = file_create_filename('config', file_directory_temp());
+    file_prepare_directory($tmp_config_dir_path, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+    $data = db_select($this->table, 'c', array('target' => $this->database))
+      ->fields('c')
+      ->execute()
+      ->fetchAllAssoc('name', PDO::FETCH_ASSOC);
+    foreach($data as $config_name => $row) {
+      file_put_contents($tmp_config_dir_path . '/' . $config_name . '.json', $row['data']);
+    }
+
+    // And tar it up.
+    $realpath = backdrop_realpath($archive_file_uri);
+    $archiver = new ArchiverTar($archive_file_uri);
+    $config_files = array();
+    foreach (array_keys($data) as $config_name) {
+      $config_files[] = $tmp_config_dir_path . '/' . $config_name . '.json';
+    }
+    $archiver->getArchive()->createModify($config_files, '', $tmp_config_dir_path);
+  }
 }
 
 /**
