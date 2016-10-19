@@ -1014,7 +1014,8 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
         'ctime' => array(
           'type' => 'int',
           'not null' => TRUE,
-          'description' => 'The last write time',
+          'default' => 0,
+          'description' => 'The node changed time (see stat(2) for details.)',
         ),
       ),
       'primary key' => array('name'),
@@ -1153,14 +1154,20 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
     $data = $this->encode($data) . "\n";
     $file_path = $this->getFilePath($name);
     try {
-      db_merge($this->table, array('target' => $this->database))
+      $result = db_merge($this->table, array('target' => $this->database))
         ->key(array('name' => $name))
         ->fields(array(
           'name' => $name,
           'data' => $data,
-          'ctime' => time(),
         ))
         ->execute();
+      if ($result == MergeQuery::STATUS_INSERT) {
+        db_update($this->table, array('target' => $this->database))
+          ->fields(array('ctime' => time()))
+          ->condition('name', $name)
+          ->condition('ctime', 0)
+          ->execute();
+      }
     }
     catch (\Exception $e) {
       throw new ConfigStorageException('Failed to write configuration file: ' . $this->getFilePath($name), 0, $e);
