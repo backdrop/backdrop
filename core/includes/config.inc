@@ -870,7 +870,7 @@ interface ConfigStorageInterface {
    * by this object.
    *
    * @param string $file_uri
-   *   The URI of the file to import.
+   *   The URI of the tar archive file to import.
    *
    * @throws ConfigStorageException
    *
@@ -878,6 +878,20 @@ interface ConfigStorageInterface {
    *   TRUE on success, FALSE otherwise.
    */
   public function importArchive($file_uri);
+
+  /**
+   * Export an archive of configuration files from the config storage managed
+   * by this object.
+   *
+   * @param string $file_uri
+   *   The URI of the tar archive file to create.
+   *
+   * @throws ConfigStorageException
+   *
+   * @return bool
+   *   TRUE on success, FALSE otherwise.
+   */
+  public function exportArchive($file_uri);
 }
 
 /**
@@ -1091,5 +1105,17 @@ class ConfigFileStorage implements ConfigStorageInterface {
       throw new ConfigStorageException($e->getMessage(), 0, $e);
     }
     return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function exportArchive($file_uri) {
+    $archiver = new ArchiverTar($file_uri);
+    $config_files = array();
+    foreach ($this->listAll() as $config_name) {
+      $config_files[] = $this->directory . '/' . $config_name . '.json';
+    }
+    $archiver->getArchive()->createModify($config_files, '', $this->directory);
   }
 }

@@ -198,15 +198,8 @@ function config_export_full_form_submit(array $form, array &$form_state) {
  */
 function config_download_full_export() {
   $file_path = file_create_filename('config.tar.gz', file_directory_temp());
-  $archiver = new ArchiverTar($file_path);
-  $config_dir = config_get_config_directory();
-  $config_storage = new ConfigFileStorage($config_dir);
-  $config_files = array();
-  foreach ($config_storage->listAll() as $config_name) {
-    $config_files[] = $config_dir . '/' . $config_name . '.json';
-  }
-  $archiver->getArchive()->createModify($config_files, '', config_get_config_directory());
-
+  $config_storage = config_get_config_storage();
+  $config_storage->exportArchive($file_path);
   $filename = str_replace(file_directory_temp() . '/', '', $file_path);
   $headers = array(
     'Content-Disposition' => 'attachment; filename=config.tar.gz',
