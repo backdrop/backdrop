@@ -1196,12 +1196,12 @@ div.messages {
   outline: medium none;
 }
 
-#views-live-preview div.contextual-links-wrapper {
+#views-live-preview .contextual-links-wrapper {
   right: auto;
   top: auto;
 }
 
-html.js #views-live-preview div.contextual-links-wrapper {
+html.js #views-live-preview .contextual-links-wrapper {
   display: inline;
   right: auto;
   left: auto;
@@ -1212,18 +1212,18 @@ html.js #views-live-preview div.contextual-links-wrapper {
   display: block;
 }
 
-#views-live-preview div.contextual-links-wrapper ul.contextual-links {
+#views-live-preview .contextual-links-wrapper .contextual-links {
   min-width: 10em;
   right: auto;
   border-radius: 0 4px 4px 4px;
 }
-[dir="rtl"] #views-live-preview div.contextual-links-wrapper ul.contextual-links {
+[dir="rtl"] #views-live-preview .contextual-links-wrapper .contextual-links {
   left: auto;
   right: 0;
   border-radius: 4px 0 4px 4px;
 }
 
-#views-live-preview ul.contextual-links li span {
+#views-live-preview .contextual-links li span {
   font-weight: bold;
   margin: 0.25em 0;
   padding: 0.5em 1em 0.25em 0.5em;

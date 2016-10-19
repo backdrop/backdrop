@@ -17,7 +17,7 @@
 /**
  * Contextual links.
  */
-div.contextual-links-wrapper {
+.contextual-links-wrapper {
   display: none;
   font-size: 90%;
   position: absolute;
@@ -25,18 +25,18 @@ div.contextual-links-wrapper {
   top: 2px;
   z-index: 999;
 }
-[dir="rtl"] div.contextual-links-wrapper {
+[dir="rtl"] .contextual-links-wrapper {
   left: 5px;
   right: auto;
 }
-.js div.contextual-links-wrapper {
+.js .contextual-links-wrapper {
   display: block;
 }
-a.contextual-links-trigger {
+.contextual-links-trigger {
   background: transparent url(../images/gear-select.png) no-repeat 2px 0;
   border: 1px solid transparent;
   display: none;
-  height: 18px;
+  height: 19px;
   margin: 0;
   padding: 0 2px;
   outline: none;
@@ -46,17 +46,17 @@ a.contextual-links-trigger {
   -moz-border-radius: 4px;
   border-radius: 4px;
 }
-[dir="rtl"] a.contextual-links-trigger {
+[dir="rtl"] .contextual-links-trigger {
   text-indent: -90px;
 }
-a.contextual-links-trigger:hover,
-a.contextual-links-trigger:focus,
-div.contextual-links-active a.contextual-links-trigger {
+.contextual-links-trigger:hover,
+.contextual-links-trigger:focus,
+.contextual-links-active .contextual-links-trigger {
   background-position: 2px -18px;
   background-color: #fff;
   border-color: #ccc;
 }
-div.contextual-links-active a.contextual-links-trigger {
+.contextual-links-active .contextual-links-trigger {
   background-color: #fff;
   border-color: #ccc;
   border-bottom: none;
@@ -65,7 +65,7 @@ div.contextual-links-active a.contextual-links-trigger {
   -moz-border-radius: 4px 4px 0 0;
   border-radius: 4px 4px 0 0;
 }
-div.contextual-links-wrapper ul.contextual-links {
+.contextual-links-wrapper .contextual-links {
   background-color: #fff;
   border: 1px solid #ccc;
   display: none;
@@ -79,38 +79,38 @@ div.contextual-links-wrapper ul.contextual-links {
   -moz-border-radius: 4px 0 4px 4px; /* LTR */
   border-radius: 4px 0 4px 4px; /* LTR */
 }
-[dir="rtl"] div.contextual-links-wrapper ul.contextual-links {
+[dir="rtl"] .contextual-links-wrapper .contextual-links {
   text-align: right;
   -moz-border-radius: 0 4px 4px 4px;
   border-radius: 0 4px 4px 4px;
   left: 0;
   right: auto;
 }
-a.contextual-links-trigger-active,
-div.contextual-links-active a.contextual-links-trigger,
-div.contextual-links-active ul.contextual-links {
+.contextual-links-trigger-active,
+.contextual-links-active .contextual-links-trigger,
+.contextual-links-active .contextual-links {
   display: block;
 }
-ul.contextual-links li {
+.contextual-links li {
   line-height: 100%;
   list-style: none;
   list-style-image: none;
   margin: 0;
   padding: 0;
 }
-div.contextual-links-wrapper a {
+.contextual-links-wrapper a {
   text-decoration: none;
 }
-ul.contextual-links li a {
+.contextual-links li a {
   color: #333 !important;
   display: block;
   margin: 0.25em 0;
   padding: 0.25em 1em 0.25em 0.5em; /* LTR */
   text-indent: 0;
 }
-[dir="rtl"] ul.contextual-links li a {
+[dir="rtl"] .contextual-links li a {
   padding: 0.25em 0.5em 0.25em 1em;
 }
-ul.contextual-links li a:hover {
+.contextual-links li a:hover {
   background-color: #bfdcee;
 }

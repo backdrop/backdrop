@@ -1007,6 +1007,13 @@ ul.secondary li a:active {
 }
 
 /**
+ * Contextual Links font-size
+ */
+.contextual-links-wrapper {
+  font-size: 0.9rem;
+}
+
+/**
  * Responsive tabs
  */
 .responsive-tabs-mobile ul.primary {
