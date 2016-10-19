@@ -31,16 +31,6 @@
   }
 }
 
-@media (min-width: 62em) {
-  .block-hero {
-    /* Remove full width styles on larger screens */
-    left: auto;
-    width: 100%;
-    -webkit-transform: none;
-    transform: none;
-  }
-}
-
 .block-hero-no-image {
   background: #0074bd url(../../images/texture.png) no-repeat center center;
   background-blend-mode: luminosity;

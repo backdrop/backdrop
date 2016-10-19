@@ -66,6 +66,24 @@ function basis_preprocess_header(&$variables) {
 }
 
 /**
+ * Implements template_preprocess_block().
+ *
+ * @see block.tpl.php
+ */
+function basis_preprocess_block(&$variables) {
+  $block = $variables['block'];
+  // Wrap hero block content in an extra container to position it in the center.
+  if ($block->module === 'layout' && $block->delta === 'hero') {
+    $prefix = '<div class="hero-container container">';
+    $suffix = '</div>';
+    $variables['title_prefix'] =  $prefix . $variables['title_prefix'];
+    $variables['title_suffix'] .= $suffix;
+    $variables['content']['#prefix'] = $prefix;
+    $variables['content']['#suffix'] = $suffix;
+  }
+}
+
+/**
  * Overrides theme_breadcrumb().
  *
  * Removes &raquo; from markup.
