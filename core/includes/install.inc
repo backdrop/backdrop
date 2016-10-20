@@ -717,8 +717,8 @@ function backdrop_install_config_directories() {
     // Check that the directories are entirely empty. Disallowing installation
     // over existing config directories.
     if (count($config_storage->listAll()) > 0) {
-      throw new Exception(format_string('The directory %directory must be completely empty to proceed with installation.', array(
-        '%directory' => $config_directory,
+      throw new Exception(format_string('The %directory configuration must be completely empty to proceed with installation.', array(
+        '%directory' => config_get_config_directory($config_type),
       )));
     }
 
