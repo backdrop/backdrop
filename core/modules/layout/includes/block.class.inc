@@ -145,7 +145,9 @@ class Block extends LayoutHandler {
    */
   function getAdminPreview() {
     $info = $this->getBlockInfo();
-    $block_content = $this->settings['content'];
+    if (isset($this->settings['content'])) {
+      $block_content = $this->settings['content'];
+    }
 
     $preview = '';
 
@@ -166,6 +168,7 @@ class Block extends LayoutHandler {
       }
       $preview .= '</p>';
     }
+
     $preview .= $this->getAdminConditionsPreview();
 
     return $preview;
