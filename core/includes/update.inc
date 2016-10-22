@@ -87,8 +87,10 @@ function update_prepare_bootstrap() {
 
   // Check whether settings.php needs to be rewritten.
   $settings_exist = !empty($GLOBALS['config_directories']);
+  $active_config = config_get_config_storage('active');
+  $staging_config = config_get_config_storage('staging');
 
-  if (!$settings_exist || !is_dir(config_get_config_directory('active')) || !is_dir(config_get_config_directory('staging'))) {
+  if (!$settings_exist || !$active_config->isInitialized() || !$staging_config->isInitialized()) {
     backdrop_install_config_directories();
   }
 

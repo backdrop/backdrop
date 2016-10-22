@@ -712,6 +712,14 @@ interface ConfigStorageInterface {
   public function initializeStorage();
 
   /**
+   * Check that the storage managed by this object is present and functional.
+   *
+   * @return bool
+   *   TRUE on success, FALSE in case of an error.
+   */
+  public function isInitialized();
+
+  /**
    * Returns whether a configuration object exists.
    *
    * @param string $name
@@ -931,6 +939,13 @@ class ConfigFileStorage implements ConfigStorageInterface {
       '%directory' => $config_directory,
     )));
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isInitialized() {
+    return is_dir($this->directory);
   }
 
   /**
