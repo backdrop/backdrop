@@ -3011,17 +3011,23 @@ function system_header_block_form($settings) {
     '#empty_option' => '- ' . t('None') . ' -',
     '#default_value' => $settings['menu'],
   );
-  $form['logo'] = array(
+  $form['components'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Site information'),
+    '#description' => t('Show or hide various components of your site header. To change the values of these components, visit the !site_info page.',
+      array('!site_info' => l(t('Site information'), 'admin/config/system/site-information'))),
+  );
+  $form['components']['logo'] = array(
     '#type' => 'checkbox',
     '#title' => t('Logo'),
     '#default_value' => $settings['logo'],
   );
-  $form['site_name'] = array(
+  $form['components']['site_name'] = array(
     '#type' => 'checkbox',
     '#title' => t('Site name'),
     '#default_value' => $settings['site_name'],
   );
-  $form['site_slogan'] = array(
+  $form['components']['site_slogan'] = array(
     '#type' => 'checkbox',
     '#title' => t('Site slogan'),
     '#default_value' => $settings['site_slogan'],
@@ -3038,8 +3044,8 @@ function system_header_block($settings) {
   $settings += array(
     'menu' => 'user-menu',
     'logo' => TRUE,
-    'site_slogan' => TRUE,
     'site_name' => TRUE,
+    'site_slogan' => TRUE,
   );
 
   $menu = $settings['menu'] ? menu_navigation_links($settings['menu']) : NULL;
