@@ -227,7 +227,7 @@ function config_uninstall_config($module, $config_name = NULL) {
  *   (optional) The type of config directory to return. Backdrop core provides
  *   'active' and 'staging'. Defaults to 'active'.
  *
- * @return Config
+ * @return ConfigStorageInterface
  *   A ConfigStorageInterface object managing the specified configuration type.
  */
 function config_get_config_storage($type = 'active') {
