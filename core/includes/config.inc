@@ -1190,7 +1190,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
       return FALSE;
     }
     db_delete($this->table, array('target' => $this->database))
-      ->condition('name', $new_name)
+      ->condition('name', $name)
       ->execute();
     return TRUE;
   }
