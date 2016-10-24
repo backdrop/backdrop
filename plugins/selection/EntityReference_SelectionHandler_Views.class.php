@@ -84,6 +84,7 @@ class EntityReference_SelectionHandler_Views implements EntityReference_Selectio
       return FALSE;
     }
     $this->view->set_display($display_name);
+    $this->view->pre_execute();
 
     // Make sure the query is not cached.
     $this->view->is_cacheable = FALSE;
