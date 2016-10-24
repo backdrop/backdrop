@@ -1120,6 +1120,7 @@ function entityreference_field_formatter_info() {
       'field types' => array('entityreference'),
       'settings' => array(
         'link' => FALSE,
+        'bypass_access' => FALSE,
       ),
     ),
     'entityreference_entity_id' => array(
@@ -1149,6 +1150,13 @@ function entityreference_field_formatter_settings_form($field, $instance, $view_
   $element = array();
 
   if ($display['type'] == 'entityreference_label') {
+    $element['bypass_access'] = array(
+      '#title' => t('Show entity labels regardless of user access'),
+      '#description' => t("All entities in the field will be shown, without checking them for access. If the 'Link' setting is also enabled, an entity which the user does not have access to view will show without a link."),
+      '#type' => 'checkbox',
+      '#default_value' => $settings['bypass_access'],
+    );
+
     $element['link'] = array(
       '#title' => t('Link label to the referenced entity'),
       '#type' => 'checkbox',
@@ -1200,6 +1208,7 @@ function entityreference_field_formatter_settings_summary($field, $instance, $vi
 
   if ($display['type'] == 'entityreference_label') {
     $summary[] = $settings['link'] ? t('Link to the referenced entity') : t('No link');
+    $summary[] = $settings['bypass_access'] ? t('Show labels regardless of access') : t('Respect entity access for label visibility');
   }
 
   if ($display['type'] == 'entityreference_entity_view') {
@@ -1273,22 +1282,27 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
   $result = array();
   $settings = $display['settings'];
 
-  // Rebuild the items list to contain only those with access.
-  foreach ($items as $key => $item) {
-    if (empty($item['access'])) {
-      unset($items[$key]);
-    }
-  }
-
   switch ($display['type']) {
     case 'entityreference_label':
       $handler = entityreference_get_selection_handler($field, $instance, $entity_type, $entity);
 
       foreach ($items as $delta => $item) {
-        $label = $handler->getLabel($item['entity']);
-        // If the link is to be displayed and the entity has a uri, show link.
-        // Note the assignment ($url = ) here is intended to be an assignment.
-        if ($display['settings']['link'] && ($uri = entity_uri($field['settings']['target_type'], $item['entity']))) {
+        // Skip an item that is not accessible, unless we're allowing output of
+        // entity labels without considering access.
+        if (empty($item['access']) && !$display['settings']['bypass_access']) {
+          continue;
+        }
+
+        // Calling EntityReferenceHandler::getLabel() would make a repeated,
+        // wasteful call to entity_access().
+        $label = entity_label($field['settings']['target_type'], $item['entity']);
+
+        // Check if the settings and access allow a link to be displayed.
+        $display_link = $display['settings']['link'] && $item['access'];
+
+        // If the link is allowed and the entity has a uri, display a link.
+        // Note the assignment ($uri = ) here is intended to be an assignment.
+        if ($display_link && ($uri = entity_uri($field['settings']['target_type'], $item['entity']))) {
           $result[$delta] = array('#markup' => l($label, $uri['path'], $uri['options']));
         }
         else {
@@ -1299,6 +1313,11 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
 
     case 'entityreference_entity_id':
       foreach ($items as $delta => $item) {
+        // Skip an item that is not accessible.
+        if (empty($item['access'])) {
+          continue;
+        }
+
         $result[$delta] = array('#markup' => check_plain($item['target_id']));
       }
       break;
@@ -1310,6 +1329,11 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
       }
 
       foreach ($items as $delta => $item) {
+        // Skip an item that is not accessible.
+        if (empty($item['access'])) {
+          continue;
+        }
+
         // Protect ourselves from recursive rendering.
         static $depth = 0;
         $depth++;
