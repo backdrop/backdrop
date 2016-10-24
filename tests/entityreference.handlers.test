@@ -194,6 +194,21 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
       ),
     );
     $this->assertReferencable($field, $referencable_tests, 'Node handler (admin)');
+
+    // Verify autocomplete input validation.
+    $handler = entityreference_get_selection_handler($field);
+    $element = array(
+      '#parents' => array('element_name'),
+    );
+    $form_state = array();
+    $form = array();
+    $value = $handler->validateAutocompleteInput($nodes['published1']->title, $element, $form_state, $form);
+    $this->assertEqual($value, $nodes['published1']->nid);
+
+    $invalid_input = $this->randomName();
+    $value = $handler->validateAutocompleteInput($invalid_input, $element, $form_state, $form);
+    $this->assertNull($value);
+    $this->assertEqual(form_get_error($element), t('There are no entities matching "%value"', array('%value' => $invalid_input)));
   }
 
   /**

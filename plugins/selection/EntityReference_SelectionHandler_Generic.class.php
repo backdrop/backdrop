@@ -208,7 +208,11 @@ class EntityReference_SelectionHandler_Generic implements EntityReference_Select
    * Implements EntityReferenceHandler::validateAutocompleteInput().
    */
   public function validateAutocompleteInput($input, &$element, &$form_state, $form) {
-      $entities = $this->getReferencableEntities($input, '=', 6);
+      $bundled_entities = $this->getReferencableEntities($input, '=', 6);
+      $entities = array();
+      foreach($bundled_entities as $entities_list) {
+        $entities += $entities_list;
+      }
       if (empty($entities)) {
         // Error if there are no entities available for a required field.
         form_error($element, t('There are no entities matching "%value"', array('%value' => $input)));
