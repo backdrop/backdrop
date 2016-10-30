@@ -1385,15 +1385,6 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
         else {
           $options = $elements['#options'];
         }
-        if (is_array($elements['#value'])) {
-          $value = in_array($elements['#type'], array('checkboxes', 'tableselect')) ? array_keys($elements['#value']) : $elements['#value'];
-          foreach ($value as $v) {
-            if (!isset($options[$v])) {
-              form_error($elements, $t('An illegal choice has been detected. Please contact the site administrator.'));
-              watchdog('form', 'Illegal choice %choice in !name element.', array('%choice' => $v, '!name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']), WATCHDOG_ERROR);
-            }
-          }
-        }
         // Non-multiple select fields always have a value in HTML. If the user
         // does not change the form, it will be the value of the first option.
         // Because of this, form validation for the field will almost always
@@ -1403,13 +1394,27 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
         // identical to the empty option's value, we reset the element's value
         // to NULL to trigger the regular #required handling below.
         // @see form_process_select()
-        elseif ($elements['#type'] == 'select' && !$elements['#multiple'] && $elements['#required'] && !isset($elements['#default_value']) && $elements['#value'] === $elements['#empty_value']) {
+        if ($elements['#type'] == 'select' && !$elements['#multiple'] && $elements['#required'] && !isset($elements['#default_value']) && $elements['#value'] === $elements['#empty_value']) {
           $elements['#value'] = NULL;
           form_set_value($elements, NULL, $form_state);
         }
-        elseif (!isset($options[$elements['#value']])) {
-          form_error($elements, $t('An illegal choice has been detected. Please contact the site administrator.'));
-          watchdog('form', 'Illegal choice %choice in %name element.', array('%choice' => $elements['#value'], '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']), WATCHDOG_ERROR);
+        // Multiple select fields
+        else {
+          if (is_array($elements['#value'])) {
+            $value = in_array($elements['#type'], array('checkboxes', 'tableselect')) ? array_keys($elements['#value']) : $elements['#value'];
+            foreach ($value as $v) {
+              if (!isset($options[$v])) {
+                $option = $v;
+              }
+            }
+          }
+          elseif (!isset($options[$elements['#value']])) {
+            $option = $elements['#value'];
+          }
+          $message = $t('Invalid option %option in !name element.', array('%option' => $option, '!name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']));
+          watchdog('form', $message, array(), WATCHDOG_ERROR);
+          $message .= ' ' . $t('Please contact the site administrator.');
+          form_error($elements, $message);
         }
       }
     }
