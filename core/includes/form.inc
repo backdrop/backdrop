@@ -1399,7 +1399,7 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
           form_set_value($elements, NULL, $form_state);
         }
         // Multiple select fields
-        else {
+        elseif (is_array($elements['#value']) || !isset($options[$elements['#value']])) {
           $option = '';
           if (is_array($elements['#value'])) {
             $value = in_array($elements['#type'], array('checkboxes', 'tableselect')) ? array_keys($elements['#value']) : $elements['#value'];
