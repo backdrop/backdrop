@@ -302,8 +302,6 @@ function theme_update_version($variables) {
   $version = $variables['version'];
   $tag = $variables['tag'];
   $class = implode(' ', $variables['class']);
-  $project = explode(' ',$variables['version']['name']);
-  $coreupdate = ($project[0] == 'backdrop');
 
   $output = '';
   $output .= '<table class="version ' . $class . '">';
