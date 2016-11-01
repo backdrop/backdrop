@@ -78,10 +78,13 @@ function theme_update_report($variables) {
   }
 
   foreach ($data as $project) {
+    //Don't show a link to the "Update modules" page for core
+    $updatelink = ($project['name'] != 'backdrop');
     switch ($project['status']) {
       case UPDATE_CURRENT:
         $class = 'status';
         $icon = theme('image', array('uri' => 'core/misc/watchdog-ok.png', 'width' => 18, 'height' => 18, 'alt' => t('ok'), 'title' => t('ok')));
+        $updatelink = 0;
         break;
       case UPDATE_UNKNOWN:
       case UPDATE_NOT_CHECKED:
@@ -105,7 +108,12 @@ function theme_update_report($variables) {
 
     $row = '<div class="version-status">';
     $status_label = theme('update_status_label', array('status' => $project['status']));
-    $row .= !empty($status_label) ? $status_label : check_plain($project['reason']);
+    if (empty($status_label)) $status_label = check_plain($project['reason']);
+    if ($updatelink) {
+      $row .= l($status_label,'admin/modules/update',array('html' => TRUE));
+    } else {
+      $row .= $status_label;
+    }
     $row .= '<span class="icon">' . $icon . '</span>';
     $row .= "</div>\n";
 
@@ -294,6 +302,8 @@ function theme_update_version($variables) {
   $version = $variables['version'];
   $tag = $variables['tag'];
   $class = implode(' ', $variables['class']);
+  $project = explode(' ',$variables['version']['name']);
+  $coreupdate = ($project[0] == 'backdrop');
 
   $output = '';
   $output .= '<table class="version ' . $class . '">';
