@@ -204,6 +204,11 @@ function theme_layout_region_inner($variables) {
  */
 function layout_preprocess_layout(&$variables) {
   $settings = $variables['layout']->settings;
+
+  // Check if any Title Component blocks have been placed. These will override
+  // the variables here.
+  $should_display = _layout_title_component_blocks_exist($variables);
+
   $variables += array(
     'action_links' => NULL,
     'tabs' => NULL,
@@ -212,7 +217,7 @@ function layout_preprocess_layout(&$variables) {
   );
 
   if (!$variables['admin']) {
-    if (!isset($variables['title'])) {
+    if (!isset($variables['title']) && $should_display['title']) {
       if ($settings['title_display'] === LAYOUT_TITLE_NONE) {
         $variables['title'] = NULL;
       }
@@ -227,7 +232,7 @@ function layout_preprocess_layout(&$variables) {
 
     // Generate messages last in order to capture as many as possible for the
     // current page.
-    if (!isset($variables['messages'])) {
+    if (!isset($variables['messages']) && $should_display['messages']) {
       $variables['messages'] = theme('status_messages');
     }
   }
@@ -236,9 +241,32 @@ function layout_preprocess_layout(&$variables) {
   }
 
   if (!$variables['admin']) {
-    $variables['action_links'] = menu_local_actions();
-    $variables['tabs'] =  menu_local_tabs();
+    if ($should_display['action_links']) {
+      $variables['action_links'] = menu_local_actions();
+    }
+    if ($should_display['tabs']) {
+      $variables['tabs'] =  menu_local_tabs();
+    }
   }
+}
+
+/**
+ * Utility function to return if a title component block is in a layout.
+ */
+function _layout_title_component_blocks_exist($variables) {
+  $active_component_blocks = array();
+  foreach ($variables['layout']->content as $block) {
+    if ($block->delta == 'title_components') {
+      $active_component_blocks[] = $block->childDelta;
+    }
+  }
+
+  $should_display['title'] = (!in_array('title_combo', $active_component_blocks) && !in_array('page_title', $active_component_blocks));
+  $should_display['messages'] = (!in_array('title_combo', $active_component_blocks) && !in_array('system_messages', $active_component_blocks));
+  $should_display['tabs'] = (!in_array('title_combo', $active_component_blocks) && !in_array('local_task_tabs', $active_component_blocks));
+  $should_display['action_links'] = (!in_array('title_combo', $active_component_blocks) && !in_array('local_actions', $active_component_blocks));
+
+  return $should_display;
 }
 
 /**
