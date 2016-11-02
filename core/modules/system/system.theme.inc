@@ -657,3 +657,61 @@ function _token_token_tree_format_row($token, array $token_info, $is_group = FAL
 
   return $row;
 }
+
+/**
+ * Prepares variables for Title Component block templates.
+ */
+function system_preprocess_title_components(&$variables) {
+  $settings = $variables['settings'];
+  $child_delta = $variables['child_delta'];
+  $variables += array(
+    'action_links' => NULL,
+    'tabs' => NULL,
+    'messages' => NULL,
+    'title' => NULL,
+  );
+
+  if ($child_delta == 'page_title' || $child_delta == 'title_combo') {
+    if ($settings['page_title_markup'] == 'none') {
+      $variables['page_title'] = backdrop_get_title();
+    }
+    else {
+      $output = '<' . $settings['page_title_markup'];
+      if (isset($settings['page_title_class'])) {
+        $output .= ' class="' . $settings['page_title_class'] . '"';
+      }
+      $output .= '>' . backdrop_get_title() . '</' . $settings['page_title_markup'] . '>' . "\n";
+      $variables['page_title'] = $output;
+    }
+  }
+  if ($child_delta == 'local_task_tabs' || $child_delta == 'title_combo') {
+    $menus =  array();
+    switch ($settings['tab_type']) {
+      case 'primary':
+        $menus =  array(
+          'primary' => menu_primary_local_tasks(),
+        );
+        break;
+      case 'secondary':
+        $menus =  array(
+          'secondary' => menu_secondary_local_tasks(),
+        );
+        break;
+      case 'both':
+        $menus =  array(
+          'primary' => menu_primary_local_tasks(),
+          'secondary' => menu_secondary_local_tasks(),
+        );
+        break;
+    }
+    $variables['tabs'] =   theme('menu_local_tasks', $menus);
+  }
+  if ($child_delta == 'local_actions' || $child_delta == 'title_combo') {
+    $variables['action_links'] = menu_local_actions();
+  }
+  
+  if ($child_delta == 'system_messages' || $child_delta == 'title_combo') {
+    $variables['messages'] = theme('status_messages');
+  }
+  
+}
