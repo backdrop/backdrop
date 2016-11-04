@@ -2347,9 +2347,11 @@ function system_block_info() {
   $all_menus = function_exists('menu_get_menus') ? menu_get_menus() : array();
   foreach (menu_list_system_menus() as $menu_name => $title) {
     $custom_title = isset($all_menus[$menu_name]) ? $all_menus[$menu_name] : $title;
+    // Remove the word "menu" from the menu title if it exists.
+    $title = str_replace(" menu", "", $title);
     $blocks[$menu_name] = array(
       'info' => check_plain(t($custom_title)),
-      'description' => t('A hierarchical list of links for the @menu.', array('@menu' => t($title))),
+      'description' => t('A list of links for the %menu.', array('%menu' => t($title))),
     );
   }
   return $blocks;
