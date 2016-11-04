@@ -110,7 +110,7 @@ function theme_update_report($variables) {
     $status_label = theme('update_status_label', array('status' => $project['status']));
     if (empty($status_label)) $status_label = check_plain($project['reason']);
     if ($updatelink) {
-      $row .= l($status_label,'admin/modules/update',array('html' => TRUE));
+      $row .= l($status_label,'admin/'.$project['project_type'].'s/update',array('html' => TRUE));
     } else {
       $row .= $status_label;
     }
