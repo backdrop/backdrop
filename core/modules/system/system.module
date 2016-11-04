@@ -2351,7 +2351,7 @@ function system_block_info() {
     $title = str_replace(" menu", "", $title);
     $blocks[$menu_name] = array(
       'info' => check_plain(t($custom_title)),
-      'description' => t('A list of links for the %menu.', array('%menu' => t($title))),
+      'description' => t('A list of links for the %menu menu.', array('%menu' => t($title))),
     );
   }
   return $blocks;
