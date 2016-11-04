@@ -450,9 +450,11 @@ function menu_block_info() {
 
   $blocks = array();
   foreach ($menus as $name => $title) {
+    // Remove the word "menu" from the menu title if it exists.
+    $title = str_replace(" menu", "", $title);
     $blocks[$name] = array(
       'info' => check_plain($title),
-      'description' => t('The hierarchical list of links for the @title menu.', array('@title' => $title)),
+      'description' => t('The list of links for the %title menu.', array('%title' => $title)),
       // Menu blocks can't be cached because each menu item can have
       // a custom access callback. menu.inc manages its own caching.
       'cache' => BACKDROP_NO_CACHE,
