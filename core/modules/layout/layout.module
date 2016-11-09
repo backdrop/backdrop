@@ -640,6 +640,11 @@ function layout_block_info() {
     'description' => t('A hero block often consists of text over a background image, though either are optional.'),
     'class' => 'BlockHero',
   );
+  $blocks['region_copy'] = array(
+    'info' => t('Region copy block'),
+    'description' => t('Provide a block which displays the blocks from a chosen region.'),
+    'class' => 'BlockRegionCopy',
+  );
 
   return $blocks;
 }
@@ -657,6 +662,7 @@ function layout_autoload_info() {
     'BlockLegacy' => 'includes/block_legacy.class.inc',
     'BlockText' => 'includes/block.text.inc',
     'BlockHero' => 'includes/block.hero.inc',
+    'BlockRegionCopy' => 'includes/block.region_copy.inc',
     'LayoutMenuItem' => 'includes/layout_menu_item.class.inc',
 
     // Exceptions.
