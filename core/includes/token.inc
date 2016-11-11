@@ -702,7 +702,7 @@ function token_element_validate(&$element, &$form_state) {
   if (isset($element['#token_types'])) {
     $invalid_tokens = token_get_invalid_tokens_by_context($tokens, $element['#token_types']);
     if ($invalid_tokens) {
-      form_error($element, t('The %element-title is using the following invalid tokens: @invalid-tokens.', array('%element-title' => $title, '@invalid-tokens' => implode(', ', $invalid_tokens))));
+      form_error($element, t('The !element-title is using the following invalid tokens: @invalid-tokens.', array('!element-title' => $title, '@invalid-tokens' => implode(', ', $invalid_tokens))));
     }
   }
 
