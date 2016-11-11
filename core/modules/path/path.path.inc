@@ -34,13 +34,13 @@ function node_path_info() {
 
   foreach (node_type_get_types() as $node_type_name => $node_type) {
     if (count($languages) && !empty($node_type->settings['language'])) {
-      $info['node']['pattern items'][$node_type_name] = t('Default URL alias pattern for @node_type (applies to all @node_type content types with blank URL alias patterns below)', array('@node_type' => $node_type->name));
+      $info['node']['pattern items'][$node_type_name] = t('Default URL alias pattern for %node_type (applies to all %node_type content types with blank URL alias patterns below)', array('%node_type' => $node_type->name));
       foreach ($languages as $langcode => $language) {
-        $info['node']['pattern items'][$node_type_name . '_' . $langcode] = t('URL alias pattern for all @language @node_type URLs', array('@node_type' => $node_type->name, '@language' => $language->name));
+        $info['node']['pattern items'][$node_type_name . '_' . $langcode] = t('URL alias pattern for all %node_type URLs in %language', array('%node_type' => $node_type->name, '%language' => $language->name));
       }
     }
     else {
-      $info['node']['pattern items'][$node_type_name] = t('URL alias pattern for all @node_type URLs', array('@node_type' => $node_type->name));
+      $info['node']['pattern items'][$node_type_name] = t('URL alias pattern for all %node_type URLs', array('%node_type' => $node_type->name));
     }
   }
 
