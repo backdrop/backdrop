@@ -250,9 +250,6 @@ function install_begin_request(&$install_state) {
   include_once BACKDROP_ROOT . '/core/includes/session.inc';
   require_once BACKDROP_ROOT . '/core/includes/theme.inc';
 
-  // Set up $language, so t() caller functions will still work.
-  backdrop_language_initialize();
-
   require_once BACKDROP_ROOT . '/core/includes/ajax.inc';
   $module_list['system']['filename'] = 'core/modules/system/system.module';
   $module_list['entity']['filename'] = 'core/modules/entity/entity.module';
@@ -274,6 +271,9 @@ function install_begin_request(&$install_state) {
   require_once BACKDROP_ROOT . '/core/includes/cache.inc';
   require_once BACKDROP_ROOT . '/core/includes/cache-install.inc';
   $GLOBALS['settings']['cache_default_class'] = 'BackdropFakeCache';
+
+  // Set up $language, so t() caller functions will still work.
+  backdrop_language_initialize();
 
   // Prepare for themed output. We need to run this at the beginning of the
   // page request to avoid a different theme accidentally getting set. (We also
@@ -1564,6 +1564,7 @@ function install_import_translations(&$install_state) {
   $langcode = $install_state['parameters']['langcode'];
 
   include_once BACKDROP_ROOT . '/core/includes/standard.inc';
+  module_enable(array('language', 'locale'));
   $standard_languages = standard_language_list();
   if (!isset($standard_languages[$langcode])) {
     // Backdrop does not know about this language, so we prefill its values with
