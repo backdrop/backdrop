@@ -423,3 +423,157 @@ function hook_entity_prepare_view($entities, $type) {
     }
   }
 }
+
+/**
+ * Describe the view modes for entity types.
+ *
+ * View modes let entities be displayed differently depending on the context.
+ * For instance, a node can be displayed differently on its own page ('full'
+ * mode), on the home page or taxonomy listings ('teaser' mode), or in an RSS
+ * feed ('rss' mode). Modules taking part in the display of the entity (notably
+ * the Field API) can adjust their behavior depending on the requested view
+ * mode. An additional 'default' view mode is available for all entity types.
+ * This view mode is not intended for actual entity display, but holds default
+ * display settings. For each available view mode, administrators can configure
+ * whether it should use its own set of field display settings, or just
+ * replicate the settings of the 'default' view mode, thus reducing the amount
+ * of display configurations to keep track of.
+ *
+ * Note: This hook is invoked inside an implementation of
+ * hook_entity_info_alter() so care must be taken not to call anything that
+ * will result in an additional, and hence recurisve call to entity_get_info().
+ *
+ * @return array
+ *   An associative array of all entity view modes, keyed by the entity
+ *   type name, and then the view mode name, with the following keys:
+ *   - label: The human-readable name of the view mode.
+ *   - custom_settings: A boolean specifying whether the view mode should by
+ *     default use its own custom field display settings. If FALSE, entities
+ *     displayed in this view mode will reuse the 'default' display settings
+ *     by default (e.g. right after the module exposing the view mode is
+ *     enabled), but administrators can later use the Field UI to apply custom
+ *     display settings specific to the view mode.
+ *
+ * @see entity_view_mode_entity_info_alter()
+ * @see hook_entity_view_mode_info_alter()
+ */
+function hook_entity_view_mode_info() {
+  $view_modes['user']['full'] = array(
+    'label' => t('User account'),
+  );
+  $view_modes['user']['compact'] = array(
+    'label' => t('Compact'),
+    'custom_settings' => TRUE,
+  );
+  return $view_modes;
+}
+
+/**
+ * Alter the view modes for entity types.
+ *
+ * Note: This hook is invoked inside an implementation of
+ * hook_entity_info_alter() so care must be taken not to call anything that
+ * will result in an additional, and hence recurisve call to entity_get_info().
+ *
+ * @param array $view_modes
+ *   An array of view modes, keyed first by entity type, then by view mode name.
+ *
+ * @see entity_view_mode_entity_info_alter()
+ * @see hook_entity_view_mode_info()
+ */
+function hook_entity_view_mode_info_alter(&$view_modes) {
+  $view_modes['user']['full']['custom_settings'] = TRUE;
+}
+
+/**
+ * Change the view mode of an entity that is being displayed.
+ *
+ * @param string $view_mode
+ *   The view_mode that is to be used to display the entity.
+ * @param array $context
+ *   Array with contextual information, including:
+ *   - entity_type: The type of the entity that is being viewed.
+ *   - entity: The entity object.
+ *   - langcode: The langcode the entity is being viewed in.
+ */
+function hook_entity_view_mode_alter(&$view_mode, $context) {
+  // For nodes, change the view mode when it is teaser.
+  if ($context['entity_type'] == 'node' && $view_mode == 'teaser') {
+    $view_mode = 'my_custom_view_mode';
+  }
+}
+
+/**
+ * Act on a view mode before it is created or updated.
+ *
+ * @param string $view_mode
+ *   The view_mode that is to be used to display the entity.
+ * @param $entity_type
+ *   The type of entity being saved (i.e. node, user, comment).
+ */
+function hook_entity_view_mode_presave($view_mode, $entity_type) {
+  // Force all view modes to be saved with custom settings.
+  $view_mode['custom settings'] = TRUE;
+  return $view_mode;
+}
+
+/**
+ * Respond to creation of a new view mode.
+ *
+ * @param string $view_mode
+ *   The view_mode that is to be used to display the entity.
+ * @param $entity_type
+ *   The type of entity being saved (i.e. node, user, comment).
+ */
+function hook_entity_view_mode_insert($view_mode, $entity_type) {
+  config_set('my_module.view_modes', 'view_mode_list', array($entity_type => $view_mode);
+}
+
+/**
+ * Respond to update of a view mode.
+ *
+ * @param string $view_mode
+ *   The view_mode that is to be used to display the entity.
+ * @param $entity_type
+ *   The type of entity being saved (i.e. node, user, comment).
+ */
+function hook_entity_view_mode_update($view_mode, $entity_type) {
+  config_set('my_module.view_modes', 'view_mode_list', array($entity_type => $view_mode);
+}
+
+/**
+ * Respond to deletion of a view mode.
+ *
+ * @param string $view_mode
+ *   The view_mode that is to be used to display the entity.
+ * @param $entity_type
+ *   The type of entity being saved (i.e. node, user, comment).
+ */
+function hook_entity_view_mode_delete($view_mode, $entity_type) {
+  $config = config('my_module.view_modes');
+  $view_mode_list = $config->get('view_mode_list');
+  unset($view_mode_list[$view_mode['machine_name']]);
+  $config->set('view_mode_list', $view_mode_list);
+  $config->save();
+}
+
+/**
+ * Act on a view mode which is being renamed.
+ *
+ * @param $entity_type
+ *   The type of entity being saved (i.e. node, user, comment).
+ * @param string $old_view_mode_name
+ *   The name of the view_mode before it is renamed.
+ * @param string $new_view_mode_name
+ *   The name of the view_mode after it is renamed.
+ */
+function hook_entity_view_mode_rename($entity_type, $old_view_mode_name, $new_view_mode_name) {
+  $config = config('my_module.view_modes');
+  $view_mode_list = $config->get('view_mode_list');
+  if (isset($view_mode_list[$old_view_mode_name]) {
+    $view_mode_list[$new_view_mode_name] = $view_mode_list[$old_view_mode_name];
+    unset($view_mode_list[$old_view_mode_name]);
+  }
+  $config->set('view_mode_list', $view_mode_list);
+  $config->save();
+}

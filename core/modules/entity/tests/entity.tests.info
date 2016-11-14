@@ -27,3 +27,15 @@ name = Entity loading
 description = Tests the entity_load() function.
 group = Entity API
 file = entity_crud.test
+
+[EntityViewModeFunctionalTest]
+name = View modes
+description = Tests view mode functionality.
+group = Entity API
+file = entity.test
+
+[EntityViewModeSuggestionsTest]
+name = View mode suggestions
+description = Tests view mode altering theme suggestions.
+group = Entity API
+file = entity.test
