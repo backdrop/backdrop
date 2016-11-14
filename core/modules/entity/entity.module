@@ -152,7 +152,10 @@ function entity_view_mode_save($entity_type, $view_mode) {
   }
 
   // Let modules modify the view mode before it is saved.
-  $view_mode = module_invoke_all('entity_view_mode_presave', $view_mode, $entity_type);
+  $view_mode_invoke = module_invoke_all('entity_view_mode_presave', $view_mode, $entity_type);
+  if (isset($view_mode_invoke)) {
+    $view_mode = array_merge($view_mode, $view_mode_invoke);
+  }
 
   // Save the view mode.
   $view_modes = config_get('entity.view_modes', 'view_modes');
@@ -480,7 +483,10 @@ function entity_get_info($entity_type = NULL) {
         backdrop_alter('entity_view_mode_info', $view_mode_info);
 
         // Add in the variable entity view modes which override hook-provided.
-        $view_mode_info = backdrop_array_merge_deep($view_mode_info, config_get('entity.view_modes', 'view_modes'));
+        $config = config_get('entity.view_modes', 'view_modes');
+        if ($config) {
+          $view_mode_info = backdrop_array_merge_deep($view_mode_info, $config);
+        }
 
         // Add in the combined custom entity view modes which override the existing
         // view modes in the entity information.
