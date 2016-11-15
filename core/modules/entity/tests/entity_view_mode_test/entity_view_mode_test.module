@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * @file
+ * Test module for the entity_view_mode module.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function entity_view_mode_test_theme() {
+  $info = array();
+
+  $info['entity_view_mode_test'] = array(
+    'render element' => 'elements',
+    // Template needs to be set in order to actually have preprocess functions
+    // added to its registry.
+    'template' => 'does-not-exist',
+    'function' => 'entity_view_mode_test_return_suggestions',
+  );
+
+  return $info;
+}
+
+function template_preprocess_entity_view_mode_test(&$variables) {
+  $variables['theme_hook_suggestions'][] = 'test__last';
+  $variables['theme_hook_suggestions'][] = 'test__bundle';
+  $variables['theme_hook_suggestions'][] = 'test__id';
+  $variables['theme_hook_suggestions'][] = 'test__first';
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function entity_view_mode_test_theme_registry_alter(&$registry) {
+  if ($hooks = variable_get('entity_view_mode_theme_output_suggestions', array())) {
+    foreach ($hooks as $hook) {
+      if (isset($registry[$hook])) {
+        $registry[$hook]['function'] = 'entity_view_mode_test_return_suggestions';
+      }
+    }
+  }
+}
+
+function entity_view_mode_test_return_suggestions(array $variables) {
+  $suggestions = array();
+  if (!empty($variables['theme_hook_suggestions'])) {
+    $suggestions = $variables['theme_hook_suggestions'];
+  }
+  if (!empty($variables['theme_hook_suggestion'])) {
+    $suggestions[] = $variables['theme_hook_suggestion'];
+  }
+  return array_reverse($suggestions);
+}
