@@ -77,29 +77,31 @@ function entity_menu_local_tasks_alter(&$data, $router_item, $root_path) {
   // replace the load argument in the admin paths with a '%' and append
   // '/display' and check if this matches the current $root_path.
   $display = FALSE;
-  foreach (entity_get_info() as $entity_type => $entity_info) {
-    if ($entity_info['fieldable']) {
-      foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
-        if (isset($bundle_info['admin'])) {
-          $path = $bundle_info['admin']['path'];
-          $root_path_string = '';
-          if (isset($bundle_info['admin']['bundle argument'])) {
-            $bundle_arg = $bundle_info['admin']['bundle argument'];
-            $parts = explode('/', $path);
-            $load_arg = $parts[$bundle_arg];
-            $root_path_string = str_replace($load_arg, '%', $path) . '/display';
-          }
-          else {
-            $root_path_string = $path . '/display';
-          }
-          if ($root_path_string == $root_path){
-            $display = TRUE;
+  // Only check if the $root_path ends in '/display'.
+  if (substr_compare($root_path, '/display', strlen($root_path)-8, 8) === 0) {
+    foreach (entity_get_info() as $entity_type => $entity_info) {
+      if (!empty($entity_info['fieldable'])) {
+        foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
+          if (isset($bundle_info['admin'])) {
+            $path = $bundle_info['admin']['path'];
+            $root_path_string = '';
+            if (isset($bundle_info['admin']['bundle argument'])) {
+              $bundle_arg = $bundle_info['admin']['bundle argument'];
+              $parts = explode('/', $path);
+              $load_arg = $parts[$bundle_arg];
+              $root_path_string = str_replace($load_arg, '%', $path) . '/display';
+            }
+            else {
+              $root_path_string = $path . '/display';
+            }
+            if ($root_path_string == $root_path){
+              $display = TRUE;
+            }
           }
         }
       }
     }
   }
-  
   if ($display) {
     $item = menu_get_item('admin/config/system/view-modes');
     if ($item['access']) {
@@ -490,14 +492,15 @@ function entity_get_info($entity_type = NULL) {
 
         // Add in the combined custom entity view modes which override the existing
         // view modes in the entity information.
-        foreach ($view_mode_info as $entity_type => $view_modes) {
-          if (isset($entity_info[$entity_type])) {
-            if (!isset($entity_info[$entity_type]['view modes'])) {
-              $entity_info[$entity_type]['view modes'] = array();
+        foreach ($view_mode_info as $type => $view_modes) {
+          if (isset($entity_info[$type])) {
+            if (!isset($entity_info[$type]['view modes'])) {
+              $entity_info[$type]['view modes'] = array();
             }
-            $entity_info[$entity_type]['view modes'] = $entity_info[$entity_type]['view modes'] + $view_modes;
+            $entity_info[$type]['view modes'] = $entity_info[$type]['view modes'] + $view_modes;
           }
         }
+
         foreach ($entity_info[$name]['view modes'] as $view_mode => $view_mode_info) {
           $entity_info[$name]['view modes'][$view_mode] += array(
             'custom settings' => FALSE,
@@ -939,6 +942,22 @@ function entity_autoload_info() {
     'EntityFieldQueryException' => 'entity.query.inc',
     'EntityFieldQuery' => 'entity.query.inc',
   );
+}
+
+/**
+ * Implements hook_hook_info().
+ */
+function entity_hook_info() {
+  $hooks = array(
+    'entity_view_mode_info',
+    'entity_view_mode_info_alter',
+    'entity_view_mode_presave',
+    'entity_view_mode_insert',
+    'entity_view_mode_update',
+    'entity_view_mode_delete',
+  );
+
+  return array_fill_keys($hooks, array('group' => 'entity'));
 }
 
 /**
