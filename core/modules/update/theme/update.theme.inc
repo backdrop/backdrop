@@ -79,12 +79,12 @@ function theme_update_report($variables) {
 
   foreach ($data as $project) {
     //Don't show a link to the "Update modules" page for core
-    $updatelink = ($project['name'] != 'backdrop');
+    $update_link = ($project['name'] != 'backdrop');
     switch ($project['status']) {
       case UPDATE_CURRENT:
         $class = 'status';
         $icon = theme('image', array('uri' => 'core/misc/watchdog-ok.png', 'width' => 18, 'height' => 18, 'alt' => t('ok'), 'title' => t('ok')));
-        $updatelink = 0;
+        $update_link = 0;
         break;
       case UPDATE_UNKNOWN:
       case UPDATE_NOT_CHECKED:
@@ -108,9 +108,11 @@ function theme_update_report($variables) {
 
     $row = '<div class="version-status">';
     $status_label = theme('update_status_label', array('status' => $project['status']));
-    if (empty($status_label)) $status_label = check_plain($project['reason']);
-    if ($updatelink) {
-      $row .= l($status_label,'admin/'.$project['project_type'].'s/update',array('html' => TRUE));
+    if (empty($status_label)) {
+      $status_label = check_plain($project['reason']);
+    }
+    if ($update_link) {
+      $row .= l($status_label,'admin/' . $project['project_type'] . 's/update',array('html' => TRUE));
     } else {
       $row .= $status_label;
     }
@@ -357,4 +359,3 @@ function theme_update_status_label($variables) {
 
   }
 }
-
