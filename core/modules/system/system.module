@@ -1031,7 +1031,7 @@ function system_menu() {
   $items['system/transliterate/%'] = array(
     'page callback' => 'system_transliterate_ajax',
     'page arguments' => array(2),
-    'access arguments' => array('access content'),
+    'access callback' => 'system_transliterate_ajax_access',
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
   );
