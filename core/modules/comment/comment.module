@@ -1892,13 +1892,13 @@ function comment_form($form, &$form_state, $comment) {
 
   // Prepare cancel link.
   if (isset($_GET['destination'])) {
-    $path = urldecode($_GET['destination']);
+    $path = $_GET['destination'];
   }
   elseif (isset($node->nid) && !isset($comment->cid)) {
     $path = 'node/' . $node->nid;
   }
   elseif (isset($_SERVER['HTTP_REFERER'])) {
-    $path = urldecode($_SERVER['HTTP_REFERER']);
+    $path = $_SERVER['HTTP_REFERER'];
   }
   elseif (isset($comment->cid)) {
     $path = 'comment/' . $comment->cid . '#comment-' . $comment->cid;

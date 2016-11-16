@@ -83,10 +83,10 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
 
   // Prepare cancel link.
   if (isset($_GET['destination'])) {
-    $path = urldecode($_GET['destination']);
+    $path = $_GET['destination'];
   }
   elseif (isset($_SERVER['HTTP_REFERER'])) {
-    $path = urldecode($_SERVER['HTTP_REFERER']);
+    $path = $_SERVER['HTTP_REFERER'];
   }
   elseif (user_access('administer blocks')) {
     $path = 'admin/structure/block';

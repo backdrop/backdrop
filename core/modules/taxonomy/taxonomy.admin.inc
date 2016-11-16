@@ -732,10 +732,10 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
 
   // Prepare cancel link.
   if (isset($_GET['destination'])) {
-    $path = urldecode($_GET['destination']);
+    $path = $_GET['destination'];
   }
   elseif (isset($_SERVER['HTTP_REFERER'])) {
-    $path = urldecode($_SERVER['HTTP_REFERER']);
+    $path = $_SERVER['HTTP_REFERER'];
   }
   elseif (user_access('administer taxonomy')) {
     $path = 'admin/structure/taxonomy/' . $vocabulary->machine_name;
