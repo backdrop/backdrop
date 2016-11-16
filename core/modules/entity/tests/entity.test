@@ -304,9 +304,8 @@ class EntityViewModeSuggestionsTest extends EntityViewModeTestHelper {
   public function setUp(array $modules = array()) {
     parent::setUp($modules);
 
-    // Core RDF module causes PHP notices with entity rendering.
-    module_disable(array('rdf'));
-
+    state_set('entity_view_mode_theme_output_suggestions', array('comment', 'node', 'taxonomy_term', 'user_profile'));
+    backdrop_theme_rebuild();
     backdrop_static_reset('theme_get_registry');
   }
 
@@ -323,7 +322,8 @@ class EntityViewModeSuggestionsTest extends EntityViewModeTestHelper {
     $this->assertIdentical($actual_suggestions, $expected_suggestions);
 
     // Rendering comments uses '#theme' => 'comment__node_type'.
-    $comment = (object) array(
+    $comment_body = $this->randomName();
+    $comment = entity_create('comment', array(
       'cid' => NULL,
       'nid' => $node->nid,
       'pid' => 0,
@@ -331,9 +331,14 @@ class EntityViewModeSuggestionsTest extends EntityViewModeTestHelper {
       'status' => COMMENT_PUBLISHED,
       'subject' => $this->randomName(),
       'language' => LANGUAGE_NONE,
-      'comment_body' => array(LANGUAGE_NONE => array($this->randomName())),
-    );
+      'comment_body' => array(LANGUAGE_NONE => array($comment_body)),
+    ));
+
     comment_save($comment);
+    $comment->comment_body[LANGUAGE_NONE][0] = array(
+      'value' => $comment_body,
+      'format' => 'filtered_html',
+    );
     $build = comment_view($comment, $node, 'comment_test');
     $actual_suggestions = theme($build['#theme'], $build);
     $expected_suggestions = array(
@@ -354,18 +359,18 @@ class EntityViewModeSuggestionsTest extends EntityViewModeTestHelper {
     );
     $this->assertIdentical($actual_suggestions, $expected_suggestions);
 
-    $term = (object) array(
+    $term = entity_create('taxonomy_term',  array(
       'name' => $this->randomName(),
-      'vocabulary_machine_name' => 'tags',
-    );
+      'vocabulary' => 'tags',
+    ));
     taxonomy_term_save($term);
     $build = taxonomy_term_view($term, 'term_test');
     $actual_suggestions = theme($build['#theme'], $build);
     $expected_suggestions = array(
       'taxonomy_term__' . $term->tid . '__term_test',
       'taxonomy_term__' . $term->tid,
-      'taxonomy_term__' . $term->vocabulary_machine_name . '__term_test',
-      'taxonomy_term__' . $term->vocabulary_machine_name,
+      'taxonomy_term__' . $term->vocabulary . '__term_test',
+      'taxonomy_term__' . $term->vocabulary,
     );
     $this->assertIdentical($actual_suggestions, $expected_suggestions);
 
