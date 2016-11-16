@@ -96,7 +96,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
         $query = db_select('taxonomy_term_data', 'td');
         $query->fields('td');
         $query->condition('td.tid', $argument);
-        $query->addTag('term_access');
+        $query->addTag('taxonomy_term_access');
         $term = $query->execute()->fetchObject();
         if (!$term) {
           return FALSE;

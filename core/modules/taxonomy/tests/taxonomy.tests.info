@@ -82,6 +82,12 @@ description = Verifies operation of a taxonomy-based EntityFieldQuery.
 group = Taxonomy
 file = taxonomy.test
 
+[TaxonomyQueryAlterTestCase]
+name = Taxonomy query tags
+description = Verifies that taxonomy_term_access tags are added to queries.
+group = Taxonomy
+file = taxonomy.test
+
 [TaxonomyViewsHandlerRelationshipNodeTermDataTest]
 name = Views taxonomy relationship
 description = Tests the taxonomy term on node relationship handler for Views.
