@@ -3668,6 +3668,7 @@ function form_process_machine_name($element, &$form_state) {
 
   $js_settings = $element['#machine_name'];
   $js_settings['source'] = '#' . $source['#id'];
+  $js_settings['replace_token'] = backdrop_get_token($element['#machine_name']['replace_pattern']);
   $element['#attributes']['data-machine-name'] = json_encode($js_settings);
   $element['#attached']['js'][] = 'core/misc/machine-name.js';
 

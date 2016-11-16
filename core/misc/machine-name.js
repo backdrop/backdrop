@@ -149,6 +149,7 @@ Backdrop.behaviors.machineName = {
    *   The machine name settings for the corresponding field, containing:
    *   - replace: A character to replace disallowed characters with; e.g., '_'
    *     or '-'.
+   *   - replace_token: A token to validate the regular expression.
    *   - maxlength: The maximum length of the machine name.
    *   - langcode: The language of the source string with which transliteration
    *     should be performed.
@@ -160,7 +161,7 @@ Backdrop.behaviors.machineName = {
     // Expand the settings to match the callback's input.
     // See system_transliterate_ajax().
     var transliterationOptions = {};
-    var copyOptions = ['replace', 'langcode', 'maxlength', 'replace_pattern'];
+    var copyOptions = ['replace', 'langcode', 'maxlength', 'replace_pattern', 'replace_token'];
     for (var n = 0; n < copyOptions.length; n++) {
       if (settings.hasOwnProperty(copyOptions[n])) {
         transliterationOptions[copyOptions[n]] = settings[copyOptions[n]];
