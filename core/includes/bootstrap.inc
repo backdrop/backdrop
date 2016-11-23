@@ -112,6 +112,11 @@ define('WATCHDOG_INFO', 6);
 define('WATCHDOG_DEBUG', 7);
 
 /**
+ * Log message severity -- Deprecated function / feature notices.
+ */
+define('WATCHDOG_DEPRECATED', 8);
+
+/**
  * @} End of "defgroup logging_severity_levels".
  */
 
@@ -811,6 +816,13 @@ function backdrop_settings_initialize() {
     }
   }
 
+  // Pull in the database charset option if specified. This removes the need
+  // to use the long-form array and allows enabling ut8mb4 support even if the
+  // server provided options via $_SERVER['BACKDROP_SETTINGS'].
+  if (isset($database_charset) && isset($databases['default']['default']) && !isset($databases['default']['default']['charset'])) {
+    $databases['default']['default']['charset'] = $database_charset;
+  }
+
   if (isset($base_url)) {
     // Parse fixed base URL from settings.php.
     $parts = parse_url($base_url);
@@ -1011,6 +1023,9 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
  * @deprecated since 1.0
  */
 function variable_initialize($conf = array()) {
+  // watchdog_deprecated_function() is not called here even though this function
+  // is deprecated because this function is *always* called during bootstrap.
+
   // NOTE: caching the variables improves performance by 20% when serving
   // cached pages.
   if ($cached = cache('bootstrap')->get('variables')) {
@@ -1095,6 +1110,7 @@ function settings_get($name, $default = NULL) {
 function variable_get($name, $default = NULL) {
   global $conf;
 
+  watchdog_deprecated_function('bootstrap', __FUNCTION__);
   return isset($conf[$name]) ? $conf[$name] : $default;
 }
 
@@ -1128,6 +1144,8 @@ function variable_get($name, $default = NULL) {
 function variable_set($name, $value) {
   global $conf;
 
+  watchdog_deprecated_function('bootstrap', __FUNCTION__);
+
   db_merge('variable')->key(array('name' => $name))->fields(array('value' => serialize($value)))->execute();
 
   cache('bootstrap')->delete('variables');
@@ -1152,6 +1170,8 @@ function variable_set($name, $value) {
  */
 function variable_del($name) {
   global $conf;
+
+  watchdog_deprecated_function('bootstrap', __FUNCTION__);
 
   db_delete('variable')
     ->condition('name', $name)
@@ -1564,7 +1584,7 @@ function backdrop_page_header() {
   $default_headers = array(
     'Expires' => 'Sun, 19 Nov 1978 05:00:00 GMT',
     'Last-Modified' => gmdate(DATE_RFC1123, REQUEST_TIME),
-    'Cache-Control' => 'no-cache, must-revalidate, post-check=0, pre-check=0',
+    'Cache-Control' => 'no-cache, must-revalidate',
     'X-Content-Type-Options' => 'nosniff',
     'ETag' => '"' . REQUEST_TIME . '"',
   );
@@ -1995,6 +2015,55 @@ function request_uri() {
 }
 
 /**
+ * Logs a deprecation warning.
+ *
+ * This is a wrapper function for watchdog() to record uses of deprecated
+ * functions in Backdrop modules. To prevent an explosion of WATCHDOG_DEPRECATED
+ * messages, only the first use of a function in a particular file:line will get
+ * a watchdog message.
+ *
+ * @param $type
+ *   The category to which this message belongs.
+ * @param $func
+ *   The function or method deprecated. Usually, __FUNCTION__ or __METHOD__.
+ * @param $link
+ *   A link to associate with the message.
+ *
+ * @see watchdog()
+ */
+function watchdog_deprecated_function($type, $func, $link = NULL) {
+  static $deprecated_calls = array();
+
+  // Return early if not logging deprecation warnings.
+  if (!watchdog_severity_enabled(WATCHDOG_DEPRECATED)) {
+    return;
+  }
+
+  require_once BACKDROP_ROOT . '/core/includes/errors.inc';
+
+  // Get the caller of the deprecated function.
+  $trace = debug_backtrace();
+  array_shift($trace);
+  $caller = _backdrop_get_last_caller($trace);
+
+  $caller_sig = $caller['file'] . ':' . $caller['line'];
+  if (array_key_exists($caller_sig, $deprecated_calls)) {
+    return;
+  }
+  $deprecated_calls[$caller_sig] = TRUE;
+
+  // Call watchdog()
+  $message = 'The function @original_caller (@file:@line) called deprecated function @function(). It will be removed in the next major release of Backdrop.';
+  $variables = array(
+    '@function' => $func,
+    '@original_caller' => $caller['function'],
+    '@file' => basename($caller['file']),
+    '@line' => $caller['line'],
+  );
+  watchdog($type, $message, $variables, WATCHDOG_DEPRECATED, $link);
+}
+
+/**
  * Logs an exception.
  *
  * This is a wrapper function for watchdog() which automatically decodes an
@@ -2020,6 +2089,11 @@ function request_uri() {
  */
 function watchdog_exception($type, Exception $exception, $message = NULL, $variables = array(), $severity = WATCHDOG_ERROR, $link = NULL) {
 
+  // Return early if not logging this severity level.
+  if (!watchdog_severity_enabled($severity)) {
+    return;
+  }
+
    // Use a default value if $message is not set.
    if (empty($message)) {
      // The exception message is run through check_plain() by _backdrop_decode_exception().
@@ -2033,6 +2107,36 @@ function watchdog_exception($type, Exception $exception, $message = NULL, $varia
    require_once BACKDROP_ROOT . '/core/includes/errors.inc';
    $variables += _backdrop_decode_exception($exception);
    watchdog($type, $message, $variables, $severity, $link);
+}
+
+/**
+ * Check if logging is enabled for a given severity level.
+ *
+ * @param int $severity
+ *   One of the WATCHDOG_* severity constants.
+ *
+ * @return TRUE if enabled, FALSE otherwise.
+ *
+ * @since 1.5.0
+ *
+ * @see watchdog_severity_levels()
+ */
+function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
+  try {
+    $enabled_severity_levels = config('system.core')->get('watchdog_enabled_severity_levels');
+  }
+  catch (Exception $e) {
+    $enabled_severity_levels = NULL;
+  }
+
+  // This may be called before system.core, such as when running update.php or
+  // the initial installation. As such we provide the defaults if needed.
+  if (!isset($enabled_severity_levels)) {
+    $enabled_severity_levels = array(0, 1, 2, 3, 4, 5, 6);
+  }
+
+  // Return TRUE if the severity level is enabled.
+  return in_array($severity, $enabled_severity_levels);
 }
 
 /**
@@ -2062,6 +2166,7 @@ function watchdog_exception($type, Exception $exception, $message = NULL, $varia
  *   - WATCHDOG_NOTICE: (default) Normal but significant conditions.
  *   - WATCHDOG_INFO: Informational messages.
  *   - WATCHDOG_DEBUG: Debug-level messages.
+ *   - WATCHDOG_DEPRECATED: Use of deprecated functions or features.
  * @param $link
  *   A link to associate with the message.
  *
@@ -2072,6 +2177,11 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
   global $user, $base_root;
 
   static $in_error_state = FALSE;
+
+  // Don't log messages if not enabled for this severity level.
+  if (!watchdog_severity_enabled($severity)) {
+    return;
+  }
 
   // It is possible that the error handling will itself trigger an error. In that case, we could
   // end up in an infinite loop. To avoid that, we implement a simple static semaphore.
@@ -3865,14 +3975,14 @@ function backdrop_is_html() {
  * Detects if this is an AJAX HTTP request.
  */
 function backdrop_is_ajax() {
-  return !empty($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/vnd.backdrop-ajax') === 0;
+  return !empty($_POST) && !empty($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/vnd.backdrop-ajax') === 0;
 }
 
 /**
  * Detects if this is a dialog HTTP request.
  */
 function backdrop_is_dialog() {
-  return !empty($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/vnd.backdrop-dialog') === 0;
+  return !empty($_POST) && !empty($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/vnd.backdrop-dialog') === 0;
 }
 
 /**

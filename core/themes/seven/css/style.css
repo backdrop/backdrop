@@ -333,7 +333,7 @@ ul.primary li:last-child a {
  * Secondary admin tabs
  */
 ul.secondary {
-  font-size: 0.8125em;
+  font-size: 0.875em;
   font-weight: bold;
   padding: 16px 23px 6px;
   margin: 0 -20px 0;
@@ -346,11 +346,17 @@ ul.secondary {
 ul.secondary li {
   display: inline-block;
   margin: 0 5px 10px;
+  padding: 0;
 }
 ul.secondary li a {
   display: block;
-  border: 2px solid #e3e2e2;
-  color: #444B53;
+  border: 0;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  background: #ddd;
+  color: #000;
+  font-weight: normal;
   transition:
     background-color 0.6s ease,
     color 0.6s ease;
@@ -360,15 +366,16 @@ ul.secondary li a:hover,
 ul.secondary li.active a,
 ul.secondary li.active a.active {
   padding: .36em 1em;
-  -webkit-border-radius: 1.45em;
-  -moz-border-radius: 1.45em;
-  border-radius: 1.45em;
 }
-ul.secondary li a:hover,
-ul.secondary li.active a,
-ul.secondary li.active a.active {
+ul.secondary li a:hover {
   color: #000;
-  background: #e3e2e2;
+  background: #c5c5c3;
+}
+ul.secondary li.active a,
+ul.secondary li.active a:hover,
+ul.secondary li.active a.active {
+  color: #fff;
+  background: #666;
 }
 
 /**
@@ -607,6 +614,9 @@ tr.selected td {
 .system-status-report tr.error {
   color: #8c2e0b;
   background-color: #fef5f1;
+}
+.diff-table td {
+  padding: 4px;
 }
 
 /**
@@ -864,6 +874,9 @@ a.button {
   border-radius: 4px;
   transition: background-color 0.6s ease 0s, color 0.6s ease 0s;
 }
+a.button {
+  display: inline-block;
+}
 [dir="rtl"] input.form-submit,
 [dir="rtl"] a.button {
   margin-left: 1em;
@@ -886,8 +899,6 @@ input.form-submit:focus {
   background-color: #CFDE56;
   border-color: #CFDE56;
 }
-a.button:link,
-a.button:visited,
 a.button:active,
 input.form-submit:active {
   /* @todo, decide on an active state */
@@ -911,6 +922,8 @@ button.button-primary {
   border-color: #1766ae;
   background-color: #1766ae;
 }
+a.button-primary:hover,
+a.button-primary:focus,
 input.button-primary:hover,
 input.button-primary:focus,
 button.button-primary:hover,
@@ -918,6 +931,7 @@ button.button-primary:focus {
   border-color: #114a75;
   background-color: #114a75;
 }
+a.button-secondary,
 input.button-secondary,
 button.button-secondary {
   color: #828188;
@@ -926,6 +940,8 @@ button.button-secondary {
   -moz-box-shadow: inset 0px 0px 0px 2px #97979e;
   box-shadow: inset 0px 0px 0px 2px #97979e;
 }
+a.button-secondary:hover,
+a.button-secondary:focus,
 input.button-secondary:hover,
 input.button-secondary:focus,
 button.button-secondary:hover,
@@ -933,6 +949,7 @@ button.button-secondary:focus {
   color: white;
   background-color: #97979e;
 }
+a.button-danger,
 input.button-danger,
 button.button-danger {
   color: #e7251b;
@@ -941,6 +958,8 @@ button.button-danger {
   -moz-box-shadow: inset 0px 0px 0px 2px #e7251b;
   box-shadow: inset 0px 0px 0px 2px #e7251b;
 }
+a.button-danger:hover,
+a.button-danger:focus,
 input.button-danger:hover,
 input.button-danger:focus,
 button.button-danger:hover,
@@ -1095,7 +1114,7 @@ div.admin-panel h3 {
  * Layout configuration.
  */
 #layout-edit-main {
-  padding: 20px 0;
+  padding: 20px 0 0;
   border-radius: 4px;
   background-color: #f7f7f7;
   border: 2px solid #EAEAEA;
@@ -1249,13 +1268,16 @@ body.maintenance-page .sidebar {
   float: right;
 }
 body.maintenance-page main {
+  padding: 0 20px;
+}
+body.maintenance-page .sidebar + main {
   max-width: 590px;
   padding-right: 20px; /* LTR */
   margin-left: 210px; /* LTR */
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
-[dir="rtl"] body.maintenance-page main {
+[dir="rtl"] body.maintenance-page .sidebar + main {
   padding-right: 0;
   padding-left: 20px;
   margin-left: 0;
@@ -1595,18 +1617,4 @@ div.add-or-remove-shortcuts {
   100% {
     left: 100%;
   }
-}
-
-/**
- * Misc. Elements
- */
-#check-font-wrapper #check-font {
-  /* Bumping specificity since it's very important these styles apply. */
-  /* This is for testing if the webfont has loaded. */
-  font-family: 'Open Sans', monospace;
-  font-size: 10px;
-  font-weight: 400;
-  position: absolute;
-  z-index: -100;
-  visibility: hidden;
 }

@@ -45,6 +45,12 @@ function filter_theme() {
  */
 function filter_element_info() {
   $type['text_format'] = array(
+    // The text format selected by default for this element.
+    '#format' => NULL,
+    // Whether file uploads are permitted through the editor (if supported).
+    // Disable by default, modules must specifically implement saving files as
+    // permanent when they save their text data. See filter_entity_insert().
+    '#editor_uploads' => FALSE,
     '#process' => array('filter_process_format'),
     '#base_type' => 'textarea',
     '#theme_wrappers' => array('text_format_wrapper'),
@@ -222,7 +228,7 @@ function filter_config_data_validate(Config $config, array $config_info) {
  * @param $format_id
  *   The format ID.
  *
- * @return
+ * @return stdClass
  *   A fully-populated text format object, if the requested format exists and
  *   is enabled. If the format does not exist, or exists in the database but
  *   has been marked as disabled, FALSE is returned.
@@ -673,7 +679,7 @@ function filter_modules_disabled($modules) {
  *   account will be returned. All formats will be returned otherwise. Defaults
  *   to NULL.
  *
- * @return array
+ * @return stdClass[]
  *   An array of text format objects, keyed by the format ID and ordered by
  *   weight.
  *
@@ -1043,6 +1049,7 @@ function _filter_format_is_cacheable($format) {
  * @deprecated since 1.0
  */
 function filter_list_format($format_id) {
+  watchdog_deprecated_function('Filter', __FUNCTION__);
   if ($format = filter_format_load($format_id)) {
     return $format->filters;
   }
@@ -1209,6 +1216,9 @@ function filter_process_format($element) {
     $element['#attached'] = filter_get_attached($formats);
   }
 
+  // Specify if uploads are allowed by using a data attribute.
+  $element['value']['#attributes']['data-editor-uploads'] = empty($element['#editor_uploads']) ? 'false' : 'true';
+
   // Use the default format for this user if none was selected.
   if (!isset($element['#format'])) {
     $element['#format'] = filter_default_format($user);
@@ -1225,7 +1235,7 @@ function filter_process_format($element) {
     '#type' => 'fieldset',
     '#attributes' => array('class' => array('filter-wrapper')),
     '#title' => t('Formatting options'),
-    '#collapsible' => TRUE, 
+    '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
 
@@ -1494,7 +1504,7 @@ function _filter_tips($format_id, $long = FALSE) {
  * @param $text
  *   The partial (X)HTML snippet to load. Invalid mark-up will be corrected on
  *   import.
- * @return
+ * @return DOMDocument
  *   A DOMDocument that represents the loaded (X)HTML snippet.
  */
 function filter_dom_load($text) {
@@ -1713,10 +1723,10 @@ function _filter_get_file_ids_by_field(EntityInterface $entity) {
       foreach ($entity->$processed_text_field as $langcode => $values) {
         foreach ($values as $delta => $text) {
           if (isset($text['value'])) {
-            $fids[$processed_text_field] = array_merge($fids[$processed_text_field], _filter_parse_file_fids($text['value']));
+            $fids[$processed_text_field] = array_merge($fids[$processed_text_field], filter_parse_file_fids($text['value']));
           }
           if (isset($text['summary'])) {
-            $fids[$processed_text_field] = array_merge($fids[$processed_text_field], _filter_parse_file_fids($text['summary']));
+            $fids[$processed_text_field] = array_merge($fids[$processed_text_field], filter_parse_file_fids($text['summary']));
           }
         }
       }
@@ -1756,7 +1766,7 @@ function _filter_get_processed_text_fields(EntityInterface $entity) {
  * @return array
  *   An array of all found FIDs.
  */
-function _filter_parse_file_fids($text) {
+function filter_parse_file_fids($text) {
   $dom = filter_dom_load($text);
   $xpath = new DOMXPath($dom);
   $fids = array();

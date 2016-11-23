@@ -7,10 +7,10 @@
  * in a readable manner.
  */
 body {
-  margin: 10px;
+  margin: 0 10px;
 }
 body > .layout {
-  max-width: 940px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 

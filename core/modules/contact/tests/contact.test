@@ -8,18 +8,20 @@
  * Tests the site-wide contact form.
  */
 class ContactSitewideTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('contact');
+
+    // Create and login administrative user.
+    $this->admin_user = $this->backdropCreateUser(array('access site-wide contact form', 'administer contact forms', 'administer account settings', 'administer permissions', 'administer users'));
+    $this->backdropLogin($this->admin_user);
   }
 
   /**
    * Tests configuration options and the site-wide contact form.
    */
   function testSiteWideContact() {
-    // Create and login administrative user.
-    $admin_user = $this->backdropCreateUser(array('access site-wide contact form', 'administer contact forms', 'administer account settings'));
-    $this->backdropLogin($admin_user);
-
     $flood_limit = 3;
     $config = config('contact.settings');
     $config->set('contact_threshold_limit', $flood_limit);
@@ -40,7 +42,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     $this->backdropLogout();
     $this->backdropGet('contact');
     $this->assertResponse(404);
-    $this->backdropLogin($admin_user);
+    $this->backdropLogin($this->admin_user);
     $this->backdropGet('contact');
     $this->assertResponse(200);
     $this->assertText(t('The contact form has not been configured.'));
@@ -82,7 +84,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     $this->backdropGet('contact');
     $this->assertText(t('Your e-mail address'), 'Contact form is shown when there is one category.');
     $this->assertNoText(t('Category'), 'When there is only one category, the category selection element is hidden.');
-    $this->backdropLogin($admin_user);
+    $this->backdropLogin($this->admin_user);
 
     // Add more categories.
     $this->addCategory($category = $this->randomName(16), implode(',', array($recipients[0], $recipients[1])), '', FALSE);
@@ -149,7 +151,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     $this->assertRaw(t('You cannot send more than %number messages in @interval. Try again later.', array('%number' => $config->get('contact_threshold_limit'), '@interval' => format_interval(600))), 'Message threshold reached.');
 
     // Delete created categories.
-    $this->backdropLogin($admin_user);
+    $this->backdropLogin($this->admin_user);
     $this->deleteCategories();
   }
 
@@ -157,10 +159,6 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
   * Tests auto-reply on the site-wide contact form.
   */
   function testAutoReply() {
-    // Create and login administrative user.
-    $admin_user = $this->backdropCreateUser(array('access site-wide contact form', 'administer contact forms', 'administer permissions', 'administer users'));
-    $this->backdropLogin($admin_user);
-
     // Set up three categories, 2 with an auto-reply and one without.
     $foo_autoreply = $this->randomName(40);
     $bar_autoreply = $this->randomName(40);
@@ -297,6 +295,8 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
  * Tests the personal contact form.
  */
 class ContactPersonalTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   private $admin_user;
   private $web_user;
   private $contact_user;
@@ -308,9 +308,7 @@ class ContactPersonalTestCase extends BackdropWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array('administer contact forms', 'administer users', 'administer account settings'));
 
     // Create some normal users with their contact forms enabled by default.
-    $config = config('contact.settings');
-    $config->set('contact_default_status', TRUE);
-    $config->save();
+    config_set('contact.settings', 'contact_default_status', TRUE);
 
     $this->web_user = $this->backdropCreateUser(array('access user contact forms'));
     $this->contact_user = $this->backdropCreateUser();

@@ -5,6 +5,14 @@
  */
 
 /**
+ * Implements hook_preprocess_page().
+ */
+function seven_preprocess_page(&$variables) {
+  // Add the OpenSans font from core on every page of the site.
+  backdrop_add_library('system', 'opensans', TRUE);
+}
+
+/**
  * Prepares variables for layout templates.
  */
 function seven_preprocess_layout(&$variables) {

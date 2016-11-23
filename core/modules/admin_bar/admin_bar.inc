@@ -65,7 +65,7 @@ function admin_bar_output($complete = FALSE) {
 
     // Check for status report errors.
     if (user_access('administer site configuration')) {
-      $content['menu']['menu'] += admin_bar_links_alert();
+      $content['alert'] = admin_bar_links_alert();
     }
 
     // Add menu additions.
@@ -674,10 +674,17 @@ function admin_bar_links_alert() {
         $count++;
       }
     }
+    $alert = array(
+      '#theme' => 'admin_bar_links',
+      '#wrapper_attributes' => array(
+        'id' => 'admin-bar-alert',
+      ),
+      '#weight' => 20,
+    );
+
     // Add a link to the status report.
     $alert['alert'] = array(
       '#title' => '<span class="error-label">' . t('Site status') . '</span><span class="error-count">' . $count . '</span>',
-      '#weight' => 1,
       '#attributes' => array(
         'title' => format_plural($count, 'One problem was detected with your Backdrop installation.', 'Several problems were detected with your Backdrop installation.'),
         'class' => array('admin-bar-alert', 'admin-bar-alert-error'),

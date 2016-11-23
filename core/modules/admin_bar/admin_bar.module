@@ -126,6 +126,27 @@ function admin_bar_language_delete() {
 }
 
 /**
+ * Implements hook_taxonomy_vocabulary_insert().
+ */
+function admin_bar_taxonomy_vocabulary_insert(TaxonomyVocabulary $vocabulary) {
+  cache('admin_bar')->flush();
+}
+
+/**
+ * Implements hook_taxonomy_vocabulary_update().
+ */
+function admin_bar_taxonomy_vocabulary_update(TaxonomyVocabulary $vocabulary) {
+  cache('admin_bar')->flush();
+}
+
+/**
+ * Implements hook_taxonomy_vocabulary_delete().
+ */
+function admin_bar_taxonomy_vocabulary_delete(TaxonomyVocabulary $vocabulary) {
+  cache('admin_bar')->flush();
+}
+
+/**
  * Implements hook_preprocess_page().
  */
 function admin_bar_preprocess_page(&$variables) {

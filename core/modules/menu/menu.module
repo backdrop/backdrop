@@ -41,6 +41,7 @@ function menu_menu() {
   $items['admin/structure/menu/parents'] = array(
     'title' => 'Parent menu items',
     'page callback' => 'menu_parent_options_js',
+    'delivery callback' => 'backdrop_json_deliver',
     'type' => MENU_CALLBACK,
     'access arguments' => array('administer menu'),
   );
@@ -372,7 +373,8 @@ function menu_parent_options_js() {
   }
   $options = _menu_get_options(menu_get_menus(), $available_menus, array('mlid' => 0));
 
-  backdrop_json_output($options);
+  // Displayed as JSON by delivery callback backdrop_json_deliver().
+  return $options;
 }
 
 /**

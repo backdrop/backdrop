@@ -123,3 +123,9 @@ name = Language negotiation info
 description = Tests alterations to language types/negotiation info.
 group = Locale
 file = locale.test
+
+[LocaleStringIsSafeTest]
+name = Test if a string is safe
+description = Tests locale translation safe string handling.
+group = Locale
+file = locale.test

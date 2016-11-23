@@ -21,7 +21,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     }
 
     // Convert legacy vid option to machine name vocabulary.
-    if (isset($this->options['vid']) && !empty($this->options['vid']) & empty($this->options['vocabulary'])) {
+    if (isset($this->options['vid']) && !empty($this->options['vid']) && empty($this->options['vocabulary'])) {
       $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
       $vid = $this->options['vid'];
       if (isset($vocabularies[$vid], $vocabularies[$vid]->machine_name)) {
@@ -126,7 +126,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     }
     else {
       if (!empty($this->options['hierarchy']) && $this->options['limit']) {
-        $tree = taxonomy_get_tree($vocabulary->vid);
+        $tree = taxonomy_get_tree($vocabulary->machine_name);
         $options = array();
 
         if ($tree) {
@@ -144,7 +144,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
         $query->orderby('td.vocabulary');
         $query->orderby('td.weight');
         $query->orderby('td.name');
-        $query->addTag('term_access');
+        $query->addTag('taxonomy_term_access');
         if ($this->options['limit']) {
           $query->condition('td.vocabulary', $vocabulary->machine_name);
         }
@@ -309,7 +309,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     $query->fields('td');
     $query->condition('td.name', $names);
     $query->condition('td.vocabulary', $this->options['vocabulary']);
-    $query->addTag('term_access');
+    $query->addTag('taxonomy_term_access');
     $result = $query->execute();
     foreach ($result as $term) {
       unset($missing[strtolower($term->name)]);

@@ -41,7 +41,7 @@ Backdrop.behaviors.dialog = {
    */
   prepareDialogButtons: function ($dialog) {
     var buttons = [];
-    var $buttons = $dialog.find('.form-actions input[type=submit]');
+    var $buttons = $dialog.find('.form-actions input[type=submit], .form-actions a.button');
     $buttons.each(function () {
       // Hidden form buttons need special attention. For browser consistency,
       // the button needs to be "visible" in order to have the enter key fire
@@ -52,7 +52,8 @@ Backdrop.behaviors.dialog = {
         width: 0,
         height: 0,
         padding: 0,
-        border: 0
+        border: 0,
+        overflow: 'hidden'
       });
       buttons.push({
         'text': $originalButton.html() || $originalButton.attr('value'),

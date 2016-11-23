@@ -43,10 +43,11 @@ function TableResponsive (table) {
 
   this.$table.before($('<div class="tableresponsive-toggle-columns"></div>').append(this.$link));
 
-  // Attach a resize handler to the window.
-  $(window)
-    .on('resize.tableresponsive', $.proxy(this, 'eventhandlerEvaluateColumnVisibility'))
-    .trigger('resize.tableresponsive');
+  var _this = this;
+  Backdrop.optimizedResize.add(function() {
+    $.proxy(_this, 'eventhandlerEvaluateColumnVisibility');
+    $(window).trigger('resize.tableresponsive');
+  });
 }
 
 /**

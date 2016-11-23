@@ -558,6 +558,7 @@ function system_menu() {
   $items['system/timezone'] = array(
     'title' => 'Time zone',
     'page callback' => 'system_timezone',
+    'delivery callback' => 'backdrop_json_deliver',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
@@ -806,6 +807,15 @@ function system_menu() {
     'file' => 'system.admin.inc',
     'weight' => -15,
   );
+  $items['admin/config/development/utf8mb4-upgrade'] = array(
+    'title' => 'Database 4 byte UTF-8 upgrade',
+    'description' => 'Upgrades the database to support 4 byte UTF-8 characters such as emoji and mathmatical symbols.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('system_utf8mb4_convert_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+  );
 
   // Regional and date settings.
   $items['admin/config/regional'] = array(
@@ -885,7 +895,7 @@ function system_menu() {
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/clean-urls'] = array(
-    'page callback' => 'backdrop_goto',
+    'page callback' => 'backdrop_goto_deprecated',
     'page arguments' => array('admin/config/search/urls'),
     'access arguments' => array('access administration pages'),
     'type' => MENU_CALLBACK,
@@ -1021,7 +1031,7 @@ function system_menu() {
   $items['system/transliterate/%'] = array(
     'page callback' => 'system_transliterate_ajax',
     'page arguments' => array(2),
-    'access arguments' => array('access content'),
+    'access callback' => 'system_transliterate_ajax_access',
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
   );
@@ -1211,6 +1221,17 @@ function system_library_info() {
     ),
   );
 
+  $libraries['backdrop.menus'] = array(
+    'title' => 'Backdrop menu styles',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/menus.js' => array('group' => JS_DEFAULT),
+    ),
+    'css' => array(
+      backdrop_get_path('module', 'system') . '/css/menu-dropdown.theme.css' => array('group' => CSS_DEFAULT),
+    ),
+  );
+
   // jQuery.
   $libraries['jquery'] = array(
     'title' => 'jQuery',
@@ -1315,6 +1336,39 @@ function system_library_info() {
         'group' => JS_LIBRARY,
         'weight' => -21,
         'browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE),
+      ),
+    ),
+  );
+
+  // SmartMenus.
+  $libraries['smartmenus'] = array(
+    'title' => 'SmartMenus',
+    'website' => 'http://www.smartmenus.org',
+    'version' => '1.0.0',
+    'css' => array(
+      'core/misc/smartmenus/css/sm-core-css.css' => array(
+        'group' => CSS_THEME,
+        'media' => 'screen',
+      ),
+    ),
+    'js' => array(
+      // Backdrop includes a "combined" file that bundles together both the
+      // main library and the keyboard support file.
+      'core/misc/smartmenus/jquery.smartmenus.combined.js' => array(
+        'group' => JS_LIBRARY,
+      ),
+    ),
+  );
+
+  // OpenSans.
+  $libraries['opensans'] = array(
+    'title' => 'OpenSans',
+    'website' => 'https://fonts.google.com/specimen/Open+Sans',
+    'version' => '1.0',
+    'css' => array(
+      'core/misc/opensans/opensans.css' => array(
+        'group' => CSS_THEME,
+        'media' => 'screen',
       ),
     ),
   );
@@ -2023,10 +2077,10 @@ function system_authorized_run($callback, $file, $arguments = array(), $page_tit
  *
  * @see batch_process()
  */
-function system_authorized_batch_process() {
+function system_authorized_batch_process($redirect_callback = 'backdrop_goto') {
   $finish_url = system_authorized_get_url();
   $process_url = system_authorized_batch_processing_url();
-  batch_process($finish_url, $process_url);
+  batch_process($finish_url, $process_url, $redirect_callback);
 }
 
 /**
@@ -2112,7 +2166,7 @@ function system_init() {
   $path = backdrop_get_path('module', 'system');
   // Add the CSS for this module. These aren't in system.info, because they
   // need to be in the CSS_SYSTEM group rather than the CSS_DEFAULT group.
-  backdrop_add_css('core/misc/normalize.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE, 'weight' => -10));
+  backdrop_add_css('core/misc/normalize.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE, 'weight' => -1000));
   backdrop_add_css($path . '/css/system.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
   if (path_is_admin(current_path())) {
     backdrop_add_css($path . '/css/system.admin.css', array('group' => CSS_SYSTEM));
@@ -2797,15 +2851,6 @@ function _system_rebuild_theme_data() {
   // Set defaults for theme info.
   $defaults = array(
     'engine' => 'phptemplate',
-    'regions' => array(
-      'sidebar_first' => 'Left sidebar',
-      'sidebar_second' => 'Right sidebar',
-      'content' => 'Content',
-      'header' => 'Header',
-      'footer' => 'Footer',
-      'highlighted' => 'Highlighted',
-      'page_bottom' => 'Page bottom',
-    ),
     'description' => '',
     'screenshot' => 'screenshot.png',
     'php' => BACKDROP_MINIMUM_PHP,
@@ -3061,7 +3106,7 @@ function confirm_form($form, $question, $path, $description = NULL, $yes = NULL,
 
   // Prepare cancel link.
   if (isset($_GET['destination'])) {
-    $options = backdrop_parse_url(urldecode($_GET['destination']));
+    $options = backdrop_parse_url($_GET['destination']);
   }
   elseif (is_array($path)) {
     $options = $path;
@@ -3461,6 +3506,7 @@ function system_time_zones($blank = NULL) {
  * @deprecated since 1.3.1
  */
 function system_check_http_request() {
+   watchdog_deprecated_function('system', __FUNCTION__);
   // Try to get the content of the front page via backdrop_http_request().
   $result = backdrop_http_request(url('', array('absolute' => TRUE)), array('max_redirects' => 0, 'timeout' => 10));
   // We only care that we get a http response - this means that Backdrop
@@ -3477,7 +3523,7 @@ function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_t
   // interpreted as the empty string.
   $abbreviation = $abbreviation ? $abbreviation : '';
   $timezone = timezone_name_from_abbr($abbreviation, intval($offset), $is_daylight_saving_time);
-  backdrop_json_output($timezone);
+  return array('timezone' => $timezone);
 }
 
 /**

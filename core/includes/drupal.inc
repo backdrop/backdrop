@@ -521,26 +521,6 @@ function &drupal_register_shutdown_function($callback = NULL) {
 // Functions from common.inc.
 
 /**
- * Adds content to a specified region.
- *
- * @deprecated since 1.0.0
- * @see backdrop_add_region_content()
- */
-function drupal_add_region_content($region = NULL, $data = NULL) {
-  return backdrop_add_region_content($region, $data);
-}
-
-/**
- * Gets assigned content for a given region.
- *
- * @deprecated since 1.0.0
- * @see backdrop_get_region_content()
- */
-function drupal_get_region_content($region = NULL, $delimiter = ' ') {
-  return backdrop_get_region_content($region, $delimiter);
-}
-
-/**
  * Gets the name of the currently active installation profile.
  *
  * @deprecated since 1.0.0
@@ -1339,6 +1319,7 @@ function drupal_render_cid_create($elements) {
  * @see backdrop_sort()
  */
 function element_sort_by_title($a, $b) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   $a_title = (is_array($a) && isset($a['#title'])) ? $a['#title'] : '';
   $b_title = (is_array($b) && isset($b['#title'])) ? $b['#title'] : '';
   return strnatcasecmp($a_title, $b_title);
@@ -1351,6 +1332,7 @@ function element_sort_by_title($a, $b) {
  * @see backdrop_sort()
  */
 function element_sort($a, $b) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   $a_weight = (is_array($a) && isset($a['#weight'])) ? $a['#weight'] : 0;
   $b_weight = (is_array($b) && isset($b['#weight'])) ? $b['#weight'] : 0;
   if ($a_weight == $b_weight) {
@@ -1366,6 +1348,7 @@ function element_sort($a, $b) {
  * @see backdrop_sort()
  */
 function drupal_sort_weight($a, $b) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   $a_weight = (is_array($a) && isset($a['weight'])) ? $a['weight'] : 0;
   $b_weight = (is_array($b) && isset($b['weight'])) ? $b['weight'] : 0;
   if ($a_weight == $b_weight) {
@@ -1381,6 +1364,7 @@ function drupal_sort_weight($a, $b) {
  * @see backdrop_sort()
  */
 function drupal_sort_title($a, $b) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   if (!isset($b['title'])) {
     return -1;
   }
@@ -1397,6 +1381,7 @@ function drupal_sort_title($a, $b) {
  * @see backdrop_array_get_nested_value()
  */
 function &drupal_array_get_nested_value(array &$array, array $parents, &$key_exists = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_array_get_nested_value($array, $parents, $key_exists);
 }
 
@@ -1407,6 +1392,7 @@ function &drupal_array_get_nested_value(array &$array, array $parents, &$key_exi
  * @see backdrop_array_set_nested_value()
  */
 function drupal_array_set_nested_value(array &$array, array $parents, $value, $force = FALSE) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_array_set_nested_value($array, $parents, $value, $force);
 }
 
@@ -1417,6 +1403,7 @@ function drupal_array_set_nested_value(array &$array, array $parents, $value, $f
  * @see backdrop_array_unset_nested_value()
  */
 function drupal_array_unset_nested_value(array &$array, array $parents, &$key_existed = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_array_unset_nested_value($array, $parents, $key_existed);
 }
 
@@ -1427,6 +1414,7 @@ function drupal_array_unset_nested_value(array &$array, array $parents, &$key_ex
  * @see backdrop_array_nested_key_exists()
  */
 function drupal_array_nested_key_exists(array $array, array $parents) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_array_nested_key_exists($array, $parents);
 }
 
@@ -1437,6 +1425,7 @@ function drupal_array_nested_key_exists(array $array, array $parents) {
  * @see backdrop_common_theme()
  */
 function drupal_common_theme() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_common_theme();
 }
 
@@ -1447,6 +1436,7 @@ function drupal_common_theme() {
  * @see backdrop_install_schema()
  */
 function drupal_install_schema($module) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_install_schema($module);
 }
 
@@ -1457,6 +1447,7 @@ function drupal_install_schema($module) {
  * @see backdrop_uninstall_schema()
  */
 function drupal_uninstall_schema($module) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_uninstall_schema($module);
 }
 
@@ -1467,6 +1458,7 @@ function drupal_uninstall_schema($module) {
  * @see backdrop_get_schema_unprocessed()
  */
 function drupal_get_schema_unprocessed($module, $table = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_get_schema_unprocessed($module, $table);
 }
 
@@ -1477,6 +1469,7 @@ function drupal_get_schema_unprocessed($module, $table = NULL) {
  * @see backdrop_schema_fields_sql()
  */
 function drupal_schema_fields_sql($table, $prefix = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_schema_fields_sql($table, $prefix);
 }
 
@@ -1487,6 +1480,7 @@ function drupal_schema_fields_sql($table, $prefix = NULL) {
  * @see backdrop_write_record()
  */
 function drupal_write_record($table, &$record, $primary_keys = array()) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_write_record($table, $record, $primary_keys);
 }
 
@@ -1497,6 +1491,7 @@ function drupal_write_record($table, &$record, $primary_keys = array()) {
  * @see backdrop_parse_info_file()
  */
 function drupal_parse_info_file($filename, $process_sections = FALSE) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_parse_info_file($filename, $process_sections);
 }
 
@@ -1507,6 +1502,7 @@ function drupal_parse_info_file($filename, $process_sections = FALSE) {
  * @see backdrop_parse_info_format()
  */
 function drupal_parse_info_format($data, $process_sections = FALSE) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_parse_info_format($data, $process_sections);
 }
 
@@ -1517,6 +1513,7 @@ function drupal_parse_info_format($data, $process_sections = FALSE) {
  * @see backdrop_explode_tags()
  */
 function drupal_explode_tags($tags) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_explode_tags($tags);
 }
 
@@ -1527,6 +1524,7 @@ function drupal_explode_tags($tags) {
  * @see backdrop_implode_tags()
  */
 function drupal_implode_tags($tags) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_implode_tags($tags);
 }
 
@@ -1537,6 +1535,7 @@ function drupal_implode_tags($tags) {
  * @see backdrop_flush_all_caches()
  */
 function drupal_flush_all_caches() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_flush_all_caches();
 }
 
@@ -1547,6 +1546,7 @@ function drupal_flush_all_caches() {
  * @see backdrop_parse_dependency()
  */
 function drupal_parse_dependency($dependency) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_parse_dependency($dependency);
 }
 
@@ -1557,6 +1557,7 @@ function drupal_parse_dependency($dependency) {
  * @see backdrop_check_incompatibility()
  */
 function drupal_check_incompatibility($v, $current_version) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_check_incompatibility($v, $current_version);
 }
 
@@ -1567,6 +1568,7 @@ function drupal_check_incompatibility($v, $current_version) {
  * @see backdrop_get_updaters()
  */
 function drupal_get_updaters() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_get_updaters();
 }
 
@@ -1577,6 +1579,7 @@ function drupal_get_updaters() {
  * @see backdrop_get_filetransfer_info()
  */
 function drupal_get_filetransfer_info() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_get_filetransfer_info();
 }
 
@@ -1586,6 +1589,7 @@ function drupal_get_filetransfer_info() {
  * @deprecated since 1.0.0
  */
 function format_username($account) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return user_format_name($account);
 }
 
@@ -1598,6 +1602,7 @@ function format_username($account) {
  * @see backdrop_error_levels()
  */
 function drupal_error_levels() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_error_levels();
 }
 
@@ -1610,6 +1615,7 @@ function drupal_error_levels() {
  * @see backdrop_move_uploaded_file()
  */
 function drupal_move_uploaded_file($filename, $uri) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_move_uploaded_file($filename, $uri);
 }
 
@@ -1620,6 +1626,7 @@ function drupal_move_uploaded_file($filename, $uri) {
  * @see backdrop_chmod()
  */
 function drupal_chmod($uri, $mode = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_chmod($uri, $mode);
 }
 
@@ -1630,6 +1637,7 @@ function drupal_chmod($uri, $mode = NULL) {
  * @see backdrop_unlink()
  */
 function drupal_unlink($uri, $context = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_unlink($uri, $context);
 }
 
@@ -1640,6 +1648,7 @@ function drupal_unlink($uri, $context = NULL) {
  * @see backdrop_realpath()
  */
 function drupal_realpath($uri) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_realpath($uri);
 }
 
@@ -1650,6 +1659,7 @@ function drupal_realpath($uri) {
  * @see backdrop_dirname()
  */
 function drupal_dirname($uri) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_dirname($uri);
 }
 
@@ -1660,6 +1670,7 @@ function drupal_dirname($uri) {
  * @see backdrop_basename()
  */
 function drupal_basename($uri, $suffix = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_basename($uri, $suffix);
 }
 
@@ -1670,6 +1681,7 @@ function drupal_basename($uri, $suffix = NULL) {
  * @see backdrop_mkdir()
  */
 function drupal_mkdir($uri, $mode = NULL, $recursive = FALSE, $context = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_mkdir($uri, $mode, $recursive, $context);
 }
 
@@ -1680,6 +1692,7 @@ function drupal_mkdir($uri, $mode = NULL, $recursive = FALSE, $context = NULL) {
  * @see backdrop_rmdir()
  */
 function drupal_rmdir($uri, $context = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_rmdir($uri, $context);
 }
 
@@ -1690,6 +1703,7 @@ function drupal_rmdir($uri, $context = NULL) {
  * @see backdrop_tempnam()
  */
 function drupal_tempnam($directory, $prefix) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_tempnam($directory, $prefix);
 }
 
@@ -1699,6 +1713,7 @@ function drupal_tempnam($directory, $prefix) {
  * @deprecated since 1.0.0
  */
 function file_create_htaccess($directory, $private = TRUE, $force_overwrite = FALSE) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   file_save_htaccess($directory, $private, $force_overwrite);
 }
 
@@ -1711,6 +1726,7 @@ function file_create_htaccess($directory, $private = TRUE, $force_overwrite = FA
  * @see backdrop_get_form()
  */
 function drupal_get_form() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   $args = func_get_args(); // pass $args to form function
   return call_user_func_array('backdrop_get_form', $args);
 }
@@ -1722,6 +1738,7 @@ function drupal_get_form() {
  * @see backdrop_build_form()
  */
 function drupal_build_form($form_id, &$form_state) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_build_form($form_id, $form_state);
 }
 
@@ -1732,6 +1749,7 @@ function drupal_build_form($form_id, &$form_state) {
  * @see backdrop_rebuild_form()
  */
 function drupal_rebuild_form($form_id, &$form_state, $old_form = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_rebuild_form($form_id, $form_state, $old_form);
 }
 
@@ -1742,6 +1760,7 @@ function drupal_rebuild_form($form_id, &$form_state, $old_form = NULL) {
  * @see backdrop_form_submit()
  */
 function drupal_form_submit($form_id, &$form_state) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_form_submit($form_id, $form_state);
 }
 
@@ -1752,6 +1771,7 @@ function drupal_form_submit($form_id, &$form_state) {
  * @see backdrop_retrieve_form()
  */
 function drupal_retrieve_form($form_id, &$form_state) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_retrieve_form($form_id, $form_state);
 }
 
@@ -1762,6 +1782,7 @@ function drupal_retrieve_form($form_id, &$form_state) {
  * @see backdrop_process_form()
  */
 function drupal_process_form($form_id, &$form, &$form_state) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_process_form($form_id, $form, $form_state);
 }
 
@@ -1772,6 +1793,7 @@ function drupal_process_form($form_id, &$form, &$form_state) {
  * @see backdrop_prepare_form()
  */
 function drupal_prepare_form($form_id, &$form, &$form_state) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_prepare_form($form_id, $form, $form_state);
 }
 
@@ -1782,6 +1804,7 @@ function drupal_prepare_form($form_id, &$form, &$form_state) {
  * @see backdrop_validate_form()
  */
 function drupal_validate_form($form_id, &$form, &$form_state) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_validate_form($form_id, $form, $form_state);
 }
 
@@ -1792,6 +1815,7 @@ function drupal_validate_form($form_id, &$form, &$form_state) {
  * @see backdrop_redirect_form()
  */
 function drupal_redirect_form($form_state) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_redirect_form($form_state);
 }
 
@@ -1804,6 +1828,7 @@ function drupal_redirect_form($form_state) {
  * @see backdrop_depth_first_search()
  */
 function drupal_depth_first_search(&$graph) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_depth_first_search($graph);
 }
 
@@ -1816,6 +1841,7 @@ function drupal_depth_first_search(&$graph) {
  * @see install_backdrop()
  */
 function install_drupal() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   install_backdrop();
 }
 
@@ -1828,6 +1854,7 @@ function install_drupal() {
  * @see backdrop_load_updates()
  */
 function drupal_load_updates() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_load_updates();
 }
 
@@ -1838,6 +1865,7 @@ function drupal_load_updates() {
  * @see backdrop_get_schema_versions()
  */
 function drupal_get_schema_versions($module) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_get_schema_versions($module);
 }
 
@@ -1848,6 +1876,7 @@ function drupal_get_schema_versions($module) {
  * @see backdrop_get_installed_schema_version()
  */
 function drupal_get_installed_schema_version($module, $reset = FALSE, $array = FALSE) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_get_installed_schema_version($module, $reset, $array);
 }
 
@@ -1858,6 +1887,7 @@ function drupal_get_installed_schema_version($module, $reset = FALSE, $array = F
  * @see backdrop_set_installed_schema_version()
  */
 function drupal_set_installed_schema_version($module, $version) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_set_installed_schema_version($module, $version);
 }
 
@@ -1868,6 +1898,7 @@ function drupal_set_installed_schema_version($module, $version) {
  * @see backdrop_install_profile_distribution_name()
  */
 function drupal_install_profile_distribution_name() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_install_profile_distribution_name();
 }
 
@@ -1878,6 +1909,7 @@ function drupal_install_profile_distribution_name() {
  * @see backdrop_detect_baseurl()
  */
 function drupal_detect_baseurl($file = 'core/install.php') {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_detect_baseurl($file);
 }
 
@@ -1888,6 +1920,7 @@ function drupal_detect_baseurl($file = 'core/install.php') {
  * @see backdrop_load_database_driver()
  */
 function drupal_detect_database_types() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   $installer = backdrop_load_database_driver();
   return array('mysql' => $installer->name());
 }
@@ -1899,6 +1932,7 @@ function drupal_detect_database_types() {
  * @see backdrop_load_database_driver()
  */
 function drupal_get_database_types() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   $mysql = backdrop_load_database_driver();
   return array('mysql' => $mysql);
 }
@@ -1910,6 +1944,7 @@ function drupal_get_database_types() {
  * @see backdrop_rewrite_settings()
  */
 function drupal_rewrite_settings($settings = array()) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_rewrite_settings($settings);
 }
 
@@ -1920,6 +1955,7 @@ function drupal_rewrite_settings($settings = array()) {
  * @see backdrop_verify_profile()
  */
 function drupal_verify_profile($install_state) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_verify_profile($install_state);
 }
 
@@ -1930,6 +1966,7 @@ function drupal_verify_profile($install_state) {
  * @see backdrop_install_system()
  */
 function drupal_install_system() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_install_system();
 }
 
@@ -1940,6 +1977,7 @@ function drupal_install_system() {
  * @see backdrop_uninstall_modules()
  */
 function drupal_uninstall_modules($module_list = array(), $uninstall_dependents = TRUE) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_uninstall_modules($module_list, $uninstall_dependents);
 }
 
@@ -1950,6 +1988,7 @@ function drupal_uninstall_modules($module_list = array(), $uninstall_dependents 
  * @see backdrop_verify_install_file()
  */
 function drupal_verify_install_file($file, $mask = NULL, $type = 'file') {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_verify_install_file($file, $mask, $type);
 }
 
@@ -1960,6 +1999,7 @@ function drupal_verify_install_file($file, $mask = NULL, $type = 'file') {
  * @see backdrop_install_mkdir()
  */
 function drupal_install_mkdir($file, $mask, $message = TRUE) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_install_mkdir($file, $mask, $message);
 }
 
@@ -1970,6 +2010,7 @@ function drupal_install_mkdir($file, $mask, $message = TRUE) {
  * @see backdrop_current_script_url()
  */
 function drupal_current_script_url($query = array()) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_current_script_url($query);
 }
 
@@ -1980,6 +2021,7 @@ function drupal_current_script_url($query = array()) {
  * @see backdrop_requirements_url()
  */
 function drupal_requirements_url($severity) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_requirements_url($severity);
 }
 
@@ -1990,6 +2032,7 @@ function drupal_requirements_url($severity) {
  * @see backdrop_check_profile()
  */
 function drupal_check_profile($profile) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_check_profile($profile);
 }
 
@@ -2000,6 +2043,7 @@ function drupal_check_profile($profile) {
  * @see backdrop_requirements_severity()
  */
 function drupal_requirements_severity(&$requirements) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_requirements_severity($requirements);
 }
 
@@ -2010,6 +2054,7 @@ function drupal_requirements_severity(&$requirements) {
  * @see backdrop_check_module()
  */
 function drupal_check_module($module) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_check_module($module);
 }
 
@@ -2022,6 +2067,7 @@ function drupal_check_module($module) {
  * @see backdrop_mail()
  */
 function drupal_mail($module, $key, $to, $language, $params = array(), $from = NULL, $send = TRUE) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_mail($module, $key, $to, $language, $params, $from, $send);
 }
 
@@ -2032,6 +2078,7 @@ function drupal_mail($module, $key, $to, $language, $params = array(), $from = N
  * @see backdrop_mail_system()
  */
 function drupal_mail_system($module, $key) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_mail_system($module, $key);
 }
 
@@ -2042,6 +2089,7 @@ function drupal_mail_system($module, $key) {
  * @see backdrop_wrap_mail()
  */
 function drupal_wrap_mail($text, $indent = '') {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_wrap_mail($text, $indent);
 }
 
@@ -2052,6 +2100,7 @@ function drupal_wrap_mail($text, $indent = '') {
  * @see backdrop_html_to_text()
  */
 function drupal_html_to_text($string, $allowed_tags = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_html_to_text($string, $allowed_tags);
 }
 
@@ -2064,6 +2113,7 @@ function drupal_html_to_text($string, $allowed_tags = NULL) {
  * @see backdrop_required_modules()
  */
 function drupal_required_modules() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_required_modules();
 }
 
@@ -2074,6 +2124,7 @@ function drupal_required_modules() {
  * @see backdrop_alter()
  */
 function drupal_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$context3 = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_alter($type, $data, $context1, $context2, $context3);
 }
 
@@ -2086,6 +2137,7 @@ function drupal_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$con
  * @see backdrop_path_initialize()
  */
 function drupal_path_initialize() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_path_initialize();
 }
 
@@ -2096,6 +2148,7 @@ function drupal_path_initialize() {
  * @see backdrop_lookup_path()
  */
 function drupal_lookup_path($action, $path = '', $langcode = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_lookup_path($action, $path, $langcode);
 }
 
@@ -2106,6 +2159,7 @@ function drupal_lookup_path($action, $path = '', $langcode = NULL) {
  * @see backdrop_cache_system_paths()
  */
 function drupal_cache_system_paths() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_cache_system_paths();
 }
 
@@ -2116,6 +2170,7 @@ function drupal_cache_system_paths() {
  * @see backdrop_get_path_alias()
  */
 function drupal_get_path_alias($path = NULL, $langcode = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_get_path_alias($path, $langcode);
 }
 
@@ -2126,6 +2181,7 @@ function drupal_get_path_alias($path = NULL, $langcode = NULL) {
  * @see backdrop_get_normal_path()
  */
 function drupal_get_normal_path($path, $langcode = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_get_normal_path($path, $langcode);
 }
 
@@ -2136,6 +2192,7 @@ function drupal_get_normal_path($path, $langcode = NULL) {
  * @see backdrop_is_front_page()
  */
 function drupal_is_front_page() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_is_front_page();
 }
 
@@ -2146,6 +2203,7 @@ function drupal_is_front_page() {
  * @see backdrop_match_path()
  */
 function drupal_match_path($path, $patterns) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_match_path($path, $patterns);
 }
 
@@ -2155,6 +2213,7 @@ function drupal_match_path($path, $patterns) {
  * @deprecated since 1.0.0
  */
 function drupal_path_alias_whitelist_rebuild($source = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return array();
 }
 
@@ -2165,6 +2224,7 @@ function drupal_path_alias_whitelist_rebuild($source = NULL) {
  * @see backdrop_valid_path()
  */
 function drupal_valid_path($path, $dynamic_allowed = FALSE) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_valid_path($path, $dynamic_allowed);
 }
 
@@ -2175,6 +2235,7 @@ function drupal_valid_path($path, $dynamic_allowed = FALSE) {
  * @see backdrop_clear_path_cache()
  */
 function drupal_clear_path_cache($source = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_clear_path_cache($source);
 }
 
@@ -2187,6 +2248,7 @@ function drupal_clear_path_cache($source = NULL) {
  * @see backdrop_session_initialize()
  */
 function drupal_session_initialize() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_session_initialize();
 }
 
@@ -2197,6 +2259,7 @@ function drupal_session_initialize() {
  * @see backdrop_session_start()
  */
 function drupal_session_start() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_session_start();
 }
 
@@ -2207,6 +2270,7 @@ function drupal_session_start() {
  * @see backdrop_session_commit()
  */
 function drupal_session_commit() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_session_commit();
 }
 
@@ -2217,6 +2281,7 @@ function drupal_session_commit() {
  * @see backdrop_session_started()
  */
 function drupal_session_started($set = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_session_started($set);
 }
 
@@ -2227,6 +2292,7 @@ function drupal_session_started($set = NULL) {
  * @see backdrop_session_regenerate()
  */
 function drupal_session_regenerate() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_session_regenerate();
 }
 
@@ -2237,6 +2303,7 @@ function drupal_session_regenerate() {
  * @see backdrop_session_destroy_uid()
  */
 function drupal_session_destroy_uid($uid) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_session_destroy_uid($uid);
 }
 
@@ -2247,6 +2314,7 @@ function drupal_session_destroy_uid($uid) {
  * @see backdrop_save_session()
  */
 function drupal_save_session($status = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_save_session($status);
 }
 
@@ -2259,6 +2327,7 @@ function drupal_save_session($status = NULL) {
  * @see backdrop_theme_access()
  */
 function drupal_theme_access($theme) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_theme_access($theme);
 }
 
@@ -2269,6 +2338,7 @@ function drupal_theme_access($theme) {
  * @see backdrop_theme_initialize()
  */
 function drupal_theme_initialize() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_theme_initialize();
 }
 
@@ -2279,6 +2349,7 @@ function drupal_theme_initialize() {
  * @see backdrop_theme_rebuild()
  */
 function drupal_theme_rebuild() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_theme_rebuild();
 }
 
@@ -2289,6 +2360,7 @@ function drupal_theme_rebuild() {
  * @see backdrop_find_base_themes()
  */
 function drupal_find_base_themes($themes, $key, $used_keys = array()) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_find_base_themes($themes, $key, $used_keys);
 }
 
@@ -2299,6 +2371,7 @@ function drupal_find_base_themes($themes, $key, $used_keys = array()) {
  * @see backdrop_find_theme_functions()
  */
 function drupal_find_theme_functions($cache, $prefixes) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_find_theme_functions($cache, $prefixes);
 }
 
@@ -2309,6 +2382,7 @@ function drupal_find_theme_functions($cache, $prefixes) {
  * @see backdrop_find_theme_templates()
  */
 function drupal_find_theme_templates($cache, $extension, $path) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_find_theme_templates($cache, $extension, $path);
 }
 
@@ -2321,6 +2395,7 @@ function drupal_find_theme_templates($cache, $extension, $path) {
  * @see backdrop_xml_parser_create()
  */
 function drupal_xml_parser_create(&$data) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_xml_parser_create($data);
 }
 
@@ -2331,6 +2406,7 @@ function drupal_xml_parser_create(&$data) {
  * @see backdrop_convert_to_utf8()
  */
 function drupal_convert_to_utf8($data, $encoding) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_convert_to_utf8($data, $encoding);
 }
 
@@ -2341,6 +2417,7 @@ function drupal_convert_to_utf8($data, $encoding) {
  * @see backdrop_truncate_bytes()
  */
 function drupal_truncate_bytes($string, $len) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_truncate_bytes($string, $len);
 }
 
@@ -2351,6 +2428,7 @@ function drupal_truncate_bytes($string, $len) {
  * @see backdrop_strlen()
  */
 function drupal_strlen($text) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_strlen($text);
 }
 
@@ -2361,6 +2439,7 @@ function drupal_strlen($text) {
  * @see backdrop_strtoupper()
  */
 function drupal_strtoupper($text) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_strtoupper($text);
 }
 
@@ -2371,6 +2450,7 @@ function drupal_strtoupper($text) {
  * @see backdrop_strtolower()
  */
 function drupal_strtolower($text) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_strtolower($text);
 }
 
@@ -2381,6 +2461,7 @@ function drupal_strtolower($text) {
  * @see backdrop_ucfirst()
  */
 function drupal_ucfirst($text) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_ucfirst($text);
 }
 
@@ -2391,6 +2472,7 @@ function drupal_ucfirst($text) {
  * @see backdrop_substr()
  */
 function drupal_substr($text, $start, $length = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_substr($text, $start, $length);
 }
 
@@ -2403,6 +2485,7 @@ function drupal_substr($text, $start, $length = NULL) {
  * @see backdrop_var_export()
  */
 function drupal_var_export($var, $prefix = '') {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_var_export($var, $prefix);
 }
 
@@ -2416,6 +2499,7 @@ function drupal_var_export($var, $prefix = '') {
  * @deprecated since 1.0.0
  */
 function node_types_rebuild() {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   node_type_cache_reset();
 }
 
@@ -2440,6 +2524,7 @@ function node_types_rebuild() {
  * @deprecated since 1.0.0
  */
 function system_settings_form($form) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
 
@@ -2468,6 +2553,7 @@ function system_settings_form($form) {
  * @deprecated since 1.0.0
  */
 function system_settings_form_submit($form, &$form_state) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   form_state_values_clean($form_state);
 
   foreach ($form_state['values'] as $key => $value) {
@@ -2488,6 +2574,7 @@ function system_settings_form_submit($form, &$form_state) {
  * @deprecated since 1.0.0
  */
 function system_get_date_types($type = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
   $formats = system_get_date_formats($type);
 
   if ($type) {

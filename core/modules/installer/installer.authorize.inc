@@ -66,17 +66,19 @@ function installer_authorize_run_update($filetransfer, $projects) {
  *   The canonical project short name (e.g., {system}.name).
  * @param string $updater_name
  *   The name of the Updater class to use for installing this project.
- * @param string $local_url
- *   The URL to the locally installed temp directory where the project has
+ * @param string $project_realpath
+ *   The path to the locally installed temp directory where the project has
  *   already been downloaded and extracted into.
+ * @param string|FALSE $redirect_callback
+ *   Callback to handle the redirection to the authorize.php file.
  */
-function installer_authorize_run_install($filetransfer, $project, $updater_name, $local_url) {
+function installer_authorize_run_install($filetransfer, $project, $updater_name, $project_realpath, $redirect_callback = 'backdrop_goto') {
   $operations[] = array(
     'installer_authorize_batch_copy_project',
     array(
       $project,
       $updater_name,
-      $local_url,
+      $project_realpath,
       $filetransfer,
     ),
   );
@@ -93,7 +95,7 @@ function installer_authorize_run_install($filetransfer, $project, $updater_name,
   batch_set($batch);
 
   // Invoke the batch via authorize.php.
-  system_authorized_batch_process();
+  system_authorized_batch_process($redirect_callback);
 }
 
 /**
@@ -103,15 +105,15 @@ function installer_authorize_run_install($filetransfer, $project, $updater_name,
  *   The canonical short name of the project being installed.
  * @param string $updater_name
  *   The name of the Updater class to use for installing this project.
- * @param string $local_url
- *   The URL to the locally installed temp directory where the project has
+ * @param string $project_realpath
+ *   The path to the locally installed temp directory where the project has
  *   already been downloaded and extracted into.
  * @param FileTransfer $filetransfer
  *   The FileTransfer object to use for performing this operation.
  * @param array $context
  *   Reference to an array used for Batch API storage.
  */
-function installer_authorize_batch_copy_project($project, $updater_name, $local_url, $filetransfer, &$context) {
+function installer_authorize_batch_copy_project($project, $updater_name, $project_realpath, $filetransfer, &$context) {
 
   // Initialize some variables in the Batch API $context array.
   if (!isset($context['results']['log'])) {
@@ -140,7 +142,7 @@ function installer_authorize_batch_copy_project($project, $updater_name, $local_
   }
 
   /* @var Updater $updater */
-  $updater = new $updater_name($local_url);
+  $updater = new $updater_name($project_realpath);
 
   try {
     if ($updater->isInstalled()) {

@@ -423,7 +423,7 @@ Backdrop.ajax.prototype.beforeSend = function (jqXHR, options) {
 
   // Disable the element that received the change to prevent user interface
   // interaction while the Ajax request is in progress.
-  if (options.disable !== false) {
+  if (this.disable !== false) {
     $(this.element).addClass('progress-disabled').prop('disabled', true);
   }
 
@@ -502,7 +502,9 @@ Backdrop.ajax.prototype.cleanUp = function (jqXHR) {
   }
 
   // Reactivate the triggering element.
-  $(this.element).removeClass('progress-disabled').prop('disabled', false);
+  if (this.disable !== false) {
+    $(this.element).removeClass('progress-disabled').prop('disabled', false);
+  }
 };
 
 /**

@@ -310,7 +310,7 @@ function update_info_page() {
   $output .= "</ol>\n";
   $output .= "<p>When you have performed the above steps you may proceed.</p>\n";
   $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
-  $output .= '<form method="post" action="' . $form_action . '"><p><input type="submit" value="Continue" class="form-submit" /></p></form>';
+  $output .= '<form method="post" action="' . $form_action . '"><p><input type="submit" value="Continue" class="form-submit button-primary" /></p></form>';
   $output .= "\n";
   return $output;
 }
@@ -361,7 +361,12 @@ function update_access_allowed() {
 /**
  * Adds the update task list to the current page.
  */
-function update_task_list($active = NULL) {
+function update_task_list($set_active = NULL) {
+  static $active;
+  if ($set_active) {
+    $active = $set_active;
+  }
+
   // Default list of tasks.
   $tasks = array(
     'requirements' => 'Verify requirements',
@@ -371,7 +376,7 @@ function update_task_list($active = NULL) {
     'finished' => 'Review log',
   );
 
-  backdrop_add_region_content('sidebar_first', theme('task_list', array('items' => $tasks, 'active' => $active)));
+  return theme('task_list', array('items' => $tasks, 'active' => $active));
 }
 
 /**
@@ -402,11 +407,11 @@ function update_check_requirements($skip_warnings = FALSE) {
   // If there are errors, always display them. If there are only warnings, skip
   // them if the caller has indicated they should be skipped.
   if ($severity == REQUIREMENT_ERROR || ($severity == REQUIREMENT_WARNING && !$skip_warnings)) {
-    update_task_list('requirements');
     backdrop_set_title('Requirements problem');
+    $task_list = update_task_list('requirements');
     $status_report = theme('status_report', array('requirements' => $requirements));
     $status_report .= 'Check the messages and <a href="' . check_url(backdrop_requirements_url($severity)) . '">try again</a>.';
-    print theme('update_page', array('content' => $status_report));
+    print theme('update_page', array('content' => $status_report, 'sidebar' => $task_list));
     exit();
   }
 }
@@ -540,5 +545,6 @@ if (isset($output) && $output) {
   backdrop_session_start();
   // We defer the display of messages until all updates are done.
   $progress_page = ($batch = batch_get()) && isset($batch['running']);
-  print theme('update_page', array('content' => $output, 'show_messages' => !$progress_page));
+  $task_list = update_task_list();
+  print theme('update_page', array('content' => $output, 'sidebar' => $task_list, 'show_messages' => !$progress_page));
 }

@@ -24,9 +24,12 @@ class EntityLayoutContext extends LayoutContext {
 
   function label() {
     $info = entity_get_info($this->entity_type);
+    // @todo: Contexts do not yet have settings to make this possible. Once
+    // the ability to add manual contexts (e.g. an arbitrary node), then this
+    // will actually do something.
     if (isset($this->settings['id'])) {
       if ($entity = entity_load($this->entity_type, $this->settings['id'])) {
-        return t('@type: @nid (@title)', array('@type' => $info['label'], '@id' => $entity->id(), '@title' => $entity->label()));
+        return t('@type: @id (@title)', array('@type' => $info['label'], '@id' => $entity->id(), '@title' => $entity->label()));
       }
       else {
         return t('Unknown @type: @id', array('@type' => $info['label'], '@id' =>$this->settings['id']));

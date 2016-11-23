@@ -446,6 +446,72 @@ Backdrop.ajaxError = function (xmlhttp, uri, customMessage) {
   return message;
 };
 
+/**
+ * Run a callback after the given font has been loaded.
+ *
+ * If the font is already loaded, the callback will be executed immediately.
+ *
+ * @param fontName
+ *   Font name as shown in CSS.
+ * @param callback
+ *   Function to run once font has loaded.
+ *
+ * @since 1.4.5
+ */
+Backdrop.isFontLoaded = function(fontName, callback) {
+  if (typeof fontName === 'undefined') {
+    return false;
+  }
+
+  if (typeof Backdrop.fontsLoaded[fontName] === 'undefined') {
+    Backdrop.fontsLoaded[fontName] = false;
+  }
+  else if (Backdrop.fontsLoaded[fontName]) {
+    // Fonts loaded, run the callback and don't run anything else.
+    if (typeof callback !== 'undefined') {
+      callback();
+    }
+    return true;
+  }
+
+  var $body = $('body');
+  var checkFontCounter = 0;
+  // Append an invisible element that will be monospace font or our desired
+  // font. We're using a repeating i because the characters width will
+  // drastically change when it's monospace vs. proportional font.
+  var $checkFontElement = $('<span id="check-font" style="font-family: \'' + fontName + '\', monospace;">iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii</span>');
+  // Control is the same but it will always be our 'control' font, monospace.
+  var $checkFontElementControl = $checkFontElement.clone().attr('id', 'check-font-control').css('font-family', 'monospace');
+  var $checkFontElements = $('<span id="check-font-wrapper" aria-hidden="true" style="visibility: hidden; position: absolute; z-index: -100;"></span>').append($checkFontElement).append($checkFontElementControl);
+  $body.append($checkFontElements);
+
+  // Function to check the width of the font, if it's substantially different
+  // we'll know we our real font has loaded
+  function checkFont() {
+    var currentWidth = $checkFontElement.width();
+    var controlWidth = $checkFontElementControl.width();
+    if (controlWidth !== currentWidth || checkFontCounter >= 60) {
+      Backdrop.fontsLoaded[fontName] = true;
+      // If our font has loaded, or it's been 6 seconds
+      if (typeof callback !== 'undefined') {
+        callback();
+      }
+      // Clean up after ourselves
+      clearInterval(checkFontInterval);
+      $checkFontElements.remove();
+    }
+    checkFontCounter++;
+  }
+  var checkFontInterval = setInterval(checkFont, 100);
+
+  // If we got here, font is not yet loaded, but the callback will be fired
+  // when it is ready.
+  return false;
+};
+if (typeof Backdrop.fontsLoaded === 'undefined') {
+  Backdrop.fontsLoaded = {};
+}
+
 // Class indicating that JS is enabled; used for styling purpose.
 $('html').addClass('js');
 
@@ -492,10 +558,11 @@ Backdrop.theme.prototype = {
 Backdrop.featureDetect = {};
 
 /**
- * Flexbox feature detection
- * Testing for flex-wrap as it's typically most important in flexbox layouts
+ * Tests for flex-wrap as it's typically most important in flexbox layouts.
  *
- * @return {boolean} True if browser supports flex-wrap
+ * @return {boolean} True if browser supports flex-wrap.
+ *
+ * @since 1.4.4
  */
 Backdrop.featureDetect.flexbox = function() {
   var $body = $('body'),
@@ -518,7 +585,62 @@ Backdrop.featureDetect.flexbox = function() {
       return false;
     }
   }
+};
 
-}
+/**
+ * Resource friendly window resize function
+ * Groups all window resize functions and runs them only when a frame comes up
+ * From: developer.mozilla.org/en-US/docs/Web/Events/resize#requestAnimationFrame_customEvent
+ *
+ * Example use:
+ * @code
+ *   Backdrop.optimizedResize.add(function() {
+ *     console.log('Smooth AND resource effecient!');
+ *   });
+ * @endcode
+ */
+Backdrop.optimizedResize = (function() {
+  // Set defaults
+  var callbacks = [],
+    running = false;
+
+  // Fired on resize event
+  function resize() {
+    if (!running) {
+      running = true;
+      // Provide setTimeout fallback to old browsers
+      if (window.requestAnimationFrame) {
+        window.requestAnimationFrame(runCallbacks);
+      } else {
+        setTimeout(runCallbacks, 66);
+      }
+    }
+  }
+
+  // Run the actual callbacks
+  function runCallbacks() {
+    callbacks.forEach(function(callback) {
+      callback();
+    });
+    running = false;
+  }
+
+  // Adds callback to loop
+  function addCallback(callback) {
+    if (callback) {
+      callbacks.push(callback);
+    }
+  }
+
+  return {
+    // Public method to add additional callback
+    add: function(callback) {
+      if (!callbacks.length) {
+        window.addEventListener('resize', resize);
+      }
+      addCallback(callback);
+    }
+  }
+}());
 
 })(jQuery);

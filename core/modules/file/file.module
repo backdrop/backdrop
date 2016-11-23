@@ -22,6 +22,7 @@ function file_menu() {
   );
   $items['file/progress'] = array(
     'page callback' => 'file_ajax_progress',
+    'delivery callback' => 'backdrop_json_deliver',
     'access arguments' => array('access content'),
     'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,
@@ -295,8 +296,8 @@ function file_ajax_progress($key) {
     }
   }
 
-  backdrop_json_output($progress);
-  backdrop_exit();
+  // Displayed as JSON by delivery callback backdrop_json_deliver().
+  return $progress;
 }
 
 /**

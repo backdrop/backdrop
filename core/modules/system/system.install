@@ -177,6 +177,12 @@ function system_requirements($phase) {
     );
   }
 
+  // Test database-specific multi-byte UTF-8 related requirements.
+  $charset_requirements = _system_check_db_utf8mb4_requirements($phase);
+  if (!empty($charset_requirements)) {
+    $requirements['database_charset'] = $charset_requirements;
+  }
+
   // Test PHP memory_limit
   $memory_limit = ini_get('memory_limit');
   $requirements['php_memory_limit'] = array(
@@ -538,7 +544,103 @@ function system_requirements($phase) {
       );
     }
   }
+  
+  if ($phase == 'runtime') {
+    // Inform user about status of display error messages.
+    $error_level = config_get('system.core', 'error_level');
+    $description_start = $t('Backdrop CMS provides the ability to display error messages, which can be useful while a site is in development.');
+    $logging_url = base_path() . 'admin/config/development/logging';
+    if ($error_level != ERROR_REPORTING_HIDE) {
+      $value =  $t('Enabled');
+      $severity =  REQUIREMENT_WARNING;
+      $description = $description_start . ' ' . $t('Do not forget to <a href="@error_level">disable the display of errors</a> when you have finished testing and this site goes live.', array('@error_level' => $logging_url));
+    }
+    else {
+      $value =  $t('Disabled');
+      $severity =  REQUIREMENT_OK;
+      $description = $description_start . ' ' . $t('If your site is in development, you might want to <a href="@error_level">enable the display of errors</a>.', array('@error_level' => $logging_url));
+    }
 
+    $requirements['error_level'] = array(
+      'title' => $t('Display error messages'),
+      'value' => $value,
+      'severity' => $severity,
+      'description' => $description,
+    );
+  }
+
+  return $requirements;
+}
+
+/**
+ * Checks whether the requirements for multi-byte UTF-8 support are met.
+ *
+ * @param string $phase
+ *   The hook_requirements() stage.
+ *
+ * @return array
+ *   A requirements array with the result of the charset check.
+ */
+function _system_check_db_utf8mb4_requirements($phase) {
+  global $install_state;
+  // In the requirements check of the installer, skip the utf8mb4 check unless
+  // the database connection info has been preconfigured by hand with valid
+  // information before running the installer, as otherwise we cannot get a
+  // valid database connection object.
+  if (isset($install_state['settings_verified']) && !$install_state['settings_verified']) {
+    return array();
+  }
+
+  $connection = Database::getConnection();
+  $t = get_t();
+  $requirements['title'] = $t('Database system 4 bit UTF-8 support');
+
+  $utf8mb4_active = $connection->utf8mb4IsActive();
+  $utf8mb4_supported = $connection->utf8mb4IsSupported();
+  $documentation_url = 'https://api.backdropcms.org/database-configuration';
+  $upgrade_path = 'admin/config/development/utf8mb4-upgrade';
+
+  $requirements['description'] = $t('4 bit UTF-8 support enables extended characters to be saved into the database, including emojis, Asian symbols and mathematical symbols.');
+
+  if ($utf8mb4_active) {
+    if ($utf8mb4_supported) {
+      if ($phase != 'install' && !state_get('database_utf8mb4_active', FALSE)) {
+        // Supported, active, and configurable, but not all database tables
+        // have been converted yet.
+        $requirements['value'] = l($t('Database tables need conversion'), $upgrade_path);
+        $requirements['description'] .= ' ' . $t('Your server supports this feature but not all tables have been converted to use it.');
+        if ($_GET['q'] !== $upgrade_path) {
+          $requirements['description'] .= ' ' . $t('After making a database backup, you should <a href="@url">convert existing tables</a>.', array('@url' => url($upgrade_path)));
+        }
+        $requirements['severity'] = REQUIREMENT_ERROR;
+      }
+      else {
+        // Supported, active.
+        $requirements['value'] = $t('Enabled');
+        $requirements['severity'] = REQUIREMENT_OK;
+      }
+    }
+    else {
+      // Not supported, active.
+      $requirements['value'] = $t('Not supported');
+      $requirements['description'] .= ' ' . $t('This feature is enabled, but not supported on your system. Please turn this off in settings.php, or ensure that all database-related requirements are met. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
+      $requirements['severity'] = REQUIREMENT_ERROR;
+    }
+  }
+  else {
+    if ($utf8mb4_supported) {
+      // Supported, not active.
+      $requirements['value'] = $t('Not enabled');
+      $requirements['description'] .= ' ' . $t('This feature is not enabled, but it is supported on your system. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
+      $requirements['severity'] = REQUIREMENT_INFO;
+    }
+    else {
+      // Not supported, not active.
+      $requirements['value'] = $t('Not available');
+      $requirements['description'] .= ' ' . $t('This feature is not supported on your system. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
+      $requirements['severity'] = REQUIREMENT_INFO;
+    }
+  }
   return $requirements;
 }
 
@@ -2809,6 +2911,44 @@ function system_update_1056() {
   if ($limit = $config->get('row_limit')) {
     $config->set('log_row_limit', $limit);
     $config->clear('row_limit');
+    $config->save();
+  }
+}
+
+/**
+ * Add default for watchdog_enabled_severity_levels.
+ */
+function system_update_1057() {
+  $config = config('system.core');
+  $config->set('watchdog_enabled_severity_levels', array(0, 1, 2, 3, 4, 5, 6));
+  $config->save();
+}
+
+/**
+ * Clarify state "menu_expanded" as "menus_containing_expanded_items".
+ */
+function system_update_1058() {
+  state_set('menus_containing_expanded_items', state_get('menu_expanded'));
+  state_del('menu_expanded');
+}
+
+/**
+ * Set home page menu to render as a drop-down menu.
+ */
+function system_update_1059() {
+  $config = config('layout.layout.home');
+  // Only apply this update if the config file already exists.
+  if (!$config->isNew()) {
+    $content = $config->get('content');
+    foreach ($content as $uuid => $block_info) {
+      // If the main menu block is present and no style is set, set to dropdown.
+      if ($block_info['plugin'] == 'system:main-menu' && empty($block_info['data']['settings']['block_settings']['style'])) {
+        $content[$uuid]['data']['settings']['block_settings']['style'] = 'dropdown';
+        $content[$uuid]['data']['settings']['block_settings']['level'] = 1;
+        $content[$uuid]['data']['settings']['block_settings']['depth'] = 0;
+      }
+    }
+    $config->set('content', $content);
     $config->save();
   }
 }

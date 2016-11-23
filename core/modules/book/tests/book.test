@@ -48,6 +48,9 @@ class BookTestCase extends BackdropWebTestCase {
     $this->book_author = $this->backdropCreateUser(array('create new books', 'create book content', 'edit own book content', 'add content to books'));
     $this->web_user = $this->backdropCreateUser(array('node test view'));
     $this->admin_user = $this->backdropCreateUser(array('create new books', 'create book content', 'edit own book content', 'add content to books', 'administer layouts', 'administer permissions', 'administer book outlines', 'node test view'));
+
+    // Disable default path patterns for nodes.
+    config_set('path.settings', 'node_pattern', '');
   }
 
   /**
@@ -273,7 +276,7 @@ class BookTestCase extends BackdropWebTestCase {
 
     // Test correct display of the block.
     $nodes = $this->createBook();
-    $this->backdropGet('<front>');
+    $this->backdropGet('user');
     $this->assertText($block_title, 'Book navigation block is displayed.');
     $this->assertText($this->book->title, format_string('Link to book root (@title) is displayed.', array('@title' => $nodes[0]->title)));
     $this->assertNoText($nodes[0]->title, 'No links to individual book pages are displayed.');

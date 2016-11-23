@@ -492,7 +492,7 @@ function redirect_element_validate_source($element, &$form_state) {
     // Check if this is an alias.
     $alias = path_load(array('alias' => $parsed_value['path']));
     if ($alias) {
-      $form_state['storage']['override_messages']['existing-alias'] = t('The source path !path is an existing alias. You may prefer to <a href="@url-alias">edit this URL alias</a> rather than using a redirect.', array('!path' => '<em>' . l($parsed_value['path'], $parsed_value['path']) . '</em>', '@url-alias' => url('admin/config/search/path/edit/' . $alias['pid'])));
+      $form_state['storage']['override_messages']['existing-alias'] = t('The source path !path is an existing URL alias. You may prefer to <a href="@url-alias">edit this URL alias</a> rather than using a redirect.', array('!path' => '<em>' . l($parsed_value['path'], $parsed_value['path']) . '</em>', '@url-alias' => url('admin/config/search/path/edit/' . $alias['pid'])));
       $form_state['rebuild'] = TRUE;
       return $element;
     }
@@ -660,7 +660,7 @@ function redirect_settings_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Automatically create redirects when URL aliases are changed.'),
     '#default_value' => $config->get('auto_redirect'),
-    '#description' => t('This setting is most commonly used when replacing existing aliases under the "Update action" in the <a href="!url">URL alias settings</a>.', array('!url' => url('admin/config/search/path/patterns/settings'))),
+    '#description' => t('This setting is most commonly used when replacing existing URL aliases under the "URL alias upadte action" in the <a href="!url">URL alias settings</a>.', array('!url' => url('admin/config/search/path/patterns/settings'))),
     '#disabled' => !module_exists('path'),
   );
   $form['passthrough_querystring'] = array(

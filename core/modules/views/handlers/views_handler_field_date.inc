@@ -25,8 +25,8 @@ class views_handler_field_date extends views_handler_field {
 
     $date_formats = array();
     $date_types = system_get_date_formats();
-    foreach ($date_types as $machine_name => $value) {
-      $date_formats[$machine_name] = check_plain(t('@name format', array('@name' => $value['name'])) . ': ' . format_date(REQUEST_TIME, $machine_name));
+    foreach ($date_types as $machine_name => $date_type) {
+      $date_formats[$machine_name] = $date_type['label'] . ': ' . format_date(REQUEST_TIME, $machine_name);
     }
 
     $form['date_format'] = array(

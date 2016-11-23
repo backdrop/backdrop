@@ -17,7 +17,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp('field_test');
-    $this->web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content', 'administer content types'));
+    $this->web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content', 'administer content types', 'administer fields'));
     $this->backdropLogin($this->web_user);
   }
 

@@ -55,7 +55,7 @@ Backdrop.behaviors.setTimezone = {
         dataType: 'json',
         success: function (data) {
           if (data) {
-            $timezone.val(data);
+            $timezone.val(data.timezone);
           }
         }
       });

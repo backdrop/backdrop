@@ -567,6 +567,8 @@ class AJAXElementValidation extends AJAXTestCase {
  * Tests use of dialogs as wrappers for Ajax responses.
  */
 class AJAXDialogTest extends AJAXTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp();
 

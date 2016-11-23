@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains install and update functions for Views.
@@ -126,6 +125,28 @@ function views_update_1003() {
   db_delete('variable')
     ->condition('name', $delete_variables, 'IN')
     ->execute();
+}
+
+/**
+ * Replace the frontpage view with promoted.
+ */
+function views_update_1004() {
+  // If the old frontpage view is still disabled, delete it.
+  if (config_get('views.view.frontpage', 'disabled') === TRUE) {
+    $config_frontpage = config('views.view.frontpage');
+    $config_frontpage->delete();
+  }
+  // See if there is already a promoted view on this site.
+  $config_promoted = config('views.view.promoted');
+  if ($config_promoted->isNew()) {
+    // If not, create the new promoted view and mark it disabled.
+    $path = backdrop_get_path('module', 'views') . '/config/';
+    $contents = file_get_contents($path . 'views.view.promoted.json');
+    $data = json_decode($contents, true);
+    $config_promoted->setData($data);
+    $config_promoted->set('disabled', TRUE);
+    $config_promoted->save();
+  }
 }
 
 /**

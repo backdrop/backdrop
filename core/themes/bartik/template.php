@@ -44,13 +44,6 @@ function bartik_preprocess_layout(&$variables) {
 }
 
 /**
- * Overrides theme_menu_tree().
- */
-function bartik_menu_tree($variables) {
-  return '<ul class="menu clearfix">' . $variables['tree'] . '</ul>';
-}
-
-/**
  * Overrides theme_field__FIELD_TYPE().
  */
 function bartik_field__taxonomy_term_reference($variables) {

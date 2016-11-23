@@ -4,6 +4,12 @@ description = Test the loading of multiple nodes.
 group = Node
 file = node.test
 
+[NodeFrontPageCallback]
+name = Custom front page
+description = Test changing front page to custom redirect /node to custom page.
+group = Node
+file = node.test
+
 [NodeLoadHooksTestCase]
 name = Node load hooks
 description = Test the hooks invoked when a node is being loaded.
@@ -181,6 +187,12 @@ file = node.test
 [NodePageCacheTest]
 name = Node page cache test
 description = Test cache invalidation of node operations.
+group = Node
+file = node.test
+
+[NodeMultiByteUtf8Test]
+name = Multi-byte UTF-8
+description = Test that multi-byte UTF-8 characters are stored and retrieved correctly.
 group = Node
 file = node.test
 

@@ -3326,7 +3326,12 @@ function form_process_actions($element, &$form_state) {
 
   $first_button = NULL;
   $primary_set = FALSE;
-  foreach (element_children($element) as $key) {
+  foreach (element_children($element, TRUE) as $key) {
+    // Don't add automatic classes to non-buttons.
+    if (!in_array($element[$key]['#type'], array('button', 'submit'))) {
+      continue;
+    }
+
     $button = $element[$key];
     if (!$first_button && $button['#type'] === 'submit') {
       $first_button = $key;
@@ -3663,6 +3668,7 @@ function form_process_machine_name($element, &$form_state) {
 
   $js_settings = $element['#machine_name'];
   $js_settings['source'] = '#' . $source['#id'];
+  $js_settings['replace_token'] = backdrop_get_token($element['#machine_name']['replace_pattern']);
   $element['#attributes']['data-machine-name'] = json_encode($js_settings);
   $element['#attached']['js'][] = 'core/misc/machine-name.js';
 
@@ -4948,8 +4954,9 @@ function batch_process($redirect = NULL, $url = 'batch', $redirect_callback = 'b
       $_SESSION['batches'][$batch['id']] = TRUE;
 
       // Redirect for processing.
-      $function = $batch['redirect_callback'];
-      $function($batch['url'], array('query' => array('op' => 'start', 'id' => $batch['id'])));
+      if ($function = $batch['redirect_callback']) {
+        $function($batch['url'], array('query' => array('op' => 'start', 'id' => $batch['id'])));
+      }
     }
     else {
       // Non-progressive execution: bypass the whole progressbar workflow

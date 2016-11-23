@@ -49,7 +49,7 @@ class OptionsWidgetsTestCase extends FieldTestCase {
     $this->bool = field_create_field($this->bool);
 
     // Create a web user.
-    $this->web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content'));
+    $this->web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content', 'administer fields'));
     $this->backdropLogin($this->web_user);
   }
 
@@ -455,7 +455,7 @@ class OptionsWidgetsTestCase extends FieldTestCase {
     $this->assertNoFieldChecked("edit-bool-$langcode");
 
     // Create admin user.
-    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer taxonomy'));
+    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer taxonomy', 'administer fields'));
     $this->backdropLogin($admin_user);
 
     // Create a test field instance.

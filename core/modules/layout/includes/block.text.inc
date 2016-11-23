@@ -2,7 +2,7 @@
 
 /**
  *  TextBlock extends Block
- *  
+ *
  *  This class allows us to create text blocks.
  */
 class BlockText extends Block {
@@ -33,7 +33,9 @@ class BlockText extends Block {
   }
 
   /**
-   *  Sets block content on block view.
+   * Returns the rendered content of this block.
+   *
+   * @return string
    */
   function getContent() {
     if (!empty($this->settings['content'])) {
@@ -62,6 +64,7 @@ class BlockText extends Block {
       '#title' => t('Block content'),
       '#default_value' => $this->settings['content'],
       '#format' => $this->settings['format'],
+      '#editor_uploads' => TRUE,
       '#rows' => 5,
     );
 

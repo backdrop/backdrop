@@ -216,10 +216,10 @@ class ViewsCacheTest extends ViewsSqlTest {
     $expected_type = 'application/rss+xml';
     $this->assertIdentical(0, strpos(trim($first_content_type), $expected_type), t('Expected content type returned.'));
 
-    // Check that we have 5 items in RSS feed returned by the first request.
+    // Check that we have 7 items in RSS feed returned by the first request.
     $xml = simplexml_load_string($first_content);
     $items = $xml->xpath('/rss/channel/item');
-    $this->assertEqual(5, count($items), t('The number of RSS feed items matched.'));
+    $this->assertEqual(7, count($items), t('The number of RSS feed items matched.'));
 
     // Create another node to be sure we get cached results on the second
     // request.

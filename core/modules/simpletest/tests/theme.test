@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for the theme API.
@@ -481,6 +480,8 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
  * Functional test for initialization of the theme system in hook_init().
  */
 class ThemeHookInitUnitTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('theme_test');
   }
@@ -491,7 +492,7 @@ class ThemeHookInitUnitTest extends BackdropWebTestCase {
   function testThemeInitializationHookInit() {
     $this->backdropGet('theme-test/hook-init');
     $this->assertRaw('Themed output generated in hook_init()', 'Themed output generated in hook_init() correctly appears on the page.');
-    $this->assertRaw('bartik/css/style.css', "The default theme's CSS appears on the page when the theme system is initialized in hook_init().");
+    $this->assertRaw('stark/layout.css', "The default theme's CSS appears on the page when the theme system is initialized in hook_init().");
   }
 }
 
@@ -744,10 +745,26 @@ class ThemeDatetime extends BackdropWebTestCase {
  * Tests for theme debug markup.
  */
 class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $admin_user;
 
   function setUp() {
     parent::setUp('theme_test', 'node');
     theme_enable(array('test_theme'));
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'administer nodes',
+    ));
+    $this->backdropLogin($this->admin_user);
+
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page', 'node_submitted' => TRUE));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post', 'node_submitted' => TRUE));
+
+    // Disable cache.
+    config_set('system.core', 'cache', '0');
   }
 
   /**
@@ -766,18 +783,18 @@ class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
 
     // Create a node and test different features of the debug markup.
     $node = $this->backdropCreateNode();
-    $this->backdropGet('node/' . $node->nid);
+    $this->backdropGet("node/$node->nid");
     $this->assertRaw('<!-- THEME DEBUG -->', 'Theme debug markup found in theme output when debug is enabled.');
     $this->assertRaw("CALL: theme('node')", 'Theme call information found.');
-    $this->assertRaw('x node--1' . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   * node' . $extension, 'Suggested template files found in order and node ID specific template shown as current template.');
-    $template_filename = $templates['node__1']['path'] . '/' . $templates['node__1']['template'] . $extension;
+    $this->assertRaw('x node--' . $node->nid . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   * node' . $extension, 'Suggested template files found in order and node ID specific template shown as current template.');
+    $template_filename = $templates['node__' . $node->nid]['path'] . '/' . $templates['node__' . $node->nid]['template'] . $extension;
     $this->assertRaw("BEGIN OUTPUT from '$template_filename'", 'Full path to current template file found.');
 
     // Create another node and make sure the template suggestions shown in the
     // debug markup are correct.
     $node2 = $this->backdropCreateNode();
-    $this->backdropGet('node/' . $node2->nid);
-    $this->assertRaw('* node--2' . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   x node' . $extension, 'Suggested template files found in order and base template shown as current template.');
+    $this->backdropGet("node/$node2->nid");
+    $this->assertRaw('* node--' . $node2->nid . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   x node' . $extension, 'Suggested template files found in order and base template shown as current template.');
 
     // Create another node and make sure the template suggestions shown in the
     // debug markup are correct.
@@ -786,7 +803,7 @@ class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
     $build += node_view($node3);
     $output = backdrop_render($build);
     $this->assertTrue(strpos($output, "CALL: theme('node__foo__bar')") !== FALSE, 'Theme call information found.');
-    $this->assertTrue(strpos($output, '* node--foo--bar' . $extension . PHP_EOL . '   * node--foo' . $extension . PHP_EOL . '   * node--3' . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   x node' . $extension) !== FALSE, 'Suggested template files found in order and base template shown as current template.');
+    $this->assertTrue(strpos($output, '* node--foo--bar' . $extension . PHP_EOL . '   * node--foo' . $extension . PHP_EOL . '   * node--' . $node3->nid . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   x node' . $extension) !== FALSE, 'Suggested template files found in order and base template shown as current template.');
 
     // Disable theme debug.
     config_set('system.core', 'theme_debug', FALSE);

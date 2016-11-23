@@ -1134,6 +1134,7 @@ function user_menu() {
   $items['user/autocomplete'] = array(
     'title' => 'User autocomplete',
     'page callback' => 'user_autocomplete',
+    'delivery callback' => 'backdrop_json_deliver',
     'access callback' => 'user_access',
     'access arguments' => array('access user profiles'),
     'type' => MENU_CALLBACK,
@@ -1218,6 +1219,14 @@ function user_menu() {
     'file' => 'system.admin.inc',
     'file path' => backdrop_get_path('module', 'system'),
   );
+  $items['admin/config/people/settings'] = array(
+    'title' => 'Account settings',
+    'description' => 'Configure settings for user accounts.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_admin_settings'),
+    'access arguments' => array('administer account settings'),
+    'file' => 'user.admin.inc',
+  );
 
   // Permissions forms.
   $items['admin/config/people/permissions'] = array(
@@ -1252,30 +1261,7 @@ function user_menu() {
     'file' => 'user.admin.inc',
   );
 
-  // Administration pages.
-  $items['admin/config/people'] = array(
-    'title' => 'User accounts',
-    'description' => 'Configure user accounts.',
-    'position' => 'left',
-    'weight' => -20,
-    'page callback' => 'system_admin_menu_block_page',
-    'access arguments' => array('access administration pages'),
-    'file' => 'system.admin.inc',
-    'file path' => backdrop_get_path('module', 'system'),
-  );
-
-  // Settings.
-  $items['admin/config/people/settings'] = array(
-    'title' => 'Account settings',
-    'description' => 'Configure settings for user accounts.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('user_admin_settings'),
-    'access arguments' => array('administer account settings'),
-    'file' => 'user.admin.inc',
-    'weight' => 10,
-  );
-
-  // User email settings.
+  // Emails.
   $items['admin/config/people/emails'] = array(
     'title' => 'Account emails',
     'description' => 'Configure email templates used for account registration and management.',
@@ -2858,10 +2844,10 @@ function user_register_form($form, &$form_state) {
 
   // Prepare cancel link.
   if (isset($_GET['destination'])) {
-    $path = urldecode($_GET['destination']);
+    $path = $_GET['destination'];
   }
   elseif (isset($_SERVER['HTTP_REFERER'])) {
-    $path = urldecode($_SERVER['HTTP_REFERER']);
+    $path = $_SERVER['HTTP_REFERER'];
   }
   elseif (user_access('administer users')) {
     $path = 'admin/people';

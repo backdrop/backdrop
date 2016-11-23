@@ -291,7 +291,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     menu_cache_clear('main-menu');
 
     // Load front page.
-    $this->backdropGet('node');
+    $this->backdropGet('<front>');
     $this->assertLink(t('Menu link #1'), 0, 'Found menu link #1');
     $this->assertLink(t('Menu link #1-1'), 0, 'Found menu link #1-1');
     $this->assertLink(t('Menu link #2'), 0, 'Found menu link #2');
@@ -498,7 +498,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     menu_link_save($menu_link);
 
     // Load front page.
-    $this->backdropGet('node');
+    $this->backdropGet('<front>');
     $this->assertRaw('title="Test title attribute"', 'Title attribute of a menu link renders.');
     $this->assertRaw('testparam=testvalue', 'Query parameter added to menu link.');
   }
@@ -650,7 +650,7 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test automatic reparenting of menu links.
+   * Test automatic re-parenting of menu links.
    */
   function testMenuLinkReparenting($module = 'menu_test') {
     // Check the initial hierarchy.
@@ -792,6 +792,8 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
  * Tests rebuilding the menu by setting 'menu_rebuild_needed.'
  */
 class MenuRebuildTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * Test if the 'menu_rebuild_needed' variable triggers a menu_rebuild() call.
    */
@@ -801,7 +803,7 @@ class MenuRebuildTestCase extends BackdropWebTestCase {
     $this->assertEqual($admin_exists, 'admin', "The path 'admin/' exists prior to deleting.");
 
     // Delete the path item 'admin', and test that the path doesn't exist in the database.
-    $delete = db_delete('menu_router')
+    db_delete('menu_router')
       ->condition('path', 'admin')
       ->execute();
     $admin_exists = db_query('SELECT path from {menu_router} WHERE path = :path', array(':path' => 'admin'))->fetchField();
@@ -822,6 +824,8 @@ class MenuRebuildTestCase extends BackdropWebTestCase {
  * Menu tree data related tests.
  */
 class MenuTreeDataTestCase extends BackdropUnitTestCase {
+  protected $profile = 'testing';
+
   /**
    * Dummy link structure acceptable for menu_tree_data().
    */
@@ -869,10 +873,12 @@ class MenuTreeDataTestCase extends BackdropUnitTestCase {
  * Menu tree output related tests.
  */
 class MenuTreeOutputTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * Dummy link structure acceptable for menu_tree_output().
    */
-  var $tree_data = array(
+  protected $tree_data = array(
     '1'=> array(
       'link' => array( 'menu_name' => 'main-menu', 'mlid' => 1, 'hidden'=>0, 'has_children' => 1, 'title' => 'Item 1', 'in_active_trail' => 1, 'access'=>1, 'href' => 'a', 'localized_options' => array('attributes' => array('title' =>'')) ),
       'below' => array(
@@ -890,10 +896,6 @@ class MenuTreeOutputTestCase extends BackdropWebTestCase {
     '6' => array('link' => array( 'menu_name' => 'main-menu', 'mlid' => 6, 'hidden'=>0, 'has_children' => 0, 'title' => 'Item 6', 'in_active_trail' => 0, 'access'=>0, 'href' => 'f', 'localized_options' => array('attributes' => array('title' =>'')) ), 'below' => array( ) ),
     '7' => array('link' => array( 'menu_name' => 'main-menu', 'mlid' => 7, 'hidden'=>0, 'has_children' => 0, 'title' => 'Item 7', 'in_active_trail' => 0, 'access'=>1, 'href' => 'g', 'localized_options' => array('attributes' => array('title' =>'')) ), 'below' => array( ) )
   );
-
-  function setUp() {
-    parent::setUp();
-  }
 
   /**
    * Validate the generation of a proper menu tree output.
@@ -919,6 +921,9 @@ class MenuTreeOutputTestCase extends BackdropWebTestCase {
  * Menu breadcrumbs related tests.
  */
 class MenuBreadcrumbTestCase extends MenuWebTestCase {
+  protected $admin_user;
+  protected $web_user;
+
   function setUp() {
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
@@ -1085,7 +1090,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
 
     // Verify that breadcrumb on node listing page contains "Home" only.
     $trail = array();
-    $this->assertBreadcrumb('node', $trail);
+    $this->assertBreadcrumb('home', $trail);
 
     // Verify node breadcrumbs (in menu).
     // Do this separately for Main menu and Main menu, since only the
@@ -1099,6 +1104,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $node_type->settings['menu_parent'] = 'main-menu:0';
     node_type_save($node_type);
 
+    $child = $parent = NULL;
     foreach ($menus as $menu) {
       // Create a parent node in the current menu.
       $title = $this->randomName();
@@ -1150,14 +1156,10 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       $trail += array(
         "node/$nid3" => $node3->menu['link_title'],
       );
-      $tree += array(
-        "node/$nid3" => $node3->menu['link_title'],
-      );
       $this->assertBreadcrumb("node/$nid3/edit", $trail);
 
-      // Verify that node listing page still contains "Home" only.
-      $trail = array();
-      $this->assertBreadcrumb('node', $trail);
+      // Verify that the home page does not have a breadcrumb.
+      $this->assertBreadcrumb('<front>', array());
 
       if ($menu == 'main-menu') {
         $parent = $node2;
@@ -1277,7 +1279,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     ));
     $this->backdropLogout();
 
-    // Verify breadcrumb on front page.
+    // Verify that there is no breadcrumb on front page.
     $this->assertBreadcrumb('<front>', array());
 
     // Verify breadcrumb on user pages (without menu link) for anonymous user.
@@ -1414,6 +1416,8 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
  * Tests active menu trails.
  */
 class MenuTrailTestCase extends MenuWebTestCase {
+  protected $admin_user;
+
   function setUp() {
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {

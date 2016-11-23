@@ -1,0 +1,13 @@
+/**
+ * @file
+ * Component Layout CSS and some Page layout overrides
+ */
+
+.l-header {
+  position: relative;
+  margin: 0 0 2rem;
+}
+
+.layout .l-messages {
+  margin: 0 0 2rem;
+}

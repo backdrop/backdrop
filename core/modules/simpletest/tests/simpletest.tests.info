@@ -190,6 +190,12 @@ description = Test that $_GET['destination'] and $_REQUEST['destination'] cannot
 group = Bootstrap
 file = bootstrap.test
 
+[BootstrapWatchdogTestCase]
+name = Watchdog
+description = Check the basic watchdog functionality
+group = Bootstrap
+file = bootstrap.test
+
 [CacheSavingCase]
 name = Cache saving test
 description = Check our variables are saved and restored the right way.

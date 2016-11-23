@@ -75,7 +75,7 @@ class views_handler_relationship_node_term_data extends views_handler_relationsh
       $query->addJoin($def['type'], 'taxonomy_index', 'tn', 'tn.tid = td.tid');
       $query->condition('td.vocabulary', array_filter($this->options['vocabularies']));
       if (empty($this->query->options['disable_sql_rewrite'])) {
-        $query->addTag('term_access');
+        $query->addTag('taxonomy_term_access');
       }
       $query->fields('td');
       $query->fields('tn', array('nid'));

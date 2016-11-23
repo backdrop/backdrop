@@ -740,9 +740,12 @@ function install_display_output($output, $install_state) {
     // Let the theming function know when every step of the installation has
     // been completed.
     $active_task = $install_state['installation_finished'] ? NULL : $install_state['active_task'];
-    backdrop_add_region_content('sidebar_first', theme('task_list', array('items' => install_tasks_to_display($install_state), 'active' => $active_task)));
+    $task_list = theme('task_list', array('items' => install_tasks_to_display($install_state), 'active' => $active_task));
   }
-  print theme('install_page', array('content' => $output));
+  else {
+    $task_list = NULL;
+  }
+  print theme('install_page', array('content' => $output, 'sidebar' => $task_list));
   exit;
 }
 
@@ -835,6 +838,13 @@ function install_system_module(&$install_state) {
 
   state_set('install_profile_modules', array_diff($modules, array('system')));
   $install_state['database_tables_exist'] = TRUE;
+
+  // Prevent the hook_requirements() check from telling us to convert the
+  // database to utf8mb4.
+  $connection = Database::getConnection();
+  if ($connection->utf8mb4IsActive()) {
+    state_set('backdrop_utf8mb4_tables', TRUE);
+  }
 }
 
 /**
@@ -865,6 +875,20 @@ function install_verify_completed_task() {
 
   // No install task found.
   return NULL;
+}
+
+/**
+ * Verifies if UTF8 MB4 support is available in the database.
+ *
+ * @return bool
+ */
+function install_verify_database_utf8mb4() {
+  try {
+    return Database::getConnection()->utf8mb4IsSupported();
+  }
+  catch (Exception $e) {
+    return FALSE;
+  }
 }
 
 /**
@@ -1058,6 +1082,16 @@ function install_settings_form_submit($form, &$form_state) {
     'value' => $db_settings['db_prefix'],
   );
   backdrop_rewrite_settings($settings);
+
+  // Check if UTF-8 MB4 support exists in the database and add to settings.php.
+  if (install_verify_database_utf8mb4()) {
+    $settings['database_charset'] = array(
+      'value' => 'utf8mb4',
+      'required' => TRUE,
+    );
+    backdrop_rewrite_settings($settings);
+  }
+
   // Indicate that the settings file has been verified, and check the database
   // for the last completed task, now that we have a valid connection. This
   // last step is important since we want to trigger an error if the new

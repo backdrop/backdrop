@@ -19,6 +19,9 @@ class PathTestCase extends BackdropWebTestCase {
       'name' => 'Page',
     ));
 
+    // Set a default path pattern for all node types.
+    config_set('path.settings', 'node_pattern', '[node:content-type]/[node:title]');
+
     // Create test user and login.
     $web_user = $this->backdropCreateUser(array('access content', 'create page content', 'edit own page content', 'administer url aliases', 'create url aliases'));
     $this->backdropLogin($web_user);
@@ -119,6 +122,7 @@ class PathTestCase extends BackdropWebTestCase {
 
     // Create alias.
     $edit = array();
+    $edit['path[auto]'] = FALSE;
     $edit['path[alias]'] = $this->randomName(8);
     $this->backdropPost('node/' . $node1->nid . '/edit', $edit, t('Save'));
 
@@ -128,6 +132,7 @@ class PathTestCase extends BackdropWebTestCase {
     $this->assertResponse(200);
 
     // Change alias to one containing "exotic" characters.
+    $edit['path[auto]'] = FALSE;
     $previous = $edit['path[alias]'];
     $edit['path[alias]'] = "- ._~!$'\"()*@[]?&+%#,;=:" . // "Special" ASCII characters.
       "%23%25%26%2B%2F%3F" . // Characters that look like a percent-escaped string.
@@ -183,6 +188,7 @@ class PathTestCase extends BackdropWebTestCase {
     // Create one node with a random alias.
     $node_one = $this->backdropCreateNode();
     $edit = array();
+    $edit['path[auto]'] = FALSE;
     $edit['path[alias]'] = $this->randomName();
     $this->backdropPost('node/' . $node_one->nid . '/edit', $edit, t('Save'));
 
@@ -312,6 +318,7 @@ class PathLanguageTestCase extends BackdropWebTestCase {
     // Edit the node to set language and path.
     $edit = array();
     $edit['langcode'] = 'en';
+    $edit['path[auto]'] = FALSE;
     $edit['path[alias]'] = $english_alias;
     $this->backdropPost('node/' . $english_node->nid . '/edit', $edit, t('Save'));
 
@@ -327,6 +334,7 @@ class PathLanguageTestCase extends BackdropWebTestCase {
     $edit["title"] = $this->randomName();
     $edit["body[$langcode][0][value]"] = $this->randomName();
     $french_alias = $this->randomName();
+    $edit['path[auto]'] = FALSE;
     $edit['path[alias]'] = $french_alias;
     $this->backdropPost(NULL, $edit, t('Save'));
 
@@ -553,6 +561,10 @@ class PathHooksTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp(array('node', 'path', 'path_test'));
+    // Disable default path patterns for nodes.
+    config_set('path.settings', 'node_pattern', '');
+    config_set('path.settings', 'node_post_pattern', '');
+
     $this->backdropCreateContentType(array(
       'type' => 'page',
       'name' => 'Page',

@@ -27,7 +27,7 @@ class FieldUITestCase extends BackdropWebTestCase {
     parent::setUp($modules);
 
     // Create test user.
-    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer taxonomy'));
+    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer taxonomy', 'administer fields'));
     $this->backdropLogin($admin_user);
 
     // Create content type, with underscores.
@@ -765,7 +765,7 @@ class FieldUIAlterTestCase extends BackdropWebTestCase {
     parent::setUp(array('field_test'));
 
     // Create test user.
-    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer users', 'administer account settings'));
+    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer users', 'administer fields', 'administer account settings'));
     $this->backdropLogin($admin_user);
   }
 

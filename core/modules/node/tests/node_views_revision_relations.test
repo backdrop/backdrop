@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of ViewsNodeRevisionRelationsTestCase.
@@ -11,6 +10,16 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests basic node_revision table integration into views.
  */
 class NodeViewsRevisionRelationsTestCase extends ViewsSqlTest {
+  protected $profile = 'testing';
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp();
+
+    // Create content type for testing.
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
+  }
+
   /**
    * Create a node with revision and rest result count for both views.
    */
@@ -19,7 +28,7 @@ class NodeViewsRevisionRelationsTestCase extends ViewsSqlTest {
     // Create revision of the node.
     $node_revision = clone $node;
     $node_revision->revision = 1;
-    node_save($node_revision);
+    $node_revision->save();
     $column_map = array(
       'vid' => 'vid',
       'node_revision_nid' => 'node_revision_nid',
@@ -32,13 +41,13 @@ class NodeViewsRevisionRelationsTestCase extends ViewsSqlTest {
     $resultset_nid = array(
       array(
         'vid' => '1',
-        'node_revision_nid' => '1',
-        'node_node_revision_nid' => '1',
+        'node_revision_nid' => $node->nid,
+        'node_node_revision_nid' => $node->nid,
       ),
       array(
         'vid' => '2',
-        'node_revision_nid' => '1',
-        'node_node_revision_nid' => '1',
+        'node_revision_nid' => $node->nid,
+        'node_node_revision_nid' => $node->nid,
       ),
     );
     $this->assertIdenticalResultset($view_nid, $resultset_nid, $column_map);

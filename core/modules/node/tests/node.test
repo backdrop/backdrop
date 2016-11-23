@@ -28,9 +28,17 @@ class NodeWebTestCase extends BackdropWebTestCase {
  * Tests the node_load_multiple() function.
  */
 class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp();
-    $web_user = $this->backdropCreateUser(array('create post content', 'create page content'));
+
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
+
+    // Create and login web user.
+    $web_user = $this->backdropCreateUser(array('create post content', 'create page content', 'access content'));
     $this->backdropLogin($web_user);
   }
 
@@ -99,8 +107,13 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
  * Tests for the hooks invoked during node_load().
  */
 class NodeLoadHooksTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('node_test');
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
   }
 
   /**
@@ -525,7 +538,7 @@ class NodeCreationTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/page', $edit, t('Save'));
 
     // Check that the user was redirected to the home page.
-    $this->assertText(t('Welcome to Backdrop'), 'The user is redirected to the home page.');
+    $this->assertText(t('This is your first post! You may edit or delete it.'), 'The user is redirected to the home page.');
   }
 }
 
@@ -645,18 +658,19 @@ class NodeBlockTestCase extends BackdropWebTestCase {
    * Tests that the "Syndicate" block is shown when enabled.
    */
   function testSyndicateBlock() {
-    $layout = layout_load('default');
+    $layout = layout_load('home');
     $layout->addBlock('node', 'syndicate', 'footer');
     $layout->save();
 
     $syndicate_selector = '//*[contains(@class,"block-node-syndicate")]//a[contains(@class,"feed-icon")]';
-    $this->backdropGet('node');
+
+    $this->backdropGet('<front>');
     $elements = $this->xpath($syndicate_selector);
-    $this->assertEqual(count($elements), 1, 'Syndicate block found on /node.');
+    $this->assertEqual(count($elements), 1, 'Syndicate block found on front page.');
 
     $this->backdropGet('user');
     $elements = $this->xpath($syndicate_selector);
-    $this->assertEqual(count($elements), 1, 'Syndicate block not shown on /user.');
+    $this->assertEqual(count($elements), 0, 'Syndicate block not shown on /user.');
   }
 }
 
@@ -666,6 +680,10 @@ class NodeBlockTestCase extends BackdropWebTestCase {
 class NodePostSettingsTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
+
+    // Use Stark for expected markup checking.
+    theme_enable(array('stark'));
+    config_set('system.core', 'theme_default', 'stark');
 
     $web_user = $this->backdropCreateUser(array('create page content', 'administer content types', 'access user profiles'));
     $this->backdropLogin($web_user);
@@ -689,7 +707,7 @@ class NodePostSettingsTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/page', $edit, t('Save'));
 
     // Check that the post information is displayed.
-    $elements = $this->xpath('//div[contains(@class,:class)]', array(':class' => 'submitted'));
+    $elements = $this->xpath('//p[contains(@class, :class)]', array(':class' => 'submitted'));
     $this->assertEqual(count($elements), 1, 'Post information is displayed.');
   }
 
@@ -724,10 +742,14 @@ class NodePostSettingsTestCase extends BackdropWebTestCase {
  * sitewide RSS feed at rss.xml.
  */
 class NodeRSSContentTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     // Enable dummy module that implements hook_node_view.
     parent::setUp('node_test');
+    module_disable(array('views'));
 
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
     // Use bypass node access permission here, because the test class uses
     // hook_grants_alter() to deny access to everyone on node_access
     // queries.
@@ -748,6 +770,9 @@ class NodeRSSContentTestCase extends BackdropWebTestCase {
     $rss_only_content = t('Extra data that should appear only in the RSS feed for node !nid.', array('!nid' => $node->nid));
     $this->assertText($rss_only_content, 'Node content designated for RSS appear in RSS feed.');
 
+    // Check that it renders just the xml of the feed not the html.
+    $this->assertNoRaw('<!DOCTYPE html>', 'Node content in the feed is just XML not HTML.');
+
     // Check that content added in view modes other than 'rss' doesn't
     // appear in RSS feed.
     $non_rss_content = t('Extra data that should appear everywhere except the RSS feed for node !nid.', array('!nid' => $node->nid));
@@ -766,7 +791,7 @@ class NodeRSSContentTestCase extends BackdropWebTestCase {
     // viewing node.
     $this->backdropGet("node/$node->nid");
     $this->assertNoText($rss_only_content, "Node content designed for RSS doesn't appear when viewing node.");
-    
+
     // Check that the node feed page does not try to interpret additional path
     // components as arguments for node_feed() and returns default content.
     $this->backdropGet('rss.xml/' . $this->randomName() . '/' . $this->randomName());
@@ -782,6 +807,8 @@ class NodeRSSContentTestCase extends BackdropWebTestCase {
  * @todo Cover hook_node_access in a separate test class.
  */
 class NodeAccessUnitTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * Asserts node_access() correctly grants or denies access.
    */
@@ -794,6 +821,11 @@ class NodeAccessUnitTest extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp();
+
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
+
     // Clear permissions for authenticated users.
     $role = user_role_load(BACKDROP_AUTHENTICATED_ROLE);
     $role->permissions = array();
@@ -831,6 +863,12 @@ class NodeAccessUnitTest extends BackdropWebTestCase {
     $this->assertNodeAccess(array('view' => TRUE, 'update' => FALSE), $node4, $web_user4);
     $this->assertNodeAccess(array('view' => FALSE), $node4, $web_user5);
 
+    // User can 'view all unpublished content'.
+    $web_user6 = $this->backdropCreateUser(array('access content', 'view any unpublished content'));
+    $this->assertNodeAccess(array('view' => TRUE, 'update' => FALSE), $node4, $web_user6);
+    $node5 = $this->backdropCreateNode(array('status' => 0, 'uid' => $web_user5->uid));
+    $this->assertNodeAccess(array('view' => TRUE, 'update' => FALSE), $node5, $web_user6);
+
     // Tests the default access provided for a published node.
     $node5 = $this->backdropCreateNode();
     $this->assertNodeAccess(array('view' => TRUE, 'update' => FALSE, 'delete' => FALSE), $node5, $web_user3);
@@ -841,18 +879,24 @@ class NodeAccessUnitTest extends BackdropWebTestCase {
  * Tests hook_node_access_records() functionality.
  */
 class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     // Enable dummy module that implements hook_node_grants(),
     // hook_node_access_records(), hook_node_grants_alter() and
     // hook_node_access_records_alter().
     parent::setUp('node_test');
+
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
   }
 
   /**
    * Creates a node and tests the creation of node access rules.
    */
   function testNodeAccessRecords() {
-    // Create an post node.
+    // Create a post node.
     $node1 = $this->backdropCreateNode(array('type' => 'post'));
     $this->assertTrue(node_load($node1->nid), 'Post node created.');
 
@@ -920,6 +964,10 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
     parent::setUp('node_access_test');
     node_access_rebuild();
     state_set('node_access_test_private', TRUE);
+
+    // Disable default path patterns for nodes.
+    config_set('path.settings', 'node_pattern', '');
+    config_set('path.settings', 'node_post_pattern', '');
   }
 
   /**
@@ -1062,8 +1110,11 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
  * Tests node save related functionality, including import-save.
  */
 class NodeSaveTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('node_test');
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
     // Create a user that is allowed to post; we'll use this to test the submission.
     $web_user = $this->backdropCreateUser(array('create post content'));
     $this->backdropLogin($web_user);
@@ -1249,7 +1300,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->assertResponse(200, 'The new content type can be accessed at node/add.');
 
     // Create a content type via the user interface.
-    $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types'));
+    $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types', 'administer fields'));
     $this->backdropLogin($web_user);
     $edit = array(
       'name' => 'foo',
@@ -1265,7 +1316,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
    * Tests editing a node type using the UI.
    */
   function testNodeTypeEditing() {
-    $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types'));
+    $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types', 'administer fields'));
     $this->backdropLogin($web_user);
 
     $instance = field_info_instance('node', 'body', 'page');
@@ -1405,6 +1456,9 @@ class NodeTypeTestCase extends BackdropWebTestCase {
    * without content present.
    */
   function testNodeTypeHasContent() {
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
+
     // Test node type to assert no content has been created.
     $this->assertFalse(node_type_has_content('post'), 'The post node type has no content associated with it.');
 
@@ -1509,18 +1563,30 @@ class NodeAccessRebuildTestCase extends BackdropWebTestCase {
  * Tests node administration page functionality.
  */
 class NodeAdminTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp();
+
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
 
     // Remove the "view own unpublished content" permission which is set
     // by default for authenticated users so we can test this permission
     // correctly.
     user_role_revoke_permissions(BACKDROP_AUTHENTICATED_ROLE, array('view own unpublished content'));
 
-    $this->admin_user = $this->backdropCreateUser(array('access administration pages', 'access content overview', 'administer nodes', 'bypass node access'));
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'access content overview',
+      'administer nodes',
+      'bypass node access',
+    ));
     $this->base_user_1 = $this->backdropCreateUser(array('access content overview'));
     $this->base_user_2 = $this->backdropCreateUser(array('access content overview', 'view own unpublished content'));
     $this->base_user_3 = $this->backdropCreateUser(array('access content overview', 'bypass node access'));
+    $this->base_user_4 = $this->backdropCreateUser(array('access content overview', 'view any unpublished content'));
   }
 
   /**
@@ -1666,6 +1732,17 @@ class NodeAdminTestCase extends BackdropWebTestCase {
       $this->assertLinkByHref('node/' . $node->nid . '/edit');
       $this->assertLinkByHref('node/' . $node->nid . '/delete');
     }
+
+    // Verify 'view any unpubished content' allows view but not edit or delete.
+    $this->backdropLogout();
+    $this->backdropLogin($this->base_user_4);
+    $this->backdropGet('admin/content');
+    $this->assertResponse(200);
+    foreach ($nodes as $node) {
+      $this->assertLinkByHref('node/' . $node->nid);
+      $this->assertNoLinkByHref('node/' . $node->nid . '/edit');
+      $this->assertNoLinkByHref('node/' . $node->nid . '/delete');
+    }
   }
 }
 
@@ -1683,6 +1760,11 @@ class NodeTitleTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp();
+
+    // Use Stark for expected markup checking.
+    theme_enable(array('stark'));
+    config_set('system.core', 'theme_default', 'stark');
+
     $this->admin_user = $this->backdropCreateUser(array('administer nodes', 'create post content', 'create page content'));
     $this->backdropLogin($this->admin_user);
   }
@@ -1710,7 +1792,7 @@ class NodeTitleTestCase extends BackdropWebTestCase {
     $this->assertEqual(current($this->xpath($xpath)), $node->title, 'Node breadcrumb is equal to node title.', 'Node');
 
     // Test node title in comment preview.
-    $this->assertEqual(current($this->xpath('//article[@id=:id]/header/h2/a', array(':id' => 'node-' . $node->nid))), $node->title, 'Node preview title is equal to node title.', 'Node');
+    $this->assertEqual(current($this->xpath('//article[@id=:id]//h2/a', array(':id' => 'node-' . $node->nid))), $node->title, 'Node preview title is equal to node title.', 'Node');
 
     // Test node title is clickable on teaser list (/node).
     $this->backdropGet('node');
@@ -1735,15 +1817,63 @@ class NodeFeedTestCase extends BackdropWebTestCase {
 }
 
 /**
+ * Test toggle between custom front page callback and default /node callback.
+ */
+class NodeFrontPageCallback extends BackdropWebTestCase {
+  function setUp() {
+    parent::setUp('node', 'system');
+
+    $this->admin_user = $this->backdropCreateUser(
+      array(
+        'administer site configuration',
+        'administer nodes',
+        'create post content',
+        'create page content'
+      )
+    );
+    $this->backdropLogin($this->admin_user);
+  }
+
+  function testCustomFrontPage() {
+    $settings = array(
+      'title' => $this->randomName(8),
+      'promote' => 0,
+    );
+    // Set a custom front page.
+    $node = $this->backdropCreateNode($settings);
+    $edit['site_frontpage'] = 'node/' . $node->nid;
+    $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
+    $this->backdropGet('<front>');
+    $this->assertNoText(t('No content has been promoted yet.'), 'Confirmed /home is not the frontpage.');
+    $this->assertText($node->title);
+
+    // Set back to default front page.
+    $edit['site_frontpage'] = 'home';
+    $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
+    $this->backdropGet('<front>');
+    $this->assertText(t('This is your first post! You may edit or delete it.'), "Default /home front page restored.");
+  }
+}
+
+/**
  * Functional tests for the node module blocks.
  */
 class NodeBlockFunctionalTest extends BackdropWebTestCase {
+
   function setUp() {
     parent::setUp('node', 'block');
 
     // Create users and test node.
-    $this->admin_user = $this->backdropCreateUser(array('administer content types', 'administer nodes', 'administer blocks', 'administer layouts'));
+    $this->admin_user = $this->backdropCreateUser(array(
+      'administer content types',
+      'administer nodes',
+      'administer blocks',
+      'administer layouts',
+    ));
     $this->web_user = $this->backdropCreateUser(array('access content', 'create post content'));
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
   }
 
   /**
@@ -1758,8 +1888,8 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     ));
 
     // Set the block to a region to confirm block is available.
-    $layout = layout_load('default');
-    $block = $layout->addBlock('node', 'recent', 'sidebar');
+    $layout = layout_load('home');
+    $block = $layout->addBlock('node', 'recent', 'content');
 
     // Set block title and variables.
     $block_title = $this->randomName();
@@ -1802,6 +1932,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
 
     // Test that only the 2 latest nodes are shown.
     $this->backdropLogin($this->web_user);
+    $this->backdropGet('');
     $this->assertNoText($node1->title, t('Node not found in block.'));
     $this->assertText($node2->title, t('Node found in block.'));
     $this->assertText($node3->title, t('Node found in block.'));
@@ -1849,7 +1980,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
     // Add a condition to specify only the post type should have this layout.
-    $this->backdropPost('admin/structure/layouts/manage/post_layout/settings', array(), t('Add visibility condition'));
+    $this->backdropPost('admin/structure/layouts/manage/post_layout/configure', array(), t('Add visibility condition'));
     $this->backdropPost(NULL, array('condition' => 'node_type'), t('Load condition'));
     $this->backdropPost(NULL, array('bundles[post]' => 1), t('Add visibility condition'));
     $this->backdropPost(NULL, array(), t('Save layout'));
@@ -1866,6 +1997,88 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->assertText($custom_block['title'], 'Block was displayed on the post node.');
     $this->backdropGet('node/' . $node4->nid);
     $this->assertNoText($custom_block['title'], 'Block was not displayed on the page node.');
+  }
+
+  /**
+   * Tests the Existing content block.
+   */
+  function testNodeBlock() {
+    $this->backdropLogin($this->admin_user);
+
+    // Add some test nodes.
+    $node1_settings = array('uid' => $this->web_user->uid, 'type' => 'post');
+    $node2_settings = array(
+      'body' => array(LANGUAGE_NONE => array(array('value' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam vitae arcu at leo cursus laoreet. Curabitur dui tortor, adipiscing malesuada tempor in, bibendum ac diam. Cras non tellus a libero pellentesque condimentum. This is the middle. Suspendisse ac lacus libero. Ut non est vel nisl faucibus interdum nec sed leo. Pellentesque sem risus, vulputate eu semper eget, auctor in libero. Ut fermentum est vitae metus convallis scelerisque. Phasellus pellentesque rhoncus tellus, eu dignissim purus posuere id. Quisque eu fringilla ligula. Morbi ullamcorper, lorem et mattis egestas, tortor neque pretium velit, eget eleifend odio turpis eu purus. Donec vitae metus quis leo pretium tincidunt a pulvinar sem. Morbi adipiscing laoreet mauris vel placerat. Nullam elementum, nisl sit amet scelerisque malesuada, dolor nunc hendrerit quam, eu ultrices erat est in orci. Curabitur feugiat egestas nisl sed accumsan. This is the end.'))),
+      'promote' => 1,
+    );
+
+    $node1 = $this->backdropCreateNode($node1_settings);
+    $node2 = $this->backdropCreateNode($node2_settings);
+
+    // Check that $node2 does not appear on $node1 path.
+    $this->backdropGet('node/' . $node1->nid);
+    $this->assertNoText($node2->title, t('Node 2 title not found on Node 1.'));
+
+    // Add a Existing content block with default settings.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Existing content'));
+    $edit = array(
+      'nid' => $node2->nid,
+      'leave_node_title' => TRUE,
+      'link_node_title' => TRUE,
+      'links' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+    $first_block = $this->xpath('(//*[@id="layout-content-form"]//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
+    ));
+    $first_block_uuid = (string) $first_block[0]['data-block-id'];
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('node/' . $node1->nid);
+
+    // Check that the title for $node2 only appears once on the page.
+    $elements = $this->xpath('//*[text()="' . $node2->title . '"]');
+    $this->assertEqual(count($elements), 1, 'The node title appears only once on the page.');
+
+    // Test that the full node is shown.
+    $this->assertText('This is the middle');
+    $this->assertText('This is the end');
+
+    // Read more text not found.
+    $this->assertNoText('Read more');
+
+    // The block title is linked to the node
+    $elements = $this->xpath("//h2[contains(@class, :class)]//a[contains(@href, :href)]", array(':class' => 'block-title', ':href' => strtolower($node2->title)));
+    $this->assertEqual(count($elements), 1, 'The block title is linked to the node');
+
+    // Make several changes to the Existing content block settings.
+    $edit = array(
+      'leave_node_title' => FALSE,
+      'link_node_title' => FALSE,
+      'view_mode' => 'teaser',
+    );
+    $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $edit, t('Save block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('node/' . $node1->nid);
+
+    // Check that $node2 title now only appears on $node1 path once
+    $this->assertUniqueText($node2->title, 'The node title appears once on the page.');
+
+    // The title is from the block title, not the node
+    $elements = $this->xpath("//h2[contains(@class,':class') and text() = ':title']", array(':class' => 'block-title', ':title' => $node2->title));
+    $this->assertFalse($elements, 'The block title is the node title.');
+
+    // The title is not linked to the node.
+    $elements = $this->xpath("//h2[contains(@class,':class')]//a[contains(@href,'node/:href')]", array(':class' => 'block-title', ':href' => $node2->nid));
+    $this->assertFalse($elements, 'The block title is not linked to the node');
+
+    // Test that the full node is not shown.
+    $this->assertText('This is the middle');
+    $this->assertNoText('This is the end');
+
+    // Read more text now found.
+    $this->assertText('Read more');
   }
 }
 
@@ -1892,6 +2105,8 @@ class NodeBuildContent extends BackdropWebTestCase {
  * Tests node_query_node_access_alter().
  */
 class NodeQueryAlter extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * User with permission to view content.
    *
@@ -1908,6 +2123,7 @@ class NodeQueryAlter extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp('node_access_test');
+
     node_access_rebuild();
 
     // Create some content.
@@ -2235,7 +2451,7 @@ class NodeTokenReplaceTestCase extends BackdropWebTestCase {
     foreach ($tests as $input => $expected) {
       $output = token_replace($input, array('node' => $node), array('language' => $language, 'sanitize' => FALSE));
       $this->assertEqual($output, $expected, format_string('Unsanitized node token %token replaced for node without a summary.', array('%token' => $input)));
-    }    
+    }
   }
 }
 
@@ -2398,8 +2614,8 @@ class NodeAccessFieldTestCase extends NodeWebTestCase {
     node_access_rebuild();
 
     // Create some users.
-    $this->admin_user = $this->backdropCreateUser(array('access content', 'bypass node access'));
-    $this->content_admin_user = $this->backdropCreateUser(array('access content', 'administer content types'));
+    $this->admin_user = $this->backdropCreateUser(array('access content', 'bypass node access', 'administer fields'));
+    $this->content_admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer fields'));
 
     // Add a custom field to the page content type.
     $this->field_name = backdrop_strtolower($this->randomName() . '_field_name');
@@ -2604,4 +2820,28 @@ class NodePageCacheTest extends NodeWebTestCase {
     $this->backdropGet($node_path);
     $this->assertResponse(404);
   }
+}
+
+/**
+ * Tests that multi-byte UTF-8 characters are stored and retrieved correctly.
+ */
+class NodeMultiByteUtf8Test extends NodeWebTestCase {
+  /**
+   * Tests that multi-byte UTF-8 characters are stored and retrieved correctly.
+   */
+  public function testMultiByteUtf8() {
+    $connection = Database::getConnection();
+    // On MySQL, this test will only run if 'charset' is set to 'utf8mb4' in
+    // settings.php.
+    if (!($connection->utf8mb4IsSupported() && $connection->utf8mb4IsActive())) {
+      return;
+    }
+    $title = '🐙';
+    $this->assertTrue(backdrop_strlen($title) < strlen($title), 'Title has multi-byte characters.');
+    $node = $this->backdropCreateNode(array('title' => $title));
+    $this->backdropGet('node/' . $node->nid);
+    $result = $this->xpath('//h1[@id="page-title"]');
+    $this->assertEqual(trim((string) $result[0]), $title, 'The passed title was returned.');
+  }
+
 }

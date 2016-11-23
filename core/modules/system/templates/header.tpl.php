@@ -5,7 +5,7 @@
  *
  * Available variables:
  *
- * - $base_path: The base URL path of the Backdrop installation. At the very
+ * - $base_path: The base path of the Backdrop installation. At the very
  *   least, this will always default to /.
  * - $directory: The directory the template is located in, e.g. modules/system
  *   or themes/bartik.

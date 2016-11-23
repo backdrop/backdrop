@@ -131,7 +131,7 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
   if ($tag_last != '') {
     $query = db_select('taxonomy_term_data', 't');
     $query->addTag('translatable');
-    $query->addTag('term_access');
+    $query->addTag('taxonomy_term_access');
 
     // Do not select already entered terms.
     if (!empty($tags_typed)) {
@@ -159,5 +159,6 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
     }
   }
 
-  backdrop_json_output($term_matches);
+  // Displayed as JSON by delivery callback backdrop_json_deliver().
+  return $term_matches;
 }

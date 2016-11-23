@@ -534,6 +534,7 @@ function text_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       $element = $main_widget;
       $element['#type'] = 'text_format';
       $element['#format'] = isset($items[$delta]['format']) ? $items[$delta]['format'] : NULL;
+      $element['#editor_uploads'] = TRUE;
       $element['#base_type'] = $main_widget['#type'];
     }
     else {

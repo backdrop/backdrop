@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide views data and handlers for node.module.
@@ -737,6 +736,7 @@ function node_views_query_substitutions() {
   return array(
     '***ADMINISTER_NODES***' => intval(user_access('administer nodes')),
     '***VIEW_OWN_UNPUBLISHED_NODES***' => intval(user_access('view own unpublished content')),
+    '***VIEW_ANY_UNPUBLISHED_NODES***' => intval(user_access('view any unpublished content')),
     '***BYPASS_NODE_ACCESS***' =>  intval(user_access('bypass node access')),
   );
 }

@@ -1335,12 +1335,12 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
    */
   function testAdministratorRole() {
     $this->backdropLogin($this->admin_user);
-    $this->backdropGet('admin/config/people/settings');
+    $this->backdropGet('admin/config/people/roles');
 
     // Set the user's role to be the administrator role.
     $edit = array();
     $edit['user_admin_role'] = $this->role_name;
-    $this->backdropPost('admin/config/people/settings', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/people/roles', $edit, t('Save roles'));
 
     // Enable book module and ensure the 'administer book outlines' permission
     // is assigned by default.
@@ -1374,23 +1374,6 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     $this->assertTrue(user_access('administer nodes', $account), 'User now has "administer nodes" permission.');
     $this->assertFalse(user_access('access user profiles', $account), 'User no longer has "access user profiles" permission.');
     $this->assertTrue(user_access('administer site configuration', $account), 'User still has "administer site configuration" permission.');
-  }
-
-  /**
-   * Tests the admin form validates user picture settings.
-   */
-  function testUserPictureAdminFormValidation() {
-    $this->backdropLogin($this->backdropCreateUser(array('administer account settings')));
-    // The default values are valid.
-    $this->backdropPost('admin/config/people/settings', array(), 'Save configuration');
-    $this->assertText(t('The configuration options have been saved.'), 'The default values are valid.');
-
-    // The form does not save with an invalid file size.
-    $edit = array(
-      'user_picture_file_size' => $this->randomName(),
-    );
-    $this->backdropPost('admin/config/people/settings', $edit, t('Save configuration'));
-    $this->assertNoText(t('The configuration options have been saved.'), 'The form does not save with an invalid file size.');
   }
 }
 
@@ -1527,10 +1510,10 @@ class UserAdminSettingsFormTest extends SystemConfigFormCase {
     module_load_include('admin.inc', 'user');
     $this->form_id = 'user_admin_settings';
     $this->values = array(
-      'anonymous' => array(
-        '#value' => $this->randomString(10),
+      'user_picture_path' => array(
+        '#value' => $this->randomName(10),
         '#config_name' => 'system.core',
-        '#config_key' => 'anonymous',
+        '#config_key' => 'user_picture_path',
       ),
     );
   }
@@ -1704,6 +1687,11 @@ class UserBlocksUnitTests extends BackdropWebTestCase {
   function testUserLoginBlock() {
     // Create a user with some permission that anonymous users lack.
     $user = $this->backdropCreateUser(array('administer permissions'));
+
+    // Add the block to the default layout.
+    $layout = layout_load('default');
+    $layout->addBlock('user', 'login', 'sidebar');
+    $layout->save();
 
     // Log in using the block.
     $edit = array();
@@ -2083,7 +2071,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     $role_name = '123';
     $edit = array('name' => $role_name, 'label' => $role_name);
     $this->backdropPost('admin/config/people/roles', $edit, t('Add role'));
-    $this->assertText(t('The role has been added.'), 'The role has been added.');
+    $this->assertText(t('The 123 role has been added.'), 'The role has been added.');
     backdrop_static_reset('user_roles');
     $role = user_role_load($role_name);
     $this->assertTrue(is_object($role), 'The role was successfully loaded from config.');
@@ -2097,7 +2085,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     $new_label = '456';
     $edit = array('label' => $new_label);
     $this->backdropPost("admin/config/people/roles/edit/$role_name", $edit, t('Save role'));
-    $this->assertText(t('The role has been renamed.'), 'The role has been renamed.');
+    $this->assertText(t('The 123 role has been renamed to 456.'), 'The role has been renamed.');
     backdrop_static_reset('user_roles');
     $role = user_role_load($role_name);
     $this->assertFalse($role->label === $old_label, 'The role has had its label changed.');
@@ -2120,11 +2108,18 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     // Set this as the administrator role.
     config_set('system.core', 'user_admin_role', $admin_role->name);
 
+    // Test cancel deleting a role.
+    $role_name = 'administrator';
+    $this->backdropGet("admin/config/people/roles/delete/$role_name");
+    $this->clickLink(t('Cancel'));
+    $this->assertResponse(200);
+    $this->assertUrl('admin/config/people/roles', array(), 'Redirected to correct URL after cancel.');
+
     // Test deleting the default administrator role.
     $role_name = 'administrator';
     $role = user_role_load($role_name);
     $this->backdropPost("admin/config/people/roles/delete/$role_name", array(), t('Delete'));
-    $this->assertText(t('The role has been deleted.'), 'The role has been deleted');
+    $this->assertText(t('The administrator role has been deleted.'), 'The role has been deleted');
     $this->assertNoLinkByHref("admin/config/people/roles/edit/$role_name", 'Role edit link removed.');
     backdrop_static_reset('user_roles');
     $this->assertFalse(user_role_load($role_name), 'A deleted role can no longer be loaded.');
@@ -2145,7 +2140,7 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
 
     // Change the role weight and submit the form.
     $edit = array('roles['. $role_name .'][weight]' => $old_weight + 1);
-    $this->backdropPost('admin/config/people/roles', $edit, t('Save order'));
+    $this->backdropPost('admin/config/people/roles', $edit, t('Save roles'));
     $this->assertText(t('The role settings have been updated.'), 'The role settings form submitted successfully.');
 
     // Retrieve the saved role and compare its weight.

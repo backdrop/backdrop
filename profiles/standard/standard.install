@@ -99,24 +99,25 @@ function standard_install() {
   $full_html_format = (object) $full_html_format;
   filter_format_save($full_html_format);
 
-  // Enable Bartik theme and set it as default theme instead of Stark.
+  // Enable Basis theme and set it as default theme instead of Stark.
   // @see system_install()
-  $default_theme = 'bartik';
+  $default_theme = 'basis';
   config_set('system.core', 'theme_default', $default_theme);
   theme_enable(array($default_theme));
   theme_disable(array('stark'));
 
-  // Set front page to "node".
-  config_set('system.core', 'site_frontpage', 'node');
+  // Set front page to "home".
+  config_set('system.core', 'site_frontpage', 'home');
+  backdrop_flush_all_caches();
 
-  // Insert default pre-defined node types into the database. For a complete
-  // list of available node type attributes, refer to the node type API
-  // documentation at: http://api.drupal.org/api/HEAD/function/hook_node_info.
+  // Create default pre-defined node types. For a complete list of available
+  // node type attributes please refer to the node type API documentation at:
+  // https://api.backdropcms.org/api/backdrop/core!modules!node!node.module/function/node_type_save
   $types = array(
     array(
       'type' => 'page',
       'name' => st('Page'),
-      'description' => st("Add a page for static content, such as an 'About us' page."),
+      'description' => st("Add a page with static content, like the 'About' page."),
       'settings' => array(
         'status_default' => TRUE,
         'promote_enabled' => FALSE,
@@ -125,7 +126,8 @@ function standard_install() {
         'sticky_default' => FALSE,
         'revision_enabled' => TRUE,
         'revision_default' => FALSE,
-        'show_submitted_info' => FALSE,
+        'node_submitted' => FALSE,
+        'node_user_picture' => FALSE,
         'comment_default' => COMMENT_NODE_CLOSED,
         'menu_options' => array('main-menu'),
       ),
@@ -145,6 +147,8 @@ function standard_install() {
         'revision_default' => FALSE,
         'show_submitted_info' => TRUE,
         'comment_default' => COMMENT_NODE_OPEN,
+        'node_submitted' => TRUE,
+        'node_user_picture' => TRUE,
       ),
       'is_new' => TRUE,
     ),
@@ -159,6 +163,7 @@ function standard_install() {
   // Add default alias for page content types.
   config('path.settings')
     ->set('node_page_pattern', '[node:title]')
+    ->set('node_post_pattern', 'posts/[node:title]')
     ->save();
 
   // Enable user picture support and set the default to a square thumbnail option.
@@ -168,6 +173,53 @@ function standard_install() {
     ->set('user_picture_file_size', '800')
     ->set('user_picture_style', 'thumbnail')
     ->save();
+
+  // Create an initial post to welcome users on install.
+  $post = new Node(
+    array(
+      'title' => st('Your first post!'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('This is your first post! You may edit or delete it.'),
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 1,
+      'type' => 'post',
+    )
+  );
+  $post->save();
+
+  // Create an "About" page node.
+  $page = new Node(
+    array(
+      'title' => st('About'),
+      'body' => array(
+        LANGUAGE_NONE => array(
+          array(
+            'value' => st('This is a page with static content. You may edit or delete it.'),
+          ),
+        ),
+      ),
+      'uid' => 1,
+      'status' => 1,
+      'promote' => 0,
+      'type' => 'page',
+    )
+  );
+  $page->save();
+
+  // Create an "About" link in the main menu.
+  $item = array(
+    'link_path' => 'node/' . $page->nid,
+    'link_title' => 'About',
+    'weight' => 1,
+  );
+  menu_link_save($item);
+
 
   // Allow visitor account creation with administrative approval.
   config_set('system.core', 'user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
@@ -319,6 +371,16 @@ function standard_install() {
     'link_title' => st('Home'),
     'link_path' => '<front>',
     'menu_name' => 'main-menu',
+    'weight' => -1,
+  );
+  menu_link_save($item);
+
+  // Create a login link in the account menu.
+  $item = array(
+    'link_title' => st('Login'),
+    'link_path' => 'user/login',
+    'menu_name' => 'user-menu',
+    'weight' => -1,
   );
   menu_link_save($item);
 
@@ -333,4 +395,9 @@ function standard_install() {
     ->execute();
   config_set('system.core', 'admin_theme', 'seven');
   config_set('system.core', 'node_admin_theme', '1');
+
+  // Enable the page cache and aggregation.
+  config_set('system.core', 'preprocess_css', '1');
+  config_set('system.core', 'preprocess_js', '1');
+  config_set('system.core', 'cache', '1');
 }

@@ -166,7 +166,9 @@ abstract class LayoutContext {
    * var_dump($context->isA('user')); // FALSE.
    * @endcode
    *
-   * @param $plugin
+   * @param string $plugin
+   *
+   * @return bool
    */
   function isA($plugin) {
     return $plugin === $this->plugin || in_array($plugin, $this->aliases);

@@ -12,7 +12,7 @@
 function node_overview_types() {
   $types = node_type_get_types();
   $names = node_type_get_names();
-  $field_ui = module_exists('field_ui');
+  $field_ui = module_exists('field_ui') && user_access('administer fields');
   $header = array(t('Name'), t('Operations'));
   $rows = array();
 
@@ -79,8 +79,10 @@ function node_overview_types() {
  */
 function node_type_form($form, &$form_state, $type = NULL) {
   if (!isset($type->type)) {
-    // This is a new type. Populate with the defaults.
+    // This is a new type. Populate with the defaults...
     $type = node_type_set_defaults();
+    // ...and set the page title.
+    backdrop_set_title(t('Add content type'));
   }
 
   // Make the type object available to implementations of hook_form_alter().
@@ -158,7 +160,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
   $form['workflow']['status_default'] = array(
     '#type' => 'radios',
-    '#title' => t('Published status'),
+    '#title' => t('Default status'),
     '#options' => array(
       1 => t('Published'),
       0 => t('Unpublished'),
@@ -302,7 +304,20 @@ function node_type_form($form, &$form_state, $type = NULL) {
     );
   }
 
+  $path = 'admin/structure/types';
+  $options = array();
+  $options['attributes']['class'][] = 'form-cancel';
+
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $path,
+    '#options' => $options,
+    '#weight' => 50,
+  );
+
   return $form;
+
 }
 
 /**
@@ -596,7 +611,7 @@ function node_type_delete_confirm($form, &$form_state, $type) {
  * Process content type delete confirm submissions.
  *
  * @see node_type_delete_confirm()
- */                                                
+ */
 function node_type_delete_confirm_submit($form, &$form_state) {
   $type_name = $form_state['values']['type'];
   node_type_delete($type_name);

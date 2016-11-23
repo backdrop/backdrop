@@ -16,8 +16,8 @@ function user_autocomplete($string = '') {
     }
   }
 
-  backdrop_json_output($matches);
-  backdrop_exit();
+  // Displayed as JSON by delivery callback backdrop_json_deliver().
+  return $matches;
 }
 
 /**
@@ -259,10 +259,10 @@ function user_profile_form($form, &$form_state, $account) {
 
   // Prepare cancel link.
   if (isset($_GET['destination'])) {
-    $path = urldecode($_GET['destination']);
+    $path = $_GET['destination'];
   }
   elseif (isset($_SERVER['HTTP_REFERER'])) {
-    $path = urldecode($_SERVER['HTTP_REFERER']);
+    $path = $_SERVER['HTTP_REFERER'];
   }
   elseif (isset($account->uid)) {
     $path = 'user/' . $account->uid;

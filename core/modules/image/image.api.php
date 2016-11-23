@@ -134,9 +134,7 @@ function hook_image_style_flush($style) {
  * by checking the $style['storage'] property.
  *
  * If your module needs to provide a new style (rather than modify an existing
- * one) use hook_image_default_styles() instead.
- *
- * @see hook_image_default_styles()
+ * one) place the whole config file in your modules /config directory instead.
  */
 function hook_image_styles_alter(&$styles) {
   // Check that we only affect a default style.

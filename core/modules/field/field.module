@@ -263,6 +263,21 @@ define('FIELD_LOAD_CURRENT', 'FIELD_LOAD_CURRENT');
 define('FIELD_LOAD_REVISION', 'FIELD_LOAD_REVISION');
 
 /**
+ * Implements hook_permission().
+ */
+function field_permission() {
+  return array(
+    'administer fields' => array(
+      'title' => t('Administer fields'),
+      'description' => t('Additional permissions are required based on what the fields are attached to (for example, <a href="@url">administer content types</a> to manage fields attached to content).', array(
+        '@url' => '#module-node',
+      )),
+      'restrict access' => TRUE,
+    ),
+  );
+}
+
+/**
  * Implements hook_theme().
  */
 function field_theme() {

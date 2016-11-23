@@ -22,7 +22,7 @@ class FileFieldTestCase extends BackdropWebTestCase {
     $modules[] = 'path';
     $modules[] = 'file_module_test';
     parent::setUp($modules);
-    $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer users', 'administer permissions', 'administer content types', 'administer nodes', 'bypass node access', 'create url aliases'));
+    $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer users', 'administer permissions', 'administer content types', 'administer nodes', 'bypass node access', 'administer fields', 'create url aliases'));
     $this->backdropLogin($this->admin_user);
   }
 
@@ -1390,7 +1390,7 @@ class FilePrivateTestCase extends FileFieldTestCase {
     $type_name = 'page';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name, array('uri_scheme' => 'private'));
-	
+
     // Create a field with no view access - see field_test_field_access().
     $no_access_field_name = 'field_no_view_access';
     $this->createFileField($no_access_field_name, $type_name, array('uri_scheme' => 'private'));

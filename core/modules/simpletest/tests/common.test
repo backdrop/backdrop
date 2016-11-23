@@ -960,7 +960,7 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     $result = backdrop_http_request(url('node', array('absolute' => TRUE)));
     $this->assertEqual($result->code, 200, 'Fetched page successfully.');
     $this->backdropSetContent($result->data);
-    $this->assertTitle(t('Welcome to @site-name | @site-name', array('@site-name' => config_get('system.core', 'site_name'))), 'Site title matches.');
+    $this->assertTitle(t('Home | @site-name', array('@site-name' => config_get('system.core', 'site_name'))), 'Site title matches.');
 
     // Test that code and status message is returned.
     $result = backdrop_http_request(url('pagedoesnotexist', array('absolute' => TRUE)));
@@ -1198,6 +1198,7 @@ class CommonBackdropGotoTestCase extends BackdropWebTestCase {
  * Tests for the JavaScript system.
  */
 class CommonJavaScriptTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
   /**
    * Store configured value for JavaScript preprocessing.
    */
@@ -1640,6 +1641,8 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
  * Tests for backdrop_render().
  */
 class CommonBackdropRenderTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('common_test');
   }

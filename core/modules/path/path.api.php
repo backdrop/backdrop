@@ -114,10 +114,13 @@ function hook_path_delete($path) {
  *       entities of this type will have a "path" property added to their
  *       objects upon loading.
  *   - label: Translated label for the settings group.
- *   - pattern description: The translated label for the default pattern (e.g.,
- *       t('Default path pattern (applies to all content types with blank
- *       patterns)')
- *   - pattern default: Default pattern  (e.g. 'content/[node:title]')
+ *   - pattern description: The translated label for the default URL alias
+ *       pattern (e.g. t('Default path pattern (applies to all content types
+ *       with blank patterns)')
+ *   - pattern default: Default URL alias pattern (e.g. 'content/[node:title]')
+ *   - type delete callback: The name of the function that should be run for
+ *       bulk deletion of entity bundle types.
+ *       See node_path_type_delete_callback() for an example.
  *   - batch update callback: The name of function that should be ran for
  *       bulk update. See node_path_bulk_update_batch_process() for an example.
  *   - batch file: The name of the file with the bulk update function.
@@ -140,6 +143,7 @@ function hook_path_info() {
     'label' => t('File paths'),
     'pattern description' => t('Default path pattern (applies to all file types with blank patterns below)'),
     'pattern default' => 'files/[file:name]',
+    'type delete callback' => 'node_path_type_delete_callback',
     'batch update callback' => 'file_entity_path_bulk_update_batch_process',
     'batch file' => 'file.path.inc',
   );

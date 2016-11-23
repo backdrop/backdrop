@@ -61,6 +61,7 @@ class LayoutAccess extends LayoutHandler {
    * Settings form for configuring this access item.
    */
   function form(&$form, &$form_state) {
+    /* @var Layout|LayoutMenuItem $item */
     if ($form_state['menu_item']) {
       $item = $form_state['menu_item'];
     }

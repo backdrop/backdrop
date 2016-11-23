@@ -177,6 +177,7 @@ function template_preprocess_node(&$variables) {
   $variables['node_url']  = url($uri['path'], $uri['options']);
   $variables['title']     = check_plain($node->title);
   $variables['page']      = $variables['view_mode'] == 'full' && node_is_page($node);
+  $variables['block']     = $variables['view_mode'] == 'block';
 
   // Flatten the node entity's member fields.
   $variables = array_merge((array) $node, $variables);
@@ -193,11 +194,13 @@ function template_preprocess_node(&$variables) {
   // Display post information only on certain node types.
   $node_type = node_type_get_type($node->type);
   if ($node_type->settings['node_submitted']) {
-    $variables['display_submitted'] = TRUE;
-    $variables['submitted'] = t('Submitted by !username on !datetime', array('!username' => $variables['name'], '!datetime' => $variables['date']));
-    $variables['user_picture'] = '';
-    if ($node_type->settings['node_user_picture']) {
-      $variables['user_picture'] = theme('user_picture', array('account' => $node));
+    if (!$variables['block'] || ($variables['block'] && !empty($variables['elements']['#display_submitted']))) {
+      $variables['display_submitted'] = TRUE;
+      $variables['submitted'] = t('Submitted by !username on !datetime', array('!username' => $variables['name'], '!datetime' => $variables['date']));
+      $variables['user_picture'] = '';
+      if ($node_type->settings['node_user_picture']) {
+        $variables['user_picture'] = theme('user_picture', array('account' => $node));
+      }
     }
   }
   else {

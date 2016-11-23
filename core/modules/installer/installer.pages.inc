@@ -28,6 +28,21 @@ function installer_browser_page($type) {
       backdrop_set_message(t('You have recently installed modules. <a href="@url">Continue to the enable page.</a>', array('@url' => url('admin/installer/install/enable'))), 'status', FALSE);
     }
   }
+
+  switch($type) {
+    case 'layout':
+      backdrop_set_title(t('Install layouts'));
+      break;
+    case 'module':
+      backdrop_set_title(t('Install modules'));
+      break;
+    case 'theme':
+      backdrop_set_title(t('Install themes'));
+      break;
+    default:
+      break;
+  }
+
   // Save needed filters to session.
   if (isset($_GET['repository'])) {
     $_SESSION['installer_browser_sever_filter'] = $_GET['repository'];
@@ -703,7 +718,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         '#type' => 'link',
         '#name' => 'cancel',
         '#title' => t('Finish without enabling'),
-        '#href' => 'admin/install/reset/module/all',
+        '#href' => 'admin/installer/reset/module/all',
         '#options' => array(),
       );
     }
@@ -714,7 +729,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         '#type' => 'link',
         '#name' => 'cancel',
         '#title' => t('Cancel'),
-        '#href' => 'admin/install/reset/module/all',
+        '#href' => 'admin/installer/reset/module/all',
         '#options' => array(),
       );
       $form['missing'] = array(

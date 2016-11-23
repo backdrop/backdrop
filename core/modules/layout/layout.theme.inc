@@ -9,6 +9,7 @@
  */
 function theme_layout_reorder_layouts($variables) {
   $element = $variables['element'];
+  $rows = array();
 
   // Assemble the data for a table from everything in $form['handlers']
   foreach (element_children($element) as $layout_name) {
@@ -51,11 +52,11 @@ function theme_layout_info($variables) {
   // Build template thumbnail preview
   $preview_path = $info['path'] . '/' . $info['preview'];
   $preview_img = theme('image', array('uri' => $preview_path));
-  $preview = l($preview_img, 'admin/structure/layouts/manage/' . $layout->name . '/edit', array('html' => TRUE));
+  $preview = l($preview_img, 'admin/structure/layouts/manage/' . $layout->name, array('html' => TRUE));
 
   // Create a link to the settings page
-  $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/settings');
-  
+  $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/configure');
+
   $output = '';
   $output .= '<div class="layout-info">';
   $output .= $preview;
@@ -76,6 +77,7 @@ function theme_layout_info($variables) {
  * @return string
  */
 function theme_layout_condition_info($variables) {
+  /* @var Layout $layout */
   $layout = $variables['layout'];
   // Build a list of visibility conditions on this layout
   $conditions = array();
@@ -214,7 +216,7 @@ function layout_preprocess_layout(&$variables) {
       if ($settings['title_display'] === LAYOUT_TITLE_NONE) {
         $variables['title'] = NULL;
       }
-      elseif ($settings['title_display'] === LAYOUT_TITLE_CUSTOM) {
+      elseif ($settings['title_display'] === LAYOUT_TITLE_CUSTOM || ($settings['title_display'] === LAYOUT_TITLE_BLOCK && !empty($settings['title']))) {
         $variables['title'] = check_plain(t($settings['title']));
         backdrop_set_title(t($settings['title']));
       }
@@ -230,7 +232,7 @@ function layout_preprocess_layout(&$variables) {
     }
   }
   else {
-    $variables['title'] = t('Page title');
+    $variables['title'] = $variables['content']['title'];
   }
 
   if (!$variables['admin']) {
@@ -248,8 +250,23 @@ function template_preprocess_block(&$variables) {
   $style = $block->style;
 
   $variables['classes'] = array();
+  $variables['attributes'] = array();
   $variables['title_prefix'] = '';
   $variables['title_suffix'] = '';
+
+  // Add the hero background image inline. This could also be added in a
+  // specific template_preprocess_block__layout__hero() function, but we add
+  // it here just to cut down on unnecessary separation.
+  if (get_class($block) == 'BlockHero') {
+    $variables['classes'][] = 'block-hero';
+    if (isset($block->settings['image_path'])) {
+      $variables['attributes']['style'] = 'background-image:url(' . $block->settings['image_path'] . ');';
+      $variables['classes'][] = 'block-hero-image';
+    }
+    else {
+      $variables['classes'][] = 'block-hero-no-image';
+    }
+  }
 
   if (module_exists('contextual') && user_access('access contextual links')) {
     $links = array();
@@ -320,7 +337,6 @@ function template_preprocess_block_dynamic(&$variables) {
 
   // Classes for the wrapper set in template_preprocess_block().
   $variables['wrapper_tag'] = $style->settings['wrapper_tag'];
-  $variables['attributes'] = array();
 
   // Title tag and classes.
   $variables['title_tag'] = $style->settings['title_tag'];

@@ -200,8 +200,14 @@ CKEDITOR.plugins.add('backdropimage', {
       modes: {wysiwyg: 1},
       canUndo: true,
       exec: function (editor, data) {
+        // Default to uploads being enabled, unless specifically requested not
+        // to be. Access permission is checked in the back-end form itself, this
+        // is just to prevent UX confusion from allowing uploads but then having
+        // them cleaned up by Backdrop's temporary file cleanup.
+        var uploadsEnabled = editor.element.$.getAttribute('data-editor-uploads') === 'false' ? 0 : 1;
         var dialogSettings = {
           title: data.dialogTitle,
+          uploads: uploadsEnabled,
           dialogClass: 'editor-image-dialog'
         };
         Backdrop.ckeditor.openDialog(editor, editor.config.backdrop.imageDialogUrl, data.existingValues, data.saveCallback, dialogSettings);

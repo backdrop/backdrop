@@ -169,49 +169,6 @@ define('BACKDROP_CACHE_GLOBAL', 0x0008);
  */
 
 /**
- * Adds content to a specified region.
- *
- * @param $region
- *   Page region the content is added to.
- * @param $data
- *   Content to be added.
- */
-function backdrop_add_region_content($region = NULL, $data = NULL) {
-  static $content = array();
-
-  if (isset($region) && isset($data)) {
-    $content[$region][] = $data;
-  }
-  return $content;
-}
-
-/**
- * Gets assigned content for a given region.
- *
- * @param $region
- *   A specified region to fetch content for. If NULL, all regions will be
- *   returned.
- * @param $delimiter
- *   Content to be inserted between imploded array elements.
- */
-function backdrop_get_region_content($region = NULL, $delimiter = ' ') {
-  $content = backdrop_add_region_content();
-  if (isset($region)) {
-    if (isset($content[$region]) && is_array($content[$region])) {
-      return implode($delimiter, $content[$region]);
-    }
-  }
-  else {
-    foreach (array_keys($content) as $region) {
-      if (is_array($content[$region])) {
-        $content[$region] = implode($delimiter, $content[$region]);
-      }
-    }
-    return $content;
-  }
-}
-
-/**
  * Gets the name of the currently active installation profile.
  *
  * When this function is called during Backdrop's initial installation process,
@@ -729,6 +686,18 @@ function backdrop_encode_path($path) {
 }
 
 /**
+ * A wrapper function for deprecated menu entries redirecting to their new path.
+ *
+ * @see backdrop_goto()
+ *
+ * @since 1.5.0
+ */
+function backdrop_goto_deprecated($path = '', array $options = array(), $http_response_code = 302) {
+  watchdog('system', 'The path %path has been deprecated and will be removed in the next major release of Backdrop. This path was called from %referrer. It is recommended to remove it from any existing links.', array('%path' => $path, '%referrer' => $_SERVER['HTTP_REFERER']), WATCHDOG_DEPRECATED);
+  backdrop_goto($path, $options, $http_response_code);
+}
+
+/**
  * Sends the user to a different page.
  *
  * This issues an on-site HTTP redirect. The function makes sure the redirected
@@ -856,7 +825,8 @@ function backdrop_access_denied() {
  *   - headers: An array containing request headers to send as name/value pairs.
  *   - method: A string containing the request method. Defaults to 'GET'.
  *   - data: A string containing the request body, formatted as
- *     'param=value&param=value&...'. Defaults to NULL.
+ *     'param=value&param=value&...'; to generate this, use http_build_query().
+ *     Defaults to NULL.
  *   - max_redirects: An integer representing how many times a redirect
  *     may be followed. Defaults to 3.
  *   - timeout: A float representing the maximum number of seconds the function
@@ -3097,7 +3067,7 @@ function backdrop_get_path($type, $name) {
 }
 
 /**
- * Returns the base URL path (i.e., directory) of the Backdrop installation.
+ * Returns the base path (i.e., directory) of the Backdrop installation.
  *
  * base_path() adds a "/" to the beginning and end of the returned path if the
  * path is not empty. At the very least, this will return "/".
@@ -3251,6 +3221,12 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
  */
 function backdrop_add_css($data = NULL, $options = NULL) {
   $css = &backdrop_static(__FUNCTION__, array());
+  $count = &backdrop_static(__FUNCTION__ . '_count', 0);
+
+  // Reset the order counter every time the number of entries in $css is 0.
+  if (count($css) === 0) {
+    $count = 0;
+  }
 
   // Construct the options, taking the defaults into consideration.
   if (isset($options)) {
@@ -3286,7 +3262,8 @@ function backdrop_add_css($data = NULL, $options = NULL) {
     }
 
     // Always add a tiny value to the weight, to conserve the insertion order.
-    $options['weight'] += count($css) / 1000;
+    $options['weight'] += $count / 1000;
+    $count++;
 
     // Add an every page weight for sorting.
     $options['every_page_weight'] = $options['every_page'] ? -1 : 1;
@@ -5523,6 +5500,56 @@ function backdrop_json_output($var = NULL) {
 }
 
 /**
+ * Packages and sends the result of a page callback to the browser as JSON.
+ *
+ * @param $page_callback_result
+ *   The result of a page callback. Can be one of:
+ *   - NULL: to indicate no content.
+ *   - An integer menu status constant: to indicate an error condition.
+ *   - An array of raw data to be printed as JSON.
+ *
+ * @since 1.5.0
+ *
+ * @see backdrop_deliver_page()
+ * @see backdrop_deliver_html_page()
+ */
+function backdrop_json_deliver($page_callback_result) {
+
+  // Menu status constants are integers; page content is a string or array.
+  if (is_int($page_callback_result)) {
+    switch ($page_callback_result) {
+      case MENU_NOT_FOUND:
+        backdrop_add_http_header('Status', '404 Not Found');
+        watchdog('page not found', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
+        $output = array('error' => t('Page not found'));
+        break;
+
+      case MENU_ACCESS_DENIED:
+        backdrop_add_http_header('Status', '403 Forbidden');
+        watchdog('access denied', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
+        $output = array('error' => t('Access denied'));
+        break;
+
+      case MENU_SITE_OFFLINE:
+        backdrop_add_http_header('Status', '503 Service unavailable');
+        backdrop_set_title(t('Site under maintenance'));
+        $output = array('error' => t('Site is offline.'));
+        break;
+    }
+  }
+  elseif (isset($page_callback_result)) {
+    $output = $page_callback_result;
+  }
+
+  if (isset($output)) {
+    backdrop_json_output($page_callback_result);
+  }
+
+  // Perform end-of-request tasks.
+  backdrop_page_footer();
+}
+
+/**
  * Gets a salt useful for hardening against SQL injection.
  *
  * @return
@@ -5666,6 +5693,7 @@ function _backdrop_bootstrap_full() {
  * @deprecated since 1.3.0
  */
 function backdrop_page_set_cache() {
+  watchdog_deprecated_function('common', __FUNCTION__);
   $cache = FALSE;
   if (backdrop_page_is_cacheable()) {
     $page_content = ob_get_clean();
@@ -6462,7 +6490,7 @@ function backdrop_render(&$elements) {
  *
  * @return string
  *   The rendered HTML of all children of the element.
-
+ *
  * @see backdrop_render()
  */
 function backdrop_render_children(&$element, $children_keys = NULL) {
@@ -6858,17 +6886,17 @@ function element_info_property($type, $property_name, $default = NULL) {
  *   The input array to be sorted.
  * @param array $keys
  *   An array of keys to sort by. Values must be PHP sorting type flags,
- *   either SORT_NUMERIC or SORT_STRING, and default to SORT_NUMERIC if an 
- *   unindexed array is passed in. 
+ *   either SORT_NUMERIC or SORT_STRING, and default to SORT_NUMERIC if an
+ *   unindexed array is passed in.
  *
  * Example usage:
  * @code
  * // Sort by a single numeric key:
  * backdrop_sort($my_array, array('weight' => SORT_NUMERIC));
- * 
+ *
  * // Short-hand sort by a numeric key:
  * backdrop_sort($my_array, array('weight'));
- * 
+ *
  * // Sort by numeric and string keys.
  * backdrop_sort($my_array, array('weight' => SORT_NUMERIC, 'title' => SORT_STRING));
  * @endcode
@@ -7468,14 +7496,14 @@ function backdrop_common_theme() {
     ),
     // From theme.maintenance.inc.
     'maintenance_page' => array(
-      'variables' => array('content' => NULL, 'show_messages' => TRUE),
+      'variables' => array('content' => NULL, 'sidebar' => NULL, 'footer' => NULL, 'show_messages' => TRUE),
       'template' => 'templates/maintenance-page',
     ),
     'update_page' => array(
-      'variables' => array('content' => NULL, 'show_messages' => TRUE),
+      'variables' => array('content' => NULL, 'sidebar' => NULL, 'footer' => NULL, 'show_messages' => TRUE),
     ),
     'install_page' => array(
-      'variables' => array('content' => NULL),
+      'variables' => array('content' => NULL, 'sidebar' => NULL, 'footer' => NULL),
     ),
     'task_list' => array(
       'variables' => array('items' => NULL, 'active' => NULL),
@@ -8121,6 +8149,7 @@ function watchdog_severity_levels() {
     WATCHDOG_NOTICE  => t('notice'),
     WATCHDOG_INFO    => t('info'),
     WATCHDOG_DEBUG   => t('debug'),
+    WATCHDOG_DEPRECATED => t('deprecated'),
   );
 }
 

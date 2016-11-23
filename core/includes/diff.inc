@@ -1248,7 +1248,7 @@ class BackdropDiffFormatter extends DiffFormatter {
     return array(
       array(
         'data' => '+',
-        'class' => 'diff-marker',
+        'class' => 'diff-marker diff-addedline',
       ),
       array(
         'data' => $line,
@@ -1261,7 +1261,7 @@ class BackdropDiffFormatter extends DiffFormatter {
     return array(
       array(
         'data' => '-',
-        'class' => 'diff-marker',
+        'class' => 'diff-marker diff-deletedline',
       ),
       array(
         'data' => $line,

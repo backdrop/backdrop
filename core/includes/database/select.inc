@@ -717,6 +717,11 @@ class SelectQueryExtender implements SelectQueryInterface {
     return $this->query->preExecute($query);
   }
 
+  /**
+   * Implements SelectQueryInterface::execute().
+   *
+   * @return NULL|DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch|stdClass[]
+   */
   public function execute() {
     // By calling preExecute() here, we force it to preprocess the extender
     // object rather than just the base query object.  That means
@@ -992,28 +997,52 @@ class SelectQuery extends Query implements SelectQueryInterface {
 
   /* Implementations of QueryAlterableInterface. */
 
+  /**
+   * Implements QueryAlterableInterface::addTag().
+   *
+   * @return SelectQuery
+   */
   public function addTag($tag) {
     $this->alterTags[$tag] = 1;
     return $this;
   }
 
+  /**
+   * Implements QueryAlterableInterface::hasTag().
+   */
   public function hasTag($tag) {
     return isset($this->alterTags[$tag]);
   }
 
+  /**
+   * Implements QueryAlterableInterface::hasAllTags().
+   */
   public function hasAllTags() {
     return !(boolean)array_diff(func_get_args(), array_keys($this->alterTags));
   }
 
+  /**
+   * Implements QueryAlterableInterface::hasAnyTag().
+   */
   public function hasAnyTag() {
     return (boolean)array_intersect(func_get_args(), array_keys($this->alterTags));
   }
 
+  /**
+   * Implements QueryAlterableInterface::addMetaData().
+   *
+   * @return SelectQuery
+   */
   public function addMetaData($key, $object) {
     $this->alterMetaData[$key] = $object;
     return $this;
   }
 
+  /**
+   * Implements QueryAlterableInterface::getMetaData().
+   *
+   * @return SelectQuery
+   */
   public function getMetaData($key) {
     return isset($this->alterMetaData[$key]) ? $this->alterMetaData[$key] : NULL;
   }
@@ -1356,6 +1385,20 @@ class SelectQuery extends Query implements SelectQueryInterface {
 
     // Modules may alter all queries or only those having a particular tag.
     if (!empty($this->alterTags)) {
+      // Many contrib modules (wrongly) assume that query tags used for
+      // access-checking purposes follow the pattern $entity_type . '_access'.
+      // But this is not the case for taxonomy terms, since core used to add
+      // term_access instead of taxonomy_term_access to its queries. Provide
+      // backwards compatibility by adding both tags here instead of attempting
+      // to fix all contrib modules in a coordinated effort.
+      // TODO:
+      // - Extract this mechanism into a hook as part of a public (non-security)
+      //   issue.
+      // - Emit E_USER_DEPRECATED if term_access is used.
+      $term_access_tags = array('term_access' => 1, 'taxonomy_term_access' => 1);
+      if (array_intersect_key($this->alterTags, $term_access_tags)) {
+        $this->alterTags += $term_access_tags;
+      }
       $hooks = array('query');
       foreach ($this->alterTags as $tag => $value) {
         $hooks[] = 'query_' . $tag;
@@ -1381,6 +1424,8 @@ class SelectQuery extends Query implements SelectQueryInterface {
 
   /**
    * Implements SelectQueryInterface::execute().
+   *
+   * @return NULL|DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch|stdClass[]
    */
   public function execute() {
     // If validation fails, simply return NULL.

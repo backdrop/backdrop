@@ -27,7 +27,7 @@ function update_settings($form, &$form_state) {
 
   $form['update_check_disabled'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Check for updates of disabled modules, themes, and layouts'),
+    '#title' => t('Check for updates of disabled and uninstalled modules, themes, and layouts.'),
     '#default_value' => $config->get('update_disabled_extensions'),
   );
 
@@ -105,10 +105,11 @@ function update_settings_validate($form, &$form_state) {
  * Form submission handler for update_settings().
  *
  * Also invalidates the cache of available updates if the "Check for updates of
- * disabled modules, themes, and layouts" setting is being changed. The available updates
- * report needs to refetch available update data after this setting changes or
- * it would show misleading things (e.g., listing the disabled projects on the
- * site with the "No available releases found" warning).
+ * disabled and uninstalled modules, themes, and layouts." setting is being
+ * changed. The available updates report needs to refetch available update data
+ * after this setting changes or it would show misleading things (e.g., listing
+ * the disabled projects on the site with the "No available releases found"
+ * warning).
  *
  * @see update_settings_validate()
  */
@@ -127,7 +128,7 @@ function update_settings_submit($form, $form_state) {
     ->set('update_emails', $form_state['notify_emails'])
     ->set('update_threshold', $form_state['values']['update_notification_threshold'])
     ->save();
-    
+
   // Display status messages for this form.
   backdrop_set_message(t('The configuration options have been saved.'));
 }

@@ -12,7 +12,7 @@
  * - $content: The actual content of the block.
  */
 ?>
-<div class="<?php print implode(' ', $classes); ?>">
+<div class="<?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
 
 <?php print render($title_prefix); ?>
 <?php if ($title): ?>

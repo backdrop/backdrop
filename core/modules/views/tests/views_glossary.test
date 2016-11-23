@@ -11,6 +11,8 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests glossary view ( summary of arguments ).
  */
 class ViewsGlossaryTestCase extends ViewsSqlTest {
+  protected $profile = 'testing';
+
   public function setUp() {
     parent::setUp('views', 'views_test');
   }

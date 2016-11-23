@@ -36,8 +36,8 @@ function dropbuttonClickHandler (e) {
  * All secondary actions beyond the first in the list are presented in a
  * dropdown list accessible through a toggle arrow associated with the button.
  *
- * @param {jQuery} $dropbutton
- *   A jQuery element.
+ * @param DOMElement dropbutton
+ *   A DOM element.
  *
  * @param {Object} settings
  *   A list of options including:
@@ -153,7 +153,7 @@ $.extend(DropButton.prototype, {
  */
 Backdrop.theme.prototype.dropbuttonToggle = function (options) {
   return '<li class="dropbutton-toggle"><button type="button" role="button"><span class="dropbutton-arrow"><span class="visually-hidden">' + options.title + '</span></span></button></li>';
-}
+};
 
 // Expose constructor in the public space.
 Backdrop.DropButton = DropButton;

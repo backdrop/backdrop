@@ -688,7 +688,22 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     backdrop_deliver_html_page() unless a value is inherited from a parent menu
  *     item. Note that this function is called even if the access checks fail,
  *     so any custom delivery callback function should take that into account.
- *     See backdrop_deliver_html_page() for an example.
+ *     Backdrop includes the following delivery callbacks in core:
+ *     - backdrop_deliver_html_page(): The default used for printing HTML pages.
+ *       Menu items with this callback may be wrapped in a layout template by
+ *       Layout module. See layout_route_handler().
+ *     - backdrop_json_deliver: The value of the menu callback will be rendered
+ *       as JSON without any further processing. This delivery callback should
+ *       be used on any path that should return a JSON response at all times,
+ *       even on access denied or 404 pages.
+ *     - ajax_deliver: This delivery callback is used when returning AJAX
+ *       commands that will be interpreted by Backdrop core's ajax.js file. This
+ *       delivery callback is set automatically if the menu callback returns a
+ *       renderable element with the #type property "ajax_commands".
+ *     - ajax_deliver_dialog: This delivery callback is used when the contents
+ *       of a menu callback should be returned as AJAX commands to open as a
+ *       dialog. This delivery callback is set automatically if the requesting
+ *       AJAX call requested a dialog. See system_page_delivery_callback_alter().
  *   - "access callback": A function returning TRUE if the user has access
  *     rights to this menu item, and FALSE if not. It can also be a boolean
  *     constant instead of a function, and you can also use numeric values
@@ -725,6 +740,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     "file". This defaults to the path to the module implementing the hook.
  *   - "load arguments": An array of arguments to be passed to each of the
  *     wildcard object loaders in the path, after the path argument itself.
+ *
  *     For example, if a module registers path node/%node/revisions/%/view
  *     with load arguments set to array(3), the '%node' in the path indicates
  *     that the loader function node_load() will be called with the second
@@ -732,6 +748,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     indicates that the fourth path component will also be passed to
  *     node_load() (numbering of path components starts at zero). So, if path
  *     node/12/revisions/29/view is requested, node_load(12, 29) will be called.
+ *
  *     There are also two "magic" values that can be used in load arguments.
  *     "%index" indicates the index of the wildcard path component. "%map"
  *     indicates the path components as an array. For example, if a module
@@ -1771,7 +1788,7 @@ function hook_theme_registry_alter(&$theme_registry) {
  * @return
  *   The machine-readable name of the theme that should be used for the current
  *   page request. The value returned from this function will only have an
- *   effect if it corresponds to a currently-active theme on the site. Do not 
+ *   effect if it corresponds to a currently-active theme on the site. Do not
  *   return a value if you do not wish to set a custom theme.
  */
 function hook_custom_theme() {
@@ -1807,6 +1824,7 @@ function hook_custom_theme() {
  *     - WATCHDOG_NOTICE: Normal but significant conditions.
  *     - WATCHDOG_INFO: Informational messages.
  *     - WATCHDOG_DEBUG: Debug-level messages.
+ *     - WATCHDOG_DEPRECATED: Deprecated use of a function or feature.
  *   - link: An optional link provided by the module that called the watchdog()
  *     function.
  *   - message: The text of the message to be logged. Variables in the message
@@ -1821,14 +1839,15 @@ function hook_watchdog(array $log_entry) {
   global $base_url, $language;
 
   $severity_list = array(
-    WATCHDOG_EMERGENCY     => t('Emergency'),
-    WATCHDOG_ALERT     => t('Alert'),
-    WATCHDOG_CRITICALI     => t('Critical'),
-    WATCHDOG_ERROR       => t('Error'),
-    WATCHDOG_WARNING   => t('Warning'),
-    WATCHDOG_NOTICE    => t('Notice'),
-    WATCHDOG_INFO      => t('Info'),
-    WATCHDOG_DEBUG     => t('Debug'),
+    WATCHDOG_EMERGENCY  => t('Emergency'),
+    WATCHDOG_ALERT      => t('Alert'),
+    WATCHDOG_CRITICAL   => t('Critical'),
+    WATCHDOG_ERROR      => t('Error'),
+    WATCHDOG_WARNING    => t('Warning'),
+    WATCHDOG_NOTICE     => t('Notice'),
+    WATCHDOG_INFO       => t('Info'),
+    WATCHDOG_DEBUG      => t('Debug'),
+    WATCHDOG_DEPRECATED => t('Deprecated Use'),
   );
 
   $to = 'someone@example.com';
@@ -3122,7 +3141,7 @@ function hook_autoload_info_alter(&$class_registry) {
  * inspect later. It is important to remove any temporary variables using
  * state_del() before your last task has completed and control is handed
  * back to the installer.
- * 
+ *
  * @param array $install_state
  *   An array of information about the current installation state.
  *

@@ -2771,27 +2771,6 @@ function template_preprocess_maintenance_page(&$variables) {
   $favicon = backdrop_get_favicon();
   backdrop_add_html_head_link(array('rel' => 'shortcut icon', 'href' => $favicon['path'], 'type' => $favicon['type']));
 
-  global $theme;
-  // Retrieve the theme data to list all available regions.
-  $theme_data = list_themes();
-  $regions = $theme_data[$theme]->info['regions'];
-
-  // Get all region content set with backdrop_add_region_content().
-  foreach (array_keys($regions) as $region) {
-    // Assign region to a region variable.
-    $region_content = backdrop_get_region_content($region);
-    isset($variables[$region]) ? $variables[$region] .= $region_content : $variables[$region] = $region_content;
-  }
-
-  // Setup layout variable.
-  $variables['layout'] = 'none';
-  if (!empty($variables['sidebar_first'])) {
-    $variables['layout'] = 'first';
-  }
-  if (!empty($variables['sidebar_second'])) {
-    $variables['layout'] = ($variables['layout'] == 'first') ? 'both' : 'second';
-  }
-
   // Construct page title
   if (backdrop_get_title()) {
     $head_title = array(
@@ -2834,17 +2813,6 @@ function template_preprocess_maintenance_page(&$variables) {
   $variables['classes'][] = 'in-maintenance';
   if (isset($variables['db_is_active']) && !$variables['db_is_active']) {
     $variables['classes'][] = 'db-offline';
-  }
-
-  if ($variables['layout'] == 'both') {
-    $variables['classes'][] = 'two-sidebars';
-  }
-  elseif ($variables['layout'] == 'none') {
-    $variables['classes'][] = 'no-sidebars';
-  }
-  else {
-    $variables['classes'][] = 'one-sidebar';
-    $variables['classes'][] = 'sidebar-' . $variables['layout'];
   }
 
   // Dead databases will show error messages so supplying this template will

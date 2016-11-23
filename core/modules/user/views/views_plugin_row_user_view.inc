@@ -6,7 +6,7 @@
  */
 
 /**
- * A row plugin which renders a user via user_view.
+ * A row plugin which renders a user account via user_view.
  *
  * @ingroup views_row_plugins
  */
@@ -14,7 +14,7 @@ class views_plugin_row_user_view extends views_plugin_row {
   var $base_table = 'users';
   var $base_field = 'uid';
 
-  // Store the users to be used for pre_render.
+  // Store the user accounts to be used for pre_render.
   var $users = array();
 
   function option_definition() {
@@ -34,7 +34,7 @@ class views_plugin_row_user_view extends views_plugin_row {
       '#title' => t('View mode'),
       '#default_value' => $this->options['view_mode'],
      );
-    $form['help']['#markup'] = t("Display the user with standard user view. It might be necessary to add a user-profile.tpl.php in your themes template folder, because the default <a href=\"@user-profile-api-link\">user-profile</a>e template don't show the username per default.", array('@user-profile-api-link' => url('http://api.drupal.org/api/drupal/modules--user--user-profile.tpl.php/7')));
+    $form['help']['#markup'] = t("Display the user account using the standard user account view. It might be necessary to add a user-profile.tpl.php file in your themes template folder, because the default <a href=\"@user-profile-api-link\">user-profile</a> template doesn't show the username.", array('@user-profile-api-link' => url('https://api.backdropcms.org/api/backdrop/core%21modules%21user%21templates%21user-profile.tpl.php/1')));
   }
 
 

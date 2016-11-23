@@ -9,12 +9,12 @@
   <body class="<?php print implode(' ', $classes); ?>">
     <div id="page">
 
-    <?php if ($sidebar_first): ?>
-      <div id="sidebar-first" class="sidebar">
+    <?php if ($sidebar): ?>
+      <div id="sidebar" class="sidebar">
         <?php if ($logo): ?>
           <img id="logo" src="<?php print $logo ?>" alt="<?php print $site_name ?>" />
         <?php endif; ?>
-        <?php print $sidebar_first ?>
+        <?php print $sidebar ?>
       </div>
     <?php endif; ?>
 
@@ -28,7 +28,7 @@
   </div>
 
   <footer role="contentinfo">
-    <?php print $page_bottom; ?>
+    <?php print $footer; ?>
   </footer>
 
   </body>
