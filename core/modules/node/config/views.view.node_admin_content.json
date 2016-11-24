@@ -3,7 +3,7 @@
     "name": "node_admin_content",
     "description": "",
     "module": "node",
-    "storage": 2,
+    "storage": 4,
     "tag": "default",
     "disabled": false,
     "base_table": "node",
