@@ -1839,7 +1839,7 @@ function _install_configure_form($form, &$form_state, &$install_state) {
   $form['admin_account']['account']['mail'] = array(
     '#type' => 'email',
     '#title' => st('E-mail address'),
-    '#description' => st("Notifications about pending security upadtes and site problems will be sent to this email address. It can be hosted on an external domain (such as a gmail.com or hotmail.com email)."),
+    '#description' => st("Notifications about pending security upadtes and site problems will be sent to this email address. It can be an address hosted on an external domain (such as a gmail.com or hotmail.com email)."),
     '#required' => TRUE,
     '#weight' => -5,
   );
