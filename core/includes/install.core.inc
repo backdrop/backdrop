@@ -1794,6 +1794,13 @@ function install_check_requirements($install_state) {
 function _install_configure_form($form, &$form_state, &$install_state) {
   include_once BACKDROP_ROOT . '/core/includes/locale.inc';
 
+  if (!empty(ini_get('sendmail_from'))) {
+    $site_email = ini_get('sendmail_from');
+  }
+  else {
+    $site_email = "no-reply@" . $_SERVER['SERVER_NAME'];
+  }
+
   $form['site_information'] = array(
     '#type' => 'fieldset',
     '#title' => st('Site information'),
@@ -1808,8 +1815,8 @@ function _install_configure_form($form, &$form_state, &$install_state) {
   $form['site_information']['site_mail'] = array(
     '#type' => 'email',
     '#title' => st('Site e-mail address'),
-    '#default_value' => ini_get('sendmail_from'),
-    '#description' => st("Automated e-mails, such as registration information, will be sent from this address. Use an address ending in your site's domain to help prevent these e-mails from being flagged as spam."),
+    '#default_value' => $site_email,
+    '#description' => st("Automated outgoing e-mails, such as registration information, will be sent from this address. Use an email address ending in your site's domain, since using an email address from an external domain (such as a gmail.com or hotmail.com email) will result in e-mails being flagged as spam."),
     '#required' => TRUE,
     '#weight' => -15,
   );
@@ -1832,6 +1839,7 @@ function _install_configure_form($form, &$form_state, &$install_state) {
   $form['admin_account']['account']['mail'] = array(
     '#type' => 'email',
     '#title' => st('E-mail address'),
+    '#description' => st("Notifications about pending security upadtes and site problems will be sent to this email address. It can belong to an external domain (such as a gmail.com or hotmail.com email)."),
     '#required' => TRUE,
     '#weight' => -5,
   );
