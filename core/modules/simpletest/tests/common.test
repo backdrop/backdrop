@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for common.inc functionality.
@@ -66,6 +65,8 @@ class CommonBackdropAlterTestCase extends BackdropWebTestCase {
  * inheriting from a web test case rather than a unit test case.
  */
 class CommonURLUnitTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * Confirm that invalid text given as $path is filtered.
    */
@@ -154,6 +155,27 @@ class CommonURLUnitTestCase extends BackdropWebTestCase {
     $this->assertEqual(backdrop_http_build_query(array(' &#//+%20@۞' => 'a')), '%20%26%23//%2B%2520%40%DB%9E=a', 'Key was properly encoded.');
     $this->assertEqual(backdrop_http_build_query(array('a' => '1', 'b' => '2', 'c' => '3')), 'a=1&b=2&c=3', 'Multiple values were properly concatenated.');
     $this->assertEqual(backdrop_http_build_query(array('a' => array('b' => '2', 'c' => '3'), 'd' => 'foo')), 'a[b]=2&a[c]=3&d=foo', 'Nested array was properly encoded.');
+  }
+
+  /**
+   * Test backdrop_get_bare_domain().
+   */
+  function testBackdropGetBareDomain() {
+    $original = 'http://www.example.com/path-to-page';
+    $result = 'example.com';
+    $this->assertEqual(backdrop_get_bare_domain($original), $result, "Bare domain $result was properly determined.");
+
+    $original = 'http://example.com/path-to-page';
+    $result = 'example.com';
+    $this->assertEqual(backdrop_get_bare_domain($original), $result, "Bare domain $result was properly determined.");
+
+    $original = 'https://www.example.co.uk/path-to-page';
+    $result = 'example.co.uk';
+    $this->assertEqual(backdrop_get_bare_domain($original), $result, "Bare domain $result was properly determined.");
+
+    $original = 'http://example.co.uk/path-to-page';
+    $result = 'example.co.uk';
+    $this->assertEqual(backdrop_get_bare_domain($original), $result, "Bare domain $result was properly determined.");
   }
 
   /**

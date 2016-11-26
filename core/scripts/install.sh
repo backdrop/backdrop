@@ -28,7 +28,6 @@ Options:
 --db-url=<mysql://root:pass@127.0.0.1/db  A database URL. Only required for initial install - not re-install.
 
 --locale=<en-GB>                          A short language code. Sets the default site language. Language files must already be present.
---site-mail                               From: for system mailings. Defaults to admin@example.com
 --site-name                               Defaults to Backdrop
 
 \n
@@ -57,7 +56,6 @@ $options = array(
   'db-prefix' => '',
   'db-url' => '',
   'locale' => 'en',
-  'site-mail' => 'admin@example.com',
   'site-name' => 'Backdrop',
   'root' => '',
 );
@@ -138,7 +136,6 @@ $settings = array(
     ),
     'install_configure_form' => array(
       'site_name' => $options['site-name'],
-      'site_mail' => $options['site-mail'],
       'account' => array(
         'name' => $options['account-name'],
         'mail' => $options['account-mail'],

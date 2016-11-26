@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the contact module.
@@ -9,25 +8,24 @@
  * Implements hook_install().
  */
 function contact_install() {
-  $site_mail = config_get('system.core', 'site_mail');
-  if (empty($site_mail))  {
-    $site_mail = ini_get('sendmail_from');
+  $email = db_query("SELECT mail FROM {users} WHERE uid = 1 AND status = 1")->fetchField();
+  if ($email) {
+    // Insert a default contact category.
+    $contact = array(
+      'cid' => 1,
+      'category' => 'Website feedback',
+      'recipients' => $email,
+      'reply' => '',
+      'weight' => 1,
+    );
+
+    $config_data['categories'][] = $contact;
+    $config_data['contact_default_category'] = 1;
+
+    $config = config('contact.categories');
+    $config->setData($config_data);
+    $config->save();
   }
-  // Insert a default contact category.
-  $contact = array(
-    'cid' => 1,
-    'category' => 'Website feedback',
-    'recipients' => $site_mail,
-    'reply' => '',
-    'weight' => 1,
-  );
-
-  $config_data['categories'][] = $contact;
-  $config_data['contact_default_category'] = 1;
-
-  $config = config('contact.categories');
-  $config->setData($config_data);
-  $config->save();
 }
 
 /**
@@ -84,4 +82,4 @@ function contact_update_1001() {
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
- 
+

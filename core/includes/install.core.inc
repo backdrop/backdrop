@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * API functions for installing Backdrop.
@@ -366,7 +365,7 @@ function install_run_tasks(&$install_state) {
  *
  * @param $task
  *   An array of information about the task to be run as returned by
- *   hook_install_tasks(). 
+ *   hook_install_tasks().
  * @param $install_state
  *   An array of information about the current installation state. This is
  *   passed in by reference so that it can be modified by the task.
@@ -559,13 +558,13 @@ function install_tasks($install_state) {
       'run' => INSTALL_TASK_RUN_IF_REACHED,
     ),
     'install_verify_requirements' => array(
-      'display_name' => st('Verify requirements'),
+      'display_name' => st('Verify site requirements'),
     ),
     'install_hash_salt' => array(
       'run' => INSTALL_TASK_RUN_IF_REACHED,
     ),
     'install_settings_form' => array(
-      'display_name' => st('Set up database'),
+      'display_name' => st('Set up your database'),
       'type' => 'form',
       'run' => $install_state['settings_verified'] ? INSTALL_TASK_SKIP : INSTALL_TASK_RUN_IF_NOT_COMPLETED,
     ),
@@ -587,7 +586,7 @@ function install_tasks($install_state) {
       'run' => $needs_translations ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
     ),
     'install_configure_form' => array(
-      'display_name' => st('Configure site'),
+      'display_name' => st('Configure your site'),
       'type' => 'form',
     ),
   );
@@ -1808,17 +1807,10 @@ function _install_configure_form($form, &$form_state, &$install_state) {
     '#required' => TRUE,
     '#weight' => -20,
   );
-  $form['site_information']['site_mail'] = array(
-    '#type' => 'email',
-    '#title' => st('Site e-mail address'),
-    '#default_value' => ini_get('sendmail_from'),
-    '#description' => st("Automated e-mails, such as registration information, will be sent from this address. Use an address ending in your site's domain to help prevent these e-mails from being flagged as spam."),
-    '#required' => TRUE,
-    '#weight' => -15,
-  );
+
   $form['admin_account'] = array(
     '#type' => 'fieldset',
-    '#title' => st('Site maintenance account'),
+    '#title' => st('Primary user account'),
     '#collapsible' => FALSE,
   );
 
@@ -1826,7 +1818,7 @@ function _install_configure_form($form, &$form_state, &$install_state) {
   $form['admin_account']['account']['name'] = array('#type' => 'textfield',
     '#title' => st('Username'),
     '#maxlength' => USERNAME_MAX_LENGTH,
-    '#description' => st('Spaces are allowed; punctuation is not allowed except for periods, hyphens, and underscores.'),
+    '#description' => st('Spaces are allowed. Punctuation is not allowed except for periods, pluses, hyphens, and underscores.'),
     '#required' => TRUE,
     '#weight' => -10,
     '#attributes' => array('class' => array('username')),
@@ -1920,7 +1912,6 @@ function install_configure_form_submit($form, &$form_state) {
 
   config('system.core')
     ->set('site_name', $form_state['values']['site_name'])
-    ->set('site_mail', $form_state['values']['site_mail'])
     ->save();
   config('system.date')
     ->set('default_timezone', $form_state['values']['date_default_timezone'])
