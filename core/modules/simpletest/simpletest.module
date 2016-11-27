@@ -78,6 +78,10 @@ function simpletest_config_info() {
     'label' => t('Testing settings'),
     'group' => t('Configuration'),
   );
+  $prefixes['simpletest.testconfig'] = array(
+    'label' => t('Configuration file for testing purposes'),
+    'group' => t('Test Data'),
+  );
   return $prefixes;
 }
 

@@ -2272,3 +2272,30 @@ function form_test_html_id($form, &$form_state) {
   );
   return $form;
 }
+
+/**
+ * A form to test system_settings_form().
+ */
+function form_test_system_config_form() {
+  $config = config('simpletest.testconfig');
+  $sysconfig = config('system.core');
+  $form['#config'] = 'simpletest.testconfig';
+  $form['abc'] = array(
+    '#type' => 'textfield',
+    '#title' => 'abc',
+    '#default_value' => $config->get('abc'),
+  );
+  $form['def'] = array(
+    '#type' => 'textfield',
+    '#title' => 'def',
+    '#default_value' => $config->get('def'),
+  );
+  $form['rss_description'] = array(
+    '#type' => 'textfield',
+    '#title' => 'xyz',
+    '#default_value' => $sysconfig->get('rss_description'),
+    '#config' => 'system.core',
+  );
+
+  return system_settings_form($form);
+}
