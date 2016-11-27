@@ -286,6 +286,7 @@ function contact_form_user_admin_settings_alter(&$form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Contact settings'),
     '#weight' => 0,
+    '#config' => 'contact.settings',
   );
   $form['contact']['contact_default_status'] = array(
     '#type' => 'checkbox',
@@ -293,17 +294,4 @@ function contact_form_user_admin_settings_alter(&$form, &$form_state) {
     '#description' => t('Changing this setting will not affect existing users.'),
     '#default_value' => $config->get('contact_default_status'),
   );
-  array_unshift($form['#submit'], 'contact_user_admin_submit');
-}
-
-/**
- * Form submission handler for contact_form_user_admin_settings_alter().
- *
- * Save the default personal contact setting.
- */
-function contact_user_admin_submit($form, &$form_state) {
-  $config = config('contact.settings');
-  $config->set('contact_default_status', $form_state['values']['contact_default_status']);
-  $config->save();
-  unset($form_state['values']['contact_default_status']);
 }
