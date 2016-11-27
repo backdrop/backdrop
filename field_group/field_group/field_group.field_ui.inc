@@ -189,7 +189,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     );
 
     if ($form_state['formatter_settings_edit'] == $name) {
-      $table[$name]['format']['#cell_attributes'] = array('colspan' => $display_overview ? 3 : 3);
+      $table[$name]['format']['#cell_attributes'] = array('colspan' => $display_overview ? 3 : 2);
       $table[$name]['format']['format_settings'] = array(
         '#type' => 'container',
         '#attributes' => array('class' => array('field-formatter-settings-edit-form')),
@@ -229,7 +229,11 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
         $table[$name]['settings_summary'] = field_group_format_settings_summary($name, $group);
       }
       // Add the configure button.
-      $table[$name]['settings_edit'] = $base_button + array(
+      $table[$name]['settings_edit'] = array(
+        '#type' => 'container',
+        '#attributes' => array('class' => array('field-formatter-settings-edit-wrapper')),
+      );
+      $table[$name]['settings_edit']['edit'] = $base_button + array(
         '#type' => 'submit',
         '#name' => $name . '_group_settings_edit',
         '#value' => t('Edit'),
@@ -237,22 +241,18 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
         '#op' => 'edit',
         // Do not check errors for the 'Edit' button.
         '#limit_validation_errors' => array(),
-        '#prefix' => '<div class="field-formatter-settings-edit-wrapper">',
-        //'#suffix' => '</div>',
       );
-      //if ($display_overview) {
-        $table[$name]['settings_edit']['#suffix'] = l(t('Delete'), $params->admin_path . '/groups/' . $name . '/delete/' . $params->mode) . '</div>';
-      //}
+      if ($display_overview) {
+        $table[$name]['settings_edit']['delete'] = array(
+          '#markup' => l(t('Delete'), $params->admin_path . '/groups/' . $name . '/delete/' . $params->mode),
+        );
+      }
     }
-/*
     if (!$display_overview) {
-      $table[$name] += array(
-        'delete' => array(
-          '#markup' => l(t('Delete'), $params->admin_path . '/groups/' . $name . '/delete/form'),
-        ),
+      $table[$name]['settings_edit']['delete'] = array(
+        '#markup' => l(t('Delete'), $params->admin_path . '/groups/' . $name . '/delete/form'),
       );
     }
-*/
   }
 
   // Additional row: add new group.
@@ -268,7 +268,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
         '#default_value' => 'fieldset',
         '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
       ),
-      '#cell_attributes' => array('colspan' => 3),
+      '#cell_attributes' => array('colspan' => 2),
     ),
   );
 
@@ -1009,6 +1009,3 @@ function field_group_disabled_groups_overview($disabled_groups, $entity_info, $p
   return $table;
 
 }
-/**
- * eof().
- */

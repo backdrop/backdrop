@@ -7,12 +7,13 @@
  * For an overview of all php and javascript hooks, see field_group.api.php.
  * 
  * BACKDROP PORT
- * 1. variable_get/set
+ * 1. variable_get/set [x]
  * 2. fieldset js
  * 3. remove ctools/exportable dependency
  * ctools_export_load_object
  * _exportable_unpack_object
  * _exportable_get_defaults
+ * 4. change drupal to backdrop
  *
  */
 

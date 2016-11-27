@@ -12,3 +12,7 @@
 #edit-refresh {
   display:none;
 }
+
+tr.field-group input.form-submit {
+  float: none;
+}
