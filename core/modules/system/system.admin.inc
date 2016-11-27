@@ -1126,6 +1126,7 @@ function system_site_information_settings($form, &$form_state) {
     $site_mail = ini_get('sendmail_from');
   }
 
+  $form['#config'] = 'system.core';
   $form['site_information'] = array(
     '#type' => 'fieldset',
     '#title' => t('Site details'),
@@ -1255,12 +1256,7 @@ function system_site_information_settings($form, &$form_state) {
   );
 
   $form['#validate'][] = 'system_site_information_settings_validate';
-
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration')
-  );
+  $form['#submit'][] = 'system_site_information_settings_submit';
 
   // Inject human-friendly form element descriptions for logo and favicon.
   foreach (array('logo' => 'logo.png', 'favicon' => 'favicon.ico') as $type => $default) {
@@ -1292,7 +1288,7 @@ function system_site_information_settings($form, &$form_state) {
     }
   }
 
-  return $form;
+  return system_settings_form($form);
 }
 
 /**
@@ -1446,22 +1442,6 @@ function system_site_information_settings_submit($form, &$form_state) {
   else {
     $form_state['values']['site_favicon_mimetype'] = '';
   }
-
-  config('system.core')
-    ->set('site_name', $form_state['values']['site_name'])
-    ->set('site_logo_theme', $form_state['values']['site_logo_theme'])
-    ->set('site_logo_path', $form_state['values']['site_logo_path'])
-    ->set('site_favicon_theme', $form_state['values']['site_favicon_theme'])
-    ->set('site_favicon_path', $form_state['values']['site_favicon_path'])
-    ->set('site_favicon_mimetype', $form_state['values']['site_favicon_mimetype'])
-    ->set('site_mail', $form_state['values']['site_mail'])
-    ->set('site_slogan', $form_state['values']['site_slogan'])
-    ->set('site_frontpage', $form_state['values']['site_frontpage'])
-    ->set('default_nodes_main', $form_state['values']['default_nodes_main'])
-    ->set('site_403', $form_state['values']['site_403'])
-    ->set('site_404', $form_state['values']['site_404'])
-    ->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -1471,6 +1451,7 @@ function system_site_information_settings_submit($form, &$form_state) {
  */
 function system_cron_settings($form, &$form_state) {
   global $base_url;
+  $form['#config'] = 'system.core';
   $form['description'] = array(
     '#markup' => '<p>' . t('Cron takes care of running periodic tasks like checking for updates and indexing content for search.') . '</p>',
   );
@@ -1501,24 +1482,7 @@ function system_cron_settings($form, &$form_state) {
     '#options' => array(0 => t('Never')) + backdrop_map_assoc(array(3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
   );
 
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration')
-  );
-  return $form;
-}
-
-/**
- * Form submit handler; Handle submission for cron settings.
- *
- * @ingroup forms
- */
-function system_cron_settings_submit($form, &$form_state) {
-  config('system.core')
-    ->set('cron_safe_threshold', $form_state['values']['cron_safe_threshold'])
-    ->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
+  return system_settings_form($form);
 }
 
 /**
@@ -1545,6 +1509,7 @@ function system_run_cron_submit($form, &$form_state) {
  * @see system_logging_settings_submit()
  */
 function system_logging_settings($form, &$form_state) {
+  $form['#config'] = 'system.core';
   $form['error_level'] = array(
     '#type' => 'radios',
     '#title' => t('Error messages to display'),
@@ -1557,24 +1522,7 @@ function system_logging_settings($form, &$form_state) {
     '#description' => t('It is recommended that sites running on production environments do not display any errors.'),
   );
 
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration')
-  );
-  return $form;
-}
-
-/**
- * Form submission handler for system_logging_settings().
- *
- * @ingroup forms
- */
-function system_logging_settings_submit($form, &$form_state) {
-  config('system.core')
-    ->set('error_level', $form_state['values']['error_level'])
-    ->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
+  return system_settings_form($form);
 }
 
 /**
@@ -1587,6 +1535,7 @@ function system_performance_settings($form, &$form_state) {
   backdrop_add_js(backdrop_get_path('module', 'system') . '/js/system.admin.js');
   $config = config('system.core');
 
+  $form['#config'] = 'system.core';
   $form['clear_cache'] = array(
     '#type' => 'fieldset',
     '#title' => t('Clear cache'),
@@ -1671,38 +1620,13 @@ function system_performance_settings($form, &$form_state) {
     '#disabled' => $disabled,
   );
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration'),
-  );
-
   $form['#submit'][] = 'backdrop_clear_css_cache';
   $form['#submit'][] = 'backdrop_clear_js_cache';
   // This form allows page compression settings to be changed, which can
   // invalidate the page cache, so it needs to be cleared on form submit.
   $form['#submit'][] = 'system_clear_page_cache_submit';
-  $form['#submit'][] = 'system_performance_settings_submit';
 
-  return $form;
-}
-
-/**
- * Form submission handler for system_performance_settings().
- *
- * @ingroup forms
- */
-function system_performance_settings_submit($form, &$form_state) {
-  $config = config('system.core');
-  $config->set('cache', $form_state['values']['cache']);
-  $config->set('page_cache_maximum_age', $form_state['values']['page_cache_maximum_age']);
-  $config->set('page_cache_background_fetch', $form_state['values']['page_cache_background_fetch']);
-  $config->set('page_compression', $form_state['values']['page_compression']);
-  $config->set('preprocess_css', $form_state['values']['preprocess_css']);
-  $config->set('preprocess_js', $form_state['values']['preprocess_js']);
-  $config->save();
-  // Display status messages for this form.
-  backdrop_set_message(t('The configuration options have been saved.'));
+  return system_settings_form($form);
 }
 
 /**
@@ -1730,6 +1654,7 @@ function system_clear_page_cache_submit($form, &$form_state) {
  * @ingroup forms
  */
 function system_file_system_settings() {
+  $form['#config'] = 'system.core';
   $form['file_public_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Public file system path'),
@@ -1808,30 +1733,7 @@ function system_file_system_settings() {
     ),
   );
 
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration'),
-  );
-
-  return $form;
-}
-
-/**
- * Submit handler for system_file_system_settings().
- */
-function system_file_system_settings_submit($form, &$form_state) {
-  $config = config('system.core');
-  $config->set('file_public_path', $form_state['values']['file_public_path']);
-  $config->set('file_private_path', $form_state['values']['file_private_path']);
-  $config->set('file_temporary_path', $form_state['values']['file_temporary_path']);
-  $config->set('file_default_scheme', $form_state['values']['file_default_scheme']);
-  $config->set('file_transliterate_uploads', $form_state['values']['file_transliterate_uploads']);
-  $config->set('file_transliterate_uploads_display_name', $form_state['values']['file_transliterate_uploads_display_name']);
-  $config->set('file_transliterate_lowercase', $form_state['values']['file_transliterate_lowercase']);
-  $config->save();
-  // Display status messages for this form.
-  backdrop_set_message(t('The configuration options have been saved.'));
+  return system_settings_form($form);
 }
 
 /**
@@ -1910,6 +1812,7 @@ function system_image_toolkit_settings_submit($form, &$form_state) {
  */
 function system_rss_feeds_settings() {
   $rss_config = config('system.core');
+  $form['#config'] = 'system.core';
   $form['rss_description'] = array(
     '#type' => 'textarea',
     '#title' => t('Feed description'),
@@ -1935,25 +1838,7 @@ function system_rss_feeds_settings() {
     '#description' => t('Global setting for the default display of content items in each feed.')
   );
 
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration')
-  );
-
-  return $form;
-}
-
-/**
- * Submit handler for system_rss_feeds_settings().
- */
-function system_rss_feeds_settings_submit($form, &$form_state) {
-  $config = config('system.core');
-  $config->set('rss_description', $form_state['values']['rss_description']);
-  $config->set('rss_limit', $form_state['values']['rss_limit']);
-  $config->set('rss_viewmode', $form_state['values']['rss_viewmode']);
-  $config->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
+  return system_settings_form($form);
 }
 
 /**
@@ -1970,6 +1855,7 @@ function system_regional_settings($form, &$form_state) {
   // Date settings:
   $zones = system_time_zones();
 
+  $form['#config'] = 'system.date';
   $form['locale'] = array(
     '#type' => 'fieldset',
     '#title' => t('Locale'),
@@ -2040,31 +1926,7 @@ function system_regional_settings($form, &$form_state) {
     '#description' => t('Only applied if users may set their own time zone.')
   );
 
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration'),
-  );
-  return $form;
-}
-
-/**
- * Form submission handler for regional settings.
- *
- * @ingroup forms
- * @see system_regional_settings()
- */
-function system_regional_settings_submit($form, &$form_state) {
-  config('system.date')
-    ->set('default_country', $form_state['values']['site_default_country'])
-    ->set('first_day', $form_state['values']['date_first_day'])
-    ->set('default_timezone', $form_state['values']['date_default_timezone'])
-    ->set('user_configurable_timezones', $form_state['values']['configurable_timezones'])
-    ->set('user_empty_timezone_message', $form_state['values']['empty_timezone_message'])
-    ->set('user_default_timezone', $form_state['values']['user_default_timezone'])
-    ->save();
-  // Display status messages for this form.
-  backdrop_set_message(t('The configuration options have been saved.'));
+  return system_settings_form($form);
 }
 
 /**
@@ -2161,6 +2023,7 @@ function system_urls_settings($form, &$form_state) {
     }
   }
 
+  $form['#config'] = 'system.core';
   // Show the enable/disable form if clean URLs are available or if the user
   // must be able to resolve a conflicting setting.
   if ($available || $conflict) {
@@ -2169,11 +2032,6 @@ function system_urls_settings($form, &$form_state) {
       '#title' => t('Enable clean URLs'),
       '#default_value' => config_get('system.core', 'clean_url'),
       '#description' => t('Use URLs like <code>example.com/user</code> instead of <code>example.com/?q=user</code>.'),
-    );
-    $form['actions']['#type'] = 'actions';
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Save configuration'),
     );
     if ($conflict) {
       // $form_state['redirect'] needs to be set to the non-clean URL,
@@ -2215,18 +2073,7 @@ function system_urls_settings($form, &$form_state) {
     '#description' => t('This option makes Backdrop use HTTPS protocol for generated canonical URLs. Please note: to get it working in mixed-mode (both secure and insecure) sessions, the variable "https" should be set to TRUE in your file <code>settings.php</code>' ),
   );
 
-  return $form;
-}
-
-/**
- * Submit handler for system_urls_settings().
- */
-function system_urls_settings_submit($form, $form_state) {
-  $config = config('system.core');
-  $config->set('clean_url', $form_state['values']['clean_url']);
-  $config->set('canonical_secure', $form_state['values']['canonical_secure']);
-  $config->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
+  return system_settings_form($form);
 }
 
 /**
