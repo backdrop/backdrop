@@ -230,28 +230,29 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
       }
       // Add the configure button.
       $table[$name]['settings_edit'] = $base_button + array(
-        '#type' => 'image_button',
+        '#type' => 'submit',
         '#name' => $name . '_group_settings_edit',
-        '#src' => 'misc/configure.png',
+        '#value' => t('Edit'),
         '#attributes' => array('class' => array('field-formatter-settings-edit'), 'alt' => t('Edit')),
         '#op' => 'edit',
         // Do not check errors for the 'Edit' button.
         '#limit_validation_errors' => array(),
         '#prefix' => '<div class="field-formatter-settings-edit-wrapper">',
-        '#suffix' => '</div>',
+        //'#suffix' => '</div>',
       );
-      if ($display_overview) {
-        $table[$name]['settings_edit']['#suffix'] .= l(t('delete'), $params->admin_path . '/groups/' . $name . '/delete/' . $params->mode);
-      }
+      //if ($display_overview) {
+        $table[$name]['settings_edit']['#suffix'] = l(t('Delete'), $params->admin_path . '/groups/' . $name . '/delete/' . $params->mode) . '</div>';
+      //}
     }
-
+/*
     if (!$display_overview) {
       $table[$name] += array(
         'delete' => array(
-          '#markup' => l(t('delete'), $params->admin_path . '/groups/' . $name . '/delete/form'),
+          '#markup' => l(t('Delete'), $params->admin_path . '/groups/' . $name . '/delete/form'),
         ),
       );
     }
+*/
   }
 
   // Additional row: add new group.
@@ -609,8 +610,8 @@ function field_group_field_overview_submit($form, &$form_state) {
     }
   }
 
-  // Prepare storage with ctools.
-  ctools_include('export');
+  // Prepare storage with Exportable.
+  module_load_include('inc', 'exportable', 'export');
 
   // Create new group.
   if (!empty($form_values['_add_new_group']['group_name'])) {
@@ -640,9 +641,9 @@ function field_group_field_overview_submit($form, &$form_state) {
     $classes = _field_group_get_html_classes($new_group);
     $new_group->format_settings['instance_settings']['classes'] = implode(' ', $classes->optional);
 
-    // Save and enable it in ctools.
-    ctools_export_crud_save('field_group', $new_group);
-    ctools_export_crud_enable('field_group', $new_group->identifier);
+    // Save and enable it in Exportable.
+    exportable_crud_save('field_group', $new_group);
+    exportable_crud_enable('field_group', $new_group->identifier);
 
     // Store new group information for any additional submit handlers.
     $form_state['groups_added']['_add_new_group'] = $new_group->group_name;
@@ -681,7 +682,7 @@ function field_group_field_overview_submit($form, &$form_state) {
       $group->format_settings['instance_settings'] += $default_formatter_settings['instance_settings'];
     }
 
-    ctools_export_crud_save('field_group', $group);
+    exportable_crud_save('field_group', $group);
   }
 
   cache_clear_all('field_groups', 'cache_field');
@@ -759,7 +760,7 @@ function field_group_delete_form_submit($form, &$form_state) {
   $bundles = field_info_bundles();
   $bundle_label = $bundles[$entity_type][$bundle]['label'];
 
-  ctools_include('export');
+  module_load_include('inc', 'exportable', 'export');
   field_group_group_export_delete($group, FALSE);
 
   drupal_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => t($group->label), '%type' => $bundle_label)));
@@ -805,8 +806,8 @@ function field_group_enable_form_submit($form, &$form_state) {
   $bundles = field_info_bundles();
   $bundle_label = $bundles[$entity_type][$bundle]['label'];
 
-  ctools_include('export');
-  ctools_export_crud_enable('field_group', $group->identifier);
+  module_load_include('inc', 'exportable', 'export');
+  exportable_crud_enable('field_group', $group->identifier);
 
   drupal_set_message(t('The group %group has been enabled on the %type content type.', array('%group' => t($group->label), '%type' => $bundle_label)));
 
@@ -844,8 +845,8 @@ function field_group_field_ui_create_vertical_tabs(&$form, &$form_state, $params
       '#suffix' => '</div>',
       '#tree' => TRUE,
     );
-    $form['#attached']['js'][] = 'misc/form.js';
-    $form['#attached']['js'][] = 'misc/collapse.js';
+    $form['#attached']['js'][] = 'core/misc/form.js';
+    $form['#attached']['js'][] = 'core/misc/collapse.js';
   }
 
   // Add extra guidelines for webmaster.
@@ -954,10 +955,10 @@ function field_group_field_ui_clone_field_groups($form, &$form_state) {
       $source_group->children = array();
       unset($source_group->export_type, $source_group->type, $source_group->table);
 
-      // Save and enable it in ctools.
-      ctools_include('export');
-      ctools_export_crud_save('field_group', $source_group);
-      ctools_export_crud_enable('field_group', $source_group->identifier);
+      // Save and enable it in Exportable.
+      module_load_include('inc', 'exportable', 'export');
+      exportable_crud_save('field_group', $source_group);
+      exportable_crud_enable('field_group', $source_group->identifier);
 
       drupal_set_message(t('Fieldgroup @group cloned successfully.', array('@group' => $source_group->group_name)));
 

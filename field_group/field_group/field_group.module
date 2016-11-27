@@ -5,6 +5,14 @@
  * Fieldgroup module.
  *
  * For an overview of all php and javascript hooks, see field_group.api.php.
+ * 
+ * BACKDROP PORT
+ * 1. variable_get/set
+ * 2. fieldset js
+ * 3. remove ctools/exportable dependency
+ * ctools_export_load_object
+ * _exportable_unpack_object
+ * _exportable_get_defaults
  *
  */
 
@@ -118,12 +126,12 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
   $mode = array_pop($args_pop);
 
   $group = field_group_load_field_group($group_name, $entity_type, $bundle_name, $mode);
-
+debug($group,'group');
   return empty($group) ? FALSE : $group;
 }
 
 /**
- * Ctools load callback to load fieldgroup by identifier.
+ * Exportable load callback to load fieldgroup by identifier.
  */
 function field_group_load_field_group_by_identifier($identifier) {
 
@@ -150,8 +158,8 @@ function field_group_load_field_group_by_identifier($identifier) {
  */
 function field_group_load_field_group($group_name, $entity_type, $bundle_name, $mode) {
 
-  ctools_include('export');
-  $objects = ctools_export_load_object('field_group', 'conditions', array(
+  module_load_include('inc', 'exportable', 'export');
+  $objects = exportable_load_object('field_group', 'conditions', array(
     'group_name' => $group_name,
     'entity_type' => $entity_type,
     'bundle' => $bundle_name,
@@ -167,9 +175,9 @@ function field_group_load_field_group($group_name, $entity_type, $bundle_name, $
 }
 
 /**
- * Implements hook_ctools_plugin_api().
+ * Implements hook_exportable_plugin_api().
  */
-function field_group_ctools_plugin_api($owner, $api) {
+function field_group_exportable_plugin_api($owner, $api) {
   if ($owner == 'field_group' && $api == 'field_group') {
     return array('version' => 1);
   }
@@ -239,15 +247,16 @@ function field_group_theme_registry_alter(&$theme_registry) {
  */
 function field_group_field_attach_delete_bundle($entity_type, $bundle) {
 
-  ctools_include('export');
+  module_load_include('inc', 'exportable', 'export');
+  
   $list = field_group_read_groups(array('bundle' => $bundle, 'entity_type' => $entity_type));
 
   // Delete the entity's entry from field_group of all entities.
-  // We fetch the field groups first to assign the removal task to ctools.
+  // We fetch the field groups first to assign the removal task to exportable.
   if (isset($list[$entity_type], $list[$entity_type][$bundle])) {
     foreach ($list[$entity_type][$bundle] as $group_mode => $groups) {
       foreach ($groups as $group) {
-        ctools_export_crud_delete('field_group', $group);
+        exportable_crud_delete('field_group', $group);
       }
     }
   }
@@ -1382,7 +1391,7 @@ function field_group_field_extra_fields() {
   $extra['user']['user'] = array('form' => array());
 
   // User picture field to integrate with user module.
-  if (variable_get('user_pictures', 0)) {
+  if (config_get('system.core', 'user_pictures')) {
     $extra['user']['user']['form']['picture'] = array(
       'label' => t('Picture'),
       'description' => t('User picture'),
@@ -1658,10 +1667,10 @@ function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode
       $groups = $cached->data;
     }
     else {
-      $ctools_export_load_object = &drupal_static('ctools_export_load_object');
-      $ctools_export_load_object_all = &drupal_static('ctools_export_load_object_all');
-      unset($ctools_export_load_object['field_group']);
-      unset($ctools_export_load_object_all['field_group']);
+      $exportable_load_object = &drupal_static('exportable_load_object');
+      $exportable_load_object_all = &drupal_static('exportable_load_object_all');
+      unset($exportable_load_object['field_group']);
+      unset($exportable_load_object_all['field_group']);
       $groups = field_group_read_groups();
       cache_set('field_groups', $groups, 'cache_field');
     }
@@ -1700,13 +1709,13 @@ function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode
 function field_group_read_groups($conditions = array(), $enabled = TRUE) {
 
   $groups = array();
-  ctools_include('export');
+  module_load_include('inc', 'exportable', 'export');
 
   if (empty($conditions)) {
-    $records = ctools_export_load_object('field_group');
+    $records = exportable_load_object('field_group');
   }
   else {
-    $records = ctools_export_load_object('field_group', 'conditions', $conditions);
+    $records = exportable_load_object('field_group', 'conditions', $conditions);
   }
 
   foreach ($records as $group) {
@@ -1817,22 +1826,22 @@ function field_group_pack($group) {
 
 /**
  * Delete a field group.
- * This function is also called by ctools export when calls are
- * made through ctools_export_crud_delete().
+ * This function is also called by exportable export when calls are
+ * made through exportable_crud_delete().
  *
  * @param $group
  *   A group definition.
- * @param $ctools_crud
- *  Is this function called by the ctools crud delete.
+ * @param $exportable_crud
+ *  Is this function called by the exportable crud delete.
  */
-function field_group_group_export_delete($group, $ctools_crud = TRUE) {
+function field_group_group_export_delete($group, $exportable_crud = TRUE) {
 
   $query = db_delete('field_group');
 
   if (isset($group->identifier)) {
     $query->condition('identifier', $group->identifier);
-    if (!$ctools_crud) {
-      ctools_export_crud_disable('field_group', $group->identifier);
+    if (!$exportable_crud) {
+      exportable_crud_disable('field_group', $group->identifier);
     }
   }
   elseif (isset($group->id)) {
@@ -1854,8 +1863,8 @@ function field_group_group_export_delete($group, $ctools_crud = TRUE) {
  * field_group_group_save().
  *
  * Saves a group definition.
- * This function is called by ctools export when calls are made
- * through ctools_export_crud_save().
+ * This function is called by Exportable export when calls are made
+ * through exportable_crud_save().
  *
  * @param $group
  *   A group definition.
@@ -2245,19 +2254,19 @@ function _field_group_get_default_formatter_settings($format_type, $mode) {
  * Callback to bulk export field groups.
  */
 function field_group_field_group_to_hook_code($data, $module) {
-  ctools_include('export');
-  $schema = ctools_export_get_schema('field_group');
+  module_load_include('inc', 'exportable', 'export');
+  $schema = exportable_get_schema('field_group');
   $export = $schema['export'];
 
   $translatables = array();
-  $objects = ctools_export_load_object('field_group', 'names', array_values($data));
+  $objects = exportable_load_object('field_group', 'names', array_values($data));
   $code = "/**\n";
   $code .= " * Implements hook_{$export['default hook']}()\n";
   $code .= " */\n";
   $code .= "function " . $module . "_{$export['default hook']}() {\n";
   $code .= "  \${$export['identifier']}s = array();\n\n";
   foreach ($objects as $object) {
-    $code .= ctools_export_object('field_group', $object, '  ');
+    $code .= exportable_object('field_group', $object, '  ');
     $code .= "  \${$export['identifier']}s['" . check_plain($object->{$export['key']}) . "'] = \${$export['identifier']};\n\n";
     if (!empty($object->data['label'])) {
       $translatables[] =  $object->data['label'];
