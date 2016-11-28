@@ -1,7 +1,7 @@
 Field Group
 ===========
 
-A module that will group a set of fields. You can add fieldgroups in several types with their own format settings.
+This module will group a set of fields with different HTML wrappers on the content type form and/or view. You can add fieldgroups in several types with their own format settings.
 
 Description
 -----------
@@ -15,7 +15,7 @@ Available group types:
 * Vertical tabs
 * Accordions
 * Divs
-* Multipage steps: <strong>Note: This is only client side.
+* Multipage steps: (Note: This is only client side.)
 * HTML5 group type
 * Html element
 
@@ -29,10 +29,15 @@ This project is GPL v2 software. See the LICENSE.txt file in this directory for 
 Maintainers
 -----------
 
-Ported to Backdrop CMS by Herb v/d Dool (https://github.com/herbdool).
+Herb v/d Dool (https://github.com/herbdool)
 
-Maintainers of Drupal 7 version:
+Credit
+------
+
+Drupal 7 version:
 
 * stalski - http://drupal.org/user/322618
 * swentel - http://drupal.org/user/107403
 * zuuperman - http://drupal.org/user/361625
+
+Ported to Backdrop CMS by Herb v/d Dool (https://github.com/herbdool).
