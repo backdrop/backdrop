@@ -2758,7 +2758,7 @@ function backdrop_bootstrap($phase = NULL, $new_phase = TRUE) {
     }
 
     // Enter the requested phase if it is after the current phase.
-    while ($phases && ($phase > $stored_phase || $final_phase > $stored_phase)) {
+    while ($phases && $phase > $stored_phase && $final_phase > $stored_phase) {
       $current_phase = array_shift($phases);
 
       // This function is re-entrant. Only update the completed phase when the
