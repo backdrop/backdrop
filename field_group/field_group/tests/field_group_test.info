@@ -1,6 +1,0 @@
-name = "Field Group Test"
-description = "Test module for Field Group"
-core = "7.x"
-package = Fields
-hidden = TRUE
-

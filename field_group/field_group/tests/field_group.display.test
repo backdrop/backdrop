@@ -8,24 +8,16 @@
 /**
  * Group display tests
  */
-class GroupDisplayTestCase extends DrupalWebTestCase {
+class GroupDisplayTestCase extends BackdropWebTestCase {
 
   protected $node;
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Display tests',
-      'description' => 'Test the field group display.',
-      'group' => 'Field Group',
-    );
-  }
 
   function setUp() {
 
     parent::setUp('field_test', 'field_group', 'field_group_test');
 
     $node = new stdClass();
-    $node->type = 'article';
+    $node->type = 'post';
     $node->title = $this->randomName();
     $node->status = 1;
 
@@ -41,7 +33,7 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
       $instance = array(
         'field_name' => $field_name,
         'entity_type' => 'node',
-        'bundle' => 'article',
+        'bundle' => 'post',
         'label' => $this->randomName(),
         'display' => array(
           'default' => array(
@@ -75,28 +67,31 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
    */
   function createGroup($mode, array $data) {
 
-    $group_name = 'group_' . drupal_strtolower($this->randomName(8));
-    $identifier = $group_name . '|node|article|' . $mode;
+    $group_name = 'group_' . backdrop_strtolower($this->randomName(8));
+    //$identifier = $group_name . '|node|post|' . $mode;
 
     $field_group = new stdClass;
-    $field_group->disabled = FALSE;
-    $field_group->api_version = 1;
-    $field_group->identifier = $identifier;
+    //$field_group->disabled = FALSE;
+    //$field_group->api_version = 1;
+    //$field_group->identifier = $identifier;
     $field_group->group_name = $group_name;
     $field_group->entity_type = 'node';
-    $field_group->bundle = 'article';
+    $field_group->bundle = 'post';
     $field_group->mode = $mode;
     $field_group->parent_name = '';
     $field_group->children = $data['children'];
-    $field_group->data = $data;
-    drupal_write_record('field_group', $field_group);
-    ctools_export_crud_enable('field_group', $field_group->identifier);
+    //$field_group->data = $data;
+    $field_group->label = $data['label'];
+    $field_group->weight = $data['weight'];
+    $field_group->format_type = $data['format_type'];
+    $field_group->format_settings = $data['format_settings'];
+    field_group_group_save($field_group);
 
     return $field_group;
   }
 
   /**
-   * Test if an empty  formatter.
+   * Test if an empty formatter.
    */
   function testFieldAccess() {
 
@@ -124,8 +119,8 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
     );
     $group = $this->createGroup('default', $data);
 
-    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
-    $this->drupalGet('node/' . $this->node->nid);
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+    $this->backdropGet('node/' . $this->node->nid);
 
     // Test if group is not shown.
     $this->assertNoFieldByXPath("//div[contains(@id, 'wrapper-id')]", NULL, t('Div that contains fields with no access is not shown.'));
@@ -160,8 +155,8 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
     );
     $group = $this->createGroup('default', $data);
 
-    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
-    $this->drupalGet('node/' . $this->node->nid);
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+    $this->backdropGet('node/' . $this->node->nid);
 
     // Test group ids and classes.
     $this->assertFieldByXPath("//div[contains(@id, 'wrapper-id')]", NULL, t('Wrapper id set on wrapper div'));
@@ -173,16 +168,18 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
     // Set show label to true.
     $group->data['format_settings']['instance_settings']['show_label'] = TRUE;
 
-    drupal_write_record('field_group', $group, array('identifier'));
-    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
-    $this->drupalGet('node/' . $this->node->nid);
+    //backdrop_write_record('field_group', $group, array('identifier'));
+    field_group_group_save($group, FALSE);
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+    $this->backdropGet('node/' . $this->node->nid);
     $this->assertRaw('<h3><span>' . $data['label'] . '</span></h3>', t('Label is shown'));
 
     // Change to collapsible
     $group->data['format_settings']['formatter'] = 'collapsible';
-    drupal_write_record('field_group', $group, array('identifier'));
-    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
-    $this->drupalGet('node/' . $this->node->nid);
+    //backdrop_write_record('field_group', $group, array('identifier'));
+    field_group_group_save($group, FALSE);
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
+    $this->backdropGet('node/' . $this->node->nid);
     $this->assertFieldByXPath("//div[contains(@class, 'speed-fast')]", NULL, t('Speed class is set'));
     $this->assertFieldByXPath("//div[contains(@class, 'effect-blink')]", NULL, t('Effect class is set'));
   }
@@ -245,9 +242,9 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
     );
     $tabs = $this->createGroup('default', $data);
 
-    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
 
-    $this->drupalGet('node/' . $this->node->nid);
+    $this->backdropGet('node/' . $this->node->nid);
 
     // Test properties.
     $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]", NULL, t('Test class set on tabs wrapper'));
@@ -321,9 +318,9 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
     );
     $tabs = $this->createGroup('default', $data);
 
-    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
 
-    $this->drupalGet('node/' . $this->node->nid);
+    $this->backdropGet('node/' . $this->node->nid);
 
     // Test properties.
     $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]", NULL, t('Test class set on tabs wrapper'));
@@ -357,7 +354,7 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
       ),
     );
     $first_item = $this->createGroup('default', $data);
-    $first_item_id = 'node_article_full_' . $first_item->group_name;
+    $first_item_id = 'node_post_full_' . $first_item->group_name;
 
     $data = array(
       'label' => 'Accordion item 2',
@@ -375,7 +372,7 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
       ),
     );
     $second_item = $this->createGroup('default', $data);
-    $second_item_id = 'node_article_full_' . $second_item->group_name;
+    $second_item_id = 'node_post_full_' . $second_item->group_name;
 
     $data = array(
       'label' => 'Accordion',
@@ -395,9 +392,9 @@ class GroupDisplayTestCase extends DrupalWebTestCase {
     );
     $accordion = $this->createGroup('default', $data);
 
-    $groups = field_group_info_groups('node', 'article', 'default', TRUE);
+    $groups = field_group_info_groups('node', 'post', 'default', TRUE);
 
-    $this->drupalGet('node/' . $this->node->nid);
+    $this->backdropGet('node/' . $this->node->nid);
 
     // Test properties.
     $this->assertFieldByXPath("//div[contains(@class, 'test-class-wrapper')]", NULL, t('Test class set on tabs wrapper'));
