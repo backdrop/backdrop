@@ -30,7 +30,7 @@
 /**
  * Javascript hooks
  *
- * Drupal.FieldGroup.Effects.processHook.execute()
+ * Backdrop.FieldGroup.Effects.processHook.execute()
  * See field_group.js for the examples for all implemented formatters.
  */
 
@@ -132,7 +132,7 @@ function hook_field_group_format_settings($group) {
     $form['formatter'] = array(
       '#title' => t('Fieldgroup settings'),
       '#type' => 'select',
-      '#options' => drupal_map_assoc($formatter['format_types']),
+      '#options' => backdrop_map_assoc($formatter['format_types']),
       '#default_value' => isset($group->format_settings['formatter']) ? $group->format_settings['formatter'] : $formatter['default_formatter'],
       '#weight' => 1,
     );
@@ -209,7 +209,7 @@ function hook_field_group_format_settings($group) {
  * This function gives you the oppertunity to create the given
  * wrapper element that can contain the fields.
  * In the example beneath, some variables are prepared and used when building the
- * actual wrapper element. All elements in drupal fapi can be used.
+ * actual wrapper element. All elements in backdrop fapi can be used.
  *
  * Note that at this point, the field group has no notion of the fields in it.
  *
@@ -255,7 +255,7 @@ function hook_field_group_pre_render(& $element, $group, & $form) {
       $element += $add;
 
       if ($effect == 'blind') {
-        drupal_add_library('system', 'effects.blind');
+        backdrop_add_library('system', 'effects.blind');
       }
 
       break;
@@ -303,8 +303,8 @@ function hook_field_group_build_pre_render_alter(& $element) {
   }
 
   // You might include additional javascript files and stylesheets.
-  $element['#attached']['js'][] = drupal_get_path('module', 'field_group') . '/field_group.js';
-  $element['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.css';
+  $element['#attached']['js'][] = backdrop_get_path('module', 'field_group') . '/js/field_group.js';
+  $element['#attached']['css'][] = backdrop_get_path('module', 'field_group') . '/css/field_group.css';
 
 }
 
@@ -324,22 +324,9 @@ function hook_field_group_format_summary($group) {
 }
 
 /**
- * Implement hook_ctools_plugin_api().
- * This hook is needed to let ctools know about exportables.
- * If you create field groups by using hook_field_group_info, you
- * will need to include the ctools api hook as well.
- */
-function hook_ctools_plugin_api($module, $api) {
-  if ($module == 'field_group' && $api == 'field_group') {
-    return array('version' => 1);
-  }
-}
-
-/**
  * Implements hook_field_group_info().
- * Don't forget to include the ctools hook to notify that
- * your modules has field group exports.
- * @see hook_ctools_plugin_api.
+ *
+ * Called when reading all the groups.
  */
 function hook_field_group_info() {
 
@@ -360,21 +347,15 @@ function hook_field_group_info_alter(&$groups) {
 /**
  * Implements hook_field_group_update_field_group().
  *
- * This hook is invoked by ctools export API.
- * Note that this is used by ctools and the group could occasional be
- * the group ID.
- *
  * @param $object $group
  *   The FieldGroup object.
  */
 function hook_field_group_update_field_group($group) {
-  // Delete extra data depending on the group.
+  // Update data depending on the group.
 }
 
 /**
  * Implements hook_field_group_delete_field_group().
- *
- * This hook is invoked by ctools export API.
  *
  * @param $object $group
  *   The FieldGroup object.
@@ -385,8 +366,6 @@ function hook_field_group_delete_field_group($group) {
 
 /**
  * Implements hook_field_group_create_field_group().
- *
- * This hook is invoked by ctools export API.
  *
  * @param $object $group
  *   The FieldGroup object.
@@ -419,10 +398,6 @@ function hook_field_group_create_field_group($group) {
  *   The view mode scope for the field groups.
  *
  * @see field_group_read_groups()
- * @see ctools_export_crud_load()
- * @see ctools_export_crud_load_all()
- * @see ctools_export_crud_delete()
- * @see ctools_export_crud_save()
  */
 function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode = NULL, $reset = FALSE) {
   // This function caches the result and delegates to field_group_read_groups.
@@ -439,8 +414,8 @@ function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode
  * @see field_group_info_groups()
  * @see ctools_export_load_object()
  */
-function field_group_read_groups($conditions = array(), $enabled = TRUE) {
-  // This function loads the requested groups through ctools export api.
+function field_group_read_groups($conditions = array()) {
+  // This function loads the requested groups
 }
 
 /**
