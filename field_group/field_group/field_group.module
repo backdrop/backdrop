@@ -249,7 +249,7 @@ function field_group_field_attach_delete_bundle($entity_type, $bundle) {
  */
 function field_group_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
 
-  $form['#attached']['css'][] = backdrop_get_path('module', 'field_group') . '/field_group.field_ui.css';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'field_group') . '/css/field_group.field_ui.css';
   field_group_attach_groups($form, 'form', $form_state);
   $form['#pre_render'][] = 'field_group_form_pre_render';
 }
@@ -1341,10 +1341,10 @@ function field_group_library() {
     'website' => 'http://drupal.org/node/323112',
     'version' => '1.0',
     'js' => array(
-      $path . '/horizontal-tabs/horizontal-tabs.js' => array(),
+      $path . '/js/horizontal-tabs/horizontal-tabs.js' => array(),
     ),
     'css' => array(
-      $path . '/horizontal-tabs/horizontal-tabs.css' => array(),
+      $path . '/css/horizontal-tabs/horizontal-tabs.css' => array(),
     ),
   );
   // Multipage Tabs.
@@ -1353,10 +1353,10 @@ function field_group_library() {
     'website' => 'http://drupal.org/node/323112',
     'version' => '1.0',
     'js' => array(
-      $path . '/multipage/multipage.js' => array(),
+      $path . '/js/multipage/multipage.js' => array(),
     ),
     'css' => array(
-      $path . '/multipage/multipage.css' => array(),
+      $path . '/css/multipage/multipage.css' => array(),
     ),
   );
 

@@ -291,8 +291,8 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     );
   }
 
-  $form['#attached']['css'][] = backdrop_get_path('module', 'field_group') . '/field_group.field_ui.css';
-  $form['#attached']['js'][] = backdrop_get_path('module', 'field_group') . '/field_group.field_ui.js';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'field_group') . '/css/field_group.field_ui.css';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'field_group') . '/js/field_group.field_ui.js';
 
   $form['#validate'][] = 'field_group_field_overview_validate';
   $form['#submit'][] = 'field_group_field_overview_submit';
