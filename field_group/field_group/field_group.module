@@ -5,17 +5,32 @@
  * Fieldgroup module.
  *
  * For an overview of all php and javascript hooks, see field_group.api.php.
- * 
- * BACKDROP PORT
- * 1. variable_get/set [x]
- * 2. fieldset js
- * 3. remove ctools/exportable dependency
- * ctools_export_load_object
- * _exportable_unpack_object
- * _exportable_get_defaults
- * 4. change drupal to backdrop
  *
  */
+
+/**
+ * Implements hook_config_info().
+ */
+function field_group_config_info() {
+  $prefixes['field_group.field_group'] = array(
+    'name_key' => array('group_name', 'entity_type', 'bundle', 'mode'),
+    'label_callback' => 'field_group_config_label',
+    'group' => t('Field groups'),
+  );
+  return $prefixes;
+}
+
+/**
+ * Given a bundle config file, display a unique label.
+ */
+function field_group_config_label($config, $config_name) {
+  list($group_name, $entity_type_name, $bundle, $mode) = explode('.', str_replace('field_group.field_group.', '', $config_name));
+  $entity_type = entity_get_info($entity_type_name);
+  $entity_label = $entity_type['label'];
+  $bundle_label = isset($entity_type['bundles'][$bundle]['label']) ? $entity_type['bundles'][$bundle]['label'] : $bundle;
+
+  return $entity_label . ' - ' . $bundle_label . ' - Mode: ' . $mode . ' - ' . $group_name;
+}
 
 /**
  * Implements hook_menu().
@@ -46,6 +61,7 @@ function field_group_menu() {
           if (isset($bundle_info['admin']['bundle argument'])) {
             $bundle_arg = $bundle_info['admin']['bundle argument'];
             $bundle_pos = (string) $bundle_arg;
+
           }
           else {
             $bundle_arg = $bundle_name;
@@ -127,22 +143,7 @@ function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_
   $mode = array_pop($args_pop);
 
   $group = field_group_load_field_group($group_name, $entity_type, $bundle_name, $mode);
-debug($group,'group');
   return empty($group) ? FALSE : $group;
-}
-
-/**
- * Exportable load callback to load fieldgroup by identifier.
- */
-function field_group_load_field_group_by_identifier($identifier) {
-
-  $parts = explode('|', $identifier);
-  if (count($parts) != 4) {
-    return;
-  }
-
-  return field_group_load_field_group($parts[0], $parts[1], $parts[2], $parts[3]);
-
 }
 
 /**
@@ -159,29 +160,10 @@ function field_group_load_field_group_by_identifier($identifier) {
  */
 function field_group_load_field_group($group_name, $entity_type, $bundle_name, $mode) {
 
-  module_load_include('inc', 'exportable', 'export');
-  $objects = exportable_load_object('field_group', 'conditions', array(
-    'group_name' => $group_name,
-    'entity_type' => $entity_type,
-    'bundle' => $bundle_name,
-    'mode' => $mode,
-  ));
-  $object = array_shift($objects);
-
-  if ($object && isset($object->data)) {
-    return field_group_unpack($object);
-  }
+  $config = config('field_group.field_group.' . $entity_type . '.' . $bundle_name . '.' . $mode . '.' . $group_name);
+  $object = (object) $config->get();
 
   return $object;
-}
-
-/**
- * Implements hook_exportable_plugin_api().
- */
-function field_group_exportable_plugin_api($owner, $api) {
-  if ($owner == 'field_group' && $api == 'field_group') {
-    return array('version' => 1);
-  }
 }
 
 /**
@@ -248,16 +230,14 @@ function field_group_theme_registry_alter(&$theme_registry) {
  */
 function field_group_field_attach_delete_bundle($entity_type, $bundle) {
 
-  module_load_include('inc', 'exportable', 'export');
-  
   $list = field_group_read_groups(array('bundle' => $bundle, 'entity_type' => $entity_type));
 
   // Delete the entity's entry from field_group of all entities.
-  // We fetch the field groups first to assign the removal task to exportable.
   if (isset($list[$entity_type], $list[$entity_type][$bundle])) {
     foreach ($list[$entity_type][$bundle] as $group_mode => $groups) {
       foreach ($groups as $group) {
-        exportable_crud_delete('field_group', $group);
+        $config = config('field_group.field_group.' . $entity_type . '.' . $bundle_name . '.' . $mode . '.' . $group_name);
+        $config->delete();
       }
     }
   }
@@ -1664,17 +1644,7 @@ function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode
   static $groups = FALSE;
 
   if (!$groups || $reset) {
-    if (!$reset && $cached = cache_get('field_groups', 'cache_field')) {
-      $groups = $cached->data;
-    }
-    else {
-      $exportable_load_object = &drupal_static('exportable_load_object');
-      $exportable_load_object_all = &drupal_static('exportable_load_object_all');
-      unset($exportable_load_object['field_group']);
-      unset($exportable_load_object_all['field_group']);
-      $groups = field_group_read_groups();
-      cache_set('field_groups', $groups, 'cache_field');
-    }
+    $groups = field_group_read_groups();
   }
 
   if (!isset($entity_type)) {
@@ -1701,61 +1671,36 @@ function field_group_info_groups($entity_type = NULL, $bundle = NULL, $view_mode
  *   'bundle' The name of the bundle.
  *   'mode' The view mode.
  *
- * @param boolean $enabled
- *   Return enabled or disabled groups.
- *
  * @return array
  *   Array of groups.
  */
-function field_group_read_groups($conditions = array(), $enabled = TRUE) {
+function field_group_read_groups($conditions = array()) {
 
   $groups = array();
-  module_load_include('inc', 'exportable', 'export');
 
-  if (empty($conditions)) {
-    $records = exportable_load_object('field_group');
-  }
-  else {
-    $records = exportable_load_object('field_group', 'conditions', $conditions);
+  $records = array();
+
+  $config_names = config_get_names_with_prefix('field_group.field_group');
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    $field = (object)$config->get();
+    $records[$config_name] = $field;
+
+    // If any conditions don't pass then skip that record
+    if (!empty($conditions)) {
+      foreach ($conditions as $key => $value) {
+        if ($field->$key != $value) {
+          unset($records[$config_name]);
+        }
+      }
+    }
   }
 
   foreach ($records as $group) {
-
-    // Return only enabled groups.
-    if ($enabled && isset($group->disabled) && $group->disabled) {
-      continue;
-    }
-    // Return only disabled groups.
-    elseif (!$enabled && (!isset($group->disabled) || !$group->disabled)) {
-      continue;
-    }
-
-    $groups[$group->entity_type][$group->bundle][$group->mode][$group->group_name] = field_group_unpack($group);
-
+    $groups[$group->entity_type][$group->bundle][$group->mode][$group->group_name] = $group;
   }
   drupal_alter('field_group_info', $groups);
   return $groups;
-
-}
-
-/**
- * Utility function to recreate identifiers.
- */
-function _field_group_recreate_identifiers() {
-
-  // Migrate the field groups so they have a unique identifier.
-  $result = db_select('field_group', 'fg')
-    ->fields('fg')
-    ->execute();
-  $rows = array();
-  foreach($result as $row) {
-    $row->identifier = $row->group_name . '|' . $row->entity_type . '|' . $row->bundle . '|' . $row->mode;
-    $row->data = unserialize($row->data);
-    $rows[] = $row;
-  }
-  foreach ($rows as $row) {
-    drupal_write_record('field_group', $row, array('id'));
-  }
 
 }
 
@@ -1777,83 +1722,15 @@ function field_group_exists($group_name, $entity_type, $bundle, $mode) {
 }
 
 /**
- * Unpacks a database row in a FieldGroup object.
- * @param $packed_group
- *   Database result object with stored group data.
- * @return $group
- *   Field group object.
- */
-function field_group_unpack($packed_group) {
-  if (empty($packed_group->data)) {
-    return $packed_group;
-  }
-
-  // Extract unserialized data.
-  $group = clone $packed_group;
-  $data = $group->data;
-  unset($group->data);
-  $group->label = isset($data['label']) ? $data['label'] : '';
-  $group->weight = isset($data['weight']) ? $data['weight'] : '';
-  $group->children = isset($data['children']) ? $data['children'] : '';
-  $group->format_type = !empty($data['format_type']) ? $data['format_type'] : 'fieldset';
-  if (isset($data['format_settings'])) {
-    $group->format_settings = $data['format_settings'];
-  }
-
-  return $group;
-}
-
-/**
- * Packs a FieldGroup object into a database row.
- * @param $group
- *   FieldGroup object.
- * @return $record
- *   Database row object, ready to be inserted/update
- */
-function field_group_pack($group) {
-
-  $record = clone $group;
-  $record->data = array(
-    'label' => $record->label,
-    'weight' => $record->weight,
-    'children' => $record->children,
-    'format_type' => !empty($record->format_type) ? $record->format_type : 'fieldset',
-  );
-  if (isset($record->format_settings)) {
-    $record->data['format_settings'] = $record->format_settings;
-  }
-  return $record;
-}
-
-/**
  * Delete a field group.
- * This function is also called by exportable export when calls are
- * made through exportable_crud_delete().
  *
  * @param $group
  *   A group definition.
- * @param $exportable_crud
- *  Is this function called by the exportable crud delete.
  */
-function field_group_group_export_delete($group, $exportable_crud = TRUE) {
+function field_group_group_delete($group) {
 
-  $query = db_delete('field_group');
-
-  if (isset($group->identifier)) {
-    $query->condition('identifier', $group->identifier);
-    if (!$exportable_crud) {
-      exportable_crud_disable('field_group', $group->identifier);
-    }
-  }
-  elseif (isset($group->id)) {
-    $query->condition('id', $group->id);
-  }
-
-  if (!empty($group->mode)) {
-    $query->condition('mode', $group->mode);
-  }
-
-  $query->execute();
+  $config = config('field_group.field_group.' . $group->entity_type . '.' . $group->bundle . '.' . $group->mode . '.' . $group->group_name);
+  $config->delete();
 
   cache_clear_all('field_groups', 'cache_field');
   module_invoke_all('field_group_delete_field_group', $group);
@@ -1864,31 +1741,27 @@ function field_group_group_export_delete($group, $exportable_crud = TRUE) {
  * field_group_group_save().
  *
  * Saves a group definition.
- * This function is called by Exportable export when calls are made
- * through exportable_crud_save().
  *
  * @param $group
  *   A group definition.
  */
-function field_group_group_save(& $group) {
+function field_group_group_save(& $group, $new = TRUE) {
 
   // Prepare the record.
-  $object = field_group_pack($group);
+  $object = $group;
 
-  if (isset($object->export_type) && $object->export_type & EXPORT_IN_DATABASE) {
+  if ($new == FALSE) {
     // Existing record.
-    $update = array('id');
     module_invoke_all('field_group_update_field_group', $object);
   }
   else {
     // New record.
-    $update = array();
-    $object->export_type = EXPORT_IN_DATABASE;
     module_invoke_all('field_group_create_field_group', $object);
   }
 
-  return drupal_write_record('field_group', $object, $update);
-
+  $config = config('field_group.field_group.' . $object->entity_type . '.' . $object->bundle . '.' . $object->mode . '.' . $object->group_name);
+  $config->setData((array)$object);
+  $config->save();
 }
 
 /**
@@ -2249,39 +2122,4 @@ function _field_group_get_default_formatter_settings($format_type, $mode) {
     'formatter' => isset($formatter['default_formatter']) ? $formatter['default_formatter'] : '',
     'instance_settings' => $formatter['instance_settings']
   );
-}
-
-/**
- * Callback to bulk export field groups.
- */
-function field_group_field_group_to_hook_code($data, $module) {
-  module_load_include('inc', 'exportable', 'export');
-  $schema = exportable_get_schema('field_group');
-  $export = $schema['export'];
-
-  $translatables = array();
-  $objects = exportable_load_object('field_group', 'names', array_values($data));
-  $code = "/**\n";
-  $code .= " * Implements hook_{$export['default hook']}()\n";
-  $code .= " */\n";
-  $code .= "function " . $module . "_{$export['default hook']}() {\n";
-  $code .= "  \${$export['identifier']}s = array();\n\n";
-  foreach ($objects as $object) {
-    $code .= exportable_object('field_group', $object, '  ');
-    $code .= "  \${$export['identifier']}s['" . check_plain($object->{$export['key']}) . "'] = \${$export['identifier']};\n\n";
-    if (!empty($object->data['label'])) {
-      $translatables[] =  $object->data['label'];
-    }
-    if (!empty($object->data['description'])) {
-      $translatables[] =  $object->data['description'];
-    }
-  }
-
-  if (!empty($translatables)) {
-    $code .= features_translatables_export($translatables, '  ') . "\n";
-  }
-
-  $code .= "  return \${$export['identifier']}s;";
-  $code .= "}\n";
-  return $code;
 }

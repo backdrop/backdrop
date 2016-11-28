@@ -610,9 +610,6 @@ function field_group_field_overview_submit($form, &$form_state) {
     }
   }
 
-  // Prepare storage with Exportable.
-  module_load_include('inc', 'exportable', 'export');
-
   // Create new group.
   if (!empty($form_values['_add_new_group']['group_name'])) {
     $values = $form_values['_add_new_group'];
@@ -621,7 +618,6 @@ function field_group_field_overview_submit($form, &$form_state) {
     $formatter = $field_group_types[($mode == 'form' ? 'form' : 'display')][$values['format']['type']];
 
     $new_group = (object) array(
-      'identifier' => $values['group_name'] . '|' . $entity_type . '|' . $bundle . '|' . $mode,
       'group_name' => $values['group_name'],
       'entity_type' => $entity_type,
       'bundle' => $bundle,
@@ -631,7 +627,6 @@ function field_group_field_overview_submit($form, &$form_state) {
       'weight' => $values['weight'],
       'label' => $values['label'],
       'format_type' => $values['format']['type'],
-      'disabled' => FALSE,
     );
     $new_group->format_settings = array('formatter' => isset($formatter['default_formatter']) ? $formatter['default_formatter'] : '');
     if (isset($formatter['instance_settings'])) {
@@ -641,9 +636,7 @@ function field_group_field_overview_submit($form, &$form_state) {
     $classes = _field_group_get_html_classes($new_group);
     $new_group->format_settings['instance_settings']['classes'] = implode(' ', $classes->optional);
 
-    // Save and enable it in Exportable.
-    exportable_crud_save('field_group', $new_group);
-    exportable_crud_enable('field_group', $new_group->identifier);
+    field_group_group_save($new_group, TRUE);
 
     // Store new group information for any additional submit handlers.
     $form_state['groups_added']['_add_new_group'] = $new_group->group_name;
@@ -681,8 +674,7 @@ function field_group_field_overview_submit($form, &$form_state) {
       $group->format_settings += $default_formatter_settings;
       $group->format_settings['instance_settings'] += $default_formatter_settings['instance_settings'];
     }
-
-    exportable_crud_save('field_group', $group);
+    field_group_group_save($group, FALSE);
   }
 
   cache_clear_all('field_groups', 'cache_field');
@@ -760,8 +752,7 @@ function field_group_delete_form_submit($form, &$form_state) {
   $bundles = field_info_bundles();
   $bundle_label = $bundles[$entity_type][$bundle]['label'];
 
-  module_load_include('inc', 'exportable', 'export');
-  field_group_group_export_delete($group, FALSE);
+  field_group_group_delete($group);
 
   drupal_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => t($group->label), '%type' => $bundle_label)));
 
@@ -769,51 +760,6 @@ function field_group_delete_form_submit($form, &$form_state) {
   $form_state['redirect'] = $form['#redirect'];
 }
 
-/**
- * Menu callback; present a form for re-enabling a group.
- */
-function field_group_enable_form($form, &$form_state, $group, $view_mode = 'form') {
-
-  $form['#group'] = $group;
-  $admin_path = _field_ui_bundle_admin_path($group->entity_type, $group->bundle);
-  if ($view_mode == 'form') {
-    $admin_path .= '/fields';
-  }
-  else {
-    $admin_path .= '/display/' . $view_mode;
-  }
-  $form['#redirect'] = array($admin_path);
-  $output = confirm_form($form,
-    t('Are you sure you want to enable the group %group?', array('%group' => t($group->label))),
-    $admin_path,
-    '',
-    t('Enable'), t('Cancel'),
-    'confirm'
-  );
-  return $output;
-}
-
-/**
- * Re-enable the group on a bundle.
- */
-function field_group_enable_form_submit($form, &$form_state) {
-
-  $group = $form['#group'];
-  $bundle = $group->bundle;
-  $entity_type = $group->entity_type;
-  $group->mode = $form_state['build_info']['args'][1];
-
-  $bundles = field_info_bundles();
-  $bundle_label = $bundles[$entity_type][$bundle]['label'];
-
-  module_load_include('inc', 'exportable', 'export');
-  exportable_crud_enable('field_group', $group->identifier);
-
-  drupal_set_message(t('The group %group has been enabled on the %type content type.', array('%group' => t($group->label), '%type' => $bundle_label)));
-
-  // Redirect.
-  $form_state['redirect'] = $form['#redirect'];
-}
 
 /**
  * Create vertical tabs.
@@ -872,26 +818,6 @@ function field_group_field_ui_create_vertical_tabs(&$form, &$form_state, $params
     '#submit' => array('field_group_field_ui_clone_field_groups')
   );
 
-  $disabled_groups = field_group_read_groups(array(), FALSE);
-
-  // Show disabled fieldgroups, and make it possible to enable them again.
-  if ($disabled_groups && isset($disabled_groups[$params->entity_type][$params->bundle][$params->mode])) {
-    $form['additional_settings']['disabled_field_groups'] = array(
-
-      '#type' => 'fieldset',
-
-      '#title' => t('Disabled fieldgroups'),
-
-      '#collapsible' => TRUE,
-
-      '#collapsed' => FALSE,
-
-      '#parents' => array('additional_settings'),
-
-    );
-    $form['additional_settings']['disabled_field_groups']['overview'] = field_group_disabled_groups_overview($disabled_groups[$params->entity_type][$params->bundle][$params->mode], $entity_info, $params);
-  }
-
 }
 
 /**
@@ -947,65 +873,15 @@ function field_group_field_ui_clone_field_groups($form, &$form_state) {
         continue;
       }
 
-      // Recreate the identifier and reset the id.
-      $source_group->id = NULL;
+      // Reset
       $source_group->mode = $form_state['field_group_params']->mode;
-      $source_group->identifier = $source_group->group_name . '|' . $source_group->entity_type . '|' . $source_group->bundle . '|' . $form_state['field_group_params']->mode;
-      $source_group->disabled = FALSE;
       $source_group->children = array();
-      unset($source_group->export_type, $source_group->type, $source_group->table);
 
-      // Save and enable it in Exportable.
-      module_load_include('inc', 'exportable', 'export');
-      exportable_crud_save('field_group', $source_group);
-      exportable_crud_enable('field_group', $source_group->identifier);
+      field_group_group_save($source_group, TRUE);
 
       drupal_set_message(t('Fieldgroup @group cloned successfully.', array('@group' => $source_group->group_name)));
 
     }
   }
-
-}
-
-/**
- * Show an overview of all the disabled fieldgroups, and make it possible to activate them again.
- * @param $disabled_groups Array with all disabled groups.
- */
-function field_group_disabled_groups_overview($disabled_groups, $entity_info, $params) {
-
-  $formatter_options = field_group_field_formatter_options($params->mode != 'form' ? 'display' : 'form');
-
-  $table = array(
-    '#theme' => 'table',
-    '#header' => array(
-      t('Label'),
-      t('Machine name'),
-      t('Field'),
-      t('Widget'),
-      t('Operations'),
-    ),
-    '#attributes' => array(
-      'class' => array('field-ui-overview'),
-    ),
-    '#rows' => array(),
-  );
-
-  // Add all of the disabled groups as a row on the table.
-  foreach ($disabled_groups as $group) {
-
-    $summary = field_group_format_settings_summary($group->group_name, $group);
-
-    $row = array();
-    $row[] = $group->label;
-    $row[] = $group->group_name;
-    $row[] = $formatter_options[$group->format_type];
-    $row[] = render($summary);
-    $path = (isset($entity_info['bundles'][$params->bundle]['admin']['real path']) ? $entity_info['bundles'][$params->bundle]['admin']['real path'] : $entity_info['bundles'][$params->bundle]['admin']['path']);
-    $row[] = l(t('Enable'), $path . '/groups/' . $group->group_name . '/enable/' . $group->mode);
-
-    $table['#rows'][] = $row;
-  }
-
-  return $table;
 
 }
