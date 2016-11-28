@@ -2,112 +2,38 @@
 
 /**
  * @file
- * Fieldgroup module install file.
+ * Field group module install file.
  */
-
-/**
- * Implements hook_schema().
- */
-function field_group_schema() {
-  $schema['field_group'] = array(
-    'description' => t('Table that contains field group entries and settings.'),
-
-    // Exportable definitions.
-    'export' => array(
-      'key' => 'identifier',
-      'identifier' => 'field_group',
-      'default hook' => 'field_group_info',
-      'load callback' => 'field_group_group_load_by_identifier',
-      'save callback' => 'field_group_group_save',
-      'delete callback' => 'field_group_group_export_delete',
-      'can disable' => TRUE,
-      'api' => array(
-        'owner' => 'field_group',
-        'api' => 'field_group',
-        'minimum_version' => 1,
-        'current_version' => 1,
-      ),
-    ),
-
-    'fields' => array(
-      'id' => array(
-        'type' => 'serial',
-        'not null' => TRUE,
-        'description' => 'The primary identifier for a group',
-        'no export' => TRUE,
-      ),
-      'identifier' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'The unique string identifier for a group.',
-      ),
-      'group_name' => array(
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'The name of this group.',
-      ),
-      'entity_type' => array(
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'bundle' => array(
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-        'default' => ''
-        ),
-      'mode' => array(
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-        'default' => ''
-      ),
-      // @todo 'parent_name' is redundant with the data in the 'children'
-      // entry, brings a risk of inconsistent data. This should be removed from
-      // the schema and pre-computed it if needed in field_group_get_groups().
-      'parent_name' => array(
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'The parent name for a group',
-      ),
-      'data' => array(
-        'type' => 'blob',
-        'size' => 'big',
-        'not null' => TRUE,
-        'serialize' => TRUE,
-        'description' => 'Serialized data containing the group properties that do not warrant a dedicated column.',
-      ),
-    ),
-    'primary key' => array('id'),
-    'indexes' => array(
-      'group_name' => array('group_name'),
-    ),
-    'unique keys' => array(
-      'identifier' => array('identifier'),
-    ),
-  );
-  return $schema;
-}
-
-/**
- * Implements of hook_install().
- *
- */
-function field_group_install() {
-}
-
 
 /**
  * Implements hook_update_last_removed().
  */
 function field_group_update_last_removed() {
   return 7008;
+}
+
+/**
+ * Migrate field groups from table to config.
+ */
+function field_group_update_1000() {
+  if (db_table_exists('field_group')) {
+    // Only upgrade active fields. As we no longer support multiple fields with
+    // the same name, this prevents upgrading deleted fields that would conflict
+    // with active fields with the same name.
+    $result = db_query('SELECT * FROM {field_group}');
+    foreach ($result as $row) {
+      $field_group = (array) $row;
+      $field_group += unserialize($field_group['data']);
+      unset($field_group['id']);
+      unset($field_group['identifier']);
+      unset($field_group['data']);
+      unset($field_group['export_type']);
+      unset($field_group['disabled']);   
+
+      $config = config('field_group.field_group.' . $field_group['entity_type'] . '.' . $field_group['bundle'] . '.' . $field_group['mode'] . '.' . $field_group['group_name']);
+      $config->setData($field_group);
+      $config->save();
+    }
+    db_drop_table('field_group');
+  }
 }
