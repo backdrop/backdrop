@@ -2,21 +2,21 @@
 (function($) {
 
 /**
- * Drupal FieldGroup object.
+ * Backdrop FieldGroup object.
  */
-Drupal.FieldGroup = Drupal.FieldGroup || {};
-Drupal.FieldGroup.Effects = Drupal.FieldGroup.Effects || {};
-Drupal.FieldGroup.groupWithfocus = null;
+Backdrop.FieldGroup = Backdrop.FieldGroup || {};
+Backdrop.FieldGroup.Effects = Backdrop.FieldGroup.Effects || {};
+Backdrop.FieldGroup.groupWithfocus = null;
 
-Drupal.FieldGroup.setGroupWithfocus = function(element) {
+Backdrop.FieldGroup.setGroupWithfocus = function(element) {
   element.css({display: 'block'});
-  Drupal.FieldGroup.groupWithfocus = element;
+  Backdrop.FieldGroup.groupWithfocus = element;
 }
 
 /**
- * Implements Drupal.FieldGroup.processHook().
+ * Implements Backdrop.FieldGroup.processHook().
  */
-Drupal.FieldGroup.Effects.processFieldset = {
+Backdrop.FieldGroup.Effects.processFieldset = {
   execute: function (context, settings, type) {
     if (type == 'form') {
       // Add required fields mark to any fieldsets containing required fields
@@ -26,7 +26,7 @@ Drupal.FieldGroup.Effects.processFieldset = {
         }
         if ($('.error', $(this)).length) {
           $('legend span.fieldset-legend', $(this)).eq(0).addClass('error');
-          Drupal.FieldGroup.setGroupWithfocus($(this));
+          Backdrop.FieldGroup.setGroupWithfocus($(this));
         }
       });
     }
@@ -34,9 +34,9 @@ Drupal.FieldGroup.Effects.processFieldset = {
 }
 
 /**
- * Implements Drupal.FieldGroup.processHook().
+ * Implements Backdrop.FieldGroup.processHook().
  */
-Drupal.FieldGroup.Effects.processAccordion = {
+Backdrop.FieldGroup.Effects.processAccordion = {
   execute: function (context, settings, type) {
     $('div.field-group-accordion-wrapper', context).once('fieldgroup-effects', function () {
       var wrapper = $(this);
@@ -93,9 +93,9 @@ Drupal.FieldGroup.Effects.processAccordion = {
 }
 
 /**
- * Implements Drupal.FieldGroup.processHook().
+ * Implements Backdrop.FieldGroup.processHook().
  */
-Drupal.FieldGroup.Effects.processHtabs = {
+Backdrop.FieldGroup.Effects.processHtabs = {
   execute: function (context, settings, type) {
     if (type == 'form') {
       // Add required fields mark to any element containing required fields
@@ -105,7 +105,7 @@ Drupal.FieldGroup.Effects.processHtabs = {
         }
         if ($('.error', $(this)).length) {
           $(this).data('horizontalTab').link.parent().addClass('error');
-          Drupal.FieldGroup.setGroupWithfocus($(this));
+          Backdrop.FieldGroup.setGroupWithfocus($(this));
           $(this).data('horizontalTab').focus();
         }
       });
@@ -114,9 +114,9 @@ Drupal.FieldGroup.Effects.processHtabs = {
 }
 
 /**
- * Implements Drupal.FieldGroup.processHook().
+ * Implements Backdrop.FieldGroup.processHook().
  */
-Drupal.FieldGroup.Effects.processTabs = {
+Backdrop.FieldGroup.Effects.processTabs = {
   execute: function (context, settings, type) {
     if (type == 'form') {
 
@@ -131,7 +131,7 @@ Drupal.FieldGroup.Effects.processTabs = {
           $(this).data('verticalTab').link.parent().addClass('error');
           // Focus the first tab with error.
           if (!errorFocussed) {
-            Drupal.FieldGroup.setGroupWithfocus($(this));
+            Backdrop.FieldGroup.setGroupWithfocus($(this));
             $(this).data('verticalTab').focus();
             errorFocussed = true;
           }
@@ -142,12 +142,12 @@ Drupal.FieldGroup.Effects.processTabs = {
 }
 
 /**
- * Implements Drupal.FieldGroup.processHook().
+ * Implements Backdrop.FieldGroup.processHook().
  *
  * TODO clean this up meaning check if this is really
  *      necessary.
  */
-Drupal.FieldGroup.Effects.processDiv = {
+Backdrop.FieldGroup.Effects.processDiv = {
   execute: function (context, settings, type) {
 
     $('div.collapsible', context).once('fieldgroup-effects', function() {
@@ -196,16 +196,16 @@ Drupal.FieldGroup.Effects.processDiv = {
 /**
  * Behaviors.
  */
-Drupal.behaviors.fieldGroup = {
+Backdrop.behaviors.fieldGroup = {
   attach: function (context, settings) {
-    settings.field_group = settings.field_group || Drupal.settings.field_group;
+    settings.field_group = settings.field_group || Backdrop.settings.field_group;
     if (settings.field_group == undefined) {
       return;
     }
 
     // Execute all of them.
-    $.each(Drupal.FieldGroup.Effects, function (func) {
-      // We check for a wrapper function in Drupal.field_group as
+    $.each(Backdrop.FieldGroup.Effects, function (func) {
+      // We check for a wrapper function in Backdrop.field_group as
       // alternative for dynamic string function calls.
       var type = func.toLowerCase().replace("process", "");
       if (settings.field_group[type] != undefined && $.isFunction(this.execute)) {

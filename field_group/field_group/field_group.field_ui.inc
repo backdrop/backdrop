@@ -291,8 +291,8 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
     );
   }
 
-  $form['#attached']['css'][] = drupal_get_path('module', 'field_group') . '/field_group.field_ui.css';
-  $form['#attached']['js'][] = drupal_get_path('module', 'field_group') . '/field_group.field_ui.js';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'field_group') . '/field_group.field_ui.css';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'field_group') . '/field_group.field_ui.js';
 
   $form['#validate'][] = 'field_group_field_overview_validate';
   $form['#submit'][] = 'field_group_field_overview_submit';
@@ -330,7 +330,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
       $group_check = field_group_load_field_group($group_name, $params->entity_type, $params->bundle, $params->mode);
       if (isset($parent_requirements[$group_check->format_type])) {
         if (!$group_check->parent_name || field_group_load_field_group($group_check->parent_name, $params->entity_type, $params->bundle, $params->mode)->format_type != $parent_requirements[$group_check->format_type]['parent']) {
-          drupal_set_message(t($parent_requirements[$group_check->format_type]['message']), 'warning', FALSE);
+          backdrop_set_message(t($parent_requirements[$group_check->format_type]['message']), 'warning', FALSE);
         }
       }
     }
@@ -341,7 +341,7 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
  * Return an array of field_group_formatter options.
  */
 function field_group_field_formatter_options($type) {
-  $options = &drupal_static(__FUNCTION__);
+  $options = &backdrop_static(__FUNCTION__);
 
   if (!isset($options)) {
     $options = array();
@@ -561,7 +561,7 @@ function field_group_field_overview_validate($form, &$form_state) {
       $group_name = $group['group_name'];
 
       // Add the 'group_' prefix.
-      if (drupal_substr($group_name, 0, 6) != 'group_') {
+      if (backdrop_substr($group_name, 0, 6) != 'group_') {
         $group_name = 'group_' . $group_name;
         form_set_value($form['fields']['_add_new_group']['group_name'], $group_name, $form_state);
       }
@@ -570,7 +570,7 @@ function field_group_field_overview_validate($form, &$form_state) {
       if (!preg_match('!^group_[a-z0-9_]+$!', $group_name)) {
         form_set_error('fields][_add_new_group][group_name', t('Add new group: the group name %group_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores.', array('%group_name' => $group_name)));
       }
-      if (drupal_strlen($group_name) > 32) {
+      if (backdrop_strlen($group_name) > 32) {
         form_set_error('fields][_add_new_group][group_name', t("Add new group: the group name %group_name is too long. The name is limited to 32 characters, including the 'group_' prefix.", array('%group_name' => $group_name)));
       }
 
@@ -640,7 +640,7 @@ function field_group_field_overview_submit($form, &$form_state) {
 
     // Store new group information for any additional submit handlers.
     $form_state['groups_added']['_add_new_group'] = $new_group->group_name;
-    drupal_set_message(t('New group %label successfully created.', array('%label' => $new_group->label)));
+    backdrop_set_message(t('New group %label successfully created.', array('%label' => $new_group->label)));
 
     // Replace the newly created group in the $children array, in case it was
     // dragged directly in an existing field.
@@ -754,7 +754,7 @@ function field_group_delete_form_submit($form, &$form_state) {
 
   field_group_group_delete($group);
 
-  drupal_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => t($group->label), '%type' => $bundle_label)));
+  backdrop_set_message(t('The group %group has been deleted from the %type content type.', array('%group' => t($group->label), '%type' => $bundle_label)));
 
   // Redirect.
   $form_state['redirect'] = $form['#redirect'];
@@ -844,7 +844,7 @@ function field_group_field_ui_clone_field_groups_validate($form, &$form_state) {
   foreach ($form_state['#source_groups'] as $key => $group) {
     if (in_array($group->format_type, $non_existing_types)) {
       unset($form_state['#source_groups'][$key]);
-      drupal_set_message(t('Skipping @group because this type does not exist in current mode', array('@group' => $group->label)), 'warning');
+      backdrop_set_message(t('Skipping @group because this type does not exist in current mode', array('@group' => $group->label)), 'warning');
     }
   }
 
@@ -869,7 +869,7 @@ function field_group_field_ui_clone_field_groups($form, &$form_state) {
 
     foreach ($form_state['#source_groups'] as $source_group) {
       if (in_array($source_group->group_name, $fields)) {
-        drupal_set_message(t('Fieldgroup @group is not cloned since a group already exists with the same name.', array('@group' => $source_group->group_name)), 'warning');
+        backdrop_set_message(t('Fieldgroup @group is not cloned since a group already exists with the same name.', array('@group' => $source_group->group_name)), 'warning');
         continue;
       }
 
@@ -879,7 +879,7 @@ function field_group_field_ui_clone_field_groups($form, &$form_state) {
 
       field_group_group_save($source_group, TRUE);
 
-      drupal_set_message(t('Fieldgroup @group cloned successfully.', array('@group' => $source_group->group_name)));
+      backdrop_set_message(t('Fieldgroup @group cloned successfully.', array('@group' => $source_group->group_name)));
 
     }
   }
