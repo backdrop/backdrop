@@ -9,7 +9,7 @@
   width: 100vw;
   min-height: 30vh;
   padding: 1.5rem 2rem 2rem;
-  margin: 0 0 2rem;
+  margin: -2rem 0 2rem; /* Negative top margin collapses spacing under header */
   -webkit-transform: translate(-50%, 0);
   transform: translate(-50%, 0);
   -webkit-transition: min-height 0.25s;
