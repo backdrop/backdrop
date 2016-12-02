@@ -167,8 +167,5 @@ function template_preprocess_taxonomy_term(&$variables) {
   // Gather classes, and clean up name so there are no underscores.
   $vocabulary_name_css = backdrop_clean_css_identifier($term->vocabulary);
   $variables['classes'][] = 'vocabulary-' . $vocabulary_name_css;
-
-  $variables['theme_hook_suggestions'][] = 'taxonomy_term__' . $term->vocabulary;
-  $variables['theme_hook_suggestions'][] = 'taxonomy_term__' . $term->tid;
 }
 

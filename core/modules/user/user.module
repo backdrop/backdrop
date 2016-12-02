@@ -107,7 +107,7 @@ function user_theme() {
 function user_entity_info() {
   return array(
     'user' => array(
-      'label' => t('User'),
+      'label' => t('User account'),
       'bundle label' => t('Type'),
       'controller class' => 'UserStorageController',
       'base table' => 'users',
@@ -119,7 +119,7 @@ function user_entity_info() {
       ),
       'bundles' => array(
         'user' => array(
-          'label' => t('User'),
+          'label' => t('User account'),
           'admin' => array(
             'path' => 'admin/config/people/manage',
             'access arguments' => array('administer account settings'),
@@ -2056,7 +2056,7 @@ function user_view($account, $view_mode = 'full', $langcode = NULL) {
   unset($account->content);
 
   $build += array(
-    '#theme' => 'user_profile',
+    '#theme' => 'user_profile__' . $view_mode,
     '#account' => $account,
     '#view_mode' => $view_mode,
     '#language' => $langcode,

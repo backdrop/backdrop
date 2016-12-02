@@ -441,7 +441,7 @@ function hook_entity_prepare_view($entities, $type) {
  *
  * Note: This hook is invoked inside an implementation of
  * hook_entity_info_alter() so care must be taken not to call anything that
- * will result in an additional, and hence recurisve call to entity_get_info().
+ * will result in an additional (and hence recursive) call to entity_get_info().
  *
  * @return array
  *   An associative array of all entity view modes, keyed by the entity
@@ -473,7 +473,7 @@ function hook_entity_view_mode_info() {
  *
  * Note: This hook is invoked inside an implementation of
  * hook_entity_info_alter() so care must be taken not to call anything that
- * will result in an additional, and hence recurisve call to entity_get_info().
+ * will result in an additional (and hence recursive) call to entity_get_info().
  *
  * @param array $view_modes
  *   An array of view modes, keyed first by entity type, then by view mode name.
@@ -489,7 +489,9 @@ function hook_entity_view_mode_info_alter(&$view_modes) {
  * Change the view mode of an entity that is being displayed.
  *
  * @param string $view_mode
- *   The view_mode that is to be used to display the entity.
+ *   The view mode that is to be used to display the entity. Note: this
+ *     variable is passed by reference, and changing the value will change the
+ *     view mode that is used by the calling function.
  * @param array $context
  *   Array with contextual information, including:
  *   - entity_type: The type of the entity that is being viewed.
@@ -507,7 +509,7 @@ function hook_entity_view_mode_alter(&$view_mode, $context) {
  * Act on a view mode before it is created or updated.
  *
  * @param string $view_mode
- *   The view_mode that is to be used to display the entity.
+ *   The view mode that is to be used to display the entity.
  * @param $entity_type
  *   The type of entity being saved (i.e. node, user, comment).
  */
@@ -521,7 +523,7 @@ function hook_entity_view_mode_presave($view_mode, $entity_type) {
  * Respond to creation of a new view mode.
  *
  * @param string $view_mode
- *   The view_mode that is to be used to display the entity.
+ *   The view mode that is to be used to display the entity.
  * @param $entity_type
  *   The type of entity being saved (i.e. node, user, comment).
  */
@@ -533,7 +535,7 @@ function hook_entity_view_mode_insert($view_mode, $entity_type) {
  * Respond to update of a view mode.
  *
  * @param string $view_mode
- *   The view_mode that is to be used to display the entity.
+ *   The view mode that is to be used to display the entity.
  * @param $entity_type
  *   The type of entity being saved (i.e. node, user, comment).
  */
@@ -545,7 +547,7 @@ function hook_entity_view_mode_update($view_mode, $entity_type) {
  * Respond to deletion of a view mode.
  *
  * @param string $view_mode
- *   The view_mode that is to be used to display the entity.
+ *   The view mode that is to be used to display the entity.
  * @param $entity_type
  *   The type of entity being saved (i.e. node, user, comment).
  */
@@ -553,27 +555,6 @@ function hook_entity_view_mode_delete($view_mode, $entity_type) {
   $config = config('my_module.view_modes');
   $view_mode_list = $config->get('view_mode_list');
   unset($view_mode_list[$view_mode['machine_name']]);
-  $config->set('view_mode_list', $view_mode_list);
-  $config->save();
-}
-
-/**
- * Act on a view mode which is being renamed.
- *
- * @param $entity_type
- *   The type of entity being saved (i.e. node, user, comment).
- * @param string $old_view_mode_name
- *   The name of the view_mode before it is renamed.
- * @param string $new_view_mode_name
- *   The name of the view_mode after it is renamed.
- */
-function hook_entity_view_mode_rename($entity_type, $old_view_mode_name, $new_view_mode_name) {
-  $config = config('my_module.view_modes');
-  $view_mode_list = $config->get('view_mode_list');
-  if (isset($view_mode_list[$old_view_mode_name]) {
-    $view_mode_list[$new_view_mode_name] = $view_mode_list[$old_view_mode_name];
-    unset($view_mode_list[$old_view_mode_name]);
-  }
   $config->set('view_mode_list', $view_mode_list);
   $config->save();
 }

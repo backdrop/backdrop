@@ -227,8 +227,7 @@ function template_preprocess_node(&$variables) {
     $variables['classes'][] = backdrop_html_class('view-mode-' . $variables['view_mode']);
   }
 
-  // Clean up name so there are no underscores.
-  $variables['theme_hook_suggestions'][] = 'node__' . $node->type;
+  // Add an extra theme hook suggetion for node id.
   $variables['theme_hook_suggestions'][] = 'node__' . $node->nid;
 }
 

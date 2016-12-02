@@ -1039,7 +1039,7 @@ function node_view(Node $node, $view_mode = 'full', $langcode = NULL) {
   unset($node->content);
 
   $build += array(
-    '#theme' => 'node',
+    '#theme' => 'node__' . $node->type . '__' . $view_mode,
     '#node' => $node,
     '#view_mode' => $view_mode,
     '#langcode' => $langcode,

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for field_ui.module.
@@ -830,5 +829,214 @@ class FieldUIAlterTestCase extends BackdropWebTestCase {
     // Test that the widget is not altered on page nodes.
     $this->backdropGet('admin/structure/types/manage/page/fields/alter_test_options');
     $this->assertText('Widget type: options_select', 'Widget type is not altered for pages in hook_field_widget_form_alter().');
+  }
+}
+
+/**
+ * Helper class for testing view mode functionality.
+ */
+class FieldUIViewModeTestHelper extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * Overrides BackdropWebTestCase::setUp().
+   */
+  public function setUp(array $modules = array()) {
+    $modules[] = 'comment';
+    $modules[] = 'field_ui';
+    $modules[] = 'taxonomy';
+    $modules[] = 'view_mode_test';
+    parent::setUp($modules);
+
+    // Create an administrative user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'administer fields',
+      'administer view modes',
+      'administer content types',
+    ));
+
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    // Create a post content type with comments enabled.
+    $this->backdropCreateContentType(array(
+      'type' => 'post',
+      'name' => 'Post',
+      'settings' => array(
+        'comment_default' => COMMENT_NODE_OPEN,
+      ),
+    ));
+  }
+
+  /**
+   * Overrides BackdropWebTestCase::refreshVariables().
+   *
+   * Ensures that the entity and field view mode caches are cleared so they
+   * can be reliably checked in the test.
+   */
+  protected function refreshVariables() {
+    parent::refreshVariables();
+
+    // Clear the entity and display caches.
+    backdrop_static_reset('field_view_mode_settings');
+    entity_info_cache_clear();
+  }
+
+  public function assertViewModeExists($entity_type, $view_mode) {
+    $info = entity_get_info($entity_type);
+    return $this->assertTrue(!empty($info['view modes'][$view_mode]), "View mode $view_mode found for entity type $entity_type.");
+  }
+
+  public function assertNoViewModeExists($entity_type, $view_mode) {
+    $info = entity_get_info($entity_type);
+    return $this->assertTrue(!isset($info['view modes'][$view_mode]), "View mode $view_mode not found for entity type $entity_type.");
+  }
+
+  public function getActualViewMode($entity_type, $bundle, $view_mode) {
+    $view_mode_settings = field_view_mode_settings($entity_type, $bundle);
+    return (!empty($view_mode_settings[$view_mode]['custom_settings']) ? $view_mode : 'default');
+  }
+
+  public function assertActualViewMode($entity_type, $bundle, $view_mode, $expected_view_mode) {
+    $actual_view_mode = $this->getActualViewMode($entity_type, $bundle, $view_mode);
+    return $this->assertIdentical($expected_view_mode, $actual_view_mode, "View mode $view_mode for entity type $entity_type and bundle $bundle actually uses view mode $actual_view_mode, expected $expected_view_mode.");
+  }
+
+  public function assertViewModeDefaultDisplay($entity_type, $bundle, $view_mode) {
+    return $this->assertActualViewMode($entity_type, $bundle, $view_mode, 'default');
+  }
+
+  public function assertViewModeCustomDisplay($entity_type, $bundle, $view_mode) {
+    return $this->assertActualViewMode($entity_type, $bundle, $view_mode, $view_mode);
+  }
+}
+
+/**
+ * Tests view mode functionality.
+ */
+class FieldUIViewModeFunctionalTest extends FieldUIViewModeTestHelper {
+
+  /**
+   * Tests view mode functionality.
+   */
+  public function testFieldUIViewModes() {
+    $this->backdropLogin($this->admin_user);
+    $this->backdropGet('admin/structure/types/manage/post/display');
+    $this->assertLinkByHref('admin/structure/types/manage/post/display/add');
+
+    // Set some 'default' settings under a field instance.
+    $settings = field_bundle_settings('node', 'post');
+    $settings['extra_fields']['display']['test']['default']['testing'] = TRUE;
+    field_bundle_settings('node', 'post', $settings);
+
+    $settings = field_bundle_settings('node', 'page');
+    $settings['extra_fields']['display']['test']['default']['testing'] = FALSE;
+    field_bundle_settings('node', 'page', $settings);
+
+    $settings = field_bundle_settings('comment', 'comment_node_post');
+    $settings['extra_fields']['display']['test']['default']['testing'] = TRUE;
+    field_bundle_settings('comment', 'comment_node_post', $settings);
+
+    // Attempt to create a view mode that already is provided by core.
+    $edit = array(
+      'label' => 'Custom 1',
+      'machine_name' => 'teaser',
+    );
+    $this->backdropPost('admin/structure/types/manage/post/display/add', $edit, 'Save');
+    $this->assertText('The machine-readable name is already in use. It must be unique.');
+
+    // Save a valid custom view mode for the Post content type.
+    $edit['machine_name'] = 'custom_1';
+    $this->backdropPost('admin/structure/types/manage/post/display/add', $edit, 'Save');
+    $this->assertViewModeExists('node', 'custom_1');
+    $this->assertViewModeDefaultDisplay('node', 'page', 'custom_1');
+    $this->assertViewModeCustomDisplay('node', 'post', 'custom_1');
+
+    // Test that the default settings are applied to new custom view modes.
+    $settings = field_bundle_settings('node', 'post');
+    $this->assertEqual($settings['extra_fields']['display']['test']['custom_1']['testing'], TRUE, 'The default settings were applied to the new view mode.');
+
+    // Reset the view-mode on the post content type.
+    $this->backdropPost('admin/structure/types/manage/post/display/custom_1/reset', array(), 'Reset');
+    $this->assertViewModeExists('node', 'custom_1');
+    $this->assertViewModeDefaultDisplay('node', 'post', 'custom_1');
+    $this->assertViewModeDefaultDisplay('node', 'page', 'custom_1');
+
+    // Enable the view-mode on the page content type.
+    $this->backdropGet('admin/structure/types/manage/page/display/custom_1/enable');
+    $this->assertViewModeExists('node', 'custom_1');
+    $this->assertViewModeCustomDisplay('node', 'page', 'custom_1');
+    $this->assertViewModeDefaultDisplay('node', 'post', 'custom_1');
+
+    // Test that the default settings are applied to newly enabled view modes.
+    $settings = field_bundle_settings('node', 'page');
+    $this->assertEqual($settings['extra_fields']['display']['test']['custom_1']['testing'], FALSE, 'The default settings were applied to the newly enabled view mode.');
+
+    // Delete the view mode.
+    $this->backdropPost('admin/structure/types/manage/page/display/custom_1/delete', array(), 'Delete');
+    $this->assertText('Deleted the Custom 1 view mode.');
+    $this->assertNoViewModeExists('node', 'custom_1');
+    $this->assertViewModeDefaultDisplay('node', 'page', 'custom_1');
+    $this->assertViewModeDefaultDisplay('node', 'post', 'custom_1');
+
+    //Create a comment view mode.
+    $edit = array(
+      'label' => 'Comment 1',
+      'machine_name' => 'com_1',
+    );
+    $this->backdropPost('admin/structure/types/manage/post/comment/display/add', $edit, 'Save');
+    $this->assertViewModeExists('comment', 'com_1');
+    $this->assertViewModeDefaultDisplay('comment', 'comment_node_page', 'com_1');
+    $this->assertViewModeCustomDisplay('comment', 'comment_node_post', 'com_1');
+
+    // Test that the default comment settings are applied to custom view modes.
+    $settings = field_bundle_settings('comment', 'comment_node_post');
+    $this->assertEqual($settings['extra_fields']['display']['test']['com_1']['testing'], TRUE, 'The default settings were applied to the comment view mode.');
+  }
+
+  /**
+   * Test the new entity view mode hooks.
+   */
+  public function testInfoHooks() {
+    config_set('entity.view_modes', 'view_modes', array(
+      'node' => array(
+        'info_3' => array(
+          'label' => t('Variable-altered view mode'),
+          'custom settings' => TRUE,
+        ),
+      ),
+      'taxonomy_term' => array(),
+    ));
+    $this->refreshVariables();
+
+    $info = entity_get_info();
+
+    // An invalid entity type in hook_entity_view_mode_info() does not pass
+    // into the entity info array.
+    $this->assertTrue(!isset($info['invalid-type']));
+
+    // Test hook-provided view modes.
+    $this->assertIdentical($info['node']['view modes']['info_1'], array(
+      'label' => t('Hook-defined view mode #1'),
+      'custom settings' => FALSE,
+    ));
+    $this->assertIdentical($info['node']['view modes']['info_2'], array(
+      'label' => t('Hook-altered view mode'),
+      'custom settings' => TRUE,
+    ));
+    $this->assertIdentical($info['node']['view modes']['info_3'], array(
+      'label' => t('Variable-altered view mode'),
+      'custom settings' => TRUE,
+    ));
+    $this->assertIdentical($info['taxonomy_term']['view modes']['info_1'], array(
+      'label' => t('Hook-defined view mode #1'),
+      'custom settings' => TRUE,
+    ));
+
+    // Test that entity view modes defined in hook_entity_info() are never
+    // overridden by custom view modes.
+    $this->assertIdentical($info['node']['view modes']['full'], array(
+      'label' => 'Full content',
+      'custom settings' => FALSE,
+    ));
   }
 }

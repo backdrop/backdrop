@@ -14,6 +14,17 @@ function field_ui_field_attach_rename_bundle($entity_type, $bundle_old, $bundle_
 }
 
 /**
+ * Implements hook_permission().
+ */
+function field_ui_permission() {
+  return array(
+    'administer view modes' => array(
+      'title' => t('Add, edit, and delete custom view modes.'),
+    ),
+  );
+}
+
+/**
  * Implements hook_menu().
  */
 function field_ui_menu() {
@@ -42,15 +53,16 @@ function field_ui_menu() {
           // would be replaced with the bundle name string.
           if (isset($bundle_info['admin']['bundle argument'])) {
             $bundle_arg = $bundle_info['admin']['bundle argument'];
-            $bundle_pos = (string) $bundle_arg;
+            $bundle_position = (string) $bundle_arg;
           }
           else {
             $bundle_arg = $bundle_name;
-            $bundle_pos = '0';
+            $bundle_position = '0';
           }
           // This is the position of the %field_ui_menu placeholder in the
           // items below.
           $field_position = count(explode('/', $path)) + 1;
+          $view_mode_position = count(explode('/', $path)) + 1;
 
           // Extract access information, providing defaults.
           $access = array_intersect_key($bundle_info['admin'], backdrop_map_assoc(array('access callback', 'access arguments')));
@@ -78,7 +90,7 @@ function field_ui_menu() {
             'file' => 'field_ui.admin.inc',
           ) + $access;
           $items["$path/fields/%field_ui_menu"] = array(
-            'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
+            'load arguments' => array($entity_type, $bundle_arg, $bundle_position, '%map'),
             'title callback' => 'field_ui_menu_title',
             'title arguments' => array($field_position),
             'page callback' => 'backdrop_get_form',
@@ -86,7 +98,7 @@ function field_ui_menu() {
             'file' => 'field_ui.admin.inc',
           ) + $access;
           $items["$path/fields/%field_ui_menu/edit"] = array(
-            'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
+            'load arguments' => array($entity_type, $bundle_arg, $bundle_position, '%map'),
             'title' => 'Edit',
             'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_field_edit_form', $field_position),
@@ -94,7 +106,7 @@ function field_ui_menu() {
             'file' => 'field_ui.admin.inc',
           ) + $access;
           $items["$path/fields/%field_ui_menu/field-settings"] = array(
-            'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
+            'load arguments' => array($entity_type, $bundle_arg, $bundle_position, '%map'),
             'title' => 'Field settings',
             'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_field_settings_form', $field_position),
@@ -102,7 +114,7 @@ function field_ui_menu() {
             'file' => 'field_ui.admin.inc',
           ) + $access;
           $items["$path/fields/%field_ui_menu/widget-type"] = array(
-            'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
+            'load arguments' => array($entity_type, $bundle_arg, $bundle_position, '%map'),
             'title' => 'Widget type',
             'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_widget_type_form', $field_position),
@@ -110,7 +122,7 @@ function field_ui_menu() {
             'file' => 'field_ui.admin.inc',
           ) + $access;
           $items["$path/fields/%field_ui_menu/delete"] = array(
-            'load arguments' => array($entity_type, $bundle_arg, $bundle_pos, '%map'),
+            'load arguments' => array($entity_type, $bundle_arg, $bundle_position, '%map'),
             'title' => 'Delete',
             'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_field_delete_form', $field_position),
@@ -119,39 +131,75 @@ function field_ui_menu() {
             'file' => 'field_ui.admin.inc',
           ) + $access;
 
-          // 'Manage display' tab.
+          // 'Manage displays' overview.
           $items["$path/display"] = array(
-            'title' => 'Manage display',
-            'page callback' => 'backdrop_get_form',
-            'page arguments' => array('field_ui_display_overview_form', $entity_type, $bundle_arg, 'default'),
+            'title' => 'Manage displays',
+            'page callback' => 'field_ui_display_overview',
+            'page arguments' => array($entity_type, $bundle_arg),
             'type' => MENU_LOCAL_TASK,
             'weight' => 2,
             'file' => 'field_ui.admin.inc',
           ) + $access;
 
-          // View modes secondary tabs.
+          // View modes displays.
           // The same base $path for the menu item (with a placeholder) can be
           // used for all bundles of a given entity type; but depending on
           // administrator settings, each bundle has a different set of view
-          // modes available for customisation. So we define menu items for all
+          // modes available for customization. So we define menu items for all
           // view modes, and use an access callback to determine which ones are
           // actually visible for a given bundle.
           $weight = 0;
-          $view_modes = array('default' => array('label' => t('Default'))) + $entity_info['view modes'];
-          foreach ($view_modes as $view_mode => $view_mode_info) {
-            $items["$path/display/$view_mode"] = array(
-              'title' => $view_mode_info['label'],
-              'page arguments' => array('field_ui_display_overview_form', $entity_type, $bundle_arg, $view_mode),
-              // The access callback needs to check both the current 'custom
-              // display' setting for the view mode, and the overall access
-              // rules for the bundle admin pages.
-              'access callback' => '_field_ui_view_mode_menu_access',
-              'access arguments' => array_merge(array($entity_type, $bundle_arg, $view_mode, $access['access callback']), $access['access arguments']),
-              'type' => ($view_mode == 'default' ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
-              'weight' => ($view_mode == 'default' ? -10 : $weight++),
-              'file' => 'field_ui.admin.inc',
-            );
-          }
+
+          $items["$path/display/%"] = array(
+            'title callback' => 'field_ui_manage_display_title',
+            'title arguments' => array($entity_type, $view_mode_position),
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_ui_display_form', $entity_type, $bundle_arg, $view_mode_position),
+            // The access callback needs to check both the current 'custom
+            // display' setting for the view mode, and the overall access
+            // rules for the bundle admin pages.
+            'access callback' => '_field_ui_view_mode_menu_access',
+            'access arguments' => array_merge(array($entity_type, $bundle_arg, $view_mode_position, $access['access callback']), $access['access arguments']),
+            'file' => 'field_ui.admin.inc',
+          );
+
+          // View mode administration.
+          $items["$path/display/add"] = array(
+            'title' => 'Add view mode',
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_ui_view_mode_form', $entity_type, $bundle_arg),
+            'access arguments' => array('administer view modes'),
+            'file' => 'field_ui.admin.inc',
+            'type' => MENU_LOCAL_ACTION,
+          );
+          $items["$path/display/%/configure"] = array(
+            'title' => 'Configure view mode',
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_ui_view_mode_form', $entity_type, $bundle_arg, $view_mode_position),
+            'access arguments' => array('administer view modes'),
+            'file' => 'field_ui.admin.inc',
+          );
+          $items["$path/display/%/delete"] = array(
+            'title' => 'Delete view mode',
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_ui_view_mode_delete_form', $entity_type, $bundle_arg, $view_mode_position),
+            'access arguments' => array('administer view modes'),
+            'file' => 'field_ui.admin.inc',
+          );
+          $items["$path/display/%/enable"] = array(
+            'title' => 'Enable view mode',
+            'page callback' => 'field_ui_view_mode_enable',
+            'page arguments' => array($entity_type, $bundle_arg, $view_mode_position),
+            'access arguments' => array('administer view modes'),
+            'file' => 'field_ui.admin.inc',
+          );
+          $items["$path/display/%/reset"] = array(
+            'title' => 'Reset to default',
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_ui_view_mode_reset_form', $entity_type, $bundle_arg, $view_mode_position),
+            'access arguments' => array('administer view modes'),
+            'file' => 'field_ui.admin.inc',
+          );
         }
       }
     }
@@ -168,7 +216,7 @@ function field_ui_menu() {
  *   The name of the entity.
  * @param $bundle_name
  *   The name of the bundle, as contained in the path.
- * @param $bundle_pos
+ * @param $bundle_position
  *   The position of $bundle_name in $map.
  * @param $map
  *   The translated menu router path argument map.
@@ -178,7 +226,7 @@ function field_ui_menu() {
  *
  * @ingroup field
  */
-function field_ui_menu_load($field_name, $entity_type, $bundle_name, $bundle_pos, $map) {
+function field_ui_menu_load($field_name, $entity_type, $bundle_name, $bundle_position, $map) {
   // Extract the actual bundle name from the translated argument map.
   // The menu router path to manage fields of an entity can be shared among
   // multiple bundles. For example:
@@ -189,8 +237,8 @@ function field_ui_menu_load($field_name, $entity_type, $bundle_name, $bundle_pos
   // type string as $bundle_name, which is not the bundle name for comments.
   // We therefore leverage the dynamically translated $map provided by the menu
   // system to retrieve the actual bundle and bundle name for the current path.
-  if ($bundle_pos > 0) {
-    $bundle = $map[$bundle_pos];
+  if ($bundle_position > 0) {
+    $bundle = $map[$bundle_position];
     $bundle_name = field_extract_bundle($entity_type, $bundle);
   }
   // Check whether the field exists at all.
@@ -254,6 +302,10 @@ function field_ui_theme() {
   return array(
     'field_ui_table' => array(
       'render element' => 'elements',
+      'file' => 'field_ui.theme.inc',
+    ),
+    'field_ui_view_modes' => array(
+      'render element' => 'element',
       'file' => 'field_ui.theme.inc',
     ),
   );
