@@ -112,7 +112,20 @@ function theme_update_report($variables) {
       $status_label = check_plain($project['reason']);
     }
     if ($update_link) {
-      $row .= l($status_label,'admin/' . $project['project_type'] . 's/update',array('html' => TRUE));
+      switch ($project['project_type']) {
+        case 'theme':
+          $updatepath = 'admin/appearance/update';
+          break;
+ 
+        case 'layout':
+          $updatepath = 'admin/layouts/update';
+          break;
+
+        case 'module':
+        default:
+          $updatepath = 'admin/modules/update';
+      }
+      $row .= l($status_label,$updatepath,array('html' => TRUE));
     } else {
       $row .= $status_label;
     }
