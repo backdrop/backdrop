@@ -1109,7 +1109,7 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
 
   $form['fields'] = $table;
 
-  // Custom display settings.
+  // View modes.
   if ($view_mode == 'default') {
     $form['modes'] = array(
       '#type' => 'fieldset',
@@ -1132,10 +1132,15 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
     }
     $form['modes']['view_modes_custom'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Use custom display settings for the following view modes'),
       '#options' => $options,
       '#default_value' => $default,
     );
+    if (user_access('administer view modes')) {
+      $form['modes']['add'] = array(
+        '#type' => 'markup',
+        '#markup' => l(t('+ Add view mode'), 'admin/structure/view-modes/add/' . $entity_type),
+      );
+    }
   }
 
   // In overviews involving nested rows from contributed modules (i.e

@@ -1,115 +1,122 @@
 <?php
+/**
+ * @file
+ * Administration pages and forms for entity module.
+ */
 
 /**
- * List all custom view modes.
+ * Admin listing page for entity view modes.
  */
 function entity_view_mode_list() {
   $custom_view_modes = config_get('entity.view_modes', 'view_modes');
   $entity_info = entity_get_info();
 
-  $build = array(
-    '#prefix' => '<div id="view-modes-accordion">',
-    '#suffix' => '</div>',
-    '#attached' => array(
-      'library' => array(
-        //array('system', 'ui.accordion'),
-      ),
-      'js' => array(
-        //backdrop_get_path('module', 'entity_view_mode') . '/entity_view_mode.admin.js',
-      ),
-    ),
-  );
-
+  $rows = array();
   foreach (array_keys($entity_info) as $entity_type) {
     if (empty($entity_info[$entity_type]['view modes'])) {
       continue;
     }
 
-    $build[$entity_type] = array(
-      '#type' => 'fieldset',
-      '#title' => $entity_info[$entity_type]['label'],
-      '#collapsible' => TRUE,
-    );
-
     // Sort view modes by machine name.
     ksort($entity_info[$entity_type]['view modes']);
 
-    $rows = array();
     foreach ($entity_info[$entity_type]['view modes'] as $view_mode => $view_mode_info) {
-      $rows[$view_mode]['label'] = check_plain($view_mode_info['label']);
-      $rows[$view_mode]['type'] = !empty($custom_view_modes[$entity_type][$view_mode]) ? t('In configuration') : t('In code');
-      $rows[$view_mode]['custom_settings'] = !empty($view_mode_info['custom settings']) ? t('Yes') : t('No');
+      $rows[$entity_type . '-' . $view_mode]['label'] = check_plain($view_mode_info['label']);
+      $rows[$entity_type . '-' . $view_mode]['entity'] = $entity_info[$entity_type]['label'];
+      $rows[$entity_type . '-' . $view_mode]['type'] = !empty($custom_view_modes[$entity_type][$view_mode]) ? t('In configuration') : t('In code');
+      $rows[$entity_type . '-' . $view_mode]['custom_settings'] = !empty($view_mode_info['custom settings']) ? t('Yes') : t('No');
 
       $operations = array();
       if (isset($custom_view_modes[$entity_type][$view_mode])) {
         $operations['edit'] = array(
           'title' => t('Edit'),
-          'href' => "admin/config/system/view-modes/edit/{$entity_type}/{$view_mode}",
+          'href' => "admin/structure/view-modes/edit/{$entity_type}/{$view_mode}",
         );
         $operations['delete'] = array(
           'title' => t('Delete'),
-          'href' => "admin/config/system/view-modes/delete/{$entity_type}/{$view_mode}",
+          'href' => "admin/structure/view-modes/delete/{$entity_type}/{$view_mode}",
         );
       }
       if (!empty($operations)) {
-        $rows[$view_mode]['operations'] = array(
+        $rows[$entity_type . '-' . $view_mode]['operations'] = array(
           'data' => array(
-            '#theme' => 'links',
+            '#type' => 'dropbutton',
             '#links' => $operations,
-            '#attributes' => array('class' => array('links', 'inline')),
           ),
         );
       }
       else {
-        $rows[$view_mode]['operations'] = t('None (view mode locked)');
+        $rows[$entity_type . '-' . $view_mode]['operations'] = t('<em>locked</em>');
       }
     }
-
-    $rows['_add_new'][] = array(
-      'data' => l(t('Add new view mode'), "admin/config/system/view-modes/add/{$entity_type}"),
-      'colspan' => 4,
-    );
-
-    $build[$entity_type]['view_modes'] = array(
-      '#theme' => 'table',
-      '#header' => array(
-        t('View mode'),
-        t('Type'),
-        t('Custom settings'),
-        t('Operations'),
-      ),
-      '#rows' => $rows,
-    );
   }
+
+  $build['view_modes'] = array(
+    '#theme' => 'table',
+    '#header' => array(
+      array('data' => t('View mode')),
+      array('data' => t('Entity')),
+      array('data' => t('Storage state')),
+      array('data' => t('Custom settings')),
+      array(
+        'data' => t('Operations'),
+        'class' => array('class' => 'operations'),
+      ),
+    ),
+    '#rows' => $rows,
+  );
 
   return $build;
 }
 
 /**
- * Form builder; edit a custom view mode.
+ * Form builder: edit a custom view mode.
  */
-function entity_view_mode_edit_form($form, &$form_state, $entity_type, $machine_name = NULL) {
-  $form['#entity_type'] = $entity_type;
-  $form['#entity_info'] = $entity_info = entity_get_info($entity_type);
+function entity_view_mode_edit_form($form, &$form_state, $entity_type = NULL, $machine_name = NULL) {
   $view_mode = entity_view_mode_load($entity_type, $machine_name);
-
-  if (empty($entity_info['view modes']) || (isset($machine_name) && empty($view_mode))) {
-    backdrop_not_found();
-    backdrop_exit();
-  }
-
-  $form['entity_type'] = array(
-    '#type' => 'item',
-    '#title' => t('Entity type'),
-    '#markup' => $entity_info['label'],
-  );
-
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
     '#default_value' => isset($view_mode['label']) ? $view_mode['label'] : '',
     '#required' => TRUE,
   );
+
+  $entity_info = entity_get_info($entity_type);
+  if ($entity_type === NULL) {
+
+    // Get the type from form state (for ajax).
+    $entity_type = !empty($form_state['values']['entity_type']) ? $form_state['values']['entity_type'] : 'node';
+
+    // Only offer entity options with view modes.
+    $options = array();
+    foreach ($entity_info as $machine => $info) {
+      if (!empty($info['view modes'])) {
+        $options[$machine] = t($info['label']);
+      }
+    }
+    $form['entity_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Entity type'),
+      '#options' => $options,
+      '#default_value' => array_key_exists($entity_type, $options)? $entity_type : '',
+      '#ajax' => array(
+        'wrapper' => 'ajax-bundles',
+        'callback' => 'entity_view_mode_ajax_update',
+        'method' => 'replace',
+        'effect' => 'fade',
+       ),
+    );
+  }
+  else {
+    $form['entity_type'] = array(
+      '#type' => 'item',
+      '#title' => t('Entity type'),
+      '#markup' => $entity_info['label'],
+    );
+  }
+
+  $form['#entity_type'] = $entity_type;
+  $form['#entity_info'] = $entity_info[$entity_type];
 
   $form['machine_name'] = array(
     '#type' => 'machine_name',
@@ -131,7 +138,6 @@ function entity_view_mode_edit_form($form, &$form_state, $entity_type, $machine_
   $form['custom_settings'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use custom display settings'),
-    '#description' => t('Unchecking this will delete all the display settings for this view mode.'),
     '#default_value' => isset($entity_info['view modes'][$machine_name]['custom settings']) ? $entity_info['view modes'][$machine_name]['custom settings'] : TRUE,
   );
 
@@ -141,15 +147,22 @@ function entity_view_mode_edit_form($form, &$form_state, $entity_type, $machine_
   $form['enabled_bundles'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Enable this view mode for the following types'),
-    '#description' => t('Unchecking a type that has already been configured will delete the display settings for this view mode.'),
     '#options' => $bundle_options,
     '#default_value' => $bundle_values,
+    '#prefix' => '<div id="ajax-bundles">',
+    '#suffix' => '</div>',
     '#states' => array(
       'visible' => array(
         ':input[name="custom_settings"]' => array('checked' => TRUE),
       ),
     ),
   );
+
+  if (isset($machine_name)) {
+    // Add some extra help text for existing view modes.
+    $form['custom_settings']['#description'] = t('Unchecking this will delete all the display settings for this view mode.');
+    $form['enabled_bundles']['#description'] = t('Unchecking a type that has already been configured will delete the display settings for this view mode.');
+  }
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['save'] = array(
@@ -160,11 +173,24 @@ function entity_view_mode_edit_form($form, &$form_state, $entity_type, $machine_
   return $form;
 }
 
+/**
+ * Ajax callback to update bundle checkbox options.
+ */
+function entity_view_mode_ajax_update($form, $form_state) {
+  return $form['enabled_bundles'];
+}
+
+/**
+ * Helper function: checks if the view mode exists.
+ */
 function entity_view_mode_exists($machine_name, $element, $form_state) {
   $entity_info = entity_get_info($element['#entity_type']);
   return !empty($entity_info['view modes'][$machine_name]);
 }
 
+/**
+ * Submit hanlder for entity_view_mode_edit_form().
+ */
 function entity_view_mode_edit_form_submit($form, &$form_state) {
   // Save the view mode.
   form_state_values_clean($form_state);
@@ -175,9 +201,12 @@ function entity_view_mode_edit_form_submit($form, &$form_state) {
     '@entity-type' => backdrop_strtolower($form['#entity_info']['label']),
     '%view-mode' => $view_mode['label'],
   )));
-  $form_state['redirect'] = 'admin/config/system/view-modes';
+  $form_state['redirect'] = 'admin/structure/view-modes';
 }
 
+/**
+ * Form builder: delete a view mode.
+ */
 function entity_view_mode_delete_form(array $form, $form_state, $entity_type, $machine_name) {
   $form['#entity_type'] = $entity_type;
   $form['#entity_info'] = $entity_info = entity_get_info($entity_type);
@@ -199,13 +228,16 @@ function entity_view_mode_delete_form(array $form, $form_state, $entity_type, $m
       '@entity-type' => backdrop_strtolower($entity_info['label']),
       '%view-mode' => $view_mode['label'],
     )),
-    'admin/config/system/view-modes',
+    'admin/structure/view-modes',
     t('Deleting a view mode will cause any output still requesting to use that view mode to use the default display settings.'),
     t('Delete'),
     t('Cancel')
   );
 }
 
+/**
+ * Submit handler for entity_view_mode_delete_form().
+ */
 function entity_view_mode_delete_form_submit($form, &$form_state) {
   entity_view_mode_delete($form['#entity_type'], $form_state['values']['machine_name']);
 
@@ -213,5 +245,5 @@ function entity_view_mode_delete_form_submit($form, &$form_state) {
     '@entity-type' => backdrop_strtolower($form['#entity_info']['label']),
     '%view-mode' => $form['#view_mode']['label'],
   )));
-  $form_state['redirect'] = 'admin/config/system/view-modes';
+  $form_state['redirect'] = 'admin/structure/view-modes';
 }
