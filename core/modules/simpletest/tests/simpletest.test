@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for simpletest.module.
@@ -208,7 +207,7 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
    */
   function getTestIdFromResults() {
     foreach ($this->childTestResults['assertions'] as $assertion) {
-      if (preg_match('@^Test ID is ([0-9]*)\.$@', $assertion['message'], $matches)) {
+      if (preg_match('@^PASS: Test ID is ([0-9]*)\.$@', $assertion['message'], $matches)) {
         return $matches[1];
       }
     }

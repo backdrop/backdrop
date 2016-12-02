@@ -123,7 +123,7 @@ function simpletest_result_form($form, &$form_state, $test_id) {
     $rows = array();
     foreach ($assertions as $assertion) {
       $row = array();
-      $row[] = $assertion->message;
+      $row[] = strtoupper(str_replace('simpletest-', '', $assertion->status)) . ': ' . $assertion->message;
       $row[] = $assertion->message_group;
       $row[] = backdrop_basename($assertion->file);
       $row[] = $assertion->line;
