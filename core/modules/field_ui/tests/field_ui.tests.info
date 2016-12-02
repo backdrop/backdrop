@@ -15,3 +15,9 @@ name = Widget customization
 description = Test custom field widget hooks and callbacks on field administration pages.
 group = Field UI
 file = field_ui.test
+
+[FieldUIViewModeFunctionalTest]
+name = View modes
+description = Tests view mode functionality.
+group = Field UI
+file = field_ui.test

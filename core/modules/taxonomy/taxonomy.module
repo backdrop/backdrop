@@ -684,7 +684,7 @@ function taxonomy_term_view(TaxonomyTerm $term, $view_mode = 'full', $langcode =
   unset($term->content);
 
   $build += array(
-    '#theme' => 'taxonomy_term',
+    '#theme' => 'taxonomy_term__' . $term->vocabulary . '__' . $view_mode,
     '#term' => $term,
     '#view_mode' => $view_mode,
     '#language' => $langcode,
