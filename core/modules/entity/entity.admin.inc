@@ -1,7 +1,11 @@
 <?php
+/**
+ * @file
+ * Admin pages for entity module.
+ */
 
 /**
- * List all custom view modes.
+ * List all custom display modes.
  */
 function entity_view_mode_list() {
   $custom_view_modes = config_get('entity.view_modes', 'view_modes');
@@ -31,7 +35,7 @@ function entity_view_mode_list() {
       '#collapsible' => TRUE,
     );
 
-    // Sort view modes by machine name.
+    // Sort display modes by machine name.
     ksort($entity_info[$entity_type]['view modes']);
 
     $rows = array();
@@ -61,19 +65,19 @@ function entity_view_mode_list() {
         );
       }
       else {
-        $rows[$view_mode]['operations'] = t('None (view mode locked)');
+        $rows[$view_mode]['operations'] = t('None (display mode locked)');
       }
     }
 
     $rows['_add_new'][] = array(
-      'data' => l(t('Add new view mode'), "admin/config/system/view-modes/add/{$entity_type}"),
+      'data' => l(t('Add new display mode'), "admin/config/system/view-modes/add/{$entity_type}"),
       'colspan' => 4,
     );
 
     $build[$entity_type]['view_modes'] = array(
       '#theme' => 'table',
       '#header' => array(
-        t('View mode'),
+        t('Display mode'),
         t('Type'),
         t('Custom settings'),
         t('Operations'),
@@ -86,7 +90,7 @@ function entity_view_mode_list() {
 }
 
 /**
- * Form builder; edit a custom view mode.
+ * Form builder; edit a custom display mode.
  */
 function entity_view_mode_edit_form($form, &$form_state, $entity_type, $machine_name = NULL) {
   $form['#entity_type'] = $entity_type;
@@ -131,7 +135,7 @@ function entity_view_mode_edit_form($form, &$form_state, $entity_type, $machine_
   $form['custom_settings'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use custom display settings'),
-    '#description' => t('Unchecking this will delete all the display settings for this view mode.'),
+    '#description' => t('Unchecking this will delete all the display settings for this display mode.'),
     '#default_value' => isset($entity_info['view modes'][$machine_name]['custom settings']) ? $entity_info['view modes'][$machine_name]['custom settings'] : TRUE,
   );
 
@@ -140,8 +144,8 @@ function entity_view_mode_edit_form($form, &$form_state, $entity_type, $machine_
 
   $form['enabled_bundles'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Enable this view mode for the following types'),
-    '#description' => t('Unchecking a type that has already been configured will delete the display settings for this view mode.'),
+    '#title' => t('Enable this display mode for the following types'),
+    '#description' => t('Unchecking a type that has already been configured will delete the display settings for this display mode.'),
     '#options' => $bundle_options,
     '#default_value' => $bundle_values,
     '#states' => array(
@@ -166,12 +170,12 @@ function entity_view_mode_exists($machine_name, $element, $form_state) {
 }
 
 function entity_view_mode_edit_form_submit($form, &$form_state) {
-  // Save the view mode.
+  // Save the display mode.
   form_state_values_clean($form_state);
   $view_mode = $form_state['values'];
   entity_view_mode_save($form['#entity_type'], $view_mode);
 
-  backdrop_set_message(t('Saved the %view-mode @entity-type view mode.', array(
+  backdrop_set_message(t('Saved the %view-mode @entity-type display mode.', array(
     '@entity-type' => backdrop_strtolower($form['#entity_info']['label']),
     '%view-mode' => $view_mode['label'],
   )));
@@ -195,12 +199,12 @@ function entity_view_mode_delete_form(array $form, $form_state, $entity_type, $m
 
   return confirm_form(
     $form,
-    t('Are you sure you want to delete the %view-mode @entity-type view mode?', array(
+    t('Are you sure you want to delete the %view-mode @entity-type display mode?', array(
       '@entity-type' => backdrop_strtolower($entity_info['label']),
       '%view-mode' => $view_mode['label'],
     )),
     'admin/config/system/view-modes',
-    t('Deleting a view mode will cause any output still requesting to use that view mode to use the default display settings.'),
+    t('Deleting a display mode will cause any output using that display mode to use the default display settings.'),
     t('Delete'),
     t('Cancel')
   );
@@ -209,7 +213,7 @@ function entity_view_mode_delete_form(array $form, $form_state, $entity_type, $m
 function entity_view_mode_delete_form_submit($form, &$form_state) {
   entity_view_mode_delete($form['#entity_type'], $form_state['values']['machine_name']);
 
-  backdrop_set_message(t('Deleted the %view-mode @entity-type view mode.', array(
+  backdrop_set_message(t('Deleted the %view-mode @entity-type display mode.', array(
     '@entity-type' => backdrop_strtolower($form['#entity_info']['label']),
     '%view-mode' => $form['#view_mode']['label'],
   )));

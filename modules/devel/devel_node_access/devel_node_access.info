@@ -1,0 +1,12 @@
+name = Devel Node Access
+description = Developer blocks and page illustrating relevant node_access records.
+package = Development
+backdrop = 1.x
+dependencies[] = menu
+configure = admin/config/development/devel
+type = module
+
+; Added by Backdrop CMS packaging script on 2016-08-28
+project = devel
+version = 1.x-1.6.0
+timestamp = 1472448918

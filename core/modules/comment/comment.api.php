@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the Comment module.
@@ -65,7 +64,7 @@ function hook_comment_load($comments) {
  * @param $comment
  *   Passes in the comment the action is being performed on.
  * @param $view_mode
- *   View mode, e.g. 'full', 'teaser'...
+ *   Display mode, e.g. 'full', 'teaser'...
  * @param $langcode
  *   The language code used for rendering.
  *
