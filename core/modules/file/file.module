@@ -8,6 +8,58 @@
 require_once BACKDROP_ROOT . '/core/modules/file/file.field.inc';
 
 /**
+ * Implements hook_action_info().
+ */
+function file_action_info() {
+  $actions['file_delete'] = array(
+    'label' => t('Delete file(s)'),
+    'type' => 'file',
+    'callback' => 'file_delete_file_action',
+    'file' => 'file.actions.inc',
+  );
+
+  return $actions;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function file_autoload_info() {
+  return array(
+    // Views handlers.
+    'views_handler_argument_file_fid' => 'views/views_handler_argument_file_fid.inc',
+    'views_handler_field_file' => 'views/views_handler_field_file.inc',
+    'views_handler_field_file_link_delete' => 'views/views_handler_field_file_link_delete.inc',
+    'views_handler_field_file_extension' => 'views/views_handler_field_file_extension.inc',
+    'views_handler_field_file_filemime' => 'views/views_handler_field_file_filemime.inc',
+    'views_handler_field_file_uri' => 'views/views_handler_field_file_uri.inc',
+    'views_handler_field_file_status' => 'views/views_handler_field_file_status.inc',
+    'views_handler_filter_file_status' => 'views/views_handler_filter_file_status.inc',
+    'views_handler_field_file_link' => 'views/views_handler_field_file_link.inc',
+  );
+}
+
+/**
+ * Implements hook_permission().
+ */
+function file_permission() {
+  return array(
+    'access file overview' => array(
+      'title' => t('Access the files overview page'),
+      'description' => t('Get an overview of <a href="@url">all files</a>.', array('@url' => url('admin/content/files'))),
+    ),
+    'access files' => array(
+      'title' => t('Access any file'),
+      'description' => t('View files as their own pages.'),
+    ),
+    'delete files' => array(
+      'title' => t('Delete any file'),
+      'description' => t('Delete files from the file administration listing.'),
+    ),
+  );
+}
+
+/**
  * Implements hook_menu().
  */
 function file_menu() {
@@ -26,6 +78,16 @@ function file_menu() {
     'access arguments' => array('access content'),
     'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,
+  );
+
+  $items['file/%file/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'backdrop_get_form',
+    'page arguments'  => array('file_delete_form', 1),
+    'access arguments' => array('delete files'),
+    'weight' => 1,
+    'type' => MENU_CALLBACK,
+    'file' => 'file.pages.inc',
   );
 
   return $items;
@@ -934,6 +996,21 @@ function file_get_file_references(File $file, $field = NULL, $age = FIELD_LOAD_R
   }
 
   return isset($field) ? $references[$field['field_name']] : array_filter($references);
+}
+
+/**
+ * Returns the file type name of the passed file or file type string.
+ *
+ * @param $file
+ *   A file object or string that indicates the file type to return.
+ *
+ * @return
+ *   The file type name or FALSE if the file type is not found.
+ */
+function file_type_get_name($file) {
+  $type = is_object($file) ? $file->type : $file;
+  $info = entity_get_info('file');
+  return isset($info['bundles'][$type]['label']) ? $info['bundles'][$type]['label'] : FALSE;
 }
 
 /**
