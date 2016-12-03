@@ -20,6 +20,7 @@ ln -s $GITLC_DEPLOY_DIR/.htaccess ./
 # Unlink settings.php and copy instead.
 rm -f settings.php
 cp $GITLC_DEPLOY_DIR/settings.php ./
+echo "\$config_directories['active'] = 'db://config_active';" >>  ./settings.php
 
 # Unlink files and copy instead.
 rm -f files
