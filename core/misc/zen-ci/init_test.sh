@@ -29,7 +29,7 @@ cp -r $GITLC_DEPLOY_DIR/files ./
 php $SITEPATH/core/scripts/install.sh  --db-url=mysql://test:@localhost/test --root=/home/test/www
 
 # Relate to Issue 2777. Testing configs stored in shm.
-ACTIVE_PATH=`cat $SITEPATH/settings.php |grep '^\$config.*active'|awk '{print$3}'| tr ';' ' ' |tr '\'' ' '`
+ACTIVE_PATH=`cat $SITEPATH/settings.php |grep '^\$config.*active'|awk '{print$3}'| tr ';' ' ' |tr "'" ' '`
 mkdir /dev/shm/config
 mv $ACTIVE_PATH /dev/shm/config/active
 ln -s /dev/shm/config/active $ACTIVE_PATH
