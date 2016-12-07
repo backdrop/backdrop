@@ -1,0 +1,8 @@
+name = MySQL Database Backend
+description = Enable the use of MySQL databases
+
+database_backend[DatabaseConnection_mysql] = database.inc
+database_backend[DatabaseTasks_mysql] = install.inc
+database_backend[InsertQuery_mysql] = query.inc
+database_backend[TruncateQuery_mysql] = query.inc
+database_backend[DatabaseSchema_mysql] = schema.inc
