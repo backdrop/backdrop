@@ -16,8 +16,6 @@ function backdrop_class_list() {
     'BackdropCacheArray' => $path . 'bootstrap.inc',
     'SchemaCache' => $path . 'boostrap.inc',
     'BackdropFakeCache' => $path . 'cache-install.inc',
-    'BackdropNullCache' => $path . 'cache.inc',
-    'BackdropDatabaseCache' => $path . 'cache.inc',
     'BackdropCacheInterface' => $path . 'cache.inc',
     'Color' => $path . 'color.inc',
     'Diff' => $path . 'diff.inc',
@@ -92,12 +90,6 @@ function backdrop_class_list() {
     'SelectQuery' => $path . 'database/select.inc',
     'QueryExtendableInterface' => $path . 'database/select.inc',
     'SelectQueryInterface' => $path . 'database/select.inc',
-
-    'DatabaseConnection_mysql' => $path . 'database/mysql/database.inc',
-    'DatabaseTasks_mysql' => $path . 'database/mysql/install.inc',
-    'InsertQuery_mysql' => $path . 'database/mysql/query.inc',
-    'TruncateQuery_mysql' => $path . 'database/mysql/query.inc',
-    'DatabaseSchema_mysql' => $path . 'database/mysql/schema.inc',
 
     'FileTransfer' => $path . 'filetransfer/filetransfer.inc',
     'FileTransferException' => $path . 'filetransfer/filetransfer.inc',
