@@ -1,0 +1,4 @@
+name = Cache Database
+description = Support cache bins stored in the database
+
+cache_backend[BackdropDatabaseCache] = cache_database.inc
