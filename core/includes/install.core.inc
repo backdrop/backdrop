@@ -273,6 +273,7 @@ function install_begin_request(&$install_state) {
   // suspect, due to the fact that Backdrop is not fully set up yet.
   require_once BACKDROP_ROOT . '/core/includes/cache.inc';
   require_once BACKDROP_ROOT . '/core/includes/cache-install.inc';
+  backdrop_load_backends('cache');
   $GLOBALS['settings']['cache_default_class'] = 'BackdropFakeCache';
 
   // Prepare for themed output. We need to run this at the beginning of the
@@ -366,7 +367,7 @@ function install_run_tasks(&$install_state) {
  *
  * @param $task
  *   An array of information about the task to be run as returned by
- *   hook_install_tasks(). 
+ *   hook_install_tasks().
  * @param $install_state
  *   An array of information about the current installation state. This is
  *   passed in by reference so that it can be modified by the task.
