@@ -3769,10 +3769,7 @@ function system_autoload_info() {
     'views_handler_field_file_status' => 'views/views_handler_field_file_status.inc',
     'views_handler_filter_file_status' => 'views/views_handler_filter_file_status.inc',
     'views_handler_filter_system_type' => 'views/views_handler_filter_system_type.inc',
-  ) +
-  backdrop_find_backends('database') +
-  backdrop_find_backends('cache') +
-  backdrop_find_backends('config');
+  );
 }
 
 /**

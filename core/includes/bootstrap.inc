@@ -4000,6 +4000,10 @@ function backdrop_autoload($class) {
         $class_registry[$module_class] = BACKDROP_ROOT . '/' . $module_path . '/' . $relative_path;
       }
     }
+    // Load class registries for the backends.
+    $class_registry +=  backdrop_find_backends('database');
+    $class_registry += backdrop_find_backends('cache');
+    $class_registry += backdrop_find_backends('config');
     backdrop_alter('autoload_info', $class_registry);
   }
 
