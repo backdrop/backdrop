@@ -1113,7 +1113,7 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
   if ($view_mode == 'default') {
     $form['modes'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Custom display settings'),
+      '#title' => t('View modes'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
