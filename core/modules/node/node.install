@@ -1095,6 +1095,27 @@ function node_update_1012() {
 }
 
 /**
+ * Replace the node_admin_content view config with a new manage_content config.
+ */
+function node_update_1013() {
+  // If the old node_admin_content view has not been customized, delete it.
+    if (config_get('views.view.node_admin_content', 'storage') === 4) {
+      $config_node_admin_content = config('views.view.node_admin_content');
+      $config_node_admin_content->delete();
+    }
+  // Check if there is already a manage_content view.
+  $config_manage_content = config('views.view.manage_content');
+  if ($config_manage_content->isNew()) {
+    // If not, create the new manage_content view.
+    $path = backdrop_get_path('module', 'node') . '/config/';
+    $contents = file_get_contents($path . 'views.view.manage_content.json');
+    $data = json_decode($contents, true);
+    $config_manage_content->setData($data);
+    $config_manage_content->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
