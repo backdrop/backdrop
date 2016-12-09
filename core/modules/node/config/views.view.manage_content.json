@@ -1,6 +1,6 @@
 {
-    "_config_name": "views.view.node_admin_content",
-    "name": "node_admin_content",
+    "_config_name": "views.view.manage_content",
+    "name": "manage_content",
     "description": "",
     "module": "node",
     "storage": 4,
