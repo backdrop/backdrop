@@ -18,6 +18,14 @@
   background-size: cover;
 }
 
+.l-top .block-hero {
+  margin-top: -2rem;/* Negative top margin collapses spacing under header */
+}
+
+.container .block-hero {
+  margin-top: 0; /* If hero is in a container don't collapse top spacing */
+}
+
 @media (min-width: 25em) {
   .block-hero {
     padding: 2rem 3rem 3rem;
