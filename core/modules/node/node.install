@@ -1095,7 +1095,8 @@ function node_update_1012() {
 }
 
 /**
- * Replace the node_admin_content view config with a new manage_content config.
+ * Replace the node_admin_content view (if not customized) with the new
+ * manage_content view.
  */
 function node_update_1013() {
   // If the old node_admin_content view has not been customized, delete it.
