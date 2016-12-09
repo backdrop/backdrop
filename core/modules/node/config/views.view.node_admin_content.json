@@ -3,11 +3,11 @@
     "name": "node_admin_content",
     "description": "",
     "module": "node",
-    "storage": 4,
+    "storage": 2,
     "tag": "default",
     "disabled": false,
     "base_table": "node",
-    "human_name": "Admin Content",
+    "human_name": "Administer content",
     "core": "1.0",
     "display": {
         "default": {
@@ -385,7 +385,7 @@
                         "order": "DESC"
                     }
                 },
-                "title": "Admin Content",
+                "title": "Manage content",
                 "relationships": {
                     "uid": {
                         "id": "uid",
@@ -506,7 +506,7 @@
                 "path": "admin/content/node",
                 "menu": {
                     "type": "default tab",
-                    "title": "Find content",
+                    "title": "Manage content",
                     "description": "",
                     "name": "management",
                     "weight": "-1",
