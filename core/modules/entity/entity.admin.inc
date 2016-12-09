@@ -24,7 +24,6 @@ function entity_view_mode_list() {
       $rows[$entity_type . '-' . $view_mode]['label'] = check_plain($view_mode_info['label']);
       $rows[$entity_type . '-' . $view_mode]['entity'] = $entity_info[$entity_type]['label'];
       $rows[$entity_type . '-' . $view_mode]['type'] = !empty($custom_view_modes[$entity_type][$view_mode]) ? t('In configuration') : t('In code');
-      $rows[$entity_type . '-' . $view_mode]['custom_settings'] = !empty($view_mode_info['custom settings']) ? t('Yes') : t('No');
 
       $operations = array();
       if (isset($custom_view_modes[$entity_type][$view_mode])) {
@@ -57,7 +56,6 @@ function entity_view_mode_list() {
       array('data' => t('View mode')),
       array('data' => t('Entity')),
       array('data' => t('Storage state')),
-      array('data' => t('Custom settings')),
       array(
         'data' => t('Operations'),
         'class' => array('class' => 'operations'),
@@ -135,12 +133,6 @@ function entity_view_mode_edit_form($form, &$form_state, $entity_type = NULL, $m
     );
   }
 
-  $form['custom_settings'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Use custom display settings'),
-    '#default_value' => isset($entity_info['view modes'][$machine_name]['custom settings']) ? $entity_info['view modes'][$machine_name]['custom settings'] : TRUE,
-  );
-
   $bundle_options = entity_view_mode_get_possible_bundles($entity_type);
   $bundle_values = !empty($machine_name) ? array_keys(entity_view_mode_get_enabled_bundles($entity_type, $machine_name)) : array_keys($bundle_options);
 
@@ -160,8 +152,7 @@ function entity_view_mode_edit_form($form, &$form_state, $entity_type = NULL, $m
 
   if (isset($machine_name)) {
     // Add some extra help text for existing view modes.
-    $form['custom_settings']['#description'] = t('Unchecking this will delete all the display settings for this view mode.');
-    $form['enabled_bundles']['#description'] = t('Unchecking a type that has already been configured will delete the display settings for this view mode.');
+    $form['enabled_bundles']['#description'] = t('Unchecking a type that has already been configured will disable the display settings for this view mode.');
   }
 
   $form['actions'] = array('#type' => 'actions');
