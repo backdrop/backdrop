@@ -1095,6 +1095,27 @@ function node_update_1012() {
 }
 
 /**
+ * Update the empty text, name, and menu link, for the admin content view.
+ */
+function node_update_1013() {
+  $config = config('views.view.node_admin_content');
+  // If the node_admin_content view name has not been changed, update it.
+  if ($config->get('display.default.display_options.title') == 'Admin Content') {
+    $config->set('display.default.display_options.title', 'Content');
+  }
+  // If the empty text has not been changed, update it.
+  if ($config->get('display.default.display_options.empty.content') == 'No content available.') {
+    $config->set('display.default.display_options.empty.content', 'No content found.');
+  }
+  // If the menu item has not been changed, update it.
+  if ($config->get('display.page.display_options.menu.title') == 'Find content') {
+    $config->set('display.page.display_options.menu.title', 'Manage content');
+  }
+  $config->save();
+  cache_clear_all();
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

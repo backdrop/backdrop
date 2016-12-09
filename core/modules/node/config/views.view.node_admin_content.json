@@ -385,7 +385,7 @@
                         "order": "DESC"
                     }
                 },
-                "title": "Admin Content",
+                "title": "Content",
                 "relationships": {
                     "uid": {
                         "id": "uid",
@@ -409,7 +409,7 @@
                         "ui_name": "",
                         "label": "",
                         "empty": true,
-                        "content": "No content available.",
+                        "content": "No content found.",
                         "tokenize": 0
                     }
                 },
@@ -506,7 +506,7 @@
                 "path": "admin/content/node",
                 "menu": {
                     "type": "default tab",
-                    "title": "Find content",
+                    "title": "Manage content",
                     "description": "",
                     "name": "management",
                     "weight": "-1",

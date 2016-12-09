@@ -2164,7 +2164,7 @@ class NodeQueryAlter extends BackdropWebTestCase {
     $this->assertNoText('Exception', "No database exception");
 
     $this->backdropGet('admin/content');
-    $this->assertText(t('No content available.'));
+    $this->assertText(t('No content found.'));
   }
 
   /**
