@@ -449,7 +449,7 @@ function _get_router_item_children($path){
   return $children;
 }
 
-function _get_router_item_tabs($path){
+function _get_router_item_tabs(&$path){
   static $cached_items;
   
   if(isset($cached_items[$path])) {
@@ -463,6 +463,7 @@ function _get_router_item_tabs($path){
   foreach($ancestors as $ancestor) {
     $filename = $root . $ancestor . '/tabs.json';
     if(is_file($filename)) {
+      $path = $ancestor;
       $content = file_get_contents($filename);
       if($item = backdrop_json_decode($content)) {
         usort($item, "menu_router_sort_tabs");
@@ -2095,7 +2096,7 @@ function _get_top_tabs($router_item, $parts) {
  *     a default local task, then this corresponds to the parent tab.
  */
 function menu_local_tasks($level = 0) {
- // $data = &backdrop_static(__FUNCTION__);
+  $data = &backdrop_static(__FUNCTION__);
   $root_path = &backdrop_static(__FUNCTION__ . ':root_path', '');
   $empty = array(
     'tabs' => array('count' => 0, 'output' => array()),
@@ -2110,60 +2111,66 @@ function menu_local_tasks($level = 0) {
     $tabs = array();
 
     $router_item = menu_get_item();
-
+    $origin_router_item = $router_item;
+    
     // If this router item points to its parent, start from the parents to
     // compute tabs and actions.
-/*    if ($router_item && ($router_item['type'] & MENU_LINKS_TO_PARENT)) {
-      $parts = explode("/", $_GET['q']);
-      array_pop($parts);
-      $router_item = menu_get_item(implode("/", $parts));
-    }*/
-    if ($level == 0) {
-      $parts = explode("/", $_GET['q']);
-      $router_item = _get_top_tabs($router_item, $parts);
+    if ($router_item && ($router_item['type'] & MENU_LINKS_TO_PARENT)) {
+      $router_item = menu_get_item($router_item['tab_parent_href']);
     }
-
+    
     // If we failed to fetch a router item or the current user doesn't have
     // access to it, don't bother computing the tabs.
     if (!$router_item || !$router_item['access']) {
       return $empty;
     }
 
-    // Get all tabs (also known as local tasks) and the root page.
-/*    $cid = 'local_tasks:' . $router_item['tab_root'];
-    $cache_menu = cache('menu');
-    if ($cache = $cache_menu->get($cid)) {
-      $result = $cache->data;
-    }
-    else {
-      $result = db_select('menu_router', NULL, array('fetch' => PDO::FETCH_ASSOC))
-        ->fields('menu_router')
-        ->condition('tab_root', $router_item['tab_root'])
-        ->condition('context', MENU_CONTEXT_INLINE, '<>')
-        ->orderBy('weight')
-        ->orderBy('title')
-        ->execute()
-        ->fetchAll();
-      $cache_menu->set($cid, $result);
-    }*/
     $map = $router_item['original_map'];
-    $children = array();
-    $tasks = array();
     $root_path = $router_item['path'];
-
-    $tabs_current = array();
-    $actions_current = array();
-    $tab_count = 0;
-    $action_count = 0;
     
     $tabs_current = _get_router_item_tabs($root_path);
     foreach($tabs_current as $key => $item) {
       _menu_translate($tabs_current[$key]['#link'], $map, TRUE);
       if(!$tabs_current[$key]['#link']['access']) {
         unset($tabs_current[$key]);
+      } else {
+        if (($item['#link']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
+          $tabs_current[$key]['#link']['path'] = $item['#link']['path'] = $router_item['path'];
+        }
+        if ($item['#link']['path'] == $origin_router_item['path']) {
+          $tabs_current[$key]['#active'] = TRUE;
+        }
       }
     }
-    $tab_count = count($tabs_current);
+
+    if($router_item['tab_root'] != $root_path) {
+      $tabs_parent = array();
+      $tabs_parent = _get_router_item_tabs($router_item['tab_root']);
+      
+      foreach($tabs_parent as $key => $item) {
+        _menu_translate($tabs_parent[$key]['#link'], $map, TRUE);
+        if(!$tabs_parent[$key]['#link']['access']) {
+          unset($tabs_parent[$key]);
+        } else {
+          if (($item['#link']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
+            $tabs_current[$key]['#link']['path'] = $item['#link']['path'] = $router_item['path'];
+          }
+          if ($item['#link']['path'] == $origin_router_item['path']) {
+            $tabs_current[$key]['#active'] = TRUE;
+          }
+        }
+      }
+      $tabs[0]['count'] = count($tabs_parent);
+      $tabs[0]['output'] = $tabs_parent;  
+      
+      $tabs[1]['count'] = count($tabs_current);
+      $tabs[1]['output'] = $tabs_current;  
+    } else {
+      $tabs[0]['count'] = count($tabs_current);
+      $tabs[0]['output'] = $tabs_current;  
+    }
+    print_r($tabs);
+    $data['tabs'] = $tabs;   
     
     $actions_current = _get_router_item_actions($root_path);
     foreach($actions_current as $key => $item) {
@@ -2173,70 +2180,15 @@ function menu_local_tasks($level = 0) {
       }
       
     }
-    
-    $action_count = count($actions_current);
 
-    /*foreach ($router_item['children'] as $item) {
-      _menu_translate($item, $map, TRUE);
-      if (!($item['type'] & MENU_IS_LOCAL_TASK)) {
-        // This item is not a tab, skip it.
-        continue;
-      }
-      if ($item['access']) {
-        $link = $item;
-        if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
-          $link['href'] = $router_item['path'];
-          // Mark the link as active, if the current path happens to be the
-          // path of the default local task itself (i.e., instead of its
-          // tab_parent_href or tab_root_href). Normally, links for default
-          // local tasks link to their parent, but the path of default local
-          // tasks can still be accessed directly, in which case this link
-          // would not be marked as active, since l() only compares the href
-          // with $_GET['q'].
-          if ($link['href'] != $_GET['q']) {
-            $link['localized_options']['attributes']['class'][] = 'active';
-          }
-          $tabs_current[] = array(
-            '#theme' => 'menu_local_task',
-            '#link' => $link,
-            '#active' => TRUE,
-          );
-          $tab_count++;
-        } else {
-          // Actions can be normal items too, so bitmask with
-          // MENU_IS_LOCAL_ACTION before checking.
-          if (($item['type'] & MENU_IS_LOCAL_ACTION) == MENU_IS_LOCAL_ACTION) {
-            // The item is an action, display it as such.
-            $actions_current[] = array(
-              '#theme' => 'menu_local_action',
-              '#link' => $link,
-            );
-            $action_count++;
-          }
-          else {
-            // Otherwise, it's a normal tab.
-            $tabs_current[] = array(
-              '#theme' => 'menu_local_task',
-              '#link' => $link,
-            );
-            $tab_count++;
-          }
-        }
-      }
-    }
-    */
-    $data['actions']['count'] = $action_count;
+    $data['actions']['count'] = count($actions_current);
     $data['actions']['output'] = $actions_current;
     
-    $tabs[$level]['count'] = $tab_count;
-    $tabs[$level]['output'] = $tabs_current;   
-//    $tabs = array_values($tabs);
-    $data['tabs'] = $tabs;   
     
     // Allow modules to alter local tasks or dynamically append further tasks.
     backdrop_alter('menu_local_tasks', $data, $router_item, $root_path);
   }
-  print_r($data['tabs']);
+
   if (isset($data['tabs'][$level])) {
     return array(
       'tabs' => $data['tabs'][$level],
