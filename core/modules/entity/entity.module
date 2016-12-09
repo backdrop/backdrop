@@ -170,7 +170,7 @@ function entity_view_mode_delete($entity_type, $machine_name) {
     module_invoke_all('entity_view_mode_delete', $view_mode, $entity_type);
 
     $config = config('entity.view_modes');
-    $view_modes = $config->get('entity_view_modes');
+    $view_modes = $config->get('view_modes');
     unset($view_modes[$entity_type][$machine_name]);
     $config->set('view_modes', $view_modes);
     $config->save();

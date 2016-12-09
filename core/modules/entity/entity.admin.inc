@@ -30,10 +30,12 @@ function entity_view_mode_list() {
         $operations['edit'] = array(
           'title' => t('Edit'),
           'href' => "admin/structure/view-modes/edit/{$entity_type}/{$view_mode}",
+          'query' => array('destination' => current_path()),
         );
         $operations['delete'] = array(
           'title' => t('Delete'),
           'href' => "admin/structure/view-modes/delete/{$entity_type}/{$view_mode}",
+          'query' => array('destination' => current_path()),
         );
       }
       if (!empty($operations)) {
@@ -43,9 +45,6 @@ function entity_view_mode_list() {
             '#links' => $operations,
           ),
         );
-      }
-      else {
-        $rows[$entity_type . '-' . $view_mode]['operations'] = t('<em>locked</em>');
       }
     }
   }
@@ -110,6 +109,7 @@ function entity_view_mode_edit_form($form, &$form_state, $entity_type = NULL, $m
       '#type' => 'item',
       '#title' => t('Entity type'),
       '#markup' => $entity_info['label'],
+      '#access' => FALSE,
     );
   }
 
@@ -192,7 +192,6 @@ function entity_view_mode_edit_form_submit($form, &$form_state) {
     '@entity-type' => backdrop_strtolower($form['#entity_info']['label']),
     '%view-mode' => $view_mode['label'],
   )));
-  $form_state['redirect'] = 'admin/structure/view-modes';
 }
 
 /**
@@ -220,7 +219,7 @@ function entity_view_mode_delete_form(array $form, $form_state, $entity_type, $m
       '%view-mode' => $view_mode['label'],
     )),
     'admin/structure/view-modes',
-    t('Deleting a view mode will cause any output still requesting to use that view mode to use the default display settings.'),
+    t('Deleting a view mode will cause any content still using it to revert to the default display settings.'),
     t('Delete'),
     t('Cancel')
   );
@@ -236,5 +235,4 @@ function entity_view_mode_delete_form_submit($form, &$form_state) {
     '@entity-type' => backdrop_strtolower($form['#entity_info']['label']),
     '%view-mode' => $form['#view_mode']['label'],
   )));
-  $form_state['redirect'] = 'admin/structure/view-modes';
 }

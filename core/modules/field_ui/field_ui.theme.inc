@@ -86,3 +86,57 @@ function theme_field_ui_table($variables) {
   return theme('table', $table);
 }
 
+
+function theme_field_ui_modes($variables) {
+  $element = $variables['element'];
+  $view_modes = $element['#view_modes'];
+  $entity_type = $element['#entity_type'];
+  $custom_view_modes = config_get('entity.view_modes', 'view_modes');
+
+  $header = array(
+    t('Enabled view modes'),
+    t('Storage state'),
+    t('Operations'),
+  );
+
+  $rows = array();
+  foreach (element_children($element) as $view_mode_name) {
+    $row = array();
+
+    $row['enabled'] = backdrop_render($element[$view_mode_name]);
+    $row['type'] = !empty($custom_view_modes[$entity_type][$view_mode_name]) ? t('In configuration') : t('In code');
+
+    $operations = array();
+    if (isset($custom_view_modes[$entity_type][$view_mode_name])) {
+      $operations['edit'] = array(
+        'title' => t('Edit'),
+        'href' => "admin/structure/view-modes/edit/{$entity_type}/{$view_mode_name}",
+        'query' => array('destination' => current_path()),
+      );
+      $operations['delete'] = array(
+        'title' => t('Delete'),
+        'href' => "admin/structure/view-modes/delete/{$entity_type}/{$view_mode_name}",
+        'query' => array('destination' => current_path()),
+      );
+    }
+    $row['operations'] = array(
+      'data' => array(
+        '#type' => 'dropbutton',
+        '#links' => $operations,
+      ),
+    );
+
+    $rows[] = $row;
+  }
+
+  if (user_access('administer view modes')) {
+    $rows[] = array(array(
+      'data' => l(t('+ Add view mode'), 'admin/structure/view-modes/add/' . $entity_type, array('query' => array('destination' => current_path()))),
+      'colspan' => '3',
+    ));;
+  }
+
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'menu-overview')));
+  $output .= backdrop_render_children($form);
+  return $output;
+}

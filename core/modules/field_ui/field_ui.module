@@ -256,6 +256,10 @@ function field_ui_theme() {
       'render element' => 'elements',
       'file' => 'field_ui.theme.inc',
     ),
+    'field_ui_modes' => array(
+      'render element' => 'element',
+      'file' => 'field_ui.theme.inc',
+    ),
   );
 }
 
