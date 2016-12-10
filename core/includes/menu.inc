@@ -2104,17 +2104,12 @@ function menu_local_tasks($level = 0) {
     $tabs = array();
 
     $router_item = menu_get_item();
-    
+    print_r($router_item);
     // If this router item points to its parent, start from the parents to
     // compute tabs and actions.
     if ($router_item && ($router_item['type'] & MENU_LINKS_TO_PARENT)) {
       $router_item = menu_get_item($router_item['tab_parent_href']);
     }
-    
-    // Get ancestors to make tabs active based on it.
-    $parts = explode("/", $router_item['path']);
-    $ancestors = menu_get_ancestors($parts);
-    print_r($router_item);
     
     // If we failed to fetch a router item or the current user doesn't have
     // access to it, don't bother computing the tabs.
@@ -2126,8 +2121,7 @@ function menu_local_tasks($level = 0) {
     $root_path = $router_item['path'];
 
     $tabs_parent = _get_router_item_tabs($router_item['tab_root']);
-    print_r($tabs_parent);
-    
+
     if(!$router_item['tab_parent']){
       $path = $router_item['path'];
     } else {
@@ -2149,7 +2143,6 @@ function menu_local_tasks($level = 0) {
           $item['#link']['_origin_path'] = $item['#link']['path'];
           $item['#link']['path'] = $item['#link']['tab_parent'];
         }
-        echo "Check: " . $item['#link']['path']. " == " . $path. "\n";
         if($item['#link']['path'] == $path) {
           $item['#active'] = TRUE;
           $tab_current_path = $item['#link']['path'];
@@ -2157,15 +2150,11 @@ function menu_local_tasks($level = 0) {
             $tab_current_path = $item['#link']['_origin_path'];
           }
           $tabs_current = _get_router_item_tabs($tab_current_path);
-          echo " ... catch\n";
-        } else {
-          echo " ... miss\n" . strcmp($item['#link']['href'], $path);
         }           
         $tabs_parent[$key] = $item;
       }
     }
     
-    print_r($tabs_parent);
     $tabs[0]['count'] = count($tabs_parent);
     $tabs[0]['output'] = $tabs_parent; 
     
@@ -2179,10 +2168,8 @@ function menu_local_tasks($level = 0) {
         } else {
           if (($item['#link']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
             $item['#link']['href'] = $item['#link']['tab_parent_href'];
-//            $item['#link']['_origin_path'] = $item['#link']['path'];
             $item['#link']['path'] = $item['#link']['tab_parent'];
           }
-          echo "Check: " . $item['#link']['path']."\n";
           if($item['#link']['path'] == $path) {
             $item['#active'] = TRUE;
           }            
@@ -2194,22 +2181,6 @@ function menu_local_tasks($level = 0) {
         $tabs[1]['output'] = $tabs_current;
       }
     }
-   /* if($router_item['tab_root'] != $root_path) {
-      $tabs_current = _get_router_item_tabs($router_item['path']);
-      foreach($tabs_current as $key => $item) {
-        _menu_translate($item['#link'], $map, TRUE);
-        if(!$item['#link']['access']) {
-          unset($tabs_current[$key]);
-        } else {
-          if(in_array($item['#link']['path'], $ancestors)) {
-            $item['#active'] = TRUE;
-          }
-          $tabs_current[$key] = $item;
-        }
-      }
-      $tabs[1]['count'] = count($tabs_current);
-      $tabs[1]['output'] = $tabs_current;
-    }*/
            
     $data['tabs'] = $tabs;   
     
