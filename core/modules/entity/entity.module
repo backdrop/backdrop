@@ -20,76 +20,15 @@ function entity_modules_disabled() {
 }
 
 /**
- * Implements hook_permission().
- */
-function entity_permission() {
-  return array(
-    'administer view modes' => array(
-      'title' => t('Add, edit and delete custom view modes.'),
-    ),
-  );
-}
-
-/**
- * Implements hook_menu().
- */
-function entity_menu() {
-  $items['admin/structure/view-modes'] = array(
-    'title' => 'View modes',
-    'description' => 'Create new custom view modes for content.',
-    'page callback' => 'entity_view_mode_list',
-    'access arguments' => array('administer view modes'),
-    'file' => 'entity.admin.inc',
-  );
-  $items['admin/structure/view-modes/add'] = array(
-    'title' => 'Add view mode',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('entity_view_mode_edit_form'),
-    'access arguments' => array('administer view modes'),
-    'file' => 'entity.admin.inc',
-  );
-  $items['admin/structure/view-modes/add/%'] = array(
-    'title' => 'Add view mode',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('entity_view_mode_edit_form', 4),
-    'access arguments' => array('administer view modes'),
-    'file' => 'entity.admin.inc',
-  );
-  $items['admin/structure/view-modes/edit/%/%'] = array(
-    'title' => 'Edit view mode',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('entity_view_mode_edit_form', 4, 5),
-    'access arguments' => array('administer view modes'),
-    'file' => 'entity.admin.inc',
-  );
-  $items['admin/structure/view-modes/delete/%/%'] = array(
-    'title' => 'Edit view mode',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('entity_view_mode_delete_form', 4, 5),
-    'access arguments' => array('administer view modes'),
-    'file' => 'entity.admin.inc',
-  );
-
-  return $items;
-}
-
-/**
- * Implements hook_menu_local_tasks_alter().
- */
-function entity_menu_local_tasks_alter(&$data, $router_item, $root_path) {
-  if ($root_path == 'admin/structure/view-modes') {
-    $item = menu_get_item('admin/structure/view-modes/add');
-    if ($item['access']) {
-      $data['actions']['output'][] = array(
-        '#theme' => 'menu_local_action',
-        '#link' => $item,
-      );
-    }
-  }
-}
-
-/**
  * Load a custom entity view mode by entity type and machine name.
+ *
+ * @param (string) $entity_type
+ *   Entity type. For example, node, user or term.
+ * @param  (string) $machine_name
+ *   Machine name of view mode.
+ *
+ * @return  FALSE|(array)
+ *   Array representing the loaded view mode, or FALSE if not found.
  */
 function entity_view_mode_load($entity_type, $machine_name) {
   $view_modes = config_get('entity.view_modes', 'view_modes');
@@ -104,6 +43,11 @@ function entity_view_mode_load($entity_type, $machine_name) {
 
 /**
  * Save a custom view mode.
+ *
+ * @param (string) $entity_type
+ *   Entity type. For example, node, user or term.
+ * @param  (array) $view_mode
+ *   Fully loaded view mode, ready for saving.
  */
 function entity_view_mode_save($entity_type, $view_mode) {
   $existing_view_mode_name = !empty($view_mode['old_machine_name']) ? $view_mode['old_machine_name'] : $view_mode['machine_name'];
@@ -164,6 +108,11 @@ function entity_view_mode_save($entity_type, $view_mode) {
 
 /**
  * Delete a custom view mode.
+ *
+ * @param (string) $entity_type
+ *   Entity type. For example, node, user or term.
+ * @param  (string) $machine_name
+ *   Machine name of view mode.
  */
 function entity_view_mode_delete($entity_type, $machine_name) {
   if ($view_mode = entity_view_mode_load($entity_type, $machine_name)) {
@@ -178,118 +127,6 @@ function entity_view_mode_delete($entity_type, $machine_name) {
     // Clear the static entity info cache and rebuild the menu.
     entity_info_cache_clear();
     state_set('menu_rebuild_needed', TRUE);
-  }
-}
-
-/**
- * Implements hook_entity_view_mode_insert() on behalf of core field module.
- */
-function field_entity_view_mode_insert($view_mode, $entity_type) {
-  field_entity_view_mode_update($view_mode, $entity_type);
-}
-
-/**
- * Implements hook_entity_view_mode_rename() on behalf of core field module.
- */
-function field_entity_view_mode_rename($entity_type, $view_mode_old, $view_mode_new) {
-  $entity_info = entity_get_info($entity_type);
-
-  foreach (array_keys($entity_info['bundles']) as $bundle) {
-    // Update all field bundle settings for the renamed view mode.
-    $settings = field_bundle_settings($entity_type, $bundle);
-    $changed = FALSE;
-    if (isset($settings['view_modes'][$view_mode_old])) {
-      $settings['view_modes'][$view_mode_new] = $settings['view_modes'][$view_mode_old];
-      unset($settings['view_modes'][$view_mode_old]);
-      $changed = TRUE;
-    }
-    if (isset($settings['extra_fields']['display'][$view_mode_old])) {
-      $settings['extra_fields']['display'][$view_mode_new] = $settings['extra_fields']['display'][$view_mode_old];
-      unset($settings['extra_fields']['display'][$view_mode_old]);
-      $changed = TRUE;
-    }
-    if ($changed) {
-      field_bundle_settings($entity_type, $bundle, $settings);
-    }
-
-    // Update all field instance display settings for the renamed view mode.
-    $instances = field_read_instances(array('entity_type' => $entity_type, 'bundle' => $bundle));
-    foreach ($instances as $instance) {
-      // Remove the view mode settings from all configured field instances.
-      if (isset($instance['display'][$view_mode_old])) {
-        $instance['display'][$view_mode_new] = $instance['display'][$view_mode_old];
-        field_update_instance($instance);
-      }
-    }
-  }
-}
-
-/**
- * Implements hook_entity_view_mode_update() on behalf of core field module.
- */
-function field_entity_view_mode_update($view_mode, $entity_type) {
-  module_load_include('inc', 'field_ui', 'field_ui.admin');
-  $entity_info = entity_get_info($entity_type);
-  $view_mode_name = $view_mode['machine_name'];
-
-  // If custom settings is set to false, then we should be disabling this view
-  // view mode for all bundles.
-  //if (empty($view_mode['custom settings'])) {
-  //  $view_mode['enabled_bundles'] = array_fill_keys(array_keys($entity_info['bundles']), 0);
-  //}
-
-  if (!empty($view_mode['enabled_bundles'])) {
-    foreach ($view_mode['enabled_bundles'] as $bundle => $value) {
-      $bundle_settings = field_bundle_settings($entity_type, $bundle);
-
-      // Display a message for each view mode newly configured to use custom
-      // settings.
-      $view_mode_settings = field_view_mode_settings($entity_type, $bundle);
-      if (!empty($value) && empty($view_mode_settings[$view_mode_name]['custom_settings'])) {
-        $path = _field_ui_bundle_admin_path($entity_type, $bundle) . "/display/$view_mode_name";
-        backdrop_set_message(t('The %view_mode @entity_type @bundle view mode now uses custom display settings copied from the default view mode. You might want to <a href="@url">configure them</a>.', array(
-          '%view_mode' => $view_mode['label'],
-          '@entity_type' => $entity_info['label'],
-          '@bundle' => $entity_info['bundles'][$bundle]['label'],
-          '@url' => url($path, array('query' => backdrop_get_destination())),
-        )));
-        // Initialize the newly customized view mode with the display settings
-        // from the default view mode.
-        _field_ui_add_default_view_mode_settings($entity_type, $bundle, $view_mode_name, $bundle_settings);
-      }
-
-      // Save updated bundle settings.
-      $bundle_settings['view_modes'][$view_mode_name]['custom_settings'] = !empty($value);
-      field_bundle_settings($entity_type, $bundle, $bundle_settings);
-    }
-  }
-}
-
-/**
- * Implements hook_entity_view_mode_delete() on behalf of core field module.
- */
-function field_entity_view_mode_delete($view_mode, $entity_type) {
-  $entity_info = entity_get_info($entity_type);
-  $view_mode_name = $view_mode['machine_name'];
-
-  foreach (array_keys($entity_info['bundles']) as $bundle) {
-    // Remove all field bundle settings for the deleted view mode.
-    $settings = field_bundle_settings($entity_type, $bundle);
-    if (isset($settings['view_modes'][$view_mode_name]) || isset($settings['extra_fields']['display'][$view_mode_name])) {
-      unset($settings['view_modes'][$view_mode_name]);
-      unset($settings['extra_fields']['display'][$view_mode_name]);
-      field_bundle_settings($entity_type, $bundle, $settings);
-    }
-
-    // Remove all field instance display settings for the deleted view mode.
-    $instances = field_read_instances(array('entity_type' => $entity_type, 'bundle' => $bundle));
-    foreach ($instances as $instance) {
-      // Remove the view mode settings from all configured field instances.
-      if (isset($instance['display'][$view_mode_name])) {
-        unset($instance['display'][$view_mode_name]);
-        field_update_instance($instance);
-      }
-    }
   }
 }
 
@@ -394,6 +231,14 @@ function entity_view_mode_get_possible_bundles($entity_type) {
   }
 
   return $bundles;
+}
+
+/**
+ * Helper function: checks if the view mode exists.
+ */
+function entity_view_mode_exists($machine_name, $element, $form_state) {
+  $entity_info = entity_get_info($element['#entity_type']);
+  return !empty($entity_info['view modes'][$machine_name]);
 }
 
 /**

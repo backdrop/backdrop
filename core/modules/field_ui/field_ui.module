@@ -14,9 +14,56 @@ function field_ui_field_attach_rename_bundle($entity_type, $bundle_old, $bundle_
 }
 
 /**
+ * Implements hook_permission().
+ */
+function field_ui_permission() {
+  return array(
+    'administer view modes' => array(
+      'title' => t('Add, edit and delete custom view modes.'),
+    ),
+  );
+}
+
+/**
  * Implements hook_menu().
  */
 function field_ui_menu() {
+  $items['admin/structure/view-modes'] = array(
+    'title' => 'View modes',
+    'description' => 'Create new custom view modes for content.',
+    'page callback' => 'entity_view_mode_list',
+    'access arguments' => array('administer view modes'),
+    'file' => 'entity.admin.inc',
+  );
+  $items['admin/structure/view-modes/add'] = array(
+    'title' => 'Add view mode',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('entity_view_mode_edit_form'),
+    'access arguments' => array('administer view modes'),
+    'file' => 'entity.admin.inc',
+  );
+  $items['admin/structure/view-modes/add/%'] = array(
+    'title' => 'Add view mode',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('entity_view_mode_edit_form', 4),
+    'access arguments' => array('administer view modes'),
+    'file' => 'entity.admin.inc',
+  );
+  $items['admin/structure/view-modes/edit/%/%'] = array(
+    'title' => 'Edit view mode',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('entity_view_mode_edit_form', 4, 5),
+    'access arguments' => array('administer view modes'),
+    'file' => 'entity.admin.inc',
+  );
+  $items['admin/structure/view-modes/delete/%/%'] = array(
+    'title' => 'Edit view mode',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('entity_view_mode_delete_form', 4, 5),
+    'access arguments' => array('administer view modes'),
+    'file' => 'entity.admin.inc',
+  );
+
   $items['admin/reports/fields'] = array(
     'title' => 'Fields',
     'description' => 'Overview of fields on all entity types.',

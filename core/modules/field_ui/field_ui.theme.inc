@@ -95,6 +95,7 @@ function theme_field_ui_modes($variables) {
 
   $header = array(
     t('Enabled view modes'),
+    t('Machine name'),
     t('Storage state'),
     t('Operations'),
   );
@@ -104,6 +105,7 @@ function theme_field_ui_modes($variables) {
     $row = array();
 
     $row['enabled'] = backdrop_render($element[$view_mode_name]);
+    $row['machine'] = t($view_mode_name);
     $row['type'] = !empty($custom_view_modes[$entity_type][$view_mode_name]) ? t('In configuration') : t('In code');
 
     $operations = array();
@@ -132,11 +134,12 @@ function theme_field_ui_modes($variables) {
   if (user_access('administer view modes')) {
     $rows[] = array(array(
       'data' => l(t('+ Add view mode'), 'admin/structure/view-modes/add/' . $entity_type, array('query' => array('destination' => current_path()))),
-      'colspan' => '3',
+      'colspan' => '4',
     ));;
   }
 
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'menu-overview')));
   $output .= backdrop_render_children($form);
+
   return $output;
 }
