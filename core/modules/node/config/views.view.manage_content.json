@@ -385,7 +385,7 @@
                         "order": "DESC"
                     }
                 },
-                "title": "Manage content",
+                "title": "Content",
                 "relationships": {
                     "uid": {
                         "id": "uid",
