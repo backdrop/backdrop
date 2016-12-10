@@ -2144,14 +2144,28 @@ function menu_local_tasks($level = 0) {
       if(!$item['#link']['access']) {
         unset($tabs_parent[$key]);
       } else {
-        echo "Check: " . $item['#link']['path']."\n";
+        if (($item['#link']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
+          $item['#link']['href'] = $item['#link']['tab_parent_href'];
+          $item['#link']['_origin_path'] = $item['#link']['path'];
+          $item['#link']['path'] = $item['#link']['tab_parent'];
+        }
+        echo "Check: " . $item['#link']['path']. " == " . $path. "\n";
         if($item['#link']['path'] == $path) {
           $item['#active'] = TRUE;
-          $tabs_current = _get_router_item_tabs($path);
-        }            
+          $tab_current_path = $item['#link']['path'];
+          if(isset($item['#link']['_origin_path'])){
+            $tab_current_path = $item['#link']['_origin_path'];
+          }
+          $tabs_current = _get_router_item_tabs($tab_current_path);
+          echo " ... catch\n";
+        } else {
+          echo " ... miss\n" . strcmp($item['#link']['href'], $path);
+        }           
         $tabs_parent[$key] = $item;
       }
     }
+    
+    print_r($tabs_parent);
     $tabs[0]['count'] = count($tabs_parent);
     $tabs[0]['output'] = $tabs_parent; 
     
@@ -2163,6 +2177,11 @@ function menu_local_tasks($level = 0) {
         if(!$item['#link']['access']) {
           unset($tabs_current[$key]);
         } else {
+          if (($item['#link']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
+            $item['#link']['href'] = $item['#link']['tab_parent_href'];
+//            $item['#link']['_origin_path'] = $item['#link']['path'];
+            $item['#link']['path'] = $item['#link']['tab_parent'];
+          }
           echo "Check: " . $item['#link']['path']."\n";
           if($item['#link']['path'] == $path) {
             $item['#active'] = TRUE;
