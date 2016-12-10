@@ -509,6 +509,25 @@ function _get_router_item_actions($path){
   return array();
 }
 
+function _get_router_item_context($path){
+  static $cached_items;
+  
+  if(isset($cached_items[$path])) {
+    return $cached_items[$path];
+  }
+  
+  $root = "files/menu_router/";
+  
+  $filename = $root . $path . '/context.json';
+  if(is_file($filename)) {
+    $content = file_get_contents($filename);
+    if($item = backdrop_json_decode($content)) {
+      $cached_items[$path] = $item;
+      return $item;
+    }
+  }
+  return array();
+}
 
 /**
  * Read router item from json.
@@ -2280,31 +2299,25 @@ function menu_contextual_links($module, $parent_path, $args) {
   if (!isset($data[$root_path])) {
     // Get all contextual links that are direct children of the router item and
     // not of the tab type 'view'.
-/*    if(!empty($router_item['children'])){
-      foreach($router_item['children'] as $name => $children_item){
-        //print_r($children_item);
-        if($children_item['context'] != MENU_CONTEXT_NONE && $children_item['context'] != MENU_CONTEXT_PAGE) {
-          $data[$root_path][$name] = $children_item;
-        }
-      }
-    }*/
+    $data[$root_path] = _get_router_item_context($root_path);
   }
+
   $parent_length = backdrop_strlen($root_path) + 1;
   $map = $router_item['original_map'];
-  if(isset($data[$root_path])){
-    foreach ($data[$root_path] as $item) {
-      // Extract the actual "task" string from the path argument.
-      $key = backdrop_substr($item['path'], $parent_length);
-  
-      // Denormalize and translate the contextual link.
-      _menu_translate($item, $map, TRUE);
-      if (!$item['access']) {
-        continue;
-      }
-      // All contextual links are keyed by the actual "task" path argument,
-      // prefixed with the name of the implementing module.
-      $links[$module . '-' . $key] = $item;
+
+  foreach($data[$root_path] as $item){
+    // Extract the actual "task" string from the path argument.
+    $key = backdrop_substr($item['path'], $parent_length);
+    
+    // Denormalize and translate the contextual link.
+    _menu_translate($item, $map, TRUE);
+    if (!$item['access']) {
+      continue;
     }
+    // All contextual links are keyed by the actual "task" path argument,
+    // prefixed with the name of the implementing module.
+    $links[$module . '-' . $key] = $item;
+    
   }
   // Allow modules to alter contextual links.
   backdrop_alter('menu_contextual_links', $links, $router_item, $root_path);
