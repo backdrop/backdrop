@@ -8,4 +8,4 @@ file = field_group.ui.test
 name = Field Group Display tests
 description = Test the field group display.
 group = Field Group
-file = field_group.display.test
+file = field_group.ui.test

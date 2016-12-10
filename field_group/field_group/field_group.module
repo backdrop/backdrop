@@ -1121,7 +1121,7 @@ function field_group_field_group_build_pre_render_alter(& $element) {
   }
 
   // Add the default field_group javascript and stylesheet.
-  $element['#attached']['js'][] = backdrop_get_path('module', 'field_group') . '/field_group.js';
+  $element['#attached']['js'][] = backdrop_get_path('module', 'field_group') . '/js/field_group.js';
 
   // Move additional settings to the last multipage pane if configured that way.
   // Note that multipages MUST be in the root of the form.
@@ -1629,7 +1629,7 @@ function theme_multipage_pane($variables) {
 }
 
 /**
- * Get all groups.
+ * Get all groups that match.
  *
  * @param $entity_type
  *   The name of the entity.
