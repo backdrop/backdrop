@@ -2065,14 +2065,6 @@ function menu_navigation_links($menu_name, $level = 0) {
   return $links;
 }
 
-function _get_top_tabs($router_item, $parts) {
-  if($router_item && ($router_item['type'] & MENU_IS_LOCAL_TASK)) {
-    array_pop($parts);    
-    $router_item = menu_get_item(implode("/", $parts));
-    return _get_top_tabs($router_item, $parts);
-  }
-  return $router_item;
-}
 /**
  * Collects the local tasks (tabs), action links, and the root path.
  *
@@ -2134,29 +2126,26 @@ function menu_local_tasks($level = 0) {
     }
     $tabs = array();
     $tabs_current = array();
+    $sub_tabs_path = FALSE;
     if(isset($tabs_data[$router_item['tab_root']])){
       foreach($tabs_data[$router_item['tab_root']] as $key => $item) {
         _menu_translate($item, $map, TRUE);
         
         if($item['access']) {
-  /*        if (($item['#link']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
-            $item['#link']['href'] = $item['#link']['tab_parent_href'];
-            $item['#link']['_origin_path'] = $item['#link']['path'];
-            $item['#link']['path'] = $item['#link']['tab_parent'];
-          }*/
+          if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
+            $item['href'] = $item['tab_parent_href'];
+            $item['path'] = $item['tab_parent'];
+          }
           $tab = array(
             '#theme' => 'menu_local_task',
             '#link' => $item,
           );
-          if($item['tab_parent'] == $path) {
+          if($item['path'] == $path) {
             $tab['#active'] = TRUE;
-          }
-  /*          $tab_current_path = $item['path'];
-            if(isset($item['#link']['_origin_path'])){
-              $tab_current_path = $item['#link']['_origin_path'];
+            if (($item['type'] & MENU_LINKS_TO_PARENT) != MENU_LINKS_TO_PARENT) {
+              $sub_tabs_path = $item['path'];
             }
-  //          $tabs_current = _get_router_item_tabs($tab_current_path);
-          } */          
+          }
           $tabs_current[] = $tab;
         }
       }
@@ -2164,31 +2153,25 @@ function menu_local_tasks($level = 0) {
       $tabs[0]['output'] = $tabs_current; 
     }
     
-    if($router_item['tab_root'] != $router_item['path']) {
+    if($sub_tabs_path) {
       $tabs_current = array();
-      if(isset($tabs_data[$router_item['path']])){
-        foreach($tabs_data[$router_item['path']] as $key => $item) {
+      if(isset($tabs_data[$sub_tabs_path])){
+        foreach($tabs_data[$sub_tabs_path] as $key => $item) {
           _menu_translate($item, $map, TRUE);
           
           if($item['access']) {
-    /*        if (($item['#link']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
-              $item['#link']['href'] = $item['#link']['tab_parent_href'];
-              $item['#link']['_origin_path'] = $item['#link']['path'];
-              $item['#link']['path'] = $item['#link']['tab_parent'];
-            }*/
+            if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
+              $item['href'] = $item['tab_parent_href'];
+              $item['path'] = $item['tab_parent'];
+            }
             $tab = array(
               '#theme' => 'menu_local_task',
               '#link' => $item,
             );
-            if($item['tab_parent'] == $path) {
+            
+            if($item['path'] == $router_item['path']) {
               $tab['#active'] = TRUE;
             }
-    /*          $tab_current_path = $item['path'];
-              if(isset($item['#link']['_origin_path'])){
-                $tab_current_path = $item['#link']['_origin_path'];
-              }
-    //          $tabs_current = _get_router_item_tabs($tab_current_path);
-            } */          
             $tabs_current[] = $tab;
           }
         }
@@ -2197,30 +2180,6 @@ function menu_local_tasks($level = 0) {
       }
     }
     
-  /*  if(!empty($tabs_current)){
-      $path = $router_item['path'];
-      foreach($tabs_current as $key => $item) {
-        _menu_translate($item['#link'], $map, TRUE);
-        
-        if(!$item['#link']['access']) {
-          unset($tabs_current[$key]);
-        } else {
-          if (($item['#link']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
-            $item['#link']['href'] = $item['#link']['tab_parent_href'];
-            $item['#link']['path'] = $item['#link']['tab_parent'];
-          }
-          if($item['#link']['path'] == $path) {
-            $item['#active'] = TRUE;
-          }            
-          $tabs_current[$key] = $item;
-        }
-      }
-      if(!empty($tabs_current)) {
-        $tabs[1]['count'] = count($tabs_current);
-        $tabs[1]['output'] = $tabs_current;
-      }
-    }*/
-           
     $data['tabs'] = $tabs;   
     
     $actions_current = array();
