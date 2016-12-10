@@ -108,17 +108,19 @@ function theme_field_ui_modes($variables) {
     $row['machine'] = t($view_mode_name);
     $row['type'] = !empty($custom_view_modes[$entity_type][$view_mode_name]) ? t('In configuration') : t('In code');
 
+    $path = current_path();
+
     $operations = array();
     if (isset($custom_view_modes[$entity_type][$view_mode_name])) {
       $operations['edit'] = array(
         'title' => t('Edit'),
-        'href' => "admin/structure/view-modes/edit/{$entity_type}/{$view_mode_name}",
-        'query' => array('destination' => current_path()),
+        'href' => "$path/view-modes/{$view_mode_name}/edit",
+        'query' => array('destination' => $path),
       );
       $operations['delete'] = array(
         'title' => t('Delete'),
-        'href' => "admin/structure/view-modes/delete/{$entity_type}/{$view_mode_name}",
-        'query' => array('destination' => current_path()),
+        'href' => "$path/view-modes/{$view_mode_name}/delete",
+        'query' => array('destination' => $path),
       );
     }
     $row['operations'] = array(
@@ -133,7 +135,7 @@ function theme_field_ui_modes($variables) {
 
   if (user_access('administer view modes')) {
     $rows[] = array(array(
-      'data' => l(t('+ Add view mode'), 'admin/structure/view-modes/add/' . $entity_type, array('query' => array('destination' => current_path()))),
+      'data' => l(t('+ Add view mode'), current_path() . '/view-modes/add', array('query' => array('destination' => current_path()))),
       'colspan' => '4',
     ));;
   }

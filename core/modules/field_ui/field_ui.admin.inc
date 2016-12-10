@@ -2146,7 +2146,13 @@ function field_ui_next_destination($entity_type, $bundle) {
  * Form builder: Edit a view mode name.
  */
 function field_ui_view_mode_form($form, &$form_state, $entity_type = NULL, $machine_name = NULL) {
-  $view_mode = entity_view_mode_load($entity_type, $machine_name);
+  $entity_info = entity_get_info($entity_type);
+  $form['#entity_type'] = $entity_type;
+  $form['#entity_info'] = $entity_info[$entity_type];
+
+  if ($machine_name != NULL) {
+    $view_mode = entity_view_mode_load($entity_type, $machine_name);
+  }
 
   $form['label'] = array(
     '#type' => 'textfield',
@@ -2179,71 +2185,20 @@ function field_ui_view_mode_form($form, &$form_state, $entity_type = NULL, $mach
     );
   }
 
-  $entity_info = entity_get_info($entity_type);
-  if ($entity_type === NULL) {
-
-    // Get the type from form state (for ajax).
-    $entity_type = !empty($form_state['values']['entity_type']) ? $form_state['values']['entity_type'] : 'node';
-
-    // Only offer entity options with view modes.
-    $options = array();
-    foreach ($entity_info as $machine => $info) {
-      if (!empty($info['view modes'])) {
-        $options[$machine] = t($info['label']);
-      }
-    }
-    $form['entity_type'] = array(
-      '#type' => 'select',
-      '#title' => t('Entity type'),
-      '#options' => $options,
-      '#default_value' => array_key_exists($entity_type, $options)? $entity_type : '',
-      '#ajax' => array(
-        'wrapper' => 'ajax-bundles',
-        'callback' => 'field_ui_view_mode_form_ajax',
-        'method' => 'replace',
-        'effect' => 'fade',
-       ),
-    );
-  }
-  else {
-    $form['entity_type'] = array(
-      '#type' => 'item',
-      '#title' => t('Entity type'),
-      '#markup' => $entity_info['label'],
-      '#access' => FALSE,
-    );
-  }
-
-  $form['#entity_type'] = $entity_type;
-  $form['#entity_info'] = $entity_info[$entity_type];
-
-  $bundle_options = entity_view_mode_get_possible_bundles($entity_type);
-  $bundle_values = !empty($machine_name) ? array_keys(entity_view_mode_get_enabled_bundles($entity_type, $machine_name)) : array_keys($bundle_options);
-
-  $form['enabled_bundles'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Enable this view mode for the following types'),
-    '#options' => $bundle_options,
-    '#default_value' => $bundle_values,
-    '#prefix' => '<div id="ajax-bundles">',
-    '#suffix' => '</div>',
-    '#states' => array(
-      'visible' => array(
-        ':input[name="custom_settings"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
-
-  if (isset($machine_name)) {
-    // Add some extra help text for existing view modes.
-    $form['enabled_bundles']['#description'] = t('Unchecking a type that has already been configured will disable the display settings for this view mode.');
-  }
-
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
   );
+  if ($machine_name != NULL) {
+    $form['#view_mode'] = $view_mode;
+    $form['actions']['delete'] = array(
+      '#type' => 'submit',
+      '#value' => t('Delete'),
+      '#weight' => 10,
+      '#submit' => array('field_ui_view_mode_delete_form'),
+    );
+  }
 
   return $form;
 }
@@ -2273,28 +2228,13 @@ function field_ui_view_mode_form_submit($form, &$form_state) {
 /**
  * Form builder: Delete a view mode.
  */
-function field_ui_view_mode_delete_form(array $form, $form_state, $entity_type, $machine_name) {
-  $form['#entity_type'] = $entity_type;
-  $form['#entity_info'] = $entity_info = entity_get_info($entity_type);
-  $form['#view_mode'] = $view_mode = entity_view_mode_load($entity_type, $machine_name);
-
-  if (empty($form['#view_mode'])) {
-    backdrop_not_found();
-    backdrop_exit();
-  }
-
-  $form['machine_name'] = array(
-    '#type' => 'value',
-    '#value' => $machine_name,
-  );
+function field_ui_view_mode_delete_form($form, &$form_state, $entity_type = NULL, $machine_name = NULL, $bundle = NULL) {
+  $path = _field_ui_bundle_admin_path($entity_type, $bundle) . '/display';
 
   return confirm_form(
     $form,
-    t('Are you sure you want to delete the %view-mode @entity-type view mode?', array(
-      '@entity-type' => backdrop_strtolower($entity_info['label']),
-      '%view-mode' => $view_mode['label'],
-    )),
-    'admin/structure/view-modes',
+    t('Are you sure you want to delete the %view-mode view mode?', array('%view-mode' => $form['#view_mode']['label'])),
+    $path,
     t('Deleting a view mode will cause any content still using it to revert to the default display settings.'),
     t('Delete'),
     t('Cancel')

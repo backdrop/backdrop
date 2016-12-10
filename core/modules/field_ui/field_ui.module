@@ -28,42 +28,6 @@ function field_ui_permission() {
  * Implements hook_menu().
  */
 function field_ui_menu() {
-  $items['admin/structure/view-modes'] = array(
-    'title' => 'View modes',
-    'description' => 'Create new custom view modes for content.',
-    'page callback' => 'entity_view_mode_list',
-    'access arguments' => array('administer view modes'),
-    'file' => 'entity.admin.inc',
-  );
-  $items['admin/structure/view-modes/add'] = array(
-    'title' => 'Add view mode',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('entity_view_mode_edit_form'),
-    'access arguments' => array('administer view modes'),
-    'file' => 'entity.admin.inc',
-  );
-  $items['admin/structure/view-modes/add/%'] = array(
-    'title' => 'Add view mode',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('entity_view_mode_edit_form', 4),
-    'access arguments' => array('administer view modes'),
-    'file' => 'entity.admin.inc',
-  );
-  $items['admin/structure/view-modes/edit/%/%'] = array(
-    'title' => 'Edit view mode',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('entity_view_mode_edit_form', 4, 5),
-    'access arguments' => array('administer view modes'),
-    'file' => 'entity.admin.inc',
-  );
-  $items['admin/structure/view-modes/delete/%/%'] = array(
-    'title' => 'Edit view mode',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('entity_view_mode_delete_form', 4, 5),
-    'access arguments' => array('administer view modes'),
-    'file' => 'entity.admin.inc',
-  );
-
   $items['admin/reports/fields'] = array(
     'title' => 'Fields',
     'description' => 'Overview of fields on all entity types.',
@@ -98,6 +62,7 @@ function field_ui_menu() {
           // This is the position of the %field_ui_menu placeholder in the
           // items below.
           $field_position = count(explode('/', $path)) + 1;
+          $view_mode_position = count(explode('/', $path)) + 2;
 
           // Extract access information, providing defaults.
           $access = array_intersect_key($bundle_info['admin'], backdrop_map_assoc(array('access callback', 'access arguments')));
@@ -175,6 +140,30 @@ function field_ui_menu() {
             'weight' => 2,
             'file' => 'field_ui.admin.inc',
           ) + $access;
+
+          // View mode administration.
+          $items["$path/display/view-modes/add"] = array(
+            'title' => 'Add view mode',
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_ui_view_mode_form', $entity_type),
+            'access arguments' => array('administer view modes'),
+            'file' => 'field_ui.admin.inc',
+          );
+          // View mode administration.
+          $items["$path/display/view-modes/%/edit"] = array(
+            'title' => 'Edit view mode',
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_ui_view_mode_form', $entity_type, $view_mode_position),
+            'access arguments' => array('administer view modes'),
+            'file' => 'field_ui.admin.inc',
+          );
+          $items["$path/display/view-modes/%/delete"] = array(
+            'title' => 'Delete view mode',
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_ui_view_mode_delete_form', $entity_type, $view_mode_position, $bundle_arg),
+            'access arguments' => array('administer view modes'),
+            'file' => 'field_ui.admin.inc',
+          );
 
           // View modes secondary tabs.
           // The same base $path for the menu item (with a placeholder) can be

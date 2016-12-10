@@ -205,34 +205,6 @@ function entity_preprocess(&$variables, $hook) {
   }
 }
 
-function entity_view_mode_get_enabled_bundles($entity_type, $view_mode_name) {
-  $bundles = array();
-
-  $entity_info = entity_get_info($entity_type);
-  foreach ($entity_info['bundles'] as $bundle => $bundle_info) {
-    $view_mode_settings = field_view_mode_settings($entity_type, $bundle);
-    if (!empty($view_mode_settings[$view_mode_name]['custom_settings'])) {
-      $bundles[$bundle] = $bundle_info['label'];
-    }
-  }
-
-  return $bundles;
-}
-
-/**
- * Helper function. Returns bundles in format suitable for form checlist.
- */
-function entity_view_mode_get_possible_bundles($entity_type) {
-  $bundles = array();
-
-  $entity_info = entity_get_info($entity_type);
-  foreach ($entity_info['bundles'] as $bundle => $bundle_info) {
-    $bundles[$bundle] = $bundle_info['label'];
-  }
-
-  return $bundles;
-}
-
 /**
  * Helper function: checks if the view mode exists.
  */
