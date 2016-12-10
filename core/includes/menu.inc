@@ -449,29 +449,26 @@ function _get_router_item_children($path){
   return $children;
 }
 
-function _get_router_item_tabs(&$path){
+function _get_router_item_tabs($path){
   static $cached_items;
   
   if(isset($cached_items[$path])) {
     return $cached_items[$path];
   }
   
-  $parts = explode("/", $path);
-  $ancestors = menu_get_ancestors($parts);
   $root = "files/menu_router/";
   
-  foreach($ancestors as $ancestor) {
-    $filename = $root . $ancestor . '/tabs.json';
-    if(is_file($filename)) {
-      $path = $ancestor;
-      $content = file_get_contents($filename);
-      if($item = backdrop_json_decode($content)) {
-        usort($item, "menu_router_sort_tabs");
-        $cached_items[$path] = $item;
-        return $item;
-      }
+
+  $filename = $root . $path . '/tabs.json';
+  if(is_file($filename)) {
+    $content = file_get_contents($filename);
+    if($item = backdrop_json_decode($content)) {
+      usort($item, "menu_router_sort_tabs");
+      $cached_items[$path] = $item;
+      return $item;
     }
   }
+
   return array();
 }
 
@@ -497,18 +494,14 @@ function _get_router_item_actions($path){
     return $cached_items[$path];
   }
   
-  $parts = explode("/", $path);
-  $ancestors = menu_get_ancestors($parts);
   $root = "files/menu_router/";
   
-  foreach($ancestors as $ancestor) {
-    $filename = $root . $ancestor . '/actions.json';
-    if(is_file($filename)) {
-      $content = file_get_contents($filename);
-      if($item = backdrop_json_decode($content)) {
-        $cached_items[$path] = $item;
-        return $item;
-      }
+  $filename = $root . $path . '/actions.json';
+  if(is_file($filename)) {
+    $content = file_get_contents($filename);
+    if($item = backdrop_json_decode($content)) {
+      $cached_items[$path] = $item;
+      return $item;
     }
   }
   return array();
@@ -2112,6 +2105,17 @@ function menu_local_tasks($level = 0) {
 
     $router_item = menu_get_item();
     
+    // If this router item points to its parent, start from the parents to
+    // compute tabs and actions.
+    if ($router_item && ($router_item['type'] & MENU_LINKS_TO_PARENT)) {
+      $router_item = menu_get_item($router_item['tab_parent_href']);
+    }
+    
+    // Get ancestors to make tabs active based on it.
+    $parts = explode("/", $router_item['path']);
+    $ancestors = menu_get_ancestors($parts);
+    print_r($router_item);
+    
     // If we failed to fetch a router item or the current user doesn't have
     // access to it, don't bother computing the tabs.
     if (!$router_item || !$router_item['access']) {
@@ -2120,56 +2124,74 @@ function menu_local_tasks($level = 0) {
 
     $map = $router_item['original_map'];
     $root_path = $router_item['path'];
+
+    $tabs_parent = _get_router_item_tabs($router_item['tab_root']);
+    print_r($tabs_parent);
     
-    $tabs_current = _get_router_item_tabs($root_path);
-    foreach($tabs_current as $key => $item) {
-      _menu_translate($item['#link'], $map, TRUE);
-      if(!$item['#link']['access']) {
-        unset($tabs_current[$key]);
+    if(!$router_item['tab_parent']){
+      $path = $router_item['path'];
+    } else {
+      if($router_item['tab_parent'] == $router_item['tab_root']) {
+        $path = $router_item['path'];
       } else {
-        
-        if (($item['#link']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
-          $item['#link']['href'] = $item['#link']['tab_parent_href'];
-          $item['#link']['path'] = $item['#link']['tab_parent'];
-        }      
-        if ($item['#link']['path'] == $router_item['path']) {
-          $item['#active'] = TRUE;
-        }
-        $tabs_current[$key] = $item;
+        $path = $router_item['tab_parent'];
       }
     }
-
-    if($router_item['tab_root'] != $root_path) {
-      $tabs_parent = array();
-      $tabs_parent = _get_router_item_tabs($router_item['tab_root']);
+    $tabs_current = array();
+    foreach($tabs_parent as $key => $item) {
+      _menu_translate($item['#link'], $map, TRUE);
       
-      foreach($tabs_parent as $key => $item) {
+      if(!$item['#link']['access']) {
+        unset($tabs_parent[$key]);
+      } else {
+        echo "Check: " . $item['#link']['path']."\n";
+        if($item['#link']['path'] == $path) {
+          $item['#active'] = TRUE;
+          $tabs_current = _get_router_item_tabs($path);
+        }            
+        $tabs_parent[$key] = $item;
+      }
+    }
+    $tabs[0]['count'] = count($tabs_parent);
+    $tabs[0]['output'] = $tabs_parent; 
+    
+    if(!empty($tabs_current)){
+      $path = $router_item['path'];
+      foreach($tabs_current as $key => $item) {
         _menu_translate($item['#link'], $map, TRUE);
         
         if(!$item['#link']['access']) {
-          unset($tabs_parent[$key]);
+          unset($tabs_current[$key]);
         } else {
-          if (($item['#link']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
-            $item['#link']['href'] = $item['#link']['tab_parent_href'];
-            $item['#link']['path'] = $item['#link']['tab_parent'];
-          }
-          
-          if ($item['#link']['path'] == $router_item['path']) {
+          echo "Check: " . $item['#link']['path']."\n";
+          if($item['#link']['path'] == $path) {
             $item['#active'] = TRUE;
-          }
-          $tabs_parent[$key] = $item;
+          }            
+          $tabs_current[$key] = $item;
         }
       }
-      $tabs[0]['count'] = count($tabs_parent);
-      $tabs[0]['output'] = $tabs_parent;  
-      
-      $tabs[1]['count'] = count($tabs_current);
-      $tabs[1]['output'] = $tabs_current;  
-    } else {
-      $tabs[0]['count'] = count($tabs_current);
-      $tabs[0]['output'] = $tabs_current;  
+      if(!empty($tabs_current)) {
+        $tabs[1]['count'] = count($tabs_current);
+        $tabs[1]['output'] = $tabs_current;
+      }
     }
-//    print_r($tabs);
+   /* if($router_item['tab_root'] != $root_path) {
+      $tabs_current = _get_router_item_tabs($router_item['path']);
+      foreach($tabs_current as $key => $item) {
+        _menu_translate($item['#link'], $map, TRUE);
+        if(!$item['#link']['access']) {
+          unset($tabs_current[$key]);
+        } else {
+          if(in_array($item['#link']['path'], $ancestors)) {
+            $item['#active'] = TRUE;
+          }
+          $tabs_current[$key] = $item;
+        }
+      }
+      $tabs[1]['count'] = count($tabs_current);
+      $tabs[1]['output'] = $tabs_current;
+    }*/
+           
     $data['tabs'] = $tabs;   
     
     $actions_current = _get_router_item_actions($root_path);
