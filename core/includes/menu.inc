@@ -462,10 +462,12 @@ function _get_router_item_tabs($path){
   $filename = $root . $path . '/tabs.json';
   if(is_file($filename)) {
     $content = file_get_contents($filename);
-    if($item = backdrop_json_decode($content)) {
-      usort($item, "menu_router_sort_tabs");
-      $cached_items[$path] = $item;
-      return $item;
+    if($content_json = backdrop_json_decode($content)) {
+      foreach($content_json as $tab_parent => $items){
+        usort($content_json[$tab_parent], "menu_router_sort_tabs");
+      }
+      $cached_items[$path] = $content_json;
+      return $content_json;
     }
   }
 
@@ -474,16 +476,16 @@ function _get_router_item_tabs($path){
 
 // Sort by Weight and title
 function menu_router_sort_tabs($a, $b) {
-  $a_w = $a['#link']['weight'];
-  $b_w = $b['#link']['weight'];
+  $a_w = $a['weight'];
+  $b_w = $b['weight'];
   if($a_w > $b_w ) {
     return 1;
   }
   if($a_w < $b_w ) {
     return -1;
   }
-  $a_t = $a['#link']['title'];
-  $b_t = $b['#link']['title'];
+  $a_t = $a['title'];
+  $b_t = $b['title'];
   return ($a_t > $b_t) ? +1 : -1;
 }
 
@@ -2104,7 +2106,6 @@ function menu_local_tasks($level = 0) {
     $tabs = array();
 
     $router_item = menu_get_item();
-    print_r($router_item);
     // If this router item points to its parent, start from the parents to
     // compute tabs and actions.
     if ($router_item && ($router_item['type'] & MENU_LINKS_TO_PARENT)) {
@@ -2120,7 +2121,7 @@ function menu_local_tasks($level = 0) {
     $map = $router_item['original_map'];
     $root_path = $router_item['path'];
 
-    $tabs_parent = _get_router_item_tabs($router_item['tab_root']);
+    $tabs_data = _get_router_item_tabs($router_item['tab_root']);
 
     if(!$router_item['tab_parent']){
       $path = $router_item['path'];
@@ -2131,34 +2132,72 @@ function menu_local_tasks($level = 0) {
         $path = $router_item['tab_parent'];
       }
     }
+    $tabs = array();
     $tabs_current = array();
-    foreach($tabs_parent as $key => $item) {
-      _menu_translate($item['#link'], $map, TRUE);
-      
-      if(!$item['#link']['access']) {
-        unset($tabs_parent[$key]);
-      } else {
-        if (($item['#link']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
-          $item['#link']['href'] = $item['#link']['tab_parent_href'];
-          $item['#link']['_origin_path'] = $item['#link']['path'];
-          $item['#link']['path'] = $item['#link']['tab_parent'];
-        }
-        if($item['#link']['path'] == $path) {
-          $item['#active'] = TRUE;
-          $tab_current_path = $item['#link']['path'];
-          if(isset($item['#link']['_origin_path'])){
-            $tab_current_path = $item['#link']['_origin_path'];
+    if(isset($tabs_data[$router_item['tab_root']])){
+      foreach($tabs_data[$router_item['tab_root']] as $key => $item) {
+        _menu_translate($item, $map, TRUE);
+        
+        if($item['access']) {
+  /*        if (($item['#link']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
+            $item['#link']['href'] = $item['#link']['tab_parent_href'];
+            $item['#link']['_origin_path'] = $item['#link']['path'];
+            $item['#link']['path'] = $item['#link']['tab_parent'];
+          }*/
+          $tab = array(
+            '#theme' => 'menu_local_task',
+            '#link' => $item,
+          );
+          if($item['tab_parent'] == $path) {
+            $tab['#active'] = TRUE;
           }
-          $tabs_current = _get_router_item_tabs($tab_current_path);
-        }           
-        $tabs_parent[$key] = $item;
+  /*          $tab_current_path = $item['path'];
+            if(isset($item['#link']['_origin_path'])){
+              $tab_current_path = $item['#link']['_origin_path'];
+            }
+  //          $tabs_current = _get_router_item_tabs($tab_current_path);
+          } */          
+          $tabs_current[] = $tab;
+        }
+      }
+      $tabs[0]['count'] = count($tabs_current);
+      $tabs[0]['output'] = $tabs_current; 
+    }
+    
+    if($router_item['tab_root'] != $router_item['path']) {
+      $tabs_current = array();
+      if(isset($tabs_data[$router_item['path']])){
+        foreach($tabs_data[$router_item['path']] as $key => $item) {
+          _menu_translate($item, $map, TRUE);
+          
+          if($item['access']) {
+    /*        if (($item['#link']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
+              $item['#link']['href'] = $item['#link']['tab_parent_href'];
+              $item['#link']['_origin_path'] = $item['#link']['path'];
+              $item['#link']['path'] = $item['#link']['tab_parent'];
+            }*/
+            $tab = array(
+              '#theme' => 'menu_local_task',
+              '#link' => $item,
+            );
+            if($item['tab_parent'] == $path) {
+              $tab['#active'] = TRUE;
+            }
+    /*          $tab_current_path = $item['path'];
+              if(isset($item['#link']['_origin_path'])){
+                $tab_current_path = $item['#link']['_origin_path'];
+              }
+    //          $tabs_current = _get_router_item_tabs($tab_current_path);
+            } */          
+            $tabs_current[] = $tab;
+          }
+        }
+        $tabs[1]['count'] = count($tabs_current);
+        $tabs[1]['output'] = $tabs_current; 
       }
     }
     
-    $tabs[0]['count'] = count($tabs_parent);
-    $tabs[0]['output'] = $tabs_parent; 
-    
-    if(!empty($tabs_current)){
+  /*  if(!empty($tabs_current)){
       $path = $router_item['path'];
       foreach($tabs_current as $key => $item) {
         _menu_translate($item['#link'], $map, TRUE);
@@ -2180,15 +2219,19 @@ function menu_local_tasks($level = 0) {
         $tabs[1]['count'] = count($tabs_current);
         $tabs[1]['output'] = $tabs_current;
       }
-    }
+    }*/
            
     $data['tabs'] = $tabs;   
     
-    $actions_current = _get_router_item_actions($root_path);
-    foreach($actions_current as $key => $item) {
-      _menu_translate($actions_current[$key]['#link'], $map, TRUE);
-      if(!$actions_current[$key]['#link']['access']) {
-        unset($actions_current[$key]);
+    $actions_current = array();
+    $actions = _get_router_item_actions($root_path);
+    foreach($actions as $key => $item) {
+      _menu_translate($item, $map, TRUE);
+      if($item['access']) {
+        $actions_current[] = array(
+          '#theme' => 'menu_local_action',
+          '#link' => $item,
+        );
       }
       
     }
