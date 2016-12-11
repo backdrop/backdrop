@@ -1951,6 +1951,25 @@ function menu_navigation_links($menu_name, $level = 0) {
   return $links;
 }
 
+/**
+ * Process tabs_data and generate $tabs with $level.
+ *
+ * @param $tabs_data
+ *   A multilevel associative array containing tabs information grouped by tab_parent.
+ * @param $path
+ *   The path; for example, 'node/5'. The function will find the corresponding tabs.
+ * @param $depth
+ *   The depth of reqursion.
+ * @param $map
+ *   A path argument array, used to replace integer values in $data; an integer
+ *   value N in $data will be replaced by value $map[N]. Typically, the $map
+ *   array is generated from a call to the arg() function.
+ * @param $root_path
+ *   The full current $route_item['path'].
+ *
+ * @return
+ *   A flat array containing tabs information grouped by $level.
+ */
 function _menu_local_tasks_generate_tabs($tabs_data, $path, $depth = 0, $map, $root_path) {
   static $tabs;
   $items = $tabs_data[$path];
@@ -2036,15 +2055,6 @@ function menu_local_tasks($level = 0) {
     $root_path = $router_item['path'];
     $tabs_data = _get_router_item_tabs($router_item['tab_root']);
 
-    // Prepare $active_path to determinate active tab.
-    $active_path = $router_item['path'];
-    if($router_item['tab_parent']){
-      if($router_item['tab_parent'] == $router_item['tab_root']) {
-        $active_path = $router_item['path'];
-      } else {
-        $active_path = $router_item['tab_parent'];
-      }
-    }
     $tabs = array();
     $depth = 0;
     if(isset($tabs_data[$router_item['tab_root']])){
