@@ -57,7 +57,8 @@ function _menu_router_files_build($callbacks) {
   }
 
   // @todo Use config settings to get root path.
-  $root = "files/menu_router." . backdrop_random_key();
+  $dest = "files/menu_router";
+  $root = $dest . "." . backdrop_random_key();
   if(!is_dir($root)) {
     file_prepare_directory($root, FILE_CREATE_DIRECTORY);
   }
@@ -65,6 +66,10 @@ function _menu_router_files_build($callbacks) {
   foreach ($menu_router_tree as $item) {
     _save_menu_router_item($item, $root);
   }
+  $origin = $dest . "." .  time();
+  rename($dest, $origin);
+  rename($root, $dest);
+  file_unmanaged_delete_recursive($origin);
 }
 
 /**
