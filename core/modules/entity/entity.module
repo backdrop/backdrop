@@ -59,13 +59,6 @@ function entity_view_mode_save($entity_type, $view_mode) {
     unset($view_mode['old_machine_name']);
   }
 
-  // The key value for custom settings needs to be converted from
-  // 'custom_settings' to 'custom settings' before saving.
-  if (isset($view_mode['custom_settings'])) {
-    $view_mode['custom settings'] = (bool) $view_mode['custom_settings'];
-    unset($view_mode['custom_settings']);
-  }
-
   // Determine if we will be inserting a new view mode.
   if (!isset($view_mode['is_new'])) {
     $view_mode['is_new'] = empty($view_mode['original']);
@@ -80,8 +73,7 @@ function entity_view_mode_save($entity_type, $view_mode) {
   // Save the view mode.
   $view_modes = config_get('entity.view_modes', 'view_modes');
   unset($view_modes[$entity_type][$existing_view_mode_name]);
-  $view_modes[$entity_type][$view_mode_name] = array_intersect_key($view_mode, backdrop_map_assoc(array('label', 'custom settings')));
-  $view_modes[$entity_type][$view_mode_name] += array('custom settings' => TRUE);
+  $view_modes[$entity_type][$view_mode_name] = array('label' => $view_mode['label']);
   config_set('entity.view_modes', 'view_modes', $view_modes);
 
   // Allow modules to respond after the view mode is saved.

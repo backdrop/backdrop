@@ -142,18 +142,10 @@ function field_ui_menu() {
           ) + $access;
 
           // View mode administration.
-          $items["$path/display/view-modes/add"] = array(
-            'title' => 'Add view mode',
+          $items["$path/display/view-modes/%/configure"] = array(
+            'title' => 'Configure view mode',
             'page callback' => 'backdrop_get_form',
-            'page arguments' => array('field_ui_view_mode_form', $entity_type),
-            'access arguments' => array('administer view modes'),
-            'file' => 'field_ui.admin.inc',
-          );
-          // View mode administration.
-          $items["$path/display/view-modes/%/edit"] = array(
-            'title' => 'Edit view mode',
-            'page callback' => 'backdrop_get_form',
-            'page arguments' => array('field_ui_view_mode_form', $entity_type, $view_mode_position),
+            'page arguments' => array('field_ui_view_mode_form', $entity_type, $view_mode_position, $bundle_arg),
             'access arguments' => array('administer view modes'),
             'file' => 'field_ui.admin.inc',
           );
