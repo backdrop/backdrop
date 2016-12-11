@@ -157,7 +157,7 @@ function _save_menu_router_tabs_actions($item, $root) {
       return;
     }
     if (($item['_item_']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
-      _save_menu_router_tab_item($item);
+      _save_menu_router_tab_item($item, $root);
     } else {
       if (($item['_item_']['type'] & MENU_IS_LOCAL_ACTION) == MENU_IS_LOCAL_ACTION) {
         // The item is an action, display it as such.
