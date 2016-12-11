@@ -2061,8 +2061,6 @@ function menu_local_tasks($level = 0) {
       $tabs = _menu_local_tasks_generate_tabs($tabs_data, $router_item['tab_root'], $depth, $map, $root_path);
     }
 
-    $data['tabs'] = $tabs;   
-    
     $actions_current = array();
     $actions = _get_router_item_actions($root_path);
     foreach($actions as $key => $item) {
@@ -2075,11 +2073,10 @@ function menu_local_tasks($level = 0) {
       }
       
     }
-
+    $data['tabs'] = $tabs;
     $data['actions']['count'] = count($actions_current);
     $data['actions']['output'] = $actions_current;
-    
-    
+
     // Allow modules to alter local tasks or dynamically append further tasks.
     backdrop_alter('menu_local_tasks', $data, $router_item, $root_path);
   }
@@ -2163,10 +2160,9 @@ function menu_contextual_links($module, $parent_path, $args) {
     // not of the tab type 'view'.
     $data[$root_path] = _get_router_item_context($root_path);
   }
-
   $parent_length = backdrop_strlen($root_path) + 1;
   $map = $router_item['original_map'];
-  foreach ($data[$root_path] as $item){
+  foreach ($data[$root_path] as $item) {
     // Extract the actual "task" string from the path argument.
     $key = backdrop_substr($item['path'], $parent_length);
 
