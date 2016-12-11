@@ -23,25 +23,64 @@ backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
 
 $callbacks = array();
 foreach (module_implements('menu') as $module) {
-    $router_items = call_user_func($module . '_menu');
-    if (isset($router_items) && is_array($router_items)) {
-      foreach (array_keys($router_items) as $path) {
-        $router_items[$path]['module'] = $module;
-      }
-      $callbacks = array_merge($callbacks, $router_items);
+  $router_items = call_user_func($module . '_menu');
+  if (isset($router_items) && is_array($router_items)) {
+    foreach (array_keys($router_items) as $path) {
+      $router_items[$path]['module'] = $module;
     }
+    $callbacks = array_merge($callbacks, $router_items);
   }
+}
 
 backdrop_alter('menu', $callbacks);
+// Update Path and load
+$callbacks_path = array();
+foreach ($callbacks as $path => $item) {
+  $parts = explode('/', $path);
+  if(!isset($item['_load_functions'])){
+    $item['_load_functions'] = array();
+    $item['to_arg_functions'] = array();
+  }
+  
+  $item['number_parts'] = count($parts);
+  
+  foreach ($parts as $k => $part) {
+    // Look for wildcards in the form allowed to be used in PHP functions,
+    // because we are using these to construct the load function names.
+    if (preg_match('/^%(|' . BACKDROP_PHP_FUNCTION_PATTERN . ')$/', $part, $matches)) {
+      if (empty($matches[1])) {
+        $match = TRUE;
+        $item['_load_functions'][$k] = NULL;
+      } else {
+        if (function_exists($matches[1] . '_to_arg')) {
+          $item['to_arg_functions'][$k] = $matches[1] . '_to_arg';
+          $item['_load_functions'][$k] = NULL;
+          $match = TRUE;
+        }
+        if (function_exists($matches[1] . '_load')) {
+          $function = $matches[1] . '_load';
+          $path = str_replace('%' . $matches[1], '%', $path);  
+          // Create an array of arguments that will be passed to the _load
+          // function when this menu path is checked, if 'load arguments'
+          // exists.
+          $item['_load_functions'][$k] = isset($item['load arguments']) ? array($function => $item['load arguments']) : $function;
+        }
+      }
+    }
+  }
+  
+  //$path = implode("/", $parts);
+  $callbacks_path[$path] = $item;
+}
 //print_r($callbacks);
 $router_structure = array();
-ksort($callbacks);
-//print_r($callbacks);
-foreach ($callbacks as $path => $item) {
+ksort($callbacks_path);
+//print_r($callbacks_path);
+foreach ($callbacks_path as $path => $item) {
   _set_router_data($router_structure, $path, $item);
 }
 
-
+//print_r($router_structure);
 $menu_router_tree = array();
 foreach($router_structure as $path => $item){
   $parts = explode('/', $path);
@@ -82,7 +121,7 @@ function _generate_menu_tree(&$menu_router_tree, $parts, $item) {
       'include_file' => $item['include file'],
       'tab_parent' => $item['tab_parent'],
       'tab_root' => $item['tab_root'],
-
+      'number_parts' => $item['number_parts'],
     );
   }
 }
@@ -93,24 +132,15 @@ function _store_item($item){
   if(!is_dir($root)) {
     file_prepare_directory($root, FILE_CREATE_DIRECTORY);
   }
-
-  $children = array();
-  foreach($item as $name => $content){
-
-    if($name != '_item_') {
-      _store_item($item[$name]);
-      if(isset($item[$name]['_item_'])) {
-        $children[$name] = $item[$name]['_item_'];
-      }
-    }
-  }
+  
   if(isset($item['_item_'])) {
+    echo "store: " . $item['_item_']['path'] . "\n";
     $dir = $root . '/' . $item['_item_']['path'];
     if(!is_dir($dir)) {
       file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
       // TODO: Set backdrop_chmod on parent dir, if path has multiple level.
     }
-    
+  
     $filename = $dir . '/item.json'; 
     $item_json = backdrop_json_encode($item['_item_'], TRUE);
     file_unmanaged_save_data($item_json, $filename, FILE_EXISTS_REPLACE);  
@@ -120,55 +150,118 @@ function _store_item($item){
       $children_json = backdrop_json_encode($children, TRUE);
       file_unmanaged_save_data($children_json, $children_filename, FILE_EXISTS_REPLACE);
     }
-    _set_tabs_actions($item, $dir);
+    _set_tabs_actions($item);
+    _store_context($item);
+  }
+  foreach($item as $name => $content){
+  
+    if($name != '_item_' ) {
+      if(isset($content['_item_']['type']) && isset($item['_item_']['path'])) {
+        // The default task href is looking to parent URL.
+        if (($content['_item_']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
+          $item[$name]['_item_']['href'] = $item['_item_']['path'];
+        }
+      }
+      _store_item($item[$name]);
+    }
   }
 }
 
-function _set_tabs_actions($parent_item, $dir){
+function _store_tab_item($item) {
+  $root = "files/menu_router";
+  if(!is_dir($root)) {
+    file_prepare_directory($root, FILE_CREATE_DIRECTORY);
+  }
+  $dir = $root . '/' . $item['_item_']['tab_root'];
   
-  $action_count = 0;
-  $tab_count = 0;
-  $actions_current = array();
-  $tabs_current = array();
-  foreach($parent_item as $name => $subitem){
-    if($name != '_item_' && isset($subitem['_item_'])){
-      $item = $subitem['_item_'];
-      if($item['context'] == MENU_CONTEXT_INLINE) {
-        continue;
-      }
-      // Local tasks can be normal items too, so bitmask with
-      // MENU_IS_LOCAL_TASK before checking.
-      if (!($item['type'] & MENU_IS_LOCAL_TASK)) {
-        // This item is not a tab, skip it.
-        continue;
-      }
-      if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
-        $item['href'] = $parent_item['_item_']['path'];
-        $tabs_current[] = array(
-          '#theme' => 'menu_local_task',
-          '#link' => $item,
-        );
-        $tab_count++;
+  $filename = $dir . '/tabs.json';
+  $content = array();
+  if(file_exists($filename)){
+    $content = backdrop_json_decode(file_get_contents($filename));
+  }
+  
+  $content[$item['_item_']['tab_parent']][$item['_item_']['path']] = $item['_item_'];
+  $content_json = backdrop_json_encode($content, TRUE);
+  file_unmanaged_save_data($content_json, $filename, FILE_EXISTS_REPLACE);
+}
+
+function _store_action_item($item) {
+  $root = "files/menu_router";
+  if(!is_dir($root)) {
+    file_prepare_directory($root, FILE_CREATE_DIRECTORY);
+  }
+  $dir = $root . '/' . $item['_item_']['tab_root'];
+  
+  $filename = $dir . '/actions.json';
+  $content = array();
+  if(file_exists($filename)){
+    $content = backdrop_json_decode(file_get_contents($filename));
+  }
+  
+  $content[$item['_item_']['path']] = $item['_item_'];
+  $content_json = backdrop_json_encode($content, TRUE);
+  file_unmanaged_save_data($content_json, $filename, FILE_EXISTS_REPLACE);
+}
+
+function _store_context($item) {
+  $root = "files/menu_router";
+  if(!is_dir($root)) {
+    file_prepare_directory($root, FILE_CREATE_DIRECTORY);
+  }
+  $dir = $root . '/' . $item['_item_']['tab_root'];
+  
+  $filename = $dir . '/context.json';  
+  
+  $content = array();
+  if(file_exists($filename)){
+    $content = backdrop_json_decode(file_get_contents($filename));
+  }
+  
+  if( isset($item['_item_'])){
+    if($item['_item_']['context'] == MENU_CONTEXT_NONE) {
+      return;
+    }
+
+    if($item['_item_']['context'] == MENU_CONTEXT_PAGE) {
+      return;
+    }
+    
+    $content[$item['_item_']['path']] = $item['_item_'];
+    $content_json = backdrop_json_encode($content, TRUE);
+    file_unmanaged_save_data($content_json, $filename, FILE_EXISTS_REPLACE);
+  }
+}
+
+function _set_tabs_actions($item){
+  
+  if( isset($item['_item_'])){
+//    $item = $subitem['_item_'];
+    
+    if($item['_item_']['context'] == MENU_CONTEXT_INLINE) {
+      return;
+    }
+    // Local tasks can be normal items too, so bitmask with
+    // MENU_IS_LOCAL_TASK before checking.
+    if (!($item['_item_']['type'] & MENU_IS_LOCAL_TASK)) {
+      // This item is not a tab, skip it.
+      return;
+    }
+    if (($item['_item_']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
+//      $item['_item_']['href'] = $parent_item['_item_']['path'];
+      // We need to change path as well in this case.
+      // $item['path'] = $item['href'];
+      _store_tab_item($item);
+    } else {
+      if (($item['_item_']['type'] & MENU_IS_LOCAL_ACTION) == MENU_IS_LOCAL_ACTION) {
+        // The item is an action, display it as such.
+        _store_action_item($item);
       } else {
-        if (($item['type'] & MENU_IS_LOCAL_ACTION) == MENU_IS_LOCAL_ACTION) {
-          // The item is an action, display it as such.
-          $actions_current[] = array(
-            '#theme' => 'menu_local_action',
-            '#link' => $item,
-          );
-          $action_count++;
-        } else {
-          // Otherwise, it's a normal tab.
-          $tabs_current[] = array(
-            '#theme' => 'menu_local_task',
-            '#link' => $item,
-          );
-          $tab_count++;
-        }
+        _store_tab_item($item);
       }
     }
   }
-  if($tab_count > 0 ){
+
+/*  if($tab_count > 0 ){
     $tabs_filename = $dir . '/tabs.json';
     $tabs_json = backdrop_json_encode($tabs_current, TRUE);
     file_unmanaged_save_data($tabs_json, $tabs_filename, FILE_EXISTS_REPLACE);
@@ -177,13 +270,13 @@ function _set_tabs_actions($parent_item, $dir){
     $action_filename = $dir . '/actions.json';
     $action_json = backdrop_json_encode($actions_current, TRUE);
     file_unmanaged_save_data($action_json, $action_filename, FILE_EXISTS_REPLACE);
-  }
+  }*/
 }
 
 function _set_router_data(&$router_structure, $path, $item){
   $parts = explode('/', $path);
   
-  if(!isset($item['_load_functions'])){
+ /* if(!isset($item['_load_functions'])){
     $item['_load_functions'] = array();
     $item['to_arg_functions'] = array();
   }
@@ -218,7 +311,7 @@ function _set_router_data(&$router_structure, $path, $item){
     }
   }
   
-  $path = implode("/", $parts);
+  $path = implode("/", $parts);*/
     
   $item += array(
     'title' => '',
@@ -374,6 +467,11 @@ function _set_router_data(&$router_structure, $path, $item){
     $file_path = $item['file path'] ? $item['file path'] : backdrop_get_path('module', $item['module']);
     $item['include file'] = $file_path . '/' . $item['file'];
   }
+  
+  /*if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
+    // We need to change path as well in this case.
+    $item['path'] = $item['href'];
+  }        */
   $router_structure[$path] = $item;
   /*
   $router_structure[$part]['_item_'] = array(
