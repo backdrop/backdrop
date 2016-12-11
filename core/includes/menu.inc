@@ -1976,7 +1976,7 @@ function _menu_local_tasks_generate_tabs($tabs_data, $path, $depth = 0, $map, $r
   $tabs_current = array();
   foreach($items as $key => $item) {
     _menu_translate($item, $map, TRUE);
-    
+
     if($item['access']) {
       $tab = array(
         '#theme' => 'menu_local_task',
@@ -2004,7 +2004,7 @@ function _menu_local_tasks_generate_tabs($tabs_data, $path, $depth = 0, $map, $r
     }
   }
   $tabs[$depth]['count'] = count($tabs_current);
-  $tabs[$depth]['output'] = $tabs_current; 
+  $tabs[$depth]['output'] = $tabs_current;
   return $tabs;
 }
 
@@ -2071,7 +2071,7 @@ function menu_local_tasks($level = 0) {
           '#link' => $item,
         );
       }
-      
+
     }
     $data['tabs'] = $tabs;
     $data['actions']['count'] = count($actions_current);
@@ -2738,7 +2738,7 @@ function menu_router_build() {
   backdrop_alter('menu', $callbacks);
   list($menu, $masks) = _menu_router_database_build($callbacks);
   _menu_router_cache($menu);
-  
+
   require_once BACKDROP_ROOT . '/core/includes/menu_router.inc';
   _menu_router_files_build($callbacks);
 
@@ -3911,23 +3911,23 @@ function _menu_sort($a, $b) {
  *   node/% item and return that. Defaults to the current path.
  *
  * @return array|FALSE
- *   The router item or, if an error occurs, FALSE. A router item is 
+ *   The router item or, if an error occurs, FALSE. A router item is
  *   an associative array. The value corresponding to the key 'map' holds the
  *   loaded objects.
  */
 function _get_router_item($path){
   static $cached_items;
-  
+
   if(isset($cached_items[$path])) {
     return $cached_items[$path];
   }
-  
+
   $parts = explode("/", $path);
   $ancestors = menu_get_ancestors($parts);
-  
+
   // @todo Use config settings to get root path.
   $root = "files/menu_router/";
-  
+
   foreach($ancestors as $ancestor) {
     $filename = $root . $ancestor . '/item.json';
     if(is_file($filename)) {
@@ -3955,13 +3955,13 @@ function _get_router_item($path){
  */
 function _get_router_item_tabs($path){
   static $cached_items;
-  
+
   if(isset($cached_items[$path])) {
     return $cached_items[$path];
   }
-  
+
   // @todo Use config settings to get root path.
-  $root = "files/menu_router/";  
+  $root = "files/menu_router/";
 
   $filename = $root . $path . '/tabs.json';
   if(is_file($filename)) {
@@ -3992,14 +3992,14 @@ function _get_router_item_tabs($path){
  */
 function _get_router_item_actions($path){
   static $cached_items;
-  
+
   if(isset($cached_items[$path])) {
     return $cached_items[$path];
   }
-  
+
   // @todo Use config settings to get root path.
   $root = "files/menu_router/";
-  
+
   $filename = $root . $path . '/actions.json';
   if(is_file($filename)) {
     $content = file_get_contents($filename);
@@ -4025,14 +4025,14 @@ function _get_router_item_actions($path){
  */
 function _get_router_item_context($path){
   static $cached_items;
-  
+
   if(isset($cached_items[$path])) {
     return $cached_items[$path];
   }
-  
+
   // @todo Use config settings to get root path.
   $root = "files/menu_router/";
-  
+
   $filename = $root . $path . '/context.json';
   if(is_file($filename)) {
     $content = file_get_contents($filename);
