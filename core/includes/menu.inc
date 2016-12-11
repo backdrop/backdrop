@@ -2736,10 +2736,10 @@ function menu_router_build() {
   }
   // Alter the menu as defined in modules, keys are like user/%user.
   backdrop_alter('menu', $callbacks);
-  if (!isset($GLOBALS['backdrop_test_info'])) {
+//  if (!isset($GLOBALS['backdrop_test_info'])) {
     list($menu, $masks) = _menu_router_database_build($callbacks);
     _menu_router_cache($menu);
-  }
+//  }*/
 
   require_once BACKDROP_ROOT . '/core/includes/menu_router.inc';
   _menu_router_files_build($callbacks);
