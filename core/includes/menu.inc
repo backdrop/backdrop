@@ -1996,7 +1996,7 @@ function _menu_local_tasks_generate_tabs($tabs_data, $path, $depth = 0, $map, $r
       if(isset($tab['#active'])) {
         if (($item['type'] & MENU_LINKS_TO_PARENT) != MENU_LINKS_TO_PARENT) {
           if(isset($tabs_data[$item['path']])) {
-            _get_menu_local_tabs_by_path($tabs_data, $item['path'], ($depth + 1), $map, $root_path);
+            _menu_local_tasks_generate_tabs($tabs_data, $item['path'], ($depth + 1), $map, $root_path);
           }
         }
       }
