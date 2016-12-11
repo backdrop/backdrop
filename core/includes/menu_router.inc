@@ -58,6 +58,10 @@ function _menu_router_files_build($callbacks) {
 
   // @todo Use config settings to get root path.
   $dest = "files/menu_router";
+  if ($test_prefix = backdrop_valid_test_ua()) {
+    // See BackdropWebTestBase::setUp().
+    $dest = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router';
+  }
   $root = $dest . "." . backdrop_random_key();
   if(!is_dir($root)) {
     file_prepare_directory($root, FILE_CREATE_DIRECTORY);
