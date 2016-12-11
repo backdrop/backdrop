@@ -457,7 +457,14 @@ function menu_get_item($path = NULL, $router_item = NULL) {
   }
 
   $original_map = arg(NULL, $path);
-  $router_item = _get_router_item($path);
+  if(!$router_item = _get_router_item($path)){
+    // Rebuild if we know it's needed, or if the menu masks are missing which
+    // occurs rarely, likely due to a race condition of multiple rebuilds.
+    if (state_get('menu_rebuild_needed', FALSE) || !state_get('menu_masks', array())) {
+      menu_rebuild();
+      $router_item = _get_router_item($path);
+    }
+  }
 
   if ($router_item) {
     // Allow modules to alter the router item before it is translated and
@@ -1487,26 +1494,7 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
     // link.
     $query = db_select('menu_links', 'ml', array('fetch' => PDO::FETCH_ASSOC));
     $query->addTag('translatable');
-    $query->leftJoin('menu_router', 'm', 'm.path = ml.router_path');
     $query->fields('ml');
-    $query->fields('m', array(
-      'load_functions',
-      'to_arg_functions',
-      'access_callback',
-      'access_arguments',
-      'page_callback',
-      'page_arguments',
-      'delivery_callback',
-      'tab_parent',
-      'tab_root',
-      'title',
-      'title_callback',
-      'title_arguments',
-      'theme_callback',
-      'theme_arguments',
-      'type',
-      'description',
-    ));
     for ($i = 1; $i <= MENU_MAX_DEPTH; $i++) {
       $query->orderBy('p' . $i, 'ASC');
     }
@@ -1534,6 +1522,9 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
     // Build an ordered array of links using the query result object.
     $links = array();
     foreach ($query->execute() as $item) {
+      if($route_item = _get_router_item($item['router_path'])){
+        $item += $route_item;
+      }
       $links[] = $item;
     }
     $active_trail = (isset($parameters['active_trail']) ? $parameters['active_trail'] : array());
@@ -2701,7 +2692,7 @@ function menu_rebuild() {
 
   try {
     list($menu, $masks) = menu_router_build();
-    _menu_router_save($menu, $masks);
+//    _menu_router_save($menu, $masks);
     _menu_navigation_links_rebuild($menu);
     // Clear the menu, page and block caches.
     menu_cache_clear_all();
@@ -2737,12 +2728,13 @@ function menu_router_build() {
   // Alter the menu as defined in modules, keys are like user/%user.
   backdrop_alter('menu', $callbacks);
 //  if (!isset($GLOBALS['backdrop_test_info'])) {
-    list($menu, $masks) = _menu_router_database_build($callbacks);
-    _menu_router_cache($menu);
+//    list($menu, $masks) = _menu_router_database_build($callbacks);
+//    _menu_router_cache($menu);
 //  }*/
 
   require_once BACKDROP_ROOT . '/core/includes/menu_router.inc';
-  _menu_router_files_build($callbacks);
+  list($menu, $masks) = _menu_router_files_build($callbacks);
+  _menu_router_cache($menu);
 
   return array($menu, $masks);
 }
@@ -2805,6 +2797,9 @@ function _menu_navigation_links_rebuild($menu) {
   foreach ($menu as $path => $item) {
     if ($item['_visible']) {
       $menu_links[$path] = $item;
+      if(!isset($item['_number_parts'])) {
+        $item['_number_parts'] = count(explode("/", $path));
+      }
       $sort[$path] = $item['_number_parts'];
     }
   }
@@ -3944,6 +3939,34 @@ function _get_router_item($path){
       }
     }
   }
+  return FALSE;
+}
+
+/**
+ * Remove router json file
+ *
+ * @param $path
+ *   The path; for example, 'node/5'. The function will find the corresponding
+ *   node/% item and return that. Defaults to the current path.
+ *
+ * @return bool|FALSE
+ *   If router item exists - return TRUE.
+ */
+function _remove_router_item($path){
+
+  // @todo Use config settings to get root path.
+  $root = "files/menu_router/";
+  if ($test_prefix = backdrop_valid_test_ua()) {
+    // See BackdropWebTestBase::setUp().
+    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
+  }
+  
+  $filename = $root . $path . '/item.json';
+  if (file_exists($filename)) {
+    backdrop_unlink($filename);
+    return TRUE;
+  }
+  
   return FALSE;
 }
 

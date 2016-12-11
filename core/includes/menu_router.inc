@@ -8,6 +8,9 @@
  * Builds the router files strucure based on the data from hook_menu().
  */
 function _menu_router_files_build($callbacks) {
+  $menu = array();
+  $masks = array();
+    
   $callbacks_path = array();
   foreach ($callbacks as $path => $item) {
     if(!isset($item['_load_functions'])){
@@ -49,6 +52,8 @@ function _menu_router_files_build($callbacks) {
   foreach ($callbacks_path as $path => $item) {
     _prepare_menu_router_item($router_structure, $path, $item);
   }
+  
+  $menu = $router_structure;
 
   $menu_router_tree = array();
   foreach ($router_structure as $path => $item) {
@@ -81,6 +86,7 @@ function _menu_router_files_build($callbacks) {
   if(is_dir($tmp_dir_name)){
     file_unmanaged_delete_recursive($tmp_dir_name);
   }
+  return array($menu, $masks);
 }
 
 /**

@@ -2466,16 +2466,14 @@ function system_admin_menu_block($item) {
 
   $content = array();
   $query = db_select('menu_links', 'ml', array('fetch' => PDO::FETCH_ASSOC));
-  $query->join('menu_router', 'm', 'm.path = ml.router_path');
   $query
     ->fields('ml')
-    // Weight should be taken from {menu_links}, not {menu_router}.
-    ->fields('m', array_diff(backdrop_schema_fields_sql('menu_router'), array('weight')))
     ->condition('ml.plid', $item['mlid'])
     ->condition('ml.menu_name', $item['menu_name'])
     ->condition('ml.hidden', 0);
 
   foreach ($query->execute() as $link) {
+    $link += _get_router_item($link['router_path']);
     _menu_link_translate($link);
     if ($link['access']) {
       // The link description, either derived from 'description' in
@@ -3299,17 +3297,14 @@ function system_get_module_admin_tasks($module, $info) {
   if (!isset($links)) {
     $links = array();
     $query = db_select('menu_links', 'ml', array('fetch' => PDO::FETCH_ASSOC));
-    $query->join('menu_router', 'm', 'm.path = ml.router_path');
     $query
       ->fields('ml')
       // Weight should be taken from {menu_links}, not {menu_router}.
-      ->fields('m', array_diff(backdrop_schema_fields_sql('menu_router'), array('weight')))
       ->condition('ml.link_path', 'admin/%', 'LIKE')
       ->condition('ml.hidden', 0, '>=')
-      ->condition('ml.module', 'system')
-      ->condition('m.number_parts', 1, '>')
-      ->condition('m.page_callback', 'system_admin_menu_block_page', '<>');
+      ->condition('ml.module', 'system');
     foreach ($query->execute() as $link) {
+      $link += _get_router_item($link['router_path']);
       _menu_link_translate($link);
       if ($link['access']) {
         $links[$link['router_path']] = $link;

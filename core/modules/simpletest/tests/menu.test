@@ -522,7 +522,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
    * Load the router for a given path.
    */
   protected function menuLoadRouter($router_path) {
-    return db_query('SELECT * FROM {menu_router} WHERE path = :path', array(':path' => $router_path))->fetchAssoc();
+    return _get_router_item($router_path);
   }
 
   /**
@@ -799,14 +799,13 @@ class MenuRebuildTestCase extends BackdropWebTestCase {
    */
   function testMenuRebuildByVariable() {
     // Check if 'admin' path exists.
-    $admin_exists = db_query('SELECT path from {menu_router} WHERE path = :path', array(':path' => 'admin'))->fetchField();
+    $admin_exists = _get_router_item('admin');
     $this->assertEqual($admin_exists, 'admin', "The path 'admin/' exists prior to deleting.");
 
     // Delete the path item 'admin', and test that the path doesn't exist in the database.
-    db_delete('menu_router')
-      ->condition('path', 'admin')
-      ->execute();
-    $admin_exists = db_query('SELECT path from {menu_router} WHERE path = :path', array(':path' => 'admin'))->fetchField();
+    _remove_router_item('admin');
+
+    $admin_exists = _get_router_item('admin');
     $this->assertFalse($admin_exists, "The path 'admin/' has been deleted and doesn't exist in the database.");
 
     // Now we enable the rebuild variable and trigger menu_execute_active_handler()
@@ -814,7 +813,7 @@ class MenuRebuildTestCase extends BackdropWebTestCase {
     state_set('menu_rebuild_needed', TRUE);
     // menu_execute_active_handler() should trigger the rebuild.
     $this->backdropGet('<front>');
-    $admin_exists = db_query('SELECT path from {menu_router} WHERE path = :path', array(':path' => 'admin'))->fetchField();
+    $admin_exists = _get_router_item('admin');
     $this->assertEqual($admin_exists, 'admin', "The menu has been rebuilt, the path 'admin' now exists again.");
   }
 

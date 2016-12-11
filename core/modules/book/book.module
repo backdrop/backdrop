@@ -1159,8 +1159,9 @@ function book_link_load($mlid, $skip_access_check = FALSE) {
   }
 
   if (!isset($cache[$mlid])) {
-    $item = db_query("SELECT * FROM {menu_links} ml INNER JOIN {book} b ON b.mlid = ml.mlid LEFT JOIN {menu_router} m ON m.path = ml.router_path WHERE ml.mlid = :mlid", array(':mlid' => $mlid))->fetchAssoc();
+    $item = db_query("SELECT * FROM {menu_links} ml INNER JOIN {book} b ON b.mlid = ml.mlid WHERE ml.mlid = :mlid", array(':mlid' => $mlid))->fetchAssoc();
     if (!empty($item)) {
+      $item += _get_router_item($item['router_path']);
       if ($skip_access_check) {
         $item['access'] = TRUE;
       }
@@ -1207,10 +1208,8 @@ function book_menu_subtree_data($link) {
     // If the subtree data was not in the cache, $data will be NULL.
     if (!isset($data)) {
       $query = db_select('menu_links', 'ml', array('fetch' => PDO::FETCH_ASSOC));
-      $query->join('menu_router', 'm', 'm.path = ml.router_path');
       $query->join('book', 'b', 'ml.mlid = b.mlid');
       $query->fields('b');
-      $query->fields('m', array('load_functions', 'to_arg_functions', 'access_callback', 'access_arguments', 'page_callback', 'page_arguments', 'delivery_callback', 'title', 'title_callback', 'title_arguments', 'type'));
       $query->fields('ml');
       $query->condition('menu_name', $link['menu_name']);
       for ($i = 1; $i <= MENU_MAX_DEPTH && $link["p$i"]; ++$i) {
@@ -1221,6 +1220,7 @@ function book_menu_subtree_data($link) {
       }
       $links = array();
       foreach ($query->execute() as $item) {
+        $item += _get_router_item($item['router_path']);
         $links[] = $item;
       }
       $data['tree'] = menu_tree_data($links, array(), $link['depth']);
