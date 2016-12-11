@@ -112,6 +112,31 @@ function theme_field_ui_modes($variables) {
     array('data' => t('Operations'), 'class' => array('operations')),
   );
 
+  $default_checkbox = array(
+    '#type' => 'checkbox',
+    '#title' => t('Default'),
+    '#default_value' => TRUE,
+    '#attributes' => array('disabled' => 'true', 'checked' => 'checked'),
+  );
+  $default_operations = array(
+    'manage' => array(
+      'title' => t('Manage display'),
+      'href' => "$path/default",
+    ),
+  );
+  $first_row = array();
+  $row = array();
+  $row['enabled'] = backdrop_render($default_checkbox);
+  $row['machine'] = t('default');
+  $row['storage'] = t('N/A');
+  $row['operations'] = array(
+    'data' => array(
+      '#type' => 'dropbutton',
+      '#links' => $default_operations,
+    ),
+  );
+  $first_row = array('data' => $row, 'class' => array('default-view-mode'));
+
   $last_row = array();
   if (isset($element['new'])) {
     $row = array();
