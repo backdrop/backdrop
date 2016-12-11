@@ -399,7 +399,6 @@ function menu_get_ancestors($parts) {
  * @return
  *   The unserialized $data array, with path arguments replaced.
  */
-
 function menu_unserialize($data, $map) {
   if(!is_array($data)){
     if(!$data = unserialize($data)){
@@ -430,131 +429,6 @@ function menu_set_item($path, $router_item) {
   menu_get_item($path, $router_item);
 }
 
-function _get_router_item_children($path){
-  $children = array();
-  $dh  = opendir($path);
-  while (false !== ($filename = readdir($dh))) {
-    if($filename != '.' && $filename != '..'){
-      $tmp_name = $path . '/'. $filename;
-      if(is_dir($tmp_name) && is_file($tmp_name . "/item.json")){
-        $content = file_get_contents($tmp_name . "/item.json");
-        if($item = backdrop_json_decode($content)) {
-          $parts = explode("/", $tmp_name);
-          $name = array_pop($parts);
-          $children[$name] = $item;
-        }
-      }
-    }
-  }
-  return $children;
-}
-
-function _get_router_item_tabs($path){
-  static $cached_items;
-  
-  if(isset($cached_items[$path])) {
-    return $cached_items[$path];
-  }
-  
-  $root = "files/menu_router/";
-  
-
-  $filename = $root . $path . '/tabs.json';
-  if(is_file($filename)) {
-    $content = file_get_contents($filename);
-    if($content_json = backdrop_json_decode($content)) {
-      foreach($content_json as $tab_parent => $items){
-        usort($content_json[$tab_parent], "menu_router_sort_tabs");
-      }
-      $cached_items[$path] = $content_json;
-      return $content_json;
-    }
-  }
-
-  return array();
-}
-
-// Sort by Weight and title
-function menu_router_sort_tabs($a, $b) {
-  $a_w = $a['weight'];
-  $b_w = $b['weight'];
-  if($a_w > $b_w ) {
-    return 1;
-  }
-  if($a_w < $b_w ) {
-    return -1;
-  }
-  $a_t = $a['title'];
-  $b_t = $b['title'];
-  return ($a_t > $b_t) ? +1 : -1;
-}
-
-function _get_router_item_actions($path){
-  static $cached_items;
-  
-  if(isset($cached_items[$path])) {
-    return $cached_items[$path];
-  }
-  
-  $root = "files/menu_router/";
-  
-  $filename = $root . $path . '/actions.json';
-  if(is_file($filename)) {
-    $content = file_get_contents($filename);
-    if($item = backdrop_json_decode($content)) {
-      $cached_items[$path] = $item;
-      return $item;
-    }
-  }
-  return array();
-}
-
-function _get_router_item_context($path){
-  static $cached_items;
-  
-  if(isset($cached_items[$path])) {
-    return $cached_items[$path];
-  }
-  
-  $root = "files/menu_router/";
-  
-  $filename = $root . $path . '/context.json';
-  if(is_file($filename)) {
-    $content = file_get_contents($filename);
-    if($item = backdrop_json_decode($content)) {
-      $cached_items[$path] = $item;
-      return $item;
-    }
-  }
-  return array();
-}
-
-/**
- * Read router item from json.
- */
-function menu_router_read_item($path){
-  static $cached_items;
-  
-  if(isset($cached_items[$path])) {
-    return $cached_items[$path];
-  }
-  
-  $parts = explode("/", $path);
-  $ancestors = menu_get_ancestors($parts);
-  $root = "files/menu_router/";
-  
-  foreach($ancestors as $ancestor) {
-    $filename = $root . $ancestor . '/item.json';
-    if(is_file($filename)) {
-      $content = file_get_contents($filename);
-      if($item = backdrop_json_decode($content)) {
-        $cached_items[$path] = $item;
-        return $item;
-      }
-    }
-  }
-  return FALSE;
-}
 /**
  * Gets a router item.
  *
@@ -574,14 +448,16 @@ function menu_router_read_item($path){
  *   be filled in based on the database values and the objects loaded.
  */
 function menu_get_item($path = NULL, $router_item = NULL) {
+  $router_items = &backdrop_static(__FUNCTION__);
   if (!isset($path)) {
     $path = $_GET['q'];
   }
+  if (isset($router_item)) {
+    return $router_item;
+  }
 
   $original_map = arg(NULL, $path);
-
-  $router_item = menu_router_read_item($path);
-
+  $router_item = _get_router_item($path);
 
   if ($router_item) {
     // Allow modules to alter the router item before it is translated and
@@ -788,9 +664,6 @@ function _menu_check_access(&$item, $map) {
   }
   else {
     $arguments = menu_unserialize($item['access_arguments'], $map);
-    if(!is_array($arguments)){
-      $arguments = array();
-    };
     // As call_user_func_array is quite slow and user_access is a very common
     // callback, it is worth making a special case for it.
     if ($callback == 'user_access') {
@@ -943,12 +816,6 @@ function _menu_translate(&$router_item, $map, $to_arg = FALSE) {
   if (isset($router_item['tab_parent'])) {
     $tab_parent_map = explode('/', $router_item['tab_parent']);
   }
-  if(!isset($router_item['number_parts'])){
-    $parts = explode('/', $router_item['path'], MENU_MAX_PARTS);
-    $number_parts = count($parts);
-    $router_item['number_parts'] = $number_parts;
-  }
-    
   for ($i = 0; $i < $router_item['number_parts']; $i++) {
     if ($link_map[$i] == '%') {
       $link_map[$i] = $path_map[$i];
@@ -2084,6 +1951,44 @@ function menu_navigation_links($menu_name, $level = 0) {
   return $links;
 }
 
+function _menu_local_tasks_generate_tabs($tabs_data, $path, $depth = 0, $map, $root_path) {
+  static $tabs;
+  $items = $tabs_data[$path];
+  $tabs_current = array();
+  foreach($items as $key => $item) {
+    _menu_translate($item, $map, TRUE);
+    
+    if($item['access']) {
+      $tab = array(
+        '#theme' => 'menu_local_task',
+      );
+      if(mb_strpos($root_path, $item['path']) === 0) {
+        $tab['#active'] = TRUE;
+      }
+      if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
+        $item['href'] = $item['tab_parent_href'];
+        $item['path'] = $item['tab_parent'];
+        if( $item['path'] == $root_path) {
+          $tab['#active'] = TRUE;
+        }
+      }
+      $tab['#link'] = $item;
+
+      if(isset($tab['#active'])) {
+        if (($item['type'] & MENU_LINKS_TO_PARENT) != MENU_LINKS_TO_PARENT) {
+          if(isset($tabs_data[$item['path']])) {
+            _get_menu_local_tabs_by_path($tabs_data, $item['path'], ($depth + 1), $map, $root_path);
+          }
+        }
+      }
+      $tabs_current[] = $tab;
+    }
+  }
+  $tabs[$depth]['count'] = count($tabs_current);
+  $tabs[$depth]['output'] = $tabs_current; 
+  return $tabs;
+}
+
 /**
  * Collects the local tasks (tabs), action links, and the root path.
  *
@@ -2112,17 +2017,15 @@ function menu_local_tasks($level = 0) {
 
   if (!isset($data)) {
     $data = array();
-    // Set defaults in case there are no actions or tabs.
-    $actions = $empty['actions'];
-    $tabs = array();
 
     $router_item = menu_get_item();
+
     // If this router item points to its parent, start from the parents to
     // compute tabs and actions.
     if ($router_item && ($router_item['type'] & MENU_LINKS_TO_PARENT)) {
       $router_item = menu_get_item($router_item['tab_parent_href']);
     }
-    
+
     // If we failed to fetch a router item or the current user doesn't have
     // access to it, don't bother computing the tabs.
     if (!$router_item || !$router_item['access']) {
@@ -2131,74 +2034,23 @@ function menu_local_tasks($level = 0) {
 
     $map = $router_item['original_map'];
     $root_path = $router_item['path'];
-
     $tabs_data = _get_router_item_tabs($router_item['tab_root']);
 
-    if(!$router_item['tab_parent']){
-      $path = $router_item['path'];
-    } else {
+    // Prepare $active_path to determinate active tab.
+    $active_path = $router_item['path'];
+    if($router_item['tab_parent']){
       if($router_item['tab_parent'] == $router_item['tab_root']) {
-        $path = $router_item['path'];
+        $active_path = $router_item['path'];
       } else {
-        $path = $router_item['tab_parent'];
+        $active_path = $router_item['tab_parent'];
       }
     }
     $tabs = array();
-    $tabs_current = array();
-    $sub_tabs_path = FALSE;
+    $depth = 0;
     if(isset($tabs_data[$router_item['tab_root']])){
-      foreach($tabs_data[$router_item['tab_root']] as $key => $item) {
-        _menu_translate($item, $map, TRUE);
-        
-        if($item['access']) {
-          if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
-            $item['href'] = $item['tab_parent_href'];
-            $item['path'] = $item['tab_parent'];
-          }
-          $tab = array(
-            '#theme' => 'menu_local_task',
-            '#link' => $item,
-          );
-          if($item['path'] == $path) {
-            $tab['#active'] = TRUE;
-            if (($item['type'] & MENU_LINKS_TO_PARENT) != MENU_LINKS_TO_PARENT) {
-              $sub_tabs_path = $item['path'];
-            }
-          }
-          $tabs_current[] = $tab;
-        }
-      }
-      $tabs[0]['count'] = count($tabs_current);
-      $tabs[0]['output'] = $tabs_current; 
+      $tabs = _menu_local_tasks_generate_tabs($tabs_data, $router_item['tab_root'], $depth, $map, $root_path);
     }
-    
-    if($sub_tabs_path) {
-      $tabs_current = array();
-      if(isset($tabs_data[$sub_tabs_path])){
-        foreach($tabs_data[$sub_tabs_path] as $key => $item) {
-          _menu_translate($item, $map, TRUE);
-          
-          if($item['access']) {
-            if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
-              $item['href'] = $item['tab_parent_href'];
-              $item['path'] = $item['tab_parent'];
-            }
-            $tab = array(
-              '#theme' => 'menu_local_task',
-              '#link' => $item,
-            );
-            
-            if($item['path'] == $router_item['path']) {
-              $tab['#active'] = TRUE;
-            }
-            $tabs_current[] = $tab;
-          }
-        }
-        $tabs[1]['count'] = count($tabs_current);
-        $tabs[1]['output'] = $tabs_current; 
-      }
-    }
-    
+
     $data['tabs'] = $tabs;   
     
     $actions_current = array();
@@ -2304,11 +2156,10 @@ function menu_contextual_links($module, $parent_path, $args) {
 
   $parent_length = backdrop_strlen($root_path) + 1;
   $map = $router_item['original_map'];
-
-  foreach($data[$root_path] as $item){
+  foreach ($data[$root_path] as $item){
     // Extract the actual "task" string from the path argument.
     $key = backdrop_substr($item['path'], $parent_length);
-    
+
     // Denormalize and translate the contextual link.
     _menu_translate($item, $map, TRUE);
     if (!$item['access']) {
@@ -2317,8 +2168,8 @@ function menu_contextual_links($module, $parent_path, $args) {
     // All contextual links are keyed by the actual "task" path argument,
     // prefixed with the name of the implementing module.
     $links[$module . '-' . $key] = $item;
-    
   }
+
   // Allow modules to alter contextual links.
   backdrop_alter('menu_contextual_links', $links, $router_item, $root_path);
 
@@ -2389,7 +2240,7 @@ function menu_local_tabs() {
  */
 function theme_menu_local_tasks($variables) {
   $output = '';
-  
+
   if (!empty($variables['primary'])) {
     $variables['primary']['#prefix'] = '<h2 class="element-invisible">' . t('Primary tabs') . '</h2>';
     $variables['primary']['#prefix'] .= '<ul class="tabs primary">';
@@ -2583,9 +2434,9 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
     // 1. The current item href.
     $path_candidates[$item['href']] = $item['href'];
     // 2. The tab root href of the current item (if any).
-/*    if ($item['tab_parent'] && ($tab_root = menu_get_item($item['tab_root_href']))) {
+    if ($item['tab_parent'] && ($tab_root = menu_get_item($item['tab_root_href']))) {
       $path_candidates[$tab_root['href']] = $tab_root['href'];
-    }*/
+    }
     // 3. The current item path (with wildcards).
     $path_candidates[$item['path']] = $item['path'];
     // 4. The tab root path of the current item (if any).
@@ -4021,6 +3872,167 @@ function _menu_site_status($path = NULL, $display_messages = FALSE) {
   backdrop_alter('menu_site_status', $site_status, $read_only_path);
 
   return $site_status;
+}
+
+/**
+ * Comparator routine for use in sorting menu items.
+ */
+function _menu_sort($a, $b) {
+  if($a['weight'] > $b['weight'] ) {
+    return 1;
+  }
+  if($a['weight'] < $b['weight'] ) {
+    return -1;
+  }
+  if($a['title'] > $b['title'] ) {
+    return 1;
+  }
+  if($a['title'] < $b['title'] ) {
+    return -1;
+  }
+  return 0;
+}
+
+/**
+ * Search and read a router item from json file.
+ *
+ * @param $path
+ *   The path; for example, 'node/5'. The function will find the corresponding
+ *   node/% item and return that. Defaults to the current path.
+ *
+ * @return array|FALSE
+ *   The router item or, if an error occurs, FALSE. A router item is 
+ *   an associative array. The value corresponding to the key 'map' holds the
+ *   loaded objects.
+ */
+function _get_router_item($path){
+  static $cached_items;
+  
+  if(isset($cached_items[$path])) {
+    return $cached_items[$path];
+  }
+  
+  $parts = explode("/", $path);
+  $ancestors = menu_get_ancestors($parts);
+  
+  // @todo Use config settings to get root path.
+  $root = "files/menu_router/";
+  
+  foreach($ancestors as $ancestor) {
+    $filename = $root . $ancestor . '/item.json';
+    if(is_file($filename)) {
+      $content = file_get_contents($filename);
+      if($item = backdrop_json_decode($content)) {
+        $cached_items[$path] = $item;
+        return $item;
+      }
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Gets a router item tabs.
+ *
+ * @param $path
+ *   The path; for example, 'node/5'. The function will find the corresponding
+ *   node/% item and return that. Defaults to the current path.
+ *
+ * @return array
+ *   The router item tabs array or empty array. A
+ *   router item tabs is an associative multilevel array corresponding to router
+ *   items path.
+ */
+function _get_router_item_tabs($path){
+  static $cached_items;
+  
+  if(isset($cached_items[$path])) {
+    return $cached_items[$path];
+  }
+  
+  // @todo Use config settings to get root path.
+  $root = "files/menu_router/";  
+
+  $filename = $root . $path . '/tabs.json';
+  if(is_file($filename)) {
+    $content = file_get_contents($filename);
+    if($content_json = backdrop_json_decode($content)) {
+      foreach($content_json as $tab_parent => $items){
+        usort($content_json[$tab_parent], "_menu_sort");
+      }
+      $cached_items[$path] = $content_json;
+      return $content_json;
+    }
+  }
+
+  return array();
+}
+
+/**
+ * Gets a router item actions.
+ *
+ * @param $path
+ *   The path; for example, 'node/5'. The function will find the corresponding
+ *   node/% item and return that. Defaults to the current path.
+ *
+ * @return array
+ *   The router item actions array or empty array. A
+ *   router item actions is an associative array corresponding to router
+ *   items path.
+ */
+function _get_router_item_actions($path){
+  static $cached_items;
+  
+  if(isset($cached_items[$path])) {
+    return $cached_items[$path];
+  }
+  
+  // @todo Use config settings to get root path.
+  $root = "files/menu_router/";
+  
+  $filename = $root . $path . '/actions.json';
+  if(is_file($filename)) {
+    $content = file_get_contents($filename);
+    if($item = backdrop_json_decode($content)) {
+      $cached_items[$path] = $item;
+      return $item;
+    }
+  }
+  return array();
+}
+
+/**
+ * Gets a router item context.
+ *
+ * @param $path
+ *   The path; for example, 'node/5'. The function will find the corresponding
+ *   node/% item and return that. Defaults to the current path.
+ *
+ * @return array
+ *   The router item context array or empty array. A
+ *   router item context is an associative array corresponding to router
+ *   items path.
+ */
+function _get_router_item_context($path){
+  static $cached_items;
+  
+  if(isset($cached_items[$path])) {
+    return $cached_items[$path];
+  }
+  
+  // @todo Use config settings to get root path.
+  $root = "files/menu_router/";
+  
+  $filename = $root . $path . '/context.json';
+  if(is_file($filename)) {
+    $content = file_get_contents($filename);
+    if($item = backdrop_json_decode($content)) {
+      usort($item, "_menu_sort");
+      $cached_items[$path] = $item;
+      return $item;
+    }
+  }
+  return array();
 }
 
 /**
