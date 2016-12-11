@@ -2740,8 +2740,11 @@ function menu_router_build() {
   }
   // Alter the menu as defined in modules, keys are like user/%user.
   backdrop_alter('menu', $callbacks);
-  list($menu, $masks) = _menu_router_build($callbacks);
+  list($menu, $masks) = _menu_router_database_build($callbacks);
   _menu_router_cache($menu);
+  
+  require_once BACKDROP_ROOT . '/core/menu_router.inc';
+  _menu_router_files_build($callbacks);
 
   return array($menu, $masks);
 }
@@ -3522,8 +3525,9 @@ function _menu_link_parents_set(&$item, $parent) {
 
 /**
  * Builds the router table based on the data from hook_menu().
+ * @todo mark it deprecated at some point.
  */
-function _menu_router_build($callbacks) {
+function _menu_router_database_build($callbacks) {
   // First pass: separate callbacks from paths, making paths ready for
   // matching. Calculate fitness, and fill some default values.
   $menu = array();
