@@ -58,10 +58,13 @@ function _menu_router_files_build($callbacks) {
 
   // @todo Use config settings to get root path.
   $dest = "files/menu_router";
-  if ($test_prefix = backdrop_valid_test_ua()) {
+  // backdrop_valid_test_ua() is not returning info inside testrun.
+  if (isset($GLOBALS['backdrop_test_info'])) {
+    $test_prefix = $GLOBALS['backdrop_test_info']['test_run_id'];
     // See BackdropWebTestBase::setUp().
     $dest = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router';
   }
+
   $root = $dest . "." . backdrop_random_key();
   if(!is_dir($root)) {
     file_prepare_directory($root, FILE_CREATE_DIRECTORY);
@@ -70,10 +73,14 @@ function _menu_router_files_build($callbacks) {
   foreach ($menu_router_tree as $item) {
     _save_menu_router_item($item, $root);
   }
-  $origin = $dest . "." .  time();
-  rename($dest, $origin);
+  $tmp_dir_name = $dest . "." .  time();
+  if(is_dir($dest)){
+    rename($dest, $tmp_dir_name);
+  }
   rename($root, $dest);
-  file_unmanaged_delete_recursive($origin);
+  if(is_dir($tmp_dir_name)){
+    file_unmanaged_delete_recursive($tmp_dir_name);
+  }
 }
 
 /**
