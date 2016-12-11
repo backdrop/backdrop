@@ -96,76 +96,84 @@ function theme_field_ui_table($variables) {
  *
  * @ingroup themeable
  */
-function theme_field_ui_modes($variables) {
+function theme_field_ui_view_modes($variables) {
   $element = $variables['element'];
   $view_modes = $element['#view_modes'];
   $entity_type = $element['#entity_type'];
-  $view_mode_settings = $element['#view_mode_settings'];
   $path = current_path();
 
-  $custom_view_modes = config_get('entity.view_modes', 'view_modes');
-
   $header = array(
-    t('Enabled'),
-    t('Machine name'),
-    t('Storage state'),
+    array('data' => t('View modes')),
+    array('data' => t('Machine name'), 'class' => array('priority-low')),
+    array('data' => t('Status'), 'class' => array('priority-medium')),
     array('data' => t('Operations'), 'class' => array('operations')),
   );
 
-  $default_checkbox = array(
-    '#type' => 'checkbox',
-    '#title' => t('Default'),
-    '#default_value' => TRUE,
-    '#attributes' => array('disabled' => 'true', 'checked' => 'checked'),
-  );
-  $default_operations = array(
-    'manage' => array(
-      'title' => t('Manage display'),
-      'href' => "$path/default",
-    ),
-  );
-  $first_row = array();
+  // Add the row for the default view mode.
   $row = array();
-  $row['enabled'] = backdrop_render($default_checkbox);
+  $row['label'] = t('Default');
   $row['machine'] = t('default');
   $row['storage'] = t('N/A');
   $row['operations'] = array(
     'data' => array(
       '#type' => 'dropbutton',
-      '#links' => $default_operations,
+      '#links' => array(
+        'manage' => array(
+          'title' => t('Manage display'),
+          'href' => "$path/default",
+        ),
+      ),
     ),
   );
-  $first_row = array('data' => $row, 'class' => array('default-view-mode'));
+  $first_row = array(
+    'class' => array('default-view-mode'),
+    'data' => $row,
+  );
 
+  // Add the row for adding a new view mode. @todo, replace with action link?
   $last_row = array();
   if (isset($element['new'])) {
     $row = array();
-    $row['enabled'] = backdrop_render($element['new']['label']);
+    $row['label'] = backdrop_render($element['new']['label']);
     $row['machine'] = backdrop_render($element['new']['machine_name']);
-    $row['storage'] = array('data' => t('New'), 'colspan' => 2);
+    $row['status'] = array('data' => backdrop_render($element['new']['submit']), 'colspan' => 2);
     unset($element['new']);
 
     $last_row = array('data' => $row, 'class' => array('add-new-view-mode'));
   }
 
-  $storage_states = array();
-
   $rows = array($first_row);
-  foreach (element_children($element) as $view_mode_name) {
+  foreach ($view_modes as $view_mode_name => $veiw_mode_info) {
+    $class = '';
     $row = array();
 
-    $row['enabled'] = backdrop_render($element[$view_mode_name]);
+    $row['label'] = t($veiw_mode_info['label']);
     $row['machine'] = t($view_mode_name);
-    $row['storage'] = !empty($custom_view_modes[$entity_type][$view_mode_name]) ? t('Custom') : t('Default (module-provided)');
+    $row['status'] = t($veiw_mode_info['status']);
 
     $operations = array();
-    if ($view_mode_settings[$view_mode_name]['custom_settings']) {
+    if ($view_modes[$view_mode_name]['custom settings']) {
       $operations['manage'] = array(
         'title' => t('Manage display'),
         'href' => "$path/$view_mode_name",
+        'query' => array('destination' => $path),
+      );
+      $operations['revert'] = array(
+        'title' => t('Revert to default'),
+        'href' => "$path/view-modes/{$view_mode_name}/default",
+        'query' => array('destination' => $path),
       );
     }
-    if (isset($custom_view_modes[$entity_type][$view_mode_name])) {
+    else {
+      $class = 'disabled';
+      $operations['customize'] = array(
+        'title' => t('Customize'),
+        'href' => "$path/view-modes/{$view_mode_name}/customize",
+        'query' => array('destination' => $path),
+      );
+    }
+
+    if ($veiw_mode_info['storage'] == 'Custom') {
       $operations['configure'] = array(
         'title' => t('Configure'),
         'href' => "$path/view-modes/{$view_mode_name}/configure",
@@ -177,6 +185,7 @@ function theme_field_ui_modes($variables) {
         'query' => array('destination' => $path),
       );
     }
+
     $row['operations'] = array(
       'data' => array(
         '#type' => 'dropbutton',
@@ -184,11 +193,11 @@ function theme_field_ui_modes($variables) {
       ),
     );
 
-    $rows[] = $row;
+    $rows[] = array('data' => $row, 'class' => array($class));
   }
   $rows[] = $last_row;
 
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('view-modes'))));
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('field-ui-view-modes'))));
   $output .= backdrop_render_children($form);
 
   return $output;
