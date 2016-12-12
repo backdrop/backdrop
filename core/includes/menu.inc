@@ -2659,14 +2659,33 @@ function menu_get_active_title() {
 function menu_link_load($mlid, $skip_access_check = FALSE) {
   if (is_numeric($mlid)) {
     $query = db_select('menu_links', 'ml');
-    $query->leftJoin('menu_router', 'm', 'm.path = ml.router_path');
     $query->fields('ml');
     // Weight should be taken from {menu_links}, not {menu_router}.
-    $query->addField('ml', 'weight', 'link_weight');
-    $query->fields('m');
     $query->condition('ml.mlid', $mlid);
     if ($item = $query->execute()->fetchAssoc()) {
-      $item['weight'] = $item['link_weight'];
+      if(!$router_item = _get_router_item($item['router_path'])){
+        $router_item = array(
+          'type' => NULL,
+          'page_callback' => NULL,
+          'load_functions' => NULL,
+          'to_arg_functions' => NULL,
+          'access_callback' => NULL,
+          'access_arguments' => NULL,
+          'page_callback' => NULL,
+          'page_arguments' => NULL,
+          'delivery_callback' => NULL,
+          'tab_parent' => NULL,
+          'tab_root' => NULL,
+          'title' => NULL,
+          'title_callback' => NULL,
+          'title_arguments' => NULL,
+          'theme_callback' => NULL,
+          'theme_arguments' => NULL,
+          'type' => NULL,
+          'description' => NULL,
+        );
+      }
+      $item += $router_item;
       if ($skip_access_check) {
         $item['access'] = TRUE;
       }
