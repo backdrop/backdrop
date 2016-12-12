@@ -83,7 +83,7 @@ function _menu_router_files_build($callbacks) {
   foreach ($menu_router_tree as $item) {
     _save_menu_router_item($item, $root);
   }
-  $tmp_dir_name = $dest . "." .  time();
+  $tmp_dir_name = $dest . "." .  time() . backdrop_random_key();
   if(is_dir($dest)){
     rename($dest, $tmp_dir_name);
   }
