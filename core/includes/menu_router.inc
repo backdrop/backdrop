@@ -83,13 +83,13 @@ function _menu_router_files_build($callbacks) {
   foreach ($menu_router_tree as $item) {
     _save_menu_router_item($item, $root);
   }
-  $tmp_dir_name = $dest . "." .  time() . backdrop_random_key();
+  $tmp_dir_name = $dest . "." .  time();
   if(is_dir($dest)){
     rename($dest, $tmp_dir_name);
   }
   rename($root, $dest);
   if(is_dir($tmp_dir_name)){
-    //file_unmanaged_delete_recursive($tmp_dir_name);
+    file_unmanaged_delete_recursive($tmp_dir_name);
   }
   return array($menu, $masks);
 }
@@ -405,6 +405,10 @@ function _prepare_menu_router_item(&$router_structure, $path, $item){
           }
         }
       }
+    }
+    else {
+      $item['tab_parent'] = '';
+      $item['tab_root'] = $path;
     }
   }
   if (!isset($item['access callback']) && isset($item['access arguments'])) {
