@@ -89,7 +89,7 @@ function _menu_router_files_build($callbacks) {
   }
   rename($root, $dest);
   if(is_dir($tmp_dir_name)){
-    file_unmanaged_delete_recursive($tmp_dir_name);
+    //file_unmanaged_delete_recursive($tmp_dir_name);
   }
   return array($menu, $masks);
 }
@@ -112,7 +112,9 @@ function _save_menu_router_item($item, $root){
 
     $filename = $dir . '/item.json';
     $item_json = backdrop_json_encode($item['_item_'], TRUE);
-    file_unmanaged_save_data($item_json, $filename, FILE_EXISTS_REPLACE);
+//    file_unmanaged_save_data($item_json, $filename, FILE_EXISTS_REPLACE);
+    file_put_contents($filename, $item_json);
+    backdrop_chmod($filename);
 
     _save_menu_router_tabs_actions($item, $root);
     _save_menu_router_context($item, $root);
@@ -158,7 +160,10 @@ function _save_menu_router_context($item, $root) {
 
     $content[$item['_item_']['path']] = $item['_item_'];
     $content_json = backdrop_json_encode($content, TRUE);
-    file_unmanaged_save_data($content_json, $filename, FILE_EXISTS_REPLACE);
+    //file_unmanaged_save_data($content_json, $filename, FILE_EXISTS_REPLACE);
+    file_put_contents($filename, $content_json);
+    backdrop_chmod($filename);
+
   }
 }
 
@@ -214,7 +219,10 @@ function _save_menu_router_action_item($item, $root) {
 
   $content[$item['_item_']['path']] = $item['_item_'];
   $content_json = backdrop_json_encode($content, TRUE);
-  file_unmanaged_save_data($content_json, $filename, FILE_EXISTS_REPLACE);
+  //file_unmanaged_save_data($content_json, $filename, FILE_EXISTS_REPLACE);
+  file_put_contents($filename, $content_json);
+  backdrop_chmod($filename);
+  
 }
 
 /**
@@ -235,7 +243,10 @@ function _save_menu_router_tab_item($item, $root) {
 
   $content[$item['_item_']['tab_parent']][$item['_item_']['path']] = $item['_item_'];
   $content_json = backdrop_json_encode($content, TRUE);
-  file_unmanaged_save_data($content_json, $filename, FILE_EXISTS_REPLACE);
+  //file_unmanaged_save_data($content_json, $filename, FILE_EXISTS_REPLACE);
+  file_put_contents($filename, $content_json);
+  backdrop_chmod($filename);
+  
 }
 
 /**
