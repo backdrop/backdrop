@@ -1023,7 +1023,7 @@ function layout_provides_path($path) {
   }
   $return = NULL;
   if($item = _get_router_item($path)) {
-    if ($router->page_callback == 'layout_page_callback') {
+    if ($item['page_callback'] == 'layout_page_callback') {
       $return = TRUE;
     }
     else {

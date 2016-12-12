@@ -20,6 +20,7 @@ function _menu_router_files_build($callbacks) {
     $parts = explode('/', $path);
     $item['number_parts'] = count($parts);
     foreach ($parts as $k => $part) {
+      $match = FALSE;
       // Look for wildcards in the form allowed to be used in PHP functions,
       // because we are using these to construct the load function names.
       if (preg_match('/^%(|' . BACKDROP_PHP_FUNCTION_PATTERN . ')$/', $part, $matches)) {
@@ -34,15 +35,19 @@ function _menu_router_files_build($callbacks) {
           }
           if (function_exists($matches[1] . '_load')) {
             $function = $matches[1] . '_load';
-            $path = str_replace('%' . $matches[1], '%', $path);
             // Create an array of arguments that will be passed to the _load
             // function when this menu path is checked, if 'load arguments'
             // exists.
             $item['_load_functions'][$k] = isset($item['load arguments']) ? array($function => $item['load arguments']) : $function;
+            $match = TRUE;
           }
         }
       }
+      if ($match) {
+        $parts[$k] = '%';
+      }
     }
+    $path = implode("/", $parts);
     $callbacks_path[$path] = $item;
   }
   // Sort items based on path. This way we are going to process all items
