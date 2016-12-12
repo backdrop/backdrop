@@ -1522,9 +1522,29 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
     // Build an ordered array of links using the query result object.
     $links = array();
     foreach ($query->execute() as $item) {
-      if($route_item = _get_router_item($item['router_path'])){
-        $item += $route_item;
+      if(!$router_item = _get_router_item($item['router_path'])){
+        $router_item = array(
+          'type' => NULL,
+          'page_callback' => NULL,
+          'load_functions' => NULL,
+          'to_arg_functions' => NULL,
+          'access_callback' => NULL,
+          'access_arguments' => NULL,
+          'page_callback' => NULL,
+          'page_arguments' => NULL,
+          'delivery_callback' => NULL,
+          'tab_parent' => NULL,
+          'tab_root' => NULL,
+          'title' => NULL,
+          'title_callback' => NULL,
+          'title_arguments' => NULL,
+          'theme_callback' => NULL,
+          'theme_arguments' => NULL,
+          'type' => NULL,
+          'description' => NULL,
+        );
       }
+      $item += $router_item;
       $links[] = $item;
     }
     $active_trail = (isset($parameters['active_trail']) ? $parameters['active_trail'] : array());
@@ -2447,17 +2467,38 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
     array_unshift($menu_names, $selected_menu);
 
     $query = db_select('menu_links', 'ml', array('fetch' => PDO::FETCH_ASSOC));
-    $query->leftJoin('menu_router', 'm', 'm.path = ml.router_path');
     $query->fields('ml');
     // Weight must be taken from {menu_links}, not {menu_router}.
     $query->addField('ml', 'weight', 'link_weight');
-    $query->fields('m');
     $query->condition('ml.link_path', $path_candidates, 'IN');
     $query->addTag('preferred_menu_links');
 
     // Sort candidates by link path and menu name.
     $candidates = array();
     foreach ($query->execute() as $candidate) {
+      if(!$router_item = _get_router_item($candidate['router_path'])){
+        $router_item = array(
+          'type' => NULL,
+          'page_callback' => NULL,
+          'load_functions' => NULL,
+          'to_arg_functions' => NULL,
+          'access_callback' => NULL,
+          'access_arguments' => NULL,
+          'page_callback' => NULL,
+          'page_arguments' => NULL,
+          'delivery_callback' => NULL,
+          'tab_parent' => NULL,
+          'tab_root' => NULL,
+          'title' => NULL,
+          'title_callback' => NULL,
+          'title_arguments' => NULL,
+          'theme_callback' => NULL,
+          'theme_arguments' => NULL,
+          'type' => NULL,
+          'description' => NULL,
+        );
+      }
+      $candidate += $router_item;
       $candidate['weight'] = $candidate['link_weight'];
       $candidates[$candidate['link_path']][$candidate['menu_name']] = $candidate;
       // Add any menus not already in the menu name search list.
@@ -3323,34 +3364,27 @@ function _menu_set_expanded_menus() {
  */
 function _menu_find_router_path($link_path) {
   // $menu will only have data during a menu rebuild.
-  $menu = _menu_router_cache();
+//  $menu = _menu_router_cache();
 
-  $router_path = $link_path;
-  $parts = explode('/', $link_path, MENU_MAX_PARTS);
+
+  $parts = explode('/', $link_path);
   $ancestors = menu_get_ancestors($parts);
+  
+  // @todo Use config settings to get root path.
+  $root = "files/menu_router/";
+  if ($test_prefix = backdrop_valid_test_ua()) {
+    // See BackdropWebTestBase::setUp().
+    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
+  }
 
-  if (empty($menu)) {
-    // Not during a menu rebuild, so look up in the database.
-    $router_path = (string) db_select('menu_router')
-      ->fields('menu_router', array('path'))
-      ->condition('path', $ancestors, 'IN')
-      ->orderBy('fit', 'DESC')
-      ->range(0, 1)
-      ->execute()->fetchField();
-  }
-  elseif (!isset($menu[$router_path])) {
-    // Add an empty router path as a fallback.
-    $ancestors[] = '';
-    foreach ($ancestors as $key => $router_path) {
-      if (isset($menu[$router_path])) {
-        // Exit the loop leaving $router_path as the first match.
-        break;
-      }
+  foreach($ancestors as $ancestor) {
+    $filename = $root . $ancestor . '/item.json';
+    if(is_file($filename)) {
+      return $ancestor;
     }
-    // If we did not find the path, $router_path will be the empty string
-    // at the end of $ancestors.
   }
-  return $router_path;
+  
+  return FALSE;
 }
 
 /**

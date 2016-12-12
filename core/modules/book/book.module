@@ -1161,7 +1161,29 @@ function book_link_load($mlid, $skip_access_check = FALSE) {
   if (!isset($cache[$mlid])) {
     $item = db_query("SELECT * FROM {menu_links} ml INNER JOIN {book} b ON b.mlid = ml.mlid WHERE ml.mlid = :mlid", array(':mlid' => $mlid))->fetchAssoc();
     if (!empty($item)) {
-      $item += _get_router_item($item['router_path']);
+      if(!$router_item = _get_router_item($item['router_path'])){
+        $router_item = array(
+          'type' => NULL,
+          'page_callback' => NULL,
+          'load_functions' => NULL,
+          'to_arg_functions' => NULL,
+          'access_callback' => NULL,
+          'access_arguments' => NULL,
+          'page_callback' => NULL,
+          'page_arguments' => NULL,
+          'delivery_callback' => NULL,
+          'tab_parent' => NULL,
+          'tab_root' => NULL,
+          'title' => NULL,
+          'title_callback' => NULL,
+          'title_arguments' => NULL,
+          'theme_callback' => NULL,
+          'theme_arguments' => NULL,
+          'type' => NULL,
+          'description' => NULL,
+        );
+      }
+      $item += $router_item;
       if ($skip_access_check) {
         $item['access'] = TRUE;
       }
@@ -1220,7 +1242,29 @@ function book_menu_subtree_data($link) {
       }
       $links = array();
       foreach ($query->execute() as $item) {
-        $item += _get_router_item($item['router_path']);
+        if(!$router_item = _get_router_item($item['router_path'])){
+          $router_item = array(
+            'type' => NULL,
+            'page_callback' => NULL,
+            'load_functions' => NULL,
+            'to_arg_functions' => NULL,
+            'access_callback' => NULL,
+            'access_arguments' => NULL,
+            'page_callback' => NULL,
+            'page_arguments' => NULL,
+            'delivery_callback' => NULL,
+            'tab_parent' => NULL,
+            'tab_root' => NULL,
+            'title' => NULL,
+            'title_callback' => NULL,
+            'title_arguments' => NULL,
+            'theme_callback' => NULL,
+            'theme_arguments' => NULL,
+            'type' => NULL,
+            'description' => NULL,
+          );
+        }
+        $item += $router_item;
         $links[] = $item;
       }
       $data['tree'] = menu_tree_data($links, array(), $link['depth']);
