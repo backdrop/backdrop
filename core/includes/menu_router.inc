@@ -326,15 +326,6 @@ function _prepare_menu_router_item(&$router_structure, $path, $item){
       $parent = &$router_structure[$parent_path];
       // If we have no menu name, try to inherit it from parent items.
       if (!isset($item['menu_name'])) {
-        // If the parent item of this item does not define a menu name (and no
-        // previous iteration assigned one already), try to find the menu name
-        // of the parent item in the currently stored menu links.
-        if (!isset($parent['menu_name'])) {
-          $menu_name = db_query("SELECT menu_name FROM {menu_links} WHERE router_path = :router_path AND module = 'system'", array(':router_path' => $parent_path))->fetchField();
-          if ($menu_name) {
-            $parent['menu_name'] = $menu_name;
-          }
-        }
         // If the parent item defines a menu name, inherit it.
         if (!empty($parent['menu_name'])) {
           $item['menu_name'] = $parent['menu_name'];
