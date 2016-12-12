@@ -57,7 +57,29 @@ function menu_overview_form($form, &$form_state, $menu) {
   $result = db_query($sql, array(':menu' => $menu['menu_name']), array('fetch' => PDO::FETCH_ASSOC));
   $links = array();
   foreach ($result as $item) {
-    $item += _get_router_item($item['router_path']);
+    if(!$router_item =_get_router_item($item['router_path'])) {
+      $router_item = array(
+        'type' => NULL,
+        'page_callback' => NULL,
+        'load_functions' => NULL,
+        'to_arg_functions' => NULL,
+        'access_callback' => NULL,
+        'access_arguments' => NULL,
+        'page_callback' => NULL,
+        'page_arguments' => NULL,
+        'delivery_callback' => NULL,
+        'tab_parent' => NULL,
+        'tab_root' => NULL,
+        'title' => NULL,
+        'title_callback' => NULL,
+        'title_arguments' => NULL,
+        'theme_callback' => NULL,
+        'theme_arguments' => NULL,
+        'type' => NULL,
+        'description' => NULL,
+      );
+    }
+    $item += $router_item;
     $links[] = $item;
   }
   $tree = menu_tree_data($links);
