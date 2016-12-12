@@ -569,8 +569,16 @@ ul.tips {
   background: rgba(255, 255, 255, 0.7);
   height: 2.4em;
   line-height: 2.4em;
-  padding: 0 0.8em;
   text-decoration: none;
+}
+.l-header ul.menu .expanded a {
+  padding: 0 0.8em;
+}
+.l-header ul.menu .leaf a {
+  padding-left: 0.8em;
+}
+[dir="rtl"] .l-header ul.menu .leaf a {
+  padding-right: 0.8em;
 }
 .js .menu-dropdown a,
 .js .menu-dropdown a:hover,
@@ -578,7 +586,6 @@ ul.tips {
 .js .menu-dropdown a:active {
   height: 2.4em;
   line-height: 2.4em;
-  padding-right: 0;
 }
 .l-header ul.menu li li a {
   background: rgba(255, 255, 255, 0.8);
