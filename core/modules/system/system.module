@@ -2473,7 +2473,29 @@ function system_admin_menu_block($item) {
     ->condition('ml.hidden', 0);
 
   foreach ($query->execute() as $link) {
-    $link += _get_router_item($link['router_path']);
+    if(!$router_item = _get_router_item($link['router_path'])){
+      $router_item = array(
+        'type' => NULL,
+        'page_callback' => NULL,
+        'load_functions' => NULL,
+        'to_arg_functions' => NULL,
+        'access_callback' => NULL,
+        'access_arguments' => NULL,
+        'page_callback' => NULL,
+        'page_arguments' => NULL,
+        'delivery_callback' => NULL,
+        'tab_parent' => NULL,
+        'tab_root' => NULL,
+        'title' => NULL,
+        'title_callback' => NULL,
+        'title_arguments' => NULL,
+        'theme_callback' => NULL,
+        'theme_arguments' => NULL,
+        'type' => NULL,
+        'description' => NULL,
+      );
+    }
+    $link += $router_item;
     _menu_link_translate($link);
     if ($link['access']) {
       // The link description, either derived from 'description' in
@@ -3304,7 +3326,29 @@ function system_get_module_admin_tasks($module, $info) {
       ->condition('ml.hidden', 0, '>=')
       ->condition('ml.module', 'system');
     foreach ($query->execute() as $link) {
-      $link += _get_router_item($link['router_path']);
+      if(!$router_item = _get_router_item($link['router_path'])){
+        $router_item = array(
+          'type' => NULL,
+          'page_callback' => NULL,
+          'load_functions' => NULL,
+          'to_arg_functions' => NULL,
+          'access_callback' => NULL,
+          'access_arguments' => NULL,
+          'page_callback' => NULL,
+          'page_arguments' => NULL,
+          'delivery_callback' => NULL,
+          'tab_parent' => NULL,
+          'tab_root' => NULL,
+          'title' => NULL,
+          'title_callback' => NULL,
+          'title_arguments' => NULL,
+          'theme_callback' => NULL,
+          'theme_arguments' => NULL,
+          'type' => NULL,
+          'description' => NULL,
+        );
+      }
+      $link += $router_item;
       _menu_link_translate($link);
       if ($link['access']) {
         $links[$link['router_path']] = $link;
