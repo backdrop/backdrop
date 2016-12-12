@@ -1022,7 +1022,8 @@ function layout_provides_path($path) {
     return FALSE;
   }
   $return = NULL;
-  if($item = _get_router_item($path)) {
+  $item = FALSE;
+  if($item = _get_exact_router_item($path)) {
     if ($item['page_callback'] == 'layout_page_callback') {
       $return = TRUE;
     }
@@ -1030,7 +1031,6 @@ function layout_provides_path($path) {
       $return = FALSE;
     }
   }
-
   return $return;  
 }
 

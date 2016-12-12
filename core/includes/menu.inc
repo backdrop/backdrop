@@ -3996,6 +3996,36 @@ function _get_router_item($path){
 }
 
 /**
+ * Search and read a router item from json file.
+ *
+ * @param $path
+ *   The path; for example, 'node/5'. The function will find the corresponding
+ *   node/% item and return that. Defaults to the current path.
+ *
+ * @return array|FALSE
+ *   The router item or, if an error occurs, FALSE. A router item is
+ *   an associative array. The value corresponding to the key 'map' holds the
+ *   loaded objects.
+ */
+function _get_exact_router_item($path){
+  // @todo Use config settings to get root path.
+  $root = "files/menu_router/";
+  if ($test_prefix = backdrop_valid_test_ua()) {
+    // See BackdropWebTestBase::setUp().
+    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
+  }
+
+  $filename = $root . $path . '/item.json';
+  if(is_file($filename)) {
+    $content = file_get_contents($filename);
+    if($item = backdrop_json_decode($content)) {
+      return $item;
+    }
+  }
+  return FALSE;
+}
+
+/**
  * Remove router json file
  *
  * @param $path
