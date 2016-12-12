@@ -224,7 +224,29 @@ function admin_bar_tree_dynamic(array $expand_map) {
   // placeholder expansion arguments.
   $tree_dynamic = array();
   foreach ($result as $mlid => $link) {
-    $link += _get_router_item($link['router_path']);
+    if(!$router_item = _get_exact_router_item($link['router_path'])){
+      $router_item = array(
+        'type' => NULL,
+        'page_callback' => NULL,
+        'load_functions' => NULL,
+        'to_arg_functions' => NULL,
+        'access_callback' => NULL,
+        'access_arguments' => NULL,
+        'page_callback' => NULL,
+        'page_arguments' => NULL,
+        'delivery_callback' => NULL,
+        'tab_parent' => NULL,
+        'tab_root' => NULL,
+        'title' => NULL,
+        'title_callback' => NULL,
+        'title_arguments' => NULL,
+        'theme_callback' => NULL,
+        'theme_arguments' => NULL,
+        'type' => NULL,
+        'description' => NULL,
+      );
+    }
+    $link += $router_item;
     $result[$link['plid']] = $link;
     // If contained in $expand_map, then this is a (first) parent, and we need
     // to store by the defined 'parent' path for later merging, as well as

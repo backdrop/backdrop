@@ -2473,7 +2473,7 @@ function system_admin_menu_block($item) {
     ->condition('ml.hidden', 0);
 
   foreach ($query->execute() as $link) {
-    if(!$router_item = _get_router_item($link['router_path'])){
+    if(!$router_item = _get_exact_router_item($link['router_path'])){
       $router_item = array(
         'type' => NULL,
         'page_callback' => NULL,
@@ -3326,7 +3326,7 @@ function system_get_module_admin_tasks($module, $info) {
       ->condition('ml.hidden', 0, '>=')
       ->condition('ml.module', 'system');
     foreach ($query->execute() as $link) {
-      if(!$router_item = _get_router_item($link['router_path'])){
+      if(!$router_item = _get_exact_router_item($link['router_path'])){
         $router_item = array(
           'type' => NULL,
           'page_callback' => NULL,
