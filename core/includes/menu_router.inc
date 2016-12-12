@@ -406,11 +406,15 @@ function _prepare_menu_router_item(&$router_structure, $path, $item){
         }
       }
     }
-    else {
-      $item['tab_parent'] = '';
-      $item['tab_root'] = $path;
-    }
   }
+  
+  if(!isset($item['tab_parent'])) {
+    $item['tab_parent'] = '';
+  }
+  if(!isset($item['tab_root'])) {
+    $item['tab_root'] = $path;
+  }
+
   if (!isset($item['access callback']) && isset($item['access arguments'])) {
     // Default callback.
     $item['access callback'] = 'user_access';
