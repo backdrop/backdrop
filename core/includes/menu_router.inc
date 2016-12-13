@@ -146,6 +146,10 @@ function _save_menu_router_item($item, $root){
  */
 function _save_menu_router_context($item, $root) {
   $dir = $root . '/' . $item['_item_']['tab_root'];
+  if(!is_dir($dir)) {
+    file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+    // @todo Set backdrop_chmod on parent dir, if path has multiple level.
+  }
 
   $filename = $dir . '/context.json';
 
@@ -215,6 +219,10 @@ function _save_menu_router_tabs_actions($item, $root) {
  */
 function _save_menu_router_action_item($item, $root) {
   $dir = $root . '/' . $item['_item_']['tab_root'];
+  if(!is_dir($dir)) {
+    file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+    // @todo Set backdrop_chmod on parent dir, if path has multiple level.
+  }
 
   $filename = $dir . '/actions.json';
   $content = array();
@@ -239,6 +247,10 @@ function _save_menu_router_action_item($item, $root) {
  */
 function _save_menu_router_tab_item($item, $root) {
   $dir = $root . '/' . $item['_item_']['tab_root'];
+  if(!is_dir($dir)) {
+    file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
+    // @todo Set backdrop_chmod on parent dir, if path has multiple level.
+  }
 
   $filename = $dir . '/tabs.json';
   $content = array();
