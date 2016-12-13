@@ -453,36 +453,38 @@ function menu_get_item($path = NULL, $router_item = NULL) {
     $path = $_GET['q'];
   }
   if (isset($router_item)) {
-    return $router_item;
+    $router_items[$path] = $router_item;
   }
+  if (!isset($router_items[$path])) {  
+    // Rebuild if we know it's needed, or if the menu masks are missing which
+    // occurs rarely, likely due to a race condition of multiple rebuilds.
+    if (state_get('menu_rebuild_needed', FALSE)) {
+      menu_rebuild();
+    }
   
-  // Rebuild if we know it's needed, or if the menu masks are missing which
-  // occurs rarely, likely due to a race condition of multiple rebuilds.
-  if (state_get('menu_rebuild_needed', FALSE)) {
-    menu_rebuild();
-  }
-
-  $original_map = arg(NULL, $path);
-  $router_item = _get_router_item($path);
-
-  if ($router_item) {
-    // Allow modules to alter the router item before it is translated and
-    // checked for access.
-    backdrop_alter('menu_get_item', $router_item, $path, $original_map);
-
-    $map = _menu_translate($router_item, $original_map);
-    $router_item['original_map'] = $original_map;
-    if ($map === FALSE) {
-      $router_items[$path] = FALSE;
-      return FALSE;
+    $original_map = arg(NULL, $path);
+    $router_item = _get_router_item($path);
+  
+    if ($router_item) {
+      // Allow modules to alter the router item before it is translated and
+      // checked for access.
+      backdrop_alter('menu_get_item', $router_item, $path, $original_map);
+  
+      $map = _menu_translate($router_item, $original_map);
+      $router_item['original_map'] = $original_map;
+      if ($map === FALSE) {
+        $router_items[$path] = FALSE;
+        return FALSE;
+      }
+      if ($router_item['access']) {
+        $router_item['map'] = $map;
+        $router_item['page_arguments'] = array_merge(menu_unserialize($router_item['page_arguments'], $map), array_slice($map, $router_item['number_parts']));
+        $router_item['theme_arguments'] = array_merge(menu_unserialize($router_item['theme_arguments'], $map), array_slice($map, $router_item['number_parts']));
+      }
     }
-    if ($router_item['access']) {
-      $router_item['map'] = $map;
-      $router_item['page_arguments'] = array_merge(menu_unserialize($router_item['page_arguments'], $map), array_slice($map, $router_item['number_parts']));
-      $router_item['theme_arguments'] = array_merge(menu_unserialize($router_item['theme_arguments'], $map), array_slice($map, $router_item['number_parts']));
-    }
+    $router_items[$path] = $router_item;
   }
-  return $router_item;
+  return $router_items[$path];
 }
 
 /**
