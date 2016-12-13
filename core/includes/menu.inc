@@ -2069,6 +2069,10 @@ function menu_local_tasks($level = 0) {
 
     $tabs = array();
     $depth = 0;
+    // @TODO need to be reviewed.
+    if(isset($tabs_data[$router_item['tab_parent']])){
+      $tabs = _menu_local_tasks_generate_tabs($tabs_data, $router_item['tab_parent'], $depth, $map, $root_path);
+    }
     if(isset($tabs_data[$router_item['tab_root']])){
       $tabs = _menu_local_tasks_generate_tabs($tabs_data, $router_item['tab_root'], $depth, $map, $root_path);
     }
