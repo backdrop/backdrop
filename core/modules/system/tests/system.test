@@ -2264,7 +2264,7 @@ class SystemAdminTestCase extends BackdropWebTestCase {
     // Verify that all visible, top-level administration links are listed on
     // the main administration page.
     foreach (menu_get_router() as $path => $item) {
-      if (strpos($path, 'admin/') === 0 && ($item['type'] & MENU_VISIBLE_IN_TREE) && $item['_number_parts'] == 2) {
+      if (strpos($path, 'admin/') === 0 && ($item['type'] & MENU_VISIBLE_IN_TREE) && count(explode("/", $item['path'])) == 2) {
         $this->assertLink($item['title']);
         $this->assertLinkByHref($path);
         $this->assertText($item['description']);
