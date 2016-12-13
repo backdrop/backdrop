@@ -2930,6 +2930,7 @@ function backdrop_page_footer() {
     }
   }
   else {
+    //DEBUG
     backdrop_set_length_headers($page_length);
     // Do not print body content on HTTP HEAD requests. See
     // backdrop_serve_page_from_cache() for further explanation.
@@ -5628,6 +5629,7 @@ function _backdrop_bootstrap_full() {
   require_once BACKDROP_ROOT . '/core/includes/theme.inc';
   require_once BACKDROP_ROOT . '/core/includes/pager.inc';
   require_once BACKDROP_ROOT . '/' . settings_get('menu_inc', 'core/includes/menu.inc');
+  require_once BACKDROP_ROOT . '/' . settings_get('menu_router_inc', 'core/includes/menu_router.inc');
   require_once BACKDROP_ROOT . '/core/includes/tablesort.inc';
   require_once BACKDROP_ROOT . '/core/includes/file.inc';
   require_once BACKDROP_ROOT . '/core/includes/unicode.inc';
