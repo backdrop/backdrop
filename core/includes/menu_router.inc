@@ -432,7 +432,6 @@ function _prepare_menu_router_item(&$router_structure, $path, $item){
   }
 
   $item['load_functions'] = $item['_load_functions'];
-  unset($item['_load_functions']);
 
   $item += array(
     'access arguments' => array(),
