@@ -1524,26 +1524,7 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
     $links = array();
     foreach ($query->execute() as $item) {
       if(!$router_item = _get_exact_router_item($item['router_path'])){
-        $router_item = array(
-          'type' => NULL,
-          'page_callback' => NULL,
-          'load_functions' => NULL,
-          'to_arg_functions' => NULL,
-          'access_callback' => NULL,
-          'access_arguments' => NULL,
-          'page_callback' => NULL,
-          'page_arguments' => NULL,
-          'delivery_callback' => NULL,
-          'tab_parent' => NULL,
-          'tab_root' => NULL,
-          'title' => NULL,
-          'title_callback' => NULL,
-          'title_arguments' => NULL,
-          'theme_callback' => NULL,
-          'theme_arguments' => NULL,
-          'type' => NULL,
-          'description' => NULL,
-        );
+        $router_item = _get_empty_router_item();
       }
       $item += $router_item;
       $links[] = $item;
@@ -2482,26 +2463,7 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
     $candidates = array();
     foreach ($query->execute() as $candidate) {
       if(!$router_item = _get_exact_router_item($candidate['router_path'])){
-        $router_item = array(
-          'type' => NULL,
-          'page_callback' => NULL,
-          'load_functions' => NULL,
-          'to_arg_functions' => NULL,
-          'access_callback' => NULL,
-          'access_arguments' => NULL,
-          'page_callback' => NULL,
-          'page_arguments' => NULL,
-          'delivery_callback' => NULL,
-          'tab_parent' => NULL,
-          'tab_root' => NULL,
-          'title' => NULL,
-          'title_callback' => NULL,
-          'title_arguments' => NULL,
-          'theme_callback' => NULL,
-          'theme_arguments' => NULL,
-          'type' => NULL,
-          'description' => NULL,
-        );
+        $router_item = _get_empty_router_item();
       }
       $candidate += $router_item;
       $candidate['weight'] = $candidate['link_weight'];
@@ -2669,26 +2631,7 @@ function menu_link_load($mlid, $skip_access_check = FALSE) {
     $query->condition('ml.mlid', $mlid);
     if ($item = $query->execute()->fetchAssoc()) {
       if(!$router_item = _get_exact_router_item($item['router_path'])){
-        $router_item = array(
-          'type' => NULL,
-          'page_callback' => NULL,
-          'load_functions' => NULL,
-          'to_arg_functions' => NULL,
-          'access_callback' => NULL,
-          'access_arguments' => NULL,
-          'page_callback' => NULL,
-          'page_arguments' => NULL,
-          'delivery_callback' => NULL,
-          'tab_parent' => NULL,
-          'tab_root' => NULL,
-          'title' => NULL,
-          'title_callback' => NULL,
-          'title_arguments' => NULL,
-          'theme_callback' => NULL,
-          'theme_arguments' => NULL,
-          'type' => NULL,
-          'description' => NULL,
-        );
+        $router_item = _get_empty_router_item();
       }
       $item += $router_item;
       if ($skip_access_check) {
@@ -4010,6 +3953,37 @@ function _get_exact_router_item($path){
   }
   return FALSE;
 }
+
+/**
+ * Search and read a router item from json file.
+ *
+ * @return array
+ *   A router item is an associative array. The value corresponding to 
+ *   the key 'map' holds the loaded objects.
+ */
+function _get_empty_router_item(){
+  return array(
+    'type' => NULL,
+    'page_callback' => NULL,
+    'load_functions' => NULL,
+    'to_arg_functions' => NULL,
+    'access_callback' => NULL,
+    'access_arguments' => NULL,
+    'page_callback' => NULL,
+    'page_arguments' => NULL,
+    'delivery_callback' => NULL,
+    'tab_parent' => NULL,
+    'tab_root' => NULL,
+    'title' => NULL,
+    'title_callback' => NULL,
+    'title_arguments' => NULL,
+    'theme_callback' => NULL,
+    'theme_arguments' => NULL,
+    'type' => NULL,
+    'description' => NULL,
+  );
+}
+
 
 /**
  * Remove router json file

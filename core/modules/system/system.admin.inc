@@ -16,26 +16,7 @@ function system_admin_config_page() {
       WHERE menu_name = :menu_name AND ml.plid = :mlid AND hidden = 0", $admin, array('fetch' => PDO::FETCH_ASSOC));
     foreach ($result as $item) {
       if(!$router_item = _get_exact_router_item($item['router_path'])){
-        $router_item = array(
-          'type' => NULL,
-          'page_callback' => NULL,
-          'load_functions' => NULL,
-          'to_arg_functions' => NULL,
-          'access_callback' => NULL,
-          'access_arguments' => NULL,
-          'page_callback' => NULL,
-          'page_arguments' => NULL,
-          'delivery_callback' => NULL,
-          'tab_parent' => NULL,
-          'tab_root' => NULL,
-          'title' => NULL,
-          'title_callback' => NULL,
-          'title_arguments' => NULL,
-          'theme_callback' => NULL,
-          'theme_arguments' => NULL,
-          'type' => NULL,
-          'description' => NULL,
-        );
+        $router_item = _get_empty_router_item();
       }
       $item += $router_item;
       _menu_link_translate($item);
