@@ -10,7 +10,7 @@
 function _menu_router_files_build($callbacks) {
   $menu = array();
   $masks = array();
-    
+
   $callbacks_path = array();
   foreach ($callbacks as $path => $item) {
     if(!isset($item['_load_functions'])){
@@ -57,7 +57,7 @@ function _menu_router_files_build($callbacks) {
   foreach ($callbacks_path as $path => $item) {
     _prepare_menu_router_item($router_structure, $path, $item);
   }
-  
+
   $menu = $router_structure;
 
   $menu_router_tree = array();
@@ -222,7 +222,7 @@ function _save_menu_router_action_item($item, $root) {
   //file_unmanaged_save_data($content_json, $filename, FILE_EXISTS_REPLACE);
   file_put_contents($filename, $content_json);
   backdrop_chmod($filename);
-  
+
 }
 
 /**
@@ -250,7 +250,7 @@ function _save_menu_router_tab_item($item, $root) {
   //file_unmanaged_save_data($content_json, $filename, FILE_EXISTS_REPLACE);
   file_put_contents($filename, $content_json);
   backdrop_chmod($filename);
-  
+
 }
 
 /**
@@ -411,7 +411,7 @@ function _prepare_menu_router_item(&$router_structure, $path, $item){
       }
     }
   }
-  
+
   if(!isset($item['tab_parent'])) {
     $item['tab_parent'] = '';
   }
@@ -575,7 +575,7 @@ function _remove_router_item($path){
     backdrop_unlink($filename);
     return TRUE;
   }
-  
+
   return FALSE;
 }
 
@@ -605,7 +605,7 @@ function _menu_router_root_path(){
  * Get empty router item array.
  *
  * @return array
- *   A router item is an associative array. The value corresponding to 
+ *   A router item is an associative array. The value corresponding to
  *   the key 'map' holds the loaded objects.
  */
 function _get_empty_router_item(){
