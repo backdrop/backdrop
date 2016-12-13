@@ -5,6 +5,63 @@
  */
 
 /**
+ * Process tabs_data and generate $tabs with $level.
+ *
+ * @param $tabs_data
+ *   A multilevel associative array containing tabs information grouped by tab_parent.
+ * @param $path
+ *   The path; for example, 'node/5'. The function will find the corresponding tabs.
+ * @param $depth
+ *   The depth of reqursion.
+ * @param $map
+ *   A path argument array, used to replace integer values in $data; an integer
+ *   value N in $data will be replaced by value $map[N]. Typically, the $map
+ *   array is generated from a call to the arg() function.
+ * @param $root_path
+ *   The full current $route_item['path'].
+ *
+ * @return
+ *   A flat array containing tabs information grouped by $level.
+ */
+function _menu_local_tasks_generate_tabs($tabs_data, $path, $depth = 0, $map, $root_path) {
+  static $tabs;
+  $items = $tabs_data[$path];
+  $tabs_current = array();
+  foreach($items as $key => $item) {
+    _menu_translate($item, $map, TRUE);
+
+    if($item['access']) {
+      $tab = array(
+        '#theme' => 'menu_local_task',
+      );
+      if(mb_strpos($root_path, $item['path']) === 0) {
+        $tab['#active'] = TRUE;
+      }
+      if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
+        $item['href'] = $item['tab_parent_href'];
+        $item['path'] = $item['tab_parent'];
+        if( $item['path'] == $root_path) {
+          $tab['#active'] = TRUE;
+        }
+      }
+      $tab['#link'] = $item;
+
+      if(isset($tab['#active'])) {
+        if (($item['type'] & MENU_LINKS_TO_PARENT) != MENU_LINKS_TO_PARENT) {
+          if(isset($tabs_data[$item['path']])) {
+            _menu_local_tasks_generate_tabs($tabs_data, $item['path'], ($depth + 1), $map, $root_path);
+          }
+        }
+      }
+      $tabs_current[] = $tab;
+    }
+  }
+  $tabs[$depth]['count'] = count($tabs_current);
+  $tabs[$depth]['output'] = $tabs_current;
+  return $tabs;
+}
+
+/**
  * Builds the router files strucure based on the data from hook_menu().
  */
 function _menu_router_files_build($callbacks) {
