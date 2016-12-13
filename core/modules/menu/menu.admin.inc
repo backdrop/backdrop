@@ -516,7 +516,7 @@ function menu_delete_menu_confirm_submit($form, &$form_state) {
   }
 
   // Reset all the menu links defined by the system via hook_menu().
-  $result = db_query("SELECT * FROM {menu_links} ml WHERE ml.menu_name = :menu AND ml.module = 'system' ORDER BY m.number_parts ASC", array(':menu' => $menu['menu_name']), array('fetch' => PDO::FETCH_ASSOC));
+  $result = db_query("SELECT * FROM {menu_links} ml WHERE ml.menu_name = :menu AND ml.module = 'system' ORDER BY m.router_path ASC", array(':menu' => $menu['menu_name']), array('fetch' => PDO::FETCH_ASSOC));
   foreach ($result as $link) {
     if(!$router_item =_get_exact_router_item($link['router_path'])) {
       $router_item = array(
