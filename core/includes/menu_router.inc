@@ -644,18 +644,23 @@ function _remove_router_item($path){
  * @return string
  */
 function _menu_router_root_path(){
+  static $cached_root;
+  if($cached_root) {
+    return $cached_root;
+  }
+
   // @todo Use config settings to get root path.
-  $root = "files/menu_router";
+  $cached_root = "files/menu_router";
   if ($test_prefix = backdrop_valid_test_ua()) {
     // See BackdropWebTestBase::setUp().
-    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router';
+    $cached_root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router';
   }
   if (isset($GLOBALS['backdrop_test_info'])) {
     $test_prefix = $GLOBALS['backdrop_test_info']['test_run_id'];
     // See BackdropWebTestBase::setUp().
-    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router';
+    $cached_root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router';
   }
-  return $root;
+  return $cached_root;
 }
 
 /**
@@ -701,11 +706,18 @@ function _get_empty_router_item(){
  *   loaded objects.
  */
 function _get_exact_router_item($path){
+  static $cached_items;
+
+  if(isset($cached_items[$path])) {
+    return $cached_items[$path];
+  }
+
   $root = _menu_router_root_path();
   $filename = $root . '/' . $path . '/item.json';
   if(is_file($filename)) {
     $content = file_get_contents($filename);
     if($item = backdrop_json_decode($content)) {
+      $cached_items[$path] = $item;
       return $item;
     }
   }
