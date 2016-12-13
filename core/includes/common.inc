@@ -2930,7 +2930,6 @@ function backdrop_page_footer() {
     }
   }
   else {
-    //DEBUG
     backdrop_set_length_headers($page_length);
     // Do not print body content on HTTP HEAD requests. See
     // backdrop_serve_page_from_cache() for further explanation.
