@@ -455,16 +455,15 @@ function menu_get_item($path = NULL, $router_item = NULL) {
   if (isset($router_item)) {
     return $router_item;
   }
+  
+  // Rebuild if we know it's needed, or if the menu masks are missing which
+  // occurs rarely, likely due to a race condition of multiple rebuilds.
+  if (state_get('menu_rebuild_needed', FALSE) || !state_get('menu_masks', array())) {
+    menu_rebuild();
+  }
 
   $original_map = arg(NULL, $path);
-  if(!$router_item = _get_router_item($path)){
-    // Rebuild if we know it's needed, or if the menu masks are missing which
-    // occurs rarely, likely due to a race condition of multiple rebuilds.
-    if (state_get('menu_rebuild_needed', FALSE) || !state_get('menu_masks', array())) {
-      menu_rebuild();
-      $router_item = _get_router_item($path);
-    }
-  }
+  $router_item = _get_router_item($path);
 
   if ($router_item) {
     // Allow modules to alter the router item before it is translated and
@@ -3396,6 +3395,12 @@ function _menu_find_router_path($link_path) {
     $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
   }
 
+  if (isset($GLOBALS['backdrop_test_info'])) {
+    $test_prefix = $GLOBALS['backdrop_test_info']['test_run_id'];
+    // See BackdropWebTestBase::setUp().
+    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
+  }
+
   foreach($ancestors as $ancestor) {
     $filename = $root . $ancestor . '/item.json';
     if(is_file($filename)) {
@@ -3982,6 +3987,13 @@ function _get_router_item($path){
     $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
   }
 
+  if (isset($GLOBALS['backdrop_test_info'])) {
+    $test_prefix = $GLOBALS['backdrop_test_info']['test_run_id'];
+    // See BackdropWebTestBase::setUp().
+    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
+  }  
+
+
   foreach($ancestors as $ancestor) {
     $filename = $root . $ancestor . '/item.json';
     if(is_file($filename)) {
@@ -4014,6 +4026,12 @@ function _get_exact_router_item($path){
     // See BackdropWebTestBase::setUp().
     $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
   }
+  
+  if (isset($GLOBALS['backdrop_test_info'])) {
+    $test_prefix = $GLOBALS['backdrop_test_info']['test_run_id'];
+    // See BackdropWebTestBase::setUp().
+    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
+  }  
 
   $filename = $root . $path . '/item.json';
   if(is_file($filename)) {
@@ -4043,7 +4061,11 @@ function _remove_router_item($path){
     // See BackdropWebTestBase::setUp().
     $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
   }
-  
+  if (isset($GLOBALS['backdrop_test_info'])) {
+    $test_prefix = $GLOBALS['backdrop_test_info']['test_run_id'];
+    // See BackdropWebTestBase::setUp().
+    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
+  }  
   $filename = $root . $path . '/item.json';
   if (file_exists($filename)) {
     backdrop_unlink($filename);
@@ -4078,6 +4100,13 @@ function _get_router_item_tabs($path){
     // See BackdropWebTestBase::setUp().
     $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
   }
+
+  if (isset($GLOBALS['backdrop_test_info'])) {
+    $test_prefix = $GLOBALS['backdrop_test_info']['test_run_id'];
+    // See BackdropWebTestBase::setUp().
+    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
+  }  
+
 
   $filename = $root . $path . '/tabs.json';
   if(is_file($filename)) {
@@ -4120,6 +4149,13 @@ function _get_router_item_actions($path){
     $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
   }
 
+  if (isset($GLOBALS['backdrop_test_info'])) {
+    $test_prefix = $GLOBALS['backdrop_test_info']['test_run_id'];
+    // See BackdropWebTestBase::setUp().
+    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
+  }  
+
+
   $filename = $root . $path . '/actions.json';
   if(is_file($filename)) {
     $content = file_get_contents($filename);
@@ -4153,6 +4189,12 @@ function _get_router_item_context($path){
   // @todo Use config settings to get root path.
   $root = "files/menu_router/";
   if ($test_prefix = backdrop_valid_test_ua()) {
+    // See BackdropWebTestBase::setUp().
+    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
+  }
+
+  if (isset($GLOBALS['backdrop_test_info'])) {
+    $test_prefix = $GLOBALS['backdrop_test_info']['test_run_id'];
     // See BackdropWebTestBase::setUp().
     $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router/';
   }

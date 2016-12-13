@@ -68,7 +68,12 @@ function _menu_router_files_build($callbacks) {
 
   // @todo Use config settings to get root path.
   $dest = "files/menu_router";
-  // backdrop_valid_test_ua() is not returning info inside testrun.
+  if ($test_prefix = backdrop_valid_test_ua()) {
+    // See BackdropWebTestBase::setUp().
+    $dest = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router';
+  }
+
+  // backdrop_valid_test_ua() is not returning info inside test run.
   if (isset($GLOBALS['backdrop_test_info'])) {
     $test_prefix = $GLOBALS['backdrop_test_info']['test_run_id'];
     // See BackdropWebTestBase::setUp().

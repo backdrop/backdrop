@@ -800,7 +800,7 @@ class MenuRebuildTestCase extends BackdropWebTestCase {
   function testMenuRebuildByVariable() {
     // Check if 'admin' path exists.
     $admin_exists = _get_exact_router_item('admin');
-    $this->assertEqual($admin_exists, 'admin', "The path 'admin/' exists prior to deleting.");
+    $this->assertEqual($admin_exists['path'], 'admin', "The path 'admin/' exists prior to deleting.");
 
     // Delete the path item 'admin', and test that the path doesn't exist in the database.
     _remove_router_item('admin');
@@ -814,7 +814,7 @@ class MenuRebuildTestCase extends BackdropWebTestCase {
     // menu_execute_active_handler() should trigger the rebuild.
     $this->backdropGet('<front>');
     $admin_exists = _get_exact_router_item('admin');
-    $this->assertEqual($admin_exists, 'admin', "The menu has been rebuilt, the path 'admin' now exists again.");
+    $this->assertEqual($admin_exists['path'], 'admin', "The menu has been rebuilt, the path 'admin' now exists again.");
   }
 
 }
