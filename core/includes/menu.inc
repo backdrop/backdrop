@@ -860,7 +860,7 @@ function _menu_translate(&$router_item, $map, $to_arg = FALSE) {
  * @see hook_menu()
  */
 function _menu_link_map_translate(&$map, $to_arg_functions) {
-  $to_arg_functions = unserialize($to_arg_functions);
+  $to_arg_functions = $to_arg_functions;
   foreach ($to_arg_functions as $index => $function) {
     // Translate place-holders into real values.
     $arg = $function(!empty($map[$index]) ? $map[$index] : '', $map, $index);
