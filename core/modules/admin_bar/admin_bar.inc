@@ -316,6 +316,9 @@ function admin_bar_merge_tree(array &$tree, array $tree_dynamic, array $expand_m
       // Expand anonymous to named placeholders.
       // @see _menu_load_objects()
       $path_args = explode('/', $link['path']);
+      if(!is_array($link['load_functions'])) {
+        $link['load_functions'] = unserialize($link['load_functions']);
+      }
       $load_functions = $link['load_functions'];
       if (is_array($load_functions)) {
         foreach ($load_functions as $index => $function) {

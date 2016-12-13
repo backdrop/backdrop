@@ -458,3 +458,254 @@ function _prepare_menu_router_item(&$router_structure, $path, $item){
   }
   $router_structure[$path] = $item;
 }
+
+
+/**
+ * Gets a router item tabs.
+ *
+ * @param $path
+ *   The path; for example, 'node/5'. The function will find the corresponding
+ *   node/% item and return that. Defaults to the current path.
+ *
+ * @return array
+ *   The router item tabs array or empty array. A
+ *   router item tabs is an associative multilevel array corresponding to router
+ *   items path.
+ */
+function _get_router_item_tabs($path){
+  static $cached_items;
+
+  if(isset($cached_items[$path])) {
+    return $cached_items[$path];
+  }
+
+  $root = _menu_router_root_path();
+  $filename = $root . '/' . $path . '/tabs.json';
+  if(is_file($filename)) {
+    $content = file_get_contents($filename);
+    if($content_json = backdrop_json_decode($content)) {
+      foreach($content_json as $tab_parent => $items){
+        usort($content_json[$tab_parent], "_menu_sort");
+      }
+      $cached_items[$path] = $content_json;
+      return $content_json;
+    }
+  }
+
+  return array();
+}
+
+/**
+ * Gets a router item actions.
+ *
+ * @param $path
+ *   The path; for example, 'node/5'. The function will find the corresponding
+ *   node/% item and return that. Defaults to the current path.
+ *
+ * @return array
+ *   The router item actions array or empty array. A
+ *   router item actions is an associative array corresponding to router
+ *   items path.
+ */
+function _get_router_item_actions($path){
+  static $cached_items;
+
+  if(isset($cached_items[$path])) {
+    return $cached_items[$path];
+  }
+
+  $root = _menu_router_root_path();
+  $filename = $root . '/' . $path . '/actions.json';
+  if(is_file($filename)) {
+    $content = file_get_contents($filename);
+    if($item = backdrop_json_decode($content)) {
+      $cached_items[$path] = $item;
+      return $item;
+    }
+  }
+  return array();
+}
+
+/**
+ * Gets a router item context.
+ *
+ * @param $path
+ *   The path; for example, 'node/5'. The function will find the corresponding
+ *   node/% item and return that. Defaults to the current path.
+ *
+ * @return array
+ *   The router item context array or empty array. A
+ *   router item context is an associative array corresponding to router
+ *   items path.
+ */
+function _get_router_item_context($path){
+  static $cached_items;
+
+  if(isset($cached_items[$path])) {
+    return $cached_items[$path];
+  }
+
+  $root = _menu_router_root_path();
+  $filename = $root . '/' . $path . '/context.json';
+  if(is_file($filename)) {
+    $content = file_get_contents($filename);
+    if($item = backdrop_json_decode($content)) {
+      usort($item, "_menu_sort");
+      $cached_items[$path] = $item;
+      return $item;
+    }
+  }
+  return array();
+}
+
+/**
+ * Remove router json file
+ *
+ * @param $path
+ *   The path; for example, 'node/5'. The function will find the corresponding
+ *   node/% item and return that. Defaults to the current path.
+ *
+ * @return bool|FALSE
+ *   If router item exists - return TRUE.
+ */
+function _remove_router_item($path){
+  $root = _menu_router_root_path();
+  $filename = $root . '/' . $path . '/item.json';
+  if (file_exists($filename)) {
+    backdrop_unlink($filename);
+    return TRUE;
+  }
+  
+  return FALSE;
+}
+
+
+
+/**
+ * Get menu_router root directory path.
+ *
+ * @return string
+ */
+function _menu_router_root_path(){
+  // @todo Use config settings to get root path.
+  $root = "files/menu_router";
+  if ($test_prefix = backdrop_valid_test_ua()) {
+    // See BackdropWebTestBase::setUp().
+    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router';
+  }
+  if (isset($GLOBALS['backdrop_test_info'])) {
+    $test_prefix = $GLOBALS['backdrop_test_info']['test_run_id'];
+    // See BackdropWebTestBase::setUp().
+    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router';
+  }
+  return $root;
+}
+
+/**
+ * Get empty router item array.
+ *
+ * @return array
+ *   A router item is an associative array. The value corresponding to 
+ *   the key 'map' holds the loaded objects.
+ */
+function _get_empty_router_item(){
+  return array(
+    'type' => NULL,
+    'page_callback' => NULL,
+    'load_functions' => NULL,
+    'to_arg_functions' => NULL,
+    'access_callback' => NULL,
+    'access_arguments' => NULL,
+    'page_callback' => NULL,
+    'page_arguments' => NULL,
+    'delivery_callback' => NULL,
+    'tab_parent' => NULL,
+    'tab_root' => NULL,
+    'title' => NULL,
+    'title_callback' => NULL,
+    'title_arguments' => NULL,
+    'theme_callback' => NULL,
+    'theme_arguments' => NULL,
+    'type' => NULL,
+    'description' => NULL,
+  );
+}
+
+/**
+ * Read a router item from json file.
+ *
+ * @param $path
+ *   The path; for example, 'node/%'. The function will find NOT the corresponding
+ *   node/% item to node/5.
+ *
+ * @return array|FALSE
+ *   The router item or, if an error occurs, FALSE. A router item is
+ *   an associative array. The value corresponding to the key 'map' holds the
+ *   loaded objects.
+ */
+function _get_exact_router_item($path){
+  $root = _menu_router_root_path();
+  $filename = $root . '/' . $path . '/item.json';
+  if(is_file($filename)) {
+    $content = file_get_contents($filename);
+    if($item = backdrop_json_decode($content)) {
+      return $item;
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Search and read a router item from json file.
+ *
+ * @param $path
+ *   The path; for example, 'node/5'. The function will find the corresponding
+ *   node/% item and return that. Defaults to the current path.
+ *
+ * @return array|FALSE
+ *   The router item or, if an error occurs, FALSE. A router item is
+ *   an associative array. The value corresponding to the key 'map' holds the
+ *   loaded objects.
+ */
+function _get_router_item($path){
+  static $cached_items;
+
+  if(isset($cached_items[$path])) {
+    return $cached_items[$path];
+  }
+
+  $parts = explode("/", $path);
+  $ancestors = menu_get_ancestors($parts);
+  $root = _menu_router_root_path();
+  foreach($ancestors as $ancestor) {
+    $filename = $root . '/' . $ancestor . '/item.json';
+    if(is_file($filename)) {
+      $content = file_get_contents($filename);
+      if($item = backdrop_json_decode($content)) {
+        $cached_items[$path] = $item;
+        return $item;
+      }
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Comparator routine for use in sorting menu items.
+ */
+function _menu_sort($a, $b) {
+  if($a['weight'] > $b['weight'] ) {
+    return 1;
+  }
+  if($a['weight'] < $b['weight'] ) {
+    return -1;
+  }
+  if($a['title'] > $b['title'] ) {
+    return 1;
+  }
+  if($a['title'] < $b['title'] ) {
+    return -1;
+  }
+  return 0;
+}
+
