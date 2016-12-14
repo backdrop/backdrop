@@ -28,4 +28,4 @@ chdir(BACKDROP_ROOT);
 require_once BACKDROP_ROOT . '/core/includes/bootstrap.inc';
 backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
 
-menu_router_build();
+menu_rebuild();
