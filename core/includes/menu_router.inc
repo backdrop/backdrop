@@ -70,12 +70,16 @@ function _menu_router_files_build($callbacks) {
 
   $callbacks_path = array();
   foreach ($callbacks as $path => $item) {
+    $fit = 0;
+    $move = FALSE;    
     if(!isset($item['_load_functions'])){
       $item['_load_functions'] = array();
       $item['to_arg_functions'] = array();
     }
     $parts = explode('/', $path);
     $item['number_parts'] = count($parts);
+    $slashes = $item['number_parts'] - 1;
+
     foreach ($parts as $k => $part) {
       $match = FALSE;
       // Look for wildcards in the form allowed to be used in PHP functions,
@@ -103,7 +107,18 @@ function _menu_router_files_build($callbacks) {
       if ($match) {
         $parts[$k] = '%';
       }
+      else {
+        $fit |=  1 << ($slashes - $k);
+      }
     }
+    if ($fit) {
+      $move = TRUE;
+    }
+    else {
+      // If there is no %, it fits maximally.
+      $fit = (1 << $item['number_parts']) - 1;
+    }
+    $masks[$fit] = 1;
     $path = implode("/", $parts);
     $callbacks_path[$path] = $item;
   }
@@ -140,6 +155,11 @@ function _menu_router_files_build($callbacks) {
   if(is_dir($tmp_dir_name)){
     file_unmanaged_delete_recursive($tmp_dir_name);
   }
+
+// Sort the masks so they are in order of descending fit.
+  $masks = array_keys($masks);
+  rsort($masks);
+  state_set('menu_masks', $masks);
   return array($menu, $masks);
 }
 
@@ -726,22 +746,34 @@ function _get_exact_router_item($path){
  */
 function _get_router_item($path){
   static $cached_items;
+  static $cached_router_items;
 
   if(isset($cached_items[$path])) {
     return $cached_items[$path];
   }
-
   $parts = explode("/", $path);
   $ancestors = menu_get_ancestors($parts);
   $root = _menu_router_root_path();
+    
+  $found = FALSE;
   foreach($ancestors as $ancestor) {
     $filename = $root . '/' . $ancestor . '/item.json';
     if(is_file($filename)) {
-      $content = file_get_contents($filename);
-      if($item = backdrop_json_decode($content)) {
-        $cached_items[$path] = $item;
-        return $item;
-      }
+      $found = TRUE;
+      break;
+    }
+  }
+  // Do not double read the same menu roiter item.
+  // Different $path could lead to the same router_item;
+  if($found) {
+    if(isset($cached_router_items[$filename])){
+      return $cached_router_items[$filename];
+    }
+    $content = file_get_contents($filename);
+    if($item = backdrop_json_decode($content)) {
+      $cached_items[$path] = $item;
+      $cached_router_items[$filename] = $item;
+      return $item;
     }
   }
   return FALSE;
