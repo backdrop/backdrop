@@ -448,6 +448,11 @@ function menu_set_item($path, $router_item) {
  *   be filled in based on the database values and the objects loaded.
  */
 function menu_get_item($path = NULL, $router_item = NULL) {
+  static $count =0;
+  static $total = 0;
+  $start = microtime(TRUE);
+  echo "<!-- \nRequest[menu_get_item] total:".$total." " . $count . " for: " . $path . " ... ";
+  $count++;
   $router_items = &backdrop_static(__FUNCTION__);
   if (!isset($path)) {
     $path = $_GET['q'];
@@ -469,11 +474,14 @@ function menu_get_item($path = NULL, $router_item = NULL) {
       // Allow modules to alter the router item before it is translated and
       // checked for access.
       backdrop_alter('menu_get_item', $router_item, $path, $original_map);
-
+      echo "\n\t\t - before translate" .round(((microtime(true)- $start)*1000),4) . "ms\n ";
       $map = _menu_translate($router_item, $original_map);
+      echo "\n\t\t - after translate" .round(((microtime(true)- $start)*1000),4) . "ms\n ";
       $router_item['original_map'] = $original_map;
       if ($map === FALSE) {
         $router_items[$path] = FALSE;
+        echo round(((microtime(true)- $start)*1000),4) . "ms\n";
+          $total += round(((microtime(true)- $start)*1000),4);
         return FALSE;
       }
       if ($router_item['access']) {
@@ -484,6 +492,8 @@ function menu_get_item($path = NULL, $router_item = NULL) {
     }
     $router_items[$path] = $router_item;
   }
+  echo round(((microtime(true)- $start)*1000),4) . "ms\n -->";
+  $total += round(((microtime(true)- $start)*1000),4);
   return $router_items[$path];
 }
 
@@ -2685,9 +2695,9 @@ function menu_router_build() {
 //    _menu_router_cache($menu);
 //  }*/
 
-//  require_once BACKDROP_ROOT . '/core/includes/menu_router.inc';
   list($menu, $masks) = _menu_router_files_build($callbacks);
   _menu_router_cache($menu);
+  state_set('menu_masks', $masks);
 
   return array($menu, $masks);
 }
