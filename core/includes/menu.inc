@@ -3275,21 +3275,35 @@ function _menu_set_expanded_menus() {
  */
 function _menu_find_router_path($link_path) {
   // $menu will only have data during a menu rebuild.
-//  $menu = _menu_router_cache();
+  $menu = _menu_router_cache();
 
-
+  $router_path = $link_path;
   $parts = explode('/', $link_path);
   $ancestors = menu_get_ancestors($parts);
-  
-  $root = _menu_router_root_path();
-  foreach($ancestors as $ancestor) {
-    $filename = $root . '/' . $ancestor . '/item.json';
-    if(is_file($filename)) {
-      return $ancestor;
+
+  if (empty($menu)) {
+    $root = _menu_router_root_path();
+    foreach($ancestors as $ancestor) {
+      $filename = $root . '/' . $ancestor . '/item.json';
+      if(is_file($filename)) {
+        $router_path = $ancestor;
+        break;
+      }
     }
   }
-  
-  return FALSE;
+  elseif (!isset($menu[$router_path])) {
+    // Add an empty router path as a fallback.
+    $ancestors[] = '';
+    foreach ($ancestors as $key => $router_path) {
+      if (isset($menu[$router_path])) {
+        // Exit the loop leaving $router_path as the first match.
+        break;
+      }
+    }
+    // If we did not find the path, $router_path will be the empty string
+    // at the end of $ancestors.
+  }  
+  return $router_path;
 }
 
 /**
