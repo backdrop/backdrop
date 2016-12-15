@@ -144,7 +144,7 @@ function _menu_router_files_build($callbacks) {
   _menu_route_prepare_directory($root);
 
   foreach ($menu_router_tree as $item) {
-    _save_menu_router_item($item, $root);
+    _save_menu_router($item, $root);
   }
   $tmp_dir_name = $dest . "." .  time();
   if (is_dir($dest)) {
@@ -179,17 +179,10 @@ function _menu_route_prepare_directory($dir) {
  *   An array representing a menu router item.
  *
  */
-function _save_menu_router_item($item, $root) {
+function _save_menu_router($item, $root) {
 
   if (isset($item['_item_'])) {
-    $dir = $root . '/' . $item['_item_']['path'];
-    _menu_route_prepare_directory($dir);
-
-    $filename = $dir . '/item.json';
-    $item_json = backdrop_json_encode($item['_item_'], TRUE);
-    file_put_contents($filename, $item_json);
-    backdrop_chmod($filename);
-
+    _save_menu_router_item($item['_item_'], $root);
     _save_menu_router_tabs_actions($item, $root);
     _save_menu_router_context($item, $root);
   }
@@ -202,9 +195,19 @@ function _save_menu_router_item($item, $root) {
           $item[$name]['_item_']['href'] = $item['_item_']['path'];
         }
       }
-      _save_menu_router_item($item[$name], $root);
+      _save_menu_router($item[$name], $root);
     }
   }
+}
+
+function _save_menu_router_item($item, $root){
+  $dir = $root . '/' . $item['path'];
+  _menu_route_prepare_directory($dir);
+
+  $filename = $dir . '/item.json';
+  $item_json = backdrop_json_encode($item, TRUE);
+  file_put_contents($filename, $item_json);
+  backdrop_chmod($filename);
 }
 /**
  * Determinate if item is context and save it.
