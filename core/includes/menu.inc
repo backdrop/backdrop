@@ -458,7 +458,7 @@ function menu_get_item($path = NULL, $router_item = NULL) {
   if (!isset($router_items[$path])) {
     // Rebuild if we know it's needed, or if the menu masks are missing which
     // occurs rarely, likely due to a race condition of multiple rebuilds.
-    if (state_get('menu_rebuild_needed', FALSE)) {
+    if (state_get('menu_rebuild_needed', FALSE) || !state_get('menu_masks', array())) {
       menu_rebuild();
     }
   

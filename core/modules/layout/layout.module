@@ -1031,7 +1031,7 @@ function layout_provides_path($path) {
       $return = FALSE;
     }
   }
-  return $return;  
+  return $return;
 }
 
 /**

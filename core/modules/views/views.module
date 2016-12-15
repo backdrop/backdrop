@@ -374,7 +374,6 @@ function views_permission() {
 function views_menu() {
   // Any event which causes a menu_rebuild could potentially mean that the
   // Views data is updated -- module changes, profile changes, etc.
-  // Debug
   views_invalidate_cache();
   $items = array();
   $items['views/ajax'] = array(
