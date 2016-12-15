@@ -141,9 +141,7 @@ function _menu_router_files_build($callbacks) {
 
   $dest = _menu_router_root_path();
   $root = $dest . "." . backdrop_random_key();
-  if (!is_dir($root)) {
-    file_prepare_directory($root, FILE_CREATE_DIRECTORY);
-  }
+  _menu_route_prepare_directory($root);
 
   foreach ($menu_router_tree as $item) {
     _save_menu_router_item($item, $root);
@@ -155,7 +153,7 @@ function _menu_router_files_build($callbacks) {
   rename($root, $dest);
   if (is_dir($tmp_dir_name)) {
     // Use background clean up to speed up process.
-    popen('rm -rf ' . $tmp_dir_name . ' &', 'r');
+    file_unmanaged_delete_recursive($tmp_dir_name);
   }
 
 // Sort the masks so they are in order of descending fit.
@@ -165,6 +163,12 @@ function _menu_router_files_build($callbacks) {
   return array($menu, $masks);
 }
 
+function _menu_route_prepare_directory($dir) {
+  if(!is_dir($dir)) {
+    @backdrop_mkdir($dir, NULL, TRUE);
+  }
+  backdrop_chmod($dir);
+}
 /**
  * Save menu router item to json file.
  *
@@ -176,14 +180,10 @@ function _save_menu_router_item($item, $root) {
 
   if (isset($item['_item_'])) {
     $dir = $root . '/' . $item['_item_']['path'];
-    if (!is_dir($dir)) {
-      file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
-      // @todo Set backdrop_chmod on parent dir, if path has multiple level.
-    }
+    _menu_route_prepare_directory($dir);
 
     $filename = $dir . '/item.json';
     $item_json = backdrop_json_encode($item['_item_'], TRUE);
-//    file_unmanaged_save_data($item_json, $filename, FILE_EXISTS_REPLACE);
     file_put_contents($filename, $item_json);
     backdrop_chmod($filename);
 
@@ -212,10 +212,7 @@ function _save_menu_router_item($item, $root) {
  */
 function _save_menu_router_context($item, $root) {
   $dir = $root . '/' . $item['_item_']['tab_root'];
-  if (!is_dir($dir)) {
-    file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
-    // @todo Set backdrop_chmod on parent dir, if path has multiple level.
-  }
+  _menu_route_prepare_directory($dir);
 
   $filename = $dir . '/context.json';
 
@@ -235,7 +232,6 @@ function _save_menu_router_context($item, $root) {
 
     $content[$item['_item_']['path']] = $item['_item_'];
     $content_json = backdrop_json_encode($content, TRUE);
-    //file_unmanaged_save_data($content_json, $filename, FILE_EXISTS_REPLACE);
     file_put_contents($filename, $content_json);
     backdrop_chmod($filename);
 
@@ -285,10 +281,8 @@ function _save_menu_router_tabs_actions($item, $root) {
  */
 function _save_menu_router_action_item($item, $root) {
   $dir = $root . '/' . $item['_item_']['tab_root'];
-  if (!is_dir($dir)) {
-    file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
-    // @todo Set backdrop_chmod on parent dir, if path has multiple level.
-  }
+  _menu_route_prepare_directory($dir);
+
 
   $filename = $dir . '/actions.json';
   $content = array();
@@ -298,7 +292,6 @@ function _save_menu_router_action_item($item, $root) {
 
   $content[$item['_item_']['path']] = $item['_item_'];
   $content_json = backdrop_json_encode($content, TRUE);
-  //file_unmanaged_save_data($content_json, $filename, FILE_EXISTS_REPLACE);
   file_put_contents($filename, $content_json);
   backdrop_chmod($filename);
 
@@ -313,10 +306,7 @@ function _save_menu_router_action_item($item, $root) {
  */
 function _save_menu_router_tab_item($item, $root) {
   $dir = $root . '/' . $item['_item_']['tab_root'];
-  if (!is_dir($dir)) {
-    file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
-    // @todo Set backdrop_chmod on parent dir, if path has multiple level.
-  }
+  _menu_route_prepare_directory($dir);
 
   $filename = $dir . '/tabs.json';
   $content = array();
@@ -326,7 +316,6 @@ function _save_menu_router_tab_item($item, $root) {
 
   $content[$item['_item_']['tab_parent']][$item['_item_']['path']] = $item['_item_'];
   $content_json = backdrop_json_encode($content, TRUE);
-  //file_unmanaged_save_data($content_json, $filename, FILE_EXISTS_REPLACE);
   file_put_contents($filename, $content_json);
   backdrop_chmod($filename);
 
