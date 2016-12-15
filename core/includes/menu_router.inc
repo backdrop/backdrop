@@ -64,7 +64,7 @@ function _menu_local_tasks_generate_tabs($tabs_data, $path, $depth = 0, $map, $r
 /**
  * Builds the router files strucure based on the data from hook_menu().
  */
-function _menu_router_files_build($callbacks) {
+function _menu_router_build($callbacks) {
   $menu = array();
   $masks = array();
 
