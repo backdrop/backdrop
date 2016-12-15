@@ -78,6 +78,7 @@ function _menu_router_build($callbacks) {
     }
     $parts = explode('/', $path);
     $item['number_parts'] = count($parts);
+    $item['_number_parts'] = $item['number_parts'];
     $slashes = $item['number_parts'] - 1;
 
     foreach ($parts as $k => $part) {
@@ -120,6 +121,7 @@ function _menu_router_build($callbacks) {
       $fit = (1 << $item['number_parts']) - 1;
     }
     $masks[$fit] = 1;
+    $item['_fit'] = $fit;
     $path = implode("/", $parts);
     $callbacks_path[$path] = $item;
   }
