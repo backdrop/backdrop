@@ -172,7 +172,7 @@ function _menu_router_files_build($callbacks) {
  *   An array representing a menu router item.
  *
  */
-function _save_menu_router_item($item, $root){
+function _save_menu_router_item($item, $root) {
 
   if (isset($item['_item_'])) {
     $dir = $root . '/' . $item['_item_']['path'];
@@ -389,7 +389,7 @@ function _generate_menu_router_tree(&$menu_router_tree, $parts, $item) {
  *   An array representing a menu router item.
  *
  */
-function _prepare_menu_router_item(&$router_structure, $path, $item){
+function _prepare_menu_router_item(&$router_structure, $path, $item) {
   $parts = explode('/', $path);
 
   $item += array(
@@ -551,7 +551,7 @@ function _prepare_menu_router_item(&$router_structure, $path, $item){
  *   router item tabs is an associative multilevel array corresponding to router
  *   items path.
  */
-function _get_router_item_tabs($path){
+function _get_router_item_tabs($path) {
   static $cached_items;
 
   if (isset($cached_items[$path])) {
@@ -586,7 +586,7 @@ function _get_router_item_tabs($path){
  *   router item actions is an associative array corresponding to router
  *   items path.
  */
-function _get_router_item_actions($path){
+function _get_router_item_actions($path) {
   static $cached_items;
 
   if (isset($cached_items[$path])) {
@@ -617,7 +617,7 @@ function _get_router_item_actions($path){
  *   router item context is an associative array corresponding to router
  *   items path.
  */
-function _get_router_item_context($path){
+function _get_router_item_context($path) {
   static $cached_items;
 
   if (isset($cached_items[$path])) {
@@ -647,7 +647,7 @@ function _get_router_item_context($path){
  * @return bool|FALSE
  *   If router item exists - return TRUE.
  */
-function _remove_router_item($path){
+function _remove_router_item($path) {
   $root = _menu_router_root_path();
   $filename = $root . '/' . $path . '/item.json';
   if (file_exists($filename)) {
@@ -665,17 +665,20 @@ function _remove_router_item($path){
  *
  * @return string
  */
-function _menu_router_root_path(){
-  // @todo Use config settings to get root path.
-  $root = "files/menu_router";
-  if ($test_prefix = backdrop_valid_test_ua()) {
-    // See BackdropWebTestBase::setUp().
-    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router';
-  }
-  if (isset($GLOBALS['backdrop_test_info'])) {
-    $test_prefix = $GLOBALS['backdrop_test_info']['test_run_id'];
-    // See BackdropWebTestBase::setUp().
-    $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router';
+function _menu_router_root_path() {
+  static $root;
+    if (!$root) {
+    // @todo Use config settings to get root path.
+    $root = "files/menu_router";
+    if ($test_prefix = backdrop_valid_test_ua()) {
+      // See BackdropWebTestBase::setUp().
+      $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router';
+    }
+    if (isset($GLOBALS['backdrop_test_info'])) {
+      $test_prefix = $GLOBALS['backdrop_test_info']['test_run_id'];
+      // See BackdropWebTestBase::setUp().
+      $root = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/menu_router';
+    }
   }
   return $root;
 }
@@ -687,7 +690,7 @@ function _menu_router_root_path(){
  *   A router item is an associative array. The value corresponding to
  *   the key 'map' holds the loaded objects.
  */
-function _get_empty_router_item(){
+function _get_empty_router_item() {
   return array(
     'type' => NULL,
     'page_callback' => NULL,
@@ -722,7 +725,7 @@ function _get_empty_router_item(){
  *   an associative array. The value corresponding to the key 'map' holds the
  *   loaded objects.
  */
-function _get_exact_router_item($path){
+function _get_exact_router_item($path) {
   $root = _menu_router_root_path();
   $filename = $root . '/' . $path . '/item.json';
   if (is_file($filename)) {
@@ -746,7 +749,7 @@ function _get_exact_router_item($path){
  *   an associative array. The value corresponding to the key 'map' holds the
  *   loaded objects.
  */
-function _get_router_item($path){
+function _get_router_item($path) {
   static $cached_items;
   static $cached_router_items;
 
