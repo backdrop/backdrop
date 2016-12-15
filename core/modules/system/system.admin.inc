@@ -15,7 +15,7 @@ function system_admin_config_page() {
       FROM {menu_links} ml
       WHERE menu_name = :menu_name AND ml.plid = :mlid AND hidden = 0", $admin, array('fetch' => PDO::FETCH_ASSOC));
     foreach ($result as $item) {
-      if(!$router_item = _get_exact_router_item($item['router_path'])){
+      if (!$router_item = _get_exact_router_item($item['router_path'])) {
         $router_item = _get_empty_router_item();
       }
       $item += $router_item;

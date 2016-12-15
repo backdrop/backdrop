@@ -1161,7 +1161,7 @@ function book_link_load($mlid, $skip_access_check = FALSE) {
   if (!isset($cache[$mlid])) {
     $item = db_query("SELECT * FROM {menu_links} ml INNER JOIN {book} b ON b.mlid = ml.mlid WHERE ml.mlid = :mlid", array(':mlid' => $mlid))->fetchAssoc();
     if (!empty($item)) {
-      if(!$router_item = _get_exact_router_item($item['router_path'])){
+      if (!$router_item = _get_exact_router_item($item['router_path'])) {
         $router_item = _get_empty_router_item();
       }
       $item += $router_item;
@@ -1223,7 +1223,7 @@ function book_menu_subtree_data($link) {
       }
       $links = array();
       foreach ($query->execute() as $item) {
-        if(!$router_item = _get_exact_router_item($item['router_path'])){
+        if (!$router_item = _get_exact_router_item($item['router_path'])) {
           $router_item = _get_empty_router_item();
         }
         $item += $router_item;

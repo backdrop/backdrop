@@ -859,7 +859,7 @@ function _menu_translate(&$router_item, $map, $to_arg = FALSE) {
  * @see hook_menu()
  */
 function _menu_link_map_translate(&$map, $to_arg_functions) {
-  if(!is_array($to_arg_functions)) {
+  if (!is_array($to_arg_functions)) {
     $to_arg_functions = unserialize($to_arg_functions);
   }
   foreach ($to_arg_functions as $index => $function) {
@@ -2006,7 +2006,7 @@ function menu_local_tasks($level = 0) {
     $actions = _get_router_item_actions($root_path);
     foreach($actions as $key => $item) {
       _menu_translate($item, $map, TRUE);
-      if($item['access']) {
+      if ($item['access']) {
         $actions_current[] = array(
           '#theme' => 'menu_local_action',
           '#link' => $item,
@@ -2748,7 +2748,7 @@ function _menu_navigation_links_rebuild($menu) {
   foreach ($menu as $path => $item) {
     if ($item['_visible']) {
       $menu_links[$path] = $item;
-      if(!isset($item['_number_parts'])) {
+      if (!isset($item['_number_parts'])) {
         $item['_number_parts'] = count(explode("/", $path));
       }
       $sort[$path] = $item['_number_parts'];
@@ -3284,7 +3284,7 @@ function _menu_find_router_path($link_path) {
     $root = _menu_router_root_path();
     foreach($ancestors as $ancestor) {
       $filename = $root . '/' . $ancestor . '/item.json';
-      if(is_file($filename)) {
+      if (is_file($filename)) {
         $router_path = $ancestor;
         break;
       }

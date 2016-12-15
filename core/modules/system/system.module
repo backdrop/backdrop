@@ -2473,7 +2473,7 @@ function system_admin_menu_block($item) {
     ->condition('ml.hidden', 0);
 
   foreach ($query->execute() as $link) {
-    if(!$router_item = _get_exact_router_item($link['router_path'])){
+    if (!$router_item = _get_exact_router_item($link['router_path'])) {
       $router_item = _get_empty_router_item();
     }
     $link += $router_item;
@@ -3261,7 +3261,7 @@ function system_jump_menu_submit($form, &$form_state) {
   // This allows duplicate paths to be used in jump menus for multiple options.
   $redirect_array = explode("::", $form_state['values']['jump']);
 
-  if(isset($redirect_array[1]) && !empty($redirect_array[1])){
+  if (isset($redirect_array[1]) && !empty($redirect_array[1])) {
     $redirect = $redirect_array[1];
   }
   else {
@@ -3307,10 +3307,10 @@ function system_get_module_admin_tasks($module, $info) {
       ->condition('ml.hidden', 0, '>=')
       ->condition('ml.module', 'system');
     foreach ($query->execute() as $link) {
-      if(!$router_item = _get_exact_router_item($link['router_path'])){
+      if (!$router_item = _get_exact_router_item($link['router_path'])) {
         $router_item = _get_empty_router_item();
       }
-      if($router_item['page_callback'] == 'system_admin_menu_block_page') {
+      if ($router_item['page_callback'] == 'system_admin_menu_block_page') {
         continue;
       }
       $link += $router_item;

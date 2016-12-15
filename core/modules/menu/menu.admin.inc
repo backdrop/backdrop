@@ -57,7 +57,7 @@ function menu_overview_form($form, &$form_state, $menu) {
   $result = db_query($sql, array(':menu' => $menu['menu_name']), array('fetch' => PDO::FETCH_ASSOC));
   $links = array();
   foreach ($result as $item) {
-    if(!$router_item =_get_exact_router_item($item['router_path'])) {
+    if (!$router_item =_get_exact_router_item($item['router_path'])) {
       $router_item = _get_empty_router_item();
     }
     $item += $router_item;
@@ -499,7 +499,7 @@ function menu_delete_menu_confirm_submit($form, &$form_state) {
   // Reset all the menu links defined by the system via hook_menu().
   $result = db_query("SELECT * FROM {menu_links} ml WHERE ml.menu_name = :menu AND ml.module = 'system' ORDER BY ml.router_path ASC", array(':menu' => $menu['menu_name']), array('fetch' => PDO::FETCH_ASSOC));
   foreach ($result as $link) {
-    if(!$router_item =_get_exact_router_item($link['router_path'])) {
+    if (!$router_item =_get_exact_router_item($link['router_path'])) {
       $router_item = _get_empty_router_item();
     }
     $link += $router_item;

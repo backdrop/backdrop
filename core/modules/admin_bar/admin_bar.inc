@@ -224,7 +224,7 @@ function admin_bar_tree_dynamic(array $expand_map) {
   // placeholder expansion arguments.
   $tree_dynamic = array();
   foreach ($result as $mlid => $link) {
-    if(!$router_item = _get_exact_router_item($link['router_path'])){
+    if (!$router_item = _get_exact_router_item($link['router_path'])) {
       $router_item = _get_empty_router_item();
     }
     $link += $router_item;
@@ -316,7 +316,7 @@ function admin_bar_merge_tree(array &$tree, array $tree_dynamic, array $expand_m
       // Expand anonymous to named placeholders.
       // @see _menu_load_objects()
       $path_args = explode('/', $link['path']);
-      if(!is_array($link['load_functions'])) {
+      if (!is_array($link['load_functions'])) {
         $link['load_functions'] = unserialize($link['load_functions']);
       }
       $load_functions = $link['load_functions'];

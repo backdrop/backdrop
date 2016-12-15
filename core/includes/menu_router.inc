@@ -30,25 +30,25 @@ function _menu_local_tasks_generate_tabs($tabs_data, $path, $depth = 0, $map, $r
   foreach($items as $key => $item) {
     _menu_translate($item, $map, TRUE);
 
-    if($item['access']) {
+    if ($item['access']) {
       $tab = array(
         '#theme' => 'menu_local_task',
       );
-      if(mb_strpos($root_path, $item['path']) === 0) {
+      if (mb_strpos($root_path, $item['path']) === 0) {
         $tab['#active'] = TRUE;
       }
       if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
         $item['href'] = $item['tab_parent_href'];
         $item['path'] = $item['tab_parent'];
-        if( $item['path'] == $root_path) {
+        if ( $item['path'] == $root_path) {
           $tab['#active'] = TRUE;
         }
       }
       $tab['#link'] = $item;
 
-      if(isset($tab['#active'])) {
+      if (isset($tab['#active'])) {
         if (($item['type'] & MENU_LINKS_TO_PARENT) != MENU_LINKS_TO_PARENT) {
-          if(isset($tabs_data[$item['path']])) {
+          if (isset($tabs_data[$item['path']])) {
             _menu_local_tasks_generate_tabs($tabs_data, $item['path'], ($depth + 1), $map, $root_path);
           }
         }
@@ -141,7 +141,7 @@ function _menu_router_files_build($callbacks) {
 
   $dest = _menu_router_root_path();
   $root = $dest . "." . backdrop_random_key();
-  if(!is_dir($root)) {
+  if (!is_dir($root)) {
     file_prepare_directory($root, FILE_CREATE_DIRECTORY);
   }
 
@@ -173,9 +173,9 @@ function _menu_router_files_build($callbacks) {
  */
 function _save_menu_router_item($item, $root){
 
-  if(isset($item['_item_'])) {
+  if (isset($item['_item_'])) {
     $dir = $root . '/' . $item['_item_']['path'];
-    if(!is_dir($dir)) {
+    if (!is_dir($dir)) {
       file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
       // @todo Set backdrop_chmod on parent dir, if path has multiple level.
     }
@@ -191,8 +191,8 @@ function _save_menu_router_item($item, $root){
   }
   foreach($item as $name => $content){
 
-    if($name != '_item_' ) {
-      if(isset($content['_item_']['type']) && isset($item['_item_']['path'])) {
+    if ($name != '_item_' ) {
+      if (isset($content['_item_']['type']) && isset($item['_item_']['path'])) {
         // The default task href is looking to parent URL.
         if (($content['_item_']['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
           $item[$name]['_item_']['href'] = $item['_item_']['path'];
@@ -211,7 +211,7 @@ function _save_menu_router_item($item, $root){
  */
 function _save_menu_router_context($item, $root) {
   $dir = $root . '/' . $item['_item_']['tab_root'];
-  if(!is_dir($dir)) {
+  if (!is_dir($dir)) {
     file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
     // @todo Set backdrop_chmod on parent dir, if path has multiple level.
   }
@@ -224,11 +224,11 @@ function _save_menu_router_context($item, $root) {
   }
 
   if ( isset($item['_item_'])) {
-    if($item['_item_']['context'] == MENU_CONTEXT_NONE) {
+    if ($item['_item_']['context'] == MENU_CONTEXT_NONE) {
       return;
     }
 
-    if($item['_item_']['context'] == MENU_CONTEXT_PAGE) {
+    if ($item['_item_']['context'] == MENU_CONTEXT_PAGE) {
       return;
     }
 
@@ -252,7 +252,7 @@ function _save_menu_router_tabs_actions($item, $root) {
 
   if ( isset($item['_item_'])) {
 
-    if($item['_item_']['context'] == MENU_CONTEXT_INLINE) {
+    if ($item['_item_']['context'] == MENU_CONTEXT_INLINE) {
       return;
     }
 
@@ -284,7 +284,7 @@ function _save_menu_router_tabs_actions($item, $root) {
  */
 function _save_menu_router_action_item($item, $root) {
   $dir = $root . '/' . $item['_item_']['tab_root'];
-  if(!is_dir($dir)) {
+  if (!is_dir($dir)) {
     file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
     // @todo Set backdrop_chmod on parent dir, if path has multiple level.
   }
@@ -312,7 +312,7 @@ function _save_menu_router_action_item($item, $root) {
  */
 function _save_menu_router_tab_item($item, $root) {
   $dir = $root . '/' . $item['_item_']['tab_root'];
-  if(!is_dir($dir)) {
+  if (!is_dir($dir)) {
     file_prepare_directory($dir, FILE_CREATE_DIRECTORY);
     // @todo Set backdrop_chmod on parent dir, if path has multiple level.
   }
@@ -344,8 +344,8 @@ function _save_menu_router_tab_item($item, $root) {
  */
 function _generate_menu_router_tree(&$menu_router_tree, $parts, $item) {
   $part = array_shift($parts);
-  if(count($parts) > 0) {
-    if(!isset($menu_router_tree[$part])) {
+  if (count($parts) > 0) {
+    if (!isset($menu_router_tree[$part])) {
       $menu_router_tree[$part] = array();
     }
     _generate_menu_router_tree($menu_router_tree[$part], $parts, $item);
@@ -490,10 +490,10 @@ function _prepare_menu_router_item(&$router_structure, $path, $item){
     }
   }
 
-  if(!isset($item['tab_parent'])) {
+  if (!isset($item['tab_parent'])) {
     $item['tab_parent'] = '';
   }
-  if(!isset($item['tab_root'])) {
+  if (!isset($item['tab_root'])) {
     $item['tab_root'] = $path;
   }
 
@@ -553,15 +553,15 @@ function _prepare_menu_router_item(&$router_structure, $path, $item){
 function _get_router_item_tabs($path){
   static $cached_items;
 
-  if(isset($cached_items[$path])) {
+  if (isset($cached_items[$path])) {
     return $cached_items[$path];
   }
 
   $root = _menu_router_root_path();
   $filename = $root . '/' . $path . '/tabs.json';
-  if(is_file($filename)) {
+  if (is_file($filename)) {
     $content = file_get_contents($filename);
-    if($content_json = backdrop_json_decode($content)) {
+    if ($content_json = backdrop_json_decode($content)) {
       foreach($content_json as $tab_parent => $items){
         usort($content_json[$tab_parent], "_menu_sort");
       }
@@ -588,15 +588,15 @@ function _get_router_item_tabs($path){
 function _get_router_item_actions($path){
   static $cached_items;
 
-  if(isset($cached_items[$path])) {
+  if (isset($cached_items[$path])) {
     return $cached_items[$path];
   }
 
   $root = _menu_router_root_path();
   $filename = $root . '/' . $path . '/actions.json';
-  if(is_file($filename)) {
+  if (is_file($filename)) {
     $content = file_get_contents($filename);
-    if($item = backdrop_json_decode($content)) {
+    if ($item = backdrop_json_decode($content)) {
       $cached_items[$path] = $item;
       return $item;
     }
@@ -619,15 +619,15 @@ function _get_router_item_actions($path){
 function _get_router_item_context($path){
   static $cached_items;
 
-  if(isset($cached_items[$path])) {
+  if (isset($cached_items[$path])) {
     return $cached_items[$path];
   }
 
   $root = _menu_router_root_path();
   $filename = $root . '/' . $path . '/context.json';
-  if(is_file($filename)) {
+  if (is_file($filename)) {
     $content = file_get_contents($filename);
-    if($item = backdrop_json_decode($content)) {
+    if ($item = backdrop_json_decode($content)) {
       usort($item, "_menu_sort");
       $cached_items[$path] = $item;
       return $item;
@@ -724,9 +724,9 @@ function _get_empty_router_item(){
 function _get_exact_router_item($path){
   $root = _menu_router_root_path();
   $filename = $root . '/' . $path . '/item.json';
-  if(is_file($filename)) {
+  if (is_file($filename)) {
     $content = file_get_contents($filename);
-    if($item = backdrop_json_decode($content)) {
+    if ($item = backdrop_json_decode($content)) {
       return $item;
     }
   }
@@ -749,7 +749,7 @@ function _get_router_item($path){
   static $cached_items;
   static $cached_router_items;
 
-  if(isset($cached_items[$path])) {
+  if (isset($cached_items[$path])) {
     return $cached_items[$path];
   }
   $parts = explode("/", $path);
@@ -759,19 +759,19 @@ function _get_router_item($path){
   $found = FALSE;
   foreach($ancestors as $ancestor) {
     $filename = $root . '/' . $ancestor . '/item.json';
-    if(is_file($filename)) {
+    if (is_file($filename)) {
       $found = TRUE;
       break;
     }
   }
   // Do not double read the same menu roiter item.
   // Different $path could lead to the same router_item;
-  if($found) {
+  if ($found) {
     if (isset($cached_router_items[$filename])) {
       return $cached_router_items[$filename];
     }
     $content = file_get_contents($filename);
-    if($item = backdrop_json_decode($content)) {
+    if ($item = backdrop_json_decode($content)) {
       $cached_items[$path] = $item;
       $cached_router_items[$filename] = $item;
       return $item;
@@ -784,16 +784,16 @@ function _get_router_item($path){
  * Comparator routine for use in sorting menu items.
  */
 function _menu_sort($a, $b) {
-  if($a['weight'] > $b['weight'] ) {
+  if ($a['weight'] > $b['weight'] ) {
     return 1;
   }
-  if($a['weight'] < $b['weight'] ) {
+  if ($a['weight'] < $b['weight'] ) {
     return -1;
   }
-  if($a['title'] > $b['title'] ) {
+  if ($a['title'] > $b['title'] ) {
     return 1;
   }
-  if($a['title'] < $b['title'] ) {
+  if ($a['title'] < $b['title'] ) {
     return -1;
   }
   return 0;
