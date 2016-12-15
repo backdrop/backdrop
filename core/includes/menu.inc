@@ -400,8 +400,8 @@ function menu_get_ancestors($parts) {
  *   The unserialized $data array, with path arguments replaced.
  */
 function menu_unserialize($data, $map) {
-  if(!is_array($data)){
-    if(!$data = unserialize($data)){
+  if (!is_array($data)) {
+    if (!$data = unserialize($data)) {
       return array();
     }
   }
@@ -460,10 +460,10 @@ function menu_get_item($path = NULL, $router_item = NULL) {
     // occurs rarely, likely due to a race condition of multiple rebuilds.
     if (state_get('menu_rebuild_needed', FALSE) || !state_get('menu_masks', array())) {
       menu_rebuild();
-    }  
+    }
     $original_map = arg(NULL, $path);
     $router_item = _get_router_item($path);
-  
+
     if ($router_item) {
       // Allow modules to alter the router item before it is translated and
       // checked for access.
@@ -1524,7 +1524,7 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
     // Build an ordered array of links using the query result object.
     $links = array();
     foreach ($query->execute() as $item) {
-      if(!$router_item = _get_exact_router_item($item['router_path'])){
+      if (!$router_item = _get_exact_router_item($item['router_path'])) {
         $router_item = _get_empty_router_item();
       }
       $item += $router_item;
@@ -1995,10 +1995,10 @@ function menu_local_tasks($level = 0) {
     $tabs = array();
     $depth = 0;
     // @TODO need to be reviewed.
-    if(isset($tabs_data[$router_item['tab_parent']])){
+    if (isset($tabs_data[$router_item['tab_parent']])) {
       $tabs = _menu_local_tasks_generate_tabs($tabs_data, $router_item['tab_parent'], $depth, $map, $root_path);
     }
-    if(isset($tabs_data[$router_item['tab_root']])){
+    if (isset($tabs_data[$router_item['tab_root']])) {
       $tabs = _menu_local_tasks_generate_tabs($tabs_data, $router_item['tab_root'], $depth, $map, $root_path);
     }
 
@@ -2405,7 +2405,7 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
     // Sort candidates by link path and menu name.
     $candidates = array();
     foreach ($query->execute() as $candidate) {
-      if(!$router_item = _get_exact_router_item($candidate['router_path'])){
+      if (!$router_item = _get_exact_router_item($candidate['router_path'])) {
         $router_item = _get_empty_router_item();
       }
       $candidate += $router_item;
@@ -2573,7 +2573,7 @@ function menu_link_load($mlid, $skip_access_check = FALSE) {
     // Weight should be taken from {menu_links}, not {menu_router}.
     $query->condition('ml.mlid', $mlid);
     if ($item = $query->execute()->fetchAssoc()) {
-      if(!$router_item = _get_exact_router_item($item['router_path'])){
+      if (!$router_item = _get_exact_router_item($item['router_path'])) {
         $router_item = _get_empty_router_item();
       }
       $item += $router_item;

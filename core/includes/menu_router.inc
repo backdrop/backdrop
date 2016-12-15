@@ -72,7 +72,7 @@ function _menu_router_files_build($callbacks) {
   foreach ($callbacks as $path => $item) {
     $fit = 0;
     $move = FALSE;    
-    if(!isset($item['_load_functions'])){
+    if (!isset($item['_load_functions'])) {
       $item['_load_functions'] = array();
       $item['to_arg_functions'] = array();
     }
@@ -88,7 +88,8 @@ function _menu_router_files_build($callbacks) {
         if (empty($matches[1])) {
           $match = TRUE;
           $item['_load_functions'][$k] = NULL;
-        } else {
+        }
+        else {
           if (function_exists($matches[1] . '_to_arg')) {
             $item['to_arg_functions'][$k] = $matches[1] . '_to_arg';
             $item['_load_functions'][$k] = NULL;
@@ -148,11 +149,11 @@ function _menu_router_files_build($callbacks) {
     _save_menu_router_item($item, $root);
   }
   $tmp_dir_name = $dest . "." .  time();
-  if(is_dir($dest)){
+  if (is_dir($dest)) {
     rename($dest, $tmp_dir_name);
   }
   rename($root, $dest);
-  if(is_dir($tmp_dir_name)){
+  if (is_dir($tmp_dir_name)) {
     file_unmanaged_delete_recursive($tmp_dir_name);
   }
 
@@ -218,11 +219,11 @@ function _save_menu_router_context($item, $root) {
   $filename = $dir . '/context.json';
 
   $content = array();
-  if(file_exists($filename)){
+  if (file_exists($filename)) {
     $content = backdrop_json_decode(file_get_contents($filename));
   }
 
-  if( isset($item['_item_'])){
+  if ( isset($item['_item_'])) {
     if($item['_item_']['context'] == MENU_CONTEXT_NONE) {
       return;
     }
@@ -249,7 +250,7 @@ function _save_menu_router_context($item, $root) {
  */
 function _save_menu_router_tabs_actions($item, $root) {
 
-  if( isset($item['_item_'])){
+  if ( isset($item['_item_'])) {
 
     if($item['_item_']['context'] == MENU_CONTEXT_INLINE) {
       return;
@@ -290,7 +291,7 @@ function _save_menu_router_action_item($item, $root) {
 
   $filename = $dir . '/actions.json';
   $content = array();
-  if(file_exists($filename)){
+  if (file_exists($filename)) {
     $content = backdrop_json_decode(file_get_contents($filename));
   }
 
@@ -318,7 +319,7 @@ function _save_menu_router_tab_item($item, $root) {
 
   $filename = $dir . '/tabs.json';
   $content = array();
-  if(file_exists($filename)){
+  if (file_exists($filename)) {
     $content = backdrop_json_decode(file_get_contents($filename));
   }
 
@@ -766,7 +767,7 @@ function _get_router_item($path){
   // Do not double read the same menu roiter item.
   // Different $path could lead to the same router_item;
   if($found) {
-    if(isset($cached_router_items[$filename])){
+    if (isset($cached_router_items[$filename])) {
       return $cached_router_items[$filename];
     }
     $content = file_get_contents($filename);
