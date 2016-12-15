@@ -2678,7 +2678,6 @@ function menu_router_build() {
   }
   // Alter the menu as defined in modules, keys are like user/%user.
   backdrop_alter('menu', $callbacks);
-
   list($menu, $masks) = _menu_router_build($callbacks);
   _menu_router_cache($menu);
   state_set('menu_masks', $masks);
