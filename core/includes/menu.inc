@@ -3505,8 +3505,8 @@ function _menu_router_save($menu, $masks) {
     // Fill in insert object values.
     $insert->values(array(
       'path' => $item['path'],
-      'load_functions' => $item['load_functions'],
-      'to_arg_functions' => $item['to_arg_functions'],
+      'load_functions' => serialize($item['load_functions']),
+      'to_arg_functions' => serialize($item['to_arg_functions']),
       'access_callback' => $item['access callback'],
       'access_arguments' => serialize($item['access arguments']),
       'page_callback' => $item['page callback'],
