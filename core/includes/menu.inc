@@ -460,8 +460,7 @@ function menu_get_item($path = NULL, $router_item = NULL) {
     // occurs rarely, likely due to a race condition of multiple rebuilds.
     if (state_get('menu_rebuild_needed', FALSE) || !state_get('menu_masks', array())) {
       menu_rebuild();
-    }
-  
+    }  
     $original_map = arg(NULL, $path);
     $router_item = _get_router_item($path);
   
@@ -469,6 +468,7 @@ function menu_get_item($path = NULL, $router_item = NULL) {
       // Allow modules to alter the router item before it is translated and
       // checked for access.
       backdrop_alter('menu_get_item', $router_item, $path, $original_map);
+
       $map = _menu_translate($router_item, $original_map);
       $router_item['original_map'] = $original_map;
       if ($map === FALSE) {
@@ -2012,7 +2012,6 @@ function menu_local_tasks($level = 0) {
           '#link' => $item,
         );
       }
-
     }
     $data['tabs'] = $tabs;
     $data['actions']['count'] = count($actions_current);
@@ -3302,7 +3301,7 @@ function _menu_find_router_path($link_path) {
     }
     // If we did not find the path, $router_path will be the empty string
     // at the end of $ancestors.
-  }  
+  }
   return $router_path;
 }
 
