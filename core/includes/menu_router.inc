@@ -205,14 +205,8 @@ function _save_menu_router_item($item, $root){
   _menu_route_prepare_directory($dir);
 
   $filename = $dir . '/item.json';
-  // Use fopen fwrite instead of file_put_content to speed it up.
-  $f = @fopen($filename, 'w');
-  if (!$f) {
-    return false;
-  } else {
-    fwrite($f, backdrop_json_encode($item, TRUE));
-    fclose($f);
-  }
+  $item_json = backdrop_json_encode($item, TRUE);
+  file_put_contents($filename, $item_json);
   backdrop_chmod($filename);
 }
 /**
