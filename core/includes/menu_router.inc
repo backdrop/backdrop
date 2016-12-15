@@ -152,28 +152,35 @@ function _menu_router_files_build($callbacks) {
   }
   rename($root, $dest);
   if (is_dir($tmp_dir_name)) {
-    // Use background clean up to speed up process.
     file_unmanaged_delete_recursive($tmp_dir_name);
   }
 
-// Sort the masks so they are in order of descending fit.
+  // Sort the masks so they are in order of descending fit.
   $masks = array_keys($masks);
   rsort($masks);
   state_set('menu_masks', $masks);
   return array($menu, $masks);
 }
 
-function _menu_route_prepare_directory($dir) {
-/*  if(!is_dir($dir)) {
-    file_prepare_directory($dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
-  }*/
-  if(!is_dir($dir)) {
-    @backdrop_mkdir($dir, NULL, TRUE);
-  }
-  backdrop_chmod($dir);
-}
 /**
- * Save menu router item to json file.
+ * Prepare router item directory.
+ *
+ * Directories need to have execute permissions to be considered a directory by
+ * FTP servers, etc.
+ *
+ * @param $directory
+ *   A string reference containing the name of a directory path or URI. A
+ *   trailing slash will be trimmed from a path.
+ */
+function _menu_route_prepare_directory($directory) {
+  if(!is_dir($directory)) {
+    @backdrop_mkdir($directory, NULL, TRUE);
+  }
+  backdrop_chmod($directory);
+}
+
+/**
+ * Process router item tree.
  *
  * @param $item
  *   An array representing a menu router item.
@@ -200,6 +207,13 @@ function _save_menu_router($item, $root) {
   }
 }
 
+/**
+ * Save router item into json file.
+ *
+ * @param $item
+ *   An array representing a menu router item.
+ *
+ */
 function _save_menu_router_item($item, $root){
   $dir = $root . '/' . $item['path'];
   _menu_route_prepare_directory($dir);
@@ -209,6 +223,7 @@ function _save_menu_router_item($item, $root){
   file_put_contents($filename, $item_json);
   backdrop_chmod($filename);
 }
+
 /**
  * Determinate if item is context and save it.
  *
@@ -652,8 +667,6 @@ function _remove_router_item($path) {
 
   return FALSE;
 }
-
-
 
 /**
  * Get menu_router root directory path.
