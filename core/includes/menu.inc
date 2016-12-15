@@ -1990,16 +1990,7 @@ function menu_local_tasks($level = 0) {
 
     $map = $router_item['original_map'];
     $root_path = $router_item['path'];
-    
-    $cid = 'local_tasks:' . $router_item['tab_root'];
-    $cache_menu = cache('menu');
-    if ($cache = $cache_menu->get($cid)) {
-      $tabs_data = $cache->data;
-    }
-    else {
-      $tabs_data = _get_router_item_tabs($router_item['tab_root']);
-      $cache_menu->set($cid, $tabs_data);
-    }
+    $tabs_data = _get_router_item_tabs($router_item['tab_root']);
 
     $tabs = array();
     $depth = 0;
