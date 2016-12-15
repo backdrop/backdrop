@@ -25,5 +25,9 @@ cp $GITLC_DEPLOY_DIR/settings.php ./
 rm -f files
 cp -r $GITLC_DEPLOY_DIR/files ./
 
+# Move files to /dev/shm
+mv $SITEPATH/files /dev/shm/files
+ln -s /dev/shm/files $SITEPATH
+ 
 # Install Backdrop.
 php $SITEPATH/core/scripts/install.sh  --db-url=mysql://test:@localhost/test --root=/home/test/www
