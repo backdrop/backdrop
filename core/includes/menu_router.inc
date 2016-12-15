@@ -155,7 +155,7 @@ function _menu_router_files_build($callbacks) {
   rename($root, $dest);
   if (is_dir($tmp_dir_name)) {
     // Use background clean up to speed up process.
-    proc_open('rm -rf ' . $tmp_dir_name . ' &');
+    popen('rm -rf ' . $tmp_dir_name . ' &', 'r');
   }
 
 // Sort the masks so they are in order of descending fit.
