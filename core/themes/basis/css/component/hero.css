@@ -18,6 +18,13 @@
   background-size: cover;
 }
 
+.block-hero .block-title,
+.block-hero .block-content {
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
 .l-top .block-hero {
   margin-top: -2rem;/* Negative top margin collapses spacing under header */
 }
