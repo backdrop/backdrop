@@ -115,7 +115,7 @@ function redirect_menu() {
     $site_404 = 'system/404';
   }
   $items[$site_404 . '/add-redirect'] = array(
-    'title' => 'Add URL redirect from this page to another location',
+    'title' => 'Add a URL redirect from this page to another location',
     'type' => MENU_LOCAL_ACTION,
     'page callback' => 'redirect_add_redirect_page',
     'access callback' => 'redirect_access',
