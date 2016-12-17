@@ -69,7 +69,7 @@ function redirect_menu() {
     'file' => 'redirect.admin.inc',
   );
   $items['admin/config/search/redirect/list'] = array(
-    'title' => 'List redirects',
+    'title' => 'List URL redirects',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
