@@ -993,11 +993,30 @@ function field_ui_toggle_view_mode_form($form, &$form_state, $view_mode_name, $e
   $view_mode = entity_view_mode_load($entity_type, $view_mode_name);
   $path = _field_ui_bundle_admin_path($entity_type, $bundle->type) . '/display';
 
+  $message = '';
+
+  // Check to see if this view mode is in use on any other bundles.
+  $active = array();
+  $entity_info = entity_get_info($entity_type);
+  foreach($entity_info['bundles'] as $machine => $bundle) {
+    $settings = field_view_mode_settings($entity_type, $machine);
+    if (isset($settings[$view_mode_name]) && $settings[$view_mode_name]) {
+      $active[] = t($bundle['label']);
+    }
+  }
+
+  if (!empty($active)) {
+    $message .= '<p>' . t('The <em>%view-mode</em> view mode has been customized in the following places:', array('%view-mode' => $view_mode['label'])) . '</p>';
+    $message .= theme('item_list', array('items' => $active));
+  }
+
+  $message .= '<p>' . t('A reset will cause all customizations to be lost. The <em>Default</em> view mode will be used instead.') . '</p>';
+
   return confirm_form(
     $form,
     t('Are you sure you want to Reset the %view-mode view mode?', array('%view-mode' => $view_mode['label'])),
     $path,
-    t('A reset will cause customizations to be lost. Content using the <em>%view-mode</em> view mode will display using the <em>Default</em> settings.', array('%view-mode' => $view_mode['label'])),
+    $message,
     t('Reset'),
     t('Cancel')
   );
@@ -2378,17 +2397,36 @@ function field_ui_view_mode_form_submit($form, &$form_state) {
 /**
  * Form builder: Delete a view mode.
  */
-function field_ui_view_mode_delete_form($form, &$form_state, $entity_type = NULL, $machine_name = NULL, $bundle = NULL) {
+function field_ui_view_mode_delete_form($form, &$form_state, $entity_type = NULL, $view_mode_name = NULL, $bundle = NULL) {
   $form['#entity_type'] = $entity_type;
-  $form['#machine_name'] = $machine_name;
-  $view_mode = entity_view_mode_load($entity_type, $machine_name);
+  $form['#machine_name'] = $view_mode_name;
+  $view_mode = entity_view_mode_load($entity_type, $view_mode_name);
   $path = _field_ui_bundle_admin_path($entity_type, $bundle->type) . '/display';
+
+  $message = '';
+
+  // Check to see if this view mode is in use on any other bundles.
+  $active = array();
+  $entity_info = entity_get_info($entity_type);
+  foreach ($entity_info['bundles'] as $machine => $bundle) {
+    $settings = field_view_mode_settings($entity_type, $machine);
+    if (isset($settings[$view_mode_name]) && $settings[$view_mode_name]) {
+      $active[] = t($bundle['label']);
+    }
+  }
+
+  if (!empty($active)) {
+    $message .= '<p>' . t('The <em>%view-mode</em> view mode has been customized in the following places:', array('%view-mode' => $view_mode['label'])) . '</p>';
+    $message .= theme('item_list', array('items' => $active));
+  }
+
+  $message .= '<p>' . t('Deleting a view mode will cause any content still using it to display using the <em>Default</em> settings.') . '</p>';
 
   return confirm_form(
     $form,
     t('Are you sure you want to delete the %view-mode view mode?', array('%view-mode' => $view_mode['label'])),
     $path,
-    t('Deleting a view mode will cause any content still using it to display using the <em>Default</em> settings.'),
+    $message,
     t('Delete'),
     t('Cancel')
   );
