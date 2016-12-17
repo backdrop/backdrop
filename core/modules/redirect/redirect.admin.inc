@@ -765,7 +765,7 @@ function redirect_404_list($form = NULL) {
     $operations = array();
     if (redirect_access('create', 'redirect')) {
       $operations['add'] = array(
-        'title' => t('Add redirect'),
+        'title' => t('Add URL redirect'),
         'href' => 'admin/config/search/redirect/add/',
         'query' => array('source' => $result->message) + $destination,
       );
