@@ -158,15 +158,15 @@ function field_ui_menu() {
           );
           $items["$path/display/view-modes/%/customize"] = array(
             'title' => 'Customize view mode',
-            'page callback' => 'field_ui_toggle_view_mode',
-            'page arguments' => array($view_mode_position, '1', $entity_type, $bundle_arg),
+            'page callback' => 'field_ui_toggle_view_mode_on',
+            'page arguments' => array($view_mode_position, $entity_type, $bundle_arg),
             'access arguments' => array('administer view modes'),
             'file' => 'field_ui.admin.inc',
           );
           $items["$path/display/view-modes/%/default"] = array(
-            'title' => 'Revert to default',
-            'page callback' => 'field_ui_toggle_view_mode',
-            'page arguments' => array($view_mode_position, '0', $entity_type, $bundle_arg),
+            'title' => 'Reset to default',
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_ui_toggle_view_mode_form', $view_mode_position, $entity_type, $bundle_arg),
             'access arguments' => array('administer view modes'),
             'file' => 'field_ui.admin.inc',
           );

@@ -158,10 +158,9 @@ function theme_field_ui_view_modes($variables) {
         'href' => "$path/$view_mode_name",
         'query' => array('destination' => $path),
       );
-      $operations['revert'] = array(
-        'title' => t('Revert to default'),
+      $operations['default'] = array(
+        'title' => t('Reset to default'),
         'href' => "$path/view-modes/{$view_mode_name}/default",
-        'query' => array('destination' => $path),
       );
     }
     else {
@@ -169,7 +168,6 @@ function theme_field_ui_view_modes($variables) {
       $operations['customize'] = array(
         'title' => t('Customize'),
         'href' => "$path/view-modes/{$view_mode_name}/customize",
-        'query' => array('destination' => $path),
       );
     }
 
