@@ -164,7 +164,8 @@ class RedirectFunctionalTest extends RedirectTestHelper {
     $this->backdropGet('admin/reports/page-not-found');
     $this->clickLink('Fix 404 pages with URL redirects');
 
-    // Check that normal users do not see the "Add URL redirect" link on 404 pages.
+    // Check that normal users do not see the "Add URL redirect" link on 404
+    // pages.
     $this->backdropLogout();
     $this->backdropGet('invalid-path3');
     $this->assertNoLink('Add a URL redirect from this page to another location');
