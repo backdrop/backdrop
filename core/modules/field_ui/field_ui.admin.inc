@@ -831,10 +831,6 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
   $field_types = field_info_field_types();
   $extra_fields = field_info_extra_fields($entity_type, $bundle, 'display');
 
-  $form_state += array(
-    'formatter_settings_edit' => NULL,
-  );
-
   $form += array(
     '#entity_type' => $entity_type,
     '#bundle' => $bundle,
@@ -842,6 +838,7 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
     '#fields' => array_keys($instances),
     '#extra' => array_keys($extra_fields),
   );
+  $form['#attached']['css'][] = backdrop_get_path('module', 'field_ui') . '/css/field_ui.css';
 
   $entity_info = entity_get_info($entity_type);
   $view_modes = $entity_info['view modes'];
@@ -850,12 +847,12 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
   $custom_view_modes = config_get('entity.view_modes', 'view_modes');
 
   // Sort view modes into active/default, and merge in view mode settings.
-  $current = array();
-  $disabled = array();
+  $custom = array();
+  $default = array();
   foreach ($view_modes as $view_mode_name => $mode) {
     $custom_settings = isset($view_mode_settings[$view_mode_name]['custom_settings']) ? (bool) $view_mode_settings[$view_mode_name]['custom_settings'] : (bool) $mode['custom settings'];
 
-    $current[$view_mode_name] = array(
+    $custom[$view_mode_name] = array(
       'label' => $mode['label'],
       'custom settings' => $custom_settings,
       'storage' => !empty($custom_view_modes[$entity_type][$view_mode_name]) ? 'Custom' : 'Default (module-provided)',
@@ -863,32 +860,50 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
     );
 
     if (!($custom_settings)) {
-      $disabled[$view_mode_name] = $current[$view_mode_name];
-      unset($current[$view_mode_name]);
+      $default[$view_mode_name] = $custom[$view_mode_name];
+      unset($custom[$view_mode_name]);
     }
   }
-  // Add view modes using default back onto the bottom of the table.
-  $current += $disabled;
 
-  $form['modes']['view_modes'] = array(
+  $form['view_modes'] = array();
+
+  // Add customized view modes prominently.
+  $form['view_modes']['custom'] = array(
     '#type' => 'group',
     '#theme' => 'field_ui_view_modes',
     '#tree' => TRUE,
-    '#view_modes' => $current,
+    '#view_modes' => $custom,
     '#entity_type' => $entity_type,
+    '#state' => 'custom',
   );
 
-  // Place view mode edit form elements here too.
+  // Add default view modes in a way that's more hidden.
   if (user_access('administer view modes')) {
-    $form['modes']['view_modes']['new'] = array();
+    $form['view_modes']['more'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Additonal view modes'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $form['view_modes']['more']['default'] = array(
+      '#type' => 'group',
+      '#theme' => 'field_ui_view_modes',
+      '#tree' => TRUE,
+      '#view_modes' => $default,
+      '#entity_type' => $entity_type,
+      '#state' => 'default',
+    );
 
-    $form['modes']['view_modes']['new']['label'] = array(
+    // Provide a form to add a new view mode.
+    $form['view_modes']['more']['default']['new'] = array();
+    $form['view_modes']['more']['default']['new']['label'] = array(
       '#type' => 'textfield',
+      '#title' => t('New view mode'),
+      '#description' => t('Human readable name'),
       '#default_value' => '',
       '#size' => 20,
     );
-
-    $form['modes']['view_modes']['new']['machine_name'] = array(
+    $form['view_modes']['more']['default']['new']['machine_name'] = array(
       '#type' => 'machine_name',
       '#title' => t('Machine name'),
       '#default_value' => '',
@@ -897,17 +912,18 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
       '#required' => FALSE,
       '#size' => 15,
       '#machine_name' => array(
-        'source' => array('modes', 'view_modes', 'new', 'label'),
+        'source' => array('view_modes', 'more', 'default', 'new', 'label'),
         'exists' => 'entity_view_mode_exists',
         'standalone' => TRUE,
         'label' => '',
+        'description' => '',
       ),
     );
-
-    $form['modes']['view_modes']['new']['submit'] = array('#type' => 'submit', '#value' => t('Add new view mode'));
+    $form['view_modes']['more']['default']['new']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Add new view mode'),
+    );
   }
-
-  $form['#attached']['css'][] = backdrop_get_path('module', 'field_ui') . '/css/field_ui.css';
 
   return $form;
 }
@@ -922,18 +938,18 @@ function field_ui_display_overview_form_submit($form, &$form_state) {
   $view_mode = $form['#view_mode'];
 
   // Save view modes data.
-  if (!empty($form_state['values']['view_modes']['new']['machine_name'])) {
+  if (!empty($form_state['values']['default']['new']['machine_name'])) {
     $view_mode = array(
-      'machine_name' => $form_state['values']['view_modes']['new']['machine_name'],
-      'label' => $form_state['values']['view_modes']['new']['label'],
+      'machine_name' => $form_state['values']['default']['new']['machine_name'],
+      'label' => $form_state['values']['default']['new']['label'],
       'is_new' => TRUE,
     );
     entity_view_mode_save($form['#entity_type'], $view_mode);
     $view_mode_name = $view_mode['machine_name'];
 
     // Customize by default for this bundle only.
+    $bundle_settings = field_bundle_settings($entity_type, $bundle);
     $bundle_settings['view_modes'][$view_mode_name]['custom_settings'] = TRUE;
-    $view_mode_settings = field_view_mode_settings($entity_type, $bundle);
     // Initialize with default setting, and save.
     _field_ui_add_default_view_mode_settings($entity_type, $bundle, $view_mode_name, $bundle_settings);
     field_bundle_settings($entity_type, $bundle, $bundle_settings);

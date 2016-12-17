@@ -101,6 +101,7 @@ function theme_field_ui_view_modes($variables) {
   $view_modes = $element['#view_modes'];
   $entity_type = $element['#entity_type'];
   $path = current_path();
+  $rows = array();
 
   $header = array(
     array('data' => t('View modes')),
@@ -110,39 +111,41 @@ function theme_field_ui_view_modes($variables) {
   );
 
   // Add the row for the default view mode.
-  $row = array();
-  $row['label'] = t('Default');
-  $row['machine'] = t('default');
-  $row['storage'] = t('N/A');
-  $row['operations'] = array(
-    'data' => array(
-      '#type' => 'dropbutton',
-      '#links' => array(
-        'manage' => array(
-          'title' => t('Manage display'),
-          'href' => "$path/default",
+  $first_row = array();
+  if ($element['#state'] == 'custom') {
+    $row = array();
+    $row['label'] = t('Default');
+    $row['machine'] = t('default');
+    $row['storage'] = t('N/A');
+    $row['operations'] = array(
+      'data' => array(
+        '#type' => 'dropbutton',
+        '#links' => array(
+          'manage' => array(
+            'title' => t('Manage display'),
+            'href' => "$path/default",
+          ),
         ),
       ),
-    ),
-  );
-  $first_row = array(
-    'class' => array('default-view-mode'),
-    'data' => $row,
-  );
+    );
+    $first_row = array(
+      'class' => array('default-view-mode'),
+      'data' => $row,
+    );
+    $rows = array($first_row);
+  }
 
   // Add the row for adding a new view mode. @todo, replace with action link?
   $last_row = array();
-  if (isset($element['new'])) {
+  if ($element['#state'] == 'default' && isset($element['new'])) {
     $row = array();
     $row['label'] = backdrop_render($element['new']['label']);
     $row['machine'] = backdrop_render($element['new']['machine_name']);
     $row['status'] = array('data' => backdrop_render($element['new']['submit']), 'colspan' => 2);
     unset($element['new']);
-
     $last_row = array('data' => $row, 'class' => array('add-new-view-mode'));
   }
 
-  $rows = array($first_row);
   foreach ($view_modes as $view_mode_name => $veiw_mode_info) {
     $class = '';
     $row = array();
