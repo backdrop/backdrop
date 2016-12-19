@@ -1181,7 +1181,7 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => empty($block->uuid) ? t('Add block') : t('Save block'),
+    '#value' => empty($block->uuid) ? t('Add block') : t('Update block'),
   );
 
   $form['#tree'] = TRUE;
