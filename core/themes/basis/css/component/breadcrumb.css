@@ -20,7 +20,7 @@
   float: left;
 }
 
-.breadcrumb li a {
+.breadcrumb li a, .breadcrumb li p {
   position: relative;
   z-index: 1;
   display: block;
