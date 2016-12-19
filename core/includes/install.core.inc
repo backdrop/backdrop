@@ -1300,6 +1300,8 @@ function install_find_translations() {
  */
 function install_find_translation_files($langcode = NULL) {
   $directory = settings_get('locale_translate_file_directory', 'files/translations');
+  // @todo: Remove the "drupal" check in 2.x (assuming we have a localization
+  //   server by then).
   $files = file_scan_directory($directory, '!(install|drupal-\d+\.\d+)\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
   return $files;
 }
