@@ -849,7 +849,9 @@ function entityreference_field_widget_form(&$form, &$form_state, $field, $instan
 
     // Build an array of entities ID.
     foreach ($items as $item) {
-      $entity_ids[] = $item['target_id'];
+      if (isset($item['target_id'])) {
+        $entity_ids[] = $item['target_id'];
+      }
     }
 
     // Load those entities and loop through them to extract their labels.
