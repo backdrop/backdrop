@@ -856,7 +856,7 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
       'label' => $mode['label'],
       'custom settings' => $custom_settings,
       'storage' => !empty($custom_view_modes[$entity_type][$view_mode_name]) ? 'Custom' : 'Default (module-provided)',
-      'status' => $custom_settings ? 'Customized' : 'Using <em>Default</em>',
+      'status' => $custom_settings ? 'Customized' : 'Using the <em>Default display</em>',
     );
 
     if (!($custom_settings)) {
@@ -866,6 +866,13 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
   }
 
   $form['view_modes'] = array();
+
+  $help  = '<p>' . t('When items are viewed as part of a list, they are often displayed in a different way than when viewed alone on a full page. Each way an item can be displayed is called a <strong>View Mode</strong>. ') . '</p>';
+  $help .= '<p>' . t('The <strong>Default</strong> will be used for view modes that have not been explicitly customized. This is useful when many view modes share the same field display settings. For example: <em>Full content</em> and <em>Search index</em> are usually the same, so both will often use the <em>Default</em>.') . '</p>';
+  $form['view_modes']['help'] = array(
+    '#type' => 'markup',
+    '#markup' => $help,
+  );
 
   // Add customized view modes prominently.
   $form['view_modes']['custom'] = array(
@@ -881,7 +888,7 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
   if (user_access('administer view modes')) {
     $form['view_modes']['more'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Additonal view modes'),
+      '#title' => t('View modes using the Default display'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );

@@ -114,7 +114,7 @@ function theme_field_ui_view_modes($variables) {
   $first_row = array();
   if ($element['#state'] == 'custom') {
     $row = array();
-    $row['label'] = t('Default');
+    $row['label'] = t('Default display');
     $row['machine'] = t('default');
     $row['storage'] = t('N/A');
     $row['operations'] = array(
