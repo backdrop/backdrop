@@ -156,6 +156,7 @@ function field_ui_menu() {
             'access arguments' => array('administer view modes'),
             'file' => 'field_ui.admin.inc',
           );
+          // $view_mode_position, $entity_type, $bundle_arg
           $items["$path/display/view-modes/%/customize"] = array(
             'title' => 'Customize view mode',
             'page callback' => 'field_ui_toggle_view_mode_on',

@@ -821,6 +821,9 @@ function field_ui_field_overview_form_submit($form, &$form_state) {
  * @ingroup forms
  */
 function field_ui_display_overview_form($form, &$form_state, $entity_type, $bundle, $view_mode) {
+  if (is_object($bundle)) {
+    $bundle_label = $bundle->name;
+  }
   $bundle = field_extract_bundle($entity_type, $bundle);
 
   field_ui_inactive_message($entity_type, $bundle);
@@ -841,6 +844,9 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
   $form['#attached']['css'][] = backdrop_get_path('module', 'field_ui') . '/css/field_ui.css';
 
   $entity_info = entity_get_info($entity_type);
+  if (!isset($bundle_label)) {
+    $bundle_label = $entity_info['label'];
+  }
   $view_modes = $entity_info['view modes'];
   backdrop_sort($view_modes, array('label' => SORT_STRING));
   $view_mode_settings = field_view_mode_settings($entity_type, $bundle);
@@ -867,7 +873,7 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
 
   $form['view_modes'] = array();
 
-  $help  = '<p>' . t('When items are viewed as part of a list, they are often displayed in a different way than when viewed alone on a full page. Each way an item can be displayed is called a <strong>View Mode</strong>. ') . '</p>';
+  $help  = '<p>' . t('When @label items are viewed as part of a list, they are often displayed in a different way than when viewed alone on a full page. Each way an item can be displayed is called a <strong>View Mode</strong>.', array('@label' => $bundle_label)) . '</p>';
   $help .= '<p>' . t('The <strong>Default</strong> will be used for view modes that have not been explicitly customized. This is useful when many view modes share the same field display settings. For example: <em>Full content</em> and <em>Search index</em> are usually the same, so both will often use the <em>Default</em>.') . '</p>';
   $form['view_modes']['help'] = array(
     '#type' => 'markup',
@@ -972,12 +978,14 @@ function field_ui_display_overview_form_submit($form, &$form_state) {
  * the Manage displays page.
  */
 function field_ui_toggle_view_mode_on($view_mode_name, $entity_type, $bundle) {
-  // Save updated bundle settings.
-  $bundle_settings = field_bundle_settings($entity_type, $bundle->type);
-  $bundle_settings['view_modes'][$view_mode_name]['custom_settings'] = TRUE;
-  field_bundle_settings($entity_type, $bundle->type, $bundle_settings);
+  $bundle = field_extract_bundle($entity_type, $bundle);
 
-  $path = _field_ui_bundle_admin_path($entity_type, $bundle->type) . "/display";
+  // Save updated bundle settings.
+  $bundle_settings = field_bundle_settings($entity_type, $bundle);
+  $bundle_settings['view_modes'][$view_mode_name]['custom_settings'] = TRUE;
+  field_bundle_settings($entity_type, $bundle, $bundle_settings);
+
+  $path = _field_ui_bundle_admin_path($entity_type, $bundle) . "/display";
 
   // Set a friendly message.
   $entity_info = entity_get_info($entity_type);
@@ -994,11 +1002,13 @@ function field_ui_toggle_view_mode_on($view_mode_name, $entity_type, $bundle) {
  * Form builder: Set a view mode back to using default settings.
  */
 function field_ui_toggle_view_mode_form($form, &$form_state, $view_mode_name, $entity_type, $bundle) {
+  $bundle = field_extract_bundle($entity_type, $bundle);
+
   $form['#entity_type'] = $entity_type;
   $form['#machine_name'] = $view_mode_name;
-  $form['#bundle'] = $bundle->type;
+  $form['#bundle'] = $bundle;
   $view_mode = entity_view_mode_load($entity_type, $view_mode_name);
-  $path = _field_ui_bundle_admin_path($entity_type, $bundle->type) . '/display';
+  $path = _field_ui_bundle_admin_path($entity_type, $bundle) . '/display';
 
   $message = '';
 
