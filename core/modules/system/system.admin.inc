@@ -2400,7 +2400,7 @@ function system_configure_date_formats_form($form, &$form_state, $format = NULL)
     '#maxlength' => 100,
     '#default_value' => empty($format['label']) ? '' : $format['label'],
     '#description' => t('A name for the new format'),
-    '#placeholder' => t('e.g. My date format')
+    '#placeholder' => t('e.g. My date format'),
   );
 
   $form['name'] = array(
