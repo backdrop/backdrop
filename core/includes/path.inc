@@ -278,6 +278,14 @@ function backdrop_is_front_page() {
     // we can check it against the 'site_frontpage' variable.
     $is_front_page = ($_GET['q'] == config_get('system.core', 'site_frontpage'));
   }
+  
+  // Issue 2413
+  if('user' == config_get('system.core', 'site_frontpage')) {
+    $router_item = menu_get_item();
+    if($router_item['path'] == 'user/%') {
+      $is_front_page = TRUE;
+    }
+  }
 
   return $is_front_page;
 }
