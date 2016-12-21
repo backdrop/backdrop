@@ -330,10 +330,15 @@ function field_ui_inactive_instances($entity_type, $bundle_name = NULL) {
 function field_ui_form_node_type_form_alter(&$form, $form_state) {
   // Display the button only on the 'Add content type' page.
   if (empty($form['#node_type']->type)) {
-    $form['actions']['save_continue'] = array(
+    $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Save and add fields'),
       '#weight' => 35,
+    );
+    $form['actions']['save'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save content type'),
+      '#weight' => 55,
     );
     $form['#submit'][] = 'field_ui_form_node_type_form_submit';
   }
@@ -345,7 +350,7 @@ function field_ui_form_node_type_form_alter(&$form, $form_state) {
  * @see field_ui_form_node_type_form_alter()
  */
 function field_ui_form_node_type_form_submit($form, &$form_state) {
-  if ($form_state['triggering_element']['#parents'][0] === 'save_continue') {
+  if ($form_state['triggering_element']['#parents'][0] === 'submit') {
     $form_state['redirect'] = _field_ui_bundle_admin_path('node', $form_state['values']['type']) .'/fields';
   }
 }
