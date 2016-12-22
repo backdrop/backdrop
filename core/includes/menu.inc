@@ -1117,7 +1117,7 @@ function menu_tree_output($tree, $_current_depth = 0) {
       $class[] = 'active-trail';
       $data['link']['localized_options']['attributes']['class'][] = 'active-trail';
     }
-   // Issue 2413. Make user link active on user/UID page
+     // Issue 2413. Make user link active on user/UID page
     if($data['link']['href'] == 'user' && $router_item['path'] == 'user/%') {
       $class[] = 'active';
       $data['link']['localized_options']['attributes']['class'][] = 'active';
@@ -1945,9 +1945,20 @@ function menu_navigation_links($menu_name, $level = 0) {
   foreach ($tree as $item) {
     if ($item['link']['access'] && !$item['link']['hidden']) {
       // Issue #2413.
-      if('user' == config_get('system.core', 'site_frontpage') && $router_item['path'] == 'user/%' && $item['link']['link_path'] == '<front>') {
+      // If default home page is user.
+      if('user' == config_get('system.core', 'site_frontpage')){
+        if( $router_item['path'] == 'user/%' && $item['link']['link_path'] == '<front>') {
+          $item['link']['in_active_trail'] = TRUE;
+        }
+      }
+      // Make menu item `user` active if we on user profile page.
+      if($router_item['path'] == 'user/%' && $item['link']['link_path'] == 'user' ) {
         $item['link']['in_active_trail'] = TRUE;
       }
+      // Make menu item `user` active if we on user login page.
+      if($router_item['path'] == 'user' && $item['link']['link_path'] == 'user/login') {
+        $item['link']['in_active_trail'] = TRUE;
+      }      
       $class = '';
       $l = $item['link']['localized_options'];
       $l['href'] = $item['link']['href'];

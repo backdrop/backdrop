@@ -280,6 +280,7 @@ function backdrop_is_front_page() {
   }
   
   // Issue 2413
+  // If user is default home page, and we on user profile page.
   if('user' == config_get('system.core', 'site_frontpage')) {
     $router_item = menu_get_item();
     if($router_item['path'] == 'user/%') {
