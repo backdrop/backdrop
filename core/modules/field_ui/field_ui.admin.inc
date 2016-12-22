@@ -873,11 +873,9 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
 
   $form['view_modes'] = array();
 
-  $help  = '<p>' . t('When @label items are viewed as part of a list, they are often displayed in a different way than when viewed alone on a full page. Each way an item can be displayed is called a <strong>View Mode</strong>.', array('@label' => $bundle_label)) . '</p>';
-  $help .= '<p>' . t('The <strong>Default</strong> will be used for view modes that have not been explicitly customized. This is useful when many view modes share the same field display settings. For example: <em>Full content</em> and <em>Search index</em> are usually the same, so both will often use the <em>Default</em>.') . '</p>';
   $form['view_modes']['help'] = array(
     '#type' => 'markup',
-    '#markup' => $help,
+    '#markup' => '<p>' . t('When @label items are viewed as part of a list, they are often displayed in a different way than when viewed alone on a full page. Each way an item can be displayed is called a <strong>View Mode</strong>.', array('@label' => $bundle_label)) . '</p>',
   );
 
   // Add customized view modes prominently.

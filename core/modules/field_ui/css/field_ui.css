@@ -74,8 +74,12 @@
 .field-ui-view-modes tr.disabled td {
   color: #999;
 }
-.field-ui-view-modes tr.default-view-mode td {
+.field-ui-view-modes tr.default-view-mode-header td {
+  background-color: #e9e8e8;
   font-weight: bold;
+}
+.field-ui-view-modes tr.default-view-mode td {
+
 }
 .field-ui-view-modes th.operations {
   text-align: center;

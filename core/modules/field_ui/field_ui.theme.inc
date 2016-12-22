@@ -110,42 +110,6 @@ function theme_field_ui_view_modes($variables) {
     array('data' => t('Operations'), 'class' => array('operations')),
   );
 
-  // Add the row for the default view mode.
-  $first_row = array();
-  if ($element['#state'] == 'custom') {
-    $row = array();
-    $row['label'] = t('Default display');
-    $row['machine'] = t('default');
-    $row['storage'] = t('N/A');
-    $row['operations'] = array(
-      'data' => array(
-        '#type' => 'dropbutton',
-        '#links' => array(
-          'manage' => array(
-            'title' => t('Manage display'),
-            'href' => "$path/default",
-          ),
-        ),
-      ),
-    );
-    $first_row = array(
-      'class' => array('default-view-mode'),
-      'data' => $row,
-    );
-    $rows = array($first_row);
-  }
-
-  // Add the row for adding a new view mode. @todo, replace with action link?
-  $last_row = array();
-  if ($element['#state'] == 'default' && isset($element['new'])) {
-    $row = array();
-    $row['label'] = backdrop_render($element['new']['label']);
-    $row['machine'] = backdrop_render($element['new']['machine_name']);
-    $row['status'] = array('data' => backdrop_render($element['new']['submit']), 'colspan' => 2);
-    unset($element['new']);
-    $last_row = array('data' => $row, 'class' => array('add-new-view-mode'));
-  }
-
   foreach ($view_modes as $view_mode_name => $veiw_mode_info) {
     $class = '';
     $row = array();
@@ -196,7 +160,43 @@ function theme_field_ui_view_modes($variables) {
 
     $rows[] = array('data' => $row, 'class' => array($class));
   }
-  $rows[] = $last_row;
+
+  // Add the row for the default view mode.
+  $default_row = array();
+  if ($element['#state'] == 'custom') {
+    $row = array();
+    $row['label'] = array('data' => t('Default (used for all view modes without specific field settings)'));
+    $row['machine'] = '';
+    $row['storage'] = '';
+    $row['operations'] = '';
+    $default_header = array(
+      'class' => array('default-view-mode-header'),
+      'data' => $row,
+    );
+
+    $row = array();
+    $row['label'] = t('Default display');
+    $row['machine'] = t('default');
+    $row['storage'] = t('N/A');
+    $row['operations'] = array(
+      'data' => array(
+        '#type' => 'dropbutton',
+        '#links' => array(
+          'manage' => array(
+            'title' => t('Manage display'),
+            'href' => "$path/default",
+          ),
+        ),
+      ),
+    );
+    $default_row = array(
+      'class' => array('default-view-mode'),
+      'data' => $row,
+    );
+  }
+
+  $rows[] = $default_header;
+  $rows[] = $default_row;
 
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('field-ui-view-modes'))));
   $output .= backdrop_render_children($form);
