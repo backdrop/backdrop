@@ -2398,7 +2398,9 @@ function system_configure_date_formats_form($form, &$form_state, $format = NULL)
     '#type' => 'textfield',
     '#title' => 'Label',
     '#maxlength' => 100,
-    '#default_value' => empty($format['label']) ? '' : $format['label']
+    '#default_value' => empty($format['label']) ? '' : $format['label'],
+    '#description' => t('A name for the new format'),
+    '#placeholder' => t('e.g. My date format'),
   );
 
   $form['name'] = array(
@@ -2420,7 +2422,8 @@ function system_configure_date_formats_form($form, &$form_state, $format = NULL)
     '#type' => 'textfield',
     '#title' => t('Format string'),
     '#maxlength' => 100,
-    '#description' => t('A user-defined date format. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')),
+    '#description' => t('A date format using PHP date and time codes. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')),
+    '#placeholder' => t('e.g. F j Y'),    
     '#default_value' => $pattern,
     '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',
     '#ajax' => array(
