@@ -37,6 +37,7 @@
 .header-site-name-wrapper {
   margin: 0;
   padding: 0;
+  overflow-wrap: break-word;
 }
 
 @media (min-width: 34em) {
