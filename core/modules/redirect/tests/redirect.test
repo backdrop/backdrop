@@ -152,26 +152,27 @@ class RedirectFunctionalTest extends RedirectTestHelper {
    * Tests the links added to 404 pages for creating redirects.
    */
   function test404Interface() {
-    // Check that 404 pages do get add redirect links for admin users.
+    // Check that 404 pages do get "Add URL redirect" links for admin users.
     $this->backdropGet('invalid-path1');
     $this->backdropGet('invalid-path2');
-    $this->assertLink('Add URL redirect from this page to another location');
+    $this->assertLink('Add a URL redirect from this page to another location');
 
-    // Check that 403 pages do not get the add redirect link at all.
+    // Check that 403 pages do not get the "Add URL redirect" link at all.
     $this->backdropGet('admin/config/system/actions');
-    $this->assertNoLink('Add URL redirect from this page to another location');
+    $this->assertNoLink('Add a URL redirect from this page to another location');
 
     $this->backdropGet('admin/reports/page-not-found');
     $this->clickLink('Fix 404 pages with URL redirects');
 
-    // Check that normal users do not see the add redirect link on 404 pages.
+    // Check that normal users do not see the "Add URL redirect" link on 404
+    // pages.
     $this->backdropLogout();
     $this->backdropGet('invalid-path3');
-    $this->assertNoLink('Add an URL redirect from this page to another location');
+    $this->assertNoLink('Add a URL redirect from this page to another location');
   }
 
   /**
-   * Tests the links added to 404 pages for creating redirects.
+   * Tests the links added to 404 pages for creating URL redirects.
    */
   function testPageCache() {
     // Set up cache variables.
