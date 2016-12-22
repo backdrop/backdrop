@@ -90,3 +90,20 @@ function basis_breadcrumb($variables) {
   }
   return $output;
 }
+
+/**
+ * Add mobile menu toggle button
+ * for main menu
+ */
+function basis_menu_tree__main_menu($variables) {
+  $return = '';
+  $theme_path = backdrop_get_path('theme', 'basis');
+  drupal_add_js(array('basis' => array('menuToggle' => theme_get_setting('menu_toggle'))), 'setting');
+  if (theme_get_setting('menu_toggle')) {
+    if ($variables['depth'] == 0) {
+      $return = '<!-- Mobile menu toggle button (hamburger/x icon) --><input id="main-menu-state" type="checkbox" /><label class="main-menu-btn" for="main-menu-state">  <span class="main-menu-btn-icon"></span> Menu</label>';
+    }
+  }
+  $return .= '<ul ' . backdrop_attributes($variables['attributes']) . '>' . $variables['tree'] . '</ul>';
+  return $return;
+}
