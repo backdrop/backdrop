@@ -1,0 +1,77 @@
+.comment {
+  margin-bottom: 20px;
+  display: table;
+}
+
+.comment .attribution {
+  display: table-cell;
+  padding: 0 30px 0 0; /* LTR */
+  vertical-align: top;
+  overflow: hidden;
+}
+
+[dir="rtl"] .comment .attribution {
+  padding: 0 0 0 30px; /* RTL */
+}
+
+.comment .comment-text {
+  border: 1px solid #dee2ea;
+  display: table-cell;
+  vertical-align: top;
+  position: relative;
+  width: 100%;
+}
+
+.comment .comment-text:before {
+  position: absolute;
+  top: 11px;
+  right: 100%;
+  left: -30px;
+  display: block;
+  pointer-events: none;
+  content: "";
+  border-width: 15px;
+  border-color: transparent #dee2ea transparent transparent;
+  border-style: solid;
+}
+
+[dir="rtl"] .comment .comment-text:before {
+  left: 100%;
+  right: -30px;
+  border-color: transparent transparent transparent #dee2ea;
+}
+
+.comment-title {
+  background-color: #dee2ea;
+  padding: 10px 0;
+}
+
+.comment-title h3 {
+  padding: 0 0 0 20px;
+  display: inline;
+}
+
+[dir="rtl"] .comment-title h3 {
+  padding: 0 20px 0 0;
+}
+
+.comment-time {
+  padding: 0 0 0 20px;
+}
+
+[dir="rtl"] .comment-time {
+  padding: 0 20px 0 0;
+}
+
+.comment .content {
+  padding: 0 20px;
+}
+
+.comment-footer {
+  float: right;
+  padding: 15px 20px;
+}
+
+[dir="rtl"] .comment-footer {
+  float: left;
+}
