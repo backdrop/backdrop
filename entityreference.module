@@ -1111,6 +1111,32 @@ function entityreference_autocomplete_callback_get_matches($type, $field, $insta
   drupal_json_output($matches);
 }
 
+ /**
+ * Introspects field and instance settings, and determines the correct settings
+ * for the functioning of the formatter.
+ *
+ * Settings:
+ *   - entity_type - The entity_type being loaded.
+ *   - column - The name of the ref. field column that stores the entity id.
+ */
+function entityreference_field_type_settings($field) {
+  $settings = array(
+    'entity_type' => NULL,
+    'column' => NULL,
+  );
+
+  if ($field['type'] == 'entityreference') {
+    $settings['entity_type'] = $field['settings']['target_type'];
+    $settings['column'] = 'target_id';
+  }
+  elseif ($field['type'] == 'taxonomy_term_reference') {
+    $settings['entity_type'] = 'taxonomy_term';
+    $settings['column'] = 'tid';
+  }
+
+  return $settings;
+}
+
 /**
  * Implements hook_field_formatter_info().
  */
@@ -1133,7 +1159,7 @@ function entityreference_field_formatter_info() {
     'entityreference_entity_view' => array(
       'label' => t('Rendered entity'),
       'description' => t('Display the referenced entities rendered by entity_view().'),
-      'field types' => array('entityreference'),
+      'field types' => array('entityreference', 'taxonomy_term_reference'),
       'settings' => array(
         'view_mode' => 'default',
         'links' => TRUE,
@@ -1149,6 +1175,7 @@ function entityreference_field_formatter_info() {
 function entityreference_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
+  $field_type_settings = entityreference_field_type_settings($field);
   $element = array();
 
   if ($display['type'] == 'entityreference_label') {
@@ -1167,7 +1194,7 @@ function entityreference_field_formatter_settings_form($field, $instance, $view_
   }
 
   if ($display['type'] == 'entityreference_entity_view') {
-    $entity_info = entity_get_info($field['settings']['target_type']);
+    $entity_info = entity_get_info($field_type_settings['entity_type']);
     $options = array('default' => t('Default'));
     if (!empty($entity_info['view modes'])) {
       foreach ($entity_info['view modes'] as $view_mode => $view_mode_settings) {
@@ -1205,6 +1232,7 @@ function entityreference_field_formatter_settings_form($field, $instance, $view_
 function entityreference_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
+  $field_type_settings = entityreference_field_type_settings($field);
 
   $summary = array();
 
@@ -1214,7 +1242,7 @@ function entityreference_field_formatter_settings_summary($field, $instance, $vi
   }
 
   if ($display['type'] == 'entityreference_entity_view') {
-    $entity_info = entity_get_info($field['settings']['target_type']);
+    $entity_info = entity_get_info($field_type_settings['entity_type']);
     $view_mode_label = $settings['view_mode'] == 'default' ? t('Default') : $settings['view_mode'];
     if (isset($entity_info['view modes'][$settings['view_mode']]['label'])) {
       $view_mode_label = $entity_info['view modes'][$settings['view_mode']]['label'];
@@ -1231,19 +1259,22 @@ function entityreference_field_formatter_settings_summary($field, $instance, $vi
  * Implements hook_field_formatter_prepare_view().
  */
 function entityreference_field_formatter_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items, $displays) {
+  $field_type_settings = entityreference_field_type_settings($field);
+  $target_type = $field_type_settings['entity_type'];
+  $column = $field_type_settings['column'];
   $target_ids = array();
 
   // Collect every possible entity attached to any of the entities.
   foreach ($entities as $id => $entity) {
     foreach ($items[$id] as $delta => $item) {
-      if (isset($item['target_id'])) {
-        $target_ids[] = $item['target_id'];
+      if (isset($item[$column])) {
+        $target_ids[] = $item[$column];
       }
     }
   }
 
   if ($target_ids) {
-    $target_entities = entity_load($field['settings']['target_type'], $target_ids);
+    $target_entities = entity_load($target_type, $target_ids);
   }
   else {
     $target_entities = array();
@@ -1255,12 +1286,12 @@ function entityreference_field_formatter_prepare_view($entity_type, $entities, $
 
     foreach ($items[$id] as $delta => $item) {
       // Check whether the referenced entity could be loaded.
-      if (isset($item['target_id']) && isset($target_entities[$item['target_id']])) {
+      if (isset($target_entities[$item[$column]]) && isset($target_entities[$item[$column]])) {
         // Replace the instance value with the term data.
-        $items[$id][$delta]['entity'] = $target_entities[$item['target_id']];
+        $items[$id][$delta]['entity'] = $target_entities[$item[$column]];
         // Check whether the user has access to the referenced entity.
-        $has_view_access = (entity_access('view', $field['settings']['target_type'], $target_entities[$item['target_id']]) !== FALSE);
-        $has_update_access = (entity_access('update', $field['settings']['target_type'], $target_entities[$item['target_id']]) !== FALSE);
+        $has_view_access = (entity_access('view', $target_type, $target_entities[$item[$column]]) !== FALSE);
+        $has_update_access = (entity_access('update', $target_type, $target_entities[$item[$column]]) !== FALSE);
         $items[$id][$delta]['access'] = ($has_view_access || $has_update_access);
       }
       // Otherwise, unset the instance value, since the entity does not exist.
@@ -1283,6 +1314,9 @@ function entityreference_field_formatter_prepare_view($entity_type, $entities, $
 function entityreference_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $result = array();
   $settings = $display['settings'];
+  $field_type_settings = entityreference_field_type_settings($field);
+  $target_type = $field_type_settings['entity_type'];
+  $column = $field_type_settings['column'];
 
   switch ($display['type']) {
     case 'entityreference_label':
@@ -1304,7 +1338,7 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
 
         // If the link is allowed and the entity has a uri, display a link.
         // Note the assignment ($uri = ) here is intended to be an assignment.
-        if ($display_link && ($uri = entity_uri($field['settings']['target_type'], $item['entity']))) {
+        if ($display_link && ($uri = entity_uri($target_type, $item['entity']))) {
           $result[$delta] = array('#markup' => l($label, $uri['path'], $uri['options']));
         }
         else {
@@ -1320,7 +1354,7 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
           continue;
         }
 
-        $result[$delta] = array('#markup' => check_plain($item['target_id']));
+        $result[$delta] = array('#markup' => check_plain($item[$column]));
       }
       break;
 
@@ -1340,15 +1374,15 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
         static $depth = 0;
         $depth++;
         if ($depth > 20) {
-          throw new EntityReferenceRecursiveRenderingException(t('Recursive rendering detected when rendering entity @entity_type(@entity_id). Aborting rendering.', array('@entity_type' => $entity_type, '@entity_id' => $item['target_id'])));
+          throw new EntityReferenceRecursiveRenderingException(t('Recursive rendering detected when rendering entity @entity_type(@entity_id). Aborting rendering.', array('@entity_type' => $target_type, '@entity_id' => $item[$column])));
         }
 
         $target_entity = clone $item['entity'];
         unset($target_entity->content);
-        $result[$delta] = entity_view($field['settings']['target_type'], array($item['target_id'] => $target_entity), $settings['view_mode'], $target_langcode, FALSE);
+        $result[$delta] = entity_view($target_type, array($item[$column] => $target_entity), $settings['view_mode'], $langcode, FALSE);
 
-        if (empty($settings['links']) && isset($result[$delta][$field['settings']['target_type']][$item['target_id']]['links'])) {
-          $result[$delta][$field['settings']['target_type']][$item['target_id']]['links']['#access'] = FALSE;
+        if (empty($settings['links']) && isset($result[$delta][$target_type][$column]['links'])) {
+          $result[$delta][$target_type][$item[$column]]['links']['#access'] = FALSE;
         }
         $depth = 0;
       }
