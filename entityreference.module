@@ -93,6 +93,20 @@ function entityreference_flush_caches() {
 }
 
 /**
+ * Implements hook_theme().
+ */
+function entityreference_theme($existing, $type, $theme, $path) {
+  return array(
+    'entityreference_label' => array(
+      'variables' => array('label' => NULL, 'item' => NULL, 'settings' => NULL, 'uri' => NULL),
+    ),
+    'entityreference_entity_id' => array(
+      'variables' => array('item' => NULL, 'settings' => NULL),
+    ),
+  );
+}
+
+/**
  * Implements hook_menu().
  */
 function entityreference_menu() {
@@ -1336,14 +1350,23 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
         // Check if the settings and access allow a link to be displayed.
         $display_link = $display['settings']['link'] && $item['access'];
 
+        $uri = NULL;
+
         // If the link is allowed and the entity has a uri, display a link.
-        // Note the assignment ($uri = ) here is intended to be an assignment.
-        if ($display_link && ($uri = entity_uri($target_type, $item['entity']))) {
-          $result[$delta] = array('#markup' => l($label, $uri['path'], $uri['options']));
+        if ($display_link) {
+          $uri = entity_uri($target_type, $item['entity']);
         }
-        else {
-          $result[$delta] = array('#markup' => check_plain($label));
-        }
+
+        $result[$delta] = array(
+          '#theme' => 'entityreference_label',
+          '#label' => $label,
+          '#item' => $item,
+          '#uri' => $uri,
+          '#settings' => array(
+            'display' => $display['settings'],
+            'field' => $field['settings'],
+          ),
+        );
       }
       break;
 
@@ -1354,7 +1377,14 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
           continue;
         }
 
-        $result[$delta] = array('#markup' => check_plain($item[$column]));
+        $result[$delta] = array(
+          '#theme' => 'entityreference_entity_id',
+          '#item' => $item,
+          '#settings' => array(
+            'display' => $display['settings'],
+            'field' => $field['settings'],
+          ),
+        );
       }
       break;
 
@@ -1405,4 +1435,45 @@ function entityreference_views_api() {
     'api' => 3,
     'path' => drupal_get_path('module', 'entityreference') . '/views',
   );
+}
+
+/**
+ * Theme label.
+ *
+ * @ingroup themeable.
+ */
+function theme_entityreference_label($vars) {
+  $label = $vars['label'];
+  $settings = $vars['settings'];
+  $item = $vars['item'];
+  $uri = $vars['uri'];
+
+  $output = '';
+
+  // If the link is to be displayed and the entity has a uri, display a link.
+  // Note the assignment ($url = ) here is intended to be an assignment.
+  if ($settings['display']['link'] && isset($uri['path'])) {
+    $output .= l($label, $uri['path'], $uri['options']);
+  }
+  else {
+    $output .= check_plain($label);
+  }
+
+  return $output;
+}
+
+/**
+ * Theme entity_id
+ *
+ * @ingroup themeable.
+ */
+function theme_entityreference_entity_id($vars) {
+  $settings = $vars['settings'];
+  $item = $vars['item'];
+
+  $output = '';
+
+  $output = check_plain($item['target_id']);
+
+  return $output;
 }
