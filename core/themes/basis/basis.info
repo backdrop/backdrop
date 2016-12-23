@@ -23,7 +23,6 @@ stylesheets[all][] = css/component/breadcrumb.css
 stylesheets[all][] = css/component/pager.css
 stylesheets[all][] = css/component/hero.css
 stylesheets[all][] = css/component/teasers.css
-stylesheets[all][] = css/utility.css
 stylesheets[all][] = css/skin.css
 stylesheets[print][] = css/print.css
 
