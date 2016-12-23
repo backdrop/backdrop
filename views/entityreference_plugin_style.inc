@@ -26,7 +26,7 @@ class entityreference_plugin_style extends views_plugin_style {
         '#title' => t('Search fields'),
         '#options' => $options,
         '#required' => TRUE,
-        '#default_value' => $this->options['search_fields'],
+        '#default_value' => isset($this->options['search_fields']) ? $this->options['search_fields'] : array(),
         '#description' => t('Select the field(s) that will be searched when using the autocomplete widget.'),
         '#weight' => -3,
       );
