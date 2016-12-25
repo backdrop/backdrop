@@ -23,7 +23,18 @@
                     "type": "none"
                 },
                 "exposed_form": {
-                    "type": "basic"
+                    "type": "basic",
+                    "options": {
+                        "submit_button": "Filter",
+                        "reset_button": 0,
+                        "reset_button_label": "Reset",
+                        "exposed_sorts_label": "Sort by",
+                        "expose_sort_order": 1,
+                        "sort_asc_label": "Asc",
+                        "sort_desc_label": "Desc",
+                        "autosubmit": 0,
+                        "autosubmit_hide": 1
+                    }
                 },
                 "pager": {
                     "type": "full",
@@ -676,7 +687,7 @@
                         "group_type": "group",
                         "ui_name": "",
                         "operator": "=",
-                        "value": false,
+                        "value": "All",
                         "group": 1,
                         "exposed": true,
                         "expose": {
