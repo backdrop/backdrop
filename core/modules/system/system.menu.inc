@@ -19,12 +19,15 @@ function system_menu_block_defaults($menu_name) {
     'level' => 1,
     'menu_name' => $menu_name,
     'style' => NULL,
+    'menu_toggle_hash' => backdrop_random_key(),
   );
   if ($menu_name == 'main-menu') {
     $defaults['depth'] = 1;
+    $defaults['menu_toggle'] = 1;
   }
   else {
     $defaults['depth'] = 0;
+    $defaults['menu_toggle'] = 0;
   }
   return $defaults;
 }
@@ -101,6 +104,16 @@ function system_menu_block_form($config) {
       ),
     ),
   );
+  $form['menu_toggle'] = array(
+    '#type' => 'checkbox',
+    '#title' => 'Display menu toggle button on small screens',
+    '#default_value' => $config['menu_toggle'],
+    '#description' => t('When enabled, a menu toggle button—commonly known as a "hamburger" icon—will appear on small screens and allow the user to toggle the visibility of the menu.'),
+  );
+  $form['menu_toggle_hash'] = array(
+    '#type' => 'hidden',
+    '#default_value' => $config['menu_toggle_hash'],
+  );
 
   return $form;
 }
@@ -163,6 +176,10 @@ function system_menu_block_build(array $config) {
       if ($config['style'] === 'dropdown') {
         $data['content']['#attached']['library'][] = array('system', 'smartmenus');
       }
+    }
+    if (!empty($config['menu_toggle']) && $config['menu_toggle'] == TRUE) {
+      $data['content']['#attached']['css'][] = backdrop_get_path('module', 'system') . '/css/menu-toggle.theme.css';
+      $data['content']['#prefix'] = theme('menu_toggle', array('#enabled' => $config['menu_toggle'], 'hash' => $config['menu_toggle_hash']));
     }
     if (!empty($config['style_settings'])) {
       $data['content']['#wrapper_attributes']['data-menu-style'] = backdrop_json_encode($config['style_settings']);
