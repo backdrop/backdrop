@@ -7604,6 +7604,9 @@ function backdrop_common_theme() {
     'menu_local_tasks' => array(
       'variables' => array('primary' => array(), 'secondary' => array()),
     ),
+    'menu_toggle' => array(
+      'variables' => array('#enabled' => NULL, 'hash' => NULL),
+    ),
     // From form.inc.
     'select' => array(
       'render element' => 'element',
