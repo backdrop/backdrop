@@ -1837,6 +1837,32 @@ function theme_menu_local_actions($variables) {
 }
 
 /**
+ * Returns rendered HTML for a menu toggle.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *     - #enabled: A boolean indicating whether the menu toggle is active.
+ *     - hash: Unique string id to match the label to the input.
+ *
+ * @see theme_menu_toggle()
+ * @ingroup themeable
+ */
+function theme_menu_toggle($variables) {
+  $output = '';
+  if ($variables['#enabled']) {
+    $output = '<input id="menu-toggle--state-' . $variables['hash'] . '" class="menu-toggle--state element-invisible" type="checkbox"  aria-controls="' . $variables['hash'] . '" />';
+    $output .= '<label class="menu-toggle__button" for="menu-toggle--state-' . $variables['hash'] . '">';
+    $output .= '<span class="menu-toggle__button-icon"></span><span class="menu-toggle__button-text">';
+    $output .= t('Menu');
+    $output .= '</span>';
+    $output .= '<span class="menu-toggle__assistive-text element-invisible">';
+    $output .= t('Toggle main menu visibility');
+    $output .= '</span></label>';
+  }
+  return $output;
+}
+
+/**
  * Gets the custom theme for the current page, if there is one.
  *
  * @param $initialize
