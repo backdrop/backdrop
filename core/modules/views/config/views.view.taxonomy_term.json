@@ -7,7 +7,6 @@
     "disabled": true,
     "base_table": "node",
     "human_name": "Taxonomy term",
-    "core": 7,
     "display": {
         "default": {
             "display_title": "Master",
