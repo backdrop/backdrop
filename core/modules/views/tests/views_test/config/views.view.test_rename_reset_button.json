@@ -7,7 +7,6 @@
     "disabled": false,
     "base_table": "node",
     "human_name": "",
-    "core": 0,
     "display": {
         "default": {
             "display_title": "Master",
