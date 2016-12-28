@@ -106,10 +106,6 @@ function system_theme() {
       //'variables' => array('content' => NULL, 'layout' => NULL, 'block' => NULL, 'style' => NULL, 'settings' => array(), 'attributes' => array()),
       'base hook' => 'block',
     ) + $base,
-    'block__system__main_menu' => array(
-      'template' => 'templates/block--system--main-menu',
-      'base hook' => 'block',
-    ) + $base,
     'tree_table' => array(
       'variables' => array(
         'header' => array(),
@@ -139,6 +135,11 @@ function system_theme() {
         'show_restricted' => FALSE,
         'recursion_limit' => 3,
         'dialog' => TRUE,
+      ),
+    ) + $base,
+    'menu_toggle' => array(
+      'variables' => array(
+        'enabled' => NULL
       ),
     ) + $base,
   ));
