@@ -206,13 +206,13 @@ class ImageToolkitGdTestCase extends BackdropWebTestCase {
   protected $height = 20;
 
   protected function checkRequirements() {
+    $errors = parent::checkRequirements();
+
     image_get_available_toolkits();
     if (!function_exists('image_gd_check_settings') || !image_gd_check_settings()) {
-      return array(
-        'Image manipulations for the GD toolkit cannot run because the GD toolkit is not available.',
-      );
+      $errors[] = 'Image manipulations for the GD toolkit cannot run because the GD toolkit is not available.';
     }
-    return parent::checkRequirements();
+    return $errors;
   }
 
   /**
