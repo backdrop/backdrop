@@ -2622,6 +2622,9 @@ class LocaleDateFormatsFunctionalTest extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('locale');
 
+    // Make sure we're using UTC
+    date_default_timezone_set('UTC');
+
     // Create and login user.
     $admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer languages', 'access administration pages', 'create post content'));
     $this->backdropLogin($admin_user);
