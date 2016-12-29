@@ -137,11 +137,6 @@ function system_theme() {
         'dialog' => TRUE,
       ),
     ) + $base,
-    'menu_toggle' => array(
-      'variables' => array(
-        'enabled' => NULL
-      ),
-    ) + $base,
   ));
 }
 
