@@ -573,10 +573,6 @@ abstract class BackdropTestCase {
     }
     $missing_requirements = $this->checkRequirements();
     if (!empty($missing_requirements)) {
-      $missing_requirements_object = new ReflectionObject($this);
-      $caller = array(
-        'file' => $missing_requirements_object->getFileName(),
-      );
       foreach ($missing_requirements as $missing_requirement) {
         $this->fail($missing_requirement, 'Requirements check.');
       }
