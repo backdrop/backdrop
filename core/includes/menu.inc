@@ -1837,7 +1837,7 @@ function theme_menu_local_actions($variables) {
 }
 
 /**
- * Returns rendered HTML for the local actions.
+ * Returns rendered HTML for a menu toggle.
  *
  * @param $variables
  *   An associative array containing:
