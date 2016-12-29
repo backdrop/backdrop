@@ -578,7 +578,7 @@ abstract class BackdropTestCase {
         'file' => $missing_requirements_object->getFileName(),
       );
       foreach ($missing_requirements as $missing_requirement) {
-        BackdropTestCase::insertAssert($this->testId, $class, FALSE, $missing_requirement, 'Requirements check.', $caller);
+        $this->fail($missing_requirement, 'Requirements check.');
       }
     }
     else {
