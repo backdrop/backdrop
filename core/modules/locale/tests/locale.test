@@ -2627,6 +2627,16 @@ class LocaleDateFormatsFunctionalTest extends BackdropWebTestCase {
     $this->backdropLogin($admin_user);
   }
 
+  protected function checkRequirements() {
+    $errors = parent::checkRequirements();
+
+    if (!extension_loaded('intl')) {
+      $errors[] = 'PHP intl extention is not present.';
+    }
+
+    return $errors;
+  }
+
   /**
    * Functional tests for localizing date formats.
    */
