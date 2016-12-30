@@ -94,7 +94,7 @@ class views_handler_field_bulk_form extends views_handler_field {
   function views_form(&$form, &$form_state) {
     // Check whether the view returns any results before rendering the bulk
     // operations form.
-    if ((count($this->view->result)) == 0) {
+    if ((count($this->view->result)) !== 0) {
       // Add the tableselect javascript.
       $form['#attached']['js'][] = 'core/misc/tableselect.js';
 
