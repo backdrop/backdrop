@@ -1,7 +1,7 @@
 {
     "_config_name": "views.view.manage_comments",
     "name": "manage_comments",
-    "description": "Provides a list of all commnets on the site. Allows actions such as finding all comments by a specific user, listing and then publishing unapproved comments or unpublishing published ones etc.",
+    "description": "Provides a list of all comments on the site. Allows actions such as finding all comments by a specific user and approving, unpublishing or deleting comments.",
     "module": "comment",
     "tag": "default",
     "disabled": false,
