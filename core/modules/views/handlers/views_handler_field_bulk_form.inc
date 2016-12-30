@@ -92,48 +92,53 @@ class views_handler_field_bulk_form extends views_handler_field {
    *   An associative array containing the current state of the form.
    */
   function views_form(&$form, &$form_state) {
-    // Add the tableselect javascript.
-    $form['#attached']['js'][] = 'core/misc/tableselect.js';
+    // Check whether the view returns any results before rendering the bulk
+    // operations form.
+    if ((count($this->view->result)) == 0) {
+      // Add the tableselect javascript.
+      $form['#attached']['js'][] = 'core/misc/tableselect.js';
 
-    // Render checkboxes for all rows.
-    $form[$this->options['id']]['#tree'] = TRUE;
-    foreach ($this->view->result as $row_index => $row) {
-      $form[$this->options['id']][$row_index] = array(
-        '#type' => 'checkbox',
-        // We are not able to determine a main "title" for each row, so we can
-        // only output a generic label.
-        '#title' => t('Update this item'),
-        '#title_display' => 'invisible',
-        '#return_value' => $row->{$this->field_alias},
-        '#default_value' => !empty($form_state['values'][$this->options['id']][$row_index]) ? 1 : NULL,
+      // Render checkboxes for all rows.
+      $form[$this->options['id']]['#tree'] = TRUE;
+      foreach ($this->view->result as $row_index => $row) {
+        $form[$this->options['id']][$row_index] = array(
+          '#type' => 'checkbox',
+          // We are not able to determine a main "title" for each row, so we can
+          // only output a generic label.
+          '#title' => t('Update this item'),
+          '#title_display' => 'invisible',
+          '#return_value' => $row->{$this->field_alias},
+          '#default_value' => !empty($form_state['values'][$this->options['id']][$row_index]) ? 1 : NULL,
+        );
+      }
+
+      // Ensure a consistent container for filters/operations in the view
+      // header.
+      $form['header'] = array(
+        '#weight' => -100,
       );
+
+      // Build the bulk operations action widget for the header.
+      // Allow themes to apply .container-inline on this separate container.
+      $form['header'][$this->options['id']] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Operations'),
+        '#attributes' => array('class' => array('views-bulk-form')),
+        '#id' => NULL,
+      );
+      $form['header'][$this->options['id']]['action'] = array(
+        '#type' => 'select',
+        '#options' => $this->get_bulk_options(),
+        '#empty_option' => '- ' . t('Choose an action') . ' -',
+      );
+
+      // Set the form actions container in the header.
+      $actions['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Execute'),
+      );
+      $form['header'][$this->options['id']]['actions'] = $actions;
     }
-
-    // Ensure a consistent container for filters/operations in the view header.
-    $form['header'] = array(
-      '#weight' => -100,
-    );
-
-    // Build the bulk operations action widget for the header.
-    // Allow themes to apply .container-inline on this separate container.
-    $form['header'][$this->options['id']] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Operations'),
-      '#attributes' => array('class' => array('views-bulk-form')),
-      '#id' => NULL,
-    );
-    $form['header'][$this->options['id']]['action'] = array(
-      '#type' => 'select',
-      '#options' => $this->get_bulk_options(),
-      '#empty_option' => '- ' . t('Choose an action') . ' -',
-    );
-
-    // Set the form actions container in the header.
-    $actions['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Execute'),
-    );
-    $form['header'][$this->options['id']]['actions'] = $actions;
   }
 
   /**
