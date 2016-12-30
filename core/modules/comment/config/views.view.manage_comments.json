@@ -865,6 +865,20 @@
                     },
                     "default": "changed",
                     "empty_table": 0
+                },
+                "empty": {
+                    "area_text_custom": {
+                        "id": "area_text_custom",
+                        "table": "views",
+                        "field": "area_text_custom",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "label": "",
+                        "empty": true,
+                        "content": "No comments found.",
+                        "tokenize": 0
+                    }
                 }
             }
         },
