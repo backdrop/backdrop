@@ -1699,8 +1699,9 @@ function _filter_record_file_usage(array $fids, EntityInterface $entity) {
  */
 function _filter_delete_file_usage(array $fids, EntityInterface $entity, $count) {
   foreach ($fids as $fid) {
-    $file = file_load($fid);
-    file_usage_delete($file, 'filter', $entity->entityType(), $entity->id(), $count);
+    if ($file = file_load($fid)) {
+      file_usage_delete($file, 'filter', $entity->entityType(), $entity->id(), $count);
+    }
   }
 }
 
