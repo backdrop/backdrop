@@ -977,8 +977,17 @@ function file_icon_map(File $file) {
  *   (optional) The name of a field type. If given, limits the reference check
  *   to fields of the given type.
  *
- * @return
- *   An integer value.
+ * @return array
+ *   A nested array in the following format:
+ *   - field_name => field_references
+ *     - entity_type => type_references
+ *       - id => reference
+ *   The first level key contains the field names.
+ *   The second level key contains the entity type.
+ *   The third level key contains entity ID.
+ *
+ * @see file_file_download()
+ * @see file_file_predelete()
  */
 function file_get_file_references(File $file, $field = NULL, $age = FIELD_LOAD_REVISION, $field_type = 'file') {
   $references = backdrop_static(__FUNCTION__, array());
@@ -996,21 +1005,6 @@ function file_get_file_references(File $file, $field = NULL, $age = FIELD_LOAD_R
   }
 
   return isset($field) ? $references[$field['field_name']] : array_filter($references);
-}
-
-/**
- * Returns the file type name of the passed file or file type string.
- *
- * @param $file
- *   A file object or string that indicates the file type to return.
- *
- * @return
- *   The file type name or FALSE if the file type is not found.
- */
-function file_type_get_name($file) {
-  $type = is_object($file) ? $file->type : $file;
-  $info = entity_get_info('file');
-  return isset($info['bundles'][$type]['label']) ? $info['bundles'][$type]['label'] : FALSE;
 }
 
 /**
