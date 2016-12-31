@@ -163,8 +163,14 @@ function _node_mass_update_batch_finished($success, $results, $operations) {
  * @ingroup forms
  */
 function node_multiple_delete_confirm($form, &$form_state) {
-  if (isset($_SESSION['node_delete_action']['timestamp']) && (REQUEST_TIME - $_SESSION['node_delete_action']['timestamp'] < 6000)) {
+  if (isset($form_state['nids'])) {
+    $nids = $form_state['nids'];
+  }
+  elseif (isset($_SESSION['node_delete_action']['timestamp']) && (REQUEST_TIME - $_SESSION['node_delete_action']['timestamp'] < 6000)) {
     $nids = $_SESSION['node_delete_action']['nids'];
+    $form_state['nids'] = $nids;
+    $form_state['cache'] = TRUE;
+    unset($_SESSION['node_delete_action']);
   }
   else {
     $nids = array();
@@ -205,10 +211,6 @@ function node_multiple_delete_confirm_submit($form, &$form_state) {
   cache_clear_all();
   $count = count($form_state['values']['nodes']);
   watchdog('content', 'Deleted @count posts.', array('@count' => $count));
-
-  if (isset($_SESSION['node_delete_action'])) {
-    unset($_SESSION['node_delete_action']);
-  }
 
   backdrop_set_message(format_plural($count, 'Deleted 1 post.', 'Deleted @count posts.'));
   $form_state['redirect'] = 'admin/content';

@@ -14,7 +14,7 @@ function file_action_info() {
   $actions['file_delete'] = array(
     'label' => t('Delete file(s)'),
     'type' => 'file',
-    'callback' => 'file_delete_file_action',
+    'callback' => 'file_delete_action',
     'file' => 'file.actions.inc',
   );
 
@@ -45,16 +45,13 @@ function file_autoload_info() {
 function file_permission() {
   return array(
     'access file overview' => array(
-      'title' => t('Access the files overview page'),
-      'description' => t('Get an overview of <a href="@url">all files</a>.', array('@url' => url('admin/content/files'))),
-    ),
-    'access files' => array(
-      'title' => t('Access any file'),
-      'description' => t('View files as their own pages.'),
+      'title' => t('Access the manage files overview'),
+      'description' => t('The <a href="@url">manage files overview page</a> shows all files uploaded to the site.', array('@url' => url('admin/content/files'))),
     ),
     'delete files' => array(
       'title' => t('Delete any file'),
-      'description' => t('Delete files from the file administration listing.'),
+      'description' => t('Allow deleting files directly from the manage files overview page.'),
+      'restrict access' => TRUE,
     ),
   );
 }
@@ -87,6 +84,15 @@ function file_menu() {
     'access arguments' => array('delete files'),
     'weight' => 1,
     'type' => MENU_CALLBACK,
+    'file' => 'file.pages.inc',
+  );
+
+  $items['admin/content/files/delete'] = array(
+    'title' => 'Confirm deleting multiple files',
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('file_multiple_delete_confirm'),
+    'access arguments' => array('delete files'),
     'file' => 'file.pages.inc',
   );
 
@@ -391,6 +397,22 @@ function file_progress_implementation() {
  */
 function file_file_predelete(File $file) {
   // TODO: Remove references to a file that is in-use.
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function file_admin_paths() {
+  // Re-use the node admin theme setting for files.
+  if (config_get('system.core', 'node_admin_theme')) {
+    $paths = array(
+      'file/*/delete' => TRUE,
+    );
+    return $paths;
+  }
+  else {
+    return array();
+  }
 }
 
 /**

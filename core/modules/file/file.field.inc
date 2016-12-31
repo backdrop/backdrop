@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Field module functionality for the File module.
@@ -235,7 +234,9 @@ function file_field_insert($entity_type, $entity, $field, $instance, $langcode, 
 
   // Add a new usage of each uploaded file.
   foreach ($items as $item) {
-    file_usage_add(file_load($item['fid']), 'file', $entity_type, $id);
+    if ($file = file_load($item['fid'])) {
+      file_usage_add($file, 'file', $entity_type, $id);
+    }
   }
 }
 
@@ -251,7 +252,9 @@ function file_field_update($entity_type, $entity, $field, $instance, $langcode, 
   // deletion of previous file usages are necessary.
   if (!empty($entity->revision)) {
     foreach ($items as $item) {
-      file_usage_add(file_load($item['fid']), 'file', $entity_type, $id);
+      if ($file = file_load($item['fid'])) {
+        file_usage_add($file, 'file', $entity_type, $id);
+      }
     }
     return;
   }
@@ -280,7 +283,9 @@ function file_field_update($entity_type, $entity, $field, $instance, $langcode, 
   // Add new usage entries for newly added files.
   foreach ($items as $item) {
     if (!in_array($item['fid'], $original_fids)) {
-      file_usage_add(file_load($item['fid']), 'file', $entity_type, $id);
+      if ($file = file_load($item['fid'])) {
+        file_usage_add($file, 'file', $entity_type, $id);
+      }
     }
   }
 }
