@@ -29,7 +29,7 @@
                     "type": "basic"
                 },
                 "pager": {
-                    "type": "some",
+                    "type": "full",
                     "options": {
                         "items_per_page": "100"
                     }
@@ -45,13 +45,7 @@
                         "group_type": "group",
                         "ui_name": "",
                         "label": "Operations",
-                        "element_type": "",
-                        "element_class": "",
-                        "element_label_type": "",
-                        "element_label_class": "",
-                        "element_label_colon": 1,
-                        "element_wrapper_type": "",
-                        "element_wrapper_class": "",
+                        "element_label_colon": 0,
                         "element_default_classes": 0,
                         "empty": "",
                         "hide_empty": 0,
@@ -77,14 +71,8 @@
                         "ui_name": "",
                         "label": "Type",
                         "exclude": 0,
-                        "element_type": "",
-                        "element_class": "",
-                        "element_label_type": "",
-                        "element_label_class": "",
-                        "element_label_colon": 1,
-                        "element_wrapper_type": "",
-                        "element_wrapper_class": "",
-                        "element_default_classes": 0,
+                        "element_label_colon": 0,
+                        "element_default_classes": 1,
                         "empty": "",
                         "hide_empty": 0,
                         "empty_zero": 0,
@@ -101,14 +89,8 @@
                         "ui_name": "",
                         "label": "Uploaded",
                         "exclude": 0,
-                        "element_type": "",
-                        "element_class": "",
-                        "element_label_type": "",
-                        "element_label_class": "",
-                        "element_label_colon": 1,
-                        "element_wrapper_type": "",
-                        "element_wrapper_class": "",
-                        "element_default_classes": 0,
+                        "element_label_colon": 0,
+                        "element_default_classes": 1,
                         "empty": "",
                         "hide_empty": 0,
                         "empty_zero": 0,
@@ -126,14 +108,8 @@
                         "ui_name": "",
                         "label": "Size",
                         "exclude": 0,
-                        "element_type": "",
-                        "element_class": "",
-                        "element_label_type": "",
-                        "element_label_class": "",
-                        "element_label_colon": 1,
-                        "element_wrapper_type": "",
-                        "element_wrapper_class": "",
-                        "element_default_classes": 0,
+                        "element_label_colon": 0,
+                        "element_default_classes": 1,
                         "empty": "",
                         "hide_empty": 0,
                         "empty_zero": 0,
@@ -149,18 +125,32 @@
                         "ui_name": "",
                         "label": "Status",
                         "exclude": 0,
-                        "element_type": "",
-                        "element_class": "",
-                        "element_label_type": "",
-                        "element_label_class": "",
-                        "element_label_colon": 1,
-                        "element_wrapper_type": "",
-                        "element_wrapper_class": "",
-                        "element_default_classes": 0,
+                        "element_label_colon": 0,
+                        "element_default_classes": 1,
                         "empty": "",
                         "hide_empty": 0,
                         "empty_zero": 0,
                         "hide_alter_empty": 1
+                    },
+                    "count": {
+                        "id": "count",
+                        "table": "file_usage",
+                        "field": "count",
+                        "relationship": "none",
+                        "group_type": "sum",
+                        "ui_name": "",
+                        "label": "Use count",
+                        "exclude": 0,
+                        "element_label_colon": 0,
+                        "element_default_classes": 1,
+                        "empty": "",
+                        "hide_empty": 0,
+                        "empty_zero": 0,
+                        "hide_alter_empty": 1,
+                        "set_precision": false,
+                        "precision": 0,
+                        "decimal": ".",
+                        "separator": ","
                     },
                     "delete": {
                         "id": "delete",
@@ -171,13 +161,7 @@
                         "ui_name": "",
                         "label": "",
                         "exclude": 1,
-                        "element_type": "",
-                        "element_class": "",
-                        "element_label_type": "",
-                        "element_label_class": "",
-                        "element_label_colon": false,
-                        "element_wrapper_type": "",
-                        "element_wrapper_class": "",
+                        "element_label_colon": 0,
                         "element_default_classes": 0,
                         "empty": "",
                         "hide_empty": 0,
@@ -194,13 +178,7 @@
                         "ui_name": "",
                         "label": "Operations",
                         "exclude": 0,
-                        "element_type": "",
-                        "element_class": "",
-                        "element_label_type": "",
-                        "element_label_class": "",
-                        "element_label_colon": 1,
-                        "element_wrapper_type": "",
-                        "element_wrapper_class": "",
+                        "element_label_colon": 0,
                         "element_default_classes": 0,
                         "empty": "",
                         "hide_empty": 0,
@@ -218,7 +196,32 @@
                         "destination": 1
                     }
                 },
-                "filters": [],
+                "filters": {
+                    "filename": {
+                        "id": "filename",
+                        "table": "file_managed",
+                        "field": "filename",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "operator": "contains",
+                        "value": "",
+                        "group": "1",
+                        "exposed": true,
+                        "expose": {
+                            "operator_id": "filename_op",
+                            "label": "File name",
+                            "description": "",
+                            "use_operator": 0,
+                            "operator": "filename_op",
+                            "identifier": "filename",
+                            "required": 0,
+                            "remember": 0,
+                            "multiple": false
+                        },
+                        "is_grouped": false
+                    }
+                },
                 "sorts": [],
                 "title": "Content",
                 "empty": {
@@ -235,6 +238,89 @@
                         "format": "filtered_html",
                         "tokenize": 0
                     }
+                },
+                "group_by": 1,
+                "style_options": {
+                    "grouping": [],
+                    "row_class": "",
+                    "default_row_class": 0,
+                    "row_class_special": 0,
+                    "override": 1,
+                    "sticky": 0,
+                    "caption": "",
+                    "summary": "",
+                    "columns": {
+                        "bulk_form": "bulk_form",
+                        "filename": "filename",
+                        "filemime": "filemime",
+                        "timestamp": "timestamp",
+                        "filesize": "filesize",
+                        "status": "status",
+                        "count": "count",
+                        "delete": "delete",
+                        "dropbutton": "dropbutton"
+                    },
+                    "info": {
+                        "bulk_form": {
+                            "align": "",
+                            "separator": "",
+                            "empty_column": 0
+                        },
+                        "filename": {
+                            "sortable": 1,
+                            "default_sort_order": "asc",
+                            "align": "",
+                            "separator": "",
+                            "empty_column": 0
+                        },
+                        "filemime": {
+                            "sortable": 0,
+                            "default_sort_order": "asc",
+                            "align": "",
+                            "separator": "",
+                            "empty_column": 0
+                        },
+                        "timestamp": {
+                            "sortable": 1,
+                            "default_sort_order": "desc",
+                            "align": "",
+                            "separator": "",
+                            "empty_column": 0
+                        },
+                        "filesize": {
+                            "sortable": 1,
+                            "default_sort_order": "desc",
+                            "align": "",
+                            "separator": "",
+                            "empty_column": 0
+                        },
+                        "status": {
+                            "sortable": 1,
+                            "default_sort_order": "asc",
+                            "align": "",
+                            "separator": "",
+                            "empty_column": 0
+                        },
+                        "count": {
+                            "sortable": 1,
+                            "default_sort_order": "desc",
+                            "align": "views-align-center",
+                            "separator": "",
+                            "empty_column": 0
+                        },
+                        "delete": {
+                            "align": "",
+                            "separator": "",
+                            "empty_column": 0
+                        },
+                        "dropbutton": {
+                            "align": "",
+                            "separator": "",
+                            "empty_column": 0
+                        }
+                    },
+                    "default": "timestamp",
+                    "empty_table": 1
                 }
             }
         },

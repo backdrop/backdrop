@@ -124,6 +124,7 @@ class File extends Entity {
   public function uri() {
     return array(
       'path' => $this->uri,
+      'options' => array(),
     );
   }
 }
