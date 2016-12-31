@@ -1245,6 +1245,8 @@ function image_effect_apply($image, $effect) {
  * @param $value
  * @param $current_pixels
  * @param $new_pixels
+ *
+ * return int
  */
 function image_filter_keyword($value, $current_pixels, $new_pixels) {
   switch ($value) {
@@ -1254,10 +1256,10 @@ function image_filter_keyword($value, $current_pixels, $new_pixels) {
 
     case 'bottom':
     case 'right':
-      return $current_pixels - $new_pixels;
+      return (int) round($current_pixels - $new_pixels);
 
     case 'center':
-      return $current_pixels / 2 - $new_pixels / 2;
+      return (int) round($current_pixels / 2 - $new_pixels / 2);
   }
-  return $value;
+  return (int) $value;
 }
