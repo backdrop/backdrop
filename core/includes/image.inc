@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * API for manipulating images.
@@ -449,6 +448,92 @@ function image_save(stdClass $image, $destination = NULL) {
     }
   }
   return FALSE;
+}
+
+/**
+ * Determines the correct color index value for the background.
+ *
+ * @param $image
+ *   An image object. The $image->resource, $image->info['width'], and
+ *   $image->info['height'] values will be modified by this call.
+ * @param $background
+ *   A string specifying an RGBA color in the formats: '#RGB', 'RGB', '#RGBA',
+ *   'RGBA', '#RRGGBB', 'RRGGBB', '#RRGGBBAA', 'RRGGBBAA' or '0xRRGGBBAA'.
+ *
+ * @return $background
+ *   An hexadecimal color identifier or FALSE if the allocation failed. If no
+ *   color is provided this will default to transparent For images that support
+ *   transparency, otherwise it will be white.
+ *
+ * @see image_hex2rgba().
+ */
+function image_get_colorindex(stdClass $image, $background = NULL) {
+  if (isset($background)) {
+    $rgba = image_hex2rgba($background);
+    $background = imagecolorallocatealpha($image->resource, $rgba['red'], $rgba['green'], $rgba['blue'], $rgba['alpha']);
+  }
+  // Set the background color as transparent if $background is NULL.
+  else {
+    // Get the current transparent color.
+    $background = imagecolortransparent($image->resource);
+
+    // If using a PNG with alpha transparency, the color may be -1. Allocate a
+    // dedicated full alpha transparent color.
+    if ($background === -1) {
+      $background = imagecolorallocatealpha($image->resource, 255, 255, 255, 127);
+    }
+    // Allocating a transparent color may fail (e.g. on a jpg). Use white as
+    // a fallback.
+    if ($background === FALSE) {
+      $background = imagecolorallocatealpha($image->resource, 255, 255, 255, 0);
+    }
+  }
+
+  return $background;
+}
+
+/**
+ * Converts a hex string to RGBA (red, green, blue, alpha) integer values and
+ * tidies up the input hex color string.
+ *
+ * @param $hex
+ *   A string specifying an RGBA color in the formats: '#RGB', 'RGB', '#RGBA',
+ *   'RGBA', '#RRGGBB', 'RRGGBB', '#RRGGBBAA', 'RRGGBBAA' or '0xRRGGBBAA'. The
+ *   color is passed by reference to tidy up the string for consistency.
+ *
+ * @return
+ *   An associative array with 'red', 'green', 'blue' and 'alpha' as keys and corresponding
+ *   color decimal integer as values or FALSE on an invalid color hex string.
+ */
+function image_hex2rgba(&$hex) {
+  // Remove the leading '0x', if any (legacy).
+  if (strpos($hex, '0x') === 0) {
+    $hex = substr($hex, 2);
+  }
+
+  // Save a uppercase version without leading "#" for later processing.
+  $hex_color = drupal_strtoupper(ltrim($hex, '#'));
+
+  // Normalize shorthand versions.
+  // '#FA3' will become '#FFAA33', '#FA37' will become '#FFAA3377'.
+  if (strlen($hex_color) <= 4) {
+    $hex_color = preg_replace('|([0-9A-F])|', '\1\1', $hex_color);
+  }
+
+  // Ensure consistency for the color string.
+  $hex = '#' . $hex_color;
+
+  // Return FALSE if is not a valid hex color string.
+  if (!preg_match('/^([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})([0-7][0-9A-F])?$/', $hex_color, $colors)) {
+    return FALSE;
+  }
+
+  return array(
+    'red' => hexdec($colors[1]),
+    'green' => hexdec($colors[2]),
+    'blue' => hexdec($colors[3]),
+    'alpha' => isset($colors[4]) ? hexdec($colors[4]) : 0,
+  );
 }
 
 /**
