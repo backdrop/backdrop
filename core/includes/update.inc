@@ -365,7 +365,7 @@ function update_module_enable(array $modules) {
 /**
  * Gets the value of a variable from the database during update hooks.
  *
- * Use this during the Drupal 7 upgrade path instead of variable_get().
+ * Use this during the upgrade path instead of variable_get().
  *
  * @param string $name
  *   The name of the variable.
@@ -385,7 +385,7 @@ function update_variable_get($name, $default = NULL) {
 /**
  * Sets a persistent variable during update hooks.
  *
- * Use this during the Drupal 7 upgrade path instead of variable_set().
+ * Use this during the upgrade path instead of variable_set().
  *
  * @param string $name
  *   The name of the variable.
@@ -406,7 +406,7 @@ function update_variable_set($name, $value) {
 /**
  * Delete a variable from the database during update hooks.
  *
- * Use this during the Drupal 7 upgrade path instead of variable_del().
+ * Use this during the upgrade path instead of variable_del().
  *
  * @param string $name
  *   The name of the variable to delete.
