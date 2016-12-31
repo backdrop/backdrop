@@ -217,6 +217,13 @@ function system_themes_page() {
   backdrop_alter('system_themes_page', $theme_groups);
 
   $admin_form = backdrop_get_form('system_themes_admin_form', $admin_theme_options);
+
+  // Inform user if theme_debug is enabled.
+  $theme_debug_enabled = config_get('system.core', 'theme_debug');
+  if ($theme_debug_enabled) {
+    backdrop_set_message(t('Theme debugging is enabled. See the <a href="@theme_debug">Status report</a> page for more info.', array('@theme_debug' => base_path() . 'admin/reports/status')), 'warning');  
+  }
+  
   return theme('system_themes_page', array('theme_groups' => $theme_groups, 'theme_group_titles' => $theme_group_titles)) . backdrop_render($admin_form);
 }
 
@@ -400,6 +407,12 @@ function system_theme_settings($form, &$form_state, $key) {
     '#type' => 'submit',
     '#value' => t('Save theme settings'),
   );
+  
+  // Inform user if theme_debug is enabled.
+  $theme_debug_enabled = config_get('system.core', 'theme_debug');
+  if ($theme_debug_enabled) {
+    backdrop_set_message(t('Theme debugging is enabled. See the <a href="@theme_debug">Status report</a> page for more info.', array('@theme_debug' => base_path() . 'admin/reports/status')), 'warning');
+  }
 
   return $form;
 }
