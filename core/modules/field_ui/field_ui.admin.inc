@@ -844,7 +844,7 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
   );
 
   if (empty($instances) && empty($extra_fields)) {
-    backdrop_set_message(t('There are no fields yet added. You can add new fields on the <a href="@link">Manage fields</a> page.', array('@link' => url($admin_path . '/fields'))), 'warning');
+    backdrop_set_message(t('There are no fields added yet. You can add new fields on the <a href="@link">Manage fields</a> page.', array('@link' => url($admin_path . '/fields'))), 'warning');
     return $form;
   }
 
@@ -1109,33 +1109,64 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
 
   $form['fields'] = $table;
 
-  // Custom display settings.
+  // View modes.
   if ($view_mode == 'default') {
     $form['modes'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Custom display settings'),
+      '#title' => t('View modes'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
-    // Collect options and default values for the 'Custom display settings'
-    // checkboxes.
-    $options = array();
-    $default = array();
+
+    $view_mode_settings = field_view_mode_settings($entity_type, $bundle);
     $entity_info = entity_get_info($entity_type);
     $view_modes = $entity_info['view modes'];
-    $view_mode_settings = field_view_mode_settings($entity_type, $bundle);
-    foreach ($view_modes as $view_mode_name => $view_mode_info) {
-      $options[$view_mode_name] = $view_mode_info['label'];
-      if (!empty($view_mode_settings[$view_mode_name]['custom_settings'])) {
-        $default[] = $view_mode_name;
-      }
-    }
-    $form['modes']['view_modes_custom'] = array(
-      '#type' => 'checkboxes',
-      '#title' => t('Use custom display settings for the following view modes'),
-      '#options' => $options,
-      '#default_value' => $default,
+    backdrop_sort($view_modes, array('label' => SORT_STRING));
+
+    $form['modes']['view_modes'] = array(
+      '#type' => 'group',
+      '#theme' => 'field_ui_modes',
+      '#tree' => TRUE,
+      '#view_modes' => $view_modes,
+      '#entity_type' => $entity_type,
+      '#view_mode_settings' => $view_mode_settings,
     );
+
+    // Place view mode edit form elements here too.
+    if (user_access('administer view modes')) {
+      $form['modes']['view_modes']['new'] = array();
+
+      $form['modes']['view_modes']['new']['label'] = array(
+        '#type' => 'textfield',
+        '#default_value' => '',
+        '#size' => 20,
+        '#field_prefix' => '&nbsp;+&nbsp;',
+      );
+
+      $form['modes']['view_modes']['new']['machine_name'] = array(
+        '#type' => 'machine_name',
+        '#title' => t('Machine name'),
+        '#default_value' => '',
+        '#entity_type' => $entity_type,
+        '#maxlength' => 26,
+        '#required' => FALSE,
+        '#size' => 15,
+        '#machine_name' => array(
+          'source' => array('modes', 'view_modes', 'new', 'label'),
+          'exists' => 'entity_view_mode_exists',
+          'standalone' => TRUE,
+          'label' => '',
+        ),
+      );
+    }
+
+    foreach ($view_modes as $view_mode_name => $view_mode_info) {
+      $form['modes']['view_modes'][$view_mode_name] = array(
+        '#type' => 'checkbox',
+        '#title' => $view_mode_info['label'],
+        '#default_value' => $view_mode_settings[$view_mode_name]['custom_settings'],
+      );
+    }
   }
 
   // In overviews involving nested rows from contributed modules (i.e
@@ -1174,6 +1205,96 @@ function field_ui_display_overview_form($form, &$form_state, $entity_type, $bund
   return $form;
 }
 
+/**
+ * Form submission handler for field_ui_display_overview_form().
+ */
+function field_ui_display_overview_form_submit($form, &$form_state) {
+  $form_values = $form_state['values'];
+  $entity_type = $form['#entity_type'];
+  $bundle = $form['#bundle'];
+  $view_mode = $form['#view_mode'];
+
+  // Save data for 'regular' fields.
+  foreach ($form['#fields'] as $field_name) {
+    // Retrieve the stored instance settings to merge with the incoming values.
+    $instance = field_read_instance($entity_type, $field_name, $bundle);
+    $values = $form_values['fields'][$field_name];
+    // Get formatter settings. They lie either directly in submitted form
+    // values (if the whole form was submitted while some formatter
+    // settings were being edited), or have been persisted in
+    // $form_state.
+    $settings = array();
+    if (isset($values['settings_edit_form']['settings'])) {
+      $settings = $values['settings_edit_form']['settings'];
+    }
+    elseif (isset($form_state['formatter_settings'][$field_name])) {
+      $settings = $form_state['formatter_settings'][$field_name];
+    }
+    elseif (isset($instance['display'][$view_mode]['settings'])) {
+      $settings = $instance['display'][$view_mode]['settings'];
+    }
+
+    // Only save settings actually used by the selected formatter.
+    $default_settings = field_info_formatter_settings($values['type']);
+    $settings = array_intersect_key($settings, $default_settings);
+
+    $instance['display'][$view_mode] = array(
+      'label' => $values['label'],
+      'type' => $values['type'],
+      'weight' => $values['weight'],
+      'settings' => $settings,
+    );
+    field_update_instance($instance);
+  }
+
+  // Get current bundle settings.
+  $bundle_settings = field_bundle_settings($entity_type, $bundle);
+
+  // Save data for 'extra' fields.
+  foreach ($form['#extra'] as $name) {
+    $bundle_settings['extra_fields']['display'][$name][$view_mode] = array(
+      'weight' => $form_values['fields'][$name]['weight'],
+      'visible' => $form_values['fields'][$name]['type'] == 'visible',
+    );
+  }
+
+  // Save view modes data.
+  if ($view_mode == 'default') {
+    if (!empty($form_state['values']['view_modes']['new']['machine_name'])) {
+      $view_mode = array(
+        'machine_name' => $form_state['values']['view_modes']['new']['machine_name'],
+        'label' => $form_state['values']['view_modes']['new']['label'],
+        'is_new' => TRUE,
+      );
+      entity_view_mode_save($form['#entity_type'], $view_mode);
+      // Enable by default for this bundle.
+      $form_values['view_modes'][$view_mode['machine_name']] = TRUE;
+    }
+
+    $entity_info = entity_get_info($entity_type);
+    foreach ($form_values['view_modes'] as $view_mode_name => $value) {
+
+      // Display a message for each view mode newly configured to use custom
+      // settings.
+      $view_mode_settings = field_view_mode_settings($entity_type, $bundle);
+
+      if ($value && !$view_mode_settings[$view_mode_name]['custom_settings']) {
+        $view_mode_label = $entity_info['view modes'][$view_mode_name]['label'];
+        $path = _field_ui_bundle_admin_path($entity_type, $bundle) . "/display/$view_mode_name";
+        backdrop_set_message(t('The %view_mode mode now uses custom display settings. You might want to <a href="@url">configure them</a>.', array('%view_mode' => $view_mode_label, '@url' => url($path))));
+        // Initialize the newly customized view mode with the display settings
+        // from the default view mode.
+        _field_ui_add_default_view_mode_settings($entity_type, $bundle, $view_mode_name, $bundle_settings);
+      }
+      $bundle_settings['view_modes'][$view_mode_name]['custom_settings'] = !empty($value);
+    }
+  }
+
+  // Save updated bundle settings.
+  field_bundle_settings($entity_type, $bundle, $bundle_settings);
+
+  backdrop_set_message(t('Your settings have been saved.'));
+}
 
 /**
  * Form submission handler for buttons in field_ui_display_overview_form().
@@ -1251,84 +1372,6 @@ function field_ui_display_overview_multistep_js($form, &$form_state) {
 
   // Return the whole table.
   return $form['fields'];
-}
-
-/**
- * Form submission handler for field_ui_display_overview_form().
- */
-function field_ui_display_overview_form_submit($form, &$form_state) {
-  $form_values = $form_state['values'];
-  $entity_type = $form['#entity_type'];
-  $bundle = $form['#bundle'];
-  $view_mode = $form['#view_mode'];
-
-  // Save data for 'regular' fields.
-  foreach ($form['#fields'] as $field_name) {
-    // Retrieve the stored instance settings to merge with the incoming values.
-    $instance = field_read_instance($entity_type, $field_name, $bundle);
-    $values = $form_values['fields'][$field_name];
-    // Get formatter settings. They lie either directly in submitted form
-    // values (if the whole form was submitted while some formatter
-    // settings were being edited), or have been persisted in
-    // $form_state.
-    $settings = array();
-    if (isset($values['settings_edit_form']['settings'])) {
-      $settings = $values['settings_edit_form']['settings'];
-    }
-    elseif (isset($form_state['formatter_settings'][$field_name])) {
-      $settings = $form_state['formatter_settings'][$field_name];
-    }
-    elseif (isset($instance['display'][$view_mode]['settings'])) {
-      $settings = $instance['display'][$view_mode]['settings'];
-    }
-
-    // Only save settings actually used by the selected formatter.
-    $default_settings = field_info_formatter_settings($values['type']);
-    $settings = array_intersect_key($settings, $default_settings);
-
-    $instance['display'][$view_mode] = array(
-      'label' => $values['label'],
-      'type' => $values['type'],
-      'weight' => $values['weight'],
-      'settings' => $settings,
-    );
-    field_update_instance($instance);
-  }
-
-  // Get current bundle settings.
-  $bundle_settings = field_bundle_settings($entity_type, $bundle);
-
-  // Save data for 'extra' fields.
-  foreach ($form['#extra'] as $name) {
-    $bundle_settings['extra_fields']['display'][$name][$view_mode] = array(
-      'weight' => $form_values['fields'][$name]['weight'],
-      'visible' => $form_values['fields'][$name]['type'] == 'visible',
-    );
-  }
-
-  // Save view modes data.
-  if ($view_mode == 'default') {
-    $entity_info = entity_get_info($entity_type);
-    foreach ($form_values['view_modes_custom'] as $view_mode_name => $value) {
-      // Display a message for each view mode newly configured to use custom
-      // settings.
-      $view_mode_settings = field_view_mode_settings($entity_type, $bundle);
-      if (!empty($value) && empty($view_mode_settings[$view_mode_name]['custom_settings'])) {
-        $view_mode_label = $entity_info['view modes'][$view_mode_name]['label'];
-        $path = _field_ui_bundle_admin_path($entity_type, $bundle) . "/display/$view_mode_name";
-        backdrop_set_message(t('The %view_mode mode now uses custom display settings. You might want to <a href="@url">configure them</a>.', array('%view_mode' => $view_mode_label, '@url' => url($path))));
-        // Initialize the newly customized view mode with the display settings
-        // from the default view mode.
-        _field_ui_add_default_view_mode_settings($entity_type, $bundle, $view_mode_name, $bundle_settings);
-      }
-      $bundle_settings['view_modes'][$view_mode_name]['custom_settings'] = !empty($value);
-    }
-  }
-
-  // Save updated bundle settings.
-  field_bundle_settings($entity_type, $bundle, $bundle_settings);
-
-  backdrop_set_message(t('Your settings have been saved.'));
 }
 
 /**
@@ -2138,4 +2181,101 @@ function field_ui_next_destination($entity_type, $bundle) {
   }
   $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
   return $admin_path . '/fields';
+}
+
+/**
+ * Form builder: Edit a view mode name.
+ */
+function field_ui_view_mode_form($form, &$form_state, $entity_type = NULL, $machine_name = NULL, $bundle = NULL) {
+  $entity_info = entity_get_info($entity_type);
+  $form['#entity_type'] = $entity_type;
+  $form['#entity_info'] = $entity_info[$entity_type];
+  $path = _field_ui_bundle_admin_path($entity_type, $bundle->type) . '/display';
+
+  if ($machine_name != NULL) {
+    $view_mode = entity_view_mode_load($entity_type, $machine_name);
+  }
+
+  $form['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('View mode name'),
+    '#default_value' => isset($view_mode['label']) ? $view_mode['label'] : '',
+    '#required' => TRUE,
+    '#size' => 20,
+  );
+
+  $form['machine_name'] = array(
+    '#type' => 'machine_name',
+    '#title' => t('Machine name'),
+    '#default_value' => $machine_name,
+    '#entity_type' => $entity_type,
+    '#maxlength' => 26,
+    '#required' => FALSE,
+    '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
+    '#size' => 15,
+    '#machine_name' => array(
+      'source' => array('label'),
+      'standalone' => TRUE,
+      'exists' => 'entity_view_mode_exists',
+    ),
+  );
+
+  if (isset($machine_name)) {
+    $form['old_machine_name'] = array(
+      '#type' => 'value',
+      '#value' => $machine_name,
+    );
+  }
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['save'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit hanlder for field_ui_view_mode_edit_form().
+ */
+function field_ui_view_mode_form_submit($form, &$form_state) {
+  // Save the view mode.
+  form_state_values_clean($form_state);
+  $view_mode = $form_state['values'];
+  entity_view_mode_save($form['#entity_type'], $view_mode);
+
+  backdrop_set_message(t('Updated the %view-mode view mode.', array(
+    '%view-mode' => $view_mode['label'],
+  )));
+}
+
+/**
+ * Form builder: Delete a view mode.
+ */
+function field_ui_view_mode_delete_form($form, &$form_state, $entity_type = NULL, $machine_name = NULL, $bundle = NULL) {
+  $form['#entity_type'] = $entity_type;
+  $form['#machine_name'] = $machine_name;
+  $view_mode = entity_view_mode_load($entity_type, $machine_name);
+  $path = _field_ui_bundle_admin_path($entity_type, $bundle->type) . '/display';
+
+  return confirm_form(
+    $form,
+    t('Are you sure you want to delete the %view-mode view mode?', array('%view-mode' => $view_mode['label'])),
+    $path,
+    t('Deleting a view mode will cause any content still using it to revert to the default display settings.'),
+    t('Delete'),
+    t('Cancel')
+  );
+}
+
+/**
+ * Submit handler for field_ui_view_mode_delete_form().
+ */
+function field_ui_view_mode_delete_form_submit($form, &$form_state) {
+  entity_view_mode_delete($form['#entity_type'], $form['#machine_name']);
+
+  backdrop_set_message(t('Deleted the %view-mode view mode.', array(
+    '%view-mode' => $form['#view_mode']['label'],
+  )));
 }

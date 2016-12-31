@@ -86,3 +86,85 @@ function theme_field_ui_table($variables) {
   return theme('table', $table);
 }
 
+/**
+ * Returns HTML for the entity view mode table.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - element: An associative array containing a Form API structure to be
+ *     rendered as a table.
+ *
+ * @ingroup themeable
+ */
+function theme_field_ui_modes($variables) {
+  $element = $variables['element'];
+  $view_modes = $element['#view_modes'];
+  $entity_type = $element['#entity_type'];
+  $view_mode_settings = $element['#view_mode_settings'];
+  $path = current_path();
+
+  $custom_view_modes = config_get('entity.view_modes', 'view_modes');
+
+  $header = array(
+    t('Enabled'),
+    t('Machine name'),
+    t('Storage state'),
+    array('data' => t('Operations'), 'class' => array('operations')),
+  );
+
+  $last_row = array();
+  if (isset($element['new'])) {
+    $row = array();
+    $row['enabled'] = backdrop_render($element['new']['label']);
+    $row['machine'] = backdrop_render($element['new']['machine_name']);
+    $row['storage'] = array('data' => t('New'), 'colspan' => 2);
+    unset($element['new']);
+
+    $last_row = array('data' => $row, 'class' => array('add-new-view-mode'));
+  }
+
+  $storage_states = array();
+
+  $rows = array($first_row);
+  foreach (element_children($element) as $view_mode_name) {
+    $row = array();
+
+    $row['enabled'] = backdrop_render($element[$view_mode_name]);
+    $row['machine'] = t($view_mode_name);
+    $row['storage'] = !empty($custom_view_modes[$entity_type][$view_mode_name]) ? t('Custom') : t('Default (module-provided)');
+
+    $operations = array();
+    if ($view_mode_settings[$view_mode_name]['custom_settings']) {
+      $operations['manage'] = array(
+        'title' => t('Manage display'),
+        'href' => "$path/$view_mode_name",
+      );
+    }
+    if (isset($custom_view_modes[$entity_type][$view_mode_name])) {
+      $operations['configure'] = array(
+        'title' => t('Configure'),
+        'href' => "$path/view-modes/{$view_mode_name}/configure",
+        'query' => array('destination' => $path),
+      );
+      $operations['delete'] = array(
+        'title' => t('Delete'),
+        'href' => "$path/view-modes/{$view_mode_name}/delete",
+        'query' => array('destination' => $path),
+      );
+    }
+    $row['operations'] = array(
+      'data' => array(
+        '#type' => 'dropbutton',
+        '#links' => $operations,
+      ),
+    );
+
+    $rows[] = $row;
+  }
+  $rows[] = $last_row;
+
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('view-modes'))));
+  $output .= backdrop_render_children($form);
+
+  return $output;
+}
