@@ -84,6 +84,7 @@ function simpletest_result_form($form, &$form_state, $test_id) {
 
   // Load all classes and include CSS.
   backdrop_add_css(backdrop_get_path('module', 'simpletest') . '/css/simpletest.css');
+  backdrop_add_js(backdrop_get_path('module', 'simpletest') . '/js/simpletest.js');
 
   // Keep track of which test cases passed or failed.
   $filter = array(
@@ -121,26 +122,34 @@ function simpletest_result_form($form, &$form_state, $test_id) {
 
     // Create table of assertions for the group.
     $rows = array();
+    $message = '';
     foreach ($assertions as $assertion) {
+      $class = array();
+      $message = $assertion->message;
+      if ($assertion->status != 'pass') {
+        $class[] = 'simpletest-failed';
+        $message .= '<br />' . t('<em>Simpletest failed</em>');
+      }
       $row = array();
-      $row[] = $assertion->message;
+      $row[] = $message;
       $row[] = $assertion->message_group;
       $row[] = backdrop_basename($assertion->file);
       $row[] = $assertion->line;
       $row[] = $assertion->function;
       $row[] = simpletest_result_status_image($assertion->status);
 
-      $class = 'simpletest-' . $assertion->status;
+      $class[] = 'simpletest-' . $assertion->status;
       if ($assertion->message_group == 'Debug') {
-        $class = 'simpletest-debug';
+        $class[] = 'simpletest-debug';
       }
-      $rows[] = array('data' => $row, 'class' => array($class));
+      $rows[] = array('data' => $row, 'class' => $class);
 
       $group_summary['#' . $assertion->status]++;
       $form['result']['summary']['#' . $assertion->status]++;
     }
     $form['result']['results'][$group]['table'] = array(
       '#theme' => 'table',
+      '#attributes' => array('class' => array('simpletest-result-table')),
       '#header' => $header,
       '#rows' => $rows,
     );

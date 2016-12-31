@@ -1,6 +1,32 @@
 (function ($) {
 
 /**
+ * Scrolls to the next failed row on the test results page.
+ */
+Backdrop.behaviors.simpleTestScrollToFail = {
+  attach: function (context, settings) {
+    var failRows = $('.simpletest-result-table').find('.simpletest-failed');
+    var totalFails = failRows.length;
+    var step = 0;
+    if (totalFails) {
+      $(document).keypress(function(e) {
+        if(e.which == 13) {
+          $('body').animate({
+              scrollTop: $(failRows[step]).offset().top - 200
+          }, 200);
+          if(step + 1 == totalFails) {
+            step = 0;
+          }
+          else {
+            step++;
+          }
+        }
+      });
+    }
+  }
+};
+
+/**
  * Collapses table rows followed by group rows on the test listing page.
  */
 Backdrop.behaviors.simpleTestGroupCollapse = {
