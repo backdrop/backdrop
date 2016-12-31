@@ -259,7 +259,7 @@ $.extend(TableHeader.prototype, {
       $stickyCell = this.$stickyHeaderCells.eq($that.index());
       display = $that.css('display');
       if (display !== 'none') {
-        $stickyCell.css({'width': $that.outerWidth(), 'display': display});
+        $stickyCell.css({'width': $that.width(), 'display': display});
       }
       else {
         $stickyCell.css('display', 'none');
