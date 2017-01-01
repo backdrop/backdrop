@@ -14,6 +14,17 @@ function field_ui_field_attach_rename_bundle($entity_type, $bundle_old, $bundle_
 }
 
 /**
+ * Implements hook_permission().
+ */
+function field_ui_permission() {
+  return array(
+    'administer view modes' => array(
+      'title' => t('Add, edit and delete custom view modes.'),
+    ),
+  );
+}
+
+/**
  * Implements hook_menu().
  */
 function field_ui_menu() {
@@ -51,6 +62,7 @@ function field_ui_menu() {
           // This is the position of the %field_ui_menu placeholder in the
           // items below.
           $field_position = count(explode('/', $path)) + 1;
+          $view_mode_position = count(explode('/', $path)) + 2;
 
           // Extract access information, providing defaults.
           $access = array_intersect_key($bundle_info['admin'], backdrop_map_assoc(array('access callback', 'access arguments')));
@@ -121,13 +133,52 @@ function field_ui_menu() {
 
           // 'Manage display' tab.
           $items["$path/display"] = array(
-            'title' => 'Manage display',
+            'title' => 'Manage displays',
             'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_display_overview_form', $entity_type, $bundle_arg, 'default'),
             'type' => MENU_LOCAL_TASK,
             'weight' => 2,
             'file' => 'field_ui.admin.inc',
           ) + $access;
+
+          // View mode administration.
+          $items["$path/display/view-modes/%/add"] = array(
+            'title' => 'Add view mode',
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_ui_view_mode_form', $entity_type, $view_mode_position, $bundle_arg),
+            'access arguments' => array('administer view modes'),
+            'file' => 'field_ui.admin.inc',
+            'type' => MENU_LOCAL_ACTION,
+          );
+          $items["$path/display/view-modes/%/configure"] = array(
+            'title' => 'Configure view mode',
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_ui_view_mode_form', $entity_type, $view_mode_position, $bundle_arg),
+            'access arguments' => array('administer view modes'),
+            'file' => 'field_ui.admin.inc',
+          );
+          $items["$path/display/view-modes/%/delete"] = array(
+            'title' => 'Delete view mode',
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_ui_view_mode_delete_form', $entity_type, $view_mode_position, $bundle_arg),
+            'access arguments' => array('administer view modes'),
+            'file' => 'field_ui.admin.inc',
+          );
+          // $view_mode_position, $entity_type, $bundle_arg
+          $items["$path/display/view-modes/%/customize"] = array(
+            'title' => 'Customize view mode',
+            'page callback' => 'field_ui_toggle_view_mode_on',
+            'page arguments' => array($view_mode_position, $entity_type, $bundle_arg),
+            'access arguments' => array('administer view modes'),
+            'file' => 'field_ui.admin.inc',
+          );
+          $items["$path/display/view-modes/%/default"] = array(
+            'title' => 'Reset to default',
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('field_ui_toggle_view_mode_form', $view_mode_position, $entity_type, $bundle_arg),
+            'access arguments' => array('administer view modes'),
+            'file' => 'field_ui.admin.inc',
+          );
 
           // View modes secondary tabs.
           // The same base $path for the menu item (with a placeholder) can be
@@ -141,13 +192,12 @@ function field_ui_menu() {
           foreach ($view_modes as $view_mode => $view_mode_info) {
             $items["$path/display/$view_mode"] = array(
               'title' => $view_mode_info['label'],
-              'page arguments' => array('field_ui_display_overview_form', $entity_type, $bundle_arg, $view_mode),
+              'page arguments' => array('field_ui_display_form', $entity_type, $bundle_arg, $view_mode),
               // The access callback needs to check both the current 'custom
               // display' setting for the view mode, and the overall access
               // rules for the bundle admin pages.
               'access callback' => '_field_ui_view_mode_menu_access',
               'access arguments' => array_merge(array($entity_type, $bundle_arg, $view_mode, $access['access callback']), $access['access arguments']),
-              'type' => ($view_mode == 'default' ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
               'weight' => ($view_mode == 'default' ? -10 : $weight++),
               'file' => 'field_ui.admin.inc',
             );
@@ -254,6 +304,10 @@ function field_ui_theme() {
   return array(
     'field_ui_table' => array(
       'render element' => 'elements',
+      'file' => 'field_ui.theme.inc',
+    ),
+    'field_ui_view_modes' => array(
+      'render element' => 'element',
       'file' => 'field_ui.theme.inc',
     ),
   );

@@ -86,3 +86,120 @@ function theme_field_ui_table($variables) {
   return theme('table', $table);
 }
 
+/**
+ * Returns HTML for the entity view mode table.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - element: An associative array containing a Form API structure to be
+ *     rendered as a table.
+ *
+ * @ingroup themeable
+ */
+function theme_field_ui_view_modes($variables) {
+  $element = $variables['element'];
+  $view_modes = $element['#view_modes'];
+  $entity_type = $element['#entity_type'];
+  $path = current_path();
+  $rows = array();
+
+  $header = array(
+    array('data' => t('View modes')),
+    array('data' => t('Machine name'), 'class' => array('priority-low')),
+    array('data' => t('Status'), 'class' => array('priority-medium')),
+    array('data' => t('Operations'), 'class' => array('operations')),
+  );
+
+  foreach ($view_modes as $view_mode_name => $veiw_mode_info) {
+    $class = '';
+    $row = array();
+
+    $row['label'] = t($veiw_mode_info['label']);
+    $row['machine'] = t($view_mode_name);
+    $row['status'] = t($veiw_mode_info['status']);
+
+    $operations = array();
+    if ($view_modes[$view_mode_name]['custom settings']) {
+      $operations['manage'] = array(
+        'title' => t('Manage display'),
+        'href' => "$path/$view_mode_name",
+        'query' => array('destination' => $path),
+      );
+      $operations['default'] = array(
+        'title' => t('Reset to default'),
+        'href' => "$path/view-modes/{$view_mode_name}/default",
+      );
+    }
+    else {
+      $class = 'disabled';
+      $operations['customize'] = array(
+        'title' => t('Customize'),
+        'href' => "$path/view-modes/{$view_mode_name}/customize",
+      );
+    }
+
+    if ($veiw_mode_info['storage'] == 'Custom') {
+      $operations['configure'] = array(
+        'title' => t('Configure'),
+        'href' => "$path/view-modes/{$view_mode_name}/configure",
+        'query' => array('destination' => $path),
+      );
+      $operations['delete'] = array(
+        'title' => t('Delete'),
+        'href' => "$path/view-modes/{$view_mode_name}/delete",
+        'query' => array('destination' => $path),
+      );
+    }
+
+    $row['operations'] = array(
+      'data' => array(
+        '#type' => 'dropbutton',
+        '#links' => $operations,
+      ),
+    );
+
+    $rows[] = array('data' => $row, 'class' => array($class));
+  }
+
+  // Add the row for the default view mode.
+  $default_row = array();
+  if ($element['#state'] == 'custom') {
+    $row = array();
+    $row['label'] = array('data' => t('Default (used for all view modes without specific field settings)'));
+    $row['machine'] = '';
+    $row['storage'] = '';
+    $row['operations'] = '';
+    $default_header = array(
+      'class' => array('default-view-mode-header'),
+      'data' => $row,
+    );
+
+    $row = array();
+    $row['label'] = t('Default display');
+    $row['machine'] = t('default');
+    $row['storage'] = t('N/A');
+    $row['operations'] = array(
+      'data' => array(
+        '#type' => 'dropbutton',
+        '#links' => array(
+          'manage' => array(
+            'title' => t('Manage display'),
+            'href' => "$path/default",
+          ),
+        ),
+      ),
+    );
+    $default_row = array(
+      'class' => array('default-view-mode'),
+      'data' => $row,
+    );
+  }
+
+  $rows[] = $default_header;
+  $rows[] = $default_row;
+
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('field-ui-view-modes'))));
+  $output .= backdrop_render_children($form);
+
+  return $output;
+}
