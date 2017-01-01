@@ -2058,7 +2058,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
       'link_node_title' => FALSE,
       'view_mode' => 'teaser',
     );
-    $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $edit, t('Save block'));
+    $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet('node/' . $node1->nid);
 
