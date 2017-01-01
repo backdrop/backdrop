@@ -573,12 +573,8 @@ abstract class BackdropTestCase {
     }
     $missing_requirements = $this->checkRequirements();
     if (!empty($missing_requirements)) {
-      $missing_requirements_object = new ReflectionObject($this);
-      $caller = array(
-        'file' => $missing_requirements_object->getFileName(),
-      );
       foreach ($missing_requirements as $missing_requirement) {
-        BackdropTestCase::insertAssert($this->testId, $class, FALSE, $missing_requirement, 'Requirements check.', $caller);
+        $this->fail($missing_requirement, 'Requirements check.');
       }
     }
     else {
@@ -1569,7 +1565,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * Copies the cached tables and config for a profile if one is available.
    *
    * @return
-   *   TRUE when cache used, FALSE when cache is not available.   
+   *   TRUE when cache used, FALSE when cache is not available.
    *
    * @see BackdropWebTestCase::setUp()
    * @see BackdropWebTestCase::tearDown()
@@ -1579,27 +1575,27 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     if (is_dir($config_cache_dir)) {
       $prefix = 'simpletest_cache_' . $this->profile . '_';
-      
+
       $tables = db_query("SHOW TABLES LIKE :prefix", array(':prefix' => db_like($prefix) . '%' ))->fetchCol();
-      
+
       foreach ($tables as $table_prefix) {
         $table = substr($table_prefix, strlen($prefix));
         db_query('CREATE TABLE ' . $this->databasePrefix . $table . ' LIKE ' . $table_prefix);
         db_query('INSERT ' . $this->databasePrefix . $table . ' SELECT * FROM ' . $table_prefix);
       }
-      
+
       $this->recursiveCopy($config_cache_dir, $this->public_files_directory);
 
       return TRUE;
     }
-    return FALSE; 
+    return FALSE;
   }
 
   /**
    * Recursively copy one directory to another.
    *
    */
-  private function recursiveCopy($src, $dst) { 
+  private function recursiveCopy($src, $dst) {
     $dir = opendir($src);
     if(!file_exists($dst)){
       mkdir($dst);
@@ -1608,7 +1604,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       if (( $file != '.' ) && ( $file != '..' )) {
         if ( is_dir($src . '/' . $file) ) {
           $this->recursiveCopy($src . '/' . $file, $dst . '/' . $file);
-        } 
+        }
         else {
           copy($src . '/' . $file, $dst . '/' . $file);
         }

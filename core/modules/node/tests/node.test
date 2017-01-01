@@ -166,6 +166,9 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp();
 
+    // Make sure we're using UTC
+    date_default_timezone_set('UTC');
+
     // Create and login user.
     $web_user = $this->backdropCreateUser(array(
       'view revisions',
