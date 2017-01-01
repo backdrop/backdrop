@@ -3543,7 +3543,7 @@ class FieldBlockTestCase extends FieldTestCase {
       'title_display' => 'none',
       'label' => 'above',
     );
-    $this->backdropPost(NULL, $block_settings, t('Save block'));
+    $this->backdropPost(NULL, $block_settings, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Check the block title settings are shown on the front-end.
