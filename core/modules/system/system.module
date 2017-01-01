@@ -3965,7 +3965,7 @@ function _system_sort_form_values_by_config($form, &$form_state, $inherited_buck
       $configs[$bucket][$key] = $form_state['values'][$key];
     }
     // Descend into subgroups.
-    if (is_array($form_fragment) && !empty(element_children($form_fragment))) {
+    if (is_array($form_fragment) && count(element_children($form_fragment))) {
       $configs = _system_sort_form_values_by_config($form_fragment, $form_state, $bucket, $configs);
     }
   }
