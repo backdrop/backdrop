@@ -2139,10 +2139,22 @@ class SystemSettingsFormTest extends SystemConfigFormCase {
         '#config_name' => 'simpletest.testconfig',
         '#config_key' => 'def',
       ),
+      // Test single-element overrrides
       'rss_description' => array(
         '#value' => $this->randomString(),
         '#config_name' => 'system.core',
         '#config_key' => 'rss_description',
+      ),
+      // Test fieldsets of overrides.
+      'ghi' => array(
+        '#value' => $this->randomString(),
+        '#config_name' => 'simpletest.secondconfig',
+        '#config_key' => 'ghi',
+      ),
+      'jkl' => array(
+        '#value' => $this->randomString(),
+        '#config_name' => 'simpletest.secondconfig',
+        '#config_key' => 'jkl',
       ),
     );
   }
