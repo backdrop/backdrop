@@ -511,6 +511,55 @@ function backdrop_get_query_array($query) {
 }
 
 /**
+ * Take a full URL and return only the bare domain.
+ *
+ * @param (string) $url
+ *   A fully-qualified URL like https://www.example.co.uk/path-to-page.
+ *
+ * @return (string)
+ *   The bare domain of the starting URL like example.com or example.co.uk.
+ */
+function backdrop_get_bare_domain($url) {
+  $parts = parse_url($url);
+
+  if (array_key_exists('host', $parts)) {
+    $domain = $parts['host'];
+
+    // Always strip off www.
+    if (substr($domain, 0, 4) == 'www.') {
+      $domain = substr($domain, 4);
+    }
+
+    return $domain;
+  }
+  elseif (array_key_exists('path', $parts)) {
+    // Always remove any trailing path.
+    $parts_array = explode('/', $parts['path'], 2);
+    $domain = array_shift($parts_array);
+
+    // Always strip off www.
+    if (substr($domain, 0, 4) == 'www.') {
+      $domain = substr($domain, 3);
+    }
+
+    // See what's remaining.
+    $sub_parts = explode('.', $domain);
+    if (count($sub_parts) > 2) {
+      $last = array_pop($sub_parts);
+      if (strlen($last) == 2) {
+        // Likely a country-specific domain like .co.uk.
+        $second_to_last = array_pop($sub_parts);
+        $domain = array_pop($sub_parts) . '.' . $second_to_last . '.' . $last;
+      }
+    }
+
+    return $domain;
+  }
+
+  return $url;
+}
+
+/**
  * Parses an array into a valid, rawurlencoded query string.
  *
  * This differs from http_build_query() as we need to rawurlencode() (instead of
