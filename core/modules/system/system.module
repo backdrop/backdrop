@@ -3907,8 +3907,7 @@ function system_settings_form_submit($form, &$form_state) {
   form_state_values_clean($form_state);
 
   if (!empty($form['#config'])) {
-    $configs = array();
-    _system_sort_form_values_by_config($form, $form_state, $configs, $form['#config']);
+    $configs = _system_sort_form_values_by_config($form, $form_state, $form['#config']);
     foreach ($configs as $bucket => $data) {
       config_set_multiple($bucket, $data);
     }
@@ -3945,13 +3944,17 @@ function system_settings_form_submit($form, &$form_state) {
  *   An associative array containing the structure of a portion of the form.
  * @param &$form_state
  *   A keyed array containing the current state of the form.
- * @param $configs
- *   A keyed array that will contain the form values sorted by CMI bucket when
- *   the function returns.
  * @param $inherited_bucket
  *   The name of the bucket to use if $form['#config'] is not set.
+ * @param $configs
+ *   A keyed array that will contain the form values sorted by CMI bucket when
+ *   the function returns.  Defaults to an empty array.
+ * @return
+ *    Returns an array where the keys are the names of the CMI buckets (e.g.,
+ *    system.settings) and the values are key => value arrays of the settings
+ *    for each bucket.
  */
-function _system_sort_form_values_by_config($form, &$form_state, &$configs, $inherited_bucket) {
+function _system_sort_form_values_by_config($form, &$form_state, $inherited_bucket, $configs = array()) {
   foreach (element_children($form) as $key) {
     $form_fragment = $form[$key];
 
@@ -3962,8 +3965,8 @@ function _system_sort_form_values_by_config($form, &$form_state, &$configs, $inh
       $configs[$bucket][$key] = $form_state['values'][$key];
     }
     // Descend into subgroups.
-    if (is_array($form_fragment)) {
-      _system_sort_form_values_by_config($form_fragment, $form_state, $configs, $bucket);
+    if (is_array($form_fragment) && !empty(element_children($form_fragment))) {
+      $configs = _system_sort_form_values_by_config($form_fragment, $form_state, $bucket, $configs);
     }
   }
   return $configs;
