@@ -530,12 +530,12 @@ class SimpleTestMissingCheckedRequirements extends BackdropWebTestCase {
    * Overrides checkRequirements().
    */
   protected function checkRequirements() {
+    $errors = parent::checkRequirements();
+
     if (backdrop_valid_test_ua()) {
-      return array(
-        'Test is not allowed to run.'
-      );
+      $errors[] = 'Test is not allowed to run.';
     }
-    return parent::checkRequirements();
+    return $errors;
   }
 
   /**

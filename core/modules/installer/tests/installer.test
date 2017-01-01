@@ -27,6 +27,16 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
     $this->backdropLogin($this->privileged_user);
   }
 
+  protected function checkRequirements() {
+    $errors = parent::checkRequirements();
+
+    if (!extension_loaded('zip')) {
+      $errors[] = 'PHP zip extension is not present.';
+    }
+
+    return $errors;
+  }
+
   public function testProjectBrowserProjects() {
     // Attempt to fetch the default projects
     $edit = array();
@@ -112,7 +122,7 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
     // Set maintenance mode off
     $edit = array(
       // Cannot test in maintenance mode, as the HTTP request to fetch projects
-      // always will fail since we are fetching from the (now offline) site 
+      // always will fail since we are fetching from the (now offline) site
       // itself.
       'maintenance_mode' => FALSE,
     );
