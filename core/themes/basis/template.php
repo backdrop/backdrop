@@ -78,7 +78,6 @@ function basis_preprocess_header(&$variables) {
  * @see theme_breadcrumb().
  */
 function basis_breadcrumb($variables) {
-  $page_title = backdrop_get_title();
   $breadcrumb = $variables['breadcrumb'];
   $output = '';
   if (!empty($breadcrumb)) {
@@ -86,7 +85,7 @@ function basis_breadcrumb($variables) {
     // Provide a navigational heading to give context for breadcrumb links to
     // screen-reader users. Make the heading invisible with .element-invisible.
     $output .= '<h2 class="element-invisible">' . t('You are here') . '</h2>';
-    $output .= '<ol><li>' . implode('</li><li>', $breadcrumb) . '</li><li><span>' . $page_title . '</span></li></ol>';
+    $output .= '<ol><li>' . implode('</li><li>', $breadcrumb) . '</li></ol>';
     $output .= '</nav>';
   }
   return $output;

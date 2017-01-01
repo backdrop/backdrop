@@ -2378,7 +2378,7 @@ function system_block_view($delta = '', $settings = array()) {
       return $block;
     case 'breadcrumb':
       $block['subject'] = NULL;
-      $block['content'] = theme('breadcrumb', array('breadcrumb' => backdrop_get_breadcrumb()));
+      $block['content'] = system_breadcrumb_block($settings);
       return $block;
     case 'powered-by':
       $block['subject'] = NULL;
@@ -2405,6 +2405,14 @@ function system_block_view($delta = '', $settings = array()) {
 function system_block_configure($delta, $settings) {
   if ($delta === 'header') {
     return system_header_block_form($settings);
+  }
+  elseif ($delta === 'breadcrumb') {
+    $form['current'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Display the current page title as the last breadcrumb'),
+      '#default_value' => !empty($settings['current']),
+    );
+    return $form;
   }
   // System-defined menu blocks.
   foreach (menu_list_system_menus() as $menu_name => $title) {
@@ -3042,6 +3050,20 @@ function system_header_block($settings) {
   $variables['menu']        = $menu ? theme('links__header_menu', array('links' => $menu)) : NULL;
 
   return theme('header', $variables);
+}
+
+/**
+ * Output the content for the breadcrumb block.
+ *
+ * @see system_block_view()
+ */
+function system_breadcrumb_block($settings = array()) {
+  $crumbs = backdrop_get_breadcrumb();
+  if (isset($settings['current']) && $settings['current'] == TRUE) {
+    $crumbs[] = '<span>' . backdrop_get_title() . '</span>';
+  }
+
+  return theme('breadcrumb', array('breadcrumb' => $crumbs));
 }
 
 /**
