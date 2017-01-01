@@ -3876,6 +3876,10 @@ function system_settings_form($form) {
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
 
+  if (empty($form['#config']) && !settings_get('backdrop_drupal_compatibility')) {
+    drupal_set_message(t('Drupal compatibility layer is disabled and this form has not be updated to use Backdrop CMI.  Changes will not be saved.'), 'warning');
+  }
+
   if (!empty($_POST) && form_get_errors()) {
     backdrop_set_message(t('The settings have not been saved because of the errors.'), 'error');
   }
@@ -3911,6 +3915,11 @@ function system_settings_form_submit($form, &$form_state) {
   }
   else {
     watchdog('form', 'Backdrop 2.0 and later will require forms using system_settings_form() to set $form[\'#config\'].', array(), WATCHDOG_DEPRECATED);
+    if (!settings_get('backdrop_drupal_compatibility')) {
+      backdrop_set_message(t('Settings not saved: Drupal compatibility layer is disabled and this form has not be updated to use Backdrop CMI.', 'error'));
+      return;
+    }
+
     foreach ($form_state['values'] as $key => $value) {
       if (is_array($value) && isset($form_state['values']['array_filter'])) {
         $value = array_keys(array_filter($value));
