@@ -568,7 +568,20 @@ function system_requirements($phase) {
       'description' => $description,
     );
   }
-
+  
+  if ($phase == 'runtime') {
+    // Inform the user if theme_debug is enabled.
+    $theme_debug_enabled = config_get('system.core', 'theme_debug');
+    if ($theme_debug_enabled) {
+      $requirements['theme_debug'] = array(
+        'title' => $t('Theme debug'),
+        'value' => $t('Enabled'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Theme debugging is currently enabled, and should be disabled on a live site. This setting can be changed using the <a href="!url">Devel module</a>.', array('!url' => module_exists('devel') ? url('admin/config/development/devel') : 'https://backdropcms.org/project/devel')),
+      );
+    }
+  }
+  
   return $requirements;
 }
 
