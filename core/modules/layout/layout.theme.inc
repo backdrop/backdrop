@@ -207,7 +207,7 @@ function layout_preprocess_layout(&$variables) {
 
   // Check if any Title Component blocks have been placed. These will override
   // the variables here.
-  $should_display = _layout_title_component_blocks_exist($variables);
+  $should_display = _layout_page_component_blocks_exist($variables);
 
   $variables += array(
     'action_links' => NULL,
@@ -253,18 +253,18 @@ function layout_preprocess_layout(&$variables) {
 /**
  * Utility function to return if a title component block is in a layout.
  */
-function _layout_title_component_blocks_exist($variables) {
+function _layout_page_component_blocks_exist($variables) {
   $active_component_blocks = array();
   foreach ($variables['layout']->content as $block) {
-    if ($block->delta == 'title_components') {
+    if ($block->delta == 'page_components') {
       $active_component_blocks[] = $block->childDelta;
     }
   }
 
-  $should_display['title'] = (!in_array('title_combo', $active_component_blocks) && !in_array('page_title', $active_component_blocks));
-  $should_display['messages'] = (!in_array('title_combo', $active_component_blocks) && !in_array('system_messages', $active_component_blocks));
-  $should_display['tabs'] = (!in_array('title_combo', $active_component_blocks) && !in_array('local_task_tabs', $active_component_blocks));
-  $should_display['action_links'] = (!in_array('title_combo', $active_component_blocks) && !in_array('local_actions', $active_component_blocks));
+  $should_display['title'] = (!in_array('title_combo', $active_component_blocks) && !in_array('title', $active_component_blocks));
+  $should_display['messages'] = (!in_array('title_combo', $active_component_blocks) && !in_array('messages', $active_component_blocks));
+  $should_display['tabs'] = (!in_array('title_combo', $active_component_blocks) && !in_array('tabs', $active_component_blocks));
+  $should_display['action_links'] = (!in_array('title_combo', $active_component_blocks) && !in_array('action_links', $active_component_blocks));
 
   return $should_display;
 }

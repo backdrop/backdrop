@@ -1,12 +1,12 @@
 <?php
 
 /**
- * TitleComponents extends Block
+ * PageComponents extends Block
  *
  * This class allows us to display the page title, local task tabs, 
  * local actions links, and messages in a block.
  */
-class TitleComponents extends Block {
+class PageComponents extends Block {
   /**
    * {@inheritdoc}
    */
@@ -36,7 +36,7 @@ class TitleComponents extends Block {
    * @return string
    */
   function getContent() {
-    return theme('title_components', array('child_delta' => $this->childDelta, 'settings' => $this->settings));
+    return theme('page_components', array('child_delta' => $this->childDelta, 'settings' => $this->settings));
   }
 
   /**
@@ -44,12 +44,12 @@ class TitleComponents extends Block {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
-    if ($this->childDelta == 'title_combo' || $this->childDelta == 'page_title') {
-      $form['page_title'] = array(
+    if ($this->childDelta == 'title_combo' || $this->childDelta == 'title') {
+      $form['title'] = array(
         '#type' => 'fieldset',
         '#title' => t('Page title'),
       );
-      $form['page_title']['page_title_markup'] = array(
+      $form['title']['title_markup'] = array(
         '#title' => t('Title tag'),
         '#type' => 'select',
         '#options' => array(
@@ -62,16 +62,16 @@ class TitleComponents extends Block {
           'h6' => t('h6'),
           'div' => t('div'),
         ),
-        '#default_value' => empty($this->settings['page_title_markup']) ? 'h1' : $this->settings['page_title_markup'],
+        '#default_value' => empty($this->settings['title_markup']) ? 'h1' : $this->settings['title_markup'],
       );
-      $form['page_title']['page_title_class'] = array(
+      $form['title']['title_class'] = array(
         '#title' => t('CSS class to use'),
         '#type' => 'textfield',
-        '#default_value' => empty($this->settings['page_title_class']) ? '' : $this->settings['page_title_class'],
+        '#default_value' => empty($this->settings['title_class']) ? '' : $this->settings['title_class'],
       );
     }
 
-    if ($this->childDelta == 'title_combo' || $this->childDelta == 'local_task_tabs') {
+    if ($this->childDelta == 'title_combo' || $this->childDelta == 'tabs') {
       $form['tabs'] = array(
         '#type' => 'fieldset',
         '#title' => t('Local task tabs'),
@@ -93,11 +93,11 @@ class TitleComponents extends Block {
    * Submit handler to save the form settings.
    */
   function formSubmit($form, &$form_state) {
-    if (isset($form_state['values']['page_title']['page_title_markup'])) {
-      $this->settings['page_title_markup'] = $form_state['values']['page_title']['page_title_markup'];
+    if (isset($form_state['values']['title']['title_markup'])) {
+      $this->settings['title_markup'] = $form_state['values']['title']['title_markup'];
     }
-    if (isset($form_state['values']['page_title']['page_title_class'])) {
-      $this->settings['page_title_class'] = $form_state['values']['page_title']['page_title_class'];
+    if (isset($form_state['values']['title']['title_class'])) {
+      $this->settings['title_class'] = $form_state['values']['title']['title_class'];
     }
     if (isset($form_state['values']['tabs']['tab_type'])) {
       $this->settings['tab_type'] = $form_state['values']['tabs']['tab_type'];
@@ -116,19 +116,19 @@ class TitleComponents extends Block {
         'info' => t('Title combo'),
         'description' => t('Displays the page title, local task tabs, local actions links, and messages.'),
       ),
-      'local_task_tabs' => array(
+      'tabs' => array(
         'info' => t('Local task tabs'),
         'description' => t('Displays the local task tabs.'),
       ),
-      'page_title' => array(
+      'title' => array(
         'info' => t('Page title'),
         'description' => t('Displays the page title.'),
       ),
-      'local_actions' => array(
+      'action_links' => array(
         'info' => t('Local actions'),
         'description' => t('Displays the local actions links.'),
       ),
-      'system_messages' => array(
+      'messages' => array(
         'info' => t('System messages'),
         'description' => t('Displays the system messages.'),
       ),

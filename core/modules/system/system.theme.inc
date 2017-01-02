@@ -659,9 +659,9 @@ function _token_token_tree_format_row($token, array $token_info, $is_group = FAL
 }
 
 /**
- * Prepares variables for Title Component block templates.
+ * Prepares variables for Page Component block templates.
  */
-function system_preprocess_title_components(&$variables) {
+function system_preprocess_page_components(&$variables) {
   $settings = $variables['settings'];
   $child_delta = $variables['child_delta'];
   $variables += array(
@@ -671,20 +671,20 @@ function system_preprocess_title_components(&$variables) {
     'title' => NULL,
   );
 
-  if ($child_delta == 'page_title' || $child_delta == 'title_combo') {
-    if ($settings['page_title_markup'] == 'none') {
-      $variables['page_title'] = backdrop_get_title();
+  if ($child_delta == 'title' || $child_delta == 'title_combo') {
+    if ($settings['title_markup'] == 'none') {
+      $variables['title'] = backdrop_get_title();
     }
     else {
-      $output = '<' . $settings['page_title_markup'];
-      if (isset($settings['page_title_class'])) {
-        $output .= ' class="' . $settings['page_title_class'] . '"';
+      $output = '<' . $settings['title_markup'];
+      if (isset($settings['title_class'])) {
+        $output .= ' class="' . $settings['title_class'] . '"';
       }
-      $output .= '>' . backdrop_get_title() . '</' . $settings['page_title_markup'] . '>' . "\n";
-      $variables['page_title'] = $output;
+      $output .= '>' . backdrop_get_title() . '</' . $settings['title_markup'] . '>' . "\n";
+      $variables['title'] = $output;
     }
   }
-  if ($child_delta == 'local_task_tabs' || $child_delta == 'title_combo') {
+  if ($child_delta == 'tabs' || $child_delta == 'title_combo') {
     $menus =  array();
     switch ($settings['tab_type']) {
       case 'primary':
@@ -713,5 +713,9 @@ function system_preprocess_title_components(&$variables) {
   if ($child_delta == 'system_messages' || $child_delta == 'title_combo') {
     $variables['messages'] = theme('status_messages');
   }
-  
+
+  // Add specific suggestions that can override the default implementation.
+  $variables['theme_hook_suggestions'] = array(
+    'page_components__' . $child_delta,
+  );
 }

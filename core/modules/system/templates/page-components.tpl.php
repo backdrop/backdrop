@@ -4,7 +4,18 @@
  * Template for outputting title component blocks.
  *
  * Combo title block displays the page title, local task tabs, 
- * local actions links, and messages
+ * local actions links, and messages.
+ *
+ * To override the display of page components, copy this file and place it
+ * inside your theme. 
+ * To override individual individual components, create one of the following
+ * templates in your theme:
+ * - page-components.tpl.php
+ * - page-components--action-links.tpl.php
+ * - page-components--messages.tpl.php
+ * - page-components--tabs.tpl.php
+ * - page-components--title.tpl.php
+ * - page-components--title-combo.tpl.php
  *
  * Variables available:
  * Variables:
@@ -22,10 +33,10 @@
   </div>
 <?php endif; ?>
 
-<?php if ($page_title): ?>
+<?php if ($title): ?>
   <?php print render($title_prefix); ?>
-    <h1 class="page-title">
-      <?php print $page_title; ?>
+    <h1 class="title">
+      <?php print $title; ?>
     </h1>
   <?php print render($title_suffix); ?>
 <?php endif; ?>
