@@ -119,6 +119,7 @@ h6 a {
   text-decoration: none;
 }
 
+iframe,
 img {
   max-width: 100%;
   height: auto;
