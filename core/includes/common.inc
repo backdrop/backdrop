@@ -231,15 +231,17 @@ function backdrop_get_breadcrumb() {
 }
 
 /**
- * Gets the site logo.
+ * Gets the path and dimensions of the site wide logo.
  *
- * Falls back to none (empty string) if not defined or theme provided.
- *
- * @return (string) $logo
- *   URL to the logo file to use for the site.
+ * @return array
+ *   An array containing "path", "width", and "height".
  */
-function backdrop_get_logo() {
-  $logo = '';
+function backdrop_get_logo_info() {
+  $info = array(
+    'path' => '',
+    'width' => NULL,
+    'height' => NULL,
+  );
 
   // The logo may be needed on pages prior to config being ready, e.g. during
   // installer or on maintenance pages. Default to an empty string if unable to
@@ -251,16 +253,49 @@ function backdrop_get_logo() {
       global $theme;
       $theme_data = list_themes();
       $theme_object = $theme_data[$theme];
-      if (file_exists($logo = dirname($theme_object->filename) . '/logo.png')) {
-        $logo = file_create_url($logo);
+      $logo = dirname($theme_object->filename) . '/logo.png';
+      if (file_exists($logo)) {
+        $info['path'] = $logo;
       }
     }
     elseif ($site_config->get('site_logo_path')) {
-      $logo = file_create_url($site_config->get('site_logo_path'));
+      $info['path'] = $site_config->get('site_logo_path');
+    }
+
+    // Retrieve stored logo dimensions.
+    if ($attributes = $site_config->get('site_logo_attributes')) {
+      $info = array_merge($info, $attributes);
+    }
+    // Set the logo dimensions if not set.
+    elseif ($info['path'] && $dimensions = @getimagesize($info['path'])) {
+      $attributes = array();
+      list($attributes['width'], $attributes['height']) = $dimensions;
+      $site_config->set('site_logo_attributes', $attributes);
+      $info = array_merge($info, $attributes);
     }
   }
   catch (ConfigException $e) {
     // Use the default empty logo.
+  }
+
+  return $info;
+}
+
+/**
+ * Gets the site logo.
+ *
+ * Falls back to none (empty string) if not defined or theme provided.
+ *
+ * @return (string) $logo
+ *   URL to the logo file to use for the site.
+ *
+ * @see backdrop_get_logo_properties()
+ */
+function backdrop_get_logo() {
+  $logo = '';
+  $logo_info = backdrop_get_logo_info();
+  if ($logo_info['path']) {
+    $logo = file_create_url($logo_info['path']);
   }
 
   return $logo;

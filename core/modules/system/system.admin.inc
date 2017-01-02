@@ -1423,6 +1423,15 @@ function system_site_information_settings_submit($form, &$form_state) {
     $form_state['values']['site_logo_theme'] = 0;
     $form_state['values']['site_logo_path'] = $filename;
   }
+
+  if ($form_state['values']['site_logo_path']) {
+    $dimensions = @getimagesize($form_state['values']['site_logo_path']);
+    $form_state['values']['site_logo_attributes'] = array(
+      'width' => $dimensions[0],
+      'height' => $dimensions[1],
+    );
+  }
+
   if (!empty($form_state['values']['site_favicon_upload'])) {
     $file = $form_state['values']['site_favicon_upload'];
     unset($form_state['values']['site_favicon_upload']);
@@ -1451,6 +1460,7 @@ function system_site_information_settings_submit($form, &$form_state) {
     ->set('site_name', $form_state['values']['site_name'])
     ->set('site_logo_theme', $form_state['values']['site_logo_theme'])
     ->set('site_logo_path', $form_state['values']['site_logo_path'])
+    ->set('site_logo_attributes', $form_state['values']['site_logo_attributes'])
     ->set('site_favicon_theme', $form_state['values']['site_favicon_theme'])
     ->set('site_favicon_path', $form_state['values']['site_favicon_path'])
     ->set('site_favicon_mimetype', $form_state['values']['site_favicon_mimetype'])
