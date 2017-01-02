@@ -400,6 +400,12 @@ description = Check escaping of theme_feed_icon().
 group = System
 file = common.test
 
+[ConfigObjectTestCase]
+name = Config object tests
+description = low-level object tests of the Config class and friends.
+group = System
+file = config_obj.test
+
 [DatabaseConnectionTestCase]
 name = Connection tests
 description = Tests of the core database system.

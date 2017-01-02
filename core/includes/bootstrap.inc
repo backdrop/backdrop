@@ -2894,8 +2894,9 @@ function _backdrop_bootstrap_configuration() {
   }
 
   // Check that the config directory is not empty.
-  if (!defined('MAINTENANCE_MODE') && ($directory = config_get_config_directory('active'))) {
-    if (!(is_file($directory . '/system.core.json') || is_file($directory . '/system.performance.json'))) {
+  if (!defined('MAINTENANCE_MODE') && ($config_storage = config_get_config_storage('active'))) {
+    if (!($config_storage->exists('system.core') || $config_storage->exists('system.performance'))) {
+      $directory = config_get_config_directory('active');
       throw new Exception("The configuration directory in settings.php is specified as '$directory', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.");
     }
   }

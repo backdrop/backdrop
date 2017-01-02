@@ -705,19 +705,22 @@ function backdrop_install_config_directories() {
     // public files directory, which has already been verified to be writable
     // itself. But if it somehow fails anyway, the installation cannot proceed.
     // Bail out using a similar error message as in system_requirements().
-    $config_directory = config_get_config_directory($config_type);
-    if (!file_prepare_directory($config_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-      throw new Exception(format_string('The directory %directory could not be created or could not be made writable. To proceed with the installation, either create the directory and modify its permissions manually or ensure that the installer has the permissions to create it automatically. For more information, see the <a href="@handbook_url">Installation Instructions</a> page.', array(
-        '%directory' => $config_directory,
-        '@handbook_url' => 'https://backdropcms.org/installation',
-      )));
+   $config_storage = config_get_config_storage($config_type);
+    try {
+      $config_storage->initializeStorage();
+    }
+    catch (\ConfigStorageException $e) {
+      throw new Exception(format_string('@storage_error.  To proceed with the installation, either create the directory and modify its permissions manually or ensure that the installer has the permissions to create it automatically. For more information, see the <a href="@handbook_url">Installation Instructions</a> page.', array(
+          '@storage_error' => $e->getMessage(),
+          '@handbook_url' => 'https://backdropcms.org/installation',
+        )), 0, $e);
     }
 
     // Check that the directories are entirely empty. Disallowing installation
     // over existing config directories.
-    if (count(file_scan_directory($config_directory, '/.*/')) > 0) {
-      throw new Exception(format_string('The directory %directory must be completely empty to proceed with installation.', array(
-        '%directory' => $config_directory,
+    if (count($config_storage->listAll()) > 0) {
+      throw new Exception(format_string('The %directory configuration must be completely empty to proceed with installation.', array(
+        '%directory' => config_get_config_directory($config_type),
       )));
     }
 
@@ -741,7 +744,10 @@ make this configuration active, see admin/config/development/configuration/sync.
 ');
     }
 
-    file_put_contents($config_directory . '/README.md', $text);
+    // Only write the README.md to a file storage directory.
+    if (is_a($config_storage, 'ConfigFileStorage')) {
+      file_put_contents(config_get_config_directory($config_type) . '/README.md', $text);
+    }
   }
 }
 

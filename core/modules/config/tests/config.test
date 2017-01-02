@@ -309,7 +309,7 @@ class ConfigurationUITest extends BackdropWebTestCase {
     $this->assert(!empty($archive_files), 'Downloaded archive file is not empty.');
 
     // Prepare the list of config files from active storage.
-    $storage_active = new ConfigFileStorage(config_get_config_directory('active'));
+    $storage_active = config_get_config_storage('active');
     $config_files = array();
     foreach ($storage_active->listAll() as $config_name) {
       $config_files[] = $config_name . '.json';
@@ -404,8 +404,8 @@ class ConfigurationUITest extends BackdropWebTestCase {
    *   The target config storage name.
    */
   public function copyConfig($source = 'active', $target = 'staging') {
-    $source_storage = new ConfigFileStorage(config_get_config_directory($source));
-    $target_storage = new ConfigFileStorage(config_get_config_directory($target));
+    $source_storage = config_get_config_storage($source);
+    $target_storage = config_get_config_storage($target);
     $target_storage->deleteAll();
     foreach ($source_storage->listAll() as $name) {
       $target_storage->write($name, $source_storage->read($name));

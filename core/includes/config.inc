@@ -33,8 +33,7 @@ function config($config_file, $type = 'active') {
   $loaded_configs = &$backdrop_static_fast['loaded_configs'];
 
   if (!isset($loaded_configs[$type][$config_file])) {
-    $directory = config_get_config_directory($type);
-    $storage = new ConfigFileStorage($directory);
+    $storage = config_get_config_storage($type);
     $config = new Config($config_file, $storage);
     $config->load();
     $cache = $config->get('_config_static');
@@ -163,8 +162,7 @@ function config_get_config_directory($type = 'active') {
  *   An array containing matching configuration object names.
  */
 function config_get_names_with_prefix($prefix, $type = 'active') {
-  $directory = config_get_config_directory($type);
-  $storage = new ConfigFileStorage($directory);
+  $storage = config_get_config_storage($type);
   return $storage->listAll($prefix);
 }
 
@@ -180,8 +178,7 @@ function config_get_names_with_prefix($prefix, $type = 'active') {
  *   An array containing matching configuration objects.
  */
 function config_load_multiple($names, $type = 'active') {
-  $directory = config_get_config_directory($type);
-  $storage = new ConfigFileStorage($directory);
+  $storage = config_get_config_storage($type);
   return $storage->readMultiple($names);
 }
 
@@ -237,6 +234,21 @@ function config_uninstall_config($module, $config_name = NULL) {
       }
     }
   }
+}
+
+/**
+ * Get the storage object for the specified configuration type
+ *
+ * @param string $type
+ *   (optional) The type of config directory to return. Backdrop core provides
+ *   'active' and 'staging'. Defaults to 'active'.
+ *
+ * @return ConfigStorageInterface
+ *   A ConfigStorageInterface object managing the specified configuration type.
+ */
+function config_get_config_storage($type = 'active') {
+  $directory = config_get_config_directory($type);
+  return new ConfigFileStorage($directory);
 }
 
 /**
@@ -718,6 +730,28 @@ class Config {
 interface ConfigStorageInterface {
 
   /**
+   * Perform any steps needed to create and initialize the storage.  This may
+   * include creating directories or database tables, and initializing data
+   * structures.
+   *
+   * This function does not re-initialize already initialized storage.
+   *
+   * @return bool
+   *   TRUE on success, FALSE in case of an error.
+   *
+   * @throws ConfigStorageException
+   */
+  public function initializeStorage();
+
+  /**
+   * Check that the storage managed by this object is present and functional.
+   *
+   * @return bool
+   *   TRUE on success, FALSE in case of an error.
+   */
+  public function isInitialized();
+
+  /**
    * Returns whether a configuration object exists.
    *
    * @param string $name
@@ -871,6 +905,33 @@ interface ConfigStorageInterface {
    */
   public function deleteAll($prefix = '');
 
+  /**
+   * Import an archive of configuration files into the config storage managed
+   * by this object.
+   *
+   * @param string $file_uri
+   *   The URI of the tar archive file to import.
+   *
+   * @throws ConfigStorageException
+   *
+   * @return bool
+   *   TRUE on success, FALSE otherwise.
+   */
+  public function importArchive($file_uri);
+
+  /**
+   * Export an archive of configuration files from the config storage managed
+   * by this object.
+   *
+   * @param string $file_uri
+   *   The URI of the tar archive file to create.
+   *
+   * @throws ConfigStorageException
+   *
+   * @return bool
+   *   TRUE on success, FALSE otherwise.
+   */
+  public function exportArchive($file_uri);
 }
 
 /**
@@ -893,6 +954,30 @@ class ConfigFileStorage implements ConfigStorageInterface {
    */
   public function __construct($directory) {
     $this->directory = $directory;
+  }
+
+  /**
+   * Create a configuration directory, if it does not already exist, and ensure
+   * it is writable by the site.
+   *
+   * @return bool
+   *   TRUE on success, FALSE in case of an error.
+   *
+   * @throws ConfigStorageException
+   */
+  public function initializeStorage() {
+    if (!file_prepare_directory($this->directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
+      throw new ConfigStorageException(format_string('The directory %directory could not be created or could not be made writable. ', array(
+      '%directory' => $config_directory,
+    )));
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isInitialized() {
+    return is_dir($this->directory);
   }
 
   /**
@@ -1050,5 +1135,34 @@ class ConfigFileStorage implements ConfigStorageInterface {
     }
 
     return $success;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function importArchive($file_uri) {
+    $realpath = backdrop_realpath($file_uri);
+
+    try {
+      $archiver = new ArchiverTar($realpath);
+      $archiver->extract($this->directory, $archiver->listContents());
+    }
+    catch (\Exception $e) {
+      watchdog('config', 'Could not extract the archive @uri: @error', array('@uri' => $file_uri, '@error' => $e->getMessage()), WATCHDOG_ERROR);
+      throw new ConfigStorageException($e->getMessage(), 0, $e);
+    }
+    return TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function exportArchive($file_uri) {
+    $archiver = new ArchiverTar($file_uri);
+    $config_files = array();
+    foreach ($this->listAll() as $config_name) {
+      $config_files[] = $this->directory . '/' . $config_name . '.json';
+    }
+    $archiver->getArchive()->createModify($config_files, '', $this->directory);
   }
 }
