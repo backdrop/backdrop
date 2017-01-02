@@ -325,7 +325,7 @@ function taxonomy_menu() {
   $items['admin/structure/taxonomy/%taxonomy_vocabulary/list'] = array(
     'title' => 'List terms',
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -20,
+    'weight' => -40,
   );
   $items['admin/structure/taxonomy/%taxonomy_vocabulary/configure'] = array(
     'title' => 'Configure',
@@ -333,8 +333,20 @@ function taxonomy_menu() {
     'page arguments' => array('taxonomy_form_vocabulary', 3),
     'access arguments' => array('administer taxonomy'),
     'type' => MENU_LOCAL_TASK,
-    'weight' => -10,
+    'weight' => -30,
     'file' => 'taxonomy.admin.inc',
+  );
+  $items['admin/structure/taxonomy/%taxonomy_vocabulary/fields'] = array(
+    'title' => 'Manage fields',
+    'access arguments' => array('administer taxonomy'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => -20,
+  );
+  $items['admin/structure/taxonomy/%taxonomy_vocabulary/display'] = array(
+    'title' => 'Manage displays',
+    'access arguments' => array('administer taxonomy'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => -10,
   );
 
   $items['admin/structure/taxonomy/%taxonomy_vocabulary/add'] = array(
