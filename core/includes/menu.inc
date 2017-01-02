@@ -1849,15 +1849,12 @@ function theme_menu_local_actions($variables) {
  */
 function theme_menu_toggle($variables) {
   $output = '';
-  if ($variables['#enabled']) {
-    $output = '<input id="menu-toggle--state-' . $variables['hash'] . '" class="menu-toggle--state element-invisible" type="checkbox"  aria-controls="' . $variables['hash'] . '" />';
-    $output .= '<label class="menu-toggle__button" for="menu-toggle--state-' . $variables['hash'] . '">';
-    $output .= '<span class="menu-toggle__button-icon"></span><span class="menu-toggle__button-text">';
-    $output .= t('Menu');
-    $output .= '</span>';
-    $output .= '<span class="menu-toggle__assistive-text element-invisible">';
-    $output .= t('Toggle main menu visibility');
-    $output .= '</span></label>';
+  if ($variables['enabled']) {
+    $output  = '<input id="menu-toggle-state-' . $variables['hash'] . '" class="menu-toggle-state element-invisible" type="checkbox"  aria-controls="menu-toggle-state-' . $variables['hash'] . '" />';
+    $output .= '<label class="menu-toggle-button" for="menu-toggle-state-' . $variables['hash'] . '">';
+    $output .= '  <span class="menu-toggle-button-icon"></span><span class="menu-toggle-button-text">' . t($variables['text']) . '</span>';
+    $output .= '  <span class="menu-toggle-assistive-text element-invisible">' . t('Toggle menu visibility') . '</span>';
+    $output .= '</label>';
   }
   return $output;
 }
