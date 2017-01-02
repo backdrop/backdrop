@@ -232,9 +232,15 @@ description = Tests alteration of arguments passed to backdrop_alter().
 group = Common
 file = common.test
 
-[CommonURLUnitTestCase]
+[CommonURLWebTestCase]
 name = URL generation tests
-description = Confirm that url(), backdrop_get_query_parameters(), backdrop_http_build_query(), and l() work correctly with various input.
+description = Confirm that url() and l() work correctly with various input.
+group = Common
+file = common.test
+
+[CommonURLUnitTestCase]
+name = URL checking tests
+description = Confirm URL parsing functions work correctly with various input.
 group = Common
 file = common.test
 

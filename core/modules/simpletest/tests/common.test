@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for common.inc functionality.
@@ -65,7 +64,9 @@ class CommonBackdropAlterTestCase extends BackdropWebTestCase {
  * url() calls module_implements(), which may issue a db query, which requires
  * inheriting from a web test case rather than a unit test case.
  */
-class CommonURLUnitTestCase extends BackdropWebTestCase {
+class CommonURLWebTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * Confirm that invalid text given as $path is filtered.
    */
@@ -97,141 +98,6 @@ class CommonURLUnitTestCase extends BackdropWebTestCase {
 
   private function hasClass($link, $class) {
     return preg_match('|class="([^\"\s]+\s+)*' . $class . '|', $link);
-  }
-
-  /**
-   * Test backdrop_get_query_parameters().
-   */
-  function testBackdropGetQueryParameters() {
-    $original = array(
-      'a' => 1,
-      'b' => array(
-        'd' => 4,
-        'e' => array(
-          'f' => 5,
-        ),
-      ),
-      'c' => 3,
-      'q' => 'foo/bar',
-    );
-
-    // Default arguments.
-    $result = $_GET;
-    unset($result['q']);
-    $this->assertEqual(backdrop_get_query_parameters(), $result, "\$_GET['q'] was removed.");
-
-    // Default exclusion.
-    $result = $original;
-    unset($result['q']);
-    $this->assertEqual(backdrop_get_query_parameters($original), $result, "'q' was removed.");
-
-    // First-level exclusion.
-    $result = $original;
-    unset($result['b']);
-    $this->assertEqual(backdrop_get_query_parameters($original, array('b')), $result, "'b' was removed.");
-
-    // Second-level exclusion.
-    $result = $original;
-    unset($result['b']['d']);
-    $this->assertEqual(backdrop_get_query_parameters($original, array('b[d]')), $result, "'b[d]' was removed.");
-
-    // Third-level exclusion.
-    $result = $original;
-    unset($result['b']['e']['f']);
-    $this->assertEqual(backdrop_get_query_parameters($original, array('b[e][f]')), $result, "'b[e][f]' was removed.");
-
-    // Multiple exclusions.
-    $result = $original;
-    unset($result['a'], $result['b']['e'], $result['c']);
-    $this->assertEqual(backdrop_get_query_parameters($original, array('a', 'b[e]', 'c')), $result, "'a', 'b[e]', 'c' were removed.");
-  }
-
-  /**
-   * Test backdrop_http_build_query().
-   */
-  function testBackdropHttpBuildQuery() {
-    $this->assertEqual(backdrop_http_build_query(array('a' => ' &#//+%20@۞')), 'a=%20%26%23//%2B%2520%40%DB%9E', 'Value was properly encoded.');
-    $this->assertEqual(backdrop_http_build_query(array(' &#//+%20@۞' => 'a')), '%20%26%23//%2B%2520%40%DB%9E=a', 'Key was properly encoded.');
-    $this->assertEqual(backdrop_http_build_query(array('a' => '1', 'b' => '2', 'c' => '3')), 'a=1&b=2&c=3', 'Multiple values were properly concatenated.');
-    $this->assertEqual(backdrop_http_build_query(array('a' => array('b' => '2', 'c' => '3'), 'd' => 'foo')), 'a[b]=2&a[c]=3&d=foo', 'Nested array was properly encoded.');
-  }
-
-  /**
-   * Test backdrop_parse_url().
-   */
-  function testBackdropParseUrl() {
-    // Relative URL.
-    $url = 'foo/bar?foo=bar&bar=baz&baz#foo';
-    $result = array(
-      'path' => 'foo/bar',
-      'query' => array('foo' => 'bar', 'bar' => 'baz', 'baz' => ''),
-      'fragment' => 'foo',
-    );
-    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL parsed correctly.');
-
-    // Relative URL that is known to confuse parse_url().
-    $url = 'foo/bar:1';
-    $result = array(
-      'path' => 'foo/bar:1',
-      'query' => array(),
-      'fragment' => '',
-    );
-    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL parsed correctly.');
-
-    // Absolute URL.
-    $url = '/foo/bar?foo=bar&bar=baz&baz#foo';
-    $result = array(
-      'path' => '/foo/bar',
-      'query' => array('foo' => 'bar', 'bar' => 'baz', 'baz' => ''),
-      'fragment' => 'foo',
-    );
-    $this->assertEqual(backdrop_parse_url($url), $result, 'Absolute URL parsed correctly.');
-
-    // External URL testing.
-    $url = 'https://backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
-
-    // Test that Backdrop can recognize an absolute URL. Used to prevent attack
-    // vectors.
-    $this->assertTrue(url_is_external($url), 'Correctly identified an external URL.');
-
-    // External URL without an explicit protocol.
-    $url = '//backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
-    $this->assertTrue(url_is_external($url), 'Correctly identified an external URL without a protocol part.');
-
-    // Internal URL starting with a slash.
-    $url = '/backdropcms.org';
-    $this->assertFalse(url_is_external($url), 'Correctly identified an internal URL with a leading slash.');
-
-    // Test the parsing of absolute URLs.
-    $url = 'https://backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
-    $result = array(
-      'path' => 'https://backdropcms.org/foo/bar',
-      'query' => array('foo' => 'bar', 'bar' => 'baz', 'baz' => ''),
-      'fragment' => 'foo',
-    );
-    $this->assertEqual(backdrop_parse_url($url), $result, 'External URL parsed correctly.');
-
-    // Verify proper parsing of URLs when clean URLs are disabled.
-    $result = array(
-      'path' => 'foo/bar',
-      'query' => array('bar' => 'baz'),
-      'fragment' => 'foo',
-    );
-    // Non-clean URLs #1: Absolute URL generated by url().
-    $url = $GLOBALS['base_url'] . '/?q=foo/bar&bar=baz#foo';
-    $this->assertEqual(backdrop_parse_url($url), $result, 'Absolute URL with clean URLs disabled parsed correctly.');
-
-    // Non-clean URLs #2: Relative URL generated by url().
-    $url = '?q=foo/bar&bar=baz#foo';
-    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL with clean URLs disabled parsed correctly.');
-
-    // Non-clean URLs #3: URL generated by url() on non-Apache webserver.
-    $url = 'index.php?q=foo/bar&bar=baz#foo';
-    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL on non-Apache webserver with clean URLs disabled parsed correctly.');
-
-    // Test that backdrop_parse_url() does not allow spoofing a URL to force a malicious redirect.
-    $parts = backdrop_parse_url('forged:http://cwe.mitre.org/data/definitions/601.html');
-    $this->assertFalse(valid_url($parts['path'], TRUE), 'backdrop_parse_url() correctly parsed a forged URL.');
   }
 
   /**
@@ -356,6 +222,176 @@ class CommonURLUnitTestCase extends BackdropWebTestCase {
     $url = '//backdropcms.org';
     $result = url($url);
     $this->assertEqual($url, $result, 'External URL without protocol is not altered.');
+  }
+}
+
+/**
+ * All URL testing that does not require a Backdrop bootstrap.
+ */
+class CommonURLUnitTestCase extends BackdropUnitTestCase {
+  /**
+   * Test backdrop_get_query_parameters().
+   */
+  function testBackdropGetQueryParameters() {
+    $original = array(
+      'a' => 1,
+      'b' => array(
+        'd' => 4,
+        'e' => array(
+          'f' => 5,
+        ),
+      ),
+      'c' => 3,
+      'q' => 'foo/bar',
+    );
+
+    // Default arguments.
+    $result = $_GET;
+    unset($result['q']);
+    $this->assertEqual(backdrop_get_query_parameters(), $result, "\$_GET['q'] was removed.");
+
+    // Default exclusion.
+    $result = $original;
+    unset($result['q']);
+    $this->assertEqual(backdrop_get_query_parameters($original), $result, "'q' was removed.");
+
+    // First-level exclusion.
+    $result = $original;
+    unset($result['b']);
+    $this->assertEqual(backdrop_get_query_parameters($original, array('b')), $result, "'b' was removed.");
+
+    // Second-level exclusion.
+    $result = $original;
+    unset($result['b']['d']);
+    $this->assertEqual(backdrop_get_query_parameters($original, array('b[d]')), $result, "'b[d]' was removed.");
+
+    // Third-level exclusion.
+    $result = $original;
+    unset($result['b']['e']['f']);
+    $this->assertEqual(backdrop_get_query_parameters($original, array('b[e][f]')), $result, "'b[e][f]' was removed.");
+
+    // Multiple exclusions.
+    $result = $original;
+    unset($result['a'], $result['b']['e'], $result['c']);
+    $this->assertEqual(backdrop_get_query_parameters($original, array('a', 'b[e]', 'c')), $result, "'a', 'b[e]', 'c' were removed.");
+  }
+
+  /**
+   * Test backdrop_http_build_query().
+   */
+  function testBackdropHttpBuildQuery() {
+    $this->assertEqual(backdrop_http_build_query(array('a' => ' &#//+%20@۞')), 'a=%20%26%23//%2B%2520%40%DB%9E', 'Value was properly encoded.');
+    $this->assertEqual(backdrop_http_build_query(array(' &#//+%20@۞' => 'a')), '%20%26%23//%2B%2520%40%DB%9E=a', 'Key was properly encoded.');
+    $this->assertEqual(backdrop_http_build_query(array('a' => '1', 'b' => '2', 'c' => '3')), 'a=1&b=2&c=3', 'Multiple values were properly concatenated.');
+    $this->assertEqual(backdrop_http_build_query(array('a' => array('b' => '2', 'c' => '3'), 'd' => 'foo')), 'a[b]=2&a[c]=3&d=foo', 'Nested array was properly encoded.');
+  }
+
+  /**
+   * Test backdrop_get_bare_domain().
+   */
+   function testBackdropGetBareDomain() {
+     // Input => Expected Output.
+     $tests = array(
+       'http://www.example.com/path-to-page' => 'example.com',
+       'http://example.com/path-to-page' => 'example.com',
+       'http://beta.example.com/path-to-page' => 'example.com',
+       'https://www.beta.example.co.uk/path-to-page' => 'example.co.uk',
+       'http://example.co.uk/path-to-page' => 'example.co.uk',
+       'http://beta.example.co.uk/path-to-page' => 'example.co.uk',
+       '//example.co.uk/path-to-page' => 'example.co.uk',
+
+       'example.co.uk' => 'example.co.uk',
+       'example.com' => 'example.com',
+       'beta.example.com' => 'example.com',
+       'alpha.beta.example.com' => 'example.com',
+       'bbc.co.uk' => 'bbc.co.uk',
+       'foo.bbc.co.uk' => 'bbc.co.uk',
+       'bar.foo.bbc.co.uk' => 'bbc.co.uk',
+       'bar.foo.abc.com' => 'abc.com',
+       'lb.cm' => 'lb.cm',
+     );
+
+     foreach ($tests as $input => $expected_output) {
+       $this->assertIdentical($expected_output, backdrop_get_bare_domain($input));
+     }
+   }
+
+  /**
+   * Test backdrop_parse_url().
+   */
+  function testBackdropParseUrl() {
+    // Relative URL.
+    $url = 'foo/bar?foo=bar&bar=baz&baz#foo';
+    $result = array(
+      'path' => 'foo/bar',
+      'query' => array('foo' => 'bar', 'bar' => 'baz', 'baz' => ''),
+      'fragment' => 'foo',
+    );
+    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL parsed correctly.');
+
+    // Relative URL that is known to confuse parse_url().
+    $url = 'foo/bar:1';
+    $result = array(
+      'path' => 'foo/bar:1',
+      'query' => array(),
+      'fragment' => '',
+    );
+    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL parsed correctly.');
+
+    // Absolute URL.
+    $url = '/foo/bar?foo=bar&bar=baz&baz#foo';
+    $result = array(
+      'path' => '/foo/bar',
+      'query' => array('foo' => 'bar', 'bar' => 'baz', 'baz' => ''),
+      'fragment' => 'foo',
+    );
+    $this->assertEqual(backdrop_parse_url($url), $result, 'Absolute URL parsed correctly.');
+
+    // External URL testing.
+    $url = 'https://backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
+
+    // Test that Backdrop can recognize an absolute URL. Used to prevent attack
+    // vectors.
+    $this->assertTrue(url_is_external($url), 'Correctly identified an external URL.');
+
+    // External URL without an explicit protocol.
+    $url = '//backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
+    $this->assertTrue(url_is_external($url), 'Correctly identified an external URL without a protocol part.');
+
+    // Internal URL starting with a slash.
+    $url = '/backdropcms.org';
+    $this->assertFalse(url_is_external($url), 'Correctly identified an internal URL with a leading slash.');
+
+    // Test the parsing of absolute URLs.
+    $url = 'https://backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
+    $result = array(
+      'path' => 'https://backdropcms.org/foo/bar',
+      'query' => array('foo' => 'bar', 'bar' => 'baz', 'baz' => ''),
+      'fragment' => 'foo',
+    );
+    $this->assertEqual(backdrop_parse_url($url), $result, 'External URL parsed correctly.');
+
+    // Verify proper parsing of URLs when clean URLs are disabled.
+    $result = array(
+      'path' => 'foo/bar',
+      'query' => array('bar' => 'baz'),
+      'fragment' => 'foo',
+    );
+    // Non-clean URLs #1: Absolute URL generated by url().
+    $url = $GLOBALS['base_url'] . '/?q=foo/bar&bar=baz#foo';
+    $this->assertEqual(backdrop_parse_url($url), $result, 'Absolute URL with clean URLs disabled parsed correctly.');
+
+    // Non-clean URLs #2: Relative URL generated by url().
+    $url = '?q=foo/bar&bar=baz#foo';
+    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL with clean URLs disabled parsed correctly.');
+
+    // Non-clean URLs #3: URL generated by url() on non-Apache webserver.
+    $url = 'index.php?q=foo/bar&bar=baz#foo';
+    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL on non-Apache webserver with clean URLs disabled parsed correctly.');
+
+    // Test that backdrop_parse_url() does not allow spoofing a URL to force a malicious redirect.
+    $parts = backdrop_parse_url('forged:http://cwe.mitre.org/data/definitions/601.html');
+    $this->assertFalse(valid_url($parts['path'], TRUE), 'backdrop_parse_url() correctly parsed a forged URL.');
   }
 }
 
