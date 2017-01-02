@@ -41,6 +41,27 @@ Backdrop.menuStyles.dropdown = {
       subIndicatorsText: ''
     });
     $(element).addClass('sm').smartmenus(settings);
+
+    // Add gentle menu slide behavior.
+    $('.menu-toggle-state').once('smartmenus-behavior', function() {
+      var $mainMenuState = $(this);
+      // animate mobile menu
+      $mainMenuState.change(function(e) {
+        var $menu = $(element);
+        if (this.checked) {
+          $menu.hide().slideDown(250, function() { $menu.css('display', ''); });
+        }
+        else {
+          $menu.show().slideUp(250, function() { $menu.css('display', ''); });
+        }
+      });
+      // hide mobile menu beforeunload
+      $(window).bind('beforeunload unload', function() {
+        if ($mainMenuState[0].checked) {
+          $mainMenuState[0].click();
+        }
+      });
+    });
   }
 };
 
