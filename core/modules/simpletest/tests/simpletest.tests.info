@@ -946,6 +946,12 @@ description = Tests the form API url element.
 group = Form API
 file = form.test
 
+[SystemSettingsFormTest]
+name = System Settings Form
+description = Tests system_settings_form().
+group = System
+file = form.test
+
 [GraphUnitTest]
 name = Graph
 description = Graph handling unit tests.

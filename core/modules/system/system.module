@@ -3852,3 +3852,175 @@ function system_admin_paths() {
   );
   return $paths;
 }
+
+/**
+ * Sets up a form to save information automatically.
+ *
+ * This function adds a submit handler and a submit button to a form array. The
+ * submit function saves all the data in the form.
+ *
+ * If $form['#config'] is present in the form, the values will be saved to the
+ * named settings file (e.g., mymodule.settings). If sub-elements or groups of
+ * sub-elements have their own '#config' keys, then values of those elements and
+ * their children will be saved to that settings file.
+ *
+ * For example, consider the form:
+ *
+ * @code
+ * $primary_config = config('mymodule.settings');
+ * $secondary_config = config('mymodule.second');
+ * $tertiary_config = config('mymodule.third');
+ * $form = array(
+ *   '#config' => 'mymodule.settings',
+ *   'first_setting' => array(
+ *     '#type' => 'textfield',
+ *     '#title' => t('First Setting'),
+ *     '#default_setting' => $settings_config->get('first_setting'),
+ *   ),
+ *   'second_setting' => array( ... ),
+ *
+ *   'bonus_fieldset' => array(
+ *     '#type' => 'fieldset',
+ *     '#title' => t('Secondary Settings'),
+ *     '#config' => 'mymodule.second',
+ *
+ *     'bonus_one' => array( ... ),
+ *     'bonus_two' => array( ... ),
+ *
+ *     'bonus_three' => array(
+ *       '#type' => 'textfield',
+ *       '#default_setting' => $tertiary_config->get('bonus_three'),
+ *       '#config' => 'mymodule.third',
+ *     ),
+ *   ),
+ * );
+ * @endcode
+ *
+ * The top-level '#config' is "mymodule.settings". The values of 'first_setting'
+ * and 'second_setting' will both be saved to "mymodule.settings".
+ *
+ * The 'bonus_fieldset' has its own '#config' setting, "mymodule.second", which
+ * overrides the top-level '#config' setting, so 'bonus_one' and 'bonus_two'
+ * will be saved to "mymodule.second".
+ *
+ * The 'bonus_three' has its own '#config' setting, "mymodule.third", which
+ * overrides the one from the fieldset. The value of 'bonus_three' will be
+ * saved to the "mymodule.third".
+ *
+ * Modules that implement hook_form_alter() can use the '#config' settings to
+ * save their data to their own settings file by setting the '#config' parameter
+ * in thier elements or fieldsets.
+ *
+ * If no top-level $form['#config'] value is present, then the values will be
+ * saved to variables using variable_set() from the Drupal compatibility layer.
+ * This behavior is deprecated and will be remove in Backdrop 2.0.
+ *
+ * If you need to manipulate the data in a custom manner, you can either put
+ * your own submission handler in the form array before calling this function,
+ * or just use your own submission handler instead of calling this function.
+ *
+ * @param $form
+ *   An associative array containing the structure of the form.
+ *
+ * @return
+ *   The form structure.
+ *
+ * @see system_settings_form_submit()
+ * @see _system_sort_form_values_by_config()
+ *
+ * @since 1.6.0 Restored and made compatible with configuration management.
+ */
+function system_settings_form($form) {
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
+
+  if (empty($form['#config']) && !settings_get('backdrop_drupal_compatibility')) {
+    drupal_set_message(t('Drupal compatibility layer is disabled and this form has not be updated to use Backdrop configuration management.  Changes will not be saved.'), 'warning');
+  }
+
+  if (!empty($_POST) && form_get_errors()) {
+    backdrop_set_message(t('The settings have not been saved because of the errors.'), 'error');
+  }
+  $form['#submit'][] = 'system_settings_form_submit';
+  if (!isset($form['#theme'])) {
+    $form['#theme'] = 'system_settings_form';
+  }
+  return $form;
+}
+
+/**
+ * Form submission handler for system_settings_form().
+ *
+ * If you want node type configure style handling of your checkboxes,
+ * add an array_filter value to your form.
+ *
+ * @since 1.6.0 Restored and made compatible with configuration management.
+ */
+function system_settings_form_submit($form, &$form_state) {
+  form_state_values_clean($form_state);
+
+  if (!empty($form['#config'])) {
+    $configs = _system_sort_form_values_by_config($form, $form_state, $form['#config']);
+    foreach ($configs as $bucket => $data) {
+      config_set_multiple($bucket, $data);
+    }
+  }
+  else {
+    watchdog('form', 'Backdrop 2.0 and later will require forms using system_settings_form() to set $form[\'#config\'].', array(), WATCHDOG_DEPRECATED);
+    if (!settings_get('backdrop_drupal_compatibility')) {
+      backdrop_set_message(t('Settings not saved: Drupal compatibility layer is disabled and this form has not be updated to use Backdrop configuration management.', 'error'));
+      return;
+    }
+
+    foreach ($form_state['values'] as $key => $value) {
+      if (is_array($value) && isset($form_state['values']['array_filter'])) {
+        $value = array_keys(array_filter($value));
+      }
+      variable_set($key, $value);
+    }
+  }
+
+  backdrop_set_message(t('The configuration options have been saved.'));
+}
+
+/**
+ * Sorts the $form_state['values'] array into CMI buckets by $form['#config'].
+ *
+ * This function recursively searches the form to assign values from
+ * $form_state['values'] into specific CMI buckets.  The top of $form must
+ * contain a $form['#config'] entry with the name of the default CMI bucket
+ * to use.  If an element contains its own $form['#config'] entry, that CMI
+ * bucket name will be used for that element and any child elements in the
+ * form.
+ *
+ * @param $form
+ *   An associative array containing the structure of a portion of the form.
+ * @param &$form_state
+ *   A keyed array containing the current state of the form.
+ * @param $inherited_bucket
+ *   The name of the bucket to use if $form['#config'] is not set.
+ * @param $configs
+ *   A keyed array that will contain the form values sorted by CMI bucket when
+ *   the function returns.  Defaults to an empty array.
+ * @return
+ *    Returns an array where the keys are the names of the CMI buckets (e.g.,
+ *    system.settings) and the values are key => value arrays of the settings
+ *    for each bucket.
+ */
+function _system_sort_form_values_by_config($form, &$form_state, $inherited_bucket, $configs = array()) {
+  foreach (element_children($form) as $key) {
+    $form_fragment = $form[$key];
+
+    // Specific elements or groups of elements can specify a bucket.
+    $bucket = empty($form_fragment['#config']) ? $inherited_bucket : $form_fragment['#config'];
+    // Save this element, if the value is present.
+    if (array_key_exists($key, $form_state['values'])) {
+      $configs[$bucket][$key] = $form_state['values'][$key];
+    }
+    // Descend into subgroups.
+    if (is_array($form_fragment) && count(element_children($form_fragment))) {
+      $configs = _system_sort_form_values_by_config($form_fragment, $form_state, $bucket, $configs);
+    }
+  }
+  return $configs;
+}

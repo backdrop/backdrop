@@ -2272,3 +2272,50 @@ function form_test_html_id($form, &$form_state) {
   );
   return $form;
 }
+
+/**
+ * A form to test system_settings_form().
+ */
+function form_test_system_config_form() {
+  $config = config('simpletest.testconfig');
+  $form['#config'] = 'simpletest.testconfig';
+  $form['abc'] = array(
+    '#type' => 'textfield',
+    '#title' => 'abc',
+    '#default_value' => $config->get('abc'),
+  );
+  $form['def'] = array(
+    '#type' => 'textfield',
+    '#title' => 'def',
+    '#default_value' => $config->get('def'),
+  );
+
+  // Test single-element overrrides
+  $sysconfig = config('system.core');
+  $form['rss_description'] = array(
+    '#type' => 'textfield',
+    '#title' => 'xyz',
+    '#default_value' => $sysconfig->get('rss_description'),
+    '#config' => 'system.core',
+  );
+
+  // Test fieldsets of overrides.
+  $second_config = config('simpletest.secondconfig');
+  $form['second_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Second Settings',
+    '#config' => 'simpletest.secondconfig',
+  );
+  $form['second_settings']['ghi'] = array(
+    '#type' => 'textfield',
+    '#title' => 'ghi',
+    '#default_value' => $second_config->get('ghi')
+  );
+  $form['second_settings']['jkl'] = array(
+    '#type' => 'textfield',
+    '#title' => 'jkl',
+    '#default_value' => $second_config->get('jkl')
+  );
+
+  return system_settings_form($form);
+}

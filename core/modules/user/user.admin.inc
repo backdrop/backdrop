@@ -119,7 +119,7 @@ function user_multiple_cancel_confirm_submit($form, &$form_state) {
  */
 function user_admin_settings($form, &$form_state) {
   $config = config('system.core');
-  $mail_config = config('user.mail');
+  $form['#config'] = 'system.core';
 
   // User login settings.
   $form['user_login'] = array(
@@ -283,29 +283,9 @@ function user_admin_settings($form, &$form_state) {
  * Form submission handler for user_admin_settings().
  */
 function user_admin_settings_submit($form, &$form_state) {
-  $values = $form_state['values'];
-
-  $config = config('system.core');
-  $config->set('user_cancel_method', $values['user_cancel_method']);
-  $config->set('user_login_method', $form_state['values']['user_login_method']);
-  $config->set('user_register', $values['user_register']);
-  $config->set('user_email_verification', $values['user_email_verification']);
-  $config->set('user_email_match', $form_state['values']['user_email_match']);
-  $config->set('user_signatures', $values['user_signatures']);
-  $config->set('user_pictures', $values['user_pictures']);
-  $config->set('user_picture_path', $values['user_picture_path']);
-  $config->set('user_picture_default', $values['user_picture_default']);
-  if (isset($values['user_picture_style'])) {
-    $config->set('user_picture_style', $values['user_picture_style']);
-  }
-  $config->set('user_picture_dimensions', $values['user_picture_dimensions']);
-  $config->set('user_picture_file_size', $values['user_picture_file_size']);
-  $config->set('user_picture_guidelines', $values['user_picture_guidelines']);
-  $config->save();
-
+  system_settings_form_submit($form, $form_state);
   // Clear the token cache.
   token_cache_clear();
-  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
