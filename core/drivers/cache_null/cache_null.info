@@ -1,0 +1,4 @@
+name = NULL Cache
+description = A dummy cache implementation
+
+cache_backend[BackdropNullCache] = cache_null.inc

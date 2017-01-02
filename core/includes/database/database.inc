@@ -1719,8 +1719,11 @@ abstract class Database {
       throw new DatabaseDriverNotSpecifiedException('Driver not specified for this database connection: ' . $key);
     }
 
+    $backends = backdrop_find_backends('database');
     $driver_class = 'DatabaseConnection_' . $driver;
-    require_once BACKDROP_ROOT . '/core/includes/database/' . $driver . '/database.inc';
+    if (array_key_exists($driver_class, $backends)) {
+      require_once $backends[$driver_class];
+    }
 
     /* @var DatabaseConnection $new_connection */
     $new_connection = new $driver_class(self::$databaseInfo[$key][$target]);

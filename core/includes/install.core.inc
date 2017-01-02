@@ -269,6 +269,7 @@ function install_begin_request(&$install_state) {
   // suspect, due to the fact that Backdrop is not fully set up yet.
   require_once BACKDROP_ROOT . '/core/includes/cache.inc';
   require_once BACKDROP_ROOT . '/core/includes/cache-install.inc';
+  backdrop_load_backends('cache');
   $GLOBALS['settings']['cache_default_class'] = 'BackdropFakeCache';
 
   // Set up $language, so t() caller functions will still work.

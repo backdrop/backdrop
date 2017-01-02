@@ -1,0 +1,6 @@
+name = File-based configuration
+description = Store configuration in flat files
+version = BACKDROP_VERSION
+backdrop = 1.x
+
+config_backend[ConfigFileStorage] = config_file_storage.inc
