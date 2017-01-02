@@ -8,6 +8,55 @@
 require_once BACKDROP_ROOT . '/core/modules/file/file.field.inc';
 
 /**
+ * Implements hook_action_info().
+ */
+function file_action_info() {
+  $actions['file_delete'] = array(
+    'label' => t('Delete file(s)'),
+    'type' => 'file',
+    'callback' => 'file_delete_action',
+    'file' => 'file.actions.inc',
+  );
+
+  return $actions;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function file_autoload_info() {
+  return array(
+    // Views handlers.
+    'views_handler_argument_file_fid' => 'views/views_handler_argument_file_fid.inc',
+    'views_handler_field_file' => 'views/views_handler_field_file.inc',
+    'views_handler_field_file_link_delete' => 'views/views_handler_field_file_link_delete.inc',
+    'views_handler_field_file_extension' => 'views/views_handler_field_file_extension.inc',
+    'views_handler_field_file_filemime' => 'views/views_handler_field_file_filemime.inc',
+    'views_handler_field_file_uri' => 'views/views_handler_field_file_uri.inc',
+    'views_handler_field_file_status' => 'views/views_handler_field_file_status.inc',
+    'views_handler_filter_file_status' => 'views/views_handler_filter_file_status.inc',
+    'views_handler_field_file_link' => 'views/views_handler_field_file_link.inc',
+  );
+}
+
+/**
+ * Implements hook_permission().
+ */
+function file_permission() {
+  return array(
+    'access file overview' => array(
+      'title' => t('Access the manage files overview'),
+      'description' => t('The <a href="@url">manage files overview page</a> shows all files uploaded to the site.', array('@url' => url('admin/content/files'))),
+    ),
+    'delete files' => array(
+      'title' => t('Delete any file'),
+      'description' => t('Allow deleting files directly from the manage files overview page.'),
+      'restrict access' => TRUE,
+    ),
+  );
+}
+
+/**
  * Implements hook_menu().
  */
 function file_menu() {
@@ -26,6 +75,25 @@ function file_menu() {
     'access arguments' => array('access content'),
     'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,
+  );
+
+  $items['file/%file/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'backdrop_get_form',
+    'page arguments'  => array('file_delete_form', 1),
+    'access arguments' => array('delete files'),
+    'weight' => 1,
+    'type' => MENU_CALLBACK,
+    'file' => 'file.pages.inc',
+  );
+
+  $items['admin/content/files/delete'] = array(
+    'title' => 'Confirm deleting multiple files',
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('file_multiple_delete_confirm'),
+    'access arguments' => array('delete files'),
+    'file' => 'file.pages.inc',
   );
 
   return $items;
@@ -329,6 +397,22 @@ function file_progress_implementation() {
  */
 function file_file_predelete(File $file) {
   // TODO: Remove references to a file that is in-use.
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function file_admin_paths() {
+  // Re-use the node admin theme setting for files.
+  if (config_get('system.core', 'node_admin_theme')) {
+    $paths = array(
+      'file/*/delete' => TRUE,
+    );
+    return $paths;
+  }
+  else {
+    return array();
+  }
 }
 
 /**
@@ -915,8 +999,17 @@ function file_icon_map(File $file) {
  *   (optional) The name of a field type. If given, limits the reference check
  *   to fields of the given type.
  *
- * @return
- *   An integer value.
+ * @return array
+ *   A nested array in the following format:
+ *   - field_name => field_references
+ *     - entity_type => type_references
+ *       - id => reference
+ *   The first level key contains the field names.
+ *   The second level key contains the entity type.
+ *   The third level key contains entity ID.
+ *
+ * @see file_file_download()
+ * @see file_file_predelete()
  */
 function file_get_file_references(File $file, $field = NULL, $age = FIELD_LOAD_REVISION, $field_type = 'file') {
   $references = backdrop_static(__FUNCTION__, array());

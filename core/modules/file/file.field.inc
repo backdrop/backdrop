@@ -234,7 +234,10 @@ function file_field_insert($entity_type, $entity, $field, $instance, $langcode, 
 
   // Add a new usage of each uploaded file.
   foreach ($items as $item) {
-    file_usage_add(file_load($item['fid']), 'file', $entity_type, $id);
+    $file = file_load($item['fid']);
+    if ($file) {
+      file_usage_add($file, 'file', $entity_type, $id);
+    }
   }
 }
 
@@ -250,7 +253,9 @@ function file_field_update($entity_type, $entity, $field, $instance, $langcode, 
   // deletion of previous file usages are necessary.
   if (!empty($entity->revision)) {
     foreach ($items as $item) {
-      file_usage_add(file_load($item['fid']), 'file', $entity_type, $id);
+      if ($file = file_load($item['fid'])) {
+        file_usage_add($file, 'file', $entity_type, $id);
+      }
     }
     return;
   }
@@ -269,7 +274,9 @@ function file_field_update($entity_type, $entity, $field, $instance, $langcode, 
       $original_fids[] = $original_item['fid'];
       if (isset($original_item['fid']) && !in_array($original_item['fid'], $current_fids)) {
         // Decrement the file usage count by 1.
-        file_usage_delete(file_load($original_item['fid']), 'file', $entity_type, $id);
+        if ($file = file_load($original_item['fid'])) {
+          file_usage_delete($file, 'file', $entity_type, $id);
+        }
       }
     }
   }
@@ -277,7 +284,9 @@ function file_field_update($entity_type, $entity, $field, $instance, $langcode, 
   // Add new usage entries for newly added files.
   foreach ($items as $item) {
     if (!in_array($item['fid'], $original_fids)) {
-      file_usage_add(file_load($item['fid']), 'file', $entity_type, $id);
+      if ($file = file_load($item['fid'])) {
+        file_usage_add($file, 'file', $entity_type, $id);
+      }
     }
   }
 }
@@ -290,7 +299,9 @@ function file_field_delete($entity_type, $entity, $field, $instance, $langcode, 
 
   // Delete all file usages within this entity.
   foreach ($items as $delta => $item) {
-    file_usage_delete(file_load($item['fid']), 'file', $entity_type, $id, 0);
+    if ($file = file_load($item['fid'])) {
+      file_usage_delete($file, 'file', $entity_type, $id, 0);
+    }
   }
 }
 
@@ -301,7 +312,9 @@ function file_field_delete_revision($entity_type, $entity, $field, $instance, $l
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
   foreach ($items as $delta => $item) {
     // Decrement the file usage count by 1.
-    file_usage_delete(file_load($item['fid']), 'file', $entity_type, $id);
+    if ($file = file_load($item['fid'])) {
+      file_usage_delete($file, 'file', $entity_type, $id);
+    }
   }
 }
 

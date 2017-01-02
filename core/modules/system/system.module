@@ -3783,13 +3783,6 @@ function system_autoload_info() {
     'FileStorageController' => 'file.entity.inc',
 
     // Views handlers.
-    'views_handler_argument_file_fid' => 'views/views_handler_argument_file_fid.inc',
-    'views_handler_field_file' => 'views/views_handler_field_file.inc',
-    'views_handler_field_file_extension' => 'views/views_handler_field_file_extension.inc',
-    'views_handler_field_file_filemime' => 'views/views_handler_field_file_filemime.inc',
-    'views_handler_field_file_uri' => 'views/views_handler_field_file_uri.inc',
-    'views_handler_field_file_status' => 'views/views_handler_field_file_status.inc',
-    'views_handler_filter_file_status' => 'views/views_handler_filter_file_status.inc',
     'views_handler_filter_system_type' => 'views/views_handler_filter_system_type.inc',
   );
 }

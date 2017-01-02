@@ -1589,7 +1589,7 @@ function _node_add_access() {
 function node_menu() {
   $items['admin/content/node/delete'] = array(
     'title' => 'Confirm content deletion',
-    'type' => MENU_CALLBACK,
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('node_multiple_delete_confirm'),
     'access arguments' => array('access content overview'),
