@@ -3857,27 +3857,85 @@ function system_admin_paths() {
  * Sets up a form to save information automatically.
  *
  * This function adds a submit handler and a submit button to a form array. The
- * submit function saves all the data in the form, using variable_set(), to
- * variables named the same as the keys in the form array. Note that this means
- * you should normally prefix your form array keys with your module name, so
- * that they are unique when passed into variable_set().
+ * submit function saves all the data in the form.
+ *
+ * If $form['#config'] is present in the form, the values will be saved to the
+ * named settings file (e.g., mymodule.settings). If sub-elements or groups of
+ * sub-elements have their own '#config' keys, then values of those elements and
+ * their children will be saved to that settings file.
+ *
+ * For example, consider the form:
+ *
+ * @code
+ * $primary_config = config('mymodule.settings');
+ * $secondary_config = config('mymodule.second');
+ * $tertiary_config = config('mymodule.third');
+ * $form = array(
+ *   '#config' => 'mymodule.settings',
+ *   'first_setting' => array(
+ *     '#type' => 'textfield',
+ *     '#title' => t('First Setting'),
+ *     '#default_setting' => $settings_config->get('first_setting'),
+ *   ),
+ *   'second_setting' => array( ... ),
+ *
+ *   'bonus_fieldset' => array(
+ *     '#type' => 'fieldset',
+ *     '#title' => t('Secondary Settings'),
+ *     '#config' => 'mymodule.second',
+ *
+ *     'bonus_one' => array( ... ),
+ *     'bonus_two' => array( ... ),
+ *
+ *     'bonus_three' => array(
+ *       '#type' => 'textfield',
+ *       '#default_setting' => $tertiary_config->get('bonus_three'),
+ *       '#config' => 'mymodule.third',
+ *     ),
+ *   ),
+ * );
+ * @endcode
+ *
+ * The top-level '#config' is "mymodule.settings". The values of 'first_setting'
+ * and 'second_setting' will both be saved to "mymodule.settings".
+ *
+ * The 'bonus_fieldset' has its own '#config' setting, "mymodule.second", which
+ * overrides the top-level '#config' setting, so 'bonus_one' and 'bonus_two'
+ * will be saved to "mymodule.second".
+ *
+ * The 'bonus_three' has its own '#config' setting, "mymodule.third", which
+ * overrides the one from the fieldset. The value of 'bonus_three' will be
+ * saved to the "mymodule.third".
+ *
+ * Modules that implement hook_form_alter() can use the '#config' settings to
+ * save their data to their own settings file by setting the '#config' parameter
+ * in thier elements or fieldsets.
+ *
+ * If no top-level $form['#config'] value is present, then the values will be
+ * saved to variables using variable_set() from the Drupal compatibility layer.
+ * This behavior is deprecated and will be remove in Backdrop 2.0.
  *
  * If you need to manipulate the data in a custom manner, you can either put
  * your own submission handler in the form array before calling this function,
  * or just use your own submission handler instead of calling this function.
  *
- * This function is deprecated in Backdrop because it saves to the old
- * "variables" table. In Backdrop sites, developers are encouraged to save
- * configuration using the config system. See config(), config_set(), and
- * config_get() for information on saving into configuration.
+ * @param $form
+ *   An associative array containing the structure of the form.
  *
+ * @return
+ *   The form structure.
+ *
+ * @see system_settings_form_submit()
+ * @see _system_sort_form_values_by_config()
+ *
+ * @since 1.6.0 Restored and made compatible with configuration management.
  */
 function system_settings_form($form) {
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
 
   if (empty($form['#config']) && !settings_get('backdrop_drupal_compatibility')) {
-    drupal_set_message(t('Drupal compatibility layer is disabled and this form has not be updated to use Backdrop CMI.  Changes will not be saved.'), 'warning');
+    drupal_set_message(t('Drupal compatibility layer is disabled and this form has not be updated to use Backdrop configuration management.  Changes will not be saved.'), 'warning');
   }
 
   if (!empty($_POST) && form_get_errors()) {
@@ -3896,12 +3954,7 @@ function system_settings_form($form) {
  * If you want node type configure style handling of your checkboxes,
  * add an array_filter value to your form.
  *
- * Use of this function is discouraged because it is not compatible with the
- * configuration system. See config(), config_set(), and config_get() for
- * alternatives. Rather than reusing this submit handler throughout settings
- * forms, developers should create separate submit handlers for each form
- * to save the settings into various configuration files as needed.
- *
+ * @since 1.6.0 Restored and made compatible with configuration management.
  */
 function system_settings_form_submit($form, &$form_state) {
   form_state_values_clean($form_state);
@@ -3915,7 +3968,7 @@ function system_settings_form_submit($form, &$form_state) {
   else {
     watchdog('form', 'Backdrop 2.0 and later will require forms using system_settings_form() to set $form[\'#config\'].', array(), WATCHDOG_DEPRECATED);
     if (!settings_get('backdrop_drupal_compatibility')) {
-      backdrop_set_message(t('Settings not saved: Drupal compatibility layer is disabled and this form has not be updated to use Backdrop CMI.', 'error'));
+      backdrop_set_message(t('Settings not saved: Drupal compatibility layer is disabled and this form has not be updated to use Backdrop configuration management.', 'error'));
       return;
     }
 
