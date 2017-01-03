@@ -672,15 +672,15 @@ function system_preprocess_page_components(&$variables) {
   );
 
   if ($child_delta == 'title' || $child_delta == 'title_combo') {
-    if ($settings['title_markup'] == 'none') {
+    if ($settings['title_tag'] == 'none') {
       $variables['title'] = backdrop_get_title();
     }
     else {
-      $output = '<' . $settings['title_markup'];
-      if (isset($settings['title_class'])) {
+      $output = '<' . $settings['title_tag'];
+      if (strlen($settings['title_class'])) {
         $output .= ' class="' . $settings['title_class'] . '"';
       }
-      $output .= '>' . backdrop_get_title() . '</' . $settings['title_markup'] . '>' . "\n";
+      $output .= '>' . backdrop_get_title() . '</' . $settings['title_tag'] . '>' . "\n";
       $variables['title'] = $output;
     }
   }
@@ -704,7 +704,7 @@ function system_preprocess_page_components(&$variables) {
         );
         break;
     }
-    $variables['tabs'] =   theme('menu_local_tasks', $menus);
+    $variables['tabs'] = theme('menu_local_tasks', $menus);
   }
   if ($child_delta == 'local_actions' || $child_delta == 'title_combo') {
     $variables['action_links'] = menu_local_actions();

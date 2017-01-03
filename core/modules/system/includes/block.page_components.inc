@@ -12,6 +12,12 @@ class PageComponents extends Block {
    */
   function __construct($plugin_name, array $data) {
     parent::__construct($plugin_name, $data);
+
+    $this->settings += array(
+      'title_tag' => 'h1',
+      'title_class' => '',
+      'tab_type' => 'both'
+    );
   }
 
   /**
@@ -20,14 +26,7 @@ class PageComponents extends Block {
   function getAdminTitle() {
     $children = $this->getChildren();
     $title = $children[$this->childDelta]['info'];
-    return !empty($this->settings['title']) ? check_plain($this->settings['title']) : $title;
-  }
-
-  /**
-   *  Sets block subject on block view.
-   */
-  function getTitle() {
-    return isset($this->settings['title']) ? check_plain($this->settings['title']) : '';
+    return strlen($this->settings['title']) ? check_plain($this->settings['title']) : $title;
   }
 
   /**
@@ -49,7 +48,7 @@ class PageComponents extends Block {
         '#type' => 'fieldset',
         '#title' => t('Page title'),
       );
-      $form['title']['title_markup'] = array(
+      $form['title']['title_tag'] = array(
         '#title' => t('Title tag'),
         '#type' => 'select',
         '#options' => array(
@@ -62,12 +61,12 @@ class PageComponents extends Block {
           'h6' => t('h6'),
           'div' => t('div'),
         ),
-        '#default_value' => empty($this->settings['title_markup']) ? 'h1' : $this->settings['title_markup'],
+        '#default_value' => $this->settings['title_tag'],
       );
       $form['title']['title_class'] = array(
         '#title' => t('CSS class to use'),
         '#type' => 'textfield',
-        '#default_value' => empty($this->settings['title_class']) ? '' : $this->settings['title_class'],
+        '#default_value' => $this->settings['title_class'],
       );
     }
 
@@ -93,8 +92,8 @@ class PageComponents extends Block {
    * Submit handler to save the form settings.
    */
   function formSubmit($form, &$form_state) {
-    if (isset($form_state['values']['title']['title_markup'])) {
-      $this->settings['title_markup'] = $form_state['values']['title']['title_markup'];
+    if (isset($form_state['values']['title']['title_tag'])) {
+      $this->settings['title_tag'] = $form_state['values']['title']['title_tag'];
     }
     if (isset($form_state['values']['title']['title_class'])) {
       $this->settings['title_class'] = $form_state['values']['title']['title_class'];
@@ -117,8 +116,8 @@ class PageComponents extends Block {
         'description' => t('Displays the page title, local task tabs, local actions links, and messages.'),
       ),
       'tabs' => array(
-        'info' => t('Local task tabs'),
-        'description' => t('Displays the local task tabs.'),
+        'info' => t('Tabs (Local tasks)'),
+        'description' => t('Displays the links for menu local tasks, such as "View" or "Edit"'),
       ),
       'title' => array(
         'info' => t('Page title'),
@@ -126,13 +125,12 @@ class PageComponents extends Block {
       ),
       'action_links' => array(
         'info' => t('Local actions'),
-        'description' => t('Displays the local actions links.'),
+        'description' => t('Displays the local actions links, such as "Add content".'),
       ),
       'messages' => array(
         'info' => t('System messages'),
-        'description' => t('Displays the system messages.'),
+        'description' => t('Displays messages to the user after an action is performed, such as form validation errors or success messages.'),
       ),
     );
   }
-
 }
