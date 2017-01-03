@@ -15,7 +15,7 @@ class PageComponents extends Block {
 
     $this->settings += array(
       'title_tag' => 'h1',
-      'title_class' => '',
+      'title_class' => 'page-title',
       'tab_type' => 'both'
     );
   }
