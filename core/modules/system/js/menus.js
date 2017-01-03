@@ -41,24 +41,29 @@ Backdrop.menuStyles.dropdown = {
       subIndicatorsText: ''
     });
     $(element).addClass('sm').smartmenus(settings);
+  }
+};
 
-    // Add gentle menu slide behavior.
-    $('.menu-toggle-state').once('smartmenus-behavior', function() {
-      var $mainMenuState = $(this);
-      // animate mobile menu
-      $mainMenuState.change(function(e) {
-        var $menu = $(element);
+Backdrop.behaviors.menuToggles = {
+  attach: function(context, settings) {
+    var $menus = $(context).find('[data-menu-toggle-id]').once('menu-toggles');
+    $menus.each(function() {
+      var element = this;
+      var $menu = $(element);
+      var id = $menu.data('menuToggleId');
+      var $menuToggleState = $('#' + id);
+      $menuToggleState.change(function(e) {
+        // animate mobile menu
         if (this.checked) {
           $menu.hide().slideDown(250, function() { $menu.css('display', ''); });
-        }
-        else {
+        } else {
           $menu.show().slideUp(250, function() { $menu.css('display', ''); });
         }
       });
       // hide mobile menu beforeunload
       $(window).bind('beforeunload unload', function() {
-        if ($mainMenuState[0].checked) {
-          $mainMenuState[0].click();
+        if ($menuToggleState[0].checked) {
+          $menuToggleState[0].click();
         }
       });
     });

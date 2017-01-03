@@ -1841,8 +1841,9 @@ function theme_menu_local_actions($variables) {
  *
  * @param $variables
  *   An associative array containing:
- *     - #enabled: A boolean indicating whether the menu toggle is active.
- *     - hash: Unique string id to match the label to the input.
+ *     - enabled: A boolean indicating whether the menu toggle should be shown.
+ *     - id: Unique identifier, generated with backdrop_html_id().
+ *     - text: Translated text for the menu toggle button.
  *
  * @see theme_menu_toggle()
  * @ingroup themeable
@@ -1850,9 +1851,11 @@ function theme_menu_local_actions($variables) {
 function theme_menu_toggle($variables) {
   $output = '';
   if ($variables['enabled']) {
-    $output  = '<input id="menu-toggle-state-' . $variables['hash'] . '" class="menu-toggle-state element-invisible" type="checkbox"  aria-controls="menu-toggle-state-' . $variables['hash'] . '" />';
-    $output .= '<label class="menu-toggle-button" for="menu-toggle-state-' . $variables['hash'] . '">';
-    $output .= '  <span class="menu-toggle-button-icon"></span><span class="menu-toggle-button-text">' . t($variables['text']) . '</span>';
+    $id = $variables['id'];
+    $output  = '<input id="' . $id . '" class="menu-toggle-state element-invisible" type="checkbox"  aria-controls="' . $id . '" />';
+    $output .= '<label class="menu-toggle-button" for="' . $id . '">';
+    $output .= '  <span class="menu-toggle-button-icon"></span>';
+    $output .= '  <span class="menu-toggle-button-text">' . $variables['text'] . '</span>';
     $output .= '  <span class="menu-toggle-assistive-text element-invisible">' . t('Toggle menu visibility') . '</span>';
     $output .= '</label>';
   }
