@@ -699,56 +699,71 @@ function backdrop_install_config_directories() {
   }
 
   // Ensure the config directories exist or can be created, and are writable.
-  foreach (array('active', 'staging') as $config_type) {
-    // This should never fail, since if the config directory was specified in
-    // settings.php it will have already been created and verified earlier, and
-    // if it wasn't specified in settings.php, it is created here inside the
-    // public files directory, which has already been verified to be writable
-    // itself. But if it somehow fails anyway, the installation cannot proceed.
-    // Bail out using a similar error message as in system_requirements().
-   $config_storage = config_get_config_storage($config_type);
-    try {
-      $config_storage->initializeStorage();
-    }
-    catch (\ConfigStorageException $e) {
-      throw new Exception(format_string('@storage_error.  To proceed with the installation, either create the directory and modify its permissions manually or ensure that the installer has the permissions to create it automatically. For more information, see the <a href="@handbook_url">Installation Instructions</a> page.', array(
-          '@storage_error' => $e->getMessage(),
-          '@handbook_url' => 'https://backdropcms.org/installation',
-        )), 0, $e);
-    }
 
-    // Check that the directories are entirely empty. Disallowing installation
-    // over existing config directories.
-    if (count($config_storage->listAll()) > 0) {
-      throw new Exception(format_string('The %directory configuration must be completely empty to proceed with installation.', array(
-        '%directory' => config_get_config_directory($config_type),
-      )));
-    }
+  // This should never fail, since if the config directory was specified in
+  // settings.php it will have already been created and verified earlier, and
+  // if it wasn't specified in settings.php, it is created here inside the
+  // public files directory, which has already been verified to be writable
+  // itself. But if it somehow fails anyway, the installation cannot proceed.
+  // Bail out using a similar error message as in system_requirements().
+  $config_storage = config_get_config_storage('active');
+  try {
+    $config_storage->initializeStorage();
+  }
+  catch (\ConfigStorageException $e) {
+    throw new Exception(format_string('@storage_error.  To proceed with the installation, either create the directory and modify its permissions manually or ensure that the installer has the permissions to create it automatically. For more information, see the <a href="@handbook_url">Installation Instructions</a> page.', array(
+        '@storage_error' => $e->getMessage(),
+        '@handbook_url' => 'https://backdropcms.org/installation',
+      )), 0, $e);
+  }
 
+  // Check that the directories are entirely empty. Disallowing installation
+  // over existing config directories.
+  if (count($config_storage->listAll()) > 0) {
+    throw new Exception(format_string('The %directory configuration must be completely empty to proceed with installation.', array(
+      '%directory' => config_get_config_directory('active'),
+    )));
+  }
+  if (is_a($config_storage, 'ConfigFileStorage')) {
     // Put a README.md into each config directory. This is required so that
     // they can later be added to git. Since these directories are auto-
     // created, we have to write out the README rather than just adding it
     // to the Backdrop core repository. These strings are formatted to wrap at
     // 80 characters.
-    if ($config_type === 'active') {
-      $text = ltrim('
+    $text = ltrim('
 This directory contains the active configuration for your Backdrop site. To move
 this configuration between environments, contents from this directory should be
 placed in the staging directory on the target server. To make this configuration
 active, see admin/config/development/configuration/sync on the target server.
 ');
-    }
-    elseif ($config_type === 'staging') {
-      $text = ltrim('
+    file_put_contents(config_get_config_directory('active') . '/README.md', $text);
+  }
+
+  // Now try to create an empty staging directory, but don't refuse to install
+  // just because data is in the staging directory.  The admin may be trying to
+  // install the site in prod with the latest configuration.
+  $config_storage = config_get_config_storage('staging');
+  try {
+    $config_storage->initializeStorage();
+  }
+  catch (\ConfigStorageException $e) {
+    backdrop_set_message(t('Unable to initialize the staging configuration directory %directory.',
+      array('%directory' => config_get_config_directory('staging'))), 'warning', FALSE);
+  }
+
+  // Only write the README.md to a file storage directory.
+  $text = ltrim('
 This directory contains configuration to be imported into your Backdrop site. To
 make this configuration active, see admin/config/development/configuration/sync.
 ');
-    }
+  if (is_a($config_storage, 'ConfigFileStorage')) {
+    file_put_contents(config_get_config_directory('staging') . '/README.md', $text);
+  }
 
-    // Only write the README.md to a file storage directory.
-    if (is_a($config_storage, 'ConfigFileStorage')) {
-      file_put_contents(config_get_config_directory($config_type) . '/README.md', $text);
-    }
+  if (count($config_storage->listAll()) > 0) {
+    backdrop_set_message(t('The staging configuration in %directory is not empty. This may be expected or it may indicate a serious configuration issue with the webserver.', array(
+      '%directory' => config_get_config_directory('staging'),
+    )), 'warning', FALSE);
   }
 }
 
