@@ -178,8 +178,8 @@ function system_menu_block_build(array $config) {
       }
     }
     if (!empty($config['toggle']) && $config['toggle'] == TRUE) {
+      $data['content']['#wrapper_attributes']['data-menu-toggle-hash'] = $config['hash'];
       $data['content']['#attached']['css'][] = backdrop_get_path('module', 'system') . '/css/menu-toggle.theme.css';
-      $data['content']['#attached']['css'][] = backdrop_get_path('module', 'system') . '/js/menu-toggle.js';
       $data['content']['#prefix'] = theme('menu_toggle', array('enabled' => $config['toggle'], 'text' => 'Menu', 'hash' => $config['hash']));
     }
     if (!empty($config['style_settings'])) {
