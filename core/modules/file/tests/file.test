@@ -1039,7 +1039,7 @@ class FileFieldDisplayTestCase extends FileFieldTestCase {
       $edit = array(
         "fields[$field_name][type]" => $formatter,
       );
-      $this->backdropPost("admin/structure/types/manage/$type_name/display", $edit, t('Save'));
+      $this->backdropPost("admin/structure/types/manage/$type_name/display/default", $edit, t('Save'));
       $this->backdropGet('node/' . $node->nid);
       $this->assertNoText($field_name, format_string('Field label is hidden when no file attached for formatter %formatter', array('%formatter' => $formatter)));
     }

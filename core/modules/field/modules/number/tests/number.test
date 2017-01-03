@@ -128,7 +128,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
 
     // Set the formatter to "number_integer" and to "unformatted", and just
     // check that the settings summary does not generate warnings.
-    $this->backdropGet("admin/structure/types/manage/$type/display");
+    $this->backdropGet("admin/structure/types/manage/$type/display/default");
     $edit = array(
       "fields[field_$field_name][type]" => 'number_integer',
     );

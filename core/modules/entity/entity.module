@@ -126,6 +126,8 @@ function entity_view_mode_delete($entity_type, $machine_name) {
 /**
  * Helper function: checks if the view mode exists.
  *
+ * This callback is used as a machine_name element "exists" callback.
+ *
  * @param string $machine_name
  *   The machine name of the view mode to check for.
  *
@@ -134,7 +136,7 @@ function entity_view_mode_delete($entity_type, $machine_name) {
  *
  * @see field_ui_view_mode_form().
  */
-function entity_view_mode_exists($machine_name) {
+function entity_view_mode_exists($machine_name, $element, $form_state) {
   $entity_info = entity_get_info($element['#entity_type']);
   return !empty($entity_info['view modes'][$machine_name]);
 }
