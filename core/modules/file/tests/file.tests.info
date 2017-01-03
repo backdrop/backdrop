@@ -51,3 +51,9 @@ name = Private file test
 description = Uploads a test to a private node and checks access.
 group = File
 file = file.test
+
+[FileAdminTestCase]
+name = File administration
+description = Test file administration page functionality.
+group = File
+file = file.test

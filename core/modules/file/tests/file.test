@@ -22,7 +22,20 @@ class FileFieldTestCase extends BackdropWebTestCase {
     $modules[] = 'path';
     $modules[] = 'file_module_test';
     parent::setUp($modules);
-    $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer users', 'administer permissions', 'administer content types', 'administer nodes', 'bypass node access', 'administer fields', 'create url aliases'));
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'access administration pages',
+      'administer site configuration',
+      'administer users',
+      'administer permissions',
+      'administer content types',
+      'administer nodes',
+      'bypass node access',
+      'administer fields',
+      'create url aliases',
+      'access file overview',
+      'delete files',
+    ));
     $this->backdropLogin($this->admin_user);
   }
 
@@ -1427,5 +1440,116 @@ class FilePrivateTestCase extends FileFieldTestCase {
     $this->assertNoRaw($node_file->filename, 'File without view field access permission does not appear after attempting to attach it to a new node.');
     $this->backdropGet(file_create_url($node_file->uri));
     $this->assertResponse(403, 'Confirmed that access is denied for the file without view field access permission after attempting to attach it to a new node.');
+  }
+}
+
+/**
+ * Tests node administration page functionality.
+ */
+class FileAdminTestCase extends FileFieldTestCase {
+  protected $profile = 'testing';
+
+  function setUp() {
+    $modules = array('file');
+    parent::setUp($modules);
+
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
+
+    $this->base_user_1 = $this->backdropCreateUser(array('access file overview'));
+    $this->base_user_2 = $this->backdropCreateUser(array('access file overview', 'delete files'));
+  }
+
+  /**
+   * Tests file overview with different user permissions.
+   */
+  function testFileAdminPages() {
+    $this->backdropLogin($this->admin_user);
+
+    // Create a file field to add files.
+    $field_name = strtolower($this->randomName());
+    $type_name = 'post';
+    $this->createFileField($field_name, $type_name, array(), array('file_extensions' => ''));
+
+    // Create test files.
+    $files = array();
+    $files['file_1'] = $this->getTestFile('text');
+    $files['file_2'] = $this->getTestFile('text', 131072);
+    $files['file_3'] = $this->getTestFile('text', 1310720);
+    $files['file_4'] = $this->getTestFile('image');
+    $files['file_5'] = $this->getTestFile('image');
+    $files['file_6'] = $this->getTestFile('image');
+
+    foreach ($files as $file) {
+      // Create a new node with the file attached.
+      $nid = $this->uploadNodeFile($file, $field_name, $type_name);
+    }
+
+    // Test that the default sort by timestamp actually fires properly.
+    $files_query = db_select('file_managed', 'f')
+      ->fields('f', array('fid'))
+      ->orderBy('timestamp', 'DESC')
+      ->execute()
+      ->fetchCol();
+
+    // Create a set of loaded file entities to use for testing.
+    $files = array();
+    foreach ($files_query as $fid) {
+      $files[$fid] = file_load($fid);
+    }
+
+    $files_list = array();
+    $this->backdropGet('admin/content/files');
+    foreach ($this->xpath('//table/tbody/tr/td/div/input/@value') as $input) {
+      $files_list[] = (string) $input;
+    }
+    $this->assertEqual($files_query, $files_list, 'Files correctly sorted by timestamp, by default.');
+
+    // Test file size sort.
+    $files_query = db_select('file_managed', 'f')
+      ->fields('f', array('fid'))
+      ->orderBy('filesize')
+      ->execute()
+      ->fetchCol();
+
+    $files_list = array();
+    $this->backdropGet('admin/content/files', array('query' => array('sort' => 'asc', 'order' => 'filesize')));
+    foreach ($this->xpath('//table/tbody/tr/td/div/input/@value') as $input) {
+      $files_list[] = $input;
+    }
+    $this->assertEqual($files_query, $files_list, 'Files correctly sorted by filesize.');
+
+    // Verify delete links for any file.
+    $this->backdropGet('admin/content/files');
+    $this->assertResponse(200);
+    $index = 0;
+
+    foreach ($files as $file) {
+      $this->assertLinkByHref(file_create_url($file->uri));
+      $this->assertLinkByHref('file/' . $file->fid . '/delete');
+      // Verify tableselect.
+      $this->assertFieldByName('bulk_form[' . $index . ']', '', 'Bulk operations found.');
+      $index++;
+    }
+
+    // Verify no delete links are displayed without delete permission.
+    $this->backdropLogout();
+    $this->backdropLogin($this->base_user_1);
+    $this->backdropGet('admin/content/files');
+    $this->assertResponse(200);
+    foreach ($files as $file) {
+      $this->assertLinkByHref(file_create_url($file->uri));
+      $this->assertNoLinkByHref('file/' . $file->fid . '/delete');
+    }
+
+    // Verify delete links are displayed with delete permission added.
+    $this->backdropLogout();
+    $this->backdropLogin($this->base_user_2);
+    $this->backdropGet('admin/content/files');
+    $this->assertResponse(200);
+    foreach ($files as $file) {
+      $this->assertLinkByHref('file/' . $file->fid . '/delete');
+    }
   }
 }
