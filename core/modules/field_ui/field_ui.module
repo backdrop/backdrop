@@ -190,7 +190,7 @@ function field_ui_menu() {
             'title' => 'Enable view mode',
             'page callback' => 'field_ui_view_mode_enable',
             'page arguments' => array($entity_type, $bundle_arg, $view_mode_position),
-            'access arguments' => array('administer view modes'),
+            'access callback' => 'field_ui_view_mode_enable_access',
             'file' => 'field_ui.admin.inc',
           );
           $items["$path/display/%/reset"] = array(

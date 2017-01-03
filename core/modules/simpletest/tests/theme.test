@@ -785,8 +785,14 @@ class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
     $node = $this->backdropCreateNode();
     $this->backdropGet("node/$node->nid");
     $this->assertRaw('<!-- THEME DEBUG -->', 'Theme debug markup found in theme output when debug is enabled.');
-    $this->assertRaw("CALL: theme('node')", 'Theme call information found.');
-    $this->assertRaw('x node--' . $node->nid . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   * node' . $extension, 'Suggested template files found in order and node ID specific template shown as current template.');
+    $this->assertRaw("CALL: theme('node__page__full')", 'Theme call information found.');
+    $debug_output = <<<EOL
+   * node--page--full.tpl.php
+   * node--page.tpl.php
+   x node--{$node->nid}.tpl.php
+   * node.tpl.php
+EOL;
+    $this->assertRaw($debug_output, 'Suggested template files found in order and node ID specific template shown as current template.');
     $template_filename = $templates['node__' . $node->nid]['path'] . '/' . $templates['node__' . $node->nid]['template'] . $extension;
     $this->assertRaw("BEGIN OUTPUT from '$template_filename'", 'Full path to current template file found.');
 
@@ -794,7 +800,13 @@ class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
     // debug markup are correct.
     $node2 = $this->backdropCreateNode();
     $this->backdropGet("node/$node2->nid");
-    $this->assertRaw('* node--' . $node2->nid . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   x node' . $extension, 'Suggested template files found in order and base template shown as current template.');
+    $debug_output = <<<EOL
+   * node--page--full.tpl.php
+   * node--page.tpl.php
+   * node--{$node2->nid}.tpl.php
+   x node.tpl.php
+EOL;
+    $this->assertRaw($debug_output, 'Suggested template files found in order and base template shown as current template.');
 
     // Create another node and make sure the template suggestions shown in the
     // debug markup are correct.
@@ -803,7 +815,13 @@ class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
     $build += node_view($node3);
     $output = backdrop_render($build);
     $this->assertTrue(strpos($output, "CALL: theme('node__foo__bar')") !== FALSE, 'Theme call information found.');
-    $this->assertTrue(strpos($output, '* node--foo--bar' . $extension . PHP_EOL . '   * node--foo' . $extension . PHP_EOL . '   * node--' . $node3->nid . $extension . PHP_EOL . '   * node--page' . $extension . PHP_EOL . '   x node' . $extension) !== FALSE, 'Suggested template files found in order and base template shown as current template.');
+    $debug_output = <<<EOL
+   * node--foo--bar.tpl.php
+   * node--foo.tpl.php
+   * node--{$node3->nid}.tpl.php
+   x node.tpl.php
+EOL;
+    $this->assertTrue(strpos($output, $debug_output) !== FALSE, 'Suggested template files found in order and base template shown as current template.');
 
     // Disable theme debug.
     config_set('system.core', 'theme_debug', FALSE);

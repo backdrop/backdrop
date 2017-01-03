@@ -49,7 +49,7 @@ class LinkAttributeCrudTest extends LinkBaseTestClass {
     $this->field_name = $this->createLinkField();
 
     // Test the plain formatter.
-    $this->backdropGet('admin/structure/types/manage/page/display');
+    $this->backdropGet('admin/structure/types/manage/page/display/default');
     $edit = array(
       'fields[' . $this->field_name . '][label]' => 'above',
       'fields[' . $this->field_name . '][type]' => 'link_plain',
@@ -82,7 +82,7 @@ class LinkAttributeCrudTest extends LinkBaseTestClass {
     }
 
     // Test the URL formatter.
-    $this->backdropGet('admin/structure/types/manage/page/display');
+    $this->backdropGet('admin/structure/types/manage/page/display/default');
     $edit = array(
       'fields[' . $this->field_name . '][label]' => 'above',
       'fields[' . $this->field_name . '][type]' => 'link_url',
@@ -99,7 +99,7 @@ class LinkAttributeCrudTest extends LinkBaseTestClass {
     }
 
     // Test the short formatter.
-    $this->backdropGet('admin/structure/types/manage/page/display');
+    $this->backdropGet('admin/structure/types/manage/page/display/default');
     $edit = array(
       'fields[' . $this->field_name . '][label]' => 'above',
       'fields[' . $this->field_name . '][type]' => 'link_short',
@@ -117,7 +117,7 @@ class LinkAttributeCrudTest extends LinkBaseTestClass {
     }
 
     // Test the label formatter.
-    $this->backdropGet('admin/structure/types/manage/page/display');
+    $this->backdropGet('admin/structure/types/manage/page/display/default');
     $edit = array(
       'fields[' . $this->field_name . '][label]' => 'above',
       'fields[' . $this->field_name . '][type]' => 'link_label',
@@ -135,7 +135,7 @@ class LinkAttributeCrudTest extends LinkBaseTestClass {
     }
 
     // Test the separate formatter.
-    $this->backdropGet('admin/structure/types/manage/page/display');
+    $this->backdropGet('admin/structure/types/manage/page/display/default');
     $edit = array(
       'fields[' . $this->field_name . '][label]' => 'above',
       'fields[' . $this->field_name . '][type]' => 'link_separate',
@@ -169,7 +169,7 @@ class LinkAttributeCrudTest extends LinkBaseTestClass {
     }
 
     // Test the plain title formatter.
-    $this->backdropGet('admin/structure/types/manage/page/display');
+    $this->backdropGet('admin/structure/types/manage/page/display/default');
     $edit = array(
       'fields[' . $this->field_name . '][label]' => 'above',
       'fields[' . $this->field_name . '][type]' => 'link_title_plain',

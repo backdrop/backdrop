@@ -893,7 +893,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
 class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
   function setUp() {
     parent::setUp('taxonomy');
-    $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access', 'administer content types', 'administer fields'));
+    $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access', 'administer content types', 'administer fields', 'administer view modes'));
     $this->backdropLogin($this->admin_user);
     $this->vocabulary = $this->createVocabulary();
 
@@ -939,10 +939,9 @@ class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
 
     // RSS display must be added manually.
     $this->backdropGet("admin/structure/types/manage/post/display");
-    $edit = array(
-      "view_modes_custom[rss]" => '1',
-    );
-    $this->backdropPost(NULL, $edit, t('Save'));
+    list($enable_link) = $this->xpath('//tr[contains(@class, "view-mode--rss")]//a');
+    $enable_href_parts = backdrop_parse_url($enable_link['href']);
+    $this->backdropGet($enable_href_parts['path'], $enable_href_parts);
 
     // Change the format to 'RSS category'.
     $this->backdropGet("admin/structure/types/manage/post/display/rss");

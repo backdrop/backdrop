@@ -1425,8 +1425,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * Generate a token for the currently logged in user.
    */
   protected function backdropGetToken($value = '') {
-    $private_key = backdrop_get_private_key();
-    return backdrop_hmac_base64($value, $this->session_id . $private_key);
+    return backdrop_hmac_base64($value, $this->session_id . backdrop_get_private_key() . backdrop_get_hash_salt());
   }
 
   /*

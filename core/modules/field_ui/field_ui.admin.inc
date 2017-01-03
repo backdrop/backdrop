@@ -2316,6 +2316,13 @@ function field_ui_view_mode_delete_form_submit($form, &$form_state) {
 }
 
 /**
+ * Access callback: Checks the users access and token to enable a view mode.
+ */
+function field_ui_view_mode_enable_access() {
+  return user_access('administer view modes') && backdrop_valid_token($_GET['token'], 'view_mode_enable');
+}
+
+/**
  * Menu callback: Enables the manage display UI for a view mode.
  */
 function field_ui_view_mode_enable($entity_type, $bundle, $view_mode_name, $redirect = TRUE) {

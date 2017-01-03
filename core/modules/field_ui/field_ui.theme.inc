@@ -135,12 +135,12 @@ function theme_field_ui_view_modes($variables) {
 
   $customized_count = 0;
   $default_count = 0;
-  foreach ($view_modes as $view_mode_name => $veiw_mode_info) {
-    $class = '';
+  foreach ($view_modes as $view_mode_name => $view_mode_info) {
+    $row_classes = array('view-mode--' . str_replace('_', '-', $view_mode_name));
     $row = array();
 
-    $row['label'] = t($veiw_mode_info['label']);
-    $row['machine'] = t($view_mode_name);
+    $row['label'] = check_plain(t($view_mode_info['label']));
+    $row['machine'] = $view_mode_name;
 
     $operations = array();
     if ($view_modes[$view_mode_name]['custom settings']) {
@@ -157,15 +157,20 @@ function theme_field_ui_view_modes($variables) {
     }
     else {
       $default_count++;
-      $class = 'uses-default';
+      $row_classes[] = 'uses-default';
       $row['label'] .= '&nbsp;<small>(<em>' . t('Uses the Default view mode') . '</em>)</small>';
-      $operations['enable'] = array(
-        'title' => t('Enable'),
-        'href' => "$path/{$view_mode_name}/enable",
-      );
+      if (user_access('administer view modes')) {
+        $operations['enable'] = array(
+          'title' => t('Enable'),
+          'href' => "$path/{$view_mode_name}/enable",
+          'query' => array(
+            'token' => backdrop_get_token('view_mode_enable'),
+          ),
+        );
+      }
     }
 
-    if ($veiw_mode_info['storage'] == 'Custom') {
+    if ($view_mode_info['storage'] == 'Custom' && user_access('administer view modes')) {
       $operations['configure'] = array(
         'title' => t('Configure'),
         'href' => "$path/{$view_mode_name}/configure",
@@ -197,7 +202,7 @@ function theme_field_ui_view_modes($variables) {
       $customized_count++; // Ensure header only prints once.
     }
 
-    $rows[] = array('data' => $row, 'class' => array($class));
+    $rows[] = array('data' => $row, 'class' => $row_classes);
   }
 
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('field-ui-view-modes'))));
