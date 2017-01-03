@@ -84,6 +84,7 @@ function file_field_instance_settings_form($field, $instance) {
     '#type' => 'textfield',
     '#title' => t('File directory'),
     '#default_value' => $settings['file_directory'],
+    '#field_prefix' => $field['settings']['uri_scheme'] == 'public' ? config_get('system.core', 'file_public_path') . '/' : '',
     '#description' => t('Optional subdirectory within the upload destination where files will be stored. Do not include preceding or trailing slashes.'),
     '#element_validate' => array('_file_generic_settings_file_directory_validate'),
     '#weight' => 3,
