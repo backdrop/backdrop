@@ -44,6 +44,9 @@ Backdrop.menuStyles.dropdown = {
   }
 };
 
+/**
+ * Adds a collapsible "hamburger" button to toggle links if enabled on a menu.
+ */
 Backdrop.behaviors.menuToggles = {
   attach: function(context, settings) {
     var $menus = $(context).find('[data-menu-toggle-id]').once('menu-toggles');
@@ -53,14 +56,14 @@ Backdrop.behaviors.menuToggles = {
       var id = $menu.data('menuToggleId');
       var $menuToggleState = $('#' + id);
       $menuToggleState.change(function(e) {
-        // animate mobile menu
+        // Animate mobile menu.
         if (this.checked) {
           $menu.hide().slideDown(250, function() { $menu.css('display', ''); });
         } else {
           $menu.show().slideUp(250, function() { $menu.css('display', ''); });
         }
       });
-      // hide mobile menu beforeunload
+      // Hide mobile menu beforeunload.
       $(window).bind('beforeunload unload', function() {
         if ($menuToggleState[0].checked) {
           $menuToggleState[0].click();

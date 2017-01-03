@@ -147,6 +147,9 @@
   display: block;
   padding: 1rem 1.25rem;
 }
+.l-header .menu-toggle-button {
+  padding: .5rem 0;
+}
 
 @media (min-width: 34em) {
   /* Specific selector to avoid contextual links */
