@@ -9,8 +9,6 @@
 .menu-toggle-button {
   position: relative;
   display: inline-block;
-  width: 28px;
-  height: 28px;
   text-indent: 28px;
   white-space: nowrap;
   overflow: hidden;
@@ -30,9 +28,13 @@
     top: -99999px;
   }
 }
+.menu-toggle-button-text {
+  vertical-align: middle;
+  padding: 0 .5em;
+}
 
 /**
- * Hamburger icon
+ * Hamburger icon.
  */
 .menu-toggle-button-icon,
 .menu-toggle-button-icon:before,
@@ -58,7 +60,7 @@
 }
 
 /**
- * X icon
+ * Close icon.
  */
 .menu-toggle-state:checked ~ .menu-toggle-button .menu-toggle-button-icon {
   height: 0;
@@ -76,7 +78,7 @@
 }
 
 /**
- * Menu state checkbox
+ * Menu state checkbox.
  */
 .menu-toggle-state {
   position: absolute;
@@ -91,15 +93,15 @@
 .menu-toggle-state ~ .menu {
   display: none;
 }
-/* hide the menu in mobile view */
+/* Hide the menu in mobile view. */
 .menu-toggle-state:not(:checked) ~ .menu {
   display: none;
 }
 .menu-toggle-state:checked ~ .menu {
   display: block;
 }
-@media (min-width: 48em) {  /* 768px @ 16px font size */
-  /* always show the menu in desktop view */
+@media (min-width: 48em) {  /* 768px @ 16px font size. */
+  /* Always show the menu in desktop view. */
   .menu-toggle-state:not(:checked) ~ .menu {
     display: block;
   }

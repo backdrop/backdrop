@@ -273,10 +273,6 @@ fieldset .fieldset-legend {
   }
 }
 
-.l-header .block-system-main-menu {
-  text-align: center;
-}
-
 /**
  * Menus in header area
  * More layout styles included since they'll be effected by menu item count
