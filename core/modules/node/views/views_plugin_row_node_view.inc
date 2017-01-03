@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the node view row style plugin.
@@ -49,7 +48,7 @@ class views_plugin_row_node_view extends views_plugin_row {
     $form['view_mode'] = array(
       '#type' => 'select',
       '#options' => $options,
-      '#title' => t('View mode'),
+      '#title' => t('Display mode'),
       '#default_value' => $this->options['view_mode'],
      );
     $form['links'] = array(

@@ -26,7 +26,7 @@
  *   - node-[type]: The current node type. For example, if the node is a
  *     "Post" it would result in "node-post". Note that the machine
  *     name will often be in a short form of the human readable label.
- *   - view-mode-[view_mode]: The View Mode of the node e.g. teaser or full.
+ *   - view-mode-[view_mode]: The Display mode of the node e.g. teaser or full.
  *   The following are controlled through the node publishing options.
  *   - promoted: Nodes that are promoted.
  *   - sticky: Nodes ordered above other non-sticky nodes in teaser
@@ -52,7 +52,7 @@
  * - $id: Position of the node. Increments each time it's output.
  *
  * Node status variables:
- * - $view_mode: View mode; for example, "full", "teaser".
+ * - $view_mode: Display mode; for example, "full", "teaser".
  * - $teaser: Flag for the teaser state (shortcut for $view_mode == 'teaser').
  * - $page: Flag for the full page state.
  * - $promote: Flag for promotion state.
