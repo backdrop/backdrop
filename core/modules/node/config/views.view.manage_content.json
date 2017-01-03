@@ -1,13 +1,13 @@
 {
-    "_config_name": "views.view.node_admin_content",
-    "name": "node_admin_content",
+    "_config_name": "views.view.manage_content",
+    "name": "manage_content",
     "description": "",
     "module": "node",
     "storage": 4,
     "tag": "default",
     "disabled": false,
     "base_table": "node",
-    "human_name": "Admin Content",
+    "human_name": "Manage content",
     "core": "1.0",
     "display": {
         "default": {
@@ -385,7 +385,7 @@
                         "order": "DESC"
                     }
                 },
-                "title": "Admin Content",
+                "title": "Content",
                 "relationships": {
                     "uid": {
                         "id": "uid",
@@ -409,7 +409,7 @@
                         "ui_name": "",
                         "label": "",
                         "empty": true,
-                        "content": "No content available.",
+                        "content": "No content found.",
                         "tokenize": 0
                     }
                 },
@@ -506,7 +506,7 @@
                 "path": "admin/content/node",
                 "menu": {
                     "type": "default tab",
-                    "title": "Find content",
+                    "title": "Manage content",
                     "description": "",
                     "name": "management",
                     "weight": "-1",
