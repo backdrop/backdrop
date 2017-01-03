@@ -7605,7 +7605,7 @@ function backdrop_common_theme() {
       'variables' => array('primary' => array(), 'secondary' => array()),
     ),
     'menu_toggle' => array(
-      'variables' => array('enabled' => NULL, 'text' => 'Menu', 'hash' => NULL),
+      'variables' => array('enabled' => NULL, 'id' => NULL, 'text' => ''),
     ),
     // From form.inc.
     'select' => array(
