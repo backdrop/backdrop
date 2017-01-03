@@ -44,4 +44,30 @@ Backdrop.menuStyles.dropdown = {
   }
 };
 
+Backdrop.behaviors.menuToggles = {
+  attach: function(context, settings) {
+    var $menus = $(context).find('[data-menu-toggle-hash]').once('menu-toggles');
+    $menus.each(function() {
+      var element = this;
+      var $menu = $(element);
+      var hash = $menu.data('menuToggleHash');
+      var $menuToggleState = $('#menu-toggle-state-' + hash);
+      $menuToggleState.change(function(e) {
+        // animate mobile menu
+        if (this.checked) {
+          $menu.hide().slideDown(250, function() { $menu.css('display', ''); });
+        } else {
+          $menu.show().slideUp(250, function() { $menu.css('display', ''); });
+        }
+      });
+      // hide mobile menu beforeunload
+      $(window).bind('beforeunload unload', function() {
+        if ($menuToggleState[0].checked) {
+          $menuToggleState[0].click();
+        }
+      });
+    });
+  }
+};
+
 })(jQuery);
