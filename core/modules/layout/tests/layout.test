@@ -1582,7 +1582,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//ul[contains(@class, "tabs")]');
     $this->assertEqual(count($tabs), 1, 'The tabs nav element was found.');
 
-    // Add a Title combo block.
+    // Go back to the default layout.
     $this->backdropGet('admin/structure/layouts/manage/default');
 
     // Add a Title combo block to the header.
@@ -1616,6 +1616,44 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $this->assertEqual(count($combo_tabs), 1, 'The Title combo tabs DIV was found.');
     $combo_messages = $this->xpath('(//div[contains(@class, "block-system-title-combo")])//div[contains(@class, "l-messages")]');
     $this->assertEqual(count($combo_messages), 1, 'The Title combo messages DIV was found.');
+
+    // Remove the Title combo block.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $remove_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(
+      ':uuid' => $title_combo_block_uuid,
+    ));
+    $remove_url_parts = backdrop_parse_url($remove_link[0]['href']);
+    $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Add a Local actions block to the header.
+    $this->clickLink(t('Add block'), 0);
+    $this->clickLink(t('Local actions'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+
+    // Add a System messages block to the header.
+    $this->clickLink(t('Add block'), 0);
+    $this->clickLink(t('System messages'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check that the system message DIV no longer shows but the messages block
+    // does.
+    $messages = $this->xpath('(//div[contains(@class, "l-wrapper")])//div[contains(@class, "l-messages")]');
+    $this->assertEqual(count($messages), 0, 'The messages DIV was not found.');
+    $block_messages = $this->xpath('(//div[contains(@class, "block-system-messages")])//div[contains(@class, "l-messages")]');
+    $this->assertEqual(count($block_messages), 1, 'The System messages block was found.');
+
+    // Go to the layouts list and check that the Local actions DIV no longer
+    // shows but the block does.
+    $this->backdropGet('admin/structure/layouts');
+    $actions = $this->xpath('(//div[contains(@class, "l-wrapper")])//div[contains(@class, "l-action-links")]');
+    $this->assertEqual(count($actions), 0, 'The messages DIV was not found.');
+    $block_actions = $this->xpath('(//div[contains(@class, "block-system-action-links")])//ul[contains(@class, "action-links")]');
+    $this->assertEqual(count($block_actions), 1, 'The System messages block was found.');
+
   }
 }
 
