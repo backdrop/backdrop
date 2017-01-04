@@ -1191,6 +1191,19 @@ function layout_get_layout_template_info($template_name = NULL) {
     }
   }
 
+  $current_path = current_path();
+  // List of paths that always require a rebuild of the list of layout
+  // templates (see https://github.com/backdrop/backdrop-issues/issues/984).
+  // This includes the "Layout settings" page...
+  $paths = array(
+    'admin/structure/layouts/settings',
+  );
+  // ...and all the "Configure layout" pages.
+  $layouts = layout_load_all();
+  foreach ($layouts as $layout) {
+    $paths[] = 'admin/structure/layouts/manage/' . $layout->name . '/configure';
+  }
+
   // Rebuild the list.
   if (!isset($info)) {
     $files = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'layouts', 'name', 0);
