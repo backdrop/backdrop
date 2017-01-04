@@ -44,11 +44,11 @@ class PageComponents extends Block {
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
     if ($this->childDelta == 'title_combo' || $this->childDelta == 'title') {
-      $form['title'] = array(
+      $form['title_wrapper'] = array(
         '#type' => 'fieldset',
         '#title' => t('Page title'),
       );
-      $form['title']['title_tag'] = array(
+      $form['title_wrapper']['title_tag'] = array(
         '#title' => t('Title tag'),
         '#type' => 'select',
         '#options' => array(
@@ -63,7 +63,7 @@ class PageComponents extends Block {
         ),
         '#default_value' => $this->settings['title_tag'],
       );
-      $form['title']['title_class'] = array(
+      $form['title_wrapper']['title_class'] = array(
         '#title' => t('CSS class to use'),
         '#type' => 'textfield',
         '#default_value' => $this->settings['title_class'],
@@ -92,11 +92,11 @@ class PageComponents extends Block {
    * Submit handler to save the form settings.
    */
   function formSubmit($form, &$form_state) {
-    if (isset($form_state['values']['title']['title_tag'])) {
-      $this->settings['title_tag'] = $form_state['values']['title']['title_tag'];
+    if (isset($form_state['values']['title_wrapper']['title_tag'])) {
+      $this->settings['title_tag'] = $form_state['values']['title_wrapper']['title_tag'];
     }
-    if (isset($form_state['values']['title']['title_class'])) {
-      $this->settings['title_class'] = $form_state['values']['title']['title_class'];
+    if (isset($form_state['values']['title_wrapper']['title_class'])) {
+      $this->settings['title_class'] = $form_state['values']['title_wrapper']['title_class'];
     }
     if (isset($form_state['values']['tabs']['tab_type'])) {
       $this->settings['tab_type'] = $form_state['values']['tabs']['tab_type'];
