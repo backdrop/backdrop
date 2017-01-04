@@ -706,11 +706,11 @@ function system_preprocess_page_components(&$variables) {
     }
     $variables['tabs'] = theme('menu_local_tasks', $menus);
   }
-  if ($child_delta == 'local_actions' || $child_delta == 'title_combo') {
+  if ($child_delta == 'action_links' || $child_delta == 'title_combo') {
     $variables['action_links'] = menu_local_actions();
   }
   
-  if ($child_delta == 'system_messages' || $child_delta == 'title_combo') {
+  if ($child_delta == 'messages' || $child_delta == 'title_combo') {
     $variables['messages'] = theme('status_messages');
   }
 
