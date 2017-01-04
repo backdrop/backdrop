@@ -15,6 +15,16 @@ class LinkValidateTest extends LinkBaseTestClass {
     $this->field_name = $this->createLinkField();
   }
 
+  protected function checkRequirements() {
+    $errors = parent::checkRequirements();
+
+    if (!extension_loaded('intl')) {
+      $errors[] = 'PHP intl extension is not present.';
+    }
+
+    return $errors;
+  }
+
   /**
    * Checks if a URL is valid through the UI.
    *

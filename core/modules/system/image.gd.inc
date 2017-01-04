@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * GD2 toolkit for image manipulation within Backdrop.
@@ -25,7 +24,7 @@ function image_gd_settings() {
       '#description' => t('Define the image quality for JPEG manipulations. Ranges from 0 to 100. Higher values mean better image quality but bigger files.'),
       '#min' => 0,
       '#max' => 100,
-      '#default_value' => config_get('system.core', 'image_jpeg_quality', 75),
+      '#default_value' => config_get('system.core', 'image_jpeg_quality'),
       '#field_suffix' => t('%'),
     );
 
@@ -58,12 +57,19 @@ function image_gd_check_settings() {
  *   The new width of the resized image, in pixels.
  * @param $height
  *   The new height of the resized image, in pixels.
+ * @param $background
+ *   An hexadecimal integer specifying the background color to use for the
+ *   uncovered area of the image after manipulation. E.g. 0x000000 for black,
+ *   0xff00ff for magenta, and 0xffffff for white. For images that support
+ *   transparency, this will default to transparent. Otherwise it will
+ *   default to white.
+ *
  * @return
  *   TRUE or FALSE, based on success.
  *
  * @see image_resize()
  */
-function image_gd_resize(stdClass $image, $width, $height) {
+function image_gd_resize(stdClass $image, $width, $height, $background = NULL) {
   $res = image_gd_create_tmp($image, $width, $height);
 
   if (!imagecopyresampled($res, $image->resource, 0, 0, 0, 0, $width, $height, $image->info['width'], $image->info['height'])) {
@@ -91,7 +97,8 @@ function image_gd_resize(stdClass $image, $width, $height) {
  *   uncovered area of the image after the rotation. E.g. 0x000000 for black,
  *   0xff00ff for magenta, and 0xffffff for white. For images that support
  *   transparency, this will default to transparent. Otherwise it will
- *   be white.
+ *   default to white.
+ *
  * @return
  *   TRUE or FALSE, based on success.
  *
@@ -105,29 +112,7 @@ function image_gd_rotate(stdClass $image, $degrees, $background = NULL) {
   }
 
   // Convert the hexadecimal background value to a color index value.
-  if (isset($background)) {
-    $rgb = array();
-    for ($i = 16; $i >= 0; $i -= 8) {
-      $rgb[] = (($background >> $i) & 0xFF);
-    }
-    $background = imagecolorallocatealpha($image->resource, $rgb[0], $rgb[1], $rgb[2], 0);
-  }
-  // Set the background color as transparent if $background is NULL.
-  else {
-    // Get the current transparent color.
-    $background = imagecolortransparent($image->resource);
-
-    // If using a PNG with alpha transparency, the color may be -1. Allocate a
-    // dedicated full alpha transparent color.
-    if ($background === -1) {
-      $background = imagecolorallocatealpha($image->resource, 255, 255, 255, 127);
-    }
-    // Allocating a transparent color may fail (e.g. on a jpg). Use white as
-    // a fallback.
-    if ($background === FALSE) {
-      $background = imagecolorallocatealpha($image->resource, 255, 255, 255, 0);
-    }
-  }
+  $background = _image_gd_get_colorindex($image, $background);
 
   // Images are assigned a new color palette when rotating, removing any
   // transparency flags. For GIF images, keep a record of the transparent color.
@@ -173,15 +158,31 @@ function image_gd_rotate(stdClass $image, $degrees, $background = NULL) {
  *   The width of the cropped area, in pixels.
  * @param $height
  *   The height of the cropped area, in pixels.
+ * @param $background
+ *   An hexadecimal integer specifying the background color to use for the
+ *   uncovered area of the image after manipulation. E.g. #000000 for black,
+ *   #ff00ff for magenta, and #ffffff for white. For images that support
+ *   transparency, this will default to transparent. Otherwise it will
+ *   be white.
+ *
  * @return
  *   TRUE or FALSE, based on success.
  *
  * @see image_crop()
  */
-function image_gd_crop(stdClass $image, $x, $y, $width, $height) {
+function image_gd_crop(stdClass $image, $x, $y, $width, $height, $background = NULL) {
   $res = image_gd_create_tmp($image, $width, $height);
 
-  if (!imagecopyresampled($res, $image->resource, 0, 0, $x, $y, $width, $height, $width, $height)) {
+  // Convert the hexadecimal background value to a color index value.
+  $background = _image_gd_get_colorindex($image, $background);
+
+  // Fill the background color.
+  imagefill($res, 0, 0, $background);
+
+  // Copy the source image to our new destination image. We use
+  // $image->info['width'] instead of $width because we are copying using the
+  // source image's width and height, not the destination width and height.
+  if (!imagecopyresampled($res, $image->resource, -$x, -$y, 0, 0, $image->info['width'], $image->info['height'], $image->info['width'], $image->info['height'])) {
     return FALSE;
   }
 
@@ -266,7 +267,7 @@ function image_gd_save(stdClass $image, $destination) {
     return FALSE;
   }
   if ($extension == 'jpeg') {
-    $success = $function($image->resource, $destination, config_get('system.core', 'image_jpeg_quality', 75));
+    $success = $function($image->resource, $destination, config_get('system.core', 'image_jpeg_quality'));
   }
   else {
     // Always save PNG images with full transparency.
@@ -362,3 +363,45 @@ function image_gd_get_info(stdClass $image) {
 /**
  * @} End of "addtogroup image".
  */
+
+
+/**
+ * Determines the correct color index value for the background.
+ *
+ * @param $image
+ *   An image object. The $image->resource values will be modified by this call.
+ * @param $background
+ *   A string specifying an RGBA color in the formats: '#RGB', 'RGB', '#RGBA',
+ *   'RGBA', '#RRGGBB', 'RRGGBB', '#RRGGBBAA', 'RRGGBBAA' or '0xRRGGBBAA'.
+ *
+ * @return $background
+ *   An hexadecimal color identifier or FALSE if the allocation failed. If no
+ *   color is provided this will default to transparent For images that support
+ *   transparency, otherwise it will be white.
+ *
+ * @see image_hex2rgba().
+ */
+function _image_gd_get_colorindex(stdClass $image, $background = NULL) {
+  if (isset($background)) {
+    $rgba = image_hex2rgba($background);
+    $background = imagecolorallocatealpha($image->resource, $rgba['red'], $rgba['green'], $rgba['blue'], $rgba['alpha']);
+  }
+  // Set the background color as transparent if $background is NULL.
+  else {
+    // Get the current transparent color.
+    $background = imagecolortransparent($image->resource);
+
+    // If using a PNG with alpha transparency, the color may be -1. Allocate a
+    // dedicated full alpha transparent color.
+    if ($background === -1) {
+      $background = imagecolorallocatealpha($image->resource, 255, 255, 255, 127);
+    }
+    // Allocating a transparent color may fail (e.g. on a jpg). Use white as
+    // a fallback.
+    if ($background === FALSE) {
+      $background = imagecolorallocatealpha($image->resource, 255, 255, 255, 0);
+    }
+  }
+
+  return $background;
+}

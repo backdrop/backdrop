@@ -2639,7 +2639,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $edit = array(
       'block_settings[depth]' => 3,
     );
-    $this->backdropPost(NULL, $edit, t('Save block'));
+    $this->backdropPost(NULL, $edit, t('Update block'));
 
     // Save the layout and return to the front page.
     $this->backdropPost(NULL, array(), t('Save layout'));
@@ -2657,7 +2657,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $edit = array(
       'block_settings[depth]' => 0,
     );
-    $this->backdropPost(NULL, $edit, t('Save block'));
+    $this->backdropPost(NULL, $edit, t('Update block'));
 
     // Save the layout and return to the front page.
     $this->backdropPost(NULL, array(), t('Save layout'));
@@ -2671,7 +2671,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $edit = array(
       'block_settings[level]' => 2,
     );
-    $this->backdropPost(NULL, $edit, t('Save block'));
+    $this->backdropPost(NULL, $edit, t('Update block'));
 
     // Save the layout and return to the front page.
     $this->backdropPost(NULL, array(), t('Save layout'));
@@ -2693,7 +2693,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $edit = array(
       'block_settings[style]' => 'top_only',
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save block'));
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Verify only top level links are shown even when on a 3rd-level link.
@@ -2710,7 +2710,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     $edit = array(
       'block_settings[style]' => 'dropdown',
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save block'));
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet($item2['link_path']);

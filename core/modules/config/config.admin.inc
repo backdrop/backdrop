@@ -198,15 +198,8 @@ function config_export_full_form_submit(array $form, array &$form_state) {
  */
 function config_download_full_export() {
   $file_path = file_create_filename('config.tar.gz', file_directory_temp());
-  $archiver = new ArchiverTar($file_path);
-  $config_dir = config_get_config_directory();
-  $config_storage = new ConfigFileStorage($config_dir);
-  $config_files = array();
-  foreach ($config_storage->listAll() as $config_name) {
-    $config_files[] = $config_dir . '/' . $config_name . '.json';
-  }
-  $archiver->getArchive()->createModify($config_files, '', config_get_config_directory());
-
+  $config_storage = config_get_config_storage();
+  $config_storage->exportArchive($file_path);
   $filename = str_replace(file_directory_temp() . '/', '', $file_path);
   $headers = array(
     'Content-Disposition' => 'attachment; filename=config.tar.gz',
@@ -247,19 +240,15 @@ function config_import_full_form(array $form, array &$form_state) {
 function config_import_full_form_submit(array &$form, array &$form_state) {
   if ($fid = $form_state['values']['import_tarball']) {
     // Empty out the existing staging directory.
-    $config_dir = config_get_config_directory('staging');
-    $config_storage = new ConfigFileStorage($config_dir);
+    $config_storage = config_get_config_storage('staging');
     $config_storage->deleteAll();
 
     // Convert the file URI to a file path that is readable by ArchiverTar.
     $file = file_load($fid);
-    $realpath = backdrop_realpath($file->uri);
-
     try {
-      $archiver = new ArchiverTar($realpath);
-      $archiver->extract($config_dir, $archiver->listContents());
+      $config_storage->importArchive($file->uri);
     }
-    catch (\Exception $e) {
+    catch (\ConfigStorageException $e) {
       form_set_error('import_tarball', t('Could not extract the contents of the tar file. The error message is "@message".', array('@message' => $e->getMessage())));
     }
     file_delete($file->fid);
@@ -372,8 +361,7 @@ function config_export_single_form_update_type($form, &$form_state) {
 function config_export_single_form_update_export($form, &$form_state) {
   if ($form_state['values']['config_name']) {
     $config_name = $form_state['values']['config_name'];
-    $directory = config_get_config_directory('active');
-    $storage = new ConfigFileStorage($directory);
+    $storage = config_get_config_storage('active');
     $config = new Config($config_name, $storage);
 
     // Re-add the config name property so it shows up in the export.
@@ -419,8 +407,7 @@ function config_import_single_form(array $form, array &$form_state) {
  */
 function config_import_single_form_validate(array &$form, array &$form_state) {
   // Decode the submitted import.
-  $active_directory = config_get_config_directory('active');
-  $active_storage = new ConfigFileStorage($active_directory);
+  $active_storage = config_get_config_storage('active');
   try {
     $data = $active_storage->decode($form_state['values']['import']);
   }
@@ -482,10 +469,8 @@ function config_import_single_form_submit(array &$form, array &$form_state) {
  * Utility function to get the current diffs between active and staging.
  */
 function config_get_statuses() {
-  $active_directory = config_get_config_directory('active');
-  $staging_directory = config_get_config_directory('staging');
-  $active_storage = new ConfigFileStorage($active_directory);
-  $staging_storage = new ConfigFileStorage($staging_directory);
+  $active_storage = config_get_config_storage('active');
+  $staging_storage = config_get_config_storage('staging');
 
   // Create full list of all files from both active and staging.
   $active_files = $active_storage->listAll();
@@ -529,8 +514,7 @@ function config_get_statuses() {
  * Utility function to get the current diffs between active and staging.
  */
 function config_get_modified_times() {
-  $staging_directory = config_get_config_directory('staging');
-  $staging_storage = new ConfigFileStorage($staging_directory);
+  $staging_storage = config_get_config_storage('staging');
   $staging_files = $staging_storage->listAll();
   $modified_times = array();
   foreach ($staging_files as $file) {
@@ -549,10 +533,8 @@ function config_get_modified_times() {
  *   An array of formatted strings showing the diffs between the two storages.
  */
 function config_diff($name) {
-  $active_directory = config_get_config_directory('active');
-  $staging_directory = config_get_config_directory('staging');
-  $active_storage = new ConfigFileStorage($active_directory);
-  $staging_storage = new ConfigFileStorage($staging_directory);
+  $active_storage = config_get_config_storage('active');
+  $staging_storage = config_get_config_storage('staging');
 
   $source_data = explode("\n", backdrop_json_encode($active_storage->read($name), TRUE));
   $target_data = explode("\n", backdrop_json_encode($staging_storage->read($name), TRUE));

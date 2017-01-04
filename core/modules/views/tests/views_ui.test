@@ -576,6 +576,14 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
  * Tests the ability of the views wizard to create views with a jump menu style plugin.
  */
 class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
+
+  function setup() {
+    parent::setup();
+
+    // Make sure we're using UTC
+    date_default_timezone_set('UTC');
+  }
+
   /**
    * Tests the jump menu style plugin.
    */

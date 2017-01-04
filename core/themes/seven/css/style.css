@@ -133,7 +133,8 @@ ul.menu li.expanded {
   padding-bottom: 5px;
 }
 .breadcrumb li,
-.breadcrumb li a {
+.breadcrumb li a,
+.breadcrumb li span {
   vertical-align: middle;
 }
 .breadcrumb li:after {

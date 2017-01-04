@@ -544,7 +544,7 @@ function system_requirements($phase) {
       );
     }
   }
-  
+
   if ($phase == 'runtime') {
     // Inform user about status of display error messages.
     $error_level = config_get('system.core', 'error_level');
@@ -568,7 +568,20 @@ function system_requirements($phase) {
       'description' => $description,
     );
   }
-
+  
+  if ($phase == 'runtime') {
+    // Inform the user if theme_debug is enabled.
+    $theme_debug_enabled = config_get('system.core', 'theme_debug');
+    if ($theme_debug_enabled) {
+      $requirements['theme_debug'] = array(
+        'title' => $t('Theme debug'),
+        'value' => $t('Enabled'),
+        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Theme debugging is currently enabled, and should be disabled on a live site. This setting can be changed using the <a href="!url">Devel module</a>.', array('!url' => module_exists('devel') ? url('admin/config/development/devel') : 'https://backdropcms.org/project/devel')),
+      );
+    }
+  }
+  
   return $requirements;
 }
 
@@ -672,6 +685,14 @@ function system_install() {
   // Populate the cron key variable.
   $cron_key = backdrop_random_key();
   state_set('cron_key', $cron_key);
+
+  // Set the site_mail to a sensible default. Note that installs via the
+  // command line will not have a SERVER_NAME, and so the site mail must be
+  // specified manually via the install.sh script --site-mail option.
+  $site_mail = 'noreply@' . backdrop_get_bare_domain($_SERVER['SERVER_NAME']);
+  if (valid_email_address($site_mail)) {
+    config_set('system.core', 'site_mail', $site_mail);
+  }
 }
 
 /**

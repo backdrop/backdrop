@@ -69,12 +69,12 @@ function redirect_menu() {
     'file' => 'redirect.admin.inc',
   );
   $items['admin/config/search/redirect/list'] = array(
-    'title' => 'List redirects',
+    'title' => 'List URL redirects',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
   $items['admin/config/search/redirect/add'] = array(
-    'title' => 'Add redirect',
+    'title' => 'Add URL redirect',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('redirect_edit_form'),
     'access callback' => 'redirect_access',
@@ -115,7 +115,7 @@ function redirect_menu() {
     $site_404 = 'system/404';
   }
   $items[$site_404 . '/add-redirect'] = array(
-    'title' => 'Add URL redirect from this page to another location',
+    'title' => 'Add a URL redirect from this page to another location',
     'type' => MENU_LOCAL_ACTION,
     'page callback' => 'redirect_add_redirect_page',
     'access callback' => 'redirect_access',
@@ -127,7 +127,7 @@ function redirect_menu() {
   if (module_exists('dblog')) {
     $items['admin/config/search/redirect/404'] = array(
       'title' => 'Fix 404 pages',
-      'description' => 'Add redirects for 404 pages.',
+      'description' => 'Add URL redirects for 404 pages.',
       'page callback' => 'redirect_404_list',
       'access arguments' => array('administer redirects'),
       'file' => 'redirect.admin.inc',

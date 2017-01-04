@@ -87,8 +87,10 @@ function update_prepare_bootstrap() {
 
   // Check whether settings.php needs to be rewritten.
   $settings_exist = !empty($GLOBALS['config_directories']);
+  $active_config = config_get_config_storage('active');
+  $staging_config = config_get_config_storage('staging');
 
-  if (!$settings_exist || !is_dir(config_get_config_directory('active')) || !is_dir(config_get_config_directory('staging'))) {
+  if (!$settings_exist || !$active_config->isInitialized() || !$staging_config->isInitialized()) {
     backdrop_install_config_directories();
   }
 
@@ -365,7 +367,7 @@ function update_module_enable(array $modules) {
 /**
  * Gets the value of a variable from the database during update hooks.
  *
- * Use this during the Drupal 7 upgrade path instead of variable_get().
+ * Use this during the upgrade path instead of variable_get().
  *
  * @param string $name
  *   The name of the variable.
@@ -385,7 +387,7 @@ function update_variable_get($name, $default = NULL) {
 /**
  * Sets a persistent variable during update hooks.
  *
- * Use this during the Drupal 7 upgrade path instead of variable_set().
+ * Use this during the upgrade path instead of variable_set().
  *
  * @param string $name
  *   The name of the variable.
@@ -406,7 +408,7 @@ function update_variable_set($name, $value) {
 /**
  * Delete a variable from the database during update hooks.
  *
- * Use this during the Drupal 7 upgrade path instead of variable_del().
+ * Use this during the upgrade path instead of variable_del().
  *
  * @param string $name
  *   The name of the variable to delete.

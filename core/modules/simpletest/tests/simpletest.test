@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for simpletest.module.
@@ -208,7 +207,7 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
    */
   function getTestIdFromResults() {
     foreach ($this->childTestResults['assertions'] as $assertion) {
-      if (preg_match('@^Test ID is ([0-9]*)\.$@', $assertion['message'], $matches)) {
+      if (preg_match('@^PASS: Test ID is ([0-9]*)\.$@', $assertion['message'], $matches)) {
         return $matches[1];
       }
     }
@@ -531,12 +530,12 @@ class SimpleTestMissingCheckedRequirements extends BackdropWebTestCase {
    * Overrides checkRequirements().
    */
   protected function checkRequirements() {
+    $errors = parent::checkRequirements();
+
     if (backdrop_valid_test_ua()) {
-      return array(
-        'Test is not allowed to run.'
-      );
+      $errors[] = 'Test is not allowed to run.';
     }
-    return parent::checkRequirements();
+    return $errors;
   }
 
   /**

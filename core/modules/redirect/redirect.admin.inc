@@ -650,12 +650,12 @@ function redirect_delete_form_submit($form, &$form_state) {
  * Form builder for redirection settings.
  *
  * @see system_settings_form()
- * @see redirect_settings_form_submit()
  *
  * @ingroup forms
  */
 function redirect_settings_form($form, &$form_state) {
   $config = config('redirect.settings');
+  $form['#config'] = 'redirect.settings';
   $form['auto_redirect'] = array(
     '#type' => 'checkbox',
     '#title' => t('Automatically create redirects when URL aliases are changed.'),
@@ -687,29 +687,7 @@ function redirect_settings_form($form, &$form_state) {
     '#description' => t('Only redirects managed by the redirect module itself will be deleted. Redirects managed by other modules will be left alone.'),
   );
 
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration'),
-  );
-  $form['#submit'][] = 'redirect_settings_form_submit';
-  return $form;
-}
-
-/**
- * Form submit handler; clears the page cache.
- *
- * @see settings_form()
- */
-function redirect_settings_form_submit($form, &$form_state) {
-  $values = $form_state['values'];
-  $config = config('redirect.settings');
-  $config->set('auto_redirect', (bool) $values['auto_redirect']);
-  $config->set('passthrough_querystring', (bool) $values['passthrough_querystring']);
-  $config->set('additional_statuses', (bool) $values['additional_statuses']);
-  $config->set('purge_inactive', (bool) $values['purge_inactive']);
-  $config->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
+  return system_settings_form($form);
 }
 
 /**
@@ -765,7 +743,7 @@ function redirect_404_list($form = NULL) {
     $operations = array();
     if (redirect_access('create', 'redirect')) {
       $operations['add'] = array(
-        'title' => t('Add redirect'),
+        'title' => t('Add URL redirect'),
         'href' => 'admin/config/search/redirect/add/',
         'query' => array('source' => $result->message) + $destination,
       );

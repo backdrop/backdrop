@@ -4,6 +4,8 @@
  * Unit tests for the Backdrop Form API.
  */
 
+include_once(dirname(__FILE__) . '/system_config_test.inc');
+
 class FormsTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('form_test');
@@ -2119,5 +2121,41 @@ class FormUrlTestCase extends BackdropWebTestCase {
     $values = backdrop_json_decode($this->backdropPost('form-test/url', $edit, 'Submit'));
     $this->assertEqual($values['url'], $edit['url']);
     $this->assertEqual($values['url_required'], $edit['url_required']);
+  }
+}
+
+class SystemSettingsFormTest extends SystemConfigFormCase {
+  public function setUp() {
+    parent::setUp(array('form_test'));
+    $this->form_id = 'form_test_system_config_form';
+    $this->values = array(
+      'abc' => array(
+        '#value' => $this->randomString(),
+        '#config_name' => 'simpletest.testconfig',
+        '#config_key' => 'abc',
+      ),
+      'def' => array(
+        '#value' => $this->randomString(),
+        '#config_name' => 'simpletest.testconfig',
+        '#config_key' => 'def',
+      ),
+      // Test single-element overrrides
+      'rss_description' => array(
+        '#value' => $this->randomString(),
+        '#config_name' => 'system.core',
+        '#config_key' => 'rss_description',
+      ),
+      // Test fieldsets of overrides.
+      'ghi' => array(
+        '#value' => $this->randomString(),
+        '#config_name' => 'simpletest.secondconfig',
+        '#config_key' => 'ghi',
+      ),
+      'jkl' => array(
+        '#value' => $this->randomString(),
+        '#config_name' => 'simpletest.secondconfig',
+        '#config_key' => 'jkl',
+      ),
+    );
   }
 }

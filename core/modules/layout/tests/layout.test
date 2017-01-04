@@ -171,7 +171,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => $block_new_title,
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save block'));
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet($layout_url);
     $this->assertText(check_plain($block_new_title));
@@ -180,7 +180,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title_display' => LAYOUT_TITLE_NONE,
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save block'));
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet($layout_url);
     $this->assertNoText('Foo subject');
@@ -192,7 +192,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_DEFAULT,
       'style_settings[classes]' => $custom_class,
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save block'));
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet($layout_url);
@@ -212,7 +212,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'style' => 'dynamic',
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save block'));
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $edit = array(
       'style_settings[wrapper_tag]' => 'aside',
       'style_settings[title_tag]' => 'h3',
@@ -220,7 +220,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'style_settings[content_tag]' => 'p',
       'style_settings[content_classes]' => $content_class,
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save block'));
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet($layout_url);
@@ -256,7 +256,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'region' => 'footer',
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save block'));
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet($layout_url);
@@ -340,7 +340,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'bundles[page]' => TRUE,
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-    $this->backdropPost(Null, array(), t('Save block'));
+    $this->backdropPost(Null, array(), t('Update block'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
@@ -368,7 +368,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'bundles[page]' => FALSE,
     );
     $this->backdropPost(NULL, $edit, t('Save visibility condition'));
-    $this->backdropPost(Null, array(), t('Save block'));
+    $this->backdropPost(Null, array(), t('Update block'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
@@ -388,7 +388,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'paths' => 'node/' . $this->test_node1->nid,
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-    $this->backdropPost(NULL, array(), t('Save block'));
+    $this->backdropPost(NULL, array(), t('Update block'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
     // Create another post node and check the combination of conditions work.
@@ -442,7 +442,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'entity_id' => $this->test_node1->nid,
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-    $this->backdropPost(Null, array(), t('Save block'));
+    $this->backdropPost(Null, array(), t('Update block'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
@@ -467,7 +467,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'entity_id' => $this->web_user->uid,
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-    $this->backdropPost(NULL, array(), t('Save block'));
+    $this->backdropPost(NULL, array(), t('Update block'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
@@ -564,7 +564,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'contexts[my_node]' => '3',
     );
-    $this->backdropPost(NULL, $edit, t('Save block'));
+    $this->backdropPost(NULL, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Now the second node should be used as the title in the page.
@@ -1365,13 +1365,13 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $edit = array(
       'reusable' => TRUE,
     );
-    $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $edit, t('Save block'));
+    $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $edit, t('Update block'));
     $this->assertText(t('Admin label is required when making a block reusable.'));
     $edit['label'] = 'My custom block label';
-    $this->backdropPost(NULL, $edit, t('Save block'));
+    $this->backdropPost(NULL, $edit, t('Update block'));
     $this->assertText(t('An internal name is required when making a block reusable.'));
     $edit['delta'] = 'my_custom_block';
-    $this->backdropPost(NULL, $edit, t('Save block'));
+    $this->backdropPost(NULL, $edit, t('Update block'));
 
     // Now back on the layout main page. Check the new admin label is shown.
     $this->assertText('My custom block label');
@@ -1582,7 +1582,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//ul[contains(@class, "tabs")]');
     $this->assertEqual(count($tabs), 1, 'The tabs nav element was found.');
 
-    // Add a Title combo block.
+    // Go back to the default layout.
     $this->backdropGet('admin/structure/layouts/manage/default');
 
     // Add a Title combo block to the header.
@@ -1616,6 +1616,44 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $this->assertEqual(count($combo_tabs), 1, 'The Title combo tabs DIV was found.');
     $combo_messages = $this->xpath('(//div[contains(@class, "block-system-title-combo")])//div[contains(@class, "l-messages")]');
     $this->assertEqual(count($combo_messages), 1, 'The Title combo messages DIV was found.');
+
+    // Remove the Title combo block.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $remove_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(
+      ':uuid' => $title_combo_block_uuid,
+    ));
+    $remove_url_parts = backdrop_parse_url($remove_link[0]['href']);
+    $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Add a Local actions block to the header.
+    $this->clickLink(t('Add block'), 0);
+    $this->clickLink(t('Local actions'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+
+    // Add a System messages block to the header.
+    $this->clickLink(t('Add block'), 0);
+    $this->clickLink(t('System messages'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check that the system message DIV no longer shows but the messages block
+    // does.
+    $messages = $this->xpath('(//div[contains(@class, "l-wrapper")])//div[contains(@class, "l-messages")]');
+    $this->assertEqual(count($messages), 0, 'The messages DIV was not found.');
+    $block_messages = $this->xpath('(//div[contains(@class, "block-system-messages")])//div[contains(@class, "l-messages")]');
+    $this->assertEqual(count($block_messages), 1, 'The System messages block was found.');
+
+    // Go to the layouts list and check that the Local actions DIV no longer
+    // shows but the block does.
+    $this->backdropGet('admin/structure/layouts');
+    $actions = $this->xpath('(//div[contains(@class, "l-wrapper")])//div[contains(@class, "l-action-links")]');
+    $this->assertEqual(count($actions), 0, 'The messages DIV was not found.');
+    $block_actions = $this->xpath('(//div[contains(@class, "block-system-action-links")])//ul[contains(@class, "action-links")]');
+    $this->assertEqual(count($block_actions), 1, 'The System messages block was found.');
+
   }
 }
 

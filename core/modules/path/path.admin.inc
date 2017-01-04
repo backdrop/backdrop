@@ -577,13 +577,7 @@ function path_patterns_settings_form($form) {
     );
   }
 
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration'),
-  );
-
-  return $form;
+  return system_settings_form($form);
 }
 
 /**
@@ -612,31 +606,6 @@ function path_patterns_settings_form_validate($form, &$form_state) {
 }
 
 /**
- * Submit handler for path_patterns_settings_form().
- */
-function path_patterns_settings_form_submit($form, &$form_state) {
-  $config = config('path.settings');
-  $values = $form_state['values'];
-  $config->set('verbose', $values['verbose']);
-  $config->set('separator', $values['separator']);
-  $config->set('case', $values['case']);
-  $config->set('max_length', $values['max_length']);
-  $config->set('max_component_length', $values['max_component_length']);
-  $config->set('update_action', $values['update_action']);
-  $config->set('transliterate', $values['transliterate']);
-  $config->set('reduce_ascii', $values['reduce_ascii']);
-  $config->set('ignore_words', $values['ignore_words']);
-
-  $punctuation = path_punctuation_chars();
-  foreach ($punctuation as $name => $details) {
-    $config->set('punctuation_' . $name, $values['punctuation_' . $name]);
-  }
-
-  $config->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
-}
-
-/**
  * Form builder; Bulk path alias update form.
  *
  * @see path_bulk_update_form_submit()
@@ -654,7 +623,7 @@ function path_bulk_update_form($form, &$form_state) {
   $all_path_info = path_get_info();
 
   $rows = array();
-  
+
   foreach ($all_path_info as $type => $path_info) {
     if (!empty($path_info['batch update callback'])) {
       $form['update'][$type]['base'] = array(
@@ -669,7 +638,7 @@ function path_bulk_update_form($form, &$form_state) {
       $form['#update_callbacks'][$type] = $path_info;
       // Check if this entity provides bundle types as pattern items and create
       // a row for each of these bundle types. For the Node entity the pattern
-      // items would be keyed by be node types; for taxonomy, these would be 
+      // items would be keyed by be node types; for taxonomy, these would be
       // vocabularies.
       if (isset($path_info['pattern items'])) {
         foreach ($path_info['pattern items'] as $item => $item_label) {
@@ -760,8 +729,8 @@ function theme_path_bulk_update_form($variables) {
  * @see path_admin_bulk_delete_confirm()
  */
 function path_bulk_update_form_rebuild_submit($form, &$form_state) {
-  // If aliases are being deleted, rebuild the form to show the confirm form. 
-  // Otherwise aliases are being generated or updated, call the 
+  // If aliases are being deleted, rebuild the form to show the confirm form.
+  // Otherwise aliases are being generated or updated, call the
   // path_bulk_update_form_generate_submit() form.
   if ($form_state['values']['operations']['operation'] == 'delete') {
     $form_state['storage']['delete'] = TRUE;

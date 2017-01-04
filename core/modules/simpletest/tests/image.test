@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for core image handling API.
@@ -207,13 +206,13 @@ class ImageToolkitGdTestCase extends BackdropWebTestCase {
   protected $height = 20;
 
   protected function checkRequirements() {
+    $errors = parent::checkRequirements();
+
     image_get_available_toolkits();
     if (!function_exists('image_gd_check_settings') || !image_gd_check_settings()) {
-      return array(
-        'Image manipulations for the GD toolkit cannot run because the GD toolkit is not available.',
-      );
+      $errors[] = 'Image manipulations for the GD toolkit cannot run because the GD toolkit is not available.';
     }
-    return parent::checkRequirements();
+    return $errors;
   }
 
   /**
@@ -323,7 +322,7 @@ class ImageToolkitGdTestCase extends BackdropWebTestCase {
       $operations += array(
         'rotate_5' => array(
           'function' => 'rotate',
-          'arguments' => array(5, 0xFF00FF), // Fuchsia background.
+          'arguments' => array(5, 'FF00FF'), // Fuchsia background.
           'width' => 42,
           'height' => 24,
           'corners' => array_fill(0, 4, $this->fuchsia),
@@ -460,7 +459,6 @@ class ImageToolkitGdTestCase extends BackdropWebTestCase {
         }
       }
     }
-
   }
 }
 

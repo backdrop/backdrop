@@ -123,7 +123,7 @@ function simpletest_result_form($form, &$form_state, $test_id) {
     $rows = array();
     foreach ($assertions as $assertion) {
       $row = array();
-      $row[] = $assertion->message;
+      $row[] = strtoupper(str_replace('simpletest-', '', $assertion->status)) . ': ' . $assertion->message;
       $row[] = $assertion->message_group;
       $row[] = backdrop_basename($assertion->file);
       $row[] = $assertion->line;
@@ -288,10 +288,10 @@ function simpletest_result_status_image($status) {
  *
  * @ingroup forms
  * @see simpletest_settings_form_validate()
- * @see simpletest_settings_form_submit()
  */
 function simpletest_settings_form($form, &$form_state) {
   $config = config('simpletest.settings');
+  $form['#config'] = 'simpletest.settings';
   $form['general'] = array(
     '#type' => 'fieldset',
     '#title' => t('General'),
@@ -347,25 +347,7 @@ function simpletest_settings_form($form, &$form_state) {
     $form['httpauth']['simpletest_httpauth_password']['#description'] = t('To change the password, enter the new password here.');
   }
 
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration')
-  );
-  return $form;
-}
-
-/**
- * Form submission handler for simpletest_settings_form().
- */
-function simpletest_settings_form_submit($form, &$form_state) {
-  config('simpletest.settings')
-    ->set('simpletest_clear_results', $form_state['values']['simpletest_clear_results'])
-    ->set('simpletest_verbose', $form_state['values']['simpletest_verbose'])
-    ->set('simpletest_method', $form_state['values']['simpletest_httpauth_method'])
-    ->set('simpletest_username', $form_state['values']['simpletest_httpauth_username'])
-    ->set('simpletest_password', $form_state['values']['simpletest_httpauth_password'])
-    ->save();
+  return system_settings_form($form);
 }
 
 /**

@@ -150,17 +150,7 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
     '#title' => t('Database log messages to keep'),
     '#default_value' => config_get('system.core', 'log_row_limit'),
     '#options' => array(0 => t('All')) + backdrop_map_assoc(array(100, 1000, 10000, 100000, 1000000)),
-    '#description' => t('The maximum number of messages to keep in the database log. Requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/reports/status')))
+    '#description' => t('The maximum number of messages to keep in the database log. Requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/reports/status'))),
+    '#config' => 'system.core',
   );
-  $form['#submit'][] = 'dblog_logging_settings_submit';
 }
-
-/**
- * Form submission handler for system_logging_settings().
- *
- * @see dblog_form_system_logging_settings_alter()
- */
-function dblog_logging_settings_submit($form, &$form_state) {
-  config_set('system.core', 'log_row_limit', $form_state['values']['dblog_row_limit']);
-}
-

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * API for manipulating images.
@@ -449,6 +448,50 @@ function image_save(stdClass $image, $destination = NULL) {
     }
   }
   return FALSE;
+}
+
+/**
+ * Converts a hex string to RGBA (red, green, blue, alpha) integer values and
+ * tidies up the input hex color string.
+ *
+ * @param $hex
+ *   A string specifying an RGBA color in the formats: '#RGB', 'RGB', '#RGBA',
+ *   'RGBA', '#RRGGBB', 'RRGGBB', '#RRGGBBAA', 'RRGGBBAA' or '0xRRGGBBAA'. The
+ *   color is passed by reference to tidy up the string for consistency.
+ *
+ * @return
+ *   An associative array with 'red', 'green', 'blue' and 'alpha' as keys and corresponding
+ *   color decimal integer as values or FALSE on an invalid color hex string.
+ */
+function image_hex2rgba(&$hex) {
+  // Remove the leading '0x', if any (legacy).
+  if (strpos($hex, '0x') === 0) {
+    $hex = substr($hex, 2);
+  }
+
+  // Save a uppercase version without leading "#" for later processing.
+  $hex_color = drupal_strtoupper(ltrim($hex, '#'));
+
+  // Normalize shorthand versions.
+  // '#FA3' will become '#FFAA33', '#FA37' will become '#FFAA3377'.
+  if (strlen($hex_color) <= 4) {
+    $hex_color = preg_replace('|([0-9A-F])|', '\1\1', $hex_color);
+  }
+
+  // Ensure consistency for the color string.
+  $hex = '#' . $hex_color;
+
+  // Return FALSE if is not a valid hex color string.
+  if (!preg_match('/^([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})([0-7][0-9A-F])?$/', $hex_color, $colors)) {
+    return FALSE;
+  }
+
+  return array(
+    'red' => hexdec($colors[1]),
+    'green' => hexdec($colors[2]),
+    'blue' => hexdec($colors[3]),
+    'alpha' => isset($colors[4]) ? hexdec($colors[4]) : 0,
+  );
 }
 
 /**

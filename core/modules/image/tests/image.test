@@ -293,87 +293,73 @@ class ImageEffectsUnitTest extends ImageToolkitTestCase {
   }
 
   /**
-   * Test the image_resize_effect() function.
+   * Test all the image effects provided by core.
    */
-  function testResizeEffect() {
+  function testEffects() {
+    // Test the image_resize_effect() function.
     $this->assertTrue(image_resize_effect($this->image, array('width' => 1, 'height' => 2)), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('resize'));
 
     // Check the parameters.
     $calls = image_test_get_all_calls();
-    $this->assertEqual($calls['resize'][0][1], 1, 'Width was passed correctly');
-    $this->assertEqual($calls['resize'][0][2], 2, 'Height was passed correctly');
-  }
+    $this->assertIdentical($calls['resize'][0][1], 1, 'Width was passed correctly');
+    $this->assertIdentical($calls['resize'][0][2], 2, 'Height was passed correctly');
+    image_test_reset();
 
-  /**
-   * Test the image_scale_effect() function.
-   */
-  function testScaleEffect() {
+    // Test the image_scale_effect() function.
     // @todo: need to test upscaling.
     $this->assertTrue(image_scale_effect($this->image, array('width' => 10, 'height' => 10)), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('resize'));
 
     // Check the parameters.
     $calls = image_test_get_all_calls();
-    $this->assertEqual($calls['resize'][0][1], 10, 'Width was passed correctly');
-    $this->assertEqual($calls['resize'][0][2], 5, 'Height was based off aspect ratio and passed correctly');
-  }
+    $this->assertIdentical($calls['resize'][0][1], 10, 'Width was passed correctly');
+    $this->assertIdentical($calls['resize'][0][2], 5, 'Height was based off aspect ratio and passed correctly');
+    image_test_reset();
 
-  /**
-   * Test the image_crop_effect() function.
-   */
-  function testCropEffect() {
+    // Test the image_crop_effect() function.
     // @todo should test the keyword offsets.
     $this->assertTrue(image_crop_effect($this->image, array('anchor' => 'top-1', 'width' => 3, 'height' => 4)), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('crop'));
 
     // Check the parameters.
     $calls = image_test_get_all_calls();
-    $this->assertEqual($calls['crop'][0][1], 0, 'X was passed correctly');
-    $this->assertEqual($calls['crop'][0][2], 1, 'Y was passed correctly');
-    $this->assertEqual($calls['crop'][0][3], 3, 'Width was passed correctly');
-    $this->assertEqual($calls['crop'][0][4], 4, 'Height was passed correctly');
-  }
+    $this->assertIdentical($calls['crop'][0][1], 0, 'X was passed correctly');
+    $this->assertIdentical($calls['crop'][0][2], 1, 'Y was passed correctly');
+    $this->assertIdentical($calls['crop'][0][3], 3, 'Width was passed correctly');
+    $this->assertIdentical($calls['crop'][0][4], 4, 'Height was passed correctly');
+    image_test_reset();
 
-  /**
-   * Test the image_scale_and_crop_effect() function.
-   */
-  function testScaleAndCropEffect() {
+    // Test the image_scale_and_crop_effect() function.
     $this->assertTrue(image_scale_and_crop_effect($this->image, array('width' => 5, 'height' => 10)), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('resize', 'crop'));
 
     // Check the parameters.
     $calls = image_test_get_all_calls();
-    $this->assertEqual($calls['crop'][0][1], 7.5, 'X was computed and passed correctly');
-    $this->assertEqual($calls['crop'][0][2], 0, 'Y was computed and passed correctly');
-    $this->assertEqual($calls['crop'][0][3], 5, 'Width was computed and passed correctly');
-    $this->assertEqual($calls['crop'][0][4], 10, 'Height was computed and passed correctly');
-  }
+    $this->assertIdentical($calls['crop'][0][1], 7.5, 'X was computed and passed correctly');
+    $this->assertIdentical($calls['crop'][0][2], 0.0, 'Y was computed and passed correctly');
+    $this->assertIdentical($calls['crop'][0][3], 5, 'Width was computed and passed correctly');
+    $this->assertIdentical($calls['crop'][0][4], 10, 'Height was computed and passed correctly');
+    image_test_reset();
 
-  /**
-   * Test the image_desaturate_effect() function.
-   */
-  function testDesaturateEffect() {
+    // Test the image_desaturate_effect() function.
     $this->assertTrue(image_desaturate_effect($this->image, array()), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('desaturate'));
 
     // Check the parameters.
     $calls = image_test_get_all_calls();
-    $this->assertEqual(count($calls['desaturate'][0]), 1, 'Only the image was passed.');
-  }
+    $this->assertIdentical(count($calls['desaturate'][0]), 1, 'Only the image was passed.');
+    image_test_reset();
 
-  /**
-   * Test the image_rotate_effect() function.
-   */
-  function testRotateEffect() {
-    // @todo: need to test with 'random' => TRUE
+    // Test the image_rotate_effect() function.
     $this->assertTrue(image_rotate_effect($this->image, array('degrees' => 90, 'bgcolor' => '#fff')), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('rotate'));
 
     // Check the parameters.
     $calls = image_test_get_all_calls();
-    $this->assertEqual($calls['rotate'][0][1], 90, 'Degrees were passed correctly');
-    $this->assertEqual($calls['rotate'][0][2], 0xffffff, 'Background color was passed correctly');
+    $this->assertIdentical($calls['rotate'][0][1], 90, 'Degrees were passed correctly');
+    $this->assertIdentical($calls['rotate'][0][2], '#FFFFFF', 'Background color was passed correctly');
+    image_test_reset();
   }
 
   /**
@@ -818,8 +804,8 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
       'alt_field' => 1,
       'file_extensions' => $test_image_extension,
       'max_filesize' => '50 KB',
-      'max_resolution' => '100x100',
-      'min_resolution' => '10x10',
+      'max_dimensions' => '100x100',
+      'min_dimensions' => '10x10',
       'title_field' => 1,
     );
     $widget_settings = array(
@@ -834,7 +820,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $this->backdropGet('node/add/post');
     $this->assertText(t('Files must be less than 50 KB.'), 'Image widget max file size is displayed on post form.');
     $this->assertText(t('Allowed file types: ' . $test_image_extension . '.'), 'Image widget allowed file types displayed on post form.');
-    $this->assertText(t('Images must be larger than 10x10 pixels. Images larger than 100x100 pixels will be scaled down.'), 'Image widget allowed resolution displayed on post form.');
+    $this->assertText(t('Images must be larger than 10x10 pixels. Images larger than 100x100 pixels will be scaled down.'), 'Image widget allowed dimensions displayed on post form.');
 
     // We have to create the post first and then edit it because the alt
     // and title fields do not display until the image has been attached.
@@ -968,13 +954,13 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
   /**
    * Test min/max resolution settings.
    */
-  function testResolution() {
+  function testDimensions() {
     $field_name = strtolower($this->randomName());
-    $min_resolution = 50;
-    $max_resolution = 100;
+    $min_dimensions = 50;
+    $max_dimensions = 100;
     $instance_settings = array(
-      'max_resolution' => $max_resolution . 'x' . $max_resolution,
-      'min_resolution' => $min_resolution . 'x' . $min_resolution,
+      'max_dimensions' => $max_dimensions . 'x' . $max_dimensions,
+      'min_dimensions' => $min_dimensions . 'x' . $min_dimensions,
     );
     $this->createImageField($field_name, 'post', array(), $instance_settings);
 
@@ -984,10 +970,10 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $image_that_is_too_small = FALSE;
     foreach ($this->backdropGetTestFiles('image') as $image) {
       $info = image_get_info($image->uri);
-      if ($info['width'] > $max_resolution) {
+      if ($info['width'] > $max_dimensions) {
         $image_that_is_too_big = $image;
       }
-      if ($info['width'] < $min_resolution) {
+      if ($info['width'] < $min_dimensions) {
         $image_that_is_too_small = $image;
       }
       if ($image_that_is_too_small && $image_that_is_too_big) {
@@ -995,9 +981,9 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
       }
     }
     $nid = $this->uploadNodeImage($image_that_is_too_small, $field_name, 'post');
-    $this->assertText(t('The specified file ' . $image_that_is_too_small->filename . ' could not be uploaded. The image is too small; the minimum dimensions are 50x50 pixels.'), 'Node save failed when minimum image resolution was not met.');
+    $this->assertText(t('The specified file ' . $image_that_is_too_small->filename . ' could not be uploaded. The image is too small; the minimum dimensions are 50x50 pixels.'), 'Node save failed when minimum image dimensions was not met.');
     $nid = $this->uploadNodeImage($image_that_is_too_big, $field_name, 'post');
-    $this->assertText(t('The image was resized to fit within the maximum allowed dimensions of 100x100 pixels.'), 'Image exceeding max resolution was properly resized.');
+    $this->assertText(t('The image was resized to fit within the maximum allowed dimensions of 100x100 pixels.'), 'Image exceeding max dimensions was properly resized.');
   }
 }
 

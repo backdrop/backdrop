@@ -1,13 +1,13 @@
 {
     "_config_name": "views.view.node_admin_content",
     "name": "node_admin_content",
-    "description": "",
+    "description": "Administrative listing for managing content.",
     "module": "node",
     "storage": 4,
     "tag": "default",
     "disabled": false,
     "base_table": "node",
-    "human_name": "Admin Content",
+    "human_name": "Administer content",
     "core": "1.0",
     "display": {
         "default": {

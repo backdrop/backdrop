@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * API functions for installing Backdrop.
@@ -250,9 +249,6 @@ function install_begin_request(&$install_state) {
   include_once BACKDROP_ROOT . '/core/includes/session.inc';
   require_once BACKDROP_ROOT . '/core/includes/theme.inc';
 
-  // Set up $language, so t() caller functions will still work.
-  backdrop_language_initialize();
-
   require_once BACKDROP_ROOT . '/core/includes/ajax.inc';
   $module_list['system']['filename'] = 'core/modules/system/system.module';
   $module_list['entity']['filename'] = 'core/modules/entity/entity.module';
@@ -274,6 +270,9 @@ function install_begin_request(&$install_state) {
   require_once BACKDROP_ROOT . '/core/includes/cache.inc';
   require_once BACKDROP_ROOT . '/core/includes/cache-install.inc';
   $GLOBALS['settings']['cache_default_class'] = 'BackdropFakeCache';
+
+  // Set up $language, so t() caller functions will still work.
+  backdrop_language_initialize();
 
   // Prepare for themed output. We need to run this at the beginning of the
   // page request to avoid a different theme accidentally getting set. (We also
@@ -366,7 +365,7 @@ function install_run_tasks(&$install_state) {
  *
  * @param $task
  *   An array of information about the task to be run as returned by
- *   hook_install_tasks(). 
+ *   hook_install_tasks().
  * @param $install_state
  *   An array of information about the current installation state. This is
  *   passed in by reference so that it can be modified by the task.
@@ -559,13 +558,13 @@ function install_tasks($install_state) {
       'run' => INSTALL_TASK_RUN_IF_REACHED,
     ),
     'install_verify_requirements' => array(
-      'display_name' => st('Verify requirements'),
+      'display_name' => st('Verify site requirements'),
     ),
     'install_hash_salt' => array(
       'run' => INSTALL_TASK_RUN_IF_REACHED,
     ),
     'install_settings_form' => array(
-      'display_name' => st('Set up database'),
+      'display_name' => st('Set up your database'),
       'type' => 'form',
       'run' => $install_state['settings_verified'] ? INSTALL_TASK_SKIP : INSTALL_TASK_RUN_IF_NOT_COMPLETED,
     ),
@@ -587,7 +586,7 @@ function install_tasks($install_state) {
       'run' => $needs_translations ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
     ),
     'install_configure_form' => array(
-      'display_name' => st('Configure site'),
+      'display_name' => st('Configure your site'),
       'type' => 'form',
     ),
   );
@@ -1300,7 +1299,9 @@ function install_find_translations() {
  */
 function install_find_translation_files($langcode = NULL) {
   $directory = settings_get('locale_translate_file_directory', 'files/translations');
-  $files = file_scan_directory($directory, '!install\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
+  // @todo: Remove the "drupal" check in 2.x (assuming we have a localization
+  //   server by then).
+  $files = file_scan_directory($directory, '!(install|drupal-\d+\.\d+)\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
   return $files;
 }
 
@@ -1564,6 +1565,7 @@ function install_import_translations(&$install_state) {
   $langcode = $install_state['parameters']['langcode'];
 
   include_once BACKDROP_ROOT . '/core/includes/standard.inc';
+  module_enable(array('language', 'locale'));
   $standard_languages = standard_language_list();
   if (!isset($standard_languages[$langcode])) {
     // Backdrop does not know about this language, so we prefill its values with
@@ -1805,17 +1807,10 @@ function _install_configure_form($form, &$form_state, &$install_state) {
     '#required' => TRUE,
     '#weight' => -20,
   );
-  $form['site_information']['site_mail'] = array(
-    '#type' => 'email',
-    '#title' => st('Site e-mail address'),
-    '#default_value' => ini_get('sendmail_from'),
-    '#description' => st("Automated e-mails, such as registration information, will be sent from this address. Use an address ending in your site's domain to help prevent these e-mails from being flagged as spam."),
-    '#required' => TRUE,
-    '#weight' => -15,
-  );
+
   $form['admin_account'] = array(
     '#type' => 'fieldset',
-    '#title' => st('Site maintenance account'),
+    '#title' => st('Primary user account'),
     '#collapsible' => FALSE,
   );
 
@@ -1823,7 +1818,7 @@ function _install_configure_form($form, &$form_state, &$install_state) {
   $form['admin_account']['account']['name'] = array('#type' => 'textfield',
     '#title' => st('Username'),
     '#maxlength' => USERNAME_MAX_LENGTH,
-    '#description' => st('Spaces are allowed; punctuation is not allowed except for periods, hyphens, and underscores.'),
+    '#description' => st('Spaces are allowed. Punctuation is not allowed except for periods, pluses, hyphens, and underscores.'),
     '#required' => TRUE,
     '#weight' => -10,
     '#attributes' => array('class' => array('username')),
@@ -1917,7 +1912,6 @@ function install_configure_form_submit($form, &$form_state) {
 
   config('system.core')
     ->set('site_name', $form_state['values']['site_name'])
-    ->set('site_mail', $form_state['values']['site_mail'])
     ->save();
   config('system.date')
     ->set('default_timezone', $form_state['values']['date_default_timezone'])

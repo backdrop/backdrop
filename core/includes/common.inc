@@ -511,6 +511,58 @@ function backdrop_get_query_array($query) {
 }
 
 /**
+ * Take a full URL and return only the bare domain, with sub-domains removed.
+ *
+ * @param string $url
+ *   A fully-qualified URL like https://www.example.co.uk/path-to-page or a
+ *   partial URL without the protocol, such as www.example.co.uk, as would be
+ *   provided by $_SERVER['SERVER_NAME'].
+ *
+ * @return string|FALSE
+ *   The bare domain of the starting URL like example.com or example.co.uk.
+ */
+function backdrop_get_bare_domain($url) {
+  $parts = parse_url(trim($url, '/'));
+  $domain = FALSE;
+
+  // Support full URLs with protocol.
+  if (array_key_exists('host', $parts)) {
+    $domain = $parts['host'];
+  }
+  // Partial URLs without protocol.
+  elseif (array_key_exists('path', $parts)) {
+    // Always remove any trailing path.
+    $parts_array = explode('/', $parts['path'], 2);
+    $domain = array_shift($parts_array);
+  }
+
+  if ($domain) {
+    // Always strip off www.
+    if (substr($domain, 0, 4) == 'www.') {
+      $domain = substr($domain, 3);
+    }
+
+    // See what's remaining.
+    $sub_parts = explode('.', $domain);
+    if (count($sub_parts) > 2) {
+      $last = array_pop($sub_parts);
+      $second_to_last = array_pop($sub_parts);
+      // Likely a country-specific domain like .co.uk.
+      if (strlen($last) === 2 && count($sub_parts)) {
+        $domain = array_pop($sub_parts) . '.' . $second_to_last . '.' . $last;
+      }
+      // Either a longer top-level domain such as .com or a short domain with
+      // no sub-domains (other than www) like lb.cm.
+      else {
+        $domain = $second_to_last . '.' . $last;
+      }
+    }
+  }
+
+  return $domain;
+}
+
+/**
  * Parses an array into a valid, rawurlencoded query string.
  *
  * This differs from http_build_query() as we need to rawurlencode() (instead of

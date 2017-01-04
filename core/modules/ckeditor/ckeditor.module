@@ -484,6 +484,7 @@ function ckeditor_get_settings($format, $existing_settings) {
     //'format_tags' => implode(';', $format->editor_settings['format_list']),
     'language' => isset($language->language) ? $language->language : '',
     'resize_dir' => 'vertical',
+    'disableNativeSpellChecker' => FALSE,
   );
 
   // Add the allowedContent setting, which ensures CKEditor only allows tags
