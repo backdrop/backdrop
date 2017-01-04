@@ -1205,7 +1205,7 @@ function layout_get_layout_template_info($template_name = NULL) {
   }
 
   // Rebuild the list.
-  if (!isset($info)) {
+  if (!isset($info) || in_array($current_path, $paths)) {
     $files = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'layouts', 'name', 0);
     $init = array();
     foreach ($files as $name => $file) {
