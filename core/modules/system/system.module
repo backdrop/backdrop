@@ -3011,6 +3011,11 @@ function system_header_block_form($settings) {
     '#empty_option' => '- ' . t('None') . ' -',
     '#default_value' => $settings['menu'],
   );
+  $form = array(
+    '#type' => 'fieldset',
+    '#title' => t('Site information components'),
+    '#description' => t('Here you can enable or disable the various components of the header of your site. To change the values of these components, use the !site_info page.', array('!site_info' => l(t('Site information'), 'admin/config/system/site-information'))),
+  );
   $form['logo'] = array(
     '#type' => 'checkbox',
     '#title' => t('Logo'),
@@ -3038,8 +3043,8 @@ function system_header_block($settings) {
   $settings += array(
     'menu' => 'user-menu',
     'logo' => TRUE,
-    'site_slogan' => TRUE,
     'site_name' => TRUE,
+    'site_slogan' => TRUE,
   );
 
   $menu = $settings['menu'] ? menu_navigation_links($settings['menu']) : NULL;
