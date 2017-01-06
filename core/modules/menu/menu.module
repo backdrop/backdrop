@@ -79,6 +79,7 @@ function menu_menu() {
     'page arguments' => array('menu_edit_item', 'add', NULL, 4),
     'access arguments' => array('administer menu'),
     'type' => MENU_LOCAL_ACTION,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'file' => 'menu.admin.inc',
   );
   $items['admin/structure/menu/manage/%menu/configure'] = array(
@@ -87,7 +88,7 @@ function menu_menu() {
     'page arguments' => array('menu_edit_menu', 'configure', 4),
     'access arguments' => array('administer menu'),
     'type' => MENU_LOCAL_TASK,
-    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'context' => MENU_CONTEXT_PAGE,
     'file' => 'menu.admin.inc',
   );
   $items['admin/structure/menu/manage/%menu/delete'] = array(
@@ -307,7 +308,7 @@ function menu_delete($menu) {
   menu_delete_links($menu['menu_name']);
 
   // Remove menu from active menus variable.
-  $active_menus = $config->get('active_menus_default') ?: array_keys(menu_get_menus());  
+  $active_menus = $config->get('active_menus_default') ?: array_keys(menu_get_menus());
   foreach ($active_menus as $i => $menu_name) {
     if ($menu['menu_name'] == $menu_name) {
       unset($active_menus[$i]);
