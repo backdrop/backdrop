@@ -15,6 +15,7 @@
   -webkit-transition: min-height 0.25s;
   transition: min-height 0.25s;
   will-change: min-height;
+  background-position: center center;
   background-size: cover;
 }
 
