@@ -896,7 +896,7 @@ ul.action-links a {
 .block-hero-no-image {
   background-color: #0074bd;
   background-image: url(../images/texture.png);
-  background-repeat: no-repeat;
+  background-repeat: repeat;
   background-position: center center;
   background-blend-mode: luminosity; /* Colorizes bg image */
 }
