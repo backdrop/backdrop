@@ -22,11 +22,11 @@ function _installer_browser_is_project_enabled($type, $name) {
       break;
     case 'theme':
       $themes = list_themes();
-      return (isset($themes[$name]) && $themes[$name]->status == 1);
+      return isset($themes[$name]) && $themes[$name]->status;
       break;
     case 'layout':
       $excluded_templates = config_get('layout.settings', 'excluded_templates');
-      return (!empty(layout_get_layout_info($name)) && !in_array($name, $excluded_templates));
+      return layout_get_layout_template_info($name) && !in_array($name, $excluded_templates);
       break;
   }
   return FALSE;
