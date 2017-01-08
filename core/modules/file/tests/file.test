@@ -1499,6 +1499,10 @@ class FileAdminTestCase extends FileFieldTestCase {
       $files[$fid] = file_load($fid);
     }
 
+    // Add a second usage for the last file.
+    $edit[$field_name . '[und][0][fid]'] = $fid;
+    $this->backdropPost('node/' . $nid . '/edit', $edit, 'Save');
+
     $files_list = array();
     $this->backdropGet('admin/content/files');
     foreach ($this->xpath('//table/tbody/tr/td/div/input/@value') as $input) {
@@ -1521,10 +1525,7 @@ class FileAdminTestCase extends FileFieldTestCase {
     $this->assertEqual($files_query, $files_list, 'Files correctly sorted by filesize.');
 
     // Verify delete links for any file.
-    $this->backdropGet('admin/content/files');
-    $this->assertResponse(200);
     $index = 0;
-
     foreach ($files as $file) {
       $this->assertLinkByHref(file_create_url($file->uri));
       $this->assertLinkByHref('file/' . $file->fid . '/delete');
@@ -1550,6 +1551,21 @@ class FileAdminTestCase extends FileFieldTestCase {
     $this->assertResponse(200);
     foreach ($files as $file) {
       $this->assertLinkByHref('file/' . $file->fid . '/delete');
+
+      // Verify use count on confirm form is correct.
+      $this->backdropGet('file/' . $file->fid . '/delete');
+      $count = db_query("SELECT count(fid) FROM {file_usage} WHERE fid = :fid", array(':fid' => $file->fid))->fetchField();
+      if ($count == 0) {
+        $text = 'This file has no known content referencing it';
+      }
+      else {
+        $singular = 'This file is referenced by one piece of content.';
+        $plural = "This file is referenced by @count pieces of content.";
+        $text = format_plural($count, $singular, $plural);
+      }
+      $this->assertText($text, 'Correct file usage counts appear on confirm page: ', $count);
+      // Test the cancel link on the confirm form.
+      $this->clickLink('Cancel');
     }
   }
 }

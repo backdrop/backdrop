@@ -53,7 +53,7 @@ function file_delete_form($form, &$form_state, $file) {
     t('Are you sure you want to delete the file %title?', array(
       '%title' => entity_label('file', $file),
     )),
-    'file/' . $file->fid,
+    'admin/content/files',
     $description,
     t('Delete')
   );
