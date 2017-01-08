@@ -3677,8 +3677,8 @@ function system_get_date_formats($date_format_name = NULL) {
  *   Include hidden, non-configurable date formats, such as those used by HTML5
  *   date/time elements.
  *
- * @return
- *   The date format id if it exists and is not hidden, FALSE otherwise.
+ * @return mixed
+ *   The date format array if it exists and is not hidden, FALSE otherwise.
  */
 function system_date_format_load($date_format_name, $include_hidden = TRUE) {
   if (($format = system_get_date_formats($date_format_name)) && ($include_hidden || empty($format['hidden']))) {
