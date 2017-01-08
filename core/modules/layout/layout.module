@@ -631,12 +631,12 @@ function layout_layout_api() {
 function layout_block_info() {
   $blocks = array();
   $blocks['custom_block'] = array(
-    'info' => t('Add a custom block'),
+    'info' => t('Custom block'),
     'description' => t('A basic block for adding custom text.'),
     'class' => 'BlockText',
   );
   $blocks['hero'] = array(
-    'info' => t('Add a hero block'),
+    'info' => t('Hero block'),
     'description' => t('A hero block often consists of text over a background image, though either are optional.'),
     'class' => 'BlockHero',
   );

@@ -1059,7 +1059,7 @@ function layout_title_settings_form($form, &$form_state, Layout $layout) {
   $block_options = array();
   foreach ($layout->content as $uuid => $block) {
     $title = $all_blocks[$block->module][$block->delta]['info'];
-    if (!empty($title) && $title !== 'Add a custom block') {
+    if (!empty($title) && $title !== 'Custom block') {
       $block_options[$uuid] = $title;
     }
   }
