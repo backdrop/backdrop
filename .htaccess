@@ -71,6 +71,8 @@ DirectoryIndex index.php index.html index.htm
   # as the control files used by CVS, are protected by the FilesMatch directive
   # above.
   #
+  # The ".well-known" directory used by Let's Encrypt is access white-listed.
+  #
   # NOTE: This only works when mod_rewrite is loaded. Without mod_rewrite, it is
   # not possible to block access to entire directories from .htaccess because
   # <DirectoryMatch> is not allowed here.
@@ -78,6 +80,7 @@ DirectoryIndex index.php index.html index.htm
   # If you do not have mod_rewrite installed, you should remove these
   # directories from your webroot or otherwise protect them from being
   # downloaded.
+  RewriteCond %{REQUEST_URI} !^/\.well-known
   RewriteRule "(^|/)\." - [F]
 
   # If your site can be accessed both with and without the 'www.' prefix, you
