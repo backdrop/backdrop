@@ -19,10 +19,32 @@ class BlockText extends Block {
   }
 
   /**
-   *  Sets title text on draggable block panel in Layout builder.
+   *  Sets the title text on the draggable block panel in the "Manage blocks"
+   *  page.
    */
   function getAdminTitle() {
-    return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Custom block');
+    // The admin title text for custom blocks will always fall back to this...
+    $admin_title = t('Custom block');
+    // ...but if there is a display title, it will be appended to it. 
+    $admin_title .= !empty($this->settings['title']) ? ': ' . check_plain($this->settings['title']) : '';
+    return $admin_title;
+  }
+
+  /**
+   *  Returns a preview for this block to be used on the draggable block panel
+   *  in the "Manage blocks" form.
+   */
+  function getAdminPreview() {
+    // The admin preview for custom blocks and hero blocks will always fall back
+    // to their description...
+    $block_description = layout_get_block_info($this->module)[$this->delta]['description'];
+    $admin_preview = $block_description;
+    // ...but if they have content, then that will be used instead.
+    $block_content = $this->settings['content'];
+    if (!empty($block_content)) {
+      $admin_preview = $block_content;
+    }
+    return $admin_preview;
   }
 
   /**
