@@ -8,13 +8,24 @@
   margin: 0 0 1.5em;
 }
 
-.form-type-textarea label,
-.form-type-textfield label,
-.form-type-select label,
+.form-type-email label,
 .form-type-file label,
-.form-type-password label {
+.form-type-password label,
+.form-type-select label,
+.form-type-textarea label,
+.form-type-textfield label {
   display: block;
   margin: 0 0 0.25em;
+}
+
+abbr.form-required,
+abbr.tabledrag-changed,
+abbr.ajax-changed {
+    border-bottom: none;
+}
+
+.form-required {
+  color: #f00;
 }
 
 .form-item-radios label,
