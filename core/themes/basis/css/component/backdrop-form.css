@@ -21,7 +21,7 @@
 abbr.form-required,
 abbr.tabledrag-changed,
 abbr.ajax-changed {
-  border-bottom: none;
+  text-decoration: none;
 }
 
 .form-required {
