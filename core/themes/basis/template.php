@@ -56,8 +56,9 @@ function basis_preprocess_header(&$variables) {
     $logo_attributes = array();
     $logo_wrapper_classes = array();
     $logo_wrapper_classes[] = 'header-logo-wrapper';
-    $logo_size = getimagesize($logo);
-    if (!empty($logo_size)) {
+    global $base_url;
+    $logo_path = backdrop_realpath(str_replace($base_url . base_path(), '', $logo));
+    $logo_size = getimagesize($logo_path);    if (!empty($logo_size)) {
       if ($logo_size[0] < $logo_size[1]) {
         $logo_wrapper_classes[] = 'header-logo-tall';
       }
