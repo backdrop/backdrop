@@ -37,8 +37,8 @@ class BlockText extends Block {
   function getAdminPreview() {
     // The admin preview for custom blocks and hero blocks will always fall back
     // to their description...
-    $block_description = layout_get_block_info(($this->module)[$this->delta]['description']);
-    $admin_preview = $block_description;
+    $block_info = layout_get_block_info($this->module, $this->delta);
+    $admin_preview = $block_info['description'];
     // ...but if they have content, then that will be used instead.
     if (!empty($this->settings['content'])) {
       $admin_preview = $this->settings['content'];
