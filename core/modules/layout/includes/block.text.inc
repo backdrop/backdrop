@@ -40,11 +40,13 @@ class BlockText extends Block {
     $block_description = layout_get_block_info($this->module)[$this->delta]['description'];
     $admin_preview = $block_description;
     // ...but if they have content, then that will be used instead.
-    $block_content = $this->settings['content'];
-    if (!empty($block_content)) {
-      $admin_preview = $block_content;
+    if (!isset($this->settings['content'])) {
+      $block_content = $this->settings['content'];
+      if (!empty($block_content)) {
+        $admin_preview = $block_content;
+      }
+      return $admin_preview;
     }
-    return $admin_preview;
   }
 
   /**
