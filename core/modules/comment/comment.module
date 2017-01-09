@@ -176,7 +176,7 @@ function comment_theme() {
  */
 function comment_menu() {
   $items['admin/content/comment'] = array(
-    'title' => 'Comments',
+    'title' => 'Manage comments',
     'description' => 'List and edit site comments and the comment approval queue.',
     'page callback' => 'comment_admin',
     'access arguments' => array('administer comments'),
