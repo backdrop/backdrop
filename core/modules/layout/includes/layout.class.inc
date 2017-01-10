@@ -710,6 +710,10 @@ class Layout {
       }
     }
 
+    // Get contexts from relationships
+    $relationships = layout_context_get_relationships($this->contexts);
+    layout_get_context_from_relationships($relationships, $this->contexts);
+
     // Add on the current user context, which is always available.
     if (!isset($this->contexts['current_user'])) {
       $this->contexts['current_user'] = layout_create_context('user', array(
