@@ -704,15 +704,14 @@ class Layout {
       }
       elseif ($this->path) {
         $this->contexts = layout_context_required_by_path($this->path);
+        // Get contexts from relationships
+        $relationships = layout_context_get_relationships($this->contexts);
+        layout_get_context_from_relationships($relationships, $this->contexts);
       }
       else {
         $this->contexts = array();
       }
     }
-
-    // Get contexts from relationships
-    $relationships = layout_context_get_relationships($this->contexts);
-    layout_get_context_from_relationships($relationships, $this->contexts);
 
     // Add on the current user context, which is always available.
     if (!isset($this->contexts['current_user'])) {

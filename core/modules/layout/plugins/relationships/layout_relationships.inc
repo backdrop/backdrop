@@ -20,9 +20,9 @@ class LayoutRelationshipUserFromNode extends LayoutRelationship {
 
       $context = layout_create_context('user', array());
       $context->data = $account;
-        
-      return $context;
     }
+
+    return $context;
   }
 
 }

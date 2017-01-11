@@ -1363,7 +1363,9 @@ function layout_get_context_from_relationships($relationships, &$contexts) {
   }
   if($contexts_from_relationships_list) {
     foreach ($contexts_from_relationships_list as $key => $context_from_relationships) {
-      $contexts[$key] = $context_from_relationships;
+      if (is_object($context_from_relationships)) {
+        $contexts[$key] = $context_from_relationships;
+      }
     }
   }
 }
