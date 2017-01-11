@@ -1330,7 +1330,8 @@ function layout_context_get_relationships($contexts) {
  */
 function layout_get_context_from_relationship($relationship, $source_context) {
   $relationship = layout_create_handler('layout_relationship', $relationship['name']);
-  $context = $relationship->getContext($source_context);
+  $new_context = clone($source_context);
+  $context = $relationship->getContext($new_context);
   if ($context) {
     return $context;
   }
@@ -1352,7 +1353,6 @@ function layout_get_context_from_relationship($relationship, $source_context) {
  */
 function layout_get_context_from_relationships($relationships, &$contexts) {
   $contexts_from_relationships_list = array();
-
   foreach ($relationships as $rname => $rdata) {
     foreach ($contexts as $context) {
       if ($context->plugin == $rdata['context']) {

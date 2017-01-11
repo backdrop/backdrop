@@ -13,6 +13,7 @@ class LayoutRelationshipUserFromNode extends LayoutRelationship {
    * Get the context from this relationship.
    */
   function getContext($context) {
+    $context->plugin = 'user';
     if (isset($context->data->uid)) {
       // Load the user that is the author of the node.
       $uid = $context->data->uid;
