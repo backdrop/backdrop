@@ -2662,7 +2662,6 @@ function template_preprocess_page(&$variables) {
 
   // Construct the head <title>.
   $head_title = array();
-  $variables['head_title_array'] = $head_title;
   if (backdrop_get_title()) {
     $head_title['page_title'] = strip_tags(backdrop_get_title());
     // If the active primary tab is the same as the page title, then prepend
@@ -2690,6 +2689,8 @@ function template_preprocess_page(&$variables) {
     $head_title['site_slogan'] = check_plain($slogan);
     $variables['head_title'] .= ', ' . $head_title['site_slogan'];
   }
+
+  $variables['head_title_array'] = $head_title;
 
 }
 
