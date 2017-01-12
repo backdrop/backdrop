@@ -1035,7 +1035,7 @@ class CommentPreviewTest extends CommentHelperCase {
     $this->backdropPost('node/' . $this->node->nid, $edit, t('Preview'));
 
     // Check that the preview is displaying the title and body.
-    $this->assertTitle(t('Preview comment | Backdrop'), 'Page title is "Preview comment".');
+    $this->assertTitle(t('Preview comment | Backdrop CMS'), 'Page title is "Preview comment".');
     $this->assertText($edit['subject'], 'Title displayed.');
     $this->assertText($edit['comment_body[' . $langcode . '][0][value]'], 'Comment displayed.');
 
@@ -1074,7 +1074,7 @@ class CommentPreviewTest extends CommentHelperCase {
     $this->backdropPost('comment/' . $comment->id . '/edit', $edit, t('Preview'));
 
     // Check that the preview is displaying the subject, comment, author and date correctly.
-    $this->assertTitle(t('Preview comment | Backdrop'), 'Page title is "Preview comment".');
+    $this->assertTitle(t('Preview comment | Backdrop CMS'), 'Page title is "Preview comment".');
     $this->assertText($edit['subject'], 'Title displayed.');
     $this->assertText($edit['comment_body[' . $langcode . '][0][value]'], 'Comment displayed.');
     $this->assertText($edit['name'], 'Author displayed.');
