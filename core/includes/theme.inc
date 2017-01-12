@@ -2658,7 +2658,7 @@ function template_preprocess_page(&$variables) {
 
   $menu_active_title = menu_get_active_title();
   $active_primary_tab = menu_local_tasks_get_active_title(0);
-  $active_secondary_tab = menu_local_tasks_get_active_title(1)
+  $active_secondary_tab = menu_local_tasks_get_active_title(1);
 
   // Construct the head <title>.
   $head_title = array();
