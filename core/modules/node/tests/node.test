@@ -1787,7 +1787,7 @@ class NodeTitleTestCase extends BackdropWebTestCase {
     // Test <title> tag.
     $this->backdropGet("node/$node->nid");
     $xpath = '//title';
-    $this->assertEqual(current($this->xpath($xpath)), $node->title .' | Backdrop', 'Page title is equal to node title.', 'Node');
+    $this->assertEqual(current($this->xpath($xpath)), $node->title .' | Backdrop CMS', 'Page title is equal to node title.', 'Node');
 
     // Test breadcrumb in comment preview.
     $this->backdropGet("comment/reply/$node->nid");
