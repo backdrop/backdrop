@@ -641,7 +641,41 @@ function layout_block_info() {
     'class' => 'BlockHero',
   );
 
+  // TEMPORARY!! For testing relationships PR only!!
+  $blocks['relationships_tester_block'] = array(
+    'info' => t('User relationships test block'),
+    'description' => 'Displays node UID.',
+    'required contexts' => array('user' => 'user'),
+  );
+
   return $blocks;
+}
+
+// TEMPORARY!! For testing relationships PR only!!
+function layout_block_view($delta = '', $settings = array(), $contexts = array()) {
+  $block = array();
+
+  switch ($delta) {
+    case 'relationships_tester_block':
+      $block['subject'] = t('Test block for testing relationships');
+      if (isset($contexts['user'])) {
+        $author = $contexts['user'];
+        $block['content'] = array(
+          '#theme' => 'item_list',
+          '#items' => array(
+            t('Name: !name', array('!name' => $author->name)),
+            t('UID: !uid', array('!uid' => $author->uid)),
+          ),
+          '#title' => t('The author of this node is:'),
+        );
+      }
+      else {
+        $block['content'] = 'The user context is not available on this path';
+      }
+      break;
+
+  }
+  return $block;
 }
 
 /**
@@ -1702,6 +1736,8 @@ function layout_context_required_by_path($path) {
   // Put the required contexts in order based on the path.
   ksort($required_context_info);
 
+  $router_item = menu_get_item();
+
   // Convert required context info into objects.
   $required_contexts[$path] = array();
   foreach ($required_context_info as $context_position => $context_info) {
@@ -1712,6 +1748,9 @@ function layout_context_required_by_path($path) {
     $context->position = $context_position;
     $context->plugin = $context_info['plugin'];
     $required_contexts[$path][$context_position] = $context;
+    if (isset($router_item['map'][$context->position])) {
+      $context->setData($router_item['map'][$context->position]);
+    }
   }
 
   return $required_contexts[$path];
