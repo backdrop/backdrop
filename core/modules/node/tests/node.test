@@ -637,7 +637,7 @@ class NodeTitleXSSTestCase extends BackdropWebTestCase {
 
     $this->backdropGet('node/' . $node->nid);
     // assertTitle() decodes HTML-entities inside the <title> element.
-    $this->assertTitle($edit["title"] . ' | Backdrop', 'Title is displayed when viewing a node.');
+    $this->assertTitle($edit["title"] . ' | Backdrop CMS', 'Title is displayed when viewing a node.');
     $this->assertNoRaw($xss, 'Harmful tags are escaped when viewing a node.');
 
     $this->backdropGet('node/' . $node->nid . '/edit');
