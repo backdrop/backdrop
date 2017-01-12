@@ -82,7 +82,7 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
     // Check if the token is recognized in each of the contexts.
     foreach ($tests as $test) {
       $input = $test['prefix'] . '[site:name]' . $test['suffix'];
-      $expected = $test['prefix'] . 'Backdrop' . $test['suffix'];
+      $expected = $test['prefix'] . 'Backdrop CMS' . $test['suffix'];
       $output = token_replace($input, array(), array('language' => $language));
       $this->assertTrue($output == $expected, format_string('Token recognized in string %string', array('%string' => $input)));
     }
