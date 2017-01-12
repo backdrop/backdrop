@@ -2655,21 +2655,43 @@ function template_preprocess_page(&$variables) {
   backdrop_add_html_head_link(array('rel' => 'shortcut icon', 'href' => $favicon['path'], 'type' => $favicon['type']));
 
   $site_config = config('system.core');
-  // Construct page title.
+
+  $menu_active_title = menu_get_active_title();
+  $active_primary_tab = menu_local_tasks_get_active_title(0);
+  $active_secondary_tab = menu_local_tasks_get_active_title(1);
+
+  // Construct the head <title>.
+  $head_title = array();
   if (backdrop_get_title()) {
-    $head_title = array(
-      'title' => strip_tags(backdrop_get_title()),
-      'name' => check_plain($site_config->get('site_name')),
-    );
+    $head_title['page_title'] = strip_tags(backdrop_get_title());
+    // If the active primary tab is the same as the page title, then prepend
+    // the parent menu item title to the head <title>.
+    if ($active_primary_tab === $head_title['page_title']) {
+      $variables['head_title'] = $menu_active_title . ': ';
+    }
+    $variables['head_title'] .= $head_title['page_title'];
   }
-  else {
-    $head_title = array('name' => check_plain($site_config->get('site_name')));
-    if ($slogan = $site_config->get('site_slogan')) {
-      $head_title['slogan'] = check_plain($slogan);
+  if ($active_primary_tab) {
+    $head_title['primary_tab'] = $active_primary_tab;
+    // Only add the primary active tab title to the head <title> if it is not
+    // the same as the page title.
+    if ($active_primary_tab !== $head_title['page_title']) {
+      $variables['head_title'] .= ': ' . $head_title['primary_tab'];
     }
   }
+  if ($active_secondary_tab) {
+    $head_title['secondary_tab'] = $active_secondary_tab;
+    $variables['head_title'] .= ': ' . $head_title['secondary_tab'];
+  }
+  $head_title['site_name'] = check_plain($site_config->get('site_name'));
+  $variables['head_title'] .= ' | ' . $head_title['site_name'];
+  if ($slogan = $site_config->get('site_slogan')) {
+    $head_title['site_slogan'] = check_plain($slogan);
+    $variables['head_title'] .= ', ' . $head_title['site_slogan'];
+  }
+
   $variables['head_title_array'] = $head_title;
-  $variables['head_title'] = implode(' | ', $head_title);
+
 }
 
 /**
