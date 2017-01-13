@@ -1410,6 +1410,21 @@ function system_site_information_settings_submit($form, &$form_state) {
     $form_state['values']['site_logo_theme'] = 0;
     $form_state['values']['site_logo_path'] = $filename;
   }
+
+  if ($form_state['values']['site_logo_path']) {
+    $dimensions = @getimagesize($form_state['values']['site_logo_path']);
+    $form_state['values']['site_logo_attributes'] = array(
+      'width' => $dimensions[0],
+      'height' => $dimensions[1],
+    );
+  }
+  else {
+    $form_state['values']['site_logo_attributes'] = array(
+      'width' => "",
+      'height' => "",
+    );
+  }
+
   if (!empty($form_state['values']['site_favicon_upload'])) {
     $file = $form_state['values']['site_favicon_upload'];
     unset($form_state['values']['site_favicon_upload']);
@@ -1438,6 +1453,7 @@ function system_site_information_settings_submit($form, &$form_state) {
     ->set('site_name', $form_state['values']['site_name'])
     ->set('site_logo_theme', $form_state['values']['site_logo_theme'])
     ->set('site_logo_path', $form_state['values']['site_logo_path'])
+    ->set('site_logo_attributes', $form_state['values']['site_logo_attributes'])
     ->set('site_favicon_theme', $form_state['values']['site_favicon_theme'])
     ->set('site_favicon_path', $form_state['values']['site_favicon_path'])
     ->set('site_favicon_mimetype', $form_state['values']['site_favicon_mimetype'])
@@ -2423,7 +2439,7 @@ function system_configure_date_formats_form($form, &$form_state, $format = NULL)
     '#title' => t('Format string'),
     '#maxlength' => 100,
     '#description' => t('A date format using PHP date and time codes. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')),
-    '#placeholder' => t('e.g. F j Y'),    
+    '#placeholder' => t('e.g. F j Y'),
     '#default_value' => $pattern,
     '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',
     '#ajax' => array(
