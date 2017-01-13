@@ -2624,11 +2624,11 @@ function layout_settings_page($form, &$form_state) {
 
   // Get the list of layout template options. The list needs to be rebuilt (see
   // https://github.com/backdrop/backdrop-issues/issues/984)
-  $all_layout_info = layout_get_layout_template_info(NULL, $rebuild = TRUE);
+  $all_template_info = layout_get_layout_template_info(NULL, $rebuild = TRUE);
   $options = array();
   $default = array();
   $form_state['hidden_templates'] = array();
-  foreach ($all_layout_info as $template_name => $template_info) {
+  foreach ($all_template_info as $template_name => $template_info) {
     // Build the default values list.
     if (!in_array($template_name, $excluded)) {
       $default[] = $template_name;
