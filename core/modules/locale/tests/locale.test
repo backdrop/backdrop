@@ -2275,7 +2275,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
 
     // Check that URLs are rewritten using the given browser language.
     $fields = $this->xpath('//*[contains(@class,"site-name")]//a[@rel="home" and @href=:url]//span', $args);
-    $this->assertTrue($fields[0] == 'Backdrop', 'URLs are rewritten using the browser language.');
+    $this->assertTrue($fields[0] == 'Backdrop CMS', 'URLs are rewritten using the browser language.');
   }
 
   /**

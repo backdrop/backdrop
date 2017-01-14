@@ -2655,7 +2655,7 @@ function template_preprocess_page(&$variables) {
   backdrop_add_html_head_link(array('rel' => 'shortcut icon', 'href' => $favicon['path'], 'type' => $favicon['type']));
 
   $site_config = config('system.core');
-  // Construct page title.
+  // Construct head <title>.
   if (backdrop_get_title()) {
     $head_title = array(
       'title' => strip_tags(backdrop_get_title()),
@@ -2771,18 +2771,14 @@ function template_preprocess_maintenance_page(&$variables) {
   $favicon = backdrop_get_favicon();
   backdrop_add_html_head_link(array('rel' => 'shortcut icon', 'href' => $favicon['path'], 'type' => $favicon['type']));
 
-  // Construct page title
+  // Construct head <title>.
+  $head_title = array();
   if (backdrop_get_title()) {
-    $head_title = array(
-      'title' => strip_tags(backdrop_get_title()),
-      'name' => $site_name,
-    );
+    $head_title['title'] = strip_tags(backdrop_get_title());
   }
-  else {
-    $head_title = array('name' => $site_name);
-    if ($site_slogan) {
-      $head_title['slogan'] = $site_slogan;
-    }
+  $head_title['name'] = $site_name ? $site_name : 'Backdrop CMS';
+  if ($site_slogan) {
+    $head_title['slogan'] = $site_slogan;
   }
 
   // Set the default language if necessary.

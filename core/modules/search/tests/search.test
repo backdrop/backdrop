@@ -255,7 +255,7 @@ class SearchPageText extends BackdropWebTestCase {
     $this->backdropGet('search/node');
     $this->assertText(t('Enter your keywords'));
     $this->assertText(t('Search'));
-    $title = t('Search') . ' | Backdrop';
+    $title = t('Search') . ' | Backdrop CMS';
     $this->assertTitle($title, 'Search page title is correct');
 
     $edit = array();
