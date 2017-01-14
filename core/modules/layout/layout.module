@@ -1112,6 +1112,10 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
         }
       }
 
+      // Get contexts from relationships
+      $relationships = layout_context_get_relationships($contexts);
+      layout_get_context_from_relationships($relationships, $contexts);
+
       if (!$layout->disabled && $layout->checkAccess()) {
         $selected_layout = $layout;
         break;
@@ -1736,8 +1740,6 @@ function layout_context_required_by_path($path) {
   // Put the required contexts in order based on the path.
   ksort($required_context_info);
 
-  $router_item = menu_get_item();
-
   // Convert required context info into objects.
   $required_contexts[$path] = array();
   foreach ($required_context_info as $context_position => $context_info) {
@@ -1748,9 +1750,6 @@ function layout_context_required_by_path($path) {
     $context->position = $context_position;
     $context->plugin = $context_info['plugin'];
     $required_contexts[$path][$context_position] = $context;
-    if (isset($router_item['map'][$context->position])) {
-      $context->setData($router_item['map'][$context->position]);
-    }
   }
 
   return $required_contexts[$path];

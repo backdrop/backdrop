@@ -19,7 +19,9 @@ class LayoutRelationshipUserFromNode extends LayoutRelationship {
       $uid = $context->data->uid;
       $account = user_load($uid);
     }
-    $user_context = layout_create_context('user');
+    $user_context = layout_create_context('user', array(
+      'position' => $context->position,
+    ));
     $user_context->setData($account);
 
     return $user_context;
