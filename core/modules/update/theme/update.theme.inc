@@ -78,10 +78,13 @@ function theme_update_report($variables) {
   }
 
   foreach ($data as $project) {
+    // Don't show a link to the "Update modules" page for core.
+    $update_link = ($project['name'] != 'backdrop');
     switch ($project['status']) {
       case UPDATE_CURRENT:
         $class = 'status';
         $icon = theme('image', array('uri' => 'core/misc/watchdog-ok.png', 'width' => 18, 'height' => 18, 'alt' => t('ok'), 'title' => t('ok')));
+        $update_link = 0;
         break;
       case UPDATE_UNKNOWN:
       case UPDATE_NOT_CHECKED:
@@ -89,6 +92,7 @@ function theme_update_report($variables) {
       case UPDATE_NOT_FETCHED:
         $class = 'unknown';
         $icon = '';
+        $update_link = 0;
         break;
       case UPDATE_NOT_SECURE:
       case UPDATE_REVOKED:
@@ -105,7 +109,28 @@ function theme_update_report($variables) {
 
     $row = '<div class="version-status">';
     $status_label = theme('update_status_label', array('status' => $project['status']));
-    $row .= !empty($status_label) ? $status_label : check_plain($project['reason']);
+    if (empty($status_label)) {
+      $status_label = check_plain($project['reason']);
+    }
+    if ($update_link) {
+      switch ($project['project_type']) {
+        case 'theme':
+          $updatepath = 'admin/appearance/update';
+          break;
+
+        case 'layout':
+          $updatepath = 'admin/layouts/update';
+          break;
+
+        case 'module':
+        default:
+          $updatepath = 'admin/modules/update';
+      }
+      $row .= l($status_label, $updatepath, array('html' => TRUE));
+    }
+    else {
+      $row .= $status_label;
+    }
     $row .= '<span class="icon">' . $icon . '</span>';
     $row .= "</div>\n";
 
@@ -349,4 +374,3 @@ function theme_update_status_label($variables) {
 
   }
 }
-
