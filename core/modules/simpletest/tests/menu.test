@@ -55,7 +55,7 @@ class MenuWebTestCase extends BackdropWebTestCase {
 
     // Additionally assert page title, if given.
     if (isset($page_title)) {
-      $this->assertTitle(strtr('@title | Backdrop', array('@title' => $page_title)));
+      $this->assertTitle(strtr('@title | Backdrop CMS', array('@title' => $page_title)));
     }
 
     // Additionally assert active trail in a menu tree output, if given.
@@ -514,7 +514,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
       $this->backdropGet('menu-title-test/case' . $case_no);
       $this->assertResponse(200);
       $asserted_title = 'Alternative example title - Case ' . $case_no;
-      $this->assertTitle($asserted_title . ' | Backdrop', 'Menu title is: ' . $asserted_title, 'Menu');
+      $this->assertTitle($asserted_title . ' | Backdrop CMS', 'Menu title is: ' . $asserted_title, 'Menu');
     }
   }
 

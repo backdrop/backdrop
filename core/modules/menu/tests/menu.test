@@ -89,7 +89,7 @@ class MenuTestCase extends BackdropWebTestCase {
     $this->assertNoTitle('Home | Backdrop');
     $this->backdropLogout();
     $this->backdropGet('user/register');
-    $this->assertTitle($item['link_title'] . ' | Backdrop');
+    $this->assertTitle($item['link_title'] . ' | Backdrop CMS');
     $this->backdropGet('user');
     $this->assertNoTitle('Home | Backdrop');
   }
@@ -391,7 +391,7 @@ class MenuTestCase extends BackdropWebTestCase {
       // Verify menu link.
       $this->clickLink($title);
       $title = $parent_node->title;
-      $this->assertTitle(t("@title | Backdrop", array('@title' => $title)), 'Parent menu link link target was correct');
+      $this->assertTitle(t("@title | Backdrop CMS", array('@title' => $title)), 'Parent menu link link target was correct');
     }
 
     // Verify menu link.
@@ -401,7 +401,7 @@ class MenuTestCase extends BackdropWebTestCase {
     // Verify menu link link.
     $this->clickLink($title);
     $title = $item_node->title;
-    $this->assertTitle(t("@title | Backdrop", array('@title' => $title)), 'Menu link link target was correct');
+    $this->assertTitle(t("@title | Backdrop CMS", array('@title' => $title)), 'Menu link link target was correct');
   }
 
   /**

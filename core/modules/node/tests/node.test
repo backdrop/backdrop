@@ -637,7 +637,7 @@ class NodeTitleXSSTestCase extends BackdropWebTestCase {
 
     $this->backdropGet('node/' . $node->nid);
     // assertTitle() decodes HTML-entities inside the <title> element.
-    $this->assertTitle($edit["title"] . ' | Backdrop', 'Title is displayed when viewing a node.');
+    $this->assertTitle($edit["title"] . ' | Backdrop CMS', 'Title is displayed when viewing a node.');
     $this->assertNoRaw($xss, 'Harmful tags are escaped when viewing a node.');
 
     $this->backdropGet('node/' . $node->nid . '/edit');
@@ -1787,7 +1787,7 @@ class NodeTitleTestCase extends BackdropWebTestCase {
     // Test <title> tag.
     $this->backdropGet("node/$node->nid");
     $xpath = '//title';
-    $this->assertEqual(current($this->xpath($xpath)), $node->title .' | Backdrop', 'Page title is equal to node title.', 'Node');
+    $this->assertEqual(current($this->xpath($xpath)), $node->title .' | Backdrop CMS', 'Page title is equal to node title.', 'Node');
 
     // Test breadcrumb in comment preview.
     $this->backdropGet("comment/reply/$node->nid");

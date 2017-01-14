@@ -82,7 +82,7 @@ class LanguageListTest extends BackdropWebTestCase {
 
     // Ensure 'edit' link works.
     $this->clickLink(t('Edit'));
-    $this->assertTitle(t('Edit language | Backdrop'), t('Page title is "Edit language".'));
+    $this->assertTitle(t('Edit language | Backdrop CMS'), t('Page title is "Edit language".'));
     // Edit a language.
     $name = $this->randomName(16);
     $edit = array(
