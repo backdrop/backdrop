@@ -1099,6 +1099,10 @@ function node_update_1012() {
  */
 function node_update_1013() {
   $config = config('views.view.node_admin_content');
+  // If human name has not be changed, update it.
+  if ($config->get('human_name') == 'Admin Content') {
+    $config->set('human_name', 'Administer content');
+  }
   // If the node_admin_content view name has not been changed, update it.
   if ($config->get('display.default.display_options.title') == 'Admin Content') {
     $config->set('display.default.display_options.title', 'Content');
