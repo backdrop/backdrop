@@ -1,4 +1,4 @@
-/**
+﻿/**
  * This is a Backdrop-optimized build of CKEditor.
  *
  * You may re-use it at any time at http://ckeditor.com/builder to build
@@ -11,7 +11,7 @@
  */
 
 /**
- * @license Copyright (c) 2003-2016, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md or http://ckeditor.com/license
  */
 
@@ -25,10 +25,10 @@
  * (1) http://ckeditor.com/builder
  *     Visit online builder to build CKEditor from scratch.
  *
- * (2) http://ckeditor.com/builder/11819a2c5c3edb0be90cc07e1cc6a055
+ * (2) http://ckeditor.com/builder/e3edecd34ef9f16c5ccf2f1c4bbba0e9
  *     Visit online builder to build CKEditor, starting with the same setup as before.
  *
- * (3) http://ckeditor.com/builder/download/11819a2c5c3edb0be90cc07e1cc6a055
+ * (3) http://ckeditor.com/builder/download/e3edecd34ef9f16c5ccf2f1c4bbba0e9
  *     Straight download link to the latest version of CKEditor (Optimized) with the same setup as before.
  *
  * NOTE:
@@ -37,7 +37,7 @@
  */
 
 var CKBUILDER_CONFIG = {
-	skin: 'moono',
+	skin: 'moono-lisa',
 	preset: 'standard',
 	ignore: [
 		'.bender',
@@ -59,7 +59,6 @@ var CKBUILDER_CONFIG = {
 		'node_modules',
 		'package.json',
 		'README.md',
-		'tests',
 		// Parts of CKEditor that we consciously don't ship with Backdrop.
 		'adapters',
 		'config.js',
@@ -67,7 +66,8 @@ var CKBUILDER_CONFIG = {
 		'Gruntfile.js',
 		'styles.js',
 		'samples',
-		'skins/moono/readme.md'
+		'skins/moono/readme.md',
+		'tests'
 	],
 	plugins : {
 		'a11yhelp' : 1,
@@ -108,10 +108,8 @@ var CKBUILDER_CONFIG = {
 		'tabletools' : 1,
 		'toolbar' : 1,
 		'undo' : 1,
+		'uploadwidget' : 1,
 		'widget' : 1,
 		'wysiwygarea' : 1
-	},
-	languages : {
-		'en' : 1
 	}
 };
