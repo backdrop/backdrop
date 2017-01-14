@@ -1088,6 +1088,49 @@ ul.secondary li a:active {
 }
 
 /**
+ * Comments
+ */
+.comments .indented:before {
+  top: -1em;
+  left: 0;
+  width: 0.5em;
+  height: 1.5em;
+  border-left-color: #dee2ea;
+  border-bottom-color: #dee2ea;
+}
+
+.comments .indented:after {
+  border-top-color: #dee2ea;
+  border-right-color: #dee2ea;
+}
+
+.comment-header:before {
+  border-bottom-color: #dee2ea;
+  border-left-color: #dee2ea;
+  background: #fff;
+}
+
+.comment .comment-text {
+  border-color: #dee2ea;
+}
+
+.comment-title {
+  padding: 1em 1.25em 0.25em;
+}
+
+.comment-title h3 {
+  font-size: 1.125em;
+}
+
+.comment-time {
+  font-size: 0.875em;
+}
+
+.comment-footer {
+  background: #dee2ea;
+}
+
+/**
  * Font related override utility classes
  */
 .color-inverse {
