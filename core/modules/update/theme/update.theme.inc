@@ -92,6 +92,7 @@ function theme_update_report($variables) {
       case UPDATE_NOT_FETCHED:
         $class = 'unknown';
         $icon = '';
+        $updatelink = 0;
         break;
       case UPDATE_NOT_SECURE:
       case UPDATE_REVOKED:
