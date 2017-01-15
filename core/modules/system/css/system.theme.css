@@ -141,15 +141,15 @@ abbr.ajax-changed {
 .form-item select.error {
   border: 2px solid red;
 }
-.form-type-checkboxes.error,
-.form-type-radios.error {
+.form-type-checkboxes.form-error,
+.form-type-radios.form-error {
   border: 2px solid red;
 }
 /* Display border on a single checkbox, but not on checkboxes within a group. */
-.form-type-checkbox.error {
+.form-type-checkbox.form-error {
   border: 2px solid red;
 }
-.form-type-checkboxes.error .form-type-checkbox.error {
+.form-type-checkboxes.form-error .form-type-checkbox.form-error {
   border: none;
 }
 
