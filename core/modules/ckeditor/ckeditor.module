@@ -238,6 +238,7 @@ function ckeditor_ckeditor_plugins() {
     'Table' => array(
       'label' => t('Table'),
       'required_html' => array(array('tags' => array('table', 'thead', 'tbody', 'tr', 'td', 'th'))),
+      'dependencies' => array('contextmenu', 'tabletools', 'tableresize'),
     ),
     'Maximize' => array(
       'label' => t('Maximize'),
@@ -382,6 +383,7 @@ function ckeditor_get_settings($format, $existing_settings) {
   $external_plugins = array();
   $external_css = array();
   $all_buttons = array();
+  $dependencies = array();
   foreach ($plugin_info as $plugin_name => $plugin) {
     // Check if this plugin should be enabled.
     if (isset($plugin['enabled callback'])) {
@@ -432,6 +434,11 @@ function ckeditor_get_settings($format, $existing_settings) {
               $external_css = array_merge($external_css, $external_plugin['css']);
             }
           }
+
+          // Add in dependencies.
+          if (isset($all_buttons[$button_name]['dependencies'])) {
+            $dependencies = array_merge($dependencies, $all_buttons[$button_name]['dependencies']);
+          }
         }
       }
       $toolbar[] = $checked_group;
@@ -462,11 +469,21 @@ function ckeditor_get_settings($format, $existing_settings) {
     $css[$key] = base_path() . $css_path;
   }
 
+  // Default plugins that should be removed unless requested explicitly.
+  $excluded = array(
+    'image',
+    'tabletools',
+    'tableresize',
+    'contextmenu',
+  );
+  $excluded_plugins = array_diff($excluded, $dependencies);
+  $extra_plugins = array_unique(array_merge(array_keys($external_plugins), $dependencies));
+
   // Initialize reasonable defaults that provide expected basic behavior.
   $settings = array(
     'toolbar' => $toolbar,
-    'extraPlugins' => implode(',', array_keys($external_plugins)),
-    'removePlugins' => 'image',
+    'extraPlugins' => implode(',', $extra_plugins),
+    'removePlugins' => implode(',', $excluded_plugins),
     'removeButtons' => '',
     // Empty custom config must be a string.
     // See http://docs.ckeditor.com/#!/guide/dev_configuration.
