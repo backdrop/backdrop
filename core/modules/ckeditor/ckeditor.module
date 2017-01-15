@@ -466,7 +466,7 @@ function ckeditor_get_settings($format, $existing_settings) {
   $settings = array(
     'toolbar' => $toolbar,
     'extraPlugins' => implode(',', array_keys($external_plugins)),
-    'removePlugins' => 'image',
+    'removePlugins' => 'image, contextmenu',
     'removeButtons' => '',
     // Empty custom config must be a string.
     // See http://docs.ckeditor.com/#!/guide/dev_configuration.
