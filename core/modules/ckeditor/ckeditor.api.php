@@ -52,6 +52,9 @@
  *   - required_html: If this button requires certain HTML tags or attributes
  *     to be allowed, specify an nested array for each set of tags that should
  *     be allowed. For example:
+ *   - dependencies: An array of other plugin names on which this button
+ *     depends. A common use is to add the "contextmenu" plugin, if the button
+ *     makes options available only via contextual menu.
  *
  *     @code
  *     array(
@@ -83,12 +86,16 @@ function hook_ckeditor_plugins() {
     'file' => 'plugin.js',
     'css' => array(backdrop_get_path('module', 'mymodule') . '/css/myplugin.css'),
     'enabled callback' => 'mymodule_myplugin_plugin_check',
-    'required_html' => array(
-      array(
-        'tags' => array('a'),
-        'attributes' => array('href', 'alt'),
-        'styles' => array('color', 'text-decoration'),
-        'classes' => array('external', 'internal'),
+    'buttons' => array(
+      'MyPlugin' => array(
+        'label' => t('My custom button'),
+        'required_html' => array(
+          'tags' => array('a'),
+          'attributes' => array('href', 'alt'),
+          'styles' => array('color', 'text-decoration'),
+          'classes' => array('external', 'internal'),
+        ),
+        'dependencies' => array('contextmenu'),
       ),
     ),
   );
