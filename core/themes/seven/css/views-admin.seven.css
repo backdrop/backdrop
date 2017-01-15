@@ -314,11 +314,11 @@ table th {
 }
 
 .views-ui-dialog fieldset.collapsible {
-  padding-top: 1.5em;
+  padding-top: 2.5em;
 }
 
 .views-ui-dialog fieldset.collapsed {
-  padding-top: 2.5em;
+  padding-top: 1.5em;
 }
 
 .filterable-option .form-item.form-type-checkbox {
