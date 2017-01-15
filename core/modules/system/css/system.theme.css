@@ -1,4 +1,3 @@
-
 /**
  * @file
  * Basic styling for common markup.
@@ -141,6 +140,17 @@ abbr.ajax-changed {
 .form-item textarea.error,
 .form-item select.error {
   border: 2px solid red;
+}
+.form-type-checkboxes.error,
+.form-type-radios.error {
+  border: 2px solid red;
+}
+/* Display border on a single checkbox, but not on checkboxes within a group. */
+.form-type-checkbox.error {
+  border: 2px solid red;
+}
+.form-type-checkboxes.error .form-type-checkbox.error {
+  border: none;
 }
 
 /**
