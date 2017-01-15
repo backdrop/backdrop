@@ -2975,6 +2975,31 @@ function system_update_1059() {
 }
 
 /**
+ * Remove the homepage breadcrumb block.
+ */
+function system_update_1060() {
+  $config = config('layout.layout.home');
+  // Only apply this update if the config file already exists.
+  if (!$config->isNew()) {
+    $positions = $config->get('positions');
+    $content = $config->get('content');
+    foreach ($content as $uuid => $block_config) {
+      // If the breadcrumb block is found and in the top region, remove it.
+      if ($block_config['plugin'] === 'system:breadcrumb') {
+        if (in_array($uuid, $positions['top'])) {
+          unset($content[$uuid]);
+          $positions['top'] = array_diff($positions['top'], array($uuid));
+          $config->set('positions', $positions);
+          $config->set('content', $content);
+          $config->save();
+        }
+        break;
+      }
+    }
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
