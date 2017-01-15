@@ -3229,7 +3229,9 @@ function form_pre_render_conditional_form_element($element) {
   // Add the element type to the wrapping container.
   if (isset($element['#type'])) {
     $element['#attributes']['class'][] = 'form-' . $element['#type'];
-    _form_set_class($element, array('form-' . $element['#type']));
+    if (isset($element['#parents']) && form_get_error($element) !== NULL && !empty($element['#validated'])) {
+      $element['#attributes']['class'][] = 'form-error';
+    }
   }
 
   // The disabled attribute is only shown on the children, not on the wrapper.
@@ -4504,7 +4506,7 @@ function theme_form_element($variables) {
   if (!empty($element['#type'])) {
     $attributes['class'][] = 'form-type-' . strtr($element['#type'], '_', '-');
     if (isset($element['#parents']) && form_get_error($element) !== NULL && !empty($element['#validated'])) {
-      $attributes['class'][] = 'error';
+      $attributes['class'][] = 'form-error';
     }
   }
   if (!empty($element['#name'])) {
