@@ -2328,6 +2328,9 @@ function field_ui_view_mode_form_submit($form, &$form_state) {
     )));
   }
 
+  // Rebuild the admin menu cache.
+  cache('admin_bar')->flush();
+
   $form_state['redirect'] = $path;
 }
 
@@ -2389,7 +2392,11 @@ function field_ui_view_mode_delete_form_submit($form, &$form_state) {
  * Access callback: Checks the users access and token to enable a display mode.
  */
 function field_ui_view_mode_enable_access() {
-  return user_access('administer view modes') && backdrop_valid_token($_GET['token'], 'view_mode_enable');
+  $token_check = TRUE;
+  if (isset($_GET['token']))  {
+    $token_check = backdrop_valid_token($_GET['token'], 'view_mode_enable');
+  }
+  return user_access('administer view modes') && $token_check;
 }
 
 /**

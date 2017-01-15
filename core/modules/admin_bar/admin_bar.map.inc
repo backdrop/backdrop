@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Implements hook_admin_bar_map() on behalf of core modules.
@@ -87,7 +86,7 @@ function node_admin_bar_map() {
 /**
  * Implements hook_admin_bar_map() on behalf of Field UI module.
  *
- * @todo Figure out how to fix the comment entity bundle mappings.
+ * @todo Figure out how to fix the comment bundle mappings.
  */
 function field_ui_admin_bar_map() {
   $map = array();
@@ -112,25 +111,65 @@ function field_ui_admin_bar_map() {
         continue;
       }
 
-      if ($fields = field_info_instances($entity_type, $bundle)) {
-        $path = $bundle_info['admin']['path'];
-        $argument = array();
-        if (isset($bundle_info['admin']['bundle argument'])) {
-          $bundle_arg = arg($bundle_info['admin']['bundle argument'], $path);
-          $argument[$bundle_arg] = array($bundle);
-        }
-        $argument['%field_ui_menu'] = array_keys($fields);
+      // Start collecting argument info.
+      $path = $bundle_info['admin']['path'];
 
+      $arguments = array();
+      if (isset($bundle_info['admin']['bundle argument'])) {
+        $bundle_arg = arg($bundle_info['admin']['bundle argument'], $path);
+        if (isset($bundle_info['admin']['bundle argument'])) {
+          $arguments[$bundle_arg] = array($bundle);
+        }
+      }
+
+      if (!isset($map["$path/fields"])) {
+        $map["$path/fields"] = array(
+          'parent' => $path,
+          'arguments' => array(),
+        );
+      }
+      $map["$path/fields"]['arguments'][] = $arguments;
+
+      // Add edit field info.
+      if ($fields = field_info_instances($entity_type, $bundle)) {
+        $field_arguments = $arguments;
+        $field_arguments['%field_ui_menu'] = array_keys($fields);
         if (!isset($map["$path/fields/%field_ui_menu"])) {
           $map["$path/fields/%field_ui_menu"] = array(
             'parent' => "$path/fields",
             'arguments' => array(),
           );
         }
-        $map["$path/fields/%field_ui_menu"]['arguments'][] = $argument;
+        $map["$path/fields/%field_ui_menu"]['arguments'][] = $field_arguments;
       }
-    }
-  }
+
+      if (!isset($map["$path/display"])) {
+        $map["$path/display"] = array(
+          'parent' => $path,
+          'arguments' => array(),
+        );
+      }
+      $map["$path/display"]['arguments'][] = $arguments;
+
+      // Add manage display for each customized view mode.
+      $modes = array('default');
+      foreach ($entity_info['view modes'] as $machine => $mode) {
+        if ($mode['custom settings']) {
+          $modes[] = $machine;
+        }
+      }
+      $display_arguments = $arguments;
+      $display_arguments['%'] = $modes;
+      if (!isset($map["$path/display/%"])) {
+        $map["$path/display/%"] = array(
+          'parent' => "$path/display",
+          'arguments' => array(),
+        );
+      }
+      $map["$path/display/%"]['arguments'][] = $display_arguments;
+
+    } // End: foreach bundle type.
+  } // End: foreach entity type.
 
   return $map;
 }
@@ -142,12 +181,14 @@ function taxonomy_admin_bar_map() {
   if (!user_access('administer taxonomy')) {
     return;
   }
+  // List terms.
   $map['admin/structure/taxonomy/%taxonomy_vocabulary'] = array(
     'parent' => 'admin/structure/taxonomy',
     'arguments' => array(
       array('%taxonomy_vocabulary' => array_keys(taxonomy_vocabulary_load_multiple(FALSE))),
     ),
   );
+
   return $map;
 }
 

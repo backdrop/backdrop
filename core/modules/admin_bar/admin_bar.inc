@@ -490,11 +490,9 @@ function admin_bar_links_menu($tree) {
     // Remove description to prevent mouseover tooltip clashes.
     unset($data['link']['localized_options']['attributes']['title']);
 
-    // Make action links (typically "Add ...") appear first in dropdowns.
-    // They might appear first already, but only as long as there is no link
-    // that comes alphabetically first (e.g., a node type with label "Ad").
+    // Make action links (typically "Add ...") appear last in dropdowns.
     if ($data['link']['type'] & MENU_IS_LOCAL_ACTION) {
-      $data['link']['weight'] -= 1000;
+      $data['link']['weight'] = -1000;
     }
 
     $links[$data['link']['href']] = array(
