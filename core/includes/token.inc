@@ -688,13 +688,13 @@ function token_element_validate(&$element, &$form_state) {
 
   // Validate if an element must have a minimum number of tokens.
   if (isset($element['#min_tokens']) && count($tokens) < $element['#min_tokens']) {
-    $error = format_plural($element['#min_tokens'], 'The %element-title cannot contain fewer than one token.', 'The %element-title must contain at least @count tokens.', array('%element-title' => $title));
+    $error = format_plural($element['#min_tokens'], 'The !element-title cannot contain fewer than one token.', 'The !element-title must contain at least @count tokens.', array('!element-title' => $title));
     form_error($element, $error);
   }
 
   // Validate if an element must have a maximum number of tokens.
   if (isset($element['#max_tokens']) && count($tokens) > $element['#max_tokens']) {
-    $error = format_plural($element['#max_tokens'], 'The %element-title may not contain more than one token.', 'The %element-title may not contain more than @count tokens.', array('%element-title' => $title));
+    $error = format_plural($element['#max_tokens'], 'The !element-title may not contain more than one token.', 'The !element-title may not contain more than @count tokens.', array('!element-title' => $title));
     form_error($element, $error);
   }
 
@@ -702,7 +702,7 @@ function token_element_validate(&$element, &$form_state) {
   if (isset($element['#token_types'])) {
     $invalid_tokens = token_get_invalid_tokens_by_context($tokens, $element['#token_types']);
     if ($invalid_tokens) {
-      form_error($element, t('The %element-title is using the following invalid tokens: @invalid-tokens.', array('%element-title' => $title, '@invalid-tokens' => implode(', ', $invalid_tokens))));
+      form_error($element, t('The !element-title is using the following invalid tokens: @invalid-tokens.', array('!element-title' => $title, '@invalid-tokens' => implode(', ', $invalid_tokens))));
     }
   }
 
