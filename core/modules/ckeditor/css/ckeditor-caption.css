@@ -9,9 +9,10 @@
  * Responsive figure elements, based on http://stackoverflow.com/a/13363408.
  */
 .caption {
-  display: inline-block;
+  display: table;
   margin: 0 12px 10px;
   border: 1px solid #ccc;
+  max-width: 100%;
 }
 .cke_widget_wrapper.align-center {
   text-align: center;
@@ -21,7 +22,8 @@
   max-width: 100%;
 }
 .caption > figcaption {
-  display: block;
+  display: table-caption;
+  caption-side: bottom;
   /* Compensate for the space required by the CKEditor drag handle. */
   margin-top: -3px;
   padding: 3px 6px;
