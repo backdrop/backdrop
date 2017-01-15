@@ -1,4 +1,4 @@
-/**
+﻿/**
  * This is a Backdrop-optimized build of CKEditor.
  *
  * You may re-use it at any time at http://ckeditor.com/builder to build
@@ -11,7 +11,7 @@
  */
 
 /**
- * @license Copyright (c) 2003-2016, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md or http://ckeditor.com/license
  */
 
@@ -25,10 +25,10 @@
  * (1) http://ckeditor.com/builder
  *     Visit online builder to build CKEditor from scratch.
  *
- * (2) http://ckeditor.com/builder/11819a2c5c3edb0be90cc07e1cc6a055
+ * (2) http://ckeditor.com/builder/9601e8a4f446e48a2eec0a186955b32d
  *     Visit online builder to build CKEditor, starting with the same setup as before.
  *
- * (3) http://ckeditor.com/builder/download/11819a2c5c3edb0be90cc07e1cc6a055
+ * (3) http://ckeditor.com/builder/download/9601e8a4f446e48a2eec0a186955b32d
  *     Straight download link to the latest version of CKEditor (Optimized) with the same setup as before.
  *
  * NOTE:
@@ -59,16 +59,18 @@ var CKBUILDER_CONFIG = {
 		'node_modules',
 		'package.json',
 		'README.md',
-		'tests',
-		// Parts of CKEditor that we consciously don't ship with Backdrop.
-		'adapters',
-		'config.js',
-		'contents.css',
-		'Gruntfile.js',
-		'styles.js',
-		'samples',
-		'skins/moono/readme.md'
+		'tests'
 	],
+    // So that they are not shipped with Backdrop, after using this config file
+    // for rebuilding, the following are removed manually, because adding them
+    // to the ignore array does not cause them to be ignored:
+    // 'README.md',
+    // 'adapters',
+    // 'config.js',
+    // 'contents.css',
+    // 'samples',
+    // 'skins/moono/readme.md',
+    // 'styles.js',
 	plugins : {
 		'a11yhelp' : 1,
 		'about' : 1,
@@ -108,10 +110,79 @@ var CKBUILDER_CONFIG = {
 		'tabletools' : 1,
 		'toolbar' : 1,
 		'undo' : 1,
+		'uploadwidget' : 1,
 		'widget' : 1,
 		'wysiwygarea' : 1
 	},
 	languages : {
-		'en' : 1
+		'af' : 1,
+		'ar' : 1,
+		'az' : 1,
+		'bg' : 1,
+		'bn' : 1,
+		'bs' : 1,
+		'ca' : 1,
+		'cs' : 1,
+		'cy' : 1,
+		'da' : 1,
+		'de' : 1,
+		'de-ch' : 1,
+		'el' : 1,
+		'en' : 1,
+		'en-au' : 1,
+		'en-ca' : 1,
+		'en-gb' : 1,
+		'eo' : 1,
+		'es' : 1,
+		'et' : 1,
+		'eu' : 1,
+		'fa' : 1,
+		'fi' : 1,
+		'fo' : 1,
+		'fr' : 1,
+		'fr-ca' : 1,
+		'gl' : 1,
+		'gu' : 1,
+		'he' : 1,
+		'hi' : 1,
+		'hr' : 1,
+		'hu' : 1,
+		'id' : 1,
+		'is' : 1,
+		'it' : 1,
+		'ja' : 1,
+		'ka' : 1,
+		'km' : 1,
+		'ko' : 1,
+		'ku' : 1,
+		'lt' : 1,
+		'lv' : 1,
+		'mk' : 1,
+		'mn' : 1,
+		'ms' : 1,
+		'nb' : 1,
+		'nl' : 1,
+		'no' : 1,
+		'oc' : 1,
+		'pl' : 1,
+		'pt' : 1,
+		'pt-br' : 1,
+		'ro' : 1,
+		'ru' : 1,
+		'si' : 1,
+		'sk' : 1,
+		'sl' : 1,
+		'sq' : 1,
+		'sr' : 1,
+		'sr-latn' : 1,
+		'sv' : 1,
+		'th' : 1,
+		'tr' : 1,
+		'tt' : 1,
+		'ug' : 1,
+		'uk' : 1,
+		'vi' : 1,
+		'zh' : 1,
+		'zh-cn' : 1
 	}
 };
