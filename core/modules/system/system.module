@@ -708,7 +708,6 @@ function system_menu() {
     'title' => 'Administration',
     'description' => 'Administration tools.',
     'position' => 'left',
-    'weight' => -12,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
@@ -885,37 +884,12 @@ function system_menu() {
 
   // Search settings.
   $items['admin/config/search'] = array(
-    'title' => 'Search and metadata',
-    'description' => 'Local site search, metadata and SEO.',
+    'title' => 'Search',
+    'description' => 'Local site search settings.',
     'position' => 'left',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
-    'file' => 'system.admin.inc',
-  );
-  // @deprecated: Remove backwards-compatibility redirect in 2.0.
-  $items['admin/config/search/clean-urls'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
-    'page arguments' => array('admin/config/search/urls'),
-    'access arguments' => array('access administration pages'),
-    'type' => MENU_CALLBACK,
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/search/urls'] = array(
-    'title' => 'URL handling',
-    'description' => 'Handling URL-related configuration of your site.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_urls_settings'),
-    'access arguments' => array('administer site configuration'),
-    'file' => 'system.admin.inc',
-    'weight' => 5,
-  );
-  $items['admin/config/search/urls/check'] = array(
-    'title' => 'Clean URL check',
-    'page callback' => 'backdrop_json_output',
-    'page arguments' => array(array('status' => TRUE)),
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
   );
 
@@ -947,7 +921,73 @@ function system_menu() {
     'file' => 'system.admin.inc',
     'weight' => 20,
   );
+
+  // URL handling.
+  $items['admin/config/urls'] = array(
+    'title' => 'URL handling',
+    'description' => 'Settings related to URLs including path aliases and URL recirects.',
+    'position' => 'right',
+    'weight' => -20,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file' => 'system.admin.inc',
+  );
+  $items['admin/config/urls/settings'] = array(
+    'title' => 'URL settings',
+    'description' => 'General URL-related configuration for your site.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('system_urls_settings'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+  );
+  $items['admin/config/urls/settings/check'] = array(
+    'title' => 'Clean URL check',
+    'page callback' => 'backdrop_json_output',
+    'page arguments' => array(array('status' => TRUE)),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'system.admin.inc',
+  );
+
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/urls'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/clean-urls'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/urls/check'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/settings/check'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
   // Additional categories
+  $items['admin/config/content'] = array(
+    'title' => 'Content authoring',
+    'description' => 'Settings related to formatting and authoring content.',
+    'position' => 'left',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file' => 'system.admin.inc',
+  );
+  $items['admin/config/metadata'] = array(
+    'title' => 'Metadata',
+    'description' => 'Settings related to meta tags, and other data commonly used by search engines.',
+    'position' => 'left',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file' => 'system.admin.inc',
+  );
   $items['admin/config/user-interface'] = array(
     'title' => 'User interface',
     'description' => 'Tools that enhance the user interface.',
@@ -955,22 +995,12 @@ function system_menu() {
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
-    'weight' => -15,
   );
   $items['admin/config/workflow'] = array(
     'title' => 'Workflow',
-    'description' => 'Content workflow, editorial workflow tools.',
+    'description' => 'Settings related to editorial workflow.',
     'position' => 'right',
     'weight' => 5,
-    'page callback' => 'system_admin_menu_block_page',
-    'access arguments' => array('access administration pages'),
-    'file' => 'system.admin.inc',
-  );
-  $items['admin/config/content'] = array(
-    'title' => 'Content authoring',
-    'description' => 'Settings related to formatting and authoring content.',
-    'position' => 'left',
-    'weight' => -15,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',

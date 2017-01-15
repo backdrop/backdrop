@@ -30,41 +30,40 @@ function path_permission() {
  * Implements hook_menu().
  */
 function path_menu() {
-  $items['admin/config/search/path'] = array(
+  $items['admin/config/urls/path'] = array(
     'title' => 'URL aliases',
     'description' => "Change your site's URLs by setting up automatic URL alias patterns.",
     'page callback' => 'path_admin_overview',
     'access arguments' => array('administer url aliases'),
-    'weight' => -5,
     'file' => 'path.admin.inc',
   );
-  $items['admin/config/search/path/edit/%path'] = array(
+  $items['admin/config/urls/path/list'] = array(
+    'title' => 'List URL aliases',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['admin/config/urls/path/edit/%path'] = array(
     'title' => 'Edit alias',
     'page callback' => 'path_admin_edit',
     'page arguments' => array(5),
     'access arguments' => array('administer url aliases'),
     'file' => 'path.admin.inc',
   );
-  $items['admin/config/search/path/delete/%path'] = array(
+  $items['admin/config/urls/path/delete/%path'] = array(
     'title' => 'Delete alias',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_admin_delete_confirm', 5),
     'access arguments' => array('administer url aliases'),
     'file' => 'path.admin.inc',
   );
-  $items['admin/config/search/path/list'] = array(
-    'title' => 'List URL aliases',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
-  $items['admin/config/search/path/add'] = array(
+  $items['admin/config/urls/path/add'] = array(
     'title' => 'Add URL alias',
     'page callback' => 'path_admin_edit',
     'access arguments' => array('administer url aliases'),
     'type' => MENU_LOCAL_ACTION,
     'file' => 'path.admin.inc',
   );
-  $items['admin/config/search/path/patterns'] = array(
+  $items['admin/config/urls/path/patterns'] = array(
     'title' => 'URL alias patterns',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_patterns_form'),
@@ -73,7 +72,7 @@ function path_menu() {
     'weight' => 10,
     'file' => 'path.admin.inc',
   );
-  $items['admin/config/search/path/patterns/list'] = array(
+  $items['admin/config/urls/path/patterns/list'] = array(
     'title' => 'List URL alias patterns',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_patterns_form'),
@@ -82,8 +81,17 @@ function path_menu() {
     'weight' => 0,
     'file' => 'path.admin.inc',
   );
-  $items['admin/config/search/path/bulk-update'] = array(
-    'title' => 'URL alias bulk actions',
+  $items['admin/config/urls/path/patterns/settings'] = array(
+    'title' => 'URL alias pattern settings',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('path_patterns_settings_form'),
+    'access arguments' => array('administer path patterns'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 5,
+    'file' => 'path.admin.inc',
+  );
+  $items['admin/config/urls/path/bulk-update'] = array(
+    'title' => 'Generate URL aliases',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_bulk_update_form'),
     'access arguments' => array('administer url aliases'),
@@ -91,14 +99,85 @@ function path_menu() {
     'weight' => 5,
     'file' => 'path.admin.inc',
   );
-  $items['admin/config/search/path/patterns/settings'] = array(
-    'title' => 'URL alias pattern settings',
+  $items['admin/config/urls/path/bulk-delete'] = array(
+    'title' => 'Delete URL aliases',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('path_patterns_settings_form'),
     'access arguments' => array('administer path patterns'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 10,
     'file' => 'path.admin.inc',
+  );
+
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/path'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/path'),
+    'access arguments' => array('administer url aliases'),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/path/list'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/path/list'),
+    'access arguments' => array('administer url aliases'),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/path/edit/%path'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/path/edit/%path'),
+    'access arguments' => array('administer url aliases'),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/path/delete/%path'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/path/delete/%path'),
+    'access arguments' => array('administer url aliases'),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/path/add'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/path/add'),
+    'access arguments' => array('administer url aliases'),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/path/patterns'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/path/patterns'),
+    'access arguments' => array('administer path patterns'),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/path/patterns/list'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/path/patterns/list'),
+    'access arguments' => array('administer path patterns'),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/path/patterns/settings'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/path/patterns/settings'),
+    'access arguments' => array('administer path patterns'),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/path/bulk-update'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/path/bulk-update'),
+    'access arguments' => array('administer path patterns'),
+    'type' => MENU_CALLBACK,
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/search/path/bulk-delete'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/urls/path/bulk-delete'),
+    'access arguments' => array('administer path patterns'),
+    'type' => MENU_CALLBACK,
   );
 
   return $items;
@@ -767,8 +846,8 @@ function path_form_element(Entity $entity) {
     );
 
     // Add a shortcut link to configure URL alias patterns.
-    if (backdrop_valid_path('admin/config/search/path/patterns')) {
-      $fieldset['auto']['#description'] .= ' ' . l(t('Configure URL alias patterns.'), 'admin/config/search/path/patterns');
+    if (backdrop_valid_path('admin/config/urls/path/patterns')) {
+      $fieldset['auto']['#description'] .= ' ' . l(t('Configure URL alias patterns.'), 'admin/config/urls/path/patterns');
     }
   }
 

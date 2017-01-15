@@ -173,7 +173,7 @@ function taxonomy_path_type_delete_callback($types) {
 }
 
 /**
- * Batch processing callback; Generate aliases for taxonomy terms.
+ * Batch processing callback; Generate URL aliases for taxonomy terms.
  */
 function taxonomy_path_bulk_update_batch_process(&$context) {
   if (!isset($context['sandbox']['current'])) {
@@ -251,7 +251,7 @@ function user_path_info() {
 }
 
 /**
- * Batch processing callback; Generate aliases for users.
+ * Batch processing callback; Generate URL aliases for users.
  */
 function user_path_bulk_update_batch_process(&$context) {
   if (!isset($context['sandbox']['current'])) {

@@ -679,28 +679,28 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit = array();
     $edit['max_length'] = 'abc';
     $edit['max_component_length'] = 'abc';
-    $this->backdropPost('admin/config/search/path/patterns/settings', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
     $this->assertText('Maximum URL alias length must be a number.');
     $this->assertText('Maximum component length must be a number.');
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '0';
     $edit['max_component_length'] = '0';
-    $this->backdropPost('admin/config/search/path/patterns/settings', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
     $this->assertText('Maximum URL alias length must be higher or equal to 1.');
     $this->assertText('Maximum component length must be higher or equal to 1.');
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '999';
     $edit['max_component_length'] = '999';
-    $this->backdropPost('admin/config/search/path/patterns/settings', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
     $this->assertText('Maximum URL alias length must be below or equal to 255.');
     $this->assertText('Maximum component length must be below or equal to 255.');
     $this->assertNoText('The configuration options have been saved.');
 
     $edit['max_length'] = '50';
     $edit['max_component_length'] = '50';
-    $this->backdropPost('admin/config/search/path/patterns/settings', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/urls/path/patterns/settings', $edit, 'Save configuration');
     $this->assertText('The configuration options have been saved.');
 
     // To test alternate interfaces, we need more permissions.
@@ -742,7 +742,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit = array();
     $edit['node_pattern'] = '[node:title]/[user:name]/[term:name]';
     $edit['node_page_pattern'] = 'page';
-    $this->backdropPost('admin/config/search/path/patterns', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/urls/path/patterns', $edit, 'Save configuration');
     $this->assertText('The Default URL alias pattern (applies to all content types with blank URL alias patterns below) is using the following invalid tokens: [user:name], [term:name].');
     $this->assertText('The URL alias pattern for all Page URLs cannot contain fewer than one token.');
     $this->assertNoText('The configuration options have been saved.');
@@ -750,7 +750,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit['node_pattern'] = '[node:title]';
     $edit['node_page_pattern'] = 'page/[node:title]';
     $edit['node_post_pattern'] = '';
-    $this->backdropPost('admin/config/search/path/patterns', $edit, 'Save configuration');
+    $this->backdropPost('admin/config/urls/path/patterns', $edit, 'Save configuration');
     $this->assertText('The configuration options have been saved.');
   }
 
@@ -905,8 +905,8 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
       'update[user][base]' => TRUE,
       'operations[operation]' => 'generate',
     );
-    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
-    $this->assertText('Generated 20 URL aliases.'); // 12 nodes + 6 terms + 2 users.
+    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
+    $this->assertText('Generated 20 URL aliases.'); // 12 nodes + 6 terms + 2 users
 
     // Check that aliases have actually been created.
     foreach ($this->nodes as $node) {
@@ -919,7 +919,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
     $this->nodes[$new_node->nid] = $new_node;
 
     // Run the update again which should only run against the new node.
-    $this->backdropPost('admin/config/search/path/bulk-update', $edit, t('Execute'));
+    $this->backdropPost('admin/config/urls/path/bulk-update', $edit, t('Execute'));
     $this->assertText('Generated 1 URL alias.'); // 1 node + 0 users
 
     $this->assertEntityAliasExists('node', $new_node);
