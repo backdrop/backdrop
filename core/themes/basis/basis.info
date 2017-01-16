@@ -17,7 +17,6 @@ stylesheets[all][] = css/component/vertical-tabs.css
 stylesheets[all][] = css/component/fieldset.css
 stylesheets[all][] = css/component/dialog.css
 stylesheets[all][] = css/component/progress.css
-stylesheets[all][] = css/component/status-messages.css
 stylesheets[all][] = css/component/admin-tabs.css
 stylesheets[all][] = css/component/breadcrumb.css
 stylesheets[all][] = css/component/pager.css
@@ -25,6 +24,7 @@ stylesheets[all][] = css/component/hero.css
 stylesheets[all][] = css/component/teasers.css
 stylesheets[all][] = css/component/comment.css
 stylesheets[all][] = css/skin.css
+
 stylesheets[print][] = css/print.css
 
 ; Remove unwanted core CSS
