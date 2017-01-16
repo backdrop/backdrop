@@ -8,6 +8,80 @@
   margin: 0 0 2rem;
 }
 
-.layout .l-messages {
+.l-wrapper-inner.container {
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.l-top {
+  text-align: left;
+}
+
+.l-messages {
   margin: 0 0 2rem;
+}
+
+.l-messages,
+.l-page-title,
+.tabs,
+.block-system-breadcrumb,
+.l-content,
+.l-middle,
+.block-hero * {
+  padding-right: .9375rem;
+  padding-left: .9375rem;
+  margin-right: auto;
+  margin-left: auto;
+  text-align: left;
+}
+
+@media (min-width: 34em) {
+  .l-messages,
+  .l-page-title,
+  .tabs,
+  .block-system-breadcrumb,
+  .l-content,
+  .l-middle,
+  .block-hero * {
+    max-width: 34rem;
+  }
+}
+
+@media (min-width: 48em) {
+  .l-messages,
+  .l-page-title,
+  .tabs,
+  .block-system-breadcrumb,
+  .l-content,
+  .l-middle,
+  .block-hero * {
+    max-width: 45rem;
+  }
+}
+
+@media (min-width: 62em) {
+  .l-messages,
+  .l-page-title,
+  .tabs,
+  .block-system-breadcrumb,
+  .l-content,
+  .l-middle,
+  .block-hero * {
+    max-width: 60rem;
+  }
+}
+
+@media (min-width: 75em) {
+  .l-messages,
+  .l-page-title,
+  .tabs,
+  .block-system-breadcrumb,
+  .l-content,
+  .l-middle,
+  .block-hero * {
+    max-width: 72.25rem;
+  }
 }
