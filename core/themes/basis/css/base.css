@@ -135,6 +135,8 @@ label {
 table {
   width: 100%;
   margin: 0 0 1em;
+  border-collapse: collapse;
+  border-spacing: 0;
 }
 
 caption {
