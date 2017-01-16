@@ -1484,6 +1484,7 @@ class FileAdminTestCase extends FileFieldTestCase {
     foreach ($files as $file) {
       // Create a new node with the file attached.
       $nid = $this->uploadNodeFile($file, $field_name, $type_name);
+      sleep(1);
     }
 
     // Test that the default sort by timestamp actually fires properly.
