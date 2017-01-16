@@ -1459,21 +1459,11 @@ function system_site_information_settings_submit($form, &$form_state) {
   }
 
   config('system.core')
-    ->set('site_name', $form_state['values']['site_name'])
-    ->set('site_logo_theme', $form_state['values']['site_logo_theme'])
-    ->set('site_logo_path', $form_state['values']['site_logo_path'])
     ->set('site_logo_attributes', $form_state['values']['site_logo_attributes'])
     ->set('site_favicon_theme', $form_state['values']['site_favicon_theme'])
     ->set('site_favicon_path', $form_state['values']['site_favicon_path'])
     ->set('site_favicon_mimetype', $form_state['values']['site_favicon_mimetype'])
-    ->set('site_mail', $form_state['values']['site_mail'])
-    ->set('site_slogan', $form_state['values']['site_slogan'])
-    ->set('site_frontpage', $form_state['values']['site_frontpage'])
-    ->set('default_nodes_main', $form_state['values']['default_nodes_main'])
-    ->set('site_403', $form_state['values']['site_403'])
-    ->set('site_404', $form_state['values']['site_404'])
     ->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
