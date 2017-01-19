@@ -650,7 +650,7 @@ function _system_check_db_utf8mb4_requirements($phase) {
     else {
       // Not supported, not active.
       $requirements['value'] = $t('Not available');
-      $requirements['description'] .= ' ' . $t('This feature is not supported on your system. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
+      $requirements['description'] .= ' ' . $t('This feature is not supported on your system. See the <a href="@url">documentation on adding 4-byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
       $requirements['severity'] = REQUIREMENT_INFO;
     }
   }
