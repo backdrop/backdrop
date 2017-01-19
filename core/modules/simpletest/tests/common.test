@@ -3111,13 +3111,13 @@ class CommonBackdropSortUnitTest extends BackdropUnitTestCase {
     $this->test_array = array(
       'breadcrumb' => array(
         'info' => 'Breadcrumb',
-        'weight' => 1,
+        'weight' => 4,
         'description' => 'The current page breadcrumb trail.',
         'render last' => TRUE,
       ),
       'main-menu' => array(
         'info' => 'Primary navigation',
-        'weight' => 1,
+        'weight' => 2,
         'description' => 'A hierarchical list of links for the Primary navigation.',
       ),
       'recent' => array(
@@ -3153,9 +3153,9 @@ class CommonBackdropSortUnitTest extends BackdropUnitTestCase {
       'form',
       'custom_block',
       'content',
-      'breadcrumb',
       'main-menu',
       'recent',
+      'breadcrumb',
     );
 
     // Sort by a single numeric key.
@@ -3186,10 +3186,10 @@ class CommonBackdropSortUnitTest extends BackdropUnitTestCase {
     $expected = array(
       'form',
       'custom_block',
-      'breadcrumb',
       'content',
       'main-menu',
       'recent',
+      'breadcrumb',
     );
 
     // Sort by numeric and string keys.
