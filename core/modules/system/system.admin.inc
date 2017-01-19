@@ -1912,11 +1912,10 @@ function system_regional_settings($form, &$form_state) {
     '#options' => $zones,
   );
 
-  $configurable_timezones = $system_date->get('user_configurable_timezones');
-  $form['timezone']['configurable_timezones'] = array(
+  $form['timezone']['user_configurable_timezones'] = array(
     '#type' => 'checkbox',
     '#title' => t('Users may set their own time zone.'),
-    '#default_value' => $configurable_timezones,
+    '#default_value' => $system_date->get('user_configurable_timezones'),
   );
 
   $form['timezone']['configurable_timezones_wrapper'] =  array(
@@ -1925,7 +1924,7 @@ function system_regional_settings($form, &$form_state) {
       // Hide the user configured timezone settings when users are forced to use
       // the default setting.
       'invisible' => array(
-        'input[name="configurable_timezones"]' => array('checked' => FALSE),
+        'input[name="user_configurable_timezones"]' => array('checked' => FALSE),
       ),
     ),
   );
