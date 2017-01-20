@@ -3000,6 +3000,50 @@ function system_update_1060() {
 }
 
 /**
+ * Update contrib entity view mode module to core version.
+ */
+function system_update_1061() {
+  $old_config = config('entity_view_mode.settings');
+  $new_config = config('entity.view_modes');
+
+  // Backdrop pre-1.6 view modes from entity_view_mode.module:
+  if (!$old_config->isNew()) {
+    $old_data = $old_config->get('entity_view_modes');
+  }
+  // Drupal 7 entity_view_mode.module:
+  else {
+    $old_data = update_variable_get('entity_view_modes');
+  }
+
+  $new_data = array();
+  if ($old_data) {
+    foreach ($old_data as $entity_type => $old_view_modes) {
+      foreach ($old_view_modes as $view_mode_name => $view_mode) {
+        // Backdrop does not have a "custom settings" flag.
+        if (isset($view_mode['custom settings'])) {
+          unset($view_mode['custom settings']);
+        }
+        $new_data[$entity_type][$view_mode_name] = $view_mode;
+      }
+    }
+  }
+
+  // Only update core if no view modes have yet been set.
+  if ($new_data && !$new_config->get('view_modes')) {
+    $new_config->set('view_modes', $new_data);
+    $new_config->save();
+
+    // Delete the old configuration regardless of location.
+    $old_config->delete();
+    update_variable_del('entity_view_modes');
+  }
+
+  // Remove the entry for the entity_view_mode module in the system table. This
+  // will "disable" the module if present.
+  db_query("DELETE FROM {system} WHERE name = 'entity_view_mode' AND type = 'module'");
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
