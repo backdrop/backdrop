@@ -3541,7 +3541,7 @@ function form_process_tableselect($element) {
             '#title_display' => 'invisible',
             '#return_value' => $key,
             '#default_value' => isset($value[$key]) ? $key : NULL,
-            '#attributes' => $element['#attributes'],
+            '#attributes' => array_merge($element['#attributes'], array('data-first-col-select' => array('first-col-select'))),
           );
         }
         else {
