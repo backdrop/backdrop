@@ -137,6 +137,35 @@ function user_admin_settings($form, &$form_state) {
     ),
     '#default_value' => $config->get('user_login_method'),
   );
+  $form['user_login']['hide_username_wrapper'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Username options on the registration page'),
+    '#states' => array(
+      'visible' => array(
+        'input[name="user_login_method"]' => array('value' => USER_LOGIN_EMAIL_ONLY),
+      ),
+    ),
+  );
+  $form['user_login']['hide_username_wrapper']['hide_username_on_registration'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Hide username field on registration page'),
+    '#default_value' => $config->get('hide_username_on_registration'),
+  );
+  $form['user_login']['hide_username_wrapper']['username_generation_method'] = array(
+    '#type' => 'radios',
+    '#title' => t('Generate usernames'),
+    '#options' => array(
+      0 => t('Use the email address as username'),
+      1 => t('Generate a username based on the email address'),
+      2 => t('Generate a random username'),
+    ),
+    '#default_value' => $config->get('username_generation_method'),
+    '#states' => array(
+      'visible' => array(
+        'input[name="hide_username_on_registration"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
 
   // User registration settings.
   $form['registration_cancellation'] = array(
