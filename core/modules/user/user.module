@@ -689,6 +689,9 @@ function user_account_form(&$form, &$form_state) {
     '#type'   => 'container',
     '#weight' => -10,
   );
+
+  $user_login_method = config_get('system.core', 'user_login_method');
+  $show_name_on_register = ($user_login_method == USER_LOGIN_USERNAME_OR_EMAIL || $user_login_method == USER_LOGIN_USERNAME_ONLY);
   // Only show name field on registration form or user can change own username.
   $form['account']['name'] = array(
     '#type' => 'textfield',
@@ -698,7 +701,7 @@ function user_account_form(&$form, &$form_state) {
     '#required' => TRUE,
     '#attributes' => array('class' => array('username')),
     '#default_value' => (!$register ? $account->name : ''),
-    '#access' => ($register || ($user->uid == $account->uid && user_access('change own username')) || $admin),
+    '#access' => (($register && $show_name_on_register) || ($user->uid == $account->uid && user_access('change own username')) || $admin),
     '#weight' => -10,
   );
 
@@ -872,6 +875,15 @@ function user_account_form_validate($form, &$form_state) {
   // Validate new or changing username.
   if (isset($form_state['values']['name'])) {
     $name = $form_state['values']['name'];
+    $user_login_method = config_get('system.core', 'user_login_method');
+    // If login is by email only, set the username as the email during
+    // registration.
+    // Alternatively, and ideally, we should generate a unique username, either
+    // from the email or randomly, to avoid exposing the user's email address - 
+    // in the 'author' displays for example.
+    if ($name == '' && $user_login_method == USER_LOGIN_EMAIL_ONLY && empty($account->uid)) {
+      $form_state['values']['name'] = $name = $mail;
+    }
     if ($error = user_validate_name($name)) {
       form_set_error('name', $error);
     }
