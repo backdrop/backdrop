@@ -179,67 +179,64 @@ function template_preprocess_installer_browser_project(&$variables) {
   // If the project is already downloaded...
   if (_installer_browser_is_project_enabled($project['type'], $project['name'])) {
 
-    // ...set the action text and link based on project type.
+    $status_text = t('Already enabled');
+
+    // ...set the action label and link based on project type.
     switch ($project['type']) {
       case 'module':
         $all_modules_info = system_rebuild_module_data();
         $project_info = $all_modules_info[$project['name']];
         // If the module has a coniguration page defined in its .info file.
         if (isset($project_info->info['configure'])) {
-          $action = 'configure';
-          $url = $project_info->info['configure'];
+          $action_label = t('Configure');
+          $action_url = $project_info->info['configure'];
         }
         break;
       case 'theme':
         // If the theme has settings.
         if (backdrop_theme_access($project['name']) && theme_has_settings($project['name'])) {
-          $action = 'settings';
-          $url = 'admin/appearance/settings/' . $project['name'];
+          $action_label = t('Settings');
+          $action_url = 'admin/appearance/settings/' . $project['name'];
         }
         break;
       case 'layout':
         // All layout themplates can be enabled/disabled in the "Layout
         // settings" page.
-        $action = 'settings';
-        $url = 'admin/structure/layouts/settings';
+        $action_label = t('Settings');
+        $action_url = 'admin/structure/layouts/settings';
         break;
     }
 
-    $status = '<div class="install-disabled">' . t('Already enabled');
-    // If the project has a config page (for modules), or a settings page (for
-    // themes, or is a layout template (that can always be enabled/disabled),...
-    if (isset($action) && isset($url)) {
-      // ...then render the respective action link after the "Already enabled"
-      // status...
-      $status .= ', ' . t('<a href="@url">@action</a>', array('@url' => url($url), '@action' => $action));
-    }
-    $status .= '</div>';
-    // ...and do not render the "Add to/remove from the installation queue"
-    // link.
+    $action_url = url($action_url);
+
+    // Do not render the "Add to/remove from the installation queue" link.
     $install = '';
 
   }
 
   // If the project has been downloaded, but not enabled yet,...
   elseif ($found) {
+
+    $status_text = t('Already downloaded');
+
     switch ($project['type']) {
       case 'module':
-        $url = 'admin/modules';
+        $action_url = 'admin/modules';
         break;
       case 'theme':
-        $url = 'admin/appearance/list';
+        $action_url = 'admin/appearance/list';
         break;
       case 'layout':
-        $url = 'admin/structure/layouts/settings';
+        $action_url = 'admin/structure/layouts/settings';
         break;
     }
-    // ...render the status text...
-    $status = '<div class="install-disabled">' . t('Already downloaded');
-    // ...also add the "enable" action that points to the respective project
-    // type list page (with a URL fragment that scrolls the page to the
-    // specific project)...
-    $status .= ', ' . t('<a href="@url">enable</a>', array('@url' => url($url, array('fragment' => $project['type'] . '-' . $project['name']))));
-    $status .= '</div>';
+
+    // ...add the "Enable" action that points to the respective project type
+    // list page (with a URL fragment that scrolls the page to the specific
+    // project)...
+    $action_label = t('Enable');
+    $action_url = url($action_url, array('fragment' => $project['type'] . '-' . $project['name']));
+
     // ...and do not render the "Add to/remove from the installation queue"
     // link.
     $install = '';
@@ -251,6 +248,18 @@ function template_preprocess_installer_browser_project(&$variables) {
     $status = '';
     // ...render the "Add to/remove from the installation queue" link.
     $install = installer_browser_add_remove_queue_link($project['name']);
+  }
+
+  // If the status text has been set (project is either just downloaded or
+  // downloaded and enabled),...
+  if ($status_text) {
+    // ...then render the project installation status instead of the "Add
+    // to/remove from the installation queue" link...
+    $status = '<span class="install-disabled">' . $status_text . '</span>';
+    // ...and if there is an action, render its link as well.
+    if (isset($action_label) && isset($action_url)) {
+      $status .= ' | <span class="install-action"><a href="' . $action_url . '">' . $action_label . '</a></span>';
+    }
   }
 
   $variables['status'] = $status;
