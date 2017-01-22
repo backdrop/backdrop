@@ -252,7 +252,7 @@ function template_preprocess_installer_browser_project(&$variables) {
 
   // If the status text has been set (project is either just downloaded or
   // downloaded and enabled),...
-  if ($status_text) {
+  if (isset($status_text)) {
     // ...then render the project installation status instead of the "Add
     // to/remove from the installation queue" link...
     $status = '<span class="install-disabled">' . $status_text . '</span>';
