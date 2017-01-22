@@ -3862,6 +3862,20 @@ function system_config_info() {
 }
 
 /**
+ * Implements hook_config_aliases().
+ */
+function system_config_aliases() {
+  $aliases = array(
+    'system.date' => array(
+      'user_configurable_timezones' => 'user_timezone_configurable',
+      'configurable_timezones' => 'user_timezone_configurable',
+    ),
+  );
+
+  return $aliases;
+}
+
+/**
  * Implements hook_system_info_alter().
  *
  * @deprecated since 1.1
