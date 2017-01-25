@@ -39,7 +39,7 @@ function comment_admin($type = 'new') {
  * @see theme_comment_admin_overview()
  */
 function comment_admin_overview($form, &$form_state, $arg) {
-  // Build an 'Operations' form.
+  // Build the 'Operations' form.
   $form['operations'] = array(
     '#type' => 'fieldset',
     '#title' => t('Operations'),
