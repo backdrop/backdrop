@@ -40,7 +40,7 @@ function comment_admin($type = 'new') {
  */
 function comment_admin_overview($form, &$form_state, $arg) {
   // Build an 'Operations' form.
-  $form['options'] = array(
+  $form['operations'] = array(
     '#type' => 'fieldset',
     '#title' => t('Operations'),
     '#attributes' => array('class' => array('container-inline')),
@@ -54,14 +54,14 @@ function comment_admin_overview($form, &$form_state, $arg) {
   }
   $options['delete'] = t('Delete the selected comments');
 
-  $form['options']['operation'] = array(
+  $form['operations']['operation'] = array(
     '#type' => 'select',
-    '#title' => t('Operation'),
+    '#title' => t('Operations'),
     '#title_display' => 'invisible',
     '#options' => $options,
-    '#default_value' => 'publish',
+    '#empty_option' => '- ' . t('Choose an action') . ' -',
   );
-  $form['options']['submit'] = array(
+  $form['operations']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Execute'),
   );
