@@ -137,6 +137,16 @@ function user_admin_settings($form, &$form_state) {
     ),
     '#default_value' => $config->get('user_login_method'),
   );
+  $form['user_login']['hide_username_on_registration'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Hide username field on registration'),
+    '#default_value' => $config->get('hide_username_on_registration'),
+    '#states' => array(
+      'visible' => array(
+        'input[name="user_login_method"]' => array('value' => USER_LOGIN_EMAIL_ONLY),
+      ),
+    ),
+  );
 
   // User registration settings.
   $form['registration_cancellation'] = array(
