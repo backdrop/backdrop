@@ -137,11 +137,6 @@ function redirect_list_form($form, &$form_state) {
     '#attributes' => array(
       'class' => array('redirect-list-tableselect'),
     ),
-    '#attached' => array(
-      'js' => array(
-        backdrop_get_path('module', 'redirect') . '/js/redirect.admin.js',
-      ),
-    ),
   );
   if (redirect_access('create', 'redirect')) {
     $form['rids']['#empty'] .= ' ' . l(t('Add URL redirect.'), 'admin/config/search/redirect/add');
