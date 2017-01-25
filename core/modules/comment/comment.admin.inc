@@ -46,7 +46,7 @@ function comment_admin_overview($form, &$form_state, $arg) {
     '#prefix' => '<div class="container-inline">',
     '#suffix' => '</div>',
     '#attributes' => array(
-        'class' => array('comment-operations')
+      'class' => array('comment-operations')
     ),
   );
 
