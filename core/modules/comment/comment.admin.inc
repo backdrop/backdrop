@@ -39,10 +39,10 @@ function comment_admin($type = 'new') {
  * @see theme_comment_admin_overview()
  */
 function comment_admin_overview($form, &$form_state, $arg) {
-  // Build an 'Update options' form.
+  // Build an 'Operations' form.
   $form['options'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Update options'),
+    '#title' => t('Operations'),
     '#attributes' => array('class' => array('container-inline')),
   );
 
@@ -63,7 +63,7 @@ function comment_admin_overview($form, &$form_state, $arg) {
   );
   $form['options']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Update'),
+    '#value' => t('Execute'),
   );
 
   // Load the comments that need to be displayed.
@@ -155,7 +155,8 @@ function comment_admin_overview($form, &$form_state, $arg) {
  */
 function comment_admin_overview_validate($form, &$form_state) {
   $form_state['values']['comments'] = array_diff($form_state['values']['comments'], array(0));
-  // We can't execute any 'Update options' if no comments were selected.
+  // We can't execute any of the available operations if no comments were
+  // selected.
   if (count($form_state['values']['comments']) == 0) {
     form_set_error('', t('Select one or more comments to perform the update on.'));
   }
