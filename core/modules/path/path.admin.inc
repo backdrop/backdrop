@@ -657,7 +657,7 @@ function path_bulk_update_form($form, &$form_state) {
     }
   }
 
-  // Build the 'Update options' form.
+  // Build the 'Operations' form.
   $form['operations'] = array(
     '#type' => 'fieldset',
     '#title' => t('Operations'),
