@@ -43,7 +43,11 @@ function comment_admin_overview($form, &$form_state, $arg) {
   $form['operations'] = array(
     '#type' => 'fieldset',
     '#title' => t('Operations'),
-    '#attributes' => array('class' => array('container-inline')),
+    '#prefix' => '<div class="container-inline">',
+    '#suffix' => '</div>',
+    '#attributes' => array(
+        'class' => array('comment-operations')
+    ),
   );
 
   if ($arg == 'approval') {
