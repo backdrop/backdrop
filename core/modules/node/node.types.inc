@@ -16,6 +16,9 @@ function node_overview_types() {
   $header = array(t('Name'), t('Operations'));
   $rows = array();
 
+  // Sort the list of content types by Label instead of machine name.
+  asort($names);
+
   foreach ($names as $key => $name) {
     $type = $types[$key];
     if (node_hook($type->type, 'form')) {
