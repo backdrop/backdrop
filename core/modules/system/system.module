@@ -123,6 +123,7 @@ function system_theme() {
         'show_restricted' => FALSE,
         'recursion_limit' => 3,
         'dialog' => FALSE,
+        'js' => TRUE,
       ),
     ) + $base,
     'token_tree_link' => array(

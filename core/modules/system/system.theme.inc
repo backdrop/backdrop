@@ -610,7 +610,10 @@ function theme_token_tree($variables) {
     $table_variables['attributes']['class'][] = 'token-click-insert';
   }
 
-  backdrop_add_library('system', 'token');
+  if ($variables['js']) {
+    backdrop_add_library('system', 'token');
+  }
+
   $output = theme('tree_table', $table_variables);
   return $output;
 }

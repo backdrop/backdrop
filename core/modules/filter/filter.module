@@ -69,6 +69,16 @@ function filter_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
   );
+  $items['editor/dialog/token/%filter_format'] = array(
+    'title' => 'Insert token',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('filter_format_editor_token_form', 3),
+    'access callback' => 'filter_dialog_access',
+    'access arguments' => array(3, 'token'),
+    'theme callback' => 'ajax_base_page_theme',
+    'type' => MENU_CALLBACK,
+    'file' => 'filter.pages.inc',
+  );
   $items['editor/dialog/link/%filter_format'] = array(
     'title' => 'Edit image',
     'page callback' => 'backdrop_get_form',
