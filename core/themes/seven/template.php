@@ -42,7 +42,15 @@ function seven_preprocess_layout(&$variables) {
  */
 function seven_node_add_list($variables) {
   $content = $variables['content'];
+
+  // Sort content types by title instead of machine name.
+  uasort($content, 'compare_by_title');
+  function compare_by_title($a, $b) {
+    return (strcmp($a['title'], $b['title']));
+  }
+
   $output = '';
+
   if ($content) {
     $output = '<ul class="admin-list">';
     foreach ($content as $item) {
@@ -56,7 +64,9 @@ function seven_node_add_list($variables) {
   else {
     $output = '<p>' . t('You have not created any content types yet. Go to the <a href="@create-content">content type creation page</a> to add a new content type.', array('@create-content' => url('admin/structure/types/add'))) . '</p>';
   }
+
   return $output;
+
 }
 
 /**
