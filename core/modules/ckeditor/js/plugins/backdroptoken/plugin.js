@@ -38,6 +38,8 @@ CKEDITOR.plugins.add('backdroptoken', {
           });
           $element.find('.token-click-insert .token-key').once('token-click-insert', function() {
             var newThis = $('<a href="javascript:void(0);" title="' + Backdrop.t('Insert this token into your form') + '">' + $(this).html() + '</a>').click(function(){
+              var tokenText = $(this).text();
+              editor.insertText( tokenText );
             });
             $(this).html(newThis);
           });
@@ -57,10 +59,6 @@ CKEDITOR.plugins.add('backdroptoken', {
             var $moreLink = $link.clone();
             $moreLink.click(toggleDescription);
             $(this).css('display', 'none').before(' ').before($moreLink);
-          });
-          $('.token-key').once('token-key').click(function(e) {
-            var tokenText = $(this).text();
-            editor.insertText( tokenText );
           });
         });
 
