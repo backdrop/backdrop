@@ -44,10 +44,9 @@ function seven_node_add_list($variables) {
   $content = $variables['content'];
 
   // Sort content types by title instead of machine name.
-  uasort($content, 'compare_by_title');
-  function compare_by_title($a, $b) {
+  uasort($content, function ($a, $b) {
     return (strcmp($a['title'], $b['title']));
-  }
+  });
 
   $output = '';
 
