@@ -40,8 +40,16 @@ function node_add_page() {
       );
     }
   }
-  // Bypass the node/add listing if only one content type is available.
-  if (count($content) == 1) {
+  // If there are more than one content types, sort them by title instead of
+  // machine name before displaying the list of links...
+  if (count($content) !== 1) {
+    uasort($content, function ($a, $b) {
+      return (strcmp($a['title'], $b['title']));
+    });
+  }
+  // ...otherwise bypass the node/add listing and go directly to the
+  // node/add/[type] page of the single content type.
+  else {
     $item = array_shift($content);
     backdrop_goto($item['href']);
   }
