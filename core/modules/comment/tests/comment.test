@@ -1636,7 +1636,7 @@ class CommentApprovalTest extends CommentHelperCase {
 
     // Delete multiple comments in one operation.
     $edit = array(
-      'operation' => 'delete',
+      'operations' => 'delete',
       "comments[{$comments[0]->id}]" => 1,
       "comments[{$comments[1]->id}]" => 1,
       "comments[{$anonymous_comment4->id}]" => 1,
