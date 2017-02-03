@@ -55,6 +55,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#default_value' => isset($values['href']) ? $values['href'] : FALSE,
     '#parents' => array('attributes', 'href'),
+    '#autocomplete_path' => 'filter-link/autocomplete',
   );
   $form['target'] = array(
     '#title' => t('Open in new window'),
@@ -74,6 +75,68 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
   );
 
   return $form;
+}
+
+/**
+ * Autocomplete callback for link textfield.
+ */
+function _filter_link_autocomplete($string) {
+  $matches = array();
+  if ($string) {
+    // Get node matches.
+    $results = db_select('node')
+      ->fields('node', array('nid', 'title'))
+      ->condition('title', db_like($string) . '%', 'LIKE')
+      ->addTag('node_access')
+      ->range(0, 10)
+      ->execute();
+    foreach ($results as $result) {
+      $node = node_load($result->nid);
+      $path = backdrop_get_path_alias('node/' . $node->nid);
+      $matches['/' . $path] = check_plain($node->title) . ' (' . t('Content') . ')';
+    }
+
+    // Get user matches.
+    $results = db_select('users')
+      ->fields('users', array('uid', 'name'))
+      ->condition('name', db_like($string) . '%', 'LIKE')
+      ->addTag('user_access')
+      ->range(0, 10)
+      ->execute();
+    foreach ($results as $result) {
+      $user = user_load($result->uid);
+      $path = backdrop_get_path_alias('user/' . $user->uid);
+      $matches['/' . $path] = user_format_name($user) . ' (' . t('User') . ')';
+    }
+
+    // Get taxonomy term matches.
+    $results = db_select('taxonomy_term_data')
+      ->fields('taxonomy_term_data', array('tid', 'name'))
+      ->condition('name', db_like($string) . '%', 'LIKE')
+      ->addTag('taxonomy_term_access')
+      ->range(0, 10)
+      ->execute();
+    foreach ($results as $result) {
+      $taxonomy_term = taxonomy_term_load($result->tid);
+      $path = backdrop_get_path_alias('taxonomy/term/' . $taxonomy_term->tid);
+      $matches['/' . $path] = check_plain($taxonomy_term->name) . ' (' . t('Taxonomy term') . ')';
+    }
+
+    // Get Views page matches.
+    $views = views_get_enabled_views();
+    foreach ($views as $view) {
+      // Todo: check access.
+      foreach ($view->display as $display => $display_info) {
+        if ($display_info->display_plugin == 'page' && !empty($display_info->display_options['path'])) {
+          $path = backdrop_get_path_alias($display_info->display_options['path']);
+          $view_display_title = (!empty($display_info->title)) ? $display_info->title : check_plain($view->human_name) . ' : ' . $display;
+          $matches['/' . $path] = $view_display_title . ' (' . t('Views page') . ')';
+        }
+      }
+    }
+  }
+
+  backdrop_json_output($matches);
 }
 
 /**
