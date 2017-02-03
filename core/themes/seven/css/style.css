@@ -1016,6 +1016,9 @@ select.form-select {
   will-change: border-color;
   height: 43px;
 }
+select.form-select[multiple] {
+  height: auto;
+}
 select.form-select:focus {
   color: #000;
   border-color: #43afe4;
