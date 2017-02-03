@@ -129,8 +129,10 @@ function _filter_link_autocomplete($string) {
       foreach ($view->display as $display => $display_info) {
         if ($display_info->display_plugin == 'page' && !empty($display_info->display_options['path'])) {
           $path = backdrop_get_path_alias($display_info->display_options['path']);
-          $view_display_title = (!empty($display_info->title)) ? $display_info->title : check_plain($view->human_name) . ' : ' . $display;
-          $matches['/' . $path] = $view_display_title . ' (' . t('Views page') . ')';
+          if (stripos($view->human_name, $string) !== false || (!empty($display_info->title) && stripos($display_info->title, $string) !== false)) {
+            $view_display_title = (!empty($display_info->title)) ? $display_info->title : check_plain($view->human_name) . ' : ' . $display;
+            $matches['/' . $path] = $view_display_title . ' (' . t('Views page') . ')';
+          }
         }
       }
     }
