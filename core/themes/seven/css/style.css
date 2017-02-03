@@ -639,6 +639,7 @@ tr.selected td {
     display: none;
   }
 }
+
 /**
  * Fieldsets.
  *
@@ -749,6 +750,17 @@ fieldset .fieldset-wrapper {
   top: .75em;
   border: .32em solid transparent;
   border-left-color: black;
+}
+
+/**
+ * Views exposed form (matches fieldsets).
+ */
+form.views-exposed-form {
+  margin: 1em 0;
+  padding: 7px 13px;
+  border-radius: 4px;
+  background-color: #fff;
+  border: 2px solid #EAEAEA;
 }
 
 /**
