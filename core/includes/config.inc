@@ -674,7 +674,7 @@ class Config {
     if (array_key_exists($key, $aliases)) {
       $parsed = $this->parseAlias($aliases[$key]);
       $config = ($parsed['config']) ? config($parsed['config']) : $this;
-      return $config->set($key, $value);
+      return $config->set($parsed['key'], $value);
     }
 
     if (!$this->isLoaded) {
