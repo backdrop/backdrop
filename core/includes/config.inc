@@ -587,6 +587,16 @@ class Config {
     if (array_key_exists($key, $aliases)) {
       $parsed = $this->parseAlias($aliases[$key]);
       $config = ($parsed['config']) ? config($parsed['config']) : $this;
+      watchdog('config',
+        'Config setting @old_config:@old_key has been deprecated. Use @new_config:@new_key instead.',
+        array(
+          '@old_config' => $this->name,
+          '@old_key' => $key,
+          '@new_config' => $config->name,
+          '@new_key' => $parsed['key'],
+        ),
+        WATCHODG_DEPRECATED
+      );
       return $config->get($parsed['key']);
     }
 
@@ -674,6 +684,16 @@ class Config {
     if (array_key_exists($key, $aliases)) {
       $parsed = $this->parseAlias($aliases[$key]);
       $config = ($parsed['config']) ? config($parsed['config']) : $this;
+      watchdog('config',
+        'Config setting @old_config:@old_key has been deprecated. Use @new_config:@new_key instead.',
+        array(
+          '@old_config' => $this->name,
+          '@old_key' => $key,
+          '@new_config' => $config->name,
+          '@new_key' => $parsed['key'],
+        ),
+        WATCHODG_DEPRECATED
+      );
       return $config->set($parsed['key'], $value);
     }
 
