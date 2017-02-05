@@ -222,6 +222,18 @@ class LayoutRendererEditor extends LayoutRendererStandard {
       ),
     );
 
+    if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta =='title_combo')) {
+      $links['title'] = array(
+        'title' => t('Page title settings'),
+        'href' => $this->getUrl('edit-title', 'title'),
+        'attributes' => array(
+          'class' => array('use-ajax'),
+          'data-dialog' => TRUE,
+          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+        ),
+      );
+    }
+
     $dropbutton = array(
       '#type' => 'dropbutton',
       '#links' => $links,
