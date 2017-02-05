@@ -1466,6 +1466,12 @@ function layout_block_configure_ajax_update($form, $form_state) {
     $commands[] = ajax_command_replace('#layout-editor-block-' . $block->uuid, $renderer->renderBlock($block));
   }
 
+  // Remove the page title pseudo region if we're adding a Title block or a
+  // Combo block.
+  if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta =='title_combo')) {
+    $commands[] = ajax_command_remove('#layout-editor-title');
+  }
+
   // Update the messages area.
   if ($message = layout_locked_message($layout, 'layout')) {
     backdrop_set_message($message, 'warning');
