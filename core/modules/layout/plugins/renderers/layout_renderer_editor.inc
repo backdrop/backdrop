@@ -47,9 +47,23 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    * {@inheritdoc}
    */
   function renderRegion($region_id, $blocks) {
+    $render_title_region = TRUE;
+    $all_layout_blocks = $this->layout->content;
+    foreach ($all_layout_blocks as $block) {
+      if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta =='title_combo')) {
+        $render_title_region = FALSE;
+        break;
+      }
+    }
+
     $output = '';
     if ($region_id == 'title') {
-      return $this->renderTitleRegion($region_id);
+      if ($render_title_region) {
+        return $this->renderTitleRegion($region_id);
+      }
+      else {
+        $output = '<div class="layout-title-region-empty"></div>';
+      }
     }
     else {
       $content = implode('', $blocks);
