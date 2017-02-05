@@ -791,7 +791,7 @@ function date_timezone_is_valid($timezone) {
  */
 function date_default_timezone($check_user = TRUE) {
   global $user;
-  if ($check_user && config_get('system.date','user_timezone_configurable') && !empty($user->timezone)) {
+  if ($check_user && config_get('system.date','user_configurable_timezones') && !empty($user->timezone)) {
     return $user->timezone;
   }
   else {
