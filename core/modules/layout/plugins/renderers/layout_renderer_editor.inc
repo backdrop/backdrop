@@ -62,7 +62,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
         return $this->renderTitleRegion($region_id);
       }
       else {
-        $output = '<div class="layout-title-region-empty"></div>';
+        $output = '<div id="layout-title-region-empty"></div>';
       }
     }
     else {
