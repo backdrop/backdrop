@@ -16,8 +16,8 @@
  * @ingroup views_templates
  */
 ?>
-<?php dpm($classes); if (!empty($title)) : ?>
-  <h3><?php print $title . "IKNKN"; ?></h3>
+<?php if (!empty($title)) : ?>
+  <h3><?php print $title; ?></h3>
 <?php endif; ?>
   <div class="<?php print $classes; ?>">
 <?php if ($options['alignment'] == 'vertical') : ?>
