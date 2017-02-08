@@ -1951,7 +1951,19 @@ function theme_dropbutton_wrapper($variables) {
  */
 function theme_image($variables) {
   $attributes = $variables['attributes'];
-  $attributes['src'] = file_create_url($variables['uri']);
+
+  // Check for missing 'uri', allow D7's 'path' instead.
+  $uri = $variables['uri'];
+  if (!$uri && !empty($variables['path'])) {
+    watchdog('Image',
+      'theme_image() called with deprecated "path", use "uri" instead.',
+      array(),
+      WATCHDOG_DEPRECATED,
+      'https://api.backdropcms.org/api/backdrop/core%21includes%21theme.inc/function/theme_image/1'
+    );
+    $uri = $variables['path'];
+  }
+  $attributes['src'] = file_create_url($uri);
 
   foreach (array('width', 'height', 'alt', 'title') as $key) {
     if (isset($variables[$key])) {
