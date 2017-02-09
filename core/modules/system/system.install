@@ -606,14 +606,14 @@ function _system_check_db_utf8mb4_requirements($phase) {
 
   $connection = Database::getConnection();
   $t = get_t();
-  $requirements['title'] = $t('Database system 4 bit UTF-8 support');
+  $requirements['title'] = $t('Database system 4-byte UTF-8 support');
 
   $utf8mb4_active = $connection->utf8mb4IsActive();
   $utf8mb4_supported = $connection->utf8mb4IsSupported();
   $documentation_url = 'https://api.backdropcms.org/database-configuration';
   $upgrade_path = 'admin/config/development/utf8mb4-upgrade';
 
-  $requirements['description'] = $t('4 bit UTF-8 support enables extended characters to be saved into the database, including emojis, Asian symbols and mathematical symbols.');
+  $requirements['description'] = $t('4-byte UTF-8 support enables extended characters to be saved into the database, including emojis, Asian symbols and mathematical symbols.');
 
   if ($utf8mb4_active) {
     if ($utf8mb4_supported) {
@@ -650,7 +650,7 @@ function _system_check_db_utf8mb4_requirements($phase) {
     else {
       // Not supported, not active.
       $requirements['value'] = $t('Not available');
-      $requirements['description'] .= ' ' . $t('This feature is not supported on your system. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
+      $requirements['description'] .= ' ' . $t('This feature is not supported on your system. See the <a href="@url">documentation on adding 4-byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
       $requirements['severity'] = REQUIREMENT_INFO;
     }
   }
