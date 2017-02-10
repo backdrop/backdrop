@@ -2455,6 +2455,21 @@ function system_block_configure($delta, $settings) {
 }
 
 /**
+ * Implements hook_block_save().
+ */
+function system_block_save($delta, &$edit = array()) {
+  if ($delta === 'header') {
+    // Clean up all the components so Layout module can save them correctly.
+    if (is_array($edit['components']) && !empty($edit['components'])) {
+      foreach ($edit['components'] as $key => $value) {
+        $edit[$key] = $value;
+      }
+      unset($edit['components']);
+    }
+  }
+}
+
+/**
  * Implements hook_preprocess_block().
  */
 function system_preprocess_block(&$variables) {
@@ -3063,6 +3078,7 @@ function system_header_block_form($settings) {
     '#title' => t('Site slogan'),
     '#default_value' => $settings['site_slogan'],
   );
+
   return $form;
 }
 
