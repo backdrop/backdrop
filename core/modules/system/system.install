@@ -568,7 +568,7 @@ function system_requirements($phase) {
       'description' => $description,
     );
   }
-  
+
   if ($phase == 'runtime') {
     // Inform the user if theme_debug is enabled.
     $theme_debug_enabled = config_get('system.core', 'theme_debug');
@@ -581,7 +581,7 @@ function system_requirements($phase) {
       );
     }
   }
-  
+
   return $requirements;
 }
 
@@ -3041,6 +3041,17 @@ function system_update_1061() {
   // Remove the entry for the entity_view_mode module in the system table. This
   // will "disable" the module if present.
   db_query("DELETE FROM {system} WHERE name = 'entity_view_mode' AND type = 'module'");
+}
+
+/**
+ * Remove configuration settings that were never used.
+ */
+function system_update_1062() {
+  $config = config('system.date');
+  $config->clear('user_timezone_configurable');
+  $config->clear('user_timezone_default');
+  $config->clear('user_timezone_warn');
+  $config->save();
 }
 
 /**

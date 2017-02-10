@@ -1877,7 +1877,6 @@ function system_regional_settings($form, &$form_state) {
   // Date settings:
   $zones = system_time_zones();
 
-  $form['#config'] = 'system.date';
   $form['locale'] = array(
     '#type' => 'fieldset',
     '#title' => t('Locale'),
@@ -1948,7 +1947,31 @@ function system_regional_settings($form, &$form_state) {
     '#description' => t('Only applied if users may set their own time zone.')
   );
 
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+  return $form;
+}
+
+/**
+ * Form submission handler for regional settings.
+ *
+ * @ingroup forms
+ * @see system_regional_settings()
+ */
+function system_regional_settings_submit($form, &$form_state) {
+  config('system.date')
+    ->set('default_country', $form_state['values']['site_default_country'])
+    ->set('first_day', $form_state['values']['date_first_day'])
+    ->set('default_timezone', $form_state['values']['date_default_timezone'])
+    ->set('user_configurable_timezones', $form_state['values']['configurable_timezones'])
+    ->set('user_empty_timezone_message', $form_state['values']['empty_timezone_message'])
+    ->set('user_default_timezone', $form_state['values']['user_default_timezone'])
+    ->save();
+  // Display status messages for this form.
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
