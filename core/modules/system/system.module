@@ -2463,8 +2463,8 @@ function system_block_save($delta, &$edit = array()) {
     if (is_array($edit['components']) && !empty($edit['components'])) {
       foreach ($edit['components'] as $key => $value) {
         $edit[$key] = $value;
-        unset($edit['components'][$key]);
       }
+      unset($edit['components']);
     }
   }
 }
