@@ -1158,13 +1158,16 @@ function user_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
-  $items['user/register'] = array(
-    'title' => 'Create new account',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('user_register_form'),
-    'access callback' => 'user_register_access',
-    'type' => MENU_LOCAL_TASK,
-  );
+  // Do not render the registration tab if the site is in maintenance mode.
+  if (!state_get('maintenance_mode', FALSE)) {
+    $items['user/register'] = array(
+      'title' => 'Create new account',
+      'page callback' => 'backdrop_get_form',
+      'page arguments' => array('user_register_form'),
+      'access callback' => 'user_register_access',
+      'type' => MENU_LOCAL_TASK,
+    );
+  }
 
   $items['user/password'] = array(
     'title' => 'Reset password',
