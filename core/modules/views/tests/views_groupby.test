@@ -4,8 +4,6 @@
  * Tests aggregate functionality of Views.
  */
 
-require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
-
 /**
  * Tests aggregate functionality of views, for example count.
  */

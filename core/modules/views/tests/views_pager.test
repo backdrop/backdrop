@@ -4,8 +4,6 @@
  * Definition of ViewsPagerTest.
  */
 
-require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
-
 /**
  * Tests the pluggable pager system.
  */

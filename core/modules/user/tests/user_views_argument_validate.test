@@ -5,8 +5,6 @@
  * Definition of UserViewsArgumentValidate.
  */
 
-require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
-
 /**
  * Tests views user argument argument handler.
  */

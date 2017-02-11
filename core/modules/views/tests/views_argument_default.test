@@ -5,8 +5,6 @@
  * Definition of ViewsArgumentDefaultTest.
  */
 
-require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
-
 /**
  * Basic test for pluggable argument default.
  */

@@ -5,8 +5,6 @@
  * Definition of ViewsModuleTest.
  */
 
-require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
-
 /**
  * Tests basic functions from the Views module.
  */

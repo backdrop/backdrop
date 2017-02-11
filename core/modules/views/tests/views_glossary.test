@@ -5,8 +5,6 @@
  * Definition of ViewsGlossaryTestCase.
  */
 
-require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
-
 /**
  * Tests glossary view ( summary of arguments ).
  */
