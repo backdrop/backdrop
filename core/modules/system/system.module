@@ -3095,7 +3095,11 @@ function system_header_block($settings) {
     'site_slogan' => TRUE,
   );
 
-  $menu = $settings['menu'] ? menu_navigation_links($settings['menu']) : NULL;
+  // Render the header menu only if the site is not in maintenance mode or the
+  // logged in user has the 'access site in maintenance mode' permission.
+  if (!state_get('maintenance_mode', FALSE) || user_access('access site in maintenance mode')) {
+    $menu = $settings['menu'] ? menu_navigation_links($settings['menu']) : NULL;
+  }
   $site_config = config('system.core');
   $variables['logo']        = $settings['logo'] ? backdrop_get_logo() : NULL;
   $variables['logo_attributes'] = $settings['logo'] ? array_diff_key(backdrop_get_logo_info(), array('path' => '')) : array();
@@ -3112,12 +3116,19 @@ function system_header_block($settings) {
  * @see system_block_view()
  */
 function system_breadcrumb_block($settings = array()) {
-  $crumbs = backdrop_get_breadcrumb();
-  if (isset($settings['current']) && $settings['current'] == TRUE) {
-    $crumbs[] = '<span>' . backdrop_get_title() . '</span>';
-  }
+  // Render breadcrumbs only if the site is not in maintenance mode or the
+  // logged in user has the 'access site in maintenance mode' permission.
+  if (!state_get('maintenance_mode', FALSE) || user_access('access site in maintenance mode')) {
+    $crumbs = backdrop_get_breadcrumb();
+    if (isset($settings['current']) && $settings['current'] == TRUE) {
+      $crumbs[] = '<span>' . backdrop_get_title() . '</span>';
+    }
 
-  return theme('breadcrumb', array('breadcrumb' => $crumbs));
+    return theme('breadcrumb', array('breadcrumb' => $crumbs));
+  }
+  else {
+    return NULL;
+  }
 }
 
 /**
