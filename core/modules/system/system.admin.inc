@@ -2008,6 +2008,10 @@ function system_site_maintenance_mode($form, &$form_state) {
 function system_site_maintenance_mode_submit($form, &$form_state) {
   state_set('maintenance_mode', (bool) $form_state['values']['maintenance_mode']);
   config_set('system.core', 'maintenance_mode_message', $form_state['values']['maintenance_mode_message']);
+  // Rebuild menus so that certain items that are hidden when in maintenance
+  // mode (like the "Create new account" form for example) are immediately
+  // hidden/shown when switching to/from maintenance mode.
+  menu_rebuild();
 
   // Give specific messages on the primary action for this form.
   if ($form_state['values']['maintenance_mode']) {
