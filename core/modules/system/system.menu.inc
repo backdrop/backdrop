@@ -134,55 +134,59 @@ function system_menu_block_form($config) {
  *   - subject_array: The title as a renderable array.
  */
 function system_menu_block_build(array $config) {
-  if (module_exists('menu')) {
-    $menu_names = menu_get_menus();
-  }
-  else {
-    $menu_names = menu_list_system_menus();
-  }
-
-  // Set defaults.
-  $config += array(
-    'style' => 'tree',
-    'level' => 1,
-    'depth' => 3,
-  );
-
-  // Get the default block name.
-  backdrop_static_reset('menu_block_set_title');
-  $menu_name = str_replace('_', '-', $config['menu_name']);
-  system_menu_block_set_title($menu_names[$menu_name]);
-
-  // Get the raw menu tree data.
-  $tree = system_menu_tree_block_data($config);
-  $title = system_menu_block_get_title();
-
+  // Build menu blocks only if the site is not in maintenance mode or the
+  // logged in user has the 'access site in maintenance mode' permission.
   $data = array();
-  $data['subject'] = $title;
-  $data['content'] = array();
-  // Create a renderable tree.
-  if (!empty($tree) && $output = menu_tree_output($tree)) {
-    $data['content'] = $output;
-    // Add any menu style (currently always "dropdown" if any).
-    if (!empty($config['style'])) {
-      $data['content']['#wrapper_attributes']['class'][] = 'menu-' . str_replace('_', '-', $config['style']);
-      $data['content']['#wrapper_attributes']['data-menu-style'] = $config['style'];
-      $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
-      if ($config['style'] === 'dropdown') {
-        $data['content']['#attached']['library'][] = array('system', 'smartmenus');
+  if (!state_get('maintenance_mode', FALSE) || user_access('access site in maintenance mode')) {
+    if (module_exists('menu')) {
+      $menu_names = menu_get_menus();
+    }
+    else {
+      $menu_names = menu_list_system_menus();
+    }
+
+    // Set defaults.
+    $config += array(
+      'style' => 'tree',
+      'level' => 1,
+      'depth' => 3,
+    );
+
+    // Get the default block name.
+    backdrop_static_reset('menu_block_set_title');
+    $menu_name = str_replace('_', '-', $config['menu_name']);
+    system_menu_block_set_title($menu_names[$menu_name]);
+
+    // Get the raw menu tree data.
+    $tree = system_menu_tree_block_data($config);
+    $title = system_menu_block_get_title();
+
+    $data['subject'] = $title;
+    $data['content'] = array();
+    // Create a renderable tree.
+    if (!empty($tree) && $output = menu_tree_output($tree)) {
+      $data['content'] = $output;
+      // Add any menu style (currently always "dropdown" if any).
+      if (!empty($config['style'])) {
+        $data['content']['#wrapper_attributes']['class'][] = 'menu-' . str_replace('_', '-', $config['style']);
+        $data['content']['#wrapper_attributes']['data-menu-style'] = $config['style'];
+        $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
+        if ($config['style'] === 'dropdown') {
+          $data['content']['#attached']['library'][] = array('system', 'smartmenus');
+        }
+      }
+      if (!empty($config['toggle']) && $config['toggle'] == TRUE) {
+        $id = backdrop_html_id('menu-toggle-state');
+        $data['content']['#wrapper_attributes']['data-menu-toggle-id'] = $id;
+        $data['content']['#prefix'] = theme('menu_toggle', array('enabled' => $config['toggle'], 'id' => $id, 'text' => t('Menu')));
+        $data['content']['#attached']['css'][] = backdrop_get_path('module', 'system') . '/css/menu-toggle.theme.css';
+      }
+      if (!empty($config['style_settings'])) {
+        $data['content']['#wrapper_attributes']['data-menu-style'] = backdrop_json_encode($config['style_settings']);
       }
     }
-    if (!empty($config['toggle']) && $config['toggle'] == TRUE) {
-      $id = backdrop_html_id('menu-toggle-state');
-      $data['content']['#wrapper_attributes']['data-menu-toggle-id'] = $id;
-      $data['content']['#prefix'] = theme('menu_toggle', array('enabled' => $config['toggle'], 'id' => $id, 'text' => t('Menu')));
-      $data['content']['#attached']['css'][] = backdrop_get_path('module', 'system') . '/css/menu-toggle.theme.css';
-    }
-    if (!empty($config['style_settings'])) {
-      $data['content']['#wrapper_attributes']['data-menu-style'] = backdrop_json_encode($config['style_settings']);
-    }
   }
-
+  
   return $data;
 }
 
