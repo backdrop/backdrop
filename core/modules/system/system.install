@@ -183,6 +183,22 @@ function system_requirements($phase) {
     $requirements['database_charset'] = $charset_requirements;
   }
 
+  // Report jQuery and jQuery UI versions.
+  if ($phase == 'runtime') {
+    $jquery = backdrop_get_library('system', 'jquery');
+    $jquery_ui = backdrop_get_library('system', 'ui');
+    $requirements['jquery'] = array(
+      'title' => $t('jQuery'),
+      'severity' => REQUIREMENT_OK,
+      'value' => $jquery['version'],
+    );
+    $requirements['jquery_ui'] = array(
+      'title' => $t('jQuery UI'),
+      'severity' => REQUIREMENT_OK,
+      'value' => $jquery_ui['version'],
+    );
+  }
+
   // Test PHP memory_limit
   $memory_limit = ini_get('memory_limit');
   $requirements['php_memory_limit'] = array(
