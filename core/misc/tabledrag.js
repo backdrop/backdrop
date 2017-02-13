@@ -121,8 +121,8 @@ Backdrop.tableDrag = function (table, tableSettings) {
   // as event handlers do not have direct access to the tableDrag object.
   $(document).on('touchmove', function (event) { return self.dragRow(event.originalEvent.touches[0], self); });
   $(document).on('touchend', function (event) { return self.dropRow(event.originalEvent.touches[0], self); });
-  $(document).on('mousemove', function (event) { return self.dragRow(event, self); });
-  $(document).on('mouseup', function (event) { return self.dropRow(event, self); });
+  $(document).on('mousemove pointermove', function (event) { return self.dragRow(event, self); });
+  $(document).on('mouseup pointerup', function (event) { return self.dropRow(event, self); });
 };
 
 /**
@@ -888,7 +888,7 @@ Backdrop.tableDrag.prototype.setScroll = function (scrollAmount) {
 
   this.scrollInterval = setInterval(function () {
     // Update the scroll values stored in the object.
-    self.checkScroll(self.currentpointerCoords.y);
+    self.checkScroll(self.currentPointerCoords.y);
     var aboveTable = self.scrollY > self.table.topY;
     var belowTable = self.scrollY + self.windowHeight < self.table.bottomY;
     if (scrollAmount > 0 && belowTable || scrollAmount < 0 && aboveTable) {
