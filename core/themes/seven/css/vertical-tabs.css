@@ -171,6 +171,7 @@
 }
 [dir="rtl"] .vertical-tab-selected .vertical-tab-link {
   border-right: 4px solid #0074bd;
+  border-left: none;
 }
 .vertical-tab-selected strong,
 .vertical-tab-selected .fieldset-legend {
