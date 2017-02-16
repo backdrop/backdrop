@@ -227,6 +227,9 @@ function theme_update_report($variables) {
 
     $row .= '<div class="includes">';
     sort($project['includes']);
+    // If the project has both enabled and disabled submodules, then render them
+    // as a list with two items, one holding enabled and one holding disabled
+    // submodules.
     if (!empty($project['disabled'])) {
       sort($project['disabled']);
       // Make sure we start with a clean slate for each project in the report.
@@ -236,7 +239,9 @@ function theme_update_report($variables) {
       $includes_items[] = t('Disabled: %disabled', array('%disabled' => implode(', ', $project['disabled'])));
       $row .= theme('item_list', array('items' => $includes_items));
     }
-    else {
+    // If the project has only enabled submodules, then list them only if there
+    // is more than one.
+    elseif (count($project['includes']) > 1) {
       $row .= t('Includes: %includes', array('%includes' => implode(', ', $project['includes'])));
     }
     $row .= "</div>\n";
