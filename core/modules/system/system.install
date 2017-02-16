@@ -183,6 +183,22 @@ function system_requirements($phase) {
     $requirements['database_charset'] = $charset_requirements;
   }
 
+  // Report jQuery and jQuery UI versions.
+  if ($phase == 'runtime') {
+    $jquery = backdrop_get_library('system', 'jquery');
+    $jquery_ui = backdrop_get_library('system', 'ui');
+    $requirements['jquery'] = array(
+      'title' => $t('jQuery'),
+      'severity' => REQUIREMENT_OK,
+      'value' => $jquery['version'],
+    );
+    $requirements['jquery_ui'] = array(
+      'title' => $t('jQuery UI'),
+      'severity' => REQUIREMENT_OK,
+      'value' => $jquery_ui['version'],
+    );
+  }
+
   // Test PHP memory_limit
   $memory_limit = ini_get('memory_limit');
   $requirements['php_memory_limit'] = array(
@@ -568,7 +584,7 @@ function system_requirements($phase) {
       'description' => $description,
     );
   }
-  
+
   if ($phase == 'runtime') {
     // Inform the user if theme_debug is enabled.
     $theme_debug_enabled = config_get('system.core', 'theme_debug');
@@ -581,7 +597,7 @@ function system_requirements($phase) {
       );
     }
   }
-  
+
   return $requirements;
 }
 
@@ -606,14 +622,14 @@ function _system_check_db_utf8mb4_requirements($phase) {
 
   $connection = Database::getConnection();
   $t = get_t();
-  $requirements['title'] = $t('Database system 4 bit UTF-8 support');
+  $requirements['title'] = $t('Database system 4-byte UTF-8 support');
 
   $utf8mb4_active = $connection->utf8mb4IsActive();
   $utf8mb4_supported = $connection->utf8mb4IsSupported();
   $documentation_url = 'https://api.backdropcms.org/database-configuration';
   $upgrade_path = 'admin/config/development/utf8mb4-upgrade';
 
-  $requirements['description'] = $t('4 bit UTF-8 support enables extended characters to be saved into the database, including emojis, Asian symbols and mathematical symbols.');
+  $requirements['description'] = $t('4-byte UTF-8 support enables extended characters to be saved into the database, including emojis, Asian symbols and mathematical symbols.');
 
   if ($utf8mb4_active) {
     if ($utf8mb4_supported) {
@@ -650,7 +666,7 @@ function _system_check_db_utf8mb4_requirements($phase) {
     else {
       // Not supported, not active.
       $requirements['value'] = $t('Not available');
-      $requirements['description'] .= ' ' . $t('This feature is not supported on your system. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
+      $requirements['description'] .= ' ' . $t('This feature is not supported on your system. See the <a href="@url">documentation on adding 4-byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
       $requirements['severity'] = REQUIREMENT_INFO;
     }
   }
@@ -2997,6 +3013,61 @@ function system_update_1060() {
       }
     }
   }
+}
+
+/**
+ * Update contrib entity view mode module to core version.
+ */
+function system_update_1061() {
+  $old_config = config('entity_view_mode.settings');
+  $new_config = config('entity.view_modes');
+
+  // Backdrop pre-1.6 view modes from entity_view_mode.module:
+  if (!$old_config->isNew()) {
+    $old_data = $old_config->get('entity_view_modes');
+  }
+  // Drupal 7 entity_view_mode.module:
+  else {
+    $old_data = update_variable_get('entity_view_modes');
+  }
+
+  $new_data = array();
+  if ($old_data) {
+    foreach ($old_data as $entity_type => $old_view_modes) {
+      foreach ($old_view_modes as $view_mode_name => $view_mode) {
+        // Backdrop does not have a "custom settings" flag.
+        if (isset($view_mode['custom settings'])) {
+          unset($view_mode['custom settings']);
+        }
+        $new_data[$entity_type][$view_mode_name] = $view_mode;
+      }
+    }
+  }
+
+  // Only update core if no view modes have yet been set.
+  if ($new_data && !$new_config->get('view_modes')) {
+    $new_config->set('view_modes', $new_data);
+    $new_config->save();
+
+    // Delete the old configuration regardless of location.
+    $old_config->delete();
+    update_variable_del('entity_view_modes');
+  }
+
+  // Remove the entry for the entity_view_mode module in the system table. This
+  // will "disable" the module if present.
+  db_query("DELETE FROM {system} WHERE name = 'entity_view_mode' AND type = 'module'");
+}
+
+/**
+ * Remove configuration settings that were never used.
+ */
+function system_update_1062() {
+  $config = config('system.date');
+  $config->clear('user_timezone_configurable');
+  $config->clear('user_timezone_default');
+  $config->clear('user_timezone_warn');
+  $config->save();
 }
 
 /**
