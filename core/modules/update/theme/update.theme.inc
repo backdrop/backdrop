@@ -213,62 +213,76 @@ function theme_update_report($variables) {
     if (!empty($versions_inner)) {
       $row .= "<div class=\"versions\">\n" . $versions_inner . "</div>\n";
     }
-    $row .= "<div class=\"info\">\n";
-    if (!empty($project['extra'])) {
-      $row .= '<div class="extra">' . "\n";
-      foreach ($project['extra'] as $key => $value) {
-        $row .= '<div class="' . implode(' ', $value['class']) . '">';
-        $row .= check_plain($value['label']) . ': ';
-        $row .= backdrop_placeholder($value['data']);
-        $row .= "</div>\n";
-      }
-      $row .= "</div>\n";  // extra div.
-    }
 
-    $row .= '<div class="includes">';
-    sort($project['includes']);
-    if (!empty($project['disabled'])) {
-      sort($project['disabled']);
-      // Make sure we start with a clean slate for each project in the report.
-      $includes_items = array();
-      $row .= t('Includes:');
-      $includes_items[] = t('Enabled: %includes', array('%includes' => implode(', ', $project['includes'])));
-      $includes_items[] = t('Disabled: %disabled', array('%disabled' => implode(', ', $project['disabled'])));
-      $row .= theme('item_list', array('items' => $includes_items));
-    }
-    else {
-      $row .= t('Includes: %includes', array('%includes' => implode(', ', $project['includes'])));
-    }
-    $row .= "</div>\n";
+    // Render the .info div only if there is something to be rendered in it.
+    if (!empty($project['extra']) || count($project['includes']) > 1 || !empty($project['base_themes']) || !empty($project['sub_themes'])) {
+      $row .= "<div class=\"info\">\n";
 
-    if (!empty($project['base_themes'])) {
-      $row .= '<div class="basethemes">';
-      asort($project['base_themes']);
-      $base_themes = array();
-      foreach ($project['base_themes'] as $base_key => $base_theme) {
-        switch ($status[$base_key]) {
-          case UPDATE_NOT_SECURE:
-          case UPDATE_REVOKED:
-          case UPDATE_NOT_SUPPORTED:
-            $base_themes[] = t('%base_theme (!base_label)', array('%base_theme' => $base_theme, '!base_label' => theme('update_status_label', array('status' => $status[$base_key]))));
-            break;
-
-          default:
-            $base_themes[] = backdrop_placeholder($base_theme);
+      if (!empty($project['extra'])) {
+        $row .= '<div class="extra">' . "\n";
+        foreach ($project['extra'] as $key => $value) {
+          $row .= '<div class="' . implode(' ', $value['class']) . '">';
+          $row .= check_plain($value['label']) . ': ';
+          $row .= backdrop_placeholder($value['data']);
+          $row .= "</div>\n";
         }
+        $row .= "</div>\n";  // .extra div
       }
-      $row .= t('Depends on: !basethemes', array('!basethemes' => implode(', ', $base_themes)));
-      $row .= "</div>\n";
-    }
 
-    if (!empty($project['sub_themes'])) {
-      $row .= '<div class="subthemes">';
-      sort($project['sub_themes']);
-      $row .= t('Required by: %subthemes', array('%subthemes' => implode(', ', $project['sub_themes'])));
-      $row .= "</div>\n";
-    }
+      // Render the includes info only if the project has more than one
+      // submodule.
+      if (count($project['includes']) > 1) {
+        $row .= '<div class="includes">';
+        sort($project['includes']);
+        // If the project has both enabled and disabled submodules, then render
+        // them as a list with two items, one holding enabled and one holding
+        // disabled submodules.
+        if (!empty($project['disabled'])) {
+          sort($project['disabled']);
+          // Make sure we start with a clean slate for each project in the
+          // report.
+          $includes_items = array();
+          $row .= t('Includes:');
+          $includes_items[] = t('Enabled: %includes', array('%includes' => implode(', ', $project['includes'])));
+          $includes_items[] = t('Disabled: %disabled', array('%disabled' => implode(', ', $project['disabled'])));
+          $row .= theme('item_list', array('items' => $includes_items));
+        }
+        // ...otherwise, render the included modules in a single row.
+        else {
+          $row .= t('Includes: %includes', array('%includes' => implode(', ', $project['includes'])));
+        }
+        $row .= "</div>\n";  // .includes div
+      }
 
-    $row .= "</div>\n"; // info div.
+      if (!empty($project['base_themes'])) {
+        $row .= '<div class="basethemes">';
+        asort($project['base_themes']);
+        $base_themes = array();
+        foreach ($project['base_themes'] as $base_key => $base_theme) {
+          switch ($status[$base_key]) {
+            case UPDATE_NOT_SECURE:
+            case UPDATE_REVOKED:
+            case UPDATE_NOT_SUPPORTED:
+              $base_themes[] = t('%base_theme (!base_label)', array('%base_theme' => $base_theme, '!base_label' => theme('update_status_label', array('status' => $status[$base_key]))));
+              break;
+
+            default:
+              $base_themes[] = backdrop_placeholder($base_theme);
+          }
+        }
+        $row .= t('Depends on: !basethemes', array('!basethemes' => implode(', ', $base_themes)));
+        $row .= "</div>\n";  // .basethemes div
+      }
+
+      if (!empty($project['sub_themes'])) {
+        $row .= '<div class="subthemes">';
+        sort($project['sub_themes']);
+        $row .= t('Required by: %subthemes', array('%subthemes' => implode(', ', $project['sub_themes'])));
+        $row .= "</div>\n";  // .subthemes div
+      }
+
+      $row .= "</div>\n";  // info div.
+    }
 
     if (!isset($rows[$project['project_type']])) {
       $rows[$project['project_type']] = array();
