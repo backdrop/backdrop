@@ -123,6 +123,13 @@ function node_form($form, &$form_state, Node $node) {
   // in 'TYPE-node-form' potentially clashes with third-party class names.
   $form['#attributes']['class'][0] = backdrop_html_class('node-' . $node->type . '-form');
 
+  $form['help'] = array(
+    '#type' => 'markup',
+    '#markup' => '<p>' . filter_xss_admin($node_type->help) . '</p>',
+    '#access' => !empty($node_type->help),
+    '#weight' => -500,
+  );
+
   // Basic node information.
   // These elements are just values so they are not even sent to the client.
   foreach (array('nid', 'vid', 'uid', 'created', 'type') as $key) {
