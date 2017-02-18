@@ -1579,7 +1579,8 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
     $handler = isset($layout->conditions[$condition_id]) ? $layout->conditions[$condition_id] : NULL;
   }
   $form['help'] = array(
-    '#markup' => '<p>' . $help . '</p>',
+    '#type' => 'help',
+    '#markup' => $help,
   );
   $all_access_info = _layout_get_all_info('layout_access');
   backdrop_sort($all_access_info, array('title'));
@@ -1898,7 +1899,8 @@ function layout_reorder_form($form, &$form_state) {
   }
 
   $form['help'] = array(
-    '#markup' => '<p class="help">' . t('Layouts at the same path are selected based on the first layout that matches its conditions. Reorder the layouts on this page to affect the layout that will be used first.') . '</p>',
+    '#type' => 'help',
+    '#markup' => t('Layouts at the same path are selected based on the first layout that matches its conditions. Reorder the layouts on this page to affect the layout that will be used first.'),
   );
 
   $form['layouts'] = array(

@@ -2367,6 +2367,17 @@ function theme_item_list($variables) {
 }
 
 /**
+ * Returns HTML for a help element.
+ */
+function theme_help($variables) {
+  // Wrap in a paragraph tag if one is not present.
+  if (strpos($variables['markup'], '<p') === FALSE) {
+    $variables['markup'] = '<p>' . $variables['markup'] . '</p>';
+  }
+  return '<div class="help">' . $variables['markup'] . '</div>';
+}
+
+/**
  * Returns HTML for a "more help" link.
  *
  * @param $variables
@@ -2795,7 +2806,6 @@ function template_preprocess_maintenance_page(&$variables) {
   $variables['front_page']        = url();
   $variables['breadcrumb']        = '';
   $variables['feed_icons']        = '';
-  $variables['help']              = '';
   $variables['messages']          = $variables['show_messages'] ? theme('status_messages') : '';
   $variables['main_menu']         = array();
   $variables['secondary_menu']    = array();

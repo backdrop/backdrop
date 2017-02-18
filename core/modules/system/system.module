@@ -484,6 +484,11 @@ function system_element_info() {
     '#markup' => '',
     '#pre_render' => array('backdrop_pre_render_markup'),
   );
+  $types['help'] = array(
+    '#markup' => '',
+    '#pre_render' => array('backdrop_pre_render_markup'),
+    '#theme' => 'help',
+  );
   $types['link'] = array(
     '#pre_render' => array('backdrop_pre_render_link', 'backdrop_pre_render_markup'),
   );

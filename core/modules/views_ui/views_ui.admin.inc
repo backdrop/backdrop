@@ -3986,6 +3986,7 @@ function views_ui_config_item_form($form, &$form_state) {
 
       if (!empty($handler->definition['help'])) {
         $form['options']['form_description'] = array(
+          '#type' => 'help',
           '#markup' => $handler->definition['help'],
           '#theme_wrappers' => array('container'),
           '#attributes' => array('class' => array('form-item description')),
