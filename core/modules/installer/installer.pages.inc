@@ -511,6 +511,31 @@ function installer_browser_installation_install_dependencies_page() {
 function installer_browser_installation_enable_page($type = 'enable') {
   module_load_include('inc', 'installer', 'installer.browser');
   $installed_projects = installer_browser_get_installed_projects();
+  $modules = system_rebuild_module_data();
+
+  // Go through each of the installed projects...
+  foreach ($installed_projects as $project) {
+    // ...and if the project is a module and it is among the list of available
+    // modules...
+    if ($project['type'] == 'module' && isset($modules[$project['name']])) {
+      // ...then go through each of the available modules...
+      foreach ($modules as $module) {
+        // ...and find the ones that belong to the same project/package as the
+        // installed project currenlty being checked (but exclude the main
+        // module itself)...
+        if ($modules[$project['name']]->info['project'] === $module->info['project'] && $modules[$project['name']]->name != $module->name) {
+          // ...then add it to the array of installed projects (we only need
+          // type, machine name and project title for the checks later in
+          // installer_browser_installation_enable_form()).
+          $installed_projects[$module->name] = array(
+            'type' => $module->info['type'],
+            'title' => $module->info['name'],
+            'name' => $module->name,
+          );
+        }
+      }
+    }
+  }
 
   if (count($installed_projects) > 0) {
     return backdrop_get_form('installer_browser_installation_' . $type . '_form', $installed_projects);
