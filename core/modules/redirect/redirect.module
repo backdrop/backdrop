@@ -645,7 +645,7 @@ function redirect_validate(Redirect $redirect, $form, &$form_state) {
   redirect_hash($redirect);
   if ($existing = redirect_load_by_hash($redirect->hash)) {
     if ($redirect->rid != $existing->rid) {
-      form_set_error('source', t('The source path %source is already being redirected. Do you want to <a href="@edit-page">edit the existing redirect</a>?', array('%source' => redirect_url($redirect->source, $redirect->source_options), '@edit-page' => url('admin/config/search/redirect/edit/'. $existing->rid))));
+      form_set_error('source', t('The source path %source is already being redirected. Do you want to <a href="@edit-page">edit the existing redirect</a>?', array('%source' => redirect_url($redirect->source, $redirect->source_options), '@edit-page' => url('admin/config/urls/redirect/edit/'. $existing->rid))));
     }
   }
 
@@ -1361,7 +1361,7 @@ function redirect_field_attach_form($entity_type, $entity, &$form, &$form_state,
   if (redirect_access('create', 'redirect')) {
     $form['redirect']['actions']['#links']['add'] = array(
       'title' => t('Add URL redirect to this @type', array('@type' => backdrop_strtolower($info['label']))),
-      'href' => 'admin/config/search/redirect/add',
+      'href' => 'admin/config/urls/redirect/add',
       'query' => array_filter($redirect) + backdrop_get_destination(),
     );
   }
