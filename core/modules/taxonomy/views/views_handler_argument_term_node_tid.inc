@@ -38,6 +38,7 @@ class views_handler_argument_term_node_tid extends views_handler_argument_many_t
   function title_query() {
     $titles = array();
     $result = db_select('taxonomy_term_data', 'td')
+      ->addTag('taxonomy_term_access')
       ->fields('td', array('name'))
       ->condition('td.tid', $this->value)
       ->execute();
