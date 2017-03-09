@@ -95,6 +95,29 @@ function config_set($config_file, $option, $value) {
 }
 
 /**
+ * A shortcut function to delete a single value from a config file.
+ *
+ * Note that this function immediately writes the config file to disk and clears
+ * associated caches related to the new config. If deleting a number of options
+ * in the same configuration file, it is better to create a config object
+ * directly, delete all the necessary values, and then save the config file
+ * minus new options all at once.
+ *
+ * @param string $config_file
+ *   The name of the configuration object to retrieve. The name corresponds to
+ *   an JSON configuration file. For @code config(book.admin) @endcode, the
+ *   config object returned will contain the contents of book.admin.json.
+ * @param string $option
+ *   The name of the config option within the file to set. The config option
+ *   may contain periods to indicate levels within the config file.
+ */
+function config_clear($config_file, $option) {
+  $config = config($config_file);
+  $config->clear($option);
+  $config->save();
+}
+
+/**
  * A shortcut function to set and save multiple values in a config file.
  *
  * Note that this function immediately writes the config file to disk and clears
