@@ -182,7 +182,7 @@ function entityreference_get_behavior_handlers($field, $instance = NULL) {
 /**
  * Get the behavior handler for a given entityreference field and instance.
  *
- * @param $handler
+ * @param $behavior
  *   The behavior handler name.
  */
 function _entityreference_get_behavior_handler($behavior) {
