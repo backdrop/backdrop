@@ -199,6 +199,10 @@ class EntityReference_SelectionHandler_Views implements EntityReference_Selectio
    *   The arguments to be send to the View.
    */
   protected function handleArgs($args) {
+    if (!module_exists('token')) {
+      return $args;
+    }
+
     // Parameters for token_replace().
     $data = array();
     $options = array('clear' => TRUE);
