@@ -144,18 +144,20 @@ class EntityReferenceBehavior_TaxonomyIndex extends EntityReference_BehaviorHand
       // already inserted in taxonomy_build_node_index().
       $tid_all = array_diff($tid_all, $original_tid_all);
 
-      // Insert index entries for all the node's terms.
+      // Insert index entries for all the node's terms, preventing duplicates.
       if (!empty($tid_all)) {
-        $query = db_insert('taxonomy_index')->fields(array('nid', 'tid', 'sticky', 'created'));
         foreach ($tid_all as $tid) {
-          $query->values(array(
+          $row = array(
             'nid' => $node->nid,
             'tid' => $tid,
             'sticky' => $sticky,
             'created' => $node->created,
-          ));
+          );
+          $query = db_merge('taxonomy_index')
+            ->key($row)
+            ->fields($row);
+          $query->execute();
         }
-        $query->execute();
       }
     }
   }

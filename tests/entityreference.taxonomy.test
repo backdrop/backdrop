@@ -112,4 +112,52 @@ class EntityReferenceTaxonomyTestCase extends DrupalWebTestCase {
     $this->assertFalse(taxonomy_select_nodes(1));
   }
 
+  /**
+   * Add a second ER field from node/article to taxonomy.
+   *
+   * This should not cause {taxonomy_index} to receive duplicate entries.
+   */
+  protected function setupForIndexDuplicates() {
+    // Create an entity reference field.
+    $field = array(
+      'entity_types' => array('node'),
+      'settings' => array(
+        'handler' => 'base',
+        'target_type' => 'taxonomy_term',
+        'handler_settings' => array(
+          'target_bundles' => array(),
+        ),
+      ),
+      'field_name' => 'field_entityreference_term2',
+      'type' => 'entityreference',
+    );
+    $field = field_create_field($field);
+    $instance = array(
+      'field_name' => 'field_entityreference_term2',
+      'bundle' => 'article',
+      'entity_type' => 'node',
+    );
+
+    // Enable the taxonomy-index behavior.
+    $instance['settings']['behaviors']['taxonomy-index']['status'] = TRUE;
+    field_create_instance($instance);
+  }
+
+  /**
+   * Make sure the index only contains one entry for a given node->term
+   * reference, even when multiple ER fields link from the node bundle to terms.
+   */
+  public function testIndexDuplicates() {
+    // Extra setup for this test: add another ER field on this content type.
+    $this->setupForIndexDuplicates();
+
+    // Assert node insert with reference to term in first field.
+    $tid = 1;
+    $settings = array();
+    $settings['type'] = 'article';
+    $settings['field_entityreference_term'][LANGUAGE_NONE][0]['target_id'] = $tid;
+    $node = $this->drupalCreateNode($settings);
+
+    $this->assertEqual(taxonomy_select_nodes($tid), array($node->nid));
+  }
 }

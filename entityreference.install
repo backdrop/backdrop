@@ -163,3 +163,18 @@ function entityreference_update_7002() {
     ));
   }
 }
+
+/**
+ * Remove duplicate rows in the taxonomy_index table.
+ */
+function entityreference_update_7100() {
+  $tx_schema = drupal_get_schema('taxonomy_index');
+  db_create_table('taxonomy_index_tmp', $tx_schema);
+  $select = db_select('taxonomy_index', 'tx');
+  $select->fields('tx');
+  $select->groupBy('tx.nid');
+  $select->groupBy('tx.tid');
+  db_insert('taxonomy_index_tmp')->from($select)->execute();
+  db_drop_table('taxonomy_index');
+  db_rename_table('taxonomy_index_tmp', 'taxonomy_index');
+}
