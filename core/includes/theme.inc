@@ -2174,6 +2174,7 @@ function theme_table($variables) {
       if (isset($row['data'])) {
         $cells = $row['data'];
         $no_striping = isset($row['no_striping']) ? $row['no_striping'] : FALSE;
+        $merge = isset($row['merge']) ? $row['merge'] : FALSE;
 
         // Set the attributes array and exclude 'data' and 'no_striping'.
         $tr_attributes = $row;
@@ -2186,9 +2187,15 @@ function theme_table($variables) {
         $no_striping = FALSE;
       }
       if (count($cells)) {
-        // Add odd/even class.
+        // Add odd/even and merge-up/merge-down/merge-both classes.
         if (!$no_striping) {
-          $class = $flip[$class];
+          if ($merge) {
+            $tr_attributes['class'][] = 'merge-' . $merge;
+          }
+          if (!$merge || $merge === 'down') {
+            $class = $flip[$class];
+          }
+          
           $tr_attributes['class'][] = $class;
         }
 

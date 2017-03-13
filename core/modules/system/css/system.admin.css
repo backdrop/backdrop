@@ -109,7 +109,7 @@ span.admin-missing {
  * Status report.
  */
 table.system-status-report td {
-  padding: 6px;
+  padding: 11px 6px;
   vertical-align: middle;
 }
 table.system-status-report tr.merge-up td {
@@ -137,6 +137,12 @@ table.system-status-report td.status-icon div:before {
   width: 28px;
   height: 28px;
   border-radius: 15px;
+}
+table.system-status-report tr.info td.status-icon div:before {
+  background: #CCCCCC url(../../../misc/message-16-info.png) no-repeat center center;
+}
+table.system-status-report tr.status td.status-icon div:before {
+  background: #CFDE56 url(../../../misc/message-16-ok.png) no-repeat center center;
 }
 table.system-status-report tr.error td.status-icon div:before {
   background: #EE3D23 url(../../../misc/message-16-error.png) no-repeat center center;
