@@ -1409,7 +1409,7 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
 
         $target_entity = clone $item['entity'];
         unset($target_entity->content);
-        $result[$delta] = entity_view($target_type, array($item[$column] => $target_entity), $settings['view_mode'], $langcode, FALSE);
+        $result[$delta] = entity_view($target_type, array($item[$column] => $target_entity), $settings['view_mode'], $target_langcode, FALSE);
 
         if (empty($settings['links']) && isset($result[$delta][$target_type][$column]['links'])) {
           $result[$delta][$target_type][$item[$column]]['links']['#access'] = FALSE;
