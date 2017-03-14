@@ -633,7 +633,7 @@ function _system_check_db_utf8mb4_requirements($phase) {
 
   if ($utf8mb4_active) {
     if ($utf8mb4_supported) {
-      if ($phase != 'install' && !state_get('database_utf8mb4_active', FALSE)) {
+      if ($phase != 'install' && $phase != 'update' && !state_get('database_utf8mb4_active', FALSE)) {
         // Supported, active, and configurable, but not all database tables
         // have been converted yet.
         $requirements['value'] = l($t('Database tables need conversion'), $upgrade_path);
