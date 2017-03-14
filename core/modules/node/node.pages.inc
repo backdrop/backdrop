@@ -124,8 +124,8 @@ function node_form($form, &$form_state, Node $node) {
   $form['#attributes']['class'][0] = backdrop_html_class('node-' . $node->type . '-form');
 
   $form['help'] = array(
-    '#type' => 'markup',
-    '#markup' => '<p>' . filter_xss_admin($node_type->help) . '</p>',
+    '#type' => 'help',
+    '#markup' => filter_xss_admin($node_type->help),
     '#access' => !empty($node_type->help),
     '#weight' => -500,
   );

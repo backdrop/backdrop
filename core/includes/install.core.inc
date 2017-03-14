@@ -1437,7 +1437,8 @@ function install_select_language_form($form, &$form_state, $files) {
 
   if (count($files) == 1) {
     $form['help'] = array(
-      '#markup' => '<p><a href="' . check_url(backdrop_current_script_url(array('translate' => 'true'))) . '">' . st('Learn how to install Backdrop in other languages') . '</a></p>',
+      '#type' => 'help',
+      '#markup' => '<a href="' . check_url(backdrop_current_script_url(array('translate' => 'true'))) . '">' . st('Learn how to install Backdrop in other languages') . '</a>',
     );
   }
   $form['actions'] = array('#type' => 'actions');

@@ -2395,6 +2395,7 @@ function system_utf8mb4_convert_form($form, &$form_state) {
   $utf8mb4_tables_converted = state_get('database_utf8mb4_active', FALSE);
 
   $form['help'] = array(
+    '#type' => 'help',
     '#markup' => '<p>' . $requirements['description'] . '</p>',
   );
 
