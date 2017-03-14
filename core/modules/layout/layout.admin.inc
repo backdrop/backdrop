@@ -467,7 +467,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
     if ($alias) {
       $error = t('That path is currently assigned to be an alias for "@alias".', array('@alias' => $alias->source));
       if (user_access('administer url aliases')) {
-        $error .= ' ' . t('<a href="!url">Delete the alias first</a>, then save this layout.', array('!url' => url('admin/config/search/path/delete/' . $alias->pid, array('query' => array('destination' => $_GET['q'])))));
+        $error .= ' ' . t('<a href="!url">Delete the alias first</a>, then save this layout.', array('!url' => url('admin/config/urls/path/delete/' . $alias->pid, array('query' => array('destination' => $_GET['q'])))));
       }
       form_error($form['path'], $error);
     }

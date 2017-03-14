@@ -4,4 +4,4 @@ package = System
 backdrop = 1.x
 version = BACKDROP_VERSION
 type = module
-configure = admin/config/search/redirect/settings
+configure = admin/config/urls/redirect/settings
