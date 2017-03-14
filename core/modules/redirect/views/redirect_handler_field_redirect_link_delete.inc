@@ -36,7 +36,7 @@ class redirect_handler_field_redirect_link_delete extends views_handler_field {
     $rid = $values->{$this->aliases['rid']};
     if (($redirect = redirect_load($rid)) && redirect_access('delete', $redirect)) {
       $text = !empty($this->options['text']) ? $this->options['text'] : t('Delete');
-      $output = l($text, "admin/config/search/redirect/delete/" . $rid, array('query' => backdrop_get_destination()));
+      $output = l($text, "admin/config/urls/redirect/delete/" . $rid, array('query' => backdrop_get_destination()));
     }
     return $output;
   }
