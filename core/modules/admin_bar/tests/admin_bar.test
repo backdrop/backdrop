@@ -218,9 +218,10 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
     );
     $this->backdropPost('admin/config/people/roles', $edit, t('Add role'));
 
-    // Grant the 'administer content types' permission for the role.
+    // Grant the 'administer content types' and 'assign all roles' permissions for the role.
     $edit = array(
       'test[administer content types]' => TRUE,
+      'test[assign all roles]' => TRUE,
     );
     $this->backdropPost('admin/config/people/permissions/test', $edit, t('Save permissions'));
     // Verify that Structure » Content types does not appear.
