@@ -459,6 +459,8 @@ function path_patterns_settings_form($form) {
   module_load_include('inc', 'path');
   $config = config('path.settings');
 
+  $form['#config'] = 'path.settings';
+  
   $form['verbose'] = array(
     '#type' => 'checkbox',
     '#title' => t('Verbose'),
