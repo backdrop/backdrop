@@ -289,12 +289,12 @@ function dblog_filters() {
 /**
  * Returns HTML for a log message.
  *
- * @param array $event
+ * @param object $event
  *   An object containing at least the message and variables properties.
- * @param array $is_link
+ * @param bool $is_link
  *   (optional) Format message as link, event->wid is required.
  *
- * @return
+ * @return string
  *   HTML containing a link to the full report.
  */
 function dblog_format_message($event, $is_link = FALSE) {
