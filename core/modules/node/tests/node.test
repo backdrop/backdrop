@@ -1378,7 +1378,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
       'administer content types',
       'administer permissions',
       'administer users',
-      'administer user roles',
+      'assign roles',
       'access user profiles',
     ));
     $this->backdropLogin($admin_user);
