@@ -2228,11 +2228,13 @@ function user_roles($members_only = FALSE, $permission = NULL, $full_objects = F
       $user_roles[$role_name]->label = t($role_data['label']);
       // Mark roles granted 'restrict access' permission(s).
       $user_roles[$role_name]->restrict_access = FALSE;
-      foreach($role_data['permissions'] as $perm_name) {
-        $perm = $perms[$perm_name];
-        if (!empty($perm['restrict access'])) {
-          $user_roles[$role_name]->restrict_access = TRUE;
-          break;
+      foreach ($role_data['permissions'] as $perm_name) {
+        if (isset($perms[$perm_name])) {
+          $perm = $perms[$perm_name];
+          if (!empty($perm['restrict access'])) {
+            $user_roles[$role_name]->restrict_access = TRUE;
+            break;
+          }
         }
       }
     }
