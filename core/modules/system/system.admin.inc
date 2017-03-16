@@ -2093,11 +2093,21 @@ function system_urls_settings($form, &$form_state) {
       '#type' => 'markup',
       '#markup' => '<p>' . t('Use URLs like <code>example.com/user</code> instead of <code>example.com/?q=user</code>.'),
     );
+    // check if mod_rewrite is enabled.
+    if ( strpos($_SERVER["SERVER_SOFTWARE"], 'Apache') !== FALSE) {
+      $modules = apache_get_modules();
+      if (in_array('mod_rewrite', $modules)) {
+        $mod_rewrite_message = '<div class="messages error">' . t("You need to enable Apache mod_rewrite module to use clean URLs.") . '</div>';
+      }
+      else {
+        $mod_rewrite_message = '<p>' . t('Clean URLs cannot be enabled. If you are directed to this page or to a <em>Page not found (404)</em> error after testing for clean URLs, see the <a href="@handbook">online handbook</a>.', array('@handbook' => 'http://drupal.org/node/15365')) . '</p>';
+      }
+    }
     // Explain why the user is seeing this page and what to expect after
     // clicking the 'Run the clean URL test' button.
     $form['clean_url_test_result'] = array(
       '#type' => 'markup',
-      '#markup' => '<p>' . t('Clean URLs cannot be enabled. If you are directed to this page or to a <em>Page not found (404)</em> error after testing for clean URLs, see the <a href="@handbook">online handbook</a>.', array('@handbook' => 'http://drupal.org/node/15365')) . '</p>',
+      '#markup' => $mod_rewrite_message,
     );
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['clean_url_test'] = array(
