@@ -660,7 +660,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
 
     // Find the last row in the users table to apply the URL alias to the new user.
     $this->backdropGet('admin/people', array('query' => array('order' => 'created', 'sort' => 'asc')));
-    $checkbox = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//input[@type="checkbox"]');
+    $checkbox = $this->xpath('//form[@id="views-form-manage-user-accounts-page"]//tr[last()]//input[@type="checkbox"]');
     $checkbox_name = (string) $checkbox[0]['name'];
 
     $edit = array(

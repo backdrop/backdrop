@@ -1138,5 +1138,27 @@ function user_update_1012() {
 }
 
 /**
+ * Replace the user_admin view (if not customized) with the new 
+ * manage_user_accounts view.
+ */
+function user_update_1013() {
+  // If the old user_admin view has not been customized, delete it.
+    if (config_get('views.view.user_admin', 'storage') === 4) {
+      $config_user_admin = config('views.view.user_admin');
+      $config_user_admin->delete();
+    }
+  // Check if there is already a manage_user_accounts view.
+  $config_manage_user_accounts = config('views.view.manage_user_accounts');
+  if ($config_manage_user_accounts->isNew()) {
+    // If not, create the new manage_user_accounts view.
+    $path = backdrop_get_path('module', 'user') . '/config/';
+    $contents = file_get_contents($path . 'views.view.manage_user_accounts.json');
+    $data = json_decode($contents, true);
+    $config_manage_user_accounts->setData($data);
+    $config_manage_user_accounts->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */

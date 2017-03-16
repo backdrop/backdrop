@@ -1418,14 +1418,14 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $this->assertEqual($user_c->status, 1, 'User C not blocked');
 
     $this->backdropGet('admin/people', array('query' => array('order' => 'created', 'sort' => 'asc')));
-    $checkbox = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//input[@type="checkbox"]');
+    $checkbox = $this->xpath('//form[@id="views-form-manage-user-accounts-page"]//tr[last()]//input[@type="checkbox"]');
     $user_c_checkbox = (string) $checkbox[0]['name'];
 
     $edit = array();
     $edit['action'] = 'user_block_user_action';
     $edit[$user_c_checkbox] = TRUE;
     $this->backdropPost('admin/people', $edit, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
-    $status_result = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//td[position()=3]');
+    $status_result = $this->xpath('//form[@id="views-form-manage-user-accounts-page"]//tr[last()]//td[position()=3]');
     $this->assertEqual(trim($status_result[0]), 'Blocked', 'User C blocked');
 
     // Test unblocking of a user from /admin/people page and sending of activation mail
@@ -1433,7 +1433,7 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $editunblock['action'] = 'user_unblock_user_action';
     $editunblock[$user_c_checkbox] = TRUE;
     $this->backdropPost('admin/people', $editunblock, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
-    $status_result = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//td[position()=3]');
+    $status_result = $this->xpath('//form[@id="views-form-manage-user-accounts-page"]//tr[last()]//td[position()=3]');
     $this->assertEqual(trim($status_result[0]), 'Active', 'User C unblocked');
     $this->assertMail("to", $user_c->mail, "Activation mail sent to user C");
 

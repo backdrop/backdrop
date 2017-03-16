@@ -1,13 +1,13 @@
 {
-    "_config_name": "views.view.user_admin",
-    "name": "user_admin",
+    "_config_name": "views.view.manage_user_accounts",
+    "name": "manage_user_accounts",
     "description": "Manage user accounts, roles, and permissions.",
     "module": "user",
     "storage": 4,
     "tag": "default",
     "disabled": false,
     "base_table": "users",
-    "human_name": "Administer users",
+    "human_name": "Manage user accounts",
     "core": "1.0-dev",
     "display": {
         "default": {
@@ -817,7 +817,7 @@
                         "ui_name": "",
                         "label": "",
                         "empty": true,
-                        "content": "No accounts found.",
+                        "content": "No user accounts found.",
                         "tokenize": 0
                     }
                 },
