@@ -2,11 +2,11 @@
     "_config_name": "admin_bar.settings",
     "margin_top": 1,
     "position_fixed": 0,
-    "components": [
+    "components": {
         "admin_bar.icon": 1,
         "admin_bar.menu": 1,
         "admin_bar.search": 1,
         "admin_bar.users": 1,
         "admin_bar.account": 1
-    ]
+    }
 }
