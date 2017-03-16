@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the user module.
@@ -1124,7 +1123,7 @@ function user_update_1011() {
 }
 
 /**
- * Update 'Find user accounts'  to 'Manage user accounts'
+ * Update 'Find user accounts' to 'Manage user accounts'
  */
 function user_update_1012() {
   $config = config('views.view.user_admin');
@@ -1135,6 +1134,22 @@ function user_update_1012() {
     $config->set('display.page.display_options.menu.title', 'Manage user accounts');
   }
   $config->save();
+}
+
+/**
+ * Grant accounts with 'administer permissions' the new 'assign roles' permission.
+ */
+function user_update_1013() {
+  $names = config_get_names_with_prefix('user.role.');
+  foreach ($names as $config_name) {
+    $config = config($config_name);
+    $permissions = $config->get('permissions');
+    if (in_array('administer permissions', $permissions)) {
+      $permissions[] = 'assign roles';
+      $config->set('permissions', $permissions);
+      $config->save();
+    }
+  }
 }
 
 /**

@@ -497,8 +497,8 @@ function user_permission() {
       'title' => t('Administer users'),
       'restrict access' => TRUE,
     ),
-    'administer user roles' => array(
-      'title' => t('Administer user roles'),
+    'assign roles' => array(
+      'title' => t('Assign user roles'),
       'restrict access' => TRUE,
     ),
     'administer account settings' => array(
@@ -782,25 +782,8 @@ function user_account_form(&$form, &$form_state) {
     '#title' => t('Roles'),
     '#default_value' => (!$register && isset($account->roles) ? $account->roles : array()),
     '#options' => $roles,
-    '#access' => $roles && user_access('administer user roles'),
+    '#access' => $roles && user_access('assign roles'),
   );
-  $roles = user_roles(TRUE, NULL, TRUE);
-  foreach($roles as $role_name => $role) {
-    if ($role_name != BACKDROP_AUTHENTICATED_ROLE) {
-      $disabled = FALSE;
-      if (!user_access('administer permissions')) {
-        if (!empty($role->restrict_access)) {
-          $disabled = TRUE;
-        }
-      }
-      if ($disabled) {
-        $form['account']['roles'][$role_name]['#disabled'] = $disabled;
-        if (in_array($role_name, $form['account']['roles']['#default_value'])) {
-          $form['account']['roles'][$role_name]['#value'] = $role_name;
-        }
-      }
-    }
-  }
   $form['account']['roles'][BACKDROP_AUTHENTICATED_ROLE] = array(
     '#disabled' => TRUE,
     '#value' => 'authenticated',
@@ -2222,19 +2205,9 @@ function user_roles($members_only = FALSE, $permission = NULL, $full_objects = F
 
     // Convert user roles into objects.
     // @todo: Consider using classes and a constructor here.
-    $perms = user_load_permissions();
     foreach ($user_roles as $role_name => $role_data) {
       $user_roles[$role_name] = (object) $user_roles[$role_name];
       $user_roles[$role_name]->label = t($role_data['label']);
-      // Mark roles granted 'restrict access' permission(s).
-      $user_roles[$role_name]->restrict_access = FALSE;
-      foreach($role_data['permissions'] as $perm_name) {
-        $perm = $perms[$perm_name];
-        if (!empty($perm['restrict access'])) {
-          $user_roles[$role_name]->restrict_access = TRUE;
-          break;
-        }
-      }
     }
   }
 
@@ -2258,24 +2231,6 @@ function user_roles($members_only = FALSE, $permission = NULL, $full_objects = F
   }
 
   return $return_roles;
-}
-
-/**
- * Helper for user_roles().
- *
- * @return
- *   An associative array of fully qualified permissions indexed by
- *   permission name.
- */
-function user_load_permissions() {
-  $perms = array();
-  foreach (module_implements('permission') as $module) {
-    $module_perms = module_invoke($module, 'permission');
-    foreach ($module_perms as $perm_name => $perm) {
-      $perms[$perm_name] = $perm;
-    }
-  }
-  return $perms;
 }
 
 /**
@@ -2770,10 +2725,8 @@ function user_action_info() {
     if ($role_name === BACKDROP_AUTHENTICATED_ROLE) {
       continue;
     }
-    if (!user_access('administer user roles') && !user_access('administer permissions')) {
-      if (!empty($role->restrict_access)) {
-        continue;
-      }
+    if (!user_access('assign roles') && !user_access('administer permissions')) {
+      continue;
     }
     $index++;
 
