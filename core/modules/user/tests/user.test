@@ -2234,7 +2234,11 @@ class UserRolesAssignmentTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp();
-    $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'administer users'));
+    $this->admin_user = $this->backdropCreateUser(array(
+      'administer permissions',
+      'assign roles',
+      'administer users',
+    ));
     $this->backdropLogin($this->admin_user);
   }
 

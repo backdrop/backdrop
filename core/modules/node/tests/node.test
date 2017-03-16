@@ -1373,7 +1373,14 @@ class NodeTypeTestCase extends BackdropWebTestCase {
    */
   function testNodeTypePermissions() {
     // Create admin user.
-    $admin_user = $this->backdropCreateUser(array('bypass node access', 'administer content types', 'administer permissions', 'administer users', 'access user profiles'));
+    $admin_user = $this->backdropCreateUser(array(
+      'bypass node access',
+      'administer content types',
+      'administer permissions',
+      'administer users',
+      'assign roles',
+      'access user profiles',
+    ));
     $this->backdropLogin($admin_user);
 
     // Create new role

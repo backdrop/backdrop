@@ -107,7 +107,13 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
    */
   function testVocabularyPermissions() {
     // Create admin user.
-    $admin_user = $this->backdropCreateUser(array('administer taxonomy', 'administer permissions', 'administer users', 'access user profiles'));
+    $admin_user = $this->backdropCreateUser(array(
+      'administer taxonomy',
+      'administer permissions',
+      'assign roles',
+      'administer users',
+      'access user profiles',
+    ));
     $this->backdropLogin($admin_user);
 
     // Create new role
