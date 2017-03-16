@@ -4004,7 +4004,7 @@ function system_settings_form($form) {
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
 
   if (empty($form['#config']) && !settings_get('backdrop_drupal_compatibility')) {
-    drupal_set_message(t('Drupal compatibility layer is disabled and this form has not be updated to use Backdrop configuration management.  Changes will not be saved.'), 'warning');
+    backdrop_set_message(t('Drupal compatibility layer is disabled and this form has not been updated to use Backdrop configuration management. Changes will not be saved.'), 'warning');
   }
 
   if (!empty($_POST) && form_get_errors()) {
@@ -4037,7 +4037,7 @@ function system_settings_form_submit($form, &$form_state) {
   else {
     watchdog('form', 'Backdrop 2.0 and later will require forms using system_settings_form() to set $form[\'#config\'].', array(), WATCHDOG_DEPRECATED);
     if (!settings_get('backdrop_drupal_compatibility')) {
-      backdrop_set_message(t('Settings not saved: Drupal compatibility layer is disabled and this form has not be updated to use Backdrop configuration management.', 'error'));
+      backdrop_set_message(t('Settings not saved: Drupal compatibility layer is disabled and this form has not been updated to use Backdrop configuration management.', 'error'));
       return;
     }
 
