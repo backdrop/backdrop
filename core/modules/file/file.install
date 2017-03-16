@@ -115,7 +115,7 @@ function file_requirements($phase) {
 }
 
 /**
- * Add a the view for managing files.
+ * Add a view for managing files.
  */
 function file_update_1000() {
   $view_config = array(
