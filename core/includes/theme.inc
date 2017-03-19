@@ -1955,12 +1955,7 @@ function theme_image($variables) {
   // Check for missing 'uri', allow D7's 'path' instead.
   $uri = $variables['uri'];
   if (!$uri && !empty($variables['path'])) {
-    watchdog('Image',
-      'theme_image() called with deprecated "path", use "uri" instead.',
-      array(),
-      WATCHDOG_DEPRECATED,
-      'https://api.backdropcms.org/api/backdrop/core%21includes%21theme.inc/function/theme_image/1'
-    );
+    watchdog('image', 'theme_image() called with deprecated "path", use "uri" instead.', array(), WATCHDOG_DEPRECATED, 'https://api.backdropcms.org/api/backdrop/core%21includes%21theme.inc/function/theme_image/1');
     $uri = $variables['path'];
   }
   $attributes['src'] = file_create_url($uri);
@@ -2006,7 +2001,7 @@ function theme_breadcrumb($variables) {
  *     - "data": The localized title of the table column.
  *     - "field": The database field represented in the table column (required
  *       if user is to be able to sort on this column).
- *     - "sort": A default sort order for this column ("asc" or "desc"). 
+ *     - "sort": A default sort order for this column ("asc" or "desc").
  *     - "class": An array of values for the 'class' attribute. In particular,
  *       the least important columns that can be hidden on narrow and medium
  *       width screens should have a 'priority-low' class, referenced with the
