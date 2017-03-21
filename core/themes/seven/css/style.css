@@ -623,6 +623,12 @@ tr.selected td {
   width: 1%;
   white-space: nowrap;
 }
+@media (max-width: 720px) {
+  .system-status-report td.status-title {
+    width: 50%;
+    white-space: normal;
+  }
+}
 
 .diff-table td {
   padding: 4px;
