@@ -2097,7 +2097,7 @@ function system_urls_settings($form, &$form_state) {
     // clicking the 'Run the clean URL test' button.
     $form['clean_url_test_result'] = array(
       '#type' => 'markup',
-      '#markup' => '<p>' . t('Clean URLs cannot be enabled. If you are directed to this page or to a <em>Page not found (404)</em> error after testing for clean URLs, see the <a href="@handbook">online handbook</a>.', array('@handbook' => 'http://drupal.org/node/15365')) . '</p>',
+      '#markup' => '<p>' . t('Clean URLs cannot be enabled. If you are directed to this page or to a <em>Page not found (404)</em> error after testing for clean URLs, see the !handbook.', array('!handbook' => l(t('online handbook'), 'http://drupal.org/node/15365'))) . '</p>',
     );
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['clean_url_test'] = array(
@@ -2115,7 +2115,7 @@ function system_urls_settings($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Use HTTPS for canonical URLs'),
     '#default_value' => config_get('system.core', 'canonical_secure'),
-    '#description' => t('This option makes Backdrop use HTTPS protocol for generated canonical URLs. Please note: to get it working in mixed-mode (both secure and insecure) sessions, the variable "https" should be set to TRUE in your file <code>settings.php</code>' ),
+    '#description' => t('This option makes Backdrop use HTTPS protocol for generated canonical URLs. Please note: to get it working in mixed-mode (both secure and insecure) sessions, the variable <code>https<code> should be set to <code>TRUE<code> in your file <code>settings.php</code>' ),
   );
 
   return system_settings_form($form);
