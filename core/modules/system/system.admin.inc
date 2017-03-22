@@ -2081,14 +2081,14 @@ function system_urls_settings($form, &$form_state) {
     if ($conflict) {
       // $form_state['redirect'] needs to be set to the non-clean URL,
       // otherwise the setting is not saved.
-      $form_state['redirect'] = url('', array('query' => array('q' => '/admin/config/search/clean-urls')));
+      $form_state['redirect'] = url('', array('query' => array('q' => '/admin/config/urls/clean-urls')));
     }
   }
   // Show the clean URLs test form.
   else {
     backdrop_add_js(backdrop_get_path('module', 'system') . '/js/system.admin.js');
 
-    $form_state['redirect'] = url('admin/config/search/clean-urls');
+    $form_state['redirect'] = url('admin/config/urls/clean-urls');
     $form['clean_url_description'] = array(
       '#type' => 'markup',
       '#markup' => '<p>' . t('Use URLs like <code>example.com/user</code> instead of <code>example.com/?q=user</code>.'),
