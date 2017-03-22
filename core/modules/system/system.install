@@ -469,7 +469,7 @@ function system_requirements($phase) {
       $requirements['update status'] = array(
         'value' => $t('Not enabled'),
         'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Update notifications are not enabled. It is <strong>highly recommended</strong> that you enable the Update Manager module from the !module_admin_page in order to stay up-to-date on new releases. For more information, read the !update_status_handbook.', array('!module_admin_page' => l($t('module administration page'), 'admin/modules'), '!update_status_handbook' => l($t('Update status handbook page'), 'http://drupal.org/handbook/modules/update'))),
+        'description' => $t('Update notifications are not enabled. It is <strong>highly recommended</strong> that you enable the Update Manager module from the <a href="@module">module administration page</a> in order to stay up-to-date on new releases. For more information, <a href="@update">Update status handbook page</a>.', array('@update' => 'http://drupal.org/handbook/modules/update', '@module' => url('admin/modules'))),
       );
     }
     else {
@@ -565,16 +565,16 @@ function system_requirements($phase) {
     // Inform user about status of display error messages.
     $error_level = config_get('system.core', 'error_level');
     $description = $t('Backdrop CMS provides the ability to display error messages, which can be useful while a site is in development.');
-    $logging_url = 'admin/config/development/logging';
+    $logging_url = url('admin/config/development/logging');
     if ($error_level != ERROR_REPORTING_HIDE) {
       $value = $t('Enabled');
       $severity = REQUIREMENT_WARNING;
-      $description .= ' ' . $t('Do not forget to !action when you have finished testing and this site goes live.', array('!action' => l($t('disable the display of errors'), $logging_url)));
+      $description .= ' ' . $t('Do not forget to <a href="@url">disable the display of errors</a> when you have finished testing and this site goes live.', array('@url' => $logging_url));
     }
     else {
       $value = $t('Disabled');
       $severity = REQUIREMENT_OK;
-      $description .= ' ' . $t('If your site is in development, you might want to !action.', array('!action' => l($t('enable the display of errors'), $logging_url)));
+      $description .= ' ' . $t('If your site is in development, you might want to <a href="@url">enable the display of errors</a>.', array('@url' => $logging_url));
     }
 
     $requirements['error_level'] = array(
@@ -593,7 +593,7 @@ function system_requirements($phase) {
         'title' => $t('Theme debug'),
         'value' => $t('Enabled'),
         'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Theme debugging is currently enabled, and should be disabled on a live site. This setting can be changed using the !devel_link.', array('!devel_link' => l($t('Devel module'), module_exists('devel') ? 'admin/config/development/devel' : 'https://backdropcms.org/project/devel'))),
+        'description' => $t('Theme debugging is currently enabled, and should be disabled on a live site. This setting can be changed using the <a href="!url">Devel module</a>.', array('!url' => module_exists('devel') ? url('admin/config/development/devel') : 'https://backdropcms.org/project/devel')),
       );
     }
   }
