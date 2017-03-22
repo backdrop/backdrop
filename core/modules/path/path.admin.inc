@@ -186,7 +186,7 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
   $form['actions']['cancel'] = array(
     '#type' => 'link',
     '#title' => t('Cancel'),
-    '#href' => isset($_GET['destination']) ? $_GET['destination'] : 'admin/config/search/path',
+    '#href' => isset($_GET['destination']) ? $_GET['destination'] : 'admin/config/urls/path',
   );
 
   return $form;
@@ -514,7 +514,7 @@ function path_patterns_settings_form($form) {
   $delete_label = t('Create a new URL alias. Delete the old URL alias.');
   if (module_exists('redirect')) {
     $auto_redirect = config_get('redirect.settings', 'auto_redirect');
-    $description .= ' ' . t('The !redirect_settings affect whether a redirect is created when a URL alias is deleted.', array('!redirect_settings' => l(t('Redirect module settings'), 'admin/config/search/redirect/settings')));
+    $description .= ' ' . t('The !redirect_settings affect whether a redirect is created when a URL alias is deleted.', array('!redirect_settings' => l(t('Redirect module settings'), 'admin/config/urls/redirect/settings')));
     if ($auto_redirect) {
       $delete_label = t('Create a new URL alias. Replace the old URL alias with a redirect.');
     }
@@ -896,7 +896,7 @@ function path_admin_bulk_delete_confirm($form, $form_state) {
   $form['#submit'][] = 'path_bulk_update_form_bulk_delete_submit';
 
   $question = t('Delete all the following URL aliases?');
-  $path = 'admin/config/search/path/bulk-update';
+  $path = 'admin/config/urls/path/bulk-update';
   $description = t('This action cannot be undone.');
   $yes = t('Delete URL aliases');
 
