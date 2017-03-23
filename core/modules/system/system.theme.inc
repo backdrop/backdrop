@@ -296,10 +296,11 @@ function theme_status_report($variables) {
   );
 
   $system_status_report_table = array(
+    'header' => array(),
     'rows' => array(),
-    'attributes' => array(
-      'class' => 'system-status-report',
-    ),
+    'attributes' => array('class' => 'system-status-report'),
+    'caption' => '',
+    'colgroups' => array(),
     'sticky' => FALSE,
     'empty' => 'No status report. Something is definitely wrong.',
   );
