@@ -78,7 +78,7 @@ function path_admin_overview($keys = NULL) {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
-    '#empty' => t('No URL aliases available. !add_url_alias_link', array('@link' => l(t('Add URL alias.'), 'admin/config/urls/path/add'))),
+    '#empty' => t('No URL aliases available. <a href="@link">Add URL alias</a>.', array('@link' => url('admin/config/urls/path/add'))),
   );
   $build['path_pager'] = array('#theme' => 'pager');
 
@@ -514,13 +514,13 @@ function path_patterns_settings_form($form) {
   $delete_label = t('Create a new URL alias. Delete the old URL alias.');
   if (module_exists('redirect')) {
     $auto_redirect = config_get('redirect.settings', 'auto_redirect');
-    $description .= ' ' . t('The !redirect_settings affect whether a redirect is created when a URL alias is deleted.', array('!redirect_settings' => l(t('Redirect module settings'), 'admin/config/urls/redirect/settings')));
+    $description .= ' ' . t('The <a href="!url">Redirect module settings</a> affect whether a redirect is created when a URL alias is deleted.', array('!url' => url('admin/config/search/redirect/settings')));
     if ($auto_redirect) {
       $delete_label = t('Create a new URL alias. Replace the old URL alias with a redirect.');
     }
   }
   else {
-    $description .= ' ' . t('Considering enabling the Redirect module on the !modules_page to create redirects when your aliases change.', array('!modules_page' => l(t('modules page'), 'admin/modules')));
+    $description .= ' ' . t('Considering enabling the Redirect module on the <a href="!url">modules page</a> to create redirects when your aliases change.', array('!url' => url('admin/modules')));
   }
   $form['update_action'] = array(
     '#type' => 'radios',
