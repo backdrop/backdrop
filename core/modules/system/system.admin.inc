@@ -2097,7 +2097,7 @@ function system_urls_settings($form, &$form_state) {
     // clicking the 'Run the clean URL test' button.
     $form['clean_url_test_result'] = array(
       '#type' => 'markup',
-      '#markup' => '<p>' . t('Clean URLs cannot be enabled. If you are directed to this page or to a <em>Page not found (404)</em> error after testing for clean URLs, see the !handbook.', array('!handbook' => l(t('online handbook'), 'http://drupal.org/node/15365'))) . '</p>',
+      '#markup' => '<p>' . t('Clean URLs cannot be enabled. If you are directed to this page or to a <em>Page not found (404)</em> error after testing for clean URLs, see the <a href="@url">online handbook</a>.', array('@url' => url('http://drupal.org/node/15365'))) . '</p>',
     );
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['clean_url_test'] = array(
