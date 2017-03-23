@@ -294,26 +294,48 @@ function theme_status_report($variables) {
       'class' => 'error',
     ),
   );
-  $output = '<table class="system-status-report">';
+
+  $system_status_report_table = array(
+    'rows' => array(),
+    'attributes' => array(
+      'class' => 'system-status-report',
+    ),
+    'sticky' => FALSE,
+    'empty' => 'No status report. Something is definitely wrong.',
+  );
 
   foreach ($requirements as $requirement) {
-    if (empty($requirement['#type'])) {
-      $severity = $severities[isset($requirement['severity']) ? (int) $requirement['severity'] : REQUIREMENT_OK];
-      $severity['icon'] = '<div title="' . $severity['title'] . '"><span class="element-invisible">' . $severity['title'] . '</span></div>';
+    $severity = $severities[isset($requirement['severity']) ? (int) $requirement['severity'] : REQUIREMENT_OK];
+    $severity['icon'] = '<div title="' . $severity['title'] . '"><span class="element-invisible">' . $severity['title'] . '</span></div>';
 
-      // Output table row(s)
+  if (empty($requirement['#type'])) {
+      $system_status_report_table['rows'][] = array(
+        'data' => array(
+          array('data' => $severity['icon'], 'class' => 'status-icon'),
+          array('data' => $requirement['title'], 'class' => 'status-title'),
+          array('data' => '<span>' . $requirement['value'] . '</span>', 'class' => 'status-value'),
+        ),
+        'class' => array($severity['class']),
+      );
+      // If the requirement has a description...
       if (!empty($requirement['description'])) {
-        $output .= '<tr class="' . $severity['class'] . ' merge-down"><td class="status-icon">' . $severity['icon'] . '</td><td class="status-title">' . $requirement['title'] . '</td><td class="status-value">' . $requirement['value'] . '</td></tr>';
-        $output .= '<tr class="' . $severity['class'] . ' merge-up"><td colspan="3" class="status-description">' . $requirement['description'] . '</td></tr>';
-      }
-      else {
-        $output .= '<tr class="' . $severity['class'] . '"><td class="status-icon">' . $severity['icon'] . '</td><td class="status-title">' . $requirement['title'] . '</td><td class="status-value">' . $requirement['value'] . '</td></tr>';
+        // ...find the key of the parrent row...
+        $parrent_row = count($system_status_report_table['rows']) - 1;
+        // ...and add "merge-down" to the parrent row classes...
+        $system_status_report_table['rows'][$parrent_row]['class'][] = 'merge-down';
+        // Then render the descritpion row...
+        $system_status_report_table['rows'][] = array(
+          'data' => array(
+            array('data' => $requirement['description'], 'class' => 'status-description', 'colspan' => 3,),
+          ),
+          // ...and add the "merge-up" class.
+          'class' => array($severity['class'], 'merge-up'),
+        );
       }
     }
   }
 
-  $output .= '</table>';
-  return $output;
+  return theme_table($system_status_report_table);
 }
 
 /**
