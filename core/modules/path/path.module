@@ -289,7 +289,7 @@ function path_node_type_form_submit($form, &$form_state) {
       // the specific pattern.
       $config->clear($pattern_type);
       if (empty($pattern) && !empty($generic_pattern)) {
-        backdrop_set_message(t('The <em>Default URL alias pattern</em> field was left empty, so the generic pattern of <code>@pattern</code> will still be used. This can be changed on the !url_alias_patterns page.', array('@pattern' => $generic_pattern, '!url_alias_patterns' => l(t('URL alias patterns'), 'admin/config/urls/path/patterns'))));
+        backdrop_set_message(t('The <em>Default URL alias pattern</em> field was left empty, so the generic pattern of <code>@pattern</code> will still be used. This can be changed on the <a href="!url">URL alias patterns</a> page.', array('@pattern' => $generic_pattern, '!url' => url('admin/config/urls/path/patterns'))));
       }
     }
     $config->save();
@@ -349,7 +349,7 @@ function path_taxonomy_form_vocabulary_submit($form, &$form_state) {
       // the specific pattern.
       $config->clear($pattern_type);
       if (empty($pattern)) {
-        backdrop_set_message(t('The <em>Default URL alias pattern</em> field was left empty, so the generic pattern of <code>@pattern</code> will still be used. This can be changed on the !url_alias_patterns page.', array('@pattern' => $generic_pattern, '!url_alias_patterns' => l(t('URL alias patterns'), 'admin/config/urls/path/patterns'))));
+        backdrop_set_message(t('The <em>Default URL alias pattern</em> field was left empty, so the generic pattern of <code>@pattern</code> will still be used. This can be changed on the <a href="!url">URL alias patterns</a> page.', array('@pattern' => $generic_pattern, '!url' => url('admin/config/urls/path/patterns'))));
       }
     }
     $config->save();
