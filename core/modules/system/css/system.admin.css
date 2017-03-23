@@ -138,6 +138,12 @@ table.system-status-report td.status-icon div:before {
   height: 28px;
   border-radius: 15px;
 }
+table.system-status-report tr.info td.status-icon div:before {
+  background: #CCCCCC url(../../../misc/message-16-info.png) no-repeat center center;
+}
+table.system-status-report tr.status td.status-icon div:before {
+  background: #CFDE56 url(../../../misc/message-16-ok.png) no-repeat center center;
+}
 table.system-status-report tr.error td.status-icon div:before {
   background: #EE3D23 url(../../../misc/message-16-error.png) no-repeat center center;
 }
