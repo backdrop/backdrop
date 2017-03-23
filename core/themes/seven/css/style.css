@@ -602,6 +602,7 @@ tr.selected td {
 .system-status-report span.status-value {
   padding: 2px 7px;
   border-radius: 4px;
+  margin: 20px;
 }
 .system-status-report .status-description {
   color: #787878;
