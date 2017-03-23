@@ -631,7 +631,7 @@ tr.selected td {
 .system-status-report tr.error {
   color: #ec351c;
 }
-.system-status-report tr.error .status-value span {
+.system-status-report tr.error span.status-value {
   background: #f9edec;
 }
 .system-status-report span.status-title {
