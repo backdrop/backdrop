@@ -321,15 +321,16 @@ function theme_status_report($variables) {
       if (!empty($requirement['description'])) {
         // ...find the key of the parrent row...
         $parrent_row = count($system_status_report_table['rows']) - 1;
-        // ...and add "merge-down" to the parrent row classes...
-        $system_status_report_table['rows'][$parrent_row]['class'][] = 'merge-down';
+        // ...and set the "merge" attribute of the parrent row to "down".
+        $system_status_report_table['rows'][$parrent_row]['merge'] = 'down';
         // Then render the descritpion row...
         $system_status_report_table['rows'][] = array(
           'data' => array(
             array('data' => $requirement['description'], 'class' => 'status-description', 'colspan' => 3,),
           ),
-          // ...and add the "merge-up" class.
-          'class' => array($severity['class'], 'merge-up'),
+          'class' => array($severity['class']),
+          // ...and set the "merge" attribute to "up".
+          'merge' => 'up',
         );
       }
     }
