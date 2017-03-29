@@ -252,6 +252,36 @@ function config_get_config_storage($type = 'active') {
 }
 
 /**
+ * Returns the list of configuration aliases for a given object.
+ *
+ * @param string
+ *   $name The name of the configuration object, e.g., system.core.
+ *
+ * @return array
+ *   An array of key => value pairs, where the key is the alias and the value
+ *   is the canonical setting name. If the value is in another object, the name
+ *   of the other object will be prefixed and delimited with a colon (:).
+ *   E.g., 'system.core:theme_debug' references the 'theme_debug' setting in
+ *   the 'system.core' configuration object.
+ */
+function config_get_config_aliases($name) {
+  //$aliases = &backdrop_static(__FUNCTION__);
+  static $aliases = NULL;
+
+  // Bootstrap reads config before loading module.inc.
+  // We'll assume Bootstrap knows what it is doing.
+  if (!function_exists('module_invoke_all')) {
+    return array();
+  }
+
+  if ($aliases === NULL) {
+    $aliases = module_invoke_all('config_aliases');
+  }
+
+  return array_key_exists($name, $aliases) ? $aliases[$name] : array();
+}
+
+/**
  * A base exception thrown in any configuration system operations.
  */
 class ConfigException extends Exception {}
@@ -345,6 +375,18 @@ class Config {
    * @var bool
    */
   protected $isLoaded = FALSE;
+
+  /**
+   * Aliases for some configuration items.
+   *
+   * When configuration items move, it is a good idea to provide an alias from
+   * the old value to the new value. If a request is made for an alias, the
+   * original is returned and a WATCHODG_DEPRECATED message is logged.
+   *
+   * @var array
+   * @see hook_config_aliases
+   */
+  protected $aliases = array();
 
   /**
    * Constructs a configuration object.
@@ -477,6 +519,49 @@ class Config {
   }
 
   /**
+   * Parse an alias specification.
+   *
+   * An alias may have a colon (:) in it to specify another configuration
+   * object. For example, "system.core:theme_debug" means the "theme_debug"
+   * setting in the "system.core" object.
+   *
+   * If no object is specified, with or without a colon, then the alias
+   * references another setting in the same object. That is, both "theme_debug"
+   * and ":theme_debug" reference the "theme_debug" setting in the current
+   * object.
+   *
+   * @param string
+   *   The alias.
+   *
+   * @return array
+   *   An associative array with keys 'config' and 'key' referencing the name
+   *   of the config object and the name of the setting, respectively.
+   */
+  protected function parseAlias($alias) {
+    // Most common case, $alias is the new name of a config item in the same
+    // object.
+    $parts = array(
+      'config' => NULL,
+      'key' => $alias,
+    );
+
+    // If it has a colon in the name, then it specifies an object:item.
+    if (strpos($alias, ':') !== FALSE) {
+      $components = explode(':', $alias);
+
+      $config = reset($components);
+      $key = end($components);
+      // Allow ":item" to mean this object, new name
+      // Don't note a new config object if it is not a different config object.
+      if ($config && ($config !== $this->name)) {
+        $parts['config'] = $config;
+      }
+      $parts['key'] = $key;
+    }
+    return $parts;
+  }
+
+  /**
    * Gets data from this configuration object.
    *
    * @param string $key
@@ -497,6 +582,14 @@ class Config {
    *   The data that was requested.
    */
   public function get($key = '') {
+    // Translate aliases.
+    $aliases = config_get_config_aliases($this->name);
+    if (array_key_exists($key, $aliases)) {
+      $parsed = $this->parseAlias($aliases[$key]);
+      $config = ($parsed['config']) ? config($parsed['config']) : $this;
+      return $config->get($key);
+    }
+
     if (!$this->isLoaded) {
       $this->load();
     }
@@ -576,6 +669,14 @@ class Config {
    *   The configuration object.
    */
   public function set($key, $value) {
+    // Translate aliases.
+    $aliases = config_get_config_aliases($this->name);
+    if (array_key_exists($key, $aliases)) {
+      $parsed = $this->parseAlias($aliases[$key]);
+      $config = ($parsed['config']) ? config($parsed['config']) : $this;
+      return $config->set($key, $value);
+    }
+
     if (!$this->isLoaded) {
       $this->load();
     }
