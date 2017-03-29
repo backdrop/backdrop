@@ -1179,7 +1179,7 @@ function _layout_get_all_info($data_type, $init = array()) {
  * 
  * @param boolean $rebuild
  *   Whether or not the list of layout template info needs to be rebuilt (see
- *   https://github.com/backdrop/backdrop-issues/issues/984). The rebuilt is
+ *   https://github.com/backdrop/backdrop-issues/issues/984). The rebuild is
  *   required only on specific cases, so this defaults to FALSE. That way, the
  *   rest of the times the layout cache is used (when available) for performance
  *   reasons.
@@ -1193,8 +1193,7 @@ function _layout_get_all_info($data_type, $init = array()) {
 function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE) {
   $info = &backdrop_static(__FUNCTION__);
 
-  // Try getting a cached list of layout info. Skip this if the optional
-  // $rebuild argument has been passed to the function.
+  // Try getting a cached list of layout info.
   if (!isset($info) && !$rebuild) {
     $cache = cache('cache')->get('layout_info');
     if ($cache && $cache->data) {
@@ -1202,9 +1201,7 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
     }
   }
 
-  // Rebuild the list of layout info in the following two cases:
-  // - If trying to get a list of layout info from cache did not work.
-  // - If the optional $rebuild argument has been passed to the function.
+  // Rebuild the list of layout info.
   if (!isset($info) || $rebuild) {
     $files = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'layouts', 'name', 0);
     $init = array();
