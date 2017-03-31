@@ -514,7 +514,7 @@ function path_patterns_settings_form($form) {
   $delete_label = t('Create a new URL alias. Delete the old URL alias.');
   if (module_exists('redirect')) {
     $auto_redirect = config_get('redirect.settings', 'auto_redirect');
-    $description .= ' ' . t('The <a href="!url">Redirect module settings</a> affect whether a redirect is created when a URL alias is deleted.', array('!url' => url('admin/config/search/redirect/settings')));
+    $description .= ' ' . t('The <a href="!url">Redirect module settings</a> affect whether a redirect is created when a URL alias is deleted.', array('!url' => url('admin/config/urls/redirect/settings')));
     if ($auto_redirect) {
       $delete_label = t('Create a new URL alias. Replace the old URL alias with a redirect.');
     }
