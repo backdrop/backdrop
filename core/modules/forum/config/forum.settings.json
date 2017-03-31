@@ -1,0 +1,10 @@
+{
+    "_config_name": "forum.settings",
+    "forum_nav_vocabulary": "forums",
+    "forum_containers": [],
+    "forum_hot_topic": 15,
+    "forum_per_page": 25,
+    "forum_order": 1,
+    "forum_block_num_active": 5,
+    "forum_block_num_new": 5
+}

@@ -1,0 +1,58 @@
+/**
+ * @file
+ * Styling for the Forum module.
+ */
+
+#forum .description {
+  font-size: 0.9em;
+  margin: 0.5em;
+}
+#forum td.created,
+#forum td.posts,
+#forum td.topics,
+#forum td.last-reply,
+#forum td.replies,
+#forum td.pager {
+  white-space: nowrap;
+}
+
+.view-forums .forum-name .icon {
+  background-image: url(images/forum-icons.png);
+  background-repeat: no-repeat;
+  float: left; /* LTR */
+  height: 24px;
+  margin: 0 9px 0 0; /* LTR */
+  width: 24px;
+}
+.view-forums .forum-name .forum-status-new {
+  background-position: -24px 0;
+}
+
+.view-forums .indent-1 {padding-left:20px;}
+.view-forums .indent-2 {padding-left:30px;}
+.view-forums .indent-3 {padding-left:40px;}
+.view-forums .indent-4 {padding-left:50px;}
+
+.view-topic .topic-title-wrapper div {
+  background-image: url(images/forum-icons.png);
+  background-repeat: no-repeat;
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+.view-topic .topic-title-wrapper .topic-status-new {
+  background-position: -24px 0;
+}
+.view-topic .topic-title-wrapper .topic-status-hot {
+  background-position: -48px 0;
+}
+.view-topic .topic-title-wrapper .topic-status-hot-new {
+  background-position: -72px 0;
+}
+.view-topic .topic-title-wrapper .topic-status-sticky {
+  background-position: -96px 0;
+}
+.view-topic .topic-title-wrapper .topic-status-closed {
+  background-position: -120px 0;
+}
+

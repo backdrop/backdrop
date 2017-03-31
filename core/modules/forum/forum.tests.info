@@ -1,0 +1,12 @@
+[ForumTestCase]
+name = Test Forums
+description = Provides automated tests for the Forum module.
+group = Forum
+file = tests/forum.test
+
+[ForumIndexTestCase]
+name = Test Forum Index
+description = Tests the forum index listing.
+group = Forum
+file = tests/forum.test
+
