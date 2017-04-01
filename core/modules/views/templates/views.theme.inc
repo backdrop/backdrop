@@ -686,8 +686,8 @@ function template_preprocess_views_view_grid(&$variables) {
   $columns  = $options['columns'];
   $variables['classes_array'] = array();
   if (!$options['default_classes']) {
-    $variables['classes_array'][] = 'views-responsive-grid';
-    $variables['classes_array'][] = 'views-responsive-grid-' . $options['alignment'];
+    $variables['classes_array'][] = 'views-grid';
+    $variables['classes_array'][] = 'views-grid-' . $options['alignment'];
     $variables['classes_array'][] = 'views-columns-' . $columns;
   }
   $variables['classes_array'] = array_merge($variables['classes_array'], explode(' ', $options['wrapper_classes']));
@@ -710,6 +710,9 @@ function template_preprocess_views_view_grid(&$variables) {
           'classes' => implode(' ', $classes),
           'content' => $variables['rows'][current($keys)],
         );
+        if ($options['automatic_width']) {
+          $rows[$row_id][$col_id]['col_style'] = array('style' => 'flex: ' . (100 / $columns) . '%;');
+        }
         $classes = explode(' ', $options['row_classes']);
         if (!$options['default_classes']) {
           $classes[] = 'views-row-' . ($row_id + 1);

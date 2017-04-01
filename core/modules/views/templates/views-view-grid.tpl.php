@@ -34,7 +34,7 @@
   <?php foreach ($rows as $row_id => $row) : ?>
     <div class="<?php print trim($row_classes[$row_id]); ?>">
   <?php foreach ($row as $item_id => $item) : ?>
-    <div class="<?php print trim($item['classes']); ?>">
+    <div class="<?php print trim($item['classes']); ?>" <?php print backdrop_attributes($item['col_style']); ?>>
       <?php print $item['content']; ?>
     </div>
   <?php endforeach; ?>

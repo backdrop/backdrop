@@ -17,6 +17,7 @@ class views_plugin_style_grid extends views_plugin_style {
   function option_definition() {
     $options = parent::option_definition();
     $options['columns'] = array('default' => '4');
+    $options['automatic_width'] = array('default' => 1);
     $options['alignment'] = array('default' => 'horizontal');
     $options['wrapper_classes'] = array('default' => '');
     $options['column_classes'] = array('default' => 'views-column');
@@ -44,6 +45,12 @@ class views_plugin_style_grid extends views_plugin_style {
       '#default_value' => $options['columns'],
       '#required' => TRUE,
       '#element_validate' => array('views_element_validate_integer'),
+    );
+    $form['automatic_width'] = array(
+      '#type' => 'checkbox',
+     '#title' => t('Automatic width'),
+     '#description' => t('The width of each column will be calculated automatically based on the number of columns entered.'),
+     '#default_value' => $options['automatic_width'],
     );
     $form['alignment'] = array(
       '#type' => 'radios',
