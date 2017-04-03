@@ -1322,7 +1322,7 @@ function entityreference_autoload_info() {
   return array(
     'EntityReference_BehaviorHandler' => 'plugins/behavior/abstract.inc',
     'EntityReference_BehaviorHandler_Abstract' => 'plugins/behavior/abstract.inc',
-    'EntityReference_BehaviorHandler_Broken extends' => 'plugins/behavior/abstract.inc',
+    'EntityReference_BehaviorHandler_Broken' => 'plugins/behavior/abstract.inc',
     'EntityReferenceBehavior_TaxonomyIndex' => 'plugins/behavior/EntityReferenceBehavior_TaxonomyIndex.class.php',
     'EntityReferenceBehavior_ViewsFilterSelect' => 'plugins/behavior/EntityReferenceBehavior_ViewsFilterSelect.class.php',
     'EntityReference_SelectionHandler' => 'plugins/selection/abstract.inc',
