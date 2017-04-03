@@ -701,10 +701,10 @@ function entityreference_field_widget_settings_form($field, $instance) {
       '#description' => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of nodes.'),
     );
     $form['size'] = array(
-      '#type' => 'textfield',
+      '#type' => 'number',
       '#title' => t('Size of textfield'),
       '#default_value' => $settings['size'],
-      '#element_validate' => array('_element_validate_integer_positive'),
+      '#min' => 1,
       '#required' => TRUE,
     );
   }
@@ -1320,24 +1320,24 @@ function entityreference_load_selection_class($property) {
 
 function entityreference_autoload_info() {
   return array(
-    'EntityReference_BehaviorHandler' => 'plugins\behavior\abstract.inc',
-    'EntityReference_BehaviorHandler_Abstract' => 'plugins\behavior\abstract.inc',
-    'EntityReference_BehaviorHandler_Broken extends' => 'plugins\behavior\abstract.inc',
-    'EntityReferenceBehavior_TaxonomyIndex' => 'plugins\behavior\EntityReferenceBehavior_TaxonomyIndex.class.php',
-    'EntityReferenceBehavior_ViewsFilterSelect' => 'plugins\behavior\EntityReferenceBehavior_ViewsFilterSelect.class.php',
-    'EntityReference_SelectionHandler' => 'plugins\selection\abstract.inc',
-    'EntityReference_SelectionHandler_Broken' => 'plugins\selection\abstract.inc',
-    'EntityReference_SelectionHandler_Generic' => 'plugins\selection\EntityReference_SelectionHandler_Generic.class.php',
-    'EntityReference_SelectionHandler_Generic_node' => 'plugins\selection\EntityReference_SelectionHandler_Generic.class.php',
-    'EntityReference_SelectionHandler_Generic_user' => 'plugins\selection\EntityReference_SelectionHandler_Generic.class.php',
-    'EntityReference_SelectionHandler_Generic_comment' => 'plugins\selection\EntityReference_SelectionHandler_Generic.class.php',
-    'EntityReference_SelectionHandler_Generic_file' => 'plugins\selection\EntityReference_SelectionHandler_Generic.class.php',
-    'EntityReference_SelectionHandler_Generic_taxonomy_term' => 'plugins\selection\EntityReference_SelectionHandler_Generic.class.php',
-    'EntityReferenceRecursiveRenderingException' => 'plugins\selection\EntityReference_SelectionHandler_Generic.class.php',
-    'EntityReference_SelectionHandler_Views' => 'plugins\selection\EntityReference_SelectionHandler_Views.class.php',
-    'entityreference_plugin_display' => 'views\entityreference_plugin_display.inc',
-    'entityreference_plugin_row_fields' => 'views\entityreference_plugin_row_fields.inc',
-    'entityreference_plugin_style' => 'views\entityreference_plugin_style.inc',
+    'EntityReference_BehaviorHandler' => 'plugins/behavior/abstract.inc',
+    'EntityReference_BehaviorHandler_Abstract' => 'plugins/behavior/abstract.inc',
+    'EntityReference_BehaviorHandler_Broken extends' => 'plugins/behavior/abstract.inc',
+    'EntityReferenceBehavior_TaxonomyIndex' => 'plugins/behavior/EntityReferenceBehavior_TaxonomyIndex.class.php',
+    'EntityReferenceBehavior_ViewsFilterSelect' => 'plugins/behavior/EntityReferenceBehavior_ViewsFilterSelect.class.php',
+    'EntityReference_SelectionHandler' => 'plugins/selection/abstract.inc',
+    'EntityReference_SelectionHandler_Broken' => 'plugins/selection/abstract.inc',
+    'EntityReference_SelectionHandler_Generic' => 'plugins/selection/EntityReference_SelectionHandler_Generic.class.php',
+    'EntityReference_SelectionHandler_Generic_node' => 'plugins/selection/EntityReference_SelectionHandler_Generic.class.php',
+    'EntityReference_SelectionHandler_Generic_user' => 'plugins/selection/EntityReference_SelectionHandler_Generic.class.php',
+    'EntityReference_SelectionHandler_Generic_comment' => 'plugins/selection/EntityReference_SelectionHandler_Generic.class.php',
+    'EntityReference_SelectionHandler_Generic_file' => 'plugins/selection/EntityReference_SelectionHandler_Generic.class.php',
+    'EntityReference_SelectionHandler_Generic_taxonomy_term' => 'plugins/selection/EntityReference_SelectionHandler_Generic.class.php',
+    'EntityReferenceRecursiveRenderingException' => 'plugins/selection/EntityReference_SelectionHandler_Generic.class.php',
+    'EntityReference_SelectionHandler_Views' => 'plugins/selection/EntityReference_SelectionHandler_Views.class.php',
+    'entityreference_plugin_display' => 'views/entityreference_plugin_display.inc',
+    'entityreference_plugin_row_fields' => 'views/entityreference_plugin_row_fields.inc',
+    'entityreference_plugin_style' => 'views/entityreference_plugin_style.inc',
   );
 }
 
