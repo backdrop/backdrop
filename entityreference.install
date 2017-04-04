@@ -6,7 +6,7 @@
 function entityreference_field_schema($field) {
   if ($field['type'] == 'entityreference') {
     // Load the base table configuration from the cache.
-    $base_tables = variable_get('entityreference:base-tables', array());
+    $base_tables = config_get('entityreference.settings', 'base-tables');
 
     $schema = array(
       'columns' => array(
@@ -42,4 +42,3 @@ function entityreference_field_schema($field) {
     return $schema;
   }
 }
-
