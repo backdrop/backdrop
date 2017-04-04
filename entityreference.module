@@ -381,8 +381,7 @@ function _entityreference_field_settings_process($form, $form_state) {
   );
 
   $handlers = entityreference_entityreference_selection_plugins();
-  asort($handlers);
-  // uasort($handlers, 'ctools_plugin_sort');
+  backdrop_sort($handlers);
   $handlers_options = array();
   foreach ($handlers as $handler => $handler_info) {
     $handlers_options[$handler] = check_plain($handler_info['title']);
