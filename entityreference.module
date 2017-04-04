@@ -977,8 +977,8 @@ function entityreference_autocomplete_callback_get_matches($type, $field, $insta
   $entity = NULL;
   if ($entity_id !== 'NULL') {
     $entity = entity_load($entity_type, $entity_id);
-    $has_view_access = (entity_access('view', $entity_type, $entity) !== FALSE);
-    $has_update_access = (entity_access('update', $entity_type, $entity) !== FALSE);
+    $has_view_access = (entityreference_entity_access('view', $entity_type, $entity) !== FALSE);
+    $has_update_access = (entityreference_entity_access('update', $entity_type, $entity) !== FALSE);
     if (!$entity || !($has_view_access || $has_update_access)) {
       return MENU_ACCESS_DENIED;
     }
@@ -1161,8 +1161,8 @@ function entityreference_field_formatter_prepare_view($entity_type, $entities, $
         // Replace the instance value with the term data.
         $items[$id][$delta]['entity'] = $target_entities[$item['target_id']];
         // Check whether the user has access to the referenced entity.
-        $has_view_access = (entity_access('view', $field['settings']['target_type'], $target_entities[$item['target_id']]) !== FALSE);
-        $has_update_access = (entity_access('update', $field['settings']['target_type'], $target_entities[$item['target_id']]) !== FALSE);
+        $has_view_access = (entityreference_entity_access('view', $field['settings']['target_type'], $target_entities[$item['target_id']]) !== FALSE);
+        $has_update_access = (entityreference_entity_access('update', $field['settings']['target_type'], $target_entities[$item['target_id']]) !== FALSE);
         $items[$id][$delta]['access'] = ($has_view_access || $has_update_access);
       }
       // Otherwise, unset the instance value, since the entity does not exist.
@@ -1340,11 +1340,16 @@ function entityreference_autoload_info() {
   );
 }
 
-function entity_access($op, $entity_type, $entity = NULL, $account = NULL) {
+/**
+ * Check user access to the entity.
+ *
+ * Until entity_access is supported in core.
+ */
+function entityreference_entity_access($op, $entity_type, $entity = NULL, $account = NULL) {
+  if (($info = entity_get_info()) && isset($info[$entity_type]['access callback'])) {
+    return $info[$entity_type]['access callback']($op, $entity, $account, $entity_type);
+  }
   return TRUE;
-  // if (($info = entity_get_info()) && isset($info[$entity_type]['access callback'])) {
-    // return $info[$entity_type]['access callback']($op, $entity, $account, $entity_type);
-  // }
 }
 
 /**
