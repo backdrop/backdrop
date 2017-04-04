@@ -4,13 +4,6 @@
  * Test for Entity Reference taxonomy integration.
  */
 class EntityReferenceTaxonomyTestCase extends BackdropWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Entity Reference Taxonomy',
-      'description' => 'Tests nodes with reference to terms as indexed.',
-      'group' => 'Entity Reference',
-    );
-  }
 
   public function setUp() {
     parent::setUp('entityreference', 'taxonomy');

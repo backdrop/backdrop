@@ -9,16 +9,9 @@
  * Test for Entity Reference admin UI.
  */
 class EntityReferenceAdminTestCase extends BackdropWebTestCase {
-  public static function getInfo() {
-    return array(
-      'name' => 'Entity Reference UI',
-      'description' => 'Tests for the administrative UI.',
-      'group' => 'Entity Reference',
-    );
-  }
 
   public function setUp() {
-    parent::setUp(array('field_ui', 'entity', 'ctools', 'entityreference'));
+    parent::setUp(array('field_ui', 'entity', 'entityreference'));
 
     // Create test user.
     $this->admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer fields'));
