@@ -2,7 +2,7 @@
 
 /**
  * @file
- * CTools plugin class for the taxonomy-index behavior.
+ * Plugin class for the taxonomy-index behavior.
  */
 
 /**

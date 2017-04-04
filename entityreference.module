@@ -1285,7 +1285,6 @@ function entityreference_entityreference_behavior_plugins() {
     return $plugins;
 }
 
-
 /**
  * Implements hook_entityreference_plugins().
  */
@@ -1305,18 +1304,25 @@ function entityreference_entityreference_selection_plugins() {
     return $plugins;
 }
 
+/**
+ * Load a behavior class for a given property.
+ */
 function entityreference_load_behavior_class($property) {
   $plugins = entityreference_entityreference_behavior_plugins();
   return $plugins[$property]['class'];
 }
 
+/**
+ * Load a selection class for a given property.
+ */
 function entityreference_load_selection_class($property) {
   $plugins = entityreference_entityreference_selection_plugins();
   return $plugins[$property]['class'];
 }
 
-
-
+/**
+ * Implements hook_autoload_info().
+ */
 function entityreference_autoload_info() {
   return array(
     'EntityReference_BehaviorHandler' => 'plugins/behavior/abstract.inc',
