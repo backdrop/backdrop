@@ -775,7 +775,7 @@ function entityreference_field_widget_form(&$form, &$form_state, $field, $instan
     }
 
     // Load those entities and loop through them to extract their labels.
-    $entities = entity_load($field['settings']['target_type'], $entity_ids);
+    $entities = entity_load_multiple($field['settings']['target_type'], $entity_ids);
 
     foreach ($entities as $entity_id => $entity_item) {
       $label = $handler->getLabel($entity_item);
@@ -976,7 +976,7 @@ function entityreference_autocomplete_callback_get_matches($type, $field, $insta
 
   $entity = NULL;
   if ($entity_id !== 'NULL') {
-    $entity = entity_load_single($entity_type, $entity_id);
+    $entity = entity_load($entity_type, $entity_id);
     $has_view_access = (entity_access('view', $entity_type, $entity) !== FALSE);
     $has_update_access = (entity_access('update', $entity_type, $entity) !== FALSE);
     if (!$entity || !($has_view_access || $has_update_access)) {
@@ -1145,7 +1145,7 @@ function entityreference_field_formatter_prepare_view($entity_type, $entities, $
   }
 
   if ($target_ids) {
-    $target_entities = entity_load($field['settings']['target_type'], $target_ids);
+    $target_entities = entity_load_multiple($field['settings']['target_type'], $target_ids);
   }
   else {
     $target_entities = array();
