@@ -5,7 +5,7 @@
  * Abstraction of the selection logic of an entity reference field.
  *
  * Implementations that wish to provide an implementation of this should
- * register it using CTools' plugin system.
+ * register it with hook_entityreference_selection_plugins().
  */
 interface EntityReference_SelectionHandler {
   /**
