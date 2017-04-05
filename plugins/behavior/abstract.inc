@@ -4,7 +4,7 @@
  * Additional behaviors for a Entity Reference field.
  *
  * Implementations that wish to provide an implementation of this should
- * register it using CTools' plugin system.
+ * register it using hook_entityreference_behavior_plugins().
  */
 interface EntityReference_BehaviorHandler {
 
@@ -157,7 +157,7 @@ abstract class EntityReference_BehaviorHandler_Abstract implements EntityReferen
   public function __construct($behavior) {
     $this->behavior = $behavior;
 
-    $plugins = entityreference_entityreference_behavior_plugins();
+    $plugins = _entityreference_behavior_plugins();
     $plugin = $plugins[$behavior];
     $this->plugin = $plugin;
   }
