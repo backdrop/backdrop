@@ -75,6 +75,9 @@ fieldset.fieldset-no-legend {
   padding: 5px;
 }
 #views-ui-preview-form .form-submit {
+  /* Make sure button doesn't hang over help text */
+  font-size: 0.875em;
+  padding: 0 18px;
   line-height: 36px;
 }
 
