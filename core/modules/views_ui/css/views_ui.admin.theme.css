@@ -49,7 +49,7 @@
     url("../images/sprites.png"),
     -moz-linear-gradient(
       -90deg,
-      #ffffff 0px,
+      #fff 0px,
       #e8e8e8 100%);
   background-image:
     url("../images/sprites.png"),
@@ -64,7 +64,7 @@
     url("../images/sprites.png"),
     -webkit-linear-gradient(
       -90deg,
-      #ffffff 0px,
+      #fff 0px,
       #e8e8e8 100%);
   background-repeat: no-repeat, repeat-y;
   border: 1px solid #dddddd;
@@ -574,7 +574,7 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 .views-displays .secondary a:hover,
 .views-displays .secondary .active a {
   background-color: #666666;
-  color: #ffffff;
+  color: #fff;
   border-bottom-width: 1px;
 }
 
@@ -630,7 +630,8 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 }
 
 #edit-display-settings-top {
-  padding-bottom: 4px;
+  padding: 0.5em 0.5em;
+  background: #e9e8e8;
 }
 
 #edit-display-settings-content {
@@ -638,7 +639,8 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 }
 
 #edit-display-settings-main {
-  margin-top: 15px;
+  padding: 0.75em 0;
+  background: #fff;
 }
 
 /* @end */
@@ -679,7 +681,7 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 
 #views-ui-preview-form .arguments-preview,
 #views-ui-preview-form .form-type-textfield {
-  margin-left: 14px;
+  margin: 0 0 0 14px;
 }
 
 #views-ui-preview-form .form-type-textfield label {
@@ -704,7 +706,6 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 .views-ui-display-tab-bucket {
   line-height: 20px;
   margin: 0;
-  padding-top: 4px;
 }
 
 .views-ui-display-tab-bucket + .views-ui-display-tab-bucket {
@@ -722,7 +723,7 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 .views-ui-display-tab-bucket h3 {
   font-size: small;
   margin: 0;
-  background-color: #e9e8e8;
+  background-color: #f7f7f7;
 }
 
 .views-ui-display-tab-bucket .horizontal.actions {
@@ -974,14 +975,14 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 /* @group Live preview elements */
 
 #views-preview-wrapper {
-  border: 1px solid #CCC;
-  border-top: 2px solid #CCC;
   padding-bottom: 12px;
-  padding-top: 12px;
+  padding-top: 20px;
+  margin: 0 0 1em;
+  border-top: 0.125em solid #CCC;
 }
 
 #views-ui-preview-form {
-  margin: 12px;
+  padding: 12px;
 }
 
 #views-live-preview {
@@ -1128,8 +1129,8 @@ div.messages {
 
 .views-ui-display-tab-bucket .dropbutton-wrapper {
   position: absolute;
-  right: 20px; /* LTR */
-  top: 12px;
+  right: 12px; /* LTR */
+  top: 8px;
 }
 [dir="rtl"] .views-ui-display-tab-bucket .dropbutton-wrapper {
   left: 20px;
@@ -1234,3 +1235,8 @@ html.js #views-live-preview .contextual-links-wrapper {
 }
 
 /* @end */
+
+
+#views-ajax-popup {
+  padding: 0 0 1.25em;
+}
