@@ -66,6 +66,10 @@
     width: 12rem;
     top: 1em;
   }
+  
+  .js .menu-dropdown ul li {
+    padding-left: 0;
+  }
 
   .js .menu-dropdown > li {
     float: left;
