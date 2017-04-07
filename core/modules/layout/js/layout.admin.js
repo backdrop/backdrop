@@ -109,7 +109,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
     }
 
     // Detect the addition of new blocks.
-    if ($(context).hasClass('layout-editor-block:not(#layout-editor-title)')) {
+    if ($(context).hasClass('layout-editor-block')) {
       var regionName = $(context).closest('.layout-editor-region').data('regionName');
       var positions = $('input[name="content[positions][' + regionName + ']"]').get(0);
       var blockId = $(context).data('blockId');
