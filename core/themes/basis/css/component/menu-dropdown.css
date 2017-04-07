@@ -6,10 +6,19 @@
   position: relative;
 }
 
-.js .menu-dropdown > li {
+.js .menu-dropdown li,
+.js .menu-dropdown a.has-submenu.highlighted {
   float: none;
-  border-bottom: 1px solid #114a75;
+  border-bottom: 1px solid #777;
   background: transparent;
+}
+
+.js .menu-dropdown li.last {
+  border-bottom: 0;
+}
+
+.js .menu-dropdown ul li {
+  padding-left: 2em;
 }
 
 .js .menu-dropdown li.has-children > a {
@@ -19,13 +28,15 @@
 
 .menu-dropdown a span.sub-arrow {
   position: absolute;
-  top: 50%;
+  top: 30%;
   margin-top: -1.0625rem;
   left: auto;
-  right: 0.25rem;
-  width: 2.125rem;
-  height: 2.125rem;
+  right: 0;
+  width: 3.5rem;
+  height: 3.5rem;
   overflow: hidden;
+  border: 1px solid #777;
+  background: #333;
   font: bold 1rem/2.125rem monospace;
   text-align: center;
   text-shadow: none;
@@ -34,6 +45,7 @@
 .menu-dropdown span.sub-arrow:before {
   display: block;
   content: '+';
+  margin-top: 0.5625rem;
 }
 
 .menu-dropdown a.highlighted span.sub-arrow:before {
