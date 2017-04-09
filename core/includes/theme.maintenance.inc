@@ -90,6 +90,7 @@ function _backdrop_maintenance_theme() {
   // When the database is inactive it's not called so we add it here.
   $path = backdrop_get_path('module', 'system');
   backdrop_add_css('core/misc/normalize.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
+  backdrop_add_css('core/misc/opinionate.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
   backdrop_add_css($path . '/css/system.css');
   backdrop_add_css($path . '/css/system.admin.css');
   backdrop_add_css($path . '/css/system.theme.css');
