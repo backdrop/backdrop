@@ -1619,7 +1619,7 @@ function filter_entity_update(EntityInterface $entity) {
   $entity_info = entity_get_info($entity->entityType());
   $vid_key = isset($entity_info['entity keys']['revision']) ? $entity_info['entity keys']['revision'] : NULL;
   if (!empty($entity->original)){
-    $vid_key && $entity->$vid_key != $entity->original->$vid_key) {
+    if ($vid_key && $entity->$vid_key != $entity->original->$vid_key) {
       $referenced_files_by_field = _filter_get_file_ids_by_field($entity);
       foreach ($referenced_files_by_field as $field => $fids) {
         _filter_record_file_usage($fids, $entity);
