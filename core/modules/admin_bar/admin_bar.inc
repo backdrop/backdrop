@@ -34,6 +34,7 @@ function admin_bar_output($complete = FALSE) {
   if (!isset($content)) {
     // Retrieve enabled components to display and make them available for others.
     $components = $config->get('components');
+
     $content['#components'] = $components;
     $content['#complete'] = $complete;
 
@@ -50,7 +51,7 @@ function admin_bar_output($complete = FALSE) {
     module_load_include('inc', 'admin_bar');
 
     // Add administration bar.
-    if (in_array('admin_bar.menu', $components) || $complete) {
+    if ($components['admin_bar.menu'] || $complete) {
       $content['menu'] = array(
         '#theme' => 'admin_bar_links',
         '#wrapper_attributes' => array(
@@ -70,16 +71,16 @@ function admin_bar_output($complete = FALSE) {
 
     // Add menu additions.
     $content['extra']['extra'] = array();
-    if (in_array('admin_bar.icon', $components) || $complete) {
+    if ($components['admin_bar.icon'] || $complete) {
       $content['icon'] = admin_bar_links_icon();
     }
-    if (in_array('admin_bar.search', $components) || $complete) {
+    if ($components['admin_bar.search'] || $complete) {
       $content['extra']['extra'] += admin_bar_links_search();
     }
-    if (in_array('admin_bar.account', $components) || $complete) {
+    if ($components['admin_bar.account'] || $complete) {
       $content['extra']['extra'] += admin_bar_links_account();
     }
-    if (in_array('admin_bar.users', $components) || $complete) {
+    if ($components['admin_bar.users'] || $complete) {
       $content['extra']['extra'] += admin_bar_links_users();
     }
 
@@ -717,6 +718,9 @@ function admin_bar_theme_settings() {
     '#description' => t('Displays the administration bar always at the top of the browser viewport, even when scrolling the page.'),
   );
 
+  $components = $config->get('components');
+  $enabled_components = array_keys(array_filter($components));
+
   $form['components'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Enabled components'),
@@ -727,7 +731,7 @@ function admin_bar_theme_settings() {
       'admin_bar.users' => t('User counts'),
       'admin_bar.account' => t('Account links'),
     ),
-    '#default_value' => $config->get('components'),
+    '#default_value' => $enabled_components,
     '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
   );
 
@@ -739,7 +743,21 @@ function admin_bar_theme_settings() {
     '#value' => t('Save configuration'),
   );
 
+  $form['#submit'] = array('admin_bar_theme_settings_submit');
   return system_settings_form($form);
+}
+
+/**
+ * Submit handler for admin_bar_theme_settings().
+ */
+function admin_bar_theme_settings_submit($form, &$form_state) {
+  foreach ($form_state['values']['components'] as $component => $value) {
+    if ($component === $value) {
+      // Makes sure that the enabled components are saved in config with value
+      // "1" instead of the component name.
+      $form_state['values']['components'][$value] = 1;
+    }
+  }
 }
 
 /**
