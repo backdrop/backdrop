@@ -176,11 +176,47 @@ function template_preprocess_installer_browser_project(&$variables) {
   // Check if the project is installed.
   $found = backdrop_get_filename($project['type'], $project['name']);
   if (_installer_browser_is_project_enabled($project['type'], $project['name'])) {
-    $variables['status'] = '<div class="install-disabled">Already enabled</div>';
+    $status = '<div class="install-disabled">' . t('Already enabled');
+    switch ($project['type']) {
+      case 'module':
+        $all_modules_info = system_rebuild_module_data();
+        $project_info = $all_modules_info[$project['name']];
+        if (isset($project_info->info['configure'])) {
+          $action = 'configure';
+          $url = $project_info->info['configure'];
+        }
+        break;
+      case 'theme':
+        if (backdrop_theme_access($project['name']) && theme_has_settings($project['name'])) {
+          $action = 'settings';
+          $url = 'admin/appearance/settings/' . $project['name'];
+        }
+        break;
+      case 'layout':
+        $action = 'settings';
+        $url = 'admin/structure/layouts/settings';
+        break;
+    }
+    $status .= ', ' . t('<a href="@url">@action</a>', array('@url' => url($url), '@action' => $action));
+    $status .= '</div>';
+    $variables['status'] = $status;
     $variables['install'] = '';
   }
   elseif ($found) {
-    $variables['status'] = '<div class="install-disabled">Already downloaded</div>';
+    $variables['status'] = '<div class="install-disabled">' . t('Already downloaded');
+    switch ($project['type']) {
+      case 'module':
+        $url = 'admin/modules#module-' . $project['name'];
+        break;
+      case 'theme':
+        $url = 'admin/appearance/list#theme-' . $project['name'];
+        break;
+      case 'layout':
+        $url = 'admin/structure/layouts/settings#layout-' . $project['name'];
+        break;
+    }
+    $variables['status'] .= ', ' . t('<a href="@url">enable</a>', array('@url' => url($url)));
+    $variables['status'] .= '</div>';
     $variables['install'] = '';
   }
   else {
