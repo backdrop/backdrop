@@ -505,13 +505,11 @@ td.group-title {
 /* @group Attachments */
 
 .views-displays {
-  border: 1px solid #CCC;
   padding-bottom: 36px;
 }
 
 .views-display-top {
   background-color: #F9F9F9;
-  border-bottom: 1px solid #CCCCCC;
   padding: 8px 8px 8px; /* LTR */
   position: relative;
 }
@@ -704,7 +702,6 @@ ul#views-display-menu-tabs li.add ul.action-list li{
  */
 
 .views-ui-display-tab-bucket {
-  border: 1px solid #f3f3f3;
   line-height: 20px;
   margin: 0;
   padding-top: 4px;
@@ -714,7 +711,10 @@ ul#views-display-menu-tabs li.add ul.action-list li{
   border-top: medium none;
 }
 
-.views-ui-display-tab-bucket > h3,
+.views-ui-display-tab-bucket > h3 {
+  padding: 10px 20px;
+}
+
 .views-ui-display-tab-bucket > .views-display-setting {
   padding: 2px 6px 4px;
 }
@@ -722,6 +722,7 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 .views-ui-display-tab-bucket h3 {
   font-size: small;
   margin: 0;
+  background-color: #e9e8e8;
 }
 
 .views-ui-display-tab-bucket .horizontal.actions {
@@ -1127,11 +1128,11 @@ div.messages {
 
 .views-ui-display-tab-bucket .dropbutton-wrapper {
   position: absolute;
-  right: 5px; /* LTR */
-  top: 4px;
+  right: 20px; /* LTR */
+  top: 12px;
 }
 [dir="rtl"] .views-ui-display-tab-bucket .dropbutton-wrapper {
-  left: 5px;
+  left: 20px;
   right: auto;
 }
 .views-ui-display-tab-bucket .dropbutton-wrapper,
