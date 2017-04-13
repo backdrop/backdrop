@@ -109,7 +109,7 @@ span.admin-missing {
  * Status report.
  */
 table.system-status-report td {
-  padding: 6px;
+  padding: 11px 6px;
   vertical-align: middle;
 }
 table.system-status-report tr.merge-up td {
