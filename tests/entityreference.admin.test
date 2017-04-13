@@ -68,7 +68,7 @@ class EntityReferenceAdminTestCase extends DrupalWebTestCase {
       'fields[_add_new_field][type]' => 'entityreference',
       'fields[_add_new_field][widget_type]' => 'entityreference_autocomplete',
     ), t('Save'));
-    return;
+
     // Node should be selected by default.
     $this->assertFieldByName('field[settings][target_type]', 'node');
     // The base handler should be selected by default.
