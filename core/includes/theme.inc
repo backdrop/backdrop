@@ -1994,7 +1994,7 @@ function theme_breadcrumb($variables) {
  *     - "data": The localized title of the table column.
  *     - "field": The database field represented in the table column (required
  *       if user is to be able to sort on this column).
- *     - "sort": A default sort order for this column ("asc" or "desc"). 
+ *     - "sort": A default sort order for this column ("asc" or "desc").
  *     - "class": An array of values for the 'class' attribute. In particular,
  *       the least important columns that can be hidden on narrow and medium
  *       width screens should have a 'priority-low' class, referenced with the
@@ -2174,7 +2174,6 @@ function theme_table($variables) {
       if (isset($row['data'])) {
         $cells = $row['data'];
         $no_striping = isset($row['no_striping']) ? $row['no_striping'] : FALSE;
-        $merge = isset($row['merge']) ? $row['merge'] : FALSE;
 
         // Set the attributes array and exclude 'data' and 'no_striping'.
         $tr_attributes = $row;
@@ -2187,15 +2186,9 @@ function theme_table($variables) {
         $no_striping = FALSE;
       }
       if (count($cells)) {
-        // Add odd/even and merge-up/merge-down/merge-both classes.
+        // Add odd/even class.
         if (!$no_striping) {
-          if ($merge) {
-            $tr_attributes['class'][] = 'merge-' . $merge;
-          }
-          if (!$merge || $merge === 'down') {
-            $class = $flip[$class];
-          }
-          
+          $class = $flip[$class];
           $tr_attributes['class'][] = $class;
         }
 

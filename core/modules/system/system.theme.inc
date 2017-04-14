@@ -276,6 +276,32 @@ function theme_system_modules_uninstall($variables) {
  */
 function theme_status_report($variables) {
   $requirements = $variables['requirements'];
+  backdrop_sort($requirements, array('title' => SORT_STRING));
+
+  // Separate requirements by severity.
+  $errors = array();
+  $warnings = array();
+  $infos = array();
+  $okays = array();
+  foreach ($requirements as $requirement) {
+    switch ($requirement['severity']) {
+      case REQUIREMENT_ERROR:
+        $errors[] = $requirement;
+        break;
+      case REQUIREMENT_WARNING:
+        $warnings[] = $requirement;
+        break;
+      case REQUIREMENT_INFO:
+        $infos[] = $requirement;
+        break;
+      case REQUIREMENT_OK:
+        $okays[] = $requirement;
+        break;
+    }
+  }
+  // Put them back together in the desired order.
+  $requirements = array_merge($errors, $warnings, $infos, $okays);
+
   $severities = array(
     REQUIREMENT_INFO => array(
       'title' => t('Info'),
@@ -305,37 +331,38 @@ function theme_status_report($variables) {
     'empty' => 'No status report. Something is definitely wrong.',
   );
 
+  $rows = array();
   foreach ($requirements as $requirement) {
     $severity = $severities[isset($requirement['severity']) ? (int) $requirement['severity'] : REQUIREMENT_OK];
     $severity['icon'] = '<div title="' . $severity['title'] . '"><span class="element-invisible">' . $severity['title'] . '</span></div>';
 
-  if (empty($requirement['#type'])) {
-      $system_status_report_table['rows'][] = array(
-        'data' => array(
-          array('data' => $severity['icon'], 'class' => 'status-icon'),
-          array('data' => $requirement['title'], 'class' => 'status-title'),
-          array('data' => '<span>' . $requirement['value'] . '</span>', 'class' => 'status-value'),
-        ),
-        'class' => array($severity['class']),
-      );
-      // If the requirement has a description...
-      if (!empty($requirement['description'])) {
-        // ...find the key of the parrent row...
-        $parrent_row = count($system_status_report_table['rows']) - 1;
-        // ...and set the "merge" attribute of the parrent row to "down".
-        $system_status_report_table['rows'][$parrent_row]['merge'] = 'down';
-        // Then render the descritpion row...
-        $system_status_report_table['rows'][] = array(
-          'data' => array(
-            array('data' => $requirement['description'], 'class' => 'status-description', 'colspan' => 3,),
-          ),
-          'class' => array($severity['class']),
-          // ...and set the "merge" attribute to "up".
-          'merge' => 'up',
-        );
-      }
+    $title = $requirement['title'] . '<br/>';
+    $title .= '<span class="status-summary-mobile">' . $requirement['value'] . '</span>';
+
+    $more = ' ';
+    $details = '';
+    if (!empty($requirement['description'])) {
+      $more .= '<a class="description-toggle" href="#">more</a>';
+      $details = '<div class="status-description">' . $requirement['description']. '</div>';
     }
+
+    $description = '<div class="status-summary">' . $requirement['value'] . $more . '</div>' . $details;
+
+    $row = array(
+      'data' => array(
+        array('data' => $severity['icon'], 'class' => 'status-icon'),
+        array('data' => $title, 'class' => 'status-title'),
+        array('data' => $description, 'class' => array('status-value', 'priority-medium')),
+      ),
+      'class' => array($severity['class']),
+    );
+
+    $rows[] = $row;
   }
+
+  $system_status_report_table['rows'] = $rows;
+  $path = backdrop_get_path('module', 'system');
+  backdrop_add_js($path . '/js/status.js');
 
   return theme_table($system_status_report_table);
 }

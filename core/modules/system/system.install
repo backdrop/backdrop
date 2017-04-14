@@ -52,7 +52,7 @@ function system_requirements($phase) {
   if (function_exists('phpinfo')) {
     $requirements['php'] = array(
       'title' => $t('PHP'),
-      'value' => ($phase == 'runtime') ? $phpversion .' ('. l($t('more information'), 'admin/reports/status/php') .')' : $phpversion,
+      'value' => ($phase == 'runtime') ? $phpversion .' ('. l($t('PHP information'), 'admin/reports/status/php') .')' : $phpversion,
     );
   }
   else {
@@ -190,12 +190,7 @@ function system_requirements($phase) {
     $requirements['jquery'] = array(
       'title' => $t('jQuery'),
       'severity' => REQUIREMENT_OK,
-      'value' => $jquery['version'],
-    );
-    $requirements['jquery_ui'] = array(
-      'title' => $t('jQuery UI'),
-      'severity' => REQUIREMENT_OK,
-      'value' => $jquery_ui['version'],
+      'value' => $t('jQuery version !jqv / jQuery UI version !jquiv', array('!jqv' => $jquery['version'], '!jquiv' => $jquery_ui['version'])),
     );
   }
 
@@ -290,20 +285,22 @@ function system_requirements($phase) {
     }
 
     // Set summary and description based on values determined above.
-    $summary = $t('Last run !time ago', array('!time' => format_interval(REQUEST_TIME - $cron_last)));
+    $summary = $t('Last run !time ago (<a href="@url">Run cron manually</a>)', array(
+      '!time' => format_interval(REQUEST_TIME - $cron_last),
+      '@url' => url('admin/reports/status/run-cron')
+    ));
     $description = '';
     if ($severity != REQUIREMENT_OK) {
       $description = $t('Cron has not run recently.') . ' ' . $help;
     }
 
-    $description .= ' ' . $t('You can <a href="@cron">run cron manually</a>.', array('@cron' => url('admin/reports/status/run-cron')));
-    $description .= '<br />' . $t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key'))))));
+    $description .= $t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key'))))));
 
     $requirements['cron'] = array(
       'title' => $t('Cron maintenance tasks'),
       'severity' => $severity,
       'value' => $summary,
-      'description' => $description
+      'description' => $description,
     );
   }
 
@@ -386,7 +383,7 @@ function system_requirements($phase) {
         $latest_schema = end($updates);
         if ($current_schema < $latest_schema) {
           $requirements['update']['severity'] = REQUIREMENT_ERROR;
-          $requirements['update']['value'] = $t('Out of date');
+          $requirements['update']['value'] = $t('Out of date') . ' (' . l(t('Run database updates'), base_path() . 'core/update.php'). ')';
           $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">database update script</a> immediately.', array('@update' => base_path() . 'core/update.php'));
           break;
         }
@@ -477,7 +474,7 @@ function system_requirements($phase) {
         'value' => $t('Enabled'),
       );
     }
-    $requirements['update status']['title'] = $t('Update notifications');
+    $requirements['update status']['title'] = $t('Backdrop CMS update notifications');
   }
 
   if ($phase == 'runtime') {

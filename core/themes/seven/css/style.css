@@ -599,51 +599,6 @@ tr.selected td {
   background: #ffc;
   border-color: #eeb;
 }
-.system-status-report .status-value span {
-  padding: 2px 7px;
-  border-radius: 4px;
-}
-.system-status-report .status-description {
-  color: #787878;
-}
-.system-status-report tr.status .status-title {
-  color: #000000;
-}
-.system-status-report tr.status .status-value span {
-  color: #3a5619;
-  background: #e9eebc;
-}
-.system-status-report tr.info .status-title {
-  color: #000000;
-}
-.system-status-report tr.info .status-value span {
-  color: #040f37;
-  background: #cccccc;
-}
-.system-status-report tr.warning .status-title {
-  color: #000000;
-}
-.system-status-report tr.warning .status-value span {
-  color: #64645f;
-  background: #faf5c9;
-}
-.system-status-report tr.error {
-  color: #ec351c;
-}
-.system-status-report tr.error .status-value span {
-  background: #f9edec;
-}
-.system-status-report td.status-title {
-  font-weight: bold;
-  width: 1%;
-  white-space: nowrap;
-}
-@media (max-width: 720px) {
-  .system-status-report td.status-title {
-    width: 50%;
-    white-space: normal;
-  }
-}
 .diff-table td {
   padding: 4px;
 }
