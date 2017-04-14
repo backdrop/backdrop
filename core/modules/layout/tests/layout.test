@@ -1612,7 +1612,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     // Check that the Combo block elements show.
     $combo_page_title = $this->xpath('(//div[contains(@class, "block-system-title-combo")])//h1[contains(@class, "title")]');
     $this->assertEqual(count($combo_page_title), 1, 'The Title combo title DIV was found.');
-    $combo_tabs = $this->xpath('(//div[contains(@class, "block-system-title-combo")])//div[contains(@class, "tabs")]');
+    $combo_tabs = $this->xpath('(//div[contains(@class, "block-system-title-combo")])//nav[contains(@class, "tabs")]');
     $this->assertEqual(count($combo_tabs), 1, 'The Title combo tabs DIV was found.');
     $combo_messages = $this->xpath('(//div[contains(@class, "block-system-title-combo")])//div[contains(@class, "l-messages")]');
     $this->assertEqual(count($combo_messages), 1, 'The Title combo messages DIV was found.');
