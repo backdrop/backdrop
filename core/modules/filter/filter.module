@@ -135,7 +135,7 @@ function filter_menu() {
   );
   $items['filter-link/autocomplete'] = array(
     'page callback' => '_filter_link_autocomplete',
-    'access arguments' => array('view content'),
+    'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
   );

@@ -85,28 +85,38 @@ function _filter_link_autocomplete($string) {
   if ($string) {
     // Get node matches.
     $results = db_select('node')
-      ->fields('node', array('nid', 'title'))
+      ->fields('node', array('nid', 'title', 'status'))
       ->condition('title', db_like($string) . '%', 'LIKE')
+      ->condition('status', 1)
       ->addTag('node_access')
+      ->orderBy('nid', 'DESC')
       ->range(0, 10)
       ->execute();
     foreach ($results as $result) {
-      $node = node_load($result->nid);
-      $path = backdrop_get_path_alias('node/' . $node->nid);
-      $matches['/' . $path] = check_plain($node->title) . ' (' . t('Content') . ')';
+      $path = backdrop_get_path_alias('node/' . $result->nid);
+      $matches['/' . $path] = check_plain($result->title) . ' (' . t('Content') . ')';
     }
 
     // Get user matches.
-    $results = db_select('users')
-      ->fields('users', array('uid', 'name'))
-      ->condition('name', db_like($string) . '%', 'LIKE')
-      ->addTag('user_access')
-      ->range(0, 10)
-      ->execute();
-    foreach ($results as $result) {
-      $user = user_load($result->uid);
-      $path = backdrop_get_path_alias('user/' . $user->uid);
-      $matches['/' . $path] = user_format_name($user) . ' (' . t('User') . ')';
+    if (user_access('access user profiles')) {
+      $results = db_select('users')
+        ->fields('users', array('uid', 'name'))
+        ->condition('name', db_like($string) . '%', 'LIKE')
+        ->range(0, 10)
+        ->orderBy('uid', 'DESC')
+        ->execute();
+      // We need to load the User object to user user_format_name().
+      $uids = array();
+      foreach ($results as $result) {
+        $uids[] = $result->uid;
+      }
+      if (!empty($uids)) {
+        $users = user_load_multiple($uids);
+        foreach ($users as $user) {
+          $path = backdrop_get_path_alias('user/' . $user->uid);
+          $matches['/' . $path] = user_format_name($user) . ' (' . t('User') . ')';
+        }
+      }
     }
 
     // Get taxonomy term matches.
@@ -115,29 +125,34 @@ function _filter_link_autocomplete($string) {
       ->condition('name', db_like($string) . '%', 'LIKE')
       ->addTag('taxonomy_term_access')
       ->range(0, 10)
+      ->orderBy('tid', 'DESC')
       ->execute();
     foreach ($results as $result) {
-      $taxonomy_term = taxonomy_term_load($result->tid);
-      $path = backdrop_get_path_alias('taxonomy/term/' . $taxonomy_term->tid);
-      $matches['/' . $path] = check_plain($taxonomy_term->name) . ' (' . t('Taxonomy term') . ')';
+      $path = backdrop_get_path_alias('taxonomy/term/' . $result->tid);
+      $matches['/' . $path] = check_plain($result->name) . ' (' . t('Taxonomy term') . ')';
     }
 
     // Get Views page matches.
     $views = views_get_enabled_views();
     foreach ($views as $view) {
-      // Todo: check access.
-      foreach ($view->display as $display => $display_info) {
-        if ($display_info->display_plugin == 'page' && !empty($display_info->display_options['path'])) {
-          $path = backdrop_get_path_alias($display_info->display_options['path']);
+      foreach ($view->display as $display_id => $display) {
+        if ($view->access($display_id) && $display->display_plugin == 'page' && !empty($display->display_options['path'])) {
+          $path = backdrop_get_path_alias($display->display_options['path']);
           if (!path_is_admin($path)) {
-            if (stripos($view->human_name, $string) !== false || (!empty($display_info->title) && stripos($display_info->title, $string) !== false)) {
-              $view_display_title = (!empty($display_info->title)) ? $display_info->title : check_plain($view->human_name) . ' : ' . $display;
+            if (stripos($view->human_name, $string) !== false || (!empty($display->title) && stripos($display->title, $string) !== false)) {
+              $view_display_title = (!empty($display->title)) ? $display->title : check_plain($view->human_name) . ' : ' . $display_id;
               $matches['/' . $path] = $view_display_title . ' (' . t('Views page') . ')';
             }
           }
         }
       }
     }
+  }
+
+  // Load layout paths
+  $menu_items = layout_get_all_configs('menu_item');
+  foreach ($menu_items as $menu_item) {
+    $matches['/' . $menu_item['path']] = check_plain($menu_item['name']) . ' (' . t('Layout path') . ')';
   }
 
   backdrop_json_output($matches);
