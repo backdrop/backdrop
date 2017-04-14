@@ -52,21 +52,21 @@ class PageComponents extends Block {
         '#title' => t('Title tag'),
         '#type' => 'select',
         '#options' => array(
-          'none' => t('- No tag -'),
-          'h1' => t('h1'),
-          'h2' => t('h2'),
-          'h3' => t('h3'),
-          'h4' => t('h4'),
-          'h5' => t('h5'),
-          'h6' => t('h6'),
-          'div' => t('div'),
+          'h1' => 'H1',
+          'h2' => 'H2',
+          'h3' => 'H3',
+          'h4' => 'H4',
+          'h5' => 'H5',
+          'h6' => 'H6',
+          'div' => 'DIV',
         ),
         '#default_value' => $this->settings['title_tag'],
       );
-      $form['title_wrapper']['title_class'] = array(
-        '#title' => t('CSS class to use'),
+      $form['title_wrapper']['title_classes'] = array(
+        '#title' => t('Heading classes'),
         '#type' => 'textfield',
-        '#default_value' => $this->settings['title_class'],
+        '#default_value' => $this->settings['title_classes'],
+        '#description' => t('Additional classes to be added to the page title.'),
       );
     }
 
@@ -82,8 +82,11 @@ class PageComponents extends Block {
           'both' => t('Primary and secondary'),
           'primary' => t('Primary'),
           'secondary' => t('Secondary'),
+          'hidden' => t('Hidden'),
         ),
         '#default_value' => $this->settings['tab_type'],
+        '#description' => t('Tabs are commonly used to show links for editing content, viewing revisions, and accessing sub-pages of configuration.
+'),
       );
     }
   }
@@ -95,8 +98,8 @@ class PageComponents extends Block {
     if (isset($form_state['values']['title_wrapper']['title_tag'])) {
       $this->settings['title_tag'] = $form_state['values']['title_wrapper']['title_tag'];
     }
-    if (isset($form_state['values']['title_wrapper']['title_class'])) {
-      $this->settings['title_class'] = $form_state['values']['title_wrapper']['title_class'];
+    if (isset($form_state['values']['title_wrapper']['title_classes'])) {
+      $this->settings['title_classes'] = $form_state['values']['title_wrapper']['title_classes'];
     }
     if (isset($form_state['values']['tabs']['tab_type'])) {
       $this->settings['tab_type'] = $form_state['values']['tabs']['tab_type'];

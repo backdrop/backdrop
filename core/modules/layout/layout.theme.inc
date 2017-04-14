@@ -207,7 +207,7 @@ function layout_preprocess_layout(&$variables) {
 
   // Check if any Title Component blocks have been placed. These will override
   // the variables here.
-  $should_display = _layout_page_component_blocks_exist($variables);
+  $block_exists = _layout_page_component_blocks_exist($variables);
 
   $variables += array(
     'action_links' => NULL,
@@ -217,7 +217,7 @@ function layout_preprocess_layout(&$variables) {
   );
 
   if (!$variables['admin']) {
-    if (!isset($variables['title']) && $should_display['title']) {
+    if (!isset($variables['title']) && !$block_exists['title']) {
       if ($settings['title_display'] === LAYOUT_TITLE_NONE) {
         $variables['title'] = NULL;
       }
@@ -232,7 +232,7 @@ function layout_preprocess_layout(&$variables) {
 
     // Generate messages last in order to capture as many as possible for the
     // current page.
-    if (!isset($variables['messages']) && $should_display['messages']) {
+    if (!isset($variables['messages']) && !$block_exists['messages']) {
       $variables['messages'] = theme('status_messages');
     }
   }
@@ -241,10 +241,10 @@ function layout_preprocess_layout(&$variables) {
   }
 
   if (!$variables['admin']) {
-    if ($should_display['action_links']) {
+    if (!$block_exists['action_links']) {
       $variables['action_links'] = menu_local_actions();
     }
-    if ($should_display['tabs']) {
+    if (!$block_exists['tabs']) {
       $variables['tabs'] =  menu_local_tabs();
     }
   }
@@ -261,12 +261,12 @@ function _layout_page_component_blocks_exist($variables) {
     }
   }
 
-  $should_display['title'] = (!in_array('title_combo', $active_component_blocks) && !in_array('title', $active_component_blocks));
-  $should_display['messages'] = (!in_array('title_combo', $active_component_blocks) && !in_array('messages', $active_component_blocks));
-  $should_display['tabs'] = (!in_array('title_combo', $active_component_blocks) && !in_array('tabs', $active_component_blocks));
-  $should_display['action_links'] = (!in_array('title_combo', $active_component_blocks) && !in_array('action_links', $active_component_blocks));
+  $block_exists['title'] = (in_array('title_combo', $active_component_blocks) || in_array('title', $active_component_blocks));
+  $block_exists['messages'] = (in_array('title_combo', $active_component_blocks) || in_array('messages', $active_component_blocks));
+  $block_exists['tabs'] = (in_array('title_combo', $active_component_blocks) || in_array('tabs', $active_component_blocks));
+  $block_exists['action_links'] = (in_array('title_combo', $active_component_blocks) || in_array('action_links', $active_component_blocks));
 
-  return $should_display;
+  return $block_exists;
 }
 
 /**

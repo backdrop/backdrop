@@ -672,17 +672,12 @@ function system_preprocess_page_components(&$variables) {
   );
 
   if ($child_delta == 'title' || $child_delta == 'title_combo') {
-    if ($settings['title_tag'] == 'none') {
-      $variables['title'] = backdrop_get_title();
-    }
-    else {
-      $output = '<' . $settings['title_tag'];
-      if (strlen($settings['title_class'])) {
-        $output .= ' class="' . $settings['title_class'] . '"';
-      }
-      $output .= '>' . backdrop_get_title() . '</' . $settings['title_tag'] . '>' . "\n";
-      $variables['title'] = $output;
-    }
+    $variables['title'] = backdrop_get_title();
+    $variables['title_tag'] = $settings['title_tag'];
+    $variables['title_classes'] = $settings['title_classes'];
+    $variables['title_attributes'] = array(
+      'class' => array_filter(explode(' ', $settings['title_classes'])),
+    );
   }
   if ($child_delta == 'tabs' || $child_delta == 'title_combo') {
     $menus =  array();
@@ -704,7 +699,12 @@ function system_preprocess_page_components(&$variables) {
         );
         break;
     }
-    $variables['tabs'] = theme('menu_local_tasks', $menus);
+    if ($settings['tab_type'] == 'hidden') {
+      $variables['tabs'] = '';
+    }
+    else {
+      $variables['tabs'] = theme('menu_local_tasks', $menus);
+    }
   }
   if ($child_delta == 'action_links' || $child_delta == 'title_combo') {
     $variables['action_links'] = menu_local_actions();
