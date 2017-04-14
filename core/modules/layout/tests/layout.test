@@ -1313,7 +1313,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     ));
     $first_block_uuid = (string) $first_block[0]['data-block-id'];
 
-    // Add a Custom Text block without subject.
+    // Add a Custom Text block without title.
     $this->clickLink(t('Add block'), 3);
     $this->clickLink(t('Custom block'));
     $edit = array(
@@ -1339,7 +1339,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
       ':region' => 'l-sidebar',
       ':block' => 'block-layout-custom-block',
     ));
-    $this->assertEqual(count($elements), 2, 'Two custom text blocks were found in the sidebar.');
+    $this->assertEqual(count($elements), 3, 'Three custom text blocks were found in the sidebar.');
 
     // Both title and content are visible for block one.
     $this->assertText($block_title_1);
@@ -1351,10 +1351,8 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $title_2 = $this->xpath('(//div[contains(@class, "block-layout-text-block")])[2]//h2');
     $this->assertFalse($title_2);
 
-    // Block three doesn't appear.
-    $this->assertNoText($block_title_3);
-    $block_3 = $this->xpath('(//div[contains(@class, "block-layout-text-block")])[3]');
-    $this->assertFalse($block_3);
+    // Block three title is visible.
+    $this->assertText($block_title_3);
 
     // Convert the first block from being a text block into a custom block.
     module_enable(array('block'));
