@@ -264,7 +264,7 @@ function path_form_node_type_form_alter(&$form, $form_state) {
 
   $settings = array(
     'default' => $url_pattern,
-    'description' => t('New pages will have URLs that match a pattern based on wildcards called <em>tokens</em>. For example the URL <code>blog/my-first-post</code> could be created using the pattern <code>blog/[node:title]<code> if the title of the blog post was "My first post".'),
+    'description' => t('New pages will have URLs that match a pattern based on wildcards called <em>tokens</em>. For example the URL <code>blog/my-first-post</code> could be created using the pattern <code>blog/[node:title]</code> if the title of the blog post was "My first post".'),
     'token_types' => array('node'),
   );
   $form += path_pattern_settings_form($settings);
