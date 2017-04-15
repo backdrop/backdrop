@@ -1,0 +1,11 @@
+name = Entity cache
+description = Provides caching for core entities including nodes and taxonomy terms.
+
+core = 8.x
+package = Core
+
+files[] = entitycache.module
+files[] = entitycache.comment.inc
+files[] = entitycache.taxonomy.inc
+files[] = entitycache.test
+;hidden[] = TRUE

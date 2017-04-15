@@ -1,0 +1,50 @@
+<?php
+
+/**
+ * @file Schema and install hooks for the entitycache module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function entitycache_schema() {
+  $schema = array();
+  // Load the .module file rather than declare this function twice.
+  drupal_load('module', 'entitycache');
+  $entities = array_keys(entitycache_supported_core_entities());
+  $cache_schema = drupal_get_schema_unprocessed('system', 'cache');
+
+  foreach ($entities as $type) {
+    $schema["cache_entity_$type"] = $cache_schema;
+    $schema["cache_entity_$type"]['description'] = "Cache table used to store $type entity records.";
+  }
+  return $schema;
+}
+
+/**
+ * Implements hook_enable().
+ */
+function entitycache_enable() {
+  variable_set('entitycache_enabled', TRUE);
+}
+
+/**
+ * Implements hook_disable().
+ */
+function entitycache_disable() {
+  variable_del('entitycache_enabled');
+}
+
+/**
+ * Empty update.
+ */
+function entitycache_update_7001() {
+}
+
+/**
+ * Rebuild entity info cache and registry.
+ */
+function entitycache_update_7002() {
+  registry_update();
+  entity_info_cache_clear();
+}
