@@ -519,6 +519,10 @@ function system_modules($form, $form_state = array()) {
     if (!empty($file->info['hidden'])) {
       unset($visible_files[$filename]);
     }
+    // Remove required core modules from list.
+    if (!empty($file->info['required']) && $file->info['required']) {
+      unset($visible_files[$filename]);
+    }
   }
 
   uasort($visible_files, 'system_sort_modules_by_info_name');
