@@ -261,7 +261,7 @@ Backdrop.behaviors.viewsUiRenderAddViewButton = {
     $displayButtons.appendTo($addDisplayDropdown.find('.action-list')).wrap('<li>')
       .parent().first().addClass('first').end().last().addClass('last');
     // Remove the 'Add ' prefix from the button labels since they're being
-    // palced in an 'Add' dropdown.
+    // placed in an 'Add' dropdown.
     // @todo This assumes English, but so does $addDisplayDropdown above. Add
     //   support for translation.
     $displayButtons.each(function () {
