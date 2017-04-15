@@ -541,9 +541,13 @@ function system_modules($form, $form_state = array()) {
   );
 
   $form['filter']['core_switch'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Exclude core modules'),
-    '#default_value' => 0,
+    '#type' => 'checkboxes',
+    '#title' => t('Show the following modules'),
+    '#default_value' => array('core', 'contrib'),
+    '#options' => array(
+      'core' => 'Core',
+      'contrib' => 'Contrib',
+    ),
   );
 
   uasort($visible_files, 'system_sort_modules_by_info_name');

@@ -127,6 +127,25 @@ Backdrop.behaviors.moduleFilterByText = {
       $('#edit-tags').on('change', filterModuleListByTag);
       $('#edit-core-switch').on('change', filterCore);
     }
+
+    corefltr = $form.find('#edit-core-switch-core');
+    contribfltr = $form.find('#edit-core-switch-contrib');
+    corefltr.change(function() {
+      if (corefltr.is(':not(:checked)')) {
+          contribfltr.prop('disabled', true);
+      }
+      else {
+        contribfltr.prop('disabled', false);
+      }
+    });
+    contribfltr.change(function() {
+      if (contribfltr.is(':not(:checked)')) {
+          corefltr.prop('disabled', true);
+      }
+      else {
+        corefltr.prop('disabled', false);
+      }
+    });
   }
 };
 
