@@ -1,0 +1,17 @@
+[EntityReferenceAdminTestCase]
+name = Entity Reference UI
+description = Tests for the administrative UI.
+group = Field types
+file = tests/entityreference.admin.test
+
+[EntityReferenceHandlersTestCase]
+name = Entity Reference Handlers
+description = Tests for the base handlers provided by Entity Reference.
+group = Field types
+file = tests/entityreference.handlers.test
+
+[EntityReferenceTaxonomyTestCase]
+name = Entity Reference Taxonomy
+description = Tests nodes with reference to terms as indexed.
+group = Field types
+file = tests/entityreference.taxonomy.test

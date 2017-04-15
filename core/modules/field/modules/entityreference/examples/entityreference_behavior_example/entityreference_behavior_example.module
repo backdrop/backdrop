@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * @file
+ * Example module to demonstrate Entity reference behavior handlers.
+ */
+
+/**
+ * Implements hook_entityreference_plugin_info_alter().
+ */
+function entityreference_behavior_example_entityreference_plugin_info_alter(&$plugins) {
+  $plugins['behavior']['test_field_behavior'] = array(
+    'title' => t('Test behavior'),
+    'class' => 'EntityReferenceFieldBehaviorExample',
+    'weight' => 10,
+    'module' => 'entityreference_behavior_example',
+    'behavior type' => 'field',
+  );
+  
+  $plugins['behavior']['test_instance_behavior'] = array(
+    'title' => t('Test instance behavior'),
+    'class' => 'EntityReferenceInstanceBehaviorExample',
+    'weight' => 10,
+    'module' => 'entityreference_behavior_example',
+    'behavior type' => 'instance',
+  );
+}

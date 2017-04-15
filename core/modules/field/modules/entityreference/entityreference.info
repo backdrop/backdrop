@@ -1,0 +1,17 @@
+name = Entity Reference
+description = Provides a field that can reference other entities.
+core = 8.x
+package = Core
+dependencies[] = entity
+
+; Migrate handler.
+files[] = entityreference.migrate.inc
+
+; Our plugins interfaces and abstract implementations.
+files[] = plugins/selection/abstract.inc
+files[] = plugins/selection/views.inc
+files[] = plugins/behavior/abstract.inc
+
+files[] = views/entityreference_plugin_display.inc
+files[] = views/entityreference_plugin_style.inc
+files[] = views/entityreference_plugin_row_fields.inc

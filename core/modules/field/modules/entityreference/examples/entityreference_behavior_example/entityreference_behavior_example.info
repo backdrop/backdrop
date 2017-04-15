@@ -1,0 +1,5 @@
+name = Entity Reference Behavior Example
+description = Provides some example code for implementing Entity Reference behaviors.
+core = 8.x
+package = Examples
+dependencies[] = entityreference
