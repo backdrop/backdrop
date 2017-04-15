@@ -1,6 +1,7 @@
 name = Taxonomy
 description = Enables the organization of content by category.
 package = Categorization
+tags[] = Taxonomy
 tags[] = Categorization
 tags[] = Core
 version = BACKDROP_VERSION

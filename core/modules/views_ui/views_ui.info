@@ -2,6 +2,7 @@ name = Views UI
 description = Administrative interface to views. Without this module, you cannot create or configure views.
 package = Views
 tags[] = Views
+tags[] = Content Display
 tags[] = Core
 version = BACKDROP_VERSION
 type = module
