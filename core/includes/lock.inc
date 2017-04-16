@@ -106,12 +106,20 @@ function lock_acquire($name, $timeout = 30.0) {
   $timeout = max($timeout, 0.001);
   $expire = microtime(TRUE) + $timeout;
   if (isset($locks[$name])) {
-    // Try to extend the expiration of a lock we already acquired.
-    $success = (bool) db_update('semaphore')
-      ->fields(array('expire' => $expire))
-      ->condition('name', $name)
-      ->condition('value', _lock_id())
-      ->execute();
+    // Compare the current expire to previous since db_update will fail if they match.
+    $old_expire = db_query("SELECT expire FROM {semaphore} WHERE name = :name AND value = :lock_id", array(':name' => $name, ':lock_id' => _lock_id()))->fetchField();
+    if ($old_expire == $expire) {
+      $success = TRUE;
+    }
+    else {
+      // Try to extend the expiration of a lock we already acquired.
+      $success = (bool) db_update('semaphore')
+        ->fields(array('expire' => $expire))
+        ->condition('name', $name)
+        ->condition('value', _lock_id())
+        ->execute();
+    }
+
     if (!$success) {
       // The lock was broken.
       unset($locks[$name]);
