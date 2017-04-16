@@ -1,0 +1,137 @@
+diff --git a/core/modules/field/modules/text/text.install b/core/modules/field/modules/text/text.install
+index 1b8d00b..edea70f 100644
+--- a/core/modules/field/modules/text/text.install
++++ b/core/modules/field/modules/text/text.install
+@@ -44,6 +44,16 @@ function text_field_schema($field) {
+         ),
+       );
+       break;
++
++    case 'text_color':
++      $columns = array(
++        'value' => array(
++          'type' => 'varchar',
++          'length' => 7,
++          'not null' => FALSE,
++        ),
++      );
++      break;
+   }
+   $columns += array(
+     'format' => array(
+diff --git a/core/modules/field/modules/text/text.module b/core/modules/field/modules/text/text.module
+index dcf4d1e..d726cb6 100644
+--- a/core/modules/field/modules/text/text.module
++++ b/core/modules/field/modules/text/text.module
+@@ -53,6 +53,14 @@ function text_field_info() {
+       'default_widget' => 'text_textarea_with_summary',
+       'default_formatter' => 'text_default',
+     ),
++    'text_color' => array(
++      'label' => t('Color'),
++      'description' => t('This field stores a hex colour value in the database.'),
++      'settings' => array(),
++      'instance_settings' => array(),
++      'default_widget' => 'text_color',
++      'default_formatter' => 'text_plain',
++    ),
+   );
+ }
+ 
+@@ -85,17 +93,20 @@ function text_field_settings_form($field, $instance, $has_data) {
+  * Implements hook_field_instance_settings_form().
+  */
+ function text_field_instance_settings_form($field, $instance) {
++  $form = array();
+   $settings = $instance['settings'];
+ 
+-  $form['text_processing'] = array(
+-    '#type' => 'radios',
+-    '#title' => t('Text processing'),
+-    '#default_value' => $settings['text_processing'],
+-    '#options' => array(
+-      t('Plain text'),
+-      t('Filtered text (user selects text format)'),
+-    ),
+-  );
++  if ($field['type'] != 'text_color') {
++    $form['text_processing'] = array(
++      '#type' => 'radios',
++      '#title' => t('Text processing'),
++      '#default_value' => $settings['text_processing'],
++      '#options' => array(
++        t('Plain text'),
++        t('Filtered text (user selects text format)'),
++      ),
++    );
++  }
+   if ($field['type'] == 'text_with_summary') {
+     $form['display_summary'] = array(
+       '#type' => 'checkbox',
+@@ -186,7 +197,12 @@ function text_field_formatter_info() {
+     ),
+     'text_plain' => array(
+       'label' => t('Plain text'),
+-      'field types' => array('text', 'text_long', 'text_with_summary'),
++      'field types' => array(
++        'text',
++        'text_long',
++        'text_with_summary',
++        'text_color'
++      ),
+     ),
+ 
+     // The text_trimmed formatter displays the trimmed version of the
+@@ -315,7 +331,7 @@ function _text_sanitize($instance, $langcode, $item, $column) {
+   if (isset($item["safe_$column"])) {
+     return $item["safe_$column"];
+   }
+-  return $instance['settings']['text_processing'] ? check_markup($item[$column], $item['format'], $langcode) : check_plain($item[$column]);
++  return !empty($instance['settings']['text_processing']) ? check_markup($item[$column], $item['format'], $langcode) : check_plain($item[$column]);
+ }
+ 
+ /**
+@@ -463,6 +479,11 @@ function text_field_widget_info() {
+       'field types' => array('text_with_summary'),
+       'settings' => array('rows' => 9, 'summary_rows' => 3),
+     ),
++    'text_color' => array(
++      'label' => t('Color field'),
++      'field types' => array('text_color'),
++      'settings' => array('size' => 20),
++    ),
+   );
+ }
+ 
+@@ -473,7 +494,8 @@ function text_field_widget_settings_form($field, $instance) {
+   $widget = $instance['widget'];
+   $settings = $widget['settings'];
+ 
+-  if ($widget['type'] == 'text_textfield') {
++  if ($widget['type'] == 'text_textfield' ||
++      $widget['type'] == 'text_color') {
+     $form['size'] = array(
+       '#type' => 'number',
+       '#title' => t('Size of textfield'),
+@@ -539,11 +561,20 @@ function text_field_widget_form(&$form, &$form_state, $field, $instance, $langco
+         '#attributes' => array('class' => array('text-full')),
+       );
+       break;
++
++    case 'text_color':
++      $main_widget = $element + array(
++        '#type' => 'color',
++        '#default_value' => isset($items[$delta]['value']) ? $items[$delta]['value'] : NULL,
++        '#size' => $instance['widget']['settings']['size'],
++        '#attributes' => array('class' => array('text-color')),
++      );
++      break;
+   }
+ 
+   if ($main_widget) {
+     // Conditionally alter the form element's type if text processing is enabled.
+-    if ($instance['settings']['text_processing']) {
++    if (!empty($instance['settings']['text_processing'])) {
+       $element = $main_widget;
+       $element['#type'] = 'text_format';
+       $element['#format'] = isset($items[$delta]['format']) ? $items[$delta]['format'] : NULL;

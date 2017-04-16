@@ -44,6 +44,16 @@ function text_field_schema($field) {
         ),
       );
       break;
+
+    case 'text_color':
+      $columns = array(
+        'value' => array(
+          'type' => 'varchar',
+          'length' => 7,
+          'not null' => FALSE,
+        ),
+      );
+      break;
   }
   $columns += array(
     'format' => array(
