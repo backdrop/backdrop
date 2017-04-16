@@ -1,4 +1,4 @@
-(function ($) {
+(function ($, Drupal) {
 
 Backdrop.behaviors.tableSelect = {
   attach: function (context, settings) {
@@ -88,4 +88,4 @@ Backdrop.tableSelectRange = function (from, to, state) {
   }
 };
 
-})(jQuery);
+})(jQuery, Drupal);
