@@ -5,3 +5,4 @@ misc/jquery.form.js
 misc/jquery.js
 misc/jquery.once.js
 misc/ui
+misc/domready

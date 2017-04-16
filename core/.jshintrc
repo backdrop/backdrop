@@ -2,7 +2,6 @@
   "browser"   : true,
   "curly"     : true,
   "eqeqeq"    : true,
-  "expr"      : true,
   "forin"     : true,
   "latedef"   : true,
   "newcap"    : true,
