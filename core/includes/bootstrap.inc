@@ -989,6 +989,12 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
       elseif ($type === 'theme' || $type === 'layout') {
         $extension = 'info';
       }
+      // get layout path
+      elseif ($type === 'layout' && function_exists('layout_get_layout_info')) {
+        if ($layout_info = layout_get_layout_info($name)) {
+          $extension = 'info';
+        }
+      }
       else {
         $extension = $type;
       }
