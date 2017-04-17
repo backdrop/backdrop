@@ -86,6 +86,9 @@ function book_schema() {
     ),
   );
 
+  // cache bin for book data
+  $schema['cache_book'] = backdrop_get_schema_unprocessed('system', 'cache');
+
   return $schema;
 }
 
@@ -110,6 +113,15 @@ function book_update_1000() {
   update_variable_del('book_allowed_types');
   update_variable_del('book_child_type');
   update_variable_del('book_block_mode');
+}
+
+/**
+ * Add in the book cache bin.
+ */
+function book_update_1001() {
+  if (!db_table_exists('cache_book')) {
+    db_create_table('cache_book', backdrop_get_schema_unprocessed('system', 'cache'));
+  }
 }
 
 /**
