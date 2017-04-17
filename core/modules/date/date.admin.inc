@@ -197,7 +197,7 @@ function _date_field_instance_settings_form($field, $instance) {
   $form['default_value'] = array(
     '#type' => 'select',
     '#title' => t('Default date'),
-    '#default_value' => $settings['default_value'],
+    '#default_value' => 'blank',//$settings['default_value'],
     '#options' => array(
       'blank'     => t('No default value'),
       'now'       => t('Now'),
