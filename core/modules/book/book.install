@@ -86,6 +86,9 @@ function book_schema() {
     ),
   );
 
+  // Create cache bin for book link data.
+  $schema['cache_book'] = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_book']['description'] = 'Cache table for the Book module to store previous, up, and next tree associations.';
   return $schema;
 }
 
@@ -110,6 +113,18 @@ function book_update_1000() {
   update_variable_del('book_allowed_types');
   update_variable_del('book_child_type');
   update_variable_del('book_block_mode');
+}
+
+/**
+ * Add in the book cache bin.
+ */
+function book_update_1001() {
+  // Create cache bin for book link data.
+  if (!db_table_exists('cache_book')) {
+    $schema = backdrop_get_schema_unprocessed('system', 'cache');
+    $schema['description'] = 'Cache table for the Book module to store previous, up, and next tree associations.';
+    db_create_table('cache_book', $schema);
+  }
 }
 
 /**

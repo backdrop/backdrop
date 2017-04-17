@@ -892,6 +892,10 @@ function book_node_presave(Node $node) {
   if (empty($node->nid)) {
     $node->book['mlid'] = NULL;
   }
+  // If this is an existing book being saved, clear cache records for it.
+  if (!empty($node->book['bid']) && $node->book['bid'] != 'new') {
+    _book_cache_clear($node->book['bid'], TRUE);
+  }
 }
 
 /**
@@ -945,6 +949,8 @@ function book_node_predelete(Node $node) {
       ->condition('mlid', $node->book['mlid'])
       ->execute();
     backdrop_static_reset('book_get_books');
+    // Ensure the cache items related to this book are removed.
+    _book_cache_clear($node->book['bid'], TRUE);
   }
 }
 
@@ -1242,4 +1248,42 @@ function book_menu_subtree_data($link) {
   }
 
   return $tree[$cid];
+}
+
+/**
+ * Invalidates cached data relating to book_cache.
+ *
+ * @param $cid
+ *   (optional) Cache ID of the record to clear from the private update module
+ *   cache. If empty, all records will be cleared from the table except fetch
+ *   tasks. Defaults to NULL.
+ * @param $wildcard
+ *   (optional) If TRUE, cache IDs starting with $cid are deleted in addition to
+ *   the exact cache ID specified by $cid. Defaults to FALSE.
+ */
+function _book_cache_clear($cid = NULL, $wildcard = FALSE) {
+  if (empty($cid)) {
+    cache('book')->delete($cid);
+  }
+  else {
+    cache('book')->deletePrefix($cid);
+  }
+}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function book_flush_caches() {
+  return array('book');
+}
+
+/**
+ * Implements hook_admin_bar_cache_info().
+ */
+function book_admin_bar_cache_info() {
+  $caches['book'] = array(
+    'title' => t('Book data'),
+    'callback' => '_book_cache_clear',
+  );
+  return $caches;
 }
