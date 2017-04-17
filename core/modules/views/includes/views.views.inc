@@ -253,15 +253,14 @@ function views_views_plugins() {
       ),
       'grid' => array(
         'title' => t('Grid'),
-        'help' => t('Displays rows in a grid.'),
+        'help' => t('Display content in a grid.'),
         'handler' => 'views_plugin_style_grid',
         'theme' => 'views_view_grid',
-        'uses fields' => FALSE,
         'uses row plugin' => TRUE,
-        'uses row class' => TRUE,
+        'uses row class' => FALSE,
         'uses options' => TRUE,
+        'uses grouping' => TRUE,
         'type' => 'normal',
-        'help topic' => 'style-grid',
       ),
       'table' => array(
         'title' => t('Table'),
