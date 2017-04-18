@@ -155,6 +155,34 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
   }
   $message['headers'] = $headers;
 
+  // If requested set Reply-To to the From and re-format From address.
+  if (variable_get('site_mail_replyto') &&
+      empty($message['headers']['Reply-To']) &&
+      ($default_from_name = variable_get('site_name', 'Backdrop CMS')) &&
+      ($default_from_parts = explode('@', $default_from)) &&
+      count($default_from_parts) == 2 &&
+      $default_from_parts[1] &&
+      stripos($message['from'], '@' . $default_from_parts[1]) === FALSE) {
+    // Message is not already being sent from the domain of the default from address.
+    $message['headers']['From'] = $default_from;
+    $message['headers']['Reply-To'] = $message['from'];
+    // Match e-mails of the form 'My Name <email@domain.com>' as follows:
+    // ^          = beginning of string
+    // "?         = optional quote
+    // ([^<]*?)   = match optional characters that aren't a < (non-greedy)
+    // "?         = optional quote
+    // SPACE*     = optional spaces
+    // (?:<(.*)>) = < matching stuff > (without the angle brakets)
+    // $          = end of string
+    preg_match('/^"?([^<]*?)"? *(?:<(.*)>)?$/', $message['from'], $matches);
+    $message['from'] = $matches
+                        ? t('"!name via !site_name" <!site_mail>',
+                            array('!name' => empty($matches[1]) ? $matches[2] : $matches[1],
+                                  '!site_name' => $default_from_name,
+                                  '!site_mail' => $default_from))
+                        : $default_from;
+  }
+
   // Build the e-mail (get subject and body, allow additional headers) by
   // invoking hook_mail() on this module. We cannot use module_invoke() as
   // we need to have $message by reference in hook_mail().
