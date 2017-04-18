@@ -66,7 +66,7 @@ class views_handler_argument_search extends views_handler_argument {
       }
       $search_condition->condition("$search_index.type", $base_table);
 
-      if (!$this->search_query->simple()) {
+      if (!$this->search_query->simple() || TRUE) {
         $search_dataset = $this->query->add_table('search_dataset');
         $conditions = $this->search_query->conditions();
         $condition_conditions =& $conditions->conditions();
