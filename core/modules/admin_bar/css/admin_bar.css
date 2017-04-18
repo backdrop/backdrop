@@ -36,11 +36,11 @@
 }
 /* When body is a contextual links region. */
 .contextual-links-region #admin-bar {
-  top: -33px;
+  top: -38px;
 }
 
 .admin-bar body {
-  border-top: 33px solid #2D2D2D !important;
+  border-top: 38px solid #2D2D2D !important;
 }
 
 /* Top level items. */
