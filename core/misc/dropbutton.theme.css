@@ -12,7 +12,6 @@
 }
 .dropbutton .dropbutton-action > * {
   padding: 0.1em 0.5em;
-  white-space: nowrap;
 }
 .dropbutton .secondary-action {
   border-top: 1px solid #e8e8e8;
