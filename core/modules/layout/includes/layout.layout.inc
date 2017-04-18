@@ -139,6 +139,11 @@ function layout_layout_access_info() {
     'description' => t('Control access by the current path.'),
     'class' => 'PathLayoutAccess',
   );
+  $info['date_time'] = array(
+    'title' => t('Date and time'),
+    'description' => t('Control access by the current date and time.'),
+    'class' => 'DateTimeLayoutAccess',
+  );
   return $info;
 }
 
