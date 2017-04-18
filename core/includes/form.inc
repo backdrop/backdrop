@@ -128,7 +128,17 @@ function backdrop_get_form($form_id) {
   array_shift($args);
   $form_state['build_info']['args'] = $args;
 
-  return backdrop_build_form($form_id, $form_state);
+  $form = backdrop_build_form($form_id, $form_state);
+  if(module_exists('render_cache')){
+    $config = config('render_cache.settings');
+    if($config->get('enable')){
+      $form_unique_id = render_cache_form_storage($form_id, $form);
+      return array(
+        '#markup' => '<!-- render_cache_form:' . $form_id . ':' . $form_unique_id . ' -->',
+      );
+    }
+  }
+  return $form;
 }
 
 /**
