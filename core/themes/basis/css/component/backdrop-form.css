@@ -241,6 +241,14 @@ textarea.form-textarea:focus {
   outline: 0;
 }
 
+#autocomplete {
+  border: 0.125rem solid #d0d0d0;
+}
+#autocomplete ul {
+  margin: 0;
+  padding: 0 0.625em;
+}
+
 ul.action-links {
   margin: 1em 0;
   padding: 0 1.25em 0; /* LTR */

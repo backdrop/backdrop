@@ -186,7 +186,7 @@ Backdrop.jsAC.prototype.hidePopup = function (keycode) {
  */
 Backdrop.jsAC.prototype.populatePopup = function () {
   var $input = $(this.input);
-  var position = $input.position();
+
   // Show popup.
   if (this.popup) {
     $(this.popup).remove();
@@ -194,17 +194,33 @@ Backdrop.jsAC.prototype.populatePopup = function () {
   this.selected = false;
   this.popup = $('<div id="autocomplete"></div>')[0];
   this.popup.owner = this;
+
+  var offset = $input.offset();
+  var paddingLeft = parseInt($input.css('padding-left').replace('px', ''), 10);
+  var paddingRight = parseInt($input.css('padding-right').replace('px', ''), 10);
+  var padding = paddingLeft + paddingRight;
+
   $(this.popup).css({
-    top: parseInt(position.top + this.input.offsetHeight, 10) + 'px',
-    left: parseInt(position.left, 10) + 'px',
-    width: $input.innerWidth() + 'px',
+    top: parseInt($input.outerHeight() + offset.top, 10) + 'px',
+    left: parseInt(offset.left, 10) + 'px',
+    width: (parseInt($input.width(), 10) + padding) + 'px',
+    zIndex: 9997,
     display: 'none'
   });
-  $input.before(this.popup);
+
+  handleReposition($input);
+
+  $("body").prepend(this.popup);
 
   // Do search.
   this.db.owner = this;
   this.db.search(this.input.value);
+
+  Backdrop.optimizedResize.add(handleReposition);
+
+  function handleReposition($input) {
+    console.log('move reposition stuff here?');
+  }
 };
 
 /**
