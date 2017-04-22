@@ -13,8 +13,8 @@
   background: #eee;
   border: 1px solid #ddd;
   overflow: hidden;
-  position: absolute;
-  z-index: 100;
+  position: fixed;
+  z-index: 9997;
 }
 #autocomplete ul {
   list-style: none;
