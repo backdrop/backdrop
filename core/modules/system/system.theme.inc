@@ -284,6 +284,12 @@ function theme_status_report($variables) {
   $infos = array();
   $okays = array();
   foreach ($requirements as $requirement) {
+    if ($requirement['title'] == 'hash') {
+      dpm($requirement);
+    }
+    if (!isset($requirement['severity'])) {
+      $requirement['severity'] = REQUIREMENT_OK;
+    }
     switch ($requirement['severity']) {
       case REQUIREMENT_ERROR:
         $errors[] = $requirement;
@@ -305,19 +311,19 @@ function theme_status_report($variables) {
   $severities = array(
     REQUIREMENT_INFO => array(
       'title' => t('Info'),
-      'class' => 'info',
+      'class' => array('report-info'),
     ),
     REQUIREMENT_OK => array(
       'title' => t('OK'),
-      'class' => 'status',
+      'class' => array('report-status'),
     ),
     REQUIREMENT_WARNING => array(
       'title' => t('Warning'),
-      'class' => 'warning',
+      'class' => array('report-warning'),
     ),
     REQUIREMENT_ERROR => array(
       'title' => t('Error'),
-      'class' => 'error',
+      'class' => array('report-error'),
     ),
   );
 
@@ -350,11 +356,11 @@ function theme_status_report($variables) {
 
     $row = array(
       'data' => array(
-        array('data' => $severity['icon'], 'class' => 'status-icon'),
+        array('data' => $severity['icon'], 'class' => 'report-icon'),
         array('data' => $title, 'class' => 'status-title'),
-        array('data' => $description, 'class' => array('status-value', 'priority-medium')),
+        array('data' => $description, 'class' => array('status-value', 'priority-low')),
       ),
-      'class' => array($severity['class']),
+      'class' => $severity['class'],
     );
 
     $rows[] = $row;

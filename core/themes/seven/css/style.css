@@ -1226,9 +1226,22 @@ div.admin-options div.form-item {
   border: 0;
 }
 
-/* Update status */
-.versions table.version {
-  border: none;
+/* Status report */
+table.system-status-report {
+  border-collapse: separate;
+  border: 2px solid #EAEAEA;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+
+/* Update report */
+table.update {
+  border-collapse: separate;
+  border: 2px solid #EAEAEA;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
 }
 
 /* Maintenance theming */

@@ -11,12 +11,12 @@ Backdrop.behaviors.statusReport = {
     var $table = $('table.system-status-report');
 
     // Hide the description for non-urgent items.
-    $table.find('tr.info').find('.status-description').hide();
-    $table.find('tr.status').find('.status-description').hide();
+    $table.find('tr.report-info').find('.status-description').hide();
+    $table.find('tr.report-status').find('.status-description').hide();
 
     // Change the text on more-urgent items.
-    $table.find('tr.error').find('a.description-toggle').text(Backdrop.t('less'));
-    $table.find('tr.warning').find('a.description-toggle').text(Backdrop.t('less'));
+    $table.find('tr.report-error').find('a.description-toggle').text(Backdrop.t('less'));
+    $table.find('tr.report-warning').find('a.description-toggle').text(Backdrop.t('less'));
 
     // Toggle the requirements info.
     $('a.description-toggle').click(function(e) {

@@ -182,7 +182,6 @@ function update_manager_access() {
 function update_theme($existing, $type, $theme, $path) {
   $base = array(
     'file' => 'update.theme.inc',
-    'path' => $path . '/theme',
   );
 
   return array(

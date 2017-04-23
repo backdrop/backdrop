@@ -45,14 +45,22 @@ function system_requirements($phase) {
   $requirements['webserver'] = array(
     'title' => $t('Web server'),
     'value' => $software,
+    'severity' => REQUIREMENT_INFO,
   );
 
   // Test PHP version and show link to phpinfo() if it's available
   $phpversion = phpversion();
   if (function_exists('phpinfo')) {
+    if ($phase == 'runtime') {
+      $php_value = $t('Version: !version (<a href="!infourl">PHP information</a>)', array('!version' => $phpversion, '!infourl' => url('admin/reports/status/php')));
+    }
+    else {
+      $php_value = $t('Version: !version', array('!version' => $phpversion));
+    }
     $requirements['php'] = array(
       'title' => $t('PHP'),
-      'value' => ($phase == 'runtime') ? $phpversion .' ('. l($t('PHP information'), 'admin/reports/status/php') .')' : $phpversion,
+      'value' =>  $php_value,
+      'severity' => REQUIREMENT_INFO,
     );
   }
   else {
@@ -128,7 +136,8 @@ function system_requirements($phase) {
     $requirements['php_extensions']['description'] = $description;
   }
   else {
-    $requirements['php_extensions']['value'] = $t('Enabled');
+    $description = $t('Enabled: !extensions', array('!extensions' => implode(', ', $required_extensions)));
+    $requirements['php_extensions']['value'] = $description;
   }
 
   if ($phase == 'install' || $phase == 'update') {
@@ -167,13 +176,11 @@ function system_requirements($phase) {
     $class = 'DatabaseTasks_' . Database::getConnection()->driver();
     /* @var DatabaseTasks $tasks */
     $tasks = new $class();
+    $dbinfo = $t('!system version !version', array('!system' => $tasks->name(), '!version' => Database::getConnection()->version()));
     $requirements['database_system'] = array(
-      'title' => $t('Database system'),
-      'value' => $tasks->name(),
-    );
-    $requirements['database_system_version'] = array(
-      'title' => $t('Database system version'),
-      'value' => Database::getConnection()->version(),
+      'title' => $t('MySQL Database'),
+      'severity' => REQUIREMENT_INFO,
+      'value' => $dbinfo,
     );
   }
 
@@ -619,7 +626,7 @@ function _system_check_db_utf8mb4_requirements($phase) {
 
   $connection = Database::getConnection();
   $t = get_t();
-  $requirements['title'] = $t('Database system 4-byte UTF-8 support');
+  $requirements['title'] = $t('MySQL Database 4-byte UTF-8 support');
 
   $utf8mb4_active = $connection->utf8mb4IsActive();
   $utf8mb4_supported = $connection->utf8mb4IsSupported();
