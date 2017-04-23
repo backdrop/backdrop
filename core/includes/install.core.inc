@@ -1742,7 +1742,7 @@ function install_check_requirements($install_state) {
         $writable = backdrop_verify_install_file($settings_file, FILE_READABLE|FILE_WRITABLE);
         $exists = TRUE;
       }
-      if ($settings_file !== './settings.php') {
+      elseif ($settings_file !== './settings.php') {
         if (copy('./settings.php', $settings_file) === TRUE) {
           $exists = TRUE;
           $writable = backdrop_verify_install_file($settings_file, FILE_READABLE|FILE_WRITABLE);
