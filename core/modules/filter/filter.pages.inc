@@ -56,7 +56,6 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#default_value' => isset($values['href']) ? $values['href'] : FALSE,
     '#parents' => array('attributes', 'href'),
     '#autocomplete_path' => 'filter-link/autocomplete',
-    '#placeholder' => t('/my-path or Some Text'),
     '#description' => t('Enter a known path, or start typing to get suggestions'),
   );
   $form['target'] = array(
