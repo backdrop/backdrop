@@ -180,6 +180,15 @@ function layout_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   ) + $base;
 
+  $items['admin/structure/layouts/manage/%layout/contextual-delete/%'] = array(
+    'title' => 'Delete block',
+    'load arguments' => array(4),
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_block_configure_contextual_delete', 4, 6),
+    'context' => MENU_CONTEXT_INLINE,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  ) + $base;
+
   $items['admin/structure/layouts/manage/%layout_tempstore/remove-block/%/%layout_tempstore_block'] = array(
     'title' => 'Remove block',
     'load arguments' => array(4),
@@ -708,6 +717,15 @@ function layout_contextual_links_view_alter(&$element, $items) {
       $uuid = substr($links['layout-configure-redirect-']['href'], $last_slash + 1);
       $links['layout-configure-redirect-']['fragment'] = 'configure-block:' . $uuid;
     }
+  }
+  if (isset($links['layout-contextual-delete-'])) {
+    backdrop_add_library('system', 'backdrop.ajax');
+    backdrop_add_library('system', 'ui.dialog');
+    $links['layout-contextual-delete-']['attributes'] = array(
+        'class' => array('use-ajax'),
+        'data-dialog' => TRUE,
+        'data-dialog-options' => json_encode(array('dialogClass' => 'front-dialog', 'width' => '600')),
+    );
   }
 }
 
