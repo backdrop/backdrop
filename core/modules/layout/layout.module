@@ -184,7 +184,7 @@ function layout_menu() {
     'title' => 'Delete block',
     'load arguments' => array(4),
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_block_configure_contextual_delete', 4, 6),
+    'page arguments' => array('layout_block_configure_contextual_delete_form', 4, 6),
     'context' => MENU_CONTEXT_INLINE,
     'type' => MENU_DEFAULT_LOCAL_TASK,
   ) + $base;
