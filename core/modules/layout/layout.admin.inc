@@ -1152,15 +1152,16 @@ function layout_block_configure_contextual_remove_form($form, &$form_state, $lay
 
     $options = array();
     if (count($layouts) > 1) {
-      foreach ($layouts as $layout_name => $layout) {
-        $path = $layout->getPath();
+      foreach ($layouts as $layout_name => $active_layout) {
+        $path = $active_layout->getPath();
         $path = !empty($path) ? '(' . $path . ')' : t('(all paths using default layout)');
-        $options[$layout_name] = t('!layout !path', array('!layout' => $layout->title, '!path' => $path));
+        $options[$layout_name] = t('!layout !path', array('!layout' => $active_layout->title, '!path' => $path));
       }
       $form['remove_blocks'] = array(
         '#type' => 'checkboxes',
         '#title' => t('Remove block %block_title from the following layouts (paths)', array('%block_title' => $block_title)),
         '#options' => $options,
+        '#default_value' => $layout,
       );
     }
   }
