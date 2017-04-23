@@ -202,6 +202,13 @@ class LayoutRendererStandard {
         if (!$has_contexts || !$block->checkAccess()) {
           continue;
         }
+
+        // Copy page title from the block to the layout if needed.
+        if ($this->layout->settings['title_display'] === LAYOUT_TITLE_BLOCK) {
+          if ($block->uuid === $this->layout->settings['title_block']) {
+            $this->layout->settings['title'] = $block->getTitle();
+          }
+        }
       }
 
       $block_info = layout_get_block_info($block->module, $block->delta);
@@ -330,11 +337,28 @@ class LayoutRendererStandard {
     if (empty($this->prep_run)) {
       $this->prepare();
     }
+
+    // The page title needs to be finalized before any rendering, as it may be
+    // displayed either in the layout template or in the special "page
+    // components" block. Note the page title settings may be modified to copy
+    // the title from a block in in LayoutRendererStandard::prepareBlocks().
+    $title_set = FALSE;
+    if (!$this->admin) {
+      if ($this->layout->settings['title_display'] === LAYOUT_TITLE_CUSTOM || ($this->layout->settings['title_display'] === LAYOUT_TITLE_BLOCK && !empty($this->layout->settings['title']))) {
+        $title_set = backdrop_set_title(t($this->layout->settings['title']));
+      }
+    }
+
     $this->renderBlocks();
 
     // Return 404 or 403 if set by the main content block.
     if ($this->menu_response) {
       return $this->menu_response;
+    }
+
+    // Ensure custom titles override any title set by the main content block.
+    if ($title_set) {
+      backdrop_set_title($title_set, PASS_THROUGH);
     }
 
     $this->renderRegions();
@@ -457,12 +481,6 @@ class LayoutRendererStandard {
    *   The rendered block as HTML.
    */
   function renderBlock($block) {
-    if ($this->layout->settings['title_display'] === LAYOUT_TITLE_BLOCK) {
-      if ($block->uuid === $this->layout->settings['title_block']) {
-        $this->layout->settings['title'] = $block->getTitle();
-      }
-    }
-
     $output = '';
     if ($content = $block->getContent()) {
       $style = layout_get_style_info($block->style->plugin);

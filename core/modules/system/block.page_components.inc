@@ -43,6 +43,8 @@ class PageComponents extends Block {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
+    $form['title_display']['#access'] = FALSE;
+
     if ($this->childDelta == 'title_combo' || $this->childDelta == 'title') {
       $form['title_wrapper'] = array(
         '#type' => 'fieldset',
@@ -95,6 +97,13 @@ class PageComponents extends Block {
    * Submit handler to save the form settings.
    */
   function formSubmit($form, &$form_state) {
+    parent::formSubmit($form, $form_state);
+
+    // This block never displays a block title, as it would result in things
+    // like a title on the title component.
+    $this->settings['title_display'] = LAYOUT_TITLE_NONE;
+    $this->settings['title'] = '';
+
     if (isset($form_state['values']['title_wrapper']['title_tag'])) {
       $this->settings['title_tag'] = $form_state['values']['title_wrapper']['title_tag'];
     }

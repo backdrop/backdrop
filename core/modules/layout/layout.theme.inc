@@ -221,10 +221,6 @@ function layout_preprocess_layout(&$variables) {
       if ($settings['title_display'] === LAYOUT_TITLE_NONE) {
         $variables['title'] = NULL;
       }
-      elseif ($settings['title_display'] === LAYOUT_TITLE_CUSTOM || ($settings['title_display'] === LAYOUT_TITLE_BLOCK && !empty($settings['title']))) {
-        $variables['title'] = check_plain(t($settings['title']));
-        backdrop_set_title(t($settings['title']));
-      }
       else {
         $variables['title'] = backdrop_get_title();
       }

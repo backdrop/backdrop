@@ -3829,7 +3829,7 @@ function system_autoload_info() {
     'LayoutUpdater' => 'system.updater.inc',
 
     // Blocks.
-    'PageComponents' => 'includes/block.page_components.inc',
+    'PageComponents' => 'block.page_components.inc',
 
     // Views handlers.
     'views_handler_filter_system_type' => 'views/views_handler_filter_system_type.inc',
