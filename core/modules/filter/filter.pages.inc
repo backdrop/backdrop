@@ -82,6 +82,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
  */
 function _filter_link_autocomplete($string) {
   $matches = array();
+  $match_count = 0;
   if ($string) {
     // Get node matches.
     $results = db_select('node')
@@ -95,14 +96,15 @@ function _filter_link_autocomplete($string) {
     foreach ($results as $result) {
       $path = backdrop_get_path_alias('node/' . $result->nid);
       $matches['/' . $path] = check_plain($result->title) . ' (' . t('Content') . ')';
+      $match_count++;
     }
 
     // Get user matches.
-    if (user_access('access user profiles')) {
+    if (user_access('access user profiles') && $match_count < 10) {
       $results = db_select('users')
         ->fields('users', array('uid', 'name'))
         ->condition('name', db_like($string) . '%', 'LIKE')
-        ->range(0, 10)
+        ->range(0, 10 - $match_count)
         ->orderBy('uid', 'DESC')
         ->execute();
       // We need to load the User object to user user_format_name().
@@ -115,44 +117,59 @@ function _filter_link_autocomplete($string) {
         foreach ($users as $user) {
           $path = backdrop_get_path_alias('user/' . $user->uid);
           $matches['/' . $path] = user_format_name($user) . ' (' . t('User') . ')';
+          $match_count++;
         }
       }
     }
 
     // Get taxonomy term matches.
-    $results = db_select('taxonomy_term_data')
-      ->fields('taxonomy_term_data', array('tid', 'name'))
-      ->condition('name', db_like($string) . '%', 'LIKE')
-      ->addTag('taxonomy_term_access')
-      ->range(0, 10)
-      ->orderBy('tid', 'DESC')
-      ->execute();
-    foreach ($results as $result) {
-      $path = backdrop_get_path_alias('taxonomy/term/' . $result->tid);
-      $matches['/' . $path] = check_plain($result->name) . ' (' . t('Taxonomy term') . ')';
+    if ($match_count < 10) {
+      $results = db_select('taxonomy_term_data')
+        ->fields('taxonomy_term_data', array('tid', 'name'))
+        ->condition('name', db_like($string) . '%', 'LIKE')
+        ->addTag('taxonomy_term_access')
+        ->range(0, 10 - $match_count)
+        ->orderBy('tid', 'DESC')
+        ->execute();
+      foreach ($results as $result) {
+        $path = backdrop_get_path_alias('taxonomy/term/' . $result->tid);
+        $matches['/' . $path] = check_plain($result->name) . ' (' . t('Taxonomy term') . ')';
+        $match_count++;
+      }
     }
 
     // Get Views page matches.
-    $views = views_get_enabled_views();
-    foreach ($views as $view) {
-      foreach ($view->display as $display_id => $display) {
-        if ($view->access($display_id) && $display->display_plugin == 'page' && !empty($display->display_options['path'])) {
-          $path = backdrop_get_path_alias($display->display_options['path']);
-          if (!path_is_admin($path)) {
-            if (stripos($view->human_name, $string) !== false || (!empty($display->title) && stripos($display->title, $string) !== false)) {
-              $view_display_title = (!empty($display->title)) ? $display->title : check_plain($view->human_name) . ' : ' . $display_id;
-              $matches['/' . $path] = $view_display_title . ' (' . t('Views page') . ')';
+    if ($match_count < 10) {
+      $views = views_get_enabled_views();
+      foreach ($views as $view) {
+        foreach ($view->display as $display_id => $display) {
+          if ($view->access($display_id) && $display->display_plugin == 'page' && !empty($display->display_options['path'])) {
+            $path = backdrop_get_path_alias($display->display_options['path']);
+            if (!path_is_admin($path)) {
+              if (stripos($view->human_name, $string) !== false || (!empty($display->title) && stripos($display->title, $string) !== false)) {
+                $view_display_title = (!empty($display->title)) ? $display->title : check_plain($view->human_name) . ' : ' . $display_id;
+                $matches['/' . $path] = $view_display_title . ' (' . t('Views page') . ')';
+                $match_count++;
+              }
             }
+          }
+          if ($match_count == 10) {
+            break 2;
           }
         }
       }
     }
-  }
 
-  // Load layout paths
-  $menu_items = layout_get_all_configs('menu_item');
-  foreach ($menu_items as $menu_item) {
-    $matches['/' . $menu_item['path']] = check_plain($menu_item['name']) . ' (' . t('Layout path') . ')';
+    // Load layout paths
+    if ($match_count < 10) {
+      $menu_items = layout_get_all_configs('menu_item');
+      foreach ($menu_items as $menu_item) {
+        if (stripos($menu_item['name'], $string) !== false && $match_count < 10) {
+          $matches['/' . $menu_item['path']] = check_plain($menu_item['name']) . ' (' . t('Layout path') . ')';
+          $match_count++;
+        }
+      }
+    }
   }
 
   backdrop_json_output($matches);
