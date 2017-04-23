@@ -180,11 +180,11 @@ function layout_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   ) + $base;
 
-  $items['admin/structure/layouts/manage/%layout/contextual-delete/%'] = array(
-    'title' => 'Delete block',
+  $items['admin/structure/layouts/manage/%layout/contextual-remove/%'] = array(
+    'title' => 'Remove block',
     'load arguments' => array(4),
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_block_configure_contextual_delete_form', 4, 6),
+    'page arguments' => array('layout_block_configure_contextual_remove_form', 4, 6),
     'context' => MENU_CONTEXT_INLINE,
     'type' => MENU_DEFAULT_LOCAL_TASK,
   ) + $base;
@@ -718,10 +718,10 @@ function layout_contextual_links_view_alter(&$element, $items) {
       $links['layout-configure-redirect-']['fragment'] = 'configure-block:' . $uuid;
     }
   }
-  if (isset($links['layout-contextual-delete-'])) {
+  if (isset($links['layout-contextual-remove-'])) {
     backdrop_add_library('system', 'backdrop.ajax');
     backdrop_add_library('system', 'ui.dialog');
-    $links['layout-contextual-delete-']['attributes'] = array(
+    $links['layout-contextual-remove-']['attributes'] = array(
         'class' => array('use-ajax'),
         'data-dialog' => TRUE,
         'data-dialog-options' => json_encode(array('dialogClass' => 'front-dialog', 'width' => '600')),
