@@ -173,6 +173,8 @@ function _filter_link_autocomplete($string) {
       }
     }
   }
+  // Allow modules to alter the matches.
+  backdrop_alter('link_autocomplete', $matches, $string);
 
   backdrop_json_output($matches);
 }
