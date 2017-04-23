@@ -758,6 +758,23 @@ fieldset .fieldset-wrapper {
   background-position: 98% center;
 }
 
+#autocomplete {
+  border: 2px solid #d0d0d0;
+  border-top: 0;
+  background: hsla(0,0%,100%,0.95);
+  -webkit-border-radius: 0 0 4px 4px;
+  -moz-border-radius: 0 0 4px 4px;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 5px 0 hsla(0,0%,0%,0.15);
+}
+#autocomplete ul {
+  padding: 5px 0;
+}
+#autocomplete li {
+  padding: 0 5px;
+}
+
+
 /**
  * Form elements.
  */
