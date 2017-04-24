@@ -1298,7 +1298,7 @@ function install_find_translations() {
  * @see file_scan_directory()
  */
 function install_find_translation_files($langcode = NULL) {
-  $directory = settings_get('locale_translate_file_directory', 'files/translations');
+  $directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
   // @todo: Remove the "drupal" check in 2.x (assuming we have a localization
   //   server by then).
   $files = file_scan_directory($directory, '!(install|drupal-\d+\.\d+)\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
@@ -1343,7 +1343,7 @@ function install_select_language(&$install_state) {
     // is doing.
     if (count($files) == 1) {
       if ($install_state['interactive']) {
-        $directory = settings_get('locale_translate_file_directory', 'files/translations');
+        $directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
 
         backdrop_set_title(st('Choose language'));
         if (!empty($install_state['parameters']['translate'])) {
@@ -1741,6 +1741,12 @@ function install_check_requirements($install_state) {
         // If it does, make sure it is writable.
         $writable = backdrop_verify_install_file($settings_file, FILE_READABLE|FILE_WRITABLE);
         $exists = TRUE;
+      }
+      elseif ($settings_file !== './settings.php') {
+        if (copy('./settings.php', $settings_file) === TRUE) {
+          $exists = TRUE;
+          $writable = backdrop_verify_install_file($settings_file, FILE_READABLE|FILE_WRITABLE);
+        }
       }
     }
 
