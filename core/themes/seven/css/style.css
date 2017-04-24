@@ -156,7 +156,7 @@ ul.menu li.expanded {
   display: none;
 }
 
-@media screen and (min-width:720px) {
+@media screen and (min-width: 720px) {
   .block-system-header .name-and-slogan {
     float: left; /* LTR */
   }
@@ -599,24 +599,50 @@ tr.selected td {
   background: #ffc;
   border-color: #eeb;
 }
-.system-status-report tr {
-  border-bottom: 1px solid #ccc;
+.system-status-report .status-value span {
+  padding: 2px 7px;
+  border-radius: 4px;
 }
-.system-status-report tr.status {
-  color: #255b1e;
-  background-color: #e5ffe2;
+.system-status-report .status-description {
+  color: #787878;
 }
-.system-status-report tr.info {
+.system-status-report tr.status .status-title {
+  color: #000000;
+}
+.system-status-report tr.status .status-value span {
+  color: #3a5619;
+  background: #e9eebc;
+}
+.system-status-report tr.info .status-title {
+  color: #000000;
+}
+.system-status-report tr.info .status-value span {
   color: #040f37;
-  background-color: #bdf;
+  background: #cccccc;
 }
-.system-status-report tr.warning {
-  color: #840;
-  background-color: #fffce5;
+.system-status-report tr.warning .status-title {
+  color: #000000;
+}
+.system-status-report tr.warning .status-value span {
+  color: #64645f;
+  background: #faf5c9;
 }
 .system-status-report tr.error {
-  color: #8c2e0b;
-  background-color: #fef5f1;
+  color: #ec351c;
+}
+.system-status-report tr.error .status-value span {
+  background: #f9edec;
+}
+.system-status-report td.status-title {
+  font-weight: bold;
+  width: 1%;
+  white-space: nowrap;
+}
+@media (max-width: 720px) {
+  .system-status-report td.status-title {
+    width: 50%;
+    white-space: normal;
+  }
 }
 .diff-table td {
   padding: 4px;
@@ -625,7 +651,7 @@ tr.selected td {
 /**
  * Responsive tables.
  */
-@media screen and (max-width:450px) {
+@media screen and (max-width: 450px) {
   th.priority-low,
   td.priority-low,
   th.priority-medium,
@@ -633,7 +659,7 @@ tr.selected td {
     display: none;
   }
 }
-@media screen and (max-width:720px) {
+@media screen and (max-width: 720px) {
   th.priority-low,
   td.priority-low {
     display: none;
