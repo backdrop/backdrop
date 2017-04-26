@@ -665,7 +665,8 @@ function backdrop_install_config_directories() {
   $config_directories = array();
 
   // Include the current settings file to check the current database string.
-  $settings_file = conf_path(FALSE) . '/settings.php';
+  $conf_path = conf_path(FALSE);
+  $settings_file = $conf_path . '/settings.php';
   include $settings_file;
 
   $is_empty = empty($config_directories['active']);
@@ -676,11 +677,11 @@ function backdrop_install_config_directories() {
   if ($is_empty || $is_default) {
     $config_directories_hash = md5(backdrop_random_bytes(55));
     $update_settings["config_directories['active']"] = array(
-      'value' => 'files/config_' . $config_directories_hash . '/active',
+      'value' => $conf_path . '/files/config_' . $config_directories_hash . '/active',
       'required' => TRUE,
     );
     $update_settings["config_directories['staging']"] = array(
-      'value' => 'files/config_' . $config_directories_hash . '/staging',
+      'value' => $conf_path . '/files/config_' . $config_directories_hash . '/staging',
       'required' => TRUE,
     );
 
