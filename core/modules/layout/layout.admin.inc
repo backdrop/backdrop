@@ -1132,16 +1132,16 @@ function layout_block_configure_redirect($layout, $block_uuid) {
 /**
  * Menu callback; Remove a block from the front end contextual link.
  */
-function layout_block_configure_contextual_remove_form($form, &$form_state, $layout, $block_uuid) {
+function layout_block_contextual_remove_form($form, &$form_state, $layout, $block_uuid) {
   backdrop_set_title(t('Remove block'));
-  $delta = $form_state['block_delta'] = $layout->content[$block_uuid]->delta;
+  $delta = $layout->content[$block_uuid]->delta;
+  $module = $layout->content[$block_uuid]->module;
+  $block_info = layout_get_block_info($module, $delta);
+  $block_title = $form_state['block_title'] = $block_info['info'];
 
   // Check if this block is placed in multiple layouts. Custom and hero blocks
   // are only available to one layout, so no need to check for multiple layouts.
   if ($delta != 'custom_block' && $delta != 'hero') {
-    $module = $layout->content[$block_uuid]->module;
-    $block_info = layout_get_block_info($module, $delta);
-    $block_title = $form_state['block_title'] = $block_info['info'];
     $usage = layout_get_block_usage($module, $delta);
     $layouts = $form_state['layouts'] = layout_load_multiple(array_keys($usage));
 
@@ -1152,16 +1152,28 @@ function layout_block_configure_contextual_remove_form($form, &$form_state, $lay
 
     $options = array();
     if (count($layouts) > 1) {
-      foreach ($layouts as $layout_name => $active_layout) {
-        $path = $active_layout->getPath();
-        $path = !empty($path) ? '(' . $path . ')' : t('(all paths using default layout)');
-        $options[$layout_name] = t('!layout !path', array('!layout' => $active_layout->title, '!path' => $path));
+      foreach ($usage as $layout_name => $active_layout) {
+        foreach ($active_layout as $region_name => $block_instance) {
+          $multiple_blocks = (count($block_instance) > 1);
+          foreach ($block_instance as $index => $block) {
+            $current_layout = $layouts[$layout_name];
+            $path = $current_layout->getPath();
+            $path = !empty($path) ? ' (' . $path . ')' : t(' (all paths using default layout)');
+            $region_label = t(' in ') . check_plain($region_name) . t(' region');
+            $block_index = '';
+            if ($multiple_blocks) {
+              $block_index = t(' block ') . ($index + 1);
+            }
+            $options[$block->uuid] = $current_layout->title . $path . $region_label . $block_index;
+          }
+        }
       }
+
       $form['remove_blocks'] = array(
         '#type' => 'checkboxes',
         '#title' => t('Remove block %block_title from the following layouts (paths)', array('%block_title' => $block_title)),
         '#options' => $options,
-        '#default_value' => $layout,
+        '#default_value' => array($block_uuid),
       );
     }
   }
@@ -1179,32 +1191,47 @@ function layout_block_configure_contextual_remove_form($form, &$form_state, $lay
     '#type' => 'submit',
     '#value' => t('Remove'),
   );
+  $form['actions']['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#attributes' => array(
+      'class' => array('button-secondary',),
+    ),
+    '#submit' => array(
+      'layout_remove_block_cancel_action'
+    ),
+  );
 
   return $form;
 }
 
 /**
- * Submit handler for layout_block_configure_contextual_remove_form().
+ * Submit handler for layout_block_contextual_remove_form() cancel button.
  */
-function layout_block_configure_contextual_remove_form_submit($form, &$form_state) {
+function layout_remove_block_cancel_action(&$form, &$form_state) {
+  // Just call this to close the dialogue.
+}
+
+/**
+ * Submit handler for layout_block_contextual_remove_form() submit button.
+ */
+function layout_block_contextual_remove_form_submit($form, &$form_state) {
   $block_title = $form_state['block_title'];
   $removed = array();
 
   if (isset($form_state['values']['remove_blocks'])) {
-    $blocks_to_remove = array_filter($form_state['values']['remove_blocks']);
-    if ($blocks_to_remove) {
+    $block_uuids_to_remove = array_filter($form_state['values']['remove_blocks']);
+    if ($block_uuids_to_remove) {
       $layouts = $form_state['layouts'];
-      $delta = $form_state['block_delta'];
-      foreach($blocks_to_remove as $remove_from) {
-        $layout = $layouts[$remove_from];
-        foreach ($layout->content as $uuid => $content) {
-          if ($content->delta == $delta) {
-            $layout->removeBlock($uuid);
+      foreach($layouts as $layout) {
+        foreach($block_uuids_to_remove as $remove_block) {
+          if (isset($layout->content[$remove_block])) {
+            $layout->removeBlock($remove_block);
+            $layout->save();
+
+            $removed[] = $layout->title;
           }
         }
-        $layout->save();
-
-        $removed[] = $layout->title;
       }
     }
   }
