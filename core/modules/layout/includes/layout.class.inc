@@ -290,14 +290,6 @@ class Layout {
       }
     }
 
-    $new_this = layout_load($this->name);
-    if (!empty($this->is_new)) {
-      $new_this->invokeHook('insert');
-    }
-    else {
-      $new_this->invokeHook('update');
-    }
-
     // If this layout overrides an existing module path, reassign or delete
     // the layout menu item.
     if ((layout_provides_path($this->path) === FALSE) && menu_get_item($this->path)) {
@@ -329,6 +321,14 @@ class Layout {
       }
     }
     layout_reset_caches();
+
+    $new_this = layout_load($this->name);
+    if (!empty($this->is_new)) {
+      $new_this->invokeHook('insert');
+    }
+    else {
+      $new_this->invokeHook('update');
+    }
   }
 
   /**
