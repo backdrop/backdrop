@@ -174,7 +174,7 @@
   left: 0; /* LTR */
   margin: 0;
   position: absolute;
-  top: 23px;
+  top: 30px;
   z-index: 50;
 }
 [dir="rtl"] .views-displays .secondary .action-list {
