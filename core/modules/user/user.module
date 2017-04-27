@@ -2283,13 +2283,14 @@ function user_role_save($role) {
   if (isset($role->permissions)) {
     $config->set('permissions', $role->permissions);
   }
+  $is_new = $config->isNew();
   $config->save();
-  if ($config->isNew()) {
-    module_invoke_all('user_role_update', $role);
+  if ($is_new) {
+    module_invoke_all('user_role_insert', $role);
     $status = SAVED_NEW;
   }
   else {
-    module_invoke_all('user_role_insert', $role);
+    module_invoke_all('user_role_update', $role);
     $status = SAVED_UPDATED;
   }
 
