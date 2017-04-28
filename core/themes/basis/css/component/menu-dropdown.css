@@ -78,6 +78,11 @@
     top: 1em;
   }
 
+  .js .menu-dropdown li,
+  .js .menu-dropdown a.has-submenu.highlighted {
+    border-bottom: none;
+  }
+
   .js .menu-dropdown ul li a,
   .js .menu-dropdown ul li li a{
     padding-left: 1.25rem;
