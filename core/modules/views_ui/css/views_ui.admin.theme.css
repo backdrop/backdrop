@@ -546,8 +546,15 @@ td.group-title {
   margin-bottom: 5px;
 }
 
+#views-display-menu-tabs li.add {
+  border: 1px solid #fff;
+}
 #views-display-menu-tabs li.add ul.action-list li {
   margin: 0;
+}
+
+.views-displays .secondary a {
+  border: 2px solid #fff;
 }
 
 /**
@@ -556,7 +563,6 @@ td.group-title {
 .views-displays ul.secondary li.active a.active.error,
 .views-displays .secondary a.error {
   border: 2px solid #ED541D;
-  padding: 1px 6px;
 }
 
 .views-displays .secondary a:focus {
@@ -565,9 +571,8 @@ td.group-title {
 
 .views-displays .secondary a:hover,
 .views-displays .secondary .active a {
-  background-color: #666666;
+  background-color: #666;
   color: #fff;
-  border-bottom-width: 1px;
 }
 
 .views-displays .secondary .add > a {

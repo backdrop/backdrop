@@ -119,6 +119,13 @@
   float: right;
 }
 
+.views-displays .secondary > li:first-child {
+  margin-left: 0; /* LTR */
+}
+[dir="rtl"] .views-displays .secondary > li:first-child {
+  margin-right: 0;
+}
+
 .views-displays .secondary .open > a {
   position: relative;
   z-index: 51;
