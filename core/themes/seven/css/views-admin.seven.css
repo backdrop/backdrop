@@ -107,7 +107,6 @@ fieldset.fieldset-no-legend {
 
 /* @group Lists */
 
-.views-admin ul.secondary,
 .views-admin .item-list ul {
   margin: 0;
   padding: 0;
@@ -164,15 +163,12 @@ table th {
  * The tabs that switch between sections
  */
 
-.views-admin .icon.add {
-  background-position: center 5px;
-}
-
 .views-displays .secondary a {
   transition: none;
+  border: 2px solid #fff;
 }
 .views-displays .secondary li.add a {
-  background-color: #ffffff;
+  background-color: #fff;
   color: #008BCB;
 }
 .views-displays .secondary li.add a:hover {
@@ -180,10 +176,15 @@ table th {
   color: #008BCB;
 }
 .views-displays .secondary a:hover > .icon.add {
-  background-position: center 5px;
+  background-position: center 3px;
+}
+
+.views-displays .secondary .action-list {
+  top: 30px;
+  box-shadow: 0 5px 5px -5px hsla(0, 0%, 0%, 0.3);
 }
 .views-displays .secondary .action-list li {
-  background-color: #ffffff;
+  background-color: #fff;
 }
 .views-displays .secondary .action-list li:hover {
   background-color: #f7f7f7;
@@ -192,7 +193,6 @@ table th {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
-
 .views-displays .secondary .open > a:hover {
   background-color: #f1f1f1;
   color: #008BCB;

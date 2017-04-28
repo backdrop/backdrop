@@ -154,14 +154,26 @@
 
 /* @group Attachment details new section button */
 
-.views-displays .secondary {
-  text-align: left; /* LTR */
-  float: left; /* LTR */
-}
 
-[dir="rtl"] .views-displays .secondary {
-  text-align: right;
-  float: right;
+@media (min-width: 768px) {
+  .views-display-top .secondary {
+    margin-right: 23em; /* LTR */
+    text-align: left; /* LTR */
+    float: left; /* LTR */
+    clear: none;
+  }
+  [dir="rtl"] .views-display-top .secondary {
+    margin-right: 0;
+    margin-left: 23em;
+    text-align: right;
+    float: right;
+  }
+  .views-display-top .dropbutton-wrapper {
+    float: right;
+  }
+  [dir="rtl"] .views-display-top .dropbutton-wrapper {
+    float: left;
+  }
 }
 
 .views-display-top .secondary .action-list li {
@@ -181,7 +193,7 @@
   left: 0; /* LTR */
   margin: 0;
   position: absolute;
-  top: 30px;
+  top: 25px;
   z-index: 50;
 }
 [dir="rtl"] .views-displays .secondary .action-list {

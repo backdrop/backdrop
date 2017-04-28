@@ -93,8 +93,8 @@
  */
 .views-admin span.icon {
   display: inline-block;
-  float: left;
   position: relative;
+  vertical-align: middle;
 }
 
 .views-admin .icon.compact {
@@ -117,11 +117,11 @@
 }
 
 .views-admin .icon.add {
-  background-position: center 5px;
+  background-position: center 3px;
 }
 
 .views-admin a.icon.add {
-  background-position: center 5px, left top;
+  background-position: center 3px, left top;
 }
 
 .views-admin .icon.delete {
@@ -145,7 +145,7 @@
 }
 
 .views-displays .secondary .open a:hover > .icon.add {
-  background-position: center 5px;
+  background-position: center 3px;
 }
 
 /* @end */
@@ -509,13 +509,8 @@ td.group-title {
 }
 
 .views-display-top {
-  background-color: #F9F9F9;
   margin: .5em 0;
   position: relative;
-}
-
-.views-display-top .secondary {
-  margin-right: 18em;
 }
 
 .views-display-top .secondary > li {
@@ -554,7 +549,7 @@ td.group-title {
 }
 
 .views-displays .secondary a {
-  border: 2px solid #fff;
+  border: 2px solid inherit;
 }
 
 /**
@@ -588,16 +583,12 @@ td.group-title {
   background-color: #f1f1f1;
 }
 
-.views-displays .secondary .action-list {
-  box-shadow: 0 5px 5px -5px hsla(0, 0%, 0%, 0.3);
-}
-
 .views-displays .secondary .action-list  li {
   background-color: #f1f1f1;
   border-color: #cbcbcb;
   border-style: solid;
   border-width: 0 1px;
-  padding: 2px 9px;
+  padding: 0;
 }
 
 .views-displays .secondary .action-list  li:first-child {
@@ -616,8 +607,11 @@ td.group-title {
   background: none repeat scroll 0 0 transparent;
   border: medium none;
   margin: 0;
-  padding: 0;
-  line-height: 1;
+  padding: 2px 9px;
+  width: 100%;
+  text-align: inherit;
+  color: inherit;
+  line-height: 1.5;
 }
 
 .views-displays .secondary .action-list li:hover {
@@ -1121,14 +1115,6 @@ div.messages {
 /* @end */
 
 /* @group Drop buttons */
-
-.views-display-top .dropbutton-wrapper {
-  float: right;
-}
-[dir="rtl"] .views-display-top .dropbutton-wrapper {
-  float: left;
-}
-
 .views-ui-display-tab-bucket .dropbutton-wrapper {
   position: absolute;
   right: 12px; /* LTR */

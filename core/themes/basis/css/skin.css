@@ -627,6 +627,7 @@ button.button-primary,
 .ui-widget-header .ui-state-default {
   color: white;
   background: #0074bd;
+  border: none;
 }
 
 input.button-primary:hover,
