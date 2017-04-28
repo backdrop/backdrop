@@ -77,8 +77,9 @@
     width: 12rem;
     top: 1em;
   }
-  
-  .js .menu-dropdown ul li {
+
+  .js .menu-dropdown ul li a,
+  .js .menu-dropdown ul li li a{
     padding-left: 0;
   }
 
