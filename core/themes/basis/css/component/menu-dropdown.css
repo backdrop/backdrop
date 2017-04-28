@@ -10,7 +10,6 @@
 .js .menu-dropdown a.has-submenu.highlighted {
   float: none;
   border-bottom: 1px solid #777;
-  background: transparent;
 }
 
 .js .menu-dropdown li.last {
