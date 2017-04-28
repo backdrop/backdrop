@@ -1576,7 +1576,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
 
     // Check the system message shows.
     $messages = $this->xpath('(//div[contains(@class, "l-messages")])//div[contains(@class, "messages")]');
-    $this->assertEqual(count($messages), 1, 'The system messages DIV was found.');
+    $this->assertEqual(count($messages), 1, 'The Page messages DIV was found.');
 
     // Check the tabs show.
     $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//ul[contains(@class, "tabs")]');
@@ -1587,7 +1587,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
 
     // Add a Title combo block to the header.
     $this->clickLink(t('Add block'), 0);
-    $this->clickLink(t('Title combo'));
+    $this->clickLink(t('Page title combo'));
     $this->backdropPost(NULL, array(), t('Add block'));
     $title_combo_block = $this->xpath('(//*[@id="layout-content-form"]//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
       ':region' => 'header',
@@ -1628,12 +1628,12 @@ class LayoutBlockTest extends BackdropWebTestCase {
 
     // Add a Local actions block to the header.
     $this->clickLink(t('Add block'), 0);
-    $this->clickLink(t('Local actions'));
+    $this->clickLink(t('Page local actions'));
     $this->backdropPost(NULL, array(), t('Add block'));
 
-    // Add a System messages block to the header.
+    // Add a Page messages block to the header.
     $this->clickLink(t('Add block'), 0);
-    $this->clickLink(t('System messages'));
+    $this->clickLink(t('Page messages'));
     $this->backdropPost(NULL, array(), t('Add block'));
 
     // Save the layout.
@@ -1644,7 +1644,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $messages = $this->xpath('(//div[contains(@class, "l-wrapper")])//div[contains(@class, "l-messages")]');
     $this->assertEqual(count($messages), 0, 'The messages DIV was not found.');
     $block_messages = $this->xpath('(//div[contains(@class, "block-system-messages")])//div[contains(@class, "l-messages")]');
-    $this->assertEqual(count($block_messages), 1, 'The System messages block was found.');
+    $this->assertEqual(count($block_messages), 1, 'The Page messages block was found.');
 
     // Go to the layouts list and check that the Local actions DIV no longer
     // shows but the block does.
@@ -1652,7 +1652,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $actions = $this->xpath('(//div[contains(@class, "l-wrapper")])//div[contains(@class, "l-action-links")]');
     $this->assertEqual(count($actions), 0, 'The messages DIV was not found.');
     $block_actions = $this->xpath('(//div[contains(@class, "block-system-action-links")])//ul[contains(@class, "action-links")]');
-    $this->assertEqual(count($block_actions), 1, 'The System messages block was found.');
+    $this->assertEqual(count($block_actions), 1, 'The Page messages block was found.');
 
   }
 }

@@ -21,7 +21,7 @@ class PageComponents extends Block {
   }
 
   /**
-   *  Sets title text on draggable block panel in Layout builder.
+   * {@inheritdoc}
    */
   function getAdminTitle() {
     $children = $this->getChildren();
@@ -30,16 +30,14 @@ class PageComponents extends Block {
   }
 
   /**
-   * Returns the rendered content of this block.
-   *
-   * @return string
+   * {@inheritdoc}
    */
   function getContent() {
     return theme('page_components', array('child_delta' => $this->childDelta, 'settings' => $this->settings));
   }
 
   /**
-   *  Builds the block's configuration form.
+   * {@inheritdoc}
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
@@ -94,7 +92,7 @@ class PageComponents extends Block {
   }
 
   /**
-   * Submit handler to save the form settings.
+   * {@inheritdoc}
    */
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
@@ -116,32 +114,29 @@ class PageComponents extends Block {
   }
 
   /**
-   * Creates an array of "child blocks" for display in the "Add Block" dialog.
-   *
-   * This allows a single entry in hook_block_info() to provide multiple
-   * block instances.
+   * {@inheritdoc}
    */
   function getChildren() {
     return array(
       'title_combo' => array(
-        'info' => t('Title combo'),
-        'description' => t('Displays the page title, local task tabs, local actions links, and messages.'),
+        'info' => t('Page title combo'),
+        'description' => t('Displays the page title, tabs (local tasks), local actions links, and messages. Replaces all the normal equivalents on the page with a single block.'),
       ),
       'tabs' => array(
-        'info' => t('Tabs (Local tasks)'),
-        'description' => t('Displays the links for menu local tasks, such as "View" or "Edit"'),
+        'info' => t('Page tabs (Local tasks)'),
+        'description' => t('Displays the links for menu local tasks, such as "View" or "Edit". Replaces the normal tabs on the page with a block.'),
       ),
       'title' => array(
         'info' => t('Page title'),
-        'description' => t('Displays the page title.'),
+        'description' => t('Displays the page title. Replaces the normal page title with a block.'),
       ),
       'action_links' => array(
-        'info' => t('Local actions'),
-        'description' => t('Displays the local actions links, such as "Add content".'),
+        'info' => t('Page local actions'),
+        'description' => t('Displays the local actions links, such as "Add content". Replaces the normal local actions on the page with a block.'),
       ),
       'messages' => array(
-        'info' => t('System messages'),
-        'description' => t('Displays messages to the user after an action is performed, such as form validation errors or success messages.'),
+        'info' => t('Page messages'),
+        'description' => t('Displays messages to the user after an action is performed, such as form validation errors or success messages. Replaces the normal messages on the page with a block.'),
       ),
     );
   }

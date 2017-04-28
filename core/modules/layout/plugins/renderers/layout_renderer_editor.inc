@@ -213,15 +213,6 @@ class LayoutRendererEditor extends LayoutRendererStandard {
       ),
     );
 
-    $links['remove'] = array(
-      'title' => t('Remove'),
-      'href' => $this->getUrl('remove-block', $block->uuid),
-      'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
-      'attributes' => array(
-        'class' => array('remove-block', 'use-ajax'),
-      ),
-    );
-
     if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta =='title_combo')) {
       $links['title'] = array(
         'title' => t('Page title settings'),
@@ -233,6 +224,15 @@ class LayoutRendererEditor extends LayoutRendererStandard {
         ),
       );
     }
+
+    $links['remove'] = array(
+      'title' => t('Remove'),
+      'href' => $this->getUrl('remove-block', $block->uuid),
+      'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
+      'attributes' => array(
+        'class' => array('remove-block', 'use-ajax'),
+      ),
+    );
 
     $dropbutton = array(
       '#type' => 'dropbutton',
