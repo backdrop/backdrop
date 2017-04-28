@@ -1473,6 +1473,9 @@ div.add-or-remove-shortcuts {
   font-size: 1.2em;
   font-weight: normal;
 }
+.ui-dialog .ui-dialog-buttonpane {
+  background: #e9e8e8;
+}
 .ui-dialog {
   border: 1px solid #d0d0d0;
   -webkit-border-radius: 4px;

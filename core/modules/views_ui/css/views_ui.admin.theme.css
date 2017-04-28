@@ -49,7 +49,7 @@
     url("../images/sprites.png"),
     -moz-linear-gradient(
       -90deg,
-      #ffffff 0px,
+      #fff 0px,
       #e8e8e8 100%);
   background-image:
     url("../images/sprites.png"),
@@ -64,7 +64,7 @@
     url("../images/sprites.png"),
     -webkit-linear-gradient(
       -90deg,
-      #ffffff 0px,
+      #fff 0px,
       #e8e8e8 100%);
   background-repeat: no-repeat, repeat-y;
   border: 1px solid #dddddd;
@@ -117,11 +117,11 @@
 }
 
 .views-admin .icon.add {
-  background-position: center 3px;
+  background-position: center 5px;
 }
 
 .views-admin a.icon.add {
-  background-position: center 3px, left top;
+  background-position: center 5px, left top;
 }
 
 .views-admin .icon.delete {
@@ -145,7 +145,7 @@
 }
 
 .views-displays .secondary .open a:hover > .icon.add {
-  background-position: center 3px;
+  background-position: center 5px;
 }
 
 /* @end */
@@ -356,8 +356,8 @@ input.form-radio {
 .views-admin h1.unit-title {
   font-size: 15px;
   line-height: 1.6154;
-  margin-bottom: 0;
-  margin-top: 18px;
+  margin: 0;
+  padding-top: 1.5em;
 }
 
 /* @end */
@@ -505,14 +505,12 @@ td.group-title {
 /* @group Attachments */
 
 .views-displays {
-  border: 1px solid #CCC;
   padding-bottom: 36px;
 }
 
 .views-display-top {
   background-color: #F9F9F9;
-  border-bottom: 1px solid #CCCCCC;
-  padding: 8px 8px 8px; /* LTR */
+  margin: .5em 0;
   position: relative;
 }
 
@@ -544,20 +542,12 @@ td.group-title {
  * The tabs that switch between sections
  */
 
-ul#views-display-menu-tabs li {
+#views-display-menu-tabs li {
   margin-bottom: 5px;
 }
 
-ul#views-display-menu-tabs li.add ul.action-list li{
+#views-display-menu-tabs li.add ul.action-list li {
   margin: 0;
-}
-
-.views-displays .secondary a {
-  border: 1px solid #cbcbcb;
-  display: inline-block;
-  font-size: small;
-  line-height: 1.3333;
-  padding: 3px 7px;
 }
 
 /**
@@ -576,10 +566,13 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 .views-displays .secondary a:hover,
 .views-displays .secondary .active a {
   background-color: #666666;
-  color: #ffffff;
+  color: #fff;
   border-bottom-width: 1px;
 }
 
+.views-displays .secondary .add > a {
+  border: 1px solid #cbcbcb;
+}
 .views-displays .secondary .open > a {
   background-color: #f1f1f1;
   border-bottom: 1px solid transparent;
@@ -588,6 +581,10 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 
 .views-displays .secondary .open > a:hover {
   background-color: #f1f1f1;
+}
+
+.views-displays .secondary .action-list {
+  box-shadow: 0 5px 5px -5px hsla(0, 0%, 0%, 0.3);
 }
 
 .views-displays .secondary .action-list  li {
@@ -615,6 +612,7 @@ ul#views-display-menu-tabs li.add ul.action-list li{
   border: medium none;
   margin: 0;
   padding: 0;
+  line-height: 1;
 }
 
 .views-displays .secondary .action-list li:hover {
@@ -632,7 +630,8 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 }
 
 #edit-display-settings-top {
-  padding-bottom: 4px;
+  padding: 0.5em 0.5em;
+  background: #e9e8e8;
 }
 
 #edit-display-settings-content {
@@ -640,7 +639,8 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 }
 
 #edit-display-settings-main {
-  margin-top: 15px;
+  padding: 0.75em 0;
+  background: #fff;
 }
 
 /* @end */
@@ -681,7 +681,11 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 
 #views-ui-preview-form .arguments-preview,
 #views-ui-preview-form .form-type-textfield {
-  margin-left: 14px;
+  margin: 0 0 0 14px;
+}
+[dir="rtl"] #views-ui-preview-form .arguments-preview,
+[dir="rtl"] #views-ui-preview-form .form-type-textfield {
+  margin: 0 14px 0 0;
 }
 
 #views-ui-preview-form .form-type-textfield label {
@@ -704,24 +708,23 @@ ul#views-display-menu-tabs li.add ul.action-list li{
  */
 
 .views-ui-display-tab-bucket {
-  border: 1px solid #f3f3f3;
   line-height: 20px;
   margin: 0;
-  padding-top: 4px;
 }
 
 .views-ui-display-tab-bucket + .views-ui-display-tab-bucket {
   border-top: medium none;
 }
 
-.views-ui-display-tab-bucket > h3,
-.views-ui-display-tab-bucket > .views-display-setting {
-  padding: 2px 6px 4px;
+.views-ui-display-tab-bucket > h3 {
+  padding: 11px 20px;
 }
+
 
 .views-ui-display-tab-bucket h3 {
   font-size: small;
   margin: 0;
+  background-color: #f7f7f7;
 }
 
 .views-ui-display-tab-bucket .horizontal.actions {
@@ -779,9 +782,8 @@ ul#views-display-menu-tabs li.add ul.action-list li{
  */
 
 .views-ui-display-tab-bucket .views-display-setting {
-  color: #666666;
   font-size: 14px;
-  padding-bottom: 0.5em;
+  padding: .5em;
 }
 
 .views-ui-display-tab-bucket .views-group-text {
@@ -815,7 +817,7 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 }
 
 .views-filterable-options .even .form-type-checkbox {
-  background-color: #F3F4EE;
+  background-color: #f7f7f7;
 }
 
 .filterable-option .form-item {
@@ -973,14 +975,14 @@ ul#views-display-menu-tabs li.add ul.action-list li{
 /* @group Live preview elements */
 
 #views-preview-wrapper {
-  border: 1px solid #CCC;
-  border-top: 2px solid #CCC;
   padding-bottom: 12px;
-  padding-top: 12px;
+  padding-top: 20px;
+  margin: 0 0 1em;
+  border-top: 0.125em solid #CCC;
 }
 
 #views-ui-preview-form {
-  margin: 12px;
+  padding: 12px;
 }
 
 #views-live-preview {
@@ -1121,22 +1123,22 @@ div.messages {
 [dir="rtl"] .views-display-top .dropbutton-wrapper {
   float: left;
 }
-.views-display-top .dropbutton-wrapper a {
-  font-size: 12px;
-}
 
 .views-ui-display-tab-bucket .dropbutton-wrapper {
   position: absolute;
-  right: 5px; /* LTR */
-  top: 4px;
+  right: 12px; /* LTR */
+  top: 8px;
 }
 [dir="rtl"] .views-ui-display-tab-bucket .dropbutton-wrapper {
-  left: 5px;
+  left: 20px;
   right: auto;
+}
+#edit-display-settings-top .dropbutton-wrapper {
+  top: 12px;
 }
 .views-ui-display-tab-bucket .dropbutton-wrapper,
 .views-ui-display-tab-bucket .dropbutton-wrapper * {
-  font-size: 11px;
+  font-size: 12px;
 }
 .views-ui-display-tab-bucket .dropbutton li > * {
   padding: 0.2em 0.75em;
@@ -1149,7 +1151,7 @@ div.messages {
   background: none;
   border: medium;
   font-family: inherit;
-  font-size: 12px;
+  font-size: 14px;
   padding-left: 12px;
   margin-bottom: 0;
   line-height: normal;
@@ -1233,3 +1235,8 @@ html.js #views-live-preview .contextual-links-wrapper {
 }
 
 /* @end */
+
+
+#views-ajax-popup {
+  padding: 0 0 1.25em;
+}
