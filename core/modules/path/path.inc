@@ -159,7 +159,11 @@ function path_clean_string($string, array $options = array()) {
   }
 
   $langcode = LANGUAGE_NONE;
-  if (!empty($options['language']->langcode)) {
+  $site_langcode = config_get('system.core', 'language_default');
+  if (!empty($site_langcode)) {
+    $langcode = $site_langcode;
+  }
+  elseif (!empty($options['language']->langcode)) {
     $langcode = $options['language']->langcode;
   }
   elseif (!empty($options['langcode'])) {
