@@ -1464,7 +1464,7 @@ function install_already_done_error() {
   global $base_url;
 
   backdrop_set_title(st('Backdrop already installed'));
-  return st('<ul><li>To start over, you must empty your existing database.</li><li>To install to a different database, edit the appropriate <em>settings.php</em> file in the <em>sites</em> folder.</li><li>To upgrade an existing installation, proceed to the <a href="@base-url/core/update.php">update script</a>.</li><li>View your <a href="@base-url">existing site</a>.</li></ul>', array('@base-url' => $base_url));
+  return st('<ul><li>To start over, you must empty your existing database.</li><li>To install to a different database, edit the appropriate <pre>settings.php</pre> file located in the root folder of your site.</li><li>To upgrade an existing installation, proceed to the <a href="@base-url/core/update.php">update script</a>.</li><li>View your <a href="@base-url">existing site</a>.</li></ul>', array('@base-url' => $base_url));
 }
 
 /**
