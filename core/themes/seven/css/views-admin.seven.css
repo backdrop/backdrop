@@ -230,6 +230,7 @@ table th {
   -webkit-border-radius: 4px 4px 0 0;
   -moz-border-radius: 4px 4px 0;
   border-radius: 4px 4px 0 0;
+  margin-bottom: .5em;
 }
 
 .views-ui-display-tab-bucket .links {
