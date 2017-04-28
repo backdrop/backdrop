@@ -117,11 +117,6 @@ fieldset.fieldset-no-legend {
   clear: none;
 }
 
-.views-displays ul.secondary li.active a,
-.views-displays ul.secondary li.active a.active {
-  border: 1px solid transparent;
-}
-
 .views-admin .links li {
   padding-right: 0; /* LTR */
 }
@@ -154,6 +149,12 @@ table th {
 
 #edit-display-settings-title {
   color: #008BCB;
+}
+
+#edit-display-settings-top {
+  -webkit-border-radius: 4px 4px 0 0;
+  -moz-border-radius: 4px 4px 0;
+  border-radius: 4px 4px 0 0;
 }
 
 /* @end */
@@ -226,6 +227,9 @@ table th {
 .views-ui-display-tab-bucket h3 {
   font-size: 14px;
   text-transform: uppercase;
+  -webkit-border-radius: 4px 4px 0 0;
+  -moz-border-radius: 4px 4px 0;
+  border-radius: 4px 4px 0 0;
 }
 
 .views-ui-display-tab-bucket .links {
@@ -326,9 +330,9 @@ table th {
 
 .filterable-option .form-item.form-type-checkbox {
   /* This selector is aggressive because Seven's reset for .form-items is aggressive. */
-  padding-bottom: 4px;
-  padding-left: 4px;
-  padding-top: 4px;
+  padding-bottom: 8px;
+  padding-left: 8px;
+  padding-top: 8px;
 }
 
 /* @end */
