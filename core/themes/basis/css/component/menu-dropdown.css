@@ -28,7 +28,7 @@
 
 .menu-dropdown a span.sub-arrow {
   position: absolute;
-  top: 30%;
+  top: 1rem;
   margin-top: -1.0625rem;
   left: auto;
   right: 0;
@@ -37,7 +37,7 @@
   overflow: hidden;
   border: 1px solid #777;
   background: #333;
-  font: bold 1rem/2.125rem monospace;
+  font: normal 1.384615rem/2.125rem monospace;
   text-align: center;
   text-shadow: none;
 }
@@ -50,7 +50,14 @@
 
 .menu-dropdown a.highlighted span.sub-arrow:before {
   display: block;
-  content: '-';
+  content: '–';
+}
+
+@media (min-width: 34em) {
+  .menu-dropdown a span.sub-arrow {
+    width: 3.625rem;
+    height: 3.625rem;
+  }
 }
 
 @media (min-width: 48em) {
