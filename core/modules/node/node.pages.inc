@@ -165,16 +165,28 @@ function node_form($form, &$form_state, Node $node) {
   }
   $form['#node'] = $node;
 
+
+  // If the site has multiple languages or a non-English language, use the
+  // site default language as the default content language.
+  $site_langcode = config_get('system.core', 'language_default');
+  $langcode_count = config_get('system.core', 'language_count');
+  if ($site_langcode !== 'en' || $langcode_count > 1) {
+    $default_langcode = $site_langcode;
+  }
+  else {
+    $default_langcode = LANGUAGE_NONE;
+  }
   if ($node_type->settings['language'] && module_exists('language')) {
     $languages = language_list(TRUE);
     $language_options = array();
     foreach ($languages as $langcode => $language) {
       $language_options[$langcode] = $language->name;
     }
+    $default_langcode = array_key_exists($default_langcode, $language_options) ? $default_langcode : '';
     $form['langcode'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
-      '#default_value' => (isset($node->langcode) ? $node->langcode : ''),
+      '#default_value' => (isset($node->langcode) ? $node->langcode : $default_langcode),
       '#options' => $language_options,
       '#empty_value' => LANGUAGE_NONE,
     );
@@ -182,9 +194,9 @@ function node_form($form, &$form_state, Node $node) {
   else {
     $form['langcode'] = array(
       '#type' => 'value',
-      // New nodes without multilingual support have undefined language, old
+      // New nodes without multilingual use the default language, old
       // nodes keep their language if language.module is not available.
-      '#value' => !isset($form['#node']->nid) ? LANGUAGE_NONE : $node->langcode,
+      '#value' => !isset($form['#node']->nid) ? $default_langcode : $node->langcode,
     );
   }
 
