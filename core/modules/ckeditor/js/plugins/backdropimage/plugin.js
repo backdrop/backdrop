@@ -14,7 +14,7 @@
 "use strict";
 
 CKEDITOR.plugins.add('backdropimage', {
-  requires: 'image2',
+  requires: 'image2,uploadwidget',
 
   beforeInit: function (editor) {
     // Override the image2 widget definition to require and handle the
@@ -252,6 +252,101 @@ CKEDITOR.plugins.add('backdropimage', {
         cmd.contextSensitive = 1;
         cmd.on('refresh', disableButtonIfOnWidget, null, null, 4);
       }
+    }
+
+    // Clipboard / Drag upload support:
+    if (CKEDITOR.plugins.clipboard.isFileApiSupported) {
+
+      // Register a file upload request event. By default CKEditor will upload
+      // files into POST with the key "upload", but Backdrop requires files be
+      // placed within a "files" nested array. This renames the value used to
+      // upload the file, so it can be processed by file_save_upload().
+      // See http://docs.ckeditor.com/#!/guide/dev_file_upload.
+      editor.on('fileUploadRequest', function(evt) {
+        evt.data.requestData['files[upload]'] = evt.data.requestData['upload'];
+        delete evt.data.requestData['upload'];
+      });
+
+      // Nearly all code below is adapted from the CKEditor "uploadimage"
+      // plugin. It has been modified to include the Backdrop "data-file-id"
+      // attribute when writing the HTML. Original source code is available at
+      // https://github.com/ckeditor/ckeditor-dev/blob/master/plugins/uploadimage/plugin.js
+      var fileTools = CKEDITOR.fileTools;
+      var uploadUrl = fileTools.getUploadUrl(editor.config, 'image');
+      if (!uploadUrl) {
+        CKEDITOR.error('backdropimage-config');
+        return;
+      }
+
+      // Handle images which are available in the dataTransfer.
+      fileTools.addUploadWidget(editor, 'backdropimage', {
+        supportedTypes: /image\/(jpeg|png|gif)/,
+        uploadUrl: uploadUrl,
+        fileToElement: function() {
+          var img = new CKEDITOR.dom.element('img');
+          img.setAttribute('src', loadingImage);
+          return img;
+        },
+        parts: {
+          img: 'img'
+        },
+        onUploading: function(upload) {
+          // Show the image during the upload.
+          this.parts.img.setAttribute('src', upload.data);
+        },
+        onUploaded: function(upload) {
+          // Width and height could be returned by server (#13519).
+          var $img = this.parts.img.$,
+            width = upload.responseData.width || $img.naturalWidth,
+            height = upload.responseData.height || $img.naturalHeight,
+            fileId = upload.responseData.fileId;
+
+          // Set width and height to prevent blinking.
+          this.replaceWith('<img src="' + upload.url + '" ' +
+            'data-file-id="' + fileId + '" ' +
+            'width="' + width + '" ' +
+            'height="' + height + '">');
+        }
+      });
+
+      // Handle images which are not available in the dataTransfer.
+      // This means that we need to read them from the <img src="data:..."> elements.
+      editor.on('paste', function(evt) {
+        // For performance reason do not parse data if it does not contain img tag and data attribute.
+        if (!evt.data.dataValue.match(/<img[\s\S]+data:/i)) {
+          return;
+        }
+
+        var data = evt.data;
+        var tempDoc = document.implementation.createHTMLDocument('');
+        var temp = new CKEDITOR.dom.element(tempDoc.body);
+        var imgs, img, i;
+
+        // Without this isReadOnly will not works properly.
+        temp.data('cke-editable', 1);
+        temp.appendHtml(data.dataValue);
+        imgs = temp.find('img');
+        for (i = 0; i < imgs.count(); i++) {
+          img = imgs.getItem(i);
+
+          // Image have to contain src=data:...
+          var isDataInSrc = img.getAttribute('src') && img.getAttribute('src').substring(0, 5) == 'data:';
+          var isRealObject = img.data('cke-realelement') === null;
+
+          // We are not uploading images in non-editable blocks and fake objects (#13003).
+          if (isDataInSrc && isRealObject && !img.data('cke-upload-id') && !img.isReadOnly(1)) {
+            var loader = editor.uploadRepository.create(img.getAttribute('src'));
+            loader.upload(uploadUrl);
+            fileTools.markElement(img, 'backdropimage', loader.id);
+            fileTools.bindNotifications(editor, loader);
+          }
+        }
+
+        data.dataValue = temp.getHtml();
+      });
+
+      // Black rectangle which is shown before image is loaded.
+      var loadingImage = 'data:image/gif;base64,R0lGODlhDgAOAIAAAAAAAP///yH5BAAAAAAALAAAAAAOAA4AAAIMhI+py+0Po5y02qsKADs=';
     }
   }
 
