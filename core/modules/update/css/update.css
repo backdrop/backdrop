@@ -3,19 +3,9 @@
  * Styles used by the Update Manager module.
  */
 .checked .button {
-  margin-top: 10px;
+  margin: 1em;
+  vertical-align: middle;
 }
- @media all and (min-width: 550px) {
-  .checked .button {
-    margin-top: 0;
-    margin-left: 25px; /* LTR */
-  }
-  [dir="rtl"] .checked .button {
-    margin-left: 0;
-    margin-right: 25px;
-  }
-}
-
 
 table.update {
   width: 100%;
@@ -28,21 +18,25 @@ table.update {
 .update .project {
   font-weight: bold;
   font-size: 110%;
-  height: 57px;
 }
 @media all and (min-width: 550px) {
   .update .project {
-    height: 22px;
+    float: left; /* LTR */
+  }
+  [dir="rtl"] .update .project {
+    float: right;
+  }
+  .update .version-status {
+    float: right; /* LTR */
+  }
+  [dir="rtl"] .update .version-status {
+    float: left;
+  }
+  .update .versions {
+    clear: both;
   }
 }
 
-.update .update-data {
-  position: relative;
-}
-.update .version-status {
-  position: absolute;
-  top: 42px;
-}
 @media all and (min-width: 550px) {
   .update .version-status {
     text-align: right;

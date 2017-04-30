@@ -39,7 +39,7 @@ function theme_update_manager_update_form($variables) {
 function theme_update_last_check($variables) {
   $last = $variables['last'];
   $output = '<div class="update checked">';
-  $output .= $last ? t('Last checked: @time ago', array('@time' => format_interval(REQUEST_TIME - $last))) : t('Last checked: never');
+  $output .= $last ? t('Last checked: @time ago', array('@time' => format_interval(REQUEST_TIME - $last))) : t('Last checked: never') . ' ';
   $output .= l(t('Check manually'), 'admin/reports/updates/check', array('attributes' => array('class' => array('button', 'button-secondary')), 'query' => backdrop_get_destination()));
   $output .= "</div>\n";
   return $output;
@@ -274,8 +274,9 @@ function theme_update_report($variables) {
       $info_section = '<div class="info">' . $extra_section . $includes_section . $base_section . $sub_section . '</div>';
     }
 
-    $row  = '<div class="version-status">' . $status_label . '</div>';
+    $row = '';
     $row .= '<div class="project">' . $project_section . '</div>';
+    $row .= '<div class="version-status">' . $status_label . '</div>';
     if (!empty($versions_inner)) {
       $row .= '<div class="versions">' . $versions_inner . '</div>';
     }

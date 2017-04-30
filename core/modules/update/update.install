@@ -148,15 +148,19 @@ function _update_requirement_check($project, $type) {
       $requirement_label = t('Up to date');
   }
   if (isset($requirement_label)) {
-    if ($status != UPDATE_CURRENT && $type == 'core' && isset($project['recommended'])) {
-      $version_available = t('version @version available', array('@version' => $project['recommended']));
+    if ($status != UPDATE_CURRENT) {
+      if ($type == 'core' && isset($project['recommended'])) {
+        $version_available = t('version @version available', array('@version' => $project['recommended']));
+      }
+      else {
+        $version_available = t('Updates available');
+      }
       if (update_manager_access()) {
-        $requirement_label .= ' (' . l($version_available, 'admin/reports/updates/update') . ')';
+        $requirement_label .= ' (' . l($version_available, 'admin/modules/update') . ')';
       }
       else {
         $requirement_label .= ' (' . l($version_available, 'admin/reports/updates') . ')';
       }
-
     }
     $requirement['value'] = $requirement_label;
   }
