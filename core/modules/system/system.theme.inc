@@ -276,44 +276,101 @@ function theme_system_modules_uninstall($variables) {
  */
 function theme_status_report($variables) {
   $requirements = $variables['requirements'];
+  backdrop_sort($requirements, array('title' => SORT_STRING));
+
+  // Separate requirements by severity.
+  $errors = array();
+  $warnings = array();
+  $infos = array();
+  $okays = array();
+  foreach ($requirements as $requirement) {
+    if ($requirement['title'] == 'hash') {
+      dpm($requirement);
+    }
+    if (!isset($requirement['severity'])) {
+      $requirement['severity'] = REQUIREMENT_OK;
+    }
+    switch ($requirement['severity']) {
+      case REQUIREMENT_ERROR:
+        $errors[] = $requirement;
+        break;
+      case REQUIREMENT_WARNING:
+        $warnings[] = $requirement;
+        break;
+      case REQUIREMENT_INFO:
+        $infos[] = $requirement;
+        break;
+      case REQUIREMENT_OK:
+        $okays[] = $requirement;
+        break;
+    }
+  }
+  // Put them back together in the desired order.
+  $requirements = array_merge($errors, $warnings, $infos, $okays);
+
   $severities = array(
     REQUIREMENT_INFO => array(
       'title' => t('Info'),
-      'class' => 'info',
+      'class' => array('report-info'),
     ),
     REQUIREMENT_OK => array(
       'title' => t('OK'),
-      'class' => 'status',
+      'class' => array('report-status'),
     ),
     REQUIREMENT_WARNING => array(
       'title' => t('Warning'),
-      'class' => 'warning',
+      'class' => array('report-warning'),
     ),
     REQUIREMENT_ERROR => array(
       'title' => t('Error'),
-      'class' => 'error',
+      'class' => array('report-error'),
     ),
   );
-  $output = '<table class="system-status-report">';
 
+  $system_status_report_table = array(
+    'header' => array(),
+    'rows' => array(),
+    'attributes' => array('class' => 'system-status-report'),
+    'caption' => '',
+    'colgroups' => array(),
+    'sticky' => FALSE,
+    'empty' => 'No status report. Something is definitely wrong.',
+  );
+
+  $rows = array();
   foreach ($requirements as $requirement) {
-    if (empty($requirement['#type'])) {
-      $severity = $severities[isset($requirement['severity']) ? (int) $requirement['severity'] : REQUIREMENT_OK];
-      $severity['icon'] = '<div title="' . $severity['title'] . '"><span class="element-invisible">' . $severity['title'] . '</span></div>';
+    $severity = $severities[isset($requirement['severity']) ? (int) $requirement['severity'] : REQUIREMENT_OK];
+    $severity['icon'] = '<div title="' . $severity['title'] . '"><span class="element-invisible">' . $severity['title'] . '</span></div>';
 
-      // Output table row(s)
-      if (!empty($requirement['description'])) {
-        $output .= '<tr class="' . $severity['class'] . ' merge-down"><td class="status-icon">' . $severity['icon'] . '</td><td class="status-title">' . $requirement['title'] . '</td><td class="status-value">' . $requirement['value'] . '</td></tr>';
-        $output .= '<tr class="' . $severity['class'] . ' merge-up"><td colspan="3" class="status-description">' . $requirement['description'] . '</td></tr>';
-      }
-      else {
-        $output .= '<tr class="' . $severity['class'] . '"><td class="status-icon">' . $severity['icon'] . '</td><td class="status-title">' . $requirement['title'] . '</td><td class="status-value">' . $requirement['value'] . '</td></tr>';
-      }
+    $title = $requirement['title'] . '<br/>';
+    $title .= '<span class="status-summary-mobile">' . $requirement['value'] . '</span>';
+
+    $more = ' ';
+    $details = '';
+    if (!empty($requirement['description'])) {
+      $more .= '<a class="description-toggle" href="#">more</a>';
+      $details = '<div class="status-description">' . $requirement['description']. '</div>';
     }
+
+    $description = '<div class="status-summary">' . $requirement['value'] . $more . '</div>' . $details;
+
+    $row = array(
+      'data' => array(
+        array('data' => $severity['icon'], 'class' => 'report-icon'),
+        array('data' => $title, 'class' => 'status-title'),
+        array('data' => $description, 'class' => array('status-value', 'priority-low')),
+      ),
+      'class' => $severity['class'],
+    );
+
+    $rows[] = $row;
   }
 
-  $output .= '</table>';
-  return $output;
+  $system_status_report_table['rows'] = $rows;
+  $path = backdrop_get_path('module', 'system');
+  backdrop_add_js($path . '/js/status.js');
+
+  return theme_table($system_status_report_table);
 }
 
 /**
