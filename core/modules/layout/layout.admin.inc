@@ -958,7 +958,7 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
     }
   }
   backdrop_sort($block_list, array('info' => SORT_STRING));
-  
+
   $output['search'] = array(
     '#type' => 'textfield',
     '#title' => 'Search',
@@ -1001,13 +1001,40 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
       $description = isset($block_info['description']) ? $block_info['description'] : NULL;
     }
     else {
-      $link = $block_info['info'];
-      $description = isset($block_info['description']) ? $block_info['description'] . ' ': NULL;
-      if (!empty($block_info['required contexts'])) {
-        $context_string = implode(', ', array_keys($block_info['required contexts']));
+      // Remove the main page content block since it's special.
+      if ($block_info['info'] == 'Main page content') {
+        continue;
       }
-      $description .= '<br />' . t('Block cannot be placed in this layout as it requires context: !contexts', array('!contexts' => $context_string));
+
+      $link = $block_info['info'];
+      $description = isset($block_info['description']) ? $block_info['description'] . ' ': '';
+
+      if (count($required_contexts) == 1) {
+        $required_context = reset($required_contexts);
+        switch($required_context) {
+          case 'node':
+            $requirements_info = t('<strong>Requires:</strong> A layout with a <em>node</em> context available, for example: on the path node/%.');
+            break;
+          case 'term':
+            $requirements_info = t('<strong>Requires:</strong> A layout with a <em>user</em> context available, for example: on the path user/%.');
+            break;
+          case 'term':
+            $requirements_info = t('<strong>Requires:</strong> A layout with a <em>term</em> context available, for example: on the path taxonomy/term/%.');
+            break;
+            // Unknown path, not safe to use as an example.
+          default:
+            $requirements_info = t('<strong>Requires:</strong> A layout with a <em>!context</em> context available.', array('!context' => $required_context));;
+            break;
+        }
+      }
+      else {
+        // Multiple contexts required.
+        $context_string = implode(', ', array_keys($block_info['required contexts']));
+        $requirements_info = t('<strong>Requires:</strong> A layout with the contexts: !contexts available', array('!contexts' => $context_string));;
+      }
+      $description .= '<div class="requirement">' . $requirements_info . '</div>';
     }
+
     $output['block_list']['block_list_inner'][$key] = array(
       '#type' => 'item',
       '#markup' => $link,
