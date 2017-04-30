@@ -10,10 +10,6 @@
   margin: 0;
 }
 
-.views-admin a:hover {
-  text-decoration: none;
-}
-
 /* @end */
 
 /* @group Layout */
@@ -504,22 +500,9 @@ td.group-title {
 
 /* @group Attachments */
 
-.views-displays {
-  padding-bottom: 36px;
-}
-
 .views-display-top {
   margin: .5em 0;
   position: relative;
-}
-
-.views-display-top .secondary > li {
-  margin-right: 6px;
-  padding-left: 0;
-}
-
-.views-display-top .secondary > li:last-child {
-  margin-right: 0;
 }
 
 #views-display-extra-actions li {
@@ -612,6 +595,7 @@ td.group-title {
   text-align: inherit;
   color: inherit;
   line-height: 1.5;
+  cursor: pointer;
 }
 
 .views-displays .secondary .action-list li:hover {
@@ -716,7 +700,7 @@ td.group-title {
 }
 
 .views-ui-display-tab-bucket > h3 {
-  padding: 11px 20px;
+  padding: .75em 1em;
 }
 
 
@@ -782,7 +766,7 @@ td.group-title {
 
 .views-ui-display-tab-bucket .views-display-setting {
   font-size: 14px;
-  padding: .25em .5em;
+  padding: .25em 1em;
 }
 
 .views-ui-display-tab-bucket .views-group-text {
@@ -1124,9 +1108,6 @@ div.messages {
   left: 20px;
   right: auto;
 }
-#edit-display-settings-top .dropbutton-wrapper {
-  top: 12px;
-}
 .views-ui-display-tab-bucket .dropbutton-wrapper,
 .views-ui-display-tab-bucket .dropbutton-wrapper * {
   font-size: 12px;
@@ -1146,6 +1127,7 @@ div.messages {
   padding-left: 12px;
   margin-bottom: 0;
   line-height: normal;
+  cursor: pointer;
 }
 .views-ui-display-tab-actions .dropbutton-wrapper input.form-submit {
   text-align: right;

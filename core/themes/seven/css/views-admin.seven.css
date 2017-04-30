@@ -129,10 +129,6 @@ fieldset.fieldset-no-legend {
   padding-right: 0;
 }
 
-.views-display-top ul.secondary {
-  background-color: transparent;
-}
-
 /* @end */
 
 /* @group Tables */
@@ -162,10 +158,19 @@ table th {
  *
  * The tabs that switch between sections
  */
-
+.views-display-top {
+  margin: 0 0 0 -6px; /* LTR */
+}
+[dir="rtl"] .views-display-top {
+  margin: 0 -6px 0 0;
+}
+.views-display-top ul.secondary {
+  background-color: transparent;
+}
 .views-displays .secondary a {
   transition: none;
   border: 2px solid #fff;
+  border-radius: 5px; /* Additional radius needed to include border width. */
 }
 .views-displays .secondary li.add a {
   background-color: #fff;
