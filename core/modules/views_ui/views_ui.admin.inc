@@ -1106,7 +1106,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   );
 
   $form['displays'] = array(
-    '#prefix' => '<h1 class="unit-title clearfix">' . t('Displays') . '</h1>' . "\n" . '<div class="views-displays">',
+    '#prefix' => '<h1 class="unit-title">' . t('Displays') . '</h1>' . "\n" . '<div class="views-displays">',
     '#suffix' => '</div>',
   );
 
