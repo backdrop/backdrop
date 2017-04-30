@@ -95,6 +95,10 @@ function system_theme() {
     'admin_block_content' => array(
       'variables' => array('content' => NULL),
     ) + $base,
+    'page_components' => array(
+      'variables' => array('settings' => NULL, 'child_delta' => NULL),
+      'template' => 'templates/page-components',
+    ),
     'system_admin_index' => array(
       'variables' => array('menu_items' => NULL),
     ) + $base,
@@ -2361,6 +2365,12 @@ function system_block_info() {
     'description' => t('Displays a link to <a href="https://backdropcms.org">the Backdrop CMS website</a>.'),
     'weight' => '10',
   );
+  $blocks['page_components'] = array(
+    'info' => t('Page components'),
+    'description' => t('Displays the page title, local task tabs, local actions links, and messages.'),
+    'class' => 'PageComponents',
+    'render last' => TRUE,
+  );
   // System-defined menu blocks. Load customizations from Menu module.
   $all_menus = function_exists('menu_get_menus') ? menu_get_menus() : array();
   foreach (menu_list_system_menus() as $menu_name => $title) {
@@ -3817,6 +3827,9 @@ function system_autoload_info() {
     'ModuleUpdater' => 'system.updater.inc',
     'ThemeUpdater' => 'system.updater.inc',
     'LayoutUpdater' => 'system.updater.inc',
+
+    // Blocks.
+    'PageComponents' => 'block.page_components.inc',
 
     // Views handlers.
     'views_handler_filter_system_type' => 'views/views_handler_filter_system_type.inc',
