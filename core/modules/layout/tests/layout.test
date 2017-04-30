@@ -1529,10 +1529,11 @@ class LayoutBlockTest extends BackdropWebTestCase {
     ));
 
     // Check page title exists.
-    $this->backdropGet("node/1");
+    $this->backdropGet('node/1');
 
-    $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1["Test node title"]');
+    $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1');
     $this->assertEqual(count($page_title), 1, 'The page title was found.');
+    $this->assertEqual((string) $page_title[0], 'Test node title');
 
     $this->backdropGet('admin/structure/layouts/manage/default');
 
@@ -1549,12 +1550,59 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Go to the welcome page and check that the title div is absent.
-    $this->backdropGet("node/1");
-    $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1["Test node title"]');
+    $this->backdropGet('node/1');
+    $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1');
     $this->assertEqual(count($page_title), 0, 'The page title was not found.');
 
     // Check the title block shows.
-    $page_title = $this->xpath('(//div[contains(@class, "block-system-title")])//h1["Test node title"]');
+    $page_title = $this->xpath('(//div[contains(@class, "block-system-title")])//h1');
+    $this->assertEqual((string) $page_title[0], 'Test node title');
+
+    // Configure the block to use a custom title that overrides the normal title.
+    $data = array(
+      'title_display' => 'custom',
+      'title' => 'A & "custom" title',
+    );
+    $this->backdropPost('admin/structure/layouts/manage/default/edit-title/editor/title', $data, t('Save configuration'));
+    $this->backdropPost('admin/structure/layouts/manage/default/blocks', array(), t('Save layout'));
+    $this->backdropGet('node/1');
+    $title = $this->xpath('(//div[contains(@class, "block-system-title")])//h1');
+    $this->assertEqual((string) $title[0], 'A & "custom" title');
+
+    // Configure the block to copy a title title from another block.
+    // Find the first block within the select list (usually breadcrumb).
+    $this->backdropGet('admin/structure/layouts/manage/default/edit-title/editor/title');
+    $block_value = $this->xpath('//select[@name="title_block"]/option[@selected]');
+    $first_block_uuid = $block_value[0]['value'];
+    $data = array(
+      'title_display' => 'block',
+    );
+    $this->backdropPost(NULL, $data, t('Save configuration'));
+
+    // Set a custom title on the first block and confirm it is copied into
+    // the title block.
+    $data = array(
+      'title_display' => 'custom',
+      'title' => 'A title from a different block',
+    );
+    $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $data, t('Update block'));
+    $this->backdropPost('admin/structure/layouts/manage/default/blocks', array(), t('Save layout'));
+    $this->backdropGet('node/1');
+    $title = $this->xpath('(//div[contains(@class, "block-system-title")])//h1');
+    $this->assertEqual((string)$title[0], 'A title from a different block');
+
+    // Try with no page title at all (should use the default title within the
+    // HEAD tag).
+    $data = array(
+      'title_display' => 'none',
+    );
+    $this->backdropPost('admin/structure/layouts/manage/default/edit-title/editor/title', $data, t('Save configuration'));
+    $this->backdropPost('admin/structure/layouts/manage/default/blocks', array(), t('Save layout'));
+    $this->backdropGet('node/1');
+    $title = $this->xpath('(//div[contains(@class, "block-system-title")])');
+    $this->assertEqual(count($title), 0, 'The entire title block is hidden when title is not displayed.');
+    $head_title = $this->xpath('//head//title');
+    $this->assertIdentical(strpos((string) $head_title[0], 'Test node title'), 0, 'Default title found in HEAD when title is hidden on page.');
 
     // Remove the title block.
     $this->backdropGet('admin/structure/layouts/manage/default');
@@ -1565,13 +1613,21 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
     $this->backdropPost(NULL, array(), t('Save layout'));
 
-    // Check page title exists again.
-    $this->backdropGet("node/1");
+    // Restore the default title settings.
+    $this->backdropGet('admin/structure/layouts/manage/default/edit-title/editor/title');
+    $data = array(
+      'title_display' => 'default',
+    );
+    $this->backdropPost(NULL, $data, t('Save configuration'));
+    $this->backdropPost('admin/structure/layouts/manage/default', array(), t('Save layout'));
 
-    $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1["Your first post!"]');
+    // Check the normal page title exists again.
+    $this->backdropGet('node/1');
+    $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1');
     $this->assertEqual(count($page_title), 1, 'The page title was found.');
+    $this->assertEqual((string) $page_title[0], 'Test node title');
 
-    // Edit the node to get a system mesage.
+    // Edit the node to get a system message.
     $this->backdropPost("node/1/edit", array(), t('Save'));
 
     // Check the system message shows.
@@ -1598,11 +1654,11 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Go to the welcome page and check the hardcoded page elements are absent.
-    $this->backdropGet("node/1");
+    $this->backdropGet('node/1');
     $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1["Your first post!"]');
     $this->assertEqual(count($page_title), 0, 'The page title was not found.');
     $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//div[contains(@class, "tabs")]');
-    $this->assertEqual(count($tabs), 0, 'The tabs  div was not found.');
+    $this->assertEqual(count($tabs), 0, 'The tabs DIV was not found.');
 
     // Edit the node to get a system mesage.
     $this->backdropPost("node/1/edit", array(), t('Save'));
@@ -1653,7 +1709,6 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $this->assertEqual(count($actions), 0, 'The messages DIV was not found.');
     $block_actions = $this->xpath('(//div[contains(@class, "block-system-action-links")])//ul[contains(@class, "action-links")]');
     $this->assertEqual(count($block_actions), 1, 'The Page messages block was found.');
-
   }
 }
 

@@ -173,6 +173,9 @@ class LayoutRendererStandard {
     if ($this->layout->settings['title_display'] === LAYOUT_TITLE_CUSTOM) {
       $this->page_title = t($this->layout->settings['title']);
     }
+    elseif ($this->layout->settings['title_display'] === LAYOUT_TITLE_NONE) {
+      $this->page_title = FALSE;
+    }
 
     $this->prepareBlocks($this->layout->content);
     $this->prepareRegions($this->layout->positions, $this->layout->settings);

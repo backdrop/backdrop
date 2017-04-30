@@ -45,7 +45,15 @@ class PageComponents extends Block {
     if ($this->childDelta == 'title_combo' || $this->childDelta == 'title' && isset($this->page_title)) {
       $this->settings['title'] = $this->page_title;
     }
-    return theme('page_components', array('child_delta' => $this->childDelta, 'settings' => $this->settings));
+
+    $output = theme('page_components', array('child_delta' => $this->childDelta, 'settings' => $this->settings));
+
+    // Check for any non-space contents. A hidden page title may show nothing
+    // at all and the whole block should be hidden in such a case.
+    if (strlen(trim($output)) === 0) {
+      return NULL;
+    }
+    return $output;;
   }
 
   /**
