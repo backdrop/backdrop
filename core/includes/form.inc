@@ -2958,8 +2958,20 @@ function theme_radio($variables) {
   $element['#attributes']['type'] = 'radio';
   element_set_attributes($element, array('id', 'name', '#return_value' => 'value'));
 
-  if (isset($element['#return_value']) && $element['#value'] !== FALSE && $element['#value'] == $element['#return_value']) {
-    $element['#attributes']['checked'] = 'checked';
+  if (isset($element['#return_value']) && $element['#value'] !== FALSE) {
+    // To avoid auto-casting during '==' we convert int 0 to '0' for both
+    // operands. It will prevent wrong true-checking for both cases:
+    // 0 == 'string' and 'string' == 0.
+    if ($element['#value'] === 0) {
+      $element['#value'] = '0';
+    }
+    if ($element['#return_value'] === 0) {
+      $element['#return_value'] = '0';
+    }
+
+    if ($element['#value'] === $element['#return_value']) {
+      $element['#attributes']['checked'] = 'checked';
+    }
   }
   _form_set_class($element, array('form-radio'));
 
