@@ -119,13 +119,6 @@
   float: right;
 }
 
-.views-displays .secondary > li:first-child {
-  margin-left: 0; /* LTR */
-}
-[dir="rtl"] .views-displays .secondary > li:first-child {
-  margin-right: 0;
-}
-
 .views-displays .secondary .open > a {
   position: relative;
   z-index: 51;
@@ -153,7 +146,6 @@
 /* @end */
 
 /* @group Attachment details new section button */
-
 
 @media (min-width: 768px) {
   .views-display-top .secondary {
@@ -203,6 +195,29 @@
 
 .views-displays .secondary .action-list  li {
   display: block;
+}
+
+/* @end */
+
+
+/* @group Display top area */
+
+#edit-display-settings-top .dropbutton-wrapper {
+  position: relative;
+  top: auto;
+  left: auto;
+  right: auto;
+  float: right; /* LTR */
+}
+[dir="rtl"] #edit-display-settings-top .dropbutton-wrapper {
+  float: left;
+}
+#edit-display-settings-top .views-ui-display-tab-setting {
+  position: relative;
+  float: left; /* LTR */
+}
+[dir="rtl"] #edit-display-settings-top .views-ui-display-tab-setting {
+  float: right;
 }
 
 /* @end */
