@@ -672,7 +672,7 @@ function system_preprocess_page_components(&$variables) {
   );
 
   if ($child_delta == 'title' || $child_delta == 'title_combo') {
-    $variables['title'] = backdrop_get_title();
+    $variables['title'] = $settings['title'];
     $variables['title_tag'] = $settings['title_tag'];
     $variables['title_classes'] = $settings['title_classes'];
     $variables['title_attributes'] = array(

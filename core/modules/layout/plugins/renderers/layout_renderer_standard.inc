@@ -120,6 +120,21 @@ class LayoutRendererStandard {
   var $suffix = '';
 
   /**
+   * The title that should be displayed on the page.
+   *
+   * The page title can come from a number of places: copied from a block, a
+   * menu callback (within the main page content block), or a custom layout
+   * title. We track this separately from backdrop_set_title() to avoid double-
+   * setting or getting the title within a single request.
+   *
+   * This value is not escaped and should be run through check_plain() when
+   * adding to the page. The title should already be translated when set.
+   *
+   * @var string
+   */
+  protected $page_title = NULL;
+
+  /**
    * Construct the object that will be used to render the layout.
    *
    * @param Layout $layout
@@ -153,6 +168,12 @@ class LayoutRendererStandard {
    * method via parent::prepare(), or manually set $this->prep_run = TRUE.
    */
   function prepare() {
+    // Set the custom page title. Note this may be overridden in prepareBlocks()
+    // by copying a title from a block.
+    if ($this->layout->settings['title_display'] === LAYOUT_TITLE_CUSTOM) {
+      $this->page_title = t($this->layout->settings['title']);
+    }
+
     $this->prepareBlocks($this->layout->content);
     $this->prepareRegions($this->layout->positions, $this->layout->settings);
     $this->prep_run = TRUE;
@@ -203,10 +224,10 @@ class LayoutRendererStandard {
           continue;
         }
 
-        // Copy page title from the block to the layout if needed.
+        // Set the page title from the block.
         if ($this->layout->settings['title_display'] === LAYOUT_TITLE_BLOCK) {
           if ($block->uuid === $this->layout->settings['title_block']) {
-            $this->layout->settings['title'] = $block->getTitle();
+            $this->page_title = $block->getTitle();
           }
         }
       }
@@ -338,17 +359,6 @@ class LayoutRendererStandard {
       $this->prepare();
     }
 
-    // The page title needs to be finalized before any rendering, as it may be
-    // displayed either in the layout template or in the special "page
-    // components" block. Note the page title settings may be modified to copy
-    // the title from a block in in LayoutRendererStandard::prepareBlocks().
-    $title_set = FALSE;
-    if (!$this->admin) {
-      if ($this->layout->settings['title_display'] === LAYOUT_TITLE_CUSTOM || ($this->layout->settings['title_display'] === LAYOUT_TITLE_BLOCK && !empty($this->layout->settings['title']))) {
-        $title_set = backdrop_set_title(t($this->layout->settings['title']));
-      }
-    }
-
     $this->renderBlocks();
 
     // Return 404 or 403 if set by the main content block.
@@ -356,12 +366,11 @@ class LayoutRendererStandard {
       return $this->menu_response;
     }
 
-    // Ensure custom titles override any title set by the main content block.
-    if ($title_set) {
-      backdrop_set_title($title_set, PASS_THROUGH);
-    }
-
     $this->renderRegions();
+
+    if ($this->page_title) {
+      backdrop_set_title($this->page_title);
+    }
 
     module_load_include('inc', 'layout', 'layout.theme');
     if (empty($this->layout_info['template'])) {
@@ -481,6 +490,13 @@ class LayoutRendererStandard {
    *   The rendered block as HTML.
    */
   function renderBlock($block) {
+    // Pass any page title to the page components block before rendering it.
+    if (method_exists($block, 'setPageTitle')) {
+      /* @var $block PageComponents */
+      $page_title = isset($this->page_title) ? $this->page_title : backdrop_get_title();
+      $block->setPageTitle($page_title);
+    }
+
     $output = '';
     if ($content = $block->getContent()) {
       $style = layout_get_style_info($block->style->plugin);

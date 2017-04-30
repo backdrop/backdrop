@@ -7,6 +7,8 @@
  * local actions links, and messages in a block.
  */
 class PageComponents extends Block {
+  protected $page_title = '';
+
   /**
    * {@inheritdoc}
    */
@@ -18,6 +20,13 @@ class PageComponents extends Block {
       'title_classes' => 'page-title',
       'tab_type' => 'both'
     );
+  }
+
+  /**
+   * Special function for PageComponents. Sets the page title to be used.
+   */
+  function setPageTitle($page_title) {
+    $this->page_title = $page_title;
   }
 
   /**
@@ -33,6 +42,9 @@ class PageComponents extends Block {
    * {@inheritdoc}
    */
   function getContent() {
+    if ($this->childDelta == 'title_combo' || $this->childDelta == 'title' && isset($this->page_title)) {
+      $this->settings['title'] = $this->page_title;
+    }
     return theme('page_components', array('child_delta' => $this->childDelta, 'settings' => $this->settings));
   }
 
