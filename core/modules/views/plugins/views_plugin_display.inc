@@ -1077,13 +1077,20 @@ class views_plugin_display extends views_plugin {
         'title' => t('Format'),
         'column' => 'first',
       ),
+      'fields' => array(
+        'title' => t('Fields'),
+        'column' => 'first',
+      ),
       'filters' => array(
         'title' => t('Filters'),
         'column' => 'first',
       ),
-      'fields' => array(
-        'title' => t('Fields'),
-        'column' => 'first',
+      'access' => array(
+        'title' => t('Access'),
+        'column' => 'second',
+        'build' => array(
+          '#weight' => -5,
+        ),
       ),
       'pager' => array(
         'title' => t('Pager'),
@@ -1094,13 +1101,6 @@ class views_plugin_display extends views_plugin {
         'column' => 'third',
         'build' => array(
           '#weight' => 1,
-        ),
-      ),
-      'access' => array(
-        'title' => '',
-        'column' => 'second',
-        'build' => array(
-          '#weight' => -5,
         ),
       ),
       'other' => array(
