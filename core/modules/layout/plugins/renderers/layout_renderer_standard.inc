@@ -235,6 +235,9 @@ class LayoutRendererStandard {
         }
       }
 
+      // Let the block prepare any data before rendering.
+      $block->prepare();
+
       $block_info = layout_get_block_info($block->module, $block->delta);
 
       // If this block wants to render last, add it to the $last array. We allow
