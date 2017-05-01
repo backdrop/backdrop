@@ -214,7 +214,7 @@ function _views_find_module_templates($cache, $path) {
       $templates[$hook] = array(
         'template' => $template,
         'path' => dirname($file->filename),
-        'includes' => isset($cache[$hook]['includes']) ? $cache[$hook]['includes'] : NULL,
+        'includes' => !empty($cache[$hook]['includes']) ? $cache[$hook]['includes'] : array(),
       );
     }
     // Ensure that the pattern is maintained from base themes to its sub-themes.
@@ -244,7 +244,7 @@ function _views_find_module_templates($cache, $path) {
             'variables' => isset($info['variables']) ? $info['variables'] : NULL,
             'render element' => isset($info['render element']) ? $info['render element'] : NULL,
             'base hook' => $hook,
-            'includes' => isset($info['includes']) ? $info['includes'] : NULL,
+            'includes' => !empty($info['includes']) ? $info['includes'] : array(),
           );
         }
       }

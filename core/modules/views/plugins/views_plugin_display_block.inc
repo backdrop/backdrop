@@ -31,7 +31,6 @@ class views_plugin_display_block extends views_plugin_display {
         'link_to_view'    => array('default' => FALSE),
         'more_link'       => array('default' => FALSE),
         'path_override'   => array('default' => FALSE),
-        'title_override'  => array('default' => FALSE),
         'exposed_form'    => array('default' => FALSE),
         'fields_override' => array('default' => FALSE),
       ),
@@ -75,16 +74,16 @@ class views_plugin_display_block extends views_plugin_display {
 
     if (empty($info)) {
       if ($this->display->display_title == $this->definition['title']) {
-        $info = t('View: @view', array('@view' => $this->view->get_human_name()));
+        $info = t('View: @view', array('@view' => t($this->view->get_human_name())));
       }
       else {
-        $info = t('View: @view: @display', array('@view' => $this->view->get_human_name(), '@display' => $this->display->display_title));
+        $info = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
       }
     }
     return array(
       $delta => array(
         'info' => $info,
-        'description' => check_plain($this->view->description),
+        'description' => $this->view->description ? check_plain(t($this->view->description)) : t('Block display from the "@view" view.', array('@view' => t($this->view->get_human_name()))),
         'cache' => $this->get_cache_type(),
         'class' => 'ViewsBlock',
       ),
@@ -229,7 +228,6 @@ class views_plugin_display_block extends views_plugin_display {
           'link_to_view' => t('Link block title to view page'),
           'more_link' => t('More link'),
           'path_override' => t('Path override'),
-          'title_override' => t('Title override'),
           'exposed_form' => t('Use exposed widgets form as block configuration'),
           'fields_override' => t('Fields override'),
         );

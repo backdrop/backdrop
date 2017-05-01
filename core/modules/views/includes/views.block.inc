@@ -50,11 +50,14 @@ class ViewsBlock extends Block {
     list($view_name, $display_id) = explode('-', $this->delta);
     if ($view = views_get_view($view_name)) {
       $view->set_display($display_id);
-      if ($this->display->display_title == $this->definition['title']) {
+      if ($block_description = $view->display_handler->get_option('block_description')) {
+        $info = t($block_description);
+      }
+      elseif ($view->display[$display_id]->display_title == $view->display_handler->definition['title']) {
         $info = t('View: @view', array('@view' => $view->get_human_name()));
       }
       else {
-        $info = t('View: @view: @display', array('@view' => $view->get_human_name(), '@display' => $view->display->display_title));
+        $info = t('View: @view (@display)', array('@view' => $view->get_human_name(), '@display' => $view->display[$display_id]->display_title));
       }
 
     }
@@ -73,6 +76,7 @@ class ViewsBlock extends Block {
         $view->destroy();
         return;
       }
+      $this->setDefaultsFromView($view);
 
       $view->set_display($display_id);
       $view->display_handler->set_override_options($this->settings);
@@ -107,7 +111,7 @@ class ViewsBlock extends Block {
             break;
 
           case 'user':
-            $args[] = $this->settings['arguments'][$id];
+            $args[] = (isset($this->settings['arguments'][$id]) && strlen($this->settings['arguments'][$id])) ? $this->settings['arguments'][$id] : NULL;
             break;
 
           case 'wildcard':
@@ -117,8 +121,7 @@ class ViewsBlock extends Block {
 
           case 'none':
           default:
-            // Put in NULL.
-            // views.module knows what to do with NULL (or missing) arguments
+            // Let Views handle a NULL (or missing) argument.
             $args[] = NULL;
             break;
         }
@@ -202,20 +205,24 @@ class ViewsBlock extends Block {
       }
 
       $output = $view->execute_display($display_id);
-      if (is_string($output['content'])) {
-        $output['content'] = array(
-          '#markup' => $output['content'],
-        );
+      if ($output) {
+        if (is_string($output['content'])) {
+          $output['content'] = array(
+            '#markup' => $output['content'],
+          );
+        }
+
+        if (($allow['link_to_view'] && !empty($this->settings['link_to_view'])) ||
+          (!$allow['link_to_view'] && $view->display_handler->get_option('link_to_view'))) {
+          $output['path'] = $view->get_url();
+        }
+
+        views_add_contextual_links($output['content'], 'block', $view, $display_id);
+
+        $this->viewOutput = $output;
       }
 
-      if (($allow['link_to_view'] && !empty($this->settings['link_to_view'])) ||
-        (!$allow['link_to_view'] && $view->display_handler->get_option('link_to_view'))) {
-        $output['path'] = $view->get_url();
-      }
-
-      views_add_contextual_links($output['content'], 'block', $view, $display_id);
       $view->destroy();
-      $this->viewOutput = $output;
     }
   }
 
@@ -232,7 +239,7 @@ class ViewsBlock extends Block {
     }
 
     // Link to the view if a path is provided in ViewsBlock::prepare().
-    if (isset($this->viewOutput['path'])) {
+    if ($title && isset($this->viewOutput['path'])) {
       $title = l($title, $this->viewOutput['path'], array('html' => TRUE));
     }
 
@@ -247,7 +254,7 @@ class ViewsBlock extends Block {
   }
 
   /**
-   *  Builds the block's configuration form.
+   * {@inheritdoc}
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
@@ -307,47 +314,26 @@ class ViewsBlock extends Block {
       );
     }
 
-    if (!empty($allow['feed_icons'])) {
-      $form['feed_icons'] = array(
-        '#type' => 'checkbox',
-        '#default_value' => !empty($this->settings['feed_icons']),
-        '#title' => t('Display feed icons'),
-      );
-    }
-
     if ($allow['path_override']) {
+      $form['path_override'] = array(
+        '#type' => 'checkbox',
+        '#default_value' => $this->settings['path_override'],
+        '#title' => t('Override path'),
+        '#description' => t('Use a different path for the more link, pager, and other links.')
+      );
       $form['path'] = array(
         '#type' => 'textfield',
         '#default_value' => isset($this->settings['path']) ? $this->settings['path'] : $view->get_path(),
         '#title' => t('Override path'),
-        '#size' => 30,
-        '#description' => t('Set a different path to be used by the embedded view.'),
+        '#size' => 30,        '#states' => array(
+          'visible' => array(
+            ':input[name="path_override"]' => array('checked' => TRUE),
+          ),
+        ),
       );
     }
 
     $view->init_style();
-    if ($allow['fields_override'] && $view->style_plugin->uses_fields()) {
-      $form['fields_override'] = array(
-        '#type' => 'fieldset',
-        '#title' => 'Fields to display',
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
-        '#tree' => TRUE,
-      );
-      foreach ($view->display_handler->get_handlers('field') as $field => $handler) {
-        $title = $handler->ui_name();
-        if ($handler->options['label']) {
-          $title .= ' (' . check_plain($handler->options['label']) . ')';
-        }
-
-        $form['fields_override'][$field] = array(
-          '#type' => 'checkbox',
-          '#title' => $title,
-          '#default_value' => isset($this->settings['fields_override'][$field]) ? $this->settings['fields_override'][$field] : !$handler->options['exclude'],
-        );
-      }
-    }
-
     if (empty($this->settings['exposed'])) {
       $this->settings['exposed'] = array();
     }
@@ -366,14 +352,6 @@ class ViewsBlock extends Block {
       $view->init_handlers();
       $exposed_form = array();
       $exposed_form = views_exposed_form($exposed_form, $exposed_form_state);
-
-      $form['exposed'] = array(
-        '#title' => t('Filter options'),
-        '#type' => 'fieldset',
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
-        '#tree' => TRUE,
-      );
 
       foreach ($exposed_form['#info'] as $id => $info) {
         $form['exposed'][$id] = array(
@@ -404,6 +382,38 @@ class ViewsBlock extends Block {
 
     if (isset($exposed_form['sort_order'])) {
       $form['exposed']['sort_order'] = $exposed_form['sort_order'];
+    }
+
+    if (!empty($form['exposed'])) {
+      $form['exposed'] += array(
+        '#title' => t('Filter options'),
+        '#type' => 'fieldset',
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+        '#tree' => TRUE,
+      );
+    }
+
+    if ($allow['fields_override'] && $view->style_plugin->uses_fields()) {
+      $form['fields_override'] = array(
+        '#type' => 'fieldset',
+        '#title' => 'Fields to display',
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+        '#tree' => TRUE,
+      );
+      foreach ($view->display_handler->get_handlers('field') as $field => $handler) {
+        $title = $handler->ui_name();
+        if ($handler->options['label']) {
+          $title .= ' (' . check_plain($handler->options['label']) . ')';
+        }
+
+        $form['fields_override'][$field] = array(
+          '#type' => 'checkbox',
+          '#title' => $title,
+          '#default_value' => isset($this->settings['fields_override'][$field]) ? $this->settings['fields_override'][$field] : !$handler->options['exclude'],
+        );
+      }
     }
 
     if ($allow['use_pager']) {
@@ -445,7 +455,7 @@ class ViewsBlock extends Block {
         '#description' => t('Enter the number of items to skip; enter 0 to skip no items.'),
       );
     }
-    if ($form['pager']) {
+    if (!empty($form['pager'])) {
       $form['pager'] += array(
         '#type' => 'fieldset',
         '#title' => t('Pager options'),
@@ -457,14 +467,14 @@ class ViewsBlock extends Block {
   }
 
   /**
-   * Validates the form settings.
+   * {@inheritdoc}
    */
   function formValidate($form, &$form_state) {
     parent::formValidate($form, $form_state);
   }
 
   /**
-   * Submit handler to save the form settings.
+   * {@inheritdoc}
    */
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
@@ -473,7 +483,6 @@ class ViewsBlock extends Block {
     $keys = array(
       'link_to_view',
       'more_link',
-      'feed_icons',
       'use_pager',
       'pager_id',
       'items_per_page',
