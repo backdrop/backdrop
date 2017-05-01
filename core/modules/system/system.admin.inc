@@ -2115,7 +2115,7 @@ function system_urls_settings($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Use HTTPS for canonical URLs'),
     '#default_value' => config_get('system.core', 'canonical_secure'),
-    '#description' => t('This option makes Backdrop use HTTPS protocol for generated canonical URLs. Please note: to get it working in mixed-mode (both secure and insecure) sessions, the variable <code>https<code> should be set to <code>TRUE<code> in your file <code>settings.php</code>' ),
+    '#description' => t('This option makes Backdrop use HTTPS protocol for generated canonical URLs. Please note: to get it working in mixed-mode (both secure and insecure) sessions, the variable <code>https</code> should be set to <code>TRUE</code> in your file <code>settings.php</code>' ),
   );
 
   return system_settings_form($form);
