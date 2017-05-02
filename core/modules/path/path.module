@@ -353,7 +353,7 @@ function path_taxonomy_form_vocabulary_submit($form, &$form_state) {
 function path_form_user_admin_settings_alter(&$form, $form_state) {
   $settings = array(
     'default' => config_get('path.settings', 'user_pattern'),
-    'description' => t('New pages will have URLs that match a pattern based on wildcards called <em>tokens</em>. For example the URL <code>members/jane-doe<code> could be created using the pattern <code>members/[user:name]<code> if the user name is "Jane Doe".'),
+    'description' => t('New pages will have URLs that match a pattern based on wildcards called <em>tokens</em>. For example the URL <code>members/jane-doe</code> could be created using the pattern <code>members/[user:name]</code> if the user name is "Jane Doe".'),
     'token_types' => array('user'),
   );
   $form += path_pattern_settings_form($settings);
