@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide views data and handlers for taxonomy.module.
@@ -182,6 +181,22 @@ function taxonomy_views_data() {
       'title' => t('Term edit link'),
       'help' => t('Provide a simple link to edit the term.'),
       'handler' => 'views_handler_field_term_link_edit',
+    ),
+  );
+
+  $data['taxonomy_term_data']['term_tid_depth'] = array(
+    'help' => t('Display term ionly f it has the requested depth.'),
+    'real field' => 'tid',
+    /*
+    'argument' => array(
+      'title' => t('Taxonomy term depth'),
+      'handler' => 'views_handler_argument_term_depth',
+      'accept depth modifier' => TRUE,
+    ),
+    */
+    'filter' => array(
+      'title' => t('Taxonomy term depth'),
+      'handler' => 'views_handler_filter_term_depth',
     ),
   );
 
