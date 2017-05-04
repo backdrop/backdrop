@@ -693,6 +693,9 @@ function user_account_form(&$form, &$form_state) {
     '#type'   => 'container',
     '#weight' => -10,
   );
+
+  $hide_username = config_get('system.core', 'hide_username_on_registration');
+
   // Only show name field on registration form or user can change own username.
   $form['account']['name'] = array(
     '#type' => 'textfield',
@@ -702,7 +705,7 @@ function user_account_form(&$form, &$form_state) {
     '#required' => TRUE,
     '#attributes' => array('class' => array('username')),
     '#default_value' => (!$register ? $account->name : ''),
-    '#access' => ($register || ($user->uid == $account->uid && user_access('change own username')) || $admin),
+    '#access' => (($register && !$hide_username) || ($user->uid == $account->uid && user_access('change own username')) || $admin),
     '#weight' => -10,
   );
 
@@ -876,6 +879,24 @@ function user_account_form_validate($form, &$form_state) {
   // Validate new or changing username.
   if (isset($form_state['values']['name'])) {
     $name = $form_state['values']['name'];
+    $hide_username_on_registration = config_get('system.core', 'hide_username_on_registration');
+    // If login is by email only, admins have the option to hide the username
+    // field. If it's hidden, set the username as the email during registration.
+    if ($name == '' && $hide_username_on_registration && empty($account->uid)) {
+      $username_generation_method = config_get('system.core', 'username_generation_method');
+      switch ($username_generation_method) {
+        case 0:
+          $name = $mail;
+          break;
+        case 1:
+          $name = user_generate_username($mail);
+          break;
+        case 2:
+          $name = user_generate_username();
+          break;
+      }
+      $form_state['values']['name'] = $name;
+    }
     if ($error = user_validate_name($name)) {
       form_set_error('name', $error);
     }
@@ -936,6 +957,95 @@ function user_account_form_validate($form, &$form_state) {
       form_set_error('signature', t('The signature is too long: it must be %max characters or less.', array('%max' => $user_schema['fields']['signature']['length'])));
     }
   }
+}
+
+/**
+ * Returns a new string suitable for use as a username.
+ *
+ * If an email address is provided, the username will be generated from the
+ * part of the address before the "@" sign. If no email is provided a random
+ * pronounceable string will be generated.
+ *
+ * @param string $mail
+ *   (optional) An email address.
+ *
+ * @return string
+ *   A unique valid username.
+ */
+function user_generate_username($mail = NULL) {
+  $username = '';
+  if ($mail) {
+    $username = preg_replace('/@.*$/', '', $mail);
+    $username = user_registration_cleanup_username($username);
+  }
+  else {
+    $consonants  = 'bcdfghjklmnprstvwz';
+    $vowels  = 'aeiou';
+    $username = '';
+        
+    for ($j=0; $j < 3; $j++) {
+      $username .= $consonants[rand(0, 17)];
+      $username .= $vowels[rand(0, 4)];
+    }
+    $username .= $consonants[rand(0, 17)];
+ 
+  }
+
+  // Allow modules to modify generated names.
+  backdrop_alter('user_generate_username', $username, $mail);
+  return user_registration_unique_username($username);
+}
+
+/**
+ * Given a string, returns a new string suitable for use as a username.
+ *
+ * @param string $name
+ *   The string to be cleaned up.
+ *
+ * @return string
+ *   Cleaned up username.
+ */
+function user_registration_cleanup_username($name) {
+  // Strip illegal characters.
+  $name = preg_replace('/[^\x{80}-\x{F7} a-zA-Z0-9@_.\'-]/', '', $name);
+
+  // Strip leading and trailing spaces.
+  $name = trim($name);
+
+  // Convert any other series of spaces to a single underscore.
+  $name = preg_replace('/\s+/', '_', $name);
+
+  // If there's nothing left use a default.
+  $name = ('' === $name) ? t('user') : $name;
+
+  // Truncate to a reasonable size.
+  $name = (backdrop_strlen($name) > (USERNAME_MAX_LENGTH - 10)) ? backdrop_substr($name, 0, USERNAME_MAX_LENGTH - 11) : $name;
+  return $name;
+}
+
+/**
+ * Given a starting point returns a legal, unique username.
+ *
+ * @param string $name
+ *   A name from which to base the final user name.  May contain illegal
+ *   characters; these will be stripped.
+ *
+ * @return string
+ *   A unique user name based on $name.
+ *
+ * @see user_validate_name()
+ */
+function user_registration_unique_username($name) {
+  // Iterate until we find a unique name.
+  $i = 0;
+  do {
+    $new_name = empty($i) ? $name : $name . '_' . $i;
+    $found = db_query_range("SELECT uid from {users} WHERE name = :name", 0, 1, array(':name' => $new_name))->fetchAssoc();
+
+    $i++;
+  } while (!empty($found));
+
+  return $new_name;
 }
 
 function user_login_block($form) {
