@@ -343,6 +343,17 @@ function ckeditor_ckeditor_plugins() {
     ),
   );
 
+  $plugins['backdroptoken'] = array(
+    'path' => backdrop_get_path('module', 'ckeditor') . '/js/plugins/backdroptoken',
+    'file' => 'plugin.js',
+    'buttons' => array(
+      'BackdropToken' => array(
+        'label' => t('Token'),
+        'image' => $image_prefix . '/token.png',
+      ),
+    ),
+  );
+
   return $plugins;
 }
 
@@ -533,6 +544,10 @@ function ckeditor_get_settings($format, $existing_settings) {
   );
 
   // Create a token for access to dialogs.
+  if (isset($external_plugins['backdroptoken'])) {
+    $link_token = filter_editor_dialog_token($format, 'token');
+    $settings['backdrop']['tokenDialogUrl'] = url('editor/dialog/token/' . $format->format, array('query' => array('token' => $link_token, 'calling_path' => $_GET['q'])));
+  }
   if (isset($external_plugins['backdroplink'])) {
     $link_token = filter_editor_dialog_token($format, 'link');
     $settings['backdrop']['linkDialogUrl'] = url('editor/dialog/link/' . $format->format, array('query' => array('token' => $link_token, 'calling_path' => $_GET['q'])));

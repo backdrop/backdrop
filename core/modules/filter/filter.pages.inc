@@ -24,6 +24,22 @@ function filter_tips_long($format = NULL) {
 }
 
 /**
+ * Form callback: Display a form for inserting tokens.
+ */
+function filter_format_editor_token_form($form, &$form_state, $format) {
+  $form_state['format'] = $format;
+
+  backdrop_add_css(backdrop_get_path('module', 'system') . '/css/token.css');
+
+  $tree = '<div>' . theme('token_tree', array('js' => FALSE)) . '</div>';
+  $form['token'] = array(
+    '#markup' => $tree,
+  );
+
+  return $form;
+}
+
+/**
  * Form callback: Display a form for inserting/editing a link.
  */
 function filter_format_editor_link_form($form, &$form_state, $format) {

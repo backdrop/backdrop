@@ -69,6 +69,16 @@ function filter_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
   );
+  $items['editor/dialog/token/%filter_format'] = array(
+    'title' => 'Insert token',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('filter_format_editor_token_form', 3),
+    'access callback' => 'filter_dialog_access',
+    'access arguments' => array(3, 'token'),
+    'theme callback' => 'ajax_base_page_theme',
+    'type' => MENU_CALLBACK,
+    'file' => 'filter.pages.inc',
+  );
   $items['editor/dialog/link/%filter_format'] = array(
     'title' => 'Edit image',
     'page callback' => 'backdrop_get_form',
@@ -1844,6 +1854,13 @@ function filter_filter_info() {
     'process callback' => '_filter_image_align',
     'weight' => 5,
   );
+  $filters['filter_tokens'] = array(
+    'title' => t('Replace tokens'),
+    'description' => t('The usage of this filter should be restricted to trusted users only as tokens with sensitive data could be exposed.'),
+    'process callback' => '_filter_tokens',
+    'tips callback' => '_filter_tokens_tips',
+    'cache' => FALSE,
+  );
   return $filters;
 }
 
@@ -2530,6 +2547,65 @@ function _filter_image_align($text) {
   }
 
   return filter_dom_serialize($dom);
+}
+
+/**
+ * Filter process callback for the token text filter.
+ */
+function _filter_tokens($text, $filter, $format, $langcode, $cache, $cache_id) {
+  $data = array();
+  $options = array('clear' => TRUE);
+
+  // Prevent recursion.
+  static $object_loaded = FALSE;
+
+  if (!$object_loaded) {
+    $object_loaded = TRUE;
+
+    // Load tokens for contexts defined on the layout.
+    $layout = layout_get_layout_by_path();
+    $contexts = $layout->getContexts();
+    foreach ($contexts as $context) {
+      if (isset($context->data)) {
+        $data[$context->plugin] = $context->data;
+      }
+    }
+
+    // If the default layouts are being used, load common token types.
+    if (in_array($layout->name, array('admin_default', 'default'))) {
+      $menu_item = menu_get_item();
+      if ($menu_item) {
+        switch ($menu_item['map'][0]) {
+          case 'node':
+          case 'user':
+            $data[$menu_item['map'][0]] = $menu_item['map'][1];
+            break;
+          case 'taxonomy':
+            $data[$menu_item['map'][1]] = $menu_item['map'][2];
+             break;
+          case '_backdrop_bootstrap_full':
+          case 'menu_execute_active_handler':
+            break 2;
+        }
+      }
+    }
+  }
+
+  return token_replace($text, $data, $options);
+}
+
+/**
+ * Filter tip callback for the token input filter.
+ */
+function _filter_tokens_tips($filter, $format, $long = FALSE) {
+  if ($long) {
+    $output = t('Global tokens will be replaced with their respective token values (e.g. [site:name] or [current-page:title]). The following is a list of the tokens that are available:');
+    $output .= theme('token_tree', array('click_insert' => FALSE));
+    return $output;
+  }
+  else {
+    return t('Global tokens will be replaced with their respective token values (e.g. [site:name] or [current-page:title]).');
+  }
 }
 
 /**
