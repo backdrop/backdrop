@@ -40,8 +40,8 @@ function entity_view_mode_load($entity_type, $machine_name) {
   }
   else {
     $entity_info = entity_get_info($entity_type);
-    if (!empty($entity_info['view modes'][$entity_type][$machine_name])) {
-      return $entity_info['view modes'][$entity_type][$machine_name] + array('machine_name' => $machine_name);
+    if (!empty($entity_info['view modes'][$machine_name])) {
+      return $entity_info['view modes'][$machine_name] + array('machine_name' => $machine_name);
     }
   }
 
