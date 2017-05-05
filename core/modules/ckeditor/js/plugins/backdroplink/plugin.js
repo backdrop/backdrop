@@ -72,6 +72,12 @@ CKEDITOR.plugins.add('backdroplink', {
 
             // Set the link so individual properties may be set below.
             linkElement = getSelectedLink(editor);
+
+            // Move the selection to after the link so the user may continue
+            // typing outside of the link element itself.
+            range.setStartAfter(linkElement);
+            range.setEndAfter(linkElement);
+            range.select();
           }
           // Update the link properties.
           else if (linkElement) {
