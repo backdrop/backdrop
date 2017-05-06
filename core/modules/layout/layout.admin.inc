@@ -2043,6 +2043,10 @@ function layout_clone_form_submit($form, &$form_state) {
   $layout = $form_state['layout'];
   $layout->title = $form_state['values']['title'];
   $layout->name = $form_state['values']['name'];
+  if (!empty($layout->menu_item)) {
+	  $layout->menu_item->menu['title'] = $form_state['values']['name'];
+	  $layout->menu_item->name = $form_state['values']['name'];
+  }
   $layout->save();
 
   // Redirect to the full settings form.
