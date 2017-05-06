@@ -560,11 +560,12 @@ function filter_editor_image_upload_settings_form($format) {
     $form['scheme'][$scheme]['#attributes']['data-label'] = t('Storage: @name', array('@name' => $info['name']));
   }
 
+  $token_link = ' ' . theme('token_tree_link');
   $form['directory'] = array(
     '#type' => 'textfield',
     '#default_value' => $settings['directory'],
     '#title' => t('Upload directory'),
-    '#description' => t("A directory relative to the files directory where uploaded images will be stored."),
+    '#description' => t("A directory relative to the files directory where uploaded images will be stored.<br />This field supports tokens.") . ' ' . theme('token_tree_link'),
     '#states' => $show_if_image_uploads_enabled,
   );
 
