@@ -560,7 +560,6 @@ function filter_editor_image_upload_settings_form($format) {
     $form['scheme'][$scheme]['#attributes']['data-label'] = t('Storage: @name', array('@name' => $info['name']));
   }
 
-  $token_link = ' ' . theme('token_tree_link');
   $form['directory'] = array(
     '#type' => 'textfield',
     '#default_value' => $settings['directory'],
