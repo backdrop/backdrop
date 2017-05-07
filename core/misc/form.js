@@ -75,4 +75,13 @@ Backdrop.behaviors.fillUserInfoFromCookie = {
   }
 };
 
+/**
+ * Give first form element on a form the focus.
+ */
+Backdrop.behaviors.autoFocus = {
+  attach:function() {
+    $('form:first *:input[type=text]:first').focus();
+  }
+};
+
 })(jQuery);
