@@ -149,14 +149,17 @@ fieldset .fieldset-legend {
   background: #20252e;
 }
 
+.l-header-inner {
+  color: #fff;
+  padding: 0;
+}
+
 @media (min-width: 34em) {
   .l-header-inner {
     min-height: 6.125rem;
+    padding-right: .9375rem;
+    padding-left: .9375rem;
   }
-}
-
-.l-header-inner {
-  color: #fff;
 }
 
 .l-header a {
@@ -318,7 +321,7 @@ fieldset .fieldset-legend {
 }
 
 .js .menu-dropdown > li {
-  border-bottom-color: #114a75;
+  border-bottom-color: #777;
 }
 
 .menu-dropdown a.disabled {
