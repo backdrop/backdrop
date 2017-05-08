@@ -1092,6 +1092,13 @@ ul.secondary li a:active {
 }
 
 /**
+ * Nodes
+ */
+.node[data-status]:before {
+  color: #dee2ea;
+}
+
+/**
  * Comments
  */
 .comments .indented:before {

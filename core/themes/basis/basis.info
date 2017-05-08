@@ -21,6 +21,7 @@ stylesheets[all][] = css/component/admin-tabs.css
 stylesheets[all][] = css/component/breadcrumb.css
 stylesheets[all][] = css/component/pager.css
 stylesheets[all][] = css/component/hero.css
+stylesheets[all][] = css/component/node.css
 stylesheets[all][] = css/component/teasers.css
 stylesheets[all][] = css/component/comment.css
 stylesheets[all][] = css/skin.css
