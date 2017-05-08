@@ -614,6 +614,38 @@ function field_info_bundles($entity_type = NULL) {
 }
 
 /**
+ * Returns a cached lightweight map of fields across bundles.
+ *
+ * The function only returns active, non deleted fields.
+ *
+ * @return
+ *   An array keyed by field name. Each value is an array with two entries:
+ *   - type: The field type.
+ *   - bundles: The bundles in which the field appears, as an array with entity
+ *     types as keys and the array of bundle names as values.
+ * Example:
+ * @code
+ * array(
+ *   'body' => array(
+ *     'bundles' => array(
+ *       'node' => array('page', 'article'),
+ *     ),
+ *     'type' => 'text_with_summary',
+ *   ),
+ * );
+ * @endcode
+ */
+function field_info_field_map() {
+  static $field_info_cache = NULL;
+
+  if (empty($field_info_cache)){
+    $field_info_cache = field_info_fields();
+  }
+
+  return $field_info_cache;
+}
+
+/**
  * Returns all field definitions.
  *
  * @return
