@@ -97,6 +97,7 @@ class views_plugin_style_rss extends views_plugin_style {
   }
 
   function render() {
+    module_load_include('inc', 'views', 'templates/views.theme');
     if (empty($this->row_plugin)) {
       watchdog('views', 'views_plugin_style_default: Missing row plugin');
       return;
