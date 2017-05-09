@@ -104,6 +104,7 @@ function views_theme($existing, $type, $theme, $path) {
   $hooks['views_view_field'] = $base + array(
     'pattern' => 'views_view_field__',
     'variables' => array('view' => NULL, 'field' => NULL, 'row' => NULL),
+    'file' => 'views.theme.inc',
   );
   $hooks['views_view_grouping'] = $base + array(
     'pattern' => 'views_view_grouping__',
