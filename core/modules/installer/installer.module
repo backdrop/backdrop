@@ -390,3 +390,26 @@ function installer_config_info() {
   );
   return $prefixes;
 }
+
+/**
+ * Implements hook_modules_enabled().
+ */
+function installer_modules_enabled($modules) {
+  module_load_include('inc', 'installer', 'installer.browser');
+
+  foreach ($modules as $module_name) {
+    installer_browser_installed_projects_remove($module_name);
+  }
+}
+
+/**
+ * Implements hook_themes_enabled().
+ */
+function installer_themes_enabled($theme_list) {
+  module_load_include('inc', 'installer', 'installer.browser');
+
+  foreach ($theme_list as $theme_name) {
+    installer_browser_installed_projects_remove($theme_name);
+  }
+}
+
