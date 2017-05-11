@@ -218,6 +218,13 @@ class Layout {
     if ($this->storage === LAYOUT_STORAGE_DEFAULT) {
       $this->storage = LAYOUT_STORAGE_OVERRIDE;
     }
+    $is_new = !empty($this->is_new);
+
+    // Allow modules to act on layout data before saving.
+    foreach (module_implements('layout_presave') as $module) {
+      $function = $module . '_layout_presave';
+      $function($this);
+    }
 
     $data = array(
       'path' => $this->path,
@@ -254,12 +261,6 @@ class Layout {
           'data' => $config_type_data->toArray(),
         );
       }
-    }
-
-    // Allow modules to act on layout data before saving.
-    foreach (module_implements('layout_presave') as $module) {
-      $function = $module . '_layout_presave';
-      $function($this);
     }
 
     if (isset($this->original_name) && $this->original_name != $this->name) {
@@ -323,7 +324,7 @@ class Layout {
     layout_reset_caches();
 
     $new_this = layout_load($this->name);
-    if (!empty($this->is_new)) {
+    if ($is_new) {
       $new_this->invokeHook('insert');
     }
     else {
