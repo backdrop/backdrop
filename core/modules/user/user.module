@@ -414,7 +414,7 @@ function user_role_permissions($role_names = array()) {
  *   (optional) The account to check, if not given use currently logged in user.
  *
  * @return
- *   Boolean TRUE if the current user has the requested permission.
+ *   Boolean TRUE if the user has the requested permission.
  *
  * All permission checks in Backdrop should go through this function. This
  * way, we guarantee consistent behavior, and ensure that the superuser
