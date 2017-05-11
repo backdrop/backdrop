@@ -60,7 +60,7 @@ class GroupUITestCase extends GroupTestCase {
     $this->assertTrue(array_key_exists($this->group_name, $groups), t('Group found in groups array'));
 
     // Add new group on the 'Manage display' page.
-    $this->backdropPost('admin/structure/types/manage/post/display', $group, t('Save'));
+    $this->backdropPost('admin/structure/types/manage/post/display/default', $group, t('Save'));
     $this->assertRaw(t('New group %label successfully created.', array('%label' => $this->group_label)), t('Group message displayed on screen.'));
 
     // Test if group is in the $groups array.

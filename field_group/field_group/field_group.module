@@ -265,9 +265,9 @@ function field_group_form_field_ui_field_overview_form_alter(&$form, &$form_stat
 
 /**
  * Implements hook_form_FORM_ID_alter().
- * Using hook_form_field_ui_display_overview_form_alter.
+ * Using hook_form_field_ui_display_form_alter.
  */
-function field_group_form_field_ui_display_overview_form_alter(&$form, &$form_state) {
+function field_group_form_field_ui_display_form_alter(&$form, &$form_state) {
   form_load_include($form_state, 'inc', 'field_group', 'field_group.field_ui');
   field_group_field_ui_overview_form_alter($form, $form_state, TRUE);
 }
