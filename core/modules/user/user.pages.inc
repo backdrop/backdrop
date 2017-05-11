@@ -46,6 +46,12 @@ function user_pass() {
     $form['name']['#value'] = $user->mail;
     $form['mail'] = array(
       '#prefix' => '<p>',
+      // As of https://www.drupal.org/node/889772 the user no longer must log
+      // out (if they are still logged in when using the password reset link,
+      // they will be logged out automatically then), but this text is kept as
+      // is to avoid breaking translations as well as to encourage the user to
+      // log out manually at a time of their own choosing (when it will not
+      // interrupt anything else they may have been in the middle of doing).
       '#markup' =>  t('Password reset instructions will be mailed to %email. You must log out to use the password reset link in the e-mail.', array('%email' => $user->mail)),
       '#suffix' => '</p>',
     );
@@ -113,9 +119,20 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
   // When processing the one-time login link, we have to make sure that a user
   // isn't already logged in.
   if ($user->uid) {
-    // The existing user is already logged in.
+    // The existing user is already logged in. Log them out and reload the
+    // current page so the password reset process can continue.
     if ($user->uid == $uid) {
-      backdrop_set_message(t('You are logged in as %user. <a href="!user_edit">Change your password.</a>', array('%user' => $user->name, '!user_edit' => url("user/$user->uid/edit"))));
+      // Preserve the current destination (if any) and ensure the redirect goes
+      // back to the current page; any custom destination set in
+      // hook_user_logout() and intended for regular logouts would not be
+      // appropriate here.
+      $destination = array();
+      if (isset($_GET['destination'])) {
+        $destination = backdrop_get_destination();
+      }
+      user_logout_current_user();
+      unset($_GET['destination']);
+      backdrop_goto(current_path(), array('query' => backdrop_get_query_parameters() + $destination));
     }
     // A different user is already logged in on the computer.
     else {
@@ -123,12 +140,13 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
       if (!empty($reset_link_account)) {
         backdrop_set_message(t('Another user (%other_user) is already logged into the site on this computer, but you tried to use a reset password link for user %resetting_user. Please <a href="!logout">logout</a> and try using the link again.',
           array('%other_user' => $user->name, '%resetting_user' => $reset_link_account->name, '!logout' => url('user/logout'))), 'warning');
-      } else {
+      }
+      else {
         // Invalid one-time link specifies an unknown user.
         backdrop_set_message(t('The one-time login link you clicked is invalid.'), 'error');
       }
+      backdrop_goto();
     }
-    backdrop_goto();
   }
   else {
     // Time out, in seconds, until login URL expires.
@@ -213,6 +231,14 @@ function user_pass_reset_form_submit($form, &$form_state) {
  * Menu callback; logs the current user out, and redirects to the home page.
  */
 function user_logout() {
+  user_logout_current_user();
+  backdrop_goto();
+}
+
+/**
+ * Logs the current user out.
+ */
+function user_logout_current_user() {
   global $user;
 
   watchdog('user', 'Session closed for %name.', array('%name' => $user->name));
@@ -221,8 +247,6 @@ function user_logout() {
 
   // Destroy the current session, and reset $user to the anonymous user.
   session_destroy();
-
-  backdrop_goto();
 }
 
 /**
