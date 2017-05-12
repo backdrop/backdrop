@@ -3,12 +3,19 @@
  * Styling for node content.
  */
 
+.node {
+  position: relative;
+}
+
 /* Display "Draft" watermark on unpublished content. */
+/* See basis_preprocess_node(). */
 .node[data-status]:before {
   content: attr(data-status);
   position: absolute;
-  z-index: -1;
+  z-index: 5;
   width: 100%;
+  top: 20%;
+  pointer-events: none;
   text-align: center;
   text-transform: uppercase;
   font-size: 10em;
