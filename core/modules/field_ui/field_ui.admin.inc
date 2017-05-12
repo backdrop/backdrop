@@ -11,7 +11,7 @@
  */
 function field_ui_manage_display_title($entity_type, $machine_name) {
   if ($machine_name === 'default') {
-    return 'Default';
+    return t('Default');
   }
   $view_mode = entity_view_mode_load($entity_type, $machine_name);
   return $view_mode['label'];
