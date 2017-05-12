@@ -197,6 +197,22 @@ Backdrop.behaviors.editorImageDialog = {
         }
       }
     }, 1);
+
+    // Image library
+    var $libraryField = $('[data-editor-image-library-base-url]', context);
+
+    if ($libraryField.length){
+      // Delegate this click event to an element outside of the view, so that
+      // the view can use ajax without breaking this event.
+      $('.form-item-image-library-src').on('click', '.image-library-choose-file', function(){
+
+        // Make this a relative URL to the image byt stripping the base_url.
+        var relativeImgSrc = $(this).find('img').attr('src')
+            .replace($libraryField.data('editor-image-library-base-url'), '');
+
+        $libraryField.find('input[type=text]').val(relativeImgSrc);
+      });
+    }
   }
 };
 
@@ -209,6 +225,10 @@ Backdrop.behaviors.editorImageDialog = {
  * the changes into the contents of their interface.
  */
 Backdrop.ajax.prototype.commands.editorDialogSave = function (ajax, response, status) {
+  // leverage the default "image url" save method for the image library
+  if (response.values.image_library.src.replace(' ', '') !== ''){
+    response.values.attributes.src = response.values.image_library.src;
+  }
   $(window).trigger('editor:dialogsave', [response.values]);
 };
 
