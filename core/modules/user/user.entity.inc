@@ -265,10 +265,11 @@ class UserStorageController extends EntityDatabaseStorageController {
    */
   protected function preSave(EntityInterface $entity) {
     // Update the user password if it has changed.
-    if ($entity->isNew() || (!empty($entity->pass) && $entity->pass != $entity->original->pass)) {
+    $new_pass = isset($entity->pass) && strlen(trim($entity->pass)) > 0 ? trim($entity->pass) : NULL;
+    if ($entity->isNew() || !is_null($new_pass) && $new_pass !== $entity->original->pass) {
       // Allow alternate password hashing schemes.
       require_once BACKDROP_ROOT . '/' . settings_get('password_inc', 'core/includes/password.inc');
-      $entity->pass = user_hash_password(trim($entity->pass));
+      $entity->pass = user_hash_password($new_pass);
       // Abort if the hashing failed and returned FALSE.
       if (!$entity->pass) {
         throw new EntityMalformedException('The entity does not have a password.');

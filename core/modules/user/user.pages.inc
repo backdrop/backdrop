@@ -329,7 +329,7 @@ function user_profile_form_submit($form, &$form_state) {
   $account->save();
   $form_state['values']['uid'] = $account->uid;
 
-  if (!empty($edit['pass'])) {
+  if (strlen(trim($form_state['values']['pass'])) > 0) {
     // Remove the password reset tag since a new password was saved.
     unset($_SESSION['pass_reset_'. $account->uid]);
   }
