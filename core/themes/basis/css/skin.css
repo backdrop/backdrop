@@ -1198,3 +1198,9 @@ ul.secondary li a:active {
   font-style: normal;
 }
 
+/**
+ * Unpublished content
+ */
+.unpublished {
+  opacity: .4;
+}
