@@ -323,10 +323,10 @@ function _installer_browser_batch_install_release($release_name, $project, &$con
     watchdog('installer', 'There was an error while installing %project.
       !message',
       array('%project' => $project['title'], '!message' => $result['message']), WATCHDOG_ERROR);
-    $context['results']['failures'][] = t('Error installing %project. Errors have been logged.',
-      array('%project' => $project['title']));
-    $context['message'] = t('Error installing %project. !message',
+    $context['results']['failures'][] = t('Error installing %project. !message',
       array('%project' => $project['title'], '!message' => $result['message']));
+    $context['message'] = t('Error installing %project. Errors have been logged.',
+      array('%project' => $project['title']));
   }
 }
 
@@ -350,6 +350,9 @@ function _installer_browser_batch_install_releases_finished($success, $results, 
     if (!empty($results)) {
       if (!empty($results['failures'])) {
         backdrop_set_message(format_plural(count($results['failures']), 'Failed to install one project.', 'Failed to install @count projects.'), 'error');
+        foreach($results['failures'] as $message){
+          backdrop_set_message($message, 'error');
+        }
       }
     }
   }
