@@ -57,7 +57,9 @@ function user_pass() {
 }
 
 /**
- * Validate handler for user_pass().
+ * Form validation handler for user_pass().
+ *
+ * @see user_pass_submit()
  */
 function user_pass_validate($form, &$form_state) {
   $name = trim($form_state['values']['name']);
@@ -78,7 +80,9 @@ function user_pass_validate($form, &$form_state) {
 }
 
 /**
- * Submit handler for user_pass().
+ * Form submission handler for user_pass().
+ *
+ * @see user_pass_validate()
  */
 function user_pass_submit($form, &$form_state) {
   global $language;
@@ -300,14 +304,18 @@ function user_profile_form($form, &$form_state, $account) {
 }
 
 /**
- * Validate handler for user_profile_form().
+ * Form validation handler for user_profile_form().
+ *
+ * @see user_profile_form_submit()
  */
 function user_profile_form_validate($form, &$form_state) {
   entity_form_field_validate('user', $form, $form_state);
 }
 
 /**
- * Submit handler for user_profile_form().
+ * Form submission handler for user_profile_form().
+ *
+ * @see user_profile_form_validate()
  */
 function user_profile_form_submit($form, &$form_state) {
   $account = $form_state['user'];
