@@ -893,7 +893,7 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
 
   // If the permissions of the downloaded file match those of the settings.php
   // directory, go ahead and install the module directly.
-  if (fileowner($project_realpath) == fileowner(conf_path())) {
+  if (fileowner($project_realpath) == fileowner(conf_path()) || filegroup($project_realpath) == filegroup(conf_path())) {
     module_load_include('inc', 'installer', 'installer.authorize');
     $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
 
