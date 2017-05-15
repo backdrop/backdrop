@@ -165,16 +165,24 @@ function entityreference_update_7002() {
 }
 
 /**
+ * Implements hook_update_N().
+ *
  * Remove duplicate rows in the taxonomy_index table.
  */
 function entityreference_update_7100() {
   if (db_table_exists('taxonomy_index')) {
+    if (db_table_exists('taxonomy_index_tmp')) {
+      db_drop_table('taxonomy_index_tmp');
+    }
+
     $tx_schema = drupal_get_schema('taxonomy_index');
     db_create_table('taxonomy_index_tmp', $tx_schema);
     $select = db_select('taxonomy_index', 'tx');
-    $select->fields('tx');
+    $select->fields('tx', array('nid', 'tid'));
     $select->groupBy('tx.nid');
     $select->groupBy('tx.tid');
+    $select->addExpression('MAX(sticky)', 'sticky');
+    $select->addExpression('MAX(created)', 'created');
     db_insert('taxonomy_index_tmp')->from($select)->execute();
     db_drop_table('taxonomy_index');
     db_rename_table('taxonomy_index_tmp', 'taxonomy_index');
