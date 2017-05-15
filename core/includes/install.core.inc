@@ -248,6 +248,7 @@ function install_begin_request(&$install_state) {
   include_once BACKDROP_ROOT . '/core/includes/module.inc';
   include_once BACKDROP_ROOT . '/core/includes/session.inc';
   require_once BACKDROP_ROOT . '/core/includes/theme.inc';
+  require_once BACKDROP_ROOT . '/core/includes/tablesort.inc';
 
   require_once BACKDROP_ROOT . '/core/includes/ajax.inc';
   $module_list['system']['filename'] = 'core/modules/system/system.module';
