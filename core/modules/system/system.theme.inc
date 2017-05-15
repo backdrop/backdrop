@@ -284,9 +284,6 @@ function theme_status_report($variables) {
   $infos = array();
   $okays = array();
   foreach ($requirements as $requirement) {
-    if ($requirement['title'] == 'hash') {
-      dpm($requirement);
-    }
     if (!isset($requirement['severity'])) {
       $requirement['severity'] = REQUIREMENT_OK;
     }
