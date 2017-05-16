@@ -1381,6 +1381,7 @@ function _date_popup_datepicker_format_replacements() {
     'M' => 'M',
     'Y' => 'yy',
     'y' => 'y',
+    'S' => '',
   );
 }
 
