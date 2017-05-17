@@ -38,7 +38,7 @@
   <?php endif; ?>
 
   <div class="l-wrapper">
-    <div class="l-wrapper-inner container container-fluid <?php if ($contextual_region_class) : print $contextual_region_class; endif;?>">
+    <div class="l-wrapper-inner container container-fluid <?php if (isset($contextual_region_class)) : print $contextual_region_class; endif;?>">
 
       <?php if ($messages): ?>
         <div class="l-messages" role="status" aria-label="<?php print t('Status messages'); ?>">
