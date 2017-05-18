@@ -4006,7 +4006,7 @@ function _menu_site_status($path = NULL, $display_messages = FALSE) {
       }
     }
     else {
-      $site_status = MENU_SITE_OFFLINE;;
+      $site_status = MENU_SITE_OFFLINE;
     }
   }
 
