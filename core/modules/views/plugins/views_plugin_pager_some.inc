@@ -13,9 +13,9 @@
 class views_plugin_pager_some extends views_plugin_pager {
   function summary_title() {
     if (!empty($this->options['offset'])) {
-      return format_plural($this->options['items_per_page'], '@count item, skip @skip', '@count items, skip @skip', array('@count' => $this->options['items_per_page'], '@skip' => $this->options['offset']));
+      return format_plural($this->options['items_per_page'], 'Only @count item', 'Only @count items, skip the first @skip', array('@count' => $this->options['items_per_page'], '@skip' => $this->options['offset']));
     }
-      return format_plural($this->options['items_per_page'], '@count item', '@count items', array('@count' => $this->options['items_per_page']));
+      return format_plural($this->options['items_per_page'], 'Only @count item', 'Only the first @count items', array('@count' => $this->options['items_per_page']));
   }
 
   function option_definition() {
