@@ -646,9 +646,20 @@ class views_plugin_display_page extends views_plugin_display {
   }
 
   function get_pager_text() {
+    $pager = $this->get_option('pager');
+    $items_per_page_title = t('Items to display');
+    $items_per_page_description = t('The number of items to display.');
+
+    if (in_array($pager['type'], array('full', 'mini'))) {
+      $items_per_page_title = t('Items to display per page');
+      $items_per_page_description = t('The number of items to display per page.');
+    }
+
+    $items_per_page_description .= ' ' . t('Enter 0 for no limit');
+
     return array(
-      'items per page title' => t('Items per page'),
-      'items per page description' => t('The number of items to display per page. Enter 0 for no limit.')
+      'items per page title' => $items_per_page_title,
+      'items per page description' => $items_per_page_description,
     );
   }
 }
