@@ -284,9 +284,6 @@ function theme_status_report($variables) {
   $infos = array();
   $okays = array();
   foreach ($requirements as $requirement) {
-    if ($requirement['title'] == 'hash') {
-      dpm($requirement);
-    }
     if (!isset($requirement['severity'])) {
       $requirement['severity'] = REQUIREMENT_OK;
     }
@@ -683,8 +680,8 @@ function _token_token_tree_format_row($token, array $token_info, $is_group = FAL
     'id' => '',
     'class' => array(),
     'data' => array(
-      'name' => '',
-      'token' => '',
+      'name' => array(),
+      'token' => array(),
       'value' => '',
     ),
   );
