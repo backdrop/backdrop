@@ -89,7 +89,7 @@ function block_block_info() {
   foreach ($config_names as $config_name) {
     $block = config_get($config_name);
     $blocks[$block['delta']] = $block;
-    $blocks[$block['delta']]['description'] = t('A reusable custom block.');
+    $blocks[$block['delta']]['description'] = strlen($block['description']) ? $block['description'] : '';
   }
   return $blocks;
 }
@@ -195,6 +195,15 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#required' => TRUE,
     '#weight' => -20,
     '#id' => 'block-info',
+  );
+  $form['description'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Block description'),
+    '#default_value' => $edit['description'],
+    '#maxlength' => 128,
+    '#description' => t('Used in administrative interfaces and not shown to end-users.'),
+    '#weight' => -18,
+    '#id' => 'block-description',
   );
   $form['delta'] = array(
     '#type' => 'machine_name',
