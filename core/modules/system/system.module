@@ -3063,17 +3063,17 @@ function system_header_block_form($settings) {
   $form['components']['logo'] = array(
     '#type' => 'checkbox',
     '#title' => t('Logo'),
-    '#default_value' => $settings['logo'],
+    '#default_value' => $settings['components']['logo'],
   );
   $form['components']['site_name'] = array(
     '#type' => 'checkbox',
     '#title' => t('Site name'),
-    '#default_value' => $settings['site_name'],
+    '#default_value' => $settings['components']['site_name'],
   );
   $form['components']['site_slogan'] = array(
     '#type' => 'checkbox',
     '#title' => t('Site slogan'),
-    '#default_value' => $settings['site_slogan'],
+    '#default_value' => $settings['components']['site_slogan'],
   );
 
   return $form;
