@@ -70,7 +70,8 @@ class views_plugin_display_block extends views_plugin_display {
    */
   function execute_hook_block_list($delta = 0, $edit = array()) {
     $delta = $this->view->name . '-' . $this->display->id;
-    $info = $this->get_option('block_description');
+    $info = $this->get_option('display_description');
+    $block_description = $info;
 
     if (empty($info)) {
       if ($this->display->display_title == $this->definition['title']) {
@@ -83,7 +84,7 @@ class views_plugin_display_block extends views_plugin_display {
     return array(
       $delta => array(
         'info' => $info,
-        'description' => $this->view->description ? check_plain(t($this->view->description)) : t('Block display from the "@view" view.', array('@view' => t($this->view->get_human_name()))),
+        'description' => $block_description ? check_plain(t($block_description)) : t('Block display from the "@view" view.', array('@view' => t($this->view->get_human_name()))),
         'cache' => $this->get_cache_type(),
         'class' => 'ViewsBlock',
       ),
