@@ -102,7 +102,9 @@ define('MAIL_LINE_ENDINGS', isset($_SERVER['WINDIR']) || (isset($_SERVER['SERVER
  * @param $params
  *   Optional parameters to build the e-mail.
  * @param string $reply
- *   Optional e-mail address to be used to answer.
+ *   Optional parameter to set the Reply-To header. If the domain matches the
+ *   domain in the approved sending email address (system.core.site_mail) this
+ *   value will also be used to set From header.
  * @param $send
  *   If TRUE, backdrop_mail() will call backdrop_mail_system()->mail() to deliver
  *   the message, and store the result in $message['result']. Modules
@@ -150,9 +152,41 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
     // SMTP server.
     $headers['From'] = $headers['Sender'] = $headers['Return-Path'] = $from;
   }
-  if ($reply) {
-    $headers['Reply-to'] = $reply;
+
+  if (isset($reply)) {
+    // Check to see if the domain matches the specefied sending email address.
+    $default_from_parts = explode('@', $from);
+    if (count($default_from_parts) == 2 && isset($default_from_parts[1]) &&
+        stripos($reply, '@' . $default_from_parts[1]) === FALSE) {
+
+      // If domain does not match set Reply-To to From, and reformat From.
+      $headers['Reply-To'] = $reply;
+      // Match e-mails of the form 'My Name <email@domain.com>' as follows:
+      // ^          = beginning of string
+      // "?         = optional quote
+      // ([^<]*?)   = match optional characters that aren't a < (non-greedy)
+      // "?         = optional quote
+      // SPACE*     = optional spaces
+      // (?:<(.*)>) = < matching stuff > (without the angle brakets)
+      // $          = end of string
+      preg_match('/^"?([^<]*?)"? *(?:<(.*)>)?$/', $reply, $matches);
+      if ($matches) {
+         $reformated = t('"!name via !site_name" <!site_mail>', array(
+          '!name' => empty($matches[1]) ? $matches[2] : $matches[1],
+          '!site_name' => config_get('system.core', 'site_name'),
+          '!site_mail' => $from,
+        ));
+        $message['from'] = $reformated;
+        $headers['From'] = $reformated;
+      }
+    }
+    else {
+      // If the domain matches the specefied email it is likely safe to use.
+      $message['from'] = $reply;
+      $headers['From'] = $reply;
+    }
   }
+
   $message['headers'] = $headers;
 
   // Build the e-mail (get subject and body, allow additional headers) by
