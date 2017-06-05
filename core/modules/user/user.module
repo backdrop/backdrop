@@ -693,6 +693,8 @@ function user_account_form(&$form, &$form_state) {
     '#type'   => 'container',
     '#weight' => -10,
   );
+
+  $generate_usernames = config_get('system.core', 'generate_usernames');
   // Only show name field on registration form or user can change own username.
   $form['account']['name'] = array(
     '#type' => 'textfield',
@@ -702,7 +704,7 @@ function user_account_form(&$form, &$form_state) {
     '#required' => TRUE,
     '#attributes' => array('class' => array('username')),
     '#default_value' => (!$register ? $account->name : ''),
-    '#access' => ($register || ($user->uid == $account->uid && user_access('change own username')) || $admin),
+    '#access' => (($register && !$generate_usernames) || ($user->uid == $account->uid && user_access('change own username')) || $admin),
     '#weight' => -10,
   );
 
@@ -876,30 +878,38 @@ function user_account_form_validate($form, &$form_state) {
   // Validate new or changing username.
   if (isset($form_state['values']['name'])) {
     $name = $form_state['values']['name'];
-    if ($error = user_validate_name($name)) {
-      form_set_error('name', $error);
-    }
-    // Cast the user ID as an integer. It might have been set to NULL, which
-    // could lead to unexpected results.
-    else {
-      $name_taken = (bool) db_select('users')
-        ->fields('users', array('uid'))
-        ->condition('uid', (int) $account->uid, '<>')
-        ->condition('name', db_like($name), 'LIKE')
-        ->range(0, 1)
-        ->execute()
-        ->fetchField();
-
-      if ($name_taken) {
-        form_set_error('name', t('The name %name is already taken.', array('%name' => $name)));
+    // Admins have the option to generate the username.
+    if (!config_get('system.core', 'generate_usernames')){
+      if ($error = user_validate_name($name)) {
+        form_set_error('name', $error);
       }
-      // Check whether the user name provided is an email address. If so, make
-      // sure it matches the mail value.
-      if (config('system.core')->get('user_email_match') && (valid_email_address($name))) {
-        if ($name !== $mail) {
-          form_set_error('name', t('An email address was provided as a username, but does not match the account email address.'));
+      // Cast the user ID as an integer. It might have been set to NULL, which
+      // could lead to unexpected results.
+      else {
+        $name_taken = (bool) db_select('users')
+          ->fields('users', array('uid'))
+          ->condition('uid', (int) $account->uid, '<>')
+          ->condition('name', db_like($name), 'LIKE')
+          ->range(0, 1)
+          ->execute()
+          ->fetchField();
+
+        if ($name_taken) {
+          form_set_error('name', t('The name %name is already taken.', array('%name' => $name)));
+        }
+        // Check whether the user name provided is an email address. If so, make
+        // sure it matches the mail value.
+        if (config('system.core')->get('user_email_match') && (valid_email_address($name))) {
+          if ($name !== $mail) {
+            form_set_error('name', t('An email address was provided as a username, but does not match the account email address.'));
+          }
         }
       }
+    }
+    else {
+      // Here we can use user_password() to generate a safe random string.
+      // This username will be updated t use the UID in hook_user_insert().
+      $form_state['values']['name'] = 'account-' . user_password();
     }
   }
 
@@ -2973,6 +2983,25 @@ function user_register_submit($form, &$form_state) {
     backdrop_set_message(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.<br />In the meantime, a welcome message with further instructions has been sent to your e-mail address.'));
     $form_state['redirect'] = '';
   }
+}
+
+/**
+ * Implements hook_user_insert().
+ */
+function user_user_insert($account) {
+  // Don't create a new username if one is already set.
+  if (!empty($account->name) && strpos($account->name, 'account-') !== 0) {
+    return;
+  }
+
+  // Replace placeholder username with generated username containing UID.
+  $new_name = 'account-' . $account->uid;
+  db_update('users')
+    ->fields(array('name' => $new_name))
+    ->condition('uid', $account->uid)
+    ->execute();
+
+  $account->name = $new_name;
 }
 
 /**

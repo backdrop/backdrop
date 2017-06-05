@@ -118,14 +118,48 @@ function user_multiple_cancel_confirm_submit($form, &$form_state) {
  * @ingroup forms
  */
 function user_admin_settings($form, &$form_state) {
+  module_load_include('inc', 'user', 'user.pages');
   $config = config('system.core');
   $form['#config'] = 'system.core';
+
+  // User registration settings.
+  $form['registration'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Registration'),
+    '#weight' => -4,
+  );
+  $form['registration']['user_register'] = array(
+    '#type' => 'radios',
+    '#title' => t('Who can register accounts?'),
+    '#default_value' => $config->get('user_register'),
+    '#options' => array(
+      USER_REGISTER_ADMINISTRATORS_ONLY => t('Administrators only'),
+      USER_REGISTER_VISITORS => t('Visitors'),
+      USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL => t('Visitors, but administrator approval is required'),
+    )
+  );
+  $form['registration']['user_email_verification'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Require email verification when a visitor creates an account.'),
+    '#default_value' => $config->get('user_email_verification'),
+    '#description' => t('New users will be required to validate their email address prior to logging into the site, and will be assigned a system-generated password. With this setting disabled, users will be logged in immediately upon registering, and may select their own passwords during registration.')
+  );
+  $form['registration']['user_email_match'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('When an email address is used as username, require a matching email address.'),
+    '#default_value' => $config->get('user_email_match'),
+  );
+  $form['registration']['generate_usernames'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Hide the username field (and automatically generate usernames).'),
+    '#default_value' => $config->get('generate_usernames'),
+  );
 
   // User login settings.
   $form['user_login'] = array(
     '#type' => 'fieldset',
-    '#title' => t('User log in'),
-    '#weight' => -2,
+    '#title' => t('Log in'),
+    '#weight' => -3,
   );
   $form['user_login']['user_login_method'] = array(
     '#type' => 'radios',
@@ -138,58 +172,11 @@ function user_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('user_login_method'),
   );
 
-  // User registration settings.
-  $form['registration_cancellation'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Registration and cancellation'),
-    '#weight' => -4,
-  );
-
-  $form['registration_cancellation']['user_register'] = array(
-    '#type' => 'radios',
-    '#title' => t('Who can register accounts?'),
-    '#default_value' => $config->get('user_register'),
-    '#options' => array(
-      USER_REGISTER_ADMINISTRATORS_ONLY => t('Administrators only'),
-      USER_REGISTER_VISITORS => t('Visitors'),
-      USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL => t('Visitors, but administrator approval is required'),
-    )
-  );
-  $form['registration_cancellation']['user_email_verification'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Require email verification when a visitor creates an account.'),
-    '#default_value' => $config->get('user_email_verification'),
-    '#description' => t('New users will be required to validate their email address prior to logging into the site, and will be assigned a system-generated password. With this setting disabled, users will be logged in immediately upon registering, and may select their own passwords during registration.')
-  );
-  $form['registration_cancellation']['user_email_match'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('When an email address is used as username, require a matching email address.'),
-    '#default_value' => $config->get('user_email_match'),
-  );
-  module_load_include('inc', 'user', 'user.pages');
-  $form['registration_cancellation']['user_cancel_method'] = array(
-    '#type' => 'item',
-    '#title' => t('When cancelling a user account'),
-    '#description' => t('Users with the %select-cancel-method or %administer-users <a href="@permissions-url">permissions</a> can override this default method.', array('%select-cancel-method' => t('Select method for cancelling account'), '%administer-users' => t('Administer users'), '@permissions-url' => url('admin/config/people/permissions'))),
-  );
-  $form['registration_cancellation']['user_cancel_method'] += user_cancel_methods();
-  foreach (element_children($form['registration_cancellation']['user_cancel_method']) as $element) {
-    // Remove all account cancellation methods that have #access defined, as
-    // those cannot be configured as default method.
-    if (isset($form['registration_cancellation']['user_cancel_method'][$element]['#access'])) {
-      $form['registration_cancellation']['user_cancel_method'][$element]['#access'] = FALSE;
-    }
-    // Remove the description (only displayed on the confirmation form).
-    else {
-      unset($form['registration_cancellation']['user_cancel_method'][$element]['#description']);
-    }
-  }
-
   // Account settings.
   $form['personalization'] = array(
     '#type' => 'fieldset',
     '#title' => t('Personalization'),
-    '#weight' => 2,
+    '#weight' => -2,
   );
   $form['personalization']['user_signatures'] = array(
     '#type' => 'checkbox',
@@ -270,6 +257,30 @@ function user_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('user_picture_guidelines'),
     '#description' => t("This text is displayed at the picture upload form in addition to the default guidelines. It's useful for helping or instructing your users."),
   );
+
+  // User registration settings.
+  $form['cancellation'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Cancellation'),
+    '#weight' => 3,
+  );
+  $form['cancellation']['user_cancel_method'] = array(
+    '#type' => 'item',
+    '#title' => t('When cancelling a user account'),
+    '#description' => t('Users with the %select-cancel-method or %administer-users <a href="@permissions-url">permissions</a> can override this default method.', array('%select-cancel-method' => t('Select method for cancelling account'), '%administer-users' => t('Administer users'), '@permissions-url' => url('admin/config/people/permissions'))),
+  );
+  $form['cancellation']['user_cancel_method'] += user_cancel_methods();
+  foreach (element_children($form['cancellation']['user_cancel_method']) as $element) {
+    // Remove all account cancellation methods that have #access defined, as
+    // those cannot be configured as default method.
+    if (isset($form['cancellation']['user_cancel_method'][$element]['#access'])) {
+      $form['cancellation']['user_cancel_method'][$element]['#access'] = FALSE;
+    }
+    // Remove the description (only displayed on the confirmation form).
+    else {
+      unset($form['cancellation']['user_cancel_method'][$element]['#description']);
+    }
+  }
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
