@@ -275,6 +275,7 @@ function block_custom_block_save(array $edit, $delta = NULL) {
       'delta' => $delta,
       'info' => '',
       'title' => '',
+      'description' => '',
       'body' => array('value' => '', 'format' => ''),
     );
   }
