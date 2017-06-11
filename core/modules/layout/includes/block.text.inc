@@ -139,7 +139,7 @@ class BlockText extends Block {
           form_error($form['convert']['label'], t('Admin label is required when making a block reusable.'));
         }
         elseif (empty($delta)) {
-          form_error($form['convert']['delta'], t('An internal name is required when making a block reusable.'));
+          form_error($form['convert']['delta'], t('A machine-readable name is required when making a block reusable.'));
         }
       }
     }
