@@ -70,8 +70,8 @@ class views_plugin_display_block extends views_plugin_display {
    */
   function execute_hook_block_list($delta = 0, $edit = array()) {
     $delta = $this->view->name . '-' . $this->display->id;
-    $info = $this->get_option('display_description');
-    $block_description = $info;
+    $info = $this->get_option('block_layout_description');
+    $block_layout_description = $info;
 
     if (empty($info)) {
       if ($this->display->display_title == $this->definition['title']) {
@@ -84,7 +84,7 @@ class views_plugin_display_block extends views_plugin_display {
     return array(
       $delta => array(
         'info' => $info,
-        'description' => $block_description ? check_plain(t($block_description)) : t('Block display from the "@view" view.', array('@view' => t($this->view->get_human_name()))),
+        'description' => $block_layout_description ? check_plain(t($block_layout_description)) : t('Block display from the "@view" view.', array('@view' => t($this->view->get_human_name()))),
         'cache' => $this->get_cache_type(),
         'class' => 'ViewsBlock',
       ),
@@ -126,14 +126,24 @@ class views_plugin_display_block extends views_plugin_display {
     );
 
     $block_description = strip_tags($this->get_option('block_description'));
+    $block_layout_description = strip_tags($this->get_option('block_layout_description'));
     if (empty($block_description)) {
       $block_description = t('None');
     }
-
+    if (empty($block_layout_description)) {
+      $block_layout_description = t('None');
+    }
+    
     $options['block_description'] = array(
       'category' => 'block',
       'title' => t('Block admin label'),
       'value' => views_ui_truncate($block_description, 24),
+    );
+    
+    $options['block_layout_description'] = array(
+      'category' => 'block',
+      'title' => t('Block layout description'),
+      'value' => views_ui_truncate($block_layout_description, 24),
     );
 
     $options['link_to_view'] = array(
@@ -212,6 +222,15 @@ class views_plugin_display_block extends views_plugin_display {
           '#type' => 'textfield',
           '#description' => t('Used in administrative interfaces and not shown to end-users.'),
           '#default_value' => $this->get_option('block_description'),
+        );
+        break;
+        
+      case 'block_layout_description':
+        $form['#title'] .= t('Block description for Layout');
+        $form['block_layout_description'] = array(
+          '#type' => 'textfield',
+          '#description' => t('Used when managing blocks in layouts and not shown to end-users.'),
+          '#default_value' => $this->get_option('block_layout_description'),
         );
         break;
 
@@ -379,6 +398,7 @@ class views_plugin_display_block extends views_plugin_display {
     parent::options_submit($form, $form_state);
     switch ($form_state['section']) {
       case 'block_description':
+      case 'block_layout_description':
       case 'allow':
       case 'argument_input':
       case 'link_to_view':
