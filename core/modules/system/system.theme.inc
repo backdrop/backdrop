@@ -715,7 +715,7 @@ function _token_token_tree_format_row($token, array $token_info, $is_group = FAL
 /**
  * Prepares variables for Page Component block templates.
  */
-function system_preprocess_page_components(&$variables) {
+function template_preprocess_page_components(&$variables) {
   $settings = $variables['settings'];
   $child_delta = $variables['child_delta'];
   $variables += array(
@@ -763,7 +763,7 @@ function system_preprocess_page_components(&$variables) {
   if ($child_delta == 'action_links' || $child_delta == 'title_combo') {
     $variables['action_links'] = menu_local_actions();
   }
-  
+
   if ($child_delta == 'messages' || $child_delta == 'title_combo') {
     $variables['messages'] = theme('status_messages');
   }
