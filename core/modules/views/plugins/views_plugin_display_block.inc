@@ -70,21 +70,24 @@ class views_plugin_display_block extends views_plugin_display {
    */
   function execute_hook_block_list($delta = 0, $edit = array()) {
     $delta = $this->view->name . '-' . $this->display->id;
-    $info = $this->get_option('block_layout_description');
-    $block_layout_description = $info;
+    $block_title = $this->get_option('block_description');
+		$block_description = $this->get_option('block_layout_description');
 
-    if (empty($info)) {
+    if (empty($block_title)) {
       if ($this->display->display_title == $this->definition['title']) {
-        $info = t('View: @view', array('@view' => t($this->view->get_human_name())));
+        $block_title = t('View: @view', array('@view' => t($this->view->get_human_name())));
       }
       else {
-        $info = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+        $block_title = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
       }
     }
+    else {
+		  $block_title = t('View: ').$block_title;
+		}
     return array(
       $delta => array(
-        'info' => $info,
-        'description' => $block_layout_description ? check_plain(t($block_layout_description)) : t('Block display from the "@view" view.', array('@view' => t($this->view->get_human_name()))),
+        'info' => $block_title,
+        'description' => $block_description ? check_plain(t($block_description)) : t('A block display from the "@view" view.', array('@view' => t($this->view->get_human_name()))),
         'cache' => $this->get_cache_type(),
         'class' => 'ViewsBlock',
       ),
