@@ -87,7 +87,7 @@ class views_plugin_display_block extends views_plugin_display {
     return array(
       $delta => array(
         'info' => $block_title,
-        'description' => $block_description ? check_plain(t($block_description)) : t('A block display from the "@view" view.', array('@view' => t($this->view->get_human_name()))),
+        'description' => check_plain(t($block_description)) .' ('. t('A block display from the "@view" view.', array('@view' => t($this->view->get_human_name()))) .')',
         'cache' => $this->get_cache_type(),
         'class' => 'ViewsBlock',
       ),
