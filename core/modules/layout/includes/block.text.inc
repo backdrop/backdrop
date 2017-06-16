@@ -96,7 +96,7 @@ class BlockText extends Block {
        '#title' => t('Block description'),
        '#maxlength' => 128,
        '#description' => t('Used in administrative interfaces and not shown to end-users.'),
-       '#weight' => 3,
+       '#weight' => 4,
         '#states' => array(
           'visible' => array(
             ':input[name="reusable"]' => array('checked' => TRUE),
@@ -112,7 +112,7 @@ class BlockText extends Block {
           'exists' => 'block_custom_block_load',
         ),
         '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
-        '#weight' => 4,
+        '#weight' => 3,
         '#required' => FALSE,
       );
     }
