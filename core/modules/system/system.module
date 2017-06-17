@@ -1012,7 +1012,7 @@ function system_menu() {
     'description' => "Get a status report about your site's operation and any detected problems.",
     'page callback' => 'system_status',
     'weight' => -60,
-    'access arguments' => array('administer site configuration'),
+    'access arguments' => array('access site reports'),
     'file' => 'system.admin.inc',
   );
   $items['admin/reports/status/run-cron'] = array(

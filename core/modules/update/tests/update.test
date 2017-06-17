@@ -62,7 +62,11 @@ class UpdateTestHelper extends BackdropWebTestCase {
 class UpdateCoreTestCase extends UpdateTestHelper {
   function setUp() {
     parent::setUp(array('update_test', 'update'));
-    $admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer modules'));
+    $admin_user = $this->backdropCreateUser(array(
+      'administer site configuration',
+      'administer modules',
+      'access site reports',
+    ));
     $this->backdropLogin($admin_user);
   }
 
@@ -290,7 +294,10 @@ class UpdateCoreTestCase extends UpdateTestHelper {
 class UpdateTestContribCase extends UpdateTestHelper {
   function setUp() {
     parent::setUp(array('update_test', 'update', 'aaa_update_test', 'bbb_update_test', 'ccc_update_test'));
-    $admin_user = $this->backdropCreateUser(array('administer site configuration'));
+    $admin_user = $this->backdropCreateUser(array(
+      'administer site configuration',
+      'access site reports',
+    ));
     $this->backdropLogin($admin_user);
   }
 
@@ -591,7 +598,11 @@ class UpdateTestContribCase extends UpdateTestHelper {
   function testHookUpdateStatusAlter() {
     $GLOBALS['settings']['allow_authorize_operations'] = TRUE;
     $config = config('update.settings');
-    $update_admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer software updates'));
+    $update_admin_user = $this->backdropCreateUser(array(
+      'administer site configuration',
+      'administer software updates',
+      'access site reports',
+    ));
     $this->backdropLogin($update_admin_user);
 
     $system_info = array(
