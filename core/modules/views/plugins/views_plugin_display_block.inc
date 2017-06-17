@@ -70,24 +70,29 @@ class views_plugin_display_block extends views_plugin_display {
    */
   function execute_hook_block_list($delta = 0, $edit = array()) {
     $delta = $this->view->name . '-' . $this->display->id;
-    $block_title = $this->get_option('block_description');
-		$block_description = $this->get_option('block_layout_description');
-
-    if (empty($block_title)) {
+    $block_admin_title = $this->get_option('block_description');
+	  $block_description = $this->get_option('block_layout_description');
+    // Check whether block admin title has been entered and
+    // if not, check whether the block display has been named.
+    if (empty($block_admin_title)) {
       if ($this->display->display_title == $this->definition['title']) {
-        $block_title = t('View: @view', array('@view' => t($this->view->get_human_name())));
+        // Block display has not been named so compose a title for display.
+        $block_admin_title = t('View: @view', array('@view' => t($this->view->get_human_name())));
       }
       else {
-        $block_title = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+        // Block display has a name 'display title' so include this in display.
+        $block_admin_title = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
       }
     }
     else {
-		  $block_title = t('View: ').$block_title;
-		}
+      // There is a block admin title so use this, prefixed with 'View'
+      // to indicate that this block originates from a view.
+      $block_admin_title = t('View: ') . $block_admin_title;
+    }
     return array(
       $delta => array(
-        'info' => $block_title,
-        'description' => check_plain(t($block_description)) .' ('. t('A block display from the "@view" view.', array('@view' => t($this->view->get_human_name()))) .')',
+        'info' => $block_admin_title,
+        'description' => check_plain(t($block_description)) . ' (' . t('A block display from the "@view" view.', array('@view' => t($this->view->get_human_name()))) .')',
         'cache' => $this->get_cache_type(),
         'class' => 'ViewsBlock',
       ),
@@ -416,7 +421,7 @@ class views_plugin_display_block extends views_plugin_display {
   /**
    * Adjust the array of argument input to match the current list of
    * arguments available for this display. This ensures that changing
-   * the arguments doesn't cause the argument input field to just
+   * the arguments does not cause the argument input field to just
    * break.
    */
   function get_argument_input() {
