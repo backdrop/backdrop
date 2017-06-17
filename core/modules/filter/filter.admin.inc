@@ -254,7 +254,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
   // Add user role access selection.
   $form['roles'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Roles'),
+    '#title' => t('Roles allowed to use this text format'),
     '#options' => array_map('check_plain', user_roles()),
     '#disabled' => $is_fallback,
   );
