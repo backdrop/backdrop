@@ -145,7 +145,7 @@ function theme_update_report($variables) {
       $project_section .= ' <span class="version-date">(' . format_date($project['datestamp'], 'custom', 'Y-M-d') . ')</span>';
     }
 
-    $versions_inner = '';
+    $versions_inner = ' ';
     $security_class = array();
     $version_class = array();
     if (isset($project['recommended'])) {
