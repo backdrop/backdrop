@@ -20,7 +20,7 @@ class views_plugin_display_block extends views_plugin_display {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['block_description'] = array('default' => '', 'translatable' => TRUE);
+    $options['block_admin_label'] = array('default' => '', 'translatable' => TRUE);
     $options['block_caching'] = array('default' => BACKDROP_NO_CACHE);
 
     $options['allow'] = array(
@@ -69,30 +69,26 @@ class views_plugin_display_block extends views_plugin_display {
    * Return a list of blocks provided by this display plugin.
    */
   function execute_hook_block_list($delta = 0, $edit = array()) {
-    $delta = $this->view->name . '-' . $this->display->id;
-    $block_admin_title = $this->get_option('block_description');
-	  $block_description = $this->get_option('block_layout_description');
-    // Check whether block admin title has been entered and
-    // if not, check whether the block display has been named.
-    if (empty($block_admin_title)) {
+		$delta = $this->view->name . '-' . $this->display->id;
+		$view_name = $this->view->name;
+    $block_title = $this->get_option('block_admin_label');
+	  $block_admin_description = $this->get_option('block_admin_description');
+    if (empty($block_title)) {
       if ($this->display->display_title == $this->definition['title']) {
-        // Block display has not been named so compose a title for display.
-        $block_admin_title = t('View: @view', array('@view' => t($this->view->get_human_name())));
+        $block_title = t('View: @view', array('@view' => t($this->view->get_human_name())));
       }
       else {
-        // Block display has a name 'display title' so include this in display.
-        $block_admin_title = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+        $block_title = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
       }
     }
-    else {
-      // There is a block admin title so use this, prefixed with 'View'
-      // to indicate that this block originates from a view.
-      $block_admin_title = t('View: ') . $block_admin_title;
-    }
+		if (empty($block_admin_description)) {
+		  $block_admin_description = t('A views block display with no block admin description provided yet');
+		}
     return array(
       $delta => array(
-        'info' => $block_admin_title,
-        'description' => check_plain(t($block_description)) . ' (' . t('A block display from the "@view" view.', array('@view' => t($this->view->get_human_name()))) .')',
+        'info' => $block_title,
+				'title' => t('View: @view (@display)', array('@view' => t($this->view->get_human_name()), '@display' => t($view_name))),
+        'description' => check_plain(t($block_admin_description)),
         'cache' => $this->get_cache_type(),
         'class' => 'ViewsBlock',
       ),
@@ -133,25 +129,27 @@ class views_plugin_display_block extends views_plugin_display {
       ),
     );
 
-    $block_description = strip_tags($this->get_option('block_description'));
-    $block_layout_description = strip_tags($this->get_option('block_layout_description'));
-    if (empty($block_description)) {
-      $block_description = t('None');
+    $block_admin_label = strip_tags($this->get_option('block_admin_label'));
+		$block_admin_description = strip_tags($this->get_option('block_admin_description'));
+    if (empty($block_admin_label)) {
+      $block_admin_label = t('None');
     }
-    if (empty($block_layout_description)) {
-      $block_layout_description = t('None');
+		if (empty($block_admin_description)) {
+      $block_admin_description = t('None');
     }
-    
-    $options['block_description'] = array(
+
+    $options['block_admin_label'] = array(
       'category' => 'block',
       'title' => t('Block admin label'),
-      'value' => views_ui_truncate($block_description, 24),
+      'value' => views_ui_truncate($block_admin_label, 48),
+			'desc' => t('Used, for example, in Layouts'),
     );
-    
-    $options['block_layout_description'] = array(
+
+		$options['block_admin_description'] = array(
       'category' => 'block',
-      'title' => t('Block layout description'),
-      'value' => views_ui_truncate($block_layout_description, 24),
+      'title' => t('Block admin description'),
+      'value' => views_ui_truncate($block_admin_description, 48),
+			'desc' => t('Used, for example, in Layouts'),
     );
 
     $options['link_to_view'] = array(
@@ -224,21 +222,21 @@ class views_plugin_display_block extends views_plugin_display {
     parent::options_form($form, $form_state);
 
     switch ($form_state['section']) {
-      case 'block_description':
+      case 'block_admin_label':
         $form['#title'] .= t('Block admin label');
-        $form['block_description'] = array(
+        $form['block_admin_label'] = array(
           '#type' => 'textfield',
           '#description' => t('Used in administrative interfaces and not shown to end-users.'),
-          '#default_value' => $this->get_option('block_description'),
+          '#default_value' => $this->get_option('block_admin_label'),
         );
         break;
-        
-      case 'block_layout_description':
+
+			case 'block_admin_description':
         $form['#title'] .= t('Block description for Layout');
-        $form['block_layout_description'] = array(
+        $form['block_admin_description'] = array(
           '#type' => 'textfield',
           '#description' => t('Used when managing blocks in layouts and not shown to end-users.'),
-          '#default_value' => $this->get_option('block_layout_description'),
+          '#default_value' => $this->get_option('block_admin_description'),
         );
         break;
 
@@ -405,8 +403,8 @@ class views_plugin_display_block extends views_plugin_display {
     // It is very important to call the parent function here:
     parent::options_submit($form, $form_state);
     switch ($form_state['section']) {
-      case 'block_description':
-      case 'block_layout_description':
+      case 'block_admin_label':
+			case 'block_admin_description':
       case 'allow':
       case 'argument_input':
       case 'link_to_view':

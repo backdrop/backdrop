@@ -1000,6 +1000,7 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
         'admin/structure/layouts/manage/' . $layout->name . '/add-block/' . $renderer_name . '/' . $region_name . '/' . $key,
         array(
           'attributes' => array(
+					  'title' => $block_info['title'],
             'class' => array('use-ajax block-item'),
             'data-dialog' => TRUE,
             'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),

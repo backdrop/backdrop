@@ -50,8 +50,9 @@ class ViewsBlock extends Block {
     list($view_name, $display_id) = explode('-', $this->delta);
     if ($view = views_get_view($view_name)) {
       $view->set_display($display_id);
-      if ($block_description = $view->display_handler->get_option('block_description')) {
-        $info = t($block_description);
+			// Check whether a Block Admin Label has been entered.
+      if ($block_admin_label = $view->display_handler->get_option('block_admin_label')) {
+        $info = t($block_admin_label);
       }
       elseif ($view->display[$display_id]->display_title == $view->display_handler->definition['title']) {
         $info = t('View: @view', array('@view' => $view->get_human_name()));

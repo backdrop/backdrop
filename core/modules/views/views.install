@@ -153,3 +153,28 @@ function views_update_1004() {
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
+
+/**
+ * Amend the config setting for a display's Block admin label.
+ */
+function views_update_2000() {
+  // Find the relevant config details.
+  $configs = config_get_names_with_prefix('views.view.');
+  foreach ($configs as $config_detail) {
+    $this_config = config_get($config_detail);
+    foreach($this_config['display'] as $display_name => $display_detail){
+      // Find the config settings for block displays
+      if (isset($display_detail['display_plugin']) && ($display_detail['display_plugin'] == 'block')){
+        $block_description = '';
+        if (isset($display_detail['display_options']['block_description'])){
+          $block_description = $display_detail['display_options']['block_description'];
+        }
+        // Check whether a setting for block admin label already exists.
+        if (!isset($display_detail['display_options']['block_admin_label'])){
+          // Add the new config setting 'block_admin_label'.
+          config_set($config_detail, "display.$display_name.display_options.block_admin_label",$block_description);
+        }
+      }
+    }
+  }
+}
