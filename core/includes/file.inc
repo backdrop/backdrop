@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * API for handling file uploads and server file management.
@@ -1582,6 +1581,13 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
 
   // If we made it this far it's safe to record this file in the database.
   $file->save();
+  // Track non-public files in the session if they were uploaded by an
+  // anonymous user. This allows modules such as the File module to only
+  // grant view access to the specific anonymous user who uploaded the file.
+  // See file_file_download().
+  if (!$user->uid && $destination_scheme !== 'public') {
+    $_SESSION['anonymous_allowed_file_ids'][$file->fid] = $file->fid;
+  }
   // Add file to the cache.
   $upload_cache[$form_field_name] = $file;
   return $file;
