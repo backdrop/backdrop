@@ -194,11 +194,7 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
       $temp_view = $this->get_temporary_view();
 
       // Add the sort from the options to the default display.
-      // This is broken, in that the sort order field also gets added as a
-      // select field. See http://drupal.org/node/844910.
-      // We work around this further down.
-      $sort = $options['subquery_sort'];
-      list($sort_table, $sort_field) = explode('.', $sort);
+      list($sort_table, $sort_field) = explode('.', $options['subquery_sort']);
       $sort_options = array('order' => $options['subquery_order']);
       $temp_view->add_item('default', 'sort', $sort_table, $sort_field, $sort_options);
     }
@@ -268,27 +264,43 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
     // In the meantime, this works, but with a leap of faith...
     $orders =& $subquery->getOrderBy();
     foreach ($orders as $order_key => $order) {
-      // But if we're using a whole view, we don't know what we have!
-      if ($options['subquery_view']) {
-        list($sort_table, $sort_field) = explode('.', $order_key);
-      }
+      // Until http://drupal.org/node/844910 is fixed, $order_key is a field
+      // alias from SELECT. De-alias it using the View object.
+      $sort_table = $temp_view->query->fields[$order_key]['table'];
+      $sort_field = $temp_view->query->fields[$order_key]['field'];
       $orders[$sort_table . $this->subquery_namespace . '.' . $sort_field] = $order;
       unset($orders[$order_key]);
     }
 
     // The query we get doesn't include the LIMIT, so add it here.
     $subquery->range(0, 1);
+  
+    // Clone the query object to force recompilation of the underlying where and
+    // having objects on the next step.
+    $subquery = clone $subquery;
+    
+    // Add in Views Query Substitutions such as ***CURRENT_TIME***.
+    views_query_views_alter($subquery);
 
     // Extract the SQL the temporary view built.
     $subquery_sql = $subquery->__toString();
 
-    // Replace the placeholder with the outer, correlated field.
-    // Eg, change the placeholder ':users_uid' into the outer field 'users.uid'.
-    // We have to work directly with the SQL, because putting a name of a field
-    // into a SelectQuery that it does not recognize (because it's outer) just
-    // makes it treat it as a string.
-    $outer_placeholder = ':' . str_replace('.', '_', $this->definition['outer field']);
-    $subquery_sql = str_replace($outer_placeholder, $this->definition['outer field'], $subquery_sql);
+    // Replace subquery argument placeholders.
+    $quoted = $subquery->getArguments();
+    $connection = Database::getConnection();
+    foreach ($quoted as $key => $val) {
+      if (is_array($val)) {
+        $quoted[$key] = implode(', ', array_map(array($connection, 'quote'), $val));
+      }
+      // If the correlated placeholder has been located, replace it with the outer field name.
+      elseif ($val === '**CORRELATED**') {
+       $quoted[$key] = $this->definition['outer field'];
+      }
+      else {
+        $quoted[$key] = $connection->quote($val);
+      }
+    }
+    $subquery_sql = strtr($subquery_sql, $quoted);
 
     return $subquery_sql;
   }
