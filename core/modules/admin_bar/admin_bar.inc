@@ -675,7 +675,7 @@ function admin_bar_empty_message() {
     ),
   );
 
-  $message = t('All admin bar components have been disabled. You can re-enable them <a href="@admin_bar_config">here</a>.', array('@admin_bar_config' => url('admin/config/administration/admin-bar')));
+  $message = t('All Administration bar components have been disabled. You can re-enable them <a href="@admin_bar_config">here</a>.', array('@admin_bar_config' => url('admin/config/administration/admin-bar')));
 
   $empty_message['message'] = array(
     '#title' => $message,
