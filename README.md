@@ -26,6 +26,22 @@ Installation
 
 3. Follow the instructions provided by the installer.
 
+Installation for Local Development with Lando
+------------
+
+1. Open and configure the `.lando.yml` file
+  - Usually this just means changing the name of your site from `my-backdrop` to the name that you will use for this site.
+
+2. To start up your dev stack type:
+  - `lando start` in your linux or mac terminal.
+
+3. Your site will be available at `my-backdrop.lndo.site` (change `my-backdrop` part of the URL if you've changed the name of the app in step 1.).
+
+4. To stop your lando stack type:
+  - `lando stop`
+
+Full lando documentation is avaialbel at: https://docs.lndo.io/
+
 Bug Reports and Feature Requests
 --------------------------------
 Please use the GitHub
@@ -84,5 +100,5 @@ All Backdrop code is Copyright 2001 - 2016 by the original authors.
 
 Backdrop also includes works under different copyright notices that are
 distributed according to the terms of the GNU General Public License or a
-compatible license. These individual works may have specific copyright 
+compatible license. These individual works may have specific copyright
 information noted within their source code files or directories.

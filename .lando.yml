@@ -1,0 +1,124 @@
+##
+# You can use this file to easily spin up a development stack for your Backdrop
+# sites using the Lando dev stack.
+#
+# Lando is a free, open source and cross-platform local development environment
+# tool built on Docker container technology. It is the successor project to
+# Kalabox.
+#
+# You can read more about the lando project and its full capabilities here:
+# https://docs.lndo.io/
+#
+##
+
+# Change this to your sitename like `my-project` or `sso-company`.
+# Backdrop recipe
+name: my-backdrop
+
+# Start with the default Backdrop recipe
+recipe: backdrop
+
+# Configure the Backdrop recipe
+config:
+
+  # See: https://backdropcms.org/requirements
+
+  # Optionally specify the php version to use.
+  #
+  # If ommitted this will default to the latest php version supported by Backdrop.
+  # Consult the `php` service to see what versions are available. Note that all
+  # such versions may not be supported in Backdrop 6 so YMMV.
+  #
+  # See: https://backdropcms.org/requirements
+  #
+  # NOTE: that this needs to be wrapped in quotes so that it is a string
+  #
+  # You can use one of '5.3', '5.5', '5.6', '7.0' or '7.1' here for PHP
+  # versions.
+  #
+  php: '7.0'
+
+  # Optionally specify whether you want to serve Backdrop via nginx or apache
+  #
+  # If ommitted this will default to the latest apache
+  #
+  # See: https://backdropcms.org/requirements
+  #
+  # via: nginx
+
+  # Optionally specify the location of the webroot relative to your approot.
+  #
+  # If ommitted this will be your approot itself.
+  #
+  # webroot: www
+
+  # Optionally specify the version of Backdrush you want for your site
+  #
+  # This can be either
+  #   - `stable`
+  #   - `dev`
+  #   - `any valid git ref for which there will be a github download` eg 0.0.3
+  #
+  # If ommitted this will use the stable Backdrush.
+  #
+  backdrush: stable
+
+  # Optionally specify the database type, this can be one of:
+  #
+  #   - `mysql`
+  #   - `mariadb`
+  #
+  # If ommitted this will default to the latest mysql. You can additionally provide
+  # a version with `type:version` but you will need to consult the documentation
+  # for the correct DB service to see what versions are available
+  #
+  # See: https://backdropcms.org/requirements
+  #
+  database: mariadb
+
+  # Optionally activate xdebug
+  xdebug: true
+
+  # Optionally mix in your own config files
+  #
+  # If ommitted this will use the default Backdrop config files for the respective
+  # services.
+  #
+  # Definitely consult the relevant documentaion for each service to make sure
+  # you are specifying the correct value for the config.
+  #
+  # conf:
+    # server: config/backdrop.conf
+    # database: config/mysql
+    # php: config/php.ini
+
+
+# The Backdrop recipe is super slick but we want to augment this recipe so we can
+# run our front end tooling magix
+services:
+  # Uncomment this 'appserver' key if you would like to
+  # inject a pre-run script
+  # appserver:
+  #   scripts:
+  #     - scripts/my-script.sh
+  #
+  # To fix your database connection port, useful if you want to have shortcuts
+  # to your database connection in a helper app like SequelPro, you can
+  # uncomment thes lines (be sure to comment out or remove the 'database:' key
+  # above).
+  # database:
+  #   type: mariadb:latest
+  #   portforward: 3339
+  #
+  node:
+    type: node:6.10
+  cache:
+    type: redis
+    persist: true
+tooling:
+  redis-cli:
+    service: cache
+  node:
+    service: node
+  npm:
+    service: node
