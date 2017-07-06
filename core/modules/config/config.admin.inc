@@ -227,7 +227,8 @@ function config_import_full_form(array $form, array &$form_state) {
     '#upload_location' => 'temporary://',
   );
 
-  $form['submit'] = array(
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Stage import'),
   );
