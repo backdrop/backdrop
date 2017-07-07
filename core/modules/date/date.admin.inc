@@ -228,7 +228,7 @@ function _date_field_instance_settings_form($field, $instance) {
     '#title' => t('Default end date'),
     '#default_value' => $settings['default_value2'],
     '#options' => array(
-      'same'      => t('Same as Default date'),
+      'same'      => t('Same as start date'),
       'blank'     => t('No default value'),
       'now'       => t('Now'),
       'strtotime' => t('Relative'),
