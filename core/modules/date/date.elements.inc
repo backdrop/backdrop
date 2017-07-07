@@ -1562,6 +1562,12 @@ function date_combo_validate($element, &$form_state) {
 
   $field_name = $element['#field_name'];
   $delta = $element['#delta'];
+  
+  // if option is 'same', set the end date to be the same as the start.
+  $default_value2 = $element['value2']['#instance']['settings']['default_value2'];
+  if ($default_value2 == 'same') {
+    $element['#value']['value2'] = $element['#value']['value'];
+  }
 
   // Related issue: https://drupal.org/node/2279831.
   if (!is_array($element['#field_parents'])) {
