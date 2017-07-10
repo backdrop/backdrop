@@ -5,6 +5,24 @@
  */
 
 /**
+ * Modules should return this value from hook_file_entity_access() to allow
+ * access to a file.
+ */
+define('FILE_ENTITY_ACCESS_ALLOW', 'allow');
+
+/**
+ * Modules should return this value from hook_file_entity_access() to deny
+ * access to a file.
+ */
+define('FILE_ENTITY_ACCESS_DENY', 'deny');
+
+/**
+ * Modules should return this value from hook_file_entity_access() to not affect
+ * file access.
+ */
+define('FILE_ENTITY_ACCESS_IGNORE', NULL);
+
+/**
  * The {file_managed}.type value when the file type has not yet been determined.
  */
 define('FILE_TYPE_NONE', 'undefined');
