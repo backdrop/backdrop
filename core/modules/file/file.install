@@ -105,11 +105,23 @@ function file_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+	  'type' => array(
+        'description' => 'The type of this file.',
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        // If the FILE_TYPE_NONE constant ever changes, then change the value here
+        // too, and add an update function to deal with existing records. The
+        // constant isn't used here, because there may be cases where this function
+        // runs without the module file loaded.
+        'default' => 'undefined',
+      ),
     ),
     'indexes' => array(
       'uid' => array('uid'),
       'status' => array('status'),
       'timestamp' => array('timestamp'),
+	    'file_type' => array('type'),
     ),
     'unique keys' => array(
       'uri' => array('uri'),
@@ -166,6 +178,39 @@ function file_schema() {
       'type_id' => array('type', 'id'),
       'fid_count' => array('fid', 'count'),
       'fid_module' => array('fid', 'module'),
+    ),
+  );
+
+  $schema['file_metadata'] = array(
+    'description' => 'Cache images dimensions.',
+    'fields' => array(
+      'fid' => array(
+        'description' => 'The {file_managed}.fid of the metadata.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => "The name of the metadata (e.g. 'width').",
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'value' => array(
+        'description' => "The value of the metadata (e.g. '200px').",
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('fid', 'name'),
+    'foreign keys' => array(
+      'file_managed' => array(
+        'table' => 'file_managed',
+        'columns' => array('fid' => 'fid'),
+      ),
     ),
   );
 
@@ -648,3 +693,287 @@ function file_update_1000() {
     $config->save();
   }
 }
+
+/**
+ * Function to create the title and alt text fields and instances.
+ */
+function _file_create_alt_title_fields() {
+  $t = get_t();
+  // Create the alt text field and instance.
+  // Define the alt text field.
+  $alt_text_field = array(
+    'active' => '1',
+    'cardinality' => '1',
+    'deleted' => '0',
+    'entity_types' => array(),
+    'field_name' => 'field_file_image_alt_text',
+    'foreign keys' => array(
+      'format' => array(
+        'columns' => array(
+          'format' => 'format',
+        ),
+        'table' => 'filter_format',
+      ),
+    ),
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => '255',
+    ),
+    'translatable' => '0',
+    'type' => 'text',
+  );
+
+  // As long as the alt text field doesn't already exist create it.
+  if (!field_info_field($alt_text_field['field_name'])) {
+    field_create_field($alt_text_field);
+  }
+
+  // Define the alt text instance.
+  $alt_text_instance = array(
+    'bundle' => 'image',
+    'default_value' => NULL,
+    'deleted' => '0',
+    'description' => $t('Alternative text is used by screen readers, search engines, and when the image cannot be loaded. By adding alt text you improve accessibility and search engine optimization.'),
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'preview' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'file',
+    'field_name' => 'field_file_image_alt_text',
+    'label' => 'Alt Text',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => '0',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => '60',
+      ),
+      'type' => 'text_textfield',
+      'weight' => '-4',
+    ),
+  );
+
+  // As long as the alt text instance doesn't already exist create it.
+  if (!field_info_instance($alt_text_instance['entity_type'], $alt_text_instance['field_name'], $alt_text_instance['bundle'])) {
+    field_create_instance($alt_text_instance);
+  }
+
+  // Create the title text field and instance.
+  // Define the title text field.
+  $title_text_field = array(
+    'active' => '1',
+    'cardinality' => '1',
+    'deleted' => '0',
+    'entity_types' => array(),
+    'field_name' => 'field_file_image_title_text',
+    'foreign keys' => array(
+      'format' => array(
+        'columns' => array(
+          'format' => 'format',
+        ),
+        'table' => 'filter_format',
+      ),
+    ),
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => '255',
+    ),
+    'translatable' => '0',
+    'type' => 'text',
+  );
+
+  // As long as the title text field doesn't exist create it.
+  if (!field_info_field($title_text_field['field_name'])) {
+    field_create_field($title_text_field);
+  }
+
+  // Define the title text instance.
+  $title_text_instance = array(
+    'bundle' => 'image',
+    'default_value' => NULL,
+    'deleted' => '0',
+    'description' => $t('Title text is used in the tool tip when a user hovers their mouse over the image. Adding title text makes it easier to understand the context of an image and improves usability.'),
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 1,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'preview' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'file',
+    'field_name' => 'field_file_image_title_text',
+    'label' => 'Title Text',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => '0',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => '60',
+      ),
+      'type' => 'text_textfield',
+      'weight' => '-3',
+    ),
+  );
+
+  // As long as the title text instance doesn't already exist create it.
+  if (!field_info_instance($title_text_instance['entity_type'], $title_text_instance['field_name'], $title_text_instance['bundle'])) {
+    field_create_instance($title_text_instance);
+  }
+}
+
+/**
+ * Add {file_managed}.type field
+ */
+function file_update_1001() {
+  $schema = array();
+  $schema['file_metadata'] = array(
+    'description' => 'Cache images dimensions.',
+    'fields' => array(
+      'fid' => array(
+        'description' => 'The {file_managed}.fid of the metadata.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => "The name of the metadata (e.g. 'width').",
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'value' => array(
+        'description' => "The value of the metadata (e.g. '200px').",
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('fid', 'name'),
+    'foreign keys' => array(
+      'file_managed' => array(
+        'table' => 'file_managed',
+        'columns' => array('fid' => 'fid'),
+      ),
+    ),
+  );
+  $spec = array(
+    'description' => 'The type of this file.',
+    'type' => 'varchar',
+    'length' => 50,
+    'not null' => TRUE,
+    'default' => 'undefined',
+  );
+  $indexes_new = array(
+    'indexes' => array(
+      'file_type' => array('type'),
+    )
+  );
+
+  // If another module (e.g., Media) had added a {file_managed}.type field,
+  // then change it to the expected specification. Otherwise, add the field.
+  if (db_field_exists('file_managed', 'type')) {
+    // db_change_field() will fail if any records have type=NULL, so update
+    // them to the new default value.
+    db_update('file_managed')->fields(array('type' => $spec['default']))->isNull('type')->execute();
+
+    // Indexes using a field being changed must be dropped prior to calling
+    // db_change_field(). However, the database API doesn't provide a way to do
+    // this without knowing what the old indexes are. Therefore, it is the
+    // responsibility of the module that added them to drop them prior to
+    // allowing this module to be installed.
+    db_change_field('file_managed', 'type', 'type', $spec, $indexes_new);
+  }
+  else {
+    db_add_field('file_managed', 'type', $spec, $indexes_new);
+  }
+
+  // Create the {file_metadata} database table.
+  if (!db_table_exists('file_metadata')) {
+    db_create_table('file_metadata', $schema['file_metadata']);
+  }
+
+  // Set permissions.
+  $roles = user_roles();
+  foreach ($roles as $rid => $role) {
+    user_role_grant_permissions($rid, array('view files'));
+  }
+
+  // Create the title and alt text fields.
+  _file_create_alt_title_fields();
+
+  // Classify existing files according to the currently defined file types.
+  // Queue all files to be classified during cron runs using the Queue API.
+  $queue = BackdropQueue::get('file_type_determine');
+  $result = db_query('SELECT fid FROM {file_managed}');
+  foreach ($result as $record) {
+    $queue->createItem($record->fid);
+  }
+
+  // Warn users that existing files will not have a file type until the queue
+  // has been processed.
+  if ($queue->numberOfItems()) {
+    backdrop_set_message(t('Existing files must be classified according to the currently defined file types. These files have been queued for processing and will have their file type determined during cron runs.'));
+  }
+}
+

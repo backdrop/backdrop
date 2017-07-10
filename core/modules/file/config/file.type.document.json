@@ -1,0 +1,9 @@
+{
+    "_config_name": "file.type.document",
+    "type": "document",
+    "name": "Document",
+    "description": "A document file is written information.",
+    "mimetypes": "text/plain\r\napplication/msword\r\napplication/vnd.ms-excel\r\napplication/pdf\r\napplication/vnd.ms-powerpoint\r\napplication/vnd.oasis.opendocument.text\r\napplication/vnd.oasis.opendocument.spreadsheet\r\napplication/vnd.oasis.opendocument.presentation\r\napplication/vnd.openxmlformats-officedocument.spreadsheetml.sheet\r\napplication/vnd.openxmlformats-officedocument.presentationml.presentation\r\napplication/vnd.openxmlformats-officedocument.wordprocessingml.document",
+	"disabled": false,
+	"module": "file"
+}
