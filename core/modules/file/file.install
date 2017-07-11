@@ -294,7 +294,7 @@ function file_requirements($phase) {
  */
 function file_install() {
   // Create the title and alt text fields.
-  _file_entity_create_alt_title_fields();
+  _file_create_alt_title_fields();
 }
 
 /**
