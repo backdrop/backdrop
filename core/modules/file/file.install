@@ -292,7 +292,7 @@ function file_requirements($phase) {
 /**
  * Implements hook_install().
  */
-function file_entity_install() {
+function file_install() {
   // Create the title and alt text fields.
   _file_entity_create_alt_title_fields();
 }
