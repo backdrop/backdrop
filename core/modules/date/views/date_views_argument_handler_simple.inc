@@ -19,7 +19,6 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
     parent::init($view, $options);
 
     // Add a date handler.
-    module_load_include('inc', 'date_api', 'date_api_sql');
     $this->date_handler = new date_sql_handler(DATE_UNIX);
     if (!empty($this->definition['field_name'])) {
       $field = field_info_field($this->definition['field_name']);
@@ -77,7 +76,7 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
       else {
         $value = date($this->arg_format, REQUEST_TIME);
       }
-      drupal_alter('date_default_argument', $this, $value);
+      backdrop_alter('date_default_argument', $this, $value);
 
       return $value;
     }
