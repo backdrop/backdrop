@@ -7,47 +7,8 @@
 /**
  * Date API argument handler.
  */
+// @codingStandardsIgnoreStart
 class date_views_argument_handler_simple extends views_handler_argument_date {
-
-  /**
-   * @var date_sql_handler
-   */
-  var $date_handler;
-
-  /**
-   * @var string
-   */
-  var $format;
-
-  /**
-   * @var string
-   */
-  var $sql_format;
-
-  /**
-   * @var array
-   */
-  var $placeholders = array();
-
-  /**
-   * @var string
-   */
-  var $base_table;
-
-  /**
-   * @var string
-   */
-  var $original_table;
-
-  /**
-   * @var DateTime
-   */
-  protected $min_date;
-
-  /**
-   * @var DateTime
-   */
-  protected $max_date;
 
   /**
    * Get granularity.
@@ -58,6 +19,7 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
     parent::init($view, $options);
 
     // Add a date handler.
+    module_load_include('inc', 'date_api', 'date_api_sql');
     $this->date_handler = new date_sql_handler(DATE_UNIX);
     if (!empty($this->definition['field_name'])) {
       $field = field_info_field($this->definition['field_name']);
@@ -103,6 +65,8 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
    * Formatted appropriately for this argument.
    */
   function get_default_argument($raw = FALSE) {
+    $is_default = FALSE;
+
     if (!$raw && $this->options['default_argument_type'] == 'date') {
       $granularity = $this->options['granularity'];
       if ($granularity == 'week') {
@@ -113,7 +77,7 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
       else {
         $value = date($this->arg_format, REQUEST_TIME);
       }
-      backdrop_alter('date_default_argument', $this, $value);
+      drupal_alter('date_default_argument', $this, $value);
 
       return $value;
     }
@@ -172,7 +136,7 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
       '#type' => 'textfield',
       '#title' => t('Custom summary date format'),
       '#default_value' => $this->options['title_format_custom'],
-      '#description' => t('A custom format for the title and summary date format. Define a php date format string like "m-d-Y H:i" (see <a href="http://php.net/date">http://php.net/date</a> for more details).'),
+      '#description' => t("A custom format for the title and summary date format. Define a php date format string like 'm-d-Y H:i' (see <a href=\"@link\">http://php.net/date</a> for more details).", array('@link' => 'http://php.net/date')),
       '#attributes' => array('class' => array('dependent-options')),
       '#states' => array(
         'visible' => array(
@@ -315,7 +279,7 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
     $this->base_alias = $this->name_alias = $this->query->add_field(NULL, $formula, $this->field . '_summary');
     $this->query->set_count_field(NULL, $formula, $this->field);
 
-    $this->summary_basics(FALSE);
+    return $this->summary_basics(FALSE);
   }
 
   /**
@@ -404,9 +368,9 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
     if (empty($this->argument)) {
       return TRUE;
     }
-    $date_range = $this->date_handler->arg_range($this->argument);
-    $this->min_date = $date_range[0];
-    $this->max_date = $date_range[1];
+    $this->date_range = $this->date_handler->arg_range($this->argument);
+    $this->min_date = $this->date_range[0];
+    $this->max_date = $this->date_range[1];
     $this->limit = date_range_years($this->options['year_range']);
     $group = !empty($this->options['date_group']) ? $this->options['date_group'] : 0;
 
@@ -420,3 +384,4 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
   }
 
 }
+// @codingStandardsIgnoreEnd

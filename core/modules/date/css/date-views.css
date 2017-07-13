@@ -1,3 +1,23 @@
+/* Pager plugin css */
+div.date-views-pager {
+  margin-left: auto;
+  margin-right: auto;
+}
+div.date-views-pager li {
+  float: left;
+  text-align: left;
+  width: 20%;
+}
+
+div.date-views-pager div.current-page {
+  font-weight: bold;
+  text-align: center;
+}
+div.date-views-pager div.next-month,
+div.date-views-pager div.next-year {
+  text-align: right;
+}
+
 /* Views filter form css */
 .views-group-box div.date-views-filter-fieldset {
   margin-left: 0;
