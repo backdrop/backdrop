@@ -144,9 +144,26 @@ function date_theme($existing, $type, $theme, $path) {
         'attributes' => array(),
       ),
     ) + $base,
+    'date_nav_title' =>  array(
+      'variables' => array(
+        'granularity' => NULL,
+        'view' => NULL,
+        'link' => NULL,
+        'format' => NULL,
+      ),
+    ) + $base,
     'date_views_filter_form' => array(
       'template' => 'templates/date-views-filter-form',
       'render element' => 'form',
+    ) + $base,
+    'date_views_pager' => array(
+      'variables' => array(
+        'plugin' => NULL,
+        'input' => NULL,
+      ),
+      // Register a pattern so that it can work like all views templates.
+      'pattern' => 'date_views_pager__',
+      'template' => 'templates/date-views-pager',
     ) + $base,
   );
 
@@ -575,6 +592,7 @@ function date_autoload_info() {
     'date_views_argument_handler_simple' => 'views/date_views_argument_handler_simple.inc',
     'date_views_filter_handler' => 'views/date_views_filter_handler.inc',
     'date_views_filter_handler_simple' => 'views/date_views_filter_handler_simple.inc',
+    'date_views_plugin_pager' => 'views/date_views_plugin_pager.inc',
   );
 }
 
