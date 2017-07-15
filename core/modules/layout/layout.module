@@ -1021,18 +1021,14 @@ function layout_provides_path($path) {
   if (empty($path)) {
     return FALSE;
   }
-
-  $result = db_query('SELECT * FROM {menu_router} WHERE path = :path', array(':path' => $path));
   $return = NULL;
-
-  // If any page callback exists at this path, allow it to trump custom layouts.
-  foreach ($result as $router) {
-    if ($router->page_callback == 'layout_page_callback') {
+  $item = FALSE;
+  if ($item = _get_exact_router_item($path)) {
+    if ($item['page_callback'] == 'layout_page_callback') {
       $return = TRUE;
     }
     else {
       $return = FALSE;
-      break;
     }
   }
   return $return;

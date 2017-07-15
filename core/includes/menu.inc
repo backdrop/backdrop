@@ -400,17 +400,17 @@ function menu_get_ancestors($parts) {
  *   The unserialized $data array, with path arguments replaced.
  */
 function menu_unserialize($data, $map) {
-  if ($data = unserialize($data)) {
-    foreach ($data as $k => $v) {
-      if (is_int($v)) {
-        $data[$k] = isset($map[$v]) ? $map[$v] : '';
-      }
+  if (!is_array($data)) {
+    if (!$data = unserialize($data)) {
+      return array();
     }
-    return $data;
   }
-  else {
-    return array();
+  foreach ($data as $k => $v) {
+    if (is_int($v)) {
+      $data[$k] = isset($map[$v]) ? $map[$v] : '';
+    }
   }
+  return $data;
 }
 
 
@@ -462,10 +462,7 @@ function menu_get_item($path = NULL, $router_item = NULL) {
       menu_rebuild();
     }
     $original_map = arg(NULL, $path);
-
-    $parts = array_slice($original_map, 0, MENU_MAX_PARTS);
-    $ancestors = menu_get_ancestors($parts);
-    $router_item = db_query_range('SELECT * FROM {menu_router} WHERE path IN (:ancestors) ORDER BY fit DESC', 0, 1, array(':ancestors' => $ancestors))->fetchAssoc();
+    $router_item = _get_router_item($path);
 
     if ($router_item) {
       // Allow modules to alter the router item before it is translated and
@@ -862,7 +859,9 @@ function _menu_translate(&$router_item, $map, $to_arg = FALSE) {
  * @see hook_menu()
  */
 function _menu_link_map_translate(&$map, $to_arg_functions) {
-  $to_arg_functions = unserialize($to_arg_functions);
+  if (!is_array($to_arg_functions)) {
+    $to_arg_functions = unserialize($to_arg_functions);
+  }
   foreach ($to_arg_functions as $index => $function) {
     // Translate place-holders into real values.
     $arg = $function(!empty($map[$index]) ? $map[$index] : '', $map, $index);
@@ -1497,26 +1496,7 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
     // link.
     $query = db_select('menu_links', 'ml', array('fetch' => PDO::FETCH_ASSOC));
     $query->addTag('translatable');
-    $query->leftJoin('menu_router', 'm', 'm.path = ml.router_path');
     $query->fields('ml');
-    $query->fields('m', array(
-      'load_functions',
-      'to_arg_functions',
-      'access_callback',
-      'access_arguments',
-      'page_callback',
-      'page_arguments',
-      'delivery_callback',
-      'tab_parent',
-      'tab_root',
-      'title',
-      'title_callback',
-      'title_arguments',
-      'theme_callback',
-      'theme_arguments',
-      'type',
-      'description',
-    ));
     for ($i = 1; $i <= MENU_MAX_DEPTH; $i++) {
       $query->orderBy('p' . $i, 'ASC');
     }
@@ -1544,6 +1524,10 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
     // Build an ordered array of links using the query result object.
     $links = array();
     foreach ($query->execute() as $item) {
+      if (!$router_item = _get_exact_router_item($item['router_path'])) {
+        $router_item = _get_empty_router_item();
+      }
+      $item += $router_item;
       $links[] = $item;
     }
     $active_trail = (isset($parameters['active_trail']) ? $parameters['active_trail'] : array());
@@ -2015,9 +1999,6 @@ function menu_local_tasks($level = 0) {
 
   if (!isset($data)) {
     $data = array();
-    // Set defaults in case there are no actions or tabs.
-    $actions = $empty['actions'];
-    $tabs = array();
 
     $router_item = menu_get_item();
 
@@ -2033,181 +2014,34 @@ function menu_local_tasks($level = 0) {
       return $empty;
     }
 
-    // Get all tabs (also known as local tasks) and the root page.
-    $cid = 'local_tasks:' . $router_item['tab_root'];
-    $cache_menu = cache('menu');
-    if ($cache = $cache_menu->get($cid)) {
-      $result = $cache->data;
-    }
-    else {
-      $result = db_select('menu_router', NULL, array('fetch' => PDO::FETCH_ASSOC))
-        ->fields('menu_router')
-        ->condition('tab_root', $router_item['tab_root'])
-        ->condition('context', MENU_CONTEXT_INLINE, '<>')
-        ->orderBy('weight')
-        ->orderBy('title')
-        ->execute()
-        ->fetchAll();
-      $cache_menu->set($cid, $result);
-    }
     $map = $router_item['original_map'];
-    $children = array();
-    $tasks = array();
     $root_path = $router_item['path'];
+    $tabs_data = _get_router_item_tabs($router_item['tab_root']);
 
-    foreach ($result as $item) {
+    $tabs = array();
+    $depth = 0;
+    // @TODO need to be reviewed.
+    if (isset($tabs_data[$router_item['tab_parent']])) {
+      $tabs = _menu_local_tasks_generate_tabs($tabs_data, $router_item['tab_parent'], $depth, $map, $root_path);
+    }
+    if (isset($tabs_data[$router_item['tab_root']])) {
+      $tabs = _menu_local_tasks_generate_tabs($tabs_data, $router_item['tab_root'], $depth, $map, $root_path);
+    }
+
+    $actions_current = array();
+    $actions = _get_router_item_actions($root_path);
+    foreach($actions as $key => $item) {
       _menu_translate($item, $map, TRUE);
-      if ($item['tab_parent']) {
-        // All tabs, but not the root page.
-        $children[$item['tab_parent']][$item['path']] = $item;
+      if ($item['access']) {
+        $actions_current[] = array(
+          '#theme' => 'menu_local_action',
+          '#link' => $item,
+        );
       }
-      // Store the translated item for later use.
-      $tasks[$item['path']] = $item;
     }
-
-    // Find all tabs below the current path.
-    $path = $router_item['path'];
-    // Tab parenting may skip levels, so the number of parts in the path may not
-    // equal the depth. Thus we use the $depth counter (offset by 1000 for ksort).
-    $depth = 1001;
-    $actions['count'] = 0;
-    $actions['output'] = array();
-    while (isset($children[$path])) {
-      $tabs_current = array();
-      $actions_current = array();
-      $next_path = '';
-      $tab_count = 0;
-      $action_count = 0;
-      foreach ($children[$path] as $item) {
-        // Local tasks can be normal items too, so bitmask with
-        // MENU_IS_LOCAL_TASK before checking.
-        if (!($item['type'] & MENU_IS_LOCAL_TASK)) {
-          // This item is not a tab, skip it.
-          continue;
-        }
-        if ($item['access']) {
-          $link = $item;
-          // The default task is always active. As tabs can be normal items
-          // too, so bitmask with MENU_LINKS_TO_PARENT before checking.
-          if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
-            // Find the first parent which is not a default local task or action.
-            for ($p = $item['tab_parent']; ($tasks[$p]['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT; $p = $tasks[$p]['tab_parent']);
-            // Use the path of the parent instead.
-            $link['href'] = $tasks[$p]['href'];
-            // Mark the link as active, if the current path happens to be the
-            // path of the default local task itself (i.e., instead of its
-            // tab_parent_href or tab_root_href). Normally, links for default
-            // local tasks link to their parent, but the path of default local
-            // tasks can still be accessed directly, in which case this link
-            // would not be marked as active, since l() only compares the href
-            // with $_GET['q'].
-            if ($link['href'] != $_GET['q']) {
-              $link['localized_options']['attributes']['class'][] = 'active';
-            }
-            $tabs_current[] = array(
-              '#theme' => 'menu_local_task',
-              '#link' => $link,
-              '#active' => TRUE,
-            );
-            $next_path = $item['path'];
-            $tab_count++;
-          }
-          else {
-            // Actions can be normal items too, so bitmask with
-            // MENU_IS_LOCAL_ACTION before checking.
-            if (($item['type'] & MENU_IS_LOCAL_ACTION) == MENU_IS_LOCAL_ACTION) {
-              // The item is an action, display it as such.
-              $actions_current[] = array(
-                '#theme' => 'menu_local_action',
-                '#link' => $link,
-              );
-              $action_count++;
-            }
-            else {
-              // Otherwise, it's a normal tab.
-              $tabs_current[] = array(
-                '#theme' => 'menu_local_task',
-                '#link' => $link,
-              );
-              $tab_count++;
-            }
-          }
-        }
-      }
-      $path = $next_path;
-      $tabs[$depth]['count'] = $tab_count;
-      $tabs[$depth]['output'] = $tabs_current;
-      $actions['count'] += $action_count;
-      $actions['output'] = array_merge($actions['output'], $actions_current);
-      $depth++;
-    }
-    $data['actions'] = $actions;
-    // Find all tabs at the same level or above the current one.
-    $parent = $router_item['tab_parent'];
-    $path = $router_item['path'];
-    $depth = 1000;
-    while (isset($children[$parent])) {
-      $tabs_current = array();
-      $next_path = '';
-      $next_parent = '';
-      $count = 0;
-      foreach ($children[$parent] as $item) {
-        // Skip local actions.
-        if ($item['type'] & MENU_IS_LOCAL_ACTION) {
-          continue;
-        }
-        if ($item['access']) {
-          $count++;
-          $link = $item;
-          // Local tasks can be normal items too, so bitmask with
-          // MENU_LINKS_TO_PARENT before checking.
-          if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
-            // Find the first parent which is not a default local task.
-            for ($p = $item['tab_parent']; ($tasks[$p]['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT; $p = $tasks[$p]['tab_parent']);
-            // Use the path of the parent instead.
-            $link['href'] = $tasks[$p]['href'];
-            if ($item['path'] == $router_item['path']) {
-              $root_path = $tasks[$p]['path'];
-            }
-          }
-          // We check for the active tab.
-          if ($item['path'] == $path) {
-            // Mark the link as active, if the current path is a (second-level)
-            // local task of a default local task. Since this default local task
-            // links to its parent, l() will not mark it as active, as it only
-            // compares the link's href to $_GET['q'].
-            if ($link['href'] != $_GET['q']) {
-              $link['localized_options']['attributes']['class'][] = 'active';
-            }
-            $tabs_current[] = array(
-              '#theme' => 'menu_local_task',
-              '#link' => $link,
-              '#active' => TRUE,
-            );
-            $next_path = $item['tab_parent'];
-            if (isset($tasks[$next_path])) {
-              $next_parent = $tasks[$next_path]['tab_parent'];
-            }
-          }
-          else {
-            $tabs_current[] = array(
-              '#theme' => 'menu_local_task',
-              '#link' => $link,
-            );
-          }
-        }
-      }
-      $path = $next_path;
-      $parent = $next_parent;
-      $tabs[$depth]['count'] = $count;
-      $tabs[$depth]['output'] = $tabs_current;
-      $depth--;
-    }
-    // Sort by depth.
-    ksort($tabs);
-    // Remove the depth, we are interested only in their relative placement.
-    $tabs = array_values($tabs);
     $data['tabs'] = $tabs;
+    $data['actions']['count'] = count($actions_current);
+    $data['actions']['output'] = $actions_current;
 
     // Allow modules to alter local tasks or dynamically append further tasks.
     backdrop_alter('menu_local_tasks', $data, $router_item, $root_path);
@@ -2290,15 +2124,7 @@ function menu_contextual_links($module, $parent_path, $args) {
   if (!isset($data[$root_path])) {
     // Get all contextual links that are direct children of the router item and
     // not of the tab type 'view'.
-    $data[$root_path] = db_select('menu_router', 'm')
-      ->fields('m')
-      ->condition('tab_parent', $router_item['tab_root'])
-      ->condition('context', MENU_CONTEXT_NONE, '<>')
-      ->condition('context', MENU_CONTEXT_PAGE, '<>')
-      ->orderBy('weight')
-      ->orderBy('title')
-      ->execute()
-      ->fetchAllAssoc('path', PDO::FETCH_ASSOC);
+    $data[$root_path] = _get_router_item_context($root_path);
   }
   $parent_length = backdrop_strlen($root_path) + 1;
   $map = $router_item['original_map'];
@@ -2596,17 +2422,19 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
     array_unshift($menu_names, $selected_menu);
 
     $query = db_select('menu_links', 'ml', array('fetch' => PDO::FETCH_ASSOC));
-    $query->leftJoin('menu_router', 'm', 'm.path = ml.router_path');
     $query->fields('ml');
     // Weight must be taken from {menu_links}, not {menu_router}.
     $query->addField('ml', 'weight', 'link_weight');
-    $query->fields('m');
     $query->condition('ml.link_path', $path_candidates, 'IN');
     $query->addTag('preferred_menu_links');
 
     // Sort candidates by link path and menu name.
     $candidates = array();
     foreach ($query->execute() as $candidate) {
+      if (!$router_item = _get_exact_router_item($candidate['router_path'])) {
+        $router_item = _get_empty_router_item();
+      }
+      $candidate += $router_item;
       $candidate['weight'] = $candidate['link_weight'];
       $candidates[$candidate['link_path']][$candidate['menu_name']] = $candidate;
       // Add any menus not already in the menu name search list.
@@ -2767,14 +2595,14 @@ function menu_get_active_title() {
 function menu_link_load($mlid, $skip_access_check = FALSE) {
   if (is_numeric($mlid)) {
     $query = db_select('menu_links', 'ml');
-    $query->leftJoin('menu_router', 'm', 'm.path = ml.router_path');
     $query->fields('ml');
     // Weight should be taken from {menu_links}, not {menu_router}.
-    $query->addField('ml', 'weight', 'link_weight');
-    $query->fields('m');
     $query->condition('ml.mlid', $mlid);
     if ($item = $query->execute()->fetchAssoc()) {
-      $item['weight'] = $item['link_weight'];
+      if (!$router_item = _get_exact_router_item($item['router_path'])) {
+        $router_item = _get_empty_router_item();
+      }
+      $item += $router_item;
       if ($skip_access_check) {
         $item['access'] = TRUE;
       }
@@ -2878,6 +2706,7 @@ function menu_router_build() {
   backdrop_alter('menu', $callbacks);
   list($menu, $masks) = _menu_router_build($callbacks);
   _menu_router_cache($menu);
+  state_set('menu_masks', $masks);
 
   return array($menu, $masks);
 }
@@ -2940,6 +2769,9 @@ function _menu_navigation_links_rebuild($menu) {
   foreach ($menu as $path => $item) {
     if ($item['_visible']) {
       $menu_links[$path] = $item;
+      if (!isset($item['_number_parts'])) {
+        $item['_number_parts'] = count(explode("/", $path));
+      }
       $sort[$path] = $item['_number_parts'];
     }
   }
@@ -3466,17 +3298,18 @@ function _menu_find_router_path($link_path) {
   $menu = _menu_router_cache();
 
   $router_path = $link_path;
-  $parts = explode('/', $link_path, MENU_MAX_PARTS);
+  $parts = explode('/', $link_path);
   $ancestors = menu_get_ancestors($parts);
 
   if (empty($menu)) {
-    // Not during a menu rebuild, so look up in the database.
-    $router_path = (string) db_select('menu_router')
-      ->fields('menu_router', array('path'))
-      ->condition('path', $ancestors, 'IN')
-      ->orderBy('fit', 'DESC')
-      ->range(0, 1)
-      ->execute()->fetchField();
+    $root = _menu_router_root_path();
+    foreach($ancestors as $ancestor) {
+      $filename = $root . '/' . $ancestor . '/item.json';
+      if (is_file($filename)) {
+        $router_path = $ancestor;
+        break;
+      }
+    }
   }
   elseif (!isset($menu[$router_path])) {
     // Add an empty router path as a fallback.
@@ -3657,234 +3490,8 @@ function _menu_link_parents_set(&$item, $parent) {
 }
 
 /**
- * Builds the router table based on the data from hook_menu().
- */
-function _menu_router_build($callbacks) {
-  // First pass: separate callbacks from paths, making paths ready for
-  // matching. Calculate fitness, and fill some default values.
-  $menu = array();
-  $masks = array();
-  foreach ($callbacks as $path => $item) {
-    $load_functions = array();
-    $to_arg_functions = array();
-    $fit = 0;
-    $move = FALSE;
-
-    $parts = explode('/', $path, MENU_MAX_PARTS);
-    $number_parts = count($parts);
-    // We store the highest index of parts here to save some work in the fit
-    // calculation loop.
-    $slashes = $number_parts - 1;
-    // Extract load and to_arg functions.
-    foreach ($parts as $k => $part) {
-      $match = FALSE;
-      // Look for wildcards in the form allowed to be used in PHP functions,
-      // because we are using these to construct the load function names.
-      if (preg_match('/^%(|' . BACKDROP_PHP_FUNCTION_PATTERN . ')$/', $part, $matches)) {
-        if (empty($matches[1])) {
-          $match = TRUE;
-          $load_functions[$k] = NULL;
-        }
-        else {
-          if (function_exists($matches[1] . '_to_arg')) {
-            $to_arg_functions[$k] = $matches[1] . '_to_arg';
-            $load_functions[$k] = NULL;
-            $match = TRUE;
-          }
-          if (function_exists($matches[1] . '_load')) {
-            $function = $matches[1] . '_load';
-            // Create an array of arguments that will be passed to the _load
-            // function when this menu path is checked, if 'load arguments'
-            // exists.
-            $load_functions[$k] = isset($item['load arguments']) ? array($function => $item['load arguments']) : $function;
-            $match = TRUE;
-          }
-        }
-      }
-      if ($match) {
-        $parts[$k] = '%';
-      }
-      else {
-        $fit |=  1 << ($slashes - $k);
-      }
-    }
-    if ($fit) {
-      $move = TRUE;
-    }
-    else {
-      // If there is no %, it fits maximally.
-      $fit = (1 << $number_parts) - 1;
-    }
-    $masks[$fit] = 1;
-    $item['_load_functions'] = $load_functions;
-    $item['to_arg_functions'] = empty($to_arg_functions) ? '' : serialize($to_arg_functions);
-    $item += array(
-      'title' => '',
-      'weight' => 0,
-      'type' => MENU_NORMAL_ITEM,
-      'module' => '',
-      '_number_parts' => $number_parts,
-      '_parts' => $parts,
-      '_fit' => $fit,
-    );
-    $item += array(
-      '_visible' => (bool) ($item['type'] & MENU_VISIBLE_IN_BREADCRUMB),
-      '_tab' => (bool) ($item['type'] & MENU_IS_LOCAL_TASK),
-    );
-    if ($move) {
-      $new_path = implode('/', $item['_parts']);
-      $menu[$new_path] = $item;
-      $sort[$new_path] = $number_parts;
-    }
-    else {
-      $menu[$path] = $item;
-      $sort[$path] = $number_parts;
-    }
-  }
-  array_multisort($sort, SORT_NUMERIC, $menu);
-  // Apply inheritance rules.
-  foreach ($menu as $path => $v) {
-    $item = &$menu[$path];
-    if (!$item['_tab']) {
-      // Non-tab items.
-      $item['tab_parent'] = '';
-      $item['tab_root'] = $path;
-    }
-    // If not specified, assign the default tab type for local tasks.
-    elseif (!isset($item['context'])) {
-      $item['context'] = MENU_CONTEXT_PAGE;
-    }
-    for ($i = $item['_number_parts'] - 1; $i; $i--) {
-      $parent_path = implode('/', array_slice($item['_parts'], 0, $i));
-      if (isset($menu[$parent_path])) {
-
-        $parent = &$menu[$parent_path];
-
-        // If we have no menu name, try to inherit it from parent items.
-        if (!isset($item['menu_name'])) {
-          // If the parent item of this item does not define a menu name (and no
-          // previous iteration assigned one already), try to find the menu name
-          // of the parent item in the currently stored menu links.
-          if (!isset($parent['menu_name'])) {
-            $menu_name = db_query("SELECT menu_name FROM {menu_links} WHERE router_path = :router_path AND module = 'system'", array(':router_path' => $parent_path))->fetchField();
-            if ($menu_name) {
-              $parent['menu_name'] = $menu_name;
-            }
-          }
-          // If the parent item defines a menu name, inherit it.
-          if (!empty($parent['menu_name'])) {
-            $item['menu_name'] = $parent['menu_name'];
-          }
-        }
-        if (!isset($item['tab_parent'])) {
-          // Parent stores the parent of the path.
-          $item['tab_parent'] = $parent_path;
-        }
-        if (!isset($item['tab_root']) && !$parent['_tab']) {
-          $item['tab_root'] = $parent_path;
-        }
-        // If an access callback is not found for a default local task we use
-        // the callback from the parent, since we expect them to be identical.
-        // In all other cases, the access parameters must be specified.
-        if (($item['type'] == MENU_DEFAULT_LOCAL_TASK) && !isset($item['access callback']) && isset($parent['access callback'])) {
-          $item['access callback'] = $parent['access callback'];
-          if (!isset($item['access arguments']) && isset($parent['access arguments'])) {
-            $item['access arguments'] = $parent['access arguments'];
-          }
-        }
-        // Same for page callbacks.
-        if (!isset($item['page callback']) && isset($parent['page callback'])) {
-          $item['page callback'] = $parent['page callback'];
-          if (!isset($item['page arguments']) && isset($parent['page arguments'])) {
-            $item['page arguments'] = $parent['page arguments'];
-          }
-          if (!isset($item['file path']) && isset($parent['file path'])) {
-            $item['file path'] = $parent['file path'];
-          }
-          if (!isset($item['file']) && isset($parent['file'])) {
-            $item['file'] = $parent['file'];
-            if (empty($item['file path']) && isset($item['module']) && isset($parent['module']) && $item['module'] != $parent['module']) {
-              $item['file path'] = backdrop_get_path('module', $parent['module']);
-            }
-          }
-        }
-        // Same for delivery callbacks.
-        if (!isset($item['delivery callback']) && isset($parent['delivery callback'])) {
-          $item['delivery callback'] = $parent['delivery callback'];
-        }
-        // Same for theme callbacks.
-        if (!isset($item['theme callback']) && isset($parent['theme callback'])) {
-          $item['theme callback'] = $parent['theme callback'];
-          if (!isset($item['theme arguments']) && isset($parent['theme arguments'])) {
-            $item['theme arguments'] = $parent['theme arguments'];
-          }
-        }
-        // Same for load arguments: if a loader doesn't have any explict
-        // arguments, try to find arguments in the parent.
-        if (!isset($item['load arguments'])) {
-          foreach ($item['_load_functions'] as $k => $function) {
-            // This loader doesn't have any explict arguments...
-            if (!is_array($function)) {
-              // ... check the parent for a loader at the same position
-              // using the same function name and defining arguments...
-              if (isset($parent['_load_functions'][$k]) && is_array($parent['_load_functions'][$k]) && key($parent['_load_functions'][$k]) === $function) {
-                // ... and inherit the arguments on the child.
-                $item['_load_functions'][$k] = $parent['_load_functions'][$k];
-              }
-            }
-          }
-        }
-      }
-    }
-    if (!isset($item['access callback']) && isset($item['access arguments'])) {
-      // Default callback.
-      $item['access callback'] = 'user_access';
-    }
-    if (!isset($item['access callback']) || empty($item['page callback'])) {
-      $item['access callback'] = 0;
-    }
-    if (is_bool($item['access callback'])) {
-      $item['access callback'] = intval($item['access callback']);
-    }
-
-    $item['load_functions'] = empty($item['_load_functions']) ? '' : serialize($item['_load_functions']);
-    $item += array(
-      'access arguments' => array(),
-      'access callback' => '',
-      'page arguments' => array(),
-      'page callback' => '',
-      'delivery callback' => '',
-      'title arguments' => array(),
-      'title callback' => 't',
-      'theme arguments' => array(),
-      'theme callback' => '',
-      'description' => '',
-      'position' => '',
-      'context' => 0,
-      'tab_parent' => '',
-      'tab_root' => $path,
-      'path' => $path,
-      'file' => '',
-      'file path' => '',
-      'include file' => '',
-    );
-
-    // Calculate out the file to be included for each callback, if any.
-    if ($item['file']) {
-      $file_path = $item['file path'] ? $item['file path'] : backdrop_get_path('module', $item['module']);
-      $item['include file'] = $file_path . '/' . $item['file'];
-    }
-  }
-
-  // Sort the masks so they are in order of descending fit.
-  $masks = array_keys($masks);
-  rsort($masks);
-
-  return array($menu, $masks);
-}
-
-/**
  * Saves data from menu_router_build() to the router table.
+ * @todo mark it deprecated at some point.
  */
 function _menu_router_save($menu, $masks) {
   // Delete the existing router since we have some data to replace it.
@@ -3924,8 +3531,8 @@ function _menu_router_save($menu, $masks) {
     // Fill in insert object values.
     $insert->values(array(
       'path' => $item['path'],
-      'load_functions' => $item['load_functions'],
-      'to_arg_functions' => $item['to_arg_functions'],
+      'load_functions' => serialize($item['load_functions']),
+      'to_arg_functions' => serialize($item['to_arg_functions']),
       'access_callback' => $item['access callback'],
       'access_arguments' => serialize($item['access arguments']),
       'page_callback' => $item['page callback'],

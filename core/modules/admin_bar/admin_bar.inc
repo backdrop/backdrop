@@ -198,11 +198,8 @@ function admin_bar_tree_dynamic(array $expand_map) {
 
   // Use queried plid columns to query sub-trees for the router paths.
   $query = db_select('menu_links', 'ml');
-  $query->join('menu_router', 'm', 'ml.router_path = m.path');
   $query
-    ->fields('ml')
-    ->fields('m', array_diff(backdrop_schema_fields_sql('menu_router'), backdrop_schema_fields_sql('menu_links')));
-
+    ->fields('ml');
   // The retrieved menu link trees have to be ordered by depth, so parents
   // always come before their children for the storage logic below.
   foreach ($p_columns as $column) {
@@ -227,6 +224,11 @@ function admin_bar_tree_dynamic(array $expand_map) {
   // placeholder expansion arguments.
   $tree_dynamic = array();
   foreach ($result as $mlid => $link) {
+    if (!$router_item = _get_exact_router_item($link['router_path'])) {
+      $router_item = _get_empty_router_item();
+    }
+    $link += $router_item;
+    $result[$link['plid']] = $link;
     // If contained in $expand_map, then this is a (first) parent, and we need
     // to store by the defined 'parent' path for later merging, as well as
     // provide the expansion map arguments to apply to the dynamic tree.
@@ -314,7 +316,10 @@ function admin_bar_merge_tree(array &$tree, array $tree_dynamic, array $expand_m
       // Expand anonymous to named placeholders.
       // @see _menu_load_objects()
       $path_args = explode('/', $link['path']);
-      $load_functions = unserialize($link['load_functions']);
+      if (!is_array($link['load_functions'])) {
+        $link['load_functions'] = unserialize($link['load_functions']);
+      }
+      $load_functions = $link['load_functions'];
       if (is_array($load_functions)) {
         foreach ($load_functions as $index => $function) {
           if ($function) {

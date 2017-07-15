@@ -50,13 +50,17 @@ function menu_overview_form($form, &$form_state, $menu) {
   global $menu_admin;
   $form['#attached']['css'] = array(backdrop_get_path('module', 'menu') . '/css/menu.css');
   $sql = "
-    SELECT m.load_functions, m.to_arg_functions, m.access_callback, m.access_arguments, m.page_callback, m.page_arguments, m.delivery_callback, m.title, m.title_callback, m.title_arguments, m.type, m.description, ml.*
-    FROM {menu_links} ml LEFT JOIN {menu_router} m ON m.path = ml.router_path
+    SELECT ml.*
+    FROM {menu_links} ml 
     WHERE ml.menu_name = :menu
     ORDER BY p1 ASC, p2 ASC, p3 ASC, p4 ASC, p5 ASC, p6 ASC, p7 ASC, p8 ASC, p9 ASC";
   $result = db_query($sql, array(':menu' => $menu['menu_name']), array('fetch' => PDO::FETCH_ASSOC));
   $links = array();
   foreach ($result as $item) {
+    if (!$router_item =_get_exact_router_item($item['router_path'])) {
+      $router_item = _get_empty_router_item();
+    }
+    $item += $router_item;
     $links[] = $item;
   }
   $tree = menu_tree_data($links);
@@ -493,8 +497,12 @@ function menu_delete_menu_confirm_submit($form, &$form_state) {
   }
 
   // Reset all the menu links defined by the system via hook_menu().
-  $result = db_query("SELECT * FROM {menu_links} ml INNER JOIN {menu_router} m ON ml.router_path = m.path WHERE ml.menu_name = :menu AND ml.module = 'system' ORDER BY m.number_parts ASC", array(':menu' => $menu['menu_name']), array('fetch' => PDO::FETCH_ASSOC));
+  $result = db_query("SELECT * FROM {menu_links} ml WHERE ml.menu_name = :menu AND ml.module = 'system' ORDER BY ml.router_path ASC", array(':menu' => $menu['menu_name']), array('fetch' => PDO::FETCH_ASSOC));
   foreach ($result as $link) {
+    if (!$router_item =_get_exact_router_item($link['router_path'])) {
+      $router_item = _get_empty_router_item();
+    }
+    $link += $router_item;
     menu_reset_item($link);
   }
 
