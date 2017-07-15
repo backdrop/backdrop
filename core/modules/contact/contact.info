@@ -1,6 +1,9 @@
 name = Contact
 description = Enables the use of both personal and site-wide contact forms.
 package = System
+tags[] = System
+tags[] = Mail
+tags[] = Core
 version = BACKDROP_VERSION
 type = module
 backdrop = 1.x
