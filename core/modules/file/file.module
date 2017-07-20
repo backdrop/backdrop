@@ -2930,7 +2930,7 @@ function file_view_multiple($files, $view_mode = 'full', $weight = 0, $langcode 
  */
 function file_view($file, $view_mode = 'full', $langcode = NULL) {
   if (!isset($langcode)) {
-    $langcode = $GLOBALS['language_content']->language;
+    $langcode = $GLOBALS['language_content']->langcode;
   }
 
   // Populate $file->content with a render() array.

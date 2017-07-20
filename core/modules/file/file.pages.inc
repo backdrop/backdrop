@@ -486,7 +486,7 @@ function file_edit($form, &$form_state, $file) {
     ),
     '#attached' => array(
       'js' => array(
-        backdrop_get_path('module', 'file_entity') . '/file_entity.js',
+        backdrop_get_path('module', 'file') . '/js/file_edit.js',
         array(
           'type' => 'setting',
           'data' => array('anonymous' => variable_get('anonymous', t('Anonymous'))),
