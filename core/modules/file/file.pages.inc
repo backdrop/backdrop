@@ -514,13 +514,13 @@ function file_edit($form, &$form_state, $file) {
     '#submit' => array('file_edit_submit'),
     '#validate' => array('file_edit_validate'),
   );
-  /*$form['actions']['delete'] = array(
+  $form['actions']['delete'] = array(
     '#type' => 'submit',
     '#value' => t('Delete'),
     '#weight' => 10,
     '#submit' => array('file_edit_delete_submit'),
     '#access' => file_access('delete', $file),
-  );*/
+  );
 
   // Build the URL for the cancel button taking into account that there might be
   // a "destination" that includes query string variables.
@@ -660,6 +660,22 @@ function file_edit_submit($form, &$form_state) {
   }
 
   $form_state['redirect'] = 'file/' . $file->fid;
+
+  // Clear the page and block caches.
+  cache_clear_all();
+}
+
+/**
+ * Form submission handler for the 'Delete' button for file_entity_edit().
+ */
+function file_edit_delete_submit($form, &$form_state) {
+  $fid = $form_state['values']['fid'];
+  $destination = array();
+  if (isset($_GET['destination'])) {
+    $destination = backdrop_get_destination();
+    unset($_GET['destination']);
+  }
+  $form_state['redirect'] = array('file/' . $fid . '/delete', array('query' => $destination));
 
   // Clear the page and block caches.
   cache_clear_all();
