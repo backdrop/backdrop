@@ -286,7 +286,7 @@ function _file_update_image_field_dimensions($file) {
  * Update an entity's field values without changing anything on the entity.
  */
 function _file_entity_fields_update($entity_type, $entity) {
-  list($id) = entity_extract_ids($entity_type, $entity);
+  $id = $entity->id();
   if (empty($id)) {
     throw new Exception(t('Cannot call _file_entity_update_entity_fields() on a new entity.'));
   }

@@ -230,12 +230,10 @@ function file_field_prepare_view($entity_type, $entities, $field, $instances, $l
  * Implements hook_field_insert().
  */
 function file_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
-
   // Add a new usage of each uploaded file.
   foreach ($items as $item) {
     if ($file = file_load($item['fid'])) {
-      file_usage_add($file, 'file', $entity_type, $id);
+      file_usage_add($file, 'file', $entity_type, $entity->id());
     }
   }
 }
@@ -246,7 +244,7 @@ function file_field_insert($entity_type, $entity, $field, $instance, $langcode, 
  * Checks for files that have been removed from the object.
  */
 function file_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+  $id = $entity->id();
 
   // On new revisions, all files are considered to be a new usage and no
   // deletion of previous file usages are necessary.
@@ -294,12 +292,10 @@ function file_field_update($entity_type, $entity, $field, $instance, $langcode, 
  * Implements hook_field_delete().
  */
 function file_field_delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
-
   // Delete all file usages within this entity.
   foreach ($items as $delta => $item) {
     if ($file = file_load($item['fid'])) {
-      file_usage_delete($file, 'file', $entity_type, $id, 0);
+      file_usage_delete($file, 'file', $entity_type, $entity->id(), 0);
     }
   }
 }
@@ -308,11 +304,10 @@ function file_field_delete($entity_type, $entity, $field, $instance, $langcode, 
  * Implements hook_field_delete_revision().
  */
 function file_field_delete_revision($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
   foreach ($items as $delta => $item) {
     // Decrement the file usage count by 1.
     if ($file = file_load($item['fid'])) {
-      file_usage_delete($file, 'file', $entity_type, $id);
+      file_usage_delete($file, 'file', $entity_type, $entity->id());
     }
   }
 }
