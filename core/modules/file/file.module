@@ -627,7 +627,7 @@ function file_file_formatter_file_field_settings($form, &$form_state, $settings,
 /**
  * Implements hook_file_formatter_FORMATTER_view().
  *
- * Returns a drupal_render() array to display an image of the chosen style.
+ * Returns a backdrop_render() array to display an image of the chosen style.
  *
  * This formatter is only capable of displaying local images. If the passed in
  * file is either not local or not an image, nothing is returned, so that
@@ -2277,7 +2277,7 @@ function _file_sort_array_by_weight(&$a) {
     $a[$key]['weight'] += $i / 1000;
     $i++;
   }
-  uasort($a, 'drupal_sort_weight');
+  backdrop_sort($a, array('weight' => SORT_NUMERIC));
   foreach ($a as $key => $item) {
     $a[$key]['weight'] = $original_weight[$key];
   }
@@ -2887,7 +2887,7 @@ function file_permissions_get_configured_types() {
  *   language is provided the current content language is used.
  *
  * @return array
- *   An array in the format expected by drupal_render().
+ *   An array in the format expected by backdrop_render().
  */
 function file_view_multiple($files, $view_mode = 'full', $weight = 0, $langcode = NULL) {
   $build = array();
@@ -2926,7 +2926,7 @@ function file_view_multiple($files, $view_mode = 'full', $weight = 0, $langcode 
  *   content language of the current request.
  *
  * @return array
- *   An array as expected by drupal_render().
+ *   An array as expected by backdrop_render().
  */
 function file_view($file, $view_mode = 'full', $langcode = NULL) {
   if (!isset($langcode)) {
@@ -3037,7 +3037,7 @@ function file_build_content($file, $view_mode = 'full', $langcode = NULL) {
  *   content language of the current request.
  *
  * @return array
- *   An array as expected by drupal_render().
+ *   An array as expected by backdrop_render().
  */
 function file_view_file($file, $displays = 'full', $langcode = NULL) {
   if (!isset($langcode)) {

@@ -13,13 +13,13 @@
  * Menu callback; view a single file entity.
  */
 function file_view_page($file) {
-  drupal_set_title($file->filename);
+  backdrop_set_title($file->filename);
 
   $uri = entity_uri('file', $file);
   // Set the file path as the canonical URL to prevent duplicate content.
-  drupal_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], $uri['options'])), TRUE);
+  backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], $uri['options'])), TRUE);
   // Set the non-aliased path as a default shortlink.
-  drupal_add_html_head_link(array('rel' => 'shortlink', 'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE)))), TRUE);
+  backdrop_add_html_head_link(array('rel' => 'shortlink', 'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE)))), TRUE);
 
   return file_view($file, 'full');
 }
@@ -32,9 +32,9 @@ function file_download_page($file) {
   if (!is_file($file->uri)) {
     return MENU_NOT_FOUND;
   }
-  // @todo Remove this once drupal_basename is fixed for PHP versions greater
+  // @todo Remove this once backdrop_basename is fixed for PHP versions greater
   //  than '5.3.29'.
-  $basename_function = version_compare(PHP_VERSION,'5.3.29','>') ? 'basename' : 'drupal_basename';
+  $basename_function = version_compare(PHP_VERSION,'5.3.29','>') ? 'basename' : 'backdrop_basename';
   $headers = array(
     'Content-Type' => mime_header_encode($file->filemime),
     'Content-Disposition' => 'attachment; filename="' . mime_header_encode($basename_function($file->uri)) . '"',
