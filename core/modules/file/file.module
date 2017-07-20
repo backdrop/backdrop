@@ -3041,7 +3041,7 @@ function file_build_content($file, $view_mode = 'full', $langcode = NULL) {
  */
 function file_view_file($file, $displays = 'full', $langcode = NULL) {
   if (!isset($langcode)) {
-    $langcode = $GLOBALS['language_content']->language;
+    $langcode = $GLOBALS['language_content']->langcode;
   }
 
   // Prepare incoming display specifications.

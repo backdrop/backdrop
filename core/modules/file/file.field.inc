@@ -995,7 +995,7 @@ function file_field_formatter_prepare_view($entity_type, $entities, $field, $ins
  */
 function file_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
-  $settings = $display['settings'];
+  $settings = isset($display['settings']) ? $display['settings'] : array();
 
   switch ($display['type']) {
     case 'file_default':
