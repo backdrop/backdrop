@@ -523,10 +523,18 @@ class LayoutRendererStandard {
         $title = $block->getTitle();
       }
 
+      $data = array(
+        'subject' => $title,
+        'content' => $content,
+      );
+
+      // Add a backwards compatible way to alter all blocks.
+      backdrop_alter(array('block_view', 'block_view_' . $block->module . '_' . str_replace('-', '_', $block->delta)), $data, $block);
+
       // Assemble a structured content array.
       $content = (object) array(
-        'title' => $title,
-        'content' => $content,
+        'title' => $data['subject'],
+        'content' => $data['content'],
       );
 
       if (isset($style) && isset($style['block theme'])) {
