@@ -105,7 +105,7 @@ function system_menu_block_form($config) {
   );
   $form['toggle'] = array(
     '#type' => 'checkbox',
-    '#title' => 'Display menu toggle button on small screens',
+    '#title' => t('Display menu toggle button on small screens'),
     '#default_value' => $config['toggle'],
     '#description' => t('A menu toggle button, commonly known as a hamburger icon, allows the menu to be hidden initially on devices with small screens, but then easily expanded.'),
   );
