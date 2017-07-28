@@ -569,7 +569,7 @@ function installer_browser_installation_theme_form($form, &$form_state, $project
       else {
         $form[$theme]['set'] = array(
           '#type' => 'submit',
-          '#value' => 'Set as default theme',
+          '#value' => t('Set as default theme'),
           '#name' => $theme . '-submit',
           '#submit' => array('installer_browser_installation_theme_set'),
         );
@@ -581,7 +581,7 @@ function installer_browser_installation_theme_form($form, &$form_state, $project
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['next_link'] = array(
       '#type' => 'submit',
-      '#value' => 'Next: enable new modules',
+      '#value' => t('Next: enable new modules'),
       '#submit' => array('installer_browser_installation_theme_next'),
     );
   }
@@ -803,7 +803,7 @@ function installer_browser_install_button_form($form, &$form_state) {
   $form['#attributes']['class'] = 'installer-browser-install-button-form';
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => 'Install',
+    '#value' => t('Install'),
   );
   $form['#action'] = url('admin/installer/install/select_versions');
   $form['cancel'] = array(
@@ -948,7 +948,7 @@ function installer_browser_filters_form_submit($form, &$form_state) {
 function installer_browser_manual_install_link($form, &$form_state) {
   $manual['link'] = array(
     '#type' => 'link',
-    '#title' => 'Manual installation',
+    '#title' => t('Manual installation'),
     '#href' => 'admin/installer/manual',
     '#attributes' => array(
       'class' => array('use-ajax'),
