@@ -830,14 +830,14 @@ function field_ui_field_overview_form_submit($form, &$form_state) {
  */
 function field_ui_display_overview($entity_type, $bundle) {
   if (is_object($bundle)) {
-    $bundle_label = $bundle->name;
+    $bundle_label = check_plain($bundle->name);
   }
   $bundle = field_extract_bundle($entity_type, $bundle);
   $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
 
   $entity_info = entity_get_info($entity_type);
   if (!isset($bundle_label)) {
-    $bundle_label = $entity_info['label'];
+    $bundle_label = check_plain($entity_info['label']);
   }
   $view_mode_settings = field_view_mode_settings($entity_type, $bundle);
   $custom_view_modes = config_get('entity.view_modes', 'view_modes');
