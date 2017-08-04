@@ -51,6 +51,10 @@ function file_permission() {
       'title' => t('Access the manage files overview'),
       'description' => t('The <a href="@url">manage files overview page</a> shows all files uploaded to the site.', array('@url' => url('admin/content/files'))),
     ),
+    'create files' => array(
+      'title' => t('Add and upload new files'),
+      'description' => t('Add new files directly from the manage files overview page.'),
+    ),
     'delete files' => array(
       'title' => t('Delete any file'),
       'description' => t('Allow deleting files directly from the manage files overview page.'),
@@ -80,6 +84,17 @@ function file_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['file/add'] = array(
+    'title' => 'Add a file',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('file_add_form'),
+    'access arguments' => array('create files'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'file.pages.inc',
+    'menu_name' => 'management',
+    'weight' => -10,
+  );
+
   $items['file/%file/delete'] = array(
     'title' => 'Delete',
     'page callback' => 'backdrop_get_form',
@@ -100,6 +115,22 @@ function file_menu() {
   );
 
   return $items;
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function file_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // Add action link for 'file/add' on 'admin/content/files' page.
+  if ($root_path == 'admin/content/files') {
+    $item = menu_get_item('file/add');
+    if ($item['access']) {
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
 }
 
 /**
@@ -429,6 +460,7 @@ function file_admin_paths() {
   if (config_get('system.core', 'node_admin_theme')) {
     $paths = array(
       'file/*/delete' => TRUE,
+      'file/add' => TRUE,
     );
     return $paths;
   }
