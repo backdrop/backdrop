@@ -27,6 +27,9 @@ stylesheets[all][] = css/skin.css
 
 stylesheets[print][] = css/print.css
 
+; Include a style sheet in the rich-text editor.
+ckeditor_stylesheets[] = css/base.css
+
 ; Remove unwanted core CSS
 stylesheets[all][] = system.theme.css
 stylesheets[all][] = menu-dropdown.theme.css
