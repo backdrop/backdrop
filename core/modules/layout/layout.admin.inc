@@ -969,7 +969,7 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
 
   $output['search'] = array(
     '#type' => 'textfield',
-    '#title' => 'Search',
+    '#title' => t('Search'),
     '#attributes' => array(
       'id' => array('layout-block-list-search'),
     ),

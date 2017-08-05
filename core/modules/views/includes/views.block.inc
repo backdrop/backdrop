@@ -397,7 +397,7 @@ class ViewsBlock extends Block {
     if ($allow['fields_override'] && $view->style_plugin->uses_fields()) {
       $form['fields_override'] = array(
         '#type' => 'fieldset',
-        '#title' => 'Fields to display',
+        '#title' => t('Fields to display'),
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
         '#tree' => TRUE,
