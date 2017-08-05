@@ -300,7 +300,7 @@ function path_admin_filter_form($form, &$form_state, $keys = '') {
   );
   $form['basic']['filter'] = array(
     '#type' => 'search',
-    '#title' => 'URL alias',
+    '#title' => t('URL alias'),
     '#title_display' => 'invisible',
     '#default_value' => $keys,
     '#maxlength' => 128,

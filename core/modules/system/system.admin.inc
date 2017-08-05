@@ -2301,7 +2301,7 @@ function system_configure_date_formats_form($form, &$form_state, $format = NULL)
 
   $form['label'] = array(
     '#type' => 'textfield',
-    '#title' => 'Label',
+    '#title' => t('Label'),
     '#maxlength' => 100,
     '#default_value' => empty($format['label']) ? '' : $format['label'],
     '#description' => t('A name for the new format'),

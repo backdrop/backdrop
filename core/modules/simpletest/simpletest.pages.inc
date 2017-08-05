@@ -167,7 +167,7 @@ function simpletest_result_form($form, &$form_state, $test_id) {
 
   $form['action']['filter'] = array(
     '#type' => 'select',
-    '#title' => 'Filter',
+    '#title' => t('Filter'),
     '#options' => array(
       'all' => t('All (@count)', array('@count' => count($filter['pass']) + count($filter['fail']))),
       'pass' => t('Pass (@count)', array('@count' => count($filter['pass']))),

@@ -159,7 +159,7 @@ function update_script_selection_form($form, &$form_state) {
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
-      '#value' => 'Apply pending updates',
+      '#value' => t('Apply pending updates'),
     );
   }
   return $form;
