@@ -1591,13 +1591,14 @@ class BackdropWebTestCase extends BackdropTestCase {
     $config_cache_dir = $this->originalFileDirectory . '/simpletest/simpletest_cache_' . $this->profile;
 
     if (is_dir($config_cache_dir)) {
+      $schema = self::getDatabaseConnection()->schema();
       $prefix = 'simpletest_cache_' . $this->profile . '_';
 
-      $tables = db_query("SHOW TABLES LIKE :prefix", array(':prefix' => db_like($prefix) . '%' ))->fetchCol();
+      $tables = $schema->findTables(db_like($prefix) . '%');
 
       foreach ($tables as $table_prefix) {
         $table = substr($table_prefix, strlen($prefix));
-        db_query('CREATE TABLE ' . $this->databasePrefix . $table . ' LIKE ' . $table_prefix);
+        db_query('CREATE TABLE ' . $this->databasePrefix . $table . ' LIKE ' . $table_prefix );
         db_query('INSERT ' . $this->databasePrefix . $table . ' SELECT * FROM ' . $table_prefix);
       }
 
