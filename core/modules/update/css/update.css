@@ -32,7 +32,8 @@ table.update {
   [dir="rtl"] .update .version-status {
     float: left;
   }
-  .update .versions {
+  .update .versions,
+  .update .info {
     clear: both;
   }
 }
