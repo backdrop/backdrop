@@ -177,7 +177,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
         }
         $term = $query->execute()->fetchObject();
 
-        if ($term && (empty($vocabularies) || !empty($vocabularies[$term->machine_name]))) {
+        if ($term && (empty($vocabularies) || !empty($vocabularies[$term->vocabulary]))) {
           if ($type == 'convert') {
             $this->argument->argument = $term->tid;
           }
