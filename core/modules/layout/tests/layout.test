@@ -1897,7 +1897,7 @@ class LayoutBlockTextTest extends BackdropWebTestCase {
     $this->clickLink(t('Custom block'));
     $this->backdropPost(NULL, array(
       'title' => 'Custom block test',
-      'content[value]' => $this->randomString(32) . $image_string,
+      'content[value]' => '<p>Some content with an image in the middle.</p><p>'. $image_string . '</p><p>End of content.</p>',
     ), t('Add block'));
 
     // Get the block UUID.
