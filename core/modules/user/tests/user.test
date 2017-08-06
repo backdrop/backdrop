@@ -1517,11 +1517,11 @@ class UserTimeZoneFunctionalTest extends BackdropWebTestCase {
     $this->backdropLogin($web_user);
 
     // Create some nodes with different authored-on dates.
-    // Two dates in PST (winter time):
+    // One date in PST (winter time):
     $date1 = '2007-03-09 21:00:00 -0800';
-    $date2 = '2007-03-11 01:00:00 -0800';
-    // One date in PDT (summer time):
-    $date3 = '2007-03-20 21:00:00 -0700';
+    // Two dates in PDT (summer time):
+    $date2 = '2007-03-12 01:00:00 -0700';
+    $date3 = '2007-03-25 21:00:00 -0700';
     $node1 = $this->backdropCreateNode(array('created' => strtotime($date1), 'type' => 'post'));
     $node2 = $this->backdropCreateNode(array('created' => strtotime($date2), 'type' => 'post'));
     $node3 = $this->backdropCreateNode(array('created' => strtotime($date3), 'type' => 'post'));
@@ -1530,24 +1530,24 @@ class UserTimeZoneFunctionalTest extends BackdropWebTestCase {
     $this->backdropGet("node/$node1->nid");
     $this->assertText('2007-03-09 21:00 PST', 'Date should be PST.');
     $this->backdropGet("node/$node2->nid");
-    $this->assertText('2007-03-11 01:00 PST', 'Date should be PST.');
+    $this->assertText('2007-03-12 01:00 PDT', 'Date should be PDT.');
     $this->backdropGet("node/$node3->nid");
-    $this->assertText('2007-03-20 21:00 PDT', 'Date should be PDT.');
+    $this->assertText('2007-03-25 21:00 PDT', 'Date should be PDT.');
 
     // Change user time zone to Santiago time.
     $edit = array();
     $edit['mail'] = $web_user->mail;
-    $edit['timezone'] = 'America/Santiago';
+    $edit['timezone'] = 'Europe/Paris';
     $this->backdropPost("user/$web_user->uid/edit", $edit, t('Save'));
-    $this->assertText(t('The changes have been saved.'), 'Time zone changed to Santiago time.');
+    $this->assertText(t('The changes have been saved.'), 'Time zone changed to Central Europe time.');
 
     // Confirm date format and time zone.
     $this->backdropGet("node/$node1->nid");
-    $this->assertText('2007-03-10 02:00 CLST', 'Date should be Chile summer time; five hours ahead of PST.');
+    $this->assertText('2007-03-10 06:00 CET', 'Date should be Central European Time; nine hours ahead of PST.');
     $this->backdropGet("node/$node2->nid");
-    $this->assertText('2007-03-11 05:00 CLT', 'Date should be Chile time; four hours ahead of PST');
+    $this->assertText('2007-03-12 09:00 CET', 'Date should be Central European Time; eight hours ahead of PDT');
     $this->backdropGet("node/$node3->nid");
-    $this->assertText('2007-03-21 00:00 CLT', 'Date should be Chile time; three hours ahead of PDT.');
+    $this->assertText('2007-03-26 06:00 CEST', 'Date should be Central European Summer Time; nine hours ahead of PDT.');
   }
 }
 
