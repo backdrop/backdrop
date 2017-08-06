@@ -107,7 +107,7 @@ function system_menu_block_form($config) {
     '#type' => 'checkbox',
     '#title' => t('Display menu toggle button on small screens'),
     '#default_value' => $config['toggle'],
-    '#description' => t('On devices with small screens, this option reduces the menu to a toggle button, commonly known as <a href="@url" target="_blank"><em>hamburger button</em></a>. Clicking the icon reveals or hides the menu, saving screen space.', array('@url' => 'https://en.wikipedia.org/wiki/Hamburger_button')),
+    '#description' => t('On devices with small screens, this option reduces the menu to a toggle button, commonly known as <a href="https://en.wikipedia.org/wiki/Hamburger_button" target="_blank"><em>hamburger button</em></a>. Clicking the icon reveals or hides the menu, saving screen space.'),
   );
 
   return $form;
