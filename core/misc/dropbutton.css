@@ -26,11 +26,11 @@
 .js .dropbutton-widget {
   position: absolute;
   top: 0;
-  right: 0; /* LTR */
+  left: 0; /* LTR */
 }
 [dir="rtl"].js .dropbutton-widget {
-  left: 0;
-  right: auto;
+  right: 0;
+  left: auto;
 }
 /* UL styles are over-scoped in core, so this selector needs weight parity. */
 .js .dropbutton-widget .dropbutton {
