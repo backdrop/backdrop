@@ -1,5 +1,5 @@
 .sm-clean {
-  background: #eeeeee;
+  background: #eee;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   -ms-border-radius: 5px;
@@ -10,7 +10,7 @@
   padding: 13px 20px;
   /* make room for the toggle button (sub indicator) */
   padding-right: 58px;
-  color: #555555;
+  color: #555;
   font-family: "Lucida Sans Unicode", "Lucida Sans", "Lucida Grande", Arial, sans-serif;
   font-size: 18px;
   font-weight: normal;
@@ -21,7 +21,7 @@
   color: #d23600;
 }
 .sm-clean a.disabled {
-  color: #bbbbbb;
+  color: #bbb;
 }
 .sm-clean a span.sub-arrow {
   position: absolute;
@@ -152,7 +152,7 @@
   /* ...end */
   .sm-clean {
     padding: 0 10px;
-    background: #eeeeee;
+    background: #eee;
     -webkit-border-radius: 100px;
     -moz-border-radius: 100px;
     -ms-border-radius: 100px;
@@ -161,7 +161,7 @@
   }
   .sm-clean a, .sm-clean a:hover, .sm-clean a:focus, .sm-clean a:active, .sm-clean a.highlighted {
     padding: 12px 12px;
-    color: #555555;
+    color: #555;
     -webkit-border-radius: 0 !important;
     -moz-border-radius: 0 !important;
     -ms-border-radius: 0 !important;
@@ -175,7 +175,7 @@
     color: #d23600;
   }
   .sm-clean a.disabled {
-    color: #bbbbbb;
+    color: #bbb;
   }
   .sm-clean a.has-submenu {
     padding-right: 24px;
@@ -222,7 +222,7 @@
     border-color: transparent transparent white transparent;
   }
   .sm-clean ul {
-    border: 1px solid #bbbbbb;
+    border: 1px solid #bbb;
     padding: 5px 0;
     background: white;
     -webkit-border-radius: 5px !important;
@@ -237,10 +237,10 @@
   .sm-clean ul a, .sm-clean ul a:hover, .sm-clean ul a:focus, .sm-clean ul a:active, .sm-clean ul a.highlighted {
     border: 0 !important;
     padding: 10px 20px;
-    color: #555555;
+    color: #555;
   }
   .sm-clean ul a:hover, .sm-clean ul a:focus, .sm-clean ul a:active, .sm-clean ul a.highlighted {
-    background: #eeeeee;
+    background: #eee;
     color: #d23600;
   }
   .sm-clean ul a.current {
@@ -248,7 +248,7 @@
   }
   .sm-clean ul a.disabled {
     background: white;
-    color: #cccccc;
+    color: #ccc;
   }
   .sm-clean ul a.has-submenu {
     padding-right: 20px;
@@ -259,7 +259,7 @@
     margin-top: -5px;
     border-width: 5px;
     border-style: dashed dashed dashed solid;
-    border-color: transparent transparent transparent #555555;
+    border-color: transparent transparent transparent #555;
   }
   .sm-clean span.scroll-up,
   .sm-clean span.scroll-down {
@@ -272,7 +272,7 @@
   }
   .sm-clean span.scroll-up:hover,
   .sm-clean span.scroll-down:hover {
-    background: #eeeeee;
+    background: #eee;
   }
   .sm-clean span.scroll-up:hover span.scroll-up-arrow, .sm-clean span.scroll-up:hover span.scroll-down-arrow {
     border-color: transparent transparent #d23600 transparent;
@@ -346,7 +346,7 @@
     background: white;
   }
   .sm-clean.sm-vertical a.disabled {
-    background: #eeeeee;
+    background: #eee;
   }
   .sm-clean.sm-vertical a span.sub-arrow {
     right: 8px;
@@ -354,7 +354,7 @@
     margin-top: -5px;
     border-width: 5px;
     border-style: dashed dashed dashed solid;
-    border-color: transparent transparent transparent #555555;
+    border-color: transparent transparent transparent #555;
   }
   .sm-clean.sm-vertical > li > ul:before,
   .sm-clean.sm-vertical > li > ul:after {
@@ -364,7 +364,7 @@
     padding: 10px 20px;
   }
   .sm-clean.sm-vertical ul a:hover, .sm-clean.sm-vertical ul a:focus, .sm-clean.sm-vertical ul a:active, .sm-clean.sm-vertical ul a.highlighted {
-    background: #eeeeee;
+    background: #eee;
   }
   .sm-clean.sm-vertical ul a.disabled {
     background: white;

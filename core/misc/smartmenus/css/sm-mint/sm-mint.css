@@ -7,7 +7,7 @@
   padding: 13px 20px;
   /* make room for the toggle button (sub indicator) */
   padding-right: 58px;
-  color: #333333;
+  color: #333;
   font-family: Arial, sans-serif;
   font-size: 16px;
   font-weight: normal;
@@ -18,7 +18,7 @@
   font-weight: bold;
 }
 .sm-mint a.disabled {
-  color: #cccccc;
+  color: #ccc;
 }
 .sm-mint a span.sub-arrow {
   position: absolute;
@@ -124,7 +124,7 @@
   }
   .sm-mint a, .sm-mint a:hover, .sm-mint a:focus, .sm-mint a:active, .sm-mint a.highlighted {
     padding: 11px 20px;
-    color: #333333;
+    color: #333;
     -webkit-border-radius: 4px 4px 0 0;
     -moz-border-radius: 4px 4px 0 0;
     -ms-border-radius: 4px 4px 0 0;
@@ -137,14 +137,14 @@
   }
   .sm-mint a.highlighted {
     background: #f6ffed;
-    color: #333333;
+    color: #333;
     -webkit-box-shadow: 0 4px 3px rgba(0, 0, 0, 0.25);
     -moz-box-shadow: 0 4px 3px rgba(0, 0, 0, 0.25);
     box-shadow: 0 4px 3px rgba(0, 0, 0, 0.25);
   }
   .sm-mint a.disabled {
     background: transparent;
-    color: #cccccc;
+    color: #ccc;
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
@@ -206,7 +206,7 @@
   .sm-mint ul a, .sm-mint ul a:hover, .sm-mint ul a:focus, .sm-mint ul a:active, .sm-mint ul a.highlighted {
     border: 0 !important;
     padding: 10px 20px;
-    color: #333333;
+    color: #333;
     -webkit-border-radius: 0;
     -moz-border-radius: 0;
     -ms-border-radius: 0;
@@ -352,7 +352,7 @@
   }
   .sm-mint.sm-vertical a.disabled {
     background: transparent;
-    color: #cccccc;
+    color: #ccc;
   }
   .sm-mint.sm-vertical a span.sub-arrow {
     right: 10px;

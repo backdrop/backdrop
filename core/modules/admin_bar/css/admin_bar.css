@@ -103,7 +103,7 @@
 #admin-bar li > span {
   background: transparent none;
   border: none;
-  color: #EEE;
+  color: #eee;
   font-weight: normal;
   text-align: left; /* LTR */
   text-decoration: none;
@@ -209,7 +209,7 @@
 #admin-bar .dropdown li li a.expanded-trail {
   background-color: #111;
   border-color: #444;
-  color: #EEE;
+  color: #eee;
 }
 
 /* Icon menu */

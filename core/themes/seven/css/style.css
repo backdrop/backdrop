@@ -62,7 +62,7 @@ ul.menu li.expanded {
   display: inline-block;
   background-color: #444b53;
   font-weight: bold;
-  color: #ffffff;
+  color: #fff;
   min-width: 20px;
   padding: 7px 10px;
   -webkit-border-radius: 4px;
@@ -82,7 +82,7 @@ ul.menu li.expanded {
 .item-list .pager a:hover {
   text-decoration: none;
   background-color: #444b53;
-  color: #ffffff;
+  color: #fff;
   transition: background-color 0.6s ease, color 0.6s ease;
 }
 
@@ -537,7 +537,7 @@ tr.drag-previous {
   background: #ffb;
 }
 tr:hover {
-  background: #ffff99;
+  background: #ff9;
 }
 th {
   vertical-align: middle;
@@ -568,7 +568,7 @@ th.select-all {
 }
 th.active {
   background: #444b53;
-  color: #ffffff;
+  color: #fff;
 }
 th a {
   display: block;
@@ -576,7 +576,7 @@ th a {
 }
 th.active a {
   padding: 0 25px 0 0; /* LTR */
-  color: #ffffff;
+  color: #fff;
 }
 [dir="rtl"] table th.active a {
   padding: 0 0 0 25px;
@@ -654,7 +654,7 @@ fieldset {
   padding: 3em 0 0 0; /* LTR */
   border-radius: 4px;
   background-color: #fff;
-  border: 2px solid #EAEAEA;
+  border: 2px solid #eaeaea;
   min-width: 0;
 }
 [dir="rtl"] fieldset {
@@ -1134,7 +1134,7 @@ div.admin-panel h3 {
   padding: 20px 0 0;
   border-radius: 4px;
   background-color: #f7f7f7;
-  border: 2px solid #EAEAEA;
+  border: 2px solid #eaeaea;
 }
 #layout-edit-main .layout {
   margin: 0;
@@ -1194,12 +1194,12 @@ div.admin-panel h3 {
 .layout-settings-form .layout-options .form-type-radio:active label,
 .layout-settings-form .layout-options .form-type-radio:hover label,
 .layout-settings-form .layout-options .form-type-radio input:checked + label {
-  background-color: #ffffff;
+  background-color: #fff;
   border-color: #d0d0d0;
 }
 .layout-settings-page .layout-options .form-type-checkbox input:focus + label,
 .layout-settings-form .layout-options .form-type-radio input:focus + label {
-  background-color: #ffffff;
+  background-color: #fff;
   border-color: #43afe4;
 }
 .layout-settings-page .layout-options .form-type-checkbox img,
@@ -1208,7 +1208,7 @@ div.admin-panel h3 {
   z-index: -1; /* Fix IE issue clicking on image doesn't trigger radio */
   padding: 4px;
   border-radius: 4px;
-  background: #ffffff;
+  background: #fff;
 }
 
 /* Update options. */
@@ -1243,7 +1243,7 @@ div.admin-options div.form-item {
 /* Status report */
 table.system-status-report {
   border-collapse: separate;
-  border: 2px solid #EAEAEA;
+  border: 2px solid #eaeaea;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
@@ -1252,7 +1252,7 @@ table.system-status-report {
 /* Update report */
 table.update {
   border-collapse: separate;
-  border: 2px solid #EAEAEA;
+  border: 2px solid #eaeaea;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
@@ -1431,10 +1431,10 @@ div.add-or-remove-shortcuts {
   line-height: 1.2;
 }
 #field-display-overview tr.field-formatter-settings-changed {
-  background: #ffffbb;
+  background: #ffb;
 }
 #field-display-overview tr.drag {
-  background: #ffee77;
+  background: #fe7;
 }
 #field-display-overview tr.field-formatter-settings-editing {
   background: #d5e9f2;
@@ -1503,7 +1503,7 @@ div.add-or-remove-shortcuts {
 
 /* Views UI */
 .views-ui-display-tab-actions .dropbutton-wrapper input.form-submit {
-  background-color: #ffffff;
+  background-color: #fff;
   color: #0074bd;
 }
 .views-ui-display-tab-actions .dropbutton-wrapper input.form-submit:hover {

@@ -490,13 +490,13 @@ tr:hover del.diffchange {
  * Hero blocks.
  */
 .block-hero {
-  background-color: #cccccc;
+  background-color: #ccc;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: top center;
   padding: 50px 100px;
   text-align: center;
-  color: #ffffff;
+  color: #fff;
   margin-bottom: 50px;
 }
 

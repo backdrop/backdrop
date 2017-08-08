@@ -41,7 +41,7 @@ del {
   text-decoration: line-through;
 }
 tr.odd {
-  background-color: #dddddd;
+  background-color: #ddd;
 }
 img {
   outline: 0;
@@ -592,7 +592,7 @@ ul.tips {
 .l-header .rounded-tabs ul.menu > li > a.active,
 .l-header .square-tabs ul.menu > li > a.active {
   color: #333;
-  background: #ffffff;
+  background: #fff;
 }
 
 .l-header ul.menu > li.last > a {
@@ -650,7 +650,7 @@ ul.tips {
   }
   .l-header ul.menu-dropdown ul {
     border: 0;
-    box-shadow: 2px 2px 2px -2px #333333;
+    box-shadow: 2px 2px 2px -2px #333;
   }
 }
 .l-header .no-tabs ul.menu > li > a.active {
@@ -1160,7 +1160,7 @@ article .link-wrapper ul.links {
   float: right;
 }
 .tabs ul.primary li.active a {
-  border-bottom: 1px solid #ffffff;
+  border-bottom: 1px solid #fff;
 }
 .tabs ul.primary li a {
   color: #000;
@@ -1179,7 +1179,7 @@ article .link-wrapper ul.links {
   border-top-right-radius: 6px;
 }
 .tabs ul.primary li.active a {
-  background-color: #ffffff;
+  background-color: #fff;
 }
 .tabs ul.secondary {
   border-bottom: none;
@@ -1315,8 +1315,8 @@ a.button:active {
 /* -------------- Form Elements   ------------- */
 
 fieldset {
-  background: #ffffff;
-  border: 1px solid #cccccc;
+  background: #fff;
+  border: 1px solid #ccc;
   margin-top: 10px;
   margin-bottom: 32px;
   padding: 0 0 10px;

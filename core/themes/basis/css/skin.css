@@ -86,7 +86,7 @@ table [aria-sort="ascending"] a:after {
  */
 fieldset {
   background-color: #fff;
-  border-color: #EAEAEA;
+  border-color: #eaeaea;
 }
 
 legend {
@@ -334,12 +334,12 @@ fieldset .fieldset-legend {
 }
 
 .menu-dropdown a.disabled {
-  color: #bbbbbb;
+  color: #bbb;
 }
 
 @media (min-width: 48em) {
   .menu-dropdown a.disabled {
-    color: #bbbbbb;
+    color: #bbb;
   }
 
   .js .menu-dropdown ul ul {
@@ -380,7 +380,7 @@ fieldset .fieldset-legend {
 
   .menu-dropdown ul a.disabled {
     background: #fff;
-    color: #cccccc;
+    color: #ccc;
   }
 
   .menu-dropdown ul a span.sub-arrow {
@@ -394,7 +394,7 @@ fieldset .fieldset-legend {
 
   .menu-dropdown span.scroll-up:hover,
   .menu-dropdown span.scroll-down:hover {
-    background: #eeeeee;
+    background: #eee;
   }
 
   .menu-dropdown span.scroll-up-arrow,
