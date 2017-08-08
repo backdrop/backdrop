@@ -6,11 +6,11 @@ body {
 }
 .layout,
 .l-container {
-  background: #fff;
+  background: #ffffff;
 }
 .l-header {
   color: #fffeff;
-  background-color: #000;
+  background-color: #000000;
   background-image: -moz-linear-gradient(top, #000000 0%, #000001 100%);
   background-image: -ms-linear-gradient(top, #000000 0%, #000001 100%);
   background-image: -o-linear-gradient(top, #000000 0%, #000001 100%);
@@ -46,14 +46,14 @@ input {
   color: #3b3b3b;
 }
 .tabs ul.primary > li > a.active {
-  background-color: #fff;
+  background-color: #ffffff;
 }
 .tabs ul.primary > li.active > a {
-  background-color: #fff;
-  border-bottom: 1px solid #fff;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ffffff;
 }
 .comment .comment-arrow {
-  border-color: #fff;
+  border-color: #ffffff;
 }
 
 a,
