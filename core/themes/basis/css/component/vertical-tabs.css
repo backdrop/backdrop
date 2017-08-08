@@ -39,7 +39,7 @@
 }
 @media (min-width: 48em) {
   .vertical-tabs-list {
-    display:block;
+    display: block;
     float: left; /* LTR */
     margin: -1px 0 -1px -15em; /* LTR */
   }
