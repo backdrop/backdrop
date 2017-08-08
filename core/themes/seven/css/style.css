@@ -146,7 +146,7 @@ ul.menu li.expanded {
   padding: 0 3px;
   background: url(../images/angle-right--gray.png) no-repeat center center;
   /* SVG hack */
-  background-image:
+  background-image: 
     linear-gradient(transparent, transparent),
     url(../images/angle-right--gray.svg);
   background-size: auto 100%;
@@ -754,7 +754,6 @@ fieldset .fieldset-wrapper {
 #autocomplete li {
   padding: 0 5px;
 }
-
 
 /**
  * Form elements.

@@ -7,8 +7,8 @@
     padding: 0 0 0 15em; /* LTR */
   }
   [dir="rtl"] .vertical-tabs {
-     padding-left: 0;
-     padding-right: 15em;
+    padding-left: 0;
+    padding-right: 15em;
   }
 }
 .vertical-tabs-list {

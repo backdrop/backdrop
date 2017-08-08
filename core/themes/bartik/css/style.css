@@ -96,7 +96,6 @@ pre {
   white-space: pre-wrap;
 }
 
-
 /* ------------------ Fonts ------------------ */
 
 body,
@@ -591,7 +590,6 @@ ul.tips {
   background: #ffffff;
 }
 
-
 .l-header ul.menu > li.last > a {
   margin-bottom: 1em;
 }
@@ -626,7 +624,6 @@ ul.tips {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }
-
 
   .l-header ul.menu > li {
     float: left; /* LTR */
@@ -1241,7 +1238,7 @@ ul.action-links li a {
   padding: 0;
 }
 
- /* -------------- Hero blocks  -------------- */
+/* -------------- Hero blocks  -------------- */
 
 .block-hero {
   position: relative;
@@ -1268,7 +1265,6 @@ ul.action-links li a {
     font-size: 180%;
   }
 }
-
 
 /* -------------- User Profile   -------------- */
 

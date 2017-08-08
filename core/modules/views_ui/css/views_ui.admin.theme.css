@@ -197,7 +197,7 @@ input.form-radio {
 
 /* Hide 'remove' checkboxes. */
 .views-remove-checkbox {
-    display: none;
+  display: none;
 }
 
 /* sizes the labels of checkboxes and radio button to the height of the text */
@@ -304,7 +304,6 @@ input.form-radio {
   .views-list thead {
     display: none;
   }
-
 
   .views-list td,
   .views-list tr {
@@ -634,10 +633,10 @@ td.group-title {
  */
 
 .views-display-column + .views-display-column {
-   margin-top: 0;
- }
+  margin-top: 0;
+}
 
- /* @end */
+/* @end */
 
 /* @group Auto preview
  *
@@ -702,7 +701,6 @@ td.group-title {
 .views-ui-display-tab-bucket > h3 {
   padding: .75em 1em;
 }
-
 
 .views-ui-display-tab-bucket h3 {
   font-size: small;
@@ -796,7 +794,7 @@ td.group-title {
 }
 
 .views-filterable-options {
-  border-top:  1px solid #CCC;
+  border-top: 1px solid #CCC;
 }
 
 .views-filterable-options .even .form-type-checkbox {
@@ -838,8 +836,6 @@ td.group-title {
 .views-ui-dialog .views-add-form-selected.container-inline > div {
   display: block;
 }
-
-
 
 .views-ui-dialog #edit-selected {
   margin: 0;
@@ -1208,7 +1204,6 @@ html.js #views-live-preview .contextual-links-wrapper {
 }
 
 /* @end */
-
 
 #views-ajax-popup {
   padding: 0 0 1.25em;

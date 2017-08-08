@@ -121,7 +121,7 @@ fieldset .fieldset-legend {
 .icon-external-link-arrow {
   background: #0074bd;
   /* Should be bg color */
-  border-color:  #fff;
+  border-color: #fff;
 }
 
 .icon-external-link-arrow:before {
@@ -402,7 +402,6 @@ fieldset .fieldset-legend {
   }
 }
 
-
 /**
  * Footer styles
  */
@@ -451,7 +450,6 @@ fieldset .fieldset-legend {
 .breadcrumb li:after {
   border-color: #fff;
 }
-
 
 /**
  * Tabledrag
@@ -759,7 +757,6 @@ select.form-select[disabled] {
   background-color: #eee;
   color: #777;
 }
-
 
 ul.action-links a {
   background: transparent url(../images/add.png) no-repeat 0 center;

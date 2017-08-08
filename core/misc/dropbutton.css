@@ -32,6 +32,7 @@
   left: 0;
   right: auto;
 }
+
 /* UL styles are over-scoped in core, so this selector needs weight parity. */
 .js .dropbutton-widget .dropbutton {
   list-style-image: none;
@@ -84,8 +85,7 @@
   -moz-border-radius: 5px;
   border-radius: 5px;
 }
-.dropbutton-multiple .dropbutton a {
-  /* LTR */
+.dropbutton-multiple .dropbutton a { /* LTR */
   -webkit-border-top-left-radius: 5px;
   -webkit-border-bottom-left-radius: 5px;
   -moz-border-radius-topleft: 5px;
@@ -133,8 +133,7 @@
   left: 0;
   right: auto;
 }
-.dropbutton-toggle button {
-  /* LTR */
+.dropbutton-toggle button { /* LTR */
   -webkit-border-top-right-radius: 5px;
   -webkit-border-bottom-right-radius: 5px;
   -moz-border-radius-topright: 5px;

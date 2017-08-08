@@ -7,13 +7,13 @@
   border: 1px solid #ccc;
   background: #fff;
 }
- @media (min-width: 750px) {
+@media (min-width: 750px) {
   .vertical-tabs {
     padding: 0 0 0 15em; /* LTR */
   }
-   [dir="rtl"] .vertical-tabs {
-     padding-left: 0;
-     padding-right: 15em;
+  [dir="rtl"] .vertical-tabs {
+    padding-left: 0;
+    padding-right: 15em;
   }
   .vertical-tabs:before {
     content: '';
@@ -34,13 +34,13 @@
   border-top: 1px solid #ccc;
   padding: 0;
 }
- @media (min-width: 750px) {
+@media (min-width: 750px) {
   .vertical-tabs-list {
-    display:block;
+    display: block;
     float: left; /* LTR */
     margin: -1px 0 -1px -15em; /* LTR */
   }
-   [dir="rtl"] .vertical-tabs-list {
+  [dir="rtl"] .vertical-tabs-list {
     margin-left: 0;
     margin-right: -15em;
     float: right;
@@ -95,7 +95,7 @@
     display: block;
   }
 }
- /* Layout of each tab */
+/* Layout of each tab */
 .vertical-tab-item {
   border: 1px solid #ccc;
   border-left-width: 0; /* LTR */
@@ -116,9 +116,7 @@
   padding: 0.5em 0.6em;
   font-size: 1em;
   cursor: pointer;
-  transition:
-    background-color 0.3s,
-    color 0.3s;
+  transition: background-color 0.3s, color 0.3s;
 }
 .vertical-tab-link span{
   display: block;
@@ -161,7 +159,7 @@
   z-index: 1;
   position: relative;
 }
- [dir="rtl"] .vertical-tab-selected.vertical-tab-item {
+[dir="rtl"] .vertical-tab-selected.vertical-tab-item {
   border-left-width: 0;
   border-right-width: 1px;
 }

@@ -34,6 +34,7 @@
 #admin-bar-wrapper {
   overflow: hidden;
 }
+
 /* When body is a contextual links region. */
 .contextual-links-region #admin-bar {
   top: -33px;
@@ -222,6 +223,7 @@
 #admin-bar-icon .admin-bar-icon img {
   vertical-align: bottom;
 }
+
 /* Add a border when using the default Backdrop logo. */
 #admin-bar-icon .admin-bar-icon img[src$="core/misc/favicon.ico"] {
   outline: 1px solid #45454A;
@@ -238,9 +240,10 @@
 }
 #admin-bar-extra .dropdown li {
   direction: ltr; /* LTR */
-}[dir="rtl"] #admin-bar-extra .dropdown li {
-   direction: rtl;
- }
+}
+[dir="rtl"] #admin-bar-extra .dropdown li {
+  direction: rtl;
+}
 
 /* Online users */
 #admin-bar .dropdown .admin-bar-users a {
