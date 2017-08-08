@@ -14,6 +14,7 @@
 }
 
 .header-identity-wrapper:after {
+
   /* Clearfix */
   content: '';
   display: table;
@@ -75,6 +76,7 @@
 }
 
 .l-header .block-system-header .block-content:after {
+
   /* Clearfix header block */
   content: "";
   display: table;
@@ -89,6 +91,7 @@
 }
 
 .header-menu:after {
+
   /* Clearfix header menu */
   content: "";
   display: table;
@@ -96,6 +99,7 @@
 }
 
 .header-menu > .links {
+
   /* Center menu at mobile */
   display: inline-block;
 }
@@ -126,6 +130,7 @@
 }
 
 .l-header .menu:after {
+
   /* Clearfix menus */
   content: '';
   display: table;
@@ -156,6 +161,7 @@
 }
 
 @media (min-width: 34em) {
+
   /* Specific selector to avoid contextual links */
   .l-header .menu a,
   .header-menu a {
@@ -165,6 +171,7 @@
 
 @media (min-width: 48em) {
   .header-menu a {
+
     /* Attempt at lining up baseline of site name and header menu */
     padding-top: 1.9375rem;
     padding-bottom: 1.0625rem;
@@ -174,6 +181,7 @@
 
 @media (min-width: 62em) {
   .header-menu a {
+
     /* Attempt at lining up baseline of site name and header menu */
     padding-top: 2rem;
     padding-bottom: 1rem;
@@ -189,6 +197,7 @@
 
 .header-menu .links li:before,
 .header-menu .links li:after {
+
   /* Hides arrows intented for action links in body */
   display: none;
 }

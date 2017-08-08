@@ -359,6 +359,7 @@ table.screenshot {
 .exposed-filters .form-select {
   width: 14em;
 }
+
 /* Current filters */
 .exposed-filters .current-filters {
   margin-bottom: 1em;

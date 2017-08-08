@@ -1129,6 +1129,7 @@ div.messages {
   text-align: right;
   min-width: 100%;
   margin: 0;
+
   /* LTR */
   -webkit-border-top-right-radius: 0;
   -webkit-border-bottom-right-radius: 0;
@@ -1179,6 +1180,7 @@ html.js #views-live-preview .contextual-links-wrapper {
 }
 
 #views-live-preview a.contextual-links-trigger {
+
   /* Always show contextual links in Views previews. */
   display: block;
 }

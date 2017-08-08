@@ -16,6 +16,7 @@
 }
 .responsive-tabs-processed .duplicated-tab,
 .responsive-tabs-mobile ul.primary {
+
   /* Hidden elements, hiding from sighted users only */
   visibility: hidden;
   height: 0;
@@ -23,6 +24,7 @@
   clip: rect(1px, 1px, 1px, 1px);
 }
 .expand-dropdown-tabs.responsive-tabs-mobile ul.primary {
+
   /* Reverse hidden elements styles */
   visibility: visible;
   height: auto;

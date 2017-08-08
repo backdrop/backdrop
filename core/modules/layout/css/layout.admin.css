@@ -83,6 +83,7 @@
   float: left;
 }
 .layout-settings-page .layout-options .form-item input.form-checkbox {
+
   /* Needed to override Seven's style.css */
   margin-right: 0;
   margin-left: 0;
@@ -281,6 +282,7 @@
 .layout-content-form .title div.description {
   clear: both;
 }
+
 /* Remove the drop shadow indicating this item is movable */
 .layout-content-form .page-title .layout-editor-block {
   box-shadow: none;

@@ -95,6 +95,7 @@ div.error:before {
     background-image: url(../../../misc/message-32-error.png);
   }
 }
+
 /* SVG overrides */
 div.status:before {
   background-image: linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg);

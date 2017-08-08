@@ -392,8 +392,10 @@ ul.tips {
   word-spacing: 0.1em;
   font-style: italic;
 }
+
 /* Region header blocks. */
 .l-header .block:after {
+
   /* Clearfix */
   content: "";
   display: table;
@@ -450,6 +452,7 @@ ul.tips {
 .l-header .header-menu li.last a {
   border-bottom: 0;
 }
+
 /* User Login block in the header region */
 .l-header .block-user-login {
   width: auto;
@@ -514,6 +517,7 @@ ul.tips {
   background: #fff;
   background: rgba(255, 255, 255, 0.9);
 }
+
 /* Search block in region header. */
 .l-header .block-search-form {
   width: 208px;
@@ -521,6 +525,7 @@ ul.tips {
 .l-header .block-search-form .form-text {
   width: 154px;
 }
+
 /* Language switcher block in region header. */
 .l-header .block-locale ul li {
   display: inline;
@@ -601,6 +606,7 @@ ul.tips {
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
+
 /* Likewise, the last tab is rounded on the bottom. */
 .l-header .rounded-tabs ul.menu > li.last > a {
   -moz-border-radius-bottomleft: 8px;
@@ -1437,6 +1443,7 @@ select.form-select {
 .form-actions {
   padding-top: 10px;
 }
+
 /* Contact Form */
 .contact-form #edit-name {
   width: 75%;

@@ -77,6 +77,7 @@
     width: 100%;
   }
   .vertical-tabs-pane {
+
     /* Using position and height instead of display because of FF issue */
     position: absolute;
     left: -9999em;
@@ -84,6 +85,7 @@
     border: 0;
     background: transparent;
   }
+
   /* Show active pane */
   .vertical-tabs-pane.vertical-tab-selected {
     position: static;
@@ -98,6 +100,7 @@
     display: block;
   }
 }
+
 /* Layout of each tab */
 .vertical-tab-item {
   border: 1px solid #ccc;
@@ -111,6 +114,7 @@
   border-left-width: 1px;
   border-right-width: 0;
 }
+
 /* .vertical-tab-link applies to fieldset legend at small screens and
    a link in .vertical-tabs-list at larger screen sizes */
 .vertical-tab-link {
@@ -175,6 +179,7 @@
   line-height: 1.4;
   margin-bottom: 0;
 }
+
 /* Styles for legend at smaller screen sizes */
 .vertical-tabs-pane > .vertical-tab-link {
   width: 100%;

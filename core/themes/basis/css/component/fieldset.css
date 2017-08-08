@@ -104,6 +104,7 @@ fieldset .fieldset-wrapper {
     display: block;
   }
 }
+
 /* Collapsed state styles */
 .js fieldset.collapsed {
   padding: 3.774em 0 0!important;

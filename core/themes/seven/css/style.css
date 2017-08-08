@@ -145,6 +145,7 @@ ul.menu li.expanded {
   vertical-align: middle;
   padding: 0 3px;
   background: url(../images/angle-right--gray.png) no-repeat center center;
+
   /* SVG hack */
   background-image: 
     linear-gradient(transparent, transparent),
@@ -330,6 +331,7 @@ ul.primary li:last-child a {
     float: left;
   }
 }
+
 /**
  * Secondary admin tabs
  */
@@ -383,6 +385,7 @@ ul.secondary li.active a.active {
  * Page layout.
  */
 .layout {
+
   /* Add a margin to all layouts. */
   margin: 0 20px;
 }
@@ -395,6 +398,7 @@ ul.secondary li.active a.active {
   margin: 0 0 20px;
 }
 .l-header:before {
+
   /* Gray bar background */
   content: '';
   position: absolute;
@@ -411,18 +415,21 @@ ul.secondary li.active a.active {
   background-color: #f0f0f0;
 }
 .l-header:after {
+
   /* Clearfix for IE8 issue */
   content: '';
   display: table;
   clear: both;
 }
 .l-header > * {
+
   /* Makes sure gray bar is behind header content */
   position: relative;
   z-index: 1;
 }
 .layout--one-column #messages,
 .layout--one-column #content .section {
+
   /* Make the one column layout margin match other layouts. */
   margin: 0 15px;
 }
@@ -552,6 +559,7 @@ th:last-child {
   -moz-border-radius: 0 4px 0 0;
   border-radius: 0 4px 0 0;
 }
+
 /**
  * Force browsers to calculate the width of a 'select all' TH element.
  */
@@ -620,6 +628,7 @@ tr.selected td {
     display: none;
   }
 }
+
 /**
  * Fieldsets.
  *
@@ -675,6 +684,7 @@ fieldset fieldset {
 fieldset fieldset fieldset {
   background-color: #f8f8f8;
 }
+
 /**
  * Collapsible Fieldsets
  */
@@ -721,6 +731,7 @@ fieldset .fieldset-wrapper {
     display: block;
   }
 }
+
 /* Collapsed state styles */
 .js fieldset.collapsed {
   padding: 1.6em 0;
@@ -901,6 +912,7 @@ input.form-submit:focus {
 }
 a.button:active,
 input.form-submit:active {
+
   /* @todo, decide on an active state */
   text-decoration: none;
   background-color: #CFDE56;
@@ -1020,6 +1032,7 @@ select.form-select:focus {
   color: #000;
   border-color: #43afe4;
 }
+
 /* de-emphasize the text format */
 select.filter-list {
   padding: 2px 8px;
@@ -1132,6 +1145,7 @@ div.admin-panel h3 {
   background: none;
 }
 #layout-edit-main .l-header:before {
+
   /* Make sure the page gray bg isn't showing inside layout edit area */
   background: transparent;
 }
@@ -1143,6 +1157,7 @@ div.admin-panel h3 {
  * Pretty block radios, `:not(#foo) >` rules out browsers that can't support this
  */
 :not(#foo) > .layout-settings-form .layout-options .form-type-radio input {
+
   /* Hide radios from visuals but not screen-readers */
   position: absolute;
   width: 1px;
@@ -1597,6 +1612,7 @@ div.add-or-remove-shortcuts {
   transition: width .4s;
   will-change: width;
 }
+
 /* Progress Bar Animation */
 .progress .filled:after {
   content: "";

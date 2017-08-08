@@ -14,6 +14,7 @@
 .js .menu-dropdown a:hover,
 .js .menu-dropdown a:focus,
 .js .menu-dropdown a:active {
+
   /* make room for the toggle button (sub indicator) */
   padding-right: 58px;
   font-weight: normal;
@@ -49,6 +50,7 @@
 }
 
 @media (min-width: 48em) {
+
   /* Switch to desktop layout
   -----------------------------------------------
      These transform the menu tree from

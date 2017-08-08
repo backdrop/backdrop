@@ -75,6 +75,7 @@ fieldset.fieldset-no-legend {
   padding: 5px;
 }
 #views-ui-preview-form .form-submit {
+
   /* Make sure button doesn't hang over help text */
   font-size: 0.875em;
   padding: 0 18px;
@@ -300,6 +301,7 @@ table th {
 }
 
 .views-query-info table tr td:last-child {
+
   /* Fixes a Seven style that bleeds down into this table unnecessarily */
   border-right: 0 none;
 }
@@ -335,6 +337,7 @@ table th {
 }
 
 .filterable-option .form-item.form-type-checkbox {
+
   /* This selector is aggressive because Seven's reset for .form-items is aggressive. */
   padding-bottom: 8px;
   padding-left: 8px;

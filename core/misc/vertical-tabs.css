@@ -51,6 +51,7 @@
     border: 0;
     background: transparent;
   }
+
   /* Show active pane */
   .vertical-tabs-pane.vertical-tab-selected {
     display: block;
@@ -63,6 +64,7 @@
     display: block;
   }
 }
+
 /* Layout of each tab */
 .vertical-tab-item {
   background: #eee;
@@ -111,6 +113,7 @@
   line-height: normal;
   margin-bottom: 0;
 }
+
 /* Styles for legend at smaller screen sizes */
 .vertical-tabs-pane > .vertical-tab-link {
   position: relative;
