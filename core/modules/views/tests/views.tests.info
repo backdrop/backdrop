@@ -4,6 +4,12 @@ description = Tests pluggable access for views.
 group = Views Plugins
 file = views_access.test
 
+[ViewsAjaxTest]
+name = Ajax
+description = Test views with and without ajax enabled.
+group = Views Handlers
+file = views_ajax.test
+
 [ViewsAnalyzeTest]
 name = Views Analyze
 description = Test the views analyze system.
