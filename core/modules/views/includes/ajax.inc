@@ -40,7 +40,7 @@ function views_ajax() {
 
     // Load the view.
     $view = views_get_view($name);
-    if ($view && $view->access($display_id)) {
+    if ($view && $view->access($display_id) && $view->set_display($display_id) && $view->display_handler->use_ajax()) {
       // Fix 'q' for paging.
       if (!empty($path)) {
         $_GET['q'] = $path;
