@@ -1,0 +1,105 @@
+<?php
+/**
+ * @file
+ * Definition of ViewsAjaxTest.
+ */
+
+require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
+
+/**
+ * Tests views ajax display.
+ */
+class ViewsAjaxTest extends ViewsSqlTest {
+
+  public function setUp() {
+    parent::setUp('views', 'views_test');
+    // Create a second node.
+    $this->backdropCreateNode(array('type' => 'post', 'status' => NODE_PUBLISHED));
+  }
+
+  /**
+   * Perform a simple AJAX POST HTTP request.
+   *
+   * @param string $path
+   *   Backdrop path where the request should be POSTed.
+   * @param string $accept
+   *   The value for the "Accept" header. Usually either 'application/json' or
+   *   'application/vnd.backdrop-ajax'.
+   * @param array $post
+   *   The POST data. When making a 'application/vnd.backdrop-ajax' request, the
+   *   Ajax page state data should be included. Use getAjaxPageStatePostData()
+   *   for that.
+   *
+   * @return
+   *   The content returned from the call to curl_exec().
+   */
+  public function simpleAjaxPost($path, $accept, $post = array()) {
+    $options['absolute'] = TRUE;
+    foreach ($post as $key => $value) {
+      // Encode according to application/x-www-form-urlencoded
+      // Both names and values needs to be urlencoded, according to
+      // http://www.w3.org/TR/html4/interact/forms.html#h-17.13.4.1
+      $post[$key] = urlencode($key) . '=' . urlencode($value);
+    }
+    $postfields = implode('&', $post);
+    $headers = array(
+      'Accept: ' . $accept,
+      'Content-Type: application/x-www-form-urlencoded',
+    );
+    return $this->curlExec(array(
+      CURLOPT_URL => url($path, $options),
+      CURLOPT_POST => TRUE,
+      CURLOPT_POSTFIELDS => $postfields,
+      CURLOPT_HTTPHEADER => $headers,
+    ));
+  }
+
+  /**
+   * Tests an ajax and non-ajax view.
+   */
+  public function testAjaxView() {
+    $this->backdropCreateNode();
+    $this->backdropGet('test_ajax_view');
+    $backdrop_settings = $this->backdropGetSettings();
+
+    $this->assertTrue(isset($backdrop_settings['views']['ajax_path']), 'The Ajax callback path is set in backdropSettings.');
+    $this->assertEqual(count($backdrop_settings['views']['ajaxViews']), 1);
+    $view_entry = current(array_keys($backdrop_settings['views']['ajaxViews']));
+    $this->assertEqual($backdrop_settings['views']['ajaxViews'][$view_entry]['view_name'], 'test_ajax', 'The view\'s ajaxViews array entry has the correct \'view_name\' key.');
+    $this->assertEqual($backdrop_settings['views']['ajaxViews'][$view_entry]['view_display_id'], 'page', 'The view\'s ajaxViews array entry has the correct \'view_display_id\' key.');
+
+    $post = array(
+      'view_name' => 'test_ajax',
+      'view_display_id' => 'page',
+    );
+
+    $response = $this->simpleAjaxPost('views/ajax', 'application/json', $post);
+    $data = backdrop_json_decode($response);
+
+    $this->assertTrue(isset($data[0]['settings']['views']['ajaxViews']));
+
+    // Ensure that the view insert command is part of the result.
+    $this->assertEqual($data[1]['command'], 'insert');
+    $this->assertTrue(strpos($data[1]['selector'], '.view-dom-id-') === 0);
+
+    $this->backdropSetContent($data[1]['data']);
+    $result = $this->xpath('//div[contains(@class, "views-row")]');
+    $this->assertEqual(count($result), 4, 'Ensure that all site node are rendered in the HTML.');
+
+    $post = array(
+      'view_name' => 'test_noajax',
+      'view_display_id' => 'default',
+    );
+
+    $response = $this->simpleAjaxPost('views/ajax', 'application/json', $post);
+    $data = backdrop_json_decode($response);
+
+    // We get an ajax response with no commands instead of a 403 if
+    // the view cannot be accessed.
+    foreach ($data as $item) {
+      $this->assertIdentical('settings', $item['command']);
+      $this->assertTrue(empty($item['data']));
+    }
+  }
+
+}
