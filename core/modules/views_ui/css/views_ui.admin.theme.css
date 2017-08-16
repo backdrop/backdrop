@@ -384,7 +384,7 @@ th.views-ui-path {
 }
 
 th.views-ui-operations {
-  width: 10%;
+  width: 15%;
 }
 
 /* @end */
@@ -1101,11 +1101,20 @@ div.messages {
 /* @group Drop buttons */
 .views-ui-display-tab-bucket .dropbutton-wrapper {
   position: absolute;
-  right: 12px; /* LTR */
   top: 8px;
 }
-[dir="rtl"] .views-ui-display-tab-bucket .dropbutton-wrapper {
-  left: 20px;
+.views-ui-display-tab-bucket .dropbutton-wrapper.dropbutton-multiple {
+  right: 80px; /* LTR */
+}
+.views-ui-display-tab-bucket .dropbutton-wrapper.dropbutton-single {
+  right: 55px; /* LTR */
+}
+[dir="rtl"] .views-ui-display-tab-bucket .dropbutton-wrapper.dropbutton-multiple {
+  left: 80px;
+  right: auto;
+}
+[dir="rtl"] .views-ui-display-tab-bucket .dropbutton-wrapper.dropbutton-single {
+  left: 55px;
   right: auto;
 }
 .views-ui-display-tab-bucket .dropbutton-wrapper,
