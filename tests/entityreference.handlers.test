@@ -271,7 +271,7 @@ class EntityReferenceHandlersTestCase extends DrupalWebTestCase {
         ),
         'result' => array(
           'user' => array(
-            $users['admin']->uid => '- Restricted access -',
+            $users['admin']->uid => ENTITYREFERENCE_DENIED,
             $users['non_admin']->uid => $user_labels['non_admin'],
           ),
         ),

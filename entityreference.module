@@ -1,5 +1,7 @@
 <?php
 
+define('ENTITYREFERENCE_DENIED', '- Restricted access -');
+
 /**
  * @file
  * Entityreference primary module file.
@@ -1106,10 +1108,14 @@ function entityreference_autocomplete_callback_get_matches($type, $field, $insta
   if (isset($tag_last)) {
     // Get an array of matching entities.
     $entity_labels = $handler->getReferencableEntities($tag_last, $instance['widget']['settings']['match_operator'], 10);
-
+    $denied_label = t(ENTITYREFERENCE_DENIED);
     // Loop through the products and convert them into autocomplete output.
     foreach ($entity_labels as $values) {
       foreach ($values as $entity_id => $label) {
+        // Never autocomplete entities that aren't accessible.
+        if ($label == $denied_label) {
+          continue;
+        }
         $key = "$label ($entity_id)";
         // Strip starting/trailing white spaces, line breaks and tags.
         $key = preg_replace('/\s\s+/', ' ', str_replace("\n", '', trim(decode_entities(strip_tags($key)))));
