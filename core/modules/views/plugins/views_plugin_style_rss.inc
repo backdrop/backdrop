@@ -105,7 +105,10 @@ class views_plugin_style_rss extends views_plugin_style {
 
     // This will be filled in by the row plugin and is used later on in the
     // theming output.
-    $this->namespaces = array('xmlns:dc' => 'http://purl.org/dc/elements/1.1/');
+    $this->namespaces = array(
+      'xmlns:dc' => 'http://purl.org/dc/elements/1.1/',
+      'xmlns:atom' => 'http://www.w3.org/2005/Atom',
+    );
 
     // Fetch any additional elements for the channel and merge in their
     // namespaces.
