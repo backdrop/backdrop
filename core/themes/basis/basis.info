@@ -23,12 +23,14 @@ stylesheets[all][] = css/component/pager.css
 stylesheets[all][] = css/component/hero.css
 stylesheets[all][] = css/component/teasers.css
 stylesheets[all][] = css/component/comment.css
+stylesheets[all][] = css/component/caption.css
 stylesheets[all][] = css/skin.css
 
 stylesheets[print][] = css/print.css
 
 ; Include a style sheet in the rich-text editor.
 ckeditor_stylesheets[] = css/base.css
+ckeditor_stylesheets[] = css/component/caption.css
 
 ; Remove unwanted core CSS
 stylesheets[all][] = system.theme.css
