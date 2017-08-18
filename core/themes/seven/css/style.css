@@ -145,11 +145,7 @@ ul.menu li.expanded {
   vertical-align: middle;
   padding: 0 3px;
   background: url(../images/angle-right--gray.png) no-repeat center center;
-  /* SVG hack */
-  background-image:
-    linear-gradient(transparent, transparent),
-    url(../images/angle-right--gray.svg);
-  background-size: auto 100%;
+  background-size: 8px;
 }
 
 .breadcrumb li.last:after {
@@ -431,68 +427,60 @@ main {
 }
 
 /* Administration page listings. */
-ul.admin-list li {
+.admin-list li {
   position: relative;
-  padding-left: 30px; /* LTR */
-  padding-top: 9px;
+  padding: 9px 15px;
   border-top: 1px solid #ccc;
-  margin-left: 0; /* LTR */
-  margin-bottom: 10px;
-  background: url(../images/list-item.png) no-repeat 0 11px; /* LTR */
+  margin: 0;
+}
+ul.admin-list li {
+  /* Specificity bump to override upstream */
   list-style-type: none;
   list-style-image: none;
 }
-[dir="rtl"] ul.admin-list li {
-  padding: 9px 30px 0 0;
-  margin-right: 0;
-  background: url(../images/list-item-rtl.png) no-repeat right 11px;
-}
-ul.admin-list li:first-child {
+.admin-list li:first-child {
   border-top: none;
 }
 .admin-panel .item-list ul,
-ul.admin-list {
+.admin-list {
   margin: 0;
   padding: 0;
 }
 .admin-panel .item-list ul,
-ul.admin-list.compact {
+.admin-list.compact {
   margin: 8px 0;
 }
 .admin-panel .item-list li,
-ul.admin-list.compact li {
+.admin-list.compact li {
   border: none;
   background: none;
   margin: 0 0 0.75em;
   line-height: 1;
   padding: 0;
 }
-ul.admin-list li:last-child {
+.admin-list li:last-child {
   border-bottom: none;
 }
-ul.admin-list li a {
-  margin-left: -30px; /* LTR */
-  padding: 0 0 4px 30px; /* LTR */
+.admin-list li a {
+  padding: 0 0 4px; /* LTR */
   min-height: 0;
 }
-[dir="rtl"] ul.admin-list li a {
-  margin-right: -30px;
-  margin-left: 0;
-  padding: 0 30px 4px 0;
+[dir="rtl"] .admin-list li a {
+  padding: 0 0 4px;
 }
-ul.admin-list.compact li a {
+.admin-list.compact li a {
   margin-left: 0; /* LTR */
   padding: 0;
 }
-[dir="rtl"] ul.admin-list.compact li a {
+[dir="rtl"] .admin-list.compact li a {
   margin-right: 0;
 }
-ul.admin-list li div.description a {
+.admin-list li div.description a {
   margin-left: 0; /* LTR */
   padding: 0;
   min-height: inherit;
 }
-[dir="rtl"] ul.admin-list li div.description a {
+[dir="rtl"] .admin-list li div.description a {
   margin-right: 0;
 }
 .admin-panel .description {
@@ -1060,6 +1048,7 @@ ul.action-links li {
 ul.action-links a {
   padding-left: 15px; /* LTR */
   background: transparent url(../images/add.png) no-repeat 0 center;
+  background-size: 9px;
   line-height: 30px;
 }
 [dir="rtl"] ul.action-links a {
@@ -1077,27 +1066,59 @@ div.filter-options select {
 /**
  * System.
  */
-div.admin .right,
-div.admin .left {
+.admin .right,
+.admin .left {
   width: 49%;
   margin: 0;
 }
-div.admin-panel,
-div.admin-panel .body {
+.admin-panel,
+.admin-panel .body {
   padding: 0;
   clear: left;
 }
-div.admin-panel {
+.admin-panel {
   margin: 0 0 20px;
   padding: 9px;
   background: #f8f8f8;
   border: 1px solid #ccc;
 }
-div.admin-panel h3 {
+.admin-panel h3 {
+  margin: 4px;
+  padding: 6px 0 6px 35px;
   font-size: 0.923em;
   text-transform: uppercase;
-  margin: 0;
-  padding-bottom: 9px;
+  background: url('../images/fa-chevron-circle-right.png') no-repeat left center;
+  background-size: 21.333333px;
+}
+.admin-panel-people h3 {
+  background-image: url('../images/fa-user.png');
+}
+.admin-panel-content h3 {
+  background-image: url('../images/fa-pencil-square-o.png');
+}
+.admin-panel-system h3 {
+  background-image: url('../images/fa-hdd-o.png');
+}
+.admin-panel-urls h3 {
+  background-image: url('../images/fa-link.png');
+}
+.admin-panel-administration h3 {
+  background-image: url('../images/fa-cog.png');
+}
+.admin-panel-media h3 {
+  background-image: url('../images/fa-picture-o.png');
+}
+.admin-panel-search h3 {
+  background-image: url('../images/fa-search.png');
+}
+.admin-panel-regional h3 {
+  background-image: url('../images/fa-globe.png');
+}
+.admin-panel-development h3 {
+  background-image: url('../images/fa-wrench.png');
+}
+.admin-panel-services h3 {
+  background-image: url('../images/fa-rss.png');
 }
 
 /* admin/appearance */
@@ -1388,6 +1409,7 @@ ol.task-list li.active:after {
 }
 ol.task-list li.done {
   background: transparent url(../images/task-check.png) no-repeat 0 50%;
+  background-size: 14px;
   color: green;
 }
 [dir="rtl"] ol.task-list li.done {
