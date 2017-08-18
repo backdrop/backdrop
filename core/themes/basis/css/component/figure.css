@@ -1,0 +1,26 @@
+/**
+ * @file
+ * Figure and Figure Captions.
+ *
+ * Responsive figure elements, based on http://stackoverflow.com/a/13363408.
+ */
+.caption {
+  display: table;
+  max-width: 100%;
+  margin: 0 12px 10px;
+}
+.caption.align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+.caption > * {
+  display: block;
+  max-width: 100%;
+}
+.caption > figcaption {
+  display: table-caption;
+  caption-side: bottom;
+  max-width: none;
+  padding: .4em .4em;
+  background-color: #eee;
+}

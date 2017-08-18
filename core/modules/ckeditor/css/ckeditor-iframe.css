@@ -33,6 +33,11 @@ ol, ul, dl {
   margin: 10px 0;
 }
 
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 /**
  * CKEditor Image2 widgets wrap images in a <span> tag that requires center
  * alignment. As normally the image itself has the "align-center" class that

@@ -15,6 +15,7 @@ stylesheets[all][] = css/component/backdrop-form.css
 stylesheets[all][] = css/component/tabledrag.css
 stylesheets[all][] = css/component/vertical-tabs.css
 stylesheets[all][] = css/component/fieldset.css
+stylesheets[all][] = css/component/figure.css
 stylesheets[all][] = css/component/dialog.css
 stylesheets[all][] = css/component/progress.css
 stylesheets[all][] = css/component/admin-tabs.css
