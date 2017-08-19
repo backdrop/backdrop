@@ -637,7 +637,7 @@ function _menu_load_objects(&$item, &$map) {
           $return = call_user_func_array($function, $args);
         }
         else {
-          $return = $function($value);
+          $return = ($value[0] === '%') ? NULL : $function($value);
         }
         // If callback returned an error or there is no callback, trigger 404.
         if ($return === FALSE) {
