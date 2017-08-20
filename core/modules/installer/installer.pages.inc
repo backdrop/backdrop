@@ -554,7 +554,7 @@ function installer_browser_installation_theme_form($form, &$form_state, $project
       if (file_exists($themes[$theme]->info['screenshot'])) {
         $form[$theme]['image'] = array(
           '#type' => 'item',
-          '#markup' => theme('image', array('uri' => $themes[$theme]->info['screenshot'])),
+          '#markup' => theme('image', array('path' => $themes[$theme]->info['screenshot'])),
           '#attributes' => array(
             'class' => array('installer-installed-theme-image'),
           ),

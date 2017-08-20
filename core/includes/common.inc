@@ -7531,6 +7531,11 @@ function backdrop_common_theme() {
       'variables' => array('children' => NULL),
     ),
     'image' => array(
+      // Both a "path" and "uri" are supported for specifying image paths.
+      // Path should be used for images relative to Backdrop installation root.
+      // URIs should be used for images within the public or private files
+      // directories (e.g. public://example.png).
+      //
       // HTML 4 and XHTML 1.0 always require an alt attribute. The HTML 5 draft
       // allows the alt attribute to be omitted in some cases. Therefore,
       // default the alt attribute to an empty string, but allow code calling
@@ -7543,7 +7548,7 @@ function backdrop_common_theme() {
       // - http://dev.w3.org/html5/spec/Overview.html#alt
       // The title attribute is optional in all cases, so it is omitted by
       // default.
-      'variables' => array('uri' => NULL, 'width' => NULL, 'height' => NULL, 'alt' => '', 'title' => NULL, 'attributes' => array()),
+      'variables' => array('uri' => NULL, 'path' => NULL, 'width' => NULL, 'height' => NULL, 'alt' => '', 'title' => NULL, 'attributes' => array()),
     ),
     'breadcrumb' => array(
       'variables' => array('breadcrumb' => NULL),

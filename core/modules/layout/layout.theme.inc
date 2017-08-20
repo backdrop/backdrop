@@ -51,7 +51,7 @@ function theme_layout_info($variables) {
 
   // Build template thumbnail preview
   $preview_path = $info['path'] . '/' . $info['preview'];
-  $preview_img = theme('image', array('uri' => $preview_path));
+  $preview_img = theme('image', array('path' => $preview_path));
   $preview = l($preview_img, 'admin/structure/layouts/manage/' . $layout->name, array('html' => TRUE));
 
   // Create a link to the settings page
