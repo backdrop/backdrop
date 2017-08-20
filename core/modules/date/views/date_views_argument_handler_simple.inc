@@ -278,7 +278,7 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
     $this->base_alias = $this->name_alias = $this->query->add_field(NULL, $formula, $this->field . '_summary');
     $this->query->set_count_field(NULL, $formula, $this->field);
 
-    return $this->summary_basics(FALSE);
+    $this->summary_basics(FALSE);
   }
 
   /**

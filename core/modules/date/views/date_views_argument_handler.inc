@@ -126,10 +126,8 @@ class date_views_argument_handler extends date_views_argument_handler_simple {
     // There is no easy way to do summary queries on multiple fields, so remove that option.
     unset($defaults['summary']);
 
-    if ($which) {
-      if (!empty($defaults[$which])) {
-        return $defaults[$which];
-      }
+    if ($which && !empty($defaults[$which])) {
+      return $defaults[$which];
     }
     else {
       return $defaults;
