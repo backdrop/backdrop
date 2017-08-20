@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administration pages for image settings.
@@ -501,8 +500,8 @@ function image_scale_form($data) {
   $form['upscale'] = array(
     '#type' => 'checkbox',
     '#default_value' => (isset($data['upscale'])) ? $data['upscale'] : 0,
-    '#title' => t('Allow Upscaling'),
-    '#description' => t('Let scale make images larger than their original size'),
+    '#title' => t('Enable upscaling'),
+    '#description' => t('Allows images to be made larger than their original size.'),
   );
   return $form;
 }
