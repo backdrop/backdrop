@@ -20,14 +20,12 @@ figure {
   margin: 0;
 }
 
-blockquote,
-figcaption {
-  border-left: 0.25rem solid #c6cad2;
+blockquote {
+  border-left: 0.25rem solid #c6cad2; /* LTR */
 }
-
-figcaption {
-  margin: 0.5em 0 1em;
-  padding: 0.3em 0.5em;
+[dir="rtl"] blockquote {
+  border-left: none;
+  border-right: 0.25rem solid #c6cad2;
 }
 
 blockquote {
