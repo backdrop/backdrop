@@ -10,7 +10,7 @@
 /**
  * Date API argument handler.
  */
-// @codingStandardsIgnoreStart
+
 class date_views_argument_handler extends date_views_argument_handler_simple {
 
   /**
@@ -200,4 +200,3 @@ class date_views_argument_handler extends date_views_argument_handler_simple {
   }
 
 }
-// @codingStandardsIgnoreEnd

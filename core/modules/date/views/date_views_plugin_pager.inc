@@ -69,7 +69,7 @@
 /**
  * Example plugin to handle paging by month.
  */
-// @codingStandardsIgnoreStart
+
 class date_views_plugin_pager extends views_plugin_pager {
 
   /**
@@ -353,4 +353,3 @@ class date_views_plugin_pager extends views_plugin_pager {
     return theme($pager_theme, array('plugin' => $this, 'input' => $input));
   }
 }
-// @codingStandardsIgnoreEnd
