@@ -1124,17 +1124,73 @@ function taxonomy_vocabulary_load($machine_name) {
 }
 
 /**
- * Drupal-compatible wrapper to load a vocabulary by machine name.
+ * Legacy wrapper to return the parents of a term by TID.
  *
  * This function is no longer necessary, as all vocabularies are always loaded
  * by machine name. Simply call taxonomy_vocabulary_load() directly.
  *
- * @deprecated since 1.0
+ * @deprecated since 1.0.0
  * @see taxonomy_vocabulary_load()
  */
 function taxonomy_vocabulary_machine_name_load($machine_name) {
   watchdog_deprecated_function('taxonomy', __FUNCTION__);
   return taxonomy_vocabulary_load($machine_name);
+}
+
+/**
+ * Legacy wrapper to return the parents of a term by TID.
+ *
+ * Do not call this function, use taxonomy_term_load_parents() instead.
+ *
+ * @deprecated since 1.0.0
+ * @see taxonomy_term_load_parents()
+ * @see https://api.backdropcms.org/node/41635
+ */
+function taxonomy_get_parents($tid) {
+  watchdog_deprecated_function('taxonomy', __FUNCTION__);
+  return taxonomy_term_load_parents($tid);
+}
+
+/**
+ * Legacy wrapper to load all the parents of a term by TID.
+ *
+ * Do not call this function, use taxonomy_term_load_parents_all() instead.
+ *
+ * @deprecated since 1.0.0
+ * @see taxonomy_term_load_parents_all()
+ * @see https://api.backdropcms.org/node/41635
+ */
+function taxonomy_get_parents_all($tid) {
+  watchdog_deprecated_function('taxonomy', __FUNCTION__);
+  return taxonomy_term_load_parents_all($tid);
+}
+
+/**
+ * Legacy wrapper to load the children of a TID.
+ *
+ * Do not call this function, use taxonomy_term_load_children() instead.
+ *
+ * @deprecated since 1.0.0
+ * @see taxonomy_term_load_children()
+ * @see https://api.backdropcms.org/node/41635
+ */
+function taxonomy_get_children($tid, $vid = 0) {
+  watchdog_deprecated_function('taxonomy', __FUNCTION__);
+  return taxonomy_term_load_children($tid, $vid = 0);
+}
+
+/**
+ * Legacy wrapper to try to map a string to an existing term.
+ *
+ * Do not call this function, use taxonomy_get_term_by_name() instead.
+ *
+ * @deprecated since 1.0.0
+ * @see taxonomy_term_load_multiple_by_name()
+ * @see https://api.backdropcms.org/node/41635
+ */
+function taxonomy_get_term_by_name($name, $vocabulary = NULL)  {
+  watchdog_deprecated_function('taxonomy', __FUNCTION__);
+  taxonomy_term_load_multiple_by_name($name, $vocabulary = NULL);
 }
 
 /**
