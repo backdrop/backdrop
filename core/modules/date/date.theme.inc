@@ -483,17 +483,17 @@ function template_preprocess_date_views_filter_form(&$variables) {
 /**
  * Jump in and move the pager.
  */
-function date_preprocess_views_view(&$vars) {
-  $view = $vars['view'];
+function date_preprocess_views_view(&$variables) {
+  $view = $variables['view'];
   if (!empty($view->date_info) && !empty($view->date_info->date_pager_position)) {
     switch ($view->date_info->date_pager_position) {
       case 'top':
-        $vars['header'] .= $vars['pager'];
-        $vars['pager'] = '';
+        $variables['header'] .= $variables['pager'];
+        $variables['pager'] = '';
         break;
 
       case 'both':
-        $vars['header'] .= $vars['pager'];
+        $variables['header'] .= $variables['pager'];
         break;
 
       default:
@@ -505,16 +505,16 @@ function date_preprocess_views_view(&$vars) {
 /**
  * Preprocess function for Date pager template.
  */
-function template_preprocess_date_views_pager(&$vars) {
+function template_preprocess_date_views_pager(&$variables) {
   backdrop_add_css(backdrop_get_path('module', 'date') . "/css/date-views.css");
 
-  $plugin = $vars['plugin'];
-  $input = $vars['input'];
+  $plugin = $variables['plugin'];
+  $input = $variables['input'];
   $view = $plugin->view;
 
-  $vars['nav_title'] = '';
-  $vars['next_url'] = '';
-  $vars['prev_url'] = '';
+  $variables['nav_title'] = '';
+  $variables['next_url'] = '';
+  $variables['prev_url'] = '';
 
   if (empty($view->date_info) || empty($view->date_info->min_date)) {
     return;
@@ -559,7 +559,7 @@ function template_preprocess_date_views_pager(&$vars) {
       }
       $prev_path = str_replace($date_info->date_arg, $prev_arg, $date_info->url);
       $prev_args[$pos] = $prev_arg;
-      $vars['prev_url'] = date_pager_url($view, NULL, $prev_arg);
+      $variables['prev_url'] = date_pager_url($view, NULL, $prev_arg);
     }
     if (!empty($next_date)) {
       switch ($granularity) {
@@ -572,29 +572,29 @@ function template_preprocess_date_views_pager(&$vars) {
       }
       $next_path = str_replace($date_info->date_arg, $next_arg, $date_info->url);
       $next_args[$pos] = $next_arg;
-      $vars['next_url'] = date_pager_url($view, NULL, $next_arg);
+      $variables['next_url'] = date_pager_url($view, NULL, $next_arg);
     }
 
-    $vars['next_options'] = $vars['prev_options'] = array();
+    $variables['next_options'] = $variables['prev_options'] = array();
   }
   else {
     $next_path = '';
     $prev_path = '';
-    $vars['next_url'] = '';
-    $vars['prev_url'] = '';
-    $vars['next_options'] = $vars['prev_options'] = array();
+    $variables['next_url'] = '';
+    $variables['prev_url'] = '';
+    $variables['next_options'] = $variables['prev_options'] = array();
   }
 
   // Check whether navigation links would point to
   // a date outside the allowed range.
-  if (!empty($next_date) && !empty($vars['next_url']) && date_format($next_date, 'Y') > $date_info->limit[1]) {
-    $vars['next_url'] = '';
+  if (!empty($next_date) && !empty($variables['next_url']) && date_format($next_date, 'Y') > $date_info->limit[1]) {
+    $variables['next_url'] = '';
   }
-  if (!empty($prev_date) && !empty($vars['prev_url']) && date_format($prev_date, 'Y') < $date_info->limit[0]) {
-    $vars['prev_url'] = '';
+  if (!empty($prev_date) && !empty($variables['prev_url']) && date_format($prev_date, 'Y') < $date_info->limit[0]) {
+    $variables['prev_url'] = '';
   }
-  $vars['prev_options'] += array('attributes' => array());
-  $vars['next_options'] += array('attributes' => array());
+  $variables['prev_options'] += array('attributes' => array());
+  $variables['next_options'] += array('attributes' => array());
   $prev_title = '';
   $next_title = '';
 
@@ -620,16 +620,16 @@ function template_preprocess_date_views_pager(&$vars) {
       $next_title = t('Navigate to next day');
       break;
   }
-  $vars['prev_options']['attributes'] += array('title' => $prev_title);
-  $vars['next_options']['attributes'] += array('title' => $next_title);
+  $variables['prev_options']['attributes'] += array('title' => $prev_title);
+  $variables['next_options']['attributes'] += array('title' => $next_title);
 
   // Add nofollow for next/prev links.
-  $vars['prev_options']['attributes'] += array('rel' => 'nofollow');
-  $vars['next_options']['attributes'] += array('rel' => 'nofollow');
+  $variables['prev_options']['attributes'] += array('rel' => 'nofollow');
+  $variables['next_options']['attributes'] += array('rel' => 'nofollow');
 
   // Need this so we can use '&laquo;' or images in the links.
-  $vars['prev_options'] += array('html' => TRUE);
-  $vars['next_options'] += array('html' => TRUE);
+  $variables['prev_options'] += array('html' => TRUE);
+  $variables['next_options'] += array('html' => TRUE);
 
   $link = FALSE;
   // Month navigation titles are used as links in the block view.
@@ -642,8 +642,8 @@ function template_preprocess_date_views_pager(&$vars) {
     'link' => $link,
   );
   $nav_title = theme('date_nav_title', $params);
-  $vars['nav_title'] = $nav_title;
-  $vars['mini'] = !empty($date_info->mini);
+  $variables['nav_title'] = $nav_title;
+  $variables['mini'] = !empty($date_info->mini);
 }
 
 /**
