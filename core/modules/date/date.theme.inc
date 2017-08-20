@@ -515,6 +515,7 @@ function template_preprocess_date_views_pager(&$variables) {
   $variables['nav_title'] = '';
   $variables['next_url'] = '';
   $variables['prev_url'] = '';
+  $variables['classes'] = array('date-nav-wrapper');
 
   if (empty($view->date_info) || empty($view->date_info->min_date)) {
     return;

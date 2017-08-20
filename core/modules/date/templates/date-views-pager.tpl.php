@@ -6,6 +6,8 @@
  * Available variables:
  * - $plugin: The pager plugin object. This contains the view.
  * - $plugin->view: The view object for this navigation.
+ * - $classes: Array of classes that can be used to style contextually through
+ *   CSS.
  * - $nav_title: The formatted title for this view. In the case of block
  *   views, it will be a link to the full view, otherwise it will
  *   be the formatted name of the year, month, day, or week.
@@ -21,8 +23,8 @@
 <?php if (!empty($pager_prefix)) : ?>
 <?php print $pager_prefix; ?>
 <?php endif; ?>
-<div class="date-nav-wrapper clearfix<?php if (!empty($extra_classes)): print $extra_classes; endif; ?>">
-  <div class="date-nav item-list">
+<div class="<?php print implode(' ', $classes); ?> clearfix">
+  <div class="date-nav">
     <div class="date-heading">
       <h3><?php print $nav_title ?></h3>
     </div>
