@@ -28,6 +28,7 @@
 }
 
 .js .menu-dropdown li.has-children > a {
+
   /* make room for the toggle button (sub indicator) */
   padding-right: 3.625rem;
 }
@@ -67,6 +68,7 @@
 }
 
 @media (min-width: 48em) {
+
   /**
    * Switch to desktop layout
    * These transform the menu tree from
@@ -110,6 +112,7 @@
   .menu-dropdown ul a {
     white-space: normal;
   }
+
   /* END Rules that should not be edited */
 
   .js .menu-dropdown ul ul {

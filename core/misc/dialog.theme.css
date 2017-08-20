@@ -45,6 +45,7 @@
   margin: 0;
 }
 .ui-dialog .ajax-progress-throbber {
+
   /* Can't do center:50% middle: 50%, so approximate it for a typical window size. */
   left: 49%;
   position: fixed;

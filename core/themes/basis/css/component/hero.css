@@ -3,6 +3,7 @@
  * Hero component styling.
  */
 .block-hero {
+
   /* Positioning, width and transform is to make hero full width on smaller screens */
   position: relative;
   left: 50%;
@@ -47,6 +48,7 @@
 
 @media (min-width: 62em) {
   .block-hero {
+
     /* Remove full width styles on larger screens */
     left: auto;
     width: 100%;
@@ -66,6 +68,7 @@
 }
 
 .no-background-blend-mode .block-hero-no-image {
+
   /* Fixes IE bug where text is behind pseudo-element */
   position: relative;
   z-index: 1;

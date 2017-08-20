@@ -102,12 +102,12 @@
  *
  * The tabs that switch between sections
  */
- .views-displays .secondary {
-   border-bottom: 0 none;
-   margin: 0;
-   overflow: visible;
-   padding: 0;
- }
+.views-displays .secondary {
+  border-bottom: 0 none;
+  margin: 0;
+  overflow: visible;
+  padding: 0;
+}
 
 .views-displays .secondary > li {
   border-right: 0 none;
@@ -143,6 +143,7 @@
 .views-display-tab .fieldset-wrapper > .views-ui-display-tab-bucket .actions {
   opacity: 1.0;
 }
+
 /* @end */
 
 /* @group Attachment details new section button */
@@ -198,7 +199,6 @@
 }
 
 /* @end */
-
 
 /* @group Display top area */
 
@@ -263,6 +263,7 @@
 
   #edit-display-settings-top,
   .views-display-columns {
+
     /* Prevent extra spacing on outer edges from child padding */
     margin: 0 -0.5em;
   }
@@ -283,6 +284,7 @@
 /* @group Modal dialog box */
 
 .views-ui-dialog {
+
   /* We need this so the button is visible. */
   overflow: visible;
   position: fixed;
@@ -381,6 +383,7 @@
 div.form-item-options-value-all {
   display: none;
 }
+
 /* @end */
 
 /* @group Backdrop overrides */
@@ -394,8 +397,6 @@ div.form-item-options-value-all {
 }
 
 /* @end */
-
-
 
 /* @group Javascript dependent styling */
 
@@ -418,6 +419,7 @@ html.js span.js-only {
 /* Base Page */
 #views-ui-list-page .ajax-progress-throbber,
 .views-admin .ajax-progress-throbber {
+
   /* Can't do center:50% middle: 50%, so approximate it for a typical window size. */
   left: 49%;
   position: fixed;
@@ -431,6 +433,7 @@ html.js span.js-only {
 
 /* Modal */
 #views-ajax-popup .ajax-progress-throbber {
+
   /* Can't do center:50% middle: 50%, so approximate it for a typical window size. */
   left: 49%;
   position: fixed;

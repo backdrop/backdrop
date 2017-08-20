@@ -133,6 +133,7 @@
 .installer-browser-install-sidebar {
   display: none;
 }
+
 /* Larger screens show the progress steps when installing. */
 @media only screen and (min-width: 768px) {
   .installer-browser-install-sidebar {
@@ -198,7 +199,7 @@
 }
 
 .ui-dialog.project-dialog {
-  max-width:95%;
+  max-width: 95%;
 }
 
 .project-dialog-description {

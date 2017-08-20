@@ -28,6 +28,7 @@
   white-space: pre;
   zoom: 1; /* IE7 */
 }
+
 /* Animated throbber */
 .js input.form-autocomplete {
   background-image: url(../../../misc/throbber-inactive.png);
@@ -199,6 +200,7 @@ table.sticky-header {
 [dir="rtl"] .progress .percentage {
   float: left;
 }
+
 /* Throbber */
 .ajax-progress {
   display: inline-block;
@@ -227,6 +229,7 @@ tr .ajax-progress-throbber .throbber {
 .container-inline label {
   display: inline;
 }
+
 /* Fieldset contents always need to be rendered as block. */
 .container-inline .fieldset-wrapper {
   display: block;

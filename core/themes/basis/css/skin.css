@@ -6,6 +6,7 @@
  */
 body {
   font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+
   /**
    * Default font size for site should be set on body element in rem units.
    * This is better for some accessibility technologies. Although it's not true
@@ -85,7 +86,7 @@ table [aria-sort="ascending"] a:after {
  */
 fieldset {
   background-color: #fff;
-  border-color: #EAEAEA;
+  border-color: #eaeaea;
 }
 
 legend {
@@ -120,8 +121,9 @@ fieldset .fieldset-legend {
 
 .icon-external-link-arrow {
   background: #0074bd;
+
   /* Should be bg color */
-  border-color:  #fff;
+  border-color: #fff;
 }
 
 .icon-external-link-arrow:before {
@@ -176,17 +178,20 @@ fieldset .fieldset-legend {
 }
 
 .block-system-header {
+
   /* Helps center .header-identity-wrapper on smaller screens */
   text-align: center;
 }
 
 .header-identity-wrapper {
+
   /* BG color for slogan, and logo/site name if they don't have a bg */
   background: #000;
 }
 
 @media (min-width: 34em) {
   .header-identity-wrapper {
+
     /* Helps center .header-identity-wrapper on smaller screens */
     display: inline-block;
   }
@@ -217,6 +222,7 @@ fieldset .fieldset-legend {
 .header-logo-wrapper {
   max-width: 6rem;
   height: 3.5rem;
+
   /* Keeps logo in same container as text but avoids padding */
   margin: -1.25rem 1rem -1rem -1.25rem;
 }
@@ -224,6 +230,7 @@ fieldset .fieldset-legend {
 @media (min-width: 48em) {
   .header-logo-wrapper {
     height: 4.25rem;
+
     /* Keeps logo in same container as text but avoids padding */
     margin: -1.75rem 1.25rem -1.25rem -1.25rem;
   }
@@ -282,11 +289,13 @@ fieldset .fieldset-legend {
  * and word size
  */
 .header-menu {
+
   /* Center menu at mobile */
   text-align: center;
 }
 
 .header-menu > .links {
+
   /* Center menu at mobile */
   display: inline-block;
 }
@@ -325,12 +334,12 @@ fieldset .fieldset-legend {
 }
 
 .menu-dropdown a.disabled {
-  color: #bbbbbb;
+  color: #bbb;
 }
 
 @media (min-width: 48em) {
   .menu-dropdown a.disabled {
-    color: #bbbbbb;
+    color: #bbb;
   }
 
   .js .menu-dropdown ul ul {
@@ -371,7 +380,7 @@ fieldset .fieldset-legend {
 
   .menu-dropdown ul a.disabled {
     background: #fff;
-    color: #cccccc;
+    color: #ccc;
   }
 
   .menu-dropdown ul a span.sub-arrow {
@@ -385,7 +394,7 @@ fieldset .fieldset-legend {
 
   .menu-dropdown span.scroll-up:hover,
   .menu-dropdown span.scroll-down:hover {
-    background: #eeeeee;
+    background: #eee;
   }
 
   .menu-dropdown span.scroll-up-arrow,
@@ -402,12 +411,12 @@ fieldset .fieldset-legend {
   }
 }
 
-
 /**
  * Footer styles
  */
 .l-footer {
   border-top: 0.25rem solid #c6cad2;
+
   /* If footer text wraps, remove line-height & add padding styles to blocks */
   line-height: 3;
   padding: 0.5em 0 1em;
@@ -426,11 +435,13 @@ fieldset .fieldset-legend {
 }
 
 .drop-lounging {
+
   /* To make Drop larger/smaller, adjust the width below. */
   width: 7em;
 }
 
 .drop-lounging:before {
+
   /* Uncomment below to remove Drop, or remove markup from block--system--powered-by.tpl.php */
   /* display: none; */
   background-image: url("../images/drop-lounging.png");
@@ -451,7 +462,6 @@ fieldset .fieldset-legend {
 .breadcrumb li:after {
   border-color: #fff;
 }
-
 
 /**
  * Tabledrag
@@ -502,6 +512,7 @@ abbr.tabledrag-changed {
 }
 
 div.status:before {
+
   /* background-image: url(../../../misc/message-24-ok.png); */
   background-color: #CFDE56;
 }
@@ -513,6 +524,7 @@ div.status:before {
 }
 
 div.warning:before {
+
   /* background-image: url(../../../misc/message-24-warning.png); */
   background-color: #FCE400;
 }
@@ -524,6 +536,7 @@ div.warning:before {
 }
 
 div.error:before {
+
   /* background-image: url(../../../misc/message-24-error.png); */
   background-color: #EE3D23;
 }
@@ -531,14 +544,17 @@ div.error:before {
 /* Desktop size icons */
 @media only screen and (min-width: 34em) {
   div.status:before {
+
     /* background-image: url(../../../misc/message-32-ok.png); */
   }
 
   div.warning:before {
+
     /* background-image: url(../../../misc/message-32-warning.png); */
   }
 
   div.error:before {
+
     /* background-image: url(../../../misc/message-32-error.png); */
   }
 }
@@ -549,16 +565,19 @@ div.error:before {
  * SVGs.
  */
 div.status:before {
+
   /* background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg); */
   /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg); */
 }
 
 div.warning:before {
+
   /* background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg); */
   /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg); */
 }
 
 div.error:before {
+
   /* background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-error.svg); */
   /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-error.svg); */
 }
@@ -760,7 +779,6 @@ select.form-select[disabled] {
   color: #777;
 }
 
-
 ul.action-links a {
   background: transparent url(../images/add.png) no-repeat 0 center;
   line-height: 1.875;
@@ -828,6 +846,7 @@ ul.action-links a {
 .pager-next a:before,
 .pager-last a:before,
 .pager-last a:after {
+
   /* Mobile chevron color */
   border-color: #fff;
 }
@@ -906,6 +925,7 @@ ul.action-links a {
 }
 
 .no-background-blend-mode .block-hero-no-image:before {
+
   /* If we don't have blend-modes, use a more saturated version of overlay color */
   /* Semi-transparent overlay has similar effect as luminosity */
   background: #009dff;
@@ -928,6 +948,7 @@ ul.action-links a {
  * Primary admin tabs
  */
 nav.tabs:before {
+
   /* Background behind primary tabs */
   background-color: #586172;
 }

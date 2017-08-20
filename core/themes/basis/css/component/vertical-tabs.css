@@ -10,13 +10,13 @@
   border: 1px solid #ccc;
   background: #fff;
 }
- @media (min-width: 48em) {
+@media (min-width: 48em) {
   .vertical-tabs {
     padding: 0 0 0 15em; /* LTR */
   }
-   [dir="rtl"] .vertical-tabs {
-     padding-left: 0;
-     padding-right: 15em;
+  [dir="rtl"] .vertical-tabs {
+    padding-left: 0;
+    padding-right: 15em;
   }
   .vertical-tabs:before {
     content: '';
@@ -37,13 +37,13 @@
   border-top: 1px solid #ccc;
   padding: 0;
 }
- @media (min-width: 48em) {
+@media (min-width: 48em) {
   .vertical-tabs-list {
-    display:block;
+    display: block;
     float: left; /* LTR */
     margin: -1px 0 -1px -15em; /* LTR */
   }
-   [dir="rtl"] .vertical-tabs-list {
+  [dir="rtl"] .vertical-tabs-list {
     margin-left: 0;
     margin-right: -15em;
     float: right;
@@ -77,6 +77,7 @@
     width: 100%;
   }
   .vertical-tabs-pane {
+
     /* Using position and height instead of display because of FF issue */
     position: absolute;
     left: -9999em;
@@ -84,6 +85,7 @@
     border: 0;
     background: transparent;
   }
+
   /* Show active pane */
   .vertical-tabs-pane.vertical-tab-selected {
     position: static;
@@ -98,7 +100,8 @@
     display: block;
   }
 }
- /* Layout of each tab */
+
+/* Layout of each tab */
 .vertical-tab-item {
   border: 1px solid #ccc;
   border-left-width: 0; /* LTR */
@@ -111,6 +114,7 @@
   border-left-width: 1px;
   border-right-width: 0;
 }
+
 /* .vertical-tab-link applies to fieldset legend at small screens and
    a link in .vertical-tabs-list at larger screen sizes */
 .vertical-tab-link {
@@ -160,7 +164,7 @@
   background-color: #fff;
   border-right-width: 0; /* LTR */
 }
- [dir="rtl"] .vertical-tab-selected.vertical-tab-item {
+[dir="rtl"] .vertical-tab-selected.vertical-tab-item {
   border-left-width: 0;
   border-right-width: 1px;
 }
@@ -175,6 +179,7 @@
   line-height: 1.4;
   margin-bottom: 0;
 }
+
 /* Styles for legend at smaller screen sizes */
 .vertical-tabs-pane > .vertical-tab-link {
   width: 100%;

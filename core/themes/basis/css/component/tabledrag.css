@@ -117,7 +117,7 @@ tr.draggable .handle .handle-inner:after {
   top: 0;
   left: 0;
   -webkit-transform: translate(-0.375em, -0.25em);
-          transform: translate(-0.375em, -0.25em);
+  transform: translate(-0.375em, -0.25em);
   border: 0.375em solid transparent;
   border-right-color: #333;
   border-left: 0;

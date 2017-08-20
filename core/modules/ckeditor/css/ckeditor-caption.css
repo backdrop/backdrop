@@ -22,6 +22,7 @@
 }
 .caption > figcaption {
   display: block;
+
   /* Compensate for the space required by the CKEditor drag handle. */
   margin-top: -3px;
   padding: 3px 6px;

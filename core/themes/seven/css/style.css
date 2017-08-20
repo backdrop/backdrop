@@ -62,7 +62,7 @@ ul.menu li.expanded {
   display: inline-block;
   background-color: #444b53;
   font-weight: bold;
-  color: #ffffff;
+  color: #fff;
   min-width: 20px;
   padding: 7px 10px;
   -webkit-border-radius: 4px;
@@ -82,7 +82,7 @@ ul.menu li.expanded {
 .item-list .pager a:hover {
   text-decoration: none;
   background-color: #444b53;
-  color: #ffffff;
+  color: #fff;
   transition: background-color 0.6s ease, color 0.6s ease;
 }
 
@@ -145,8 +145,9 @@ ul.menu li.expanded {
   vertical-align: middle;
   padding: 0 3px;
   background: url(../images/angle-right--gray.png) no-repeat center center;
+
   /* SVG hack */
-  background-image:
+  background-image: 
     linear-gradient(transparent, transparent),
     url(../images/angle-right--gray.svg);
   background-size: auto 100%;
@@ -330,6 +331,7 @@ ul.primary li:last-child a {
     float: left;
   }
 }
+
 /**
  * Secondary admin tabs
  */
@@ -383,6 +385,7 @@ ul.secondary li.active a.active {
  * Page layout.
  */
 .layout {
+
   /* Add a margin to all layouts. */
   margin: 0 20px;
 }
@@ -395,6 +398,7 @@ ul.secondary li.active a.active {
   margin: 0 0 20px;
 }
 .l-header:before {
+
   /* Gray bar background */
   content: '';
   position: absolute;
@@ -411,18 +415,21 @@ ul.secondary li.active a.active {
   background-color: #f0f0f0;
 }
 .l-header:after {
+
   /* Clearfix for IE8 issue */
   content: '';
   display: table;
   clear: both;
 }
 .l-header > * {
+
   /* Makes sure gray bar is behind header content */
   position: relative;
   z-index: 1;
 }
 .layout--one-column #messages,
 .layout--one-column #content .section {
+
   /* Make the one column layout margin match other layouts. */
   margin: 0 15px;
 }
@@ -530,7 +537,7 @@ tr.drag-previous {
   background: #ffb;
 }
 tr:hover {
-  background: #ffff99;
+  background: #ff9;
 }
 th {
   vertical-align: middle;
@@ -552,6 +559,7 @@ th:last-child {
   -moz-border-radius: 0 4px 0 0;
   border-radius: 0 4px 0 0;
 }
+
 /**
  * Force browsers to calculate the width of a 'select all' TH element.
  */
@@ -560,7 +568,7 @@ th.select-all {
 }
 th.active {
   background: #444b53;
-  color: #ffffff;
+  color: #fff;
 }
 th a {
   display: block;
@@ -568,7 +576,7 @@ th a {
 }
 th.active a {
   padding: 0 25px 0 0; /* LTR */
-  color: #ffffff;
+  color: #fff;
 }
 [dir="rtl"] table th.active a {
   padding: 0 0 0 25px;
@@ -620,6 +628,7 @@ tr.selected td {
     display: none;
   }
 }
+
 /**
  * Fieldsets.
  *
@@ -645,7 +654,7 @@ fieldset {
   padding: 3em 0 0 0; /* LTR */
   border-radius: 4px;
   background-color: #fff;
-  border: 2px solid #EAEAEA;
+  border: 2px solid #eaeaea;
   min-width: 0;
 }
 [dir="rtl"] fieldset {
@@ -675,6 +684,7 @@ fieldset fieldset {
 fieldset fieldset fieldset {
   background-color: #f8f8f8;
 }
+
 /**
  * Collapsible Fieldsets
  */
@@ -721,6 +731,7 @@ fieldset .fieldset-wrapper {
     display: block;
   }
 }
+
 /* Collapsed state styles */
 .js fieldset.collapsed {
   padding: 1.6em 0;
@@ -754,7 +765,6 @@ fieldset .fieldset-wrapper {
 #autocomplete li {
   padding: 0 5px;
 }
-
 
 /**
  * Form elements.
@@ -902,6 +912,7 @@ input.form-submit:focus {
 }
 a.button:active,
 input.form-submit:active {
+
   /* @todo, decide on an active state */
   text-decoration: none;
   background-color: #CFDE56;
@@ -1021,6 +1032,7 @@ select.form-select:focus {
   color: #000;
   border-color: #43afe4;
 }
+
 /* de-emphasize the text format */
 select.filter-list {
   padding: 2px 8px;
@@ -1122,7 +1134,7 @@ div.admin-panel h3 {
   padding: 20px 0 0;
   border-radius: 4px;
   background-color: #f7f7f7;
-  border: 2px solid #EAEAEA;
+  border: 2px solid #eaeaea;
 }
 #layout-edit-main .layout {
   margin: 0;
@@ -1133,6 +1145,7 @@ div.admin-panel h3 {
   background: none;
 }
 #layout-edit-main .l-header:before {
+
   /* Make sure the page gray bg isn't showing inside layout edit area */
   background: transparent;
 }
@@ -1144,6 +1157,7 @@ div.admin-panel h3 {
  * Pretty block radios, `:not(#foo) >` rules out browsers that can't support this
  */
 :not(#foo) > .layout-settings-form .layout-options .form-type-radio input {
+
   /* Hide radios from visuals but not screen-readers */
   position: absolute;
   width: 1px;
@@ -1180,12 +1194,12 @@ div.admin-panel h3 {
 .layout-settings-form .layout-options .form-type-radio:active label,
 .layout-settings-form .layout-options .form-type-radio:hover label,
 .layout-settings-form .layout-options .form-type-radio input:checked + label {
-  background-color: #ffffff;
+  background-color: #fff;
   border-color: #d0d0d0;
 }
 .layout-settings-page .layout-options .form-type-checkbox input:focus + label,
 .layout-settings-form .layout-options .form-type-radio input:focus + label {
-  background-color: #ffffff;
+  background-color: #fff;
   border-color: #43afe4;
 }
 .layout-settings-page .layout-options .form-type-checkbox img,
@@ -1194,7 +1208,7 @@ div.admin-panel h3 {
   z-index: -1; /* Fix IE issue clicking on image doesn't trigger radio */
   padding: 4px;
   border-radius: 4px;
-  background: #ffffff;
+  background: #fff;
 }
 
 /* Update options. */
@@ -1229,7 +1243,7 @@ div.admin-options div.form-item {
 /* Status report */
 table.system-status-report {
   border-collapse: separate;
-  border: 2px solid #EAEAEA;
+  border: 2px solid #eaeaea;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
@@ -1238,7 +1252,7 @@ table.system-status-report {
 /* Update report */
 table.update {
   border-collapse: separate;
-  border: 2px solid #EAEAEA;
+  border: 2px solid #eaeaea;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
@@ -1417,10 +1431,10 @@ div.add-or-remove-shortcuts {
   line-height: 1.2;
 }
 #field-display-overview tr.field-formatter-settings-changed {
-  background: #ffffbb;
+  background: #ffb;
 }
 #field-display-overview tr.drag {
-  background: #ffee77;
+  background: #fe7;
 }
 #field-display-overview tr.field-formatter-settings-editing {
   background: #d5e9f2;
@@ -1489,7 +1503,7 @@ div.add-or-remove-shortcuts {
 
 /* Views UI */
 .views-ui-display-tab-actions .dropbutton-wrapper input.form-submit {
-  background-color: #ffffff;
+  background-color: #fff;
   color: #0074bd;
 }
 .views-ui-display-tab-actions .dropbutton-wrapper input.form-submit:hover {
@@ -1598,6 +1612,7 @@ div.add-or-remove-shortcuts {
   transition: width .4s;
   will-change: width;
 }
+
 /* Progress Bar Animation */
 .progress .filled:after {
   content: "";

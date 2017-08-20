@@ -69,11 +69,11 @@ input#edit-filters-filter-html-settings-allowed-html {
   display: inline-block;
   padding: 0 1em;
   border-left: none;
-  border-right: 1px solid #CCC;
+  border-right: 1px solid #ccc;
 }
 [dir="rtl"] .editor-image-toggle {
   border-right: none;
-  border-left: 1px solid #CCC;
+  border-left: 1px solid #ccc;
 }
 [dir="ltr"] .editor-image-toggle.first {
   padding-left: 0;
