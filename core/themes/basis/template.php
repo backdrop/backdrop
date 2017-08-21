@@ -65,6 +65,18 @@ function basis_preprocess_header(&$variables) {
 }
 
 /**
+ * Implements template_preprocess_node().
+ *
+ * @see node.tpl.php
+ */
+function basis_preprocess_node(&$variables) {
+  // Add translated string for displaying draft status.
+  if (!$variables['node']->status) {
+    $variables['attributes']['data-status'] = t('Draft');
+  }
+}
+
+/**
  * Overrides theme_breadcrumb().
  *
  * Removes &raquo; from markup.
