@@ -614,7 +614,11 @@ function path_punctuation_chars() {
     else {
       $punctuation = array();
       $punctuation['double_quotes']      = array('value' => '"', 'name' => t('Double quotation marks'));
-      $punctuation['quotes']             = array('value' => '\'', 'name' => t("Single quotation marks (apostrophe)"));
+      $punctuation['quotes']             = array('value' => '\'', 'name' => t('Single quotation marks (apostrophe)'));
+      $punctuation['opening_double_quotes'] = array('value' => '“', 'name' => t('Opening curly double quotation marks'));
+      $punctuation['closing_double_quotes'] = array('value' => '”', 'name' => t('Closing curly double quotation marks'));
+      $punctuation['opening_quotes']        = array('value' => '‘', 'name' => t('Opening curly single quotation marks (apostrophe)'));
+      $punctuation['closing_quotes']        = array('value' => '’', 'name' => t('Closing curly single quotation marks (apostrophe)'));
       $punctuation['backtick']           = array('value' => '`', 'name' => t('Back tick'));
       $punctuation['comma']              = array('value' => ',', 'name' => t('Comma'));
       $punctuation['period']             = array('value' => '.', 'name' => t('Period'));
