@@ -144,7 +144,7 @@ ul.menu li.expanded {
   height: 1em;
   vertical-align: middle;
   padding: 0 3px;
-  background: url(../images/angle-right--gray.png) no-repeat center center;
+  background: url(../images/fa-chevron-right--gray--32.png) no-repeat center center;
   background-size: 8px;
 }
 
@@ -1047,7 +1047,7 @@ ul.action-links li {
 }
 ul.action-links a {
   padding-left: 15px; /* LTR */
-  background: transparent url(../images/add.png) no-repeat 0 center;
+  background: transparent url(../images/fa-plus--blue--32.png) no-repeat 0 center;
   background-size: 9px;
   line-height: 30px;
 }
@@ -1408,12 +1408,12 @@ ol.task-list li.active:after {
   border-right-color: #E8E6E5;
 }
 ol.task-list li.done {
-  background: transparent url(../images/task-check.png) no-repeat 0 50%;
+  background: transparent url(../images/fa-check--green--32.png) no-repeat 0 50%;
   background-size: 14px;
   color: green;
 }
 [dir="rtl"] ol.task-list li.done {
-  background: transparent url(../images/task-check.png) no-repeat right 50%;
+  background: transparent url(../images/fa-check--green--32.png) no-repeat right 50%;
 }
 
 .step-indicator {
