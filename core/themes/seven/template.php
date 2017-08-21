@@ -33,6 +33,11 @@ function seven_preprocess_layout(&$variables) {
       }
     }
   }
+  $path_array = explode('/', current_path());
+  if ($path_array[0] == 'admin' && $path_array[1] == 'config' && isset($path_array[2])) {
+    $variables['classes'][] = 'admin-config';
+    $variables['classes'][] = 'admin-config-' . $path_array[2];
+  }
 }
 
 /**
@@ -148,4 +153,35 @@ function seven_breadcrumb($variables) {
 
 function seven_preprocess_maintenance_page(&$variables) {
   $variables['html_attributes']['class'][] = 'maintenance-page-wrapper';
+}
+
+/**
+ * Overridde theme_admin_block()
+ */
+function seven_admin_block($variables) {
+  $block = $variables['block'];
+  $output = '';
+
+  // Construct class
+  $path_array = explode('/', $variables['block']['path']);
+  $class_suffix = end($path_array);
+
+  // Don't display the block if it has no content to display.
+  if (empty($block['show'])) {
+    return $output;
+  }
+
+  $output .= '<div class="admin-panel admin-panel-' . $class_suffix . '">';
+  if (!empty($block['title'])) {
+    $output .= '<h3>' . $block['title'] . '</h3>';
+  }
+  if (!empty($block['content'])) {
+    $output .= '<div class="body">' . $block['content'] . '</div>';
+  }
+  else {
+    $output .= '<div class="description">' . $block['description'] . '</div>';
+  }
+  $output .= '</div>';
+
+  return $output;
 }
