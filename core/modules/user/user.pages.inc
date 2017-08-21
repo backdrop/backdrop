@@ -550,8 +550,11 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
 function user_page() {
   global $user;
   if ($user->uid) {
+    $current_path = $_GET['q'];
     menu_set_active_item('user/' . $user->uid);
-    return menu_execute_active_handler(NULL, FALSE, 'menu_default_route_handler');
+    $output = menu_execute_active_handler(NULL, FALSE, 'menu_default_route_handler');
+    menu_set_active_item($current_path);
+    return $output;
   }
   else {
     return backdrop_get_form('user_login');
