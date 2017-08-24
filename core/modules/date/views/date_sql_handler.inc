@@ -72,24 +72,8 @@ class date_sql_handler {
    */
   public function set_db_timezone($offset = '+00:00') {
     static $already_set = FALSE;
-    $type = Database::getConnection()->databaseType();
     if (!$already_set) {
-      switch ($type) {
-        case 'mysql':
-          db_query("SET @@session.time_zone = '$offset'");
-          break;
-
-        case 'pgsql':
-          db_query("SET TIME ZONE INTERVAL '$offset' HOUR TO MINUTE");
-          break;
-
-        case 'sqlsrv':
-          // Issue #1201342, This is the wrong way to set the timezone, this
-          // still needs to be fixed. In the meantime, commenting this out makes
-          // SQLSRV functional.
-          // db_query('TimeZone.setDefault(TimeZone.getTimeZone("GMT"))');
-          break;
-      }
+      Database::getConnection()->setSessionTimezoneOffset($offset);
       $already_set = TRUE;
     }
   }

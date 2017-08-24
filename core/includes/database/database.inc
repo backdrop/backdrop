@@ -1359,6 +1359,11 @@ abstract class DatabaseConnection extends PDO {
     // UTF-8.
     return FALSE;
   }
+
+  /**
+   * Set the session timezone by offset.
+   */
+  abstract public function setSessionTimezoneOffset($offset);
 }
 
 /**
