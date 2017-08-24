@@ -314,7 +314,7 @@ function views_get_timezone() {
   $offset = '+00:00';
   static $already_set = FALSE;
   if (!$already_set) {
-    db_query("SET @@session.time_zone = '$offset'");
+    Database::getConnection('default')->setSessionTimezoneOffset($offset);
     $already_set = true;
   }
 

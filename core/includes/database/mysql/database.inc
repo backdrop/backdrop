@@ -259,6 +259,10 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     $this->query("DROP TABLE {backdrop_utf8mb4_test}");
     return TRUE;
   }
+
+  public function setSessionTimezoneOffset($offset) {
+    $this->query("SET @@session.time_zone = :offset", array(':offset' => $offset));
+  }
 }
 
 
