@@ -301,9 +301,9 @@
   margin: 1em 0;
   padding: 0 20px;
 }
-.form-item-reusable-admin-label {
+.form-item.form-item-reusable-admin-label {
   padding-left: 20px;
 }
-[dir="rtl"] .form-item-reusable-admin-label {
+[dir="rtl"] .form-item.form-item-reusable-admin-label {
   padding-right: 20px;
 }
