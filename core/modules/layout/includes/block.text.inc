@@ -79,7 +79,7 @@ class BlockText extends Block {
         '#description' => t('If enabled, this block will be made reusable across different layouts and will be listed in the !link page. This option may not be unchecked once enabled.', array('!link' => l(t('Custom blocks'), 'admin/structure/block'))),
         '#weight' => 1,
       );
-      $form['convert']['label'] = array(
+      $form['convert']['reusable-admin-label'] = array(
         '#type' => 'textfield',
         '#title' => t('Admin label'),
         '#maxlength' => 64,
