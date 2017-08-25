@@ -103,7 +103,7 @@ class BlockText extends Block {
         '#title' => t('Machine-readable name'),
         '#maxlength' => 64,
         '#machine_name' => array(
-          'source' => array('convert', 'label'),
+          'source' => array('convert', 'reusable-admin-label'),
           'exists' => 'block_custom_block_load',
         ),
         '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
@@ -132,11 +132,11 @@ class BlockText extends Block {
     parent::formValidate($form, $form_state);
 
     if (module_exists('block')) {
-      $label = trim($form_state['values']['label']);
+      $reusable_admin_label = trim($form_state['values']['reusable-admin-label']);
       $delta = trim($form_state['values']['delta']);
       if ($form_state['values']['reusable']) {
-        if (empty($label)) {
-          form_error($form['convert']['label'], t('Admin label is required when making a block reusable.'));
+        if (empty($reusable_admin_label)) {
+          form_error($form['convert']['reusable-admin-label'], t('Admin label is required when making a block reusable.'));
         }
         elseif (empty($delta)) {
           form_error($form['convert']['delta'], t('A machine-readable name is required when making a block reusable.'));
@@ -157,7 +157,7 @@ class BlockText extends Block {
       $this->plugin = 'block:' . $delta;
 
       $edit = array(
-        'info' => $form_state['values']['label'],
+        'info' => $form_state['values']['reusable-admin-label'],
         'title' => $form_state['values']['title'],
         'body' => $form_state['values']['content'],
       );
