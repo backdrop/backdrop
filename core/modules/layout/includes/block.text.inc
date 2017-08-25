@@ -98,7 +98,7 @@ class BlockText extends Block {
           ),
         ),
       );
-      $form['convert']['delta'] = array(
+      $form['convert']['reusable-delta'] = array(
         '#type' => 'machine_name',
         '#title' => t('Machine-readable name'),
         '#maxlength' => 64,
@@ -133,13 +133,13 @@ class BlockText extends Block {
 
     if (module_exists('block')) {
       $reusable_admin_label = trim($form_state['values']['reusable-admin-label']);
-      $delta = trim($form_state['values']['delta']);
+      $delta = trim($form_state['values']['reusable-delta']);
       if ($form_state['values']['reusable']) {
         if (empty($reusable_admin_label)) {
           form_error($form['convert']['reusable-admin-label'], t('Admin label is required when making a block reusable.'));
         }
         elseif (empty($delta)) {
-          form_error($form['convert']['delta'], t('A machine-readable name is required when making a block reusable.'));
+          form_error($form['convert']['reusable-delta'], t('A machine-readable name is required when making a block reusable.'));
         }
       }
     }
