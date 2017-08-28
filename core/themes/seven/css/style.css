@@ -1585,57 +1585,71 @@ div.add-or-remove-shortcuts {
 }
 .progress .bar {
   margin: 0 0.2em .5em 0;
-  border: 2px solid #e5e5e6;
-  border-radius: 3px;
+  border: 2px solid #d0d0d0;
+  border-radius: 4px;
   overflow: hidden;
-  background: #e5e5e6;
+  background: #eaeaea;
+  height: 2.5em;
 }
 .progress .filled {
+  background: #0074bd;
+  background-image: -webkit-linear-gradient(#0085D9, #0074bd);
+  height: 100%;
   position: relative;
   overflow: hidden;
-  background: #CFDE56;
+  border-radius: 3px;
+}
+.progress .filled:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
   -webkit-transition: width .4s;
   transition: width .4s;
   will-change: width;
+  background-image: -webkit-gradient(linear, 0 0, 100% 100%,
+    color-stop(.25, rgba(255, 255, 255, .2)),
+    color-stop(.25, transparent), color-stop(.5, transparent),
+    color-stop(.5, rgba(255, 255, 255, .2)),
+    color-stop(.75, rgba(255, 255, 255, .2)),
+    color-stop(.75, transparent), to(transparent)
+  );
+  background-image: linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, .2) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, .2) 50%,
+    rgba(255, 255, 255, .2) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 50px 50px;
+  padding: 0 1px;
+  height: 2.5em;
+  -webkit-animation: animate-stripes 2s linear infinite;
+  -moz-animation: animate-stripes 2s linear infinite;
+  -webkit-transition: width 0.5s ease-out;
+  transition: width 0.5s ease-out;
 }
-/* Progress Bar Animation */
-.progress .filled:after {
-  content: "";
-  position: absolute;
-  display: block;
-  width: 15%;
-  height: 100%;
-  background: -webkit-linear-gradient(0deg, #CFDE56 0%, #dbe788 60%, #CFDE56 65%);
-  background: linear-gradient(90deg, #CFDE56 0%, #dbe788 60%, #CFDE56 65%);
-  background-color: #CFDE56;
-  border-radius: 3px;
-  background-size: auto 200%;
-  background-position: 0 100%;
-  -webkit-animation: progressGradient 3s infinite;
-  animation: progressGradient 3s infinite;
-  -webkit-animation-fill-mode: forwards;
-  animation-fill-mode: forwards;
-  -webkit-animation-timing-function: linear;
-  animation-timing-function: linear;
-  -webkit-transition: width .4s;
-  transition: width .4s;
-  will-change: left, width;
-}
-
-@-webkit-keyframes progressGradient {
-  0% {
-    left: -15%;
-  }
-  100% {
-    left: 100%;
-  }
+[dir="rtl"] .progress .filled:after {
+  animation-direction: reverse;
+  -webkit-animation-direction: reverse;
+  -moz-animation-direction: reverse;
 }
 
-@keyframes progressGradient {
-  0% {
-    left: -15%;
-  }
-  100% {
-    left: 100%;
-  }
+/**
+ * Progress bar animations.
+ */
+@-webkit-keyframes animate-stripes {
+  0% { background-position: 0 0; } 100% { background-position: 50px 50px; }
+}
+@-ms-keyframes animate-stripes {
+  0% { background-position: 0 0; } 100% { background-position: 50px 50px; }
+}
+@keyframes animate-stripes {
+  0% { background-position: 0 0; } 100% { background-position: 50px 50px; }
 }
