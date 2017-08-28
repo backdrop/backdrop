@@ -117,10 +117,8 @@ class views_handler_field_bulk_form extends views_handler_field {
     // Build the bulk operations action widget for the header.
     // Allow themes to apply .container-inline on this separate container.
     $form['header'][$this->options['id']] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Operations'),
+      '#type' => 'container',
       '#attributes' => array('class' => array('views-bulk-form')),
-      '#id' => NULL,
     );
     $form['header'][$this->options['id']]['action'] = array(
       '#title' => t('Operation'),
