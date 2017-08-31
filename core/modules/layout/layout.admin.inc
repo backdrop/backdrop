@@ -91,7 +91,7 @@ function layout_list_page() {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
-    '#attributes' => array('id' => 'layout-list'),
+    '#attributes' => array('class' =>   array('layout-list')),
     '#empty' => t('No layouts have been created yet.'),
   );
   return $page;
