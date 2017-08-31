@@ -37,7 +37,17 @@ function menu_overview_page() {
     $rows[] = $row;
   }
 
-  return theme('table', array('header' => $header, 'rows' => $rows));
+  $page = array();
+  $page['#attached']['css'][] = backdrop_get_path('module', 'menu') . '/css/menu.admin.css';
+  $page['table'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#attributes' => array('class' => array('menu-admin-overview')),
+    '#empty' => t('No menus have been created yet.'),
+  );
+
+  return $page;
 }
 
 /**
@@ -48,7 +58,7 @@ function menu_overview_page() {
  */
 function menu_overview_form($form, &$form_state, $menu) {
   global $menu_admin;
-  $form['#attached']['css'] = array(backdrop_get_path('module', 'menu') . '/css/menu.css');
+  $form['#attached']['css'] = array(backdrop_get_path('module', 'menu') . '/css/menu.admin.css');
   $sql = "
     SELECT m.load_functions, m.to_arg_functions, m.access_callback, m.access_arguments, m.page_callback, m.page_arguments, m.delivery_callback, m.title, m.title_callback, m.title_arguments, m.type, m.description, ml.*
     FROM {menu_links} ml LEFT JOIN {menu_router} m ON m.path = ml.router_path
