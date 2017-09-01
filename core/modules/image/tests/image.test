@@ -434,7 +434,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     // Setup a style to be created and effects to add to it.
     $style_name = strtolower($this->randomName(10));
     $style_label = $this->randomName();
-    $style_path = 'admin/config/media/image-styles/edit/' . $style_name;
+    $style_path = 'admin/config/media/image-styles/configure/' . $style_name;
     $effect_edits = array(
       'image_resize' => array(
         'data[width]' => 100,
@@ -532,7 +532,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     $this->backdropPost($style_path, $edit, t('Update style'));
 
     // Note that after changing the style name, the style path is changed.
-    $style_path = 'admin/config/media/image-styles/edit/' . $style_name;
+    $style_path = 'admin/config/media/image-styles/configure/' . $style_name;
 
     // Check that the URL was updated.
     $this->backdropGet($style_path);
@@ -589,7 +589,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     // Setup a style to be created and effects to add to it.
     $style_name = 'thumbnail';
     $style_label = 'Thumbnail (100x100)';
-    $edit_path = 'admin/config/media/image-styles/edit/' . $style_name;
+    $edit_path = 'admin/config/media/image-styles/configure/' . $style_name;
     $delete_path = 'admin/config/media/image-styles/delete/' . $style_name;
     $revert_path = 'admin/config/media/image-styles/revert/' . $style_name;
 
@@ -654,7 +654,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     $style_name = strtolower($this->randomName(10));
     $style_label = $this->randomName();
     image_style_save(array('name' => $style_name, 'label' => $style_label));
-    $style_path = 'admin/config/media/image-styles/edit/' . $style_name;
+    $style_path = 'admin/config/media/image-styles/configure/' . $style_name;
 
     // Create an image field that uses the new style.
     $field_name = strtolower($this->randomName(10));
@@ -680,7 +680,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
       'name' => $new_style_name,
       'label' => $new_style_label,
     );
-    $this->backdropPost('admin/config/media/image-styles/edit/' . $style_name, $edit, t('Update style'));
+    $this->backdropPost('admin/config/media/image-styles/configure/' . $style_name, $edit, t('Update style'));
     $this->assertText(t('Changes to the style have been saved.'), format_string('Style %name was renamed to %new_name.', array('%name' => $style_name, '%new_name' => $new_style_name)));
     $this->backdropGet('node/' . $nid);
     $this->assertRaw(check_plain(image_style_url($new_style_name, $node->{$field_name}[LANGUAGE_NONE][0]['uri'])), format_string('Image displayed using style replacement style.'));
@@ -1548,7 +1548,7 @@ class ImageStyleFlushTest extends ImageFieldTestCase {
     // Setup a style to be created and effects to add to it.
     $style_name = strtolower($this->randomName(10));
     $style_label = $this->randomName();
-    $style_path = 'admin/config/media/image-styles/edit/' . $style_name;
+    $style_path = 'admin/config/media/image-styles/configure/' . $style_name;
     $effect_edits = array(
       'image_resize' => array(
         'data[width]' => 100,
