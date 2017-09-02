@@ -579,7 +579,7 @@ function hook_block_view($delta = '', $settings = array(), $contexts = array()) 
  *   The block title and content as returned by the module that defined the
  *   block. This could be an empty array or NULL value (if the block is empty)
  *   or an array containing the following:
- *   - subject: The default (localized) title of the block.
+ *   - title: The (localized) title of the block.
  *   - content: Either a string or a renderable array representing the content
  *     of the block. You should check that the content is an array before trying
  *     to modify parts of the renderable structure.
@@ -616,7 +616,7 @@ function hook_block_view_alter(&$data, $block) {
  *   The data as returned from the hook_block_view() implementation of the
  *   module that defined the block. This could be an empty array or NULL value
  *   (if the block is empty) or an array containing:
- *   - subject: The localized title of the block.
+ *   - title: The localized title of the block.
  *   - content: Either a string or a renderable array representing the content
  *     of the block. You should check that the content is an array before trying
  *     to modify parts of the renderable structure.
@@ -638,7 +638,7 @@ function hook_block_view_MODULE_DELTA_alter(&$data, $block) {
 
   // Change the title of the "somedelta" block provided by the "mymodule"
   // module.
-  $data['subject'] = t('New title of the block');
+  $data['title'] = t('New title of the block');
 }
 
 /**

@@ -524,16 +524,16 @@ class LayoutRendererStandard {
       }
 
       $data = array(
-        'subject' => $title,
+        'title' => $title,
         'content' => $content,
       );
 
-      // Add a backwards compatible way to alter all blocks.
+      // Allow altering of the title and content by other modules.
       backdrop_alter(array('block_view', 'block_view_' . $block->module . '_' . str_replace('-', '_', $block->delta)), $data, $block);
 
       // Assemble a structured content array.
       $content = (object) array(
-        'title' => $data['subject'],
+        'title' => $data['title'],
         'content' => $data['content'],
       );
 
