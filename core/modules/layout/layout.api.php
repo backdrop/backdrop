@@ -203,11 +203,11 @@ function hook_layout_renderer_info() {
  *
  * Layouts can be reverted only if the configuration is provided
  * by a module. Layouts created in the Layout Builder User Interface
- * cannot be reverted. 
+ * cannot be reverted.
  * A layout revert operation results in deletion of the existing
  * layout configuration and replacement with the default configuration
- * from the providing module. 
- * This hook is invoked from Layout::revert() after a layout has been 
+ * from the providing module.
+ * This hook is invoked from Layout::revert() after a layout has been
  * reverted and the new configuration has been inserted into the live
  * config directory and the layout cache has been cleared.
  *
@@ -227,7 +227,7 @@ function hook_layout_revert(Layout $old_layout) {
 /**
  * Respond to a layout being deleted.
  *
- * This hook is invoked from Layout::delete() after a layout has been 
+ * This hook is invoked from Layout::delete() after a layout has been
  * deleted.
  *
  * @param Layout $layout
@@ -244,7 +244,7 @@ function hook_layout_delete(Layout $layout) {
 /**
  * Respond to a layout being enabled.
  *
- * This hook is invoked from Layout::enable() after a layout has been 
+ * This hook is invoked from Layout::enable() after a layout has been
  * enabled.
  *
  * @param Layout $layout
@@ -263,10 +263,10 @@ function hook_layout_enable(Layout $layout) {
 /**
  * Respond to a layout being disabled.
  *
- * This hook is invoked from Layout::disable() after a layout has been 
+ * This hook is invoked from Layout::disable() after a layout has been
  * disabled.
- * A layout configuration may be disabled by a user from the administrative 
- * list of layouts. A disabled layout will not affect pages at its configured 
+ * A layout configuration may be disabled by a user from the administrative
+ * list of layouts. A disabled layout will not affect pages at its configured
  * path, but will retain its configuration so that it may be enabled later.
  *
  * @param Layout $layout
@@ -569,35 +569,32 @@ function hook_block_view($delta = '', $settings = array(), $contexts = array()) 
 /**
  * Perform alterations to the content of a block.
  *
- * This hook allows you to modify any data returned by hook_block_view().
+ * This hook allows you to modify blocks before they are rendered.
  *
  * Note that instead of hook_block_view_alter(), which is called for all
  * blocks, you can also use hook_block_view_MODULE_DELTA_alter() to alter a
  * specific block.
  *
  * @param $data
- *   The data as returned from the hook_block_view() implementation of the
- *   module that defined the block. This could be an empty array or NULL value
- *   (if the block is empty) or an array containing:
- *   - subject: The default localized title of the block.
+ *   The block title and content as returned by the module that defined the
+ *   block. This could be an empty array or NULL value (if the block is empty)
+ *   or an array containing the following:
+ *   - title: The (localized) title of the block.
  *   - content: Either a string or a renderable array representing the content
  *     of the block. You should check that the content is an array before trying
  *     to modify parts of the renderable structure.
  * @param $block
- *   The block object, as loaded from the database, having the main properties:
+ *   The Block object. It will have have at least the following properties:
  *   - module: The name of the module that defined the block.
  *   - delta: The unique identifier for the block within that module, as defined
  *     in hook_block_info().
- * @param array $settings
- *   An array of settings for this block.
- * @param array $contexts
- *   An array of contexts required by this block. Each context will be keyed
- *   by the string specified in this module's hook_block_info().
+ *   - settings: All block settings as defined for this instance of the block.
+ *   - contexts: All layout contexts available for the layout.
  *
  * @see hook_block_view_MODULE_DELTA_alter()
  * @see hook_block_view()
  */
-function hook_block_view_alter(&$data, $block, $settings = array(), $contexts = array()) {
+function hook_block_view_alter(&$data, $block) {
   // Remove the contextual links on all blocks that provide them.
   if (is_array($data['content']) && isset($data['content']['#contextual_links'])) {
     unset($data['content']['#contextual_links']);
@@ -619,7 +616,7 @@ function hook_block_view_alter(&$data, $block, $settings = array(), $contexts = 
  *   The data as returned from the hook_block_view() implementation of the
  *   module that defined the block. This could be an empty array or NULL value
  *   (if the block is empty) or an array containing:
- *   - subject: The localized title of the block.
+ *   - title: The localized title of the block.
  *   - content: Either a string or a renderable array representing the content
  *     of the block. You should check that the content is an array before trying
  *     to modify parts of the renderable structure.
@@ -634,14 +631,14 @@ function hook_block_view_alter(&$data, $block, $settings = array(), $contexts = 
  * @see hook_block_view_alter()
  * @see hook_block_view()
  */
-function hook_block_view_MODULE_DELTA_alter(&$data, $block, $settings = array()) {
+function hook_block_view_MODULE_DELTA_alter(&$data, $block) {
   // This code will only run for a specific block. For example, if MODULE_DELTA
   // in the function definition above is set to "mymodule_somedelta", the code
   // will only run on the "somedelta" block provided by the "mymodule" module.
 
   // Change the title of the "somedelta" block provided by the "mymodule"
   // module.
-  $data['subject'] = t('New title of the block');
+  $data['title'] = t('New title of the block');
 }
 
 /**
