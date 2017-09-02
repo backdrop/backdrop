@@ -1598,8 +1598,7 @@ class BackdropWebTestCase extends BackdropTestCase {
 
       foreach ($tables as $table_prefix) {
         $table = substr($table_prefix, strlen($prefix));
-        db_query('CREATE TABLE ' . $this->databasePrefix . $table . ' LIKE ' . $table_prefix );
-        db_query('INSERT ' . $this->databasePrefix . $table . ' SELECT * FROM ' . $table_prefix);
+        $schema->cloneTable($table_prefix, $this->databasePrefix . $table);
       }
 
       $this->recursiveCopy($config_cache_dir, $this->public_files_directory);

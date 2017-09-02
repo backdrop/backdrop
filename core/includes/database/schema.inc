@@ -680,6 +680,39 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   abstract protected function createTableSql($name, $table);
 
   /**
+   * Create an exact duplicate of an existing table, including all content.
+   *
+   * @param $source
+   *   The name of the table to be copied.
+   * @param $target
+   *   The name of the new table to be created and populated with data.
+   *
+   * @throws DatabaseSchemaObjectExistsException
+   *   If the new table specified already exists.
+   */
+  public function cloneTable($source, $target) {
+    if ($this->tableExists($target)) {
+      throw new DatabaseSchemaObjectExistsException(t('Table @name already exists.', array('@name' => $target)));
+    }
+    $statements = $this->cloneTableSql($source, $target);
+    foreach ($statements as $statement) {
+      $this->connection->query($statement);
+    }
+  }
+
+  /**
+   * Generate an array of query strings suitable for cloning a table.
+   *
+   * @param $source
+   *   The name of the table to be copied.
+   * @param $target
+   *   The name of the new table to be created and populated with data.
+   * @return
+   *   An array of SQL statements to clone the table, including inserting data.
+   */
+  abstract protected function cloneTableSql($source, $target);
+
+  /**
    * Return an array of field names from an array of key/index column specifiers.
    *
    * This is usually an identity function but if a key/index uses a column prefix
