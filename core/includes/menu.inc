@@ -3997,24 +3997,23 @@ function _menu_site_status($path = NULL, $display_messages = FALSE) {
       // Ensure that the maintenance mode message is displayed only once
       // (allowing for page redirects) and specifically suppress its display on
       // the batch and maintenance mode settings pages.
-      if ($display_messages && !in_array($_GET['q'], array('batch', 'admin/config/development/maintenance'))) {
+      if ($display_messages && !in_array(current_path(), array('batch', 'admin/config/development/maintenance'))) {
+        $message = t('The site is currently in maintenance mode.');
         if (user_access('administer site configuration')) {
-          backdrop_set_message(t('Operating in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance'))), 'status', FALSE);
+          $message .= ' ' . l(t('Go online.'), 'admin/config/development/maintenance', array('query' => backdrop_get_destination()));
         }
-        else {
-          backdrop_set_message(t('Operating in maintenance mode.'), 'status', FALSE);
-        }
+        backdrop_set_message($message, 'warning', FALSE);
       }
     }
     else {
-      $site_status = MENU_SITE_OFFLINE;;
+      $site_status = MENU_SITE_OFFLINE;
     }
   }
 
   // Allow other modules to change the site status but not the path because that
   // would not change the global variable. hook_url_inbound_alter() can be used
   // to change the path. Code later will not use the $read_only_path variable.
-  $read_only_path = !empty($path) ? $path : $_GET['q'];
+  $read_only_path = !empty($path) ? $path : current_path();
   backdrop_alter('menu_site_status', $site_status, $read_only_path);
 
   return $site_status;

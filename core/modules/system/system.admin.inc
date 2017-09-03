@@ -2010,7 +2010,7 @@ function system_site_maintenance_mode_submit($form, &$form_state) {
   config_set('system.core', 'maintenance_mode_message', $form_state['values']['maintenance_mode_message']);
 
   // Give specific messages on the primary action for this form.
-  if ($form_state['values']['maintenance_mode']) {
+  if ($form_state['values']['maintenance_mode'] && current_path() == 'admin/config/development/maintenance') {
     backdrop_set_message(t('The site is now in maintenance mode. Only users with the "Access site in maintenance mode" permission will be able to access the site.'), 'warning');
   }
   elseif ($form['maintenance_mode']['#default_value'] != $form_state['values']['maintenance_mode']) {
