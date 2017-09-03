@@ -58,12 +58,12 @@ function theme_image_style_list($variables) {
   $rows = array();
   foreach ($styles as $style) {
     $row = array();
-    $row[] = l($style['label'], 'admin/config/media/image-styles/edit/' . $style['name']);
+    $row[] = l($style['label'], 'admin/config/media/image-styles/configure/' . $style['name']);
 
     $links = array();
-    $links['edit'] = array(
-      'title' => t('Edit'),
-      'href' => 'admin/config/media/image-styles/edit/' . $style['name'],
+    $links['configure'] = array(
+      'title' => t('Configure'),
+      'href' => 'admin/config/media/image-styles/configure/' . $style['name'],
     );
 
     if ($style['storage'] == IMAGE_STORAGE_NORMAL) {
