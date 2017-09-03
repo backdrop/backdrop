@@ -205,7 +205,9 @@ function batch_test_chained_form_submit_1($form, &$form_state) {
   batch_test_stack('submit handler 1');
   batch_test_stack('value = ' . $form_state['values']['value']);
 
-  $form_state['values']['value']++;
+  $form_state['values']['original'] = $form_state['values']['value'];
+  $form_state['values']['counter'] = 1;
+  $form_state['values']['value'] = $form_state['values']['original'] . '-' . $form_state['values']['counter'];
   batch_set(_batch_test_batch_1());
 
   // This redirect should not be taken into account.
@@ -219,7 +221,8 @@ function batch_test_chained_form_submit_2($form, &$form_state) {
   batch_test_stack('submit handler 2');
   batch_test_stack('value = ' . $form_state['values']['value']);
 
-  $form_state['values']['value']++;
+  $form_state['values']['counter']++;
+  $form_state['values']['value'] = $form_state['values']['original'] . '-' . $form_state['values']['counter'];
   batch_set(_batch_test_batch_2());
 
   // This redirect should not be taken into account.
@@ -233,7 +236,8 @@ function batch_test_chained_form_submit_3($form, &$form_state) {
   batch_test_stack('submit handler 3');
   batch_test_stack('value = ' . $form_state['values']['value']);
 
-  $form_state['values']['value']++;
+  $form_state['values']['counter']++;
+  $form_state['values']['value'] = $form_state['values']['original'] . '-' . $form_state['values']['counter'];
 
   // This redirect should not be taken into account.
   $form_state['redirect'] = 'should/be/discarded';
@@ -246,7 +250,8 @@ function batch_test_chained_form_submit_4($form, &$form_state) {
   batch_test_stack('submit handler 4');
   batch_test_stack('value = ' . $form_state['values']['value']);
 
-  $form_state['values']['value']++;
+  $form_state['values']['counter']++;
+  $form_state['values']['value'] = $form_state['values']['original'] . '-' . $form_state['values']['counter'];
   batch_set(_batch_test_batch_3());
 
   // This is the redirect that should prevail.

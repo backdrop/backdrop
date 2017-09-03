@@ -9,6 +9,8 @@
  * Tests for the Batch API.
  */
 class BatchProcessingTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('batch_test');
   }
@@ -89,7 +91,7 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
   function testBatchFormMultipleBatches() {
     // Batches 1, 2 and 3 are triggered in sequence by different submit
     // handlers. Each submit handler modify the submitted 'value'.
-    $value = rand(0, 255);
+    $value = 'sample-value';
     $edit = array('value' => $value);
     $this->backdropPost('batch-test/chained', $edit, 'Submit');
     // Check that result messages are present and in the correct order.
@@ -106,7 +108,7 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
   function testBatchFormProgrammatic() {
     // Batches 1, 2 and 3 are triggered in sequence by different submit
     // handlers. Each submit handler modify the submitted 'value'.
-    $value = rand(0, 255);
+    $value = 'sample-value-from-menu';
     $this->backdropGet('batch-test/programmatic/' . $value);
     // Check that result messages are present and in the correct order.
     $this->assertBatchMessages($this->_resultMessages('chained'), t('Batches defined in separate submit handlers performed successfully.'));
@@ -122,7 +124,7 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
   function testBackdropFormSubmitInBatch() {
     // Displaying the page triggers a batch that programmatically submits a
     // form.
-    $value = rand(0, 255);
+    $value = 'sample-value-from-menu';
     $this->backdropGet('batch-test/nested-programmatic/' . $value);
     $this->assertEqual(batch_test_stack(), array('mock form submitted with value = ' . $value), t('backdrop_form_submit() ran successfully within a batch operation.'));
   }
@@ -210,12 +212,12 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
         $stack[] = 'value = ' . $value;
         $stack = array_merge($stack, $this->_resultStack('batch_1'));
         $stack[] = 'submit handler 2';
-        $stack[] = 'value = ' . ($value + 1);
+        $stack[] = 'value = ' . ($value . '-1');
         $stack = array_merge($stack, $this->_resultStack('batch_2'));
         $stack[] = 'submit handler 3';
-        $stack[] = 'value = ' . ($value + 2);
+        $stack[] = 'value = ' . ($value . '-2');
         $stack[] = 'submit handler 4';
-        $stack[] = 'value = ' . ($value + 3);
+        $stack[] = 'value = ' . ($value . '-3');
         $stack = array_merge($stack, $this->_resultStack('batch_3'));
         break;
     }
@@ -268,6 +270,8 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
  * Tests for the Batch API Progress page.
  */
 class BatchPageTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('batch_test');
   }
@@ -299,6 +303,7 @@ class BatchPageTestCase extends BackdropWebTestCase {
  * works properly in all cases.
  */
 class BatchPercentagesUnitTestCase extends BackdropUnitTestCase {
+  protected $profile = 'testing';
   protected $testCases = array();
 
   function setUp() {
