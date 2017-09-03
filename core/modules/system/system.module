@@ -974,21 +974,21 @@ function system_menu() {
 
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/urls'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/settings'),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/clean-urls'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/settings'),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_CALLBACK,
   );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/search/urls/check'] = array(
-    'page callback' => 'backdrop_goto_deprecated',
+    'page callback' => 'system_redirect_deprecated_page',
     'page arguments' => array('admin/config/urls/settings/check'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
@@ -4256,6 +4256,27 @@ function path_autocomplete($string = '') {
   // Allow modules to alter the matches.
   backdrop_alter('path_autocomplete', $matches, $string);
   backdrop_json_output($matches);
+}
+
+/**
+ * Menu callback; Redirects a deprecated menu location to a new path.
+ *
+ * This wrapper around backdrop_goto_deprecated() should be used as the menu
+ * callback in hook_menu() when redirecting from an old path to a new one.
+ *
+ * @since 1.8.0
+ */
+function system_redirect_deprecated_page($path) {
+  // Perform any substitutions in the passed-in path with the current path.
+  $parts = explode('/', $path);
+  foreach ($parts as $index => $path_part) {
+    if (substr($path_part, 0, 1) === '%') {
+      $parts[$index] = arg($index);
+    }
+  }
+  $path = implode('/', $parts);
+
+  backdrop_goto_deprecated($path);
 }
 
 /**
