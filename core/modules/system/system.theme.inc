@@ -99,7 +99,7 @@ function theme_system_themes_page($variables) {
     foreach ($theme_groups[$state] as $theme) {
 
       // Theme the screenshot.
-      $screenshot = $theme->screenshot ? theme('path', $theme->screenshot) : '<div class="no-screenshot">' . t('no screenshot') . '</div>';
+      $screenshot = $theme->screenshot ? theme('image', $theme->screenshot) : '<div class="no-screenshot">' . t('no screenshot') . '</div>';
 
       // Localize the theme description.
       $description = t($theme->info['description']);
