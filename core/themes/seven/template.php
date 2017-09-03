@@ -66,6 +66,7 @@ function seven_node_add_list($variables) {
  */
 function seven_admin_block_content($variables) {
   $content = $variables['content'];
+  backdrop_sort($content, array('link_title' => SORT_STRING));
   $output = '';
   if (!empty($content)) {
     $output = '<ul class="admin-list">';
@@ -79,6 +80,39 @@ function seven_admin_block_content($variables) {
     }
     $output .= '</ul>';
   }
+  return $output;
+}
+
+/**
+ * Overrides theme_admin_page().
+ *
+ * Sorts the admin panels alphabetically and uses the bootstrap grid.
+ */
+function seven_admin_page($variables) {
+  $blocks = array_values($variables['blocks']);
+  $container = array(
+    'left' => '',
+    'right' => '',
+  );
+  foreach ($blocks as $key => $block) {
+    if ($block_output = theme('admin_block', array('block' => $block))) {
+      if (($key+1) < count($blocks)/2) {
+        $container['left'] .= $block_output;
+      }
+      else {
+        $container['right'] .= $block_output;
+      }
+    }
+  }
+
+  backdrop_add_library('layout', 'bootstrap4-gs');
+  $output = '<div class="row">';
+  foreach ($container as $id => $data) {
+    $output .= '<div class="col-md-6">';
+    $output .= $data;
+    $output .= '</div>';
+  }
+  $output .= '</div>';
   return $output;
 }
 
