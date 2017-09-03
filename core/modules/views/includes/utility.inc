@@ -89,6 +89,11 @@ function _views_prepare_handler($definition, $data, $field, $type) {
  */
 function views_get_table_join($table, $base_table) {
   $data = views_fetch_data($table);
+  // #global is a special flag which let's a table appear all the time.
+  // @see views_views_data().
+  if (isset($data['table']['join']['#global'])) {
+    return;
+  }
   if (isset($data['table']['join'][$base_table])) {
     $h = $data['table']['join'][$base_table];
     if (!empty($h['handler']) && class_exists($h['handler'])) {
