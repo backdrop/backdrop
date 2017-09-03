@@ -4000,7 +4000,7 @@ function _menu_site_status($path = NULL, $display_messages = FALSE) {
       if ($display_messages && !in_array(current_path(), array('batch', 'admin/config/development/maintenance'))) {
         $message = t('The site is currently in maintenance mode.');
         if (user_access('administer site configuration')) {
-          $message .= ' ' . l(t('Go online.'), 'admin/config/development/maintenance', array('query' => array('destination' => $destination)));
+          $message .= ' ' . l(t('Go online.'), 'admin/config/development/maintenance', array('query' => backdrop_get_destination()));
         }
         backdrop_set_message($message, 'warning', FALSE);
       }
