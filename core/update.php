@@ -161,6 +161,11 @@ function update_script_selection_form($form, &$form_state) {
       '#type' => 'submit',
       '#value' => t('Apply pending updates'),
     );
+    $form['actions']['cancel'] = array(
+      '#type' => 'link',
+      '#href' => '<front>',
+      '#title' => t('Cancel'),
+    );
   }
   return $form;
 }
@@ -299,19 +304,26 @@ function update_info_page() {
   update_task_list('info');
   backdrop_set_title('Backdrop database update');
   $token = backdrop_get_token('update');
-  $output = '<p>Use this utility to update your database whenever you install a new version of Backdrop CMS and/or one of the site\'s modules.</p><p>For more detailed information, see the <a href="https://backdropcms.org/guide/upgrade">Upgrading Backdrop CMS</a> page. If you are unsure of what these terms mean you should probably contact your hosting provider.</p>';
+  $output = '<p>Use this utility to update your database whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
+  $output .= '<p>For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page. If you are unsure of what these terms mean, contact your hosting provider.</p>';
+  $output .= '<p>Before running updates, the following steps are recommended.</p>';
   $output .= "<ol>\n";
-  $output .= "<li><strong>Make any necessary backups.</strong> This update utility will alter your database and config files. In case of an emergency you may need to revert to a recent backup; make sure you have one.\n";
+  $output .= "<li><strong>Create backups.</strong> This update utility will alter your database and config files. In case of an emergency you may need to revert to a recent backup; make sure you have one.\n";
   $output .= "<ul>\n";
-  $output .= "<li><strong>Database:</strong> Back up a dump of the '" . $db_name . "' database.</li>\n";
-  $output .= "<li><strong>Config files:</strong> Back up the entire '" . $config_dir . "' directory.</li>\n";
+  $output .= "<li><strong>Database:</strong> Create a database dump of the '" . $db_name . "' database.</li>\n";
+  $output .= "<li><strong>Config files:</strong> Back up the entire directory at '" . $config_dir . "'.</li>\n";
   $output .= "</ul>\n";
-  $output .= '<li>Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a> (optional but recommended).</li>' . "\n";
-  $output .= "<li>Install your new files into the appropriate location, as described in the handbook.</li>\n";
+  $output .= '<li>Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a>.</li>' . "\n";
+  $output .= "<li>Install your new files into the appropriate location, as described in <a href=\"https://backdropcms.org/upgrade\">the handbook</a>.</li>\n";
   $output .= "</ol>\n";
-  $output .= "<p>When you have performed the above steps you may proceed.</p>\n";
+  $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
   $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
-  $output .= '<form method="post" action="' . $form_action . '"><p><input type="submit" value="Continue" class="form-submit button-primary" /></p></form>';
+  $output .= '<form method="post" action="' . $form_action . '">
+  <div class="form-actions">
+    <input type="submit" value="Continue" class="form-submit button-primary" />
+    <a href="' . base_path() . '">Cancel</a>
+  </div>
+  </form>';
   $output .= "\n";
   return $output;
 }

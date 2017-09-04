@@ -137,8 +137,9 @@ function theme_task_list($variables) {
     }
     $list .= '<li';
     $list .= ($class ? ' class="' . $class . '"' : '') . '>';
-    $list .= $item;
+    $list .= '<span class="task-item">' . $item;
     $list .= ($status ? '<span class="element-invisible">' . $status . '</span>' : '');
+    $list .= '</span>';
     $list .= '</li>';
   }
 

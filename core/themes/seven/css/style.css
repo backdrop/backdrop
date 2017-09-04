@@ -1311,7 +1311,7 @@ body.maintenance-page .sidebar + main {
   padding-right: 0;
   padding-left: 20px;
   margin-left: 0;
-  margin-right: 200px;
+  margin-right: 240px;
 }
 body.maintenance-page h1 {
   margin: 0 auto 1em;
@@ -1339,25 +1339,24 @@ body.maintenance-page .password-parent {
   width: 100%;
   max-width: 300px;
 }
-body.maintenance-page .form-submit {
-  display: block;
-}
 body.maintenance-page #logo {
   max-width: 120px;
   margin: 0 auto;
 }
 ol.task-list {
-  margin-top: 20px;
+  margin: 0;
+  padding-left: 0; /* LTR */
   padding-right: 17px;
   padding-bottom: 1em;
-  padding-left: 0; /* LTR */
   font-size: .9em;
   text-align: left; /* LTR */
   list-style-type: none;
   list-style-image: none;
+
 }
 [dir="rtl"] ol.task-list {
   text-align: right;
+  padding-left: 17px;
   padding-right: 0;
 }
 body.maintenance-page ol.task-list {
@@ -1392,28 +1391,29 @@ ol.task-list li.active:after {
   line-height: 0;
 }
 [dir="rtl"] ol.task-list li.active:after {
+  left: auto;
   right: 100%;
   border-left-color: transparent;
   border-right-color: #E8E6E5;
 }
-ol.task-list li.done {
+ol.task-list .task-item {
   position: relative;
+  vertical-align: middle;
+  margin: 0 0 0 2.5em; /* LTR */
 }
-ol.task-list li.done::before {
+[dir="rtl"] ol.task-list .task-item {
+  margin-right: 2.5em;
+  margin-left: 0;
+}
+ol.task-list .done:before {
   content: ' ';
   display: inline-block;
   position: absolute;
-  top: 0.3333em;
-  left: -30px; /* LTR */
   width: 25px;
   height: 25px;
   border-radius: 15px;
   background: #CFDE56 url(../../../misc/icon-ok.png) no-repeat center center;
   background-size: 60%;
-}
-[dir="rtl"] ol.task-list li.done {
-  left: 0;
-  right: -30px;
 }
 
 .step-indicator {
