@@ -146,9 +146,7 @@ ul.menu li.expanded {
   padding: 0 3px;
   background: url(../images/angle-right--gray.png) no-repeat center center;
   /* SVG hack */
-  background-image:
-    linear-gradient(transparent, transparent),
-    url(../images/angle-right--gray.svg);
+  background-image: linear-gradient(transparent, transparent), url(../images/angle-right--gray.svg);
   background-size: auto 100%;
 }
 
@@ -431,72 +429,66 @@ main {
 }
 
 /* Administration page listings. */
-ul.admin-list li {
+.admin-list li {
   position: relative;
-  padding-left: 30px; /* LTR */
-  padding-top: 9px;
+  padding: 9px 15px;
   border-top: 1px solid #ccc;
-  margin-left: 0; /* LTR */
-  margin-bottom: 10px;
-  background: url(../images/list-item.png) no-repeat 0 11px; /* LTR */
+  margin: 0;
+}
+ul.admin-list li {
+  /* Specificity bump to override upstream */
   list-style-type: none;
   list-style-image: none;
 }
-[dir="rtl"] ul.admin-list li {
-  padding: 9px 30px 0 0;
-  margin-right: 0;
-  background: url(../images/list-item-rtl.png) no-repeat right 11px;
-}
-ul.admin-list li:first-child {
+.admin-list li:first-child {
   border-top: none;
 }
 .admin-panel .item-list ul,
-ul.admin-list {
+.admin-list {
   margin: 0;
   padding: 0;
 }
 .admin-panel .item-list ul,
-ul.admin-list.compact {
+.admin-list.compact {
   margin: 8px 0;
 }
 .admin-panel .item-list li,
-ul.admin-list.compact li {
+.admin-list.compact li {
   border: none;
   background: none;
   margin: 0 0 0.75em;
   line-height: 1;
   padding: 0;
 }
-ul.admin-list li:last-child {
+.admin-list li:last-child {
   border-bottom: none;
 }
-ul.admin-list li a {
-  margin-left: -30px; /* LTR */
-  padding: 0 0 4px 30px; /* LTR */
+.admin-list li a {
+  padding: 0 0 4px; /* LTR */
   min-height: 0;
 }
-[dir="rtl"] ul.admin-list li a {
-  margin-right: -30px;
-  margin-left: 0;
-  padding: 0 30px 4px 0;
+[dir="rtl"] .admin-list li a {
+  padding: 0 0 4px;
 }
-ul.admin-list.compact li a {
+.admin-list.compact li a {
   margin-left: 0; /* LTR */
   padding: 0;
 }
-[dir="rtl"] ul.admin-list.compact li a {
+[dir="rtl"] .admin-list.compact li a {
   margin-right: 0;
 }
-ul.admin-list li div.description a {
+.admin-list li div.description a {
   margin-left: 0; /* LTR */
   padding: 0;
   min-height: inherit;
 }
-[dir="rtl"] ul.admin-list li div.description a {
+[dir="rtl"] .admin-list li div.description a {
   margin-right: 0;
 }
 .admin-panel .description {
   line-height: inherit;
+  padding: 2px 0;
+  margin: 0;
 }
 div.submitted {
   color: #898989;
@@ -1089,27 +1081,61 @@ div.filter-options select {
 /**
  * System.
  */
-div.admin .right,
-div.admin .left {
+.admin .right,
+.admin .left {
   width: 49%;
   margin: 0;
 }
-div.admin-panel,
-div.admin-panel .body {
+.admin-panel,
+.admin-panel .body {
   padding: 0;
   clear: left;
 }
-div.admin-panel {
+.admin-panel {
   margin: 0 0 20px;
   padding: 9px;
-  background: #f8f8f8;
+  background: #fff;
   border: 1px solid #ccc;
+  border-radius: 4px;
 }
-div.admin-panel h3 {
+.admin-panel h3 {
+  margin: 4px 0 4px 4px;
+  padding: 6px 0 6px 35px;
   font-size: 0.923em;
   text-transform: uppercase;
-  margin: 0;
-  padding-bottom: 9px;
+  /* All icons derived from Font Awesome. See README.md in the Seven theme.*/
+  background: url('../images/chevron-circle-right--black--64.png') no-repeat left center;
+  background-size: 23px;
+}
+.admin-panel-people h3 {
+  background-image: url('../images/user--black--64.png');
+}
+.admin-panel-content h3 {
+  background-image: url('../images/pencil-square-o--black--64.png');
+}
+.admin-panel-system h3 {
+  background-image: url('../images/hdd-o--black--64.png');
+}
+.admin-panel-administration h3 {
+  background-image: url('../images/cog--black--64.png');
+}
+.admin-panel-media h3 {
+  background-image: url('../images/picture-o--black--64.png');
+}
+.admin-panel-search h3 {
+  background-image: url('../images/search--black--64.png');
+}
+.admin-panel-regional h3 {
+  background-image: url('../images/globe--black--64.png');
+}
+.admin-panel-urls h3 {
+  background-image: url('../images/link--black--64.png');
+}
+.admin-panel-development h3 {
+  background-image: url('../images/wrench--black--64.png');
+}
+.admin-panel-services h3 {
+  background-image: url('../images/rss--black--64.png');
 }
 
 /* admin/appearance */
