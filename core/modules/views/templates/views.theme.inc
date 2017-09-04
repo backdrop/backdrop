@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Preprocessors and helper functions to make theming easier.
@@ -680,45 +679,27 @@ function template_preprocess_views_view_table(&$variables) {
  */
 function template_preprocess_views_view_grid(&$variables) {
   $view     = $variables['view'];
+  $rows     = $variables['rows'];
   $result   = $view->result;
-  $options  = $view->style_plugin->options;
-  $handler  = $view->style_plugin;
+  $style    = $view->style_plugin;
+  $options  = $style->options;
   $default_row_class = isset($options['default_row_class']) ? $options['default_row_class'] : TRUE;
   $row_class_special = isset($options['row_class_special']) ? $options['row_class_special'] : TRUE;
 
   $columns  = $options['columns'];
 
-  $rows = array();
-  $row_indexes = array();
+  $variables['row_classes'] = array();
+  $default_row_class = isset($options['default_row_class']) ? $options['default_row_class'] : FALSE;
+  $row_class_special = isset($options['row_class_special']) ? $options['row_class_special'] : FALSE;
 
-  if ($options['alignment'] == 'horizontal') {
-    $row = array();
-    $col_count = 0;
-    $row_count = 0;
-    $count = 0;
-    foreach ($variables['rows'] as $row_index => $item) {
-      $count++;
-      $row[] = $item;
-      $row_indexes[$row_count][$col_count] = $row_index;
-      $col_count++;
-      if ($count % $columns == 0) {
-        $rows[] = $row;
-        $row = array();
-        $col_count = 0;
-        $row_count++;
-      }
-    }
-    if ($row) {
-      // Fill up the last line only if it's configured, but this is default.
-      if (!empty($handler->options['fill_single_line']) && count($rows)) {
-        for ($i = 0; $i < ($columns - $col_count); $i++) {
-          $row[] = '';
-        }
-      }
-      $rows[] = $row;
-    }
-  }
-  else {
+  // Set up striping values.
+  $count = 0;
+  $max = count($rows);
+
+
+  // @TODO reorder based on vertical alignment.
+  if ($options['alignment'] == 'vertical') {
+    $rows = array();
     $num_rows = floor(count($variables['rows']) / $columns);
     // The remainders are the 'odd' columns that are slightly longer.
     $remainders = count($variables['rows']) % $columns;
@@ -745,57 +726,33 @@ function template_preprocess_views_view_grid(&$variables) {
         $rows[count($rows) - 1][$i] = '';
       }
     }
-  }
 
-  // Apply the row classes
-  foreach ($rows as $row_number => $row) {
-    $row_classes = array();
+  }
+  // end @TODO
+
+  foreach ($rows as $id => $row) {
+    $count++;
+    $variables['row_classes'][$id] = array();
     if ($default_row_class) {
-      $row_classes[] =  'row-' . ($row_number + 1);
+      $variables['row_classes'][$id][] = 'views-row';
+      $variables['row_classes'][$id][] = 'views-row-' . $count;
     }
     if ($row_class_special) {
-      if ($row_number == 0) {
-        $row_classes[] =  'row-first';
+      $variables['row_classes'][$id][] = ($count % 2 ? 'odd' : 'even');
+      if ($count == 1) {
+        $variables['row_classes'][$id][] = 'first';
       }
-      if (count($rows) == ($row_number + 1)) {
-        $row_classes[] =  'row-last';
+      if ($count == $max) {
+        $variables['row_classes'][$id][] = 'last';
       }
     }
-    $variables['row_classes'][$row_number] = $row_classes;
-    foreach ($rows[$row_number] as $column_number => $item) {
-      $column_classes = array();
-      if ($default_row_class) {
-        $column_classes[] = 'col-'. ($column_number + 1);
-      }
-      if ($row_class_special) {
-        if ($column_number == 0) {
-          $column_classes[] = 'col-first';
-        }
-        elseif (count($rows[$row_number]) == ($column_number + 1)) {
-          $column_classes[] = 'col-last';
-        }
-      }
-      if (isset($row_indexes[$row_number][$column_number]) && $column_class = $view->style_plugin->get_row_class($row_indexes[$row_number][$column_number])) {
-        $column_classes[] = $column_class;
-      }
-      $variables['column_classes'][$row_number][$column_number] = $column_classes;
+
+    if ($row_class = $view->style_plugin->get_row_class($id)) {
+      $variables['row_classes'][$id][] = $row_class;
     }
   }
-  $variables['rows'] = $rows;
-  $variables['classes'] = array('views-view-grid', 'cols-' . $columns);
 
-  // Add the summary to the list if set.
-  if (!empty($handler->options['summary'])) {
-    $variables['attributes'] = array('summary' => filter_xss_admin($handler->options['summary']));
-  }
-
-  // Add the caption to the list if set.
-  if (!empty($handler->options['caption'])) {
-    $variables['caption'] = filter_xss_admin($handler->options['caption']);
-  }
-  else {
-    $variables['caption'] = '';
-  }
+  $variables['classes'] = array('views-view-grid', 'views-view-grid-cols-' . $columns);
 }
 
 /**

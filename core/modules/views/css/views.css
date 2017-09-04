@@ -48,9 +48,49 @@
   text-align: center;
 }
 
-/* Remove the border on tbody that system puts in */
-.views-view-grid tbody {
-  border-top: none;
+/* Views grid styles */
+.views-view-grid {
+  display: grid;
+}
+.views-view-grid-cols-1 {
+  grid-template-columns: repeat(1, 1fr);
+}
+.views-view-grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.views-view-grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.views-view-grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+.views-view-grid-cols-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+.views-view-grid-cols-6 {
+  grid-template-columns: repeat(6, 1fr);
+}
+.views-view-grid-cols-7 {
+  grid-template-columns: repeat(7, 1fr);
+}
+.views-view-grid-cols-8 {
+  grid-template-columns: repeat(8, 1fr);
+}
+.views-view-grid-cols-9 {
+  grid-template-columns: repeat(9, 1fr);
+}
+.views-view-grid-cols-10 {
+  grid-template-columns: repeat(10, 1fr);
+}
+.views-view-grid-cols-11 {
+  grid-template-columns: repeat(11, 1fr);
+}
+.views-view-grid-cols-12 {
+  grid-template-columns: repeat(12, 1fr);
+}
+.views-view-grid .views-row {
+  padding: 1rem;
+  border: 1px solid #ccc;
 }
 
 .view .progress-disabled {
