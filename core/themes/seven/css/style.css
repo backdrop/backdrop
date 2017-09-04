@@ -1291,7 +1291,7 @@ body.maintenance-page .page-title {
 }
 body.maintenance-page .sidebar {
   float: left; /* LTR */
-  width: 190px;
+  width: 220px;
   text-align: center;
 }
 [dir="rtl"] body.maintenance-page .sidebar {
@@ -1303,7 +1303,7 @@ body.maintenance-page main {
 body.maintenance-page .sidebar + main {
   max-width: 590px;
   padding-right: 20px; /* LTR */
-  margin-left: 210px; /* LTR */
+  margin-left: 240px; /* LTR */
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
@@ -1348,7 +1348,6 @@ body.maintenance-page #logo {
 }
 ol.task-list {
   margin-top: 20px;
-  margin-left: 0; /* LTR */
   padding-right: 17px;
   padding-bottom: 1em;
   padding-left: 0; /* LTR */
@@ -1359,39 +1358,38 @@ ol.task-list {
 }
 [dir="rtl"] ol.task-list {
   text-align: right;
-  margin-right: 0;
   padding-right: 0;
 }
-ol.task-list li {
-  padding: 0.5em 1em 0.5em 20px; /* LTR */
-  color: #1a1a1a;
+body.maintenance-page ol.task-list {
+  margin-top: 50px;
 }
-[dir="rtl"] ol.task-list li {
-  padding: 0.5em 20px 0.5em 1em;
+ol.task-list li {
+  padding: .75em;
+  color: #1a1a1a;
+  line-height: 20px;
 }
 ol.task-list li.active {
-  padding: 0.5em 1em 0.5em 20px; /* LTR */
+  padding: .75em;
   font-weight: normal;
   color: #000;
   background: #E8E6E5;
   position: relative;
-}
-[dir="rtl"] ol.task-list li.active {
-  padding: 0.5em 20px 0.5em 1em;
 }
 ol.task-list li.active:after {
   left: 100%; /* LTR */
   border: solid transparent;
   border-color: rgba(255, 255, 255, 0);
   border-left-color: #E8E6E5; /* LTR */
-  border-width: 17px;
+  border-width: 21px;
   content: " ";
   height: 0;
   width: 0;
   position: absolute;
   pointer-events: none;
   top: 50%;
-  margin-top: -17px;
+  margin-top: -21px;
+  font-size: 0;
+  line-height: 0;
 }
 [dir="rtl"] ol.task-list li.active:after {
   right: 100%;
@@ -1399,11 +1397,23 @@ ol.task-list li.active:after {
   border-right-color: #E8E6E5;
 }
 ol.task-list li.done {
-  background: transparent url(../images/task-check.png) no-repeat 0 50%;
-  color: green;
+  position: relative;
+}
+ol.task-list li.done::before {
+  content: ' ';
+  display: inline-block;
+  position: absolute;
+  top: 0.3333em;
+  left: -30px; /* LTR */
+  width: 25px;
+  height: 25px;
+  border-radius: 15px;
+  background: #CFDE56 url(../../../misc/icon-ok.png) no-repeat center center;
+  background-size: 60%;
 }
 [dir="rtl"] ol.task-list li.done {
-  background: transparent url(../images/task-check.png) no-repeat right 50%;
+  left: 0;
+  right: -30px;
 }
 
 .step-indicator {
