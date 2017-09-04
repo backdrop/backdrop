@@ -144,10 +144,8 @@ ul.menu li.expanded {
   height: 1em;
   vertical-align: middle;
   padding: 0 3px;
-  background: url(../images/angle-right--gray.png) no-repeat center center;
-  /* SVG hack */
-  background-image: linear-gradient(transparent, transparent), url(../images/angle-right--gray.svg);
-  background-size: auto 100%;
+  background: url(../images/chevron-right--gray--32.png) no-repeat center center;
+  background-size: 8px;
 }
 
 .breadcrumb li.last:after {
@@ -1063,7 +1061,8 @@ ul.action-links li {
 }
 ul.action-links a {
   padding-left: 15px; /* LTR */
-  background: transparent url(../images/add.png) no-repeat 0 center;
+  background: transparent url(../images/plus--blue--32.png) no-repeat 0 center;
+  background-size: 9px;
   line-height: 30px;
 }
 [dir="rtl"] ul.action-links a {
@@ -1099,12 +1098,20 @@ div.filter-options select {
   border-radius: 4px;
 }
 .admin-panel h3 {
-  margin: 4px 0 4px 4px;
-  padding: 6px 0 6px 35px;
+  margin: 4px 0 4px 4px; /* LTR */
+  padding: 6px 0 6px 35px; /* LTR */
   font-size: 0.923em;
   text-transform: uppercase;
   /* All icons derived from Font Awesome. See README.md in the Seven theme.*/
-  background: url('../images/chevron-circle-right--black--64.png') no-repeat left center;
+  background: url('../images/chevron-circle-right--black--64.png') no-repeat left center; /* LTR */
+  background-size: 23px;
+}
+[dir="rtl"] .admin-panel h3 {
+  margin-left: 0;
+  margin-right: 4px;
+  padding-left: 0;
+  padding-right: 35px;
+  background: url('../images/chevron-circle-left--black--64.png') no-repeat right center; /* LTR */
   background-size: 23px;
 }
 .admin-panel-people h3 {
