@@ -508,6 +508,7 @@ function system_modules($form, $form_state = array()) {
       'autocomplete' => 'off',
       'title' => t('Enter a part of the module name or description to filter.'),
     ),
+    '#default_value' => ($_GET['search']) ? $_GET['search'] : '',
   );
 
   // Get current list of modules.
@@ -963,7 +964,17 @@ function system_modules_submit($form, &$form_state) {
     backdrop_set_message(t('The configuration options have been saved.'));
   }
 
-  $form_state['redirect'] = 'admin/modules';
+  // Check if a previous search is present and preserve it on redirect.
+  if ($form_state['values']['search']) {
+    $parameter = $form_state['values']['search'];
+    $form_state['redirect'] = array(
+      'admin/modules',
+      array('query' => array('search' => $parameter))
+    );
+  }
+  else {
+    $form_state['redirect'] = 'admin/modules';
+  }
 }
 
 /**
