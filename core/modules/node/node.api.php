@@ -1222,7 +1222,7 @@ function hook_validate(Node $node, $form, &$form_state) {
  * @param Node $node
  *   The node to be displayed, as returned by node_load().
  * @param $view_mode
- *   View mode, e.g. 'full', 'teaser', ...
+ *   Display mode, e.g. 'full', 'teaser', ...
  *
  * @return
  *   The passed $node parameter should be modified as necessary and returned so

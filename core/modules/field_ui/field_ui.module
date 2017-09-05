@@ -19,7 +19,7 @@ function field_ui_field_attach_rename_bundle($entity_type, $bundle_old, $bundle_
 function field_ui_permission() {
   return array(
     'administer view modes' => array(
-      'title' => t('Add, edit, and delete custom view modes.'),
+      'title' => t('Add, edit, and delete custom Display modes.'),
     ),
   );
 }
@@ -141,13 +141,13 @@ function field_ui_menu() {
             'file' => 'field_ui.admin.inc',
           ) + $access;
 
-          // View modes displays.
+          // Display modes.
           // The same base $path for the menu item (with a placeholder) can be
           // used for all bundles of a given entity type; but depending on
           // administrator settings, each bundle has a different set of view
           // modes available for customization. So we define menu items for all
-          // view modes, and use an access callback to determine which ones are
-          // actually visible for a given bundle.
+          // Display modes, and use an access callback to determine which ones
+          // are actually visible for a given bundle.
           $weight = 0;
 
           $items["$path/display/%"] = array(
@@ -156,16 +156,16 @@ function field_ui_menu() {
             'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_display_form', $entity_type, $bundle_arg, $view_mode_position),
             // The access callback needs to check both the current 'custom
-            // display' setting for the view mode, and the overall access
+            // display' setting for the Display mode, and the overall access
             // rules for the bundle admin pages.
             'access callback' => '_field_ui_view_mode_menu_access',
             'access arguments' => array_merge(array($entity_type, $bundle_arg, $view_mode_position, $access['access callback']), $access['access arguments']),
             'file' => 'field_ui.admin.inc',
           );
 
-          // View mode administration.
+          // Display mode administration.
           $items["$path/display/add"] = array(
-            'title' => 'Add view mode',
+            'title' => 'Add display mode',
             'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_view_mode_form', $entity_type, $bundle_arg),
             'access arguments' => array('administer view modes'),
@@ -173,21 +173,21 @@ function field_ui_menu() {
             'type' => MENU_LOCAL_ACTION,
           );
           $items["$path/display/%/configure"] = array(
-            'title' => 'Configure view mode',
+            'title' => 'Configure Display mode',
             'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_view_mode_form', $entity_type, $bundle_arg, $view_mode_position),
             'access arguments' => array('administer view modes'),
             'file' => 'field_ui.admin.inc',
           );
           $items["$path/display/%/delete"] = array(
-            'title' => 'Delete view mode',
+            'title' => 'Delete Display mode',
             'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_view_mode_delete_form', $entity_type, $bundle_arg, $view_mode_position),
             'access arguments' => array('administer view modes'),
             'file' => 'field_ui.admin.inc',
           );
           $items["$path/display/%/enable"] = array(
-            'title' => 'Enable view mode',
+            'title' => 'Enable Display mode',
             'page callback' => 'field_ui_view_mode_enable',
             'page arguments' => array($entity_type, $bundle_arg, $view_mode_position),
             'access callback' => 'field_ui_view_mode_enable_access',
@@ -262,13 +262,13 @@ function field_ui_menu_title($instance) {
 }
 
 /**
- * Access callback: Checks access for the 'view mode display settings' pages.
+ * Access callback: Checks access for the Display mode pages.
  *
  * @see field_ui_menu()
  */
 function _field_ui_view_mode_menu_access($entity_type, $bundle, $view_mode, $access_callback) {
   // First, determine visibility according to the 'use custom display'
-  // setting for the view mode.
+  // setting for the Display mode.
   $bundle = field_extract_bundle($entity_type, $bundle);
   $view_mode_settings = field_view_mode_settings($entity_type, $bundle);
   $visibility = ($view_mode == 'default') || !empty($view_mode_settings[$view_mode]['custom_settings']);

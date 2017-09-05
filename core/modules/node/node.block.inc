@@ -134,7 +134,7 @@ class NodeBlock extends Block {
     unset($view_mode_options['search_result']);
 
     $form['view_mode'] = array(
-      '#title' => t('View mode'),
+      '#title' => t('Display mode'),
       '#type' => 'select',
       '#options' => $view_mode_options,
       '#default_value' => isset($settings['view_mode']) ? $settings['view_mode'] : 'full',

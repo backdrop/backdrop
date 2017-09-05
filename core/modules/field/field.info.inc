@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Field Info API, providing information about available fields and field types.
@@ -335,7 +334,7 @@ function _field_info_prepare_instance($instance, $field) {
     $instance['display'][$view_mode] = _field_info_prepare_instance_display($field, $display);
   }
 
-  // Fallback to 'hidden' for view modes configured to use custom display
+  // Fallback to 'hidden' for display modes configured to use custom display
   // settings, and for which the instance has no explicit settings.
   $entity_info = entity_get_info($instance['entity_type']);
   $view_modes = array_merge(array('default'), array_keys($entity_info['view modes']));
@@ -725,13 +724,13 @@ function field_info_instance($entity_type, $field_name, $bundle_name) {
  *     'name_of_pseudo_field_component' => array(
  *       'label' => The human readable name of the component,
  *       'description' => A short description of the component content,
- *       // One entry per view mode, including the 'default' mode:
+ *       // One entry per display mode, including the 'default' mode:
  *       'display' => array(
  *         'default' => array(
  *           'weight' => The weight of the component in displayed entities in
- *             this view mode,
+ *             this display mode,
  *           'visible' => TRUE if the component is visible, FALSE if hidden, in
- *             displayed entities in this view mode,
+ *             displayed entities in this display mode,
  *         ),
  *         'teaser' => array(
  *           // ...
@@ -775,7 +774,7 @@ function field_info_extra_fields($entity_type, $bundle, $context) {
  *   The bundle name.
  * @param $context
  *   The context for which the maximum weight is requested. Either 'form', or
- *   the name of a view mode.
+ *   the name of a display mode.
  * @return
  *   The maximum weight of the entity's components, or NULL if no components
  *   were found.

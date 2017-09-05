@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Field CRUD API, handling field and field instance creation and deletion.
@@ -467,14 +466,14 @@ function field_delete_field($field_name) {
  *     - settings: each omitted setting is given the default value specified in
  *       hook_field_widget_info().
  *   - display:
- *     Settings for the 'default' view mode will be added if not present, and
- *     each view mode in the definition will be completed with the following
+ *     Settings for the 'default' display mode will be added if not present, and
+ *     each display mode in the definition will be completed with the following
  *     default values:
  *     - label: 'above'
  *     - type: the default formatter specified in hook_field_info().
  *     - settings: each omitted setting is given the default value specified in
  *       hook_field_formatter_info().
- *     View modes not present in the definition are left empty, and the field
+ *     Display modes not present in the definition are left empty, and the field
  *     will not be displayed in this mode.
  *
  * @return
@@ -604,7 +603,7 @@ function field_validate_instance($instance, $update = FALSE, $load_field = TRUE)
 
     // @todo: Check that the widget type is known and can handle the field type.
     // @todo: Check that the formatters are known and can handle the field type.
-    // @todo: Check that the display view modes are known for the entity type.
+    // @todo: Check that the display display modes are known for the entity type.
   }
 }
 
@@ -636,8 +635,9 @@ function _field_write_instance($instance, $update = FALSE) {
   $instance['widget']['module'] = $widget_type['module'];
   $instance['widget']['settings'] += field_info_widget_settings($instance['widget']['type']);
 
-  // Make sure there are at least display settings for the 'default' view mode,
-  // and fill in defaults for each view mode specified in the definition.
+  // Make sure there are at least display settings for the 'default' display
+  // mode, and fill in defaults for each display mode specified in the
+  // definition.
   $instance['display'] += array(
     'default' => array(),
   );

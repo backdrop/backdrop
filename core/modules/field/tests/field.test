@@ -1386,9 +1386,9 @@ class FieldInfoTestCase extends FieldTestCase {
 
     // Check that display settings are set for the 'default' mode.
     $display = $instance['display']['default'];
-    $this->assertIdentical($display['type'], $field_type['default_formatter'], "Formatter is set for the 'default' view mode");
+    $this->assertIdentical($display['type'], $field_type['default_formatter'], "Formatter is set for the 'default' display mode");
     $formatter_type = field_info_formatter_types($display['type']);
-    $this->assertIdentical($display['settings'], $formatter_type['settings'] , "Formatter settings are set for the 'default' view mode");
+    $this->assertIdentical($display['settings'], $formatter_type['settings'] , "Formatter settings are set for the 'default' display mode");
   }
 
   /**
@@ -2072,7 +2072,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
       $this->assertText($setting . '|' . $value['value'] . '|' . ($value['value'] + 1), format_string('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
 
-    // View mode: check that display settings specified in the instance are
+    // Display mode: check that display settings specified in the instance are
     // used.
     $output = field_view_field('test_entity', $this->entity, $this->field_name, 'teaser');
     $this->backdropSetContent(backdrop_render($output));
@@ -2082,8 +2082,8 @@ class FieldDisplayAPITestCase extends FieldTestCase {
       $this->assertText($setting . '|' . $value['value'], format_string('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
 
-    // Unknown view mode: check that display settings for 'default' view mode
-    // are used.
+    // Unknown display mode: check that display settings for 'default' display
+    // mode are used.
     $output = field_view_field('test_entity', $this->entity, $this->field_name, 'unknown_view_mode');
     $this->backdropSetContent(backdrop_render($output));
     $setting = $this->instance['display']['default']['settings']['test_formatter_setting'];
@@ -2137,7 +2137,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
       $this->assertText($setting . '|' . $value['value'] . '|' . ($value['value'] + 1), format_string('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
 
-    // View mode: check that display settings specified in the instance are
+    // Display mode: check that display settings specified in the instance are
     // used.
     $setting = $this->instance['display']['teaser']['settings']['test_formatter_setting'];
     foreach ($this->values as $delta => $value) {
@@ -2147,8 +2147,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
       $this->assertText($setting . '|' . $value['value'], format_string('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
 
-    // Unknown view mode: check that display settings for 'default' view mode
-    // are used.
+    // Unknown display mode: check that display settings for 'default' are used.
     $setting = $this->instance['display']['default']['settings']['test_formatter_setting'];
     foreach ($this->values as $delta => $value) {
       $item = $this->entity->{$this->field_name}[LANGUAGE_NONE][$delta];
@@ -2595,8 +2594,8 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
   // TODO : test creation with
   // - a full fledged $instance structure, check that all the values are there
   // - a minimal $instance structure, check all default values are set
-  // defer actual $instance comparison to a helper function, used for the two cases above,
-  // and for testUpdateFieldInstance
+  // defer actual $instance comparison to a helper function, used for the two
+  // cases above, and for testUpdateFieldInstance
 
   /**
    * Test the creation of a field instance.
@@ -2721,7 +2720,7 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
     $this->assertEqual($instance['display']['default']['settings']['test_formatter_setting'], $instance_new['display']['default']['settings']['test_formatter_setting'], 'Formatter setting change is saved');
     $this->assertEqual($instance['display']['default']['weight'], $instance_new['display']['default']['weight'], 'Widget weight change is saved');
 
-    // Check that changing widget and formatter types updates the default settings.
+    // Check that changing widget & formatter types updates default settings.
     $instance = field_read_instance('test_entity', $this->instance_definition['field_name'], $this->instance_definition['bundle']);
     $instance['widget']['type'] = 'test_field_widget_multiple';
     $instance['display']['default']['type'] = 'field_test_multiple';
@@ -2736,7 +2735,7 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
     $settings = $info['settings'];
     $this->assertIdentical($settings, array_intersect_key($instance_new['display']['default']['settings'], $settings) , 'Changing formatter type updates default settings.');
 
-    // Check that adding a new view mode is saved and gets default settings.
+    // Check that adding a new display mode is saved and gets default settings.
     $instance = field_read_instance('test_entity', $this->instance_definition['field_name'], $this->instance_definition['bundle']);
     $instance['display']['teaser'] = array();
     field_update_instance($instance);

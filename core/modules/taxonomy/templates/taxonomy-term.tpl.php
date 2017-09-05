@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Default theme implementation to display a term.
@@ -22,7 +21,7 @@
  *
  * Other variables:
  * - $term: Full term object. Contains data that may not be safe.
- * - $view_mode: View mode, e.g. 'full', 'teaser'...
+ * - $view_mode: Display mode, e.g. 'full', or 'teaser'.
  * - $page: Flag for the full page state.
  * - $zebra: Outputs either "even" or "odd". Useful for zebra striping in
  *   teaser listings.

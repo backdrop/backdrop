@@ -149,17 +149,17 @@ require_once BACKDROP_ROOT . '/core/modules/field/field.form.inc';
  *   - module (string, read-only): The name of the module that implements the
  *     widget type.
  * - display (array): A sub-array of key/value pairs identifying the way field
- *   values should be displayed in each of the entity type's view modes, plus
- *   the 'default' mode. For each view mode, Field UI lets site administrators
+ *   values should be displayed in each of the entity type's display modes, plus
+ *   the 'default' mode. For each display mode, Field UI lets site administrators
  *   define whether they want to use a dedicated set of display options or the
  *   'default' options to reduce the number of displays to maintain as they
  *   add new fields. For nodes, on a fresh install, only the 'teaser' view
- *   mode is configured to use custom display options, all other view modes
+ *   mode is configured to use custom display options, all other display modes
  *   defined use the 'default' options by default. When programmatically
  *   adding field instances on nodes, it is therefore recommended to at least
  *   specify display options for 'default' and 'teaser':
  *   - default (array): A sub-array of key/value pairs describing the display
- *     options to be used when the field is being displayed in view modes
+ *     options to be used when the field is being displayed in display modes
  *     that are not configured to use dedicated display options:
  *     - label (string): Position of the label. 'inline', 'above' and
  *       'hidden' are the values recognized by the default 'field' theme
@@ -169,13 +169,13 @@ require_once BACKDROP_ROOT . '/core/modules/field/field.form.inc';
  *     - settings (array): A sub-array of key/value pairs of display
  *       options specific to the formatter.
  *     - weight (float): The weight of the field relative to the other entity
- *       components displayed in this view mode.
+ *       components displayed in this display mode.
  *     - module (string, read-only): The name of the module which implements
  *       the display formatter.
  *   - some_mode: A sub-array of key/value pairs describing the display
  *     options to be used when the field is being displayed in the 'some_mode'
- *     view mode. Those options will only be actually applied at run time if
- *     the view mode is not configured to use default settings for this bundle:
+ *     display mode. Those options will only be actually applied at run time if
+ *     the display mode is not configured to use default settings for this bundle:
  *     - ...
  *   - other_mode:
  *     - ...
@@ -738,9 +738,9 @@ function _field_sort_items_value_helper($a, $b) {
  * @param array|null $settings
  *   (optional) The settings to store, an associative array with the following
  *   elements:
- *   - view_modes: An associative array keyed by view mode, with the following
- *     key/value pairs:
- *     - custom_settings: Boolean specifying whether the view mode uses a
+ *   - view_modes: An associative array keyed by display mode, with the
+ *     following key/value pairs:
+ *     - custom_settings: Boolean specifying whether the display mode uses a
  *       dedicated set of display options (TRUE), or the 'default' options
  *       (FALSE). Defaults to FALSE.
  *   - extra_fields: An associative array containing the form and display
@@ -751,8 +751,8 @@ function _field_sort_items_value_helper($a, $b) {
  *         entity form.
  *     - display: An associative array whose keys are the names of extra fields,
  *       and whose values are associative arrays keyed by the name of view
- *       modes. This array must include an item for the 'default' view mode.
- *       Each view mode sub-array contains the following elements:
+ *       modes. This array must include an item for the 'default' display mode.
+ *       Each display mode sub-array contains the following elements:
  *       - weight: The weight of the extra field, determining its position when
  *         an entity is viewed.
  *       - visible: TRUE if the extra field is visible, FALSE otherwise.
@@ -798,16 +798,16 @@ function field_bundle_settings($entity_type, $bundle, $settings = NULL) {
 }
 
 /**
- * Returns view mode settings in a given bundle.
+ * Returns display mode settings in a given bundle.
  *
  * @param $entity_type
  *   The type of entity; e.g. 'node' or 'user'.
  * @param $bundle
- *   The bundle name to return view mode settings for.
+ *   The bundle name to return display mode settings for.
  *
  * @return
- *   An array keyed by view mode, with the following key/value pairs:
- *   - custom_settings: Boolean specifying whether the view mode uses a
+ *   An array keyed by display mode, with the following key/value pairs:
+ *   - custom_settings: Boolean specifying whether the display mode uses a
  *     dedicated set of display options (TRUE), or the 'default' options
  *     (FALSE). Defaults to FALSE.
  */
@@ -817,7 +817,7 @@ function field_view_mode_settings($entity_type, $bundle) {
   if (!isset($cache[$entity_type][$bundle])) {
     $bundle_settings = field_bundle_settings($entity_type, $bundle);
     $settings = $bundle_settings['view_modes'];
-    // Include view modes for which nothing has been stored yet, but whose
+    // Include display modes for which nothing has been stored yet, but whose
     // definition in hook_entity_info() specify they should use custom settings
     // by default.
     $entity_info = entity_get_info($entity_type);
@@ -833,12 +833,12 @@ function field_view_mode_settings($entity_type, $bundle) {
 }
 
 /**
- * Returns the display settings to use for an instance in a given view mode.
+ * Returns the display settings to use for an instance in a given display mode.
  *
  * @param $instance
  *   The field instance being displayed.
  * @param $view_mode
- *   The view mode.
+ *   The display mode.
  * @param $entity
  *   The entity being displayed.
  *
@@ -846,7 +846,7 @@ function field_view_mode_settings($entity_type, $bundle) {
  *   The display settings to be used when displaying the field values.
  */
 function field_get_display($instance, $view_mode, $entity) {
-  // Check whether the view mode uses custom display settings or the 'default'
+  // Check whether the display mode uses custom display settings or the 'default'
   // mode.
   $view_mode_settings = field_view_mode_settings($instance['entity_type'], $instance['bundle']);
   $actual_mode = (!empty($view_mode_settings[$view_mode]['custom_settings']) ? $view_mode : 'default');
@@ -866,20 +866,20 @@ function field_get_display($instance, $view_mode, $entity) {
 }
 
 /**
- * Returns the display settings to use for pseudo-fields in a given view mode.
+ * Returns the display settings to use for pseudo-fields in a display mode.
  *
  * @param $entity_type
  *   The type of $entity; e.g., 'node' or 'user'.
  * @param $bundle
  *   The bundle name.
  * @param $view_mode
- *   The view mode.
+ *   The display mode.
  *
  * @return
  *   The display settings to be used when viewing the bundle's pseudo-fields.
  */
 function field_extra_fields_get_display($entity_type, $bundle, $view_mode) {
-  // Check whether the view mode uses custom display settings or the 'default'
+  // Check whether the display mode uses custom display settings or the 'default'
   // mode.
   $view_mode_settings = field_view_mode_settings($entity_type, $bundle);
   $actual_mode = (!empty($view_mode_settings[$view_mode]['custom_settings'])) ? $view_mode : 'default';
@@ -978,7 +978,7 @@ function _field_filter_xss_display_allowed_tags() {
  *   The field value to display, as found in
  *   $entity->field_name[$langcode][$delta].
  * @param $display
- *   Can be either the name of a view mode, or an array of display settings.
+ *   Can be either the name of a display mode, or an array of display settings.
  *   See field_view_field() for more information.
  * @param $langcode
  *   (Optional) The language of the value in $item. If not provided, the
@@ -1035,11 +1035,11 @@ function field_view_value($entity_type, $entity, $field_name, $item, $display = 
  *   The name of the field to display.
  * @param $display
  *   Can be either:
- *   - The name of a view mode. The field will be displayed according to the
- *     display settings specified for this view mode in the $instance
+ *   - The name of a display mode. The field will be displayed according to the
+ *     display settings specified for this display mode in the $instance
  *     definition for the field in the entity's bundle.
- *     If no display settings are found for the view mode, the settings for
- *     the 'default' view mode will be used.
+ *     If no display settings are found for the display mode, the settings for
+ *     the 'default' display mode will be used.
  *   - An array of display settings, as found in the 'display' entry of
  *     $instance definitions. The following key/value pairs are allowed:
  *     - label: (string) Position of the label. The default 'field' theme
@@ -1227,7 +1227,7 @@ function field_extract_bundle($entity_type, $bundle) {
 function field_field_display_alter(&$display, $context) {
   if ($context['view_mode'] == 'token') {
     $view_mode_settings = field_view_mode_settings($context['instance']['entity_type'], $context['instance']['bundle']);
-    // If the token view mode fell back to the 'default' view mode, then
+    // If the token display mode fell back to the 'default' display mode, then
     // use the default token formatter.
     if (empty($view_mode_settings[$context['view_mode']]['custom_settings'])) {
       $field_type_info = field_info_field_types($context['field']['type']);
@@ -1327,19 +1327,19 @@ function field_entity_view_mode_update($view_mode, $entity_type) {
     foreach ($view_mode['enabled_bundles'] as $bundle => $value) {
       $bundle_settings = field_bundle_settings($entity_type, $bundle);
 
-      // Display a message for each view mode newly configured to use custom
+      // Display a message for each display mode newly configured to use custom
       // settings.
       $view_mode_settings = field_view_mode_settings($entity_type, $bundle);
       if (!empty($value) && empty($view_mode_settings[$view_mode_name]['custom_settings'])) {
         $path = _field_ui_bundle_admin_path($entity_type, $bundle) . "/display/$view_mode_name";
-        backdrop_set_message(t('The %view_mode @entity_type @bundle view mode now uses custom display settings copied from the default view mode. You might want to <a href="@url">configure them</a>.', array(
+        backdrop_set_message(t('The %view_mode @entity_type @bundle display mode now uses custom display settings copied from the default display mode. You might want to <a href="@url">configure them</a>.', array(
           '%view_mode' => $view_mode['label'],
           '@entity_type' => $entity_info['label'],
           '@bundle' => $entity_info['bundles'][$bundle]['label'],
           '@url' => url($path, array('query' => backdrop_get_destination())),
         )));
-        // Initialize the newly customized view mode with the display settings
-        // from the default view mode.
+        // Initialize the newly customized display mode with the display settings
+        // from the default display mode.
         _field_ui_add_default_view_mode_settings($entity_type, $bundle, $view_mode_name, $bundle_settings);
       }
 
@@ -1358,7 +1358,7 @@ function field_entity_view_mode_delete($view_mode, $entity_type) {
   $view_mode_name = $view_mode['machine_name'];
 
   foreach (array_keys($entity_info['bundles']) as $bundle) {
-    // Remove all field bundle settings for the deleted view mode.
+    // Remove all field bundle settings for the deleted display mode.
     $settings = field_bundle_settings($entity_type, $bundle);
     if (isset($settings['view_modes'][$view_mode_name]) || isset($settings['extra_fields']['display'][$view_mode_name])) {
       unset($settings['view_modes'][$view_mode_name]);
@@ -1366,10 +1366,10 @@ function field_entity_view_mode_delete($view_mode, $entity_type) {
       field_bundle_settings($entity_type, $bundle, $settings);
     }
 
-    // Remove all field instance display settings for the deleted view mode.
+    // Remove all field instance display settings for the deleted display mode.
     $instances = field_read_instances(array('entity_type' => $entity_type, 'bundle' => $bundle));
     foreach ($instances as $instance) {
-      // Remove the view mode settings from all configured field instances.
+      // Remove the display mode settings from all configured field instances.
       if (isset($instance['display'][$view_mode_name])) {
         unset($instance['display'][$view_mode_name]);
         field_update_instance($instance);

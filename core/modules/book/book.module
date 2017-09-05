@@ -83,7 +83,7 @@ function book_autoload_info() {
  * @param Node $node
  *   The book page node to add links to.
  * @param $view_mode
- *   The view mode of the node.
+ *   The display mode of the node.
  */
 function book_node_view_link(Node $node, $view_mode) {
   $links = array();
@@ -231,7 +231,7 @@ function book_admin_paths() {
  * Implements hook_entity_info_alter().
  */
 function book_entity_info_alter(&$info) {
-  // Add the 'Print' view mode for nodes.
+  // Add the 'Print' display mode for nodes.
   $info['node']['view modes'] += array(
     'print' => array(
       'label' => t('Print'),
