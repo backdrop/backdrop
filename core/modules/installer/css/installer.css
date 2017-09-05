@@ -138,8 +138,7 @@
   .installer-browser-install-sidebar {
     display: block;
     float: left; /* LTR */
-    width: 19%;
-    padding: 10px;
+    width: 220px;
     box-sizing: border-box;
   }
   [dir="rtl"] .installer-browser-install-sidebar {
@@ -147,13 +146,13 @@
   }
 
   .installer-browser-install-main {
-    padding: 10px;
-    float: right; /* LTR */
-    width: 76%;
+    padding: 0 20px;
+    margin-left: 240px; /* LTR */
     box-sizing: border-box;
   }
   [dir="rtl"] .installer-browser-install-main {
-    float: left;
+    margin-left: 0;
+    margin-right: 240px;
   }
 }
 
