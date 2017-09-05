@@ -53,6 +53,22 @@ Backdrop.behaviors.filePreviewLinks = {
 };
 
 /**
+ * Attach behaviors to Vertical tabs on file administration pages.
+ */
+Backdrop.behaviors.fileFieldsetSummaries = {
+  attach: function (context) {
+    $('fieldset.file-form-destination', context).backdropSetSummary(function (context) {
+      var scheme = $('.form-item-scheme input:checked', context).parent().text();
+      return Backdrop.t('Destination: @scheme', { '@scheme': scheme });
+    });
+    $('fieldset.file-form-user', context).backdropSetSummary(function (context) {
+      var name = $('.form-item-name input', context).val() || Backdrop.settings.anonymous;
+      return Backdrop.t('By @name', { '@name': name });
+    });
+  }
+};
+
+/**
  * File upload utility functions.
  */
 Backdrop.file = Backdrop.file || {

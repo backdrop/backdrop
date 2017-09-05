@@ -1,8 +1,373 @@
 <?php
 /**
  * @file
- * Supports file operations including View, Edit, and Delete.
+ * Supports file operations including Edit, and Delete.
  */
+
+/**
+ * Page callback: Form constructor for the file edit form.
+ *
+ * @param object $file
+ *   A file object from file_load().
+ */
+function file_edit_form($form, &$form_state, $file) {
+  // @todo Add type w/ https://github.com/backdrop/backdrop-issues/issues/2632
+  backdrop_set_title(t('<em>Edit file</em> @title', array('@title' => $file->filename)), PASS_THROUGH);
+
+  $form_state['file'] = $file;
+
+  $form['#attributes']['class'][] = 'file-form';
+  if (!empty($file->type)) {
+    $form['#attributes']['class'][] = 'file-' . $file->type . '-form';
+  }
+
+  // Basic file information.
+  // These elements are just values so they are not even sent to the client.
+  // @todo Add type w/ https://github.com/backdrop/backdrop-issues/issues/2632
+  foreach (array('fid', 'uid', 'timestamp') as $key) {
+    $form[$key] = array(
+      '#type' => 'value',
+      '#value' => isset($file->$key) ? $file->$key : NULL,
+    );
+  }
+
+  $form['filename'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Filename'),
+    '#default_value' => $file->filename,
+    '#required' => TRUE,
+    '#maxlength' => 255,
+    '#weight' => -10,
+  );
+
+  // Set up replacement file validation.
+  $replacement_options = array();
+
+  // The replacement file must have the same extension as the original file.
+  $replacement_options['file_extensions'] = pathinfo($file->uri, PATHINFO_EXTENSION);
+
+  $form['replace_upload'] = array(
+    '#type' => 'file',
+    '#title' => t('Replace file'),
+    '#description' => t('This file will replace the existing file. This action cannot be undone.'),
+    '#upload_validators' => file_get_upload_validators($replacement_options),
+    '#pre_render' => array('file_upload_validators_pre_render'),
+  );
+
+  $form['additional_settings'] = array(
+    '#type' => 'vertical_tabs',
+    '#weight' => 99,
+  );
+
+  // File destination information for administrators.
+  $form['destination'] = array(
+    '#type' => 'fieldset',
+    '#access' => user_access('administer files'),
+    '#title' => t('Destination'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#attributes' => array(
+      'class' => array('file-form-destination'),
+    ),
+    '#attached' => array(
+      'js' => array(
+        backdrop_get_path('module', 'file') . '/js/file.js',
+      ),
+    ),
+  );
+
+  $options = array();
+  foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
+    $options[$scheme] = check_plain($info['name']);
+  }
+
+  $form['destination']['scheme'] = array(
+    '#type' => 'radios',
+    '#title' => t('Destination'),
+    '#options' => $options,
+    '#default_value' => file_uri_scheme($file->uri),
+  );
+
+  // File user information for administrators.
+  $anonymous = config_get('system.core', 'anonymous');
+  $form['user'] = array(
+    '#type' => 'fieldset',
+    '#access' => user_access('administer files'),
+    '#title' => t('Authoring information'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#attributes' => array(
+      'class' => array('file-form-user'),
+    ),
+    '#attached' => array(
+      'js' => array(
+        backdrop_get_path('module', 'file') . '/js/file.js',
+        array(
+          'type' => 'setting',
+          'data' => array('anonymous' => t($anonymous)),
+        ),
+      ),
+    ),
+    '#weight' => 90,
+  );
+  $form['user']['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Authored by'),
+    '#maxlength' => 60,
+    '#autocomplete_path' => 'user/autocomplete',
+    '#default_value' => !empty($file->uid) ? user_load($file->uid)->name : '',
+    '#weight' => -1,
+    '#description' => t('Leave blank for %anonymous.', array('%anonymous' => $anonymous)),
+  );
+
+  // Add the buttons.
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#weight' => 5,
+    '#submit' => array('file_edit_form_submit'),
+    '#validate' => array('file_edit_form_validate'),
+  );
+  $form['actions']['delete'] = array(
+    '#type' => 'submit',
+    '#value' => t('Delete'),
+    '#weight' => 10,
+    '#submit' => array('file_delete_form_submit'),
+    '#access' => user_access('delete files'),
+  );
+
+  // Build the URL for the cancel button taking into account that there might be
+  // a "destination" that includes query string variables.
+  $parameters = backdrop_get_query_parameters();
+  $destination = isset($parameters['destination']) ? $parameters['destination'] : 'file/' . $file->fid;
+  $url = backdrop_parse_url($destination);
+
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $url['path'],
+    '#options' => array('query' => $url['query']),
+    '#weight' => 15,
+  );
+
+  $langcode = function_exists('entity_language') ? entity_language('file', $file) : NULL;
+  field_attach_form('file', $file, $form, $form_state, $langcode);
+
+  return $form;
+}
+
+/**
+ * Form validation handler for file_edit_form().
+ */
+function file_edit_form_validate($form, &$form_state) {
+  $file = (object) $form_state['values'];
+
+  // Validate the "associated user" field.
+  if (!empty($file->name) && !($account = user_load_by_name($file->name))) {
+    // The use of empty() is mandatory in the context of usernames
+    // as the empty string denotes the anonymous user. In case we
+    // are dealing with an anonymous user we set the user ID to 0.
+    form_set_error('name', t('The username %name does not exist.', array('%name' => $file->name)));
+  }
+
+  // Handle the replacement file if uploaded.
+  if (isset($form_state['values']['replace_upload'])) {
+    // Save the file as a temporary file.
+    $file = file_save_upload('replace_upload', $form['replace_upload']['#upload_validators']);
+    if (!empty($file)) {
+      // Put the temporary file in form_values so we can save it on submit.
+      $form_state['values']['replace_upload'] = $file;
+    }
+    elseif ($file === FALSE) {
+      // File uploaded failed.
+      form_set_error('replace_upload', t('The replacement file could not be uploaded.'));
+    }
+  }
+
+  // Run entity form validation.
+  entity_form_field_validate('file', $form, $form_state);
+}
+
+/**
+ * Form submission handler for the 'Save' button for file_edit_form().
+ */
+function file_edit_form_submit($form, &$form_state) {
+  $file = $form_state['file'];
+  $orphaned_uri = '';
+
+  // Check if a replacement file has been uploaded.
+  if (!empty($form_state['values']['replace_upload'])) {
+    // Create a backup file to help avoid confusion.
+    if ($backup = file_copy($file, $file->uri, FILE_EXISTS_RENAME)) {
+      $backup->filename = $file->fid . '-backup-' . $backup->filename;
+      $backup->status = 0;
+      $backup->save();
+    }
+
+    $replacement = $form_state['values']['replace_upload'];
+    // Move file from temp to permanent home.
+    if (pathinfo($replacement->uri, PATHINFO_EXTENSION) == pathinfo($file->uri, PATHINFO_EXTENSION)) {
+      file_unmanaged_copy($replacement->uri, $file->uri, FILE_EXISTS_REPLACE);
+      // Rename the replacement temporary file to avoid confusion.
+      $parts = explode('.', $replacement->filename);
+      $extension = array_pop($parts);
+      $replacement->filename = $file->fid .'-replacement-' . $replacement->filename;
+      $replacement->save();
+    }
+    else {
+      $destination_uri = rtrim($file->uri, backdrop_basename($file->uri)) . backdrop_basename($replacement->uri);
+      $replace_mode = $destination_uri == $file->uri ? FILE_EXISTS_REPLACE : FILE_EXISTS_RENAME;
+      if ($new_file_uri = file_unmanaged_copy($replacement->uri, $destination_uri, $replace_mode)) {
+
+        // Rename the temporary file to avoid confusion.
+        $replacement->filename = $file->fid . '-replacement-' . $replacement->filename;
+        $replacement->save();
+
+        // Remove temporary file.
+        file_delete($replacement);
+
+        // Update if the uri target has changed.
+        if ($new_file_uri != $file->uri) {
+          // Store the original file uri to delete if save is successful.
+          $orphaned_uri = $file->uri;
+
+          // Update file entity uri.
+          $file->uri = $new_file_uri;
+        }
+      }
+    }
+
+    // Clear any image styles for this file.
+      // @todo check and see if it's an image once we have $file->type.
+    $image_info = image_get_info($file->uri);
+    if (!empty($image_info)) {
+      image_path_flush($file->uri);
+    }
+  }
+
+  // Run entity form submit handling and save the file.
+  entity_form_submit_build_entity('file', $file, $form, $form_state);
+
+  // A user might assign the associated user by entering a user name in the file
+  // edit form, which we then need to translate to a user ID.
+  if (isset($file->name)) {
+    // The use of isset() is mandatory in the context of user IDs, because
+    // user ID 0 denotes the anonymous user.
+    if ($user = user_load_by_name($file->name)) {
+      $file->uid = $user->uid;
+    }
+    else {
+      // Anonymous user.
+      $file->uid = 0;
+    }
+  }
+  elseif ($file->uid) {
+    $user = user_load($file->uid);
+    $file->name = $user->name;
+  }
+
+  if (file_uri_scheme($file->uri) != $form_state['values']['scheme']) {
+    $file_destination = $form_state['values']['scheme'] . '://' . file_uri_target($file->uri);
+    $file_destination = file_stream_wrapper_uri_normalize($file_destination);
+    $file_destination_dirname = backdrop_dirname($file_destination);
+    // Create the directory in case it doesn't exist.
+    file_prepare_directory($file_destination_dirname, FILE_CREATE_DIRECTORY);
+    if ($moved_file = file_move($file, $file_destination, FILE_EXISTS_RENAME)) {
+      // Only re-assign the file object if file_move() did not fail.
+      $file = $moved_file;
+    }
+  }
+
+  file_save($file);
+
+  $args = array(
+    '%title' => entity_label('file', $file),
+  );
+  watchdog('file', 'File: updated %title.', $args);
+  backdrop_set_message(t('File: %title has been updated.', $args));
+
+  // Clean up orphaned file.
+  if (!empty($orphaned_uri)) {
+    file_unmanaged_delete($orphaned_uri);
+
+    $args['@orphaned'] = file_uri_target($orphaned_uri);
+    watchdog('file', 'File: deleted orphaned file @orphaned for %title.', $args);
+    backdrop_set_message(t('The replaced @type @orphaned has been deleted.', $args));
+  }
+
+  $form_state['redirect'] = 'admin/content/files';
+
+  // Clear the page and block caches.
+  cache_clear_all();
+}
+
+/**
+ * Retrieves the upload validators for a file.
+ *
+ * @param array $options
+ *   (optional) An array of options for file validation.
+ *
+ * @return array
+ *   An array suitable for passing to file_save_upload() or for a managed_file
+ *   or upload element's '#upload_validators' property.
+ */
+function file_get_upload_validators(array $options = array()) {
+  // Set up file upload validators.
+  $validators = array();
+
+  // Validate file extensions. If there are no file extensions in $params there
+  // is no file extension validation.
+  if (!empty($options['file_extensions'])) {
+    $validators['file_validate_extensions'] = array($options['file_extensions']);
+  }
+  else {
+    $validators['file_validate_extensions'] = array(config_get('system.core', 'file_default_allowed_extensions'));
+  }
+
+  // Cap the upload size according to the system or user defined limit.
+  $max_filesize = parse_size(file_upload_max_size());
+  if (!empty($options['max_filesize']) && $options['max_filesize'] < $max_filesize) {
+    $max_filesize = parse_size($options['max_filesize']);
+  }
+
+  // There is always a file size limit due to the PHP server limit.
+  $validators['file_validate_size'] = array($max_filesize);
+
+  // Add image validators.
+  $options += array('min_resolution' => 0, 'max_resolution' => 0);
+  if ($options['min_resolution'] || $options['max_resolution']) {
+    $validators['file_validate_image_resolution'] = array($options['max_resolution'], $options['min_resolution']);
+  }
+
+  // Add other custom upload validators from options.
+  if (!empty($options['upload_validators'])) {
+    $validators += $options['upload_validators'];
+  }
+
+  return $validators;
+}
+
+/**
+ * Pre-render callback for adding validation descriptions to file upload fields.
+ */
+function file_upload_validators_pre_render($element) {
+  if (!empty($element['#upload_validators'])) {
+    if (!isset($element['#description'])) {
+      $element['#description'] = '';
+    }
+    if ($element['#description'] !== FALSE) {
+      $element['#description'] = theme('file_upload_help', array(
+        'description' => $element['#description'],
+        'upload_validators' => $element['#upload_validators'],
+      ));
+    }
+  }
+
+  return $element;
+}
 
 /**
  * Page callback: Form constructor for the file deletion confirmation form.
