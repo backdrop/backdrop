@@ -1,49 +1,49 @@
 /* Layout listing form. */
-#layout-list .layout-group td {
+.layout-list .layout-group td {
   background: #dddddd;
 }
-#layout-list .layout-group td:first-child {
+.layout-list .layout-group td:first-child {
   font-weight: bold;
 }
-#layout-list .layout-row td:first-child {
+.layout-list .layout-row td:first-child {
   padding-left: 24px;
 }
-#layout-list tr.disabled td {
+.layout-list tr.disabled td {
   color: #999;
 }
-#layout-list td:last-child {
+.layout-list td:last-child {
   min-width: 160px;
 }
 
 @media (min-width: 768px) {
-  #layout-list span.priority-low {
+  .layout-list span.priority-low {
     display: inline;
   }
 }
 
-#layout-list img {
+.layout-list img {
   display: none;
   float: left; /* LTR */
   margin-right: 10px;
   max-width: 37px;
   height: auto;
 }
-[dir="rtl"] #layout-list img {
+[dir="rtl"] .layout-list img {
   float: right; /* LTR */
   margin-right: 0;
   margin-left: 10px;
 }
 @media (min-width: 768px) {
-  #layout-list img {
+  .layout-list img {
     display: inline;
   }
 }
 
-#layout-list .layout-conditions-list ul {
+.layout-list .layout-conditions-list ul {
   margin-left: 0;
 }
 
-#layout-list .layout-title {
+.layout-list .layout-title {
   font-weight: bold;
 }
 

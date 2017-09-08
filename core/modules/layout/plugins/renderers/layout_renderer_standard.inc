@@ -523,10 +523,18 @@ class LayoutRendererStandard {
         $title = $block->getTitle();
       }
 
-      // Assemble a structured content array.
-      $content = (object) array(
+      $data = array(
         'title' => $title,
         'content' => $content,
+      );
+
+      // Allow altering of the title and content by other modules.
+      backdrop_alter(array('block_view', 'block_view_' . $block->module . '_' . str_replace('-', '_', $block->delta)), $data, $block);
+
+      // Assemble a structured content array.
+      $content = (object) array(
+        'title' => $data['title'],
+        'content' => $data['content'],
       );
 
       if (isset($style) && isset($style['block theme'])) {

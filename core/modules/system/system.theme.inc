@@ -99,7 +99,7 @@ function theme_system_themes_page($variables) {
     foreach ($theme_groups[$state] as $theme) {
 
       // Theme the screenshot.
-      $screenshot = $theme->screenshot ? theme('path', $theme->screenshot) : '<div class="no-screenshot">' . t('no screenshot') . '</div>';
+      $screenshot = $theme->screenshot ? theme('image', $theme->screenshot) : '<div class="no-screenshot">' . t('no screenshot') . '</div>';
 
       // Localize the theme description.
       $description = t($theme->info['description']);
@@ -112,7 +112,7 @@ function theme_system_themes_page($variables) {
 
       // Make sure to provide feedback on compatibility.
       if (!empty($theme->incompatible_core)) {
-        $output .= '<div class="incompatible">' . t('This version is not compatible with Backdrop CMS !core_version and should be replaced.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . '</div>';
+        $output .= '<div class="incompatible">' . t('This version is not compatible with Backdrop CMS !core_version.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . '</div>';
       }
       elseif (!empty($theme->incompatible_php)) {
         if (substr_count($theme->info['php'], '.') < 2) {
@@ -428,14 +428,21 @@ function theme_admin_page($variables) {
  */
 function theme_admin_block($variables) {
   $block = $variables['block'];
-  $output = '';
+  $classes = array('admin-panel');
+  // Construct a more specific class.
+  if (isset($variables['block']['path'])) {
+    $path_parts = explode('/', $variables['block']['path']);
+    $class_suffix = end($path_parts);
+    $classes[] = ' ' . backdrop_clean_css_identifier('admin-panel-' . $class_suffix);
+  }
 
+  $output = '';
   // Don't display the block if it has no content to display.
   if (empty($block['show'])) {
     return $output;
   }
 
-  $output .= '<div class="admin-panel">';
+  $output .= '<div class="' . implode(' ', $classes) . '">';
   if (!empty($block['title'])) {
     $output .= '<h3>' . $block['title'] . '</h3>';
   }
@@ -763,7 +770,7 @@ function system_preprocess_page_components(&$variables) {
   if ($child_delta == 'action_links' || $child_delta == 'title_combo') {
     $variables['action_links'] = menu_local_actions();
   }
-  
+
   if ($child_delta == 'messages' || $child_delta == 'title_combo') {
     $variables['messages'] = theme('status_messages');
   }

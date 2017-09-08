@@ -5,9 +5,9 @@
  */
 
 /**
- * Implements hook_preprocess_page().
+ * Prepares variables for page templates.
  *
- * @see maintenance_page.tpl.php
+ * @see page.tpl.php
  */
 function basis_preprocess_page(&$variables) {
   $node = menu_get_object();
@@ -28,7 +28,7 @@ function basis_preprocess_page(&$variables) {
 }
 
 /**
- * Implements template_preprocess_page().
+ * Prepares variables for layout templates.
  *
  * @see layout.tpl.php
  */
@@ -44,7 +44,22 @@ function basis_preprocess_layout(&$variables) {
 }
 
 /**
- * Implements template_preprocess_header().
+ * Prepares variables for node templates.
+ *
+ * @see node.tpl.php
+ */
+function basis_preprocess_node(&$variables) {
+  if ($variables['status'] == NODE_NOT_PUBLISHED) {
+    $name = node_type_get_name($variables['type']);
+    $variables['title_suffix']['unpublished_indicator'] = array(
+      '#type' => 'markup',
+      '#markup' => '<div class="unpublished-indicator">' . t('This @type is unpublished.', array('@type' => $name)) . '</div>',
+    );
+  }
+}
+
+/**
+ * Prepares variables for header templates.
  *
  * @see header.tpl.php
  */
@@ -65,9 +80,7 @@ function basis_preprocess_header(&$variables) {
 }
 
 /**
- * Overrides theme_breadcrumb().
- *
- * Removes &raquo; from markup.
+ * Overrides theme_breadcrumb(). Removes &raquo; from markup.
  *
  * @see theme_breadcrumb().
  */

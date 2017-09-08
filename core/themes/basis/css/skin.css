@@ -1014,6 +1014,16 @@ ul.secondary li a:active {
 }
 
 /**
+ * Unpublished indicator.
+ */
+.unpublished-indicator {
+  line-height: 1.6rem;
+  background-color: #ee3d23;
+  color: #fff;
+  padding: .75rem;
+}
+
+/**
  * Responsive tabs
  */
 .responsive-tabs-mobile ul.primary {

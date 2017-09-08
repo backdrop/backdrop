@@ -19,6 +19,7 @@ function system_menu_block_defaults($menu_name) {
     'level' => 1,
     'menu_name' => $menu_name,
     'style' => NULL,
+    'expand_all' => FALSE,
   );
   if ($menu_name == 'main-menu') {
     $defaults['depth'] = 1;
@@ -103,6 +104,17 @@ function system_menu_block_form($config) {
       ),
     ),
   );
+  $form['expand_all'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show all menu links'),
+    '#default_value' => $config['expand_all'],
+    '#description' => t('When checked, all menu links will be displayed. When unchecked, only expanded or active trail menu links will be displayed.'),
+    '#states' => array(
+      'visible' => array(
+        'select[name="block_settings[style]"]' => array('value' => 'tree'),
+      ),
+    ),
+  );
   $form['toggle'] = array(
     '#type' => 'checkbox',
     '#title' => t('Display menu toggle button on small screens'),
@@ -146,6 +158,7 @@ function system_menu_block_build(array $config) {
     'style' => 'tree',
     'level' => 1,
     'depth' => 3,
+    'expand_all' => FALSE,
   );
 
   // Get the default block name.

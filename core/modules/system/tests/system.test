@@ -1112,11 +1112,12 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/config/development/maintenance', $edit, 'Save configuration');
     $this->assertRaw('The site is now in maintenance mode. Only users with the "Access site in maintenance mode" permission will be able to access the site.', 'Maintenance confirmation message shown.');
 
-    $admin_message = format_string('Operating in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance')));
-    $user_message = 'Operating in maintenance mode.';
+    $path = config_get('system.core', 'site_frontpage');
+    $admin_message = format_string('The site is currently in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance', array('query' => array('destination' => $path)))));
+    $user_message = 'The site is currently in maintenance mode.';
     $offline_message = format_string('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.core', 'site_name')));
 
-    $this->backdropGet('');
+    $this->backdropGet($path);
     $this->assertRaw($admin_message, 'Found the site maintenance mode message.');
 
     // Logout and verify that offline message is displayed.

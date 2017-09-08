@@ -144,12 +144,8 @@ ul.menu li.expanded {
   height: 1em;
   vertical-align: middle;
   padding: 0 3px;
-  background: url(../images/angle-right--gray.png) no-repeat center center;
-  /* SVG hack */
-  background-image:
-    linear-gradient(transparent, transparent),
-    url(../images/angle-right--gray.svg);
-  background-size: auto 100%;
+  background: url(../images/chevron-right--gray--32.png) no-repeat center center;
+  background-size: 8px;
 }
 
 .breadcrumb li.last:after {
@@ -431,72 +427,66 @@ main {
 }
 
 /* Administration page listings. */
-ul.admin-list li {
+.admin-list li {
   position: relative;
-  padding-left: 30px; /* LTR */
-  padding-top: 9px;
+  padding: 9px 15px;
   border-top: 1px solid #ccc;
-  margin-left: 0; /* LTR */
-  margin-bottom: 10px;
-  background: url(../images/list-item.png) no-repeat 0 11px; /* LTR */
+  margin: 0;
+}
+ul.admin-list li {
+  /* Specificity bump to override upstream */
   list-style-type: none;
   list-style-image: none;
 }
-[dir="rtl"] ul.admin-list li {
-  padding: 9px 30px 0 0;
-  margin-right: 0;
-  background: url(../images/list-item-rtl.png) no-repeat right 11px;
-}
-ul.admin-list li:first-child {
+.admin-list li:first-child {
   border-top: none;
 }
 .admin-panel .item-list ul,
-ul.admin-list {
+.admin-list {
   margin: 0;
   padding: 0;
 }
 .admin-panel .item-list ul,
-ul.admin-list.compact {
+.admin-list.compact {
   margin: 8px 0;
 }
 .admin-panel .item-list li,
-ul.admin-list.compact li {
+.admin-list.compact li {
   border: none;
   background: none;
   margin: 0 0 0.75em;
   line-height: 1;
   padding: 0;
 }
-ul.admin-list li:last-child {
+.admin-list li:last-child {
   border-bottom: none;
 }
-ul.admin-list li a {
-  margin-left: -30px; /* LTR */
-  padding: 0 0 4px 30px; /* LTR */
+.admin-list li a {
+  padding: 0 0 4px; /* LTR */
   min-height: 0;
 }
-[dir="rtl"] ul.admin-list li a {
-  margin-right: -30px;
-  margin-left: 0;
-  padding: 0 30px 4px 0;
+[dir="rtl"] .admin-list li a {
+  padding: 0 0 4px;
 }
-ul.admin-list.compact li a {
+.admin-list.compact li a {
   margin-left: 0; /* LTR */
   padding: 0;
 }
-[dir="rtl"] ul.admin-list.compact li a {
+[dir="rtl"] .admin-list.compact li a {
   margin-right: 0;
 }
-ul.admin-list li div.description a {
+.admin-list li div.description a {
   margin-left: 0; /* LTR */
   padding: 0;
   min-height: inherit;
 }
-[dir="rtl"] ul.admin-list li div.description a {
+[dir="rtl"] .admin-list li div.description a {
   margin-right: 0;
 }
 .admin-panel .description {
   line-height: inherit;
+  padding: 2px 0;
+  margin: 0;
 }
 div.submitted {
   color: #898989;
@@ -620,6 +610,7 @@ tr.selected td {
     display: none;
   }
 }
+
 /**
  * Fieldsets.
  *
@@ -730,6 +721,17 @@ fieldset .fieldset-wrapper {
   top: .75em;
   border: .32em solid transparent;
   border-left-color: black;
+}
+
+/**
+ * Views exposed form (matches fieldsets).
+ */
+form.views-exposed-form {
+  margin: 1em 0;
+  padding: 7px 13px;
+  border-radius: 4px;
+  background-color: #fff;
+  border: 2px solid #EAEAEA;
 }
 
 /**
@@ -1059,7 +1061,8 @@ ul.action-links li {
 }
 ul.action-links a {
   padding-left: 15px; /* LTR */
-  background: transparent url(../images/add.png) no-repeat 0 center;
+  background: transparent url(../images/plus--blue--32.png) no-repeat 0 center;
+  background-size: 9px;
   line-height: 30px;
 }
 [dir="rtl"] ul.action-links a {
@@ -1077,27 +1080,69 @@ div.filter-options select {
 /**
  * System.
  */
-div.admin .right,
-div.admin .left {
+.admin .right,
+.admin .left {
   width: 49%;
   margin: 0;
 }
-div.admin-panel,
-div.admin-panel .body {
+.admin-panel,
+.admin-panel .body {
   padding: 0;
   clear: left;
 }
-div.admin-panel {
+.admin-panel {
   margin: 0 0 20px;
   padding: 9px;
-  background: #f8f8f8;
+  background: #fff;
   border: 1px solid #ccc;
+  border-radius: 4px;
 }
-div.admin-panel h3 {
+.admin-panel h3 {
+  margin: 4px 0 4px 4px; /* LTR */
+  padding: 6px 0 6px 35px; /* LTR */
   font-size: 0.923em;
   text-transform: uppercase;
-  margin: 0;
-  padding-bottom: 9px;
+  /* All icons derived from Font Awesome. See README.md in the Seven theme.*/
+  background: url('../images/chevron-circle-right--black--64.png') no-repeat left center; /* LTR */
+  background-size: 23px;
+}
+[dir="rtl"] .admin-panel h3 {
+  margin-left: 0;
+  margin-right: 4px;
+  padding-left: 0;
+  padding-right: 35px;
+  background: url('../images/chevron-circle-left--black--64.png') no-repeat right center; /* LTR */
+  background-size: 23px;
+}
+.admin-panel-people h3 {
+  background-image: url('../images/user--black--64.png');
+}
+.admin-panel-content h3 {
+  background-image: url('../images/pencil-square-o--black--64.png');
+}
+.admin-panel-system h3 {
+  background-image: url('../images/hdd-o--black--64.png');
+}
+.admin-panel-administration h3 {
+  background-image: url('../images/cog--black--64.png');
+}
+.admin-panel-media h3 {
+  background-image: url('../images/picture-o--black--64.png');
+}
+.admin-panel-search h3 {
+  background-image: url('../images/search--black--64.png');
+}
+.admin-panel-regional h3 {
+  background-image: url('../images/globe--black--64.png');
+}
+.admin-panel-urls h3 {
+  background-image: url('../images/link--black--64.png');
+}
+.admin-panel-development h3 {
+  background-image: url('../images/wrench--black--64.png');
+}
+.admin-panel-services h3 {
+  background-image: url('../images/rss--black--64.png');
 }
 
 /* admin/appearance */
@@ -1279,7 +1324,7 @@ body.maintenance-page .page-title {
 }
 body.maintenance-page .sidebar {
   float: left; /* LTR */
-  width: 190px;
+  width: 220px;
   text-align: center;
 }
 [dir="rtl"] body.maintenance-page .sidebar {
@@ -1291,7 +1336,7 @@ body.maintenance-page main {
 body.maintenance-page .sidebar + main {
   max-width: 590px;
   padding-right: 20px; /* LTR */
-  margin-left: 210px; /* LTR */
+  margin-left: 240px; /* LTR */
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
@@ -1299,7 +1344,7 @@ body.maintenance-page .sidebar + main {
   padding-right: 0;
   padding-left: 20px;
   margin-left: 0;
-  margin-right: 200px;
+  margin-right: 240px;
 }
 body.maintenance-page h1 {
   margin: 0 auto 1em;
@@ -1327,71 +1372,81 @@ body.maintenance-page .password-parent {
   width: 100%;
   max-width: 300px;
 }
-body.maintenance-page .form-submit {
-  display: block;
-}
 body.maintenance-page #logo {
   max-width: 120px;
   margin: 0 auto;
 }
 ol.task-list {
-  margin-top: 20px;
-  margin-left: 0; /* LTR */
+  margin: 0;
+  padding-left: 0; /* LTR */
   padding-right: 17px;
   padding-bottom: 1em;
-  padding-left: 0; /* LTR */
   font-size: .9em;
   text-align: left; /* LTR */
   list-style-type: none;
   list-style-image: none;
+
 }
 [dir="rtl"] ol.task-list {
   text-align: right;
-  margin-right: 0;
+  padding-left: 17px;
   padding-right: 0;
 }
-ol.task-list li {
-  padding: 0.5em 1em 0.5em 20px; /* LTR */
-  color: #1a1a1a;
+body.maintenance-page ol.task-list {
+  margin-top: 50px;
 }
-[dir="rtl"] ol.task-list li {
-  padding: 0.5em 20px 0.5em 1em;
+ol.task-list li {
+  padding: .75em;
+  color: #1a1a1a;
+  line-height: 20px;
 }
 ol.task-list li.active {
-  padding: 0.5em 1em 0.5em 20px; /* LTR */
+  padding: .75em;
   font-weight: normal;
   color: #000;
   background: #E8E6E5;
   position: relative;
-}
-[dir="rtl"] ol.task-list li.active {
-  padding: 0.5em 20px 0.5em 1em;
 }
 ol.task-list li.active:after {
   left: 100%; /* LTR */
   border: solid transparent;
   border-color: rgba(255, 255, 255, 0);
   border-left-color: #E8E6E5; /* LTR */
-  border-width: 17px;
+  border-width: 21px;
   content: " ";
   height: 0;
   width: 0;
   position: absolute;
   pointer-events: none;
   top: 50%;
-  margin-top: -17px;
+  margin-top: -21px;
+  font-size: 0;
+  line-height: 0;
 }
 [dir="rtl"] ol.task-list li.active:after {
+  left: auto;
   right: 100%;
   border-left-color: transparent;
   border-right-color: #E8E6E5;
 }
-ol.task-list li.done {
-  background: transparent url(../images/task-check.png) no-repeat 0 50%;
-  color: green;
+ol.task-list .task-item {
+  position: relative;
+  vertical-align: middle;
+  margin: 0 0 0 2.5em; /* LTR */
 }
-[dir="rtl"] ol.task-list li.done {
-  background: transparent url(../images/task-check.png) no-repeat right 50%;
+[dir="rtl"] ol.task-list .task-item {
+  margin-right: 2.5em;
+  margin-left: 0;
+}
+ol.task-list .done:before {
+  content: ' ';
+  display: inline-block;
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  border-radius: 15px;
+  background: #CFDE56 url(../../../misc/icon-ok.png) no-repeat center center;
+  background-size: 60%;
 }
 
 .step-indicator {
@@ -1454,8 +1509,12 @@ div.add-or-remove-shortcuts {
 .js .dropbutton-wrapper.open .dropbutton-widget {
   border-color: #0d68a6;
 }
+.js .dropbutton li {
+  text-align: inherit;
+}
 .js .dropbutton a {
   text-transform: uppercase;
+  text-align: inherit;
 }
 .js .dropbutton a:hover {
   text-decoration: none;
@@ -1585,57 +1644,71 @@ div.add-or-remove-shortcuts {
 }
 .progress .bar {
   margin: 0 0.2em .5em 0;
-  border: 2px solid #e5e5e6;
-  border-radius: 3px;
+  border: 2px solid #d0d0d0;
+  border-radius: 4px;
   overflow: hidden;
-  background: #e5e5e6;
+  background: #eaeaea;
+  height: 2.5em;
 }
 .progress .filled {
+  background: #0074bd;
+  background-image: -webkit-linear-gradient(#0085D9, #0074bd);
+  height: 100%;
   position: relative;
   overflow: hidden;
-  background: #CFDE56;
+  border-radius: 3px;
+}
+.progress .filled:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
   -webkit-transition: width .4s;
   transition: width .4s;
   will-change: width;
+  background-image: -webkit-gradient(linear, 0 0, 100% 100%,
+    color-stop(.25, rgba(255, 255, 255, .2)),
+    color-stop(.25, transparent), color-stop(.5, transparent),
+    color-stop(.5, rgba(255, 255, 255, .2)),
+    color-stop(.75, rgba(255, 255, 255, .2)),
+    color-stop(.75, transparent), to(transparent)
+  );
+  background-image: linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, .2) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, .2) 50%,
+    rgba(255, 255, 255, .2) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 50px 50px;
+  padding: 0 1px;
+  height: 2.5em;
+  -webkit-animation: animate-stripes 2s linear infinite;
+  -moz-animation: animate-stripes 2s linear infinite;
+  -webkit-transition: width 0.5s ease-out;
+  transition: width 0.5s ease-out;
 }
-/* Progress Bar Animation */
-.progress .filled:after {
-  content: "";
-  position: absolute;
-  display: block;
-  width: 15%;
-  height: 100%;
-  background: -webkit-linear-gradient(0deg, #CFDE56 0%, #dbe788 60%, #CFDE56 65%);
-  background: linear-gradient(90deg, #CFDE56 0%, #dbe788 60%, #CFDE56 65%);
-  background-color: #CFDE56;
-  border-radius: 3px;
-  background-size: auto 200%;
-  background-position: 0 100%;
-  -webkit-animation: progressGradient 3s infinite;
-  animation: progressGradient 3s infinite;
-  -webkit-animation-fill-mode: forwards;
-  animation-fill-mode: forwards;
-  -webkit-animation-timing-function: linear;
-  animation-timing-function: linear;
-  -webkit-transition: width .4s;
-  transition: width .4s;
-  will-change: left, width;
-}
-
-@-webkit-keyframes progressGradient {
-  0% {
-    left: -15%;
-  }
-  100% {
-    left: 100%;
-  }
+[dir="rtl"] .progress .filled:after {
+  animation-direction: reverse;
+  -webkit-animation-direction: reverse;
+  -moz-animation-direction: reverse;
 }
 
-@keyframes progressGradient {
-  0% {
-    left: -15%;
-  }
-  100% {
-    left: 100%;
-  }
+/**
+ * Progress bar animations.
+ */
+@-webkit-keyframes animate-stripes {
+  0% { background-position: 0 0; } 100% { background-position: 50px 50px; }
+}
+@-ms-keyframes animate-stripes {
+  0% { background-position: 0 0; } 100% { background-position: 50px 50px; }
+}
+@keyframes animate-stripes {
+  0% { background-position: 0 0; } 100% { background-position: 50px 50px; }
 }

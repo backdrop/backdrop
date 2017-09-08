@@ -25,10 +25,10 @@
  * (1) http://ckeditor.com/builder
  *     Visit online builder to build CKEditor from scratch.
  *
- * (2) http://ckeditor.com/builder/9601e8a4f446e48a2eec0a186955b32d
+ * (2) http://ckeditor.com/builder/6fb1cc844895a936c156bd50f7fafd26
  *     Visit online builder to build CKEditor, starting with the same setup as before.
  *
- * (3) http://ckeditor.com/builder/download/9601e8a4f446e48a2eec0a186955b32d
+ * (3) http://ckeditor.com/builder/download/6fb1cc844895a936c156bd50f7fafd26
  *     Straight download link to the latest version of CKEditor (Optimized) with the same setup as before.
  *
  * NOTE:
@@ -40,37 +40,39 @@ var CKBUILDER_CONFIG = {
 	skin: 'moono-lisa',
 	preset: 'standard',
 	ignore: [
-		'.bender',
-		'bender.js',
-		'bender-err.log',
-		'bender-out.log',
-		'dev',
 		'.DS_Store',
+		'.bender',
 		'.editorconfig',
 		'.gitattributes',
 		'.gitignore',
-		'gruntfile.js',
 		'.idea',
 		'.jscsrc',
 		'.jshintignore',
 		'.jshintrc',
-		'less',
 		'.mailmap',
+		'.travis.yml',
+		'README.md',
+		'bender-err.log',
+		'bender-out.log',
+		'bender.ci.js',
+		'bender.js',
+		'dev',
+		'gruntfile.js',
+		'less',
 		'node_modules',
 		'package.json',
-		'README.md',
 		'tests'
 	],
-    // So that they are not shipped with Backdrop, after using this config file
-    // for rebuilding, the following are removed manually, because adding them
-    // to the ignore array does not cause them to be ignored:
-    // 'README.md',
-    // 'adapters',
-    // 'config.js',
-    // 'contents.css',
-    // 'samples',
-    // 'skins/moono/readme.md',
-    // 'styles.js',
+  // So that they are not shipped with Backdrop, after using this config file
+  // for rebuilding, the following are removed manually, because adding them
+  // to the ignore array does not cause them to be ignored:
+  // 'README.md',
+  // 'adapters',
+  // 'config.js',
+  // 'contents.css',
+  // 'samples',
+  // 'skins/moono-lisa/readme.md',
+  // 'styles.js',
 	plugins : {
 		'a11yhelp' : 1,
 		'about' : 1,
@@ -134,6 +136,7 @@ var CKBUILDER_CONFIG = {
 		'en-gb' : 1,
 		'eo' : 1,
 		'es' : 1,
+		'es-mx' : 1,
 		'et' : 1,
 		'eu' : 1,
 		'fa' : 1,
