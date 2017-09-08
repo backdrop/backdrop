@@ -43,7 +43,7 @@ Backdrop.behaviors.pathGenerate = {
 
     // Add check all checkboxes in the table head row.
     var strings = { 'selectAll': Backdrop.t('Select all rows in this table'), 'selectNone': Backdrop.t('Deselect all rows in this table') };
-    $form.find('th.path-alias-generate').prepend($('<input type="checkbox" class="select-all-alias form-checkbox" />').attr('title', strings.selectAll)).click(function (event) {
+    $form.find('th.path-alias-generate').wrapInner('<label class="option" for="select-all-alias"></label>').prepend($('<input type="checkbox" id="select-all-alias" class="select-all-alias form-checkbox" />').attr('title', strings.selectAll)).click(function (event) {
       if ($(event.target).is('input[type="checkbox"]')) {
         $form.find("input.path-type, input.path-base").each(function () {
           $(this).prop('checked', event.target.checked);
