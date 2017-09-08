@@ -289,6 +289,35 @@ Backdrop.behaviors.responsivePrimaryTabs = {
     $(document).ready(handleResize);
   }
 
-}
+};
+
+Backdrop.behaviors.sevenDropButtonWidths = {
+  attach: function(context, settings) {
+    function adjustDropButtonWidths() {
+      var $dropbutton = $(this);
+      var widestItem, width, $item;
+      $dropbutton.find('li').each(function() {
+        $item = $(this).css('display', 'block');
+        width = $item.outerWidth();
+        $item.css('display', '');
+        if (!widestItem || width > widestItem) {
+          widestItem = width;
+        }
+      });
+      if (widestItem) {
+        $dropbutton.find('.dropbutton').css('min-width', widestItem + 'px');
+      }
+
+      // Fix parent element min-width, like <td class="operations">
+      $dropbutton.parent().css('min-width', $dropbutton.find('.dropbutton-widget').outerWidth() + 'px');
+    }
+
+
+    Backdrop.isFontLoaded('Open Sans', function() {
+      $(context).find('.dropbutton-wrapper').once('dropbutton-width', adjustDropButtonWidths);
+    });
+
+  }
+};
 
 })(jQuery);
