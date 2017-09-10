@@ -2065,9 +2065,15 @@ function format_rss_item($title, $link, $description, $args = array()) {
  *     - 'key': element name
  *     - 'value': element contents
  *     - 'attributes': associative array of element attributes
+ *     - 'encoded': TRUE if 'value' is already encoded
  *
- *   In both cases, 'value' can be a simple string, or it can be another array
- *   with the same format as $array itself for nesting.
+ * In both cases, 'value' can be a simple string, or it can be another array
+ * with the same format as $array itself for nesting.
+ *
+ * If 'encoded' is TRUE it is up to the caller to ensure that 'value' is either
+ * entity-encoded or CDATA-escaped. Using this option is not recommended when
+ * working with untrusted user input, since failing to escape the data
+ * correctly has security implications.
  *
  * @return string
  *  A string of XML representing the elements passed in.
@@ -2083,7 +2089,7 @@ function format_xml_elements($array) {
         }
 
         if (isset($value['value']) && $value['value'] != '') {
-          $output .= '>' . (is_array($value['value']) ? format_xml_elements($value['value']) : check_plain($value['value'])) . '</' . $value['key'] . ">\n";
+          $output .= '>' . (is_array($value['value']) ? format_xml_elements($value['value']) : (!empty($value['encoded']) ? $value['value'] : check_plain($value['value']))) . '</' . $value['key'] . ">\n";
         }
         else {
           $output .= " />\n";
