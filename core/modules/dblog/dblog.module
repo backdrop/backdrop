@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * System monitoring and logging for administrators.
@@ -125,20 +124,27 @@ function dblog_watchdog(array $log_entry) {
   if (!function_exists('backdrop_substr')) {
     require_once BACKDROP_ROOT . '/core/includes/unicode.inc';
   }
-  Database::getConnection('default', 'default')->insert('watchdog')
-    ->fields(array(
-      'uid' => $log_entry['uid'],
-      'type' => backdrop_substr($log_entry['type'], 0, 64),
-      'message' => $log_entry['message'],
-      'variables' => serialize($log_entry['variables']),
-      'severity' => $log_entry['severity'],
-      'link' => backdrop_substr($log_entry['link'], 0, 255),
-      'location' => $log_entry['request_uri'],
-      'referer' => $log_entry['referer'],
-      'hostname' => backdrop_substr($log_entry['ip'], 0, 128),
-      'timestamp' => $log_entry['timestamp'],
-    ))
-    ->execute();
+  try {
+    Database::getConnection('default', 'default')->insert('watchdog')
+      ->fields(array(
+        'uid' => $log_entry['uid'],
+        'type' => backdrop_substr($log_entry['type'], 0, 64),
+        'message' => $log_entry['message'],
+        'variables' => serialize($log_entry['variables']),
+        'severity' => $log_entry['severity'],
+        'link' => backdrop_substr($log_entry['link'], 0, 255),
+        'location' => $log_entry['request_uri'],
+        'referer' => $log_entry['referer'],
+        'hostname' => backdrop_substr($log_entry['ip'], 0, 128),
+        'timestamp' => $log_entry['timestamp'],
+      ))
+      ->execute();
+  }
+  catch (Exception $e) {
+    // Exception is ignored so that watchdog does not break pages during the
+    // installation process or is not able to create the watchdog table during
+    // installation.
+  }
 }
 
 /**
