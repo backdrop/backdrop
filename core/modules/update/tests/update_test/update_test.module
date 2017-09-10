@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Module for testing Update Manager functionality.
@@ -11,6 +10,7 @@
 function update_test_system_theme_info() {
   $themes['update_test_basetheme'] = backdrop_get_path('module', 'update_test') . '/themes/update_test_basetheme/update_test_basetheme.info';
   $themes['update_test_subtheme'] = backdrop_get_path('module', 'update_test') . '/themes/update_test_subtheme/update_test_subtheme.info';
+  $themes['update_test_admintheme'] = backdrop_get_path('module', 'update_test') . '/themes/update_test_admintheme/update_test_admintheme.info';
   return $themes;
 }
 
