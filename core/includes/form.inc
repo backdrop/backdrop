@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions for form and batch generation and processing.
@@ -3542,6 +3541,7 @@ function form_process_tableselect($element) {
             '#return_value' => $key,
             '#default_value' => isset($value[$key]) ? $key : NULL,
             '#attributes' => $element['#attributes'],
+            '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
           );
         }
         else {
