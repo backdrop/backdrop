@@ -143,6 +143,13 @@ function number_field_presave($entity_type, $entity, $field, $instance, $langcod
       }
     }
   }
+  if ($field['type'] == 'number_float') {
+    foreach ($items as $delta => $item) {
+      if (isset($item['value'])) {
+        $items[$delta]['value'] = floatval($item['value']);
+      }
+    }
+  }
 }
 
 /**
