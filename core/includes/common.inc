@@ -4173,7 +4173,11 @@ function backdrop_html_id($id) {
   // be merged with content already on the base page. The HTML IDs must be
   // unique for the fully merged content. Therefore, initialize $seen_ids to
   // take into account IDs that are already in use on the base page.
-  $seen_ids_init = &backdrop_static(__FUNCTION__ . ':init');
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast['seen_ids_init'])) {
+    $backdrop_static_fast['seen_ids_init'] = &backdrop_static(__FUNCTION__ . ':init');
+  }
+  $seen_ids_init = &$backdrop_static_fast['seen_ids_init'];
   if (!isset($seen_ids_init)) {
     // Ideally, Backdrop would provide an API to persist state information about
     // prior page requests in the database, and we'd be able to add this
@@ -4218,7 +4222,10 @@ function backdrop_html_id($id) {
       }
     }
   }
-  $seen_ids = &backdrop_static(__FUNCTION__, $seen_ids_init);
+  if (!isset($backdrop_static_fast['seen_ids'])) {
+    $backdrop_static_fast['seen_ids'] = &backdrop_static(__FUNCTION__, $seen_ids_init);
+  }
+  $seen_ids = &$backdrop_static_fast['seen_ids'];
 
   $id = strtr(backdrop_strtolower($id), array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
 
