@@ -1331,7 +1331,7 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
     parent::setUp('search', 'search_extra_type');
 
     // Login as a user that can create and search content.
-    $this->search_user = $this->backdropCreateUser(array('search content', 'administer search', 'administer nodes', 'bypass node access', 'access user profiles', 'administer users', 'administer blocks'));
+    $this->search_user = $this->backdropCreateUser(array('search content', 'administer search', 'administer nodes', 'bypass node access', 'access user profiles', 'administer users', 'administer blocks', 'access site reports'));
     $this->backdropLogin($this->search_user);
 
     // Delete the two default nodes.
@@ -1383,6 +1383,21 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/search/settings', $edit, t('Save configuration'));
     $this->assertNoText(t('The active search modules have been changed.'), 'Form does not save with an invalid word length.');
+
+    // Test logging setting. It should be on by default.
+    $config = config('search.settings');
+    $config->set('search_logging', TRUE)->save();
+    $text = $this->randomName(5);
+    $this->backdropPost('search/node', array('keys' => $text), t('Search'));
+    $this->backdropGet('admin/reports/dblog');
+    $this->assertLink('Searched Content for ' . $text . '.', 0, 'Search was logged');
+
+    // Turn off logging.
+    $config->set('search_logging', FALSE)->save();
+    $text = $this->randomName(5);
+    $this->backdropPost('search/node', array('keys' => $text), t('Search'));
+    $this->backdropGet('admin/reports/dblog');
+    $this->assertNoLink('Searched Content for ' . $text . '.', 'Search was not logged');
   }
 
   /**
