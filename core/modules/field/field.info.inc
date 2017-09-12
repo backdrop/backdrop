@@ -27,6 +27,7 @@
 function field_info_cache_clear() {
   backdrop_static_reset('field_view_mode_settings');
   backdrop_static_reset('field_available_languages');
+  backdrop_static_reset('field_info_field_map');
 
   // @todo: Remove this when field_attach_*_bundle() bundle management
   // functions are moved to the entity API.
@@ -633,10 +634,12 @@ function field_info_bundles($entity_type = NULL) {
  *   ),
  * );
  * @endcode
+ *
+ * @since 1.9.0
  */
 function field_info_field_map() {
   // Read from the "static" cache.
-  static $field_info_cache = NULL;
+  $field_info_cache = backdrop_static(__FUNCTION__, array());
 
   if (!empty($field_info_cache)) {
     return $field_info_cache;
@@ -646,7 +649,7 @@ function field_info_field_map() {
   $field_info_cache = array();
   $field_info_fields = field_info_fields();
 
-  foreach($field_info_fields as $field_name => $field_info){
+  foreach ($field_info_fields as $field_name => $field_info) {
     $field_info_cache[$field_name]['type'] = $field_info['type'];
     $field_info_cache[$field_name]['bundles'] = $field_info['bundles'];
   }
