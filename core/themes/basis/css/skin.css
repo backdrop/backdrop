@@ -760,6 +760,31 @@ select.form-select[disabled] {
   color: #777;
 }
 
+.form-error input.form-autocomplete,
+.form-error input.form-text,
+.form-error input.form-tel,
+.form-error input.form-email,
+.form-error input.form-url,
+.form-error input.form-color,
+.form-error input.form-number,
+.form-error input.form-search,
+.form-error input.form-file,
+.form-error textarea.form-textarea,
+.form-error select.form-select {
+  border-color: #EC351C;
+}
+
+.form-type-checkboxes.form-error,
+.form-type-radios.form-error {
+  border: 0.125rem solid #EC351C;
+}
+/* Display border on a single checkbox, but not on checkboxes within a group. */
+.form-type-checkbox.form-error {
+  border: 0.125rem solid #EC351C;
+}
+.form-type-checkboxes.form-error .form-type-checkbox.form-error {
+  border: none;
+}
 
 ul.action-links a {
   background: transparent url(../images/add.png) no-repeat 0 center;
