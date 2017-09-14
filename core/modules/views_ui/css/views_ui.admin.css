@@ -199,29 +199,6 @@
 
 /* @end */
 
-
-/* @group Display top area */
-
-#edit-display-settings-top .dropbutton-wrapper {
-  position: relative;
-  top: auto;
-  left: auto;
-  right: auto;
-  float: right; /* LTR */
-}
-[dir="rtl"] #edit-display-settings-top .dropbutton-wrapper {
-  float: left;
-}
-#edit-display-settings-top .views-ui-display-tab-setting {
-  position: relative;
-  float: left; /* LTR */
-}
-[dir="rtl"] #edit-display-settings-top .views-ui-display-tab-setting {
-  float: right;
-}
-
-/* @end */
-
 /* @group Attachment details collapsible fieldset */
 
 .views-display-tab .fieldset-legend {
