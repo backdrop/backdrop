@@ -244,14 +244,9 @@
     margin: 0 -0.5em;
   }
 
-  .views-display-columns > * {
-    box-sizing: border-box;
-    float: left; /* LTR */
-    width: 33.333%;
-    padding: 0 0.5em;
-  }
-  [dir="rtl"] .views-display-columns > * {
-    float: right;
+  #edit-display-settings-main .views-display-column {
+    padding-right: .666rem;
+    padding-left: .666rem;
   }
 }
 
