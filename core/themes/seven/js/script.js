@@ -296,7 +296,7 @@ Backdrop.behaviors.sevenDropButtonWidths = {
     function adjustDropButtonWidths() {
       var $dropbutton = $(this);
 
-      // Get widest item width
+      // Get widest item width.
       var widestItem = 0, $item;
       $dropbutton.find('li:hidden').each(function() {
         // Use a clone element to avoid altering element CSS properties.
@@ -305,7 +305,7 @@ Backdrop.behaviors.sevenDropButtonWidths = {
         $item.remove();
       });
 
-      // Set dropbutton list (<ul>) as wide as it's widest child
+      // Set dropbutton list (<ul>) as wide as it's widest child.
       $dropbutton.find('.dropbutton').css('min-width', widestItem + 'px');
 
       // Set parent element min-width, like <td class="operations"> to prevent
