@@ -1454,8 +1454,12 @@ div.add-or-remove-shortcuts {
 .js .dropbutton-wrapper.open .dropbutton-widget {
   border-color: #0d68a6;
 }
+.js .dropbutton li {
+  text-align: inherit;
+}
 .js .dropbutton a {
   text-transform: uppercase;
+  text-align: inherit;
 }
 .js .dropbutton a:hover {
   text-decoration: none;

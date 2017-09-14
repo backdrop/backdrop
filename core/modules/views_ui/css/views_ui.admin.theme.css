@@ -1099,22 +1099,21 @@ div.messages {
 /* @end */
 
 /* @group Drop buttons */
-.views-ui-display-tab-bucket .dropbutton-wrapper {
-  position: absolute;
-  top: 8px;
+.js .views-displays .dropbutton-widget {
+  left: auto; /* LTR */
+  right: 0; /* LTR */
 }
-.views-ui-display-tab-bucket .dropbutton-wrapper.dropbutton-multiple {
-  right: 80px; /* LTR */
-}
-.views-ui-display-tab-bucket .dropbutton-wrapper.dropbutton-single {
-  right: 55px; /* LTR */
-}
-[dir="rtl"] .views-ui-display-tab-bucket .dropbutton-wrapper.dropbutton-multiple {
-  left: 80px;
+[dir="rtl"].js .views-displays .dropbutton-widget {
+  left: 0;
   right: auto;
 }
-[dir="rtl"] .views-ui-display-tab-bucket .dropbutton-wrapper.dropbutton-single {
-  left: 55px;
+.views-ui-display-tab-bucket .dropbutton-wrapper {
+  position: absolute;
+  right: 12px; /* LTR */
+  top: 8px;
+}
+[dir="rtl"] .views-ui-display-tab-bucket .dropbutton-wrapper {
+  left: 12px;
   right: auto;
 }
 .views-ui-display-tab-bucket .dropbutton-wrapper,
@@ -1139,7 +1138,7 @@ div.messages {
   cursor: pointer;
 }
 .views-ui-display-tab-actions .dropbutton-wrapper input.form-submit {
-  text-align: right;
+  text-align: left;
   min-width: 100%;
   margin: 0;
   /* LTR */
@@ -1157,7 +1156,7 @@ div.messages {
   border-bottom-left-radius: 5px;
 }
 [dir="rtl"] .views-ui-display-tab-actions .dropbutton-wrapper input.form-submit {
-  text-align: left;
+  text-align: right;
   -webkit-border-top-right-radius: 0;
   -webkit-border-bottom-right-radius: 5px;
   -moz-border-radius-topright: 0;
