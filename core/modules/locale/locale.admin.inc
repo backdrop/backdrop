@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administration functions for locale.module.
@@ -148,7 +147,7 @@ function language_negotiation_configure_form_submit($form, &$form_state) {
  * @see language_negotiation_configure_url_form_submit()
  */
 function language_negotiation_configure_url_form($form, &$form_state) {
-  $form['locale_language_negotiation_url_part'] = array(
+  $form['language_negotiation_url_part'] = array(
     '#title' => t('Part of the URL that determines language'),
     '#type' => 'radios',
     '#options' => array(
@@ -165,7 +164,7 @@ function language_negotiation_configure_url_form($form, &$form_state) {
     '#description' => t('Language codes or other custom text to use as a path prefix for URL language detection. For the default language, this value may be left blank. <strong>Modifying this value may break existing URLs. Use with caution in a production environment.</strong> Example: Specifying "deutsch" as the path prefix code for German results in URLs like "example.com/deutsch/contact".'),
     '#states' => array(
       'visible' => array(
-        ':input[name="locale_language_negotiation_url_part"]' => array(
+        ':input[name="language_negotiation_url_part"]' => array(
           'value' => (string) LANGUAGE_NEGOTIATION_URL_PREFIX,
         ),
       ),
@@ -178,7 +177,7 @@ function language_negotiation_configure_url_form($form, &$form_state) {
     '#description' => t('The domain names to use for these languages. Leave blank for the default language. Use with caution in a production environment.<strong>Modifying this value may break existing URLs. Use with caution in a production environment.</strong> Example: Specifying "de.example.com" as language domain for German will result in an URL like "http://de.example.com/contact".'),
     '#states' => array(
       'visible' => array(
-        ':input[name="locale_language_negotiation_url_part"]' => array(
+        ':input[name="language_negotiation_url_part"]' => array(
           'value' => (string) LANGUAGE_NEGOTIATION_URL_DOMAIN,
         ),
       ),
@@ -238,7 +237,7 @@ function language_negotiation_configure_url_form_validate($form, &$form_state) {
     $value = $form_state['values']['prefix'][$langcode];
 
     if ($value === '') {
-      if (!$language->default && $form_state['values']['locale_language_negotiation_url_part'] == LANGUAGE_NEGOTIATION_URL_PREFIX) {
+      if (!$language->default && $form_state['values']['language_negotiation_url_part'] == LANGUAGE_NEGOTIATION_URL_PREFIX) {
         // Validation error if the prefix is blank for a non-default language, and value is for selected negotiation type.
         form_error($form['prefix'][$langcode], t('The prefix may only be left blank for the default language.'));
       }
@@ -255,7 +254,7 @@ function language_negotiation_configure_url_form_validate($form, &$form_state) {
     $value = $form_state['values']['domain'][$langcode];
 
     if ($value === '') {
-      if (!$language->default && $form_state['values']['locale_language_negotiation_url_part'] == LANGUAGE_NEGOTIATION_URL_DOMAIN) {
+      if (!$language->default && $form_state['values']['language_negotiation_url_part'] == LANGUAGE_NEGOTIATION_URL_DOMAIN) {
         // Validation error if the domain is blank for a non-default language, and value is for selected negotiation type.
         form_error($form['domain'][$langcode], t('The domain may only be left blank for the default language.'));
       }
@@ -272,7 +271,7 @@ function language_negotiation_configure_url_form_validate($form, &$form_state) {
  */
 function language_negotiation_configure_url_form_submit($form, &$form_state) {
   // Save selected format (prefix or domain).
-  config_set('locale.settings', 'language_negotiation_url_part', $form_state['values']['locale_language_negotiation_url_part']);
+  config_set('locale.settings', 'language_negotiation_url_part', $form_state['values']['language_negotiation_url_part']);
 
   // Save new domain and prefix values.
   locale_language_negotiation_url_prefixes_save($form_state['values']['prefix']);
