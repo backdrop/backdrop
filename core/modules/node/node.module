@@ -2070,6 +2070,7 @@ function node_feed($nids = FALSE, $channel = array()) {
 
   backdrop_add_http_header('Content-Type', 'application/rss+xml; charset=utf-8');
   print $output;
+  exit();
 }
 
 /**
