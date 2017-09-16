@@ -32,7 +32,7 @@
  *
  * Other variables:
  * - $element['#object']: The entity to which the field is attached.
- * - $element['#view_mode']: View mode, e.g. 'full', 'teaser'...
+ * - $element['#view_mode']: Display mode, e.g. 'full' or 'teaser'.
  * - $element['#field_name']: The field name.
  * - $element['#field_type']: The field type.
  * - $element['#field_language']: The field language.

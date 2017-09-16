@@ -769,14 +769,14 @@ class NodeRSSContentTestCase extends BackdropWebTestCase {
 
     $this->backdropGet('rss.xml');
 
-    // Check that content added in 'rss' view mode appear in RSS feed.
+    // Check that content added in 'rss' display mode appear in RSS feed.
     $rss_only_content = t('Extra data that should appear only in the RSS feed for node !nid.', array('!nid' => $node->nid));
     $this->assertText($rss_only_content, 'Node content designated for RSS appear in RSS feed.');
 
     // Check that it renders just the xml of the feed not the html.
     $this->assertNoRaw('<!DOCTYPE html>', 'Node content in the feed is just XML not HTML.');
 
-    // Check that content added in view modes other than 'rss' doesn't
+    // Check that content added in display modes other than 'rss' doesn't
     // appear in RSS feed.
     $non_rss_content = t('Extra data that should appear everywhere except the RSS feed for node !nid.', array('!nid' => $node->nid));
     $this->assertNoText($non_rss_content, "Node content not designed for RSS doesn't appear in RSS feed.");
@@ -790,7 +790,7 @@ class NodeRSSContentTestCase extends BackdropWebTestCase {
     $this->assertRaw(format_xml_elements(array($test_element)), 'Extra RSS elements appear in RSS feed.');
     $this->assertRaw($test_ns, 'Extra namespaces appear in RSS feed.');
 
-    // Check that content added in 'rss' view mode doesn't appear when
+    // Check that content added in 'rss' display mode doesn't appear when
     // viewing node.
     $this->backdropGet("node/$node->nid");
     $this->assertNoText($rss_only_content, "Node content designed for RSS doesn't appear when viewing node.");
@@ -2681,7 +2681,7 @@ class NodeAccessFieldTestCase extends NodeWebTestCase {
 }
 
 /**
- * Tests changing view modes for nodes.
+ * Tests changing display modes for nodes.
  */
 class NodeEntityViewModeAlterTest extends NodeWebTestCase {
   function setUp() {
@@ -2705,7 +2705,7 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
 
     $node = $this->backdropGetNodeByTitle($edit["title"]);
 
-    // Set the flag to alter the view mode and view the node.
+    // Set the flag to alter the display mode and view the node.
     state_set('node_test_change_view_mode', 'teaser');
     $this->backdropGet('node/' . $node->nid);
 
@@ -2716,11 +2716,11 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
 
     // Test that the correct build mode has been set.
     $build = node_view($node);
-    $this->assertEqual($build['#view_mode'], 'teaser', 'The view mode has correctly been set to teaser.');
+    $this->assertEqual($build['#view_mode'], 'teaser', 'The display mode has correctly been set to teaser.');
   }
 
   /**
-   * Tests fields that were previously hidden when the view mode is changed.
+   * Tests fields that were previously hidden when the display mode is changed.
    */
   function testNodeViewModeChangeHiddenField() {
     // Hide the tags field on the default display
@@ -2742,7 +2742,7 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
 
     $node = $this->backdropGetNodeByTitle($edit["title"]);
 
-    // Set the flag to alter the view mode and view the node.
+    // Set the flag to alter the display mode and view the node.
     state_set('node_test_change_view_mode', 'teaser');
     $this->backdropGet('node/' . $node->nid);
 
@@ -2755,7 +2755,7 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
 
     // Test that the correct build mode has been set.
     $build = node_view($node);
-    $this->assertEqual($build['#view_mode'], 'teaser', 'The view mode has correctly been set to teaser.');
+    $this->assertEqual($build['#view_mode'], 'teaser', 'The display mode has correctly been set to teaser.');
   }
 }
 

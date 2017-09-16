@@ -2900,13 +2900,13 @@ function system_update_1060() {
 }
 
 /**
- * Update contrib entity view mode module to core version.
+ * Update contrib entity display mode module to core version.
  */
 function system_update_1061() {
   $old_config = config('entity_view_mode.settings');
   $new_config = config('entity.view_modes');
 
-  // Backdrop pre-1.6 view modes from entity_view_mode.module:
+  // Backdrop pre-1.6 display modes from entity_view_mode.module:
   if (!$old_config->isNew()) {
     $old_data = $old_config->get('entity_view_modes');
   }
@@ -2928,7 +2928,7 @@ function system_update_1061() {
     }
   }
 
-  // Only update core if no view modes have yet been set.
+  // Only update core if no display modes have yet been set.
   if ($new_data && !$new_config->get('view_modes')) {
     $new_config->set('view_modes', $new_data);
     $new_config->save();

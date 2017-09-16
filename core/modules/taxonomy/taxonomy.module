@@ -88,7 +88,7 @@ function taxonomy_entity_info() {
       ),
       'bundles' => array(),
       'view modes' => array(
-        // @todo View mode for display as a field (when attached to nodes etc).
+        // @todo Display mode for display as a field (when attached to nodes etc).
         'full' => array(
           'label' => t('Taxonomy term page'),
           'custom settings' => FALSE,
@@ -561,9 +561,9 @@ function taxonomy_term_show($term) {
  * @param $terms
  *   An array of taxonomy terms as returned by taxonomy_term_load_multiple().
  * @param $view_mode
- *   View mode, e.g. 'full', 'teaser'...
+ *   (optional) Display mode, e.g. 'full' or 'teaser'. Defaults to 'teaser'.
  * @param $weight
- *   An integer representing the weight of the first taxonomy term in the list.
+ *   (optional) An integer representing the weight of the first taxonomy term.
  * @param $langcode
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
@@ -601,16 +601,16 @@ function taxonomy_term_view_multiple($terms, $view_mode = 'teaser', $weight = 0,
  * The content built for the taxonomy term (field values, file attachments or
  * other term components) will vary depending on the $view_mode parameter.
  *
- * Backdrop core defines the following view modes for terms, with the following
- * default use cases:
+ * Backdrop core defines the following display modes for terms, with the
+ * following default use cases:
  *   - full (default): term is displayed on its own page (taxonomy/term/123)
- * Contributed modules might define additional view modes, or use existing
- * view modes in additional contexts.
+ * Contributed modules might define additional display modes, or use existing
+ * display modes in additional contexts.
  *
  * @param $term
  *   A taxonomy term object.
  * @param $view_mode
- *   View mode, e.g. 'full', 'teaser'...
+ *   (optional) Display mode, e.g. 'full' or 'teaser'. Defaults to 'full'.
  * @param $langcode
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
@@ -623,7 +623,7 @@ function taxonomy_term_build_content($term, $view_mode = 'full', $langcode = NUL
   // Remove previously built content, if exists.
   $term->content = array();
 
-  // Allow modules to change the view mode.
+  // Allow modules to change the display mode.
   $view_mode = key(entity_view_mode_prepare('taxonomy_term', array($term->tid => $term), $view_mode, $langcode));
 
   // Add the term description if the term has one and it is visible.
@@ -652,7 +652,7 @@ function taxonomy_term_build_content($term, $view_mode = 'full', $langcode = NUL
   module_invoke_all('taxonomy_term_view', $term, $view_mode, $langcode);
   module_invoke_all('entity_view', $term, 'taxonomy_term', $view_mode, $langcode);
 
-  // Make sure the current view mode is stored if no module has already
+  // Make sure the current display mode is stored if no module has already
   // populated the related key.
   $term->content += array('#view_mode' => $view_mode);
 }
@@ -663,7 +663,7 @@ function taxonomy_term_build_content($term, $view_mode = 'full', $langcode = NUL
  * @param TaxonomyTerm $term
  *   A taxonomy term entity.
  * @param $view_mode
- *   View mode, e.g. 'full', 'teaser'...
+ *   (optional) Display mode, e.g. 'full' or 'teaser'. Defaults to 'full'.
  * @param $langcode
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.

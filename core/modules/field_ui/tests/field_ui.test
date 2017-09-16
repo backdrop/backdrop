@@ -546,7 +546,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
 }
 
 /**
- * Tests the functionality of the 'Manage display' screens.
+ * Tests the functionality of the 'Manage displays' screens.
  */
 class FieldUIManageDisplayTestCase extends FieldUITestCase {
   function setUp() {
@@ -575,8 +575,8 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
     $setting_name = key($default_settings);
     $setting_value = $instance['display']['default']['settings'][$setting_name];
 
-    // Display the "Manage display" screen and check that the expected formatter
-    // is selected.
+    // Display the "Manage displays" screen and check that the expected
+    // formatter is selected.
     $this->backdropGet($manage_display);
     $this->assertFieldByName('fields[field_test][type]', $format, 'The expected formatter is selected.');
     $this->assertText("$setting_name: $setting_value", 'The expected summary is displayed.');
@@ -602,7 +602,7 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
   }
 
   /**
-   * Tests switching view modes to use custom or 'default' settings'.
+   * Tests switching display modes to use custom or 'default' settings'.
    */
   function testViewModeCustom() {
     // Create a field, and a node with some data for the field.
@@ -630,8 +630,8 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
 
     // Check that the field is displayed with the default formatter in 'rss'
     // mode (uses 'default'), and hidden in 'teaser' mode (uses custom settings).
-    $this->assertNodeViewText($node, 'rss', $output['field_test_default'], "The field is displayed as expected in view modes that use 'default' settings.");
-    $this->assertNodeViewNoText($node, 'teaser', $value, "The field is hidden in view modes that use custom settings.");
+    $this->assertNodeViewText($node, 'rss', $output['field_test_default'], "The field is displayed as expected in display modes that use 'default' settings.");
+    $this->assertNodeViewNoText($node, 'teaser', $value, "The field is hidden in display modes that use custom settings.");
 
     // Change fomatter for 'default' mode, check that the field is displayed
     // accordingly in 'rss' mode.
@@ -639,7 +639,7 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
       'fields[field_test][type]' => 'field_test_with_prepare_view',
     );
     $this->backdropPost('admin/structure/types/manage/' . $this->hyphen_type . '/display/default', $edit, t('Save'));
-    $this->assertNodeViewText($node, 'rss', $output['field_test_with_prepare_view'], "The field is displayed as expected in view modes that use 'default' settings.");
+    $this->assertNodeViewText($node, 'rss', $output['field_test_with_prepare_view'], "The field is displayed as expected in display modes that use 'default' settings.");
 
     // Specialize the 'rss' mode, check that the field is displayed the same.
     // The enable link is protected with a CSRF token, so get the link href
@@ -650,7 +650,7 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
     $this->backdropGet($enable_href_parts['path'], $enable_href_parts);
     $this->assertNodeViewText($node, 'rss', $output['field_test_with_prepare_view'], "The field is displayed as expected in newly specialized 'rss' mode.");
 
-    // Set the field to 'hidden' in the view mode, check that the field is
+    // Set the field to 'hidden' in the display mode, check that the field is
     // hidden.
     $edit = array(
       'fields[field_test][type]' => 'hidden',
@@ -658,24 +658,24 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
     $this->backdropPost('admin/structure/types/manage/' . $this->hyphen_type . '/display/rss', $edit, t('Save'));
     $this->assertNodeViewNoText($node, 'rss', $value, "The field is hidden in 'rss' mode.");
 
-    // Set the view mode back to 'default', check that the field is displayed
+    // Set the display mode back to 'default', check that the field is displayed
     // accordingly.
     $this->backdropPost('admin/structure/types/manage/' . $this->hyphen_type . '/display/rss/reset', array(), t('Reset'));
     $this->assertNodeViewText($node, 'rss', $output['field_test_with_prepare_view'], "The field is displayed as expected when 'rss' mode is set back to 'default' settings.");
 
-    // Specialize the view mode again.
+    // Specialize the display mode again.
     $this->backdropGet($enable_href_parts['path'], $enable_href_parts);
-    // Check that the previous settings for the view mode have been kept.
+    // Check that the previous settings for the display mode have been kept.
     $this->assertNodeViewNoText($node, 'rss', $value, "The previous settings are kept when 'rss' mode is specialized again.");
   }
 
   /**
-   * Asserts that a string is found in the rendered node in a view mode.
+   * Asserts that a string is found in the rendered node in a display mode.
    *
    * @param Node $node
    *   The node.
    * @param $view_mode
-   *   The view mode in which the node should be displayed.
+   *   The display mode in which the node should be displayed.
    * @param $text
    *   Plain text to look for.
    * @param $message
@@ -689,12 +689,12 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
   }
 
   /**
-   * Asserts that a string is not found in the rendered node in a view mode.
+   * Asserts that a string is not found in the rendered node in a display mode.
    *
    * @param Node $node
    *   The node.
    * @param $view_mode
-   *   The view mode in which the node should be displayed.
+   *   The display mode in which the node should be displayed.
    * @param $text
    *   Plain text to look for.
    * @param $message
@@ -707,7 +707,7 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
   }
 
   /**
-   * Asserts that a string is (not) found in the rendered nodein a view mode.
+   * Asserts that a string is (not) found in the rendered nodein a display mode.
    *
    * This helper function is used by assertNodeViewText() and
    * assertNodeViewNoText().
@@ -715,7 +715,7 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
    * @param Node $node
    *   The node.
    * @param $view_mode
-   *   The view mode in which the node should be displayed.
+   *   The display mode in which the node should be displayed.
    * @param $text
    *   Plain text to look for.
    * @param $message
@@ -738,7 +738,7 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
     $clone = clone $node;
     $element = node_view($clone, $view_mode);
     $output = backdrop_render($element);
-    $this->verbose(t('Rendered node - view mode: @view_mode', array('@view_mode' => $view_mode)) . '<hr />'. $output);
+    $this->verbose(t('Rendered node - display mode: @view_mode', array('@view_mode' => $view_mode)) . '<hr />'. $output);
 
     // Assign content so that BackdropWebTestCase functions can be used.
     $this->backdropSetContent($output);
@@ -829,7 +829,7 @@ class FieldUIAlterTestCase extends BackdropWebTestCase {
 }
 
 /**
- * Helper class for testing view mode functionality.
+ * Helper class for testing display mode functionality.
  */
 class FieldUIViewModeTestHelper extends BackdropWebTestCase {
   protected $profile = 'testing';
@@ -866,7 +866,7 @@ class FieldUIViewModeTestHelper extends BackdropWebTestCase {
   /**
    * Overrides BackdropWebTestCase::refreshVariables().
    *
-   * Ensures that the entity and field view mode caches are cleared so they
+   * Ensures that the entity and field display mode caches are cleared so they
    * can be reliably checked in the test.
    */
   protected function refreshVariables() {
@@ -879,12 +879,12 @@ class FieldUIViewModeTestHelper extends BackdropWebTestCase {
 
   public function assertViewModeExists($entity_type, $view_mode) {
     $info = entity_get_info($entity_type);
-    return $this->assertTrue(!empty($info['view modes'][$view_mode]), "View mode $view_mode found for entity type $entity_type.");
+    return $this->assertTrue(!empty($info['view modes'][$view_mode]), "Display mode $view_mode found for entity type $entity_type.");
   }
 
   public function assertNoViewModeExists($entity_type, $view_mode) {
     $info = entity_get_info($entity_type);
-    return $this->assertTrue(!isset($info['view modes'][$view_mode]), "View mode $view_mode not found for entity type $entity_type.");
+    return $this->assertTrue(!isset($info['view modes'][$view_mode]), "Display mode $view_mode not found for entity type $entity_type.");
   }
 
   public function getActualViewMode($entity_type, $bundle, $view_mode) {
@@ -894,7 +894,7 @@ class FieldUIViewModeTestHelper extends BackdropWebTestCase {
 
   public function assertActualViewMode($entity_type, $bundle, $view_mode, $expected_view_mode) {
     $actual_view_mode = $this->getActualViewMode($entity_type, $bundle, $view_mode);
-    return $this->assertIdentical($expected_view_mode, $actual_view_mode, "View mode $view_mode for entity type $entity_type and bundle $bundle actually uses view mode $actual_view_mode, expected $expected_view_mode.");
+    return $this->assertIdentical($expected_view_mode, $actual_view_mode, "Display mode $view_mode for entity type $entity_type and bundle $bundle actually uses display mode $actual_view_mode, expected $expected_view_mode.");
   }
 
   public function assertViewModeDefaultDisplay($entity_type, $bundle, $view_mode) {
@@ -907,12 +907,12 @@ class FieldUIViewModeTestHelper extends BackdropWebTestCase {
 }
 
 /**
- * Tests view mode functionality.
+ * Tests display mode functionality.
  */
 class FieldUIViewModeFunctionalTest extends FieldUIViewModeTestHelper {
 
   /**
-   * Tests view mode functionality.
+   * Tests display mode functionality.
    */
   public function testFieldUIViewModes() {
     $this->backdropLogin($this->admin_user);
@@ -932,7 +932,7 @@ class FieldUIViewModeFunctionalTest extends FieldUIViewModeTestHelper {
     $settings['extra_fields']['display']['test']['default']['testing'] = TRUE;
     field_bundle_settings('comment', 'comment_node_post', $settings);
 
-    // Attempt to create a view mode that already is provided by core.
+    // Attempt to create a display mode that already is provided by core.
     $edit = array(
       'label' => 'Custom 1',
       'machine_name' => 'teaser',
@@ -940,16 +940,16 @@ class FieldUIViewModeFunctionalTest extends FieldUIViewModeTestHelper {
     $this->backdropPost('admin/structure/types/manage/post/display/add', $edit, 'Save');
     $this->assertText('The machine-readable name is already in use. It must be unique.');
 
-    // Save a valid custom view mode for the Post content type.
+    // Save a valid custom display mode for the Post content type.
     $edit['machine_name'] = 'custom_1';
     $this->backdropPost('admin/structure/types/manage/post/display/add', $edit, 'Save');
     $this->assertViewModeExists('node', 'custom_1');
     $this->assertViewModeDefaultDisplay('node', 'page', 'custom_1');
     $this->assertViewModeCustomDisplay('node', 'post', 'custom_1');
 
-    // Test that the default settings are applied to new custom view modes.
+    // Test that the default settings are applied to new custom display modes.
     $settings = field_bundle_settings('node', 'post');
-    $this->assertEqual($settings['extra_fields']['display']['test']['custom_1']['testing'], TRUE, 'The default settings were applied to the new view mode.');
+    $this->assertEqual($settings['extra_fields']['display']['test']['custom_1']['testing'], TRUE, 'The default settings were applied to the new display mode.');
 
     // Reset the view-mode on the post content type.
     $this->backdropPost('admin/structure/types/manage/post/display/custom_1/reset', array(), 'Reset');
@@ -966,18 +966,18 @@ class FieldUIViewModeFunctionalTest extends FieldUIViewModeTestHelper {
     $this->assertViewModeCustomDisplay('node', 'page', 'custom_1');
     $this->assertViewModeDefaultDisplay('node', 'post', 'custom_1');
 
-    // Test that the default settings are applied to newly enabled view modes.
+    // Test that the default settings are applied to newly enabled display modes.
     $settings = field_bundle_settings('node', 'page');
-    $this->assertEqual($settings['extra_fields']['display']['test']['custom_1']['testing'], FALSE, 'The default settings were applied to the newly enabled view mode.');
+    $this->assertEqual($settings['extra_fields']['display']['test']['custom_1']['testing'], FALSE, 'The default settings were applied to the newly enabled display mode.');
 
-    // Delete the view mode.
+    // Delete the display mode.
     $this->backdropPost('admin/structure/types/manage/page/display/custom_1/delete', array(), 'Delete');
-    $this->assertText('Deleted the Custom 1 view mode.');
+    $this->assertText('Deleted the Custom 1 display mode.');
     $this->assertNoViewModeExists('node', 'custom_1');
     $this->assertViewModeDefaultDisplay('node', 'page', 'custom_1');
     $this->assertViewModeDefaultDisplay('node', 'post', 'custom_1');
 
-    //Create a comment view mode.
+    //Create a comment display mode.
     $edit = array(
       'label' => 'Comment 1',
       'machine_name' => 'com_1',
@@ -987,19 +987,19 @@ class FieldUIViewModeFunctionalTest extends FieldUIViewModeTestHelper {
     $this->assertViewModeDefaultDisplay('comment', 'comment_node_page', 'com_1');
     $this->assertViewModeCustomDisplay('comment', 'comment_node_post', 'com_1');
 
-    // Test that the default comment settings are applied to custom view modes.
+    // Test that the default comment settings are applied to custom display modes.
     $settings = field_bundle_settings('comment', 'comment_node_post');
-    $this->assertEqual($settings['extra_fields']['display']['test']['com_1']['testing'], TRUE, 'The default settings were applied to the comment view mode.');
+    $this->assertEqual($settings['extra_fields']['display']['test']['com_1']['testing'], TRUE, 'The default settings were applied to the comment display mode.');
   }
 
   /**
-   * Test the new entity view mode hooks.
+   * Test the new entity display mode hooks.
    */
   public function testInfoHooks() {
     config_set('entity.view_modes', 'view_modes', array(
       'node' => array(
         'info_3' => array(
-          'label' => t('Variable-altered view mode'),
+          'label' => t('Variable-altered display mode'),
           'custom settings' => TRUE,
         ),
       ),
@@ -1013,26 +1013,26 @@ class FieldUIViewModeFunctionalTest extends FieldUIViewModeTestHelper {
     // into the entity info array.
     $this->assertTrue(!isset($info['invalid-type']));
 
-    // Test hook-provided view modes.
+    // Test hook-provided display modes.
     $this->assertIdentical($info['node']['view modes']['info_1'], array(
-      'label' => t('Hook-defined view mode #1'),
+      'label' => t('Hook-defined display mode #1'),
       'custom settings' => FALSE,
     ));
     $this->assertIdentical($info['node']['view modes']['info_2'], array(
-      'label' => t('Hook-altered view mode'),
+      'label' => t('Hook-altered display mode'),
       'custom settings' => TRUE,
     ));
     $this->assertIdentical($info['node']['view modes']['info_3'], array(
-      'label' => t('Variable-altered view mode'),
+      'label' => t('Variable-altered display mode'),
       'custom settings' => TRUE,
     ));
     $this->assertIdentical($info['taxonomy_term']['view modes']['info_1'], array(
-      'label' => t('Hook-defined view mode #1'),
+      'label' => t('Hook-defined display mode #1'),
       'custom settings' => TRUE,
     ));
 
-    // Test that entity view modes defined in hook_entity_info() are never
-    // overridden by custom view modes.
+    // Test that entity display modes defined in hook_entity_info() are never
+    // overridden by custom display modes.
     $this->assertIdentical($info['node']['view modes']['full'], array(
       'label' => 'Full content',
       'custom settings' => FALSE,

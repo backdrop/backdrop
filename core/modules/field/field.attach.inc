@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Field attach API, allowing entities (nodes, users, ...) to be 'fieldable'.
@@ -1077,7 +1076,7 @@ function field_attach_delete_revision($entity_type, $entity) {
  * @param $entities
  *   An array of entities, keyed by entity id.
  * @param $view_mode
- *   View mode, e.g. 'full', 'teaser'...
+ *   Display mode, e.g. 'full' or 'teaser'.
  * @param $langcode
  *   (Optional) The language the field values are to be shown in. If no language
  *   is provided the current language is used.
@@ -1115,7 +1114,7 @@ function field_attach_prepare_view($entity_type, $entities, $view_mode, $langcod
   _field_invoke_multiple('prepare_view', $entity_type, $prepare, $null, $null, $options);
   // Then let the formatters do their own specific massaging.
   // field_default_prepare_view() takes care of dispatching to the correct
-  // formatters according to the display settings for the view mode.
+  // formatters according to the display settings for the display mode.
   _field_invoke_multiple_default('prepare_view', $entity_type, $prepare, $view_mode, $null, $options);
 }
 
@@ -1142,7 +1141,7 @@ function field_attach_prepare_view($entity_type, $entities, $view_mode, $langcod
  *     '#object' => the fieldable entity being displayed,
  *     '#entity_type' => the type of the entity being displayed,
  *     '#language' => the language of the field values being displayed,
- *     '#view_mode' => the view mode,
+ *     '#view_mode' => the display mode,
  *     '#field_name' => the name of the field,
  *     '#field_type' => the type of the field,
  *     '#formatter' => the name of the formatter,
@@ -1158,7 +1157,7 @@ function field_attach_prepare_view($entity_type, $entities, $view_mode, $langcod
  * @param $entity
  *   The entity with fields to render.
  * @param $view_mode
- *   View mode, e.g. 'full', 'teaser'...
+ *   Display mode, e.g. 'full' or 'teaser'.
  * @param $langcode
  *   The language the field values are to be shown in. If no language is
  *   provided the current language is used.

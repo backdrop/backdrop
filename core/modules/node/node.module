@@ -155,7 +155,7 @@ function node_entity_info() {
   );
 
   // Search integration is provided by node.module, so search-related
-  // view modes for nodes are defined here and not in search.module.
+  // display modes for nodes are defined here and not in search.module.
   if (module_exists('search')) {
     $return['node']['view modes'] += array(
       'search_index' => array(
@@ -1018,7 +1018,7 @@ function node_revision_delete($revision_id) {
  * @param Node $node
  *   A node entity.
  * @param $view_mode
- *   (optional) View mode, e.g., 'full', 'teaser'... Defaults to 'full.'
+ *   (optional) Display mode, e.g. 'full' or 'teaser'. Defaults to 'full'.
  * @param $langcode
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
@@ -1047,7 +1047,7 @@ function node_view(Node $node, $view_mode = 'full', $langcode = NULL) {
 
   // Add contextual links for this node, except when the node is already being
   // displayed on its own page. Modules may alter this behavior (for example,
-  // to restrict contextual links to certain view modes) by implementing
+  // to restrict contextual links to certain display modes) by implementing
   // hook_node_view_alter().
   if (!empty($node->nid) && !($view_mode == 'full' && node_is_page($node))) {
     $build['#contextual_links']['node'] = array('node', array($node->nid));
@@ -1066,7 +1066,7 @@ function node_view(Node $node, $view_mode = 'full', $langcode = NULL) {
  * The content built for the node (field values, comments, file attachments or
  * other node components) will vary depending on the $view_mode parameter.
  *
- * Backdrop core defines the following view modes for nodes, with the following
+ * Backdrop core defines the following display modes for nodes, with the following
  * default use cases:
  *   - full (default): node is being displayed on its own page (node/123)
  *   - teaser: node is being displayed on the default home page listing, or on
@@ -1077,13 +1077,13 @@ function node_view(Node $node, $view_mode = 'full', $langcode = NULL) {
  *   - search_result: node is being displayed as a search result.
  *   If book.module is enabled:
  *   - print: node is being displayed in print-friendly mode.
- * Contributed modules might define additional view modes, or use existing
- * view modes in additional contexts.
+ * Contributed modules might define additional display modes, or use existing
+ * display modes in additional contexts.
  *
  * @param Node $node
  *   A node entity.
  * @param $view_mode
- *   (optional) View mode, e.g., 'full', 'teaser'... Defaults to 'full.'
+ *   (optional) Display mode, e.g. 'full' or 'teaser'. Defaults to 'full'.
  * @param $langcode
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
@@ -1096,7 +1096,7 @@ function node_build_content(Node $node, $view_mode = 'full', $langcode = NULL) {
   // Remove previously built content, if exists.
   $node->content = array();
 
-  // Allow modules to change the view mode.
+  // Allow modules to change the display mode.
   $view_mode = key(entity_view_mode_prepare('node', array($node->nid => $node), $view_mode, $langcode));
 
   // The 'view' hook can be implemented to overwrite the default function
@@ -1140,7 +1140,7 @@ function node_build_content(Node $node, $view_mode = 'full', $langcode = NULL) {
   module_invoke_all('node_view', $node, $view_mode, $langcode);
   module_invoke_all('entity_view', $node, 'node', $view_mode, $langcode);
 
-  // Make sure the current view mode is stored if no module has already
+  // Make sure the current display mode is stored if no module has already
   // populated the related key.
   $node->content += array('#view_mode' => $view_mode);
 }
@@ -2078,7 +2078,7 @@ function node_feed($nids = FALSE, $channel = array()) {
  * @param $nodes
  *   An array of nodes as returned by node_load_multiple().
  * @param $view_mode
- *   (optional) View mode, e.g., 'full', 'teaser'... Defaults to 'teaser.'
+ *   (optional) Display mode, e.g. 'full' or 'teaser'. Defaults to 'teaser.'
  * @param $weight
  *   (optional) Integer representing the weight of the first node in the list.
  * @param $langcode

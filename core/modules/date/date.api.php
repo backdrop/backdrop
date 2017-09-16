@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the Date module.
@@ -456,7 +455,7 @@ function hook_date_field_widget_settings_form_alter(&$form, $context) {
  *   An associative array containing the following keys:
  *   - field: The $field array.
  *   - instance: The $instance array.
- *   - view_mode: The formatter view mode.
+ *   - view_mode: The formatter display mode.
  *
  * @see hook_field_formatter_settings_form()
  */
@@ -490,7 +489,7 @@ function hook_date_field_formatter_settings_form_alter(&$form, &$form_state, $co
  *   An associative array containing the following keys:
  *   - field: The $field array.
  *   - instance: The $instance array.
- *   - view_mode: The formatter view mode.
+ *   - view_mode: The formatter display mode.
  *
  * @see hook_field_formatter_settings_summary()
  */

@@ -179,8 +179,8 @@ group = Node
 file = node.test
 
 [NodeEntityViewModeAlterTest]
-name = Node entity view mode
-description = Test changing view mode.
+name = Node entity display mode
+description = Test changing display mode.
 group = Node
 file = node.test
 

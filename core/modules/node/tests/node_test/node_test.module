@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * A dummy module for testing node related hooks.
@@ -156,7 +155,7 @@ function node_test_node_update(Node $node) {
  * Implements hook_entity_view_mode_alter().
  */
 function node_test_entity_view_mode_alter(&$view_mode, $context) {
-  // Only alter the view mode if we are on the test callback.
+  // Only alter the display mode if we are on the test callback.
   if ($change_view_mode = state_get('node_test_change_view_mode', '')) {
     $view_mode = $change_view_mode;
   }

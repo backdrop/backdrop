@@ -2039,7 +2039,7 @@ function user_view_page($account) {
  * @param $account
  *   A user object.
  * @param $view_mode
- *   View mode, e.g. 'full'.
+ *   (optional) Display mode, e.g. 'full' or 'teaser'. Defaults to 'full'.
  * @param $langcode
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
@@ -2079,7 +2079,7 @@ function user_view($account, $view_mode = 'full', $langcode = NULL) {
  * @param $account
  *   A user object.
  * @param $view_mode
- *   View mode, e.g. 'full'.
+ *   (optional) Display mode, e.g. 'full' or 'teaser'. Defaults to 'full'.
  * @param $langcode
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
@@ -2092,7 +2092,7 @@ function user_build_content($account, $view_mode = 'full', $langcode = NULL) {
   // Remove previously built content, if exists.
   $account->content = array();
 
-  // Allow modules to change the view mode.
+  // Allow modules to change the display mode.
   $view_mode = key(entity_view_mode_prepare('user', array($account->uid => $account), $view_mode, $langcode));
 
   // Build fields content.
@@ -2104,7 +2104,7 @@ function user_build_content($account, $view_mode = 'full', $langcode = NULL) {
   module_invoke_all('user_view', $account, $view_mode, $langcode);
   module_invoke_all('entity_view', $account, 'user', $view_mode, $langcode);
 
-  // Make sure the current view mode is stored if no module has already
+  // Make sure the current display mode is stored if no module has already
   // populated the related key.
   $account->content += array('#view_mode' => $view_mode);
 }

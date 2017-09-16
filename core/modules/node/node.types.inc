@@ -36,7 +36,7 @@ function node_overview_types() {
           'weight' => 5,
         );
         $links['display'] = array(
-          'title' => t('Manage display'),
+          'title' => t('Manage displays'),
           'href' => 'admin/structure/types/manage/' . $type_url_str . '/display',
           'weight' => 10,
         );

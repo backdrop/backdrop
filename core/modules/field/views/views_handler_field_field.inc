@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_field_field.
@@ -492,7 +491,7 @@ class views_handler_field_field extends views_handler_field {
       'deleted' => 0,
     );
 
-    // Store the settings in a '_custom' view mode.
+    // Store the settings in a '_custom' display mode.
     $this->instance['display']['_custom'] = array(
       'type' => $format,
       'settings' => $settings,
