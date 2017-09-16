@@ -75,6 +75,7 @@ Backdrop.behaviors.moduleFilterByText = {
 
       // @todo Use autofocus attribute when possible.
       $input.focus().on('keyup', filterModuleList);
+      $input.triggerHandler('keyup');
     }
   }
 };
