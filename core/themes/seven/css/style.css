@@ -1430,6 +1430,7 @@ ol.task-list li.active:after {
   border-right-color: #E8E6E5;
 }
 ol.task-list .task-item {
+  display: inline-block;
   position: relative;
   vertical-align: middle;
   margin: 0 0 0 2.5em; /* LTR */
