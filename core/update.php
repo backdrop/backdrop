@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administrative page for handling updates from one Backdrop version to another.
@@ -83,12 +82,13 @@ function update_script_selection_form($form, &$form_state) {
     if (!isset($update['start'])) {
       $form['start'][$module] = array(
         '#type' => 'item',
-        '#title' => $module . ' module',
+        '#title' => '<strong>' . $module . ' </strong>',
         '#markup'  => $update['warning'],
-        '#prefix' => '<div class="messages warning">',
-        '#suffix' => '</div>',
       );
+      $incompatible_count++;
       $incompatible_updates_exist = TRUE;
+      $warning = t('The <em>!module</em> module cannot be updated.', array('!module' => $module));
+      backdrop_set_message($warning, 'warning');
       continue;
     }
     if (!empty($update['pending'])) {
@@ -115,7 +115,12 @@ function update_script_selection_form($form, &$form_state) {
       $incompatible_count++;
       $module_update_key = $data['module'] . '_updates';
       if (isset($form['start'][$module_update_key]['#items'][$data['number']])) {
-        $text = $data['missing_dependencies'] ? 'This update will been skipped due to the following missing dependencies: <em>' . implode(', ', $data['missing_dependencies']) . '</em>' : "This update will be skipped due to an error in the module's code.";
+        if ($data['missing_dependencies']) {
+          $text = 'This update will be skipped due to the following missing dependencies: <em>' . implode(', ', $data['missing_dependencies']) . '</em>';
+        }
+        else {
+          $text = 'This update will be skipped due to an error in the module code.';
+        }
         $form['start'][$module_update_key]['#items'][$data['number']] .= '<div class="warning">' . $text . '</div>';
       }
       // Move the module containing this update to the top of the list.
@@ -123,12 +128,7 @@ function update_script_selection_form($form, &$form_state) {
     }
   }
 
-  // Warn the user if any updates were incompatible.
-  if ($incompatible_updates_exist) {
-    backdrop_set_message('Some of the pending updates cannot be applied because their dependencies were not met.', 'warning');
-  }
-
-  if (empty($count)) {
+  if (empty($count) && $incompatible_count == 0) {
     backdrop_set_message(t('No pending updates.'));
     unset($form);
     $form['links'] = array(
@@ -140,26 +140,40 @@ function update_script_selection_form($form, &$form_state) {
     backdrop_flush_all_caches();
   }
   else {
-    $form['help'] = array(
-      '#type' => 'help',
-      '#markup' => 'Updates have been found that need to be applied. You may review the updates below before executing them.',
-      '#weight' => -5,
-    );
-    if ($incompatible_count) {
+    $number_applied = ($count) ? $count - $incompatible_count : 0;
+    if ($number_applied && $incompatible_count) {
       $form['start']['#title'] = format_plural(
         $count,
         '1 pending update (@number_applied to be applied, @number_incompatible skipped)',
         '@count pending updates (@number_applied to be applied, @number_incompatible skipped)',
-        array('@number_applied' => $count - $incompatible_count, '@number_incompatible' => $incompatible_count)
+        array('@number_applied' => $number_applied, '@number_incompatible' => $incompatible_count)
       );
+      $form['start']['#collapsed'] = FALSE;
+    }
+    elseif ($incompatible_count) {
+      $form['start']['#title'] = format_plural(
+        $count,
+        '1 pending update (@number_incompatible skipped)',
+        '@count pending updates (@number_incompatible skipped)',
+        array('@number_incompatible' => $incompatible_count)
+      );
+      $form['start']['#collapsed'] = FALSE;
     }
     else {
+      $form['help'] = array(
+        '#type' => 'help',
+        '#markup' => 'Updates have been found that need to be applied. You may review these updates below.',
+        '#weight' => -5,
+      );
       $form['start']['#title'] = format_plural($count, '1 pending update', '@count pending updates');
     }
+
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Apply pending updates'),
+      // Only show Apply button if there is at least 1 update.
+      '#access' => $count,
     );
     $form['actions']['cancel'] = array(
       '#type' => 'link',
