@@ -937,7 +937,7 @@ function template_preprocess_views_view_row_rss(&$variables) {
   $options  = &$variables['options'];
   $item     = &$variables['row'];
 
-  $variables['title'] = check_plain($item->title);
+  $variables['title'] = $item->title;
   $variables['link'] = check_url($item->link);
   $variables['description'] = check_plain($item->description);
   $variables['item_elements'] = empty($item->elements) ? '' : format_xml_elements($item->elements);
