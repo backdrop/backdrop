@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Gettext parsing and generating API.
@@ -31,9 +30,6 @@
  *   TRUE if the import was successful, FALSE otherwise.
  */
 function _locale_import_po($file, $langcode, $mode) {
-  // Try to allocate enough time to parse and import the data.
-  backdrop_set_time_limit(240);
-
   // Check if we have the language already in the database.
   if (!language_load($langcode)) {
     backdrop_set_message(t('The language selected for import is not supported.'), 'error');
@@ -122,6 +118,11 @@ function _locale_import_read_po($op, $file, $mode = NULL, $langcode = NULL) {
   $lineno = 0;
 
   while (!feof($fd)) {
+    // Refresh time limit every 10 parsed rows.
+    if (!($lineno % 10)) {
+      backdrop_set_time_limit(30);
+    }
+
     // A line should not be longer than 10 * 1024.
     $line = fgets($fd, 10 * 1024);
 
