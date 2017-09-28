@@ -1490,10 +1490,11 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @see BackdropWebTestCase::tearDown()
    */
   protected function prepareEnvironment() {
-    global $user, $language, $settings, $config_directories;
+    global $user, $language, $language_url, $settings, $config_directories;
 
     // Store necessary current values before switching to prefixed database.
     $this->originalLanguage = $language;
+    $this->originalLanguageUrl = $language_url;
     $this->originalLanguageDefault = config_get('system.core', 'language_default');
     $this->originalConfigDirectories = $config_directories;
     $this->originalFileDirectory = config_get('system.core', 'file_public_path');
@@ -1505,10 +1506,9 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Set to English to prevent exceptions from utf8_truncate() from t()
     // during install if the current language is not 'en'.
     // The following array/object conversion is copied from language_default().
-    $language = (object) array(
+    $language_url = $language = (object) array(
       'langcode' => 'en',
       'name' => 'English',
-      'direction' => 0,
       'enabled' => 1,
       'weight' => 0,
     );
@@ -1637,7 +1637,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   TRUE if set up completes, FALSE if an error occurred.
    */
   protected function setUp() {
-    global $user, $language, $conf;
+    global $user, $language, $language_url, $conf;
     // Create the database prefix for this test.
     $this->prepareDatabasePrefix();
 
@@ -1738,7 +1738,7 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Set up English language.
     unset($conf['language_default']);
-    $language = language_default();
+    $language_url = $language = language_default();
 
     // Use the test mail class instead of the default mail handler class.
     config_set('system.mail', 'default-system', 'TestingMailSystem');
@@ -1799,7 +1799,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * created by setUp(), and reset the database prefix.
    */
   protected function tearDown() {
-    global $user, $language, $settings, $config_directories;
+    global $user, $language, $language_url, $settings, $config_directories;
 
     // In case a fatal error occurred that was not in the test process read the
     // log to pick up any fatal errors.
@@ -1872,6 +1872,7 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Reset language.
     $language = $this->originalLanguage;
+    $language_url = $this->originalLanguageUrl;
     if ($this->originalLanguageDefault) {
       $GLOBALS['conf']['language_default'] = $this->originalLanguageDefault;
     }
