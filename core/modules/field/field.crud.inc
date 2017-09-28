@@ -215,7 +215,7 @@ function field_update_field($field) {
   module_invoke($storage_type['module'], 'field_storage_update_field', $field, $prior_field, $has_data);
 
   // Clear caches
-  field_cache_clear(TRUE);
+  field_cache_clear();
 
   // Invoke external hooks after the cache is cleared for API consistency.
   module_invoke_all('field_update_field', $field, $prior_field, $has_data);
