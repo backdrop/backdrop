@@ -9,6 +9,9 @@
  */
 class date_sql_handler {
   var $db_type = NULL;
+  // A connection to the database that will run the query.
+  var $db_connection = NULL;
+  // Default date type
   var $date_type = DATE_DATETIME;
   // A string timezone name.
   var $db_timezone = 'UTC';
@@ -31,7 +34,8 @@ class date_sql_handler {
    * The object constuctor.
    */
   public function __construct($date_type = DATE_DATETIME, $local_timezone = NULL, $offset = '+00:00') {
-    $this->db_type = Database::getConnection()->databaseType();
+    $this->db_connection = Database::getConnection();
+    $this->db_type = $this->db_connection->databaseType();
     $this->date_type = $date_type;
     $this->db_timezone = 'UTC';
     $this->local_timezone = isset($local_timezone) ? $local_timezone : date_default_timezone();
@@ -44,11 +48,7 @@ class date_sql_handler {
   public function db_tz_support($reset = FALSE) {
     $has_support = state_get('date_db_tz_support', -1);
     if ($has_support === -1 || $reset) {
-      $has_support = FALSE;
-      $test = db_query("SELECT CONVERT_TZ('2008-02-15 12:00:00', 'UTC', 'US/Central')")->fetchField();
-      if ($test == '2008-02-15 06:00:00') {
-        $has_support = TRUE;
-      }
+      $has_support = $this->db_connection->hasTimezoneSupport();
       state_set('date_db_tz_support', $has_support);
     }
     return $has_support;
@@ -113,18 +113,7 @@ class date_sql_handler {
       $this->local_timezone = 'UTC';
       return $this->sql_offset('NOW()', $offset);
     }
-    switch ($this->date_type) {
-      case DATE_UNIX:
-        $field = "FROM_UNIXTIME($field)";
-        break;
-
-      case DATE_ISO:
-        $field = "STR_TO_DATE($field, '%Y-%m-%dT%T')";
-        break;
-
-      case DATE_DATETIME:
-        break;
-    }
+    $field = $this->db_connection->dateFieldSql($this->date_type, $field);
     // Adjust the resulting value to the right timezone/offset.
     return $this->sql_tz($field, $offset, $comp_date);
   }
@@ -134,7 +123,7 @@ class date_sql_handler {
    */
   function sql_offset($field, $offset = NULL) {
     if (!empty($offset)) {
-      return "ADDTIME($field, SEC_TO_TIME($offset))";
+      return $this->db_connection->dateMathSql($field, 'ADD', $offset, 'SECOND');
     }
     return $field;
   }
@@ -153,15 +142,8 @@ class date_sql_handler {
    *   like SECOND, MINUTE, DAY, HOUR.
    */
   function sql_date_math($field, $direction, $count, $granularity) {
-    $granularity = strtoupper($granularity);
-    switch ($direction) {
-      case 'ADD':
-        return "DATE_ADD($field, INTERVAL $count $granularity)";
-
-      case 'SUB':
-        return "DATE_SUB($field, INTERVAL $count $granularity)";
-    }
-    return $field;
+    $field = $this->db_connection->dateFieldSql($this->date_type, $field);
+    return $this->db_connection->dateMathSql($field, $direction, $count, $granularity);
   }
 
   /**
@@ -204,7 +186,7 @@ class date_sql_handler {
     }
     // Otherwise make a database timezone adjustment to the field.
     else {
-      return "CONVERT_TZ($field, $db_zone, $localzone)";
+      return $this->db_connection->dateConvertTimezoneSql($field, $db_zone, $localzone);
     }
   }
 
@@ -220,27 +202,7 @@ class date_sql_handler {
    *   An appropriate SQL string for the db type and field type.
    */
   function sql_format($format, $field) {
-   $replace = array(
-      'Y' => '%Y',
-      'y' => '%y',
-      'M' => '%b',
-      'm' => '%m',
-      'n' => '%c',
-      'F' => '%M',
-      'D' => '%a',
-      'd' => '%d',
-      'l' => '%W',
-      'j' => '%e',
-      'W' => '%v',
-      'H' => '%H',
-      'h' => '%h',
-      'i' => '%i',
-      's' => '%s',
-      'A' => '%p',
-      '\WW' => 'W%U',
-    );
-    $format = strtr($format, $replace);
-    return "DATE_FORMAT($field, '$format')";
+    return $this->db_connection->dateFormatSql($format, $field);
   }
 
   /**
@@ -255,37 +217,7 @@ class date_sql_handler {
    *   An appropriate SQL string for the db type and field type.
    */
   function sql_extract($extract_type, $field) {
-    // Note there is no space after FROM to avoid db_rewrite problems
-    // see http://drupal.org/node/79904.
-    switch (strtoupper($extract_type)) {
-      case 'DATE':
-        return $field;
-      case 'YEAR':
-        return "EXTRACT(YEAR FROM($field))";
-      case 'MONTH':
-        return "EXTRACT(MONTH FROM($field))";
-      case 'DAY':
-        return "EXTRACT(DAY FROM($field))";
-      case 'HOUR':
-        return "EXTRACT(HOUR FROM($field))";
-      case 'MINUTE':
-        return "EXTRACT(MINUTE FROM($field))";
-      case 'SECOND':
-        return "EXTRACT(SECOND FROM($field))";
-
-      // ISO week number for date.
-      case 'WEEK':
-        return "WEEK($field, 3)";
-      case 'DOW':
-        // MySQL returns 1 for Sunday through 7 for Saturday, PHP date
-        // functions use 0 for Sunday and 6 for Saturday.
-        return "INTEGER(DAYOFWEEK($field) - 1)";
-      case 'DOY':
-        return "DAYOFYEAR($field)";
-    }
-
-    // An unknown function.
-    return FALSE;
+    return $this->db_connection->dateExtractSql($extract_type, $field);
   }
 
   /**

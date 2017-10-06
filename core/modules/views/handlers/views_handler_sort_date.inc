@@ -46,25 +46,26 @@ class views_handler_sort_date extends views_handler_sort {
    */
   function query() {
     $this->ensure_my_table();
+    $dbconn = $this->query->database_connection();
     switch ($this->options['granularity']) {
       case 'second':
       default:
         $this->query->add_orderby($this->table_alias, $this->real_field, $this->options['order']);
         return;
       case 'minute':
-        $formula = views_date_sql_format('YmdHi', "$this->table_alias.$this->real_field");
+        $formula = $dbconn->dateFormatSql('YmdHi', "$this->table_alias.$this->real_field");
         break;
       case 'hour':
-        $formula = views_date_sql_format('YmdH', "$this->table_alias.$this->real_field");
+        $formula = $dbconn->dateFormatSql('YmdH', "$this->table_alias.$this->real_field");
         break;
       case 'day':
-        $formula = views_date_sql_format('Ymd', "$this->table_alias.$this->real_field");
+        $formula = $dbconn->dateFormatSql('Ymd', "$this->table_alias.$this->real_field");
         break;
       case 'month':
-        $formula = views_date_sql_format('Ym', "$this->table_alias.$this->real_field");
+        $formula = $dbconn->dateFormatSql('Ym', "$this->table_alias.$this->real_field");
         break;
       case 'year':
-        $formula = views_date_sql_format('Y', "$this->table_alias.$this->real_field");
+        $formula = $dbconn->dateFormatSql('Y', "$this->table_alias.$this->real_field");
         break;
     }
 

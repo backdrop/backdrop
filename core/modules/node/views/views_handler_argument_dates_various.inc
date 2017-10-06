@@ -18,7 +18,11 @@ class views_handler_argument_node_created_fulldate extends views_handler_argumen
     parent::construct();
     $this->format = 'F j, Y';
     $this->arg_format = 'Ymd';
-    $this->formula = views_date_sql_format($this->arg_format, "***table***.$this->real_field");
+  }
+
+  function init(&$view, &$options) {
+    parent::init($view, $options);
+    $this->formula = $this->query->database_connection()->dateFormatSql($this->arg_format, "***table***.$this->real_field");
   }
 
   /**
@@ -47,8 +51,13 @@ class views_handler_argument_node_created_year extends views_handler_argument_da
   function construct() {
     parent::construct();
     $this->arg_format = 'Y';
-    $this->formula = views_date_sql_extract('YEAR', "***table***.$this->real_field");
   }
+
+  function init(&$view, &$options) {
+    parent::init($view, $options);
+    $this->formula = $this->query->database_connection()->dateExtractSql('YEAR', "***table***.$this->real_field");
+  }
+
 }
 
 /**
@@ -62,7 +71,11 @@ class views_handler_argument_node_created_year_month extends views_handler_argum
     parent::construct();
     $this->format = 'F Y';
     $this->arg_format = 'Ym';
-    $this->formula = views_date_sql_format($this->arg_format, "***table***.$this->real_field");
+  }
+
+  function init(&$view, &$options) {
+    parent::init($view, $options);
+    $this->formula = $this->query->database_connection()->dateFormatSql($this->arg_format, "***table***.$this->real_field");
   }
 
   /**
@@ -90,9 +103,13 @@ class views_handler_argument_node_created_month extends views_handler_argument_d
    */
   function construct() {
     parent::construct();
-    $this->formula = views_date_sql_extract('MONTH', "***table***.$this->real_field");
     $this->format = 'F';
     $this->arg_format = 'm';
+  }
+
+  function init(&$view, &$options) {
+    parent::init($view, $options);
+    $this->formula = $this->query->database_connection()->dateExtractSql('MONTH', "***table***.$this->real_field");
   }
 
   /**
@@ -126,9 +143,13 @@ class views_handler_argument_node_created_day extends views_handler_argument_dat
    */
   function construct() {
     parent::construct();
-    $this->formula = views_date_sql_extract('DAY', "***table***.$this->real_field");
     $this->format = 'j';
     $this->arg_format = 'd';
+  }
+
+  function init(&$view, &$options) {
+    parent::init($view, $options);
+    $this->formula = $this->query->database_connection()->dateExtractSql('DAY', "***table***.$this->real_field");
   }
 
   /**
@@ -164,7 +185,11 @@ class views_handler_argument_node_created_week extends views_handler_argument_da
   function construct() {
     parent::construct();
     $this->arg_format = 'w';
-    $this->formula = views_date_sql_extract('WEEK', "***table***.$this->real_field");
+  }
+
+  function init(&$view, &$options) {
+    parent::init($view, $options);
+    $this->formula = $this->query->database_connection()->dateExtractSql('WEEK', "***table***.$this->real_field");
   }
 
   /**
