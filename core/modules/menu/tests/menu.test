@@ -669,7 +669,12 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
 
-    // Create a node.
+    // Verify that the menu link title on the node add form has the correct
+    // maxlength.
+    $this->backdropGet('node/add/page');
+    $this->assertPattern('/<input .* id="edit-menu-link-title" .* maxlength="255" .* \/>/', 'Menu link title field has correct maxlength in node add form.');
+
+    // Create a node with menu link disabled.
     $node_title = $this->randomName();
     $language = LANGUAGE_NONE;
     $edit = array(
@@ -722,6 +727,11 @@ class MenuNodeTestCase extends BackdropWebTestCase {
       'menu_options[main-menu]' => 1,
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+
+    // Verify that the menu link title on the node edit form has the correct
+    // maxlength.
+    $this->backdropGet('node/' . $node->nid . '/edit');
+    $this->assertPattern('/<input .* id="edit-menu-link-title" .* maxlength="255" .* \/>/', 'Menu link title field has correct maxlength in node edit form.');
 
     // Edit the node and remove the menu link.
     $edit = array(

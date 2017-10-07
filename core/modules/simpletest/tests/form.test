@@ -1035,6 +1035,26 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
     $this->assertTrue(isset($errors['tableselect']), 'Option checker disallows invalid values for radio buttons.');
   }
 
+  /**
+   * Test presence of ajax functionality
+   */
+  function testAjax() {
+    $rows = array('row1', 'row2', 'row3');
+    // Test checkboxes (#multiple == TRUE).
+    foreach ($rows as $row) {
+      $element = 'tableselect[' . $row . ']';
+      $edit = array($element => TRUE);
+      $result = $this->backdropPostAJAX('form_test/tableselect/multiple-true', $edit, $element);
+      $this->assertFalse(empty($result), t('Ajax triggers on checkbox for @row.', array('@row' => $row)));
+    }
+    // Test radios (#multiple == FALSE).
+    $element = 'tableselect';
+    foreach ($rows as $row) {
+      $edit = array($element => $row);
+      $result = $this->backdropPostAjax('form_test/tableselect/multiple-false', $edit, $element);
+      $this->assertFalse(empty($result), t('Ajax triggers on radio for @row.', array('@row' => $row)));
+    }
+  }
 
   /**
    * Helper function for the option check test to submit a form while collecting errors.
@@ -2124,7 +2144,35 @@ class FormUrlTestCase extends BackdropWebTestCase {
   }
 }
 
+/**
+ * Tests for form textarea.
+ */
+class FormTextareaTestCase extends BackdropUnitTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * Tests that textarea value is properly set.
+   */
+  public function testValueCallback() {
+    $element = array();
+    $form_state = array();
+    $test_cases = array(
+      array(NULL, FALSE),
+      array(NULL, NULL),
+      array('', array('test')),
+      array('test', 'test'),
+      array('123', 123),
+    );
+    foreach ($test_cases as $test_case) {
+      list($expected, $input) = $test_case;
+      $this->assertIdentical($expected, form_type_textarea_value($element, $input, $form_state));
+    }
+  }
+}
+
 class SystemSettingsFormTest extends SystemConfigFormCase {
+  protected $profile = 'testing';
+
   public function setUp() {
     parent::setUp(array('form_test'));
     $this->form_id = 'form_test_system_config_form';
