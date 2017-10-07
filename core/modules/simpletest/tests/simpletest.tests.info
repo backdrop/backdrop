@@ -952,6 +952,12 @@ description = Tests the form API url element.
 group = Form API
 file = form.test
 
+[FormTextareaTestCase]
+name = Form textarea
+description = Tests form textarea related functions.
+group = Form API
+file = form.test
+
 [SystemSettingsFormTest]
 name = System Settings Form
 description = Tests system_settings_form().
