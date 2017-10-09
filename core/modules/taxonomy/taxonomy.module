@@ -304,6 +304,8 @@ function taxonomy_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
     'file' => 'taxonomy.pages.inc',
+    // Prevent Layout from affecting our markup by specifying delivery callback.
+    'delivery callback' => 'backdrop_deliver_html_page',
   );
   $items['taxonomy/autocomplete'] = array(
     'title' => 'Autocomplete taxonomy',
