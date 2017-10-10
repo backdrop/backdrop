@@ -2663,6 +2663,9 @@ function template_preprocess_page(&$variables) {
   if ($variables['is_front']) {
     $variables['classes'][] = 'front';
   }
+  else {
+    $variables['classes'][] = 'not-front';
+  }
 
   // Add a class that tells us whether the page is viewed by an authenticated user or not.
   if ($variables['logged_in']) {
