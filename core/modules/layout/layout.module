@@ -1183,8 +1183,23 @@ function _layout_get_all_info($data_type, $init = array()) {
 function layout_get_layout_template_info($template_name = NULL) {
   $info = &backdrop_static(__FUNCTION__);
 
-  // Try getting a cached list of layout info.
-  if (!isset($info)) {
+  $current_path = current_path();
+  // List of paths that always require a rebuild of the list of layout
+  // templates (see https://github.com/backdrop/backdrop-issues/issues/984).
+  // This includes the "Layout settings" page...
+  $paths = array(
+    'admin/structure/layouts/settings',
+  );
+  // ...and all the "Configure layout" pages.
+  $layouts = layout_load_all();
+  foreach ($layouts as $layout) {
+    $paths[] = 'admin/structure/layouts/manage/' . $layout->name . '/configure';
+  }
+
+  // Try getting a cached list of layout info and use that if set. Skip this for
+  // paths that always require a rebuild of the list of layout templates (since
+  // the layout info cache is being updated as part of the rebuild).
+  if (!isset($info) && !in_array($current_path, $paths)) {
     $cache = cache('cache')->get('layout_info');
     if ($cache && $cache->data) {
       $info = $cache->data;
@@ -1192,7 +1207,7 @@ function layout_get_layout_template_info($template_name = NULL) {
   }
 
   // Rebuild the list.
-  if (!isset($info)) {
+  if (!isset($info) || in_array($current_path, $paths)) {
     $files = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'layouts', 'name', 0);
     $init = array();
     foreach ($files as $name => $file) {
