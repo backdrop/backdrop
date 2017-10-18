@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Hooks provided the Entity module.
+ * Hooks provided by the Entity module.
  */
 
 /**
@@ -542,7 +542,7 @@ function hook_entity_view_mode_insert($view_mode, $entity_type) {
  *   The type of entity being saved (i.e. node, user, comment).
  */
 function hook_entity_view_mode_update($view_mode, $entity_type) {
-  config_set('my_module.view_modes', 'view_mode_list', array($entity_type => $view_mode);
+  config_set('my_module.view_modes', 'view_mode_list', array($entity_type => $view_mode));
 }
 
 /**
