@@ -1114,7 +1114,7 @@ div.filter-options select {
   background: url('../images/chevron-circle-left--black--64.png') no-repeat right center; /* LTR */
   background-size: 23px;
 }
-.admin-panel-people h3 {
+.admin-panel-accounts h3 {
   background-image: url('../images/user--black--64.png');
 }
 .admin-panel-content h3 {

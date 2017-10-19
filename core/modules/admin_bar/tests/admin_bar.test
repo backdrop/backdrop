@@ -206,7 +206,7 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
     $edit = array(
       $role_name . '[administer site configuration]' => TRUE,
     );
-    $this->backdropPost('admin/config/people/permissions', $edit, t('Save permissions'));
+    $this->backdropPost('admin/config/accounts/permissions', $edit, t('Save permissions'));
     // Verify that Configuration appears.
     $this->assertLinkTrailByTitle(array(t('Configuration')));
 
@@ -217,13 +217,13 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
       'name' => 'test',
       'label' => 'Test',
     );
-    $this->backdropPost('admin/config/people/roles', $edit, t('Add role'));
+    $this->backdropPost('admin/config/accounts/roles', $edit, t('Add role'));
 
     // Grant the 'administer content types' permission for the role.
     $edit = array(
       'test[administer content types]' => TRUE,
     );
-    $this->backdropPost('admin/config/people/permissions/test', $edit, t('Save permissions'));
+    $this->backdropPost('admin/config/accounts/permissions/test', $edit, t('Save permissions'));
     // Verify that Structure » Content types does not appear.
     $this->assertNoLinkTrailByTitle(array(t('Structure'), t('Content types')));
 
@@ -236,7 +236,7 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
     $this->assertLinkTrailByTitle(array(t('Structure'), t('Content types')));
 
     // Delete the role.
-    $this->backdropPost('admin/config/people/roles/delete/test', array(), t('Delete'));
+    $this->backdropPost('admin/config/accounts/roles/delete/test', array(), t('Delete'));
     // Verify that Structure » Content types does not appear.
     $this->assertNoLinkTrailByTitle(array(t('Structure'), t('Content types')));
   }

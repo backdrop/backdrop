@@ -1127,7 +1127,7 @@ function user_update_1011() {
  */
 function user_update_1012() {
   $config = config('views.view.user_admin');
-	if ($config->get('display.default.display_options.title') == 'User accounts') {
+  if ($config->get('display.default.display_options.title') == 'User accounts') {
     $config->set('display.default.display_options.title', 'Manage user accounts');
   }
   if ($config->get('display.page.display_options.menu.title') == 'Find user accounts') {
@@ -1149,6 +1149,17 @@ function user_update_1013() {
       $config->set('permissions', $permissions);
       $config->save();
     }
+  }
+}
+
+/**
+ * Update 'People' menus to 'User accounts'.
+ */
+function user_update_1014() {
+  $config = config('views.view.user_admin');
+  if ($config->get('display.page.display_options.path') == 'admin/people/list') {
+    $config->set('display.page.display_options.path', 'admin/accounts/list');
+    $config->save();
   }
 }
 

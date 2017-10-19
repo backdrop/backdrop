@@ -624,10 +624,10 @@ function admin_bar_links_users() {
   // Add link to show current authenticated/anonymous users.
   $links['user-counter'] = array(
     '#title' => admin_bar_get_user_count(),
-    '#description' => t('Current anonymous / authenticated users'),
+    '#description' => t('Current authenticated users'),
     '#weight' => 20,
     '#attributes' => array('class' => array('admin-bar-action', 'admin-bar-users')),
-    '#href' => (user_access('administer users') ? 'admin/people/list' : 'user'),
+    '#href' => (user_access('administer users') ? 'admin/accounts/list' : 'user'),
   );
   return $links;
 }

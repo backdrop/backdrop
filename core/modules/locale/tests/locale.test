@@ -1616,12 +1616,12 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
     $this->assertText(t('Language negotiation configuration saved.'), 'Set language negotiation.');
 
-    // Check if the language selector is available on admin/people/create and
+    // Check if the language selector is available on admin/accounts/create and
     // set to the currently active language.
-    $this->backdropGet($langcode . '/admin/people/create');
+    $this->backdropGet($langcode . '/admin/accounts/create');
     $this->assertFieldChecked("edit-language-$langcode", 'Global language set in the language selector.');
 
-    // Create a user with the admin/people/create form and check if the correct
+    // Create a user with the admin/accounts/create form and check if the correct
     // language is set.
     $username = $this->randomName(10);
     $edit = array(
@@ -1631,7 +1631,7 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
       'pass[pass2]' => $username,
     );
 
-    $this->backdropPost($langcode . '/admin/people/create', $edit, t('Create new account'));
+    $this->backdropPost($langcode . '/admin/accounts/create', $edit, t('Create new account'));
 
     $user = user_load_by_name($username);
     $this->assertEqual($user->language, $langcode, 'New user has correct language set.');

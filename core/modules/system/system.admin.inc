@@ -91,7 +91,7 @@ function system_admin_index() {
       // Sort links by title.
       backdrop_sort($admin_tasks, array('title' => SORT_STRING));
       // Move 'Configure permissions' links to the bottom of each section.
-      $permission_key = "admin/config/people/permissions#module-$module";
+      $permission_key = "admin/config/accounts/permissions#module-$module";
       if (isset($admin_tasks[$permission_key])) {
         $permission_task = $admin_tasks[$permission_key];
         unset($admin_tasks[$permission_key]);
@@ -605,7 +605,7 @@ function system_modules($form, $form_state = array()) {
     if ($module->status && user_access('administer permissions') && in_array($filename, module_implements('permission'))) {
       $extra['links']['permissions'] = array(
         'title' => t('Permissions'),
-        'href' => 'admin/config/people/permissions',
+        'href' => 'admin/config/accounts/permissions',
         'attributes' => array('class' => array('module-link', 'module-link-permissions'), 'title' => t('Configure permissions')),
         'fragment' => 'module-' . $filename,
       );
@@ -2001,7 +2001,7 @@ function system_site_maintenance_mode($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Put site into maintenance mode'),
     '#default_value' => state_get('maintenance_mode', FALSE),
-    '#description' => t('Visitors will only see the maintenance mode message. Only users with the "Access site in maintenance mode" <a href="@permissions-url">permission</a> will be able to access the site. Authorized users can log in directly via the <a href="@user-login">user login</a> page.', array('@permissions-url' => url('admin/config/people/permissions'), '@user-login' => url('user'))),
+    '#description' => t('Visitors will only see the maintenance mode message. Only users with the "Access site in maintenance mode" <a href="@permissions-url">permission</a> will be able to access the site. Authorized users can log in directly via the <a href="@user-login">user login</a> page.', array('@permissions-url' => url('admin/config/accounts/permissions'), '@user-login' => url('user'))),
   );
   $form['maintenance_mode_message'] = array(
     '#type' => 'textarea',
