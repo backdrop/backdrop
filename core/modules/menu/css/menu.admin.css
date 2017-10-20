@@ -1,0 +1,18 @@
+
+/* Menu admin overview table  */
+.menu-admin-overview td:last-child {
+  /* Dropdown buttons */
+  min-width: 140px;
+}
+
+.menu-operations {
+  width: 100px;
+}
+
+.menu-enabled {
+  width: 70px;
+}
+
+.menu-enabled input {
+  margin-left:25px;
+}
