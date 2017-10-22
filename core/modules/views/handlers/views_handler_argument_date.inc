@@ -27,6 +27,11 @@ class views_handler_argument_date extends views_handler_argument_formula {
   var $option_name = 'default_argument_date';
   var $arg_format = 'Y-m-d';
 
+  function init(&$view, &$options) {
+    parent::init($view, $options);
+    $view->init_query();
+  }
+
   /**
    * Add an option to set the default value to the current date.
    */
