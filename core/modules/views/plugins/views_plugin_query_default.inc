@@ -1257,7 +1257,9 @@ class views_plugin_query_default extends views_plugin_query {
       $target = 'slave';
     }
 
-    return Database::getConnection($target, $key);
+    $database_connection = Database::getConnection($target, $key);
+    $database_connection->setSessionTimezoneOffset('+00:00');
+    return $database_connection;
   }
 
   /**

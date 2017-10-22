@@ -113,7 +113,7 @@ class date_sql_handler {
       $this->local_timezone = 'UTC';
       return $this->sql_offset('NOW()', $offset);
     }
-    $field = $this->db_connection->dateFieldSql($this->date_type, $field);
+    $field = $this->db_connection->dateFieldSql($field, $this->date_type);
     // Adjust the resulting value to the right timezone/offset.
     return $this->sql_tz($field, $offset, $comp_date);
   }
@@ -142,7 +142,6 @@ class date_sql_handler {
    *   like SECOND, MINUTE, DAY, HOUR.
    */
   function sql_date_math($field, $direction, $count, $granularity) {
-    $field = $this->db_connection->dateFieldSql($this->date_type, $field);
     return $this->db_connection->dateMathSql($field, $direction, $count, $granularity);
   }
 
@@ -217,7 +216,7 @@ class date_sql_handler {
    *   An appropriate SQL string for the db type and field type.
    */
   function sql_extract($extract_type, $field) {
-    return $this->db_connection->dateExtractSql($extract_type, $field);
+    return $this->db_connection->dateExtractSql($field, $extract_type);
   }
 
   /**

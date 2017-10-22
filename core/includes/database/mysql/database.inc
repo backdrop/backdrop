@@ -270,8 +270,10 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     return ($test == '2008-02-15 06:00:00');
   }
 
-  public function dateFieldSql($date_type, $field) {
+  public function dateFieldSql($field, $date_type = DATE_UNIX) {
     switch ($date_type) {
+      case 'int':
+        watchdog('database', 'Date field type "int" has been deprecated, use DATE_UNIX instead.', array(), WATCHDOG_DEPRECATED);
       case DATE_UNIX:
         $field = "FROM_UNIXTIME($field)";
         break;
@@ -287,7 +289,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     return $field;
   }
 
-  public function dateMathSql($field, $dirction, $count, $granularity) {
+  public function dateMathSql($field, $direction, $count, $granularity) {
     $granularity = strtoupper($granularity);
     switch ($direction) {
       case 'ADD':
@@ -299,7 +301,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     return $field;
   }
 
-  public function dateFormatSql($format, $field) {
+  public function dateFormatSql($field, $format) {
     $replace = array(
       'Y' => '%Y',
       'y' => '%y',
@@ -322,7 +324,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     return "DATE_FORMAT($field, '$format')";
   }
 
-  public function dateExtractSql($extract_type, $field) {
+  public function dateExtractSql($field, $extract_type) {
     // Note there is no space after FROM to avoid db_rewrite problems
     // see http://drupal.org/node/79904.
     switch (strtoupper($extract_type)) {
