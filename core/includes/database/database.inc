@@ -173,6 +173,8 @@
  * @see http://drupal.org/developing/api/database
  */
 
+// Global date constants
+require_once 'core/includes/date.inc';
 
 /**
  * Base Database API class.
@@ -1369,7 +1371,7 @@ abstract class DatabaseConnection extends PDO {
 
   abstract public function hasTimezoneSupport();
 
-  abstract public function dateFieldSql($field_type, $field);
+  abstract public function dateFieldSql($field, $field_type = DATE_UNIX);
 
   abstract public function dateMathSql($field, $direction, $count, $granularity);
 
@@ -1386,7 +1388,7 @@ abstract class DatabaseConnection extends PDO {
    * @return string
    *   An appropriate SQL string for the db type and field type.
    */
-  abstract public function dateFormatSql($format, $field);
+  abstract public function dateFormatSql($field, $format);
 
   /**
    * Extract part of a date from a date field.
@@ -1399,7 +1401,7 @@ abstract class DatabaseConnection extends PDO {
    * @return string
    *   An appropriate SQL string for the db type and field type.
    */
-  abstract public function dateExtractSql($extract_type, $field);
+  abstract public function dateExtractSql($field, $extract_type);
 }
 
 /**
