@@ -22,7 +22,9 @@ class views_handler_argument_node_created_fulldate extends views_handler_argumen
 
   function init(&$view, &$options) {
     parent::init($view, $options);
-    $this->formula = $this->query->database_connection()->dateFormatSql($this->arg_format, "***table***.$this->real_field");
+    $db_connection = $this->query->database_connection();
+    $field = $db_connection->dateFieldSql("***table***.$this->real_field");
+    $this->formula = $db_connection->dateFormatSql($field, $this->arg_format);
   }
 
   /**
@@ -55,7 +57,9 @@ class views_handler_argument_node_created_year extends views_handler_argument_da
 
   function init(&$view, &$options) {
     parent::init($view, $options);
-    $this->formula = $this->query->database_connection()->dateExtractSql('YEAR', "***table***.$this->real_field");
+    $db_connection = $this->query->database_connection();
+    $field = $db_connection->dateFieldSql("***table***.$this->real_field");
+    $this->formula = $db_connection->dateExtractSql($field, 'YEAR');
   }
 
 }
@@ -75,7 +79,9 @@ class views_handler_argument_node_created_year_month extends views_handler_argum
 
   function init(&$view, &$options) {
     parent::init($view, $options);
-    $this->formula = $this->query->database_connection()->dateFormatSql($this->arg_format, "***table***.$this->real_field");
+    $db_connection = $this->query->database_connection();
+    $field = $db_connection->dateFieldSql("***table***.$this->real_field");
+    $this->formula = $db_connection->dateFormatSql($field, $this->arg_format);
   }
 
   /**
@@ -109,7 +115,9 @@ class views_handler_argument_node_created_month extends views_handler_argument_d
 
   function init(&$view, &$options) {
     parent::init($view, $options);
-    $this->formula = $this->query->database_connection()->dateExtractSql('MONTH', "***table***.$this->real_field");
+    $db_connection = $this->query->database_connection();
+    $field = $db_connection->dateFieldSql("***table***.$this->real_field");
+    $this->formula = $db_connection->dateExtractSql($field, 'MONTH');
   }
 
   /**
@@ -149,7 +157,9 @@ class views_handler_argument_node_created_day extends views_handler_argument_dat
 
   function init(&$view, &$options) {
     parent::init($view, $options);
-    $this->formula = $this->query->database_connection()->dateExtractSql('DAY', "***table***.$this->real_field");
+    $db_connection = $this->query->database_connection();
+    $field = $db_connection->dateFieldSql("***table***.$this->real_field");
+    $this->formula = $db_connection->dateExtractSql($field, 'DAY');
   }
 
   /**
@@ -189,7 +199,9 @@ class views_handler_argument_node_created_week extends views_handler_argument_da
 
   function init(&$view, &$options) {
     parent::init($view, $options);
-    $this->formula = $this->query->database_connection()->dateExtractSql('WEEK', "***table***.$this->real_field");
+    $db_connection = $this->query->database_connection();
+    $field = $db_connection->dateFieldSql("***table***.$this->real_field");
+    $this->formula = $db_connection->dateExtractSql($field, 'WEEK');
   }
 
   /**
