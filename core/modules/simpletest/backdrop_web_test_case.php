@@ -129,7 +129,13 @@ abstract class BackdropTestCase {
    *   Array of errors containing a list of unmet requirements.
    */
   protected function checkRequirements() {
-    return array();
+    $errors = array();
+
+    if (!extension_loaded('curl')) {
+      $errors[] = 'PHP curl extension is not present.';
+    }
+
+    return $errors;
   }
 
   /**
