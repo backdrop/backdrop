@@ -259,6 +259,109 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     $this->query("DROP TABLE {backdrop_utf8mb4_test}");
     return TRUE;
   }
+
+  public function setSessionTimezoneOffset($offset) {
+    $this->query("SET @@session.time_zone = :offset", array(':offset' => $offset));
+  }
+
+
+  public function hasTimezoneSupport() {
+    $test = db_query("SELECT CONVERT_TZ('2008-02-15 12:00:00', 'UTC', 'US/Central')")->fetchField();
+    return ($test == '2008-02-15 06:00:00');
+  }
+
+  public function dateFieldSql($field, $date_type = DATE_UNIX) {
+    switch ($date_type) {
+      case 'int':
+        watchdog('database', 'Date field type "int" has been deprecated, use DATE_UNIX instead.', array(), WATCHDOG_DEPRECATED);
+      case DATE_UNIX:
+        $field = "FROM_UNIXTIME($field)";
+        break;
+
+      case DATE_ISO:
+        $field = "STR_TO_DATE($field, '%Y-%m-%dT%T')";
+        break;
+
+      case DATE_DATETIME:
+        break;
+    }
+
+    return $field;
+  }
+
+  public function dateMathSql($field, $direction, $count, $granularity) {
+    $granularity = strtoupper($granularity);
+    switch ($direction) {
+      case 'ADD':
+        return "DATE_ADD($field, INTERVAL $count $granularity)";
+
+      case 'SUB':
+        return "DATE_SUB($field, INTERVAL $count $granularity)";
+    }
+    return $field;
+  }
+
+  public function dateFormatSql($field, $format) {
+    $replace = array(
+      'Y' => '%Y',
+      'y' => '%y',
+      'M' => '%b',
+      'm' => '%m',
+      'n' => '%c',
+      'F' => '%M',
+      'D' => '%a',
+      'd' => '%d',
+      'l' => '%W',
+      'j' => '%e',
+      'W' => '%v',
+      'H' => '%H',
+      'h' => '%h',
+      'i' => '%i',
+      's' => '%s',
+      'A' => '%p',
+    );
+    $format = strtr($format, $replace);
+    return "DATE_FORMAT($field, '$format')";
+  }
+
+  public function dateExtractSql($field, $extract_type) {
+    // Note there is no space after FROM to avoid db_rewrite problems
+    // see http://drupal.org/node/79904.
+    switch (strtoupper($extract_type)) {
+      case 'DATE':
+        return $field;
+      case 'YEAR':
+        return "EXTRACT(YEAR FROM($field))";
+      case 'MONTH':
+        return "EXTRACT(MONTH FROM($field))";
+      case 'DAY':
+        return "EXTRACT(DAY FROM($field))";
+      case 'HOUR':
+        return "EXTRACT(HOUR FROM($field))";
+      case 'MINUTE':
+        return "EXTRACT(MINUTE FROM($field))";
+      case 'SECOND':
+        return "EXTRACT(SECOND FROM($field))";
+
+      // ISO week number for date.
+      case 'WEEK':
+        return "WEEK($field, 3)";
+      case 'DOW':
+        // MySQL returns 1 for Sunday through 7 for Saturday, PHP date
+        // functions use 0 for Sunday and 6 for Saturday.
+        return "INTEGER(DAYOFWEEK($field) - 1)";
+      case 'DOY':
+        return "DAYOFYEAR($field)";
+    }
+
+    // An unknown function.
+    return FALSE;
+
+  }
+
+  public function dateConvertTimezoneSql($field, $source, $target) {
+    return "CONVERT_TZ($field, $source, $target)";
+  }
 }
 
 

@@ -1239,6 +1239,30 @@ class views_plugin_query_default extends views_plugin_query {
   }
 
   /**
+   * Return the database connection that will be used for the query.
+   *
+   * @return
+   *   A DatabaseConnection object.
+   */
+  function database_connection() {
+    $target = 'default';
+    $key = 'default';
+    // Detect an external database and set the
+    if (isset($this->view->base_database)) {
+      $key = $this->view->base_database;
+    }
+
+    // Set the slave target if the slave option is set
+    if (!empty($this->options['slave'])) {
+      $target = 'slave';
+    }
+
+    $database_connection = Database::getConnection($target, $key);
+    $database_connection->setSessionTimezoneOffset('+00:00');
+    return $database_connection;
+  }
+
+  /**
    * Generate a query and a countquery from all of the information supplied
    * to the object.
    *
@@ -1276,21 +1300,10 @@ class views_plugin_query_default extends views_plugin_query {
     }
 
     $options = array();
-    $target = 'default';
-    $key = 'default';
-    // Detect an external database and set the
-    if (isset($this->view->base_database)) {
-      $key = $this->view->base_database;
-    }
-
-    // Set the slave target if the slave option is set
-    if (!empty($this->options['slave'])) {
-      $target = 'slave';
-    }
 
     // Go ahead and build the query.
     // db_select doesn't support to specify the key, so use getConnection directly.
-    $query = Database::getConnection($target, $key)
+    $query = $this->database_connection()
       ->select($this->base_table, $this->base_table, $options)
       ->addTag('views')
       ->addTag('views_' . $this->view->name);

@@ -314,7 +314,7 @@ function views_get_timezone() {
   $offset = '+00:00';
   static $already_set = FALSE;
   if (!$already_set) {
-    db_query("SET @@session.time_zone = '$offset'");
+    Database::getConnection('default')->setSessionTimezoneOffset($offset);
     $already_set = true;
   }
 
@@ -336,6 +336,7 @@ function views_get_timezone() {
  *   An appropriate SQL string for the db type and field type.
  */
 function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
+  watchdog_deprecated_function('views', __FUNCTION__);
   $offset = $set_offset !== NULL ? $set_offset : views_get_timezone();
   if (isset($offset) && !is_numeric($offset)) {
     $dtz = new DateTimeZone($offset);
@@ -373,6 +374,7 @@ function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
  *   An appropriate SQL string for the db type and field type.
  */
 function views_date_sql_format($format, $field, $field_type = 'int', $set_offset = NULL) {
+  watchdog_deprecated_function('views', __FUNCTION__);
   $field = views_date_sql_field($field, $field_type, $set_offset);
   $replace = array(
     'Y' => '%Y',
@@ -413,6 +415,7 @@ function views_date_sql_format($format, $field, $field_type = 'int', $set_offset
  *   An appropriate SQL string for the db type and field type.
  */
 function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set_offset = NULL) {
+  watchdog_deprecated_function('views', __FUNCTION__);
   $field = views_date_sql_field($field, $field_type, $set_offset);
 
   // Note there is no space after FROM to avoid db_rewrite problems
