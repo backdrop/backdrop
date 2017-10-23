@@ -201,7 +201,7 @@ class date_sql_handler {
    *   An appropriate SQL string for the db type and field type.
    */
   function sql_format($format, $field) {
-    return $this->db_connection->dateFormatSql($format, $field);
+    return $this->db_connection->dateFormatSql($field, $format);
   }
 
   /**
