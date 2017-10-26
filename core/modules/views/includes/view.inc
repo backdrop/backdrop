@@ -1869,7 +1869,7 @@ class view {
   function clone_view() {
     $clone = clone($this);
 
-    $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'header', 'footer', 'empty', 'query', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'exposed_widgets', 'many_to_one_tables', 'feed_icon');
+    $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'header', 'footer', 'empty', 'query', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'exposed_widgets', 'many_to_one_tables', 'feed_icon', 'module');
     foreach ($keys as $key) {
       if (isset($clone->$key)) {
         unset($clone->$key);
@@ -1877,6 +1877,7 @@ class view {
     }
     $clone->built = $clone->executed = FALSE;
     $clone->build_info = array();
+    $clone->module = '';
     $clone->attachment_before = '';
     $clone->attachment_after = '';
     $clone->result = array();
@@ -1891,6 +1892,7 @@ class view {
       }
     }
     $clone->display = $displays;
+    $clone->storage = VIEWS_STORAGE_NORMAL;
 
     return $clone;
   }
