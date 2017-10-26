@@ -274,4 +274,18 @@ class RedirectFunctionalTest extends RedirectTestHelper {
     $this->assertRedirect($redirect);
     $this->assertEqual($redirect->redirect, $node_path);
   }
+
+  /**
+   * Tests presence or absence of Redirect elements on node edit forms.
+   */
+  function testNodeRedirectForm() {
+    // Ensure that the redirect form is not present on node/add
+    $this->backdropGet('node/add');
+    $this->assertNoLink('Add URL redirect to this node');
+
+    // Ensure that the redirect form is present on node/[nid]/edit
+    $node = $this->backdropCreateNode(array('type' => 'post'));
+    $this->backdropGet('node/' . $node->nid . '/edit');
+    $this->assertLink('Add URL redirect to this node');
+  }
 }
