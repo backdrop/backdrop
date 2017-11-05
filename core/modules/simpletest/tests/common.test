@@ -1564,6 +1564,154 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Tests adding JavaScript files with additional attributes.
+   */
+  public function testAttributes() {
+    // Disable aggregation.
+    config_set('system.core', 'preprocess_js', 0);
+    // Add internal and external JavaScript files that add the 'async' and
+    // 'defer' attributes, and check that these attributes appear on the
+    // <script> tags.
+    $js_internal = 'core/misc/collapse.js';
+    $js_external = 'http://example.com/script.js';
+    backdrop_add_js($js_internal, array('attributes' => array('async' => 'async'), 'defer' => 'defer'));
+    backdrop_add_js($js_external, array(
+      'attributes' => array(
+        'async' => 'async',
+      ),
+      'defer' => 'defer',
+      'type' => 'external',
+    ));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @async="async" and @defer="defer"]'), 'Rendered internal JavaScript with correct defer and async attributes.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @async="async" and @defer="defer"]'), 'Rendered external JavaScript with correct defer and async attributes.');
+
+    // Only 'defer' attribute is set.
+    backdrop_add_js($js_internal, array('defer' => 'defer'));
+    backdrop_add_js($js_external, array('defer' => 'defer', 'type' => 'external'));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @defer="defer"]'), 'Rendered internal JavaScript with correct defer attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @defer="defer"]'), 'Rendered external JavaScript with correct defer attribute.');
+
+    // Only 'async' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('async' => 'async')));
+    backdrop_add_js($js_external, array('attributes' => array('async' => 'async'), 'type' => 'external'));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @async="async"]'), 'Rendered internal JavaScript with correct async attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @async="async"]'), 'Rendered external JavaScript with correct async attribute.');
+
+    // Only 'custom' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('custom' => 'foo')));
+    backdrop_add_js($js_external, array('attributes' => array('custom' => 'foo'), 'type' => 'external'));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @custom="foo"]'), 'Rendered internal JavaScript with correct custom attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @custom="foo"]'), 'Rendered external JavaScript with correct custom attribute.');
+
+    // Only 'defer' and 'custom' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('custom' => 'foo'), 'defer' => 'defer'));
+    backdrop_add_js($js_external, array(
+      'attributes' => array(
+        'custom' => 'foo',
+      ),
+      'defer' => 'defer',
+      'type' => 'external',
+    ));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @custom="foo" and @defer="defer"]'), 'Rendered internal JavaScript with correct custom attribute and defer attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @custom="foo" and @defer="defer"]'), 'Rendered external JavaScript with correct custom attribute and defer attribute.');
+
+    // Only 'async' and 'custom' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('custom' => 'foo', 'async' => 'async')));
+    backdrop_add_js($js_external, array(
+      'attributes' => array(
+        'custom' => 'foo',
+        'async' => 'async',
+      ),
+      'type' => 'external',
+    ));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @custom="foo" and @async="async"]'), 'Rendered internal JavaScript with custom attribute and async attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @custom="foo" and @async="async"]'), 'Rendered external JavaScript with correct custom attribute and async attribute.');
+  }
+
+  /**
+   * Tests that attributes are maintained when JS aggregation is enabled.
+   */
+  public function testAggregatedAttributes() {
+    // Enable aggregation.
+    config_set('system.core', 'preprocess_js', TRUE);
+    // Add internal and external JavaScript files that add the 'async' and
+    // 'defer' attributes, and check that these attributes appear on the
+    // <script> tags.
+    $js_internal = 'core/misc/collapse.js';
+    $js_external = 'http://example.com/script.js';
+    backdrop_add_js($js_internal, array('attributes' => array('async' => 'async'), 'defer' => 'defer'));
+    backdrop_add_js($js_external, array('attributes' => array('async' => 'async'), 'defer' => 'defer', 'type' => 'external'));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @async="async" and @defer="defer"]'), 'Rendered internal JavaScript with correct defer and async attributes.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @async="async" and @defer="defer"]'), 'Rendered external JavaScript with correct defer and async attributes.');
+
+    // Only 'defer' attribute is set.
+    backdrop_add_js($js_internal, array('defer' => 'defer'));
+    backdrop_add_js($js_external, array('defer' => 'defer', 'type' => 'external'));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @defer="defer"]'), 'Rendered internal JavaScript with correct defer attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @defer="defer"]'), 'Rendered external JavaScript with correct defer attribute.');
+
+    // Only 'async' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('async' => 'async')));
+    backdrop_add_js($js_external, array('attributes' => array('async' => 'async'), 'type' => 'external'));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @async="async"]'), 'Rendered internal JavaScript with correct async attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @async="async"]'), 'Rendered external JavaScript with correct async attribute.');
+
+    // Only 'custom' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('custom' => 'foo')));
+    backdrop_add_js($js_external, array('attributes' => array('custom' => 'foo'), 'type' => 'external'));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @custom="foo"]'), 'Rendered internal JavaScript with correct custom attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @custom="foo"]'), 'Rendered external JavaScript with correct custom attribute.');
+
+    // Only 'defer' and 'custom' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('custom' => 'foo'), 'defer' => 'defer'));
+    backdrop_add_js($js_external, array(
+      'attributes' => array(
+        'custom' => 'foo',
+      ),
+      'defer' => 'defer',
+      'type' => 'external',
+    ));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @custom="foo" and @defer="defer"]'), 'Rendered internal JavaScript with custom attribute and defer attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @custom="foo" and @defer="defer"]'), 'Rendered external JavaScript with correct custom attribute and defer attribute.');
+
+    // Only 'async' and 'custom' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('custom' => 'foo', 'async' => 'async')));
+    backdrop_add_js($js_external, array(
+      'attributes' => array(
+        'custom' => 'foo',
+        'async' => 'async',
+      ),
+      'type' => 'external',
+    ));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @custom="foo" and @async="async"]'), 'Rendered internal JavaScript with custom attribute and async attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @custom="foo" and @async="async"]'), 'Rendered external JavaScript with correct custom attribute and async attribute.');
+  }
+
+  /**
    * Test altering a JavaScript's weight via hook_js_alter().
    *
    * @see simpletest_js_alter()
