@@ -529,10 +529,12 @@ function menu_node_save(Node $node) {
       }
     }
     elseif (trim($link['link_title'])) {
-      $language_list = language_list();
       $link['link_title'] = trim($link['link_title']);
       $link['link_path'] = "node/$node->nid";
-      $link['options']['language'] = $language_list[$node->langcode];
+      if ($node->langcode != LANGUAGE_NONE) {
+        $language_list = language_list();
+        $link['options']['language'] = $language_list[$node->langcode];
+      }
       if (trim($link['description'])) {
         $link['options']['attributes']['title'] = trim($link['description']);
       }
