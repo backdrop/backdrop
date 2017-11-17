@@ -704,17 +704,26 @@ function admin_bar_links_alert() {
 function admin_bar_theme_settings() {
   $config = config('admin_bar.settings');
   $form['#config'] = 'admin_bar.settings';
+
   $form['margin_top'] = array(
     '#type' => 'checkbox',
     '#title' => t('Adjust top margin'),
     '#default_value' => $config->get('margin_top'),
     '#description' => t('Shifts the entire site content down to make room for the administration bar. If disabled, absolute- or fixed-positioned page elements may be covered by the administration bar.'),
   );
+
   $form['position_fixed'] = array(
     '#type' => 'checkbox',
     '#title' => t('Keep bar at top of page'),
     '#default_value' => $config->get('position_fixed'),
     '#description' => t('Displays the administration bar always at the top of the browser viewport, even when scrolling the page.'),
+  );
+
+  $form['back_to_site'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Add Back To Site Link'),
+    '#default_value' => $config->get('back_to_site'),
+    '#description' => t('Changes the home link to the last non-admin page you visited.'),
   );
 
   $form['components'] = array(

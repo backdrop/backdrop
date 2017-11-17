@@ -243,6 +243,15 @@ function admin_bar_preprocess_page(&$variables) {
     $settings['position_fixed'] = $setting;
   }
 
+  // Send whether this is an admin page to JS for back to site functionality.
+  $settings['current_path_is_admin'] = false;
+  $settings['current_path'] = current_path();
+  if (path_is_admin($settings['current_path'])) {
+    $settings['current_path_is_admin'] = true;
+  }
+  $settings['back_to_site'] = config_get('admin_bar.settings', 'back_to_site');
+  $settings['frontpage'] = config_get('system.core', 'site_frontpage');
+
   backdrop_add_js(array('admin_bar' => $settings), 'setting');
 }
 
