@@ -396,7 +396,7 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
     config_set('admin_bar.settings', 'back_to_site', 1);
 
     // Clear the cache to make sure variable change takes effect.
-    cache_clear_all();
+    //cache_clear_all();
 
     // Go back to non-admin page and then back to admin page.
     $this->backdropGet('foo');

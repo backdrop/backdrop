@@ -487,7 +487,7 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
 Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
 
   // Don't do anything if variable isn't set.
-  if (settings.admin_bar.back_to_site === 0) {
+  if (settings.admin_bar.back_to_site && settings.admin_bar.back_to_site === 0) {
     return;
   }
 
