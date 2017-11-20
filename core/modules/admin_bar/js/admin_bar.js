@@ -41,6 +41,8 @@ Backdrop.behaviors.adminBar = {
           setTimeout(function () {
             $adminBar.css({visibility: ''});
           }, 0);
+
+
         }
       });
     }
@@ -476,45 +478,42 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
   });
 };
 
-  /**
-   * Replaces the "Home" link with "Back to site" link.
-   *
-   * Back to site link points to the last non-administrative page the user visited
-   * within the same browser tab.
-   */
-  Backdrop.behaviors.escapeAdmin = {
-    attach: function (context, settings) {
+/**
+ * Replaces the "Home" link with "Back to site" link.
+ *
+ * Back to site link points to the last non-administrative page the user visited
+ * within the same browser tab.
+ */
+Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
 
-      // Don't do anything if variable isn't set.
-      if (settings.admin_bar.back_to_site === 0) {
-        return;
-      }
+  // Don't do anything if variable isn't set.
+  if (settings.admin_bar.back_to_site === 0) {
+    return;
+  }
 
-      // @todo The back to site change has race condition issues.
-      $(window).bind('load', function () {
-        var escapeAdminPath = sessionStorage.getItem('escapeAdminPath');
+  // Grab the stored path of the last non-admin page.
+  var escapeAdminPath = sessionStorage.getItem('escapeAdminPath');
 
-        // Saves the last non-administrative page in the browser to be able to link back
-        // to it when browsing administrative pages. If there is a destination parameter
-        // there is not need to save the current path because the page is loaded within
-        // an existing "workflow".
-        if (!settings.admin_bar.current_path_is_admin && !/destination=/.test(window.location.search)) {
-          sessionStorage.setItem('escapeAdminPath', settings.admin_bar.current_path);
-        }
+  // Saves the last non-administrative page in the browser to be able to link back
+  // to it when browsing administrative pages. If there is a destination parameter
+  // there is not need to save the current path because the page is loaded within
+  // an existing "workflow".
+  if (!settings.admin_bar.current_path_is_admin && !/destination=/.test(window.location.search)) {
+    sessionStorage.setItem('escapeAdminPath', settings.admin_bar.current_path);
+  }
 
-        // We only want the first anchor tag.
-        var $toolbarEscape = $('.admin-bar-icon a').first();
+  // We only want to change the first anchor tag in the admin bar icon sub-menu.
+  var $toolbarEscape = $('.admin-bar-icon a').first();
 
-        if ($toolbarEscape.length
-          && settings.admin_bar.current_path_is_admin
-          && settings.admin_bar.frontpage !== escapeAdminPath
-          && escapeAdminPath !== null) {
-            $toolbarEscape.attr('href', settings.basePath + escapeAdminPath);
-            $toolbarEscape.text(Backdrop.t('Back To Site'));
-        }
-      });
-    }
-  };
+  // If the current page is admin and not the front page, then switch the path.
+  if ($toolbarEscape.length
+    && settings.admin_bar.current_path_is_admin
+    && settings.admin_bar.frontpage !== escapeAdminPath
+    && escapeAdminPath !== null) {
+    $toolbarEscape.attr('href', settings.basePath + escapeAdminPath);
+    $toolbarEscape.text(Backdrop.t('Back To Site'));
+  }
+};
 
 /**
  * @} End of "defgroup admin_behaviors".
