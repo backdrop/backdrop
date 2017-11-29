@@ -39,6 +39,16 @@ function translation_menu() {
     'weight' => 2,
     'file' => 'translation.pages.inc',
   );
+  $items['admin/config/regional/language/node-configure'] = array(
+    'title' => 'Content options',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('translation_node_configure_form'),
+    'access arguments' => array('administer languages'),
+    'weight' => 20,
+    'file' => 'translation.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
   return $items;
 }
 
@@ -273,11 +283,15 @@ function translation_node_view(Node $node, $view_mode) {
       }
     }
 
-    $node->content['links']['translation'] = array(
-      '#theme' => 'links__node__translation',
-      '#links' => $links,
-      '#attributes' => array('class' => array('links', 'inline')),
-    );
+    // Check if the user wants links to translated versions of the node.
+    $hide_links = config_get('translation.settings', 'translation_hide_translation_links');
+    if (!$hide_links) {
+      $node->content['links']['translation'] = array(
+        '#theme' => 'links__node__translation',
+        '#links' => $links,
+        '#attributes' => array('class' => array('links', 'inline')),
+      );
+    }
   }
 }
 

@@ -1,4 +1,5 @@
 {
   "_config_name": "translation.settings",
-  "language_type": "language"
+  "language_type": "language",
+  "translation_hide_translation_links": 0
 }
