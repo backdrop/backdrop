@@ -284,8 +284,8 @@ function translation_node_view(Node $node, $view_mode) {
     }
 
     // Check if the user wants links to translated versions of the node.
-    $hide_links = config_get('translation.settings', 'translation_hide_translation_links');
-    if (!$hide_links) {
+    $show_translation_links = config_get('translation.settings', 'translation_show_translation_links');
+    if ($show_translation_links) {
       $node->content['links']['translation'] = array(
         '#theme' => 'links__node__translation',
         '#links' => $links,

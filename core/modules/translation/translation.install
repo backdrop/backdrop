@@ -22,6 +22,22 @@ function translation_update_1000() {
 }
 
 /**
+ * Add configuration to show or hide content translation links on nodes.
+ */
+function translation_update_1001() {
+  // Check if user has existing i18n_hide_translation_links setting.
+  $i18n_hide_translation_links = (update_variable_get('i18n_hide_translation_links')) ? 0 : 1;
+  $config = config('translation.settings');
+  $config->set(
+    'translation_show_translation_links',
+    $i18n_hide_translation_links
+  );
+  $config->save();
+
+  update_variable_del('i18n_hide_translation_links');
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
