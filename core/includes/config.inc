@@ -551,6 +551,56 @@ class Config {
   }
 
   /**
+   * Gets translated data from this configuration object.
+   *
+   * @param string $key
+   *   A string that maps to a key within the configuration data.
+   *   For instance in the following configuration array:
+   *   @code
+   *   array(
+   *     'foo' => array(
+   *       'bar' => 'baz',
+   *     ),
+   *   );
+   *   @endcode
+   *   A key of 'foo.bar' would return the string 'baz'. However, a key of 'foo'
+   *   would return array('bar' => 'baz').
+   *   If no key is specified, then the entire data array is returned.
+   *
+   * @param array $args
+   *   An associative array of replacements to make. Occurrences in $string of
+   *   any key in $args are replaced with the corresponding value, after optional
+   *   sanitization and formatting. The type of sanitization and formatting
+   *   depends on the first character of the key:
+   *   - @variable: Escaped to HTML using check_plain(). Use this as the default
+   *     choice for anything displayed on a page on the site.
+   *   - %variable: Escaped to HTML and formatted using backdrop_placeholder(),
+   *     which makes it display as <em>emphasized</em> text.
+   *   - !variable: Inserted as is, with no sanitization or formatting. Only use
+   *     this for text that has already been prepared for HTML display (for
+   *     example, user-supplied text that has already been run through
+   *     check_plain() previously, or is expected to contain some limited HTML
+   *     tags and has already been run through filter_xss() previously).
+   * @param array $options
+   *   An associative array of additional options, with the following elements:
+   *   - 'langcode' (defaults to the current language): The language code to
+   *     translate to a language other than what is used to display the page.
+   *   - 'context' (defaults to the empty context): The context the source string
+   *     belongs to.
+   *
+   * @return mixed
+   *   The translated data that was requested.
+   *
+   * @see t()
+   * @see get()
+   */
+  public function getTranslated($key = '', $args = array(), $options = array()) {
+    $translatedKey = t($this->get($key), $args, $options);
+
+    return $translatedKey;
+  }
+
+  /**
    * Replaces the data of this configuration object.
    *
    * @param array $data
