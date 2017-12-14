@@ -1322,9 +1322,9 @@ function redirect_field_attach_form($entity_type, $entity, &$form, &$form_state,
   }
 
   $uri = $entity->uri();
-  if (empty($uri['path'])) {
-    // If the entity has no source path, then we cannot lookup the existing
-    // redirects.
+  if (empty($uri['path']) || $entity->isNew()) {
+    // If the entity has no source path, or the entity is a new one, then we
+    // cannot lookup the existing redirects.
     return;
   }
 
