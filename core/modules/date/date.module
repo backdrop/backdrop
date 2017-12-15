@@ -815,20 +815,11 @@ function date_format_type_options() {
 }
 
 /**
- * Creates an example date.
+ * Creates an example date object.
  *
  * This ensures a clear difference between month and day, and 12 and 24 hours.
  */
 function date_example_date() {
-  $now = date_now();
-  if (date_format($now, 'M') == date_format($now, 'F')) {
-    date_modify($now, '+1 month');
-  }
-  if (date_format($now, 'm') == date_format($now, 'd')) {
-    date_modify($now, '+1 day');
-  }
-  if (date_format($now, 'H') == date_format($now, 'h')) {
-    date_modify($now, '+12 hours');
-  }
-  return $now;
+  // use a fixed unambiguous date and time.
+  return new BackdropDateTime('2099-12-31 23:59:00');
 }
