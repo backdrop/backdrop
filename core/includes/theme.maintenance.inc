@@ -93,6 +93,7 @@ function _backdrop_maintenance_theme() {
   backdrop_add_css($path . '/css/system.css');
   backdrop_add_css($path . '/css/system.admin.css');
   backdrop_add_css($path . '/css/system.theme.css');
+  backdrop_add_css($path . '/css/messages.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
   backdrop_add_css($path . '/css/system.maintenance.css');
 }
 
