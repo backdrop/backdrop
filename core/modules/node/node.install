@@ -1120,6 +1120,17 @@ function node_update_1013() {
 }
 
 /**
+ * Give each type a config key of node_hider defaulted to 0.
+ */
+function node_update_1014() {
+  // Get the types.
+  $types = _node_types_build()->names;
+  foreach ($types as $type) {
+    config_set('node.types.' . $type, 'node_hider', "0");
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
