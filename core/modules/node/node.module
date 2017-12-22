@@ -460,6 +460,7 @@ function node_type_save($info) {
   $type_data['has_title'] = (bool) $type_data['has_title'];
   $type_data['modified'] = (bool) $type_data['modified'];
   $type_data['disabled'] = (bool) $type_data['disabled'];
+  $type_data['node_hider'] = $info->node_hider;
 
   // Don't ever save the is_new flag or old_type into config.
   if (isset($type_data['is_new'])) {
@@ -2186,6 +2187,12 @@ function node_page_default() {
  * @see node_menu()
  */
 function node_page_view(Node $node) {
+  // If the user has chosen to hide this node from page views return 404.
+  $node_hider = config_get('node.type.' . $node->type, 'node_hider');
+  if ($node_hider) {
+    backdrop_not_found();
+  }
+
   // If there is a menu link to this node, the link becomes the last part
   // of the active trail, and the link name becomes the page title.
   // Thus, we must explicitly set the page title to be the node title.

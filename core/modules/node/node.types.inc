@@ -255,6 +255,23 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
   $form['permissions']['permissions'] = node_type_form_permissions($type->type);
 
+  // Node hider form
+  $form['node_hider'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Node hider'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#access' => user_access('administer permissions'),
+    '#weight' => 0,
+  );
+  $form['node_hider']['node_hider_value'] = array(
+    '#type' => 'radios',
+    '#title' => t('Would you like to hide these nodes from the world?'),
+    '#options' => array(0 => 'No', 1 => 'Yes'),
+    '#default_value' => config_get('node.type.' . $type->type, 'node_hider'),
+    '#description' => t('By default nodes will have URLs and be visible as a web page, but you can disable that by selecting \'No\' here.'),
+  );
   $form['display'] = array(
     '#type' => 'fieldset',
     '#title' => t('Display settings'),
@@ -377,6 +394,7 @@ function node_type_form_submit($form, &$form_state) {
   // module alters the title field.
   $type->has_title = ($type->title_label != '');
   $type->modified = TRUE;
+  $type->node_hider = $form_state['values']['node_hider_value'];
 
   // Check for any keys that match those provided by hook_node_type_load(). Any
   // values that match a settings key are saved automatically.
