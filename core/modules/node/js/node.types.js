@@ -29,14 +29,14 @@ Backdrop.behaviors.contentTypes = {
       return vals.join(', ');
     });
 
-    // Node hider settings.
-    $context.find('#edit-node-hider').backdropSetSummary(function() {
+    // Pageless settings.
+    $context.find('#edit-pageless').backdropSetSummary(function() {
       var vals = [];
-      if (!parseInt($context.find('input[name="node_hider_value"]:checked').val())) {
-        vals.push(Backdrop.t('Showing node pages'));
+      if (!parseInt($context.find('input[name="pageless_value"]:checked').val())) {
+        vals.push(Backdrop.t('Showing pages'));
       }
       else {
-        vals.push(Backdrop.t('Hiding node pages'));
+        vals.push(Backdrop.t('Hiding pages'));
       }
       return vals.join(', ');
     });

@@ -460,7 +460,7 @@ function node_type_save($info) {
   $type_data['has_title'] = (bool) $type_data['has_title'];
   $type_data['modified'] = (bool) $type_data['modified'];
   $type_data['disabled'] = (bool) $type_data['disabled'];
-  $type_data['node_hider'] = !empty($info->node_hider) ? $info->node_hider: "0";
+  $type_data['pageless'] = !empty($info->pageless) ? $info->pageless: "0";
 
   // Don't ever save the is_new flag or old_type into config.
   if (isset($type_data['is_new'])) {
@@ -2188,8 +2188,8 @@ function node_page_default() {
  */
 function node_page_view(Node $node) {
   // If the user has chosen to hide this node from page views return 404.
-  $node_hider = config_get('node.type.' . $node->type, 'node_hider');
-  if ($node_hider) {
+  $pageless = config_get('node.type.' . $node->type, 'pageless');
+  if ($pageless) {
     backdrop_not_found();
   }
 

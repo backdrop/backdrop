@@ -255,32 +255,32 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
   $form['permissions']['permissions'] = node_type_form_permissions($type->type);
 
-  // Node hider form
-  $form['node_hider'] = array(
+  // Pageless form
+  $form['pageless'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Node hider'),
+    '#title' => t('Pageless'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
     '#access' => user_access('administer permissions'),
     '#weight' => 0,
   );
-  $node_hider_default = (config_get('node.type.' . $type->type, 'node_hider')) ?
-    config_get('node.type.' . $type->type, 'node_hider') : "0";
-  $form['node_hider']['node_hider_value'] = array(
+  $pageless_default = (config_get('node.type.' . $type->type, 'pageless')) ?
+    config_get('node.type.' . $type->type, 'pageless') : "0";
+  $form['pageless']['pageless_value'] = array(
     '#type' => 'radios',
-    '#title' => t('Would you like to hide these nodes from the world?'),
+    '#title' => t('Would you like to hide these pages from the world?'),
     '#options' => array(
-      0 => 'No. Business as usual these nodes will have pages.',
-      1 => 'Yes. Remove page display to use elsewhere.'
+      0 => 'No. Business as usual these pages will be displayed.',
+      1 => 'Yes. Remove page display to use as content elsewhere on the site.'
     ),
-    '#default_value' => $node_hider_default,
+    '#default_value' => $pageless_default,
     '#description' => t('By default nodes will have URLs and be visible as a web page, but you can disable that by selecting \'Yes\' here.'),
   );
-  $form['node_hider']['explanation'] = array(
+  $form['pageless']['explanation'] = array(
     '#type' => 'markup',
     '#title' => t('Why?'),
-    '#markup' => t(_node_hider_explanation()),
+    '#markup' => t(_node_pageless_explanation()),
   );
 
   $form['display'] = array(
@@ -405,8 +405,8 @@ function node_type_form_submit($form, &$form_state) {
   // module alters the title field.
   $type->has_title = ($type->title_label != '');
   $type->modified = TRUE;
-  $type->node_hider = !empty($form_state['values']['node_hider_value']) ?
-    $form_state['values']['node_hider_value'] : "0";
+  $type->pageless = !empty($form_state['values']['pageless_value']) ?
+    $form_state['values']['pageless_value'] : "0";
 
   // Check for any keys that match those provided by hook_node_type_load(). Any
   // values that match a settings key are saved automatically.
@@ -659,19 +659,19 @@ function node_type_delete_confirm_submit($form, &$form_state) {
 }
 
 /**
- * Helper function to create the explanation content for the node_hider setting.
+ * Helper function to create the explanation content for the pageless setting.
  */
-function _node_hider_explanation() {
+function _node_pageless_explanation() {
   $markup = '
     <h4>Why?</h4>
     <p>
-      Here are some use cases one might choose to hide the page display of a node:
+      Here are some use cases one might choose to hide the page display:
       <ul>
         <li>
           Views
            <ul>
              <li>
-               One might want to create a view of content that will never show the individual node just the view (slider).
+               One might want to create a view of content that will never show the individual page just the view (slider).
              </li>
            </ul>
         </li>
