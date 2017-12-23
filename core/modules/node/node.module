@@ -460,7 +460,7 @@ function node_type_save($info) {
   $type_data['has_title'] = (bool) $type_data['has_title'];
   $type_data['modified'] = (bool) $type_data['modified'];
   $type_data['disabled'] = (bool) $type_data['disabled'];
-  $type_data['node_hider'] = $info->node_hider;
+  $type_data['node_hider'] = !empty($info->node_hider) ? $info->node_hider: "0";
 
   // Don't ever save the is_new flag or old_type into config.
   if (isset($type_data['is_new'])) {

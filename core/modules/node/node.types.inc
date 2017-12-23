@@ -265,7 +265,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#access' => user_access('administer permissions'),
     '#weight' => 0,
   );
-  $node_hider_default = (config_get('node.type.' . $type->type, 'node_hider')) ? 
+  $node_hider_default = (config_get('node.type.' . $type->type, 'node_hider')) ?
     config_get('node.type.' . $type->type, 'node_hider') : "0";
   $form['node_hider']['node_hider_value'] = array(
     '#type' => 'radios',
@@ -405,7 +405,8 @@ function node_type_form_submit($form, &$form_state) {
   // module alters the title field.
   $type->has_title = ($type->title_label != '');
   $type->modified = TRUE;
-  $type->node_hider = ($form_state['values']['node_hider_value']) ? $form_state['values']['node_hider_value'] : "0";
+  $type->node_hider = !empty($form_state['values']['node_hider_value']) ?
+    $form_state['values']['node_hider_value'] : "0";
 
   // Check for any keys that match those provided by hook_node_type_load(). Any
   // values that match a settings key are saved automatically.
