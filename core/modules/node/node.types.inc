@@ -265,11 +265,13 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#access' => user_access('administer permissions'),
     '#weight' => 0,
   );
+  $node_hider_default = (config_get('node.type.' . $type->type, 'node_hider')) ? 
+    config_get('node.type.' . $type->type, 'node_hider') : "0";
   $form['node_hider']['node_hider_value'] = array(
     '#type' => 'radios',
     '#title' => t('Would you like to hide these nodes from the world?'),
     '#options' => array(0 => 'No', 1 => 'Yes'),
-    '#default_value' => config_get('node.type.' . $type->type, 'node_hider'),
+    '#default_value' => $node_hider_default,
     '#description' => t('By default nodes will have URLs and be visible as a web page, but you can disable that by selecting \'No\' here.'),
   );
   $form['display'] = array(
