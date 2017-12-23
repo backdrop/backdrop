@@ -2,72 +2,55 @@
 /**
  * @file
  * Date pager.
- * Works with a Date argument, the argument filters
- * the view and the pager provides back/next navigation.
+ * Works with a Date argument, the argument filters the view and the pager
+ * provides back/next navigation.
  *
  * USER NOTES:
  *
  * To use this, add a pager to a view, and choose the option to 'Page by date'.
  * There are several settings:
- * - The pager id: Set an id to be used as the identifier
- *    in the url for pager values, defaults to 'date'.
- * - Pager position: Choose whether to display the date
- *    pager above, below, or both above and below the content.
- * - Link format: Choose whether the pager links will be in t
- *    he simple 'calendar/2011-12' format or the
- *    more complex 'calendar/?date=2011-12' pager format.
- *    The second one is more likely to work correctly
- *    if the pager is used in blocks and panels.
+ * - The pager id: Set an id to be used as the identifier in the url for pager
+ * values, defaults to 'date'.
+ * - Pager position: Choose whether to display the date pager above, below, or
+ * both above and below the content.
+ * - Link format: Choose whether the pager links will be in the simple
+ * 'calendar/2011-12' format or the more complex 'calendar/?date=2011-12' pager
+ * format. The second one is more likely to work correctly if the pager is used
+ * in blocks and panels.
  *
- * The pager works in combination with a Date argument
- * and it will use the date fields and granularity
- * set in that argument to create its back/next links.
- * If the view has no Date argument, the pager can
- * do nothing. The argument can either be a 'Date' argument
- * that lets you select one or more date fields
- * in the argument, or the simple 'Content' argument for an
- * individual date field. It must be an
- * argument that uses the date argument handler.
+ * The pager works in combination with a Date argument and it will use the date
+ * fields and granularity set in that argument to create its back/next links. If
+ * the view has no Date argument, the pager can do nothing. The argument can
+ * either be a 'Date' argument that lets you select one or more date fields in
+ * the argument, or the simple 'Content' argument for an individual date field.
+ * It must be an argument that uses the date argument handler.
  *
  * DEVELOPER NOTES
  *
- * The pager could technically create a query of its own rather
- * than depending on the date argument to
- * set the query, but it has only a limited set of tools to work
- * with because it is a plugin, not a handler:
- * it has no knowledge about relationships, it cannot use the
- * ensure_my_table() function, plugins are not even invoked in pre_query(),
- * so can't do anything there.
+ * The pager could technically create a query of its own rather than depending
+ * on the date argument to set the query, but it has only a limited set of tools
+ * to work with because it is a plugin, not a handler: it has no knowledge about
+ * relationships, it cannot use the ensure_my_table() function, plugins are not
+ * even invoked in pre_query(), so can't do anything there.
  *
- * My conclusion was that the date pager simply
- * is not powerful enough to create its own queries for
- * date fields, which require very complex queries.
- * Instead, we can combine this with a date argument and
- * let the argument create the query and let the pager
- * just provide the back/next links. If there is no
- * date argument, the pager will do nothing.
+ * My conclusion was that the date pager simply is not powerful enough to create
+ * its own queries for date fields, which require very complex queries. Instead,
+ * we can combine this with a date argument and let the argument create the
+ * query and let the pager just provide the back/next links. If there is no date
+ * argument, the pager will do nothing.
  *
- * There are still other problems. The pager is not even
- * initialized until after all the handlers
- * have created their queries, so it has no chance
- * to alter values ahead of that. And the argument
- * has no knowledge of the pager, so it can't check
- * for pager values before the query is created.
+ * There are still other problems. The pager is not even initialized until after
+ * all the handlers have created their queries, so it has no chance to alter
+ * values ahead of that. And the argument has no knowledge of the pager, so it
+ * can't check for pager values before the query is created.
  *
- * The solution used here is to let the argument create
- * the original query. The pager query
- * runs after that, so the pager checks to see
- * if there is a pager value that needs to be used in the query.
- * The date argument has identified the placeholders
- * it used in the query. So if a change is needed,
- * we can swap the pager value into the query created
- * by the date argument and adjust the
- * $view->date_info values set by the argument accordingly
- * so the theme will pick up the new information.
- */
-
-/**
- * Example plugin to handle paging by month.
+ * The solution used here is to let the argument create the original query. The
+ * pager query runs after that, so the pager checks to see if there is a pager
+ * value that needs to be used in the query. The date argument has identified
+ * the placeholders it used in the query. So if a change is needed, we can swap
+ * the pager value into the query created by the date argument and adjust the
+ * $view->date_info values set by the argument accordingly so the theme will
+ * pick up the new information.
  */
 
 class date_views_plugin_pager extends views_plugin_pager {
