@@ -405,7 +405,7 @@ function node_type_form_submit($form, &$form_state) {
   // module alters the title field.
   $type->has_title = ($type->title_label != '');
   $type->modified = TRUE;
-  $type->node_hider = $form_state['values']['node_hider_value'];
+  $type->node_hider = ($form_state['values']['node_hider_value']) ? $form_state['values']['node_hider_value'] : "0";
 
   // Check for any keys that match those provided by hook_node_type_load(). Any
   // values that match a settings key are saved automatically.
