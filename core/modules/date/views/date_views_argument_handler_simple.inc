@@ -11,6 +11,46 @@
 class date_views_argument_handler_simple extends views_handler_argument_date {
 
   /**
+   * @var date_sql_handler
+   */
+  var $date_handler;
+
+  /**
+   * @var string
+   */
+  var $format;
+
+  /**
+   * @var string
+   */
+  var $sql_format;
+
+  /**
+   * @var array
+   */
+  var $placeholders = array();
+
+  /**
+   * @var string
+   */
+  var $base_table;
+
+  /**
+   * @var string
+   */
+  var $original_table;
+
+  /**
+   * @var DateTime
+   */
+  protected $min_date;
+
+  /**
+   * @var DateTime
+   */
+  protected $max_date;
+
+  /**
    * Get granularity.
    *
    * Use it to create the formula and a format for the results.
