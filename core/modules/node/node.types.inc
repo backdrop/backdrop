@@ -270,10 +270,19 @@ function node_type_form($form, &$form_state, $type = NULL) {
   $form['node_hider']['node_hider_value'] = array(
     '#type' => 'radios',
     '#title' => t('Would you like to hide these nodes from the world?'),
-    '#options' => array(0 => 'No', 1 => 'Yes'),
+    '#options' => array(
+      0 => 'No. Business as usual these nodes will have pages.',
+      1 => 'Yes. Remove page display to use elsewhere.'
+    ),
     '#default_value' => $node_hider_default,
-    '#description' => t('By default nodes will have URLs and be visible as a web page, but you can disable that by selecting \'No\' here.'),
+    '#description' => t('By default nodes will have URLs and be visible as a web page, but you can disable that by selecting \'Yes\' here.'),
   );
+  $form['node_hider']['explanation'] = array(
+    '#type' => 'markup',
+    '#title' => t('Why?'),
+    '#markup' => t(_node_hider_explanation()),
+  );
+
   $form['display'] = array(
     '#type' => 'fieldset',
     '#title' => t('Display settings'),
@@ -646,4 +655,36 @@ function node_type_delete_confirm_submit($form, &$form_state) {
 
   $form_state['redirect'] = 'admin/structure/types';
   return;
+}
+
+/**
+ * Helper function to create the explanation content for the node_hider setting.
+ */
+function _node_hider_explanation() {
+  $markup = '
+    <h4>Why?</h4>
+    <p>
+      Here are some use cases one might choose to hide the page display of a node:
+      <ul>
+        <li>
+          Views
+           <ul>
+             <li>
+               One might want to create a view of content that will never show the individual node just the view (slider).
+             </li>
+           </ul>
+        </li>
+        <li>
+          Content Blocks
+          <ul>
+            <li>
+              One might want to make a block that has content that needs to be translatable.
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </p>
+  ';
+
+  return $markup;
 }
