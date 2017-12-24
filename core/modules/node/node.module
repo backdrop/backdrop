@@ -2192,6 +2192,8 @@ function node_page_default() {
  * @see node_menu()
  */
 function node_page_view(Node $node) {
+  // Get the current user.
+  $account = $GLOBALS['user'];
   // If the user has chosen to hide this node from page views return 404.
   $pageless = config_get('node.type.' . $node->type, 'pageless');
   $bypass_pageless = user_access('bypass pageless setting', $account);
