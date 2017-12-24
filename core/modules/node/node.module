@@ -1228,6 +1228,11 @@ function node_permission() {
     'delete revisions' => array(
       'title' => t('Delete content revisions'),
     ),
+    'bypass pageless setting' => array(
+      'title' => t('Bypass pageless setting'),
+      'description' => t('View pageless content regardless of pageless setting.'),
+      'restrict access' => TRUE,
+    ),
   );
 
   // Generate standard node permissions for all applicable node types.
@@ -2189,7 +2194,8 @@ function node_page_default() {
 function node_page_view(Node $node) {
   // If the user has chosen to hide this node from page views return 404.
   $pageless = config_get('node.type.' . $node->type, 'pageless');
-  if ($pageless) {
+  $bypass_pageless = user_access('bypass pageless setting', $account);
+  if ($pageless && !$bypass_pageless) {
     backdrop_not_found();
   }
 
