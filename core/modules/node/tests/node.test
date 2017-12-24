@@ -1313,6 +1313,18 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
     $config = config('node.type.foo');
     $this->assertFalse($config->isNew(), 'The new content type has been created in config.');
+    $this->assertEqual($config->get('pageless'), '0', 'The new content type has expected default pageless of 0.');
+
+    // Add a node of type foo; make sure we can visit it with 200 response..
+    $foo_settings = array('uid' => $this->web_user->uid, 'type' => 'post');
+    $foo_node = $this->backdropCreateNode($foo_settings);
+    $this->backdropGet('/node/' . $foo_node->nid);
+    $this->assertResponse(200, 'Recieved 200 response from node type foo with pageless set to 0.');
+
+    // Edit content type foo to pageless = 1 and check the setting.
+    $config->set('pageless', '1');
+    $config->save();
+    $this->assertEqual($config->get('pageless'), '1', 'The new content type has expected pageless setting of 1.');
   }
 
   /**
