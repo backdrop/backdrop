@@ -255,10 +255,10 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
   $form['permissions']['permissions'] = node_type_form_permissions($type->type);
 
-  // Pageless form
+  // Pageless settings form
   $form['pageless'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Pageless'),
+    '#title' => t('Pageless settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
@@ -269,18 +269,13 @@ function node_type_form($form, &$form_state, $type = NULL) {
     config_get('node.type.' . $type->type, 'pageless') : "0";
   $form['pageless']['pageless_value'] = array(
     '#type' => 'radios',
-    '#title' => t('Would you like to hide these pages from the world?'),
+    '#title' => t('Show pages as usual.'),
     '#options' => array(
-      0 => 'No. Business as usual these pages will be displayed.',
-      1 => 'Yes. Remove page display to use as content elsewhere on the site.'
+      0 => 'Yes.', 
+      1 => 'No, hide the page display from visitors.',
     ),
     '#default_value' => $pageless_default,
-    '#description' => t('By default nodes will have URLs and be visible as a web page, but you can disable that by selecting \'Yes\' here.'),
-  );
-  $form['pageless']['explanation'] = array(
-    '#type' => 'markup',
-    '#title' => t('Why?'),
-    '#markup' => t(_node_pageless_explanation()),
+    '#description' => t('Pageless content can be displayed elsewhere on the site, for instance in a view or in a block.'),
   );
 
   $form['display'] = array(
@@ -658,34 +653,3 @@ function node_type_delete_confirm_submit($form, &$form_state) {
   return;
 }
 
-/**
- * Helper function to create the explanation content for the pageless setting.
- */
-function _node_pageless_explanation() {
-  $markup = '
-    <h4>Why?</h4>
-    <p>
-      Here are some use cases one might choose to hide the page display:
-      <ul>
-        <li>
-          Views
-           <ul>
-             <li>
-               One might want to create a view of content that will never show the individual page just the view (slider).
-             </li>
-           </ul>
-        </li>
-        <li>
-          Content Blocks
-          <ul>
-            <li>
-              One might want to make a block that has content that needs to be translatable.
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </p>
-  ';
-
-  return $markup;
-}
