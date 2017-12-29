@@ -774,15 +774,27 @@ function backdrop_settings_initialize() {
   // Convert simplified database settings into the full databases array.
   if (!empty($database) && $database !== 'mysql://user:pass@localhost/database_name') {
     $database_parts = parse_url($database);
+    if (!$database_parts || !is_array($database_parts) || (count($database_parts) == 1)) {
+      printf('The database setting could not be parsed. Please check the $database setting in settings.php.');
+      exit;
+    }
     $databases['default']['default'] = array(
-      'driver' => $database_parts['scheme'],
+      'driver' => isset($database_parts['scheme']) ? $database_parts['scheme'] : NULL,
       'database' => substr($database_parts['path'], 1), // Remove leading slash.
       'username' => isset($database_parts['user']) ? $database_parts['user'] : '',
       'password' => isset($database_parts['pass']) ? $database_parts['pass'] : '',
-      'host' => $database_parts['host'],
+      'host' => isset($database_parts['host']) ? $database_parts['host'] : NULL,
       'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
       'prefix' => !empty($database_prefix) ? $database_prefix : '',
     );
+    $required_parts = array('driver', 'database', 'username', 'host');
+    foreach ($required_parts as $key) {
+      if (!$databases['default']['default'][$key]) {
+        $missing_field = ($key == 'database') ? 'name' : $key;
+        printf('Could not find a value for the database "%s" setting. Please check the $database setting in settings.php.', $missing_field);
+        exit;
+      }
+    }
   }
 
   $is_https = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on';
