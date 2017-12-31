@@ -109,7 +109,7 @@
 
   <?php print render($content['links']); ?>
 
-  <?php if ($page && ($comments['comments'] || $comments['comment_form'])): ?>
+  <?php if ($page && (isset($comments['comments']) || isset($comments['comment_form']))): ?>
     <section class="comments" id="comments">
       <?php if ($comments['comments']): ?>
         <h2 class="title"><?php print t('Comments'); ?></h2>
