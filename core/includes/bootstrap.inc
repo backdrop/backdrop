@@ -774,6 +774,9 @@ function backdrop_settings_initialize() {
   // Convert simplified database settings into the full databases array.
   if (!empty($database) && $database !== 'mysql://user:pass@localhost/database_name') {
     $database_parts = parse_url($database);
+    if (!$database_parts) {
+      trigger_error('The database setting could not be parsed. Please check the $database setting in settings.php.', E_USER_ERROR);
+    }
     $databases['default']['default'] = array(
       'driver' => $database_parts['scheme'],
       'database' => substr($database_parts['path'], 1), // Remove leading slash.
@@ -783,6 +786,13 @@ function backdrop_settings_initialize() {
       'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
       'prefix' => !empty($database_prefix) ? $database_prefix : '',
     );
+    $required_parts = array('driver', 'database', 'username', 'host');
+    foreach ($required_parts as $key) {
+      if (!$databases['default']['default'][$key]) {
+        $missing_field = ($key == 'database') ? 'name' : $key;
+        trigger_error('Could not find a value for the database "' . $missing_field . '" setting. Please check the $database setting in settings.php.', E_USER_ERROR);
+      }
+    }
   }
 
   $is_https = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on';
@@ -2123,10 +2133,10 @@ function watchdog_exception($type, Exception $exception, $message = NULL, $varia
  */
 function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
   try {
-    $enabled_severity_levels = config('system.core')->get('watchdog_enabled_severity_levels');
+    $enabled_severity_levels = function_exists('config') ? config('system.core')->get('watchdog_enabled_severity_levels') : array();
   }
   catch (Exception $e) {
-    $enabled_severity_levels = NULL;
+    $enabled_severity_levels = array();
   }
 
   // This may be called before system.core, such as when running update.php or

@@ -206,7 +206,9 @@ function _backdrop_log_error($error, $fatal = FALSE) {
     $number++;
   }
 
-  watchdog('php', '%type: !message in %function (line %line of %file).', $error, $error['severity_level']);
+  // Suppress errors here in the event that the database is not accessible,
+  // preventing cascading errors.
+  @watchdog('php', '%type: !message in %function (line %line of %file).', $error, $error['severity_level']);
 
   if ($fatal) {
     backdrop_add_http_header('Status', '500 Service unavailable (with message)');
