@@ -5,6 +5,157 @@
  */
 
 /**
+ * Form callback for adding a file via an upload form.
+ *
+ * This is a multi step form which has 1-4 pages:
+ * - Upload file
+ * - Choose filetype
+ *   If there is only one candidate (based on mimetype) we will skip this step.
+ * - Edit scheme
+ * - Edit fields (Skip this step if there are no fields on this entity type.)
+ */
+function file_add_form($form, &$form_state, $options = array()) {
+  if (!is_array($options)) {
+    $options = array($options);
+  }
+  $step = (isset($form_state['step']) && in_array($form_state['step'], array(1, 2, 3, 4))) ? $form_state['step'] : 1;
+
+  $form['#step'] = $step;
+  $form['#options'] = $options + array(
+    'types' => array(),
+    'enabledPlugins' => array(),
+    'schemes' => array(),
+    'max_filesize' => '',
+    'uri_scheme' => 'public',
+  );
+
+  switch ($step) {
+    case 1:
+      $form['upload'] = array(
+        '#type' => 'managed_file',
+        '#title' => t('Upload a new file'),
+        '#upload_location' => file_upload_destination_uri($options),
+        '#upload_validators' => file_get_upload_validators($options),
+        '#progress_indicator' => 'bar',
+        '#required' => TRUE,
+        '#pre_render' => array('file_managed_file_pre_render', 'file_upload_validators_pre_render'),
+        '#default_value' => isset($form_state['storage']['upload']) ? $form_state['storage']['upload'] : NULL,
+      );
+
+      $form['actions'] = array('#type' => 'actions');
+      $form['actions']['next'] = array(
+        '#type' => 'submit',
+        '#value' => t('Next'),
+      );
+
+      form_load_include($form_state, 'inc', 'file_entity', 'file_entity.pages');
+
+      return $form;
+
+    case 2:
+      return file_add_step_filetype($form, $form_state, $options);
+
+    case 3:
+      return file_add_step_scheme($form, $form_state, $options);
+
+    case 4:
+      return file_add_step_fields($form, $form_state, $options);
+  }
+}
+
+/**
+ * Determines the upload location for the file add upload form.
+ *
+ * @param array $params
+ *   An array of parameters from the media browser.
+ * @param array $data
+ *   (optional) An array of token objects to pass to token_replace().
+ *
+ * @return string
+ *   A file directory URI with tokens replaced.
+ *
+ * @see token_replace()
+ */
+function file_upload_destination_uri(array $params, array $data = array()) {
+  $params += array(
+    'uri_scheme' => file_default_scheme(),
+    'file_directory' => '',
+  );
+
+  $destination = trim($params['file_directory'], '/');
+
+  // Replace tokens.
+  $destination = token_replace($destination, $data);
+
+  return $params['uri_scheme'] . '://' . $destination;
+}
+
+/**
+ * Retrieves the upload validators for a file.
+ *
+ * @param array $options
+ *   (optional) An array of options for file validation.
+ *
+ * @return array
+ *   An array suitable for passing to file_save_upload() or for a managed_file
+ *   or upload element's '#upload_validators' property.
+ */
+function file_get_upload_validators(array $options = array()) {
+  // Set up file upload validators.
+  $validators = array();
+
+  // Validate file extensions. If there are no file extensions in $params there
+  // is no file extension validation.
+  if (!empty($options['file_extensions'])) {
+    $validators['file_validate_extensions'] = array($options['file_extensions']);
+  }
+  else {
+    $validators['file_validate_extensions'] = array(config_get('system.core', 'file_default_allowed_extensions'));
+  }
+
+  // Cap the upload size according to the system or user defined limit.
+  $max_filesize = parse_size(file_upload_max_size());
+  if (!empty($options['max_filesize']) && $options['max_filesize'] < $max_filesize) {
+    $max_filesize = parse_size($options['max_filesize']);
+  }
+
+  // There is always a file size limit due to the PHP server limit.
+  $validators['file_validate_size'] = array($max_filesize);
+
+  // Add image validators.
+  $options += array('min_resolution' => 0, 'max_resolution' => 0);
+  if ($options['min_resolution'] || $options['max_resolution']) {
+    $validators['file_validate_image_resolution'] = array($options['max_resolution'], $options['min_resolution']);
+  }
+
+  // Add other custom upload validators from options.
+  if (!empty($options['upload_validators'])) {
+    $validators += $options['upload_validators'];
+  }
+
+  return $validators;
+}
+
+/**
+ * Pre-render callback for adding validation descriptions to file upload fields.
+ */
+function file_upload_validators_pre_render($element) {
+  if (!empty($element['#upload_validators'])) {
+    if (!isset($element['#description'])) {
+      $element['#description'] = '';
+    }
+    if ($element['#description'] !== FALSE) {
+      $element['#description'] = theme('file_upload_help', array(
+        'description' => $element['#description'],
+        'upload_validators' => $element['#upload_validators'],
+      ));
+    }
+  }
+
+  return $element;
+}
+
+/**
  * Page callback: Form constructor for the file deletion confirmation form.
  *
  * Path: file/%file/delete
