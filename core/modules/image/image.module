@@ -468,7 +468,7 @@ function image_field_update_instance($instance, $prior_instance) {
  * Clear cached versions of a specific file in all styles.
  *
  * @param $path
- *   The Backdrop file path to the original image.
+ *   The URI or path to the original image.
  */
 function image_path_flush($path) {
   $styles = image_styles();

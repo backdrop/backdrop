@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity controller and class for files.
