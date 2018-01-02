@@ -779,9 +779,9 @@ function backdrop_settings_initialize() {
     }
     $databases['default']['default'] = array(
       'driver' => $database_parts['scheme'],
-      'database' => substr($database_parts['path'], 1), // Remove leading slash.
-      'username' => isset($database_parts['user']) ? $database_parts['user'] : '',
-      'password' => isset($database_parts['pass']) ? $database_parts['pass'] : '',
+      'database' => rawurldecode(substr($database_parts['path'], 1)), // Remove leading slash.
+      'username' => isset($database_parts['user']) ? rawurldecode($database_parts['user']) : '',
+      'password' => isset($database_parts['pass']) ? rawurldecode($database_parts['pass']) : '',
       'host' => $database_parts['host'],
       'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
       'prefix' => !empty($database_prefix) ? $database_prefix : '',
