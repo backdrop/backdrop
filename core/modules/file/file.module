@@ -52,9 +52,9 @@ function file_permission() {
       'title' => t('Access the manage files overview'),
       'description' => t('The <a href="@url">manage files overview page</a> shows all files uploaded to the site.', array('@url' => url('admin/content/files'))),
     ),
-    'edit files' => array(
+    'manage files' => array(
       'title' => t('Manage or replace any file'),
-      'description' => t('Allow managing files of from the files overview page.'),
+      'description' => t('Allow managing of files from the files overview page.'),
       'restrict access' => TRUE,
     ),
     'delete files' => array(
@@ -89,8 +89,8 @@ function file_menu() {
   $items['file/%file/manage'] = array(
     'title' => 'Manage',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('file_edit_form', 1),
-    'access arguments' => array('edit files'),
+    'page arguments' => array('file_manage_form', 1),
+    'access arguments' => array('manage files'),
     'weight' => 0,
     'type' => MENU_CALLBACK,
     'file' => 'file.pages.inc',
