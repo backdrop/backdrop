@@ -32,6 +32,7 @@ function file_autoload_info() {
     // Views handlers.
     'views_handler_argument_file_fid' => 'views/views_handler_argument_file_fid.inc',
     'views_handler_field_file' => 'views/views_handler_field_file.inc',
+    'views_handler_field_file_link_edit' => 'views/views_handler_field_file_link_edit.inc',
     'views_handler_field_file_link_delete' => 'views/views_handler_field_file_link_delete.inc',
     'views_handler_field_file_extension' => 'views/views_handler_field_file_extension.inc',
     'views_handler_field_file_filemime' => 'views/views_handler_field_file_filemime.inc',
@@ -50,6 +51,11 @@ function file_permission() {
     'access file overview' => array(
       'title' => t('Access the manage files overview'),
       'description' => t('The <a href="@url">manage files overview page</a> shows all files uploaded to the site.', array('@url' => url('admin/content/files'))),
+    ),
+    'edit files' => array(
+      'title' => t('Edit or replace any file'),
+      'description' => t('Allow editing files directly from the manage files overview page.'),
+      'restrict access' => TRUE,
     ),
     'delete files' => array(
       'title' => t('Delete any file'),
@@ -80,6 +86,15 @@ function file_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['file/%file/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('file_edit_form', 1),
+    'access arguments' => array('edit files'),
+    'weight' => 0,
+    'type' => MENU_CALLBACK,
+    'file' => 'file.pages.inc',
+  );
   $items['file/%file/delete'] = array(
     'title' => 'Delete',
     'page callback' => 'backdrop_get_form',
@@ -429,6 +444,7 @@ function file_admin_paths() {
   if (config_get('system.core', 'node_admin_theme')) {
     $paths = array(
       'file/*/delete' => TRUE,
+      'file/*/edit' => TRUE,
     );
     return $paths;
   }
