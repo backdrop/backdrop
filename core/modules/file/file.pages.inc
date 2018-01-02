@@ -5,12 +5,12 @@
  */
 
 /**
- * Page callback: Form constructor for the file edit form.
+ * Page callback: Form constructor for the file manage form.
  *
  * @param File $file
  *   A file object from file_load().
  */
-function file_edit_form($form, &$form_state, File $file) {
+function file_manage_form($form, &$form_state, File $file) {
   backdrop_set_title(t('<em>Manage file</em> @title', array('@title' => $file->filename)), PASS_THROUGH);
 
   $form_state['file'] = $file;
@@ -127,8 +127,8 @@ function file_edit_form($form, &$form_state, File $file) {
     '#type' => 'submit',
     '#value' => t('Save'),
     '#weight' => 5,
-    '#submit' => array('file_edit_form_submit'),
-    '#validate' => array('file_edit_form_validate'),
+    '#submit' => array('file_manage_form_submit'),
+    '#validate' => array('file_manage_form_validate'),
   );
   $form['actions']['delete'] = array(
     '#type' => 'submit',
@@ -158,9 +158,9 @@ function file_edit_form($form, &$form_state, File $file) {
 }
 
 /**
- * Form validation handler for file_edit_form().
+ * Form validation handler for file_manage_form().
  */
-function file_edit_form_validate($form, &$form_state) {
+function file_manage_form_validate($form, &$form_state) {
   // Validate the "associated user" field.
   if (!empty($form_state['values']['name']) && !($account = user_load_by_name($form_state['values']['name']))) {
     // The use of empty() is mandatory in the context of usernames
@@ -174,9 +174,9 @@ function file_edit_form_validate($form, &$form_state) {
 }
 
 /**
- * Form submission handler for the 'Save' button for file_edit_form().
+ * Form submission handler for the 'Save' button for file_manage_form().
  */
-function file_edit_form_submit($form, &$form_state) {
+function file_manage_form_submit($form, &$form_state) {
   /* @var File $file */
   $file = $form_state['file'];
   /* @var File $temporary_upload */
