@@ -5,7 +5,7 @@
  */
 
 /**
- * Field handler to present a link to edit a file.
+ * Field handler to present a link to manage a file.
  *
  * @ingroup views_field_handlers
  */
@@ -46,10 +46,10 @@ class views_handler_field_file_link_edit extends views_handler_field_entity {
     }
 
     $this->options['alter']['make_link'] = TRUE;
-    $this->options['alter']['path'] = "file/$file->fid/edit";
+    $this->options['alter']['path'] = "file/$file->fid/manage";
     $this->options['alter']['query'] = backdrop_get_destination();
 
-    $text = !empty($this->options['text']) ? $this->options['text'] : t('Edit');
+    $text = !empty($this->options['text']) ? $this->options['text'] : t('Manage');
     return $text;
   }
 }

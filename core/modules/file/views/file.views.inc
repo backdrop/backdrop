@@ -90,8 +90,8 @@ function file_views_data() {
 
   // Edit link.
   $data['file_managed']['edit'] = array(
-    'title' => t('Edit link'),
-    'help' => t('Provide a simple link to edit the file entity.'),
+    'title' => t('Manage link'),
+    'help' => t('A link to edit the file entity.'),
     'field' => array(
       'handler' => 'views_handler_field_file_link_edit',
       'real field' => 'fid',

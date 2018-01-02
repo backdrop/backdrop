@@ -1679,7 +1679,7 @@ class FileAdminTestCase extends FileFieldTestCase {
       $this->assertLinkByHref('file/' . $file->fid . '/delete');
 
       // Verify no edit links are displayed without edit permission.
-      $this->assertNoLinkByHref('file/' . $file->fid . '/edit');
+      $this->assertNoLinkByHref('file/' . $file->fid . '/manage');
 
       // Verify use count on confirm form is correct.
       $this->backdropGet('file/' . $file->fid . '/delete');
@@ -1703,7 +1703,7 @@ class FileAdminTestCase extends FileFieldTestCase {
     $this->backdropGet('admin/content/files');
     $this->assertResponse(200);
     foreach ($files as $file) {
-      $this->assertLinkByHref('file/' . $file->fid . '/edit');
+      $this->assertLinkByHref('file/' . $file->fid . '/manage');
     }
 
     // Verify changing a filename changes the database value.
@@ -1712,7 +1712,7 @@ class FileAdminTestCase extends FileFieldTestCase {
     $new_filename = 'changedme' . $extension;
     $edit = array();
     $edit['filename'] = $new_filename;
-    $this->backdropPost('file/' . $file->fid . '/edit', $edit, 'Save');
+    $this->backdropPost('file/' . $file->fid . '/manage', $edit, 'Save');
     $this->assertText($new_filename, 'File name changed in database.');
 
     // Verify uploading a new file replaces the existing file.
@@ -1720,13 +1720,13 @@ class FileAdminTestCase extends FileFieldTestCase {
     $edit = array();
     $test_file = $this->getTestFile('text', 131072); // 128KB
     $edit['files[replace_upload]'] = backdrop_realpath($test_file->uri);
-    $this->backdropPost('file/' . $file->fid . '/edit', $edit, 'Save');
+    $this->backdropPost('file/' . $file->fid . '/manage', $edit, 'Save');
     $this->assertText(format_size(131072), 'File size matches new upload.');
     // Do it twice to be sure.
     $edit = array();
     $test_file = $this->getTestFile('text', 1310720); // 1.2MB
     $edit['files[replace_upload]'] = backdrop_realpath($test_file->uri);
-    $this->backdropPost('file/' . $file->fid . '/edit', $edit, 'Save');
+    $this->backdropPost('file/' . $file->fid . '/manage', $edit, 'Save');
     $this->assertText(format_size(1310720), 'File size matches new upload.');
   }
 }

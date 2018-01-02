@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Supports file operations including Edit, and Delete.
+ * Supports file operations including Manage and Delete.
  */
 
 /**
@@ -11,7 +11,7 @@
  *   A file object from file_load().
  */
 function file_edit_form($form, &$form_state, File $file) {
-  backdrop_set_title(t('<em>Edit file</em> @title', array('@title' => $file->filename)), PASS_THROUGH);
+  backdrop_set_title(t('<em>Manage file</em> @title', array('@title' => $file->filename)), PASS_THROUGH);
 
   $form_state['file'] = $file;
   $form_state['temporary_upload'] = NULL;
@@ -314,25 +314,6 @@ function file_get_upload_validators(array $options = array()) {
   }
 
   return $validators;
-}
-
-/**
- * Pre-render callback for adding validation descriptions to file upload fields.
- */
-function file_upload_validators_pre_render($element) {
-  if (!empty($element['#upload_validators'])) {
-    if (!isset($element['#description'])) {
-      $element['#description'] = '';
-    }
-    if ($element['#description'] !== FALSE) {
-      $element['#description'] = theme('file_upload_help', array(
-        'description' => $element['#description'],
-        'upload_validators' => $element['#upload_validators'],
-      ));
-    }
-  }
-
-  return $element;
 }
 
 /**
