@@ -750,7 +750,7 @@ function views_language_list($field = 'name', $all = FALSE) {
     $languages = language_list();
   }
   else {
-    $languages = language_list('enabled');
+    $languages = language_list(TRUE);
   }
   $list = array();
   foreach ($languages as $language) {

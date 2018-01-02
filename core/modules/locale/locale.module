@@ -168,15 +168,11 @@ function locale_config_info() {
 function locale_language_selector_form($user) {
   global $language;
   // Get list of enabled languages only.
-  $languages = language_list(TRUE);
+  $language_options = language_list(TRUE, TRUE);
 
   // If the user is being created, we set the user language to the page language.
   $user_preferred_language = $user->uid ? user_preferred_language($user) : $language;
 
-  $names = array();
-  foreach ($languages as $langcode => $item) {
-    $names[$langcode] = $item->name;
-  }
   // Get language negotiation settings.
   $mode = language_negotiation_get(LANGUAGE_TYPE_INTERFACE) != LANGUAGE_NEGOTIATION_DEFAULT;
   $form['locale'] = array(
@@ -185,10 +181,10 @@ function locale_language_selector_form($user) {
     '#weight' => 1,
   );
   $form['locale']['language'] = array(
-    '#type' => (count($names) <= 5 ? 'radios' : 'select'),
+    '#type' => (count($language_options) <= 5 ? 'radios' : 'select'),
     '#title' => t('Language'),
     '#default_value' => $user_preferred_language->langcode,
-    '#options' => $names,
+    '#options' => $language_options,
     '#description' => $mode ? t("This account's default language for e-mails, and preferred language for site presentation.") : t("This account's default language for e-mails."),
   );
   return $form;
