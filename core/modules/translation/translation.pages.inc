@@ -32,10 +32,10 @@ function translation_node_overview(Node $node) {
 
   $type = config_get('translation.settings', 'language_type');
   $header = array(t('Language'), t('Title'), t('Status'), t('Operations'));
+  $rows = array();
 
-  foreach (language_list() as $langcode => $language) {
+  foreach (language_list(TRUE, TRUE) as $langcode => $language_name) {
     $options = array();
-    $language_name = $language->name;
     if (isset($translations[$langcode])) {
       // Existing translation in the translation set: display status.
       // We load the full node to check whether the user can edit it.

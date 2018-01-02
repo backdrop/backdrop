@@ -143,11 +143,7 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
 
   // A hidden value unless language.module is enabled.
   if (module_exists('language')) {
-    $languages = language_list(TRUE);
-    foreach ($languages as $langcode => $language) {
-      $language_options[$langcode] = $language->name;
-    }
-
+    $language_options = language_list(TRUE, TRUE);
     $form['langcode'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
