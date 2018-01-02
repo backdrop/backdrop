@@ -3319,11 +3319,11 @@ function language_multilingual() {
  *   (optional) Whether to return only enabled languages.
  * @param $option_list
  *   (optional) Whether to return a list of options instead of objects. This
- *   list is suitable for use in a select list #options array.
+ *   list is suitable for use in a select list #options array. This list is
+ *   ordered by weight and then language name.
  *
- * @return stdClass[]
- *   An associative array of languages, keyed by the language code, ordered by
- *   weight ascending and name ascending.
+ * @return (stdClass|string)[]
+ *   An associative array of languages, keyed by the language code.
  */
 function language_list($only_enabled = FALSE, $option_list = FALSE) {
   $languages = &backdrop_static(__FUNCTION__);
@@ -3379,6 +3379,10 @@ function language_list($only_enabled = FALSE, $option_list = FALSE) {
   if ($option_list) {
     $list = array();
     $this_list = $only_enabled ? $languages['enabled'] : $languages['all'];
+    // backdrop_sort() needed for ordering, but common.inc may not be loaded
+    // in very early bootstrap. Include only if returning an option list.
+    require_once __DIR__ . '/common.inc';
+    backdrop_sort($this_list, array('weight' => SORT_NUMERIC, 'name' => SORT_STRING));
     foreach ($this_list as $language) {
       $list[$language->langcode] = $language->name;
     }

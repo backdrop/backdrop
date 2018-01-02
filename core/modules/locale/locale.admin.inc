@@ -185,7 +185,7 @@ function language_negotiation_configure_url_form($form, &$form_state) {
   );
 
   // Get the enabled languages only.
-  $languages = language_list(TRUE);
+  $language_list = language_list(TRUE, TRUE);
   $prefixes = locale_language_negotiation_url_prefixes();
   $domains = locale_language_negotiation_url_domains();
 
@@ -194,17 +194,17 @@ function language_negotiation_configure_url_form($form, &$form_state) {
   $mock_language = (object)(array(
     'langcode' => '',
   ));
-  foreach ($languages as $langcode => $language) {
+  foreach ($language_list as $langcode => $label) {
     $form['prefix'][$langcode] = array(
       '#type' => 'textfield',
-      '#title' => t('%language (%langcode) path prefix', array('%language' => $language->name, '%langcode' => $language->langcode)),
+      '#title' => t('%language (%langcode) path prefix', array('%language' => $label, '%langcode' => $langcode)),
       '#maxlength' => 64,
       '#default_value' => isset($prefixes[$langcode]) ? $prefixes[$langcode] : '',
       '#field_prefix' => url('', array('absolute' => TRUE, 'language' => $mock_language)) . (config_get('system.core', 'clean_url') ? '' : '?q=')
     );
     $form['domain'][$langcode] = array(
       '#type' => 'textfield',
-      '#title' => t('%language (%langcode) domain', array('%language' => $language->name, '%langcode' => $language->langcode)),
+      '#title' => t('%language (%langcode) domain', array('%language' => $label, '%langcode' => $langcode)),
       '#maxlength' => 128,
       '#default_value' => isset($domains[$langcode]) ? $domains[$langcode] : '',
     );
@@ -229,7 +229,6 @@ function language_negotiation_configure_url_form($form, &$form_state) {
 function language_negotiation_configure_url_form_validate($form, &$form_state) {
   // Get the enabled languages only.
   $languages = language_list(TRUE);
-  $default = language_default();
 
   // Count repeated values for uniqueness check.
   $count = array_count_values($form_state['values']['prefix']);

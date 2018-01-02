@@ -166,11 +166,7 @@ function node_form($form, &$form_state, Node $node) {
   $form['#node'] = $node;
 
   if ($node_type->settings['language'] && module_exists('language')) {
-    $languages = language_list(TRUE);
-    $language_options = array();
-    foreach ($languages as $langcode => $language) {
-      $language_options[$langcode] = $language->name;
-    }
+    $language_options = language_list(TRUE, TRUE);
     $form['langcode'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
