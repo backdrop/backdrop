@@ -56,7 +56,6 @@ function system_menu_block_form($config) {
       'tree' => t('Hierarchical tree'),
     ),
     '#default_value' => empty($config['style']) ? 'tree' : $config['style'],
-    '#description' => t('The menu style may adjust how a menu is displayed, such as a tree of links or a dropdown.'),
   );
 
   $form['level'] = array(
