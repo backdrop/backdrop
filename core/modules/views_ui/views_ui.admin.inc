@@ -1936,7 +1936,12 @@ function views_ui_clone_form($form, &$form_state, view $view) {
  * Submit handler for views_ui_clone_form().
  */
 function views_ui_clone_form_submit($form, &$form_state) {
+  // Get a safe clone of the source view.
   $new_view = $form_state['view']->clone_view();
+  // Reset some values to allow deletion of cloned views.
+  $new_view->module = '';
+  $new_view->storage = VIEWS_STORAGE_NORMAL;
+  // Set new machine name and label.
   $new_view->name = $form_state['values']['name'];
   $new_view->human_name = $form_state['values']['label'];
   $new_view->save();
