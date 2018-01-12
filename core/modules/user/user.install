@@ -491,7 +491,7 @@ function user_update_1009() {
     'tag' => 'default',
     'disabled' => FALSE,
     'base_table' => 'users',
-    'human_name' => 'Administer users',
+    'human_name' => 'Administer user accounts',
     'core' => '1.0-dev',
     'display' => array(
       'default' => array(

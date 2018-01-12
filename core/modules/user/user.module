@@ -494,7 +494,7 @@ function user_permission() {
       'restrict access' => TRUE,
     ),
     'administer users' => array(
-      'title' => t('Administer users'),
+      'title' => t('Administer user accounts'),
       'restrict access' => TRUE,
     ),
     'assign roles' => array(
