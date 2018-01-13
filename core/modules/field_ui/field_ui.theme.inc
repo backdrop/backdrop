@@ -122,7 +122,7 @@ function theme_field_ui_view_modes($variables) {
       '#type' => 'dropbutton',
       '#links' => array(
         'manage' => array(
-          'title' => t('Manage displays'),
+          'title' => t('Manage display'),
           'href' => "$path/default",
         ),
       ),
@@ -146,7 +146,7 @@ function theme_field_ui_view_modes($variables) {
     if ($view_modes[$view_mode_name]['custom settings']) {
       $customized_count++;
       $operations['manage'] = array(
-        'title' => t('Manage displays'),
+        'title' => t('Manage display'),
         'href' => "$path/$view_mode_name",
         'query' => array('destination' => $path),
       );
