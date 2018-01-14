@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Interface translation summary, editing and deletion user interfaces.
@@ -377,7 +376,7 @@ function locale_translate_edit_form_submit($form, &$form_state) {
     $translation = db_query("SELECT translation FROM {locales_target} WHERE lid = :lid AND language = :language", array(':lid' => $lid, ':language' => $key))->fetchField();
     if (!empty($value)) {
       // Only update or insert if we have a value to use.
-      if (!empty($translation)) {
+      if (is_string($translation)) {
         db_update('locales_target')
           ->fields(array(
             'translation' => $value,

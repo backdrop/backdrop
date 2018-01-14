@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the dblog module.
@@ -90,4 +89,13 @@ function dblog_schema() {
   );
 
   return $schema;
+}
+
+/**
+ * Account for possible legacy systems where dblog was not installed.
+ */
+function dblog_update_1000() {
+  if (!db_table_exists('watchdog')) {
+    db_create_table('watchdog', backdrop_get_schema_unprocessed('dblog', 'watchdog'));
+  }
 }
