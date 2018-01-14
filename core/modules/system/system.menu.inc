@@ -56,7 +56,6 @@ function system_menu_block_form($config) {
       'tree' => t('Hierarchical tree'),
     ),
     '#default_value' => empty($config['style']) ? 'tree' : $config['style'],
-    '#description' => t('The menu style may adjust how a menu is displayed, such as a tree of links or a dropdown.'),
   );
 
   $form['level'] = array(
@@ -108,7 +107,7 @@ function system_menu_block_form($config) {
     '#type' => 'checkbox',
     '#title' => t('Show all menu links'),
     '#default_value' => $config['expand_all'],
-    '#description' => t('When checked, all menu links will be displayed. When unchecked, only expanded or active trail menu links will be displayed.'),
+    '#description' => t('When unchecked, only expanded or active trail menu links will be displayed.'),
     '#states' => array(
       'visible' => array(
         'select[name="block_settings[style]"]' => array('value' => 'tree'),

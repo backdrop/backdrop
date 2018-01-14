@@ -51,7 +51,6 @@ function views_views_data() {
 
   $data['views']['area'] = array(
     'title' => t('Text area'),
-    'help' => t('Provide markup text for the area.'),
     'area' => array(
       'handler' => 'views_handler_area_text',
     ),
