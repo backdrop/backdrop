@@ -2958,6 +2958,16 @@ function system_update_1062() {
 }
 
 /**
+ * Set a default value for the X-Frame-Options header. This will not allow the
+ * site to be rendered in an iframe on another domain unless specified.
+ */
+function system_update_1063() {
+  $config = config('system.core');
+  $config->set('x_frame_options', 'SAMEORIGIN');
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
