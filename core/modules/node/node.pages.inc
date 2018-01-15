@@ -84,7 +84,6 @@ function node_add($type) {
 /**
  * Form validation handler for node_form().
  *
- * @see node_form_delete_submit()
  * @see node_form_submit()
  * @see node_form_submit_build_node()
  */
@@ -103,7 +102,6 @@ function node_form_validate($form, &$form_state) {
 /**
  * Form constructor for the node add/edit form.
  *
- * @see node_form_delete_submit()
  * @see node_form_validate()
  * @see node_form_submit()
  * @see node_form_submit_build_node()
@@ -339,11 +337,16 @@ function node_form($form, &$form_state, Node $node) {
     '#submit' => array('node_form_submit'),
   );
   if (!empty($node->nid) && node_access('delete', $node)) {
+    // Use a link for the delete button so the form doesn't need to validate.
     $form['actions']['delete'] = array(
-      '#type' => 'submit',
-      '#value' => t('Delete'),
+      '#type' => 'link',
+      '#title' => t('Delete'),
+      '#href' => "node/{$node->nid}/delete",
+      '#options' => array(
+        'query' => isset($_GET['destination']) ? backdrop_get_destination() : array(),
+        'attributes' => array('class' => array('button', 'button-secondary', 'form-delete'))
+      ),
       '#weight' => 15,
-      '#submit' => array('node_form_delete_submit'),
     );
   }
   $form['actions']['cancel'] = array(
@@ -370,26 +373,8 @@ function node_form($form, &$form_state, Node $node) {
 }
 
 /**
- * Form submission handler for the 'Delete' button for node_form().
- *
- * @see node_form_validate()
- * @see node_form_submit()
- * @see node_form_submit_build_node()
- */
-function node_form_delete_submit($form, &$form_state) {
-  $destination = array();
-  if (isset($_GET['destination'])) {
-    $destination = backdrop_get_destination();
-    unset($_GET['destination']);
-  }
-  $node = $form['#node'];
-  $form_state['redirect'] = array('node/' . $node->nid . '/delete', array('query' => $destination));
-}
-
-/**
  * Form submission handler that saves the node for node_form().
  *
- * @see node_form_delete_submit()
  * @see node_form_validate()
  * @see node_form_submit_build_node()
  */
@@ -431,7 +416,6 @@ function node_form_submit($form, &$form_state) {
  * entity with the current step's values before proceeding to the next step.
  *
  * @see node_form()
- * @see node_form_delete_submit()
  * @see node_form_validate()
  * @see node_form_submit()
  */
