@@ -154,6 +154,18 @@ function search_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('search_overlap_cjk'),
     '#description' => t('Whether to apply a simple Chinese/Japanese/Korean tokenizer based on overlapping sequences. Turn this off if you want to use an external preprocessor for this instead. Does not affect other languages. <strong>Changing this setting will invalidate the search index.</strong>')
   );
+  
+  $form['placeholder'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Search field placeholder')
+  );
+  $form['placeholder']['search_field_placeholder'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Placeholder for search form field'),
+    '#default_value' => $config->get('search_field_placeholder'),
+    '#size' => 60,
+    '#description' => t('Optional. Example: Search terms.')
+  );
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
@@ -192,6 +204,7 @@ function search_admin_settings_submit($form, &$form_state) {
   }
   $config->set('search_cron_limit', $form_state['values']['search_cron_limit']);
   $config->set('search_default_module', $form_state['values']['search_default_module']);
+  $config->set('search_field_placeholder', trim($form_state['values']['search_field_placeholder']));
   // Check whether we are resetting the values.
   if ($form_state['triggering_element']['#value'] == t('Reset to defaults')) {
     $new_modules = array('node', 'user');
