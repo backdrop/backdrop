@@ -382,6 +382,12 @@ description = Make sure that backdrop_add_feed() works correctly with various co
 group = Common
 file = common.test
 
+[CommonBackdropSortUnitTest]
+name = backdrop_sort() tests
+description = Test that backdrop_sort() works correctly.
+group = Common
+file = common.test
+
 [ArrayDiffUnitTest]
 name = Array differences
 description = Performs tests on backdrop_array_diff_assoc_recursive().
