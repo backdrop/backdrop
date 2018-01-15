@@ -41,7 +41,7 @@ class views_handler_field_file_link_edit extends views_handler_field_entity {
    */
   function render_link($file, $values) {
     // Ensure user has access to delete this file.
-    if (!user_access('edit files')) {
+    if (!user_access('manage files')) {
       return;
     }
 

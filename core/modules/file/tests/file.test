@@ -1583,7 +1583,7 @@ class FileAdminTestCase extends FileFieldTestCase {
 
     $this->base_user_1 = $this->backdropCreateUser(array('access file overview'));
     $this->base_user_2 = $this->backdropCreateUser(array('access file overview', 'delete files'));
-    $this->base_user_3 = $this->backdropCreateUser(array('access file overview', 'delete files', 'edit files'));
+    $this->base_user_3 = $this->backdropCreateUser(array('access file overview', 'delete files', 'manage files'));
   }
 
   /**

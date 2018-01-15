@@ -707,3 +707,25 @@ function file_update_1001() {
     $config->save();
   }
 }
+
+/**
+ * Switch the 'edit file' permission from file_entity to 'manage file'.
+ */
+function file_update_1002() {
+  $roles = user_roles(FALSE, 'edit files');
+  if (!empty($roles)) {
+    foreach ($roles as $name) {
+      $config = config('user.role.' . $name);
+      $permissions = $config->get('permissions');
+      if ($key = array_search('edit files', $permissions)) {
+        // Add the new permission.
+        $permissions[] = 'manage files';
+        // Remove the old permission.
+        unset($permissions[$key]);
+        // Save the role.
+        $config->set('permissions', $permissions);
+        $config->save();
+      }
+    }
+  }
+}
