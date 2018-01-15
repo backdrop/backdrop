@@ -142,6 +142,12 @@ description = Tests specific parts of the user entity like the URI callback and 
 group = User
 file = user.test
 
+[UserViewsTestCase]
+name = Reset password
+description = Ensure that password reset methods work as expected.
+group = User
+file = user.test
+
 [UserPasswordResetTest]
 name = Reset password
 description = Ensure that password reset works as expected.
