@@ -7018,12 +7018,14 @@ function element_info_property($type, $property_name, $default = NULL) {
  * // Sort by a single numeric key:
  * backdrop_sort($my_array, array('weight' => SORT_NUMERIC));
  *
- * // Short-hand sort by a numeric key:
+ * // Shorthand sort by a numeric key:
  * backdrop_sort($my_array, array('weight'));
  *
  * // Sort by numeric and string keys.
  * backdrop_sort($my_array, array('weight' => SORT_NUMERIC, 'title' => SORT_STRING));
  * @endcode
+ *
+ * @since 1.9.0 The $dir parameter was added.
  */
 function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT_ASC) {
   // Ensure all keys have a sort value.
