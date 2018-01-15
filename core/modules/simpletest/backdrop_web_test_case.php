@@ -1410,7 +1410,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       'name' => $by_email ? $account->mail : $account->name,
       'pass' => $account->pass_raw
     );
-    $this->backdropPost('user', $edit, t('Log in'));
+    $this->backdropPost('user/login', $edit, t('Log in'));
 
     // Check for the logged-in class.
     $result = $this->xpath('/html/body[contains(@class, "logged-in")]');
