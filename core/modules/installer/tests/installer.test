@@ -258,7 +258,7 @@ class InstallerTestUploadCase extends BackdropWebTestCase {
     );
     $config->set('update_system_info', $setting)->save();
     $config->set('update_url', url('update-test', array('absolute' => TRUE)))->save();
-    $config->set('update_xml_map', array('backdrop' => '2-sec'))->save();
+    state_set('update_test_xml_map', array('backdrop' => '2-sec'));
     // Initialize the update status.
     $this->backdropGet('admin/reports/updates');
 

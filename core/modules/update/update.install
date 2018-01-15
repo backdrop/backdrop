@@ -218,6 +218,16 @@ function update_update_1002() {
 }
 
 /**
+ * Removes the testing-only values from the update.settings config.
+ */
+function update_update_1003() {
+  $config = config('update.settings');
+  $config->clear('update_xml_map');
+  $config->clear('update_system_info');
+  $config->save();
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

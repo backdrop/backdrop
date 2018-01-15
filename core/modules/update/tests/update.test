@@ -12,8 +12,8 @@
  * (specified via hook_system_info_alter() in the update_test helper module)
  * describing what's currently installed. Each test case defines a set of
  * projects to install, their current state (via the 'update_test_system_info'
- * variable) and the desired available update data (via the
- * 'update_test_xml_map' variable), and then performs a series of assertions
+ * state value) and the desired available update data (via the
+ * 'update_test_xml_map' state value), and then performs a series of assertions
  * that the report matches our expectations given the specific initial state and
  * availability scenario.
  */
@@ -42,7 +42,7 @@ class UpdateTestHelper extends BackdropWebTestCase {
     // update_test module.
     $config->set('update_url', url($url, array('absolute' => TRUE)))->save();
     // Save the map for update_test_mock_page() to use.
-    $config->set('update_xml_map', $xml_map)->save();
+    state_set('update_test_xml_map', $xml_map);
     // Manually check the update status.
     $this->backdropGet('admin/reports/updates/check');
   }
@@ -125,7 +125,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
         'datestamp' => '1000000000',
       ),
     );
-    config_set('update.settings', 'update_system_info', $system_info);
+    state_set('update_test_system_info', $system_info);
     $this->refreshUpdateStatus(array('backdrop' => 'dev'));
     $this->assertNoText(t('2001-Sep-'));
     $this->assertText(t('Up to date'));
@@ -140,7 +140,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
     $config = config('update.settings');
     $this->setSystemInfo1_0();
     $config->set('update_url', url('update-test', array('absolute' => TRUE)))->save();
-    $config->set('update_xml_map', array('backdrop' => '0'))->save();
+    state_set('update_test_xml_map', array('backdrop' => '0'));
 
     $this->cronRun();
     $this->backdropGet('admin/modules');
@@ -155,7 +155,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
     $config = config('update.settings');
     // Instead of using refreshUpdateStatus(), set these manually.
     $config->set('update_url', url('update-test', array('absolute' => TRUE)))->save();
-    $config->set('update_xml_map', array('backdrop' => '0'))->save();
+    state_set('update_test_xml_map', array('backdrop' => '0'));
 
     $this->backdropGet('admin/reports/updates');
     $this->clickLink(t('Check manually'));
@@ -173,7 +173,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
     $config = config('update.settings');
     // Instead of using refreshUpdateStatus(), set these manually.
     $config->set('update_url', url('update-test', array('absolute' => TRUE)))->save();
-    $config->set('update_xml_map', array('backdrop' => '1'))->save();
+    state_set('update_test_xml_map', array('backdrop' => '1'));
 
     $this->backdropGet('admin/reports/updates');
     $this->clickLink(t('Check manually'));
@@ -191,7 +191,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
     $config = config('update.settings');
     // Instead of using refreshUpdateStatus(), set these manually.
     $config->set('update_url', url('update-test', array('absolute' => TRUE)))->save();
-    $config->set('update_xml_map', array('backdrop' => '2-sec'))->save();
+    state_set('update_test_xml_map', array('backdrop' => '2-sec'));
 
     $this->backdropGet('admin/reports/updates');
     $this->clickLink(t('Check manually'));
@@ -285,7 +285,7 @@ class UpdateCoreTestCase extends UpdateTestHelper {
         'version' => '1.0',
       ),
     );
-    config_set('update.settings', 'update_system_info', $setting);
+    state_set('update_test_system_info', $setting);
   }
 
 }
@@ -314,7 +314,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
         'hidden' => FALSE,
       ),
     );
-    config_set('update.settings', 'update_system_info', $system_info);
+    state_set('update_test_system_info', $system_info);
     $this->refreshUpdateStatus(array('backdrop' => '0', 'aaa_update_test' => 'no-releases'));
     $this->backdropGet('admin/reports/updates');
     // Cannot use $this->assertStandardTests() because we need to check for the
@@ -342,7 +342,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
         'hidden' => FALSE,
       ),
     );
-    config_set('update.settings', 'update_system_info', $system_info);
+    state_set('update_test_system_info', $system_info);
     $this->refreshUpdateStatus(
       array(
         'backdrop' => '0',
@@ -401,7 +401,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
         'hidden' => FALSE,
       ),
     );
-    config_set('update.settings', 'update_system_info', $system_info);
+    state_set('update_test_system_info', $system_info);
     $this->refreshUpdateStatus(array('backdrop' => '0', '#all' => '1_0'));
     // We're expecting the report to say all projects are up to date.
     $this->assertText(t('Up to date'));
@@ -457,7 +457,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
         'hidden' => FALSE,
       ),
     );
-    config_set('update.settings', 'update_system_info', $system_info);
+    state_set('update_test_system_info', $system_info);
     $xml_mapping = array(
       'backdrop' => '0',
       'update_test_subtheme' => '1_0',
@@ -502,8 +502,8 @@ class UpdateTestContribCase extends UpdateTestHelper {
         'hidden' => FALSE,
       ),
     );
-    config_set('system.core', 'update_test_system_info', $system_info);
-    config_set('system.core', 'update_check_disabled', FALSE);
+    state_set('update_test_system_info', $system_info);
+    config_set('update.settings', 'update_check_disabled', FALSE);
     $xml_mapping = array(
       // This is enough because we don't check the update status of the admin
       // theme. We want to check that the admin theme is included in the list.
@@ -553,7 +553,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
     // of update_max_fetch_attempts. Therefore this variable is set very high
     // to avoid test failures in those cases.
     $config->set('update_max_attempts', 99999)->save();
-    $config->set('update_system_info', $system_info)->save();
+    state_set('update_test_system_info', $system_info);
     $xml_mapping = array(
       'backdrop' => '0',
       'update_test_subtheme' => '1_0',
@@ -603,7 +603,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
         'hidden' => FALSE,
       ),
     );
-    config_set('update.settings', 'update_system_info', $system_info);
+    state_set('update_test_system_info',  $system_info);
 
     $xml_mapping = array(
       'backdrop' => '0',
@@ -663,7 +663,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
         'hidden' => FALSE,
       ),
     );
-    $config->set('update_system_info', $system_info)->save();
+    state_set('update_test_system_info', $system_info);
     $update_status = array(
       'aaa_update_test' => array(
         'status' => UPDATE_NOT_SECURE,
