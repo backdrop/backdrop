@@ -57,6 +57,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'href'),
     '#autocomplete_path' => 'filter-link/autocomplete',
     '#description' => t('Enter a known path, or start typing to get suggestions'),
+    '#maxlength' => 256,
   );
   $form['target'] = array(
     '#title' => t('Open in new window'),
