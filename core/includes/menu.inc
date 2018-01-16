@@ -1703,6 +1703,8 @@ function _menu_tree_data(&$links, $parents, $depth) {
  * Implements template_preprocess_HOOK() for theme_menu_tree().
  */
 function template_preprocess_menu_tree(&$variables) {
+  $variables['#tree'] = $variables['tree'];
+
   $variables['attributes'] = array();
   if (isset($variables['tree']['#wrapper_attributes'])) {
     $variables['attributes'] = $variables['tree']['#wrapper_attributes'];
@@ -2786,7 +2788,7 @@ function menu_link_load($mlid, $skip_access_check = FALSE) {
 }
 
 /**
- * Clears the cached cached data for a single named menu.
+ * Clears the cached data for a single named menu.
  */
 function menu_cache_clear($menu_name = 'main-menu') {
   cache('menu')->deletePrefix('links:' . $menu_name . ':');

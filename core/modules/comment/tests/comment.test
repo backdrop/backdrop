@@ -11,7 +11,11 @@ class CommentHelperCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
   function setUp($modules = array()) {
-    $modules = array_merge($modules, array('comment', 'node', 'search'));
+    $modules = func_get_args();
+    if (isset($modules[0]) && is_array($modules[0])) {
+      $modules = $modules[0];
+    }
+    $modules[] = 'comment';
     parent::setUp($modules);
 
     // Create a post content type with comments enabled.
@@ -1524,7 +1528,7 @@ class CommentPagerTest extends CommentHelperCase {
  */
 class CommentNodeAccessTest extends CommentHelperCase {
   function setUp() {
-    parent::setUp(array('node_access_test'));
+    parent::setUp('search', 'node_access_test');
 
     $web_user_role = $this->web_user->roles[count($this->web_user->roles) - 1];
     user_role_grant_permissions($web_user_role, array('node test view'));
