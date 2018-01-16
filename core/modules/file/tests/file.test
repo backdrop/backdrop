@@ -1602,9 +1602,9 @@ class FileAdminTestCase extends FileFieldTestCase {
     $files['file_1'] = $this->getTestFile('text');
     $files['file_2'] = $this->getTestFile('text', 131072);
     $files['file_3'] = $this->getTestFile('text', 1310720);
-    $files['file_4'] = $this->getTestFile('image');
-    $files['file_5'] = $this->getTestFile('image');
-    $files['file_6'] = $this->getTestFile('image');
+    $files['file_4'] = $this->getTestFile('image', 125);
+    $files['file_5'] = $this->getTestFile('image', 183);
+    $files['file_6'] = $this->getTestFile('image', 1885);
 
     foreach ($files as $file) {
       // Create a new node with the file attached.
