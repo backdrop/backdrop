@@ -153,16 +153,19 @@ function system_menu_block_build(array $config) {
   }
 
   // Set defaults.
-  $config += array(
-    'style' => 'tree',
-    'level' => 1,
-    'depth' => 3,
-    'expand_all' => FALSE,
-  );
+  $menu_name = str_replace('_', '-', $config['menu_name']);
+  $config += system_menu_block_defaults($menu_name);
+  if (empty($config['style'])) {
+    $config['style'] = 'tree';
+  }
+
+  // Always expand dropdown style output.
+  if ($config['style'] === 'dropdown') {
+    $config['expand_all'] = TRUE;
+  }
 
   // Get the default block name.
   backdrop_static_reset('menu_block_set_title');
-  $menu_name = str_replace('_', '-', $config['menu_name']);
   system_menu_block_set_title($menu_names[$menu_name]);
 
   // Get the raw menu tree data.
