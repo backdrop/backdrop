@@ -19,7 +19,6 @@ function system_menu_block_defaults($menu_name) {
     'level' => 1,
     'menu_name' => $menu_name,
     'style' => NULL,
-    'expand_all' => FALSE,
   );
   if ($menu_name == 'main-menu') {
     $defaults['depth'] = 1;
@@ -157,8 +156,13 @@ function system_menu_block_build(array $config) {
     'style' => 'tree',
     'level' => 1,
     'depth' => 3,
-    'expand_all' => FALSE,
   );
+  
+  if ($config['style'] == 'tree') {
+    $config += array(
+      'expand_all' => FALSE,
+    );
+  }
 
   // Get the default block name.
   backdrop_static_reset('menu_block_set_title');
