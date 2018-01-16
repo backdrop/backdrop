@@ -28,3 +28,12 @@
   border-left: none;
   border-right: 0.25rem solid #c6cad2;
 }
+
+img.align-left {
+  margin-right: 2em;
+  margin-bottom: 1em;
+}
+img.align-right {
+  margin-left: 2em;
+  margin-bottom: 1em;
+}
