@@ -38,8 +38,9 @@ function ckeditor_image_upload($format) {
   $file = file_save_upload('upload', $validators, $destination);
   if ($file) {
     // Try to make a local path if possible for better portability.
+    $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
     $url = file_create_url($file->uri);
-    $url = str_replace($GLOBALS['base_url'], '', $url);
+    $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
     $image_info = image_get_info($file->uri);
     $response = array(
       'uploaded' => 1,

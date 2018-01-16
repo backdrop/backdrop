@@ -354,8 +354,9 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
     $file = file_load($fid);
 
     // Try to make a local path if possible for better portability.
+    $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
     $url = file_create_url($file->uri);
-    $url = str_replace($GLOBALS['base_url'], '', $url);
+    $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
 
     $form_state['values']['attributes']['src'] = $url;
     $form_state['values']['attributes']['data-file-id'] = $fid;
