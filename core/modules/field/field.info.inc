@@ -27,6 +27,7 @@
 function field_info_cache_clear() {
   backdrop_static_reset('field_view_mode_settings');
   backdrop_static_reset('field_available_languages');
+  backdrop_static_reset('field_info_field_map');
 
   // @todo: Remove this when field_attach_*_bundle() bundle management
   // functions are moved to the entity API.
@@ -610,6 +611,50 @@ function field_info_bundles($entity_type = NULL) {
     $bundles[$type] = $entity_info['bundles'];
   }
   return $bundles;
+}
+
+/**
+ * Returns a lightweight map of fields across bundles.
+ *
+ * The function only returns active, non deleted fields.
+ *
+ * @return
+ *   An array keyed by field name. Each value is an array with two entries:
+ *   - type: The field type.
+ *   - bundles: The bundles in which the field appears, as an array with entity
+ *     types as keys and the array of bundle names as values.
+ * Example:
+ * @code
+ * array(
+ *   'body' => array(
+ *     'bundles' => array(
+ *       'node' => array('page', 'article'),
+ *     ),
+ *     'type' => 'text_with_summary',
+ *   ),
+ * );
+ * @endcode
+ *
+ * @since 1.9.0
+ */
+function field_info_field_map() {
+  // Read from the "static" cache.
+  $field_info_cache = backdrop_static(__FUNCTION__, array());
+
+  if (!empty($field_info_cache)) {
+    return $field_info_cache;
+  }
+
+  // Rebuild static cache
+  $field_info_cache = array();
+  $field_info_fields = field_info_fields();
+
+  foreach ($field_info_fields as $field_name => $field_info) {
+    $field_info_cache[$field_name]['type'] = $field_info['type'];
+    $field_info_cache[$field_name]['bundles'] = $field_info['bundles'];
+  }
+
+  return $field_info_cache;
 }
 
 /**
