@@ -1,5 +1,6 @@
 {
     "_config_name": "search.settings",
+    "_config_static": true,
     "search_active_modules": [
         "node",
         "user"
@@ -23,5 +24,6 @@
         "em": 3,
         "a": 10
     },
-    "search_embedded_form_submitted": 0
+    "search_embedded_form_submitted": 0,
+    "search_logging": false
 }

@@ -753,6 +753,16 @@ function backdrop_valid_http_host($host) {
 }
 
 /**
+ * Checks whether an HTTPS request is being served.
+ *
+ * @return bool
+ *   TRUE if the request is HTTPS, FALSE otherwise.
+ */
+function backdrop_is_https() {
+  return isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on';
+}
+
+/**
  * Sets the base URL, cookie domain, and session name from configuration.
  */
 function backdrop_settings_initialize() {
@@ -795,7 +805,7 @@ function backdrop_settings_initialize() {
     }
   }
 
-  $is_https = isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) == 'on';
+  $is_https = backdrop_is_https();
 
   // Load settings specified by the server, if present
   if (isset($_SERVER['BACKDROP_SETTINGS'])) {

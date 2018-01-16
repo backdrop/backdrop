@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * User page callbacks for the search module.
@@ -58,6 +57,11 @@ function search_view($module = NULL, $keys = '') {
     }
     // Only search if there are keywords or non-empty conditions.
     if ($keys || !empty($conditions)) {
+      if (config_get('search.settings', 'search_logging')) {
+        // Log the search keys.
+        watchdog('search', 'Searched %type for %keys.', array('%keys' => $keys, '%type' => $info['title']), WATCHDOG_NOTICE, l(t('results'), 'search/' . $info['path'] . '/' . $keys));
+      }
+
       // Collect the search results.
       $results = search_data($keys, $info['module'], $conditions);
     }

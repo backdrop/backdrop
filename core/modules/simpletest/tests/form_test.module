@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Helper module for the form API tests.
@@ -34,6 +33,13 @@ function form_test_menu() {
     'title' => 'Form #required validation without #title',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('form_test_validate_required_form_no_title'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['form-test/validate-no-token'] = array(
+    'title' => 'Form validation without a CSRF token',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('form_test_validate_no_token'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -489,6 +495,27 @@ function form_test_validate_required_form_no_title($form, &$form_state) {
  */
 function form_test_validate_required_form_no_title_submit($form, &$form_state) {
   backdrop_set_message('The form_test_validate_required_form_no_title form was submitted successfully.');
+}
+
+/**
+ * Form builder for testing submission of a form without a CSRF token.
+ */
+function form_test_validate_no_token($form, &$form_state) {
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save',
+  );
+
+  $form['#token'] = FALSE;
+
+  return $form;
+}
+
+/**
+ * Form submission handler for form_test_validate_no_token().
+ */
+function form_test_validate_no_token_submit($form, &$form_state) {
+  backdrop_set_message('The form_test_validate_no_token form has been submitted successfully.');
 }
 
 /**
