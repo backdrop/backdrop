@@ -1388,6 +1388,8 @@ class UserAdminTestCase extends BackdropWebTestCase {
   function testUserAdmin() {
     // Create admin user to delete registered user.
     $admin_user = $this->backdropCreateUser(array('administer users', 'access user profiles'));
+    $admin_user->created -= 2;
+    $admin_user->save();
 
     $user_a = $this->backdropCreateUser(array());
     $user_b = $this->backdropCreateUser(array('administer taxonomy'));
