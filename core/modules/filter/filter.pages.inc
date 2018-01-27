@@ -24,7 +24,7 @@ function filter_tips_long($format = NULL) {
 }
 
 /**
- * Form callback: Display a form for inserting/editing a link.
+ * Form callback: Display a form for inserting/editing a link or uploading a file.
  */
 function filter_format_editor_link_form($form, &$form_state, $format) {
   $form_state['format'] = $format;
@@ -33,6 +33,9 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
   if (isset($form_state['input']['dialogOptions']['target'])) {
     $form_state['storage']['dialog_selector'] = $form_state['input']['dialogOptions']['target'];
   }
+
+  // Record if file uploading is requested by the calling element.
+  $element_supports_uploads = !isset($form_state['input']['dialogOptions']['uploads']) || (bool) $form_state['input']['dialogOptions']['uploads'];
 
   // Pull in any default values set by the editor.
   $values = array();
@@ -53,12 +56,58 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#title' => t('URL'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
-    '#default_value' => isset($values['href']) ? $values['href'] : FALSE,
+    '#placeholder' => '/files/uploads/myfile.pdf',
+    '#default_value' => isset($values['href']) ? $values['href'] : NULL,
     '#parents' => array('attributes', 'href'),
+    '#wrapper_attributes' => array(
+      'data-editor-image-toggle' => t('Link URL'),
+    ),
+    '#weight' => -10,
     '#autocomplete_path' => 'filter-link/autocomplete',
     '#description' => t('Enter a known path, or start typing to get suggestions'),
-    '#maxlength' => 256,
   );
+
+
+  // Construct strings to use in the upload validators.
+  $upload_settings = isset($format->editor_settings['image_upload']) ? $format->editor_settings['image_upload'] : array();
+  $upload_settings += array(
+    'status' => 0,
+    'max_size' => NULL,
+    'scheme' => 'public',
+    'directory' => 'uploads',
+  );
+
+  $max_filesize = !empty($upload_settings['max_size']) ? min(parse_size($upload_settings['max_size']), file_upload_max_size()) : file_upload_max_size();
+  $existing_file = !empty($values['data-file-id']) ? file_load($values['data-file-id']) : NULL;
+  $fid = $existing_file ? $existing_file->fid : NULL;
+  $form['file']['fid'] = array(
+    '#title' => t('Upload file'),
+    '#type' => 'managed_file',
+    '#upload_location' => $upload_settings['scheme'] . '://uploads',
+    '#default_value' => $fid ? $fid : NULL,
+    '#upload_validators' => array(
+      'file_validate_extensions' => array('pdf doc docx txt'),
+      'file_validate_size' => array($max_filesize),
+    ),
+    '#wrapper_attributes' => array(
+      'data-editor-image-toggle' => t('Upload file'),
+    ),
+    '#parents' => array('fid'),
+    '#weight' => -2,
+    '#access' => $element_supports_uploads && $upload_settings['status'] && user_access('upload editor files'),
+  );
+
+
+  // If no current value or an existing file exists, default to showing
+  // the uploading interface.
+  if ($fid || empty($form['file']['src']['#default_value'])) {
+    $form['file']['fid']['#weight'] = -10;
+    $form['file']['src']['#default_value'] = '';
+  }
+  // Otherwise if editing an unmanaged file, show the raw URL field.
+  else {
+    $form['file']['src']['#weight'] = -10;
+  }
   $form['target'] = array(
     '#title' => t('Open in new window'),
     '#type' => 'checkbox',
@@ -361,6 +410,25 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
 
     $form_state['values']['attributes']['src'] = $url;
     $form_state['values']['attributes']['data-file-id'] = $fid;
+    unset($form_state['values']['fid']);
+  }
+}
+
+/**
+ * Submit handler for filter_format_editor_link_form().
+ */
+function filter_format_editor_link_form_submit($form, &$form_state) {
+
+  if (!empty($form_state['values']['fid'])) {
+    $fid = $form_state['values']['fid'];
+    $file = file_load($fid);
+
+    // Try to make a local path if possible for better portability.
+    $url = file_create_url($file->uri);
+    $url = str_replace($GLOBALS['base_url'], '', $url);
+
+    $form_state['values']['attributes']['data-file-id'] = $fid;
+    $form_state['values']['attributes']['href'] = $url;
     unset($form_state['values']['fid']);
   }
 }
