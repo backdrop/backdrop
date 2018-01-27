@@ -64,6 +64,17 @@ class OptionsWidgetsTestCase extends FieldTestCase {
     );
     $this->bool = field_create_field($this->bool);
 
+    // Boolean field.
+    $this->bool_radio = array(
+      'field_name' => 'bool_radio',
+      'type' => 'list_boolean',
+      'cardinality' => 1,
+      'settings' => array(
+        'allowed_values' => array(FALSE => 'False', TRUE => 'True'),
+      ),
+    );
+    $this->bool_radio = field_create_field($this->bool_radio);
+
     // Create a web user.
     $this->web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content', 'administer fields'));
     $this->backdropLogin($this->web_user);
@@ -74,7 +85,7 @@ class OptionsWidgetsTestCase extends FieldTestCase {
    */
   function testRadioButtons() {
     // Create an instance of the 'single value' field.
-    $instance = array(
+    $instance1 = array(
       'field_name' => $this->card_1['field_name'],
       'entity_type' => 'test_entity',
       'bundle' => 'test_bundle',
@@ -82,7 +93,26 @@ class OptionsWidgetsTestCase extends FieldTestCase {
         'type' => 'options_buttons',
       ),
     );
-    $instance = field_create_instance($instance);
+    $instance2 = array(
+      'field_name' => $this->card_2['field_name'],
+      'entity_type' => 'test_entity',
+      'bundle' => 'test_bundle',
+      'widget' => array(
+        'type' => 'options_buttons',
+      ),
+    );
+    $instance3 = array(
+      'field_name' => $this->bool_radio['field_name'],
+      'entity_type' => 'test_entity',
+      'bundle' => 'test_bundle',
+      'widget' => array(
+        'type' => 'options_buttons',
+      ),
+      'required' => TRUE,
+    );
+    $instance1 = field_create_instance($instance1);
+    $instance2 = field_create_instance($instance2);
+    $instance3 = field_create_instance($instance3);
     $langcode = LANGUAGE_NONE;
 
     // Create an entity.
@@ -96,29 +126,54 @@ class OptionsWidgetsTestCase extends FieldTestCase {
     $this->assertNoFieldChecked("edit-card-1-$langcode-0");
     $this->assertNoFieldChecked("edit-card-1-$langcode-1");
     $this->assertNoFieldChecked("edit-card-1-$langcode-2");
+    $this->assertNoFieldChecked("edit-card-2-$langcode-0");
+    $this->assertNoFieldChecked("edit-card-2-$langcode-1");
+    $this->assertNoFieldChecked("edit-card-2-$langcode-2");
+    // This should fail.
+    $this->assertNoFieldChecked("edit-bool-radio-$langcode-0");
+    $this->assertNoFieldChecked("edit-bool-radio-$langcode-1");
+    // Dangerous text removed.
     $this->assertRaw('Some dangerous &amp; unescaped <strong>markup</strong>', 'Option text was properly filtered.');
 
-    // Select first option.
-    $edit = array("card_1[$langcode]" => 0);
+    // Select some options.
+    $edit = array(
+      "card_1[$langcode]" => 0,
+      "bool_radio[$langcode]" => 1,
+    );
     $this->backdropPost(NULL, $edit, t('Save'));
     $this->assertFieldValues($entity_init, 'card_1', $langcode, array(0));
+    $this->assertFieldValues($entity_init, 'bool_radio', $langcode, array(TRUE));
 
-    // Check that the selected button is checked.
+    // Check that the correct radio is selected.
     $this->backdropGet('test-entity/manage/' . $entity->ftid . '/edit');
     $this->assertFieldChecked("edit-card-1-$langcode-0");
     $this->assertNoFieldChecked("edit-card-1-$langcode-1");
     $this->assertNoFieldChecked("edit-card-1-$langcode-2");
+    $this->assertFieldChecked("edit-bool-radio-$langcode-1");
+    $this->assertNoFieldChecked("edit-bool-radio-$langcode-0");
 
-    // Unselect option.
-    $edit = array("card_1[$langcode]" => '_none');
+    // Unselect an option previously selected, select zero and false.
+    $edit = array(
+      "card_1[$langcode]" => '_none',
+      "card_2[$langcode][0]" => 1,
+      "bool_radio[$langcode]" => 0,
+    );
     $this->backdropPost(NULL, $edit, t('Save'));
     $this->assertFieldValues($entity_init, 'card_1', $langcode, array());
+    $this->assertFieldValues($entity_init, 'card_2', $langcode, array(0));
+    $this->assertFieldValues($entity_init, 'bool_radio', $langcode, array(FALSE));
+
+    // Check that zero/false radio options are properly selected.
+    $this->backdropGet('test-entity/manage/' . $entity->ftid . '/edit');
+    $this->assertFieldChecked("edit-card-2-$langcode-0");
+    $this->assertFieldChecked("edit-bool-radio-$langcode-0");
+    $this->assertNoFieldChecked("edit-bool-radio-$langcode-1");
 
     // Check that required radios with one option is auto-selected.
     $this->card_1['settings']['allowed_values'] = array(99 => 'Only allowed value');
     field_update_field($this->card_1);
-    $instance['required'] = TRUE;
-    field_update_instance($instance);
+    $instance1['required'] = TRUE;
+    field_update_instance($instance1);
     $this->backdropGet('test-entity/manage/' . $entity->ftid . '/edit');
     $this->assertFieldChecked("edit-card-1-$langcode-99");
   }
