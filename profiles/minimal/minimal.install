@@ -14,7 +14,7 @@
 function minimal_install() {
   // Enable Bartik theme and set it as default theme instead of Stark.
   // @see system_install()
-  $default_theme = 'bartik';
+  $default_theme = 'basis';
   config_set('system.core', 'theme_default', $default_theme);
   theme_enable(array($default_theme));
   theme_disable(array('stark'));
