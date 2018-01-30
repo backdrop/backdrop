@@ -100,6 +100,25 @@ function _filter_link_autocomplete($string) {
       $matches['/' . $path] = check_plain($result->title) . ' (' . t('Content') . ')';
       $match_count++;
     }
+    
+    				// Get file matches.
+    $results = db_select('file_managed')
+      ->fields('file_managed', array('fid', 'filename', 'uri', 'filemime', 'status'))
+      ->condition('filename', db_like($string) . '%', 'LIKE')
+      ->condition('status', 1)
+						->condition('filemime', 'image%', 'NOT LIKE')
+      ->orderBy('fid', 'DESC')
+      ->range(0, 10)
+      ->execute();
+    foreach ($results as $result) {
+      $path = $result->uri;
+      if(substr($path,0,9) == 'public://'){
+        $public_path = config_get('system.core','file_public_path');
+        $path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/' . $public_path . '/' . substr($path,9);
+      }
+      $matches[$path] = check_plain($result->filename) . ' (' . t('File') . ')';
+      $match_count++;
+    }
 
     // Get user matches.
     if (user_access('access user profiles') && $match_count < 10) {
