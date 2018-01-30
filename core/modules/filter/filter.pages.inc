@@ -101,17 +101,21 @@ function _filter_link_autocomplete($string) {
       $match_count++;
     }
     
-    				// Get file matches.
+    // Get file matches.
     $results = db_select('file_managed')
       ->fields('file_managed', array('fid', 'filename', 'uri', 'filemime', 'status'))
       ->condition('filename', db_like($string) . '%', 'LIKE')
       ->condition('status', 1)
-						->condition('filemime', 'image%', 'NOT LIKE')
+      ->condition('filemime', 'image%', 'NOT LIKE')
       ->orderBy('fid', 'DESC')
-      ->range(0, 10)
+      ->range(0, 10 - $match_count)
       ->execute();
     foreach ($results as $result) {
       $path = $result->uri;
+      // The stored uri may be prefixed with 'public://'
+      // If so, this must be replaced to obtain a local path
+      // modified to allow for installation in a subdirectory.
+      // To do: provide for a uri prefixed with 'private://'
       if(substr($path,0,9) == 'public://'){
         $public_path = config_get('system.core','file_public_path');
         $path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/' . $public_path . '/' . substr($path,9);
