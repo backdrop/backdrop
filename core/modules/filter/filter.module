@@ -585,6 +585,11 @@ function filter_permission() {
     'title' => t('Upload images through editor dialogs'),
     'description' => t('Allow users with access to image dialogs to upload files.'),
   );
+  
+  $perms['upload editor files'] = array(
+    'title' => t('Upload files through editor dialogs'),
+    'description' => t('Allow users with access to editor dialogs to upload files.'),
+  );
 
   // Generate permissions for each text format. Warn the administrator that any
   // of them are potentially unsafe.
