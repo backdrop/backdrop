@@ -53,14 +53,14 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
 
   // Use a "textfield" rather than "url" to allow relative paths.
   $form['href'] = array(
-    '#title' => t('URL'),
+    '#title' => t('Link to existing content'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
-    '#placeholder' => '/files/uploads/myfile.pdf',
+    '#placeholder' => ' ',
     '#default_value' => isset($values['href']) ? $values['href'] : NULL,
     '#parents' => array('attributes', 'href'),
     '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Link URL'),
+      'data-editor-image-toggle' => t('Link to existing content'),
     ),
     '#weight' => -10,
     '#autocomplete_path' => 'filter-link/autocomplete',
@@ -75,22 +75,24 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     'max_size' => NULL,
     'scheme' => 'public',
     'directory' => 'uploads',
+    'file_extensions' => 'txt',
   );
 
   $max_filesize = !empty($upload_settings['max_size']) ? min(parse_size($upload_settings['max_size']), file_upload_max_size()) : file_upload_max_size();
+  $file_extensions = !empty($upload_settings['file_extensions']) ? $upload_settings['file_extensions'] : 'txt';
   $existing_file = !empty($values['data-file-id']) ? file_load($values['data-file-id']) : NULL;
   $fid = $existing_file ? $existing_file->fid : NULL;
   $form['file']['fid'] = array(
-    '#title' => t('Upload file'),
+    '#title' => t('Upload and link to a file'),
     '#type' => 'managed_file',
-    '#upload_location' => $upload_settings['scheme'] . '://uploads',
+    '#upload_location' => $upload_settings['scheme'] . '://' . $upload_settings['directory'] ,
     '#default_value' => $fid ? $fid : NULL,
     '#upload_validators' => array(
-      'file_validate_extensions' => array('pdf doc docx txt'),
+      'file_validate_extensions' => array($file_extensions),
       'file_validate_size' => array($max_filesize),
     ),
     '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Upload file'),
+      'data-editor-image-toggle' => t('Upload and link to a file'),
     ),
     '#parents' => array('fid'),
     '#weight' => -2,
