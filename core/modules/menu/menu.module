@@ -55,7 +55,6 @@ function menu_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('menu_edit_menu', 'add'),
     'access arguments' => array('administer menu'),
-    'type' => MENU_LOCAL_ACTION,
     'file' => 'menu.admin.inc',
   );
   $items['admin/structure/menu/manage/%menu'] = array(
@@ -78,7 +77,6 @@ function menu_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('menu_edit_item', 'add', NULL, 4),
     'access arguments' => array('administer menu'),
-    'type' => MENU_LOCAL_ACTION,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'file' => 'menu.admin.inc',
   );
