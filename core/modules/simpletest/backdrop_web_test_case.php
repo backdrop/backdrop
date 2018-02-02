@@ -53,6 +53,13 @@ abstract class BackdropTestCase {
   protected $originalConfigDirectories = NULL;
 
   /**
+   * URL to the verbose output file directory.
+   *
+   * @var string
+   */
+  protected $verboseDirectoryUrl;
+
+  /**
    * Time limit for the test.
    */
   protected $timeLimit = 500;
@@ -825,10 +832,21 @@ class BackdropUnitTestCase extends BackdropTestCase {
    * method.
    */
   protected function setUp() {
-    global $conf;
+    global $conf, $language;
 
     // Store necessary current values before switching to the test environment.
     $this->originalFileDirectory = config_get('system.core', 'file_public_path');
+
+    // Set to English to prevent any use of the database in t() calls.
+    // The following array/object conversion is copied from language_default().
+    $this->originalLanguage = $language;
+    $language = (object) array(
+      'langcode' => 'en',
+      'name' => 'English',
+      'direction' => 0,
+      'enabled' => TRUE,
+      'weight' => 0,
+    );
 
     $this->prepareDatabasePrefix();
 
@@ -870,7 +888,7 @@ class BackdropUnitTestCase extends BackdropTestCase {
   }
 
   protected function tearDown() {
-    global $conf;
+    global $conf, $language;
 
     // Get back to the original connection.
     Database::removeConnection('default');
@@ -887,6 +905,9 @@ class BackdropUnitTestCase extends BackdropTestCase {
     if (isset($this->originalModuleList)) {
       module_list(TRUE, FALSE, FALSE, $this->originalModuleList);
     }
+
+    // Reset language.
+    $language = $this->originalLanguage;
   }
 }
 
@@ -1005,20 +1026,6 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @var bool
    */
   protected $originalCleanUrl;
-
-  /**
-   * The original site language object, before changing for testing purposes.
-   *
-   * @var stdClass
-   */
-  protected $originalLanguage;
-
-  /**
-   * The original default language code, before changing for testing purposes.
-   *
-   * @var string
-   */
-  protected $originalLanguageDefault;
 
   /**
    * The original shutdown handlers array, before it was cleaned for testing purposes.
@@ -1501,7 +1508,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Store necessary current values before switching to prefixed database.
     $this->originalLanguage = $language;
     $this->originalLanguageUrl = $language_url;
-    $this->originalLanguageDefault = config_get('system.core', 'language_default');
     $this->originalConfigDirectories = $config_directories;
     $this->originalFileDirectory = config_get('system.core', 'file_public_path');
     $this->originalProfile = backdrop_get_profile();
@@ -1879,9 +1885,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Reset language.
     $language = $this->originalLanguage;
     $language_url = $this->originalLanguageUrl;
-    if ($this->originalLanguageDefault) {
-      $GLOBALS['conf']['language_default'] = $this->originalLanguageDefault;
-    }
 
     // Close the CURL handler.
     $this->curlClose();
