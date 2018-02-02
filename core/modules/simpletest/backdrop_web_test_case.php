@@ -545,8 +545,12 @@ abstract class BackdropTestCase {
    */
   protected function verbose($message) {
     if ($id = simpletest_verbose($message)) {
-      $url = file_create_url($this->originalFileDirectory . '/simpletest/verbose/' . get_class($this) . '-' . $id . '.html');
-      $this->error(l(t('Verbose message'), $url, array('attributes' => array('target' => '_blank'))), 'User notice');
+      $class_safe = str_replace('\\', '_', get_class($this));
+      $url = $this->verboseDirectoryUrl . '/' . $class_safe . '-' . $id . '.html';
+      // Not using l() to avoid invoking the theme system, so that unit tests
+      // can use verbose() as well.
+      $link = '<a href="' . $url . '" target="_blank">' . t('Verbose message') . '</a>';
+      $this->error($link, 'User notice');
     }
   }
 
@@ -836,6 +840,7 @@ class BackdropUnitTestCase extends BackdropTestCase {
 
     // Store necessary current values before switching to the test environment.
     $this->originalFileDirectory = config_get('system.core', 'file_public_path');
+    $this->verboseDirectoryUrl = file_create_url($this->originalFileDirectory . '/simpletest/verbose');
 
     // Set to English to prevent any use of the database in t() calls.
     // The following array/object conversion is copied from language_default().
@@ -1510,6 +1515,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     $this->originalLanguageUrl = $language_url;
     $this->originalConfigDirectories = $config_directories;
     $this->originalFileDirectory = config_get('system.core', 'file_public_path');
+    $this->verboseDirectoryUrl = file_create_url($this->originalFileDirectory . '/simpletest/verbose');
     $this->originalProfile = backdrop_get_profile();
     $this->originalCleanUrl = config_get('system.core', 'clean_url');
     $this->originalUser = $user;
