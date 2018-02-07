@@ -470,7 +470,7 @@ function image_hex2rgba(&$hex) {
   }
 
   // Save a uppercase version without leading "#" for later processing.
-  $hex_color = drupal_strtoupper(ltrim($hex, '#'));
+  $hex_color = backdrop_strtoupper(ltrim($hex, '#'));
 
   // Normalize shorthand versions.
   // '#FA3' will become '#FFAA33', '#FA37' will become '#FFAA3377'.
