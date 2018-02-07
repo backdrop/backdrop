@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Admin page callbacks for the block module.
@@ -29,6 +28,12 @@ function block_admin_list() {
       'title' => t('Delete'),
       'href' => 'admin/structure/block/manage/' . $delta . '/delete',
     );
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export/Custom Blocks/block.custom.' . $delta,
+      );
+    }
     $operations = array(
       '#type' => 'operations',
       '#links' => $links,
