@@ -28,6 +28,12 @@ function menu_overview_page() {
       'title' => t('Configure'),
       'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/configure',
     );
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export/Menus/menu.menu.' . $menu['menu_name'],
+      );
+    }
     $row[] = array(
       'data' => array(
         '#type' => 'operations',
