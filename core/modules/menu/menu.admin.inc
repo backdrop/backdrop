@@ -28,6 +28,13 @@ function menu_overview_page() {
       'title' => t('Configure'),
       'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/configure',
     );
+    $system_menus = menu_list_system_menus();
+    if (!isset($system_menus[$menu['menu_name']])) {
+      $links['delete'] = array(
+        'title' => t('Delete'),
+        'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/delete',
+      );
+    }
     $row[] = array(
       'data' => array(
         '#type' => 'operations',
