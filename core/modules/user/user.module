@@ -3027,9 +3027,10 @@ function user_modules_uninstalled($modules) {
  * proper destination after a user has been properly logged in.
  */
 function user_login_destination() {
+  global $user;
   $destination = backdrop_get_destination();
   if ($destination['destination'] == 'user/login') {
-    $destination['destination'] = 'user';
+    $destination['destination'] = 'user/' . $user->uid;
   }
   return $destination;
 }

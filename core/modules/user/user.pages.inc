@@ -557,6 +557,15 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
  */
 function user_page() {
   global $user;
+
+  // To help users upgrading from versions of Backdrop prior to 1.9.0 where this
+  // menu callback was used on 'user/login' as well as 'user', rebuild the
+  // menu automatically if this page is loaded at 'user/login'.
+  // See https://github.com/backdrop/backdrop-issues/issues/260.
+  if ($_GET['q'] === 'user/login') {
+    menu_rebuild();
+  }
+
   if ($user->uid) {
     backdrop_goto('user/' . $user->uid);
   }
