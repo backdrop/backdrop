@@ -249,6 +249,7 @@ function contact_mail($key, &$message, $params) {
  * @see user_profile_form()
  */
 function contact_form_user_profile_form_alter(&$form, &$form_state) {
+  $config = config('contact.settings');
   $form['contact'] = array(
     '#type' => 'fieldset',
     '#title' => t('Contact settings'),
@@ -259,7 +260,7 @@ function contact_form_user_profile_form_alter(&$form, &$form_state) {
   $form['contact']['contact'] = array(
     '#type' => 'checkbox',
     '#title' => t('Personal contact form'),
-    '#default_value' => !empty($account->data['contact']) ? $account->data['contact'] : FALSE,
+    '#default_value' => isset($account->data['contact']) ? $account->data['contact'] : $config->get('contact_default_status'),
     '#description' => t('Allow other users to contact you via a <a href="@url">personal contact form</a> which keeps your e-mail address hidden. Note that some privileged users such as site administrators are still able to contact you even if you choose to disable this feature.', array('@url' => url("user/$account->uid/contact"))),
   );
 }
@@ -269,7 +270,12 @@ function contact_form_user_profile_form_alter(&$form, &$form_state) {
  */
 function contact_user_presave($account) {
   $config = config('contact.settings');
-  $account->data['contact'] = isset($account->contact) ? $account->contact : $config->get('contact_default_status');
+  if (isset($account->contact)) {
+    $account->data['contact'] = $account->contact;
+  }
+  elseif (!isset($account->data['contact'])) {
+    $account->data['contact'] = $config->get('contact_default_status');
+  }
 }
 
 /**
