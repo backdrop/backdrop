@@ -656,7 +656,7 @@ class LocalePluralFormatTest extends BackdropWebTestCase {
    *   Additional options to pass to the translation import form.
    */
   function importPoFile($contents, array $options = array()) {
-    $name = tempnam('temporary://', "po_") . '.po';
+    $name = backdrop_tempnam('temporary://', "po_") . '.po';
     file_put_contents($name, $contents);
     $options['files[file]'] = $name;
     $options['mode'] = LOCALE_IMPORT_OVERWRITE;
@@ -949,7 +949,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
    *   Additional options to pass to the translation import form.
    */
   function importPoFile($contents, array $options = array()) {
-    $name = tempnam('temporary://', "po_") . '.po';
+    $name = backdrop_tempnam('temporary://', "po_") . '.po';
     file_put_contents($name, $contents);
     $options['files[file]'] = $name;
     $this->backdropPost('admin/config/regional/translate/import', $options, t('Import'));
@@ -1131,7 +1131,7 @@ class LocaleExportFunctionalTest extends BackdropWebTestCase {
   function testExportTranslation() {
     // First import some known translations.
     // This will also automatically enable the 'fr' language.
-    $name = tempnam('temporary://', "po_") . '.po';
+    $name = backdrop_tempnam('temporary://', "po_") . '.po';
     file_put_contents($name, $this->getPoFile());
     $this->backdropPost('admin/config/regional/translate/import', array(
       'langcode' => 'fr',
