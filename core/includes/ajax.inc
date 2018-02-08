@@ -251,7 +251,7 @@ function ajax_render($commands = array()) {
       $items[$type] = $function();
       backdrop_alter($type, $items[$type]);
       // @todo Inline CSS and JS items are indexed numerically. These can't be
-      //   reliably diffed with array_diff_key(), since the number can change
+      //   reliably differed with array_diff_key(), since the number can change
       //   due to factors unrelated to the inline content, so for now, we strip
       //   the inline items from Ajax responses, and can add support for them
       //   when backdrop_add_css() and backdrop_add_js() are changed to use a

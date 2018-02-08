@@ -3,8 +3,10 @@
  * @file field.tpl.php
  * Default template implementation to display the value of a field.
  *
- * This file is not used and is here as a starting point for customization only.
- * @see theme_field()
+ * This file is not used by core, which uses theme functions instead for
+ * performance reasons. The markup is the same, though, so if you want to use
+ * template files rather than functions to extend field theming, copy this to
+ * your custom theme. See theme_field() for a discussion of performance.
  *
  * Copy this file and place it inside your theme. You'll likely want to rename
  * the file so that it only affects the field you are trying to override.
