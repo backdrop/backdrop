@@ -337,6 +337,28 @@ class ContactPersonalTestCase extends BackdropWebTestCase {
     $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
     $this->assertResponse(200);
 
+    // Test that users can disable their contact form.
+    $this->backdropLogin($this->contact_user);
+    $edit = array('contact' => FALSE);
+    $this->backdropPost('user/' . $this->contact_user->uid . '/edit', $edit, 'Save');
+    $this->backdropLogout();
+    $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
+    $this->assertResponse(403);
+
+    // Test that user's contact status stays disabled when saving.
+    $contact_user_temp = user_load($this->contact_user->uid, TRUE);
+    user_save($contact_user_temp);
+    $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
+    $this->assertResponse(403);
+
+    // Test that users can enable their contact form.
+    $this->backdropLogin($this->contact_user);
+    $edit = array('contact' => TRUE);
+    $this->backdropPost('user/' . $this->contact_user->uid . '/edit', $edit, 'Save');
+    $this->backdropLogout();
+    $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
+    $this->assertResponse(200);
+
     // Revoke the personal contact permission for the anonymous user.
     user_role_revoke_permissions(BACKDROP_ANONYMOUS_ROLE, array('access user contact forms'));
     $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
