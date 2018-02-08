@@ -156,6 +156,9 @@ require_once __DIR__ . '/query.inc';
  * @see backdrop_install_schema()
  */
 
+/**
+ * Base class for database schema definitions.
+ */
 abstract class DatabaseSchema implements QueryPlaceholderInterface {
 
   /**
