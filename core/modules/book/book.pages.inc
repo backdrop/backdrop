@@ -34,7 +34,6 @@ function book_render() {
  * @see book_menu()
  */
 function book_outline(Node $node) {
-  backdrop_set_title($node->title);
   return backdrop_get_form('book_outline_form', $node);
 }
 

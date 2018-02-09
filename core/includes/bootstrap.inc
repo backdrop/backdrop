@@ -2383,7 +2383,7 @@ function backdrop_get_title() {
 
   // During a bootstrap, menu.inc is not included and thus we cannot provide a title.
   if (!isset($title) && function_exists('menu_get_active_title')) {
-    $title = check_plain(menu_get_active_title());
+    $title = menu_get_active_title();
   }
 
   return $title;

@@ -1504,8 +1504,6 @@ function user_login($form, &$form_state) {
     backdrop_goto('user/' . $user->uid);
   }
 
-  backdrop_set_title(t('Log in'));
-
   // Display login form:
   $credentials = config_get('system.core', 'user_login_method');
   $form['name'] = array('#type' => 'textfield',
@@ -2816,7 +2814,7 @@ function user_form_field_ui_field_edit_form_submit($form, &$form_state) {
  */
 function user_register_form($form, &$form_state) {
   global $user;
-  // We need to set the page title bc this menu entry is a local task.
+  // We need to set the page title because this menu entry is a local task.
   backdrop_set_title('Create new account');
 
   $admin = user_access('administer users');

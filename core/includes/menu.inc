@@ -753,7 +753,7 @@ function _menu_item_localize(&$item, $map, $link_translate = FALSE) {
         $item['title'] = call_user_func_array($callback, menu_unserialize($item['title_arguments'], $map));
       }
       // Avoid calling check_plain again on l() function.
-      if ($callback == 'check_plain') {
+      if ($callback == 'check_plain' || !$item['title_sanitize']) {
         $item['localized_options']['html'] = TRUE;
       }
     }
@@ -815,6 +815,9 @@ function _menu_translate(&$router_item, $map, $to_arg = FALSE) {
     $router_item['access'] = FALSE;
     return FALSE;
   }
+
+  // Convert sanitize title to be a strict boolean.
+  $router_item['title_sanitize'] = !isset($router_item['title_sanitize']) || $router_item['title_sanitize'] ? TRUE : FALSE;
 
   // Generate the link path for the page request or local tasks.
   $link_map = explode('/', $router_item['path']);
@@ -1512,6 +1515,7 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
       'title',
       'title_callback',
       'title_arguments',
+      'title_sanitize',
       'theme_callback',
       'theme_arguments',
       'type',
@@ -1544,6 +1548,7 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
     // Build an ordered array of links using the query result object.
     $links = array();
     foreach ($query->execute() as $item) {
+      $item['title_sanitize'] = (bool) $item;
       $links[] = $item;
     }
     $active_trail = (isset($parameters['active_trail']) ? $parameters['active_trail'] : array());
@@ -2739,11 +2744,13 @@ function menu_get_active_title() {
       // This is not a local task, so use it for the page title (unless the
       // conditions described above are met).
       if (isset($local_task_title) && isset($item['href']) && $item['href'] == '<front>') {
-        return $local_task_title;
+        $title = $local_task_title;
       }
       else {
-        return $item['title'];
+        $title = $item['title'];
       }
+      $sanitize = !isset($item['title_sanitize']) || $item['title_sanitize'];
+      return $sanitize ? check_plain($title) : $title;
     }
   }
 }
@@ -3858,6 +3865,7 @@ function _menu_router_build($callbacks) {
       'delivery callback' => '',
       'title arguments' => array(),
       'title callback' => 't',
+      'title sanitize' => TRUE,
       'theme arguments' => array(),
       'theme callback' => '',
       'description' => '',
@@ -3911,6 +3919,7 @@ function _menu_router_save($menu, $masks) {
       'title',
       'title_callback',
       'title_arguments',
+      'title_sanitize',
       'theme_callback',
       'theme_arguments',
       'type',
@@ -3940,6 +3949,7 @@ function _menu_router_save($menu, $masks) {
       'tab_root' => $item['tab_root'],
       'title' => $item['title'],
       'title_callback' => $item['title callback'],
+      'title_sanitize' => $item['title sanitize'] ? 1 : 0,
       'title_arguments' => ($item['title arguments'] ? serialize($item['title arguments']) : ''),
       'theme_callback' => $item['theme callback'],
       'theme_arguments' => serialize($item['theme arguments']),

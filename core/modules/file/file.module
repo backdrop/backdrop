@@ -87,7 +87,10 @@ function file_menu() {
   );
 
   $items['file/%file/manage'] = array(
-    'title' => 'Manage',
+    'title' => 'Manage file',
+    'title callback' => 'file_manage_title',
+    'title arguments' => array(1),
+    'title sanitize' => FALSE,
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('file_manage_form', 1),
     'access arguments' => array('manage files'),

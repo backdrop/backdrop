@@ -46,6 +46,13 @@ function block_admin_list() {
 }
 
 /**
+ * Menu title callback for the configure block form.
+ */
+function block_admin_configure_title($custom_block) {
+  return t('Configure block %title', array('%title' => $custom_block['info']));
+}
+
+/**
  * Form constructor for the block configuration form.
  *
  * Also used by block_add_block_form() for adding a new custom block.
@@ -70,12 +77,6 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
       'title' => '',
       'body' => array('value' => '', 'format' => NULL),
     );
-  }
-  if ($custom_block['info']) {
-    backdrop_set_title(t("'%name' block", array('%name' => $custom_block['info'])), PASS_THROUGH);
-  }
-  else {
-    backdrop_set_title(t('Add custom block'));
   }
 
   // Call our own block configuration form (also used by Layout module).

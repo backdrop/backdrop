@@ -30,6 +30,7 @@ function user_autocomplete($string = '') {
 function user_pass() {
   global $user;
 
+  // We need to set the page title because this menu entry is a local task.
   backdrop_set_title(t('Reset password'));
 
   $form['name'] = array(

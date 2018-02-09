@@ -5,14 +5,19 @@
  */
 
 /**
+ * Title callback; Display the title for managing an individual file.
+ */
+function file_manage_title(File $file) {
+  return t('Manage file %filename', array('%filename' => $file->filename));
+}
+
+/**
  * Page callback: Form constructor for the file manage form.
  *
  * @param File $file
  *   A file object from file_load().
  */
 function file_manage_form($form, &$form_state, File $file) {
-  backdrop_set_title(t('<em>Manage file</em> @title', array('@title' => $file->filename)), PASS_THROUGH);
-
   $form_state['file'] = $file;
   $form_state['temporary_upload'] = NULL;
 
