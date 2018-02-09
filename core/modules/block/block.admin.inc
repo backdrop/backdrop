@@ -245,15 +245,17 @@ function block_custom_block_translate_list($form, &$form_state, $delta) {
 
   $header = array(
     t('Language'),
-    t('Translated'),
+    t('Title'),
+    t('Status'),
     t('Operations'),
   );
 
   $rows = array();
 
   if (isset($custom_block['default_language']) && ($custom_block['default_language'] == LANGUAGE_NONE)) {
-    $row[] = t('Language neutral');
-    $row[] = t('Source');
+    $row[] = t('Language neutral (source)');
+    $row[] = isset($custom_block['title']) ? $custom_block['title'] : t('N/A');
+    $row[] = t('Not Translated');
     $links = array();
     $links['edit'] = array(
       'title' => t('Edit'),
@@ -269,17 +271,20 @@ function block_custom_block_translate_list($form, &$form_state, $delta) {
 
   foreach ($language_list as $langcode => $item) {
     $row = array();
-    $row[] = t($item->name);
+
     // Check if this is the source language.
     if (isset($custom_block['default_language']) && ($langcode == $custom_block['default_language'])) {
-      $row[] = t('Source');
+      $row[] = t($item->name) . ' ' . t('(source)');
     }
     else {
-      $row[] = isset($custom_block['translations'][$langcode]) ? t('Translated') : t('Not Translated');
+      $row[] = t($item->name);
     }
+    $row[] = isset($custom_block['translations'][$langcode]['title']) ? $custom_block['translations'][$langcode]['title'] : t('N/A');
+    $row[] = isset($custom_block['translations'][$langcode]) ? t('Translated') : t('Not Translated');
+
     $links = array();
     $links['edit'] = array(
-      'title' => t('Edit'),
+      'title' => isset($custom_block['translations'][$langcode]) ? t('EDIT') : t('ADD TRANSLATION'),
       'href' => 'admin/structure/block/manage/' . $delta . '/translate/' . $langcode,
     );
     $operations = array(

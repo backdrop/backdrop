@@ -265,7 +265,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
   // LANGUAGE_NONE.
   // This combination should only be set if adding a new block.
   if (isset($edit['default_language']) && ($edit['default_language'] == LANGUAGE_NONE)) {
-    $options = array(LANGUAGE_NONE => t('Language neutral'));
+    $options = array(LANGUAGE_NONE => t('- None -'));
     $language_list = language_list();
     foreach ($language_list as $value) {
       $options[$value->langcode] = $value->name;
@@ -298,6 +298,11 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
       '#default_value' => TRUE,
       '#disabled' => TRUE,
     );
+
+    // Add a notice for translation.
+    if (module_exists('language')) {
+      $form['reusable']['#description'] .= t('NOTE: You have module "language" enabled. If you want to make this block translatable, this block must be marked as reusable.');
+    }
   }
 
   return $form;
