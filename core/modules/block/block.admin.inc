@@ -74,9 +74,6 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
   if ($custom_block['info']) {
     backdrop_set_title(t("'%name' block", array('%name' => $custom_block['info'])), PASS_THROUGH);
   }
-  else {
-    backdrop_set_title(t('Add custom block'));
-  }
 
   // Call our own block configuration form (also used by Layout module).
   $form += block_custom_block_form($custom_block, TRUE);

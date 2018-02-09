@@ -2730,7 +2730,7 @@ function menu_get_active_title() {
     // title in that case than to fall back on the front page link in the
     // active trail (which is usually "Home" and would not make sense in this
     // context).
-    if ((bool) ($item['type'] & MENU_IS_LOCAL_TASK)) {
+    if ((bool) ($item['type'] & MENU_IS_LOCAL_TASK) && ($item['type'] != MENU_LOCAL_ACTION)) {
       // A local task title is being skipped; track it in case it needs to be
       // used later.
       $local_task_title = $item['title'];

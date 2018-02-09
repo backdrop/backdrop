@@ -117,6 +117,18 @@ function menu_update_1003() {
 }
 
 /**
+ * Remove the unnecessary manual administration menu links for each custom menu.
+ */
+function menu_update_1004() {
+  $menu_paths = array();
+  $config_names = config_get_names_with_prefix('menu.menu.');
+  foreach ($config_names as $config_name) {
+    $menu_paths[] = 'admin/structure/menu/manage/' . config($config_name)->get('menu_name');
+  }
+  db_query("DELETE FROM {menu_links} WHERE link_path IN (:menu_paths)", array(':menu_paths' => $menu_paths));
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
