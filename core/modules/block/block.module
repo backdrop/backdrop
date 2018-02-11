@@ -263,7 +263,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
 
   // Add language select dropdown if edit info is empty.
   // This combination should only be set if adding a new block.
-  if (empty($edit['info'])) {
+  if (isset($edit['default_language']) && empty($edit['info'])) {
     $options = array(LANGUAGE_NONE => t('- None -'));
     $language_list = language_list();
     foreach ($language_list as $value) {
