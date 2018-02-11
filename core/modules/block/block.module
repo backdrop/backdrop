@@ -56,8 +56,8 @@ function block_menu() {
     'context' => MENU_CONTEXT_NONE,
     'file' => 'block.admin.inc',
   );
-  $items['admin/structure/block/manage/%/translate'] = array(
-    'title' => 'Translate blocks',
+  $items['admin/structure/block/manage/%/translation'] = array(
+    'title' => 'Translate',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('block_custom_block_translate_list', 4),
     'access arguments' => array('translate blocks'),
@@ -70,7 +70,7 @@ function block_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('block_custom_block_translate', 4, 6),
     'access arguments' => array('translate blocks'),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_NORMAL_ITEM,
     'context' => MENU_CONTEXT_NONE,
     'file' => 'block.admin.inc',
   );
@@ -261,10 +261,9 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#weight' => -17,
   );
 
-  // Add language select dropdown if variable is set and language is set to
-  // LANGUAGE_NONE.
+  // Add language select dropdown if edit info is empty.
   // This combination should only be set if adding a new block.
-  if (isset($edit['default_language']) && ($edit['default_language'] == LANGUAGE_NONE)) {
+  if (empty($edit['info'])) {
     $options = array(LANGUAGE_NONE => t('- None -'));
     $language_list = language_list();
     foreach ($language_list as $value) {
