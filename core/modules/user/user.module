@@ -722,13 +722,16 @@ function user_account_form(&$form, &$form_state) {
       '#description' => t('To change the current user password, enter the new password in both fields.'),
     );
     // To skip the current password field, the user must have logged in via a
-    // one-time link and have the token in the URL.
-    $pass_reset = isset($_SESSION['pass_reset_' . $account->uid]) && isset($_GET['pass-reset-token']) && ($_GET['pass-reset-token'] == $_SESSION['pass_reset_' . $account->uid]);
+    // one-time link and have the token in the URL. Store this in $form_state
+    // so it persists even on subsequent Ajax requests.
+    if (!isset($form_state['user_pass_reset'])) {
+      $form_state['user_pass_reset'] = isset($_SESSION['pass_reset_' . $account->uid]) && isset($_GET['pass-reset-token']) && ($_GET['pass-reset-token'] == $_SESSION['pass_reset_' . $account->uid]);
+    }
     $protected_values = array();
     $current_pass_description = '';
     // The user may only change their own password without their current
     // password if they logged in via a one-time login link.
-    if (!$pass_reset) {
+    if (!$form_state['user_pass_reset']) {
       $protected_values['mail'] = $form['account']['mail']['#title'];
       $protected_values['pass'] = t('Password');
       $request_new = l(t('Reset password'), 'user/password', array('attributes' => array('title' => t('Reset password via one-time login link.'))));
@@ -3024,9 +3027,10 @@ function user_modules_uninstalled($modules) {
  * proper destination after a user has been properly logged in.
  */
 function user_login_destination() {
+  global $user;
   $destination = backdrop_get_destination();
   if ($destination['destination'] == 'user/login') {
-    $destination['destination'] = 'user';
+    $destination['destination'] = 'user/' . $user->uid;
   }
   return $destination;
 }
