@@ -980,6 +980,13 @@ function system_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'title_sanitize' => array(
+        'description' => 'Boolean indicator if this menu title should be run through check_plain() after running through the title_callback.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => FALSE,
+        'default' => 1,
+      ),
       'theme_callback' => array(
         'description' => 'A function which returns the name of the theme that will be used to render this page. If left empty, the default theme will be used.',
         'type' => 'varchar',
@@ -2965,6 +2972,20 @@ function system_update_1063() {
   $config = config('system.core');
   $config->set('x_frame_options', 'SAMEORIGIN');
   $config->save();
+}
+
+/**
+ * Add column for "title_sanitize" to {menu_router}.
+ */
+function system_update_1064() {
+  $spec = array(
+    'description' => 'Boolean indicator if this menu title should be run through check_plain() after running through the title_callback.',
+    'type' => 'int',
+    'size' => 'tiny',
+    'not null' => FALSE,
+    'default' => 1,
+  );
+  db_add_field('menu_router', 'title_sanitize', $spec);
 }
 
 /**

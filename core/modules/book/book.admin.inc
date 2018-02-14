@@ -114,7 +114,6 @@ function book_admin_settings_submit($form, &$form_state) {
  * @ingroup forms
  */
 function book_admin_edit($form, $form_state, Node $node) {
-  backdrop_set_title($node->title);
   $form['#node'] = $node;
   _book_admin_table($node, $form);
   $form['save'] = array(

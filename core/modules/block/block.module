@@ -32,6 +32,9 @@ function block_menu() {
   );
   $items['admin/structure/block/manage/%block_custom_block'] = array(
     'title' => 'Configure block',
+    'title callback' => 'block_admin_configure_title',
+    'title arguments' => array(4),
+    'title sanitize' => FALSE,
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('block_admin_configure', 4),
     'access arguments' => array('administer blocks'),
