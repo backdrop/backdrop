@@ -187,20 +187,11 @@ function file_requirements($phase) {
     $server_software = $_SERVER['SERVER_SOFTWARE'];
 
     // Test the web server identity.
-    if (preg_match("/nginx/i", $server_software)) {
-      $is_nginx = TRUE;
-      $is_apache = FALSE;
-      $fastcgi = FALSE;
-    }
-    elseif (preg_match("/apache/i", $server_software)) {
-      $is_nginx = FALSE;
-      $is_apache = TRUE;
+    $is_nginx = backdrop_is_nginx();
+    $is_apache = backdrop_is_apache();
+    $fastcgi = FALSE;
+    if ($is_apache) {
       $fastcgi = strpos($server_software, 'mod_fastcgi') !== FALSE || strpos($server_software, 'mod_fcgi') !== FALSE;
-    }
-    else {
-      $is_nginx = FALSE;
-      $is_apache = FALSE;
-      $fastcgi = FALSE;
     }
 
     $description = NULL;
