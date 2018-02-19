@@ -545,6 +545,7 @@ img.align-right {
 /**
  * Clearfix text areas in case of floated contents
  */
+.field-type-text-long:after,
 .field-type-text-with-summary:after {
   content: '';
   display: table;
