@@ -76,7 +76,7 @@ function ckeditor_settings_form_validate($form, &$form_state) {
 
   $styles = _ckeditor_settings_parse_style_list($settings['plugins']['style']['style_list']);
   foreach ($styles as $style) {
-    if (empty($style['name']) || empty($style['element']) || empty($style['attributes']['class'])) {
+    if (empty($style['name']) || empty($style['element']))   {
       form_error($form['editor_settings']['plugins']['style']['style_list'], t('The CKEditor list of styles is not formatted properly. Be sure to include one style per line, with the format "element.class|Label".'));
     }
   }
@@ -114,11 +114,14 @@ function _ckeditor_settings_parse_style_list($style_list_string) {
     if ($style) {
       @list($element, $label) = explode('|', $style, 2);
       @list($element, $class) = explode('.', $element, 2);
-      $styles[] = array(
+      $style = array(
         'name' => $label,
         'element' => $element,
-        'attributes' => array('class' => $class),
       );
+      if ($class) {
+        $style['attributes']['class'] = $class;
+      }
+      $styles[] = $style;
     }
   }
   return $styles;
@@ -137,7 +140,8 @@ function _ckeditor_settings_stringify_style_list(array $style_list = NULL) {
   $string = '';
   if ($style_list) {
     foreach ($style_list as $style) {
-      $string .= $style['element'] . '.' . $style['attributes']['class'] . '|' . $style['name'] . "\n";
+      $class = !empty($style['attributes']['class']) ? '.' . $style['attributes']['class'] : '';
+      $string .= $style['element'] . $class . '|' . $style['name'] . "\n";
     }
   }
   return $string;

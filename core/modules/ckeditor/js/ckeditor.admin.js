@@ -29,6 +29,7 @@ Backdrop.behaviors.ckeditorAdmin = {
       // Remove the invalid buttons after a delay to allow all behaviors to
       // finish attaching.
       window.setTimeout(function() {
+        JSON.parse($textarea.val());
         adminToolbarRemoveInvalidButtons();
         adminToolbarInitializeButtons();
       }, 10);
