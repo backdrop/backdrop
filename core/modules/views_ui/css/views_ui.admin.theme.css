@@ -634,8 +634,17 @@ td.group-title {
  */
 
 .views-display-column + .views-display-column {
-   margin-top: 0;
- }
+  margin-top: 0;
+}
+
+.views-display-column.third {
+  margin-top: 30px;
+}
+@media (min-width: 992px) {
+  .views-display-column.third {
+    margin-top: 0;
+  }
+}
 
  /* @end */
 
@@ -692,7 +701,6 @@ td.group-title {
 
 .views-ui-display-tab-bucket {
   line-height: 20px;
-  margin: 0;
 }
 
 .views-ui-display-tab-bucket + .views-ui-display-tab-bucket {
@@ -754,7 +762,6 @@ td.group-title {
 
 .views-ui-display-tab-bucket {
   position: relative;
-  margin: 0 0 0.8em;
 }
 
 /* @end */

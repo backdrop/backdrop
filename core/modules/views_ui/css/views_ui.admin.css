@@ -199,29 +199,6 @@
 
 /* @end */
 
-
-/* @group Display top area */
-
-#edit-display-settings-top .dropbutton-wrapper {
-  position: relative;
-  top: auto;
-  left: auto;
-  right: auto;
-  float: right; /* LTR */
-}
-[dir="rtl"] #edit-display-settings-top .dropbutton-wrapper {
-  float: left;
-}
-#edit-display-settings-top .views-ui-display-tab-setting {
-  position: relative;
-  float: left; /* LTR */
-}
-[dir="rtl"] #edit-display-settings-top .views-ui-display-tab-setting {
-  float: right;
-}
-
-/* @end */
-
 /* @group Attachment details collapsible fieldset */
 
 .views-display-tab .fieldset-legend {
@@ -267,14 +244,9 @@
     margin: 0 -0.5em;
   }
 
-  .views-display-columns > * {
-    box-sizing: border-box;
-    float: left; /* LTR */
-    width: 33.333%;
-    padding: 0 0.5em;
-  }
-  [dir="rtl"] .views-display-columns > * {
-    float: right;
+  #edit-display-settings-main .views-display-column {
+    padding-right: .666rem;
+    padding-left: .666rem;
   }
 }
 

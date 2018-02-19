@@ -1562,7 +1562,7 @@ function views_ui_get_display_tab_details($view, $display) {
   $display_title = views_ui_get_display_label($view, $display->id, FALSE);
   $build = array(
     '#theme_wrappers' => array('container'),
-    '#attributes' => array('id' => 'edit-display-settings-details'),
+    '#attributes' => array('id' => 'edit-display-settings-details', 'class' => array('container')),
   );
 
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
@@ -1576,7 +1576,7 @@ function views_ui_get_display_tab_details($view, $display) {
   if ($display->id != 'default') {
     $build['top']['#theme_wrappers'] = array('container');
     $build['top']['#attributes']['id'] = 'edit-display-settings-top';
-    $build['top']['#attributes']['class'] = array('views-ui-display-tab-actions', 'views-ui-display-tab-bucket', 'clearfix');
+    $build['top']['#attributes']['class'] = array('views-ui-display-tab-actions', 'views-ui-display-tab-bucket', 'clearfix', 'row');
 
     // The Delete, Duplicate and Undo Delete buttons.
     $build['top']['actions'] = array(
@@ -1665,13 +1665,13 @@ function views_ui_get_display_tab_details($view, $display) {
 
   $build['columns'] = array();
   $build['columns']['#theme_wrappers'] = array('container');
-  $build['columns']['#attributes'] = array('id' => 'edit-display-settings-main', 'class' => array('clearfix', 'views-display-columns'));
+  $build['columns']['#attributes'] = array('id' => 'edit-display-settings-main', 'class' => array('clearfix', 'views-display-columns', 'row'));
 
   $build['columns']['first']['#theme_wrappers'] = array('container');
-  $build['columns']['first']['#attributes'] = array('class' => array('views-display-column', 'first'));
+  $build['columns']['first']['#attributes'] = array('class' => array('views-display-column', 'first', 'col-md-6', 'col-lg-4'));
 
   $build['columns']['second']['#theme_wrappers'] = array('container');
-  $build['columns']['second']['#attributes'] = array('class' => array('views-display-column', 'second'));
+  $build['columns']['second']['#attributes'] = array('class' => array('views-display-column', 'second', 'col-md-6', 'col-lg-4'));
 
   $build['columns']['second']['settings'] = array();
   $build['columns']['second']['header'] = array();
@@ -1681,7 +1681,7 @@ function views_ui_get_display_tab_details($view, $display) {
   // The third column buckets are wrapped in a container.
   // @todo: Convert this to #type = details when available.
   $build['columns']['third']['#theme_wrappers'] = array('container');
-  $build['columns']['third']['#attributes'] = array('class' => array('views-display-column', 'third'));
+  $build['columns']['third']['#attributes'] = array('class' => array('views-display-column', 'third', 'col-md-12', 'col-lg-4'));
   // Specify an id that won't change after AJAX requests. Use the same ID across
   // different displays of the same view, so changing displays doesn't
   // affect the column display.
@@ -1740,6 +1740,8 @@ function views_ui_get_display_tab_details($view, $display) {
   $build['columns']['third']['collapse']['arguments'] = views_ui_edit_form_get_bucket('argument', $view, $display);
   $build['columns']['third']['collapse']['relationships'] = views_ui_edit_form_get_bucket('relationship', $view, $display);
   $build['columns']['third']['collapse']['empty'] = views_ui_edit_form_get_bucket('empty', $view, $display);
+
+  $build['columns']['#attached']['library'][] = array('layout', 'bootstrap4-gs');
 
   return $build;
 }
