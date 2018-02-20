@@ -15,10 +15,16 @@
  */
 function filter_tips_long($format = NULL) {
   if (!empty($format)) {
-    $output = theme('filter_tips', array('tips' => _filter_tips($format->format, TRUE), 'long' => TRUE));
+    $output = theme('filter_tips', array(
+      'tips' => _filter_tips($format->format, TRUE),
+      'long' => TRUE
+    ));
   }
   else {
-    $output = theme('filter_tips', array('tips' => _filter_tips(-1, TRUE), 'long' => TRUE));
+    $output = theme('filter_tips', array(
+      'tips' => _filter_tips(-1, TRUE),
+      'long' => TRUE
+    ));
   }
   return $output;
 }
@@ -53,14 +59,14 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
 
   // Use a "textfield" rather than "url" to allow relative paths.
   $form['href'] = array(
-    '#title' => t('URL'),
+    '#title' => t('Link to existing content'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
-    '#placeholder' => '/files/uploads/myfile.pdf',
+    '#placeholder' => ' ',
     '#default_value' => isset($values['href']) ? $values['href'] : NULL,
     '#parents' => array('attributes', 'href'),
     '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Link URL'),
+      'data-editor-image-toggle' => t('Link to existing content'),
     ),
     '#weight' => -10,
     '#autocomplete_path' => 'filter-link/autocomplete',
@@ -69,28 +75,24 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
 
 
   // Construct strings to use in the upload validators.
-  $upload_settings = isset($format->editor_settings['image_upload']) ? $format->editor_settings['image_upload'] : array();
-  $upload_settings += array(
-    'status' => 0,
-    'max_size' => NULL,
-    'scheme' => 'public',
-    'directory' => 'uploads',
-  );
+  $upload_settings = isset($format->editor_settings['file_upload']) ? $format->editor_settings['file_upload'] : array();
 
   $max_filesize = !empty($upload_settings['max_size']) ? min(parse_size($upload_settings['max_size']), file_upload_max_size()) : file_upload_max_size();
+  $file_extensions = !empty($upload_settings['file_extensions']) ? $upload_settings['file_extensions'] : 'txt';
+  $file_directory = !empty($upload_settings['directory']) ? $upload_settings['directory'] : 'uploads';
   $existing_file = !empty($values['data-file-id']) ? file_load($values['data-file-id']) : NULL;
   $fid = $existing_file ? $existing_file->fid : NULL;
   $form['file']['fid'] = array(
-    '#title' => t('Upload file'),
+    '#title' => t('Upload a file and link to it'),
     '#type' => 'managed_file',
-    '#upload_location' => $upload_settings['scheme'] . '://uploads',
+    '#upload_location' => $upload_settings['scheme'] . '://' . $file_directory,
     '#default_value' => $fid ? $fid : NULL,
     '#upload_validators' => array(
-      'file_validate_extensions' => array('pdf doc docx txt'),
+      'file_validate_extensions' => array($file_extensions),
       'file_validate_size' => array($max_filesize),
     ),
     '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Upload file'),
+      'data-editor-image-toggle' => t('Upload a file and link to it'),
     ),
     '#parents' => array('fid'),
     '#weight' => -2,
@@ -150,6 +152,26 @@ function _filter_link_autocomplete($string) {
       $match_count++;
     }
 
+    // Get file matches.
+    $results = db_select('file_managed')
+      ->fields('file_managed', array('fid', 'filename', 'uri', 'filemime', 'status'))
+      ->condition('filename', db_like($string) . '%', 'LIKE')
+      ->condition('status', 1)
+      ->condition('filemime', 'image%', 'NOT LIKE')
+      ->orderBy('fid', 'DESC')
+      ->range(0, 10 - $match_count)
+      ->execute();
+    foreach ($results as $result) {
+      // Try to make a local path if possible for better portability.
+      $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
+
+      $url = file_create_url($result->uri);
+      $path = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
+
+      $matches[$path] = check_plain($result->filename) . ' (' . t('File')  . ')';
+      $match_count++;
+    }
+
     // Get user matches.
     if (user_access('access user profiles') && $match_count < 10) {
       $results = db_select('users')
@@ -197,7 +219,7 @@ function _filter_link_autocomplete($string) {
           if ($view->access($display_id) && $display->display_plugin == 'page' && !empty($display->display_options['path'])) {
             $path = backdrop_get_path_alias($display->display_options['path']);
             if (!path_is_admin($path)) {
-              if (stripos($view->human_name, $string) !== false || (!empty($display->title) && stripos($display->title, $string) !== false)) {
+              if (stripos($view->human_name, $string) !== FALSE || (!empty($display->title) && stripos($display->title, $string) !== FALSE)) {
                 $view_display_title = (!empty($display->title)) ? $display->title : check_plain($view->human_name) . ' : ' . $display_id;
                 $matches['/' . $path] = $view_display_title . ' (' . t('Views page') . ')';
                 $match_count++;
@@ -215,7 +237,7 @@ function _filter_link_autocomplete($string) {
     if ($match_count < 10) {
       $menu_items = layout_get_all_configs('menu_item');
       foreach ($menu_items as $menu_item) {
-        if (stripos($menu_item['name'], $string) !== false && $match_count < 10) {
+        if (stripos($menu_item['name'], $string) !== FALSE && $match_count < 10) {
           $matches['/' . $menu_item['path']] = check_plain($menu_item['name']) . ' (' . t('Layout path') . ')';
           $match_count++;
         }
@@ -418,14 +440,24 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
  * Submit handler for filter_format_editor_link_form().
  */
 function filter_format_editor_link_form_submit($form, &$form_state) {
+  if (isset($form_state['values']['fid'])) {
+    // Value of fid is zero for existing files so get it from href.
+    // This is to ensure that linked files get attribute 'data-file-id'.
+    if ($form_state['values']['fid'] == 0){
+      $uri = $form_state['values']['attributes']['href'];
+      $fid = _filter_get_file_id($uri);
+    }
+    // Value of fid is available in form values.
+    else {$fid = $form_state['values']['fid'];}
 
-  if (!empty($form_state['values']['fid'])) {
-    $fid = $form_state['values']['fid'];
+    // Get file details.
     $file = file_load($fid);
 
     // Try to make a local path if possible for better portability.
+    // Absolute path is needed if Backdrop is installed in subdirectory.
+    $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
     $url = file_create_url($file->uri);
-    $url = str_replace($GLOBALS['base_url'], '', $url);
+    $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
 
     $form_state['values']['attributes']['data-file-id'] = $fid;
     $form_state['values']['attributes']['href'] = $url;
@@ -478,4 +510,27 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   if ($value !== '' && !valid_url($value, TRUE) && !valid_url($value, FALSE)) {
     form_error($element, t('The URL %url is not valid.', array('%url' => $value)));
   }
+}
+
+/**
+ * Find a managed file ID from a url.
+ *
+ */
+function _filter_get_file_id($href) {
+  // Extract file name and directory from $href.
+  $public_path = config_get('system.core','file_public_path');
+  $pp_length = strlen($public_path);
+  $pos = strpos($href,$public_path);
+  $filename = substr($href,$pos + $pp_length);
+  // Now find this file name in uri field to get fid.
+  $results = db_select('file_managed')
+    ->fields('file_managed', array('fid', 'uri'))
+    ->condition('uri', '%' . $filename, 'LIKE')
+    ->orderBy('fid', 'DESC')
+    ->execute();
+
+  foreach ($results as $found) {
+    $result = $found->fid;
+  }
+  return $result;
 }
