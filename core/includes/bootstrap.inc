@@ -763,6 +763,32 @@ function backdrop_is_https() {
 }
 
 /**
+ * Checks whether Backdrop is running under Apache.
+ *
+ * @return bool
+ *   TRUE if Backdrop is running under Apache, FALSE if not.
+ *
+ * @since 1.9.2
+ */
+function backdrop_is_apache() {
+  $server_software = $_SERVER['SERVER_SOFTWARE'];
+  return (bool) preg_match("/apache/i", $server_software);
+}
+
+/**
+ * Checks whether Backdrop is running under Nginx.
+ *
+ * @return bool
+ *   TRUE if Backdrop is running under Nginx, FALSE if not.
+ *
+ * @since 1.9.2
+ */
+function backdrop_is_nginx() {
+  $server_software = $_SERVER['SERVER_SOFTWARE'];
+  return (bool) preg_match("/nginx/i", $server_software);
+}
+
+/**
  * Sets the base URL, cookie domain, and session name from configuration.
  */
 function backdrop_settings_initialize() {
