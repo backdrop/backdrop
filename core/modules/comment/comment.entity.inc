@@ -25,6 +25,13 @@ class Comment extends Entity {
   public $pid;
 
   /**
+   * The comment type (bundle).
+   *
+   * @var string
+   */
+  public $node_type;
+
+  /**
    * The comment language code.
    *
    * @var string
@@ -85,6 +92,13 @@ class Comment extends Entity {
    */
   public function entityType() {
     return 'comment';
+  }
+
+  /**
+   * Implements EntityInterface::bundle().
+   */
+  public function bundle() {
+    return $this->node_type;
   }
 
   /**
