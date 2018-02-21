@@ -17,7 +17,16 @@ if (Backdrop.settings.drupalCompatibility) {
   window.Drupal = Backdrop;
 }
 
-/**
+// Pre-filter Ajax requests to guard against XSS attacks.
+// This is similar to the fix that is built in to jQuery 3.0 and higher.
+// See https://github.com/jquery/jquery/issues/2432
+$.ajaxPrefilter(function (s) {
+  if (s.crossDomain) {
+    s.contents.script = false;
+  }
+});
+
+  /**
  * Attach all registered behaviors to a page element.
  *
  * Behaviors are event-triggered actions that attach to page elements, enhancing
@@ -130,6 +139,7 @@ Backdrop.detachBehaviors = function (context, settings, trigger) {
 Backdrop.checkPlain = function (str) {
   str = str.toString()
     .replace(/&/g, '&amp;')
+    .replace(/'/g, '&#39;')
     .replace(/"/g, '&quot;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
