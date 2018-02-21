@@ -44,7 +44,7 @@ function system_requirements($phase) {
   $software = $_SERVER['SERVER_SOFTWARE'];
   $requirements['webserver'] = array(
     'title' => $t('Web server'),
-    'value' => $software,
+    'value' => check_plain($software),
     'severity' => REQUIREMENT_INFO,
   );
 
@@ -234,7 +234,7 @@ function system_requirements($phase) {
   }
 
   // Test the contents of the .htaccess files.
-  if ($phase == 'runtime') {
+  if ($phase == 'runtime' && backdrop_is_apache()) {
     // Try to write the .htaccess files first, to prevent false alarms in case
     // (for example) the /tmp directory was wiped.
     file_ensure_htaccess();
