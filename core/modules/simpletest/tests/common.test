@@ -223,6 +223,22 @@ class CommonURLWebTestCase extends BackdropWebTestCase {
     $result = url($url);
     $this->assertEqual($url, $result, 'External URL without protocol is not altered.');
   }
+
+  /**
+   * Tests the url() function on internal paths which mimic external URLs.
+   */
+  function testInternalPathMimicsExternal() {
+    module_enable(array('common_test'));
+    // Ensure that calling url(current_path()) on "/http://example.com" (an
+    // internal path which mimics an external URL) always links to the internal
+    // path, not the external URL. This helps protect against external URL link
+    // injection vulnerabilities.
+    state_set('common_test_link_to_current_path', TRUE);
+    $this->backdropGet('/http://example.com');
+    $this->clickLink('link which should point to the current path');
+    $this->assertUrl('/http://example.com');
+    $this->assertText('link which should point to the current path');
+  }
 }
 
 /**

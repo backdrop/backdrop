@@ -111,6 +111,9 @@ function common_test_init() {
   if (state_get('common_test_redirect_current_path', FALSE)) {
     backdrop_goto(current_path());
   }
+  if (state_get('common_test_link_to_current_path', FALSE)) {
+    backdrop_set_message(l('link which should point to the current path', current_path()));
+  }
 }
 
 /**
