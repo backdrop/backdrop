@@ -7,8 +7,17 @@
  * Editor settings callback; Provide options for CKEditor module.
  */
 function ckeditor_settings_form(&$form, $form_state, $format) {
+  // Build the toolbar based on the current values from $form_state. This
+  // maintains the toolbar button changes when a form validation error occurs.
+  $format_copy = clone $format;
+  if (isset($form_state['input']['editor_settings']['toolbar'])) {
+    if ($toolbar = @json_decode($form_state['input']['editor_settings']['toolbar'], TRUE)) {
+      $format_copy->editor_settings['toolbar'] = $toolbar;
+    }
+  }
+
   $plugins = ckeditor_plugins();
-  $toolbar_element = theme('ckeditor_settings_toolbar', array('format' => $format, 'plugins' => $plugins));
+  $toolbar_element = theme('ckeditor_settings_toolbar', array('format' => $format_copy, 'plugins' => $plugins));
   $elements = array(
     '#attached' => array(
       'library' => array(
