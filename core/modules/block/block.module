@@ -273,7 +273,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     $form['default_language'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
-      '#description' => 'Please select the default language for this custum block.',
+      '#description' => 'Please select the default language for this custom block.',
       '#options' => $options,
       '#default_value' => language_default()->langcode,
     );
