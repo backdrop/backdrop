@@ -6,6 +6,57 @@
  */
 
 /**
+ * Contact settings form.
+ *
+ * @see contact_menu()
+ * @ingroup forms
+ * @since 1.11.0
+ */
+function contact_settings_form($form, &$form_state) {
+  $config = config('contact.settings');
+  $form['#config'] = 'contact.settings';
+
+  $form['fields'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#title' => t("Fields"),
+  );
+  $form['fields']['copy'] = array(
+    '#type' => 'checkbox',
+    '#title' => t("Show the 'Send yourself a copy' checkbox"),
+    '#description' => t("Allow users to send themselves a copy on site-wide and personnal contact forms."),
+    '#default_value' => contact_show_personal_copy_checkbox()
+  );
+
+  $form['threshold'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => t("Send limit"),
+    '#description' => t("Configure thresholds for the contact forms to minimize malicious users sending multiple emails. Control the number of emails that can be sent in a window of time by anyone with the same IP address."),
+  );
+  $form['threshold']['wrapper'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('container-inline')),
+  );
+  $form['threshold']['wrapper']['contact_threshold_limit'] = array(
+    '#type' => 'select',
+    '#title' => t('Limit to'),
+    '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 75, 100, 125, 150, 200, 250, 500)),
+    '#default_value' => $config->get('contact_threshold_limit'),
+  );
+  $form['threshold']['wrapper']['contact_threshold_window'] = array(
+    '#type' => 'select',
+    '#title' => t('messages per'),
+    '#options' => array(0 => t('None (disabled)')) + backdrop_map_assoc(array(60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval'),
+    '#default_value' => $config->get('contact_threshold_window'),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
  * Page callback: Lists contact categories.
  *
  * @see contact_menu()
