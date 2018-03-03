@@ -645,57 +645,58 @@ function file_update_1000() {
  */
 function file_update_1001() {
   $config = config('views.view.file_admin');
+  if ($config) {
+    // Get all the fields.
+    $fields = $config->get('display.default.display_options.fields');
 
-  // Get all the fields.
-  $fields = $config->get('display.default.display_options.fields');
+    // If the file field is not already there...
+    if (!array_key_exists('edit', $fields)) {
 
-  // If the file field is not already there...
-  if (!array_key_exists('edit', $fields)) {
+      // Remove the delete and drop-button fields.
+      $delete = $fields['delete'];
+      unset($fields['delete']);
+      $dropbutton = $fields['dropbutton'];
+      unset($fields['dropbutton']);
 
-    // Remove the delete and drop-button fields.
-    $delete = $fields['delete'];
-    unset($fields['delete']);
-    $dropbutton = $fields['dropbutton'];
-    unset($fields['dropbutton']);
+      // Add the Manage file field.
+      $fields['edit'] = array(
+        'id' => 'edit',
+        'table' => 'file_managed',
+        'field' => 'edit',
+        'relationship' => 'none',
+        'group_type' => 'group',
+        'ui_name' => '',
+        'label' => 'Manage link',
+        'exclude' => TRUE,
+        'alter' => array(),
+        'element_type' => '',
+        'element_class' => '',
+        'element_label_type' => '',
+        'element_label_class' => '',
+        'element_label_colon' => TRUE,
+        'element_wrapper_type' => '',
+        'element_wrapper_class' => '',
+        'element_default_classes' => TRUE,
+        'empty' => '',
+        'hide_empty' => 0,
+        'empty_zero' => 0,
+        'hide_alter_empty' => TRUE,
+        'text' => 'Manage',
+      );
 
-    // Add the Manage file field.
-    $fields['edit'] = array(
-      'id' => 'edit',
-      'table' => 'file_managed',
-      'field' => 'edit',
-      'relationship' => 'none',
-      'group_type' => 'group',
-      'ui_name' => '',
-      'label' => 'Manage link',
-      'exclude' => TRUE,
-      'alter' => array(),
-      'element_type' => '',
-      'element_class' => '',
-      'element_label_type' => '',
-      'element_label_class' => '',
-      'element_label_colon' => TRUE,
-      'element_wrapper_type' => '',
-      'element_wrapper_class' => '',
-      'element_default_classes' => TRUE,
-      'empty' => '',
-      'hide_empty' => 0,
-      'empty_zero' => 0,
-      'hide_alter_empty' => TRUE,
-      'text' => 'Manage',
-    );
+      // Put delete field back, after edit.
+      $fields['delete'] = $delete;
 
-    // Put delete field back, after edit.
-    $fields['delete'] = $delete;
+      // Add the Manage file field to the drop-button set.
+      $dropbutton['fields'] = array('edit' => 'edit') + $dropbutton['fields'];
 
-    // Add the Manage file field to the drop-button set.
-    $dropbutton['fields'] = array('edit' => 'edit') + $dropbutton['fields'];
+      // Add the dropbutton field back to the view.
+      $fields['dropbutton'] = $dropbutton;
 
-    // Add the dropbutton field back to the view.
-    $fields['dropbutton'] = $dropbutton;
-
-    // Save the view.
-    $config->set('display.default.display_options.fields', $fields);
-    $config->save();
+      // Save the view.
+      $config->set('display.default.display_options.fields', $fields);
+      $config->save();
+    }
   }
 }
 
