@@ -1332,6 +1332,7 @@ function user_menu() {
   );
   return $items;
 }
+
 /**
  * Implements hook_menu_alter().
  */
@@ -1440,6 +1441,30 @@ function user_admin_paths() {
     'user/*/edit/*' => TRUE,
   );
   return $paths;
+}
+
+/**
+ * Implements hook_layout_context_info().
+ */
+function user_layout_context_info() {
+  $info['user'] = array(
+    'title' => t('User account'),
+    // Define the class which is used to handle this context.
+    'class' => 'EntityLayoutContext',
+    // Define menu paths where the node ID is a "known" context.
+    'menu paths' => array(
+      'user/%user',
+      'user/%user/view',
+    ),
+    // Given the menu paths defined above, identify the part of the path that
+    // is needed to generate this context.
+    'path placeholder' => '%user',
+
+    // Given an argument, the callback that will be responsible for loading the
+    // main context data.
+    'load callback' => 'user_load',
+  );
+  return $info;
 }
 
 /**
