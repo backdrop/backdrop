@@ -308,6 +308,7 @@ function comment_node_type_load(&$types) {
       'comment_user_picture' => TRUE,
       'comment_form_location' => COMMENT_FORM_BELOW,
       'comment_preview' => BACKDROP_OPTIONAL,
+      'comment_close_days' => 14
     );
   }
 }
@@ -1204,6 +1205,16 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         BACKDROP_OPTIONAL => t('Optional'),
         BACKDROP_REQUIRED => t('Required'),
       ),
+    );
+    $form['comment']['comment_close_days'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Automatically close comments on old content'),
+      '#size' => 5,
+      '#maxlength' => 4,
+      '#field_prefix' => t('Close comments after'),
+      '#default_value' => $node_type->settings['comment_close_days'],
+      '#field_suffix' => t('days'),
+      '#element_validate' => array('_comment_close_days_validate'),
     );
   }
 }
@@ -2333,6 +2344,87 @@ function comment_file_download_access($field, $entity_type, $entity) {
       return node_access('view', $node);
     }
     return FALSE;
+  }
+}
+
+
+/**
+ * Implements hook_cron().
+ */
+function comment_cron() {
+  _comment_close_all();
+}
+
+/**
+ * Close all comments that meet the current threshold.
+ *
+ * @param $now
+ *  A UNIX timestamp for the expiration time.
+ */
+function _comment_close_all($now = NULL) {
+  if (is_null($now)) {
+    $now = REQUEST_TIME;
+  }
+  $content_types = node_type_get_names();
+
+  foreach ($content_types as $type => $name) {
+    // Set it up.
+    $config = config('node.type.' . $type);
+    $days = $config->get('settings.comment_close_days');
+
+    // If a day is set, do this one.
+    if (!empty($days)) {
+      $oldest_allowed = _comment_closer_oldest_allowed($days, $now);
+
+      // Fetch nodes that should have comments closed.
+      $result = db_query("SELECT nid FROM {node} WHERE created < :oldest AND type = :type AND comment = :comment",
+        array(':oldest' => $oldest_allowed, ':type' => $type, ':comment' => COMMENT_NODE_OPEN)
+      );
+      $nids = $result->fetchCol();
+
+      // Update those rows.
+      foreach($nids as $nid) {
+        $node = node_load($nid);
+        $node->comment = COMMENT_NODE_CLOSED;
+        node_save($node);
+      }
+
+      $count  = $result->rowCount();
+      if ($count) {
+        $vars = array(
+          '!count' => $count,
+          '@type' => $name,
+          '!date' => format_date($oldest_allowed),
+        );
+        $msg = 'Closed comments on !count @type posts created at, or before, !date.';
+        watchdog('comment', $msg, $vars, WATCHDOG_NOTICE);
+      }
+    }
+  }
+}
+
+/**
+ * Helper function for generating date from age interval.
+ */
+function _comment_closer_oldest_allowed($days, $now = NULL) {
+  if ($days == 0) {
+    return 0;
+  }
+
+  if (empty($now)) {
+    $now = isset($_SERVER['REQUEST_TIME']) ? $_SERVER['REQUEST_TIME'] : REQUEST_TIME;
+  }
+
+  return strtotime("-$days days", $now);
+}
+
+/**
+ * Form element validation to ensure proper data.
+ */
+function _comment_close_days_validate($element, &$form_state) {
+  $days = $element['#value'];
+  if (!is_numeric($days) || $days < 0 || $days != intval($days)) {
+    form_error($element, t('The field "Automatically close comments on old content" should be a positive integer.'));
   }
 }
 
