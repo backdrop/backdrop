@@ -308,6 +308,7 @@ function comment_node_type_load(&$types) {
       'comment_user_picture' => TRUE,
       'comment_form_location' => COMMENT_FORM_BELOW,
       'comment_preview' => BACKDROP_OPTIONAL,
+      'comment_close_enable' => FALSE,
       'comment_close_days' => 14
     );
   }
@@ -1206,11 +1207,20 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         BACKDROP_REQUIRED => t('Required'),
       ),
     );
+    $form['comment']['comment_close_enable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Automatically close comments on old content'),
+      '#default_value' => $node_type->settings['comment_close_enable'],
+    );
     $form['comment']['comment_close_days'] = array(
       '#type' => 'textfield',
-      '#title' => t('Automatically close comments on old content'),
-      '#size' => 5,
+      '#size' => 4,
       '#maxlength' => 4,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="comment_close_enable"]' => array('checked' => FALSE),
+        ),
+      ),
       '#field_prefix' => t('Close comments after'),
       '#default_value' => $node_type->settings['comment_close_days'],
       '#field_suffix' => t('days'),
@@ -2347,7 +2357,6 @@ function comment_file_download_access($field, $entity_type, $entity) {
   }
 }
 
-
 /**
  * Implements hook_cron().
  */
@@ -2371,9 +2380,10 @@ function _comment_close_all($now = NULL) {
     // Set it up.
     $config = config('node.type.' . $type);
     $days = $config->get('settings.comment_close_days');
+    $enable = $config->get('settings.comment_close_enable');
 
     // If a day is set, do this one.
-    if (!empty($days)) {
+    if (!empty($enable) && !empty($days)) {
       $oldest_allowed = _comment_closer_oldest_allowed($days, $now);
 
       // Fetch nodes that should have comments closed.
@@ -2424,7 +2434,7 @@ function _comment_closer_oldest_allowed($days, $now = NULL) {
 function _comment_close_days_validate($element, &$form_state) {
   $days = $element['#value'];
   if (!is_numeric($days) || $days < 0 || $days != intval($days)) {
-    form_error($element, t('The field "Automatically close comments on old content" should be a positive integer.'));
+    form_error($element, t('The "Close comments after" field should be a positive number.'));
   }
 }
 
