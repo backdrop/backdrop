@@ -112,6 +112,30 @@ function taxonomy_entity_info() {
 }
 
 /**
+ * Implements hook_layout_context_info().
+ */
+function taxonomy_layout_context_info() {
+  $info['taxonomy_term'] = array(
+    'title' => t('Taxonomy Term'),
+    // Define the class which is used to handle this context.
+    'class' => 'EntityLayoutContext',
+    // Define menu paths where the term ID is a "known" context.
+    'menu paths' => array(
+      'taxonomy/term/%taxonomy_term',
+      'taxonomy/term/%taxonomy_term/view',
+      'taxonomy/term/%taxonomy_term/edit',
+    ),
+    // Given the menu paths defined above, identify the part of the path that
+    // is needed to generate this context.
+    'path placeholder' => '%taxonomy_term',
+    // Given an argument, the callback that will be responsible for loading the
+    // main context data.
+    'load callback' => 'taxonomy_term_load',
+  );
+  return $info;
+}
+
+/**
  * Implements hook_views_api().
  */
 function taxonomy_views_api() {
