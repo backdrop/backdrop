@@ -59,7 +59,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
 
   // Use a "textfield" rather than "url" to allow relative paths.
   $form['href'] = array(
-    '#title' => t('Link to existing content'),
+    '#title' => t('Link value'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => ' ',
@@ -110,6 +110,16 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
   else {
     $form['file']['src']['#weight'] = -10;
   }
+
+  $form['linktext'] = array(
+    '#title' => t('Link text'),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['linktext']) ? $values['linktext'] : '',
+    '#parents' => array('attributes', 'linktext'),
+    '#description' => t('Default text is the link value. Enter some alternative link text here if preferred.'),
+  );
+
+
   $form['target'] = array(
     '#title' => t('Open in new window'),
     '#type' => 'checkbox',
@@ -447,21 +457,22 @@ function filter_format_editor_link_form_submit($form, &$form_state) {
       $uri = $form_state['values']['attributes']['href'];
       $fid = _filter_get_file_id($uri);
     }
-    // Value of fid is available in form values.
+    // Value of fid may be available in form values.
     else {$fid = $form_state['values']['fid'];}
+    if ($fid) {
+      // Get file details.
+      $file = file_load($fid);
 
-    // Get file details.
-    $file = file_load($fid);
+      // Try to make a local path if possible for better portability.
+      // Absolute path is needed if Backdrop is installed in subdirectory.
+      $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
+      $url = file_create_url($file->uri);
+      $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
 
-    // Try to make a local path if possible for better portability.
-    // Absolute path is needed if Backdrop is installed in subdirectory.
-    $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
-    $url = file_create_url($file->uri);
-    $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
-
-    $form_state['values']['attributes']['data-file-id'] = $fid;
-    $form_state['values']['attributes']['href'] = $url;
-    unset($form_state['values']['fid']);
+      $form_state['values']['attributes']['data-file-id'] = $fid;
+      $form_state['values']['attributes']['href'] = $url;
+      unset($form_state['values']['fid']);
+    }
   }
 }
 

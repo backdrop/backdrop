@@ -70,17 +70,28 @@ CKEDITOR.plugins.add('backdroplink', {
       exec: function (editor) {
         var backdropImageUtils = CKEDITOR.plugins.backdropimage;
         var focusedImageWidget = backdropImageUtils && backdropImageUtils.getFocusedWidget(editor);
+        var selectedText = editor.getSelection().getSelectedText();
         var linkElement = getSelectedLink(editor);
+        if (linkElement && (selectedText == "")) {
+          selectedText = linkElement.$.firstChild.data;
+        }
 
         // Set existing values based on selected element.
         var existingValues = {};
         if (linkElement && linkElement.$) {
           existingValues = parseAttributes(editor, linkElement);
+
+          // Override the displayed link text.
+          existingValues.linktext = selectedText;
         }
         // Or, if an image widget is focused, we're editing a link wrapping
         // an image widget.
         else if (focusedImageWidget && focusedImageWidget.data.link) {
           existingValues = CKEDITOR.tools.clone(focusedImageWidget.data.link);
+        }
+        // Or, if selected element is not an existing link or an image.
+        else {
+          existingValues.linktext = selectedText;
         }
 
         // Prepare a save callback to be used upon saving the dialog.
@@ -99,11 +110,46 @@ CKEDITOR.plugins.add('backdroplink', {
             editor.fire('saveSnapshot');
             return;
           }
+          else {
+            // If not an image, replace text of link with new text.
+            var selection = editor.getSelection();
+            var oldtext = selection.getSelectedText();
+            var newtext = returnValues.attributes.linktext;
+            var range = selection.getRanges(1)[0];
+
+            // If no text is selected within a link
+            // replace the link with the new text.
+            if (newtext && (oldtext == "")){
+              // Enlarge the range to include the whole link.
+              range.enlarge(CKEDITOR.ENLARGE_BLOCK_CONTENTS);
+
+              // Create a new node to insert at range.
+              var text = new CKEDITOR.dom.text( newtext );
+
+              // Replace current link with new text.
+              range.deleteContents();
+              range.collapse(true);
+              range.insertNode(text);
+              range.selectNodeContents(text);
+
+              // Make new text into a link.
+              var style = new CKEDITOR.style({element: 'a', attributes: returnValues.attributes});
+              style.type = CKEDITOR.STYLE_INLINE;
+              style.applyToRange(range);
+            }
+            // If new text is different, replace the item specified by range.
+            else if (newtext && (newtext != oldtext)) {
+              // Create a new node to insert at range.
+              var text = new CKEDITOR.dom.text( newtext );
+              // Delete current contents at range.
+              range.deleteContents();
+              range.insertNode(text);
+              range.selectNodeContents(text);
+            }
+          }
 
           // Create a new link element if needed.
           if (!linkElement && returnValues.attributes.href) {
-            var selection = editor.getSelection();
-            var range = selection.getRanges(1)[0];
 
             // Use link URL as text with a collapsed cursor.
             if (range.collapsed) {
