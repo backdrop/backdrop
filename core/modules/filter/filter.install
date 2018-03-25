@@ -86,34 +86,6 @@ function filter_update_1001() {
 }
 
 /**
- * Add a separate permission for file upload access.
- */
-function filter_update_1002() {
-  user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('upload editor files'));
-
-  // Enable uploading on existing text formats for which
-  // image uploading is already enabled.
-  $format_configs = config_get_names_with_prefix('filter.format.');
-
-  foreach ($format_configs as $config_name) {
-    $config = config($config_name);
-    if ($config->get('editor')) {
-      $editor_settings = (array) $config->get('editor_settings');
-      if (isset($editor_settings['image_upload'])){
-        $upload_settings = array();
-        $upload_settings['status'] = 1;
-        $upload_settings['max_size'] = '';
-        $upload_settings['scheme'] = 'public';
-        $upload_settings['directory'] = 'inline-files';
-        $upload_settings['file_extensions'] = 'txt pdf';
-        $editor_settings['file_upload'] = $upload_settings;
-        $config->set('editor_settings', $editor_settings);
-        $config->save();
-      }
-    }
-  }
-}
-/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
