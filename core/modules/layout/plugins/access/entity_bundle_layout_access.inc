@@ -74,6 +74,12 @@ class EntityBundleLayoutAccess extends LayoutAccess {
 
     /* @var Entity $entity */
     $entity = $this->contexts[$this->entity_type]->data;
+
+    // Quick hack to un-break entity bundle access check.
+    if (is_numeric($entity)) {
+      $entity = entity_load($this->entity_type, $entity);
+    }
+
     $bundle = $entity->bundle();
     if (!in_array($bundle, $this->settings['bundles'])) {
       return FALSE;
