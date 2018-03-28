@@ -2852,35 +2852,17 @@ function _backdrop_exception_handler($exception) {
  * Sets up the script environment and loads settings.php.
  */
 function _backdrop_bootstrap_configuration() {
-  // Set the Backdrop custom error handler.
-  set_error_handler('_backdrop_error_handler');
-  set_exception_handler('_backdrop_exception_handler');
-
   backdrop_environment_initialize();
   // Start a page timer:
   timer_start('page');
   // Initialize the configuration, including variables from settings.php.
   backdrop_settings_initialize();
+  // Sanitize input from $_GET, $_POST, etc.
+  _backdrop_bootstrap_sanitize_request();
 
-  // Sanitize the destination parameter (which is often used for redirects) to
-  // prevent open redirect attacks leading to other domains. Sanitize both
-  // $_GET['destination'] and $_REQUEST['destination'] to protect code that
-  // relies on either, but do not sanitize $_POST to avoid interfering with
-  // unrelated form submissions. The sanitization happens here because
-  // url_is_external() requires settings.php variables to be available.
-  if (isset($_GET['destination']) || isset($_REQUEST['destination'])) {
-    require_once BACKDROP_ROOT . '/core/includes/common.inc';
-    // If the destination is an external URL, remove it.
-    if (isset($_GET['destination']) && url_is_external($_GET['destination'])) {
-      unset($_GET['destination']);
-      unset($_REQUEST['destination']);
-    }
-    // If there's still something in $_REQUEST['destination'] that didn't come
-    // from $_GET, check it too.
-    if (isset($_REQUEST['destination']) && (!isset($_GET['destination']) || $_REQUEST['destination'] != $_GET['destination']) && url_is_external($_REQUEST['destination'])) {
-      unset($_REQUEST['destination']);
-    }
-  }
+  // Set the Backdrop custom error handler.
+  set_error_handler('_backdrop_error_handler');
+  set_exception_handler('_backdrop_exception_handler');
 
   // Load configuration classes and functions.
   require_once BACKDROP_ROOT . '/core/includes/config.inc';
@@ -3091,6 +3073,82 @@ function _backdrop_bootstrap_page_header() {
     ob_start();
     backdrop_page_header();
   }
+}
+
+/**
+ * Sanitizes unsafe input from the PHP request super-globals.
+ */
+function _backdrop_bootstrap_sanitize_request() {
+  // Remove dangerous keys from input data.
+  $whitelist = settings_get('sanitize_input_whitelist', array());
+  $log_sanitized_keys = settings_get('sanitize_input_logging');
+
+  // Process query string parameters.
+  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_GET, $whitelist);
+  if ($sanitized_keys && $log_sanitized_keys) {
+    trigger_error(format_string('Potentially unsafe keys removed from query string parameters (GET): @keys', array('@keys' => implode(', ', $sanitized_keys))), E_USER_WARNING);
+  }
+  // Process request body parameters.
+  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_POST, $whitelist);
+  if ($sanitized_keys && $log_sanitized_keys) {
+    trigger_error(format_string('Potentially unsafe keys removed from request body parameters (POST): @keys', array('@keys' => implode(', ', $sanitized_keys))), E_USER_WARNING);
+  }
+  // Process cookie parameters.
+  $sanitized_keys = _backdrop_bootstrap_sanitize_input($_COOKIE, $whitelist);
+  if ($sanitized_keys && $log_sanitized_keys) {
+    trigger_error(format_string('Potentially unsafe keys removed from cookie parameters (COOKIE): @keys', array('@keys' => implode(', ', $sanitized_keys))), E_USER_WARNING);
+  }
+  // Process request global. No need to log; already logged in $_GET and $_POST.
+  _backdrop_bootstrap_sanitize_input($_REQUEST, $whitelist);
+
+  // Sanitize the destination parameter (which is often used for redirects) to
+  // prevent open redirect attacks leading to other domains. Sanitize both
+  // $_GET['destination'] and $_REQUEST['destination'] to protect code that
+  // relies on either, but do not sanitize $_POST to avoid interfering with
+  // unrelated form submissions. The sanitization happens here because
+  // url_is_external() requires settings.php variables to be available.
+  if (isset($_GET['destination']) || isset($_REQUEST['destination'])) {
+    require_once BACKDROP_ROOT . '/core/includes/common.inc';
+    // If the destination is an external URL, remove it.
+    if (isset($_GET['destination']) && url_is_external($_GET['destination'])) {
+      unset($_GET['destination']);
+      unset($_REQUEST['destination']);
+    }
+    // If there's still something in $_REQUEST['destination'] that didn't come
+    // from $_GET, check it too.
+    if (isset($_REQUEST['destination']) && (!isset($_GET['destination']) || $_REQUEST['destination'] != $_GET['destination']) && url_is_external($_REQUEST['destination'])) {
+      unset($_REQUEST['destination']);
+    }
+  }
+}
+
+/**
+ * Sanitizes unsafe keys from request input.
+ *
+ * @param mixed $input
+ *   The input data array from a request to be sanitized.
+ * @param string[] $whitelist
+ *   Whitelist of input keys that are considered acceptable.
+ *
+ * @return string[]
+ *   The list of any input keys have been filtered out, if any.
+ */
+function _backdrop_bootstrap_sanitize_input(&$input, $whitelist = array()) {
+  $sanitized_keys = array();
+
+  if (is_array($input)) {
+    foreach ($input as $key => $value) {
+      if ($key !== '' && $key[0] === '#' && !in_array($key, $whitelist, TRUE)) {
+        unset($input[$key]);
+        $sanitized_keys[] = $key;
+      }
+      elseif (is_array($input[$key])) {
+        $sanitized_keys = array_merge($sanitized_keys, _backdrop_bootstrap_sanitize_input($input[$key], $whitelist));
+      }
+    }
+  }
+
+  return $sanitized_keys;
 }
 
 /**
