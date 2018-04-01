@@ -1213,7 +1213,9 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#default_value' => $node_type->settings['comment_close_enable'],
     );
     $form['comment']['comment_close_days'] = array(
-      '#type' => 'textfield',
+      '#type' => 'number',
+      '#min' => 1,
+      '#step' => 1,
       '#size' => 4,
       '#maxlength' => 4,
       '#states' => array(
@@ -1224,7 +1226,6 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#field_prefix' => t('Close comments after'),
       '#default_value' => $node_type->settings['comment_close_days'],
       '#field_suffix' => t('days'),
-      '#element_validate' => array('_comment_close_days_validate'),
     );
   }
 }
@@ -2366,25 +2367,25 @@ function comment_cron() {
 
 /**
  * Close all comments that meet the current threshold.
- *
- * @param $now
- *  A UNIX timestamp for the expiration time.
  */
-function _comment_close_all($now = NULL) {
-  if (is_null($now)) {
-    $now = REQUEST_TIME;
-  }
+function _comment_close_all() {
+  $now = REQUEST_TIME;
+
   $content_types = node_type_get_names();
 
   foreach ($content_types as $type => $name) {
-    // Set it up.
+    // Get the content type settings.
     $config = config('node.type.' . $type);
     $days = $config->get('settings.comment_close_days');
     $enable = $config->get('settings.comment_close_enable');
 
     // If a day is set, do this one.
     if (!empty($enable) && !empty($days)) {
-      $oldest_allowed = _comment_closer_oldest_allowed($days, $now);
+      if (empty($now)) {
+        $now = isset($_SERVER['REQUEST_TIME']) ? $_SERVER['REQUEST_TIME'] : REQUEST_TIME;
+      }
+
+      $oldest_allowed = strtotime("-$days days", $now);
 
       // Fetch nodes that should have comments closed.
       $result = db_query("SELECT nid FROM {node} WHERE created < :oldest AND type = :type AND comment = :comment",
@@ -2393,7 +2394,7 @@ function _comment_close_all($now = NULL) {
       $nids = $result->fetchCol();
 
       // Update those rows.
-      foreach($nids as $nid) {
+      foreach ($nids as $nid) {
         $node = node_load($nid);
         $node->comment = COMMENT_NODE_CLOSED;
         node_save($node);
@@ -2410,31 +2411,6 @@ function _comment_close_all($now = NULL) {
         watchdog('comment', $msg, $vars, WATCHDOG_NOTICE);
       }
     }
-  }
-}
-
-/**
- * Helper function for generating date from age interval.
- */
-function _comment_closer_oldest_allowed($days, $now = NULL) {
-  if ($days == 0) {
-    return 0;
-  }
-
-  if (empty($now)) {
-    $now = isset($_SERVER['REQUEST_TIME']) ? $_SERVER['REQUEST_TIME'] : REQUEST_TIME;
-  }
-
-  return strtotime("-$days days", $now);
-}
-
-/**
- * Form element validation to ensure proper data.
- */
-function _comment_close_days_validate($element, &$form_state) {
-  $days = $element['#value'];
-  if (!is_numeric($days) || $days < 0 || $days != intval($days)) {
-    form_error($element, t('The "Close comments after" field should be a positive number.'));
   }
 }
 
