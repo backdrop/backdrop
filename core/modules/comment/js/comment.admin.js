@@ -22,6 +22,9 @@ Backdrop.behaviors.commentFieldsetSummaries = {
 
     // Provide the summary for the node type form.
     $context.find('fieldset.comment-node-type-settings-form').backdropSetSummary(function() {
+      if ($context.find('.form-item-comment-global-disable input:checked').length) {
+        return Backdrop.checkPlain('Globally disabled');
+      }
       var vals = [];
 
       // Default comment setting.

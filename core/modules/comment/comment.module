@@ -67,6 +67,12 @@ define('COMMENT_NODE_CLOSED', 1);
  */
 define('COMMENT_NODE_OPEN', 2);
 
+
+/**
+ * Comments globally disabled for this type.
+ */
+define('COMMENT_GLOBAL_DISABLE', 0);
+
 /**
  * Implements hook_entity_info().
  */
@@ -299,6 +305,7 @@ function comment_count_unpublished() {
 function comment_node_type_load(&$types) {
   foreach ($types as $type_name => $type) {
     $types[$type_name]->settings += array(
+      'comment_global_disable' => COMMENT_GLOBAL_DISABLE,
       'comment_enabled' => FALSE,
       'comment_default' => COMMENT_NODE_OPEN,
       'comment_per_page' => 50,
@@ -1143,6 +1150,12 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       ),
       '#weight' => 20,
     );
+    $form['comment']['comment_global_disable'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Globally disable'),
+      '#description' => t('Checking this box will eliminate the vertical tab for comment settings per node.'),
+      '#default_value' => $node_type->settings['comment_global_disable'],
+    );
     // Unlike coment_form_node_form_alter(), all of these settings are applied
     // as defaults to all new nodes. Therefore, it would be wrong to use #states
     // to hide the other settings based on the primary comment setting.
@@ -1154,18 +1167,33 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         COMMENT_NODE_OPEN => t('Open comments'),
         COMMENT_NODE_CLOSED => t('Closed comments'),
       ),
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="comment_global_disable"]' => array('checked' => TRUE),
+        ),
+      ),
     );
     $form['comment']['comment_per_page'] = array(
       '#type' => 'select',
       '#title' => t('Comments per page'),
       '#default_value' => $node_type->settings['comment_per_page'],
       '#options' => _comment_per_page(),
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="comment_global_disable"]' => array('checked' => TRUE),
+        ),
+      ),
     );
     $form['comment']['comment_mode'] = array(
       '#type' => 'checkbox',
       '#title' => t('Show comment replies in a threaded list'),
       '#default_value' => $node_type->settings['comment_mode'],
       '#description' => t('A threaded list differs from chronologocal in that each comment follows it\'s parent, and is usually indented.'),
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="comment_global_disable"]' => array('checked' => TRUE),
+        ),
+      ),
     );
     $form['comment']['comment_anonymous'] = array(
       '#type' => 'select',
@@ -1177,23 +1205,43 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         COMMENT_ANONYMOUS_MUST_CONTACT => t('Anonymous posters must leave their contact information'),
       ),
       '#access' => user_access('post comments', backdrop_anonymous_user()),
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="comment_global_disable"]' => array('checked' => TRUE),
+        ),
+      ),
     );
     $form['comment']['comment_subject_field'] = array(
       '#type' => 'checkbox',
       '#title' => t('Allow comment title'),
       '#default_value' => $node_type->settings['comment_subject_field'],
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="comment_global_disable"]' => array('checked' => TRUE),
+        ),
+      ),
     );
     if (config_get('system.core', 'user_pictures')) {
       $form['comment']['comment_user_picture'] = array(
         '#type' => 'checkbox',
         '#title' => t('Display pictures for comment authors'),
         '#default_value' => $node_type->settings['comment_user_picture'],
+        '#states' => array(
+          'invisible' => array(
+            ':input[name="comment_global_disable"]' => array('checked' => TRUE),
+          ),
+        ),
       );
     }
     $form['comment']['comment_form_location'] = array(
       '#type' => 'checkbox',
       '#title' => t('Show reply form on the same page as comments'),
       '#default_value' => $node_type->settings['comment_form_location'],
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="comment_global_disable"]' => array('checked' => TRUE),
+        ),
+      ),
     );
     $form['comment']['comment_preview'] = array(
       '#type' => 'radios',
@@ -1204,6 +1252,11 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         BACKDROP_OPTIONAL => t('Optional'),
         BACKDROP_REQUIRED => t('Required'),
       ),
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="comment_global_disable"]' => array('checked' => TRUE),
+        ),
+      ),
     );
   }
 }
@@ -1213,52 +1266,58 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
  */
 function comment_form_node_form_alter(&$form, $form_state) {
   $node = $form['#node'];
-  $form['comment_settings'] = array(
-    '#type' => 'fieldset',
-    '#access' => user_access('administer comments'),
-    '#title' => t('Comment settings'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#group' => 'additional_settings',
-    '#attributes' => array(
-      'class' => array('comment-node-settings-form'),
-    ),
-    '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'comment') . '/js/comment.admin.js'),
-     ),
-    '#weight' => 80,
+  $comment_global_disable = config_get(
+    'node.type.' . $node->type,
+    'settings.comment_global_disable'
   );
-  $comment_count = isset($node->nid) ? db_query('SELECT comment_count FROM {node_comment_statistics} WHERE nid = :nid', array(':nid' => $node->nid))->fetchField() : 0;
-  $comment_settings = ($node->comment == COMMENT_NODE_HIDDEN) ? COMMENT_NODE_CLOSED : $node->comment;
-  $form['comment_settings']['comment'] = array(
-    '#type' => 'radios',
-    '#title' => t('Comments'),
-    '#title_display' => 'invisible',
-    '#parents' => array('comment'),
-    '#default_value' => $comment_settings,
-    '#options' => array(
-      COMMENT_NODE_OPEN => t('Open'),
-      COMMENT_NODE_CLOSED => t('Closed'),
-    ),
-    COMMENT_NODE_OPEN => array(
-      '#description' => t('Users with the "Post comments" permission can post comments.'),
-    ),
-    COMMENT_NODE_CLOSED => array(
-      '#description' => t('Users cannot post comments.'),
-    ),
-  );
-  // If the node has comments, add the "hidden" option too.
-  if (!empty($comment_count)) {
-    $form['comment_settings']['comment_hidden'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Hide existing comments.'),
-      '#default_value' => ($node->comment == COMMENT_NODE_HIDDEN) ? TRUE : FALSE,
-      '#states' => array(
-        'visible' => array(
-          ':input[name="comment"]' => array('value' => COMMENT_NODE_CLOSED),
-        ),
+  if ($comment_global_disable == 0) {
+    $form['comment_settings'] = array(
+      '#type' => 'fieldset',
+      '#access' => user_access('administer comments'),
+      '#title' => t('Comment settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#group' => 'additional_settings',
+      '#attributes' => array(
+        'class' => array('comment-node-settings-form'),
+      ),
+      '#attached' => array(
+        'js' => array(backdrop_get_path('module', 'comment') . '/js/comment.admin.js'),
+       ),
+      '#weight' => 80,
+    );
+    $comment_count = isset($node->nid) ? db_query('SELECT comment_count FROM {node_comment_statistics} WHERE nid = :nid', array(':nid' => $node->nid))->fetchField() : 0;
+    $comment_settings = ($node->comment == COMMENT_NODE_HIDDEN) ? COMMENT_NODE_CLOSED : $node->comment;
+    $form['comment_settings']['comment'] = array(
+      '#type' => 'radios',
+      '#title' => t('Comments'),
+      '#title_display' => 'invisible',
+      '#parents' => array('comment'),
+      '#default_value' => $comment_settings,
+      '#options' => array(
+        COMMENT_NODE_OPEN => t('Open'),
+        COMMENT_NODE_CLOSED => t('Closed'),
+      ),
+      COMMENT_NODE_OPEN => array(
+        '#description' => t('Users with the "Post comments" permission can post comments.'),
+      ),
+      COMMENT_NODE_CLOSED => array(
+        '#description' => t('Users cannot post comments.'),
       ),
     );
+    // If the node has comments, add the "hidden" option too.
+    if (!empty($comment_count)) {
+      $form['comment_settings']['comment_hidden'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Hide existing comments.'),
+        '#default_value' => ($node->comment == COMMENT_NODE_HIDDEN) ? TRUE : FALSE,
+        '#states' => array(
+          'visible' => array(
+            ':input[name="comment"]' => array('value' => COMMENT_NODE_CLOSED),
+          ),
+        ),
+      );
+    }
   }
 }
 
