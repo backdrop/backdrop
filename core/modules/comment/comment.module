@@ -308,7 +308,7 @@ function comment_node_type_load(&$types) {
       'comment_user_picture' => TRUE,
       'comment_form_location' => COMMENT_FORM_BELOW,
       'comment_preview' => BACKDROP_OPTIONAL,
-      'comment_close_enable' => FALSE,
+      'comment_close_enabled' => FALSE,
       'comment_close_days' => 14
     );
   }
@@ -1207,10 +1207,10 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         BACKDROP_REQUIRED => t('Required'),
       ),
     );
-    $form['comment']['comment_close_enable'] = array(
+    $form['comment']['comment_close_enabled'] = array(
       '#type' => 'checkbox',
       '#title' => t('Automatically close comments on old content'),
-      '#default_value' => $node_type->settings['comment_close_enable'],
+      '#default_value' => $node_type->settings['comment_close_enabled'],
     );
     $form['comment']['comment_close_days'] = array(
       '#type' => 'number',
@@ -1220,7 +1220,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#maxlength' => 4,
       '#states' => array(
         'invisible' => array(
-          ':input[name="comment_close_enable"]' => array('checked' => FALSE),
+          ':input[name="comment_close_enabled"]' => array('checked' => FALSE),
         ),
       ),
       '#field_prefix' => t('Close comments after'),
@@ -2377,7 +2377,7 @@ function _comment_close_all() {
     // Get the content type settings.
     $config = config('node.type.' . $type);
     $days = $config->get('settings.comment_close_days');
-    $enable = $config->get('settings.comment_close_enable');
+    $enable = $config->get('settings.comment_close_enabled');
 
     // If a day is set, do this one.
     if (!empty($enable) && !empty($days)) {
