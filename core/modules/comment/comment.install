@@ -150,6 +150,14 @@ function comment_schema() {
         'size' => 'tiny',
         'description' => 'The published status of a comment. (0 = Not Published, 1 = Published)',
       ),
+      'override_auto_closer' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'Override the automatic comment closer. (0 = Do not override, 1 = Override)',
+      );
       'thread' => array(
         'type' => 'varchar',
         'length' => 255,
@@ -361,6 +369,25 @@ function comment_update_1003() {
       $config->save();
     }
   }
+}
+
+/**
+ * Add an Override column for automatic comment closing for individual nodes.
+ */
+function comment_update_1004() {
+  if (db_field_exists('comment', 'override_auto_closer')) {
+    return;
+  }
+
+  $schema = array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+    'size' => 'tiny',
+    'description' => 'Override the automatic comment closer. (0 = Do not override, 1 = Override)',
+  );
+  db_add_field('comment', 'override_auto_closer', $schema);
 }
 
 /**
