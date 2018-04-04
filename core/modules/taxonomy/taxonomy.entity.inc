@@ -68,6 +68,15 @@ class TaxonomyTerm extends Entity {
   public $parent;
 
   /**
+   * Cached access values.
+   *
+   * @var array
+   *
+   * @see Node::access()
+   */
+  private $rights = array();
+
+  /**
    * Implements EntityInterface::id().
    */
   public function id() {
@@ -104,6 +113,57 @@ class TaxonomyTerm extends Entity {
       'options' => array(),
     );
   }
+
+  /**
+   * Overrides Entity::createAccess().
+   */
+  public static function createAccess($account = NULL) {
+    $rights = &backdrop_static(__METHOD__, array());
+
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    // If we've already checked access for this node, user and op, return from
+    // cache.
+    if (isset($rights[$account->uid])) {
+      return $rights[$account->uid];
+    }
+
+    $rights[$account->uid] = user_access('administer taxonomy', $account);
+    return $rights[$account->uid];
+  }
+
+  /**
+   * Overrides Entity::access().
+   */
+  public function access($op, $account = NULL) {
+    if (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
+      // If the $op was not one of the supported ones, we return access denied.
+      return FALSE;
+    }
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    // If we've already checked access for this entity, user and op, return from
+    // cache.
+    if (isset($this->rights[$account->uid][$op])) {
+      return $this->rights[$account->uid][$op];
+    }
+
+    if ($op == 'view') {
+      $this->rights[$account->uid][$op] = user_access('access content', $account);
+      return $this->rights[$account->uid][$op];
+    }
+    elseif ($op == 'udpate' || $op == 'delete') {
+      $this->rights[$account->uid][$op] = user_access("$op terms in $this->vocabulary", $account) || user_access('administer taxonomy', $account);
+      return $this->rights[$account->uid][$op];
+    }
+  }
+
 }
 
 /**

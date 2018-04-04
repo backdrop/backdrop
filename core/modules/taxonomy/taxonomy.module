@@ -388,13 +388,7 @@ function taxonomy_admin_paths() {
  * @see taxonomy_menu()
  */
 function taxonomy_term_access($op, $term) {
-  if (!$term || !in_array($op, array('edit', 'delete'), TRUE)) {
-    // If there was no term to check against, or the $op was not one of the
-    // supported ones, we return access denied.
-    return FALSE;
-  }
-
-  return user_access("$op terms in $term->vocabulary") || user_access('administer taxonomy');
+  return $term->access($op);
 }
 
 /**

@@ -128,6 +128,15 @@ class User extends Entity {
   public $roles = array();
 
   /**
+   * Cached access values.
+   *
+   * @var array
+   *
+   * @see Node::access()
+   */
+  private $rights = array();
+
+  /**
    * Implements EntityInterface::id().
    */
   public function id() {
@@ -137,7 +146,7 @@ class User extends Entity {
   /**
    * Implements EntityInterface::entityType().
    */
-  public function entityType() {
+  public static function entityType() {
     return 'user';
   }
 
@@ -164,6 +173,67 @@ class User extends Entity {
   }
 
   /**
+   * Overrides Entity::createAccess().
+   */
+  public static function createAccess($account = NULL) {
+    return user_access('administer users', $account);
+  }
+
+  /**
+   * Overrides Entity::access().
+   *
+   * @param string $op
+   *   The operation to be performed on the node. Possible values are:
+   *   - "view".
+   *   - "update".
+   *   - "delete".
+   * @param User|AnonymousUser $account
+   *   (optional) The user to check for. Leave it to NULL to check for the
+   *   global user.
+   *
+   * @return bool
+   *   TRUE if access is granted, FALSE otherwise.
+   */
+  public function access($op, $account = NULL) {
+    if (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
+      // If the $op was not one of the supported ones, we return access denied.
+      return FALSE;
+    }
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    // If we've already checked access for this node, user and op, return from
+    // cache.
+    if (isset($this->rights[$account->uid][$op])) {
+      return $this->rights[$account->uid][$op];
+    }
+
+    if ($op == 'view') {
+      // Never allow access to view the anonymous user account.
+      if (is_a($account, 'User')) {
+        // Admins can view all, users can view own profiles at all times.
+        if ($GLOBALS['user']->uid == $account->uid || user_access('administer users', $account)) {
+          return TRUE;
+        }
+        elseif (user_access('access user profiles', $account)) {
+          return $account->status;
+        }
+      }
+      return FALSE;
+    }
+    elseif ($op == 'update') {
+      return (($account->uid == $this->uid) || user_access('administer users', $account)) && $this->uid > 0;
+    }
+    elseif ($op == 'delete') {
+      return ((($account->uid == $this->uid) && user_access('cancel account', $account)) || user_access('administer users', $account)) && $this->uid > 0;
+    }
+
+    return FALSE;
+  }
+
+  /**
    * Implements EntityInterface::save().
    */
   public function save() {
@@ -176,6 +246,7 @@ class User extends Entity {
 
     return $return;
   }
+
 }
 
 

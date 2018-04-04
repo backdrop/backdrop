@@ -1094,34 +1094,32 @@ function user_register_access() {
 /**
  * User view access callback.
  *
- * @param $account
+ * @param User|AnonymousUser $account
  *   Can either be a full user object or a $uid.
+ *
+ * @return bool
+ *   Whether access is allowed or not.
  */
 function user_view_access($account) {
-  $uid = is_object($account) ? $account->uid : (int) $account;
-
-  // Never allow access to view the anonymous user account.
-  if ($uid) {
-    // Admins can view all, users can view own profiles at all times.
-    if ($GLOBALS['user']->uid == $uid || user_access('administer users')) {
-      return TRUE;
-    }
-    elseif (user_access('access user profiles')) {
-      // At this point, load the complete account object.
-      if (!is_object($account)) {
-        $account = user_load($uid);
-      }
-      return (is_object($account) && $account->status);
-    }
+  if (!($account instanceof User) && is_int($account)) {
+    $account = user_load($account);
   }
-  return FALSE;
+  return $account && $account->access('view');
 }
 
 /**
  * Access callback for user account editing.
  */
 function user_edit_access($account) {
-  return (($GLOBALS['user']->uid == $account->uid) || user_access('administer users')) && $account->uid > 0;
+  if (!($account instanceof User) && is_int($account)) {
+    $account = user_load($account);
+  }
+  // Account for anonymous users, which are of class AnonymousUser.
+  if ($account instanceof User) {
+    /** @var User $account */
+    return $account->access('update');
+  }
+  return FALSE;
 }
 
 /**
@@ -1131,7 +1129,15 @@ function user_edit_access($account) {
  * users, and prevent the anonymous user from cancelling the account.
  */
 function user_cancel_access($account) {
-  return ((($GLOBALS['user']->uid == $account->uid) && user_access('cancel account')) || user_access('administer users')) && $account->uid > 0;
+  if (!($account instanceof User) && is_int($account)) {
+    $account = user_load($account);
+  }
+  // Account for anonymous users, which are of class AnonymousUser.
+  if ($account instanceof User) {
+    /** @var User $account */
+    return $account->access('delete');
+  }
+  return FALSE;
 }
 
 /**
