@@ -1281,6 +1281,11 @@ function comment_form_node_form_alter(&$form, $form_state) {
         ),
       ),
     );
+    $form['comment_settings']['comment_closer_override'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Override the automatic closing comments of old content'),
+      '#default_value' => isset($node->comment_closer_override) ? $node->comment_closer_override : 0,
+    );
   }
 }
 
@@ -2388,7 +2393,7 @@ function _comment_close_all() {
       $oldest_allowed = strtotime("-$days days", $now);
 
       // Fetch nodes that should have comments closed.
-      $result = db_query("SELECT nid FROM {node} WHERE created < :oldest AND type = :type AND comment = :comment",
+      $result = db_query("SELECT nid FROM {node} WHERE created < :oldest AND comment_closer_override = 0 AND type = :type AND comment = :comment",
         array(':oldest' => $oldest_allowed, ':type' => $type, ':comment' => COMMENT_NODE_OPEN)
       );
       $nids = $result->fetchCol();
