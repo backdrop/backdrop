@@ -38,7 +38,7 @@ class TestFieldEntity extends Entity {
   /**
    * Implements EntityInterface::createAccess().
    */
-  public static function createAccess($account = NULL) {
+  public static function createAccess($bundle = NULL, $account = NULL) {
     return TRUE;
   }
 

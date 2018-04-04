@@ -202,7 +202,7 @@ class Node extends Entity {
   /**
    * Overrides Entity::createAccess().
    */
-  public static function createAccess($account = NULL) {
+  public static function createAccess($bundle = NULL, $account = NULL) {
     $rights = &backdrop_static(__METHOD__, array());
 
     // If no user object is supplied, the access check is for the current user.
@@ -230,7 +230,7 @@ class Node extends Entity {
     // - At least one module says to grant access.
     // If no module specified either allow or deny, we fall back to the
     // node_access table.
-    $access = module_invoke_all('node_access', self::entityType(), 'create', $account);
+    $access = module_invoke_all('node_access', $bundle, 'create', $account);
     if (in_array(NODE_ACCESS_DENY, $access, TRUE)) {
       $rights[$account->uid] = FALSE;
       return FALSE;

@@ -175,7 +175,7 @@ class User extends Entity {
   /**
    * Overrides Entity::createAccess().
    */
-  public static function createAccess($account = NULL) {
+  public static function createAccess($bundle = NULL, $account = NULL) {
     return user_access('administer users', $account);
   }
 

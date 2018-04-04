@@ -77,6 +77,8 @@ interface EntityInterface {
   /**
    * Determines whether the given user has access to create this type of entity.
    *
+   * @param string $bundle
+   *   (optional) The entity's bundle to check create access against.
    * @param User|AnonymousUser $account
    *   (optional) The user to check for. Leave it to NULL to check for the
    *   global user.
@@ -85,7 +87,7 @@ interface EntityInterface {
    *   Whether access is allowed or not. If the entity type does not specify any
    *   access information, NULL is returned.
    */
-  public static function createAccess($account = NULL);
+  public static function createAccess($bundle = NULL, $account = NULL);
 
   /**
    * Determines whether the given user has access to this entity.
