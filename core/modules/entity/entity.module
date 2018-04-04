@@ -144,8 +144,7 @@ function entity_view_mode_exists($machine_name, $element, $form_state) {
  * Determines whether the given user has access to an entity.
  *
  * @param string $op
- *   The operation being performed. One of 'view', 'update', 'create' or
- *   'delete'.
+ *   The operation being performed. One of 'view', 'update' or 'delete'.
  * @param string $entity_type
  *   The entity type of the entity to check for.
  * @param EntityInterface $entity
@@ -159,11 +158,14 @@ function entity_view_mode_exists($machine_name, $element, $form_state) {
  *   access information, NULL is returned.
  *
  * @see entity_type_supports()
+ * @deprecated since 1.0.0
  */
 function entity_access($op, $entity_type, EntityInterface $entity = NULL, User $account = NULL) {
-  if (($info = entity_get_info()) && isset($info[$entity_type]['access callback'])) {
-    return $info[$entity_type]['access callback']($op, $entity, $account, $entity_type);
+  if (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
+    // If the $op was not one of the supported ones, we return access denied.
+    return FALSE;
   }
+  return $entity->access($op, $account);
 }
 
 /**
