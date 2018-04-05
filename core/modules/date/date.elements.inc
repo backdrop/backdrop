@@ -827,7 +827,7 @@ function date_select_input_date($element, $input) {
  */
 function date_local_date($item, $timezone, $field, $instance, $part = 'value') {
 
-  $value = $item[$part];
+  $value = (!empty($item)) ? $item[$part]: '';
 
   // If the value is empty, don't try to create a date object because it will
   // end up being the current day.
@@ -1418,11 +1418,13 @@ function date_combo_element_process($element, &$form_state, $form) {
   // in the formatters.
   $process = date_process_values($field, $instance);
   foreach ($process as $processed) {
-    if (!isset($element['#default_value'][$processed])) {
+    if (!isset($element['#default_value'][$processed]) && !empty($element['#default_value'])) {
       $element['#default_value'][$processed] = '';
     }
     $date = date_local_date($element['#default_value'], $element['#date_timezone'], $field, $instance, $processed);
-    $element['#default_value'][$processed] = is_object($date) ? date_format($date, DATE_FORMAT_DATETIME) : '';
+    if (!empty($element['#default_value'])) {
+      $element['#default_value'][$processed] = is_object($date) ? date_format($date, DATE_FORMAT_DATETIME) : '';
+    }
   }
 
   // Blank out the end date for optional end dates that match the start date,
