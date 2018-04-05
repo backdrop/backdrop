@@ -34,7 +34,6 @@ function filter_tips_long($format = NULL) {
  */
 function filter_format_editor_link_form($form, &$form_state, $format) {
   $form_state['format'] = $format;
-
   // Record the dialog selector that needs to be closed if present.
   if (isset($form_state['input']['dialogOptions']['target'])) {
     $form_state['storage']['dialog_selector'] = $form_state['input']['dialogOptions']['target'];
@@ -116,7 +115,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#type' => 'textfield',
     '#default_value' => isset($values['linktext']) ? $values['linktext'] : '',
     '#parents' => array('attributes', 'linktext'),
-    '#description' => t('Default text is the link value. Enter some alternative link text here if preferred.'),
+    '#description' => t('Default is the link or file identifier. Enter some alternative link text here if needed.'),
   );
 
 
@@ -256,7 +255,6 @@ function _filter_link_autocomplete($string) {
   }
   // Allow modules to alter the matches.
   backdrop_alter('link_autocomplete', $matches, $string);
-
   backdrop_json_output($matches);
 }
 
@@ -450,29 +448,38 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
  * Submit handler for filter_format_editor_link_form().
  */
 function filter_format_editor_link_form_submit($form, &$form_state) {
-  if (isset($form_state['values']['fid'])) {
-    // Value of fid is zero for existing files so get it from href.
-    // This is to ensure that linked files get attribute 'data-file-id'.
-    if ($form_state['values']['fid'] == 0){
-      $uri = $form_state['values']['attributes']['href'];
-      $fid = _filter_get_file_id($uri);
-    }
-    // Value of fid may be available in form values.
-    else {$fid = $form_state['values']['fid'];}
-    if ($fid) {
-      // Get file details.
+  // Look for file and get fid from uri.
+  $fid = 0;
+  $uri = '';
+  if (isset($form_state['values']['attributes']['href']) && (strlen($form_state['values']['attributes']['href']) > 1)){
+    $uri = $form_state['values']['attributes']['href'];
+    // Check for FID for this URI.
+    $fid = _filter_get_file_id($uri);
+  }
+  // File upload will not have provided href but provides fid.
+  elseif (isset($form_state['values']['fid'])) {
+    $fid = $form_state['values']['fid'];
+  }
+  // If file is found get its URI.
+  if ($fid > 0) {
       $file = file_load($fid);
-
+      $uri = file_create_url($file->uri);
       // Try to make a local path if possible for better portability.
       // Absolute path is needed if Backdrop is installed in subdirectory.
       $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
-      $url = file_create_url($file->uri);
-      $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
 
+      $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $uri);
       $form_state['values']['attributes']['data-file-id'] = $fid;
       $form_state['values']['attributes']['href'] = $url;
       unset($form_state['values']['fid']);
-    }
+  }
+  else {
+      // Modify references to other URIs.
+      $url = substr(base_path(), 0, -1) . $uri;
+      $form_state['values']['attributes']['href'] = $url;
+      // Remove any reference to a data file.
+      unset($form_state['values']['fid']);
+      $form_state['values']['attributes']['data-file-id'] = NULL;
   }
 }
 
@@ -529,10 +536,8 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
  */
 function _filter_get_file_id($href) {
   // Extract file name and directory from $href.
-  $public_path = config_get('system.core','file_public_path');
-  $pp_length = strlen($public_path);
-  $pos = strpos($href,$public_path);
-  $filename = substr($href,$pos + $pp_length);
+  $pos = strrpos($href, "/");
+  $filename = substr($href,$pos + 1);
   // Now find this file name in uri field to get fid.
   $results = db_select('file_managed')
     ->fields('file_managed', array('fid', 'uri'))
@@ -540,6 +545,7 @@ function _filter_get_file_id($href) {
     ->orderBy('fid', 'DESC')
     ->execute();
 
+  $result = 0;
   foreach ($results as $found) {
     $result = $found->fid;
   }
