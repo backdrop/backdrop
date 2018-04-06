@@ -239,7 +239,7 @@ group = Common
 file = common.test
 
 [CommonURLUnitTestCase]
-name = URL checking tests
+name = URL checking unit tests
 description = Confirm URL parsing functions work correctly with various input.
 group = Common
 file = common.test

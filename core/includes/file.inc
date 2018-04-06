@@ -471,6 +471,11 @@ function file_prepare_directory(&$directory, $options = FILE_MODIFY_PERMISSIONS)
  * Creates a .htaccess file in each files directory if it is missing.
  */
 function file_ensure_htaccess() {
+  // No need to create htaccess files if not running Apache.
+  if (!backdrop_is_apache()) {
+    return;
+  }
+
   file_save_htaccess('public://', FALSE);
   if (config_get('system.core', 'file_private_path')) {
     file_save_htaccess('private://', TRUE);
