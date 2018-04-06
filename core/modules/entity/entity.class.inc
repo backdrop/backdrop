@@ -79,7 +79,7 @@ interface EntityInterface {
    *
    * @param string $bundle
    *   (optional) The entity's bundle to check create access against.
-   * @param User|AnonymousUser $account
+   * @param User|AnonymousUser|object $account
    *   (optional) The user to check for. Leave it to NULL to check for the
    *   global user.
    *
@@ -95,7 +95,7 @@ interface EntityInterface {
    * @param string $op
    *   The operation being performed. One of 'view', 'update', 'create' or
    *   'delete'.
-   * @param User|AnonymousUser $account
+   * @param User|AnonymousUser|object $account
    *   (optional) The user to check for. Leave it to NULL to check for the
    *   global user.
    *

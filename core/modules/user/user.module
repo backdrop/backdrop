@@ -1094,7 +1094,7 @@ function user_register_access() {
 /**
  * User view access callback.
  *
- * @param User|AnonymousUser $account
+ * @param User|AnonymousUser|object $account
  *   Can either be a full user object or a $uid.
  *
  * @return bool

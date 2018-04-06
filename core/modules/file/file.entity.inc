@@ -106,7 +106,7 @@ class File extends Entity {
   /**
    * Implements EntityInterface::entityType().
    */
-  public function entityType() {
+  public static function entityType() {
     return 'file';
   }
 
@@ -140,12 +140,12 @@ class File extends Entity {
 
     // If we've already checked access for this node, user and op, return from
     // cache.
-    if (isset($rights[$account->uid])) {
-      return $rights[$account->uid];
+    if (isset($rights[$account->uid][$bundle])) {
+      return $rights[$account->uid][$bundle];
     }
 
-    $rights[$account->uid] = user_access('access content', $account);
-    return $rights[$account->uid];
+    $rights[$account->uid][$bundle] = user_access('access content', $account);
+    return $rights[$account->uid][$bundle];
   }
 
   /**
@@ -155,7 +155,7 @@ class File extends Entity {
    *   The operation to be performed on the node. Possible values are:
    *   - "update".
    *   - "delete".
-   * @param User|AnonymousUser $account
+   * @param User|AnonymousUser|object $account
    *   (optional) The user to check for. Leave it to NULL to check for the
    *   global user.
    *
@@ -163,6 +163,10 @@ class File extends Entity {
    *   TRUE if access is granted, FALSE otherwise.
    */
   public function access($op, $account = NULL) {
+    // Casting class with private property causes errors due to added prefix.
+    // e.g. "\0" . 'File' . "\0". So use static array instead.
+    $rights = &backdrop_static(__METHOD__, array());
+
     if (!in_array($op, array('update', 'delete'), TRUE)) {
       // If the $op was not one of the supported ones, we return access denied.
       return FALSE;
@@ -172,22 +176,25 @@ class File extends Entity {
       $account = $GLOBALS['user'];
     }
 
+    $cid = $this->id();
+
     // If we've already checked access for this node, user and op, return from
     // cache.
-    if (isset($this->rights[$account->uid][$op])) {
-      return $this->rights[$account->uid][$op];
+    if (isset($rights[$account->uid][$cid][$op])) {
+      return $rights[$account->uid][$cid][$op];
     }
 
     if ($op == 'update') {
-      $this->rights[$account->uid][$op] = user_access('manage files', $account);
-      return $this->rights[$account->uid][$op];
+      $rights[$account->uid][$cid][$op] = user_access('manage files', $account);
+      return $rights[$account->uid][$cid][$op];
     }
     elseif ($op == 'delete') {
-      $this->rights[$account->uid][$op] = user_access('delete files', $account);
-      return $this->rights[$account->uid][$op];
+      $rights[$account->uid][$cid][$op] = user_access('delete files', $account);
+      return $rights[$account->uid][$cid][$op];
     }
 
-    return FALSE;
+    $rights[$account->uid][$cid][$op] = FALSE;
+    return $rights[$account->uid][$cid][$op];
   }
 
 }

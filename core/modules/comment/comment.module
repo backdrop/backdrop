@@ -214,7 +214,7 @@ function comment_menu() {
     'page callback' => 'comment_edit_page',
     'page arguments' => array(1),
     'access callback' => 'comment_access',
-    'access arguments' => array('edit', 1),
+    'access arguments' => array('update', 1),
     'type' => MENU_LOCAL_TASK,
     'weight' => 0,
   );

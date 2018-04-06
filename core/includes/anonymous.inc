@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Provides a class for managing anonymous users.
  *
@@ -8,7 +9,7 @@
  * use of the AnonymousUser class in places where different kinds of users are
  * listed together.
  */
-class AnonymousUser {
+class AnonymousUser implements UserInterface {
   public $uid = 0;
   public $name = NULL;
   public $hostname = NULL;
@@ -18,7 +19,7 @@ class AnonymousUser {
   /**
    * Constructor for an anonymous user object.
    */
-  function __contruct($values = array()) {
+  public function __construct($values = array()) {
     foreach ($values as $key => $value) {
       $this->$key = $value;
     }
@@ -44,4 +45,19 @@ class AnonymousUser {
   public function uri() {
     return FALSE;
   }
+
+  /**
+   * Provides anonymous user createAccess for consistency with User entities.
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    return FALSE;
+  }
+
+  /**
+   * Provides anonymous user access for consistency with User entities.
+   */
+  public function access($op, $account = NULL) {
+    return FALSE;
+  }
+
 }

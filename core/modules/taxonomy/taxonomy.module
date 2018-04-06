@@ -388,6 +388,10 @@ function taxonomy_admin_paths() {
  * @see taxonomy_menu()
  */
 function taxonomy_term_access($op, $term) {
+  if ($op == 'edit') {
+    // Normalize edit op to update.
+    $op = 'update';
+  }
   return $term->access($op);
 }
 

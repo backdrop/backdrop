@@ -141,15 +141,6 @@ class Node extends Entity {
   public $revision_uid;
 
   /**
-   * Cached access values.
-   *
-   * @var array
-   *
-   * @see Node::access()
-   */
-  private $rights = array();
-
-  /**
    * Create a new Node instance.
    */
   function __construct(array $values = array()) {
@@ -212,17 +203,17 @@ class Node extends Entity {
 
     // If we've already checked access for this node, user and op, return from
     // cache.
-    if (isset($rights[$account->uid])) {
-      return $rights[$account->uid];
+    if (isset($rights[$account->uid][$bundle])) {
+      return $rights[$account->uid][$bundle];
     }
 
     if (user_access('bypass node access', $account)) {
-      $rights[$account->uid] = TRUE;
-      return TRUE;
+      $rights[$account->uid][$bundle] = TRUE;
+      return $rights[$account->uid][$bundle];
     }
     if (!user_access('access content', $account)) {
-      $rights[$account->uid] = FALSE;
-      return FALSE;
+      $rights[$account->uid][$bundle] = FALSE;
+      return $rights[$account->uid][$bundle];
     }
 
     // We grant access to the node if both of the following conditions are met:
@@ -232,15 +223,16 @@ class Node extends Entity {
     // node_access table.
     $access = module_invoke_all('node_access', $bundle, 'create', $account);
     if (in_array(NODE_ACCESS_DENY, $access, TRUE)) {
-      $rights[$account->uid] = FALSE;
-      return FALSE;
+      $rights[$account->uid][$bundle] = FALSE;
+      return $rights[$account->uid][$bundle];
     }
     elseif (in_array(NODE_ACCESS_ALLOW, $access, TRUE)) {
-      $rights[$account->uid] = TRUE;
-      return TRUE;
+      $rights[$account->uid][$bundle] = TRUE;
+      return $rights[$account->uid][$bundle];
     }
 
-    return FALSE;
+    $rights[$account->uid][$bundle] = FALSE;
+    return $rights[$account->uid][$bundle];
   }
 
   /**
@@ -251,7 +243,7 @@ class Node extends Entity {
    *   - "view".
    *   - "update".
    *   - "delete".
-   * @param User|AnonymousUser $account
+   * @param User|AnonymousUser|object $account
    *   (optional) The user to check for. Leave it to NULL to check for the
    *   global user.
    *
@@ -259,6 +251,10 @@ class Node extends Entity {
    *   TRUE if access is granted, FALSE otherwise.
    */
   public function access($op, $account = NULL) {
+    // Casting class with private property causes errors due to added prefix.
+    // e.g. "\0" . 'Node' . "\0". So use static array instead.
+    $rights = &backdrop_static(__METHOD__, array());
+
     if (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
       // If the $op was not one of the supported ones, we return access denied.
       return FALSE;
@@ -268,19 +264,21 @@ class Node extends Entity {
       $account = $GLOBALS['user'];
     }
 
+    $cid = $this->id();
+
     // If we've already checked access for this node, user and op, return from
     // cache.
-    if (isset($this->rights[$account->uid][$op])) {
-      return $this->rights[$account->uid][$op];
+    if (isset($rights[$account->uid][$cid][$op])) {
+      return $rights[$account->uid][$cid][$op];
     }
 
     if (user_access('bypass node access', $account)) {
-      $this->rights[$account->uid][$op] = TRUE;
-      return TRUE;
+      $rights[$account->uid][$cid][$op] = TRUE;
+      return $rights[$account->uid][$cid][$op];
     }
     if (!user_access('access content', $account)) {
-      $this->rights[$account->uid][$op] = FALSE;
-      return FALSE;
+      $rights[$account->uid][$cid][$op] = FALSE;
+      return $rights[$account->uid][$cid][$op];
     }
 
     // We grant access to the node if both of the following conditions are met:
@@ -290,24 +288,24 @@ class Node extends Entity {
     // node_access table.
     $access = module_invoke_all('node_access', $this, $op, $account);
     if (in_array(NODE_ACCESS_DENY, $access, TRUE)) {
-      $this->rights[$account->uid][$op] = FALSE;
-      return FALSE;
+      $rights[$account->uid][$cid][$op] = FALSE;
+      return $rights[$account->uid][$cid][$op];
     }
     elseif (in_array(NODE_ACCESS_ALLOW, $access, TRUE)) {
-      $this->rights[$account->uid][$op] = TRUE;
-      return TRUE;
+      $rights[$account->uid][$cid][$op] = TRUE;
+      return $rights[$account->uid][$cid][$op];
     }
 
     // Check if user can view any unpublished nodes.
     if ($op == 'view' && !$this->status && user_access('view any unpublished content', $account) && $account->uid != 0) {
-      $this->rights[$account->uid][$op] = TRUE;
-      return TRUE;
+      $rights[$account->uid][$cid][$op] = TRUE;
+      return $rights[$account->uid][$cid][$op];
     }
 
     // Check if authors can view their own unpublished nodes.
     if ($op == 'view' && !$this->status && user_access('view own unpublished content', $account) && $account->uid == $this->uid && $account->uid != 0) {
-      $this->rights[$account->uid][$op] = TRUE;
-      return TRUE;
+      $rights[$account->uid][$cid][$op] = TRUE;
+      return $rights[$account->uid][$cid][$op];
     }
 
     // If the module did not override the access rights, use those set in the
@@ -339,18 +337,19 @@ class Node extends Entity {
         $result = (bool) $query
           ->execute()
           ->fetchField();
-        $this->rights[$account->uid][$op] = $result;
-        return $result;
+        $rights[$account->uid][$cid][$op] = $result;
+        return $rights[$account->uid][$cid][$op];
       }
       elseif ($op == 'view' && $this->status) {
         // If no modules implement hook_node_grants(), the default behavior is
         // to allow all users to view published nodes, so reflect that here.
-        $this->rights[$account->uid][$op] = TRUE;
-        return TRUE;
+        $rights[$account->uid][$cid][$op] = TRUE;
+        return $rights[$account->uid][$cid][$op];
       }
     }
 
-    return FALSE;
+    $rights[$account->uid][$cid][$op] = FALSE;
+    return $rights[$account->uid][$cid][$op];
   }
 
   /**

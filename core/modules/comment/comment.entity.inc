@@ -81,15 +81,6 @@ class Comment extends Entity {
   public $homepage;
 
   /**
-   * Cached access values.
-   *
-   * @var array
-   *
-   * @see Node::access()
-   */
-  private $rights = array();
-
-  /**
    * Implements EntityInterface::id().
    */
   public function id() {
@@ -99,7 +90,7 @@ class Comment extends Entity {
   /**
    * Implements EntityInterface::entityType().
    */
-  public function entityType() {
+  public static function entityType() {
     return 'comment';
   }
 
@@ -140,12 +131,12 @@ class Comment extends Entity {
 
     // If we've already checked access for this node, user and op, return from
     // cache.
-    if (isset($rights[$account->uid])) {
-      return $rights[$account->uid];
+    if (isset($rights[$account->uid][$bundle])) {
+      return $rights[$account->uid][$bundle];
     }
 
-    $rights[$account->uid] = user_access('post comments', $account);
-    return $rights[$account->uid];
+    $rights[$account->uid][$bundle] = user_access('post comments', $account);
+    return $rights[$account->uid][$bundle];
   }
 
   /**
@@ -158,7 +149,7 @@ class Comment extends Entity {
    *   - "approve".
    *   - "delete".
    *   - "delete".
-   * @param User|AnonymousUser $account
+   * @param User|AnonymousUser|object $account
    *   (optional) The user to check for. Leave it to NULL to check for the
    *   global user.
    *
@@ -166,7 +157,11 @@ class Comment extends Entity {
    *   TRUE if access is granted, FALSE otherwise.
    */
   public function access($op, $account = NULL) {
-    if (!in_array($op, array('view', 'update', 'apprive', 'delete'), TRUE)) {
+    // Casting class with private property causes errors due to added prefix.
+    // e.g. "\0" . 'Comment' . "\0". So use static array instead.
+    $rights = &backdrop_static(__METHOD__, array());
+
+    if (!in_array($op, array('view', 'update', 'approve', 'delete'), TRUE)) {
       // If the $op was not one of the supported ones, we return access denied.
       return FALSE;
     }
@@ -175,30 +170,33 @@ class Comment extends Entity {
       $account = $GLOBALS['user'];
     }
 
+    $cid = $this->id();
+
     // If we've already checked access for this node, user and op, return from
     // cache.
-    if (isset($this->rights[$account->uid][$op])) {
-      return $this->rights[$account->uid][$op];
+    if (isset($rights[$account->uid][$cid][$op])) {
+      return $rights[$account->uid][$cid][$op];
     }
 
     if ($op == 'view') {
-      $this->rights[$account->uid][$op] = user_access('access comments', $account);
-      return $this->rights[$account->uid][$op];
+      $rights[$account->uid][$cid][$op] = user_access('access comments', $account);
+      return $rights[$account->uid][$cid][$op];
     }
     elseif ($op == 'update') {
-      $this->rights[$account->uid][$op] = ($account->uid && $account->uid == $this->uid && $this->status == COMMENT_PUBLISHED && user_access('edit own comments', $account)) || user_access('administer comments', $account);
-      return $this->rights[$account->uid][$op];
+      $rights[$account->uid][$cid][$op] = ($account->uid && $account->uid == $this->uid && $this->status == COMMENT_PUBLISHED && user_access('edit own comments', $account)) || user_access('administer comments', $account);
+      return $rights[$account->uid][$cid][$op];
     }
     elseif ($op == 'approve') {
-      $this->rights[$account->uid][$op] = user_access('administer comments', $account);
-      return $this->rights[$account->uid][$op];
+      $rights[$account->uid][$cid][$op] = user_access('administer comments', $account);
+      return $rights[$account->uid][$cid][$op];
     }
     elseif ($op == 'delete') {
-      $this->rights[$account->uid][$op] = user_access('administer comments', $account);
-      return $this->rights[$account->uid][$op];
+      $rights[$account->uid][$cid][$op] = user_access('administer comments', $account);
+      return $rights[$account->uid][$cid][$op];
     }
 
-    return FALSE;
+    $rights[$account->uid][$cid][$op] = FALSE;
+    return $rights[$account->uid][$cid][$op];
   }
 
 }

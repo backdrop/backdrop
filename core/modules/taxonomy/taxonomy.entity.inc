@@ -68,15 +68,6 @@ class TaxonomyTerm extends Entity {
   public $parent;
 
   /**
-   * Cached access values.
-   *
-   * @var array
-   *
-   * @see Node::access()
-   */
-  private $rights = array();
-
-  /**
    * Implements EntityInterface::id().
    */
   public function id() {
@@ -100,7 +91,7 @@ class TaxonomyTerm extends Entity {
   /**
    * Implements EntityInterface::entityType().
    */
-  public function entityType() {
+  public static function entityType() {
     return 'taxonomy_term';
   }
 
@@ -127,18 +118,22 @@ class TaxonomyTerm extends Entity {
 
     // If we've already checked access for this node, user and op, return from
     // cache.
-    if (isset($rights[$account->uid])) {
-      return $rights[$account->uid];
+    if (isset($rights[$account->uid][$bundle])) {
+      return $rights[$account->uid][$bundle];
     }
 
-    $rights[$account->uid] = user_access('administer taxonomy', $account);
-    return $rights[$account->uid];
+    $rights[$account->uid][$bundle] = user_access('administer taxonomy', $account);
+    return $rights[$account->uid][$bundle];
   }
 
   /**
    * Overrides Entity::access().
    */
   public function access($op, $account = NULL) {
+    // Casting class with private property causes errors due to added prefix.
+    // e.g. "\0TaxonomyTerm\0". So use static array instead.
+    $rights = &backdrop_static(__METHOD__, array());
+
     if (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
       // If the $op was not one of the supported ones, we return access denied.
       return FALSE;
@@ -148,20 +143,25 @@ class TaxonomyTerm extends Entity {
       $account = $GLOBALS['user'];
     }
 
+    $cid = $this->id();
+
     // If we've already checked access for this entity, user and op, return from
     // cache.
-    if (isset($this->rights[$account->uid][$op])) {
-      return $this->rights[$account->uid][$op];
+    if (isset($rights[$account->uid][$cid][$op])) {
+      return $rights[$account->uid][$cid][$op];
     }
 
     if ($op == 'view') {
-      $this->rights[$account->uid][$op] = user_access('access content', $account);
-      return $this->rights[$account->uid][$op];
+      $rights[$account->uid][$cid][$op] = user_access('access content', $account);
+      return $rights[$account->uid][$cid][$op];
     }
-    elseif ($op == 'udpate' || $op == 'delete') {
-      $this->rights[$account->uid][$op] = user_access("$op terms in $this->vocabulary", $account) || user_access('administer taxonomy', $account);
-      return $this->rights[$account->uid][$op];
+    elseif ($op == 'update' || $op == 'delete') {
+      $rights[$account->uid][$cid][$op] = user_access("$op terms in $this->vocabulary", $account) || user_access('administer taxonomy', $account);
+      return $rights[$account->uid][$cid][$op];
     }
+
+    $rights[$account->uid][$cid][$op] = FALSE;
+    return $rights[$account->uid][$cid][$op];
   }
 
 }

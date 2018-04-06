@@ -2443,18 +2443,19 @@ function node_form_system_themes_admin_form_submit($form, &$form_state) {
  * @param Node|string $node
  *   The node entity on which the operation is to be performed, or the node type
  *   (e.g., 'post') for the 'create' operation.
- * @param User $account
+ * @param User|object $account
  *   (optional) A user object representing the user for whom the operation is to
  *   be performed. Determines access for a user other than the current user.
+ *   This really should always be a User object, but it not always is.
  *
  * @return bool
  *   TRUE if the operation may be performed, FALSE otherwise.
  *
  * @see node_menu()
  */
-function node_access($op, $node, User $account = NULL) {
+function node_access($op, $node, $account = NULL) {
   if ($op == 'create') {
-    return Node::createAccess($op, $account);
+    return Node::createAccess($node, $account);
   }
   elseif ($node instanceof Node) {
     return $node->access($op, $account);

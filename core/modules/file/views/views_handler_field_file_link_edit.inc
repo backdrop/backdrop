@@ -41,7 +41,7 @@ class views_handler_field_file_link_edit extends views_handler_field_entity {
    */
   function render_link(File $file, $values) {
     // Ensure user has access to edit this file.
-    if (!$file->access('edit')) {
+    if (!$file->access('update')) {
       return;
     }
 
