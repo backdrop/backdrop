@@ -167,7 +167,7 @@ class User extends Entity implements UserInterface {
    * Overrides Entity::createAccess().
    */
   public static function createAccess($bundle = NULL, $account = NULL) {
-    $rights = &backdrop_static(__METHOD__, []);
+    $rights = &backdrop_static(__METHOD__, array());
 
     // If no user object is supplied, the access check is for the current user.
     if (empty($account)) {
