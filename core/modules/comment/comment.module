@@ -1034,25 +1034,25 @@ function comment_links(Comment $comment, Node $node) {
   if ($node->comment == COMMENT_NODE_OPEN) {
     if ($comment->access('delete') || $comment->access('edit') || Comment::createAccess() || $comment->access('approve')) {
       if ($comment->access('delete')) {
-        $links['comment-delete'] = [
+        $links['comment-delete'] = array(
           'title' => t('delete'),
           'href'  => "comment/$comment->cid/delete",
           'html'  => TRUE,
-        ];
+        );
       }
       if ($comment->access('edit')) {
-        $links['comment-edit'] = [
+        $links['comment-edit'] = array(
           'title' => t('edit'),
           'href'  => "comment/$comment->cid/edit",
           'html'  => TRUE,
-        ];
+        );
       }
       if (Comment::createAccess()) {
-        $links['comment-reply'] = [
+        $links['comment-reply'] = array(
           'title' => t('reply'),
           'href'  => "comment/reply/$comment->nid/$comment->cid",
           'html'  => TRUE,
-        ];
+        );
       }
       if ($comment->status == COMMENT_NOT_PUBLISHED && $comment->access('approve')) {
         $links['comment-approve'] = array(
