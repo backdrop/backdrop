@@ -268,16 +268,16 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   }
 
   $form['path'] = array(
-    '#title' => t('Path'),
-    '#type' => 'textfield',
+    '#title' => t('Paths'),
+    '#type' => 'textarea',
     '#default_value' => $layout->getPath(),
     '#required' => TRUE,
-    '#description' => t('Use the "%" (percent) symbol to indicate a wildcard in the path. i.e. "node/%" or "node/%/edit".'),
+    '#description' => t('Enter paths, one path per line. Use the "%" (percent) symbol to indicate a wildcard in the path. i.e. "node/%" or "node/%/edit".'),
     '#access' => !$layout->isDefault(),
   );
   $form['path_update'] = array(
     '#type' => 'submit',
-    '#value' => t('Check path'),
+    '#value' => t('Check paths'),
     '#validate' => array(
       'layout_settings_form_validate',
     ),
@@ -351,14 +351,16 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   // wildcards e.g. node/1 instead of node/%. This is usually (but not always)
   // a misconfiguration of the layout.
   $layout_path = $layout->getPath();
-  $router_item = menu_get_item($layout_path);
-  if ($router_item && $router_item['path'] !== $layout_path && substr_count($router_item['path'], '/') === substr_count($layout_path, '/') && layout_context_required_by_path($router_item['path'])) {
-    $message = t('The path entered will create a new page and disable the current "@old_path". If you intended to add a layout for "@old_path", use the path "@new_path" and add a URL path condition for "@old_path".', array('@new_path' => $router_item['path'], '@old_path' => $layout->getPath()));
-    if (backdrop_is_ajax()) {
-      backdrop_set_message($message, 'warning');
-    }
-    else {
-      $form['messages']['#messages']['warning'][] = $message;
+  if (!empty($layout_path)) {
+    $router_item = menu_get_item($layout_path);
+    if ($router_item && $router_item['path'] !== $layout_path && substr_count($router_item['path'], '/') === substr_count($layout_path, '/') && layout_context_required_by_path($router_item['path'])) {
+      $message = t('The path entered will create a new page and disable the current "@old_path". If you intended to add a layout for "@old_path", use the path "@new_path" and add a URL path condition for "@old_path".', array('@new_path' => $router_item['path'], '@old_path' => $layout->getPath()));
+      if (backdrop_is_ajax()) {
+        backdrop_set_message($message, 'warning');
+      }
+      else {
+        $form['messages']['#messages']['warning'][] = $message;
+      }
     }
   }
 
@@ -462,31 +464,39 @@ function layout_settings_form_validate(&$form, &$form_state) {
   /* @var Layout $layout */
   $layout = $form_state['layout'];
 
-  // Remove trailing and preceding slashes.
-  $path = $form_state['values']['path'] = trim($form_state['values']['path'], '/');
+  // Prepare entered paths.
+  $paths = explode("\n", $form_state['values']['path']);
+  $paths = array_map('trim', $paths);
+  $paths = array_filter($paths, 'strlen');
+  $form_state['values']['path'] = $paths;
 
-  if (strpos($path, '%') === 0) {
-    form_error($form['path'], t('The first part of a path may not be a wildcard.'));
-  }
+  foreach ($paths as $path) {
+      // Remove trailing and preceding slashes.
+    $path = trim($path, '/');
 
-  // Ensure the path is not already an alias to something else.
-  if (strpos($path, '%') === FALSE) {
-    $alias = db_query('SELECT * FROM {url_alias} WHERE alias = :path', array(':path' => $path))->fetchObject();
-    if ($alias) {
-      $error = t('That path is currently assigned to be an alias for "@alias".', array('@alias' => $alias->source));
-      if (user_access('administer url aliases')) {
-        $error .= ' ' . t('<a href="!url">Delete the alias first</a>, then save this layout.', array('!url' => url('admin/config/urls/path/delete/' . $alias->pid, array('query' => array('destination' => $_GET['q'])))));
-      }
-      form_error($form['path'], $error);
+    if (strpos($path, '%') === 0) {
+      form_error($form['path'], t('The first part of a path may not be a wildcard.'));
     }
-  }
 
-  // Ensure path is properly formed.
-  $parts = explode('/', $path);
-  foreach ($parts as $part) {
-    $wildcard_position = strpos($part, '%');
-    if ($wildcard_position !== FALSE && ($wildcard_position > 0 || strlen($part) > 1)) {
-      form_error($form['path'], t('Wildcard placeholders must be the only character in their part of the path i.e. "@part" should be "%".', array('@part' => $part)));
+    // Ensure the path is not already an alias to something else.
+    if (strpos($path, '%') === FALSE) {
+      $alias = db_query('SELECT * FROM {url_alias} WHERE alias = :path', array(':path' => $path))->fetchObject();
+      if ($alias) {
+        $error = t('That path is currently assigned to be an alias for "@alias".', array('@alias' => $alias->source));
+        if (user_access('administer url aliases')) {
+          $error .= ' ' . t('<a href="!url">Delete the alias first</a>, then save this layout.', array('!url' => url('admin/config/urls/path/delete/' . $alias->pid, array('query' => array('destination' => $_GET['q'])))));
+        }
+        form_error($form['path'], $error);
+      }
+    }
+
+    // Ensure path is properly formed.
+    $parts = explode('/', $path);
+    foreach ($parts as $part) {
+      $wildcard_position = strpos($part, '%');
+      if ($wildcard_position !== FALSE && ($wildcard_position > 0 || strlen($part) > 1)) {
+        form_error($form['path'], t('Wildcard placeholders must be the only character in their part of the path i.e. "@part" should be "%".', array('@part' => $part)));
+      }
     }
   }
 
@@ -616,20 +626,22 @@ function layout_settings_form_update_layout($form, &$form_state) {
       $name = $plugin . (($plugin_counts[$plugin] === 1) ? '' : $plugin_counts[$plugin]);
 
       // Persist machine names if they already exists for this argument.
-      if (isset($layout->menu_item->arguments[$position])) {
-        $existing_argument = $layout->menu_item->arguments[$position];
-        if ($existing_argument['plugin'] === $plugin) {
-          $name = $existing_argument['name'];
+      foreach ($layout->menu_item as $item) {
+        if (isset($layout->menu_item->arguments[$position])) {
+          $existing_argument = $layout->menu_item->arguments[$position];
+          if ($existing_argument['plugin'] === $plugin) {
+            $name = $existing_argument['name'];
+          }
         }
-      }
 
-      $arguments[$position] = array(
-        'plugin' => $plugin,
-        'name' => $name,
-        'position' => $position,
-      );
+        $arguments[$position] = array(
+          'plugin' => $plugin,
+          'name' => $name,
+          'position' => $position,
+        );
+        $item->arguments = $arguments;
+      }
     }
-    $layout->menu_item->arguments = $arguments;
   }
 
   if (!empty($layout->is_new)) {
@@ -739,7 +751,7 @@ function layout_settings_form_save_submit($form, &$form_state) {
   else {
     backdrop_set_message(t('Layout saved.'));
   }
-  $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name;
+  //$form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name;
 }
 
 /**
