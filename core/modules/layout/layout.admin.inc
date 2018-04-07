@@ -15,7 +15,15 @@ function layout_list_page() {
   // Group layouts by path.
   $path_groups = array();
   foreach ($layouts as $layout) {
-    $path_groups[$layout->getPath()][$layout->name] = $layout;
+    $layout_paths = $layout->getPath();
+    if (is_array($layout_paths)) {
+      foreach ($layout_paths as $layout_path) {
+        $path_groups[$layout_path][$layout->name] = $layout;
+      }
+    }
+    else {
+      $path_groups[$layout_paths][$layout->name] = $layout;
+    }
   }
 
   // Assemble the rows of the table.
