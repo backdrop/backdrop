@@ -5,19 +5,27 @@
  */
 
 /**
+ * Implements hook_schema_alter().
+ */
+function comment_schema_alter(&$schema) {
+  $schema['node']['fields']['comment_closer_override'] = array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+    'size' => 'tiny',
+    'description' => 'Override the automatic comment closer. (0 = Do not override, 1 = Override)',
+  );
+}
+
+/**
  * Implements hook_install().
  */
 function comment_install() {
   if (!db_field_exists('node', 'comment_closer_override')) {
-    $schema = array(
-      'type' => 'int',
-      'unsigned' => TRUE,
-      'not null' => TRUE,
-      'default' => 0,
-      'size' => 'tiny',
-      'description' => 'Override the automatic comment closer. (0 = Do not override, 1 = Override)',
-    );
-    db_add_field('node', 'comment_closer_override', $schema);
+    $schema = array();
+    comment_schema_alter($schema);
+    db_add_field('node', 'comment_closer_override', $schema['node']['fields']['comment_closer_override']);
   }
 }
 
@@ -395,15 +403,9 @@ function comment_update_1004() {
     return;
   }
 
-  $schema = array(
-    'type' => 'int',
-    'unsigned' => TRUE,
-    'not null' => TRUE,
-    'default' => 0,
-    'size' => 'tiny',
-    'description' => 'Override the automatic comment closer. (0 = Do not override, 1 = Override)',
-  );
-  db_add_field('node', 'comment_closer_override', $schema);
+  $schema = array();
+  comment_schema_alter($schema);
+  db_add_field('node', 'comment_closer_override', $schema['node']['fields']['comment_closer_override']);
 }
 
 /**
