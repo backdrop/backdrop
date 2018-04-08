@@ -2455,7 +2455,14 @@ function node_form_system_themes_admin_form_submit($form, &$form_state) {
  */
 function node_access($op, $node, $account = NULL) {
   if ($op == 'create') {
-    return Node::createAccess($node, $account);
+    // In some cases a node object, rather than a bundle string is provided.
+    if (is_string($node)) {
+      $bundle = $node;
+    }
+    else {
+      $bundle = $node->bundle();
+    }
+    return Node::createAccess($bundle, $account);
   }
   elseif ($node instanceof Node) {
     return $node->access($op, $account);

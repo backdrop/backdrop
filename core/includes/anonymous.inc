@@ -14,6 +14,7 @@ class AnonymousUser implements UserInterface {
   public $name = NULL;
   public $hostname = NULL;
   public $roles = array(BACKDROP_ANONYMOUS_ROLE);
+  public $status = 1;
   public $cache = 0;
 
   /**
