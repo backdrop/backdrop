@@ -155,7 +155,7 @@ function _update_requirement_check($project, $type) {
       else {
         $version_available = t('Updates available');
       }
-      if (update_manager_access() && module_exists('project_installer')) {
+      if (update_manager_access() && module_exists('installer')) {
         $requirement_label .= ' (' . l($version_available, 'admin/modules/update') . ')';
       }
       else {
