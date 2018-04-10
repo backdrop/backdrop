@@ -91,6 +91,18 @@ class BlockText extends Block {
           ),
         ),
       );
+      $form['convert']['description'] = array(
+       '#type' => 'textfield',
+       '#title' => t('Block description'),
+       '#maxlength' => 128,
+       '#description' => t('Used in administrative interfaces and not shown to end-users.'),
+       '#weight' => 4,
+        '#states' => array(
+          'visible' => array(
+            ':input[name="reusable"]' => array('checked' => TRUE),
+          ),
+				),
+      );
       $form['convert']['delta'] = array(
         '#type' => 'machine_name',
         '#title' => t('Internal name'),
@@ -140,6 +152,7 @@ class BlockText extends Block {
       $edit = array(
         'info' => $form_state['values']['label'],
         'title' => $form_state['values']['title'],
+        'description' => $form_state['values']['description'],
         'body' => $form_state['values']['content'],
       );
       block_custom_block_save($edit, $delta);
