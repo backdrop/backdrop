@@ -47,7 +47,7 @@ class views_handler_field_term_link_edit extends views_handler_field {
         'tid' => $tid,
         'vocabulary' => $this->get_value($values, 'vocabulary')
       ));
-      if (taxonomy_term_access('edit', $term)) {
+      if (taxonomy_term_access('update', $term)) {
         $text = !empty($this->options['text']) ? $this->options['text'] : t('edit');
         $tid = $this->get_value($values, 'tid');
         return l($text, 'taxonomy/term/'. $tid . '/edit', array('query' => backdrop_get_destination()));
