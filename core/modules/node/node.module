@@ -2436,10 +2436,10 @@ function node_form_system_themes_admin_form_submit($form, &$form_state) {
  *
  * @param string $op
  *   The operation to be performed on the node. Possible values are:
+ *   - "create"
  *   - "view"
  *   - "update"
  *   - "delete"
- *   - "create"
  * @param Node|string $node
  *   The node entity on which the operation is to be performed, or the node type
  *   (e.g., 'post') for the 'create' operation.

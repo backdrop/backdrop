@@ -20,6 +20,8 @@ class TestEntity extends Entity {
 
   /**
    * Implements EntityInterface::entityType().
+   *
+   * @since 1.10.0 This method is now static.
    */
   public static function entityType() {
     return 'entity_test';

@@ -90,6 +90,8 @@ class TaxonomyTerm extends Entity {
 
   /**
    * Implements EntityInterface::entityType().
+   *
+   * @since 1.10.0 This method is now static.
    */
   public static function entityType() {
     return 'taxonomy_term';
@@ -109,59 +111,52 @@ class TaxonomyTerm extends Entity {
    * Overrides Entity::createAccess().
    */
   public static function createAccess($bundle = NULL, $account = NULL) {
-    $rights = &backdrop_static(__METHOD__, array());
-
     // If no user object is supplied, the access check is for the current user.
     if (empty($account)) {
       $account = $GLOBALS['user'];
     }
 
-    // If we've already checked access for this node, user and op, return from
-    // cache.
-    if (isset($rights[$account->uid][$bundle])) {
-      return $rights[$account->uid][$bundle];
-    }
-
-    $rights[$account->uid][$bundle] = user_access('administer taxonomy', $account);
-    return $rights[$account->uid][$bundle];
+    return user_access('administer taxonomy', $account);
   }
 
   /**
    * Overrides Entity::access().
+   *
+   * @param string $op
+   *   The operation to be performed on the file. Possible values are:
+   *   - "create".
+   *   - "view".
+   *   - "update".
+   *   - "delete".
+   * @param User|AnonymousUser|object $account
+   *   (optional) The user to check for. Leave it to NULL to check for the
+   *   global user.
+   *
+   * @return bool
+   *   TRUE if access is granted, FALSE otherwise.
    */
   public function access($op, $account = NULL) {
-    // Casting class with private property causes errors due to added prefix.
-    // e.g. "\0TaxonomyTerm\0". So use static array instead.
-    $rights = &backdrop_static(__METHOD__, array());
-
-    if (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
+    if ($op == 'create') {
+      return self::createAccess($this->bundle(), $account);
+    }
+    elseif (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
       // If the $op was not one of the supported ones, we return access denied.
       return FALSE;
     }
+
     // If no user object is supplied, the access check is for the current user.
     if (empty($account)) {
       $account = $GLOBALS['user'];
     }
 
-    $cid = $this->id();
-
-    // If we've already checked access for this entity, user and op, return from
-    // cache.
-    if (isset($rights[$account->uid][$cid][$op])) {
-      return $rights[$account->uid][$cid][$op];
-    }
-
     if ($op == 'view') {
-      $rights[$account->uid][$cid][$op] = user_access('access content', $account);
-      return $rights[$account->uid][$cid][$op];
+      return user_access('access content', $account);
     }
     elseif ($op == 'update' || $op == 'delete') {
-      $rights[$account->uid][$cid][$op] = user_access("$op terms in $this->vocabulary", $account) || user_access('administer taxonomy', $account);
-      return $rights[$account->uid][$cid][$op];
+      return user_access("$op terms in $this->vocabulary", $account) || user_access('administer taxonomy', $account);
     }
 
-    $rights[$account->uid][$cid][$op] = FALSE;
-    return $rights[$account->uid][$cid][$op];
+    return FALSE;
   }
 
 }

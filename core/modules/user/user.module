@@ -1111,9 +1111,6 @@ function user_view_access($account) {
  * Access callback for user account editing.
  */
 function user_edit_access($account) {
-  if (!($account instanceof User) && is_int($account)) {
-    $account = user_load($account);
-  }
   // Account for anonymous users, which are of class AnonymousUser.
   if ($account instanceof User) {
     /** @var User $account */
@@ -1129,9 +1126,6 @@ function user_edit_access($account) {
  * users, and prevent the anonymous user from cancelling the account.
  */
 function user_cancel_access($account) {
-  if (!($account instanceof User) && is_int($account)) {
-    $account = user_load($account);
-  }
   // Account for anonymous users, which are of class AnonymousUser.
   if ($account instanceof User) {
     /** @var User $account */

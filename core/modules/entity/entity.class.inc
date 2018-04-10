@@ -44,6 +44,8 @@ interface EntityInterface {
    *
    * @return
    *   The type of the entity.
+   *
+   * @since 1.10.0 This method is now static.
    */
   public static function entityType();
 
@@ -138,6 +140,7 @@ interface EntityInterface {
  * Defines a base entity class.
  */
 abstract class Entity extends stdClass implements EntityInterface {
+
   /**
    * Constructs a new entity object.
    */
@@ -168,6 +171,20 @@ abstract class Entity extends stdClass implements EntityInterface {
   }
 
   /**
+   * Implements EntityInterface::createAccess().
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    return TRUE;
+  }
+
+  /**
+   * Implements EntityInterface::access().
+   */
+  public function access($op, $account = NULL) {
+    return TRUE;
+  }
+
+  /**
    * Implements EntityInterface::save().
    */
   public function save() {
@@ -195,6 +212,7 @@ abstract class Entity extends stdClass implements EntityInterface {
     }
     return $duplicate;
   }
+
 }
 
 /**

@@ -1032,38 +1032,36 @@ function comment_build_content(Comment $comment, Node $node, $view_mode = 'full'
 function comment_links(Comment $comment, Node $node) {
   $links = array();
   if ($node->comment == COMMENT_NODE_OPEN) {
-    if ($comment->access('delete') || $comment->access('edit') || Comment::createAccess() || $comment->access('approve')) {
-      if ($comment->access('delete')) {
-        $links['comment-delete'] = array(
-          'title' => t('delete'),
-          'href'  => "comment/$comment->cid/delete",
-          'html'  => TRUE,
-        );
-      }
-      if ($comment->access('edit')) {
-        $links['comment-edit'] = array(
-          'title' => t('edit'),
-          'href'  => "comment/$comment->cid/edit",
-          'html'  => TRUE,
-        );
-      }
-      if (Comment::createAccess()) {
-        $links['comment-reply'] = array(
-          'title' => t('reply'),
-          'href'  => "comment/reply/$comment->nid/$comment->cid",
-          'html'  => TRUE,
-        );
-      }
-      if ($comment->status == COMMENT_NOT_PUBLISHED && $comment->access('approve')) {
-        $links['comment-approve'] = array(
-          'title' => t('approve'),
-          'href' => "comment/$comment->cid/approve",
-          'html' => TRUE,
-          'query' => array('token' => backdrop_get_token("comment/$comment->cid/approve")),
-        );
-      }
+    if ($comment->access('delete')) {
+      $links['comment-delete'] = array(
+        'title' => t('delete'),
+        'href'  => "comment/$comment->cid/delete",
+        'html'  => TRUE,
+      );
     }
-    else {
+    if ($comment->access('edit')) {
+      $links['comment-edit'] = array(
+        'title' => t('edit'),
+        'href'  => "comment/$comment->cid/edit",
+        'html'  => TRUE,
+      );
+    }
+    if (Comment::createAccess()) {
+      $links['comment-reply'] = array(
+        'title' => t('reply'),
+        'href'  => "comment/reply/$comment->nid/$comment->cid",
+        'html'  => TRUE,
+      );
+    }
+    if ($comment->status == COMMENT_NOT_PUBLISHED && $comment->access('approve')) {
+      $links['comment-approve'] = array(
+        'title' => t('approve'),
+        'href' => "comment/$comment->cid/approve",
+        'html' => TRUE,
+        'query' => array('token' => backdrop_get_token("comment/$comment->cid/approve")),
+      );
+    }
+    if (empty($links)) {
       $links['comment-forbidden']['title'] = theme('comment_post_forbidden', array('node' => $node));
       $links['comment-forbidden']['html'] = TRUE;
     }
@@ -1472,16 +1470,29 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
  * based on the replies to their posts.
  *
  * @param string $op
- *   The operation that is to be performed on the comment. Only 'edit' is
- *   recognized now.
- * @param Comment $comment
- *   The comment object.
+ *   The operation that is to be performed on the comment. Possible values are:
+ *   - "create"
+ *   - "update"
+ * @param Comment|null $comment
+ *   (optional) The comment object, or NULL when using 'create' op.
  *
  * @return bool
  *   TRUE if the current user has acces to the comment, FALSE otherwise.
+ *
+ * @since 1.10.0 The "edit" $op option is deprecated. Use "update" instead. The "create" $op option was added.
  */
-function comment_access($op, Comment $comment) {
-  return $comment->access($op);
+function comment_access($op, Comment $comment = NULL) {
+  if ($op == 'edit') {
+    // Normalize edit op to update.
+    $op = 'update';
+  }
+
+  if ($op == 'create') {
+    return Comment::createAccess();
+  }
+  else {
+    return $comment->access($op);
+  }
 }
 
 /**

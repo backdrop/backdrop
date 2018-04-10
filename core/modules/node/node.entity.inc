@@ -161,6 +161,8 @@ class Node extends Entity {
 
   /**
    * Implements EntityInterface::entityType().
+   *
+   * @since 1.10.0 This method is now static.
    */
   public static function entityType() {
     return 'node';
@@ -255,7 +257,10 @@ class Node extends Entity {
     // e.g. "\0" . 'Node' . "\0". So use static array instead.
     $rights = &backdrop_static(__METHOD__, array());
 
-    if (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
+    if ($op == 'create') {
+      return self::createAccess($this->bundle(), $account);
+    }
+    elseif (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
       // If the $op was not one of the supported ones, we return access denied.
       return FALSE;
     }

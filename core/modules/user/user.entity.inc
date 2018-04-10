@@ -136,6 +136,8 @@ class User extends Entity implements UserInterface {
 
   /**
    * Implements EntityInterface::entityType().
+   *
+   * @since 1.10.0 This method is now static.
    */
   public static function entityType() {
     return 'user';
@@ -167,21 +169,12 @@ class User extends Entity implements UserInterface {
    * Overrides Entity::createAccess().
    */
   public static function createAccess($bundle = NULL, $account = NULL) {
-    $rights = &backdrop_static(__METHOD__, array());
-
     // If no user object is supplied, the access check is for the current user.
     if (empty($account)) {
       $account = $GLOBALS['user'];
     }
 
-    // If we've already checked access for this node, user and op, return from
-    // cache.
-    if (isset($rights[$account->uid][$bundle])) {
-      return $rights[$account->uid][$bundle];
-    }
-
-    $rights[$account->uid][$bundle] = user_access('administer users', $account);
-    return $rights[$account->uid][$bundle];
+    return user_access('administer users', $account);
   }
 
   /**
@@ -189,6 +182,7 @@ class User extends Entity implements UserInterface {
    *
    * @param string $op
    *   The operation to be performed on the node. Possible values are:
+   *   - "create".
    *   - "view".
    *   - "update".
    *   - "delete".
@@ -204,13 +198,16 @@ class User extends Entity implements UserInterface {
     // e.g. "\0" . 'User' . "\0". So use static array instead.
     $rights = &backdrop_static(__METHOD__, array());
 
-    // We can't always count on backdrop to provide an AnonymousUser for
+    // We can't always count on Backdrop to provide an AnonymousUser for
     // anonymous users, so test explicitly.
     if (!$this->uid) {
       return FALSE;
     }
 
-    if (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
+    if ($op == 'create') {
+      return self::createAccess(NULL, $account);
+    }
+    elseif (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
       // If the $op was not one of the supported ones, we return access denied.
       return FALSE;
     }

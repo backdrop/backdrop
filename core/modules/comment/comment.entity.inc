@@ -89,6 +89,8 @@ class Comment extends Entity {
 
   /**
    * Implements EntityInterface::entityType().
+   *
+   * @since 1.10.0 This method is now static.
    */
   public static function entityType() {
     return 'comment';
@@ -122,21 +124,12 @@ class Comment extends Entity {
    * Overrides Entity::createAccess().
    */
   public static function createAccess($bundle = NULL, $account = NULL) {
-    $rights = &backdrop_static(__METHOD__, array());
-
     // If no user object is supplied, the access check is for the current user.
     if (empty($account)) {
       $account = $GLOBALS['user'];
     }
 
-    // If we've already checked access for this node, user and op, return from
-    // cache.
-    if (isset($rights[$account->uid][$bundle])) {
-      return $rights[$account->uid][$bundle];
-    }
-
-    $rights[$account->uid][$bundle] = user_access('post comments', $account);
-    return $rights[$account->uid][$bundle];
+    return user_access('post comments', $account);
   }
 
   /**
@@ -161,7 +154,10 @@ class Comment extends Entity {
     // e.g. "\0" . 'Comment' . "\0". So use static array instead.
     $rights = &backdrop_static(__METHOD__, array());
 
-    if (!in_array($op, array('view', 'update', 'approve', 'delete'), TRUE)) {
+    if ($op == 'create') {
+      return self::createAccess(NULL, $account);
+    }
+    elseif (!in_array($op, array('view', 'update', 'approve', 'delete'), TRUE)) {
       // If the $op was not one of the supported ones, we return access denied.
       return FALSE;
     }
