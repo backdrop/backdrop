@@ -1584,6 +1584,30 @@ function _node_add_access() {
 }
 
 /**
+ * Implements hook_layout_context_info().
+ */
+function node_layout_context_info() {
+  $info['node'] = array(
+    'title' => t('Content (node)'),
+    // Define the class which is used to handle this context.
+    'class' => 'EntityLayoutContext',
+    // Define menu paths where the node ID is a "known" context.
+    'menu paths' => array(
+      'node/%node',
+      'node/%node/view',
+      'node/%node/edit',
+    ),
+    // Given the menu paths defined above, identify the part of the path that
+    // is needed to generate this context.
+    'path placeholder' => '%node',
+    // Given an argument, define the callback that will be responsible for
+    // loading the main context data.
+    'load callback' => 'node_load',
+  );
+  return $info;
+}
+
+/**
  * Implements hook_menu().
  */
 function node_menu() {
