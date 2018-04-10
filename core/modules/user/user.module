@@ -137,6 +137,30 @@ function user_entity_info() {
 }
 
 /**
+ * Implements hook_layout_context_info().
+ */
+function user_layout_context_info() {
+  $info['user'] = array(
+    'title' => t('User account'),
+    // Define the class which is used to handle this context.
+    'class' => 'EntityLayoutContext',
+    // Define menu paths where the user ID is a "known" context.
+    'menu paths' => array(
+      'user/%user',
+      'user/%user/view',
+      'user/%user/edit',
+    ),
+    // Given the menu paths defined above, identify the part of the path that
+    // is needed to generate this context.
+    'path placeholder' => '%user',
+    // Given an argument, define the callback that will be responsible for
+    // loading the main context data.
+    'load callback' => 'user_load',
+  );
+  return $info;
+}
+
+/**
  * Implements hook_field_info_alter().
  */
 function user_field_info_alter(&$info) {
