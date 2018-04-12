@@ -6020,11 +6020,16 @@ function backdrop_cron_run() {
  * @code
  * backdrop_system_listing("/\.module$/", "modules", 'name', 0);
  * @endcode
- * this function will search the site-wide modules directory (i.e., /modules/),
- * your installation profile's directory (i.e.
- * /profiles/your_site_profile/modules/), and your site-specific directory (i.e.
- * /sites/your_site_name/modules), in that order, and return information about
- * all of the files ending in .module in those directories.
+ *
+ * The following directories will then be searched for modules:
+ * - /sites/[site_name]/modules
+ * - /modules
+ * - /profiles/[install_profile_name]/modules
+ * - /core/profiles/[install_profile_name]/modules
+ * - /core/modules
+ * Directories will be searched in that order. If a module of the same name
+ * exists in two places, the earlier locations will take precedence over the
+ * later ones.
  *
  * The information is returned in an associative array, which can be keyed on
  * the file name ($key = 'filename'), the file name without the extension ($key
