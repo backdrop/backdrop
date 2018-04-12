@@ -1153,7 +1153,7 @@ function user_update_1013() {
 }
 
 /**
- * Implements hook_update_N(). Fixes system email linebreaks.
+ * Fixes system email linebreaks.
  */
 function user_update_1014() {
   $emails = array(
