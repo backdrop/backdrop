@@ -2225,3 +2225,43 @@ class CommentNodeChangesTestCase extends CommentHelperCase {
 
   }
 }
+
+/**
+ * Tests that comments behave correctly when the auto closer is enabled.
+ */
+class CommentNodeAutoCloserTestCase extends CommentHelperCase {
+  /**
+   * Tests opening, closing, and hiding comments.
+   */
+  function testNodeCommentAutoCloserSettings() {
+    $this->backdropLogin($this->admin_user);
+
+    $this->setCommentSettings('comment_close_enabled', TRUE, 'Comment auto closer enabled.');
+    // Set node created date to older than default 14 days
+    $this->backdropGet('node/' . $this->node->nid . '/edit');
+
+    $edit = array(
+      'created' => strtotime(now() - '15 days'),
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    // Run cron
+    $this->cronRun();
+
+    $this->backdropGet('node/' . $this->node->nid);
+    $this->assertEqual(count($this->xpath('//form[@id="comment-form"]')), 0, 'Comment form not on node page when comments are closed.');
+
+    // Override the auto comment closer so the node can be kept open.
+    $edit = array(
+      'comment' => COMMENT_NODE_OPEN,
+      'comment_closer_override' => TRUE,
+    );
+    $this->backdropPost('node/' . $this->node->nid . '/edit', $edit, t('Save'));
+
+    // Run cron
+    $this->cronRun();
+
+    $this->backdropGet('node/' . $this->node->nid);
+    $this->assertEqual(count($this->xpath('//form[@id="comment-form"]')), 1, 'Comment form visible on node page when comments auto closer is overridden for individual node.');
+  }
+}
