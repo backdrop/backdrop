@@ -983,8 +983,16 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
 
   // Profiles are a special case: they have a fixed location and naming.
   if ($type == 'profile') {
-    $profile_filename = "profiles/$name/$name.profile";
-    $files[$type][$name] = file_exists($profile_filename) ? $profile_filename : FALSE;
+    $profile_filenames = array("profiles/$name/$name.profile", "core/profiles/$name/$name.profile");
+    foreach ($profile_filenames as $profile_filename) {
+      if (file_exists($profile_filename)) {
+        $files[$type][$name] = $profile_filename;
+        break;
+      }
+      else {
+        $files[$type][$name] = FALSE;
+      }
+    }
   }
   if (!isset($files[$type])) {
     $files[$type] = array();
