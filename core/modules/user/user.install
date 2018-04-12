@@ -1153,5 +1153,31 @@ function user_update_1013() {
 }
 
 /**
+ * Fixes system email linebreaks.
+ */
+function user_update_1014() {
+  $emails = array(
+    'register_admin_created_body',
+    'register_pending_approval_body',
+    'register_no_approval_required_body',
+    'register_no_approval_required_body',
+    'password_reset_body',
+    'status_activated_body',
+    'status_blocked_body',
+    'cancel_confirm_body',
+    'status_canceled_body',
+  );
+  $config = config('user.mail');
+  foreach ($emails as $name) {
+    $mail = $config->get($name);
+    if (strstr($mail, '\n')) {
+      $fixed_mail = str_replace('\n', "\n", $mail);
+      $config->set($name, $fixed_mail);
+    }
+  }
+  $config->save();
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */
