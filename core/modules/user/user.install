@@ -1171,7 +1171,6 @@ function user_update_1014() {
   foreach ($emails as $name) {
     $mail = $config->get($name);
     if (strstr($mail, '\n')) {
-      dpm('match');
       $fixed_mail = str_replace('\n', "\n", $mail);
       $config->set($name, $fixed_mail);
     }
