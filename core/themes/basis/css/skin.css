@@ -17,7 +17,7 @@ body {
 }
 
 a {
-  color: #0074bd;
+  color: #0073bd;
 }
 
 a:focus,
@@ -31,7 +31,7 @@ a:active {
 
 blockquote,
 figcaption {
-  border-left-color: #c6cad2;
+  border-left-color: #bbb;
 }
 
 pre,
@@ -40,12 +40,12 @@ code {
 }
 
 code {
-  border-color: #c6cad2;
+  border-color: #bbb;
   background: #dee2ea;
 }
 
 pre code {
-  border-left-color: #c6cad2;
+  border-left-color: #bbb;
   background: transparent;
 }
 
@@ -63,7 +63,7 @@ td {
 }
 
 th {
-  border-right-color: #c6cad2;
+  border-right-color: #bbb;
   background: #dee2ea;
 }
 
@@ -85,7 +85,7 @@ table [aria-sort="ascending"] a:after {
  */
 fieldset {
   background-color: #fff;
-  border-color: #EAEAEA;
+  border-color: #bbb;
 }
 
 legend {
@@ -150,7 +150,7 @@ fieldset .fieldset-legend {
 }
 
 .l-header-inner {
-  color: #fff;
+  color: #fffffe;
   padding: 0;
 }
 
@@ -163,7 +163,7 @@ fieldset .fieldset-legend {
 }
 
 .l-header a {
-  color: #fff;
+  color: #fffffe;
   text-decoration: none;
 }
 
@@ -321,16 +321,16 @@ fieldset .fieldset-legend {
 }
 
 .js .menu-dropdown > li {
-  border-bottom-color: #777;
+  border-bottom-color: #bbb;
 }
 
 .menu-dropdown a.disabled {
-  color: #bbbbbb;
+  color: #bbb;
 }
 
 @media (min-width: 48em) {
   .menu-dropdown a.disabled {
-    color: #bbbbbb;
+    color: #bbb;
   }
 
   .js .menu-dropdown ul ul {
@@ -407,11 +407,12 @@ fieldset .fieldset-legend {
  * Footer styles
  */
 .l-footer {
-  border-top: 0.25rem solid #c6cad2;
+  border-top: 0.25rem solid #bbb;
   /* If footer text wraps, remove line-height & add padding styles to blocks */
   line-height: 3;
   padding: 0.5em 0 1em;
   margin: 5em 0 0;
+  background-color: #fffeff;
 }
 
 /**
@@ -487,7 +488,7 @@ tr.draggable .handle .handle-inner:after {
 }
 
 abbr.tabledrag-changed {
-  background: #FCE400;
+  background: #fce400;
 }
 
 /**
@@ -498,34 +499,34 @@ abbr.tabledrag-changed {
 /* Neutral or Good status message colors */
 .status {
   color: #234600;
-  background-color: #E9EEBC;
+  background-color: #e9eebc;
 }
 
 div.status:before {
   /* background-image: url(../../../misc/message-24-ok.png); */
-  background-color: #CFDE56;
+  background-color: #cfde56;
 }
 
 /* Warning status message colors */
 .warning {
   color: #555;
-  background-color: #FAF5C9;
+  background-color: #faf5c9;
 }
 
 div.warning:before {
   /* background-image: url(../../../misc/message-24-warning.png); */
-  background-color: #FCE400;
+  background-color: #fce400;
 }
 
 /* Error status message colors */
 .error {
-  color: #EC351C;
-  background-color: #F9EDEC;
+  color: #f00;
+  background-color: #f9edec;
 }
 
 div.error:before {
   /* background-image: url(../../../misc/message-24-error.png); */
-  background-color: #EE3D23;
+  background-color: #f00;
 }
 
 /* Desktop size icons */
@@ -576,7 +577,7 @@ div.error:before {
 .form-item .description,
 .password-strength,
 .password-match {
-  border-left-color: #c6cad2;
+  border-left-color: #bbb;
 }
 
 .field-suffix .machine-name-value {
@@ -586,7 +587,7 @@ div.error:before {
 
 select.form-select {
   font-weight: 400;
-  border-color: #d0d0d0;
+  border-color: #bbb;
   color: #444b53;
   background: #fff;
 }
@@ -672,8 +673,8 @@ button.button-secondary:active {
 
 input.button-danger,
 button.button-danger {
-  color: #e7251b;
-  box-shadow: inset 0 0 0 0.125rem #e7251b;
+  color: #f00;
+  box-shadow: inset 0 0 0 0.125rem #f00;
   background: transparent;
 }
 
@@ -682,7 +683,7 @@ input.button-danger:focus,
 button.button-danger:hover,
 button.button-danger:focus {
   color: #fff;
-  background-color: #e7251b;
+  background-color: #f00;
 }
 
 input.form-button-disabled,
@@ -715,7 +716,7 @@ input.form-number,
 input.form-search,
 input.form-file,
 textarea.form-textarea {
-  border-color: #d0d0d0;
+  border-color: #bbb;
   font-weight: 400;
   color: #444b53;
   background: #fff;
@@ -757,7 +758,7 @@ input.form-file[disabled],
 textarea.form-textarea[disabled],
 select.form-select[disabled] {
   background-color: #eee;
-  color: #777;
+  color: #bbb;
 }
 
 .form-error input.form-autocomplete,
@@ -771,16 +772,16 @@ select.form-select[disabled] {
 .form-error input.form-file,
 .form-error textarea.form-textarea,
 .form-error select.form-select {
-  border-color: #EC351C;
+  border-color: #f00;
 }
 
 .form-type-checkboxes.form-error,
 .form-type-radios.form-error {
-  border: 0.125rem solid #EC351C;
+  border: 0.125rem solid #f00;
 }
 /* Display border on a single checkbox, but not on checkboxes within a group. */
 .form-type-checkbox.form-error {
-  border: 0.125rem solid #EC351C;
+  border: 0.125rem solid #f00;
 }
 .form-type-checkboxes.form-error .form-type-checkbox.form-error {
   border: none;
@@ -806,7 +807,7 @@ ul.action-links a {
  * Teaser
  */
 .view-mode-teaser + .view-mode-teaser {
-  border-top-color: #c6cad2;
+  border-top-color: #bbb;
 }
 
 /**
@@ -993,14 +994,14 @@ ul.primary li a:focus,
 .responsive-tabs-mobile .expand-dropdown-tabs-control.js-active:before,
 .expand-dropdown-tabs-control.js-active {
   color: #000;
-  background: #bcc2cc;
+  background: #d5d5d5;
 }
 
 ul.primary li a:active,
 .expand-dropdown-tabs-control:active,
 .responsive-tabs-mobile .expand-dropdown-tabs-control:active:before {
   background: #dee2ea;
-  box-shadow: inset 0 0 0 0.125em #bcc2cc;
+  box-shadow: inset 0 0 0 0.125em #d5d5d5;
 }
 
 /**
@@ -1043,7 +1044,7 @@ ul.secondary li a:active {
  */
 .unpublished-indicator {
   line-height: 1.6rem;
-  background-color: #ee3d23;
+  background-color: #f00;
   color: #fff;
   padding: .75rem;
 }
@@ -1066,7 +1067,7 @@ ul.secondary li a:active {
 }
 
 .responsive-tabs-after .expand-dropdown-tabs-control {
-  border-left-color: 2px solid #bcc2cc;
+  border-left-color: 2px solid #d5d5d5;
 }
 
 .expand-dropdown-tabs-label {
@@ -1100,7 +1101,7 @@ ul.secondary li a:active {
 }
 
 .expand-dropdown-tabs .expand-dropdown-tabs-control:after {
-  border-top-color: #bcc2cc;
+  border-top-color: #d5d5d5;
 }
 
 .responsive-tabs-mobile ul.primary,
@@ -1119,7 +1120,7 @@ ul.secondary li a:active {
 }
 
 .responsive-tabs-mobile ul.primary a:after {
-  background: #bcc2cc;
+  background: #d5d5d5;
 }
 
 .responsive-tabs-mobile-header-padder {
@@ -1232,4 +1233,3 @@ ul.secondary li a:active {
 .font-style-normal {
   font-style: normal;
 }
-
