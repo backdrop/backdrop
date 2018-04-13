@@ -268,6 +268,19 @@ function backdrop_load_database_driver() {
  * Defines basic Backdrop requirements for databases.
  */
 abstract class DatabaseTasks {
+  /**
+   * The PDO driver name for MySQL and equivalent databases.
+   *
+   * @var string
+   */
+  protected $pdoDriver;
+
+  /**
+   * Error code for "Unknown database" error.
+   *
+   * @var int
+   */
+  protected $databaseNotFoundErrorCode;
 
   /**
    * Structure that describes each task to run.
@@ -416,10 +429,40 @@ abstract class DatabaseTasks {
       Database::getConnection();
       $this->pass('Backdrop can CONNECT to the database ok.');
     }
-    catch (PDOException $e) {
-      $message = preg_replace('/SQLSTATE\[(\w+)\] \[(\w+)\] (.*)/', '$3', $e->getMessage());
-      $this->fail(st('Failed to connect to your database server. The server reports the following message: %error.', array('%error' => $message)));
-      return FALSE;
+    catch (\Exception $e) {
+      // Attempt to create the database if it is not found.
+      if ($e->getCode() === $this->databaseNotFoundErrorCode) {
+        // Remove the database string from connection info.
+        $connection_info = Database::getConnectionInfo();
+        $database = $connection_info['default']['database'];
+        unset($connection_info['default']['database']);
+
+        // In order to change the Database::$databaseInfo array, need to remove
+        // the active connection, then re-add it with the new info.
+        Database::removeConnection('default');
+        Database::addConnectionInfo('default', 'default', $connection_info['default']);
+
+        try {
+          // Now, attempt the connection again; if it's successful, attempt to
+          // create the database.
+          if (preg_match('/[^A-Za-z0-9_.]+/', $database)) {
+            $this->fail(st('Database %database is not valid. Only use alphanumeric characters and underscores in the database name.', array('%database' => $database)));
+          }
+          Database::getConnection()->createDatabase($database);
+        }
+        catch (DatabaseNotFoundException $e) {
+          // Still no dice; probably a permission issue. Raise the error to the
+          // installer.
+          $this->fail(st('Database %database not found. The server reports the following message when attempting to create the database: %error.', array('%database' => $database, '%error' => $e->getMessage())));
+          return FALSE;
+        }
+      }
+      else {
+        // Database connection failed for some other reason than the database
+        // not existing.
+        $this->fail(st('Failed to connect to your database server. The server reports the following message: %error.<ul><li>Is the database server running?</li><li>Does the database exist or does the database user have sufficient privileges to create the database?</li><li>Have you entered the correct database name?</li><li>Have you entered the correct username and password?</li><li>Have you entered the correct database hostname?</li></ul>', array('%error' => $e->getMessage())));
+        return FALSE;
+      }
     }
     return TRUE;
   }
