@@ -39,6 +39,15 @@ Backdrop.behaviors.moduleFilterByText = {
     function filterModuleList() {
       var query = $input.val().toLowerCase();
 
+      function showPackageFieldset(index, element) {
+        var $fieldset = $(element);
+        var $sources = $fieldset.find('legend .fieldset-title');
+        var textMatch = $sources.text().toLowerCase().indexOf(query) !== -1;
+        var $rows = $fieldset.find('tbody tr');
+        $fieldset.toggle(textMatch);
+        $rows.show();
+      }
+
       function showModuleRow(index, row) {
         var $row = $(row);
         var $sources = $row.find('.table-filter-text-source');
@@ -52,6 +61,8 @@ Backdrop.behaviors.moduleFilterByText = {
 
         // We first show() all <fieldset>s to be able to use ':visible'.
         $fieldset.show().each(hidePackageFieldset);
+        // Then show modules when the package matches.
+        $fieldset.each(showPackageFieldset);
 
         if ($fieldset.filter(':visible').length === 0) {
           if ($('.filter-empty').length === 0) {
