@@ -1851,9 +1851,12 @@ function _install_configure_form($form, &$form_state, &$install_state) {
     '#weight' => -5,
   );
   $form['admin_account']['account']['pass'] = array(
-    '#type' => 'password_confirm',
+    '#title' => st('Password'),
+    '#type' => 'password',
     '#required' => TRUE,
     '#weight' => 0,
+    '#password_toggle' => TRUE,
+    '#password_strength' => TRUE,
   );
 
   $form['server_settings'] = array(

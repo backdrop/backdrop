@@ -1636,8 +1636,7 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
     $edit = array(
       'name' => $username,
       'mail' => $this->randomName(4) . '@example.com',
-      'pass[pass1]' => $username,
-      'pass[pass2]' => $username,
+      'pass' => $username,
     );
 
     $this->backdropPost($langcode . '/admin/people/create', $edit, t('Create new account'));
@@ -1673,8 +1672,7 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
     // Set pass_raw so we can login the new user.
     $user->pass_raw = $this->randomName(10);
     $edit = array(
-      'pass[pass1]' => $user->pass_raw,
-      'pass[pass2]' => $user->pass_raw,
+      'pass' => $user->pass_raw,
     );
 
     $this->backdropPost($user_edit, $edit, t('Save'));
