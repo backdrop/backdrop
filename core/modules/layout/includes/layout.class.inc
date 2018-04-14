@@ -321,9 +321,7 @@ class Layout {
       }
       if (!in_array($item->path, $paths)) {
         $item->reassign();
-        dpm('reassign');
       }
-        dpm($item);
       $item->save();
     }
 
@@ -636,7 +634,7 @@ class Layout {
    * @return string
    */
   function getPath() {
-    $paths = (array) $this->path;
+    $paths = is_array($this->path) ? $this->path : array($this->path);
     if ($this->menu_item) {
       foreach ($this->menu_item as $item) {
         $paths[] = $item->path;

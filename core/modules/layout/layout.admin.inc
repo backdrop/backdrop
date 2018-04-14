@@ -168,10 +168,13 @@ function _layout_get_group_operations($path, array $group) {
 
   $last_layout = end($group);
   reset($group);
+
   if ($last_layout->menu_item) {
+  $last_item = reset($last_layout->menu_item);
+    
     $links['menu_settings'] = array(
       'title' => t('Menu settings'),
-      'href' => 'admin/structure/layouts/menu/' . $last_layout->menu_item->name,
+      'href' => 'admin/structure/layouts/menu/' . $last_item->path,
     );
   }
   if (count($group) > 1) {
