@@ -167,10 +167,6 @@ fieldset .fieldset-legend {
   text-decoration: none;
 }
 
-.l-header a:hover {
-  color: #edf8ff;
-}
-
 .l-header a:active {
   background: #114a75;
 }
@@ -605,7 +601,7 @@ button.form-submit,
   color: #333;
   letter-spacing: 0.025em;
   line-height: 2.875;
-  background: #e5e5e6;
+  background: #d5d5d5;
 }
 
 .button:hover,
@@ -613,13 +609,13 @@ button.form-submit,
 input.form-submit:hover,
 input.form-submit:focus {
   color: #333;
-  background: #e5e5e6;
+  background: #d5d5d5;
 }
 
 .button:active,
 input.form-submit:active {
   color: #333;
-  background: #e5e5e6;
+  background: #d5d5d5;
 }
 
 .button,
@@ -867,8 +863,8 @@ ul.action-links a {
 }
 
 .progress .bar {
-  border-color: #e5e5e6;
-  background: #e5e5e6;
+  border-color: #d5d5d5;
+  background: #d5d5d5;
 }
 
 .progress .filled {
@@ -1015,7 +1011,7 @@ ul.secondary {
 
 ul.secondary li a {
   border-color: #e3e2e2;
-  color: #444B53;
+  color: #444b53;
 }
 
 ul.secondary li a:hover,

@@ -13,6 +13,7 @@ $info = array(
     'link' => t('Link color'),
     'hovermenu' => t('Hover menu link background'),
     'border_thingy' => t('Border thingies'), //These are all over the place.
+    'form_focus_border' => t('Form element borders when selected'),
     'action_item_background' => t('Action item background'),
     'buttons' => t('Buttons'), // Action item link backgrounds, pager backgrounds, vertical tab backgrounds
     'buttons_hover' => t('Buttons Hover'), // Action item link backgrounds, vertical tab backgrounds
@@ -34,6 +35,7 @@ $info = array(
         'link' => '#0073bd',
         'hovermenu' => '#114a75',
         'border_thingy' => '#bbb',
+        'form_focus_border' => '#43afe4',
         'action_item_background' => '#586172',
         'buttons' => '#dee2ea',
         'buttons_hover' => '#d5d5d5',
@@ -67,9 +69,4 @@ $info = array(
     'css/component/caption.css',
     'css/skin.css',
   ),
-
-  // Preview files.
-  'preview_css' => 'color/preview.css',
-  'preview_js' => 'color/preview.js',
-  'preview_html' => 'color/preview.html',
 );
