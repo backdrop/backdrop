@@ -283,6 +283,15 @@ abstract class DatabaseTasks {
   protected $databaseNotFoundErrorCode;
 
   /**
+   * Error code when the connection is refused.
+   *
+   * This may happen whether port number is incorrect or socket file is missing.
+   *
+   * @var int
+   */
+  protected $connectionRefusedErrorCode;
+
+  /**
    * Structure that describes each task to run.
    *
    * @var array
@@ -422,48 +431,102 @@ abstract class DatabaseTasks {
    * Check if we can connect to the database.
    */
   protected function connect() {
+    $original_connection_info = $modified_connection_info = Database::getConnectionInfo();
+    $last_exception = FALSE;
     try {
       // This doesn't actually test the connection.
       db_set_active();
       // Now actually do a check.
       Database::getConnection();
-      $this->pass('Backdrop can CONNECT to the database ok.');
     }
-    catch (\Exception $e) {
-      // Attempt to create the database if it is not found.
-      if ($e->getCode() === $this->databaseNotFoundErrorCode) {
-        // Remove the database string from connection info.
-        $connection_info = Database::getConnectionInfo();
-        $database = $connection_info['default']['database'];
-        unset($connection_info['default']['database']);
+    catch (PDOException $e) {
+      $original_failed_exception = $last_exception = $e;
+    }
 
-        // In order to change the Database::$databaseInfo array, need to remove
-        // the active connection, then re-add it with the new info.
+    // Attempt to use localhost instead of 127.0.0.1 (or vice-versa). This can
+    // help when installing Backdrop in two situations:
+    // - When using localhost, a socket is used. If the socket is not where PHP
+    //   expects, switch to 127.0.0.1 and use TCP/IP instead.
+    // - When using 127.0.0.1, if the port number is not correct, using a
+    //   socket may work instead. This can happen when using local environments
+    //   that use non-standard port numbers for the database.
+    if ($last_exception && ($last_exception->getCode() === $this->connectionRefusedErrorCode)) {
+      if ($original_connection_info['default']['host'] === 'localhost') {
+        $modified_connection_info['default']['host'] = '127.0.0.1';
+        $modified_connection_info['default']['port'] = '3306';
+      }
+      elseif ($original_connection_info['default']['host'] === '127.0.0.1') {
+        $modified_connection_info['default']['host'] = 'localhost';
+        $modified_connection_info['default']['port'] = '';
+      }
+      if ($original_connection_info != $modified_connection_info) {
         Database::removeConnection('default');
-        Database::addConnectionInfo('default', 'default', $connection_info['default']);
-
+        Database::addConnectionInfo('default', 'default', $modified_connection_info['default']);
         try {
-          // Now, attempt the connection again; if it's successful, attempt to
-          // create the database.
-          if (preg_match('/[^A-Za-z0-9_.]+/', $database)) {
-            $this->fail(st('Database %database is not valid. Only use alphanumeric characters and underscores in the database name.', array('%database' => $database)));
-          }
-          Database::getConnection()->createDatabase($database);
+          Database::getConnection();
+          $last_exception = FALSE;
+
+          // Connection was successful, but settings.php needs to be updated.
+          $db_settings = $modified_connection_info['default'];
+          $settings['database'] = array(
+            'value' => $db_settings['driver'] . '://' . rawurlencode($db_settings['username']) . ':' . rawurlencode($db_settings['password']) . '@' . $db_settings['host'] . ($db_settings['port'] ? (':' . $db_settings['port']) : '') . '/' . rawurlencode($db_settings['database']),
+            'required' => TRUE,
+          );
+          $settings['database_prefix'] = array(
+            'value' => $db_settings['db_prefix'],
+          );
+          backdrop_rewrite_settings($settings);
         }
-        catch (DatabaseNotFoundException $e) {
-          // Still no dice; probably a permission issue. Raise the error to the
-          // installer.
-          $this->fail(st('Database %database not found. The server reports the following message when attempting to create the database: %error.', array('%database' => $database, '%error' => $e->getMessage())));
-          return FALSE;
+        catch (Exception $e) {
+          $last_exception = $e;
         }
       }
-      else {
-        // Database connection failed for some other reason than the database
-        // not existing.
-        $this->fail(st('Failed to connect to your database server. The server reports the following message: %error.<ul><li>Is the database server running?</li><li>Does the database exist or does the database user have sufficient privileges to create the database?</li><li>Have you entered the correct database name?</li><li>Have you entered the correct username and password?</li><li>Have you entered the correct database hostname?</li></ul>', array('%error' => $e->getMessage())));
+    }
+
+    // Attempt to create the database if it is not found.
+    if ($last_exception && ($last_exception->getCode() === $this->databaseNotFoundErrorCode)) {
+      $database = $modified_connection_info['default']['database'];
+      unset($modified_connection_info['default']['database']);
+
+      // Before attempting to create a database, ensure the name is acceptable.
+      if (preg_match('/[^A-Za-z0-9_.]+/', $database)) {
+        $this->fail(st('Database %database is not valid. Only use alphanumeric characters and underscores in the database name.', array('%database' => $database)));
         return FALSE;
       }
+
+      // Remove the database from the connection, then attempt to create it.
+      Database::removeConnection('default');
+      Database::addConnectionInfo('default', 'default', $modified_connection_info['default']);
+      try {
+        Database::getConnection()->createDatabase($database);
+        $last_exception = FALSE;
+      }
+      catch (PDOException $e) {
+        $last_exception = $e;
+      }
     }
+
+    // Attempts at fixing the database connection have failed, report the
+    // original exception error message.
+    if ($last_exception) {
+      $host = $original_connection_info['default']['host'];
+      if ($original_connection_info['default']['port']) {
+        $host .= ':' . $original_connection_info['default']['port'];
+      }
+      $exception_message = preg_replace('/SQLSTATE\[.*\]/', '', $original_failed_exception->getMessage());
+      $error = st('Failed to connect to your database server. The server reports the following message: %error.', array('%error' => $exception_message));
+      $error .= '<div class="item-list"><ul><li>';
+      $error .= st('Is the database server running on %host?', array('%host' => $host));
+      $error .= '</li><li>';
+      $error .= st('Is %database the correct database name?', array('%database' => $original_connection_info['default']['database']));
+      $error .= '</li><li>';
+      $error .= st('Are the username and password correct?');
+      $error .= '</li></ul></div>';
+      $this->fail($error);
+      return FALSE;
+    }
+
+    $this->pass('Backdrop can CONNECT to the database ok.');
     return TRUE;
   }
 
@@ -488,6 +551,22 @@ abstract class DatabaseTasks {
   protected function checkEngineVersion() {
     if ($this->minimumVersion() && version_compare(Database::getConnection()->version(), $this->minimumVersion(), '<')) {
       $this->fail(st("The database version %version is less than the minimum required version %minimum_version.", array('%version' => Database::getConnection()->version(), '%minimum_version' => $this->minimumVersion())));
+    }
+  }
+
+  /**
+   * Check the engine version.
+   */
+  protected function checkUtf8mb4() {
+    $connection = Database::getConnection();
+    $connection_info = Database::getConnectionInfo();
+    if (!$connection->utf8mb4IsActive()) {
+      if ($connection->utf8mb4IsSupported()) {
+        $connection_info['default']['charset'] = 'utf8mb4';
+        Database::removeConnection('default');
+        Database::addConnectionInfo('default', 'default', $connection_info['default']);
+        Database::getConnection();
+      }
     }
   }
 
@@ -548,7 +627,7 @@ abstract class DatabaseTasks {
     $form['advanced_options']['host'] = array(
       '#type' => 'textfield',
       '#title' => st('Database host'),
-      '#default_value' => empty($database['host']) ? 'localhost' : $database['host'],
+      '#default_value' => empty($database['host']) ? '127.0.0.1' : $database['host'],
       '#size' => 45,
       // Hostnames can be 255 characters long.
       '#maxlength' => 255,
