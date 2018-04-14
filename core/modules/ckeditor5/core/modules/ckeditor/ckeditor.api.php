@@ -52,10 +52,6 @@
  *   - required_html: If this button requires certain HTML tags or attributes
  *     to be allowed, specify an nested array for each set of tags that should
  *     be allowed. For example:
- *   - dependencies: An array of other plugin names on which this button
- *     depends. A common use is to add the "contextmenu" plugin, if the button
- *     makes options available only via contextual menu.
- *
  *     @code
  *     array(
  *       array(
@@ -66,9 +62,11 @@
  *       ),
  *     );
  *     @endcode
- *
  *     Note that this must be a nested array, to allow for the button to require
  *     different attributes on different tags.
+ *   - dependencies: An array of other plugin names on which this button
+ *     depends. A common use is to add the "contextmenu" plugin, if the button
+ *     makes options available only via contextual menu.
  *   - optional_html: If this button can work with or without certain tags or
  *     attributes in a reduced manner, then specify additional values that can
  *     be used to provide the full functionality. This should match the same
