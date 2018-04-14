@@ -2446,7 +2446,9 @@ function theme_head_tag($variables) {
   $element = $variables['element'];
   $attributes = isset($element['#attributes']) ? backdrop_attributes($element['#attributes']) : '';
   if (!isset($element['#value'])) {
-    return '<' . $element['#tag'] . $attributes . " />\n";
+    if (!empty($element['#tag'])) {
+      return '<' . $element['#tag'] . $attributes . " />\n";
+    }
   }
   else {
     $output = '<' . $element['#tag'] . $attributes . '>';
