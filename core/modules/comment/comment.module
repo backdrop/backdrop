@@ -1290,7 +1290,7 @@ function comment_form_node_form_alter(&$form, $form_state) {
     $form['comment_settings']['comment_closer_override'] = array(
       '#type' => 'checkbox',
       '#title' => t('Override the automatic closing of comments'),
-      '#description' => t('This content type is set to automatically disable commenting on old content. Override to leave commenting enabled on this item.'),
+      '#description' => t('This content type is set to automatically disable commenting on old content after !close-days days. Override to leave commenting enabled on this item.', array('!close-days' => $config->get('settings.comment_close_days'))),
       '#default_value' => isset($node->comment_closer_override) ? $node->comment_closer_override : 0,
     );
   }
