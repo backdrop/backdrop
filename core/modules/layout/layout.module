@@ -284,6 +284,7 @@ function layout_menu() {
 
   // Add menu entries for each custom layout path.
   foreach (layout_menu_item_load_all() as $menu_item) {
+    dpm($menu_item);
     if (!empty($menu_item->disabled)) {
       continue;
     }
@@ -316,6 +317,7 @@ function layout_menu() {
     }
   }
 
+  dpm($items);
   // A page in the Reports section to list all blocks and their modules.
   $items['admin/reports/blocks'] = array(
     'title' => 'Blocks',
@@ -871,6 +873,7 @@ function layout_load_all() {
  */
 function layout_menu_item_load($menu_item_name) {
   $menu_items = layout_menu_item_load_multiple(array($menu_item_name));
+  dpm($menu_item_name);
 
   // Returned menu items are by path, so return the first item if it exists.
   if ($path = key($menu_items)) {
@@ -903,19 +906,32 @@ function layout_menu_item_load_multiple($menu_item_names = NULL) {
   }
 
   if ($menu_items_to_load) {
+    $config_menu_items = array();
     $configs = layout_get_all_configs('menu_item');
+    foreach ($configs as $config) {
+      if (isset($config['menu_items'])) {
+        foreach ($config['menu_items'] as $config_item) {
+        $config_menu_items[$config_item['name']] = $config_item;
+        }
+      }
+      else {
+        $config_menu_items[$config['name']] = $config;
+      }
+    }
+  dpm($configs);
     foreach ($menu_items_to_load as $menu_item_name) {
-      if (isset($configs[$menu_item_name]['menu_items'])) {
-        foreach ($configs[$menu_item_name]['menu_items'] as $item) {
+      if (isset($config_menu_items[$menu_item_name]['menu_items'])) {
+        foreach ($config_menu_items[$menu_item_name]['menu_items'] as $item) {
           $loaded_menu_items[$menu_item_name][] = new LayoutMenuItem($item);
         }
       }
       else {
-        if (isset($configs[$menu_item_name]['path'])) {
-          $loaded_menu_items[$menu_item_name][] = new LayoutMenuItem($configs[$menu_item_name]);
+        if (isset($config_menu_items[$menu_item_name]['path'])) {
+          $loaded_menu_items[$menu_item_name][] = new LayoutMenuItem($config_menu_items[$menu_item_name]);
         }
       }
     }
+        dpm('oko');
   }
 
   // Return the requested menu items.
@@ -1495,6 +1511,7 @@ function layout_get_layout_tempstore($name, $type = 'layout') {
       }
       elseif ($type == 'menu_item') {
         $item = layout_menu_item_load($name);
+  dpm($item);
       }
     }
     $caches[$type][$name] = $item;
@@ -1545,7 +1562,10 @@ function layout_tempstore_load($layout_name) {
  * Menu loader callback to load a Layout cache object.
  */
 function layout_tempstore_menu_item_load($layout_name) {
-  return layout_get_layout_tempstore($layout_name, 'menu_item');
+  $tt = layout_get_layout_tempstore($layout_name, 'menu_item');
+  dpm($tt);
+  return $tt;
+  //return layout_get_layout_tempstore($layout_name, 'menu_item');
 }
 
 /**
