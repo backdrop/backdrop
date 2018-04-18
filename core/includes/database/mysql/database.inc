@@ -256,7 +256,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     catch (Exception $e) {
       return FALSE;
     }
-    $this->query("DROP TABLE {backdrop_utf8mb4_test}");
+    $this->query("DROP TABLE IF EXISTS {backdrop_utf8mb4_test}");
     return TRUE;
   }
 }
