@@ -1698,6 +1698,12 @@ function install_finished(&$install_state) {
   // visiting of install.php.
   state_set('install_task', 'done');
 
+  // Record if UTF8MB4 support was enabled during the installation.
+  $connection = Database::getConnection();
+  if ($connection->utf8mb4IsActive()) {
+    state_set('database_utf8mb4_active', TRUE);
+  }
+
   // Run cron to populate update status tables (if available) so that users
   // will be warned if they've installed an out of date Backdrop version.
   // Will also trigger indexing of profile-supplied content or feeds.
