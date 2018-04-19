@@ -163,10 +163,11 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'radios',
     '#title' => t('Default status'),
     '#options' => array(
+      0 => t('Draft'),
       1 => t('Published'),
-      0 => t('Unpublished'),
+      2 => t('Schedule Publish Time'),
     ),
-    '#default_value' => (int) $type->settings['status_default'],
+    '#default_value' => isset($type->settings['status_default']) ? $type->settings['status_default'] : 1,
     '#description' => t('Unpublished content is only accessible to the content creator or site administrators.')
   );
 
@@ -383,8 +384,8 @@ function node_type_form_submit($form, &$form_state) {
       $type->settings[$key] = $value;
     }
   }
-
-  $status = node_type_save($type);
+  $type->settings['status_default'] = $form_state['values']['status_default'];
+  $status = node_type_save($type, 'type');
   menu_rebuild();
 
   if ($status == SAVED_UPDATED) {
@@ -523,7 +524,7 @@ function node_node_type_load(&$types) {
   foreach ($types as $type_name => $type) {
     $types[$type_name]->settings += array(
       // Basic workflow settings.
-      'status_default' => TRUE,
+      'status_default' => 1,
       'promote_enabled' => TRUE,
       'promote_default' => FALSE,
       'sticky_enabled' => TRUE,

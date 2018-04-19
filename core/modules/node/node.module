@@ -112,6 +112,17 @@ function node_cron() {
   db_delete('history')
     ->condition('timestamp', NODE_NEW_LIMIT, '<')
     ->execute();
+
+  $get_nodes_to_publish = db_query(
+    'SELECT * FROM node WHERE published_on < UNIX_TIMESTAMP(NOW())
+      AND status = 0
+      AND published_on != 0'
+  );
+  foreach($get_nodes_to_publish as $n) {
+    $node = node_load($n->nid);
+    $node->status = 1;
+    $node->save();
+  }
 }
 
 /**
