@@ -21,6 +21,13 @@ class LayoutMenuItem {
   var $name = '';
 
   /**
+   * The layout this menu item is attached to.
+   *
+   * @var string
+   */
+  var $layout = '';
+
+  /**
    * The title of this menu item.
    *
    * @var string
@@ -146,6 +153,7 @@ class LayoutMenuItem {
     // Convert all properties to an array.
     $data = array(
       'name' => $this->name,
+      'layout' => $this->layout,
       'title' => $this->title,
       'path' => $this->path,
       'menu' => $this->menu,
