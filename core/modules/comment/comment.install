@@ -8,7 +8,7 @@
  * Implements hook_schema_alter().
  */
 function comment_schema_alter(&$schema) {
-  $schema['node']['fields']['comment_closer_override'] = array(
+  $schema['node']['fields']['comment_close_override'] = array(
     'type' => 'int',
     'unsigned' => TRUE,
     'not null' => TRUE,
@@ -22,10 +22,10 @@ function comment_schema_alter(&$schema) {
  * Implements hook_install().
  */
 function comment_install() {
-  if (!db_field_exists('node', 'comment_closer_override')) {
+  if (!db_field_exists('node', 'comment_close_override')) {
     $schema = array();
     comment_schema_alter($schema);
-    db_add_field('node', 'comment_closer_override', $schema['node']['fields']['comment_closer_override']);
+    db_add_field('node', 'comment_close_override', $schema['node']['fields']['comment_close_override']);
   }
 }
 
@@ -63,8 +63,8 @@ function comment_uninstall() {
   }
   
   // Remove comment closer override.
-  if (db_field_exists('node', 'comment_closer_override')) {
-    db_drop_field('node', 'comment_closer_override');
+  if (db_field_exists('node', 'comment_close_override')) {
+    db_drop_field('node', 'comment_close_override');
   }
 }
 
@@ -399,13 +399,13 @@ function comment_update_1003() {
  * Add an Override column for automatic comment closing for individual nodes.
  */
 function comment_update_1004() {
-  if (db_field_exists('node', 'comment_closer_override')) {
+  if (db_field_exists('node', 'comment_close_override')) {
     return;
   }
 
   $schema = array();
   comment_schema_alter($schema);
-  db_add_field('node', 'comment_closer_override', $schema['node']['fields']['comment_closer_override']);
+  db_add_field('node', 'comment_close_override', $schema['node']['fields']['comment_close_override']);
 }
 
 /**
