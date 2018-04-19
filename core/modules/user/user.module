@@ -742,8 +742,11 @@ function user_account_form(&$form, &$form_state) {
   // assign a password during registration.
   if (!$register) {
     $form['account']['pass'] = array(
-      '#type' => 'password_confirm',
-      '#description' => t('To change the current user password, enter the new password in both fields.'),
+      '#title' => t('New password'),
+      '#type' => 'password',
+      '#description' => t('Current password must be entered to set a new password.'),
+      '#password_toggle' => TRUE,
+      '#password_strength' => TRUE,
     );
     // To skip the current password field, the user must have logged in via a
     // one-time link and have the token in the URL. Store this in $form_state
@@ -773,6 +776,7 @@ function user_account_form(&$form, &$form_state) {
         '#access' => !empty($protected_values),
         '#description' => $current_pass_description,
         '#weight' => -5,
+        '#password_toggle' => TRUE,
         // Do not let web browsers remember this password, since we are
         // trying to confirm that the person submitting the form actually
         // knows the current one.
@@ -783,8 +787,10 @@ function user_account_form(&$form, &$form_state) {
   }
   elseif (!config_get('system.core', 'user_email_verification') || $admin) {
     $form['account']['pass'] = array(
-      '#type' => 'password_confirm',
-      '#description' => t('Provide a password for the new account in both fields.'),
+      '#type' => 'password',
+      '#description' => t('Provide a password for the new account.'),
+      '#password_toggle' => TRUE,
+      '#password_strength' => TRUE,
       '#required' => TRUE,
     );
   }
@@ -2652,6 +2658,42 @@ function _user_mail_notify($op, $account, $language = NULL) {
 }
 
 /**
+ * Form element process handler for client-side password hide/show and strength.
+ * @param $element
+ */
+function user_form_process_password($element) {
+  global $user;
+
+  if ($element['#password_strength']) {
+    $strength_settings = array(
+      'strengthTitle' => t('Password strength: '),
+      'weak' => t('poor'),
+      'fair' => t('fair'),
+      'good' => t('good'),
+      'strong' => t('excellent'),
+      'username' => (isset($user->name) ? $user->name : ''),
+    );
+
+    $element['#attributes']['data-password-strength'] = backdrop_json_encode($strength_settings, FALSE);
+  }
+
+  if ($element['#password_toggle']) {
+    $toggle_settings = array(
+      'toggleShowTitle' => t('Show password'),
+      'toggleHideTitle' => t('Hide password'),
+      'toggleDefault' => $element['#password_shown'] ? 'show' : 'hide',
+    );
+
+    $element['#attributes']['data-password-toggle'] = backdrop_json_encode($toggle_settings, FALSE);
+  }
+
+  if ($element['#password_strength'] || $element['#password_toggle']) {
+    $element['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.js';
+  }
+  return $element;
+}
+
+/**
  * Form element process handler for client-side password validation.
  *
  * This #process handler is automatically invoked for 'password_confirm' form
@@ -2661,24 +2703,14 @@ function _user_mail_notify($op, $account, $language = NULL) {
  * @see system_element_info()
  */
 function user_form_process_password_confirm($element) {
-  global $user;
-
-  $js_settings = array(
-    'password' => array(
-      'strengthTitle' => t('Password strength: '),
-      'confirmTitle' => t('Passwords match: '),
-      'confirmSuccess' => t('yes'),
-      'confirmFailure' => t('no'),
-      'weak' => t('poor'),
-      'fair' => t('fair'),
-      'good' => t('good'),
-      'strong' => t('excellent'),
-      'username' => (isset($user->name) ? $user->name : ''),
-    ),
+  $confirm_settings = array(
+    'confirmTitle' => t('Passwords match: '),
+    'confirmSuccess' => t('yes'),
+    'confirmFailure' => t('no'),
   );
 
   $element['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.js';
-  $element['#attached']['js'][] = array('data' => $js_settings, 'type' => 'setting');
+  $element['pass2']['#attributes']['data-password-confirm'] = backdrop_json_encode($confirm_settings, FALSE);
 
   return $element;
 }

@@ -2997,6 +2997,9 @@ function form_process_password_confirm($element) {
     '#value' => empty($element['#value']) ? NULL : $element['#value']['pass1'],
     '#required' => $element['#required'],
     '#attributes' => array('class' => array('password-field')),
+    '#password_strength' => TRUE,
+    '#password_shown' => FALSE,
+    '#password_toggle' => FALSE,
   );
   $element['pass2'] =  array(
     '#type' => 'password',
@@ -3004,6 +3007,9 @@ function form_process_password_confirm($element) {
     '#value' => empty($element['#value']) ? NULL : $element['#value']['pass2'],
     '#required' => $element['#required'],
     '#attributes' => array('class' => array('password-confirm')),
+    '#password_strength' => FALSE,
+    '#password_shown' => FALSE,
+    '#password_toggle' => FALSE,
   );
   $element['#element_validate'] = array('password_confirm_validate');
   $element['#tree'] = TRUE;
