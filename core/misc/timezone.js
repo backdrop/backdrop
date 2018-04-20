@@ -7,6 +7,28 @@ Backdrop.behaviors.setTimezone = {
   attach: function (context, settings) {
     var $timezone = $(context).find('.timezone-detect').once('timezone');
     if ($timezone.length) {
+      // Modern approach: use JavaScript timezone capability.
+      try {
+        var resolvedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (resolvedTimezone && !resolvedTimezone.match('Etc/')) {
+          // Select lists, ensure the option is available, otherwise fallback to
+          // AJAX implementation.
+          if ($timezone.is('select')) {
+            if ($timezone.find('[value="' + resolvedTimezone + '"]').length) {
+              $timezone.val(resolvedTimezone);
+              return
+            }
+          }
+          // Text or hidden elements, just set the value directly.
+          else {
+            $timezone.val(resolvedTimezone);
+            return;
+          }
+        }
+      }
+      catch (e) {}
+
+      // Legacy approach: Combine the date offset and an AJAX request.
       var dateString = Date();
       // In some client environments, date strings include a time zone
       // abbreviation, between 3 and 5 letters enclosed in parentheses,
