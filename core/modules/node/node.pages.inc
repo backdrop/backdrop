@@ -293,69 +293,44 @@ function node_form($form, &$form_state, Node $node) {
     ),
     '#weight' => -10,
   );
-  /**
-   * Helper function to determine #default_value of 'publishing_states'.
-   *
-   *  @param $type
-   *   The node type object that the node/add form is working on.
-   *
-   * @return int.
-   *  Status code for the publishing state of the node.
-   *   0 => Draft
-   *   1 => Publish Now
-   *   2 => Schedule Publish Time
-   */
-  function _is_scheduled($type) {
-    $node = node_load(arg(1));
-    if (arg(2) == 'edit') {
-      if ($node->published_on > 0 && $node->status == 0) {
-        return 2;
-      }
-      elseif ($node->status == 0) {
-        return 0;
-      }
-      elseif ($node->status == 1) {
-        return 1;
-      }
+  $is_scheduled = $node_type->settings['status_default'];
+  if ($node->nid) {
+    if ($node->published_on > 0 && $node->status == 0) {
+      $is_scheduled = 2;
     }
-    return $type->settings['status_default'];
+    elseif ($node->status == 0) {
+      $is_scheduled = 0;
+    }
+    elseif ($node->status == 1) {
+      $is_scheduled = 1;
+    }
   }
-  $form['options']['publishing-states'] = array(
+  $form['options']['publishing_states'] = array(
     '#type' => 'radios',
     '#options' => array(
       0 => t('Save Draft'),
       1 => t('Publish Now'),
       2 => t('Schedule Publish Time'),
     ),
-    '#default_value' => _is_scheduled($node_type),
+    '#default_value' => $is_scheduled,
   );
-  /**
-   * Helper function to determine the #default_vaule of 'future-publish'.
-   *
-   * @return date.
-   *  If a non zero 'published_on' date exists for this node then return it,
-   *  otherwise use the current time.
-   */
-  function _remember_published_on() {
-    $node = node_load(arg(1));
-    $current_published_on = date(time());
-    if (arg(2) == 'edit') {
-      if ($node->status == 0 && $node->published_on != 0) {
-        $current_published_on = $node->published_on;
-      }
+  $current_published_on = date(time());
+  if (!empty($node->nid)) {
+    if ($node->status == 0 && $node->published_on != 0) {
+      $current_published_on = $node->published_on;
     }
-    return date('Y-m-d g:i', $current_published_on);
   }
-  $form['options']['future-publish'] = array(
+  $current_published_on = date('Y-m-d g:i', $current_published_on);
+  $form['options']['future_publish'] = array(
     '#type' => 'date_popup',
     '#title' => t('Publish on:'),
     '#date_format' => 'Y-m-d g:i',
     '#date_increment' => 10,
     '#date_year_range' => '-0:+3',
-    '#default_value' => _remember_published_on(),
+    '#default_value' => $current_published_on,
     '#states' => array(
       'visible' => array(
-       ':input[name="publishing-states"]' => array('value' => 2),
+       ':input[name="publishing_states"]' => array('value' => 2),
       ),
     ),
   );
@@ -455,6 +430,11 @@ function node_form_submit($form, &$form_state) {
     watchdog('content', '@type: updated %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
     backdrop_set_message(t('@type %title has been updated.', $t_args));
   }
+  if ($node->future_publish) {
+    $today = date("D M j G:i:s", strtotime($node->future_publish));
+    backdrop_set_message(t('This content will be published on @date.', array('@date' => $today)));
+
+  }
   if ($node->nid) {
     $form_state['values']['nid'] = $node->nid;
     $form_state['nid'] = $node->nid;
@@ -492,17 +472,17 @@ function node_form_submit_build_node($form, &$form_state) {
   form_execute_handlers('submit', $form, $form_state);
 
   $node = $form_state['node'];
-  if ($form_state['values']['publishing-states'] == 1) {
+  if ($form_state['values']['publishing_states'] == 1) {
     $node->status = 1;
     $node->published_on = 0;
   }
-  elseif ($form_state['values']['publishing-states'] == 0) {
+  elseif ($form_state['values']['publishing_states'] == 0) {
     $node->status = 0;
     $node->published_on = 0;
   }
-  elseif ($form_state['values']['publishing-states'] == 2) {
+  elseif ($form_state['values']['publishing_states'] == 2) {
     $node->status = 0;
-    $node->published_on = strtotime($form_state['values']['future-publish']);
+    $node->published_on = strtotime($form_state['values']['future_publish']);
   }
   else {
     $node->published_on = 0;

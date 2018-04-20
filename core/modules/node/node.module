@@ -916,6 +916,11 @@ function node_validate($node, $form, &$form_state) {
     form_set_error('date', t('You have to specify a valid date.'));
   }
 
+  // Validate the "Publish on" field.
+  if (!empty($node->future_publish) && strtotime($node->future_publish) < REQUEST_TIME) {
+    form_set_error('future_publish[date]', t('Publish time cannot be in the past.'));
+  }
+
   // Invoke hook_validate() for node type specific validation and
   // hook_node_validate() for miscellaneous validation needed by modules. Can't
   // use node_invoke() or module_invoke_all(), because $form_state must be
