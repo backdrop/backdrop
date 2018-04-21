@@ -114,14 +114,15 @@ function node_cron() {
     ->execute();
 
   $get_nodes_to_publish = db_query(
-    'SELECT * FROM node WHERE published_on < UNIX_TIMESTAMP(NOW())
-      AND status = 0
-      AND published_on != 0'
+      "SELECT * FROM {node} WHERE published_on < UNIX_TIMESTAMP(NOW())
+      AND status = '0'
+      AND published_on != 0"
   );
   foreach($get_nodes_to_publish as $n) {
-    $node = node_load($n->nid);
-    $node->status = 1;
-    $node->save();
+    if ($node = node_load($n->nid)) {
+      $node->status = 1;
+      $node->save();
+    }
   }
 }
 
@@ -917,9 +918,9 @@ function node_validate($node, $form, &$form_state) {
   }
 
   // Validate the "Publish on" field.
-  if (!empty($node->future_publish) && strtotime($node->future_publish) < REQUEST_TIME) {
-    form_set_error('future_publish[date]', t('Publish time cannot be in the past.'));
-  }
+  //if (!empty($node->future_publish) && strtotime($node->future_publish) < REQUEST_TIME) {
+    //form_set_error('future_publish[date]', t('Publish time cannot be in the past.'));
+  //}
 
   // Invoke hook_validate() for node type specific validation and
   // hook_node_validate() for miscellaneous validation needed by modules. Can't
