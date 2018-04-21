@@ -308,11 +308,12 @@ function node_form($form, &$form_state, Node $node) {
   $form['options']['publishing_states'] = array(
     '#type' => 'radios',
     '#options' => array(
-      0 => t('Save Draft'),
-      1 => t('Publish Now'),
-      2 => t('Schedule Publish Time'),
+      1 => t('Publish now'),
+      0 => t('Save draft'),
+      2 => t('Publish later'),
     ),
     '#default_value' => $is_scheduled,
+    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators. Content set to Publish later will be saved as draft when the content is created, but will be automatically published on the date and time selected; this requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/reports/status')))
   );
   $current_published_on = date(time());
   if (!empty($node->nid)) {

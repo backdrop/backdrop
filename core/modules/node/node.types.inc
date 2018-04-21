@@ -163,12 +163,12 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'radios',
     '#title' => t('Default status'),
     '#options' => array(
-      0 => t('Draft'),
-      1 => t('Published'),
-      2 => t('Schedule Publish Time'),
+      1 => t('Publish now'),
+      0 => t('Save draft'),
+      2 => t('Publish later'),
     ),
     '#default_value' => isset($type->settings['status_default']) ? $type->settings['status_default'] : 1,
-    '#description' => t('Unpublished content is only accessible to the content creator or site administrators.')
+    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators. Content set to Publish later will be saved as draft when the content is created, but will be automatically published on the date and time selected; this requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/reports/status')))
   );
 
   if (module_exists('language')) {
