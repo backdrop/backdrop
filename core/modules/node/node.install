@@ -102,6 +102,13 @@ function node_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'published_on' => array(
+        'description' => 'The UNIX UTC timestamp when to publish',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'indexes' => array(
       'node_changed'        => array('changed'),
@@ -1135,6 +1142,21 @@ function node_update_1014() {
   ));
   db_add_primary_key('history', array('uid', 'nid'));
   db_add_index('history', 'nid', array('nid'));
+}
+  
+/**
+ * Add column 'published_on' to the node table to allow nodes to be scheduled
+ * for publication at a future date.
+ */
+function node_update_1015() {
+  $spec = array(
+    'type' => 'int',
+    'description' => 'The UNIX UTC timestamp when to publish',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+  );
+  db_add_field( 'node', 'published_on', $spec);
 }
 
 /**

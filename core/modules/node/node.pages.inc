@@ -293,10 +293,47 @@ function node_form($form, &$form_state, Node $node) {
     ),
     '#weight' => -10,
   );
-  $form['options']['status'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Published'),
-    '#default_value' => $node->status,
+  $is_scheduled = $node_type->settings['status_default'];
+  if ($node->nid) {
+    if ($node->published_on > 0 && $node->status == 0) {
+      $is_scheduled = 2;
+    }
+    elseif ($node->status == 0) {
+      $is_scheduled = 0;
+    }
+    elseif ($node->status == 1) {
+      $is_scheduled = 1;
+    }
+  }
+  $form['options']['publishing_states'] = array(
+    '#type' => 'radios',
+    '#options' => array(
+      1 => t('Publish now'),
+      0 => t('Save draft'),
+      2 => t('Publish later'),
+    ),
+    '#default_value' => $is_scheduled,
+    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators. Content set to Publish later will be saved as draft when the content is created, but will be automatically published on the date and time selected; this requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/reports/status')))
+  );
+  $current_published_on = date(time());
+  if (!empty($node->nid)) {
+    if ($node->status == 0 && $node->published_on != 0) {
+      $current_published_on = $node->published_on;
+    }
+  }
+  $current_published_on = date('Y-m-d g:i', $current_published_on);
+  $form['options']['future_publish'] = array(
+    '#type' => 'date_popup',
+    '#title' => t('Publish on:'),
+    '#date_format' => 'Y-m-d g:i',
+    '#date_increment' => 10,
+    '#date_year_range' => '-0:+3',
+    '#default_value' => $current_published_on,
+    '#states' => array(
+      'visible' => array(
+       ':input[name="publishing_states"]' => array('value' => 2),
+      ),
+    ),
   );
   $form['options']['promote'] = array(
     '#type' => 'checkbox',
@@ -379,12 +416,14 @@ function node_form($form, &$form_state, Node $node) {
  * @see node_form_submit_build_node()
  */
 function node_form_submit($form, &$form_state) {
+  $original_status = $form_state['node']->status && $form_state['node']->nid;
   $node = node_form_submit_build_node($form, $form_state);
   $insert = empty($node->nid);
   $node->save();
   $node_link = l(t('view'), 'node/' . $node->nid);
+  $type = node_type_get_name($node);
   $watchdog_args = array('@type' => $node->type, '%title' => $node->title);
-  $t_args = array('@type' => node_type_get_name($node), '%title' => $node->title);
+  $t_args = array('@type' => $type, '%title' => $node->title);
 
   if ($insert) {
     watchdog('content', '@type: added %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
@@ -393,6 +432,15 @@ function node_form_submit($form, &$form_state) {
   else {
     watchdog('content', '@type: updated %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
     backdrop_set_message(t('@type %title has been updated.', $t_args));
+  }
+  if ($node->published_on) {
+    $message = '';
+    if (!empty($original_status)) {
+      $message .= t('@type has been unpublished.', array('@type' => $type)) . ' ';
+    }
+    $today = date("D M j G:i:s", strtotime($node->future_publish));
+    $message .= t('@type will be published on @date.', array('@type' => $type, '@date' => $today));
+    backdrop_set_message($message);
   }
   if ($node->nid) {
     $form_state['values']['nid'] = $node->nid;
@@ -431,6 +479,21 @@ function node_form_submit_build_node($form, &$form_state) {
   form_execute_handlers('submit', $form, $form_state);
 
   $node = $form_state['node'];
+  if ($form_state['values']['publishing_states'] == 1) {
+    $node->status = 1;
+    $node->published_on = 0;
+  }
+  elseif ($form_state['values']['publishing_states'] == 0) {
+    $node->status = 0;
+    $node->published_on = 0;
+  }
+  elseif ($form_state['values']['publishing_states'] == 2) {
+    $node->status = 0;
+    $node->published_on = strtotime($form_state['values']['future_publish']);
+  }
+  else {
+    $node->published_on = 0;
+  }
   entity_form_submit_build_entity('node', $node, $form, $form_state);
 
   node_submit($node);
