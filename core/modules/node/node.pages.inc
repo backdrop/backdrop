@@ -441,7 +441,6 @@ function node_form_submit($form, &$form_state) {
     $today = date("D M j G:i:s", strtotime($node->future_publish));
     $message .= t('@type will be published on @date.', array('@type' => $type, '@date' => $today));
     backdrop_set_message($message);
-
   }
   if ($node->nid) {
     $form_state['values']['nid'] = $node->nid;
