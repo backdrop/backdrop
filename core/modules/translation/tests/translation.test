@@ -60,9 +60,9 @@ class TranslationTestCase extends BackdropWebTestCase {
     // Unpublish the original node to check that this has no impact on the
     // translation overview page, publish it again afterwards.
     $this->backdropLogin($this->admin_user);
-    $this->backdropPost('node/' . $node->nid . '/edit', array('publishing-states' => 0), t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', array('publishing_states' => 0), t('Save'));
     $this->backdropGet('node/' . $node->nid . '/translate');
-    $this->backdropPost('node/' . $node->nid . '/edit', array('publishing-states' => 1), t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', array('publishing_states' => 1), t('Save'));
     $this->backdropLogin($this->translator);
 
     // Check that the "Add translation" link uses a localized path.
@@ -165,7 +165,7 @@ class TranslationTestCase extends BackdropWebTestCase {
     // Unpublish the Spanish translation to check that the related language
     // switch link is not shown.
     $this->backdropLogin($this->admin_user);
-    $edit = array('publishing-states' => 0);
+    $edit = array('publishing_states' => 0);
     $this->backdropPost("node/$translation_es->nid/edit", $edit, t('Save'));
     $this->backdropLogin($this->translator);
     $this->assertLanguageSwitchLinks($node, $translation_es, FALSE);
@@ -176,7 +176,7 @@ class TranslationTestCase extends BackdropWebTestCase {
     $edit = array('language[locale-url][enabled]' => FALSE);
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
     $this->resetCaches();
-    $edit = array('publishing-states' => 1);
+    $edit = array('publishing_states' => 1);
     $this->backdropPost("node/$translation_es->nid/edit", $edit, t('Save'));
     $this->backdropLogin($this->translator);
     $this->assertLanguageSwitchLinks($node, $translation_es, TRUE, 'node');
