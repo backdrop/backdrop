@@ -44,10 +44,26 @@
   max-width: 100%;
 }
 .password-toggle {
-  right: 0;
+  right: 11px;
   position: absolute;
-  font-size: 80%;
-  top: -2em;
+  font-size: 70%;
+  top: 0.5em;
+  color: #888;
+  background-color: #fff;
+  padding: 4px;
+  border-radius: 6px;
+  border: #ccc solid 1px;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+a.password-toggle:hover {
+  background-color: #ccc;
+  color: #fff;
+  text-decoration: none;
+  -webkit-transition: background-color 1s ease-out;
+  -moz-transition: background-color 1s ease-out;
+  -o-transition: background-color 1s ease-out;
+  transition: background-color 1s ease-out;
 }
 
 /**
