@@ -921,7 +921,7 @@ class FileFieldWidgetTestCase extends FileFieldTestCase {
     // Unpublishes node.
     $this->backdropLogin($this->admin_user);
     $edit = array(
-      'status' => FALSE,
+      'publishing_states' => 0,
     );
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
 
