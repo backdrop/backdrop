@@ -416,12 +416,14 @@ function node_form($form, &$form_state, Node $node) {
  * @see node_form_submit_build_node()
  */
 function node_form_submit($form, &$form_state) {
+  $original_status = $form_state['node']->status && $form_state['node']->nid;
   $node = node_form_submit_build_node($form, $form_state);
   $insert = empty($node->nid);
   $node->save();
   $node_link = l(t('view'), 'node/' . $node->nid);
+  $type = node_type_get_name($node);
   $watchdog_args = array('@type' => $node->type, '%title' => $node->title);
-  $t_args = array('@type' => node_type_get_name($node), '%title' => $node->title);
+  $t_args = array('@type' => $type, '%title' => $node->title);
 
   if ($insert) {
     watchdog('content', '@type: added %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
@@ -431,9 +433,14 @@ function node_form_submit($form, &$form_state) {
     watchdog('content', '@type: updated %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
     backdrop_set_message(t('@type %title has been updated.', $t_args));
   }
-  if ($node->future_publish) {
+  if ($node->published_on) {
+    $message = '';
+    if (!empty($original_status)) {
+      $message .= t('@type has been unpublished.', array('@type' => $type)) . ' ';
+    }
     $today = date("D M j G:i:s", strtotime($node->future_publish));
-    backdrop_set_message(t('This content will be published on @date.', array('@date' => $today)));
+    $message .= t('@type will be published on @date.', array('@type' => $type, '@date' => $today));
+    backdrop_set_message($message);
 
   }
   if ($node->nid) {
