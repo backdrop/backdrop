@@ -2,6 +2,22 @@
  * @file
  * Admin styles for the Database Logging module.
  */
+.filter-log-messages-wrapper,
+.dblog-clear-wrapper {
+  padding: 12px;
+  margin-bottom: 3px;
+  min-height: 277px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+}
+.dblog-clear-wrapper {
+  min-height: 111px;
+}
+.filter-form-prefix,
+.dblog-clear-form-prefix {
+  font-size: 1.2em;
+}
 .dblog-filter-form .form-item-type,
 .dblog-filter-form .form-item-severity {
   float: left; /* LTR */
@@ -15,6 +31,12 @@
    */
   width: 15em;
 }
+@media (max-width: 700px) {
+  .dblog-filter-form .form-item-type,
+  .dblog-filter-form .form-item-severity {
+    float: none;
+  }
+}
 [dir="rtl"] .dblog-filter-form .form-item-type,
 [dir="rtl"] .dblog-filter-form .form-item-severity {
   float: right;
@@ -27,7 +49,15 @@
 }
 .dblog-filter-form .form-actions {
   float: left; /* LTR */
-  padding: 3ex 0 0 1em; /* LTR */
+  padding: 4ex 0 0 1em; /* LTR */
+}
+@media (max-width: 750px) {
+  .dblog-filter-form .form-actions {
+    float: none;
+  }
+}
+.button-danger {
+  margin-top: 12px;
 }
 [dir="rtl"] .dblog-filter-form .form-actions {
   float: right;
