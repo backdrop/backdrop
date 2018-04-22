@@ -982,17 +982,16 @@ function install_settings_form($form, &$form_state, &$install_state) {
 
   // Add driver specific configuration options.
   $form['driver']['#options']['mysql'] = $driver->name();
-
   $form['settings']['mysql'] = $driver->getFormOptions($database);
   $form['settings']['mysql']['#prefix'] = '<h2 class="js-hide">' . st('@driver_name settings', array('@driver_name' => $driver->name())) . '</h2>';
   $form['settings']['mysql']['#type'] = 'container';
   $form['settings']['mysql']['#tree'] = TRUE;
   $form['settings']['mysql']['advanced_options']['#parents'] = array('mysql');
-  $form['settings']['mysql']['#states'] = array(
-    'visible' => array(
-      ':input[name=driver]' => array('value' => 'mysql'),
-    )
-  );
+  // For this exceptional situation, maintain the database password even on
+  // form validation errors.
+  if (isset($form_state['input']['mysql']['password'])) {
+    $form['settings']['mysql']['password']['#attributes']['value'] = $form_state['input']['mysql']['password'];
+  }
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['save'] = array(

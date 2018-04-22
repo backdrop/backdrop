@@ -11,7 +11,6 @@
  */
 
 class DatabaseConnection_mysql extends DatabaseConnection {
-
   /**
    * Flag to indicate if the cleanup function in __destruct() should run.
    *
@@ -53,7 +52,9 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     // set when escaping. This has security implications. See
     // https://www.drupal.org/node/1201452 for further discussion.
     $dsn .= ';charset=' . $charset;
-    $dsn .= ';dbname=' . $connection_options['database'];
+    if (!empty($connection_options['database'])) {
+      $dsn .= ';dbname=' . $connection_options['database'];
+    }
     // Allow PDO options to be overridden.
     $connection_options += array(
       'pdo' => array(),
@@ -125,6 +126,25 @@ class DatabaseConnection_mysql extends DatabaseConnection {
 
   public function databaseType() {
     return 'mysql';
+  }
+
+  /**
+   * Overrides DatabaseConnection::createDatabase().
+   *
+   * @param string $database
+   *   The name of the database to create.
+   *
+   * @throws DatabaseNotFoundException
+   */
+  public function createDatabase($database) {
+    try {
+      // Create the database and set it as active.
+      $this->exec("CREATE DATABASE IF NOT EXISTS $database");
+      $this->exec("USE $database");
+    }
+    catch (\Exception $e) {
+      throw new DatabaseNotFoundException($e->getMessage());
+    }
   }
 
   public function mapConditionOperator($operator) {
