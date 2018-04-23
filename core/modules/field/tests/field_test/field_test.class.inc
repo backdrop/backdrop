@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Test class for the test_entity entity type.
  */

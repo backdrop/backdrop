@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity controller and class for comments.
@@ -140,7 +139,6 @@ class Comment extends Entity {
    *   - "view".
    *   - "update".
    *   - "approve".
-   *   - "delete".
    *   - "delete".
    * @param User|AnonymousUser|object $account
    *   (optional) The user to check for. Leave it to NULL to check for the

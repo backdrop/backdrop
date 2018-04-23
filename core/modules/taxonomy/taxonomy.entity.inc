@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity classes and controllers for Taxonomy module.

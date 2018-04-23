@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Test entity classes.
@@ -47,14 +46,14 @@ class TestEntity extends Entity {
    * Implements EntityInterface::createAccess().
    */
   public static function createAccess($bundle = NULL, $account = NULL) {
-    return TRUE;
+    return NULL;
   }
 
   /**
    * Implements EntityInterface::access().
    */
   public function access($op, $account = NULL) {
-    return TRUE;
+    return NULL;
   }
 
 }

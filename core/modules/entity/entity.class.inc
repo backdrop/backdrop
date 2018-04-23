@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides an interface and a base class for entities.
