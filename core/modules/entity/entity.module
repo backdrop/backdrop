@@ -591,6 +591,39 @@ function entity_label($entity_type, $entity) {
 }
 
 /**
+ * Checks whether the given entity is the default revision.
+ *
+ * Note that newly created entities will always be created in default revision,
+ * thus TRUE is returned for not yet saved entities.
+ *
+ * @param string $entity_type
+ *   The type of the entity.
+ * @param EntityInterface $entity
+ *   The entity object to check.
+ *
+ * @return bool
+ *   A boolean indicating whether the entity is in default revision is returned.
+ *   If the entity is not revisionable or is new, TRUE is returned.
+ *
+ * @see entity_revision_set_default()
+ */
+function entity_revision_is_default($entity_type, EntityInterface $entity) {
+  $info = entity_get_info($entity_type);
+  if (empty($info['entity keys']['revision'])) {
+    // Entity isn't revisionable.
+    return TRUE;
+  }
+  // Newly created entities will always be created in default revision.
+  if (!empty($entity->is_new) || empty($entity->{$info['entity keys']['id']})) {
+    return TRUE;
+  }
+  // Load the default entity and compare the ID. Usually, the entity should be
+  // already statically cached anyway.
+  $default = entity_load($entity_type, $entity->{$info['entity keys']['id']});
+  return $default->{$info['entity keys']['revision']} == $entity->{$info['entity keys']['revision']};
+}
+
+/**
  * Attaches field API validation to entity forms.
  */
 function entity_form_field_validate($entity_type, $form, &$form_state) {
