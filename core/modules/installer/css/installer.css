@@ -77,12 +77,17 @@
 }
 
 .project-extra {
-  clear: both;
   color: gray;
+  clear: right; /* LTR */
   text-align: right; /* LTR */
 }
 [dir="rtl"] .project-extra {
   text-align: left;
+  clear: left;
+}
+
+.project-status {
+  text-align: right;
 }
 
 .project-install {
@@ -114,11 +119,79 @@
   clear: both;
   position: relative;
 }
-
 .project-item-first {
   clear: both;
   padding: 10px;
   position: relative;
+}
+
+.screenshot {
+  margin: 0 0 5px 0;
+  overflow: hidden;
+}
+.screenshot img {
+  width: 100%;
+  height: auto;
+}
+@media (min-width: 500px) {
+  .screenshot {
+    float: left;
+    width: 133px;
+    height: 100px;
+    margin: 0;
+  }
+  .has-image .project-information {
+    margin-left: 148px;
+  }
+}
+
+.screenshot .placeholder {
+  color: #fff;
+  background-color: #c5c5c3;
+  display: inline-block;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  font-size: 35px;
+  line-height: 100px;
+  float: left;
+}
+
+.project-dialog .screenshot {
+  float: none;
+  width: 100%;
+  text-align: center;
+  height: auto;
+}
+.project-dialog .screenshot img {
+  width: 300px;
+  height: auto;
+}
+.project-dialog .has-image .project-extra {
+  text-align: center;
+  clear: none;
+  margin-top: 30px;
+}
+.project-dialog .has-image .project-install {
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .project-dialog .screenshot {
+    float: right;
+    width: 300px;
+    height: 186px;
+  }
+  .project-dialog .screenshot img {
+    width: 100%;
+    height: auto;
+  }
+  .project-dialog .has-image .project-extra {
+    text-align: left;
+  }
+  .project-dialog .has-image .project-install {
+    text-align: left;
+  }
 }
 
 .install-disabled {
@@ -156,8 +229,22 @@
   }
 }
 
+#installer-browser-manual-install-link {
+  text-align: center;
+}
+
+.project-dialog .project-dialog-header {
+  text-align: center;
+}
+@media (min-width: 600px) {
+  .project-dialog .project-dialog-header {
+    text-align: left;
+  }
+}
+
 .project-title {
   font-size: 18px;
+  margin-bottom: 10px;
 }
 
 .project-dialog .project-title {
