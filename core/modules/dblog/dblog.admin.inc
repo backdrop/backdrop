@@ -31,7 +31,6 @@ function dblog_overview() {
   );
 
   $build['dblog_filter_form'] = backdrop_get_form('dblog_filter_form');
-  $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
 
   $header = array(
     '', // Icon column.
@@ -86,6 +85,8 @@ function dblog_overview() {
     '#empty' => t('No log messages available.'),
   );
   $build['dblog_pager'] = array('#theme' => 'pager');
+
+  $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
 
   return $build;
 }
@@ -418,13 +419,18 @@ function dblog_clear_log_form($form) {
     '#type' => 'fieldset',
     '#title' => t('Clear log messages'),
     '#description' => t('This will permanently remove the log messages from the database.'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
   );
   $form['dblog_clear']['clear'] = array(
     '#type' => 'submit',
     '#value' => t('Clear log messages'),
     '#submit' => array('dblog_clear_log_submit'),
+    '#attributes' => array(
+      'class' => array(
+        'button-danger',
+      ),
+    ),
   );
 
   return $form;
