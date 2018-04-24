@@ -31,7 +31,6 @@ function dblog_overview() {
   );
 
   $build['dblog_filter_form'] = backdrop_get_form('dblog_filter_form');
-  $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
 
   $header = array(
     '', // Icon column.
@@ -86,6 +85,8 @@ function dblog_overview() {
     '#empty' => t('No log messages available.'),
   );
   $build['dblog_pager'] = array('#theme' => 'pager');
+
+  $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
 
   return $build;
 }
@@ -337,12 +338,9 @@ function dblog_format_message($event, $is_link = FALSE) {
 function dblog_filter_form($form) {
   $filters = dblog_filters();
 
-  $form['filters'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Filter log messages'),
-    '#collapsible' => TRUE,
-    '#collapsed' => empty($_SESSION['dblog_overview_filter']),
-  );
+  $form['#prefix'] =
+    '<div class="filter-log-messages-wrapper"><div class="filter-form-prefix">Filter log messages</div>';
+
   foreach ($filters as $key => $filter) {
     $form['filters']['status'][$key] = array(
       '#title' => $filter['title'],
@@ -370,6 +368,9 @@ function dblog_filter_form($form) {
       '#value' => t('Reset')
     );
   }
+
+  $form['#suffix'] = '</div>';
+
   return $form;
 }
 
@@ -414,18 +415,24 @@ function dblog_filter_form_submit($form, &$form_state) {
  * @ingroup forms
  */
 function dblog_clear_log_form($form) {
-  $form['dblog_clear'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Clear log messages'),
-    '#description' => t('This will permanently remove the log messages from the database.'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
+  $form['#prefix'] = '<div class="dblog-clear-wrapper"><div class="dblog-clear-form-prefix">
+      Clear log messages
+    </div>
+    <div class="dblog-clear-message">
+      This will permanently remove the log messages from the database.
+    </div>';
   $form['dblog_clear']['clear'] = array(
     '#type' => 'submit',
     '#value' => t('Clear log messages'),
     '#submit' => array('dblog_clear_log_submit'),
+    '#attributes' => array(
+      'class' => array(
+        'button-danger',
+      ),
+    ),
   );
+
+  $form['#suffix'] = '</div>';
 
   return $form;
 }
