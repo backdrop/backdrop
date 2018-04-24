@@ -68,9 +68,7 @@ Backdrop.behaviors.moduleFilterByText = {
         $rows.each(showModuleRow);
 
         // We first show() all <fieldset>s to be able to use ':visible'.
-        $fieldset.show().each(hidePackageFieldset);
-        // Then show modules when the package matches.
-        $fieldset.each(showPackageFieldset);
+        $fieldsets.show().each(hidePackageFieldset);
 
         if ($fieldsets.filter(':visible').length === 0) {
           if ($('.filter-empty').length === 0) {
