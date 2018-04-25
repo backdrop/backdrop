@@ -614,6 +614,10 @@ function file_field_widget_process($element, &$form_state, $form) {
   if ($field['cardinality'] != 1) {
     $parents = array_slice($element['#array_parents'], 0, -1);
     $new_path = 'file/ajax/' . implode('/', $parents) . '/' . $form['form_build_id']['#value'];
+    // Token here is not generated with backdrop_token() as it does not need to
+    // be session-based.
+    $token = backdrop_hmac_base64($new_path, backdrop_get_private_key() . backdrop_get_hash_salt());
+    $new_path .= '/' . $token;
     $field_element = backdrop_array_get_nested_value($form, $parents);
     $new_wrapper = $field_element['#id'] . '-ajax-wrapper';
     foreach (element_children($element) as $key) {
