@@ -184,6 +184,13 @@ description = Tests that the confirm form does not use external destinations.
 group = System
 file = tests/system.test
 
+
+[BackdropRequestSanitizerUnitTestCase]
+name = Request sanitizer
+description = Ensure early bootstrap sanitization routines filter dangerous input.
+group = Bootstrap
+file = tests/system.test
+
 [UuidUnitTestCase]
 name = UUID handling
 description = Test the handling of Universally Unique IDentifiers (UUIDs).

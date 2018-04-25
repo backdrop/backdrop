@@ -328,14 +328,34 @@ function file_file_download($uri, $field_type = 'file') {
  * @see file_menu()
  */
 function file_ajax_upload() {
-  $form_parents = func_get_args();
-  $form_build_id = (string) array_pop($form_parents);
+  $args = func_get_args();
+  // Token used to validate that the path values are unmodified.
+  $token = (string) array_pop($args);
+  // Form build key to pull from the form cache.
+  $form_build_id = (string) array_pop($args);
+  // All remaining arguments are the path to the form element in the form tree.
+  $form_parents = $args;
+  // Reassemble the #ajax['path'] property so we can validate the token.
+  $original_path = 'file/ajax/' . implode('/', $form_parents) . '/' . $form_build_id;
+  $original_token = backdrop_hmac_base64($original_path, backdrop_get_private_key() . backdrop_get_hash_salt());
+  if ($original_token !== $token) {
+    // Path has been tampered with. Reject the request.
+    backdrop_set_message(t('Invalid upload token.'), 'error');
+    $commands = array();
+    $commands[] = ajax_command_remove('.file-ajax-messages');
+    $commands[] = ajax_command_prepend(NULL, '<div class="file-ajax-messages">' . theme('status_messages') . '</div>');
+    return array('#type' => 'ajax', '#commands' => $commands);
+  }
+
+  // Sanitize form parents before using them.
+  $form_parents = array_filter($form_parents, 'element_child');
 
   if (empty($_POST['form_build_id']) || $form_build_id != $_POST['form_build_id']) {
     // Invalid request.
     backdrop_set_message(t('An unrecoverable error occurred. The uploaded file likely exceeded the maximum file size (@size) that this server supports.', array('@size' => format_size(file_upload_max_size()))), 'error');
     $commands = array();
-    $commands[] = ajax_command_replace(NULL, theme('status_messages'));
+    $commands[] = ajax_command_remove('.file-ajax-messages');
+    $commands[] = ajax_command_prepend(NULL, '<div class="file-ajax-messages">' . theme('status_messages') . '</div>');
     return array('#type' => 'ajax', '#commands' => $commands);
   }
 
@@ -345,16 +365,10 @@ function file_ajax_upload() {
     // Invalid form_build_id.
     backdrop_set_message(t('An unrecoverable error occurred. Use of this form has expired. Try reloading the page and submitting again.'), 'error');
     $commands = array();
-    $commands[] = ajax_command_replace(NULL, theme('status_messages'));
+    $commands[] = ajax_command_remove('.file-ajax-messages');
+    $commands[] = ajax_command_prepend(NULL, '<div class="file-ajax-messages">' . theme('status_messages') . '</div>');
     return array('#type' => 'ajax', '#commands' => $commands);
   }
-
-  // Get the current element and count the number of files.
-  $current_element = $form;
-  foreach ($form_parents as $parent) {
-    $current_element = $current_element[$parent];
-  }
-  $current_file_count = isset($current_element['#file_upload_delta']) ? $current_element['#file_upload_delta'] : 0;
 
   // Process user input. $form and $form_state are modified in the process.
   backdrop_process_form($form['#form_id'], $form, $form_state);
@@ -364,7 +378,7 @@ function file_ajax_upload() {
     $form = $form[$parent];
   }
 
-  $form['#prefix'] .= theme('status_messages');
+  $form['#prefix'] .= '<div class="file-ajax-messages">' . theme('status_messages') . '</div>';
   $output = backdrop_render($form);
   $js = backdrop_add_js();
   $settings = backdrop_array_merge_deep_array($js['settings']['data']);
@@ -469,8 +483,14 @@ function file_managed_file_process($element, &$form_state, $form) {
   $element['#file'] = $fid ? file_load($fid) : FALSE;
   $element['#tree'] = TRUE;
 
+  // Token here is not generated with backdrop_token() as it does not need to
+  // be session-based.
+  $path = 'file/ajax/' . implode('/', $element['#array_parents']) . '/' . $form['form_build_id']['#value'];
+  $token = backdrop_hmac_base64($path, backdrop_get_private_key() . backdrop_get_hash_salt());
+  $path .= '/' . $token;
+
   $ajax_settings = array(
-    'path' => 'file/ajax/' . implode('/', $element['#array_parents']) . '/' . $form['form_build_id']['#value'],
+    'path' => $path,
     'wrapper' => $element['#id'] . '-ajax-wrapper',
     'effect' => 'none',
     'progress' => array(

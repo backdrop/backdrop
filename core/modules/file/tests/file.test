@@ -467,6 +467,41 @@ class FileManagedFileElementTestCase extends FileFieldTestCase {
       }
     }
   }
+
+  /**
+   * Tests file_ajax_upload() parents_hash.
+   */
+  function testManagedFileParentsHash() {
+    // Perform the tests with all permutations of $form['#tree'] and
+    // $element['#extended'].
+    foreach (array(0, 1) as $tree) {
+      foreach (array(0, 1) as $extended) {
+        $test_file = $this->getTestFile('text');
+        $path = 'file/test/' . $tree . '/' . $extended;
+        $input_base_name = $tree ? 'nested_file' : 'file';
+
+        // Upload, then Submit.
+        $last_fid_prior = $this->getLastFileId();
+        $this->backdropGet($path);
+        $edit = array('files[' . $input_base_name . ']' => backdrop_realpath($test_file->uri));
+
+        // Get the Ajax settings bound to the triggering element.
+        $xpath = '//*[@name="' . $input_base_name . '_upload_button' . '"]';
+        $element = $this->xpath($xpath);
+        $element_id = (string) $element[0]['id'];
+        $ajax_settings = $this->backdropSettings['ajax'][$element_id];
+        // Remove the token from the URL.
+        $ajax_path = explode('/', $ajax_settings['url']);
+        array_pop($ajax_path);
+        $ajax_path = implode('/', $ajax_path);
+        $this->assertNoRaw(t('Invalid upload token.'));
+        $this->backdropPostAJAX(NULL, $edit, $input_base_name . '_upload_button', $ajax_path);
+        $this->assertRaw(t('Invalid upload token.'));
+        $last_fid = $this->getLastFileId();
+        $this->assertEqual($last_fid, $last_fid_prior, 'No new file got uploaded.');
+      }
+    }
+  }
 }
 
 /**
