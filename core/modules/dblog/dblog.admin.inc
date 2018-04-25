@@ -31,6 +31,7 @@ function dblog_overview() {
   );
 
   $build['dblog_filter_form'] = backdrop_get_form('dblog_filter_form');
+  $build['dblog_filter_form']['#weight'] = 10;
 
   $header = array(
     '', // Icon column.
@@ -83,10 +84,15 @@ function dblog_overview() {
     '#rows' => $rows,
     '#attributes' => array('id' => 'admin-dblog', 'class' => array('admin-dblog')),
     '#empty' => t('No log messages available.'),
+    '#weight' => 20,
   );
-  $build['dblog_pager'] = array('#theme' => 'pager');
+  $build['dblog_pager'] = array(
+    '#theme' => 'pager',
+    '#weight' => 30,
+  );
 
   $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
+  $build['dblog_clear_log_form']['#weight'] = 40;
 
   return $build;
 }
