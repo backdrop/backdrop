@@ -13,7 +13,7 @@ function block_admin_list() {
 
   $header = array(
     t('Block'),
-    t('Description'),
+    array('data' => t('Description'), 'class' => array('priority-low')),
     t('Operations'),
   );
 

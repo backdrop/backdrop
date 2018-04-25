@@ -93,7 +93,7 @@ class BlockText extends Block {
       );
       $form['convert']['description'] = array(
        '#type' => 'textfield',
-       '#title' => t('Block description'),
+       '#title' => t('Admin description'),
        '#maxlength' => 128,
        '#description' => t('Used in administrative interfaces and not shown to end-users.'),
        '#weight' => 4,

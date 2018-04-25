@@ -196,7 +196,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
   );
   $form['description'] = array(
     '#type' => 'textfield',
-    '#title' => t('Block description'),
+    '#title' => t('Admin description'),
     '#default_value' => $edit['description'],
     '#maxlength' => 128,
     '#description' => t('Used in administrative interfaces and not shown to end-users.'),
