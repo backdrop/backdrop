@@ -2504,6 +2504,72 @@ class ConfirmFormTest extends BackdropWebTestCase {
 }
 
 /**
+ * Tests request sanitation used in early bootstrap.
+ */
+class BackdropRequestSanitizerUnitTestCase extends BackdropUnitTestCase {
+  protected $testCases = array();
+
+  function setUp() {
+    // Set up an array of test cases.
+    $this->testCases = array(
+      'invalid_param_get' => array(
+        'setup' => array('_GET' => array('#q' => 'blah', 'destination' => 'whatever?foo=bar'), '_POST' => array('foo' => 'bar')),
+        'expected' => array('_GET' => array('destination' => 'whatever?foo=bar'), '_POST' => array('foo' => 'bar')),
+      ),
+      'invalid_param_post' => array(
+        'setup' => array('_POST' => array('#q' => 'blah')),
+        'expected' => array('_POST' => array()),
+      ),
+      'invalid_param_cookie' => array(
+        'setup' => array('_COOKIE' => array('#q' => 'blah')),
+        'expected' => array('_COOKIE' => array()),
+      ),
+      'invalid_param_request' => array(
+        'setup' => array('_REQUEST' => array('#q' => 'blah')),
+        'expected' => array('_REQUEST' => array()),
+      ),
+      'invalid_destination_get' => array(
+        'setup' => array('_GET' => array('destination' => 'whatever?%23test=value')),
+        'expected' => array('_GET' => array()),
+      ),
+      'invalid_destination_get_subkey' => array(
+        'setup' => array('_GET' => array('destination' => 'whatever?blah[%23test]=value')),
+        'expected' => array('_GET' => array()),
+      ),
+      'invalid_destination_get_q' => array(
+        'setup' => array('_GET' => array('destination' => 'whatever?q[%23test]=value&foo=bar')),
+        'expected' => array('_GET' => array()),
+      ),
+      'invalid_destination_zero_bytes_get' => array(
+        'setup' => array('_GET' => array('destination' => "whatever?[\x00bar]=base&%23test=value")),
+        'expected' => array('_GET' => array()),
+      ),
+      'valid_destination' => array(
+        'setup' => array('_GET' => array('destination' => 'whatever')),
+        'expected' => array('_GET' => array('destination' => 'whatever')),
+      ),
+    );
+    parent::setUp();
+  }
+
+  /**
+   * Tests request sanitation used in early bootstrap.
+   */
+  function testBackdropRequestSanitizer() {
+    foreach ($this->testCases as $provider_name => $arguments) {
+      foreach ($arguments['setup'] as $global_name => $value) {
+        $GLOBALS[$global_name] = $value;
+      }
+      // Suppress errors so the resulting globals can be checked.
+      @_backdrop_bootstrap_sanitize_request();
+      foreach ($arguments['expected'] as $global_name => $value) {
+        $this->assertEqual($GLOBALS[$global_name], $value);
+      }
+    }
+  }
+}
+
+/**
  * Tests uuid.inc and related functions.
  */
 class UuidUnitTestCase extends BackdropUnitTestCase {
