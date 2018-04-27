@@ -754,7 +754,7 @@ function layout_settings_form_save_submit($form, &$form_state) {
   else {
     backdrop_set_message(t('Layout saved.'));
   }
-  //$form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name;
+  $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name;
 }
 
 /**

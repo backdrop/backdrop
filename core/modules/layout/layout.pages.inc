@@ -38,7 +38,6 @@ function layout_page_callback() {
 
   // No layouts match based on conditions.
   if (!$match_found) {
-    dpm('aha'0;
     return MENU_NOT_FOUND;
   }
 

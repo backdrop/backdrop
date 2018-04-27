@@ -120,6 +120,9 @@ class LayoutMenuItem {
       $this->$key = $value;
     }
 
+    $this->name = $this->getMachineName($this->path, $this->layout);
+    //$this->name = $this->getMachineName($this->$path, $this->$path);
+
     // Ensure defaults for menu settings.
     if (empty($this->menu)) {
       $this->menu = array();
@@ -150,8 +153,9 @@ class LayoutMenuItem {
    * Save a menu item configuration.
    */
   function save() {
+    // todo menu_items need unique ids
     // Convert all properties to an array.
-    $data = array(
+    $menu_item = array(
       'name' => $this->name,
       'layout' => $this->layout,
       'title' => $this->title,
@@ -160,6 +164,15 @@ class LayoutMenuItem {
       'conditions' => array(),
       'arguments' => $this->arguments,
     );
+    // $data = array(
+      // 'name' => $this->name,
+      // 'layout' => $this->layout,
+      // 'title' => $this->title,
+      // 'path' => $this->path,
+      // 'menu' => $this->menu,
+      // 'conditions' => array(),
+      // 'arguments' => $this->arguments,
+    // );
 
     // Convert all conditions.
     foreach ($this->conditions as $condition) {
@@ -170,9 +183,15 @@ class LayoutMenuItem {
       );
     }
 
-    config('layout.menu_item.' . $this->name)
-      ->setData($data)
-      ->save();
+    // todo save to this->layout
+    $config = config('layout.menu_item.' . $this->layout);
+    $data = $config->get();
+    $data['menu_item'][$this->name] = $menu_item;
+    $config->setData($data);
+    $config->save();
+    // config('layout.menu_item.' . $this->name)
+      // ->setData($data)
+      // ->save();
     layout_reset_caches();
     menu_rebuild();
   }
@@ -314,5 +333,17 @@ class LayoutMenuItem {
       }
     }
     return TRUE;
+  }
+
+    /**
+   * Generate a machine name unique to this menu item's layout.
+   */
+  function getMachineName($path, $layout) {
+    $machine_name = preg_replace('@[^a-z0-9-]+@','-', strtolower($path));
+    $config_data = config('layout.menu_item.' . $layout)->get();
+    if (isset($config_data->menu_item[$machine_name])) {
+      return $this->getMachineName($machine_name . mt_rand(1,9), $layout);
+    }
+    return $machine_name;
   }
 }

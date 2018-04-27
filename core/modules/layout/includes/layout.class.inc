@@ -291,40 +291,41 @@ class Layout {
       }
     }
 
-    // If this layout overrides an existing module path, reassign or delete
-    // the layout menu item.
     $paths = is_array($this->path) ? $this->path : array($paths);
+    $existing_items = array();
+    if (!empty($this->menu_item)) {
+      foreach ($this->menu_item as $name => $item) {
+        $existing_items[$item->path] = $name;
+      }
+    }
     foreach ($paths as $path) {
+      // If this layout overrides an existing module path, reassign or delete
+      // the layout menu item.
       if ((layout_provides_path($path) === FALSE) && menu_get_item($path)) {
-        if (isset($this->menu_item[$path])) {
-          $this->menu_item[$path]->delete();
+        if (isset($existing_items[$path])) {
+          $this->menu_item[$existing_items[$path]]->delete();
         }
       }
       elseif ($this->menu_item) {
         // If not overriding an existing module path, ensure that the layout always
         // has a layout menu item at the same path.
-        if (!isset($this->menu_item[$path])) {
-          // Clone the first existing menu item
-          $first_item = reset($this->menu_item);
-          $new_menu_item = clone($first_item);
-          $new_menu_item->path = $path;
-          $new_menu_item->name = $this->name;
-          $new_menu_item->is_new = TRUE;
-          $this->menu_item[$path] = $new_menu_item;
-          $this->menu_item[$path]->save();
+        // todo wrong check
+        if (!isset($existing_items[$path])) {
+          $menu_item_settings = array(
+            'path' => $path,
+            'layout' => $this->name,
+          );
+          $new_item = new LayoutMenuItem($menu_item_settings);
+          $new_item->save();
         }
       }
     }
     foreach ($this->menu_item as $item) {
       if (isset($this->original_name) && $this->original_name !== $this->name && $item->name === $this->original_name) {
-        config('layout.menu_item.' . $item->name)->delete();
-      }
-      if (!in_array($item->path, $paths)) {
-        $item->reassign();
+        $item->delete();
       }
       $item->save();
     }
-
         
     layout_reset_caches();
 
@@ -588,36 +589,23 @@ class Layout {
    */
   function setPath($paths) {
     $paths = is_array($paths) ? $paths : array($paths);
-    // todo
+    // todo currently not checking for changed paths
     // if (empty($this->menu_item) || $this->menu_item->path !== $paths) {
     if (empty($this->menu_item)) {
       foreach ($paths as $path) {
         // Use an existing menu item if one exists at this path.
         if ($existing_item = layout_menu_item_load_multiple_by_path($path)) {
-          $this->menu_item[$path] = $existing_item;
+          $this->menu_item[$existing_item->name] = $existing_item;
         }
         // If this layout doesn't have a menu item, make one. If the path is
         // provided by another module, no menu item is necessary.
         elseif (layout_provides_path($path) === NULL) {
-          if (empty($this->menu_item[$path])) {
-            $menu_item_settings = array(
-              'path' => $path,
-              'name' => $this->name,
-            );
-            $this->menu_item[$path] = new LayoutMenuItem($menu_item_settings);
-          }
-          else {
-            $this->menu_item[$path]->path = $path;
-          }
-        }
-        else {
-          if ($this->menu_item[$path]) {
-            $this->menu_item[$path]->delete();
-            unset($this->menu_item[$path]);
-          }
-          if (empty($this->menu_item)) {
-            $this->menu_item = NULL;
-          }
+          $menu_item_settings = array(
+            'path' => $path,
+            'layout' => $this->name,
+          );
+          $new_item = new LayoutMenuItem($menu_item_settings);
+          $this->menu_item[$new_item->name] = $new_item;
         }
       }
     }
