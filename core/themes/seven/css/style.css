@@ -1598,10 +1598,9 @@ div.add-or-remove-shortcuts {
     border-top: 1px solid #CCCCCC;
     width: 100%;
     left: 0;
-    padding: 20px 40px 8px;
     margin: 0;
     z-index: 999;
-    padding: 10px 40px;
+    padding: 10px 40px 0;
     box-shadow: -20px 2px 20px rgba(0,0,0,0.4);
     input.form-submit {
       margin-bottom: 0 !important;
