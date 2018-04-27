@@ -13,6 +13,7 @@ function block_admin_list() {
 
   $header = array(
     t('Block'),
+    array('data' => t('Description'), 'class' => array('priority-low')),
     t('Operations'),
   );
 
@@ -20,6 +21,7 @@ function block_admin_list() {
   foreach ($custom_blocks_info as $delta => $block_info) {
     $row = array();
     $row[] = check_plain($block_info['info']);
+    $row[] = check_plain($block_info['description']);
     $links = array();
     $links['configure'] = array(
       'title' => t('Configure'),
