@@ -273,7 +273,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $form['path'] = array(
     '#title' => t('Paths'),
     '#type' => 'textarea',
-    '#default_value' => $layout->getPath(),
+    '#default_value' => implode("\n", $layout->getPath()),
     '#required' => TRUE,
     '#description' => t('Enter paths, one path per line. Use the "%" (percent) symbol to indicate a wildcard in the path. i.e. "node/%" or "node/%/edit".'),
     '#access' => !$layout->isDefault(),
