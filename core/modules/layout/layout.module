@@ -967,7 +967,14 @@ function layout_menu_item_load_multiple($menu_item_names = NULL) {
 function layout_menu_item_load_multiple_by_path($path) {
   $configs = layout_get_all_configs('menu_item');
   foreach ($configs as $menu_item_name => $config) {
-    if ($config['path'] === $path) {
+    if (isset($config['menu_item'])) {
+      foreach ($config['menu_item'] as $item) {
+        if ($item['path'] === $path) {
+          return layout_menu_item_load($$item['name']);
+        }
+      }
+    }
+    elseif ($config['path'] === $path) {
       return layout_menu_item_load($menu_item_name);
     }
   }
@@ -1025,10 +1032,12 @@ function layout_get_all_configs($type) {
     }
 
     // Sort the configs by path and weight.
-    backdrop_sort($configs, array(
-      'path' => SORT_STRING,
-      'weight' => SORT_NUMERIC,
-    ));
+    if ($type == 'layout') {
+      backdrop_sort($configs, array(
+        'path' => SORT_STRING,
+        'weight' => SORT_NUMERIC,
+      ));
+    }
 
     // Put default layouts at the bottom.
     if ($type === 'layout') {

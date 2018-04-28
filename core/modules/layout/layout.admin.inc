@@ -723,7 +723,20 @@ function layout_settings_form_save_submit($form, &$form_state) {
 
   // If this is a new layout, populate blocks from default layout.
   if (!empty($layout->is_new)) {
-    $default_layout_name = path_is_admin($layout->getPath()) ? 'admin_default' : 'default';
+    // If any of the paths are not admin, use the default layout.
+    $default_layout_name = 'admin_default';
+    $paths = $layout->getPath();
+    if (is_array($paths)) {
+      foreach ($paths as $path) {
+        if (!path_is_admin($path)) {
+          $default_layout_name = 'default';
+          break;
+        }
+      }
+    }
+    else {
+      $default_layout_name = path_is_admin($paths) ? 'admin_default' : 'default';
+    }
     $default_layout = layout_load($default_layout_name);
     // Get the template being used by this layout.
     $template_info = layout_get_layout_template_info($layout->layout_template);

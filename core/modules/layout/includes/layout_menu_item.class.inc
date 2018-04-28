@@ -121,7 +121,6 @@ class LayoutMenuItem {
     }
 
     $this->name = $this->getMachineName($this->path, $this->layout);
-    //$this->name = $this->getMachineName($this->$path, $this->$path);
 
     // Ensure defaults for menu settings.
     if (empty($this->menu)) {
@@ -187,6 +186,7 @@ class LayoutMenuItem {
     $config = config('layout.menu_item.' . $this->layout);
     $data = $config->get();
     $data['menu_item'][$this->name] = $menu_item;
+    $data['name'] = $this->layout;
     $config->setData($data);
     $config->save();
     // config('layout.menu_item.' . $this->name)
