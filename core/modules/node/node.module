@@ -18,6 +18,11 @@ define('NODE_NOT_PUBLISHED', 0);
 define('NODE_PUBLISHED', 1);
 
 /**
+ * Denotes that the node is not published, but scheduled for later.
+ */
+define('NODE_SCHEDULED', 2);
+
+/**
  * Denotes that the node is not promoted.
  */
 define('NODE_NOT_PROMOTED', 0);
@@ -113,12 +118,12 @@ function node_cron() {
     ->condition('timestamp', NODE_NEW_LIMIT, '<')
     ->execute();
 
-  $get_nodes_to_publish = db_query(
-      "SELECT * FROM {node} WHERE published_on < UNIX_TIMESTAMP(NOW())
+  $scheduled_nodes = db_query(
+      "SELECT nid FROM {node} WHERE scheduled <= UNIX_TIMESTAMP(NOW())
       AND status = '0'
-      AND published_on != 0"
+      AND scheduled != 0"
   );
-  foreach($get_nodes_to_publish as $n) {
+  foreach ($scheduled_nodes as $n) {
     if ($node = node_load($n->nid)) {
       $node->status = 1;
       $node->save();

@@ -71,6 +71,12 @@ function node_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'scheduled' => array(
+        'description' => 'A Unix timestamp indicating content is scheduled to be published in the future.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
       'comment' => array(
         'description' => 'Whether comments are allowed on this node: 0 = no, 1 = closed (read only), 2 = open (read/write).',
         'type' => 'int',
@@ -99,13 +105,6 @@ function node_schema() {
       'translate' => array(
         'description' => 'A boolean indicating whether this translation page needs to be updated.',
         'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'published_on' => array(
-        'description' => 'The UNIX UTC timestamp when to publish',
-        'type' => 'int',
-        'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
       ),
@@ -334,7 +333,7 @@ function node_uninstall() {
   // Delete node types.
   $names = config_get_names_with_prefix('node.type');
   foreach ($names as $config_name) {
-    $config = config_load($config_name);
+    $config = config($config_name);
     $config->delete();
   }
 
@@ -1145,18 +1144,21 @@ function node_update_1014() {
 }
   
 /**
- * Add column 'published_on' to the node table to allow nodes to be scheduled
+ * Add column 'published' to the node table to allow nodes to be scheduled
  * for publication at a future date.
  */
 function node_update_1015() {
+  if (db_field_exists('node', 'scheduled')) {
+    return;
+  }
+
   $spec = array(
+    'description' => 'A Unix timestamp indicating content is scheduled to be published in the future.',
     'type' => 'int',
-    'description' => 'The UNIX UTC timestamp when to publish',
-    'unsigned' => TRUE,
     'not null' => TRUE,
     'default' => 0,
   );
-  db_add_field( 'node', 'published_on', $spec);
+  db_add_field( 'node', 'scheduled', $spec);
 }
 
 /**

@@ -293,45 +293,33 @@ function node_form($form, &$form_state, Node $node) {
     ),
     '#weight' => -10,
   );
-  $is_scheduled = $node_type->settings['status_default'];
-  if ($node->nid) {
-    if ($node->published_on > 0 && $node->status == 0) {
-      $is_scheduled = 2;
-    }
-    elseif ($node->status == 0) {
-      $is_scheduled = 0;
-    }
-    elseif ($node->status == 1) {
-      $is_scheduled = 1;
-    }
+
+  $status = $node_type->settings['status_default'];
+  if ($node->scheduled) {
+    $status = NODE_SCHEDULED;
   }
-  $form['options']['publishing_states'] = array(
+  $form['options']['status'] = array(
     '#type' => 'radios',
     '#options' => array(
-      1 => t('Publish now'),
-      0 => t('Save draft'),
-      2 => t('Publish later'),
+      NODE_PUBLISHED => t('Publish now'),
+      NODE_NOT_PUBLISHED => t('Save draft'),
+      NODE_SCHEDULED => t('Schedule for later'),
     ),
-    '#default_value' => $is_scheduled,
-    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators. Content set to Publish later will be saved as draft when the content is created, but will be automatically published on the date and time selected; this requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/reports/status')))
+    '#default_value' => $status,
+    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators. Content set to Schedule for later will be saved as draft when the content is created, but will be automatically published on the date and time selected.'),
   );
-  $current_published_on = date(time());
-  if (!empty($node->nid)) {
-    if ($node->status == 0 && $node->published_on != 0) {
-      $current_published_on = $node->published_on;
-    }
-  }
-  $current_published_on = date('Y-m-d g:i', $current_published_on);
-  $form['options']['future_publish'] = array(
+
+  // Default the scheduled time to the current time.
+  $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME;
+  $form['options']['scheduled'] = array(
     '#type' => 'date_popup',
     '#title' => t('Publish on:'),
-    '#date_format' => 'Y-m-d g:i',
+    '#date_format' => 'Y-m-d g:i a',
     '#date_increment' => 10,
-    '#date_year_range' => '-0:+3',
-    '#default_value' => $current_published_on,
+    '#default_value' => format_date($scheduled_date, 'custom', 'Y-m-d g:i a'),
     '#states' => array(
       'visible' => array(
-       ':input[name="publishing_states"]' => array('value' => 2),
+       ':input[name="status"]' => array('value' => NODE_SCHEDULED),
       ),
     ),
   );
@@ -433,13 +421,12 @@ function node_form_submit($form, &$form_state) {
     watchdog('content', '@type: updated %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
     backdrop_set_message(t('@type %title has been updated.', $t_args));
   }
-  if ($node->published_on) {
+  if ($node->scheduled) {
     $message = '';
     if (!empty($original_status)) {
       $message .= t('@type has been unpublished.', array('@type' => $type)) . ' ';
     }
-    $today = date("D M j G:i:s", strtotime($node->future_publish));
-    $message .= t('@type will be published on @date.', array('@type' => $type, '@date' => $today));
+    $message .= t('@type will be published on @date.', array('@type' => $type, '@date' => format_date($node->scheduled)));
     backdrop_set_message($message);
   }
   if ($node->nid) {
@@ -476,26 +463,21 @@ function node_form_submit_build_node($form, &$form_state) {
   //   submit handlers during button-level submit processing is worth supporting
   //   properly, and if so, add a Form API function for doing so.
   unset($form_state['submit_handlers']);
-  form_execute_handlers('submit', $form, $form_state);
-
   $node = $form_state['node'];
-  if ($form_state['values']['publishing_states'] == 1) {
-    $node->status = 1;
-    $node->published_on = 0;
-  }
-  elseif ($form_state['values']['publishing_states'] == 0) {
-    $node->status = 0;
-    $node->published_on = 0;
-  }
-  elseif ($form_state['values']['publishing_states'] == 2) {
-    $node->status = 0;
-    $node->published_on = strtotime($form_state['values']['future_publish']);
-  }
-  else {
-    $node->published_on = 0;
-  }
-  entity_form_submit_build_entity('node', $node, $form, $form_state);
 
+  // Convert the published date into a timestamp.
+  if ($form_state['values']['status'] == NODE_SCHEDULED) {
+    $schedule_date = new BackdropDateTime($form_state['values']['scheduled']);
+    $form_state['values']['scheduled'] = $schedule_date->format('U');
+    $form_state['values']['status'] = NODE_NOT_PUBLISHED;
+  }
+  // Or if not scheduled, set timestamp to 0, indicating it is not scheduled.
+  else {
+    $form_state['values']['scheduled'] = 0;
+  }
+
+  form_execute_handlers('submit', $form, $form_state);
+  entity_form_submit_build_entity('node', $node, $form, $form_state);
   node_submit($node);
   foreach (module_implements('node_submit') as $module) {
     $function = $module . '_node_submit';
