@@ -13,7 +13,7 @@ function block_permission() {
       'title' => t('Administer custom blocks'),
     ),
   );
-  if (module_exists('language')) {
+  if (module_exists('locale')) {
     $permissions['translate blocks'] = array(
       'title' => t('Translate custom blocks') );
   }
@@ -175,7 +175,7 @@ function block_block_view($delta = '') {
  *   - format: Filter ID of the filter format for the body.
  */
 function block_custom_block_load($delta, $langcode = NULL) {
-  if (module_exists('language') && $langcode == NULL) {
+  if (module_exists('locale') && $langcode == NULL) {
     global $language;
     $langcode = $language->langcode;
   }
@@ -299,7 +299,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     );
 
     // Add a notice for translation.
-    if (module_exists('language')) {
+    if (module_exists('locale')) {
       $form['reusable']['#description'] .= t('If you want to make this block translatable, this block must be marked as reusable.');
     }
   }
@@ -340,7 +340,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
  * )
  */
 function block_custom_block_save(array $edit, $delta = NULL, $langcode = NULL) {
-  $translateable = module_exists('language');
+  $translateable = module_exists('locale');
 
   $delta = $delta ? $delta : preg_replace('/[^a-z0-9_]+/', '_', strtolower($edit['info']));
   $block = block_custom_block_load($delta);

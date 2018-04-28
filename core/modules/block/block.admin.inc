@@ -29,7 +29,7 @@ function block_admin_list() {
       'title' => t('Delete'),
       'href' => 'admin/structure/block/manage/' . $delta . '/delete',
     );
-    if (module_exists('language')) {
+    if (module_exists('locale')) {
       $links['translate'] = array(
         'title' => t('Translate'),
         'href' => 'admin/structure/block/manage/' . $delta . '/translation',
@@ -71,7 +71,7 @@ function block_admin_list() {
 function block_admin_configure($form, &$form_state, $delta = NULL) {
   if ($delta) {
     $langcode = NULL;
-    if (module_exists('language') && !isset($form['langcode'])) {
+    if (module_exists('locale') && !isset($form['langcode'])) {
       // Get the current Language and try to load the block in that Language.
       global $language;
       $langcode = $language->langcode;
@@ -87,7 +87,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
       'title' => '',
       'body' => array('value' => '', 'format' => NULL),
     );
-    if (module_exists('language')) {
+    if (module_exists('locale')) {
       $custom_block['default_langcode'] = LANGUAGE_NONE;
     }
   }
@@ -122,7 +122,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
   }
   $options = backdrop_parse_url($path);
   // Check if we have a clean path without language prefix.
-  if (module_exists('language')) {
+  if (module_exists('locale')) {
     list(, $options['path']) = language_url_split_prefix($options['path'], language_list());
   }
   $options['attributes']['class'][] = 'form-cancel';
