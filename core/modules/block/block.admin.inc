@@ -29,7 +29,7 @@ function block_admin_list() {
       'title' => t('Delete'),
       'href' => 'admin/structure/block/manage/' . $delta . '/delete',
     );
-    if (module_exists('translation')) {
+    if (module_exists('language')) {
       $links['translate'] = array(
         'title' => t('Translate'),
         'href' => 'admin/structure/block/manage/' . $delta . '/translation',
@@ -56,8 +56,10 @@ function block_admin_list() {
  *
  * Also used by block_add_block_form() for adding a new custom block.
  *
- * @param $module
- *   Name of the module that implements the block to be configured.
+ * @param array $form
+ *   An associative array containing the structure of a portion of the form.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
  * @param $delta
  *   Unique ID of the block within the context of $module.
  *
@@ -77,13 +79,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
     elseif (isset($form['langcode'])) {
       $langcode = $form['langcode']['#value'];
     }
-    // Set or load the block.
-    if (is_array($delta)) {
-      $custom_block = $delta;
-    }
-    else {
-      $custom_block = block_custom_block_load($delta, $langcode);
-    }
+    $custom_block = block_custom_block_load($delta, $langcode);
   }
   else {
     $custom_block = array(
@@ -92,7 +88,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
       'body' => array('value' => '', 'format' => NULL),
     );
     if (module_exists('language')) {
-      $custom_block['default_language'] = LANGUAGE_NONE;
+      $custom_block['default_langcode'] = LANGUAGE_NONE;
     }
   }
   if ($custom_block['info']) {
@@ -104,9 +100,8 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
 
   // Set title for translate block form.
   if (isset($form['langcode'])) {
-    $language_list = language_list();
-    $language = $language_list[$form['langcode']['#value']]->name;
-    backdrop_set_title(t("Translate '%name' block to %language", array('%name' => $custom_block['info'], '%language' => $language)), PASS_THROUGH);
+    $language = $language = language_load($form['langcode']['#value']);
+    backdrop_set_title(t("Translate '%name' block to %language", array('%name' => $custom_block['info'], '%language' => $language->name)), PASS_THROUGH);
   }
 
   // Call our own block configuration form (also used by Layout module).
@@ -128,12 +123,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
   $options = backdrop_parse_url($path);
   // Check if we have a clean path without language prefix.
   if (module_exists('language')) {
-    $path = $options['path'];
-    $language_list = language_list();
-    $result = language_url_split_prefix($path, $language_list);
-    if ($result[0] !== FALSE) {
-      $options['path'] = $result[1];
-    }
+    // list(, $options['path']) = language_url_split_prefix($options['path'], language_list());
   }
   $options['attributes']['class'][] = 'form-cancel';
   $form['actions'] = array('#type' => 'actions');
@@ -155,6 +145,11 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
 /**
  * Form validation handler for block_admin_configure().
  *
+ * @param array $form
+ *   An associative array containing the structure of a portion of the form.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
+ *
  * @see block_admin_configure()
  * @see block_admin_configure_submit()
  */
@@ -171,6 +166,11 @@ function block_admin_configure_validate($form, &$form_state) {
 /**
  * Form submission handler for block_admin_configure().
  *
+ * @param array $form
+ *   An associative array containing the structure of a portion of the form.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
+ *
  * @see block_admin_configure()
  * @see block_admin_configure_validate()
  */
@@ -182,6 +182,11 @@ function block_admin_configure_submit($form, &$form_state) {
 
 /**
  * Form constructor for the add block form.
+ *
+ * @param array $form
+ *   An associative array containing the structure of a portion of the form.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
  *
  * @see block_menu()
  * @see block_add_block_form_validate()
@@ -195,6 +200,11 @@ function block_add_block_form($form, &$form_state) {
 /**
  * Form validation handler for block_add_block_form().
  *
+ * @param array $form
+ *   An associative array containing the structure of a portion of the form.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
+ *
  * @see block_add_block_form()
  * @see block_add_block_form_submit()
  */
@@ -204,6 +214,12 @@ function block_add_block_form_validate($form, &$form_state) {
 
 /**
  * Form submission handler for block_add_block_form().
+ *
+ *
+ * @param array $form
+ *   An associative array containing the structure of a portion of the form.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
  *
  * Saves the new custom block.
  *
@@ -219,9 +235,10 @@ function block_add_block_form_submit($form, &$form_state) {
 /**
  * Form constructor for the custom block deletion form.
  *
- * @param $module
- *   The name of the module that implements the block to be deleted. This should
- *   always equal 'block' since it only allows custom blocks to be deleted.
+ * @param array $form
+ *   An associative array containing the structure of a portion of the form.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
  * @param $delta
  *   The unique ID of the block within the context of $module.
  *
@@ -239,6 +256,11 @@ function block_custom_block_delete($form, &$form_state, $delta) {
 /**
  * Form submission handler for block_custom_block_delete().
  *
+ * @param array $form
+ *   An associative array containing the structure of a portion of the form.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
+ *
  * @see block_custom_block_delete()
  */
 function block_custom_block_delete_submit($form, &$form_state) {
@@ -251,10 +273,10 @@ function block_custom_block_delete_submit($form, &$form_state) {
 /**
  * Form constructor for the block translation list form.
  *
- * @param $form
- *   The form.
- * @param $form_state
- *   The form_state
+ * @param array $form
+ *   An associative array containing the structure of a portion of the form.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
  * @param $delta
  *   Unique ID of the block within the context of $module.
  * @ingroup forms
@@ -273,7 +295,7 @@ function block_custom_block_translate_list($form, &$form_state, $delta) {
 
   $rows = array();
 
-  if (isset($custom_block['default_language']) && ($custom_block['default_language'] == LANGUAGE_NONE)) {
+  if (isset($custom_block['default_langcode']) && ($custom_block['default_langcode'] == LANGUAGE_NONE)) {
     $row[] = t('Language neutral (source)');
     $row[] = isset($custom_block['title']) ? $custom_block['title'] : t('N/A');
     $row[] = t('Source');
@@ -295,7 +317,7 @@ function block_custom_block_translate_list($form, &$form_state, $delta) {
     $links = array();
 
     // Check if this is the source language.
-    if (isset($custom_block['default_language']) && ($langcode == $custom_block['default_language'])) {
+    if (isset($custom_block['default_langcode']) && ($langcode == $custom_block['default_langcode'])) {
       $row[] = t($item->name) . ' ' . t('(source)');
       $row[] = isset($custom_block['title']) ? $custom_block['title'] : t('N/A');
       $row[] = t('Source');
@@ -338,10 +360,10 @@ function block_custom_block_translate_list($form, &$form_state, $delta) {
 /**
  * Menu callback function for translating a single block.
  *
- * @param  array $form
- *   The later form.
- * @param  array &$form_state
- *   The form state array.
+ * @param array $form
+ *   An associative array containing the structure of a portion of the form.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
  * @param  string $delta
  *   The unique machine name of that block.
  * @param  string $langcode
@@ -359,6 +381,11 @@ function block_custom_block_translate($form, &$form_state, $delta, $langcode) {
 /**
  * Form validation handler for block_custom_block_translate().
  *
+ * @param array $form
+ *   An associative array containing the structure of a portion of the form.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
+ *
  * @see block_custom_block_translate()
  * @see block_custom_block_translate_submit()
  */
@@ -370,6 +397,11 @@ function block_custom_block_translate_validate($form, &$form_state) {
  * Form submission handler for block_custom_block_translate().
  *
  * Saves the new custom block.
+ *
+ * @param array $form
+ *   An associative array containing the structure of a portion of the form.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
  *
  * @see block_custom_block_translate()
  * @see block_custom_block_translate_validate()

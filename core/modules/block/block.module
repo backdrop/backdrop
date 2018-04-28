@@ -13,7 +13,7 @@ function block_permission() {
       'title' => t('Administer custom blocks'),
     ),
   );
-  if (module_exists('translation')) {
+  if (module_exists('language')) {
     $permissions['translate blocks'] = array(
       'title' => t('Translate custom blocks') );
   }
@@ -175,7 +175,7 @@ function block_block_view($delta = '') {
  *   - format: Filter ID of the filter format for the body.
  */
 function block_custom_block_load($delta, $langcode = NULL) {
-  if (module_exists('translation') && $langcode == NULL) {
+  if (module_exists('language') && $langcode == NULL) {
     global $language;
     $langcode = $language->langcode;
   }
@@ -218,7 +218,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     'title' => '',
     'body' => array('value' => '', 'format' => NULL),
     'delta' => NULL,
-    'default_language' => LANGUAGE_NONE,
+    'default_langcode' => LANGUAGE_NONE,
   );
   $form['title'] = array(
     '#type' => 'textfield',
@@ -263,17 +263,17 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
 
   // Add language select dropdown if edit info is empty.
   // This combination should only be set if adding a new block.
-  if (isset($edit['default_language']) && empty($edit['info'])) {
+  if (isset($edit['default_langcode']) && empty($edit['info'])) {
     $options = array(LANGUAGE_NONE => t('- None -'));
     $language_list = language_list();
     foreach ($language_list as $value) {
       $options[$value->langcode] = $value->name;
     }
 
-    $form['default_language'] = array(
+    $form['default_langcode'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
-      '#description' => 'Please select the default language for this custom block.',
+      '#description' => 'Please select the default language for this custum block.',
       '#options' => $options,
       '#default_value' => language_default()->langcode,
     );
@@ -300,7 +300,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
 
     // Add a notice for translation.
     if (module_exists('language')) {
-      $form['reusable']['#description'] .= t('NOTE: You have module "language" enabled. If you want to make this block translatable, this block must be marked as reusable.');
+      $form['reusable']['#description'] .= t('If you want to make this block translatable, this block must be marked as reusable.');
     }
   }
 
@@ -325,9 +325,22 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
  * @param $langcode
  *   The language code for the block.
  *   If set, only the translation is saved.
+ *
+ * Custom blocks have two new keys in the config.
+ * - default_langcode and
+ * - translations
+ *
+ * default_langcode holds the langcode of the source language - the language the block is created with.
+ * In the translations key the translations of the other languages are stored.
+ * The structure of the tranlations is:
+ * [langcode] => array(
+ *    'info' => '',
+ *    'title' => '',
+ *    'body' => array('value' => '', 'format' => ''),
+ * )
  */
 function block_custom_block_save(array $edit, $delta = NULL, $langcode = NULL) {
-  $translateable = module_exists('translation');
+  $translateable = module_exists('language');
 
   $delta = $delta ? $delta : preg_replace('/[^a-z0-9_]+/', '_', strtolower($edit['info']));
   $block = block_custom_block_load($delta);
@@ -337,14 +350,14 @@ function block_custom_block_save(array $edit, $delta = NULL, $langcode = NULL) {
       'info' => '',
       'title' => '',
       'body' => array('value' => '', 'format' => ''),
-      'default_language' => LANGUAGE_NONE,
+      'default_langcode' => LANGUAGE_NONE,
     );
   }
   // If langcode == NULL we come from add or edit form, so
   // store the default values.
-  // Same if the langcode is the deafault language.
-  if ($langcode === NULL || (isset($block['default_language']) &&
-      ($langcode == $block['default_language']))) {
+  // Same if the langcode is the default language.
+  if ($langcode === NULL || (isset($block['default_langcode']) &&
+      ($langcode == $block['default_langcode']))) {
     foreach ($block as $key => $value) {
       if (isset($edit[$key])) {
         $block[$key] = $edit[$key];
@@ -356,8 +369,8 @@ function block_custom_block_save(array $edit, $delta = NULL, $langcode = NULL) {
   // store the translation.
   if ($translateable &&
       ($langcode != NULL) &&
-      isset($block['default_language']) &&
-      ($langcode != $block['default_language'])) {
+      isset($block['default_langcode']) &&
+      ($langcode != $block['default_langcode'])) {
     // store the translations
     if (isset($edit['info'])) {
       $block['translations'][$langcode]['info'] = $edit['info'];
