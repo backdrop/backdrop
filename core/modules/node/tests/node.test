@@ -2919,9 +2919,9 @@ class NodePublishScheduling extends BackdropWebTestCase {
     $this->backdropPost('node/add/foobsee', $settings, t('Save'));
     $node = $this->backdropGetNodeByTitle($name);
     $this->assertEqual($node->status, '0', 'The node is in the state Unpublished.');
-    $this->assertNotEqual($node->published, 0, 'The node has a non zero published date.');
-    // Set the publish_on date in the past and run cron
-    $node->published = 1;
+    $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');
+    // Set the scheduled date in the past and run cron
+    $node->scheduled = 1;
     node_save($node);
     $this->cronRun();
     $node = node_load($node->nid);

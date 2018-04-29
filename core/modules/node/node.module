@@ -126,6 +126,7 @@ function node_cron() {
   foreach ($scheduled_nodes as $n) {
     if ($node = node_load($n->nid)) {
       $node->status = 1;
+      $node->scheduled = 0;
       $node->save();
     }
   }

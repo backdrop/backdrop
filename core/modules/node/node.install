@@ -1144,8 +1144,7 @@ function node_update_1014() {
 }
   
 /**
- * Add column 'published' to the node table to allow nodes to be scheduled
- * for publication at a future date.
+ * Add column for scheduling the publishing of content in the future.
  */
 function node_update_1015() {
   if (db_field_exists('node', 'scheduled')) {
