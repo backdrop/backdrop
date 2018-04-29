@@ -621,12 +621,13 @@ class Layout {
    * @return string
    */
   function getPath() {
+    // todo: this is probably nonsense.
     $paths = is_array($this->path) ? $this->path : array($this->path);
     if ($this->menu_item) {
       foreach ($this->menu_item as $item) {
         $layout_paths[] = $item->path;
       }
-      return $layout_paths;
+      return array_unique(array_merge($layout_paths, $paths));
     }
     return $paths;
   }
@@ -711,7 +712,11 @@ class Layout {
         }
       }
       elseif ($this->path) {
-        $this->contexts = layout_context_required_by_path($this->path);
+        $paths = is_array($this->path) ? $this->path : array($this->path);
+        $this->contexts = array();
+        foreach ($paths as $path) {
+          $this->contexts = array_merge(layout_context_required_by_path($path), $this->contexts);
+        }
       }
       else {
         $this->contexts = array();

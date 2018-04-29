@@ -994,10 +994,13 @@ function layout_get_all_configs($type) {
     }
 
     // Sort the configs by path and weight.
-    backdrop_sort($configs, array(
-      'path' => SORT_STRING,
-      'weight' => SORT_NUMERIC,
-    ));
+    // todo fix this for layout configs.
+    if ($type != 'layout') {
+      backdrop_sort($configs, array(
+        'path' => SORT_STRING,
+        'weight' => SORT_NUMERIC,
+      ));
+    }
 
     // Put default layouts at the bottom.
     if ($type === 'layout') {

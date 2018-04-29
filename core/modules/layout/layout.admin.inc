@@ -280,7 +280,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   );
   $form['path_update'] = array(
     '#type' => 'submit',
-    '#value' => t('Check paths'),
+    '#value' => t('Check path'),
     '#validate' => array(
       'layout_settings_form_validate',
     ),
@@ -472,6 +472,10 @@ function layout_settings_form_validate(&$form, &$form_state) {
   $paths = array_map('trim', $paths);
   $paths = array_filter($paths, 'strlen');
   $form_state['values']['path'] = $paths;
+  // Ensure that all conditions have context requirements met.
+  $context_plugins = array(
+    'user', // The user plugin is always available for the current user.
+  );
 
   foreach ($paths as $path) {
       // Remove trailing and preceding slashes.
@@ -501,15 +505,11 @@ function layout_settings_form_validate(&$form, &$form_state) {
         form_error($form['path'], t('Wildcard placeholders must be the only character in their part of the path i.e. "@part" should be "%".', array('@part' => $part)));
       }
     }
-  }
 
-  // Ensure that all conditions have context requirements met.
-  $context_plugins = array(
-    'user', // The user plugin is always available for the current user.
-  );
-  $contexts = layout_context_required_by_path($path);
-  foreach ($contexts as $context) {
-    $context_plugins[] = $context->plugin;
+    $contexts = layout_context_required_by_path($path);
+    foreach ($contexts as $context) {
+      $context_plugins[] = $context->plugin;
+    }
   }
   foreach ($layout->conditions as $key => $condition) {
     $required_contexts = $condition->getRequiredContexts();
