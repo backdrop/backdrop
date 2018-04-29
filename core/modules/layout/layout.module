@@ -284,36 +284,36 @@ function layout_menu() {
 
   // Add menu entries for each custom layout path.
   foreach (layout_menu_item_load_all() as $menu_item) {
-      if (!empty($menu_item->disabled)) {
-        continue;
+    if (!empty($menu_item->disabled)) {
+      continue;
+    }
+
+    $path             = array();
+    $page_arguments   = array($menu_item->name);
+    $access_arguments = array($menu_item->name);
+    $load_arguments   = array($menu_item->name, '%map', '%index');
+
+    // Replace placeholders with named placeholders for known contexts.
+    foreach (explode('/', $menu_item->path) as $position => $bit) {
+      $placeholder = $bit;
+      if (strpos($bit, '%') === 0) {
+        $placeholder = '%layout_path';
       }
 
-      $path             = array();
-      $page_arguments   = array($menu_item->name);
-      $access_arguments = array($menu_item->name);
-      $load_arguments   = array($menu_item->name, '%map', '%index');
+      $path[]             = $placeholder;
+      $page_arguments[]   = $position;
+      $access_arguments[] = $position;
+    }
 
-      // Replace placeholders with named placeholders for known contexts.
-      foreach (explode('/', $menu_item->path) as $position => $bit) {
-        $placeholder = $bit;
-        if (strpos($bit, '%') === 0) {
-          $placeholder = '%layout_path';
-        }
+    $menu_path = implode('/', $path);
+    $items[$menu_path] = layout_page_menu_item($menu_item->menu, $access_arguments, $page_arguments, $load_arguments);
 
-        $path[]             = $placeholder;
-        $page_arguments[]   = $position;
-        $access_arguments[] = $position;
-      }
-
-      $menu_path = implode('/', $path);
-      $items[$menu_path] = layout_page_menu_item($menu_item->menu, $access_arguments, $page_arguments, $load_arguments);
-
-      // Add a parent menu item if one is configured.
-      if (isset($menu_item->menu['type']) && $menu_item->menu['type'] == 'default tab') {
-        array_pop($path);
-        $parent_path = implode('/', $path);
-        $items[$parent_path] = layout_page_menu_item($menu_item->menu['parent'], $access_arguments, $page_arguments, $load_arguments);
-      }
+    // Add a parent menu item if one is configured.
+    if (isset($menu_item->menu['type']) && $menu_item->menu['type'] == 'default tab') {
+      array_pop($path);
+      $parent_path = implode('/', $path);
+      $items[$parent_path] = layout_page_menu_item($menu_item->menu['parent'], $access_arguments, $page_arguments, $load_arguments);
+    }
   }
 
   // A page in the Reports section to list all blocks and their modules.
@@ -921,28 +921,10 @@ function layout_menu_item_load_multiple($menu_item_names = NULL) {
   }
 
   if ($menu_items_to_load) {
-    $config_menu_items = array();
     $configs = layout_get_all_configs('menu_item');
-    foreach ($configs as $config) {
-      if (isset($config['menu_item'])) {
-        foreach ($config['menu_item'] as $config_item) {
-          $config_menu_items[$config_item['name']] = $config_item;
-        }
-      }
-      else {
-        $config_menu_items[$config['name']] = $config;
-      }
-    }
     foreach ($menu_items_to_load as $menu_item_name) {
-      if (isset($config_menu_items[$menu_item_name]['menu_item'])) {
-        foreach ($config_menu_items[$menu_item_name]['menu_item'] as $item) {
-          $loaded_menu_items[$menu_item_name][] = new LayoutMenuItem($item);
-        }
-      }
-      else {
-        if (isset($config_menu_items[$menu_item_name]['path'])) {
-          $loaded_menu_items[$menu_item_name][] = new LayoutMenuItem($config_menu_items[$menu_item_name]);
-        }
+      if (isset($configs[$menu_item_name])) {
+        $loaded_menu_items[$menu_item_name] = new LayoutMenuItem($configs[$menu_item_name]);
       }
     }
   }
@@ -951,10 +933,8 @@ function layout_menu_item_load_multiple($menu_item_names = NULL) {
   $menu_items = array();
   foreach ($menu_item_names as $menu_item_name) {
     if (isset($loaded_menu_items[$menu_item_name])) {
-      foreach ($loaded_menu_items[$menu_item_name] as $loaded_item) {
-        $path = $loaded_item->path;
-        $menu_items[$path] = $loaded_item;
-      }
+      $path = $loaded_menu_items[$menu_item_name]->path;
+      $menu_items[$path] = $loaded_menu_items[$menu_item_name];
     }
   }
 
@@ -967,14 +947,7 @@ function layout_menu_item_load_multiple($menu_item_names = NULL) {
 function layout_menu_item_load_multiple_by_path($path) {
   $configs = layout_get_all_configs('menu_item');
   foreach ($configs as $menu_item_name => $config) {
-    if (isset($config['menu_item'])) {
-      foreach ($config['menu_item'] as $item) {
-        if ($item['path'] === $path) {
-          return layout_menu_item_load($$item['name']);
-        }
-      }
-    }
-    elseif ($config['path'] === $path) {
+    if ($config['path'] === $path) {
       return layout_menu_item_load($menu_item_name);
     }
   }
@@ -989,18 +962,7 @@ function layout_menu_item_load_multiple_by_path($path) {
  */
 function layout_menu_item_load_all() {
   $configs = layout_get_all_configs('menu_item');
-  $menu_item_names = array();
-  foreach ($configs as $config_name => $config) {
-    if (isset($config['menu_item'])) {
-      foreach ($config['menu_item'] as $name => $config) {
-        $menu_item_names[] = $name;
-      }
-    }
-    else {
-      $menu_item_names[] = $config_name;
-    }
-  }
-      
+  $menu_item_names = array_keys($configs);
   return layout_menu_item_load_multiple($menu_item_names);
 }
 
@@ -1032,12 +994,10 @@ function layout_get_all_configs($type) {
     }
 
     // Sort the configs by path and weight.
-    if ($type == 'layout') {
-      backdrop_sort($configs, array(
-        'path' => SORT_STRING,
-        'weight' => SORT_NUMERIC,
-      ));
-    }
+    backdrop_sort($configs, array(
+      'path' => SORT_STRING,
+      'weight' => SORT_NUMERIC,
+    ));
 
     // Put default layouts at the bottom.
     if ($type === 'layout') {

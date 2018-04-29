@@ -152,26 +152,16 @@ class LayoutMenuItem {
    * Save a menu item configuration.
    */
   function save() {
-    // todo menu_items need unique ids
     // Convert all properties to an array.
-    $menu_item = array(
+    $data = array(
       'name' => $this->name,
-      'layout' => $this->layout,
       'title' => $this->title,
       'path' => $this->path,
+      'layout' => $this->layout,
       'menu' => $this->menu,
       'conditions' => array(),
       'arguments' => $this->arguments,
     );
-    // $data = array(
-      // 'name' => $this->name,
-      // 'layout' => $this->layout,
-      // 'title' => $this->title,
-      // 'path' => $this->path,
-      // 'menu' => $this->menu,
-      // 'conditions' => array(),
-      // 'arguments' => $this->arguments,
-    // );
 
     // Convert all conditions.
     foreach ($this->conditions as $condition) {
@@ -182,16 +172,9 @@ class LayoutMenuItem {
       );
     }
 
-    // todo save to this->layout
-    $config = config('layout.menu_item.' . $this->layout);
-    $data = $config->get();
-    $data['menu_item'][$this->name] = $menu_item;
-    $data['name'] = $this->layout;
-    $config->setData($data);
-    $config->save();
-    // config('layout.menu_item.' . $this->name)
-      // ->setData($data)
-      // ->save();
+    config('layout.menu_item.' . $this->name)
+      ->setData($data)
+      ->save();
     layout_reset_caches();
     menu_rebuild();
   }
