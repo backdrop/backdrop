@@ -5,8 +5,3 @@ version = BACKDROP_VERSION
 type = module
 backdrop = 1.x
 hidden = TRUE
-
-; Added by Backdrop CMS packaging script on 2017-09-15
-project = backdrop
-version = 1.8.0
-timestamp = 1505542963

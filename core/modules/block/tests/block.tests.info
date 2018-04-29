@@ -9,8 +9,3 @@ name = Block translation functionality
 description = Add, translate and delete custom block.
 group = Block
 file = block.translation.test
-
-; Added by Backdrop CMS packaging script on 2017-09-15
-project = backdrop
-version = 1.8.0
-timestamp = 1505542963
