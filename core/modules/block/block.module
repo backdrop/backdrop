@@ -8,14 +8,13 @@
  * Implements hook_permission().
  */
 function block_permission() {
-  $permissions = array(
-    'administer blocks' => array(
-      'title' => t('Administer custom blocks'),
-    ),
+  $permissions['administer blocks'] = array(
+    'title' => t('Administer custom blocks'),
   );
   if (module_exists('locale')) {
     $permissions['translate blocks'] = array(
-      'title' => t('Translate custom blocks') );
+      'title' => t('Translate custom blocks'),
+    );
   }
   return $permissions;
 }
