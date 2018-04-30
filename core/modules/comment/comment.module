@@ -1241,10 +1241,10 @@ function comment_form_node_form_alter(&$form, $form_state) {
       COMMENT_NODE_CLOSED => t('Closed'),
     ),
     COMMENT_NODE_OPEN => array(
-      '#description' => t('Users with the "Post comments" permission can post comments.'),
+      '#description' => t('People with the "Post comments" permission will be able to post comments.'),
     ),
     COMMENT_NODE_CLOSED => array(
-      '#description' => t('Users cannot post comments.'),
+      '#description' => t('People will not be able to post comments.'),
     ),
   );
   // If the node has comments, add the "hidden" option too.
