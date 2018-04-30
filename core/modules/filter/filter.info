@@ -1,11 +1,12 @@
+type = module
 name = Filter
 description = Filters content in preparation for display.
 package = System
-tags[] = System
-tags[] = Filters and Editors
-tags[] = Core
+tags[] = Filters
+tags[] = Formats
+tags[] = Text Editors
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
 required = TRUE
+
 configure = admin/config/content/formats

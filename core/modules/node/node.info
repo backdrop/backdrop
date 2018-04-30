@@ -1,11 +1,9 @@
+type = module
 name = Node
 description = Allows content to be submitted to the site and displayed on pages.
 package = System
 tags[] = Content
-tags[] = System
-tags[] = Core
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
 required = TRUE
 dependencies[] = entity

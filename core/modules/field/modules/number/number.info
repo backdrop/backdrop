@@ -1,9 +1,8 @@
+type = module
 name = Number
 description = Defines numeric field types.
 package = Fields
-tags[] = Fields
-tags[] = Core
+tags[] = Content
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
 dependencies[] = field

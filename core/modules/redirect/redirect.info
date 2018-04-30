@@ -1,10 +1,9 @@
+type = module
 name = Redirect
 description = Allows users to redirect from old URLs to new URLs.
 package = System
-tags[] = Path Management
-tags[] = System
-tags[] = Core
+tags[] = URL handling
 backdrop = 1.x
 version = BACKDROP_VERSION
-type = module
+
 configure = admin/config/urls/redirect/settings

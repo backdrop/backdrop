@@ -1,10 +1,11 @@
+type = module
 name = Search
 description = Enables site-wide keyword searching.
 package = Search
-tags[] = Search
-tags[] = Core
+tags[] = Utility
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
+
 configure = admin/config/search/settings
+
 stylesheets[all][] = search.theme.css

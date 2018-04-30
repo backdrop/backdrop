@@ -1,11 +1,10 @@
+type = module
 name = Block
 description = Controls the visual building blocks a page is constructed with. Blocks are boxes of content rendered into an area, or region, of a web page.
-package = Layout
-tags[] = Layout
+package = Layouts
 tags[] = Blocks
-tags[] = Content Display
-tags[] = Core
+tags[] = Site Architecture
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
+
 configure = admin/structure/block

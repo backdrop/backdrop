@@ -507,7 +507,7 @@ function system_modules($form, $form_state = array()) {
     '#type' => 'textfield',
     '#title' => t('Filter'),
     '#size' => 30,
-    '#placeholder' => t('Enter module name…'),
+    '#placeholder' => t('Search...'),
     '#attributes' => array(
       'class' => array('table-filter-text'),
       'autocomplete' => 'off',
@@ -519,42 +519,13 @@ function system_modules($form, $form_state = array()) {
   // Get current list of modules.
   $files = system_rebuild_module_data();
 
-  // Remove hidden modules from display list.
-  //Build tag list
   $visible_files = $files;
-  $all_tags = array();
   foreach ($visible_files as $filename => $file) {
+    // Remove hidden modules from the modules list.
     if (!empty($file->info['hidden'])) {
       unset($visible_files[$filename]);
     }
-    if (isset($file->info['tags'])) {
-      $all_tags = array_merge($all_tags, $file->info['tags']);
-    }
   }
-  
-  // Add list of available tags to js
-  $tags = array();
-  foreach ($all_tags as $tag) {
-    $tags[$tag] = $tag;
-  }
-  asort($tags);
-  $tags = array('All' => 'All tags') + $tags;
-
-  $form['filter']['tags'] = array(
-    '#type' => 'select',
-    '#title' => t('Search by tags'),
-    '#options' => $tags,
-  );
-
-  $form['filter']['core_switch'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Show the following modules'),
-    '#default_value' => array('core', 'contrib'),
-    '#options' => array(
-      'core' => 'Core',
-      'contrib' => 'Contrib',
-    ),
-  );
 
   uasort($visible_files, 'system_sort_modules_by_info_name');
 
@@ -668,16 +639,15 @@ function system_modules($form, $form_state = array()) {
         }
       }
     }
-    $form['modules'][$filename] = _system_modules_build_row($module->info, $extra);
+    $form['modules'][$module->info['package']][$filename] = _system_modules_build_row($module->info, $extra);
   }
-  // Lastly, sort all fieldsets by title.
-  // backdrop_sort($form['modules'], array($filename => SORT_STRING));
-  
+
   // Add basic information to the fieldsets.
-    $form['modules'] += array(
-      '#type' => 'container',
-      // '#title' => t('mods'),
-      // '#collapsible' => TRUE,
+  foreach (element_children($form['modules']) as $package) {
+    $form['modules'][$package] += array(
+      '#type' => 'fieldset',
+      '#title' => t($package),
+      '#collapsible' => TRUE,
       '#theme' => 'system_modules_fieldset',
       '#header' => array(
         array('class' => array('checkbox')),
@@ -687,6 +657,7 @@ function system_modules($form, $form_state = array()) {
         array('data' => t('Operations')),
       ),
     );
+  }
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -694,7 +665,7 @@ function system_modules($form, $form_state = array()) {
     '#value' => t('Save configuration'),
   );
   $form['#action'] = url('admin/modules/list/confirm');
-  
+
   return $form;
 }
 
@@ -722,6 +693,20 @@ function system_sort_themes($a, $b) {
  * Build a table row for the system modules page.
  */
 function _system_modules_build_row($info, $extra) {
+  // Prepare the tag list by ensuring all tags are lower case.
+  $tags = array();
+  if (isset($info['tags'])) {
+    foreach ($info['tags'] as $tag) {
+      $tags[] = check_plain($tag);
+    }
+  }
+  if (isset($info['package'])) {
+    $tags[] = check_plain($info['package']);
+  }
+  if (empty($tags)) {
+    $tags[] = 'Other';
+  }
+
   // Add in the defaults.
   $extra += array(
     'requires' => array(),
@@ -744,19 +729,10 @@ function _system_modules_build_row($info, $extra) {
   $form['version'] = array(
     '#markup' => $info['version'],
   );
-  $tags = array();
-  if(isset($info['tags'])) {
-    $tags = $info['tags'];
-  }
-  elseif(isset($info['package'])) {
-    $tags[] = $info['package'];
-  }
-  else {
-    $tags[] = 'Other'; 
-  }
   $form['tags'] = array(
     '#markup' => implode(', ', $tags),
   );
+
   $form['#requires'] = $extra['requires'];
   $form['#required_by'] = $extra['required_by'];
   $form['#required_by_distribution'] = $extra['required_by_distribution'];

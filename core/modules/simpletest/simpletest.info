@@ -1,9 +1,9 @@
+type = module
 name = Testing
 description = Provides a framework for unit and functional testing.
 package = Development
-tags[] = Development
-tags[] = Core
+tags[] = Testing
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
+
 configure = admin/config/development/testing/settings

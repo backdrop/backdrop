@@ -70,6 +70,13 @@ small .admin-link:after {
 /**
  * Modules page.
  */
+#system-modules .table-filter {
+  margin: 1em 0;
+  padding: 7px 13px;
+  border-radius: 4px;
+  background-color: #fff;
+  border: 2px solid #EAEAEA;
+}
 #system-modules div.incompatible {
   font-weight: bold;
 }

@@ -1,8 +1,7 @@
 name = Locale
 description = Provides language negotiation functionality and user interface translation to languages other than English.
 package = Translation
-tags[] = Language and Translation
-tags[] = Core
+tags[] = Language
 version = BACKDROP_VERSION
 type = module
 backdrop = 1.x

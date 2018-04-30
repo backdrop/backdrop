@@ -173,16 +173,16 @@ function theme_system_modules_fieldset($variables) {
 
     $requirements .= '<div class="requirements">';
     if ($requires) {
-      $requirements .= '<div class="admin-requirements">' . t('Requires: !module-list', array('!module-list' => implode(', ', $module['#requires']))) . '</div>';
+      $requirements .= '<div class="admin-requirements">' . t('Requires:') . ' ' . implode(', ', $module['#requires']) . '</div>';
     }
     if ($required_by) {
-      $requirements .= '<div class="admin-requirements">' . t('Required by: !module-list', array('!module-list' => implode(', ', $module['#required_by']))) . '</div>';
+      $requirements .= '<div class="admin-requirements">' . t('Required by:') . ' ' . implode(', ', $module['#required_by']) . '</div>';
     }
-    $requirements .= '<div class="admin-requirements module-tags">' . t('Tags: !tags', array('!tags' => backdrop_render($module['tags']))) . '</div>';
+    $requirements .= '<div class="admin-requirements table-filter-text-source">' . t('Tags:') . ' ' . backdrop_render($module['tags']) . '</div>';
     $requirements .= '</div>';
 
     // Build a requirements toggle.
-    $toggle .= ' <a class="requirements-toggle" href="#">' . t('more') . '</a>';
+    $toggle .= ' <a class="requirements-toggle" href="#">' . t('more') . '<span class="arrow"></span></a>';
 
     // Add the description, along with any modules it requires.
     $details = '<div class="text table-filter-text-source"> ' . backdrop_render($module['description']) . $toggle . '</div>' . $requirements;

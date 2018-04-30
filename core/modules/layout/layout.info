@@ -1,9 +1,9 @@
+type = module
 name = Layout
 description = Provides a drag and drop page building tool.
-package = Layout
-tags[] = Layout
-tags[] = Core
+package = Layouts
+tags[] = Blocks
+tags[] = Site Architecture
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
 required = TRUE
