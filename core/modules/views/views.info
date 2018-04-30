@@ -1,10 +1,9 @@
+type = module
 name = Views
 description = Create customized lists and queries from your database.
 package = Views
-tags[] = Views
-tags[] = Core
+tags[] = Site Architecture
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
 stylesheets[all][] = css/views.css
 required = TRUE

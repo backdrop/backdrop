@@ -1,8 +1,7 @@
 name = Language
 description = Lets you configure a number of languages to be used on your website.
 package = Translation
-tags[] = Language and Translation
-tags[] = Core
+tags[] = Language
 version = BACKDROP_VERSION
 type = module
 backdrop = 1.x

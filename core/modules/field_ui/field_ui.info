@@ -1,9 +1,8 @@
+type = module
 name = Field UI
 description = User interface for the Field API.
 package = Fields
-tags[] = Fields
-tags[] = Core
+tags[] = User Interface
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
 dependencies[] = field

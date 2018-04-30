@@ -1,9 +1,9 @@
+type = module
 name = Update Manager
 description = Checks for available updates.
-version = BACKDROP_VERSION
-type = module
 package = Development
-tags[] = Development
-tags[] = Core
+tags[] = Utility
+version = BACKDROP_VERSION
 backdrop = 1.x
+
 configure = admin/reports/updates/settings

@@ -1,12 +1,12 @@
+type = module
 name = User
 description = Manages the user registration and login system.
 package = System
-tags[] = System
-tags[] = User Management
-tags[] = Core
+tags[] = Account Management
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
 required = TRUE
+
 configure = admin/config/people
+
 stylesheets[all][] = css/user.css

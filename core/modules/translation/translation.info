@@ -1,9 +1,8 @@
+type = module
 name = Content Translation
 description = Allows content to be translated into different languages.
 dependencies[] = locale
-package = Language and Translation
-tags[] = Translation
-tags[] = Core
+package = Translation
+tags[] = Language
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x

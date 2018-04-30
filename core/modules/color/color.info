@@ -1,9 +1,7 @@
+type = module
 name = Color
 description = Allows administrators to change the color scheme of compatible themes.
 package = Appearance
-tags[] = Appearance
 tags[] = Theme Enhancements
-tags[] = Core
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x

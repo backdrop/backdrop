@@ -2,11 +2,10 @@ name = Taxonomy
 description = Enables the organization of content by category.
 package = Categorization
 tags[] = Taxonomy
-tags[] = Categorization
-tags[] = Core
 version = BACKDROP_VERSION
 type = module
 backdrop = 1.x
 dependencies[] = options
 dependencies[] = entity
+
 configure = admin/structure/taxonomy

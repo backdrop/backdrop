@@ -1,10 +1,9 @@
+type = module
 name = Field SQL Storage
 description = Stores field data in an SQL database.
 package = Fields
-tags[] = Fields
-tags[] = Core
+tags[] = System
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
 dependencies[] = field
 required = TRUE
