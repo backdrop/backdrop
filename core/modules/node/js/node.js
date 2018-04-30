@@ -28,11 +28,21 @@ Backdrop.behaviors.nodeFieldsetSummaries = {
     $('fieldset.node-form-options', context).backdropSetSummary(function (context) {
       var vals = [];
 
-      $('div#edit-publishing-states', context).parent().change(function () {
-        var published_state = "";
-        published_state = $('input[type="radio"]:checked').next('label:first').text();
-        vals.push(Backdrop.checkPlain($.trim(published_state)));
-      }).trigger('change');
+      // Status radio button.
+      var $status = $(context).find('input[name="status"]:checked');
+      if ($status.val() == 2) {
+        var scheduledDate = $('input[name="scheduled[date]"]').val() + ' ' + $('input[name="scheduled[time]"]').val();
+        vals.push(Backdrop.t('Scheduled for @date', { '@date': scheduledDate }));
+      }
+      else {
+        var statusLabel = $status.parent().text();
+        vals.push(Backdrop.checkPlain($.trim(statusLabel)));
+      }
+
+      // Other checkboxes like Promoted and Sticky.
+      $(context).find('input:checked').not($status).parent().each(function () {
+        vals.push(Backdrop.checkPlain($.trim($(this).text())));
+      });
 
       return vals.join(', ');
     });

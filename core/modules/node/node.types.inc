@@ -163,12 +163,18 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'radios',
     '#title' => t('Default status'),
     '#options' => array(
-      1 => t('Publish now'),
-      0 => t('Save draft'),
-      2 => t('Publish later'),
+      NODE_PUBLISHED => t('Publish now'),
+      NODE_NOT_PUBLISHED => t('Save draft'),
+      NODE_SCHEDULED => t('Publish later'),
     ),
-    '#default_value' => isset($type->settings['status_default']) ? $type->settings['status_default'] : 1,
-    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators. Content set to Publish later will be saved as draft when the content is created, but will be automatically published on the date and time selected; this requires a <a href="@cron">cron maintenance task</a>.', array('@cron' => url('admin/reports/status')))
+    '#default_value' => isset($type->settings['status_default']) ? $type->settings['status_default'] : NODE_PUBLISHED,
+    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators.') . ' ' . t('Content set to Schedule for later will be saved as draft when the content is created, but will be automatically published on the date and time selected.'),
+    '#required' => TRUE,
+  );
+  $form['workflow']['status_default'][NODE_SCHEDULED]['#states'] = array(
+    'visible' => array(
+      'input[name="scheduling_enabled"]' => array('checked' => TRUE),
+    ),
   );
 
   if (module_exists('language')) {
@@ -179,6 +185,12 @@ function node_type_form($form, &$form_state, $type = NULL) {
       '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new posts are saved with no defined language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
     );
   }
+
+  $form['workflow']['scheduling_enabled'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show option for scheduling'),
+    '#default_value' => $type->settings['scheduling_enabled'],
+  );
 
   $form['workflow']['sticky'] = array(
     '#type' => 'checkboxes',
@@ -384,8 +396,7 @@ function node_type_form_submit($form, &$form_state) {
       $type->settings[$key] = $value;
     }
   }
-  $type->settings['status_default'] = $form_state['values']['status_default'];
-  $status = node_type_save($type, 'type');
+  $status = node_type_save($type);
   menu_rebuild();
 
   if ($status == SAVED_UPDATED) {
@@ -524,7 +535,8 @@ function node_node_type_load(&$types) {
   foreach ($types as $type_name => $type) {
     $types[$type_name]->settings += array(
       // Basic workflow settings.
-      'status_default' => 1,
+      'status_default' => NODE_PUBLISHED,
+      'scheduling_enabled' => TRUE,
       'promote_enabled' => TRUE,
       'promote_default' => FALSE,
       'sticky_enabled' => TRUE,

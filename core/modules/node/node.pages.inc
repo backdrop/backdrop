@@ -294,8 +294,8 @@ function node_form($form, &$form_state, Node $node) {
     '#weight' => -10,
   );
 
-  $status = $node_type->settings['status_default'];
-  if ($node->scheduled) {
+  $status = $node->nid ? $node->status : $node_type->settings['status_default'];
+  if ($node->scheduled && $node_type->settings['scheduling_enabled']) {
     $status = NODE_SCHEDULED;
   }
   $form['options']['status'] = array(
@@ -306,8 +306,16 @@ function node_form($form, &$form_state, Node $node) {
       NODE_SCHEDULED => t('Schedule for later'),
     ),
     '#default_value' => $status,
-    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators. Content set to Schedule for later will be saved as draft when the content is created, but will be automatically published on the date and time selected.'),
+    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators.'),
   );
+
+  // Adjustments to the status radios if scheduling is enabled/disabled.
+  if ($node_type->settings['scheduling_enabled']) {
+    $form['options']['status']['#description'] .= ' ' . t('Content set to Schedule for later will be saved as draft when the content is created, but will be automatically published on the date and time selected.');
+  }
+  else {
+    $form['options']['status'][NODE_SCHEDULED]['#access'] = FALSE;
+  }
 
   // Default the scheduled time to the current time.
   $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME;
@@ -322,7 +330,10 @@ function node_form($form, &$form_state, Node $node) {
        ':input[name="status"]' => array('value' => NODE_SCHEDULED),
       ),
     ),
+    '#access' => $node_type->settings['scheduling_enabled'],
   );
+
+
   $form['options']['promote'] = array(
     '#type' => 'checkbox',
     '#title' => t('Promoted'),
@@ -465,7 +476,7 @@ function node_form_submit_build_node($form, &$form_state) {
   unset($form_state['submit_handlers']);
   $node = $form_state['node'];
 
-  // Convert the published date into a timestamp.
+  // Convert the scheduled date into a timestamp.
   if ($form_state['values']['status'] == NODE_SCHEDULED) {
     $schedule_date = new BackdropDateTime($form_state['values']['scheduled']);
     $form_state['values']['scheduled'] = $schedule_date->format('U');
