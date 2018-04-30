@@ -2877,10 +2877,10 @@ class NodePublishScheduling extends BackdropWebTestCase {
     // Create a node of type foobee and assert that its published-state is set
     // to Draft.
     $name = $this->randomName(8);
-    $settings = array(
+    $edit = array(
       'title' => $name,
     );
-    $this->backdropPost('node/add/fooba', $settings, t('Save'));
+    $this->backdropPost('node/add/fooba', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($name);
     $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
 
@@ -2895,10 +2895,10 @@ class NodePublishScheduling extends BackdropWebTestCase {
     // Create a node of type foobee and assert that its published-state is set
     // to Published.
     $name = $this->randomName(8);
-    $settings = array(
+    $edit = array(
       'title' => $name,
     );
-    $this->backdropPost('node/add/foobee', $settings, t('Save'));
+    $this->backdropPost('node/add/foobee', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($name);
     $this->assertEqual($node->status, '1', 'The node is in the state Published.');
 
@@ -2913,10 +2913,13 @@ class NodePublishScheduling extends BackdropWebTestCase {
     // Create a node of type foobee and assert that its published-state is set
     // to Draft.
     $name = $this->randomName(8);
-    $settings = array(
+    $edit = array(
       'title' => $name,
+      // Schedule five minutes into the future to be sure we past the current time.
+      'scheduled[date]' => format_date(REQUEST_TIME + 360, 'custom', 'Y-m-d', $web_user->timezone),
+      'scheduled[time]' => format_date(REQUEST_TIME + 360, 'custom', 'g:i a', $web_user->timezone),
     );
-    $this->backdropPost('node/add/foobsee', $settings, t('Save'));
+    $this->backdropPost('node/add/foobsee', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($name);
     $this->assertEqual($node->status, '0', 'The node is in the state Unpublished.');
     $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');

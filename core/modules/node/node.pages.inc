@@ -317,21 +317,26 @@ function node_form($form, &$form_state, Node $node) {
     $form['options']['status'][NODE_SCHEDULED]['#access'] = FALSE;
   }
 
-  // Default the scheduled time to the current time.
-  $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME;
-  $form['options']['scheduled'] = array(
-    '#type' => 'date_popup',
-    '#title' => t('Publish on:'),
-    '#date_format' => 'Y-m-d g:i a',
-    '#date_increment' => 10,
-    '#default_value' => format_date($scheduled_date, 'custom', 'Y-m-d g:i a'),
-    '#states' => array(
-      'visible' => array(
-       ':input[name="status"]' => array('value' => NODE_SCHEDULED),
+  if ($node_type->settings['scheduling_enabled'] && user_access('administer nodes')) {
+    // Default the scheduled time to the current time.
+    $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME;
+    $form['options']['scheduled'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Publish on'),
+      '#date_format' => 'Y-m-d g:i a',
+      '#date_increment' => 10,
+      '#default_value' => format_date($scheduled_date, 'custom', 'Y-m-d g:i a'),
+      '#states' => array(
+        'visible' => array(
+         ':input[name="status"]' => array('value' => NODE_SCHEDULED),
+        ),
       ),
-    ),
-    '#access' => $node_type->settings['scheduling_enabled'],
-  );
+    );
+  }
+  // If the user doesn't have access to scheduling, default to published.
+  elseif ($form['options']['status']['#default_value'] == NODE_SCHEDULED) {
+    $form['options']['status']['#default_value'] = NODE_PUBLISHED;
+  }
 
 
   $form['options']['promote'] = array(
@@ -477,7 +482,8 @@ function node_form_submit_build_node($form, &$form_state) {
   $node = $form_state['node'];
 
   // Convert the scheduled date into a timestamp.
-  if ($form_state['values']['status'] == NODE_SCHEDULED) {
+  $form_state['values']['status'] = (int) $form_state['values']['status'];
+  if ($form_state['values']['status'] === NODE_SCHEDULED) {
     $schedule_date = new BackdropDateTime($form_state['values']['scheduled']);
     $form_state['values']['scheduled'] = $schedule_date->format('U');
     $form_state['values']['status'] = NODE_NOT_PUBLISHED;
