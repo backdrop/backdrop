@@ -140,14 +140,16 @@ function _date_element_info() {
 /**
  * Create a date object from a datetime string value.
  */
-function date_default_date($element) {
+function date_create_from_element($element, $value = NULL) {
   $granularity = date_format_order($element['#date_format']);
-  $default_value = $element['#default_value'];
+  if (empty($value)) {
+    $value = $element['#default_value'];
+  }
   $format = DATE_FORMAT_DATETIME;
 
   // The text and popup widgets might return less than a full datetime string.
-  if (strlen($element['#default_value']) < 19) {
-    switch (strlen($element['#default_value'])) {
+  if (strlen($value) < 19) {
+    switch (strlen($value)) {
       case 16:
         $format = 'Y-m-d H:i';
         break;
@@ -169,7 +171,7 @@ function date_default_date($element) {
         break;
     }
   }
-  $date = new BackdropDateTime($default_value, $element['#date_timezone'], $format);
+  $date = new BackdropDateTime($value, $element['#date_timezone'], $format);
   if (is_object($date)) {
     $date->limitGranularity($granularity);
     if ($date->validGranularity($granularity, $element['#date_flexible'])) {
@@ -331,7 +333,7 @@ function date_text_element_value_callback($element, $input = FALSE, &$form_state
   }
   // No input? Try the default value.
   elseif (!empty($element['#default_value'])) {
-    $date = date_default_date($element);
+    $date = date_create_from_element($element);
   }
   if (date_is_date($date)) {
     $return['date'] = date_format_date($date, 'custom', $element['#date_format']);
@@ -490,7 +492,7 @@ function date_select_element_value_callback($element, $input = FALSE, &$form_sta
     $date = date_select_input_date($element, $input);
   }
   elseif (!empty($element['#default_value'])) {
-    $date = date_default_date($element);
+    $date = date_create_from_element($element);
   }
   $granularity = date_format_order($element['#date_format']);
   $formats = array(
@@ -529,7 +531,7 @@ function date_select_element_process($element, &$form_state, $form) {
     $date = date_select_input_date($element, $element['#default_value']);
   }
   elseif (!empty($element['#default_value'])) {
-    $date = date_default_date($element);
+    $date = date_create_from_element($element);
   }
 
   $element['#tree'] = TRUE;
@@ -921,26 +923,35 @@ function date_popup_element_value_callback($element, $input = FALSE, &$form_stat
   $granularity = date_format_order($element['#date_format']);
   $has_time = date_has_time($granularity);
   $date = NULL;
-  $return = $has_time ? array('date' => '', 'time' => '') : array('date' => '');
+  $return = NULL;
+
   // Normal input from submitting the form element.
   // Check is_array() to skip the string input values created by Views pagers.
   // Those string values, if present, should be interpreted as empty input.
   if ($input !== FALSE && is_array($input)) {
-    $return = $input;
     $date = date_popup_input_date($element, $input);
   }
   // No input? Try the default value.
   elseif (!empty($element['#default_value'])) {
-    $date = date_default_date($element);
+    $date = date_create_from_element($element);
   }
   // Date with errors won't re-display.
   if (date_is_date($date)) {
-    $return['date'] = !$date->timeOnly ? date_format_date($date, 'custom', _date_popup_date_format($element)) : '';
-    $return['time'] = $has_time ? date_format_date($date, 'custom', _date_popup_time_format($element)) : '';
+    $return = '';
+    if (!$date->timeOnly) {
+      $return .= date_format_date($date, 'custom', _date_popup_date_format($element));
+    }
+    if ($has_time) {
+      $return .= ' ' . date_format_date($date, 'custom', _date_popup_time_format($element));
+    }
   }
-  elseif (!empty($input)) {
-    $return = $input;
+  elseif (isset($date->originalTime)) {
+    $return = $date->originalTime;
   }
+  else {
+    $return = NULL;
+  }
+
   return $return;
 
 }
@@ -970,10 +981,9 @@ function date_popup_element_process($element, &$form_state, $form) {
     );
   }
 
-  $element['date'] = _date_popup_process_date_part($element);
-  $element['time'] = _date_popup_process_time_part($element);
+  $element['date'] = _date_popup_process_date_part($element, $form_state);
+  $element['time'] = _date_popup_process_time_part($element, $form_state);
 
-  // If
   if (empty($element['#date_title_printed'])) {
     // Both date and time exist.
     if (!empty($element['date']) && !empty($element['time'])) {
@@ -997,6 +1007,7 @@ function date_popup_element_process($element, &$form_state, $form) {
   }
 
   // Remove the title from the overall element.
+  $element['#date_title'] = $element['#title'];
   $element['#title'] = NULL;
 
   if (isset($element['#element_validate'])) {
@@ -1017,28 +1028,32 @@ function date_popup_element_process($element, &$form_state, $form) {
 /**
  * Process the date portion of the element.
  */
-function _date_popup_process_date_part(&$element) {
+function _date_popup_process_date_part(&$element, $form_state) {
   $date_granularity = _date_popup_date_granularity($element);
   if (empty($date_granularity)) {
     return array();
   }
 
-  // When used as a Views exposed filter widget, $element['#value'] contains an
-  // array instead an string. Fill the 'date' string in this case.
-  $mock = NULL;
-  $callback_values = date_popup_element_value_callback($element, FALSE, $mock);
-  if (!isset($element['#value']['date']) && isset($callback_values['date'])) {
-    $element['#value']['date'] = $callback_values['date'];
+  // The parents for this sub-element.
+  $parents = array_merge($element['#parents'], array('date'));
+
+  // Pull the date out of the string value.
+  $date = new BackdropDateTime($element['#value'], $element['#date_timezone']);
+
+  // If the date is unparsable, restore the value from the input to maintain
+  // the value in the field (though it is invalid).
+  if ($date->errors) {
+    $date = NULL;
+    $value = backdrop_array_get_nested_value($form_state['input'], $parents);
+  }
+  else {
+    $value = date_format_date($date, 'custom', _date_popup_date_format($element));
   }
 
   // The datepicker can't handle zero or negative values like 0:+1
   // even though the Date API can handle them, so rework the value
   // we pass to the datepicker to use defaults it can accept (such as +0:+1)
   // date_range_string() adds the necessary +/- signs to the range string.
-  $date = '';
-  if (!empty($element['#value']['date'])) {
-    $date = new BackdropDateTime($element['#value']['date'], $element['#date_timezone'], _date_popup_date_format($element));
-  }
   $range = date_range_years($element['#date_year_range'], $date);
   $year_range = date_range_string($range);
 
@@ -1067,12 +1082,11 @@ function _date_popup_process_date_part(&$element) {
 
   // Manually build this element and set the value -
   // this will prevent corrupting the parent value.
-  $parents = array_merge($element['#parents'], array('date'));
   $sub_element = array(
     '#type' => 'textfield',
     '#title' => $element['#title'],
     '#title_display' => $element['#date_label_position'] == 'above' ? 'before' : 'invisible',
-    '#default_value' => date_format_date($date, 'custom', _date_popup_date_format($element)),
+    '#default_value' => $value,
     '#input' => FALSE,
     '#size' => !empty($element['#size']) ? $element['#size'] : 20,
     '#maxlength' => !empty($element['#maxlength']) ? $element['#maxlength'] : 30,
@@ -1104,29 +1118,37 @@ function _date_popup_process_date_part(&$element) {
 /**
  * Process the time portion of the element.
  */
-function _date_popup_process_time_part(&$element) {
+function _date_popup_process_time_part(&$element, $form_state) {
   $granularity = date_format_order($element['#date_format']);
   $has_time = date_has_time($granularity);
   if (empty($has_time)) {
     return array();
   }
 
-  // When used as a Views exposed filter widget, $element['#value'] contains an
-  // array instead an string. Fill the 'time' string in this case.
-  $mock = NULL;
-  $callback_values = date_popup_element_value_callback($element, FALSE, $mock);
-  if (!isset($element['#value']['time']) && isset($callback_values['time'])) {
-    $element['#value']['time'] = $callback_values['time'];
+  // The parents for this sub-element.
+  $parents = array_merge($element['#parents'], array('time'));
+
+  // Pull the date out of the string value.
+  $date = new BackdropDateTime($element['#value'], $element['#date_timezone']);
+
+  // If the date is unparsable, restore the value from the input to maintain
+  // the value in the field (though it is invalid).
+  if ($date->errors) {
+    $date = NULL;
+    $value = backdrop_array_get_nested_value($form_state['input'], $parents);
+  }
+  else {
+    $value = date_format_date($date, 'custom', _date_popup_date_format($element));
   }
 
   // Manually build this element and set the value -
   // this will prevent corrupting the parent value.
-  $parents = array_merge($element['#parents'], array('time'));
   $sub_element = array(
     '#type' => 'textfield',
     '#title' => isset($element['#title']) ? t('Time for @label', array('@label' => $element['#title'])) : t('Time'),
     '#title_display' => 'invisible',
-    '#default_value' => $element['#value']['time'],
+    '#default_value' => $value,
+    '#input' => FALSE,
     '#size' => 15,
     '#maxlength' => 10,
     '#parents' => $parents,
@@ -1189,20 +1211,9 @@ function date_popup_validate($element, &$form_state) {
   if (date_hidden_element($element)) {
     return;
   }
-  if (is_string($element['#value'])) {
-    return;
-  }
 
-  module_load_include('inc', 'date', 'date.elements');
-  $input_exists = NULL;
-  $input = backdrop_array_get_nested_value($form_state['values'], $element['#parents'], $input_exists);
-  // If the date is a string, it is not considered valid and can cause problems
-  // later on, so just exit out now.
-  if (is_string($input)) {
-    return;
-  }
-
-  backdrop_alter('date_popup_pre_validate', $element, $form_state, $input);
+  $date = date_create_from_element($element, $element['#value']);
+  backdrop_alter('date_popup_pre_validate', $element, $form_state, $element['#value']);
 
   $label = '';
   if (!empty($element['#date_title'])) {
@@ -1211,34 +1222,26 @@ function date_popup_validate($element, &$form_state) {
   elseif (!empty($element['#title'])) {
     $label = t($element['#title']);
   }
-  $date = date_popup_input_date($element, $input);
-
   // If the date has errors, display them.
   // If something was input but there is no date, the date is invalid.
   // If the field is empty and required, set error message and return.
   $error_field = implode('][', $element['#parents']);
   if (empty($date) || !empty($date->errors)) {
+
     if (is_object($date) && !empty($date->errors)) {
-      $message = t('The value input for field %field is invalid:', array('%field' => $label));
+      $message = t('The value input for %field is invalid:', array('%field' => $label));
       $message .= count($date->errors) ? (' ' . implode('', $date->errors)) : ('<br />' . implode('<br />', $date->errors));
       form_set_error($error_field, $message);
-      return;
     }
-    if (!empty($input['date'])) {
-      $message = t('The value input for field %field is invalid.', array('%field' => $label));
+    elseif (!empty($input['date'])) {
+      $message = t('The value input for %field is invalid.', array('%field' => $label));
       form_set_error($error_field, $message);
-      return;
     }
-    if ($element['#required']) {
+    elseif ($element['#required']) {
       $message = t('A valid date is required for %title.', array('%title' => $label));
       form_set_error($error_field, $message);
-      return;
     }
   }
-
-  // If the created date is valid, set it.
-  $value = !empty($date) ? $date->format(DATE_FORMAT_DATETIME) : NULL;
-  form_set_value($element, $value, $form_state);
 }
 
 /**
