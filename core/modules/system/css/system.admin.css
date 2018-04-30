@@ -70,6 +70,33 @@ small .admin-link:after {
 /**
  * Modules page.
  */
+#system-modules .table-filter {
+  margin: 1em 0;
+  padding: 7px 13px;
+  border-radius: 4px;
+  background-color: #fff;
+  border: 2px solid #EAEAEA;
+}
+#system-modules .form-item-search,
+#system-modules .form-item-tags,
+#system-modules .form-item-source {
+  display: inline-block;
+  padding-right: 1em; /* LTR */
+}
+[dir="rtl"] #system-modules .form-item-search,
+[dir="rtl"] #system-modules .form-item-tags,
+[dir="rtl"] #system-modules .form-item-source  {
+  padding-right: 0;
+  padding-left: 1em;
+}
+#system-modules .form-type-checkbox {
+  display: inline-block;
+  padding-right: .75em; /* LTR */
+}
+[dir="rtl"] #system-modules .form-type-checkbox {
+  padding-right: 0;
+  padding-left: .75em;
+}
 #system-modules div.incompatible {
   font-weight: bold;
 }

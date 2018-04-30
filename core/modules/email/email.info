@@ -1,9 +1,9 @@
+type = module
 name = Email
 description = Defines an email field type.
 package = Fields
-tags[] = Fields
-tags[] = Email
-tags[] = Core
+tags[] = Mail
+tags[] = Content
 version = BACKDROP_VERSION
 backdrop = 1.x
-type = module
+

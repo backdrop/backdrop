@@ -1,13 +1,13 @@
+type = module
 name = Comment
 description = Allows users to comment on and discuss published content.
 package = Comments
-tags[] = Comments
-tags[] = Core
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
 dependencies[] = node
 dependencies[] = text
 dependencies[] = entity
+
 configure = admin/content/comment
+
 stylesheets[all][] = css/comment.css

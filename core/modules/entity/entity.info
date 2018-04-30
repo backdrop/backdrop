@@ -1,9 +1,8 @@
+type = module
 name = Entity
 description = API for managing entities like nodes and users.
 package = System
-tags[] = System
-tags[] = Core
+tags[] = Content
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
 required = TRUE

@@ -784,8 +784,15 @@ div.teaser-checkbox .form-item,
 .text-format-wrapper .form-item {
   padding-bottom: 0;
 }
+.form-item {
+  margin-top: .5em;
+  margin-bottom: .5em;
+}
 .form-item label {
   margin: 0 0 10px;
+}
+.views-exposed-form label {
+  margin: 0 0 5px;
 }
 fieldset label {
   font-weight: normal;

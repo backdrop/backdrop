@@ -1,13 +1,12 @@
+type = module
 name = Field
 description = Field API to add fields to entities like nodes and users.
 package = System
-tags[] = System
 tags[] = Fields
-tags[] = Core
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
 dependencies[] = field_sql_storage
 dependencies[] = entity
 required = TRUE
+
 stylesheets[all][] = css/field.css

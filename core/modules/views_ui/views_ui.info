@@ -1,11 +1,10 @@
+type = module
 name = Views UI
 description = Administrative interface to views. Without this module, you cannot create or configure views.
 package = Views
-tags[] = Views
-tags[] = Content Display
-tags[] = Core
+tags[] = User Interface
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
-configure = admin/structure/views
 dependencies[] = views
+
+configure = admin/structure/views

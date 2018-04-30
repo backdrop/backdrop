@@ -1,10 +1,11 @@
+type = module
 name = CKEditor
 description = WYSIWYG editing for rich text fields using CKEditor.
-package = User interface
-tags[] = User interface
-tags[] = Filters and Editors
-tags[] = Core
+package = User Interface
+tags[] = Filters
+tags[] = Formats
+tags[] = Text Editors
 version = BACKDROP_VERSION
 backdrop = 1.x
-type = module
+
 configure = admin/config/content/formats

@@ -6,13 +6,12 @@
  * Additionally accounts for multiple tables being wrapped in "package" fieldset
  * elements.
  */
-Backdrop.behaviors.moduleFilterByText = {
+Backdrop.behaviors.moduleFilter = {
   attach: function(context, settings) {
     var $input = $('input.table-filter-text').once('table-filter-text');
     var $form = $('#system-modules');
     var $rowsAndFieldsets, $rows, $fieldsets;
 
-    var tagRows = [];
     // Hide the module requirements.
     $form.find('.requirements').hide();
 
@@ -29,26 +28,27 @@ Backdrop.behaviors.moduleFilterByText = {
       e.stopPropagation();
     });
 
-    // Filter the list of modules by provided search string.
-    function filterModuleListBySearch() {
-      var query = $input.val().toLowerCase();
+    // Hide the package <fieldset> if it doesn't have any visible rows within.
+    function hidePackageFieldset(index, element) {
+      var $fieldset = $(element);
+      var $visibleRows = $fieldset.find('table:not(.sticky-header)').find('tbody tr:visible');
+      $fieldset.toggle($visibleRows.length > 0);
+    }
 
-      // Todo add magic search:
-        // 'ddd' for disabled and 'eee' for enabled
-        // '-' + '<search-term>' to negate search
+    // Fliter the list of modules by provided search string.
+    function filterModuleList() {
+      var query = $input.val().toLowerCase();
+      var tag = $('select[data-filter-tags]').val();
+      var core = $('input[data-filter-source="core"]').is(":checked");
+      var contrib = $('input[data-filter-source="contrib"]').is(":checked");
+      var custom = $('input[data-filter-source="custom"]').is(":checked");
 
       function showModuleRow(index, row) {
-        if ($('#edit-target').is(':checked')) {
-          var searchTarget = '.module-tags';
-        }
-        else {
-          var searchTarget = '.table-filter-text-source';
-        }
-
         var $row = $(row);
         var $sources = $row.find('.table-filter-text-source');
         var rowMatch = $sources.text().toLowerCase().indexOf(query) !== -1;
         var $fieldsetTitle = $row.closest('fieldset').find('legend:first');
+        var tagSource = $row.find('.module-tags').text().toLowerCase();
 
         // Finding the fieldset title and filtering it can be expensive and
         // repetitive to do for every row, so save the filtered title as data on
@@ -62,21 +62,34 @@ Backdrop.behaviors.moduleFilterByText = {
         else {
           filterTitle = $fieldsetTitle.data('filterTitle');
         }
+        // Compare the search query to the fieldset title.
         var fieldsetTitleMatch = filterTitle.indexOf(query) !== -1;
+        // Compare the requested tag to each row's tags.
+        var tagMatch = tagSource.indexOf(tag) !== -1;
+
+        // Check the module souce and show only if matched.
+        var sourceMatch = false;
+        if ($row.hasClass('core') && core ) {
+          sourceMatch = true;
+        }
+        if ($row.hasClass('contrib') && contrib) {
+          sourceMatch = true;
+        }
+        if ($row.hasClass('custom') && custom) {
+          sourceMatch = true;
+        }
 
         // If the row contains the string or the fieldset does, show the row.
-        $row.closest('tr').toggle(rowMatch || fieldsetTitleMatch);
+        $row.closest('tr').toggle((rowMatch || fieldsetTitleMatch) && tagMatch && sourceMatch);
       }
 
-      // Filter only if the length of the query is at least 2 characters.
-      if (query.length >= 2) {
-        $(tagRows).each(function( index ) {
-          showModuleRow(query, this, '.table-filter-text-source');
-        });
-
+      // Filter only if the length of the search query is at least 2 characters.
+      if (query.length >= 2 || tag || !core || !contrib || !custom) {
         $('#edit-target').on('change', function() {
           $rows.each(showModuleRow);
         });
+
+        $rows.each(showModuleRow);
 
         // We first show() all <fieldset>s to be able to use ':visible'.
         $fieldsets.show().each(hidePackageFieldset);
@@ -91,79 +104,8 @@ Backdrop.behaviors.moduleFilterByText = {
         }
       }
       else {
-        $.each(tagRows, function() {
-          $(this).show();
-        });
-      }
-    }
-
-    // Filter the list of modules by tags.
-    // Creates an array ('tagRows')of modules matching the selected tags, as a
-    // subset of the $rows object, which is used by filterModuleListBySearch()
-    // instead of $rows to do further filtering.
-    function filterModuleListByTag() {
-      var $selecTag = $('#edit-tags').val().toLowerCase();
-      // If 'All tags' selected, show all tags and add all to tagRows.
-      if ($selecTag == 'all') {
-        $rows.each(function( index ) {
-          $(this).closest('tr').show();
-          tagRows.push(this);
-        });
-      }
-      else {
-        tagRows = [];
-        $rows.each(function( index ) {
-          // Filter by tag and add matches to tagRows.
-          row = showModuleRow($selecTag, this, '.module-tags');
-          tagRows.push(row);
-        });
-      }
-
-      // Toggle no results string
-      if ($rows.filter(':visible').length === 0) {
-        if ($('.filter-empty').length === 0) {
-          $('#edit-filter').append('<p class="filter-empty">' + Backdrop.t('There were no results.') + '</p>');
-        }
-      }
-      else {
+        $rowsAndFieldsets.show();
         $('.filter-empty').remove();
-      }
-    }
-
-    // Filters each module row based either on tag or search string and returns
-    // the row if it matches.
-    function showModuleRow(selecTag, row, searchTarget) {
-      var $row = $(row);
-      var $sources = $row.find(searchTarget);
-      var coreHidden = $('#edit-core-switch-core').prop("checked") === false;
-      var contribHidden = $('#edit-core-switch-contrib').prop("checked") === false;
-      console.log($sources);
-      if (selecTag != 'all') {
-        var textMatch = $sources.text().toLowerCase().indexOf(selecTag) !== -1;
-      }
-      else {
-        var textMatch = true;
-      }
-      var coreMatch = $sources.text().toLowerCase().indexOf("core") !== -1;
-      if (coreHidden && coreMatch) {
-        $row.closest('tr').hide();
-      }
-      else if(contribHidden && !coreMatch) {
-        $row.closest('tr').hide();
-      }
-      else {
-        $row.closest('tr').toggle(textMatch);
-      }
-      if(textMatch) {
-        return row;
-      }
-    }
-
-    // Toggles rows when the 'Hide core' checkbox is toggled.
-    function filterCore() {
-      filterModuleListByTag();
-      if ($input.val().toLowerCase().length >= 2) {
-        filterModuleListBySearch();
       }
     }
 
@@ -174,30 +116,10 @@ Backdrop.behaviors.moduleFilterByText = {
 
       // @todo Use autofocus attribute when possible.
       $input.focus().on('keyup', filterModuleList);
+      $('select[data-filter-tags]').change(filterModuleList);
+      $('input[data-filter-source]').change(filterModuleList);
       $input.triggerHandler('keyup');
-      $('#edit-tags').on('change', filterModuleListByTag);
-      $('#edit-core-switch-core').on('change', filterCore);
-      $('#edit-core-switch-contrib').on('change', filterCore);
     }
-
-    corefltr = $form.find('#edit-core-switch-core');
-    contribfltr = $form.find('#edit-core-switch-contrib');
-    corefltr.change(function() {
-      if (corefltr.is(':not(:checked)')) {
-          contribfltr.prop('disabled', true);
-      }
-      else {
-        contribfltr.prop('disabled', false);
-      }
-    });
-    contribfltr.change(function() {
-      if (contribfltr.is(':not(:checked)')) {
-          corefltr.prop('disabled', true);
-      }
-      else {
-        corefltr.prop('disabled', false);
-      }
-    });
   }
 };
 
