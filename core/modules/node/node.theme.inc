@@ -188,6 +188,11 @@ function template_preprocess_node(&$variables) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
 
+  // Comments are coded directly into the node template, but comment module
+  // may not be enabled. Set a variable to ensure it exists. Comment module will
+  // add it's own replacements over the top of this.
+  $variables['comments'] = FALSE;
+
   // Make the field variables available with the appropriate language.
   field_attach_preprocess('node', $node, $variables['content'], $variables);
 

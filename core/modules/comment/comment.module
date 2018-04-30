@@ -694,14 +694,6 @@ function comment_node_view(Node $node, $view_mode) {
       '#links' => $links,
       '#attributes' => array('class' => array('links', 'inline')),
     );
-
-    // Only append comments when we are building a node on its own node detail
-    // page. We compare $node and $page_node to ensure that comments are not
-    // appended to other nodes shown on the page, for example a node_reference
-    // displayed in 'full' display mode within another node.
-    if ($node->comment && $view_mode == 'full' && node_is_page($node) && empty($node->in_preview)) {
-      $node->comments = comment_node_page_additions($node);
-    }
   }
 }
 
@@ -2218,18 +2210,19 @@ function comment_preprocess_block(&$variables) {
 function comment_preprocess_node(&$variables) {
   $node = $variables['node'];
   $node_type = node_type_get_type($node->type);
-  if (array_key_exists('comments', $variables) && !empty($variables['comments'])) {
-    if (!array_key_exists('comments', $variables['comments'])) {
-      $variables['comments']['comments'] = FALSE;
-    }
-    if (!array_key_exists('comment_form', $variables['comments'])) {
-      $variables['comments']['comment_form'] = FALSE;
-    }
+
+  // Only append comments when we are building a node on its own node detail
+  // page. We compare $node and $page_node to ensure that comments are not
+  // appended to other nodes shown on the page, for example a node_reference
+  // displayed in 'full' display mode within another node.
+  if ($node->comment && $variables['view_mode'] == 'full' && node_is_page($node) && empty($node->in_preview)) {
+    $variables['comments'] = comment_node_page_additions($node);
+    $variables['comment_display_mode'] = $node_type->settings['comment_mode'];
   }
-  else {
+  // Simplify the variables if there are no comment parts.
+  if (empty($variables['comments']['comments']) && empty($variables['comments']['comment_form'])) {
     $variables['comments'] = FALSE;
   }
-  $variables['comment_display_mode'] = $node_type->settings['comment_mode'];
 }
 
 /**
