@@ -253,6 +253,29 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
   $form['permissions']['permissions'] = node_type_form_permissions($type->type);
 
+  // Pageless settings form
+  $form['pageless'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Pageless settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#access' => user_access('administer permissions'),
+    '#weight' => 0,
+  );
+  $pageless_default = (config_get('node.type.' . $type->type, 'pageless')) ?
+    config_get('node.type.' . $type->type, 'pageless') : "0";
+  $form['pageless']['pageless_value'] = array(
+    '#type' => 'radios',
+    '#title' => t('Show pages as usual.'),
+    '#options' => array(
+      0 => 'Yes.', 
+      1 => 'No, hide the page display from visitors.',
+    ),
+    '#default_value' => $pageless_default,
+    '#description' => t('Pageless content can be displayed elsewhere on the site, for instance in a view or in a block.'),
+  );
+
   $form['display'] = array(
     '#type' => 'fieldset',
     '#title' => t('Display settings'),
@@ -375,6 +398,8 @@ function node_type_form_submit($form, &$form_state) {
   // module alters the title field.
   $type->has_title = ($type->title_label != '');
   $type->modified = TRUE;
+  $type->pageless = !empty($form_state['values']['pageless_value']) ?
+    $form_state['values']['pageless_value'] : "0";
 
   // Check for any keys that match those provided by hook_node_type_load(). Any
   // values that match a settings key are saved automatically.
@@ -625,3 +650,4 @@ function node_type_delete_confirm_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/types';
   return;
 }
+

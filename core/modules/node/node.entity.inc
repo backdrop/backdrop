@@ -63,6 +63,13 @@ class Node extends Entity {
   public $status;
 
   /**
+   * The setting to hide node display.
+   *
+   * @var string
+   */
+  public $node_hider;
+
+  /**
    * The node creation timestamp.
    *
    * @var integer

@@ -460,6 +460,7 @@ function node_type_save($info) {
   $type_data['has_title'] = (bool) $type_data['has_title'];
   $type_data['modified'] = (bool) $type_data['modified'];
   $type_data['disabled'] = (bool) $type_data['disabled'];
+  $type_data['pageless'] = !empty($info->pageless) ? $info->pageless: "0";
 
   // Don't ever save the is_new flag or old_type into config.
   if (isset($type_data['is_new'])) {
@@ -1226,6 +1227,11 @@ function node_permission() {
     ),
     'delete revisions' => array(
       'title' => t('Delete content revisions'),
+    ),
+    'bypass pageless setting' => array(
+      'title' => t('Bypass pageless setting'),
+      'description' => t('View pageless content regardless of pageless setting.'),
+      'restrict access' => TRUE,
     ),
   );
 
@@ -2210,6 +2216,15 @@ function node_page_default() {
  * @see node_menu()
  */
 function node_page_view(Node $node) {
+  // Get the current user.
+  $account = $GLOBALS['user'];
+  // If the user has chosen to hide this node from page views return 404.
+  $pageless = config_get('node.type.' . $node->type, 'pageless');
+  $bypass_pageless = user_access('bypass pageless setting', $account);
+  if ($pageless && !$bypass_pageless) {
+    backdrop_not_found();
+  }
+
   // If there is a menu link to this node, the link becomes the last part
   // of the active trail, and the link name becomes the page title.
   // Thus, we must explicitly set the page title to be the node title.

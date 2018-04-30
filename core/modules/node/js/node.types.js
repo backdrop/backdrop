@@ -29,6 +29,17 @@ Backdrop.behaviors.contentTypes = {
       return vals.join(', ');
     });
 
+    // Pageless settings.
+    $context.find('#edit-pageless').backdropSetSummary(function() {
+      var vals = [];
+      if (!parseInt($context.find('input[name="pageless_value"]:checked').val())) {
+        vals.push(Backdrop.t('Showing pages'));
+      }
+      else {
+        vals.push(Backdrop.t('Hiding pages'));
+      }
+      return vals.join(', ');
+    });
 
     // Revision settings.
     $context.find('#edit-revision').backdropSetSummary(function() {
