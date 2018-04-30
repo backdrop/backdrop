@@ -729,6 +729,7 @@ function node_type_set_defaults($info = array()) {
     'disabled' => FALSE,
     'has_title' => TRUE,
     'title_label' => 'Title',
+    'body' => TRUE,
     'settings' => array(),
   );
   $new_type = (object) $new_type;

@@ -145,12 +145,21 @@ function node_type_form($form, &$form_state, $type = NULL) {
     $form['submission']['title_label']['#description'] = t('This content type does not have a title field.');
     $form['submission']['title_label']['#required'] = FALSE;
   }
-  $form['submission']['help']  = array(
+  $form['submission']['help'] = array(
     '#type' => 'textarea',
     '#title' => t('Explanation or submission guidelines'),
     '#default_value' => $type->help,
     '#description' => t('This text will be displayed at the top of the page when creating or editing content of this type.'),
   );
+  if (empty($type->type)) {
+    // Only display this option for new content types.
+    $form['submission']['body'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Add default Body field'),
+      '#default_value' => $type->body,
+      '#description' => t('By default, a Body field is added to new content types. Disable this option if you do not want the Body field added automatically.'),
+    );
+  }
   $form['workflow'] = array(
     '#type' => 'fieldset',
     '#title' => t('Publishing settings'),
@@ -409,7 +418,9 @@ function node_type_form_submit($form, &$form_state) {
       }
       user_role_grant_permissions($role->name, $valid_perms);
     }
-    node_add_body_field($type);
+    if ($form_state['values']['body']) {
+      node_add_body_field($type);
+    }
     backdrop_set_message(t('The content type %name has been added.', array('%name' => $type->name)));
     watchdog('node', 'Added content type %name.', array('%name' => $type->name), WATCHDOG_NOTICE, l(t('view'), 'admin/structure/types'));
   }

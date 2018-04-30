@@ -1181,6 +1181,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       'title_label' => 'Title',
       'has_title' => 1,
       'is_new' => TRUE,
+      'body' => TRUE,
     );
     // Imposed values for a custom type.
     $forced = array(
