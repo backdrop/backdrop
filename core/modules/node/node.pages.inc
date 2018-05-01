@@ -301,8 +301,8 @@ function node_form($form, &$form_state, Node $node) {
   $form['options']['status'] = array(
     '#type' => 'radios',
     '#options' => array(
-      NODE_PUBLISHED => t('Publish now'),
-      NODE_NOT_PUBLISHED => t('Save draft'),
+      NODE_PUBLISHED => $node->nid ? t('Published') : t('Publish now'),
+      NODE_NOT_PUBLISHED => t('Draft'),
       NODE_SCHEDULED => t('Schedule for later'),
     ),
     '#default_value' => $status,
@@ -311,7 +311,7 @@ function node_form($form, &$form_state, Node $node) {
 
   // Adjustments to the status radios if scheduling is enabled/disabled.
   if ($node_type->settings['scheduling_enabled']) {
-    $form['options']['status']['#description'] .= ' ' . t('Content set to Schedule for later will be saved as draft when the content is created, but will be automatically published on the date and time selected.');
+    $form['options']['status']['#description'] .= ' ' . t('Content set to "Schedule for later" will be saved as draft when the content is created, but will be automatically published on the date and time selected.');
   }
   else {
     $form['options']['status'][NODE_SCHEDULED]['#access'] = FALSE;

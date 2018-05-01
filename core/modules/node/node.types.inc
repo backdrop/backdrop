@@ -163,12 +163,12 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'radios',
     '#title' => t('Default status'),
     '#options' => array(
-      NODE_PUBLISHED => t('Publish now'),
-      NODE_NOT_PUBLISHED => t('Save draft'),
-      NODE_SCHEDULED => t('Publish later'),
+      NODE_PUBLISHED => t('Published'),
+      NODE_NOT_PUBLISHED => t('Draft'),
+      NODE_SCHEDULED => t('Schedule for later'),
     ),
     '#default_value' => isset($type->settings['status_default']) ? $type->settings['status_default'] : NODE_PUBLISHED,
-    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators.') . ' ' . t('Content set to Schedule for later will be saved as draft when the content is created, but will be automatically published on the date and time selected.'),
+    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators.') . ' ' . t('Content set to "Schedule for later" will be saved as draft when the content is created, but will be automatically published on the date and time selected.'),
     '#required' => TRUE,
   );
   $form['workflow']['status_default'][NODE_SCHEDULED]['#states'] = array(

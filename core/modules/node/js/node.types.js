@@ -25,7 +25,7 @@ Backdrop.behaviors.contentTypes = {
       return vals.join(', ');
     });
 
-    // Uncheck the "Publish later" option if scheduling is disabled.
+    // Uncheck the "Schedule for later" option if scheduling is disabled.
     $context.find('input[name="scheduling_enabled"]').once().on('change', function() {
       var $checkedStatusDefault = $context.find('input[name="status_default"]:checked');
       if ($checkedStatusDefault.val() === '2') {
