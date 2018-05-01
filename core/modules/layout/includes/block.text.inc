@@ -79,6 +79,10 @@ class BlockText extends Block {
         '#description' => t('If enabled, this block will be made reusable across different layouts and be listed in on the !block_link page.', array('!block_link' => l(t('Custom blocks'), 'admin/structure/block'))),
         '#weight' => 1,
       );
+      // Add a notice for translation.
+      if (module_exists('language')) {
+        $form['convert']['reusable']['#description'] .= '<br />' . t('If you want to make this block translatable, this block must be marked as reusable.');
+      }
       $form['convert']['label'] = array(
         '#type' => 'textfield',
         '#title' => t('Admin label'),
