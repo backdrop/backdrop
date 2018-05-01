@@ -2977,7 +2977,7 @@ function system_update_1063() {
 /**
  * Add langcode column to {menu_links} table.
  */
-function system_update_1063() {
+function system_update_1064() {
   if (!db_field_exists('menu_links', 'langcode')) {
     $spec = array(
       'description' => 'The language code for this menu link; if \'und\', the link will be shown in all languages.',

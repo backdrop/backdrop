@@ -472,7 +472,12 @@ function menu_edit_item_submit($form, &$form_state) {
   else {
     backdrop_set_message(t('Your configuration has been saved.'));
   }
-  $form_state['redirect'] = 'admin/structure/menu/manage/' . $item['menu_name'];
+
+  $redirect = array('path' => 'admin/structure/menu/manage/' . $item['menu_name']);
+  if ($item['langcode'] !== LANGUAGE_NONE) {
+    $redirect['options']['query'] = array('langcode' => $item['langcode']);
+  }
+  $form_state['redirect'] = $redirect;
 }
 
 /**
