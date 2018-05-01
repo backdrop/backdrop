@@ -714,6 +714,7 @@ function filter_editor_file_upload_settings_form($format) {
     // By making this field required, we prevent a potential security issue
     // that would allow files of any type to be uploaded.
     '#required' => TRUE,
+    '#states' => $show_if_file_uploads_enabled,
   );
 
   return $form;

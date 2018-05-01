@@ -85,7 +85,7 @@ CKEDITOR.plugins.add('backdroplink', {
           existingValues = parseAttributes(editor, linkElement);
 
           // Update the displayed link text
-          existingValues.linktext = selectedText;
+          existingValues.text = selectedText;
         }
         // Or, if an image widget is focused, we're editing a link wrapping
         // an image widget.
@@ -94,7 +94,7 @@ CKEDITOR.plugins.add('backdroplink', {
         }
         // Or, if selected element is not an existing link or an image.
         else {
-          existingValues.linktext = selectedText;
+          existingValues.text = selectedText;
         }
 
         // Prepare a save callback to be used upon saving the dialog.
@@ -118,14 +118,14 @@ CKEDITOR.plugins.add('backdroplink', {
             // Get the text of the current selection.
             var oldtext = selection.getSelectedText();
             // And the replacement text.
-            var newtext = returnValues.attributes.linktext;
+            var newtext = returnValues.attributes.text;
             // Get the range of the selection.
             var range = selection.getRanges(1)[0];
 
             // If the selection is a link, replace the text
             var element = selection.getStartElement();
             this.element = element;
-            if(element.$.nodeName === "A") {
+            if (element.is('a')) {
               this.element.setText(newtext);
             }
           }
@@ -134,14 +134,14 @@ CKEDITOR.plugins.add('backdroplink', {
           if (!linkElement && returnValues.attributes.href) {
             // Use link URL as text with a collapsed cursor.
             if (range.collapsed) {
-
-              if(newtext != ""){
-                var text = new CKEDITOR.dom.text(newtext);
+              var text;
+              if (newtext) {
+                text = new CKEDITOR.dom.text(newtext);
               }
               else {
                 // Use href as link text
                 // Shorten mailto URLs to just the email address.
-                var text = new CKEDITOR.dom.text(returnValues.attributes.href.replace(/^mailto:/, ''), editor.document);
+                text = new CKEDITOR.dom.text(returnValues.attributes.href.replace(/^mailto:/, ''), editor.document);
               }
               range.insertNode(text);
               range.selectNodeContents(text);
@@ -149,10 +149,10 @@ CKEDITOR.plugins.add('backdroplink', {
 
             // Create the new link by applying a style to the new text.
             // Remove attributes that are not required.
-            if ( !(returnValues.attributes['data-file-id'] > 0)){
+            if (!returnValues.attributes['data-file-id']) {
               delete returnValues.attributes['data-file-id'];
             }
-            delete returnValues.attributes.linktext;
+            delete returnValues.attributes.text;
             var style = new CKEDITOR.style({element: 'a', attributes: returnValues.attributes});
             style.type = CKEDITOR.STYLE_INLINE;
             style.applyToRange(range);
@@ -177,7 +177,7 @@ CKEDITOR.plugins.add('backdroplink', {
                   linkElement.removeAttribute(attrName);
                 }
                 // Update the property if a value is specified.
-                else if ((returnValues.attributes[attrName].length > 0) && (attrName !== "linktext")) {
+                else if ((returnValues.attributes[attrName].length > 0) && (attrName !== "text")) {
                   linkElement.data('cke-saved-' + attrName, value);
                   linkElement.setAttribute(attrName, value);
                 }

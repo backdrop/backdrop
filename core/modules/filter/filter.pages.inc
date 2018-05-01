@@ -30,124 +30,6 @@ function filter_tips_long($format = NULL) {
 }
 
 /**
- * Form callback: Display a form for inserting/editing a link or uploading a file.
- */
-function filter_format_editor_link_form($form, &$form_state, $format) {
-  $form_state['format'] = $format;
-  // Record the dialog selector that needs to be closed if present.
-  if (isset($form_state['input']['dialogOptions']['target'])) {
-    $form_state['storage']['dialog_selector'] = $form_state['input']['dialogOptions']['target'];
-  }
-
-  // Record if file uploading is requested by the calling element.
-  $element_supports_uploads = !isset($form_state['input']['dialogOptions']['uploads']) || (bool) $form_state['input']['dialogOptions']['uploads'];
-
-  // Pull in any default values set by the editor.
-  $values = array();
-  if (isset($form_state['input']['editor_object'])) {
-    $values = $form_state['input']['editor_object'];
-  }
-
-  // Set the dialog title.
-  if (!empty($values['href'])) {
-    backdrop_set_title(t('Edit link'));
-  }
-  else {
-    backdrop_set_title(t('Insert link'));
-  }
-
-  // Use a "textfield" rather than "url" to allow relative paths.
-  $form['href'] = array(
-    '#title' => t('Link value'),
-    '#type' => 'textfield',
-    '#element_validate' => array('_filter_format_editor_link_url_validate'),
-    '#placeholder' => ' ',
-    '#default_value' => isset($values['href']) ? $values['href'] : NULL,
-    '#parents' => array('attributes', 'href'),
-    '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Link to existing content'),
-    ),
-    '#weight' => -10,
-    '#autocomplete_path' => 'filter-link/autocomplete',
-    '#description' => t('Enter a known path, or start typing to get suggestions'),
-  );
-
-
-  // Construct strings to use in the upload validators.
-
-  $upload_settings = isset($format->editor_settings['file_upload']) ? $format->editor_settings['file_upload'] : array();
-
-  $upload_settings += array(
-    'max_size' => file_upload_max_size(),
-    'file_extensions' => 'txt',
-    'directory' => 'inline-files',
-    'data-file-id' => NULL,
-  );
-
-  $max_filesize = $upload_settings['max_size'];
-  $file_extensions = $upload_settings['file_extensions'];
-  $file_directory = $upload_settings['directory'];
-  $existing_file = !empty($values['data-file-id']) ? file_load($values['data-file-id']) : NULL;
-  $fid = $existing_file ? $existing_file->fid : NULL;
-  $form['file']['fid'] = array(
-    '#title' => t('Upload a file and link to it'),
-    '#type' => 'managed_file',
-    '#upload_location' => $upload_settings['scheme'] . '://' . $file_directory,
-    '#default_value' => $fid ? $fid : NULL,
-    '#upload_validators' => array(
-      'file_validate_extensions' => array($file_extensions),
-      'file_validate_size' => array($max_filesize),
-    ),
-    '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Upload a file and link to it'),
-    ),
-    '#parents' => array('fid'),
-    '#weight' => -2,
-    '#access' => $element_supports_uploads && $upload_settings['status'] && user_access('upload editor files'),
-  );
-
-
-  // If no current value or an existing file exists, default to showing
-  // the uploading interface.
-  if ($fid || empty($form['file']['src']['#default_value'])) {
-    $form['file']['fid']['#weight'] = -10;
-    $form['file']['src']['#default_value'] = '';
-  }
-  // Otherwise if editing an unmanaged file, show the raw URL field.
-  else {
-    $form['file']['src']['#weight'] = -10;
-  }
-
-  $form['linktext'] = array(
-    '#title' => t('Link text'),
-    '#type' => 'textfield',
-    '#default_value' => isset($values['linktext']) ? $values['linktext'] : '',
-    '#parents' => array('attributes', 'linktext'),
-    '#description' => t('Default is the link or file identifier. Enter some alternative link text here if needed.'),
-  );
-
-
-  $form['target'] = array(
-    '#title' => t('Open in new window'),
-    '#type' => 'checkbox',
-    '#return_value' => '_blank',
-    '#default_value' => isset($values['target']) ? $values['target'] : FALSE,
-    '#parents' => array('attributes', 'target'),
-  );
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save'),
-    '#ajax' => array(
-      'callback' => 'filter_format_editor_dialog_save',
-      'event' => 'click',
-    ),
-  );
-
-  return $form;
-}
-
-/**
  * Autocomplete callback for link textfield.
  */
 function _filter_link_autocomplete($string) {
@@ -170,23 +52,25 @@ function _filter_link_autocomplete($string) {
     }
 
     // Get file matches.
-    $results = db_select('file_managed')
-      ->fields('file_managed', array('fid', 'filename', 'uri', 'filemime', 'status'))
-      ->condition('filename', db_like($string) . '%', 'LIKE')
-      ->condition('status', 1)
-      ->condition('filemime', 'image%', 'NOT LIKE')
-      ->orderBy('fid', 'DESC')
-      ->range(0, 10 - $match_count)
-      ->execute();
-    foreach ($results as $result) {
-      // Try to make a local path if possible for better portability.
-      $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
+    if (user_access('manage files') && $match_count < 10) {
+      $results = db_select('file_managed')
+        ->fields('file_managed', array('fid', 'filename', 'uri', 'filemime', 'status'))
+        ->condition('filename', db_like($string) . '%', 'LIKE')
+        ->condition('status', 1)
+        ->condition('filemime', 'image%', 'NOT LIKE')
+        ->orderBy('fid', 'DESC')
+        ->range(0, 10 - $match_count)
+        ->execute();
+      foreach ($results as $result) {
+        // Try to make a local path if possible for better portability.
+        $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
 
-      $url = file_create_url($result->uri);
-      $path = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
+        $url = file_create_url($result->uri);
+        $path = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
 
-      $matches[$path] = check_plain($result->filename) . ' (' . t('File')  . ')';
-      $match_count++;
+        $matches[$path] = check_plain($result->filename) . ' (' . t('File')  . ')';
+        $match_count++;
+      }
     }
 
     // Get user matches.
@@ -453,6 +337,122 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
 }
 
 /**
+ * Form callback: Display a form for inserting/editing a link or uploading a file.
+ */
+function filter_format_editor_link_form($form, &$form_state, $format) {
+  $form_state['format'] = $format;
+  // Record the dialog selector that needs to be closed if present.
+  if (isset($form_state['input']['dialogOptions']['target'])) {
+    $form_state['storage']['dialog_selector'] = $form_state['input']['dialogOptions']['target'];
+  }
+
+  // Record if file uploading is requested by the calling element.
+  $element_supports_uploads = !isset($form_state['input']['dialogOptions']['uploads']) || (bool) $form_state['input']['dialogOptions']['uploads'];
+
+  // Pull in any default values set by the editor.
+  $values = array();
+  if (isset($form_state['input']['editor_object'])) {
+    $values = $form_state['input']['editor_object'];
+  }
+
+  // Set the dialog title.
+  if (!empty($values['href'])) {
+    backdrop_set_title(t('Edit link'));
+  }
+  else {
+    backdrop_set_title(t('Insert link'));
+  }
+
+  // Use a "textfield" rather than "url" to allow relative paths.
+  $form['href'] = array(
+    '#title' => t('Link value'),
+    '#type' => 'textfield',
+    '#element_validate' => array('_filter_format_editor_link_url_validate'),
+    '#placeholder' => ' ',
+    '#default_value' => isset($values['href']) ? $values['href'] : NULL,
+    '#parents' => array('attributes', 'href'),
+    '#wrapper_attributes' => array(
+      'data-editor-image-toggle' => t('Link to existing content'),
+    ),
+    '#weight' => -10,
+    '#autocomplete_path' => 'filter-link/autocomplete',
+    '#description' => t('Enter a known path, or start typing to get suggestions'),
+  );
+
+
+  // Construct strings to use in the upload validators.
+  $upload_settings = isset($format->editor_settings['file_upload']) ? $format->editor_settings['file_upload'] : array();
+
+  $upload_settings += array(
+    'max_size' => file_upload_max_size(),
+    'file_extensions' => 'txt',
+    'directory' => 'inline-files',
+    'data-file-id' => NULL,
+  );
+
+  $max_filesize = $upload_settings['max_size'];
+  $file_extensions = $upload_settings['file_extensions'];
+  $file_directory = $upload_settings['directory'];
+  $existing_file = !empty($values['data-file-id']) ? file_load($values['data-file-id']) : NULL;
+  $fid = $existing_file ? $existing_file->fid : NULL;
+  $form['file']['fid'] = array(
+    '#title' => t('Upload a file and link to it'),
+    '#type' => 'managed_file',
+    '#upload_location' => $upload_settings['scheme'] . '://' . $file_directory,
+    '#default_value' => $fid ? $fid : NULL,
+    '#upload_validators' => array(
+      'file_validate_extensions' => array($file_extensions),
+      'file_validate_size' => array($max_filesize),
+    ),
+    '#wrapper_attributes' => array(
+      'data-editor-image-toggle' => t('Upload a file and link to it'),
+    ),
+    '#parents' => array('fid'),
+    '#weight' => -2,
+    '#access' => $element_supports_uploads && $upload_settings['status'] && user_access('upload editor files'),
+  );
+
+
+  // If no current value or an existing file exists, default to showing
+  // the uploading interface.
+  if ($fid || empty($form['file']['src']['#default_value'])) {
+    $form['file']['fid']['#weight'] = -10;
+    $form['file']['src']['#default_value'] = '';
+  }
+  // Otherwise if editing an unmanaged file, show the raw URL field.
+  else {
+    $form['file']['src']['#weight'] = -10;
+  }
+
+  $form['text'] = array(
+    '#title' => t('Link text'),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['text']) ? $values['text'] : '',
+    '#parents' => array('attributes', 'text'),
+    '#description' => t('Default is the link or file identifier. Enter some alternative link text here if needed.'),
+  );
+
+  $form['target'] = array(
+    '#title' => t('Open in new window'),
+    '#type' => 'checkbox',
+    '#return_value' => '_blank',
+    '#default_value' => isset($values['target']) ? $values['target'] : FALSE,
+    '#parents' => array('attributes', 'target'),
+  );
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#ajax' => array(
+      'callback' => 'filter_format_editor_dialog_save',
+      'event' => 'click',
+    ),
+  );
+
+  return $form;
+}
+
+/**
  * Submit handler for filter_format_editor_link_form().
  */
 function filter_format_editor_link_form_submit($form, &$form_state) {
@@ -480,6 +480,12 @@ function filter_format_editor_link_form_submit($form, &$form_state) {
       $form_state['values']['attributes']['data-file-id'] = $fid;
       $form_state['values']['attributes']['href'] = $url;
       unset($form_state['values']['fid']);
+
+      // If no text was set, use the file name.
+      if (strlen($form_state['values']['attributes']['text']) === 0) {
+        $form_state['values']['attributes']['text'] = basename($url);
+      }
+
   }
   else {
       // Modify references to other URIs.
