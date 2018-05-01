@@ -11,11 +11,6 @@ function block_permission() {
   $permissions['administer blocks'] = array(
     'title' => t('Administer custom blocks'),
   );
-  if (module_exists('locale')) {
-    $permissions['translate blocks'] = array(
-      'title' => t('Translate custom blocks'),
-    );
-  }
   return $permissions;
 }
 
@@ -59,7 +54,8 @@ function block_menu() {
     'title' => 'Translate',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('block_custom_block_translate_list', 4),
-    'access arguments' => array('translate blocks'),
+    'access arguments' => array('administer blocks', 4),
+    'access callback' => 'block_menu_access',
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_NONE,
     'file' => 'block.admin.inc',
@@ -68,7 +64,7 @@ function block_menu() {
     'title' => 'Translate block',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('block_custom_block_translate', 4, 6),
-    'access arguments' => array('translate blocks'),
+    'access arguments' => array('administer blocks'),
     'type' => MENU_NORMAL_ITEM,
     'context' => MENU_CONTEXT_NONE,
     'file' => 'block.admin.inc',
@@ -97,6 +93,28 @@ function block_config_info() {
 }
 
 /**
+ * Callback function for menu access.
+ * @param  string $permission
+ *   The permission for menu access.
+ * @param  string $delta
+ *   The name delta of the block from the URL.
+ * @return bool
+ *   TRUE if user access is TRUE and a language is set for the block.
+ */
+function block_menu_access($permission, $delta) {
+  $blocks =  block_block_info();
+  if (isset($blocks[$delta])) {
+    $block = $blocks[$delta];
+    if (isset($block['default_langcode']) &&
+        ($block['default_langcode'] != LANGUAGE_NONE) &&
+        user_access($permission)) {
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
+/**
  * Implements hook_block_info().
  */
 function block_block_info() {
@@ -111,7 +129,7 @@ function block_block_info() {
   foreach ($config_names as $config_name) {
     $block = config_get($config_name);
     $blocks[$block['delta']] = $block;
-    $blocks[$block['delta']]['description'] = t('A reusable custom block.');
+    $blocks[$block['delta']]['description'] = !empty($block['description']) ? $block['description'] : t('A reusable custom block.');
   }
   return $blocks;
 }
@@ -213,20 +231,17 @@ function block_custom_block_load($delta, $langcode = NULL) {
  */
 function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
   $edit += array(
+    'delta' => NULL,
     'info' => '',
     'title' => '',
+    'description' => '',
     'body' => array('value' => '', 'format' => NULL),
-    'delta' => NULL,
-    'default_langcode' => LANGUAGE_NONE,
   );
-  $form['title'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Display title'),
-    '#default_value' => $edit['title'],
-    '#maxlength' => 255,
-    '#description' => t('The title of the block as shown to the user. This will affect all places where this block is used.'),
-    '#weight' => -18,
-  );
+  // If the description is the default from hook_block_info(), leave blank.
+  if ($edit['description'] === t('A reusable custom block.')) {
+    $edit['description'] = '';
+  }
+
   $form['info'] = array(
     '#type' => 'textfield',
     '#title' => t('Admin label'),
@@ -236,6 +251,15 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#required' => TRUE,
     '#weight' => -20,
     '#id' => 'block-info',
+  );
+  $form['description'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Admin description'),
+    '#default_value' => $edit['description'],
+    '#maxlength' => 128,
+    '#description' => t('Used in administrative interfaces and not shown to end-users.'),
+    '#weight' => -18,
+    '#id' => 'block-description',
   );
   $form['delta'] = array(
     '#type' => 'machine_name',
@@ -249,6 +273,14 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#weight' => -19,
     '#disabled' => isset($edit['delta']),
   );
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Display title'),
+    '#default_value' => $edit['title'],
+    '#maxlength' => 255,
+    '#description' => t('The title of the block as shown to the user. This will affect all places where this block is used.'),
+    '#weight' => -17,
+  );
   $form['body'] = array(
     '#type' => 'text_format',
     '#title' => t('Block content'),
@@ -257,12 +289,12 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#editor_uploads' => TRUE,
     '#rows' => 8,
     '#required' => TRUE,
-    '#weight' => -17,
+    '#weight' => -16,
   );
 
-  // Add language select dropdown if edit info is empty.
+  // Add language select dropdown if language is not set.
   // This combination should only be set if adding a new block.
-  if (isset($edit['default_langcode']) && empty($edit['info'])) {
+  if (module_exists('locale') && $edit['default_langcode'] == LANGUAGE_NONE) {
     $options = array(LANGUAGE_NONE => t('- None -'));
     $language_list = language_list();
     foreach ($language_list as $value) {
@@ -272,9 +304,9 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     $form['default_langcode'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
-      '#description' => 'Please select the default language for this custum block.',
+      '#description' => 'Please select the default language for this custom block.',
       '#options' => $options,
-      '#default_value' => language_default()->langcode,
+      '#default_value' => $edit['default_langcode'],
     );
   }
 
@@ -348,6 +380,7 @@ function block_custom_block_save(array $edit, $delta = NULL, $langcode = NULL) {
       'delta' => $delta,
       'info' => '',
       'title' => '',
+      'description' => '',
       'body' => array('value' => '', 'format' => ''),
       'default_langcode' => LANGUAGE_NONE,
     );
@@ -370,7 +403,7 @@ function block_custom_block_save(array $edit, $delta = NULL, $langcode = NULL) {
       ($langcode != NULL) &&
       isset($block['default_langcode']) &&
       ($langcode != $block['default_langcode'])) {
-    // store the translations
+    // Store the translations.
     if (isset($edit['info'])) {
       $block['translations'][$langcode]['info'] = $edit['info'];
     }

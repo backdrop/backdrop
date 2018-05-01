@@ -31,7 +31,7 @@ function block_admin_list() {
       'title' => t('Delete'),
       'href' => 'admin/structure/block/manage/' . $delta . '/delete',
     );
-    if (module_exists('locale')) {
+    if (module_exists('locale') && $block_info['default_langcode'] != LANGUAGE_NONE) {
       $links['translate'] = array(
         'title' => t('Translate'),
         'href' => 'admin/structure/block/manage/' . $delta . '/translation',
@@ -81,7 +81,12 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
     elseif (isset($form['langcode'])) {
       $langcode = $form['langcode']['#value'];
     }
-    $custom_block = block_custom_block_load($delta, $langcode);
+    if (is_array($delta)) {
+      $custom_block = $delta;
+    }
+    else {
+      $custom_block = block_custom_block_load($delta, $langcode);
+    }
   }
   else {
     $custom_block = array(
@@ -296,23 +301,6 @@ function block_custom_block_translate_list($form, &$form_state, $delta) {
   );
 
   $rows = array();
-
-  if (isset($custom_block['default_langcode']) && ($custom_block['default_langcode'] == LANGUAGE_NONE)) {
-    $row[] = t('Language neutral (source)');
-    $row[] = isset($custom_block['title']) ? $custom_block['title'] : t('N/A');
-    $row[] = t('Source');
-    $links = array();
-    $links['edit'] = array(
-      'title' => t('Edit'),
-      'href' => 'admin/structure/block/manage/' . $delta . '/configure',
-    );
-    $operations = array(
-      '#type' => 'operations',
-      '#links' => $links,
-    );
-    $row[] = array('data' => $operations);
-    $rows[] = $row;
-  }
 
   foreach ($language_list as $langcode => $item) {
     $row = array();

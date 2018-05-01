@@ -25,7 +25,6 @@ class BlockTranslationTestCase extends BackdropWebTestCase {
       'access administration pages',
       'administer layouts',
       'administer languages',
-      'translate blocks',
     ));
     $this->backdropLogin($this->admin_user);
   }
