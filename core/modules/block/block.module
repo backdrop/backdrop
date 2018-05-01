@@ -11,11 +11,6 @@ function block_permission() {
   $permissions['administer blocks'] = array(
     'title' => t('Administer custom blocks'),
   );
-  if (module_exists('locale')) {
-    $permissions['translate blocks'] = array(
-      'title' => t('Translate custom blocks'),
-    );
-  }
   return $permissions;
 }
 

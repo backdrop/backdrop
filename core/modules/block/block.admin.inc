@@ -350,7 +350,7 @@ function block_custom_block_translate_access($delta, $langcode = NULL) {
   if ($langcode && !isset($enabled_languages[$langcode])) {
     return FALSE;
   }
-  return user_access('translate blocks');
+  return user_access('administer blocks');
 }
 
 /**

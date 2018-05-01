@@ -37,7 +37,6 @@ class BlockTranslationTestCase extends BackdropWebTestCase {
       'access administration pages',
       'administer layouts',
       'administer languages',
-      'translate blocks',
     );
     $this->checkPermissions($permissions, TRUE);
     $this->admin_user = $this->backdropCreateUser($permissions);
