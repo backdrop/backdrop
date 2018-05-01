@@ -318,8 +318,8 @@ function node_form($form, &$form_state, Node $node) {
   }
 
   if ($node_type->settings['scheduling_enabled'] && user_access('administer nodes')) {
-    // Default the scheduled time to the current time.
-    $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME;
+    // Default the scheduled time to the current time + 1 day.
+    $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME + 86400;
     $form['options']['scheduled'] = array(
       '#type' => 'date_popup',
       '#title' => t('Publish on'),
