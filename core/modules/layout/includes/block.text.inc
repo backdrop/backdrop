@@ -80,8 +80,8 @@ class BlockText extends Block {
         '#weight' => 1,
       );
       // Add a notice for translation.
-      if (module_exists('language')) {
-        $form['convert']['reusable']['#description'] .= '<br />' . t('If you want to make this block translatable, this block must be marked as reusable.');
+      if (module_exists('locale')) {
+        $form['convert']['reusable']['#description'] .= ' ' . t('Reusable blocks may also be translated.');
       }
       $form['convert']['label'] = array(
         '#type' => 'textfield',

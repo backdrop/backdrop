@@ -75,49 +75,62 @@ class BlockTranslationTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/structure/block/add');
 
     // Add a new custom block by filling out the input form on the admin/structure/block/add page.
+    $block_delta = strtolower($this->randomName(8));
     $custom_block = array();
     $custom_block['info'] = $this->randomName(8);
-    $custom_block['delta'] = strtolower($this->randomName(8));
+    $custom_block['delta'] = $block_delta;
     $custom_block['title'] = 'Testblock created in default language';
     $custom_block['body[value]'] = $this->randomName(32);
-    $custom_block['default_langcode'] = language_default()->langcode;
-    $this->backdropPost(NULL, $custom_block, 'Save block');
+    $this->backdropPost(NULL, $custom_block, t('Save block'));
 
     // Confirm that the custom block has been created, and then find its config file
     $this->assertText(t('The block has been created.'), 'Custom block successfully created.');
 
     // Check to see if the custom block was created by checking that it has a configuration file.
-    $custom_block = config_get('block.custom.'.$custom_block['delta']);
-    $this->assertNotNull($custom_block['delta'], 'Custom block found in configuration.');
+    $custom_block = config_get('block.custom.' . $block_delta);
+    $this->assertNotNull($custom_block, 'Custom block found in configuration.');
 
-    // Verify presence of configure, delete and translate links for custom block.
+    // There should not yet be a translation link.
+    $this->assertLinkByHref('admin/structure/block/manage/' . $block_delta . '/configure', 0, 'Custom block configure link found.');
+    $this->assertNoLinkByHref('admin/structure/block/manage/' . $block_delta . '/translation', 'Custom block translate link not found when translation disabled.');
+    $this->backdropGet('admin/structure/block/manage/' . $block_delta . '/translation');
+    $this->assertResponse(403, 'Access not allowed to translation page when translation disabled.');
+    $this->backdropGet('admin/structure/block/manage/' . $block_delta . '/translate/fr');
+    $this->assertResponse(403, 'Access not allowed to individual translate page when translation disabled.');
+
+    // Enable language translation by setting a source language.
+    $edit = array(
+      'default_langcode' => language_default()->langcode,
+    );
+    $this->backdropPost('admin/structure/block/manage/' . $block_delta, $edit, t('Save block'));
+
+    // Verify presence of configure and translate links for custom block.
     $this->backdropGet('admin/structure/block');
-    $this->assertLinkByHref('admin/structure/block/manage/' . $custom_block['delta'] . '/configure', 0, 'Custom block configure link found.');
-    $this->assertLinkByHref('admin/structure/block/manage/' . $custom_block['delta'] . '/delete', 0, 'Custom block delete link found.');
-    $this->assertLinkByHref('admin/structure/block/manage/' . $custom_block['delta'] . '/translation', 0, 'Custom block translate link found.');
+    $this->assertLinkByHref('admin/structure/block/manage/' . $block_delta . '/configure', 0, 'Custom block configure link found.');
+    $this->assertLinkByHref('admin/structure/block/manage/' . $block_delta . '/translation', 0, 'Custom block translate link found.');
 
     // Test translation form.
-    $this->backdropGet('admin/structure/block/manage/' . $custom_block['delta'] . '/translation');
+    $this->backdropGet('admin/structure/block/manage/' . $block_delta . '/translation');
 
     // Check if the translation links are set.
     foreach ($languages as $key => $value) {
-      $this->assertLinkByHref('admin/structure/block/manage/' . $custom_block['delta'] . '/translate/' . $key, 0, 'Found custom block translate link for ' . $value . '.');
+      $this->assertLinkByHref('admin/structure/block/manage/' . $block_delta . '/translate/' . $key, 0, 'Found custom block translate link for ' . $value . '.');
     }
 
     // Translate the blocks.
     foreach ($languages as $key => $value) {
-      $this->backdropGet('admin/structure/block/manage/' . $custom_block['delta'] . '/translate/' . $key);
+      $this->backdropGet('admin/structure/block/manage/' . $block_delta . '/translate/' . $key);
       // Translate custom block by filling out the input.
       $translated_block = array();
       $translated_block['info'] = $this->randomName(8);
       $translated_block['title'] = 'Testblock translated to ' . $value;
       $translated_block['body[value]'] = $this->randomName(32);
-      $this->backdropPost(NULL, $translated_block, 'Save block');
+      $this->backdropPost(NULL, $translated_block, t('Save block'));
     }
 
     // Set the created custom block to a specific region.
     $layout = layout_load('default');
-    $layout->addBlock('block', $custom_block['delta'], 'sidebar');
+    $layout->addBlock('block', $block_delta, 'sidebar');
     $layout->save();
 
     // Confirm that the custom block is being displayed in the default language.
