@@ -326,7 +326,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     if (!empty($edit['translations'])) {
       $form['translation_help'] = array(
         '#type' => 'help',
-        '#markup' => '<strong>' . t('Translation notice') . ':</strong> ' . t('The settings in this form are for the source translation only. Translations may be modified on the <a href="!url">block\'s translation settings page</a>.', array('!url' => url('admin/structure/block/' . $edit['delta'] . '/translation'))),
+        '#markup' => '<strong>' . t('Translation notice') . ':</strong> ' . t('The settings in this form are for the source translation only. Translations may be modified on the <a href="!url">block\'s translation settings page</a>.', array('!url' => url('admin/structure/block/manage/' . $edit['delta'] . '/translation'))),
         '#weight' => -21,
       );
     }
