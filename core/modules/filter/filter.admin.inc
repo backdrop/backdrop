@@ -641,7 +641,7 @@ function filter_editor_file_upload_settings_form($format) {
   $settings += array(
     'status' => FALSE,
     'scheme' => file_default_scheme(),
-    'directory' => 'uploads',
+    'directory' => 'inline-files',
     'max_size' => '',
     'file_extensions' => 'txt pdf',
   );

@@ -136,7 +136,7 @@ CKEDITOR.plugins.add('backdroplink', {
             if (range.collapsed) {
 
               if(newtext != ""){
-                var text = new CKEDITOR.dom.text( newtext );
+                var text = new CKEDITOR.dom.text(newtext);
               }
               else {
                 // Use href as link text

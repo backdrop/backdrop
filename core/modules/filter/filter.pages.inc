@@ -74,11 +74,19 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
 
 
   // Construct strings to use in the upload validators.
+
   $upload_settings = isset($format->editor_settings['file_upload']) ? $format->editor_settings['file_upload'] : array();
 
-  $max_filesize = !empty($upload_settings['max_size']) ? min(parse_size($upload_settings['max_size']), file_upload_max_size()) : file_upload_max_size();
-  $file_extensions = !empty($upload_settings['file_extensions']) ? $upload_settings['file_extensions'] : 'txt';
-  $file_directory = !empty($upload_settings['directory']) ? $upload_settings['directory'] : 'uploads';
+  $upload_settings += array(
+    'max_size' => file_upload_max_size(),
+    'file_extensions' => 'txt',
+    'directory' => 'inline-files',
+    'data-file-id' => NULL,
+  );
+
+  $max_filesize = $upload_settings['max_size'];
+  $file_extensions = $upload_settings['file_extensions'];
+  $file_directory = $upload_settings['directory'];
   $existing_file = !empty($values['data-file-id']) ? file_load($values['data-file-id']) : NULL;
   $fid = $existing_file ? $existing_file->fid : NULL;
   $form['file']['fid'] = array(

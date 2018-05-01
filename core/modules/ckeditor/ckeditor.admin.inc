@@ -44,8 +44,8 @@ function ckeditor_settings_form(&$form, $form_state, $format) {
     '#type' => 'fieldset',
     '#title' => t('File uploading'),
     '#attributes' => array(
-      'class' => array('ckeditor-plugin-backdropimage'),
-      'data-ckeditor-feature-dependency' => 'BackdropImage',
+      'class' => array('ckeditor-plugin-backdroplink'),
+      'data-ckeditor-feature-dependency' => 'BackdropLink',
     ),
     '#parents' => array('editor_settings', 'file_upload'),
   );
