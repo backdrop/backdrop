@@ -5,21 +5,20 @@
  */
 
 /**
- * Returns HTML for the vocabulary overview form as a sortable list of vocabularies.
+ * Returns HTML for the contact form categories administrative table.
  *
  * @param $variables
  *   An associative array containing:
- *   - form: A render element representing the form.
+ *   - element: A render element representing the categories form elements.
  *
- * @see taxonomy_overview_vocabularies()
  * @ingroup themeable
  */
-function theme_contact_category_list($variables) {
-  $form = $variables['form'];
+function theme_contact_category_list_table($variables) {
+  $element = $variables['element'];
 
   $rows = array();
-  foreach (element_children($form['categories']) as $key) {
-    $category = &$form['categories'][$key];
+  foreach (element_children($element) as $key) {
+    $category = &$element[$key];
 
     $row = array();
     $category['weight']['#attributes']['class'] = array('contact-category-weight');
@@ -43,10 +42,7 @@ function theme_contact_category_list($variables) {
     t('Operations'),
   );
 
-
-  if (isset($form['actions'])) {
-    backdrop_add_tabledrag('contact', 'order', 'sibling', 'contact-category-weight');
-  }
+  backdrop_add_tabledrag('contact', 'order', 'sibling', 'contact-category-weight');
 
   $output = theme('table', array(
     'header' => $header,
@@ -54,7 +50,7 @@ function theme_contact_category_list($variables) {
     'empty' => t('No categories available.'),
     'attributes' => array('id' => 'contact'))
   );
-  $output .= backdrop_render_children($form);
+  $output .= backdrop_render_children($element);
 
   return $output;
 }

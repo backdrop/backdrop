@@ -10,14 +10,11 @@
  * Implements hook_theme().
  */
 function contact_theme() {
-  $base = array(
-    'file' => 'contact.theme.inc',
-  );
-
   return array(
-    'contact_category_list' => array(
-      'render element' => 'form',
-    ) + $base,
+    'contact_category_list_table' => array(
+      'render element' => 'element',
+      'file' => 'contact.theme.inc',
+    ),
   );
 }
 

@@ -11,68 +11,74 @@
  * @see contact_menu()
  */
 function contact_category_list($form, $form_state) {
-  $form = array();
+  $form['help'] = array(
+    '#type' => 'markup',
+    '#markup' => t('Configure the categories shown in the <a href="!url">site-wide contact form</a> here. All categories are shown in a select list on the contact form, which will send to different addresses when selected.', array('!url' => url('contact'))),
+    '#weight' => -20,
+  );
 
   $config_data = contact_config_data();
   $default_category = $config_data['contact_default_category'];
-  $categories = $config_data['categories'];
+  $categories = (array) $config_data['categories'];
 
-  $form['#tree'] = TRUE;
+  $form['categories'] = array(
+    '#theme' => 'contact_category_list_table',
+    '#tree' => TRUE,
+  );
+
   // Loop through the categories and add them to the table.
-  if ($categories) {
-    foreach ($categories as $cat) {
-      $cid = $cat['cid'];
+  foreach ($categories as $cat) {
+    $cid = $cat['cid'];
 
-      $links = array();
-      $links['configure'] = array(
-        'title' => t('Configure'),
-        'href' => 'admin/structure/contact/configure/' . $cid,
-      );
-      $links['delete'] = array(
-        'title' => t('Delete'),
-        'href' => 'admin/structure/contact/delete/' . $cid,
-      );
+    $links = array();
+    $links['configure'] = array(
+      'title' => t('Configure'),
+      'href' => 'admin/structure/contact/configure/' . $cid,
+    );
+    $links['delete'] = array(
+      'title' => t('Delete'),
+      'href' => 'admin/structure/contact/delete/' . $cid,
+    );
 
-      $form['categories'][$cid]['weight'] = array(
-        '#type' => 'weight',
-        '#title' => t('Weight for @title', array('@title' => $cat['category'])),
-        '#title_display' => 'invisible',
-        '#default_value' => $cat['weight'],
-        '#delta' => max(10, sizeof($categories)),
-      );
-      $form['categories'][$cid]['name'] = array(
-        '#markup' => check_plain($cat['category']),
-      );
-      $form['categories'][$cid]['recipients'] = array(
-        '#markup' => check_plain($cat['recipients']),
-      );
-      $form['categories'][$cid]['default'] = array(
-        '#markup' => ($cid == $default_category) ? t('Yes') : t('No'),
-      );
-      $form['categories'][$cid]['operations'] = array(
-        '#type' => 'operations',
-        '#links' => $links,
-      );
-
-    }
+    $form['categories'][$cid]['weight'] = array(
+      '#type' => 'weight',
+      '#title' => t('Weight for @title', array('@title' => $cat['category'])),
+      '#title_display' => 'invisible',
+      '#default_value' => $cat['weight'],
+      '#delta' => max(10, count($categories)),
+    );
+    $form['categories'][$cid]['name'] = array(
+      '#markup' => check_plain($cat['category']),
+    );
+    $form['categories'][$cid]['recipients'] = array(
+      '#markup' => check_plain($cat['recipients']),
+    );
+    $form['categories'][$cid]['default'] = array(
+      '#markup' => ($cid == $default_category) ? t('Yes') : t('No'),
+    );
+    $form['categories'][$cid]['operations'] = array(
+      '#type' => 'operations',
+      '#links' => $links,
+    );
   }
 
-  $form['actions'] = array('#type' => 'actions', '#tree' => FALSE);
+  $form['actions'] = array(
+    '#type' => 'actions',
+    '#access' => count($categories) > 1,
+  );
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save')
+    '#value' => t('Save order')
   );
 
   return $form;
 }
 
 /**
- * Form submission handler for filter_admin_overview().
+ * Form submission handler for contact_category_list().
  */
 function contact_category_list_submit($form, &$form_state) {
-
   $config_data = contact_config_data();
-  $default_category = $config_data['contact_default_category'];
   $categories = $config_data['categories'];
 
   // Update the weight of each category.
@@ -89,10 +95,8 @@ function contact_category_list_submit($form, &$form_state) {
   $config->setData($config_data);
   $config->save();
 
-  backdrop_set_message(t('The contact categories ordering has been saved.'));
+  backdrop_set_message(t('The contact categories order has been saved.'));
 }
-
-
 
 /**
  * Form constructor for the category edit form.
