@@ -2992,6 +2992,17 @@ function system_update_1064() {
 }
 
 /**
+ * Update the maintenance mode message field to use tokens.
+ */
+function system_update_1064() {
+  $config = config('system.core');
+  $old_message = $config->get('maintenance_mode_message');
+  $new_message = str_replace('@site', '[site:name]', $old_message);
+  $config->set('maintenance_mode_message', $new_message);
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
