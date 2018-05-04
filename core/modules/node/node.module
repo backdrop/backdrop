@@ -894,6 +894,7 @@ function node_load($nid = NULL, $vid = NULL, $reset = FALSE) {
 function node_object_prepare(Node $node) {
   // Check if we can retrieve a node from the tempstore.
   // todo
+  global $user;
   $tempstore_id = $node->type . ':' . $user->uid;
   
   $node->tempstore_id = $tempstore_id;
