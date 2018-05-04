@@ -894,15 +894,11 @@ function node_load($nid = NULL, $vid = NULL, $reset = FALSE) {
 function node_object_prepare(Node $node) {
   // Check if we can retrieve a node from the tempstore.
   // todo
-  $tempstore_id = drupal_container()->get('request')->query->get('tempstore_id');
-  if ($tempstore_id) {
-   $node->tempstore_id = $tempstore_id;
-  }
-  else {
-   $node->tempstore_id = $node->uuid;
-  }
+  $tempstore_id = $node->type . ':' . $user->uid;
+  
+  $node->tempstore_id = $tempstore_id;
 
-  // Set up default values, if required.
+   // Set up default values, if required.
   $node_type = node_type_get_type($node->type);
   // If this is a new node, fill in the default values.
   if (!isset($node->nid) || isset($node->is_new)) {
@@ -1785,6 +1781,16 @@ function node_menu() {
       'description' => $type->description,
       'file' => 'node.pages.inc',
     );
+    $items['node/' . $type_url_str . '/preview'] = array(
+      'title' => $type->name,
+      'title callback' => 'check_plain',
+      'page callback' => 'node_preview',
+      'page arguments' => array($type->type),
+      'access callback' => 'node_access',
+      'access arguments' => array('create', $type->type),
+      'description' => $type->description,
+      'file' => 'node.pages.inc',
+    );
   }
   $items['node/%node'] = array(
     'title callback' => 'node_page_title',
@@ -1867,13 +1873,6 @@ function node_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'node.pages.inc',
   );
-  $items['node/preview/%node_tempstore'] = array(
-    'page callback' => 'node_preview',
-    'page arguments' => array(2),
-    'access callback' => 'node_access_preview',
-    'access arguments' => array(2),
-    'file' => 'node.pages.inc',
-  );
 
   return $items;
 }
@@ -1954,24 +1953,6 @@ function node_page_title(Node $node) {
  */
 function node_last_changed($nid) {
   return db_query('SELECT changed FROM {node} WHERE nid = :nid', array(':nid' => $nid))->fetch()->changed;
-}
-
-/**
- * Load a node from the tempstore.
- *
- * @param int $tempstore_id
- *   The ID of a tempstore object.
- *
- * @return \Drupal\node\Node|false
- *   A fully-populated node entity, or FALSE if the node is not found.
- */
-//todo
-function node_tempstore_load($tempstore_id) {
-  $node = drupal_container()->get('user.tempstore')->get('node')->get($tempstore_id);
-  if ($node) {
-    return $node;
-  }
-  return FALSE;
 }
 
 /**
@@ -3797,33 +3778,20 @@ function node_language_delete($language) {
 }
 
 /**
- * Get a node or menu item currently being edited from the tempstore.
+ * Get a node from the tempstore.
  *
- * If a node is not yet being edited, the node will be loaded from
- * configuration.
- *
- * @param string $name
- *   The machine name of the node item to load.
- * @param string $type
- *   The type of item to load. Must be either "node" or "menu_item".
+ * @param string $tempstore_id
+ *   The machine tempstore_id of the node item to load.
  */
-function node_get_node_tempstore($name, $type = 'node') {
+function node_get_node_tempstore($tempstore_id) {
   $caches = &backdrop_static(__FUNCTION__, array());
-  if (!isset($caches[$type][$name])) {
+  if (!isset($caches[$tempstore_id])) {
     // Try loading from tempstore first to get in-progress changes.
-    $item = tempstore_get('node.' . $type, $name);
-    if (!$item) {
-      if ($type == 'node') {
-        $item = node_load($name);
-      }
-      elseif ($type == 'menu_item') {
-        $item = node_menu_item_load($name);
-      }
-    }
-    $caches[$type][$name] = $item;
+    $item = tempstore_get('node_tempstore', $tempstore_id);
+    $caches[$tempstore_id] = $item;
   }
 
-  return $caches[$type][$name];
+  return $caches[$tempstore_id];
 }
 
 /**
@@ -3834,31 +3802,31 @@ function node_get_node_tempstore($name, $type = 'node') {
  * @param string $type
  *   The type of item to save. Must be either "node" or "menu_item".
  */
-function node_set_node_tempstore($item, $type = 'node') {
-  if (empty($item->name)) {
-    return;
-  }
-
-  // node contexts should not be stored in the tempstore, they're generated on
-  // the fly when needed after loading.
-  $item->resetContexts();
+function node_set_node_tempstore($item, $tempstore_id) {
   $item->locked = array(
     'uid' => $GLOBALS['user']->uid,
     'updated' => REQUEST_TIME,
   );
-  tempstore_set('node.' . $type, $item->name, $item, 604800);
+  tempstore_set('node_tempstore', $tempstore_id, $item, 604800);
 }
 
 /**
  * Remove an item from the object cache.
  */
-function node_clear_node_tempstore($name, $type = 'node') {
-  tempstore_clear('node.' . $type, $name);
+function node_clear_node_tempstore($tempstore_id, $type = 'node') {
+  tempstore_clear('node.' . $type, $tempstore_id);
 }
 
 /**
- * Menu loader callback to load a node cache object.
+ * Load a node from the tempstore.
+ *
+ * @param int $tempstore_id
+ *   The ID of a tempstore object.
+ *
+ * @return \Drupal\node\Node|false
+ *   A fully-populated node entity, or FALSE if the node is not found.
  */
-function node_tempstore_load($node_name) {
-  return node_get_node_tempstore($node_name, 'node');
+//todo
+function node_tempstore_load($tempstore_id) {
+  return node_get_node_tempstore($tempstore_id);
 }

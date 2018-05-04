@@ -126,7 +126,8 @@ function node_form($form, &$form_state, Node $node) {
 
   // Check if we can retrieve a node from the tempstore.
   //todo
-  $tempstore_id = drupal_container()->get('request')->query->get('tempstore_id');
+  global $user;
+  $tempstore_id = $node->type . ':' . $user->uid;
   if (!empty($tempstore_id) && ($data = node_tempstore_load($tempstore_id))) {
     $node = $data;
     $form_state['entity'] = $node;
@@ -138,6 +139,8 @@ function node_form($form, &$form_state, Node $node) {
         '#value' => $node->destination,
       );
     }
+    // todo dont show this message if redirecting from preview page.
+    backdrop_set_message(t('Continue editing this @type or cancel to clear.', array('@type' => $node->type)));
   }
 
   // Override the default CSS class name, since the user-defined node type name
@@ -387,6 +390,13 @@ function node_form($form, &$form_state, Node $node) {
     '#weight' => 5,
     '#submit' => array('node_form_submit'),
   );
+  $form['actions']['preview'] = array(
+    '#type' => 'submit',
+    '#access' => (!form_get_errors()),
+    '#value' => t('Preview'),
+    '#weight' => 6,
+    '#submit' => array('node_form_preview'),
+  );
   if (!empty($node->nid) && node_access('delete', $node)) {
     // Use a link for the delete button so the form doesn't need to validate.
     $form['actions']['delete'] = array(
@@ -429,6 +439,20 @@ function node_form($form, &$form_state, Node $node) {
  * @see node_form_validate()
  * @see node_form_submit_build_node()
  */
+function node_form_preview($form, &$form_state) {
+  $node = node_form_submit_build_node($form, $form_state);
+  global $user;
+  $tempstore_id = $node->type . ':' . $user->uid;
+  node_set_node_tempstore($node, $tempstore_id);
+  $form_state['redirect'] = 'node/' . $node->type . '/preview';
+}
+
+/**
+ * Form submission handler that saves the node for node_form().
+ *
+ * @see node_form_validate()
+ * @see node_form_submit_build_node()
+ */
 function node_form_submit($form, &$form_state) {
   $original_status = $form_state['node']->status && $form_state['node']->nid;
   $node = node_form_submit_build_node($form, $form_state);
@@ -459,6 +483,9 @@ function node_form_submit($form, &$form_state) {
   backdrop_set_message($message);
 
   if ($node->nid) {
+    global $user;
+    $tempstore_id = $node->type . ':' . $user->uid;
+    node_clear_node_tempstore($tempstore_id);
     $form_state['values']['nid'] = $node->nid;
     $form_state['nid'] = $node->nid;
 
@@ -496,7 +523,11 @@ function node_form_submit($form, &$form_state) {
  * @see node_form_build_preview()
  */
 // todo
-function node_preview($node) {
+function node_preview($type) {
+  global $user;
+  $tempstore_id = $type . ':' . $user->uid;
+  $node = node_get_node_tempstore($tempstore_id);
+  
   // Set status to true so we don't get the 'unpublished' CSS.
   $node->status = TRUE;
 
@@ -520,22 +551,113 @@ function node_preview($node) {
   $node->changed = REQUEST_TIME;
  
   // Get the view mode to render the preview in.
-  $view_mode = drupal_container()->get('request')->query->get('view_mode');
+  $view_mode = $_GET['view_mode'];
   if (empty($view_mode)) {
     $view_mode = 'full';
-   }
+  }
 
   // Property so we can manipulate $page in template_preprocess_node.
   if ($view_mode == 'full' || $view_mode == 'default') {
-    drupal_set_title($node->title);
+    backdrop_set_title($node->title);
     $node->node_page_title = TRUE;
-   }
+  }
  
   $build = array();
   // @todo all links should be disabled, except for returning to the edit form.
-  $build['#attached']['library'][] = array('node', 'drupal.node.preview');
+  //$build['#attached']['library'][] = array('node', 'drupal.node.preview');
+  $build['preview_form_select'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('node-preview-container', 'container-inline')
+    ),
+  );
+
+  $form = backdrop_get_form('node_preview_form_select', $node);
+  $build['preview_form_select']['view-mode'] = $form;
   $build['preview'] = node_view($node, $view_mode);
   return $build;
+}
+
+/**
+ * Get the preview form selection box.
+ *
+ * @param $node
+ *   A node entity.
+ *
+ * @return array $form
+ *   The view mode preview selection form.
+ */
+function node_preview_form_select(array $form, array $form_state, EntityInterface $node) {
+  global $user;
+  $tempstore_id = $type . ':' . $user->uid;
+
+  // Always add the 'default' view mode.
+  $view_mode_options = array('default' => t('Full'));
+
+  // Get view mode options.
+  $entity_info = entity_get_info('node');
+  $view_modes = $entity_info['view modes'];
+  if (is_array($view_modes)) {
+    backdrop_sort($view_modes, array('label' => SORT_STRING));
+  }
+
+  foreach ($view_modes as $key => $info) {
+      $view_mode_options[$key] = $info['label'];
+
+      // In case this is the 'full' view mode, rename default.
+      if ($key == 'full') {
+        $view_mode_options[$key] = t('Default');
+      }
+  }
+
+  $path = 'node/add/' . $node->bundle();
+  if (!empty($node->nid)) {
+    $path = 'node/' . $node->nid . '/edit';
+  }
+
+  // $view_mode = drupal_container()->get('request')->query->get('view_mode');
+  $view_mode = array();
+  if (empty($view_mode)) {
+    $view_mode = 'full';
+  }
+
+  $form['node_type'] = array(
+    '#type' => 'value',
+    '#value' => $node->type
+  );
+
+  $form['backlink'] = array(
+    '#type' => 'link',
+    '#title' => t('Back to content editing'),
+    '#href' => $path,
+    // Add the "overlay-restore" class to indicate this link should restore
+    // the context in which the preview demonstration page was opened.
+    // '#options' => array('query' => array('tempstore_id' => $tempstore_id) ,'attributes' => array('class' => array('node-preview-backlink button-action', 'overlay-restore'))),
+  );
+
+  $form['view_mode'] = array(
+    '#type' => 'select',
+    '#title' => t('Select a view mode'),
+    '#title_display' => 'invisible',
+    '#options' => $view_mode_options,
+    '#default_value' => $view_mode,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Switch'),
+    '#attributes' => array(
+      'class' => array('node-preview-switch-button')
+    )
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for the node preview view mode selection form.
+ */
+function node_preview_form_select_submit(array $form, array &$form_state) {
+  $form_state['redirect'] = array('node/' . $form_state['values']['node_type'] . '/preview', array('query' => array('view_mode' => $form_state['values']['view_mode'])));
 }
 
 /**
