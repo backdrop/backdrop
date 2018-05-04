@@ -902,7 +902,7 @@ function hook_ranking() {
 function hook_node_type_load(&$types) {
   foreach ($types as $type_name => $type) {
     $types[$type_name]->settings += array(
-      'status_default' => TRUE,
+      'status_default' => NODE_PUBLISHED,
       'promote_default' => FALSE,
       'sticky_default' => FALSE,
       'revision_default' => FALSE,

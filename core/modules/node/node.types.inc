@@ -167,7 +167,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
       NODE_NOT_PUBLISHED => t('Draft'),
       NODE_SCHEDULED => t('Schedule for later'),
     ),
-    '#default_value' => isset($type->settings['status_default']) ? $type->settings['status_default'] : NODE_PUBLISHED,
+    '#default_value' => $type->settings['status_default'],
     '#description' => t('Content saved as draft is only accessible to the content creator or site administrators.') . ' ' . t('Content set to "Schedule for later" will be saved as draft when the content is created, but will be automatically published on the date and time selected.'),
     '#required' => TRUE,
   );
@@ -556,7 +556,14 @@ function node_node_type_load(&$types) {
       // See node_permissions_get_configured_types().
       'node_permissions' => TRUE,
     );
+
+    // Ensure Boolean statuses are converted to use the node (integer) constants
+    // of NODE_PUBLISHED and NODE_NOT_PUBLISHED.
+    if (isset($type->settings['status_default'])) {
+      $types[$type_name]->settings['status_default'] = (int) $type->settings['status_default'];
+    }
   }
+
 }
 
 /**

@@ -1268,11 +1268,10 @@ class NodeSaveTestCase extends BackdropWebTestCase {
  */
 class NodeTypeTestCase extends BackdropWebTestCase {
   /**
-   * Ensures that node type functions (node_type_get_*) work correctly.
-   *
-   * Load available node types and validate the returned data.
+   * Tests creating a content type programmatically and via a form.
    */
-  function testNodeTypeGetFunctions() {
+  function testNodeTypeCreation() {
+    // Ensure node type functions (node_type_get_*) work correctly.
     $node_types = node_type_get_types();
     $node_names = node_type_get_names();
 
@@ -1284,12 +1283,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->assertEqual($node_types['post'], node_type_get_type('post'), 'Correct node type has been returned.');
     $this->assertEqual($node_types['post']->name, node_type_get_name('post'), 'Correct node type name has been returned.');
     $this->assertEqual($node_types['page']->base, node_type_get_base('page'), 'Correct node type base has been returned.');
-  }
 
-  /**
-   * Tests creating a content type programmatically and via a form.
-   */
-  function testNodeTypeCreation() {
     // Create a content type programmaticaly.
     $type = $this->backdropCreateContentType();
 
@@ -1314,6 +1308,15 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
     $config = config('node.type.foo');
     $this->assertFalse($config->isNew(), 'The new content type has been created in config.');
+
+    // Ensure publishing settings are loaded correctly even when using boolean
+    // values for "status_default".
+    $type->settings['status_default'] = TRUE;
+    node_type_save($type);
+    $type = node_type_load($type->type);
+    // The status should be NODE_PUBLISHED (1) not the Boolean (TRUE).
+    $this->assertIdentical($type->settings['status_default'], NODE_PUBLISHED);
+    $this->assertNotIdentical($type->settings['status_default'], TRUE);
   }
 
   /**
