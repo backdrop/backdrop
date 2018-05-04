@@ -2006,7 +2006,9 @@ function system_site_maintenance_mode($form, &$form_state) {
   $form['maintenance_mode_message'] = array(
     '#type' => 'textarea',
     '#title' => t('Message to display when in maintenance mode'),
-    '#default_value' => t($config->get('maintenance_mode_message'), array('@site' => config_get('system.core', 'site_name'))),
+    '#default_value' => $config->get('maintenance_mode_message'),
+    '#description' => theme('token_tree_link'),
+    '#element_validate' => array('token_element_validate'),
   );
 
   $form['actions']['#type'] = 'actions';
