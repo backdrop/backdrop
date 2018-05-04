@@ -389,7 +389,9 @@ function update_task_list($set_active = NULL) {
     'finished' => 'Review log',
   );
 
-  return theme('task_list', array('items' => $tasks, 'active' => $active));
+  if (!user_is_anonymous()) {
+    return theme('task_list', array('items' => $tasks, 'active' => $active)); 
+  }
 }
 
 /**
