@@ -462,7 +462,7 @@ function layout_route_handler($router_item) {
 
   if ($selected_layout) {
     // Render the layout.
-    $renderer = layout_create_renderer('standard', $selected_layout);
+    $renderer = layout_create_renderer($selected_layout->renderer_name, $selected_layout);
     if ($selected_layout->isDefault()) {
       $renderer->ensurePageContentBlock();
     }

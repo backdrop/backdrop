@@ -2323,3 +2323,52 @@ class LayoutBlockUsageTestCase extends BackdropWebTestCase {
     return TRUE;
   }
 }
+
+/**
+ * Tests that the correct renderer is used.
+ */
+class LayoutRendererTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp(array('layout', 'layout_test'));
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'administer layouts',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Test that the correct renderer is used
+   */
+  function testRendererSelection() {
+    // Create a new layout at a new path.
+    $this->backdropGet('admin/structure/layouts');
+    $this->clickLink(t('Add layout'));
+    $layout_name = strtolower($this->randomName());
+    $layout_title = $this->randomString();
+    $layout_url = 'layout-test-path';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_url,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    // Go the new layout path and test that it is not using the new renderer.
+    $this->backdropGet($layout_url);
+    $this->assertNoText('This layout uses the Test renderer');
+    // Load the layout and save the new renderer.
+    $test_layout = layout_get_layout_by_path($layout_url);
+    $test_layout->renderer_name = 'test_renderer';
+    $test_layout->save();
+    // Go the new layout path and test that it is now using the new renderer.
+    $this->backdropGet($layout_url);
+    $this->assertText('This layout uses the Test renderer');
+  }
+}
