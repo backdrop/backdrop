@@ -2910,6 +2910,7 @@ class NodePublishScheduling extends BackdropWebTestCase {
       'status_default' => 2,
     );
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
+
     // Create a node of type foobee and assert that its published-state is set
     // to Draft.
     $name = $this->randomName(8);
@@ -2922,12 +2923,48 @@ class NodePublishScheduling extends BackdropWebTestCase {
     $this->backdropPost('node/add/foobsee', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($name);
     $this->assertEqual($node->status, '0', 'The node is in the state Unpublished.');
-    $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');
-    // Set the scheduled date in the past and run cron
+    $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero scheduled date.');
+
+    // Set the scheduled date in the past and run cron.
     $node->scheduled = 1;
     node_save($node);
     $this->cronRun();
     $node = node_load($node->nid);
     $this->assertEqual($node->status, '1', 'The node is in the state Published.');
+
+    // Ensure scheduled dates without date module also are validated and saved.
+    module_disable(array('date'), FALSE);
+
+    // Without Date module doing the validation, ensure Node module still
+    // checks the date is valid.
+    $name = $this->randomName(9);
+    $edit = array(
+      'title' => $name,
+      'status' => NODE_SCHEDULED,
+      'scheduled' => format_date(REQUEST_TIME, 'custom', 'dddY-m-d g:i a', $web_user->timezone),
+    );
+    $this->backdropPost('node/add/foobsee', $edit, t('Save'));
+    $this->assertText(t('You have to specify a valid date.'));
+
+    // Ensure scheduling in the past is still not allowed without Date module.
+    $edit = array(
+      'title' => $name,
+      'status' => NODE_SCHEDULED,
+      'scheduled' => format_date(REQUEST_TIME - 300, 'custom', 'Y-m-d g:i a', $web_user->timezone),
+    );
+    $this->backdropPost('node/add/foobsee', $edit, t('Save'));
+    $this->assertText(t('Scheduled publish time cannot be in the past.'));
+
+    // Test successful submission and scheduling.
+    $edit = array(
+      'title' => $name,
+      'status' => NODE_SCHEDULED,
+      'scheduled' => format_date(REQUEST_TIME + 300, 'custom', 'Y-m-d g:i a', $web_user->timezone),
+    );
+    $this->backdropPost('node/add/foobsee', $edit, t('Save'));
+
+    $node = $this->backdropGetNodeByTitle($name);
+    $this->assertEqual($node->status, '0', 'The node is in the state Unpublished.');
+    $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero scheduled date.');
   }
 }
