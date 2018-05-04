@@ -113,8 +113,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->clickLink(t('Add layout'));
 
     // Create a new layout at a new path.
-    $layout_name = strtolower($this->randomName());
-    $layout_title = $this->randomString();
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
     $layout_url = 'layout-test-path';
     $edit = array(
       'title' => $layout_title,
@@ -312,8 +312,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
    */
   function testBlockPathTypeConditions() {
     // Create a new layout overriding node/%.
-    $layout_name = strtolower($this->randomName());
-    $layout_title = $this->randomString();
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
     $layout_url = 'node/%';
     $edit = array(
       'title' => $layout_title,
@@ -408,8 +408,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
    */
   function testBlockEntityIDConditions() {
     // Create a new layout overriding node/%.
-    $layout_name = strtolower($this->randomName());
-    $layout_title = $this->randomString();
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
     $layout_url = 'node/%';
     $edit = array(
       'title' => $layout_title,
@@ -491,8 +491,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
    */
   function testContexts() {
     // Make a new layout that creates a custom path with wildcards.
-    $layout_name = strtolower($this->randomName());
     $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
     $layout_path = 'node/%/foo/%';
     $edit = array(
       'title' => $layout_title,
@@ -690,8 +690,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
    */
   function testMainContentBlock() {
     // Make a new layout that overrides an existing path.
-    $layout_name = strtolower($this->randomName());
-    $layout_title = $this->randomString();
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
     $layout_path = 'layout-test-path'; // Provided by layout_test.module.
     $edit = array(
       'title' => $layout_title,
@@ -1146,8 +1146,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     field_create_instance($instance);
 
     // Make a new layout that creates a custom path with wildcards.
-    $layout_name = strtolower($this->randomName());
     $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
     $layout_path = 'taxonomy/term/%';
     $edit = array(
       'title' => $layout_title,
@@ -1212,8 +1212,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->clickLink(t('Add layout'));
 
     // Create a new layout at a new path.
-    $layout_name = strtolower($this->randomName());
-    $layout_title = $this->randomString();
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
     $layout_url = 'layout-test-path';
     $edit = array(
       'title' => $layout_title,
@@ -2138,8 +2138,8 @@ class LayoutHookTestCase extends BackdropWebTestCase {
     $this->clickLink(t('Add layout'));
 
     // Create a new layout at a new path.
-    $layout_name = strtolower($this->randomName());
-    $layout_title = $this->randomString();
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
     $layout_url = 'layout-test-path';
     $edit = array(
       'title' => $layout_title,
