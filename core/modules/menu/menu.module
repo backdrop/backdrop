@@ -648,6 +648,14 @@ function menu_form_node_form_alter(&$form, $form_state) {
   $type = $form['#node']->type;
   $node_type = node_type_load($type);
 
+  // In case we're in preview and there is no mlid yet but a title
+  // has been supplied, trick the menu form to store its information.
+  if (!empty($form['#node']->in_preview) && empty($link['mlid']) && !empty($link['link_title'])) {
+   $link['mlid'] = TRUE;
+   // @todo move all other properties to attributes as well ?
+   $link['options']['attributes']['title'] = $link['description'];
+  }
+
   // menu_parent_options() is goofy and can actually handle either a menu link
   // or a node type both as second argument. Pick based on whether there is
   // a link already (menu_node_prepare() sets mlid default to 0).

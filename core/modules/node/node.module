@@ -892,6 +892,16 @@ function node_load($nid = NULL, $vid = NULL, $reset = FALSE) {
  *   A node object.
  */
 function node_object_prepare(Node $node) {
+  // Check if we can retrieve a node from the tempstore.
+  // todo
+  $tempstore_id = drupal_container()->get('request')->query->get('tempstore_id');
+  if ($tempstore_id) {
+   $node->tempstore_id = $tempstore_id;
+  }
+  else {
+   $node->tempstore_id = $node->uuid;
+  }
+
   // Set up default values, if required.
   $node_type = node_type_get_type($node->type);
   // If this is a new node, fill in the default values.
@@ -1857,8 +1867,34 @@ function node_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'node.pages.inc',
   );
+  $items['node/preview/%node_tempstore'] = array(
+    'page callback' => 'node_preview',
+    'page arguments' => array(2),
+    'access callback' => 'node_access_preview',
+    'access arguments' => array(2),
+    'file' => 'node.pages.inc',
+  );
 
   return $items;
+}
+
+/**
+ * Access callback: Checks a user's permission for previewing a node.
+ *
+ * @param Drupal\Core\Entity\EntityInterface $node
+ *   The node entity to be previewed.
+ *
+ * @return bool
+ *   TRUE if the user has access to the preview, FALSE otherwise.
+ *
+ * @see node_menu()
+ */
+// todo
+function node_access_preview(EntityInterface $node) {
+  if (node_access('create', $node) || node_access('update', $node)) {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 /**
@@ -1918,6 +1954,24 @@ function node_page_title(Node $node) {
  */
 function node_last_changed($nid) {
   return db_query('SELECT changed FROM {node} WHERE nid = :nid', array(':nid' => $nid))->fetch()->changed;
+}
+
+/**
+ * Load a node from the tempstore.
+ *
+ * @param int $tempstore_id
+ *   The ID of a tempstore object.
+ *
+ * @return \Drupal\node\Node|false
+ *   A fully-populated node entity, or FALSE if the node is not found.
+ */
+//todo
+function node_tempstore_load($tempstore_id) {
+  $node = drupal_container()->get('user.tempstore')->get('node')->get($tempstore_id);
+  if ($node) {
+    return $node;
+  }
+  return FALSE;
 }
 
 /**
@@ -3740,4 +3794,71 @@ function node_language_delete($language) {
     ->fields(array('langcode' => ''))
     ->condition('langcode', $language->langcode)
     ->execute();
+}
+
+/**
+ * Get a node or menu item currently being edited from the tempstore.
+ *
+ * If a node is not yet being edited, the node will be loaded from
+ * configuration.
+ *
+ * @param string $name
+ *   The machine name of the node item to load.
+ * @param string $type
+ *   The type of item to load. Must be either "node" or "menu_item".
+ */
+function node_get_node_tempstore($name, $type = 'node') {
+  $caches = &backdrop_static(__FUNCTION__, array());
+  if (!isset($caches[$type][$name])) {
+    // Try loading from tempstore first to get in-progress changes.
+    $item = tempstore_get('node.' . $type, $name);
+    if (!$item) {
+      if ($type == 'node') {
+        $item = node_load($name);
+      }
+      elseif ($type == 'menu_item') {
+        $item = node_menu_item_load($name);
+      }
+    }
+    $caches[$type][$name] = $item;
+  }
+
+  return $caches[$type][$name];
+}
+
+/**
+ * Store changes to a node or menu item in the temporary store.
+ *
+ * @param node|nodeMenuItem $item
+ *   The node item to save into tempstore.
+ * @param string $type
+ *   The type of item to save. Must be either "node" or "menu_item".
+ */
+function node_set_node_tempstore($item, $type = 'node') {
+  if (empty($item->name)) {
+    return;
+  }
+
+  // node contexts should not be stored in the tempstore, they're generated on
+  // the fly when needed after loading.
+  $item->resetContexts();
+  $item->locked = array(
+    'uid' => $GLOBALS['user']->uid,
+    'updated' => REQUEST_TIME,
+  );
+  tempstore_set('node.' . $type, $item->name, $item, 604800);
+}
+
+/**
+ * Remove an item from the object cache.
+ */
+function node_clear_node_tempstore($name, $type = 'node') {
+  tempstore_clear('node.' . $type, $name);
+}
+
+/**
+ * Menu loader callback to load a node cache object.
+ */
+function node_tempstore_load($node_name) {
+  return node_get_node_tempstore($node_name, 'node');
 }

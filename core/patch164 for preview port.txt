@@ -1,0 +1,753 @@
+diff --git a/core/modules/edit/edit.module b/core/modules/edit/edit.module
+index 0125d45..644bb97 100644
+--- a/core/modules/edit/edit.module
++++ b/core/modules/edit/edit.module
+@@ -147,7 +147,9 @@ function edit_library_info() {
+ function edit_preprocess_field(&$variables) {
+   $element = $variables['element'];
+   $entity = $element['#object'];
+-  $variables['attributes']['data-edit-id'] = $entity->entityType() . '/' . $entity->id() . '/' . $element['#field_name'] . '/' . $element['#language'] . '/' . $element['#view_mode'];
++  if (empty($entity->in_preview)) {
++    $variables['attributes']['data-edit-id'] = $entity->entityType() . '/' . $entity->id() . '/' . $element['#field_name'] . '/' . $element['#language'] . '/' . $element['#view_mode'];
++  }
+ }
+ 
+ /**
+diff --git a/core/modules/filter/lib/Drupal/filter/Tests/FilterFormatAccessTest.php b/core/modules/filter/lib/Drupal/filter/Tests/FilterFormatAccessTest.php
+index 8667a5b..a210cfa 100644
+--- a/core/modules/filter/lib/Drupal/filter/Tests/FilterFormatAccessTest.php
++++ b/core/modules/filter/lib/Drupal/filter/Tests/FilterFormatAccessTest.php
+@@ -235,7 +235,7 @@ function testFormatWidgetPermissions() {
+     $this->assertText($edit[$body_value_key], 'Old body found in preview.');
+ 
+     // Save and verify that only the title was changed.
+-    $this->drupalPost(NULL, $new_edit, t('Save'));
++    $this->drupalPost('node/' . $node->nid . '/edit', $new_edit, t('Save'));
+     $this->assertNoText($edit['title'], 'Old title not found.');
+     $this->assertText($new_edit['title'], 'New title found.');
+     $this->assertText($edit[$body_value_key], 'Old body found.');
+diff --git a/core/modules/menu/menu.module b/core/modules/menu/menu.module
+index ece3aac..db6b858 100644
+--- a/core/modules/menu/menu.module
++++ b/core/modules/menu/menu.module
+@@ -544,6 +544,13 @@ function menu_form_node_form_alter(&$form, $form_state) {
+   $node = $form_state['controller']->getEntity($form_state);
+   $link = $node->menu;
+   $type = $node->type;
++  // In case we're in preview and there is no mlid yet but a title
++  // has been supplied, trick the menu form to store its information.
++  if (!empty($node->in_preview) && empty($link['mlid']) && !empty($link['link_title'])) {
++    $link['mlid'] = TRUE;
++    // @todo move all other properties to attributes as well ?
++    $link['options']['attributes']['title'] = $link['description'];
++  }
+   $options = menu_parent_options(menu_get_menus(), $link, $type);
+   // If no possible parent menu items were found, there is nothing to display.
+   if (empty($options)) {
+diff --git a/core/modules/node/images/btn-arrow-preview.png b/core/modules/node/images/btn-arrow-preview.png
+new file mode 100644
+index 0000000..4ef43c0
+--- /dev/null
++++ b/core/modules/node/images/btn-arrow-preview.png
+@@ -0,0 +1,4 @@
++‰PNG
++
++���
+IHDR������
++���|9”0���fIDAT[cøÿÿ?2–nÎ@æ0qÃX€xH�,$xBš·ÃÀ‚jí`-(‚¿~ÿ	Îî]{Eh&#Ç6/Øuh\†½fn<~D9¬õ/ŠØjÃ¡Ë»ÐAX�Æäwä†‰\Ê����IEND®B`‚
+\ No newline at end of file
+diff --git a/core/modules/node/lib/Drupal/node/NodeFormController.php b/core/modules/node/lib/Drupal/node/NodeFormController.php
+index 63b4189..e161bec 100644
+--- a/core/modules/node/lib/Drupal/node/NodeFormController.php
++++ b/core/modules/node/lib/Drupal/node/NodeFormController.php
+@@ -26,6 +26,16 @@ class NodeFormController extends EntityFormController {
+    * Overrides Drupal\Core\Entity\EntityFormController::prepareEntity().
+    */
+   protected function prepareEntity(EntityInterface $node) {
++
++    // Check if we can retrieve a node from the tempstore.
++    $tempstore_id = drupal_container()->get('request')->query->get('tempstore_id');
++    if ($tempstore_id) {
++      $node->tempstore_id = $tempstore_id;
++    }
++    else {
++      $node->tempstore_id = $node->uuid;
++    }
++
+     // Set up default values, if required.
+     $node_options = variable_get('node_options_' . $node->type, array('status', 'promote'));
+     // If this is a new node, fill in the default values.
+@@ -58,13 +68,20 @@ protected function prepareEntity(EntityInterface $node) {
+   public function form(array $form, array &$form_state, EntityInterface $node) {
+ 
+     $user_config = config('user.settings');
+-    // Some special stuff when previewing a node.
+-    if (isset($form_state['node_preview'])) {
+-      $form['#prefix'] = $form_state['node_preview'];
+-      $node->in_preview = TRUE;
+-    }
+-    else {
+-      unset($node->in_preview);
++
++    // Check if we can retrieve a node from the tempstore.
++    $tempstore_id = drupal_container()->get('request')->query->get('tempstore_id');
++    if (!empty($tempstore_id) && ($data = node_tempstore_load($tempstore_id))) {
++      $node = $data;
++      $form_state['entity'] = $node;
++
++      // Restore the destination if we previewed the node.
++      if (isset($node->destination)) {
++        $form['node_destination'] = array(
++          '#type' => 'value',
++          '#value' => $node->destination,
++        );
++      }
+     }
+ 
+     // Override the default CSS class name, since the user-defined node type
+@@ -386,12 +403,24 @@ public function submit(array $form, array &$form_state) {
+    *   A reference to a keyed array containing the current state of the form.
+    */
+   public function preview(array $form, array &$form_state) {
+-    // @todo Remove this: we should not have explicit includes in autoloaded
+-    //   classes.
+-    module_load_include('inc', 'node', 'node.pages');
+-    drupal_set_title(t('Preview'), PASS_THROUGH);
+-    $form_state['node_preview'] = node_preview($this->getEntity($form_state));
+-    $form_state['rebuild'] = TRUE;
++    $entity = $this->getEntity($form_state);
++    $entity->in_preview = TRUE;
++
++    // In case the query destination parameter is set, store it on the entity
++    // and remove it so we aren't redirected.
++    $request = drupal_container()->get('request');
++    $destination = $request->query->get('destination');
++    if (!empty($destination)) {
++      $entity->destination = $destination;
++      unset($_GET['destination']);
++    }
++    // In case we already previewed the node, but we want to preview it again.
++    elseif (isset($form_state['values']['node_destination'])) {
++      $entity->destination = $form_state['values']['node_destination'];
++    }
++
++    drupal_container()->get('user.tempstore')->get('node')->set($entity->tempstore_id, $entity);
++    $form_state['redirect'] = 'node/preview/' . $entity->tempstore_id;
+   }
+ 
+   /**
+@@ -454,6 +483,14 @@ public function save(array $form, array &$form_state) {
+       $form_state['rebuild'] = TRUE;
+     }
+ 
++    // In case we visited the node preview, override the redirect.
++    if (isset($form_state['values']['node_destination'])) {
++      $form_state['redirect'] = $form_state['values']['node_destination'];
++    }
++
++    // Remove from tempstore.
++    drupal_container()->get('user.tempstore')->get('node')->delete($node->tempstore_id);
++
+     // Clear the page and block caches.
+     cache_invalidate_tags(array('content' => TRUE));
+   }
+diff --git a/core/modules/node/lib/Drupal/node/Plugin/Core/Entity/Node.php b/core/modules/node/lib/Drupal/node/Plugin/Core/Entity/Node.php
+index 99c6b88..c86328d 100644
+--- a/core/modules/node/lib/Drupal/node/Plugin/Core/Entity/Node.php
++++ b/core/modules/node/lib/Drupal/node/Plugin/Core/Entity/Node.php
+@@ -212,6 +212,13 @@ protected function init() {
+   }
+ 
+   /**
++   * The node tempstore id.
++   *
++   * @var integer
++   */
++  public $tempstore_id;
++
++  /**
+    * Implements Drupal\Core\Entity\EntityInterface::id().
+    */
+   public function id() {
+diff --git a/core/modules/node/lib/Drupal/node/Tests/PagePreviewTest.php b/core/modules/node/lib/Drupal/node/Tests/PagePreviewTest.php
+index 28b04cd..c6906b8 100644
+--- a/core/modules/node/lib/Drupal/node/Tests/PagePreviewTest.php
++++ b/core/modules/node/lib/Drupal/node/Tests/PagePreviewTest.php
+@@ -109,13 +109,30 @@ function testPagePreview() {
+     $this->drupalPost('node/add/page', $edit, t('Preview'));
+ 
+     // Check that the preview is displaying the title, body and term.
+-    $this->assertTitle(t('Preview | Drupal'), 'Basic page title is preview.');
++    $this->assertTitle(t('@title | Drupal', array('@title' => $edit[$title_key])), 'Basic page title is preview.');
+     $this->assertText($edit[$title_key], 'Title displayed.');
+     $this->assertText($edit[$body_key], 'Body displayed.');
+     $this->assertText($edit[$term_key], 'Term displayed.');
+-
+-    // Check that the title, body and term fields are displayed with the
+-    // correct values.
++    $this->assertLink(t('Back to content editing'));
++
++    // Get the tempstore id.
++    $url = parse_url($this->getUrl());
++    $paths = explode('/', $url['path']);
++    $tempstore_id = array_pop($paths);
++
++    // Switch view mode. We'll remove the body from the body from the teaser
++    // view mode.
++    entity_get_display('node', 'page', 'teaser')
++      ->removeComponent('body')
++      ->save();
++    $view_mode_edit = array('view_mode' => 'teaser');
++    $this->drupalPost('node/preview/' . $tempstore_id, $view_mode_edit, t('Switch'));
++    $this->assertRaw('view-mode-teaser', 'View mode teaser class found.');
++    $this->assertNoText($edit[$body_key], 'Body not displayed.');
++
++    // Check that the title and body fields are displayed with the correct
++    // values after going back to the content edit page.
++    $this->clickLink(t('Back to content editing'));
+     $this->assertFieldByName($title_key, $edit[$title_key], 'Title field displayed.');
+     $this->assertFieldByName($body_key, $edit[$body_key], 'Body field displayed.');
+     $this->assertFieldByName($term_key, $edit[$term_key], 'Term field displayed.');
+@@ -141,12 +158,14 @@ function testPagePreviewWithRevisions() {
+     $this->drupalPost('node/add/page', $edit, t('Preview'));
+ 
+     // Check that the preview is displaying the title, body and term.
+-    $this->assertTitle(t('Preview | Drupal'), 'Basic page title is preview.');
++    $this->assertTitle(t('@title | Drupal', array('@title' => $edit[$title_key])), 'Basic page title is preview.');
+     $this->assertText($edit[$title_key], 'Title displayed.');
+     $this->assertText($edit[$body_key], 'Body displayed.');
+     $this->assertText($edit[$term_key], 'Term displayed.');
+ 
+-    // Check that the title, body and term fields are displayed with the correct values.
++    // Check that the title and body fields are displayed with the correct
++    // values after going back to the content edit page.
++    $this->clickLink(t('Back to content editing'));
+     $this->assertFieldByName($title_key, $edit[$title_key], 'Title field displayed.');
+     $this->assertFieldByName($body_key, $edit[$body_key], 'Body field displayed.');
+     $this->assertFieldByName($term_key, $edit[$term_key], 'Term field displayed.');
+diff --git a/core/modules/node/node.module b/core/modules/node/node.module
+index 8f9f17f..22cddc8 100644
+--- a/core/modules/node/node.module
++++ b/core/modules/node/node.module
+@@ -158,10 +158,6 @@ function node_theme() {
+       'variables' => array('content' => NULL),
+       'file' => 'node.pages.inc',
+     ),
+-    'node_preview' => array(
+-      'variables' => array('node' => NULL),
+-      'file' => 'node.pages.inc',
+-    ),
+     'node_admin_overview' => array(
+       'variables' => array('name' => NULL, 'type' => NULL),
+       'file' => 'content_types.inc',
+@@ -965,6 +961,23 @@ function node_load($nid = NULL, $reset = FALSE) {
+ }
+ 
+ /**
++ * Load a node from the tempstore.
++ *
++ * @param int $tempstore_id
++ *   The ID of a tempstore object.
++ *
++ * @return \Drupal\node\Node|false
++ *   A fully-populated node entity, or FALSE if the node is not found.
++ */
++function node_tempstore_load($tempstore_id) {
++  $node = drupal_container()->get('user.tempstore')->get('node')->get($tempstore_id);
++  if ($node) {
++    return $node;
++  }
++  return FALSE;
++}
++
++/**
+  * Loads a node revision from the database.
+  *
+  * @param int $nid
+@@ -1149,7 +1162,7 @@ function template_preprocess_node(&$variables) {
+   $uri = $node->uri();
+   $variables['node_url']  = url($uri['path'], $uri['options']);
+   $variables['label']     = check_plain($node->label());
+-  $variables['page']      = $variables['view_mode'] == 'full' && node_is_page($node);
++  $variables['page']      = ($variables['view_mode'] == 'full' && node_is_page($node)) || (!empty($node->node_page_title));
+ 
+   // Make useful flags and node data available.
+   // @todo: The comment properties only exist if comment.module is enabled, but
+@@ -1737,6 +1750,13 @@ function node_menu() {
+     'title' => 'View',
+     'type' => MENU_DEFAULT_LOCAL_TASK,
+   );
++  $items['node/preview/%node_tempstore'] = array(
++    'page callback' => 'node_preview',
++    'page arguments' => array(2),
++    'access callback' => 'node_access_preview',
++    'access arguments' => array(2),
++    'file' => 'node.pages.inc',
++  );
+   $items['node/%node/edit'] = array(
+     'title' => 'Edit',
+     'page callback' => 'node_page_edit',
+@@ -2198,6 +2218,103 @@ function node_page_view(EntityInterface $node) {
+ }
+ 
+ /**
++ * Implements hook_page_build().
++ */
++function node_page_build(&$page) {
++
++  // Add 'Back to content edit editing' link on preview page.
++  $node = menu_get_object('node_tempstore', 2);
++  if ($node) {
++
++    $page['page_top']['node-preview'] = array(
++      '#type' => 'container',
++      '#attributes' => array(
++        'class' => array('node-preview-container', 'container-inline')
++      ),
++    );
++
++    $form = drupal_get_form('node_preview_form_select', $node);
++    $page['page_top']['node-preview']['view-mode'] = $form;
++  }
++}
++
++/**
++ * Get the preview form selection box.
++ *
++ * @param Drupal\Core\Entity\EntityInterface $node
++ *   A node entity.
++ *
++ * @return array $form
++ *   The view mode preview selection form.
++ */
++function node_preview_form_select(array $form, array $form_state, EntityInterface $node) {
++
++  // Always add the 'default' view mode.
++  $view_mode_options = array('default' => t('Full'));
++
++  // Get view mode options.
++  $view_modes = entity_get_view_modes('node');
++  foreach ($view_modes as $key => $info) {
++    if (!empty($info['custom_settings'])) {
++      $view_mode_options[$key] = $info['label'];
++
++      // In case this is the 'full' view mode, rename default.
++      if ($key == 'full') {
++        $view_mode_options[$key] = t('Default');
++      }
++    }
++  }
++
++  $path = 'node/add/' . $node->bundle();
++  if (!empty($node->nid)) {
++    $path = 'node/' . $node->nid . '/edit';
++  }
++
++  $view_mode = drupal_container()->get('request')->query->get('view_mode');
++  if (empty($view_mode)) {
++    $view_mode = 'full';
++  }
++
++  $form['backlink'] = array(
++    '#type' => 'link',
++    '#title' => t('Back to content editing'),
++    '#href' => $path,
++    // Add the "overlay-restore" class to indicate this link should restore
++    // the context in which the preview demonstration page was opened.
++    '#options' => array('query' => array('tempstore_id' => $node->tempstore_id) ,'attributes' => array('class' => array('node-preview-backlink button-action', 'overlay-restore'))),
++  );
++
++  $form['tempstore_id'] = array(
++    '#type' => 'value',
++    '#value' => $node->tempstore_id
++  );
++
++  $form['view_mode'] = array(
++    '#type' => 'select',
++    '#title' => t('Select a view mode'),
++    '#title_display' => 'invisible',
++    '#options' => $view_mode_options,
++    '#default_value' => $view_mode,
++  );
++  $form['submit'] = array(
++    '#type' => 'submit',
++    '#value' => t('Switch'),
++    '#attributes' => array(
++      'class' => array('node-preview-switch-button')
++    )
++  );
++
++  return $form;
++}
++
++/**
++ * Submit handler for the node preview view mode selection form.
++ */
++function node_preview_form_select_submit(array $form, array &$form_state) {
++  $form_state['redirect'] = array('node/preview/' . $form_state['values']['tempstore_id'], array('query' => array('view_mode' => $form_state['values']['view_mode'])));
++}
++
++/**
+  * Implements hook_update_index().
+  */
+ function node_update_index() {
+@@ -2579,6 +2696,24 @@ function node_node_access($node, $op, $account) {
+ }
+ 
+ /**
++ * Access callback: Checks a user's permission for previewing a node.
++ *
++ * @param Drupal\Core\Entity\EntityInterface $node
++ *   The node entity to be previewed.
++ *
++ * @return bool
++ *   TRUE if the user has access to the preview, FALSE otherwise.
++ *
++ * @see node_menu()
++ */
++function node_access_preview(EntityInterface $node) {
++  if (node_access('create', $node) || node_access('update', $node)) {
++    return TRUE;
++  }
++  return FALSE;
++}
++
++/**
+  * Helper function to generate standard node permission list for a given type.
+  *
+  * @param $name
+@@ -3587,6 +3722,9 @@ function node_library_info() {
+     'js' => array(
+       drupal_get_path('module', 'node') . '/node.preview.js' => array(),
+     ),
++    'css' => array(
++      drupal_get_path('module', 'node') . '/node.preview.css' => array(),
++    ),
+     'dependencies' => array(
+       array('system', 'jquery'),
+       array('system', 'drupal'),
+diff --git a/core/modules/node/node.pages.inc b/core/modules/node/node.pages.inc
+index 863babd..d206d47 100644
+--- a/core/modules/node/node.pages.inc
++++ b/core/modules/node/node.pages.inc
+@@ -119,79 +119,49 @@ function node_add($node_type) {
+  * @param \Drupal\Core\Entity\EntityInterface $node
+  *   The node to preview.
+  *
+- * @return
+- *   An HTML-formatted string of a node preview.
+- *
+- * @see node_form_build_preview()
++ * @return array
++ *   A form array as expected by drupal_render().
+  */
+ function node_preview(EntityInterface $node) {
+-  if (node_access('create', $node) || node_access('update', $node)) {
+-    _field_invoke_multiple('load', 'node', array($node->nid => $node));
+-    // Load the user's name when needed.
+-    if (isset($node->name)) {
+-      // The use of isset() is mandatory in the context of user IDs, because
+-      // user ID 0 denotes the anonymous user.
+-      if ($user = user_load_by_name($node->name)) {
+-        $node->uid = $user->uid;
+-      }
+-      else {
+-        $node->uid = 0; // anonymous user
+-      }
+-    }
+-    elseif ($node->uid) {
+-      $user = user_load($node->uid);
+-      $node->name = $user->name;
++  // Set status to true so we don't get the 'unpublished' CSS.
++  $node->status = TRUE;
++
++  _field_invoke_multiple('load', 'node', array($node->nid => $node));
++  // Load the author's name when needed.
++  if (isset($node->name)) {
++    // The use of isset() is mandatory in the context of user IDs, because
++    // user ID 0 denotes the anonymous user.
++    if ($user = user_load_by_name($node->name)) {
++      $node->uid = $user->uid;
+     }
+-
+-    $node->changed = REQUEST_TIME;
+-
+-    // Display a preview of the node.
+-    if (!form_get_errors()) {
+-      $node->in_preview = TRUE;
+-      $output = theme('node_preview', array('node' => $node));
+-      unset($node->in_preview);
++    else {
++      $node->uid = 0;
+     }
+-
+-    return $output;
+   }
+-}
+-
+-/**
+- * Returns HTML for a node preview for display during node creation and editing.
+- *
+- * @param $variables
+- *   An associative array containing:
+- *   - node: The node entity which is being previewed.
+- *
+- * @see NodeFormController::preview()
+- * @see node_preview()
+- *
+- * @ingroup themeable
+- */
+-function theme_node_preview($variables) {
+-  $node = $variables['node'];
++  elseif ($node->uid) {
++    $user = user_load($node->uid);
++    $node->name = $user->name;
++  }
+ 
+-  $output = '';
++  $node->changed = REQUEST_TIME;
+ 
+-  $elements = node_view($node, 'teaser');
+-  $elements['#attached']['library'][] = array('node', 'drupal.node.preview');
+-  $trimmed = drupal_render($elements);
+-  $elements = node_view($node, 'full');
+-  $full = drupal_render($elements);
+-
+-  // Do we need to preview trimmed version of post as well as full version?
+-  if ($trimmed != $full) {
+-    drupal_set_message(t('The trimmed version of your post shows what your post looks like when promoted to the main page or when exported for syndication.<span class="no-js"> You can insert the delimiter "&lt;!--break--&gt;" (without the quotes) to fine-tune where your post gets split.</span>'));
+-    $output .= '<h3>' . t('Preview trimmed version') . '</h3>';
+-    $output .= $trimmed;
+-    $output .= '<h3>' . t('Preview full version') . '</h3>';
+-    $output .= $full;
++  // Get the view mode to render the preview in.
++  $view_mode = drupal_container()->get('request')->query->get('view_mode');
++  if (empty($view_mode)) {
++    $view_mode = 'full';
+   }
+-  else {
+-    $output .= $full;
++
++  // Property so we can manipulate $page in template_preprocess_node.
++  if ($view_mode == 'full' || $view_mode == 'default') {
++    drupal_set_title($node->title);
++    $node->node_page_title = TRUE;
+   }
+ 
+-  return $output;
++  $build = array();
++  // @todo all links should be disabled, except for returning to the edit form.
++  $build['#attached']['library'][] = array('node', 'drupal.node.preview');
++  $build['preview'] = node_view($node, $view_mode);
++  return $build;
+ }
+ 
+ /**
+diff --git a/core/modules/node/node.preview.css b/core/modules/node/node.preview.css
+new file mode 100644
+index 0000000..65388b4
+--- /dev/null
++++ b/core/modules/node/node.preview.css
+@@ -0,0 +1,70 @@
++
++.node-preview-container {
++  background: #d1e8f5;
++  background-image: -webkit-linear-gradient(top, #d1e8f5, #d3e8f4);
++  background-image: -moz-linear-gradient(top, #d1e8f5, #d3e8f4);
++  background-image: -o-linear-gradient(top, #d1e8f5, #d3e8f4);
++  background-image: linear-gradient(to bottom, #d1e8f5, #d3e8f4);
++  -webkit-box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.3333);
++  font-family: "Source Sans Pro", "Lucida Grande", Verdana, sans-serif;
++  box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.3333);
++  position: fixed;
++  z-index: 499;
++  width: 100%;
++  padding: 10px;
++}
++
++.node-preview-container .form-type-select {
++  margin-left: 25%;
++}
++
++.button-action {
++  background: #419ff1;
++  background-image: -webkit-linear-gradient(top, #419ff1, #1076d5);
++  background-image: -moz-linear-gradient(top, #419ff1, #1076d5);
++  background-image: -o-linear-gradient(top, #419ff1, #1076d5);
++  background-image: linear-gradient(to bottom, #419ff1, #1076d5);
++  border: 1px solid #0048c8;
++  border-radius: .4em;
++  -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4);
++  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4);
++  color: #fff;
++  font-size: 0.9em;
++  line-height: normal;
++  margin: 0;
++  padding: 4px 1em 4px 0.6em;
++  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
++}
++
++.button-action::before {
++  content: '';
++  display: inline-block;
++  width: 10px;
++  height: 10px;
++  background-image: url('images/btn-arrow-preview.png');
++  background-position: 0px 1px;
++  background-repeat: no-repeat;
++}
++
++.button-action:focus,
++.button-action:hover {
++  background-color: #419cf1;
++  background-image: -webkit-linear-gradient(top, #59abf3, #2a90ef);
++  background-image: -moz-linear-gradient(top, #59abf3, #2a90ef);
++  background-image: -o-linear-gradient(top, #59abf3, #2a90ef);
++  background-image: linear-gradient(to bottom, #59abf3, #2a90ef);
++  border: 1px solid #0048c8;
++  text-decoration: none;
++  color: #fff;
++}
++.button-action:active {
++  background-color: #0e69be;
++  background-image: -webkit-linear-gradient(top, #0e69be, #2a93ef);
++  background-image: -moz-linear-gradient(top, #0e69be, #2a93ef);
++  background-image: -o-linear-gradient(top, #0e69be, #2a93ef);
++  background-image: -ms-linear-gradient(top, #0e69be, #2a93ef);
++  background-image: linear-gradient(to bottom, #0e69be, #2a93ef);
++  border: 1px solid #0048c8;
++  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, .25);
++  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .25);
++}
+diff --git a/core/modules/node/node.preview.js b/core/modules/node/node.preview.js
+index 3be74e2..5199a62 100644
+--- a/core/modules/node/node.preview.js
++++ b/core/modules/node/node.preview.js
+@@ -8,16 +8,16 @@
+  */
+ Drupal.behaviors.nodePreviewDestroyLinks = {
+   attach: function (context) {
+-    var $preview = $(context).find('.node').once('node-preview');
++    var $preview = $(context).find('.page-node-preview').once('node-preview');
+     if ($preview.length) {
+-      $preview.on('click.preview', 'a:not([href^=#])', function (e) {
++      $preview.on('click.preview', 'a:not([href^=#],#edit-backlink)', function (e) {
+         e.preventDefault();
+       });
+     }
+   },
+   detach: function (context, settings, trigger) {
+     if (trigger === 'unload') {
+-      var $preview = $(context).find('.node').removeOnce('node-preview');
++      var $preview = $(context).find('.page-node-preview').removeOnce('node-preview');
+       if ($preview.length) {
+         $preview.off('click.preview');
+       }
+@@ -25,4 +25,16 @@ Drupal.behaviors.nodePreviewDestroyLinks = {
+   }
+ };
+ 
++/**
++ * View mode preview select form.
++ */
++Drupal.behaviors.nodePreviewSelectForm = {
++  attach: function (context) {
++    $('.node-preview-switch-button').hide();
++    $('#edit-view-mode').change(function() {
++      $(this).closest('form').trigger('submit');
++    });
++  }
++};
++
+ })(jQuery, Drupal);
+diff --git a/core/modules/path/path.module b/core/modules/path/path.module
+index cee17ed..2d86520 100644
+--- a/core/modules/path/path.module
++++ b/core/modules/path/path.module
+@@ -98,7 +98,10 @@ function path_menu() {
+ function path_form_node_form_alter(&$form, $form_state) {
+   $node = $form_state['controller']->getEntity($form_state);
+   $path = array();
+-  if (!empty($node->nid)) {
++  if (!empty($node->in_preview) && !empty($node->path['alias'])) {
++    $path = $node->path;
++  }
++  elseif (!empty($node->nid)) {
+     $conditions = array('source' => 'node/' . $node->nid);
+     if ($node->langcode != LANGUAGE_NOT_SPECIFIED) {
+       $conditions['langcode'] = $node->langcode;
+diff --git a/core/modules/taxonomy/lib/Drupal/taxonomy/Plugin/field/widget/TaxonomyAutocompleteWidget.php b/core/modules/taxonomy/lib/Drupal/taxonomy/Plugin/field/widget/TaxonomyAutocompleteWidget.php
+index 3457126..a8d001f 100644
+--- a/core/modules/taxonomy/lib/Drupal/taxonomy/Plugin/field/widget/TaxonomyAutocompleteWidget.php
++++ b/core/modules/taxonomy/lib/Drupal/taxonomy/Plugin/field/widget/TaxonomyAutocompleteWidget.php
+@@ -52,7 +52,13 @@ public function formElement(array $items, $delta, array $element, $langcode, arr
+ 
+     $tags = array();
+     foreach ($items as $item) {
+-      $tags[$item['tid']] = isset($item['taxonomy_term']) ? $item['taxonomy_term'] : taxonomy_term_load($item['tid']);
++      $tid = $item['tid'];
++      if ($tid == 'autocreate') {
++        $tags[] = $item;
++      }
++      else {
++        $tags[$tid] = isset($item['taxonomy_term']) ? $item['taxonomy_term'] : taxonomy_term_load($tid);
++      }
+     }
+     $element += array(
+       '#type' => 'textfield',
+diff --git a/core/modules/taxonomy/lib/Drupal/taxonomy/Tests/TermTest.php b/core/modules/taxonomy/lib/Drupal/taxonomy/Tests/TermTest.php
+index 6b8cff3..b277845 100644
+--- a/core/modules/taxonomy/lib/Drupal/taxonomy/Tests/TermTest.php
++++ b/core/modules/taxonomy/lib/Drupal/taxonomy/Tests/TermTest.php
+@@ -131,9 +131,9 @@ function testTaxonomyNode() {
+ 
+     // Preview the node.
+     $this->drupalPost('node/' . $node->nid . '/edit', $edit, t('Preview'));
+-    $this->assertNoUniqueText($term2->name, 'Term is displayed when previewing the node.');
+-    $this->drupalPost(NULL, NULL, t('Preview'));
+-    $this->assertNoUniqueText($term2->name, 'Term is displayed when previewing the node again.');
++    $this->assertUniqueText($term2->name, 'Term is displayed when previewing the node.');
++    $this->drupalPost('node/' . $node->nid . '/edit', NULL, t('Preview'), array('query' => array('tempstore_id' => $node->uuid)));
++    $this->assertUniqueText($term2->name, 'Term is displayed when previewing the node again.');
+   }
+ 
+   /**
+diff --git a/core/modules/taxonomy/taxonomy.module b/core/modules/taxonomy/taxonomy.module
+index 89f334b..e92e654 100644
+--- a/core/modules/taxonomy/taxonomy.module
++++ b/core/modules/taxonomy/taxonomy.module
+@@ -947,17 +947,24 @@ function _taxonomy_get_tid_from_term(Term $term) {
+ function taxonomy_implode_tags($tags, $vid = NULL) {
+   $typed_tags = array();
+   foreach ($tags as $tag) {
++    $label = '';
++    if (is_array($tag) && $tag['tid'] == 'autocreate') {
++      $label = $tag['name'];
++    }
+     // Extract terms belonging to the vocabulary in question.
+-    if (!isset($vid) || $tag->bundle() == $vid) {
+-      // Make sure we have a completed loaded taxonomy term.
+-      if ($tag instanceof EntityInterface && $label = $tag->label()) {
+-        // Commas and quotes in tag names are special cases, so encode 'em.
+-        if (strpos($label, ',') !== FALSE || strpos($label, '"') !== FALSE) {
+-          $typed_tags[] = '"' . str_replace('"', '""', $label) . '"';
+-        }
+-        else {
+-          $typed_tags[] = $label;
+-        }
++    else if (!isset($vid) || $tag->bundle() == $vid) {
++      // Make sure we have a completely loaded taxonomy term.
++      if ($tag instanceof EntityInterface) {
++        $label = $tag->label();
++      }
++    }
++    if (!empty($label)) {
++      // Commas and quotes in tag names are special cases, so encode 'em.
++      if (strpos($label, ',') !== FALSE || strpos($label, '"') !== FALSE) {
++        $typed_tags[] = '"' . str_replace('"', '""', $label) . '"';
++      }
++      else {
++        $typed_tags[] = $label;
+       }
+     }
+   }

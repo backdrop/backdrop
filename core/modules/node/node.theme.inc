@@ -160,6 +160,7 @@ function theme_node_admin_overview($variables) {
  *
  * @see node.tpl.php
  */
+// todo
 function template_preprocess_node(&$variables) {
   $variables['view_mode'] = $variables['elements']['#view_mode'];
   // Provide a distinct $teaser boolean.
@@ -176,7 +177,7 @@ function template_preprocess_node(&$variables) {
   $uri = entity_uri('node', $node);
   $variables['node_url']  = url($uri['path'], $uri['options']);
   $variables['title']     = check_plain($node->title);
-  $variables['page']      = $variables['view_mode'] == 'full' && node_is_page($node);
+  $variables['page']      = ($variables['view_mode'] == 'full' && node_is_page($node)) || (!empty($node->node_page_title));
   $variables['block']     = $variables['view_mode'] == 'block';
 
   // Flatten the node entity's member fields.

@@ -123,6 +123,23 @@ function node_form($form, &$form_state, Node $node) {
   }
   $node_type = node_type_get_type($node->type);
 
+
+  // Check if we can retrieve a node from the tempstore.
+  //todo
+  $tempstore_id = drupal_container()->get('request')->query->get('tempstore_id');
+  if (!empty($tempstore_id) && ($data = node_tempstore_load($tempstore_id))) {
+    $node = $data;
+    $form_state['entity'] = $node;
+
+    // Restore the destination if we previewed the node.
+    if (isset($node->destination)) {
+      $form['node_destination'] = array(
+        '#type' => 'value',
+        '#value' => $node->destination,
+      );
+    }
+  }
+
   // Override the default CSS class name, since the user-defined node type name
   // in 'TYPE-node-form' potentially clashes with third-party class names.
   $form['#attributes']['class'][0] = backdrop_html_class('node-' . $node->type . '-form');
@@ -465,6 +482,60 @@ function node_form_submit($form, &$form_state) {
     backdrop_set_message(t('The post could not be saved.'), 'error');
     $form_state['rebuild'] = TRUE;
   }
+}
+
+/**
+ * Generates a node preview.
+ *
+ * @param $node
+ *   The node to preview.
+ *
+ * @return
+ *   An HTML-formatted string of a node preview.
+ *
+ * @see node_form_build_preview()
+ */
+// todo
+function node_preview($node) {
+  // Set status to true so we don't get the 'unpublished' CSS.
+  $node->status = TRUE;
+
+  _field_invoke_multiple('load', 'node', array($node->nid => $node));
+  // Load the author's name when needed.
+  if (isset($node->name)) {
+    // The use of isset() is mandatory in the context of user IDs, because
+    // user ID 0 denotes the anonymous user.
+    if ($user = user_load_by_name($node->name)) {
+      $node->uid = $user->uid;
+     }
+    else {
+      $node->uid = 0;
+     }
+   }
+  elseif ($node->uid) {
+    $user = user_load($node->uid);
+    $node->name = $user->name;
+  }
+ 
+  $node->changed = REQUEST_TIME;
+ 
+  // Get the view mode to render the preview in.
+  $view_mode = drupal_container()->get('request')->query->get('view_mode');
+  if (empty($view_mode)) {
+    $view_mode = 'full';
+   }
+
+  // Property so we can manipulate $page in template_preprocess_node.
+  if ($view_mode == 'full' || $view_mode == 'default') {
+    drupal_set_title($node->title);
+    $node->node_page_title = TRUE;
+   }
+ 
+  $build = array();
+  // @todo all links should be disabled, except for returning to the edit form.
+  $build['#attached']['library'][] = array('node', 'drupal.node.preview');
+  $build['preview'] = node_view($node, $view_mode);
+  return $build;
 }
 
 /**

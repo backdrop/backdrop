@@ -763,13 +763,17 @@ function path_delete_all_by_entity(Entity $entity, $default_uri = NULL) {
 /**
  * Return a portion of a form for setting an alias on an entity.
  */
+// todo
 function path_form_element(Entity $entity) {
   $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
   $entity_type = $entity->entityType();
   $bundle = $entity->bundle();
 
   $path = array();
-  if (!$entity->isNew()) {
+  if (!empty($entity->in_preview) && !empty($entity->path['alias'])) {
+    $path = $entity->path;
+  }
+  elseif (!$entity->isNew()) {
     $uri = $entity->uri();
     $conditions = array(
       'source' => $uri['path'],
