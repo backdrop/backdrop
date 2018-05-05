@@ -571,7 +571,7 @@ function node_preview($type) {
  
   $build = array();
   // @todo all links should be disabled, except for returning to the edit form.
-  //$build['#attached']['library'][] = array('node', 'drupal.node.preview');
+  //$build['#attached']['library'][] = array('node', 'backdrop.node.preview');
   $build['preview_form_select'] = array(
     '#type' => 'container',
     '#attributes' => array(
@@ -622,7 +622,6 @@ function node_preview_form_select(array $form, array $form_state, EntityInterfac
     $path = 'node/' . $node->nid . '/edit';
   }
 
-  // $view_mode = drupal_container()->get('request')->query->get('view_mode');
   $view_mode = array();
   if (empty($view_mode)) {
     $view_mode = 'full';

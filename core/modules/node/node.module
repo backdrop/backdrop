@@ -1880,7 +1880,7 @@ function node_menu() {
 /**
  * Access callback: Checks a user's permission for previewing a node.
  *
- * @param Drupal\Core\Entity\EntityInterface $node
+ * @param EntityInterface $node
  *   The node entity to be previewed.
  *
  * @return bool
