@@ -1482,12 +1482,12 @@ class UserAdminSettingsEmailFormTest extends SystemConfigFormCase {
     $this->form_id = 'user_settings_email';
     $this->values = array(
       'user_mail_cancel_confirm_body' => array(
-        '#value' => $this->randomString(),
+        '#value' => $this->randomName(),
         '#config_name' => 'user.mail',
         '#config_key' => 'cancel_confirm_body',
       ),
       'user_mail_cancel_confirm_subject' => array(
-        '#value' => $this->randomString(20),
+        '#value' => $this->randomName(20),
         '#config_name' => 'user.mail',
         '#config_key' => 'cancel_confirm_subject',
       ),
