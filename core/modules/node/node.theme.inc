@@ -160,7 +160,6 @@ function theme_node_admin_overview($variables) {
  *
  * @see node.tpl.php
  */
-// todo
 function template_preprocess_node(&$variables) {
   $variables['view_mode'] = $variables['elements']['#view_mode'];
   // Provide a distinct $teaser boolean.

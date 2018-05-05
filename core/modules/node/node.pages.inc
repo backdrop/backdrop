@@ -125,7 +125,6 @@ function node_form($form, &$form_state, Node $node) {
 
 
   // Check if we can retrieve a node from the tempstore.
-  //todo
   global $user;
   $tempstore_id = $node->type . ':' . $user->uid;
   if (!empty($tempstore_id) && ($data = node_tempstore_load($tempstore_id))) {
@@ -372,23 +371,22 @@ function node_form($form, &$form_state, Node $node) {
   }
   elseif (isset($_SERVER['HTTP_REFERER'])) {
     $path = $_SERVER['HTTP_REFERER'];
+    // When coming from preview, the $path is set to the preview page.
+    if (strpos($path, 'node/' . $node->type . '/preview')) {
+      if (isset($node->nid)) {
+        $path = 'node/' . $node->nid;
+      }
+      else {
+        // todo store old $_SERVER['HTTP_REFERER'] so we can redirect to that.
+        $path = '<front>';
+      }
+    }
   }
   elseif (isset($node->nid)) {
     $path = 'node/' . $node->nid;
   }
   else {
     $path = '<front>';
-  }
-  // When coming from preview, the $path is set to the preview page.
-  // todo, maybe just check for string ending in ../preview instead of url()?
-  if ($path == url('node/' . $node->type . '/preview', array('absolute' => TRUE))) {
-    if (isset($node->nid)) {
-      $path = 'node/' . $node->nid;
-    }
-    else {
-      // todo store old $_SERVER['HTTP_REFERER'] so we can redirect to that.
-      $path = '<front>';
-    }
   }
   $options = backdrop_parse_url($path);
   $options['attributes']['class'][] = 'form-cancel';
@@ -532,7 +530,6 @@ function node_form_submit($form, &$form_state) {
  *
  * @see node_form_build_preview()
  */
-// todo
 function node_preview($type) {
   global $user;
   $tempstore_id = $type . ':' . $user->uid;
