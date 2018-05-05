@@ -177,6 +177,12 @@ function node_type_form($form, &$form_state, $type = NULL) {
     ),
   );
 
+  $form['workflow']['scheduling_enabled'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show option for scheduling'),
+    '#default_value' => $type->settings['scheduling_enabled'],
+  );
+
   if (module_exists('language')) {
     $form['workflow']['language'] = array(
       '#type' => 'checkbox',
@@ -185,12 +191,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
       '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new posts are saved with no defined language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
     );
   }
-
-  $form['workflow']['scheduling_enabled'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Show option for scheduling'),
-    '#default_value' => $type->settings['scheduling_enabled'],
-  );
 
   $form['workflow']['sticky'] = array(
     '#type' => 'checkboxes',
