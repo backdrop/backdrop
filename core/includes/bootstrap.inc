@@ -3175,13 +3175,26 @@ function _backdrop_bootstrap_sanitize_request() {
     require_once BACKDROP_ROOT . '/core/includes/common.inc';
     // If the destination is an external URL, remove it.
     if (isset($_GET['destination']) && url_is_external($_GET['destination'])) {
-      unset($_GET['destination']);
-      unset($_REQUEST['destination']);
+      $sanitized_keys = array('External URL in GET: ' . $_GET['destination']);
     }
     // If there's still something in $_REQUEST['destination'] that didn't come
     // from $_GET, check it too.
     if (isset($_REQUEST['destination']) && (!isset($_GET['destination']) || $_REQUEST['destination'] != $_GET['destination']) && url_is_external($_REQUEST['destination'])) {
+      $sanitized_keys = array('External URL in REQUEST: ' . $_REQUEST['destination']);
+    }
+
+    // If there is a query string, check its query parameters.
+    $destination_parts = backdrop_parse_url($_GET['destination']);
+    if (!empty($destination_parts['query'])) {
+      $sanitized_keys = _backdrop_bootstrap_sanitize_input($destination_parts['query'], $whitelist);
+    }
+
+    if ($sanitized_keys) {
+      unset($_GET['destination']);
       unset($_REQUEST['destination']);
+      if ($log_sanitized_keys) {
+        trigger_error(format_string('Potentially unsafe values removed from the destination query parameter: @keys', array('@keys' => implode(', ', $sanitized_keys))), E_USER_WARNING);
+      }
     }
   }
 }
@@ -4216,8 +4229,12 @@ function _backdrop_shutdown_function() {
   chdir(BACKDROP_ROOT);
 
   try {
-    while (list($key, $callback) = each($callbacks)) {
+    // Manually iterate over the array instead of using a foreach loop.
+    // A foreach operates on a copy of the array, so any shutdown functions that
+    // were added from other shutdown functions would never be called.
+    while ($callback = current($callbacks)) {
       call_user_func_array($callback['callback'], $callback['arguments']);
+      next($callbacks);
     }
   }
   catch (Exception $exception) {

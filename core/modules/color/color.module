@@ -118,7 +118,9 @@ function color_get_palette($theme, $default = FALSE) {
 
   // Load config.
   if (!$default && ($theme_palette = theme_get_setting('color.palette', $theme))) {
-    $palette = $theme_palette;
+    foreach ($theme_palette as $color_name => $color_code) {
+      $palette[$color_name] = $color_code;
+    }
   }
   return $palette;
 }

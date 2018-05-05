@@ -5,6 +5,31 @@
  */
 
 /**
+ * Implements hook_schema_alter().
+ */
+function comment_schema_alter(&$schema) {
+  $schema['node']['fields']['comment_close_override'] = array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+    'size' => 'tiny',
+    'description' => 'Override the automatic comment closer. (0 = Do not override, 1 = Override)',
+  );
+}
+
+/**
+ * Implements hook_install().
+ */
+function comment_install() {
+  if (!db_field_exists('node', 'comment_close_override')) {
+    $schema = array();
+    comment_schema_alter($schema);
+    db_add_field('node', 'comment_close_override', $schema['node']['fields']['comment_close_override']);
+  }
+}
+
+/**
  * Implements hook_uninstall().
  */
 function comment_uninstall() {
@@ -26,6 +51,8 @@ function comment_uninstall() {
       'comment_preview',
       'comment_subject_field',
       'comment_user_picture',
+      'comment_close_enabled',
+      'comment_close_days'
     );
     foreach ($comment_settings as $setting) {
       if (isset($node_type->settings[$setting])) {
@@ -33,6 +60,11 @@ function comment_uninstall() {
       }
     }
     node_type_save($node_type);
+  }
+  
+  // Remove comment closer override.
+  if (db_field_exists('node', 'comment_close_override')) {
+    db_drop_field('node', 'comment_close_override');
   }
 }
 
@@ -361,6 +393,26 @@ function comment_update_1003() {
       $config->save();
     }
   }
+}
+
+/**
+ * Add an Override column for automatic comment closing for individual nodes.
+ */
+function comment_update_1004() {
+  if (db_field_exists('node', 'comment_close_override')) {
+    return;
+  }
+
+  $comment_close_override_column = array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+    'size' => 'tiny',
+    'description' => 'Override the automatic comment closer. (0 = Do not override, 1 = Override)',
+  );
+
+  db_add_field('node', 'comment_close_override', $comment_close_override_column);
 }
 
 /**

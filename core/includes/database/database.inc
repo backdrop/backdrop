@@ -1285,6 +1285,16 @@ abstract class DatabaseConnection extends PDO {
    */
   abstract public function databaseType();
 
+  /**
+   * Creates a database.
+   *
+   * In order to use this method, you must be connected without a database
+   * specified.
+   *
+   * @param string $database
+   *   The name of the database to create.
+   */
+  abstract public function createDatabase($database);
 
   /**
    * Gets any special processing requirements for the condition operator.
@@ -1868,6 +1878,11 @@ class DatabaseTransactionExplicitCommitNotAllowedException extends Exception { }
  * Exception thrown when a rollback() resulted in other active transactions being rolled-back.
  */
 class DatabaseTransactionOutOfOrderException extends Exception { }
+
+/**
+ * Exception thrown when the specified database cannot be found.
+ */
+class DatabaseNotFoundException extends Exception { }
 
 /**
  * Exception thrown for merge queries that do not make semantic sense.

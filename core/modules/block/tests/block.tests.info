@@ -3,3 +3,9 @@ name = Block functionality
 description = Add, edit and delete custom block. Configure and move a module-defined block.
 group = Block
 file = block.test
+
+[BlockTranslationTestCase]
+name = Block translation functionality
+description = Add, translate and delete custom block.
+group = Block
+file = block.translation.test

@@ -39,3 +39,9 @@ name = Layout Block Usage Test
 description = Tests the layout_get_block_usage() function.
 group = Layout
 file = layout.test
+
+[LayoutRendererTest]
+name = Layout Renderer Test
+description = Tests that the correct renderer is used.
+group = Layout
+file = layout.test
