@@ -3815,7 +3815,7 @@ function node_set_node_tempstore($item, $tempstore_id) {
  * Remove an item from the object cache.
  */
 function node_clear_node_tempstore($tempstore_id, $type = 'node') {
-  tempstore_clear('node.' . $type, $tempstore_id);
+  tempstore_clear('node_tempstore', $tempstore_id);
 }
 
 /**

@@ -1259,17 +1259,24 @@ function _taxonomy_get_tid_from_term(TaxonomyTerm $term) {
 function taxonomy_implode_tags($tags, $vocabulary_name = NULL) {
   $typed_tags = array();
   foreach ($tags as $tag) {
+    $label = '';
+    if (is_array($tag) && $tag['tid'] == 'autocreate') {
+      $label = $tag['name'];
+    }
     // Extract terms belonging to the vocabulary in question.
-    if (!isset($vocabulary_name) || $tag->vocabulary == $vocabulary_name) {
-      // Make sure we have a completed loaded taxonomy term.
+    else if (!isset($vocabulary_name) || $tag->vocabulary == $vocabulary_name) {
+      // Make sure we have a completely loaded taxonomy term.
       if (isset($tag->name)) {
-        // Commas and quotes in tag names are special cases, so encode 'em.
-        if (strpos($tag->name, ',') !== FALSE || strpos($tag->name, '"') !== FALSE) {
-          $typed_tags[] = '"' . str_replace('"', '""', $tag->name) . '"';
-        }
-        else {
-          $typed_tags[] = $tag->name;
-        }
+        $label = $tag->label();
+      }
+    }
+    if (!empty($label)) {
+      // Commas and quotes in tag names are special cases, so encode 'em.
+      if (strpos($tag->name, ',') !== FALSE || strpos($tag->name, '"') !== FALSE) {
+        $typed_tags[] = '"' . str_replace('"', '""', $tag->name) . '"';
+      }
+      else {
+        $typed_tags[] = $label;
       }
     }
   }
@@ -1578,7 +1585,14 @@ function taxonomy_term_title(TaxonomyTerm $term) {
 function taxonomy_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   $tags = array();
   foreach ($items as $item) {
-    $tags[$item['tid']] = isset($item['taxonomy_term']) ? $item['taxonomy_term'] : taxonomy_term_load($item['tid']);
+    // $tags[$item['tid']] = isset($item['taxonomy_term']) ? $item['taxonomy_term'] : taxonomy_term_load($item['tid']);
+    $tid = $item['tid'];
+    if ($tid == 'autocreate') {
+      $tags[] = $item;
+    }
+    else {
+      $tags[$tid] = isset($item['taxonomy_term']) ? $item['taxonomy_term'] : taxonomy_term_load($tid);
+    }
   }
 
   $element += array(

@@ -141,6 +141,7 @@ function node_form($form, &$form_state, Node $node) {
     }
     // todo dont show this message if redirecting from preview page.
     backdrop_set_message(t('Continue editing this @type or cancel to clear.', array('@type' => $node->type)));
+    node_clear_node_tempstore($tempstore_id);
   }
 
   // Override the default CSS class name, since the user-defined node type name
@@ -378,6 +379,17 @@ function node_form($form, &$form_state, Node $node) {
   else {
     $path = '<front>';
   }
+  // When coming from preview, the $path is set to the preview page.
+  // todo, maybe just check for string ending in ../preview instead of url()?
+  if ($path == url('node/' . $node->type . '/preview', array('absolute' => TRUE))) {
+    if (isset($node->nid)) {
+      $path = 'node/' . $node->nid;
+    }
+    else {
+      // todo store old $_SERVER['HTTP_REFERER'] so we can redirect to that.
+      $path = '<front>';
+    }
+  }
   $options = backdrop_parse_url($path);
   $options['attributes']['class'][] = 'form-cancel';
 
@@ -440,7 +452,8 @@ function node_form($form, &$form_state, Node $node) {
  * @see node_form_submit_build_node()
  */
 function node_form_preview($form, &$form_state) {
-  $node = node_form_submit_build_node($form, $form_state);
+  $node = $form_state['node'];
+  entity_form_submit_build_entity('node', $node, $form, $form_state);
   global $user;
   $tempstore_id = $node->type . ':' . $user->uid;
   node_set_node_tempstore($node, $tempstore_id);
@@ -483,9 +496,6 @@ function node_form_submit($form, &$form_state) {
   backdrop_set_message($message);
 
   if ($node->nid) {
-    global $user;
-    $tempstore_id = $node->type . ':' . $user->uid;
-    node_clear_node_tempstore($tempstore_id);
     $form_state['values']['nid'] = $node->nid;
     $form_state['nid'] = $node->nid;
 
