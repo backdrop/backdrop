@@ -1069,8 +1069,20 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
       // Contexts must be set before the layout's access may be checked.
       $contexts = $layout->getContexts();
       foreach ($contexts as $context) {
-        if (isset($context->position) && isset($router_item['map'][$context->position])) {
-          $context->setData($router_item['map'][$context->position]);
+        if (isset($context->position)) {
+
+          // Check for an object loaded by the menu router.
+          if (isset($router_item['map'][$context->position])) {
+            $context->setData($router_item['map'][$context->position]);
+          }
+
+          // If no context is set, load one using the layout info.
+          if (!is_object($context->data)) {
+            $context_info = layout_get_context_info($context->plugin);
+            $function = $context_info['load callback'];
+            $context_data = $function($router_item['original_map'][$context->position]);
+            $context->setData($context_data);
+          }
         }
       }
 
