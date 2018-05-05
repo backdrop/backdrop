@@ -788,6 +788,7 @@ function user_account_form(&$form, &$form_state) {
   elseif (!config_get('system.core', 'user_email_verification') || $admin) {
     $form['account']['pass'] = array(
       '#type' => 'password',
+      '#title' => t('Password'),
       '#description' => t('Provide a password for the new account.'),
       '#password_toggle' => TRUE,
       '#password_strength' => TRUE,
