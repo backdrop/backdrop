@@ -3796,7 +3796,7 @@ function node_get_node_tempstore($tempstore_id) {
 /**
  * Store changes to a node or menu item in the temporary store.
  *
- * @param node|nodeMenuItem $item
+ * @param Node $item
  *   The node item to save into tempstore.
  * @param string $type
  *   The type of item to save. Must be either "node" or "menu_item".

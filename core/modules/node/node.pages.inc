@@ -444,7 +444,7 @@ function node_form($form, &$form_state, Node $node) {
 }
 
 /**
- * Form submission handler that saves the node for node_form().
+ * Form submission handler that redirects to the node preview().
  *
  * @see node_form_validate()
  * @see node_form_submit_build_node()
