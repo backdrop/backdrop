@@ -376,7 +376,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     ),
     '#weight' => -10,
     '#autocomplete_path' => 'filter-link/autocomplete',
-    '#description' => t('Enter a known path, or start typing to get suggestions'),
+    '#description' => t('Enter a known path, or start typing to get suggestions. <br /> External paths (URL) must include a protocol prefix e.g. http:// .'),
   );
 
 
