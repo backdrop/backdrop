@@ -308,6 +308,8 @@ function comment_node_type_load(&$types) {
       'comment_user_picture' => TRUE,
       'comment_form_location' => COMMENT_FORM_BELOW,
       'comment_preview' => BACKDROP_OPTIONAL,
+      'comment_close_enabled' => FALSE,
+      'comment_close_days' => 14
     );
   }
 }
@@ -1205,6 +1207,26 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         BACKDROP_REQUIRED => t('Required'),
       ),
     );
+    $form['comment']['comment_close_enabled'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Automatically close comments on old content'),
+      '#default_value' => $node_type->settings['comment_close_enabled'],
+    );
+    $form['comment']['comment_close_days'] = array(
+      '#type' => 'number',
+      '#min' => 1,
+      '#step' => 1,
+      '#size' => 4,
+      '#maxlength' => 4,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="comment_close_enabled"]' => array('checked' => FALSE),
+        ),
+      ),
+      '#field_prefix' => t('Close comments after'),
+      '#default_value' => $node_type->settings['comment_close_days'],
+      '#field_suffix' => t('days'),
+    );
   }
 }
 
@@ -1241,10 +1263,10 @@ function comment_form_node_form_alter(&$form, $form_state) {
       COMMENT_NODE_CLOSED => t('Closed'),
     ),
     COMMENT_NODE_OPEN => array(
-      '#description' => t('Users with the "Post comments" permission can post comments.'),
+      '#description' => t('People with the "Post comments" permission will be able to post comments.'),
     ),
     COMMENT_NODE_CLOSED => array(
-      '#description' => t('Users cannot post comments.'),
+      '#description' => t('People will not be able to post comments.'),
     ),
   );
   // If the node has comments, add the "hidden" option too.
@@ -1258,6 +1280,18 @@ function comment_form_node_form_alter(&$form, $form_state) {
           ':input[name="comment"]' => array('value' => COMMENT_NODE_CLOSED),
         ),
       ),
+    );
+  }
+
+  $node_type = node_type_load($node->type);
+  $enable = $node_type->settings['comment_close_enabled'];
+
+  if ($enable) {
+    $form['comment_settings']['comment_close_override'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Override the automatic closing of comments'),
+      '#description' => t('This content type is set to automatically disable commenting on old content after @close-days days. Override to leave commenting enabled on this item.', array('@close-days' => $node_type->settings['comment_close_days'])),
+      '#default_value' => isset($node->comment_close_override) ? $node->comment_close_override : 0,
     );
   }
 }
@@ -2333,6 +2367,56 @@ function comment_file_download_access($field, $entity_type, $entity) {
       return node_access('view', $node);
     }
     return FALSE;
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function comment_cron() {
+  _comment_close_all();
+}
+
+/**
+ * Close all comments that meet the current threshold.
+ */
+function _comment_close_all() {
+  $content_types = node_type_get_names();
+
+  foreach ($content_types as $type => $name) {
+    // Get the content type settings.
+    $node_type = node_type_load($type);
+    $days = $node_type->settings['comment_close_days'];
+    $enable = $node_type->settings['comment_close_enabled'];
+
+    // If a day is set, do this one.
+    if (!empty($enable) && !empty($days)) {
+      $oldest_allowed = strtotime("-$days days", REQUEST_TIME);
+
+      // Fetch nodes that should have comments closed.
+      $result = db_query("SELECT nid FROM {node} WHERE created < :oldest AND comment_close_override = 0 AND type = :type AND comment = :comment",
+        array(':oldest' => $oldest_allowed, ':type' => $type, ':comment' => COMMENT_NODE_OPEN)
+      );
+      $nids = $result->fetchCol();
+
+      // Update those rows.
+      foreach ($nids as $nid) {
+        $node = node_load($nid);
+        $node->comment = COMMENT_NODE_CLOSED;
+        node_save($node);
+      }
+
+      $count  = $result->rowCount();
+      if ($count) {
+        $vars = array(
+          '!count' => $count,
+          '@type' => $name,
+          '!date' => format_date($oldest_allowed),
+        );
+        $msg = 'Closed comments on !count @type posts created at, or before, !date.';
+        watchdog('comment', $msg, $vars, WATCHDOG_NOTICE);
+      }
+    }
   }
 }
 

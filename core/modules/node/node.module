@@ -18,6 +18,11 @@ define('NODE_NOT_PUBLISHED', 0);
 define('NODE_PUBLISHED', 1);
 
 /**
+ * Denotes that the node is not published, but scheduled for later.
+ */
+define('NODE_SCHEDULED', 2);
+
+/**
  * Denotes that the node is not promoted.
  */
 define('NODE_NOT_PROMOTED', 0);
@@ -112,6 +117,20 @@ function node_cron() {
   db_delete('history')
     ->condition('timestamp', NODE_NEW_LIMIT, '<')
     ->execute();
+
+  $scheduled_nodes = db_query(
+      "SELECT nid FROM {node} WHERE scheduled <= UNIX_TIMESTAMP(NOW())
+      AND status = '0'
+      AND scheduled != 0"
+  );
+  foreach ($scheduled_nodes as $n) {
+    if ($node = node_load($n->nid)) {
+      $node->status = 1;
+      $node->created = $node->scheduled;
+      $node->scheduled = 0;
+      $node->save();
+    }
+  }
 }
 
 /**
@@ -905,6 +924,14 @@ function node_validate($node, $form, &$form_state) {
     form_set_error('date', t('You have to specify a valid date.'));
   }
 
+  // Validate the "Publish on" field is not in the past.
+  if ($node->status == NODE_SCHEDULED && is_string($node->scheduled) && strlen($node->scheduled)) {
+    $scheduled_date = new BackdropDateTime($node->scheduled);
+    if ($scheduled_date && $scheduled_date->format('U') < REQUEST_TIME) {
+      form_set_error('scheduled', t('Scheduled publish time cannot be in the past.'));
+    }
+  }
+
   // Invoke hook_validate() for node type specific validation and
   // hook_node_validate() for miscellaneous validation needed by modules. Can't
   // use node_invoke() or module_invoke_all(), because $form_state must be
@@ -1581,6 +1608,30 @@ function _node_add_access() {
     return TRUE;
   }
   return FALSE;
+}
+
+/**
+ * Implements hook_layout_context_info().
+ */
+function node_layout_context_info() {
+  $info['node'] = array(
+    'title' => t('Content (node)'),
+    // Define the class which is used to handle this context.
+    'class' => 'EntityLayoutContext',
+    // Define menu paths where the node ID is a "known" context.
+    'menu paths' => array(
+      'node/%node',
+      'node/%node/view',
+      'node/%node/edit',
+    ),
+    // Given the menu paths defined above, identify the part of the path that
+    // is needed to generate this context.
+    'path placeholder' => '%node',
+    // Given an argument, define the callback that will be responsible for
+    // loading the main context data.
+    'load callback' => 'node_load',
+  );
+  return $info;
 }
 
 /**

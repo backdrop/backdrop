@@ -745,8 +745,9 @@ function backdrop_parse_url($url) {
   }
   // The 'q' parameter contains the path of the current page if clean URLs are
   // disabled. It overrides the 'path' of the URL when present, even if clean
-  // URLs are enabled, due to how Apache rewriting rules work.
-  if (isset($options['query']['q'])) {
+  // URLs are enabled, due to how Apache rewriting rules work. The path
+  // parameter must be a string.
+  if (isset($options['query']['q']) && is_string($options['query']['q'])) {
     $options['path'] = $options['query']['q'];
     unset($options['query']['q']);
   }
@@ -2987,7 +2988,7 @@ function backdrop_deliver_html_page($page_callback_result) {
         // Print a 503 page.
         backdrop_add_http_header('Status', '503 Service unavailable');
         backdrop_set_title(t('Site under maintenance'));
-        print theme('maintenance_page', array('content' => filter_xss_admin(t(config_get('system.core', 'maintenance_mode_message'), array('@site' => config_get('system.core', 'site_name'))))));
+        print theme('maintenance_page', array('content' => filter_xss_admin(token_replace(t(config_get('system.core', 'maintenance_mode_message'))))));
         break;
     }
   }

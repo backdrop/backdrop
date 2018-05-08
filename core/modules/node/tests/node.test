@@ -558,6 +558,7 @@ class PageViewTestCase extends BackdropWebTestCase {
     $this->assertTrue(node_load($node->nid), 'Node created.');
 
     // Try to edit with anonymous user.
+    $this->backdropLogout();
     $html = $this->backdropGet("node/$node->nid/edit");
     $this->assertResponse(403);
 
@@ -1267,11 +1268,10 @@ class NodeSaveTestCase extends BackdropWebTestCase {
  */
 class NodeTypeTestCase extends BackdropWebTestCase {
   /**
-   * Ensures that node type functions (node_type_get_*) work correctly.
-   *
-   * Load available node types and validate the returned data.
+   * Tests creating a content type programmatically and via a form.
    */
-  function testNodeTypeGetFunctions() {
+  function testNodeTypeCreation() {
+    // Ensure node type functions (node_type_get_*) work correctly.
     $node_types = node_type_get_types();
     $node_names = node_type_get_names();
 
@@ -1283,12 +1283,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->assertEqual($node_types['post'], node_type_get_type('post'), 'Correct node type has been returned.');
     $this->assertEqual($node_types['post']->name, node_type_get_name('post'), 'Correct node type name has been returned.');
     $this->assertEqual($node_types['page']->base, node_type_get_base('page'), 'Correct node type base has been returned.');
-  }
 
-  /**
-   * Tests creating a content type programmatically and via a form.
-   */
-  function testNodeTypeCreation() {
     // Create a content type programmaticaly.
     $type = $this->backdropCreateContentType();
 
@@ -1313,6 +1308,15 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
     $config = config('node.type.foo');
     $this->assertFalse($config->isNew(), 'The new content type has been created in config.');
+
+    // Ensure publishing settings are loaded correctly even when using boolean
+    // values for "status_default".
+    $type->settings['status_default'] = TRUE;
+    node_type_save($type);
+    $type = node_type_load($type->type);
+    // The status should be NODE_PUBLISHED (1) not the Boolean (TRUE).
+    $this->assertIdentical($type->settings['status_default'], NODE_PUBLISHED);
+    $this->assertNotIdentical($type->settings['status_default'], TRUE);
   }
 
   /**
@@ -2853,5 +2857,80 @@ class NodeMultiByteUtf8Test extends NodeWebTestCase {
     $result = $this->xpath('(//div[contains(@class, "l-page-title")])//h1');
     $this->assertEqual(trim((string) $result[0]), $title, 'The passed title was returned.');
   }
+}
 
+/**
+ * Tests Draft, Published, Schedule Publish Time options for node types and
+ * node instances.
+ */
+class NodePublishScheduling extends BackdropWebTestCase {
+
+  function testNodeTypeCreateDefaultDraft() {
+    // Create a content type of fooba via the user interface.
+    $this->admin_user = $this->backdropCreateUser(array('bypass node access', 'administer nodes'));
+    $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types', 'administer nodes'));
+    $this->backdropLogin($web_user);
+    $edit = array(
+      'name' => 'fooba',
+      'title_label' => 'title for fooba',
+      'type' => 'fooba',
+      'status_default' => 0,
+    );
+    $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
+    // Create a node of type foobee and assert that its published-state is set
+    // to Draft.
+    $name = $this->randomName(8);
+    $edit = array(
+      'title' => $name,
+    );
+    $this->backdropPost('node/add/fooba', $edit, t('Save'));
+    $node = $this->backdropGetNodeByTitle($name);
+    $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
+
+    // Create a content type of type foobee via the user interface.
+    $edit = array(
+      'name' => 'foobee',
+      'title_label' => 'title for foobee',
+      'type' => 'foobee',
+      'status_default' => 1,
+    );
+    $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
+    // Create a node of type foobee and assert that its published-state is set
+    // to Published.
+    $name = $this->randomName(8);
+    $edit = array(
+      'title' => $name,
+    );
+    $this->backdropPost('node/add/foobee', $edit, t('Save'));
+    $node = $this->backdropGetNodeByTitle($name);
+    $this->assertEqual($node->status, '1', 'The node is in the state Published.');
+
+    // Create a content type of type foobsee via the user interface.
+    $edit = array(
+      'name' => 'foobsee',
+      'title_label' => 'title for foobsee',
+      'type' => 'foobsee',
+      'status_default' => 2,
+    );
+    $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
+    // Create a node of type foobee and assert that its published-state is set
+    // to Draft.
+    $name = $this->randomName(8);
+    $edit = array(
+      'title' => $name,
+      // Schedule five minutes into the future to be sure we past the current time.
+      'scheduled[date]' => format_date(REQUEST_TIME + 360, 'custom', 'Y-m-d', $web_user->timezone),
+      'scheduled[time]' => format_date(REQUEST_TIME + 360, 'custom', 'g:i a', $web_user->timezone),
+    );
+    $this->backdropPost('node/add/foobsee', $edit, t('Save'));
+    $node = $this->backdropGetNodeByTitle($name);
+    $this->assertEqual($node->status, '0', 'The node is in the state Unpublished.');
+    $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');
+    // Set the scheduled date in the past and run cron
+    $node->scheduled = 1;
+    node_save($node);
+    $this->cronRun();
+    $node = node_load($node->nid);
+    $this->assertEqual($node->status, '1', 'The node is in the state Published.');
+  }
 }

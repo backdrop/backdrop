@@ -389,7 +389,12 @@ function update_task_list($set_active = NULL) {
     'finished' => 'Review log',
   );
 
-  return theme('task_list', array('items' => $tasks, 'active' => $active));
+  // Only show the task list on the left sidebar if the logged-in user is has
+  // permission to perform updates, or if the update_free_access' setting in
+  // settings.php has been set to TRUE.
+  if (settings_get('update_free_access') || user_access('administer software updates')) {
+    return theme('task_list', array('items' => $tasks, 'active' => $active));
+  }
 }
 
 /**

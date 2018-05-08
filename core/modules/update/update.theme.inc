@@ -111,7 +111,7 @@ function theme_update_report($variables) {
     if (empty($status_label)) {
       $status_label = check_plain($project['reason']);
     }
-    if ($update_link && module_exists('project_installer')) {
+    if ($update_link && module_exists('installer')) {
       switch ($project['project_type']) {
         case 'theme':
           $updatepath = 'admin/appearance/update';

@@ -586,6 +586,11 @@ function filter_permission() {
     'description' => t('Allow users with access to image dialogs to upload files.'),
   );
 
+  $perms['upload editor files'] = array(
+    'title' => t('Upload files through editor dialogs'),
+    'description' => t('Allow users with access to editor dialogs to upload files.'),
+  );
+
   // Generate permissions for each text format. Warn the administrator that any
   // of them are potentially unsafe.
   foreach (filter_formats() as $format) {
@@ -1645,7 +1650,7 @@ function filter_entity_update(EntityInterface $entity) {
         $removed_files = array_diff($original_fids_by_field[$field], $fids_by_field[$field]);
         _filter_delete_file_usage($removed_files, $entity, 1);
       }
-    }  
+    }
   }
 }
 

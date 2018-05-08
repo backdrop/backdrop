@@ -188,3 +188,21 @@ function layout_test_layout_revert($layout) {
   $return[] = (__FUNCTION__ . ' called');
   state_set('layout_test', $return);
 }
+/**
+ * Implements hook_autoload_info().
+ */
+function layout_test_autoload_info() {
+  return array(
+    'LayoutTestRenderer' => 'layout_test_renderer.inc',
+  );
+}
+
+/**
+ * Implements hook_layout_renderer_info().
+ */
+function layout_test_layout_renderer_info() {
+  $info['test_renderer'] = array(
+    'class' => 'LayoutTestRenderer',
+  );
+  return $info;
+}

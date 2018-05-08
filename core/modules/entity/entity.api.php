@@ -38,8 +38,11 @@
  *     translation handlers. Array keys are the module names, array values
  *     can be any data structure the module uses to provide field translation.
  *     Any empty value disallows the module to appear as a translation handler.
- *   - entity keys: (optional) An array describing how the Field API can extract
- *     the information it needs from the objects of the type. Elements:
+ *   - entity keys: An array describing additional information about the entity.
+ *     This is used by both the EntityFieldQuery class and the Field API.
+ *     EntityFieldQuery assumes at the very least that the id is always present.
+ *     The Field API uses this array to extract the information it needs from
+ *     the objects of the type. Elements:
  *     - id: The name of the property that contains the primary id of the
  *       entity. Every entity object passed to the Field API must have this
  *       property and its value must be numeric.

@@ -5,6 +5,19 @@
  * Enables the use of personal and site-wide contact forms.
  */
 
+
+/**
+ * Implements hook_theme().
+ */
+function contact_theme() {
+  return array(
+    'contact_category_list_table' => array(
+      'render element' => 'element',
+      'file' => 'contact.theme.inc',
+    ),
+  );
+}
+
 /**
  * Implements hook_permission().
  */
@@ -54,7 +67,8 @@ function contact_menu() {
   $items['admin/structure/contact'] = array(
     'title' => 'Contact form',
     'description' => 'Create a system contact form and set up categories for the form to use.',
-    'page callback' => 'contact_category_list',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('contact_category_list'),
     'access arguments' => array('administer contact forms'),
     'file' => 'contact.admin.inc',
   );
