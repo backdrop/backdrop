@@ -3582,6 +3582,7 @@ function form_process_tableselect($element) {
             '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
           );
         }
+        $element[$key]['#attributes']['data-tableselect-id'] = implode('-', $element['#parents']);
         if (isset($element['#options'][$key]['#weight'])) {
           $element[$key]['#weight'] = $element['#options'][$key]['#weight'];
         }
