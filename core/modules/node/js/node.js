@@ -18,8 +18,15 @@ Backdrop.behaviors.nodeFieldsetSummaries = {
     });
 
     $('fieldset.node-form-author', context).backdropSetSummary(function (context) {
-      var name = $('.form-item-name input', context).val() || Backdrop.settings.anonymous,
-        date = $('.form-item-date input', context).val();
+      var name = $('.form-item-name input', context).val() || Backdrop.settings.anonymous;
+      var dateParts = [];
+      $('.form-item-date input', context).each(function() {
+        var datePart = $(this).val();
+        if (datePart) {
+          dateParts.push(datePart);
+        }
+      });
+      var date = dateParts.join(' ');
       return date ?
         Backdrop.t('By @name on @date', { '@name': name, '@date': date }) :
         Backdrop.t('By @name', { '@name': name });
@@ -31,8 +38,15 @@ Backdrop.behaviors.nodeFieldsetSummaries = {
       // Status radio button.
       var $status = $(context).find('input[name="status"]:checked');
       if ($status.val() == 2) {
-        var scheduledDate = $('input[name="scheduled[date]"]').val() + ' ' + $('input[name="scheduled[time]"]').val();
-        vals.push(Backdrop.t('Scheduled for @date', { '@date': scheduledDate }));
+        var dateParts = [];
+        $('.form-item-scheduled input', context).each(function() {
+          var datePart = $(this).val();
+          if (datePart) {
+            dateParts.push(datePart);
+          }
+        });
+        var date = dateParts.join(' ');
+        vals.push(Backdrop.t('Scheduled for @date', { '@date': date }));
       }
       else {
         var statusLabel = $status.parent().text();
