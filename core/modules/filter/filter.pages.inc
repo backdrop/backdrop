@@ -384,13 +384,13 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
   $upload_settings = isset($format->editor_settings['file_upload']) ? $format->editor_settings['file_upload'] : array();
 
   $upload_settings += array(
-    'max_size' => file_upload_max_size(),
+    'max_size' => '',
     'file_extensions' => 'txt',
     'directory' => 'inline-files',
     'data-file-id' => NULL,
   );
 
-  $max_filesize = $upload_settings['max_size'];
+  $max_filesize = !empty($upload_settings['max_size']) ? min(parse_size($upload_settings['max_size']), file_upload_max_size()) : file_upload_max_size();
   $file_extensions = $upload_settings['file_extensions'];
   $file_directory = $upload_settings['directory'];
   $existing_file = !empty($values['data-file-id']) ? file_load($values['data-file-id']) : NULL;
@@ -410,6 +410,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#parents' => array('fid'),
     '#weight' => -2,
     '#access' => $element_supports_uploads && $upload_settings['status'] && user_access('upload editor files'),
+    '#description' => t('Files must be less than @size. <br /> Allowed file types: @extensions.', array('@size' => format_size($max_filesize), '@extensions' => $file_extensions)),
   );
 
 
