@@ -268,18 +268,35 @@ function node_title_list($result, $title = NULL) {
  *
  * @param Node $node
  *   A node entity.
+ * @param bool $save_for_later
+ *   Save the given node ID to save its marking for at the end of the request.
+ *
+ * @since 1.10 $save_for_later parameter added.
  */
-function node_tag_new(Node $node) {
+function node_tag_new($node = NULL, $save_for_later = FALSE) {
+  $nids_viewed = &backdrop_static(__FUNCTION__, array());
+  if ($node) {
+    $nids_viewed[] = $node->nid;
+  }
+
+  // Node IDs saved for later are then actually updated in a shutdown function.
+  if ($save_for_later || empty($nids_viewed)) {
+    return;
+  }
+
   global $user;
   if ($user->uid) {
     db_merge('history')
       ->key(array(
         'uid' => $user->uid,
-        'nid' => $node->nid,
+        'nid' => $nids_viewed,
       ))
       ->fields(array('timestamp' => REQUEST_TIME))
       ->execute();
    }
+
+  // Clear out the saved list so we don't update the same nodes again..
+  $nids_viewed = array();
 }
 
 /**
@@ -1195,7 +1212,8 @@ function node_show(Node $node, $message = FALSE) {
   $nodes = node_view_multiple(array($node->nid => $node), 'full');
 
   // Update the history table, stating that this user viewed this node.
-  node_tag_new($node);
+  node_tag_new($node, TRUE);
+  backdrop_register_shutdown_function('node_tag_new');
 
   return $nodes;
 }
