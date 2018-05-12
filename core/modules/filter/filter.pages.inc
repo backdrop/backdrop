@@ -376,9 +376,8 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     ),
     '#weight' => -10,
     '#autocomplete_path' => 'filter-link/autocomplete',
-    '#description' => t('Enter a known path, or start typing to get suggestions. <br /> External paths (URL) must include a protocol prefix, <e.g. <code>http://</code>.'),
+    '#description' => t('Enter a known path, or start typing to get suggestions.'),
   );
-
 
   // Construct strings to use in the upload validators.
   $upload_settings = isset($format->editor_settings['file_upload']) ? $format->editor_settings['file_upload'] : array();
@@ -536,10 +535,16 @@ function filter_format_editor_dialog_save($form, &$form_state) {
  */
 function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   $value = trim($element['#value']);
+  
+  // Use functions in the link module to produce an external URL.
+  if(module_exists(link)){
+    $value = _filter_cleanup_url($value);
+  }
+
   form_set_value($element, $value, $form_state);
 
-  // Unlike #type = 'url' validation, we allow both relative and absolute paths.
-  if ($value !== '' && !valid_url($value, TRUE) && !valid_url($value, FALSE)) {
+  // If it is not an absolute path, check that it includes the prefix /.
+  if ($value !== '' && !valid_url($value, TRUE) && !(substr($value, 0, 1) == '/')) {
     form_error($element, t('The URL %url is not valid.', array('%url' => $value)));
   }
 }
@@ -564,4 +569,42 @@ function _filter_get_file_id($href) {
     $result = $found->fid;
   }
   return $result;
+}
+
+
+/**
+ * Forms a valid URL if possible from an entered address.
+ * An adaptation of function link_cleanup_url() from link module.
+ *
+ * Trims whitespace and automatically adds an http:// to addresses without a
+ * protocol specified
+ *
+ * @param string $url
+ *   The URL entered by the user.
+ * @param string $protocol
+ *   The protocol to be prepended to the URL if one is not specified.
+ *
+ * @return string
+ *   The URL with the protocol prepended if needed.
+ */
+function _filter_cleanup_url($url, $protocol = 'http') {
+  $url = trim($url);
+  $type = link_validate_url($url);
+  if(!$type){
+    return FALSE;
+  }
+
+  if ($type === LINK_EXTERNAL) {
+    // Check if there is no protocol specified.
+    $protocol_match = preg_match('/^([a-z0-9][a-z0-9\.\-_]*:\/\/)/i', $url);
+    if (empty($protocol_match)) {
+      // But should there be? Add an automatic http:// if it starts with a domain name.
+      $domain_match = preg_match('/^(([a-z0-9]([a-z0-9\-_]*\.){1,63})([a-z]{2,63}))/i', $url);
+      if (!empty($domain_match)) {
+        $url = $protocol . "://" . $url;
+      }
+    }
+  }
+
+  return $url;
 }
