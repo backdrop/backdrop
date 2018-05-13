@@ -29,11 +29,18 @@
 function installer_authorize_run_update($filetransfer, $projects) {
   $operations = array();
   foreach ($projects as $project => $project_info) {
+    if ($project_info['project'] == 'backdrop') {
+      $updater_name = 'CoreUpdater';
+    }
+    else {
+      $updater_name = $project_info['updater_name'];
+    }
+
     $operations[] = array(
       'installer_authorize_batch_copy_project',
       array(
         $project_info['project'],
-        $project_info['updater_name'],
+        $updater_name,
         $project_info['local_url'],
         $filetransfer,
       ),

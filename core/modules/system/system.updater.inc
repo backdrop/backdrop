@@ -8,13 +8,13 @@
 /**
  * Class for updating Backdrop core using FileTransfer classes via authorize.php.
  */
-class ModuleUpdater extends Updater {
+class CoreUpdater extends Updater {
 
   /**
    * Return the Backdrop core directory.
    */
   public function getInstallDirectory() {
-    return BACKDROP_ROOT . '/core';
+    return BACKDROP_ROOT;
   }
 
   public function isInstalled() {

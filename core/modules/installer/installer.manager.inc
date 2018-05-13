@@ -174,36 +174,15 @@ function installer_manager_update_form($form, $form_state, $context) {
 
     $entry['#attributes'] = array('class' => array('update-' . $type));
 
-    // Backdrop CMS core needs to be upgraded manually.
-    $needs_manual = $project['project_type'] == 'core';
-
-    if ($needs_manual) {
-      // There are no checkboxes in the 'Manual updates' table so it will be
-      // rendered by theme('table'), not theme('tableselect'). Since the data
-      // formats are incompatible, we convert now to the format expected by
-      // theme('table').
-      unset($entry['#weight']);
-      $attributes = $entry['#attributes'];
-      unset($entry['#attributes']);
-      $entry = array(
-        'data' => $entry,
-      ) + $attributes;
-    }
-    else {
-      $form['project_downloads'][$name] = array(
-        '#type' => 'value',
-        '#value' => $recommended_release['download_link'],
-      );
-    }
+    $form['project_downloads'][$name] = array(
+      '#type' => 'value',
+      '#value' => $recommended_release['download_link'],
+    );
 
     // Based on what kind of project this is, save the entry into the
     // appropriate subarray.
     switch ($project['project_type']) {
       case 'core':
-        // Core needs manual updates at this time.
-        $projects['manual'][$name] = $entry;
-        break;
-
       case 'module':
       case 'theme':
       case 'layout':
