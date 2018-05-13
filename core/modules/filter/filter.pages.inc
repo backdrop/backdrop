@@ -537,7 +537,7 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   $value = trim($element['#value']);
   
   // Use functions in the link module to produce an external URL.
-  if(module_exists(link)){
+  if (module_exists(link)) {
     $value = _filter_cleanup_url($value);
   }
 
