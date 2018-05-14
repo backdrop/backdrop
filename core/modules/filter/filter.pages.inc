@@ -489,8 +489,8 @@ function filter_format_editor_link_form_submit($form, &$form_state) {
     }
   }
   else {
-    // Modify references to other URIs.
-    $url = substr(base_path(), 0, -1) . $uri;
+    // Modify references to other URIs if not an external link.
+    $url = (substr($uri, 0, 4) == 'http') ? $uri : substr(base_path(), 0, -1) . $uri;
     $form_state['values']['attributes']['href'] = $url;
     // Remove any reference to a data file.
     unset($form_state['values']['fid']);
