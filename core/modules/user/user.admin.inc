@@ -289,6 +289,101 @@ function user_admin_settings_submit($form, &$form_state) {
 }
 
 /**
+ * Login settings form.
+ *
+ * @ingroup forms
+ */
+function user_login_settings() {
+  $flood_config = config('user.flood');
+
+  $form['ip_limit_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Limit login attempts by IP address'),
+  );
+  $form['ip_limit_settings']['wrapper'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('container-inline')),
+  );
+  $form['ip_limit_settings']['wrapper']['flood_ip_limit'] = array(
+    '#type' => 'select',
+    '#title' => t('Attempted login limit'),
+    '#title_display' => 'invisible',
+    '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 75, 100, 125, 150, 200, 250, 500)),
+    '#default_value' => $flood_config->get('flood_ip_limit'),
+    '#prefix' => t('Limit to'),
+  );
+  $form['ip_limit_settings']['wrapper']['flood_ip_window'] = array(
+    '#type' => 'select',
+    '#title' => t('Attempted login time window'),
+    '#title_display' => 'invisible',
+    '#options' => array(0 => t('None (disabled)')) + backdrop_map_assoc(array(60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval'),
+    '#default_value' => $flood_config->get('flood_ip_window'),
+    '#prefix' => t('login attempts from one IP address per'),
+  );
+  $form['ip_limit_settings']['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('Do not allow any login from the current user\'s IP if the limit has been reached. This is independent of the per-user limit to catch attempts from one IP to log in to many different user accounts. By default we have a reasonably high limit since there may be only one apparent IP for all users at an institution.'),
+  );
+  $form['user_limit_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Limit login attempts by a user'),
+  );
+  $form['user_limit_settings']['wrapper'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('container-inline')),
+  );
+  $form['user_limit_settings']['wrapper']['flood_user_limit'] = array(
+    '#type' => 'select',
+    '#title' => t('Attempted login limit'),
+    '#title_display' => 'invisible',
+    '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 75, 100, 125, 150, 200, 250, 500)),
+    '#default_value' => $flood_config->get('flood_user_limit'),
+    '#prefix' => t('Limit to'),
+  );
+  $form['user_limit_settings']['wrapper']['flood_user_window'] = array(
+    '#type' => 'select',
+    '#title' => t('Attempted login time window'),
+    '#title_display' => 'invisible',
+    '#options' => array(0 => t('None (disabled)')) + backdrop_map_assoc(array(60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval'),
+    '#default_value' => $flood_config->get('flood_user_window'),
+    '#prefix' => t('login attempts by a user per'),
+  );
+  $form['user_limit_settings']['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('Configure the limit and the time window for users attempting to login. That is, how many failed login attempts are allowed every X hours.'),
+  );
+  $form['user_limit_settings']['flood_uid_only'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use only the User ID to identify users'),
+    '#description' => t('The default identifier is a combination of User ID and IP address. This is less secure but more resistant to denial-of-service attacks that could lock out all users with public user names. When enabled, checking for multiple login attempts will be based on the User ID only. This means that it will check regardless of the IP address from which the user is attempting to login.'),
+    '#default_value' => $flood_config->get('flood_uid_only'),
+  );
+
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for user_login_settings().
+ */
+function user_login_settings_submit($form, &$form_state) {
+  config('user.flood')
+    ->set('flood_uid_only', $form_state['values']['flood_uid_only'])
+    ->set('flood_ip_limit', $form_state['values']['flood_ip_limit'])
+    ->set('flood_ip_window', $form_state['values']['flood_ip_window'])
+    ->set('flood_user_limit', $form_state['values']['flood_user_limit'])
+    ->set('flood_user_window', $form_state['values']['flood_user_window'])
+    ->save();
+
+  backdrop_set_message(t('The configuration options have been saved.'));
+}
+
+/**
  * Menu callback: administer permissions.
  *
  * @ingroup forms

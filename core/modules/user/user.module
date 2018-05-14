@@ -1312,6 +1312,17 @@ function user_menu() {
     'weight' => 10,
   );
 
+  // Login settings.
+  $items['admin/config/people/login'] = array(
+    'title' => 'Login settings',
+    'description' => 'Configure login settings',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_login_settings'),
+    'access arguments' => array('administer account settings'),
+    'file' => 'user.admin.inc',
+    'weight' => 10,
+  );
+
   $items['user/%user'] = array(
     'title' => 'My account',
     'title callback' => 'user_page_title',
