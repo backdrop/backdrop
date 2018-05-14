@@ -7,8 +7,8 @@
 class DateAPITestCase extends BackdropUnitTestCase {
   function setUp() {
     parent::setUp();
-    require_once(BACKDROP_ROOT . '/core/modules/date/date.inc');
-    require_once(BACKDROP_ROOT . '/core/modules/date/date.class.inc');
+    require_once(BACKDROP_ROOT . '/core/includes/date.inc');
+    require_once(BACKDROP_ROOT . '/core/includes/date.class.inc');
   }
 
   public function testDateAPI() {

@@ -2242,7 +2242,7 @@ class CommentNodeAutoCloserTestCase extends CommentHelperCase {
     $this->setCommentSettings('comment_close_enabled', TRUE, 'Comment auto closer enabled.');
 
     $this->backdropGet('node/' . $this->node->nid . '/edit');
-    $this->assertField('edit-comment-close-override', 'Comment auto closer override visible when auto closer enabled.');
+    $this->assertField('edit-comment-close-enabled', 'Comment auto closer override visible when auto closer enabled.');
 
     // Run cron
     $this->cronRun();
@@ -2264,9 +2264,13 @@ class CommentNodeAutoCloserTestCase extends CommentHelperCase {
     // Override the auto comment closer so the node can be kept open.
     $edit = array(
       'comment' => COMMENT_NODE_OPEN,
-      'comment_close_override' => TRUE,
+      'comment_close_enabled' => FALSE,
     );
     $this->backdropPost('node/' . $this->node->nid . '/edit', $edit, t('Save'));
+
+    // Ensure the checkbox stays unchecked after saving.
+    $this->backdropGet('node/' . $this->node->nid . '/edit');
+    $this->assertNoFieldChecked('edit-comment-close-enabled', 'Comment close option still unchecked after saving.');
 
     // Run cron
     $this->cronRun();

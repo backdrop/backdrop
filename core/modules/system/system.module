@@ -1412,9 +1412,25 @@ function system_library_info() {
   $libraries['ui'] = array(
     'title' => 'jQuery UI: Core',
     'website' => 'http://jqueryui.com',
-    'version' => '1.10.4',
+    'version' => '1.12.1',
     'js' => array(
-      'core/misc/ui/jquery.ui.core.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.data.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.disable-selection.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.form.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.labels.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.tabbable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.unique-id.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.version.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.escape-selector.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.focusable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.form-reset-mixin.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.ie.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.keycode.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.plugin.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.safe-active-element.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.safe-blur.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
     ),
     'css' => array(
       'core/misc/ui/jquery.ui.core.css' => array(),
@@ -1460,6 +1476,34 @@ function system_library_info() {
     ),
     'css' => array(
       'core/misc/ui/jquery.ui.button.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'ui.widget'),
+    ),
+  );
+  $libraries['ui.checkboxradio'] = array(
+    'title' => 'jQuery UI: Checkbox Radio',
+    'website' => 'http://jqueryui.com/checkboxradio/',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.checkboxradio.min.js' => array(),
+    ),
+    'css' => array(
+      'core/misc/ui/jquery.ui.checkboxradio.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'ui.widget'),
+    ),
+  );
+  $libraries['ui.controlgroup'] = array(
+    'title' => 'jQuery UI: Control Group',
+    'website' => 'http://jqueryui.com/controlgroup/',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.controlgroup.min.js' => array(),
+    ),
+    'css' => array(
+      'core/misc/ui/jquery.ui.controlgroup.css' => array(),
     ),
     'dependencies' => array(
       array('system', 'ui.widget'),
