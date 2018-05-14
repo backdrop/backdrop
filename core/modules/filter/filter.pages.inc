@@ -384,14 +384,18 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
   $upload_settings = isset($format->editor_settings['file_upload']) ? $format->editor_settings['file_upload'] : array();
 
   $upload_settings += array(
-    'max_size' => file_upload_max_size(),
+    'max_size' => '',
     'file_extensions' => 'txt',
     'directory' => 'inline-files',
     'data-file-id' => NULL,
   );
 
-  $max_filesize = $upload_settings['max_size'];
+  $max_filesize = !empty($upload_settings['max_size']) ? min(parse_size($upload_settings['max_size']), file_upload_max_size()) : file_upload_max_size();
   $file_extensions = $upload_settings['file_extensions'];
+  $upload_validators = array(
+    'file_validate_extensions' => array($file_extensions),
+    'file_validate_size' => array($max_filesize),
+  );
   $file_directory = $upload_settings['directory'];
   $existing_file = !empty($values['data-file-id']) ? file_load($values['data-file-id']) : NULL;
   $fid = $existing_file ? $existing_file->fid : NULL;
@@ -400,16 +404,14 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#type' => 'managed_file',
     '#upload_location' => $upload_settings['scheme'] . '://' . $file_directory,
     '#default_value' => $fid ? $fid : NULL,
-    '#upload_validators' => array(
-      'file_validate_extensions' => array($file_extensions),
-      'file_validate_size' => array($max_filesize),
-    ),
+    '#upload_validators' => $upload_validators,
     '#wrapper_attributes' => array(
       'data-editor-image-toggle' => t('Upload a file and link to it'),
     ),
     '#parents' => array('fid'),
     '#weight' => -2,
     '#access' => $element_supports_uploads && $upload_settings['status'] && user_access('upload editor files'),
+    '#description' => theme('file_upload_help', array('upload_validators' => $upload_validators)),
   );
 
 
@@ -470,30 +472,29 @@ function filter_format_editor_link_form_submit($form, &$form_state) {
   }
   // If file is found get its URI.
   if ($fid > 0) {
-      $file = file_load($fid);
-      $uri = file_create_url($file->uri);
-      // Try to make a local path if possible for better portability.
-      // Absolute path is needed if Backdrop is installed in subdirectory.
-      $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
+    $file = file_load($fid);
+    $uri = file_create_url($file->uri);
+    // Try to make a local path if possible for better portability.
+    // Absolute path is needed if Backdrop is installed in subdirectory.
+    $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
 
-      $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $uri);
-      $form_state['values']['attributes']['data-file-id'] = $fid;
-      $form_state['values']['attributes']['href'] = $url;
-      unset($form_state['values']['fid']);
+    $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $uri);
+    $form_state['values']['attributes']['data-file-id'] = $fid;
+    $form_state['values']['attributes']['href'] = $url;
+    unset($form_state['values']['fid']);
 
-      // If no text was set, use the file name.
-      if (strlen($form_state['values']['attributes']['text']) === 0) {
-        $form_state['values']['attributes']['text'] = basename($url);
-      }
-
+    // If no text was set, use the file name.
+    if (strlen($form_state['values']['attributes']['text']) === 0) {
+      $form_state['values']['attributes']['text'] = basename($url);
+    }
   }
   else {
-      // Modify references to other URIs.
-      $url = substr(base_path(), 0, -1) . $uri;
-      $form_state['values']['attributes']['href'] = $url;
-      // Remove any reference to a data file.
-      unset($form_state['values']['fid']);
-      $form_state['values']['attributes']['data-file-id'] = NULL;
+    // Modify references to other URIs.
+    $url = substr(base_path(), 0, -1) . $uri;
+    $form_state['values']['attributes']['href'] = $url;
+    // Remove any reference to a data file.
+    unset($form_state['values']['fid']);
+    $form_state['values']['attributes']['data-file-id'] = NULL;
   }
 }
 
