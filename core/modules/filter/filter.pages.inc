@@ -392,6 +392,10 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
 
   $max_filesize = !empty($upload_settings['max_size']) ? min(parse_size($upload_settings['max_size']), file_upload_max_size()) : file_upload_max_size();
   $file_extensions = $upload_settings['file_extensions'];
+  $upload_validators = array(
+    'file_validate_extensions' => array($file_extensions),
+    'file_validate_size' => array($max_filesize),
+  );
   $file_directory = $upload_settings['directory'];
   $existing_file = !empty($values['data-file-id']) ? file_load($values['data-file-id']) : NULL;
   $fid = $existing_file ? $existing_file->fid : NULL;
@@ -400,17 +404,14 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#type' => 'managed_file',
     '#upload_location' => $upload_settings['scheme'] . '://' . $file_directory,
     '#default_value' => $fid ? $fid : NULL,
-    '#upload_validators' => array(
-      'file_validate_extensions' => array($file_extensions),
-      'file_validate_size' => array($max_filesize),
-    ),
+    '#upload_validators' => $upload_validators,
     '#wrapper_attributes' => array(
       'data-editor-image-toggle' => t('Upload a file and link to it'),
     ),
     '#parents' => array('fid'),
     '#weight' => -2,
     '#access' => $element_supports_uploads && $upload_settings['status'] && user_access('upload editor files'),
-    '#description' => t('Files must be less than @size. <br /> Allowed file types: @extensions.', array('@size' => format_size($max_filesize), '@extensions' => $file_extensions)),
+    '#description' => theme('file_upload_help', array('upload_validators' => $upload_validators)),
   );
 
 
