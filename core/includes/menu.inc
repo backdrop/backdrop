@@ -1397,7 +1397,14 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
               $query->condition('plid', $parents, 'IN');
               $query->condition('mlid', $parents, 'NOT IN');
               $query->condition('langcode', array($GLOBALS['language']->langcode, 'und'), 'IN');
-              $result = $query->execute();
+              try {
+                $result = $query->execute();
+              }
+              // If the menu links cannot be built, allow the page to render
+              // nonetheless, absent the menu links.
+              catch (PDOException $e) {
+                $result = array();
+              }
               $num_rows = FALSE;
               foreach ($result as $item) {
                 $parents[$item['mlid']] = $item['mlid'];
@@ -1555,7 +1562,15 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
 
     // Build an ordered array of links using the query result object.
     $links = array();
-    foreach ($query->execute() as $item) {
+    try {
+      $rows = $query->execute();
+    }
+    // If the menu links cannot be built, allow the page to render
+    // nonetheless, absent the menu links.
+    catch (PDOException $e) {
+      $rows = array();
+    }
+    foreach ($rows as $item) {
       $links[] = $item;
     }
     $active_trail = (isset($parameters['active_trail']) ? $parameters['active_trail'] : array());
