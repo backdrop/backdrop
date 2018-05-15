@@ -66,8 +66,8 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       PDO::MYSQL_ATTR_FOUND_ROWS => TRUE,
       // So we don't have to mess around with cursors and unbuffered queries by default.
       PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => TRUE,
-      // Because MySQL's prepared statements skip the query cache, because it's dumb.
-      PDO::ATTR_EMULATE_PREPARES => TRUE,
+      // Use MySQL-native prepared statements.
+      PDO::ATTR_EMULATE_PREPARES => FALSE,
     );
     if (defined('PDO::MYSQL_ATTR_MULTI_STATEMENTS')) {
       // An added connection option in PHP 5.5.21+ to optionally limit SQL to a
