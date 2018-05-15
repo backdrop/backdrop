@@ -537,6 +537,16 @@ function filter_format_editor_dialog_save($form, &$form_state) {
  */
 function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   $value = trim($element['#value']);
+
+  // If Link module is available, automatically clean up URL, automatically
+  // adding http:// or a prefixing slash if needed.
+  if (module_exists('link') && $type = link_validate_url($value)) {
+    $value = link_cleanup_url($value);
+    if ($type === LINK_INTERNAL && strpos($value, '/') !== 0) {
+      $value = '/' . $value;
+    }
+  }
+
   form_set_value($element, $value, $form_state);
 
   // Unlike #type = 'url' validation, we allow both relative and absolute paths.
