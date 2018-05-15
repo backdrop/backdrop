@@ -1079,7 +1079,7 @@ function install_settings_form_submit($form, &$form_state) {
     'required' => TRUE,
   );
   $settings['database_prefix'] = array(
-    'value' => $db_settings['db_prefix'],
+    'value' => $db_settings['prefix'],
   );
   backdrop_rewrite_settings($settings);
 

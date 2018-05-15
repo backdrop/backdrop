@@ -492,13 +492,13 @@ abstract class DatabaseTasks {
     );
 
     $profile = backdrop_get_profile();
-    $db_prefix = ($profile == 'standard') ? 'backdrop_' : $profile . '_';
-    $form['advanced_options']['db_prefix'] = array(
+    $prefix = ($profile == 'standard') ? 'backdrop_' : $profile . '_';
+    $form['advanced_options']['prefix'] = array(
       '#type' => 'textfield',
       '#title' => st('Table prefix'),
       '#default_value' => '',
       '#size' => 45,
-      '#description' => st('If more than one application will be sharing this database, enter a table prefix such as %prefix for your @profile site here.', array('@profile' => backdrop_install_profile_distribution_name(), '%prefix' => $db_prefix)),
+      '#description' => st('If more than one application will be sharing this database, enter a table prefix such as %prefix for your @profile site here.', array('@profile' => backdrop_install_profile_distribution_name(), '%prefix' => $prefix)),
       '#weight' => 10,
     );
 
@@ -542,7 +542,7 @@ abstract class DatabaseTasks {
 
     // Verify the table prefix.
     if (!empty($database['prefix']) && is_string($database['prefix']) && !preg_match('/^[A-Za-z0-9_.]+$/', $database['prefix'])) {
-      $errors[$database['driver'] . '][advanced_options][db_prefix'] = st('The database table prefix you have entered, %prefix, is invalid. The table prefix can only contain alphanumeric characters, periods, or underscores.', array('%prefix' => $database['prefix']));
+      $errors[$database['driver'] . '][advanced_options][prefix'] = st('The database table prefix you have entered, %prefix, is invalid. The table prefix can only contain alphanumeric characters, periods, or underscores.', array('%prefix' => $database['prefix']));
     }
 
     // Verify the database port.
