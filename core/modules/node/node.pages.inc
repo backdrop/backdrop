@@ -435,7 +435,7 @@ function node_form_submit($form, &$form_state) {
     if (!empty($original_status)) {
       $message .= t('@type has been unpublished.', array('@type' => $type)) . ' ';
     }
-    $message .= t('@type will be published on @date.', array('@type' => $type, '@date' => format_date($node->scheduled)));
+    $message .= t('@type will be published on @date (@interval from now).', array('@type' => $type, '@date' => format_date($node->scheduled), '@interval' => format_interval($node->scheduled - REQUEST_TIME)));
     backdrop_set_message($message);
   }
   if ($node->nid) {
