@@ -893,10 +893,7 @@ function node_load($nid = NULL, $vid = NULL, $reset = FALSE) {
  */
 function node_object_prepare(Node $node) {
   // Check if we can retrieve a node from the tempstore.
-  global $user;
-  $tempstore_id = $node->type . ':' . $user->uid;
-  
-  $node->tempstore_id = $tempstore_id;
+  $tempstore_id = node_build_tempstore_id($node->type);
 
    // Set up default values, if required.
   $node_type = node_type_get_type($node->type);
@@ -3829,3 +3826,12 @@ function node_clear_node_tempstore($tempstore_id, $type = 'node') {
 function node_tempstore_load($tempstore_id) {
   return node_get_node_tempstore($tempstore_id);
 }
+
+/**
+ * Build tempstore ID.
+ */
+function node_build_tempstore_id($type) {
+  global $user;
+  return $type . ':' . $user->uid;
+}
+

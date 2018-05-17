@@ -125,8 +125,7 @@ function node_form($form, &$form_state, Node $node) {
 
 
   // Check if we can retrieve a node from the tempstore.
-  global $user;
-  $tempstore_id = $node->type . ':' . $user->uid;
+  $tempstore_id = node_build_tempstore_id($node->type);
   if (!empty($tempstore_id) && ($data = node_tempstore_load($tempstore_id))) {
     $node = $data;
     $form_state['entity'] = $node;
@@ -452,8 +451,7 @@ function node_form($form, &$form_state, Node $node) {
 function node_form_preview($form, &$form_state) {
   $node = $form_state['node'];
   entity_form_submit_build_entity('node', $node, $form, $form_state);
-  global $user;
-  $tempstore_id = $node->type . ':' . $user->uid;
+  $tempstore_id = node_build_tempstore_id($node->type);
   node_set_node_tempstore($node, $tempstore_id);
   $form_state['redirect'] = 'node/' . $node->type . '/preview';
 }
@@ -531,8 +529,7 @@ function node_form_submit($form, &$form_state) {
  * @see node_form_build_preview()
  */
 function node_preview($type) {
-  global $user;
-  $tempstore_id = $type . ':' . $user->uid;
+  $tempstore_id = node_build_tempstore_id($type);
   $node = node_get_node_tempstore($tempstore_id);
   
   // Set status to true so we don't get the 'unpublished' CSS.
@@ -595,8 +592,7 @@ function node_preview($type) {
  *   The view mode preview selection form.
  */
 function node_preview_form_select(array $form, array $form_state, EntityInterface $node) {
-  global $user;
-  $tempstore_id = $type . ':' . $user->uid;
+  $tempstore_id = node_build_tempstore_id($node->type);
 
   // Always add the 'default' view mode.
   $view_mode_options = array('default' => t('Full'));
