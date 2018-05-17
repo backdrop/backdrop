@@ -292,18 +292,19 @@ function node_form($form, &$form_state, Node $node) {
   }
   $form['options']['status'] = array(
     '#type' => 'radios',
+    '#title' => t('Published state'),
     '#options' => array(
       NODE_PUBLISHED => $node->nid ? t('Published') : t('Publish now'),
       NODE_NOT_PUBLISHED => t('Draft'),
       NODE_SCHEDULED => t('Schedule for later'),
     ),
     '#default_value' => $status,
-    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators.'),
   );
+  $form['options']['status'][NODE_NOT_PUBLISHED]['#description'] = t('Content saved as draft is only accessible to the content creator or site administrators.');
 
   // Adjustments to the status radios if scheduling is enabled/disabled.
   if ($node_type->settings['scheduling_enabled']) {
-    $form['options']['status']['#description'] .= ' ' . t('Content set to "Schedule for later" will be saved as draft when the content is created, but will be automatically published on the date and time selected.');
+    $form['options']['status'][NODE_SCHEDULED]['#description'] = t('Save as draft and set a date and time for the content to be automatically published.');
   }
   else {
     $form['options']['status'][NODE_SCHEDULED]['#access'] = FALSE;
