@@ -261,20 +261,12 @@ function node_form($form, &$form_state, Node $node) {
     '#description' => t('Leave blank for %anonymous.', array('%anonymous' => $config->get('anonymous'))),
   );
   $form['author']['date'] = array(
-    '#type' => 'textfield',
+    '#type' => module_exists('date') ? 'date_popup' : 'textfield',
     '#title' => t('Authored on'),
-    '#maxlength' => 25,
-    '#description' => t('Format: %time. The date format is YYYY-MM-DD and %timezone is the time zone offset from UTC. Leave blank to use the time of form submission.', array('%time' => !empty($node->date) ? date_format(date_create($node->date), 'Y-m-d H:i:s O') : format_date($node->created, 'custom', 'Y-m-d H:i:s O'), '%timezone' => !empty($node->date) ? date_format(date_create($node->date), 'O') : format_date($node->created, 'custom', 'O'))),
-    '#default_value' => !empty($node->date) ? $node->date : '',
-    '#attached' => array(
-      'library' => array(array('system', 'ui.datepicker')),
-      'js' => array(array(
-        'data' => "jQuery(function ($) {
-          $('#edit-date').datepicker();
-        });",
-        'type' => 'inline',
-      ))
-    ),
+    // Note #date_format only applies if date module is enabled.
+    '#date_format' => 'Y-m-d g:i a',
+    '#default_value' => !empty($node->date) ? $node->date : NULL,
+    '#description' => t('Leave blank to use the current time.'),
   );
 
   // Node options for administrators
@@ -321,8 +313,9 @@ function node_form($form, &$form_state, Node $node) {
     // Default the scheduled time to the current time + 1 day.
     $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME + 86400;
     $form['options']['scheduled'] = array(
-      '#type' => 'date_popup',
+      '#type' => module_exists('date') ? 'date_popup' : 'textfield',
       '#title' => t('Publish on'),
+      // Note #date_ properties only apply if date module is enabled.
       '#date_format' => 'Y-m-d g:i a',
       '#date_increment' => 10,
       '#default_value' => format_date($scheduled_date, 'custom', 'Y-m-d g:i a'),
@@ -442,7 +435,7 @@ function node_form_submit($form, &$form_state) {
     if (!empty($original_status)) {
       $message .= t('@type has been unpublished.', array('@type' => $type)) . ' ';
     }
-    $message .= t('@type will be published on @date.', array('@type' => $type, '@date' => format_date($node->scheduled)));
+    $message .= t('@type will be published on @date (@interval from now).', array('@type' => $type, '@date' => format_date($node->scheduled), '@interval' => format_interval($node->scheduled - REQUEST_TIME)));
     backdrop_set_message($message);
   }
   if ($node->nid) {
