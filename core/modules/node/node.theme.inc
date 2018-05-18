@@ -161,6 +161,32 @@ function theme_node_admin_overview($variables) {
  * @see node.tpl.php
  */
 function template_preprocess_node(&$variables) {
+  if ($variables['elements']['#node']->status == NODE_NOT_PUBLISHED) {
+    $name = node_type_get_name($variables['elements']['#node']->type);
+    if ($variables['elements']['#node']->scheduled == 0) {
+      $markup = '<div class="unpublished-indicator">' . t('This @type is unpublished.', array('@type' => $name)) . '</div>';
+    }
+    else {
+      $nice_scheduled_date = format_date(
+        $variables['elements']['#node']->scheduled,
+        'custom',
+        t('j M Y g:i A', array(), array('context' => 'php date format'))
+      );
+      $markup = '<div class="unpublished-indicator">'
+        . t('This @type is scheduled for publication on @scheduled.',
+            array(
+              '@type' => $name,
+              '@scheduled' => $nice_scheduled_date
+            )
+          )
+        . '</div>';
+    }
+    $variables['title_suffix']['unpublished_indicator'] = array(
+      '#type' => 'markup',
+      '#markup' => $markup,
+    );
+  }
+
   $variables['view_mode'] = $variables['elements']['#view_mode'];
   // Provide a distinct $teaser boolean.
   $variables['teaser'] = $variables['view_mode'] == 'teaser';
