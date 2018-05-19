@@ -322,18 +322,18 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
 function filter_format_editor_image_form_submit($form, &$form_state) {
   // Image source overrides file uploads, as the values are emptied out when
   // hidden by JavaScript.
-  if (!empty($form_state['values']['attributes']['src'])) {
-    $form_state['values']['fid'] = NULL;
-    $form_state['values']['attributes']['data-file-id'] = NULL;
-  }
-  // Convert any uploaded files from the FID values to the src attribute.
-  if (!empty($form_state['values']['fid'])) {
+  if (isset($form_state['values']['fid'])) {
     $fid = $form_state['values']['fid'];
-    $file = file_load($fid);
+    if ($fid == 0) {
+      $url = $form_state['values']['image_library']['src'];
+    }
+    else {
+      $file = file_load($fid);
+      $url = file_create_url($file->uri);
+    }
 
     // Try to make a local path if possible for better portability.
     $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
-    $url = file_create_url($file->uri);
     $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
 
     $form_state['values']['attributes']['src'] = $url;
