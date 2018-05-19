@@ -568,7 +568,8 @@ function node_preview($type) {
  
   $build = array();
   // @todo all links should be disabled, except for returning to the edit form.
-  //$build['#attached']['library'][] = array('node', 'backdrop.node.preview');
+  $build['#attached']['js'][] = backdrop_get_path('module', 'node') . '/js/node.preview.js';
+  $build['#attached']['css'][] = backdrop_get_path('module', 'node') . '/css/node.preview.css';
   $build['preview_form_select'] = array(
     '#type' => 'container',
     '#attributes' => array(
@@ -632,9 +633,7 @@ function node_preview_form_select(array $form, array $form_state, EntityInterfac
     '#type' => 'link',
     '#title' => t('Back to content editing'),
     '#href' => $path,
-    // Add the "overlay-restore" class to indicate this link should restore
-    // the context in which the preview demonstration page was opened.
-    // '#options' => array('query' => array('tempstore_id' => $tempstore_id) ,'attributes' => array('class' => array('node-preview-backlink button-action', 'overlay-restore'))),
+    '#attributes' => array('class' => array('node-preview-backlink button')),
   );
 
   $form['view_mode'] = array(
