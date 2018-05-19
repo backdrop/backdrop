@@ -322,7 +322,12 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
 function filter_format_editor_image_form_submit($form, &$form_state) {
   // Image source overrides file uploads, as the values are emptied out when
   // hidden by JavaScript.
-  if (isset($form_state['values']['fid'])) {
+  if (!empty($form_state['values']['attributes']['src'])) {
+    $form_state['values']['fid'] = NULL;
+    $form_state['values']['attributes']['data-file-id'] = NULL;
+  }
+  // Convert any uploaded files from the FID values to the src attribute.
+  if (isset($form_state['values']['fid'])) { 
     $fid = $form_state['values']['fid'];
     if ($fid == 0) {
       $url = $form_state['values']['image_library']['src'];
