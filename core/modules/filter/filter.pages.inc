@@ -219,16 +219,20 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#access' => $element_supports_uploads && $upload_settings['status'] && user_access('upload editor images'),
   );
 
-  // Use a "textfield" rather than "url" to allow relative paths.
-  $form['image']['src'] = array(
-    '#title' => t('Image URL'),
+  // Image library, very similar to Image URL
+  global $base_url;
+  $form['image']['library_all'] = array(
+    '#title' => t('Select image'),
+    '#description' => views_embed_view('image_library'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => '/example/image.jpg',
     '#default_value' => isset($values['src']) ? $values['src'] : NULL,
-    '#parents' => array('attributes', 'src'),
+    '#parents' => array('image_library', 'src'),
     '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Image URL'),
+      'data-editor-image-toggle' => t('Select image'),
+      'data-editor-image-library-base-url' => $base_url,
+      'data-editor-image-library-fid' => '',
     ),
     '#weight' => -2,
   );
