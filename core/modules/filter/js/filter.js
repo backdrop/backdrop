@@ -197,6 +197,22 @@ Backdrop.behaviors.editorImageDialog = {
         }
       }
     }, 1);
+    
+    // Image library
+    var $libraryField = $('[data-editor-image-library-base-url]', context);
+
+    if ($libraryField.length){
+      // Delegate this click event to an element outside of the view, so that
+      // the view can use ajax without breaking this event.
+      $('.form-item-image-library-src').on('click', '.image-library-choose-file', function(){
+
+        // Make this a relative URL to the image by stripping the base_url.
+        var relativeImgSrc = $(this).find('img').attr('src')
+            .replace($libraryField.data('editor-image-library-base-url'), '');
+
+        $libraryField.find('input[type=text]').val(relativeImgSrc);
+      });
+    }
   }
 };
 
