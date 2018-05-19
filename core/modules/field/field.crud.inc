@@ -469,7 +469,7 @@ function field_delete_field($field_name) {
  *     Settings for the 'default' display mode will be added if not present, and
  *     each display mode in the definition will be completed with the following
  *     default values:
- *     - label: 'above'
+ *     - label: 'hidden'
  *     - type: the default formatter specified in hook_field_info().
  *     - settings: each omitted setting is given the default value specified in
  *       hook_field_formatter_info().
@@ -643,7 +643,7 @@ function _field_write_instance($instance, $update = FALSE) {
   );
   foreach ($instance['display'] as $view_mode => $display) {
     $display += array(
-      'label' => 'above',
+      'label' => 'hidden',
       'type' => isset($field_type['default_formatter']) ? $field_type['default_formatter'] : 'hidden',
       'settings' => array(),
     );
