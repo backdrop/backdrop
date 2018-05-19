@@ -86,6 +86,20 @@ function filter_update_1001() {
 }
 
 /**
+ * Import the image_library view
+ */
+function filter_update_1002() {
+  $config = config('views.view.image_library');
+  if ($config->isNew()) {
+    $path = backdrop_get_path('module', 'filter') . '/config/';
+    $contents = file_get_contents($path . 'views.view.image_library.json');
+    $data = json_decode($contents, TRUE);
+    $config->setData($data);
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
