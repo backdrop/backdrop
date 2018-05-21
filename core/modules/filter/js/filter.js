@@ -216,7 +216,7 @@ Backdrop.behaviors.editorImageDialog = {
   }
 };
 
-  /**
+/**
  * Command to save the contents of an editor-provided dialog.
  *
  * This command does not close the open dialog. It should be followed by a call
@@ -227,5 +227,5 @@ Backdrop.behaviors.editorImageDialog = {
 Backdrop.ajax.prototype.commands.editorDialogSave = function (ajax, response, status) {
   $(window).trigger('editor:dialogsave', [response.values]);
 };
-
+  
 })(jQuery);
