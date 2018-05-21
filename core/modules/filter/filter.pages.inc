@@ -232,7 +232,6 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#wrapper_attributes' => array(
       'data-editor-image-toggle' => t('Select image'),
       'data-editor-image-library-base-url' => $base_url,
-      'data-editor-image-library-fid' => '',
     ),
     '#weight' => -2,
   );
