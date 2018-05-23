@@ -110,10 +110,10 @@ function block_block_info() {
   $config_names = config_get_names_with_prefix('block.custom.');
   foreach ($config_names as $config_name) {
     $block = config_get($config_name);
-    $block_info = array(
-      'info' => $block['info'],
-      'description' => $block['description'],
-    );
+    $block_info = array();
+    $block_info['info'] = $block['info'];
+    $block_info['description'] = !empty($block['description']) ? $block['description'] : NULL;
+
     // If this block has been translated, return the translated information.
     if (isset($block['translations'][$langcode])) {
       $block_info['info'] = $block['translations'][$langcode]['info'];
