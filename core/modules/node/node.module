@@ -122,7 +122,7 @@ function node_cron() {
     ->fields('n', array('nid'))
     ->condition('status', 0)
     ->condition('scheduled', 0, '!=')
-    ->condition('scheduled', time(), '<=')
+    ->condition('scheduled', REQUEST_TIME, '<=')
     ->execute();
   foreach ($scheduled_nodes as $n) {
     if ($node = node_load($n->nid)) {
@@ -287,7 +287,7 @@ function node_tag_new($node = NULL, $save_for_later = FALSE) {
 
   global $user;
   if ($user->uid) {
-    foreach($nids_viewed as $nid) {
+    foreach ($nids_viewed as $nid) {
       db_merge('history')
         ->key(array(
           'uid' => $user->uid,
