@@ -207,3 +207,13 @@ fieldset {
 [dir="rtl"] fieldset {
   padding: 2.5em 0 0;
 }
+
+/**
+ * Clearfix text areas in case of floated contents
+ */
+.field-type-text-long:after,
+.field-type-text-with-summary:after {
+  content: '';
+  display: table;
+  clear: both;
+}

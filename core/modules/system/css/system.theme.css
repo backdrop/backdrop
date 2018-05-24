@@ -541,3 +541,13 @@ img.align-right {
   border-top: none;
   background-color: #eee;
 }
+
+/**
+ * Clearfix text areas in case of floated contents
+ */
+.field-type-text-long:after,
+.field-type-text-with-summary:after {
+  content: '';
+  display: table;
+  clear: both;
+}
