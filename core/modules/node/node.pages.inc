@@ -420,24 +420,27 @@ function node_form_submit($form, &$form_state) {
   $node_link = l(t('view'), 'node/' . $node->nid);
   $type = node_type_get_name($node);
   $watchdog_args = array('@type' => $node->type, '%title' => $node->title);
-  $t_args = array('@type' => $type, '%title' => $node->title);
+  $t_args = array('@type' => $type, '%title' => $node->title, '@scheduled' => format_date($node->scheduled), '@interval' => format_interval($node->scheduled - REQUEST_TIME));
+  $message = '';
 
+  if ($node->scheduled) {
+    if (!empty($original_status)) {
+      $message = t('@type has been unpublished. It is scheduled to be republished on @scheduled (@interval from now).', $t_args);
+    }
+    else {
+      $message = t('@type will be published on @scheduled (@interval from now).', $t_args);
+    }
+  }
   if ($insert) {
     watchdog('content', '@type: added %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
-    backdrop_set_message(t('@type %title has been created.', $t_args));
+    $message = $message ? $message : t('@type %title has been created.', $t_args);
   }
   else {
     watchdog('content', '@type: updated %title.', $watchdog_args, WATCHDOG_NOTICE, $node_link);
-    backdrop_set_message(t('@type %title has been updated.', $t_args));
+    $message = $message ? $message : t('@type %title has been updated.', $t_args);
   }
-  if ($node->scheduled) {
-    $message = '';
-    if (!empty($original_status)) {
-      $message .= t('@type has been unpublished.', array('@type' => $type)) . ' ';
-    }
-    $message .= t('@type will be published on @date (@interval from now).', array('@type' => $type, '@date' => format_date($node->scheduled), '@interval' => format_interval($node->scheduled - REQUEST_TIME)));
-    backdrop_set_message($message);
-  }
+  backdrop_set_message($message);
+
   if ($node->nid) {
     $form_state['values']['nid'] = $node->nid;
     $form_state['nid'] = $node->nid;
