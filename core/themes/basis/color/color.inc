@@ -3,22 +3,18 @@
 $info = array(
   // Available colors and color labels used in theme.
   'fields' => array(
-    'header' => t('Header background'), // And active pager link.
-    'sitename' => t('Site name background'),
+    'header' => t('Header background'),
+    'base' => t('Site name background'),
     'slogan' => t('Slogan background'),
-    'titleslogan' => t('Site name and slogan'), // And main menu links.
-    'bg' => t('Main background'), // And submenu text, pager text, and drop down arrows
+    'titleslogan' => t('Site name and slogan'),
+    'bg' => t('Main background'),
     'footer' => t('Footer background'),
     'text' => t('Text color'),
     'link' => t('Link color'),
-    'hovermenu' => t('Hover menu link background'),
-    'border_thingy' => t('Border thingies'), //These are all over the place.
+    'hovermenu' => t('Main menu hover background'),
+    'borders' => t('Borders'),
     'form_focus_border' => t('Form element borders when selected'),
-    'action_item_background' => t('Action item background'),
-    'buttons' => t('Buttons'), // Action item link backgrounds, pager backgrounds, vertical tab backgrounds
-    'buttons_hover' => t('Buttons Hover'), // Action item link backgrounds, vertical tab backgrounds
-    'pager_hover' => t('Pager hover'), // Pager backgrounds
-    'handles' => t('Handles'), // table drag handles, table sorts, and the plus/minus thing in the responsive menus.
+    'buttons' => t('Buttons and Breadcrumb'),
   ),
   // Pre-defined color schemes.
   'schemes' => array(
@@ -26,7 +22,7 @@ $info = array(
       'title' => t('Basis (default)'),
       'colors' => array(
         'header' => '#20252e',
-        'sitename' => '#0074bd',
+        'base' => '#0074bd',
         'slogan' => '#000',
         'titleslogan' => '#fffffe',
         'bg' => '#fff',
@@ -34,16 +30,14 @@ $info = array(
         'text' => '#000001',
         'link' => '#0073bd',
         'hovermenu' => '#114a75',
-        'border_thingy' => '#bbb',
+        'borders' => '#bbb',
         'form_focus_border' => '#43afe4',
-        'action_item_background' => '#586172',
         'buttons' => '#dee2ea',
-        'buttons_hover' => '#d5d5d5',
-        'pager_hover' => '#3c4350',
-        'handles' => '#333',
       ),
     ),
   ),
+
+  'blend_target' => '#ffffff',
 
   // CSS files (excluding @import) to rewrite with new color scheme.
   'css' => array(
