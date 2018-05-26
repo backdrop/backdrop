@@ -6,7 +6,7 @@
  * Additionally accounts for multiple tables being wrapped in "package" fieldset
  * elements.
  */
-Backdrop.behaviors.moduleFilterByText = {
+Backdrop.behaviors.moduleFilter = {
   attach: function(context, settings) {
     var $input = $('input.table-filter-text').once('table-filter-text');
     var $form = $('#system-modules');
@@ -38,12 +38,17 @@ Backdrop.behaviors.moduleFilterByText = {
     // Fliter the list of modules by provided search string.
     function filterModuleList() {
       var query = $input.val().toLowerCase();
+      var tag = $('select[data-filter-tags]').val();
+      var core = $('input[data-filter-source="core"]').is(":checked");
+      var contrib = $('input[data-filter-source="contrib"]').is(":checked");
+      var custom = $('input[data-filter-source="custom"]').is(":checked");
 
       function showModuleRow(index, row) {
         var $row = $(row);
         var $sources = $row.find('.table-filter-text-source');
         var rowMatch = $sources.text().toLowerCase().indexOf(query) !== -1;
         var $fieldsetTitle = $row.closest('fieldset').find('legend:first');
+        var tagSource = $row.find('.module-tags').text().toLowerCase();
 
         // Finding the fieldset title and filtering it can be expensive and
         // repetitive to do for every row, so save the filtered title as data on
@@ -57,14 +62,33 @@ Backdrop.behaviors.moduleFilterByText = {
         else {
           filterTitle = $fieldsetTitle.data('filterTitle');
         }
+        // Compare the search query to the fieldset title.
         var fieldsetTitleMatch = filterTitle.indexOf(query) !== -1;
+        // Compare the requested tag to each row's tags.
+        var tagMatch = tagSource.indexOf(tag) !== -1;
+
+        // Check the module souce and show only if matched.
+        var sourceMatch = false;
+        if ($row.hasClass('core') && core ) {
+          sourceMatch = true;
+        }
+        if ($row.hasClass('contrib') && contrib) {
+          sourceMatch = true;
+        }
+        if ($row.hasClass('custom') && custom) {
+          sourceMatch = true;
+        }
 
         // If the row contains the string or the fieldset does, show the row.
-        $row.closest('tr').toggle(rowMatch || fieldsetTitleMatch);
+        $row.closest('tr').toggle((rowMatch || fieldsetTitleMatch) && tagMatch && sourceMatch);
       }
 
-      // Filter only if the length of the query is at least 2 characters.
-      if (query.length >= 2) {
+      // Filter only if the length of the search query is at least 2 characters.
+      if (query.length >= 2 || tag || !core || !contrib || !custom) {
+        $('#edit-target').on('change', function() {
+          $rows.each(showModuleRow);
+        });
+
         $rows.each(showModuleRow);
 
         // We first show() all <fieldset>s to be able to use ':visible'.
@@ -92,6 +116,8 @@ Backdrop.behaviors.moduleFilterByText = {
 
       // @todo Use autofocus attribute when possible.
       $input.focus().on('keyup', filterModuleList);
+      $('select[data-filter-tags]').change(filterModuleList);
+      $('input[data-filter-source]').change(filterModuleList);
       $input.triggerHandler('keyup');
     }
   }

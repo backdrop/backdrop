@@ -1,8 +1,10 @@
+type = module
 name = File
 description = Defines a file field type.
 package = Fields
+tags[] = File Management
+tags[] = Media
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
 required = TRUE
 dependencies[] = field
