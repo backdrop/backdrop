@@ -86,6 +86,7 @@ small .admin-link:after {
 }
 #system-modules td.version {
   width: 70px;
+  white-space: nowrap;
 }
 #system-modules td.operations {
   width: 120px;

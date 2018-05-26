@@ -325,18 +325,25 @@ function system_test_exit() {
  * Implements hook_system_info_alter().
  */
 function system_test_system_info_alter(&$info, $file, $type) {
-  // We need a static otherwise the last test will fail to alter common_test.
-  static $test;
-  if (($dependencies = state_get('system_test_dependencies', array())) || $test) {
+  if ($dependency = state_get('system_test_dependency')) {
     if ($file->name == 'module_test') {
       $info['hidden'] = FALSE;
-      $info['dependencies'][] = array_shift($dependencies);
-      state_set('system_test_dependencies', $dependencies);
-      $test = TRUE;
+      $info['dependencies'][] = $dependency;
     }
     if ($file->name == 'common_test') {
       $info['hidden'] = FALSE;
       $info['version'] = '1.x-2.4-beta3';
+    }
+  }
+
+  if ($dev_dependency = state_get('system_test_dev_dependency')) {
+    if ($file->name == 'module_test') {
+      $info['hidden'] = FALSE;
+      $info['dependencies'][] = $dev_dependency;
+    }
+    if ($file->name == 'common_test') {
+      $info['hidden'] = FALSE;
+      $info['version'] = '1.x-2.x-dev';
     }
   }
 
