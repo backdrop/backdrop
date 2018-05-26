@@ -94,7 +94,12 @@ input#edit-filters-filter-html-settings-allowed-html {
 .view-image-library td {
   padding-left: 5px;
   padding-right: 5px;
+  vertical-align: bottom;
 }
 .image-library-choose-file .field-content {
   font-size: 0.8rem;
 }
+.image-library-image {
+  max-width: 150px;
+}
+
