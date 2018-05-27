@@ -1,0 +1,5 @@
+name = Options element
+description = A custom form element for entering the options in select lists, radios, or checkboxes.
+package = System
+version = BACKDROP_VERSION
+backdrop = 1.x

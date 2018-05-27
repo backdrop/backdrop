@@ -1,0 +1,103 @@
+
+div.options-widget .draggable a.tabledrag-handle {
+  padding-right: .3em /* RTL */
+}
+
+div.form-options div.options {
+  margin-bottom: 0;
+}
+
+div.options-widget a.add span,
+div.options-widget a.remove span {
+  display: none;
+}
+
+div.options-widget a.add,
+div.options-widget a.remove,
+div.form-option-add a {
+  display: block;
+  width: 16px;
+  height: 16px;
+  margin: .2em .1em;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  float: left; /* RTL */
+}
+
+div.options-widget a.add:hover,
+div.options-widget a.remove:hover,
+div.form-option-add a:hover {
+  background-position: 0 -16px;
+}
+
+div.options-widget a.add,
+div.form-option-add a {
+  background-image: url(add.png);
+}
+
+div.options-widget a.remove {
+  background-image: url(delete.png);
+}
+
+div.default-value-pattern-match {
+  float: left; /* RTL */
+}
+
+div.remove-default {
+  float: left; /* RTL */
+}
+
+div.form-options-manual,
+div.form-option-add {
+  text-align: right; /* RTL */
+}
+div.form-options-manual a,
+div.form-option-add a {
+  float: none;
+  display: inline;
+  padding-left: 20px; /* RTL */
+}
+
+div.options-widget table {
+  width: 100%;
+  margin: 0;
+}
+
+div.options-widget table,
+div.options-widget tbody {
+  border: none;
+}
+
+div.options-widget table tr {
+  border-style: none;
+  background: none;
+}
+
+div.options-widget table td {
+  padding: 4px 6px;
+}
+
+div.options-widget table td.option-default-cell {
+  width: 6em;
+  padding: 4px 0;
+}
+
+div.options-widget table td.option-order-cell {
+  width: 2em;
+}
+
+div.options-widget table tr.indented td.option-order-cell {
+  width: 4em;
+}
+
+div.options-widget table td.option-key-cell {
+  width: 20%;
+}
+
+div.options-widget table td.option-actions-cell {
+  width: 40px;
+}
+
+div.options-widget input.form-text {
+  width: 100%;
+}
