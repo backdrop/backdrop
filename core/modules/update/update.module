@@ -734,6 +734,17 @@ function update_flush_caches() {
 }
 
 /**
+ * Implements hook_admin_bar_cache_info().
+ */
+function update_admin_bar_cache_info() {
+  $caches['update'] = array(
+    'title' => t('Update data'),
+    'callback' => '_update_cache_clear',
+  );
+  return $caches;
+}
+
+/**
  * Implements hook_config_info().
  */
 function update_config_info() {

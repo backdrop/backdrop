@@ -4136,3 +4136,24 @@ function _system_sort_form_values_by_config($form, &$form_state, $inherited_buck
   }
   return $configs;
 }
+
+/**
+ * Implements hook_admin_bar_cache_info().
+ */
+function system_admin_bar_cache_info() {
+  $caches = array(
+    'assets' => t('CSS and JavaScript'),
+    'cache' => t('Page and else'),
+    'layout' => t('Layout'),
+    'menu' => t('Menu'),
+    'theme' => t('Theme registry'),
+    'token' => t('Token registry'),
+  );
+  foreach ($caches as $name => $cache) {
+    $caches[$name] = array(
+      'title' => $cache,
+      'callback' => '_admin_bar_flush_cache',
+    );
+  }
+  return $caches;
+}
