@@ -2855,6 +2855,34 @@ function _system_rebuild_module_data() {
       $modules[$key]->info['hidden'] = TRUE;
     }
 
+    // Apply best guess version information if this is a Git checkout.
+    if (empty($modules[$key]->info['version'])) {
+      $module_base_path = BACKDROP_ROOT . '/' . preg_replace('!(.*modules/[^/]+).*!', '$1', $module->uri);
+      $git_version = FALSE;
+      if (file_exists($module_base_path . '/.git/HEAD')) {
+        // Branches names are directly in the HEAD file.
+        $git_head_contents = trim(file_get_contents($module_base_path . '/.git/HEAD'));
+        if (strpos($git_head_contents, 'ref') === 0) {
+          $git_version = trim(preg_replace('!^.*refs/heads/(.*)$!', '$1', $git_head_contents));
+        }
+        // Tags are named by sha1 hash, loop through each tag file to match it.
+        elseif (is_dir($module_base_path . '/.git/refs/tags')) {
+          $tag_files = file_scan_directory($module_base_path . '/.git/refs/tags', '/.*/', array('key' => 'filename', 'recurse' => FALSE));
+          $tag_files = array_reverse($tag_files, TRUE);
+          foreach ($tag_files as $tag_name => $tag_file) {
+            if (trim(file_get_contents($tag_file->uri)) == $git_head_contents) {
+              $git_version = $tag_name;
+              break;
+            }
+          }
+        }
+        if ($git_version) {
+          $git_version = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $git_version);
+          $modules[$key]->info['version'] = $git_version . '-dev';
+        }
+      }
+    }
+
     // Invoke hook_system_info_alter() to give installed modules a chance to
     // modify the data in the .info files if necessary.
     $type = 'module';

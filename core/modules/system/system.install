@@ -447,7 +447,7 @@ function system_requirements($phase) {
         // Check for an incompatible version.
         $required_file = $files[$required_module];
         $required_name = $required_file->info['name'];
-        $version = str_replace(BACKDROP_CORE_COMPATIBILITY . '-', '', $required_file->info['version']);
+        $version = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $required_file->info['version']);
         $compatibility = backdrop_check_incompatibility($requirement, $version);
         if ($compatibility) {
           $compatibility = rtrim(substr($compatibility, 2), ')');
