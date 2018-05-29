@@ -118,11 +118,12 @@ function node_cron() {
     ->condition('timestamp', NODE_NEW_LIMIT, '<')
     ->execute();
 
-  $scheduled_nodes = db_query(
-      "SELECT nid FROM {node} WHERE scheduled <= UNIX_TIMESTAMP(NOW())
-      AND status = '0'
-      AND scheduled != 0"
-  );
+  $scheduled_nodes = db_select('node', 'n')
+    ->fields('n', array('nid'))
+    ->condition('status', 0)
+    ->condition('scheduled', 0, '!=')
+    ->condition('scheduled', REQUEST_TIME, '<=')
+    ->execute();
   foreach ($scheduled_nodes as $n) {
     if ($node = node_load($n->nid)) {
       $node->status = 1;
@@ -286,14 +287,16 @@ function node_tag_new($node = NULL, $save_for_later = FALSE) {
 
   global $user;
   if ($user->uid) {
-    db_merge('history')
-      ->key(array(
-        'uid' => $user->uid,
-        'nid' => $nids_viewed,
-      ))
-      ->fields(array('timestamp' => REQUEST_TIME))
-      ->execute();
-   }
+    foreach ($nids_viewed as $nid) {
+      db_merge('history')
+        ->key(array(
+          'uid' => $user->uid,
+          'nid' => $nid,
+        ))
+        ->fields(array('timestamp' => REQUEST_TIME))
+        ->execute();
+    }
+  }
 
   // Clear out the saved list so we don't update the same nodes again..
   $nids_viewed = array();

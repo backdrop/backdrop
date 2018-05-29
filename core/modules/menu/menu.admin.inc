@@ -151,6 +151,7 @@ function _menu_overview_tree_form($tree, $langcode = NULL) {
       $form[$mlid]['langcode'] = array(
         '#type' => 'markup',
         '#markup' => check_plain($langcode_label),
+        '#access' => module_exists('language'),
       );
       $form[$mlid]['hidden'] = array(
         '#type' => 'checkbox',

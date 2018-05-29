@@ -345,7 +345,7 @@ function _field_info_prepare_instance($instance, $field) {
       if (!isset($instance['display'][$view_mode])) {
         $instance['display'][$view_mode] = array(
           'type' => 'hidden',
-          'label' => 'above',
+          'label' => 'hidden',
           'settings' => array(),
           'weight' => 0,
         );
@@ -370,7 +370,7 @@ function _field_info_prepare_instance_display($field, $display) {
 
   // Fill in default values.
   $display += array(
-    'label' => 'above',
+    'label' => 'hidden',
     'type' => $field_type['default_formatter'],
     'settings' => array(),
     'weight' => 0,

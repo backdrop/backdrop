@@ -1181,30 +1181,40 @@ function _layout_get_all_info($data_type, $init = array()) {
 }
 
 /**
- * Load the layout template information for a single layout template name.
+ * Load the information of either a single layout template or all available
+ * layout templates.
  *
  * @param string $template_name
- *   The name of the layout template, e.g. "boxton" or "simmons". If no layout
- *   template is specified, all layout info will be returned.
+ *   Optionally specify a name of a single layout template, e.g. "boxton" or
+ *   "simmons". If no layout template name is specified, information for all
+ *   layout templates will be returned.
+ * 
+ * @param boolean $rebuild
+ *   Whether or not the list of layout template info needs to be rebuilt (see
+ *   https://github.com/backdrop/backdrop-issues/issues/984). The rebuild is
+ *   required only on specific cases, so this defaults to FALSE. That way, the
+ *   rest of the times the layout cache is used (when available) for performance
+ *   reasons.
+ * 
  * @return array|boolean
  *   The layout template information, as returned by either a stand-alone
  *   template .info file, or through a module's hook_layout_info().
  *
  * @see hook_layout_info()
  */
-function layout_get_layout_template_info($template_name = NULL) {
+function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE) {
   $info = &backdrop_static(__FUNCTION__);
 
   // Try getting a cached list of layout info.
-  if (!isset($info)) {
+  if (!isset($info) && !$rebuild) {
     $cache = cache('cache')->get('layout_info');
     if ($cache && $cache->data) {
       $info = $cache->data;
     }
   }
 
-  // Rebuild the list.
-  if (!isset($info)) {
+  // Rebuild the list of layout info.
+  if (!isset($info) || $rebuild) {
     $files = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'layouts', 'name', 0);
     $init = array();
     foreach ($files as $name => $file) {

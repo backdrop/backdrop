@@ -100,7 +100,7 @@ function locale_schema() {
         'description' => 'Backdrop path in case of online discovered translations or file path in case of imported strings.',
       ),
       'source' => array(
-        'type' => 'blob',
+        'type' => 'text',
         'not null' => TRUE,
         'description' => 'The original string in English.',
       ),
@@ -135,7 +135,7 @@ function locale_schema() {
         'description' => 'Source string ID. References {locales_source}.lid.',
       ),
       'translation' => array(
-        'type' => 'blob',
+        'type' => 'text',
         'not null' => TRUE,
         'description' => 'Translation string value in this language.',
       ),
@@ -339,6 +339,30 @@ function locale_update_1004() {
   // Moved to state:
   update_variable_del('locale_translation_plurals');
   update_variable_del('locale_translation_javascript');
+}
+
+/**
+ * Convert source and translation from blob to text.
+ */
+function locale_update_1005() {
+  db_drop_index('locales_source', 'source_context');
+  db_change_field('locales_source', 'source', 'source',
+    array(
+      'type' => 'text',
+      'not null' => TRUE,
+      'description' => 'The original string in English.',
+    ),
+    array('indexes' => array(
+      'source_context' => array(array('source', 30), 'context'),
+    )
+  ));
+  db_change_field('locales_target', 'translation', 'translation',
+    array(
+      'type' => 'text',
+      'not null' => TRUE,
+      'description' => 'Translation string value in this language.',
+    )
+  );
 }
 
 /**

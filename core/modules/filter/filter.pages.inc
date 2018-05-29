@@ -431,7 +431,6 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#type' => 'textfield',
     '#default_value' => isset($values['text']) ? $values['text'] : '',
     '#parents' => array('attributes', 'text'),
-    '#description' => t('Default is the link or file identifier. Enter some alternative link text here if needed.'),
   );
 
   $form['target'] = array(
