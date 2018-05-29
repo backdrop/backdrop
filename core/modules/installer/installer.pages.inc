@@ -653,13 +653,21 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
       $dependency_check = TRUE;
       $dependencies = array();
       if (isset($modules[$project['name']])) {
-        foreach ($modules[$project['name']]->info['dependencies'] as $dependency) {
-          if (isset($modules[$dependency])) {
-            $dependencies[] = $modules[$dependency]->info['name'] . ' (' . t('Installed') . ')';
+        foreach ($modules[$project['name']]->requires as $dependency_name => $dependency_info) {
+          if (isset($modules[$dependency_name])) {
+            $dependency_version = $modules[$dependency_name]->info['version'];
+            if (backdrop_check_incompatibility($dependency_info, $dependency_version)) {
+              $dependency_check = FALSE;
+              $dependency_version_string = trim($dependency_info['original_version'], '()');
+              $dependencies[] = $dependency_name . ' (' . t('Requires version @version', array('@version' => $dependency_version_string)) . ')';
+            }
+            else {
+              $dependencies[] = $modules[$dependency_name]->info['name'] . ' (' . t('Installed') . ')';
+            }
           }
           else {
             $dependency_check = FALSE;
-            $dependencies[] = $dependency . ' (' . t('Missing') . ')';
+            $dependencies[] = $dependency_name . ' (' . t('Missing') . ')';
           }
         }
         if ($dependency_check) {
@@ -690,10 +698,10 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
     array('data' => t('Dependencies'), 'class' => array('priority-low')),
   );
 
-  if(!empty($options) || !empty($missing)) {
+  if (!empty($options) || !empty($missing)) {
     $form['module_instructions'] = array(
-    '#type' => 'item',
-    '#markup' => t('You may enable modules using the form below or on the main !link page.', array('!link' => l(t('Modules'), 'admin/modules'))),
+      '#type' => 'item',
+      '#markup' => t('You may enable modules using the form below or on the main !link page.', array('!link' => l(t('Modules'), 'admin/modules'))),
     );
     if (!empty($options)) {
       $form['modules'] = array(
