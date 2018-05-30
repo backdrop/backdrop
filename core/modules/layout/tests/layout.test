@@ -573,6 +573,29 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Delete the layout to prevent it interfering with following tests.
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/delete', array(), t('Delete layout'));
+
+    // Make a new layout that creates a custom path with a string pass-through.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_path = 'passthrough/%';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'boxton',
+      'path' => $layout_path,
+    );
+    // Create with the default context (string pass-through).
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Add the test block that requires both node and user contexts.
+    $this->clickLink(t('Add block'), 2);
+    $this->clickLink(t('String pass-through test'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $argument_string = 'argument-value-from-url';
+    $this->backdropGet('passthrough/' . $argument_string);
+    $this->assertText(format_string('The page argument is @string', array('@string' => $argument_string)));
   }
 
   /**
