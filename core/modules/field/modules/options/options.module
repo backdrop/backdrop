@@ -571,7 +571,6 @@ function options_form_field_ui_field_settings_form_alter(&$form, &$form_state) {
  */
 function options_form_field_ui_field_edit_form_alter(&$form, &$form_state) {
   $field = $form['#field'];
-//debug($form);
 
   if (in_array($field['type'], _options_element_supported_field_types())) {
 
@@ -583,7 +582,7 @@ function options_form_field_ui_field_edit_form_alter(&$form, &$form_state) {
     // Overwrite 'allowed_values' element.
     $element_overwrite = array(
       '#options' => $field['settings']['allowed_values'],
-      '#multiple' => !($form['field']['cardinality_container']['cardinality_number']['#default_value'] == 1),
+      '#multiple' => ($field['cardinality'] == -1),
       '#default_value' => $default_field_value,
     );
 
