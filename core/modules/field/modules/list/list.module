@@ -343,8 +343,29 @@ function list_extract_allowed_values($string, $field_type, $generate_keys) {
  */
 function list_allowed_values_string($values) {
   $lines = array();
+  $previous_key = false;
+
   foreach ($values as $key => $value) {
-    $lines[] = "$key|$value";
+    // Convert groups.
+    if (is_array($value)) {
+      $lines[] = "<$key>";
+      foreach ($value as $subkey => $subvalue) {
+        $lines[] = "$subkey|$subvalue";
+      }
+      $previous_key = $key;
+    }
+    // Typical key|value pairs.
+    else {
+      // Exit out of any groups.
+      if (isset($values[$previous_key]) && is_array($values[$previous_key])) {
+        $lines[] = "<>";
+      }
+      // Skip empty rows.
+      if ($values[$key] !== '') {
+        $lines[] = "$key|$value";
+      }
+      $previous_key = $key;
+    }
   }
   return implode("\n", $lines);
 }
