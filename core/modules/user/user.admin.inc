@@ -121,23 +121,6 @@ function user_admin_settings($form, &$form_state) {
   $config = config('system.core');
   $form['#config'] = 'system.core';
 
-  // User login settings.
-  $form['user_login'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('User log in'),
-    '#weight' => -2,
-  );
-  $form['user_login']['user_login_method'] = array(
-    '#type' => 'radios',
-    '#title' => t('Users may log in using'),
-    '#options' => array(
-      USER_LOGIN_USERNAME_OR_EMAIL => t('Username or email address'),
-      USER_LOGIN_USERNAME_ONLY => t('Username'),
-      USER_LOGIN_EMAIL_ONLY => t('Email address'),
-    ),
-    '#default_value' => $config->get('user_login_method'),
-  );
-
   // User registration settings.
   $form['registration_cancellation'] = array(
     '#type' => 'fieldset',
@@ -295,6 +278,24 @@ function user_admin_settings_submit($form, &$form_state) {
  */
 function user_login_settings() {
   $flood_config = config('user.flood');
+  $core_config = config('system.core');
+
+  // User login settings.
+  $form['user_login'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('User login'),
+    '#weight' => -2,
+  );
+  $form['user_login']['user_login_method'] = array(
+    '#type' => 'radios',
+    '#title' => t('Users may log in using'),
+    '#options' => array(
+      USER_LOGIN_USERNAME_OR_EMAIL => t('Username or email address'),
+      USER_LOGIN_USERNAME_ONLY => t('Username'),
+      USER_LOGIN_EMAIL_ONLY => t('Email address'),
+    ),
+    '#default_value' => $core_config->get('user_login_method'),
+  );
 
   $form['ip_limit_settings'] = array(
     '#type' => 'fieldset',
@@ -350,12 +351,15 @@ function user_login_settings() {
   );
   $form['user_limit_settings']['help'] = array(
     '#type' => 'help',
-    '#markup' => t('Configure the limit and the time window for users attempting to login. That is, how many failed login attempts are allowed every X hours.'),
+    '#markup' => t('Configure the limit and the time window for users attempting to log in. That is, how many failed login attempts are allowed every X hours.'),
   );
   $form['user_limit_settings']['flood_uid_only'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Use only the User ID to identify users'),
-    '#description' => t('The default identifier is a combination of User ID and IP address. This is less secure but more resistant to denial-of-service attacks that could lock out all users with public user names. When enabled, checking for multiple login attempts will be based on the User ID only. This means that it will check regardless of the IP address from which the user is attempting to login.'),
+    '#type' => 'radios',
+    '#title' => t('How to identify users attempting to log in'),
+    '#options' => array(
+      FALSE => t('User ID and IP address combination (less secure, less likely to lock out users)'),
+      TRUE => t('User ID only (more secure, more likely to lock out users)'),
+    ),
     '#default_value' => $flood_config->get('flood_uid_only'),
   );
 
@@ -378,6 +382,9 @@ function user_login_settings_submit($form, &$form_state) {
     ->set('flood_ip_window', $form_state['values']['flood_ip_window'])
     ->set('flood_user_limit', $form_state['values']['flood_user_limit'])
     ->set('flood_user_window', $form_state['values']['flood_user_window'])
+    ->save();
+  config('system.core')
+    ->set('user_login_method', $form_state['values']['user_login_method'])
     ->save();
 
   backdrop_set_message(t('The configuration options have been saved.'));
