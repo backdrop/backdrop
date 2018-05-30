@@ -1268,6 +1268,16 @@ function user_menu() {
     'file' => 'user.admin.inc',
   );
 
+  // Login settings.
+  $items['admin/config/people/login'] = array(
+    'title' => 'Login settings',
+    'description' => 'Configure login settings',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_login_settings'),
+    'access arguments' => array('administer account settings'),
+    'file' => 'user.admin.inc',
+  );
+
   // Permissions forms.
   $items['admin/config/people/permissions'] = array(
     'title' => 'Permissions',
@@ -1307,17 +1317,6 @@ function user_menu() {
     'description' => 'Configure email templates used for account registration and management.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_settings_email'),
-    'access arguments' => array('administer account settings'),
-    'file' => 'user.admin.inc',
-    'weight' => 10,
-  );
-
-  // Login settings.
-  $items['admin/config/people/login'] = array(
-    'title' => 'Login settings',
-    'description' => 'Configure login settings',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('user_login_settings'),
     'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
     'weight' => 10,

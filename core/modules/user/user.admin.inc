@@ -276,15 +276,18 @@ function user_admin_settings_submit($form, &$form_state) {
  *
  * @ingroup forms
  */
-function user_login_settings() {
+function user_login_settings($form, &$form_state) {
   $flood_config = config('user.flood');
   $core_config = config('system.core');
+
+  $form['#config'] = 'user.flood';
 
   // User login settings.
   $form['user_login'] = array(
     '#type' => 'fieldset',
     '#title' => t('User login'),
     '#weight' => -2,
+    '#config' => 'system.core',
   );
   $form['user_login']['user_login_method'] = array(
     '#type' => 'radios',
@@ -363,31 +366,7 @@ function user_login_settings() {
     '#default_value' => $flood_config->get('flood_uid_only'),
   );
 
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration'),
-  );
-
-  return $form;
-}
-
-/**
- * Submit handler for user_login_settings().
- */
-function user_login_settings_submit($form, &$form_state) {
-  config('user.flood')
-    ->set('flood_uid_only', $form_state['values']['flood_uid_only'])
-    ->set('flood_ip_limit', $form_state['values']['flood_ip_limit'])
-    ->set('flood_ip_window', $form_state['values']['flood_ip_window'])
-    ->set('flood_user_limit', $form_state['values']['flood_user_limit'])
-    ->set('flood_user_window', $form_state['values']['flood_user_window'])
-    ->save();
-  config('system.core')
-    ->set('user_login_method', $form_state['values']['user_login_method'])
-    ->save();
-
-  backdrop_set_message(t('The configuration options have been saved.'));
+  return system_settings_form($form);
 }
 
 /**
