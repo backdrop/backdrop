@@ -1730,24 +1730,25 @@ function theme_status_messages($variables) {
     'status' => t('Status message'),
     'error' => t('Error message'),
     'warning' => t('Warning message'),
+    'info' => t('Info message'),
   );
 
   foreach ($message_types as $type => $messages) {
     $output .= "<div class=\"messages $type\">\n";
     if (!empty($status_heading[$type])) {
-      $output .= '<h2 class="element-invisible">' . $status_heading[$type] . "</h2>\n";
+      $output .= '  <h2 class="element-invisible">' . $status_heading[$type] . "</h2>\n";
     }
     if (count($messages) > 1) {
-      $output .= " <ul>\n";
+      $output .= "  <ul>\n";
       foreach ($messages as $message) {
-        $output .= '  <li>' . $message . "</li>\n";
+        $output .= "    <li>" . $message . "</li>\n";
       }
-      $output .= " </ul>\n";
+      $output .= "  </ul>";
     }
     else {
       $output .= reset($messages);
     }
-    $output .= "</div>\n";
+    $output .= "\n</div>\n";
   }
 
   return $output;

@@ -83,6 +83,15 @@ div.error:before {
   background-color: #EE3D23;
 }
 
+.info {
+  color: #0074BD;
+  background-color: #BDF;
+}
+div.info:before {
+  background-image: url(../../../misc/message-24-info.png);
+  background-color: #0074BD;
+}
+
 /* Desktop size icons */
 @media only screen and (min-width: 34em) {
   div.status:before {
@@ -94,6 +103,9 @@ div.error:before {
   div.error:before {
     background-image: url(../../../misc/message-32-error.png);
   }
+  div.info:before {
+    background-image: url(../../../misc/message-32-info.png);
+  }
 }
 /* SVG overrides */
 div.status:before {
@@ -104,4 +116,7 @@ div.warning:before {
 }
 div.error:before {
   background-image: linear-gradient(transparent, transparent), url(../../../misc/message-error.svg);
+}
+div.info:before {
+  background-image: linear-gradient(transparent, transparent), url(../../../misc/message-info.svg);
 }

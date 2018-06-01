@@ -2343,6 +2343,7 @@ function backdrop_set_message($message = NULL, $type = 'status', $repeat = TRUE)
  *   - 'status'
  *   - 'warning'
  *   - 'error'
+ *   - 'info'
  * @param bool $clear_queue
  *   (optional) If this is TRUE, the queue will be cleared of messages of the
  *   type specified in the $type parameter. Otherwise the queue will be left
