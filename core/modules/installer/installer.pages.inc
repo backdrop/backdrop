@@ -255,8 +255,8 @@ function installer_browser_installation_select_versions_form($form, &$form_state
     $releases_list = array();
 
     foreach ($release_data['releases'] as $version => $release) {
-      $release_title = format_string("@project @version - @date", array(
-        '@project' => $project['title'],
+      $release_title = format_string("%project @version - @date", array(
+        '%project' => $project['title'],
         '@version' => $release['version'],
         '@date' => format_date($release['date'], 'custom', 'M j, Y'),
         ));
@@ -264,7 +264,8 @@ function installer_browser_installation_select_versions_form($form, &$form_state
         $release_title .= check_plain(" (" . implode(', ', $release['terms']['Release type']) . ")");
       }
       if (isset($release['release_link'])) {
-        $releases_list[$version] = l($release_title, $release['release_link'], array('html' => TRUE, 'attributes' => array('target' => '_blank')));
+        $release_notes_link = l("release notes", $release['release_link'], array('html' => TRUE, 'attributes' => array('target' => '_blank')));
+        $releases_list[$version] = $release_title . " (" . $release_notes_link . ")";
       }
       else {
         $releases_list[$version] = $release_title;
@@ -278,7 +279,7 @@ function installer_browser_installation_select_versions_form($form, &$form_state
 
     $form['releases'][$project['name']]['release_name'] = array(
       '#type' => 'radios',
-      '#title' => t('Select release for @project', array('@project' => $project['title'])),
+      '#title' => t('Select version for %project', array('%project' => $project['title'])),
       '#options' => $releases_list,
       '#default_value' => key($releases_list),
       '#prefix' => '<div class="installer-browser-releases-wrapper installer-browser-release-' . $project['name'] . '">',
@@ -304,7 +305,7 @@ function installer_browser_installation_select_versions_form($form, &$form_state
     }
     if (count($releases_list) > 1) {
       $form['releases'][$project['name']]['selected_text']['#markup'] .=
-        ' (<a class="installer-browser-show-releases-link js-only" href="#" rel="' . $project['name'] . '">' . t('change release') . '</a>)';
+        ' (<a class="installer-browser-show-releases-link js-only" href="#" rel="' . $project['name'] . '">' . t('selcet other version') . '</a>)';
     }
 
     // Update the project type based on the type of projects being selected.

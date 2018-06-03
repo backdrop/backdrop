@@ -23,8 +23,15 @@
   background: url("../images/remove.png") no-repeat scroll left 3px transparent;
 }
 
+.installer-browser-releases-radios {
+  padding-left: 20px;
+}
+
 .installer-browser-selected-release {
   display: none;
+}
+.installer-browser-selected-release em {
+  font-weight: bold;
 }
 
 .installer-browser-show-releases-link {
