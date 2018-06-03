@@ -33,6 +33,9 @@
 .installer-browser-selected-release em {
   font-weight: bold;
 }
+.installer-browser-releases-wrapper label.option em {
+  display: none;
+}
 
 .installer-browser-show-releases-link {
   cursor: pointer;
