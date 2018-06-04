@@ -231,6 +231,23 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#weight' => -2,
   );
 
+  // Image library., very similar to Image URL
+  global $base_url;
+  $form['image']['library_all'] = array(
+    '#title' => t('Image Library'),
+    '#description' => views_embed_view('image_library'),
+    '#type' => 'textfield',
+    '#element_validate' => array('_filter_format_editor_link_url_validate'),
+    '#placeholder' => '/example/image.jpg',
+    '#default_value' => isset($values['src']) ? $values['src'] : NULL,
+    '#parents' => array('image_library', 'src'),
+    '#wrapper_attributes' => array(
+      'data-editor-image-toggle' => t('Image Library'),
+      'data-editor-image-library-base-url' => $base_url,
+    ),
+    '#weight' => -2,
+  );
+
   // If no current value or an existing file exists, default to showing
   // the uploading interface.
   if ($fid || empty($form['image']['src']['#default_value'])) {
