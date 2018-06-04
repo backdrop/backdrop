@@ -1587,7 +1587,7 @@ div.add-or-remove-shortcuts {
   
   /* Sticky action buttons (with thanks to Adminimal) */
   .page {
-    margin-bottom: 60px;
+    margin-bottom: 65px;
   }
   .l-content > form > div > .form-actions, 
   .l-content > form > div > #layout-edit > .form-actions,
@@ -1595,13 +1595,16 @@ div.add-or-remove-shortcuts {
     position: fixed;
     bottom: 0;
     background: #fff;
-    border-top: 1px solid #CCCCCC;
+    border-top: 2px solid #CFDE56;
     width: 100%;
-    left: 0;
+    max-width: 1156px;
+    left: auto;
+    right: auto;
     margin: 0;
     z-index: 999;
-    padding: 10px 40px 0;
-    box-shadow: -20px 2px 20px rgba(0,0,0,0.4);
+    padding: 10px 40px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
     input.form-submit {
       margin-bottom: 0 !important;
     }
