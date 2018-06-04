@@ -1174,6 +1174,23 @@ function node_update_1016() {
 }
 
 /**
+ * Update content admin view to show scheduled publication info.
+ */
+function node_update_1017() {
+  // See if the content admin view has been modified on this site.
+  $config = config('views.view.node_admin_content');
+
+  // Only update if view isn't overridden
+  if ($config->get('storage') != VIEWS_STORAGE_OVERRIDE) {
+    $path = backdrop_get_path('module', 'node') . '/config/';
+    $contents = file_get_contents($path . 'views.view.node_admin_content.json');
+    $data = json_decode($contents, true);
+    $config->setData($data);
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
