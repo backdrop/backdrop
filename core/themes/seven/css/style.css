@@ -1602,7 +1602,7 @@ div.add-or-remove-shortcuts {
     right: auto;
     margin: 0;
     z-index: 999;
-    padding: 10px 40px;
+    padding: 10px 40px 0;
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
     box-sizing: border-box;
     input.form-submit {
