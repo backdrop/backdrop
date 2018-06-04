@@ -1089,7 +1089,7 @@ function system_modules_uninstall_confirm_form($storage) {
     $form['uninstall']['#tree'] = TRUE;
     $form = confirm_form(
       $form,
-      t('Are you sure you want to continue with uninstalling the modules listed bellow?'),
+      t('Are you sure you want to continue with uninstalling the modules listed below?'),
       'admin/modules/uninstall',
       theme('item_list', array('items' => $uninstall)),
       t('Uninstall'),
