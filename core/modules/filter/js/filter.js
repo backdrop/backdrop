@@ -178,6 +178,32 @@ Backdrop.behaviors.editorImageDialog = {
           $input.val(previousValue);
         }
       });
+      
+      var $display_state = $(".form-item-image-library-src").css("display");
+      if ($display_state === 'none') {$(".library-view").css({"display":"none"})}
+      else {
+        // Toggle state is set to show select an image
+        // so add library view to dialog display.
+        $view_placeholder = $("#edit-attributes-text");
+        $view_image_library = $(".library-view").attr('data-editor-image-library-view');
+        $view_placeholder.replaceWith($view_image_library);
+        // Display the library view.
+        $(".library-view").css({"display":"block"});
+        var $library_base_url = $(".form-item-image-library-src").attr('data-editor-image-library-base-url');
+         // Pointer changes background color of images.
+         $(".image-library-choose-file").mouseenter(function() {
+           $(this).css({"background-color":"gold"});
+        });
+        $(".image-library-choose-file").mouseleave(function() {
+          $(this).css({"background-color":"white"});
+        });
+        // Now add click event to images
+        $(".image-library-choose-file").click(function(){
+          var $relativeImgSrc = $(this).find('img').attr('src').replace($library_base_url , '');
+          $("#edit-image-library-src").val($relativeImgSrc);
+          $(this).css({"background-color":"goldenrod"});
+        });
+      };
     });
 
     // Add a very short delay to allow the dialog to appear.
@@ -197,22 +223,6 @@ Backdrop.behaviors.editorImageDialog = {
         }
       }
     }, 1);
-    
-    // Image library
-    var $libraryField = $('[data-editor-image-library-base-url]', context);
-
-    if ($libraryField.length){
-      // Delegate this click event to an element outside of the view, so that
-      // the view can use ajax without breaking this event.
-      $('.form-item-image-library-src').on('click', '.image-library-choose-file', function(){
-
-        // Make this a relative URL to the image by stripping the base_url.
-        var relativeImgSrc = $(this).find('img').attr('src')
-            .replace($libraryField.data('editor-image-library-base-url'), '');
-
-        $libraryField.find('input[type=text]').val(relativeImgSrc);
-      });
-    }
   }
 };
 
