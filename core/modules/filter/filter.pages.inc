@@ -222,15 +222,14 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   // Image library, very similar to Image URL
   global $base_url;
   $form['image']['library_all'] = array(
-    '#title' => t('Select image'),
-    '#description' => views_embed_view('image_library'),
+    '#title' => t('Image file URL'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
-    '#placeholder' => '/example/image.jpg',
+    '#placeholder' => ' ',
     '#default_value' => isset($values['src']) ? $values['src'] : NULL,
     '#parents' => array('image_library', 'src'),
     '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Select image'),
+      'data-editor-image-toggle' => t('Image file URL'),
       'data-editor-image-library-base-url' => $base_url,
     ),
     '#weight' => -2,
@@ -300,6 +299,17 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#default_value' => (isset($values['data-has-caption']) && strcmp($values['data-has-caption'], 'false') !== 0) ? (bool) $values['data-has-caption'] : FALSE,
     '#parents' => array('attributes', 'data-has-caption'),
     '#access' => !empty($format->filters['filter_image_caption']->status),
+  );
+   $form['library_view'] = array(
+    '#title' => t('Select from image library'),
+    '#type' => 'textfield',
+    '#default_value' => 'Image library',
+    '#wrapper_attributes' => array(
+      'class' => array('library-view'),
+      'data-editor-image-library-view' => views_embed_view('image_library'),
+    ),
+    '#parents' => array('attributes', 'text'),
+    '#weight' => 10,
   );
 
   $form['actions']['#type'] = 'actions';
