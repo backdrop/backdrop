@@ -37,7 +37,7 @@ input#edit-filters-filter-html-settings-allowed-html {
 
 .editor-dialog {
   width: 100%;
-  max-width: 700px;
+  max-width: 90%;
   z-index: 9996 !important; /* To come above the full-screen CKEditor button. */
 }
 .editor-dialog .form-managed-file .form-file,
@@ -96,10 +96,25 @@ input#edit-filters-filter-html-settings-allowed-html {
   padding-right: 5px;
   vertical-align: bottom;
 }
+.image-library-choose-file {
+  width: 24%;
+}
 .image-library-choose-file .field-content {
   font-size: 0.8rem;
 }
-.image-library-image {
-  max-width: 150px;
+.library-view {
+  display:none;
 }
-
+.form-type-number .field-suffix {
+  display: inline;
+}
+.editor-dialog .form-item {
+  margin-bottom: 0.5em;
+}
+.editor-dialog .form-item .description {
+  margin-bottom: 0.5em;
+  margin-top: 0.2em;
+  padding: 0;
+  padding-left: 2em;
+  font-size: 0.8rem;
+}
