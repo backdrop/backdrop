@@ -26,31 +26,13 @@
                     "type": "basic"
                 },
                 "pager": {
-                    "type": "full",
+                    "type": "none",
                     "options": {
                         "items_per_page": "12",
-                        "offset": "0",
-                        "id": "0",
-                        "total_pages": "",
-                        "quantity": "9",
-                        "tags": {
-                            "first": "« first",
-                            "previous": "‹ previous",
-                            "next": "next ›",
-                            "last": "last »"
-                        },
-                        "expose": {
-                            "items_per_page": 0,
-                            "items_per_page_label": "Items per page",
-                            "items_per_page_options": "5, 10, 20, 40, 60",
-                            "items_per_page_options_all": 0,
-                            "items_per_page_options_all_label": "- All -",
-                            "offset": 0,
-                            "offset_label": "Offset"
-                        }
+                        "offset": "0"
                     }
                 },
-                "style_plugin": "grid",
+                "style_plugin": "default",
                 "row_plugin": "fields",
                 "fields": {
                     "uri": {
@@ -421,7 +403,7 @@
                         "exclude": 0,
                         "alter": {
                             "alter_text": true,
-                            "text": "<img class=\"image-library-image\" src=\"[uri]\">",
+                            "text": "<p>[filename]</p><img class=\"image-library-image\" src=\"[uri]\">",
                             "make_link": 0,
                             "path": "",
                             "absolute": 0,
@@ -471,7 +453,7 @@
                         "exclude": 0,
                         "alter": {
                             "alter_text": true,
-                            "text": "[filename]\r\n<!--\r\n[uri] == File: Path\r\n[fid] == File: File ID\r\n[filemime] == File: Mime type\r\n[filename] == File: Name\r\n[filesize] == File: Size \r\n-->",
+                            "text": "<!--\r\n[uri] == File: Path\r\n[fid] == File: File ID\r\n[filemime] == File: Mime type\r\n[filename] == File: Name\r\n[filesize] == File: Size \r\n-->",
                             "make_link": 0,
                             "path": "",
                             "absolute": 0,
@@ -556,29 +538,16 @@
                 "style_options": {
                     "grouping": [],
                     "row_class": "image-library-choose-file",
-                    "default_row_class": 1,
-                    "row_class_special": 1,
-                    "columns": "4",
-                    "alignment": "horizontal",
-                    "fill_single_line": 1,
-                    "caption": "",
-                    "summary": ""
+                    "default_row_class": 0,
+                    "row_class_special": 0
                 },
                 "use_ajax": false,
-                "header": {
-                    "area": {
-                        "id": "area",
-                        "table": "views",
-                        "field": "area",
-                        "relationship": "none",
-                        "group_type": "group",
-                        "ui_name": "",
-                        "label": "",
-                        "empty": 0,
-                        "content": "<p>Remember to set the image style at the foot of this dialogue before selecting Insert.</p>\r\n",
-                        "format": "full_html",
-                        "tokenize": 0
-                    }
+                "header": [],
+                "row_options": {
+                    "default_field_elements": 1,
+                    "inline": [],
+                    "separator": "",
+                    "hide_empty": 0
                 }
             }
         }
