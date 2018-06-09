@@ -200,7 +200,7 @@ Backdrop.behaviors.editorImageDialog = {
         // Now add click event to images
         $(".image-library-choose-file").click(function(){
           var $relativeImgSrc = $(this).find('img').attr('src').replace($library_base_url , '');
-          $("#edit-image-library-src").val($relativeImgSrc);
+          $("[name='image_library[src]']").val($relativeImgSrc);
           $(this).css({"background-color":"goldenrod"});
         });
       };
