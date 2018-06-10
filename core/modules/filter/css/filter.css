@@ -94,6 +94,9 @@ input#edit-filters-filter-html-settings-allowed-html {
 .image-library-choose-file .field-content {
   font-size: 0.7rem;
 }
+.image-library-choose-file p {
+  margin: 0;
+}
 .image-library-image {
   max-width: 150px;
 }
@@ -110,7 +113,7 @@ input#edit-filters-filter-html-settings-allowed-html {
   margin-bottom: 0.5em;
   margin-top: 0.2em;
   padding: 0;
-  padding-left: 2em;
+  padding-left: 1em;
   font-size: 0.9rem;
 }
 
