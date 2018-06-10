@@ -184,7 +184,7 @@ Backdrop.behaviors.editorImageDialog = {
       else {
         // Toggle state is set to show select an image
         // so add library view to dialog display.
-        $view_placeholder = $("#edit-attributes-text");
+        $view_placeholder = $("[name='attributes[text]']");
         $view_image_library = $(".library-view").attr('data-editor-image-library-view');
         $view_placeholder.replaceWith($view_image_library);
         // Display the library view.
