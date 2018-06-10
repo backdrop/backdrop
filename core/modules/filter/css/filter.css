@@ -99,6 +99,7 @@ input#edit-filters-filter-html-settings-allowed-html {
 }
 .image-library-image {
   max-width: 150px;
+  max-height: 150px;
 }
 .library-view {
   display:none;
