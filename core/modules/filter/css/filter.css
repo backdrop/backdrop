@@ -48,7 +48,7 @@ input#edit-filters-filter-html-settings-allowed-html {
   overflow: hidden;
   vertical-align: middle;
 }
-.editor-image-size div {
+.editor-image-size .form-item {
   display: inline;
 }
 .editor-image-size .form-type-number input{
@@ -61,7 +61,13 @@ input#edit-filters-filter-html-settings-allowed-html {
   width: 30%;
   max-width: 120px;
 }
-.editor-image-align div {
+.editor-image-align .form-item {
+  display: inline;
+}
+.editor-image-align .form-item input {
+  display: inline;
+}
+.editor-image-align .form-item label {
   display: inline;
 }
 .editor-image-align .option {
@@ -125,7 +131,7 @@ input#edit-filters-filter-html-settings-allowed-html {
   display: flex;
 }
 .image-form-left {
-  width:320px;
+  width:350px;
   flex-grow: 0;
 }
 .image-form-right {
