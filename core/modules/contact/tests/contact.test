@@ -23,10 +23,11 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
    */
   function testSiteWideContact() {
     $flood_limit = 3;
-    $config = config('contact.settings');
-    $config->set('contact_threshold_limit', $flood_limit);
-    $config->set('contact_threshold_window', 600);
-    $config->save();
+    $edit = array(
+      'contact_threshold_limit' => $flood_limit,
+      'contact_threshold_window' => 600,
+    );
+    $this->backdropPost('admin/structure/contact/settings', $edit, t('Save configuration'));
 
     // Set settings.
     $edit = array();
@@ -70,12 +71,27 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
 
     // Test update contact form category.
     $categories = $this->getCategories();
-    $category_id = $this->updateCategory($categories, $category = $this->randomName(16), $recipients_str = implode(',', array($recipients[0], $recipients[1])), $reply = $this->randomName(30), FALSE);
+    $recipients_str = implode(',', $recipients);
+    $category_id = $this->updateCategory($categories, $category = $this->randomName(16), implode(', ', $recipients), $reply = $this->randomName(30), FALSE);
     $category_array = contact_load($category_id);
     $test_category = array_shift($categories);
     $this->assertEqual($category_array['category'], $category);
     $this->assertEqual($category_array['recipients'], $recipients_str);
     $this->assertEqual($category_array['reply'], $reply);
+    $this->assertRaw(t('Category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
+
+    // Test separating contacts with new lines.
+    $categories = $this->getCategories();
+    $category_id = $this->updateCategory($categories, $category = $this->randomName(16), implode("\n", $recipients), $this->randomName(30), FALSE);
+    $category_array = contact_load($category_id);
+    $this->assertEqual($category_array['recipients'], $recipients_str);
+    $this->assertRaw(t('Category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
+
+    // Test separating contacts with spaces.
+    $categories = $this->getCategories();
+    $category_id = $this->updateCategory($categories, $category = $this->randomName(16), implode(' ', $recipients), $this->randomName(30), FALSE);
+    $category_array = contact_load($category_id);
+    $this->assertEqual($category_array['recipients'], $recipients_str);
     $this->assertRaw(t('Category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
 
     // Ensure that the contact form is shown without a category selection input.

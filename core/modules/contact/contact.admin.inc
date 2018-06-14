@@ -194,8 +194,11 @@ function contact_category_edit_form($form, &$form_state, array $category = array
   $form['recipients'] = array(
     '#type' => 'textarea',
     '#title' => t('Recipients'),
-    '#default_value' => $category['recipients'],
-    '#description' => t("Example: 'webmaster@example.com' or 'sales@example.com,support@example.com' . To specify multiple recipients, separate each e-mail address with a comma, a space or a new line."),
+    // Recipients are stored comma-separated, but display with new lines for
+    // better human readability.
+    '#default_value' => implode("\n", explode(',', $category['recipients'])),
+    '#description' => t("To specify multiple recipients, separate each e-mail address with a new line, comma, or space."),
+    '#placeholder' => t("webmaster@example.com\nsales@example.com"),
     '#required' => TRUE,
   );
   $form['reply'] = array(
