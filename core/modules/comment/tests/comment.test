@@ -2225,3 +2225,57 @@ class CommentNodeChangesTestCase extends CommentHelperCase {
 
   }
 }
+
+/**
+ * Tests that comments behave correctly when the auto closer is enabled.
+ */
+class CommentNodeAutoCloserTestCase extends CommentHelperCase {
+  /**
+   * Tests the auto closer node type setting and the override setting on individual nodes.
+   */
+  function testNodeCommentAutoCloserSettings() {
+    $this->backdropLogin($this->admin_user);
+
+    $this->backdropGet('node/' . $this->node->nid . '/edit');
+    $this->assertNoField('edit-comment-close-override', 'Comment auto closer override hidden when auto closer not enabled.');
+
+    $this->setCommentSettings('comment_close_enabled', TRUE, 'Comment auto closer enabled.');
+
+    $this->backdropGet('node/' . $this->node->nid . '/edit');
+    $this->assertField('edit-comment-close-enabled', 'Comment auto closer override visible when auto closer enabled.');
+
+    // Run cron
+    $this->cronRun();
+
+    $this->backdropGet('node/' . $this->node->nid);
+    $this->assertEqual(count($this->xpath('//form[@id="comment-form"]')), 1, 'Comment form visible on node page when created date is younger than comment auto closer default time span.');
+
+    // Set node created date to older than default 14 days
+    $comment_close_days = config_get('node.type.post','settings.comment_close_days');
+    $this->node->created = time() - strtotime($comment_close_days + 1 . ' days');
+    $this->node->save();
+
+    // Run cron
+    $this->cronRun();
+
+    $this->backdropGet('node/' . $this->node->nid);
+    $this->assertEqual(count($this->xpath('//form[@id="comment-form"]')), 0, 'Comment form not on node page when created date is older than the comment auto closer default time span.');
+
+    // Override the auto comment closer so the node can be kept open.
+    $edit = array(
+      'comment' => COMMENT_NODE_OPEN,
+      'comment_close_enabled' => FALSE,
+    );
+    $this->backdropPost('node/' . $this->node->nid . '/edit', $edit, t('Save'));
+
+    // Ensure the checkbox stays unchecked after saving.
+    $this->backdropGet('node/' . $this->node->nid . '/edit');
+    $this->assertNoFieldChecked('edit-comment-close-enabled', 'Comment close option still unchecked after saving.');
+
+    // Run cron
+    $this->cronRun();
+
+    $this->backdropGet('node/' . $this->node->nid);
+    $this->assertEqual(count($this->xpath('//form[@id="comment-form"]')), 1, 'Comment form visible on node page when comments auto closer is overridden for individual node.');
+  }
+}

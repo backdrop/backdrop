@@ -308,6 +308,8 @@ function comment_node_type_load(&$types) {
       'comment_user_picture' => TRUE,
       'comment_form_location' => COMMENT_FORM_BELOW,
       'comment_preview' => BACKDROP_OPTIONAL,
+      'comment_close_enabled' => FALSE,
+      'comment_close_days' => 14
     );
   }
 }
@@ -692,14 +694,6 @@ function comment_node_view(Node $node, $view_mode) {
       '#links' => $links,
       '#attributes' => array('class' => array('links', 'inline')),
     );
-
-    // Only append comments when we are building a node on its own node detail
-    // page. We compare $node and $page_node to ensure that comments are not
-    // appended to other nodes shown on the page, for example a node_reference
-    // displayed in 'full' display mode within another node.
-    if ($node->comment && $view_mode == 'full' && node_is_page($node) && empty($node->in_preview)) {
-      $node->comments = comment_node_page_additions($node);
-    }
   }
 }
 
@@ -1205,6 +1199,26 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         BACKDROP_REQUIRED => t('Required'),
       ),
     );
+    $form['comment']['comment_close_enabled'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Automatically close comments on old content'),
+      '#default_value' => $node_type->settings['comment_close_enabled'],
+    );
+    $form['comment']['comment_close_days'] = array(
+      '#type' => 'number',
+      '#min' => 1,
+      '#step' => 1,
+      '#size' => 4,
+      '#maxlength' => 4,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="comment_close_enabled"]' => array('checked' => FALSE),
+        ),
+      ),
+      '#field_prefix' => t('Close comments after'),
+      '#default_value' => $node_type->settings['comment_close_days'],
+      '#field_suffix' => t('days'),
+    );
   }
 }
 
@@ -1241,10 +1255,10 @@ function comment_form_node_form_alter(&$form, $form_state) {
       COMMENT_NODE_CLOSED => t('Closed'),
     ),
     COMMENT_NODE_OPEN => array(
-      '#description' => t('Users with the "Post comments" permission can post comments.'),
+      '#description' => t('People with the "Post comments" permission will be able to post comments.'),
     ),
     COMMENT_NODE_CLOSED => array(
-      '#description' => t('Users cannot post comments.'),
+      '#description' => t('People will not be able to post comments.'),
     ),
   );
   // If the node has comments, add the "hidden" option too.
@@ -1260,6 +1274,25 @@ function comment_form_node_form_alter(&$form, $form_state) {
       ),
     );
   }
+
+  $node_type = node_type_load($node->type);
+  $enable = $node_type->settings['comment_close_enabled'];
+
+  if ($enable) {
+    $form['comment_settings']['comment_close_enabled'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Automatically close comments @close-days days after the Authored on date', array('@close-days' => $node_type->settings['comment_close_days'])),
+      '#description' => t('If unchecked, comments will stay on until manually closed.'),
+      // Opposite value is saved. We want to have the *unchecked* box mean the
+      // "override" is enabled. So we reverse the value to display.
+      '#default_value' => isset($node->comment_close_override) ? !$node->comment_close_override : 1,
+      '#states' => array(
+        'visible' => array(
+          ':input[name="comment"]' => array('value' => COMMENT_NODE_OPEN),
+        ),
+      ),
+    );
+  }
 }
 
 /**
@@ -1269,6 +1302,12 @@ function comment_node_presave(Node $node) {
   if ($node->comment == COMMENT_NODE_CLOSED && property_exists($node, 'comment_hidden') && $node->comment_hidden) {
     $node->comment = COMMENT_NODE_HIDDEN;
     unset($node->comment_hidden);
+  }
+  // As in comment_form_node_form_alter(), an unchecked value means the comment
+  // override should be enabled.
+  if (isset($node->comment_close_enabled)) {
+    $node->comment_close_override = !$node->comment_close_enabled;
+    unset($node->comment_close_enabled);
   }
 }
 
@@ -2184,18 +2223,19 @@ function comment_preprocess_block(&$variables) {
 function comment_preprocess_node(&$variables) {
   $node = $variables['node'];
   $node_type = node_type_get_type($node->type);
-  if (array_key_exists('comments', $variables) && !empty($variables['comments'])) {
-    if (!array_key_exists('comments', $variables['comments'])) {
-      $variables['comments']['comments'] = FALSE;
-    }
-    if (!array_key_exists('comment_form', $variables['comments'])) {
-      $variables['comments']['comment_form'] = FALSE;
-    }
+
+  // Only append comments when we are building a node on its own node detail
+  // page. We compare $node and $page_node to ensure that comments are not
+  // appended to other nodes shown on the page, for example a node_reference
+  // displayed in 'full' display mode within another node.
+  if ($node->comment && $variables['view_mode'] == 'full' && node_is_page($node) && empty($node->in_preview)) {
+    $variables['comments'] = comment_node_page_additions($node);
+    $variables['comment_display_mode'] = $node_type->settings['comment_mode'];
   }
-  else {
+  // Simplify the variables if there are no comment parts.
+  if (empty($variables['comments']['comments']) && empty($variables['comments']['comment_form'])) {
     $variables['comments'] = FALSE;
   }
-  $variables['comment_display_mode'] = $node_type->settings['comment_mode'];
 }
 
 /**
@@ -2333,6 +2373,56 @@ function comment_file_download_access($field, $entity_type, $entity) {
       return node_access('view', $node);
     }
     return FALSE;
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function comment_cron() {
+  _comment_close_all();
+}
+
+/**
+ * Close all comments that meet the current threshold.
+ */
+function _comment_close_all() {
+  $content_types = node_type_get_names();
+
+  foreach ($content_types as $type => $name) {
+    // Get the content type settings.
+    $node_type = node_type_load($type);
+    $days = $node_type->settings['comment_close_days'];
+    $enable = $node_type->settings['comment_close_enabled'];
+
+    // If a day is set, do this one.
+    if (!empty($enable) && !empty($days)) {
+      $oldest_allowed = strtotime("-$days days", REQUEST_TIME);
+
+      // Fetch nodes that should have comments closed.
+      $result = db_query("SELECT nid FROM {node} WHERE created < :oldest AND comment_close_override = 0 AND type = :type AND comment = :comment",
+        array(':oldest' => $oldest_allowed, ':type' => $type, ':comment' => COMMENT_NODE_OPEN)
+      );
+      $nids = $result->fetchCol();
+
+      // Update those rows.
+      foreach ($nids as $nid) {
+        $node = node_load($nid);
+        $node->comment = COMMENT_NODE_CLOSED;
+        node_save($node);
+      }
+
+      $count  = $result->rowCount();
+      if ($count) {
+        $vars = array(
+          '!count' => $count,
+          '@type' => $name,
+          '!date' => format_date($oldest_allowed),
+        );
+        $msg = 'Closed comments on !count @type posts created at, or before, !date.';
+        watchdog('comment', $msg, $vars, WATCHDOG_NOTICE);
+      }
+    }
   }
 }
 

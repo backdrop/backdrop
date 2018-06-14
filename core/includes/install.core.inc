@@ -982,17 +982,16 @@ function install_settings_form($form, &$form_state, &$install_state) {
 
   // Add driver specific configuration options.
   $form['driver']['#options']['mysql'] = $driver->name();
-
   $form['settings']['mysql'] = $driver->getFormOptions($database);
   $form['settings']['mysql']['#prefix'] = '<h2 class="js-hide">' . st('@driver_name settings', array('@driver_name' => $driver->name())) . '</h2>';
   $form['settings']['mysql']['#type'] = 'container';
   $form['settings']['mysql']['#tree'] = TRUE;
   $form['settings']['mysql']['advanced_options']['#parents'] = array('mysql');
-  $form['settings']['mysql']['#states'] = array(
-    'visible' => array(
-      ':input[name=driver]' => array('value' => 'mysql'),
-    )
-  );
+  // For this exceptional situation, maintain the database password even on
+  // form validation errors.
+  if (isset($form_state['input']['mysql']['password'])) {
+    $form['settings']['mysql']['password']['#attributes']['value'] = $form_state['input']['mysql']['password'];
+  }
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['save'] = array(
@@ -1079,7 +1078,7 @@ function install_settings_form_submit($form, &$form_state) {
     'required' => TRUE,
   );
   $settings['database_prefix'] = array(
-    'value' => $db_settings['db_prefix'],
+    'value' => $db_settings['prefix'],
   );
   backdrop_rewrite_settings($settings);
 
@@ -1700,6 +1699,12 @@ function install_finished(&$install_state) {
   // visiting of install.php.
   state_set('install_task', 'done');
 
+  // Record if UTF8MB4 support was enabled during the installation.
+  $connection = Database::getConnection();
+  if ($connection->utf8mb4IsActive()) {
+    state_set('database_utf8mb4_active', TRUE);
+  }
+
   // Run cron to populate update status tables (if available) so that users
   // will be warned if they've installed an out of date Backdrop version.
   // Will also trigger indexing of profile-supplied content or feeds.
@@ -1853,9 +1858,12 @@ function _install_configure_form($form, &$form_state, &$install_state) {
     '#weight' => -5,
   );
   $form['admin_account']['account']['pass'] = array(
-    '#type' => 'password_confirm',
+    '#title' => st('Password'),
+    '#type' => 'password',
     '#required' => TRUE,
     '#weight' => 0,
+    '#password_toggle' => TRUE,
+    '#password_strength' => TRUE,
   );
 
   $form['server_settings'] = array(

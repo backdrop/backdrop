@@ -504,6 +504,23 @@ function menu_block_view_alter(&$data, $block) {
 }
 
 /**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function menu_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // Add language code to the "Add link" action link under
+  // admin/structure/menu/manage/[menu-name].
+  if ($root_path == 'admin/structure/menu/manage/%') {
+    foreach ($data['actions']['output'] as $key => $action_link) {
+      if ($action_link['#link']['path'] === 'admin/structure/menu/manage/%/add') {
+        $default_langcode = isset($_GET['langcode']) ? $_GET['langcode'] : LANGUAGE_NONE;
+        $query['langcode'] = $default_langcode;
+        $data['actions']['output'][$key]['#link']['localized_options'] = array('query' => $query);
+      }
+    }
+  }
+}
+
+/**
  * Implements hook_node_insert().
  */
 function menu_node_insert(Node $node) {
@@ -531,6 +548,7 @@ function menu_node_save(Node $node) {
     elseif (trim($link['link_title'])) {
       $link['link_title'] = trim($link['link_title']);
       $link['link_path'] = "node/$node->nid";
+      $link['langcode'] = $node->langcode;
       if (trim($link['description'])) {
         $link['options']['attributes']['title'] = trim($link['description']);
       }

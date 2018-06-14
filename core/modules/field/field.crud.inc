@@ -223,11 +223,16 @@ function field_update_field($field) {
 
 /**
  * Validates a field configuration.
+ *
+ * @param $field_name
+ *   The field name to read.
+ * @param $update
+ *   Whether this is a new or existing field.
  */
 function field_validate_field($field, $update = FALSE) {
   // Field name is required.
   if (empty($field['field_name'])) {
-    throw new FieldException(format_string('Attempt to create field @field_name with no type.', array('@field_name' => $field['field_name'])));
+    throw new FieldException(format_string('Attempt to validate a field with no field name specified.'));
   }
   // Field type is required.
   if (empty($field['type'])) {
@@ -235,7 +240,7 @@ function field_validate_field($field, $update = FALSE) {
   }
   // Field name cannot contain invalid characters.
   if (!preg_match('/^[_a-z]+[_a-z0-9]*$/', $field['field_name'])) {
-    throw new FieldException(format_string('Attempt to create a field @field_name with invalid characters. Only lowercase alphanumeric characters and underscores are allowed, and only lowercase letters and underscore are allowed as the first character', array('@field_name' => $field['field_name'])));
+    throw new FieldException(format_string('The field @field_name contains invalid characters. Only lowercase alphanumeric characters and underscores are allowed, and only lowercase letters and underscore are allowed as the first character', array('@field_name' => $field['field_name'])));
   }
 
   // Validations that only apply to newly created fields.
@@ -469,7 +474,7 @@ function field_delete_field($field_name) {
  *     Settings for the 'default' display mode will be added if not present, and
  *     each display mode in the definition will be completed with the following
  *     default values:
- *     - label: 'above'
+ *     - label: 'hidden'
  *     - type: the default formatter specified in hook_field_info().
  *     - settings: each omitted setting is given the default value specified in
  *       hook_field_formatter_info().
@@ -579,6 +584,13 @@ function field_update_instance($instance) {
 
 /**
  * Validates a field instance.
+ *
+ * @param $instance
+ *   The instance name to read.
+ * @param $update
+ *   Whether this is a new or existing field instance.
+ * @param $load_field
+ *   Whether the field instance should be read directly from config.
  */
 function field_validate_instance($instance, $update = FALSE, $load_field = TRUE) {
   $label = isset($instance['label']) ? $instance['label'] : $instance['field_name'];
@@ -643,7 +655,7 @@ function _field_write_instance($instance, $update = FALSE) {
   );
   foreach ($instance['display'] as $view_mode => $display) {
     $display += array(
-      'label' => 'above',
+      'label' => 'hidden',
       'type' => isset($field_type['default_formatter']) ? $field_type['default_formatter'] : 'hidden',
       'settings' => array(),
     );

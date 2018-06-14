@@ -319,7 +319,7 @@ function admin_bar_merge_tree(array &$tree, array $tree_dynamic, array $expand_m
         foreach ($load_functions as $index => $function) {
           if ($function) {
             if (is_array($function)) {
-              list($function,) = each($function);
+              $function = key($function);
             }
             // Add the loader function name minus "_load".
             $placeholder = '%' . substr($function, 0, -5);

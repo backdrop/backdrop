@@ -25,7 +25,7 @@ Backdrop.tableSelect = function () {
   };
 
   // Find all <th> with class select-all, and insert the check all checkbox.
-  $('th.select-all', table).prepend($('<input type="checkbox" class="form-checkbox" />').attr('title', strings.selectAll)).click(function (event) {
+  $('th.select-all', table).prepend($('<input type="checkbox" class="form-checkbox" />').attr('title', strings.selectAll)).on('click', function (event) {
     if ($(event.target).is('input[type="checkbox"]')) {
       // Loop through all checkboxes and set their state to the select all checkbox' state.
       checkboxes.each(function () {
@@ -39,7 +39,8 @@ Backdrop.tableSelect = function () {
   });
 
   // For each of the checkboxes within the table that are not disabled.
-  checkboxes = $('td input[type="checkbox"]:enabled', table).click(function (e) {
+  checkboxes = $('td input[data-tableselect-id]:enabled');
+  $(table).on('click', checkboxes, function (e) {
     // Either add or remove the selected class based on the state of the check all checkbox.
     $(this).closest('tr').toggleClass('selected', this.checked);
 

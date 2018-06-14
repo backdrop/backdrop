@@ -86,6 +86,7 @@ small .admin-link:after {
 }
 #system-modules td.version {
   width: 70px;
+  white-space: nowrap;
 }
 #system-modules td.operations {
   width: 120px;
@@ -96,10 +97,10 @@ div.admin-required {
   color: #444;
 }
 span.admin-disabled {
-  color: #800;
+  color: #C61214;
 }
 span.admin-enabled {
-  color: #080;
+  color: #00BE58;
 }
 span.admin-missing {
   color: #f00;
