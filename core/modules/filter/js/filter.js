@@ -184,7 +184,7 @@ Backdrop.behaviors.editorImageDialog = {
       
       var $display_state = $(".form-item-image-library-src").css("display");
       if ($display_state === 'none') {
-        $(".library-view").css({"display":"none"});
+        $(".image-form-right").css({"display":"none"});
         $(".editor-dialog").css({"max-width":"500px","left":"25%"});
       }
       else {
@@ -199,6 +199,7 @@ Backdrop.behaviors.editorImageDialog = {
           $view_image_library = $(".library-view").attr('data-editor-image-library-view');
           $view_placeholder.replaceWith($view_image_library);
           // Display the library view.
+          $(".image-form-right").css({"display":"block"});
           $(".library-view").css({"display":"block"});
           var $library_base_url = $(".form-item-image-library-src").attr('data-editor-image-library-base-url');
           // Pointer changes background color of images.
