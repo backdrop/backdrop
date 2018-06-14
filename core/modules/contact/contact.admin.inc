@@ -25,7 +25,7 @@ function contact_settings_form($form, &$form_state) {
   $form['fields']['copy'] = array(
     '#type' => 'checkbox',
     '#title' => t("Show the 'Send yourself a copy' checkbox"),
-    '#description' => t("Allow users to send themselves a copy on site-wide and personnal contact forms."),
+    '#description' => t("Allow users to send themselves a copy on site-wide and personal contact forms."),
     '#default_value' => contact_show_personal_copy_checkbox()
   );
 
