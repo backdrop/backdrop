@@ -139,6 +139,9 @@ Backdrop.behaviors.editorImageDialog = {
           .filter(':last').addClass('last').end();
       });
     });
+    
+    // Initialise styles of Dialog.
+    $(".editor-dialog").css({"max-width":"500px","left":"25%"});
 
     $newToggles.click(function(e) {
       var $link = $(e.target);
@@ -180,29 +183,34 @@ Backdrop.behaviors.editorImageDialog = {
       });
       
       var $display_state = $(".form-item-image-library-src").css("display");
-      if ($display_state === 'none') {$(".library-view").css({"display":"none"})}
+      if ($display_state === 'none') {
+        $(".library-view").css({"display":"none"});
+        $(".editor-dialog").css({"max-width":"500px","left":"25%"});
+      }
       else {
         // Toggle state is set to show select an image
         // so add library view to dialog display.
-        $view_placeholder = $("[name='attributes[text]']");
-        $view_image_library = $(".library-view").attr('data-editor-image-library-view');
-        $view_placeholder.replaceWith($view_image_library);
-        // Display the library view.
-        $(".library-view").css({"display":"block"});
-        var $library_base_url = $(".form-item-image-library-src").attr('data-editor-image-library-base-url');
-         // Pointer changes background color of images.
-         $(".image-library-choose-file").mouseenter(function() {
-           $(this).css({"background-color":"gold"});
-        });
-        $(".image-library-choose-file").mouseleave(function() {
-          $(this).css({"background-color":"white"});
-        });
-        // Now add click event to images
-        $(".image-library-choose-file").click(function(){
-          var $relativeImgSrc = $(this).find('img').attr('src').replace($library_base_url , '');
-          $("[name='image_library[src]']").val($relativeImgSrc);
-          $(this).css({"background-color":"goldenrod"});
-        });
+        // But only for filter-format-edit-image-form.
+        if ($("form").hasClass("filter-format-editor-image-form")){
+          // Increase width of dialog form.
+          $(".editor-dialog").css({"max-width":"92%","left":"4%"});
+          // Add and display the library view.
+          $view_placeholder = $("[name='attributes[text]']");
+          $view_image_library = $(".library-view").attr('data-editor-image-library-view');
+          $view_placeholder.replaceWith($view_image_library);
+          // Display the library view.
+          $(".library-view").css({"display":"block"});
+          var $library_base_url = $(".form-item-image-library-src").attr('data-editor-image-library-base-url');
+          // Pointer changes background color of images.
+          $(".image-library-choose-file").mouseenter(function() {$(this).css({"background-color":"gold"});});
+          $(".image-library-choose-file").mouseleave(function() {$(this).css({"background-color":"white"});});
+          // Now add click event to images
+          $(".image-library-choose-file").click(function() {
+            var $relativeImgSrc = $(this).find('img').attr('src').replace($library_base_url , '');
+            $("[name='image_library[src]']").val($relativeImgSrc);
+            $(this).css({"background-color":"goldenrod"});
+          });
+        }
       };
     });
 
