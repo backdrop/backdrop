@@ -24,8 +24,8 @@ function contact_settings_form($form, &$form_state) {
   );
   $form['fields']['copy'] = array(
     '#type' => 'checkbox',
-    '#title' => t("Show the 'Send yourself a copy' checkbox"),
-    '#description' => t("Allow users to send themselves a copy on site-wide and personal contact forms."),
+    '#title' => t("Allow users to send themselves a copy of the submitted data."),
+    '#description' => t("Exposes a 'Send yourself a copy' checkbox on site-wide and personal contact forms."),
     '#default_value' => contact_show_personal_copy_checkbox()
   );
 
@@ -33,8 +33,8 @@ function contact_settings_form($form, &$form_state) {
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-    '#title' => t("Send limit"),
-    '#description' => t("Configure thresholds for the contact forms to minimize malicious users sending multiple emails. Control the number of emails that can be sent in a window of time by anyone with the same IP address."),
+    '#title' => t("Email send thresholds"),
+    '#description' => t("Limit the amount of emails that can be sent from contact forms, from the same IP, within a specific window of time. This helps prevent malicious users from sending multiple emails."),
   );
   $form['threshold']['wrapper'] = array(
     '#type' => 'container',
