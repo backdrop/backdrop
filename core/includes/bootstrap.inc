@@ -261,6 +261,20 @@ if (version_compare(PHP_VERSION, BACKDROP_MINIMUM_PHP) < 0) {
 }
 
 /**
+ * An RFC7231 Compliant date.
+ *
+ * http://tools.ietf.org/html/rfc7231#section-7.1.1.1
+ *
+ * Example: Sun, 06 Nov 1994 08:49:37 GMT
+ *
+ * This constant was introduced in PHP 7.0.19 and PHP 7.1.5 but needs to be
+ * defined by Backdrop for earlier PHP versions.
+ */
+if (!defined('DATE_RFC7231')) {
+  define('DATE_RFC7231', 'D, d M Y H:i:s \G\M\T');
+}
+
+/**
  * Provides a caching wrapper to be used in place of large array structures.
  *
  * This class should be extended by systems that need to cache large amounts
