@@ -38,7 +38,12 @@ input#edit-filters-filter-html-settings-allowed-html {
 .editor-dialog {
   width: 100%;
   max-width: 500px;
+  left: 25% !important;
   z-index: 9996 !important; /* To come above the full-screen CKEditor button. */
+}
+.editor-dialog-with-library {
+  max-width: 92%;
+  left: 4% !important;
 }
 .editor-dialog .form-managed-file .form-file,
 .editor-dialog .form-managed-file .file {
@@ -48,19 +53,21 @@ input#edit-filters-filter-html-settings-allowed-html {
   overflow: hidden;
   vertical-align: middle;
 }
+/* Make sure image size items fall in line. */
 .editor-image-size .form-item {
   display: inline;
 }
-.editor-image-size .form-type-number input{
+.editor-image-size .form-type-number input {
   display: inline;
 }
-.editor-image-size .form-type-number span{
+.editor-image-size .form-type-number span {
   display: inline;
 }
 .editor-image-size .form-number {
   width: 30%;
   max-width: 120px;
 }
+/* Make sure image alignment items fall in line. */
 .editor-image-align .form-item {
   display: inline;
 }
@@ -99,8 +106,26 @@ input#edit-filters-filter-html-settings-allowed-html {
 [dir="rtl"] .editor-image-toggle.last {
   border-left: none;
 }
-.form-item label {
-  display: block;
+.image-form-left .form-item {
+  margin: 0 0 1em;
+}
+.image-form-left .form-item label {
+  margin: 0 0 3px;
+}
+.image-form-left input.form-text {
+  padding: 5px;
+}
+.image-form-left input.form-number {
+  padding: 5px;
+}
+.image-form-left .form-item .description {
+  margin: 0;
+}
+.image-form-right .form-item {
+  margin-top: 0;
+}
+.image-form-right .form-item label{
+  margin: 0 0 0 5px;
 }
 .form-item label.editor-image-toggle {
   display: inline-block !important;
@@ -139,3 +164,7 @@ input#edit-filters-filter-html-settings-allowed-html {
   min-width: 525px;
   flex-grow: 1;
 }
+.image-form-left-full {
+  width: 100%
+}
+
