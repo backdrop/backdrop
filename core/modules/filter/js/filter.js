@@ -184,21 +184,25 @@ Backdrop.behaviors.editorImageDialog = {
       
       var $display_state = $(".form-item-image-library-src").css("display");
       if ($display_state === 'none') {
+        // Hide the right-hand (library) part of the dialog form.
         $(".image-form-right").css({"display":"none"});
-        $(".editor-dialog").css({"max-width":"500px","left":"25%"});
+        $(".editor-dialog").removeClass("editor-dialog-with-library");
+        // Set the class for the left-hand part.
+        $(".image-form-left").addClass("image-form-left-full");
       }
       else {
-        // Toggle state is set to show select an image
+        // Toggle state is set to show 'select an image'
         // so add library view to dialog display.
         // But only for filter-format-edit-image-form.
         if ($("form").hasClass("filter-format-editor-image-form")){
           // Increase width of dialog form.
-          $(".editor-dialog").css({"max-width":"92%","left":"4%"});
-          // Add and display the library view.
+          $(".editor-dialog").addClass("editor-dialog-with-library");
+          // Add the library view.
           $view_placeholder = $("[name='attributes[text]']");
           $view_image_library = $(".library-view").attr('data-editor-image-library-view');
           $view_placeholder.replaceWith($view_image_library);
           // Display the library view.
+          $(".image-form-left").removeClass("image-form-left-full");
           $(".image-form-right").css({"display":"block"});
           $(".library-view").css({"display":"block"});
           var $library_base_url = $(".form-item-image-library-src").attr('data-editor-image-library-base-url');
