@@ -141,7 +141,11 @@ Backdrop.behaviors.editorImageDialog = {
     });
     
     // Initialise styles of Dialog.
-    $(".editor-dialog").css({"max-width":"500px","left":"25%"});
+    // Hide the right-hand (library) part of the dialog form.
+    $(".image-form-right").css({"display":"none"});
+    $(".editor-dialog").removeClass("editor-dialog-with-library");
+    // Set the class for the left-hand part.
+    $(".image-form-left").addClass("image-form-left-full");
 
     $newToggles.click(function(e) {
       var $link = $(e.target);
