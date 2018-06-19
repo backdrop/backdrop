@@ -32,8 +32,7 @@
     max-width: 40%;
   }
 }
-.color-form .form-text,
-.color-form .form-select {
+.color-form .form-text {
   vertical-align: middle;
 }
 .color-form .form-text {
@@ -46,8 +45,11 @@
   margin-right: 0;
   margin-left: 5px;
 }
-.color-form select {
+select {
   max-width: 9em;
+}
+.form-type-select {
+  max-width: 25em;
 }
 #palette{
   float: left; /* LTR */

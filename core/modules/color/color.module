@@ -5,36 +5,140 @@
  */
 
 /**
- * Implements hook_theme().
- */
-function color_theme() {
-  return array(
-    'color_scheme_form' => array(
-      'render element' => 'form',
-      'file' => 'color.theme.inc',
-    ),
-  );
-}
-
-/**
  * Implements hook_form_FORM_ID_alter().
  */
 function color_form_system_theme_settings_alter(&$form, &$form_state) {
-  if (isset($form_state['build_info']['args'][0]) && ($theme = $form_state['build_info']['args'][0]) && color_get_info($theme)) {
+  if (isset($form_state['build_info']['args'][0])
+      && ($theme_name = $form_state['build_info']['args'][0])
+      && ($theme_info = color_get_info($theme_name))) {
     $form['color'] = array(
       '#type' => 'fieldset',
       '#title' => t('Color scheme'),
       '#weight' => -1,
-      '#attributes' => array('id' => 'color_scheme_form'),
-      '#theme' => 'color_scheme_form',
+      '#attributes' => array(
+        'id' => 'color_scheme_form',
+        'class' => array('color-form'),
+      ),
     );
-    $form['color'] += color_scheme_form($form, $form_state, $theme);
+
+    $theme_info['schemes'][''] = array('title' => t('Custom'), 'colors' => array());
+    $color_sets = array();
+    $schemes = array();
+    foreach ($theme_info['schemes'] as $key => $scheme) {
+      $color_sets[$key] = $scheme['title'];
+      $schemes[$key] = $scheme['colors'];
+      $schemes[$key] += $theme_info['schemes']['default']['colors'];
+    }
+
+    // See if we're using a predefined scheme.
+    // Note: we use the original theme when the default scheme is chosen.
+    $current_scheme = theme_get_setting('color.palette', $theme_name);
+    foreach ($schemes as $key => $scheme) {
+      if ($current_scheme == $scheme) {
+        $scheme_name = $key;
+        break;
+      }
+    }
+    if (empty($scheme_name)) {
+      if (empty($current_scheme)) {
+        $scheme_name = 'default';
+      }
+      else {
+        $scheme_name = '';
+      }
+    }
+
+    $base = backdrop_get_path('module', 'color');
+    // Add scheme selector.
+    $form['color']['scheme'] = array(
+      '#type' => 'select',
+      '#title' => t('Color set'),
+      '#options' => $color_sets,
+      '#default_value' => $scheme_name,
+      '#attached' => array(
+        // Add Farbtastic color picker.
+        'library' => array(
+          array('system', 'farbtastic'),
+        ),
+        // Add custom CSS.
+        'css' => array(
+          $base . '/css/color.admin.css' => array(),
+        ),
+        // Add custom JavaScript.
+        'js' => array(
+          $base . '/js/color.js',
+          array(
+            'data' => array(
+              'color' => array(
+                'reference' => color_get_palette($theme_name, TRUE),
+                'schemes' => $schemes,
+              ),
+            ),
+            'type' => 'setting',
+          ),
+        ),
+      ),
+    );
+
+    $form['color']['palette'] = array(
+      '#type' => 'container',
+      '#attributes' => array('id' => 'palette'),
+      '#tree' => TRUE,
+    );
+
+    // Add palette fields.
+    $palette = color_get_palette($theme_name);
+    $names = $theme_info['fields'];
+    foreach ($palette as $name => $value) {
+      if (isset($names[$name])) {
+        $form['color']['palette'][$name] = array(
+          '#type' => 'textfield',
+          '#title' => check_plain($names[$name]),
+          '#value_callback' => 'color_palette_color_value',
+          '#default_value' => $value,
+          '#size' => 8,
+        );
+      }
+    }
+
+    // Add the CSS and Javascript files fot the preview.
+    $theme_path = backdrop_get_path('theme', $theme_name) . '/';
+    if (isset($theme_info['preview_css']) &&file_exists($theme_path . $theme_info['preview_css'])) {
+      backdrop_add_css($theme_path . $theme_info['preview_css']);
+    }
+    if (isset($theme_info['preview_js']) &&file_exists($theme_path . $theme_info['preview_js'])) {
+      backdrop_add_js($theme_path . $theme_info['preview_js'], array('weight' => -1));
+    }
+    else {
+      backdrop_add_js($base . '/js/color.preview.js', array('weight' => -1));
+    }
+
+    // Add the HTML for the preview.
+    $form['color']['preview'] = array(
+      '#type' => 'container',
+      '#attributes' => array(
+        'class' => 'color-preview'
+      ),
+      'title' => array(
+        '#markup' => '<h2>' . t('Preview') . '</h2>',
+      )
+    );
+    if(isset($theme_info['preview_html']) && file_exists($theme_path . $theme_info['preview_html'])) {
+      $form['color']['preview']['preview']['#markup'] = file_get_contents($theme_path . $theme_info['preview_html']);
+    }
+    else {
+      $form['color']['preview']['preview']['#markup'] = file_get_contents($base . '/preview.html');
+    }
+
+    $form['color']['theme'] = array('#type' => 'value', '#value' => $theme_name);
+    $form['color']['info'] = array('#type' => 'value', '#value' => $theme_info);
+
     $form['#validate'][] = 'color_scheme_form_validate';
     array_unshift($form['#submit'], 'color_scheme_form_submit');
 
     // Check for legacy Bartik colors.
     // @todo Remove in Backdrop 2.0.
-    if ($theme === 'bartik') {
+    if ($theme_name === 'bartik') {
       module_load_include('inc', 'color', 'color.legacy');
       bartik_form_system_theme_settings_alter($form, $form_state);
     }
@@ -164,99 +268,6 @@ function color_get_palette($theme, $default = FALSE) {
     }
   }
   return $palette;
-}
-
-/**
- * Form constructor for the color configuration form for a particular theme.
- *
- * @param $theme
- *   The machine name of the theme whose color settings are being configured.
- *
- * @see color_scheme_form_validate()
- * @see color_scheme_form_submit()
- * @ingroup forms
- */
-function color_scheme_form($complete_form, &$form_state, $theme) {
-  $base = backdrop_get_path('module', 'color');
-  $info = color_get_info($theme);
-
-  $info['schemes'][''] = array('title' => t('Custom'), 'colors' => array());
-  $color_sets = array();
-  $schemes = array();
-  foreach ($info['schemes'] as $key => $scheme) {
-    $color_sets[$key] = $scheme['title'];
-    $schemes[$key] = $scheme['colors'];
-    $schemes[$key] += $info['schemes']['default']['colors'];
-  }
-
-  // See if we're using a predefined scheme.
-  // Note: we use the original theme when the default scheme is chosen.
-  $current_scheme = theme_get_setting('color.palette', $theme);
-  foreach ($schemes as $key => $scheme) {
-    if ($current_scheme == $scheme) {
-      $scheme_name = $key;
-      break;
-    }
-  }
-  if (empty($scheme_name)) {
-    if (empty($current_scheme)) {
-      $scheme_name = 'default';
-    }
-    else {
-      $scheme_name = '';
-    }
-  }
-
-  // Add scheme selector.
-  $form['scheme'] = array(
-    '#type' => 'select',
-    '#title' => t('Color set'),
-    '#options' => $color_sets,
-    '#default_value' => $scheme_name,
-    '#attached' => array(
-      // Add Farbtastic color picker.
-      'library' => array(
-        array('system', 'farbtastic'),
-      ),
-      // Add custom CSS.
-      'css' => array(
-        $base . '/css/color.admin.css' => array(),
-      ),
-      // Add custom JavaScript.
-      'js' => array(
-        $base . '/js/color.js',
-        array(
-          'data' => array(
-            'color' => array(
-              'reference' => color_get_palette($theme, TRUE),
-              'schemes' => $schemes,
-            ),
-          ),
-          'type' => 'setting',
-        ),
-      ),
-    ),
-  );
-
-  // Add palette fields.
-  $palette = color_get_palette($theme);
-  $names = $info['fields'];
-  $form['palette']['#tree'] = TRUE;
-  foreach ($palette as $name => $value) {
-    if (isset($names[$name])) {
-      $form['palette'][$name] = array(
-        '#type' => 'textfield',
-        '#title' => check_plain($names[$name]),
-        '#value_callback' => 'color_palette_color_value',
-        '#default_value' => $value,
-        '#size' => 8,
-      );
-    }
-  }
-  $form['theme'] = array('#type' => 'value', '#value' => $theme);
-  $form['info'] = array('#type' => 'value', '#value' => $info);
-
-  return $form;
 }
 
 /**
