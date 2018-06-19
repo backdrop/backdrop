@@ -81,6 +81,23 @@ function contact_menu() {
     'weight' => 1,
     'file' => 'contact.admin.inc',
   );
+  $items['admin/structure/contact/list'] = array(
+    'title' => 'Categories',
+    'page callback' => 'contact_category_list',
+    'access arguments' => array('administer contact forms'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+    'file' => 'contact.admin.inc',
+  );
+  $items['admin/structure/contact/settings'] = array(
+    'title' => 'Settings',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('contact_settings_form'),
+    'access arguments' => array('administer contact forms'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+    'file' => 'contact.admin.inc',
+  );
   $items['admin/structure/contact/configure/%contact'] = array(
     'title' => 'Configure contact category',
     'page callback' => 'backdrop_get_form',
@@ -210,6 +227,18 @@ function contact_config_data() {
   $config_data['categories'] = $categories;
 
   return $config_data;
+}
+
+/**
+ * Show the personal copy checkbox on forms
+ *
+ * @return bool
+ */
+function contact_show_personal_copy_checkbox() {
+  $config = config('contact.settings');
+  $settings = $config->get();
+
+  return (isset($settings['copy'])) ? $settings['copy'] : TRUE;
 }
 
 /**
