@@ -325,8 +325,8 @@ function user_login_settings($form, &$form_state) {
     '#prefix' => t('login attempts from one IP address per'),
   );
   $form['ip_limit_settings']['help'] = array(
-    '#type' => 'help',
-    '#markup' => t('Do not allow any login from the current user\'s IP if the limit has been reached. This is independent of the per-user limit to catch attempts from one IP to log in to many different user accounts. By default we have a reasonably high limit since there may be only one apparent IP for all users at an institution.'),
+    '#type' => 'item',
+    '#description' => t('Do not allow any login from the current user\'s IP if the limit has been reached. This is independent of the per-user limit to catch attempts from one IP to log in to many different user accounts. By default we have a reasonably high limit since there may be only one apparent IP for all users at an institution.'),
   );
   $form['user_limit_settings'] = array(
     '#type' => 'fieldset',
@@ -353,17 +353,23 @@ function user_login_settings($form, &$form_state) {
     '#prefix' => t('login attempts by a user per'),
   );
   $form['user_limit_settings']['help'] = array(
-    '#type' => 'help',
-    '#markup' => t('Configure the limit and the time window for users attempting to log in. That is, how many failed login attempts are allowed every X hours.'),
+    '#type' => 'item',
+    '#description' => t('Configure the limit and the time window for users attempting to log in. That is, how many failed login attempts are allowed every X hours.'),
   );
   $form['user_limit_settings']['flood_uid_only'] = array(
     '#type' => 'radios',
-    '#title' => t('How to identify users attempting to log in'),
+    '#title' => t('Identify users attempting to log in, using'),
     '#options' => array(
-      FALSE => t('User ID and IP address combination (less secure, less likely to lock out users)'),
-      TRUE => t('User ID only (more secure, more likely to lock out users)'),
+      FALSE => t('User ID and IP address combination'),
+      TRUE => t('User ID only'),
     ),
     '#default_value' => $flood_config->get('flood_uid_only'),
+    FALSE => array(
+      '#description' => ' Less secure, less likely to lock out users.',
+    ),
+    TRUE => array(
+      '#description' => 'More secure, more likely to lock out users.',
+    ),
   );
 
   return system_settings_form($form);
