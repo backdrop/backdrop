@@ -5,6 +5,34 @@
  */
 
 /**
+ * Returns HTML for node_preview_banner_form().
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - form: A render element representing the form.
+ *
+ * @see node_preview_banner_form()
+ * @ingroup themeable
+ */
+function theme_node_preview_banner_form($variables) {
+  $form = $variables['form'];
+
+  $output = '<div class="node-node-preview-banner-form">';
+  $output .= '<div class="node-node-preview-banner-form-left">';
+  $output .= backdrop_render($form['backlink']);
+  $output .= backdrop_render($form['preview_node_submit']);
+  $output .= '</div>';
+  $output .= '<div class="node-node-preview-banner-form-right">';
+  $output .= backdrop_render($form['view_mode']);
+  $output .= backdrop_render($form['view_mode_submit']);
+  $output .= '</div>';
+  $output .= '</div>';
+
+  $output .= backdrop_render_children($form);
+  return $output;
+}
+
+/**
  * Returns HTML for the content ranking part of the search settings admin page.
  *
  * @param $variables

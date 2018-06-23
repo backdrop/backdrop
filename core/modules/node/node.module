@@ -91,6 +91,9 @@ function node_theme() {
     'node_search_admin' => array(
       'render element' => 'form',
     ) + $base,
+    'node_preview_banner_form' => array(
+      'render element' => 'form',
+    ) + $base,
     'node_add_list' => array(
       'variables' => array('content' => NULL),
     ) + $base,

@@ -577,7 +577,7 @@ function node_preview($type) {
     ),
   );
 
-  $form = backdrop_get_form('node_preview_form_select', $node);
+  $form = backdrop_get_form('node_preview_banner_form', $node);
   $build['preview_form_select']['view-mode'] = $form;
   $build['preview'] = node_view($node, $view_mode);
   return $build;
@@ -592,7 +592,7 @@ function node_preview($type) {
  * @return array $form
  *   The view mode preview selection form.
  */
-function node_preview_form_select(array $form, array $form_state, EntityInterface $node) {
+function node_preview_banner_form(array $form, array $form_state, EntityInterface $node) {
   $tempstore_id = node_build_tempstore_id($node->type);
 
   // Always add the 'default' view mode.
@@ -624,32 +624,42 @@ function node_preview_form_select(array $form, array $form_state, EntityInterfac
     $view_mode = 'full';
   }
 
-  $form['node_type'] = array(
-    '#type' => 'value',
-    '#value' => $node->type
+  $form['node'] = array(
+    '#type' => 'hidden',
+    '#value' => $node,
   );
 
   $form['backlink'] = array(
     '#type' => 'link',
-    '#title' => t('Back to content editing'),
+    '#title' => '<<< ' . t('Back to content editing'),
     '#href' => $path,
-    '#attributes' => array('class' => array('node-preview-backlink button')),
+    '#attributes' => array('class' => array('node-preview-backlink')),
+  );
+  $form['preview_node_submit'] = array(
+    '#type' => 'submit',
+    '#submit' => array('node_preview_banner_form_node_submit'),
+    '#value' => t('Save'),
+    '#attributes' => array(
+      'class' => array('node-preview-save-button'),
+    )
   );
 
   $form['view_mode'] = array(
     '#type' => 'select',
-    '#title' => t('Select a view mode'),
-    '#title_display' => 'invisible',
+    '#title' => t('Select a display mode'),
+    //'#title_display' => 'invisible',
     '#options' => $view_mode_options,
     '#default_value' => $view_mode,
   );
-  $form['submit'] = array(
+  $form['view_mode_submit'] = array(
     '#type' => 'submit',
+    '#submit' => array('node_preview_banner_form_view_mode_submit'),
     '#value' => t('Switch'),
     '#attributes' => array(
       'class' => array('node-preview-switch-button')
     )
   );
+  $form['#theme'] = 'node_preview_banner_form';
 
   return $form;
 }
@@ -657,8 +667,33 @@ function node_preview_form_select(array $form, array $form_state, EntityInterfac
 /**
  * Submit handler for the node preview view mode selection form.
  */
-function node_preview_form_select_submit(array $form, array &$form_state) {
-  $form_state['redirect'] = array('node/' . $form_state['values']['node_type'] . '/preview', array('query' => array('view_mode' => $form_state['values']['view_mode'])));
+function node_preview_banner_form_node_submit(array $form, array &$form_state) {
+  form_load_include($form_state, 'inc', 'node', 'node.pages');
+  $node = $form_state['values']['node'];
+  node_object_prepare($node);
+  $type = $node->type;
+  $build = array();
+  $build['node'] = $node;
+  $build['values']['status'] = $node->status;
+  $build['values']['scheduled'] = $node->scheduled;
+  $build['values']['op'] = t('Save');
+  backdrop_form_submit($type . '_node_form', $build, $node);
+  $errors = form_get_errors();
+  if (!empty($errors)) {
+    foreach ($errors as $field_name => $message) {
+      watchdog('node', '%field: %message', array('%message'=> $message, '%field' => $field_name));
+    }
+  }
+  else {
+    backdrop_goto('node/' . $node->nid);
+  }
+}
+
+/**
+ * Submit handler for the node preview view mode selection form.
+ */
+function node_preview_banner_form_view_mode_submit(array $form, array &$form_state) {
+  $form_state['redirect'] = array('node/' . $form_state['values']['node']->type . '/preview', array('query' => array('view_mode' => $form_state['values']['view_mode'])));
 }
 
 /**

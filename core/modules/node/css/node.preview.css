@@ -12,15 +12,21 @@
   background-image: linear-gradient(to bottom, #d1e8f5, #d3e8f4);
   -webkit-box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.3333);
   position: fixed;
-  z-index: 499;
+  z-index: 999;
   width: 100%;
   padding: 10px;
 }
-
-.node-preview-container .form-type-select {
-  margin-left: 25%;
+.node-preview-backlink {
+  float: left;
 }
-
-.node-preview-backlink.button {
-  text-decoration: none;
+.node-node-preview-banner-form-left {
+  float: left;
 }
+.node-node-preview-banner-form-right {
+  float: right;
+}
+.node-preview-save-button {
+  float: left;
+  clear: both;
+}
+.
