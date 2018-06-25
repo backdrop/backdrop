@@ -137,8 +137,9 @@ function node_form($form, &$form_state, Node $node) {
         '#value' => $node->destination,
       );
     }
-    // todo dont show this message if redirecting from preview page.
-    backdrop_set_message(t('Continue editing this @type or cancel to clear.', array('@type' => $node->type)));
+    if (empty($form_state['save_in_progress'])) {
+      backdrop_set_message(t('Continue editing this @type or cancel to clear.', array('@type' => $node->type)));
+    }
     node_clear_node_tempstore($tempstore_id);
   }
 
@@ -675,6 +676,7 @@ function node_preview_banner_form_node_submit(array $form, array &$form_state) {
   $type = $node->type;
   $build = array();
   $build['node'] = $node;
+  $build['save_in_progress'] = TRUE;
   $build['values']['status'] = $node->status;
   $build['values']['scheduled'] = $node->scheduled;
   $build['values']['op'] = t('Save');
