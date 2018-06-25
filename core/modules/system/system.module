@@ -1351,6 +1351,19 @@ function system_library_info() {
     ),
   );
 
+  // Spectrum.
+  $libraries['spectrum'] = array(
+    'title' => 'Spectrum',
+    'website' => 'https://github.com/bgrins/spectrum',
+    'version' => '1.8',
+    'js' => array(
+      'core/misc/spectrum/spectrum.js' => array(),
+    ),
+    'css' => array(
+      'core/misc/spectrum/spectrum.css' => array(),
+    ),
+  );
+
   // HTML5 Shiv.
   $libraries['html5shiv'] = array(
     'title' => 'html5shiv',

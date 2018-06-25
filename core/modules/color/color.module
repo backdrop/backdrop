@@ -58,7 +58,7 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
       '#attached' => array(
         // Add Farbtastic color picker.
         'library' => array(
-          array('system', 'farbtastic'),
+          array('system', 'spectrum'),
         ),
         // Add custom CSS.
         'css' => array(
@@ -72,6 +72,7 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
               'color' => array(
                 'reference' => color_get_palette($theme_name, TRUE),
                 'schemes' => $schemes,
+                'theme' => $theme_name,
               ),
             ),
             'type' => 'setting',
@@ -92,25 +93,20 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
     foreach ($palette as $name => $value) {
       if (isset($names[$name])) {
         $form['color']['palette'][$name] = array(
-          '#type' => 'textfield',
+          '#type' => 'color',
           '#title' => check_plain($names[$name]),
           '#value_callback' => 'color_palette_color_value',
           '#default_value' => $value,
           '#size' => 8,
+          // These configure the polyfill for color inputs in Internet Explorer.
+          '#attributes' => array(
+            'data-preferred-format' => 'hex',
+            'data-show-input' => 'true',
+            'data-clickout-fires-change' => 'true',
+            'data-show-initial' => 'true',
+          ),
         );
       }
-    }
-
-    // Add the CSS and Javascript files fot the preview.
-    $theme_path = backdrop_get_path('theme', $theme_name) . '/';
-    if (isset($theme_info['preview_css']) &&file_exists($theme_path . $theme_info['preview_css'])) {
-      backdrop_add_css($theme_path . $theme_info['preview_css']);
-    }
-    if (isset($theme_info['preview_js']) &&file_exists($theme_path . $theme_info['preview_js'])) {
-      backdrop_add_js($theme_path . $theme_info['preview_js'], array('weight' => -1));
-    }
-    else {
-      backdrop_add_js($base . '/js/color.preview.js', array('weight' => -1));
     }
 
     // Add the HTML for the preview.
@@ -123,12 +119,8 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
         '#markup' => '<h2>' . t('Preview') . '</h2>',
       )
     );
-    if(isset($theme_info['preview_html']) && file_exists($theme_path . $theme_info['preview_html'])) {
-      $form['color']['preview']['preview']['#markup'] = file_get_contents($theme_path . $theme_info['preview_html']);
-    }
-    else {
-      $form['color']['preview']['preview']['#markup'] = file_get_contents($base . '/preview.html');
-    }
+    $preview_url = url('<front>', array('query' => array('preview' => $theme_name)));
+    $form['color']['preview']['preview']['#markup'] = '<iframe id="preview" src="' . $preview_url . '"></iframe>';
 
     $form['color']['theme'] = array('#type' => 'value', '#value' => $theme_name);
     $form['color']['info'] = array('#type' => 'value', '#value' => $theme_info);
@@ -154,23 +146,121 @@ function color_css_alter(&$css) {
   global $theme_key;
   $themes = list_themes();
 
-  // Override stylesheets.
-  $color_paths = theme_get_setting('color.stylesheets');
-
-  if (!empty($color_paths)) {
-    foreach ($themes[$theme_key]->stylesheets['all'] as $base_filename => $old_path) {
-      // Loop over the path array with recolored CSS files to find matching
-      // paths which could replace the non-recolored paths.
-      foreach ($color_paths as $color_path) {
-        // Color module currently requires unique file names to be used,
-        // which allows us to compare different file paths.
-        if (backdrop_basename($old_path) == backdrop_basename($color_path)) {
-          // Replace the path to the new css file.
-          // This keeps the order of the stylesheets intact.
-          $css[$old_path]['data'] = $color_path;
+  $preview_theme = _color_preview_theme();
+  if ($preview_theme) {
+    // Convert stylesheets for the preview.
+    $theme_info = color_get_info($preview_theme);
+    $theme_path = backdrop_get_path('theme', $preview_theme);
+    if (isset($_SESSION['color'][$theme_key])) {
+      $preview_data = $_SESSION['color'][$theme_key];
+    }
+    $paths = array('map' => array());
+    foreach ($theme_info['css'] as $file) {
+      $stylesheet = file_get_contents($theme_path . '/' . $file);
+      $stylesheet = _color_rewrite_stylesheet($preview_theme, $theme_info, $paths, $preview_data['palette'], $stylesheet);
+      foreach ($css as $path => $data) {
+        if (backdrop_basename($path) == backdrop_basename($file)) {
+          $css[$path]['type'] = 'inline';
+          $css[$path]['data'] = $stylesheet;
+          break;
         }
       }
     }
+  }
+  else {
+    // Override stylesheets.
+    $color_paths = theme_get_setting('color.stylesheets');
+
+    if (!empty($color_paths)) {
+      foreach ($themes[$theme_key]->stylesheets['all'] as $base_filename => $old_path) {
+        // Loop over the path array with recolored CSS files to find matching
+        // paths which could replace the non-recolored paths.
+        foreach ($color_paths as $color_path) {
+          // Color module currently requires unique file names to be used,
+          // which allows us to compare different file paths.
+          if (backdrop_basename($old_path) == backdrop_basename($color_path)) {
+            // Replace the path to the new css file.
+            // This keeps the order of the stylesheets intact.
+            $css[$old_path]['data'] = $color_path;
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function color_menu() {
+  $items = array();
+
+  $items['color/save_preview_settings/%'] = array(
+    'page callback' => 'color_save_preview_settings',
+    'page arguments' => array(2),
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('administer theme settings'),
+    'delivery callback' => 'backdrop_json_deliver',
+  );
+
+  return $items;
+}
+
+/**
+ * Callback function to handle saving preview settings to the user's session.
+ */
+function color_save_preview_settings($theme_name) {
+  $themes = list_themes();
+  if (in_array($theme_name, array_keys($themes))) {
+    $theme_info = color_get_info($theme_name);
+
+    // Check that the scheme is valid.
+    if (isset($_POST['scheme'])
+      && !empty($_POST['scheme'])
+      && in_array($_POST['scheme'], array_keys($theme_info['schemes']))) {
+      $scheme = $_POST['scheme'];
+    }
+    else {
+      $scheme = '';
+    }
+
+    // Check that the palette is valid.
+    if (isset($_POST['palette']) && is_array($_POST['palette'])) {
+      $palette = $_POST['palette'];
+      foreach ($palette as $field => $color) {
+        if (!in_array($field, array_keys($theme_info['fields'])) || !color_valid_hexadecimal_string($color)) {
+          unset($palette[$field]);
+        }
+      }
+    }
+
+    $_SESSION['color'][$theme_name] = array(
+      'scheme' => $scheme,
+      'palette' => $palette,
+    );
+
+    $data = array('success' => 1);
+    backdrop_json_output($data);
+  }
+}
+
+/**
+ * Implements hook_custom_theme().
+ */
+function color_custom_theme() {
+  $preview = _color_preview_theme();
+  if ($preview) {
+    return $preview;
+  }
+}
+
+/**
+ * Implements hook_url_outbound_alter().
+ */
+function color_url_outbound_alter(&$path, &$options, $original_path) {
+  $preview = _color_preview_theme();
+  if ($preview) {
+    $options['query']['preview'] = $preview;
   }
 }
 
@@ -211,25 +301,6 @@ function _color_config_save(Config $staging_config) {
         $staging_config->set('color', $updated_config);
       }
     }
-  }
-}
-
-/**
- * Replaces the logo with a color-altered logo.
- *
- * A theme that supports the color module should call this function from its
- * THEME_process_page() function, so that the correct logo is included when
- * page.tpl.php is rendered.
- *
- * @see theme()
- */
-function _color_header_alter(&$variables) {
-  global $theme_key;
-
-  // Override logo.
-  $logo = theme_get_setting('color.logo');
-  if ($logo && $variables['logo'] && preg_match('!' . $theme_key . '/logo.png$!', $variables['logo'])) {
-    $variables['logo'] = file_create_url($logo);
   }
 }
 
@@ -314,6 +385,17 @@ function color_palette_color_value($element, $input = FALSE, $form_state = array
  */
 function color_valid_hexadecimal_string($color) {
   return preg_match('/^#([a-f0-9]{3}){1,2}$/iD', $color);
+}
+
+function _color_preview_theme() {
+  $params = backdrop_get_query_parameters();
+  if (isset($params['preview'])) {
+    $themes = list_themes();
+    if (in_array($params['preview'], array_keys($themes))) {
+      return $params['preview'];
+    }
+  }
+  return '';
 }
 
 /**
