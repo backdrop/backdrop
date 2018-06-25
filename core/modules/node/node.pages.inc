@@ -556,10 +556,7 @@ function node_preview($type) {
   $node->changed = REQUEST_TIME;
  
   // Get the view mode to render the preview in.
-  $view_mode = $_GET['view_mode'];
-  if (empty($view_mode)) {
-    $view_mode = 'full';
-  }
+  $view_mode = empty($_GET['view_mode']) ? 'full' : $_GET['view_mode'];
 
   // Property so we can manipulate $page in template_preprocess_node.
   if ($view_mode == 'full' || $view_mode == 'default') {
@@ -621,13 +618,10 @@ function node_preview_banner_form(array $form, array $form_state, EntityInterfac
   }
 
   // Get the view mode to render the preview in.
-  $view_mode = $_GET['view_mode'];
-  if (empty($view_mode)) {
-    $view_mode = 'full';
-  }
+  $view_mode = empty($_GET['view_mode']) ? 'full' : $_GET['view_mode'];
 
   $form['node'] = array(
-    '#type' => 'hidden',
+    '#type' => 'value',
     '#value' => $node,
   );
 
