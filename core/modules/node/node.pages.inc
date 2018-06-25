@@ -619,7 +619,8 @@ function node_preview_banner_form(array $form, array $form_state, EntityInterfac
     $path = 'node/' . $node->nid . '/edit';
   }
 
-  $view_mode = array();
+  // Get the view mode to render the preview in.
+  $view_mode = $_GET['view_mode'];
   if (empty($view_mode)) {
     $view_mode = 'full';
   }
