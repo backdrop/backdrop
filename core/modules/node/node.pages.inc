@@ -631,7 +631,7 @@ function node_preview_banner_form(array $form, array $form_state, EntityInterfac
 
   $form['backlink'] = array(
     '#type' => 'link',
-    '#title' => '<<< ' . t('Back to content editing'),
+    '#title' => t('Back to content editing'),
     '#href' => $path,
     '#attributes' => array('class' => array('node-preview-backlink')),
   );
