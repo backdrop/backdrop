@@ -804,7 +804,7 @@ function system_modules_confirm_form($modules, $storage) {
   $form['status']['#tree'] = TRUE;
 
   foreach ($storage['more_required'] as $info) {
-    $module = format_plural(count($info['requires']), 'You must enable the following module to enable @module:', 'You must enable the following modules to enable @module:', array('@module' => $info['name']));
+    $module = format_plural(count($info['requires']), 'To enable the %module module, the following module must also be enabled:', 'To enable the %module module, the following modules must also be enabled:', array('%module' => $info['name']));
     $requirements = $info['requires'];
     $items[] = array(
       'data' => $module,
@@ -813,11 +813,12 @@ function system_modules_confirm_form($modules, $storage) {
   }
 
   foreach ($storage['missing_modules'] as $name => $info) {
-    $t_argument = array(
-      '@module' => $name,
-      '@depends' => implode(', ', $info['depends']),
+    $module = format_plural(count($info['depends']), 'The @module module is missing, so the following module will be disabled:', 'The @module module is missing, so the following modules will be disabled:', array('@module' => $name));
+    $dependencies = $info['depends'];
+    $items[] = array(
+      'data' => $module,
+      'children' => $dependencies,
     );
-    $items[] = format_plural(count($info['depends']), 'The @module module is missing, so the following module will be disabled: @depends.', 'The @module module is missing, so the following modules will be disabled: @depends.', $t_argument);
   }
 
   $form['text'] = array('#markup' => theme('item_list', array('items' => $items)));
