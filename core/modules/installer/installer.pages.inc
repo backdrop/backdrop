@@ -717,6 +717,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         '#empty' => t('No new modules installed.'),
         '#multiple' => TRUE,
         '#js_select' => TRUE,
+        '#default_value' => $options,
         '#weight' => 1,
       );
 
