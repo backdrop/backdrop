@@ -804,22 +804,18 @@ function system_modules_confirm_form($modules, $storage) {
   $form['status']['#tree'] = TRUE;
 
   foreach ($storage['more_required'] as $info) {
-    $t_argument = array(
-      '@module' => $info['name'],
-      '@required' => implode(', ', $info['requires']),
-    );
-    $items[] = format_plural(count($info['requires']), 'You must enable the @required module to install @module.', 'You must enable the @required modules to install @module.', $t_argument);
+    $header = array('Required modules to be enabled', 'Required by');
+    $requirements = $info['requires'];
+    $rows[] = array(theme('item_list', array('items' => $requirements)), $info['name']);
   }
 
   foreach ($storage['missing_modules'] as $name => $info) {
-    $t_argument = array(
-      '@module' => $name,
-      '@depends' => implode(', ', $info['depends']),
-    );
-    $items[] = format_plural(count($info['depends']), 'The @module module is missing, so the following module will be disabled: @depends.', 'The @module module is missing, so the following modules will be disabled: @depends.', $t_argument);
+    $header = array('Missing modules', 'Modules to be disabled');
+    $dependencies = $info['depends'];
+    $rows[] = array($name, theme('item_list', array('items' => $dependencies)));
   }
 
-  $form['text'] = array('#markup' => theme('item_list', array('items' => $items)));
+  $form['text'] = array('#markup' => theme('table', array('header' => $header, 'rows' => $rows)));
 
   if ($form) {
     // Set some default form values
