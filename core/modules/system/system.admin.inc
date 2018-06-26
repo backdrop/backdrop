@@ -804,11 +804,12 @@ function system_modules_confirm_form($modules, $storage) {
   $form['status']['#tree'] = TRUE;
 
   foreach ($storage['more_required'] as $info) {
-    $t_argument = array(
-      '@module' => $info['name'],
-      '@required' => implode(', ', $info['requires']),
+    $module = format_plural(count($info['requires']), 'You must enable the following module to enable @module:', 'You must enable the following modules to enable @module:', array('@module' => $info['name']));
+    $requirements = $info['requires'];
+    $items[] = array(
+      'data' => $module,
+      'children' => $requirements,
     );
-    $items[] = format_plural(count($info['requires']), 'You must enable the @required module to install @module.', 'You must enable the @required modules to install @module.', $t_argument);
   }
 
   foreach ($storage['missing_modules'] as $name => $info) {
