@@ -804,7 +804,7 @@ function system_modules_confirm_form($modules, $storage) {
   $form['status']['#tree'] = TRUE;
 
   foreach ($storage['more_required'] as $info) {
-    $module = format_plural(count($info['requires']), 'To enable the %module module, the following module must also be enabled:', 'To enable the %module module, the following modules must also be enabled:', array('%module' => $info['name']));
+    $module = format_plural(count($info['requires']), 'The %module module requires the following module to also be enabled:', 'The %module module requires the following modules to also be enabled:', array('%module' => $info['name']));
     $requirements = $info['requires'];
     $items[] = array(
       'data' => $module,
