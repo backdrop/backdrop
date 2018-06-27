@@ -804,7 +804,7 @@ function system_modules_confirm_form($modules, $storage) {
   $form['status']['#tree'] = TRUE;
 
   foreach ($storage['more_required'] as $info) {
-    $header = array('Required modules to be enabled', 'Required by');
+    $header = array('Required modules', 'Required by');
     $requirements = $info['requires'];
     $rows[] = array(theme('item_list', array('items' => $requirements)), $info['name']);
   }
