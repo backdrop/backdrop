@@ -3835,6 +3835,20 @@ function node_tempstore_load($tempstore_id) {
  */
 function node_build_tempstore_id($type) {
   global $user;
-  return $type . ':' . $user->uid;
+  $id = '';
+  if ($user->uid) {
+    $id = $user->uid;
+  }
+  else {
+    if (!empty($_SESSION['node_tempstore_id']['value'])) {
+      $id = $_SESSION['node_tempstore_id']['value'];
+    }
+    else {
+      $uuid = new Uuid();
+      $id = $uuid->generate();
+      $_SESSION['node_tempstore_id']['value'] = $id;
+    }
+  }
+  return $type . ':' . $id;
 }
 
