@@ -631,14 +631,6 @@ function node_preview_banner_form(array $form, array $form_state, EntityInterfac
     '#href' => $path,
     '#attributes' => array('class' => array('node-preview-backlink')),
   );
-  $form['preview_node_submit'] = array(
-    '#type' => 'submit',
-    '#submit' => array('node_preview_banner_form_node_submit'),
-    '#value' => t('Save'),
-    '#attributes' => array(
-      'class' => array('node-preview-save-button'),
-    )
-  );
 
   $form['view_mode'] = array(
     '#type' => 'select',
@@ -646,13 +638,28 @@ function node_preview_banner_form(array $form, array $form_state, EntityInterfac
     //'#title_display' => 'invisible',
     '#options' => $view_mode_options,
     '#default_value' => $view_mode,
+    '#attributes' => array(
+      'onChange' => 'this.form.submit()',
+      'class' => array('node-preview-display-mode', 'preview-button'),
+    )
   );
+  // This must be the first submit function so the 'onChange' event in 
+  // calls it before any other submit.$form['view_mode']
   $form['view_mode_submit'] = array(
     '#type' => 'submit',
+    '#name' => 'op',
     '#submit' => array('node_preview_banner_form_view_mode_submit'),
     '#value' => t('Switch'),
     '#attributes' => array(
-      'class' => array('node-preview-switch-button')
+      'class' => array('node-preview-switch-button', 'preview-button', 'js-hide')
+    )
+  );
+  $form['preview_node_submit'] = array(
+    '#type' => 'submit',
+    '#submit' => array('node_preview_banner_form_node_submit'),
+    '#value' => t('Save'),
+    '#attributes' => array(
+      'class' => array('node-preview-save-button', 'preview-button'),
     )
   );
   $form['#theme'] = 'node_preview_banner_form';
