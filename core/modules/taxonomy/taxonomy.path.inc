@@ -12,6 +12,7 @@ function taxonomy_path_info() {
     'entity type' => 'taxonomy_term',
     'label' => t('Taxonomy term'),
     'pattern description' => t('Default URL alias pattern (applies to all vocabularies with blank URL alias patterns below)'),
+    'alias bulk actions description' => t('All <em>taxonomy term</em> URL aliases'),
     'pattern default' => '[term:vocabulary]/[term:name]',
     'type delete callback' => 'taxonomy_path_type_delete_callback',
     'batch update callback' => 'taxonomy_path_bulk_update_batch_process',
@@ -32,12 +33,15 @@ function taxonomy_path_info() {
     foreach ($vocabularies as $vocabulary_name => $vocabulary) {
       if (count($languages) && !empty($vocabulary->language)) {
         $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('Default URL alias pattern for %vocab-name (applies to all %vocab-name categories with blank URL alias patterns below)', array('%vocab-name' => $vocabulary->name));
+        $info['taxonomy_term']['alias bulk actions items'][$vocabulary_name] = t('URL alias for <strong>%vocab-name</strong> applies to all %vocab-name categories with blank URL alias patterns below <small>(Machine name: <code>!machine_name</code>)</small>', array('%vocab-name' => $vocabulary->name, '!machine_name' => $vocabulary_name));
         foreach ($languages as $langcode => $language) {
           $info['taxonomy_term']['pattern items'][$vocabulary_name . '_' . $langcode] = t('URL alias pattern for all %vocab-name URLs in %language', array('%vocab-name' => $vocabulary->name, '%language' => $language->name));
+          $info['taxonomy_term']['alias bulk actions items'][$vocabulary_name . '_' . $langcode] = t('URL alias for <strong>%vocab-name</strong> in %language <small>(Machine name: <code>!machine_name</code>)</small>', array('%vocab-name' => $vocabulary->name, '%language' => $language->name, '!machine_name' => $vocabulary_name));
         }
       }
       else {
         $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('URL alias pattern for all %vocab-name URLs', array('%vocab-name' => $vocabulary->name));
+        $info['taxonomy_term']['alias bulk actions items'][$vocabulary_name] = t('URL alias for <strong>%vocab-name</strong> <small>(Machine name: <code>!machine_name</code>)</small>', array('%vocab-name' => $vocabulary->name, '!machine_name' => $vocabulary_name));
       }
     }
   }

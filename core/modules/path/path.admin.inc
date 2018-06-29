@@ -630,7 +630,7 @@ function path_bulk_update_form($form, &$form_state) {
     if (!empty($path_info['batch update callback'])) {
       $form['update'][$type]['base'] = array(
         '#type' => 'checkbox',
-        '#title' => t('!label URL aliases', array('!label' => $path_info['label'])),
+        '#title' => $path_info['alias bulk actions description'],
         '#attributes' => array(
           'class' => array('path-base'),
           'data-path-type' => array($type),
@@ -642,11 +642,11 @@ function path_bulk_update_form($form, &$form_state) {
       // a row for each of these bundle types. For the Node entity the pattern
       // items would be keyed by be node types; for taxonomy, these would be
       // vocabularies.
-      if (isset($path_info['pattern items'])) {
-        foreach ($path_info['pattern items'] as $item => $item_label) {
+      if (isset($path_info['alias bulk actions items'])) {
+        foreach ($path_info['alias bulk actions items'] as $item => $item_label) {
           $form['update'][$type][$item] = array(
             '#type' => 'checkbox',
-            '#title' => t('All !label URL aliases', array('!label' => $item)),
+            '#title' => $item_label,
             '#attributes' => array(
               'class' => array('path-type', 'path-' . $type),
               'data-path-type' => array($type),
@@ -661,8 +661,7 @@ function path_bulk_update_form($form, &$form_state) {
 
   // Build the 'Operations' form.
   $form['operations'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Operations'),
+    '#type' => 'container',
     '#prefix' => '<div class="container-inline">',
     '#suffix' => '</div>',
     '#attributes' => array(
@@ -765,7 +764,7 @@ function path_bulk_update_form_validate($form, &$form_state) {
       }
     }
     if (!$selected) {
-      form_set_error('update', t('You must select an alias to update.'));
+      form_set_error('update', t('You must select at least one alias category to update.'));
     }
   }
 }
