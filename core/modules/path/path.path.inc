@@ -16,6 +16,7 @@ function node_path_info() {
     'entity type' => 'node',
     'label' => t('Content'),
     'pattern description' => t('Default URL alias pattern (applies to all content types with blank URL alias patterns below)'),
+    'alias bulk actions description' => t('All <em>content</em> URL aliases'),
     'pattern default' => 'content/[node:title]',
     'type delete callback' => 'node_path_type_delete_callback',
     'batch update callback' => 'node_path_bulk_update_batch_process',
@@ -33,6 +34,7 @@ function node_path_info() {
   }
 
   foreach (node_type_get_types() as $node_type_name => $node_type) {
+    $info['node']['alias bulk actions items'][$node_type_name] = t('URL alias for <strong>%node_label</strong> <small>(Machine name: <code>!machine_name</code>)</small>', array('%node_label' => $node_type->name, '!machine_name' => $node_type->type));
     if (count($languages) && !empty($node_type->settings['language'])) {
       $info['node']['pattern items'][$node_type_name] = t('Default URL alias pattern for %node_type (applies to all %node_type content types with blank URL alias patterns below)', array('%node_type' => $node_type->name));
       foreach ($languages as $langcode => $language) {
@@ -135,6 +137,7 @@ function taxonomy_path_info() {
     'entity type' => 'taxonomy_term',
     'label' => t('Taxonomy term'),
     'pattern description' => t('Default URL alias pattern (applies to all vocabularies with blank URL alias patterns below)'),
+    'alias bulk actions description' => t('All <em>taxonomy term</em> URL aliases'),
     'pattern default' => '[term:vocabulary]/[term:name]',
     'type delete callback' => 'taxonomy_path_type_delete_callback',
     'batch update callback' => 'taxonomy_path_bulk_update_batch_process',
@@ -146,7 +149,8 @@ function taxonomy_path_info() {
   if (count($vocabularies)) {
     $info['taxonomy_term']['pattern items'] = array();
     foreach ($vocabularies as $vocabulary_name => $vocabulary) {
-      $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('URL alias pattern for all %vocab-name URLs', array('%vocab-name' => $vocabulary->name));
+    $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('URL alias pattern for all %vocabulary_label URLs', array('%vocabulary_label' => $vocabulary->name));
+    $info['taxonomy_term']['alias bulk actions items'][$vocabulary_name] = t('URL alias for <strong>%vocabulary_label</strong> <small>(Machine name: <code>!machine_name</code>)</small>', array('%vocabulary_label' => $vocabulary->name, '!machine_name' => $vocabulary_name));
     }
   }
 
@@ -240,6 +244,7 @@ function user_path_info() {
     'entity type' => 'user',
     'label' => t('User account'),
     'pattern description' => t('URL alias pattern for user account URLs'),
+    'alias bulk actions description' => t('All <em>user account</em> URL aliases'),
     'pattern default' => 'users/[user:name]',
     'batch update callback' => 'user_path_bulk_update_batch_process',
     'batch file' => 'path.path.inc',
