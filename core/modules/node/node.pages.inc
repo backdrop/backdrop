@@ -451,7 +451,7 @@ function node_form($form, &$form_state, Node $node) {
 function node_form_preview($form, &$form_state) {
   $node = $form_state['node'];
   $node_tempstore_id = $form_state['node_tempstore_id'];
-  entity_form_submit_build_entity('node', $node, $form, $form_state);
+  $node = node_form_submit_build_node($form, $form_state);
 
   node_set_node_tempstore($node, $node_tempstore_id);
   if (isset($node->nid)) {
