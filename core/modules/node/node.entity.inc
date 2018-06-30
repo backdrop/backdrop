@@ -146,12 +146,6 @@ class Node extends Entity {
    * @var integer
    */
   public $revision_uid;
-   /**
-    * The node tempstore id.
-    *
-    * @var integer
-    */
-  public $tempstore_id;
 
   /**
    * Create a new Node instance.

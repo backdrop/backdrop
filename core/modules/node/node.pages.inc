@@ -125,8 +125,9 @@ function node_form($form, &$form_state, Node $node) {
 
 
   // Check if we can retrieve a node from the tempstore.
-  $tempstore_id = node_build_tempstore_id($node->type);
-  if (!empty($tempstore_id) && ($data = node_tempstore_load($tempstore_id))) {
+  $node_tempstore_id = isset($form_state['node_tempstore_id']) ? $form_state['node_tempstore_id'] : node_build_tempstore_id();
+  $form_state['node_tempstore_id'] = $node_tempstore_id;
+  if ($data = node_tempstore_load($node_tempstore_id)) {
     $node = $data;
     $form_state['entity'] = $node;
 
@@ -140,7 +141,7 @@ function node_form($form, &$form_state, Node $node) {
     if (empty($form_state['save_in_progress'])) {
       backdrop_set_message(t('Continue editing this @type or cancel to clear.', array('@type' => $node->type)));
     }
-    node_clear_node_tempstore($tempstore_id);
+    node_clear_node_tempstore($node_tempstore_id);
   }
 
   // Override the default CSS class name, since the user-defined node type name
@@ -372,7 +373,7 @@ function node_form($form, &$form_state, Node $node) {
   elseif (isset($_SERVER['HTTP_REFERER'])) {
     $path = $_SERVER['HTTP_REFERER'];
     // When coming from preview, the $path is set to the preview page.
-    if (strpos($path, 'node/' . $node->type . '/preview')) {
+    if (strpos($path, 'node/preview')) {
       if (isset($node->nid)) {
         $path = 'node/' . $node->nid;
       }
@@ -451,10 +452,16 @@ function node_form($form, &$form_state, Node $node) {
  */
 function node_form_preview($form, &$form_state) {
   $node = $form_state['node'];
+  $node_tempstore_id = $form_state['node_tempstore_id'];
   entity_form_submit_build_entity('node', $node, $form, $form_state);
-  $tempstore_id = node_build_tempstore_id($node->type);
-  node_set_node_tempstore($node, $tempstore_id);
-  $form_state['redirect'] = 'node/' . $node->type . '/preview';
+
+  node_set_node_tempstore($node, $node_tempstore_id);
+  if (isset($node->nid)) {
+    $form_state['redirect'] = 'node/preview/' . $node->nid . '/' . $node_tempstore_id;
+  }
+  else {
+    $form_state['redirect'] = 'node/preview/' . $node->type . '/' . $node_tempstore_id;
+  }
 }
 
 /**
@@ -529,9 +536,8 @@ function node_form_submit($form, &$form_state) {
  *
  * @see node_form_build_preview()
  */
-function node_preview($type) {
-  $tempstore_id = node_build_tempstore_id($type);
-  $node = node_get_node_tempstore($tempstore_id);
+function node_preview($node_tempstore_id) {
+  $node = node_get_node_tempstore($node_tempstore_id);
   
   // Set status to true so we don't get the 'unpublished' CSS.
   $node->status = TRUE;
@@ -575,7 +581,7 @@ function node_preview($type) {
     ),
   );
 
-  $form = backdrop_get_form('node_preview_banner_form', $node);
+  $form = backdrop_get_form('node_preview_banner_form', $node, $node_tempstore_id);
   $build['preview_form_select']['view-mode'] = $form;
   $build['preview'] = node_view($node, $view_mode);
   return $build;
@@ -590,9 +596,7 @@ function node_preview($type) {
  * @return array $form
  *   The view mode preview selection form.
  */
-function node_preview_banner_form(array $form, array $form_state, EntityInterface $node) {
-  $tempstore_id = node_build_tempstore_id($node->type);
-
+function node_preview_banner_form(array $form, array $form_state, EntityInterface $node, $node_tempstore_id) {
   // Always add the 'default' view mode.
   $view_mode_options = array('default' => t('Full'));
 
@@ -616,6 +620,8 @@ function node_preview_banner_form(array $form, array $form_state, EntityInterfac
   if (!empty($node->nid)) {
     $path = 'node/' . $node->nid . '/edit';
   }
+  $query = array('node_tempstore_id' => $node_tempstore_id);
+  $url = url($path, array('query' => $query, 'absolute' => TRUE));
 
   // Get the view mode to render the preview in.
   $view_mode = empty($_GET['view_mode']) ? 'full' : $_GET['view_mode'];
@@ -628,7 +634,7 @@ function node_preview_banner_form(array $form, array $form_state, EntityInterfac
   $form['backlink'] = array(
     '#type' => 'link',
     '#title' => t('Back to content editing'),
-    '#href' => $path,
+    '#href' => $url,
     '#attributes' => array('class' => array('node-preview-backlink')),
   );
 

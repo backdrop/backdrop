@@ -896,7 +896,7 @@ function node_load($nid = NULL, $vid = NULL, $reset = FALSE) {
  */
 function node_object_prepare(Node $node) {
   // Check if we can retrieve a node from the tempstore.
-  $tempstore_id = node_build_tempstore_id($node->type);
+  $node_tempstore_id = node_build_tempstore_id($node->type);
 
    // Set up default values, if required.
   $node_type = node_type_get_type($node->type);
@@ -1781,17 +1781,27 @@ function node_menu() {
       'description' => $type->description,
       'file' => 'node.pages.inc',
     );
-    $items['node/' . $type_url_str . '/preview'] = array(
+    $items['node/preview/' . $type_url_str . '/%'] = array(
       'title' => $type->name,
       'title callback' => 'check_plain',
       'page callback' => 'node_preview',
-      'page arguments' => array($type->type),
+      'page arguments' => array(3),
       'access callback' => 'node_access',
       'access arguments' => array('create', $type->type),
       'description' => $type->description,
+      'type' => MENU_CALLBACK,
       'file' => 'node.pages.inc',
     );
   }
+  $items['node/preview/%node/%'] = array(
+    'title callback' => 'node_page_title',
+    'title arguments' => array(1),
+    'page callback' => 'node_preview',
+    'page arguments' => array(3),
+    'access callback' => 'node_access',
+    'access arguments' => array('view', 1),
+    'type' => MENU_CALLBACK,
+  );
   $items['node/%node'] = array(
     'title callback' => 'node_page_title',
     'title arguments' => array(1),
@@ -3779,18 +3789,18 @@ function node_language_delete($language) {
 /**
  * Get a node from the tempstore.
  *
- * @param string $tempstore_id
- *   The machine tempstore_id of the node item to load.
+ * @param string $node_tempstore_id
+ *   The machine node_tempstore_id of the node item to load.
  */
-function node_get_node_tempstore($tempstore_id) {
+function node_get_node_tempstore($node_tempstore_id) {
   $caches = &backdrop_static(__FUNCTION__, array());
-  if (!isset($caches[$tempstore_id])) {
+  if (!isset($caches[$node_tempstore_id])) {
     // Try loading from tempstore first to get in-progress changes.
-    $item = tempstore_get('node_tempstore', $tempstore_id);
-    $caches[$tempstore_id] = $item;
+    $item = tempstore_get('node_tempstore', $node_tempstore_id);
+    $caches[$node_tempstore_id] = $item;
   }
 
-  return $caches[$tempstore_id];
+  return $caches[$node_tempstore_id];
 }
 
 /**
@@ -3801,54 +3811,46 @@ function node_get_node_tempstore($tempstore_id) {
  * @param string $type
  *   The type of item to save. Must be either "node" or "menu_item".
  */
-function node_set_node_tempstore($item, $tempstore_id) {
+function node_set_node_tempstore($item, $node_tempstore_id) {
   $item->locked = array(
     'uid' => $GLOBALS['user']->uid,
     'updated' => REQUEST_TIME,
   );
-  tempstore_set('node_tempstore', $tempstore_id, $item, 604800);
+  tempstore_set('node_tempstore', $node_tempstore_id, $item, 604800);
 }
 
 /**
  * Remove an item from the object cache.
  */
-function node_clear_node_tempstore($tempstore_id, $type = 'node') {
-  tempstore_clear('node_tempstore', $tempstore_id);
+function node_clear_node_tempstore($node_tempstore_id, $type = 'node') {
+  tempstore_clear('node_tempstore', $node_tempstore_id);
 }
 
 /**
  * Load a node from the tempstore.
  *
- * @param int $tempstore_id
+ * @param int $node_tempstore_id
  *   The ID of a tempstore object.
  *
  * @return Node|false
  *   A fully-populated node entity, or FALSE if the node is not found.
  */
 //todo
-function node_tempstore_load($tempstore_id) {
-  return node_get_node_tempstore($tempstore_id);
+function node_tempstore_load($node_tempstore_id) {
+  return node_get_node_tempstore($node_tempstore_id);
 }
 
 /**
  * Build tempstore ID.
  */
-function node_build_tempstore_id($type) {
-  global $user;
-  $id = '';
-  if ($user->uid) {
-    $id = $user->uid;
+function node_build_tempstore_id() {
+  if (isset($_GET['node_tempstore_id'])) {
+    $node_tempstore_id = $_GET['node_tempstore_id'];
   }
   else {
-    if (!empty($_SESSION['node_tempstore_id']['value'])) {
-      $id = $_SESSION['node_tempstore_id']['value'];
-    }
-    else {
-      $uuid = new Uuid();
-      $id = $uuid->generate();
-      $_SESSION['node_tempstore_id']['value'] = $id;
-    }
+    $uuid = new Uuid();
+    $node_tempstore_id = $uuid->generate();
   }
-  return $type . ':' . $id;
+  return $node_tempstore_id;
 }
 
