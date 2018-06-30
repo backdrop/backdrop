@@ -630,6 +630,11 @@ function node_preview_banner_form(array $form, array $form_state, EntityInterfac
     '#value' => $node,
   );
 
+  $form['node_tempstore_id'] = array(
+    '#type' => 'value',
+    '#value' => $node_tempstore_id,
+  );
+
   $form['backlink'] = array(
     '#type' => 'link',
     '#title' => t('Back to content editing'),
@@ -701,7 +706,14 @@ function node_preview_banner_form_node_submit(array $form, array &$form_state) {
  * Submit handler for the node preview view mode selection form.
  */
 function node_preview_banner_form_view_mode_submit(array $form, array &$form_state) {
-  $form_state['redirect'] = array('node/' . $form_state['values']['node']->type . '/preview', array('query' => array('view_mode' => $form_state['values']['view_mode'])));
+  $node = $form_state['values']['node'];
+  $node_tempstore_id = $form_state['values']['node_tempstore_id'];
+  if (isset($node->nid)) {
+    $form_state['redirect'] = array('node/preview/' . $node->nid . '/' . $node_tempstore_id, array('query' => array('view_mode' => $form_state['values']['view_mode'])));
+  }
+  else {
+    $form_state['redirect'] = array('node/preview/' . $node->type . '/' . $node_tempstore_id, array('query' => array('view_mode' => $form_state['values']['view_mode'])));
+  }
 }
 
 /**
