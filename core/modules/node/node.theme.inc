@@ -19,8 +19,8 @@ function theme_node_preview_banner_form($variables) {
 
   $output = '<div class="node-node-preview-banner-form">';
   $output .= '<div class="node-node-preview-banner-form-left">';
-  $output .= backdrop_render($form['backlink']);
   $output .= backdrop_render($form['preview_node_submit']);
+  $output .= backdrop_render($form['backlink']);
   $output .= '</div>';
   $output .= '<div class="node-node-preview-banner-form-right">';
   $output .= backdrop_render($form['view_mode']);
