@@ -1801,6 +1801,7 @@ function node_menu() {
     'access callback' => 'node_access',
     'access arguments' => array('view', 2),
     'type' => MENU_CALLBACK,
+    'file' => 'node.pages.inc',
   );
   $items['node/%node'] = array(
     'title callback' => 'node_page_title',
