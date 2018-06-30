@@ -1795,11 +1795,11 @@ function node_menu() {
   }
   $items['node/preview/%node/%'] = array(
     'title callback' => 'node_page_title',
-    'title arguments' => array(1),
+    'title arguments' => array(2),
     'page callback' => 'node_preview',
     'page arguments' => array(3),
     'access callback' => 'node_access',
-    'access arguments' => array('view', 1),
+    'access arguments' => array('view', 2),
     'type' => MENU_CALLBACK,
   );
   $items['node/%node'] = array(
