@@ -138,9 +138,7 @@ function node_form($form, &$form_state, Node $node) {
         '#value' => $node->destination,
       );
     }
-    if (empty($form_state['save_in_progress'])) {
-      backdrop_set_message(t('Continue editing this @type or cancel to clear.', array('@type' => $node->type)));
-    }
+
     node_clear_node_tempstore($node_tempstore_id);
   }
 
@@ -462,6 +460,7 @@ function node_form_preview($form, &$form_state) {
   else {
     $form_state['redirect'] = 'node/preview/' . $node->type . '/' . $node_tempstore_id;
   }
+  backdrop_set_message(t('This is a preview. All changes are stored temporarily. Click Save to make your changes permanent, or click "Back to content editing".'));
 }
 
 /**
@@ -683,7 +682,6 @@ function node_preview_banner_form_node_submit(array $form, array &$form_state) {
   $type = $node->type;
   $build = array();
   $build['node'] = $node;
-  $build['save_in_progress'] = TRUE;
   $build['values']['status'] = $node->status;
   $build['values']['scheduled'] = $node->scheduled;
   $build['values']['op'] = t('Save');
