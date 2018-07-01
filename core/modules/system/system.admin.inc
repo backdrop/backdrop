@@ -615,7 +615,12 @@ function system_modules($form, $form_state = array()) {
   }
 
   $modules = array();
-  $form['modules'] = array('#tree' => TRUE);
+
+  // Add basic information to the fieldsets.
+  $form['modules'] = array(
+    '#theme' => 'system_modules_fieldset',
+    '#tree' => TRUE,
+  );
 
   // Used when displaying modules that are required by the installation profile.
   require_once BACKDROP_ROOT . '/core/includes/install.inc';
@@ -721,25 +726,9 @@ function system_modules($form, $form_state = array()) {
         }
       }
     }
-    $form['modules'][$module->info['package']][$filename] = _system_modules_build_row($module->info, $extra);
+    $form['modules'][$filename] = _system_modules_build_row($module->info, $extra);
   }
 
-  // Add basic information to the fieldsets.
-  foreach (element_children($form['modules']) as $package) {
-    $form['modules'][$package] += array(
-      '#type' => 'fieldset',
-      '#title' => t($package),
-      '#collapsible' => TRUE,
-      '#theme' => 'system_modules_fieldset',
-      '#header' => array(
-        array('class' => array('checkbox')),
-        t('Name'),
-        array('data' => t('Version'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
-        array('data' => t('Description'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-        array('data' => t('Operations')),
-      ),
-    );
-  }
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(

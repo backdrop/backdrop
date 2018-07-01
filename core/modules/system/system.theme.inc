@@ -203,8 +203,15 @@ function theme_system_modules_fieldset($variables) {
       $rows[] = array('data' => $row, 'class' => $classes);
     }
   }
+  $header = array(
+    array('class' => array('checkbox')),
+    t('Name'),
+    array('data' => t('Version'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
+    array('data' => t('Description'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    array('data' => t('Operations')),
+  );
 
-  return theme('table', array('header' => $form['#header'], 'rows' => $rows));
+  return theme('table', array('header' => $header, 'rows' => $rows));
 }
 
 /**
