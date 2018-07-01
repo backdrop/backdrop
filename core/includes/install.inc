@@ -473,7 +473,7 @@ abstract class DatabaseTasks {
             'required' => TRUE,
           );
           $settings['database_prefix'] = array(
-            'value' => $db_settings['db_prefix'],
+            'value' => $db_settings['prefix'],
           );
           backdrop_rewrite_settings($settings);
         }
@@ -614,13 +614,13 @@ abstract class DatabaseTasks {
     );
 
     $profile = backdrop_get_profile();
-    $db_prefix = ($profile == 'standard') ? 'backdrop_' : $profile . '_';
-    $form['advanced_options']['db_prefix'] = array(
+    $prefix = ($profile == 'standard') ? 'backdrop_' : $profile . '_';
+    $form['advanced_options']['prefix'] = array(
       '#type' => 'textfield',
       '#title' => st('Table prefix'),
       '#default_value' => '',
       '#size' => 45,
-      '#description' => st('If more than one application will be sharing this database, enter a table prefix such as %prefix for your @profile site here.', array('@profile' => backdrop_install_profile_distribution_name(), '%prefix' => $db_prefix)),
+      '#description' => st('If more than one application will be sharing this database, enter a table prefix such as %prefix for your @profile site here.', array('@profile' => backdrop_install_profile_distribution_name(), '%prefix' => $prefix)),
       '#weight' => 10,
     );
 
@@ -664,7 +664,7 @@ abstract class DatabaseTasks {
 
     // Verify the table prefix.
     if (!empty($database['prefix']) && is_string($database['prefix']) && !preg_match('/^[A-Za-z0-9_.]+$/', $database['prefix'])) {
-      $errors[$database['driver'] . '][advanced_options][db_prefix'] = st('The database table prefix you have entered, %prefix, is invalid. The table prefix can only contain alphanumeric characters, periods, or underscores.', array('%prefix' => $database['prefix']));
+      $errors[$database['driver'] . '][advanced_options][prefix'] = st('The database table prefix you have entered, %prefix, is invalid. The table prefix can only contain alphanumeric characters, periods, or underscores.', array('%prefix' => $database['prefix']));
     }
 
     // Verify the database port.
@@ -1012,7 +1012,7 @@ function backdrop_uninstall_modules($module_list = array(), $uninstall_dependent
     $module_list = array_flip(array_values($module_list));
 
     $profile = backdrop_get_profile();
-    while (list($module) = each($module_list)) {
+    foreach (array_keys($module_list) as $module) {
       if (!isset($module_data[$module]) || backdrop_get_installed_schema_version($module) == SCHEMA_UNINSTALLED) {
         // This module doesn't exist or is already uninstalled. Skip it.
         unset($module_list[$module]);

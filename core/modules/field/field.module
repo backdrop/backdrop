@@ -1044,7 +1044,7 @@ function field_view_value($entity_type, $entity, $field_name, $item, $display = 
  *     $instance definitions. The following key/value pairs are allowed:
  *     - label: (string) Position of the label. The default 'field' theme
  *       implementation supports the values 'inline', 'above' and 'hidden'.
- *       Defaults to 'above'.
+ *       Defaults to 'hidden'.
  *     - type: (string) The formatter to use. Defaults to the
  *       'default_formatter' for the field type, specified in
  *       hook_field_info(). The default formatter will also be used if the

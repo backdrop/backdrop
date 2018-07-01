@@ -1454,10 +1454,11 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
       // length if it's a string, and the item count if it's an array.
       // An unchecked checkbox has a #value of integer 0, different than string
       // '0', which could be a valid value.
-      $is_empty_multiple = (!count($elements['#value']));
+      $is_empty_multiple = (is_array($elements['#value']) || $elements['#value'] instanceof Countable) && count($elements['#value']) === 0;
+      $is_empty_null = $elements['#value'] === NULL;
       $is_empty_string = (is_string($elements['#value']) && backdrop_strlen(trim($elements['#value'])) == 0);
       $is_empty_value = ($elements['#value'] === 0);
-      if ($is_empty_multiple || $is_empty_string || $is_empty_value) {
+      if ($is_empty_multiple || $is_empty_string || $is_empty_value || $is_empty_null) {
         // Although discouraged, a #title is not mandatory for form elements. In
         // case there is no #title, we cannot set a form error message.
         // Instead of setting no #title, form constructors are encouraged to set
@@ -3587,6 +3588,7 @@ function form_process_tableselect($element) {
             '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
           );
         }
+        $element[$key]['#attributes']['data-tableselect-id'] = implode('-', $element['#parents']);
         if (isset($element['#options'][$key]['#weight'])) {
           $element[$key]['#weight'] = $element['#options'][$key]['#weight'];
         }

@@ -612,7 +612,8 @@ function _menu_load_objects(&$item, &$map) {
           // 'load arguments' in the hook_menu() entry, but they need
           // some processing. In this case the $function is the key to the
           // load_function array, and the value is the list of arguments.
-          list($function, $args) = each($function);
+          $args = current($function);
+          $function = key($function);
           $load_functions[$index] = $function;
 
           // Some arguments are placeholders for dynamic items to process.
@@ -827,7 +828,7 @@ function _menu_translate(&$router_item, $map, $to_arg = FALSE) {
     $tab_parent_map = explode('/', $router_item['tab_parent']);
   }
   for ($i = 0; $i < $router_item['number_parts']; $i++) {
-    if ($link_map[$i] == '%') {
+    if ($link_map[$i] == '%' && isset($path_map[$i])) {
       $link_map[$i] = $path_map[$i];
     }
     if (isset($tab_root_map[$i]) && $tab_root_map[$i] == '%') {
@@ -1395,7 +1396,15 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
               $query->condition('has_children', 1);
               $query->condition('plid', $parents, 'IN');
               $query->condition('mlid', $parents, 'NOT IN');
-              $result = $query->execute();
+              $query->condition('langcode', array($GLOBALS['language']->langcode, 'und'), 'IN');
+              try {
+                $result = $query->execute();
+              }
+              // If the menu links cannot be built, allow the page to render
+              // nonetheless, absent the menu links.
+              catch (PDOException $e) {
+                $result = array();
+              }
               $num_rows = FALSE;
               foreach ($result as $item) {
                 $parents[$item['mlid']] = $item['mlid'];
@@ -1476,12 +1485,19 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
   // Static cache of already built menu trees.
   $trees = &backdrop_static(__FUNCTION__, array());
 
+  if (!array_key_exists('langcode', $parameters)) {
+    $parameters['langcode'] = array($GLOBALS['language']->langcode, 'und');
+  }
+  elseif (is_string($parameters['langcode'])) {
+    $parameters['langcode'] = array($parameters['langcode']);
+  }
+
   // Build the cache id; sort parents to prevent duplicate storage and remove
   // default parameter values.
   if (isset($parameters['expanded'])) {
     sort($parameters['expanded']);
   }
-  $tree_cid = 'links:' . $menu_name . ':tree-data:' . $GLOBALS['language']->langcode . ':' . hash('sha256', serialize($parameters));
+  $tree_cid = 'links:' . $menu_name . ':tree-data:' . hash('sha256', serialize($parameters));
 
   // If we do not have this tree in the static cache, check {cache_menu}.
   if (!isset($trees[$tree_cid])) {
@@ -1534,6 +1550,9 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
     if (isset($parameters['max_depth'])) {
       $query->condition('ml.depth', $parameters['max_depth'], '<=');
     }
+    if (isset($parameters['langcode'])) {
+      $query->condition('ml.langcode', $parameters['langcode'], 'IN');
+    }
     // Add custom query conditions, if any were passed.
     if (isset($parameters['conditions'])) {
       foreach ($parameters['conditions'] as $column => $value) {
@@ -1543,7 +1562,15 @@ function _menu_build_tree($menu_name, array $parameters = array()) {
 
     // Build an ordered array of links using the query result object.
     $links = array();
-    foreach ($query->execute() as $item) {
+    try {
+      $rows = $query->execute();
+    }
+    // If the menu links cannot be built, allow the page to render
+    // nonetheless, absent the menu links.
+    catch (PDOException $e) {
+      $rows = array();
+    }
+    foreach ($rows as $item) {
       $links[] = $item;
     }
     $active_trail = (isset($parameters['active_trail']) ? $parameters['active_trail'] : array());
@@ -2500,7 +2527,8 @@ function menu_set_active_trail($new_trail = NULL) {
       // a stripped down menu tree containing the active trail only, in case
       // the given menu has not been built in this request yet.
       $tree = menu_tree_page_data($preferred_link['menu_name'], NULL, TRUE);
-      list($key, $curr) = each($tree);
+      $curr = current($tree);
+      next($tree);
     }
     // There is no link for the current path.
     else {
@@ -2530,7 +2558,8 @@ function menu_set_active_trail($new_trail = NULL) {
         }
         $tree = $curr['below'] ? $curr['below'] : array();
       }
-      list($key, $curr) = each($tree);
+      $curr = current($tree);
+      next($tree);
     }
     // Make sure the current page is in the trail to build the page title, by
     // appending either the preferred link or the menu router item for the
@@ -3172,6 +3201,10 @@ function _menu_delete_item($item, $force = FALSE) {
  *   - link_title: (required) Title to appear in menu for the link.
  *   - menu_name: (optional) The machine name of the menu for the link.
  *     Defaults to 'main-menu'.
+ *   - langcode: (optional) The language code for this menu link. The link
+ *     will only be shown if the site interface language matches the link
+ *     language. A language code of LANGUAGE_NONE indicates the menu item will
+ *     always be shown. Defaults to LANGUAGE_NONE.
  *   - weight: (optional) Integer to determine position in menu. Default is 0.
  *   - expanded: (optional) Boolean that determines if the item is expanded.
  *   - options: (optional) An array of options, see l() for more.
@@ -3201,6 +3234,7 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
     'menu_name' => 'main-menu',
     'weight' => 0,
     'link_title' => '',
+    'langcode' => LANGUAGE_NONE,
     'hidden' => 0,
     'has_children' => 0,
     'expanded' => 0,
@@ -3239,13 +3273,14 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
         'menu_name' => $item['menu_name'],
         'plid' => $item['plid'],
         'link_path' => $item['link_path'],
+        'link_title' => $item['link_title'],
+        'langcode' => $item['langcode'],
         'hidden' => $item['hidden'],
         'external' => $item['external'],
         'has_children' => $item['has_children'],
         'expanded' => $item['expanded'],
         'weight' => $item['weight'],
         'module' => $item['module'],
-        'link_title' => $item['link_title'],
         'options' => serialize($item['options']),
         'customized' => $item['customized'],
         'updated' => $item['updated'],
@@ -3303,6 +3338,7 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
         'plid' => $item['plid'],
         'link_path' => $item['link_path'],
         'router_path' => $item['router_path'],
+        'langcode' => $item['langcode'],
         'hidden' => $item['hidden'],
         'external' => $item['external'],
         'has_children' => $item['has_children'],

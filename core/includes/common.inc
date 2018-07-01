@@ -2988,7 +2988,7 @@ function backdrop_deliver_html_page($page_callback_result) {
         // Print a 503 page.
         backdrop_add_http_header('Status', '503 Service unavailable');
         backdrop_set_title(t('Site under maintenance'));
-        print theme('maintenance_page', array('content' => filter_xss_admin(t(config_get('system.core', 'maintenance_mode_message'), array('@site' => config_get('system.core', 'site_name'))))));
+        print theme('maintenance_page', array('content' => filter_xss_admin(token_replace(t(config_get('system.core', 'maintenance_mode_message'))))));
         break;
     }
   }
@@ -5751,6 +5751,7 @@ function _backdrop_bootstrap_full() {
   }
   $called = TRUE;
   require_once BACKDROP_ROOT . '/' . settings_get('path_inc', 'core/includes/path.inc');
+  require_once BACKDROP_ROOT . '/core/includes/date.inc';
   require_once BACKDROP_ROOT . '/core/includes/theme.inc';
   require_once BACKDROP_ROOT . '/core/includes/pager.inc';
   require_once BACKDROP_ROOT . '/' . settings_get('menu_inc', 'core/includes/menu.inc');
@@ -8455,7 +8456,7 @@ function backdrop_parse_dependency($dependency) {
   $parts = explode('(', $dependency, 2);
   $value['name'] = trim($parts[0]);
   if (isset($parts[1])) {
-    $value['original_version'] = ' (' . $parts[1];
+    $value['original_version'] = '(' . $parts[1];
     foreach (explode(',', $parts[1]) as $version) {
       if (preg_match("/^\s*$p_op\s*$p_core$p_major\.$p_minor/", $version, $matches)) {
         $op = !empty($matches['operation']) ? $matches['operation'] : '=';
@@ -8485,10 +8486,10 @@ function backdrop_parse_dependency($dependency) {
 /**
  * Checks whether a version is compatible with a given dependency.
  *
- * @param $v
+ * @param array $dependency_info
  *   The parsed dependency structure from backdrop_parse_dependency().
- * @param $current_version
- *   The version to check against (like 4.2).
+ * @param string $current_version
+ *   The version to check against (like 4.2 or 1.10.0-beta4).
  *
  * @return string|NULL
  *   NULL if compatible, otherwise the original dependency version string that
@@ -8496,16 +8497,49 @@ function backdrop_parse_dependency($dependency) {
  *
  * @see backdrop_parse_dependency()
  */
-function backdrop_check_incompatibility($v, $current_version) {
-  if (!empty($v['versions'])) {
-    foreach ($v['versions'] as $required_version) {
-      if ((isset($required_version['op']) && !version_compare($current_version, $required_version['version'], $required_version['op']))) {
-        return $v['original_version'];
+function backdrop_check_incompatibility(array $dependency_info, $current_version) {
+  $current_version = _backdrop_version_compare_convert($current_version);
+  if (!empty($dependency_info['versions'])) {
+    foreach ($dependency_info['versions'] as $required_version) {
+      if ((isset($required_version['op']) && !version_compare($current_version, _backdrop_version_compare_convert($required_version['version']), $required_version['op']))) {
+        return $dependency_info['original_version'];
       }
     }
   }
   // No incompatibilities.
   return NULL;
+}
+
+/**
+ * Converts a Backdrop version string into numeric-only version string.
+ *
+ * @param string $version_string
+ *   A version string such as 1.10.0-beta4 or 1.4.x-dev.
+ * @return string
+ *   A converted string only containing numbers, for use in PHP's
+ *   version_compare() function.
+ */
+function _backdrop_version_compare_convert($version_string) {
+  // Convert "dev" releases to be the highest possible version number. For
+  // example 1.5.x-dev should be considered higher than any other 1.5 release,
+  // so we replace .x with 99999.
+  $version_string = str_replace('.x-dev', '.99999', $version_string);
+
+  // Replace common indicators with numeric equivalents for version_compare().
+  $indicator_order = array(
+    1 => 'alpha',
+    2 => 'beta',
+    3 => 'preview',
+    4 => 'rc',
+  );
+  foreach ($indicator_order as $order => $indicator) {
+    // Replace both before and after the indicator with dots, so that multiple
+    // alphas, betas, etc. would be ordered properly. For example, version
+    // 1.5.0-beta9 and 1.5.0-beta10 would become 1.5.0.2.9 and 1.5.0.2.10.
+    $version_string = str_replace('-' . $indicator, '.' . $order . '.', $version_string);
+    $version_string .= substr($version_string, -1) === '.' ? '0' : '';
+  }
+  return $version_string;
 }
 
 /**

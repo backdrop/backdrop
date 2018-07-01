@@ -5,7 +5,6 @@
  * Defines date/time field types.
  */
 
-require_once(__DIR__ . '/date.inc');
 require_once(__DIR__ . '/date.field.inc');
 
 /**
@@ -571,7 +570,6 @@ function date_views_api() {
  */
 function date_autoload_info() {
   return array(
-    'BackdropDateTime' => 'date.class.inc',
     'date_sql_handler' => 'views/date_sql_handler.inc',
     'date_views_argument_handler' => 'views/date_views_argument_handler.inc',
     'date_views_argument_handler_simple' => 'views/date_views_argument_handler_simple.inc',

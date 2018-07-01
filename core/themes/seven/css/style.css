@@ -660,6 +660,9 @@ legend {
   font-size: 120%;
   font-weight: normal;
 }
+.fieldset-description {
+  margin-bottom: 1em;
+}
 fieldset fieldset {
   background-color: #fff;
 }

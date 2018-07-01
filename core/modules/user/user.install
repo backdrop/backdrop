@@ -1179,5 +1179,19 @@ function user_update_1014() {
 }
 
 /**
+ * Change label 'Name' to 'Username' for clarity on user admin view.
+ */
+function user_update_1015() {
+  $config = config('views.view.user_admin');
+  if ($config->get('display.default.display_options.filters.name.expose.label') == 'Name') {
+    $config->set('display.default.display_options.filters.name.expose.label', 'Username');
+  }
+  if ($config->get('display.default.display_options.filters.name.expose.identifier') == 'name') {
+    $config->set('display.default.display_options.filters.name.expose.identifier', 'username');
+  }
+  $config->save();
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */

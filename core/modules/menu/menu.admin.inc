@@ -56,6 +56,28 @@ function menu_overview_page() {
 function menu_overview_form($form, &$form_state, $menu) {
   global $menu_admin;
   $form['#attached']['css'] = array(backdrop_get_path('module', 'menu') . '/css/menu.css');
+
+  $default_language = language_default();
+  $filter_langcode = isset($_GET['langcode']) ? $_GET['langcode'] : $default_language->langcode;
+
+  $form['langcode'] = array(
+    '#title' => t('Show menu in language'),
+    '#type' => 'select',
+    '#options' => language_list(TRUE, TRUE),
+    '#empty_value' => LANGUAGE_NONE,
+    '#empty_option' => t('All languages'),
+    '#default_value' => $filter_langcode,
+    '#access' => module_exists('language'),
+    '#weight' => -10,
+    '#description' => t('Show menu links for a given language. Menu links with the "All" language will be shown in every language.'),
+  );
+  $form['langcode_filter'] = array(
+    '#type' => 'submit',
+    '#value' => t('Filter'),
+    '#attributes' => array('class' => array('button-primary')),
+    '#submit' => array('menu_overview_form_language_filter_submit'),
+  );
+
   $sql = "
     SELECT m.load_functions, m.to_arg_functions, m.access_callback, m.access_arguments, m.page_callback, m.page_arguments, m.delivery_callback, m.title, m.title_callback, m.title_arguments, m.type, m.description, ml.*
     FROM {menu_links} ml LEFT JOIN {menu_router} m ON m.path = ml.router_path
@@ -74,10 +96,11 @@ function menu_overview_form($form, &$form_state, $menu) {
   menu_tree_check_access($tree, $node_links);
   $menu_admin = FALSE;
 
-  $form = array_merge($form, _menu_overview_tree_form($tree));
+  $tree_langcode = $filter_langcode === LANGUAGE_NONE ? NULL : $filter_langcode;
+  $form = array_merge($form, _menu_overview_tree_form($tree, $tree_langcode));
   $form['#menu'] =  $menu;
 
-  if (element_children($form)) {
+  if (count($links)) {
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
@@ -85,7 +108,7 @@ function menu_overview_form($form, &$form_state, $menu) {
     );
   }
   else {
-    $form['#empty_text'] = t('There are no menu links yet. <a href="@link">Add link</a>.', array('@link' => url('admin/structure/menu/manage/'. $form['#menu']['menu_name'] .'/add')));
+    $form['#empty_text'] = t('There are no menu links yet. <a href="@link">Add link</a>.', array('@link' => url('admin/structure/menu/manage/' . $form['#menu']['menu_name'] . '/add')));
   }
   return $form;
 }
@@ -95,12 +118,22 @@ function menu_overview_form($form, &$form_state, $menu) {
  *
  * @param $tree
  *   The menu_tree retrieved by menu_tree_data.
+ * @param $langcode
+ *   A language code by which to filter the list of menu items.
  */
-function _menu_overview_tree_form($tree) {
+function _menu_overview_tree_form($tree, $langcode = NULL) {
   $form = &backdrop_static(__FUNCTION__, array('#tree' => TRUE));
+  $language_options = language_list(TRUE, TRUE);
+  $language_options[LANGUAGE_NONE] = t('All');
+
   foreach ($tree as $data) {
-    $title = '';
     $item = $data['link'];
+
+    // Skip all items not in the requested language.
+    if ($langcode && $item['langcode'] !== $langcode && $item['langcode'] !== LANGUAGE_NONE) {
+      continue;
+    }
+
     // Don't show callbacks; these have $item['hidden'] < 0.
     if ($item && $item['hidden'] >= 0) {
       $mlid = 'mlid:' . $item['mlid'];
@@ -114,6 +147,12 @@ function _menu_overview_tree_form($tree) {
         $form[$mlid]['title']['#markup'] .= ' (' . t('logged in users only') . ')';
       }
 
+      $langcode_label = isset($language_options[$item['langcode']]) ? $language_options[$item['langcode']] : $item['langcode'];
+      $form[$mlid]['langcode'] = array(
+        '#type' => 'markup',
+        '#markup' => check_plain($langcode_label),
+        '#access' => module_exists('language'),
+      );
       $form[$mlid]['hidden'] = array(
         '#type' => 'checkbox',
         '#title' => t('Enable @title menu link', array('@title' => $item['title'])),
@@ -216,12 +255,38 @@ function menu_overview_form_submit($form, &$form_state) {
 }
 
 /**
+ * Submit handler for menu_overview_form().
+ *
+ * Filters the displayed form to a particular language.
+ */
+function menu_overview_form_language_filter_submit($form, &$form_state) {
+  $query['langcode'] = $form_state['values']['langcode'];
+  if (isset($_GET['destination'])) {
+    $query['destination'] = $_GET['destination'];
+  }
+  backdrop_goto($_GET['q'], array('query' => $query));
+}
+
+/**
  * Menu callback; Build the menu link editing form.
  */
 function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   if ($type == 'add' || empty($item)) {
     // This is an add form, initialize the menu link.
-    $item = array('link_title' => '', 'mlid' => 0, 'plid' => 0, 'menu_name' => $menu['menu_name'], 'weight' => 0, 'link_path' => '', 'options' => array(), 'module' => 'menu', 'expanded' => 0, 'hidden' => 0, 'has_children' => 0);
+    $item = array(
+      'menu_name' => $menu['menu_name'],
+      'mlid' => 0,
+      'plid' => 0,
+      'link_title' => '',
+      'link_path' => '',
+      'langcode' => isset($_GET['langcode']) ? $_GET['langcode'] : LANGUAGE_NONE,
+      'weight' => 0,
+      'options' => array(),
+      'module' => 'menu',
+      'expanded' => 0,
+      'hidden' => 0,
+      'has_children' => 0,
+    );
   }
   else {
     // Get the human-readable menu title from the given menu name
@@ -282,6 +347,26 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       '#description' => l($item['link_title'], $item['href'], $item['options']),
     );
   }
+
+  if (module_exists('language')) {
+    $form['langcode'] = array(
+      '#type' => 'select',
+      '#title' => t('Language'),
+      '#default_value' => $item['langcode'],
+      '#options' => language_list(TRUE, TRUE),
+      '#empty_value' => LANGUAGE_NONE,
+      '#empty_option' => t('- All (always shown) -'),
+      '#description' => t('Set a language for this menu link. The menu link will only be visible in that language.')
+    );
+  }
+  else {
+    // Maintain langcode settings if Language module is not present.
+    $form['langcode'] = array(
+      '#type' => 'value',
+      '#value' => $item['langcode'],
+    );
+  }
+
   $form['description'] = array(
     '#type' => 'textarea',
     '#title' => t('Description'),
@@ -388,7 +473,12 @@ function menu_edit_item_submit($form, &$form_state) {
   else {
     backdrop_set_message(t('Your configuration has been saved.'));
   }
-  $form_state['redirect'] = 'admin/structure/menu/manage/' . $item['menu_name'];
+
+  $redirect = array('path' => 'admin/structure/menu/manage/' . $item['menu_name']);
+  if ($item['langcode'] !== LANGUAGE_NONE) {
+    $redirect['options']['query'] = array('langcode' => $item['langcode']);
+  }
+  $form_state['redirect'] = $redirect;
 }
 
 /**

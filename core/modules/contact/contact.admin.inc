@@ -6,70 +6,147 @@
  */
 
 /**
+ * Contact settings form.
+ *
+ * @see contact_menu()
+ * @ingroup forms
+ * @since 1.11.0
+ */
+function contact_settings_form($form, &$form_state) {
+  $config = config('contact.settings');
+  $form['#config'] = 'contact.settings';
+
+  $form['fields'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#title' => t("Fields"),
+  );
+  $form['fields']['copy'] = array(
+    '#type' => 'checkbox',
+    '#title' => t("Show the 'Send yourself a copy' checkbox"),
+    '#description' => t("Allow users to send themselves a copy on site-wide and personal contact forms."),
+    '#default_value' => contact_show_personal_copy_checkbox()
+  );
+
+  $form['threshold'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => t("Send limit"),
+    '#description' => t("Configure thresholds for the contact forms to minimize malicious users sending multiple emails. Control the number of emails that can be sent in a window of time by anyone with the same IP address."),
+  );
+  $form['threshold']['wrapper'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('container-inline')),
+  );
+  $form['threshold']['wrapper']['contact_threshold_limit'] = array(
+    '#type' => 'select',
+    '#title' => t('Limit to'),
+    '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 75, 100, 125, 150, 200, 250, 500)),
+    '#default_value' => $config->get('contact_threshold_limit'),
+  );
+  $form['threshold']['wrapper']['contact_threshold_window'] = array(
+    '#type' => 'select',
+    '#title' => t('messages per'),
+    '#options' => array(0 => t('None (disabled)')) + backdrop_map_assoc(array(60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval'),
+    '#default_value' => $config->get('contact_threshold_window'),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
  * Page callback: Lists contact categories.
  *
  * @see contact_menu()
  */
-function contact_category_list() {
+function contact_category_list($form, $form_state) {
+  $form['help'] = array(
+    '#type' => 'markup',
+    '#markup' => t('Configure the categories shown in the <a href="!url">site-wide contact form</a> here. All categories are shown in a select list on the contact form, which will send to different addresses when selected.', array('!url' => url('contact'))),
+    '#weight' => -20,
+  );
 
   $config_data = contact_config_data();
-  $selected_category = $config_data['contact_default_category'];
-  $categories = $config_data['categories'];
+  $default_category = $config_data['contact_default_category'];
+  $categories = (array) $config_data['categories'];
 
-  $header = array(
-    t('Category'),
-    t('Recipients'),
-    t('Selected'),
-    t('Operations'),
+  $form['categories'] = array(
+    '#theme' => 'contact_category_list_table',
+    '#tree' => TRUE,
   );
-  $rows = array();
 
   // Loop through the categories and add them to the table.
-  if ($categories) {
-    foreach ($categories as $cat) {
-      $row = array();
-      $row[] = check_plain($cat['category']);
-      $row[] = check_plain($cat['recipients']);
+  foreach ($categories as $cat) {
+    $cid = $cat['cid'];
 
-      if ($cat['cid'] == $selected_category) {
-        $row[] = t('Yes');
-      }
-      else {
-        $row[] = t('No');
-      }
+    $links = array();
+    $links['configure'] = array(
+      'title' => t('Configure'),
+      'href' => 'admin/structure/contact/configure/' . $cid,
+    );
+    $links['delete'] = array(
+      'title' => t('Delete'),
+      'href' => 'admin/structure/contact/delete/' . $cid,
+    );
 
-      $links = array();
-      $links['configure'] = array(
-        'title' => t('Configure'),
-        'href' => 'admin/structure/contact/configure/' . $cat['cid'],
-      );
-      $links['delete'] = array(
-        'title' => t('Delete'),
-        'href' => 'admin/structure/contact/delete/' . $cat['cid'],
-      );
-      $row[] = array(
-        'data' => array(
-          '#type' => 'operations',
-          '#links' => $links,
-        ),
-      );
-      $rows[] = $row;
+    $form['categories'][$cid]['weight'] = array(
+      '#type' => 'weight',
+      '#title' => t('Weight for @title', array('@title' => $cat['category'])),
+      '#title_display' => 'invisible',
+      '#default_value' => $cat['weight'],
+      '#delta' => max(10, count($categories)),
+    );
+    $form['categories'][$cid]['name'] = array(
+      '#markup' => check_plain($cat['category']),
+    );
+    $form['categories'][$cid]['recipients'] = array(
+      '#markup' => check_plain($cat['recipients']),
+    );
+    $form['categories'][$cid]['default'] = array(
+      '#markup' => ($cid == $default_category) ? t('Yes') : t('No'),
+    );
+    $form['categories'][$cid]['operations'] = array(
+      '#type' => 'operations',
+      '#links' => $links,
+    );
+  }
+
+  $form['actions'] = array(
+    '#type' => 'actions',
+    '#access' => count($categories) > 1,
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save order')
+  );
+
+  return $form;
+}
+
+/**
+ * Form submission handler for contact_category_list().
+ */
+function contact_category_list_submit($form, &$form_state) {
+  $config_data = contact_config_data();
+  $categories = $config_data['categories'];
+
+  // Update the weight of each category.
+  foreach ($categories as $delta => $cat) {
+    $cid = $cat['cid'];
+    if (isset($form_state['values']['categories'][$cid]['weight'])) {
+      $categories[$delta]['weight'] = $form_state['values']['categories'][$cid]['weight'];
     }
   }
 
-  if (!$rows) {
-    $rows[] = array(array(
-      'data' => t('No categories available.'),
-      'colspan' => 5,
-    ));
-  }
+  // Save categories.
+  $config_data['categories'] = array_values($categories);
+  $config = config('contact.categories');
+  $config->setData($config_data);
+  $config->save();
 
-  $build['category_table'] = array(
-    '#theme' => 'table',
-    '#header' => $header,
-    '#rows' => $rows,
-  );
-  return $build;
+  backdrop_set_message(t('The contact categories order has been saved.'));
 }
 
 /**
@@ -106,12 +183,6 @@ function contact_category_edit_form($form, &$form_state, array $category = array
   $config_data = contact_config_data();
   $default_category = $config_data['contact_default_category'];
 
-  // Check if selected.
-  $selected = 0;
-  if (isset($category['cid']) AND $default_category == $category['cid']) {
-    $selected = 1;
-  }
-
   $form['category'] = array(
     '#type' => 'textfield',
     '#title' => t('Category'),
@@ -134,10 +205,8 @@ function contact_category_edit_form($form, &$form_state, array $category = array
     '#description' => t('Optional auto-reply. Leave empty if you do not want to send the user an auto-reply message.'),
   );
   $form['weight'] = array(
-    '#type' => 'weight',
-    '#title' => t('Weight'),
-    '#default_value' => $category['weight'],
-    '#description' => t('When listing categories, those with lighter (smaller) weights get listed before categories with heavier (larger) weights. Categories with equal weights are sorted alphabetically.'),
+    '#type' => 'hidden',
+    '#value' => $category['weight'],
   );
   $form['selected'] = array(
     '#type' => 'select',
@@ -146,7 +215,7 @@ function contact_category_edit_form($form, &$form_state, array $category = array
       0 => t('No'),
       1 => t('Yes'),
     ),
-    '#default_value' => $selected,
+    '#default_value' => (isset($category['cid']) && $default_category == $category['cid']),
     '#description' => t('Set this to <em>Yes</em> if you would like this category to be selected by default.'),
   );
   $form['cid'] = array(

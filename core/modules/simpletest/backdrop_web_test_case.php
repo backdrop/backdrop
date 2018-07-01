@@ -3687,7 +3687,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertOption($id, $option, $message = '') {
-    $options = $this->xpath('//select[@id=:id]/option[@value=:option]', array(':id' => $id, ':option' => $option));
+    $options = $this->xpath('//select[@id=:id]//option[@value=:option]', array(':id' => $id, ':option' => $option));
     return $this->assertTrue(isset($options[0]), $message ? $message : t('Option @option for field @id exists.', array('@option' => $option, '@id' => $id)), t('Browser'));
   }
 

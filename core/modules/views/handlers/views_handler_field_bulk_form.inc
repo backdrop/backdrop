@@ -106,6 +106,7 @@ class views_handler_field_bulk_form extends views_handler_field {
         '#title_display' => 'invisible',
         '#return_value' => $row->{$this->field_alias},
         '#default_value' => !empty($form_state['values'][$this->options['id']][$row_index]) ? 1 : NULL,
+        '#attributes' => array('data-tableselect-id' => $this->options['id'])
       );
     }
 

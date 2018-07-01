@@ -2029,14 +2029,14 @@ class FieldDisplayAPITestCase extends FieldTestCase {
     $this->backdropSetContent(backdrop_render($output));
     $settings = field_info_formatter_settings('field_test_default');
     $setting = $settings['test_formatter_setting'];
-    $this->assertText($this->label, 'Label was displayed.');
+    $this->assertNoText($this->label, 'Label was not displayed.');
     foreach ($this->values as $delta => $value) {
       $this->assertText($setting . '|' . $value['value'], format_string('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
 
     // Check that explicit display settings are used.
     $display = array(
-      'label' => 'hidden',
+      'label' => 'above',
       'type' => 'field_test_multiple',
       'settings' => array(
         'test_formatter_setting_multiple' => $this->randomName(),
@@ -2046,7 +2046,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
     $output = field_view_field('test_entity', $this->entity, $this->field_name, $display);
     $this->backdropSetContent(backdrop_render($output));
     $setting = $display['settings']['test_formatter_setting_multiple'];
-    $this->assertNoText($this->label, 'Label was not displayed.');
+    $this->assertText($this->label, 'Label was displayed.');
     $this->assertText('field_test_field_attach_view_alter', 'Alter fired, display passed.');
     $array = array();
     foreach ($this->values as $delta => $value) {
@@ -2056,7 +2056,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
 
     // Check the prepare_view steps are invoked.
     $display = array(
-      'label' => 'hidden',
+      'label' => 'above',
       'type' => 'field_test_with_prepare_view',
       'settings' => array(
         'test_formatter_setting_additional' => $this->randomName(),
@@ -2066,7 +2066,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
     $view = backdrop_render($output);
     $this->backdropSetContent($view);
     $setting = $display['settings']['test_formatter_setting_additional'];
-    $this->assertNoText($this->label, 'Label was not displayed.');
+    $this->assertText($this->label, 'Label was displayed.');
     $this->assertNoText('field_test_field_attach_view_alter', 'Alter not fired.');
     foreach ($this->values as $delta => $value) {
       $this->assertText($setting . '|' . $value['value'] . '|' . ($value['value'] + 1), format_string('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
@@ -2077,7 +2077,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
     $output = field_view_field('test_entity', $this->entity, $this->field_name, 'teaser');
     $this->backdropSetContent(backdrop_render($output));
     $setting = $this->instance['display']['teaser']['settings']['test_formatter_setting'];
-    $this->assertText($this->label, 'Label was displayed.');
+    $this->assertNoText($this->label, 'Label was not displayed.');
     foreach ($this->values as $delta => $value) {
       $this->assertText($setting . '|' . $value['value'], format_string('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
@@ -2087,7 +2087,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
     $output = field_view_field('test_entity', $this->entity, $this->field_name, 'unknown_view_mode');
     $this->backdropSetContent(backdrop_render($output));
     $setting = $this->instance['display']['default']['settings']['test_formatter_setting'];
-    $this->assertText($this->label, 'Label was displayed.');
+    $this->assertNoText($this->label, 'Label was not displayed.');
     foreach ($this->values as $delta => $value) {
       $this->assertText($setting . '|' . $value['value'], format_string('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }

@@ -5,6 +5,19 @@
  * Enables the use of personal and site-wide contact forms.
  */
 
+
+/**
+ * Implements hook_theme().
+ */
+function contact_theme() {
+  return array(
+    'contact_category_list_table' => array(
+      'render element' => 'element',
+      'file' => 'contact.theme.inc',
+    ),
+  );
+}
+
 /**
  * Implements hook_permission().
  */
@@ -54,7 +67,8 @@ function contact_menu() {
   $items['admin/structure/contact'] = array(
     'title' => 'Contact form',
     'description' => 'Create a system contact form and set up categories for the form to use.',
-    'page callback' => 'contact_category_list',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('contact_category_list'),
     'access arguments' => array('administer contact forms'),
     'file' => 'contact.admin.inc',
   );
@@ -65,6 +79,23 @@ function contact_menu() {
     'access arguments' => array('administer contact forms'),
     'type' => MENU_LOCAL_ACTION,
     'weight' => 1,
+    'file' => 'contact.admin.inc',
+  );
+  $items['admin/structure/contact/list'] = array(
+    'title' => 'Categories',
+    'page callback' => 'contact_category_list',
+    'access arguments' => array('administer contact forms'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+    'file' => 'contact.admin.inc',
+  );
+  $items['admin/structure/contact/settings'] = array(
+    'title' => 'Settings',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('contact_settings_form'),
+    'access arguments' => array('administer contact forms'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
     'file' => 'contact.admin.inc',
   );
   $items['admin/structure/contact/configure/%contact'] = array(
@@ -196,6 +227,18 @@ function contact_config_data() {
   $config_data['categories'] = $categories;
 
   return $config_data;
+}
+
+/**
+ * Show the personal copy checkbox on forms
+ *
+ * @return bool
+ */
+function contact_show_personal_copy_checkbox() {
+  $config = config('contact.settings');
+  $settings = $config->get();
+
+  return (isset($settings['copy'])) ? $settings['copy'] : TRUE;
 }
 
 /**

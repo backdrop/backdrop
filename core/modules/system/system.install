@@ -447,7 +447,7 @@ function system_requirements($phase) {
         // Check for an incompatible version.
         $required_file = $files[$required_module];
         $required_name = $required_file->info['name'];
-        $version = str_replace(BACKDROP_CORE_COMPATIBILITY . '-', '', $required_file->info['version']);
+        $version = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $required_file->info['version']);
         $compatibility = backdrop_check_incompatibility($requirement, $version);
         if ($compatibility) {
           $compatibility = rtrim(substr($compatibility, 2), ')');
@@ -1076,6 +1076,13 @@ function system_schema() {
         'not null' => TRUE,
         'default' => '',
         'translatable' => TRUE,
+      ),
+      'langcode' => array(
+        'description' => 'The language code for this menu link; if \'und\', the link will be shown in all languages.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
       ),
       'options' => array(
         'description' => 'A serialized array of options to be passed to the url() or l() function, such as a query string or HTML attributes.',
@@ -2964,6 +2971,34 @@ function system_update_1062() {
 function system_update_1063() {
   $config = config('system.core');
   $config->set('x_frame_options', 'SAMEORIGIN');
+  $config->save();
+}
+
+/**
+ * Add langcode column to {menu_links} table.
+ */
+function system_update_1064() {
+  if (!db_field_exists('menu_links', 'langcode')) {
+    $spec = array(
+      'description' => 'The language code for this menu link; if \'und\', the link will be shown in all languages.',
+      'type' => 'varchar',
+      'length' => 12,
+      'not null' => TRUE,
+      'default' => '',
+    );
+    db_add_field('menu_links', 'langcode', $spec);
+    db_query("UPDATE {menu_links} SET langcode = 'und'");
+  }
+}
+
+/**
+ * Update the maintenance mode message field to use tokens.
+ */
+function system_update_1065() {
+  $config = config('system.core');
+  $old_message = $config->get('maintenance_mode_message');
+  $new_message = str_replace('@site', '[site:name]', $old_message);
+  $config->set('maintenance_mode_message', $new_message);
   $config->save();
 }
 

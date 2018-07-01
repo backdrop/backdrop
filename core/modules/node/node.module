@@ -18,6 +18,11 @@ define('NODE_NOT_PUBLISHED', 0);
 define('NODE_PUBLISHED', 1);
 
 /**
+ * Denotes that the node is not published, but scheduled for later.
+ */
+define('NODE_SCHEDULED', 2);
+
+/**
  * Denotes that the node is not promoted.
  */
 define('NODE_NOT_PROMOTED', 0);
@@ -112,6 +117,21 @@ function node_cron() {
   db_delete('history')
     ->condition('timestamp', NODE_NEW_LIMIT, '<')
     ->execute();
+
+  $scheduled_nodes = db_select('node', 'n')
+    ->fields('n', array('nid'))
+    ->condition('status', 0)
+    ->condition('scheduled', 0, '!=')
+    ->condition('scheduled', REQUEST_TIME, '<=')
+    ->execute();
+  foreach ($scheduled_nodes as $n) {
+    if ($node = node_load($n->nid)) {
+      $node->status = 1;
+      $node->created = $node->scheduled;
+      $node->scheduled = 0;
+      $node->save();
+    }
+  }
 }
 
 /**
@@ -249,18 +269,37 @@ function node_title_list($result, $title = NULL) {
  *
  * @param Node $node
  *   A node entity.
+ * @param bool $save_for_later
+ *   Save the given node ID to save its marking for at the end of the request.
+ *
+ * @since 1.10 $save_for_later parameter added.
  */
-function node_tag_new(Node $node) {
+function node_tag_new($node = NULL, $save_for_later = FALSE) {
+  $nids_viewed = &backdrop_static(__FUNCTION__, array());
+  if ($node) {
+    $nids_viewed[] = $node->nid;
+  }
+
+  // Node IDs saved for later are then actually updated in a shutdown function.
+  if ($save_for_later || empty($nids_viewed)) {
+    return;
+  }
+
   global $user;
   if ($user->uid) {
-    db_merge('history')
-      ->key(array(
-        'uid' => $user->uid,
-        'nid' => $node->nid,
-      ))
-      ->fields(array('timestamp' => REQUEST_TIME))
-      ->execute();
-   }
+    foreach ($nids_viewed as $nid) {
+      db_merge('history')
+        ->key(array(
+          'uid' => $user->uid,
+          'nid' => $nid,
+        ))
+        ->fields(array('timestamp' => REQUEST_TIME))
+        ->execute();
+    }
+  }
+
+  // Clear out the saved list so we don't update the same nodes again..
+  $nids_viewed = array();
 }
 
 /**
@@ -900,9 +939,24 @@ function node_validate($node, $form, &$form_state) {
     form_set_error('name', t('The username %name does not exist.', array('%name' => $node->name)));
   }
 
-  // Validate the "authored on" field.
-  if (!empty($node->date) && strtotime($node->date) === FALSE) {
+  // Validate the "Authored on" field.
+  if (!empty($node->date) && is_string($node->date) && strtotime($node->date) === FALSE) {
     form_set_error('date', t('You have to specify a valid date.'));
+  }
+
+  // Validate the "Publish on" date.
+  if ($node->status == NODE_SCHEDULED && !empty($node->scheduled) && is_string($node->scheduled)) {
+    // Validate the entire string is valid.
+    if (strtotime($node->scheduled) === FALSE) {
+      form_set_error('scheduled', t('You have to specify a valid date.'));
+    }
+    // Validate the date/time is not in the past.
+    else {
+      $scheduled_date = new DateTime($node->scheduled, date_default_timezone_object());
+      if ($scheduled_date && $scheduled_date->format('U') < REQUEST_TIME) {
+        form_set_error('scheduled', t('Scheduled publish time cannot be in the past.'));
+      }
+    }
   }
 
   // Invoke hook_validate() for node type specific validation and
@@ -941,7 +995,10 @@ function node_submit($node) {
     $node->revision_uid = $user->uid;
   }
 
-  $node->created = !empty($node->date) ? strtotime($node->date) : REQUEST_TIME;
+
+  // Convert the date into a timestamp.
+  $date = new BackdropDateTime(!empty($node->date) && is_string($node->date) ? $node->date : 'now');
+  $node->created = $date->format('U');
   $node->validated = TRUE;
 
   return $node;
@@ -1168,7 +1225,8 @@ function node_show(Node $node, $message = FALSE) {
   $nodes = node_view_multiple(array($node->nid => $node), 'full');
 
   // Update the history table, stating that this user viewed this node.
-  node_tag_new($node);
+  node_tag_new($node, TRUE);
+  backdrop_register_shutdown_function('node_tag_new');
 
   return $nodes;
 }
