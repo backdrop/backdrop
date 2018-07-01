@@ -522,9 +522,12 @@ function system_modules($form, $form_state = array()) {
   $all_tags = array();
   $core_count = $contrib_count = $custom_count = 0;
   foreach ($visible_files as $filename => $file) {
-    // Remove hidden and required modules from display list.
+    // Remove hidden and required modules from tag list.
     if (!empty($file->info['hidden']) || !empty($file->info['required'])) {
-      unset($visible_files[$filename]);
+      // Remove hidden modules from display list.
+      if (!empty($file->info['hidden'])) {
+        unset($visible_files[$filename]);
+      }
     }
     else {
       // Build tag list.
@@ -935,10 +938,8 @@ function system_modules_submit($form, &$form_state) {
   // If we're not coming from the confirmation form, build the list of modules.
   if (empty($form_state['storage'])) {
     // If we're not coming from the confirmation form, build the module list.
-    foreach ($form_state['values']['modules'] as $group_name => $group) {
-      foreach ($group as $module => $enabled) {
-        $modules[$module] = array('group' => $group_name, 'enabled' => $enabled['enable']);
-      }
+    foreach ($form_state['values']['modules'] as $module => $enabled) {
+      $modules[$module] = array('enabled' => $enabled['enable']);
     }
   }
   else {
