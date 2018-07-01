@@ -308,7 +308,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
   function testProjectNamespaceForDependencies() {
     // Enable module with project namespace to ensure nothing breaks.
     $edit = array(
-      'modules[Testing][system_project_namespace_test][enable]' => TRUE,
+      'modules[system_project_namespace_test][enable]' => TRUE,
     );
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
     $this->assertModules(array('system_project_namespace_test'), TRUE);
@@ -401,7 +401,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
   function testEnableRequirementsFailureDependency() {
     // Enable comment module before testing the dependencies.
     $edit = array();
-    $edit['modules[Comments][comment][enable]'] = TRUE;
+    $edit['modules[comment][enable]'] = TRUE;
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
 
     $this->assertModules(array('requirements1_test'), FALSE);
