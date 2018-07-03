@@ -300,7 +300,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'data-has-caption'),
     '#access' => !empty($format->filters['filter_image_caption']->status),
   );
-   $form['library_view'] = array(
+  $form['library_view'] = array(
     '#title' => t('Image library'),
     '#type' => 'textfield',
     '#default_value' => 'Image library',
@@ -336,7 +336,7 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
     $form_state['values']['attributes']['data-file-id'] = NULL;
   }
   // Convert any uploaded files from the FID values to the src attribute.
-  if (isset($form_state['values']['fid'])) { 
+  if (isset($form_state['values']['fid'])) {
     $fid = $form_state['values']['fid'];
     if ($fid == 0) {
       $url = $form_state['values']['image_library']['src'];
