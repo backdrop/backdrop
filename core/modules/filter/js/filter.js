@@ -108,6 +108,7 @@ Backdrop.filterEditorDetach = function(field, format, trigger) {
  * Provides toggles for uploading an image, whether by URL or upload.
  */
 Backdrop.behaviors.editorImageDialog = {
+
   attach: function (context, settings) {
     var $newToggles = $('[data-editor-image-toggle]', context).once('editor-image-toggle');
     $newToggles.each(function() {
@@ -139,20 +140,20 @@ Backdrop.behaviors.editorImageDialog = {
           .filter(':last').addClass('last').end();
       });
     });
-    
+
     // Initialise styles of Dialog.
-    // Hide the right-hand (library) part of the dialog form.
-    $(".image-form-right").css({"display":"none"});
+    // Hide the left-hand (library) part of the dialog form.
+    $(".image-form-left").css({"display":"none"});
     $(".editor-dialog").removeClass("editor-dialog-with-library");
     // Set the class for the left-hand part.
-    $(".image-form-left").addClass("image-form-left-full");
+    $(".image-form-right").addClass("image-form-right-full");
 
     $newToggles.click(function(e) {
       var $link = $(e.target);
       if ($link.is('.editor-image-toggle') === false) {
         return;
       }
-
+      // find the first ancestor of link
       var $currentItem = $link.closest('[data-editor-image-toggle]');
       var $allItems = $('[data-editor-image-toggle]');
       var offset = $currentItem.find('.editor-image-toggle').index($link);
@@ -185,14 +186,13 @@ Backdrop.behaviors.editorImageDialog = {
           $input.val(previousValue);
         }
       });
-      
       var $display_state = $(".form-item-image-library-src").css("display");
       if ($display_state === 'none') {
         // Hide the right-hand (library) part of the dialog form.
-        $(".image-form-right").css({"display":"none"});
+        $(".image-form-left").css({"display":"none"});
         $(".editor-dialog").removeClass("editor-dialog-with-library");
         // Set the class for the left-hand part.
-        $(".image-form-left").addClass("image-form-left-full");
+        $(".image-form-right").addClass("image-form-right-full");
       }
       else {
         // Toggle state is set to show 'select an image'
@@ -206,18 +206,19 @@ Backdrop.behaviors.editorImageDialog = {
           $view_image_library = $(".library-view").attr('data-editor-image-library-view');
           $view_placeholder.replaceWith($view_image_library);
           // Display the library view.
-          $(".image-form-left").removeClass("image-form-left-full");
-          $(".image-form-right").css({"display":"block"});
+          $(".image-form-right").removeClass("image-form-right-full");
+          $(".image-form-left").css({"display":"block"});
           $(".library-view").css({"display":"block"});
           var $library_base_url = $(".form-item-image-library-src").attr('data-editor-image-library-base-url');
-          // Pointer changes background color of images.
-          $(".image-library-choose-file").mouseenter(function() {$(this).css({"background-color":"gold"});});
-          $(".image-library-choose-file").mouseleave(function() {$(this).css({"background-color":"white"});});
+
           // Now add click event to images
           $(".image-library-choose-file").click(function() {
             var $relativeImgSrc = $(this).find('img').attr('src').replace($library_base_url , '');
             $("[name='image_library[src]']").val($relativeImgSrc);
-            $(this).css({"background-color":"goldenrod"});
+            // Remove style from previous selection.
+            $(".image-library-image-selected").removeClass("image-library-image-selected");
+            // Add style to this selection.
+            $(this).addClass("image-library-image-selected");
           });
         }
       };
@@ -254,5 +255,5 @@ Backdrop.behaviors.editorImageDialog = {
 Backdrop.ajax.prototype.commands.editorDialogSave = function (ajax, response, status) {
   $(window).trigger('editor:dialogsave', [response.values]);
 };
-  
+
 })(jQuery);
