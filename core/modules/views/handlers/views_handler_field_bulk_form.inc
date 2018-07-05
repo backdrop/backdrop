@@ -167,7 +167,8 @@ class views_handler_field_bulk_form extends views_handler_field {
         if (isset($context['redirect'])) {
           actions_redirect($context['redirect']);
         }
-      } else {
+      }
+      else {
         backdrop_set_message(t('No items selected.'), 'error');
       }
 
