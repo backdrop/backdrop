@@ -974,7 +974,7 @@ td.group-title {
 
 /* @group Live preview elements */
 
-#views-preview-wrapper {
+[id="views-preview-wrapper"] {
   padding-bottom: 12px;
   padding-top: 20px;
   margin: 0 0 1em;
