@@ -13,6 +13,21 @@
  */
 function update_settings($form, &$form_state) {
   $config = config('update.settings');
+  $form['update_configure_automatic'] = array(
+    '#type' => 'select',
+    '#title' => t('Configure automatic updates'),
+    '#default_value' => $config->get('update_automatic'),
+    '#options' => array(
+      0 => t('Automatic updates off'),
+      1 => t('Security releases only'),
+      2 => t('Patch releases'),
+      3 => t('Minor releases'),
+    ),
+    '#description' =>
+      t('A <strong>Security release</strong> is a release that pathes a security vulnerability.<br />') .
+      t('A <strong>Patch release</strong> is a security and/or bug fix releases, i.e. 1.10.1 to 1.10.2 is a patch release.<br />') .
+      t('A <strong>Minor release</strong> is feature release (new functionality no API changes), i.e. 1.10.2 to 1.11.0 is a minor release.')
+  );
   $form['update_check_frequency'] = array(
     '#type' => 'radios',
     '#title' => t('Check for updates'),
@@ -121,12 +136,13 @@ function update_settings_submit($form, $form_state) {
   if ($form_state['values']['update_check_disabled'] != $config->get('update_disabled_extensions')) {
     _update_cache_clear();
   }
-
+dpm($form_state);
   $config
     ->set('update_disabled_extensions', $form_state['values']['update_check_disabled'])
     ->set('update_interval_days', $form_state['values']['update_check_frequency'])
     ->set('update_emails', $form_state['notify_emails'])
     ->set('update_threshold', $form_state['values']['update_notification_threshold'])
+    ->set('update_automatic', $form_state['values']['update_configure_automatic'])
     ->save();
 
   // Display status messages for this form.
