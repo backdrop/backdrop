@@ -200,6 +200,7 @@ function contact_category_edit_form($form, &$form_state, array $category = array
     '#description' => t("To specify multiple recipients, separate each e-mail address with a new line, comma, semicolon or space."),
     '#placeholder' => t("webmaster@example.com\nsales@example.com"),
     '#required' => TRUE,
+    '#rows' => max(5, sizeof(explode(',', $category['recipients'])) + 2),
   );
   $form['reply'] = array(
     '#type' => 'textarea',
