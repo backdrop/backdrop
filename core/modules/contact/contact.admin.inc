@@ -197,7 +197,7 @@ function contact_category_edit_form($form, &$form_state, array $category = array
     // Recipients are stored comma-separated, but display with new lines for
     // better human readability.
     '#default_value' => implode("\n", explode(',', $category['recipients'])),
-    '#description' => t("To specify multiple recipients, separate each e-mail address with a new line, comma, or space."),
+    '#description' => t("To specify multiple recipients, separate each e-mail address with a new line, comma, semicolon or space."),
     '#placeholder' => t("webmaster@example.com\nsales@example.com"),
     '#required' => TRUE,
   );
@@ -258,8 +258,8 @@ function contact_category_edit_form_validate($form, &$form_state) {
     }
   }
 
-  // Get addresses separated by comma, a space or line break.
-  $recipients = preg_split("/( |,|\n)/", $form_state['values']['recipients']);
+  // Get addresses separated by comma, space, line break or semicolon.
+  $recipients = preg_split("/( |,|;|\n)/", $form_state['values']['recipients']);
   // Cleanup addresses list.
   $recipients = array_filter(array_map('trim', $recipients));
 

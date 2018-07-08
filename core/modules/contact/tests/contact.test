@@ -94,6 +94,13 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     $this->assertEqual($category_array['recipients'], $recipients_str);
     $this->assertRaw(t('Category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
 
+    // Test separating contacts with semicolons.
+    $categories = $this->getCategories();
+    $category_id = $this->updateCategory($categories, $category = $this->randomName(16), implode(';', $recipients), $this->randomName(30), FALSE);
+    $category_array = contact_load($category_id);
+    $this->assertEqual($category_array['recipients'], $recipients_str);
+    $this->assertRaw(t('Category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
+
     // Ensure that the contact form is shown without a category selection input.
     user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access site-wide contact form'));
     $this->backdropLogout();
