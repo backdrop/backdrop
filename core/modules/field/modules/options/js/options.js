@@ -59,7 +59,7 @@ Backdrop.optionsElement = function(element) {
   this.removeDefaultElement = $(Backdrop.theme('optionsElementRemoveDefault')).get(0);
 
   // Add the options widget and toggle elements to the page.
-  $(this.manualElement).css('display', 'none').before(this.optionsElement).after(this.optionsToggleElement).after(this.optionAddElement);
+  $(this.manualElement).css('display', 'none').before(this.optionsToggleElement).before(this.optionsElement).after(this.optionAddElement);
   if (this.manualDefaultValueElement) {
     $(this.manualElement).after(this.removeDefaultElement);
   }
