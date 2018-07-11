@@ -221,6 +221,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
 
   // Image library, very similar to Image URL
   global $base_url;
+  $thumbnail_style = $upload_settings['thumbnail_style'];
   $form['image']['library_all'] = array(
     '#title' => t('Select from library'),
     '#type' => 'textfield',
@@ -230,7 +231,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#parents' => array('image_library', 'src'),
     '#wrapper_attributes' => array(
       'data-editor-image-toggle' => t('Select from library'),
-      'data-editor-image-library-base-url' => $base_url,
+      'data-editor-image-library-base-url' => $base_url . '/files/styles/' . $thumbnail_style . '/public',
     ),
     '#weight' => -2,
   );
@@ -300,6 +301,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'data-has-caption'),
     '#access' => !empty($format->filters['filter_image_caption']->status),
   );
+
   $form['library_view'] = array(
     '#title' => t('Image library'),
     '#type' => 'textfield',
@@ -311,6 +313,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'text'),
     '#weight' => 10,
   );
+
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
@@ -339,7 +342,7 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
   if (isset($form_state['values']['fid'])) {
     $fid = $form_state['values']['fid'];
     if ($fid == 0) {
-      $url = $form_state['values']['image_library']['src'];
+      $url = '/files' . $form_state['values']['image_library']['src'];
     }
     else {
       $file = file_load($fid);
