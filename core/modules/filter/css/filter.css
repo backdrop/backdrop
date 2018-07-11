@@ -128,6 +128,7 @@ input#edit-filters-filter-html-settings-allowed-html {
 .image-library-choose-file p {
   margin: 0;
   max-width: 150px;
+  max-height: 18px;
   font-size: 0.7rem;
   overflow: hidden;
   text-align: center;
@@ -138,10 +139,7 @@ input#edit-filters-filter-html-settings-allowed-html {
   display: block;
   margin-left: auto;
   margin-right: auto;
-}
-
-.image-library-image-selected {
-  background-color: #d0d0d0 !important;
+  background-color: #d0d0d0;
 }
 
 .library-view {
@@ -156,15 +154,21 @@ input#edit-filters-filter-html-settings-allowed-html {
   padding-right: 5px;
   height: 170px;
   width: 150px;
-  border: 2px solid transparent;
-  background-color: #fff;
+  border: 1px solid #dddddd;
+  background-color: #edf3ff;
   border-radius: 4px;
 }
-div.image-library-choose-file:hover {
-  background-color: #fff;
-  border: 2px solid #d0d0d0;
+.image-library-choose-file:hover {
+  background-color: #dae1ef;
+  border: 1px solid #bcbcbc;
   border-radius: 4px;
 }
+
+.image-library-image-selected {
+  background-color: #fff6ce !important;
+  border: 1px solid #0000dd;
+}
+
 .image-form-wrapper {
   display: flex;
 }
@@ -179,4 +183,7 @@ div.image-library-choose-file:hover {
 }
 .image-form-right-full {
   width: 100%
+}
+.form-item-image-directory {
+  display: none;
 }
