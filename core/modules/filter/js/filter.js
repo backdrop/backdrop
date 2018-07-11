@@ -188,10 +188,11 @@ Backdrop.behaviors.editorImageDialog = {
       });
       var $display_state = $(".form-item-image-library-src").css("display");
       if ($display_state === 'none') {
-        // Hide the right-hand (library) part of the dialog form.
+        // Hide the library part of the dialog form.
         $(".image-form-left").css({"display":"none"});
+        $(".form-item-image-directory").css({"display":"none"});
         $(".editor-dialog").removeClass("editor-dialog-with-library");
-        // Set the class for the left-hand part.
+        // Set the class for the dialog part.
         $(".image-form-right").addClass("image-form-right-full");
       }
       else {
@@ -208,6 +209,7 @@ Backdrop.behaviors.editorImageDialog = {
           // Display the library view.
           $(".image-form-right").removeClass("image-form-right-full");
           $(".image-form-left").css({"display":"block"});
+          $(".form-item-image-directory").css({"display":"block"});
           $(".library-view").css({"display":"block"});
           var $library_base_url = $(".form-item-image-library-src").attr('data-editor-image-library-base-url');
 
