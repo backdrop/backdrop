@@ -522,8 +522,8 @@ function filter_editor_image_upload_settings_form($format) {
     'max_size' => '',
     'max_dimensions' => array('width' => '', 'height' => ''),
     'orientate' => FALSE,
+    'thumbnail_style' => 'thumbnail',
   );
-
   $form['status'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable image uploads'),
@@ -626,6 +626,13 @@ function filter_editor_image_upload_settings_form($format) {
     '#max' => 99999,
     '#placeholder' => 'height',
     '#field_suffix' => 'pixels',
+    '#states' => $show_if_image_uploads_enabled,
+  );
+  $form['thumbnail_style'] = array(
+    '#type' => 'textfield',
+    '#default_value' => $settings['thumbnail_style'],
+    '#title' => t('Thumbnail style name'),
+    '#description' => t("The Style Name used for thumbnails. <br> This style must exist in config/media/image-styles."),
     '#states' => $show_if_image_uploads_enabled,
   );
 

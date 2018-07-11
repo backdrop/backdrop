@@ -26,6 +26,6 @@
 // Find position of '/files'.
 $insert_at = strpos( $output, '/files');
 // Text to insert.
-$add_to_uri = '/styles/thumbnail_150/public';
+$add_to_uri = '/styles/thumbnail/public';
 $new_output = substr_replace ($output, $add_to_uri, $insert_at + 6,0 );
 print ($new_output); ?>
