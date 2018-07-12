@@ -34,6 +34,7 @@ Backdrop.optionsElement = function(element) {
   this.manualOptionsElement = $(element).find('textarea').get(0);
   this.manualDefaultValueElement = $(element).find('input.form-text').get(0);
   this.keyTypeToggle = $(element).find('input.key-type-toggle').get(0);
+  this.keyTypeToggleField = $(element).find('.form-item-field-settings-allowed-values-custom-keys').get(0);
   this.multipleToggle = $(element).find('input.multiple-toggle').get(0);
 
   // Setup variables containing the current status of the widget.
@@ -426,6 +427,10 @@ Backdrop.optionsElement.prototype.toggleMode = function() {
     $(this.manualElement).css('display', '').find('textarea').height(height);
     $(this.optionsToggleElement).find('a').text(Backdrop.t('Normal entry'));
     $(this.removeDefaultElement).css('float', 'none');
+    $(this.keyTypeToggleField).css('display', 'none');
+    if ($('.option-settings .fieldset-wrapper').children(':visible').length == 0) {
+      $('.option-settings').css('display', 'none');
+    }
   }
   else {
     this.updateWidgetElements();
@@ -434,6 +439,8 @@ Backdrop.optionsElement.prototype.toggleMode = function() {
     $(this.manualElement).css('display', 'none');
     $(this.optionsToggleElement).find('a').text(Backdrop.t('Manual entry'));
     $(this.removeDefaultElement).css('float', 'left');
+    $(this.keyTypeToggleField).css('display', '');
+    $('.option-settings').css('display', '');
   }
 }
 
