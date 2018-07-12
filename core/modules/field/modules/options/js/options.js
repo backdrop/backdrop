@@ -425,6 +425,7 @@ Backdrop.optionsElement.prototype.toggleMode = function() {
     $(this.optionAddElement).css('display', 'none');
     $(this.manualElement).css('display', '').find('textarea').height(height);
     $(this.optionsToggleElement).find('a').text(Backdrop.t('Normal entry'));
+    $(this.removeDefaultElement).css('float', 'none');
   }
   else {
     this.updateWidgetElements();
@@ -432,6 +433,7 @@ Backdrop.optionsElement.prototype.toggleMode = function() {
     $(this.optionAddElement).css('display', '');
     $(this.manualElement).css('display', 'none');
     $(this.optionsToggleElement).find('a').text(Backdrop.t('Manual entry'));
+    $(this.removeDefaultElement).css('float', 'left');
   }
 }
 
