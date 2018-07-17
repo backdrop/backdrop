@@ -25,6 +25,7 @@ function image_field_info() {
         'max_dimensions' => '',
         'min_dimensions' => '',
         'default_image' => '',
+        'orientate' => 0,
       ),
       'default_widget' => 'image_image',
       'default_formatter' => 'image',
@@ -161,7 +162,15 @@ function image_field_instance_settings_form($field, $instance) {
     '#description' => t('The title attribute is used as a tooltip when the mouse hovers over the image.'),
     '#weight' => 11,
   );
-
+  $form['orientate'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable image re-orientation'),
+    '#description' => t('If EXIF data indicates the need, the image will be rotated appropriately before being saved. <br>
+    Note that as with resizing, rotating images on upload will cause the loss of EXIF data in the image.'),
+    '#default_value' => $settings['orientate'],
+    '#weight' => 12,
+  );
+  
   // Add the default image to the instance.
   $form['default_image'] = array(
     '#element_validate' => array('_image_field_default_image_validate'),
@@ -379,6 +388,10 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
   $settings = $instance['settings'];
 
   foreach (element_children($elements) as $delta) {
+    // Add adjustment of orientation before resizing because EXIF data is needed.
+    if ($settings['orientate']) {
+      $elements[$delta]['#upload_validators']['file_validate_image_orientation'] = array($settings['orientate']);
+    }
     // Add upload resolution validation.
     if ($settings['max_dimensions'] || $settings['min_dimensions']) {
       $elements[$delta]['#upload_validators']['file_validate_image_resolution'] = array($settings['max_dimensions'], $settings['min_dimensions']);
