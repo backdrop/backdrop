@@ -48,12 +48,19 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
       }
     }
 
+    // Generate the preview markup.
     $preview_url = url('<front>', array(
       'query' => array(
         'preview' => $theme_name
+      ),
+      'absolute' => TRUE,
+    ));
+    $preview_link = l(t('Open preview in a new window'), $preview_url, array(
+      'attributes' => array(
+        'target' => '_blank'
       )
     ));
-    $preview_markup = '<div class="color-preview"><a target="_blank" href="' . $preview_url . '">' . t('Open preview in a new window') . '</a><iframe id="preview" src="' . $preview_url . '"></iframe></div>';
+    $preview_markup = '<div class="color-preview">' . $preview_link . '<iframe id="preview" src="' . $preview_url . '"></iframe></div>';
 
     $base = backdrop_get_path('module', 'color');
     // Add scheme selector.
