@@ -62,7 +62,7 @@ Backdrop.behaviors.color = {
             }
           }
         }
-        preview();
+        update_preview();
       }
     });
 
@@ -73,19 +73,24 @@ Backdrop.behaviors.color = {
       if (schemeName !== '' && this.value !== schemes[schemeName][key]) {
         resetScheme();
       }
-      preview();
+      update_preview();
     });
 
-    preview();
+    // Setup the preview.
+    $('#system-theme-settings').addClass('has-preview').after(settings.color.preview_markup);
+
+    $(document).ready(function () {
+      update_preview();
+    });
 
     /**
      * Saves the current form values and refreshs the preview.
      */
-    function preview() {
+    function update_preview() {
       // Save the form values.
       var values = {
         scheme: $('#edit-scheme').val(),
-        palette: {},
+        palette: {}
       };
       values['scheme'] = $('#edit-scheme').val();
       $('#color_scheme_form input').each(function () {
