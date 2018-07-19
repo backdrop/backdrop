@@ -60,14 +60,20 @@
   color: #234600;
   background-color: #E9EEBC;
 }
+.status a {
+  color: #234600;
+}
 div.status:before {
   background-image: url(../../../misc/message-24-ok.png);
   background-color: #CFDE56;
 }
 
 .warning {
-  color: #555;
+  color: #525252;
   background-color: #FAF5C9;
+}
+.warning a {
+  color: #525252;
 }
 div.warning:before {
   background-image: url(../../../misc/message-24-warning.png);
@@ -75,8 +81,11 @@ div.warning:before {
 }
 
 .error {
-  color: #EC351C;
+  color: #9C1D0D;
   background-color: #F9EDEC;
+}
+.error a {
+  color: #9C1D0D;
 }
 div.error:before {
   background-image: url(../../../misc/message-24-error.png);
@@ -84,12 +93,19 @@ div.error:before {
 }
 
 .info {
-  color: #0074BD;
+  color: #004570;
   background-color: #BDF;
+}
+.info a {
+  color: #004570;
 }
 div.info:before {
   background-image: url(../../../misc/message-24-info.png);
   background-color: #0074BD;
+}
+
+.messages a {
+  text-decoration: underline;
 }
 
 /* Desktop size icons */
@@ -104,7 +120,7 @@ div.info:before {
     background-image: url(../../../misc/message-32-error.png);
   }
   div.info:before {
-    background-image: url(../../../misc/message-32-info.png);
+   background-image: url(../../../misc/message-32-info.png);
   }
 }
 /* SVG overrides */
