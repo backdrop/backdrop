@@ -58,50 +58,50 @@
 
 .status {
   color: #234600;
-  background-color: #E9EEBC;
+  background-color: #e9eebc;
 }
 .status a {
   color: #234600;
 }
 div.status:before {
   background-image: url(../../../misc/message-24-ok.png);
-  background-color: #CFDE56;
+  background-color: #cfde56;
 }
 
 .warning {
   color: #525252;
-  background-color: #FAF5C9;
+  background-color: #faf5c9;
 }
 .warning a {
   color: #525252;
 }
 div.warning:before {
   background-image: url(../../../misc/message-24-warning.png);
-  background-color: #FCE400;
+  background-color: #fce400;
 }
 
 .error {
-  color: #9C1D0D;
-  background-color: #F9EDEC;
+  color: #9c1d0d;
+  background-color: #f9edec;
 }
 .error a {
-  color: #9C1D0D;
+  color: #9c1d0d;
 }
 div.error:before {
   background-image: url(../../../misc/message-24-error.png);
-  background-color: #EE3D23;
+  background-color: #ee3d23;
 }
 
 .info {
   color: #004570;
-  background-color: #BDF;
+  background-color: #bdf;
 }
 .info a {
   color: #004570;
 }
 div.info:before {
   background-image: url(../../../misc/message-24-info.png);
-  background-color: #0074BD;
+  background-color: #0074bd;
 }
 
 .messages a {
