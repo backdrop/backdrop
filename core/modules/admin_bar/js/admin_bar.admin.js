@@ -11,8 +11,10 @@
 Backdrop.behaviors.adminBarPermissionsSetupHelp = {
   attach: function (context, settings) {
     $('#permissions', context).once('admin-bar-permissions-setup', function () {
-      // Retrieve matrix/mapping - these need to use the same indexes for the
-      // same permissions and roles.
+      /*
+       * Retrieve matrix/mapping - these need to use the same indexes for the
+       * same permissions and roles.
+       */
       var $roles = $(this).find('th:not(:first)');
       var $admin = $(this).find('input[name$="[access administration pages]"]');
       var $menu = $(this).find('input[name$="[access administration bar]"]');
@@ -28,8 +30,10 @@ Backdrop.behaviors.adminBarPermissionsSetupHelp = {
           $(this).add($menu[index]).click(function () {
             // Do nothing when disabling a permission.
             if (this.checked) {
-              // Figure out which is the other, check whether it still disabled,
-              // and if so, ask whether to auto-enable it.
+              /*
+               * Figure out which is the other, check whether it still disabled,
+               * and if so, ask whether to auto-enable it.
+               */
               var other = (this == $admin[index] ? $menu[index] : $admin[index]);
               if (!other.checked && confirm(Backdrop.t('Also allow !name role the "!permission" permission? This is usually required to display any pages within the administration bar.', {
                 '!name': $roles[index].textContent,
