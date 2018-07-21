@@ -278,6 +278,10 @@ function template_preprocess_block(&$variables) {
   $variables['title_prefix'] = '';
   $variables['title_suffix'] = '';
 
+  // Basic classes.
+  $variables['classes'][] = 'block';
+  $variables['classes'][] = backdrop_html_class('block-' . $block->module . '-' . (isset($block->childDelta) ? $block->childDelta : $block->delta));
+
   // Add the hero background image inline. This could also be added in a
   // specific template_preprocess_block__layout__hero() function, but we add
   // it here just to cut down on unnecessary separation.
@@ -290,6 +294,11 @@ function template_preprocess_block(&$variables) {
     else {
       $variables['classes'][] = 'block-hero-no-image';
     }
+  }
+
+  // Add custom classes if sent in.
+  if (!empty($style->settings['classes'])) {
+    $variables['classes'] = array_merge($variables['classes'], array_filter(explode(' ', $style->settings['classes'])));
   }
 
   if (module_exists('contextual') && user_access('access contextual links')) {
@@ -327,15 +336,6 @@ function template_preprocess_block(&$variables) {
       $variables['classes'][] = 'contextual-links-region';
       $variables['title_prefix'] = backdrop_render($build);
     }
-  }
-
-  // Basic classes.
-  $variables['classes'][] = 'block';
-  $variables['classes'][] = backdrop_html_class('block-' . $block->module . '-' . (isset($block->childDelta) ? $block->childDelta : $block->delta));
-
-  // Add custom classes if sent in.
-  if (!empty($style->settings['classes'])) {
-    $variables['classes'] = array_merge($variables['classes'], array_filter(explode(' ', $style->settings['classes'])));
   }
 
   // Set up some placeholders for constructing template file names.
