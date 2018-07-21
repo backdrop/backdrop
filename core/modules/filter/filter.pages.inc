@@ -201,7 +201,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   $existing_file = !empty($values['data-file-id']) ? file_load($values['data-file-id']) : NULL;
   $fid = $existing_file ? $existing_file->fid : NULL;
   $form['image']['fid'] = array(
-    '#title' => t('Image upload'),
+    '#title' => t('Upload an image'),
     '#type' => 'managed_file',
     '#upload_location' => $upload_settings['scheme'] . '://' . $upload_settings['directory'],
     '#default_value' => $fid ? $fid : NULL,
@@ -212,7 +212,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
       'file_validate_image_resolution' => array($max_dimensions),
     ),
     '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Image Upload'),
+      'data-editor-image-toggle' => t('Upload an image'),
     ),
     '#parents' => array('fid'),
     '#weight' => -10,
@@ -227,6 +227,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => ' ',
+    '#description' => t('The URL of the selected file.'),
     '#default_value' => isset($values['src']) ? $values['src'] : NULL,
     '#parents' => array('image_library', 'src'),
     '#wrapper_attributes' => array(
