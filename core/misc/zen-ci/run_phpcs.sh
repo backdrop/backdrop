@@ -4,7 +4,7 @@
 # Run phpcs code standards tests.
 ##
 
-#set site path
+# Set site path.
 SITEPATH="$HOME/www"
 
 # Go to domain directory.
