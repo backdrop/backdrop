@@ -161,7 +161,7 @@ input#edit-filters-filter-html-settings-allowed-html {
   float: left;
   padding-left: 5px;
   padding-right: 5px;
-  margin-top: 10px;
+  margin-bottom: 10px;
   height: 125px;
   width: 115px;
   position: relative;
@@ -182,10 +182,12 @@ input#edit-filters-filter-html-settings-allowed-html {
 
 .image-form-wrapper {
   display: flex;
+  flex-direction: row;
 }
 .image-form-right {
   width:350px;
   flex-grow: 0;
+  padding-top: 0;
 }
 .image-form-left {
   padding-right: 20px;
@@ -195,6 +197,19 @@ input#edit-filters-filter-html-settings-allowed-html {
 .image-form-right-full {
   width: 100%
 }
+@media (max-width: 1030px) {
+  .image-form-wrapper {
+    flex-direction: column;
+  }
+  .image-form-right {
+    width: 100%;
+    max-width: 800px;
+    padding-top: 30px;
+  }
+}
 .form-item-image-directory {
   display: none;
+}
+.view-image-library .view-header p {
+  margin: 0;
 }
