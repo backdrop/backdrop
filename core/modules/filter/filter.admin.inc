@@ -632,7 +632,7 @@ function filter_editor_image_upload_settings_form($format) {
     '#type' => 'textfield',
     '#default_value' => $settings['thumbnail_style'],
     '#title' => t('Thumbnail style name'),
-    '#description' => t("The Style Name used for thumbnails. <br> This style must exist in config/media/image-styles."),
+    '#description' => t("The machine name of the style used for library thumbnails. <br> This style must exist in config/media/image-styles."),
     '#states' => $show_if_image_uploads_enabled,
   );
 
