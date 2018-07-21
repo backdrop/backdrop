@@ -28,7 +28,6 @@
                 "pager": {
                     "type": "none",
                     "options": {
-                        "items_per_page": "12",
                         "offset": "0"
                     }
                 },
@@ -392,6 +391,57 @@
                         "empty_zero": 0,
                         "hide_alter_empty": 1
                     },
+                    "counter": {
+                        "id": "counter",
+                        "table": "views",
+                        "field": "counter",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "label": "View result counter",
+                        "exclude": 1,
+                        "alter": {
+                            "alter_text": 0,
+                            "text": "",
+                            "make_link": 0,
+                            "path": "",
+                            "absolute": 0,
+                            "external": 0,
+                            "replace_spaces": 0,
+                            "path_case": "none",
+                            "trim_whitespace": 0,
+                            "alt": "",
+                            "rel": "",
+                            "link_class": "",
+                            "prefix": "",
+                            "suffix": "",
+                            "target": "",
+                            "nl2br": 0,
+                            "max_length": "",
+                            "word_boundary": 1,
+                            "ellipsis": 1,
+                            "more_link": 0,
+                            "more_link_text": "",
+                            "more_link_path": "",
+                            "strip_tags": 0,
+                            "trim": 0,
+                            "preserve_tags": "",
+                            "html": 0
+                        },
+                        "element_type": "",
+                        "element_class": "",
+                        "element_label_type": "",
+                        "element_label_class": "",
+                        "element_label_colon": 1,
+                        "element_wrapper_type": "",
+                        "element_wrapper_class": "",
+                        "element_default_classes": 1,
+                        "empty": "",
+                        "hide_empty": 0,
+                        "empty_zero": 0,
+                        "hide_alter_empty": 1,
+                        "counter_start": "1"
+                    },
                     "nothing": {
                         "id": "nothing",
                         "table": "views",
@@ -403,7 +453,7 @@
                         "exclude": 0,
                         "alter": {
                             "alter_text": true,
-                            "text": "<p>[filename]</p><img class=\"image-library-image\" src=\"[uri]\">",
+                            "text": "<img class=\"image-library-image\" src=\"[uri]\">\r\n\r\n",
                             "make_link": 0,
                             "path": "",
                             "absolute": 0,
@@ -453,7 +503,7 @@
                         "exclude": 0,
                         "alter": {
                             "alter_text": true,
-                            "text": "<!--\r\n[uri] == File: Path\r\n[fid] == File: File ID\r\n[filemime] == File: Mime type\r\n[filename] == File: Name\r\n[filesize] == File: Size \r\n-->",
+                            "text": "<p>[filename]</p>\r\n",
                             "make_link": 0,
                             "path": "",
                             "absolute": 0,
@@ -542,9 +592,23 @@
                     "row_class_special": 0
                 },
                 "use_ajax": false,
-                "header": [],
+                "header": {
+                    "area": {
+                        "id": "area",
+                        "table": "views",
+                        "field": "area",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "label": "Library header",
+                        "empty": 0,
+                        "content": "<p>These images are available for selection.</p>\r\n",
+                        "format": "full_html",
+                        "tokenize": 0
+                    }
+                },
                 "row_options": {
-                    "default_field_elements": 1,
+                    "default_field_elements": 0,
                     "inline": [],
                     "separator": "",
                     "hide_empty": 0
