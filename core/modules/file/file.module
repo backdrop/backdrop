@@ -407,8 +407,8 @@ function file_ajax_progress($key) {
       $progress['percentage'] = round(100 * $status['bytes_uploaded'] / $status['bytes_total']);
     }
   }
-  elseif ($implementation == 'apc') {
-    $status = apc_fetch('upload_' . $key);
+  elseif ($implementation == 'apc' || $implementation == 'apcu') {
+    $status = $implementation == 'apc' ? apc_fetch('upload_' . $key) : apcu_fetch('upload_' . $key);
     if (isset($status['current']) && !empty($status['total'])) {
       $progress['message'] = t('Uploading... (@current of @total)', array('@current' => format_size($status['current']), '@total' => format_size($status['total'])));
       $progress['percentage'] = round(100 * $status['current'] / $status['total']);
@@ -423,8 +423,8 @@ function file_ajax_progress($key) {
  * Determines the preferred upload progress implementation.
  *
  * @return
- *   A string indicating which upload progress system is available. Either "apc"
- *   or "uploadprogress". If neither are available, returns FALSE.
+ *   A string indicating which upload progress system is available. One of
+ *   "uploadprogress", "apc", or "apcu". If none are available, returns FALSE.
  */
 function file_progress_implementation() {
   static $implementation;
@@ -436,6 +436,11 @@ function file_progress_implementation() {
     if (extension_loaded('uploadprogress')) {
       $implementation = 'uploadprogress';
     }
+    // APCu for PHP 7+
+    elseif (extension_loaded('apcu') && ini_get('apc.rfc1867')) {
+      $implementation = 'apcu';
+    }
+    // APC before PHP 7.
     elseif (extension_loaded('apc') && ini_get('apc.rfc1867')) {
       $implementation = 'apc';
     }
@@ -542,18 +547,16 @@ function file_managed_file_process($element, &$form_state, $form) {
         '#type' => 'hidden',
         '#value' => $upload_progress_key,
         '#attributes' => array('class' => array('file-progress')),
-        // Uploadprogress extension requires this field to be at the top of the
-        // form.
+        // The hidden field must be above any file upload fields.
         '#weight' => -20,
       );
     }
-    elseif ($implementation == 'apc') {
-      $element['APC_UPLOAD_PROGRESS'] = array(
+    elseif ($implementation == 'apc' || $implementation == 'apcu') {
+      $element[ini_get('apc.rfc1867_name')] = array(
         '#type' => 'hidden',
         '#value' => $upload_progress_key,
         '#attributes' => array('class' => array('file-progress')),
-        // Uploadprogress extension requires this field to be at the top of the
-        // form.
+        // The hidden field must be above any file upload fields.
         '#weight' => -20,
       );
     }
