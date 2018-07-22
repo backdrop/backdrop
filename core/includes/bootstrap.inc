@@ -254,12 +254,6 @@ define('PASS_THROUGH', -1);
  */
 define('BACKDROP_PHP_FUNCTION_PATTERN', '[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*');
 
-// Exit early if running an incompatible PHP version to avoid fatal errors.
-if (version_compare(PHP_VERSION, BACKDROP_MINIMUM_PHP) < 0) {
-  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.3.2. See the <a href="https://backdropcms.org/requirements">System Requirements</a> page for more information.';
-  exit;
-}
-
 /**
  * An RFC7231 Compliant date.
  *
@@ -269,9 +263,17 @@ if (version_compare(PHP_VERSION, BACKDROP_MINIMUM_PHP) < 0) {
  *
  * This constant was introduced in PHP 7.0.19 and PHP 7.1.5 but needs to be
  * defined by Backdrop for earlier PHP versions.
+ *
+ * @since 1.11.0
  */
 if (!defined('DATE_RFC7231')) {
   define('DATE_RFC7231', 'D, d M Y H:i:s \G\M\T');
+}
+
+// Exit early if running an incompatible PHP version to avoid fatal errors.
+if (version_compare(PHP_VERSION, BACKDROP_MINIMUM_PHP) < 0) {
+  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.3.2. See the <a href="https://backdropcms.org/requirements">System Requirements</a> page for more information.';
+  exit;
 }
 
 /**
