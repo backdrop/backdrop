@@ -27,6 +27,9 @@ class ModuleUpdater extends Updater {
     if ($relative_path = backdrop_get_path('module', $this->name)) {
       $relative_path = dirname($relative_path);
     }
+    elseif (file_exists(BACKDROP_ROOT . '/modules/contrib')) {
+      $relative_path = 'modules/contrib';
+    }
     else {
       $relative_path = 'modules';
     }
@@ -93,6 +96,9 @@ class ThemeUpdater extends Updater {
     if ($relative_path = backdrop_get_path('theme', $this->name)) {
       $relative_path = dirname($relative_path);
     }
+    elseif (file_exists(BACKDROP_ROOT . '/themes/contrib')) {
+      $relative_path = 'themes/contrib';
+    }
     else {
       $relative_path = 'themes';
     }
@@ -145,6 +151,9 @@ class LayoutUpdater extends Updater {
   public function getInstallDirectory() {
     if ($relative_path = backdrop_get_path('layout', $this->name)) {
       $relative_path = dirname($relative_path);
+    }
+    elseif (file_exists(BACKDROP_ROOT . '/layouts/contrib')) {
+      $relative_path = 'layouts/contrib';
     }
     else {
       $relative_path = 'layouts';
