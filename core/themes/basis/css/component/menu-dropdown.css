@@ -9,7 +9,7 @@
 .js .menu-dropdown li,
 .js .menu-dropdown a.has-submenu.highlighted {
   float: none;
-  border-bottom: 1px solid #777;
+  border-bottom: 1px solid #bbb;
 }
 
 .js .menu-dropdown li.last {
@@ -41,7 +41,7 @@
   width: 3.5rem;
   height: 3.5rem;
   overflow: hidden;
-  border: 1px solid #777;
+  border: 1px solid #bbb;
   background: #333;
   font: normal 1.384615rem/2.125rem monospace;
   text-align: center;

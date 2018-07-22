@@ -23,9 +23,9 @@
 
 @media (min-width: 48em) {  /* 768px @ 16px font size */
   /* hide the button in desktop view */
-  .menu-toggle-button {
-    position: absolute;
-    top: -99999px;
+  .menu-toggle-button,
+  .menu-toggle-state {
+    display: none;
   }
 }
 .menu-toggle-button-text {

@@ -2655,12 +2655,12 @@ class CommonBackdropSystemListingTestCase extends BackdropWebTestCase {
       // precedence.
       'backdrop_system_listing_incompatible_test' => array(
         'core/modules/simpletest/tests',
-        'profiles/testing/modules',
+        'core/profiles/testing/modules',
       ),
       // When both copies of the module are compatible with Backdrop core, the
       // copy in the profile directory takes precedence.
       'backdrop_system_listing_compatible_test' => array(
-        'profiles/testing/modules',
+        'core/profiles/testing/modules',
         'core/modules/simpletest/tests',
       ),
     );

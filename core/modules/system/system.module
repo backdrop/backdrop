@@ -2808,9 +2808,13 @@ function _system_rebuild_module_data() {
 
   // Include the installation profile in modules that are loaded.
   $profile = backdrop_get_profile();
+  $profile_uri = 'profiles/' . $profile . '/' . $profile . '.profile';
+  if (file_exists(BACKDROP_ROOT . '/core/profiles/' . $profile . '/' . $profile . '.profile')) {
+    $profile_uri = 'core/' . $profile_uri;
+  }
   $modules[$profile] = new stdClass();
   $modules[$profile]->name = $profile;
-  $modules[$profile]->uri = 'profiles/' . $profile . '/' . $profile . '.profile';
+  $modules[$profile]->uri = $profile_uri;
   $modules[$profile]->filename = $profile . '.profile';
 
   // Installation profile hooks are always executed last.

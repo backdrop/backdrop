@@ -87,7 +87,7 @@ class BlockText extends Block {
         '#type' => 'textfield',
         '#title' => t('Admin label'),
         '#maxlength' => 64,
-        '#description' => t('Used in administrative interfaces and not shown to end-users.'),
+        '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
         '#weight' => 2,
         '#states' => array(
           'visible' => array(
@@ -99,7 +99,7 @@ class BlockText extends Block {
        '#type' => 'textfield',
        '#title' => t('Admin description'),
        '#maxlength' => 128,
-       '#description' => t('Used in administrative interfaces and not shown to end-users.'),
+       '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
        '#weight' => 4,
         '#states' => array(
           'visible' => array(
