@@ -209,7 +209,7 @@ class views_plugin_display_block extends views_plugin_display {
         $form['#title'] .= t('Block admin label');
         $form['block_description'] = array(
           '#type' => 'textfield',
-          '#description' => t('Used in administrative interfaces and not shown to end-users.'),
+          '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
           '#default_value' => $this->get_option('block_description'),
         );
         break;
