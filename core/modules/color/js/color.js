@@ -85,7 +85,7 @@ Backdrop.behaviors.color = {
     updatePreview();
 
     /**
-     * Saves the current form values and refreshs the preview.
+     * Saves the current form values and refreshes the preview.
      */
     function updatePreview() {
       // Save the form values.
