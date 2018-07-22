@@ -397,18 +397,26 @@ function file_ajax_progress($key) {
   $progress = array(
     'message' => t('Starting upload...'),
     'percentage' => -1,
+    'session' => $_SESSION,
   );
 
   $implementation = file_progress_implementation();
-  if ($implementation == 'uploadprogress') {
+  if ($implementation == 'session.upload_progress' && isset($_SESSION[$key])) {
+    $status = $_SESSION[$key];
+    if (isset($status['bytes_processed']) && !empty($status['content_length'])) {
+      $progress['message'] = t('Uploading... (@current of @total)', array('@current' => format_size($status['bytes_processed']), '@total' => format_size($status['content_length'])));
+      $progress['percentage'] = round(100 * $status['bytes_processed'] / $status['content_length']);
+    }
+  }
+  elseif ($implementation == 'uploadprogress') {
     $status = uploadprogress_get_info($key);
     if (isset($status['bytes_uploaded']) && !empty($status['bytes_total'])) {
       $progress['message'] = t('Uploading... (@current of @total)', array('@current' => format_size($status['bytes_uploaded']), '@total' => format_size($status['bytes_total'])));
       $progress['percentage'] = round(100 * $status['bytes_uploaded'] / $status['bytes_total']);
     }
   }
-  elseif ($implementation == 'apc') {
-    $status = apc_fetch('upload_' . $key);
+  elseif ($implementation == 'apc' || $implementation == 'apcu') {
+    $status = $implementation == 'apc' ? apc_fetch('upload_' . $key) : apcu_fetch('upload_' . $key);
     if (isset($status['current']) && !empty($status['total'])) {
       $progress['message'] = t('Uploading... (@current of @total)', array('@current' => format_size($status['current']), '@total' => format_size($status['total'])));
       $progress['percentage'] = round(100 * $status['current'] / $status['total']);
@@ -423,19 +431,28 @@ function file_ajax_progress($key) {
  * Determines the preferred upload progress implementation.
  *
  * @return
- *   A string indicating which upload progress system is available. Either "apc"
- *   or "uploadprogress". If neither are available, returns FALSE.
+ *   A string indicating which upload progress system is available. One of
+ *   "session.upload_progress", "uploadprogress", "apc", or "apcu". If none are
+ *   available, returns FALSE.
  */
 function file_progress_implementation() {
   static $implementation;
   if (!isset($implementation)) {
     $implementation = FALSE;
 
-    // We prefer the PECL extension uploadprogress because it supports multiple
-    // simultaneous uploads. APC only supports one at a time.
-    if (extension_loaded('uploadprogress')) {
+    // Built-in session based upload progress available in PHP 5.4 and higher.
+    if (ini_get('session.upload_progress.enabled')) {
+      $implementation = 'session.upload_progress';
+    }
+    // The uploadprogress extension for versions before PHP 7.
+    elseif (extension_loaded('uploadprogress')) {
       $implementation = 'uploadprogress';
     }
+    // APCu for PHP 7+
+    elseif (extension_loaded('apcu') && ini_get('apc.rfc1867')) {
+      $implementation = 'apcu';
+    }
+    // APC before PHP 7.
     elseif (extension_loaded('apc') && ini_get('apc.rfc1867')) {
       $implementation = 'apc';
     }
@@ -537,7 +554,16 @@ function file_managed_file_process($element, &$form_state, $form) {
   if ($element['#progress_indicator'] == 'bar' && $implementation = file_progress_implementation()) {
     $upload_progress_key = mt_rand();
 
-    if ($implementation == 'uploadprogress') {
+    if ($implementation == 'session.upload_progress') {
+      $element[ini_get('session.upload_progress.name')] = array(
+        '#type' => 'hidden',
+        '#value' => $upload_progress_key,
+        '#attributes' => array('class' => array('file-progress')),
+        '#weight' => -20,
+        '#parents' => array(ini_get('session.upload_progress.name')),
+      );
+    }
+    elseif ($implementation == 'uploadprogress') {
       $element['UPLOAD_IDENTIFIER'] = array(
         '#type' => 'hidden',
         '#value' => $upload_progress_key,
@@ -547,13 +573,11 @@ function file_managed_file_process($element, &$form_state, $form) {
         '#weight' => -20,
       );
     }
-    elseif ($implementation == 'apc') {
-      $element['APC_UPLOAD_PROGRESS'] = array(
+    elseif ($implementation == 'apc' || $implementation == 'apcu') {
+      $element[ini_get('apc.rfc1867_name')] = array(
         '#type' => 'hidden',
         '#value' => $upload_progress_key,
         '#attributes' => array('class' => array('file-progress')),
-        // Uploadprogress extension requires this field to be at the top of the
-        // form.
         '#weight' => -20,
       );
     }
