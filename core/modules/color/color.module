@@ -5,6 +5,18 @@
  */
 
 /**
+ * Implements hook_theme().
+ */
+function color_theme() {
+  return array(
+    'color_preview' => array(
+      'render element' => 'form',
+      'file' => 'color.theme.inc',
+    ),
+  );
+}
+
+/**
  * Implements hook_form_FORM_ID_alter().
  */
 function color_form_system_theme_settings_alter(&$form, &$form_state) {
@@ -55,12 +67,7 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
       ),
       'absolute' => TRUE,
     ));
-    $preview_link = l(t('Open preview in a new window'), $preview_url, array(
-      'attributes' => array(
-        'target' => '_blank'
-      )
-    ));
-    $preview_markup = '<div class="color-preview">' . $preview_link . '<iframe id="preview" src="' . $preview_url . '"></iframe></div>';
+    $preview_markup = theme('color_preview', array('preview_url' => $preview_url));
 
     $base = backdrop_get_path('module', 'color');
     // Add scheme selector.
@@ -69,6 +76,12 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
       '#title' => t('Color set'),
       '#options' => $color_sets,
       '#default_value' => $scheme_name,
+      '#attributes' => array(
+        'data-color-schemes' => backdrop_json_encode($schemes),
+        'data-color-theme-name' => $theme_name,
+        'data-color-preview-markup' => $preview_markup,
+        'data-color-preview-token' => backdrop_get_token('color_token'),
+      ),
       '#attached' => array(
         // Add Farbtastic color picker.
         'library' => array(
@@ -80,18 +93,7 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
         ),
         // Add custom JavaScript.
         'js' => array(
-          $base . '/js/color.js',
-          array(
-            'data' => array(
-              'color' => array(
-                'reference' => color_get_palette($theme_name, TRUE),
-                'schemes' => $schemes,
-                'theme' => $theme_name,
-                'preview_markup' => $preview_markup,
-              ),
-            ),
-            'type' => 'setting',
-          ),
+          $base . '/js/color.js'
         ),
       ),
     );
@@ -215,6 +217,10 @@ function color_menu() {
  * Callback function to handle saving preview settings to the user's session.
  */
 function color_save_preview_settings($theme_name) {
+  if (!isset($_GET['token']) || !backdrop_valid_token($_GET['token'], "color_token")) {
+    return MENU_ACCESS_DENIED;
+  }
+
   $themes = list_themes();
   if (in_array($theme_name, array_keys($themes))) {
     $theme_info = color_get_info($theme_name);
@@ -263,7 +269,11 @@ function color_custom_theme() {
  * Implements hook_url_outbound_alter().
  */
 function color_url_outbound_alter(&$path, &$options, $original_path) {
-  $preview = _color_preview_theme();
+  $preview = &backdrop_static(__FUNCTION__);
+  if (!isset($preview)) {
+    $preview = _color_preview_theme();
+  }
+
   if ($preview) {
     $options['query']['preview'] = $preview;
   }
@@ -396,11 +406,10 @@ function color_valid_hexadecimal_string($color) {
 
 function _color_preview_theme() {
   if (user_access('administer themes')) {
-    $params = backdrop_get_query_parameters();
-    if (isset($params['preview'])) {
+    if (isset($_GET['preview'])) {
       $themes = list_themes();
-      if (in_array($params['preview'], array_keys($themes))) {
-        return $params['preview'];
+      if (in_array($_GET['preview'], array_keys($themes))) {
+        return $_GET['preview'];
       }
     }
   }
@@ -451,6 +460,7 @@ function color_scheme_form_submit($form, &$form_state) {
   // Remove color field elements.
   unset($form_state['values']['scheme']);
   unset($form_state['values']['palette']);
+  unset($_SESSION['color']);
 
   // Save all the values into form state for saving to config.
   $form_state['values']['color'] = color_save_configuration($theme, $info, $palette);

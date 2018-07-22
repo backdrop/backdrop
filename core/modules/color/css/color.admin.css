@@ -9,6 +9,7 @@
   margin: 0;
   padding: 0;
 }
+
 #palette,
 .form-type-select {
   float: left; /* LTR */
@@ -17,16 +18,25 @@
   max-width: 20em;
   padding-right: 2em;
 }
+
 [dir="rtl"] #palette,
 [dir="rtl"] .form-type-select {
   float: right;
 }
+
 .color-form select,
 .color-form input,
 .color-form .sp-replacer {
   float: right;
   max-width: 9em;
 }
+
+[dir="rtl"] .color-form select,
+[dir="rtl"] .color-form input,
+[dir="rtl"] .color-form .sp-replacer {
+  float: left;
+}
+
 .color-form .form-item {
   height: 35px;
   width: 100%;
@@ -45,11 +55,13 @@
   cursor: pointer;
 }
 
+/* Styles to control the color inputs in Firefox. */
 #color_scheme_form input[type=color]::-moz-color-swatch {
   border: none;
   border-radius: 100%;
 }
 
+/* Styles to control the color inputs in Chrome. */
 #color_scheme_form input[type=color]::-webkit-color-swatch {
   border: none;
   border-radius: 100%;
@@ -59,6 +71,7 @@
   padding: 0;
 }
 
+/* Styles for Spectrum when used on Internet Explorer 11 */
 #color_scheme_form .sp-replacer {
   border: solid 2px #d0d0d0;
   border-radius: 100%;
@@ -85,7 +98,7 @@
 
 #preview {
   width: 100%;
-  height: 80vh;
+  height: 100vh;
 }
 
 @media all and (min-width: 48em) {

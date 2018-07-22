@@ -18,9 +18,11 @@ Backdrop.featureDetect.inputTypeColor = function() {
 
   if ($body.hasClass('has-input-type-color')) {
     return true;
-  } else if ($body.hasClass('no-input-type-color')) {
+  }
+  else if ($body.hasClass('no-input-type-color')) {
     return false;
-  } else {
+  }
+  else {
     // Run our test by adding a color field into the DOM and checking it's type
     $body.append($inputTypeColor);
     // By default browsers that don't understand color fields will fall back to text
@@ -28,7 +30,8 @@ Backdrop.featureDetect.inputTypeColor = function() {
       $body.addClass('no-input-type-color');
       $inputTypeColor.remove();
       return false;
-    } else {
+    }
+    else {
       $body.addClass('has-input-type-color');
       $inputTypeColor.remove();
       return true;
@@ -37,8 +40,9 @@ Backdrop.featureDetect.inputTypeColor = function() {
 };
 
 Backdrop.behaviors.color = {
-  attach: function (context, settings) {
-    var schemes = settings.color.schemes;
+  attach: function (context) {
+    var settings = document.getElementById('edit-scheme').dataset;
+    var schemes = JSON.parse(settings.colorSchemes);
     // This behavior attaches by ID, so is only valid once on a page.
     var form = $('#system-theme-settings .color-form', context).once('color');
     if (form.length === 0) {
@@ -62,7 +66,7 @@ Backdrop.behaviors.color = {
             }
           }
         }
-        update_preview();
+        updatePreview();
       }
     });
 
@@ -73,20 +77,17 @@ Backdrop.behaviors.color = {
       if (schemeName !== '' && this.value !== schemes[schemeName][key]) {
         resetScheme();
       }
-      update_preview();
+      updatePreview();
     });
 
     // Setup the preview.
-    $('#system-theme-settings').addClass('has-preview').after(settings.color.preview_markup);
-
-    $(document).ready(function () {
-      update_preview();
-    });
+    $('#system-theme-settings').addClass('has-preview').after(settings.colorPreviewMarkup);
+    updatePreview();
 
     /**
      * Saves the current form values and refreshs the preview.
      */
-    function update_preview() {
+    function updatePreview() {
       // Save the form values.
       var values = {
         scheme: $('#edit-scheme').val(),
@@ -100,7 +101,7 @@ Backdrop.behaviors.color = {
       $.ajax({
         type: 'POST',
         dataType: 'json',
-        url : Backdrop.settings.basePath + 'color/save_preview_settings/' + Backdrop.settings.color.theme,
+        url : Backdrop.settings.basePath + 'color/save_preview_settings/' + settings.colorThemeName + '/?token=' + settings.colorPreviewToken,
         data: values,
         success : function(response) {
           // Refresh the preview.
