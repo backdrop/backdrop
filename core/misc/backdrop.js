@@ -187,6 +187,48 @@ Backdrop.formatString = function(str, args) {
 };
 
 /**
+ * Generates a string representation for the given byte count.
+ *
+ * @param size
+ *   A size in bytes.
+ * @param langcode
+ *   Optional language code to translate to a language other than what is used
+ *   to display the page.
+ *
+ * @return
+ *   A translated string representation of the size.
+ *
+ * @since Backdrop 1.11.0
+ */
+Backdrop.formatSize = function(size, langcode) {
+  var kilobyte = 1024;
+  if (size < kilobyte) {
+    return Backdrop.formatPlural(size, '1 byte', '@count bytes', {}, {'langcode': langcode });
+  }
+  else {
+    // Convert bytes to kilobytes and round.
+    size = Number.parseFloat(size / kilobyte).toFixed(2);
+    var units = [
+      Backdrop.t('@size KB', {}, {'langcode': langcode}),
+      Backdrop.t('@size MB', {}, {'langcode': langcode}),
+      Backdrop.t('@size GB', {}, {'langcode': langcode}),
+      Backdrop.t('@size TB', {}, {'langcode': langcode})
+    ];
+    var unit;
+    for (var n = 0; n < units.length; n++) {
+      unit = units[n];
+      if (size >= kilobyte) {
+        size = Number.parseFloat(size / kilobyte).toFixed(2);
+      }
+      else {
+        break;
+      }
+    }
+    return unit.replace('@size', size);
+  }
+};
+
+/**
  * Replace substring.
  *
  * The longest keys will be tried first. Once a substring has been replaced,
