@@ -704,6 +704,10 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
       '#markup' => t('You may enable modules using the form below or on the main !link page.', array('!link' => l(t('Modules'), 'admin/modules'))),
     );
     if (!empty($options)) {
+      // Set all module checkboxes to be checked by default when the form loads.
+      foreach ($options as $option) {
+        $options[$option] = TRUE;
+      }
       $form['modules'] = array(
         '#type' => 'tableselect',
         '#title' => t('Enable modules'),
@@ -713,6 +717,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         '#empty' => t('No new modules installed.'),
         '#multiple' => TRUE,
         '#js_select' => TRUE,
+        '#default_value' => $options,
         '#weight' => 1,
       );
 
