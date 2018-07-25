@@ -20,7 +20,8 @@
  *   An array whose keys are entity type names and whose values identify
  *   properties of those types that the system needs to know about:
  *   - label: The human-readable name of the type.
- *   - entity class: The name of the class that provides the entity's
+ *   - entity class: A class the controller will use for instantiating entities. 
+ *     Must extend the Entity class or implement EntityInterface.
  *     information. Must extend the Entity class or implement EntityInterface.
  *   - controller class: The name of the class that is used to load the objects.
  *     The class has to implement the EntityControllerInterface interface.
