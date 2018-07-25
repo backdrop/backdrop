@@ -22,7 +22,6 @@
  *   - label: The human-readable name of the type.
  *   - entity class: A class the controller will use for instantiating entities. 
  *     Must extend the Entity class or implement EntityInterface.
- *     information. Must extend the Entity class or implement EntityInterface.
  *   - controller class: The name of the class that is used to load the objects.
  *     The class has to implement the EntityControllerInterface interface.
  *     Leave blank to use the DefaultEntityController implementation.
