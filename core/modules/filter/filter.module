@@ -2545,3 +2545,14 @@ function _filter_image_align($text) {
 /**
  * @} End of "Standard filters".
  */
+
+/**
+ * Implements hook_autoload_info().
+ */
+function filter_autoload_info() {
+  return array(
+    // Views handlers.
+    'views_handler_field_file_uri' => 'views/views_handler_field_file_uri.inc',
+  );
+}
+
