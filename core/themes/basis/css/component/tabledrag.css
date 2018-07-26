@@ -132,7 +132,7 @@ abbr.tabledrag-changed {
   height: 100%;
   text-indent: -9999em;
   z-index: 0;
-  background: #FCE400;
+  background: #fce400;
 }
 
 .tabledrag-changed[title] {

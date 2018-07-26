@@ -107,7 +107,7 @@ td.checkbox .form-item input {
 .form-item .description,
 .password-strength,
 .password-match {
-  border-left: 0.25em solid #c6cad2;
+  border-left: 0.25em solid #bbb;
   margin: 0.6875em 0 2.5em;
   padding: 0.5em 0.8em;
 }
