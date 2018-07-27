@@ -107,10 +107,10 @@ function block_update_1004() {
       'info' => $block['info'],
       'title' => $block['title'],
       'body' => array(
-        'value'=> $block['body'],
+        'value' => $block['body'],
         'format' => $block['format'],
-        ),
-      );
+      ),
+    );
     $config = config('block.custom.' . $block['bid']);
     $config->setData($data);
     $config->save();
