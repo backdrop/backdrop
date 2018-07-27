@@ -53,8 +53,8 @@ function hook_admin_bar_map() {
  *   - #components: The actual components contained in $content are configurable
  *     and depend on the 'admin_bar.settings.components' configuration value.
  *     #components holds a copy of that for convenience.
- *   - #complete: A Boolean indicating whether the complete menu should be built,
- *     ignoring the current configuration in #components.
+ *   - #complete: A Boolean indicating whether the complete menu should be
+ *     built, ignoring the current configuration in #components.
  *   Passed by reference.
  *
  * @see hook_admin_bar_output_alter()
