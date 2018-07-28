@@ -330,7 +330,7 @@ function user_login_settings($form, &$form_state) {
   );
   $form['user_limit_settings'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Limit login attempts by a user'),
+    '#title' => t('Limit login attempts by user'),
   );
   $form['user_limit_settings']['wrapper'] = array(
     '#type' => 'container',
@@ -354,7 +354,7 @@ function user_login_settings($form, &$form_state) {
   );
   $form['user_limit_settings']['help'] = array(
     '#type' => 'item',
-    '#description' => t('Configure the limit and the time window for users attempting to log in. That is, how many failed login attempts are allowed every X hours.'),
+    '#description' => t('Configure the limit and the time window for users attempting to log in. That is, how many failed login attempts are allowed per specified time period.'),
   );
   $form['user_limit_settings']['flood_uid_only'] = array(
     '#type' => 'radios',
