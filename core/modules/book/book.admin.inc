@@ -37,7 +37,14 @@ function book_admin_overview() {
     $rows[] = $row;
   }
 
-  return theme('table', array('header' => $headers, 'rows' => $rows, 'empty' => t('No books available.')));
+  return theme(
+    'table',
+    array(
+      'header' => $headers,
+      'rows' => $rows,
+      'empty' => t('No books available.'),
+    )
+  );
 }
 
 /**
@@ -72,7 +79,7 @@ function book_admin_settings($form, &$form_state) {
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save configuration')
+    '#value' => t('Save configuration'),
   );
   return $form;
 }
@@ -89,7 +96,7 @@ function book_admin_settings_validate($form, &$form_state) {
   }
 }
 
- /**
+/**
  * Form submission handler for book_admin_settings().
  *
  * @see book_admin_settings_validate()
@@ -188,7 +195,7 @@ function book_admin_edit_submit($form, &$form_state) {
  *
  * @param Node $node
  *   The node of the top-level page in the book.
- * @param $form
+ * @param array $form
  *   The form that is being modified, passed by reference.
  *
  * @see book_admin_edit()
@@ -200,7 +207,8 @@ function _book_admin_table(Node $node, &$form) {
   );
 
   $tree = book_menu_subtree_data($node->book);
-  $tree = array_shift($tree); // Do not include the book item itself.
+  // Do not include the book item itself.
+  $tree = array_shift($tree);
   if ($tree['below']) {
     $hash = backdrop_hash_base64(serialize($tree['below']));
     // Store the hash value as a hidden form element so that we can detect
@@ -221,12 +229,12 @@ function _book_admin_table(Node $node, &$form) {
 /**
  * Helps build the main table in the book administration page form.
  *
- * @param $tree
+ * @param array $tree
  *   A subtree of the book menu hierarchy.
- * @param $form
+ * @param array $form
  *   The form that is being modified, passed by reference.
  *
- * @return
+ * @return array
  *   The modified form array.
  *
  * @see book_admin_edit()
@@ -275,7 +283,7 @@ function _book_admin_table_tree($tree, &$form) {
 /**
  * Returns HTML for a book administration form.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - form: A render element representing the form.
  *
@@ -338,5 +346,13 @@ function theme_book_admin_table($variables) {
     $rows[] = $row;
   }
 
-  return theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'book-outline'), 'empty' => t('No book content available.')));
+  return theme(
+    'table',
+    array(
+      'header' => $header,
+      'rows' => $rows,
+      'attributes' => array('id' => 'book-outline'),
+      'empty' => t('No book content available.'),
+    )
+  );
 }
