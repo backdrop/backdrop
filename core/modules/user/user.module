@@ -1271,7 +1271,7 @@ function user_menu() {
   // Login settings.
   $items['admin/config/people/login'] = array(
     'title' => 'Login settings',
-    'description' => 'Configure login settings',
+    'description' => 'Configure the way visitors may log in and limit login attempts.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_login_settings'),
     'access arguments' => array('administer account settings'),

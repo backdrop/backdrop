@@ -360,8 +360,8 @@ function user_login_settings($form, &$form_state) {
     '#type' => 'radios',
     '#title' => t('Identify users attempting to log in, using'),
     '#options' => array(
-      FALSE => t('User ID and IP address combination'),
-      TRUE => t('User ID only'),
+      '0' => t('User ID and IP address combination'),
+      '1' => t('User ID only'),
     ),
     '#default_value' => $flood_config->get('flood_uid_only'),
     FALSE => array(
