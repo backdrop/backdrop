@@ -7,6 +7,8 @@
 /**
  * Default argument plugin to get the current node's book root.
  */
+// @codingStandardsIgnoreStart
+// @TODO: Make all classes CamelCase and class methods lowerComelCase in 2.x.
 class views_plugin_argument_default_book_root extends views_plugin_argument_default_node {
   function get_argument() {
     // Use the argument_default_node plugin to get the nid argument.
@@ -19,3 +21,4 @@ class views_plugin_argument_default_book_root extends views_plugin_argument_defa
     }
   }
 }
+// @codingStandardsIgnoreEnd
