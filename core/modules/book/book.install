@@ -53,7 +53,7 @@ function _book_install_type_create() {
  */
 function book_schema() {
   $schema['book'] = array(
-  'description' => 'Stores book outline information. Uniquely connects each node in the outline to a link in {menu_links}',
+    'description' => 'Stores book outline information. Uniquely connects each node in the outline to a link in {menu_links}',
     'fields' => array(
       'mlid' => array(
         'type' => 'int',
