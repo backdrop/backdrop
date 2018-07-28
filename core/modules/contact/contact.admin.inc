@@ -33,7 +33,7 @@ function contact_settings_form($form, &$form_state) {
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-    '#title' => t("Email send thresholds"),
+    '#title' => t("Send limit"),
     '#description' => t("Limit the amount of emails that can be sent from contact forms, from the same IP, within a specific window of time. This helps prevent malicious users from sending multiple emails."),
   );
   $form['threshold']['wrapper'] = array(
