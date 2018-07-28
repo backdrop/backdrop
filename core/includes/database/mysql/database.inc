@@ -9,8 +9,11 @@
  * @addtogroup database
  * @{
  */
-
+// @codingStandardsIgnoreStart
+// @TODO: Make all classes CamelCase and class methods lowerComelCase in 2.x.
 class DatabaseConnection_mysql extends DatabaseConnection {
+  // @codingStandardsIgnoreEnd
+
   /**
    * Flag to indicate if the cleanup function in __destruct() should run.
    *
@@ -25,8 +28,12 @@ class DatabaseConnection_mysql extends DatabaseConnection {
    */
   protected $utf8mb4Supported;
 
+  /**
+   * Constructor for DatabaseConnection_mysql.
+   */
   public function __construct(array $connection_options = array()) {
-    // This driver defaults to transaction support, except if explicitly passed FALSE.
+    // This driver defaults to transaction support, except if explicitly passed
+    // FALSE.
     $this->transactionSupport = !isset($connection_options['transactions']) || ($connection_options['transactions'] !== FALSE);
 
     // MySQL never supports transactional DDL.
@@ -64,9 +71,11 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       // rows that actually didn't have to be updated because the values didn't
       // change. This matches common behaviour among other database systems.
       PDO::MYSQL_ATTR_FOUND_ROWS => TRUE,
-      // So we don't have to mess around with cursors and unbuffered queries by default.
+      // So we don't have to mess around with cursors and unbuffered queries by
+      // default.
       PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => TRUE,
-      // Because MySQL's prepared statements skip the query cache, because it's dumb.
+      // Because MySQL's prepared statements skip the query cache, because it's
+      // dumb.
       PDO::ATTR_EMULATE_PREPARES => TRUE,
     );
     if (defined('PDO::MYSQL_ATTR_MULTI_STATEMENTS')) {
@@ -104,26 +113,41 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     }
   }
 
+  /**
+   * Destructor for DatabaseConnection_mysql.
+   */
   public function __destruct() {
     if ($this->needsCleanup) {
       $this->nextIdDelete();
     }
   }
 
+  /**
+   * Helper function to put ranges on queries.
+   */
   public function queryRange($query, $from, $count, array $args = array(), array $options = array()) {
     return $this->query($query . ' LIMIT ' . (int) $from . ', ' . (int) $count, $args, $options);
   }
 
+  /**
+   * Helper function to create a temporary table out of a query.
+   */
   public function queryTemporary($query, array $args = array(), array $options = array()) {
     $tablename = $this->generateTemporaryTableName();
     $this->query('CREATE TEMPORARY TABLE {' . $tablename . '} Engine=MEMORY ' . $query, $args, $options);
     return $tablename;
   }
 
+  /**
+   * Helper to return the driver type.
+   */
   public function driver() {
     return 'mysql';
   }
 
+  /**
+   * Helper to return the database type.
+   */
   public function databaseType() {
     return 'mysql';
   }
@@ -147,11 +171,17 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     }
   }
 
+  /**
+   * Helper function to prevent overrides.
+   */
   public function mapConditionOperator($operator) {
     // We don't want to override any of the defaults.
     return NULL;
   }
 
+  /**
+   * Heloer function to get the next id.
+   */
   public function nextId($existing_id = 0) {
     $new_id = $this->query('INSERT INTO {sequences} () VALUES ()', array(), array('return' => Database::RETURN_INSERT_ID));
     // This should only happen after an import or similar event.
@@ -170,6 +200,9 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     return $new_id;
   }
 
+  /**
+   * Helper functon to keep DB clean without breaking InnoDB.
+   */
   public function nextIdDelete() {
     // While we want to clean up the table to keep it up from occupying too
     // much storage and memory, we must keep the highest value in the table
@@ -241,10 +274,16 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     }
   }
 
+  /**
+   * Helper function to determine if utfmb4 is in use.
+   */
   public function utf8mb4IsActive() {
     return isset($this->connectionOptions['charset']) && $this->connectionOptions['charset'] === 'utf8mb4';
   }
 
+  /**
+   * Helper function to determine if utfmb4 is available.
+   */
   public function utf8mb4IsSupported() {
     // Caching if this method is called multiple times in the same request.
     if (isset($this->utf8mb4Supported)) {
