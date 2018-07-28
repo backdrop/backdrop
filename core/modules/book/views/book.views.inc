@@ -11,9 +11,7 @@
  * Implements hook_views_data().
  */
 function book_views_data() {
-  // ----------------------------------------------------------------------
-  // book table
-
+  // Book table.
   $data['book']['table']['group']  = t('Book');
   $data['book']['table']['join'] = array(
     'node' => array(
@@ -34,8 +32,7 @@ function book_views_data() {
     // and use the node: nid argument.
   );
 
-  // ----------------------------------------------------------------------
-  // menu_links table -- this is aliased so we can get just book relations
+  // The menu_links table -- this is aliased so we can get just book relations.
 
   // Book hierarchy and weight data are now in {menu_links}.
   $data['book_menu_links']['table']['group'] = t('Book');
@@ -119,13 +116,13 @@ function book_views_data() {
  * Implements hook_views_plugins().
  */
 function book_views_plugins() {
- return array(
-   'module' => 'views',
-   'argument default' => array(
-     'book_root' => array(
-       'title' => t('Book root from current node'),
-       'handler' => 'views_plugin_argument_default_book_root'
-     ),
-   ),
- );
+  return array(
+    'module' => 'views',
+    'argument default' => array(
+      'book_root' => array(
+        'title' => t('Book root from current node'),
+        'handler' => 'views_plugin_argument_default_book_root',
+      ),
+    ),
+  );
 }
