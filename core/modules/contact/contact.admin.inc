@@ -29,6 +29,15 @@ function contact_settings_form($form, &$form_state) {
     '#default_value' => contact_show_personal_copy_checkbox()
   );
 
+  $form['permissions_wrapper'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#title' => t("Permissions"),
+  );
+  $form['permissions_wrapper']['permissions'] = contact_form_permissions();
+  $form['permissions_wrapper']['permissions']['#tree'] = TRUE;
+
   $form['threshold'] = array(
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
@@ -53,7 +62,93 @@ function contact_settings_form($form, &$form_state) {
     '#default_value' => $config->get('contact_threshold_window'),
   );
 
+  $form['#submit'][] = 'contact_settings_form_submit';
   return system_settings_form($form);
+}
+
+/**
+ * Contact settings form submit handler.
+ *
+ * @see contact_settings_form()
+ */
+function contact_settings_form_submit($form, &$form_state) {
+  // Update user permissions for each role.
+  foreach ($form_state['values']['permissions']['roles'] as $role_name => $role) {
+    user_role_change_permissions($role->name, $form_state['values']['permissions']['checkboxes'][$role->name]);
+  }
+
+  // Remove permissions from default #config store (contact.settings).
+  unset($form_state['values']['permissions']);
+}
+
+/**
+ * Builds a matrix of contact permissions.
+ *
+ * @see node_type_form_permissions()
+ */
+function contact_form_permissions() {
+  // Retrieve role names for columns.
+  $roles = user_roles(FALSE, NULL, TRUE);
+  $admin_role = config_get('system.core', 'user_admin_role');
+
+  // Note that in contact_theme(), the 'contact_form_permissions' theme callback
+  // reuses theme_user_admin_permissions(), to make it identical to the user
+  // module permissions page.
+  $form['#theme'] = array('contact_form_permissions');
+
+  // Wrap the table in a form element to make margins match other form elements.
+  $form['#theme_wrappers'] = array('form_element');
+
+  $form['roles'] = array(
+    '#type' => 'value',
+    '#value' => $roles,
+  );
+
+  // Retrieve contact related permissions.
+  $permissions = contact_permission();
+
+  // Render role/permission overview:
+  $options = array();
+  $status = array();
+  foreach ($permissions as $perm => $perm_item) {
+    // Fill in default values for the permission.
+    $perm_item += array(
+      'description' => '',
+      'restrict access' => FALSE,
+      'warning' => !empty($perm_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
+    );
+    $options[$perm] = '';
+    $form['permission'][$perm] = array(
+      '#type' => 'item',
+      '#markup' => $perm_item['title'],
+      '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
+    );
+    foreach ($roles as $role_name => $role) {
+      // Builds arrays for checked boxes for each role. Always select the Admin
+      // role on new forms.
+      if (in_array($perm, $role->permissions) || ($role->name == $admin_role)) {
+        $status[$role_name][] = $perm;
+      }
+    }
+  }
+
+  // Have to build checkboxes here after checkbox arrays are built.
+  foreach ($roles as $role_name => $role) {
+    $form['checkboxes'][$role_name] = array(
+      '#type' => 'checkboxes',
+      '#options' => $options,
+      '#default_value' => isset($status[$role_name]) ? $status[$role_name] : array(),
+      '#attributes' => array('class' => array('role-' . $role_name)),
+    );
+    $form['role_names'][$role_name] = array(
+      '#markup' => check_plain($role->label),
+      '#tree' => TRUE,
+    );
+  }
+
+  $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
+
+  return $form;
 }
 
 /**

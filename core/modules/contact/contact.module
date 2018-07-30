@@ -15,6 +15,10 @@ function contact_theme() {
       'render element' => 'element',
       'file' => 'contact.theme.inc',
     ),
+    'contact_form_permissions' => array(
+      'render element' => 'form',
+      'function' => 'theme_user_admin_permissions',
+    ),
   );
 }
 
@@ -25,6 +29,7 @@ function contact_permission() {
   return array(
     'administer contact forms' => array(
       'title' => t('Administer contact forms and contact form settings'),
+      'restrict access' => TRUE
     ),
     'access site-wide contact form' => array(
       'title' => t('Use the site-wide contact form'),
