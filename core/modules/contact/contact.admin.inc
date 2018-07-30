@@ -101,8 +101,9 @@ function contact_category_list($form, $form_state) {
     $form['categories'][$cid]['name'] = array(
       '#markup' => check_plain($cat['category']),
     );
+    $recipients = explode(',', check_plain($cat['recipients']));
     $form['categories'][$cid]['recipients'] = array(
-      '#markup' => check_plain($cat['recipients']),
+      '#markup' => theme('item_list', array('items' => $recipients)),
     );
     $form['categories'][$cid]['default'] = array(
       '#markup' => ($cid == $default_category) ? t('Yes') : t('No'),
