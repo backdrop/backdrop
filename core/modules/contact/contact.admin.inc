@@ -276,11 +276,17 @@ function contact_category_edit_form_validate($form, &$form_state) {
   $recipients = array_filter(array_map('trim', $recipients));
 
   // Check recipients are valid email.
+  $invalid_recipients = array();
   foreach ($recipients as &$recipient) {
     if (!valid_email_address($recipient)) {
-      form_set_error('recipients', t('%recipient is an invalid e-mail address.', array('%recipient' => $recipient)));
+      $invalid_recipients[] = $recipient;
     }
   }
+  if (!empty($invalid_recipients)) {
+    $message = format_plural(sizeof($invalid_recipients), '%recipient is an invalid e-mail address.', 'The following email addresses are invalid: %recipient.', array('%recipient' => implode(', ', $invalid_recipients)));
+    form_set_error('recipients', $message);
+  }
+
   // Force multiple addresses to be comma separated.
   $form_state['values']['recipients'] = implode(',', $recipients);
   // Store $config_data in $form_state for use in form_submit().
@@ -345,8 +351,8 @@ function contact_category_edit_form_submit($form, &$form_state) {
   $config->setData($config_data);
   $config->save();
 
-  backdrop_set_message(t('Category %category has been saved.', array('%category' => $form_state['values']['category'])));
-  watchdog('contact', 'Category %category has been saved.', array('%category' => $form_state['values']['category']), WATCHDOG_NOTICE, l(t('Configure'), 'admin/structure/contact/configure/' . $form_state['values']['cid']));
+  backdrop_set_message(t('Contact form category %category has been saved.', array('%category' => $form_state['values']['category'])));
+  watchdog('contact', 'Contact form category %category has been saved.', array('%category' => $form_state['values']['category']), WATCHDOG_NOTICE, l(t('Configure'), 'admin/structure/contact/configure/' . $form_state['values']['cid']));
   $form_state['redirect'] = 'admin/structure/contact';
 }
 
@@ -407,8 +413,8 @@ function contact_category_delete_form_submit($form, &$form_state) {
   $config->setData($config_data);
   $config->save();
 
-  backdrop_set_message(t('Category %category has been deleted.', array('%category' => $contact['category'])));
-  watchdog('contact', 'Category %category has been deleted.', array('%category' => $contact['category']), WATCHDOG_NOTICE);
+  backdrop_set_message(t('Contact form category %category has been deleted.', array('%category' => $contact['category'])));
+  watchdog('contact', 'Contact form category %category has been deleted.', array('%category' => $contact['category']), WATCHDOG_NOTICE);
 
   $form_state['redirect'] = 'admin/structure/contact';
 }
