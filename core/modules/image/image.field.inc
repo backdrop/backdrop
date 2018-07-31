@@ -87,6 +87,8 @@ function image_field_instance_settings_form($field, $instance) {
 
   // Add maximum and minimum resolution settings.
   $max_dimensions = explode('x', $settings['max_dimensions']) + array('', '');
+  if ($max_dimensions[0] === 0) {$max_dimensions[0] = NULL;}
+  if ($max_dimensions[1] === 0) {$max_dimensions[1] = NULL;}
   $form['max_dimensions'] = array(
     '#type' => 'item',
     '#title' => t('Maximum image dimensions'),
@@ -94,7 +96,9 @@ function image_field_instance_settings_form($field, $instance) {
     '#weight' => 4.1,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The maximum allowed image dimensions expressed as WIDTHxHEIGHT. Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
+    '#description' => t('The maximum allowed image dimensions expressed as WIDTHxHEIGHT. Leave blank or 0 for no restriction.
+     <br> If a larger image is uploaded, it will be resized to reflect the given width and height. 
+     <br>Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
   );
   $form['max_dimensions']['x'] = array(
     '#type' => 'number',
@@ -200,13 +204,13 @@ function image_field_instance_settings_form($field, $instance) {
  * Element validate function for resolution fields.
  */
 function _image_field_resolution_validate($element, &$form_state) {
+  if (empty($element['x']['#value'])) {
+    $element['x']['#value'] = 0;
+  }
+  if (empty($element['y']['#value'])) {
+    $element['y']['#value'] = 0;
+  }
   if (!empty($element['x']['#value']) || !empty($element['y']['#value'])) {
-    foreach (array('x', 'y') as $dimension) {
-      if (!$element[$dimension]['#value']) {
-        form_error($element[$dimension], t('Both a height and width value must be specified in the !name field.', array('!name' => $element['#title'])));
-        return;
-      }
-    }
     form_set_value($element, $element['x']['#value'] . 'x' . $element['y']['#value'], $form_state);
   }
   else {
