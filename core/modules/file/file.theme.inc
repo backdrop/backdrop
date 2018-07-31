@@ -291,7 +291,10 @@ function theme_file_upload_help($variables) {
       $descriptions[] = t('Images must be larger than !min pixels.', array('!min' => '<strong>' . $min . '</strong>'));
     }
     elseif ($max) {
-      $descriptions[] = t('Images larger than !max pixels will be scaled down.', array('!max' => '<strong>' . $max . '</strong>'));
+      list($width, $height) = explode('x', $max);
+      if ($height === '0') {$descriptions[] = t('Images with width greater than !width pixels will be scaled down.', array('!width' => '<strong>' . $width . '</strong>'));}
+      else if ($width === '0') {$descriptions[] = t('Images with height greater than !height pixels will be scaled down.', array('!height' => '<strong>' . $height . '</strong>'));}
+      else {$descriptions[] = t('Images larger than !max pixels will be scaled down.', array('!max' => '<strong>' . $max . '</strong>'));}
     }
   }
   if (isset($upload_validators['file_validate_image_orientation'])) {
