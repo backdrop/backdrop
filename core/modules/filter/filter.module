@@ -110,7 +110,7 @@ function filter_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/config/content/formats/add'] = array(
-    'title' => 'Add text editor',
+    'title' => 'Add text format',
     'page callback' => 'filter_admin_format_page',
     'access arguments' => array('administer filters'),
     'type' => MENU_LOCAL_ACTION,
