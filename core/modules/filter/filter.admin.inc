@@ -107,7 +107,7 @@ function filter_admin_overview_submit($form, &$form_state) {
  */
 function filter_admin_format_page($format = NULL) {
   if (!isset($format->name)) {
-    backdrop_set_title(t('Add text editor'));
+    backdrop_set_title(t('Add text format'));
     $format = (object) array(
       'format' => NULL,
       'name' => '',
