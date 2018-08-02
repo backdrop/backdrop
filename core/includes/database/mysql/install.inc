@@ -9,7 +9,7 @@
  * Specifies installation tasks for MySQL and equivalent databases.
  */
 // @codingStandardsIgnoreStart
-// @TODO: Make all classes CamelCase and class methods lowerComelCase in 2.x.
+// @TODO: Make all classes CamelCase and class methods lowerCamelCase in 2.x.
 class DatabaseTasks_mysql extends DatabaseTasks {
 // @codingStandardsIgnoreEnd  
   /**
