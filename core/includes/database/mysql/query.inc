@@ -1,18 +1,21 @@
 <?php
-
-/**
- * @addtogroup database
- * @{
- */
-
 /**
  * @file
  * Query code for MySQL embedded database engine.
  */
 
-
+/**
+ * @addtogroup database
+ * @{
+ */
+// @codingStandardsIgnoreStart
+// @TODO: Make all classes CamelCase and class methods lowerCamelCase in 2.x.
 class InsertQuery_mysql extends InsertQuery {
+  // @codingStandardsIgnoreEnd
 
+  /**
+   * Execute a sql query.
+   */
   public function execute() {
     if (!$this->preExecute()) {
       return NULL;
@@ -41,6 +44,9 @@ class InsertQuery_mysql extends InsertQuery {
     return $last_insert_id;
   }
 
+  /**
+   * Convert the query to a string.
+   */
   public function __toString() {
     // Create a sanitized comment string to prepend to the query.
     $comments = $this->connection->makeComment($this->comments);
@@ -63,8 +69,8 @@ class InsertQuery_mysql extends InsertQuery {
       foreach ($this->insertValues as $insert_values) {
         $placeholders = array();
 
-        // Default fields aren't really placeholders, but this is the most convenient
-        // way to handle them.
+        // Default fields aren't really placeholders, but this is the most
+        // convenientway to handle them.
         $placeholders = array_pad($placeholders, count($this->defaultFields), 'default');
 
         $new_placeholder = $max_placeholder + count($insert_values);
@@ -76,7 +82,8 @@ class InsertQuery_mysql extends InsertQuery {
       }
     }
     else {
-      // If there are no values, then this is a default-only query. We still need to handle that.
+      // If there are no values, then this is a default-only query. We still
+      // need to handle that.
       $placeholders = array_fill(0, count($this->defaultFields), 'default');
       $values[] = '(' . implode(', ', $placeholders) . ')';
     }
@@ -87,7 +94,11 @@ class InsertQuery_mysql extends InsertQuery {
   }
 }
 
-class TruncateQuery_mysql extends TruncateQuery { }
+// @codingStandardsIgnoreStart
+// @TODO: Make all classes CamelCase and class methods lowerCamelCase in 2.x.
+class TruncateQuery_mysql extends TruncateQuery {
+  // @codingStandardsIgnoreEnd
+}
 
 /**
  * @} End of "addtogroup database".
