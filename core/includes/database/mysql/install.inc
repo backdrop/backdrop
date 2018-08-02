@@ -8,7 +8,10 @@
 /**
  * Specifies installation tasks for MySQL and equivalent databases.
  */
+// @codingStandardsIgnoreStart
+// @TODO: Make all classes CamelCase and class methods lowerComelCase in 2.x.
 class DatabaseTasks_mysql extends DatabaseTasks {
+// @codingStandardsIgnoreEnd  
   /**
    * The PDO driver name for MySQL and equivalent databases.
    *
@@ -44,4 +47,3 @@ class DatabaseTasks_mysql extends DatabaseTasks {
     return '5.0.15';
   }
 }
-
