@@ -58,6 +58,9 @@ Backdrop.tableSelect = function () {
     // Keep track of the last checked checkbox.
     lastChecked = e.target;
   });
+
+  // Explicitly update the select-all checkbox at page load time.
+  updateSelectAll((checkboxes.length == $(checkboxes).filter(':checked').length));
 };
 
 Backdrop.tableSelectRange = function (from, to, state) {
