@@ -184,7 +184,7 @@ function update_update_1000() {
   $config->set('update_max_attempts', update_variable_get('update_max_fetch_attempts', 2));
   $config->set('update_timeout', update_variable_get('update_max_fetch_time', 5));
   $config->set('update_emails', update_variable_get('update_notify_emails', array()));
-  $config->set('update_threshold', update_variable_get('update_notification_threshold', 0));
+  $config->set('update_threshold', update_variable_get('update_notification_threshold', 'all'));
   $config->set('update_projects', update_variable_get('update_advanced_project_settings', array()));
   $config->save();
 
@@ -224,6 +224,17 @@ function update_update_1003() {
   $config = config('update.settings');
   $config->clear('update_xml_map');
   $config->clear('update_system_info');
+  $config->save();
+}
+
+/**
+ * Fix wrong default value for update_threshold setting.
+ */
+function update_update_1004() {
+  $config = config('update.settings');
+  if ($config->get('update_threshold') === 0) {
+    $config->set('update_threshold', 'all');
+  }
   $config->save();
 }
 
