@@ -60,9 +60,6 @@ Backdrop.behaviors.color = {
             var input = $('#edit-palette-' + fieldName);
             if (input.val() && input.val() != colors[fieldName]) {
               input.val(colors[fieldName]);
-              if (!Backdrop.featureDetect.inputTypeColor()) {
-                input.spectrum({color: colors[fieldName]});
-              }
             }
           }
         }
@@ -119,14 +116,6 @@ Backdrop.behaviors.color = {
       });
     }
 
-    /**
-     * Set Spectrum on elements when color inputs are not supported.
-     */
-    function getSpectrumSettings(color) {
-      return {
-        color: color
-      };
-    }
   }
 };
 

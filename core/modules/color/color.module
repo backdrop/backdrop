@@ -83,10 +83,6 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
         'data-color-preview-token' => backdrop_get_token('color_token'),
       ),
       '#attached' => array(
-        // Add Farbtastic color picker.
-        'library' => array(
-          array('system', 'spectrum'),
-        ),
         // Add custom CSS.
         'css' => array(
           $base . '/css/color.admin.css' => array(),
@@ -115,13 +111,6 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
           '#value_callback' => 'color_palette_color_value',
           '#default_value' => $value,
           '#size' => 8,
-          // These configure the polyfill for color inputs in Internet Explorer.
-          '#attributes' => array(
-            'data-preferred-format' => 'hex',
-            'data-show-input' => 'true',
-            'data-clickout-fires-change' => 'true',
-            'data-show-initial' => 'true',
-          ),
         );
       }
     }

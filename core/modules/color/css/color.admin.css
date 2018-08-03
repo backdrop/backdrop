@@ -71,25 +71,6 @@
   padding: 0;
 }
 
-/* Styles for Spectrum when used on Internet Explorer 11 */
-#color_scheme_form .sp-replacer {
-  border: solid 2px #d0d0d0;
-  border-radius: 100%;
-  padding: 0;
-}
-
-#color_scheme_form .sp-preview {
-  border-radius: 100%;
-  border: none;
-  width: 35px;
-  height: 35px;
-  margin: 0;
-}
-
-#color_scheme_form .sp-dd {
-  display: none;
-}
-
 /* Preview */
 .color-preview {
   display: block;
