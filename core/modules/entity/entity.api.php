@@ -20,6 +20,8 @@
  *   An array whose keys are entity type names and whose values identify
  *   properties of those types that the system needs to know about:
  *   - label: The human-readable name of the type.
+ *   - entity class: A class that the controller will use for instantiating 
+ *     entities. Must extend the Entity class or implement EntityInterface.
  *   - controller class: The name of the class that is used to load the objects.
  *     The class has to implement the EntityControllerInterface interface.
  *     Leave blank to use the DefaultEntityController implementation.
@@ -114,6 +116,7 @@ function hook_entity_info() {
     'node' => array(
       'label' => t('Node'),
       'controller class' => 'NodeController',
+      'entity class' => 'Node',
       'base table' => 'node',
       'revision table' => 'node_revision',
       'fieldable' => TRUE,
