@@ -105,26 +105,26 @@ input#edit-filters-filter-html-settings-allowed-html {
 [dir="rtl"] .editor-image-toggle.last {
   border-left: none;
 }
-.image-form-right .form-item {
+.editor-image-fields .form-item {
   margin: 0 0 1em;
 }
-.image-form-right input.form-text {
+.editor-image-fields input.form-text {
   padding: 5px;
 }
-.image-form-right input.form-number {
+.editor-image-fields input.form-number {
   padding: 5px;
 }
-.image-form-right .form-item .description {
+.editor-image-fields .form-item .description {
   font-size: 0.85rem;
 }
-.image-form-right .form-item {
+.editor-image-fields .form-item {
   margin-top: 0;
 }
 .form-item label.editor-image-toggle {
   display: inline-block !important;
   padding-bottom: 10px;
 }
-.image-library-choose-file p {
+.image-library-filename {
   margin: 0;
   max-width: 125px;
   max-height: 18px;
@@ -183,12 +183,12 @@ input#edit-filters-filter-html-settings-allowed-html {
   display: flex;
   flex-direction: row;
 }
-.image-form-right {
+.editor-image-fields {
   width:350px;
   flex-grow: 0;
   padding-top: 0;
 }
-.image-form-left {
+.editor-image-library {
   padding-right: 20px;
   min-width: 525px;
   flex-grow: 1;
@@ -198,17 +198,17 @@ input#edit-filters-filter-html-settings-allowed-html {
     flex-direction: column;
     justify-content: center;
   }
-  .image-form-right {
+  .editor-image-fields {
     max-width: 800px;
     padding-top: 30px;
     align-self: center;
   }
 }
+.editor-image-library .form-item label {
+  margin: 0;
+}
 .form-item-image-directory {
   display: none;
-}
-.image-form-left .form-item label {
-  margin: 0;
 }
 .view-image-library .view-header p {
   margin: 0;
