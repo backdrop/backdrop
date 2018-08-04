@@ -23,7 +23,7 @@ class UserRoleLayoutAccess extends LayoutAccess {
     if (empty($roles)) {
       return t('User can have any role');
     }
-    return format_plural(count($roles), 'User has the role @role', 'User has one of the following roles: @role', array('@role' => implode(', ', $roles)));
+    return format_plural(count($roles), 'User has the role %roles', 'User has any of the following roles: %roles', array('%roles' => implode(', ', $roles)));
   }
 
   /**
