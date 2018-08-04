@@ -194,9 +194,13 @@ function contact_category_edit_form($form, &$form_state, array $category = array
   $form['recipients'] = array(
     '#type' => 'textarea',
     '#title' => t('Recipients'),
-    '#default_value' => $category['recipients'],
-    '#description' => t("Example: 'webmaster@example.com' or 'sales@example.com,support@example.com' . To specify multiple recipients, separate each e-mail address with a comma."),
+    // Recipients are stored comma-separated, but display with new lines for
+    // better human readability.
+    '#default_value' => implode("\n", explode(',', $category['recipients'])),
+    '#description' => t("To specify multiple recipients, separate each e-mail address with a new line, comma, semicolon or space."),
+    '#placeholder' => t("webmaster@example.com\nsales@example.com"),
     '#required' => TRUE,
+    '#rows' => max(5, sizeof(explode(',', $category['recipients'])) + 2),
   );
   $form['reply'] = array(
     '#type' => 'textarea',
@@ -237,9 +241,6 @@ function contact_category_edit_form($form, &$form_state, array $category = array
  * @see contact_category_edit_form_submit()
  */
 function contact_category_edit_form_validate($form, &$form_state) {
-  // Validate and each e-mail recipient.
-  $recipients = explode(',', $form_state['values']['recipients']);
-
   // When creating a new contact form, or renaming the category on an existing
   // contact form, make sure that the given category is unique.
   $category = $form_state['values']['category'];
@@ -258,13 +259,18 @@ function contact_category_edit_form_validate($form, &$form_state) {
     }
   }
 
+  // Get addresses separated by comma, space, line break or semicolon.
+  $recipients = preg_split("/( |,|;|\n)/", $form_state['values']['recipients']);
+  // Cleanup addresses list.
+  $recipients = array_filter(array_map('trim', $recipients));
+
   // Check recipients are valid email.
   foreach ($recipients as &$recipient) {
-    $recipient = trim($recipient);
     if (!valid_email_address($recipient)) {
       form_set_error('recipients', t('%recipient is an invalid e-mail address.', array('%recipient' => $recipient)));
     }
   }
+  // Force multiple addresses to be comma separated.
   $form_state['values']['recipients'] = implode(',', $recipients);
   // Store $config_data in $form_state for use in form_submit().
   $form_state['categories_data'] = $config_data;
