@@ -143,17 +143,17 @@ Backdrop.behaviors.editorImageDialog = {
 
     // Initialise styles of Dialog.
     // Hide the left-hand (library) part of the dialog form.
-    $(".image-form-left").css({"display":"none"});
+    $(".editor-image-library").css({"display":"none"});
     $(".editor-dialog").removeClass("editor-dialog-with-library");
     // Set the class for the left-hand part.
-    $(".image-form-right").addClass("image-form-right-full");
+    $(".editor-image-fields").addClass("editor-image-fields-full");
 
     $newToggles.click(function(e) {
       var $link = $(e.target);
       if ($link.is('.editor-image-toggle') === false) {
         return;
       }
-      // find the first ancestor of link
+      // Find the first ancestor of link.
       var $currentItem = $link.closest('[data-editor-image-toggle]');
       var $allItems = $('[data-editor-image-toggle]');
       var offset = $currentItem.find('.editor-image-toggle').index($link);
@@ -189,11 +189,11 @@ Backdrop.behaviors.editorImageDialog = {
       var $display_state = $(".form-item-image-library-src").css("display");
       if ($display_state === 'none') {
         // Hide the library part of the dialog form.
-        $(".image-form-left").css({"display":"none"});
+        $(".editor-image-library").css({"display":"none"});
         $(".form-item-image-directory").css({"display":"none"});
         $(".editor-dialog").removeClass("editor-dialog-with-library");
         // Set the class for the dialog part.
-        $(".image-form-right").addClass("image-form-right-full");
+        $(".editor-image-fields").addClass("editor-image-fields-full");
       }
       else {
         // Toggle state is set to show 'select an image'
@@ -207,8 +207,8 @@ Backdrop.behaviors.editorImageDialog = {
           $view_image_library = $(".library-view").attr('data-editor-image-library-view');
           $view_placeholder.replaceWith($view_image_library);
           // Display the library view.
-          $(".image-form-right").removeClass("image-form-right-full");
-          $(".image-form-left").css({"display":"block"});
+          $(".editor-image-fields").removeClass("editor-image-fields-full");
+          $(".editor-image-library").css({"display":"block"});
           $(".form-item-image-directory").css({"display":"block"});
           $(".library-view").css({"display":"block"});
           var $library_base_url = $(".form-item-image-library-src").attr('data-editor-image-library-base-url');
