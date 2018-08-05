@@ -456,6 +456,9 @@ function node_form_preview($form, &$form_state) {
   node_set_node_tempstore($node, $node_tempstore_id);
   if (isset($node->nid)) {
     $form_state['redirect'] = 'node/preview/' . $node->nid . '/' . $node_tempstore_id;
+    if (isset($_GET['destination'])) {
+      $_GET['destination'] = $form_state['redirect'];
+    }
   }
   else {
     $form_state['redirect'] = 'node/preview/' . $node->type . '/' . $node_tempstore_id;
