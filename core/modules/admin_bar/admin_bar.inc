@@ -32,7 +32,7 @@ function admin_bar_output($complete = FALSE) {
 
   // Rebuild the output.
   if (!isset($content)) {
-    // Retrieve enabled components to display and make them available for others.
+    // Retrieve enabled components to display and make them available.
     $components = $config->get('components');
     $content['#components'] = $components;
     $content['#complete'] = $complete;
@@ -121,9 +121,9 @@ function admin_bar_output($complete = FALSE) {
 }
 
 /**
- * Build the full administration bar tree from static and expanded dynamic items.
+ * Build full administration bar tree from static and expanded dynamic items.
  *
- * @param $menu_name
+ * @param string $menu_name
  *   The menu name to use as base for the tree.
  */
 function admin_bar_tree($menu_name) {
@@ -165,11 +165,11 @@ function admin_bar_tree($menu_name) {
 /**
  * Load menu link trees for router paths containing dynamic arguments.
  *
- * @param $expand_map
+ * @param array $expand_map
  *   An array containing menu router path placeholder expansion argument
  *   mappings.
  *
- * @return
+ * @return array
  *   An associative array whose keys are the parent paths of the menu router
  *   paths given in $expand_map as well as the parent paths of any child link
  *   deeper down the tree. The parent paths are used in admin_bar_merge_tree()
@@ -212,7 +212,7 @@ function admin_bar_tree_dynamic(array $expand_map) {
   $db_or = db_or();
   foreach ($plids as $path_plids) {
     $db_and = db_and();
-    // plids with value 0 may be ignored.
+    // The plids with value 0 may be ignored.
     foreach (array_filter($path_plids) as $column => $plid) {
       $db_and->condition($column, $plid);
     }
@@ -249,11 +249,11 @@ function admin_bar_tree_dynamic(array $expand_map) {
 /**
  * Walk through the entire menu tree and merge in expanded dynamic menu links.
  *
- * @param &$tree
+ * @param array $tree
  *   A menu tree structure as returned by menu_tree_all_data().
- * @param $tree_dynamic
+ * @param array $tree_dynamic
  *   A dynamic menu tree structure as returned by admin_bar_tree_dynamic().
- * @param $expand_map
+ * @param array $expand_map
  *   An array containing menu router path placeholder expansion argument
  *   mappings.
  *
@@ -364,9 +364,9 @@ function admin_bar_merge_tree(array &$tree, array $tree_dynamic, array $expand_m
 /**
  * Translate an expanded router item into a menu link suitable for rendering.
  *
- * @param $router_item
+ * @param string $router_item
  *   A menu router item.
- * @param $map
+ * @param array $map
  *   A path map with placeholders replaced.
  */
 function admin_bar_translate($router_item, $map) {
@@ -393,10 +393,12 @@ function admin_bar_translate($router_item, $map) {
 
     // @see _menu_tree_check_access()
     $key = (50000 + $router_item['weight']) . ' ' . $router_item['title'] . ' ' . $router_item['mlid'];
-    return array($key => array(
-      'link' => $router_item,
-      'below' => array(),
-    ));
+    return array(
+      $key => array(
+        'link' => $router_item,
+        'below' => array(),
+      ),
+    );
   }
 
   return array();
@@ -405,7 +407,7 @@ function admin_bar_translate($router_item, $map) {
 /**
  * Create the cartesian product of multiple varying sized argument arrays.
  *
- * @param $arguments
+ * @param array $arguments
  *   A two dimensional array of arguments.
  *
  * @see hook_admin_bar_map()
@@ -462,11 +464,11 @@ function admin_bar_expand_args($arguments) {
 /**
  * Build the administration bar as renderable menu links.
  *
- * @param $tree
+ * @param array $tree
  *   A data structure representing the administration bar tree as returned from
  *   menu_tree_all_data().
  *
- * @return
+ * @return array
  *   The complete administration bar, suitable for theme_admin_bar_links().
  *
  * @see theme_admin_bar_links()
@@ -476,7 +478,7 @@ function admin_bar_links_menu($tree) {
   $links = array();
   foreach ($tree as $data) {
     // Skip items that are inaccessible, invisible, or only appear in the
-    // breadcrumb
+    // breadcrumb.
     if (!$data['link']['access'] || $data['link']['hidden'] == 1 || $data['link']['type'] == MENU_VISIBLE_IN_BREADCRUMB) {
       continue;
     }
@@ -754,7 +756,7 @@ function admin_bar_theme_settings_submit($form, &$form_state) {
 /**
  * Flush all caches or a specific one.
  *
- * @param $name
+ * @param string $name
  *   (optional) Name of cache to flush.
  */
 function admin_bar_flush_cache($name = NULL) {
@@ -818,7 +820,9 @@ function system_admin_bar_cache_info() {
 }
 
 /**
- * Implements hook_admin_bar_cache_info() on behalf of Update module.
+ * Implements hook_admin_bar_cache_info().
+ *
+ * On behalf of the Update module.
  */
 function update_admin_bar_cache_info() {
   $caches['update'] = array(
@@ -831,7 +835,7 @@ function update_admin_bar_cache_info() {
 /**
  * Flush all caches or a specific one.
  *
- * @param $name
+ * @param string $name
  *   (optional) Name of cache to flush.
  *
  * @see system_admin_bar_cache_info()

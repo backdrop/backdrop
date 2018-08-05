@@ -17,7 +17,9 @@ function book_token_info() {
 }
 
 /**
- * Implements hook_tokens() on behalf of book.module.
+ * Implements hook_tokens().
+ *
+ * On behalf of book.module.
  */
 function book_tokens($type, $tokens, array $data = array(), array $options = array()) {
   $replacements = array();

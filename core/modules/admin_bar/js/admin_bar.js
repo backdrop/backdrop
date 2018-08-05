@@ -27,8 +27,10 @@ Backdrop.behaviors.adminBar = {
       return;
     }
     var $adminBar = $('#admin-bar');
-    // Client-side caching; if administration bar is not in the output, it is
-    // fetched from the server and cached in the browser.
+    /*
+     * Client-side caching; if administration bar is not in the output, it is
+     * fetched from the server and cached in the browser.
+     */
     if (!$adminBar.length && settings.admin_bar.hash) {
       Backdrop.adminBar.getCache(settings.admin_bar.hash, function (response) {
         if (typeof response == 'string' && response.length > 0) {
@@ -68,14 +70,18 @@ Backdrop.adminBar.getCache = function (hash, onSuccess) {
     }
     return;
   }
-  // Send an AJAX request for the admin bar content, only if we’re not already
-  // waiting on a response from a previous request.
+  /*
+   * Send an AJAX request for the admin bar content, only if we’re not already
+   * waiting on a response from a previous request.
+   */
   if (!Backdrop.adminBar.ajaxRequest) {
     Backdrop.adminBar.ajaxRequest = $.ajax({
       cache: true,
       type: 'GET',
-      dataType: 'text', // Prevent auto-evaluation of response.
-      global: false, // Do not trigger global AJAX events.
+      // Prevent auto-evaluation of response.
+      dataType: 'text',
+      // Do not trigger global AJAX events.
+      global: false,
       url: Backdrop.settings.admin_bar.basePath.replace(/admin_bar/, 'js/admin_bar/cache/' + hash),
       success: [function (response) {
         // Cache the response data in a variable.
@@ -137,8 +143,10 @@ Backdrop.adminBar.behaviors.adminBarMarginTop = function (context, settings) {
     $('html:not(.admin-bar)', context).addClass('admin-bar');
   }
 };
-// Don’t wait until the DOM is ready, run this immediately to prevent flickering
-// or jumping page content.
+/*
+ * Don’t wait until the DOM is ready, run this immediately to prevent flickering
+ * or jumping page content.
+ */
 Backdrop.adminBar.behaviors.adminBarMarginTop(document, Backdrop.settings);
 
 /**
@@ -149,9 +157,11 @@ Backdrop.adminBar.behaviors.positionFixed = function (context, settings, $adminB
     $adminBar.addClass('admin-bar-position-fixed');
     $adminBar.css('position', 'fixed');
 
-    // Set a data attribute to inform other parts of the page that we're
-    // offsetting the top margin, then trigger an offset change. See
-    // tableheader.js for an example of how this is utilized.
+    /*
+     * Set a data attribute to inform other parts of the page that we're
+     * offsetting the top margin, then trigger an offset change. See
+     * tableheader.js for an example of how this is utilized.
+     */
     var height = $adminBar.height();
     $adminBar.attr('data-offset-top', height);
     $(document).triggerHandler('offsettopchange');
@@ -218,7 +228,6 @@ Backdrop.adminBar.behaviors.collapseWidth = function (context, settings, $adminB
     $adminBar.trigger('afterResize');
   };
 
-
   adjustItems();
   // Adjust items when window is resized.
   Backdrop.optimizedResize.add(adjustItems);
@@ -236,14 +245,18 @@ Backdrop.adminBar.behaviors.hover = function (context, settings, $adminBar) {
   $adminBar.on('mouseenter', 'li.expandable', expandChild);
   $adminBar.on('mouseleave', 'li.expandable', closeChild);
 
-  // On touch devices, the first click on an expandable link should not go to
-  // that page, but a second click will. Use touch start/end events to target
-  // these devices.
+  /*
+   * On touch devices, the first click on an expandable link should not go to
+   * that page, but a second click will. Use touch start/end events to target
+   * these devices.
+   */
   var touchElement;
   var needsExpanding;
   $adminBar.on('touchstart touchend click', 'li.expandable > a, li.expandable > span', function(e) {
-    // The touchstart event fires before all other events, including mouseenter,
-    // allowing us to check the expanded state consistently across devices.
+    /*
+     * The touchstart event fires before all other events, including mouseenter,
+     * allowing us to check the expanded state consistently across devices.
+     */
     if (e.type === 'touchstart') {
       touchElement = e.target;
       needsExpanding = $(this).siblings('ul').length > 0 && !$(this).siblings('ul').hasClass('expanded');

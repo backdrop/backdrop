@@ -63,7 +63,7 @@ function block_admin_list() {
  *   An associative array containing the structure of a portion of the form.
  * @param array $form_state
  *   A keyed array containing the current state of the form.
- * @param $delta
+ * @param string $delta
  *   Unique ID of the block within the context of $module.
  *
  * @see block_menu()
@@ -236,7 +236,7 @@ function block_add_block_form_submit($form, &$form_state) {
  *   An associative array containing the structure of a portion of the form.
  * @param array $form_state
  *   A keyed array containing the current state of the form.
- * @param $delta
+ * @param string $delta
  *   The unique ID of the block within the context of $module.
  *
  * @see block_menu()
@@ -274,8 +274,9 @@ function block_custom_block_delete_submit($form, &$form_state) {
  *   An associative array containing the structure of a portion of the form.
  * @param array $form_state
  *   A keyed array containing the current state of the form.
- * @param $delta
+ * @param string $delta
  *   Unique ID of the block within the context of $module.
+ *
  * @ingroup forms
  */
 function block_custom_block_translate_list($form, &$form_state, $delta) {
@@ -298,7 +299,9 @@ function block_custom_block_translate_list($form, &$form_state, $delta) {
 
     // Check if this is the source language.
     if (isset($custom_block['default_langcode']) && ($langcode == $custom_block['default_langcode'])) {
+      // @codingStandardsIgnoreStart
       $row[] = t($item->name) . ' ' . t('(source)');
+      // @codingStandardsIgnoreEnd
       $row[] = isset($custom_block['title']) ? check_plain($custom_block['title']) : t('N/A');
       $row[] = t('Source');
       $links['edit'] = array(
@@ -307,7 +310,9 @@ function block_custom_block_translate_list($form, &$form_state, $delta) {
       );
     }
     else {
+      // @codingStandardsIgnoreStart
       $row[] = t($item->name);
+      // @codingStandardsIgnoreEnd
       $row[] = isset($custom_block['translations'][$langcode]['title']) ? check_plain($custom_block['translations'][$langcode]['title']) : t('N/A');
       $row[] = isset($custom_block['translations'][$langcode]) ? t('Translated') : t('Not Translated');
       $links['edit'] = array(
@@ -360,9 +365,9 @@ function block_custom_block_translate_access($delta, $langcode = NULL) {
  *   An associative array containing the structure of a portion of the form.
  * @param array $form_state
  *   A keyed array containing the current state of the form.
- * @param  string $delta
+ * @param string $delta
  *   The unique machine name of that block.
- * @param  string $langcode
+ * @param string $langcode
  *   The language code value to translate to.
  *
  * @return array

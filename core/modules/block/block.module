@@ -174,13 +174,14 @@ function block_block_view($delta = '') {
 /**
  * Returns information from configuration about a user-created (custom) block.
  *
- * @param $delta
+ * @param string $delta
  *   ID of the block to get information for.
- * @param $langcode
+ * @param string $langcode
  *   The language code for loading the block.
  *
  * @return array
- *   Associative array of information stored in configuration for this block, or FALSE if it doesn't exist
+ *   Associative array of information stored in configuration for this block,
+ *   or FALSE if it doesn't exist
  *   Array keys:
  *   - delta: Block ID.
  *   - info: Block description.
@@ -228,11 +229,11 @@ function block_custom_block_load($delta, $langcode = LANGUAGE_NONE) {
 /**
  * Form constructor for the custom block form.
  *
- * @param $edit
+ * @param array $edit
  *   (optional) An associative array of information retrieved by
  *   block_custom_get_block() if an existing block is being edited, or an empty
  *   array otherwise. Defaults to array().
- * @param $stand_alone
+ * @param bool $stand_alone
  *   (optional) Set to FALSE if this form is used when displaying as part of a
  *   form within the Layout UI. The default value of TRUE should be used if this
  *   is a stand-alone form, such as when editing a block at it's own URL.
@@ -361,7 +362,8 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
  *   - delta: The machine name for the block
  *   - info: The administrative title for the block.
  *   - description: The administrative description for the block.
- *   - title: The block title (optional, since layouts have their own title field)
+ *   - title: The block title (optional, since layouts have their own title
+ *     field)
  *   - body: Associative array of body value and format. Array keys:
  *     - value: Block contents.
  *     - format: Filter ID of the filter format for the body.
@@ -372,7 +374,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
  *   Machine name of the block to save, comprised of lower-case letters,
  *   numbers, and underscores. Note: NULL values are still accepted when
  *   creating new nodes to maintain API contiguity.
- * @param $langcode
+ * @param string $langcode
  *   The language code for the block. If set, only the translation is saved.
  */
 function block_custom_block_save(array $edit, $delta = NULL, $langcode = NULL) {

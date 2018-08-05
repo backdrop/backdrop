@@ -254,7 +254,7 @@ function admin_bar_preprocess_page(&$variables) {
  * This is useful for modules that implement popup pages or other special
  * pages where the menu would be distracting or break the layout.
  *
- * @param $set
+ * @param bool $set
  *   Defaults to TRUE. If called before hook_footer(), the menu will not be
  *   displayed. If FALSE is passed, the suppression state is returned.
  */
@@ -290,7 +290,7 @@ function admin_bar_js() {
  * This should only be used for client-side cache hashes. Use cache_menu for
  * administration bar content.
  *
- * @param $cid
+ * @param string $cid
  *   The cache ID of the data to retrieve.
  */
 function admin_bar_cache_get($cid) {
@@ -312,7 +312,7 @@ function admin_bar_cache_get($cid) {
  * This should only be used for client-side cache hashes. Use cache_menu for
  * administration bar content.
  *
- * @param $cid
+ * @param string $cid
  *   The cache ID of the data to retrieve.
  */
 function admin_bar_cache_set($cid, $data) {
@@ -398,7 +398,8 @@ function admin_bar_admin_bar_replacements($complete) {
 /**
  * Return count of online authenticated users.
  *
- * @see user_block(), user.module
+ * In the user.module:
+ * @see user_block()
  */
 function admin_bar_get_user_count() {
   $interval   = REQUEST_TIME - 900;
@@ -414,13 +415,13 @@ function admin_bar_get_user_count() {
  * specified time. Can count either anonymous sessions or authenticated
  * sessions.
  *
- * @param $timestamp
+ * @param int $timestamp
  *   A Unix timestamp. Users who have been active since this time will be
  *   counted. The default is 0, which counts all existing sessions.
- * @param $anonymous
+ * @param bool $anonymous
  *   TRUE counts only anonymous users. FALSE counts only authenticated users.
  *
- * @return
+ * @return int
  *   The number of users with sessions.
  *
  * @todo There are mostly no anonymous sessions anymore. Split this into a
@@ -521,7 +522,7 @@ function admin_bar_translated_menu_link_alter(&$item, $map) {
     }
   }
 
-  // Don't waste cycles altering items that are not visible
+  // Don't waste cycles altering items that are not visible.
   if (!$item['access']) {
     return;
   }

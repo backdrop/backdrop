@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Database schema code for MySQL database servers.
@@ -10,9 +9,10 @@
  * @addtogroup schemaapi
  * @{
  */
-
+// @codingStandardsIgnoreStart
+// @TODO: Make all classes CamelCase and class methods lowerCamelCase in 2.x.
 class DatabaseSchema_mysql extends DatabaseSchema {
-
+// @codingStandardsIgnoreEnd
   /**
    * Maximum length of a table comment in MySQL.
    */
@@ -26,7 +26,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
   /**
    * Get information about the table and database name from the prefix.
    *
-   * @return
+   * @return array
    *   A keyed array with information about the database, table name and prefix.
    */
   protected function getPrefixInfo($table = 'default', $add_prefix = TRUE) {
@@ -47,12 +47,12 @@ class DatabaseSchema_mysql extends DatabaseSchema {
   }
 
   /**
-   * Build a condition to match a table name against a standard information_schema.
+   * Build a condition to match a table name against an information_schema.
    *
    * MySQL uses databases like schemas rather than catalogs so when we build
    * a condition to query the information_schema.tables, we set the default
-   * database as the schema unless specified otherwise, and exclude table_catalog
-   * from the condition criteria.
+   * database as the schema unless specified otherwise, and exclude
+   * table_catalog from the condition criteria.
    */
   protected function buildTableNameCondition($table_name, $operator = '=', $add_prefix = TRUE) {
     $table_info = $this->getPrefixInfo($table_name, $add_prefix);
@@ -66,11 +66,12 @@ class DatabaseSchema_mysql extends DatabaseSchema {
   /**
    * Generate SQL to create a new table from a Backdrop schema definition.
    *
-   * @param $name
+   * @param string $name
    *   The name of the table to create.
-   * @param $table
+   * @param array $table
    *   A Schema API table definition array.
-   * @return
+   *
+   * @return array
    *   An array of SQL statements to create the table.
    */
   protected function createTableSql($name, $table) {
@@ -124,14 +125,14 @@ class DatabaseSchema_mysql extends DatabaseSchema {
   }
 
   /**
-   * Create an SQL string for a field to be used in table creation or alteration.
+   * Create a SQL string for a field to be used in table creation or alteration.
    *
    * Before passing a field out of a schema definition into this function it has
    * to be processed by _db_process_field().
    *
-   * @param $name
+   * @param string $name
    *   Name of the field.
-   * @param $spec
+   * @param array $spec
    *   The field specification, as per the schema data structure format.
    *
    * @return string
@@ -140,7 +141,16 @@ class DatabaseSchema_mysql extends DatabaseSchema {
   protected function createFieldSql($name, $spec) {
     $sql = "`" . $name . "` " . $spec['mysql_type'];
 
-    if (in_array($spec['mysql_type'], array('VARCHAR', 'CHAR', 'TINYTEXT', 'MEDIUMTEXT', 'LONGTEXT', 'TEXT'))) {
+    $mysql_types = array(
+      'VARCHAR',
+      'CHAR',
+      'TINYTEXT',
+      'MEDIUMTEXT',
+      'LONGTEXT',
+      'TEXT',
+    );
+
+    if (in_array($spec['mysql_type'], $mysql_types)) {
       if (isset($spec['length'])) {
         $sql .= '(' . $spec['length'] . ')';
       }
@@ -195,7 +205,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
   /**
    * Set database-engine specific properties for a field.
    *
-   * @param $field
+   * @param array $field
    *   A field description array, as specified in the schema documentation.
    */
   protected function processField($field) {
@@ -214,6 +224,12 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     return $field;
   }
 
+  /**
+   * Get the feild type map.
+   *
+   * @return array
+   *   An addociative array of field types.
+   */
   public function getFieldTypeMap() {
     // Put :normal last so it gets preserved by array_flip. This makes
     // it much easier for modules (such as schema.module) to map
@@ -259,6 +275,18 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     return $map;
   }
 
+  /**
+   * Create a primary key column for a field.
+   *
+   * @param array $spec
+   *   The spec for the field.
+   *
+   * @return array
+   *   Array of unique kyes for a field any or all of 'PRIMARY KEY',
+   *   'UNIQUE KEY', and/or 'INDEX'.
+   *
+   * @see createKeysSqlHelper($fields)  
+   */
   protected function createKeysSql($spec) {
     $keys = array();
 
@@ -279,6 +307,15 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     return $keys;
   }
 
+  /**
+   * Create key sql.
+   *
+   * @param array $fields
+   *   An array of fields.
+   *
+   * @return string
+   *   Comma separated string of field columns.
+   */
   protected function createKeySql($fields) {
     $return = array();
     foreach ($fields as $field) {
@@ -292,6 +329,15 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     return implode(', ', $return);
   }
 
+  /**
+   * Create sql keys.
+   *
+   * @param array $fields
+   *   An array of fields.
+   *
+   * @return string
+   *   Comma separated string of column names.  
+   */
   protected function createKeysSqlHelper($fields) {
     $return = array();
     foreach ($fields as $field) {
@@ -305,6 +351,18 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     return implode(', ', $return);
   }
 
+  /**
+   * Rename a database table.
+   *
+   * @param string $table
+   *   The table to be renamed.
+   *
+   * @param string $new_name
+   *   The new name for the table.
+   *
+   * @return DatabaseStatementInterface|DatabaseStatementBase|
+   *   DatabaseStatementPrefetch|stdClass[]    
+   */
   public function renameTable($table, $new_name) {
     if (!$this->tableExists($table)) {
       throw new DatabaseSchemaObjectDoesNotExistException(t("Cannot rename @table to @table_new: table @table doesn't exist.", array('@table' => $table, '@table_new' => $new_name)));
@@ -317,6 +375,15 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     return $this->connection->query('ALTER TABLE {' . $table . '} RENAME TO `' . $info['table'] . '`');
   }
 
+  /**
+   * Drop a mysql table.
+   *
+   * @param string $table
+   *   The table to drop.
+   *
+   * @return bool
+   *   TRUE if the table existed, FALSE otherwise.  
+   */
   public function dropTable($table) {
     if (!$this->tableExists($table)) {
       return FALSE;
@@ -325,7 +392,18 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     $this->connection->query('DROP TABLE {' . $table . '}');
     return TRUE;
   }
-
+  /**
+   * Add a field to a table.
+   *
+   * @param string $table
+   *   The name of the table to be altered.
+   * @param string $field
+   *   The name of the column to be added to the table.
+   * @param array $spec
+   *   The specification for the field.
+   * @param array $keys_new
+   *   Optinal array of new keys.  
+   */
   public function addField($table, $field, $spec, $keys_new = array()) {
     if (!$this->tableExists($table)) {
       throw new DatabaseSchemaObjectDoesNotExistException(t("Cannot add field @table.@field: table doesn't exist.", array('@field' => $field, '@table' => $table)));
@@ -356,6 +434,17 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     }
   }
 
+  /**
+   * Drop a field from a database table.
+   *
+   * @param string $table
+   *   The database table to be altered.
+   * @param string $field
+   *   The field in the table to be removed.
+   *
+   * @return bool
+   *   TRUE if the field existed, FALSE otherwise.    
+   */
   public function dropField($table, $field) {
     if (!$this->fieldExists($table, $field)) {
       return FALSE;
@@ -365,6 +454,14 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     return TRUE;
   }
 
+  /**
+   * Set the MySQL default on a field.
+   *
+   * @param string $table
+   *   The table the field is in.
+   * @param string $field
+   *   The field to be operated on.
+   */
   public function fieldSetDefault($table, $field, $default) {
     if (!$this->fieldExists($table, $field)) {
       throw new DatabaseSchemaObjectDoesNotExistException(t("Cannot set default value of field @table.@field: field doesn't exist.", array('@table' => $table, '@field' => $field)));
@@ -380,6 +477,14 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     $this->connection->query('ALTER TABLE {' . $table . '} ALTER COLUMN `' . $field . '` SET DEFAULT ' . $default);
   }
 
+  /**
+   * Alter a field to have No Default.
+   *
+   * @param string $table
+   *   The table the field is in.
+   * @param string $field
+   *   The field to be operated on.  
+   */
   public function fieldSetNoDefault($table, $field) {
     if (!$this->fieldExists($table, $field)) {
       throw new DatabaseSchemaObjectDoesNotExistException(t("Cannot remove default value of field @table.@field: field doesn't exist.", array('@table' => $table, '@field' => $field)));
@@ -388,6 +493,18 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     $this->connection->query('ALTER TABLE {' . $table . '} ALTER COLUMN `' . $field . '` DROP DEFAULT');
   }
 
+
+  /**
+   * Determine if an index exists on a table.
+   *
+   * @param string $table
+   *   The table to check against.
+   * @param string $name
+   *   The name of the index to check for.
+   *
+   * @return bool
+   *   TRUE if index exists, FALSE otherwise.    
+   */
   public function indexExists($table, $name) {
     // Returns one row for each column in the index. Result is string or FALSE.
     // Details at http://dev.mysql.com/doc/refman/5.0/en/show-index.html
@@ -395,6 +512,14 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     return isset($row['Key_name']);
   }
 
+  /**
+   * Add a primary key to a table.
+   *
+   * @param string $table
+   *   The table to operate on.
+   * @param array $fields
+   *   The fields to be marked as PRIMARY.  
+   */
   public function addPrimaryKey($table, $fields) {
     if (!$this->tableExists($table)) {
       throw new DatabaseSchemaObjectDoesNotExistException(t("Cannot add primary key to table @table: table doesn't exist.", array('@table' => $table)));
@@ -406,6 +531,15 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     $this->connection->query('ALTER TABLE {' . $table . '} ADD PRIMARY KEY (' . $this->createKeySql($fields) . ')');
   }
 
+  /**
+   * Remove a PRMARY key markder from a field.
+   *
+   * @param string $table
+   *   The table to be operated on.
+   *
+   * @return bool
+   *   TRUE if a PRIMARY was removed, FALSE otherwise.  
+   */
   public function dropPrimaryKey($table) {
     if (!$this->indexExists($table, 'PRIMARY')) {
       return FALSE;
@@ -415,6 +549,16 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     return TRUE;
   }
 
+  /**
+   * Add a unique key to provided fields.
+   *
+   * @param string $table
+   *   The table to be operated on.
+   * @param string $name
+   *   The field to add as a unique key.
+   * @param array $fields
+   *   An arrya of fields to be checked.  
+   */
   public function addUniqueKey($table, $name, $fields) {
     if (!$this->tableExists($table)) {
       throw new DatabaseSchemaObjectDoesNotExistException(t("Cannot add unique key @name to table @table: table doesn't exist.", array('@table' => $table, '@name' => $name)));
@@ -426,6 +570,17 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     $this->connection->query('ALTER TABLE {' . $table . '} ADD UNIQUE KEY `' . $name . '` (' . $this->createKeySql($fields) . ')');
   }
 
+  /**
+   * Drop a unique key from a table.
+   *
+   * @param string $table
+   *   The table to be operated on.
+   * @param string $name
+   *   The name of th unique key to drop.
+   *
+   * @return bool
+   *   TRUE if found and dropped, FALSE otherwise.    
+   */
   public function dropUniqueKey($table, $name) {
     if (!$this->indexExists($table, $name)) {
       return FALSE;
@@ -435,6 +590,16 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     return TRUE;
   }
 
+  /**
+   * Add in index to a table.
+   *
+   * @param string $table
+   *   The table to be operated on.
+   * @param string $name
+   *   The name of the index to add.
+   * @param array $fields
+   *   The fields to be checked.    
+   */
   public function addIndex($table, $name, $fields) {
     if (!$this->tableExists($table)) {
       throw new DatabaseSchemaObjectDoesNotExistException(t("Cannot add index @name to table @table: table doesn't exist.", array('@table' => $table, '@name' => $name)));
@@ -446,6 +611,17 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     $this->connection->query('ALTER TABLE {' . $table . '} ADD INDEX `' . $name . '` (' . $this->createKeySql($fields) . ')');
   }
 
+  /**
+   * Drop an index from a table.
+   *
+   * @param string $table
+   *   The table to be operated on.
+   * @param string $name
+   *   The name of the index to add to the table.
+   *
+   * @retrun bool
+   *   TRUE if an index was added, FALSE otherwise.    
+   */
   public function dropIndex($table, $name) {
     if (!$this->indexExists($table, $name)) {
       return FALSE;
@@ -455,12 +631,32 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     return TRUE;
   }
 
+  /**
+   * Change a field.
+   *
+   * @param string $table
+   *   The table to operate on.
+   * @param string $field
+   *   The name of the field to be operated on.
+   * @param string $field_new
+   *   The new name for the field.
+   * @param array $spec
+   *   The specification for the field.
+   * @param array $keys_new
+   *   Optional array of keys for the new field.    
+   */
   public function changeField($table, $field, $field_new, $spec, $keys_new = array()) {
     if (!$this->fieldExists($table, $field)) {
       throw new DatabaseSchemaObjectDoesNotExistException(t("Cannot change the definition of field @table.@name: field doesn't exist.", array('@table' => $table, '@name' => $field)));
     }
     if (($field != $field_new) && $this->fieldExists($table, $field_new)) {
-      throw new DatabaseSchemaObjectExistsException(t("Cannot rename field @table.@name to @name_new: target field already exists.", array('@table' => $table, '@name' => $field, '@name_new' => $field_new)));
+      throw new DatabaseSchemaObjectExistsException(t("Cannot rename field @table.@name to @name_new: target field already exists.",
+        array(
+          '@table' => $table,
+          '@name' => $field,
+          '@name_new' => $field_new,
+        )
+      ));
     }
 
     $sql = 'ALTER TABLE {' . $table . '} CHANGE `' . $field . '` ' . $this->createFieldSql($field_new, $this->processField($spec));
@@ -470,8 +666,20 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     $this->connection->query($sql);
   }
 
+  /**
+   * Prepare a comment.
+   *
+   * @param string $comment
+   *   The comment to be added.
+   * @param int $length
+   *   Optional integer length for the comment.
+   *
+   * @return string
+   *   The string containing the prepared comment.    
+   */
   public function prepareComment($comment, $length = NULL) {
-    // Work around a bug in some versions of PDO, see http://bugs.php.net/bug.php?id=41125
+    // Work around a bug in some versions of PDO, see
+    // http://bugs.php.net/bug.php?id=41125
     $comment = str_replace("'", '’', $comment);
 
     // Truncate comment to maximum comment length.
@@ -501,6 +709,15 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     return preg_replace('/; InnoDB free:.*$/', '', $comment);
   }
 
+  /**
+   * Check if a table exists.
+   *
+   * @param string $table
+   *   The name of the table to be checked.
+   *
+   * @return bool
+   *   TRUE if the table exists, FALSE otherwise.  
+   */
   public function tableExists($table) {
     // The information_schema table is very slow to query under MySQL 5.0.
     // Instead, we try to select from the table in question.  If it fails,
@@ -518,6 +735,17 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     }
   }
 
+  /**
+   * Check if a field exists.
+   *
+   * @param string $table
+   *   The table that contains the field to be checked.
+   * @param string $column
+   *   The name of the field to be checked for.
+   *
+   * @return bool
+   *   TRUE if the field exists, FALSE otherwise.    
+   */
   public function fieldExists($table, $column) {
     // The information_schema table is very slow to query under MySQL 5.0.
     // Instead, we try to select from the table and field in question. If it

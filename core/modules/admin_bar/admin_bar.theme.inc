@@ -16,7 +16,7 @@ function theme_admin_bar_icon($variables) {
 /**
  * Render a themed list of links.
  *
- * @param $variables
+ * @param array $variables
  *   - elements: A renderable array of links using the following keys:
  *     - #attributes: Optional array of attributes for the list item, processed
  *       via backdrop_attributes().
@@ -71,8 +71,8 @@ function theme_admin_bar_links($variables) {
     $link = '';
     // Handle menu links.
     if (isset($elements[$path]['#href'])) {
-      // Strip destination query string from href attribute and apply a CSS class
-      // for our JavaScript behavior instead.
+      // Strip destination query string from href attribute and apply a CSS
+      // class for our JavaScript behavior instead.
       if (isset($elements[$path]['#options']['query']['destination']) && $elements[$path]['#options']['query']['destination'] == $destination) {
         unset($elements[$path]['#options']['query']['destination']);
         $elements[$path]['#options']['attributes']['class'][] = 'admin-bar-destination';

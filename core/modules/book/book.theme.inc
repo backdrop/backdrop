@@ -11,7 +11,7 @@
  * to the structured data but can also simply iterate over all elements and
  * render them (as in the default template).
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing the following key:
  *   - book_menus
  *
@@ -29,7 +29,7 @@ function template_preprocess_book_all_books_block(&$variables) {
 /**
  * Processes variables for book-navigation.tpl.php.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing the following key:
  *   - book_link
  *
@@ -72,7 +72,14 @@ function template_preprocess_book_navigation(&$variables) {
 
   $variables['has_links'] = FALSE;
   // Link variables to filter for values and set state of the flag variable.
-  $links = array('prev_url', 'prev_title', 'parent_url', 'parent_title', 'next_url', 'next_title');
+  $links = array(
+    'prev_url',
+    'prev_title',
+    'parent_url',
+    'parent_title',
+    'next_url',
+    'next_title',
+  );
   foreach ($links as $link) {
     if (isset($variables[$link])) {
       // Flag when there is a value.
@@ -84,4 +91,3 @@ function template_preprocess_book_navigation(&$variables) {
     }
   }
 }
-
