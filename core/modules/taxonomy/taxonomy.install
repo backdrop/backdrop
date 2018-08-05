@@ -305,7 +305,7 @@ function taxonomy_update_1004() {
 }
 
 /**
- * Drop the old taxonomy vocabulary table for new Backdrop installations.
+ * Drop the old taxonomy vocabulary table for existing Backdrop installations.
  */
 function taxonomy_update_1005() {
   if (db_table_exists('taxonomy_vocabulary')) {
