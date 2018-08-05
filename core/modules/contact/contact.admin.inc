@@ -176,6 +176,16 @@ function contact_category_edit_form($form, &$form_state, array $category = array
     '#type' => 'submit',
     '#value' => t('Save'),
   );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => 'admin/structure/contact',
+    '#options' => array(
+      'attributes' => array(
+        'class' => array('form-cancel')
+      ),
+    ),
+  );
 
   return $form;
 }
