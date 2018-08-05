@@ -214,4 +214,5 @@ function theme_filter_format_editor_image_form($variables) {
   $output .= '</div></div>';
 
   $output .= backdrop_render_children($form);
+  return $output;
 }
