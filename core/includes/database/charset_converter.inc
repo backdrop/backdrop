@@ -1,5 +1,6 @@
 <?php
 /**
+ * @file
  * Character set converter for database tables.
  *
  * This class is used to upgrade tables from "utf8" character set encoding to
@@ -21,6 +22,7 @@
  * @see system_utf8mb4_convert_form()
  * @see _system_utf8mb4_convert_batch()
  */
+
 class DatabaseCharsetConverter {
 
   /**
@@ -67,7 +69,7 @@ class DatabaseCharsetConverter {
   /**
    * Set the active connection for all operations.
    */
-  function setConnection(DatabaseConnection $connection) {
+  public function setConnection(DatabaseConnection $connection) {
     $this->connection = $connection;
   }
 
@@ -96,7 +98,6 @@ class DatabaseCharsetConverter {
           // Intentionally no translation here in the event this is used
           // outside a full Backdrop bootstrap (e.g. a command line tool).
           throw new Exception('The ' . $database_key . ':' . $target . ' MySQL database does not support UTF8MB4! Ensure that the conditions listed in settings.php related to innodb_large_prefix, the server version, and the MySQL driver version are met. See http://api.backdropcms.org/database-configuration for more information.');
-          continue;
         }
         // For each database:
         $this->setConnection($connection);
@@ -119,7 +120,7 @@ class DatabaseCharsetConverter {
   /**
    * Convert the database charset and collation, but not the tables within it.
    *
-   * @param string
+   * @param string $database_name
    *   Database name.
    * @param string $charset
    *   (Optional) The character set. Defaults to the constructor value.
@@ -212,9 +213,9 @@ class DatabaseCharsetConverter {
     $charset = $charset ?: $this->charset;
     $collation = $collation ?: $this->collation;
     foreach ($results as $row) {
-      // Skip fields that don't have collation, as they are probably int or similar.
-      // or if we are using that collation for this field already save a query
-      // or is not binary.
+      // Skip fields that don't have collation, as they are probably int or
+      // similar; or if we are using that collation for this field already save
+      // a query or is not binary.
       if (!$row->Collation || $row->Collation === $collation || strpos($row->Collation, '_bin') !== FALSE) {
         continue;
       }
@@ -231,12 +232,12 @@ class DatabaseCharsetConverter {
 
       $sql = "ALTER TABLE `$table_name`
               MODIFY `" . $row->Field . "` " .
-        $row->Type . " " .
-        "CHARACTER SET :charset COLLATE :collation " .
+        $row->Type .
+        " CHARACTER SET :charset COLLATE :collation " .
         ($row->Null == "YES" ? "" : "NOT NULL ") .
         $default . " " .
-        $row->Extra . " " .
-        "COMMENT :comment";
+        $row->Extra .
+        " COMMENT :comment";
 
       $params = array(
         ':charset' => $charset,
