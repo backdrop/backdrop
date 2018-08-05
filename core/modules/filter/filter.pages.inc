@@ -221,7 +221,8 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
 
   // Image library, very similar to Image URL
   global $base_url;
-  $thumbnail_style = $upload_settings['thumbnail_style'];
+  // Get current selected thumbnail style from Library View config.
+  $thumbnail_style = config_get('views.view.image_library','display.default.display_options.fields.uri.thumbnail_style');
   $form['image']['library_all'] = array(
     '#title' => t('Select from library'),
     '#type' => 'textfield',
