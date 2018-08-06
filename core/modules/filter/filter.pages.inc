@@ -304,18 +304,10 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#access' => !empty($format->filters['filter_image_caption']->status),
   );
 
+  // Incorporate the Library View in the editor dialog form.
   $form['library_view'] = array(
-    '#title' => t('Image library'),
-    '#type' => 'textfield',
-    '#default_value' => 'Image library',
-    '#wrapper_attributes' => array(
-      'class' => array('library-view'),
-      'data-editor-image-library-view' => views_embed_view('image_library'),
-    ),
-    '#parents' => array('attributes', 'text'),
-    '#weight' => 10,
+    '#markup' => '<div class="library-view" data-editor-library-view="true">' . views_embed_view('image_library') . '</div>',
   );
-
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
