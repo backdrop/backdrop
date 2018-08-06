@@ -600,7 +600,7 @@ function node_preview($node_tempstore_id) {
  */
 function node_preview_banner_form(array $form, array $form_state, EntityInterface $node, $node_tempstore_id) {
   // Always add the 'default' view mode.
-  $view_mode_options = array('default' => t('Full'));
+  $view_mode_options = array();
 
   // Get view mode options.
   $entity_info = entity_get_info('node');
@@ -610,12 +610,14 @@ function node_preview_banner_form(array $form, array $form_state, EntityInterfac
   }
 
   foreach ($view_modes as $key => $info) {
+    if (!in_array($key, array('rss', 'search_index', 'search_result'))) {
       $view_mode_options[$key] = $info['label'];
+    }
 
-      // In case this is the 'full' view mode, rename default.
-      if ($key == 'full') {
-        $view_mode_options[$key] = t('Default');
-      }
+    // In case this is the 'full' view mode, rename default.
+    if ($key == 'full') {
+      $view_mode_options[$key] = t('Default');
+    }
   }
 
   $path = 'node/add/' . $node->bundle();
