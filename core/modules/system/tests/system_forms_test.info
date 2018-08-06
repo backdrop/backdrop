@@ -4,4 +4,4 @@ description = Support module for testing forms.
 package = Testing
 version = VERSION
 backdrop = 1.x
-;hidden = TRUE
+hidden = TRUE
