@@ -2965,6 +2965,12 @@ function _backdrop_bootstrap_configuration() {
 
   // Check that the config directory is not empty.
   if (!defined('MAINTENANCE_MODE') && ($config_storage = config_get_config_storage('active'))) {
+    // If the active configuration is not setup, then the site has not been
+    // installed, and we should redirect the user to the installer.
+    if (!$config_storage->isInitialized()) {
+      include_once BACKDROP_ROOT . '/core/includes/install.inc';
+      install_goto('core/install.php');
+    }
     if (!($config_storage->exists('system.core') || $config_storage->exists('system.performance'))) {
       $directory = config_get_config_directory('active');
       throw new Exception("The configuration directory in settings.php is specified as '$directory', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.");
