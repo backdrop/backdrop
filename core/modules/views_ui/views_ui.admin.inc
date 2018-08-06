@@ -2290,10 +2290,27 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
 
 /**
  * Regenerate the current tab for AJAX updates.
+ *
+ * @param view $view
+ *   The view object to work on.
+ * @param array $output
+ *   The output array.
+ * @param string $display_id
+ *   The ID of the display in the $view that is being viewed.
  */
 function views_ui_regenerate_tab(&$view, &$output, $display_id) {
   if (!$view->set_display('default')) {
     return;
+  }
+
+  // Make sure $output is an array.
+  if (!is_array($output)) {
+    if ($output === NULL || $output === '') {
+      $output = array();
+    }
+    else {
+      $output = array($output);
+    }
   }
 
   // Regenerate the main display area.
