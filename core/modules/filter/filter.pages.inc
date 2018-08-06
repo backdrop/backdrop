@@ -340,8 +340,14 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
     $form_state['values']['fid'] = NULL;
     $form_state['values']['attributes']['data-file-id'] = NULL;
   }
+  // Do not modify an external URL.
+  $type = $form_state['values']['type'];
+  if ($type === LINK_EXTERNAL) {
+    $url = $form_state['values']['image_library']['src'];
+    $form_state['values']['attributes']['src'] = $url;
+  }
   // Convert any uploaded files from the FID values to the src attribute.
-  if (isset($form_state['values']['fid'])) {
+  elseif (isset($form_state['values']['fid'])) {
     $fid = $form_state['values']['fid'];
     if ($fid == 0) {
       $url = '/files' . $form_state['values']['image_library']['src'];
@@ -566,6 +572,7 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   // adding http:// or a prefixing slash if needed.
   if (module_exists('link') && $type = link_validate_url($value)) {
     $value = link_cleanup_url($value);
+    $form_state['values']['type'] = $type;
     if ($type === LINK_INTERNAL && strpos($value, '/') !== 0) {
       $value = '/' . $value;
     }
