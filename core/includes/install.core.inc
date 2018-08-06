@@ -296,8 +296,8 @@ function install_begin_request(&$install_state) {
   else {
     $task = NULL;
 
-    // Do not install over a configured settings.php.
-    if (!empty($GLOBALS['databases'])) {
+    // Do not install over a configured settings.php with a valid database.
+    if (!empty($GLOBALS['databases']) && Database::getConnection()) {
       throw new Exception(install_already_done_error());
     }
   }
