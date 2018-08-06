@@ -449,6 +449,172 @@ class PageEditTestCase extends BackdropWebTestCase {
 }
 
 /**
+ * Tests the node entity preview functionality.
+ */
+class PagePreviewTestCase extends BackdropWebTestCase {
+
+  function setUp() {
+    parent::setUp(array('taxonomy', 'node', 'email'));
+
+    $web_user = $this->backdropCreateUser(array('edit own page content', 'create page content'));
+    $this->backdropLogin($web_user);
+
+    // Add a vocabulary so we can test different view modes.
+    $vocabulary = new TaxonomyVocabulary(array(
+      'name' => $this->randomName(),
+      'description' => $this->randomName(),
+      'machine_name' => backdrop_strtolower($this->randomName()),
+      'help' => '',
+      'nodes' => array('page' => 'page'),
+    ));
+    debug($vocabulary);
+    taxonomy_vocabulary_save($vocabulary);
+
+    $this->vocabulary = $vocabulary;
+
+    // Add a term to the vocabulary.
+    $term = entity_create('taxonomy_term', array(
+      'name' => $this->randomName(),
+      'description' => $this->randomName(),
+      'format' => 1,//db_query_range('SELECT format FROM {filter_format}', 0, 1)->fetchField(),
+      'vocabulary' => $vocabulary->machine_name,
+    ));
+    debug($term);
+    taxonomy_term_save($term);
+
+    $this->term = $term;
+
+    // Create a field with settings to validate.
+    $this->field_email = array(
+      'field_name' => backdrop_strtolower($this->randomName()),
+      'type' => 'email',
+    );
+    field_create_field($this->field_email);
+    $this->email_instance = array(
+      'field_name' => $this->field_email['field_name'],
+      'entity_type' => 'node',
+      'bundle' => 'page',
+      'widget' => array(
+        'type' => 'email_default',
+      ),
+      'display' => array(
+        'full' => array(
+          'type' => 'email_mailto',
+        ),
+      ),
+    );
+    field_create_instance($this->email_instance);
+
+    // Set up a field and instance.
+    $this->field_name = backdrop_strtolower($this->randomName());
+    $this->field = array(
+      'field_name' => $this->field_name,
+      'type' => 'taxonomy_term_reference',
+      'settings' => array(
+        'allowed_values' => array(
+          array(
+            'vocabulary' => $this->vocabulary->machine_name,
+            'parent' => '0',
+          ),
+        ),
+      )
+    );
+
+    field_create_field($this->field);
+    $this->instance = array(
+      'field_name' => $this->field_name,
+      'entity_type' => 'node',
+      'bundle' => 'page',
+      'widget' => array(
+        'type' => 'options_select',
+      ),
+      // Hide on full display but render on teaser.
+      'display' => array(
+        'default' => array(
+          'type' => 'hidden',
+        ),
+        'teaser' => array(
+          'type' => 'taxonomy_term_reference_link',
+        ),
+      ),
+    );
+    field_create_instance($this->instance);
+  }
+
+  /**
+   * Checks the node preview functionality.
+   */
+  function testPagePreview() {
+    $langcode = LANGUAGE_NONE;
+    $title_key = "title";
+    $body_key = "body[$langcode][0][value]";
+    $term_key = "{$this->field_name}[$langcode]";
+    $email_key = "{$this->field_email['field_name']}[$langcode][0][email]";
+    debug($term_key);
+    debug($this->term->tid);
+
+    // Fill in node creation form and preview node.
+    $edit = array();
+    $edit[$title_key] = $this->randomName(8);
+    $edit[$body_key] = $this->randomName(16);
+    $edit[$term_key] = $this->term->tid;
+    $edit[$email_key] = 'email_key@example.com';
+    $this->backdropPost('node/add/page', $edit, t('Preview'));
+
+    // Check that the preview is displaying the title and body, but not term.
+    // $this->assertTitle(t('Preview | Backdrop'), 'Basic page title is preview.');
+    $this->assertText($edit[$title_key], 'Title displayed.');
+    $this->assertText($edit[$body_key], 'Body displayed.');
+    $this->assertText($edit[$email_key], 'Email displayed.');
+    $this->assertNoText($this->term->name, 'Term not displayed.');
+
+    // Change the view mode.
+    $teaser_edit = array();
+    $teaser_edit['view_mode'] = 'teaser';
+    $this->backdropPost(NULL, $teaser_edit, t('Switch'));
+
+    // Check that the preview is displaying the title, body, and term.
+    // $this->assertTitle(t('Preview | Backdrop'), 'Basic page title is preview.');
+    $this->assertText($edit[$title_key], 'Title displayed.');
+    $this->assertText($edit[$body_key], 'Body displayed.');
+    $this->assertNoText($edit[$email_key], 'Email not displayed.');
+    $this->assertText($this->term->name, 'Term displayed.');
+
+    // Return to the node edit page and check field values.
+    $this->clickLink('Back to content editing');
+
+    $this->assertFieldByName($title_key, $edit[$title_key], 'Title field displayed.');
+    $this->assertFieldByName($body_key, $edit[$body_key], 'Body field displayed.');
+    $this->assertFieldByName($term_key, $edit[$term_key], 'Term field displayed.');
+    $this->assertFieldByName($email_key, $edit[$email_key], 'Email field displayed.');
+
+    // Return to preview and save.
+    $this->backdropPost(NULL, $edit, t('Preview'));
+    $this->assertText($edit[$title_key], 'Title displayed.');
+    $this->assertText($edit[$body_key], 'Body displayed.');
+    $this->assertText($edit[$email_key], 'Email displayed.');
+    $this->assertNoText($this->term->name, 'Term not displayed.');
+
+    $this->backdropPost(NULL, array(), t('Save'));
+
+    $this->assertRaw(t('!post %title has been created.', array('!post' => 'Page', '%title' => $edit["title"])), 'Page created.');
+    $this->assertText($edit[$title_key], 'Title displayed.');
+    $this->assertText($edit[$body_key], 'Body displayed.');
+    $this->assertText($edit[$email_key], 'Email displayed.');
+    $this->assertNoText($this->term->name, 'Term not displayed.');
+
+    // Edit an existing node to check preview works.
+    $this->clickLink('Edit');
+    $this->backdropPost(NULL, $edit, t('Preview'));
+    $this->assertText($edit[$title_key], 'Title displayed.');
+    $this->assertText($edit[$body_key], 'Body displayed.');
+    $this->assertText($edit[$email_key], 'Email displayed.');
+    $this->assertNoText($this->term->name, 'Term not displayed.');
+  }
+
+}
+
+/**
  * Tests creating and saving a node.
  */
 class NodeCreationTestCase extends BackdropWebTestCase {
