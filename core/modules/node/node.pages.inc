@@ -454,14 +454,9 @@ function node_form_preview($form, &$form_state) {
   $node = node_form_submit_build_node($form, $form_state);
 
   node_set_node_tempstore($node, $node_tempstore_id);
-  if (isset($node->nid)) {
-    $form_state['redirect'] = 'node/preview/' . $node->nid . '/' . $node_tempstore_id;
-    if (isset($_GET['destination'])) {
-      $_GET['destination'] = $form_state['redirect'];
-    }
-  }
-  else {
-    $form_state['redirect'] = 'node/preview/' . $node->type . '/' . $node_tempstore_id;
+  $form_state['redirect'] = 'node/preview/' . $node->type . '/' . $node_tempstore_id;
+  if (isset($_GET['destination'])) {
+    $_GET['destination'] = $form_state['redirect'];
   }
   backdrop_set_message(t('This is a preview. All changes are stored temporarily. Click Save to make your changes permanent, or click "Back to content editing".'));
 }
@@ -538,8 +533,13 @@ function node_form_submit($form, &$form_state) {
  *
  * @see node_form_build_preview()
  */
-function node_preview($node_tempstore_id) {
-  $node = node_get_node_tempstore($node_tempstore_id);
+function node_preview($node_tempstore_id, $node_type) {
+  // The tempstore object may have expired or an invalid ID submitted. Use the 
+  // node object if available, otherwise return to the node edit page.
+  if (!$node = node_get_node_tempstore($node_tempstore_id)) {
+    backdrop_set_message(t('The preview ID is invalid or the stored preview has expired.'), 'error');
+    backdrop_goto('node/add/' . $node_type);
+  }
   
   // Set status to true so we don't get the 'unpublished' CSS.
   $node->status = TRUE;

@@ -1785,7 +1785,7 @@ function node_menu() {
       'title' => $type->name,
       'title callback' => 'check_plain',
       'page callback' => 'node_preview',
-      'page arguments' => array(3),
+      'page arguments' => array(3, $type_url_str),
       'access callback' => 'node_access',
       'access arguments' => array('create', $type->type),
       'description' => $type->description,
@@ -1793,16 +1793,6 @@ function node_menu() {
       'file' => 'node.pages.inc',
     );
   }
-  $items['node/preview/%node/%'] = array(
-    'title callback' => 'node_page_title',
-    'title arguments' => array(2),
-    'page callback' => 'node_preview',
-    'page arguments' => array(3),
-    'access callback' => 'node_access',
-    'access arguments' => array('view', 2),
-    'type' => MENU_CALLBACK,
-    'file' => 'node.pages.inc',
-  );
   $items['node/%node'] = array(
     'title callback' => 'node_page_title',
     'title arguments' => array(1),
@@ -3817,7 +3807,8 @@ function node_set_node_tempstore($item, $node_tempstore_id) {
     'uid' => $GLOBALS['user']->uid,
     'updated' => REQUEST_TIME,
   );
-  tempstore_set('node_tempstore', $node_tempstore_id, $item, 604800);
+  // Keep previews for 24 hours.
+  tempstore_set('node_tempstore', $node_tempstore_id, $item, REQUEST_TIME + 86400);
 }
 
 /**
@@ -3836,7 +3827,6 @@ function node_clear_node_tempstore($node_tempstore_id, $type = 'node') {
  * @return Node|false
  *   A fully-populated node entity, or FALSE if the node is not found.
  */
-//todo
 function node_tempstore_load($node_tempstore_id) {
   return node_get_node_tempstore($node_tempstore_id);
 }
