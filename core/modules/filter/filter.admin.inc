@@ -554,6 +554,7 @@ function filter_editor_image_upload_settings_form($format) {
       'data-editor-image-rotate' => 'orientate',
     ),
     '#states' => $show_if_image_uploads_enabled,
+    '#access' => function_exists('exif_read_data'),
   );
   
   if (!empty($options)) {
