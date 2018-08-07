@@ -57,13 +57,13 @@ class views_plugin_pager_full extends views_plugin_pager {
     $pager_text = $this->display->handler->get_pager_text();
     $form['items_per_page'] = array(
       '#title' => $pager_text['items per page title'],
-      '#type' => 'textfield',
+      '#type' => 'number',
       '#description' => $pager_text['items per page description'],
       '#default_value' => $this->options['items_per_page'],
     );
 
     $form['offset'] = array(
-      '#type' => 'textfield',
+      '#type' => 'number',
       '#title' => t('Offset'),
       '#description' => t('The number of items to skip. For example, if this field is 3, the first 3 items will be skipped and not displayed.'),
       '#default_value' => $this->options['offset'],
@@ -77,14 +77,14 @@ class views_plugin_pager_full extends views_plugin_pager {
     );
 
     $form['total_pages'] = array(
-      '#type' => 'textfield',
+      '#type' => 'number',
       '#title' => t('Number of pages'),
       '#description' => t('The total number of pages. Leave empty to show all pages.'),
       '#default_value' => $this->options['total_pages'],
     );
 
     $form['quantity'] = array(
-      '#type' => 'textfield',
+      '#type' => 'number', 
       '#title' => t('Number of pager links visible'),
       '#description' => t('Specify the number of links to pages to display in the pager.'),
       '#default_value' => $this->options['quantity'],
