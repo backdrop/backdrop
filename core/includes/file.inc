@@ -1842,7 +1842,6 @@ function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $mi
  *   A flag indicating that EXIF data should be checked and image rotated if necessary.
  */
 function file_validate_image_orientation( $file, $orientation) {
-  $errors = array();
   // Is orientation required and is PHP function available?
   if ($orientation && function_exists('exif_read_data')) {
     $file_exif = @exif_read_data(backdrop_realpath($file->uri));
@@ -1871,12 +1870,9 @@ function file_validate_image_orientation( $file, $orientation) {
         }
         backdrop_set_message(t('The image was rotated by %degrees degrees.', array('%degrees' => $degrees)));
       }
-      else {
-        $errors[] = t('The image did not require rotation');
-      }
     }
   }
-  return $errors;
+  return;
 }
 
 /**
