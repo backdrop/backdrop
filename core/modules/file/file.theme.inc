@@ -294,7 +294,9 @@ function theme_file_upload_help($variables) {
       $descriptions[] = t('Images larger than !max pixels will be scaled down.', array('!max' => '<strong>' . $max . '</strong>'));
     }
   }
-
+  if (isset($upload_validators['file_validate_image_orientation'])) {
+    $descriptions[] = t('If the need is indicated by EXIF data the image will be rotated appropriately.');
+  }
   return implode('<br />', $descriptions);
 }
 
