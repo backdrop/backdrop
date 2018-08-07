@@ -298,13 +298,6 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'data-has-caption'),
     '#access' => !empty($format->filters['filter_image_caption']->status),
   );
-  $form['orientate'] = array(
-    '#title' => t('Orientate if necessary'),
-    '#description' => t('If this is not checked, the image orientation will not be altered.'),
-    '#type' => 'checkbox',
-    '#default_value' => (isset($upload_settings['orientate']) ? $upload_settings['orientate'] : FALSE),
-    '#parents' => array('attributes', 'orientate'),
-  );
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
