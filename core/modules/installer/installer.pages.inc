@@ -265,7 +265,7 @@ function installer_browser_installation_select_versions_form($form, &$form_state
       }
       $releases_list[$version] = $release_title;
       if (isset($release['release_link'])) {
-        $releases_list[$version] .= ' (' . l('release notes', $release['release_link'], array('html' => TRUE, 'attributes' => array('target' => '_blank'))) . ')';
+        $releases_list[$version] .= ' (' . l(t('release notes'), $release['release_link'], array('html' => TRUE, 'attributes' => array('title' => t('Release notes for @project_title', array('@project_title' => $project['title'])), 'target' => '_blank'))) . ')';
       }
     }
 
