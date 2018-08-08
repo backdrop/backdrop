@@ -1807,8 +1807,8 @@ function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $mi
       // Check that it is smaller than the given dimensions.
       list($width, $height) = explode('x', $maximum_dimensions);
       if ($info['width'] > $width || $info['height'] > $height) {
-        if ($width == 0) {$width = NULL;}
-        if ($height == 0) {$height = NULL;}
+        $width = empty($width) ? NULL : $width;
+        $height = empty($height) ? NULL : $height;
         // Try to resize the image to fit the dimensions.
         if ($image = image_load($file->uri)) {
           image_scale($image, $width, $height);
