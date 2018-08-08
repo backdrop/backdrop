@@ -295,7 +295,7 @@ function theme_file_upload_help($variables) {
     }
   }
   if (isset($upload_validators['file_validate_image_orientation'])) {
-    $descriptions[] = t('If the need is indicated by EXIF data the image will be rotated appropriately.');
+    $descriptions[] = t('If the need is indicated by EXIF data, the image will be rotated appropriately.');
   }
   return implode('<br />', $descriptions);
 }
