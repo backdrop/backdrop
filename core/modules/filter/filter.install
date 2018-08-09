@@ -593,7 +593,7 @@ function filter_update_1002() {
               'ui_name' => '',
               'label' => 'Library header',
               'empty' => 0,
-              'content' => '<p>These images are available for selection.</p>\r\n',
+              'content' => '<h4>Image Library</h4><p>These images are available for selection.</p>',
               'format' => 'full_html',
               'tokenize' => 0,
             )
