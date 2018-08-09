@@ -174,9 +174,9 @@ input#edit-filters-filter-html-settings-allowed-html {
   border-radius: 3px;
 }
 
-.image-library-image-selected {
-  background-color: #cce8ff !important;
-  border: 1px solid #99d1ff !important;
+.image-library-choose-file.image-library-image-selected {
+  background-color: #cce8ff;
+  border: 1px solid #99d1ff;
 }
 
 .image-form-wrapper {
