@@ -42,7 +42,7 @@ class views_plugin_pager_some extends views_plugin_pager {
 
     $form['offset'] = array(
       '#type' => 'number',
-      '#attributes' => array('min' => 0),
+      '#min' => '0',
       '#title' => t('Offset'),
       '#description' => t('The number of items to skip. For example, if this field is 3, the first 3 items will be skipped and not displayed.'),
       '#default_value' => $this->options['offset'],
