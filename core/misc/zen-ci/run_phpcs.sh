@@ -12,4 +12,7 @@ cd $SITEPATH
 
 # Install and run backdrop/coder
 composer require backdrop/coder
-./vendor/bin/phpcs --standard=./vendor/backdrop/coder/coder_sniffer/Backdrop core/modules
+
+# Get the files that are changed and run phpcs on them.
+files=$(git diff --name-only 1.x)
+./vendor/bin/phpcs --standard=./vendor/backdrop/coder/coder_sniffer/Backdrop $files
