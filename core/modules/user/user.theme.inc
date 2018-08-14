@@ -153,7 +153,7 @@ function theme_user_permission_description($variables) {
     $description[] = $permission_item['description'];
   }
   if (!empty($permission_item['warning'])) {
-    $description[] = '<em class="permission-warning">' . $permission_item['warning'] . '</em>';
+    $description[] = '<span class="permission-warning warning">' . $permission_item['warning'] . '</span>';
   }
   if (!empty($description)) {
     return implode(' ', $description);
