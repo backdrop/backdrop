@@ -34,6 +34,8 @@
   background-repeat: no-repeat;
   background-size: 1.5em;
   background-color: #FCE400;
+  background-image: url(../../../misc/message-24-warning.png);
+  /* SVG override */
   background-image: linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg);
 }
 #user-admin-settings fieldset .fieldset-description {
