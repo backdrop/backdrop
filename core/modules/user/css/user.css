@@ -13,6 +13,29 @@
 #permissions tr.even .form-item {
   white-space: normal;
 }
+#permissions .description .permission-warning {
+  display: block;
+  position: relative;
+  box-sizing: border-box;
+  margin: 0.375rem 0;
+  padding: 0.9em 0.625em 1em 3.438em; /* LTR */
+  border-radius: 4px;
+  min-height: 3.2em;
+  overflow: hidden;
+}
+#permissions .description .permission-warning:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0; /* LTR */
+  width: 2.375em;
+  height: 100%;
+  background-position: center .625em;
+  background-repeat: no-repeat;
+  background-size: 1.5em;
+  background-color: #FCE400;
+  background-image: linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg);
+}
 #user-admin-settings fieldset .fieldset-description {
   font-size: 0.85em;
   padding-bottom: .5em;
