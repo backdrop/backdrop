@@ -78,6 +78,8 @@ function file_menu() {
     'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,
   );
+
+  // @deprecated. Remove in Backdrop 2.0.
   $items['file/progress'] = array(
     'page callback' => 'file_ajax_progress',
     'delivery callback' => 'backdrop_json_deliver',
@@ -392,6 +394,9 @@ function file_ajax_upload() {
  *
  * @param $key
  *   The unique key for this upload process.
+ *
+ * @since Backdrop 1.11: Deprecated. Upload progress is now handled client-side.
+ * @deprecated
  */
 function file_ajax_progress($key) {
   $progress = array(
@@ -422,15 +427,18 @@ function file_ajax_progress($key) {
 /**
  * Determines the preferred upload progress implementation.
  *
- * @return
- *   A string indicating which upload progress system is available. Either "apc"
- *   or "uploadprogress". If neither are available, returns FALSE.
+ * @return string
+ *   A string indicating which upload progress system is available. One of
+ *   "uploadprogress", "apc", or "client".
+ *
+ * @since Backdrop 1.11.0: Deprecated. Upload progress is handled client-side.
+ *   If uploadprogress and APC are unavailable, "client" will now always be
+ *   returned, as client-side uploading is always available.
+ * @deprecated
  */
 function file_progress_implementation() {
   static $implementation;
   if (!isset($implementation)) {
-    $implementation = FALSE;
-
     // We prefer the PECL extension uploadprogress because it supports multiple
     // simultaneous uploads. APC only supports one at a time.
     if (extension_loaded('uploadprogress')) {
@@ -438,6 +446,10 @@ function file_progress_implementation() {
     }
     elseif (extension_loaded('apc') && ini_get('apc.rfc1867')) {
       $implementation = 'apc';
+    }
+    // Client-side support is always available.
+    else {
+      $implementation = 'client';
     }
   }
   return $implementation;
@@ -533,7 +545,11 @@ function file_managed_file_process($element, &$form_state, $form) {
     '#value' => $fid,
   );
 
-  // Add progress bar support to the upload if possible.
+  // Legacy server-side progress bar support. If not available, client-side
+  // upload progress will be used instead. Client-side support does not require
+  // a hidden field nor does it do AJAX requests to check on the progress,
+  // so no [#ajax][progress][path] is necessary.
+  // @todo: Remove in Backdrop 2.0.
   if ($element['#progress_indicator'] == 'bar' && $implementation = file_progress_implementation()) {
     $upload_progress_key = mt_rand();
 
@@ -559,7 +575,9 @@ function file_managed_file_process($element, &$form_state, $form) {
     }
 
     // Add the upload progress callback.
-    $element['upload_button']['#ajax']['progress']['path'] = 'file/progress/' . $upload_progress_key;
+    if ($implementation !== 'client') {
+      $element['upload_button']['#ajax']['progress']['path'] = 'file/progress/' . $upload_progress_key;
+    }
   }
 
   // The file upload field itself.
