@@ -614,10 +614,13 @@ Backdrop.ajax.prototype.commands = {
       new_content[effect.showEffect](effect.showSpeed);
     }
 
-    // Attach all JavaScript behaviors to the new content, if it was successfully
-    // added to the page, this if statement allows #ajax['wrapper'] to be
-    // optional.
-    if (new_content.parents('html').length > 0) {
+    // Attach all JavaScript behaviors to the new content, if it was
+    // successfully added to the page and the elements not part of a larger form
+    // (in which case they'll be processed all at once in
+    // Drupal.ajax.prototype.success). The HTML parent check allows
+    // #ajax['wrapper'] to be optional.
+    var alreadyAttached = ajax.form && ajax.form.has(new_content).length > 0;
+    if (!alreadyAttached && new_content.parents('html').length > 0) {
       // Apply any settings from the returned JSON if available.
       settings = response.settings || ajax.settings || Backdrop.settings;
       Backdrop.attachBehaviors(new_content, settings);
