@@ -35,7 +35,7 @@ class views_plugin_pager_some extends views_plugin_pager {
     $form['items_per_page'] = array(
       '#title' => $pager_text['items per page title'],
       '#type' => 'number',
-      '#attributes' => array('min' => 0),
+      '#min' => '0',
       '#description' => $pager_text['items per page description'],
       '#default_value' => $this->options['items_per_page'],
     );
