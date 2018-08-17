@@ -206,7 +206,7 @@ ul.secondary li.active a.active {
 .expand-dropdown-tabs ul.responsive-tabs-dropdown li a,
 .expand-dropdown-tabs ul.responsive-tabs-dropdown li a:hover {
   border: 0;
-  border-top: 2px solid #fff;
+  border-top: 2px solid #ffffff;
   position: relative;
 }
 
@@ -325,7 +325,7 @@ ul.primary.responsive-tabs-dropdown li:last-child a {
 
 .responsive-tabs-mobile.expand-dropdown-tabs .expand-dropdown-tabs-label,
 .responsive-tabs-mobile.expand-dropdown-tabs:hover .expand-dropdown-tabs-label {
-  background: #fff;
+  background: #ffffff;
 }
 
 .responsive-tabs-mobile .expand-dropdown-tabs-control {
@@ -392,7 +392,7 @@ ul.primary.responsive-tabs-dropdown li:last-child a {
   position: relative;
   float: none;
   border-right: 0;
-  border-bottom: 2px solid #fff;
+  border-bottom: 2px solid #ffffff;
 }
 
 .responsive-tabs-mobile ul.primary a:after {
