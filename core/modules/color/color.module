@@ -147,9 +147,15 @@ function color_css_alter(&$css) {
       $theme_path = backdrop_get_path('theme', $preview_theme);
       if (isset($_SESSION['color'][$theme_key])) {
         $preview_data = $_SESSION['color'][$theme_key];
-        $paths = array('map' => array());
+        $paths = array(
+          'source' => backdrop_get_path('theme', $preview_theme) . '/',
+          'map' => array(),
+        );
         foreach ($theme_info['css'] as $file) {
           $stylesheet = file_get_contents($theme_path . '/' . $file);
+          _backdrop_build_css_path(NULL, base_path() . dirname($paths['source'] . $file) . '/');
+          $stylesheet = preg_replace_callback('/url\([\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\)/i', '_backdrop_build_css_path', $stylesheet);
+
           $stylesheet = _color_rewrite_stylesheet($preview_theme, $theme_info, $paths, $preview_data['palette'], $stylesheet);
           foreach ($css as $path => $data) {
             if (backdrop_basename($path) == backdrop_basename($file)) {
@@ -548,7 +554,6 @@ function _color_rewrite_stylesheet($theme, &$info, &$paths, $palette, $style) {
     $conversion[$k] = backdrop_strtolower($v);
   }
   $default = color_get_palette($theme, TRUE);
-
   // Split off the "Don't touch" section of the stylesheet.
   $split = "Color Module: Don't touch";
   if (strpos($style, $split) !== FALSE) {

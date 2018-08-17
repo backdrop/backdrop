@@ -80,6 +80,7 @@
 #preview {
   width: 100%;
   height: 100vh;
+  border: 1px black solid;
 }
 
 @media all and (min-width: 48em) {

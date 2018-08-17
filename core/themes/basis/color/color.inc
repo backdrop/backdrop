@@ -13,7 +13,7 @@ $info = array(
     'link' => t('Link color'),
     'hovermenu' => t('Main menu hover background'),
     'borders' => t('Borders'),
-    'form_focus_border' => t('Form element borders when selected'),
+    'formfocusborder' => t('Form element borders when selected'),
     'buttons' => t('Buttons and Breadcrumb'),
   ),
   // Pre-defined color schemes.
@@ -31,7 +31,7 @@ $info = array(
         'link' => '#0073bd',
         'hovermenu' => '#114a75',
         'borders' => '#bbb',
-        'form_focus_border' => '#43afe4',
+        'formfocusborder' => '#43afe4',
         'buttons' => '#dee2ea',
       ),
     ),
