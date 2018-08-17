@@ -1268,6 +1268,16 @@ function user_menu() {
     'file' => 'user.admin.inc',
   );
 
+  // Login settings.
+  $items['admin/config/people/login'] = array(
+    'title' => 'Login settings',
+    'description' => 'Configure the way visitors may log in and limit login attempts.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_login_settings'),
+    'access arguments' => array('administer account settings'),
+    'file' => 'user.admin.inc',
+  );
+
   // Permissions forms.
   $items['admin/config/people/permissions'] = array(
     'title' => 'Permissions',
