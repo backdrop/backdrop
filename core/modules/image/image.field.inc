@@ -165,11 +165,12 @@ function image_field_instance_settings_form($field, $instance) {
   $form['orientate'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable image re-orientation'),
-    '#description' => t('If EXIF data indicates the need, the image will be rotated appropriately before being saved. <br>
-    Note that as with resizing, rotating images on upload will cause the loss of EXIF data in the image.'),
     '#default_value' => $settings['orientate'],
     '#weight' => 12,
+    '#description' => t('If EXIF data indicates the need, the image will be rotated appropriately before being saved.'),
   );
+  // Add a second line of description.
+  $form['orientate']['#description'] .= '<br />' . t('Note that as with resizing, rotating images on upload will cause the loss of EXIF data in the image.');
   
   // Add the default image to the instance.
   $form['default_image'] = array(
