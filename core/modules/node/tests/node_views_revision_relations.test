@@ -4,8 +4,6 @@
  * Definition of ViewsNodeRevisionRelationsTestCase.
  */
 
-require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
-
 /**
  * Tests basic node_revision table integration into views.
  */

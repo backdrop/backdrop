@@ -16,8 +16,6 @@
  *   - Use relationships between different entity types, for example node and the node author(user).
  */
 
-require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
-
 /**
  * Provides some helper methods for testing fieldapi integration into views.
  */
@@ -172,7 +170,7 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
    */
   function testViewsData() {
     $data = views_fetch_data();
-    
+
     // Check the table and the joins of the first field.
     // Attached to node only.
     $field = $this->fields[0];

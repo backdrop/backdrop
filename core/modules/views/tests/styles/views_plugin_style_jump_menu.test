@@ -5,8 +5,6 @@
  * Definition of viewsPluginStyleJumpMenuTest.
  */
 
-require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
-
 /**
  * Tests jump menu style functionality.
  */

@@ -5,8 +5,6 @@
  * Definition of ViewsAccessTest.
  */
 
-require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
-
 /**
  * Basic test for pluggable access.
  */

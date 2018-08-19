@@ -5,8 +5,6 @@
  * Definition of ViewsHandlerAreaTextTest.
  */
 
-require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
-
 /**
  * Tests the text area handler.
  *
