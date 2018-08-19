@@ -442,7 +442,7 @@ function filter_update_1002() {
               'exclude' => 0,
               'alter' => array(
                 'alter_text' => 1,
-                'text' => '<img class=\'image-library-image\' src=\'[uri]\'>',
+                'text' => '<img class="image-library-image" src="[uri]" data-fid="[fid]" />',
                 'make_link' => 0,
                 'path' => '',
                 'absolute' => 0,

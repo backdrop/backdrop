@@ -39,6 +39,8 @@ input#edit-filters-filter-html-settings-allowed-html {
   width: 100%;
   max-width: 500px;
   z-index: 9996 !important; /* To come above the full-screen CKEditor button. */
+  -webkit-transition: max-width .5s, left .5s, right .5s; /* For Safari 3.1 to 6.0 */
+  transition: max-width .5s, left .5s, right .5s;
 }
 .editor-dialog-with-library {
   max-width: 92%;
@@ -150,9 +152,6 @@ input#edit-filters-filter-html-settings-allowed-html {
   box-shadow: 2px 2px #bbbbbb;
 }
 
-.library-view {
-  display:none;
-}
 .library-view.form-item {
   margin-top: 0;
 }
@@ -184,14 +183,17 @@ input#edit-filters-filter-html-settings-allowed-html {
   flex-direction: row;
 }
 .editor-image-fields {
-  width:350px;
+  width: 350px;
   flex-grow: 0;
   padding-top: 0;
 }
 .editor-image-library {
-  padding-right: 20px;
+  padding: 0 0 0 20px; /* LTR */
   min-width: 525px;
   flex-grow: 1;
+}
+[dir="rtl"] .editor-image-library {
+  padding: 0 20px 0 0;
 }
 @media (max-width: 1030px) {
   .image-form-wrapper {

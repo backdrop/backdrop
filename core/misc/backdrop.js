@@ -781,6 +781,9 @@ Backdrop.optimizedResize = (function() {
     },
     remove: function(callbackName) {
       removeCallback(callbackName);
+    },
+    trigger: function() {
+      runCallbacks();
     }
   }
 }());

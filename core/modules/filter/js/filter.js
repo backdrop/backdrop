@@ -143,11 +143,12 @@ Backdrop.behaviors.editorImageDialog = {
 
     // Initialise styles of Dialog.
     // Hide the left-hand (library) part of the dialog form.
-    $(".editor-image-library").css({"display":"none"});
+    $(".editor-image-library").css({ "display": "none" });
     $(".editor-dialog").removeClass("editor-dialog-with-library");
     // Set the class for the left-hand part.
     $(".editor-image-fields").addClass("editor-image-fields-full");
 
+    var DialogLeftPosition;
     $newToggles.click(function(e) {
       var $link = $(e.target);
       if ($link.is('.editor-image-toggle') === false) {
@@ -189,8 +190,16 @@ Backdrop.behaviors.editorImageDialog = {
       var $display_state = $(".form-item-image-library-src").css("display");
       if ($display_state === 'none') {
         // Hide the library part of the dialog form.
-        $(".editor-image-library").css({"display":"none"});
-        $(".form-item-image-directory").css({"display":"none"});
+        $(".editor-image-library").css({ "display": "none" });
+        $(".form-item-image-directory").css({ "display": "none" });
+        // Restore the previous dialog position.
+        if (DialogLeftPosition) {
+          $(".editor-dialog").css('left', DialogLeftPosition + 'px');
+          // Re-center the dialog by triggering a window resize.
+          window.setTimeout(function() {
+            Backdrop.optimizedResize.trigger();
+          }, 500);
+        }
         $(".editor-dialog").removeClass("editor-dialog-with-library");
         // Set the class for the dialog part.
         $(".editor-image-fields").addClass("editor-image-fields-full");
@@ -200,30 +209,36 @@ Backdrop.behaviors.editorImageDialog = {
         // so add library view to dialog display.
         // But only for filter-format-edit-image-form.
         if ($("form").hasClass("filter-format-editor-image-form")){
+          // Remove the dialog position, let the filter.css CSS for a
+          // percentage-based width take precedence.
+          DialogLeftPosition = $(".editor-dialog").position().left;
+          $(".editor-dialog").css('left', '');
+          // Re-center the dialog by triggering a window resize.
+          window.setTimeout(function() {
+            Backdrop.optimizedResize.trigger();
+          }, 500);
           // Increase width of dialog form.
           $(".editor-dialog").addClass("editor-dialog-with-library");
-          // Add the library view.
-          $view_placeholder = $("[name='attributes[text]']");
-          $view_image_library = $(".library-view").attr('data-editor-image-library-view');
-          $view_placeholder.replaceWith($view_image_library);
+
           // Display the library view.
           $(".editor-image-fields").removeClass("editor-image-fields-full");
-          $(".editor-image-library").css({"display":"block"});
-          $(".form-item-image-directory").css({"display":"block"});
-          $(".library-view").css({"display":"block"});
+          $(".editor-image-library").css({ "display": "block" });
+          $(".form-item-image-directory").css({ "display": "block" });
           var $library_base_url = $(".form-item-image-library-src").attr('data-editor-image-library-base-url');
 
           // Now add click event to images
           $(".image-library-choose-file").click(function() {
-            var $relativeImgSrc = $(this).find('img').attr('src').replace($library_base_url , '');
+            var $selectedImg = $(this).find('img');
+            var $relativeImgSrc =$selectedImg.attr('src').replace($library_base_url , '');
             $("[name='image_library[src]']").val($relativeImgSrc);
+            $("[name='fid[fid]']").val($selectedImg.data('fid'));
             // Remove style from previous selection.
             $(".image-library-image-selected").removeClass("image-library-image-selected");
             // Add style to this selection.
             $(this).addClass("image-library-image-selected");
           });
         }
-      };
+      }
     });
 
     // Add a very short delay to allow the dialog to appear.
