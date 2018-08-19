@@ -3,37 +3,40 @@
  * Stylesheet for the administration pages of the Color module.
  */
 
-.color-form .form-item label {
+#system-theme-settings .form-item {
+  clear: both;
+}
+
+#system-theme-settings .form-item label {
   display: inline-block;
   vertical-align: middle;
   margin: 0;
   padding: 0;
 }
 
-#palette,
-.form-type-select {
+.color-form .form-type-select {
   float: left; /* LTR */
   clear: both;
   width: 100%;
   max-width: 20em;
   padding-right: 2em;
+  padding-bottom: 1em;
 }
 
-[dir="rtl"] #palette,
-[dir="rtl"] .form-type-select {
+[dir="rtl"] .color-form .form-type-select {
   float: right;
 }
 
 .color-form select,
 .color-form input,
-.color-form .sp-replacer {
+#system-theme-settings input[type=color] {
   float: right;
   max-width: 9em;
 }
 
 [dir="rtl"] .color-form select,
 [dir="rtl"] .color-form input,
-[dir="rtl"] .color-form .sp-replacer {
+[dir="rtl"] #system-theme-settings input {
   float: left;
 }
 
@@ -47,7 +50,7 @@
 }
 
 /* Color inputs */
-#color_scheme_form input[type=color] {
+#system-theme-settings input[type=color] {
   border-radius: 100%;
   height: 35px;
   width: 35px;
@@ -56,18 +59,18 @@
 }
 
 /* Styles to control the color inputs in Firefox. */
-#color_scheme_form input[type=color]::-moz-color-swatch {
+#system-theme-settings input[type=color]::-moz-color-swatch {
   border: none;
   border-radius: 100%;
 }
 
 /* Styles to control the color inputs in Chrome. */
-#color_scheme_form input[type=color]::-webkit-color-swatch {
+#system-theme-settings input[type=color]::-webkit-color-swatch {
   border: none;
   border-radius: 100%;
 }
 
-#color_scheme_form input[type=color]::-webkit-color-swatch-wrapper {
+#system-theme-settings input[type=color]::-webkit-color-swatch-wrapper {
   padding: 0;
 }
 

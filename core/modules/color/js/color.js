@@ -57,7 +57,7 @@ Backdrop.behaviors.color = {
         var colors = schemes[schemeName];
         for (var fieldName in colors) {
           if (colors.hasOwnProperty(fieldName)) {
-            var input = $('#edit-palette-' + fieldName);
+            var input = $('input[data-color-name=' + fieldName + ']');
             if (input.val() && input.val() != colors[fieldName]) {
               input.val(colors[fieldName]);
             }
@@ -67,9 +67,9 @@ Backdrop.behaviors.color = {
       }
     });
 
-    $('#palette input').change(function () {
+    $('#system-theme-settings input[type=color]').change(function () {
       var schemeName =  document.getElementById('edit-scheme').value;
-      var key = this.id.substring(13);
+      var key = this.dataset.colorName;
 
       if (schemeName !== '' && this.value !== schemes[schemeName][key]) {
         resetScheme();
@@ -91,18 +91,20 @@ Backdrop.behaviors.color = {
         palette: {}
       };
       values['scheme'] = $('#edit-scheme').val();
-      $('#color_scheme_form input').each(function () {
-        values['palette'][this.id.substring(13)] = this.value;
+      $('#system-theme-settings input[data-color-name]').each(function () {
+        values['palette'][this.dataset.colorName] = this.value;
       });
 
+      console.log(values);
       $.ajax({
         type: 'POST',
         dataType: 'json',
         url : Backdrop.settings.basePath + 'color/save_preview_settings/' + settings.colorThemeName + '/?token=' + settings.colorPreviewToken,
         data: values,
-        success : function(response) {
+        complete : function(response) {
           // Refresh the preview.
-          document.getElementById('preview').contentDocument.location.reload(true);
+          var preview = document.getElementById('preview');
+          preview.contentDocument.location.reload(true);
         }
       });
     }
