@@ -31,7 +31,7 @@ class ColorTestCase extends BackdropWebTestCase {
     // This tests the color module in Bartik.
     $this->themes = array(
       'bartik' => array(
-        'palette_input' => 'palette[bg]',
+        'palette_input' => 'color_bg',
         'scheme' => 'goldfish',
         'scheme_color' => '#3b3b3b',
       ),
@@ -109,7 +109,7 @@ class ColorTestCase extends BackdropWebTestCase {
     $edit['scheme'] = '';
 
     foreach ($this->colorTests as $color => $is_valid) {
-      $edit['palette[bg]'] = $color;
+      $edit['color_bg'] = $color;
       $this->backdropPost($settings_path, $edit, t('Save theme settings'));
 
       if ($is_valid) {
@@ -135,7 +135,7 @@ class ColorTestCase extends BackdropWebTestCase {
     $this->assertResponse(200);
     $edit = array(
       'scheme' => '',
-      'palette[top]' => '#123456',
+      'color_top' => '#123456',
     );
     $this->backdropPost($settings_path, $edit, t('Save theme settings'));
 
@@ -172,7 +172,7 @@ class ColorTestCase extends BackdropWebTestCase {
     // Set the colors to the Blue Lagoon palette.
     $edit = array();
     foreach ($blue_lagoon_palette as $key => $color) {
-      $edit["palette[$key]"] = $color;
+      $edit["color_$key"] = $color;
     }
     $this->backdropLogin($this->bigUser);
     $this->backdropPost($settings_path, $edit, t('Save theme settings'));
@@ -185,7 +185,7 @@ class ColorTestCase extends BackdropWebTestCase {
     $this->assertNoRaw('bartik/css/legacy.css', 'Default color CSS correctly not used on the homepage.');
 
     // Modify the palette to trigger a custom palette.
-    $edit['palette[top]'] = '#292929';
+    $edit['color_top'] = '#292929';
     $this->backdropPost($settings_path, $edit, t('Save theme settings'));
 
     // Now neither the original nor legacy CSS file should be used.
@@ -199,7 +199,7 @@ class ColorTestCase extends BackdropWebTestCase {
       'scheme' => 'default',
     );
     foreach ($default_palette as $key => $color) {
-      $edit["palette[$key]"] = $color;
+      $edit["color_$key"] = $color;
     }
     $this->backdropPost($settings_path, $edit, t('Save theme settings'));
     $this->assertFalse(config_get('bartik.settings', 'color_legacy'), 'Legacy color flag set to FALSE in Bartik configuration.');

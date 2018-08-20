@@ -21,7 +21,7 @@ function bartik_form_system_theme_settings_alter(&$form, &$form_state) {
     $form['color']['scheme']['#default_value'] = 'blue_lagoon';
     $palette = $form['color']['info']['#value']['schemes']['blue_lagoon']['colors'];
     foreach ($palette as $key => $color) {
-      $form['color']['palette'][$key]['#default_value'] = $color;
+      $form['color']['color_' . $key]['#default_value'] = $color;
     }
   }
 
@@ -37,10 +37,14 @@ function bartik_form_system_theme_settings_alter(&$form, &$form_state) {
 function bartik_form_system_theme_settings_alter_submit($form, &$form_state) {
   // If still using the legacy palette, don't save a custom color scheme.
   $legacy_palette = $form['color']['info']['#value']['schemes']['blue_lagoon']['colors'];
-  if ($legacy_palette == $form_state['values']['palette']) {
+  $values = _color_get_values_from_form($form_state);
+  if ($legacy_palette == $values) {
     // Removing "info" will prevent Color module from making a new stylesheet.
     unset($form_state['values']['info']);
     unset($form_state['values']['scheme']);
+    foreach ($legacy_palette as $key => $color) {
+      unset($form_state['values']['color_' . $key]);
+    }
     unset($form_state['values']['palette']);
     // Set the legacy flag in the bartik.settings config file.
     $form_state['values']['color_legacy'] = TRUE;
