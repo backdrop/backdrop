@@ -292,8 +292,12 @@ function theme_file_upload_help($variables) {
     }
     elseif ($max) {
       list($width, $height) = explode('x', $max);
-      if ($height === '0') {$descriptions[] = t('Images with width greater than !width pixels will be scaled down.', array('!width' => '<strong>' . $width . '</strong>'));}
-      else if ($width === '0') {$descriptions[] = t('Images with height greater than !height pixels will be scaled down.', array('!height' => '<strong>' . $height . '</strong>'));}
+      if ($height === '0') {
+        $descriptions[] = t('Images wider than !width pixels will be scaled down.', array('!width' => '<strong>' . $width . '</strong>'));
+      }
+      elseif ($width === '0') {
+        $descriptions[] = t('Images taller than !height pixels will be scaled down.', array('!height' => '<strong>' . $height . '</strong>'));
+      }
       else {$descriptions[] = t('Images larger than !max pixels will be scaled down.', array('!max' => '<strong>' . $max . '</strong>'));}
     }
   }
