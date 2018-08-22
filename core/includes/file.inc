@@ -1821,7 +1821,7 @@ function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $mi
             backdrop_set_message(t('The image was resized to fit within the maximum allowed height of %height pixels.', array('%height' => $height)));
           }
           else {
-          backdrop_set_message(t('The image was resized to fit within the maximum allowed dimensions of %dimensions pixels.', array('%dimensions' => $maximum_dimensions)));
+            backdrop_set_message(t('The image was resized to fit within the maximum allowed dimensions of %dimensions pixels.', array('%dimensions' => $maximum_dimensions)));
           }
         }
         else {
