@@ -1011,8 +1011,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $this->assertText(t('The image was rotated by 90 degrees.'),'The image was correctly re-oriented.');
 
     $node = node_load($nid, NULL, TRUE);
-
-    $uri = $node->{$field_name}[LANGUAGE_NONE][0]['uri'];
+    $uri = $node->$field_name[LANGUAGE_NONE][0]['uri'];
 
     // Check orientation.
     $img = image_load($uri);
