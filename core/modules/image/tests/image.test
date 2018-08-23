@@ -985,9 +985,8 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $nid = $this->uploadNodeImage($image_that_is_too_big, $field_name, 'post');
     $this->assertText(t('The image was resized to fit within the maximum allowed dimensions of 100x100 pixels.'), 'Image exceeding max dimensions was properly resized.');
   }
-}
 
-/**
+  /**
    * Test image rotation resulting from EXIF data.
    * Requires a special test image, file rotate90cw.jpg.
    */
