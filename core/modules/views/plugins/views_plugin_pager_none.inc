@@ -39,7 +39,8 @@ class views_plugin_pager_none extends views_plugin_pager {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
     $form['offset'] = array(
-      '#type' => 'textfield',
+      '#type' => 'number',
+      '#min' => '0',
       '#title' => t('Offset'),
       '#description' => t('The number of items to skip. For example, if this field is 3, the first 3 items will be skipped and not displayed.'),
       '#default_value' => $this->options['offset'],

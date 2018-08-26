@@ -79,7 +79,7 @@ fieldset .fieldset-wrapper {
   width: 0;
   height: 0;
   border: .32em solid transparent;
-  border-top-color: #000;
+  border-top-color: #000000;
   border-bottom: 0;
   -webkit-transform: translate(0, 0.125em);
   transform: translate(0, 0.125em);

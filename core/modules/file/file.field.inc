@@ -398,7 +398,6 @@ function file_field_widget_settings_form($field, $instance) {
     '#default_value' => $settings['progress_indicator'],
     '#description' => t('The throbber display does not show the status of uploads but takes up less space. The progress bar is helpful for monitoring progress on large uploads.'),
     '#weight' => 16,
-    '#access' => file_progress_implementation(),
   );
 
   return $form;
