@@ -301,6 +301,12 @@ function node_type_form($form, &$form_state, $type = NULL) {
       ),
     );
   }
+  $form['display']['pageless'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Prevent visitors from seeing content on its own page.'),
+    '#default_value' => $type->settings['pageless'],
+    '#description' => t('The content can still be visible in a view or a block, but will be hidden to those without the proper permissions when accessed as a full page.'),
+  );
 
   $form['old_type'] = array(
     '#type' => 'value',
@@ -556,6 +562,9 @@ function node_node_type_load(&$types) {
       // Submitted information.
       'node_submitted' => TRUE,
       'node_user_picture' => TRUE,
+
+      // Pageless settings
+      'pageless' => FALSE,
 
       // Though Language module is required to change this setting, all node
       // types have a language setting, even if it is disabled by default.

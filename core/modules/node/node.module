@@ -1285,6 +1285,10 @@ function node_permission() {
     'delete revisions' => array(
       'title' => t('Delete content revisions'),
     ),
+    'bypass pageless content restriction' => array(
+      'title' => t('Bypass pageless content restriction'),
+      'description' => t('View pageless content regardless of pageless setting.'),
+    ),
   );
 
   // Generate standard node permissions for all applicable node types.
@@ -2268,6 +2272,15 @@ function node_page_default() {
  * @see node_menu()
  */
 function node_page_view(Node $node) {
+  // Get the current user.
+  global $user;
+  // If the user has chosen to hide this node from page views return 404.
+  $pageless = config_get('node.type.' . $node->type, 'settings.pageless');
+  $bypass_pageless = user_access('bypass pageless content restriction', $user);
+  if ($pageless && !$bypass_pageless) {
+    backdrop_not_found();
+  }
+
   // If there is a menu link to this node, the link becomes the last part
   // of the active trail, and the link name becomes the page title.
   // Thus, we must explicitly set the page title to be the node title.
