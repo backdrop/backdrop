@@ -5,7 +5,7 @@ Backdrop.behaviors.nodePreview = {
   attach: function (context) {
     // Insert the preview admin banner into the page before the layout.
     $('.node-preview-container').each(function() {
-      $(this).insertBefore($('.page').find('.layout'));
+      $(this).insertBefore($('.page').once('preview-js').find('.layout'));
     });
     // Prevent clicking on links during preview.
     var $preview = $(context).find('.layout').once('layout-preview');

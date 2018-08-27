@@ -17,12 +17,12 @@
 function theme_node_preview_banner_form($variables) {
   $form = $variables['form'];
 
-  $output = '<div class="node-node-preview-banner-form">';
-  $output .= '<div class="node-node-preview-banner-form-left">';
+  $output = '<div class="node-preview-banner-form">';
+  $output .= '<div class="node-preview-banner-form-actions">';
   $output .= backdrop_render($form['preview_node_submit']);
   $output .= backdrop_render($form['backlink']);
   $output .= '</div>';
-  $output .= '<div class="node-node-preview-banner-form-right">';
+  $output .= '<div class="node-preview-banner-form-view-mode">';
   $output .= backdrop_render($form['view_mode']);
   $output .= backdrop_render($form['view_mode_submit']);
   $output .= '</div>';

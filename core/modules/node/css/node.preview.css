@@ -5,54 +5,39 @@
  */
 
 .node-preview-container {
-  background-image: -webkit-linear-gradient(top, #d1e8f5, #d3e8f4);
-  background-image: -moz-linear-gradient(top, #d1e8f5, #d3e8f4);
-  background-image: -o-linear-gradient(top, #d1e8f5, #d3e8f4);
-  background-image: linear-gradient(to bottom, #d1e8f5, #d3e8f4);
-  -webkit-box-shadow: 0 1px 3px 1px rgba(0, 0, 0, 0.3333);
+  font: normal 16px/1.538 "Open Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
+  background-color: #efefef;
   z-index: 999;
   width: 100%;
   padding: 10px;
   overflow: auto;
+}
+.page.preview-js-processed .node-preview-container {
   position: fixed;
   bottom: 0;
-  height: 120px;
-  box-shadow: 0px 2px 20px rgba(0,0,0,0.4);
-  background: #fafafa;
-  font: normal 16px/1.538 "Open Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 }
-.page {
-  padding-bottom: 120px;
+a.node-preview-backlink {
+  color: #145285;
 }
 .node-preview-backlink {
   text-decoration: none;
-  margin: 10px;
-}
-.node-node-preview-banner-form-left {
-  float: left;
-}
-.node-node-preview-banner-form-right {
-  float: right;
+  display: block;
+  margin: 10px 0px;
 }
 .preview-button.form-submit {
-  border-color: #114a75;
   text-align: center;
   text-transform: uppercase;
-  background: #e5e5e6;
+  background: #145285;
   letter-spacing: 0.4px;
   line-height: 43px;
   border: 0;
   padding: 0 25px;
-  margin-bottom: 1em;
+  margin-bottom: 0;
   margin-right: 1em;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
   transition: background-color 0.6s ease 0s, color 0.6s ease 0s;
-}
-.node-preview-save-button.form-submit {
-  border-color: #1766ae;
-  background-color: #1766ae;
   clear: both;
   color: #fff;
 }
@@ -75,4 +60,32 @@
   border-radius: 4px;
   will-change: border-color;
   height: 43px;
+}
+@media (min-width: 34em) {
+  .node-preview-container {
+    height: 120px;
+  }
+  .page {
+    padding-bottom: 120px;
+  }
+  .node-preview-banner-form-actions {
+    float: left;
+  }
+  div.node-preview-banner-form-view-mode {
+    float: right;
+  }
+  .node-preview-backlink {
+    margin: 10px;
+    display: inline;
+    margin: 10px 0 10px 10px;
+  }
+}
+.page {
+  padding-bottom: 160px;
+}
+div.node-preview-banner-form-actions {
+  display: block;
+}
+.node-preview-banner-form-view-mode {
+  display: block;
 }
