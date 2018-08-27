@@ -1800,8 +1800,7 @@ function file_validate_is_image(File $file) {
  */
 function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $minimum_dimensions = 0) {
   $errors = array();
-
-   // Check first that the file is an image.
+  // Check first that the file is an image.
   if ($info = image_get_info($file->uri)) {
     if ($maximum_dimensions) {
       // Check that it is smaller than the given dimensions.
