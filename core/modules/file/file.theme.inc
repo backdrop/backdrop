@@ -302,6 +302,9 @@ function theme_file_upload_help($variables) {
       elseif (empty($width)) {
         $descriptions[] = t('Images must be at least !height pixels tall.', array('!height' => '<strong>' . $height . '</strong>'));
       }
+      else {
+        $descriptions[] = t('Images must be at least !min pixels.', array('!min' => '<strong>' . $min . '</strong>'));
+      }
     }
     elseif ($min != $max) {
       $descriptions[] = t('Images must be at least !min pixels.', array('!min' => '<strong>' . $min . '</strong>'));
