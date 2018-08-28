@@ -68,6 +68,15 @@ input.node-preview-save-button.form-submit:hover {
   will-change: border-color;
   height: 43px;
 }
+.page {
+  padding-bottom: 160px;
+}
+div.node-preview-banner-form-actions {
+  display: block;
+}
+.node-preview-banner-form-view-mode {
+  display: block;
+}
 @media (min-width: 34em) {
   .node-preview-container {
     height: 120px;
@@ -86,13 +95,4 @@ input.node-preview-save-button.form-submit:hover {
     display: inline;
     margin: 10px 0 10px 10px;
   }
-}
-.page {
-  padding-bottom: 160px;
-}
-div.node-preview-banner-form-actions {
-  display: block;
-}
-.node-preview-banner-form-view-mode {
-  display: block;
 }
