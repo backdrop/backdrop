@@ -2279,6 +2279,7 @@ function node_page_view(Node $node) {
   $bypass_pageless = user_access('bypass pageless content restriction', $user);
   if ($pageless && !$bypass_pageless) {
     backdrop_not_found();
+    backdrop_exit();
   }
 
   // If there is a menu link to this node, the link becomes the last part
