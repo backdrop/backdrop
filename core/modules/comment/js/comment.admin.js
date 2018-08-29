@@ -42,7 +42,7 @@ Backdrop.behaviors.commentFieldsetSummaries = {
       // Automatic comment closer setting.
       if ($context.find(".form-item-comment-close-enabled input:checked").length) {
         var number = parseInt($context.find(".form-item-comment-close-days input").val());
-        vals.push(Backdrop.t('Automatically close comments on old content after @number days', {'@number': number}));
+        vals.push(Backdrop.t('Automatically close comments after @number days', {'@number': number}));
       }
 
       return Backdrop.checkPlain(vals.join(', '));
