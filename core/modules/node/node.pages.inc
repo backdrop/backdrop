@@ -123,6 +123,7 @@ function node_form($form, &$form_state, Node $node) {
   }
   $node_type = node_type_get_type($node->type);
 
+  $status = $node->nid ? $node->status : $node_type->settings['status_default'];
 
   // Check if we can retrieve a node from the tempstore.
   $node_tempstore_id = isset($form_state['node_tempstore_id']) ? $form_state['node_tempstore_id'] : node_build_tempstore_id();
@@ -130,6 +131,7 @@ function node_form($form, &$form_state, Node $node) {
   if ($data = node_tempstore_load($node_tempstore_id)) {
     $node = $data;
     $form_state['entity'] = $node;
+    $status = $node->status;
 
     // Restore the destination if we previewed the node.
     if (isset($node->destination)) {
@@ -305,7 +307,6 @@ function node_form($form, &$form_state, Node $node) {
     '#weight' => -10,
   );
 
-  $status = $node->nid ? $node->status : $node_type->settings['status_default'];
   if ($node->scheduled && $node_type->settings['scheduling_enabled']) {
     $status = NODE_SCHEDULED;
   }
@@ -449,7 +450,6 @@ function node_form($form, &$form_state, Node $node) {
  * @see node_form_submit_build_node()
  */
 function node_form_preview($form, &$form_state) {
-  $node = $form_state['node'];
   $node_tempstore_id = $form_state['node_tempstore_id'];
   $node = node_form_submit_build_node($form, $form_state);
 
@@ -544,6 +544,7 @@ function node_preview($node_tempstore_id, $node_type) {
   }
   
   // Set status to true so we don't get the 'unpublished' CSS.
+  $node->old_status = $node->status;
   $node->status = TRUE;
 
   _field_invoke_multiple('load', 'node', array($node->nid => $node));
@@ -562,7 +563,7 @@ function node_preview($node_tempstore_id, $node_type) {
     $user = user_load($node->uid);
     $node->name = $user->name;
   }
- 
+
   $node->changed = REQUEST_TIME;
  
   // Get the view mode to render the preview in.
@@ -698,7 +699,7 @@ function node_preview_banner_form_node_submit(array $form, array &$form_state) {
   $type = $node->type;
   $build = array();
   $build['node'] = $node;
-  $build['values']['status'] = $node->status;
+  $build['values']['status'] = $node->old_status;
   $build['values']['scheduled'] = $node->scheduled;
   $build['values']['op'] = t('Save');
   backdrop_form_submit($type . '_node_form', $build, $node);
