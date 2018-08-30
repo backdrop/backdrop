@@ -2361,6 +2361,7 @@ class LayoutRendererTest extends BackdropWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array(
       'access content',
       'administer layouts',
+      'access user profiles',
     ));
     $this->backdropLogin($this->admin_user);
   }
@@ -2380,6 +2381,31 @@ class LayoutRendererTest extends BackdropWebTestCase {
       'name' => $layout_name,
       'layout_template' => 'moscone_flipped',
       'path' => $layout_url,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    // Go the new layout path and test that it is not using the new renderer.
+    $this->backdropGet($layout_url);
+    $this->assertNoText('This layout uses the Test renderer');
+    // Load the layout and save the new renderer.
+    $test_layout = layout_get_layout_by_path($layout_url);
+    $test_layout->renderer_name = 'test_renderer';
+    $test_layout->save();
+    // Go the new layout path and test that it is now using the new renderer.
+    $this->backdropGet($layout_url);
+    $this->assertText('This layout uses the Test renderer');
+
+    // Create a new layout at an existing path.
+    $this->backdropGet('admin/structure/layouts');
+    $this->clickLink(t('Add layout'));
+    $layout_name = strtolower($this->randomName());
+    $layout_title = $this->randomString();
+    $layout_url = 'user/1';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => 'user/%',
     );
     $this->backdropPost(NULL, $edit, t('Create layout'));
     $this->backdropPost(NULL, array(), t('Save layout'));
