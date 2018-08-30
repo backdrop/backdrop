@@ -525,8 +525,10 @@ function node_form_submit($form, &$form_state) {
 /**
  * Generates a node preview.
  *
- * @param $node
- *   The node to preview.
+ * @param $node_tempstore_id
+ *   The tempstore ID of the node being previewed.
+ * @param $node_type
+ *   The node type of the node being previewed.
  *
  * @return
  *   An HTML-formatted string of a node preview.
@@ -594,11 +596,13 @@ function node_preview($node_tempstore_id, $node_type) {
  *
  * @param $node
  *   A node entity.
+ * @param $node_tempstore_id
+ *   The tempstore ID of the node being previewed.
  *
  * @return array $form
- *   The view mode preview selection form.
+ *   The form which provides access to node preview operations.
  */
-function node_preview_banner_form(array $form, array $form_state, EntityInterface $node, $node_tempstore_id) {
+function node_preview_banner_form(array $form, array $form_state, Node $node, $node_tempstore_id) {
   // Always add the 'default' view mode.
   $view_mode_options = array();
 
@@ -684,6 +688,8 @@ function node_preview_banner_form(array $form, array $form_state, EntityInterfac
 
 /**
  * Submit handler for the node preview view mode selection form.
+ *
+ * @see node_preview_banner_form()
  */
 function node_preview_banner_form_node_submit(array $form, array &$form_state) {
   form_load_include($form_state, 'inc', 'node', 'node.pages');
@@ -709,6 +715,8 @@ function node_preview_banner_form_node_submit(array $form, array &$form_state) {
 
 /**
  * Submit handler for the node preview view mode selection form.
+ *
+ * @see node_preview_banner_form()
  */
 function node_preview_banner_form_view_mode_submit(array $form, array &$form_state) {
   $node = $form_state['values']['node'];

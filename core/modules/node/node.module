@@ -3781,7 +3781,10 @@ function node_language_delete($language) {
  * Get a node from the tempstore.
  *
  * @param string $node_tempstore_id
- *   The machine node_tempstore_id of the node item to load.
+ *   The tempstore ID of the node item to load.
+ *
+ * @return Node|false
+ *   A fully-populated node entity, or FALSE if the node is not found.
  */
 function node_get_node_tempstore($node_tempstore_id) {
   $caches = &backdrop_static(__FUNCTION__, array());
@@ -3799,8 +3802,8 @@ function node_get_node_tempstore($node_tempstore_id) {
  *
  * @param Node $item
  *   The node item to save into tempstore.
- * @param string $type
- *   The type of item to save. Must be either "node" or "menu_item".
+ * @param string $node_tempstore_id
+ *   The tempstore ID of the node being saved to the object cache.
  */
 function node_set_node_tempstore($item, $node_tempstore_id) {
   $item->locked = array(
@@ -3813,8 +3816,11 @@ function node_set_node_tempstore($item, $node_tempstore_id) {
 
 /**
  * Remove an item from the object cache.
+ *
+ * @param string $node_tempstore_id
+ *   The tempstore ID of the node to be deleted from the object cache.
  */
-function node_clear_node_tempstore($node_tempstore_id, $type = 'node') {
+function node_clear_node_tempstore($node_tempstore_id) {
   tempstore_clear('node_tempstore', $node_tempstore_id);
 }
 
@@ -3833,6 +3839,9 @@ function node_tempstore_load($node_tempstore_id) {
 
 /**
  * Build tempstore ID.
+ *
+ * @return string $node_tempstore_id
+ *   A unique string, or the current tempstore ID if set in the URL.
  */
 function node_build_tempstore_id() {
   if (isset($_GET['node_tempstore_id'])) {
