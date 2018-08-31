@@ -1174,17 +1174,16 @@ function node_update_1016() {
 }
 
 /**
- * @} End of "addtogroup updates-7.x-to-1.x"
- * The next series of updates should start at 2000.
- */
-
-/**
- * Update each content type new pageless configuration defaulted to '0'.
+ * Update each content type with new pageless configuration defaulted to disabled.
  */
 function node_update_1017() {
-  // Get the types.
   $types = config_get_names_with_prefix('node.type');
   foreach ($types as $type) {
     config_set($type, 'settings.pageless', '0');
   }
 }
+
+/**
+ * @} End of "addtogroup updates-7.x-to-1.x"
+ * The next series of updates should start at 2000.
+ */
