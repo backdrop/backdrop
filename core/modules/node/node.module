@@ -2274,9 +2274,8 @@ function node_page_default() {
 function node_page_view(Node $node) {
   // Determine if user has permission to view full page directly.
   // Display "page not found" if not.
-  global $user;
   $pageless = config_get('node.type.' . $node->type, 'settings.pageless');
-  $bypass_pageless = user_access('access page-less content', $user);
+  $bypass_pageless = user_access('view pageless content');
   if ($pageless && !$bypass_pageless) {
     backdrop_not_found();
     backdrop_exit();

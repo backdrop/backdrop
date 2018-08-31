@@ -305,7 +305,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'checkbox',
     '#title' => t('Hide full page display'),
     '#default_value' => $type->settings['pageless'],
-    '#description' => t('If enabled, the URL for this content will return a "Page not found", preventing it from being accessed directly. It may still be placed as a block or within a listing. Users who have the "View page-less content" will still be able to visit the full page URL.'),
+    '#description' => t('If enabled, this content can be placed as a block or within a listing but will not be accessible at its URL without proper permissions. This facilitates "pageless" content that is meant to be embedded with other content and never on its own. Users who have the "View pageless content" permission will still be able to visit the full page URL, while those without this permission will receive a "Page not found" error.'),
   );
 
   $form['old_type'] = array(
