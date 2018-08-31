@@ -1833,6 +1833,60 @@ function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $mi
 }
 
 /**
+ * Check for EXIF orientation data and rotate file if needed.
+ *
+ * @param File $file
+ *   A file entity.
+ * @param $orientation
+ *   A flag indicating that EXIF data should be checked and image rotated if necessary.
+ *
+ * @return
+ *   An array. If the file is an image and did not meet the requirements, it
+ *   will contain an error message.
+ *
+ * @see hook_file_validate()
+ */
+function file_validate_image_orientation(File $file, $orientation = 0) {
+  $errors = array();
+
+  // Check first that the file is an image.
+  if ($info = image_get_info($file->uri)) {
+    // Is orientation required and is PHP function available?
+    if ($orientation && function_exists('exif_read_data')) {
+      $file_exif = @exif_read_data(backdrop_realpath($file->uri));
+      // If the Orientation key|value exists rotate as required.
+      if (is_array($file_exif) && isset($file_exif['Orientation'])) {
+        // Orientation numbers and corresponding degrees.
+        // @note: Odd numbers are flipped images, would need different process.
+        switch ($file_exif['Orientation']) {
+          case 3:
+            $degrees = 180;
+            break;
+          case 6:
+            $degrees = 90;
+            break;
+          case 8:
+            $degrees = 270;
+            break;
+          default:
+            $degrees = 0;
+        }
+        if ($degrees > 0) {
+          // Load the image object for manipulation.
+          $file_image = image_load($file->uri);
+          if (image_rotate($file_image, $degrees, 0xffffff)) {
+            image_save($file_image);
+          }
+          backdrop_set_message(t('The image was rotated by @degrees degrees.', array('@degrees' => $degrees)));
+        }
+      }
+    }
+  }
+
+  return $errors;
+}
+
+/**
  * Saves a file to the specified destination and creates a database entry.
  *
  * @param $data

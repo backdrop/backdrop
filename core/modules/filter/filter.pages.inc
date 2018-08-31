@@ -197,6 +197,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     $max_dimensions = 0;
   }
   $max_filesize = !empty($upload_settings['max_size']) ? min(parse_size($upload_settings['max_size']), file_upload_max_size()) : file_upload_max_size();
+  $orientation = !empty($upload_settings['orientate']) ? $upload_settings['orientate'] : 0;
   $existing_file = !empty($values['data-file-id']) ? file_load($values['data-file-id']) : NULL;
   $fid = $existing_file ? $existing_file->fid : NULL;
   $form['image']['fid'] = array(
@@ -206,6 +207,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#default_value' => $fid ? $fid : NULL,
     '#upload_validators' => array(
       'file_validate_extensions' => array('gif png jpg jpeg'),
+      'file_validate_image_orientation' => array($orientation),
       'file_validate_size' => array($max_filesize),
       'file_validate_image_resolution' => array($max_dimensions),
     ),
