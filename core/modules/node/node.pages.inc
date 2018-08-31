@@ -451,7 +451,9 @@ function node_form($form, &$form_state, Node $node) {
  */
 function node_form_preview($form, &$form_state) {
   $node_tempstore_id = $form_state['node_tempstore_id'];
+  $old_status = $form_state['values']['status'];
   $node = node_form_submit_build_node($form, $form_state);
+  $node->old_status = $old_status;
 
   node_set_node_tempstore($node, $node_tempstore_id);
   $form_state['redirect'] = 'node/preview/' . $node->type . '/' . $node_tempstore_id;
@@ -544,7 +546,6 @@ function node_preview($node_tempstore_id, $node_type) {
   }
   
   // Set status to true so we don't get the 'unpublished' CSS.
-  $node->old_status = $node->status;
   $node->status = TRUE;
 
   _field_invoke_multiple('load', 'node', array($node->nid => $node));

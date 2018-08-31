@@ -613,7 +613,9 @@ class PagePreviewTestCase extends BackdropWebTestCase {
 
     // Test node settings during preview.
     $edit = array();
-    $edit[$title_key] = $this->randomName(8);
+    $name = $this->randomName(8);
+
+    $edit[$title_key] = $name;
     $edit[$body_key] = $this->randomName(16);
     $edit['status'] = 0;
     $this->backdropPost('node/add/page', $edit, t('Preview'));
@@ -628,7 +630,25 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     // Return to preview and save.
     $this->assertNoText('This Page is unpublished.', 'Page is not in draft state.');
     $this->backdropPost(NULL, array(), t('Save'));
-    $this->assertText('This Page is unpublished.', 'Page is shown in draft.');
+    $node = $this->backdropGetNodeByTitle($name);
+    $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
+
+    // Edit the node, check status then preview and save.
+    $this->clickLink('Edit');
+    $this->assertFieldByName('status', 0, 'Status is set to unpublished.');
+
+    $name = $this->randomName(8);
+    $edit = array();
+    $edit[$title_key] = $name;
+    $edit['status'] = 2;
+    $edit['scheduled[date]'] = format_date(REQUEST_TIME + 360, 'custom', 'Y-m-d', $web_user->timezone);
+    $edit['scheduled[time]'] = format_date(REQUEST_TIME + 360, 'custom', 'g:i a', $web_user->timezone);
+    $this->backdropPost(NULL, $edit, t('Preview'));
+    $this->backdropPost(NULL, array(), t('Save'));
+    $node = $this->backdropGetNodeByTitle($name);
+    $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
+
+    $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');
   }
 
 }
