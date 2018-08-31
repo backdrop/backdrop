@@ -305,7 +305,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'checkbox',
     '#title' => t('Hide path display'),
     '#default_value' => $type->settings['pageless'],
-    '#description' => t('If enabled, this content can be placed as a block or within a listing but will not be accessible at its URL without proper permissions. This facilitates "hidden path" content that is meant to be embedded with other content and never on its own. Users who have the "View hidden path content" permission will still be able to visit the full page URL, while those without this permission will receive a "Page not found" error.'),
+    '#description' => t('If enabled, this content can be placed as a block or within a listing but will not be accessible at its URL without proper permissions. This facilitates "hidden path" content that is meant to be embedded with other content and never on its own. Users who have the "View hidden path display" permission will still be able to visit the full page URL, while those without this permission will receive a "Page not found" error.'),
   );
 
   $form['old_type'] = array(
