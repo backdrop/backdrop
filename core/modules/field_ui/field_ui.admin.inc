@@ -899,6 +899,12 @@ function field_ui_display_overview($entity_type, $bundle) {
  * @ingroup forms
  */
 function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view_mode) {
+  $bundle_name = $bundle->name;
+  $page_title = field_ui_manage_display_title($entity_type, $view_mode);
+  backdrop_set_title(t('!page: !teaser display', array(
+    '!page' => $bundle_name,
+    '!teaser' => $page_title)));
+
   $bundle = field_extract_bundle($entity_type, $bundle);
 
   field_ui_inactive_message($entity_type, $bundle);
