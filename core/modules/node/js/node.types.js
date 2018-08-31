@@ -46,18 +46,6 @@ Backdrop.behaviors.contentTypes = {
       return vals.join(', ');
     });
 
-    // Pageless settings.
-    $context.find('#edit-display').backdropSetSummary(function() {
-      var vals = [];
-      if (!parseInt($context.find('input[name="pageless"]:checked').val())) {
-        vals.push(Backdrop.t('Showing pages'));
-      }
-      else {
-        vals.push(Backdrop.t('Hiding pages'));
-      }
-      return vals.join(', ');
-    });
-
     // Display settings.
     $context.find('#edit-display').backdropSetSummary(function(context) {
       var vals = [];
