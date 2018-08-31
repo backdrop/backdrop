@@ -1174,12 +1174,12 @@ function node_update_1016() {
 }
 
 /**
- * Update each content type with new pageless configuration defaulted to disabled.
+ * Update each content type with new hidden_path configuration defaulted to disabled.
  */
 function node_update_1017() {
   $types = config_get_names_with_prefix('node.type');
   foreach ($types as $type) {
-    config_set($type, 'settings.pageless', '0');
+    config_set($type, 'settings.hidden_path', '0');
   }
 }
 

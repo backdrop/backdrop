@@ -1315,18 +1315,18 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
     $config = config('node.type.foo');
     $this->assertFalse($config->isNew(), 'The new content type has been created in config.');
-    $this->assertEqual($config->get('settings.pageless'), '0', 'The new content type has pageless disabled.');
+    $this->assertEqual($config->get('settings.hidden_path'), '0', 'The new content type has hidden_path disabled.');
 
     // Add a node of type foo; make sure we can visit it with 200 response..
     $foo_settings = array('uid' => $web_user->uid, 'type' => 'foo');
     $foo_node = $this->backdropCreateNode($foo_settings);
     $this->backdropGet('/node/' . $foo_node->nid);
-    $this->assertResponse(200, 'Received 200 response from node type foo with pageless disabled.');
+    $this->assertResponse(200, 'Received 200 response from node type foo with hidden_path disabled.');
 
-    // Edit content type foo to pageless = 1 and check the setting.
-    $config->set('settings.pageless', '1');
+    // Edit content type foo to hidden_path = 1 and check the setting.
+    $config->set('settings.hidden_path', '1');
     $config->save();
-    $this->assertEqual($config->get('settings.pageless'), '1', 'The new content type has pageless enabled.');
+    $this->assertEqual($config->get('settings.hidden_path'), '1', 'The new content type has hidden_path enabled.');
     $this->backdropGet('/node/' . $foo_node->nid);
     $this->assertResponse(404, 'Received 404 response from node type foo where user restricted from viewing full page.');
 
