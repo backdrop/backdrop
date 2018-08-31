@@ -606,6 +606,29 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->assertText($edit[$body_key], 'Body displayed.');
     $this->assertText($edit[$email_key], 'Email displayed.');
     $this->assertNoText($this->term->name, 'Term not displayed.');
+
+    // Login as a second user with path permissions.
+    $web_user = $this->backdropCreateUser(array('bypass node access', 'administer nodes'));
+    $this->backdropLogin($web_user);
+
+    // Test node settings during preview.
+    $edit = array();
+    $edit[$title_key] = $this->randomName(8);
+    $edit[$body_key] = $this->randomName(16);
+    $edit['status'] = 0;
+    $this->backdropPost('node/add/page', $edit, t('Preview'));
+
+    $this->assertNoText('This Page is unpublished.', 'Page is not in draft state.');
+
+    // Return to the node edit page and check field values.
+    $this->clickLink('Back to content editing');
+
+    $this->assertFieldByName('status', 0, 'Status is set to unpublished.');
+
+    // Return to preview and save.
+    $this->assertNoText('This Page is unpublished.', 'Page is not in draft state.');
+    $this->backdropPost(NULL, array(), t('Save'));
+    $this->assertText('This Page is unpublished.', 'Page is shown in draft.');
   }
 
 }
