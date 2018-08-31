@@ -1082,16 +1082,16 @@ function system_modules_uninstall_confirm_form($storage) {
     );
   }
 
-  // Display a confirm form if modules have been selected.
+  // Display a confirmation form if modules have been selected.
   if (isset($uninstall)) {
+    backdrop_set_message(t('Uninstalling modules causes all data from these modules to be lost!'), 'warning');
     $form['#confirmed'] = TRUE;
     $form['uninstall']['#tree'] = TRUE;
-    $form['modules'] = array('#markup' => '<p>' . t('The following modules will be completely uninstalled from your site, and <em>all data from these modules will be lost</em>!') . '</p>' . theme('item_list', array('items' => $uninstall)));
     $form = confirm_form(
       $form,
       t('Confirm uninstall'),
       'admin/modules/uninstall',
-      t('Would you like to continue with uninstalling the above?'),
+      t('Are you sure you want to continue with uninstalling the modules listed below?') . theme('item_list', array('items' => $uninstall)),
       t('Uninstall'),
       t('Cancel'));
     return $form;
