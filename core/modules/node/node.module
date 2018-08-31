@@ -1285,9 +1285,9 @@ function node_permission() {
     'delete revisions' => array(
       'title' => t('Delete content revisions'),
     ),
-    'view page-less content' => array(
-      'title' => t('View page-less content'),
-      'description' => t('View full page URL of content, overriding restriction on viewing content directly.'),
+    'view hidden path content' => array(
+      'title' => t('View hidden path content'),
+      'description' => t('View URL of content, overriding restriction on viewing content directly.'),
     ),
   );
 
@@ -2275,7 +2275,7 @@ function node_page_view(Node $node) {
   // Determine if user has permission to view full page directly.
   // Display "page not found" if not.
   $pageless = config_get('node.type.' . $node->type, 'settings.pageless');
-  $bypass_pageless = user_access('view pageless content');
+  $bypass_pageless = user_access('view hidden path content');
   if ($pageless && !$bypass_pageless) {
     backdrop_not_found();
     backdrop_exit();

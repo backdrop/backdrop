@@ -453,9 +453,10 @@ function node_form_submit($form, &$form_state) {
       // If node type set to prevent direct viewing of full page URL
       // stay on edit page if user is not permitted.
       $pageless = config_get('node.type.' . $node->type, 'settings.pageless');
-      $bypass_pageless = user_access('view pageless content');
+      $bypass_pageless = user_access('view hidden path content');
       if ($pageless && !$bypass_pageless) {
         $form_state['redirect'] = 'node/' . $node->nid . '/edit';
+        backdrop_set_message(t('You do not have permission to view content where the path is hidden.'), 'warning');
       }
     }
   }
