@@ -688,7 +688,7 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
 }
 
 /**
- * Submit handler for the node preview view mode selection form.
+ * Submit handler for the node preview banner form.
  *
  * @see node_preview_banner_form()
  */
@@ -710,7 +710,8 @@ function node_preview_banner_form_node_submit(array $form, array &$form_state) {
     }
   }
   else {
-    backdrop_goto('node/' . $node->nid);
+    $destination = node_access('view', $node) ? 'node/' . $node->nid : '<front>';
+    backdrop_goto($destination);
   }
 }
 
