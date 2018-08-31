@@ -303,9 +303,9 @@ function node_type_form($form, &$form_state, $type = NULL) {
   }
   $form['display']['pageless'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Prevent visitors from seeing content on its own page.'),
+    '#title' => t('Hide full page display.'),
     '#default_value' => $type->settings['pageless'],
-    '#description' => t('The content can still be visible in a view or a block, but will be hidden to those without the proper permissions when accessed as a full page.'),
+    '#description' => t('If enabled, the URL for this content will return a "Page not found", preventing it from being accessed directly. It may still be placed as a block or within a listing. Users who have the "View page-less content" will still be able to visit the full page URL.'),
   );
 
   $form['old_type'] = array(
@@ -563,7 +563,7 @@ function node_node_type_load(&$types) {
       'node_submitted' => TRUE,
       'node_user_picture' => TRUE,
 
-      // Pageless settings
+      // Setting to prevent page from being accessed directly.
       'pageless' => FALSE,
 
       // Though Language module is required to change this setting, all node

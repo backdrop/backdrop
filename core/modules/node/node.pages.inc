@@ -444,7 +444,21 @@ function node_form_submit($form, &$form_state) {
   if ($node->nid) {
     $form_state['values']['nid'] = $node->nid;
     $form_state['nid'] = $node->nid;
-    $form_state['redirect'] = node_access('view', $node) ? 'node/' . $node->nid : '<front>';
+
+    // Determine whether to redirect user to full page display.
+    $form_state['redirect'] = '<front>';
+    if (node_access('view', $node)) {
+      $form_state['redirect'] = 'node/' . $node->nid;
+
+      // If node type set to prevent direct viewing of full page URL
+      // stay on edit page if user is not permitted.
+      global $user;
+      $pageless = config_get('node.type.' . $node->type, 'settings.pageless');
+      $bypass_pageless = user_access('view page-less content', $user);
+      if ($pageless && !$bypass_pageless) {
+        $form_state['redirect'] = 'node/' . $node->nid . '/edit';
+      }
+    }
   }
   else {
     // In the unlikely case something went wrong on save, the node will be
