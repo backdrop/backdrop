@@ -12,7 +12,7 @@
   padding: 10px;
   overflow: auto;
 }
-.page.preview-js-processed .node-preview-container {
+body .node-preview-container.node-preview-processed {
   position: fixed;
   bottom: 0;
 }
