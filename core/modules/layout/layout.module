@@ -1064,8 +1064,8 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
 
   if (empty($cache[$router_item['path']])) {
     $layouts = layout_load_multiple_by_path($router_item['path'], TRUE);
-    $data = NULL;
-    backdrop_alter('layout_get_layout_by_path', $layouts, $router_item, $data);
+    $object = NULL;
+    backdrop_alter('layout_get_layout_by_path', $layouts, $router_item, $object);
     $selected_layout = NULL;
     foreach ($layouts as $layout) {
       // Contexts must be set before the layout's access may be checked.
@@ -1076,8 +1076,8 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
           // Check for an object loaded by the menu router or one provided by a
           // module implementing hook_layout_get_layout_by_path_alter();
           if (isset($router_item['map'][$context->position])) {
-            $data = !empty($data) ? $data : $router_item['map'][$context->position];
-            $context->setData($data);
+            $object = !empty($object) ? $object : $router_item['map'][$context->position];
+            $context->setData($object);
           }
 
           // If no context is set, load one using the layout info.
