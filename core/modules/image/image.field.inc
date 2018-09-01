@@ -519,6 +519,10 @@ function image_field_formatter_info() {
         'image_link' => '',
         'image_float' => '',
       ),
+	  'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
+	  'file formatter' => array(
+        'mime types' => array('image/*'),
+      ),
     ),
   );
 

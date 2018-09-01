@@ -344,6 +344,9 @@ function standard_install() {
   );
   field_create_instance($instance);
 
+  // Create File alt and title fields.
+  _create_file_alt_title_fields();
+
   // Enable default permissions for system roles.
   $filtered_html_permission = filter_permission_name($filtered_html_format);
   user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access content', 'access comments', $filtered_html_permission));
@@ -398,4 +401,190 @@ function standard_install() {
   config_set('system.core', 'preprocess_css', '1');
   config_set('system.core', 'preprocess_js', '1');
   config_set('system.core', 'cache', '1');
+}
+
+/**
+ * Function to create the title and alt text fields and instances.
+ */
+function _create_file_alt_title_fields() {
+  $t = get_t();
+  // Create the alt text field and instance.
+  // Define the alt text field.
+  $alt_text_field = array(
+    'active' => '1',
+    'cardinality' => '1',
+    'deleted' => '0',
+    'entity_types' => array(),
+    'field_name' => 'field_fiat',
+    'foreign keys' => array(
+      'format' => array(
+        'columns' => array(
+          'format' => 'format',
+        ),
+        'table' => 'filter_format',
+      ),
+    ),
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => '255',
+    ),
+    'translatable' => '0',
+    'type' => 'text',
+  );
+
+  // As long as the alt text field doesn't already exist create it.
+  if (!field_info_field($alt_text_field['field_name'])) {
+    field_create_field($alt_text_field);
+  }
+
+  // Define the alt text instance.
+  $alt_text_instance = array(
+    'bundle' => 'image',
+    'default_value' => NULL,
+    'deleted' => '0',
+    'description' => t('Alternative text is used by screen readers, search engines, and when the image cannot be loaded. By adding alt text you improve accessibility and search engine optimization.'),
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'preview' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'file',
+    'field_name' => 'field_fiat',
+    'label' => 'Alt text',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => '0',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => '60',
+      ),
+      'type' => 'text_textfield',
+      'weight' => '-4',
+    ),
+  );
+
+  // As long as the alt text instance doesn't already exist create it.
+  if (!field_info_instance($alt_text_instance['entity_type'], $alt_text_instance['field_name'], $alt_text_instance['bundle'])) {
+    field_create_instance($alt_text_instance);
+  }
+
+  // Create the title text field and instance.
+  // Define the title text field.
+  $title_text_field = array(
+    'active' => '1',
+    'cardinality' => '1',
+    'deleted' => '0',
+    'entity_types' => array(),
+    'field_name' => 'field_fitt',
+    'foreign keys' => array(
+      'format' => array(
+        'columns' => array(
+          'format' => 'format',
+        ),
+        'table' => 'filter_format',
+      ),
+    ),
+    'indexes' => array(
+      'format' => array(
+        0 => 'format',
+      ),
+    ),
+    'module' => 'text',
+    'settings' => array(
+      'max_length' => '255',
+    ),
+    'translatable' => '0',
+    'type' => 'text',
+  );
+
+  // As long as the title text field doesn't exist create it.
+  if (!field_info_field($title_text_field['field_name'])) {
+    field_create_field($title_text_field);
+  }
+
+  // Define the title text instance.
+  $title_text_instance = array(
+    'bundle' => 'image',
+    'default_value' => NULL,
+    'deleted' => '0',
+    'description' => t('Title text is used in the tool tip when a user hovers their mouse over the image. Adding title text makes it easier to understand the context of an image and improves usability.'),
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 1,
+      ),
+      'full' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'preview' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => 0,
+      ),
+    ),
+    'entity_type' => 'file',
+    'field_name' => 'field_fitt',
+    'label' => 'Title text',
+    'required' => 0,
+    'settings' => array(
+      'text_processing' => '0',
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'text',
+      'settings' => array(
+        'size' => '60',
+      ),
+      'type' => 'text_textfield',
+      'weight' => '-3',
+    ),
+  );
+
+  // As long as the title text instance doesn't already exist create it.
+  if (!field_info_instance($title_text_instance['entity_type'], $title_text_instance['field_name'], $title_text_instance['bundle'])) {
+    field_create_instance($title_text_instance);
+  }
 }

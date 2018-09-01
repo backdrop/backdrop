@@ -1,0 +1,12 @@
+{
+    "_config_name": "file.type.video",
+    "type": "video",
+    "name": "Video",
+    "description": "A Video file is a moving visual recording.",
+    "mimetypes": [
+        "video/*"
+    ],
+    "disabled": false,
+    "storage": 4,
+    "module": "file"
+}
