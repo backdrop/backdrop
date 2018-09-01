@@ -105,11 +105,23 @@ function file_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'type' => array(
+        'description' => 'The type of this file.',
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        // If the FILE_TYPE_NONE constant ever changes, then change the value here
+        // too, and add an update function to deal with existing records. The
+        // constant isn't used here, because there may be cases where this function
+        // runs without the module file loaded.
+        'default' => 'undefined',
+      ),
     ),
     'indexes' => array(
       'uid' => array('uid'),
       'status' => array('status'),
       'timestamp' => array('timestamp'),
+      'file_type' => array('type'),
     ),
     'unique keys' => array(
       'uri' => array('uri'),
@@ -166,6 +178,39 @@ function file_schema() {
       'type_id' => array('type', 'id'),
       'fid_count' => array('fid', 'count'),
       'fid_module' => array('fid', 'module'),
+    ),
+  );
+
+  $schema['file_metadata'] = array(
+    'description' => 'Cache images dimensions.',
+    'fields' => array(
+      'fid' => array(
+        'description' => 'The {file_managed}.fid of the metadata.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => "The name of the metadata (e.g. 'width').",
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'value' => array(
+        'description' => "The value of the metadata (e.g. '200px').",
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('fid', 'name'),
+    'foreign keys' => array(
+      'file_managed' => array(
+        'table' => 'file_managed',
+        'columns' => array('fid' => 'fid'),
+      ),
     ),
   );
 
@@ -695,9 +740,106 @@ function file_update_1001() {
 }
 
 /**
- * Switch the 'edit files' permission from file_entity to 'manage files'.
+ * Add {file_managed}.type field
  */
 function file_update_1002() {
+  $schema = array();
+  $schema['file_metadata'] = array(
+    'description' => 'Cache images dimensions.',
+    'fields' => array(
+      'fid' => array(
+        'description' => 'The {file_managed}.fid of the metadata.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => "The name of the metadata (e.g. 'width').",
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'value' => array(
+        'description' => "The value of the metadata (e.g. '200px').",
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('fid', 'name'),
+    'foreign keys' => array(
+      'file_managed' => array(
+        'table' => 'file_managed',
+        'columns' => array('fid' => 'fid'),
+      ),
+    ),
+  );
+  $spec = array(
+    'description' => 'The type of this file.',
+    'type' => 'varchar',
+    'length' => 50,
+    'not null' => TRUE,
+    'default' => 'undefined',
+  );
+  $indexes_new = array(
+    'indexes' => array(
+      'file_type' => array('type'),
+    ),
+  );
+
+  // If another module (e.g., Media) had added a {file_managed}.type field,
+  // then change it to the expected specification. Otherwise, add the field.
+  if (db_field_exists('file_managed', 'type')) {
+    // db_change_field() will fail if any records have type=NULL, so update
+    // them to the new default value.
+    db_update('file_managed')->fields(array('type' => $spec['default']))->isNull('type')->execute();
+
+    // Indexes using a field being changed must be dropped prior to calling
+    // db_change_field(). However, the database API doesn't provide a way to do
+    // this without knowing what the old indexes are. Therefore, it is the
+    // responsibility of the module that added them to drop them prior to
+    // allowing this module to be installed.
+    db_change_field('file_managed', 'type', 'type', $spec, $indexes_new);
+  }
+  else {
+    db_add_field('file_managed', 'type', $spec, $indexes_new);
+  }
+
+  // Create the {file_metadata} database table.
+  if (!db_table_exists('file_metadata')) {
+    db_create_table('file_metadata', $schema['file_metadata']);
+  }
+
+  // Set permissions.
+  $roles = user_roles();
+  foreach ($roles as $rid => $role) {
+    user_role_grant_permissions($rid, array('view files'));
+  }
+
+  // Create the title and alt text fields.
+  // _file_create_alt_title_fields();
+
+  // Classify existing files according to the currently defined file types.
+  // Queue all files to be classified during cron runs using the Queue API.
+  $queue = BackdropQueue::get('file_type_determine');
+  $result = db_query('SELECT fid FROM {file_managed}');
+  foreach ($result as $record) {
+    $queue->createItem($record->fid);
+  }
+
+  // Warn users that existing files will not have a file type until the queue
+  // has been processed.
+  if ($queue->numberOfItems()) {
+    backdrop_set_message(t('Existing files must be classified according to the currently defined file types. These files have been queued for processing and will have their file type determined during cron runs.'));
+  }
+}
+
+/**
+ * Switch the 'edit files' permission from file_entity to 'manage files'.
+ */
+function file_update_1003() {
   $roles = user_roles(FALSE, 'edit files');
   foreach ($roles as $role_name => $role_label) {
     $config = config('user.role.' . $role_name);

@@ -57,3 +57,87 @@ name = File administration
 description = Test file administration page functionality.
 group = File
 file = file.test
+
+[FileTestHelper]
+name = FileTestHelper
+description = FileTestHelper
+group = File
+file = file.test
+
+[FileFileTypeClassificationTestCase]
+name = File classification
+description = Test existing file entity classification functionality.
+group = File
+file = file.test
+
+[FileUnitTestCase]
+name = File unit tests
+description = Test basic file entity functionality.
+group = File
+file = file.test
+
+[FileEditTestCase]
+name = File edit
+description = Create a file and test file edit functionality.
+group = File
+file = file.test
+
+[FileUploadWizardTestCase]
+name = File upload wizard
+description = Upload a file using the multi-step wizard.
+group = File
+file = file.test
+
+[FileAdminTestCase]
+name = File administration
+description = Test file administration page functionality.
+group = File
+file = file.test
+
+[FileUsageTestCase]
+name = File usage page
+description = Create a file and verify its usage.
+group = File
+file = file.test
+
+[FileAltTitleTestCase]
+name = File alt and title text
+description = Create an image file with alt and title text.
+group = File
+file = file.test
+
+[FileChangeSchemeTestCase]
+name = Changing file scheme
+description = Test changing the scheme of a file.
+group = File
+file = file.test
+
+[FileReplaceTestCase]
+name = File replacement
+description = Test file replace functionality.
+group = File
+file = file.test
+
+[FileTypeTestCase]
+name = File types
+description = Test the file entity types.
+group = File
+file = file.test
+
+[FileAccessTestCase]
+name = File access
+description = Test the access aspects of file entity.
+group = File
+file = file.test
+
+[FileAttributeOverrideTestCase]
+name = File attribute override
+description = Test overriding file entity attributes.
+group = File
+file = file.test
+
+[FileViewsFieldLinkUsageHandlerTest]
+name = File views integration: file link usage
+description = Test file usage Views field.
+group = File
+file = file.test
