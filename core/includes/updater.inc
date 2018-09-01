@@ -181,16 +181,21 @@ abstract class Updater implements BackdropUpdaterInterface {
    * @throws UpdaterException
    */
   public static function getProjectType($directory) {
-    $info_file = self::findInfoFile($directory);
-    $info = backdrop_parse_info_file($info_file);
-    if (empty($info)) {
-      throw new UpdaterException(t('Unable to parse info file: %info_file.', array('%info_file' => $info_file)));
+    if ($directory == BACKDROP_ROOT) {
+      return 'core';
     }
-    if (empty($info['type'])) {
-      throw new UpdaterException(t("The info file (%info_file) does not define a 'type' attribute.", array('%info_file' => $info_file)));
-    }
+    else {
+      $info_file = self::findInfoFile($directory);
+      $info = backdrop_parse_info_file($info_file);
+      if (empty($info)) {
+        throw new UpdaterException(t('Unable to parse info file: %info_file.', array('%info_file' => $info_file)));
+      }
+      if (empty($info['type'])) {
+        throw new UpdaterException(t("The info file (%info_file) does not define a 'type' attribute.", array('%info_file' => $info_file)));
+      }
 
-    return $info['type'];
+      return $info['type'];
+    }
   }
 
   /**
@@ -276,10 +281,19 @@ abstract class Updater implements BackdropUpdaterInterface {
       }
 
       // Copy the directory in place.
-      $filetransfer->copyDirectory($this->source, $args['install_dir']);
+      // Check for core udpate.
+      if ($this->name == 'backdrop') {
+        $source = $this->source . '/core';
+        $name = 'core';
+      }
+      else {
+        $source = $this->source;
+        $name = $this->name;
+      }
+      $filetransfer->copyDirectory($source, $args['install_dir']);
 
       // Make sure what we just installed is readable by the web server.
-      $this->makeWorldReadable($filetransfer, $args['install_dir'] . '/' . $this->name);
+      $this->makeWorldReadable($filetransfer, $args['install_dir'] . '/' . $name);
 
       // Run the updates.
       // @TODO: decide if we want to implement this.
