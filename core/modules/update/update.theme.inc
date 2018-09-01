@@ -121,7 +121,7 @@ function theme_update_report($variables) {
           $updatepath = 'admin/layouts/update';
           break;
 
-        case 'core':  
+        case 'core':
         case 'module':
         default:
           $updatepath = 'admin/modules/update';

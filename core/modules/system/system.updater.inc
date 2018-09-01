@@ -18,7 +18,7 @@ class CoreUpdater extends Updater {
   }
 
   public function isInstalled() {
-    return (bool) file_exists($this->getInstallDirectory()); 
+    return (bool) file_exists($this->getInstallDirectory());
   }
 
   public static function canUpdateDirectory($directory) {
