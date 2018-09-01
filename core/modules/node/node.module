@@ -3639,6 +3639,7 @@ function node_autoload_info() {
     'views_handler_field_node_type' => 'views/views_handler_field_node_type.inc',
     'views_handler_filter_history_user_timestamp' => 'views/views_handler_filter_history_user_timestamp.inc',
     'views_handler_filter_node_access' => 'views/views_handler_filter_node_access.inc',
+    'views_handler_filter_node_hidden_path' => 'views/views_handler_filter_node_hidden_path.inc',
     'views_handler_filter_node_status' => 'views/views_handler_filter_node_status.inc',
     'views_handler_filter_node_type' => 'views/views_handler_filter_node_type.inc',
     'views_handler_filter_node_uid_revision' => 'views/views_handler_filter_node_uid_revision.inc',
