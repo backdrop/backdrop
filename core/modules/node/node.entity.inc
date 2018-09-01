@@ -148,6 +148,13 @@ class Node extends Entity {
   public $revision_uid;
 
   /**
+   * The node preview status.
+   *
+   * @var boolean
+   */
+  public $in_preview;
+
+  /**
    * Create a new Node instance.
    */
   function __construct(array $values = array()) {

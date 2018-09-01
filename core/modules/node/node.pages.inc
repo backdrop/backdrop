@@ -377,7 +377,7 @@ function node_form($form, &$form_state, Node $node) {
         $path = 'node/' . $node->nid;
       }
       else {
-        // todo store old $_SERVER['HTTP_REFERER'] so we can redirect to that.
+        // @todo store old $_SERVER['HTTP_REFERER'] so we can redirect to that.
         $path = '<front>';
       }
     }
@@ -573,11 +573,10 @@ function node_preview($node_tempstore_id, $node_type) {
   // Property so we can manipulate $page in template_preprocess_node.
   if ($view_mode == 'full' || $view_mode == 'default') {
     backdrop_set_title($node->title);
-    $node->node_page_title = TRUE;
+    $node->in_preview = TRUE;
   }
  
   $build = array();
-  // @todo all links should be disabled, except for returning to the edit form.
   $build['#attached']['js'][] = backdrop_get_path('module', 'node') . '/js/node.preview.js';
   $build['#attached']['css'][] = backdrop_get_path('module', 'node') . '/css/node.preview.css';
   $build['preview_form_select'] = array(
@@ -656,7 +655,6 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
   $form['view_mode'] = array(
     '#type' => 'select',
     '#title' => t('Select a display mode'),
-    //'#title_display' => 'invisible',
     '#options' => $view_mode_options,
     '#default_value' => $view_mode,
     '#attributes' => array(
@@ -665,7 +663,7 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
     )
   );
   // This must be the first submit function so the 'onChange' event in 
-  // calls it before any other submit.$form['view_mode']
+  // calls it before any other submit.
   $form['view_mode_submit'] = array(
     '#type' => 'submit',
     '#name' => 'op',
