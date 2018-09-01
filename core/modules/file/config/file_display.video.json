@@ -1,0 +1,74 @@
+{
+    "_config_name": "file_display.video",
+    "type": "video",
+    "default": {
+        "file_field_file_download_link": {
+            "status": 0,
+            "weight": "0",
+            "settings": {
+                "text": "Download [file:name]"
+            }
+        },
+        "file_field_file_default": {
+            "status": 0,
+            "weight": "0"
+        },
+        "file_field_file_table": {
+            "status": 0,
+            "weight": "0"
+        },
+        "file_field_file_url_plain": {
+            "status": 0,
+            "weight": "0"
+        },
+        "file_field_file_video": {
+            "status": 1,
+            "weight": "0",
+            "settings": {
+                "controls": 1,
+                "autoplay": 0,
+                "loop": 0,
+                "muted": 0,
+                "width": "",
+                "height": "",
+                "preload": "",
+                "multiple_file_behavior": "tags"
+            }
+        }
+    },
+    "preview": {
+        "file_field_file_download_link": {
+            "status": 0,
+            "weight": "0",
+            "settings": {
+                "text": "Download [file:name]"
+            }
+        },
+        "file_field_file_default": {
+            "status": 1,
+            "weight": "0"
+        },
+        "file_field_file_table": {
+            "status": 0,
+            "weight": "0"
+        },
+        "file_field_file_url_plain": {
+            "status": 0,
+            "weight": "0"
+        },
+        "file_field_file_video": {
+            "status": 0,
+            "weight": "0",
+            "settings": {
+                "controls": 1,
+                "autoplay": 0,
+                "loop": 0,
+                "muted": 0,
+                "width": "",
+                "height": "",
+                "preload": "",
+                "multiple_file_behavior": "tags"
+            }
+        }
+    }
+}

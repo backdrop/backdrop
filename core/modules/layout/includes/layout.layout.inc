@@ -12,6 +12,53 @@
  * @see taxonomy_layout_context_info().
  */
 function layout_layout_context_info() {
+  $info['node'] = array(
+    'title' => t('Node'),
+    // Define the class which is used to handle this context.
+    'class' => 'EntityLayoutContext',
+    // Define menu paths where the node ID is a "known" context.
+    'menu paths' => array(
+      'node/%node',
+      'node/%node/view',
+    ),
+    // Given the menu paths defined above, identify the part of the path that
+    // is needed to generate this context.
+    'path placeholder' => '%node',
+
+    // Given an argument, the callback that will be responsible for loading the
+    // main context data.
+    'load callback' => 'node_load',
+  );
+  $info['user'] = array(
+    'title' => t('User'),
+    'class' => 'EntityLayoutContext',
+    'menu paths' => array(
+      'user/%user',
+      'user/%user/view',
+    ),
+    'path placeholder' => '%user',
+    'load callback' => 'user_load',
+  );
+  $info['taxonomy_term'] = array(
+    'title' => t('Term'),
+    'class' => 'EntityLayoutContext',
+    'menu paths' => array(
+      'taxonomy/term/%term',
+      'taxonomy/term/%term/view',
+    ),
+    'path placeholder' => '%term',
+    'load callback' => 'taxonomy_term_load',
+  );
+  $info['file'] = array(
+    'title' => t('File'),
+    'class' => 'EntityLayoutContext',
+    'menu paths' => array(
+      'file/%file',
+      'file/%file/view',
+    ),
+    'path placeholder' => 'file',
+    'load callback' => 'file_load',
+  );
   $info['overrides_path'] = array(
     'title' => t('Overrides path'),
     'description' => t('Layout overrides existing path provided by another module.'),

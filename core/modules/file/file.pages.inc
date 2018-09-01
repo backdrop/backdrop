@@ -5,13 +5,475 @@
  */
 
 /**
+ * Form callback for adding a file via an upload form.
+ *
+ * This is a multi step form which has 1-4 pages:
+ * - Upload file
+ * - Choose filetype
+ *   If there is only one candidate (based on mimetype) we will skip this step.
+ * - Edit scheme
+ * - Edit fields (Skip this step if there are no fields on this entity type.)
+ */
+function file_add_form($form, &$form_state, $options = array()) {
+  if (!is_array($options)) {
+    $options = array($options);
+  }
+  $step = (isset($form_state['step']) && in_array($form_state['step'], array(1, 2, 3, 4))) ? $form_state['step'] : 1;
+
+  $form['#step'] = $step;
+  $form['#options'] = $options + array(
+    'types' => array(),
+    'enabledPlugins' => array(),
+    'schemes' => array(),
+    'max_filesize' => '',
+    'uri_scheme' => 'public',
+  );
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => 'admin/content/files',
+    '#weight' => 15,
+  );
+
+  switch ($step) {
+    case 1:
+      $form['upload'] = array(
+        '#type' => 'managed_file',
+        '#title' => t('Upload a new file'),
+        '#upload_location' => file_upload_destination_uri($options),
+        '#upload_validators' => file_get_upload_validators($options),
+        '#progress_indicator' => 'bar',
+        '#pre_render' => array('file_managed_file_pre_render', 'file_upload_validators_pre_render'),
+        '#default_value' => isset($form_state['storage']['upload']) ? $form_state['storage']['upload'] : NULL,
+      );
+
+      $form['actions']['next'] = array(
+        '#type' => 'submit',
+        '#value' => t('Next'),
+      );
+
+      form_load_include($form_state, 'inc', 'file', 'file.pages');
+
+      return $form;
+
+    case 2:
+      return file_add_upload_step_filetype($form, $form_state, $options);
+
+    case 3:
+      return file_add_upload_step_scheme($form, $form_state, $options);
+
+    case 4:
+      return file_add_upload_step_fields($form, $form_state, $options);
+  }
+}
+
+/**
+ * Generate form fields for the second step in the add file wizard.
+ */
+function file_add_upload_step_filetype($form, &$form_state, array $options = array()) {
+  backdrop_set_title(t('Configure file type'));
+  $file = file_load($form_state['storage']['upload']);
+  $selected_files = $form['#options']['types'];
+
+  $form['type'] = array(
+    '#type' => 'radios',
+    '#title' => t('File type'),
+    '#options' => file_get_filetype_candidates($file, $selected_files),
+    '#default_value' => isset($form_state['storage']['type']) ? $form_state['storage']['type'] : NULL,
+    '#required' => TRUE,
+  );
+
+  $form['actions']['previous'] = array(
+    '#type' => 'submit',
+    '#value' => t('Previous'),
+    '#limit_validation_errors' => array(),
+    '#submit' => array('file_add_form_submit'),
+  );
+  $form['actions']['next'] = array(
+    '#type' => 'submit',
+    '#value' => t('Next'),
+  );
+
+  return $form;
+}
+
+/**
+ * Generate form fields for the third step in the add file wizard.
+ */
+function file_add_upload_step_scheme($form, &$form_state, array $options = array()) {
+  backdrop_set_title(t('Configure file scheme'));
+  $file = file_load($form_state['storage']['upload']);
+
+  $schemes = array();
+  foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
+    $schemes[$scheme] = check_plain($info['description']);
+  }
+
+  // Remove any schemes not found in the instance settings.
+  if (!empty($options['schemes'])) {
+    $schemes = array_intersect_key($schemes, array_flip($options['schemes']));
+  }
+
+  // Determine which scheme to use as the default value.
+  if (isset($form_state['storage']['scheme'])) {
+    $fallback_scheme = $form_state['storage']['scheme'];
+  }
+  elseif (!empty($options['uri_scheme'])) {
+    $fallback_scheme = $options['uri_scheme'];
+  }
+  else {
+    $fallback_scheme = file_default_scheme();
+  }
+
+  $form['scheme'] = array(
+    '#type' => 'radios',
+    '#title' => t('Destination'),
+    '#options' => $schemes,
+    '#default_value' => $fallback_scheme,
+    '#required' => TRUE,
+  );
+
+  $form['actions']['previous'] = array(
+    '#type' => 'submit',
+    '#value' => t('Previous'),
+    '#limit_validation_errors' => array(),
+    '#submit' => array('file_add_form_submit'),
+  );
+  $form['actions']['next'] = array(
+    '#type' => 'submit',
+    '#value' => t('Next'),
+  );
+
+  return $form;
+}
+
+/**
+ * Generate form fields for the fourth step in the add file wizard.
+ */
+function file_add_upload_step_fields($form, &$form_state, array $options = array()) {
+  backdrop_set_title(t('Configure file fields'));
+  // Load the file and overwrite the filetype set on the previous screen.
+  $file = file_load($form_state['storage']['upload']);
+  $file->type = $form_state['storage']['type'];
+
+  // Let users modify the filename here.
+  $form['filename'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#default_value' => $file->filename,
+    '#required' => TRUE,
+    '#maxlength' => 255,
+    '#weight' => -10,
+  );
+
+  // Add fields.
+  field_attach_form('file', $file, $form, $form_state);
+
+  $form['actions']['previous'] = array(
+    '#type' => 'submit',
+    '#value' => t('Previous'),
+    '#limit_validation_errors' => array(),
+    '#submit' => array('file_add_form_submit'),
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  return $form;
+}
+
+/**
+ * Validation handler for file_add_form().
+ */
+function file_add_form_validate($form, &$form_state) {
+  if ($form['#step'] === 1 && empty($form_state['values']['upload'])) {
+    form_set_error('upload', t('You need to upload a file.'));
+  }
+}
+
+/**
+ * Get the candidate filetypes for a given file.
+ *
+ * Only filetypes for which the user has access to create entities are returned.
+ *
+ * @param array $file
+ *   An upload file array from form_state.
+ *
+ * @return array
+ *   An array of file type bundles that support the file's mime type.
+ */
+function file_get_filetype_candidates($file, $selected_files = array()) {
+  $types = module_invoke_all('file_type', $file);
+  backdrop_alter('file_type', $types, $file);
+
+  // If no file types are selected in field instance settings, allow all
+  // available types.
+  if (!empty($selected_files)) {
+    // Limit file type candidates to field allowed types.
+    $types = array_intersect($types, $selected_files);
+  }
+
+  $candidates = array();
+  foreach ($types as $type) {
+    $file->type = $type;
+    if (file_access('create', $file)) {
+      $candidates[$type] = file_type_get_name($file);
+    }
+  }
+  return $candidates;
+}
+
+/**
+ * Submit handler for the add file form.
+ */
+function file_add_form_submit($form, &$form_state) {
+  $config = config('file.settings');
+  $form_state['storage'] = isset($form_state['storage']) ? $form_state['storage'] : array();
+  $form_state['storage'] = array_merge($form_state['storage'], $form_state['values']);
+
+  // Field selected allowed types.
+  $selected_files = $form['#options']['types'];
+
+  // This var is set to TRUE when we are ready to save the file.
+  $save = FALSE;
+  $trigger = $form_state['triggering_element']['#id'];
+  $triggered_next = $trigger == 'edit-next' || (strpos($trigger, 'edit-next--') === 0);
+  $triggered_previous = $trigger == 'edit-previous' || (strpos($trigger, 'edit-previous--') === 0);
+  $step_delta = ($triggered_previous) ? -1 : 1;
+
+  $steps_to_check = array(2, 3);
+  if ($triggered_previous) {
+    // If the previous button was hit,
+    // the step checking order should be reversed 3, 2.
+    $steps_to_check = array_reverse($steps_to_check);
+  }
+
+  foreach ($steps_to_check as $step) {
+    // Check if we can skip step 2 and 3.
+    if (($form['#step'] == $step - 1 && $triggered_next) || ($form['#step'] == $step + 1 && $triggered_previous)) {
+      $file = file_load($form_state['storage']['upload']);
+      if ($step == 2) {
+        // Check if we can skip step 2.
+        $candidates = file_get_filetype_candidates($file, $selected_files);
+        if (count($candidates) == 1) {
+          $candidates_keys = array_keys($candidates);
+          // There is only one possible filetype for this file.
+          // Skip the second page.
+          $form['#step'] += $step_delta;
+          $form_state['storage']['type'] = reset($candidates_keys);
+        }
+        elseif (!$candidates || $config->get('upload_wizard_skip_file_type')) {
+          // Do not assign the file a file type.
+          $form['#step'] += $step_delta;
+          $form_state['storage']['type'] = FILE_TYPE_NONE;
+        }
+      }
+      else {
+        // Check if we can skip step 3.
+        $options = $form['#options'];
+        $schemes = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
+
+        // Remove any schemes not found in the instance settings.
+        if (!empty($options['schemes'])) {
+          $schemes = array_intersect_key($schemes, $options['schemes']);
+        }
+
+        if (!file_is_writeable($file)) {
+          // The file is read-only (remote) and must use its provided scheme.
+          $form['#step'] += $step_delta;
+          $form_state['storage']['scheme'] = file_uri_scheme($file->uri);
+        }
+        elseif (count($schemes) == 1) {
+          // There is only one possible stream wrapper for this file.
+          // Skip the third page.
+          $form['#step'] += $step_delta;
+          $form_state['storage']['scheme'] = key($schemes);
+        }
+        elseif ($config->get('upload_wizard_skip_scheme')) {
+          $form['#step'] += $step_delta;
+
+          // Fallback to the URI scheme specified in the field settings
+          // otherwise use the default file scheme.
+          if (!empty($options['uri_scheme'])) {
+            $form_state['storage']['scheme'] = $options['uri_scheme'];
+          }
+          else {
+            $form_state['storage']['scheme'] = file_default_scheme();
+          }
+        }
+      }
+    }
+  }
+
+  // We have the filetype, check if we can skip step 4.
+  if ($form['#step'] == 3 && $triggered_next) {
+    $file = file_load($form_state['storage']['upload']);
+    $form_state['file'] = $file;
+    if (!field_info_instances('file', $form_state['storage']['type'])) {
+      // This filetype doesn't have fields, save the file.
+      $save = TRUE;
+    }
+    elseif ($config->get('upload_wizard_skip_fields')) {
+      // Save the file with blanks fields.
+      $save = TRUE;
+    }
+  }
+
+  // Form id's can vary depending on how many other forms are displayed, so we
+  // need to do string comparissons. e.g edit-submit--2.
+  if ($triggered_next) {
+    $form_state['step'] = $form['#step'] + 1;
+  }
+  elseif ($triggered_previous) {
+    $form_state['step'] = $form['#step'] - 1;
+  }
+  elseif (strpos($trigger, 'edit-submit') !== FALSE) {
+    $save = TRUE;
+  }
+
+  if ($save) {
+    $file = file_load($form_state['storage']['upload']);
+    if ($file) {
+      if (file_uri_scheme($file->uri) != $form_state['storage']['scheme']) {
+        $file_destination = $form_state['storage']['scheme'] . '://' . file_uri_target($file->uri);
+        $file_destination = file_stream_wrapper_uri_normalize($file_destination);
+        if ($moved_file = file_move($file, $file_destination, FILE_EXISTS_RENAME)) {
+          // Only re-assign the file object if file_move() did not fail.
+          $file = $moved_file;
+        }
+      }
+      $file->type = $form_state['storage']['type'];
+      $file->display = TRUE;
+
+      // Change the file from temporary to permanent.
+      $file->status = FILE_STATUS_PERMANENT;
+
+      // Save the form fields.
+      // Keep in mind that the values for the Field API fields must be in
+      // $form_state['values'] and not in ['storage']. This is true as long as
+      // the fields are on the last page of the multi step form.
+      entity_form_submit_build_entity('file', $file, $form, $form_state);
+
+      file_save($file);
+      $form_state['file'] = $file;
+      backdrop_set_message(t('@type %name was uploaded.', array('@type' => file_type_get_name($file), '%name' => $file->filename)));
+    }
+    else {
+      backdrop_set_message(t('An error occurred and no file was uploaded.'), 'error');
+      return;
+    }
+
+    // Figure out destination.
+    if (user_access('administer files')) {
+      $path = 'admin/content/files';
+    }
+    else {
+      $path = 'file/' . $file->fid;
+    }
+    $form_state['redirect'] = $path;
+  }
+  else {
+    $form_state['rebuild'] = TRUE;
+  }
+
+  // Clear the page and block caches.
+  cache_clear_all();
+}
+
+/**
+ * Determines the upload location for the file add upload form.
+ *
+ * @param array $params
+ *   An array of parameters from the media browser.
+ * @param array $data
+ *   (optional) An array of token objects to pass to token_replace().
+ *
+ * @return string
+ *   A file directory URI with tokens replaced.
+ *
+ * @see token_replace()
+ */
+function file_upload_destination_uri(array $params, array $data = array()) {
+  $params += array(
+    'uri_scheme' => file_default_scheme(),
+    'file_directory' => '',
+  );
+
+  $destination = trim($params['file_directory'], '/');
+
+  // Replace tokens.
+  $destination = token_replace($destination, $data);
+
+  return $params['uri_scheme'] . '://' . $destination;
+}
+
+/**
+ * Menu callback; view a single file entity.
+ */
+function file_view_page($file) {
+  backdrop_set_title($file->filename);
+
+  $uri = entity_uri('file', $file);
+  // Set the file path as the canonical URL to prevent duplicate content.
+  backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], $uri['options'])), TRUE);
+  // Set the non-aliased path as a default shortlink.
+  backdrop_add_html_head_link(array('rel' => 'shortlink', 'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE)))), TRUE);
+
+  return file_view($file, 'full');
+}
+
+/**
+ * Menu callback; download a single file entity.
+ */
+function file_download_page($file) {
+  // If the file does not exist it can cause problems with file_transfer().
+  if (!is_file($file->uri)) {
+    return MENU_NOT_FOUND;
+  }
+  // @todo Remove this once backdrop_basename is fixed for PHP versions greater
+  //  than '5.3.29'.
+  $basename_function = version_compare(PHP_VERSION,'5.3.29','>') ? 'basename' : 'backdrop_basename';
+  $headers = array(
+    'Content-Type' => mime_header_encode($file->filemime),
+    'Content-Disposition' => 'attachment; filename="' . mime_header_encode($basename_function($file->uri)) . '"',
+    'Content-Length' => $file->filesize,
+    'Content-Transfer-Encoding' => 'binary',
+    'Pragma' => 'no-cache',
+    'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+    'Expires' => '0',
+  );
+
+  // Let other modules alter the download headers.
+  backdrop_alter('file_download_headers', $headers, $file);
+
+  // Let other modules know the file is being downloaded.
+  module_invoke_all('file_transfer', $file->uri, $headers);
+
+  if (file_is_local($file)) {
+    // For local files, transfer the file and do not reveal the actual URL.
+    file_transfer($file->uri, $headers);
+  }
+  else {
+    // For remote files, just redirect the user to that file's actual URL.
+    $headers['Location'] = file_create_url($file->uri);
+    foreach ($headers as $name => $value) {
+      backdrop_add_http_header($name, $value);
+    }
+    backdrop_send_headers();
+    backdrop_exit();
+  }
+}
+
+/**
  * Page callback: Form constructor for the file manage form.
  *
  * @param File $file
  *   A file object from file_load().
  */
 function file_manage_form($form, &$form_state, File $file) {
-  backdrop_set_title(t('<em>Manage file</em> @title', array('@title' => $file->filename)), PASS_THROUGH);
+  backdrop_set_title(t('Manage file %title', array('%title' => $file->filename)), PASS_THROUGH);
 
   $form_state['file'] = $file;
   $form_state['temporary_upload'] = NULL;
@@ -24,7 +486,7 @@ function file_manage_form($form, &$form_state, File $file) {
   // Basic file information.
   // These elements are just values so they are not even sent to the client.
   // @todo Add type w/ https://github.com/backdrop/backdrop-issues/issues/2632
-  foreach (array('fid', 'uid', 'timestamp') as $key) {
+  foreach (array('fid', 'uid', 'timestamp', 'type') as $key) {
     $form[$key] = array(
       '#type' => 'value',
       '#value' => isset($file->$key) ? $file->$key : NULL,
@@ -40,18 +502,21 @@ function file_manage_form($form, &$form_state, File $file) {
     '#weight' => -10,
   );
 
-  // Set up replacement file validation.
-  $replacement_options = array();
+  // Add a 'replace this file' upload field if the file is writeable.
+  if (file_is_writeable($file)) {
+    // Set up replacement file validation.
+    $replacement_options = array();
 
-  // The replacement file must have the same extension as the original file.
-  $replacement_options['file_extensions'] = pathinfo($file->uri, PATHINFO_EXTENSION);
+    // The replacement file must have the same extension as the original file.
+    $replacement_options['file_extensions'] = pathinfo($file->uri, PATHINFO_EXTENSION);
 
-  $form['replace_upload'] = array(
-    '#type' => 'managed_file',
-    '#title' => t('File'),
-    '#description' => t('This file will replace the existing file. This action cannot be undone.'),
-    '#upload_validators' => file_get_upload_validators($replacement_options),
-  );
+    $form['replace_upload'] = array(
+      '#type' => 'managed_file',
+      '#title' => t('Replace file'),
+      '#description' => t('This file will replace the existing file. This action cannot be undone.'),
+      '#upload_validators' => file_get_upload_validators($replacement_options),
+    );
+  }
 
   $form['additional_settings'] = array(
     '#type' => 'vertical_tabs',
@@ -61,7 +526,7 @@ function file_manage_form($form, &$form_state, File $file) {
   // File destination information for administrators.
   $form['destination'] = array(
     '#type' => 'fieldset',
-    '#access' => user_access('administer files'),
+    '#access' => user_access('manage files'),
     '#title' => t('Destination'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
@@ -134,7 +599,7 @@ function file_manage_form($form, &$form_state, File $file) {
     '#type' => 'submit',
     '#value' => t('Delete'),
     '#weight' => 10,
-    '#submit' => array('file_delete_form_submit'),
+    '#submit' => array('file_delete_redirect_form'),
     '#access' => user_access('delete files'),
   );
 
@@ -271,49 +736,13 @@ function file_manage_form_submit($form, &$form_state) {
 }
 
 /**
- * Retrieves the upload validators for a file.
- *
- * @param array $options
- *   (optional) An array of options for file validation.
- *
- * @return array
- *   An array suitable for passing to file_save_upload() or for a managed_file
- *   or upload element's '#upload_validators' property.
+ * Submit handler for delete button on file manage forms.
  */
-function file_get_upload_validators(array $options = array()) {
-  // Set up file upload validators.
-  $validators = array();
-
-  // Validate file extensions. If there are no file extensions in $params there
-  // is no file extension validation.
-  if (!empty($options['file_extensions'])) {
-    $validators['file_validate_extensions'] = array($options['file_extensions']);
+function file_delete_redirect_form($form, &$form_state) {
+  if (isset($_GET['destination'])) {
+    unset($_GET['destination']);
   }
-  else {
-    $validators['file_validate_extensions'] = array(config_get('system.core', 'file_default_allowed_extensions'));
-  }
-
-  // Cap the upload size according to the system or user defined limit.
-  $max_filesize = parse_size(file_upload_max_size());
-  if (!empty($options['max_filesize']) && $options['max_filesize'] < $max_filesize) {
-    $max_filesize = parse_size($options['max_filesize']);
-  }
-
-  // There is always a file size limit due to the PHP server limit.
-  $validators['file_validate_size'] = array($max_filesize);
-
-  // Add image validators.
-  $options += array('min_resolution' => 0, 'max_resolution' => 0);
-  if ($options['min_resolution'] || $options['max_resolution']) {
-    $validators['file_validate_image_resolution'] = array($options['max_resolution'], $options['min_resolution']);
-  }
-
-  // Add other custom upload validators from options.
-  if (!empty($options['upload_validators'])) {
-    $validators += $options['upload_validators'];
-  }
-
-  return $validators;
+  backdrop_goto('file/' . $form_state['file']->fid . '/delete');
 }
 
 /**
@@ -381,7 +810,7 @@ function file_delete_form_submit($form, &$form_state) {
     backdrop_set_message(t('%title has been deleted.', array('%title' => $file->label())));
   }
 
-  $form_state['redirect'] = '<front>';
+  $form_state['redirect'] = 'admin/content/files';
 
   // Clear the page and block caches.
   cache_clear_all();
@@ -555,4 +984,119 @@ function _file_usage_get_total(File $file) {
     }
   }
   return $total;
+}
+
+/**
+ * Page callback to show file usage information.
+ */
+function file_usage_page($file) {
+  $rows = array();
+  $occured_entities = array();
+
+  // Determine all of the locations where a file is used, then loop through the
+  // occurrences and filter out any duplicates.
+  foreach (file_usage_list($file) as $module => $type) {
+    foreach ($type as $entity_type => $entity_ids) {
+      // There are cases where the actual entity doesn't exist.
+      // We have to handle this.
+      $entity_info = entity_get_info($entity_type);
+      $entities = empty($entity_info) ? NULL : entity_load($entity_type, array_keys($entity_ids));
+
+      foreach ($entity_ids as $entity_id => $count) {
+        // If this entity has already been listed in the table, just add any
+        // additional usage to the total count column in the table row and
+        // continue on to the next iteration of the loop.
+        if (isset($occured_entities[$entity_type][$entity_id])) {
+          $rows[$occured_entities[$entity_type][$entity_id]][2] += $count;
+          continue;
+        }
+
+        // Retrieve the label and the URI of the entity.
+        $label = empty($entities[$entity_id]) ? $module : entity_label($entity_type, $entities[$entity_id]);
+        $entity_uri = empty($entities[$entity_id]) ? NULL : entity_uri($entity_type, $entities[$entity_id]);
+
+        // Link the label to the URI when possible.
+        if (!empty($entity_uri['path'])) {
+          $entity_label = l($label, $entity_uri['path']);
+        }
+        else {
+          $entity_label = check_plain($label);
+        }
+
+        $rows[] = array($entity_label, $entity_type, $count);
+
+        // Record the occurrence of the entity to ensure that it isn't listed in
+        // the table again.
+        $occured_entities[$entity_type][$entity_id] = count($rows) - 1;
+      }
+    }
+  }
+
+  $header = array(t('Entity'), t('Entity type'), t('Use count'));
+  $build['caption'] = array(
+    '#type' => 'help',
+    '#markup' => t('This table lists all of the places where @filename is used.', array('@filename' => $file->filename)),
+  );
+  $build['usage_table'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => t('This file is not currently used.'),
+  );
+
+  return $build;
+}
+
+/**
+ * Retrieves the upload validators for a file.
+ *
+ * @param array $options
+ *   (optional) An array of options for file validation.
+ *
+ * @return array
+ *   An array suitable for passing to file_save_upload() or for a managed_file
+ *   or upload element's '#upload_validators' property.
+ */
+function file_get_upload_validators(array $options = array()) {
+  $config = config('file.settings');
+  // Set up file upload validators.
+  $validators = array();
+
+  // Validate file extensions. If there are no file extensions in $params and
+  // there are no Media defaults, there is no file extension validation.
+  if (!empty($options['file_extensions'])) {
+    $validators['file_validate_extensions'] = array($options['file_extensions']);
+  }
+  else {
+    $validators['file_validate_extensions'] = array($config->get('default_allowed_extensions'));
+  }
+
+  // Cap the upload size according to the system or user defined limit.
+  $max_filesize = parse_size(file_upload_max_size());
+  $file_entity_max_filesize = parse_size($config->get('max_filesize'));
+
+  // If the user defined a size limit, use the smaller of the two.
+  if (!empty($file_entity_max_filesize)) {
+    $max_filesize = min($max_filesize, $file_entity_max_filesize);
+  }
+
+  if (!empty($options['max_filesize']) && $options['max_filesize'] < $max_filesize) {
+    $max_filesize = parse_size($options['max_filesize']);
+  }
+
+  // There is always a file size limit due to the PHP server limit.
+  $validators['file_validate_size'] = array($max_filesize);
+
+  // Add image validators.
+  $options += array('min_resolution' => 0, 'max_resolution' => 0);
+  if ($options['min_resolution'] || $options['max_resolution']) {
+    $validators['file_validate_image_resolution'] = array($options['max_resolution'], $options['min_resolution']);
+  }
+
+  // Add other custom upload validators from options.
+  if (!empty($options['upload_validators'])) {
+    $validators += $options['upload_validators'];
+  }
+
+  return $validators;
 }

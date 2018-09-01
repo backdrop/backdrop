@@ -1,0 +1,10 @@
+{
+    "_config_name": "file.settings",
+    "entity_alt": "[file:field_fiat]",
+    "entity_title": "[file:field_fitt]",
+    "max_filesize": "",
+    "default_allowed_extensions": "jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm",
+    "upload_wizard_skip_fields": false,
+    "upload_wizard_skip_scheme": false,
+    "upload_wizard_skip_file_type": false
+}
