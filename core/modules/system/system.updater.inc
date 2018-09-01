@@ -2,9 +2,56 @@
 
 /**
  * @file
- * Subclasses of the Updater class to update Backdrop core knows how to update.
- * At this time, only modules, themes and layouts are supported.
+ * Subclasses of the Updater class to update Backdrop core, modules, themes, and layouts.
  */
+
+/**
+ * Class for updating Backdrop core using FileTransfer classes via authorize.php.
+ */
+class CoreUpdater extends Updater {
+
+  /**
+   * Return the Backdrop core directory.
+   */
+  public function getInstallDirectory() {
+    return BACKDROP_ROOT;
+  }
+
+  public function isInstalled() {
+    return (bool) file_exists($this->getInstallDirectory());
+  }
+
+  public static function canUpdateDirectory($directory) {
+    return (self::getProjectType($directory) == 'core');
+  }
+
+  static function canUpdate($project_name) {
+    return (bool) $this->isInstalled();
+  }
+
+  /**
+   * List of post install actions.
+   */
+  public function postInstall() {
+    $project = array();
+    $project['name'] = $this->name;
+    $project['type'] = 'core';
+    $_SESSION['project_browser_installed_projects'][$this->name] = $project;
+  }
+
+  /**
+   * List of post install actions.
+   */
+  public function postInstallTasks() {
+    return array();
+  }
+
+  public function postUpdateTasks() {
+    // We don't want to check for DB updates here, we do that once for all
+    // updated modules on the landing page.
+  }
+
+}
 
 /**
  * Class for updating modules using FileTransfer classes via authorize.php.

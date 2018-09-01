@@ -3,5 +3,6 @@
     "installer_server": {
         "url": "https://projects.backdropcms.org",
         "name": "Backdrop"
-    }
+    },
+    "core_update": false
 }
