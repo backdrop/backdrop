@@ -557,6 +557,7 @@
                     "caption": "",
                     "summary": "",
                     "columns": {
+                        "scheduled_1": "scheduled_1",
                         "bulk_form": "bulk_form",
                         "title": "title",
                         "type": "type",
@@ -569,6 +570,13 @@
                         "dropbutton": "dropbutton"
                     },
                     "info": {
+                        "scheduled_1": {
+                            "sortable": 0,
+                            "default_sort_order": "asc",
+                            "align": "",
+                            "separator": "",
+                            "empty_column": 0
+                        },
                         "bulk_form": {
                             "align": "",
                             "separator": "",
@@ -603,7 +611,7 @@
                             "empty_column": 0
                         },
                         "scheduled": {
-                            "sortable": 0,
+                            "sortable": 1,
                             "default_sort_order": "asc",
                             "align": "",
                             "separator": "",
