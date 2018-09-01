@@ -664,12 +664,12 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
               $dependencies[] = $dependency_name . ' (' . t('Requires version @version', array('@version' => $dependency_version_string)) . ')';
             }
             else {
-              $dependencies[] = $modules[$dependency_name]->info['name'] . ' (' . t('<span class="admin-enabled">installed</span>') . ')';
+              $dependencies[] = $modules[$dependency_name]->info['name'] . ' (<span class="admin-enabled">' . t('installed') . '</span>)';
             }
           }
           else {
             $dependency_check = FALSE;
-            $dependencies[] = $dependency_name . ' (' . t('<span class="admin-missing">missing</span>') . ')';
+            $dependencies[] = $dependency_name . ' (<span class="admin-missing">' . t('missing') . '</span>)';
           }
         }
         if ($dependency_check) {
