@@ -263,11 +263,9 @@ function installer_browser_installation_select_versions_form($form, &$form_state
       if (isset($release['terms']['Release type']) && !empty($release['terms']['Release type'])) {
         $release_title .= check_plain(" (" . implode(', ', $release['terms']['Release type']) . ")");
       }
+      $releases_list[$version] = $release_title;
       if (isset($release['release_link'])) {
-        $releases_list[$version] = l($release_title, $release['release_link'], array('html' => TRUE, 'attributes' => array('target' => '_blank')));
-      }
-      else {
-        $releases_list[$version] = $release_title;
+        $releases_list[$version] .= ' (' . l(t('release notes'), $release['release_link'], array('attributes' => array('title' => t('Release notes for @project_title', array('@project_title' => $project['title'])), 'target' => '_blank'))) . ')';
       }
     }
 
