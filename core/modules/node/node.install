@@ -1142,7 +1142,7 @@ function node_update_1014() {
   db_add_primary_key('history', array('uid', 'nid'));
   db_add_index('history', 'nid', array('nid'));
 }
-  
+
 /**
  * Add column for scheduling the publishing of content in the future.
  */
@@ -1170,6 +1170,16 @@ function node_update_1016() {
     $status_default = $config->get('settings.status_default');
     $config->set('settings.status_default', (int) $status_default);
     $config->save();
+  }
+}
+
+/**
+ * Update each content type with new hidden_path configuration defaulted to disabled.
+ */
+function node_update_1017() {
+  $types = config_get_names_with_prefix('node.type');
+  foreach ($types as $type) {
+    config_set($type, 'settings.hidden_path', '0');
   }
 }
 

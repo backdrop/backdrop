@@ -444,7 +444,20 @@ function node_form_submit($form, &$form_state) {
   if ($node->nid) {
     $form_state['values']['nid'] = $node->nid;
     $form_state['nid'] = $node->nid;
-    $form_state['redirect'] = node_access('view', $node) ? 'node/' . $node->nid : '<front>';
+
+    // Determine whether to redirect user to full page display.
+    $form_state['redirect'] = '<front>';
+    if (node_access('view', $node)) {
+      $form_state['redirect'] = 'node/' . $node->nid;
+
+      // If node type set to prevent direct viewing of full page URL
+      // stay on edit page if user is not permitted.
+      $type = node_type_get_type($node);
+      $bypass_hidden_path = user_access('view hidden paths');
+      if ($type->settings['hidden_path'] && !$bypass_hidden_path) {
+        $form_state['redirect'] = 'node/' . $node->nid . '/edit';
+      }
+    }
   }
   else {
     // In the unlikely case something went wrong on save, the node will be
