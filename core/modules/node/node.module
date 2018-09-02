@@ -3778,24 +3778,6 @@ function node_language_delete($language) {
 }
 
 /**
- * Implements hook_layout_get_layout_by_path().
- */
-function node_layout_get_layout_by_path_alter(&$layouts, $router_item, $object) {
-  // If the path is a node preview path, check if a custom layout exists for
-  // nodes and use that instead.
-  if ((strpos($router_item['path'], 'node/preview') === 0) && isset($router_item['map'][3])) {
-    $tempstore_id = $router_item['map'][3];
-    $object = node_get_node_tempstore($tempstore_id);
-  }
-  if ($object && $node_layouts = layout_load_multiple_by_path('node/%', TRUE)) {
-    $layouts = $node_layouts;
-  }
-  else {
-    $object = NULL;
-  }
-}
-
-/**
  * Get a node from the tempstore.
  *
  * @param string $node_tempstore_id
