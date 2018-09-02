@@ -1285,8 +1285,8 @@ function node_permission() {
     'delete revisions' => array(
       'title' => t('Delete content revisions'),
     ),
-    'view hidden path' => array(
-      'title' => t('View hidden path'),
+    'view hidden paths' => array(
+      'title' => t('View hidden paths'),
       'description' => t('View URL of content, overriding restriction on viewing content directly.'),
     ),
   );
@@ -2275,7 +2275,7 @@ function node_page_view(Node $node) {
   // Determine if user has permission to view full page directly.
   // Display "page not found" if not.
   $type = node_type_get_type($node);
-  $bypass_hidden_path = user_access('view hidden path');
+  $bypass_hidden_path = user_access('view hidden paths');
   if ($type->settings['hidden_path'] && !$bypass_hidden_path) {
     backdrop_not_found();
     backdrop_exit();

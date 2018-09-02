@@ -453,7 +453,7 @@ function node_form_submit($form, &$form_state) {
       // If node type set to prevent direct viewing of full page URL
       // stay on edit page if user is not permitted.
       $type = node_type_get_type($node);
-      $bypass_hidden_path = user_access('view hidden path');
+      $bypass_hidden_path = user_access('view hidden paths');
       if ($type->settings['hidden_path'] && !$bypass_hidden_path) {
         $form_state['redirect'] = 'node/' . $node->nid . '/edit';
       }
