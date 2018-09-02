@@ -143,13 +143,15 @@ Backdrop.behaviors.editorImageDialog = {
 
     // Initialise styles of Dialog.
     // Hide the left-hand (library) part of the dialog form.
-    $(".editor-image-library").css({ "display": "none" });
-    $(".editor-dialog").removeClass("editor-dialog-with-library");
-    // Set the class for the left-hand part.
-    $(".editor-image-fields").addClass("editor-image-fields-full");
+    if ($newToggles.length) {
+      $(".editor-image-library").css({ "display": "none" });
+      $(".editor-dialog").removeClass("editor-dialog-with-library");
+      // Set the class for the left-hand part.
+      $(".editor-image-fields").addClass("editor-image-fields-full");
+    }
 
     var DialogLeftPosition;
-    $newToggles.click(function(e) {
+    $newToggles.on('click', function(e) {
       var $link = $(e.target);
       if ($link.is('.editor-image-toggle') === false) {
         return;
@@ -187,11 +189,12 @@ Backdrop.behaviors.editorImageDialog = {
           $input.val(previousValue);
         }
       });
-      var $display_state = $(".form-item-image-library-src").css("display");
+
+      var $display_state = $('.form-item-image-library-src').css('display');
       if ($display_state === 'none') {
         // Hide the library part of the dialog form.
-        $(".editor-image-library").css({ "display": "none" });
-        $(".form-item-image-directory").css({ "display": "none" });
+        $('.editor-image-library').css({ 'display': 'none' });
+        $('.form-item-image-directory').css({ 'display': 'none' });
         // Restore the previous dialog position.
         if (DialogLeftPosition) {
           $(".editor-dialog").css('left', DialogLeftPosition + 'px');
@@ -200,42 +203,47 @@ Backdrop.behaviors.editorImageDialog = {
             Backdrop.optimizedResize.trigger();
           }, 500);
         }
-        $(".editor-dialog").removeClass("editor-dialog-with-library");
+        $('.editor-dialog').removeClass('editor-dialog-with-library');
         // Set the class for the dialog part.
-        $(".editor-image-fields").addClass("editor-image-fields-full");
+        $('.editor-image-fields').addClass('editor-image-fields-full');
       }
       else {
         // Toggle state is set to show 'select an image'
         // so add library view to dialog display.
         // But only for filter-format-edit-image-form.
-        if ($("form").hasClass("filter-format-editor-image-form")){
+        if ($('form').hasClass('filter-format-editor-image-form')){
           // Remove the dialog position, let the filter.css CSS for a
           // percentage-based width take precedence.
-          DialogLeftPosition = $(".editor-dialog").position().left;
-          $(".editor-dialog").css('left', '');
+          DialogLeftPosition = $('.editor-dialog').position().left;
+          $('.editor-dialog').css('left', '');
           // Re-center the dialog by triggering a window resize.
           window.setTimeout(function() {
             Backdrop.optimizedResize.trigger();
           }, 500);
           // Increase width of dialog form.
-          $(".editor-dialog").addClass("editor-dialog-with-library");
+          $('.editor-dialog').addClass('editor-dialog-with-library');
 
           // Display the library view.
-          $(".editor-image-fields").removeClass("editor-image-fields-full");
-          $(".editor-image-library").css({ "display": "block" });
-          $(".form-item-image-directory").css({ "display": "block" });
-          var $library_base_url = $(".form-item-image-library-src").attr('data-editor-image-library-base-url');
+          $('.editor-image-fields').removeClass('editor-image-fields-full');
+          $('.editor-image-library').css({ 'display': 'block' });
+          $('.form-item-image-directory').css({ 'display': 'block' });
+          var $library_base_url = $('.form-item-image-library-src').attr('data-editor-image-library-base-url');
 
           // Now add click event to images
-          $(".image-library-choose-file").click(function() {
+          $('.editor-image-library').once('editor-image-library').on('click', '.image-library-choose-file', function() {
             var $selectedImg = $(this).find('img');
-            var $relativeImgSrc =$selectedImg.attr('src').replace($library_base_url , '');
-            $("[name='image_library[src]']").val($relativeImgSrc);
-            $("[name='fid[fid]']").val($selectedImg.data('fid'));
+            var $relativeImgSrc = $selectedImg.attr('src').replace($library_base_url , '');
+            var $form = $(this).closest('form');
+            $form.find('[name="image_library[src]"]').val($relativeImgSrc);
+            $form.find('[name="fid[fid]"]').val($selectedImg.data('fid'));
+            // Reset width and height so image is not stretched to the any
+            // previous image's dimensions.
+            $form.find('[name="attributes[width]"]').val('');
+            $form.find('[name="attributes[height]"]').val('');
             // Remove style from previous selection.
-            $(".image-library-image-selected").removeClass("image-library-image-selected");
+            $('.image-library-image-selected').removeClass('image-library-image-selected');
             // Add style to this selection.
-            $(this).addClass("image-library-image-selected");
+            $(this).addClass('image-library-image-selected');
           });
         }
       }
