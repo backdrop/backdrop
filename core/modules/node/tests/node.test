@@ -475,7 +475,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $term = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
       'description' => $this->randomName(),
-      'format' => 1,//db_query_range('SELECT format FROM {filter_format}', 0, 1)->fetchField(),
+      'format' => 1,
       'vocabulary' => $vocabulary->machine_name,
     ));
     taxonomy_term_save($term);
