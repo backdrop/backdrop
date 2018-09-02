@@ -392,6 +392,28 @@ Backdrop.absoluteUrl = function (url) {
 };
 
 /**
+ * Returns the passed in URL as a relative URL to the current site.
+ *
+ * Relative URLs are returned only for local URLs. This will return the full
+ * URL for remote URLs.
+ *
+ * @param url
+ *   The URL string to be normalized to a relative URL.
+ *
+ * @return
+ *   The normalized, relative URL with a leading slash.
+ *
+ * @since 1.11.0
+ */
+Backdrop.relativeUrl = function (url) {
+  // Normalize to absolute first.
+  relativeUrl = Backdrop.absoluteUrl(url);
+  // Port is only present on non-HTTP(S) URLs.
+  var port = window.location.port ? (':' + window.location.port) : '';
+  return relativeUrl.replace(window.location.protocol + '//' + window.location.hostname + port, '');
+};
+
+/**
  * Returns true if the URL is within Backdrop's base path.
  *
  * @param url

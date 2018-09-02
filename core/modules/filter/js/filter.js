@@ -227,14 +227,15 @@ Backdrop.behaviors.editorImageDialog = {
           $('.editor-image-fields').removeClass('editor-image-fields-full');
           $('.editor-image-library').css({ 'display': 'block' });
           $('.form-item-image-directory').css({ 'display': 'block' });
-          var $library_base_url = $('.form-item-image-library-src').attr('data-editor-image-library-base-url');
 
           // Now add click event to images
           $('.editor-image-library').once('editor-image-library').on('click', '.image-library-choose-file', function() {
             var $selectedImg = $(this).find('img');
-            var $relativeImgSrc = $selectedImg.attr('src').replace($library_base_url , '');
+            var absoluteImgSrc = $selectedImg.data('file-url');
+            var relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
+
             var $form = $(this).closest('form');
-            $form.find('[name="image_library[src]"]').val($relativeImgSrc);
+            $form.find('[name="image_library[src]"]').val(relativeImgSrc);
             $form.find('[name="fid[fid]"]').val($selectedImg.data('fid'));
             // Reset width and height so image is not stretched to the any
             // previous image's dimensions.

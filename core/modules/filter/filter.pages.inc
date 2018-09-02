@@ -215,15 +215,12 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
       'data-editor-image-toggle' => t('Upload an image'),
     ),
     '#parents' => array('fid'),
-    '#weight' => -10,
+    '#weight' => -3,
     '#access' => $element_supports_uploads && $upload_settings['status'] && user_access('upload editor images'),
   );
 
-  // Image library, very similar to Image URL
-  global $base_url;
-  // Get current selected thumbnail style from Library View config.
-  $thumbnail_style = config_get('views.view.image_library','display.default.display_options.fields.uri.thumbnail_style');
-  $form['image']['library_all'] = array(
+  // Use a "textfield" rather than "url" to allow relative paths.
+  $form['image']['src'] = array(
     '#title' => t('Select from library'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
@@ -233,7 +230,6 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#parents' => array('image_library', 'src'),
     '#wrapper_attributes' => array(
       'data-editor-image-toggle' => t('Select from library'),
-      'data-editor-image-library-base-url' => $base_url . '/files/styles/' . $thumbnail_style . '/public',
     ),
     '#weight' => -2,
   );
