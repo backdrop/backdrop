@@ -1741,14 +1741,14 @@ function theme_status_messages($variables) {
     if (count($messages) > 1) {
       $output .= "  <ul>\n";
       foreach ($messages as $message) {
-        $output .= "    <li>" . $message . "</li>\n";
+        $output .= '    <li>' . $message . "</li>\n";
       }
-      $output .= "  </ul>";
+      $output .= "  </ul>\n";
     }
     else {
-      $output .= reset($messages);
+      $output .= reset($messages) . "\n";
     }
-    $output .= "\n</div>\n";
+    $output .= "</div>\n";
   }
 
   return $output;
