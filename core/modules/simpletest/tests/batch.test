@@ -94,6 +94,11 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
     $value = 'sample-value';
     $edit = array('value' => $value);
     $this->backdropPost('batch-test/chained', $edit, 'Submit');
+
+    // Allow space for the timestamp to increment, so items are inserted in a
+    // way that they'll be pulled out correctly.
+    sleep(2);
+
     // Check that result messages are present and in the correct order.
     $this->assertBatchMessages($this->_resultMessages('chained'), t('Batches defined in separate submit handlers performed successfully.'));
     // The stack contains execution order of batch callbacks and submit
