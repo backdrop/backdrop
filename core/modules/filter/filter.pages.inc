@@ -201,7 +201,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   $existing_file = !empty($values['data-file-id']) ? file_load($values['data-file-id']) : NULL;
   $fid = $existing_file ? $existing_file->fid : NULL;
   $form['image']['fid'] = array(
-    '#title' => t('Image upload'),
+    '#title' => t('Upload an image'),
     '#type' => 'managed_file',
     '#upload_location' => $upload_settings['scheme'] . '://' . $upload_settings['directory'],
     '#default_value' => $fid ? $fid : NULL,
@@ -212,7 +212,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
       'file_validate_image_resolution' => array($max_dimensions),
     ),
     '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Image Upload'),
+      'data-editor-image-toggle' => t('Upload an image'),
     ),
     '#parents' => array('fid'),
     '#weight' => -10,
@@ -221,27 +221,22 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
 
   // Use a "textfield" rather than "url" to allow relative paths.
   $form['image']['src'] = array(
-    '#title' => t('Image URL'),
+    '#title' => t('Select from library'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => '/example/image.jpg',
     '#default_value' => isset($values['src']) ? $values['src'] : NULL,
     '#parents' => array('attributes', 'src'),
     '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Image URL'),
+      'data-editor-image-toggle' => t('Select from library'),
     ),
-    '#weight' => -2,
+    '#weight' => -8,
   );
 
   // If no current value or an existing file exists, default to showing
   // the uploading interface.
   if ($fid || empty($form['image']['src']['#default_value'])) {
-    $form['image']['fid']['#weight'] = -10;
     $form['image']['src']['#default_value'] = '';
-  }
-  // Otherwise if editing an unmanaged file, show the raw URL field.
-  else {
-    $form['image']['src']['#weight'] = -10;
   }
 
   $form['alt'] = array(
@@ -297,6 +292,11 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#access' => !empty($format->filters['filter_image_caption']->status),
   );
 
+  // Incorporate the Library View in the editor dialog form.
+  $form['library_view'] = array(
+    '#markup' => '<div class="library-view" data-editor-library-view="true">' . views_embed_view('image_library') . '</div>',
+  );
+
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -314,12 +314,6 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
  * Submit handler for filter_format_editor_image_form().
  */
 function filter_format_editor_image_form_submit($form, &$form_state) {
-  // Image source overrides file uploads, as the values are emptied out when
-  // hidden by JavaScript.
-  if (!empty($form_state['values']['attributes']['src'])) {
-    $form_state['values']['fid'] = NULL;
-    $form_state['values']['attributes']['data-file-id'] = NULL;
-  }
   // Convert any uploaded files from the FID values to the src attribute.
   if (!empty($form_state['values']['fid'])) {
     $fid = $form_state['values']['fid'];
@@ -541,6 +535,7 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   // adding http:// or a prefixing slash if needed.
   if (module_exists('link') && $type = link_validate_url($value)) {
     $value = link_cleanup_url($value);
+    $form_state['values']['type'] = $type;
     if ($type === LINK_INTERNAL && strpos($value, '/') !== 0) {
       $value = '/' . $value;
     }
