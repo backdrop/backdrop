@@ -21,6 +21,24 @@ function options_theme() {
 }
 
 /**
+ * Implements hook_library_info().
+ */
+function options_library_info() {
+  $path = backdrop_get_path('module', 'options');
+  $libraries['options'] = array(
+    'title' => 'Options',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      $path . '/js/options.js' => array(),
+    ),
+    'css' => array(
+     $path . '/css/options.css' => array(),
+    ),
+  );
+  return $libraries;
+}
+
+/**
  * Implements hook_field_widget_info().
  *
  * Field type modules willing to use those widgets should:
@@ -478,6 +496,11 @@ function options_element_info() {
     '#default_value_pattern' => '',
     '#element_validate' => array('form_options_validate'),
     '#theme_wrappers' => array('form_element'),
+    '#attached' => array(
+      'library' => array(
+        array('options', 'options'),
+      ),
+    ),
   );
 
   return $type;
