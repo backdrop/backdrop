@@ -1063,7 +1063,27 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
   $cache = &backdrop_static(__FUNCTION__);
 
   if (empty($cache[$router_item['path']])) {
-    $layouts = layout_load_multiple_by_path($router_item['path'], TRUE);
+    // If the path is a node preview path, check if a custom layout exists for
+    // nodes and use that instead.
+    // @ todo: This adds very specific code for node previews which too closely
+    // couples Node and Layout modules. This needs to be reverted in a future 
+    // commit.
+    $data = NULL;
+    $node_types = node_type_get_types();
+    foreach ($node_types as $type) {
+      $preview_path = 'node/' . $type->type . '/preview';
+      if ($router_item['path'] == $preview_path) {
+        $tempstore_id = node_build_tempstore_id($type->type);
+        $data = node_get_node_tempstore($tempstore_id);
+        $break;
+      }
+    }
+    if ($data && $node_layouts = layout_load_multiple_by_path('node/%', TRUE)) {
+      $layouts = $node_layouts;
+    }
+    else {
+      $layouts = layout_load_multiple_by_path($router_item['path'], TRUE);
+    }
     $selected_layout = NULL;
     foreach ($layouts as $layout) {
       // Contexts must be set before the layout's access may be checked.
@@ -1071,9 +1091,13 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
       foreach ($contexts as $context) {
         if (isset($context->position)) {
 
-          // Check for an object loaded by the menu router.
+          // Check for an object loaded by the menu router. Use a preview from
+          // Tempstore if on a node preview page.
+          // @ todo: This is also specific code for node previews which needs 
+          // to be reverted in a future commit.
           if (isset($router_item['map'][$context->position])) {
-            $context->setData($router_item['map'][$context->position]);
+            $data = isset($data) ? $data : $router_item['map'][$context->position];
+            $context->setData($data);
           }
 
           // If no context is set, load one using the layout info.
