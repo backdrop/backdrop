@@ -452,11 +452,25 @@ class PageEditTestCase extends BackdropWebTestCase {
  * Tests the node entity preview functionality.
  */
 class PagePreviewTestCase extends BackdropWebTestCase {
+  /**
+   * @var string
+   */
+  protected $field_name;
+
+  /**
+   * @var string
+   */
+  protected $field_email_name;
+
+  /**
+   * @var TaxonomyTerm
+   */
+  protected $term;
 
   function setUp() {
     parent::setUp(array('taxonomy', 'node', 'email'));
 
-    $web_user = $this->backdropCreateUser(array('edit own page content', 'create page content'));
+    $web_user = $this->backdropCreateUser(array('edit own page content', 'create page content', 'administer nodes'));
     $this->backdropLogin($web_user);
 
     // Add a vocabulary so we can test different view modes.
@@ -468,8 +482,6 @@ class PagePreviewTestCase extends BackdropWebTestCase {
       'nodes' => array('page' => 'page'),
     ));
     taxonomy_vocabulary_save($vocabulary);
-
-    $this->vocabulary = $vocabulary;
 
     // Add a term to the vocabulary.
     $term = entity_create('taxonomy_term', array(
@@ -483,13 +495,14 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->term = $term;
 
     // Create a field with settings to validate.
-    $this->field_email = array(
-      'field_name' => backdrop_strtolower($this->randomName()),
+    $this->field_email_name = backdrop_strtolower($this->randomName());
+    $field_email = array(
+      'field_name' => $this->field_email_name,
       'type' => 'email',
     );
-    field_create_field($this->field_email);
-    $this->email_instance = array(
-      'field_name' => $this->field_email['field_name'],
+    field_create_field($field_email);
+    $email_instance = array(
+      'field_name' => $field_email['field_name'],
       'entity_type' => 'node',
       'bundle' => 'page',
       'widget' => array(
@@ -501,25 +514,25 @@ class PagePreviewTestCase extends BackdropWebTestCase {
         ),
       ),
     );
-    field_create_instance($this->email_instance);
+    field_create_instance($email_instance);
 
     // Set up a field and instance.
     $this->field_name = backdrop_strtolower($this->randomName());
-    $this->field = array(
+    $field = array(
       'field_name' => $this->field_name,
       'type' => 'taxonomy_term_reference',
       'settings' => array(
         'allowed_values' => array(
           array(
-            'vocabulary' => $this->vocabulary->machine_name,
+            'vocabulary' => $vocabulary->machine_name,
             'parent' => '0',
           ),
         ),
       )
     );
 
-    field_create_field($this->field);
-    $this->instance = array(
+    field_create_field($field);
+    $instance = array(
       'field_name' => $this->field_name,
       'entity_type' => 'node',
       'bundle' => 'page',
@@ -536,7 +549,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
         ),
       ),
     );
-    field_create_instance($this->instance);
+    field_create_instance($instance);
   }
 
   /**
@@ -547,7 +560,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $title_key = "title";
     $body_key = "body[$langcode][0][value]";
     $term_key = "{$this->field_name}[$langcode]";
-    $email_key = "{$this->field_email['field_name']}[$langcode][0][email]";
+    $email_key = "{$this->field_email_name}[$langcode][0][email]";
 
     // Fill in node creation form and preview node.
     $edit = array();
@@ -771,7 +784,7 @@ class PageViewTestCase extends BackdropWebTestCase {
 
     // Try to edit with anonymous user.
     $this->backdropLogout();
-    $html = $this->backdropGet("node/$node->nid/edit");
+    $this->backdropGet("node/$node->nid/edit");
     $this->assertResponse(403);
 
     // Create a user without permission to edit node.
@@ -945,7 +958,7 @@ class NodePostSettingsTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/page', $edit, t('Save'));
 
     // Check that the post information is displayed.
-    $node = $this->backdropGetNodeByTitle($edit["title"]);
+    $this->backdropGetNodeByTitle($edit["title"]);
     $this->assertNoRaw('<span class="submitted">', 'Post information is not displayed.');
   }
 }
