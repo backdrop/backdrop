@@ -215,7 +215,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
       'data-editor-image-toggle' => t('Upload an image'),
     ),
     '#parents' => array('fid'),
-    '#weight' => -3,
+    '#weight' => -10,
     '#access' => $element_supports_uploads && $upload_settings['status'] && user_access('upload editor images'),
   );
 
@@ -224,25 +224,19 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#title' => t('Select from library'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
-    '#placeholder' => ' ',
-    '#description' => t('The URL of the selected file.'),
+    '#placeholder' => '/example/image.jpg',
     '#default_value' => isset($values['src']) ? $values['src'] : NULL,
-    '#parents' => array('image_library', 'src'),
+    '#parents' => array('attributes', 'src'),
     '#wrapper_attributes' => array(
       'data-editor-image-toggle' => t('Select from library'),
     ),
-    '#weight' => -2,
+    '#weight' => -8,
   );
 
   // If no current value or an existing file exists, default to showing
   // the uploading interface.
   if ($fid || empty($form['image']['src']['#default_value'])) {
-    $form['image']['fid']['#weight'] = -10;
     $form['image']['src']['#default_value'] = '';
-  }
-  // Otherwise if editing an unmanaged file, show the raw URL field.
-  else {
-    $form['image']['src']['#weight'] = -10;
   }
 
   $form['alt'] = array(
@@ -322,31 +316,14 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
  * Submit handler for filter_format_editor_image_form().
  */
 function filter_format_editor_image_form_submit($form, &$form_state) {
-  // Image source overrides file uploads, as the values are emptied out when
-  // hidden by JavaScript.
-  if (!empty($form_state['values']['attributes']['src'])) {
-    $form_state['values']['fid'] = NULL;
-    $form_state['values']['attributes']['data-file-id'] = NULL;
-  }
-  // Do not modify an external URL.
-  $type = $form_state['values']['type'];
-  if ($type === LINK_EXTERNAL) {
-    $url = $form_state['values']['image_library']['src'];
-    $form_state['values']['attributes']['src'] = $url;
-  }
   // Convert any uploaded files from the FID values to the src attribute.
-  elseif (isset($form_state['values']['fid'])) {
+  if (!empty($form_state['values']['fid'])) {
     $fid = $form_state['values']['fid'];
-    if ($fid == 0) {
-      $url = '/files' . $form_state['values']['image_library']['src'];
-    }
-    else {
-      $file = file_load($fid);
-      $url = file_create_url($file->uri);
-    }
+    $file = file_load($fid);
 
     // Try to make a local path if possible for better portability.
     $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
+    $url = file_create_url($file->uri);
     $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
 
     $form_state['values']['attributes']['src'] = $url;

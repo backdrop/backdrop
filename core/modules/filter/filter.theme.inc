@@ -202,24 +202,22 @@ function theme_filter_tips($variables) {
 function theme_filter_format_editor_image_form($variables) {
   $form = $variables['form'];
 
+  $library = backdrop_render($form['library_view']);
+  $actions = backdrop_render($form['actions']);
+
   $output = '';
   $output .= '<div class="image-form-wrapper">';
 
   $output .= '<div class="editor-image-fields">';
-  $output .= backdrop_render($form['image']);
-  $output .= backdrop_render($form['alt']);
-  $output .= backdrop_render($form['size']);
-  $output .= backdrop_render($form['align']);
-  $output .= backdrop_render($form['caption']);
-  $output .= backdrop_render($form['image_directory']);
+  $output .= backdrop_render_children($form);
   $output .= '</div>';
 
   $output .= '<div class="editor-image-library">';
-  $output .= backdrop_render($form['library_view']);
+  $output .= $library;
   $output .= '</div>';
 
   $output .= '</div>';
 
-  $output .= backdrop_render_children($form);
+  $output .= $actions;
   return $output;
 }
