@@ -448,6 +448,8 @@ function node_form($form, &$form_state, Node $node) {
  *
  * @see node_form_validate()
  * @see node_form_submit_build_node()
+ *
+ * @since 1.11.0
  */
 function node_form_preview($form, &$form_state) {
   $node_tempstore_id = $form_state['node_tempstore_id'];
@@ -536,6 +538,8 @@ function node_form_submit($form, &$form_state) {
  *   An HTML-formatted string of a node preview.
  *
  * @see node_form_build_preview()
+ *
+ * @since 1.11.0
  */
 function node_preview($node_tempstore_id, $node_type) {
   // The tempstore object may have expired or an invalid ID submitted. Use the 
@@ -602,6 +606,8 @@ function node_preview($node_tempstore_id, $node_type) {
  *
  * @return array $form
  *   The form which provides access to node preview operations.
+ *
+ * @since 1.11.0
  */
 function node_preview_banner_form(array $form, array $form_state, Node $node, $node_tempstore_id) {
   // Always add the 'default' view mode.
@@ -690,6 +696,8 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
  * Submit handler for the node preview banner form.
  *
  * @see node_preview_banner_form()
+ *
+ * @since 1.11.0
  */
 function node_preview_banner_form_node_submit(array $form, array &$form_state) {
   form_load_include($form_state, 'inc', 'node', 'node.pages');

@@ -151,6 +151,8 @@ class Node extends Entity {
    * The node preview status.
    *
    * @var boolean
+   *
+   * @since 1.11.0
    */
   public $in_preview;
 
