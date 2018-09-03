@@ -2338,6 +2338,8 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
  *
  * @see backdrop_get_messages()
  * @see theme_status_messages()
+ *
+ * @since 1.11.0 Added "info" as an acceptable $type parameter.
  */
 function backdrop_set_message($message = NULL, $type = 'status', $repeat = TRUE) {
   if ($message || $message === '0' || $message === 0) {
