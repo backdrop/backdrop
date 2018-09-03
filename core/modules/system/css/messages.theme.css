@@ -107,6 +107,9 @@ div.info:before {
 .messages a {
   text-decoration: underline;
 }
+.messages a:hover {
+  text-decoration: none;
+}
 
 /* Desktop size icons */
 @media only screen and (min-width: 34em) {
