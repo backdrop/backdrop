@@ -4314,6 +4314,7 @@ function system_admin_paths() {
  * @since 1.6.0 Restored and made compatible with configuration management.
  */
 function system_settings_form($form) {
+  $form['#attributes']['class'] = array('sticky-enabled');
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
 

@@ -529,6 +529,8 @@ function _system_is_incompatible(&$incompatible, $files, $file) {
 function system_modules($form, $form_state = array()) {
   backdrop_set_title('Modules');
 
+  $form['#attributes']['class'][] = 'sticky-enabled';
+
   // JS-only table filters.
   $form['filter'] = array(
     '#type' => 'container',

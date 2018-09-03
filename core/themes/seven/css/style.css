@@ -1034,6 +1034,17 @@ input.form-disabled:focus {
   box-shadow: none;
   transition-property: none;
 }
+/* Style the cancel action buttons to look like links. */
+input#edit-cancel,
+input#edit-actions-cancel {
+  color: #0074bd;
+  background: transparent;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+  text-transform: none;
+  padding: 0;
+}
 input.form-autocomplete,
 input.form-text,
 input.form-tel,
@@ -1872,38 +1883,31 @@ div.add-or-remove-shortcuts {
  * Sticky submit buttons
  */
 @media (min-height: 32em) {
-  .node-form,
-  .taxonomy-form-term,
-  .block-add-block-form,
-  .block-admin-configure,
-  [id="layout-edit"],
-  .system-modules,
-  .user-admin-permissions {
+  form.sticky-enabled {
     padding-bottom: 6em;
   }
-
-  [id="views-preview-wrapper"] {
+  #views-preview-wrapper {
     padding-bottom: 11em;
   }
 
-  .node-form > div > .form-actions,
-  .taxonomy-form-term  > div > .form-actions,
-  .block-add-block-form > div > .form-actions,
-  .block-admin-configure > div > .form-actions,
-  [id="views-ui-edit-form"] > div > .form-actions,
-  [id="layout-edit"] > .form-actions,
-  .system-modules > div > .form-actions,
-  .user-admin-permissions > div > .form-actions {
+  form.sticky-enabled > div > .form-actions,
+  form.sticky-enabled > div >  #layout-edit > .form-actions {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 100;
     margin-bottom: 0;
-    padding-top: 1rem;
-    padding-left: 2.1875rem;
-    border-top: 0.125em solid #EAEAEA;
+    padding: 1rem 2.1875rem;
     background: #fff;
+    -webkit-box-shadow: 0 0px 5px 5px rgba(233,232,232,0.5);
+    -moz-box-shadow: 0 0px 5px 5px rgba(233,232,232,0.5);
+    box-shadow: 0 0px 5px 5px rgba(233,232,232,0.5);
+  }
+
+  form.sticky-enabled > div > .form-actions input.form-submit,
+  form.sticky-enabled > div >  #layout-edit > .form-actions input.form-submit {
+    margin-bottom: 0;
   }
 
   .view-changed.messages {
@@ -1922,14 +1926,8 @@ div.add-or-remove-shortcuts {
 
 /* This magic number on min-width is "content area max-width" + "container padding" */
 @media (min-width: 74.4375em) and (min-height: 32em) {
-  .node-form > div > .form-actions,
-  .taxonomy-form-term  > div > .form-actions,
-  .block-add-block-form > div > .form-actions,
-  .block-admin-configure > div > .form-actions,
-  [id="views-ui-edit-form"] > div > .form-actions,
-  [id="layout-edit"] > .form-actions,
-  .system-modules > div > .form-actions,
-  .user-admin-permissions > div > .form-actions {
+  form.sticky-enabled > div > .form-actions,
+  form.sticky-enabled > div >  #layout-edit > .form-actions {
     padding-right: calc(50vw - 578px);
     padding-left: calc(50vw - 578px);
   }

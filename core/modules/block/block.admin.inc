@@ -116,6 +116,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
 
   // Call our own block configuration form (also used by Layout module).
   $form += block_custom_block_form($custom_block, TRUE);
+  $form['#attributes']['class'][] = 'sticky-enabled';
 
   // Prepare cancel link.
   if (isset($_GET['destination'])) {

@@ -765,6 +765,7 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   $form['#term'] = (array) $term;
   $form['#term']['parent'] = $parent;
   $form['#vocabulary'] = $vocabulary;
+  $form['#attributes']['class'][] = 'sticky-enabled';
 
   $form['name'] = array(
     '#type' => 'textfield',

@@ -383,6 +383,7 @@ function user_login_settings($form, &$form_state) {
  * @see theme_user_admin_permissions()
  */
 function user_admin_permissions($form, $form_state, $role_name = NULL) {
+  $form['#attributes']['class'][] = 'sticky-enabled';
 
   // Retrieve role names for columns.
   $roles = user_roles(FALSE, NULL, TRUE);
