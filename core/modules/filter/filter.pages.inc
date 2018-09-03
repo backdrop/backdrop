@@ -190,7 +190,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     'directory' => 'inline-images',
   );
 
-  if (!empty($upload_settings['max_dimensions']['width']) && !empty($upload_settings['max_dimensions']['height'])) {
+  if (!empty($upload_settings['max_dimensions']['width']) || !empty($upload_settings['max_dimensions']['height'])) {
     $max_dimensions = $upload_settings['max_dimensions']['width'] . 'x' . $upload_settings['max_dimensions']['height'];
   }
   else {
@@ -259,8 +259,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#title' => t('Width'),
     '#title_display' => 'attribute',
     '#type' => 'number',
-    '#default_value' => isset($values['width']) ? $values['width'] : NULL,
-    '#min' => 1,
+    '#default_value' => !empty($values['width']) ? $values['width'] : '',
     '#max' => 99999,
     '#attributes' => array('placeholder' => t('width')),
     '#parents' => array('attributes', 'width'),
@@ -270,8 +269,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#title' => t('Height'),
     '#title_display' => 'attribute',
     '#type' => 'number',
-    '#default_value' => isset($values['height']) ? $values['height'] : NULL,
-    '#min' => 1,
+    '#default_value' => !empty($values['height']) ? $values['height'] : '',
     '#max' => 99999,
     '#attributes' => array('placeholder' => t('height')),
     '#parents' => array('attributes', 'height'),

@@ -87,6 +87,8 @@ function image_field_instance_settings_form($field, $instance) {
 
   // Add maximum and minimum resolution settings.
   $max_dimensions = explode('x', $settings['max_dimensions']) + array('', '');
+  $max_dimensions[0] = empty($max_dimensions[0]) ? NULL : $max_dimensions[0];
+  $max_dimensions[1] = empty($max_dimensions[1]) ? NULL : $max_dimensions[1];
   $form['max_dimensions'] = array(
     '#type' => 'item',
     '#title' => t('Maximum image dimensions'),
@@ -101,7 +103,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#title' => t('Maximum width'),
     '#title_display' => 'invisible',
     '#default_value' => $max_dimensions[0],
-    '#min' => 1,
+    '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' x ',
   );
@@ -110,12 +112,14 @@ function image_field_instance_settings_form($field, $instance) {
     '#title' => t('Maximum height'),
     '#title_display' => 'invisible',
     '#default_value' => $max_dimensions[1],
-    '#min' => 1,
+    '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
   );
 
   $min_dimensions = explode('x', $settings['min_dimensions']) + array('', '');
+  $min_dimensions[0] = empty($min_dimensions[0]) ? NULL : $min_dimensions[0];
+  $min_dimensions[1] = empty($min_dimensions[1]) ? NULL : $min_dimensions[1];
   $form['min_dimensions'] = array(
     '#type' => 'item',
     '#title' => t('Minimum image dimensions'),
@@ -130,7 +134,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#title' => t('Minimum width'),
     '#title_display' => 'invisible',
     '#default_value' => $min_dimensions[0],
-    '#min' => 1,
+    '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' x ',
   );
@@ -139,7 +143,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#title' => t('Minimum height'),
     '#title_display' => 'invisible',
     '#default_value' => $min_dimensions[1],
-    '#min' => 1,
+    '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
   );
@@ -200,13 +204,13 @@ function image_field_instance_settings_form($field, $instance) {
  * Element validate function for resolution fields.
  */
 function _image_field_resolution_validate($element, &$form_state) {
+  if (empty($element['x']['#value'])) {
+    $element['x']['#value'] = 0;
+  }
+  if (empty($element['y']['#value'])) {
+    $element['y']['#value'] = 0;
+  }
   if (!empty($element['x']['#value']) || !empty($element['y']['#value'])) {
-    foreach (array('x', 'y') as $dimension) {
-      if (!$element[$dimension]['#value']) {
-        form_error($element[$dimension], t('Both a height and width value must be specified in the !name field.', array('!name' => $element['#title'])));
-        return;
-      }
-    }
     form_set_value($element, $element['x']['#value'] . 'x' . $element['y']['#value'], $form_state);
   }
   else {
