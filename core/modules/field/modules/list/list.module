@@ -343,7 +343,7 @@ function list_extract_allowed_values($string, $field_type, $generate_keys) {
  */
 function list_allowed_values_string($values) {
   $lines = array();
-  $previous_key = false;
+  $previous_key = FALSE;
 
   foreach ($values as $key => $value) {
     // Convert groups.

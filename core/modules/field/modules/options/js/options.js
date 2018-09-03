@@ -9,11 +9,6 @@
 Backdrop.optionElements = Backdrop.optionElements || {};
 Backdrop.behaviors.optionsElement = Backdrop.behaviors.optionsElement || {};
 
-// We need to check/set HTML properties frequently, such as the disabled and
-// checked state of elements. In jQuery 1.6+, the "prop" method was added for
-// this purpose, but in earlier versions you had to use "attr".
-$.fn.oeProp = $.fn.prop ? $.fn.prop : $.fn.attr;
-
 Backdrop.behaviors.optionsElement.attach = function(context) {
   $('div.form-options:not(.options-element-processed)', context).each(function() {
     $(this).addClass('options-element-processed');
@@ -43,7 +38,7 @@ Backdrop.optionsElement = function(element) {
   this.keyType = element.className.replace(/^.*?options-key-type-([a-z]+).*?$/, '$1');
   this.customKeys = Boolean(element.className.match(/options-key-custom/));
   this.identifier = this.manualOptionsElement.id + '-widget';
-  this.enabled = !$(this.manualOptionsElement).oeProp('readonly');
+  this.enabled = !$(this.manualOptionsElement).prop('readonly');
   this.defaultValuePattern = $(element).find('input.default-value-pattern').val();
 
   if (this.defaultValuePattern) {
@@ -80,14 +75,14 @@ Backdrop.optionsElement = function(element) {
 
   // Enable the remove default link.
   $(this.removeDefaultElement).find('a').click(function() {
-    $(self.element).find('input.option-default').oeProp('checked', false).trigger('change');
+    $(self.element).find('input.option-default').prop('checked', false).trigger('change');
     return false;
   });
 
   // Add a handler for key type changes.
   if (this.keyTypeToggle) {
     $(this.keyTypeToggle).click(function() {
-      var checked = $(this).oeProp('checked');
+      var checked = $(this).prop('checked');
       // Before switching the key type, ensure we're not destroying user keys.
       if (!checked) {
         var options = self.optionsFromText();
@@ -118,7 +113,7 @@ Backdrop.optionsElement = function(element) {
   // Add a handler for multiple value changes.
   if (this.multipleToggle) {
     $(this.multipleToggle).click(function(){
-      self.setMultiple($(this).oeProp('checked'));
+      self.setMultiple($(this).prop('checked'));
     });
   }
 
@@ -318,10 +313,10 @@ Backdrop.optionsElement.prototype.updateOptionElements = function() {
 
     if (depth == 1) {
       // Affect the parent row, adjusting properties for optgroup items.
-      $(previousElement).oeProp('disabled', true).oeProp('checked', false);
+      $(previousElement).prop('disabled', true).prop('checked', false);
       $(previousRow).addClass('optgroup').find('a.add, a.remove').css('display', 'none');
       $(this).find('a.add, a.remove').css('display', '');
-      $(defaultInput).oeProp('disabled', false);
+      $(defaultInput).prop('disabled', false);
 
       // Hide the key column for the optgroup.
       if (self.customKeys) {
@@ -331,7 +326,7 @@ Backdrop.optionsElement.prototype.updateOptionElements = function() {
     }
     else {
       // Set properties for normal options that are not optgroups.
-      $(defaultInput).oeProp('disabled', false);
+      $(defaultInput).prop('disabled', false);
       $(this).removeClass('optgroup').find('a.add, a.remove').css('display', '');
 
       // Hide the key column.
@@ -364,7 +359,7 @@ Backdrop.optionsElement.prototype.addOption = function(currentOption) {
   var newOption = $(currentOption).clone()
     .find('input.option-key').val(self.keyType == 'numeric' ? self.nextNumericKey() : '').end()
     .find('input.option-value').val('').end()
-    .find('input.option-default').oeProp('checked', false).end()
+    .find('input.option-default').prop('checked', false).end()
     .find('a.tabledrag-handle').remove().end()
     .removeClass('drag-previous')
     .insertAfter(currentOption)
@@ -449,11 +444,11 @@ Backdrop.optionsElement.prototype.toggleMode = function() {
  */
 Backdrop.optionsElement.prototype.enable = function() {
   this.enabled = true;
-  $(this.manualOptionsElement).oeProp('readonly', false);
+  $(this.manualOptionsElement).prop('readonly', false);
   $(this.element).removeClass('options-disabled');
 
   $('a.add, a.remove, a.tabledrag-handle, div.form-option-add a', this.element).css('display', '');
-  $('input.form-text', this.optionsElement).oeProp('disabled', false);
+  $('input.form-text', this.optionsElement).prop('disabled', false);
 };
 
 /**
@@ -461,11 +456,11 @@ Backdrop.optionsElement.prototype.enable = function() {
  */
 Backdrop.optionsElement.prototype.disable = function() {
   this.enabled = false;
-  $(this.manualOptionsElement).oeProp('readonly', true);
+  $(this.manualOptionsElement).prop('readonly', true);
   $(this.element).addClass('options-disabled');
 
   $('a.add, a.remove, a.tabledrag-handle, div.form-option-add a', this.element).css('display', 'none');
-  $('input.form-text', this.optionsElement).oeProp('disabled', true);
+  $('input.form-text', this.optionsElement).prop('disabled', true);
 };
 
 /**
@@ -507,7 +502,7 @@ Backdrop.optionsElement.prototype.setMultiple = function(multiple) {
   }
   else {
     // Unselect all default options except the first.
-    $(this.optionsElement).find('input.option-default:checked:not(:first)').oeProp('checked', false);
+    $(this.optionsElement).find('input.option-default:checked:not(:first)').prop('checked', false);
     this.updateManualElements();
     $(this.element).removeClass('options-multiple');
   }
