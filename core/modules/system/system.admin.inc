@@ -1312,7 +1312,7 @@ function system_site_information_settings($form, &$form_state) {
  */
 function system_site_information_settings_validate($form, &$form_state) {
   // Handle file uploads.
-  $validators = array('file_validate_is_image' => array());
+  $validators = array('file_validate_extensions' => array('ico png gif jpg jpeg apng svg'));
 
   // Check for a new uploaded logo.
   $file = file_save_upload('site_logo_upload', $validators);
@@ -1327,8 +1327,6 @@ function system_site_information_settings_validate($form, &$form_state) {
       form_set_error('site_logo_upload', t('The logo could not be uploaded.'));
     }
   }
-
-  $validators = array('file_validate_extensions' => array('ico png gif jpg jpeg apng svg'));
 
   // Check for a new uploaded favicon.
   $file = file_save_upload('site_favicon_upload', $validators);
