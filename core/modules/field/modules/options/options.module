@@ -30,6 +30,8 @@ function options_library_info() {
     'version' => BACKDROP_VERSION,
     'js' => array(
       $path . '/js/options.js' => array(),
+      'core/misc/tabledrag.js' => array('group' => JS_LIBRARY, 'weight' => 5),
+      'core/misc/jquery.cookie.js' => array('group' => JS_LIBRARY),
     ),
     'css' => array(
      $path . '/css/options.css' => array(),

@@ -18,13 +18,8 @@ function _form_options_expand($element) {
   $element['#theme'] = 'options';
 
   $path = backdrop_get_path('module', 'options');
-  $element['#attached']['js'] = array(
-    'core/misc/tabledrag.js' => array('group' => JS_LIBRARY, 'weight' => 5),
-    'core/misc/jquery.cookie.js' => array('group' => JS_LIBRARY),
-    $path . '/js/options.js',
-  );
-  $element['#attached']['css'] = array(
-    $path . '/css/options.css',
+  $element['#attached']['library'] = array(
+      array('options', 'options'),
   );
 
   // Add the key type toggle checkbox.
