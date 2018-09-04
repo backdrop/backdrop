@@ -55,15 +55,24 @@ function list_field_settings_form($field, $instance, $has_data) {
     case 'list_integer':
     case 'list_float':
     case 'list_text':
+      // Get default value.
+      $options = $field['settings']['allowed_values'];
+      // Toggled by default if options already set.
+      $key_type_toggled = !empty($options);
+
       $form['allowed_values'] = array(
-        '#type' => 'textarea',
+        '#type' => 'options',
         '#title' => t('Allowed values list'),
-        '#default_value' => list_allowed_values_string($settings['allowed_values']),
-        '#rows' => 10,
+        '#default_value' => '',
+        '#default_value_allowed' => FALSE,
+        '#options' => $options,
         '#element_validate' => array('list_allowed_values_setting_validate'),
         '#field_has_data' => $has_data,
         '#field' => $field,
         '#field_type' => $field['type'],
+        '#key_type' => 'mixed', // Optimal for now.
+        '#key_type_toggle' => t('Custom formkeys'),
+        '#key_type_toggled' => $key_type_toggled,
         '#access' => empty($settings['allowed_values_function']),
       );
 
@@ -80,6 +89,8 @@ function list_field_settings_form($field, $instance, $has_data) {
       $description .= '</p>';
       $form['allowed_values']['#description'] = $description;
 
+      // Set proper allowed values in $form_state.
+      $form['#validate'][] = 'options_field_settings_validate';
       break;
 
     case 'list_boolean':
@@ -153,8 +164,7 @@ function list_allowed_values_setting_validate($element, &$form_state) {
   $has_data = $element['#field_has_data'];
   $field_type = $field['type'];
   $generate_keys = ($field_type == 'list_integer' || $field_type == 'list_float') && !$has_data;
-
-  $values = list_extract_allowed_values($element['#value'], $field['type'], $generate_keys);
+  $values = list_extract_allowed_values($element['#value']['options_text'], $field['type'], $generate_keys);
 
   if (!is_array($values)) {
     form_error($element, t('Allowed values list: invalid input.'));

@@ -568,55 +568,6 @@ function form_options_from_text($text, $key_type, $flat = FALSE, &$duplicates = 
 }
 
 /**
- * Implements hook_form_FORM_ID_alter().
- */
-function options_form_field_ui_field_settings_form_alter(&$form, &$form_state) {
-  $type = $form['field']['type']['#value'];
-
-  if (in_array($type, _options_element_supported_field_types())) {
-    // Get default value.
-    $options = form_options_from_text($form['field']['settings']['allowed_values']['#default_value'], 'mixed');
-    // Toggled by default if options already set.
-    $key_type_toggled = !empty($options);
-
-    $element_overwrite = array(
-      '#options' => $options,
-      '#multiple' => FALSE,
-      '#key_type_toggled' => $key_type_toggled,
-      '#default_value_allowed' => FALSE,
-    );
-    _options_element_add_allowed_values_element($form, $element_overwrite);
-  }
-}
-
-/**
- * Implements hook_form_FORM_ID_alter().
- */
-function options_form_field_ui_field_edit_form_alter(&$form, &$form_state) {
-  $field = $form['#field'];
-
-  if (in_array($field['type'], _options_element_supported_field_types())) {
-
-    // Use options_element default widget instead of field widget.
-    $form['instance']['default_value_widget']['#access'] = FALSE;
-    // Language is hardcoded to 'und' in field_ui_default_value_widget().
-    $default_field_value = $form['instance']['default_value_widget'][$field['field_name']][LANGUAGE_NONE]['#default_value'];
-
-    // Overwrite 'allowed_values' element.
-    $element_overwrite = array(
-      '#options' => $field['settings']['allowed_values'],
-      '#multiple' => ($field['cardinality'] == -1),
-      '#default_value' => $default_field_value,
-    );
-
-    _options_element_add_allowed_values_element($form, $element_overwrite);
-
-    // Add proper default value inside validate callback.
-    $form['#validate'][] = 'options_field_instance_settings_validate';
-  }
-}
-
-/**
  * Element #after_build callback for the options list in Field UI.
  */
 function options_field_settings_after_build($element, &$form_state) {
@@ -659,39 +610,4 @@ function options_field_instance_settings_validate($form, &$form_state) {
       $form_state
     );
   }
-}
-
-/**
- * Add options_element widget to form.
- */
-function _options_element_add_allowed_values_element(&$form, $element) {
-  $default_element = array(
-    '#type' => 'options',
-    '#key_type' => 'mixed', // Optimal for now.
-    '#key_type_toggle' => t('Custom keys'),
-    '#key_type_toggled' => TRUE,
-    '#after_build' => array('options_field_settings_after_build'),
-    '#access' => $form['field']['settings']['allowed_values']['#access'],
-    '#default_value' => '',
-    // Pass original data for validating.
-    '#original' => array(
-      '#title' => $form['field']['settings']['allowed_values']['#title'],
-      '#field_has_data' => $form['field']['settings']['allowed_values']['#field_has_data'],
-      '#field' => $form['field']['settings']['allowed_values']['#field'],
-      '#field_type' => $form['field']['settings']['allowed_values']['#field_type'],
-    )
-  );
-
-  $element = backdrop_array_merge_deep($default_element, $element);
-  $form['field']['settings']['allowed_values'] = $element;
-
-  // Set proper allowed values in $form_state.
-  $form['#validate'][] = 'options_field_settings_validate';
-}
-
-/**
- * Returns supported field types.
- */
-function _options_element_supported_field_types() {
-  return array('list_integer', 'list_float', 'list_text');
 }
