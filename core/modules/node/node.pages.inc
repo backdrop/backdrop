@@ -721,7 +721,7 @@ function node_preview_banner_form_node_submit(array $form, array &$form_state) {
     $destination = '<front>';
     if (node_access('view', $node)) {
       $destination = 'node/' . $node->nid;
-       // If node type set to prevent direct viewing of full page URL
+      // If node type set to prevent direct viewing of full page URL
       // stay on edit page if user is not permitted.
       $type = node_type_get_type($node);
       $bypass_hidden_path = user_access('view hidden paths');
