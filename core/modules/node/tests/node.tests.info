@@ -28,6 +28,12 @@ description = Create a node and test node edit functionality.
 group = Node
 file = node.test
 
+[PagePreviewTestCase]
+name = Node preview
+description = Test node preview functionality.
+group = Node
+file = node.test
+
 [NodeCreationTestCase]
 name = Node creation
 description = Create a node and test saving it.

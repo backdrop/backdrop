@@ -449,6 +449,224 @@ class PageEditTestCase extends BackdropWebTestCase {
 }
 
 /**
+ * Tests the node entity preview functionality.
+ */
+class PagePreviewTestCase extends BackdropWebTestCase {
+  /**
+   * @var string
+   */
+  protected $field_name;
+
+  /**
+   * @var string
+   */
+  protected $field_email_name;
+
+  /**
+   * @var TaxonomyTerm
+   */
+  protected $term;
+
+  function setUp() {
+    parent::setUp(array('taxonomy', 'node', 'email'));
+
+    $web_user = $this->backdropCreateUser(array('edit own page content', 'create page content', 'administer nodes'));
+    $this->backdropLogin($web_user);
+
+    // Add a vocabulary so we can test different view modes.
+    $vocabulary = new TaxonomyVocabulary(array(
+      'name' => $this->randomName(),
+      'description' => $this->randomName(),
+      'machine_name' => backdrop_strtolower($this->randomName()),
+      'help' => '',
+      'nodes' => array('page' => 'page'),
+    ));
+    taxonomy_vocabulary_save($vocabulary);
+
+    // Add a term to the vocabulary.
+    $term = entity_create('taxonomy_term', array(
+      'name' => $this->randomName(),
+      'description' => $this->randomName(),
+      'format' => 1,
+      'vocabulary' => $vocabulary->machine_name,
+    ));
+    taxonomy_term_save($term);
+
+    $this->term = $term;
+
+    // Create a field with settings to validate.
+    $this->field_email_name = backdrop_strtolower($this->randomName());
+    $field_email = array(
+      'field_name' => $this->field_email_name,
+      'type' => 'email',
+    );
+    field_create_field($field_email);
+    $email_instance = array(
+      'field_name' => $field_email['field_name'],
+      'entity_type' => 'node',
+      'bundle' => 'page',
+      'widget' => array(
+        'type' => 'email_default',
+      ),
+      'display' => array(
+        'full' => array(
+          'type' => 'email_mailto',
+        ),
+      ),
+    );
+    field_create_instance($email_instance);
+
+    // Set up a field and instance.
+    $this->field_name = backdrop_strtolower($this->randomName());
+    $field = array(
+      'field_name' => $this->field_name,
+      'type' => 'taxonomy_term_reference',
+      'settings' => array(
+        'allowed_values' => array(
+          array(
+            'vocabulary' => $vocabulary->machine_name,
+            'parent' => '0',
+          ),
+        ),
+      )
+    );
+
+    field_create_field($field);
+    $instance = array(
+      'field_name' => $this->field_name,
+      'entity_type' => 'node',
+      'bundle' => 'page',
+      'widget' => array(
+        'type' => 'options_select',
+      ),
+      // Hide on full display but render on teaser.
+      'display' => array(
+        'default' => array(
+          'type' => 'hidden',
+        ),
+        'teaser' => array(
+          'type' => 'taxonomy_term_reference_link',
+        ),
+      ),
+    );
+    field_create_instance($instance);
+  }
+
+  /**
+   * Checks the node preview functionality.
+   */
+  function testPagePreview() {
+    $langcode = LANGUAGE_NONE;
+    $title_key = "title";
+    $body_key = "body[$langcode][0][value]";
+    $term_key = "{$this->field_name}[$langcode]";
+    $email_key = "{$this->field_email_name}[$langcode][0][email]";
+
+    // Fill in node creation form and preview node.
+    $edit = array();
+    $edit[$title_key] = $this->randomName(8);
+    $edit[$body_key] = $this->randomName(16);
+    $edit[$term_key] = $this->term->tid;
+    $edit[$email_key] = 'email_key@example.com';
+    $this->backdropPost('node/add/page', $edit, t('Preview'));
+
+    // Check that the preview is displaying the title and body, but not term.
+    $this->assertTitle(t('@title | Backdrop CMS', array('@title' => $edit[$title_key])), 'Basic page title is preview.');
+    $this->assertLink(t('Back to content editing'));
+    $this->assertText($edit[$title_key], 'Title displayed.');
+    $this->assertText($edit[$body_key], 'Body displayed.');
+    $this->assertText($edit[$email_key], 'Email displayed.');
+    $this->assertNoText($this->term->name, 'Term not displayed.');
+
+    // Change the view mode.
+    $teaser_edit = array();
+    $teaser_edit['view_mode'] = 'teaser';
+    $this->backdropPost(NULL, $teaser_edit, t('Switch'));
+
+    // Check that the preview is displaying the title, body, and term.
+    $this->assertText($edit[$title_key], 'Title displayed.');
+    $this->assertText($edit[$body_key], 'Body displayed.');
+    $this->assertNoText($edit[$email_key], 'Email not displayed.');
+    $this->assertText($this->term->name, 'Term displayed.');
+
+    // Return to the node edit page and check field values.
+    $this->clickLink('Back to content editing');
+
+    $this->assertFieldByName($title_key, $edit[$title_key], 'Title field displayed.');
+    $this->assertFieldByName($body_key, $edit[$body_key], 'Body field displayed.');
+    $this->assertFieldByName($term_key, $edit[$term_key], 'Term field displayed.');
+    $this->assertFieldByName($email_key, $edit[$email_key], 'Email field displayed.');
+
+    // Return to preview and save.
+    $this->backdropPost(NULL, $edit, t('Preview'));
+    $this->assertText($edit[$title_key], 'Title displayed.');
+    $this->assertText($edit[$body_key], 'Body displayed.');
+    $this->assertText($edit[$email_key], 'Email displayed.');
+    $this->assertNoText($this->term->name, 'Term not displayed.');
+
+    $this->backdropPost(NULL, array(), t('Save'));
+
+    $this->assertRaw(t('!post %title has been created.', array('!post' => 'Page', '%title' => $edit["title"])), 'Page created.');
+    $this->assertText($edit[$title_key], 'Title displayed.');
+    $this->assertText($edit[$body_key], 'Body displayed.');
+    $this->assertText($edit[$email_key], 'Email displayed.');
+    $this->assertNoText($this->term->name, 'Term not displayed.');
+
+    // Edit an existing node to check preview works.
+    $this->clickLink('Edit');
+    $this->backdropPost(NULL, $edit, t('Preview'));
+    $this->assertText($edit[$title_key], 'Title displayed.');
+    $this->assertText($edit[$body_key], 'Body displayed.');
+    $this->assertText($edit[$email_key], 'Email displayed.');
+    $this->assertNoText($this->term->name, 'Term not displayed.');
+
+    // Login as a second user with path permissions.
+    $web_user = $this->backdropCreateUser(array('bypass node access', 'administer nodes'));
+    $this->backdropLogin($web_user);
+
+    // Test node settings during preview.
+    $edit = array();
+    $name = $this->randomName(8);
+
+    $edit[$title_key] = $name;
+    $edit[$body_key] = $this->randomName(16);
+    $edit['status'] = 0;
+    $this->backdropPost('node/add/page', $edit, t('Preview'));
+
+    $this->assertNoText('This Page is unpublished.', 'Page is not in draft state.');
+
+    // Return to the node edit page and check field values.
+    $this->clickLink('Back to content editing');
+
+    $this->assertFieldByName('status', 0, 'Status is set to unpublished.');
+
+    // Return to preview and save.
+    $this->assertNoText('This Page is unpublished.', 'Page is not in draft state.');
+    $this->backdropPost(NULL, array(), t('Save'));
+    $node = $this->backdropGetNodeByTitle($name);
+    $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
+
+    // Edit the node, check status then preview and save.
+    $this->clickLink('Edit');
+    $this->assertFieldByName('status', 0, 'Status is set to unpublished.');
+
+    $name = $this->randomName(8);
+    $edit = array();
+    $edit[$title_key] = $name;
+    $edit['status'] = 2;
+    $edit['scheduled[date]'] = format_date(REQUEST_TIME + 360, 'custom', 'Y-m-d', $web_user->timezone);
+    $edit['scheduled[time]'] = format_date(REQUEST_TIME + 360, 'custom', 'g:i a', $web_user->timezone);
+    $this->backdropPost(NULL, $edit, t('Preview'));
+    $this->backdropPost(NULL, array(), t('Save'));
+    $node = $this->backdropGetNodeByTitle($name);
+    $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
+
+    $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');
+  }
+
+}
+
+/**
  * Tests creating and saving a node.
  */
 class NodeCreationTestCase extends BackdropWebTestCase {
@@ -566,7 +784,7 @@ class PageViewTestCase extends BackdropWebTestCase {
 
     // Try to edit with anonymous user.
     $this->backdropLogout();
-    $html = $this->backdropGet("node/$node->nid/edit");
+    $this->backdropGet("node/$node->nid/edit");
     $this->assertResponse(403);
 
     // Create a user without permission to edit node.
@@ -740,7 +958,7 @@ class NodePostSettingsTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/page', $edit, t('Save'));
 
     // Check that the post information is displayed.
-    $node = $this->backdropGetNodeByTitle($edit["title"]);
+    $this->backdropGetNodeByTitle($edit["title"]);
     $this->assertNoRaw('<span class="submitted">', 'Post information is not displayed.');
   }
 }
@@ -1315,6 +1533,22 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
     $config = config('node.type.foo');
     $this->assertFalse($config->isNew(), 'The new content type has been created in config.');
+    $this->assertEqual($config->get('settings.hidden_path'), '0', 'The new content type has hidden_path disabled.');
+
+    // Add a node of type foo; make sure we can visit it with 200 response..
+    $foo_settings = array('uid' => $web_user->uid, 'type' => 'foo');
+    $foo_node = $this->backdropCreateNode($foo_settings);
+    $this->backdropGet('/node/' . $foo_node->nid);
+    $this->assertResponse(200, 'Received 200 response from node type foo with hidden_path disabled.');
+
+    // Edit content type foo to hidden_path = 1 and check the setting.
+    $config->set('settings.hidden_path', '1');
+    $config->save();
+    $this->assertEqual($config->get('settings.hidden_path'), '1', 'The new content type has hidden_path enabled.');
+    $foo_node2 = $this->backdropCreateNode($foo_settings);
+    backdrop_flush_all_caches();
+    $this->backdropGet('/node/' . $foo_node2->nid);
+    $this->assertResponse(404, 'Received 404 response from node type foo where user restricted from viewing full page.');
 
     // Ensure publishing settings are loaded correctly even when using boolean
     // values for "status_default".

@@ -43,11 +43,11 @@ class ColorTestCase extends BackdropWebTestCase {
       '#000' => TRUE,
       '#123456' => TRUE,
       '#abcdef' => TRUE,
+      '123456' => TRUE,
       '#0' => FALSE,
       '#00' => FALSE,
       '#0000' => FALSE,
       '#00000' => FALSE,
-      '123456' => FALSE,
       '#00000g' => FALSE,
     );
   }
@@ -116,7 +116,7 @@ class ColorTestCase extends BackdropWebTestCase {
         $this->assertText('The configuration options have been saved.');
       }
       else {
-        $this->assertText('You must enter a valid hexadecimal color value for Main background.');
+        $this->assertText('Main background must be a valid color.');
       }
     }
   }

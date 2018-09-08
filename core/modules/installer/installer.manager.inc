@@ -175,7 +175,7 @@ function installer_manager_update_form($form, $form_state, $context) {
     $entry['#attributes'] = array('class' => array('update-' . $type));
 
     // Backdrop CMS core needs to be upgraded manually.
-    $needs_manual = $project['project_type'] == 'core';
+    $needs_manual = ($project['project_type'] == 'core' && config_get('installer.settings', 'core_update') != TRUE);
 
     if ($needs_manual) {
       // There are no checkboxes in the 'Manual updates' table so it will be
@@ -200,10 +200,14 @@ function installer_manager_update_form($form, $form_state, $context) {
     // appropriate subarray.
     switch ($project['project_type']) {
       case 'core':
-        // Core needs manual updates at this time.
-        $projects['manual'][$name] = $entry;
+        // Core needs manual updates if automatic not enabled.
+        if (config_get('installer.settings', 'core_update')) {
+          $projects['enabled'][$name] = $entry;
+        }
+        else {
+          $projects['manual'][$name] = $entry;
+        }
         break;
-
       case 'module':
       case 'theme':
       case 'layout':
@@ -268,7 +272,7 @@ function installer_manager_update_form($form, $form_state, $context) {
 
   if (!empty($projects['manual'])) {
     $prefix = '<h2>' . t('Manual updates required') . '</h2>';
-    $prefix .= '<p>' . t('Updates of Backdrop CMS core using the web interface are not possible yet.') . '</p>';
+    $prefix .= '<p>' . t('Updates of Backdrop CMS core using the web interface are disabled.') . '</p>';
     $prefix .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org/" title="Home page with download option">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" title="Handbook article">Upgrading Backdrop CMS</a> document online.') . '</p>';
     $form['manual_updates'] = array(
       '#type' => 'markup',

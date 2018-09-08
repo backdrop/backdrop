@@ -521,8 +521,8 @@ function filter_editor_image_upload_settings_form($format) {
     'directory' => 'inline-images',
     'max_size' => '',
     'max_dimensions' => array('width' => '', 'height' => ''),
+    'orientate' => FALSE,
   );
-
   $form['status'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable image uploads'),
@@ -543,6 +543,19 @@ function filter_editor_image_upload_settings_form($format) {
   foreach ($stream_wrappers as $scheme => $info) {
     $options[$scheme] = $info['description'];
   }
+  
+  $form['orientate'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable image re-orientation'),
+    '#description' => t('If EXIF data indicates the need, the image will be rotated appropriately before being saved.'),
+    '#default_value' => $settings['orientate'],
+    '#attributes' => array(
+      'data-editor-image-rotate' => 'orientate',
+    ),
+    '#states' => $show_if_image_uploads_enabled,
+    '#access' => function_exists('exif_read_data'),
+  );
+  
   if (!empty($options)) {
     $form['scheme'] = array(
       '#type' => 'radios',

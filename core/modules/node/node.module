@@ -91,6 +91,9 @@ function node_theme() {
     'node_search_admin' => array(
       'render element' => 'form',
     ) + $base,
+    'node_preview_banner_form' => array(
+      'render element' => 'form',
+    ) + $base,
     'node_add_list' => array(
       'variables' => array('content' => NULL),
     ) + $base,
@@ -892,7 +895,10 @@ function node_load($nid = NULL, $vid = NULL, $reset = FALSE) {
  *   A node object.
  */
 function node_object_prepare(Node $node) {
-  // Set up default values, if required.
+  // Check if we can retrieve a node from the tempstore.
+  $node_tempstore_id = node_build_tempstore_id($node->type);
+
+   // Set up default values, if required.
   $node_type = node_type_get_type($node->type);
   // If this is a new node, fill in the default values.
   if (!isset($node->nid) || isset($node->is_new)) {
@@ -1284,6 +1290,10 @@ function node_permission() {
     ),
     'delete revisions' => array(
       'title' => t('Delete content revisions'),
+    ),
+    'view hidden paths' => array(
+      'title' => t('View hidden paths'),
+      'description' => t('View URL of content, overriding restriction on viewing content directly.'),
     ),
   );
 
@@ -1771,6 +1781,17 @@ function node_menu() {
       'description' => $type->description,
       'file' => 'node.pages.inc',
     );
+    $items['node/preview/' . $type_url_str . '/%'] = array(
+      'title' => $type->name,
+      'title callback' => 'check_plain',
+      'page callback' => 'node_preview',
+      'page arguments' => array(3, $type_url_str),
+      'access callback' => 'node_access',
+      'access arguments' => array('create', $type->type),
+      'description' => $type->description,
+      'type' => MENU_CALLBACK,
+      'file' => 'node.pages.inc',
+    );
   }
   $items['node/%node'] = array(
     'title callback' => 'node_page_title',
@@ -1855,6 +1876,26 @@ function node_menu() {
   );
 
   return $items;
+}
+
+/**
+ * Access callback: Checks a user's permission for previewing a node.
+ *
+ * @param Node $node
+ *   The node entity to be previewed.
+ *
+ * @return bool
+ *   TRUE if the user has access to the preview, FALSE otherwise.
+ *
+ * @see node_menu()
+ *
+ * @since 1.11.0
+ */
+function node_access_preview(Node $node) {
+  if (node_access('create', $node) || node_access('update', $node)) {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 /**
@@ -2268,6 +2309,15 @@ function node_page_default() {
  * @see node_menu()
  */
 function node_page_view(Node $node) {
+  // Determine if user has permission to view full page directly.
+  // Display "page not found" if not.
+  $type = node_type_get_type($node);
+  $bypass_hidden_path = user_access('view hidden paths');
+  if ($type->settings['hidden_path'] && !$bypass_hidden_path) {
+    backdrop_not_found();
+    backdrop_exit();
+  }
+
   // If there is a menu link to this node, the link becomes the last part
   // of the active trail, and the link name becomes the page title.
   // Thus, we must explicitly set the page title to be the node title.
@@ -3626,6 +3676,7 @@ function node_autoload_info() {
     'views_handler_field_node_type' => 'views/views_handler_field_node_type.inc',
     'views_handler_filter_history_user_timestamp' => 'views/views_handler_filter_history_user_timestamp.inc',
     'views_handler_filter_node_access' => 'views/views_handler_filter_node_access.inc',
+    'views_handler_filter_node_hidden_path' => 'views/views_handler_filter_node_hidden_path.inc',
     'views_handler_filter_node_status' => 'views/views_handler_filter_node_status.inc',
     'views_handler_filter_node_type' => 'views/views_handler_filter_node_type.inc',
     'views_handler_filter_node_uid_revision' => 'views/views_handler_filter_node_uid_revision.inc',
@@ -3727,3 +3778,91 @@ function node_language_delete($language) {
     ->condition('langcode', $language->langcode)
     ->execute();
 }
+
+/**
+ * Get a node from the tempstore.
+ *
+ * @param string $node_tempstore_id
+ *   The tempstore ID of the node item to load.
+ *
+ * @return Node|FALSE
+ *   A fully-populated node entity, or FALSE if the node is not found.
+ *
+ * @since 1.11.0
+ */
+function node_get_node_tempstore($node_tempstore_id) {
+  $caches = &backdrop_static(__FUNCTION__, array());
+  if (!isset($caches[$node_tempstore_id])) {
+    // Try loading from tempstore first to get in-progress changes.
+    $item = tempstore_get('node_tempstore', $node_tempstore_id);
+    $caches[$node_tempstore_id] = $item;
+  }
+
+  return $caches[$node_tempstore_id];
+}
+
+/**
+ * Store changes to a node or menu item in the temporary store.
+ *
+ * @param Node $item
+ *   The node item to save into tempstore.
+ * @param string $node_tempstore_id
+ *   The tempstore ID of the node being saved to the object cache.
+ *
+ * @since 1.11.0
+ */
+function node_set_node_tempstore($item, $node_tempstore_id) {
+  $item->locked = array(
+    'uid' => $GLOBALS['user']->uid,
+    'updated' => REQUEST_TIME,
+  );
+  // Keep previews for 24 hours.
+  tempstore_set('node_tempstore', $node_tempstore_id, $item, REQUEST_TIME + 86400);
+}
+
+/**
+ * Remove an item from the object cache.
+ *
+ * @param string $node_tempstore_id
+ *   The tempstore ID of the node to be deleted from the object cache.
+ *
+ * @since 1.11.0
+ */
+function node_clear_node_tempstore($node_tempstore_id) {
+  tempstore_clear('node_tempstore', $node_tempstore_id);
+}
+
+/**
+ * Load a node from the tempstore.
+ *
+ * @param int $node_tempstore_id
+ *   The ID of a tempstore object.
+ *
+ * @return Node|false
+ *   A fully-populated node entity, or FALSE if the node is not found.
+ *
+ * @since 1.11.0
+ */
+function node_tempstore_load($node_tempstore_id) {
+  return node_get_node_tempstore($node_tempstore_id);
+}
+
+/**
+ * Build tempstore ID.
+ *
+ * @return string $node_tempstore_id
+ *   A unique string, or the current tempstore ID if set in the URL.
+ *
+ * @since 1.11.0
+ */
+function node_build_tempstore_id() {
+  if (isset($_GET['node_tempstore_id'])) {
+    $node_tempstore_id = $_GET['node_tempstore_id'];
+  }
+  else {
+    $uuid = new Uuid();
+    $node_tempstore_id = $uuid->generate();
+  }
+  return $node_tempstore_id;
+}
+

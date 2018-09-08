@@ -569,6 +569,11 @@ class CommentInterfaceTest extends CommentHelperCase {
           $case['user_uid'] = $this->admin_user->uid;
           break;
       }
+
+      // Wait a few seconds to ensure that the "comment-new" flag is allowed to
+      // trigger (more than 1 second from the time the comment was created).
+      sleep(2);
+
       // Request the node with the comment.
       $this->backdropGet('node/' . $node->nid);
 

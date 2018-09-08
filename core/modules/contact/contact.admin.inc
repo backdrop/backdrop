@@ -29,6 +29,15 @@ function contact_settings_form($form, &$form_state) {
     '#default_value' => contact_show_personal_copy_checkbox()
   );
 
+  $form['permissions_wrapper'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#title' => t("Permissions"),
+  );
+  $form['permissions_wrapper']['permissions'] = contact_form_permissions();
+  $form['permissions_wrapper']['permissions']['#tree'] = TRUE;
+
   $form['threshold'] = array(
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
@@ -53,7 +62,93 @@ function contact_settings_form($form, &$form_state) {
     '#default_value' => $config->get('contact_threshold_window'),
   );
 
+  $form['#submit'][] = 'contact_settings_form_submit';
   return system_settings_form($form);
+}
+
+/**
+ * Contact settings form submit handler.
+ *
+ * @see contact_settings_form()
+ */
+function contact_settings_form_submit($form, &$form_state) {
+  // Update user permissions for each role.
+  foreach ($form_state['values']['permissions']['roles'] as $role_name => $role) {
+    user_role_change_permissions($role->name, $form_state['values']['permissions']['checkboxes'][$role->name]);
+  }
+
+  // Remove permissions from default #config store (contact.settings).
+  unset($form_state['values']['permissions']);
+}
+
+/**
+ * Builds a matrix of contact permissions.
+ *
+ * @see node_type_form_permissions()
+ */
+function contact_form_permissions() {
+  // Retrieve role names for columns.
+  $roles = user_roles(FALSE, NULL, TRUE);
+  $admin_role = config_get('system.core', 'user_admin_role');
+
+  // Note that in contact_theme(), the 'contact_form_permissions' theme callback
+  // reuses theme_user_admin_permissions(), to make it identical to the user
+  // module permissions page.
+  $form['#theme'] = array('contact_form_permissions');
+
+  // Wrap the table in a form element to make margins match other form elements.
+  $form['#theme_wrappers'] = array('form_element');
+
+  $form['roles'] = array(
+    '#type' => 'value',
+    '#value' => $roles,
+  );
+
+  // Retrieve contact related permissions.
+  $permissions = contact_permission();
+
+  // Render role/permission overview:
+  $options = array();
+  $status = array();
+  foreach ($permissions as $perm => $perm_item) {
+    // Fill in default values for the permission.
+    $perm_item += array(
+      'description' => '',
+      'restrict access' => FALSE,
+      'warning' => !empty($perm_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
+    );
+    $options[$perm] = '';
+    $form['permission'][$perm] = array(
+      '#type' => 'item',
+      '#markup' => $perm_item['title'],
+      '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
+    );
+    foreach ($roles as $role_name => $role) {
+      // Builds arrays for checked boxes for each role. Always select the Admin
+      // role on new forms.
+      if (in_array($perm, $role->permissions) || ($role->name == $admin_role)) {
+        $status[$role_name][] = $perm;
+      }
+    }
+  }
+
+  // Have to build checkboxes here after checkbox arrays are built.
+  foreach ($roles as $role_name => $role) {
+    $form['checkboxes'][$role_name] = array(
+      '#type' => 'checkboxes',
+      '#options' => $options,
+      '#default_value' => isset($status[$role_name]) ? $status[$role_name] : array(),
+      '#attributes' => array('class' => array('role-' . $role_name)),
+    );
+    $form['role_names'][$role_name] = array(
+      '#markup' => check_plain($role->label),
+      '#tree' => TRUE,
+    );
+  }
+
+  $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
+
+  return $form;
 }
 
 /**
@@ -101,8 +196,9 @@ function contact_category_list($form, $form_state) {
     $form['categories'][$cid]['name'] = array(
       '#markup' => check_plain($cat['category']),
     );
+    $recipients = explode(',', check_plain($cat['recipients']));
     $form['categories'][$cid]['recipients'] = array(
-      '#markup' => check_plain($cat['recipients']),
+      '#markup' => theme('item_list', array('items' => $recipients)),
     );
     $form['categories'][$cid]['default'] = array(
       '#markup' => ($cid == $default_category) ? t('Yes') : t('No'),
@@ -194,9 +290,13 @@ function contact_category_edit_form($form, &$form_state, array $category = array
   $form['recipients'] = array(
     '#type' => 'textarea',
     '#title' => t('Recipients'),
-    '#default_value' => $category['recipients'],
-    '#description' => t("Example: 'webmaster@example.com' or 'sales@example.com,support@example.com' . To specify multiple recipients, separate each e-mail address with a comma."),
+    // Recipients are stored comma-separated, but display with new lines for
+    // better human readability.
+    '#default_value' => implode("\n", explode(',', $category['recipients'])),
+    '#description' => t("To specify multiple recipients, separate each e-mail address with a new line, comma, semicolon or space."),
+    '#placeholder' => t("webmaster@example.com\nsales@example.com"),
     '#required' => TRUE,
+    '#rows' => max(5, sizeof(explode(',', $category['recipients'])) + 2),
   );
   $form['reply'] = array(
     '#type' => 'textarea',
@@ -247,9 +347,6 @@ function contact_category_edit_form($form, &$form_state, array $category = array
  * @see contact_category_edit_form_submit()
  */
 function contact_category_edit_form_validate($form, &$form_state) {
-  // Validate and each e-mail recipient.
-  $recipients = explode(',', $form_state['values']['recipients']);
-
   // When creating a new contact form, or renaming the category on an existing
   // contact form, make sure that the given category is unique.
   $category = $form_state['values']['category'];
@@ -268,13 +365,24 @@ function contact_category_edit_form_validate($form, &$form_state) {
     }
   }
 
+  // Get addresses separated by comma, space, line break or semicolon.
+  $recipients = preg_split("/( |,|;|\n)/", $form_state['values']['recipients']);
+  // Cleanup addresses list.
+  $recipients = array_filter(array_map('trim', $recipients));
+
   // Check recipients are valid email.
+  $invalid_recipients = array();
   foreach ($recipients as &$recipient) {
-    $recipient = trim($recipient);
     if (!valid_email_address($recipient)) {
-      form_set_error('recipients', t('%recipient is an invalid e-mail address.', array('%recipient' => $recipient)));
+      $invalid_recipients[] = $recipient;
     }
   }
+  if (!empty($invalid_recipients)) {
+    $message = format_plural(sizeof($invalid_recipients), '%recipient is an invalid e-mail address.', 'The following email addresses are invalid: %recipient.', array('%recipient' => implode(', ', $invalid_recipients)));
+    form_set_error('recipients', $message);
+  }
+
+  // Force multiple addresses to be comma separated.
   $form_state['values']['recipients'] = implode(',', $recipients);
   // Store $config_data in $form_state for use in form_submit().
   $form_state['categories_data'] = $config_data;
@@ -338,8 +446,8 @@ function contact_category_edit_form_submit($form, &$form_state) {
   $config->setData($config_data);
   $config->save();
 
-  backdrop_set_message(t('Category %category has been saved.', array('%category' => $form_state['values']['category'])));
-  watchdog('contact', 'Category %category has been saved.', array('%category' => $form_state['values']['category']), WATCHDOG_NOTICE, l(t('Configure'), 'admin/structure/contact/configure/' . $form_state['values']['cid']));
+  backdrop_set_message(t('Contact form category %category has been saved.', array('%category' => $form_state['values']['category'])));
+  watchdog('contact', 'Contact form category %category has been saved.', array('%category' => $form_state['values']['category']), WATCHDOG_NOTICE, l(t('Configure'), 'admin/structure/contact/configure/' . $form_state['values']['cid']));
   $form_state['redirect'] = 'admin/structure/contact';
 }
 
@@ -400,8 +508,8 @@ function contact_category_delete_form_submit($form, &$form_state) {
   $config->setData($config_data);
   $config->save();
 
-  backdrop_set_message(t('Category %category has been deleted.', array('%category' => $contact['category'])));
-  watchdog('contact', 'Category %category has been deleted.', array('%category' => $contact['category']), WATCHDOG_NOTICE);
+  backdrop_set_message(t('Contact form category %category has been deleted.', array('%category' => $contact['category'])));
+  watchdog('contact', 'Contact form category %category has been deleted.', array('%category' => $contact['category']), WATCHDOG_NOTICE);
 
   $form_state['redirect'] = 'admin/structure/contact';
 }

@@ -72,7 +72,7 @@ function file_views_data() {
   // uri
   $data['file_managed']['uri'] = array(
     'title' => t('Path'),
-    'help' => t('The path of the file.'),
+    'help' => t('The internal path (URI) of the file. May also display the file URL.'),
     'field' => array(
       'handler' => 'views_handler_field_file_uri',
       'click sortable' => TRUE,

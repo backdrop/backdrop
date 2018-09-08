@@ -2161,6 +2161,11 @@ function system_authorized_batch_process($redirect_callback = 'backdrop_goto') {
  */
 function system_updater_info() {
   return array(
+    'core' => array(
+      'class' => 'CoreUpdater',
+      'name' => t('Update Backdrop core'),
+      'weight' => 0,
+    ),
     'module' => array(
       'class' => 'ModuleUpdater',
       'name' => t('Update modules'),
@@ -3904,6 +3909,7 @@ function system_autoload_info() {
     'SystemQueue' => 'system.queue.inc',
     'MemoryQueue' => 'system.queue.inc',
     'Archive_Tar' => 'system.tar.inc',
+    'CoreUpdater' => 'system.updater.inc',
     'ModuleUpdater' => 'system.updater.inc',
     'ThemeUpdater' => 'system.updater.inc',
     'LayoutUpdater' => 'system.updater.inc',

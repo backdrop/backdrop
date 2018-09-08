@@ -1800,19 +1800,28 @@ function file_validate_is_image(File $file) {
  */
 function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $minimum_dimensions = 0) {
   $errors = array();
-
   // Check first that the file is an image.
   if ($info = image_get_info($file->uri)) {
     if ($maximum_dimensions) {
       // Check that it is smaller than the given dimensions.
       list($width, $height) = explode('x', $maximum_dimensions);
       if ($info['width'] > $width || $info['height'] > $height) {
+        $width = empty($width) ? NULL : $width;
+        $height = empty($height) ? NULL : $height;
         // Try to resize the image to fit the dimensions.
         if ($image = image_load($file->uri)) {
           image_scale($image, $width, $height);
           image_save($image);
           $file->filesize = $image->info['file_size'];
-          backdrop_set_message(t('The image was resized to fit within the maximum allowed dimensions of %dimensions pixels.', array('%dimensions' => $maximum_dimensions)));
+          if (!$height) {
+            backdrop_set_message(t('The image was resized to fit within the maximum allowed width of %width pixels.', array('%width' => $width)));
+          }
+          elseif (!$width) {
+            backdrop_set_message(t('The image was resized to fit within the maximum allowed height of %height pixels.', array('%height' => $height)));
+          }
+          else {
+            backdrop_set_message(t('The image was resized to fit within the maximum allowed dimensions of %dimensions pixels.', array('%dimensions' => $maximum_dimensions)));
+          }
         }
         else {
           $errors[] = t('The image is too large; the maximum dimensions are %dimensions pixels.', array('%dimensions' => $maximum_dimensions));
@@ -1821,10 +1830,71 @@ function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $mi
     }
 
     if ($minimum_dimensions) {
-      // Check that it is larger than the given dimensions.
+      // Check that it is at least as large as the given dimensions.
       list($width, $height) = explode('x', $minimum_dimensions);
-      if ($info['width'] < $width || $info['height'] < $height) {
-        $errors[] = t('The image is too small; the minimum dimensions are %dimensions pixels.', array('%dimensions' => $minimum_dimensions));
+      if ($width > 0 && $height > 0) {
+        if ($info['width'] < $width || $info['height'] < $height) {
+          $errors[] = t('The image is too small; the minimum dimensions are %dimensions pixels.', array('%dimensions' => $minimum_dimensions));
+        }
+      }
+      elseif ($width > 0 && $info['width'] < $width) {
+        $errors[] = t('The image is too small; the minimum width is %width pixels.', array('%width' => $width));
+      }
+      elseif ($info['height'] < $height) {
+        $errors[] = t('The image is too small; the minimum height is %height pixels.', array('%height' => $height));
+      }
+    }
+  }
+  return $errors;
+}
+
+/**
+ * Check for EXIF orientation data and rotate file if needed.
+ *
+ * @param File $file
+ *   A file entity.
+ * @param $orientation
+ *   A flag indicating that EXIF data should be checked and image rotated if necessary.
+ *
+ * @return
+ *   An array. If the file is an image and did not meet the requirements, it
+ *   will contain an error message.
+ *
+ * @see hook_file_validate()
+ */
+function file_validate_image_orientation(File $file, $orientation = 0) {
+  $errors = array();
+
+  // Check first that the file is an image.
+  if ($info = image_get_info($file->uri)) {
+    // Is orientation required and is PHP function available?
+    if ($orientation && function_exists('exif_read_data')) {
+      $file_exif = @exif_read_data(backdrop_realpath($file->uri));
+      // If the Orientation key|value exists rotate as required.
+      if (is_array($file_exif) && isset($file_exif['Orientation'])) {
+        // Orientation numbers and corresponding degrees.
+        // @note: Odd numbers are flipped images, would need different process.
+        switch ($file_exif['Orientation']) {
+          case 3:
+            $degrees = 180;
+            break;
+          case 6:
+            $degrees = 90;
+            break;
+          case 8:
+            $degrees = 270;
+            break;
+          default:
+            $degrees = 0;
+        }
+        if ($degrees > 0) {
+          // Load the image object for manipulation.
+          $file_image = image_load($file->uri);
+          if (image_rotate($file_image, $degrees, 0xffffff)) {
+            image_save($file_image);
+          }
+          backdrop_set_message(t('The image was rotated by @degrees degrees.', array('@degrees' => $degrees)));
+        }
       }
     }
   }
