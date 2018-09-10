@@ -171,7 +171,10 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   }
 
   // Set the dialog title and submit button label.
-  if (!empty($values['src'])) {
+  if (!empty($values['src']) || !empty($form_state['storage']['editing_image'])) {
+    // Remember this is editing, not inserting. In the event the image is
+    // removed and re-uploaded.
+    $form_state['storage']['editing_image'] = TRUE;
     backdrop_set_title(t('Edit image'));
     $submit_button_label = t('Update');
   }
