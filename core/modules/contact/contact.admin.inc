@@ -24,14 +24,14 @@ function contact_settings_form($form, &$form_state) {
   );
   $form['fields']['copy'] = array(
     '#type' => 'checkbox',
-    '#title' => t("Allow users to send themselves a copy of the submitted data."),
-    '#description' => t("Exposes a 'Send yourself a copy' checkbox on site-wide and personal contact forms."),
+    '#title' => t("Allow users to send themselves a copy of the submission."),
+    '#description' => t("Include a 'Send yourself a copy' checkbox on site-wide and personal contact forms."),
     '#default_value' => contact_show_personal_copy_checkbox()
   );
 
   $form['threshold'] = array(
     '#type' => 'fieldset',
-    '#title' => t("Send limit"),
+    '#title' => t("Spam prevention"),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
