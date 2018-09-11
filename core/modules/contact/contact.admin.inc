@@ -45,7 +45,7 @@ function contact_settings_form($form, &$form_state) {
     '#title_display' => 'invisible',
     '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 75, 100, 125, 150, 200, 250, 500)),
     '#default_value' => $config->get('contact_threshold_limit'),
-    '#prefix' => t('Limit to'),
+    '#prefix' => '<span aria-hidden="true">' . t('Limit to') . '</span>',
   );
   $form['threshold']['wrapper']['contact_threshold_window'] = array(
     '#type' => 'select',
@@ -53,7 +53,7 @@ function contact_settings_form($form, &$form_state) {
     '#title_display' => 'invisible',
     '#options' => array(0 => t('None (disabled)')) + backdrop_map_assoc(array(60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval'),
     '#default_value' => $config->get('contact_threshold_window'),
-    '#prefix' => t('messages per'),
+    '#prefix' => '<span aria-hidden="true">' . t('messages per') . '</span>',
   );
   $form['threshold']['help'] = array(
     '#type' => 'item',
