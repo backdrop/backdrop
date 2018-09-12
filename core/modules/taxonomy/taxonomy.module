@@ -1430,9 +1430,9 @@ function taxonomy_field_formatter_info() {
     ),
     'taxonomy_term_reference_term' => array(
       'label' => t('Rendered term'),
-      'description' => t('Display the referenced term in a specific view mode'),
+      'description' => t('Display the referenced term in a specific display mode'),
       'field types' => array('taxonomy_term_reference'),
-      'settings' => array('taxonomy_term_reference_view_mode' => 'full'),
+      'settings' => array('view_mode' => 'full'),
     ),
   );
 }
@@ -1525,7 +1525,7 @@ function taxonomy_field_formatter_view($entity_type, $entity, $field, $instance,
           $terms_display[$tid]->referencing_entity = $entity;
           $terms_display[$tid]->referencing_field = $field['field_name'];
         }
-        $terms_built = taxonomy_term_view_multiple($terms_display, $settings['taxonomy_term_reference_view_mode']);
+        $terms_built = taxonomy_term_view_multiple($terms_display, $settings['view_mode']);
       }
 
       // Assemble the render array.
@@ -1569,11 +1569,11 @@ function taxonomy_field_formatter_settings_form($field, $instance, $view_mode, $
       foreach ($modes as $name => $mode) {
         $options[$name] = $mode['label'];
       }
-      $element['taxonomy_term_reference_view_mode'] = array(
-        '#title' => t('View mode'),
+      $element['view_mode'] = array(
+        '#title' => t('Display mode'),
         '#type' => 'select',
         '#options' => $options,
-        '#default_value' => $settings['taxonomy_term_reference_view_mode'],
+        '#default_value' => $settings['view_mode'],
         // Never empty, so no #empty_option
       );
       break;
@@ -1593,8 +1593,11 @@ function taxonomy_field_formatter_settings_summary($field, $instance, $view_mode
     case 'taxonomy_term_reference_term':
       $entity_info = entity_get_info('taxonomy_term');
       $modes = $entity_info['view modes'];
-      $mode = $modes[$settings['taxonomy_term_reference_view_mode']]['label'];
-      $summary[] = t('View mode: %mode', array('%mode' => $mode));
+      $mode = $settings['view_mode'];
+      if (!empty($modes[$settings['view_mode']]['label'])) {
+        $mode = $modes[$settings['view_mode']]['label'];
+      }
+      $summary[] = t('Display mode: %mode', array('%mode' => $mode));
       break;
   }
 
