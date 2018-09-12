@@ -1432,7 +1432,7 @@ function taxonomy_field_formatter_info() {
       'label' => t('Rendered term'),
       'description' => t('Display the referenced term in a specific display mode'),
       'field types' => array('taxonomy_term_reference'),
-      'settings' => array('view_mode' => 'full'),
+      'settings' => array('view_mode' => 'default'),
     ),
   );
 }
@@ -1565,7 +1565,7 @@ function taxonomy_field_formatter_settings_form($field, $instance, $view_mode, $
     case 'taxonomy_term_reference_term':
       $entity_info = entity_get_info('taxonomy_term');
       $modes = $entity_info['view modes'];
-      $options = array();
+      $options = array('default' => t("Default"));
       foreach ($modes as $name => $mode) {
         $options[$name] = $mode['label'];
       }
@@ -1596,6 +1596,9 @@ function taxonomy_field_formatter_settings_summary($field, $instance, $view_mode
       $mode = $settings['view_mode'];
       if (!empty($modes[$settings['view_mode']]['label'])) {
         $mode = $modes[$settings['view_mode']]['label'];
+      }
+      if ($settings['view_mode'] == 'default') {
+        $mode = t("Default");
       }
       $summary[] = t('Display mode: %mode', array('%mode' => $mode));
       break;
