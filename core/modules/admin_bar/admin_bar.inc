@@ -46,9 +46,6 @@ function admin_bar_output($complete = FALSE) {
     $content['#prefix'] = '<div id="admin-bar" class="' . $classes . '"><div id="admin-bar-wrapper">';
     $content['#suffix'] = '</div></div>';
 
-    // Load menu builder functions.
-    module_load_include('inc', 'admin_bar');
-
     // Add administration bar.
     if (in_array('admin_bar.menu', $components) || $complete) {
       $content['menu'] = array(
