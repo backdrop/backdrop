@@ -810,6 +810,8 @@ function installer_manager_install_form_submit($form, &$form_state) {
  * @see installer_manager_install_project()
  *
  * @since 1.11.0 Removed second parameter $is_installer.
+ * @since 1.11.0 This now only downloads a project into the temporary directory,
+ *   to install the project, call installer_manager_install_project().
  */
 function installer_manager_download_project($project_url) {
   if ($project_url) {
@@ -897,6 +899,8 @@ function installer_manager_download_project($project_url) {
  *     - name: The project machine name.
  *     - title: The project human-readable name.
  *     - type: Either "module", "theme", "layout", or "core".
+ *
+ * @since 1.11.0
  */
 function installer_manager_install_project($project_location, $update = FALSE) {
   try {
