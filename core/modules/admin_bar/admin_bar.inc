@@ -46,9 +46,6 @@ function admin_bar_output($complete = FALSE) {
     $content['#prefix'] = '<div id="admin-bar" class="' . $classes . '"><div id="admin-bar-wrapper">';
     $content['#suffix'] = '</div></div>';
 
-    // Load menu builder functions.
-    module_load_include('inc', 'admin_bar');
-
     // Add administration bar.
     if (in_array('admin_bar.menu', $components) || $complete) {
       $content['menu'] = array(
@@ -792,38 +789,6 @@ function admin_bar_admin_bar_cache_info() {
   $caches['admin_bar'] = array(
     'title' => t('Administration bar'),
     'callback' => '_admin_bar_flush_cache',
-  );
-  return $caches;
-}
-
-/**
- * Implements hook_admin_bar_cache_info().
- */
-function system_admin_bar_cache_info() {
-  $caches = array(
-    'assets' => t('CSS and JavaScript'),
-    'cache' => t('Page and else'),
-    'layout' => t('Layout'),
-    'menu' => t('Menu'),
-    'theme' => t('Theme registry'),
-    'token' => t('Token registry'),
-  );
-  foreach ($caches as $name => $cache) {
-    $caches[$name] = array(
-      'title' => $cache,
-      'callback' => '_admin_bar_flush_cache',
-    );
-  }
-  return $caches;
-}
-
-/**
- * Implements hook_admin_bar_cache_info() on behalf of Update module.
- */
-function update_admin_bar_cache_info() {
-  $caches['update'] = array(
-    'title' => t('Update data'),
-    'callback' => '_update_cache_clear',
   );
   return $caches;
 }

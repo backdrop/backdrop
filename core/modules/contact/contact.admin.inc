@@ -24,8 +24,8 @@ function contact_settings_form($form, &$form_state) {
   );
   $form['fields']['copy'] = array(
     '#type' => 'checkbox',
-    '#title' => t("Show the 'Send yourself a copy' checkbox"),
-    '#description' => t("Allow users to send themselves a copy on site-wide and personal contact forms."),
+    '#title' => t("Allow users to send themselves a copy of the submission."),
+    '#description' => t("Include a 'Send yourself a copy' checkbox on site-wide and personal contact forms."),
     '#default_value' => contact_show_personal_copy_checkbox()
   );
 
@@ -40,10 +40,9 @@ function contact_settings_form($form, &$form_state) {
 
   $form['threshold'] = array(
     '#type' => 'fieldset',
+    '#title' => t("Spam prevention"),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-    '#title' => t("Send limit"),
-    '#description' => t("Configure thresholds for the contact forms to minimize malicious users sending multiple emails. Control the number of emails that can be sent in a window of time by anyone with the same IP address."),
   );
   $form['threshold']['wrapper'] = array(
     '#type' => 'container',
@@ -51,15 +50,23 @@ function contact_settings_form($form, &$form_state) {
   );
   $form['threshold']['wrapper']['contact_threshold_limit'] = array(
     '#type' => 'select',
-    '#title' => t('Limit to'),
+    '#title' => t('Email send limit'),
+    '#title_display' => 'invisible',
     '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 75, 100, 125, 150, 200, 250, 500)),
     '#default_value' => $config->get('contact_threshold_limit'),
+    '#prefix' => '<span aria-hidden="true">' . t('Limit to') . '</span>',
   );
   $form['threshold']['wrapper']['contact_threshold_window'] = array(
     '#type' => 'select',
-    '#title' => t('messages per'),
+    '#title' => t('Email send time window'),
+    '#title_display' => 'invisible',
     '#options' => array(0 => t('None (disabled)')) + backdrop_map_assoc(array(60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval'),
     '#default_value' => $config->get('contact_threshold_window'),
+    '#prefix' => '<span aria-hidden="true">' . t('messages per') . '</span>',
+  );
+  $form['threshold']['help'] = array(
+    '#type' => 'item',
+    '#description' => t("Limit the amount of emails that can be sent from contact forms, from the same IP, within a specific window of time. This helps prevent malicious users from sending multiple emails."),
   );
 
   $form['#submit'][] = 'contact_settings_form_submit';

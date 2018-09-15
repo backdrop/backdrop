@@ -542,13 +542,13 @@ function node_form_submit($form, &$form_state) {
  * @since 1.11.0
  */
 function node_preview($node_tempstore_id, $node_type) {
-  // The tempstore object may have expired or an invalid ID submitted. Use the 
+  // The tempstore object may have expired or an invalid ID submitted. Use the
   // node object if available, otherwise return to the node edit page.
   if (!$node = node_get_node_tempstore($node_tempstore_id)) {
     backdrop_set_message(t('The preview ID is invalid or the stored preview has expired.'), 'error');
     backdrop_goto('node/add/' . $node_type);
   }
-  
+
   // Set status to true so we don't get the 'unpublished' CSS.
   $node->status = TRUE;
 
@@ -570,7 +570,7 @@ function node_preview($node_tempstore_id, $node_type) {
   }
 
   $node->changed = REQUEST_TIME;
- 
+
   // Get the view mode to render the preview in.
   $view_mode = empty($_GET['view_mode']) ? 'full' : $_GET['view_mode'];
 
@@ -579,7 +579,7 @@ function node_preview($node_tempstore_id, $node_type) {
     backdrop_set_title($node->title);
     $node->in_preview = TRUE;
   }
- 
+
   $build = array();
   $build['#attached']['js'][] = backdrop_get_path('module', 'node') . '/js/node.preview.js';
   $build['#attached']['css'][] = backdrop_get_path('module', 'node') . '/css/node.preview.css';
@@ -668,7 +668,7 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
       'class' => array('node-preview-display-mode', 'preview-button'),
     )
   );
-  // This must be the first submit function so the 'onChange' event in 
+  // This must be the first submit function so the 'onChange' event in
   // calls it before any other submit.
   $form['view_mode_submit'] = array(
     '#type' => 'submit',
@@ -717,7 +717,18 @@ function node_preview_banner_form_node_submit(array $form, array &$form_state) {
     }
   }
   else {
-    $destination = node_access('view', $node) ? 'node/' . $node->nid : '<front>';
+    // Determine whether to redirect user to full page display.
+    $destination = '<front>';
+    if (node_access('view', $node)) {
+      $destination = 'node/' . $node->nid;
+      // If node type set to prevent direct viewing of full page URL
+      // stay on edit page if user is not permitted.
+      $type = node_type_get_type($node);
+      $bypass_hidden_path = user_access('view hidden paths');
+      if ($type->settings['hidden_path'] && !$bypass_hidden_path) {
+        $destination = 'node/' . $node->nid . '/edit';
+      }
+    }
     backdrop_goto($destination);
   }
 }
