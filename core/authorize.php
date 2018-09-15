@@ -4,6 +4,11 @@
  * @file
  * Administrative script for running authorized file operations.
  *
+ * Use of this file is deprecated! Authenticated file operations are no longer
+ * supported in Backdrop. File permissions either need to allow write access for
+ * the web user to allow use of the Installer module, or Installer should be
+ * disabled entirely and install/updates should be done via SSH or FTP.
+ *
  * Using this script, the site owner (the user actually owning the files on the
  * webserver) can authorize certain file-related operations to proceed with
  * elevated privileges, for example to deploy and upgrade modules or themes.
@@ -18,6 +23,8 @@
  * There are helper functions for setting up an operation to run via this
  * system in modules/system/system.module. For more information, see:
  * @link authorize Authorized operation helper functions @endlink
+ *
+ * @deprecated since 1.11.0
  */
 
 /**
@@ -44,6 +51,8 @@ define('MAINTENANCE_MODE', 'update');
 
 /**
  * Renders a 403 access denied page for authorize.php.
+ *
+ * @deprecated since 1.11.0
  */
 function authorize_access_denied_page() {
   backdrop_add_http_header('Status', '403 Forbidden');
@@ -60,6 +69,8 @@ function authorize_access_denied_page() {
  *
  * @return
  *   TRUE if the current user can run authorize.php, and FALSE if not.
+ *
+ * @deprecated since 1.11.0
  */
 function authorize_access_allowed() {
   return settings_get('allow_authorize_operations', TRUE) && user_access('administer software updates');

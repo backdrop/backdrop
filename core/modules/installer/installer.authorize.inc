@@ -25,6 +25,8 @@
  *   - project: The canonical project short name.
  *   - updater_name: The name of the Updater class to use for this project.
  *   - local_url: The locally installed location of new code to update with.
+ *
+ * @deprecated since 1.11.0
  */
 function installer_authorize_run_update($filetransfer, $projects) {
   $operations = array();
@@ -78,6 +80,8 @@ function installer_authorize_run_update($filetransfer, $projects) {
  *   already been downloaded and extracted into.
  * @param string|FALSE $redirect_callback
  *   Callback to handle the redirection to the authorize.php file.
+ *
+ * @deprecated since 1.11.0
  */
 function installer_authorize_run_install($filetransfer, $project, $updater_name, $project_realpath, $redirect_callback = 'backdrop_goto') {
   $operations[] = array(
@@ -119,6 +123,8 @@ function installer_authorize_run_install($filetransfer, $project, $updater_name,
  *   The FileTransfer object to use for performing this operation.
  * @param array $context
  *   Reference to an array used for Batch API storage.
+ *
+ * @deprecated since 1.11.0
  */
 function installer_authorize_batch_copy_project($project, $updater_name, $project_realpath, $filetransfer, &$context) {
 
@@ -188,6 +194,8 @@ function installer_authorize_batch_copy_project($project, $updater_name, $projec
  *   TRUE if the batch operation was successful; FALSE if there were errors.
  * @param $results
  *   An associative array of results from the batch operation.
+ *
+ * @deprecated since 1.11.0
  */
 function installer_authorize_update_batch_finished($success, $results) {
   foreach ($results['log'] as $project => $messages) {
@@ -255,6 +263,8 @@ function installer_authorize_update_batch_finished($success, $results) {
  *   TRUE if the batch operation was a success; FALSE if there were errors.
  * @param $results
  *   An associative array of results from the batch operation.
+ *
+ * @deprecated since 1.11.0
  */
 function installer_authorize_install_batch_finished($success, $results) {
   foreach ($results['log'] as $project => $messages) {
@@ -313,6 +323,8 @@ function installer_authorize_install_batch_finished($success, $results) {
  * @param bool $success
  *   (optional) TRUE if the operation the message is about was a success, FALSE
  *   if there were errors. Defaults to TRUE.
+ *
+ * @deprecated since 1.11.0
  */
 function _installer_batch_create_message(&$project_results, $message, $success = TRUE) {
   $project_results[] = array('message' => $message, 'success' => $success);
@@ -331,6 +343,8 @@ function _installer_batch_create_message(&$project_results, $message, $success =
  *
  * @see installer_authorize_update_batch_finished()
  * @see _update_cache_clear()
+ *
+ * @deprecated since 1.11.0
  */
 function _installer_authorize_clear_update_status() {
   $query = db_delete('cache_update');
