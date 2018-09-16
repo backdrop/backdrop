@@ -256,6 +256,7 @@ function color_save_preview_settings($theme_name) {
 function color_custom_theme() {
   $preview = _color_preview_theme();
   if ($preview) {
+    admin_bar_suppress();
     return $preview;
   }
 }
