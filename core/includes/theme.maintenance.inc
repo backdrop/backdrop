@@ -190,7 +190,7 @@ function theme_update_page($variables) {
  *
  * @ingroup themeable
  *
- * @deprecated since 1.11.0
+ * @deprecated since 1.12.0
  */
 function theme_authorize_report($variables) {
   $messages = $variables['messages'];
@@ -222,7 +222,7 @@ function theme_authorize_report($variables) {
  *
  * @ingroup themeable
  *
- * @deprecated since 1.11.0
+ * @deprecated since 1.12.0
  */
 function theme_authorize_message($variables) {
   $message = $variables['message'];

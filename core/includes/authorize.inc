@@ -14,7 +14,7 @@
  * @see authorize_filetransfer_form_submit()
  * @ingroup forms
  *
- * @deprecated since 1.11.0
+ * @deprecated since 1.12.0
  */
 function authorize_filetransfer_form($form, &$form_state) {
   global $is_https;
@@ -140,7 +140,7 @@ function authorize_filetransfer_form($form, &$form_state) {
  *
  * @see hook_filetransfer_backends()
  *
- * @deprecated since 1.11.0
+ * @deprecated since 1.12.0
  */
 function _authorize_filetransfer_connection_settings($backend) {
   $auth_connection_config = config_get('system.authorize', 'authorize_filetransfer_connection_settings_' . $backend);
@@ -173,7 +173,7 @@ function _authorize_filetransfer_connection_settings($backend) {
  * @param array $defaults
  *   The default settings for the file transfer backend we're operating on.
  *
- * @deprecated since 1.11.0
+ * @deprecated since 1.12.0
  */
 function _authorize_filetransfer_connection_settings_set_defaults(&$element, $key, array $defaults) {
   // If we're operating on a form element which isn't a fieldset, and we have
@@ -198,7 +198,7 @@ function _authorize_filetransfer_connection_settings_set_defaults(&$element, $ke
  * @see authorize_filetransfer_form()
  * @see authorize_filetransfer_submit()
  *
- * @deprecated since 1.11.0
+ * @deprecated since 1.12.0
  */
 function authorize_filetransfer_form_validate($form, &$form_state) {
   // Only validate the form if we have collected all of the user input and are
@@ -233,7 +233,7 @@ function authorize_filetransfer_form_validate($form, &$form_state) {
  * @see authorize_filetransfer_form()
  * @see authorize_filetransfer_validate()
  *
- * @deprecated since 1.11.0
+ * @deprecated since 1.12.0
  */
 function authorize_filetransfer_form_submit($form, &$form_state) {
   switch ($form_state['triggering_element']['#name']) {
@@ -297,7 +297,7 @@ function authorize_filetransfer_form_submit($form, &$form_state) {
  * @param $filetransfer
  *   The FileTransfer object to use for running the operation.
  *
- * @deprecated since 1.11.0
+ * @deprecated since 1.12.0
  */
 function authorize_run_operation($filetransfer) {
   $operation = $_SESSION['authorize_operation'];
@@ -323,7 +323,7 @@ function authorize_run_operation($filetransfer) {
  *   An instantiated FileTransfer object for the requested method and settings,
  *   or FALSE if there was an error finding or instantiating it.
  *
- * @deprecated since 1.11.0
+ * @deprecated since 1.12.0
  */
 function authorize_get_filetransfer($backend, $settings = array()) {
   $filetransfer = FALSE;
