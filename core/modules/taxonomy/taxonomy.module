@@ -1428,7 +1428,7 @@ function taxonomy_field_formatter_info() {
       'label' => t('RSS category'),
       'field types' => array('taxonomy_term_reference'),
     ),
-    'taxonomy_term_reference_term' => array(
+    'taxonomy_term_reference_rendered' => array(
       'label' => t('Rendered term'),
       'description' => t('Display the referenced term in a specific display mode'),
       'field types' => array('taxonomy_term_reference'),
@@ -1490,7 +1490,7 @@ function taxonomy_field_formatter_view($entity_type, $entity, $field, $instance,
       }
       break;
 
-    case 'taxonomy_term_reference_term':
+    case 'taxonomy_term_reference_rendered':
       // To prevent infinite recursion caused by reference cycles, we store
       // diplayed terms in a recursion queue.
       $recursion_queue = &backdrop_static(__FUNCTION__, array());
@@ -1562,7 +1562,7 @@ function taxonomy_field_formatter_settings_form($field, $instance, $view_mode, $
   $element = array();
 
   switch ($display['type']) {
-    case 'taxonomy_term_reference_term':
+    case 'taxonomy_term_reference_rendered':
       $entity_info = entity_get_info('taxonomy_term');
       $modes = $entity_info['view modes'];
       $options = array('default' => t("Default"));
@@ -1590,7 +1590,7 @@ function taxonomy_field_formatter_settings_summary($field, $instance, $view_mode
   $summary = array();
 
   switch ($display['type']) {
-    case 'taxonomy_term_reference_term':
+    case 'taxonomy_term_reference_rendered':
       $entity_info = entity_get_info('taxonomy_term');
       $modes = $entity_info['view modes'];
       $mode = $settings['view_mode'];
