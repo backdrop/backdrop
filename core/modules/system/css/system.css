@@ -297,15 +297,10 @@ tr .ajax-progress-throbber .throbber {
 /**
  * Float clearing.
  *
- * Based on the micro clearfix hack by Nicolas Gallagher, with the :before
- * pseudo selector removed to allow normal top margin collapse.
- *
- * @see http://nicolasgallagher.com/micro-clearfix-hack
+ * @see https://meiert.com/en/blog/no-clearfix/
  */
-.clearfix:after {
-  content: "";
-  display: table;
-  clear: both;
+.clearfix {
+  overflow: auto;
 }
 
 /**
@@ -367,3 +362,4 @@ section,
 summary {
   display: block;
 }
+
