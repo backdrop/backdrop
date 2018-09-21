@@ -365,6 +365,24 @@ function installer_delete_file_if_stale($path) {
 function installer_cron() {
   // Clear garbage from disk.
   installer_clear_update_disk_cache();
+
+  // Automatically update Backdrop core if the site site is configured to do
+  // that.
+  $auto_update = config_get('update.settings', 'update_automatic');
+  if ($auto_update > 0) {
+    $directory = _installer_manager_extract_directory();
+    $project_location = $directory . '/' . $project;
+    $project_realpath = backdrop_realpath($project_location);
+    $projects = array(
+      'backdrop' => array(
+        'project' => 'backdrop',
+        'local_url' => $project_realpath,
+      ),
+    );
+    module_load_include('inc', 'installer', 'installer.authorize');
+    $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
+    installer_authorize_run_update($filetransfer, $projects);
+  }
 }
 
 /**

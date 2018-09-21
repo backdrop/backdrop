@@ -12,6 +12,14 @@
  * @ingroup forms
  */
 function update_settings($form, &$form_state) {
+  $core_update = config_get('installer.settings', 'core_update');
+  $form['core_update'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow Backdrop core updates'),
+    '#default_value' => $core_update,
+    '#description' => t('Check if you want the ability to update Backdrop from web UI (required for automatic updates)'),
+  );
+
   $config = config('update.settings');
   $form['update_configure_automatic'] = array(
     '#type' => 'select',
@@ -24,9 +32,9 @@ function update_settings($form, &$form_state) {
       3 => t('Minor releases'),
     ),
     '#description' =>
-      t('A <strong>Security release</strong> is a release that pathes a security vulnerability.<br />') .
-      t('A <strong>Patch release</strong> is a security and/or bug fix releases, i.e. 1.10.1 to 1.10.2 is a patch release.<br />') .
-      t('A <strong>Minor release</strong> is feature release (new functionality no API changes), i.e. 1.10.2 to 1.11.0 is a minor release.')
+      t('A Security release removes security vulnerabilities.<br />') .
+      t('A Patch release removes bugs and contains improvements of the user interface. It may also contain security fixes. <br />') .
+      t('A Minor release adds new features (without API changes).<br />')
   );
   $form['update_check_frequency'] = array(
     '#type' => 'radios',
@@ -136,14 +144,17 @@ function update_settings_submit($form, $form_state) {
   if ($form_state['values']['update_check_disabled'] != $config->get('update_disabled_extensions')) {
     _update_cache_clear();
   }
-dpm($form_state);
+
   $config
     ->set('update_disabled_extensions', $form_state['values']['update_check_disabled'])
     ->set('update_interval_days', $form_state['values']['update_check_frequency'])
     ->set('update_emails', $form_state['notify_emails'])
     ->set('update_threshold', $form_state['values']['update_notification_threshold'])
-    ->set('update_automatic', $form_state['values']['update_configure_automatic'])
+    ->set('core_update', $form_state['values']['core_update'])
+    ->set('update_automatic', (int) $form_state['values']['update_configure_automatic'])
     ->save();
+  $core_update = ($form_state['values']['core_update']) ? TRUE : FALSE;
+  config_set('installer.settings', 'core_update', $core_update);
 
   // Display status messages for this form.
   backdrop_set_message(t('The configuration options have been saved.'));
