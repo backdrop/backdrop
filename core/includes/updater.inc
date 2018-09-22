@@ -283,6 +283,8 @@ abstract class Updater implements BackdropUpdaterInterface {
       // Copy the directory in place.
       // Check for core udpate.
       if ($this->name == 'backdrop') {
+        // Remove the eld core directory.
+        $filetransfer->removeDirectory($args['install_dir'] . '/core');
         $source = $this->source . '/core';
         $name = 'core';
       }
