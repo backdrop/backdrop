@@ -39,33 +39,6 @@ function comment_admin($type = 'new') {
  * @see theme_comment_admin_overview()
  */
 function comment_admin_overview($form, &$form_state, $arg) {
-  // Build an 'Update options' form.
-  $form['options'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Update options'),
-    '#attributes' => array('class' => array('container-inline')),
-  );
-
-  if ($arg == 'approval') {
-    $options['publish'] = t('Publish the selected comments');
-  }
-  else {
-    $options['unpublish'] = t('Unpublish the selected comments');
-  }
-  $options['delete'] = t('Delete the selected comments');
-
-  $form['options']['operation'] = array(
-    '#type' => 'select',
-    '#title' => t('Operation'),
-    '#title_display' => 'invisible',
-    '#options' => $options,
-    '#default_value' => 'publish',
-  );
-  $form['options']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Update'),
-  );
-
   // Load the comments that need to be displayed.
   $status = ($arg == 'approval') ? COMMENT_NOT_PUBLISHED : COMMENT_PUBLISHED;
   $header = array(
@@ -96,6 +69,34 @@ function comment_admin_overview($form, &$form_state, $arg) {
     $node_titles[] = $row->node_title;
   }
   $comments = comment_load_multiple($cids);
+
+  // Build an 'Bulk update options' form.
+  $form['options'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('container-inline')),
+    '#access' => !empty($comments),
+  );
+
+  if ($arg == 'approval') {
+    $options['publish'] = t('Publish the selected comments');
+  }
+  else {
+    $options['unpublish'] = t('Unpublish the selected comments');
+  }
+  $options['delete'] = t('Delete the selected comments');
+
+  $form['options']['operation'] = array(
+    '#type' => 'select',
+    '#title' => t('Operation'),
+    '#title_display' => 'invisible',
+    '#options' => $options,
+    '#default_value' => 'publish',
+  );
+  $form['options']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update'),
+  );
+
 
   // Build a table listing the appropriate comments.
   $options = array();
