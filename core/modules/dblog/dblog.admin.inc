@@ -30,7 +30,10 @@ function dblog_overview() {
     WATCHDOG_DEPRECATED => 'dblog-deprecated',
   );
 
-  $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
+  if (user_access('clear log messages')) {
+    $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
+  }
+
   $build['dblog_filter_form'] = backdrop_get_form('dblog_filter_form');
 
   $header = array(

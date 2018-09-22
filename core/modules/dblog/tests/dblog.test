@@ -17,6 +17,13 @@ class DBLogTestCase extends BackdropWebTestCase {
   protected $big_user;
 
   /**
+   * A user with limited administrative permissions.
+   *
+   * @var object
+   */
+  protected $limited_user;
+
+  /**
    * A user without any permissions.
    *
    * @var object
@@ -29,7 +36,10 @@ class DBLogTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('dblog', 'book');
     // Create users.
-    $this->big_user = $this->backdropCreateUser(array('administer site configuration', 'access administration pages', 'access site reports', 'administer users'));
+    $this->big_user = $this->backdropCreateUser(array('administer site configuration', 'access administration pages', 'access site reports', 'administer users', 'clear log messages'));
+
+    $this->limited_user = $this->backdropCreateUser(array('administer site configuration', 'access administration pages', 'access site reports', 'administer users'));
+
     $this->any_user = $this->backdropCreateUser(array());
   }
 
@@ -49,6 +59,11 @@ class DBLogTestCase extends BackdropWebTestCase {
     $this->verifyCron($row_limit);
     $this->verifyEvents();
     $this->verifyReports();
+    $this->verifyClearLogs(TRUE);
+
+    // Login with limited admin permissions.
+    $this->backdropLogin($this->limited_user);
+    $this->verifyClearLogs(FALSE);
 
     // Login the regular user.
     $this->backdropLogin($this->any_user);
@@ -130,6 +145,24 @@ class DBLogTestCase extends BackdropWebTestCase {
     for ($i = 0; $i < $count; $i++) {
       $log['message'] = $message . $i;
       dblog_watchdog($log);
+    }
+  }
+
+  /**
+   * Confirms expected state (visible, hidden) of clear logs form.
+   *
+   * @param boolean $visible
+   *   Expect clear log messages form to be shown? (TRUE/FALSE)
+   *
+   */
+  private function verifyClearLogs($visible) {
+    $this->backdropGet('admin/reports/dblog');
+
+    if ($visible) {
+      $this->assertText(t('Clear log messages'), 'DBLog clear logs form was displayed');
+    }
+    else {
+     $this->assertNoText(t('Clear log messages'), 'DBLog clear logs form was not displayed');
     }
   }
 
