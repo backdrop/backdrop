@@ -378,13 +378,17 @@ function installer_cron() {
       'local_url' => $project_realpath,
     );
 
+    // Get the backdrop.zip.
     module_load_include('inc', 'installer', 'installer.manager');
-    $state['values']['projects']['backdrop'] = 'backdrop'; //$form_state["values"]["projects"]["backdrop"]
+    $state['values']['projects']['backdrop'] = 'backdrop';
     $state['values']['project_downloads']['backdrop'] =
       'https://github.com/backdrop/backdrop/releases/download/1.11.0/backdrop.zip';
-
-    // Get backdrop.zip.
-    installer_manager_batch_project_get($project, $state['values']['project_downloads']['backdrop']);
+    $fake_context = array();
+    installer_manager_batch_project_get(
+      $projects,
+      $state['values']['project_downloads']['backdrop'],
+      $fake_context
+    );
 
     // Update Backdrop core.
     module_load_include('inc', 'installer', 'installer.authorize');
