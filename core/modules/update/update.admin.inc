@@ -31,7 +31,7 @@ function update_settings($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Allow Backdrop core updates'),
     '#default_value' => $core_update,
-    '#description' => t('Check if you want the ability to update Backdrop from web UI (required for automatic updates)'),
+    '#description' => t('Check if you want the ability to update Backdrop from web UI (required for automatic updates).'),
   );
 
   $config = config('update.settings');
@@ -44,6 +44,11 @@ function update_settings($form, &$form_state) {
       1 => t('Security releases only'),
       2 => t('Patch releases'),
       3 => t('Minor releases'),
+    ),
+    '#states' => array(
+      'disabled' => array(
+        ':input[name="core_update"]' => array('checked' => FALSE),
+      ),
     ),
     '#description' =>
       t('A Security release removes security vulnerabilities.<br />') .
@@ -98,6 +103,10 @@ function update_settings($form, &$form_state) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save configuration')
+  );
+
+  $form['#attached']['css'] = array(
+    backdrop_get_path('module', 'update') . '/css/update_settings.css',
   );
 
   return $form;
