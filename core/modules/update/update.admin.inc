@@ -12,6 +12,20 @@
  * @ingroup forms
  */
 function update_settings($form, &$form_state) {
+  $markup = t(
+    'You can configure if Backdrop is allowed to update itself and optionally if
+    it should do the updates automatically. For these updates to work the file
+    system permissions need to be set to allow this. See: ') .
+    l(
+      'File permissions and ownership',
+      'https://backdropcms.org/file-permissions-and-ownership'
+    ) .
+    t(' on BackdropCMS.org for more details.
+  ');
+  $form['core_help'] = array(
+    '#type' => 'help',
+    '#markup' => $markup,
+  );
   $core_update = config_get('installer.settings', 'core_update');
   $form['core_update'] = array(
     '#type' => 'checkbox',
