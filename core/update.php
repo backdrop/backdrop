@@ -79,6 +79,7 @@ function update_script_selection_form($form, &$form_state) {
   $updates = update_get_update_list();
   $starting_updates = array();
   $incompatible_updates_exist = FALSE;
+  $incompatible_updates_messages = array();
   foreach ($updates as $module => $update) {
     if (!isset($update['start'])) {
       $form['start'][$module] = array(
@@ -89,6 +90,7 @@ function update_script_selection_form($form, &$form_state) {
         '#suffix' => '</div>',
       );
       $incompatible_updates_exist = TRUE;
+      $incompatible_updates_messages[] = $update;
       continue;
     }
     if (!empty($update['pending'])) {
@@ -126,6 +128,13 @@ function update_script_selection_form($form, &$form_state) {
   // Warn the user if any updates were incompatible.
   if ($incompatible_updates_exist) {
     backdrop_set_message('Some of the pending updates cannot be applied because their dependencies were not met.', 'warning');
+    if (!empty($incompatible_updates_messages)) {
+      foreach ($incompatible_updates_messages as $message_info) {
+        foreach ($message_info as $severity => $message) {
+          backdrop_set_message($message, $severity);
+        }
+      }
+    }
   }
 
   if (empty($count)) {
