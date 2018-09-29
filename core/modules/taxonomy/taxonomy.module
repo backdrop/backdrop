@@ -1497,17 +1497,13 @@ function taxonomy_field_formatter_view($entity_type, $entity, $field, $instance,
 
       // If no 'referencing entity' is set, we are starting a new 'reference
       // thread' and need to reset the queue.
-      // @todo Bug: $entity->referencing_entity on terms referenced in a different
-      // thread on the page. E.g: 1 references 1+2 / 2 references 1+2 / visit homepage.
-      // We'd need a more accurate way...
       if (!isset($entity->referencing_entity)) {
         $recursion_queue = array();
       }
 
       // The recursion queue only needs to track terms.
-      if (in_array($entity_type, array('node', 'user', 'taxonomy_term'))) {
-        list($id) = entity_extract_ids($entity_type, $entity);
-        $recursion_queue[$id] = $id;
+      if (in_array($entity_type, array('taxonomy_term'))) {
+        $recursion_queue[$entity->id()] = $entity->id();
       }
 
       // Check the recursion queue to determine which terms should be fully
