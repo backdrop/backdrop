@@ -17,11 +17,10 @@
   display: none;
 }
 .options-widget a.add,
-.options-widget a.remove,
-.form-option-add a {
+.options-widget a.remove {
   display: block;
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
   margin: .2em .1em;
   background-repeat: no-repeat;
   background-position: 0 0;
@@ -33,15 +32,14 @@
   float: right;
 }
 .options-widget a.add:hover,
-.options-widget a.remove:hover,
-.form-option-add a:hover {
-  background-position: 0 -16px;
+.options-widget a.remove:hover {
+  background-position: 0 -24px;
 }
 .options-widget a.add {
-  background-image: url('../images/add.png');
+  background-image: linear-gradient(transparent, transparent), url(../../../../../misc/material/add.svg);
 }
 .options-widget a.remove {
-  background-image: url('../images/delete.png');
+  background-image: linear-gradient(transparent, transparent), url(../../../../../misc/material/remove.svg);
 }
 .default-value-pattern-match {
   float: left; /* LTR */
@@ -103,7 +101,7 @@
   width: 20%;
 }
 .options-widget td.option-actions-cell {
-  width: 40px;
+  width: 56px;
 }
 .options-widget input.form-text {
   width: 100%;
