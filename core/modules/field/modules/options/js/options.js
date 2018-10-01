@@ -821,21 +821,21 @@ Backdrop.theme.tableDragChangedWarning = function() {
  */
 Backdrop.behaviors.optionsElementFieldUI = {};
 Backdrop.behaviors.optionsElementFieldUI.attach = function(context) {
-  var $cardinalityFieldNumber = $(context).find('#edit-field-cardinality-number');
-  if ($cardinalityFieldNumber.length) {
-    $cardinalityFieldNumber.change(function() {
-      var optionsElementId = $(this).parents('fieldset:first').find('.form-type-options table').attr('id');
-      if (Backdrop.optionElements[optionsElementId]) {
-        Backdrop.optionElements[optionsElementId].setMultiple(this.value != 1);
-      }
-    }).trigger('change');
-  }
   var $cardinalityField = $(context).find('#edit-field-cardinality');
   if ($cardinalityField.length) {
     $cardinalityField.change(function() {
       var optionsElementId = $(this).parents('fieldset:first').find('.form-type-options table').attr('id');
       if (Backdrop.optionElements[optionsElementId]) {
         Backdrop.optionElements[optionsElementId].setMultiple(this.value == -1);
+      }
+    }).trigger('change');
+  }
+  var $cardinalityFieldNumber = $(context).find('#edit-field-cardinality-number');
+  if ($cardinalityFieldNumber.length && $cardinalityField.length && $cardinalityField.val() != -1) {
+    $cardinalityFieldNumber.change(function() {
+      var optionsElementId = $(this).parents('fieldset:first').find('.form-type-options table').attr('id');
+      if (Backdrop.optionElements[optionsElementId]) {
+        Backdrop.optionElements[optionsElementId].setMultiple(this.value != 1);
       }
     }).trigger('change');
   }

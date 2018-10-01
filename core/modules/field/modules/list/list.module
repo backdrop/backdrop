@@ -71,9 +71,10 @@ function list_field_settings_form($field, $instance, $has_data) {
         '#field' => $field,
         '#field_type' => $field['type'],
         '#key_type' => 'mixed', // Optimal for now.
-        '#key_type_toggle' => t('Custom formkeys'),
+        '#key_type_toggle' => t('Custom keys'),
         '#key_type_toggled' => $key_type_toggled,
         '#access' => empty($settings['allowed_values_function']),
+        '#multiple' => !($field['cardinality'] == 1),
       );
 
       $description = '<p>' . t('The possible values this field can contain. Enter one value per line, in the format key|label.');
@@ -154,6 +155,29 @@ function list_field_settings_form($field, $instance, $has_data) {
   );
 
   return $form;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+
+function list_form_field_ui_field_edit_form_alter(&$form, &$form_state) {
+  $field = $form['#field'];
+
+  if (in_array($field['type'], array('list_integer', 'list_float', 'list_text'))) {
+
+    // Use options_element default widget instead of field widget.
+    $form['instance']['default_value_widget']['#access'] = FALSE;
+    // Language is hardcoded to 'und' in field_ui_default_value_widget().
+    $default_field_value = $form['instance']['default_value_widget'][$field['field_name']][LANGUAGE_NONE]['#default_value'];
+
+    // Overwrite 'allowed_values' element.
+    $form['field']['settings']['allowed_values']['#default_value_allowed'] = TRUE;
+    $form['field']['settings']['allowed_values']['#default_value'] = $default_field_value;
+
+    // Add proper default value inside validate callback.
+    $form['#validate'][] = 'options_field_instance_settings_validate';
+  }
 }
 
 /**
