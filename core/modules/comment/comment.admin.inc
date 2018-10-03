@@ -6,195 +6,6 @@
  */
 
 /**
- * Page callback: Presents an administrative comment listing.
- *
- * @param $type
- *   The type of the overview form ('approval' or 'new'). See
- *   comment_admin_overview() for details.
- *
- * @see comment_menu()
- * @see comment_multiple_delete_confirm()
- */
-function comment_admin($type = 'new') {
-  $edit = $_POST;
-
-  if (isset($edit['operation']) && ($edit['operation'] == 'delete') && isset($edit['comments']) && $edit['comments']) {
-    return backdrop_get_form('comment_multiple_delete_confirm');
-  }
-  else {
-    return backdrop_get_form('comment_admin_overview', $type);
-  }
-}
-
-/**
- * Form constructor for the comment overview administration form.
- *
- * @param $arg
- *   The type of overview form ('approval' or 'new').
- *
- * @ingroup forms
- * @see comment_admin()
- * @see comment_admin_overview_validate()
- * @see comment_admin_overview_submit()
- * @see theme_comment_admin_overview()
- */
-function comment_admin_overview($form, &$form_state, $arg) {
-  // Build an 'Update options' form.
-  $form['options'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Update options'),
-    '#attributes' => array('class' => array('container-inline')),
-  );
-
-  if ($arg == 'approval') {
-    $options['publish'] = t('Publish the selected comments');
-  }
-  else {
-    $options['unpublish'] = t('Unpublish the selected comments');
-  }
-  $options['delete'] = t('Delete the selected comments');
-
-  $form['options']['operation'] = array(
-    '#type' => 'select',
-    '#title' => t('Operation'),
-    '#title_display' => 'invisible',
-    '#options' => $options,
-    '#default_value' => 'publish',
-  );
-  $form['options']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Update'),
-  );
-
-  // Load the comments that need to be displayed.
-  $status = ($arg == 'approval') ? COMMENT_NOT_PUBLISHED : COMMENT_PUBLISHED;
-  $header = array(
-    'subject' => array('data' => t('Title'), 'field' => 'subject'),
-    'author' => array('data' => t('Author'), 'field' => 'name', 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
-    'posted_in' => array('data' => t('Posted in'), 'field' => 'node_title', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-    'changed' => array('data' => t('Updated'), 'field' => 'c.changed', 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-    'operations' => t('Operations'),
-  );
-
-  $query = db_select('comment', 'c')->extend('PagerDefault')->extend('TableSort');
-  $query->join('node', 'n', 'n.nid = c.nid');
-  $query->addField('n', 'title', 'node_title');
-  $query->addTag('node_access');
-  $result = $query
-    ->fields('c', array('cid', 'subject', 'name', 'changed'))
-    ->condition('c.status', $status)
-    ->limit(50)
-    ->orderByHeader($header)
-    ->execute();
-
-  $cids = array();
-
-  // We collect a sorted list of node_titles during the query to attach to the
-  // comments later.
-  foreach ($result as $row) {
-    $cids[] = $row->cid;
-    $node_titles[] = $row->node_title;
-  }
-  $comments = comment_load_multiple($cids);
-
-  // Build a table listing the appropriate comments.
-  $options = array();
-  $destination = backdrop_get_destination();
-
-  foreach ($comments as $comment) {
-    // Remove the first node title from the node_titles array and attach to
-    // the comment.
-    $comment->node_title = array_shift($node_titles);
-    $options[$comment->cid] = array(
-      'subject' => array(
-        'data' => array(
-          '#type' => 'link',
-          '#title' => $comment->subject,
-          '#href' => 'comment/' . $comment->cid,
-          '#options' => array('attributes' => array('title' => truncate_utf8($comment->comment_body[LANGUAGE_NONE][0]['value'], 128)), 'fragment' => 'comment-' . $comment->cid),
-        ),
-      ),
-      'author' => theme('username', array('account' => $comment)),
-      'posted_in' => array(
-        'data' => array(
-          '#type' => 'link',
-          '#title' => $comment->node_title,
-          '#href' => 'node/' . $comment->nid,
-        ),
-      ),
-      'changed' => format_date($comment->changed, 'short'),
-    );
-    $links = array();
-    $links['edit'] = array(
-      'title' => t('Edit'),
-      'href' => 'comment/' . $comment->cid . '/edit',
-      'query' => $destination,
-    );
-    $options[$comment->cid]['operations']['data'] = array(
-      '#type' => 'operations',
-      '#links' => $links,
-    );
-  }
-
-  $form['comments'] = array(
-    '#type' => 'tableselect',
-    '#header' => $header,
-    '#options' => $options,
-    '#empty' => t('No comments available.'),
-  );
-
-  $form['pager'] = array('#theme' => 'pager');
-
-  return $form;
-}
-
-/**
- * Form validation handler for comment_admin_overview().
- *
- * @see comment_admin_overview_submit()
- */
-function comment_admin_overview_validate($form, &$form_state) {
-  $form_state['values']['comments'] = array_diff($form_state['values']['comments'], array(0));
-  // We can't execute any 'Update options' if no comments were selected.
-  if (count($form_state['values']['comments']) == 0) {
-    form_set_error('', t('Select one or more comments to perform the update on.'));
-  }
-}
-
-/**
- * Form submission handler for comment_admin_overview().
- *
- * Executes the chosen 'Update option' on the selected comments, such as
- * publishing, unpublishing or deleting.
- *
- * @see comment_admin_overview_validate()
- */
-function comment_admin_overview_submit($form, &$form_state) {
-  $operation = $form_state['values']['operation'];
-  $cids = $form_state['values']['comments'];
-
-  if ($operation == 'delete') {
-    comment_delete_multiple($cids);
-  }
-  else {
-    foreach ($cids as $cid => $value) {
-      $comment = comment_load($value);
-
-      if ($operation == 'unpublish') {
-        $comment->status = COMMENT_NOT_PUBLISHED;
-      }
-      elseif ($operation == 'publish') {
-        $comment->status = COMMENT_PUBLISHED;
-      }
-      comment_save($comment);
-    }
-  }
-  backdrop_set_message(t('The update has been performed.'));
-  $form_state['redirect'] = 'admin/content/comment';
-  cache_clear_all();
-}
-
-/**
  * Form constructor for the confirmation form for bulk comment deletion.
  *
  * @ingroup forms
@@ -202,16 +13,38 @@ function comment_admin_overview_submit($form, &$form_state) {
  * @see comment_multiple_delete_confirm_submit()
  */
 function comment_multiple_delete_confirm($form, &$form_state) {
+  if (isset($form_state['cids'])) {
+    $cids = $form_state['cids'];
+  }
+  elseif (isset($_SESSION['comment_delete_action']['timestamp']) && (REQUEST_TIME - $_SESSION['comment_delete_action']['timestamp'] < 6000)) {
+    $cids = $_SESSION['comment_delete_action']['cids'];
+    $form_state['cids'] = $cids;
+    $form_state['cache'] = TRUE;
+    unset($_SESSION['comment_delete_action']);
+  }
+  else {
+    $cids = array();
+  }
+
+  $form['#tree'] = TRUE;
+
+  if (empty($cids)) {
+    $destination = isset($_GET['destination']) ? $_GET['destination'] : 'admin/content/comment';
+    $form['empty']['#markup'] = '<p>' . t('Return to the <a href="!url">comment administration page</a>.', array('!url' => url($destination))) . '</p>';
+    backdrop_set_message(t('No comments has been selected for deletion.'), 'error');
+    return $form;
+  }
+
+  $form['comment_list'] = array(
+    '#theme' => 'item_list',
+    '#items' => array(),
+  );
+
   $edit = $form_state['input'];
 
-  $form['comments'] = array(
-    '#prefix' => '<ul>',
-    '#suffix' => '</ul>',
-    '#tree' => TRUE,
-  );
   // array_filter() returns only elements with actual values.
   $comment_counter = 0;
-  foreach (array_filter($edit['comments']) as $cid => $value) {
+  foreach (array_filter($cids) as $cid) {
     $comment = comment_load($cid);
     if (is_object($comment) && is_numeric($comment->cid)) {
       $subject = db_query('SELECT subject FROM {comment} WHERE cid = :cid', array(':cid' => $cid))->fetchField();
@@ -244,7 +77,7 @@ function comment_multiple_delete_confirm_submit($form, &$form_state) {
     watchdog('content', 'Deleted @count comments.', array('@count' => $count));
     backdrop_set_message(format_plural($count, 'Deleted 1 comment.', 'Deleted @count comments.'));
   }
-  $form_state['redirect'] = 'admin/content/comment';
+  $form_state['redirect'] = 'admin/content/comments';
 }
 
 /**
