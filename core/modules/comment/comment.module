@@ -178,13 +178,13 @@ function comment_menu() {
   // Tabs begin here.
   $items['admin/content/comment/new'] = array(
     'title' => 'Published comments',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'type' => MENU_DEFAULT_LOCAL_TASK | MENU_NORMAL_ITEM,
     'weight' => -10,
   );
   $items['admin/content/comment/approval'] = array(
     'title' => 'Unapproved comments',
     'title callback' => 'comment_count_unpublished',
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
   );
   $items['comment/%'] = array(
     'title' => 'Comment permalink',
