@@ -282,6 +282,15 @@ function comment_menu_node_type_load($name) {
 }
 
 /**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function comment_menu_local_tasks_alter(&$data, $route_name) {
+  if (strpos($route_name['path'], 'admin/content/comment') !== FALSE) {
+    $data['tabs'][1]['output'][1]['#link']['title'] = comment_count_unpublished();
+  }
+}
+
+/**
  * Returns a menu title which includes the number of unapproved comments.
  */
 function comment_count_unpublished() {
