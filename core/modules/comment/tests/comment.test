@@ -279,27 +279,32 @@ class CommentHelperCase extends BackdropWebTestCase {
   }
 
   /**
-   * Performs the specified operation on the specified comment.
+   * Performs the specified action on the specified comment.
    *
-   * @param object $comment
-   *   Comment to perform operation on.
-   * @param string $operation
+   * @param int $position
+   *   Position of comment to perform operation on.
+   * @param string $action
    *   Operation to perform.
-   * @param boolean $aproval
+   * @param string $assert_text
+   *   Message after action completed.
+   * @param boolean $approval
    *   Operation is found on approval page.
    */
-  function performCommentOperation($comment, $operation, $approval = FALSE) {
-    $edit = array();
-    $edit['operation'] = $operation;
-    $edit['comments[' . $comment->id . ']'] = TRUE;
-    $this->backdropPost('admin/content/comment' . ($approval ? '/approval' : ''), $edit, t('Update'));
+  function performCommentAction($position, $action, $assert_text, $approval = FALSE) {
+    debug($assert_text);
+    $this->backdropGet('admin/content/comment' . ($approval ? '/approval' : ''));
+    $edit = array(
+        'action' => $action,
+        'bulk_form[' . $position . ']' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Execute'));
 
-    if ($operation == 'delete') {
+    if ($action == 'comment_delete_action') {
       $this->backdropPost(NULL, array(), t('Delete comments'));
-      $this->assertRaw(format_plural(1, 'Deleted 1 comment.', 'Deleted @count comments.'), format_string('Operation @operation was performed on comment.', array('@operation' => $operation)));
+      $this->assertRaw($assert_text, format_string('Action @action was performed on comment.', array('@action' => $action)));
     }
     else {
-      $this->assertText(t('The update has been performed.'), format_string('Operation @operation was performed on comment.', array('@operation' => $operation)));
+      $this->assertText($assert_text, format_string('Action @action was performed on comment.', array('@action' => $action)));
     }
   }
 
@@ -1206,23 +1211,15 @@ class CommentAnonymous extends CommentHelperCase {
     $this->assertRaw($author_name, "The anonymous user's name is correct when editing the comment.");
     $this->assertRaw($author_mail, "The anonymous user's e-mail address is correct when editing the comment.");
 
-    // Unpublish comment.
-    $this->performCommentOperation($anonymous_comment3, 'unpublish');
+    // Unpublish comment #3.
+    $this->performCommentAction(0, 'comment_unpublish_action', t('Unpublish comment was applied to 1 item.'));
 
-    $this->backdropGet('admin/content/comment/approval');
-    $this->assertRaw('comments[' . $anonymous_comment3->id . ']', 'Comment was unpublished.');
+    // Publish comment #3.
+    $this->performCommentAction(0, 'comment_publish_action', t('Publish comment was applied to 1 item.'), TRUE);
 
-    // Publish comment.
-    $this->performCommentOperation($anonymous_comment3, 'publish', TRUE);
+    // Delete comment #3.
+    $this->performCommentAction(0, 'comment_delete_action', t('Deleted 1 comment.'));
 
-    $this->backdropGet('admin/content/comment');
-    $this->assertRaw('comments[' . $anonymous_comment3->id . ']', 'Comment was published.');
-
-    // Delete comment.
-    $this->performCommentOperation($anonymous_comment3, 'delete');
-
-    $this->backdropGet('admin/content/comment');
-    $this->assertNoRaw('comments[' . $anonymous_comment3->id . ']', 'Comment was deleted.');
     $this->backdropLogout();
 
     // Reset.
@@ -1600,7 +1597,7 @@ class CommentApprovalTest extends CommentHelperCase {
 
     // Test that the comments page loads correctly when there are no comments
     $this->backdropGet('admin/content/comment');
-    $this->assertText(t('No comments available.'));
+    $this->assertText(t('No comments found.'));
 
     $this->backdropLogout();
     $this->setCommentSubject(TRUE);
@@ -1621,7 +1618,7 @@ class CommentApprovalTest extends CommentHelperCase {
 
     // Approve comment.
     $this->backdropLogin($this->admin_user);
-    $this->performCommentOperation($anonymous_comment4, 'publish', TRUE);
+    $this->performCommentAction(0, 'comment_publish_action', 'Publish comment was applied to 1 item.', TRUE);
     $this->backdropLogout();
 
     $this->backdropGet('node/' . $this->node->nid);
@@ -1636,23 +1633,24 @@ class CommentApprovalTest extends CommentHelperCase {
     $this->backdropGet('admin/content/comment/approval');
     $this->assertText(t('Unapproved comments (@count)', array('@count' => 2)), 'Two unapproved comments waiting for approval.');
     $edit = array(
-      "comments[{$comments[0]->id}]" => 1,
-      "comments[{$comments[1]->id}]" => 1,
+      'action' => 'comment_publish_action',
+      'bulk_form[0]' => TRUE,
+      'bulk_form[1]' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Update'));
+    $this->backdropPost(NULL, $edit, t('Execute'));
     $this->assertText(t('Unapproved comments (@count)', array('@count' => 0)), 'All comments were approved.');
 
     // Delete multiple comments in one operation.
     $edit = array(
-      'operation' => 'delete',
-      "comments[{$comments[0]->id}]" => 1,
-      "comments[{$comments[1]->id}]" => 1,
-      "comments[{$anonymous_comment4->id}]" => 1,
+      'action' => 'comment_delete_action',
+      'bulk_form[0]' => TRUE,
+      'bulk_form[1]' => TRUE,
+      'bulk_form[2]' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Update'));
+    $this->backdropPost('admin/content/comment', $edit, t('Execute'));
     $this->assertText(t('Are you sure you want to delete these comments and all their children?'), 'Confirmation required.');
-    $this->backdropPost(NULL, $edit, t('Delete comments'));
-    $this->assertText(t('No comments available.'), 'All comments were deleted.');
+    $this->backdropPost(NULL, array(), t('Delete comments'));
+    $this->assertText(t('No comments found.'), 'All comments were deleted.');
   }
 
   /**
