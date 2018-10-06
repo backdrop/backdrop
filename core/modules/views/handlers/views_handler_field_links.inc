@@ -22,6 +22,7 @@ class views_handler_field_links extends views_handler_field {
 
     $options['fields'] = array('default' => array());
     $options['destination'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['token'] = array('default' => TRUE, 'bool' => TRUE);
 
     return $options;
   }
@@ -48,6 +49,12 @@ class views_handler_field_links extends views_handler_field {
       '#title' => t('Include destination'),
       '#description' => t('Include a "destination" parameter in the link to return the user to the original view upon completing the action.'),
       '#default_value' => $this->options['destination'],
+    );
+    $form['token'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Include token'),
+      '#description' => t('Include a "token" parameter in the link where it is required to complete the action.'),
+      '#default_value' => $this->options['token'],
     );
   }
 
@@ -76,6 +83,9 @@ class views_handler_field_links extends views_handler_field {
         );
         if (!empty($this->options['destination'])) {
           $links[$field]['query'] = backdrop_get_destination();
+        }
+        if (!empty($this->options['token']) && isset($this->view->field[$field]->options['alter']['query']['token'])) {
+          $links[$field]['query'] += array('token' => backdrop_get_token($this->view->field[$field]->options['alter']['path']));
         }
       }
     }
