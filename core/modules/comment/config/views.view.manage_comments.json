@@ -830,7 +830,8 @@
                         "content": "No comments found.",
                         "tokenize": 0
                     }
-                }
+                },
+                "header": []
             }
         },
         "page": {
@@ -1007,7 +1008,8 @@
                     "filters": false,
                     "filter_groups": false,
                     "title": true,
-                    "fields": false
+                    "fields": false,
+                    "header": false
                 },
                 "filter_groups": {
                     "operator": "AND",
@@ -1524,6 +1526,19 @@
                             "changed": 0
                         },
                         "destination": 1
+                    }
+                },
+                "header": {
+                    "result": {
+                        "id": "result",
+                        "table": "views",
+                        "field": "result",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "label": "",
+                        "empty": 0,
+                        "content": "There are <em>@total unapproved comments</em>."
                     }
                 }
             }

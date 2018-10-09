@@ -291,7 +291,6 @@ class CommentHelperCase extends BackdropWebTestCase {
    *   Operation is found on approval page.
    */
   function performCommentAction($position, $action, $assert_text, $approval = FALSE) {
-    debug($assert_text);
     $this->backdropGet('admin/content/comment' . ($approval ? '/approval' : ''));
     $edit = array(
         'action' => $action,
@@ -1631,14 +1630,14 @@ class CommentApprovalTest extends CommentHelperCase {
     // Publish multiple comments in one operation.
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('admin/content/comment/approval');
-    $this->assertText(t('Unapproved comments (@count)', array('@count' => 2)), 'Two unapproved comments waiting for approval.');
+    $this->assertText(t('There are @count unapproved comments.', array('@count' => 2)), 'Two unapproved comments waiting for approval.');
     $edit = array(
       'action' => 'comment_publish_action',
       'bulk_form[0]' => TRUE,
       'bulk_form[1]' => TRUE,
     );
     $this->backdropPost(NULL, $edit, t('Execute'));
-    $this->assertText(t('Unapproved comments (@count)', array('@count' => 0)), 'All comments were approved.');
+    $this->assertText(t('No comments found.'), 'All comments were approved.');
 
     // Delete multiple comments in one operation.
     $edit = array(
