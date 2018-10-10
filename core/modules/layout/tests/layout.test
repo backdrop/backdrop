@@ -239,6 +239,22 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       $this->assertEqual($content_element[0]['class'], $content_class, 'The sample block content has the correct class.');
     }
 
+    // Try injecting XSS into the classes.
+    $xss = '"><svg onload="alert(\'XSS hole\')">';
+    // The filtered string after running through backdrop_html_class().
+    $filtered_xss = 'svg onloadalertXSS hole';
+    $edit = array(
+      'style_settings[classes]' => $xss,
+      'style_settings[title_classes]' => $xss,
+      'style_settings[content_classes]' => $xss,
+    );
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet($layout_url);
+    $this->assertNoRaw($xss);
+    $this->assertRaw($filtered_xss);
+
     // Try moving the block to a different position within the layout.
     $edit = array(
       'content[positions][content]' => $block_uuid,
