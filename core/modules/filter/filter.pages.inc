@@ -554,22 +554,26 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
 
 /**
  * Find a managed file ID from a url.
- *
  */
 function _filter_get_file_id($href) {
+  $result = 0;
+
   // Extract file name and directory from $href.
   $pos = strrpos($href, "/");
   $filename = substr($href,$pos + 1);
-  // Now find this file name in uri field to get fid.
-  $results = db_select('file_managed')
-    ->fields('file_managed', array('fid', 'uri'))
-    ->condition('uri', '%' . $filename, 'LIKE')
-    ->orderBy('fid', 'DESC')
-    ->execute();
 
-  $result = 0;
-  foreach ($results as $found) {
-    $result = $found->fid;
+  // Now find this file name in uri field to get fid.
+  if (!empty($filename)) {
+    $results = db_select('file_managed')
+      ->fields('file_managed', array('fid', 'uri'))
+      ->condition('uri', '%' . $filename, 'LIKE')
+      ->orderBy('fid', 'DESC')
+      ->execute();
+
+    foreach ($results as $found) {
+      $result = $found->fid;
+    }
   }
+
   return $result;
 }
