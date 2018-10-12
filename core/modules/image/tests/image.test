@@ -820,7 +820,8 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $this->backdropGet('node/add/post');
     $this->assertText(t('Files must be less than 50 KB.'), 'Image widget max file size is displayed on post form.');
     $this->assertText(t('Allowed file types: ' . $test_image_extension . '.'), 'Image widget allowed file types displayed on post form.');
-    $this->assertText(t('Images must be larger than 10x10 pixels. Images larger than 100x100 pixels will be scaled down.'), 'Image widget allowed dimensions displayed on post form.');
+    $this->assertText(t('Images larger than 100x100 pixels will be scaled down.'), 'Image widget allowed maximum dimensions displayed on post form.');
+    $this->assertText(t('Images must be at least 10x10 pixels.'), 'Image widget allowed mimimum dimensions displayed on post form.');
 
     // We have to create the post first and then edit it because the alt
     // and title fields do not display until the image has been attached.
@@ -984,6 +985,121 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $this->assertText(t('The specified file ' . $image_that_is_too_small->filename . ' could not be uploaded. The image is too small; the minimum dimensions are 50x50 pixels.'), 'Node save failed when minimum image dimensions was not met.');
     $nid = $this->uploadNodeImage($image_that_is_too_big, $field_name, 'post');
     $this->assertText(t('The image was resized to fit within the maximum allowed dimensions of 100x100 pixels.'), 'Image exceeding max dimensions was properly resized.');
+  }
+
+  /**
+   * Test image rotation resulting from EXIF data.
+   * Requires a special test image, file rotate90cw.jpg.
+   */
+  function testOrientation() {
+    // Create an image field.
+    $field_name = strtolower($this->randomName());
+    $instance_settings = array(
+      'orientate' => 1,
+    );
+    $this->createImageField($field_name, 'post', array(), $instance_settings);
+    // Upload our test image to this field.
+    $orientation_test_image = image_load(backdrop_get_path('module', 'image') . '/images/rotate90cw.jpg');
+    $uri = $orientation_test_image->source;
+    $img = image_load($uri);
+    $this->assertTrue(is_object($img), 'Image data is available.');
+    $orientation_test_image->uri = $uri;
+
+    if (!$orientation_test_image) {
+      $this->fail(t('Could not load image %file.', array('%file' => 'rotate90cw.jpg')));
+    }
+    $nid = $this->uploadNodeImage($orientation_test_image, $field_name, 'post');
+    $this->assertText(t('The image was rotated by 90 degrees.'), 'The image was correctly re-oriented.');
+
+    $node = node_load($nid, NULL, TRUE);
+    $uri = $node->{$field_name}[LANGUAGE_NONE][0]['uri'];
+
+    // Check orientation.
+    $img = image_load($uri);
+    $this->assertTrue(is_object($img), 'Image data is available.');
+
+    // Test the aspect ratio.
+    $this->assertTrue($img->info['width'] > $img->info['height'], 'The image format is landscape.');
+
+    // Verify the rotation by color inspection.
+    $rgb = imagecolorat($img->resource, 10, 10);
+    $r = ($rgb >> 16) & 0xFF;
+    $g = ($rgb >> 8) & 0xFF;
+    $b = $rgb & 0xFF;
+    // The top left corner should be red.
+    $this->assertTrue(abs($r - 255) < 5, 'Red color component is close to 255.');
+    $this->assertTrue($g < 5, 'Green color component is close to 0.');
+    $this->assertTrue($b < 5, 'Blue color component is close to 0.');
+  }
+  
+  /**
+   * Test single width resolution setting.
+   */
+  function testWidthDimensions() {
+    $field_name = strtolower($this->randomName());
+    $min_dimensions = 50;
+    $max_dimensions = 100;
+    $instance_settings = array(
+      'max_dimensions' => $max_dimensions . 'x' . '',
+      'min_dimensions' => $min_dimensions . 'x' . '',
+    );
+    $this->createImageField($field_name, 'post', array(), $instance_settings);
+
+    // We want a test image that is too small, and a test image that is too
+    // big, so cycle through test image files until we have what we need.
+    $image_that_is_too_big = FALSE;
+    $image_that_is_too_small = FALSE;
+    foreach ($this->backdropGetTestFiles('image') as $image) {
+      $info = image_get_info($image->uri);
+      if ($info['width'] > $max_dimensions) {
+        $image_that_is_too_big = $image;
+      }
+      if ($info['width'] < $min_dimensions) {
+        $image_that_is_too_small = $image;
+      }
+      if ($image_that_is_too_small && $image_that_is_too_big) {
+        break;
+      }
+    }
+    $nid = $this->uploadNodeImage($image_that_is_too_small, $field_name, 'post');
+    $this->assertText(t('The specified file ' . $image_that_is_too_small->filename . ' could not be uploaded. The image is too small; the minimum width is 50 pixels.'), 'Node save failed when minimum image dimensions was not met.');
+    $nid = $this->uploadNodeImage($image_that_is_too_big, $field_name, 'post');
+    $this->assertText(t('The image was resized to fit within the maximum allowed width of 100 pixels.'), 'Image exceeding max width was properly resized.');
+  }
+
+  /**
+   * Test single height resolution setting.
+   */
+  function testHeightDimensions() {
+    $field_name = strtolower($this->randomName());
+    $min_dimensions = 50;
+    $max_dimensions = 100;
+    $instance_settings = array(
+      'max_dimensions' => '' . 'x' . $max_dimensions,
+      'min_dimensions' => '' . 'x' . $min_dimensions,
+    );
+    $this->createImageField($field_name, 'post', array(), $instance_settings);
+
+    // We want a test image that is too small, and a test image that is too
+    // big, so cycle through test image files until we have what we need.
+    $image_that_is_too_big = FALSE;
+    $image_that_is_too_small = FALSE;
+    foreach ($this->backdropGetTestFiles('image') as $image) {
+      $info = image_get_info($image->uri);
+      if ($info['height'] > $max_dimensions) {
+        $image_that_is_too_big = $image;
+      }
+      if ($info['height'] < $min_dimensions) {
+        $image_that_is_too_small = $image;
+      }
+      if ($image_that_is_too_small && $image_that_is_too_big) {
+        break;
+      }
+    }
+    $nid = $this->uploadNodeImage($image_that_is_too_small, $field_name, 'post');
+    $this->assertText(t('The specified file ' . $image_that_is_too_small->filename . ' could not be uploaded. The image is too small; the minimum height is 50 pixels.'), 'Node save failed when minimum image dimensions was not met.');
+    $nid = $this->uploadNodeImage($image_that_is_too_big, $field_name, 'post');
+    $this->assertText(t('The image was resized to fit within the maximum allowed height of 100 pixels.'), 'Image exceeding max height was properly resized.');
   }
 }
 

@@ -2186,9 +2186,5 @@ function views_autoload_info() {
     // Blocks.
     'ViewsBlock' => 'includes/views.block.inc',
     'ViewsSpecialBlock' => 'includes/views.special_block.inc',
-    // Tests. These are used as base classes so frequently its easiest to
-    // include them in the registry rather than include them manually.
-    'ViewsTestCase' => 'tests/views_query.inc',
-    'ViewsSqlTest' => 'tests/views_query.inc',
   );
 }

@@ -21,12 +21,12 @@
   margin: 0.5em 0 1em;
   padding: 0.3em 0.5em;
   border: none;
-  border-left: 0.25rem solid #c6cad2;
+  border-left: 0.25rem solid #bbbbbb;
   background: none;
 }
 [dir="rtl"] .caption > figcaption {
   border-left: none;
-  border-right: 0.25rem solid #c6cad2;
+  border-right: 0.25rem solid #bbbbbb;
 }
 
 img.align-left {

@@ -6022,12 +6022,16 @@ function backdrop_cron_run() {
  * @code
  * backdrop_system_listing("/\.module$/", "modules", 'name', 0);
  * @endcode
- * this function will search the site-wide modules directory (i.e., /modules/),
- * your installation profile's directory (i.e.,
- * /profiles/your_site_profile/modules/), the all-sites directory (i.e.,
- * /modules), and your site-specific directory (i.e.,
- * /modules), in that order, and return information about
- * all of the files ending in .module in those directories.
+ *
+ * The following directories will then be searched for modules:
+ * - /sites/[site_name]/modules
+ * - /modules
+ * - /profiles/[install_profile_name]/modules
+ * - /core/profiles/[install_profile_name]/modules
+ * - /core/modules
+ * Directories will be searched in that order. If a module of the same name
+ * exists in two places, the earlier locations will take precedence over the
+ * later ones.
  *
  * The information is returned in an associative array, which can be keyed on
  * the file name ($key = 'filename'), the file name without the extension ($key
@@ -6041,7 +6045,7 @@ function backdrop_cron_run() {
  *   The preg_match() regular expression for the files to find.
  * @param string $directory
  *   The subdirectory name in which the files are found. For example,
- *   'core/modules' will search in sub-directories of the /core/modules
+ *   'modules' will search in sub-directories of the /core/modules/
  *   directory, sub-directories of /modules/, etc.
  * @param string $key
  *   The key to be used for the associative array returned. Possible values are
@@ -6088,6 +6092,9 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
   // profile always has precedence.
   $profiles[] = $profile;
   foreach ($profiles as $profile) {
+    if (file_exists("core/profiles/$profile/$directory")) {
+      $searchdir[] = "core/profiles/$profile/$directory";
+    }
     if (file_exists("profiles/$profile/$directory")) {
       $searchdir[] = "profiles/$profile/$directory";
     }

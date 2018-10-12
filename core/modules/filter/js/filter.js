@@ -108,6 +108,7 @@ Backdrop.filterEditorDetach = function(field, format, trigger) {
  * Provides toggles for uploading an image, whether by URL or upload.
  */
 Backdrop.behaviors.editorImageDialog = {
+
   attach: function (context, settings) {
     var $newToggles = $('[data-editor-image-toggle]', context).once('editor-image-toggle');
     $newToggles.each(function() {
@@ -140,12 +141,22 @@ Backdrop.behaviors.editorImageDialog = {
       });
     });
 
-    $newToggles.click(function(e) {
+    // Initialize styles of Dialog.
+    // Hide the library image browser on load.
+    if ($newToggles.length) {
+      $(".editor-image-library").css({ "display": "none" });
+      $(".editor-dialog").removeClass("editor-dialog-with-library");
+      // Set the class for the left-hand part.
+      $(".editor-image-fields").addClass("editor-image-fields-full");
+    }
+
+    var DialogLeftPosition;
+    $newToggles.on('click', function(e) {
       var $link = $(e.target);
       if ($link.is('.editor-image-toggle') === false) {
         return;
       }
-
+      // Find the first ancestor of link.
       var $currentItem = $link.closest('[data-editor-image-toggle]');
       var $allItems = $('[data-editor-image-toggle]');
       var offset = $currentItem.find('.editor-image-toggle').index($link);
@@ -178,18 +189,99 @@ Backdrop.behaviors.editorImageDialog = {
           $input.val(previousValue);
         }
       });
+
+      var libraryShown = $('[name="attributes[src]"]').is(':visible');
+      if (libraryShown) {
+        // Toggle state is set to show 'select an image'
+        // so add library view to dialog display.
+        // But only for filter-format-edit-image-form.
+        if ($('form').hasClass('filter-format-editor-image-form')){
+          // Remove the dialog position, let the filter.css CSS for a
+          // percentage-based width take precedence.
+          DialogLeftPosition = $('.editor-dialog').position().left;
+          $('.editor-dialog').css('left', '');
+          // Re-center the dialog by triggering a window resize.
+          window.setTimeout(function() {
+            Backdrop.optimizedResize.trigger();
+          }, 500);
+          // Increase width of dialog form.
+          $('.editor-dialog').addClass('editor-dialog-with-library');
+
+          // Display the library view.
+          $('.editor-image-fields').removeClass('editor-image-fields-full');
+          $('.editor-image-library').css({ 'display': 'block' });
+          $('.form-item-image-directory').css({ 'display': 'block' });
+
+          // Now add click event to images
+          $('.editor-image-library').once('editor-image-library')
+            .on('click', '.image-library-choose-file', function() {
+              var $selectedImg = $(this).find('img');
+              var absoluteImgSrc = $selectedImg.data('file-url');
+              var relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
+
+              var $form = $(this).closest('form');
+              $form.find('[name="attributes[src]"]').val(relativeImgSrc);
+              $form.find('[name="fid[fid]"]').val($selectedImg.data('fid'));
+
+              // Reset width and height so image is not stretched to the any
+              // previous image's dimensions.
+              $form.find('[name="attributes[width]"]').val('');
+              $form.find('[name="attributes[height]"]').val('');
+              // Remove style from previous selection.
+              $('.image-library-image-selected').removeClass('image-library-image-selected');
+              // Add style to this selection.
+              $(this).addClass('image-library-image-selected');
+            })
+            .on('dblclick', '.image-library-choose-file', function() {
+              $(this).trigger('click');
+              var $form = $(this).closest('form');
+              var $submit = $form.find('.form-actions input[type=submit]:first');
+              $submit.trigger('mousedown').trigger('click').trigger('mouseup');
+            });
+        }
+      }
+      else {
+        // Hide the library part of the dialog form.
+        $('.editor-image-library').css({ 'display': 'none' });
+        $('.form-item-image-directory').css({ 'display': 'none' });
+        // Restore the previous dialog position.
+        if (DialogLeftPosition) {
+          $(".editor-dialog").css('left', DialogLeftPosition + 'px');
+          // Re-center the dialog by triggering a window resize.
+          window.setTimeout(function() {
+            Backdrop.optimizedResize.trigger();
+          }, 500);
+        }
+        $('.editor-dialog').removeClass('editor-dialog-with-library');
+        // Set the class for the dialog part.
+        $('.editor-image-fields').addClass('editor-image-fields-full');
+      }
     });
 
     // Add a very short delay to allow the dialog to appear.
     window.setTimeout(function() {
+      // Determine which tab should be shown.
       var $visibleItems = $('[data-editor-image-toggle]').filter(':visible');
       if ($visibleItems.length > 1) {
+        var $fidField = $visibleItems.find('[name="fid[fid]"]');
+        var $srcField = $visibleItems.find('[name="attributes[src]"]');
+        var $srcItem = $visibleItems.find($srcField).closest('[data-editor-image-toggle]');
         var $errorItem = $visibleItems.find('.error').closest('[data-editor-image-toggle]');
+
+        // If any errors are present in the form, pre-select that tab.
         if ($errorItem.length) {
           $visibleItems.not($errorItem).hide().trigger('editor-image-hide');
           $errorItem.find('input, textarea, select').filter(':focusable').first().focus();
           $errorItem.trigger('editor-image-show');
         }
+        // If an FID is not provided but a src attribute is, highlight the tab
+        // that contains the src attribute field.
+        if (($fidField.val() === '0' || !$fidField.val()) && $srcField.val().length > 0) {
+          $visibleItems.not($srcItem).hide().trigger('editor-image-hide');
+          $srcItem.find('input, textarea, select').filter(':focusable').first().focus();
+          $srcItem.trigger('editor-image-show');
+        }
+        // Otherwise, show the first tab and hide all the others.
         else {
           $visibleItems.not(':first').hide().trigger('editor-image-hide');
           $visibleItems.first().find('input, textarea, select').filter(':focusable').first().focus();
@@ -200,7 +292,7 @@ Backdrop.behaviors.editorImageDialog = {
   }
 };
 
-  /**
+/**
  * Command to save the contents of an editor-provided dialog.
  *
  * This command does not close the open dialog. It should be followed by a call

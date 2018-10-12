@@ -2161,6 +2161,11 @@ function system_authorized_batch_process($redirect_callback = 'backdrop_goto') {
  */
 function system_updater_info() {
   return array(
+    'core' => array(
+      'class' => 'CoreUpdater',
+      'name' => t('Update Backdrop core'),
+      'weight' => 0,
+    ),
     'module' => array(
       'class' => 'ModuleUpdater',
       'name' => t('Update modules'),
@@ -2795,9 +2800,13 @@ function _system_rebuild_module_data() {
 
   // Include the installation profile in modules that are loaded.
   $profile = backdrop_get_profile();
+  $profile_uri = 'profiles/' . $profile . '/' . $profile . '.profile';
+  if (file_exists(BACKDROP_ROOT . '/core/profiles/' . $profile . '/' . $profile . '.profile')) {
+    $profile_uri = 'core/' . $profile_uri;
+  }
   $modules[$profile] = new stdClass();
   $modules[$profile]->name = $profile;
-  $modules[$profile]->uri = 'profiles/' . $profile . '/' . $profile . '.profile';
+  $modules[$profile]->uri = $profile_uri;
   $modules[$profile]->filename = $profile . '.profile';
 
   // Installation profile hooks are always executed last.
@@ -3900,6 +3909,7 @@ function system_autoload_info() {
     'SystemQueue' => 'system.queue.inc',
     'MemoryQueue' => 'system.queue.inc',
     'Archive_Tar' => 'system.tar.inc',
+    'CoreUpdater' => 'system.updater.inc',
     'ModuleUpdater' => 'system.updater.inc',
     'ThemeUpdater' => 'system.updater.inc',
     'LayoutUpdater' => 'system.updater.inc',
@@ -4163,4 +4173,25 @@ function _system_sort_form_values_by_config($form, &$form_state, $inherited_buck
     }
   }
   return $configs;
+}
+
+/**
+ * Implements hook_admin_bar_cache_info().
+ */
+function system_admin_bar_cache_info() {
+  $caches = array(
+    'assets' => t('CSS and JavaScript'),
+    'cache' => t('Page and else'),
+    'layout' => t('Layout'),
+    'menu' => t('Menu'),
+    'theme' => t('Theme registry'),
+    'token' => t('Token registry'),
+  );
+  foreach ($caches as $name => $cache) {
+    $caches[$name] = array(
+      'title' => $cache,
+      'callback' => '_admin_bar_flush_cache',
+    );
+  }
+  return $caches;
 }

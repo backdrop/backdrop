@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.11.x-dev');
+define('BACKDROP_VERSION', '1.12.x-dev');
 
 /**
  * Core API compatibility.
@@ -253,6 +253,22 @@ define('PASS_THROUGH', -1);
  * @see http://php.net/manual/language.functions.php
  */
 define('BACKDROP_PHP_FUNCTION_PATTERN', '[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*');
+
+/**
+ * An RFC7231 Compliant date.
+ *
+ * http://tools.ietf.org/html/rfc7231#section-7.1.1.1
+ *
+ * Example: Sun, 06 Nov 1994 08:49:37 GMT
+ *
+ * This constant was introduced in PHP 7.0.19 and PHP 7.1.5 but needs to be
+ * defined by Backdrop for earlier PHP versions.
+ *
+ * @since 1.11.0
+ */
+if (!defined('DATE_RFC7231')) {
+  define('DATE_RFC7231', 'D, d M Y H:i:s \G\M\T');
+}
 
 // Exit early if running an incompatible PHP version to avoid fatal errors.
 if (version_compare(PHP_VERSION, BACKDROP_MINIMUM_PHP) < 0) {
@@ -983,8 +999,16 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
 
   // Profiles are a special case: they have a fixed location and naming.
   if ($type == 'profile') {
-    $profile_filename = "profiles/$name/$name.profile";
-    $files[$type][$name] = file_exists($profile_filename) ? $profile_filename : FALSE;
+    $profile_filenames = array("profiles/$name/$name.profile", "core/profiles/$name/$name.profile");
+    foreach ($profile_filenames as $profile_filename) {
+      if (file_exists($profile_filename)) {
+        $files[$type][$name] = $profile_filename;
+        break;
+      }
+      else {
+        $files[$type][$name] = FALSE;
+      }
+    }
   }
   if (!isset($files[$type])) {
     $files[$type] = array();
@@ -2314,6 +2338,8 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
  *
  * @see backdrop_get_messages()
  * @see theme_status_messages()
+ *
+ * @since 1.11.0 Added "info" as an acceptable $type parameter.
  */
 function backdrop_set_message($message = NULL, $type = 'status', $repeat = TRUE) {
   if ($message || $message === '0' || $message === 0) {
@@ -2343,6 +2369,7 @@ function backdrop_set_message($message = NULL, $type = 'status', $repeat = TRUE)
  *   - 'status'
  *   - 'warning'
  *   - 'error'
+ *   - 'info'
  * @param bool $clear_queue
  *   (optional) If this is TRUE, the queue will be cleared of messages of the
  *   type specified in the $type parameter. Otherwise the queue will be left

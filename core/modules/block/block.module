@@ -258,7 +258,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#title' => t('Admin label'),
     '#default_value' => $edit['info'],
     '#maxlength' => 64,
-    '#description' => t('Used in administrative interfaces and not shown to end-users.'),
+    '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
     '#required' => TRUE,
     '#weight' => -20,
     '#id' => 'block-info',
@@ -268,7 +268,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#title' => t('Admin description'),
     '#default_value' => $edit['description'],
     '#maxlength' => 128,
-    '#description' => t('Used in administrative interfaces and not shown to end-users.'),
+    '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
     '#weight' => -18,
     '#id' => 'block-description',
   );

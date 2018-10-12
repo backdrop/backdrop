@@ -79,7 +79,7 @@ function theme_update_report($variables) {
 
   foreach ($data as $project) {
     // Don't show a link to the "Update modules" page for core.
-    $update_link = ($project['name'] != 'backdrop');
+    $update_link = ($project['name'] != 'backdrop' || config_get('installer.settings', 'core_update'));
     switch ($project['status']) {
       case UPDATE_NOT_SECURE:
       case UPDATE_REVOKED:
@@ -121,6 +121,7 @@ function theme_update_report($variables) {
           $updatepath = 'admin/layouts/update';
           break;
 
+        case 'core':
         case 'module':
         default:
           $updatepath = 'admin/modules/update';

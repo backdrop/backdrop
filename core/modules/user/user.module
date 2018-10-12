@@ -359,6 +359,7 @@ function user_validate_picture(&$form, &$form_state) {
   // If required, validate the uploaded picture.
   $validators = array(
     'file_validate_is_image' => array(),
+    'file_validate_image_orientation' => array(TRUE),
     'file_validate_image_resolution' => array(config_get('system.core', 'user_picture_dimensions')),
     'file_validate_size' => array(config_get('system.core', 'user_picture_file_size') * 1024),
   );
@@ -1264,6 +1265,16 @@ function user_menu() {
     'description' => 'Configure settings for user accounts.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_settings'),
+    'access arguments' => array('administer account settings'),
+    'file' => 'user.admin.inc',
+  );
+
+  // Login settings.
+  $items['admin/config/people/login'] = array(
+    'title' => 'Login settings',
+    'description' => 'Configure the way visitors may log in and limit login attempts.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('user_login_settings'),
     'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
   );

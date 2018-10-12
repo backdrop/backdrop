@@ -121,23 +121,6 @@ function user_admin_settings($form, &$form_state) {
   $config = config('system.core');
   $form['#config'] = 'system.core';
 
-  // User login settings.
-  $form['user_login'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('User log in'),
-    '#weight' => -2,
-  );
-  $form['user_login']['user_login_method'] = array(
-    '#type' => 'radios',
-    '#title' => t('Users may log in using'),
-    '#options' => array(
-      USER_LOGIN_USERNAME_OR_EMAIL => t('Username or email address'),
-      USER_LOGIN_USERNAME_ONLY => t('Username'),
-      USER_LOGIN_EMAIL_ONLY => t('Email address'),
-    ),
-    '#default_value' => $config->get('user_login_method'),
-  );
-
   // User registration settings.
   $form['registration_cancellation'] = array(
     '#type' => 'fieldset',
@@ -286,6 +269,110 @@ function user_admin_settings_submit($form, &$form_state) {
   system_settings_form_submit($form, $form_state);
   // Clear the token cache.
   token_cache_clear();
+}
+
+/**
+ * Login settings form.
+ *
+ * @ingroup forms
+ */
+function user_login_settings($form, &$form_state) {
+  $flood_config = config('user.flood');
+  $core_config = config('system.core');
+
+  $form['#config'] = 'user.flood';
+
+  // User login settings.
+  $form['user_login'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('User login'),
+    '#weight' => -2,
+    '#config' => 'system.core',
+  );
+  $form['user_login']['user_login_method'] = array(
+    '#type' => 'radios',
+    '#title' => t('Users may log in using'),
+    '#options' => array(
+      USER_LOGIN_USERNAME_OR_EMAIL => t('Username or email address'),
+      USER_LOGIN_USERNAME_ONLY => t('Username'),
+      USER_LOGIN_EMAIL_ONLY => t('Email address'),
+    ),
+    '#default_value' => $core_config->get('user_login_method'),
+  );
+
+  $form['ip_limit_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Limit login attempts by IP address'),
+  );
+  $form['ip_limit_settings']['wrapper'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('container-inline')),
+  );
+  $form['ip_limit_settings']['wrapper']['flood_ip_limit'] = array(
+    '#type' => 'select',
+    '#title' => t('Attempted login limit'),
+    '#title_display' => 'invisible',
+    '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 75, 100, 125, 150, 200, 250, 500)),
+    '#default_value' => $flood_config->get('flood_ip_limit'),
+    '#prefix' => t('Limit to'),
+  );
+  $form['ip_limit_settings']['wrapper']['flood_ip_window'] = array(
+    '#type' => 'select',
+    '#title' => t('Attempted login time window'),
+    '#title_display' => 'invisible',
+    '#options' => array(0 => t('None (disabled)')) + backdrop_map_assoc(array(60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval'),
+    '#default_value' => $flood_config->get('flood_ip_window'),
+    '#prefix' => t('login attempts from one IP address per'),
+  );
+  $form['ip_limit_settings']['help'] = array(
+    '#type' => 'item',
+    '#description' => t('Do not allow any login from the current user\'s IP if the limit has been reached. This is independent of the per-user limit to catch attempts from one IP to log in to many different user accounts. By default we have a reasonably high limit since there may be only one apparent IP for all users at an institution.'),
+  );
+  $form['user_limit_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Limit login attempts by user'),
+  );
+  $form['user_limit_settings']['wrapper'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('container-inline')),
+  );
+  $form['user_limit_settings']['wrapper']['flood_user_limit'] = array(
+    '#type' => 'select',
+    '#title' => t('Attempted login limit'),
+    '#title_display' => 'invisible',
+    '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 75, 100, 125, 150, 200, 250, 500)),
+    '#default_value' => $flood_config->get('flood_user_limit'),
+    '#prefix' => t('Limit to'),
+  );
+  $form['user_limit_settings']['wrapper']['flood_user_window'] = array(
+    '#type' => 'select',
+    '#title' => t('Attempted login time window'),
+    '#title_display' => 'invisible',
+    '#options' => array(0 => t('None (disabled)')) + backdrop_map_assoc(array(60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval'),
+    '#default_value' => $flood_config->get('flood_user_window'),
+    '#prefix' => t('login attempts by a user per'),
+  );
+  $form['user_limit_settings']['help'] = array(
+    '#type' => 'item',
+    '#description' => t('Configure the limit and the time window for users attempting to log in. That is, how many failed login attempts are allowed per specified time period.'),
+  );
+  $form['user_limit_settings']['flood_uid_only'] = array(
+    '#type' => 'radios',
+    '#title' => t('Identify users attempting to log in, using'),
+    '#options' => array(
+      '0' => t('User ID and IP address combination'),
+      '1' => t('User ID only'),
+    ),
+    '#default_value' => $flood_config->get('flood_uid_only'),
+    FALSE => array(
+      '#description' => ' Less secure, less likely to lock out users.',
+    ),
+    TRUE => array(
+      '#description' => 'More secure, more likely to lock out users.',
+    ),
+  );
+
+  return system_settings_form($form);
 }
 
 /**
