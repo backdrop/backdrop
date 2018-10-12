@@ -74,14 +74,16 @@ function _form_options_expand($element) {
 
 
     if ($element['#key_type'] == 'mixed' || $element['#key_type'] == 'numeric' || $element['#key_type'] == 'custom') {
-      $element['options_field']['#description'] .= ' ' . t('Key-value pairs may be specified by separating each option with pipes, such as <em>key|value</em>.');
+      $element['options_field']['#description'] .= ' ' . t('Key-label pairs may be specified by separating each option with pipes, such as <em>key|label</em>.');
     }
     elseif ($element['#key_type_toggle']) {
-      $element['options_field']['#description'] .= ' ' . t('If the %toggle field is checked, key-value pairs may be specified by separating each option with pipes, such as <em>key|value</em>.', array('%toggle' => $element['custom_keys']['#title']));
+      $element['options_field']['#description'] .= ' ' . t('If the %toggle field is checked, key-label pairs may be specified by separating each option with pipes, such as <em>key|label</em>.', array('%toggle' => $element['custom_keys']['#title']));
     }
     if ($element['#key_type'] == 'numeric') {
       $element['options_field']['#description'] .= ' ' . t('This field requires all specified keys to be integers.');
+      $element['options_field']['#description'] .= ' ' . t('The label is optional: if a line contains a single number, it will be used as key and label.');
     }
+    $element['options_field']['#description'] .= ' ' . t('Customizing the keys will allow you to save one value internally while showing a different option to the user.');
   }
 
   // Add the field for storing default values.

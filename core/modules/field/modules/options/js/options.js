@@ -753,7 +753,7 @@ Backdrop.theme.prototype.optionsElement = function(optionsElement) {
   output += '<thead><tr>';
   output += '<th>' + (hasDefault ? Backdrop.t('Default') : '&nbsp;') + '</th>';
   output += keyType == 'textfield' ? '<th>' + Backdrop.t('Key') + '</th>' : '';
-  output += '<th>' + Backdrop.t('Value') + '</th>';
+  output += '<th>' + Backdrop.t('Label') + '</th>';
   output += '<th>&nbsp;</th>';
   output += '</tr></thead>';
 

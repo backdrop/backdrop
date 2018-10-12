@@ -63,6 +63,7 @@ function list_field_settings_form($field, $instance, $has_data) {
       $form['allowed_values'] = array(
         '#type' => 'options',
         '#title' => t('Allowed values list'),
+        '#description' => '',
         '#default_value' => '',
         '#default_value_allowed' => FALSE,
         '#options' => $options,
@@ -76,19 +77,6 @@ function list_field_settings_form($field, $instance, $has_data) {
         '#access' => empty($settings['allowed_values_function']),
         '#multiple' => !($field['cardinality'] == 1),
       );
-
-      $description = '<p>' . t('The possible values this field can contain. Enter one value per line, in the format key|label.');
-      if ($field['type'] == 'list_integer' || $field['type'] == 'list_float') {
-        $description .= '<br/>' . t('The key is the stored value, and must be numeric. The label will be used in displayed values and edit forms.');
-        $description .= '<br/>' . t('The label is optional: if a line contains a single number, it will be used as key and label.');
-        $description .= '<br/>' . t('Lists of labels are also accepted (one label per line), only if the field does not hold any values yet. Numeric keys will be automatically generated from the positions in the list.');
-      }
-      else {
-        $description .= '<br/>' . t('The key is the stored value. The label will be used in displayed values and edit forms.');
-        $description .= '<br/>' . t('The label is optional: if a line contains a single string, it will be used as key and label.');
-      }
-      $description .= '</p>';
-      $form['allowed_values']['#description'] = $description;
 
       // Set proper allowed values in $form_state.
       $form['#validate'][] = 'options_field_settings_validate';
