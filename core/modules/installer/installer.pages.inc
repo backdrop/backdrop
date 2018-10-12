@@ -531,10 +531,8 @@ function installer_browser_installation_theme_form($form, &$form_state, $project
   backdrop_add_css(backdrop_get_path('module', 'installer') . '/css/installer.css', array('preprocess' => FALSE));
   module_load_include('inc', 'installer', 'installer.browser');
 
-  $form['instructions'] = array(
-    '#type' => 'item',
-    '#markup' => t('The themes you selected have been successfully installed. You may enable installed themes here or on the main !themes page. ', array('!themes' => l(t('Themes'), 'admin/appearance')))
-  );
+  backdrop_set_message(t('The themes you selected have been successfully installed.'), 'status');
+  backdrop_set_message(t('You may use the form below to enable installed themes during this step, or do it later on the !themes page.', array('!themes' => l(t('Themes'), 'admin/appearance'))), 'info');
 
   $theme_default = config_get('system.core', 'theme_default');
   $themes = system_rebuild_theme_data();
