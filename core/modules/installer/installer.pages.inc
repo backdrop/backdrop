@@ -20,12 +20,12 @@ function installer_browser_page($type) {
   // select to view available releases. Install blocked on select versions page.
   installer_browser_check_zip_loaded();
 
-  // Show link to enable page if recently installed modules were not yet 
-  // enabled.
+  // If recently-installed modules are not enabled yet, show link to the "Enable
+  // modules" step of the installer.
   $recent_projects = installer_browser_get_installed_projects();
   foreach ($recent_projects as $project) {
     if ($project['type'] === 'module') {
-      backdrop_set_message(t('You have recently installed modules. <a href="@url">Continue to the enable page.</a>', array('@url' => url('admin/installer/install/enable'))), 'status', FALSE);
+      backdrop_set_message(t('You have recently installed modules. <a href="@url">Continue to the "Enable modules" page.</a>', array('@url' => url('admin/installer/install/enable'))), 'info', FALSE);
     }
   }
 
@@ -686,8 +686,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         }
       }
       else {
-        backdrop_set_message(t('There was an error getting information for @module',
-          array('@module' => $project['name'])), 'error');
+        backdrop_set_message(t('There was an error getting information for @module', array('@module' => $project['name'])), 'error');
       }
     }
   }
@@ -702,10 +701,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
   ksort($all_options);
 
   if (!empty($all_options)) {
-    $form['module_instructions'] = array(
-      '#type' => 'item',
-      '#markup' => t('You may enable modules using the form below or on the main !link page.', array('!link' => l(t('Modules'), 'admin/modules'))),
-    );
+    backdrop_set_message(t('You may enable installed modules during this step, using the form below, or do it later on the !link page.', array('!link' => l(t('Modules'), 'admin/modules'))), 'info');
     $form['modules'] = array(
       '#type' => 'tableselect',
       '#title' => t('Enable modules'),
