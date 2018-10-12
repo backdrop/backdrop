@@ -2321,12 +2321,22 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
  *   (optional) The translated message to be displayed to the user. For
  *   consistency with other messages, it should begin with a capital letter and
  *   end with a period.
+ * @param string $message
+ *   (optional) The translated message to be displayed to the user. For
+ *   consistency with other messages, it should begin with a capital letter and
+ *   end with a period.
  * @param string $type
- *   (optional) The message's type. Defaults to 'status'. These values are
+ *   (optional) The type of the message. Defaults to 'status'. These values are
  *   supported:
- *   - 'status'
- *   - 'warning'
- *   - 'error'
+ *   - 'status': for "Yay! it worked." messages that need to be displayed as a
+ *     direct result of a user action. Shown once, on the page where the user
+ *     action finishes.
+ *   - 'info': for "Did you know that ...?" messages that need to show generic
+ *     information, persistently across various pages. Can be the result of a
+ *     user action on another section of the site (excludes messages that should
+ *     be warnings/errors).
+ *   - 'warning': for "Careful! You should know that ..." messages.
+ *   - 'error': for "Oh-oh, something went wrong." messages.
  * @param bool $repeat
  *   (optional) If this is FALSE and the message is already set, then the
  *   message won't be repeated. Defaults to TRUE.
