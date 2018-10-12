@@ -108,7 +108,7 @@ div.info:before {
   text-decoration: underline;
 }
 .messages a:hover {
-  text-decoration: none;
+  text-decoration-style: double;
 }
 
 /* Desktop size icons */
