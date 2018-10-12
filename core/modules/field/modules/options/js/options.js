@@ -56,6 +56,7 @@ Backdrop.optionsElement = function(element) {
 
   // Add the options widget and toggle elements to the page.
   $(this.manualElement).css('display', 'none').before(this.optionsToggleElement).before(this.optionsElement).after(this.optionAddElement);
+  $(this.optionAddElement).after(Backdrop.settings.optionsElement.allowedtags);
   if (this.manualDefaultValueElement) {
     $(this.manualElement).after(this.removeDefaultElement);
   }

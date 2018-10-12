@@ -110,6 +110,12 @@ function _form_options_expand($element) {
     );
   }
 
+  // Pass allowed HTML tags to JS.
+  $element['#attached']['js'][] = array(
+    'type' => 'setting',
+    'data' => array('optionsElement' => array('allowedtags' => '<div class="description">' . t('Allowed HTML tags in labels: @tags', array('@tags' => _field_filter_xss_display_allowed_tags())) . '</div>')),
+  );
+
   // Remove properties that will confuse the FAPI.
   unset($element['#options']);
 

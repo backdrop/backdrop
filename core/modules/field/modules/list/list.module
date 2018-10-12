@@ -129,7 +129,6 @@ function list_field_settings_form($field, $instance, $has_data) {
   elseif ($instance['widget']['type'] == 'options_buttons') {
     $form['allowed_values']['#description'] .= '<p>' . t("The 'checkboxes/radio buttons' widget will display checkboxes if the <em>Number of values</em> option is greater than 1 for this field, otherwise radios will be displayed.") . '</p>';
   }
-  $form['allowed_values']['#description'] .= '<p>' . t('Allowed HTML tags in labels: @tags', array('@tags' => _field_filter_xss_display_allowed_tags())) . '</p>';
 
   $form['allowed_values_function'] = array(
     '#type' => 'value',
