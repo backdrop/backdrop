@@ -699,7 +699,8 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
   ksort($all_options);
 
   if (!empty($all_options)) {
-    backdrop_set_message(t('You may enable installed modules during this step, using the form below, or do it later on the !link page.', array('!link' => l(t('Modules'), 'admin/modules'))), 'info');
+    backdrop_set_message(t('The modules you selected have been successfully installed.'), 'status');
+    backdrop_set_message(t('You may use the form below to enable installed modules during this step, or do it later on the !link page.', array('!link' => l(t('Modules'), 'admin/modules'))), 'info');
     $form['modules'] = array(
       '#type' => 'tableselect',
       '#title' => t('Enable modules'),
