@@ -531,6 +531,9 @@ function installer_browser_installation_theme_form($form, &$form_state, $project
   backdrop_add_css(backdrop_get_path('module', 'installer') . '/css/installer.css', array('preprocess' => FALSE));
   module_load_include('inc', 'installer', 'installer.browser');
 
+  // Clear any messages from previous installer steps before showing new
+  // messages.
+  backdrop_get_messages();
   backdrop_set_message(t('The themes you selected have been successfully installed.'), 'status');
   backdrop_set_message(t('You may use the form below to enable installed themes during this step, or do it later on the !themes page.', array('!themes' => l(t('Themes'), 'admin/appearance'))), 'info');
 
@@ -699,6 +702,9 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
   ksort($all_options);
 
   if (!empty($all_options)) {
+    // Clear any messages from previous installer steps before showing new
+    // messages.
+    backdrop_get_messages();
     backdrop_set_message(t('The modules you selected have been successfully installed.'), 'status');
     backdrop_set_message(t('You may use the form below to enable installed modules during this step, or do it later on the !link page.', array('!link' => l(t('Modules'), 'admin/modules'))), 'info');
     $form['modules'] = array(
