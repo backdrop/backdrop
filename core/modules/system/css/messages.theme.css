@@ -56,52 +56,86 @@
   margin-left: 0;
 }
 
-.status {
+.messages.status {
   color: #234600;
-  background-color: #E9EEBC;
+  background-color: #e9eebc;
 }
-div.status:before {
+.messages.status a {
+  color: #234600;
+}
+div.messages.status:before {
   background-image: url(../../../misc/message-24-ok.png);
-  background-color: #CFDE56;
+  background-color: #cfde56;
 }
 
-.warning {
-  color: #555;
-  background-color: #FAF5C9;
+.messages.warning {
+  color: #525252;
+  background-color: #faf5c9;
 }
-div.warning:before {
+.messages.warning a {
+  color: #525252;
+}
+div.messages.warning:before {
   background-image: url(../../../misc/message-24-warning.png);
-  background-color: #FCE400;
+  background-color: #fce400;
 }
 
-.error {
-  color: #EC351C;
-  background-color: #F9EDEC;
+.messages.error {
+  color: #9c1d0d;
+  background-color: #f9edec;
 }
-div.error:before {
+.messages.error a {
+  color: #9c1d0d;
+}
+div.messages.error:before {
   background-image: url(../../../misc/message-24-error.png);
-  background-color: #EE3D23;
+  background-color: #ee3d23;
+}
+
+.messages.info {
+  color: #004570;
+  background-color: #bdf;
+}
+.messages.info a {
+  color: #004570;
+}
+div.messages.info:before {
+  background-image: url(../../../misc/message-24-info.png);
+  background-color: #0074bd;
+}
+
+.messages a {
+  text-decoration: underline;
+}
+.messages a:hover {
+  text-decoration: none;
 }
 
 /* Desktop size icons */
 @media only screen and (min-width: 34em) {
-  div.status:before {
+  div.messages.status:before {
     background-image: url(../../../misc/message-32-ok.png);
   }
-  div.warning:before {
+  div.messages.warning:before {
     background-image: url(../../../misc/message-32-warning.png);
   }
-  div.error:before {
+  div.messages.error:before {
     background-image: url(../../../misc/message-32-error.png);
+  }
+  div.messages.info:before {
+   background-image: url(../../../misc/message-32-info.png);
   }
 }
 /* SVG overrides */
-div.status:before {
+div.messages.status:before {
   background-image: linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg);
 }
-div.warning:before {
+div.messages.warning:before {
   background-image: linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg);
 }
-div.error:before {
+div.messages.error:before {
   background-image: linear-gradient(transparent, transparent), url(../../../misc/message-error.svg);
+}
+div.messages.info:before {
+  background-image: linear-gradient(transparent, transparent), url(../../../misc/message-info.svg);
 }
