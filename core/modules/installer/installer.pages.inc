@@ -769,6 +769,8 @@ function installer_browser_installation_enable_form_submit($form, &$form_state) 
   module_enable($enable_queue);
   unset($_SESSION['installer_browser_installed_projects']);
   backdrop_flush_all_caches();
+  // Clear all installer messages.
+  backdrop_get_messages();
   backdrop_set_message(t('Installation is complete.'));
   backdrop_goto('admin/modules/install');
 }
