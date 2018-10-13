@@ -2098,7 +2098,7 @@ function system_site_maintenance_mode_form_permissions() {
   $systmem_permissions = system_permission();
 
   // We currently need only the "Use the site in maintenance mode" permission.
-  $permissions[] = $systmem_permissions['access site in maintenance mode'];
+  $permissions['access site in maintenance mode'] = $systmem_permissions['access site in maintenance mode'];
 
   // Render role/permission overview:
   $options = array();
@@ -2116,6 +2116,7 @@ function system_site_maintenance_mode_form_permissions() {
       '#markup' => $permission_item['title'],
       '#description' => theme('user_permission_description', array('permission_item' => $permission_item)),
     );
+
     foreach ($roles as $role_name => $role) {
       // Builds arrays for checked boxes for each role. Always select the Admin
       // role on new forms.
