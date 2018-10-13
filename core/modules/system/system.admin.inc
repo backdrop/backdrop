@@ -2036,7 +2036,7 @@ function system_site_maintenance_mode($form, &$form_state) {
 
   if ($maintenance_mode) {
     backdrop_set_message(t('<strong>The site is currently in maintenance mode</strong>. Visitors will only see the maintenance mode message.'), 'warning');
-    backdrop_set_message(t('Authorized users can still log in directly via the <a href="@user-login">user login</a> page, but they need to have the "Access site in maintenance mode" <a href="@permissions-url">permission</a> in order to be able to access the site.', array('@permissions-url' => url('admin/config/people/permissions'), '@user-login' => url('user'))), 'info');
+    backdrop_set_message(t('Authorized users can still log in directly via the <a href="@user-login">user login</a> page, but they need to have the "Use site in maintenance mode" <a href="@permissions-url">permission</a> in order to be able to access the site.', array('@permissions-url' => url(current_path(), array('fragment' => 'edit-permissions-wrapper')), '@user-login' => url('user'))), 'info');
   }
 
   return $form;
