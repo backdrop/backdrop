@@ -24,6 +24,8 @@
   margin: .2em .1em;
   background-repeat: no-repeat;
   background-position: 0 0;
+  background-size: contain;
+  opacity: 0.3;
   float: left; /* LTR */
 }
 [dir="rtl"] .options-widget a.add,
@@ -33,13 +35,15 @@
 }
 .options-widget a.add:hover,
 .options-widget a.remove:hover {
-  background-position: 0 -24px;
+  opacity: 1;
 }
 .options-widget a.add {
-  background-image: linear-gradient(transparent, transparent), url(../../../../../misc/material/add.svg);
+  /* Icon derived from Font Awesome, which is licensed under the SIL OFL 1.1 */
+  background-image: url(../../../../../misc/plus-black-64.png);
 }
 .options-widget a.remove {
-  background-image: linear-gradient(transparent, transparent), url(../../../../../misc/material/remove.svg);
+  /* Icon derived from Font Awesome, which is licensed under the SIL OFL 1.1 */
+  background-image: url(../../../../../misc/minus-black-64.png);
 }
 .default-value-pattern-match {
   float: left; /* LTR */
