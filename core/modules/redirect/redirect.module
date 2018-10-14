@@ -159,7 +159,11 @@ function redirect_menu() {
   if (empty($path)) {
     $site_404 = 'system/404';
   }
-  $items[$site_404 . '/add-redirect'] = array(
+  // Adding the current path of the 404 as a parmeter to the URL, so it can be
+  // used to pre-populate the 'source' field in the "Add redirect" form. We
+  // cannot use current_path() here, as it always returns admin_bar/flush-cache.
+  // We use $_GET['destination'] instead.
+  $items[$site_404 . '/add-redirect' . '?source=' . check_plain($_GET['destination'])] = array(
     'title' => 'Add a URL redirect from this page to another location',
     'type' => MENU_LOCAL_ACTION,
     'page callback' => 'redirect_add_redirect_page',
