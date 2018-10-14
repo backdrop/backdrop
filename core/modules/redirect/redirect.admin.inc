@@ -338,6 +338,11 @@ function redirect_add_redirect_page() {
  * @ingroup forms
  */
 function redirect_edit_form($form, &$form_state, $redirect = NULL) {
+  // If not editing an existing redirect.
+  if (empty($form_state['build_info'][args])) {
+    backdrop_set_title(t('Add redirect'), CHECK_PLAIN);
+  }
+
   if (!isset($redirect)) {
     $redirect = new Redirect(array(
       'source' => isset($_GET['source']) ? urldecode($_GET['source']) : '',
