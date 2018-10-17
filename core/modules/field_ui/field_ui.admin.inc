@@ -66,7 +66,8 @@ function field_ui_fields_list() {
     }
   }
   foreach ($rows as $field_name => $cell) {
-    // Render the items of the "Used in" column as a list.
+    // A reused field can have different labels across the various bundles it is
+    // being used in. So we render the items of the "Used as" column as a list.
     $rows[$field_name]['data'][3] = theme('item_list', array('items' => $rows[$field_name]['data'][3]));
   }
 
