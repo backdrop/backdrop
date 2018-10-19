@@ -1622,16 +1622,22 @@ function system_performance_settings($form, &$form_state) {
   $directory = 'public://';
   $is_writable = is_dir($directory) && is_writable($directory);
   $disabled = !$is_writable;
-  $disabled_message = '';
-  if (!$is_writable) {
-    $disabled_message = ' ' . t('<strong class="error">Set up the <a href="!file-system">public files directory</a> to make these optimizations available.</strong>', array('!file-system' => url('admin/config/media/file-system')));
-  }
 
   $form['bandwidth_optimization'] = array(
     '#type' => 'fieldset',
     '#title' => t('Bandwidth optimization'),
-    '#description' => t('External resources can be optimized automatically, which can reduce both the size and number of requests made to your website.') . $disabled_message,
+    '#description' => t('External resources can be optimized automatically, which can reduce both the size and number of requests made to your website.'),
   );
+
+  if (!$is_writable) {
+    $form['bandwidth_optimization']['file_system_message'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('messages', 'error')),
+    );
+    $form['bandwidth_optimization']['file_system_message']['error'] = array(
+      '#markup' => t('Aggregation of Javascript and CSS files is disabled. You need to set up the <a href="!file-system">public files directory</a> to make these optimizations available.', array('!file-system' => url('admin/config/media/file-system'))),
+    );
+  }
 
   $form['bandwidth_optimization']['page_compression'] = array(
     '#type' => 'checkbox',
