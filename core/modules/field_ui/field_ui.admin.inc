@@ -30,9 +30,9 @@ function field_ui_fields_list() {
   $modules = system_rebuild_module_data();
 
   $header = array(
-    t('Field name'),
-    array('data' => t('Field type'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
-    t('Used in'),
+    array('data' => t('Field name'), 'field' => 'field_name'),
+    array('data' => t('Field type'), 'field' => 'field_type', 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
+    array('data' => t('Used in'), 'field' => 'used_in'),
   );
   $rows = array();
   foreach ($instances as $entity_type => $type_bundles) {
