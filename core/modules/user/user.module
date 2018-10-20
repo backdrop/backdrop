@@ -2314,7 +2314,7 @@ function user_role_load($role_name) {
  * @deprecated since 1.0.0
  */
 function user_role_load_by_name($role_name) {
-  watchdog_deprecated_function('user', __FUNCTION__, t('See change record: <a href="@link">Converted User roles to CMI</a>.', array('@link' => 'https://api.backdropcms.org/change-records/converted-user-roles-cmi')));
+  watchdog_deprecated_function('user', __FUNCTION__, t('Change record: <a href="@link">Converted User roles to CMI</a>', array('@link' => 'https://api.backdropcms.org/change-records/converted-user-roles-cmi')));
   user_role_load($role_name);
 }
 
