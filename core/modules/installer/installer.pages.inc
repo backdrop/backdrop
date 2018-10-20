@@ -715,7 +715,7 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
     if (!empty($missing)) {
       $form['missing_dependencies'] = array(
         '#type' => 'container',
-        '#attributes' => array('class' => array('messages', 'info')),
+        '#attributes' => array('class' => array('messages', 'warning')),
       );
       $form['missing_dependencies']['warning'] = array(
         '#markup' => t('Some modules are missing one or more dependencies and cannot be enabled. The checkboxes for these modules have been disabled.'),
