@@ -2321,10 +2321,6 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
  *   (optional) The translated message to be displayed to the user. For
  *   consistency with other messages, it should begin with a capital letter and
  *   end with a period.
- * @param string $message
- *   (optional) The translated message to be displayed to the user. For
- *   consistency with other messages, it should begin with a capital letter and
- *   end with a period.
  * @param string $type
  *   (optional) The type of the message. Defaults to 'status'. These values are
  *   supported:
