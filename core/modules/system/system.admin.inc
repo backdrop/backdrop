@@ -735,7 +735,7 @@ function _system_modules_build_row($info, $extra) {
   // Check the core compatibility.
   elseif (!isset($info['backdrop']) || $info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
     $compatible = FALSE;
-    $status_short .= t('Incompatible with Backdrop CMS !core_version.') . ' ';
+    $status_short .= t('Incompatible with Backdrop CMS !core_version.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . ' ';
     $status_long .= t('This version is not compatible with Backdrop CMS !core_version.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . ' ';
   }
 
@@ -763,8 +763,16 @@ function _system_modules_build_row($info, $extra) {
     }
   }
   else {
+    $title = t('Unable to enable');
     $form['enable'] = array(
-      '#markup' =>  theme('image', array('path' => 'core/misc/watchdog-error.png', 'alt' => t('Unable to enable'), 'title' => trim($status_short))),
+      '#type' => 'container',
+      '#attributes' => array(
+        'class' => array('modules-error', 'error'),
+        'title' => $title,
+      ),
+    );
+    $form['enable']['error-icon'] = array(
+      '#markup' => '<span class="element-invisible">' . $title . '</span>',
     );
     $form['description']['#markup'] .= theme('system_modules_incompatible', array('message' => trim($status_long)));
   }
