@@ -1800,19 +1800,28 @@ function file_validate_is_image(File $file) {
  */
 function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $minimum_dimensions = 0) {
   $errors = array();
-
   // Check first that the file is an image.
   if ($info = image_get_info($file->uri)) {
     if ($maximum_dimensions) {
       // Check that it is smaller than the given dimensions.
       list($width, $height) = explode('x', $maximum_dimensions);
       if ($info['width'] > $width || $info['height'] > $height) {
+        $width = empty($width) ? NULL : $width;
+        $height = empty($height) ? NULL : $height;
         // Try to resize the image to fit the dimensions.
         if ($image = image_load($file->uri)) {
           image_scale($image, $width, $height);
           image_save($image);
           $file->filesize = $image->info['file_size'];
-          backdrop_set_message(t('The image was resized to fit within the maximum allowed dimensions of %dimensions pixels.', array('%dimensions' => $maximum_dimensions)));
+          if (!$height) {
+            backdrop_set_message(t('The image was resized to fit within the maximum allowed width of %width pixels.', array('%width' => $width)));
+          }
+          elseif (!$width) {
+            backdrop_set_message(t('The image was resized to fit within the maximum allowed height of %height pixels.', array('%height' => $height)));
+          }
+          else {
+            backdrop_set_message(t('The image was resized to fit within the maximum allowed dimensions of %dimensions pixels.', array('%dimensions' => $maximum_dimensions)));
+          }
         }
         else {
           $errors[] = t('The image is too large; the maximum dimensions are %dimensions pixels.', array('%dimensions' => $maximum_dimensions));
@@ -1821,14 +1830,21 @@ function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $mi
     }
 
     if ($minimum_dimensions) {
-      // Check that it is larger than the given dimensions.
+      // Check that it is at least as large as the given dimensions.
       list($width, $height) = explode('x', $minimum_dimensions);
-      if ($info['width'] < $width || $info['height'] < $height) {
-        $errors[] = t('The image is too small; the minimum dimensions are %dimensions pixels.', array('%dimensions' => $minimum_dimensions));
+      if ($width > 0 && $height > 0) {
+        if ($info['width'] < $width || $info['height'] < $height) {
+          $errors[] = t('The image is too small; the minimum dimensions are %dimensions pixels.', array('%dimensions' => $minimum_dimensions));
+        }
+      }
+      elseif ($width > 0 && $info['width'] < $width) {
+        $errors[] = t('The image is too small; the minimum width is %width pixels.', array('%width' => $width));
+      }
+      elseif ($info['height'] < $height) {
+        $errors[] = t('The image is too small; the minimum height is %height pixels.', array('%height' => $height));
       }
     }
   }
-
   return $errors;
 }
 

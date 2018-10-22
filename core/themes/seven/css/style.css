@@ -1223,16 +1223,18 @@ div.filter-options select {
   min-height: 150px;
 }
 .layout-settings-page .layout-options .form-type-checkbox:active label,
-.layout-settings-page .layout-options .form-type-checkbox:hover label,
 .layout-settings-page .layout-options .form-type-checkbox input:checked + label,
 .layout-settings-form .layout-options .form-type-radio:active label,
-.layout-settings-form .layout-options .form-type-radio:hover label,
 .layout-settings-form .layout-options .form-type-radio input:checked + label {
   background-color: #ffffff;
   border-color: #d0d0d0;
 }
 .layout-settings-page .layout-options .form-type-checkbox input:focus + label,
-.layout-settings-form .layout-options .form-type-radio input:focus + label {
+.layout-settings-page .layout-options .form-type-checkbox input:hover + label,
+.layout-settings-page .layout-options .form-type-checkbox:hover input:checked + label,
+.layout-settings-form .layout-options .form-type-radio input:focus + label,
+.layout-settings-form .layout-options .form-type-radio input:hover + label,
+.layout-settings-form .layout-options .form-type-radio:hover input:checked + label {
   background-color: #ffffff;
   border-color: #43afe4;
 }

@@ -523,7 +523,6 @@ function filter_editor_image_upload_settings_form($format) {
     'max_dimensions' => array('width' => '', 'height' => ''),
     'orientate' => FALSE,
   );
-
   $form['status'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable image uploads'),
