@@ -741,7 +741,7 @@ function node_preview_banner_form_node_submit(array $form, array &$form_state) {
 function node_preview_banner_form_view_mode_submit(array $form, array &$form_state) {
   $node = $form_state['values']['node'];
   $node_tempstore_id = $form_state['values']['node_tempstore_id'];
-  $form_state['redirect'] = array('node/preview/' . $node->type . '/' . $node_tempstore_id, array('query' => array('view_mode' => $form_state['values']['view_mode'])));
+  $form_state['redirect'] = array('node/preview/' . str_replace('_', '-', $node->type) . '/' . $node_tempstore_id, array('query' => array('view_mode' => $form_state['values']['view_mode'])));
 }
 
 /**
