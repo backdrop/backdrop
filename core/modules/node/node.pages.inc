@@ -633,7 +633,7 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
 
   $path = 'node/add/' . $node->bundle();
   if (!empty($node->nid)) {
-    $path = 'node/' . $node->nid . '/edit';
+    $path = 'node/' . str_replace('_', '-', $node->type) . '/edit';
   }
   $query = array('node_tempstore_id' => $node_tempstore_id);
   $url = url($path, array('query' => $query, 'absolute' => TRUE));
