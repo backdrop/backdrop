@@ -1,0 +1,62 @@
+<?php
+
+
+/**
+ * Implements hook_requirements.
+ */
+function codesign_requirements($phase = NULL) {
+  $requirements = array();
+
+  $requirements['codesign_support'] = array(
+    'title' => 'Code Signing Support',
+    'description' => t('Code signing uses the OpenSSL extension to verify the authenticity and integrity of loaded modules.'),
+    'value' => t('Not available'),
+    'severity' => REQUIREMENT_WARNING,
+  );
+
+  if ($phase == 'runtime') {
+    $openssl_loaded = extension_loaded('openssl');
+    $requirements['codesign_openssl'] = array(
+      'title' => 'OpenSSL version',
+      'value' => $openssl_loaded ? OPENSSL_VERSION_TEXT : t('OpenSSL extension not loaded.'),
+      'severity' => $openssl_loaded ? REQUIREMENT_OK : REQUIREMENT_ERROR,
+      'description' => t('The OpenSSL extension can be used to verify the authenticity and integrity of loaded modules.'),
+    );
+
+    $gnupg_loaded = extension_loaded('gnupg');
+    $requirements['codesign_gnupg'] = array(
+      'title' => 'GnuPG extension',
+      'value' => $gnupg_loaded ? t('Available') : t('Not available'),
+      'severity' => $gnupg_loaded ? REQUIREMENT_OK : REQUIREMENT_WARNING,
+      'description' => t('The GnuPG extension can be used to verify the authenticity and integrity of loaded modules.')
+    );
+    if ($gnupg_loaded) {
+      require_once backdrop_get_path('module', 'codesign') . '/signers/gnupg.codesign.inc';
+      $gpg = gnupg_init();
+      $fp = codesign_gnupg_import_keys($gpg);
+      $keys = gnupg_keyinfo($gpg, $fp);
+      if (!empty($keys)) {
+        $requirements['gnupg_signing_key'] = array(
+          'value' => t('Signing public key found.'),
+          'severity' => REQUIREMENT_OK,
+          'description' => check_plain($keys[0]['uids'][0]['uid']),
+        );
+      }
+      else {
+        $requirements['gnupg_signing_key'] = array(
+          'value' => t('Could not read the signing public key.'),
+          'severity' => REQUIREMENT_ERROR,
+          'description' => t('This is usually because the owner of the PHP process (usually www-data or httpd) cannot write to their $HOME/.gnupg directory.'),
+        );
+      }
+      $requirements['gnupg_signing_key']['title'] = t('GnuPG signing public key');
+    }
+
+    if ($openssl_loaded || $gnupg_loaded) {
+      $requirements['codesign_support']['severity'] = REQUIREMENT_OK;
+      $requirements['codesign_support']['value'] = t('Available');
+    }
+  }
+
+  return $requirements;
+}

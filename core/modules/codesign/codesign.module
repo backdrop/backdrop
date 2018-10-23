@@ -1,0 +1,89 @@
+<?php
+
+function codesign_codesign_info() {
+  $signers = array();
+
+  $signers['openssl'] = array(
+    'title' => t('OpenSSL'),
+    'sign callback' => 'codesign_openssl_sign',
+    'verify callback' => 'codesign_openssl_verify',
+    'status callback' => 'codesign_openssl_status',
+    'file' => backdrop_get_path('module', 'codesign') . '/signers/openssl.codesign.inc',
+  );
+  $signers['gnupg'] = array(
+    'title' => t('GnuPG'),
+    'sign callback' => 'codesign_gnupg_sign',
+    'verify callback' => 'codesign_gnupg_verify',
+    'status callback' => 'codesign_gnupg_status',
+    'file' => backdrop_get_path('module', 'codesign') . '/signers/gnupg.codesign.inc',
+  );
+
+  return $signers;
+}
+
+function codesign_menu() {
+  $items = array();
+
+  $items['admin/reports/codesign'] = array(
+    'title' => 'Codesign',
+    'page callback' => 'codesign_report_page',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+function codesign_get_signature_backends() {
+  $signers = &backdrop_static(__FUNCTION__);
+
+  if (empty($signers)) {
+    $signers = module_invoke_all('codesign_info');
+  }
+
+  return $signers;
+}
+
+function codesign_report_page() {
+  $signers = codesign_get_signature_backends();
+  $renderable = array();
+
+  foreach ($signers as $key => $info) {
+    if (!empty($info['file'])) {
+      require_once $info['file'];
+    }
+    $status_callback = $info['status callback'];
+    $renderable[$key . '_title'] = array(
+      '#type' => 'markup',
+      '#markup' => t('<h2>@title</h2>', array('@title' => $info['title'])),
+    );
+    $renderable[$key] = $status_callback();
+  }
+
+  return $renderable;
+}
+
+function codesign_verify($type, $data, $signature = NULL, $options = array()) {
+  $signers = &backdrop_static(__FUNCTION__);
+  if (!$signers) {
+    $signers = module_invoke_all('codesign_info');
+  }
+
+  if (!empty($signers[$type]['file'])) {
+    require_once $signers[$type]['file'];
+  }
+
+  // Basic validation
+  if (empty($signers[$type]['verify callback']) || !function_exists($signers[$type]['verify callback'])) {
+    watchdog('codesign', 'Unknown verifier type @type.', array('@type' => $type), WATCHDOG_ERROR);
+    return FALSE;
+  }
+  if (empty($data)) {
+    watchdog('codesign', 'Nothing to verify.');
+    return FALSE;
+  }
+
+  // Get the callback and call it.
+  $verify_callback = $signers[$type]['verify callback'];
+  return $verify_callback($data, $signature, $options);
+}
