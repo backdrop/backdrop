@@ -301,11 +301,24 @@ function node_type_form($form, &$form_state, $type = NULL) {
       ),
     );
   }
+
+  $hidden_path_description = t('<strong>If enabled, all content of this type will be have a "hidden path"</strong>. This content can be placed as a block or within a listing, but will not be accessible at its URL without proper permissions. This facilitates content that is meant to be embedded with other content, but never viewed on its own. Users who have the <em>View hidden paths</em> permission will still be able to visit the full page URL, while those without this permission will receive a "Page not found" error.');
+  if (user_access('administer permissions')) {
+    $hidden_path_description .= '<br>' . l(t('Configure which user roles can view content with hidden path'), 'admin/config/people/permissions', array('fragment' => 'edit-view-hidden-paths'));
+  }
   $form['display']['hidden_path'] = array(
     '#type' => 'checkbox',
     '#title' => t('Hide path display'),
     '#default_value' => $type->settings['hidden_path'],
-    '#description' => t('If enabled, this content can be placed as a block or within a listing but will not be accessible at its URL without proper permissions. This facilitates "hidden path" content that is meant to be embedded with other content and never on its own. Users who have the "View hidden paths" permission will still be able to visit the full page URL, while those without this permission will receive a "Page not found" error.'),
+  );
+  $form['display']['hidden_path_description'] = array(
+    '#type' => 'container',
+    // If the current user can configure permissions, render this as an 'info'
+    // message, otherwise render it as a 'warning'.
+    '#attributes' => array('class' => array('messages', user_access('administer permissions') ? 'info' : 'warning')),
+  );
+  $form['display']['hidden_path_description']['message'] = array(
+    '#markup' => $hidden_path_description,
   );
 
   $form['old_type'] = array(
