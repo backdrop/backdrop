@@ -1130,7 +1130,8 @@ function node_view(Node $node, $view_mode = 'full', $langcode = NULL) {
   }
 
   // Allow modules to modify the structured node.
-  backdrop_alter(array('node_view', 'entity_view'), $build, 'node');
+  $type = 'node';
+  backdrop_alter(array('node_view', 'entity_view'), $build, $type);
 
   return $build;
 }
