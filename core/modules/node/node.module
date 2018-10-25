@@ -1116,9 +1116,21 @@ function node_view(Node $node, $view_mode = 'full', $langcode = NULL) {
     $build['#contextual_links']['node'] = array('node', array($node->nid));
   }
 
+  // Show a warning if the content type is configured to have hidden path.
+  $type = node_type_get_type($node);
+  if ($type->settings['hidden_path']) {
+    $message = t('<strong>This content is configured to have a hidden path</strong>. It can be placed as a block or within a listing, but will not be accessible at its URL without proper permissions. This facilitates content that is meant to be embedded with other content, but never viewed on its own. Users who have the <em>View hidden paths</em> permission will still be able to visit the full page URL, while those without this permission will receive a "Page not found" error.');
+    if (user_access('administer content types')) {
+      $message .= '<br>' . l(t('Change this setting'), 'admin/structure/types/manage/' . $type->type . '/configure', array('fragment' => 'edit-display'));
+    }
+    if (user_access('administer permissions')) {
+      $message .= '<br>' . l(t('Configure which user roles can view content with hidden path'), 'admin/config/people/permissions', array('fragment' => 'edit-view-hidden-paths'));
+    }
+    backdrop_set_message($message, 'warning');
+  }
+
   // Allow modules to modify the structured node.
-  $type = 'node';
-  backdrop_alter(array('node_view', 'entity_view'), $build, $type);
+  backdrop_alter(array('node_view', 'entity_view'), $build, 'node');
 
   return $build;
 }
