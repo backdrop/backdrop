@@ -301,11 +301,30 @@ function node_type_form($form, &$form_state, $type = NULL) {
       ),
     );
   }
+
   $form['display']['hidden_path'] = array(
     '#type' => 'checkbox',
     '#title' => t('Hide path display'),
     '#default_value' => $type->settings['hidden_path'],
-    '#description' => t('If enabled, this content can be placed as a block or within a listing but will not be accessible at its URL without proper permissions. This facilitates "hidden path" content that is meant to be embedded with other content and never on its own. Users who have the "View hidden paths" permission will still be able to visit the full page URL, while those without this permission will receive a "Page not found" error.'),
+  );
+  $form['display']['hidden_path_description'] = array(
+    '#type' => 'container',
+    // If the current user can configure permissions, render this as an 'info'
+    // message, otherwise render it as a 'warning'.
+    '#attributes' => array('class' => array('messages', user_access('administer permissions') ? 'info' : 'warning')),
+  );
+  $form['display']['hidden_path_description']['message'] = array(
+    '#markup' => t('<strong>If enabled, all content of this type will be have a "hidden path"</strong>. This content can be placed as a block or within a listing, but will not be accessible at its URL without proper permissions. This facilitates content that is meant to be embedded with other content, but never viewed on its own. Users who have the <em>View hidden paths</em> permission will still be able to visit the full page URL, while those without this permission will receive a "Page not found" error.'),
+  );
+  $form['display']['permissions'] = node_type_form_display_permissions();
+  $form['display']['permissions']['#access'] = user_access('administer permissions');
+  // Hide the permissions matrix if the "Hide path display" option is disabled.
+  // @todo: This visibility condition currently does not work.
+  // See https://github.com/backdrop/backdrop-issues/issues/3332#issuecomment-433254903
+  $form['display']['permissions']['#states'] = array(    
+    'visible' => array(
+      'input[name="display[hidden_path]"]' => array('checked' => TRUE),
+    ),
   );
 
   $form['old_type'] = array(
@@ -512,6 +531,84 @@ function node_type_form_permissions($type) {
       // Builds arrays for checked boxes for each role. Always select the Admin
       // role on new forms.
       if (in_array($perm, $role->permissions) || (!$type && $role->name == $admin_role)) {
+        $status[$role_name][] = $perm;
+      }
+    }
+  }
+
+  // Have to build checkboxes here after checkbox arrays are built.
+  foreach ($roles as $role_name => $role) {
+    $form['checkboxes'][$role_name] = array(
+      '#type' => 'checkboxes',
+      '#options' => $options,
+      '#default_value' => isset($status[$role_name]) ? $status[$role_name] : array(),
+      '#attributes' => array('class' => array('role-' . $role_name)),
+    );
+    $form['role_names'][$role_name] = array(
+      '#markup' => check_plain($role->label),
+      '#tree' => TRUE,
+    );
+  }
+
+  $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
+
+  return $form;
+}
+
+/**
+ * Builds a matrix of node permissions for the "Display settings" tab in the
+ * content type add/edit form.
+ *
+ * @param $type
+ *   Machine name for node type.
+ *
+ * @see node_type_form()
+ */
+function node_type_form_display_permissions() {
+  // Retrieve role names for columns.
+  $roles = user_roles(FALSE, NULL, TRUE);
+  $admin_role = config_get('system.core', 'user_admin_role');
+
+  // Note that in node_theme(), the 'node_type_form_permissions' theme callback
+  // reuses theme_user_admin_permissions(), to make it identical to the user
+  // module permissions page.
+  $form['#theme'] = array('node_type_form_permissions');
+
+  // Wrap the table in a form element to make margins match other form elements.
+  $form['#theme_wrappers'] = array('form_element');
+
+  $form['roles'] = array(
+    '#type' => 'value',
+    '#value' => $roles,
+  );
+
+  // Render role/permission overview:
+  $options = array();
+
+  $permissions = array(
+    "view hidden paths" => array(
+      'title' => t('View hidden paths'),
+    ),
+  );
+
+  $status = array();
+  foreach ($permissions as $perm => $perm_item) {
+    // Fill in default values for the permission.
+    $perm_item += array(
+      'description' => '',
+      'restrict access' => FALSE,
+      'warning' => !empty($perm_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
+    );
+    $options[$perm] = '';
+    $form['permission'][$perm] = array(
+      '#type' => 'item',
+      '#markup' => $perm_item['title'],
+      '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
+    );
+    foreach ($roles as $role_name => $role) {
+      // Builds arrays for checked boxes for each role. Always select the Admin
+      // role on new forms.
+      if (in_array($perm, $role->permissions) || ($role->name == $admin_role)) {
         $status[$role_name][] = $perm;
       }
     }
