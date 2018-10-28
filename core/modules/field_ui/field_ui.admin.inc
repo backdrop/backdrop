@@ -1550,27 +1550,32 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
 
   backdrop_set_title($instance['label']);
 
-  // We are using the machine name of the field instead of its label, as there
-  // might be different fields with the same label across various entities. See
-  // https://github.com/backdrop/backdrop-issues/issues/3349
-  $description = t('These settings apply to the %field field everywhere it is used:', array('%field' => $instance['field_name']));
-
-  // Compile a list of all instances of the field across all entities/bundles.
-  $used_as = array();
-  foreach ($field['bundles'] as $bundle_type => $bundle_info) {
-    foreach ($bundle_info as $bundle_name) {
-      $field_info_instances = field_info_instances($bundle_type, $bundle_name);
-      $field_label = $field_info_instances[$instance['field_name']]['label'];
-      $bundle_type_info = entity_get_info($bundle_type);
-      $bundle_label = $bundle_type_info['bundles'][$bundle_name]['label'];
-      if ($bundle_type_info['bundles'][$bundle_name]['admin']['real path']) {
-        $bundle_manage_fields_link = $bundle_type_info['bundles'][$bundle_name]['admin']['real path'] . "/fields";
+  // The field is not being used elsewhere, so it is safe to use its label.
+  if (count($field['entity_types']) == 0) {
+    $description = t('The %field field is not being used anywhere else.', array('%field' => $instance['label']));
+  }
+  else {
+    // Use the machine name of the field instead of its label, as there might be
+    // different fields with the same label across various entities. See
+    // https://github.com/backdrop/backdrop-issues/issues/3349
+    $description = t('These settings apply to the %field field everywhere it is used:', array('%field' => $instance['field_name']));
+    // Compile a list of all instances of the field across all entities/bundles.
+    foreach ($field['bundles'] as $bundle_type => $bundle_info) {
+      foreach ($bundle_info as $bundle_name) {
+        $field_info_instances = field_info_instances($bundle_type, $bundle_name);
+        $field_label = $field_info_instances[$instance['field_name']]['label'];
+        $bundle_type_info = entity_get_info($bundle_type);
+        $bundle_type_label = $bundle_type_info['bundle label'];
+        $bundle_label = $bundle_type_info['bundles'][$bundle_name]['label'];
+        if ($bundle_type_info['bundles'][$bundle_name]['admin']['real path']) {
+          $bundle_manage_fields_link = $bundle_type_info['bundles'][$bundle_name]['admin']['real path'] . "/fields";
+        }
+        else {
+          $bundle_manage_fields_link = $bundle_type_info['bundles'][$bundle_name]['admin']['path'] . "/fields";
+        }
+        $field_configure_link = $bundle_manage_fields_link . "/" . $field['field_name'];
+        $used_as[] = t('<em>!field_instance</em> field in the !bundle_type !bundle_label', array('!field_instance' => l($field_label, $field_configure_link), '!bundle_type' => $bundle_type_label, '!bundle_label' => l($bundle_label, $bundle_manage_fields_link)));
       }
-      else {
-        $bundle_manage_fields_link = $bundle_type_info['bundles'][$bundle_name]['admin']['path'] . "/fields";
-      }
-      $field_configure_link = $bundle_manage_fields_link . "/" . $field['field_name'];
-      $used_as[] = t('<em>!field_instance</em> field in !bundle_label', array('!field_instance' => l($field_label, $field_configure_link), '!bundle_label' => l($bundle_label, $bundle_manage_fields_link)));
     }
   }
 
