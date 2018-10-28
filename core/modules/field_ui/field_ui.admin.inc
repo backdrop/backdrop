@@ -1549,19 +1549,30 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
   $field = field_info_field($instance['field_name']);
 
   backdrop_set_title($instance['label']);
+  
+  $description = t('These settings apply to the %field field everywhere it is used:', array('%field' => $instance['field_name']));
 
-  $description = '<p>' . t('These settings apply to the %field field everywhere it is used. These settings impact the way that data is stored in the database and cannot be changed once data has been created.', array('%field' => $instance['label'])) . '</p>';
+  $used_as = array();
+  foreach ($field['bundles'] as $bundle_type => $bundle_info) {
+    foreach ($bundle_info as $bundle_name) {
+      $field_label = field_info_instances($bundle_type, $bundle_name)[$instance['field_name']]['label'];
+      $bundle_type_label = entity_get_info($bundle_type)['bundle label'];
+      $bundle_label = entity_get_info($bundle_type)['bundles'][$bundle_name]['label'];
+      $bundle_manage_fields_link = entity_get_info($bundle_type)['bundles'][$bundle_name]['admin']['real path'] . "/fields";
+      $field_configure_link = $bundle_manage_fields_link . "/" . $field['field_name'];
+      $used_as[] = t('<em>!field_instance</em> field in the !bundle_type !bundle_label', array('!field_instance' => l($field_label, $field_configure_link), '!bundle_type' => $bundle_type_label, '!bundle_label' => l($bundle_label, $bundle_manage_fields_link)));
+    }
+  }
 
   // Create a form structure for the field values.
   $form['field'] = array(
     '#type' => 'fieldset',
     '#title' => t('Field settings'),
-    '#description' => $description,
     '#tree' => TRUE,
   );
 
-  // See if data already exists for this field.
-  // If so, prevent changes to the field settings.
+  // See if data already exists for this field. If so, prevent changes to the
+  // field settings.
   $has_data = field_has_data($field);
 
   // Build the non-configurable field values.
@@ -1570,17 +1581,33 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
   $form['field']['module'] = array('#type' => 'value', '#value' => $field['module']);
   $form['field']['active'] = array('#type' => 'value', '#value' => $field['active']);
 
-  // Add settings provided by the field module. The field module is
-  // responsible for not returning settings that cannot be changed if
-  // the field already has data.
+  // Add settings provided by the field module. The field module is responsible
+  // for not returning settings that cannot be changed if the field already has
+  // data.
   $form['field']['settings'] = array();
   $additions = module_invoke($field['module'], 'field_settings_form', $field, $instance, $has_data);
   if (is_array($additions)) {
     if ($has_data) {
-      $form['field']['#description'] = '<div class="messages warning">' . t('There is data for this field in the database. Some field settings may no longer be changed.') . '</div>' . $form['field']['#description'];
+      $message = t('There is data for this field in the database. Some field settings may no longer be changed.');
+    }
+    else {
+      $message = t('These settings impact the way that data is stored in the database and cannot be changed once data has been created.');
     }
     $form['field']['settings'] = $additions;
+    $form['field']['settings']['#weight'] = 10;
   }
+
+  $form['field']['data_message'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('messages', 'warning')),
+  );
+  $form['field']['data_message']['message'] = array(
+    '#markup' => $message,
+  );
+  $form['field']['description'] = array(
+    '#markup' => $description . theme('item_list', array('items' => $used_as)),
+  );
+
   if (empty($additions)) {
     // If there are no settings and we are in the middle of adding a field for
     // the first time, skip this page entirely and proceed to the widget
@@ -1590,7 +1617,10 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
       call_user_func_array('backdrop_goto', $redirect);
     }
     $form['field']['settings'] = array(
-      '#markup' => t('%field has no field settings.', array('%field' => $instance['label'])),
+      '#prefix' => '<div>',
+      '#markup' => t('The %field field has no field settings.', array('%field' => $instance['label'])),
+      '#suffix' => '</div>',
+      '#weight' => 10,
     );
   }
   $form['#entity_type'] = $entity_type;
