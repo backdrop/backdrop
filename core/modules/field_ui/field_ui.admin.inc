@@ -1565,7 +1565,6 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
         $field_info_instances = field_info_instances($bundle_type, $bundle_name);
         $field_label = $field_info_instances[$instance['field_name']]['label'];
         $bundle_type_info = entity_get_info($bundle_type);
-        $bundle_type_label = $bundle_type_info['bundle label'];
         $bundle_label = $bundle_type_info['bundles'][$bundle_name]['label'];
         if ($bundle_type_info['bundles'][$bundle_name]['admin']['real path']) {
           $bundle_manage_fields_link = $bundle_type_info['bundles'][$bundle_name]['admin']['real path'] . "/fields";
@@ -1574,7 +1573,7 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
           $bundle_manage_fields_link = $bundle_type_info['bundles'][$bundle_name]['admin']['path'] . "/fields";
         }
         $field_configure_link = $bundle_manage_fields_link . "/" . $field['field_name'];
-        $used_as[] = t('<em>!field_instance</em> field in the !bundle_type !bundle_label', array('!field_instance' => l($field_label, $field_configure_link), '!bundle_type' => $bundle_type_label, '!bundle_label' => l($bundle_label, $bundle_manage_fields_link)));
+        $used_as[] = t('<em>!field_instance</em> field in the !bundle_type !bundle_label', array('!field_instance' => l($field_label, $field_configure_link), '!bundle_label' => l($bundle_label, $bundle_manage_fields_link)));
       }
     }
   }
