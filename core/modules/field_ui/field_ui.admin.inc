@@ -1560,11 +1560,10 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
   foreach ($field['bundles'] as $bundle_type => $bundle_info) {
     foreach ($bundle_info as $bundle_name) {
       $field_label = field_info_instances($bundle_type, $bundle_name)[$instance['field_name']]['label'];
-      $bundle_type_label = entity_get_info($bundle_type)['bundle label'];
       $bundle_label = entity_get_info($bundle_type)['bundles'][$bundle_name]['label'];
       $bundle_manage_fields_link = entity_get_info($bundle_type)['bundles'][$bundle_name]['admin']['real path'] . "/fields";
       $field_configure_link = $bundle_manage_fields_link . "/" . $field['field_name'];
-      $used_as[] = t('<em>!field_instance</em> field in the !bundle_type !bundle_label', array('!field_instance' => l($field_label, $field_configure_link), '!bundle_type' => $bundle_type_label, '!bundle_label' => l($bundle_label, $bundle_manage_fields_link)));
+      $used_as[] = t('<em>!field_instance</em> field in !bundle_label', array('!field_instance' => l($field_label, $field_configure_link), '!bundle_label' => l($bundle_label, $bundle_manage_fields_link)));
     }
   }
 
