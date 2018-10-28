@@ -1550,6 +1550,7 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
 
   backdrop_set_title($instance['label']);
 
+  $used_as = array();
   // The field is not being used elsewhere, so it is safe to use its label.
   if (sizeof($field['bundles'], 1) == 2) {
     $description = t('The %field field is not being used anywhere else.', array('%field' => $instance['label']));
@@ -1619,7 +1620,7 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
     '#markup' => $message,
   );
   $form['field']['description'] = array(
-    '#markup' => $description . $used_as ? theme('item_list', array('items' => $used_as)) : "",
+    '#markup' => $description . !empty($used_as) ? theme('item_list', array('items' => $used_as)) : "",
   );
 
   if (empty($additions)) {
