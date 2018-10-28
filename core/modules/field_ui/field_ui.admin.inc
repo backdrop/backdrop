@@ -1549,9 +1549,13 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
   $field = field_info_field($instance['field_name']);
 
   backdrop_set_title($instance['label']);
-  
+
+  // We are using the machine name of the field instead of its label, as there
+  // might be different fields with the same label across various entities. See
+  // https://github.com/backdrop/backdrop-issues/issues/3349
   $description = t('These settings apply to the %field field everywhere it is used:', array('%field' => $instance['field_name']));
 
+  // Compile a list of all instances of the field across all entities/bundles.
   $used_as = array();
   foreach ($field['bundles'] as $bundle_type => $bundle_info) {
     foreach ($bundle_info as $bundle_name) {
