@@ -1619,7 +1619,7 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
     '#markup' => $message,
   );
   $form['field']['description'] = array(
-    '#markup' => $description . theme('item_list', array('items' => $used_as)),
+    '#markup' => $description . $used_as ? theme('item_list', array('items' => $used_as)) : "",
   );
 
   if (empty($additions)) {
