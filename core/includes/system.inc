@@ -13,6 +13,8 @@
  *   - module_enabled: All enabled modules.
  *   - bootstrap: All enabled modules required for bootstrap.
  *   - theme: All themes.
+ * @param $status
+ *   Optional status. Can be either 'enabled' or 'disabled'.
  *
  * @return
  *   An associative array of modules, themes, or layout templates, keyed by
@@ -23,12 +25,12 @@
  * @see module_list()
  * @see list_themes()
  */
-function system_list($type) {
+function system_list($type, $status = NULL) {
   $lists = &backdrop_static(__FUNCTION__);
 
-  // For bootstrap modules, attempt to fetch the list from cache if possible.
-  // if not fetch only the required information to fire bootstrap hooks
-  // in case we are going to serve the page from cache.
+  // For bootstrap modules, attempt to fetch the list from cache if possible. If
+  // not, then fetch only the required information to fire bootstrap hooks in
+  // case we are going to serve the page from cache.
   if ($type == 'bootstrap') {
     if (isset($lists['bootstrap'])) {
       return $lists['bootstrap'];
@@ -41,13 +43,13 @@ function system_list($type) {
       cache('bootstrap')->set('bootstrap_modules', $bootstrap_list);
     }
     // To avoid a separate database lookup for the filepath, prime the
-    // backdrop_get_filename() static cache for bootstrap modules only.
-    // The rest is stored separately to keep the bootstrap module cache small.
+    // backdrop_get_filename() static cache for bootstrap modules only. The rest
+    // is stored separately to keep the bootstrap module cache small.
     foreach ($bootstrap_list as $module) {
       backdrop_get_filename('module', $module->name, $module->filename);
     }
-    // We only return the module names here since module_list() doesn't need
-    // the filename itself.
+    // Only return the module names here, since module_list() doesn't need the
+    // filename itself.
     $lists['bootstrap'] = array_keys($bootstrap_list);
   }
   // Otherwise build the list for enabled modules and themes.
@@ -64,8 +66,8 @@ function system_list($type) {
       // The module name (rather than the filename) is used as the fallback
       // weighting in order to guarantee consistent behavior across different
       // Backdrop installations, which might have modules installed in different
-      // locations in the file system. The ordering here must also be
-      // consistent with the one used in module_implements().
+      // locations in the file system. The ordering here must also be consistent
+      // with the one used in module_implements().
       $result = db_query("SELECT * FROM {system} WHERE type = 'theme' OR (type = 'module' AND status = 1) ORDER BY weight ASC, name ASC");
       foreach ($result as $record) {
         $record->info = unserialize($record->info);
