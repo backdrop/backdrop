@@ -71,6 +71,7 @@ require_once BACKDROP_ROOT . '/core/includes/bootstrap.inc';
 require_once BACKDROP_ROOT . '/core/includes/common.inc';
 require_once BACKDROP_ROOT . '/core/includes/file.inc';
 require_once BACKDROP_ROOT . '/core/includes/module.inc';
+require_once BACKDROP_ROOT . '/core/includes/system.inc';
 require_once BACKDROP_ROOT . '/core/includes/ajax.inc';
 
 // We prepare only a minimal bootstrap. This includes the database and

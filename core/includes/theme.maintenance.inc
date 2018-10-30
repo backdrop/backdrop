@@ -28,6 +28,7 @@ function _backdrop_maintenance_theme() {
   require_once BACKDROP_ROOT . '/core/includes/unicode.inc';
   require_once BACKDROP_ROOT . '/core/includes/file.inc';
   require_once BACKDROP_ROOT . '/core/includes/module.inc';
+  require_once BACKDROP_ROOT . '/core/includes/system.inc';
   unicode_check();
 
   // Install and update pages are treated differently to prevent theming overrides.

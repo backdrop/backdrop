@@ -359,6 +359,7 @@ function update_module_enable(array $modules) {
     // system_list_reset() is in module.inc but that would only be available
     // once the variable bootstrap is done.
     require_once BACKDROP_ROOT . '/core/includes/module.inc';
+    require_once BACKDROP_ROOT . '/core/includes/system.inc';
     system_list_reset();
     //  @todo: figure out what to do about hook_install() and hook_enable().
   }
