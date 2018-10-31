@@ -88,7 +88,8 @@ class views_plugin_pager_full extends views_plugin_pager {
     );
 
     $form['id'] = array(
-      '#type' => 'textfield',
+      '#type' => 'number',
+      '#min' => '0',
       '#title' => t('Pager ID'),
       '#description' => t("Unless you're experiencing problems with pagers related to this view, you should leave this at 0. If using multiple pagers on one page you may need to set this number to a higher value so as not to conflict within the ?page= array. Large values will add a lot of commas to your URLs, so avoid if possible."),
       '#default_value' => $this->options['id'],
