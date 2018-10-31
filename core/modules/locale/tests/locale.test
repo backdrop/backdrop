@@ -2392,9 +2392,9 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
   /**
    * Check URL rewriting for the given language.
    *
-   * The test is performed with a fixed URL (the default front page) to simply
-   * check that language prefixes are not added to it and that the prefixed URL
-   * is actually not working.
+   * The test is performed with a fixed URL (the default front page) to check
+   * that language prefixes are not added to it, and that the prefixed URL is
+   * actually not working.
    *
    * @param string $language
    *   The language prefix, e.g. 'es'.

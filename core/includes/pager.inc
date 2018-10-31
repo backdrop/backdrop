@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions to aid in presenting database results as a set of pages.
@@ -42,8 +41,8 @@ function pager_find_page($element = 0) {
  * If the items being displayed result from a database query performed using
  * Backdrop's database API, and if you have control over the construction of the
  * database query, you do not need to call this function directly; instead, you
- * can simply extend the query object with the 'PagerDefault' extender before
- * executing it. For example:
+ * can extend the query object with the 'PagerDefault' extender before executing
+ * it. For example:
  * @code
  *   $query = db_select('some_table')->extend('PagerDefault');
  * @endcode
