@@ -52,10 +52,10 @@ function system_requirements($phase) {
   $phpversion = phpversion();
   if (function_exists('phpinfo')) {
     if ($phase == 'runtime') {
-      $php_value = $t('Version: !version (<a href="!infourl">PHP information</a>)', array('!version' => $phpversion, '!infourl' => url('admin/reports/status/php')));
+      $php_value = $t('!version (<a href="!infourl">PHP information</a>)', array('!version' => $phpversion, '!infourl' => url('admin/reports/status/php')));
     }
     else {
-      $php_value = $t('Version: !version', array('!version' => $phpversion));
+      $php_value = $t('!version', array('!version' => $phpversion));
     }
     $requirements['php'] = array(
       'title' => $t('PHP'),
@@ -176,7 +176,7 @@ function system_requirements($phase) {
     $class = 'DatabaseTasks_' . Database::getConnection()->driver();
     /* @var DatabaseTasks $tasks */
     $tasks = new $class();
-    $dbinfo = $t('!system version !version', array('!system' => $tasks->name(), '!version' => Database::getConnection()->version()));
+    $dbinfo = $t('!system !version', array('!system' => $tasks->name(), '!version' => Database::getConnection()->version()));
     $requirements['database_system'] = array(
       'title' => $t('MySQL Database'),
       'severity' => REQUIREMENT_INFO,
@@ -206,7 +206,7 @@ function system_requirements($phase) {
     $requirements['jquery'] = array(
       'title' => $t('jQuery'),
       'severity' => REQUIREMENT_INFO,
-      'value' => $t('jQuery version !jqv / jQuery UI version !jquiv', array('!jqv' => $jquery['version'], '!jquiv' => $jquery_ui['version'])),
+      'value' => $t('jQuery !jqv / jQuery UI !jquiv', array('!jqv' => $jquery['version'], '!jquiv' => $jquery_ui['version'])),
     );
   }
 
