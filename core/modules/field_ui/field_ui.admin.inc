@@ -2062,7 +2062,6 @@ function field_ui_field_edit_form_validate($form, &$form_state) {
   $instance = $form_state['values']['instance'];
   $field_name = $instance['field_name'];
 
-
   // Validate field cardinality.
   $cardinality = $form_state['values']['field']['cardinality'];
   $cardinality_number = $form_state['values']['field']['cardinality_number'];
@@ -2085,6 +2084,20 @@ function field_ui_field_edit_form_validate($form, &$form_state) {
     $function = $field['module'] . '_field_validate';
     if (function_exists($function)) {
       $function(NULL, NULL, $field, $instance, LANGUAGE_NONE, $items, $errors);
+    }
+    // Checking for a difference between the existing default values
+    // and the cardinality setting.
+    $non_empty_items_count = 0;
+    foreach ($items as $item) {
+      if (!empty($item['value'])) {
+        $non_empty_items_count++;
+      }
+    }
+    if ($cardinality === 'number' && $non_empty_items_count > $cardinality_number) {
+      $errors[$field['field_name']][LANGUAGE_NONE][0][] = array(
+        'error' => 'cardinality_smaller_than_existing_default_values',
+        'message' => t('%name: you have entered more default values (@count_non_empty_items) than allowed by the %cardinality_setting_label setting.', array('%name' => $instance['label'], '@count_non_empty_items' => $non_empty_items_count, '@cardinality' => $cardinality_number, '%cardinality_setting_label' => 'Number of values')),
+      );
     }
     if (isset($errors[$field_name][LANGUAGE_NONE])) {
       // Store reported errors in $form_state.
