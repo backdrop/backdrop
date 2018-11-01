@@ -11,7 +11,7 @@
  */
 
 /**
- * @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
+ * @license Copyright (c) 2003-2018, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md or http://ckeditor.com/license
  */
 
@@ -25,10 +25,10 @@
  * (1) http://ckeditor.com/builder
  *     Visit online builder to build CKEditor from scratch.
  *
- * (2) http://ckeditor.com/builder/6fb1cc844895a936c156bd50f7fafd26
+ * (2) http://ckeditor.com/builder/58989eabf7abd2158a32dcce585c9e95
  *     Visit online builder to build CKEditor, starting with the same setup as before.
  *
- * (3) http://ckeditor.com/builder/download/6fb1cc844895a936c156bd50f7fafd26
+ * (3) http://ckeditor.com/builder/download/58989eabf7abd2158a32dcce585c9e95
  *     Straight download link to the latest version of CKEditor (Optimized) with the same setup as before.
  *
  * NOTE:
@@ -50,6 +50,7 @@ var CKBUILDER_CONFIG = {
 		'.jshintignore',
 		'.jshintrc',
 		'.mailmap',
+		'.npm',
 		'.travis.yml',
 		'README.md',
 		'bender-err.log',
@@ -63,9 +64,9 @@ var CKBUILDER_CONFIG = {
 		'package.json',
 		'tests'
 	],
-  // So that they are not shipped with Backdrop, after using this config file
-  // for rebuilding, the following are removed manually, because adding them
-  // to the ignore array does not cause them to be ignored:
+  // Some components are not to be shipped with Backdrop. Using this config file
+  // to rebuild and download the customised version of CKEditor does not
+  // automatically exclude the following, so they need to be removed manually:
   // 'README.md',
   // 'adapters',
   // 'config.js',
