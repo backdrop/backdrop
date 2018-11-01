@@ -190,6 +190,15 @@ function system_requirements($phase) {
     $requirements['database_charset'] = $charset_requirements;
   }
 
+  // Report CKEditor version.
+  if ($phase == 'runtime') {
+    $requirements['ckeditor'] = array(
+      'title' => $t('CKEditor'),
+      'severity' => REQUIREMENT_INFO,
+      'value' => CKEDITOR_VERSION,
+    );
+  }
+
   // Report jQuery and jQuery UI versions.
   if ($phase == 'runtime') {
     $jquery = backdrop_get_library('system', 'jquery');
