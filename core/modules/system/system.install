@@ -191,7 +191,7 @@ function system_requirements($phase) {
   }
 
   // Report CKEditor version.
-  if ($phase == 'runtime') {
+  if ($phase == 'runtime' && module_exists('ckeditor')) {
     $requirements['ckeditor'] = array(
       'title' => $t('CKEditor'),
       'severity' => REQUIREMENT_INFO,
