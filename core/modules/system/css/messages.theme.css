@@ -2,7 +2,8 @@
  * @file
  * Status messages styling.
  */
-.messages {
+.messages,
+#permissions .description .permission-warning {
   position: relative;
   box-sizing: border-box;
   margin: 0.375rem 0;
@@ -14,7 +15,8 @@
 [dir="rtl"] .messages {
   padding: .625em 3.438em .625em .625em;
 }
-.messages:before {
+.messages:before,
+#permissions .description .permission-warning:before {
   content: '';
   position: absolute;
   top: 0;
@@ -75,7 +77,8 @@ div.status:before {
 .warning a {
   color: #525252;
 }
-div.warning:before {
+div.warning:before,
+#permissions .description .permission-warning:before {
   background-image: url(../../../misc/message-24-warning.png);
   background-color: #fce400;
 }
@@ -130,7 +133,8 @@ div.info:before {
 div.status:before {
   background-image: linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg);
 }
-div.warning:before {
+div.warning:before,
+#permissions .description .permission-warning:before {
   background-image: linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg);
 }
 div.error:before {
