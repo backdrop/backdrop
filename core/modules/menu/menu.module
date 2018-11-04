@@ -153,35 +153,6 @@ function menu_config_info() {
 }
 
 /**
- * Implements hook_enable().
- *
- * Add a link for each custom menu.
- */
-function menu_enable() {
-  menu_rebuild();
-  $base_link = db_query("SELECT mlid AS plid, menu_name FROM {menu_links} WHERE link_path = 'admin/structure/menu' AND module = 'system'")->fetchAssoc();
-  $base_link['router_path'] = 'admin/structure/menu/manage/%';
-  $base_link['module'] = 'menu';
-  $menus = menu_load_all();
-  foreach ($menus as $menu) {
-    // $link is passed by reference to menu_link_save(), so we make a copy of $base_link.
-    $link = $base_link;
-    $link['mlid'] = 0;
-    $link['link_title'] = $menu['title'];
-    $link['link_path'] = 'admin/structure/menu/manage/' . $menu['menu_name'];
-    $menu_link = db_query("SELECT mlid FROM {menu_links} WHERE link_path = :path AND plid = :plid", array(
-      ':path' => $link['link_path'],
-      ':plid' => $link['plid']
-    ))
-    ->fetchField();
-    if (!$menu_link) {
-      menu_link_save($link);
-    }
-  }
-  menu_cache_clear_all();
-}
-
-/**
  * Title callback for the menu overview page and links.
  */
 function menu_overview_title($menu) {

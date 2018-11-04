@@ -373,7 +373,6 @@ function _views_ui_get_operations(view $view) {
  */
 function views_ui_add_page() {
   views_ui_add_admin_css();
-  backdrop_set_title(t('Add view'));
   return backdrop_get_form('views_ui_add_form');
 }
 

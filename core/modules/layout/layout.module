@@ -410,7 +410,8 @@ function layout_page_menu_item(array $menu, array $access_arguments, array $page
 function layout_page_title(Layout $layout) {
   // Page titles are run through check_plain() before output, so no escaping
   // here is intentional. See backdrop_get_title().
-  return $layout->title;
+  $path = isset($layout->menu_item->path) ? ' (' . $layout->menu_item->path . ')' : '';
+  return $layout->title . $path;
 }
 
 /**
