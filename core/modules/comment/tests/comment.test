@@ -572,7 +572,7 @@ class CommentInterfaceTest extends CommentHelperCase {
 
       // Wait a few seconds to ensure that the "comment-new" flag is allowed to
       // trigger (more than 1 second from the time the comment was created).
-      sleep(2);
+      sleep(3);
 
       // Request the node with the comment.
       $this->backdropGet('node/' . $node->nid);
