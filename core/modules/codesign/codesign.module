@@ -3,20 +3,7 @@
 function codesign_codesign_info() {
   $signers = array();
 
-  $signers['openssl'] = array(
-    'title' => t('OpenSSL'),
-    'sign callback' => 'codesign_openssl_sign',
-    'verify callback' => 'codesign_openssl_verify',
-    'status callback' => 'codesign_openssl_status',
-    'file' => backdrop_get_path('module', 'codesign') . '/signers/openssl.codesign.inc',
-  );
-  $signers['gnupg'] = array(
-    'title' => t('GnuPG'),
-    'sign callback' => 'codesign_gnupg_sign',
-    'verify callback' => 'codesign_gnupg_verify',
-    'status callback' => 'codesign_gnupg_status',
-    'file' => backdrop_get_path('module', 'codesign') . '/signers/gnupg.codesign.inc',
-  );
+  // None defined in core.  Use a contrib module.
 
   return $signers;
 }
