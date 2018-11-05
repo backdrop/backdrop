@@ -91,6 +91,7 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
   if (!isset($form_state['vocabulary'])) {
     // Create a new TaxonomyVocabulary entity for the add form.
     if (!isset($vocabulary)) {
+      backdrop_set_title(t('Add vocabulary'));
       $vocabulary = new TaxonomyVocabulary();
     }
     $form_state['vocabulary'] = $vocabulary;
