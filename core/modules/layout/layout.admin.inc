@@ -1555,6 +1555,10 @@ function layout_block_remove_page(Layout $layout, Block $block, $renderer_name) 
  * @ingroup forms
  */
 function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, Block $block = NULL, LayoutMenuItem $menu_item = NULL, $condition_id = NULL) {
+  // Ensure entity info such as entity labels are up to date.
+  // See https://github.com/backdrop/backdrop-issues/issues/3242
+  entity_info_cache_clear();
+
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   $form_state['layout'] = $layout;
   $form_state['block'] = $block;
