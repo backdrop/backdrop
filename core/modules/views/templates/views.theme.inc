@@ -691,7 +691,10 @@ function template_preprocess_views_view_grid(&$variables) {
   $rows = array();
   $row_indexes = array();
 
-  if (empty($options['deprecated_table'])) {
+  // For old view default to table if view settings haven't been updated.
+  $variables['deprecated_table'] = (!isset($options['deprecated_table']) || $options['deprecated_table']) ? TRUE : FALSE;
+
+  if (!$variables['deprecated_table']) {
     $rows = $variables['rows'];
 
     // Set up striping values.
@@ -869,9 +872,6 @@ function template_preprocess_views_view_grid(&$variables) {
   }
 
   $variables['rows'] = $rows;
-
-  // Add the deprecated table to the list if set.
-  $variables['deprecated_table'] = !empty($options['deprecated_table']) ? TRUE : FALSE;
 }
 
 /**
