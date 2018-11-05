@@ -10,6 +10,10 @@
  * Output a list of pages that are managed.
  */
 function layout_list_page() {
+  // Ensure entity info such as entity labels are up to date.
+  // See https://github.com/backdrop/backdrop-issues/issues/3242
+  entity_info_cache_clear();
+
   $layouts = layout_load_all();
 
   // Group layouts by path.
@@ -199,6 +203,10 @@ function layout_add_page() {
  * @ingroup forms
  */
 function layout_settings_form($form, &$form_state, Layout $layout) {
+  // Ensure entity info such as entity labels are up to date.
+  // See https://github.com/backdrop/backdrop-issues/issues/3242
+  entity_info_cache_clear();
+
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
 
   $form_state['layout'] = &$layout;
