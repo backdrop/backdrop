@@ -2311,7 +2311,10 @@ function system_date_time_formats() {
  */
 function system_configure_date_formats_form($form, &$form_state, $format = NULL) {
   if ($format) {
-    backdrop_set_title(t('Edit %format', array('%format' => $format['label'])), PASS_THROUGH);
+    backdrop_set_title(t('Edit date format %format', array('%format' => $format['label'])), PASS_THROUGH);
+  }
+  else {
+    backdrop_set_title(t('Add date format'));
   }
   $form_state['format'] = $format;
 
