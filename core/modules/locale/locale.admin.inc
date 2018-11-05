@@ -318,7 +318,7 @@ function language_negotiation_configure_session_form_submit($form, &$form_state)
  * Form callback; Display fields for setting the date format for each language.
  */
 function locale_date_format_form($form, &$form_state, $format) {
-  backdrop_set_title(t('Localize %format', array('%format' => $format['name'])), PASS_THROUGH);
+  backdrop_set_title(t('Localize date format %format', array('%format' => $format['label'])), PASS_THROUGH);
 
   // We use the system_date_time_lookup() function from system.admin.inc.
   form_load_include($form_state, 'inc', 'system', 'system.admin');
