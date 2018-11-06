@@ -2730,9 +2730,6 @@ function layout_configure_region_page($form, &$form_state, Layout $layout, $rend
     return MENU_NOT_FOUND;
   }
 
-  $region_label = layout_create_renderer($renderer_name, $layout)->layout_info['regions'][$region_name];
-  $form['#title'] = t('Configure region "!region_name"', array('!region_name' => $region_label));
-
   $form['#tree'] = TRUE;
 
   $options = array(
