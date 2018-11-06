@@ -2733,7 +2733,7 @@ function layout_configure_region_page($form, &$form_state, Layout $layout, $rend
   $form['#tree'] = TRUE;
 
   $options = array(
-    '' => 'No inner wrapper',
+    '' => t('No inner wrapper'),
     'div' => 'DIV',
     'nav' => 'NAV',
     'aside' => 'ASIDE',
@@ -2755,6 +2755,59 @@ function layout_configure_region_page($form, &$form_state, Layout $layout, $rend
         ':input[name="element"]' => array('value' => ''),
       ),
     ),
+  );
+
+  $form['title_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Region title type'),
+    '#options' => array(
+      '' => t('No region title'),
+      LAYOUT_REGION_TITLE_CUSTOM => t('Custom'),
+    ),
+    '#default_value' => isset($layout->settings[$region_name]['title_type']) ? $layout->settings[$region_name]['title_type'] : '',
+  );
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#default_value' => isset($layout->settings[$region_name]['title']) ? $layout->settings[$region_name]['title'] : '',
+    '#title' => t('Region title'),
+    '#states' => array(
+      'visible' => array(
+        'form.layout-configure-region-page :input[name="title_type"]' => array('value' => LAYOUT_REGION_TITLE_CUSTOM),
+      ),
+    ),
+    '#maxlength' => 255,
+  );
+  $form['title_tag'] = array(
+    '#title' => t('Region title heading level'),
+    '#type' => 'select',
+    '#options' => array(
+      'h1' => 'H1',
+      'h2' => 'H2',
+      'h3' => 'H3',
+      'h4' => 'H4',
+      'h5' => 'H5',
+      'h6' => 'H6',
+      'div' => 'DIV',
+      'span' => 'SPAN',
+      'p' => 'P',
+    ),
+    '#default_value' => isset($layout->settings[$region_name]['title_tag']) ? $layout->settings[$region_name]['title_tag'] : 'h2',
+    '#states' => array(
+      'visible' => array(
+        'form.layout-configure-region-page :input[name="title_type"]' => array('value' => LAYOUT_REGION_TITLE_CUSTOM),
+      ),
+    ),
+  );
+  $form['title_classes'] = array(
+    '#title' => t('Region title heading classes'),
+    '#type' => 'textfield',
+    '#default_value' => isset($layout->settings[$region_name]['title_classes']) ? $layout->settings[$region_name]['title_classes'] : '',
+    '#states' => array(
+      'visible' => array(
+        'form.layout-configure-region-page :input[name="title_type"]' => array('value' => LAYOUT_REGION_TITLE_CUSTOM),
+      ),
+    ),
+    '#description' => t('Additional classes to be added to the region title.'),
   );
 
   $form['actions'] = array('#type' => 'actions');
@@ -2779,6 +2832,10 @@ function layout_configure_region_page_submit($form, &$form_state) {
   $region_name = $form_state['region_name'];
   $form_state['layout']->settings[$region_name]['element'] = $form_state['values']['element'];
   $form_state['layout']->settings[$region_name]['classes'] = $form_state['values']['classes'];
+  $form_state['layout']->settings[$region_name]['title_type'] = $form_state['values']['title_type'];
+  $form_state['layout']->settings[$region_name]['title'] = $form_state['values']['title'];
+  $form_state['layout']->settings[$region_name]['title_tag'] = $form_state['values']['title_tag'];
+  $form_state['layout']->settings[$region_name]['title_classes'] = $form_state['values']['title_classes'];
   layout_set_layout_tempstore($form_state['layout']);
 }
 
