@@ -603,7 +603,7 @@ class LayoutRendererStandard {
       $classes = array_filter($classes);
     }
 
-    $title =  !empty($style_settings['title_type']) && isset($style_settings['title']) ? $style_settings['title'] : '';
+    $title = $style_settings['title_enabled'] && isset($style_settings['title']) ? $style_settings['title'] : '';
     $title_tag = isset($style_settings['title_tag']) ? $style_settings['title_tag'] : '';
     $title_classes = array();
     if (isset($style_settings['title_classes'])) {
