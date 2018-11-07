@@ -1,16 +1,4 @@
 ﻿/**
- * This is a Backdrop-optimized build of CKEditor.
- *
- * You may re-use it at any time at http://ckeditor.com/builder to build
- * CKEditor again. Alternatively, use the "build.sh" script to build it locally.
- * If you do so, be sure to pass it the "-s" flag. So: "sh build.sh -s".
- *
- * NOTE:
- *    This file is not used by CKEditor, you may remove it.
- *    Changing this file will not change your CKEditor configuration.
- */
-
-/**
  * @license Copyright (c) 2003-2018, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md or http://ckeditor.com/license
  */
@@ -64,16 +52,6 @@ var CKBUILDER_CONFIG = {
 		'package.json',
 		'tests'
 	],
-  // Some components are not to be shipped with Backdrop. Using this config file
-  // to rebuild and download the customised version of CKEditor does not
-  // automatically exclude the following, so they need to be removed manually:
-  // 'README.md',
-  // 'adapters',
-  // 'config.js',
-  // 'contents.css',
-  // 'samples',
-  // 'skins/moono-lisa/readme.md',
-  // 'styles.js',
 	plugins : {
 		'a11yhelp' : 1,
 		'about' : 1,
