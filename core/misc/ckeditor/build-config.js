@@ -1,13 +1,13 @@
 ﻿/**
  * This is a Backdrop-optimized build of CKEditor.
- *  
- * You may re-use it at any time at http://ckeditor.com/builder to build  
- * CKEditor again. Alternatively, use the "build.sh" script to build it locally.  
- * If you do so, be sure to pass it the "-s" flag. So: "sh build.sh -s".  
- *  
- * NOTE:  
+ *
+ * You may re-use it at any time at http://ckeditor.com/builder to build 
+ * CKEditor again. Alternatively, use the "build.sh" script to build it locally.
+ * If you do so, be sure to pass it the "-s" flag. So: "sh build.sh -s".
+ *
+ * NOTE:
  *    This file is not used by CKEditor, you may remove it. Changing this file
- *    will not change your CKEditor configuration. 
+ *    will not change your CKEditor configuration.
  */
 
 /**
