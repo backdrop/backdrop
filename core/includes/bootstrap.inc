@@ -3285,9 +3285,9 @@ function backdrop_valid_test_ua() {
   if (isset($_SERVER['HTTP_USER_AGENT']) && preg_match("/^(simpletest\d+);(.+);(.+);(.+)$/", $_SERVER['HTTP_USER_AGENT'], $matches)) {
     list(, $prefix, $time, $salt, $hmac) = $matches;
     $check_string =  $prefix . ';' . $time . ';' . $salt;
-    // We use the salt from settings.php to make the HMAC key, since
-    // the database is not yet initialized and we can't access any Backdrop variables.
-    // The file properties add more entropy not easily accessible to others.
+    // We use the salt from settings.php to make the HMAC key, since the
+    // database is not yet initialized and we can't access any Backdrop
+    // variables. The file properties add more entropy.
     $key = settings_get('hash_salt') . filectime(__FILE__) . fileinode(__FILE__);
     $time_diff = REQUEST_TIME - $time;
     // Since we are making a local request a 5 second time window is allowed,
@@ -3309,9 +3309,9 @@ function backdrop_generate_test_ua($prefix) {
   static $key;
 
   if (!isset($key)) {
-    // We use the salt from settings.php to make the HMAC key, since
-    // the database is not yet initialized and we can't access any Backdrop variables.
-    // The file properties add more entropy not easily accessible to others.
+    // We use the salt from settings.php to make the HMAC key, since the
+    // database is not yet initialized and we can't access any Backdrop
+    // variables. The file properties add more entropy.
     $key = settings_get('hash_salt') . filectime(__FILE__) . fileinode(__FILE__);
   }
   // Generate a moderately secure HMAC based on the database credentials.

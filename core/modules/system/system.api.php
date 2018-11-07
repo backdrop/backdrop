@@ -1252,14 +1252,14 @@ function hook_form_BASE_FORM_ID_alter(&$form, &$form_state, $form_id) {
  * function with the same name as the form ID, and use that function to build
  * the form. If no such function is found, Backdrop calls this hook. Modules
  * implementing this hook can then provide their own instructions for mapping
- * form IDs to constructor functions. As a result, you can easily map multiple
- * form IDs to a single form constructor (referred to as a 'base' form).
+ * form IDs to constructor functions. As a result, you can map multiple form IDs
+ * to a single form constructor (referred to as a 'base' form).
  *
  * Using a base form can help to avoid code duplication, by allowing many
  * similar forms to use the same code base. Another benefit is that it becomes
  * much easier for other modules to apply a general change to the group of
- * forms; hook_form_BASE_FORM_ID_alter() can be used to easily alter multiple
- * forms at once by directly targeting the shared base form.
+ * forms; hook_form_BASE_FORM_ID_alter() can be used to alter multiple forms at
+ * once by directly targeting the shared base form.
  *
  * Two example use cases where base forms may be useful are given below.
  *
@@ -1658,7 +1658,7 @@ function hook_permission() {
  *   - file: The file the implementation resides in. This file will be included
  *     prior to the theme being rendered, to make sure that the function or
  *     preprocess function (as needed) is actually loaded; this makes it
- *     possible to split theme functions out into separate files quite easily.
+ *     possible to split theme functions out into separate files.
  *   - path: Override the path of the file to be used. Ordinarily the module or
  *     theme path will be used, but if the file will not be in the default
  *     path, include it here. This path should be relative to the Backdrop root

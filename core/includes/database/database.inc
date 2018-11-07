@@ -14,13 +14,11 @@
  * @{
  * Allow the use of different database servers using the same code base.
  *
- * Backdrop provides a database abstraction layer to provide developers with
- * the ability to support multiple database servers easily. The intent of
- * this layer is to preserve the syntax and power of SQL as much as possible,
- * but also allow developers a way to leverage more complex functionality in
- * a unified way. It also provides a structured interface for dynamically
- * constructing queries when appropriate, and enforcing security checks and
- * similar good practices.
+ * Backdrop includes a database abstraction layer to provide a structured
+ * interface for dynamically constructing queries when appropriate, and to
+ * enforce security checks and similar good practices. The intent of this layer
+ * is to preserve the syntax and power of SQL as much as possible, but also
+ * allow developers to leverage more complex functionality in a unified way.
  *
  * The system is built atop PHP's PDO (PHP Data Objects) database API and
  * inherits much of its syntax and semantics.
