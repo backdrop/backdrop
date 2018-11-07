@@ -324,6 +324,28 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
     return taxonomy_vocabulary_confirm_reset_alphabetical($form, $form_state, $vocabulary->machine_name);
   }
 
+  $default_language = language_default();
+  $filter_langcode = isset($_GET['langcode_term']) ? $_GET['langcode_term'] : $default_language->langcode;
+  if (module_exists('language')) {
+    $form['langcode_term'] = array(
+      '#title' => t('Show term in language'),
+      '#type' => 'select',
+      '#options' => language_list(TRUE, TRUE),
+      '#empty_value' => LANGUAGE_NONE,
+      '#empty_option' => t('All languages'),
+      '#default_value' => $filter_langcode,
+      '#access' => module_exists('language'),
+      '#weight' => -20,
+      '#description' => t('Show terms for a given language. Terms with the "All" language will be shown in every language.'),
+    );
+    $form['langcode_filter'] = array(
+      '#type' => 'submit',
+      '#value' => t('Filter'),
+      '#attributes' => array('class' => array('button-primary')),
+      '#submit' => array('term_overview_form_language_filter_submit'),
+    );
+  }
+
   $form['#vocabulary'] = $vocabulary;
   $form['#tree'] = TRUE;
   $form['#parent_fields'] = FALSE;
@@ -353,6 +375,13 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
     if (empty($term)) {
       break;
     }
+
+    // Skip all terms not in the requested language.
+    $tree_langcode = $filter_langcode === LANGUAGE_NONE ? NULL : $filter_langcode;
+    if ($tree_langcode && $term->langcode !== $tree_langcode && $term->langcode !== LANGUAGE_NONE) {
+      continue;
+    }
+
     $delta++;
     // Count entries before the current page.
     if ($page && ($page * $page_increment) > $before_entries && !isset($back_step)) {
@@ -428,6 +457,9 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
     }
   }
 
+  $language_options = language_list(TRUE, TRUE);
+  $language_options[LANGUAGE_NONE] = t('All');
+
   // Build the actual form.
   foreach ($current_page as $key => $term) {
     // Save the term for the current page so we don't have to load it a second time.
@@ -454,6 +486,15 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
         // Same as above, the depth is modified by javascript, so it's a default_value.
         '#default_value' => $term->depth,
       );
+      // Language
+      $langcode_label = isset($language_options[$term->langcode]) ? $language_options[$term->langcode] : $term->langcode;
+      if (module_exists('language')) {
+        $form[$key]['langcode'] = array(
+          '#type' => 'markup',
+          '#markup' => check_plain($langcode_label),
+          '#access' => module_exists('language'),
+        );
+      }
       $form[$key]['weight'] = array(
         '#type' => 'weight',
         '#delta' => $delta,
@@ -500,6 +541,19 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
   }
 
   return $form;
+}
+
+/**
+ * Submit handler for term_overview_form().
+ *
+ * Filters the displayed form to a particular language.
+ */
+function term_overview_form_language_filter_submit($form, &$form_state) {
+  $query['langcode_term'] = $form_state['values']['langcode_term'];
+  if (isset($_GET['destination'])) {
+    $query['destination'] = $_GET['destination'];
+  }
+  backdrop_goto($_GET['q'], array('query' => $query));
 }
 
 /**
@@ -674,6 +728,28 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
       'autofocus' => TRUE,
     ),
   );
+
+  if (module_exists('language')) {
+    $langcode_term = isset($_GET['langcode_term']) ? $_GET['langcode_term'] : LANGUAGE_NONE;
+
+    $form['langcode'] = array(
+      '#type' => 'select',
+      '#title' => t('Language'),
+      '#default_value' => !empty($term->langcode) ? $term->langcode : $langcode_term,
+      '#options' => language_list(TRUE, TRUE),
+      '#empty_value' => LANGUAGE_NONE,
+      '#empty_option' => t('- All (always shown) -'),
+      '#description' => t('Set a language for this term. The term will only be visible in that language.')
+    );
+  }
+  else {
+    // Maintain langcode settings if Language module is not present.
+    $form['langcode'] = array(
+      '#type' => 'value',
+      '#value' => $term->langcode,
+    );
+  }
+
   $form['description'] = array(
     '#type' => 'text_format',
     '#title' => t('Description'),

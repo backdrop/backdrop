@@ -136,6 +136,8 @@ function locale_autoload_info() {
   return array(
     'views_handler_field_node_language' => 'views/views_handler_field_node_language.inc',
     'views_handler_filter_node_language' => 'views/views_handler_filter_node_language.inc',
+    'views_handler_field_term_language' => 'views/views_handler_field_term_language.inc',
+    'views_handler_filter_term_language' => 'views/views_handler_filter_term_language.inc',
     'views_handler_argument_locale_group' => 'views/views_handler_argument_locale_group.inc',
     'views_handler_argument_locale_language' => 'views/views_handler_argument_locale_language.inc',
     'views_handler_field_locale_group' => 'views/views_handler_field_locale_group.inc',
