@@ -66,15 +66,15 @@ var CKBUILDER_CONFIG = {
 		'package.json',
 		'tests'
 	],
-  // So that they are not shipped with Backdrop, after using this config file 
-  // for rebuilding, the following are removed manually, because adding them  
-  // to the ignore array does not cause them to be ignored: 
-  // 'README.md', 
-  // 'adapters',  
-  // 'config.js', 
-  // 'contents.css',  
-  // 'samples', 
-  // 'skins/moono-lisa/readme.md',  
+  // So that they are not shipped with Backdrop, after using this config file
+  // for rebuilding, the following are removed manually, because adding them
+  // to the ignore array does not cause them to be ignored:
+  // 'README.md',
+  // 'adapters',
+  // 'config.js',
+  // 'contents.css',
+  // 'samples',
+  // 'skins/moono-lisa/readme.md',
   // 'styles.js',
 	plugins : {
 		'a11yhelp' : 1,
