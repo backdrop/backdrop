@@ -328,7 +328,7 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
   $filter_langcode = isset($_GET['langcode_term']) ? $_GET['langcode_term'] : $default_language->langcode;
   if (module_exists('language')) {
     $form['langcode_term'] = array(
-      '#title' => t('Show term in language'),
+      '#title' => t('Show terms in language'),
       '#type' => 'select',
       '#options' => language_list(TRUE, TRUE),
       '#empty_value' => LANGUAGE_NONE,
