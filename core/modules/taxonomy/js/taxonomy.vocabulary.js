@@ -50,6 +50,18 @@ Backdrop.behaviors.contentTypes = {
       vals.push(Backdrop.checkPlain($(context).find('input[name="path_pattern"]').val()) || Backdrop.t('No URL alias pattern set'));
       return vals.join(', ');
     });
+
+    // Multilingual settings.
+    $context.find('#edit-language').backdropSetSummary(function(context) {
+      var vals = [];
+      if ($context.find('input[name="language"]:checked').length) {
+        vals.push(Backdrop.t('Terms can be assigned multiple languages.'));
+      }
+      else {
+        vals.push(Backdrop.t('Multilingual support not enabled.'));
+      }
+      return Backdrop.checkPlain(vals.join(', '));
+    });
   }
 };
 

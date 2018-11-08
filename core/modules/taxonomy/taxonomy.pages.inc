@@ -118,6 +118,8 @@ function taxonomy_term_feed(TaxonomyTerm $term) {
  * @see taxonomy_field_widget_info()
  */
 function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
+  // @TODO Restrict by language if module enabled.
+
   // Make sure the field exists and is a taxonomy field.
   if (!($field = field_info_field($field_name)) || $field['type'] !== 'taxonomy_term_reference') {
     // Error string. The JavaScript handler will realize this is not JSON and

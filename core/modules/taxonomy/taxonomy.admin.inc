@@ -147,6 +147,22 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
   );
   $form['permissions']['permissions'] = taxonomy_vocabulary_form_permissions($vocabulary);
 
+  if (module_exists('language')) {
+    $form['language'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Multilingual support'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#group' => 'additional_settings',
+    );
+    $form['language']['language'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Multilingual support'),
+      '#default_value' => $vocabulary->language,
+      '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new terms are saved with no defined language. Existing terms will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
+    );
+  }
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -326,7 +342,7 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
 
   $default_language = language_default();
   $filter_langcode = isset($_GET['langcode_term']) ? $_GET['langcode_term'] : $default_language->langcode;
-  if (module_exists('language')) {
+  if (module_exists('language') && $vocabulary->language) {
     $form['langcode_term'] = array(
       '#title' => t('Show terms in language'),
       '#type' => 'select',
@@ -334,7 +350,7 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
       '#empty_value' => LANGUAGE_NONE,
       '#empty_option' => t('All languages'),
       '#default_value' => $filter_langcode,
-      '#access' => module_exists('language'),
+      '#access' => module_exists('language') && $vocabulary->language,
       '#weight' => -20,
       '#description' => t('Show terms for a given language. Terms with the "All" language will be shown in every language.'),
     );
@@ -488,11 +504,11 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
       );
       // Language
       $langcode_label = isset($language_options[$term->langcode]) ? $language_options[$term->langcode] : $term->langcode;
-      if (module_exists('language')) {
+      if (module_exists('language') && $vocabulary->language) {
         $form[$key]['langcode'] = array(
           '#type' => 'markup',
           '#markup' => check_plain($langcode_label),
-          '#access' => module_exists('language'),
+          '#access' => module_exists('language') && $vocabulary->language,
         );
       }
       $form[$key]['weight'] = array(
@@ -729,7 +745,7 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
     ),
   );
 
-  if (module_exists('language')) {
+  if (module_exists('language') && $vocabulary->language) {
     $langcode_term = isset($_GET['langcode_term']) ? $_GET['langcode_term'] : LANGUAGE_NONE;
 
     $form['langcode'] = array(

@@ -173,6 +173,16 @@ function taxonomy_field_extra_fields() {
         ),
       ),
     );
+
+    // Add also the 'language' select if Language module is enabled and the
+    // bundle has multilingual support.
+    if (module_exists('language')) {
+      $return['taxonomy_term'][$bundle]['form']['language'] = array(
+        'label' => t('Language'),
+        'description' => t('Term language'),
+        'weight' => 0,
+      );
+    }
   }
 
   return $return;
@@ -1341,12 +1351,14 @@ function taxonomy_field_widget_info_alter(&$info) {
 function taxonomy_menu_local_tasks_alter(&$data, $router_item, $root_path) {
   // Add language code to the "Add link" action link under
   // admin/structure/taxonomy/[taxonomy-name].
-  if ($root_path == 'admin/structure/taxonomy/%') {
-    foreach ($data['actions']['output'] as $key => $action_link) {
-      if ($action_link['#link']['path'] === 'admin/structure/taxonomy/%/add') {
-        $default_langcode = isset($_GET['langcode_term']) ? $_GET['langcode_term'] : LANGUAGE_NONE;
-        $query['langcode_term'] = $default_langcode;
-        $data['actions']['output'][$key]['#link']['localized_options'] = array('query' => $query);
+  if (module_exists('language')) {
+    if ($root_path == 'admin/structure/taxonomy/%') {
+      foreach ($data['actions']['output'] as $key => $action_link) {
+        if ($action_link['#link']['path'] === 'admin/structure/taxonomy/%/add') {
+          $default_langcode = isset($_GET['langcode_term']) ? $_GET['langcode_term'] : LANGUAGE_NONE;
+          $query['langcode_term'] = $default_langcode;
+          $data['actions']['output'][$key]['#link']['localized_options'] = array('query' => $query);
+        }
       }
     }
   }
@@ -1688,6 +1700,17 @@ function taxonomy_field_settings_form($field, $instance, $has_data) {
   }
 
   return $form;
+}
+
+/**
+ * Implements hook_language_delete().
+ */
+function taxonomy_language_delete($language) {
+  // On terms with this language, unset the language.
+  db_update('taxonomy_term_data')
+    ->fields(array('langcode' => ''))
+    ->condition('langcode', $language->langcode)
+    ->execute();
 }
 
 /**
