@@ -75,7 +75,7 @@ Backdrop.behaviors.autosubmit = {
     // Don't wait for change event on textfields
     $('.autosubmit-full-form input:text, input:text.autosubmit', context)
       .filter(':not(.autosubmit-exclude)')
-      .once('autosubmit', function () {
+      .once('autosubmit').each(function() {
         // each textinput element has his own timeout
         var timeoutID = 0;
         $(this)
