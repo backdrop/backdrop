@@ -39,7 +39,7 @@ Backdrop.behaviors.responsivePrimaryTabs = {
 
     function initResponsivePrimaryTabs() {
       tabHeight = $('li:first-child', $primaryTabs).outerHeight();
-      $tabsWrapper.once('responsive-tabs', function(){
+      $tabsWrapper.once('responsive-tabs').each(function() {
         $primaryTabs.after(
           '<div class="expand-dropdown-tabs-control" aria-hidden="true" style="height: ' + tabHeight + 'px">' +
             '<span class="expand-dropdown-tabs-label"></span>' +
