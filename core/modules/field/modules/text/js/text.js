@@ -6,7 +6,7 @@
  */
 Backdrop.behaviors.textSummary = {
   attach: function (context, settings) {
-    $('.text-summary', context).once('text-summary', function () {
+    $('.text-summary', context).once('text-summary').each(function() {
       var $widget = $(this).closest('div.field-type-text-with-summary');
       var $summaries = $widget.find('div.text-summary-wrapper');
 
