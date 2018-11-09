@@ -1831,8 +1831,8 @@ function theme_link($variables) {
 function theme_links($variables) {
   global $language_url;
 
-  $links = $variables['links'];
-  $attributes = $variables['attributes'];
+  $links = (array) $variables['links'];
+  $attributes = (array) $variables['attributes'];
   $heading = $variables['heading'];
   $output = '';
 
