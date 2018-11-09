@@ -15,7 +15,7 @@ Backdrop.behaviors.viewsUiEditView = {
   attach: function () {
     // Only show the SQL rewrite warning when the user has chosen the
     // corresponding checkbox.
-    $('#edit-query-options-disable-sql-rewrite').on('click', function () {
+    $('#edit-query-options-disable-sql-rewrite').on('click').each(function() {
       $('.sql-rewrite-warning').toggleClass('js-hide');
     });
   }
@@ -179,7 +179,7 @@ Backdrop.behaviors.addItemForm = {
     // The add item form may have an id of views-ui-add-item-form--n.
     var $form = $(context).find('form[id^="views-ui-add-item-form"]').addBack('form[id^="views-ui-add-item-form"]').first();
     // Make sure we don't add more than one event handler to the same form.
-    $form.once('views-ui-add-item-form', function() {
+    $form.once('views-ui-add-item-form').each(function() {
       new Backdrop.viewsUi.AddItemForm($form);
     });
   }
@@ -292,7 +292,7 @@ Backdrop.behaviors.viewsUiSearchOptions = {
     // The add item form may have an id of views-ui-add-item-form--n.
     var $form = $(context).find('form[id^="views-ui-add-item-form"]').addBack('form[id^="views-ui-add-item-form"]').first();
     // Make sure we don't add more than one event handler to the same form.
-    $form.once('views-ui-filter-options', function() {
+    $form.once('views-ui-filter-options').each(function() {
       new Backdrop.viewsUi.OptionsSearch($form);
     });
   }
@@ -797,7 +797,7 @@ Backdrop.behaviors.viewsFilterConfigSelectAll = {
       .on('click', function () {
         var checked = $(this).is(':checked');
         // Update all checkbox beside the select all checkbox.
-        $(this).parents('.form-checkboxes').find('input[type=checkbox]').each(function () {
+        $(this).parents('.form-checkboxes').find('input[type=checkbox]').each(function() {
           $(this).attr('checked', checked);
         });
       });
@@ -819,7 +819,7 @@ Backdrop.behaviors.viewsFilterConfigSelectAll = {
  */
 Backdrop.behaviors.viewsImplicitFormSubmission = {
   attach: function (context, settings) {
-    $(':text, :password, :radio, :checkbox', context).once('viewsImplicitFormSubmission', function() {
+    $(':text, :password, :radio, :checkbox', context).once('viewsImplicitFormSubmission').each(function() {
       $(this).keypress(function(event) {
         if (event.which == 13) {
           var formId = this.form.id;
@@ -847,7 +847,7 @@ Backdrop.behaviors.viewsImplicitFormSubmission = {
  */
 Backdrop.behaviors.viewsRemoveIconClass = {
   attach: function (context) {
-    $(context).find('.dropbutton').once('dropbutton-icon', function () {
+    $(context).find('.dropbutton').once('dropbutton-icon').each(function() {
       $(this).find('.icon').removeClass('icon');
     });
   }
@@ -923,7 +923,7 @@ Backdrop.viewsUi.Checkboxifier.prototype.clickHandler = function (e) {
  */
 Backdrop.behaviors.viewsUiOverrideSelect = {
   attach: function (context) {
-    $(context).find('#edit-override-dropdown').once('views-ui-override-button-text', function () {
+    $(context).find('#edit-override-dropdown').once('views-ui-override-button-text').each(function() {
       var $select = $(this);
       var $submit = $select.closest('form').find('.form-submit[value="' + Backdrop.t('Apply') + '"]');
       var old_value = $submit.val();
