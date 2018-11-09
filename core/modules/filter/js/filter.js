@@ -38,7 +38,7 @@ Backdrop.behaviors.filterEditors = {
     }
 
     var $context = $(context);
-    $context.find('.filter-list:input').once('filterEditors', function () {
+    $context.find('.filter-list:input').once('filterEditors').each(function() {
       var $this = $(this);
       var activeEditor = $this.val();
       var field = $this.closest('.text-format-wrapper').find('textarea').get(-1);
