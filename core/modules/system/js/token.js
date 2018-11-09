@@ -7,7 +7,7 @@
 
 Backdrop.behaviors.tokenTree = {
   attach: function (context, settings) {
-    $(context).find('table.token-tree').once('token-tree', function () {
+    $(context).find('table.token-tree').once('token-tree').each(function() {
       $(this).treetable({
         'expandable': true,
         'clickableNodeNames': true
@@ -23,7 +23,7 @@ Backdrop.behaviors.tokenInsert = {
       Backdrop.settings.tokenFocusedField = this;
     });
 
-    $(context).find('.token-click-insert .token-key').once('token-click-insert', function() {
+    $(context).find('.token-click-insert .token-key').once('token-click-insert').each(function() {
       var newThis = $('<a href="javascript:void(0);" title="' + Backdrop.t('Insert this token into your form') + '">' + $(this).html() + '</a>').click(function(){
         if (typeof Backdrop.settings.tokenFocusedField == 'undefined') {
           alert(Backdrop.t('First click a text field into which the token should be inserted.'));
