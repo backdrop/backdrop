@@ -5,7 +5,7 @@
 Backdrop.behaviors.ckeditorAdmin = {
   attach: function (context, settings) {
     var $context = $(context);
-    $context.find('.ckeditor-toolbar-configuration').once('ckeditor-toolbar', function() {
+    $context.find('.ckeditor-toolbar-configuration').once('ckeditor-toolbar').each(function() {
       var $wrapper = $(this);
       var $textareaWrapper = $(this).find('.form-item-editor-settings-toolbar').hide();
       var $textarea = $textareaWrapper.find('textarea');
@@ -371,7 +371,7 @@ Backdrop.behaviors.ckeditorAdminToggle = {
       });
     };
 
-    $(context).find('#filter-admin-format-form').once('ckeditor-settings-toggle', function() {
+    $(context).find('#filter-admin-format-form').once('ckeditor-settings-toggle').each(function() {
       $(this).find('[data-ckeditor-feature-dependency]').hide();
       $(document).on('backdropEditorFeatureInit.ckeditorAdminToggle', function(e, feature, enabled) {
         ckeditorAdminToggleDependency(feature.name, enabled);
