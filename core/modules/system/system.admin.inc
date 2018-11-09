@@ -400,9 +400,10 @@ function system_theme_settings($form, &$form_state, $key) {
   // Process the theme and all its base themes.
   foreach ($theme_keys as $theme) {
     // Include the theme-settings.php file.
-    $filename = BACKDROP_ROOT . '/' . str_replace("/$theme.info", '', $themes[$theme]->filename) . '/theme-settings.php';
-    if (file_exists($filename)) {
-      require_once $filename;
+    $theme_settings_path = backdrop_get_path('theme', $theme) . '/theme-settings.php';
+      if (file_exists(BACKDROP_ROOT . '/' . $theme_settings_path)) {
+        require_once BACKDROP_ROOT . '/' . $theme_settings_path;
+        $form_state['build_info']['files'][] = $theme_settings_path;
     }
 
     // Call theme-specific settings.
