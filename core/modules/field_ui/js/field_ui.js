@@ -7,7 +7,7 @@
 
 Backdrop.behaviors.fieldUIFieldOverview = {
   attach: function (context, settings) {
-    $('table#field-overview', context).once('field-overview', function () {
+    $('table#field-overview', context).once('field-overview').each(function() {
       Backdrop.fieldUIFieldOverview.attachUpdateSelects(this, settings);
     });
   }
@@ -115,7 +115,7 @@ jQuery.fn.fieldUIPopulateOptions = function (options, selected, widgetDefault) {
 
 Backdrop.behaviors.fieldUIDisplayOverview = {
   attach: function (context, settings) {
-    $('table#field-display-overview', context).once('field-display-overview', function() {
+    $('table#field-display-overview', context).once('field-display-overview').each(function() {
       Backdrop.fieldUIOverview.attach(this, settings.fieldUIRowsData, Backdrop.fieldUIDisplayOverview);
     });
   }
