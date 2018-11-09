@@ -15,7 +15,7 @@ Backdrop.behaviors.viewsUiEditView = {
   attach: function () {
     // Only show the SQL rewrite warning when the user has chosen the
     // corresponding checkbox.
-    $('#edit-query-options-disable-sql-rewrite').on('click').each(function() {
+    $('#edit-query-options-disable-sql-rewrite').on('click', function () {
       $('.sql-rewrite-warning').toggleClass('js-hide');
     });
   }
@@ -797,7 +797,7 @@ Backdrop.behaviors.viewsFilterConfigSelectAll = {
       .on('click', function () {
         var checked = $(this).is(':checked');
         // Update all checkbox beside the select all checkbox.
-        $(this).parents('.form-checkboxes').find('input[type=checkbox]').each(function() {
+        $(this).parents('.form-checkboxes').find('input[type=checkbox]').each(function () {
           $(this).attr('checked', checked);
         });
       });
