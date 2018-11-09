@@ -3019,7 +3019,6 @@ function system_update_1066() {
   }
 }
 
-
 /**
  * Add default value for form_cache_expiration.
  */
