@@ -435,41 +435,43 @@ function path_entity_load($entities, $type) {
  * Implements hook_entity_insert().
  */
 function path_entity_insert(Entity $entity) {
-  $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
-  $uri = $entity->uri();
-
-  $path = array();
   if (isset($entity->path)) {
-    $path = $entity->path;
-    $path['source'] = $uri['path'];
-  }
+    $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
+    $uri = $entity->uri();
 
-  // If no pattern exists for this entity type, default to a manual alias.
-  $pattern = path_get_pattern_by_entity_type($entity->entityType(), $entity->bundle(), $langcode);
-  $path += array(
-    'pid' => NULL,
-    'alias' => '',
-    'source' => $uri['path'],
-    'langcode' => $langcode,
-    'auto' => strlen($pattern) === 0 ? FALSE : TRUE,
-  );
+    $path = array();
+    if (isset($entity->path)) {
+      $path = $entity->path;
+      $path['source'] = $uri['path'];
+    }
 
-  // Trim whitespace and slashes from alias start and end.
-  $path['alias'] = trim($path['alias'], " \t\n\r\0\x0B/");
+    // If no pattern exists for this entity type, default to a manual alias.
+    $pattern = path_get_pattern_by_entity_type($entity->entityType(), $entity->bundle(), $langcode);
+    $path += array(
+      'pid' => NULL,
+      'alias' => '',
+      'source' => $uri['path'],
+      'langcode' => $langcode,
+      'auto' => strlen($pattern) === 0 ? FALSE : TRUE,
+    );
 
-  // Save an automatic alias if specified.
-  if ($path['auto']) {
-    module_load_include('inc', 'path');
-    $path = path_save_automatic_entity_alias($entity);
-  }
-  // Otherwise save any specified alias.
-  elseif ($path['alias']) {
-    path_save($path);
-  }
+    // Trim whitespace and slashes from alias start and end.
+    $path['alias'] = trim($path['alias'], " \t\n\r\0\x0B/");
 
-  // Save the updated path into the entity.
-  if ($path) {
-    $entity->path = $path;
+    // Save an automatic alias if specified.
+    if ($path['auto']) {
+      module_load_include('inc', 'path');
+      $path = path_save_automatic_entity_alias($entity);
+    }
+    // Otherwise save any specified alias.
+    elseif ($path['alias']) {
+      path_save($path);
+    }
+
+    // Save the updated path into the entity.
+    if ($path) {
+      $entity->path = $path;
+    }
   }
 }
 
@@ -753,10 +755,12 @@ function path_delete_all_by_source($source) {
  *   The optional default uri path for the entity.
  */
 function path_delete_all_by_entity(Entity $entity, $default_uri = NULL) {
-  $uri = $entity->uri();
-  path_delete_all_by_source($uri['path']);
-  if (isset($default_uri) && $uri['path'] != $default_uri) {
-    path_delete_all_by_source($default_uri);
+  if (isset($entity->path)) {
+    $uri = $entity->uri();
+    path_delete_all_by_source($uri['path']);
+    if (isset($default_uri) && $uri['path'] != $default_uri) {
+      path_delete_all_by_source($default_uri);
+    }
   }
 }
 
