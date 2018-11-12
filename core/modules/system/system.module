@@ -3982,7 +3982,7 @@ function system_404() {
 }
 
 /**
- * Menu callback; Returns the standard "Page not found" error page.
+ * Menu callback; Returns the standard "Forbidden" error page.
  */
 function system_403() {
   return t('You are not authorized to access this page.');
