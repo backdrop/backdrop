@@ -156,6 +156,7 @@ function redirect_menu() {
 
   // Add an action link to the 404 page.
   $site_404 = config_get('system.core', 'site_404');
+  $source = request_path();
   if (empty($path)) {
     $site_404 = 'system/404';
   }
@@ -163,6 +164,7 @@ function redirect_menu() {
     'title' => 'Add a URL redirect from this page to another location',
     'type' => MENU_LOCAL_ACTION,
     'page callback' => 'redirect_add_redirect_page',
+    'page arguments' => array(array('source' => $source)),
     'access callback' => 'redirect_access',
     'access arguments' => array('create', 'redirect'),
     'file' => 'redirect.admin.inc',
