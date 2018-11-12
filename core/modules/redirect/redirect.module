@@ -156,7 +156,7 @@ function redirect_menu() {
 
   // Add an action link to the 404 page.
   $site_404 = config_get('system.core', 'site_404');
-  $source = current_path();
+  $source = $_GET['destination'];
   if (empty($path)) {
     $site_404 = 'system/404';
   }
