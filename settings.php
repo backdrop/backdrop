@@ -331,6 +331,48 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
 // $settings['allow_authorize_operations'] = FALSE;
 
 /**
+ * Trusted host configuration.
+ *
+ * Since the HTTP Host header can be set by the user making the request, it
+ * is possible to create attack vectors against a site by overriding this.
+ *
+ * Backdrop supports defining a list of trusted hosts, to prevent HTTP Host
+ * header spoofing. For more information, see:
+ * - https://api.backdropcms.org/documentation/trusted-host-settings#trusted_hosts
+ *
+ * To enable the trusted host mechanism, you specify your allowable hosts
+ * in $settings['trusted_host_patterns'] in your settings.php file. This should
+ * be an array of regular expression patterns, without delimiters, representing
+ * the hosts you would like to allow.
+ *
+ * For example, this will allow the site to only run from www.example.com:
+ * @code
+ * $settings['trusted_host_patterns'] = array(
+ *   '^www\.example\.com$',
+ * );
+ * @endcode
+ *
+ * If you are running a multisite, or if you are running your site from
+ * different domain names (eg, you don't redirect http://www.example.com to
+ * http://example.com), you should specify all of the host patterns that are
+ * allowed by your site. For example, this will allow the site to run off of all
+ * variants of example.com and example.org, with all subdomains included:
+ * @code
+ * $settings['trusted_host_patterns'] = array(
+ *   '^example\.com$',
+ *   '^.+\.example\.com$',
+ *   '^example\.org',
+ *   '^.+\.example\.org',
+ * );
+ * @endcode
+ *
+ * @see backdrop_valid_http_host()
+ * @see backdrop_check_trusted_hosts()
+ * @see system_requirements()
+*/
+// $settings['trusted_host_patterns'] = array('^www\.example\.com$');
+
+/**
  * Mixed-mode sessions:
  *
  * Set to TRUE to create both secure and insecure sessions when using HTTPS.
