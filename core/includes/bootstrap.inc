@@ -754,8 +754,8 @@ function backdrop_environment_initialize() {
 /**
  * Validates that a hostname (for example $_SERVER['HTTP_HOST']) is safe.
  *
- * @return
- *  TRUE if only containing valid characters, or FALSE otherwise.
+ * @return bool
+ *   TRUE if only containing valid characters, or FALSE otherwise.
  */
 function backdrop_valid_http_host($host) {
   // Limit the length of the host name to 1000 bytes to prevent DoS attacks with
@@ -765,7 +765,8 @@ function backdrop_valid_http_host($host) {
     // in conf_path().
     && substr_count($host, '.') <= 100
     && substr_count($host, ':') <= 100
-    && preg_match('/^\[?(?:[a-zA-Z0-9-:\]_]+\.?)+$/', $host);
+    && preg_match('/^\[?(?:[a-zA-Z0-9-:\]_]+\.?)+$/', $host)
+    && backdrop_check_trusted_hosts($host);
 }
 
 /**
@@ -4330,4 +4331,29 @@ function backdrop_clear_opcode_cache($filepath) {
     // @see http://php.net/apc-delete-file
     @apc_delete_file($filepath);
   }
+}
+
+function backdrop_check_trusted_hosts($host) {
+  $trusted_hosts =& backdrop_static(__FUNCTION__, array());
+  $trusted_host_patterns = settings_get('trusted_host_patterns', array());
+
+  if (PHP_SAPI !== 'cli' && !empty($trusted_host_patterns)) {
+
+    if (in_array($host, $trusted_hosts)) {
+      return $host;
+    }
+
+    foreach ($trusted_host_patterns as $pattern) {
+      $pattern = sprintf('{%s}i', str_replace('}', '\\}', $pattern));
+      if (preg_match($pattern, $host)) {
+        $trusted_hosts[] = $host;
+
+        return TRUE;
+      }
+    }
+
+    return FALSE;
+  }
+
+  return TRUE;
 }
