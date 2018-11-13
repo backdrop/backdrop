@@ -435,16 +435,17 @@ function path_entity_load($entities, $type) {
  * Implements hook_entity_insert().
  */
 function path_entity_insert(Entity $entity) {
-  if (isset($entity->path)) {
-    $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
-    $uri = $entity->uri();
+  $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
+  $uri = $entity->uri();
 
+  // Only generate alais if entity has a uri
+  if (!empty($uri)) {
     $path = array();
     if (isset($entity->path)) {
       $path = $entity->path;
       $path['source'] = $uri['path'];
     }
-
+  
     // If no pattern exists for this entity type, default to a manual alias.
     $pattern = path_get_pattern_by_entity_type($entity->entityType(), $entity->bundle(), $langcode);
     $path += array(
@@ -454,10 +455,10 @@ function path_entity_insert(Entity $entity) {
       'langcode' => $langcode,
       'auto' => strlen($pattern) === 0 ? FALSE : TRUE,
     );
-
+  
     // Trim whitespace and slashes from alias start and end.
     $path['alias'] = trim($path['alias'], " \t\n\r\0\x0B/");
-
+  
     // Save an automatic alias if specified.
     if ($path['auto']) {
       module_load_include('inc', 'path');
@@ -467,7 +468,7 @@ function path_entity_insert(Entity $entity) {
     elseif ($path['alias']) {
       path_save($path);
     }
-
+  
     // Save the updated path into the entity.
     if ($path) {
       $entity->path = $path;
@@ -755,12 +756,10 @@ function path_delete_all_by_source($source) {
  *   The optional default uri path for the entity.
  */
 function path_delete_all_by_entity(Entity $entity, $default_uri = NULL) {
-  if (isset($entity->path)) {
-    $uri = $entity->uri();
-    path_delete_all_by_source($uri['path']);
-    if (isset($default_uri) && $uri['path'] != $default_uri) {
-      path_delete_all_by_source($default_uri);
-    }
+  $uri = $entity->uri();
+  path_delete_all_by_source($uri['path']);
+  if (isset($default_uri) && $uri['path'] != $default_uri) {
+    path_delete_all_by_source($default_uri);
   }
 }
 
