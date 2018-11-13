@@ -757,9 +757,12 @@ function path_delete_all_by_source($source) {
  */
 function path_delete_all_by_entity(Entity $entity, $default_uri = NULL) {
   $uri = $entity->uri();
-  path_delete_all_by_source($uri['path']);
-  if (isset($default_uri) && $uri['path'] != $default_uri) {
-    path_delete_all_by_source($default_uri);
+  
+  if (!empty($uri)) {
+    path_delete_all_by_source($uri['path']);
+    if (isset($default_uri) && $uri['path'] != $default_uri) {
+      path_delete_all_by_source($default_uri);
+    }
   }
 }
 
