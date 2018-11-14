@@ -622,7 +622,7 @@ function system_requirements($phase) {
       }
       // If only one trusted host pattern, render as is...
       if (count($trusted_host_patterns) == 1) {
-        $description .= ' ' . $trusted_host_patterns[0];
+        $description .= ' ' . $trusted_host_patterns[0] . '<br>';
       }
       // ...otherwise, render the patterns as a list.
       else {
