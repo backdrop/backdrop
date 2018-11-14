@@ -605,19 +605,35 @@ function system_requirements($phase) {
   // Warn the user if trusted hostnames have not been configured.
   if ($phase == 'runtime') {
     $trusted_host_patterns = settings_get('trusted_host_patterns', array());
+    $more_info = $t('See <a href="@url">Protecting against HTTP HOST Header attacks</a> for more information.', array('@url' => 'https://www.drupal.org/node/1992030'));
     if (empty($trusted_host_patterns)) {
       $requirements['trusted_host_patterns'] = array(
         'title' => $t('Trusted Host Settings'),
         'value' => $t('Not enabled'),
-        'description' => $t('The <code>trusted_host_patterns</code> setting is not configured in settings.php. This can lead to security vulnerabilities. It is <strong>highly recommended</strong> that you configure this. See <a href="@url">Protecting against HTTP HOST Header attacks</a> for more information.', array('@url' => 'https://www.drupal.org/node/1992030')),
+        'description' => $t('The <code>trusted_host_patterns</code> setting is not configured in settings.php. It is <strong>highly recommended</strong> that you configure this, otherwise it can lead to security vulnerabilities.') . ' ' . $more_info,
         'severity' => REQUIREMENT_ERROR,
       );
     }
     else {
+      $description = format_plural(count($trusted_host_patterns), 'Configured to allow the following pattern:', 'Configured to allow the following patterns:');
+      // Wrap each pattern in <code> tags for when they are rendered later.
+      foreach ($trusted_host_patterns as $key => $trusted_host_pattern) {
+        $trusted_host_patterns[$key] = '<code>' . $trusted_host_pattern . '</code>';
+      }
+      // If only one trusted host pattern, render as is...
+      if (count($trusted_host_patterns) == 1) {
+        $description .= ' ' . $trusted_host_patterns[0];
+      }
+      theme('item_list')
+      // ...otherwise, render the patterns as a list.
+      else {
+        $description .= theme('item_list', array('items' => $trusted_host_patterns));
+      }
+      $description .= $t('You can change this by editing the <code>trusted_host_patterns</code> setting in settings.php.') . ' ' . $more_info;
       $requirements['trusted_host_patterns'] = array(
         'title' => $t('Trusted Host Settings'),
         'value' => $t('Enabled'),
-        'description' => $t('The trusted_host_patterns setting is set to allow %trusted_host_patterns.', array('%trusted_host_patterns' => join(', ', $trusted_host_patterns))),
+        'description' => $description,
       );
     }
   }
