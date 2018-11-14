@@ -624,7 +624,6 @@ function system_requirements($phase) {
       if (count($trusted_host_patterns) == 1) {
         $description .= ' ' . $trusted_host_patterns[0];
       }
-      theme('item_list')
       // ...otherwise, render the patterns as a list.
       else {
         $description .= theme('item_list', array('items' => $trusted_host_patterns));
