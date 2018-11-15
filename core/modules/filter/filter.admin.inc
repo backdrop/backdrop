@@ -18,6 +18,11 @@ function filter_admin_overview($form) {
   $fallback_format = filter_fallback_format();
   $editors = filter_get_editors();
 
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('When editing content with fields that use a rich text editor, such as the body field, text formats are presented as available options. The order in which these options are listed is defined by the order of the text formats in the table below. The options listed are also limited to only the text formats each user has permission to use, and the first format available to a user will be selected by default.'),
+  );
+
   $form['#tree'] = TRUE;
   foreach ($formats as $id => $format) {
     $links = array();
