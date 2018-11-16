@@ -99,10 +99,11 @@ function hook_search_status() {
 }
 
 /**
- * Add elements to the search settings form.
+ * Add factors and their respective influence to the "Content ranking" section
+ * of the search settings form in admin/config/search/settings.
  *
  * @return
- *   Form array for the Search settings page at admin/config/search/settings.
+ *   Array of influence factors.
  *
  * @ingroup search
  */
