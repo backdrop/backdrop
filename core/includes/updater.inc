@@ -93,10 +93,10 @@ abstract class Updater implements BackdropUpdaterInterface {
    * @throws UpdaterException
    */
   public static function factory($source) {
-    if (strpos($source, 'backdrop' !== FALSE)) {
-      $is_backdrop = explode($source, '/')[3];
+    if (strpos($source, 'backdrop') !== FALSE) {
+      $is_backdrop = explode('/', $source)[3];
       if ($is_backdrop == 'backdrop') {
-        $updater = 'CoreUpdater';
+        return 'CoreUpdater';
       }
     }
     elseif (is_dir($source)) {
