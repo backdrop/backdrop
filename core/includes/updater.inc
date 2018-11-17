@@ -210,9 +210,11 @@ abstract class Updater implements BackdropUpdaterInterface {
    * @throws UpdaterException
    */
   public static function getProjectTitle($directory) {
-    $check_for_core = explode('/', $directory)[3];
-    if ($check_for_core == 'backdrop') {
-      return 'backdrop';
+    if (strpos($directory, 'backdrop') !== FALSE) {
+      $check_for_core = explode('/', $directory)[3];
+      if ($check_for_core == 'backdrop') {
+        return 'backdrop';
+      }
     }
     else {
       $info_file = self::findInfoFile($directory);
