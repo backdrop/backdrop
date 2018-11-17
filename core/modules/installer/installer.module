@@ -369,16 +369,12 @@ function installer_cron() {
   // Automatically update Backdrop if the site site is configured to do so.
   $auto_update = config_get('update.settings', 'update_automatic');
   if ($auto_update > 0) {
-    // Make sure Updater registry is loaded.
-    backdrop_get_updaters();
-
     $directory = _installer_manager_extract_directory();
     $project_location = $directory . '/backdrop';
-    $project_realpath = backdrop_realpath($project_location);
     $projects[] = array(
       'project' => 'backdrop',
       'updater_name' => 'CoreUpdater',
-      'local_url' => $project_realpath,
+      'local_url' => $project_location,
     );
 
     // Get the backdrop.zip.
