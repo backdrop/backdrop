@@ -374,7 +374,6 @@ function installer_cron() {
 
     $directory = _installer_manager_extract_directory();
     $project_location = $directory . '/backdrop';
-    $updater = Updater::factory($project_location);
     $project_realpath = backdrop_realpath($project_location);
     $projects[] = array(
       'project' => 'backdrop',
@@ -397,9 +396,10 @@ function installer_cron() {
     // Update Backdrop core.
     module_load_include('inc', 'installer', 'installer.authorize');
     $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
-    installer_authorize_run_update($filetransfer, $updater);
+    installer_authorize_run_update($filetransfer, $projects);
 
     // Run database updates.
+    
   }
 }
 
