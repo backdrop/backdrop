@@ -371,10 +371,11 @@ function installer_cron() {
   if ($auto_update > 0) {
     $directory = _installer_manager_extract_directory();
     $project_location = $directory . '/backdrop';
+    $project_realpath = backdrop_realpath($project_location);
     $projects[] = array(
       'project' => 'backdrop',
       'updater_name' => 'CoreUpdater',
-      'local_url' => $project_location,
+      'local_url' => $project_realpath,
     );
 
     // Get the backdrop.zip.
