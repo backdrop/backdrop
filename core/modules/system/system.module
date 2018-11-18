@@ -98,7 +98,7 @@ function system_theme() {
     'page_components' => array(
       'variables' => array('settings' => NULL, 'child_delta' => NULL),
       'template' => 'templates/page-components',
-    ),
+    ) + $base,
     'system_admin_index' => array(
       'variables' => array('menu_items' => NULL),
     ) + $base,
