@@ -50,15 +50,6 @@ function taxonomy_token_info() {
     'description' => t("The URL of the taxonomy term's edit page."),
     'type' => 'url',
   );
-  $term['ttid'] = array(
-    'name' => t('Translation set ID'),
-    'description' => t('The unique ID of the original-language version of this term, if one exists.'),
-  );
-  $term['source'] = array(
-    'name' => t('Translation source term'),
-    'description' => t("The source term for this current term's translation set."),
-    'type' => 'term',
-  );
   $term['parents'] = array(
     'name' => t('Parents'),
     'description' => t("An array of all the term's parents, starting with the root."),
@@ -108,12 +99,6 @@ function taxonomy_token_info() {
     'description' => t('The vocabulary the taxonomy term belongs to.'),
     'type' => 'vocabulary',
   );
-
-  // Check to see if translation modules are enabled before showing tokens.
-  if (!module_exists('translation')) {
-    $term['ttid']['restricted'] = TRUE;
-    $term['source']['restricted'] = TRUE;
-  }
 
   return array(
     'types' => $types,
@@ -203,16 +188,6 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
           }
           break;
 
-        case 'ttid':
-          $replacements[$original] = $term->ttid;
-          break;
-
-        case 'source':
-          if (!empty($term->ttid) && $source_term = taxonomy_term_load($term->ttid)) {
-            $name = $source_term->name;
-            $replacements[$original] = $sanitize ? filter_xss($name) : $name;
-          }
-          break;
       }
     }
 
@@ -225,10 +200,6 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
     if (($vocabulary_tokens = token_find_with_prefix($tokens, 'parent')) && $parents = taxonomy_term_load_parents($term->tid)) {
       $parent = array_pop($parents);
       $replacements += token_generate('term', $vocabulary_tokens, array('term' => $parent), $options);
-    }
-
-    if (!empty($term->ttid) && ($source_tokens = token_find_with_prefix($tokens, 'source')) && $source_term = taxonomy_term_load($term->ttid)) {
-      $replacements += token_generate('term', $source_tokens, array('term' => $source_term), $options);
     }
 
     if (($url_tokens = token_find_with_prefix($tokens, 'url'))) {

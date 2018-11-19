@@ -65,19 +65,6 @@ function taxonomy_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
-      'ttid' => array(
-        'description' => 'The translation set id for this term, which equals the term id of the source post in each set.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'translate' => array(
-        'description' => 'A boolean indicating whether this translation page needs to be updated.',
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
       'weight' => array(
         'type' => 'int',
         'not null' => TRUE,
@@ -90,8 +77,6 @@ function taxonomy_schema() {
       'taxonomy_tree' => array('vocabulary', 'weight', 'name'),
       'vocabulary_name' => array('vocabulary', 'name'),
       'name' => array('name'),
-      'ttid'                => array('ttid'),
-      'translate'           => array('translate'),
     ),
   );
 
@@ -124,7 +109,7 @@ function taxonomy_schema() {
     ),
     'primary key' => array('tid', 'parent'),
   );
-  
+
   $schema['taxonomy_index'] = array(
     'description' => 'Maintains denormalized information about node/term relationships.',
     'fields' => array(
@@ -349,29 +334,6 @@ function taxonomy_update_1006() {
     );
     db_add_field('taxonomy_term_data', 'langcode', $spec);
     db_query("UPDATE {taxonomy_term_data} SET langcode = 'und'");
-  }
-  if (!db_field_exists('taxonomy_term_data', 'ttid')) {
-    $spec = array(
-      'description' => 'The translation set id for this term, which equals the term id of the source post in each set.',
-      'type' => 'int',
-      'unsigned' => TRUE,
-      'not null' => TRUE,
-      'default' => 0,
-    );
-    db_add_field('taxonomy_term_data', 'ttid', $spec);
-    db_add_index('taxonomy_term_data', 'ttid', array('ttid'));
-    db_query("UPDATE {taxonomy_term_data} SET ttid = '0'");
-  }
-  if (!db_field_exists('taxonomy_term_data', 'translate')) {
-    $spec = array(
-      'description' => 'A boolean indicating whether this translation page needs to be updated.',
-      'type' => 'int',
-      'not null' => TRUE,
-      'default' => 0,
-    );
-    db_add_field('taxonomy_term_data', 'translate', $spec);
-    db_add_index('taxonomy_term_data', 'translate', array('translate'));
-    db_query("UPDATE {taxonomy_term_data} SET translate = '0'");
   }
 }
 

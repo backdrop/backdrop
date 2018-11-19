@@ -20,6 +20,17 @@ define('TAXONOMY_HIERARCHY_SINGLE', 1);
 define('TAXONOMY_HIERARCHY_MULTIPLE', 2);
 
 /**
+ * Denotes that language is disabled on vocabulary.
+ */
+define('TAXONOMY_LANGUAGE_DISABLED', 0);
+
+/**
+ * Denotes that language is enabled on vocabulary and terms can be assigned
+ * language.
+ */
+define('TAXONOMY_LANGUAGE_ENABLED', 1);
+
+/**
  * Users can create new terms in a free-tagging vocabulary when
  * submitting a taxonomy_autocomplete_widget. We store a term object
  * whose tid is 'autocreate' as a field data item during widget
@@ -176,11 +187,21 @@ function taxonomy_field_extra_fields() {
 
     // Add also the 'language' select if Language module is enabled and the
     // bundle has multilingual support.
-    if (module_exists('language')) {
-      $return['taxonomy_term'][$bundle]['form']['language'] = array(
-        'label' => t('Language'),
-        'description' => t('Term language'),
-        'weight' => 0,
+    $vocabulary = taxonomy_vocabulary_load($bundle);
+    if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED) {
+      $return['taxonomy_term'][$bundle]['form'] += array(
+        'language' => array(
+          'label' => t('Language'),
+          'description' => t('Term language'),
+          'weight' => 0,
+        ),
+      );
+      $return['taxonomy_term'][$bundle]['display'] += array(
+        'language' => array(
+          'label' => t('Language'),
+          'description' => t('Term language'),
+          'weight' => 0,
+        ),
       );
     }
   }
@@ -1313,6 +1334,7 @@ function taxonomy_field_info() {
             'parent' => '0',
           ),
         ),
+        'follow_interface_language' => TRUE,
       ),
     ),
   );
@@ -1627,6 +1649,7 @@ function taxonomy_field_widget_form(&$form, &$form_state, $field, $instance, $la
  * Form element validate handler for taxonomy term autocomplete element.
  */
 function taxonomy_autocomplete_validate($element, &$form_state) {
+  global $language;
   // Autocomplete widgets do not send their tids in the form, so we must detect
   // them here and process them independently.
   $value = array();
@@ -1654,7 +1677,11 @@ function taxonomy_autocomplete_validate($element, &$form_state) {
           'tid' => 'autocreate',
           'name' => $typed_term,
           'vocabulary' => $vocabulary->machine_name,
+          'langcode' => LANGUAGE_NONE,
         );
+        if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED  && $field['settings']['follow_interface_language']) {
+          $term['langcode'] = $language->langcode;
+        }
       }
       $value[] = (array)$term;
     }
@@ -1696,6 +1723,16 @@ function taxonomy_field_settings_form($field, $instance, $has_data) {
     $form['allowed_values'][$delta]['parent'] = array(
       '#type' => 'value',
       '#value' => $tree['parent'],
+    );
+  }
+
+  if (module_exists('language')) {
+    $form['follow_interface_language'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Follow interface language'),
+      '#default_value' => $field['settings']['follow_interface_language'],
+      '#description' => t('If selected vocabulary terms will be autocompleted in the language of the website interface.'),
+      '#disabled' => $has_data,
     );
   }
 

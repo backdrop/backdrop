@@ -333,16 +333,15 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
  * @see theme_taxonomy_overview_terms()
  */
 function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabulary) {
-  global $pager_page_array, $pager_total, $pager_total_items;
+  global $pager_page_array, $pager_total, $pager_total_items, $language;
 
   // Check for confirmation forms.
   if (isset($form_state['confirm_reset_alphabetical'])) {
     return taxonomy_vocabulary_confirm_reset_alphabetical($form, $form_state, $vocabulary->machine_name);
   }
 
-  $default_language = language_default();
-  $filter_langcode = isset($_GET['langcode_term']) ? $_GET['langcode_term'] : $default_language->langcode;
-  if (module_exists('language') && $vocabulary->language) {
+  $filter_langcode = isset($_GET['langcode_term']) ? $_GET['langcode_term'] : $language->langcode;
+  if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED) {
     $form['langcode_term'] = array(
       '#title' => t('Show terms in language'),
       '#type' => 'select',
@@ -350,7 +349,7 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
       '#empty_value' => LANGUAGE_NONE,
       '#empty_option' => t('All languages'),
       '#default_value' => $filter_langcode,
-      '#access' => module_exists('language') && $vocabulary->language,
+      '#access' => module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED,
       '#weight' => -20,
       '#description' => t('Show terms for a given language. Terms with the "All" language will be shown in every language.'),
     );
@@ -504,11 +503,11 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
       );
       // Language
       $langcode_label = isset($language_options[$term->langcode]) ? $language_options[$term->langcode] : $term->langcode;
-      if (module_exists('language') && $vocabulary->language) {
+      if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED) {
         $form[$key]['langcode'] = array(
           '#type' => 'markup',
           '#markup' => check_plain($langcode_label),
-          '#access' => module_exists('language') && $vocabulary->language,
+          '#access' => module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED,
         );
       }
       $form[$key]['weight'] = array(
@@ -744,14 +743,11 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
       'autofocus' => TRUE,
     ),
   );
-
-  if (module_exists('language') && $vocabulary->language) {
-    $langcode_term = isset($_GET['langcode_term']) ? $_GET['langcode_term'] : LANGUAGE_NONE;
-
+  if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED) {
     $form['langcode'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
-      '#default_value' => !empty($term->langcode) ? $term->langcode : $langcode_term,
+      '#default_value' => isset($_GET['langcode_term']) ? $_GET['langcode_term'] : $term->langcode,
       '#options' => language_list(TRUE, TRUE),
       '#empty_value' => LANGUAGE_NONE,
       '#empty_option' => t('- All (always shown) -'),

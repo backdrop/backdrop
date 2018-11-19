@@ -133,14 +133,14 @@ function theme_taxonomy_overview_terms($variables) {
 
   $output = '';
 
-  if (module_exists('language')) {
+  if (module_exists('language') && $form['#vocabulary']->language == TAXONOMY_LANGUAGE_ENABLED) {
     $form['langcode_term']['#field_suffix'] = backdrop_render($form['langcode_filter']);
     $output .= backdrop_render($form['langcode_term']);
   }
 
   $header = array();
   $header[] = t('Name');
-  if (module_exists('language')) {
+  if (module_exists('language') && $form['#vocabulary']->language == TAXONOMY_LANGUAGE_ENABLED) {
     $header[] = t('Language');
   }
   $header[] = t('Weight');
