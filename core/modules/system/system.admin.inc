@@ -2108,7 +2108,7 @@ function system_urls_settings($form, &$form_state) {
     // clicking the 'Run the clean URL test' button.
     backdrop_set_message(t('Clean URLs cannot be enabled.'), 'warning');
     backdrop_set_message(t('When clean URLs can be enabled, you will be able to use URLs like <code>example.com/user</code> instead of <code>example.com/?q=user</code>.'), 'info');
-    backdrop_set_message(t('If you are directed to this page or to a "Page not found (404)" error after testing for clean URLs, see the <a href="@url">online handbook</a>.', array('@url' => url('http://drupal.org/node/15365'))), 'info');
+    backdrop_set_message(t('If you are directed to this page or to a "Page not found (404)" error after testing for clean URLs, see the <a href="@url">online handbook</a>.', array('@url' => url('https://backdropcms.org/user-guide/clean-urls'))), 'info');
 
     $form_state['redirect'] = url('admin/config/urls/settings');
     $form['actions'] = array('#type' => 'actions');
