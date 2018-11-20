@@ -2488,10 +2488,27 @@ function system_block_configure($delta, $settings) {
     return system_header_block_form($settings);
   }
   elseif ($delta === 'breadcrumb') {
-    $form['current'] = array(
+    $form['separator'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Separator'),
+      '#description' => t('The character(s) to display between breadcrumbs.'),
+      '#default_value' => !empty($settings['separator']) ? $settings['separator'] : '»',
+    );
+    $form['append'] = array(
+      '#type' => 'select',
+      '#title' => t('Append to the breadcrumb trail'),
+      '#description' => t('What to display at the end of the breadcrumb trail.'),
+      '#default_value' => !empty($settings['append']) ? $settings['append'] : '',
+      '#options' => array(
+        'current' => t('The current page title'),
+        'separator' => t('A separator'),
+      ),
+      '#empty_option' => t('Nothing'),
+    );
+    $form['hide'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Display the current page title as the last breadcrumb'),
-      '#default_value' => !empty($settings['current']),
+      '#title' => t("Hide the breadcrumb trail if the only breadcrumb is 'Home'"),
+      '#default_value' => !empty($settings['hide']),
     );
     return $form;
   }
@@ -3195,11 +3212,24 @@ function system_header_block($settings) {
  */
 function system_breadcrumb_block($settings = array()) {
   $crumbs = backdrop_get_breadcrumb();
-  if (isset($settings['current']) && $settings['current'] == TRUE) {
-    $crumbs[] = '<span>' . backdrop_get_title() . '</span>';
+
+  if (!empty($settings['append'])) {
+    $class = '';
+    if ($settings['append'] == 'separator') {
+      $class .= ' element-invisible';
+    }
+    $crumbs[] = '<span class="current' . $class . '">' . backdrop_get_title() . '</span>';
   }
 
-  return theme('breadcrumb', array('breadcrumb' => $crumbs));
+  if (isset($settings['hide']) && $settings['hide'] == TRUE && !isset($crumbs[1])) {
+    return;
+  }
+
+  $options = array('breadcrumb' => $crumbs);
+  if (isset($settings['separator'])) {
+    $options['separator'] = $settings['separator'];
+  }
+  return theme('breadcrumb', $options);
 }
 
 /**
