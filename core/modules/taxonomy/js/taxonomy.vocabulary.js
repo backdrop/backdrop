@@ -55,10 +55,10 @@ Backdrop.behaviors.contentTypes = {
     $context.find('#edit-language').backdropSetSummary(function(context) {
       var vals = [];
       if ($context.find('input[name="language"]:checked').length) {
-        vals.push(Backdrop.t('Enabled.'));
+        vals.push(Backdrop.t('Enabled'));
       }
       else {
-        vals.push(Backdrop.t('Not enabled.'));
+        vals.push(Backdrop.t('Not enabled'));
       }
       return Backdrop.checkPlain(vals.join(', '));
     });

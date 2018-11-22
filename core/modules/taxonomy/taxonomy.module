@@ -1334,7 +1334,6 @@ function taxonomy_field_info() {
             'parent' => '0',
           ),
         ),
-        'follow_interface_language' => TRUE,
       ),
     ),
   );
@@ -1656,6 +1655,7 @@ function taxonomy_autocomplete_validate($element, &$form_state) {
   if ($tags = $element['#value']) {
     // Collect candidate vocabularies.
     $field = field_widget_field($element, $form_state);
+    $instance = field_widget_instance($element, $form_state);
     $vocabularies = array();
     foreach ($field['settings']['allowed_values'] as $tree) {
       if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
@@ -1679,7 +1679,7 @@ function taxonomy_autocomplete_validate($element, &$form_state) {
           'vocabulary' => $vocabulary->machine_name,
           'langcode' => LANGUAGE_NONE,
         );
-        if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED  && $field['settings']['follow_interface_language']) {
+        if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED  && $instance['widget']['settings']['follow_interface_language']) {
           $term['langcode'] = $language->langcode;
         }
       }
@@ -1726,17 +1726,26 @@ function taxonomy_field_settings_form($field, $instance, $has_data) {
     );
   }
 
-  if (module_exists('language')) {
-    $form['follow_interface_language'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Follow interface language'),
-      '#default_value' => $field['settings']['follow_interface_language'],
-      '#description' => t('If selected vocabulary terms will be autocompleted in the language of the website interface.'),
-      '#disabled' => $has_data,
+  return $form;
+}
+
+/**
+ * Implements hook_field_widget_settings_form().
+ */
+function taxonomy_field_widget_settings_form($field, $instance) {
+  $element = array();
+  if (module_exists('language') && $instance['widget']['type'] == 'taxonomy_autocomplete') {
+    $element = array(
+      'follow_interface_language' => array(
+        '#type' => 'checkbox',
+        '#title' => t('Follow interface language'),
+        '#default_value' => isset($instance['widget']['settings']['follow_interface_language']) ? $instance['widget']['settings']['follow_interface_language'] : TRUE,
+        '#description' => t('If enabled vocabulary terms will be added in the language of the interface.'),
+      ),
     );
   }
 
-  return $form;
+  return $element;
 }
 
 /**

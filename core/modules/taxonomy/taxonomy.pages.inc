@@ -118,8 +118,6 @@ function taxonomy_term_feed(TaxonomyTerm $term) {
  * @see taxonomy_field_widget_info()
  */
 function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
-  global $language;
-
   // Make sure the field exists and is a taxonomy field.
   if (!($field = field_info_field($field_name)) || $field['type'] !== 'taxonomy_term_reference') {
     // Error string. The JavaScript handler will realize this is not JSON and
@@ -137,10 +135,6 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
     $query = db_select('taxonomy_term_data', 't');
     $query->addTag('translatable');
     $query->addTag('taxonomy_term_access');
-    // Add language condition if terms can be translated
-    if (module_exists('language') && $field['settings']['follow_interface_language']) {
-      $query->condition('t.langcode', $language->langcode);
-    }
 
     // Do not select already entered terms.
     if (!empty($tags_typed)) {
