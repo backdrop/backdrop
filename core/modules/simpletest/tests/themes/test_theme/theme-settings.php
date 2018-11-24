@@ -1,7 +1,7 @@
 <?php
  /**
  * @file
- * Theme setting file for the test_theme theme.
+ * Theme settings file for the test_theme theme.
  */
  /**
  * Implements hook_form_FORM_ID_alter().
