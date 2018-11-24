@@ -1661,12 +1661,12 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
 
     // Test that the theme-specific settings form can be saved and that the
     // theme-specific checkbox is checked and unchecked as appropriate.
-    $this->drupalGet('admin/appearance/settings/test_theme');
+    $this->backdropGet('admin/appearance/settings/test_theme');
     $this->assertNoFieldChecked('edit-test-theme-checkbox', 'The test_theme_checkbox setting is unchecked.');
-    $this->drupalPost(NULL, array('test_theme_checkbox' => TRUE), t('Save theme settings'));
+    $this->backdropPost(NULL, array('test_theme_checkbox' => TRUE), t('Save theme settings'));
     $this->assertText('The configuration options have been saved.');
     $this->assertFieldChecked('edit-test-theme-checkbox', 'The test_theme_checkbox setting is checked.');
-    $this->drupalPost(NULL, array('test_theme_checkbox' => FALSE), t('Save theme settings'));
+    $this->backdropPost(NULL, array('test_theme_checkbox' => FALSE), t('Save theme settings'));
     $this->assertText('The configuration options have been saved.');
     $this->assertNoFieldChecked('edit-test-theme-checkbox', 'The test_theme_checkbox setting is unchecked.');
   }
