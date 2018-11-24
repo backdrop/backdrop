@@ -2,7 +2,7 @@
     "_config_name": "views.view.taxonomy_term",
     "name": "taxonomy_term",
     "description": "A view to emulate Backdrop core's handling of taxonomy/term.",
-    "module": "views",
+    "module": "taxonomy",
     "tag": "default",
     "disabled": true,
     "base_table": "node",

@@ -15,6 +15,12 @@ function taxonomy_uninstall() {
     $vocabulary_name = str_replace('taxonomy.vocabulary.', '', $config_name);
     field_attach_delete_bundle('taxonomy_term', $vocabulary_name);
   }
+
+  // Remove default, un-modified view.
+  $config = config('views.view.taxonomy_term');
+  if ($config->get('storage') == VIEWS_STORAGE_DEFAULT) {
+    $config->delete();
+  }
 }
 
 /**
@@ -102,7 +108,7 @@ function taxonomy_schema() {
     ),
     'primary key' => array('tid', 'parent'),
   );
-  
+
   $schema['taxonomy_index'] = array(
     'description' => 'Maintains denormalized information about node/term relationships.',
     'fields' => array(
