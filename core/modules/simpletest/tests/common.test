@@ -3186,8 +3186,8 @@ class CommonBackdropSortUnitTest extends BackdropUnitTestCase {
       'custom_block',
       'main-menu',
       'recent',
-      'content',
       'breadcrumb',
+      'content',
       'form',
     );
 
