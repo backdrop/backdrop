@@ -11,9 +11,6 @@ function theme_views_ui_view_info($variables) {
   $view = $variables['view'];
   $title = $view->get_human_name();
 
-  $displays = _views_ui_get_displays_list($view);
-  $displays = empty($displays) ? t('None') : format_plural(count($displays), 'Display', 'Displays') . ': ' . '<em>' . implode(', ', $displays) . '</em>';
-
   switch ($view->type) {
     case t('Default'):
     default:
@@ -30,9 +27,9 @@ function theme_views_ui_view_info($variables) {
 
   $output = '';
   $output .= '<div class="views-ui-view-title">' . check_plain($title) . "</div>\n";
-  $output .= '<div class="views-ui-view-displays">' . $displays . "</div>\n";
-  $output .= '<div class="views-ui-view-storage">' . $type . "</div>\n";
-  $output .= '<div class="views-ui-view-base">' . t('Type') . ': ' . check_plain($view->base_table). "</div>\n";
+  $output .= '<div class="views-ui-view-machine-name">' . t('Machine name') . ': <code>' . check_plain($view->name) . "</code></div>\n";
+  $output .= '<div class="views-ui-view-storage">' . t('Status') . ': ' . $type . "</div>\n";
+  $output .= '<div class="views-ui-view-base">' . t('Type') . ': <code>' . check_plain($view->base_table). "</code></div>\n";
   return $output;
 }
 
