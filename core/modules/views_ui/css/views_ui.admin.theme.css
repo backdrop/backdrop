@@ -383,6 +383,10 @@ th.views-ui-displays {
   width: auto;
 }
 
+th.views-ui-displays ul {
+  margin-left: 0;
+}
+
 th.views-ui-operations {
   width: 15%;
 }
