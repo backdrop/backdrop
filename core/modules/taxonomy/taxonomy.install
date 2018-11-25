@@ -18,7 +18,7 @@ function taxonomy_uninstall() {
 
   // Remove default, un-modified view.
   $config = config('views.view.taxonomy_term');
-  if ($config->get('storage') == VIEWS_STORAGE_DEFAULT) {
+  if ($config->get('storage') != VIEWS_STORAGE_OVERRIDE) {
     $config->delete();
   }
 }

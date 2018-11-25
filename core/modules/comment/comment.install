@@ -69,7 +69,7 @@ function comment_uninstall() {
 
   // Remove default, un-modified view.
   $config = config('views.view.comments_recent');
-  if ($config->get('storage') == VIEWS_STORAGE_DEFAULT) {
+  if ($config->get('storage') != VIEWS_STORAGE_OVERRIDE) {
     $config->delete();
   }
 }
