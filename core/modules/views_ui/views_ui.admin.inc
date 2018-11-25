@@ -246,7 +246,7 @@ function views_ui_list_page() {
   $header = array(
     array('data' => t('View info'), 'class' => array('views-ui-name')),
     array('data' => t('Description'), 'class' => array('views-ui-description')),
-    array('data' => t('Path(s)'), 'class' => array('views-ui-path')),
+    array('data' => t('Displays'), 'class' => array('views-ui-displays')),
     array('data' => t('Operations'), 'class' => array('views-ui-operations')),
   );
 
@@ -273,8 +273,6 @@ function views_ui_list_page() {
   $rows = array();
   foreach ($sorted as $key) {
     $view = $views[$key];
-    $paths = _views_ui_get_paths($view);
-    $paths = implode(", ", $paths);
 
     $row = array();
     $row[] = array(
@@ -290,9 +288,9 @@ function views_ui_list_page() {
       'data-label' => t('Description'),
     );
     $row[] = array(
-      'data' => $paths,
-      'class' => array('views-ui-path'),
-      'data-label' => t('Path(s)'),
+      'data' => theme('item_list', array('items' => _views_ui_get_displays($view))),
+      'class' => array('views-ui-displays'),
+      'data-label' => t('Displays'),
     );
     $row[] = array(
       'data' => array(
