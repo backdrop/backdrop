@@ -296,6 +296,10 @@ input.form-radio {
   font-weight: bold;
 }
 
+.views-ui-view-machine-name {
+  font-weight: normal;
+}
+
 @media (max-width: 768px) {
   table.sticky-header {
     display: none;
