@@ -5,11 +5,23 @@
  */
 
 /**
+ * Display the view name and its machine name.
+ */
+function theme_views_ui_view_name($variables) {
+  $view = $variables['view'];
+
+  $output = '';
+  $output .= '<div class="views-ui-view-name">' . check_plain($view->get_human_name());
+  $output .= '<span class="views-ui-view-machine-name">' . ' (<code>' . check_plain($view->name) . '</code>)</span>';
+  $output .= '</div>';
+  return $output;
+}
+
+/**
  * Display basic administrative information about a view.
  */
 function theme_views_ui_view_info($variables) {
   $view = $variables['view'];
-  $title = $view->get_human_name();
 
   switch ($view->type) {
     case t('Default'):
@@ -26,10 +38,20 @@ function theme_views_ui_view_info($variables) {
   }
 
   $output = '';
-  $output .= '<div class="views-ui-view-title">' . check_plain($title) . "</div>\n";
-  $output .= '<div class="views-ui-view-machine-name">' . t('Machine name') . ': <code>' . check_plain($view->name) . "</code></div>\n";
-  $output .= '<div class="views-ui-view-storage">' . t('Status') . ': ' . $type . "</div>\n";
-  $output .= '<div class="views-ui-view-base">' . t('Type') . ': <code>' . check_plain($view->base_table). "</code></div>\n";
+  $output .= '<div class="views-ui-view-storage">' . t('Status') . ': ' . $type . '</div>';
+  $output .= '<div class="views-ui-view-base">' . t('Type') . ': <code>' . check_plain($view->base_table). '</code></div>';
+  return $output;
+}
+
+/**
+ * Display the view description and tags.
+ */
+function theme_views_ui_view_description($variables) {
+  $view = $variables['view'];
+
+  $output = '';
+  $output = '<div class="views-ui-view-description">' . check_plain($view->description) . '</div>';
+  $output .= '<div class="views-ui-view-tag"><span class="views-ui-view-tag-label">' . t('Tags:') . '</span> ' . check_plain($view->tag) . '</div>';
   return $output;
 }
 
