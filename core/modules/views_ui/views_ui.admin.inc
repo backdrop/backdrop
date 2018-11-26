@@ -244,7 +244,8 @@ function views_ui_list_page() {
   views_ui_add_admin_css();
 
   $header = array(
-    array('data' => t('View info'), 'class' => array('views-ui-name')),
+    array('data' => t('View name'), 'class' => array('views-ui-name')),
+    array('data' => t('View info'), 'class' => array('views-ui-info')),
     array('data' => t('Description'), 'class' => array('views-ui-description')),
     array('data' => t('Displays'), 'class' => array('views-ui-displays')),
     array('data' => t('Operations'), 'class' => array('views-ui-operations')),
@@ -276,14 +277,17 @@ function views_ui_list_page() {
 
     $row = array();
     $row[] = array(
-      'data' => theme('views_ui_view_info', array('view' => $view)),
+      'data' => theme('views_ui_view_name', array('view' => $view)),
       'class' => array('views-ui-name'),
+      'data-label' => t('View name'),
+    );
+    $row[] = array(
+      'data' => theme('views_ui_view_info', array('view' => $view)),
+      'class' => array('views-ui-info'),
       'data-label' => t('View info'),
     );
-    $data  = '<div class="views-description">' . check_plain($view->description) . '</div>';
-    $data .= '<div class="views-tag"><span class="views-tag-label">' . t('Tags:') . '</span> ' . check_plain($view->tag) . '</div>';
     $row[] = array(
-      'data' => $data,
+      'data' => theme('views_ui_view_description', array('view' => $view)),
       'class' => array('views-ui-description'),
       'data-label' => t('Description'),
     );
