@@ -11,9 +11,8 @@ function theme_views_ui_view_name($variables) {
   $view = $variables['view'];
 
   $output = '';
-  $output .= '<div class="views-ui-view-name">' . check_plain($view->get_human_name());
-  $output .= '<span class="views-ui-view-machine-name">' . ' (<code>' . check_plain($view->name) . '</code>)</span>';
-  $output .= '</div>';
+  $output .= '<div class="views-ui-view-name">' . check_plain($view->get_human_name()) . '</div>';
+  $output .= '<div class="views-ui-view-machine-name">(</span>' . check_plain($view->name) . '</span>)</div>';
   return $output;
 }
 
