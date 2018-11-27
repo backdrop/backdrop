@@ -388,11 +388,7 @@ th.views-ui-description {
 }
 
 th.views-ui-displays {
-  width: auto;
-}
-
-th.views-ui-operations {
-  width: 15%;
+  width: 25%;
 }
 
 td.views-ui-displays ul {
