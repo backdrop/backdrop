@@ -38,7 +38,7 @@ function theme_views_ui_view_info($variables) {
 
   $output = '';
   $output .= '<div class="views-ui-view-storage">' . t('Status') . ': ' . $type . '</div>';
-  $output .= '<div class="views-ui-view-base">' . t('Type') . ': <code>' . check_plain($view->base_table). '</code></div>';
+  $output .= '<div class="views-ui-view-base">' . t('Type') . ': ' . check_plain($view->base_table). '</div>';
   return $output;
 }
 
