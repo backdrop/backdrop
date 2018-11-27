@@ -200,7 +200,7 @@ function locale_views_data() {
  * Implements hook_views_data_alter().
  */
 function locale_views_data_alter(&$data) {
-  // Node language field
+  // Node language field.
   $data['node']['langcode'] = array(
     'title' => t('Language'),
     'help' => t('The language the content is in.'),
@@ -219,7 +219,7 @@ function locale_views_data_alter(&$data) {
     ),
   );
 
-  // Term language field
+  // Term language field.
   $data['taxonomy_term_data']['langcode'] = array(
     'title' => t('Language'),
     'help' => t('The language the term is in.'),
