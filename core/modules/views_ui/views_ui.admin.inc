@@ -244,8 +244,8 @@ function views_ui_list_page() {
   views_ui_add_admin_css();
 
   $header = array(
-    array('data' => t('View name'), 'class' => array('views-ui-name')),
-    array('data' => t('View info'), 'class' => array('views-ui-info')),
+    array('data' => t('Name'), 'class' => array('views-ui-name')),
+    array('data' => t('Info'), 'class' => array('views-ui-info')),
     array('data' => t('Description'), 'class' => array('views-ui-description')),
     array('data' => t('Displays'), 'class' => array('views-ui-displays')),
     array('data' => t('Operations'), 'class' => array('views-ui-operations')),
