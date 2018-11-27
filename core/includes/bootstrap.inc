@@ -2929,8 +2929,15 @@ function _backdrop_exception_handler($exception) {
     _backdrop_log_error(_backdrop_decode_exception($exception), TRUE);
   }
   catch (Exception $exception2) {
-    // Another uncaught exception was thrown while handling the first one.
-    // If we are displaying errors, then do so with no possibility of a further uncaught exception being thrown.
+    // Default the status code to 500 before any other code is run. This will
+    // make any FATAL errors return 500 responses instead of 200, and also
+    // account for cases where an exception was thrown before the 500 status
+    // could be set (e.g. while loading a maintenance theme from cache).
+    drupal_add_http_header('Status', '500 Internal Server Error');
+
+    // Another uncaught exception was thrown while handling the first one. If we
+    // are displaying errors, then do so with no possibility of a further
+    // uncaught exception being thrown.
     if (error_displayable()) {
       print '<h1>Additional uncaught exception thrown while handling exception.</h1>';
       print '<h2>Original</h2><p>' . _backdrop_render_exception_safe($exception) . '</p>';
