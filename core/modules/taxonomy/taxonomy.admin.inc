@@ -148,14 +148,14 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
   $form['permissions']['permissions'] = taxonomy_vocabulary_form_permissions($vocabulary);
 
   if (module_exists('language')) {
-    $form['language'] = array(
+    $form['multilingual'] = array(
       '#type' => 'fieldset',
       '#title' => t('Multilingual support'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#group' => 'additional_settings',
     );
-    $form['language']['language'] = array(
+    $form['multilingual']['language'] = array(
       '#type' => 'checkbox',
       '#title' => t('Multilingual support'),
       '#default_value' => $vocabulary->language,
