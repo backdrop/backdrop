@@ -297,7 +297,7 @@ input.form-radio {
 }
 
 .views-ui-view-machine-name {
-  font-weight: normal;
+  font-size: smaller;
 }
 
 @media (max-width: 768px) {
