@@ -379,8 +379,12 @@ th.views-ui-name {
   width: 20%;
 }
 
+th.views-ui-info {
+  width: 20%;
+}
+
 th.views-ui-description {
-  width: 40%;
+  width: 30%;
 }
 
 th.views-ui-displays {
