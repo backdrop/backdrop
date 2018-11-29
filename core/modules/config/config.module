@@ -221,3 +221,35 @@ function config_config_data_validate(Config $config, $config_info) {
     }
   }
 }
+
+/**
+ * Implements hook_theme().
+ */
+function config_theme() {
+  return array(
+    'config_translation' => array(
+      'variables' => array('items' => NULL),
+    ),
+  );
+}
+
+/**
+ * Returns HTML for an image field widget.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - element: A render element representing the image field widget.
+ *
+ * @ingroup themeable
+ */
+function theme_config_translation($variables) {
+  $items = $variables['items'];
+  $output = '';
+  $output .= '<div class="config-translation clearfix">';
+  foreach ($items as $key => $value) {
+    $output .= '<h4>' . $value['label'] . '</h4><pre>' . $value['text'] . '</pre>';
+  }
+  $output .= '</div>';
+
+  return $output;
+}

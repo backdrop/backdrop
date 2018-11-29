@@ -1,5 +1,8 @@
 {
     "_config_name": "user.role.authenticated",
+    "_config_translatables": [
+        "label"
+    ],
     "name": "authenticated",
     "label": "Authenticated",
     "weight": "1",
