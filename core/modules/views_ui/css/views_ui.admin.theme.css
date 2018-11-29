@@ -379,10 +379,6 @@ th.views-ui-name {
   width: 20%;
 }
 
-th.views-ui-info {
-  width: 20%;
-}
-
 th.views-ui-description {
   width: 30%;
 }
@@ -391,8 +387,21 @@ th.views-ui-displays {
   width: 25%;
 }
 
+th.views-ui-storage {
+  width: 15%;
+}
+
+th.views-ui-operations {
+  width: 15%;
+}
+
 td.views-ui-displays ul {
   margin: 0.25em 0 0.25em 0;
+}
+
+.views-ui-view-tag,
+.views-ui-view-storage {
+  margin-top: 3px;
 }
 
 /* @end */

@@ -12,14 +12,27 @@ function theme_views_ui_view_name($variables) {
 
   $output = '';
   $output .= '<div class="views-ui-view-name">' . check_plain($view->get_human_name()) . '</div>';
-  $output .= '<div class="views-ui-view-machine-name">(<span>' . check_plain($view->name) . '</span>)</div>';
+  $output .= '<div class="views-ui-view-machine-name">(</span>' . check_plain($view->name) . '</span>)</div>';
   return $output;
 }
 
 /**
- * Display basic administrative information about a view.
+ * Display the view description, tags, and type (base table).
  */
-function theme_views_ui_view_info($variables) {
+function theme_views_ui_view_description($variables) {
+  $view = $variables['view'];
+
+  $output = '';
+  $output = '<div class="views-ui-view-description">' . check_plain($view->description) . '</div>';
+  $output .= '<div class="views-ui-view-tag">' . t('Tags: ') . check_plain($view->tag) . '</div>';
+  $output .= '<div class="views-ui-view-storage">' . t('Type: ') . check_plain($view->base_table). '</div>';
+  return $output;
+}
+
+/**
+ * Display the storage status of the view.
+ */
+function theme_views_ui_view_storage($variables) {
   $view = $variables['view'];
 
   switch ($view->type) {
@@ -36,21 +49,7 @@ function theme_views_ui_view_info($variables) {
       $type = t('Overridden');
   }
 
-  $output = '';
-  $output .= '<div class="views-ui-view-storage">' . t('Status') . ': ' . $type . '</div>';
-  $output .= '<div class="views-ui-view-base">' . t('Type') . ': ' . check_plain($view->base_table). '</div>';
-  return $output;
-}
-
-/**
- * Display the view description and tags.
- */
-function theme_views_ui_view_description($variables) {
-  $view = $variables['view'];
-
-  $output = '';
-  $output = '<div class="views-ui-view-description">' . check_plain($view->description) . '</div>';
-  $output .= '<div class="views-ui-view-tag"><span class="views-ui-view-tag-label">' . t('Tags:') . '</span> ' . check_plain($view->tag) . '</div>';
+  $output = '<div class="views-ui-view-storage">' . $type . '</div>';
   return $output;
 }
 

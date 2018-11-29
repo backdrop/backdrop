@@ -235,10 +235,10 @@ function views_ui_theme() {
     'views_ui_view_name' => array(
       'variables' => array('view' => NULL, 'base' => NULL),
     ) + $base,
-    'views_ui_view_info' => array(
+    'views_ui_view_description' => array(
       'variables' => array('view' => NULL, 'base' => NULL),
     ) + $base,
-    'views_ui_view_description' => array(
+    'views_ui_view_storage' => array(
       'variables' => array('view' => NULL, 'base' => NULL),
     ) + $base,
     'views_ui_build_group_filter_form' => array(
