@@ -52,7 +52,7 @@ Backdrop.behaviors.contentTypes = {
     });
 
     // Multilingual settings.
-    $context.find('#edit-language').backdropSetSummary(function(context) {
+    $context.find('#edit-multilingual').backdropSetSummary(function(context) {
       var vals = [];
       if ($context.find('input[name="language"]:checked').length) {
         vals.push(Backdrop.t('Enabled'));

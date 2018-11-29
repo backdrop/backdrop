@@ -1743,7 +1743,7 @@ function taxonomy_field_widget_settings_form($field, $instance) {
       '#type' => 'checkbox',
       '#title' => t('Follow content language'),
       '#default_value' => isset($instance['widget']['settings']['follow_content_language']) ? $instance['widget']['settings']['follow_content_language'] : TRUE,
-      '#description' => t('If enabled vocabulary terms will be added in the language of the content.'),
+      '#description' => t('If enabled, and if the selected vocabulary has multilingual support enabled, terms will be added in the language of the content.'),
       '#access' => (module_exists('language') && $instance['widget']['type'] == 'taxonomy_autocomplete'),
     ),
   );
