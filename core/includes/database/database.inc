@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Core systems for the database layer.
@@ -79,7 +78,7 @@
  * array where keys are a placeholder label (e.g., :uid) and the value is the
  * corresponding value to use. The array may be in any order.
  *
- * Unnamed placeholders are simply a question mark. Example:
+ * Unnamed placeholders are represented by a question mark. For example:
  * @code
  * SELECT nid, title FROM {node} WHERE uid=?;
  * @endcode
@@ -122,8 +121,8 @@
  *
  * Backdrop also supports transactions, including a transparent fallback for
  * databases that do not support transactions. To start a new transaction,
- * simply call $txn = db_transaction(); in your own code. The transaction will
- * remain open for as long as the variable $txn remains in scope.  When $txn is
+ * call $txn = db_transaction(); in your own code. The transaction will remain
+ * open for as long as the variable $txn remains in scope.  When $txn is
  * destroyed, the transaction will be committed.  If your transaction is nested
  * inside of another then Backdrop will track each transaction and only commit
  * the outer-most transaction when the last transaction object goes out out of
@@ -381,8 +380,7 @@ abstract class DatabaseConnection extends PDO {
    * - throw_exception: By default, the database system will catch any errors
    *   on a query as an Exception, log it, and then rethrow it so that code
    *   further up the call chain can take an appropriate action. To suppress
-   *   that behavior and simply return NULL on failure, set this option to
-   *   FALSE.
+   *   that behavior and return NULL on failure, set this option to FALSE.
    *
    * @return
    *   An array of default query options.
@@ -1381,7 +1379,7 @@ abstract class DatabaseConnection extends PDO {
 abstract class Database {
 
   /**
-   * Flag to indicate a query call should simply return NULL.
+   * Flag to indicate a query call should return NULL.
    *
    * This is used for queries that have no reasonable return value anyway, such
    * as INSERT statements to a table without a serial primary key.
@@ -1419,7 +1417,7 @@ abstract class Database {
   static protected $databaseInfo = NULL;
 
   /**
-   * A list of key/target credentials to simply ignore.
+   * A list of key/target credentials to ignore.
    *
    * @var array
    */
@@ -1919,17 +1917,17 @@ class DatabaseDriverNotSpecifiedException extends Exception {}
 /**
  * A wrapper class for creating and managing database transactions.
  *
- * Not all databases or database configurations support transactions. For
- * example, MySQL MyISAM tables do not. It is also easy to begin a transaction
- * and then forget to commit it, which can lead to connection errors when
- * another transaction is started.
+ * Not all database configurations support transactions. For example, MySQL
+ * MyISAM tables do not. It is also easy to begin a transaction and then forget
+ * to commit it, which can lead to connection errors when another transaction is
+ * started.
  *
  * This class acts as a wrapper for transactions. To begin a transaction,
- * simply instantiate it. When the object goes out of scope and is destroyed
- * it will automatically commit. It also will check to see if the specified
- * connection supports transactions. If not, it will simply skip any transaction
- * commands, allowing user-space code to proceed normally. The only difference
- * is that rollbacks won't actually do anything.
+ * instantiate it. When the object goes out of scope and is destroyed it will
+ * automatically commit. It also will check to see if the specified connection
+ * supports transactions. If not, it will skip any transaction commands,
+ * allowing user-space code to proceed normally. The only difference is that
+ * rollbacks won't actually do anything.
  *
  * In the vast majority of cases, you should not instantiate this class
  * directly. Instead, call ->startTransaction(), from the appropriate connection
@@ -2385,9 +2383,8 @@ class DatabaseStatementEmpty implements Iterator, DatabaseStatementInterface {
 }
 
 /**
- * The following utility functions are simply convenience wrappers.
- *
- * They should never, ever have any database-specific code in them.
+ * The following utility functions are wrappers, for convenience. They should
+ * never have any database-specific code in them.
  */
 
 /**

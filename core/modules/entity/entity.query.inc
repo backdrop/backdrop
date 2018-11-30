@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity query API.
@@ -29,8 +28,8 @@ class EntityFieldQueryException extends Exception {}
  * class's standard use case involves primarily code that does need to have
  * direct access to the collected properties in order to handle alternate
  * execution routines. We therefore use public properties for simplicity. Note
- * that code that is simply creating and running a field query should still use
- * the appropriate methods to add conditions on the query.
+ * that code that is creating and running a field query should still use the
+ * appropriate methods to add conditions on the query.
  *
  * Storage engines are not required to support every type of query. By default,
  * an EntityFieldQueryException will be raised if an unsupported condition is
@@ -249,7 +248,7 @@ class EntityFieldQuery {
 
   /**
    * Adds a condition on field values.
-   * 
+   *
    * Note that entities with empty field values will be excluded from the
    * EntityFieldQuery results when using this method.
    *

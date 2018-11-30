@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Default implementation of the field storage API.
@@ -668,7 +667,7 @@ function field_sql_storage_field_storage_delete_revision($entity_type, $entity, 
 /**
  * Implements hook_field_storage_delete_instance().
  *
- * This function simply marks for deletion all data associated with the field.
+ * This function marks all data associated with the field for deletion.
  */
 function field_sql_storage_field_storage_delete_instance($instance) {
   $field = field_info_field($instance['field_name']);
