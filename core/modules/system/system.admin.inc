@@ -765,14 +765,7 @@ function _system_modules_build_row($info, $extra) {
   else {
     $title = t('Unable to enable');
     $form['enable'] = array(
-      '#type' => 'container',
-      '#attributes' => array(
-        'class' => array('modules-error', 'error'),
-        'title' => $title,
-      ),
-    );
-    $form['enable']['error-icon'] = array(
-      '#markup' => '<span class="element-invisible">' . $title . '</span>',
+      '#markup' => '<span class="modules-error"><span class="element-invisible">' . $title . '</span></span>',
     );
     $form['description']['#markup'] .= theme('system_modules_incompatible', array('message' => trim($status_long)));
   }
