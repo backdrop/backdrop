@@ -1,5 +1,4 @@
 <?php
-
 /**
  *  @file
  *  This provides SimpleTests for the core file handling functionality.
@@ -1036,8 +1035,8 @@ class FileDirectoryTest extends FileTestCase {
    * - the existing filepath, if $replace is FILE_EXISTS_REPLACE
    * - a new filepath if FILE_EXISTS_RENAME
    * - an error (returning FALSE) if FILE_EXISTS_ERROR.
-   * If the file doesn't currently exist, then it will simply return the
-   * filepath.
+   *
+   * If the file doesn't currently exist, then it will return the filepath.
    */
   function testFileDestination() {
     // First test for non-existent file.

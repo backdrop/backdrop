@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides an interface and a base class for entities.
@@ -129,8 +128,8 @@ abstract class Entity extends stdClass implements EntityInterface {
   /**
    * Implements EntityInterface::bundle().
    *
-   * Entity types that do not support bundles simply return the entity type as
-   * their bundle. Subclasses should override this method if supporting bundles.
+   * Entity types that do not support bundles return the entity type as their
+   * bundle. Subclasses should override this method if supporting bundles.
    */
   public function bundle() {
     return $this->entityType();

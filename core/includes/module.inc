@@ -613,12 +613,12 @@ function module_disable($module_list, $disable_dependents = TRUE) {
  * @{
  * Allow modules to interact with the Backdrop core.
  *
- * Backdrop's module system is based on the concept of "hooks". A hook is a PHP
- * function that is named foo_bar(), where "foo" is the name of the module
+ * Backdrop's module system is based on the concept of "hooks". A hook is simply
+ * a PHP function that is named foo_bar(), where "foo" is the name of the module
  * (whose filename is thus foo.module) and "bar" is the name of the hook. Each
  * hook has a defined set of parameters and a specified result type.
  *
- * To extend Backdrop, a module need simply implement a hook. When Backdrop wishes
+ * To extend Backdrop, a module needs to implement a hook. When Backdrop wishes
  * to allow intervention from modules, it determines which modules implement a
  * hook and calls that hook in all enabled modules that implement it.
  *

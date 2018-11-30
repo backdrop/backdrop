@@ -1548,7 +1548,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     // We inserted an HTML non-breaking space, but SimpleXML will return a
     // unicode non-breaking space (\u00a0). PHP <7.0.0 does not have native
     // unicode strings, so we encode as JSON which will encode the character.
-    // In PHP 7 this could be represented simply as $content_3 === "\u00a0".
+    // In PHP 7 this could be represented as $content_3 === "\u00a0".
     $unicode_nbsp = trim(json_encode(trim($content_3)), '"');
     $this->assertEqual($unicode_nbsp, '\u00a0', '3rd hero block contains only a non-breaking space.');
 
