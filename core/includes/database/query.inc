@@ -397,7 +397,7 @@ abstract class Query implements QueryPlaceholderInterface {
    *
    * By adding a comment to a query, you can more easily find it in your
    * query log or the list of active queries on an SQL server. This allows
-   * for easier debugging and allows you to more easily find where a query
+   * for easier debugging, and allows you to more easily find where a query
    * with a performance problem is being generated.
    *
    * The comment string will be sanitized to remove * / and other characters

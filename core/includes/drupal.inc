@@ -8,9 +8,9 @@
  * @defgroup drupal_compatibility Drupal compatibility layer.
  * @{
  * These functions and classes are wrappers around Backdrop functions that allow
- * for Drupal 7 modules to work with Backdrop easily. All of these functions
- * are made available if the "backdrop_drupal_compatibility" option is enabled
- * in your site's settings.php file.
+ * for Drupal 7 modules to work with Backdrop. All of these functions are made
+ * available if the "backdrop_drupal_compatibility" option is enabled in your
+ * site's settings.php file.
  */
 
 /**
@@ -2376,7 +2376,7 @@ function drupal_find_theme_functions($cache, $prefixes) {
 }
 
 /**
- * Allows themes and/or theme engines to easily discover overridden templates.
+ * Allows themes and/or theme engines to discover overridden templates.
  *
  * @deprecated since 1.0.0
  * @see backdrop_find_theme_templates()

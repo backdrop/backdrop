@@ -10,10 +10,10 @@
 /**
  * Minimum schema version of Drupal 7 required for upgrade to Backdrop.
  *
- * Upgrades from Drupal 7 to Backdrop require that Drupal 7 be running
- * the most recent version, or the upgrade could fail. We can't easily
- * check the Drupal 7 version once the update process has begun, so instead
- * we check the schema version of system.module in the system table.
+ * Upgrades from Drupal 7 to Backdrop require that Drupal 7 be running the most
+ * recent version, or the upgrade could fail. We can't check the Drupal 7
+ * version  once the update process has begun, so instead we check the schema
+ * version of system.module in the system table.
  */
 define('REQUIRED_D7_SCHEMA_VERSION', '7069');
 

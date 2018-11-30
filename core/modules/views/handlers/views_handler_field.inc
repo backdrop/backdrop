@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * @todo.
@@ -1564,7 +1563,7 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
 
   /**
    * Call out to the theme() function, which probably just calls render() but
-   * allows sites to override output fairly easily.
+   * allows sites to override output more easily.
    */
   function theme($values) {
     return theme($this->theme_functions(),
