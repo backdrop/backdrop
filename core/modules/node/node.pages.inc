@@ -458,7 +458,7 @@ function node_form_preview($form, &$form_state) {
   $node->old_status = $old_status;
 
   node_set_node_tempstore($node, $node_tempstore_id);
-  $form_state['redirect'] = 'node/preview/' . $node->type . '/' . $node_tempstore_id;
+  $form_state['redirect'] = 'node/preview/' . str_replace('_', '-', $node->type) . '/' . $node_tempstore_id;
   if (isset($_GET['destination'])) {
     $_GET['destination'] = $form_state['redirect'];
   }
@@ -631,7 +631,7 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
     }
   }
 
-  $path = 'node/add/' . $node->bundle();
+  $path = 'node/add/' . str_replace('_', '-', $node->bundle());
   if (!empty($node->nid)) {
     $path = 'node/' . $node->nid . '/edit';
   }
@@ -741,7 +741,7 @@ function node_preview_banner_form_node_submit(array $form, array &$form_state) {
 function node_preview_banner_form_view_mode_submit(array $form, array &$form_state) {
   $node = $form_state['values']['node'];
   $node_tempstore_id = $form_state['values']['node_tempstore_id'];
-  $form_state['redirect'] = array('node/preview/' . $node->type . '/' . $node_tempstore_id, array('query' => array('view_mode' => $form_state['values']['view_mode'])));
+  $form_state['redirect'] = array('node/preview/' . str_replace('_', '-', $node->type) . '/' . $node_tempstore_id, array('query' => array('view_mode' => $form_state['values']['view_mode'])));
 }
 
 /**
