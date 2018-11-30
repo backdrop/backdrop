@@ -763,9 +763,8 @@ function _system_modules_build_row($info, $extra) {
     }
   }
   else {
-    $title = t('Unable to enable');
     $form['enable'] = array(
-      '#markup' => '<span class="modules-error"><span class="element-invisible">' . $title . '</span></span>',
+      '#markup' => '<span class="modules-error"><span class="element-invisible">' . t('Unable to enable') . '</span></span>',
     );
     $form['description']['#markup'] .= theme('system_modules_incompatible', array('message' => trim($status_long)));
   }
