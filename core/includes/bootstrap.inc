@@ -2220,7 +2220,17 @@ function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
   // This may be called before system.core, such as when running update.php or
   // the initial installation. As such we provide the defaults if needed.
   if (!isset($enabled_severity_levels)) {
-    $enabled_severity_levels = array(0, 1, 2, 3, 4, 5, 6);
+    $enabled_severity_levels = array(
+      WATCHDOG_EMERGENCY,
+      WATCHDOG_ALERT,
+      WATCHDOG_CRITICAL,
+      WATCHDOG_ERROR,
+      WATCHDOG_WARNING,
+      WATCHDOG_NOTICE,
+      WATCHDOG_INFO,
+      // WATCHDOG_DEBUG,
+      // WATCHDOG_DEPRECATED,
+    );
   }
 
   // Return TRUE if the severity level is enabled.
