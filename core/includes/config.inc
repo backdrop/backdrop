@@ -649,6 +649,9 @@ class Config {
     if (!is_string($value)) {
       return NULL;
     }
+    if (!is_array($this->get('_config_translatables'))) {
+      return $value;
+    }
     // Ensure that it's a translatable key.
     if (!in_array($key, $this->get('_config_translatables'))) {
       return $value;
