@@ -421,7 +421,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
       'name' => $style_name,
       'label' => $style_label,
     );
-    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Create new style'));
+    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Save and add effects'));
     $this->assertRaw(t('Style %name was created.', array('%name' => $style_label)), 'Image style successfully created.');
     $options = image_style_options();
     $this->assertTrue(array_key_exists($style_name, $options), format_string('Array key %key exists.', array('%key' => $style_name)));
@@ -470,7 +470,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
       'name' => $style_name,
       'label' => $style_label,
     );
-    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Create new style'));
+    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Save and add effects'));
     $this->assertRaw(t('Style %name was created.', array('%name' => $style_label)), 'Image style successfully created.');
 
     // Add effect form.
@@ -1682,7 +1682,7 @@ class ImageStyleFlushTest extends ImageFieldTestCase {
       'name' => $style_name,
       'label' => $style_label,
     );
-    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Create new style'));
+    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Save and add effects'));
     // Add each sample effect to the style.
     foreach ($effect_edits as $effect => $edit) {
       // Add the effect.
