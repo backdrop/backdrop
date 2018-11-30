@@ -473,8 +473,8 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     $elements['#display_field'] = $field['settings']['display_field'];
 
     // Add some properties that will eventually be added to the file upload
-    // field. These are added here so that they may be referenced easily through
-    // a hook_form_alter().
+    // field. These are added here so that they may be referenced through a
+    // hook_form_alter().
     $elements['#file_upload_title'] = t('Add a new file');
     $elements['#file_upload_description'] = theme('file_upload_help', array('description' => '', 'upload_validators' => $elements[0]['#upload_validators']));
   }

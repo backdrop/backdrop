@@ -663,8 +663,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
 
-    // Change default parent item to Main menu, so we can assert more
-    // easily.
+    // Change default parent item to Main menu, so we can assert more easily.
     $edit = array(
       'menu_parent' => 'main-menu:0',
     );

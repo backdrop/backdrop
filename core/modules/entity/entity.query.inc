@@ -23,13 +23,13 @@ class EntityFieldQueryException extends Exception {}
  * nodes written by users created in the last hour, as this would require
  * querying both node->status and user->created.
  *
- * Normally we would not want to have public properties on the object, as that
- * allows the object's state to become inconsistent too easily. However, this
- * class's standard use case involves primarily code that does need to have
- * direct access to the collected properties in order to handle alternate
- * execution routines. We therefore use public properties for simplicity. Note
- * that code that is creating and running a field query should still use the
- * appropriate methods to add conditions on the query.
+ * Normally we would not want public properties on the object, as that could
+ * allow the object's state to become inconsistent. However, this class's
+ * standard use case involves primarily code that does need to have direct
+ * access to the collected properties in order to handle alternate execution
+ * routines. We therefore use public properties for simplicity. Note that code
+ * that is creating and running a field query should still use the appropriate
+ * methods to add conditions on the query.
  *
  * Storage engines are not required to support every type of query. By default,
  * an EntityFieldQueryException will be raised if an unsupported condition is

@@ -2008,7 +2008,7 @@ class view {
    *   The id to use.
    * @return
    *   The key to the display in $view->display, so that the new display
-   *   can be easily located.
+   *   can be located.
    */
   function add_display($type = 'page', $title = NULL, $id = NULL) {
     if (empty($type)) {
