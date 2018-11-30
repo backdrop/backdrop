@@ -2096,14 +2096,12 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function parse() {
     if (!$this->elements) {
-      // DOM can load HTML soup. But, HTML soup can throw warnings, suppress
-      // them.
       $htmlDom = new DOMDocument();
+      // DOM can load HTML soup, which can throw warnings. Suppress them here.
       @$htmlDom->loadHTML('<?xml encoding="UTF-8">' . $this->backdropGetContent());
       if ($htmlDom) {
         $this->pass(t('Valid HTML found on "@path"', array('@path' => $this->getUrl())), t('Browser'));
-        // It's much easier to work with simplexml than DOM, luckily enough
-        // we can just simply import our DOM tree.
+        // Import our DOM tree.
         $this->elements = simplexml_import_dom($htmlDom);
       }
     }

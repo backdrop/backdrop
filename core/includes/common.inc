@@ -6499,8 +6499,8 @@ function backdrop_render_page($page) {
  * the element has been rendered, which allows individual elements of a given
  * array to be rendered independently and prevents them from being rendered
  * more than once on subsequent calls to backdrop_render() (e.g., as part of a
- * larger array). If the same array or array element is passed more than once
- * to backdrop_render(), it simply returns an empty string.
+ * larger array). If the same array or element is passed more than once to
+ * backdrop_render(), every use beyond the first will return an empty string.
  *
  * @param array $elements
  *   The structured array describing the data to be rendered.

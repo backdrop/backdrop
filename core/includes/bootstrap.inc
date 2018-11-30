@@ -2499,10 +2499,9 @@ function backdrop_base64_encode($string) {
 /**
  * Returns a string of highly randomized bytes (over the full 8-bit range).
  *
- * This function is better than simply calling mt_rand() or any other built-in
- * PHP function because it can return a long string of bytes (compared to < 4
- * bytes normally from mt_rand()) and uses the best available pseudo-random
- * source.
+ * This function is better than calling mt_rand() or any other built-in PHP
+ * function because it can return a long string of bytes (compared to < 4 bytes
+ * normally from mt_rand()), and uses the best available pseudo-random source.
  *
  * @param $count
  *   The number of characters (bytes) to return in the string.
@@ -2929,8 +2928,15 @@ function _backdrop_exception_handler($exception) {
     _backdrop_log_error(_backdrop_decode_exception($exception), TRUE);
   }
   catch (Exception $exception2) {
-    // Another uncaught exception was thrown while handling the first one.
-    // If we are displaying errors, then do so with no possibility of a further uncaught exception being thrown.
+    // Default the status code to 500 before any other code is run. This will
+    // make any FATAL errors return 500 responses instead of 200, and also
+    // account for cases where an exception was thrown before the 500 status
+    // could be set (e.g. while loading a maintenance theme from cache).
+    drupal_add_http_header('Status', '500 Internal Server Error');
+
+    // Another uncaught exception was thrown while handling the first one. If we
+    // are displaying errors, then do so with no possibility of a further
+    // uncaught exception being thrown.
     if (error_displayable()) {
       print '<h1>Additional uncaught exception thrown while handling exception.</h1>';
       print '<h2>Original</h2><p>' . _backdrop_render_exception_safe($exception) . '</p>';
@@ -4164,10 +4170,9 @@ function backdrop_is_dialog() {
  *
  * If Backdrop has entered into background mode, it can no longer print anything
  * to the page, because the response has already been returned to the browser.
- * Anything that has been output while in background mode will simply be
- * silently discarded. Background mode is extremely useful for doing processing
- * that doesn't require output, such as cron job execution or creating cache
- * entries.
+ * Anything that has been output while in background mode will be silently
+ * discarded. Background mode is extremely useful for doing processing that
+ * doesn't require output, such as cron job execution or creating cache entries.
  *
  * Backdrop core uses background mode in two ways:
  *   - After generating a page (logged-in or anonymous) if cron has not run

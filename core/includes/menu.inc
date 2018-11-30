@@ -144,8 +144,8 @@ define('MENU_NORMAL_ITEM', MENU_VISIBLE_IN_TREE | MENU_VISIBLE_IN_BREADCRUMB);
 /**
  * Menu type -- A hidden, internal callback, typically used for API calls.
  *
- * Callbacks simply register a path so that the correct function is fired
- * when the URL is accessed. They do not appear in menus or breadcrumbs.
+ * Callbacks register a path so that the correct function is fired when the URL
+ * is accessed. They do not appear in menus or breadcrumbs.
  */
 define('MENU_CALLBACK', 0x0000);
 
@@ -318,7 +318,7 @@ define('MENU_PREFERRED_LINK', '1cf698d64d1aa4b83907cf6ed55db3a7f8e92c91');
  *
  * @return
  *   An array which contains the ancestors and placeholders. Placeholders
- *   simply contain as many '%s' as the ancestors.
+ *   contain as many '%s' as the ancestors.
  */
 function menu_get_ancestors($parts) {
   $number_parts = count($parts);

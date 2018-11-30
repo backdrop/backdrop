@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Backdrop database update API.
@@ -566,8 +565,8 @@ function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $
   foreach ($updates as $update) {
     if ($update['allowed']) {
       // Set the installed version of each module so updates will start at the
-      // correct place. (The updates are already sorted, so we can simply base
-      // this on the first one we come across in the above foreach loop.)
+      // correct place. (The updates are already sorted, so we can base this on
+      // the first one we come across in the above foreach loop.)
       if (isset($start[$update['module']])) {
         backdrop_set_installed_schema_version($update['module'], $update['number'] - 1);
         unset($start[$update['module']]);

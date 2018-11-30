@@ -792,8 +792,8 @@ function comment_node_page_additions(Node $node) {
  * 1.1.1
  *
  * which is what we already did before the standard pager patch. To achieve
- * this we simply add a "/" at the end of each "thread" value. This way, the
- * thread fields will look like this:
+ * this we add a "/" at the end of each "thread" value. This way, the thread
+ * fields will look like this:
  *
  * 1/
  * 1.1/

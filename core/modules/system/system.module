@@ -3594,7 +3594,7 @@ function system_cron() {
     ->execute();
 
   // Reset expired items in the default queue implementation table. If that's
-  // not used, this will simply be a no-op.
+  // not used, this will be a no-op.
   db_update('queue')
     ->fields(array(
       'expire' => 0,

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions for error handling.
@@ -216,7 +215,7 @@ function _backdrop_log_error($error, $fatal = FALSE) {
 
   if (backdrop_is_cli()) {
     if ($fatal) {
-      // When called from CLI, simply output a plain text message.
+      // When called from CLI, output a plain text message.
       print html_entity_decode(strip_tags(t('%type: !message in %function (line %line of %file).', $error))). "\n";
       exit;
     }
@@ -224,7 +223,7 @@ function _backdrop_log_error($error, $fatal = FALSE) {
 
   if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' && $fatal) {
     if (error_displayable($error)) {
-      // When called from JavaScript, simply output the error message.
+      // When called from JavaScript, output the error message.
       print t('%type: !message in %function (line %line of %file).', $error);
     }
     exit;

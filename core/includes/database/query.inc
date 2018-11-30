@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @addtogroup database
  * @{
@@ -139,8 +138,8 @@ interface QueryConditionInterface {
   /**
    * Compiles the saved conditions for later retrieval.
    *
-   * This method does not return anything, but simply prepares data to be
-   * retrieved via __toString() and arguments().
+   * This method does not return anything. It only prepares data to be retrieved
+   * via __toString() and arguments().
    *
    * @param $connection
    *   The database connection for which to compile the conditionals.
@@ -622,8 +621,8 @@ class InsertQuery extends Query {
    * @throws NoFieldsException
    */
   public function execute() {
-    // If validation fails, simply return NULL. Note that validation routines
-    // in preExecute() may throw exceptions instead.
+    // If validation fails, return NULL. Note that validation routines in
+    // preExecute() may throw exceptions instead.
     if (!$this->preExecute()) {
       return NULL;
     }
