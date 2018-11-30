@@ -22,7 +22,5 @@ class views_handler_sort_random extends views_handler_sort {
 
   function can_expose() { return FALSE; }
 
-  function admin_summary() {
-    return;
-  }
+  function admin_summary() { return; }
 }
