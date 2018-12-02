@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Preprocessors and helper functions to make theming easier.
@@ -478,7 +477,7 @@ function template_preprocess_views_view_table(&$variables) {
   $renders = $handler->render_fields($result);
 
   foreach ($columns as $field => $column) {
-    // Create a second variable so we can easily find what fields we have and what the
+    // Create a second variable so we can find what fields we have and what the
     // CSS classes should be.
     $variables['fields'][$field] = backdrop_clean_css_identifier($field);
     if ($active == $field) {

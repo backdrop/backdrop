@@ -161,7 +161,7 @@ function _backdrop_theme_initialize($theme, $base_themes = array(), $registry_ca
 
   // Prepare stylesheets from this theme as well as all ancestor themes.
   // We work it this way so that we can have child themes override parent
-  // theme stylesheets easily.
+  // theme stylesheets.
   $final_stylesheets = array();
 
   // Grab stylesheets from base theme
@@ -1290,7 +1290,7 @@ function backdrop_find_theme_functions($cache, $prefixes) {
 }
 
 /**
- * Allows themes and/or theme engines to easily discover overridden templates.
+ * Allows themes and/or theme engines to discover overridden templates.
  *
  * @param $cache
  *   The existing cache of theme hooks to test against.
@@ -2082,8 +2082,8 @@ function theme_breadcrumb($variables) {
  *     );
  *     @endcode
  *     These optional tags are used to group and set properties on columns
- *     within a table. For example, one may easily group three columns and
- *     apply same background style to all.
+ *     within a table. For example, one may group three columns and apply the
+ *     same background style to all.
  *   - sticky: Use a "sticky" table header.
  *   - empty: The message to display in an extra row if table does not have any
  *     rows.

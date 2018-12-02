@@ -1,10 +1,8 @@
 <?php
-
 /**
  * @file
  * Enables the use of personal and site-wide contact forms.
  */
-
 
 /**
  * Implements hook_theme().
@@ -348,4 +346,35 @@ function contact_form_user_admin_settings_alter(&$form, &$form_state) {
     '#description' => t('Changing this setting will not affect existing users.'),
     '#default_value' => $config->get('contact_default_status'),
   );
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function contact_block_info() {
+  $blocks['sitewide'] = array(
+    'info' => t('Contact form'),
+    'description' => t('Site-wide contact form.'),
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function contact_block_view($delta = '', $settings = array(), $contexts = array()) {
+  $block = array();
+
+  switch ($delta) {
+    case 'sitewide':
+      if (user_access('access site-wide contact form')) {
+        module_load_include('inc', 'contact', 'contact.pages');
+        $block['subject'] = t('Contact Us');
+        $block['content'] = backdrop_get_form('contact_site_form');
+      }
+      break;
+  }
+
+  return $block;
 }

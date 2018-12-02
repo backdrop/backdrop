@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Backdrop database update API.
@@ -11,10 +10,10 @@
 /**
  * Minimum schema version of Drupal 7 required for upgrade to Backdrop.
  *
- * Upgrades from Drupal 7 to Backdrop require that Drupal 7 be running
- * the most recent version, or the upgrade could fail. We can't easily
- * check the Drupal 7 version once the update process has begun, so instead
- * we check the schema version of system.module in the system table.
+ * Upgrades from Drupal 7 to Backdrop require that Drupal 7 be running the most
+ * recent version, or the upgrade could fail. We can't check the Drupal 7
+ * version  once the update process has begun, so instead we check the schema
+ * version of system.module in the system table.
  */
 define('REQUIRED_D7_SCHEMA_VERSION', '7069');
 
@@ -566,8 +565,8 @@ function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $
   foreach ($updates as $update) {
     if ($update['allowed']) {
       // Set the installed version of each module so updates will start at the
-      // correct place. (The updates are already sorted, so we can simply base
-      // this on the first one we come across in the above foreach loop.)
+      // correct place. (The updates are already sorted, so we can base this on
+      // the first one we come across in the above foreach loop.)
       if (isset($start[$update['module']])) {
         backdrop_set_installed_schema_version($update['module'], $update['number'] - 1);
         unset($start[$update['module']]);

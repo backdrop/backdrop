@@ -129,9 +129,9 @@ Backdrop.tableDrag = function (table, tableSettings) {
  * Initialize columns containing form elements to be hidden by default,
  * according to the settings for this tableDrag instance.
  *
- * Identify and mark each cell with a CSS class so we can easily toggle
- * show/hide it. Finally, hide columns if user does not have a
- * 'Backdrop.tableDrag.showWeight' cookie.
+ * Identify and mark each cell with a CSS class so we can toggle show/hide it.
+ * Finally, hide columns if user does not have a 'Backdrop.tableDrag.showWeight'
+ * cookie.
  */
 Backdrop.tableDrag.prototype.initColumns = function () {
   var $table = $(this.table), hidden, cell, columnIndex;
