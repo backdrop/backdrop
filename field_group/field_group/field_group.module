@@ -13,7 +13,7 @@
  */
 function field_group_config_info() {
   $prefixes['field_group.field_group'] = array(
-    'name_key' => array('group_name', 'entity_type', 'bundle', 'mode'),
+    'name_key' => array('entity_type', 'bundle', 'mode', 'group_name'),
     'label_callback' => 'field_group_config_label',
     'group' => t('Field groups'),
   );
