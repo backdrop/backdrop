@@ -11,6 +11,19 @@
 
 class DashboardMenuBlock extends DashboardBlock {
 
+  /**
+   * 'Admin title' callback for the content type.
+   */
+  function getAdminTitle() {
+    return t('Administer Menus');
+  }
+
+  /**
+   * 'Admin info' callback for the content type.
+   */
+  function getAdminPreview() {
+    return t('Provides links to administer menus.');
+  }
 
   /**
    * Run-time rendering of the body of the block.
