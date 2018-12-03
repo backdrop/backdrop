@@ -1,0 +1,7 @@
+name = Dashboard
+description = Administrative Dashboard
+package = Administration
+backdrop = 1.x
+type = module
+
+
