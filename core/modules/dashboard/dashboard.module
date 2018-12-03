@@ -173,6 +173,10 @@ function dashboard_config_info() {
     'label' => t('Dasboard default layout'),
     'group' => t('Configuration'),
   );
+  $prefixes['dashboard.settings'] = array(
+    'label' => t('Dasboard settings'),
+    'group' => t('Configuration'),
+  );
 }
 
 /**
