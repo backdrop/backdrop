@@ -36,13 +36,9 @@ class DashboardWelcomeBlock extends DashboardBlock {
   function getContent() {
     // Build the content.
     $content =  '<div class="total-control-site-overview">';
-    $content .= '  <p>' . t('Welcome to your administrative dashboard.  !panel 
-      to add more content panes here, or configure those provided by default. 
-      Views content panes can be created for you automatically according to your 
-      !settings.  Make this dashboard the perfect hub for all your administrative 
-      needs.', array(
-      '!panel' => l(t('Edit this panel'), 'admin/structure/pages/nojs/operation/page-dashboard/handlers/page_dashboard_panel_context/content'),
-      '!settings' => l(t('Total Control Settings'), 'admin/config/administration/control'),
+    $content .= '  <p>' . t('Welcome to your administrative dashboard.  !layout 
+      to add more content panes here, or configure those provided by default.', array(
+      '!layout' => l(t('Edit this layout'), 'admin/structure/layouts/manage/dashboard'),
     )) . '</p>';
     $content .= '</div>';
 
