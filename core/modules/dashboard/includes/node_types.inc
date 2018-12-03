@@ -10,7 +10,7 @@
    *
    */
 
-class DashboardContentTypesBlock extends Block {
+class DashboardContentTypesBlock extends DashboardBlock {
 
   /**
    * 'Admin title' callback for the content type.

@@ -9,7 +9,7 @@
    *
    */
 
-class DashboardOverviewUserBlock extends Block {
+class DashboardOverviewUserBlock extends DashboardBlock {
 
   /**
    * 'Admin title' callback for the content type.

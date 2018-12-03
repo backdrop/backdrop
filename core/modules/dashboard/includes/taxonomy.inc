@@ -8,7 +8,7 @@
    *
    */
 
-class DashboardTaxonomyBlock extends Block {
+class DashboardTaxonomyBlock extends DashboardBlock {
 
   /**
    * 'Admin title' callback for the content type.
