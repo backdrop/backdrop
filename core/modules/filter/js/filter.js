@@ -142,8 +142,10 @@ Backdrop.behaviors.editorImageDialog = {
     });
 
     // Initialize styles of Dialog.
-    // Hide the library image browser on load.
     if ($newToggles.length) {
+      // Initialise the Insert Link dialog toggle on load.
+      $(".form-item-attributes-href").css({ "display": "none"});
+      // Hide the library image browser on load.
       $(".editor-image-library").css({ "display": "none" });
       $(".editor-dialog").removeClass("editor-dialog-with-library");
       // Set the class for the left-hand part.
