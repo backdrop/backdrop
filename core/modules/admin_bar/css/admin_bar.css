@@ -184,8 +184,8 @@
   margin: -32px 0 0 160px; /* LTR */
 }
 [dir="rtl"] #admin-bar .dropdown li li.expandable ul {
-  margin-left: 160px;
-  margin-right: 0;
+  margin-right: 160px;
+  margin-left: 0;
 }
 
 /* Lists nested under hovered list items */
