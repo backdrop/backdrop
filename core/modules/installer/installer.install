@@ -12,3 +12,12 @@ function installer_update_1000() {
   $config->set('core_update', FALSE);
   $config->save();
 }
+
+/**
+ * Enable the core update functionality via the browser.
+ */
+function installer_update_1001() {
+  $config = config('installer.settings');
+  $config->set('core_update', TRUE);
+  $config->save();
+}
