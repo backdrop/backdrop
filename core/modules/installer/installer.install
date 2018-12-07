@@ -14,7 +14,7 @@ function installer_update_1000() {
 }
 
 /**
- * Enable the core update functionality via the browser.
+ * Enable the core update functionality via the admin UI.
  */
 function installer_update_1001() {
   $config = config('installer.settings');
