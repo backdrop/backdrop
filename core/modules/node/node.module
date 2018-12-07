@@ -1119,7 +1119,7 @@ function node_view(Node $node, $view_mode = 'full', $langcode = NULL) {
   // Show a warning if the content type is configured to have hidden path.
   $type = node_type_get_type($node);
   if ($type->settings['hidden_path']) {
-    $message = t('<strong>This content is configured to have a hidden path</strong>. It can be placed as a block or within a listing, but will not be accessible at its URL without proper permissions. This facilitates content that is meant to be embedded with other content, but never viewed on its own. Users who have the <em>View hidden paths</em> permission will still be able to visit the full page URL, while those without this permission will receive a "Page not found" error.');
+    $message = t('Only people with the <em>View hidden paths</em> permission will be able to view this page. Everyone else will receive a "Page not found" error.');
     if (user_access('administer content types')) {
       $message .= '<br>' . l(t('Change this setting'), 'admin/structure/types/manage/' . $type->type . '/configure', array('fragment' => 'edit-display'));
     }
