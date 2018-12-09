@@ -785,11 +785,11 @@ class views_many_to_one_helper {
       $field = $this->handler->relationship . '_' . $this->handler->table . '.' . $this->handler->field;
       if ($this->handler->operator == 'or' && empty($this->handler->options['reduce_duplicates'])) {
         if (empty($this->handler->options['add_table']) && empty($this->handler->view->many_to_one_tables[$field])) {
-          // query optimization, INNER joins are slightly faster, so use them
-          // when we know we can.
           $join = $this->get_join();
           if (isset($join)) {
-            $join->type = 'INNER';
+            // @todo INNER joins are slightly faster, so use them when we know
+            // we can.
+            $join->type = 'LEFT';
           }
           $this->handler->table_alias = $this->handler->query->ensure_table($this->handler->table, $this->handler->relationship, $join);
           $this->handler->view->many_to_one_tables[$field] = $this->handler->value;
