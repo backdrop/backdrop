@@ -1926,18 +1926,18 @@ function layout_reorder_form($form, &$form_state) {
     return $form;
   }
   else {
-    // Grab the path of the first layout in the list.
-    $layout_path = array_values($layouts)[0]->getPath();
     foreach ($layouts as $layout) {
-      // All layouts should have the same path, otherwise they should not be
-      // listed in this page.
-      if ($layout->getPath() != $layout_path) {
-        backdrop_set_message(t('Layouts with non-matching paths specified.'), 'error');
-        return $form;
-      }
-      else {
-        backdrop_set_title(t('Configure layout priority for the !layout_path path', array('!layout_path' => $layout_path)));
-      }
+      $layout_paths[] = $layout->getPath();
+    }
+    // All layouts listed in this form should have the same path.
+    $unique_paths = array_unique($layout_paths);
+    if (count($unique_paths) == 1) {
+      $layout_path = $unique_paths[0];
+      backdrop_set_title(t('Configure layout priority for the !layout_path path', array('!layout_path' => $layout_path)));
+    }
+    else {
+      backdrop_set_message(t('Layouts with non-matching paths specified.'), 'error');
+      return $form;
     }
   }
 
