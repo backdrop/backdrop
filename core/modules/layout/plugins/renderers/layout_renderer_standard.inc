@@ -597,7 +597,7 @@ class LayoutRendererStandard {
     if (isset($style_settings['classes'])) {
       $classes = explode(' ', $style_settings['classes']);
       foreach ($classes as $n => $class) {
-        $classes[$n] = backdrop_clean_css_identifier($class);
+        $classes[$n] = backdrop_clean_css_identifier($class, array());
       }
       $classes = array_filter($classes);
     }
