@@ -94,7 +94,7 @@ function layout_menu() {
     'title' => 'Configure layout priority',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_reorder_form'),
-    'type' => MENU_CALLBACK,
+    'type' => MENU_NORMAL_ITEM,
   ) + $base;
 
   $items['admin/structure/layouts/add'] = array(
