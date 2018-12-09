@@ -105,7 +105,7 @@ function theme_user_admin_permissions($variables) {
   $roles = user_roles();
   foreach (element_children($form['permission']) as $key) {
     $row = array();
-    // Module grouping raw.
+    // Module grouping row.
     if (is_numeric($key)) {
       $row[] = array(
         'data' => backdrop_render($form['permission'][$key]),
