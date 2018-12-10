@@ -2103,7 +2103,7 @@ function system_site_maintenance_mode_form_permissions() {
   // Render role/permission overview:
   $options = array();
   $status = array();
-  foreach ($permissions as $permisson => $permission_item) {
+  foreach ($permissions as $permission => $permission_item) {
     // Fill in default values for the permission.
     $permission_item += array(
       'description' => '',
