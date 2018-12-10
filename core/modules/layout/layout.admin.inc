@@ -168,7 +168,7 @@ function _layout_get_group_operations($path, array $group) {
   }
   if (count($group) > 1) {
     $links['reorder'] = array(
-      'title' => t('Configure layout priority'),
+      'title' => t('Layout priority'),
       'href' => 'admin/structure/layouts/reorder',
       'query' => array('layouts' => array_keys($group)),
     );
