@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides the view object type and associated methods.
@@ -1364,7 +1363,7 @@ class view {
    * have other side effects that are only intended for the 'proper'
    * use of the display, such as setting page titles and breadcrumbs.
    *
-   * If you simply want to view the display, use view::preview() instead.
+   * If you only want to view the display, use view::preview() instead.
    */
   function execute_display($display_id = NULL, $args = array()) {
     if (empty($this->current_display) || $this->current_display != $this->choose_display($display_id)) {
@@ -2009,7 +2008,7 @@ class view {
    *   The id to use.
    * @return
    *   The key to the display in $view->display, so that the new display
-   *   can be easily located.
+   *   can be located.
    */
   function add_display($type = 'page', $title = NULL, $id = NULL) {
     if (empty($type)) {

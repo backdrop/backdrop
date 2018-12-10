@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions for use with Backdrop's Ajax framework.
@@ -171,8 +170,8 @@
  * class to a link, the link will be loaded via an Ajax call. When using this
  * method, the href of the link can contain '/nojs/' as part of the path. When
  * the Ajax framework makes the request, it will convert this to '/ajax/'.
- * The server is then able to easily tell if this request was made through an
- * actual Ajax request or in a degraded state, and respond appropriately.
+ * The server is then able to tell if this request was made through an actual
+ * Ajax request or in a degraded state, and respond appropriately.
  *
  * Similarly, submit buttons can be given the class 'use-ajax-submit'. The
  * form will then be submitted via Ajax to the path specified in the #action.

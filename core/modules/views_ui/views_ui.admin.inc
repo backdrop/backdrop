@@ -4778,13 +4778,13 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
       $strings = array();
       $skip_bases = array();
       foreach ($table_data as $field => $info) {
-        // Collect table data from this table
+        // Collect table data from this table...
         if ($field == 'table') {
-          // calculate what tables this table can join to.
+          // ...calculate what tables this table can join to...
           if (!empty($info['join'])) {
             $bases = array_keys($info['join']);
           }
-          // And it obviously joins to itself.
+          // ...and it joins to itself.
           $bases[] = $table;
           continue;
         }

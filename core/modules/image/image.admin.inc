@@ -239,9 +239,10 @@ function image_style_add_form($form, &$form_state) {
     ),
   );
 
-  $form['submit'] = array(
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Create new style'),
+    '#value' => t('Save and add effects'),
   );
 
   return $form;

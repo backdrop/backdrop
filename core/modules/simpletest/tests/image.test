@@ -359,8 +359,8 @@ class ImageToolkitGdTestCase extends BackdropWebTestCase {
           'arguments' => array(),
           'height' => 20,
           'width' => 40,
-          // Grayscale corners are a bit funky. Each of the corners are a shade of
-          // gray. The values of these were determined simply by looking at the
+          // Grayscale corners are a bit funky. Each of the corners are a shade
+          // of gray. The values of these were determined by looking at the
           // final image to see what desaturated colors end up being.
           'corners' => array(
             array_fill(0, 3, 76) + array(3 => 0),

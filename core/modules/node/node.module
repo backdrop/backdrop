@@ -2556,8 +2556,8 @@ function node_form_system_themes_admin_form_submit($form, &$form_state) {
  * Note: Even a single module returning NODE_ACCESS_DENY from hook_node_access()
  * will block access to the node. Therefore, implementers should take care to
  * not deny access unless they really intend to. Unless a module wishes to
- * actively deny access it should return NODE_ACCESS_IGNORE (or simply return
- * nothing) to allow other modules or the node_access table to control access.
+ * actively deny access it should return NODE_ACCESS_IGNORE (or return nothing)
+ * to allow other modules or the node_access table to control access.
  *
  * To see how to write a node access module of your own, see
  * node_access_example.module.

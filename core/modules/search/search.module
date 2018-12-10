@@ -418,8 +418,8 @@ function search_simplify($text) {
   // can't match higher UTF-8 characters as the leftmost bit of those are 1.
   $text = preg_replace('/[.-]{2,}/', ' ', $text);
 
-  // The dot, underscore and dash are simply removed. This allows meaningful
-  // search behavior with acronyms and URLs. See unicode note directly above.
+  // The dot, underscore and dash are removed. This allows meaningful search
+  // behavior with acronyms and URLs. See unicode note directly above.
   $text = preg_replace('/[._-]+/', '', $text);
 
   // With the exception of the rules above, we consider all punctuation,
@@ -778,7 +778,7 @@ function search_node_update_index(Node $node) {
  */
 function search_node_update(Node $node) {
   // Reindex the node when it is updated. The node is automatically indexed
-  // when it is added, simply by being added to the node table.
+  // when it is created, by being added to the node table.
   search_touch_node($node->nid);
 }
 
@@ -903,7 +903,7 @@ function search_expression_insert($expression, $option, $value = NULL) {
  * If your module needs to provide a more complicated search form, then you need
  * to implement it yourself without hook_search_info(). In that case, you should
  * define it as a local task (tab) under the /search page (e.g. /search/mymodule)
- * so that users can easily find it.
+ * so that users know where to find it.
  */
 
 /**
