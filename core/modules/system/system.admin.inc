@@ -1999,7 +1999,6 @@ function system_site_maintenance_mode($form, &$form_state) {
   $maintenance_mode = state_get('maintenance_mode', FALSE)? 1 : 0;
 
   $form['maintenance_mode'] = array(
-    //'#type' => 'checkbox',
     '#type' => 'radios',
     '#title' => t('Maintenance mode'),
     '#default_value' => $maintenance_mode,
@@ -2019,6 +2018,18 @@ function system_site_maintenance_mode($form, &$form_state) {
     '#element_validate' => array('token_element_validate'),
   );
 
+  if ($maintenance_mode) {
+    backdrop_set_message(t('<strong>The site is currently in maintenance mode</strong>. Visitors will only see the maintenance mode message.'), 'warning');
+
+    $form['permissions_message'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('messages', 'info')),
+    );
+    $form['permissions_message']['info'] = array(
+      '#markup' => t('While in maintenance mode, authorized users can still log in directly via the <a href="@user-login">user login</a> page, but they need to have the "Use site in maintenance mode" permission in order to be able to access the site.', array('@user-login' => url('user'))),
+    );
+  }
+
   $form['permissions_wrapper'] = array(
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
@@ -2033,11 +2044,6 @@ function system_site_maintenance_mode($form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Save configuration'),
   );
-
-  if ($maintenance_mode) {
-    backdrop_set_message(t('<strong>The site is currently in maintenance mode</strong>. Visitors will only see the maintenance mode message.'), 'warning');
-    backdrop_set_message(t('Authorized users can still log in directly via the <a href="@user-login">user login</a> page, but they need to have the "Use site in maintenance mode" <a href="@permissions-url">permission</a> in order to be able to access the site.', array('@permissions-url' => url(current_path(), array('fragment' => 'edit-permissions-wrapper')), '@user-login' => url('user'))), 'info');
-  }
 
   return $form;
 }
