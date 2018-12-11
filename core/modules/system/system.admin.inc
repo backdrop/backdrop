@@ -2072,7 +2072,7 @@ function system_site_maintenance_mode_submit($form, &$form_state) {
   backdrop_set_message(t('The configuration options have been saved.'));
 
   if ($previous_maintenance_mode_state == 1 && !$maintenance_mode) {
-    backdrop_set_message(t('The site is no longer in maintenance mode.'));
+    backdrop_set_message(t('The site is no longer in maintenance mode. Visitors will see the site as per usual.'));
   }
 
   // In some cases, the site might seem as still online, due to cache.
