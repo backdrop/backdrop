@@ -2018,17 +2018,20 @@ function system_site_maintenance_mode($form, &$form_state) {
     '#element_validate' => array('token_element_validate'),
   );
 
+  $permissions_message_type = 'info';
   if ($maintenance_mode) {
     backdrop_set_message(t('<strong>The site is currently in maintenance mode</strong>. Visitors will only see the maintenance mode message (as configured below).'), 'warning');
 
-    $form['permissions_message'] = array(
-      '#type' => 'container',
-      '#attributes' => array('class' => array('messages', 'info')),
-    );
-    $form['permissions_message']['info'] = array(
-      '#markup' => t('While in maintenance mode, authorized users can still log in directly via the <a href="@user-login">user login</a> page, but they need to have the "Use site in maintenance mode" permission in order to be able to access the site.', array('@user-login' => url('user'))),
-    );
+    $permissions_message_type = 'warning';
   }
+
+  $form['permissions_message'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('messages', $permissions_message_type)),
+  );
+  $form['permissions_message']['info'] = array(
+    '#markup' => t('While in maintenance mode, authorized users can still log in directly via the <a href="@user-login">user login</a> page, but they need to have the "Use site in maintenance mode" permission in order to be able to access the site.', array('@user-login' => url('user'))),
+  );
 
   $form['permissions_wrapper'] = array(
     '#type' => 'fieldset',
