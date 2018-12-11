@@ -2003,23 +2003,23 @@ function system_site_maintenance_mode($form, &$form_state) {
     '#title' => t('Maintenance mode'),
     '#default_value' => $maintenance_mode,
     '#options' => array(
-      '1' => t('On'),
       '0' => t('Off'),
+      '1' => t('On'),
     ),
   );
-  $form['maintenance_mode']['1']['#description'] = t('Visitors will only see the maintenance mode message.');
   $form['maintenance_mode']['0']['#description'] = t('Visitors will see the site as per usual.');
+  $form['maintenance_mode']['1']['#description'] = t('Visitors will only see the maintenance mode message.');
 
   $form['maintenance_mode_message'] = array(
     '#type' => 'textarea',
-    '#title' => t('Message to display when in maintenance mode'),
+    '#title' => t('Maintenance mode message'),
     '#default_value' => $config->get('maintenance_mode_message'),
     '#description' => theme('token_tree_link'),
     '#element_validate' => array('token_element_validate'),
   );
 
   if ($maintenance_mode) {
-    backdrop_set_message(t('<strong>The site is currently in maintenance mode</strong>. Visitors will only see the maintenance mode message.'), 'warning');
+    backdrop_set_message(t('<strong>The site is currently in maintenance mode</strong>. Visitors will only see the maintenance mode message (as configured below).'), 'warning');
 
     $form['permissions_message'] = array(
       '#type' => 'container',
