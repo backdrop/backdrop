@@ -3260,9 +3260,7 @@ function _system_sort_requirements($a, $b) {
  *   The form array.
  */
 function confirm_form($form, $question, $path, $description = NULL, $yes = NULL, $no = NULL, $name = 'confirm') {
-  $description = isset($description) ? $description : t('This action cannot be undone.');
-
-  // Prepare cancel link.
+  // Prepare the "Cancel" link.
   if (isset($_GET['destination'])) {
     $options = backdrop_parse_url($_GET['destination']);
   }
@@ -3276,7 +3274,14 @@ function confirm_form($form, $question, $path, $description = NULL, $yes = NULL,
   backdrop_set_title($question, PASS_THROUGH);
 
   $form['#attributes']['class'][] = 'confirmation';
-  $form['description'] = array('#markup' => $description);
+
+  if (isset($description)) {
+    $form['description'] = array('#markup' => $description);
+  }
+  else {
+    backdrop_set_message(t('This action cannot be undone!'), 'warning');
+  }
+
   $form[$name] = array('#type' => 'hidden', '#value' => 1);
 
   $form['actions'] = array('#type' => 'actions');
