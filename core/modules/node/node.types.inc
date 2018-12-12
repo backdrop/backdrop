@@ -636,7 +636,7 @@ function node_type_delete_confirm($form, &$form_state, $type) {
   $num_nodes = db_query("SELECT COUNT(*) FROM {node} WHERE type = :type", array(':type' => $type->type))->fetchField();
   if ($num_nodes) {
     $message = t('Content type %type cannot be deleted', array('%type' => $type->name));
-    $description .= '<p>' . format_plural($num_nodes, 'There is 1 piece of content of type %type on your site.', 'There are @count pieces of content of type %type on your site.', array('%type' => $type->name));
+    $description = '<p>' . format_plural($num_nodes, 'There is 1 piece of content of type %type on your site.', 'There are @count pieces of content of type %type on your site.', array('%type' => $type->name));
     $description .= ' ' . t('To remove this content type, you first need to <a href="!link">remove all content of that type</a>.', array('!link' => url('admin/content'))) . '</p>';
     $cancel = t('Go back');
   }
