@@ -634,16 +634,59 @@ function node_type_delete_confirm($form, &$form_state, $type) {
   $form['name'] = array('#type' => 'value', '#value' => $type->name);
 
   $message = t('Are you sure you want to delete the content type %type?', array('%type' => $type->name));
-  $caption = '';
 
   $num_nodes = db_query("SELECT COUNT(*) FROM {node} WHERE type = :type", array(':type' => $type->type))->fetchField();
   if ($num_nodes) {
-    $caption .= '<p>' . format_plural($num_nodes, '%type is used by 1 piece of content on your site. If you remove this content type, you will not be able to edit the %type content and it may not display correctly.', '%type is used by @count pieces of content on your site. If you remove %type, you will not be able to edit the %type content and it may not display correctly.', array('%type' => $type->name)) . '</p>';
+    $description = '<p>' . format_plural($num_nodes, 'There is 1 piece of content of type %type on your site.', 'There are @count pieces of content of type %type on your site.', array('%type' => $type->name));
+    $description .= ' ' . t('To remove this content type, you must also remove all content of that type.') . '</p>';
+    $cancel = t('Go back');
+  }
+  else {
+    $description = NULL;
   }
 
-  $caption .= '<p>' . t('This action cannot be undone.') . '</p>';
+  return confirm_form($form, $message, 'admin/structure/types', $description, t('Delete all content and the content type'), NULL);
+}
 
-  return confirm_form($form, $message, 'admin/structure/types', $caption, t('Delete'));
+/**
+ * Implementes HOOK_form_alter() to add a confirmation checkbox in the
+ * node_type_delete_confirm() form when there is still content of that type. The
+ * submit button of the form is not enabled unless this checkbox is ticked.
+ *
+ * @see node_type_delete_confirm()
+ */
+function node_form_node_type_delete_confirm_alter(&$form, &$form_state, $form_id) {
+  $type = node_type_load($form['type']['#value']);
+  $num_nodes = db_query("SELECT COUNT(*) FROM {node} WHERE type = :type", array(':type' => $type->type))->fetchField();
+
+  if ($num_nodes != 0) {
+
+    $form['delete_content_warning'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('messages', 'warning')),
+      '#weight' => -10,
+    );
+    $warnings = array(
+      array('data' => t('<strong>All content of type %type will be deleted!</strong>', array('%type' => $type->name))),
+      array('data' => t('This action cannot be undone!')),
+    );
+    $form['delete_content_warning']['warning1'] = array(
+      '#markup' => theme('item_list', array('items' => $warnings)),
+    );
+
+    $form['delete_content'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Delete <bold>all content</bold> of type %type', array('%type' => $type->name)),
+      '#default_value' => 0,
+    );
+    $form['actions']['submit'] += array(
+      '#states' => array(
+        'disabled' => array(
+          ':input[name="delete_content"]' => array('checked' => FALSE),
+        ),
+      ),
+    );
+  }
 }
 
 /**
@@ -652,11 +695,26 @@ function node_type_delete_confirm($form, &$form_state, $type) {
  * @see node_type_delete_confirm()
  */
 function node_type_delete_confirm_submit($form, &$form_state) {
-  $type_name = $form_state['values']['type'];
-  node_type_delete($type_name);
+  $type = node_type_load($form['type']['#value']);
 
-  backdrop_set_message(t('The content type %name has been deleted.', array('%name' => $type_name)));
-  watchdog('node', 'Deleted content type %name.', array('%name' => $type_name), WATCHDOG_NOTICE);
+  $nodes = db_select('node', 'n')
+            ->fields('n', array('nid'))
+            ->condition('type', $type->type, '=')
+            ->execute();
+  foreach ($nodes as $node) {
+    $nids[] = $node->nid;
+  }
+
+  if (!empty($nids)) {
+    node_delete_multiple($nids);
+    $message = t(format_plural(count($nids), 'Deleted 1 piece of content of type %type.', 'Deleted @count pieces of content of type %type.'), array('%type' => $type->name));
+    drupal_set_message($message);
+    watchdog('node', $message, WATCHDOG_NOTICE);
+  }
+
+  node_type_delete($type->name);
+  backdrop_set_message(t('The content type %name has been deleted.', array('%name' => $type->name)));
+  watchdog('node', 'Deleted content type %name.', array('%name' => $type->name), WATCHDOG_NOTICE);
 
   menu_rebuild();
 
