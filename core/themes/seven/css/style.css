@@ -916,11 +916,21 @@ input.form-submit:active {
   box-shadow: 0 0 5px rgb(220, 220, 220);
 }
 input.form-button-disabled,
-input.form-button-disabled:active {
+input.form-button-disabled:active,
+input.button-primary.form-disabled,
+input.button-primary.form-disabled:active,
+input.button-primary.form-disabled:hover,
+input.button-primary.form-disabled:focus,
+input.button-secondary.form-disabled,
+input.button-secondary.form-disabled:active,
+input.button-secondary.form-disabled:hover,
+input.button-secondary.form-disabled:focus {
   background: #eee none;
   border-color: #eee;
   text-shadow: none;
   color: #999;
+  box-shadow: none;
+  transition-property: none;
 }
 input.button-primary,
 button.button-primary {
