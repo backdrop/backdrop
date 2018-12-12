@@ -310,7 +310,7 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
     menu_link_save($link);
 
     // Delete the special type and check that the link disappears.
-    $this->backdropPost('admin/structure/types/manage/special/delete', array(), t('Delete'));
+    $this->backdropPost('admin/structure/types/manage/special/delete', array(), t('Delete all content and the content type'));
     $this->backdropGet('js/admin_bar/cache/' . $hash);
 
     $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path) and text()=:title]', array(
