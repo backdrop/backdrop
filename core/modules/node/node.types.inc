@@ -633,17 +633,33 @@ function node_type_delete_confirm($form, &$form_state, $type) {
   $form['type'] = array('#type' => 'value', '#value' => $type->type);
   $form['name'] = array('#type' => 'value', '#value' => $type->name);
 
-  $message = t('Are you sure you want to delete the content type %type?', array('%type' => $type->name));
-  $caption = '';
-
   $num_nodes = db_query("SELECT COUNT(*) FROM {node} WHERE type = :type", array(':type' => $type->type))->fetchField();
   if ($num_nodes) {
-    $caption .= '<p>' . format_plural($num_nodes, '%type is used by 1 piece of content on your site. If you remove this content type, you will not be able to edit the %type content and it may not display correctly.', '%type is used by @count pieces of content on your site. If you remove %type, you will not be able to edit the %type content and it may not display correctly.', array('%type' => $type->name)) . '</p>';
+    $message = t('Content type %type cannot be deleted', array('%type' => $type->name));
+    $caption .= '<p>' . format_plural($num_nodes, 'There is 1 piece of content of type %type on your site.', 'There are @count pieces of content of type %type on your site.', array('%type' => $type->name));
+    $caption .= ' ' . t('To remove this content type, you first need to <a href="!link">remove all content of that type</a>.', array('!link' => url('admin/content'))) . '</p>';
+    $cancel = t('Go back');
+  }
+  else {
+    $message = t('Are you sure you want to delete the content type %type?', array('%type' => $type->name));
   }
 
-  $caption .= '<p>' . t('This action cannot be undone.') . '</p>';
+  return confirm_form($form, $message, 'admin/structure/types', $caption, t('Delete'), $cancel);
+}
 
-  return confirm_form($form, $message, 'admin/structure/types', $caption, t('Delete'));
+/**
+ * Implementes HOOK_form_alter() to remove the "Delete" submit button from
+ * node_type_delete_confirm() when there is still content of that type.
+ *
+ * @see node_type_delete_confirm()
+ */
+function node_form_node_type_delete_confirm_alter(&$form, &$form_state, $form_id) {
+  $type = node_type_load($form['type']['#value']);
+  $num_nodes = db_query("SELECT COUNT(*) FROM {node} WHERE type = :type", array(':type' => $type->type))->fetchField();
+
+  if ($num_nodes != 0) {
+    unset($form['actions']['submit']);
+  }
 }
 
 /**
