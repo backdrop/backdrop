@@ -744,6 +744,10 @@ form.views-exposed-form {
   background-position: 98% center;
 }
 
+[dir="rtl"].js input.form-autocomplete {
+  background-position: 1% center;
+}
+
 #autocomplete {
   border: 2px solid #d0d0d0;
   border-top: 0;
