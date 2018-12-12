@@ -640,7 +640,6 @@ function node_type_delete_confirm($form, &$form_state, $type) {
     $description = '<p>' . format_plural($num_nodes, 'There is 1 piece of content of type %type on your site.', 'There are @count pieces of content of type %type on your site.', array('%type' => $type->name));
     $description .= ' ' . t('To remove this content type, you must also remove all content of that type.') . '</p>';
     $yes = t('Delete all content and the content type');
-    $cancel = t('Go back');
   }
   else {
     $description = NULL;
