@@ -2410,7 +2410,7 @@ function system_block_info() {
   );
   $blocks['breadcrumb'] = array(
     'info' => t('Breadcrumb'),
-    'description' => t('The current page breadcrumb trail.'),
+    'description' => t('A trail of links from the homepage to the current page.'),
     'render last' => TRUE,
   );
   $blocks['powered-by'] = array(
