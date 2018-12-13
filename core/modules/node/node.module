@@ -1401,7 +1401,7 @@ function node_search_admin() {
     );
   }
 
-  // Sort factors by rank, hihest first.
+  // Sort factors by rank, highest first.
   backdrop_sort($form['content_ranking']['factors'], array('#default_value' => SORT_NUMERIC), SORT_DESC);
   return $form;
 }
