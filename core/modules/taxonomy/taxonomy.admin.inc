@@ -91,6 +91,7 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
   if (!isset($form_state['vocabulary'])) {
     // Create a new TaxonomyVocabulary entity for the add form.
     if (!isset($vocabulary)) {
+      backdrop_set_title(t('Add vocabulary'));
       $vocabulary = new TaxonomyVocabulary();
     }
     $form_state['vocabulary'] = $vocabulary;
@@ -642,9 +643,13 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   if (!isset($form_state['term'])) {
     // Create a new TaxonomyTerm entity for the add form.
     if (!isset($term)) {
+      backdrop_set_title(t('Add term'));
       $term = entity_create('taxonomy_term', array(
         'vocabulary' => $vocabulary->machine_name,
       ));
+    }
+    else {
+      backdrop_set_title(t('Edit term %term_name', array('%term_name' => $term->name)), PASS_THROUGH);
     }
     if (!isset($vocabulary) && isset($term->vocabulary)) {
       $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
