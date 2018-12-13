@@ -3128,7 +3128,7 @@ class CommonBackdropSortUnitTest extends BackdropUnitTestCase {
       'breadcrumb' => array(
         'info' => 'Breadcrumb',
         'weight' => 4,
-        'description' => 'The current page breadcrumb trail.',
+        'description' => 'A trail of links from the homepage to the current page.',
         'render last' => TRUE,
       ),
       'main-menu' => array(
@@ -3186,8 +3186,8 @@ class CommonBackdropSortUnitTest extends BackdropUnitTestCase {
       'custom_block',
       'main-menu',
       'recent',
-      'content',
       'breadcrumb',
+      'content',
       'form',
     );
 
