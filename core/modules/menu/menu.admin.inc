@@ -486,6 +486,10 @@ function menu_edit_item_submit($form, &$form_state) {
  */
 function menu_edit_menu($form, &$form_state, $type, $menu = array()) {
   $system_menus = menu_list_system_menus();
+  if (empty($menu['menu_name'])) {
+    backdrop_set_title(t('Add menu'));
+  }
+
   $menu += array(
     'menu_name' => '',
     'old_name' => !empty($menu['menu_name']) ? $menu['menu_name'] : '',
