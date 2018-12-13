@@ -1400,6 +1400,9 @@ function node_search_admin() {
       '#default_value' => $config->get('node_rank_' . $var),
     );
   }
+
+  // Sort factors by rank, highest first.
+  backdrop_sort($form['content_ranking']['factors'], array('#default_value' => SORT_NUMERIC), SORT_DESC);
   return $form;
 }
 
