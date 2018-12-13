@@ -12,7 +12,7 @@ function theme_views_ui_view_name($variables) {
 
   $output = '';
   $output .= '<div class="views-ui-view-name">' . check_plain($view->get_human_name()) . '</div>';
-  $output .= '<div class="views-ui-view-machine-name">(</span>' . check_plain($view->name) . '</span>)</div>';
+  $output .= '<div class="views-ui-view-machine-name">(<span>' . check_plain($view->name) . '</span>)</div>';
   return $output;
 }
 
