@@ -339,6 +339,11 @@ function redirect_add_redirect_page() {
  */
 function redirect_edit_form($form, &$form_state, $redirect = NULL) {
   if (!isset($redirect)) {
+    // backdrop_set_title() used to "manually" change the page title. See:
+    // https://github.com/backdrop/backdrop-issues/issues/3315
+    // @todo Check if this is needed after/if this gets fixed in core
+    // menu.module. See: https://www.drupal.org/project/drupal/issues/891892
+    backdrop_set_title(t('Add redirect'));
     $redirect = new Redirect(array(
       'source' => isset($_GET['source']) ? urldecode($_GET['source']) : '',
       'source_options' => isset($_GET['source_options']) ? backdrop_get_query_array($_GET['source_options']) : array(),
