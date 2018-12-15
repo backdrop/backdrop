@@ -102,11 +102,11 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
     );
 
     // Add palette fields.
-    $placed = backdrop_static('_color_get_color_element', array());
+    $placed = backdrop_static('color_get_color_element', array());
     foreach ($theme_info['fields'] as $name => $label) {
       // Avoid placing them if they have already been placed by the theme.
       if (!isset($placed[$theme_name]) || !isset($placed[$theme_name][$name])) {
-        $form['color']['palette'][$name] = _color_get_color_element($theme_name, $name);
+        $form['color']['palette'][$name] = color_get_color_element($theme_name, $name);
       }
     }
 
@@ -128,8 +128,9 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
 /**
  * Creates the render array for a color element.
  *
- * The function also stores which color elements have already been generated, so
- * that the color module does not attempt to print out color settings twice.
+ * The function also stores a list of which color elements have already been
+ * generated, so that the color module does not attempt to print out color
+ * settings twice.
  *
  * @param string $theme_name
  *   The theme to get color settings from.
@@ -139,14 +140,19 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
  * @return array
  *   The render array for the color element.
  */
-function _color_get_color_element($theme_name, $color_name) {
+function color_get_color_element($theme_name, $color_name) {
+  // Store a list of which elemets are already placed using backdrop_static()
+  // so that other parts of the color module can access the list.
   $placed = &backdrop_static(__FUNCTION__, array());
 
+  // Get the color settings from the theme.
   $theme_info = color_get_info($theme_name);
   $palette = color_get_palette($theme_name);
 
+  // Remember that the element has already been placed.
   $placed[$theme_name][$color_name] = TRUE;
 
+  // Return the render array for the color element.
   return array(
     '#type' => 'color',
     '#title' => check_plain($theme_info['fields'][$color_name]),
