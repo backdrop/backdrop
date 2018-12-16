@@ -901,6 +901,10 @@ a.button {
   margin-left: 0;
   margin-right: .5em;
 }
+#edit-maintenance-toggle-button {
+  margin-top: .5em;
+  margin-bottom: 0;
+}
 a.button:hover,
 input.form-submit:hover,
 a.button:focus,
