@@ -285,7 +285,7 @@ function install_begin_request(&$install_state) {
   // Check existing settings.php.
   $install_state['settings_verified'] = install_verify_settings();
 
-  if ($install_state['settings_verified'] === TRUE) {
+  if ($install_state['settings_verified']['errors'] === FALSE) {
     // Initialize the database system. Note that the connection
     // won't be initialized until it is actually requested.
     require_once BACKDROP_ROOT . '/core/includes/database/database.inc';
@@ -293,7 +293,7 @@ function install_begin_request(&$install_state) {
     // Verify the last completed task in the database, if there is one.
     $task = install_verify_completed_task();
   }
-  elseif ($install_state['settings_verified'] === FALSE) {
+  elseif ($install_state['settings_verified']['errors'] === TRUE) {
     $task = NULL;
 
     // Do not install over a configured settings.php.
@@ -304,7 +304,7 @@ function install_begin_request(&$install_state) {
   else {
     $task = NULL;
 
-    throw new Exception(install_database_connection_error($install_state['settings_verified']));
+    throw new Exception(install_database_connection_error($install_state['settings_verified']['errors']));
   }
 
   // Modify the installation state as appropriate.
@@ -911,13 +911,13 @@ function install_verify_settings() {
     $settings_file = conf_path(FALSE) . '/settings.php';
     $errors = install_database_errors($database, $settings_file);
     if (empty($errors)) {
-      return TRUE;
+      return array('errors' => FALSE);
     }
     else {
-      return $errors;
+      return array('errors' => $errors);
     }
   }
-  return FALSE;
+  return array('errors' => TRUE);
 }
 
 /**
