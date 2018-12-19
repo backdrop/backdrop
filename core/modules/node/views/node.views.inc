@@ -258,7 +258,7 @@ function node_views_data() {
   $data['views_entity_node']['view_node'] = array(
     'field' => array(
       'title' => t('Link'),
-      'help' => t('Provide a simple link to the content.'),
+      'help' => t('Provide a link to view, edit or delete the content.'),
       'handler' => 'views_handler_field_node_link',
     ),
   );
