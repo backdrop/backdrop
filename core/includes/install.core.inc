@@ -1475,11 +1475,13 @@ function install_database_connection_error($errors = array()) {
   backdrop_set_title(st('Database connection error'));
 
   $items = array();
-  $items[] = st('It looks like the your settings.php database credentials are wrong.');
-  
-  $errors = implode("\n", $errors);
+  $items[] = st('It looks like your settings.php database credentials are wrong.');
 
-  $items[] = st('Here are the raw errors messages :') . '<pre>' . $errors . '</pre>';
+  if (count($errors)) {
+    $errors = implode("\n", $errors);
+    $items[] = st('Here are the raw errors messages :') . '<pre>' . $errors . '</pre>';
+  }
+
   $items[] = st('Please correct your credentials and retry.');
 
   return theme('item_list', array('items' => $items));
