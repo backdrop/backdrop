@@ -102,11 +102,10 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
     );
 
     // Add palette fields.
-    $placed = backdrop_static('color_get_color_element', array());
     foreach ($theme_info['fields'] as $name => $label) {
       // Avoid placing them if they have already been placed by the theme.
-      if (!isset($placed[$theme_name]) || !isset($placed[$theme_name][$name])) {
-        $form['color']['palette'][$name] = color_get_color_element($theme_name, $name);
+      if (!in_array($name, $form['#color_elements'])) {
+        $form['color']['palette'][$name] = color_get_color_element($theme_name, $name, $form);
       }
     }
 
@@ -136,21 +135,19 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
  *   The theme to get color settings from.
  * @param string $color_name
  *   The name of the color element to return.
+ * @param array $form
+ *   The form array for the theme settings form.
  *
  * @return array
  *   The render array for the color element.
  */
-function color_get_color_element($theme_name, $color_name) {
-  // Store a list of which elemets are already placed using backdrop_static()
-  // so that other parts of the color module can access the list.
-  $placed = &backdrop_static(__FUNCTION__, array());
-
+function color_get_color_element($theme_name, $color_name, &$form) {
   // Get the color settings from the theme.
   $theme_info = color_get_info($theme_name);
   $palette = color_get_palette($theme_name);
 
   // Remember that the element has already been placed.
-  $placed[$theme_name][$color_name] = TRUE;
+  $form['#color_elements'][] = $color_name;
 
   // Return the render array for the color element.
   return array(

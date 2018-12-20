@@ -23,7 +23,7 @@ if (module_exists('color')) {
     'hovermenu',
   );
   foreach ($fields as $field) {
-    $form['header'][$field] = color_get_color_element('basis', $field);
+    $form['header'][$field] = color_get_color_element('basis', $field, $form);
   }
 
   $form['general'] = array(
@@ -41,14 +41,14 @@ if (module_exists('color')) {
     'buttons',
   );
   foreach ($fields as $field) {
-    $form['general'][$field] = color_get_color_element('basis', $field);
+    $form['general'][$field] = color_get_color_element('basis', $field, $form);
   }
 
   $form['footer'] = array(
     '#type' => 'fieldset',
     '#title' => t('Footer Settings'),
     '#collapsible' => TRUE,
-    'color_footer' => color_get_color_element('basis', 'footer'),
+    'color_footer' => color_get_color_element('basis', 'footer', $form),
   );
 }
 else {
