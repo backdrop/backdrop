@@ -473,7 +473,7 @@ abstract class DatabaseTasks {
             'required' => TRUE,
           );
           $settings['database_prefix'] = array(
-            'value' => $db_settings['prefix'],
+            'value' => $db_settings['prefix']['default'],
           );
           backdrop_rewrite_settings($settings);
         }

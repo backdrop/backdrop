@@ -1084,6 +1084,7 @@ function install_settings_form_submit($form, &$form_state) {
 
   // Check if UTF-8 MB4 support exists in the database and add to settings.php.
   if (install_verify_database_utf8mb4()) {
+    $settings = array();
     $settings['database_charset'] = array(
       'value' => 'utf8mb4',
       'required' => TRUE,
