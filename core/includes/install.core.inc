@@ -899,7 +899,7 @@ function install_verify_database_utf8mb4() {
 /**
  * Verifies the existing settings in settings.php.
  *
- * @return TRUE|array of errors|FALSE
+ * @return array
  */
 function install_verify_settings() {
   global $databases;
