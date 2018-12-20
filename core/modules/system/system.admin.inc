@@ -1622,16 +1622,22 @@ function system_performance_settings($form, &$form_state) {
   $directory = 'public://';
   $is_writable = is_dir($directory) && is_writable($directory);
   $disabled = !$is_writable;
-  $disabled_message = '';
-  if (!$is_writable) {
-    $disabled_message = ' ' . t('<strong class="error">Set up the <a href="!file-system">public files directory</a> to make these optimizations available.</strong>', array('!file-system' => url('admin/config/media/file-system')));
-  }
 
   $form['bandwidth_optimization'] = array(
     '#type' => 'fieldset',
     '#title' => t('Bandwidth optimization'),
-    '#description' => t('External resources can be optimized automatically, which can reduce both the size and number of requests made to your website.') . $disabled_message,
+    '#description' => t('External resources can be optimized automatically, which can reduce both the size and number of requests made to your website.'),
   );
+
+  if (!$is_writable) {
+    $form['bandwidth_optimization']['file_system_message'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('messages', 'warning')),
+    );
+    $form['bandwidth_optimization']['file_system_message']['warning'] = array(
+      '#markup' => t('Aggregation of Javascript and CSS files is disabled. You need to set up the <a href="!file-system">public files directory</a> to make these optimizations available.', array('!file-system' => url('admin/config/media/file-system'))),
+    );
+  }
 
   $form['bandwidth_optimization']['page_compression'] = array(
     '#type' => 'checkbox',
@@ -2053,7 +2059,7 @@ function system_urls_settings($form, &$form_state) {
     $available = TRUE;
   }
   else {
-    $request = backdrop_http_request($GLOBALS['base_url'] . '/admin/config/urls/urls/check');
+    $request = backdrop_http_request($GLOBALS['base_url'] . '/admin/config/urls/settings/check');
     // If the request returns HTTP 200, clean URLs are available.
     if (isset($request->code) && $request->code == 200) {
       $available = TRUE;
@@ -2085,7 +2091,7 @@ function system_urls_settings($form, &$form_state) {
   }
 
   $form['#config'] = 'system.core';
-  // Show the enable/disable form if clean URLs are available or if the user
+  // Show the enable/disable form if clean URLs are available, or if the user
   // must be able to resolve a conflicting setting.
   if ($available || $conflict) {
     $form['clean_url'] = array(
@@ -2097,24 +2103,20 @@ function system_urls_settings($form, &$form_state) {
     if ($conflict) {
       // $form_state['redirect'] needs to be set to the non-clean URL,
       // otherwise the setting is not saved.
-      $form_state['redirect'] = url('', array('query' => array('q' => '/admin/config/urls/clean-urls')));
+      $form_state['redirect'] = url('', array('query' => array('q' => '/admin/config/url/settings')));
     }
   }
   // Show the clean URLs test form.
   else {
     backdrop_add_js(backdrop_get_path('module', 'system') . '/js/system.admin.js');
 
-    $form_state['redirect'] = url('admin/config/urls/clean-urls');
-    $form['clean_url_description'] = array(
-      '#type' => 'markup',
-      '#markup' => '<p>' . t('Use URLs like <code>example.com/user</code> instead of <code>example.com/?q=user</code>.'),
-    );
     // Explain why the user is seeing this page and what to expect after
     // clicking the 'Run the clean URL test' button.
-    $form['clean_url_test_result'] = array(
-      '#type' => 'markup',
-      '#markup' => '<p>' . t('Clean URLs cannot be enabled. If you are directed to this page or to a <em>Page not found (404)</em> error after testing for clean URLs, see the <a href="@url">online handbook</a>.', array('@url' => url('http://drupal.org/node/15365'))) . '</p>',
-    );
+    backdrop_set_message(t('Clean URLs cannot be enabled.'), 'warning');
+    backdrop_set_message(t('When clean URLs can be enabled, you will be able to use URLs like <code>example.com/user</code> instead of <code>example.com/?q=user</code>.'), 'info');
+    backdrop_set_message(t('If you are directed to this page or to a "Page not found (404)" error after testing for clean URLs, see the <a href="@url">online handbook</a>.', array('@url' => url('https://backdropcms.org/user-guide/clean-urls'))), 'info');
+
+    $form_state['redirect'] = url('admin/config/urls/settings');
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['clean_url_test'] = array(
       '#type' => 'submit',
@@ -2311,7 +2313,10 @@ function system_date_time_formats() {
  */
 function system_configure_date_formats_form($form, &$form_state, $format = NULL) {
   if ($format) {
-    backdrop_set_title(t('Edit %format', array('%format' => $format['label'])), PASS_THROUGH);
+    backdrop_set_title(t('Edit date format %format', array('%format' => $format['label'])), PASS_THROUGH);
+  }
+  else {
+    backdrop_set_title(t('Add date format'));
   }
   $form_state['format'] = $format;
 
@@ -2711,6 +2716,7 @@ function system_transliteration_file_query() {
  */
 function system_transliterate_ajax($string = '') {
   backdrop_add_http_header('Content-Type', 'text/plain');
+  $string = rawurldecode($string);
   $string = system_transliterate_machine_name($string, $_GET);
 
   print $string;

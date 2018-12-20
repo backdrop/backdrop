@@ -98,10 +98,11 @@ function path_admin_overview($keys = NULL) {
  */
 function path_admin_edit($path = array()) {
   if ($path) {
-    backdrop_set_title($path['alias']);
+    backdrop_set_title(t('Edit URL alias %alias', array('%alias' => $path['alias'])), PASS_THROUGH);
     $output = backdrop_get_form('path_admin_form', $path);
   }
   else {
+    backdrop_set_title(t('Add URL alias'));
     $output = backdrop_get_form('path_admin_form');
   }
 

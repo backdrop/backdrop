@@ -33,7 +33,7 @@ function image_style_list() {
  * @see image_style_form_submit()
  */
 function image_style_form($form, &$form_state, $style) {
-  $title = t('Configure %name style', array('%name' => $style['label']));
+  $title = t('Configure image style %name', array('%name' => $style['label']));
   backdrop_set_title($title, PASS_THROUGH);
 
   $form_state['image_style'] = $style;
@@ -220,6 +220,7 @@ function image_style_form_submit($form, &$form_state) {
  * @see image_style_add_form_submit()
  */
 function image_style_add_form($form, &$form_state) {
+  backdrop_set_title(t('Add image style'));
   $form['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Style name'),
