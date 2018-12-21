@@ -14,7 +14,7 @@ function image_field_info() {
       'description' => t('This field stores the ID of an image file as an integer value.'),
       'settings' => array(
         'uri_scheme' => config_get('system.core', 'file_default_scheme'),
-        'default_image' => '',
+        'default_image' => array(),
       ),
       'instance_settings' => array(
         'file_extensions' => 'png gif jpg jpeg',
@@ -24,7 +24,7 @@ function image_field_info() {
         'title_field' => 0,
         'max_dimensions' => '',
         'min_dimensions' => '',
-        'default_image' => '',
+        'default_image' => array(),
         'orientate' => 0,
       ),
       'default_widget' => 'image_image',
@@ -414,12 +414,12 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 
   if ($field['cardinality'] == 1) {
     // If there's only one field, return it as delta 0.
-    if (empty($elements[0]['#default_value']['fid'])) {
-      $elements[0]['#description'] = theme('file_upload_help', array('description' => field_filter_xss($instance['description']), 'upload_validators' => $elements[0]['#upload_validators']));
+    if (empty($elements[0]['#default_value']['fids'])) {
+      $elements[0]['#description'] = theme('file_upload_help', array('description' => field_filter_xss($instance['description']), 'upload_validators' => $elements[0]['#upload_validators'], 'cardinality' => $field['cardinality']));
     }
   }
   else {
-    $elements['#file_upload_description'] = theme('file_upload_help', array('upload_validators' => $elements[0]['#upload_validators']));
+    $elements['#file_upload_description'] = theme('file_upload_help', array('upload_validators' => $elements[0]['#upload_validators'], 'cardinality' => $field['cardinality']));
   }
   return $elements;
 }
@@ -431,7 +431,7 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
  */
 function image_field_widget_process($element, &$form_state, $form) {
   $item = $element['#value'];
-  $item['fid'] = $element['fid']['#value'];
+  $item['fids'] = $element['fids']['#value'];
 
   $instance = field_widget_instance($element, $form_state);
 
@@ -442,10 +442,11 @@ function image_field_widget_process($element, &$form_state, $form) {
   $element['#attached']['css'][] = backdrop_get_path('module', 'image') . '/css/image.css';
 
   // Add the image preview.
-  if ($element['#file'] && $widget_settings['preview_image_style']) {
+  if (!empty($element['#files']) && $widget_settings['preview_image_style']) {
+    $file = reset($element['#files']);
     $variables = array(
       'style_name' => $widget_settings['preview_image_style'],
-      'uri' => $element['#file']->uri,
+      'uri' => $file->uri,
     );
 
     // Determine image dimensions.
@@ -454,7 +455,7 @@ function image_field_widget_process($element, &$form_state, $form) {
       $variables['height'] = $element['#value']['height'];
     }
     else {
-      $info = image_get_info($element['#file']->uri);
+      $info = image_get_info($file->uri);
 
       if (is_array($info)) {
         $variables['width'] = $info['width'];
@@ -491,7 +492,7 @@ function image_field_widget_process($element, &$form_state, $form) {
     // @see http://www.gawds.org/show.php?contentid=28
     '#maxlength' => 512,
     '#weight' => -2,
-    '#access' => (bool) $item['fid'] && $settings['alt_field'],
+    '#access' => (bool) $item['fids'] && $settings['alt_field'],
   );
   $element['title'] = array(
     '#type' => 'textfield',
@@ -500,7 +501,7 @@ function image_field_widget_process($element, &$form_state, $form) {
     '#description' => t('The title is used as a tool tip when the user hovers the mouse over the image.'),
     '#maxlength' => 1024,
     '#weight' => -1,
-    '#access' => (bool) $item['fid'] && $settings['title_field'],
+    '#access' => (bool) $item['fids'] && $settings['title_field'],
   );
 
   return $element;
