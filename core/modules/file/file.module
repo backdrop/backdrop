@@ -816,7 +816,7 @@ function file_managed_file_submit($form, &$form_state) {
     // $form_state['input'] must be updated so that file_managed_file_value()
     // has correct information during the rebuild.
     form_set_value($element['fids'], implode(' ', $fids), $form_state);
-    NestedArray::setValue($form_state['input'], $element['fids']['#parents'], implode(' ', $fids));
+    backdrop_array_set_nested_value($form_state['input'], $element['fids']['#parents'], implode(' ', $fids));
   }
 
   // Set the form to rebuild so that $form is correctly updated in response to

@@ -580,10 +580,10 @@ function file_field_widget_value($element, $input = FALSE, $form_state) {
  */
 function file_field_widget_multiple_count_validate($element, &$form_state, $form) {
   $parents = $element['#parents'];
-  $values = NestedArray::getValue($form_state['values'], $parents);
+  $values = backdrop_array_get_nested_value($form_state['values'], $parents);
 
   array_pop($parents);
-  $current = count(element_children(NestedArray::getValue($form, $parents))) - 1;
+  $current = count(element_children(backdrop_array_get_nested_value($form, $parents))) - 1;
 
   $field = field_info_field($element['#field_name']);
   $uploaded = count($values['fids']);
@@ -609,7 +609,7 @@ function file_field_widget_multiple_count_validate($element, &$form_state, $form
       'warning'
     );
     $values['fids'] = array_slice($values['fids'], 0, $keep);
-    NestedArray::setValue($form_state['values'], $element['#parents'], $values);
+    backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $values);
   }
 }
 
