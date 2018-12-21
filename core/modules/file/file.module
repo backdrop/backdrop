@@ -652,6 +652,8 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
     $fids[$key] = (int) $fid;
   }
 
+  $force_default = FALSE;
+
   // Process any input and save new uploads.
   if ($input !== FALSE) {
     $input['fids'] = $fids;
@@ -694,7 +696,7 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
             }
             // If all checks pass, allow the file to be changed.
             else {
-              $fid[] = $file->fid;
+              $fids[] = $file->fid;
             }
           }
         }

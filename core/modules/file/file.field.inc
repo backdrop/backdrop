@@ -456,7 +456,9 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       $elements[$delta] = $element;
       $elements[$delta]['#default_value'] = $item;
       $elements[$delta]['#weight'] = $delta;
-      $elements[$delta]['#element_validate'] = array('file_field_widget_multiple_count_validate');;
+      if ($field['cardinality'] != FIELD_CARDINALITY_UNLIMITED) {
+        $elements[$delta]['#element_validate'] = array('file_field_widget_multiple_count_validate');;
+      }
       $delta++;
     }
     // And then add one more empty row for new uploads except when this is a
