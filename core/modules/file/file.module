@@ -651,9 +651,6 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
   foreach ($fids as $key => $fid) {
     $fids[$key] = (int) $fid;
   }
-  elseif (is_numeric($form_state_fid)) {
-    $fid = $form_state_fid;
-  }
 
   // Process any input and save new uploads.
   if ($input !== FALSE) {

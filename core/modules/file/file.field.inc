@@ -456,7 +456,6 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       $elements[$delta] = $element;
       $elements[$delta]['#default_value'] = $item;
       $elements[$delta]['#weight'] = $delta;
-      $elements[$delta]['#multiple'] = TRUE;
       $elements[$delta]['#element_validate'] = array('file_field_widget_multiple_count_validate');;
       $delta++;
     }
@@ -467,6 +466,7 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       $elements[$delta]['#default_value'] = $defaults;
       $elements[$delta]['#weight'] = $delta;
       $elements[$delta]['#required'] = ($element['#required'] && $delta == 0);
+      $elements[$delta]['#multiple'] = TRUE;
     }
     // The group of elements all-together need some extra functionality
     // after building up the full list (like draggable table rows).
@@ -484,7 +484,7 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     // field. These are added here so that they may be referenced through a
     // hook_form_alter().
     $elements['#file_upload_title'] = t('Add a new file');
-    $elements['#file_upload_description'] = theme('file_upload_help', array('description' => '', 'upload_validators' => $elements[0]['#upload_validators'], 'cardinality' => $this->field['cardinality']));
+    $elements['#file_upload_description'] = theme('file_upload_help', array('description' => '', 'upload_validators' => $elements[0]['#upload_validators'], 'cardinality' => $field['cardinality']));
   }
 
   return $elements;
@@ -587,9 +587,9 @@ function file_field_widget_multiple_count_validate($element, &$form_state, $form
 
   $field = field_info_field($element['#field_name']);
   $uploaded = count($values['fids']);
-  $count = $uploaded  $current;
+  $count = $uploaded + $current;
   if ($count > $field['cardinality']) {
-    $keep = $uploaded - $count  $field['cardinality'];
+    $keep = $uploaded - $count + $field['cardinality'];
     $removed_files = array_slice($values['fids'], $keep);
     $removed_names = array();
     foreach ($removed_files as $fid) {
