@@ -38,7 +38,23 @@ function field_default_extract_form_values($entity_type, $entity, $field, $insta
   if ($key_exists) {
     // Remove the 'value' of the 'add more' button.
     unset($values['add_more']);
-    $items = $values;
+    // @todo: make this specific to multiple fields.
+    // if ($field['type'] == 'image') {
+      $new_values = array();
+      foreach ($values as &$value) {
+        foreach ($value['fids'] as $fid) {
+          $new_value = $value;
+          $new_value['fid'] = $fid;
+          unset($new_value['fids']);
+          $new_values[] = $new_value;
+        }
+      }
+
+      $items = $new_values;
+    // }
+    // else {
+      // $items = $values;
+    // }
   }
 }
 
