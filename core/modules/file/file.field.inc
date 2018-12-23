@@ -266,7 +266,6 @@ function file_field_update($entity_type, $entity, $field, $instance, $langcode, 
 
   // Build a display of the current FIDs.
   $current_fids = array();
-    dpm($items);
   foreach ($items as $item) {
     $current_fids[] = $item['fid'];
   }
@@ -413,7 +412,6 @@ function file_field_widget_settings_form($field, $instance) {
  * Implements hook_field_widget_form().
  */
 function file_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-
   $defaults = array(
     'fids' => array(),
     'display' => !empty($field['settings']['display_default']),
@@ -459,6 +457,9 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
   else {
     // If there are multiple values, add an element for each existing one.
     foreach ($items as $item) {
+      if (!isset($item['fids']) && isset($item['fid'])) {
+        $item['fids'][0] = $item['fid'];
+      }
       $elements[$delta] = $element;
       $elements[$delta]['#default_value'] = $item;
       $elements[$delta]['#weight'] = $delta;
