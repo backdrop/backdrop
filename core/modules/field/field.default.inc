@@ -38,10 +38,13 @@ function field_default_extract_form_values($entity_type, $entity, $field, $insta
   if ($key_exists) {
     // Remove the 'value' of the 'add more' button.
     unset($values['add_more']);
-    // @todo: make this specific to multiple fields.
-    // if ($field['type'] == 'image') {
-      $new_values = array();
-      foreach ($values as &$value) {
+
+    // Since file upload widget now supports uploads of more than one file at a
+    // time it always returns an array of fids. We have to translate this to a
+    // single fid, as field expects single value.
+    $new_values = array();
+    foreach ($values as &$value) {
+      if (isset($value['fids'])) {
         foreach ($value['fids'] as $fid) {
           $new_value = $value;
           $new_value['fid'] = $fid;
@@ -49,12 +52,16 @@ function field_default_extract_form_values($entity_type, $entity, $field, $insta
           $new_values[] = $new_value;
         }
       }
+      // @todo: if we dont find an fids on the first loop, could we break out of
+      // this? Would we ever find one loop without an fids buut others with?
+    }
 
+    if (!empty($new_values)) {
       $items = $new_values;
-    // }
-    // else {
-      // $items = $values;
-    // }
+    }
+    else {
+      $items = $values;
+    }
   }
 }
 

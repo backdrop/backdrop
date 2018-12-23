@@ -747,7 +747,7 @@ function file_managed_file_validate(&$element, &$form_state) {
     foreach ($fids as $fid) {
       if ($file = file_load($fid)) {
         if ($file->status == FILE_STATUS_PERMANENT) {
-          $references = file_usage()->listUsage($file);
+          $references = file_usage_list($file);
           if (empty($references)) {
             form_error($element, t('The file used in the !name field may not be referenced.', array('!name' => $element['#title'])));
           }
