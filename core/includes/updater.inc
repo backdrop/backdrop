@@ -181,7 +181,8 @@ abstract class Updater implements BackdropUpdaterInterface {
    * @throws UpdaterException
    */
   public static function getProjectType($directory) {
-    if ($directory == BACKDROP_ROOT) {
+    $is_backdrop = explode('/', $directory)[3];
+    if ($is_backdrop == 'backdrop') {
       return 'core';
     }
     else {
