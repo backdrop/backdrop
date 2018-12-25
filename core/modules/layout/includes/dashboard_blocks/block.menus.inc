@@ -35,12 +35,11 @@ class DashboardMenuBlock extends DashboardBlock {
     $items = array();
 
     $menus = menu_get_menus();
-      $options = array('query' => array('destination' => 'admin/dashboard'));
+      $options = array('destination' => 'admin/dashboard');
       $header = array(
         array('data' => t('Menu')),
         array(
           'data' => t('Operations'),
-          'colspan' => 3,
         ),
       );
       $rows = array();
@@ -48,12 +47,29 @@ class DashboardMenuBlock extends DashboardBlock {
     foreach ($menus as $menu_name => $menu) {
         if (array_key_exists($menu_name, $this->settings['menus'])) {
           if ($this->settings['menus'][$menu_name] === $menu_name) {
+            $links['configure'] = array(
+              'title' => t('Configure'),
+              'href' => 'admin/structure/menu/manage/' . $menu_name . '/edit',
+              'query' => $options,
+            );
+            $links['manage'] = array(
+              'title' => t('Manage links'),
+              'href' => 'admin/structure/menu/manage/' . $menu_name,
+              'query' => $options,
+            );
+            $links['add'] = array(
+              'title' => t('Add new link'),
+              'href' => 'admin/structure/menu/manage/' . $menu_name . '/add',
+              'query' => $options,
+            );
+            $operations = array(
+              '#type' => 'dropbutton',
+              '#links' => $links,
+            );
             $rows[] = array(
               'data' => array(
                 t($menu),
-                l(t('Configure'), 'admin/structure/menu/manage/' . $menu_name . '/edit', $options),
-                l(t('Manage links'), 'admin/structure/menu/manage/' . $menu_name, $options),
-                l(t('Add new link'), 'admin/structure/menu/manage/' . $menu_name . '/add', $options),
+                backdrop_render($operations),
               ),
             );
           }
