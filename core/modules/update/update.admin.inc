@@ -77,7 +77,7 @@ function update_settings($form, &$form_state) {
   $form['self_update'] = array(
     '#type' => 'fieldset',
     '#title' => t('Self-updates'),
-    '#description' => t('This website has the ability to update itself, but the file system permissions must be set properly. See: !link for more details.',
+    '#description' => t('This website has the ability to update itself, but the file system permissions must be set properly. For more details, see !link.',
       array('!link' => $docs)),
   );
   $core_update = config_get('installer.settings', 'core_update');
