@@ -32,12 +32,11 @@ class DashboardContentTypesBlock extends DashboardBlock {
   function getContent() {
     $types = node_type_get_types();
     $access = user_access('administer content types');
-    $options = array('query' => array('destination' => 'admin/dashboard'));
+    $options = array('destination' => 'admin/dashboard');
     $header = array(
       array('data' => t('Content type')),
       array(
         'data' => t('Operations'),
-        'colspan' => 3,
       ),
     );
     $rows = array();
@@ -48,12 +47,29 @@ class DashboardContentTypesBlock extends DashboardBlock {
           // Check access, then add a link to create content.
           if ($access) {
             $type_url_str = str_replace('_', '-', $object->type);
+            $links['configure'] = array(
+              'title' => t('Configure'),
+              'href' => 'admin/structure/types/manage/' . $type_url_str,
+              'query' => $options,
+            );
+            $links['manage'] = array(
+              'title' => t('Manage fields'),
+              'href' => 'admin/structure/types/manage/' . $type_url_str . '/fields',
+              'query' => $options,
+            );
+            $links['add'] = array(
+              'title' => t('Manage display'),
+              'href' => 'admin/structure/types/manage/' . $type_url_str . '/display',
+              'query' => $options,
+            );
+            $operations = array(
+              '#type' => 'dropbutton',
+              '#links' => $links,
+            );
             $rows[] = array(
               'data' => array(
                 t($object->name),
-                l(t('Configure'), 'admin/structure/types/manage/' . $type_url_str, $options),
-                l(t('Manage fields'), 'admin/structure/types/manage/' . $type_url_str . '/fields', $options),
-                l(t('Manage display'), 'admin/structure/types/manage/' . $type_url_str . '/display', $options),
+                backdrop_render($operations),
               ),
             );
           }
