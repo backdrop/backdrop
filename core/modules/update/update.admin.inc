@@ -53,7 +53,7 @@ function update_settings($form, &$form_state) {
     '#options' => array(
       'all' => t('When any update is available'),
       'security' => t('Only if a security update is available'),
-      'none' => t('Do not send email notifications.'),
+      'none' => t('Do not send email notifications'),
     ),
   );
   $notify_emails = $config->get('update_emails');
