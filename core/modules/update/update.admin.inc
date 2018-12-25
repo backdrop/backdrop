@@ -52,7 +52,7 @@ function update_settings($form, &$form_state) {
     '#default_value' => $config->get('update_threshold'),
     '#options' => array(
       'all' => t('When any update is available'),
-      'security' => t('Only if a security update is available.'),
+      'security' => t('Only if a security update is available'),
       'none' => t('Do not send email notifications.'),
     ),
   );
