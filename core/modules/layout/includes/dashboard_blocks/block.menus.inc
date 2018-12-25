@@ -1,0 +1,115 @@
+<?php
+
+  /**
+   * @file
+   *
+   * "Panel Pages" panels content pane. It shows users with permissions the
+   * panel pages on the site, and provides links directly to the "content" tab.
+   *
+   */
+
+
+class DashboardMenuBlock extends DashboardBlock {
+
+  /**
+   * 'Admin title' callback for the content type.
+   */
+  function getAdminTitle() {
+    return t('Manage Menus');
+  }
+
+  /**
+   * 'Admin info' callback for the content type.
+   */
+  function getAdminPreview() {
+    return t('Links to administer menus.');
+  }
+
+  /**
+   * Run-time rendering of the body of the block.
+   */
+  function getContent() {
+    if (!module_exists('menu')) {
+      return;
+    }
+    $items = array();
+
+    $menus = menu_get_menus();
+      $options = array('query' => array('destination' => 'admin/dashboard'));
+      $header = array(
+        array('data' => t('Menu')),
+        array(
+          'data' => t('Operations'),
+          'colspan' => 3,
+        ),
+      );
+      $rows = array();
+
+    foreach ($menus as $menu_name => $menu) {
+        if (array_key_exists($menu_name, $this->settings['menus'])) {
+          if ($this->settings['menus'][$menu_name] === $menu_name) {
+            $rows[] = array(
+              'data' => array(
+                t($menu),
+                l(t('Configure'), 'admin/structure/menu/manage/' . $menu_name . '/edit', $options),
+                l(t('Manage links'), 'admin/structure/menu/manage/' . $menu_name, $options),
+                l(t('Add new link'), 'admin/structure/menu/manage/' . $menu_name . '/add', $options),
+              ),
+            );
+          }
+        }
+      }
+
+    if (empty($rows)) {
+        $rows[] = array(
+          array(
+            'data' => t('There are no menus to display.'),
+            'colspan' => 4,
+          ),
+        );
+      }
+
+    // Build a link to the menu admin UI.
+      $link = '';
+      if (user_access('administer menu')) {
+        $link = l(t('Menu administration'), 'admin/structure/menu');
+      }
+
+    $content = theme('dashboard_admin_table', array('header' => $header, 'rows' => $rows, 'link' => $link));
+
+    return $content;
+  }
+
+  /**
+   * 'Edit form' callback for the content type.
+   */
+  function form(&$form, &$form_state) {
+    parent::form($form, $form_state);
+    if (!module_exists('menu')) {
+      return $form;
+    }
+
+    $menus = menu_get_menus();
+    foreach ($menus as $machine => $name) {
+      if (!in_array($machine, array('management', 'user-menu', 'devel'))) {
+        $menu_defaults[$machine] = $machine;
+      }
+    }
+    $form['menus'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Show links for the following menus on the dashboard'),
+      '#options' => $menus,
+      '#default_value' => ($this->settings['menus']) ? $this->settings['menus'] : $menu_defaults,
+    );
+  }
+
+  /**
+   * 'Edit form' submit callback for the content type.
+   */
+  function formSubmit($form, &$form_state) {
+    parent::formSubmit($form, $form_state);
+    foreach (array_keys($form_state['values']['menus']) as $key) {
+      $this->settings['menus'][$key] = $form_state['values']['menus'][$key];
+    }
+  }
+}

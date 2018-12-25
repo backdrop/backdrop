@@ -22,6 +22,8 @@
  * other blocks around the existing content.
  */
 
+include_once('dashboard.inc');
+
 /**
  * Layouts constant for user-defined layouts.
  */
@@ -326,6 +328,28 @@ function layout_menu() {
     'file' => 'layout.admin.inc',
   );
 
+
+  // Add dashboard and its settings menu if the layout is enabled.
+  $dashboad = layout_load('dashboard');
+  if (!$dashboard->disabled) {
+    $items['admin/dashboard/default'] = array(
+      'title' => 'Dashboard',
+      'description' => 'Total Control admin dashboard',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -100,
+    );
+    $items['admin/dashboard/settings'] = array(
+      'title' => 'Settings',
+      'page callback' => 'backdrop_get_form',
+      'page arguments' => array('layout_dashboard_admin_settings'),
+      'description' => 'Admin dashboard settings',
+      'access arguments' => array('access content'),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'layout.admin.inc',
+      'weight' => -100,
+    );
+  }
+
   return $items;
 }
 
@@ -514,6 +538,26 @@ function layout_theme() {
     'layout_region_inner' => array(
       'variables' => array('blocks' => array(), 'tag' => '', 'classes' => array(), 'attributes' => array()),
     ) + $base,
+    'dashboard_create' => array(
+      'variables' => array('create' => array()),
+      'file' => 'dashboard.theme.inc',
+    ),
+    'dashboard_overview' => array(
+      'variables' => array('content' => array(), 'users' => array()),
+      'file' => 'dashboard.theme.inc',
+    ),
+    'dashboard_overview_content' => array(
+      'variables' => array('overview' => array()),
+      'file' => 'dashboard.theme.inc',
+    ),
+    'dashboard_overview_user' => array(
+      'variables' => array('overview' => array()),
+      'file' => 'dashboard.theme.inc',
+    ),
+    'dashboard_admin_table' => array(
+      'variables' => array('header' => array(), 'rows' => array(), 'link' => FALSE),
+      'file' => 'dashboard.theme.inc',
+    ),
   );
 
   // Register all layout templates.
@@ -594,6 +638,14 @@ function layout_config_info() {
     'label_key' => 'path',
     'group' => t('Layout menu items'),
   );
+  $prefixes['layout.layout.dashboard'] = array(
+    'label' => t('Dasboard default layout'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['dashboard.settings'] = array(
+    'label' => t('Dasboard settings'),
+    'group' => t('Configuration'),
+  );
   return $prefixes;
 }
 
@@ -639,6 +691,48 @@ function layout_block_info() {
     'info' => t('Hero block'),
     'description' => t('A hero block often consists of text over a background image, though either are optional.'),
     'class' => 'BlockHero',
+  );
+
+  // Dashboard blocks.
+  $blocks['content'] = array(
+    'info' => t('Welcome'),
+    'description' => t('Intro to Total Control'),
+    'class' => 'DashboardWelcomeBlock',
+  );
+  $blocks['create'] = array(
+    'info' => t('Create content'),
+    'description' => t('Provides links to create new content'),
+    'class' => 'DashboardCreateBlock',
+  );
+  $blocks['menu'] = array(
+    'info' => t('Menus'),
+    'description' => t('Provides links to administer menus'),
+    'class' => 'DashboardMenuBlock',
+  );
+  $blocks['node_types'] = array(
+    'info' => t('Content types'),
+    'description' => t('Provides links to administer content types'),
+    'class' => 'DashboardContentTypesBlock',
+  );
+  $blocks['overview'] = array(
+    'info' => t('overview - Content & User accounts'),
+    'description' => t('An overview of both content and users in one block'),
+    'class' => 'DashboardOverviewBlock',
+  );
+  $blocks['overview_content'] = array(
+    'info' => t('Content'),
+    'description' => t('Displays a summary of content statistics'),
+    'class' => 'DashboardOverviewContentBlock',
+  );
+  $blocks['overview_user'] = array(
+    'info' => t('User accounts'),
+    'description' => t('Displays a summary of user statistics'),
+    'class' => 'DashboardOverviewUserBlock',
+  );
+  $blocks['taxonomy'] = array(
+    'info' => t('Categories'),
+    'description' => t('Provides links to administer taxonomy'),
+    'class' => 'DashboardTaxonomyBlock',
   );
 
   return $blocks;
@@ -691,6 +785,17 @@ function layout_autoload_info() {
     // Styles.
     'LayoutStyle' => 'plugins/styles/layout_style_default.inc',
     'LayoutStyleDynamic' => 'plugins/styles/layout_style_dynamic.inc',
+
+    // Dashboard blocks
+    'DashboardBlock' => 'includes/dashboard_blocks/block.dashboard.inc',
+    'DashboardWelcomeBlock' => 'includes/dashboard_blocks/block.welcome.inc',
+    'DashboardCreateBlock' => 'includes/dashboard_blocks/block.create.inc',
+    'DashboardMenuBlock' => 'includes/dashboard_blocks/block.menus.inc',
+    'DashboardContentTypesBlock' => 'includes/dashboard_blocks/block.node_types.inc',
+    'DashboardOverviewBlock' => 'includes/dashboard_blocks/block.overview.inc',
+    'DashboardOverviewContentBlock' => 'includes/dashboard_blocks/block.overview_content.inc',
+    'DashboardOverviewUserBlock' => 'includes/dashboard_blocks/block.overview_user.inc',
+    'DashboardTaxonomyBlock' => 'includes/dashboard_blocks/block.taxonomy.inc',
   );
 }
 
@@ -1795,4 +1900,21 @@ function layout_get_title_description(Layout $layout) {
   }
 
   return $description;
+}
+
+/**
+ * Implements hook_user_login().
+ * Redirects to the dashboard if configured.
+ */
+function layout_user_login(&$edit, $account) {
+  // Don't redirect for password reset.
+  if (!((arg(0) == 'user') && (arg(1) == 'reset'))) {
+    // Check for permission to use total control.
+    if (user_access('have total control', $account)) {
+      // Check for redirect to dashboard setting.
+      if (config_get('dashboard.settings', 'login_redirect') == 1) {
+        $_GET['destination'] = 'admin/dashboard';
+      }
+    }
+  }
 }
