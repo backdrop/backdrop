@@ -51,7 +51,7 @@ function update_settings($form, &$form_state) {
     '#title' => t('When should this website send e-mail notifications?'),
     '#default_value' => $config->get('update_threshold'),
     '#options' => array(
-      'all' => t('When any update is available.'),
+      'all' => t('When any update is available'),
       'security' => t('Only if a security update is available.'),
       'none' => t('Do not send email notifications.'),
     ),
