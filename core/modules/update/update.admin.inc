@@ -27,7 +27,7 @@ function update_settings($form, &$form_state) {
     '#options' => array(
       '1' => t('Check daily'),
       '7' => t('Check weekly'),
-      '0' => t('Do not check automatically.'),
+      '0' => t('Do not check automatically'),
     ),
   );
   $form['check']['update_check_disabled'] = array(
