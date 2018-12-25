@@ -32,7 +32,7 @@ function update_settings($form, &$form_state) {
   );
   $form['check']['update_check_disabled'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Also check for updates of disabled modules, themes, and layouts.'),
+    '#title' => t('Also check for updates of disabled modules, themes, and layouts'),
     '#default_value' => $config->get('update_disabled_extensions'),
   );
 
