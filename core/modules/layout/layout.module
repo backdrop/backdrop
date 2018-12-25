@@ -542,10 +542,6 @@ function layout_theme() {
       'variables' => array('create' => array()),
       'file' => 'dashboard.theme.inc',
     ),
-    'dashboard_overview' => array(
-      'variables' => array('content' => array(), 'users' => array()),
-      'file' => 'dashboard.theme.inc',
-    ),
     'dashboard_overview_content' => array(
       'variables' => array('overview' => array()),
       'file' => 'dashboard.theme.inc',
@@ -714,11 +710,6 @@ function layout_block_info() {
     'description' => t('Provides links to administer content types'),
     'class' => 'DashboardContentTypesBlock',
   );
-  $blocks['overview'] = array(
-    'info' => t('overview - Content & User accounts'),
-    'description' => t('An overview of both content and users in one block'),
-    'class' => 'DashboardOverviewBlock',
-  );
   $blocks['overview_content'] = array(
     'info' => t('Content'),
     'description' => t('Displays a summary of content statistics'),
@@ -792,7 +783,6 @@ function layout_autoload_info() {
     'DashboardCreateBlock' => 'includes/dashboard_blocks/block.create.inc',
     'DashboardMenuBlock' => 'includes/dashboard_blocks/block.menus.inc',
     'DashboardContentTypesBlock' => 'includes/dashboard_blocks/block.node_types.inc',
-    'DashboardOverviewBlock' => 'includes/dashboard_blocks/block.overview.inc',
     'DashboardOverviewContentBlock' => 'includes/dashboard_blocks/block.overview_content.inc',
     'DashboardOverviewUserBlock' => 'includes/dashboard_blocks/block.overview_user.inc',
     'DashboardTaxonomyBlock' => 'includes/dashboard_blocks/block.taxonomy.inc',

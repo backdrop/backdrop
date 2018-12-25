@@ -8,27 +8,6 @@
  */
 
 /*
- * Theme function for site overview.
- */
-/**
- * @todo Please document this function.
- * @see http://drupal.org/node/1354
- */
-function theme_dashboard_overview($variables) {
-  $content = $variables['content'];
-  $users = $variables['users'];
-
-  $output  = '<div class="total-control-site-overview">';
-  $output .= '<strong>' . t('Content') . '</strong>';
-  $output .= theme('item_list', array('items' => $content));
-  $output .= '<strong>' . t('Users') . '</strong>';
-  $output .= theme('item_list', array('items' => $users));
-  $output .= '</div>';
-
-  return $output;
-}
-
-/*
  * Theme function for content overview.
  */
 /**
