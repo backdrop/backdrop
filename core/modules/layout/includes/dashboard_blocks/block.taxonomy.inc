@@ -35,12 +35,11 @@ class DashboardTaxonomyBlock extends DashboardBlock {
     $vids = (isset($this->settings['vids'])) ? $this->settings['vids'] : array();
 
     $vocabs = taxonomy_get_vocabularies();
-      $options = array('query' => array('destination' => 'admin/dashboard'));
+      $options = array('destination' => 'admin/dashboard');
       $header = array(
         array('data' => t('Vocabulary')),
         array(
           'data' => t('Operations'),
-          'colspan' => 3,
         ),
       );
       $rows = array();
@@ -51,12 +50,29 @@ class DashboardTaxonomyBlock extends DashboardBlock {
             $term_count = db_query("SELECT count(*) FROM {taxonomy_term_data} WHERE vocabulary = :vid", array(':vid' => $vocab->machine_name))->fetchField();
             if (user_access('administer taxonomy') || user_access('edit terms in ' . $vocab->machine_name)) {
               $terms = format_plural($term_count, '1 categories', '@count categories');
+              $links['configure'] = array(
+                'title' => t('Configure'),
+                'href' => 'admin/structure/taxonomy/' . $vocab->machine_name . '/edit',
+                'query' => $options,
+              );
+              $links['manage'] = array(
+                'title' => t('Manage categories'),
+                'href' => 'admin/structure/taxonomy/' . $vocab->machine_name,
+                'query' => $options,
+              );
+              $links['add'] = array(
+                'title' => t('Add new category'),
+                'href' => 'admin/structure/taxonomy/' . $vocab->machine_name . '/add',
+                'query' => $options,
+              );
+              $operations = array(
+                '#type' => 'dropbutton',
+                '#links' => $links,
+              );
               $rows[] = array(
                 'data' => array(
                   t($vocab->name . ': ' . $terms),
-                  l(t('Configure'), 'admin/structure/taxonomy/' . $vocab->machine_name . '/edit', $options),
-                  l(t('Manage categories'), 'admin/structure/taxonomy/' . $vocab->machine_name, $options),
-                  l(t('Add new category'), 'admin/structure/taxonomy/' . $vocab->machine_name . '/add', $options),
+                  backdrop_render($operations),
                 ),
               );
             }
