@@ -17,7 +17,7 @@ function update_settings($form, &$form_state) {
   $form['check'] = array(
     '#type' => 'fieldset',
     '#title' => t('Check for available updates'),
-    '#description' =>  t('This website will check for new releases of Backdrop core as well as contributed modules, themes, and layouts. If there are updates available a message will appear on the <a href="@status_report">status report</a> page. An error message will appear if there is a security update available.',
+    '#description' =>  t('This website will check for new releases of Backdrop core, as well as contributed modules, themes, and layouts. If there are updates available, a message will appear on the <a href="@status_report">status report</a> page. An error message will appear if there is a security update available.',
       array('@status_report' => url('admin/reports/status'))),
   );
   $form['check']['update_check_frequency'] = array(
