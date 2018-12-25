@@ -26,7 +26,7 @@ function update_settings($form, &$form_state) {
     '#default_value' => $config->get('update_interval_days'),
     '#options' => array(
       '1' => t('Check daily'),
-      '7' => t('Check weekly.'),
+      '7' => t('Check weekly'),
       '0' => t('Do not check automatically.'),
     ),
   );
