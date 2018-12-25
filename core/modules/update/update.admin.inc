@@ -85,7 +85,7 @@ function update_settings($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Manual self-update'),
     '#default_value' => $core_update,
-    '#description' => t('Allow this website to first delete its core and then replace its core when updating manually.'),
+    '#description' => t('When updating manually, allow this website to delete the old version of core, and then replace it with the new version.'),
   );
   $form['self_update']['automatic_update'] = array(
     '#type' => 'checkbox',
