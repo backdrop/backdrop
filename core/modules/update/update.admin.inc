@@ -90,7 +90,7 @@ function update_settings($form, &$form_state) {
   $form['self_update']['automatic_update'] = array(
     '#type' => 'checkbox',
     '#title' => t('Automatic self-update (coming soon!)'),
-    '#description' => t('Allow this website to first delete its core and then replace its core automatically, when updates are available.'),
+    '#description' => t('When updates are available, allow this website to <strong>automatically</strong> delete the old version of core, and then replace it with the new version.'),
     '#default_value' => FALSE, // @todo update when #414 goes in
     '#disabled' => TRUE, // @todo update when #414 goes in
     '#states' => array(
