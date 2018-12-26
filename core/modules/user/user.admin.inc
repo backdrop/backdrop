@@ -748,27 +748,6 @@ function user_settings_email($form, &$form_state) {
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
   );
-  if (module_exists('locale')) {
-    $form['email_admin_created']['translation'] = array(
-      '#type' => 'fieldset',
-      '#title' => 'Translation',
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
-    $form['email_admin_created']['translation']['text'] = array(
-      '#theme' => 'config_translation',
-      '#items' => array(
-        array(
-          'label' => t('Subject'),
-          'text' => $mail_config->getTranslated('register_admin_created_subject', array(), array('context' => 'register_admin_created_subject')),
-        ),
-        array(
-          'label' => t('Body'),
-          'text' => $mail_config->getTranslated('register_admin_created_body', array(), array('context' => 'register_admin_created_body')),
-        ),
-      ),
-    );
-  }
 
   $form['email_pending_approval'] = array(
     '#type' => 'fieldset',
@@ -794,27 +773,6 @@ function user_settings_email($form, &$form_state) {
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
   );
-  if (module_exists('locale')) {
-    $form['email_pending_approval']['translation'] = array(
-      '#type' => 'fieldset',
-      '#title' => 'Translation',
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
-    $form['email_pending_approval']['translation']['text'] = array(
-      '#theme' => 'config_translation',
-      '#items' => array(
-        array(
-          'label' => t('Subject'),
-          'text' => $mail_config->getTranslated('register_pending_approval_subject', array(), array('context' => 'register_pending_approval_subject')),
-        ),
-        array(
-          'label' => t('Body'),
-          'text' => $mail_config->getTranslated('register_pending_approval_body', array(), array('context' => 'register_pending_approval_body')),
-        ),
-      ),
-    );
-  }
 
   $form['email_no_approval_required'] = array(
     '#type' => 'fieldset',
@@ -840,27 +798,6 @@ function user_settings_email($form, &$form_state) {
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
   );
-  if (module_exists('locale')) {
-    $form['email_no_approval_required']['translation'] = array(
-      '#type' => 'fieldset',
-      '#title' => 'Translation',
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
-    $form['email_no_approval_required']['translation']['text'] = array(
-      '#theme' => 'config_translation',
-      '#items' => array(
-        array(
-          'label' => t('Subject'),
-          'text' => $mail_config->getTranslated('register_no_approval_required_subject', array(), array('context' => 'register_no_approval_required_subject')),
-        ),
-        array(
-          'label' => t('Body'),
-          'text' => $mail_config->getTranslated('register_no_approval_required_body', array(), array('context' => 'register_no_approval_required_body')),
-        ),
-      ),
-    );
-  }
 
   $form['email_password_reset'] = array(
     '#type' => 'fieldset',
@@ -887,27 +824,6 @@ function user_settings_email($form, &$form_state) {
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
   );
-  if (module_exists('locale')) {
-    $form['email_password_reset']['translation'] = array(
-      '#type' => 'fieldset',
-      '#title' => 'Translation',
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
-    $form['email_password_reset']['translation']['text'] = array(
-      '#theme' => 'config_translation',
-      '#items' => array(
-        array(
-          'label' => t('Subject'),
-          'text' => $mail_config->getTranslated('password_reset_subject', array(), array('context' => 'password_reset_subject')),
-        ),
-        array(
-          'label' => t('Body'),
-          'text' => $mail_config->getTranslated('password_reset_body', array(), array('context' => 'password_reset_body')),
-        ),
-      ),
-    );
-  }
 
   $form['email_activated'] = array(
     '#type' => 'fieldset',
@@ -947,27 +863,6 @@ function user_settings_email($form, &$form_state) {
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
   );
-  if (module_exists('locale')) {
-    $form['email_activated']['translation'] = array(
-      '#type' => 'fieldset',
-      '#title' => 'Translation',
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
-    $form['email_activated']['translation']['text'] = array(
-      '#theme' => 'config_translation',
-      '#items' => array(
-        array(
-          'label' => t('Subject'),
-          'text' => $mail_config->getTranslated('status_activated_subject', array(), array('context' => 'status_activated_subject')),
-        ),
-        array(
-          'label' => t('Body'),
-          'text' => $mail_config->getTranslated('status_activated_body', array(), array('context' => 'status_activated_body')),
-        ),
-      ),
-    );
-  }
 
   $form['email_blocked'] = array(
     '#type' => 'fieldset',
@@ -1007,27 +902,6 @@ function user_settings_email($form, &$form_state) {
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
   );
-  if (module_exists('locale')) {
-    $form['email_blocked']['translation'] = array(
-      '#type' => 'fieldset',
-      '#title' => 'Translation',
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
-    $form['email_blocked']['translation']['text'] = array(
-      '#theme' => 'config_translation',
-      '#items' => array(
-        array(
-          'label' => t('Subject'),
-          'text' => $mail_config->getTranslated('status_blocked_subject', array(), array('context' => 'status_blocked_subject')),
-        ),
-        array(
-          'label' => t('Body'),
-          'text' => $mail_config->getTranslated('status_blocked_body', array(), array('context' => 'status_blocked_body')),
-        ),
-      ),
-    );
-  }
 
   $form['email_cancel_confirm'] = array(
     '#type' => 'fieldset',
@@ -1053,27 +927,6 @@ function user_settings_email($form, &$form_state) {
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
   );
-  if (module_exists('locale')) {
-    $form['email_cancel_confirm']['translation'] = array(
-      '#type' => 'fieldset',
-      '#title' => 'Translation',
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
-    $form['email_cancel_confirm']['translation']['text'] = array(
-      '#theme' => 'config_translation',
-      '#items' => array(
-        array(
-          'label' => t('Subject'),
-          'text' => $mail_config->getTranslated('cancel_confirm_subject', array(), array('context' => 'cancel_confirm_subject')),
-        ),
-        array(
-          'label' => t('Body'),
-          'text' => $mail_config->getTranslated('cancel_confirm_body', array(), array('context' => 'cancel_confirm_body')),
-        ),
-      ),
-    );
-  }
 
   $form['email_canceled'] = array(
     '#type' => 'fieldset',
@@ -1113,27 +966,6 @@ function user_settings_email($form, &$form_state) {
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array('user'),
   );
-  if (module_exists('locale')) {
-    $form['email_canceled']['translation'] = array(
-      '#type' => 'fieldset',
-      '#title' => 'Translation',
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
-    $form['email_canceled']['translation']['text'] = array(
-      '#theme' => 'config_translation',
-      '#items' => array(
-        array(
-          'label' => t('Subject'),
-          'text' => $mail_config->getTranslated('status_canceled_subject', array(), array('context' => 'status_canceled_subject')),
-        ),
-        array(
-          'label' => t('Body'),
-          'text' => $mail_config->getTranslated('status_canceled_body', array(), array('context' => 'status_canceled_body')),
-        ),
-      ),
-    );
-  }
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
