@@ -44,59 +44,68 @@ class DashboardTaxonomyBlock extends Block {
     $vids = (isset($this->settings['vids'])) ? $this->settings['vids'] : array();
 
     $vocabs = taxonomy_get_vocabularies();
-      $options = array('destination' => 'admin/dashboard');
-      $header = array(
-        array('data' => t('Vocabulary')),
-        array(
-          'data' => t('Operations'),
-        ),
-      );
-      $rows = array();
+    $options = array('destination' => 'admin/dashboard');
+    $header = array(
+      array('data' => t('Vocabulary')),
+      array(
+        'data' => t('Operations'),
+      ),
+    );
+    $rows = array();
+    $no_access = FALSE;
 
     if (!empty($vocabs)) {
-        foreach ($vocabs as $vocab) {
-          if ((in_array($vocab->machine_name, $vids)) || !array_key_exists('vids', $this->settings)) {
-            $term_count = db_query("SELECT count(*) FROM {taxonomy_term_data} WHERE vocabulary = :vid", array(':vid' => $vocab->machine_name))->fetchField();
-            if (user_access('administer taxonomy') || user_access('edit terms in ' . $vocab->machine_name)) {
-              $terms = format_plural($term_count, '1 categories', '@count categories');
-              $links['configure'] = array(
-                'title' => t('Configure'),
-                'href' => 'admin/structure/taxonomy/' . $vocab->machine_name . '/edit',
-                'query' => $options,
-              );
-              $links['manage'] = array(
-                'title' => t('Manage categories'),
-                'href' => 'admin/structure/taxonomy/' . $vocab->machine_name,
-                'query' => $options,
-              );
-              $links['add'] = array(
-                'title' => t('Add new category'),
-                'href' => 'admin/structure/taxonomy/' . $vocab->machine_name . '/add',
-                'query' => $options,
-              );
-              $operations = array(
-                '#type' => 'dropbutton',
-                '#links' => $links,
-              );
-              $rows[] = array(
-                'data' => array(
-                  t($vocab->name . ': ' . $terms),
-                  backdrop_render($operations),
-                ),
-              );
-            }
+      foreach ($vocabs as $vocab) {
+        if ((in_array($vocab->machine_name, $vids)) || !array_key_exists('vids', $this->settings)) {
+          $term_count = db_query("SELECT count(*) FROM {taxonomy_term_data} WHERE vocabulary = :vid", array(':vid' => $vocab->machine_name))->fetchField();
+          if (user_access('administer taxonomy') || user_access('edit terms in ' . $vocab->machine_name)) {
+            $terms = format_plural($term_count, '1 categories', '@count categories');
+            $links['configure'] = array(
+              'title' => t('Configure'),
+              'href' => 'admin/structure/taxonomy/' . $vocab->machine_name . '/edit',
+              'query' => $options,
+            );
+            $links['manage'] = array(
+              'title' => t('Manage categories'),
+              'href' => 'admin/structure/taxonomy/' . $vocab->machine_name,
+              'query' => $options,
+            );
+            $links['add'] = array(
+              'title' => t('Add new category'),
+              'href' => 'admin/structure/taxonomy/' . $vocab->machine_name . '/add',
+              'query' => $options,
+            );
+            $operations = array(
+              '#type' => 'dropbutton',
+              '#links' => $links,
+            );
+            $rows[] = array(
+              'data' => array(
+                t($vocab->name . ': ' . $terms),
+                backdrop_render($operations),
+              ),
+            );
+          }
+          else {
+            $no_access = TRUE;
           }
         }
       }
+    }
 
+    // If there are existing vocabularies, but user has no access to any
+    // of them, hide the block completely.
     if (empty($rows)) {
-        $rows[] = array(
-          array(
-            'data' => t('There are no vocabularies to display.'),
-            'colspan' => 4,
-          ),
-        );
+      if ($no_access) {
+        return array();
       }
+      $rows[] = array(
+        array(
+          'data' => t('There are no vocabularies to display.'),
+          'colspan' => 4,
+        ),
+      );
+    }
 
     $link = '';
       if (user_access('administer taxonomy')) {

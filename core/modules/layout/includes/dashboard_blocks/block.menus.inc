@@ -41,16 +41,17 @@ class DashboardMenuBlock extends Block {
     $items = array();
 
     $menus = menu_get_menus();
-      $options = array('destination' => 'admin/dashboard');
-      $header = array(
-        array('data' => t('Menu')),
-        array(
-          'data' => t('Operations'),
-        ),
-      );
-      $rows = array();
+    $options = array('destination' => 'admin/dashboard');
+    $header = array(
+      array('data' => t('Menu')),
+      array(
+        'data' => t('Operations'),
+      ),
+    );
+    $rows = array();
 
-    foreach ($menus as $menu_name => $menu) {
+    if (user_access('administer menu')) {
+      foreach ($menus as $menu_name => $menu) {
         if (array_key_exists($menu_name, $this->settings['menus'])) {
           if ($this->settings['menus'][$menu_name] === $menu_name) {
             $links['configure'] = array(
@@ -81,21 +82,27 @@ class DashboardMenuBlock extends Block {
           }
         }
       }
+    }
 
     if (empty($rows)) {
-        $rows[] = array(
-          array(
-            'data' => t('There are no menus to display.'),
-            'colspan' => 4,
-          ),
-        );
+      // If there are existing menuse, but user has no access to manage any
+      // of them, hide the block completely.
+      if (!empty($menus)) {
+        return array();
       }
+      $rows[] = array(
+        array(
+          'data' => t('There are no menus to display.'),
+          'colspan' => 4,
+        ),
+      );
+    }
 
     // Build a link to the menu admin UI.
-      $link = '';
-      if (user_access('administer menu')) {
-        $link = l(t('Menu administration'), 'admin/structure/menu');
-      }
+    $link = '';
+    if (user_access('administer menu')) {
+      $link = l(t('Menu administration'), 'admin/structure/menu');
+    }
 
     $content = theme('dashboard_admin_table', array('header' => $header, 'rows' => $rows, 'link' => $link));
 

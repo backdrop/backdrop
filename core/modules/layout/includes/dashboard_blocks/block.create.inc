@@ -39,19 +39,31 @@ class DashboardCreateBlock extends Block {
    */
   function getContent() {
     $types = node_type_get_types();
+    $no_access = FALSE;
     $create = array();
 
     foreach ($types as $type => $object) {
-        // Check against block this->settings for type.
-        if ((!array_key_exists($type, $this->settings['types'])) || (isset($this->settings['types']) && $this->settings['types'][$type])) {
-          // Check access, then add a link to create content.
-          if (node_access('create', $type)) {
-            $type_url_str = str_replace('_', '-', $object->type);
-            $create[] = l(t('Add new  ' . $object->name), 'node/add/' . $type_url_str);
-          }
+      // Check against block this->settings for type.
+      if ((!array_key_exists($type, $this->settings['types'])) || (isset($this->settings['types']) && $this->settings['types'][$type])) {
+        // Check access, then add a link to create content.
+        if (node_access('create', $type)) {
+          $type_url_str = str_replace('_', '-', $object->type);
+          $create[] = l(t('Add new  ' . $object->name), 'node/add/' . $type_url_str);
+        }
+        else {
+          $no_access = TRUE;
         }
       }
+    }
 
+    // If there are existing content types, but user has no access to create any
+    // of them, hide the block completely.
+    if (empty($create)) {
+      if ($no_access) {
+        return array();
+      }
+      return t('No content types have been configured');
+    }
     $content =  theme('dashboard_create', array('create' => $create));
 
     return $content;

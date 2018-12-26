@@ -45,11 +45,11 @@ class DashboardContentTypesBlock extends Block {
     );
     $rows = array();
 
-    foreach ($types as $type => $object) {
-        // this->settingsig data says to include the type.
-        if ((!array_key_exists($type, $this->settings['types'])) || (isset($this->settings['types']) && $this->settings['types'][$type]) == $type) {
-          // Check access, then add a link to create content.
-          if ($access) {
+    // Check access, then add a link to create content.
+    if ($access) {
+      foreach ($types as $type => $object) {
+          // Config data says to include the type.
+          if ((!array_key_exists($type, $this->settings['types'])) || (isset($this->settings['types']) && $this->settings['types'][$type]) == $type) {
             $type_url_str = str_replace('_', '-', $object->type);
             $links['configure'] = array(
               'title' => t('Configure'),
@@ -79,8 +79,11 @@ class DashboardContentTypesBlock extends Block {
           }
         }
       }
+      else {
+        return array();
+      }
 
-    if (empty($rows)) {
+      if (empty($rows)) {
         $rows[] = array(
           array(
             'data' => t('There are no content types to display.'),
@@ -90,9 +93,9 @@ class DashboardContentTypesBlock extends Block {
       }
 
     $link = '';
-      if (user_access('administer content types')) {
-        $link = l(t('Content type administration'), 'admin/structure/types');
-      }
+    if (user_access('administer content types')) {
+      $link = l(t('Content type administration'), 'admin/structure/types');
+    }
 
     return theme('dashboard_admin_table', array('header' => $header, 'rows' => $rows, 'link' => $link));
 
