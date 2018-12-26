@@ -22,7 +22,7 @@
  * other blocks around the existing content.
  */
 
-include_once('dashboard.inc');
+include_once('layout.dashboard.inc');
 
 /**
  * Layouts constant for user-defined layouts.
@@ -540,20 +540,16 @@ function layout_theme() {
     ) + $base,
     'dashboard_create' => array(
       'variables' => array('create' => array()),
-      'file' => 'dashboard.theme.inc',
-    ),
+    ) + $base,
     'dashboard_overview_content' => array(
       'variables' => array('overview' => array()),
-      'file' => 'dashboard.theme.inc',
-    ),
+    ) + $base,
     'dashboard_overview_user' => array(
       'variables' => array('overview' => array()),
-      'file' => 'dashboard.theme.inc',
-    ),
+    ) + $base,
     'dashboard_admin_table' => array(
       'variables' => array('header' => array(), 'rows' => array(), 'link' => FALSE),
-      'file' => 'dashboard.theme.inc',
-    ),
+    ) + $base,
   );
 
   // Register all layout templates.
@@ -722,7 +718,7 @@ function layout_block_info() {
   );
   $blocks['overview_user'] = array(
     'info' => t('Dashboard - User accounts'),
-    'description' => t('Displays a summary of user statistics'),
+    'description' => t('Displays a summary of user account statistics'),
     'class' => 'DashboardOverviewUserBlock',
   );
   $blocks['taxonomy'] = array(

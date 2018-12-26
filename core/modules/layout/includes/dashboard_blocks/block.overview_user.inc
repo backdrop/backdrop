@@ -38,7 +38,6 @@ class DashboardOverviewUserBlock extends Block {
    * Run-time rendering of the body of the block.
    */
   function getContent() {
-      dpm($this);
     $user_data = dashboard_get_user_overview($this->settings);
 
     $overview = array();
@@ -70,7 +69,6 @@ class DashboardOverviewUserBlock extends Block {
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
 
-      dpm($form_state);
     $this->settings['user'] = $form_state['values']['user'];
     foreach (array_keys($form_state['values']['roles']) as $key) {
       $this->settings['roles'][$key] = $form_state['values']['roles'][$key];
