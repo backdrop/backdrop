@@ -3,11 +3,7 @@
   /**
    * @file
    *
-   * "Create content" panels content type. It shows users links to
-   * create new content of all types for which they have permissions,
-   * and users with "administer content types" permission an optional
-   * "Configure" link as well.
-   *
+   * Administrative block for displaying available content types on the site.
    */
 
 class DashboardContentTypesBlock extends Block {
@@ -35,7 +31,7 @@ class DashboardContentTypesBlock extends Block {
   }
 
   /**
-   * Run-time rendering of the body of the pane.
+   * Run-time rendering of the body of the block.
    */
   function getContent() {
     $types = node_type_get_types();

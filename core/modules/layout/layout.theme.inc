@@ -395,7 +395,7 @@ function template_preprocess_block_dynamic(&$variables) {
 function theme_dashboard_overview_content($variables) {
   $overview = $variables['overview'];
 
-  $output  = '<div class="total-control-content-overview">';
+  $output  = '<div class="dashboard-content-overview">';
   $output .= theme('item_list', array('items' => $overview));
   $output .= '</div>';
 
@@ -408,7 +408,7 @@ function theme_dashboard_overview_content($variables) {
 function theme_dashboard_overview_user($variables) {
   $overview = $variables['overview'];
 
-  $output  = '<div class="total-control-user-overview">';
+  $output  = '<div class="dashboard-user-overview">';
   $output .= theme('item_list', array('items' => $overview));
   $output .= '</div>';
 
@@ -416,12 +416,12 @@ function theme_dashboard_overview_user($variables) {
 }
 
 /**
- * Theme function for create content pane.
+ * Theme function for create content Block.
  */
 function theme_dashboard_create($variables) {
   $create = $variables['create'];
 
-  $output  = '<div class="total-control-create">';
+  $output  = '<div class="dashboard-create">';
   $output .= theme('item_list', array('items' => $create));
   $output .= '</div>';
 
@@ -429,15 +429,15 @@ function theme_dashboard_create($variables) {
 }
 
 /**
- * Theme function for panel pages.
+ * Theme function for dashboard blocks.
  */
 function theme_dashboard_admin_table($variables) {
   $header = $variables['header'];
   $rows = $variables['rows'];
   $link = $variables['link'];
 
-  $output  = '<div class="total-control-panel-panes">';
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('panels-manage'))));
+  $output  = '<div class="dashboard-blocks">';
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('dashboard-block-manage'))));
   $output .= '  <div class="admin-page">' . $link . '</div>';
   $output .= '</div>';
 

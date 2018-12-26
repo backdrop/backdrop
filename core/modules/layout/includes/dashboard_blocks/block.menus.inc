@@ -3,9 +3,7 @@
   /**
    * @file
    *
-   * "Panel Pages" panels content pane. It shows users with permissions the
-   * panel pages on the site, and provides links directly to the "content" tab.
-   *
+   * Administrative block for displaying available menus on the site.
    */
 
 

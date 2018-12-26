@@ -330,11 +330,11 @@ function layout_menu() {
 
 
   // Add dashboard and its settings menu if the layout is enabled.
-  $dashboad = layout_load('dashboard');
+  $dashboard = layout_load('dashboard');
   if (!$dashboard->disabled) {
     $items['admin/dashboard/default'] = array(
       'title' => 'Dashboard',
-      'description' => 'Total Control admin dashboard',
+      'description' => 'Admin dashboard',
       'type' => MENU_DEFAULT_LOCAL_TASK,
       'weight' => -100,
     );
@@ -1899,8 +1899,8 @@ function layout_get_title_description(Layout $layout) {
 function layout_user_login(&$edit, $account) {
   // Don't redirect for password reset.
   if (!((arg(0) == 'user') && (arg(1) == 'reset'))) {
-    // Check for permission to use total control.
-    if (user_access('have total control', $account)) {
+    // Check for permission to use dashboard.
+    if (user_access('access dashboard', $account)) {
       // Check for redirect to dashboard setting.
       if (config_get('dashboard.settings', 'dashboard_login_redirect') == 1) {
         $_GET['destination'] = 'admin/dashboard';

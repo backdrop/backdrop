@@ -11,34 +11,34 @@
 /**
  * Retrieves overview data for all content on the site.
  *
- * @param $conf
- *   Panel content pane config data.
+ * @param $settings
+ *   Block settings data.
  *
  * @return $items
  *   An array of items for a bulleted list.
  *
  */
-function dashboard_get_content_overview($conf = array()) {
+function dashboard_get_content_overview($settings = array()) {
   $items = array();
   $types = node_type_get_types();
   $comments_exist = module_exists('comment');
 
   foreach ($types as $type => $object) {
-    // Compare against type option on pane config.
-    if ((!array_key_exists($type, $conf['types'])) || (isset($conf['types']) && $conf['types'][$type] == $type)) {
+    // Compare against type option on block settings.
+    if ((!array_key_exists($type, $settings['types'])) || (isset($settings['types']) && $settings['types'][$type] == $type)) {
       $type_count = db_query("SELECT count(*) FROM {node} WHERE type = :type and status = 1", array(':type' => $type))->fetchField();
       $content_data[$type] = format_plural($type_count, '1 ' . $object->name . ' item', '@count ' . $object->name . ' items');
 
       // Check if comments module is enabled.
       if ($comments_exist) {
 
-        // Compare against comment options on pane config.
-        if (array_key_exists($type, $conf['comments']) && $conf['comments'][$type] === $type) {
+        // Compare against comment options on block settings.
+        if (array_key_exists($type, $settings['comments']) && $settings['comments'][$type] === $type) {
           $comment_count = db_query("SELECT count(DISTINCT cid) FROM {comment} c INNER JOIN {node} n ON c.nid = n.nid WHERE n.type = :type and c.status = 1 AND n.status = 1", array(':type' => $type))->fetchField();
           $content_data[$type . '_comments'] =  format_plural($comment_count, '1 comment', '@count comments');
 
-          // Compare against spam option checkbox on pane config.
-          if (isset($conf['spam']) && $conf['spam'] == 1) {
+          // Compare against spam option checkbox on block settings.
+          if (isset($settings['spam']) && $settings['spam'] == 1) {
             $spam_count = db_query("SELECT count(DISTINCT c.cid) FROM {comment} c INNER JOIN {node} n ON c.nid = n.nid WHERE n.type = :type and c.status = 0 AND n.status = 1", array(':type' => $type))->fetchField();
             $content_data[$type . '_comments_spam'] = format_plural($spam_count, '1 spam', '@count spam');
           }
@@ -56,27 +56,27 @@ function dashboard_get_content_overview($conf = array()) {
 }
 
 /**
- * Adds content settings to the panel pane config form.
+ * Adds content settings to the block settings form.
  *
  * @param $form
- *   Panel pane config form.
- * @param $conf
- *   Panel content pane config data.
+ *   Block settings form.
+ * @param $settings
+ *   Block settings data.
  *
  */
-function dashboard_add_content_pane_settings(&$form, $conf = array()) {
+function dashboard_add_content_block_settings(&$form, $settings = array()) {
   $types = node_type_get_types();
   $type_options = array();
   $type_defaults = array();
   $comment_defaults = array();
 
-  // Set defaults based on pane config.
-  if (isset($conf['types'])) {
-    $type_defaults = $conf['types'];
+  // Set defaults based on block settings.
+  if (isset($settings['types'])) {
+    $type_defaults = $settings['types'];
   }
 
-  if (isset($conf['comments'])) {
-    $comment_defaults = $conf['comments'];
+  if (isset($settings['comments'])) {
+    $comment_defaults = $settings['comments'];
   }
 
   foreach ($types as $machine_type => $type) {
@@ -118,7 +118,7 @@ function dashboard_add_content_pane_settings(&$form, $conf = array()) {
       '#type' => 'checkbox',
       '#title' => t('Include spam counts with comments'),
       '#options' => $spam_options,
-      '#default_value' => ($form_state['op'] == 'add') ? 1 : $conf['spam'],
+      '#default_value' => ($form_state['op'] == 'add') ? 1 : $settings['spam'],
     );
   }
 }
@@ -126,8 +126,8 @@ function dashboard_add_content_pane_settings(&$form, $conf = array()) {
 /**
  * Retrieves overview data for all users on the site.
  *
- * @param $conf
- *   Panel content pane config data.
+ * @param $settings
+ *   Block settings data.
  *
  * @return $items
  *   A structured array of items containing user data, in the following format:
@@ -143,11 +143,11 @@ function dashboard_add_content_pane_settings(&$form, $conf = array()) {
  *       ),
  *     );
  */
-function dashboard_get_user_overview($conf = array()) {
+function dashboard_get_user_overview($settings = array()) {
   $items = array();
 
   // User Overview
-  if (!$conf['user'] || $conf['user'] == 1) {
+  if (!$settings['user'] || $settings['user'] == 1) {
     $items['all'] = db_query("SELECT count(*) FROM {users}")->fetchField();
     $items['active'] = db_query("SELECT count(*) FROM {users} WHERE status = 1 AND login <> 0")->fetchField();
     $items['blocked'] = db_query("SELECT count(*) FROM {users} WHERE status = 0")->fetchField();
@@ -157,7 +157,7 @@ function dashboard_get_user_overview($conf = array()) {
   $roles = user_roles(TRUE);
   $items['roles'] = array();
   foreach ($roles as $rid => $role) {
-    if (($rid != 2) && (array_key_exists($rid, $conf['roles']) && $conf['roles'][$rid])) {
+    if (($rid != 2) && (array_key_exists($rid, $settings['roles']) && $settings['roles'][$rid])) {
       $user_role_count = db_query("SELECT count(*) FROM {users} u INNER JOIN {users_roles} r on u.uid = r.uid WHERE r.role = :rid", array(':rid' => $rid))->fetchField();
       $items['roles'][$rid] = array();
       $items['roles'][$rid]['name'] = $role;
@@ -169,15 +169,15 @@ function dashboard_get_user_overview($conf = array()) {
 }
 
 /**
- * Adds user settings to the panel pane config form.
+ * Adds user settings to the block settings form.
  *
  * @param $form
- *   Panel pane config form.
- * @param $conf
- *   Panel content pane config data.
+ *   Block settings form.
+ * @param $settings
+ *   Block settings data.
  *
  */
-function dashboard_add_user_pane_settings(&$form, $conf = array()) {
+function dashboard_add_user_block_settings(&$form, $settings = array()) {
   $user_options = array(
     0 => t('no'),
     1 => t('Include the total number of user accounts, including active and blocked.'),
@@ -186,7 +186,7 @@ function dashboard_add_user_pane_settings(&$form, $conf = array()) {
     '#type' => 'checkbox',
     '#title' => t('Include the total number of user accounts, including active and blocked.'),
     '#options' => $user_options,
-    '#default_value' => ($form_state['op'] == 'add') ? TRUE : $conf['user'],
+    '#default_value' => ($form_state['op'] == 'add') ? TRUE : $settings['user'],
   );
 
   $roles = user_roles(TRUE);
@@ -204,7 +204,7 @@ function dashboard_add_user_pane_settings(&$form, $conf = array()) {
       '#type' => 'checkboxes',
       '#title' => t('Include the number of user accounts with the following roles:'),
       '#options' => $roles_options,
-      '#default_value' => ($conf['roles']) ? $conf['roles'] : $roles_defaults,
+      '#default_value' => ($settings['roles']) ? $settings['roles'] : $roles_defaults,
     );
   }
 }

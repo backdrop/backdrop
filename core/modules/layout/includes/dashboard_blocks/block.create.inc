@@ -35,14 +35,14 @@ class DashboardCreateBlock extends Block {
   }
 
   /**
-   * Run-time rendering of the body of the pane.
+   * Run-time rendering of the body of the block.
    */
   function getContent() {
     $types = node_type_get_types();
     $create = array();
 
     foreach ($types as $type => $object) {
-        // Check against pane this->settings for type.
+        // Check against block this->settings for type.
         if ((!array_key_exists($type, $this->settings['types'])) || (isset($this->settings['types']) && $this->settings['types'][$type])) {
           // Check access, then add a link to create content.
           if (node_access('create', $type)) {

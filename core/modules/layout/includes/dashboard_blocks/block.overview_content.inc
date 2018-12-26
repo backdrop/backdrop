@@ -3,9 +3,9 @@
   /**
    * @file
    *
-   * "Content overview" panels content type. Displays a summary of content
+   * "Content overview" block which displays a summary of content
    * statistics including: number pieces of each type of content, number of
-   * comments, number of blocked comments (spam) and this->settingsiguration links.
+   * comments, number of blocked comments (spam) and configuration links.
    *
    */
 
@@ -49,7 +49,7 @@ class DashboardOverviewContentBlock extends Block {
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
     // Add content settings to form.
-    dashboard_add_content_pane_settings($form, $this->settings);
+    dashboard_add_content_block_settings($form, $this->settings);
   }
 
   /**

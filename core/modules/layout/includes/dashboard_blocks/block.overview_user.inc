@@ -60,7 +60,7 @@ class DashboardOverviewUserBlock extends Block {
     parent::form($form, $form_state);
 
     // Add user settings to form.
-    dashboard_add_user_pane_settings($form, $this->settings);
+    dashboard_add_user_block_settings($form, $this->settings);
   }
 
   /**
