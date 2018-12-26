@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Template for outputting the dynamic block styling within a Layout.
+ * Template for outputting the styling of Dynamic blocks within a layout.
  *
  * This template outputs the same content as the layout-block.tpl.php template,
  * but uses a dynamic value for all its HTML tags. This allows site-builders to
