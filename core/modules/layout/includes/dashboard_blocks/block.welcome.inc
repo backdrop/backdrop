@@ -7,7 +7,14 @@
  */
 
 
-class DashboardWelcomeBlock extends DashboardBlock {
+class DashboardWelcomeBlock extends Block {
+
+  /**
+   *  Sets block subject on block view.
+   */
+  function getTitle() {
+    return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Welcome');
+  }
 
   /**
    * 'Admin title' callback for the content type.
@@ -21,13 +28,6 @@ class DashboardWelcomeBlock extends DashboardBlock {
    */
   function getAdminPreview() {
     return t('Introduction to the dashboard');
-  }
-
-  /**
-   *  Sets block subject on block view.
-   */
-  function getTitle() {
-    return isset($this->settings['title']) ? check_plain($this->settings['title']) : '';
   }
 
   /**

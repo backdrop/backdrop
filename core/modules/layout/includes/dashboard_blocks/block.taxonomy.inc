@@ -8,13 +8,22 @@
    *
    */
 
-class DashboardTaxonomyBlock extends DashboardBlock {
+class DashboardTaxonomyBlock extends Block {
+
+
+  /**
+   *  Sets block subject on block view.
+   */
+  function getTitle() {
+    return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Categories');
+  }
+
 
   /**
    * 'Admin title' callback for the content type.
    */
   function getAdminTitle() {
-    return t('Manage Taxonomy');
+    return t('Dashboard manage taxonomy');
   }
 
   /**

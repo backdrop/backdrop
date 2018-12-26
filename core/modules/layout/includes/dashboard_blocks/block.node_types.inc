@@ -10,7 +10,15 @@
    *
    */
 
-class DashboardContentTypesBlock extends DashboardBlock {
+class DashboardContentTypesBlock extends Block {
+
+
+  /**
+   *  Sets block subject on block view.
+   */
+  function getTitle() {
+    return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Content types');
+  }
 
   /**
    * 'Admin title' callback for the content type.

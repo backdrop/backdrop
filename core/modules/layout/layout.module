@@ -613,6 +613,11 @@ function layout_permission() {
       'description' => t('Add and modify layouts on pages.'),
       'restrict access' => TRUE,
     ),
+    'access dashboard' => array(
+      'title' => t('Access Dashboard'),
+      'description' => t('Access the dashboard.'),
+      'restrict access' => TRUE,
+    ),
   );
 }
 
@@ -691,37 +696,37 @@ function layout_block_info() {
 
   // Dashboard blocks.
   $blocks['content'] = array(
-    'info' => t('Welcome'),
-    'description' => t('Intro to Total Control'),
+    'info' => t('Dashboard - Welcome'),
+    'description' => t('Introduction to the Dashboard'),
     'class' => 'DashboardWelcomeBlock',
   );
   $blocks['create'] = array(
-    'info' => t('Create content'),
+    'info' => t('Dashboard - Create content'),
     'description' => t('Provides links to create new content'),
     'class' => 'DashboardCreateBlock',
   );
   $blocks['menu'] = array(
-    'info' => t('Menus'),
+    'info' => t('Dashboard - Menus'),
     'description' => t('Provides links to administer menus'),
     'class' => 'DashboardMenuBlock',
   );
   $blocks['node_types'] = array(
-    'info' => t('Content types'),
+    'info' => t('Dashboard - Content types'),
     'description' => t('Provides links to administer content types'),
     'class' => 'DashboardContentTypesBlock',
   );
   $blocks['overview_content'] = array(
-    'info' => t('Content'),
+    'info' => t('Dashboard - Content'),
     'description' => t('Displays a summary of content statistics'),
     'class' => 'DashboardOverviewContentBlock',
   );
   $blocks['overview_user'] = array(
-    'info' => t('User accounts'),
+    'info' => t('Dashboard - User accounts'),
     'description' => t('Displays a summary of user statistics'),
     'class' => 'DashboardOverviewUserBlock',
   );
   $blocks['taxonomy'] = array(
-    'info' => t('Categories'),
+    'info' => t('Dashboard - Categories'),
     'description' => t('Provides links to administer taxonomy'),
     'class' => 'DashboardTaxonomyBlock',
   );
@@ -778,7 +783,6 @@ function layout_autoload_info() {
     'LayoutStyleDynamic' => 'plugins/styles/layout_style_dynamic.inc',
 
     // Dashboard blocks
-    'DashboardBlock' => 'includes/dashboard_blocks/block.dashboard.inc',
     'DashboardWelcomeBlock' => 'includes/dashboard_blocks/block.welcome.inc',
     'DashboardCreateBlock' => 'includes/dashboard_blocks/block.create.inc',
     'DashboardMenuBlock' => 'includes/dashboard_blocks/block.menus.inc',
