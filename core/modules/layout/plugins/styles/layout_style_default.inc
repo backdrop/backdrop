@@ -26,7 +26,6 @@ class LayoutStyle extends LayoutHandler {
       'classes' => '',
     );
     $this->is_region = $is_region;
-//$this->is_text_block = ;
   }
 
   /**
