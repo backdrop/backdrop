@@ -55,6 +55,10 @@
   margin-bottom: 0;
   margin-left: 0;
 }
+.message-block.messages .block-content * {
+  margin-block-start: 0;
+  padding-top: 0;
+}
 
 .messages.status {
   color: #234600;
