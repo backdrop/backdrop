@@ -27,7 +27,8 @@
         ],
         "half1": [
             "5a4ec847-16c1-45dd-b168-58afed5081d4",
-            "c286ce1e-ff59-49ab-8be5-67375d9cb792"
+            "8ebebe78-4aa4-4d08-a79f-2463daf79863",
+            "f149b0ac-ff4c-46f5-8402-ee1aac572dfb"
         ],
         "half2": [
             "a4b4935d-e085-4d77-a522-ea805e172c1a",
@@ -91,9 +92,9 @@
             }
         },
         "e95f6c00-0fdd-4081-9fb8-cb52b5e8d223": {
-            "plugin": "dashboard:content",
+            "plugin": "layout:content",
             "data": {
-                "module": "dashboard",
+                "module": "layout",
                 "delta": "content",
                 "settings": {
                     "title_display": "default",
@@ -114,9 +115,9 @@
             }
         },
         "5a4ec847-16c1-45dd-b168-58afed5081d4": {
-            "plugin": "dashboard:create",
+            "plugin": "layout:create",
             "data": {
-                "module": "dashboard",
+                "module": "layout",
                 "delta": "create",
                 "settings": {
                     "title_display": "default",
@@ -140,11 +141,11 @@
                 }
             }
         },
-        "c286ce1e-ff59-49ab-8be5-67375d9cb792": {
-            "plugin": "dashboard:overview",
+        "8ebebe78-4aa4-4d08-a79f-2463daf79863": {
+            "plugin": "layout:overview_content",
             "data": {
-                "module": "dashboard",
-                "delta": "overview",
+                "module": "layout",
+                "delta": "overview_content",
                 "settings": {
                     "title_display": "default",
                     "title": "",
@@ -159,14 +160,37 @@
                     "comments": {
                         "page": "page",
                         "post": "post"
-                    },
+                    }
+                },
+                "uuid": "8ebebe78-4aa4-4d08-a79f-2463daf79863",
+                "style": {
+                    "plugin": "default",
+                    "data": {
+                        "settings": {
+                            "classes": ""
+                        }
+                    }
+                }
+            }
+        },
+        "f149b0ac-ff4c-46f5-8402-ee1aac572dfb": {
+            "plugin": "layout:overview_user",
+            "data": {
+                "module": "layout",
+                "delta": "overview_user",
+                "settings": {
+                    "title_display": "default",
+                    "title": "",
+                    "style": "default",
+                    "block_settings": [],
+                    "contexts": [],
                     "user": 1,
                     "roles": {
                         "authenticated": "authenticated",
                         "administrator": "administrator"
                     }
                 },
-                "uuid": "c286ce1e-ff59-49ab-8be5-67375d9cb792",
+                "uuid": "f149b0ac-ff4c-46f5-8402-ee1aac572dfb",
                 "style": {
                     "plugin": "default",
                     "data": {
@@ -178,9 +202,9 @@
             }
         },
         "a4b4935d-e085-4d77-a522-ea805e172c1a": {
-            "plugin": "dashboard:menu",
+            "plugin": "layout:menu",
             "data": {
-                "module": "dashboard",
+                "module": "layout",
                 "delta": "menu",
                 "settings": {
                     "title_display": "default",
@@ -204,9 +228,9 @@
             }
         },
         "2496a766-3efd-410d-88ea-c84f7b67806e": {
-            "plugin": "dashboard:node_types",
+            "plugin": "layout:node_types",
             "data": {
-                "module": "dashboard",
+                "module": "layout",
                 "delta": "node_types",
                 "settings": {
                     "title_display": "default",
@@ -231,9 +255,9 @@
             }
         },
         "fe51ec3f-6310-42cd-87f1-1c2361d666c1": {
-            "plugin": "dashboard:taxonomy",
+            "plugin": "layout:taxonomy",
             "data": {
-                "module": "dashboard",
+                "module": "layout",
                 "delta": "taxonomy",
                 "settings": {
                     "title_display": "default",
@@ -279,5 +303,16 @@
                 }
             }
         }
-    }
+    },
+    "conditions": [
+        {
+            "plugin": "user_permission",
+            "data": {
+                "settings": {
+                    "permission": "access dashboard",
+                    "load_condition_nojs": "Load condition"
+                }
+            }
+        }
+    ]
 }
