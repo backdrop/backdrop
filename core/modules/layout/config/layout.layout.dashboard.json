@@ -3,9 +3,9 @@
     "path": "admin/dashboard",
     "name": "dashboard",
     "title": "Dashboard",
-    "description": null,
+    "description": "Site overview dashboard",
     "renderer_name": "standard",
-    "module": null,
+    "module": "layout",
     "weight": 0,
     "storage": 1,
     "layout_template": "sutro",
@@ -23,7 +23,7 @@
             "6ea690fd-3a89-4527-ac36-ebf59dc62ae2"
         ],
         "content": [
-            "e95f6c00-0fdd-4081-9fb8-cb52b5e8d223"
+            "a144d9d3-0cac-4c20-989e-75220ab686cb"
         ],
         "half1": [
             "5a4ec847-16c1-45dd-b168-58afed5081d4",
@@ -91,19 +91,21 @@
                 }
             }
         },
-        "e95f6c00-0fdd-4081-9fb8-cb52b5e8d223": {
-            "plugin": "layout:content",
+        "a144d9d3-0cac-4c20-989e-75220ab686cb": {
+            "plugin": "layout:custom_block",
             "data": {
                 "module": "layout",
-                "delta": "content",
+                "delta": "custom_block",
                 "settings": {
                     "title_display": "default",
-                    "title": "",
+                    "title": "Site dashboard",
                     "style": "default",
                     "block_settings": [],
-                    "contexts": []
+                    "contexts": [],
+                    "content": "<p>An overview of your website.</p>\r\n",
+                    "format": "filtered_html"
                 },
-                "uuid": "e95f6c00-0fdd-4081-9fb8-cb52b5e8d223",
+                "uuid": "a144d9d3-0cac-4c20-989e-75220ab686cb",
                 "style": {
                     "plugin": "default",
                     "data": {
