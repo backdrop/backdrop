@@ -18,7 +18,10 @@
  * - $content: The actual content of the block.
  */
 ?>
-<div class="message-block messages <?php print $message_type; ?>"<?php print backdrop_attributes($attributes); ?>>
+<?php if ($message_type): ?>
+  <div class="message-block messages <?php print $message_type; ?>"<?php print backdrop_attributes($attributes); ?>>
+<?php endif; ?>
+
   <div class="block-content">
     <?php print render($content); ?>
   </div>
