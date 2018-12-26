@@ -1197,9 +1197,15 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     '#weight' => 10,
   );
   $styles = _layout_get_all_info('layout_style');
+  $block_info = $block->getBlockInfo();
+  $block_type = $block_info['class'];
   $style_options = array();
   foreach ($styles as $style_name => $style_info) {
     $style_options[$style_name] = $style_info['title'];
+  }
+  // Limit the Message style option to custom text blocks.
+  if ($block_type != 'BlockText') {
+    unset($style_options['message']);
   }
   $current_style = $block->settings['style'];
   if (isset($form_state['values']['style'])) {
@@ -1207,7 +1213,7 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
   }
   $form['style']['style'] = array(
     '#type' => 'select',
-    '#title' => t('Style'),
+    '#title' => t('Block style'),
     '#options' => $style_options,
     '#default_value' => $current_style,
     '#ajax' => array(
