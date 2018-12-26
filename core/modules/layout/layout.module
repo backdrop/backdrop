@@ -1902,7 +1902,7 @@ function layout_user_login(&$edit, $account) {
     // Check for permission to use total control.
     if (user_access('have total control', $account)) {
       // Check for redirect to dashboard setting.
-      if (config_get('dashboard.settings', 'login_redirect') == 1) {
+      if (config_get('dashboard.settings', 'dashboard_login_redirect') == 1) {
         $_GET['destination'] = 'admin/dashboard';
       }
     }

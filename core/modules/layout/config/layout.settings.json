@@ -1,5 +1,6 @@
 {
     "_config_name": "layout.settings",
+    "dashboard_login_redirect": true,
     "excluded_templates": [
         "one_column",
         "two_column",

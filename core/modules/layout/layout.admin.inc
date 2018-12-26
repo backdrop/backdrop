@@ -2892,10 +2892,10 @@ function layout_dashboard_admin_settings() {
   $config = config('dashboard.settings');
   // Redirect on log in.
   $form['#config'] = 'dashboard.settings';
-  $form['login_redirect'] = array(
+  $form['dashboard_login_redirect'] = array(
     '#type' => 'checkbox',
     '#title' => t('Redirect administrators to Dashboard after log in'),
-    '#default_value' => $config->get('login_redirect'),
+    '#default_value' => $config->get('dashboard_login_redirect'),
     '#description' => t('Everyone with the !permission permission will be automatically redirected to the Dashboard when they log in..', array(
       '!permission' => l(t('Access dashboard'), 'admin/config/people/permissions'),
     )),
