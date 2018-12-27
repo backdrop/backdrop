@@ -2026,6 +2026,9 @@ function node_block_configure($delta = '', $settings = array()) {
 
 /**
  * Returns a themed RSS icon which links to a provided feed.
+ *
+ * @param array $settings
+ *   Block configuration settings.
  */
 function node_syndicate_content($settings) {
   if (isset($settings['syndicate_settings']) && $settings['syndicate_settings'] == 'page_content') {
@@ -2035,7 +2038,7 @@ function node_syndicate_content($settings) {
   return array(
     '#theme' => 'feed_icon',
     '#url' => 'rss.xml',
-    '#title' => t('Syndicate'),
+    '#title' => t('Subscribe to promoted content'),
   );
 }
 
