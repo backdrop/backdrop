@@ -21,6 +21,14 @@ class LayoutStyleMessage extends LayoutStyle {
     parent::form($form, $form_state);
 
     if (!$this->is_region) {
+      $form['block_title_message'] = array(
+        '#type' => 'container',
+        '#attributes' => array('class' => array('messages', 'info')),
+        '#weight' => -2,
+      );
+      $form['block_title_message']['message'] = array(
+        '#markup' => t('The display title will not be rendered in the frontend when the block type is set to "Message", but it is still useful as an admin label for the block.'),
+      );
       $form['message_type'] = array(
         '#title' => t('Message type'),
         '#type' => 'radios',
