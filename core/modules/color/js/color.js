@@ -79,7 +79,11 @@ Backdrop.behaviors.color = {
 
     // Setup the preview.
     $('#system-theme-settings').addClass('has-preview').after(settings.colorPreviewMarkup);
-    updatePreview();
+    // Wait for the iframe to be loaded before attempting to apply the preview
+    // settings for the first time.
+    $('#preview').load(function () {
+      updatePreview();
+    });
 
     /**
      * Saves the current form values and refreshes the preview.
