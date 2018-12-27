@@ -1197,11 +1197,11 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     '#weight' => 10,
   );
   $styles = _layout_get_all_info('layout_style');
-  $block_info = $block->getBlockInfo();
   $style_options = array();
   foreach ($styles as $style_name => $style_info) {
     $style_options[$style_name] = $style_info['title'];
   }
+  $block_info = $block->getBlockInfo();
   // Limit the Message style option to custom text blocks.
   if (!isset($block_info['class']) || $block_info['class'] != 'BlockText') {
     unset($style_options['message']);
