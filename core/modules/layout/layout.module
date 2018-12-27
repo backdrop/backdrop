@@ -691,11 +691,6 @@ function layout_block_info() {
   );
 
   // Dashboard blocks.
-  $blocks['content'] = array(
-    'info' => t('Dashboard - Welcome'),
-    'description' => t('Introduction to the Dashboard'),
-    'class' => 'DashboardWelcomeBlock',
-  );
   $blocks['create'] = array(
     'info' => t('Dashboard - Create content'),
     'description' => t('Provides links to create new content'),
@@ -779,7 +774,6 @@ function layout_autoload_info() {
     'LayoutStyleDynamic' => 'plugins/styles/layout_style_dynamic.inc',
 
     // Dashboard blocks
-    'DashboardWelcomeBlock' => 'includes/dashboard_blocks/block.welcome.inc',
     'DashboardCreateBlock' => 'includes/dashboard_blocks/block.create.inc',
     'DashboardMenuBlock' => 'includes/dashboard_blocks/block.menus.inc',
     'DashboardContentTypesBlock' => 'includes/dashboard_blocks/block.node_types.inc',
@@ -1902,7 +1896,7 @@ function layout_user_login(&$edit, $account) {
     // Check for permission to use dashboard.
     if (user_access('access dashboard', $account)) {
       // Check for redirect to dashboard setting.
-      if (config_get('dashboard.settings', 'dashboard_login_redirect') == 1) {
+      if (config_get('layout.settings', 'dashboard_login_redirect') == 1) {
         $_GET['destination'] = 'admin/dashboard';
       }
     }

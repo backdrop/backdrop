@@ -2889,9 +2889,9 @@ function layout_get_block_usage($module = NULL, $delta = NULL) {
  * menu callback for settings page
  */
 function layout_dashboard_admin_settings() {
-  $config = config('dashboard.settings');
+  $config = config('layout.settings');
   // Redirect on log in.
-  $form['#config'] = 'dashboard.settings';
+  $form['#config'] = 'layout.settings';
   $form['dashboard_login_redirect'] = array(
     '#type' => 'checkbox',
     '#title' => t('Redirect administrators to Dashboard after log in'),

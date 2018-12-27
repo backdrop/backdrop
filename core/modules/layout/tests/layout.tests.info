@@ -45,3 +45,9 @@ name = Layout Renderer Test
 description = Tests that the correct renderer is used.
 group = Layout
 file = layout.test
+
+[LayoutDashboardTest]
+name = Layout Dashboard Test
+description = Tests the dashboard layout and blocks.
+group = Layout
+file = layout.test
