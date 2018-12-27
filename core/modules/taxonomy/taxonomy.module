@@ -1481,6 +1481,12 @@ function taxonomy_field_formatter_info() {
       'label' => t('RSS category'),
       'field types' => array('taxonomy_term_reference'),
     ),
+    'taxonomy_term_reference_rendered' => array(
+      'label' => t('Rendered term'),
+      'description' => t('Display the referenced term in a specific display mode'),
+      'field types' => array('taxonomy_term_reference'),
+      'settings' => array('view_mode' => 'default'),
+    ),
   );
 }
 
@@ -1489,6 +1495,7 @@ function taxonomy_field_formatter_info() {
  */
 function taxonomy_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
+  $settings = $display['settings'];
 
   // Terms whose tid is 'autocreate' do not exist
   // yet and $item['taxonomy_term'] is not set. Theme such terms as
@@ -1535,9 +1542,118 @@ function taxonomy_field_formatter_view($entity_type, $entity, $field, $instance,
         );
       }
       break;
+
+    case 'taxonomy_term_reference_rendered':
+      // To prevent infinite recursion caused by reference cycles, we store
+      // diplayed terms in a recursion queue.
+      $recursion_queue = &backdrop_static(__FUNCTION__, array());
+
+      // If no 'referencing entity' is set, we are starting a new 'reference
+      // thread' and need to reset the queue.
+      if (!isset($entity->referencing_entity)) {
+        $recursion_queue = array();
+      }
+
+      // The recursion queue only needs to track terms.
+      if (in_array($entity_type, array('taxonomy_term'))) {
+        $recursion_queue[$entity->id()] = $entity->id();
+      }
+
+      // Check the recursion queue to determine which terms should be fully
+      // displayed, and which terms will only be displayed as a title.
+      $terms_display = array();
+      foreach ($items as $delta => $item) {
+        if (!isset($recursion_queue[$item['tid']])) {
+          $terms_display[$item['tid']] = $item['taxonomy_term'];
+        }
+      }
+
+      // Load and build the fully displayed terms.
+      if ($terms_display) {
+        foreach ($terms_display as $tid => $term) {
+          $terms_display[$tid]->referencing_entity = $entity;
+          $terms_display[$tid]->referencing_field = $field['field_name'];
+        }
+        $terms_built = taxonomy_term_view_multiple($terms_display, $settings['view_mode']);
+      }
+
+      // Assemble the render array.
+      foreach ($items as $delta => $item) {
+        if (isset($terms_display[$item['tid']])) {
+          $element[$delta] = $terms_built['taxonomy_terms'][$item['tid']];
+        }
+        else {
+          $term = $item['taxonomy_term'];
+          $label = entity_label('taxonomy_term', $term);
+          $uri = entity_uri('taxonomy_term', $term);
+          $element[$delta] = array(
+            '#type' => 'link',
+            '#title' => $label,
+            '#href' => $uri['path'],
+            '#options' => $uri['options'],
+          );
+        }
+      }
+
+      break;
   }
 
   return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function taxonomy_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $element = array();
+
+  switch ($display['type']) {
+    case 'taxonomy_term_reference_rendered':
+      $entity_info = entity_get_info('taxonomy_term');
+      $modes = $entity_info['view modes'];
+      $options = array('default' => t("Default"));
+      foreach ($modes as $name => $mode) {
+        $options[$name] = $mode['label'];
+      }
+      $element['view_mode'] = array(
+        '#title' => t('Display mode'),
+        '#type' => 'select',
+        '#options' => $options,
+        '#default_value' => $settings['view_mode'],
+        // Never empty, so no #empty_option
+      );
+      break;
+  }
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function taxonomy_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $summary = array();
+
+  switch ($display['type']) {
+    case 'taxonomy_term_reference_rendered':
+      $entity_info = entity_get_info('taxonomy_term');
+      $modes = $entity_info['view modes'];
+      $mode = $settings['view_mode'];
+      if (!empty($modes[$settings['view_mode']]['label'])) {
+        $mode = $modes[$settings['view_mode']]['label'];
+      }
+      if ($settings['view_mode'] == 'default') {
+        $mode = t("Default");
+      }
+      $summary[] = t('Display mode: %mode', array('%mode' => $mode));
+      break;
+  }
+
+  return implode('<br />', $summary);
 }
 
 /**
