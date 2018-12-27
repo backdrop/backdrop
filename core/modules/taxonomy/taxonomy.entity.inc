@@ -32,6 +32,13 @@ class TaxonomyTerm extends Entity {
   public $name;
 
   /**
+   * Language of the term.
+   *
+   * @var string
+   */
+  public $langcode = LANGUAGE_NONE;
+
+  /**
    * (optional) Description of the term.
    *
    * @var string
