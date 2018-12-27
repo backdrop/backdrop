@@ -25,6 +25,7 @@
     "file_transliterate_uploads": 1,
     "file_transliterate_uploads_display_name": 0,
     "filter_fallback_format": "plain_text",
+    "form_cache_expiration": 21600,
     "image_toolkit": "gd",
     "image_jpeg_quality": "75",
     "image_style_flood_limit": 5,
