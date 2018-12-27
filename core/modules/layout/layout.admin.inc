@@ -1198,13 +1198,12 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
   );
   $styles = _layout_get_all_info('layout_style');
   $block_info = $block->getBlockInfo();
-  $block_type = $block_info['class'];
   $style_options = array();
   foreach ($styles as $style_name => $style_info) {
     $style_options[$style_name] = $style_info['title'];
   }
   // Limit the Message style option to custom text blocks.
-  if ($block_type != 'BlockText') {
+  if (!isset($block_info['class']) || $block_info['class'] != 'BlockText') {
     unset($style_options['message']);
   }
   $current_style = $block->settings['style'];
