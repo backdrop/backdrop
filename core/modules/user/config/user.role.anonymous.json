@@ -1,8 +1,5 @@
 {
     "_config_name": "user.role.anonymous",
-    "_config_translatables": [
-        "label"
-    ],
     "name": "anonymous",
     "label": "Anonymous",
     "weight": "0",

@@ -266,7 +266,7 @@ function node_form($form, &$form_state, Node $node) {
         backdrop_get_path('module', 'node') . '/js/node.js',
         array(
           'type' => 'setting',
-          'data' => array('anonymous' => $config->getTranslated('anonymous')),
+          'data' => array('anonymous' => $config->get('anonymous')),
         ),
       ),
     ),
@@ -279,7 +279,7 @@ function node_form($form, &$form_state, Node $node) {
     '#autocomplete_path' => 'user/autocomplete',
     '#default_value' => !empty($node->name) ? $node->name : '',
     '#weight' => -1,
-    '#description' => t('Leave blank for %anonymous.', array('%anonymous' => $config->getTranslated('anonymous'))),
+    '#description' => t('Leave blank for %anonymous.', array('%anonymous' => $config->get('anonymous'))),
   );
   $form['author']['date'] = array(
     '#type' => module_exists('date') ? 'date_popup' : 'textfield',
