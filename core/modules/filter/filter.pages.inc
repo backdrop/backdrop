@@ -385,6 +385,8 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     'file_extensions' => 'txt',
     'directory' => 'inline-files',
     'data-file-id' => NULL,
+    'status' => 0,
+    'scheme' => 'public',
   );
 
   $max_filesize = !empty($upload_settings['max_size']) ? min(parse_size($upload_settings['max_size']), file_upload_max_size()) : file_upload_max_size();
