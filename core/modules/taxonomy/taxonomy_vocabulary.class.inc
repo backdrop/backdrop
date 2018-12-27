@@ -41,8 +41,7 @@ class TaxonomyVocabulary {
   public $hierarchy = TAXONOMY_HIERARCHY_DISABLED;
 
   /**
-   * The language for the vocabulary.
-   *
+   * The language configuration for the vocabulary.
    *
    * @var integer
    */
