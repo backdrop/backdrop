@@ -332,12 +332,6 @@ function layout_menu() {
   // Add dashboard and its settings menu if the layout is enabled.
   $dashboard = layout_load('dashboard');
   if ($dashboard && !$dashboard->disabled) {
-    $items['admin/dashboard/default'] = array(
-      'title' => 'Dashboard',
-      'description' => 'Admin dashboard',
-      'type' => MENU_DEFAULT_LOCAL_TASK,
-      'weight' => -100,
-    );
     $items['admin/dashboard/settings'] = array(
       'title' => 'Settings',
       'page callback' => 'backdrop_get_form',
