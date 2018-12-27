@@ -4410,7 +4410,7 @@ function views_ui_admin_settings_basic() {
   $form['basic']['show_master_display'] = array(
     '#type' => 'checkbox',
     '#title' => t('Always show the <em>Master</em> display'),
-    '#description' => t('Show the <em>Master</em> (i.e. default) display, which is otherwise hidden by default.'),
+    '#description' => t('Show the <em>Master</em> (i.e. default) display, which is otherwise hidden.'),
     '#default_value' => $config->get('show_master_display'),
   );
 
