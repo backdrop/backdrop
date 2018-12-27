@@ -414,7 +414,7 @@ class SearchRankingTestCase extends BackdropWebTestCase {
 
     // Test each of the possible rankings.
     foreach ($node_ranks as $node_rank) {
-      // Disable all relevancy rankings except the one we are testing.
+      // Disable all relevance rankings except the one we are testing.
       foreach ($node_ranks as $var) {
         config_set('search.settings', 'node_rank_' . $var, $var == $node_rank ? 10 : 0);
       }
