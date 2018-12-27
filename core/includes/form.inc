@@ -556,10 +556,16 @@ function form_get_cache($form_build_id, &$form_state) {
 
 /**
  * Stores a form in the cache.
+ *
+ * The default cache_form expiration is 6 hours. On busy sites, the cache_form
+ * table can become very large. A shorter cache lifetime can help to keep the
+ * table's size under control.
  */
 function form_set_cache($form_build_id, $form, $form_state) {
-  // 6 hours cache life time for forms should be plenty.
-  $expire = 21600;
+  // Try to read the 'form_cache_expiration' setting from settings.php. If not
+  // set in settings.php, then default to the value set in 'system.core' config
+  // (via system_update_1067 - setting not exposed in the admin UI currently).
+  $expire = settings_get('form_cache_expiration', config_get('system.core', 'form_cache_expiration'));
 
   // Ensure that the form build_id embedded in the form structure is the same as
   // the one passed in as a parameter. This is an additional safety measure to
