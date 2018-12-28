@@ -12,7 +12,49 @@
  * @ingroup forms
  */
 function update_settings($form, &$form_state) {
+  $markup = t(
+    'You can configure if Backdrop is allowed to update itself and optionally if
+    it should do the updates automatically. For these updates to work the file
+    system permissions need to be set to allow this. See: ') .
+    l(
+      'File permissions and ownership',
+      'https://backdropcms.org/file-permissions-and-ownership'
+    ) .
+    t(' on BackdropCMS.org for more details.
+  ');
+  $form['core_help'] = array(
+    '#type' => 'help',
+    '#markup' => $markup,
+  );
+  $core_update = config_get('installer.settings', 'core_update');
+  $form['core_update'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow Backdrop core updates'),
+    '#default_value' => $core_update,
+    '#description' => t('Check if you want the ability to update Backdrop from web UI (required for automatic updates).'),
+  );
+
   $config = config('update.settings');
+  $form['update_configure_automatic'] = array(
+    '#type' => 'select',
+    '#title' => t('Configure automatic updates'),
+    '#default_value' => $config->get('update_automatic'),
+    '#options' => array(
+      0 => t('Automatic updates off'),
+      1 => t('Security releases only'),
+      2 => t('Patch releases'),
+      3 => t('Minor releases'),
+    ),
+    '#states' => array(
+      'disabled' => array(
+        ':input[name="core_update"]' => array('checked' => FALSE),
+      ),
+    ),
+    '#description' =>
+      t('A Security release removes security vulnerabilities.<br />') .
+      t('A Patch release removes bugs and contains improvements of the user interface. It may also contain security fixes. <br />') .
+      t('A Minor release adds new features (without API changes).<br />')
+  );
   $form['update_check_frequency'] = array(
     '#type' => 'radios',
     '#title' => t('Check for updates'),
@@ -61,6 +103,10 @@ function update_settings($form, &$form_state) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save configuration')
+  );
+
+  $form['#attached']['css'] = array(
+    backdrop_get_path('module', 'update') . '/css/update_settings.css',
   );
 
   return $form;
@@ -127,7 +173,11 @@ function update_settings_submit($form, $form_state) {
     ->set('update_interval_days', $form_state['values']['update_check_frequency'])
     ->set('update_emails', $form_state['notify_emails'])
     ->set('update_threshold', $form_state['values']['update_notification_threshold'])
+    ->set('core_update', $form_state['values']['core_update'])
+    ->set('update_automatic', (int) $form_state['values']['update_configure_automatic'])
     ->save();
+  $core_update = ($form_state['values']['core_update']) ? TRUE : FALSE;
+  config_set('installer.settings', 'core_update', $core_update);
 
   // Display status messages for this form.
   backdrop_set_message(t('The configuration options have been saved.'));

@@ -12,5 +12,6 @@
     "update_threshold": "all",
     "update_requirement_type": 0,
     "update_status": [],
-    "update_projects": []
+    "update_projects": [],
+    "update_automatic": 0
 }

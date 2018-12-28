@@ -1,0 +1,5 @@
+.form-disabled {
+  background-color: #eee;
+  padding: 12px;
+  opacity: 0.4;
+}

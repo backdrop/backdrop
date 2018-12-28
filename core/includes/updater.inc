@@ -93,7 +93,13 @@ abstract class Updater implements BackdropUpdaterInterface {
    * @throws UpdaterException
    */
   public static function factory($source) {
-    if (is_dir($source)) {
+    if (strpos($source, 'backdrop') !== FALSE) {
+      $is_backdrop = explode('/', $source)[3];
+      if ($is_backdrop == 'backdrop') {
+        return 'CoreUpdater';
+      }
+    }
+    elseif (is_dir($source)) {
       $updater = self::getUpdaterFromDirectory($source);
     }
     else {
@@ -210,15 +216,23 @@ abstract class Updater implements BackdropUpdaterInterface {
    * @throws UpdaterException
    */
   public static function getProjectTitle($directory) {
-    $info_file = self::findInfoFile($directory);
-    $info = backdrop_parse_info_file($info_file);
-    if (empty($info)) {
-      throw new UpdaterException(t('Unable to parse info file: %info_file.', array('%info_file' => $info_file)));
+    if (strpos($directory, 'backdrop') !== FALSE) {
+      $check_for_core = explode('/', $directory)[3];
+      if ($check_for_core == 'backdrop') {
+        return 'backdrop';
+      }
     }
-    if (empty($info['name'])) {
-      throw new UpdaterException(t("The info file (%info_file) does not define a 'name' attribute.", array('%info_file' => $info_file)));
+    else {
+      $info_file = self::findInfoFile($directory);
+      $info = backdrop_parse_info_file($info_file);
+      if (empty($info)) {
+        throw new UpdaterException(t('Unable to parse info file: %info_file. %blah', array('%info_file' => $info_file, '%blah' => $directory)));
+      }
+      if (empty($info['name'])) {
+        throw new UpdaterException(t("The info file (%info_file) does not define a 'name' attribute.", array('%info_file' => $info_file)));
+      }
+      return $info['name'];
     }
-    return $info['name'];
   }
 
   /**
@@ -283,6 +297,8 @@ abstract class Updater implements BackdropUpdaterInterface {
       // Copy the directory in place.
       // Check for core udpate.
       if ($this->name == 'backdrop') {
+        // Remove the eld core directory.
+        $filetransfer->removeDirectory($args['install_dir'] . '/core');
         $source = $this->source . '/core';
         $name = 'core';
       }
