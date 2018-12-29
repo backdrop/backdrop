@@ -464,7 +464,7 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       $elements[$delta]['#default_value'] = $item;
       $elements[$delta]['#weight'] = $delta;
       if ($field['cardinality'] != FIELD_CARDINALITY_UNLIMITED) {
-        $elements[$delta]['#element_validate'] = array('file_field_widget_multiple_count_validate');;
+        $elements[$delta]['#element_validate'] = array('file_field_widget_multiple_count_validate');
       }
       $delta++;
     }
