@@ -605,7 +605,7 @@ function file_field_widget_multiple_count_validate($element, &$form_state, $form
       $file = file_load($fid);
       $removed_names[] = $file->filename;
     }
-    drupal_set_message(
+    backdrop_set_message(
       t(
         'Field %field can only hold @max values but there were @count uploaded. The following files have been omitted as a result: %list.',
         array(

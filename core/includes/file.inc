@@ -1459,13 +1459,13 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     switch ($uploaded_files['files']['error'][$form_field_name][$i]) {
       case UPLOAD_ERR_INI_SIZE:
       case UPLOAD_ERR_FORM_SIZE:
-        drupal_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', array('%file' => $name, '%maxsize' => format_size(file_upload_max_size()))), 'error');
+        backdrop_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', array('%file' => $name, '%maxsize' => format_size(file_upload_max_size()))), 'error');
         $files[$i] = FALSE;
         continue;
 
       case UPLOAD_ERR_PARTIAL:
       case UPLOAD_ERR_NO_FILE:
-        drupal_set_message(t('The file %file could not be saved because the upload did not complete.', array('%file' => $name)), 'error');
+        backdrop_set_message(t('The file %file could not be saved because the upload did not complete.', array('%file' => $name)), 'error');
         $files[$i] = FALSE;
         continue;
  
@@ -1478,7 +1478,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
 
         // Unknown error
       default:
-        drupal_set_message(t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $name)), 'error');
+        backdrop_set_message(t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $name)), 'error');
         $files[$i] = FALSE;
         continue;
 
@@ -1487,7 +1487,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     $values = array(
       'uid' => $user->uid,
       'status' => 0,
-      'filename' => trim(drupal_basename($name, '.')),
+      'filename' => trim(backdrop_basename($name, '.')),
       'uri' => $uploaded_files['files']['tmp_name'][$form_field_name][$i],
       'filesize' => $uploaded_files['files']['size'][$form_field_name][$i],
     );
@@ -1532,7 +1532,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
       // to add it here or else the file upload will fail.
       if (!empty($extensions)) {
         $validators['file_validate_extensions'][0] .= ' txt';
-        drupal_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $file->filename)));
+        backdrop_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $file->filename)));
       }
     }
     // If the destination is not provided, use the temporary directory.
@@ -1542,7 +1542,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     // Assert that the destination contains a valid stream.
     $destination_scheme = file_uri_scheme($destination);
     if (!file_stream_wrapper_valid_scheme($destination_scheme)) {
-      drupal_set_message(t('The file could not be uploaded because the destination %destination is invalid.', array('%destination' => $destination)), 'error');
+      backdrop_set_message(t('The file could not be uploaded because the destination %destination is invalid.', array('%destination' => $destination)), 'error');
       $files[$i] = FALSE;
       continue;
     }
@@ -1555,7 +1555,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     // If file_destination() returns FALSE then $replace === FILE_EXISTS_ERROR and
     // there's an existing file so we need to bail.
     if ($file->destination === FALSE) {
-      drupal_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array('%source' => $form_field_name, '%directory' => $destination)), 'error');
+      backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array('%source' => $form_field_name, '%directory' => $destination)), 'error');
       $files[$i] = FALSE;
       continue;
     }
@@ -1582,14 +1582,14 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     // directory. This overcomes open_basedir restrictions for future file
     // operations.
     $file->uri = $file->destination;
-    if (!drupal_move_uploaded_file($uploaded_files['files']['tmp_name'][$form_field_name][$i], $file->uri)) {
+    if (!backdrop_move_uploaded_file($uploaded_files['files']['tmp_name'][$form_field_name][$i], $file->uri)) {
       form_set_error($form_field_name, t('File upload error. Could not move uploaded file.'));
       watchdog('file', 'Upload error. Could not move uploaded file %file to destination %destination.', array('%file' => $file->filename, '%destination' => $file->uri));
       $files[$i] = FALSE;
       continue;
     }
     // Set the permissions on the new file.
-    drupal_chmod($file->uri);
+    backdrop_chmod($file->uri);
     // If we are replacing an existing file re-use its database record.
     if ($replace == FILE_EXISTS_REPLACE) {
       $existing_files = entity_load_multiple_by_properties('file', array('uri' => $file->uri));
