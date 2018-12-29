@@ -361,7 +361,7 @@ function user_validate_picture(&$form, &$form_state) {
     'file_validate_is_image' => array(),
     'file_validate_image_orientation' => array(TRUE),
     'file_validate_image_resolution' => array(config_get('system.core', 'user_picture_dimensions')),
-    'file_validate_size' => array(config_get('system.core', 'user_picture_file_size') * 1024),
+    'file_validate_size' => array((int) config_get('system.core', 'user_picture_file_size') * 1024),
   );
 
   // Save the file as a temporary file.

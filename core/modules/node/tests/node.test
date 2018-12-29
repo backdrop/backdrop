@@ -876,7 +876,7 @@ class NodeTitleXSSTestCase extends BackdropWebTestCase {
  */
 class NodeBlockTestCase extends BackdropWebTestCase {
   function setUp() {
-    parent::setUp();
+    parent::setUp('node_test');
 
     // Create and login user
     $admin_user = $this->backdropCreateUser(array('administer blocks'));
@@ -884,9 +884,10 @@ class NodeBlockTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests that the "Syndicate" block is shown when enabled.
+   * Tests the "Syndicate" block settings.
    */
   function testSyndicateBlock() {
+    // Test default promoted nodes feed shown if default block settings.
     $layout = layout_load('home');
     $layout->addBlock('node', 'syndicate', 'footer');
     $layout->save();
@@ -896,10 +897,49 @@ class NodeBlockTestCase extends BackdropWebTestCase {
     $this->backdropGet('<front>');
     $elements = $this->xpath($syndicate_selector);
     $this->assertEqual(count($elements), 1, 'Syndicate block found on front page.');
+    $view_feed = $this->xpath('//a[contains(@href,"test-view-feed")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($view_feed), 0, 'View feed not found on front page.');
+    $promote_feed = $this->xpath('//a[contains(@href,"rss.xml")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($promote_feed), 1, 'Promoted nodes feed found on front page.');
 
+    // Check block not shown if not on the layout page.
     $this->backdropGet('user');
     $elements = $this->xpath($syndicate_selector);
     $this->assertEqual(count($elements), 0, 'Syndicate block not shown on /user.');
+
+    // Test block shows the RSS feed of an RSS-enabled view if set to show page
+    // content.
+    $layout = layout_load('default');
+    $block = $layout->addBlock('node', 'syndicate', 'footer');
+    $block->settings['block_settings'] = array(
+      'syndicate_settings' => 'page_content',
+    );
+    $layout->save();
+    cache_clear_all();
+
+    $this->backdropGet('test-view-view');
+    $elements = $this->xpath($syndicate_selector);
+    $this->assertEqual(count($elements), 1, 'Syndicate block found on test View page.');
+    $view_feed = $this->xpath('//a[contains(@href,"test-view-feed")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($view_feed), 1, 'View feed found on test View page.');
+    $promote_feed = $this->xpath('//a[contains(@href,"rss.xml")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($promote_feed), 0, 'Promoted nodes feed not found on test View page.');
+
+    // Test block shows the promoted nodes view if set to show this, even on a
+    // RSS enabled view's page.
+    $block->settings['block_settings'] = array(
+      'syndicate_settings' => 'promoted',
+    );
+    $layout->save();
+    cache_clear_all();
+
+    $this->backdropGet('test-view-view');
+    $elements = $this->xpath($syndicate_selector);
+    $this->assertEqual(count($elements), 1, 'Syndicate block found on test View page.');
+    $view_feed = $this->xpath('//a[contains(@href,"test-view-feed")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($view_feed), 0, 'View feed not found on test View page.');
+    $promote_feed = $this->xpath('//a[contains(@href,"rss.xml")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($promote_feed), 1, 'Promoted nodes feed found on test View page.');
   }
 }
 

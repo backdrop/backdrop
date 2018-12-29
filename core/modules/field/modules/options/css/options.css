@@ -1,0 +1,112 @@
+/**
+ * @file
+ * Stylesheet for the Options module.
+ */
+
+.options-widget .draggable a.tabledrag-handle {
+  padding-right: .3em; /* LTR */
+}
+[dir="rtl"] .options-widget .draggable a.tabledrag-handle {
+  padding-left: .3em;
+}
+.form-options .options {
+  margin-bottom: 0;
+}
+.options-widget a.add span,
+.options-widget a.remove span {
+  display: none;
+}
+.options-widget a.add,
+.options-widget a.remove {
+  display: block;
+  width: 24px;
+  height: 24px;
+  margin: .2em .1em;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-size: contain;
+  opacity: 0.3;
+  float: left; /* LTR */
+}
+[dir="rtl"] .options-widget a.add,
+[dir="rtl"] .options-widget a.remove,
+[dir="rtl"] .form-option-add a {
+  float: right;
+}
+.options-widget a.add:hover,
+.options-widget a.remove:hover {
+  opacity: 1;
+}
+.options-widget a.add {
+  /* Icon derived from Font Awesome, which is licensed under the SIL OFL 1.1 */
+  background-image: url(../../../../../misc/plus-black-64.png);
+}
+.options-widget a.remove {
+  /* Icon derived from Font Awesome, which is licensed under the SIL OFL 1.1 */
+  background-image: url(../../../../../misc/minus-black-64.png);
+}
+.default-value-pattern-match {
+  float: left; /* LTR */
+}
+[dir="rtl"] .default-value-pattern-match {
+  float: right;
+}
+.remove-default {
+  float: left; /* LTR */
+}
+[dir="rtl"] .remove-default {
+  float: right;
+}
+.form-options-manual,
+.form-option-add {
+  text-align: right; /* LTR */
+}
+[dir="rtl"] .form-options-manual,
+[dir="rtl"] .form-option-add {
+  text-align: left;
+}
+.form-options-manual a,
+.form-option-add a {
+  float: none;
+  display: inline;
+}
+.form-option-add a {
+  padding-left: 20px; /* LTR */
+}
+[dir="rtl"] .form-option-add a {
+  padding-right: 20px;
+}
+.options-widget table {
+  width: 100%;
+  margin: 0;
+}
+.options-widget table,
+.options-widget tbody {
+  border: none;
+}
+.options-widget tr {
+  border-style: none;
+  background: none;
+}
+.options-widget td {
+  padding: 4px 6px;
+}
+.options-widget td.option-default-cell {
+  width: 6em;
+  padding: 4px 0;
+}
+.options-widget td.option-order-cell {
+  width: 2em;
+}
+.options-widget tr.indented td.option-order-cell {
+  width: 4em;
+}
+.options-widget td.option-key-cell {
+  width: 20%;
+}
+.options-widget td.option-actions-cell {
+  width: 56px;
+}
+.options-widget input.form-text {
+  width: 100%;
+}

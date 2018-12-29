@@ -3030,6 +3030,15 @@ function system_update_1066() {
 }
 
 /**
+ * Add default value for form_cache_expiration.
+ */
+function system_update_1067() {
+  $config = config('system.core');
+  $config->set('form_cache_expiration', 21600);
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

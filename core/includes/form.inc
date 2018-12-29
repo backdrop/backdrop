@@ -556,10 +556,16 @@ function form_get_cache($form_build_id, &$form_state) {
 
 /**
  * Stores a form in the cache.
+ *
+ * The default cache_form expiration is 6 hours. On busy sites, the cache_form
+ * table can become very large. A shorter cache lifetime can help to keep the
+ * table's size under control.
  */
 function form_set_cache($form_build_id, $form, $form_state) {
-  // 6 hours cache life time for forms should be plenty.
-  $expire = 21600;
+  // Try to read the 'form_cache_expiration' setting from settings.php. If not
+  // set in settings.php, then default to the value set in 'system.core' config
+  // (via system_update_1067 - setting not exposed in the admin UI currently).
+  $expire = settings_get('form_cache_expiration', config_get('system.core', 'form_cache_expiration'));
 
   // Ensure that the form build_id embedded in the form structure is the same as
   // the one passed in as a parameter. This is an additional safety measure to
@@ -1454,10 +1460,11 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
       // length if it's a string, and the item count if it's an array.
       // An unchecked checkbox has a #value of integer 0, different than string
       // '0', which could be a valid value.
-      $is_empty_multiple = (is_array($elements['#value']) || $elements['#value'] instanceof Countable) && count($elements['#value']) === 0;
-      $is_empty_null = $elements['#value'] === NULL;
+      $is_countable = is_array($elements['#value']) || $elements['#value'] instanceof Countable;
+      $is_empty_multiple = $is_countable && count($elements['#value']) == 0;
       $is_empty_string = (is_string($elements['#value']) && backdrop_strlen(trim($elements['#value'])) == 0);
       $is_empty_value = ($elements['#value'] === 0);
+      $is_empty_null = is_null($elements['#value']);
       if ($is_empty_multiple || $is_empty_string || $is_empty_value || $is_empty_null) {
         // Although discouraged, a #title is not mandatory for form elements. In
         // case there is no #title, we cannot set a form error message.

@@ -20,6 +20,17 @@ define('TAXONOMY_HIERARCHY_SINGLE', 1);
 define('TAXONOMY_HIERARCHY_MULTIPLE', 2);
 
 /**
+ * Denotes that language is disabled on vocabulary.
+ */
+define('TAXONOMY_LANGUAGE_DISABLED', 0);
+
+/**
+ * Denotes that language is enabled on vocabulary and terms can be assigned
+ * language.
+ */
+define('TAXONOMY_LANGUAGE_ENABLED', 1);
+
+/**
  * Users can create new terms in a free-tagging vocabulary when
  * submitting a taxonomy_autocomplete_widget. We store a term object
  * whose tid is 'autocreate' as a field data item during widget
@@ -173,6 +184,26 @@ function taxonomy_field_extra_fields() {
         ),
       ),
     );
+
+    // If the Language module is enabled and the bundle has multilingual
+    // support, then also add the language select.
+    $vocabulary = taxonomy_vocabulary_load($bundle);
+    if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED) {
+      $return['taxonomy_term'][$bundle]['form'] += array(
+        'language' => array(
+          'label' => t('Language'),
+          'description' => t('Term language'),
+          'weight' => 0,
+        ),
+      );
+      $return['taxonomy_term'][$bundle]['display'] += array(
+        'language' => array(
+          'label' => t('Language'),
+          'description' => t('Term language'),
+          'weight' => 0,
+        ),
+      );
+    }
   }
 
   return $return;
@@ -288,6 +319,8 @@ function taxonomy_menu() {
     'title' => 'Taxonomy term',
     'title callback' => 'taxonomy_term_title',
     'title arguments' => array(2),
+    // The page callback also invokes drupal_set_title() in case the menu
+    // router's title is overridden by a menu link.
     'page callback' => 'taxonomy_term_page',
     'page arguments' => array(2),
     'access arguments' => array('access content'),
@@ -1015,6 +1048,7 @@ function taxonomy_autoload_info() {
     'views_handler_argument_term_node_tid_depth' => 'views/views_handler_argument_term_node_tid_depth.inc',
     'views_handler_argument_term_node_tid_depth_modifier' => 'views/views_handler_argument_term_node_tid_depth_modifier.inc',
     'views_handler_argument_vocabulary' => 'views/views_handler_argument_vocabulary.inc',
+    'views_handler_argument_term_language' => 'views/views_handler_argument_term_language.inc',
     'views_handler_field_taxonomy' => 'views/views_handler_field_taxonomy.inc',
     'views_handler_field_term_node_tid' => 'views/views_handler_field_term_node_tid.inc',
     'views_handler_field_term_link_edit' => 'views/views_handler_field_term_link_edit.inc',
@@ -1318,6 +1352,8 @@ function taxonomy_field_widget_info() {
       'settings' => array(
         'size' => 60,
         'autocomplete_path' => 'taxonomy/autocomplete',
+        'follow_content_language' => TRUE,
+
       ),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
@@ -1332,6 +1368,25 @@ function taxonomy_field_widget_info() {
 function taxonomy_field_widget_info_alter(&$info) {
   $info['options_select']['field types'][] = 'taxonomy_term_reference';
   $info['options_buttons']['field types'][] = 'taxonomy_term_reference';
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function taxonomy_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // Add language code to the "Add link" action link under
+  // admin/structure/taxonomy/[taxonomy-name].
+  if (module_exists('language')) {
+    if ($root_path == 'admin/structure/taxonomy/%') {
+      foreach ($data['actions']['output'] as $key => $action_link) {
+        if ($action_link['#link']['path'] === 'admin/structure/taxonomy/%/add') {
+          $default_langcode = isset($_GET['langcode_term']) ? $_GET['langcode_term'] : LANGUAGE_NONE;
+          $query['langcode_term'] = $default_langcode;
+          $data['actions']['output'][$key]['#link']['localized_options'] = array('query' => $query);
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -1428,6 +1483,12 @@ function taxonomy_field_formatter_info() {
       'label' => t('RSS category'),
       'field types' => array('taxonomy_term_reference'),
     ),
+    'taxonomy_term_reference_rendered' => array(
+      'label' => t('Rendered term'),
+      'description' => t('Display the referenced term in a specific display mode'),
+      'field types' => array('taxonomy_term_reference'),
+      'settings' => array('view_mode' => 'default'),
+    ),
   );
 }
 
@@ -1436,6 +1497,7 @@ function taxonomy_field_formatter_info() {
  */
 function taxonomy_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
+  $settings = $display['settings'];
 
   // Terms whose tid is 'autocreate' do not exist
   // yet and $item['taxonomy_term'] is not set. Theme such terms as
@@ -1482,9 +1544,118 @@ function taxonomy_field_formatter_view($entity_type, $entity, $field, $instance,
         );
       }
       break;
+
+    case 'taxonomy_term_reference_rendered':
+      // To prevent infinite recursion caused by reference cycles, we store
+      // diplayed terms in a recursion queue.
+      $recursion_queue = &backdrop_static(__FUNCTION__, array());
+
+      // If no 'referencing entity' is set, we are starting a new 'reference
+      // thread' and need to reset the queue.
+      if (!isset($entity->referencing_entity)) {
+        $recursion_queue = array();
+      }
+
+      // The recursion queue only needs to track terms.
+      if (in_array($entity_type, array('taxonomy_term'))) {
+        $recursion_queue[$entity->id()] = $entity->id();
+      }
+
+      // Check the recursion queue to determine which terms should be fully
+      // displayed, and which terms will only be displayed as a title.
+      $terms_display = array();
+      foreach ($items as $delta => $item) {
+        if (!isset($recursion_queue[$item['tid']])) {
+          $terms_display[$item['tid']] = $item['taxonomy_term'];
+        }
+      }
+
+      // Load and build the fully displayed terms.
+      if ($terms_display) {
+        foreach ($terms_display as $tid => $term) {
+          $terms_display[$tid]->referencing_entity = $entity;
+          $terms_display[$tid]->referencing_field = $field['field_name'];
+        }
+        $terms_built = taxonomy_term_view_multiple($terms_display, $settings['view_mode']);
+      }
+
+      // Assemble the render array.
+      foreach ($items as $delta => $item) {
+        if (isset($terms_display[$item['tid']])) {
+          $element[$delta] = $terms_built['taxonomy_terms'][$item['tid']];
+        }
+        else {
+          $term = $item['taxonomy_term'];
+          $label = entity_label('taxonomy_term', $term);
+          $uri = entity_uri('taxonomy_term', $term);
+          $element[$delta] = array(
+            '#type' => 'link',
+            '#title' => $label,
+            '#href' => $uri['path'],
+            '#options' => $uri['options'],
+          );
+        }
+      }
+
+      break;
   }
 
   return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function taxonomy_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $element = array();
+
+  switch ($display['type']) {
+    case 'taxonomy_term_reference_rendered':
+      $entity_info = entity_get_info('taxonomy_term');
+      $modes = $entity_info['view modes'];
+      $options = array('default' => t("Default"));
+      foreach ($modes as $name => $mode) {
+        $options[$name] = $mode['label'];
+      }
+      $element['view_mode'] = array(
+        '#title' => t('Display mode'),
+        '#type' => 'select',
+        '#options' => $options,
+        '#default_value' => $settings['view_mode'],
+        // Never empty, so no #empty_option
+      );
+      break;
+  }
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function taxonomy_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $summary = array();
+
+  switch ($display['type']) {
+    case 'taxonomy_term_reference_rendered':
+      $entity_info = entity_get_info('taxonomy_term');
+      $modes = $entity_info['view modes'];
+      $mode = $settings['view_mode'];
+      if (!empty($modes[$settings['view_mode']]['label'])) {
+        $mode = $modes[$settings['view_mode']]['label'];
+      }
+      if ($settings['view_mode'] == 'default') {
+        $mode = t("Default");
+      }
+      $summary[] = t('Display mode: %mode', array('%mode' => $mode));
+      break;
+  }
+
+  return implode('<br />', $summary);
 }
 
 /**
@@ -1560,13 +1731,15 @@ function taxonomy_field_formatter_prepare_view($entity_type, $entities, $field, 
 }
 
 /**
- * Title callback for term pages.
+ * Title callback: Returns the title of the taxonomy term.
  *
  * @param TaxonomyTerm $term
  *   A taxonomy term entity.
  *
  * @return
- *   The term name to be used as the page title.
+ *   An unsanitized string that is the title of the taxonomy term.
+ *
+ * @see taxonomy_menu()
  */
 function taxonomy_term_title(TaxonomyTerm $term) {
   return $term->name;
@@ -1597,12 +1770,17 @@ function taxonomy_field_widget_form(&$form, &$form_state, $field, $instance, $la
  * Form element validate handler for taxonomy term autocomplete element.
  */
 function taxonomy_autocomplete_validate($element, &$form_state) {
+  $langcode = LANGUAGE_NONE;
+  if (isset($form_state['values']['langcode'])) {
+    $langcode = $form_state['values']['langcode'];
+  }
   // Autocomplete widgets do not send their tids in the form, so we must detect
   // them here and process them independently.
   $value = array();
   if ($tags = $element['#value']) {
     // Collect candidate vocabularies.
     $field = field_widget_field($element, $form_state);
+    $instance = field_widget_instance($element, $form_state);
     $vocabularies = array();
     foreach ($field['settings']['allowed_values'] as $tree) {
       if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
@@ -1624,7 +1802,11 @@ function taxonomy_autocomplete_validate($element, &$form_state) {
           'tid' => 'autocreate',
           'name' => $typed_term,
           'vocabulary' => $vocabulary->machine_name,
+          'langcode' => LANGUAGE_NONE,
         );
+        if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED  && $instance['widget']['settings']['follow_content_language']) {
+          $term['langcode'] = $langcode;
+        }
       }
       $value[] = (array)$term;
     }
@@ -1670,6 +1852,34 @@ function taxonomy_field_settings_form($field, $instance, $has_data) {
   }
 
   return $form;
+}
+
+/**
+ * Implements hook_field_widget_settings_form().
+ */
+function taxonomy_field_widget_settings_form($field, $instance) {
+  $element = array(
+    'follow_content_language' => array(
+      '#type' => 'checkbox',
+      '#title' => t('Follow content language'),
+      '#default_value' => isset($instance['widget']['settings']['follow_content_language']) ? $instance['widget']['settings']['follow_content_language'] : TRUE,
+      '#description' => t('If enabled, and if the selected vocabulary has multilingual support enabled, terms will be added in the language of the content.'),
+      '#access' => (module_exists('language') && $instance['widget']['type'] == 'taxonomy_autocomplete'),
+    ),
+  );
+
+  return $element;
+}
+
+/**
+ * Implements hook_language_delete().
+ */
+function taxonomy_language_delete($language) {
+  // On terms with this language, unset the language.
+  db_update('taxonomy_term_data')
+    ->fields(array('langcode' => ''))
+    ->condition('langcode', $language->langcode)
+    ->execute();
 }
 
 /**

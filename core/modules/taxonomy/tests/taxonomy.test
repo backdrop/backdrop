@@ -1655,6 +1655,111 @@ class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
 }
 
 /**
+ * Tests setting languages for taxonomy.
+ */
+class TaxonomyLanguageFunctionalTest extends TaxonomyWebTestCase {
+  function setUp() {
+    parent::setUp('node', 'language');
+    $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access', 'administer languages', 'administer content types', 'administer fields'));
+    $this->backdropLogin($this->admin_user);
+
+    $this->vocabulary = taxonomy_vocabulary_load('tags');
+    // Add language.
+    $this->backdropGet('admin/config/regional/language');
+    $edit = array();
+    $edit['predefined_langcode'] = 'es';
+    $this->backdropPost('admin/config/regional/language/add', $edit, t('Add language'));
+
+    // Set "Post" content type to use multilingual support.
+    $this->backdropGet('admin/structure/types/manage/post');
+    $edit = array();
+    $edit['language'] = 1;
+    $this->backdropPost('admin/structure/types/manage/post', $edit, t('Save content type'));
+    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Post')), 'Post content type has been updated.');
+
+    // Check language setting on tags field.
+    $this->backdropGet('admin/structure/types/manage/post/fields/field_tags');
+    $this->assertFieldChecked('edit-instance-widget-settings-follow-content-language', 'Tags will be saved in language of content.');
+
+    // Reset static caches in our local language environment.
+    backdrop_static_reset();
+  }
+
+  /**
+   * Create, configure and delete a vocabulary via the user interface.
+   */
+  function testVocabularyLanguageInterface() {
+    // Configure the vocabulary.
+    $this->backdropGet('admin/structure/taxonomy');
+    $this->clickLink(t('Configure'));
+    $edit = array();
+    $edit['language'] = TAXONOMY_LANGUAGE_ENABLED;
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    // Check vocabulary settings.
+    $this->backdropGet('admin/structure/taxonomy');
+    $this->clickLink(t('Configure'));
+    $this->assertFieldChecked('edit-language', 'Multilingual support is enabled for vocabulary.');
+  }
+
+  /**
+   * Test term creation with a free-tagging vocabulary from the node form.
+   */
+  function testNodeTermLanguageCreation() {
+    // Configure the vocabulary.
+    $this->backdropGet('admin/structure/taxonomy');
+    $this->clickLink(t('Configure'));
+    $edit = array();
+    $edit['language'] = TAXONOMY_LANGUAGE_ENABLED;
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    $terms = array(
+      'term1' => $this->randomName(),
+      'term2' => $this->randomName(),
+    );
+
+    $edit = array();
+    $field_langcode = LANGUAGE_NONE;
+    $langcode = 'es';
+
+    $edit["title"] = $this->randomName();
+    $edit["body[$field_langcode][0][value]"] = $this->randomName();
+    // Insert the terms in a comma separated list. Vocabulary 1 is a
+    // free-tagging field created by the default profile.
+    $edit['field_tags' . "[$field_langcode]"] = backdrop_implode_tags($terms);
+    $edit['langcode'] = $langcode;
+
+    // taxonomy.module does not maintain its static caches.
+    backdrop_static_reset();
+
+    // Save, creating the terms.
+    $this->backdropPost('node/add/post', $edit, t('Save'));
+    $this->assertRaw(t('@type %title has been created.', array('@type' => t('Post'), '%title' => $edit["title"])), 'The node was created successfully.');
+    foreach ($terms as $term) {
+      $this->assertText($term, 'The term was saved and appears on the node page.');
+    }
+
+    // Get the created terms.
+    $term_objects = array();
+    foreach ($terms as $key => $term) {
+      $term_objects[$key] = taxonomy_term_load_multiple_by_name($term);
+      $term_objects[$key] = reset($term_objects[$key]);
+    }
+
+    // Test editing the node.
+    $node = $this->backdropGetNodeByTitle($edit["title"]);
+    $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
+    foreach ($terms as $term) {
+      $this->assertText($term, 'The term was retained after edit and still appears on the node page.');
+    }
+
+    // Test language of term - should be Spanish.
+    $this->backdropGet('taxonomy/term/' . $term_objects['term1']->tid . '/edit');
+    $this->assertOptionSelected('edit-langcode', 'es', 'Term is the same language as the node it was created in.');
+  }
+}
+
+/**
  * Tests for verifying that taxonomy pages use the correct theme.
  */
 class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
