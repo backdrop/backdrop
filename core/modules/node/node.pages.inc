@@ -644,7 +644,7 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
   // make it persistent across page refreshes while still in preview mode, and
   // also while switching to different display modes.
   backdrop_set_message(t('This is a preview. Links within the page are disabled.'), 'warning', FALSE);
-  backdrop_set_message(t('Changes are stored temporarily. Click <em>Save</em> to make your changes permanent, or click <em>Back to content editing</em> to make additional changes.'), 'warning', FALSE);
+  backdrop_set_message(t('<strong>Changes are stored temporarily</strong>. Click <em>Save</em> to make your changes permanent, or click <em>Back to content editing</em> to make additional changes.'), 'warning', FALSE);
 
   $form['node'] = array(
     '#type' => 'value',
