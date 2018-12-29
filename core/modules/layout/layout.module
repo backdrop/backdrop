@@ -1896,7 +1896,7 @@ function layout_user_login(&$edit, $account) {
     // Check for permission to use dashboard.
     if (user_access('access dashboard', $account)) {
       $dashboard = layout_load('dashboard');
-      if ($dashboard && !$dashboard->disabled && $layout->checkAccess()) {
+      if ($dashboard && !$dashboard->disabled && $dashboard->checkAccess()) {
         // Check for redirect to dashboard setting.
         if (config_get('layout.settings', 'dashboard_login_redirect') == 1) {
           $_GET['destination'] = 'admin/dashboard';
