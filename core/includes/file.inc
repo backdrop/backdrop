@@ -1524,7 +1524,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     // rename filename.php.foo and filename.php to filename.php.foo.txt and
     // filename.php.txt, respectively). Don't rename if 'allow_insecure_uploads'
     // evaluates to TRUE.
-    if (!config('system.file')->get('allow_insecure_uploads') && preg_match('/\.(php|pl|py|cgi|asp|js)(\.|$)/i', $file->filename) && (substr($file->filename, -4) != '.txt')) {
+    if (!settings_get('allow_insecure_uploads', 0) && preg_match('/\.(php|pl|py|cgi|asp|js)(\.|$)/i', $file->filename) && (substr($file->filename, -4) != '.txt')) {
       $file->filemime = 'text/plain';
       $file->uri .= '.txt';
       $file->filename .= '.txt';
@@ -1592,7 +1592,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     backdrop_chmod($file->uri);
     // If we are replacing an existing file re-use its database record.
     if ($replace == FILE_EXISTS_REPLACE) {
-      $existing_files = entity_load_multiple_by_properties('file', array('uri' => $file->uri));
+      $existing_files = entity_load_multiple('file', FALSE, array('uri' => $file->uri));
       if (count($existing_files)) {
         $existing = reset($existing_files);
         $file->fid = $existing->fid;
