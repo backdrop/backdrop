@@ -142,8 +142,10 @@ Backdrop.behaviors.editorImageDialog = {
     });
 
     // Initialize styles of Dialog.
-    // Hide the library image browser on load.
     if ($newToggles.length) {
+      // Initialize the Insert Link dialog on load.
+      $(".form-type-managed-file").css({ "display": "none"});
+      // Hide the library image browser on load.
       $(".editor-image-library").css({ "display": "none" });
       $(".editor-dialog").removeClass("editor-dialog-with-library");
       // Set the class for the left-hand part.
@@ -276,7 +278,7 @@ Backdrop.behaviors.editorImageDialog = {
         }
         // If an FID is not provided but a src attribute is, highlight the tab
         // that contains the src attribute field.
-        if (($fidField.val() === '0' || !$fidField.val()) && $srcField.val().length > 0) {
+        if (($fidField.val() === '0' || !$fidField.val()) && $srcField.length > 0 && $srcField.val().length > 0) {
           $visibleItems.not($srcItem).hide().trigger('editor-image-hide');
           $srcItem.find('input, textarea, select').filter(':focusable').first().focus();
           $srcItem.trigger('editor-image-show');
