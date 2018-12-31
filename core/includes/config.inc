@@ -98,7 +98,7 @@ function config_get($config_file, $option = NULL) {
  *
  * @param string $config_file
  *   The name of the configuration object to retrieve. The name corresponds to
- *   an JSON configuration file. For @code config(book.admin) @endcode, the
+ *   an JSON configuration file. For @code config('book.admin') @endcode, the
  *   config object returned will contain the contents of book.admin.json.
  * @param string $option
  *   The name of the config option within the file to read. The config option
