@@ -635,7 +635,9 @@ class Config {
       return $value;
     }
     // Set a default context so we can differentiate between config strings.
-    if (empty($options['context'])) {
+    // Rather than by using isset() or empty(), checking by key existence
+    // allows a NULL context to be used.
+    if (!array_key_exists('context', $options)) {
       $options['context'] = 'config:' . $this->getName() . ':' . $key;
     }
     return t($value, $args, $options);
