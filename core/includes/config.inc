@@ -634,6 +634,10 @@ class Config {
     if (!in_array($key, $this->get('_config_translatables'))) {
       return $value;
     }
+    // Set a default context so we can differentiate between config strings.
+    if (empty($options['context'])) {
+      $options['context'] = 'config:' . $this->getName() . ':' . $key;
+    }
     return t($value, $args, $options);
   }
 
