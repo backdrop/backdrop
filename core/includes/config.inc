@@ -105,19 +105,8 @@ function config_get($config_file, $option = NULL) {
  *   may contain periods to indicate levels within the config file. If NULL is
  *   passed in, the entire contents of the config file will be returned.
  * @param array $args
- *   An associative array of replacements to make. Occurrences in $string of
- *   any key in $args are replaced with the corresponding value, after optional
- *   sanitization and formatting. The type of sanitization and formatting
- *   depends on the first character of the key:
- *   - @variable: Escaped to HTML using check_plain(). Use this as the default
- *     choice for anything displayed on a page on the site.
- *   - %variable: Escaped to HTML and formatted using backdrop_placeholder(),
- *     which makes it display as <em>emphasized</em> text.
- *   - !variable: Inserted as is, with no sanitization or formatting. Only use
- *     this for text that has already been prepared for HTML display (for
- *     example, user-supplied text that has already been run through
- *     check_plain() previously, or is expected to contain some limited HTML
- *     tags and has already been run through filter_xss() previously).
+ *   An associative array of replacements to make. Replacements are made in the
+ *   same way as the t() function.
  * @param array $options
  *   An associative array of additional options, with the following elements:
  *   - 'langcode' (defaults to the current language): The language code to
@@ -131,7 +120,7 @@ function config_get($config_file, $option = NULL) {
  *   the file at all or if not a string.
  *
  * @see t()
- * @see get()
+ * @see config_get()
  */
 function config_get_translated($config_file, $option = NULL, $args = array(), $options = array()) {
   $config = config($config_file);
@@ -615,19 +604,8 @@ class Config {
    *   If the key's value is not a string then an empty string is returned.
    *
    * @param array $args
-   *   An associative array of replacements to make. Occurrences in $string of
-   *   any key in $args are replaced with the corresponding value, after optional
-   *   sanitization and formatting. The type of sanitization and formatting
-   *   depends on the first character of the key:
-   *   - @variable: Escaped to HTML using check_plain(). Use this as the default
-   *     choice for anything displayed on a page on the site.
-   *   - %variable: Escaped to HTML and formatted using backdrop_placeholder(),
-   *     which makes it display as <em>emphasized</em> text.
-   *   - !variable: Inserted as is, with no sanitization or formatting. Only use
-   *     this for text that has already been prepared for HTML display (for
-   *     example, user-supplied text that has already been run through
-   *     check_plain() previously, or is expected to contain some limited HTML
-   *     tags and has already been run through filter_xss() previously).
+   *   An associative array of replacements to make. Replacements are made in
+   *   the same way as the t() function.
    * @param array $options
    *   An associative array of additional options, with the following elements:
    *   - 'langcode' (defaults to the current language): The language code to
