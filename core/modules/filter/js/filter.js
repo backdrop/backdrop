@@ -143,7 +143,7 @@ Backdrop.behaviors.editorImageDialog = {
 
     // Initialize styles of Dialog.
     if ($newToggles.length) {
-      // Initialise the Insert Link dialog on load.
+      // Initialize the Insert Link dialog on load.
       $(".form-type-managed-file").css({ "display": "none"});
       // Hide the library image browser on load.
       $(".editor-image-library").css({ "display": "none" });
