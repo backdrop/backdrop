@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_plugin_style.
@@ -129,7 +128,7 @@ class views_plugin_style extends views_plugin {
 
       $classes = explode(' ', $class);
       foreach ($classes as &$class) {
-        $class = backdrop_clean_css_identifier($class);
+        $class = backdrop_clean_css_identifier($class, array());
       }
       return implode(' ', $classes);
     }
