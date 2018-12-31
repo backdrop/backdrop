@@ -2837,7 +2837,8 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
     // Retrieve the first form from the stack without changing the integer keys,
     // as they're being used for the "2 of 3" progress indicator.
     reset($view->stack);
-    list($key, $top) = each($view->stack);
+    $key = key($view->stack);
+    $top = current($view->stack);
     unset($view->stack[$key]);
 
     if (array_shift($top) != $identifier) {
