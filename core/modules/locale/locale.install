@@ -63,7 +63,7 @@ function locale_enable() {
     $config = config($name);
     if ($config->get('_config_translatables') !== NULL) {
       foreach ($config->get('_config_translatables') as $translatable) {
-        $translation = locale($config->get($translatable), $name . ':' . $translatable);
+        $translation = locale($config->get($translatable), 'config:' . $name . ':' . $translatable);
       }
     }
   }
