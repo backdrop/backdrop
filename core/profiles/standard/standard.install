@@ -121,6 +121,7 @@ function standard_install() {
       'settings' => array(
         'status_default' => NODE_PUBLISHED,
         'promote_enabled' => FALSE,
+        'node_preview' => TRUE,
         'promote_default' => FALSE,
         'sticky_enabled' => FALSE,
         'sticky_default' => FALSE,
@@ -139,6 +140,7 @@ function standard_install() {
       'description' => st('Add a blog post, news article, or press release.'),
       'settings' => array(
         'status_default' => NODE_PUBLISHED,
+        'node_preview' => TRUE,
         'promote_enabled' => TRUE,
         'promote_default' => TRUE,
         'sticky_enabled' => TRUE,
