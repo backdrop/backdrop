@@ -470,7 +470,12 @@ class PagePreviewTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp(array('taxonomy', 'node', 'email'));
 
-    $web_user = $this->backdropCreateUser(array('edit own page content', 'create page content', 'administer nodes'));
+    $web_user = $this->backdropCreateUser(array(
+      'administer content types',
+      'edit own page content',
+      'create page content',
+      'administer nodes'
+    ));
     $this->backdropLogin($web_user);
 
     // Add a vocabulary so we can test different view modes.
@@ -561,6 +566,24 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $body_key = "body[$langcode][0][value]";
     $term_key = "{$this->field_name}[$langcode]";
     $email_key = "{$this->field_email_name}[$langcode][0][email]";
+
+    // Test turning off preview.
+    $edit = array(
+      'node_preview' => 0,
+    );
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    // Refresh the field information for the rest of the test.
+    field_info_cache_clear();
+    $this->backdropGet('node/add/page');
+    $this->assertNoFieldById('edit-preview',  t('Preview'), 'Preview button not found.');
+
+    // Turn it back on and test functionality.
+    $edit = array(
+      'node_preview' => 1,
+    );
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    // Refresh the field information for the rest of the test.
+    field_info_cache_clear();
 
     // Fill in node creation form and preview node.
     $edit = array();
