@@ -500,6 +500,22 @@ function user_admin_roles($form, $form_state) {
     '#description' => t('Changing this setting will not affect existing permissions.'),
   );
 
+  $form['assign_roles'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Assignable roles'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#weight' => -20,
+  );
+  unset($roles[0]);
+  $form['assign_roles']['user_assignable_roles'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Roles available for assignment'),
+    '#default_value' => $system_config->get('user_assignable_roles'),
+    '#options' => $roles,
+    '#description' => t('Anyone with the <em>assign roles</em> permission will be able to grant these roles themselves, as well as to others.'),
+  );
+
   // Settings for anonymous users.
   $form['anonymous_settings'] = array(
     '#type' => 'fieldset',
@@ -595,7 +611,7 @@ function user_admin_roles($form, $form_state) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save roles'),
-    '#limit_validation_errors' => array(array('roles'), array('user_admin_role'), array('anonymous')),
+    '#limit_validation_errors' => array(array('roles'), array('user_admin_role'), array('user_assignable_roles'), array('anonymous')),
     '#submit' => array('user_admin_roles_order_submit'),
   );
 
@@ -610,6 +626,7 @@ function user_admin_roles_order_submit($form, &$form_state) {
   $config = config('system.core');
   $config->set('anonymous', $form_state['values']['anonymous']);
   $config->set('user_admin_role', $form_state['values']['user_admin_role']);
+  $config->set('user_assignable_roles', $form_state['values']['user_assignable_roles']);
   $config->save();
 
   // Save roles.
