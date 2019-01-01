@@ -362,7 +362,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
 
   // Use a "textfield" rather than "url" to allow relative paths.
   $form['href'] = array(
-    '#title' => t('Link value'),
+    '#title' => t('Link target'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => ' ',
@@ -373,7 +373,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     ),
     '#weight' => -10,
     '#autocomplete_path' => 'filter-link/autocomplete',
-    '#description' => t('Enter a known path, or start typing to get suggestions'),
+    '#description' => t('Enter a link to an external page or a known internal path, or start typing to get suggestions for paths of existing content.'),
   );
 
 
@@ -432,7 +432,14 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'text'),
   );
 
-  $form['target'] = array(
+  $form['advanced'] = array(
+    '#title' => t('Advanced options'),
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['advanced']['target'] = array(
     '#title' => t('Open in new window'),
     '#type' => 'checkbox',
     '#return_value' => '_blank',
@@ -440,12 +447,36 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'target'),
   );
 
-  $form['class'] = array(
+  $form['advanced']['class'] = array(
     '#title' => t('CSS classes'),
     '#description' => t('Separate each additional CSS class with a space.'),
     '#type' => 'textfield',
     '#default_value' => isset($values['class']) ? $values['class'] : '',
     '#parents' => array('attributes', 'class'),
+  );
+
+  $form['advanced']['id'] = array(
+    '#title' => t('ID'),
+    '#description' => t('Allows linking to this content using a URL fragment. Must be unique.'),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['id']) ? $values['id'] : '',
+    '#parents' => array('attributes', 'id'),
+  );
+
+  $form['advanced']['rel'] = array(
+    '#title' => t('Relation (rel)'),
+    '#description' => t('Often used by JavaScript libraries.'),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['rel']) ? $values['rel'] : '',
+    '#parents' => array('attributes', 'rel'),
+  );
+
+  $form['advanced']['title'] = array(
+    '#title' => t('Link title'),
+    '#description' => t('Populates the title attribute of the link. Usually shown as a small tooltip on hover.'),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['title']) ? $values['title'] : '',
+    '#parents' => array('attributes', 'title'),
   );
 
   $form['actions']['#type'] = 'actions';
