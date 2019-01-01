@@ -455,9 +455,10 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'class'),
   );
 
+  $fragment_info_link = l(t('fragment'), 'https://en.wikipedia.org/wiki/Fragment_identifier', array('attributes' => array('target' => '_blank')));
   $form['advanced']['id'] = array(
     '#title' => t('ID'),
-    '#description' => t('Allows linking to this content using a URL fragment. Must be unique.'),
+    '#description' => t('Allows linking to this content using a URL !fragment. Must be unique.', array('!fragment' => $fragment_info_link)),
     '#type' => 'textfield',
     '#default_value' => isset($values['id']) ? $values['id'] : '',
     '#parents' => array('attributes', 'id'),
