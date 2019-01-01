@@ -741,12 +741,13 @@ function template_preprocess_views_view_grid(&$variables) {
     }
 
     $count = 0;
+    $col_count = 1;
     foreach ($rows as $id => $row) {
       $count++;
       $variables['row_classes'][$id] = array();
       if ($default_row_class) {
-        $variables['row_classes'][$id][] = 'views-row';
-        $variables['row_classes'][$id][] = 'views-row-' . $count;
+        $variables['row_classes'][$id][] = 'views-grid-box';
+        $variables['row_classes'][$id][] = 'views-grid-box-' . $count;
       }
       if ($row_class_special) {
         $variables['row_classes'][$id][] = ($count % 2 ? 'odd' : 'even');
@@ -756,9 +757,20 @@ function template_preprocess_views_view_grid(&$variables) {
         if ($count == $max) {
           $variables['row_classes'][$id][] = 'last';
         }
+        if ($col_count == 1) {
+          $variables['row_classes'][$id][] = 'row-first';
+        }
+        if ($col_count == $options['columns']) {
+          $variables['row_classes'][$id][] = 'row-last';
+        }
       }
       if ($row_class = $view->style_plugin->get_row_class($id)) {
         $variables['row_classes'][$id][] = $row_class;
+      }
+      if ($col_count == $options['columns']) {
+        $col_count = 1;
+      } else {
+        $col_count++;
       }
     }
     $variables['classes'] = array('views-view-grid', 'views-view-grid-cols-' . $columns);
