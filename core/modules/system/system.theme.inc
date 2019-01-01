@@ -182,7 +182,7 @@ function theme_system_modules_fieldset($variables) {
       $requirements .= '</div>';
 
       // Build a requirements toggle.
-      $toggle .= ' <a class="requirements-toggle" href="#">' . t('more') . '</a>';
+      $toggle .= ' <a class="requirements-toggle" href="#">' . t('more') . '<span class="arrow"></span></a>';
     }
 
     // Add the description, along with any modules it requires.
