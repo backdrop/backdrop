@@ -568,6 +568,7 @@ function node_node_type_load(&$types) {
       'sticky_default' => FALSE,
       'revision_enabled' => TRUE,
       'revision_default' => FALSE,
+      'node_preview' => TRUE,
 
       // Submitted information.
       'node_submitted' => TRUE,
