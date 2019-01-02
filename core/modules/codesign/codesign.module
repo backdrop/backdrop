@@ -1,16 +1,28 @@
 <?php
 
-function codesign_codesign_info() {
-  $signers = array();
+/**
+ * @file
+ */
 
-  // None defined in core.  Use a contrib module.
-
-  return $signers;
-}
-
+/**
+ * Implements hook_menu().
+ */
 function codesign_menu() {
   $items = array();
 
+  $items['admin/config/system/codesign'] = array(
+    'title' => 'Codesign',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('codesign_admin_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'codesign.admin.inc',
+  );
+  $items['admin/config/system/codesign/settings'] = array(
+    'title' => 'Settings',
+    'weight' => -10,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
   $items['admin/reports/codesign'] = array(
     'title' => 'Codesign',
     'page callback' => 'codesign_report_page',
@@ -21,56 +33,193 @@ function codesign_menu() {
   return $items;
 }
 
-function codesign_get_signature_backends() {
-  $signers = &backdrop_static(__FUNCTION__);
+/**
+ * Implements hook_theme().
+ */
+function codesign_theme() {
+  $items = array();
 
-  if (empty($signers)) {
-    $signers = module_invoke_all('codesign_info');
-  }
+  // A report on the code signatures for all active modules.
+  $items['codesign_report'] = array(
+    'variables' => array(),
+    'file' => 'codesign.theme.inc',
+  );
 
-  return $signers;
+  // Display the short result of a signature verification check.  Signing
+  // modules should implement their own versions of this theme function.
+  $items['codesign_result'] = array(
+    'variables' => array(),
+    'file' => 'codesign.theme.inc',
+  );
+
+  return $items;
 }
 
+/**
+ * Implements hook_codesign_info().
+ *
+ * No signing modules are implemented in core.  A site must include at least one
+ * signing module to use codesign.
+ */
+function codesign_codesign_info() {
+  $all_signers = array();
+
+  // None defined in core.  Use a contrib module.
+
+  return $all_signers;
+}
+
+/**
+ * Returns a list of signature modules that implement hook_codesign_info().
+ *
+ * @return
+ *   An array of codesign modules and their callbacks.  Each module includes a
+ *   title, and a list of callbacks.  See hook_codesign_info() for more details.
+ *
+ * @see hook_codesign_info()
+ */
+function codesign_get_signature_backends() {
+  $all_signers = &backdrop_static(__FUNCTION__);
+
+  if (empty($all_signers)) {
+    $all_signers = module_invoke_all('codesign_info');
+  }
+
+  return $all_signers;
+}
+
+/**
+ * Returns a list of codesign profiles suitable for signing.  Typically, this is
+ * a list of private keys IDs.
+ *
+ * Each entry includes:
+ *
+ * - crypto_engine - The machine name of the backend.
+ * - name - A name for the profile, intended for humans.
+ * - profile_id - The profile ID, typically the private key fingerprint or ID.
+ * - signing_key - A structure specific to the crypto engine with additional
+ *   information about the profile.
+ *
+ * @return
+ *   An array of signign profiles, indexed by the profile_id.
+ */
+function codesign_get_signing_profiles() {
+  $signing_profiles = &backdrop_static(__FUNCTION__, array());
+
+  if (!$signing_profiles) {
+    $all_signers = codesign_get_signature_backends();
+
+    foreach ($all_signers as $engine => $info) {
+      $key_list = codesign_get_private_keychain($engine);
+      foreach ($key_list as $key_id => $key_info) {
+        $signing_profiles[$key_id] = array(
+          'crypto_engine' => $engine,
+          'name' => $key_info['name'],
+          'profile_id' => $key_id,
+          'signing_key' => $key_info,
+        );
+      }
+    }
+  }
+
+  return $signing_profiles;
+}
+
+/**
+ * Generates the Codesign report page at admin/reports/codesign.
+ *
+ * @return
+ *   A renderable array with the report for admin/reports/codesign.
+ */
 function codesign_report_page() {
-  $signers = codesign_get_signature_backends();
+  $all_signers = codesign_get_signature_backends();
   $renderable = array();
 
-  foreach ($signers as $key => $info) {
-    if (!empty($info['file'])) {
-      require_once $info['file'];
-    }
-    $status_callback = $info['status callback'];
+  foreach ($all_signers as $key => $info) {
     $renderable[$key . '_title'] = array(
       '#type' => 'markup',
       '#markup' => t('<h2>@title</h2>', array('@title' => $info['title'])),
     );
-    $renderable[$key] = $status_callback();
+    $renderable[$key] = codesign_get_signer_status($key);
   }
 
   return $renderable;
 }
 
-function codesign_verify($type, $data, $signature = NULL, $options = array()) {
-  $signers = &backdrop_static(__FUNCTION__);
-  if (!$signers) {
-    $signers = module_invoke_all('codesign_info');
+/**
+ * Validate and execute a specific callback.
+ *
+ * @param $callback
+ *   The name of the callback to execute.
+ * @param $signer
+ *   The name of the crypto engine to call
+ * @return
+ *   Returns NULL on failure and te results of the callback otherwise.
+ * @throws CodesignException
+ *   Throws an expception if the callback or signer are not specified.
+ */
+function codesign_execute_callback() {
+  $args = func_get_args();
+  if (count($args) < 2) {
+    watchdog('codesign', 'Must specify a callback and a signer.', array(), WATCHDOG_CRITICAL);
+    throw new CodesignException('Must specify a callback and a signer.');
+  }
+  $callback = array_shift($args);
+  $signer = array_shift($args);
+
+
+  // Verify the signer module exists and supports the callback.
+  $all_signers = codesign_get_signature_backends();
+  if (empty($all_signers[$signer])) {
+    watchdog('codesign', 'Unknown codesign module %signer', array('%signer' => $signer), WATCHDOG_ERROR);
+    return NULL;
+  }
+  if (!empty($all_signers[$signer]['file'])) {
+    require_once $all_signers[$signer]['file'];
+  }
+  if (empty($all_signers[$signer][$callback]) || !function_exists($all_signers[$signer][$callback])) {
+    watchdog('codesign', 'Codesign module %signer does not implement %callback.',
+      array('%signer' => $signer, '%callback' => $callback), WATCHDOG_ERROR);
+    return NULL;
   }
 
-  if (!empty($signers[$type]['file'])) {
-    require_once $signers[$type]['file'];
-  }
-
-  // Basic validation
-  if (empty($signers[$type]['verify callback']) || !function_exists($signers[$type]['verify callback'])) {
-    watchdog('codesign', 'Unknown verifier type @type.', array('@type' => $type), WATCHDOG_ERROR);
-    return FALSE;
-  }
-  if (empty($data)) {
-    watchdog('codesign', 'Nothing to verify.');
-    return FALSE;
-  }
-
-  // Get the callback and call it.
-  $verify_callback = $signers[$type]['verify callback'];
-  return $verify_callback($data, $signature, $options);
+  return call_user_func_array($all_signers[$signer][$callback], $args);
 }
+
+/**
+ * Callback wrapper functions
+ */
+
+function codesign_sign($signer, $profile, $data, $options = array()) {
+  if (empty($data)) {
+    watchdog('codesign', 'Nothing to sign.', array(), WATCHDOG_ERROR);
+    return FALSE;
+  }
+  return codesign_execute_callback('sign callback', $signer, $profile, $data, $options);
+}
+
+function codesign_verify($signer, $data, $signature = NULL, $options = array()) {
+  if (empty($data)) {
+    watchdog('codesign', 'Nothing to verify.', array(), WATCHDOG_ERROR);
+    return FALSE;
+  }
+
+  return codesign_execute_callback('verify callback', $signer, $data, $signature, $options);
+}
+
+function codesign_get_signer_status($signer) {
+  return codesign_execute_callback('status callback', $signer);
+}
+
+function codesign_get_private_keychain($signer) {
+  return codesign_execute_callback('private keychain callback', $signer);
+}
+
+function codesign_get_public_keychain($signer) {
+  return codesign_execute_callback('public keychain callback', $signer);
+}
+
+/**
+ * An exception class for Codesign.
+ */
+class CodesignException extends Exception {};
