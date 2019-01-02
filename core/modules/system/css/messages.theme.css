@@ -23,7 +23,7 @@
   height: 100%;
   background-position: center .625em;
   background-repeat: no-repeat;
-  background-size: 1.5em;
+  background-size: 32px;
 }
 .messages :nth-child(2) {
   margin-top: 0;
@@ -43,7 +43,6 @@
   }
   .messages:before {
     width: 3em;
-    background-size: 2em;
   }
 }
 [dir="rtl"] .messages:before {
@@ -56,6 +55,13 @@
   margin-left: 0;
 }
 
+.messages a {
+  text-decoration: underline;
+}
+.messages a:hover {
+  text-decoration: none;
+}
+
 .messages.status {
   color: #234600;
   background-color: #e9eebc;
@@ -64,7 +70,7 @@
   color: #234600;
 }
 div.messages.status:before {
-  background-image: url(../../../misc/message-24-ok.png);
+  background-image: url(../../../misc/message-32-ok.png);
   background-color: #cfde56;
 }
 
@@ -76,7 +82,7 @@ div.messages.status:before {
   color: #525252;
 }
 div.messages.warning:before {
-  background-image: url(../../../misc/message-24-warning.png);
+  background-image: url(../../../misc/message-32-warning.png);
   background-color: #fce400;
 }
 
@@ -88,7 +94,7 @@ div.messages.warning:before {
   color: #9c1d0d;
 }
 div.messages.error:before {
-  background-image: url(../../../misc/message-24-error.png);
+  background-image: url(../../../misc/message-32-error.png);
   background-color: #ee3d23;
 }
 
@@ -100,32 +106,10 @@ div.messages.error:before {
   color: #004570;
 }
 div.messages.info:before {
-  background-image: url(../../../misc/message-24-info.png);
+  background-image: url(../../../misc/message-32-info.png);
   background-color: #0074bd;
 }
 
-.messages a {
-  text-decoration: underline;
-}
-.messages a:hover {
-  text-decoration: none;
-}
-
-/* Desktop size icons */
-@media only screen and (min-width: 34em) {
-  div.messages.status:before {
-    background-image: url(../../../misc/message-32-ok.png);
-  }
-  div.messages.warning:before {
-    background-image: url(../../../misc/message-32-warning.png);
-  }
-  div.messages.error:before {
-    background-image: url(../../../misc/message-32-error.png);
-  }
-  div.messages.info:before {
-   background-image: url(../../../misc/message-32-info.png);
-  }
-}
 /* SVG overrides */
 div.messages.status:before {
   background-image: linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg);
@@ -139,3 +123,4 @@ div.messages.error:before {
 div.messages.info:before {
   background-image: linear-gradient(transparent, transparent), url(../../../misc/message-info.svg);
 }
+
