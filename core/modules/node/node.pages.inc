@@ -462,7 +462,6 @@ function node_form_preview($form, &$form_state) {
   if (isset($_GET['destination'])) {
     $_GET['destination'] = $form_state['redirect'];
   }
-  backdrop_set_message(t('This is a preview. All changes are stored temporarily. Click Save to make your changes permanent, or click "Back to content editing".'));
 }
 
 /**
@@ -641,6 +640,12 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
   // Get the view mode to render the preview in.
   $view_mode = empty($_GET['view_mode']) ? 'full' : $_GET['view_mode'];
 
+  // We render this message here instead of in node_form_preview() in order to
+  // make it persistent across page refreshes while still in preview mode, and
+  // also while switching to different display modes.
+  backdrop_set_message(t('This is a preview. Links within the page are disabled.'), 'warning', FALSE);
+  backdrop_set_message(t('<strong>Changes are stored temporarily</strong>. Click <em>Save</em> to make your changes permanent, or click <em>Back to content editing</em> to make additional changes.'), 'warning', FALSE);
+
   $form['node'] = array(
     '#type' => 'value',
     '#value' => $node,
@@ -668,8 +673,8 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
       'class' => array('node-preview-display-mode', 'preview-button'),
     )
   );
-  // This must be the first submit function so the 'onChange' event in
-  // calls it before any other submit.
+  // This must be the first submit function so the 'onChange' event calls it
+  // before any other submit.
   $form['view_mode_submit'] = array(
     '#type' => 'submit',
     '#name' => 'op',
