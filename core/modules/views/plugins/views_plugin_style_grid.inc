@@ -52,8 +52,8 @@ class views_plugin_style_grid extends views_plugin_style {
 
     $form['deprecated_table'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Use table (deprecated)'),
-      '#description' => t('Some sites might have made style changes based on the deprecated grid based on table. Only select this if absolutely needed.'),
+      '#title' => t('Use HTML table (deprecated)'),
+      '#description' => t('For sites with views grids that need to use the deprecated HTML tables.'),
       '#default_value' => !empty($this->options['deprecated_table']),
     );
 
