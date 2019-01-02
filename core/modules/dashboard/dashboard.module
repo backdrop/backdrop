@@ -1,0 +1,438 @@
+<?php
+/**
+ * @file
+ * Provides an administrative dashboard.
+ */
+
+
+/**
+ * Implements hook_menu().
+ */
+function dashboard_menu() {
+  $items = array();
+  $dashboard = layout_load('dashboard');
+  if ($dashboard && !$dashboard->disabled) {
+    $items['admin/dashboard/default'] = array(
+      'title' => 'Dashboard',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -100
+    );
+    $items['admin/dashboard/settings'] = array(
+      'title' => 'Settings',
+      'page callback' => 'backdrop_get_form',
+      'page arguments' => array('dashboard_admin_settings'),
+      'description' => 'Admin dashboard settings',
+      'access arguments' => array('administer dashboard'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => -10,
+    );
+  }
+
+  return $items;
+}
+
+/**
+ * Implements hook_admin_bar_output_alter().
+ */
+function dashboard_admin_bar_output_alter(&$content) {
+  // Remove Dashboard "default" sub-page (duplicate link) from Admin bar.
+  if (isset($content['menu']['menu']['admin/dashboard']['admin/dashboard/default'])) {
+    unset($content['menu']['menu']['admin/dashboard']['admin/dashboard/default']);
+  }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function dashboard_permission() {
+  return array(
+    'access dashboard' => array(
+      'title' => t('Access Dashboard'),
+      'description' => t('Access the dashboard.'),
+    ),
+    'administer dashboard' => array(
+      'title' => t('Aminister Dashboard'),
+      'description' => t('Access the dashboard settings.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function dashboard_config_info() {
+  $prefixes['layout.layout.dashboard'] = array(
+    'label' => t('Dasboard default layout'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['dashboard.settings'] = array(
+    'label' => t('Dasboard settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function dashboard_block_info() {
+  $blocks = array();
+
+  // Dashboard blocks.
+  $blocks['create'] = array(
+    'info' => t('Dashboard - Create content'),
+    'description' => t('Provides links to create new content'),
+    'class' => 'DashboardCreateBlock',
+  );
+  $blocks['menu'] = array(
+    'info' => t('Dashboard - Menus'),
+    'description' => t('Provides links to manage menus'),
+    'class' => 'DashboardMenuBlock',
+  );
+  $blocks['node_types'] = array(
+    'info' => t('Dashboard - Content types'),
+    'description' => t('Provides links to manage content types'),
+    'class' => 'DashboardContentTypesBlock',
+  );
+  $blocks['overview_content'] = array(
+    'info' => t('Dashboard - Content'),
+    'description' => t('Displays a summary of content statistics'),
+    'class' => 'DashboardOverviewContentBlock',
+  );
+  $blocks['overview_user'] = array(
+    'info' => t('Dashboard - User accounts'),
+    'description' => t('Displays a summary of user account statistics'),
+    'class' => 'DashboardOverviewUserBlock',
+  );
+
+  if (module_exists('taxonomy')) {
+    $blocks['taxonomy'] = array(
+      'info' => t('Dashboard - Categories'),
+      'description' => t('Provides links to manage taxonomy'),
+      'class' => 'DashboardTaxonomyBlock',
+    );
+  }
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function dashboard_autoload_info() {
+  return array(
+    'DashboardCreateBlock' => 'includes/block.create.inc',
+    'DashboardMenuBlock' => 'includes/block.menus.inc',
+    'DashboardContentTypesBlock' => 'includes/block.node_types.inc',
+    'DashboardOverviewContentBlock' => 'includes/block.overview_content.inc',
+    'DashboardOverviewUserBlock' => 'includes/block.overview_user.inc',
+    'DashboardTaxonomyBlock' => 'includes/block.taxonomy.inc',
+  );
+}
+
+/**
+ * Implements hook_user_presave().
+ */
+function dashboard_user_presave($account) {
+  cache_clear_all('dashboard_user_overview', 'cache');
+}
+
+/**
+ * Implements hook_user_delete().
+ */
+function dashboard_user_delete($account) {
+  cache_clear_all('dashboard_user_overview', 'cache');
+}
+
+/**
+ * Implements hook_user_login().
+ */
+function dashboard_user_login(&$edit, $account) {
+  // Don't redirect if a destination is already set.
+  if (!empty($_GET['destination'])) {
+    return;
+  }
+
+  // Don't redirect for password reset forms.
+  if (isset($_POST['form_id']) && $_POST['form_id'] == 'user_pass_reset') {
+    return;
+  }
+
+  // Don't redirect if no permission to access dashboard.
+  if (!user_access('access dashboard', $account)) {
+    return;
+  }
+
+  // Don't redirect if redirect setting is not set.
+  if (config_get('dashboard.settings', 'dashboard_login_redirect') != 1) {
+    return;
+  }
+
+  // Check access to layout and redirect.
+  $dashboard = layout_load('dashboard');
+  if ($dashboard && !$dashboard->disabled && $dashboard->checkAccess()) {
+    $_GET['destination'] = 'admin/dashboard';
+  }
+}
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function dashboard_preprocess_page(&$variables) {
+  if (arg(0) == 'admin' && arg(1) == 'dashboard') {
+    // Include dashboard specific style sheet.
+    $css_path = backdrop_get_path('module', 'dashboard') . '/css/dashboard.css';
+    backdrop_add_css($css_path);
+    $variables['classes'][] = 'dashboard';
+  }
+}
+
+/**
+ * Implements hook_preprocess_block().
+ */
+function dashboard_preprocess_block(&$variables) {
+  if ($variables['layout']->name == 'dashboard'
+     && $variables['block']->module == 'dashboard') {
+    // Add dashboard specific block class.
+    $variables['classes'][] = 'admin-panel';
+  }
+}
+
+/**
+ * Implements hook_theme()
+ */
+function dashboard_theme() {
+  $base = array(
+    'file' => 'dashboard.theme.inc',
+  );
+
+  $items = array(
+    'dashboard_create' => array(
+      'variables' => array('create' => array()),
+    ) + $base,
+    'dashboard_overview_content' => array(
+      'variables' => array('overview' => array()),
+    ) + $base,
+    'dashboard_overview_user' => array(
+      'variables' => array('overview' => array()),
+    ) + $base,
+    'dashboard_admin_table' => array(
+      'variables' => array('header' => array(), 'rows' => array(), 'link' => FALSE),
+    ) + $base,
+  );
+
+  return $items;
+}
+
+/**
+ * Retrieves overview data for all content on the site.
+ *
+ * @param $settings
+ *   Block settings data.
+ *
+ * @return $items
+ *   An array of items for a bulleted list.
+ *
+ */
+function dashboard_get_content_overview($settings = array()) {
+  // Not cached since comment and node CRUD operations are likely to be more
+  // frequent than Dashboard access events.
+  $items = array();
+  $types = node_type_get_types();
+  $comments_exist = module_exists('comment');
+  foreach ($types as $type => $object) {
+    // Compare against type option on block settings.
+    if ((!array_key_exists($type, $settings['types'])) || (isset($settings['types']) && $settings['types'][$type] == $type)) {
+      $type_count = db_query("SELECT count(*) FROM {node} WHERE type = :type and status = 1", array(':type' => $type))->fetchField();
+      $content_data[$type] = format_plural($type_count, '1 ' . $object->name . ' item', '@count ' . $object->name . ' items');
+      // Check if comments module is enabled.
+      if ($comments_exist) {
+        // Compare against comment options on block settings.
+        if (array_key_exists($type, $settings['comments']) && $settings['comments'][$type] === $type) {
+          $comment_count = db_query("SELECT count(DISTINCT cid) FROM {comment} c INNER JOIN {node} n ON c.nid = n.nid WHERE n.type = :type and c.status = 1 AND n.status = 1", array(':type' => $type))->fetchField();
+          $content_data[$type . '_comments'] =  format_plural($comment_count, '1 comment', '@count comments');
+          // Compare against spam option checkbox on block settings.
+          if (isset($settings['spam']) && $settings['spam'] == 1) {
+            $spam_count = db_query("SELECT count(DISTINCT c.cid) FROM {comment} c INNER JOIN {node} n ON c.nid = n.nid WHERE n.type = :type and c.status = 0 AND n.status = 1", array(':type' => $type))->fetchField();
+            $content_data[$type . '_comments_spam'] = format_plural($spam_count, '1 spam', '@count spam');
+          }
+        }
+      }
+      $line =  $content_data[$type];
+      $line .= (isset($content_data[$type . '_comments'])) ? ' with ' . $content_data[$type . '_comments'] : '';
+      $line .= (isset($content_data[$type . '_comments_spam'])) ? ' (' . $content_data[$type . '_comments_spam'] . ')' : '';
+      $items[] = $line;
+    }
+  }
+  return $items;
+}
+/**
+ * Adds content settings to the block settings form.
+ *
+ * @param $form
+ *   Block settings form.
+ * @param $settings
+ *   Block settings data.
+ *
+ */
+function dashboard_add_content_block_settings(&$form, $settings = array()) {
+  $types = node_type_get_types();
+  $type_options = array();
+  $type_defaults = array();
+  $comment_defaults = array();
+  // Set defaults based on block settings.
+  if (isset($settings['types'])) {
+    $type_defaults = $settings['types'];
+  }
+  if (isset($settings['comments'])) {
+    $comment_defaults = $settings['comments'];
+  }
+  foreach ($types as $machine_type => $type) {
+    $type_options[$machine_type] = $type->name;
+    // Display new content types by default.
+    if (!array_key_exists($machine_type, $type_defaults)) {
+      $type_defaults[$machine_type] = $machine_type;
+    }
+    // Do not display comments on new types by default unless it's a blog or a forum.
+    if (!array_key_exists($machine_type, $comment_defaults)) {
+      if ($machine_type == 'blog' || $machine_type == 'forum topic') {
+        $comment_defaults[$machine_type] = $machine_type;
+      }
+      else {
+        $comment_defaults[$machine_type] = 0;
+      }
+    }
+  }
+  $form['types'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Show <strong>post</strong> counts for the following content types'),
+    '#options' => $type_options,
+    '#default_value' => $type_defaults,
+  );
+  if (module_exists('comment')) {
+    $form['comments'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Show <strong>comment</strong> counts for the following content types'),
+      '#options' => $type_options,
+      '#default_value' => $comment_defaults,
+    );
+    $spam_options = array(
+      0 => t('no'),
+      1 => t('Include spam counts with comments'),
+    );
+    $form['spam'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Include spam counts with comments'),
+      '#options' => $spam_options,
+      '#default_value' => ($form_state['op'] == 'add') ? 1 : $settings['spam'],
+    );
+  }
+}
+/**
+ * Retrieves overview data for all users on the site.
+ *
+ * @param $settings
+ *   Block settings data.
+ *
+ * @return $items
+ *   A structured array of items containing user data, in the following format:
+ *     $items = array(
+ *       'all' => 16,
+ *       'active' => 9,
+ *       'blocked' => 2,
+ *       'roles' => array(
+ *         3 => array(
+ *           'name' => 'Administrator',
+ *           'count' => 4,
+ *         ),
+ *       ),
+ *     );
+ */
+function dashboard_get_user_overview($settings = array()) {
+  $items = array();
+  if ($cache = cache_get('dashboard_user_overview')) {
+    $items = $cache->data;
+  }
+  else {
+    // User Overview.
+    if (!$settings['user'] || $settings['user'] == 1) {
+      $items['all'] = db_query("SELECT count(*) FROM {users}")->fetchField();
+      $items['active'] = db_query("SELECT count(*) FROM {users} WHERE status = 1 AND login <> 0")->fetchField();
+      $items['blocked'] = db_query("SELECT count(*) FROM {users} WHERE status = 0")->fetchField();
+      // Account for UID 0. Faster than adding a where clause.
+      $items['all']--;
+      $items['blocked']--;
+    }
+    // Roles Overview.
+    $roles = user_roles(TRUE);
+    $items['roles'] = array();
+    foreach ($roles as $rid => $role) {
+      if (($rid != 2) && (array_key_exists($rid, $settings['roles']) && $settings['roles'][$rid])) {
+        $user_role_count = db_query("SELECT count(*) FROM {users} u INNER JOIN {users_roles} r on u.uid = r.uid WHERE r.role = :rid", array(':rid' => $rid))->fetchField();
+        $items['roles'][$rid] = array();
+        $items['roles'][$rid]['name'] = $role;
+        $items['roles'][$rid]['count'] = $user_role_count;
+      }
+    }
+
+    cache_set('dashboard_user_overview', $items, 'cache');
+  }
+
+  return $items;
+}
+/**
+ * Adds user settings to the block settings form.
+ *
+ * @param $form
+ *   Block settings form.
+ * @param $settings
+ *   Block settings data.
+ *
+ */
+function dashboard_add_user_block_settings(&$form, $settings = array()) {
+  $user_options = array(
+    0 => t('no'),
+    1 => t('Include the total number of user accounts, including active and blocked.'),
+  );
+  $form['user'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Include the total number of user accounts, including active and blocked.'),
+    '#options' => $user_options,
+    '#default_value' => ($form_state['op'] == 'add') ? TRUE : $settings['user'],
+  );
+  $roles = user_roles(TRUE);
+  $roles_options = array();
+  $roles_defaults = array();
+  foreach ($roles as $rid => $role) {
+    if ($rid != 2) {
+      $roles_options[$rid] = $role;
+      $roles_defaults[] = $rid;
+    }
+  }
+  if (!empty($roles_options)) {
+    $form['roles'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Include the number of user accounts with the following roles:'),
+      '#options' => $roles_options,
+      '#default_value' => ($settings['roles']) ? $settings['roles'] : $roles_defaults,
+    );
+  }
+}
+
+/**
+ * menu callback for settings page
+ */
+function dashboard_admin_settings() {
+   $config = config('dashboard.settings');
+  // Redirect on log in.
+  $form['#config'] = 'dashboard.settings';
+  $form['dashboard_login_redirect'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Redirect administrators to Dashboard after log in'),
+    '#default_value' => $config->get('dashboard_login_redirect'),
+    '#description' => t('Everyone with the !permission permission will be automatically redirected to the Dashboard when they log in..', array(
+      '!permission' => l(t('Access dashboard'), 'admin/config/people/permissions'),
+    )),
+  );
+  return system_settings_form($form);
+}
