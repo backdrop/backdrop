@@ -22,6 +22,7 @@ class views_plugin_style_grid extends views_plugin_style {
     $options['fill_single_line'] = array('default' => TRUE, 'bool' => TRUE);
     $options['summary'] = array('default' => '');
     $options['caption'] = array('default' => '');
+    $options['deprecated_table'] = array('default' => FALSE, 'bool' => TRUE);
 
     return $options;
   }
