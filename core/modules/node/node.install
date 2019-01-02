@@ -1186,7 +1186,7 @@ function node_update_1017() {
 /**
  * Update content admin view to show scheduled publication info.
  */
-function node_update_1017() {
+function node_update_1018() {
   // See if the content admin view has been modified on this site.
   $config = config('views.view.node_admin_content');
 
