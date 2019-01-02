@@ -19,10 +19,10 @@ Backdrop.behaviors.moduleFilterByText = {
     $('a.requirements-toggle').click(function(e) {
       var $requirements = $(this).closest('td').find('.requirements').toggle();
       if ($requirements.is(':visible')) {
-        $(this).text(Backdrop.t('less'));
+        $(this).text(Backdrop.t('less')).append('<span class="arrow close"></span>');
       }
       else {
-        $(this).text(Backdrop.t('more'));
+        $(this).text(Backdrop.t('more')).append('<span class="arrow"></span>');
       }
       e.preventDefault();
       e.stopPropagation();
