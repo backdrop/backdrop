@@ -1190,7 +1190,7 @@ function node_update_1018() {
   // See if the content admin view has been modified on this site.
   $config = config('views.view.node_admin_content');
 
-  // Only update if view isn't overridden
+  // Only update if view isn't overridden.
   if ($config->get('storage') == VIEWS_STORAGE_OVERRIDE) {
     return;
   }
