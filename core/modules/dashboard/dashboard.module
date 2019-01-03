@@ -12,6 +12,11 @@ function dashboard_menu() {
   $items = array();
   $dashboard = layout_load('dashboard');
   if ($dashboard && !$dashboard->disabled) {
+    $items['admin/dashboard/default'] = array(
+      'title' => 'Dashboard',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -100
+    );
     $items['admin/dashboard/settings'] = array(
       'title' => 'Settings',
       'page callback' => 'backdrop_get_form',
@@ -19,11 +24,20 @@ function dashboard_menu() {
       'description' => 'Admin dashboard settings',
       'access arguments' => array('administer dashboard'),
       'type' => MENU_LOCAL_TASK,
-      'weight' => -100,
+      'weight' => -10,
     );
   }
 
   return $items;
+}
+
+/**
+ * Implements hook_admin_bar_output_alter().
+ */
+function dashboard_admin_bar_output_alter(&$content) {
+  if (isset($content['menu']['menu']['admin/dashboard']['admin/dashboard/default'])) {
+    unset($content['menu']['menu']['admin/dashboard']['admin/dashboard/default']);
+  }
 }
 
 /**
