@@ -104,7 +104,7 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
     // Add palette fields.
     foreach ($theme_info['fields'] as $name => $label) {
       // Avoid placing them if they have already been placed by the theme.
-      if (!in_array($name, $form['#color_elements'])) {
+      if (!isset($form['#color_elements']) || !in_array($name, $form['#color_elements'])) {
         $form['color']['palette'][$name] = color_get_color_element($theme_name, $name, $form);
       }
     }
