@@ -17,7 +17,7 @@ function dashboard_menu() {
       'page callback' => 'backdrop_get_form',
       'page arguments' => array('dashboard_admin_settings'),
       'description' => 'Admin dashboard settings',
-      'access arguments' => array('access content'),
+      'access arguments' => array('administer dashboard'),
       'type' => MENU_LOCAL_TASK,
       'weight' => -100,
     );
@@ -34,7 +34,10 @@ function dashboard_permission() {
     'access dashboard' => array(
       'title' => t('Access Dashboard'),
       'description' => t('Access the dashboard.'),
-      'restrict access' => TRUE,
+    ),
+    'administer dashboard' => array(
+      'title' => t('Aminister Dashboard'),
+      'description' => t('Access the dashboard settings.'),
     ),
   );
 }
@@ -114,15 +117,19 @@ function dashboard_autoload_info() {
  * Redirects to the dashboard if configured.
  */
 function dashboard_user_login(&$edit, $account) {
-  // Don't redirect for password reset.
-  if (!((arg(0) == 'user') && (arg(1) == 'reset'))) {
-    // Check for permission to use dashboard.
-    if (user_access('access dashboard', $account)) {
-      $dashboard = layout_load('dashboard');
-      if ($dashboard && !$dashboard->disabled && $dashboard->checkAccess()) {
-        // Check for redirect to dashboard setting.
-        if (config_get('dashboard.settings', 'dashboard_login_redirect') == 1) {
-          $_GET['destination'] = 'admin/dashboard';
+  // Don't redirect if a destination is already set.
+  if (!isset($_GET['destination'])) {
+    // Don't redirect for password reset.
+    if (!isset($_POST['form_id']) || $_POST['form_id'] != 'user_pass_reset') {
+      // Check dashboard redirect setting.
+      if (config_get('dashboard.settings', 'dashboard_login_redirect') == 1) {
+        // Check for permission to use dashboard.
+        if (user_access('access dashboard', $account)) {
+          // Check for permission to access dashboard layout.
+          $dashboard = layout_load('dashboard');
+          if ($dashboard && !$dashboard->disabled && $dashboard->checkAccess()) {
+            $_GET['destination'] = 'admin/dashboard';
+          }
         }
       }
     }

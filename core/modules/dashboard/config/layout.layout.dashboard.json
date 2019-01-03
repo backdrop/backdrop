@@ -7,7 +7,7 @@
     "renderer_name": "standard",
     "module": "dashboard",
     "weight": 0,
-    "storage": 2,
+    "storage": 4,
     "layout_template": "sutro",
     "disabled": false,
     "settings": {
@@ -17,12 +17,9 @@
     },
     "positions": {
         "header": [
-            "1d07f2f1-c523-4c0d-a8ca-e7089aed712b",
-            "24a512d7-bcd7-4d4f-99eb-5f7c750a461d"
-        ],
-        "top": [
             "eb936b48-d2ec-4d9f-9dd9-ef24a1ad3493"
         ],
+        "top": [],
         "content": [
             "a144d9d3-0cac-4c20-989e-75220ab686cb"
         ],
@@ -43,64 +40,6 @@
         "title": []
     },
     "content": {
-        "1d07f2f1-c523-4c0d-a8ca-e7089aed712b": {
-            "plugin": "system:header",
-            "data": {
-                "module": "system",
-                "delta": "header",
-                "settings": {
-                    "title_display": "default",
-                    "title": "",
-                    "style": "default",
-                    "block_settings": {
-                        "menu": "user-menu",
-                        "logo": 1,
-                        "site_name": 1,
-                        "site_slogan": 1
-                    },
-                    "contexts": []
-                },
-                "uuid": "1d07f2f1-c523-4c0d-a8ca-e7089aed712b",
-                "style": {
-                    "plugin": "default",
-                    "data": {
-                        "settings": {
-                            "classes": ""
-                        }
-                    }
-                }
-            }
-        },
-        "24a512d7-bcd7-4d4f-99eb-5f7c750a461d": {
-            "plugin": "system:main-menu",
-            "data": {
-                "module": "system",
-                "delta": "main-menu",
-                "settings": {
-                    "title_display": "default",
-                    "title": "",
-                    "style": "default",
-                    "block_settings": {
-                        "menu_name": "main-menu",
-                        "style": "tree",
-                        "level": "1",
-                        "depth": "1",
-                        "expand_all": 0,
-                        "toggle": 1
-                    },
-                    "contexts": []
-                },
-                "uuid": "24a512d7-bcd7-4d4f-99eb-5f7c750a461d",
-                "style": {
-                    "plugin": "default",
-                    "data": {
-                        "settings": {
-                            "classes": ""
-                        }
-                    }
-                }
-            }
-        },
         "eb936b48-d2ec-4d9f-9dd9-ef24a1ad3493": {
             "plugin": "system:breadcrumb",
             "data": {
