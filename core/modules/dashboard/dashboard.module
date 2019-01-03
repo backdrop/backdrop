@@ -113,6 +113,20 @@ function dashboard_autoload_info() {
 }
 
 /**
+ * Implements hook_user_presave().
+ */
+function dashboard_user_presave($account) {
+  cache_clear_all('dashboard_user_overview', 'cache');
+}
+
+/**
+ * Implements hook_user_delete().
+ */
+function dashboard_user_delete($account) {
+  cache_clear_all('dashboard_user_overview', 'cache');
+}
+
+/**
  * Implements hook_user_login().
  * Redirects to the dashboard if configured.
  */
@@ -173,6 +187,8 @@ function dashboard_theme() {
  *
  */
 function dashboard_get_content_overview($settings = array()) {
+  // Not cached since comment and node CRUD operations are likely to be more
+  // frequent than Dashboard access events.
   $items = array();
   $types = node_type_get_types();
   $comments_exist = module_exists('comment');
@@ -286,23 +302,34 @@ function dashboard_add_content_block_settings(&$form, $settings = array()) {
  */
 function dashboard_get_user_overview($settings = array()) {
   $items = array();
-  // User Overview
-  if (!$settings['user'] || $settings['user'] == 1) {
-    $items['all'] = db_query("SELECT count(*) FROM {users}")->fetchField();
-    $items['active'] = db_query("SELECT count(*) FROM {users} WHERE status = 1 AND login <> 0")->fetchField();
-    $items['blocked'] = db_query("SELECT count(*) FROM {users} WHERE status = 0")->fetchField();
+  if ($cache = cache_get('dashboard_user_overview')) {
+    $items = $cache->data;
   }
-  // Roles Overview
-  $roles = user_roles(TRUE);
-  $items['roles'] = array();
-  foreach ($roles as $rid => $role) {
-    if (($rid != 2) && (array_key_exists($rid, $settings['roles']) && $settings['roles'][$rid])) {
-      $user_role_count = db_query("SELECT count(*) FROM {users} u INNER JOIN {users_roles} r on u.uid = r.uid WHERE r.role = :rid", array(':rid' => $rid))->fetchField();
-      $items['roles'][$rid] = array();
-      $items['roles'][$rid]['name'] = $role;
-      $items['roles'][$rid]['count'] = $user_role_count;
+  else {
+    // User Overview.
+    if (!$settings['user'] || $settings['user'] == 1) {
+      $items['all'] = db_query("SELECT count(*) FROM {users}")->fetchField();
+      $items['active'] = db_query("SELECT count(*) FROM {users} WHERE status = 1 AND login <> 0")->fetchField();
+      $items['blocked'] = db_query("SELECT count(*) FROM {users} WHERE status = 0")->fetchField();
+      // Account for UID 0. Faster than adding a where clause.
+      $items['all']--;
+      $items['blocked']--;
     }
+    // Roles Overview.
+    $roles = user_roles(TRUE);
+    $items['roles'] = array();
+    foreach ($roles as $rid => $role) {
+      if (($rid != 2) && (array_key_exists($rid, $settings['roles']) && $settings['roles'][$rid])) {
+        $user_role_count = db_query("SELECT count(*) FROM {users} u INNER JOIN {users_roles} r on u.uid = r.uid WHERE r.role = :rid", array(':rid' => $rid))->fetchField();
+        $items['roles'][$rid] = array();
+        $items['roles'][$rid]['name'] = $role;
+        $items['roles'][$rid]['count'] = $user_role_count;
+      }
+    }
+
+    cache_set('dashboard_user_overview', $items, 'cache');
   }
+
   return $items;
 }
 /**
