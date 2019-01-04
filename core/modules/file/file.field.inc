@@ -246,6 +246,11 @@ function file_field_insert($entity_type, $entity, $field, $instance, $langcode, 
  * Checks for files that have been removed from the object.
  */
 function file_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  // Check whether the field is defined on the object.
+  if (!isset($entity->{$field['field_name']})) {
+    // We cannot check for removed files if the field is not defined.
+    return;
+  }
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
 
   // On new revisions, all files are considered to be a new usage and no
@@ -407,9 +412,8 @@ function file_field_widget_settings_form($field, $instance) {
  * Implements hook_field_widget_form().
  */
 function file_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-
   $defaults = array(
-    'fid' => 0,
+    'fids' => array(),
     'display' => !empty($field['settings']['display_default']),
     'description' => '',
   );
@@ -436,6 +440,12 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
   );
 
   if ($field['cardinality'] == 1) {
+
+    // Field stores FID value in a single mode, so we need to transform it for
+    // form element to recognize it correctly.
+    if (!isset($items[$delta]['fids']) && isset($items[$delta]['fid'])) {
+      $items[$delta]['fids'][0] = $items[$delta]['fid'];
+    }
     // Set the default value.
     $element['#default_value'] = !empty($items) ? $items[0] : $defaults;
     // If there's only one field, return it as delta 0.
@@ -447,9 +457,15 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
   else {
     // If there are multiple values, add an element for each existing one.
     foreach ($items as $item) {
+      if (!isset($item['fids']) && isset($item['fid'])) {
+        $item['fids'][0] = $item['fid'];
+      }
       $elements[$delta] = $element;
       $elements[$delta]['#default_value'] = $item;
       $elements[$delta]['#weight'] = $delta;
+      if ($field['cardinality'] != FIELD_CARDINALITY_UNLIMITED) {
+        $elements[$delta]['#element_validate'] = array('file_field_widget_multiple_count_validate');
+      }
       $delta++;
     }
     // And then add one more empty row for new uploads except when this is a
@@ -459,6 +475,7 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       $elements[$delta]['#default_value'] = $defaults;
       $elements[$delta]['#weight'] = $delta;
       $elements[$delta]['#required'] = ($element['#required'] && $delta == 0);
+      $elements[$delta]['#multiple'] = TRUE;
     }
     // The group of elements all-together need some extra functionality
     // after building up the full list (like draggable table rows).
@@ -476,7 +493,7 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     // field. These are added here so that they may be referenced through a
     // hook_form_alter().
     $elements['#file_upload_title'] = t('Add a new file');
-    $elements['#file_upload_description'] = theme('file_upload_help', array('description' => '', 'upload_validators' => $elements[0]['#upload_validators']));
+    $elements['#file_upload_description'] = theme('file_upload_help', array('description' => '', 'upload_validators' => $elements[0]['#upload_validators'], 'cardinality' => $field['cardinality']));
   }
 
   return $elements;
@@ -556,12 +573,53 @@ function file_field_widget_value($element, $input = FALSE, $form_state) {
 
   // Ensure that all the required properties are returned even if empty.
   $return += array(
-    'fid' => 0,
+    'fids' => array(),
     'display' => 1,
     'description' => '',
   );
 
   return $return;
+}
+
+ /**
+ * Validation callback for upload element on file widget. Checks if user has
+ * uploaded more files than allowed.
+ *
+ * This validator is used only when cardinality not set to 1 or unlimited.
+ */
+function file_field_widget_multiple_count_validate($element, &$form_state, $form) {
+  $parents = $element['#parents'];
+  $values = backdrop_array_get_nested_value($form_state['values'], $parents);
+
+  array_pop($parents);
+  $current = count(element_children(backdrop_array_get_nested_value($form, $parents))) - 1;
+
+  $field = field_info_field($element['#field_name']);
+  $uploaded = count($values['fids']);
+  $count = $uploaded + $current;
+  if ($count > $field['cardinality']) {
+    $keep = $uploaded - $count + $field['cardinality'];
+    $removed_files = array_slice($values['fids'], $keep);
+    $removed_names = array();
+    foreach ($removed_files as $fid) {
+      $file = file_load($fid);
+      $removed_names[] = $file->filename;
+    }
+    backdrop_set_message(
+      t(
+        'Field %field can only hold @max values but there were @count uploaded. The following files have been omitted as a result: %list.',
+        array(
+          '%field' => $field['field_name'],
+          '@max' => $field['cardinality'],
+          '@count' => $keep,
+          '%list' => implode(', ', $removed_names),
+        )
+      ),
+      'warning'
+    );
+    $values['fids'] = array_slice($values['fids'], 0, $keep);
+    backdrop_array_set_nested_value($form_state['values'], $element['#parents'], $values);
+  }
 }
 
 /**
@@ -573,7 +631,7 @@ function file_field_widget_value($element, $input = FALSE, $form_state) {
  */
 function file_field_widget_process($element, &$form_state, $form) {
   $item = $element['#value'];
-  $item['fid'] = $element['fid']['#value'];
+  $item['fids'] = $element['fids']['#value'];
 
   $field = field_widget_field($element, $form_state);
   $instance = field_widget_instance($element, $form_state);
@@ -584,7 +642,7 @@ function file_field_widget_process($element, &$form_state, $form) {
   // Add the display field if enabled.
   if (!empty($field['settings']['display_field'])) {
     $element['display'] = array(
-      '#type' => empty($item['fid']) ? 'hidden' : 'checkbox',
+      '#type' => empty($item['fids']) ? 'hidden' : 'checkbox',
       '#title' => t('Include file in display'),
       '#value' => isset($item['display']) ? $item['display'] : $field['settings']['display_default'],
       '#attributes' => array('class' => array('file-display')),
@@ -598,7 +656,7 @@ function file_field_widget_process($element, &$form_state, $form) {
   }
 
   // Add the description field if enabled.
-  if (!empty($instance['settings']['description_field']) && $item['fid']) {
+  if (!empty($instance['settings']['description_field']) && $item['fids']) {
     $element['description'] = array(
       '#type' => 'textfield',
       '#title' => t('Description'),
@@ -733,13 +791,29 @@ function file_field_widget_submit($form, &$form_state) {
 
   $submitted_values = backdrop_array_get_nested_value($form_state['values'], array_slice($button['#parents'], 0, -2));
   foreach ($submitted_values as $delta => $submitted_value) {
-    if (!$submitted_value['fid']) {
+    if (!$submitted_value['fids']) {
       unset($submitted_values[$delta]);
     }
   }
 
+  // If there are more files uploaded via the same widget, we have to separate
+  // them, as we display each file in it's own widget.
+  $new_values = array();
+  foreach ($submitted_values as $delta => $submitted_value) {
+    if (is_array($submitted_value['fids'])) {
+      foreach ($submitted_value['fids'] as $fid) {
+        $new_value = $submitted_value;
+        $new_value['fids'] = array($fid);
+        $new_values[] = $new_value;
+      }
+    }
+    else {
+      $new_value = $submitted_value;
+    }
+  }
+
   // Re-index deltas after removing empty items.
-  $submitted_values = array_values($submitted_values);
+  $submitted_values = array_values($new_values);
 
   // Update form_state values.
   backdrop_array_set_nested_value($form_state['values'], array_slice($button['#parents'], 0, -2), $submitted_values);

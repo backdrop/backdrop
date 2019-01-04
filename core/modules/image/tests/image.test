@@ -937,7 +937,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     );
     $this->backdropPost('admin/structure/types/manage/post/fields/' . $private_field_name, $edit, t('Save settings'));
     $private_field = field_info_field($private_field_name);
-    $uri = $private_field['settings']['default_image'];
+    $uri = $private_field['settings']['default_image'][0];
     $this->assertEqual('private', file_uri_scheme($uri), 'Default image uses private:// scheme.');
     // Create a new node with no image attached and ensure that default private
     // image is displayed.
@@ -1461,10 +1461,10 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
     // Create an image field and add an instance to the post content type.
     $field_name = strtolower($this->randomName());
     $field_settings = array(
-      'default_image' => $default_images['field'],
+      'default_image' => array($default_images['field']),
     );
     $instance_settings = array(
-      'default_image' => $default_images['instance'],
+      'default_image' => array($default_images['instance']),
     );
     $widget_settings = array(
       'preview_image_style' => 'medium',
@@ -1477,7 +1477,7 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
     $instance2 = array_merge($instance, array(
       'bundle' => 'page',
       'settings' => array(
-        'default_image' => $default_images['instance2'],
+        'default_image' => array($default_images['instance2']),
       ),
     ));
     field_create_instance($instance2);
@@ -1531,7 +1531,7 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
     );
 
     // Upload a new default for the field.
-    $field['settings']['default_image'] = $default_images['field_new'];
+    $field['settings']['default_image'] = array($default_images['field_new']);
     field_update_field($field);
 
     // Confirm that the new field default is used on the post admin form.
@@ -1560,7 +1560,7 @@ class ImageFieldDefaultImagesTestCase extends ImageFieldTestCase {
     );
 
     // Upload a new default for the post's field instance.
-    $instance['settings']['default_image'] = $default_images['instance_new'];
+    $instance['settings']['default_image'] = array($default_images['instance_new']);
     field_update_instance($instance);
 
     // Confirm the new field instance default is used on the post field
