@@ -362,7 +362,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
 
   // Use a "textfield" rather than "url" to allow relative paths.
   $form['href'] = array(
-    '#title' => t('Link target'),
+    '#title' => t('Link destination'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => ' ',
@@ -373,7 +373,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     ),
     '#weight' => -10,
     '#autocomplete_path' => 'filter-link/autocomplete',
-    '#description' => t('Enter a link to an external page or a known internal path, or start typing to get suggestions for paths of existing content.'),
+    '#description' => t('Enter a link to an external page or a known internal path. Alternatively, start typing to get suggestions for paths of existing content.'),
   );
 
 
@@ -465,8 +465,8 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
   );
 
   $form['advanced']['rel'] = array(
-    '#title' => t('Relation (rel)'),
-    '#description' => t('Often used by JavaScript libraries.'),
+    '#title' => t('Relationship (rel)'),
+    '#description' => t('Specifies the relationship between the current page and the linked page.'),
     '#type' => 'textfield',
     '#default_value' => isset($values['rel']) ? $values['rel'] : '',
     '#parents' => array('attributes', 'rel'),
@@ -474,7 +474,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
 
   $form['advanced']['title'] = array(
     '#title' => t('Link title'),
-    '#description' => t('Populates the title attribute of the link. Usually shown as a small tooltip on hover.'),
+    '#description' => t('The title attribute of the link. Usually shown as a small tooltip on hover.'),
     '#type' => 'textfield',
     '#default_value' => isset($values['title']) ? $values['title'] : '',
     '#parents' => array('attributes', 'title'),
