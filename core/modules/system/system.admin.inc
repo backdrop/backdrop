@@ -2007,7 +2007,7 @@ function system_site_maintenance_mode($form, &$form_state) {
       '1' => t('On'),
     ),
   );
-  $form['maintenance_mode']['0']['#description'] = t('Visitors will see the site as per usual.');
+  $form['maintenance_mode']['0']['#description'] = t('Visitors will see the site as usual.');
   $form['maintenance_mode']['1']['#description'] = t('Visitors will only see the maintenance mode message.');
 
   $form['maintenance_mode_message'] = array(
@@ -2030,7 +2030,7 @@ function system_site_maintenance_mode($form, &$form_state) {
     '#attributes' => array('class' => array('messages', $permissions_message_type)),
   );
   $form['permissions_message']['info'] = array(
-    '#markup' => t('While in maintenance mode, authorized users can still log in directly via the <a href="@user-login">user login</a> page, but they need to have the "Use site in maintenance mode" permission in order to be able to access the site.', array('@user-login' => url('user'))),
+    '#markup' => t('People with the "Use site in maintenance mode" permission will still be able to <a href="@user-login">log in</a> while the site is in maintenance mode.', array('@user-login' => url('user/login'))),
   );
 
   $form['permissions_wrapper'] = array(
