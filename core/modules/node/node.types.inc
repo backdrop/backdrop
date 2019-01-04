@@ -158,6 +158,15 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->help,
     '#description' => t('This text will be displayed at the top of the page when creating or editing content of this type.'),
   );
+  $form['submission']['node_preview'] = array(
+    '#type' => 'radios',
+    '#title' => t('Preview before submitting'),
+    '#default_value' => $type->settings['node_preview'],
+    '#options' => array(
+      BACKDROP_DISABLED => t('Disabled'),
+      BACKDROP_OPTIONAL => t('Optional'),
+    ),
+  );
   $form['workflow'] = array(
     '#type' => 'fieldset',
     '#title' => t('Publishing settings'),
@@ -395,6 +404,7 @@ function node_type_form_submit($form, &$form_state) {
   $type->old_type = isset($form_state['values']['old_type']) ? $form_state['values']['old_type'] : $type->type;
 
   $type->description = $form_state['values']['description'];
+  $type->node_preview = $form_state['values']['node_preview'];
   $type->help = $form_state['values']['help'];
   $type->title_label = $form_state['values']['title_label'];
   // title_label is required in core; has_title will always be true, unless a
@@ -558,6 +568,7 @@ function node_node_type_load(&$types) {
       'sticky_default' => FALSE,
       'revision_enabled' => TRUE,
       'revision_default' => FALSE,
+      'node_preview' => TRUE,
 
       // Submitted information.
       'node_submitted' => TRUE,

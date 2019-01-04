@@ -765,6 +765,7 @@ function node_type_set_defaults($info = array()) {
     'name' => '',
     'base' => 'node_content',
     'module' => 'node',
+    'node_preview' => BACKDROP_OPTIONAL,
     'description' => '',
     'help' => '',
     'modified' => FALSE,
@@ -1789,8 +1790,8 @@ function node_menu() {
       'title callback' => 'check_plain',
       'page callback' => 'node_preview',
       'page arguments' => array(3, $type_url_str),
-      'access callback' => 'node_access',
-      'access arguments' => array('create', $type->type),
+      'access callback' => 'node_preview_access',
+      'access arguments' => array(3),
       'description' => $type->description,
       'type' => MENU_CALLBACK,
       'file' => 'node.pages.inc',
@@ -1884,18 +1885,19 @@ function node_menu() {
 /**
  * Access callback: Checks a user's permission for previewing a node.
  *
- * @param Node $node
- *   The node entity to be previewed.
+ * @param $node_tempstore_id
+ *   The node_tempstore_id of the node being created or updated.
  *
  * @return bool
  *   TRUE if the user has access to the preview, FALSE otherwise.
  *
  * @see node_menu()
  *
- * @since 1.11.0
+ * @since 1.12.0
  */
-function node_access_preview(Node $node) {
-  if (node_access('create', $node) || node_access('update', $node)) {
+function node_preview_access($node_tempstore_id) {
+  $node = node_get_node_tempstore($node_tempstore_id);
+  if (!empty($node) && (node_access('create', $node) || node_access('update', $node))) {
     return TRUE;
   }
   return FALSE;

@@ -124,6 +124,7 @@ function node_form($form, &$form_state, Node $node) {
   $node_type = node_type_get_type($node->type);
 
   $status = $node->nid ? $node->status : $node_type->settings['status_default'];
+  $node_preview = $node_type->settings['node_preview'];
 
   // Check if we can retrieve a node from the tempstore.
   $node_tempstore_id = isset($form_state['node_tempstore_id']) ? $form_state['node_tempstore_id'] : node_build_tempstore_id();
@@ -402,7 +403,7 @@ function node_form($form, &$form_state, Node $node) {
   );
   $form['actions']['preview'] = array(
     '#type' => 'submit',
-    '#access' => (!form_get_errors()),
+    '#access' => (!form_get_errors() && $node_preview != BACKDROP_DISABLED),
     '#value' => t('Preview'),
     '#weight' => 6,
     '#submit' => array('node_form_preview'),
