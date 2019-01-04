@@ -1957,7 +1957,7 @@ function node_update_1019() {
     $config = config($config_name);
     $settings = $config->get('settings');
     if (!isset($settings['node_preview'])) {
-      $config->set('settings.node_preview', '1');
+      $config->set('settings.node_preview', 1);
       $config->save();
     }
   }
