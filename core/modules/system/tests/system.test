@@ -608,6 +608,7 @@ class ModuleVersionTestCase extends ModuleTestCase {
       // module_test's dependencies. See system_test_system_info_alter().
       state_set('system_test_dev_dependency', $version_string);
       $this->backdropGet('admin/modules');
+
       $checkbox = $this->xpath('//input[@id="edit-modules-testing-module-test-enable"]');
       $this->assertEqual(empty($checkbox[0]['disabled']), $compatible, 'Dev dependency: ' . $version_string);
     }

@@ -119,6 +119,13 @@ class ViewsBlock extends Block {
             $args[] = isset($arguments[$id]['wildcard']) ? $arguments[$id]['wildcard'] : '*';
             break;
 
+          case 'url':
+            if (isset($argument['position'])) {
+              $arg = (int)$argument['position'];
+              $args[] = arg($arg);
+            }
+            break;
+
           case 'none':
           default:
             // Let Views handle a NULL (or missing) argument.
