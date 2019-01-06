@@ -164,7 +164,7 @@ function language_negotiation_configure_url_form($form, &$form_state) {
     '#attributes' => array('class' => array('messages', 'warning')),
   );
   $warning_message['message_wrapper']['warning'] = array(
-    '#markup' => '<strong>' . t('Modifying this value may break existing URLs. Use with caution in a production environment.') . '</strong>',
+    '#markup' => t('Modifying this value may break existing URLs. Use with caution in a production environment.'),
   );
 
   $form['prefix'] = array(
