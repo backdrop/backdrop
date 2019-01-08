@@ -4336,7 +4336,7 @@ function backdrop_clear_opcode_cache($filepath) {
 
   // Zend OPcache.
   if (function_exists('opcache_invalidate')) {
-    // In some hosting providers this might throw  PHP warnings.
+    // In some hosting providers this might throw PHP warnings.
     @opcache_invalidate($filepath, TRUE);
   }
   // APC.
