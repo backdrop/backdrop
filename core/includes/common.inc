@@ -2997,7 +2997,7 @@ function backdrop_deliver_html_page($page_callback_result) {
         // Print a 503 page.
         backdrop_add_http_header('Status', '503 Service unavailable');
         backdrop_set_title(t('Site under maintenance'));
-        print theme('maintenance_page', array('content' => filter_xss_admin(token_replace(t(config_get('system.core', 'maintenance_mode_message'))))));
+        print theme('maintenance_page', array('content' => filter_xss_admin(token_replace(config_get_translated('system.core', 'maintenance_mode_message')))));
         break;
     }
   }
