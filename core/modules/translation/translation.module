@@ -119,6 +119,22 @@ function translation_autoload_info() {
     'views_handler_filter_node_tnid' => 'views/views_handler_filter_node_tnid.inc',
     'views_handler_filter_node_tnid_child' => 'views/views_handler_filter_node_tnid_child.inc',
     'views_handler_relationship_translation' => 'views/views_handler_relationship_translation.inc',
+
+    // Translated block.
+    'TranslatedNodeBlock' => 'translation.block.inc',
+  );
+}
+
+/**
+ * Implements hook_block_info()
+ */
+function translation_block_info() {
+  return array(
+    'content' => array(
+      'info' => t('Existing content (translated)'),
+      'description' => t('Embed existing node content as a block onto other pages, with translation if available.'),
+      'class' => 'TranslatedNodeBlock'
+    )
   );
 }
 
