@@ -28,8 +28,9 @@ class TranslatedNodeBlock extends NodeBlock {
 
     $node = node_load($nid);
 
-    if (empty($node->tnid) || empty($node->langcode))
+    if (empty($node->tnid) || empty($node->langcode)) {
       return $nid;
+    }
 
     $translations = translation_node_get_translations($node->tnid);
 
