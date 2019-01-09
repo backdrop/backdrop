@@ -175,7 +175,7 @@ function image_field_instance_settings_form($field, $instance) {
   );
   // Add a second line of description.
   $form['orientate']['#description'] .= '<br />' . t('Note that as with resizing, rotating images on upload will cause the loss of EXIF data in the image.');
-  
+
   // Add the default image to the instance.
   $form['default_image'] = array(
     '#element_validate' => array('_image_field_default_image_validate'),
@@ -292,9 +292,11 @@ function image_field_presave($entity_type, $entity, $field, $instance, $langcode
 
   // Determine the dimensions if necessary.
   foreach ($items as &$item) {
-    if (!isset($item['width']) || !isset($item['height'])) {
-      $info = image_get_info(file_load($item['fid'])->uri);
+    if (empty($item['width']) || empty($item['height'])) {
+      $item['width'] = NULL;
+      $item['height'] = NULL;
 
+      $info = image_get_info(file_load($item['fid'])->uri);
       if (is_array($info)) {
         $item['width'] = $info['width'];
         $item['height'] = $info['height'];
@@ -454,14 +456,12 @@ function image_field_widget_process($element, &$form_state, $form) {
       $variables['height'] = $element['#value']['height'];
     }
     else {
+      $variables['width'] = NULL;
+      $variables['height'] = NULL;
       $info = image_get_info($element['#file']->uri);
-
       if (is_array($info)) {
         $variables['width'] = $info['width'];
         $variables['height'] = $info['height'];
-      }
-      else {
-        $variables['width'] = $variables['height'] = NULL;
       }
     }
 
