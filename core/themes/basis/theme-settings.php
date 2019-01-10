@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Theme settings file for Basis.
@@ -8,7 +7,6 @@
  * inform the user that the module supports color schemes if the Color module
  * is enabled.
  */
-
 if (module_exists('color')) {
   $form['header'] = array(
     '#type' => 'fieldset',
