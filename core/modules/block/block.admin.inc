@@ -40,7 +40,11 @@ function block_admin_list() {
     if (user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
-        'href' => 'admin/config/development/configuration/single/export/Custom Blocks/block.custom.' . $delta,
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Custom Blocks',
+          'name' => 'block.custom.' . $delta,
+        ),
       );
     }
     $operations = array(
