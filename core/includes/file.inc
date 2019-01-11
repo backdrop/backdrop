@@ -1158,11 +1158,8 @@ function file_unmanaged_move($source, $destination = NULL, $replace = FILE_EXIST
   if (!file_unmanaged_prepare($source, $destination, $replace)) {
     return FALSE;
   }
-  // Ensure compatibility with Windows.
-  // @see backdrop_unlink()
-  if ((substr(PHP_OS, 0, 3) == 'WIN') && (!file_stream_wrapper_valid_scheme(file_uri_scheme($source)))) {
-    chmod($source, 0600);
-  }
+  // The file must be writable in the old location before moving.
+  backdrop_chmod($source);
   // Attempt to resolve the URIs. This is necessary in certain configurations
   // (see above) and can also permit fast moves across local schemes.
   $real_source = ($real_source = backdrop_realpath($source)) ? $real_source : $source;
