@@ -1168,8 +1168,7 @@ function file_unmanaged_move($source, $destination = NULL, $replace = FILE_EXIST
   if (!@rename($real_source, $real_destination)) {
     // Fall back to slow copy and unlink procedure. This is necessary for
     // renames across schemes that are not local, or where rename() has not been
-    // implemented. It's not necessary to use drupal_unlink() as the Windows
-    // issue has already been resolved above.
+    // implemented.
     if (!@copy($real_source, $real_destination) || !@unlink($real_source)) {
       watchdog('file', 'The specified file %file could not be moved to %destination.', array('%file' => $source, '%destination' => $destination), WATCHDOG_ERROR);
       return FALSE;
