@@ -1140,7 +1140,7 @@ function file_move(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
  * @param $destination
  *   A URI containing the destination that $source should be moved to. The
  *   URI may be a bare filepath (without a scheme) and in that case the default
- *   scheme (file://) will be used. If this value is omitted, Drupal's default
+ *   scheme (file://) will be used. If this value is omitted, Backdrop's default
  *   files scheme will be used, usually "public://".
  * @param $replace
  *   Replace behavior when the destination file already exists:
