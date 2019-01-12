@@ -19,6 +19,29 @@ function entity_modules_disabled() {
 }
 
 /**
+ * Implements hook_entity_info_alter().
+ *
+ * @since version 1.12.0
+ */
+function entity_entity_info_alter(&$info) {
+  foreach (array_keys($info) as $entity_type) {
+    // Add a token view mode if it does not already exist. Only work with
+    // fieldable entities.
+    if (!empty($info[$entity_type]['fieldable'])) {
+      if (!isset($info[$entity_type])) {
+        $info[$entity_type]['view modes'] = array();
+      }
+      if (!isset($info[$entity_type]['view modes']['token'])) {
+        $info[$entity_type]['view modes']['token'] = array(
+          'label' => t('Tokens'),
+          'custom settings' => FALSE,
+        );
+      }
+    }
+  }
+}
+
+/**
  * Load a custom entity display mode by entity type and machine name.
  *
  * @param string $entity_type
