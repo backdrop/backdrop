@@ -692,6 +692,10 @@ fieldset .fieldset-wrapper {
   border-radius: 4px;
   background: transparent;
 }
+.js[dir="rtl"] fieldset.collapsible .fieldset-title {
+  background-image: none;
+  padding: .3em 1.8em .3em .3em;
+}
 .js fieldset.collapsible .fieldset-legend a:before {
   content: "";
   position: absolute;
@@ -703,7 +707,10 @@ fieldset .fieldset-wrapper {
   border-top-color: #000;
   border-bottom: 0;
 }
-
+.js[dir="rtl"] fieldset.collapsible .fieldset-legend a:before {
+  left: auto;
+  right: .6em;
+}
 .fieldset-legend span.summary {
   position: absolute;
   top: .4em;
@@ -724,6 +731,12 @@ fieldset .fieldset-wrapper {
   top: .75em;
   border: .32em solid transparent;
   border-left-color: black;
+}
+.js[dir="rtl"] fieldset.collapsed .fieldset-legend a:before {
+  left: auto;
+  right: .8em;
+  border-left-color: transparent;
+  border-right-color: black;
 }
 
 /**

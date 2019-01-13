@@ -240,6 +240,7 @@ abbr.ajax-changed {
 .js[dir="rtl"] fieldset.collapsed .fieldset-title {
   background-image: url(../../../misc/menu-collapsed-rtl.png);
   background-position: 98% 50%;
+  background-repeat: no-repeat;
 }
 .fieldset-legend span.summary {
   color: #999;
