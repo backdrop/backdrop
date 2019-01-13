@@ -48,6 +48,54 @@ function field_tokens($type, $tokens, array $data = array(), array $options = ar
   $sanitize = !empty($options['sanitize']);
   $langcode = isset($options['language']) ? $options['language']->langcode : NULL;
 
+  // Field value tokens.
+  if ($type == 'field-value' && !empty($data['field'])) {
+    $field = $data['field'];
+    $type_info = token_get_info($field['field_token_type']);
+    $field_value_token_type = $type_info['field-value-type'];
+
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'field':
+          $replacements[$original] = $sanitize ? check_plain($field['instance']['label']) : $field['instance']['label'];
+          break;
+      }
+    }
+
+    // Merge in the token value tokens for the first item value.
+    $items = field_get_items($field['entity_type'], $field['entity'], $field['field_name'], $langcode);
+    $replacements += token_generate($field_value_token_type, $tokens, array('item' => reset($items), 'field' => $field), $options);
+
+    // Chained [field-name:field] tokens.
+    if (($field_tokens = token_find_with_prefix($tokens, 'field'))) {
+      $replacements += token_generate('field', $field_tokens, array('field' => $field), $options);
+    }
+
+    // Chained [field-name:values] dynamic tokens.
+    if ($value_tokens = token_find_with_prefix($tokens, 'values')) {
+      $item_tokens = array();
+      foreach ($value_tokens as $name => $original) {
+        if (strpos($name, ':') === FALSE) {
+          // [field-name:values:index]
+          if (isset($items[(int) $name])) {
+            $output = field_view_value($field['entity_type'], $field['entity'], $field['field_name'], $items[(int) $name], 'token', $langcode);
+            $replacements[$original] = render($output);
+          }
+        }
+        else {
+          // [field-name:values:index:token]
+          list($index, $name) = explode(':', $name, 2);
+          $item_tokens[(int) $index][$name] = $original;
+        }
+      }
+      foreach ($item_tokens as $index => $value_tokens) {
+        if (isset($items[$index])) {
+          $replacements += token_generate($field_value_token_type, $value_tokens, array('item' => $items[$index], 'field' => $field), $options);
+        }
+      }
+    }
+  }
+
   // Entity tokens.
   if (!empty($data[$type]) && is_a($data[$type], 'Entity')) {
     // The field API does weird stuff to the entity, so let's clone it.
@@ -62,7 +110,7 @@ function field_tokens($type, $tokens, array $data = array(), array $options = ar
     }
 
     $fields = field_info_instances($entity_type, $bundle);
-    foreach (array_keys($fields) as $field_name) {
+    foreach ($fields as $field_name => $field_instance) {
       // Do not continue if the field is empty.
       if (empty($entity->{$field_name})) {
         continue;
@@ -80,6 +128,22 @@ function field_tokens($type, $tokens, array $data = array(), array $options = ar
         $field_output['#token_options'] = $options;
         $field_output['#pre_render'][] = 'field_pre_render_token';
         $replacements[$original] = backdrop_render($field_output);
+      }
+
+      // Replace the [entity:field-name:?] chained token.
+      if ($field_tokens = token_find_with_prefix($tokens, $field_name)) {
+        $field = array(
+          'entity' => $entity,
+          'entity_id' => $entity->id(),
+          'entity_type' => $entity_type,
+          'bundle' => $entity->bundle(),
+          'field_name' => $field_name,
+          'instance' => $field_instance,
+          'field' => field_info_field($field_name),
+        );
+        $field['field_token_type'] = strtr($field['field']['type'], '_', '-') . '-field';
+        $replacements += token_generate('field-value', $field_tokens, array('field' => $field), $options);
+        unset($field_data);
       }
     }
 
