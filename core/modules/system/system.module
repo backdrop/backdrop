@@ -3947,7 +3947,7 @@ function system_config_info() {
   $themes = list_themes();
   foreach ($themes as $theme_name => $theme) {
     // If the theme registers settings, it needs a config file.
-    if (isset($theme->info['settings'])) {
+    if (theme_has_settings($theme_name)) {
       $prefixes[$theme_name . '.settings'] = array(
         'label' => t('!theme settings', array('!theme' => $theme->info['name'])),
         'group' => t('Configuration'),
