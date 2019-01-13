@@ -2885,10 +2885,8 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
     $object = NULL;
     if (!empty($view->stack)) {
       $backdrop_add_js = $backdrop_add_js_original;
-      $stack = $view->stack;
-      $top = array_shift($stack);
-      $top[0] = $js;
-      $form_state = call_user_func_array('views_ui_build_form_state', $top);
+      $args = array_shift($view->stack);
+      $form_state = views_ui_build_form_state($js, $args[1], $args[2], $args[3], $args[4]);
       $form_state['input'] = array();
       $form_state['path'] = views_ui_build_form_path($form_state);
       if (!$js) {
