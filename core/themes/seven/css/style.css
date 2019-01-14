@@ -519,7 +519,9 @@ tr.drag {
 tr.drag-previous {
   background: #ffb;
 }
-tr:hover {
+tr:hover,
+tr:hover td.active,
+tr.odd:hover td.active {
   background: #ffff99;
 }
 th {
