@@ -179,12 +179,12 @@
 
 /* Log Out link */
 #admin-bar .dropdown .admin-bar-logout > a {
-  background: transparent url(../images/sign-out--white--64.png) 95% center no-repeat; /* LTR */
+  background: transparent url(../images/sign-out--white--64.png) 90% center no-repeat; /* LTR */
   background-size: 16px;
   padding-right: 28px; /* LTR */
 }
 [dir="rtl"] #admin-bar .dropdown .admin-bar-logout > a {
-  background-position: 5% center;
+  background-position: 10% center;
   padding-right: 10px;
   padding-left: 28px;
 }
