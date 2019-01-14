@@ -532,13 +532,13 @@ function user_admin_roles($form, $form_state) {
       '#attributes' => array('class' => array('role-weight')),
     );
     $links = array();
-    $links['edit'] = array(
-      'title' => t('Edit role'),
+    $links['configure'] = array(
+      'title' => t('Configure role'),
       'href' => 'admin/config/people/roles/edit/' . $role_name,
       'weight' => 0,
     );
     $links['permissions'] = array(
-      'title' => t('Edit permissions'),
+      'title' => t('Set permissions'),
       'href' => 'admin/config/people/permissions/' . $role_name,
       'weight' => 5,
     );
