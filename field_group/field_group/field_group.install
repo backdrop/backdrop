@@ -28,7 +28,7 @@ function field_group_update_1000() {
       unset($field_group['identifier']);
       unset($field_group['data']);
       unset($field_group['export_type']);
-      unset($field_group['disabled']);   
+      unset($field_group['disabled']);
 
       $config = config('field_group.field_group.' . $field_group['entity_type'] . '.' . $field_group['bundle'] . '.' . $field_group['mode'] . '.' . $field_group['group_name']);
       $config->setData($field_group);
