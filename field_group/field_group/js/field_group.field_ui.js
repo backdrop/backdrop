@@ -1,20 +1,20 @@
 
 (function($) {
 
-Drupal.behaviors.fieldUIFieldsOverview = {
+Backdrop.behaviors.fieldUIFieldsOverview = {
   attach: function (context, settings) {
     $('table#field-overview', context).once('field-field-overview', function() {
-      Drupal.fieldUIOverview.attach(this, settings.fieldUIRowsData, Drupal.fieldUIFieldOverview);
+      Backdrop.fieldUIOverview.attach(this, settings.fieldUIRowsData, Backdrop.fieldUIFieldOverview);
     });
   }
 };
-  
+
 /**
  * Row handlers for the 'Manage fields' screen.
  */
-Drupal.fieldUIFieldOverview = Drupal.fieldUIFieldOverview || {};
+Backdrop.fieldUIFieldOverview = Backdrop.fieldUIFieldOverview || {};
 
-Drupal.fieldUIFieldOverview.group = function(row, data) {
+Backdrop.fieldUIFieldOverview.group = function(row, data) {
   this.row = row;
   this.name = data.name;
   this.region = data.region;
@@ -22,16 +22,16 @@ Drupal.fieldUIFieldOverview.group = function(row, data) {
 
   // Attach change listener to the 'group format' select.
   this.$formatSelect = $('select.field-group-type', row);
-  this.$formatSelect.change(Drupal.fieldUIOverview.onChange);
+  this.$formatSelect.change(Backdrop.fieldUIOverview.onChange);
 
   return this;
 };
 
-Drupal.fieldUIFieldOverview.group.prototype = {
+Backdrop.fieldUIFieldOverview.group.prototype = {
   getRegion: function () {
     return 'main';
   },
-  
+
   regionChange: function (region, recurse) {
     return {};
   },
@@ -52,16 +52,16 @@ Drupal.fieldUIFieldOverview.group.prototype = {
       var childRowHandler = $(childRow).data('fieldUIRowHandler');
       $.extend(refreshRows, childRowHandler.regionChange(region, false));
     });
-  }  
+  }
 };
-  
-  
+
+
 /**
  * Row handlers for the 'Manage display' screen.
  */
-Drupal.fieldUIDisplayOverview = Drupal.fieldUIDisplayOverview || {};
+Backdrop.fieldUIDisplayOverview = Backdrop.fieldUIDisplayOverview || {};
 
-Drupal.fieldUIDisplayOverview.group = function(row, data) {
+Backdrop.fieldUIDisplayOverview.group = function(row, data) {
   this.row = row;
   this.name = data.name;
   this.region = data.region;
@@ -69,12 +69,12 @@ Drupal.fieldUIDisplayOverview.group = function(row, data) {
 
   // Attach change listener to the 'group format' select.
   this.$formatSelect = $('select.field-group-type', row);
-  this.$formatSelect.change(Drupal.fieldUIOverview.onChange);
+  this.$formatSelect.change(Backdrop.fieldUIOverview.onChange);
 
   return this;
 };
 
-Drupal.fieldUIDisplayOverview.group.prototype = {
+Backdrop.fieldUIDisplayOverview.group.prototype = {
   getRegion: function () {
     return (this.$formatSelect.val() == 'hidden') ? 'hidden' : 'visible';
   },
@@ -129,9 +129,9 @@ Drupal.fieldUIDisplayOverview.group.prototype = {
       var childRowHandler = $(childRow).data('fieldUIRowHandler');
       $.extend(refreshRows, childRowHandler.regionChange(region, false));
     });
-    
+
   }
-  
+
 };
 
 })(jQuery);

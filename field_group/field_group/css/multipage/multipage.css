@@ -2,14 +2,14 @@
   float: left; /* LTR */
 }
 
-.multipage-button {    
+.multipage-button {
   margin-bottom: 1em;
   margin-top: 0;
   float: left; /* LTR */
   line-height: 36px;
 }
 
-.multipage-button a {    
+.multipage-button a {
   padding-top: 10px;
 }
 
@@ -74,7 +74,7 @@ a.multipage-link-previous:hover {
   background-image: -o-linear-gradient(top,#4d90fe,#4787ed);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#4D90FE', endColorstr='#4787ED'); /* for IE */
   background: -webkit-gradient(linear, center top, center bottom, from(#4D90FE), to(#4787ED)); /* for webkit browsers */
-  background: -moz-linear-gradient(center top,  #4D90FE,  #4787ED); /* for firefox 3.6+ */ 
+  background: -moz-linear-gradient(center top,  #4D90FE,  #4787ED); /* for firefox 3.6+ */
   color: white;
   text-shadow: none;
   text-transform: uppercase;

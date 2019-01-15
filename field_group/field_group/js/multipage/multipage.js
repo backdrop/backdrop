@@ -5,7 +5,7 @@
  * Another pane can be entered by clicking next/previous.
  *
  */
-Drupal.behaviors.MultiPage = {
+Backdrop.behaviors.MultiPage = {
   attach: function (context) {
     $('.multipage-panes', context).once('multipage', function () {
 
@@ -29,11 +29,11 @@ Drupal.behaviors.MultiPage = {
         $(this).append($controls);
 
         // Check if the submit button needs to move to the latest pane.
-        if (Drupal.settings.field_group.multipage_move_submit && $('.form-actions').length) {
+        if (Backdrop.settings.field_group.multipage_move_submit && $('.form-actions').length) {
           $('.form-actions', $form).remove().appendTo($($controls, $panes.last()));
         }
 
-        var multipageControl = new Drupal.multipageControl({
+        var multipageControl = new Backdrop.multipageControl({
           title: $('> .multipage-pane-title', this).text(),
           wrapper: $(this),
           has_next: $(this).next().length,
@@ -77,9 +77,9 @@ Drupal.behaviors.MultiPage = {
  *   - title: The name of the tab.
  *   - wrapper: The jQuery object of the <div> that is the tab pane.
  */
-Drupal.multipageControl = function (settings) {
+Backdrop.multipageControl = function (settings) {
   var self = this;
-  var controls = Drupal.theme('multipage', settings);
+  var controls = Backdrop.theme('multipage', settings);
   $.extend(self, settings, controls);
 
   this.nextLink.click(function (e) {
@@ -116,7 +116,7 @@ Drupal.multipageControl = function (settings) {
 */
 };
 
-Drupal.multipageControl.prototype = {
+Backdrop.multipageControl.prototype = {
 
   /**
    * Displays the tab's content pane.
@@ -134,7 +134,7 @@ Drupal.multipageControl.prototype = {
         .val(this.wrapper.attr('id'));
     // Mark the active control for screen readers.
     $('#active-multipage-control').remove();
-    this.nextLink.after('<span id="active-multipage-control" class="element-invisible">' + Drupal.t('(active page)') + '</span>');
+    this.nextLink.after('<span id="active-multipage-control" class="element-invisible">' + Backdrop.t('(active page)') + '</span>');
   },
 
   /**
@@ -207,17 +207,17 @@ Drupal.multipageControl.prototype = {
  *   - previousLink: The anchor tag that acts as the clickable area of the control
  *   - previousTitle: The jQuery element that contains the group title
  */
-Drupal.theme.prototype.multipage = function (settings) {
+Backdrop.theme.prototype.multipage = function (settings) {
 
   var controls = {};
   controls.item = $('<span class="multipage-button"></span>');
 
   controls.previousLink = $('<input type="button" class="form-submit multipage-link-previous" value="" />');
-  controls.previousTitle = Drupal.t('Previous page');
+  controls.previousTitle = Backdrop.t('Previous page');
   controls.item.append(controls.previousLink.val(controls.previousTitle));
 
   controls.nextLink = $('<input type="button" class="form-submit multipage-link-next" value="" />');
-  controls.nextTitle = Drupal.t('Next page');
+  controls.nextTitle = Backdrop.t('Next page');
   controls.item.append(controls.nextLink.val(controls.nextTitle));
 
   if (!settings.has_next) {
@@ -231,13 +231,13 @@ Drupal.theme.prototype.multipage = function (settings) {
 };
 
 
-Drupal.FieldGroup = Drupal.FieldGroup || {};
-Drupal.FieldGroup.Effects = Drupal.FieldGroup.Effects || {};
+Backdrop.FieldGroup = Backdrop.FieldGroup || {};
+Backdrop.FieldGroup.Effects = Backdrop.FieldGroup.Effects || {};
 
 /**
- * Implements Drupal.FieldGroup.processHook().
+ * Implements Backdrop.FieldGroup.processHook().
  */
-Drupal.FieldGroup.Effects.processMultipage = {
+Backdrop.FieldGroup.Effects.processMultipage = {
   execute: function (context, settings, type) {
     if (type == 'form') {
 
@@ -252,7 +252,7 @@ Drupal.FieldGroup.Effects.processMultipage = {
             $firstErrorItem = $(this).data('multipageControl');
           }
 
-          Drupal.FieldGroup.setGroupWithfocus($(this));
+          Backdrop.FieldGroup.setGroupWithfocus($(this));
           $(this).data('multipageControl').focus();
         }
       });

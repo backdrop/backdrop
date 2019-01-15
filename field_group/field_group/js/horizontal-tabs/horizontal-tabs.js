@@ -11,7 +11,7 @@
  * which is called every time the user performs an update to a form
  * element inside the tab pane.
  */
-Drupal.behaviors.horizontalTabs = {
+Backdrop.behaviors.horizontalTabs = {
   attach: function (context) {
     $('.horizontal-tabs-panes', context).once('horizontal-tabs', function () {
       var focusID = $(':hidden.horizontal-tabs-active-tab', this).val();
@@ -29,7 +29,7 @@ Drupal.behaviors.horizontalTabs = {
 
       // Transform each fieldset into a tab.
       $fieldsets.each(function (i) {
-        var horizontal_tab = new Drupal.horizontalTab({
+        var horizontal_tab = new Backdrop.horizontalTab({
           title: $('> legend', this).text(),
           fieldset: $(this)
         });
@@ -73,9 +73,9 @@ Drupal.behaviors.horizontalTabs = {
  *   - title: The name of the tab.
  *   - fieldset: The jQuery object of the fieldset that is the tab pane.
  */
-Drupal.horizontalTab = function (settings) {
+Backdrop.horizontalTab = function (settings) {
   var self = this;
-  $.extend(this, settings, Drupal.theme('horizontalTab', settings));
+  $.extend(this, settings, Backdrop.theme('horizontalTab', settings));
 
   this.link.click(function () {
     self.focus();
@@ -94,7 +94,7 @@ Drupal.horizontalTab = function (settings) {
   });
 
   // Only bind update summary on forms.
-  if (this.fieldset.drupalGetSummary) {
+  if (this.fieldset.backdropGetSummary) {
     this.fieldset.bind('summaryUpdated', function() {
       self.updateSummary();
     }).trigger('summaryUpdated');
@@ -102,7 +102,7 @@ Drupal.horizontalTab = function (settings) {
 
 };
 
-Drupal.horizontalTab.prototype = {
+Backdrop.horizontalTab.prototype = {
   /**
    * Displays the tab's content pane.
    */
@@ -121,14 +121,14 @@ Drupal.horizontalTab.prototype = {
     this.item.addClass('selected');
     // Mark the active tab for screen readers.
     $('#active-horizontal-tab').remove();
-    this.link.append('<span id="active-horizontal-tab" class="element-invisible">' + Drupal.t('(active tab)') + '</span>');
+    this.link.append('<span id="active-horizontal-tab" class="element-invisible">' + Backdrop.t('(active tab)') + '</span>');
   },
 
   /**
    * Updates the tab's summary.
    */
   updateSummary: function () {
-    this.summary.html(this.fieldset.drupalGetSummary());
+    this.summary.html(this.fieldset.backdropGetSummary());
   },
 
   /**
@@ -184,7 +184,7 @@ Drupal.horizontalTab.prototype = {
  *       (jQuery version)
  *   - summary: The jQuery element that contains the tab summary
  */
-Drupal.theme.prototype.horizontalTab = function (settings) {
+Backdrop.theme.prototype.horizontalTab = function (settings) {
   var tab = {};
   var idAttr = settings.fieldset.attr('id');
 
@@ -194,7 +194,7 @@ Drupal.theme.prototype.horizontalTab = function (settings) {
     );
 
   // No need to add summary on frontend.
-  if (settings.fieldset.drupalGetSummary) {
+  if (settings.fieldset.backdropGetSummary) {
     tab.link.append(tab.summary = $('<span class="summary"></span>'))
     }
 
