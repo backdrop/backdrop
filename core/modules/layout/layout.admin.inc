@@ -122,6 +122,16 @@ function _layout_get_operations(Layout $layout) {
       'title' => t('Clone Layout'),
       'href' => 'admin/structure/layouts/manage/' . $layout->name . '/clone',
     );
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export Layout'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Layouts',
+          'name' => 'layout.layout.' . $layout->name,
+        ),
+      );
+    }
     if (!$layout->disabled) {
       $links['disable'] = array(
         'title' => t('Disable Layout'),
