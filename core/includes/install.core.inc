@@ -285,7 +285,7 @@ function install_begin_request(&$install_state) {
   // Check existing settings.php.
   $install_state['settings_verified'] = install_verify_settings();
 
-  if ($install_state['settings_verified']) {
+  if ($install_state['settings_verified']['errors'] === FALSE) {
     // Initialize the database system. Note that the connection
     // won't be initialized until it is actually requested.
     require_once BACKDROP_ROOT . '/core/includes/database/database.inc';
@@ -293,13 +293,18 @@ function install_begin_request(&$install_state) {
     // Verify the last completed task in the database, if there is one.
     $task = install_verify_completed_task();
   }
-  else {
+  elseif ($install_state['settings_verified']['errors'] === TRUE) {
     $task = NULL;
 
     // Do not install over a configured settings.php.
     if (!empty($GLOBALS['databases'])) {
       throw new Exception(install_already_done_error());
     }
+  }
+  else {
+    $task = NULL;
+
+    throw new Exception(install_database_connection_error($install_state['settings_verified']['errors']));
   }
 
   // Modify the installation state as appropriate.
@@ -893,6 +898,8 @@ function install_verify_database_utf8mb4() {
 
 /**
  * Verifies the existing settings in settings.php.
+ *
+ * @return array
  */
 function install_verify_settings() {
   global $databases;
@@ -904,10 +911,13 @@ function install_verify_settings() {
     $settings_file = conf_path(FALSE) . '/settings.php';
     $errors = install_database_errors($database, $settings_file);
     if (empty($errors)) {
-      return TRUE;
+      return array('errors' => FALSE);
+    }
+    else {
+      return array('errors' => $errors);
     }
   }
-  return FALSE;
+  return array('errors' => TRUE);
 }
 
 /**
@@ -1457,6 +1467,25 @@ function install_select_language_form($form, &$form_state, $files) {
 function install_no_profile_error() {
   backdrop_set_title(st('No profiles available'));
   return st('We were unable to find any installation profiles. Installation profiles tell us what modules to enable and what schema to install in the database. A profile is necessary to continue with the installation process.');
+}
+
+/**
+ * Indicates a database connection error.
+ */
+function install_database_connection_error($errors = array()) {
+  backdrop_set_title(st('Database connection error'));
+
+  $items = array();
+  $items[] = st('It looks like your settings.php database credentials are wrong.');
+
+  if (count($errors)) {
+    $errors = implode("\n", $errors);
+    $items[] = st('Here are the raw errors messages :') . '<pre>' . $errors . '</pre>';
+  }
+
+  $items[] = st('Please correct your credentials and retry.');
+
+  return theme('item_list', array('items' => $items));
 }
 
 /**
