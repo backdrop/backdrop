@@ -47,6 +47,16 @@ function taxonomy_overview_vocabularies($form) {
         'title' => t('Manage displays'),
         'href' => "admin/structure/taxonomy/$vocabulary->machine_name/display",
         'weight' => 10,
+        );
+      }
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Vocabularies',
+          'name' => 'taxonomy.vocabulary.' . $vocabulary->machine_name,
+        ),
       );
     }
     $links['delete'] = array(
