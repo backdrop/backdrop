@@ -921,13 +921,6 @@ input.form-submit:active {
   -moz-box-shadow: 0 0 5px rgb(220, 220, 220);
   box-shadow: 0 0 5px rgb(220, 220, 220);
 }
-input.form-button-disabled,
-input.form-button-disabled:active {
-  background: #eee none;
-  border-color: #eee;
-  text-shadow: none;
-  color: #999;
-}
 input.button-primary,
 button.button-primary {
   color: white;
@@ -978,6 +971,21 @@ button.button-danger:hover,
 button.button-danger:focus {
   color: white;
   background-color: #e7251b;
+}
+input.form-button-disabled,
+input.form-button-disabled:active,
+input.form-button-disabled:hover,
+input.form-button-disabled:focus,
+input.form-disabled,
+input.form-disabled:active,
+input.form-disabled:hover,
+input.form-disabled:focus {
+  background: #eee none;
+  border-color: #eee;
+  text-shadow: none;
+  color: #999;
+  box-shadow: none;
+  transition-property: none;
 }
 input.form-autocomplete,
 input.form-text,
