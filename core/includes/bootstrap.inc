@@ -4336,7 +4336,8 @@ function backdrop_clear_opcode_cache($filepath) {
 
   // Zend OPcache.
   if (function_exists('opcache_invalidate')) {
-    // In some hosting providers this might throw PHP warnings.
+    // Suppress any warnings in PHP 7.2+ caused by "Zend OPcache API is
+    // restricted by "restrict_api" configuration directive".
     @opcache_invalidate($filepath, TRUE);
   }
   // APC.
