@@ -749,6 +749,13 @@ function backdrop_environment_initialize() {
   // Set sane locale settings, to ensure consistent string, dates, times and
   // numbers handling.
   setlocale(LC_ALL, 'C');
+
+  // PHP's built-in phar:// stream wrapper is not sufficiently secure. Remove it
+  // from use unless running through CLI, for tools such as drush or other
+  // shell scripts.
+  if (!backdrop_is_cli() && in_array('phar', stream_get_wrappers())) {
+    stream_wrapper_unregister('phar');
+  }
 }
 
 /**
