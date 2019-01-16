@@ -283,9 +283,10 @@ function install_begin_request(&$install_state) {
   backdrop_maintenance_theme();
 
   // Check existing settings.php.
-  $install_state['settings_verified'] = install_verify_settings();
+  $settings_errors = array();
+  $install_state['settings_verified'] = install_verify_settings($settings_errors);
 
-  if ($install_state['settings_verified']['errors'] === FALSE) {
+  if ($install_state['settings_verified']) {
     // Initialize the database system. Note that the connection
     // won't be initialized until it is actually requested.
     require_once BACKDROP_ROOT . '/core/includes/database/database.inc';
@@ -293,18 +294,17 @@ function install_begin_request(&$install_state) {
     // Verify the last completed task in the database, if there is one.
     $task = install_verify_completed_task();
   }
-  elseif ($install_state['settings_verified']['errors'] === TRUE) {
+  elseif ($settings_errors) {
+    $task = NULL;
+    throw new Exception(install_database_connection_error($settings_errors));
+  }
+  else {
     $task = NULL;
 
     // Do not install over a configured settings.php.
     if (!empty($GLOBALS['databases'])) {
       throw new Exception(install_already_done_error());
     }
-  }
-  else {
-    $task = NULL;
-
-    throw new Exception(install_database_connection_error($install_state['settings_verified']['errors']));
   }
 
   // Modify the installation state as appropriate.
@@ -900,24 +900,24 @@ function install_verify_database_utf8mb4() {
  * Verifies the existing settings in settings.php.
  *
  * @return array
+ *   An array of errors that will be populated with any problems.
  */
-function install_verify_settings() {
+function install_verify_settings(&$errors) {
   global $databases;
+  $errors = array();
 
   // Verify existing settings (if any).
-  if (!empty($databases) && install_verify_pdo()) {
+  if (!install_verify_pdo()) {
+    $errors['pdo_missing'] = st('The required extension "PDO" is either not installed on this system or is not compatible with Backdrop.');
+  }
+  elseif (!empty($databases)) {
     $database = $databases['default']['default'];
     backdrop_static_reset('conf_path');
     $settings_file = conf_path(FALSE) . '/settings.php';
     $errors = install_database_errors($database, $settings_file);
-    if (empty($errors)) {
-      return array('errors' => FALSE);
-    }
-    else {
-      return array('errors' => $errors);
-    }
   }
-  return array('errors' => TRUE);
+
+  return empty($errors);
 }
 
 /**
@@ -1475,17 +1475,9 @@ function install_no_profile_error() {
 function install_database_connection_error($errors = array()) {
   backdrop_set_title(st('Database connection error'));
 
-  $items = array();
-  $items[] = st('It looks like your settings.php database credentials are wrong.');
-
-  if (count($errors)) {
-    $errors = implode("\n", $errors);
-    $items[] = st('Here are the raw errors messages :') . '<pre>' . $errors . '</pre>';
-  }
-
-  $items[] = st('Please correct your credentials and retry.');
-
-  return theme('item_list', array('items' => $items));
+  $output = '<p>' . st('It looks like your settings.php database connection may be incorrect.') . '</p>';
+  $output .= implode("\n", $errors);
+  return $output;
 }
 
 /**
