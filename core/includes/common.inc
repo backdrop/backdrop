@@ -1243,6 +1243,11 @@ function backdrop_http_request($url, array $options = array()) {
       elseif ($options['max_redirects']) {
         // Redirect to the new location.
         $options['max_redirects']--;
+        // Remove the automatically added Host header, as the redirect may
+        // be on a different domain name.
+        if (isset($options['headers']['Host'])) {
+          unset($options['headers']['Host']);
+        }
         $result = backdrop_http_request($location, $options);
         $result->redirect_code = $code;
       }
