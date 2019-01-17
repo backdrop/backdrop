@@ -10,7 +10,7 @@
  * @ingroup themeable
  */
 function theme_admin_bar_icon($variables) {
-  return '<img class="admin-bar-icon" src="' . $variables['src'] . '" width="14" height="12" alt="' . $variables['alt'] . '" />';
+  return t('Home');
 }
 
 /**
@@ -65,6 +65,12 @@ function theme_admin_bar_links($variables) {
       }
       if (isset($elements[$path]['#attributes']['class'])) {
         $elements[$path]['#attributes']['class'] = $elements[$path]['#attributes']['class'];
+
+        // Only add additional classes to top-level links.
+        if (substr_count($path, '/') <= 1 ) {
+          $class = backdrop_clean_css_identifier($path);
+          $elements[$path]['#options']['attributes']['class'][] = $class;
+        }
       }
     }
 

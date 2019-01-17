@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Admin page callbacks for the block module.
@@ -36,6 +35,16 @@ function block_admin_list() {
       $links['translate'] = array(
         'title' => t('Translate'),
         'href' => 'admin/structure/block/manage/' . $delta . '/translation',
+      );
+    }
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Custom Blocks',
+          'name' => 'block.custom.' . $delta,
+        ),
       );
     }
     $operations = array(

@@ -364,7 +364,11 @@ function _views_ui_get_operations(view $view) {
   if (module_exists('config') && user_access('synchronize configuration')) {
     $links['export'] = array(
       'title' => t('Export'),
-      'href' => 'admin/config/development/configuration/single/export/Views/views.view.' . $view->name,
+      'href' => 'admin/config/development/configuration/single/export',
+      'query' => array(
+        'group' => 'Views',
+        'name' => 'views.view.' . $view->name,
+      ),
     );
   }
   return $links;
@@ -1268,7 +1272,11 @@ function views_ui_render_display_top($view, $display_id) {
   if (module_exists('config') && user_access('synchronize configuration')) {
     $element['extra_actions']['#links']['export'] = array(
       'title' => t('export view'),
-      'href' => 'admin/config/development/configuration/single/export/Views/views.view.' . $view->name,
+      'href' => 'admin/config/development/configuration/single/export',
+      'query' => array(
+        'group' => 'Views',
+        'name' => 'views.view.' . $view->name,
+      ),
     );
   }
   else {

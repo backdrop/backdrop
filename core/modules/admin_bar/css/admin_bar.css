@@ -68,14 +68,135 @@
 }
 #admin-bar-menu.top-level > li > ul > li > a.active-trail {
   text-shadow: #333 0 1px 0;
-  background: #9F9F9F; /* Old browsers */
-  background: -moz-linear-gradient(#9F9F9F 0%, #808080 100%); /* FF3.6+ */
-  background: -webkit-gradient(color-stop(0%, #9F9F9F), color-stop(100%, #808080)); /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(#9F9F9F 0%, #808080 100%); /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(#9F9F9F 0%, #808080 100%); /* Opera 11.10+ */
-  background: -ms-linear-gradient(#9F9F9F 0%, #808080 100%); /* IE10+ */
-  background: linear-gradient(#9F9F9F 0%, #808080 100%); /* W3C */
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#9F9F9F', endColorstr='#808080',GradientType=0); /* IE6-9 */
+  background-color: #9F9F9F;
+}
+
+/* Home link */
+#admin-bar .dropdown li.admin-bar-icon > a {
+  background: transparent url(../images/home--white--64.png) 5% center no-repeat;
+  background-size: 16px;
+  padding-left: 28px; /* LTR */
+}
+[dir="rtl"] #admin-bar .dropdown li.admin-bar-icon > a {
+  background-position: 95% center;
+  padding-left: 10px;
+  padding-right: 28px;
+}
+
+/* Admin bar label */
+#admin-bar #admin-bar-menu.dropdown li > span.menu {
+  background: transparent url(../images/bars--white--64.png) 5% center no-repeat; /* LTR */
+  padding-left: 28px; /* LTR */
+  background-size: 16px;
+}
+[dir="rtl"] #admin-bar #admin-bar-menu.dropdown li > span.menu {
+  background-position: 95% center;
+  padding-left: 10px;
+  padding-right: 28px;
+}
+
+/* All admin bar menu links */
+#admin-bar #admin-bar-menu > li > .dropdown > li > a {
+  padding-left: 28px; /* LTR */
+}
+[dir="rtl"] #admin-bar #admin-bar-menu > li > .dropdown > li > a {
+  padding-left: 10px;
+  padding-right: 28px;
+}
+
+/* Specific admin bar menu links */
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-content {
+  background: transparent url(../images/pencil--white--64.png) 5% center no-repeat;
+  background-size: 16px;
+}
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-people {
+  background: transparent url(../images/users--white--64.png) 5% center no-repeat;
+  background-size: 16px;
+}
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-appearance {
+  background: transparent url(../images/palette--white--64.png) 5% center no-repeat;
+  background-size: 16px;
+}
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-modules {
+  background: transparent url(../images/puzzle-piece--white--64.png) 5% center no-repeat;
+  background-size: 16px;
+}
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-structure {
+  background: transparent url(../images/sort-amount-down--white--64.png) 5% center no-repeat;
+  background-size: 16px;
+}
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-config {
+  background: transparent url(../images/cog--white--64.png) 5% center no-repeat;
+  background-size: 16px;
+}
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-devel {
+  background: transparent url(../images/code--white--64.png) 5% center no-repeat;
+  background-size: 16px;
+}
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-reports {
+  background: transparent url(../images/info-circle--white--64.png) 5% center no-repeat;
+  background-size: 16px;
+}
+[dir="rtl"] #admin-bar #admin-bar-menu > li > .dropdown > li > a {
+  background-position: 95% center;
+}
+
+/* Admin tasks */
+#admin-bar #admin-bar-extra.dropdown li > span.extra {
+  background: transparent url(../images/clipboard-check--white--64.png) 5% center no-repeat; /* LTR */
+  padding-left: 28px; /* LTR */
+  background-size: 16px;
+}
+[dir="rtl"] #admin-bar #admin-bar-extra.dropdown li > span.extra {
+  background-position: 95% center;
+  padding-left: 10px;
+  padding-right: 28px;
+}
+
+/* Logged in users */
+#admin-bar .dropdown .admin-bar-users > a {
+  background: transparent url(../images/user-friends--white--64.png) 90% center no-repeat;
+  background-size: 16px;
+  padding-right: 28px; /* LTR */
+}
+[dir="rtl"] #admin-bar .dropdown .admin-bar-users > a {
+  background-position: 10% center;
+  padding-right: 10px;
+  padding-left: 28px;
+}
+
+/* My Account link */
+#admin-bar .dropdown .admin-bar-account > a {
+  background: transparent url(../images/user-circle--white--64.png) 90% center no-repeat; /* LTR */
+  padding-right: 28px; /* LTR */
+  background-size: 16px;
+}
+[dir="rtl"] #admin-bar .dropdown .admin-bar-account > a {
+  background-position: 10% center;
+  padding-right: 10px;
+  padding-left: 28px;
+}
+
+/* Log Out link */
+#admin-bar .dropdown .admin-bar-logout > a {
+  background: transparent url(../images/sign-out--white--64.png) 90% center no-repeat; /* LTR */
+  background-size: 16px;
+  padding-right: 28px; /* LTR */
+}
+[dir="rtl"] #admin-bar .dropdown .admin-bar-logout > a {
+  background-position: 10% center;
+  padding-right: 10px;
+  padding-left: 28px;
+}
+
+/* Restore active and hover colors */
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.expanded-trail,
+#admin-bar #admin-bar-extra > li > .dropdown > li > a:hover,
+#admin-bar #admin-bar-icon li.admin-bar-icon > a:hover {
+  background-color: #45454A;
+}
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.active-trail {
+  background-color: #9F9F9F;
 }
 
 #admin-bar li {
@@ -94,6 +215,9 @@
   position: static;
   background: #202020;
   vertical-align: top;
+}
+#admin-bar-wrapper {
+  padding: 0 5px;
 }
 #admin-bar-wrapper > .dropdown {
   background: transparent;
@@ -119,7 +243,7 @@
 
 #admin-bar a.expanded-trail,
 #admin-bar span.expanded-trail {
-  background: #45454A;
+  background-color: #45454A;
 }
 
 #admin-bar .dropdown .admin-bar-tab a {
@@ -184,8 +308,8 @@
   margin: -32px 0 0 160px; /* LTR */
 }
 [dir="rtl"] #admin-bar .dropdown li li.expandable ul {
-  margin-left: 160px;
-  margin-right: 0;
+  margin-right: 160px;
+  margin-left: 0;
 }
 
 /* Lists nested under hovered list items */
@@ -216,11 +340,8 @@
   display: inline-block;
   background: transparent;
 }
-#admin-bar-icon li.admin-bar-icon > a {
-  padding: 7px 8px 11px;
-}
 #admin-bar-icon .admin-bar-icon img {
-  vertical-align: bottom;
+  vertical-align: center;
 }
 /* Add a border when using the default Backdrop logo. */
 #admin-bar-icon .admin-bar-icon img[src$="core/misc/favicon.ico"] {
@@ -238,19 +359,9 @@
 }
 #admin-bar-extra .dropdown li {
   direction: ltr; /* LTR */
-}[dir="rtl"] #admin-bar-extra .dropdown li {
-   direction: rtl;
- }
-
-/* Online users */
-#admin-bar .dropdown .admin-bar-users a {
-  background: transparent url(../images/icon_users.png) 90% center no-repeat;
-  padding-right: 22px; /* LTR */
 }
-[dir="rtl"] #admin-bar .dropdown .admin-bar-users a {
-  background-position: 10% center;
-  padding-left: 22px;
-  padding-right: 0;
+[dir="rtl"] #admin-bar-extra .dropdown li {
+  direction: rtl;
 }
 
 /* Search form */
@@ -265,17 +376,23 @@
   padding: 6px 0 0;
 }
 #admin-bar .admin-bar-search input {
-  background: #fff none center right no-repeat;
+  background: #fff url(../images/search--gray--64.png) center right no-repeat;
+  background-position: right 5px center; /* LTR */
+  background-size: 12px;
   border: none;
   border-radius: 0;
   box-shadow: none;
   font-size: 12px;
   margin: 0;
   outline: none;
-  padding: 3px 22px 3px 8px;
+  padding: 5px 22px 3px 8px; /* LTR */
   width: 100%;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
+}
+[dir="rtl"] #admin-bar .admin-bar-search input {
+  background-position: left 5px center;
+  padding: 5px 8px 3px 22px;
 }
 
 #admin-bar .admin-bar-search-results .dropdown {

@@ -519,7 +519,9 @@ tr.drag {
 tr.drag-previous {
   background: #ffb;
 }
-tr:hover {
+tr:hover,
+tr:hover td.active,
+tr.odd:hover td.active {
   background: #ffff99;
 }
 th {
@@ -919,13 +921,6 @@ input.form-submit:active {
   -moz-box-shadow: 0 0 5px rgb(220, 220, 220);
   box-shadow: 0 0 5px rgb(220, 220, 220);
 }
-input.form-button-disabled,
-input.form-button-disabled:active {
-  background: #eee none;
-  border-color: #eee;
-  text-shadow: none;
-  color: #999;
-}
 input.button-primary,
 button.button-primary {
   color: white;
@@ -976,6 +971,21 @@ button.button-danger:hover,
 button.button-danger:focus {
   color: white;
   background-color: #e7251b;
+}
+input.form-button-disabled,
+input.form-button-disabled:active,
+input.form-button-disabled:hover,
+input.form-button-disabled:focus,
+input.form-disabled,
+input.form-disabled:active,
+input.form-disabled:hover,
+input.form-disabled:focus {
+  background: #eee none;
+  border-color: #eee;
+  text-shadow: none;
+  color: #999;
+  box-shadow: none;
+  transition-property: none;
 }
 input.form-autocomplete,
 input.form-text,
@@ -1510,6 +1520,15 @@ div.add-or-remove-shortcuts {
 }
 [dir="rtl"] #block-node-recent .more-link {
   padding: 0 0 5px 5px;
+}
+
+/* Date picker */
+[dir="rtl"] .ui-datepicker {
+  width: auto;
+}
+[dir="rtl"] .ui-datepicker .ui-datepicker-next {
+  right: auto;
+  top: 4px;
 }
 
 /* Dropbutton */

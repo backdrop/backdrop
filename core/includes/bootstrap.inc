@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.12.x-dev');
+define('BACKDROP_VERSION', '1.13.x-dev');
 
 /**
  * Core API compatibility.
@@ -749,6 +749,13 @@ function backdrop_environment_initialize() {
   // Set sane locale settings, to ensure consistent string, dates, times and
   // numbers handling.
   setlocale(LC_ALL, 'C');
+
+  // PHP's built-in phar:// stream wrapper is not sufficiently secure. Remove it
+  // from use unless running through CLI, for tools such as drush or other
+  // shell scripts.
+  if (!backdrop_is_cli() && in_array('phar', stream_get_wrappers())) {
+    stream_wrapper_unregister('phar');
+  }
 }
 
 /**
@@ -4336,7 +4343,9 @@ function backdrop_clear_opcode_cache($filepath) {
 
   // Zend OPcache.
   if (function_exists('opcache_invalidate')) {
-    opcache_invalidate($filepath, TRUE);
+    // Suppress any warnings in PHP 7.2+ caused by "Zend OPcache API is
+    // restricted by "restrict_api" configuration directive".
+    @opcache_invalidate($filepath, TRUE);
   }
   // APC.
   if (function_exists('apc_delete_file')) {

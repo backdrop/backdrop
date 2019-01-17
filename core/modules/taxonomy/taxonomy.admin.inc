@@ -37,6 +37,28 @@ function taxonomy_overview_vocabularies($form) {
       'title' => t('Configure'),
       'href' => "admin/structure/taxonomy/$vocabulary->machine_name/configure",
     );
+    if (module_exists('field_ui') && user_access('administer fields')) {
+      $links['fields'] = array(
+        'title' => t('Manage fields'),
+        'href' => "admin/structure/taxonomy/$vocabulary->machine_name/fields",
+        'weight' => 5,
+      );
+      $links['display'] = array(
+        'title' => t('Manage displays'),
+        'href' => "admin/structure/taxonomy/$vocabulary->machine_name/display",
+        'weight' => 10,
+        );
+      }
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Vocabularies',
+          'name' => 'taxonomy.vocabulary.' . $vocabulary->machine_name,
+        ),
+      );
+    }
     $links['delete'] = array(
       'title' => t('Delete'),
       'href' => "admin/structure/taxonomy/$vocabulary->machine_name/delete",
