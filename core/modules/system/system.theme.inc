@@ -404,8 +404,6 @@ function theme_admin_page($variables) {
     }
   }
 
-  $output = '<div class="admin clearfix">';
-
   if (!empty($container)) {
     $output = '<div class="admin clearfix">';
       foreach ($container as $id => $data) {
