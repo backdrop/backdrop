@@ -72,6 +72,11 @@ function system_requirements($phase) {
     );
   }
 
+  if (defined('PHP_VERSION_ID') && PHP_VERSION_ID < MINIMUM_SUPPORTED_PHP_VERSION_ID) {
+    $requirements['php']['description'] = $t('Backdrop has detected that your site is running on an insecure version of PHP. Although Backdrop works with this version of PHP, it is <a href="@php_supported_versions">End of Life</a>. You should upgrade as soon as possible, otherwise your site may be exposed to unpatched security vulnerabilities.', array('@php_supported_versions' => 'http://php.net/supported-versions.php'));
+    $requirements['php']['severity'] = REQUIREMENT_WARNING;
+  }
+
   if (version_compare($phpversion, BACKDROP_MINIMUM_PHP) < 0) {
     $requirements['php']['description'] = $t('Your PHP installation is too old. Backdrop requires at least PHP %version.', array('%version' => BACKDROP_MINIMUM_PHP));
     $requirements['php']['severity'] = REQUIREMENT_ERROR;
