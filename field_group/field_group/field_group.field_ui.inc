@@ -236,10 +236,10 @@ function field_group_field_ui_overview_form_alter(&$form, &$form_state, $display
       $table[$name]['settings_edit']['edit'] = $base_button + array(
         '#type' => 'submit',
         '#name' => $name . '_group_settings_edit',
-        '#value' => t('Edit'),
-        '#attributes' => array('class' => array('field-formatter-settings-edit'), 'alt' => t('Edit')),
+        '#value' => t('Configure'),
+        '#attributes' => array('class' => array('field-formatter-settings-edit'), 'alt' => t('Configure')),
         '#op' => 'edit',
-        // Do not check errors for the 'Edit' button.
+        // Do not check errors for the 'Configure' button.
         '#limit_validation_errors' => array(),
       );
       if ($display_overview) {
