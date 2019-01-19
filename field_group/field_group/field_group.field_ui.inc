@@ -398,16 +398,24 @@ function field_group_add_row($name, $parent_options, $params) {
       ),
     ),
     'group_name' => array(
-      '#type' => 'textfield',
+      '#type' => 'machine_name',
+      '#title' => t('New field name'),
       '#title_display' => 'invisible',
-      '#title' => t('Machine name for new group'),
       // This field should stay LTR even for RTL languages.
       '#field_prefix' => '<span dir="ltr">group_',
       '#field_suffix' => '</span>&lrm;',
-      '#attributes' => array('dir' => 'ltr'),
       '#size' => 15,
-      '#description' => t('Group name (a-z, 0-9, _)'),
+      '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
+      // 32 characters minus the 'field_' prefix.
+      '#maxlength' => 26,
       '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
+      '#machine_name' => array(
+        'source' => array('fields', $name, 'label'),
+        'exists' => '_field_group_group_name_exists',
+        'standalone' => TRUE,
+        'label' => '',
+      ),
+      '#required' => FALSE,
       '#cell_attributes' => array('colspan' => $params->display_overview ? 1 : 2),
     ),
   );
@@ -534,6 +542,25 @@ function field_group_display_overview_row_region($row) {
       }
       return ($row['format']['type']['#value'] == 'hidden' ? 'hidden' : 'visible');
   }
+}
+
+/**
+ * Render API callback: Checks if a group machine name is taken.
+ *
+ * @param $value
+ *   The machine name, not prefixed with 'group_'.
+ *
+ * @return
+ *   Whether or not the group machine name is taken.
+ *
+ * @todo
+ *   This callback can only check the name globally without context.
+ *   Field group names, however, can be the same in different view modes and
+ *   content types. See field_group_field_overview_validate() for current
+ *   approach to validating the group name.
+ */
+ function _field_group_group_name_exists($value) {
+  return FALSE;
 }
 
 /**
