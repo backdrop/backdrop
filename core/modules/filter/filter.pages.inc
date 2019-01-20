@@ -224,14 +224,15 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
 
   // Use a "textfield" rather than "url" to allow relative paths.
   $form['image']['src'] = array(
-    '#title' => t('Select from library'),
+    '#title' => t('Specify an image'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => '/example/image.jpg',
+    '#description' => 'Enter URL or select from image library',
     '#default_value' => isset($values['src']) ? $values['src'] : NULL,
     '#parents' => array('attributes', 'src'),
     '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Select from library'),
+      'data-editor-image-toggle' => t('Or specify an image'),
     ),
     '#weight' => -8,
   );
