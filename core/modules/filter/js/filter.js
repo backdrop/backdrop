@@ -258,7 +258,7 @@ Backdrop.behaviors.editorImageDialog = {
       }
     });
 
-    // Listen to the dialog creation event.
+    // Listen for the dialog creation event.
     $(window).on('dialog:aftercreate', function(){
       // Determine which tab should be shown.
       var $visibleItems = $('[data-editor-image-toggle]').filter(':visible');
