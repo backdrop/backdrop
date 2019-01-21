@@ -73,7 +73,7 @@ function system_requirements($phase) {
   }
 
   if (defined('PHP_VERSION_ID') && PHP_VERSION_ID < MINIMUM_SUPPORTED_PHP_VERSION_ID) {
-    $requirements['php']['description'] = $t('Backdrop has detected that your site is running on an insecure version of PHP. Although Backdrop works with this version of PHP, it is <a href="@php_supported_versions">End of Life</a>. You should upgrade as soon as possible, otherwise your site may be exposed to unpatched security vulnerabilities.', array('@php_supported_versions' => 'http://php.net/supported-versions.php'));
+    $requirements['php']['description'] = $t('Your site is running on a version of PHP that has reached <a href="@eol_wikipedia">End of life</a> status. We strongly recommend to upgrade to <a href="@php_supported_versions">a supported version</a>, in order to take advantage of security and performance improvements.', array('@eol_wikipedia' => 'https://en.wikipedia.org/wiki/End-of-life_(product)', '@php_supported_versions' => 'http://php.net/supported-versions.php'));
     $requirements['php']['severity'] = REQUIREMENT_WARNING;
   }
 
