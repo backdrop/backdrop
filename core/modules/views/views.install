@@ -152,7 +152,7 @@ function views_update_1004() {
 /**
  * Set all grid style Views to use the deprecrated table if not set already.
  */
-function views_update_1006() {
+function views_update_1005() {
   $active_storage = config_get_config_storage('active');
   $names = $active_storage->listAll();
 
