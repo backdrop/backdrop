@@ -153,14 +153,10 @@ function views_update_1004() {
  * Set all grid style Views to use the deprecrated table if not set already.
  */
 function views_update_1005() {
-  $active_storage = config_get_config_storage('active');
-  $names = $active_storage->listAll();
+  $configs = config_get_names_with_prefix('views.view.');
 
-  foreach ($names as $name) {
-    if (substr($name, 0, 11) != 'views.view.') {
-      continue;
-    }
-    $config = config($name);
+  foreach ($configs as $config_file) {
+    $config = config($config_file);
     $displays = $config->get('display');
     foreach ($displays as $display => $display_details) {
       if (!isset($display_details['display_options']['style_plugin']) || $display_details['display_options']['style_plugin'] != 'grid') {
