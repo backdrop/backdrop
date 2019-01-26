@@ -56,16 +56,16 @@
   background-size: 25px;
 }
 
-.admin-dblog .dblog-error.odd {
+.admin-dblog .dblog-error.odd:not(:hover) {
   background-color: #FFE0E0;
 }
-.admin-dblog .dblog-error.odd .active {
+.admin-dblog .dblog-error.odd:not(:hover) .active {
   background-color: #F3CECE;
 }
-.admin-dblog .dblog-error.even {
+.admin-dblog .dblog-error.even:not(:hover) {
   background: #ffc9c9;
 }
-.admin-dblog .dblog-error.even .active {
+.admin-dblog .dblog-error.even:not(:hover) .active {
   background: #eeb9b9;
 }
 .admin-dblog .dblog-error .icon:before,
