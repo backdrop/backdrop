@@ -259,7 +259,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
   // URL alias pattern.
   // @see: path_pattern_settings_form().
 
-  // Content type ermissions.
+  // Content type permissions.
   $form['permissions'] = array(
     '#type' => 'fieldset',
     '#title' => t('Permissions'),
