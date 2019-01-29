@@ -25,6 +25,14 @@ Backdrop.behaviors.contentTypes = {
       return vals.join(', ');
     });
 
+    // Multilingual support.
+    $context.find('#edit-multilingual').backdropSetSummary(function() {
+      var vals = [];
+      var multilingualSupport = $context.find('input[name="language"]:checked').parent().find('label').text();
+      vals.push(Backdrop.checkPlain($.trim(multilingualSupport)));
+      return vals.join(', ');
+    });
+
     // Uncheck the "Schedule for later" option if scheduling is disabled.
     $context.find('input[name="scheduling_enabled"]').once().on('change', function() {
       var $checkedStatusDefault = $context.find('input[name="status_default"]:checked');
