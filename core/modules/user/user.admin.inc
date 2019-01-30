@@ -121,6 +121,10 @@ function user_admin_settings($form, &$form_state) {
   $config = config('system.core');
   $form['#config'] = 'system.core';
 
+  $user_roles = user_roles();
+  $admin_label = $user_roles[$config->get('user_admin_role')];
+  $visitors_label = $config->get('anonymous');
+
   // User registration settings.
   $form['registration_cancellation'] = array(
     '#type' => 'fieldset',
@@ -133,9 +137,9 @@ function user_admin_settings($form, &$form_state) {
     '#title' => t('Who can register accounts?'),
     '#default_value' => $config->get('user_register'),
     '#options' => array(
-      USER_REGISTER_ADMINISTRATORS_ONLY => t('Administrators only'),
-      USER_REGISTER_VISITORS => t('Visitors'),
-      USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL => t('Visitors, but administrator approval is required'),
+      USER_REGISTER_ADMINISTRATORS_ONLY => t('@admin only', array('@admin' => $admin_label)),
+      USER_REGISTER_VISITORS => $visitors_label,
+      USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL => t('@visitors, but approval is required by @admin', array('@visitors' => $visitors_label, '@admin' => $admin_label)),
     )
   );
   $form['registration_cancellation']['user_email_verification'] = array(
