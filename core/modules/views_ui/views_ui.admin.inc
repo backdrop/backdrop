@@ -4016,6 +4016,20 @@ function views_ui_config_item_form($form, &$form_state) {
       // Get form from the handler.
       $handler->options_form($form['options'], $form_state);
       $form_state['handler'] = &$handler;
+
+      // Allow other modules to alter the formatter settings form.
+      if ($handler instanceof views_handler_field_field) {
+        $context = array(
+          'module' => $handler->field_info['module'],
+          'formatter' => $handler->field_info['type'],
+          'field' => field_info_field($handler->options['field']),
+          'instance' => $handler->instance,
+          'view_mode' => '_custom', // Same view mode as field_view_field().
+          'form' => $form,
+          'form_state' => $form_state,
+        );
+        backdrop_alter('field_formatter_settings_form', $form['options']['settings'], $context);
+      }
     }
 
     $name = NULL;
