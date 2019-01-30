@@ -884,7 +884,7 @@ function field_group_pre_render_htabs(&$element, $group, &$form) {
 
   // Only add form.js on forms.
   if (!empty($form['#type']) && $form['#type'] == 'form') {
-    $element['#attached']['js'][] = 'misc/form.js';
+    $element['#attached']['library'][] = array('system', 'backdrop.form');
   }
 
   $element['#attached']['library'][] = array('field_group', 'horizontal-tabs');
@@ -1330,9 +1330,9 @@ function field_group_element_info() {
 }
 
 /**
- * Implements hook_library().
+ * Implements hook_library_info().
  */
-function field_group_library() {
+function field_group_library_info() {
 
   $path = backdrop_get_path('module', 'field_group');
   // Horizontal Tabs.
