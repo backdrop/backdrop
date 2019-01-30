@@ -122,7 +122,8 @@ function user_admin_settings($form, &$form_state) {
   $form['#config'] = 'system.core';
 
   $user_roles = user_roles();
-  $admin_label = $user_roles[$config->get('user_admin_role')];
+  $admin_role = $config->get('user_admin_role');
+  $admin_label = $user_roles[$admin_role];
   $visitors_label = $config->get('anonymous');
 
   // User registration settings.
