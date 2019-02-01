@@ -1322,8 +1322,8 @@ function node_views_api() {
  * @param SearchQuery|SelectQueryExtender $query
  *   A query object that has been extended with the Search DB Extender.
  */
-function _node_rankings(SelectQueryExtender $query) {
-  if ($ranking = module_invoke_all('ranking')) {
+function _node_rankings(SelectQueryExtender $query, $keywords = NULL) {
+  if ($ranking = module_invoke_all('ranking', $keywords)) {
     $tables = &$query->getTables();
     $config = config('search.settings');
     foreach ($ranking as $rank => $values) {
@@ -1431,7 +1431,7 @@ function node_search_execute($keys = NULL, $conditions = NULL) {
   }
 
   // Add the ranking expressions.
-  _node_rankings($query);
+  _node_rankings($query, $keys);
 
   // Load results.
   $find = $query
@@ -1470,8 +1470,15 @@ function node_search_execute($keys = NULL, $conditions = NULL) {
 /**
  * Implements hook_ranking().
  */
-function node_ranking() {
+function node_ranking($keywords = NULL) {
   // Create the ranking array and add the basic ranking options.
+  $words = explode(' ', $keywords);
+  $conditions = array();
+  foreach($words as $word) {
+    $conditions[] = "n.title LIKE '%" . $word . "%'";
+  }
+  $sql_string = implode(' OR ', $conditions);
+
   $ranking = array(
     'relevance' => array(
       'title' => t('Keyword relevance'),
@@ -1487,6 +1494,11 @@ function node_ranking() {
       'title' => t('Content is promoted'),
       // The promote flag is either 0 or 1, which is automatically normalized.
       'score' => 'n.promote',
+    ),
+    'title_match' => array(
+      'title' => t('Content title match'),
+      // If a keyword appears in the title, return 1, else 0.
+      'score' => "IF((" . $sql_string . "), 1, 0)",
     ),
   );
 
