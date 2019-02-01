@@ -23,7 +23,14 @@ class NodeBlock extends Block {
    */
   function getTitle() {
     $title = NULL;
-    $node = node_load($this->settings['nid']);
+
+    // Look for and load translated node if translations are available.
+    if (module_exists('translation')) {
+      $node = $this->loadTranslatedNode();
+    } else {
+      $node = node_load($this->settings['nid']);
+    }
+
     if ($this->settings['title_display'] === LAYOUT_TITLE_CUSTOM && $this->settings['title']) {
       $title = check_plain($this->settings['title']);
     }
@@ -45,7 +52,12 @@ class NodeBlock extends Block {
    *  Sets block content on block view.
    */
   function getContent() {
-    $node = node_load($this->settings['nid']);
+    // Look for and load translated node if translations are available.
+    if (module_exists('translation')) {
+      $node = $this->loadTranslatedNode();
+    } else {
+      $node = node_load($this->settings['nid']);
+    }
 
     // Prevent display of no access to the node.
     if (!node_access('view', $node)) {
@@ -76,6 +88,24 @@ class NodeBlock extends Block {
     $content['#theme'] = 'node__block-' . $this->settings['nid'];
 
     return $content;
+  }
+
+  function loadTranslatedNode() {
+    global $language;
+
+    $node = node_load($this->settings['nid']);
+
+    if (!empty($node->tnid) && !empty($node->langcode)) {
+      $translations = translation_node_get_translations($node->tnid);
+
+      foreach ($translations as $code => $translation) {
+        if ($code == $language->langcode) {
+          return node_load($translation->nid);
+        }
+      }
+    }
+
+    return $node;
   }
 
   /**
