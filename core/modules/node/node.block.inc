@@ -25,7 +25,7 @@ class NodeBlock extends Block {
     $title = NULL;
 
     // Look for and load translated node if translations are available.
-    if (module_exists('translation')) {
+    if (module_exists('translation') && !empty($this->settings['translate'])) {
       $node = $this->loadTranslatedNode();
     } else {
       $node = node_load($this->settings['nid']);
@@ -53,7 +53,7 @@ class NodeBlock extends Block {
    */
   function getContent() {
     // Look for and load translated node if translations are available.
-    if (module_exists('translation')) {
+    if (module_exists('translation') && !empty($this->settings['translate'])) {
       $node = $this->loadTranslatedNode();
     } else {
       $node = node_load($this->settings['nid']);
@@ -181,6 +181,14 @@ class NodeBlock extends Block {
       '#default_value' => !empty($settings['links']),
       '#title' => t('Include the links "add comment", "read more" etc.'),
     );
+
+    if (module_exists('translation')) {
+      $form['translate'] = array(
+        '#type' => 'checkbox',
+        '#default_value' => !empty($settings['translate']),
+        '#title' => t('Automatically load translated version of the content'),
+      );
+    }
   }
 
   /**
@@ -218,5 +226,6 @@ class NodeBlock extends Block {
     $this->settings['link_node_title'] = (bool) $form_state['values']['link_node_title'];
     $this->settings['display_submitted'] = (bool) $form_state['values']['display_submitted'];
     $this->settings['view_mode'] = (string) $form_state['values']['view_mode'];
+    $this->settings['translate'] = (bool) $form_state['values']['translate'];
   }
 }
