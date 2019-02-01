@@ -2346,7 +2346,7 @@ function comment_unpublish_action($comment, $context = array()) {
 /**
  * Implements hook_ranking().
  */
-function comment_ranking() {
+function comment_ranking($keywords = NULL) {
   return array(
     'comments' => array(
       'title' => t('Number of comments'),
