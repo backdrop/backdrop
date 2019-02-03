@@ -694,6 +694,9 @@ fieldset .fieldset-wrapper {
   background-image: none;
   padding: .3em 1.8em .3em .3em;
 }
+.js fieldset.collapsible .fieldset-legend {
+  font-size: 16px;
+}
 .js fieldset.collapsible .fieldset-legend a:before {
   content: "";
   position: absolute;
@@ -836,10 +839,18 @@ td.checkbox .form-item input {
 .filter-wrapper {
   border-top: 0;
   padding: 10px 2px;
+  background-color: #f8f8f8;
+}
+.js fieldset.filter-wrapper.collapsed {
+  padding: 1.2em 0;
+}
+.js fieldset.filter-wrapper.collapsible .fieldset-legend {
+  font-size: 16px;
+  text-transform: none;
 }
 .filter-wrapper .fieldset-wrapper {
-  padding: 0 6px;
-  margin-top: 45px;
+  padding: 0 34px;
+  margin-top: 30px;
 }
 .filter-wrapper .form-item,
 .filter-wrapper .filter-guidelines,
