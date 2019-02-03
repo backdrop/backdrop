@@ -837,9 +837,11 @@ td.checkbox .form-item input {
 
 /* Filter */
 .filter-wrapper {
-  border-top: 0;
   padding: 10px 2px;
   background-color: #f8f8f8;
+  border: 1px #d1d1d1;
+  border-style: none solid solid solid;
+  border-radius: 0;
 }
 .js fieldset.filter-wrapper.collapsed {
   padding: 1.2em 0;
