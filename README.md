@@ -23,7 +23,7 @@ too many loaded entities that site might reach its memory limit and crash
 to "autocomplete". If you get a WSOD when trying to edit the field
 settings, you can reach the widget settings directly by navigation to
 
-  admin/structure/types/manage/[ENTITY-TYPE]/fields/[FIELD-NAME]/widget-type
+  `admin/structure/types/manage/[ENTITY-TYPE]/fields/[FIELD-NAME]/widget-type`
 
 Replace ENTITY-TYPE and FIELD_NAME with the correct values.
 
@@ -31,7 +31,7 @@ Issues
 ------
 
 To submit bug reports and feature suggestions, or to track changes:
-  http://.org/project/issues/entityreference
+  https://github.com/backdrop-contrib/entityreference/issues
 
 Current Maintainers
 -------------------
