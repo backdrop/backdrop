@@ -34,8 +34,6 @@ th {
 }
 [dir="rtl"] th {
   text-align: right;
-  padding-left: 1em;
-  padding-right: 0;
 }
 tr.even,
 tr.odd {
