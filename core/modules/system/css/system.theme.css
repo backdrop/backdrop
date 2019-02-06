@@ -29,7 +29,7 @@ hr {
 }
 th {
   border-bottom: 3px solid #ccc;
-  padding-right: 1em; /* LTR */
+  padding: 0 1em;
   text-align: left; /* LTR */
 }
 [dir="rtl"] th {
