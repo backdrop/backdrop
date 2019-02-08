@@ -290,9 +290,9 @@ Backdrop.behaviors.editorImageDialog = {
       }
       // If no element is visible show the first tab.
       else {
-          $('[data-editor-image-toggle]').not(':first').hide().trigger('editor-image-hide');
-          $('[data-editor-image-toggle]').first().show().find('input, textarea, select').filter(':focusable').first().focus();
-          $('[data-editor-image-toggle]').first().trigger('editor-image-show');
+        $('[data-editor-image-toggle]').not(':first').hide().trigger('editor-image-hide');
+        $('[data-editor-image-toggle]').first().show().find('input, textarea, select').filter(':focusable').first().focus();
+        $('[data-editor-image-toggle]').first().trigger('editor-image-show');
       }
     });
   }
