@@ -3,7 +3,6 @@
  */
 .block {
   width: 100%;
-
   /* Clearfix */
   content: "";
   display: table;
@@ -635,14 +634,11 @@ fieldset {
   position: relative;
   max-width: 100%;
   margin: 1em 0;
-  padding: 3em 0 0 0; /* LTR */
+  padding: 3em 0 0 0;
   border-radius: 4px;
   background-color: #fff;
   border: 2px solid #EAEAEA;
   min-width: 0;
-}
-[dir="rtl"] fieldset {
-  padding: 2.5em 0 0;
 }
 fieldset .fieldset-legend {
   position: absolute;
