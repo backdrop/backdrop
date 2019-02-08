@@ -321,7 +321,7 @@ function taxonomy_update_1005() {
 }
 
 /**
- * Add langcode, ttid, translate columns to {taxonomy_term_data} table.
+ * Add langcode column to {taxonomy_term_data} table.
  */
 function taxonomy_update_1006() {
   if (!db_field_exists('taxonomy_term_data', 'langcode')) {
