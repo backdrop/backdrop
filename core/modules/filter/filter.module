@@ -2458,7 +2458,7 @@ function _filter_image_caption($text) {
     $attributes['class'][] = 'caption-' . $node->tagName;
 
     $theme_parameters = array(
-      'item' => $node->ownerDocument->saveHTML($node),
+      'item' => $node->ownerDocument->saveXML($node),
       'tag' => $tag,
       'caption' => $caption,
       'attributes' => $attributes,
