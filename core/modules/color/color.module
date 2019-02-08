@@ -139,6 +139,8 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
  *
  * @return array
  *   The render array for the color element.
+ *
+ * @since 1.12.2
  */
 function color_get_color_element($theme_name, $color_name, &$form) {
   // Get the color settings from the theme.
