@@ -44,7 +44,6 @@
   }
   [dir="rtl"] .vertical-tabs-list {
     float: right;
-    margin-left: 0;
     margin: -1px -15em -1px 0;
   }
 }
