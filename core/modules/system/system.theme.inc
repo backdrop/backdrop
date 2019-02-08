@@ -415,14 +415,18 @@ function theme_admin_page($variables) {
     }
   }
 
-  $output = '<div class="admin clearfix">';
-
-  foreach ($container as $id => $data) {
-    $output .= '<div class="' . $id . ' clearfix">';
-    $output .= $data;
+  if (!empty($container)) {
+    $output = '<div class="admin clearfix">';
+      foreach ($container as $id => $data) {
+        $output .= '<div class="' . $id . ' clearfix">';
+        $output .= $data;
+        $output .= '</div>';
+      }
     $output .= '</div>';
   }
-  $output .= '</div>';
+  else {
+    $output = t('You do not have any administrative items.');
+  }
   return $output;
 }
 

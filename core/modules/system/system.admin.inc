@@ -43,12 +43,8 @@ function system_admin_config_page() {
       $blocks[(50000 + $item['weight']) . ' ' . $item['title'] . ' ' . $item['mlid']] = $block;
     }
   }
-  if ($blocks) {
-    return theme('admin_page', array('blocks' => $blocks));
-  }
-  else {
-    return t('You do not have any administrative items.');
-  }
+
+  return theme('admin_page', array('blocks' => $blocks));
 }
 
 /**
