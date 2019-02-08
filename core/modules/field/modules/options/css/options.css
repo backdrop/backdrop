@@ -26,8 +26,7 @@
   float: left; /* LTR */
 }
 [dir="rtl"] .options-widget a.add,
-[dir="rtl"] .options-widget a.remove
-{
+[dir="rtl"] .options-widget a.remove {
   float: right;
 }
 .options-widget a.add:hover,
