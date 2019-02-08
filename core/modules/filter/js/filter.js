@@ -143,8 +143,6 @@ Backdrop.behaviors.editorImageDialog = {
 
     // Initialize styles of Dialog.
     if ($newToggles.length) {
-      // Initialize the Insert Link dialog on load.
-      $(".form-type-managed-file").css({ "display": "none"});
       // Hide the library image browser on load.
       $(".editor-image-library").css({ "display": "none" });
       $(".editor-dialog").removeClass("editor-dialog-with-library");
@@ -192,7 +190,7 @@ Backdrop.behaviors.editorImageDialog = {
         }
       });
 
-      var libraryShown = $('[name="attributes[src]"]').is(':visible');
+      var libraryShown = $('.editor-image-fields').find('[name="attributes[src]"]').is(':visible');
       if (libraryShown) {
         // Toggle state is set to show 'select an image'
         // so add library view to dialog display.
@@ -260,8 +258,8 @@ Backdrop.behaviors.editorImageDialog = {
       }
     });
 
-    // Add a very short delay to allow the dialog to appear.
-    window.setTimeout(function() {
+    // Listen for the dialog creation event.
+    $(window).on('dialog:aftercreate', function(){
       // Determine which tab should be shown.
       var $visibleItems = $('[data-editor-image-toggle]').filter(':visible');
       if ($visibleItems.length > 1) {
@@ -290,7 +288,13 @@ Backdrop.behaviors.editorImageDialog = {
           $visibleItems.first().trigger('editor-image-show');
         }
       }
-    }, 1);
+      // If no element is visible show the first tab.
+      else {
+        $('[data-editor-image-toggle]').not(':first').hide().trigger('editor-image-hide');
+        $('[data-editor-image-toggle]').first().show().find('input, textarea, select').filter(':focusable').first().focus();
+        $('[data-editor-image-toggle]').first().trigger('editor-image-show');
+      }
+    });
   }
 };
 
