@@ -930,10 +930,10 @@ function template_preprocess_views_view_list(&$variables) {
   $handler  = $variables['view']->style_plugin;
 
   $class = explode(' ', $handler->options['class']);
-  $class = array_map('backdrop_clean_css_identifier', $class, array());
+  $class = array_map('backdrop_clean_css_identifier', $class, array(array()));
 
   $wrapper_class = explode(' ', $handler->options['wrapper_class']);
-  $wrapper_class = array_map('backdrop_clean_css_identifier', $wrapper_class, array());
+  $wrapper_class = array_map('backdrop_clean_css_identifier', $wrapper_class, array(array()));
 
   $variables['class'] = implode(' ', $class);
   $variables['wrapper_class'] = implode(' ', $wrapper_class);
