@@ -3087,6 +3087,22 @@ function system_rebuild_theme_data() {
 }
 
 /**
+ * Implements hook_themes_disabled().
+ *
+ * Remove the theme settings from config when the theme is disabled.
+ */
+function system_themes_disabled($theme_list) {
+  foreach ($theme_list as $theme_name) {
+    if (theme_has_settings($theme_name)) {
+      $config = config($theme_name . '.settings');
+      if (!$config->isNew()) {
+        $config->delete();
+      }
+    }
+  }
+}
+
+/**
  * Prefixes all values in an .info file array with a given path.
  *
  * This helper function is mainly used to prefix all array values of an .info
@@ -3947,7 +3963,7 @@ function system_config_info() {
   $themes = list_themes();
   foreach ($themes as $theme_name => $theme) {
     // If the theme registers settings, it needs a config file.
-    if (isset($theme->info['settings'])) {
+    if (theme_has_settings($theme_name) && $theme->status == 1) {
       $prefixes[$theme_name . '.settings'] = array(
         'label' => t('!theme settings', array('!theme' => $theme->info['name'])),
         'group' => t('Configuration'),
