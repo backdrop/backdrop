@@ -29,13 +29,11 @@ hr {
 }
 th {
   border-bottom: 3px solid #ccc;
-  padding-right: 1em; /* LTR */
+  padding: 0 1em;
   text-align: left; /* LTR */
 }
 [dir="rtl"] th {
   text-align: right;
-  padding-left: 1em;
-  padding-right: 0;
 }
 tr.even,
 tr.odd {
@@ -240,6 +238,7 @@ abbr.ajax-changed {
 .js[dir="rtl"] fieldset.collapsed .fieldset-title {
   background-image: url(../../../misc/menu-collapsed-rtl.png);
   background-position: 98% 50%;
+  background-repeat: no-repeat;
 }
 .fieldset-legend span.summary {
   color: #999;

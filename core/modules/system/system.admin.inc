@@ -43,12 +43,8 @@ function system_admin_config_page() {
       $blocks[(50000 + $item['weight']) . ' ' . $item['title'] . ' ' . $item['mlid']] = $block;
     }
   }
-  if ($blocks) {
-    return theme('admin_page', array('blocks' => $blocks));
-  }
-  else {
-    return t('You do not have any administrative items.');
-  }
+
+  return theme('admin_page', array('blocks' => $blocks));
 }
 
 /**
@@ -2283,7 +2279,7 @@ function system_date_time_formats() {
         // Prepare Operational links.
         $links = array();
         $links['edit'] = array(
-          'title' => t('Edit'),
+          'title' => t('Configure'),
           'href' => 'admin/config/regional/date-time/formats/' . $date_format_name . '/edit',
         );
         if (module_exists('locale')) {

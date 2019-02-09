@@ -1330,7 +1330,7 @@ class DateTimeFunctionalTest extends BackdropWebTestCase {
 
     // Edit custom date format.
     $this->backdropGet('admin/config/regional/date-time/formats');
-    $this->clickLink(t('Edit'));
+    $this->clickLink(t('Configure'));
     $edit = array(
       'pattern' => 'Y m',
     );
@@ -1748,8 +1748,28 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     $this->clickLink(t('Enable and set default'), 0);
     $this->assertEqual(config_get('system.core', 'theme_default'), 'bartik');
   }
-}
 
+  /**
+   * Test theme settings.
+   */
+  function testThemeSettings() {
+    theme_enable(array('basis'));
+    // Change Basis settings so config file is created.
+    $edit = array();
+    $this->backdropPost('admin/appearance/settings/basis', $edit, t('Save theme settings'));
+
+    // Ensure config file exists.
+    $config_before = config('basis.settings');
+
+    $this->assertFalse($config_before->isNew(), 'Basis config file exists.');
+
+    theme_disable(array('basis'));
+
+    // Check that config file no longer exists.
+    $config_after = config('basis.settings');
+    $this->assertTrue($config_after->isNew(), 'Basis config file does not exist.');
+  }
+}
 
 /**
  * Test the basic queue functionality.

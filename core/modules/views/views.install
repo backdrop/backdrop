@@ -150,6 +150,29 @@ function views_update_1004() {
 }
 
 /**
+ * Set all grid style Views to use the deprecrated table if not set already.
+ */
+function views_update_1005() {
+  $configs = config_get_names_with_prefix('views.view.');
+
+  foreach ($configs as $config_file) {
+    $config = config($config_file);
+    $displays = $config->get('display');
+    foreach ($displays as $display => $display_details) {
+      if (!isset($display_details['display_options']['style_plugin']) || $display_details['display_options']['style_plugin'] != 'grid') {
+        continue;
+      }
+      if (!empty($display_details['display_options']['style_options']['deprecated_table'])) {
+        continue;
+      }
+      $config->set('display.' . $display . '.display_options.style_options.deprecated_table', '1');
+    }
+    $config->save();
+  }
+
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
