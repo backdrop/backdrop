@@ -646,12 +646,12 @@ fieldset .fieldset-legend {
   top: 0;
   width: 100%;
   margin-top: .25em;
-  padding-left: 15px; /* LTR */
+  padding-left: 1em; /* LTR */
   text-transform: uppercase;
 }
 [dir="rtl"] fieldset .fieldset-legend {
   right: 0;
-  padding-right: 15px;
+  padding-right: 1em;
   padding-left: 0;
 }
 legend {
@@ -693,6 +693,9 @@ fieldset .fieldset-wrapper {
 .js[dir="rtl"] fieldset.collapsible .fieldset-title {
   background-image: none;
   padding: .3em 1.8em .3em .3em;
+}
+.js fieldset.collapsible .fieldset-legend {
+  font-size: 1em;
 }
 .js fieldset.collapsible .fieldset-legend a:before {
   content: "";
@@ -834,12 +837,22 @@ td.checkbox .form-item input {
 
 /* Filter */
 .filter-wrapper {
-  border-top: 0;
   padding: 10px 2px;
+  background-color: #f8f8f8;
+  border: 1px #d1d1d1;
+  border-style: none solid solid solid;
+  border-radius: 0;
+}
+.js fieldset.filter-wrapper.collapsed {
+  padding: 1.2em 0;
+}
+.js fieldset.filter-wrapper.collapsible .fieldset-legend {
+  font-size: .8333em;
+  text-transform: none;
 }
 .filter-wrapper .fieldset-wrapper {
-  padding: 0 6px;
-  margin-top: 45px;
+  padding: .6em 2.3em;
+  margin-top: 30px;
 }
 .filter-wrapper .form-item,
 .filter-wrapper .filter-guidelines,
