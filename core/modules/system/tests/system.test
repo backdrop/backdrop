@@ -1330,7 +1330,7 @@ class DateTimeFunctionalTest extends BackdropWebTestCase {
 
     // Edit custom date format.
     $this->backdropGet('admin/config/regional/date-time/formats');
-    $this->clickLink(t('Edit'));
+    $this->clickLink(t('Configure'));
     $edit = array(
       'pattern' => 'Y m',
     );
