@@ -1176,7 +1176,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   // so that configurations work properly, and to try to get the user to save it
   // so that it's not using weird fixed up relationships.
   if (!empty($view->relationships_changed) && empty($_POST)) {
-    backdrop_set_message(t('This view has been automatically updated to fix missing relationships. While this View should continue to work, you should verify that the automatic updates are correct and save this view.'));
+    backdrop_set_message(t('This view has been automatically configured to fix any missing relationships. The view should still continue to work, but you should verify that the automatic configuration changes are correct before saving them.'));
     views_ui_cache_set($view);
   }
   return $form;
