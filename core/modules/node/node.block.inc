@@ -226,6 +226,8 @@ class NodeBlock extends Block {
     $this->settings['link_node_title'] = (bool) $form_state['values']['link_node_title'];
     $this->settings['display_submitted'] = (bool) $form_state['values']['display_submitted'];
     $this->settings['view_mode'] = (string) $form_state['values']['view_mode'];
-    $this->settings['translate'] = (bool) $form_state['values']['translate'];
+    if (module_exists('translation')) {
+      $this->settings['translate'] = (bool) $form_state['values']['translate'];
+    }
   }
 }
