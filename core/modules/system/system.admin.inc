@@ -285,31 +285,46 @@ function system_theme_enable() {
 }
 
 /**
- * Menu callback; Disables a theme.
+ * Theme disable confirmation form.
+ *
+ * @see system_theme_disable_confirm_submit()
+ *
+ * @ingroup forms
  */
-function system_theme_disable() {
+function system_theme_disable_confirm($form, &$form_state) {
   if (isset($_REQUEST['theme']) && isset($_REQUEST['token']) && backdrop_valid_token($_REQUEST['token'], 'system-theme-operation-link')) {
-    $theme = $_REQUEST['theme'];
-    // Get current list of themes.
-    $themes = list_themes();
+    $form['theme'] = $_REQUEST['theme'];
 
-    // Check if the specified theme is one recognized by the system.
-    if (!empty($themes[$theme])) {
-      if ($theme == config_get('system.core', 'theme_default')) {
-        // Don't disable the default theme.
-        backdrop_set_message(t('%theme is the default theme and cannot be disabled.', array('%theme' => $themes[$theme]->info['name'])), 'error');
-      }
-      else {
-        theme_disable(array($theme));
-        backdrop_set_message(t('The %theme theme has been disabled.', array('%theme' => $themes[$theme]->info['name'])));
-      }
-    }
-    else {
-      backdrop_set_message(t('The %theme theme was not found.', array('%theme' => $theme)), 'error');
-    }
-    backdrop_goto('admin/appearance');
+    $confirm_question = t('Are you sure you want to disable this theme? All custom configuration will be lost.');
+    return confirm_form($form, $confirm_question, 'admin/appearance', t('This action cannot be undone.'), t('Disable'), t('Cancel'));
   }
   return MENU_ACCESS_DENIED;
+}
+
+/**
+ * Form submission handler for system_theme_disable_confirm_submit().
+ */
+function system_theme_disable_confirm_submit($form, &$form_state) {
+  $theme = $form_state['complete_form']['theme'];
+  // Get current list of themes.
+  $themes = list_themes();
+
+  // Check if the specified theme is one recognized by the system.
+  if (!empty($themes[$theme])) {
+    if ($theme == config_get('system.core', 'theme_default')) {
+      // Don't disable the default theme.
+      backdrop_set_message(t('%theme is the default theme and cannot be disabled.', array('%theme' => $themes[$theme]->info['name'])), 'error');
+    }
+    else {
+      theme_disable(array($theme));
+      backdrop_set_message(t('The %theme theme has been disabled.', array('%theme' => $themes[$theme]->info['name'])));
+    }
+  }
+  else {
+    backdrop_set_message(t('The %theme theme was not found.', array('%theme' => $theme)), 'error');
+  }
+
+  $form_state['redirect'] = 'admin/appearance';
 }
 
 /**
