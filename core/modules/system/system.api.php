@@ -778,7 +778,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     Many shortcut bitmasks are provided as constants in menu.inc:
  *     - MENU_NORMAL_ITEM: Normal menu items show up in the menu tree and can be
  *       moved/hidden by the administrator.
- *     - MENU_CALLBACK: Callbacks simply register a path so that the correct
+ *     - MENU_CALLBACK: Callbacks register a path so that the correct
  *       information is generated when the path is accessed.
  *     - MENU_SUGGESTED_ITEM: Modules may "suggest" menu items that the
  *       administrator may enable.
@@ -1252,14 +1252,14 @@ function hook_form_BASE_FORM_ID_alter(&$form, &$form_state, $form_id) {
  * function with the same name as the form ID, and use that function to build
  * the form. If no such function is found, Backdrop calls this hook. Modules
  * implementing this hook can then provide their own instructions for mapping
- * form IDs to constructor functions. As a result, you can easily map multiple
- * form IDs to a single form constructor (referred to as a 'base' form).
+ * form IDs to constructor functions. As a result, you can map multiple form IDs
+ * to a single form constructor (referred to as a 'base' form).
  *
  * Using a base form can help to avoid code duplication, by allowing many
  * similar forms to use the same code base. Another benefit is that it becomes
  * much easier for other modules to apply a general change to the group of
- * forms; hook_form_BASE_FORM_ID_alter() can be used to easily alter multiple
- * forms at once by directly targeting the shared base form.
+ * forms; hook_form_BASE_FORM_ID_alter() can be used to alter multiple forms at
+ * once by directly targeting the shared base form.
  *
  * Two example use cases where base forms may be useful are given below.
  *
@@ -1305,7 +1305,7 @@ function hook_form_BASE_FORM_ID_alter(&$form, &$form_state, $form_id) {
  *     belong to the wizard, which all share the same wrapper callback.
  */
 function hook_forms($form_id, $args) {
-  // Simply reroute the (non-existing) $form_id 'mymodule_first_form' to
+  // Reroute the (non-existing) $form_id 'mymodule_first_form' to
   // 'mymodule_main_form'.
   $forms['mymodule_first_form'] = array(
     'callback' => 'mymodule_main_form',
@@ -1368,8 +1368,8 @@ function hook_boot() {
  *
  * This hook is not run on cached pages.
  *
- * To add CSS or JS that should be present on all pages, modules should not
- * implement this hook, but declare these files in their .info file.
+ * To add CSS or JS files that should be present on all pages, modules should
+ * not implement this hook, but declare these files in their .info file.
  *
  * @see hook_boot()
  */
@@ -1658,7 +1658,7 @@ function hook_permission() {
  *   - file: The file the implementation resides in. This file will be included
  *     prior to the theme being rendered, to make sure that the function or
  *     preprocess function (as needed) is actually loaded; this makes it
- *     possible to split theme functions out into separate files quite easily.
+ *     possible to split theme functions out into separate files.
  *   - path: Override the path of the file to be used. Ordinarily the module or
  *     theme path will be used, but if the file will not be in the default
  *     path, include it here. This path should be relative to the Backdrop root
@@ -2855,8 +2855,7 @@ function hook_install() {
  * @see update_get_update_list()
  */
 function hook_update_N(&$sandbox) {
-  // For non-multipass updates, the signature can simply be;
-  // function hook_update_N() {
+  // For non-multipass updates the signature can be `function hook_update_N() {`
 
   // For most updates, the following is sufficient.
   db_add_field('mytable1', 'newcol', array('type' => 'int', 'not null' => TRUE, 'description' => 'My new integer column.'));
@@ -2894,10 +2893,10 @@ function hook_update_N(&$sandbox) {
   $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
 
   // To display a message to the user when the update is completed, return it.
-  // If you do not want to display a completion message, simply return nothing.
+  // If you do not want to display a completion message, return nothing.
   return t('The update did what it was supposed to do.');
 
-  // In case of an error, simply throw an exception with an error message.
+  // In case of an error, throw an exception with an error message.
   throw new BackdropUpdateException('Something went wrong; here is what you should do.');
 }
 
@@ -3050,7 +3049,7 @@ function hook_disable() {
  * Class names in Backdrop are typically CamelCase, with uppercase letters at
  * the start of each word (including the first letter) and no underscores.
  * The file names for classes are typically either [module_name].[class_name].inc
- * or simply [ModuleNameClassName].php.
+ * or [ModuleNameClassName].php.
  *
  * For more information about class naming conventions see the
  * @link https://api.backdropcms.org/php-standards Backdrop Coding Standards @endlink
@@ -3110,13 +3109,13 @@ function hook_autoload_info_alter(&$class_registry) {
  * installer to pause and display a page to the user by returning any themed
  * output that should be displayed on that page (but see below for tasks that
  * use the form API or batch API; the return values of these task functions are
- * handled differently). You should also use backdrop_set_title() within the task
- * callback function to set a custom page title. For some tasks, however, you
- * may want to simply do some processing and pass control to the next task
- * without ending the page request; to indicate this, simply do not send back
- * a return value from your task function at all. This can be used, for
- * example, by installation profiles that need to configure certain site
- * settings in the database without obtaining any input from the user.
+ * handled differently). You should also use backdrop_set_title() within the
+ * task callback function to set a custom page title. For some tasks, however,
+ * you may want to do some processing and pass control to the next task without
+ * ending the page request; to indicate this, do not send back a return value
+ * from your task function at all. This can be used, for example, by
+ * installation profiles that need to configure certain site settings in the
+ * database without obtaining any input from the user.
  *
  * The task function is treated specially if it defines a form or requires
  * batch processing; in that case, you should return either the form API
@@ -3217,8 +3216,8 @@ function hook_install_tasks(&$install_state) {
     // handlers. This form might be used to collect and save additional
     // information from the user that your profile needs. There are no extra
     // steps required for your profile to act as an "installation wizard"; you
-    // can simply define as many tasks of type 'form' as you wish to execute,
-    // and the forms will be presented to the user, one after another.
+    // can define as many tasks of type 'form' as you wish to execute, and the
+    // forms will be presented to the user, one after another.
     'myprofile_settings_form' => array(
       'display_name' => st('Additional options'),
       'type' => 'form',

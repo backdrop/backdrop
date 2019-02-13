@@ -385,6 +385,8 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     'file_extensions' => 'txt',
     'directory' => 'inline-files',
     'data-file-id' => NULL,
+    'status' => 0,
+    'scheme' => 'public',
   );
 
   $max_filesize = !empty($upload_settings['max_size']) ? min(parse_size($upload_settings['max_size']), file_upload_max_size()) : file_upload_max_size();
@@ -437,6 +439,15 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#default_value' => isset($values['target']) ? $values['target'] : FALSE,
     '#parents' => array('attributes', 'target'),
   );
+
+  $form['class'] = array(
+    '#title' => t('CSS classes'),
+    '#description' => t('Separate each additional CSS class with a space.'),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['class']) ? $values['class'] : '',
+    '#parents' => array('attributes', 'class'),
+  );
+
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -448,6 +459,20 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
   );
 
   return $form;
+}
+
+/**
+ * Validate handler for filter_format_editor_link_form().
+ */
+function filter_format_editor_link_form_validate($form, &$form_state) {
+  if (isset($form_state['values']['attributes']['class'])) {
+    $classes = explode(' ', $form_state['values']['attributes']['class']);
+    $clean_classes = array();
+    foreach ($classes as $class_name) {
+      $clean_classes[] = backdrop_clean_css_identifier($class_name, array());
+    }
+    $form_state['values']['attributes']['class'] = implode(' ', $clean_classes);
+  }
 }
 
 /**

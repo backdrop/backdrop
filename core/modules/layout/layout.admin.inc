@@ -122,6 +122,16 @@ function _layout_get_operations(Layout $layout) {
       'title' => t('Clone Layout'),
       'href' => 'admin/structure/layouts/manage/' . $layout->name . '/clone',
     );
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export Layout'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Layouts',
+          'name' => 'layout.layout.' . $layout->name,
+        ),
+      );
+    }
     if (!$layout->disabled) {
       $links['disable'] = array(
         'title' => t('Disable Layout'),
@@ -362,7 +372,23 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#id' => 'layout-access',
     '#access' => !$layout->isDefault(),
   );
+  $form['conditions']['add'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add visibility condition'),
+    '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
+    '#validate' => array(),
+    '#submit' => array(
+      'layout_settings_form_update_layout',
+      'layout_settings_form_condition_add',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_open_dialog',
+    ),
+    '#prefix' => '<ul class="action-links"><li>',
+    '#suffix' => '</li></ul>',
+  );
   $form['conditions']['active'] = array(
+    '#type' => 'container',
     '#theme' => 'layout_conditions',
     '#attributes' => array('class' => array('layout-access-list')),
   );
@@ -405,21 +431,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       '#name' => 'conditions_' . $access_key . '_configure',
     );
   }
-  $form['conditions']['add'] = array(
-    '#type' => 'submit',
-    '#value' => t('Add visibility condition'),
-    '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
-    '#validate' => array(),
-    '#submit' => array(
-      'layout_settings_form_update_layout',
-      'layout_settings_form_condition_add',
-    ),
-    '#ajax' => array(
-      'callback' => 'layout_ajax_form_open_dialog',
-    ),
-    '#prefix' => '<ul class="action-links"><li>',
-    '#suffix' => '</li></ul>',
-  );
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(

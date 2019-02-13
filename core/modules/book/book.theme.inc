@@ -8,8 +8,8 @@
  * Processes variables for book-all-books-block.tpl.php.
  *
  * All non-renderable elements are removed so that the template has full access
- * to the structured data but can also simply iterate over all elements and
- * render them (as in the default template).
+ * to the structured data but can also iterate over all elements and render them
+ * (as in the default template).
  *
  * @param $variables
  *   An associative array containing the following key:

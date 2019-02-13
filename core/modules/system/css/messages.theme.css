@@ -23,7 +23,7 @@
   height: 100%;
   background-position: center .625em;
   background-repeat: no-repeat;
-  background-size: 1.5em;
+  background-size: 32px;
 }
 .messages :nth-child(2) {
   margin-top: 0;
@@ -43,7 +43,6 @@
   }
   .messages:before {
     width: 3em;
-    background-size: 2em;
   }
 }
 [dir="rtl"] .messages:before {
@@ -56,54 +55,6 @@
   margin-left: 0;
 }
 
-.status {
-  color: #234600;
-  background-color: #e9eebc;
-}
-.status a {
-  color: #234600;
-}
-div.status:before {
-  background-image: url(../../../misc/message-24-ok.png);
-  background-color: #cfde56;
-}
-
-.warning {
-  color: #525252;
-  background-color: #faf5c9;
-}
-.warning a {
-  color: #525252;
-}
-div.warning:before {
-  background-image: url(../../../misc/message-24-warning.png);
-  background-color: #fce400;
-}
-
-.error {
-  color: #9c1d0d;
-  background-color: #f9edec;
-}
-.error a {
-  color: #9c1d0d;
-}
-div.error:before {
-  background-image: url(../../../misc/message-24-error.png);
-  background-color: #ee3d23;
-}
-
-.info {
-  color: #004570;
-  background-color: #bdf;
-}
-.info a {
-  color: #004570;
-}
-div.info:before {
-  background-image: url(../../../misc/message-24-info.png);
-  background-color: #0074bd;
-}
-
 .messages a {
   text-decoration: underline;
 }
@@ -111,31 +62,65 @@ div.info:before {
   text-decoration: none;
 }
 
-/* Desktop size icons */
-@media only screen and (min-width: 34em) {
-  div.status:before {
-    background-image: url(../../../misc/message-32-ok.png);
-  }
-  div.warning:before {
-    background-image: url(../../../misc/message-32-warning.png);
-  }
-  div.error:before {
-    background-image: url(../../../misc/message-32-error.png);
-  }
-  div.info:before {
-   background-image: url(../../../misc/message-32-info.png);
-  }
+.messages.status {
+  color: #234600;
+  background-color: #e9eebc;
 }
+.messages.status a {
+  color: #234600;
+}
+div.messages.status:before {
+  background-image: url(../../../misc/message-32-ok.png);
+  background-color: #cfde56;
+}
+
+.messages.warning {
+  color: #525252;
+  background-color: #faf5c9;
+}
+.messages.warning a {
+  color: #525252;
+}
+div.messages.warning:before {
+  background-image: url(../../../misc/message-32-warning.png);
+  background-color: #fce400;
+}
+
+.messages.error {
+  color: #9c1d0d;
+  background-color: #f9edec;
+}
+.messages.error a {
+  color: #9c1d0d;
+}
+div.messages.error:before {
+  background-image: url(../../../misc/message-32-error.png);
+  background-color: #ee3d23;
+}
+
+.messages.info {
+  color: #004570;
+  background-color: #bdf;
+}
+.messages.info a {
+  color: #004570;
+}
+div.messages.info:before {
+  background-image: url(../../../misc/message-32-info.png);
+  background-color: #0074bd;
+}
+
 /* SVG overrides */
-div.status:before {
+div.messages.status:before {
   background-image: linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg);
 }
-div.warning:before {
+div.messages.warning:before {
   background-image: linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg);
 }
-div.error:before {
+div.messages.error:before {
   background-image: linear-gradient(transparent, transparent), url(../../../misc/message-error.svg);
 }
-div.info:before {
+div.messages.info:before {
   background-image: linear-gradient(transparent, transparent), url(../../../misc/message-info.svg);
 }
+

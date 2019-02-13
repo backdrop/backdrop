@@ -213,8 +213,8 @@ function hook_field_info_alter(&$info) {
  *   An associative array with the following keys:
  *   - columns: An array of Schema API column specifications, keyed by column
  *     name. This specifies what comprises a value for a given field. For
- *     example, a value for a number field is simply 'value', while a value for
- *     a formatted text field is the combination of 'value' and 'format'. It is
+ *     example, a value for a number field is 'value', while a value for a
+ *     formatted text field is the combination of 'value' and 'format'. It is
  *     recommended to avoid having the column definitions depend on field
  *     settings when possible. No assumptions should be made on how storage
  *     engines internally use the original column name to structure their
@@ -850,11 +850,10 @@ function hook_field_widget_info_alter(&$info) {
  *   - #field_name: The name of the field.
  *   - #language: The language the field is being edited in.
  *   - #field_parents: The 'parents' space for the field in the form. Most
- *       widgets can simply overlook this property. This identifies the
- *       location where the field values are placed within
- *       $form_state['values'], and is used to access processing information
- *       for the field through the field_form_get_state() and
- *       field_form_set_state() functions.
+ *       widgets can overlook this property. This identifies the location where
+ *       the field values are placed within $form_state['values'], and is used
+ *       to access processing information for the field through the
+ *       field_form_get_state() and field_form_set_state() functions.
  *   - #columns: A list of field storage columns of the field.
  *   - #title: The sanitized element label for the field instance, ready for
  *     output.

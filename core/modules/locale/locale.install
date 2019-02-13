@@ -54,6 +54,19 @@ function locale_enable() {
 
   locale_language_negotiation_url_prefixes_save($prefixes);
   locale_language_negotiation_url_domains_save($domains);
+
+  // When enabling locale go through all config files and add translatables.
+  $active_storage = config_get_config_storage('active');
+  $names = $active_storage->listAll();
+
+  foreach ($names as $name) {
+    $config = config($name);
+    if ($config->get('_config_translatables') !== NULL) {
+      foreach ($config->get('_config_translatables') as $translatable) {
+        $translation = locale($config->get($translatable), 'config:' . $name . ':' . $translatable);
+      }
+    }
+  }
 }
 
 /**

@@ -244,9 +244,10 @@ function views_ui_list_page() {
   views_ui_add_admin_css();
 
   $header = array(
-    array('data' => t('View info'), 'class' => array('views-ui-name')),
+    array('data' => t('Name'), 'class' => array('views-ui-name')),
     array('data' => t('Description'), 'class' => array('views-ui-description')),
-    array('data' => t('Path(s)'), 'class' => array('views-ui-path')),
+    array('data' => t('Displays'), 'class' => array('views-ui-displays')),
+    array('data' => t('Storage state'), 'class' => array('views-ui-storage')),
     array('data' => t('Operations'), 'class' => array('views-ui-operations')),
   );
 
@@ -273,26 +274,27 @@ function views_ui_list_page() {
   $rows = array();
   foreach ($sorted as $key) {
     $view = $views[$key];
-    $paths = _views_ui_get_paths($view);
-    $paths = implode(", ", $paths);
 
     $row = array();
     $row[] = array(
-      'data' => theme('views_ui_view_info', array('view' => $view)),
+      'data' => theme('views_ui_view_name', array('view' => $view)),
       'class' => array('views-ui-name'),
-      'data-label' => t('View info'),
+      'data-label' => t('Name'),
     );
-    $data  = '<div class="views-description">' . check_plain($view->description) . '</div>';
-    $data .= '<div class="views-tag"><span class="views-tag-label">' . t('Tags:') . '</span> ' . check_plain($view->tag) . '</div>';
     $row[] = array(
-      'data' => $data,
+      'data' => theme('views_ui_view_description', array('view' => $view)),
       'class' => array('views-ui-description'),
       'data-label' => t('Description'),
     );
     $row[] = array(
-      'data' => $paths,
-      'class' => array('views-ui-path'),
-      'data-label' => t('Path(s)'),
+      'data' => theme('item_list', array('items' => _views_ui_get_displays($view))),
+      'class' => array('views-ui-displays'),
+      'data-label' => t('Displays'),
+    );
+    $row[] = array(
+      'data' => theme('views_ui_view_storage', array('view' => $view)),
+      'class' => array('views-ui-storage'),
+      'data-label' => t('Storage status'),
     );
     $row[] = array(
       'data' => array(
@@ -362,7 +364,11 @@ function _views_ui_get_operations(view $view) {
   if (module_exists('config') && user_access('synchronize configuration')) {
     $links['export'] = array(
       'title' => t('Export'),
-      'href' => 'admin/config/development/configuration/single/export/Views/views.view.' . $view->name,
+      'href' => 'admin/config/development/configuration/single/export',
+      'query' => array(
+        'group' => 'Views',
+        'name' => 'views.view.' . $view->name,
+      ),
     );
   }
   return $links;
@@ -1266,7 +1272,11 @@ function views_ui_render_display_top($view, $display_id) {
   if (module_exists('config') && user_access('synchronize configuration')) {
     $element['extra_actions']['#links']['export'] = array(
       'title' => t('export view'),
-      'href' => 'admin/config/development/configuration/single/export/Views/views.view.' . $view->name,
+      'href' => 'admin/config/development/configuration/single/export',
+      'query' => array(
+        'group' => 'Views',
+        'name' => 'views.view.' . $view->name,
+      ),
     );
   }
   else {
@@ -2837,7 +2847,8 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
     // Retrieve the first form from the stack without changing the integer keys,
     // as they're being used for the "2 of 3" progress indicator.
     reset($view->stack);
-    list($key, $top) = each($view->stack);
+    $key = key($view->stack);
+    $top = current($view->stack);
     unset($view->stack[$key]);
 
     if (array_shift($top) != $identifier) {
@@ -4401,21 +4412,21 @@ function views_ui_admin_settings_basic() {
     }
   }
 
-  // This is not currently a fieldset but we may want it to be later,
-  // so this will make it easier to change if we do.
+  // This is not currently a fieldset but we may want it to be later, so this
+  // will make it easier to change if we do.
   $form['basic'] = array();
 
   $form['basic']['show_master_display'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Always show the master display'),
-    '#description' => t('Advanced users of views may choose to see the master (i.e. default) display.'),
+    '#title' => t('Always show the <em>Master</em> display'),
+    '#description' => t('Show the <em>Master</em> (i.e. default) display, which is otherwise hidden.'),
     '#default_value' => $config->get('show_master_display'),
   );
 
   $form['basic']['display_embed'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Show the embed display in the ui.'),
-    '#description' => t('Allow advanced user to use the embed view display. The plugin itself works if it\'s not visible in the ui'),
+    '#title' => t('Allow <em>embed</em> displays to be created via the UI'),
+    '#description' => t('Enables the <em>embed</em> type of display. Embed displays can be used in code via <a href="@api_link"><code>views_embed_view()</code></a>. Embedded displays will still work even if this setting is disabled.', array('@api_link' => url('https://api.backdropcms.org/api/backdrop/core%21modules%21views%21views.module/function/views_embed_view'))),
     '#default_value' => $config->get('display_embed'),
   );
 
@@ -4778,13 +4789,13 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
       $strings = array();
       $skip_bases = array();
       foreach ($table_data as $field => $info) {
-        // Collect table data from this table
+        // Collect table data from this table...
         if ($field == 'table') {
-          // calculate what tables this table can join to.
+          // ...calculate what tables this table can join to...
           if (!empty($info['join'])) {
             $bases = array_keys($info['join']);
           }
-          // And it obviously joins to itself.
+          // ...and it joins to itself.
           $bases[] = $table;
           continue;
         }

@@ -3,7 +3,6 @@
  */
 .block {
   width: 100%;
-
   /* Clearfix */
   content: "";
   display: table;
@@ -519,7 +518,9 @@ tr.drag {
 tr.drag-previous {
   background: #ffb;
 }
-tr:hover {
+tr:hover,
+tr:hover td.active,
+tr.odd:hover td.active {
   background: #ffff99;
 }
 th {
@@ -633,14 +634,11 @@ fieldset {
   position: relative;
   max-width: 100%;
   margin: 1em 0;
-  padding: 3em 0 0 0; /* LTR */
+  padding: 3em 0 0 0;
   border-radius: 4px;
   background-color: #fff;
   border: 2px solid #EAEAEA;
   min-width: 0;
-}
-[dir="rtl"] fieldset {
-  padding: 2.5em 0 0;
 }
 fieldset .fieldset-legend {
   position: absolute;
@@ -648,12 +646,12 @@ fieldset .fieldset-legend {
   top: 0;
   width: 100%;
   margin-top: .25em;
-  padding-left: 15px; /* LTR */
+  padding-left: 1em; /* LTR */
   text-transform: uppercase;
 }
 [dir="rtl"] fieldset .fieldset-legend {
   right: 0;
-  padding-right: 15px;
+  padding-right: 1em;
   padding-left: 0;
 }
 legend {
@@ -692,6 +690,13 @@ fieldset .fieldset-wrapper {
   border-radius: 4px;
   background: transparent;
 }
+.js[dir="rtl"] fieldset.collapsible .fieldset-title {
+  background-image: none;
+  padding: .3em 1.8em .3em .3em;
+}
+.js fieldset.collapsible .fieldset-legend {
+  font-size: 1em;
+}
 .js fieldset.collapsible .fieldset-legend a:before {
   content: "";
   position: absolute;
@@ -703,7 +708,10 @@ fieldset .fieldset-wrapper {
   border-top-color: #000;
   border-bottom: 0;
 }
-
+.js[dir="rtl"] fieldset.collapsible .fieldset-legend a:before {
+  left: auto;
+  right: .6em;
+}
 .fieldset-legend span.summary {
   position: absolute;
   top: .4em;
@@ -725,6 +733,12 @@ fieldset .fieldset-wrapper {
   border: .32em solid transparent;
   border-left-color: black;
 }
+.js[dir="rtl"] fieldset.collapsed .fieldset-legend a:before {
+  left: auto;
+  right: .8em;
+  border-left-color: transparent;
+  border-right-color: black;
+}
 
 /**
  * Views exposed form (matches fieldsets).
@@ -742,6 +756,10 @@ form.views-exposed-form {
  */
 .js input.form-autocomplete {
   background-position: 98% center;
+}
+
+[dir="rtl"].js input.form-autocomplete {
+  background-position: 1% center;
 }
 
 #autocomplete {
@@ -819,12 +837,22 @@ td.checkbox .form-item input {
 
 /* Filter */
 .filter-wrapper {
-  border-top: 0;
   padding: 10px 2px;
+  background-color: #f8f8f8;
+  border: 1px #d1d1d1;
+  border-style: none solid solid solid;
+  border-radius: 0;
+}
+.js fieldset.filter-wrapper.collapsed {
+  padding: 1.2em 0;
+}
+.js fieldset.filter-wrapper.collapsible .fieldset-legend {
+  font-size: .8333em;
+  text-transform: none;
 }
 .filter-wrapper .fieldset-wrapper {
-  padding: 0 6px;
-  margin-top: 45px;
+  padding: .6em 2.3em;
+  margin-top: 30px;
 }
 .filter-wrapper .form-item,
 .filter-wrapper .filter-guidelines,
@@ -915,13 +943,6 @@ input.form-submit:active {
   -moz-box-shadow: 0 0 5px rgb(220, 220, 220);
   box-shadow: 0 0 5px rgb(220, 220, 220);
 }
-input.form-button-disabled,
-input.form-button-disabled:active {
-  background: #eee none;
-  border-color: #eee;
-  text-shadow: none;
-  color: #999;
-}
 input.button-primary,
 button.button-primary {
   color: white;
@@ -972,6 +993,21 @@ button.button-danger:hover,
 button.button-danger:focus {
   color: white;
   background-color: #e7251b;
+}
+input.form-button-disabled,
+input.form-button-disabled:active,
+input.form-button-disabled:hover,
+input.form-button-disabled:focus,
+input.form-disabled,
+input.form-disabled:active,
+input.form-disabled:hover,
+input.form-disabled:focus {
+  background: #eee none;
+  border-color: #eee;
+  text-shadow: none;
+  color: #999;
+  box-shadow: none;
+  transition-property: none;
 }
 input.form-autocomplete,
 input.form-text,
@@ -1506,6 +1542,15 @@ div.add-or-remove-shortcuts {
 }
 [dir="rtl"] #block-node-recent .more-link {
   padding: 0 0 5px 5px;
+}
+
+/* Date picker */
+[dir="rtl"] .ui-datepicker {
+  width: auto;
+}
+[dir="rtl"] .ui-datepicker .ui-datepicker-next {
+  right: auto;
+  top: 4px;
 }
 
 /* Dropbutton */

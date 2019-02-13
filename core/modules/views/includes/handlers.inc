@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines the various handler objects to help build and display views.
@@ -586,9 +585,9 @@ class views_handler extends views_object {
   /**
    * Get the join object that should be used for this handler.
    *
-   * This method isn't used a great deal, but it's very handy for easily
-   * getting the join if it is necessary to make some changes to it, such
-   * as adding an 'extra'.
+   * This method isn't used a great deal, but it's very handy for getting the
+   * join if it is necessary to make some changes to it, such as adding an
+   * 'extra'.
    */
   function get_join() {
     // get the join from this table that links back to the base table.

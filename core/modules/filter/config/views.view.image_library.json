@@ -2,6 +2,7 @@
     "_config_name": "views.view.image_library",
     "name": "image_library",
     "description": "Displays recently uploaded images for selection when creating content.",
+    "module": "filter",
     "storage": 4,
     "tag": "default",
     "disabled": false,

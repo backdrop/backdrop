@@ -765,6 +765,7 @@ function node_type_set_defaults($info = array()) {
     'name' => '',
     'base' => 'node_content',
     'module' => 'node',
+    'node_preview' => BACKDROP_OPTIONAL,
     'description' => '',
     'help' => '',
     'modified' => FALSE,
@@ -1400,6 +1401,9 @@ function node_search_admin() {
       '#default_value' => $config->get('node_rank_' . $var),
     );
   }
+
+  // Sort factors by rank, highest first.
+  backdrop_sort($form['content_ranking']['factors'], array('#default_value' => SORT_NUMERIC), SORT_DESC);
   return $form;
 }
 
@@ -1786,8 +1790,8 @@ function node_menu() {
       'title callback' => 'check_plain',
       'page callback' => 'node_preview',
       'page arguments' => array(3, $type_url_str),
-      'access callback' => 'node_access',
-      'access arguments' => array('create', $type->type),
+      'access callback' => 'node_preview_access',
+      'access arguments' => array(3),
       'description' => $type->description,
       'type' => MENU_CALLBACK,
       'file' => 'node.pages.inc',
@@ -1881,18 +1885,19 @@ function node_menu() {
 /**
  * Access callback: Checks a user's permission for previewing a node.
  *
- * @param Node $node
- *   The node entity to be previewed.
+ * @param $node_tempstore_id
+ *   The node_tempstore_id of the node being created or updated.
  *
  * @return bool
  *   TRUE if the user has access to the preview, FALSE otherwise.
  *
  * @see node_menu()
  *
- * @since 1.11.0
+ * @since 1.12.0
  */
-function node_access_preview(Node $node) {
-  if (node_access('create', $node) || node_access('update', $node)) {
+function node_preview_access($node_tempstore_id) {
+  $node = node_get_node_tempstore($node_tempstore_id);
+  if (!empty($node) && (node_access('create', $node) || node_access('update', $node))) {
     return TRUE;
   }
   return FALSE;
@@ -1982,7 +1987,7 @@ function node_revision_list(Node $node) {
 function node_block_info() {
   $blocks['syndicate'] = array(
     'info' => t('Syndicate'),
-    'description' => t('An RSS icon linking to the feed for the current page (if any).'),
+    'description' => t('An RSS icon linking to available feeds.'),
   );
   $blocks['recent'] = array(
     'info' => t('Recent content'),
@@ -2008,11 +2013,7 @@ function node_block_view($delta = '', $settings = array()) {
     case 'syndicate':
       if (backdrop_valid_path('rss.xml')) {
         $block['subject'] = t('Syndicate');
-        $block['content'] = array(
-          '#theme' => 'feed_icon',
-          '#url' => 'rss.xml',
-          '#title' => t('Syndicate'),
-        );
+        $block['content'] = node_syndicate_content($settings);
       }
       break;
 
@@ -2055,7 +2056,36 @@ function node_block_configure($delta = '', $settings = array()) {
       '#options' => backdrop_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30)),
     );
   }
+  if ($delta == 'syndicate') {
+    $form['syndicate_settings'] = array(
+      '#type' => 'radios',
+      '#title' => t('Choose the linked feed'),
+      '#default_value' => isset($settings['syndicate_settings']) ? $settings['syndicate_settings'] : 'promoted',
+      '#options' => array(
+        'promoted' => t('Always show RSS link for promoted content'),
+        'page_content' => t('Show RSS link for the current page, if available'),
+      ),
+    );
+  }
   return $form;
+}
+
+/**
+ * Returns a themed RSS icon which links to a provided feed.
+ *
+ * @param array $settings
+ *   Block configuration settings.
+ */
+function node_syndicate_content($settings) {
+  if (isset($settings['syndicate_settings']) && $settings['syndicate_settings'] == 'page_content') {
+    return backdrop_get_feeds();
+  }
+  // Default to promoted content to support legacy Syndicate blocks.
+  return array(
+    '#theme' => 'feed_icon',
+    '#url' => 'rss.xml',
+    '#title' => t('Subscribe to promoted content'),
+  );
 }
 
 /**
@@ -2556,8 +2586,8 @@ function node_form_system_themes_admin_form_submit($form, &$form_state) {
  * Note: Even a single module returning NODE_ACCESS_DENY from hook_node_access()
  * will block access to the node. Therefore, implementers should take care to
  * not deny access unless they really intend to. Unless a module wishes to
- * actively deny access it should return NODE_ACCESS_IGNORE (or simply return
- * nothing) to allow other modules or the node_access table to control access.
+ * actively deny access it should return NODE_ACCESS_IGNORE (or return nothing)
+ * to allow other modules or the node_access table to control access.
  *
  * To see how to write a node access module of your own, see
  * node_access_example.module.

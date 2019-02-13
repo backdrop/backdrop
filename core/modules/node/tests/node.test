@@ -470,7 +470,12 @@ class PagePreviewTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp(array('taxonomy', 'node', 'email'));
 
-    $web_user = $this->backdropCreateUser(array('edit own page content', 'create page content', 'administer nodes'));
+    $web_user = $this->backdropCreateUser(array(
+      'administer content types',
+      'edit own page content',
+      'create page content',
+      'administer nodes'
+    ));
     $this->backdropLogin($web_user);
 
     // Add a vocabulary so we can test different view modes.
@@ -561,6 +566,24 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $body_key = "body[$langcode][0][value]";
     $term_key = "{$this->field_name}[$langcode]";
     $email_key = "{$this->field_email_name}[$langcode][0][email]";
+
+    // Test turning off preview.
+    $edit = array(
+      'node_preview' => 0,
+    );
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    // Refresh the field information for the rest of the test.
+    field_info_cache_clear();
+    $this->backdropGet('node/add/page');
+    $this->assertNoFieldById('edit-preview',  t('Preview'), 'Preview button not found.');
+
+    // Turn it back on and test functionality.
+    $edit = array(
+      'node_preview' => 1,
+    );
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    // Refresh the field information for the rest of the test.
+    field_info_cache_clear();
 
     // Fill in node creation form and preview node.
     $edit = array();
@@ -662,6 +685,50 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
 
     $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');
+
+    // Test that a user with permissions to create, but not edit, can still 
+    // access preview.
+    $no_edit_user = $this->backdropCreateUser(array(
+      'create page content',
+      'access content',
+    ));
+    $this->backdropLogin($no_edit_user);
+
+    // Fill in node creation form and preview node.
+    $name = $this->randomName(8);
+    $edit = array();
+    $edit[$title_key] = $name;
+    $edit[$body_key] = $this->randomName(16);
+
+    $this->backdropPost('node/add/page', $edit, t('Preview'));
+    $this->assertText($edit[$title_key], 'Title displayed.');
+
+    // Test that a user with permissions to edit, but not create, can still 
+    // access preview.
+    $no_create_user = $this->backdropCreateUser(array(
+      'edit any page content',
+      'access content',
+    ));
+    $this->backdropLogin($no_create_user);
+
+    $name = $this->randomName(8);
+    $node = $this->backdropCreateNode(array('type' => 'page', 'title' => $name));
+    $this->backdropGet('node/' . $node->nid);
+    $this->clickLink('Edit');
+    $this->backdropPost(NULL, array(), t('Preview'));
+    $this->assertText($name, 'Title displayed.');
+    $url = $this->getUrl();
+
+    // Test that a user with no create or edit permissions cannot access
+    // preview.
+    $no_create_edit_user = $this->backdropCreateUser(array(
+      'access content',
+    ));
+    $this->backdropLogin($no_create_edit_user);
+
+    $this->backdropGet($url);
+    $this->assertResponse(403, 'Received 404 response from user attempting to directly access preview.');
+
   }
 
 }
@@ -876,7 +943,7 @@ class NodeTitleXSSTestCase extends BackdropWebTestCase {
  */
 class NodeBlockTestCase extends BackdropWebTestCase {
   function setUp() {
-    parent::setUp();
+    parent::setUp('node_test');
 
     // Create and login user
     $admin_user = $this->backdropCreateUser(array('administer blocks'));
@@ -884,9 +951,10 @@ class NodeBlockTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests that the "Syndicate" block is shown when enabled.
+   * Tests the "Syndicate" block settings.
    */
   function testSyndicateBlock() {
+    // Test default promoted nodes feed shown if default block settings.
     $layout = layout_load('home');
     $layout->addBlock('node', 'syndicate', 'footer');
     $layout->save();
@@ -896,10 +964,49 @@ class NodeBlockTestCase extends BackdropWebTestCase {
     $this->backdropGet('<front>');
     $elements = $this->xpath($syndicate_selector);
     $this->assertEqual(count($elements), 1, 'Syndicate block found on front page.');
+    $view_feed = $this->xpath('//a[contains(@href,"test-view-feed")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($view_feed), 0, 'View feed not found on front page.');
+    $promote_feed = $this->xpath('//a[contains(@href,"rss.xml")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($promote_feed), 1, 'Promoted nodes feed found on front page.');
 
+    // Check block not shown if not on the layout page.
     $this->backdropGet('user');
     $elements = $this->xpath($syndicate_selector);
     $this->assertEqual(count($elements), 0, 'Syndicate block not shown on /user.');
+
+    // Test block shows the RSS feed of an RSS-enabled view if set to show page
+    // content.
+    $layout = layout_load('default');
+    $block = $layout->addBlock('node', 'syndicate', 'footer');
+    $block->settings['block_settings'] = array(
+      'syndicate_settings' => 'page_content',
+    );
+    $layout->save();
+    cache_clear_all();
+
+    $this->backdropGet('test-view-view');
+    $elements = $this->xpath($syndicate_selector);
+    $this->assertEqual(count($elements), 1, 'Syndicate block found on test View page.');
+    $view_feed = $this->xpath('//a[contains(@href,"test-view-feed")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($view_feed), 1, 'View feed found on test View page.');
+    $promote_feed = $this->xpath('//a[contains(@href,"rss.xml")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($promote_feed), 0, 'Promoted nodes feed not found on test View page.');
+
+    // Test block shows the promoted nodes view if set to show this, even on a
+    // RSS enabled view's page.
+    $block->settings['block_settings'] = array(
+      'syndicate_settings' => 'promoted',
+    );
+    $layout->save();
+    cache_clear_all();
+
+    $this->backdropGet('test-view-view');
+    $elements = $this->xpath($syndicate_selector);
+    $this->assertEqual(count($elements), 1, 'Syndicate block found on test View page.');
+    $view_feed = $this->xpath('//a[contains(@href,"test-view-feed")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($view_feed), 0, 'View feed not found on test View page.');
+    $promote_feed = $this->xpath('//a[contains(@href,"rss.xml")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($promote_feed), 1, 'Promoted nodes feed found on test View page.');
   }
 }
 

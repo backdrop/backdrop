@@ -300,7 +300,7 @@ function template_preprocess_block(&$variables) {
   if (!empty($style->settings['classes'])) {
     $new_classes = explode(' ', $style->settings['classes']);
     foreach ($new_classes as $class) {
-      $variables['classes'][] = backdrop_clean_css_identifier($class);
+      $variables['classes'][] = backdrop_clean_css_identifier($class, array());
     }
     $variables['classes'] = array_filter($variables['classes']);
   }
@@ -369,7 +369,7 @@ function template_preprocess_block_dynamic(&$variables) {
   // Add title tag and classes.
   $title_classes = explode(' ', $style->settings['title_classes']);
   foreach ($title_classes as $n => $class) {
-    $title_classes[$n] = backdrop_clean_css_identifier($class);
+    $title_classes[$n] = backdrop_clean_css_identifier($class, array());
   }
   $title_classes = array_filter($title_classes);
   $variables['title_tag'] = $style->settings['title_tag'];
@@ -380,7 +380,7 @@ function template_preprocess_block_dynamic(&$variables) {
   // Add content tag and classes.
   $content_classes = explode(' ', $style->settings['content_classes']);
   foreach ($content_classes as $n => $class) {
-    $content_classes[$n] = backdrop_clean_css_identifier($class);
+    $content_classes[$n] = backdrop_clean_css_identifier($class, array());
   }
   $content_classes = array_filter($content_classes);
   $variables['content_tag'] = $style->settings['content_tag'];

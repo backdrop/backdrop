@@ -608,6 +608,7 @@ class ModuleVersionTestCase extends ModuleTestCase {
       // module_test's dependencies. See system_test_system_info_alter().
       state_set('system_test_dev_dependency', $version_string);
       $this->backdropGet('admin/modules');
+
       $checkbox = $this->xpath('//input[@id="edit-modules-testing-module-test-enable"]');
       $this->assertEqual(empty($checkbox[0]['disabled']), $compatible, 'Dev dependency: ' . $version_string);
     }
@@ -1329,7 +1330,7 @@ class DateTimeFunctionalTest extends BackdropWebTestCase {
 
     // Edit custom date format.
     $this->backdropGet('admin/config/regional/date-time/formats');
-    $this->clickLink(t('Edit'));
+    $this->clickLink(t('Configure'));
     $edit = array(
       'pattern' => 'Y m',
     );
@@ -1649,6 +1650,29 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
   }
 
   /**
+   * Test the individual per-theme settings form.
+   */
+  function testPerThemeSettings() {
+    // Enable the test theme and the module that controls it. Clear caches in
+    // between so that the module's hook_system_theme_info() implementation is
+    // correctly registered.
+    module_enable(array('theme_test'));
+    backdrop_flush_all_caches();
+    theme_enable(array('test_theme'));
+
+    // Test that the theme-specific settings form can be saved and that the
+    // theme-specific checkbox is checked and unchecked as appropriate.
+    $this->backdropGet('admin/appearance/settings/test_theme');
+    $this->assertNoFieldChecked('edit-test-theme-checkbox', 'The test_theme_checkbox setting is unchecked.');
+    $this->backdropPost(NULL, array('test_theme_checkbox' => TRUE), t('Save theme settings'));
+    $this->assertText('The configuration options have been saved.');
+    $this->assertFieldChecked('edit-test-theme-checkbox', 'The test_theme_checkbox setting is checked.');
+    $this->backdropPost(NULL, array('test_theme_checkbox' => FALSE), t('Save theme settings'));
+    $this->assertText('The configuration options have been saved.');
+    $this->assertNoFieldChecked('edit-test-theme-checkbox', 'The test_theme_checkbox setting is unchecked.');
+  }
+
+  /**
    * Test the administration theme functionality.
    */
   function testAdministrationTheme() {
@@ -1724,8 +1748,28 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     $this->clickLink(t('Enable and set default'), 0);
     $this->assertEqual(config_get('system.core', 'theme_default'), 'bartik');
   }
-}
 
+  /**
+   * Test theme settings.
+   */
+  function testThemeSettings() {
+    theme_enable(array('basis'));
+    // Change Basis settings so config file is created.
+    $edit = array();
+    $this->backdropPost('admin/appearance/settings/basis', $edit, t('Save theme settings'));
+
+    // Ensure config file exists.
+    $config_before = config('basis.settings');
+
+    $this->assertFalse($config_before->isNew(), 'Basis config file exists.');
+
+    theme_disable(array('basis'));
+
+    // Check that config file no longer exists.
+    $config_after = config('basis.settings');
+    $this->assertTrue($config_after->isNew(), 'Basis config file does not exist.');
+  }
+}
 
 /**
  * Test the basic queue functionality.

@@ -1165,52 +1165,45 @@ ul.secondary li a:active {
  * Uncomment background-image styles to override, URL will need to be
  * updated to work in a sub-theme.
  */
+
 /* Neutral or Good status message colors */
-.status {
+.messages.status {
   color: #234600;
   background-color: #e9eebc;
 }
-
-div.status:before {
-  /* background-image: url(../../../misc/message-24-ok.png); */
+div.messages.status:before {
+  /* background-image: url(../../../misc/message-32-ok.png); */
   background-color: #cfde56;
 }
 
 /* Warning status message colors */
-.warning {
+.messages.warning {
   color: #555;
   background-color: #faf5c9;
 }
-
-div.warning:before {
-  /* background-image: url(../../../misc/message-24-warning.png); */
+div.messages.warning:before {
+  /* background-image: url(../../../misc/message-32-warning.png); */
   background-color: #fce400;
 }
 
 /* Error status message colors */
-.error {
+.messages.error {
   color: #f00;
   background-color: #f9edec;
 }
-
-div.error:before {
-  /* background-image: url(../../../misc/message-24-error.png); */
+div.messages.error:before {
+  /* background-image: url(../../../misc/message-32-error.png); */
   background-color: #f00;
 }
 
-/* Desktop size icons */
-@media only screen and (min-width: 34em) {
-  div.status:before {
-    /* background-image: url(../../../misc/message-32-ok.png); */
-  }
-
-  div.warning:before {
-    /* background-image: url(../../../misc/message-32-warning.png); */
-  }
-
-  div.error:before {
-    /* background-image: url(../../../misc/message-32-error.png); */
-  }
+/* Info status message colors */
+.messages.info {
+  color: #004570;
+  background-color: #bdf;
+}
+div.messages.info:before {
+  /* background-image: url(../../../misc/message-32-info.png); */
+  background-color: #0074bd;
 }
 
 /**

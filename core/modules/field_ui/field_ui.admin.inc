@@ -832,7 +832,7 @@ function field_ui_field_overview_form_submit($form, &$form_state) {
  * @ingroup forms
  */
 function field_ui_display_overview($entity_type, $bundle) {
-  if (is_object($bundle)) {
+  if (is_object($bundle) && property_exists($bundle, 'name')) {
     $bundle_label = check_plain($bundle->name);
   }
   $bundle = field_extract_bundle($entity_type, $bundle);
@@ -899,7 +899,13 @@ function field_ui_display_overview($entity_type, $bundle) {
  * @ingroup forms
  */
 function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view_mode) {
-  $bundle_name = $bundle->name;
+  $bundle_name = '';
+  if (is_object($bundle) && property_exists($bundle, 'name')) {
+    $bundle_name = check_plain($bundle->name);
+  }
+  elseif (is_object($bundle) && property_exists($bundle, 'label')) {
+    $bundle_name = check_plain($bundle->label);
+  }
   $page_title = field_ui_manage_display_title($entity_type, $view_mode);
   backdrop_set_title(t('!page: !teaser display', array(
     '!page' => $bundle_name,

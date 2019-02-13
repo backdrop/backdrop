@@ -556,10 +556,16 @@ function form_get_cache($form_build_id, &$form_state) {
 
 /**
  * Stores a form in the cache.
+ *
+ * The default cache_form expiration is 6 hours. On busy sites, the cache_form
+ * table can become very large. A shorter cache lifetime can help to keep the
+ * table's size under control.
  */
 function form_set_cache($form_build_id, $form, $form_state) {
-  // 6 hours cache life time for forms should be plenty.
-  $expire = 21600;
+  // Try to read the 'form_cache_expiration' setting from settings.php. If not
+  // set in settings.php, then default to the value set in 'system.core' config
+  // (via system_update_1067 - setting not exposed in the admin UI currently).
+  $expire = settings_get('form_cache_expiration', config_get('system.core', 'form_cache_expiration'));
 
   // Ensure that the form build_id embedded in the form structure is the same as
   // the one passed in as a parameter. This is an additional safety measure to
@@ -795,7 +801,7 @@ function backdrop_retrieve_form($form_id, &$form_state) {
   $args = $form_state['build_info']['args'];
 
   // We first check to see if there's a function named after the $form_id.
-  // If there is, we simply pass the arguments on to it to get the form.
+  // If there is, we pass the arguments on to it to get the form.
   if (!function_exists($form_id)) {
     // In cases where many form_ids need to share a central constructor function,
     // such as the node editing form, modules can implement hook_forms(). It
@@ -1454,10 +1460,11 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
       // length if it's a string, and the item count if it's an array.
       // An unchecked checkbox has a #value of integer 0, different than string
       // '0', which could be a valid value.
-      $is_empty_multiple = (is_array($elements['#value']) || $elements['#value'] instanceof Countable) && count($elements['#value']) === 0;
-      $is_empty_null = $elements['#value'] === NULL;
+      $is_countable = is_array($elements['#value']) || $elements['#value'] instanceof Countable;
+      $is_empty_multiple = $is_countable && count($elements['#value']) == 0;
       $is_empty_string = (is_string($elements['#value']) && backdrop_strlen(trim($elements['#value'])) == 0);
       $is_empty_value = ($elements['#value'] === 0);
+      $is_empty_null = is_null($elements['#value']);
       if ($is_empty_multiple || $is_empty_string || $is_empty_value || $is_empty_null) {
         // Although discouraged, a #title is not mandatory for form elements. In
         // case there is no #title, we cannot set a form error message.
@@ -2474,8 +2481,8 @@ function form_type_radios_value(&$element, $input = FALSE) {
     return $input;
   }
   else {
-    // For default value handling, simply return #default_value. Additionally,
-    // for a NULL default value, set #has_garbage_value to prevent
+    // For default value handling, return #default_value. Additionally, for a
+    // NULL default value, set #has_garbage_value to prevent
     // _form_builder_handle_input_element() converting the NULL to an empty
     // string, so that code can distinguish between nothing selected and the
     // selection of a radio button whose value is an empty string.
@@ -3359,7 +3366,7 @@ function form_process_actions($element, &$form_state) {
   $primary_set = FALSE;
   foreach (element_children($element, TRUE) as $key) {
     // Don't add automatic classes to non-buttons.
-    if (!in_array($element[$key]['#type'], array('button', 'submit'))) {
+    if (!isset($element[$key]['#type']) || !in_array($element[$key]['#type'], array('button', 'submit'))) {
       continue;
     }
 
@@ -3835,11 +3842,11 @@ function form_pre_render_fieldset($element) {
     // If this element belongs to a group, but the group-holding element does
     // not exist, we need to render it (at its original location).
     if (!isset($element['#groups'][$group]['#group_exists'])) {
-      // Intentionally empty to clarify the flow; we simply return $element.
+      // Intentionally empty to clarify the flow. Return $element.
     }
     // If we injected this element into the group, then we want to render it.
     elseif (!empty($element['#group_fieldset'])) {
-      // Intentionally empty to clarify the flow; we simply return $element.
+      // Intentionally empty to clarify the flow. Return $element.
     }
     // Otherwise, this element belongs to a group and the group exists, so we do
     // not render it.
@@ -4892,7 +4899,7 @@ function batch_set($batch_definition) {
 
     // Add the set to the batch.
     if (empty($batch['id'])) {
-      // The batch is not running yet. Simply add the new set.
+      // The batch is not running yet. Add the new set.
       $batch['sets'][] = $batch_set;
     }
     else {

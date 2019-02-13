@@ -144,6 +144,11 @@ abstract class Updater implements BackdropUpdaterInterface {
       return FALSE;
     }
     foreach ($info_files as $info_file) {
+      // Exclude info files for tests.
+      if (backdrop_substr($info_file->filename, -11) == '.tests.info') {
+        unset($info_files[$info_file->uri]);
+        continue;
+      }
       if (backdrop_substr($info_file->filename, 0, -5) == backdrop_basename($directory)) {
         // Info file Has the same name as the directory, return it.
         return $info_file->uri;

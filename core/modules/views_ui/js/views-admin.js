@@ -101,7 +101,7 @@ Backdrop.viewsUi.FormFieldFiller = function ($target, replace, suffix) {
   };
 
   // Create bound versions of this instance's object methods to use as event
-  // handlers. This will let us easily unbind those specific handlers later on.
+  // handlers. This will let us unbind those specific handlers later on.
   // NOTE: $.proxy will not work for this because it assumes we want only
   // one bound version of an object method, whereas we need one version per
   // object instance.
@@ -124,7 +124,7 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
     // Quit populating the field as soon as it gets focus.
     this.target.on('focus.viewsUi', this.unbind);
   },
-  
+
   /**
    * Get the source form field value as altered by the passed-in parameters.
    */
@@ -136,7 +136,7 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
       dataType: "text"
     });
   },
-  
+
   /**
    * Use the title for populating the fields, or send a request
    * for a translitarated version of the source field value when needed.
@@ -156,7 +156,7 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
       });
     }
   },
-  
+
   /**
    * Stop prepopulating the form fields.
    */
@@ -164,7 +164,7 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
     this.source.off('keyup.viewsUi change.viewsUi', this.populate);
     this.target.off('focus.viewsUi', this.unbind);
   },
-  
+
   /**
    * Bind event handlers to the new form fields, after they're replaced via AJAX.
    */
@@ -420,7 +420,7 @@ Backdrop.behaviors.viewsUiPreview = {
    if ($contextualFiltersBucket.length === 0) {
      return;
    }
-  
+
    // If the display has no contextual filters, hide the form where you enter
    // the contextual filters for the live preview. If it has contextual filters,
    // show the form.
@@ -431,7 +431,7 @@ Backdrop.behaviors.viewsUiPreview = {
    else {
      $('#preview-args').parent().hide();
    }
-  
+
    // Executes an initial preview.
    if ($('#edit-displays-live-preview').once('edit-displays-live-preview').is(':checked')) {
      $('#preview-submit').once('edit-displays-live-preview').trigger('click');

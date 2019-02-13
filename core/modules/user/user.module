@@ -361,7 +361,7 @@ function user_validate_picture(&$form, &$form_state) {
     'file_validate_is_image' => array(),
     'file_validate_image_orientation' => array(TRUE),
     'file_validate_image_resolution' => array(config_get('system.core', 'user_picture_dimensions')),
-    'file_validate_size' => array(config_get('system.core', 'user_picture_file_size') * 1024),
+    'file_validate_size' => array((int) config_get('system.core', 'user_picture_file_size') * 1024),
   );
 
   // Save the file as a temporary file.
@@ -2287,12 +2287,35 @@ function user_roles($members_only = FALSE, $permission = NULL, $full_objects = F
  *   The role name to be loaded.
  *
  * @return stdClass|FALSE
- *   A fully-loaded role object if a role with the given ID exists, or FALSE
+ *   A fully-loaded role object if a role with the given name exists, or FALSE
  *   otherwise.
  */
 function user_role_load($role_name) {
   $roles = user_roles(FALSE, NULL, TRUE);
   return isset($roles[$role_name]) ? $roles[$role_name] : FALSE;
+}
+
+/**
+ * Legacy wrapper function preserved for backwards-compatibility. This function
+ * is no longer used by Backdrop core, since all roles are loaded by name now.
+ * See https://api.backdropcms.org/change-records/converted-user-roles-cmi
+ *
+ * Do not call this function; use user_role_load() instead.
+ *
+ * @param $role_name
+ *   A string representing the role name.
+ *
+ * @return
+ *   A fully-loaded role object if a role with the given name exists, or FALSE
+ *   otherwise.
+ *
+ * @see user_role_load()
+ *
+ * @deprecated since 1.0.0
+ */
+function user_role_load_by_name($role_name) {
+  watchdog_deprecated_function('user', __FUNCTION__, t('Change record:') . ' ' . l(t('Converted User roles to CMI'), 'https://api.backdropcms.org/change-records/converted-user-roles-cmi', array('attributes' => array('target' => '_blank'))));
+  user_role_load($role_name);
 }
 
 /**

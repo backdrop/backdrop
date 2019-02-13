@@ -58,6 +58,13 @@ function taxonomy_schema() {
         'not null' => FALSE,
         'description' => 'The {filter_format}.format of the description.',
       ),
+      'langcode' => array(
+        'description' => 'The language code for this term; if \'und\', the term will be shown in all languages.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
+      ),
       'weight' => array(
         'type' => 'int',
         'not null' => TRUE,
@@ -102,7 +109,7 @@ function taxonomy_schema() {
     ),
     'primary key' => array('tid', 'parent'),
   );
-  
+
   $schema['taxonomy_index'] = array(
     'description' => 'Maintains denormalized information about node/term relationships.',
     'fields' => array(
@@ -310,6 +317,23 @@ function taxonomy_update_1004() {
 function taxonomy_update_1005() {
   if (db_table_exists('taxonomy_vocabulary')) {
     db_drop_table('taxonomy_vocabulary');
+  }
+}
+
+/**
+ * Add langcode column to {taxonomy_term_data} table.
+ */
+function taxonomy_update_1006() {
+  if (!db_field_exists('taxonomy_term_data', 'langcode')) {
+    $spec = array(
+      'description' => 'The language code for this term; if \'und\', the term will be shown in all languages.',
+      'type' => 'varchar',
+      'length' => 12,
+      'not null' => TRUE,
+      'default' => '',
+    );
+    db_add_field('taxonomy_term_data', 'langcode', $spec);
+    db_query("UPDATE {taxonomy_term_data} SET langcode = 'und'");
   }
 }
 

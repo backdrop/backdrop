@@ -113,7 +113,7 @@ function filter_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/config/content/formats/add'] = array(
-    'title' => 'Add text editor',
+    'title' => 'Add text format',
     'page callback' => 'filter_admin_format_page',
     'access arguments' => array('administer filters'),
     'type' => MENU_LOCAL_ACTION,
@@ -937,11 +937,10 @@ function filter_default_format($account = NULL) {
  * administrators have the freedom to configure it further.
  *
  * Note that the fallback format is completely distinct from the default format,
- * which differs per user and is simply the first format which that user has
- * access to. The default and fallback formats are only guaranteed to be the
- * same for users who do not have access to any other format; otherwise, the
- * fallback format's weight determines its placement with respect to the user's
- * other formats.
+ * which differs per user and is the first format which that user has access to.
+ * The default and fallback formats are only guaranteed to be the same for users
+ * who do not have access to any other format; otherwise, the fallback format's
+ * weight determines its placement with respect to the user's other formats.
  *
  * Any modules implementing a format deletion functionality must not delete this
  * format.
@@ -2388,7 +2387,7 @@ function _filter_autop_tips($filter, $format, $long = FALSE) {
   }
 
   if ($long) {
-    return t('Lines and paragraphs are automatically recognized. The &lt;br /&gt; line break, &lt;p&gt; paragraph and &lt;/p&gt; close paragraph tags are inserted automatically. If paragraphs are not recognized simply add a couple blank lines.');
+    return t('Lines and paragraphs are automatically recognized. The &lt;br /&gt; line break, &lt;p&gt; paragraph and &lt;/p&gt; close paragraph tags are inserted automatically. If paragraphs are not recognized, add a couple blank lines.');
   }
   else {
     return t('Lines and paragraphs break automatically.');
@@ -2459,7 +2458,7 @@ function _filter_image_caption($text) {
     $attributes['class'][] = 'caption-' . $node->tagName;
 
     $theme_parameters = array(
-      'item' => $node->ownerDocument->saveHTML($node),
+      'item' => $node->ownerDocument->saveXML($node),
       'tag' => $tag,
       'caption' => $caption,
       'attributes' => $attributes,

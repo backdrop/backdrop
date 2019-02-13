@@ -2851,7 +2851,17 @@ function system_update_1056() {
  */
 function system_update_1057() {
   $config = config('system.core');
-  $config->set('watchdog_enabled_severity_levels', array(0, 1, 2, 3, 4, 5, 6));
+  $config->set('watchdog_enabled_severity_levels', array(
+    WATCHDOG_EMERGENCY,
+    WATCHDOG_ALERT,
+    WATCHDOG_CRITICAL,
+    WATCHDOG_ERROR,
+    WATCHDOG_WARNING,
+    WATCHDOG_NOTICE,
+    WATCHDOG_INFO,
+    // WATCHDOG_DEBUG,
+    // WATCHDOG_DEPRECATED,
+  ));
   $config->save();
 }
 
@@ -3017,6 +3027,15 @@ function system_update_1066() {
       ':name' => $profile_name,
     ));
   }
+}
+
+/**
+ * Add default value for form_cache_expiration.
+ */
+function system_update_1067() {
+  $config = config('system.core');
+  $config->set('form_cache_expiration', 21600);
+  $config->save();
 }
 
 /**

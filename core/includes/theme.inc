@@ -161,7 +161,7 @@ function _backdrop_theme_initialize($theme, $base_themes = array(), $registry_ca
 
   // Prepare stylesheets from this theme as well as all ancestor themes.
   // We work it this way so that we can have child themes override parent
-  // theme stylesheets easily.
+  // theme stylesheets.
   $final_stylesheets = array();
 
   // Grab stylesheets from base theme
@@ -1290,7 +1290,7 @@ function backdrop_find_theme_functions($cache, $prefixes) {
 }
 
 /**
- * Allows themes and/or theme engines to easily discover overridden templates.
+ * Allows themes and/or theme engines to discover overridden templates.
  *
  * @param $cache
  *   The existing cache of theme hooks to test against.
@@ -1831,8 +1831,8 @@ function theme_link($variables) {
 function theme_links($variables) {
   global $language_url;
 
-  $links = $variables['links'];
-  $attributes = $variables['attributes'];
+  $links = (array) $variables['links'];
+  $attributes = (array) $variables['attributes'];
   $heading = $variables['heading'];
   $output = '';
 
@@ -2082,8 +2082,8 @@ function theme_breadcrumb($variables) {
  *     );
  *     @endcode
  *     These optional tags are used to group and set properties on columns
- *     within a table. For example, one may easily group three columns and
- *     apply same background style to all.
+ *     within a table. For example, one may group three columns and apply the
+ *     same background style to all.
  *   - sticky: Use a "sticky" table header.
  *   - empty: The message to display in an extra row if table does not have any
  *     rows.
@@ -2105,7 +2105,7 @@ function theme_table($variables) {
   }
 
   // Format the table columns:
-  if (count($colgroups)) {
+  if (!empty($colgroups)) {
     foreach ($colgroups as $colgroup) {
       $colgroup_attributes = array();
 
@@ -2139,14 +2139,16 @@ function theme_table($variables) {
   }
 
   // Add the 'empty' row message if available.
-  if (!count($rows) && $empty) {
+  if (empty($rows) && $empty) {
     $header_count = 0;
-    foreach ($header as $header_cell) {
-      if (is_array($header_cell)) {
-        $header_count += isset($header_cell['colspan']) ? $header_cell['colspan'] : 1;
-      }
-      else {
-        $header_count++;
+    if (!empty($header)) {
+      foreach ($header as $header_cell) {
+        if (is_array($header_cell)) {
+          $header_count += isset($header_cell['colspan']) ? $header_cell['colspan'] : 1;
+        }
+        else {
+          $header_count++;
+        }
       }
     }
     $rows[] = array(array('data' => $empty, 'colspan' => $header_count, 'class' => array('empty', 'message')));
@@ -2154,11 +2156,11 @@ function theme_table($variables) {
 
   $responsive_columns = array();
   // Format the table header:
-  if (count($header)) {
+  if (!empty($header)) {
     $ts = tablesort_init($header);
     // HTML requires that the thead tag has tr tags in it followed by tbody
     // tags. Using ternary operator to check and see if we have any rows.
-    $output .= (count($rows) ? ' <thead><tr>' : ' <tr>');
+    $output .= (!empty($rows) ? ' <thead><tr>' : ' <tr>');
     $i = 0;
     foreach ($header as $cell) {
       $i++;
@@ -2178,14 +2180,14 @@ function theme_table($variables) {
       $output .= _theme_table_cell($cell, TRUE);
     }
     // Close the tags based on whether or not there are rows.
-    $output .= (count($rows) ? " </tr></thead>\n" : "</tr>\n");
+    $output .= (!empty($rows) ? " </tr></thead>\n" : "</tr>\n");
   }
   else {
     $ts = array();
   }
 
   // Format the table rows:
-  if (count($rows)) {
+  if (!empty($rows)) {
     $output .= "<tbody>\n";
     $flip = array('even' => 'odd', 'odd' => 'even');
     $class = 'even';
@@ -2205,7 +2207,7 @@ function theme_table($variables) {
         $tr_attributes = array();
         $no_striping = FALSE;
       }
-      if (count($cells)) {
+      if (!empty($cells)) {
         // Add odd/even class.
         if (!$no_striping) {
           $class = $flip[$class];
@@ -2238,7 +2240,7 @@ function theme_table($variables) {
   }
 
   // Add sticky headers if enabled.
-  if (count($header) && $sticky) {
+  if (!empty($header) && $sticky) {
     backdrop_add_js('core/misc/tableheader.js');
     // Add 'sticky-enabled' class to the table to identify it for JS.
     // This is needed to target tables constructed by this function.

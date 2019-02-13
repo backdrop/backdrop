@@ -70,6 +70,13 @@ small .admin-link:after {
 /**
  * Modules page.
  */
+#system-modules .table-filter {
+  margin: 1em 0;
+  padding: 7px 13px;
+  border-radius: 4px;
+  background-color: #fff;
+  border: 2px solid #EAEAEA;
+}
 #system-modules div.incompatible {
   font-weight: bold;
 }
@@ -90,6 +97,27 @@ small .admin-link:after {
 }
 #system-modules td.operations {
   width: 120px;
+}
+.requirements-toggle {
+  white-space: nowrap;
+}
+.requirements-toggle .arrow {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-style: solid;
+  border-width: 0.3333em 0.3333em 0;
+  display: inline-block;
+  height: 0;
+  line-height: 0;
+  width: 0;
+  overflow: hidden;
+  margin: 0.15em 0.3333em;
+}
+.requirements-toggle .arrow.close {
+  border-top-color: transparent;
+  border-bottom-color: #0074bd;
+  border-width: 0 0.3333em 0.3333em;
 }
 div.admin-requirements,
 div.admin-required {

@@ -101,17 +101,10 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
     );
 
     // Add palette fields.
-    $palette = color_get_palette($theme_name);
-    $names = $theme_info['fields'];
-    foreach ($palette as $name => $value) {
-      if (isset($names[$name])) {
-        $form['color']['palette'][$name] = array(
-          '#type' => 'color',
-          '#title' => check_plain($names[$name]),
-          '#value_callback' => 'color_palette_color_value',
-          '#default_value' => $value,
-          '#size' => 8,
-        );
+    foreach ($theme_info['fields'] as $name => $label) {
+      // Avoid placing them if they have already been placed by the theme.
+      if (!isset($form['#color_elements']) || !in_array($name, $form['#color_elements'])) {
+        $form['color']['palette'][$name] = color_get_color_element($theme_name, $name, $form);
       }
     }
 
@@ -128,6 +121,47 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
       bartik_form_system_theme_settings_alter($form, $form_state);
     }
   }
+}
+
+/**
+ * Creates the render array for a color element.
+ *
+ * The function also stores a list of which color elements have already been
+ * generated, so that the color module does not attempt to print out color
+ * settings twice.
+ *
+ * @param string $theme_name
+ *   The theme to get color settings from.
+ * @param string $color_name
+ *   The name of the color element to return.
+ * @param array $form
+ *   The form array for the theme settings form.
+ *
+ * @return array
+ *   The render array for the color element.
+ *
+ * @since 1.12.2
+ */
+function color_get_color_element($theme_name, $color_name, &$form) {
+  // Get the color settings from the theme.
+  $theme_info = color_get_info($theme_name);
+  $palette = color_get_palette($theme_name);
+
+  // Remember that the element has already been placed.
+  $form['#color_elements'][] = $color_name;
+
+  // Return the render array for the color element.
+  return array(
+    '#type' => 'color',
+    '#title' => check_plain($theme_info['fields'][$color_name]),
+    '#value_callback' => 'color_palette_color_value',
+    '#default_value' => $palette[$color_name],
+    '#size' => 8,
+    '#parents' => array('palette', $color_name),
+    '#attributes' => array(
+      'data-color-name' => $color_name,
+    ),
+  );
 }
 
 /**

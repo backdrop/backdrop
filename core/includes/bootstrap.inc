@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.12.x-dev');
+define('BACKDROP_VERSION', '1.13.x-dev');
 
 /**
  * Core API compatibility.
@@ -749,6 +749,13 @@ function backdrop_environment_initialize() {
   // Set sane locale settings, to ensure consistent string, dates, times and
   // numbers handling.
   setlocale(LC_ALL, 'C');
+
+  // PHP's built-in phar:// stream wrapper is not sufficiently secure. Remove it
+  // from use unless running through CLI, for tools such as drush or other
+  // shell scripts.
+  if (!backdrop_is_cli() && in_array('phar', stream_get_wrappers())) {
+    stream_wrapper_unregister('phar');
+  }
 }
 
 /**
@@ -1721,8 +1728,10 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   $max_age = !isset($_COOKIE[session_name()]) || isset($hook_boot_headers['vary']) ? config_get('system.core', 'page_cache_maximum_age') : 0;
   $default_headers['Cache-Control'] = 'public, max-age=' . $max_age;
 
-  // Entity tag should change if the output changes.
-  $etag = $cache->created . ($return_compressed ? '-gzip' : '');
+  // Entity tag should change if the output changes. Quotes are required per
+  // header specification:
+  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
+  $etag = '"' . $cache->created . ($return_compressed ? '-gzip' : '') . '"';
   header('Etag: ' . $etag);
 
   // See if the client has provided the required HTTP headers.
@@ -2220,7 +2229,17 @@ function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
   // This may be called before system.core, such as when running update.php or
   // the initial installation. As such we provide the defaults if needed.
   if (!isset($enabled_severity_levels)) {
-    $enabled_severity_levels = array(0, 1, 2, 3, 4, 5, 6);
+    $enabled_severity_levels = array(
+      WATCHDOG_EMERGENCY,
+      WATCHDOG_ALERT,
+      WATCHDOG_CRITICAL,
+      WATCHDOG_ERROR,
+      WATCHDOG_WARNING,
+      WATCHDOG_NOTICE,
+      WATCHDOG_INFO,
+      // WATCHDOG_DEBUG,
+      // WATCHDOG_DEPRECATED,
+    );
   }
 
   // Return TRUE if the severity level is enabled.
@@ -2499,10 +2518,9 @@ function backdrop_base64_encode($string) {
 /**
  * Returns a string of highly randomized bytes (over the full 8-bit range).
  *
- * This function is better than simply calling mt_rand() or any other built-in
- * PHP function because it can return a long string of bytes (compared to < 4
- * bytes normally from mt_rand()) and uses the best available pseudo-random
- * source.
+ * This function is better than calling mt_rand() or any other built-in PHP
+ * function because it can return a long string of bytes (compared to < 4 bytes
+ * normally from mt_rand()), and uses the best available pseudo-random source.
  *
  * @param $count
  *   The number of characters (bytes) to return in the string.
@@ -2929,8 +2947,15 @@ function _backdrop_exception_handler($exception) {
     _backdrop_log_error(_backdrop_decode_exception($exception), TRUE);
   }
   catch (Exception $exception2) {
-    // Another uncaught exception was thrown while handling the first one.
-    // If we are displaying errors, then do so with no possibility of a further uncaught exception being thrown.
+    // Default the status code to 500 before any other code is run. This will
+    // make any FATAL errors return 500 responses instead of 200, and also
+    // account for cases where an exception was thrown before the 500 status
+    // could be set (e.g. while loading a maintenance theme from cache).
+    drupal_add_http_header('Status', '500 Internal Server Error');
+
+    // Another uncaught exception was thrown while handling the first one. If we
+    // are displaying errors, then do so with no possibility of a further
+    // uncaught exception being thrown.
     if (error_displayable()) {
       print '<h1>Additional uncaught exception thrown while handling exception.</h1>';
       print '<h2>Original</h2><p>' . _backdrop_render_exception_safe($exception) . '</p>';
@@ -3285,9 +3310,9 @@ function backdrop_valid_test_ua() {
   if (isset($_SERVER['HTTP_USER_AGENT']) && preg_match("/^(simpletest\d+);(.+);(.+);(.+)$/", $_SERVER['HTTP_USER_AGENT'], $matches)) {
     list(, $prefix, $time, $salt, $hmac) = $matches;
     $check_string =  $prefix . ';' . $time . ';' . $salt;
-    // We use the salt from settings.php to make the HMAC key, since
-    // the database is not yet initialized and we can't access any Backdrop variables.
-    // The file properties add more entropy not easily accessible to others.
+    // We use the salt from settings.php to make the HMAC key, since the
+    // database is not yet initialized and we can't access any Backdrop
+    // variables. The file properties add more entropy.
     $key = settings_get('hash_salt') . filectime(__FILE__) . fileinode(__FILE__);
     $time_diff = REQUEST_TIME - $time;
     // Since we are making a local request a 5 second time window is allowed,
@@ -3309,9 +3334,9 @@ function backdrop_generate_test_ua($prefix) {
   static $key;
 
   if (!isset($key)) {
-    // We use the salt from settings.php to make the HMAC key, since
-    // the database is not yet initialized and we can't access any Backdrop variables.
-    // The file properties add more entropy not easily accessible to others.
+    // We use the salt from settings.php to make the HMAC key, since the
+    // database is not yet initialized and we can't access any Backdrop
+    // variables. The file properties add more entropy.
     $key = settings_get('hash_salt') . filectime(__FILE__) . fileinode(__FILE__);
   }
   // Generate a moderately secure HMAC based on the database credentials.
@@ -4164,10 +4189,9 @@ function backdrop_is_dialog() {
  *
  * If Backdrop has entered into background mode, it can no longer print anything
  * to the page, because the response has already been returned to the browser.
- * Anything that has been output while in background mode will simply be
- * silently discarded. Background mode is extremely useful for doing processing
- * that doesn't require output, such as cron job execution or creating cache
- * entries.
+ * Anything that has been output while in background mode will be silently
+ * discarded. Background mode is extremely useful for doing processing that
+ * doesn't require output, such as cron job execution or creating cache entries.
  *
  * Backdrop core uses background mode in two ways:
  *   - After generating a page (logged-in or anonymous) if cron has not run
@@ -4321,7 +4345,9 @@ function backdrop_clear_opcode_cache($filepath) {
 
   // Zend OPcache.
   if (function_exists('opcache_invalidate')) {
-    opcache_invalidate($filepath, TRUE);
+    // Suppress any warnings in PHP 7.2+ caused by "Zend OPcache API is
+    // restricted by "restrict_api" configuration directive".
+    @opcache_invalidate($filepath, TRUE);
   }
   // APC.
   if (function_exists('apc_delete_file')) {
