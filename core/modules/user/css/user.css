@@ -51,7 +51,6 @@
   font-size: 80%;
 }
 [dir="rtl"] .password-toggle {
-  position: absolute;
   right: unset;
   left: 0;
 }
