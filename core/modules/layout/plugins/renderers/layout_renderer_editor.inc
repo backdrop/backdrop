@@ -205,7 +205,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
     $links = array();
 
     // Only render the "Configure" link if the block is not broken.
-    if (!$block->isBroken()) {
+    if (!is_a($block, 'BlockBroken')) {
       $links['configure'] = array(
         'title' => t('Configure'),
         'href' => $this->getUrl('configure-block', $block->uuid),
