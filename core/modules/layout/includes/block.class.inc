@@ -375,9 +375,6 @@ class Block extends LayoutHandler {
  * A class used for blocks when their providing module or delta does not exist.
  */
 class BlockBroken extends Block {
-  function isBroken() {
-    return TRUE;
-  }
   function getTitle() {
     return '';
   }
