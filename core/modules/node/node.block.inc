@@ -186,7 +186,7 @@ class NodeBlock extends Block {
       $form['translate'] = array(
         '#type' => 'checkbox',
         '#default_value' => !empty($settings['translate']),
-        '#title' => t('Automatically load translated version of the content'),
+        '#title' => t('Load translated version of the content if available'),
       );
     }
   }
