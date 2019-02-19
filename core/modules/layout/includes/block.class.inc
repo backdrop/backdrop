@@ -115,18 +115,6 @@ class Block extends LayoutHandler {
   function prepare() {}
 
   /**
-   * Detect if a block is broken or not.
-   *
-   * @return bool
-   *   TRUE if the block is broken, FALSE otherwise.
-   *
-   * @since 1.11.3
-   */
-  function isBroken() {
-    return FALSE;
-  }
-
-  /**
    * Return the title of a block as configured in the layout.
    *
    * @return mixed
