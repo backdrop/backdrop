@@ -3366,7 +3366,7 @@ function form_process_actions($element, &$form_state) {
   $primary_set = FALSE;
   foreach (element_children($element, TRUE) as $key) {
     // Don't add automatic classes to non-buttons.
-    if (!in_array($element[$key]['#type'], array('button', 'submit'))) {
+    if (!isset($element[$key]['#type']) || !in_array($element[$key]['#type'], array('button', 'submit'))) {
       continue;
     }
 

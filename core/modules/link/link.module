@@ -444,6 +444,15 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
       'error_element' => array('url' => FALSE, 'title' => TRUE),
     );
   }
+
+  // Prevent unexpected data from being placed in the attributes column.
+  if (isset($item['attributes']) && is_string($item['attributes'])) {
+    $errors[$field['field_name']][$langcode][$delta][] = array(
+      'error' => 'link_required',
+      'message' => t('String values are not acceptable for attributes.'),
+      'error_element' => array('url' => TRUE, 'title' => FALSE),
+    );
+  }
 }
 
 /**
