@@ -228,10 +228,26 @@ function installer_authorize_update_batch_finished($success, $results) {
       'type' => 'error',
     );
   }
-  // Since we're doing an update of existing code, always add a task for
-  // running update.php.
   $results['tasks'][] = t('Your projects have been downloaded and updated.');
-  $results['tasks'][] = t('<a href="@update">Run database updates</a>', array('@update' => base_path() . 'core/update.php'));
+  // Since we're doing an update of existing code, check if we need to suggest
+  // running update.php.
+  $updates_needed = FALSE;
+  foreach (module_list() as $module) {
+    $updates = backdrop_get_schema_versions($module);
+    if ($updates !== FALSE) {
+      $current_schema = backdrop_get_installed_schema_version($module);
+      $latest_schema = end($updates);
+      if ($current_schema < $latest_schema) {
+        $updates_needed = TRUE;
+        break;
+      }
+    }
+  }
+  if ($updates_needed) {
+    $results['tasks'][] = t('<a href="@update">Run database updates</a>', array('@update' => base_path() . 'core/update.php'));
+  } else {
+    $results['tasks'][] = t('No database updates are required.');
+  }
 
   // Unset the variable since it is no longer needed.
   unset($_SESSION['maintenance_mode']);
