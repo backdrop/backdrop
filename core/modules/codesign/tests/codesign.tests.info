@@ -1,0 +1,5 @@
+[CodesignTestCase]
+name = Codesign functionality
+description = Test the basic signing and verification features of Codesign.
+group = Codesign
+file = codesign.test
