@@ -599,7 +599,7 @@ function field_info_storage_types($storage_type = NULL) {
  * @return array
  */
 function field_formatter_settings_get_instance_display_settings($entity_type, $field_name, $bundle, $view_mode) {
-  // There is no bundle for this entity type so the bundle name in the
+  // There is no bundle for this entity type so the bundle name is the
   // entity_type name.
   if (empty($bundle)) {
     $bundle = $entity_type;
