@@ -113,10 +113,10 @@ function codesign_get_signing_profiles() {
       $key_list = codesign_get_private_keychain($engine);
       foreach ($key_list as $key_id => $key_info) {
         $signing_profiles[$key_id] = array(
-          'crypto_engine' => $engine,
-          'name' => $key_info['name'],
-          'profile_id' => $key_id,
-          'signing_key' => $key_info,
+          '#crypto_engine' => $engine,
+          '#name' => $key_info['name'],
+          '#profile_id' => $key_id,
+          '#signing_key' => $key_info,
         );
       }
     }
