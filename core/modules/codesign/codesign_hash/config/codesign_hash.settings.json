@@ -1,0 +1,10 @@
+{
+    "_config_name": "codesign_hash.settings",
+    "profiles": {
+        "default": {
+            "name": "Default",
+            "machine_name": "default",
+            "hash_algorithm": "sha256"
+        }
+    }
+}

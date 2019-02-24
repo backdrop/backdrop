@@ -1,0 +1,64 @@
+<?php
+
+/**
+ * Implements hook_codesign_info().
+ */
+function codesign_hash_codesign_info() {
+  $signers = array();
+
+  $signers['hash'] = array(
+    'title' => t('Hash'),
+    'sign callback' => 'codesign_hash_sign',
+    'verify callback' => 'codesign_hash_verify',
+    'status callback' => 'codesign_hash_status',
+    'public keychain callback' => 'codesign_hash_get_public_keychain',
+    'private keychain callback' => 'codesign_hash_get_private_keychain',
+    'file' => backdrop_get_path('module', 'codesign_hash') . '/hash.codesign.inc',
+  );
+
+  return $signers;
+}
+
+function codesign_hash_menu() {
+  $items = array();
+
+  $items['admin/config/system/codesign/hash'] = array(
+    'title' => 'Hash Signing',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('codesign_hash_admin_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'codesign_hash.admin.inc',
+  );
+  $items['admin/config/system/codesign/hash/add'] = array(
+    'title' => 'Add Hash Signature Profile',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('codesign_hash_edit_profile_form', NULL),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'codesign_hash.admin.inc',
+  );
+  $items['admin/config/system/codesign/hash/%/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('codesign_hash_edit_profile_form', 5),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'codesign_hash.admin.inc',
+  );
+  $items['admin/config/system/codesign/hash/%/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('codesign_hash_delete_profile_form', 5),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'codesign_hash.admin.inc',
+  );
+
+  return $items;
+}
+
+function codesign_hash_algorithms() {
+  $algos = hash_algos();
+  return array_combine($algos, $algos);
+}
