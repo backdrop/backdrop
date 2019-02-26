@@ -3043,7 +3043,7 @@ function system_update_1067() {
  */
 function system_update_1068() {
   $config = config('system.core');
-  $config->set('file_scan_ignore_directories', update_variable_get('file_scan_ignore_directories', array()));
+  $config->set('file_scan_ignore_directories', update_variable_get('file_scan_ignore_directories', array('node_modules', 'bower_components')));
   $config->save();
 
   update_variable_del('file_scan_ignore_directories');
