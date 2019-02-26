@@ -2246,7 +2246,7 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
     }
 
     if (!empty($ignore_directories)) {
-      $nomask = '/^(\.\.?)|CVS|' . implode('|', $ignore_directories) . '$/';
+      $nomask = '/^((\.\.?)|CVS|' . implode('|', $ignore_directories) . ')$/';
     }
   }
 
