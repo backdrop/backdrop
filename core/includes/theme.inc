@@ -2849,3 +2849,16 @@ function template_preprocess_maintenance_page(&$variables) {
     $variables['theme_hook_suggestion'] = 'maintenance_page__offline';
   }
 }
+
+/**
+ * Check if theme_debug is enabled, and throw a warning if so.
+ */
+function theme_debug_enabled_warning() {
+  $theme_debug_enabled = config_get('system.core', 'theme_debug');
+  if ($theme_debug_enabled) {
+    backdrop_set_message(t('Theme debugging is enabled. See the <a href="!url">Status report</a> page for more info.', array('!url' => url('admin/reports/status'))), 'warning', FALSE);
+  }
+  else {
+    return;
+  }
+}
