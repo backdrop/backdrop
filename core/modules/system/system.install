@@ -3039,6 +3039,17 @@ function system_update_1067() {
 }
 
 /**
+ * Convert the file_scan_ignore_directories variable to use configuration.
+ */
+function system_update_1068() {
+  $config = config('system.core');
+  $config->set('file_scan_ignore_directories', update_variable_get('file_scan_ignore_directories', array()));
+  $config->save();
+
+  update_variable_del('file_scan_ignore_directories');
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
