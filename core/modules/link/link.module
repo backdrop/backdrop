@@ -713,11 +713,21 @@ function _link_escape_domain($url) {
   if (function_exists('idn_to_ascii')) {
     // External links.
     if (strpos($url, '://') && preg_match('!^(.*://)([^@]*@)?([^/]+)(.*)$!', $url, $matches)) {
-      $escaped_url = $matches['1'] . $matches['2'] . idn_to_ascii($matches['3']) . $matches['4'];
+      // INTL_IDNA_VARIANT_UTS46 is the default in PHP 7.4+ but does not exist
+      // in PHP 5.3. Use it if it exists, otherwise use the default variant.
+      if (defined('INTL_IDNA_VARIANT_UTS46')) {
+        $escaped_url = $matches['1'] . $matches['2'] . idn_to_ascii($matches['3'], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46) . $matches['4'];
+      } else {
+        $escaped_url = $matches['1'] . $matches['2'] . idn_to_ascii($matches['3']) . $matches['4'];
+      }
     }
     // E-mail links.
     elseif (strpos($url, 'mailto:') === 0 && preg_match('/^(mailto:)([^@]+@)(.*)$/', $url, $matches)) {
-      $escaped_url = $matches['1'] . $matches['2'] . idn_to_ascii($matches['3']);
+      if (defined('INTL_IDNA_VARIANT_UTS46')) {
+        $escaped_url = $matches['1'] . $matches['2'] . idn_to_ascii($matches['3'], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
+      } else {
+        $escaped_url = $matches['1'] . $matches['2'] . idn_to_ascii($matches['3']);
+      }
     }
     // Other links that do not have the domain at all.
     else {
