@@ -29,12 +29,11 @@ function field_ui_fields_list() {
   $modules = system_rebuild_module_data();
 
   $header = array(
-    t('Field name'),
-    array('data' => t('Field type'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
-    array('data' => t('Module'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    array('data' => t('Field name'), 'field' => 'field_name', 'sort' => 'asc'),
+    array('data' => t('Field type'), 'field' => 'field_type', 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
+    array('data' => t('Module'), 'field' => 'module', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
     t('Used as'),
   );
-
   $rows = array();
   foreach ($instances as $entity_type => $type_bundles) {
     foreach ($type_bundles as $bundle => $bundle_instances) {
@@ -43,11 +42,11 @@ function field_ui_fields_list() {
 
         // Initialize the row if we encounter the field for the first time.
         if (!isset($rows[$field_name])) {
-          $rows[$field_name]['class'] = $field['locked'] ? array('menu-disabled') : array('');
-          $rows[$field_name]['data'][0] = $field['locked'] ? t('@field_name (Locked)', array('@field_name' => $field_name)) : $field_name;
           $module_name = $field_types[$field['type']]['module'];
-          $rows[$field_name]['data'][1] = $field_types[$field['type']]['label'];
-          $rows[$field_name]['data'][2] = $modules[$module_name]->info['name'];
+          $rows[$field_name]['class'] = $field['locked'] ? array('menu-disabled') : array('');
+          $rows[$field_name]['data']['field_name'] = $field['locked'] ? t('@field_name (Locked)', array('@field_name' => $field_name)) : $field_name;
+          $rows[$field_name]['data']['field_type'] = $field_types[$field['type']]['label'];
+          $rows[$field_name]['data']['module'] = $modules[$module_name]->info['name'];
         }
 
         // Add the current instance.
@@ -57,28 +56,22 @@ function field_ui_fields_list() {
         if ($admin_path) {
           $bundle_manage_fields_link = $admin_path . '/fields';
           $field_configure_link = $bundle_manage_fields_link . '/' . $field_name;
-          $rows[$field_name]['data'][3][] = t('<a href="@field_configure_link">%field_label</a> in <a href="@bundle_manage_fields_link">@bundle_label</a>', array('@field_configure_link' => url($field_configure_link), '%field_label' => $field_label, '@bundle_manage_fields_link' => url($bundle_manage_fields_link), '@bundle_label' => $bundle_label));
+          $rows[$field_name]['data']['used_as'][] = t('<a href="@field_configure_link">%field_label</a> in <a href="@bundle_manage_fields_link">@bundle_label</a>', array('@field_configure_link' => url($field_configure_link), '%field_label' => $field_label, '@bundle_manage_fields_link' => url($bundle_manage_fields_link), '@bundle_label' => $bundle_label));
         }
         else {
-          $rows[$field_name]['data'][3][] = t('%field_label in @bundle_label', array('%field_label' => $field_label, '@bundle_label' => $bundle_label));
+          $rows[$field_name]['data']['used_as'][] = t('%field_label in @bundle_label', array('%field_label' => $field_label, '@bundle_label' => $bundle_label));
         }
+
       }
     }
   }
   foreach ($rows as $field_name => $cell) {
     // A reused field can have different labels across the various bundles it is
     // being used in. So we render the items of the "Used as" column as a list.
-    $rows[$field_name]['data'][3] = theme('item_list', array('items' => $rows[$field_name]['data'][3]));
+    $rows[$field_name]['data']['used_as'] = theme('item_list', array('items' => $rows[$field_name]['data']['used_as']));
   }
 
-  if (empty($rows)) {
-    $output = t('No fields have been defined yet.');
-  }
-  else {
-    // Sort rows by field name.
-    ksort($rows);
-    $output = theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No fields available.'),));
-  }
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No fields have been defined yet.'),));
 
   return $output;
 }
