@@ -69,21 +69,19 @@ function template_preprocess_ckeditor_settings_toolbar(&$variables) {
       $button_image = theme('image', array('path' => $button_image_path, 'title' => $button_label,));
       $button_image = '<span class="cke_button_icon">' . $button_image . '</span>';
 
-      $button_link = array(
-        'text' => $button_image,
-        'options' => array(
-          // Adds "/#" as href.
-          'fragment' => FALSE,
-          // Removes leading "/" from href.
-          'external' => TRUE,
-          'attributes' => array(
-            'role' => 'button',
-            'aria-label' => $button_label,
-            'title' => $button_label,
-          ),
-          // 'text' contains HTML.
-          'html' => TRUE,
-        ),
+      // @see: theme_link().
+      $button_link = array();
+      $button_link['text'] = $button_image;
+      // 'text' contains HTML.
+      $button_link['options']['html'] = TRUE;
+      // Add "/#" as href.
+      $button_link['options']['fragment'] = FALSE;
+      // Remove leading "/" from href.
+      $button_link['options']['external'] = TRUE;
+      $button_link['options']['attributes'] = array(
+        'role' => 'button',
+        'aria-label' => $button_label,
+        'title' => $button_label,
       );
 
       $value = theme('link', $button_link);
