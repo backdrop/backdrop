@@ -62,9 +62,31 @@ function template_preprocess_ckeditor_settings_toolbar(&$variables) {
     elseif (isset($button['image_alternative'])) {
       $value = filter_xss_admin($button['image_alternative']);
     }
-    elseif (isset($button['image'])) {
-      $value = '<img src="'. file_create_url($button['image' . $rtl]) . '" title="' . check_plain($button['label']) . '" />';
-      $value = '<a href="#" role="button" title="' . $button['label'] . '" aria-label="' . $button['label'] . '"><span class="cke_button_icon">' . $value . '</span></a>';
+    elseif (isset($button['image']) || isset($button['image' . $rtl])) {
+      $button_image_path = isset($button['image' . $rtl]) ? $button['image' . $rtl] : $button['image'];
+      $button_label = check_plain($button['label']);
+
+      $button_image = theme('image', array('path' => $button_image_path, 'title' => $button_label,));
+      $button_image = '<span class="cke_button_icon">' . $button_image . '</span>';
+
+      $button_link = array(
+        'text' => $button_image,
+        'options' => array(
+          // Adds "/#" as href.
+          'fragment' => FALSE,
+          // Removes leading "/" from href.
+          'external' => TRUE,
+          'attributes' => array(
+            'role' => 'button',
+            'aria-label' => $button_label,
+            'title' => $button_label,
+          ),
+          // 'text' contains HTML.
+          'html' => TRUE,
+        ),
+      );
+
+      $value = theme('link', $button_link);
     }
     else {
       $value = '?';
@@ -107,12 +129,13 @@ function template_preprocess_ckeditor_settings_toolbar(&$variables) {
   $variables['active_buttons'] = array();
   foreach ($active_buttons as $row_number => $button_row) {
     foreach ($button_groups[$row_number] as $group_name) {
+      $group_name = (string) $group_name;
       $variables['active_buttons'][$row_number][$group_name] = array(
         'group_name_class' => backdrop_clean_css_identifier($group_name),
         'buttons' => array(),
       );
       $buttons = array_filter($button_row, function ($button) use ($group_name) {
-        return $button['group'] === $group_name;
+        return (string) $button['group'] === $group_name;
       });
       foreach ($buttons as $button) {
         $variables['active_buttons'][$row_number][$group_name]['buttons'][] = $build_button_item($button, $rtl);
