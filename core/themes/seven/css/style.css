@@ -1138,7 +1138,7 @@ div.filter-options select {
 }
 .admin-panel .block-title,
 .admin-panel h3 {
-  margin: 9px;
+  margin: 9px 9px 0;
   padding: 6px 0 6px 35px; /* LTR */
   font-size: 0.923em;
   text-transform: uppercase;
@@ -1149,9 +1149,8 @@ div.filter-options select {
 [dir="rtl"] .admin-panel .block-title,
 [dir="rtl"] .admin-panel h3 {
   margin-left: 0;
-  margin-right: 4px;
-  padding-left: 0;
-  padding-right: 35px;
+  margin-right: 9px;
+  padding: 6px 35px 6px 0;
   background: url('../images/chevron-circle-left--black--64.png') no-repeat right center; /* LTR */
   background-size: 23px;
 }
@@ -1167,7 +1166,7 @@ div.filter-options select {
 
 /* Add special icons for admin/config */
 .admin-panel-people h3 {
-  background-image: url('../images/user--black--64.png');
+  background-image: url('../images/users--black--64.png');
 }
 .admin-panel-content h3 {
   background-image: url('../images/pencil-square-o--black--64.png');
@@ -1198,7 +1197,15 @@ div.filter-options select {
 }
 
 /* Add special icons for admin/dashboard */
-
+.block-dashboard-create .block-title {
+  background-image: url('../images/pencil-square-o--black--64.png');
+}
+.block-dashboard-overview-content .block-title {
+  background-image: url('../images/pencil-alt--black--64.png');
+}
+.block-dashboard-overview-user .block-title {
+  background-image: url('../images/users--black--64.png');
+}
 
 /* admin/appearance */
 #system-themes-page h2 {
