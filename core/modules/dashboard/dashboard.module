@@ -104,6 +104,11 @@ function dashboard_block_info() {
     'description' => t('Displays a summary of user account statistics'),
     'class' => 'DashboardOverviewUserBlock',
   );
+  $blocks['updates'] = array(
+    'info' => t('Dashboard - Available updates'),
+    'description' => t('Displays a list of available updates for modules, themes, layouts, and Backdrop core.'),
+    'class' => 'DashboardUpdateBlock',
+  );
 
   if (module_exists('taxonomy')) {
     $blocks['taxonomy'] = array(
@@ -127,6 +132,7 @@ function dashboard_autoload_info() {
     'DashboardOverviewContentBlock' => 'includes/block.overview_content.inc',
     'DashboardOverviewUserBlock' => 'includes/block.overview_user.inc',
     'DashboardTaxonomyBlock' => 'includes/block.taxonomy.inc',
+    'DashboardUpdateBlock' => 'includes/block.update.inc',
   );
 }
 

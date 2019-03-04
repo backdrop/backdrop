@@ -1212,6 +1212,9 @@ div.filter-options select {
 .block-dashboard-overview-user .block-title {
   background-image: url('../images/users--black--64.png');
 }
+.block-dashboard-updates .block-title {
+  background-image: url('../images/info-circle--black--64.png');
+}
 
 /* admin/appearance */
 #system-themes-page h2 {
