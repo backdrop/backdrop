@@ -100,7 +100,7 @@ function codesign_hash_edit_profile_form($form, &$form_state, $profile_id = NULL
     '#type' => 'actions',
     'submit' => array(
       '#type' => 'submit',
-      '#value' => t('Save configuration'),
+      '#value' => t('Save profile'),
     ),
   );
 
