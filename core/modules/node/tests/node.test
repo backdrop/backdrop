@@ -2445,6 +2445,106 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
 }
 
 /**
+ * Test translation settings on existing content block.
+ */
+class NodeTranslateBlockFunctionalTest extends BackdropWebTestCase {
+
+  function setUp() {
+    parent::setUp('node', 'block', 'locale', 'language', 'translation');
+
+    // Create users and test node.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'administer content types',
+      'administer nodes',
+      'administer blocks',
+      'administer layouts',
+      'translate content',
+      'administer languages',
+      'access content',
+      'create page content',
+    ));
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
+  }
+
+  /**
+   * Tests the Existing content block.
+   */
+  function testNodeTranslateBlock() {
+    $this->backdropLogin($this->admin_user);
+
+    $langcode = 'es';
+    // Add languages.
+    $edit['predefined_langcode'] = $langcode;
+    $this->backdropPost('admin/config/regional/language/add', $edit, t('Add language'));
+
+    // Set "Page" content type to use multilingual support with
+    // translation.
+    $this->backdropGet('admin/structure/types/manage/page');
+    $edit = array();
+    $edit['language'] = TRANSLATION_ENABLED;
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Page')), 'Page content type has been updated.');
+
+    // Add some test nodes.
+    $node1_settings = array('uid' => $this->admin_user->uid, 'type' => 'page');
+    $node1 = $this->backdropCreateNode($node1_settings);
+
+    // Add node in default language.
+    $field_langcode = LANGUAGE_NONE;
+    $title_en = 'English title';
+    $node2_settings["title"] = $title_en;
+    $node2_settings["body[$field_langcode][0][value]"] = 'English. Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
+    $node2_settings['langcode'] = 'en';
+
+    $this->backdropPost('node/add/page', $node2_settings, t('Save'));
+    $node2 = $this->backdropGetNodeByTitle($title_en);
+
+    // Add translated node.
+    $this->backdropGet('node/add/page', array('query' => array('translation' => $node2->nid, 'target' => $langcode)));
+
+    $title_es = 'Título en español';
+    $node3_settings["title"] = $title_es;
+    $node3_settings["body[$field_langcode][0][value]"] = 'Spanish. Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
+    $node2_settings['langcode'] = $langcode;
+    $this->backdropPost(NULL, $node3_settings, t('Save'));
+    $node3 = $this->backdropGetNodeByTitle($title_es);
+
+    $this->assertRaw(t('Page %title has been created.', array('%title' => $node3->title)), 'Translation created.');
+
+    // Check that $node2 does not appear on $node1 path.
+    $this->backdropGet('node/' . $node1->nid);
+    $this->assertNoText($node2->title, t('Node 2 title not found on Node 1.'));
+
+    // Add an Existing content block with default settings.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Existing content'));
+    $edit = array(
+      'nid' => $node2->nid,
+      'leave_node_title' => TRUE,
+      'link_node_title' => TRUE,
+      'links' => TRUE,
+      'translate' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('node/' . $node1->nid);
+
+    // Check the title is in English.
+    $this->assertText('English title', 'The English node appears on the page.');
+
+    // Switch language
+    $this->backdropGet('es/node/' . $node1->nid);
+
+    // Check that translated node appears.
+    $this->assertText('Título en español', 'The translated node appears on the page.');
+  }
+}
+
+/**
  * Test to ensure that a node's content is always rebuilt.
  */
 class NodeBuildContent extends BackdropWebTestCase {
