@@ -1,4 +1,4 @@
-name = Codesign
+name = Code Sign
 description = Code signing support
 package = System
 version = BACKDROP_VERSION

@@ -1,5 +1,5 @@
 {
-    "_config_name": "codesign_hash.settings",
+    "_config_name": "code_sign_hash.settings",
     "profiles": {
         "default": {
             "name": "Default",
