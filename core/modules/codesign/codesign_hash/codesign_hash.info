@@ -1,7 +1,7 @@
-name = Hashing Codesign
-description = Sample module to demonstrate codeign engine modules.
+name = Hashing Code Sign
+description = Sample module to demonstrate Code Sign engine modules.
 package = Security
 version = BACKDROP_VERSION
 backdrop = 1.x
 type = module
-dependencies[] = codesign
+dependencies[] = code_sign

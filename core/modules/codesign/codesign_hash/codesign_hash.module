@@ -1,64 +1,64 @@
 <?php
 
 /**
- * Implements hook_codesign_info().
+ * Implements hook_code_sign_info().
  */
-function codesign_hash_codesign_info() {
+function code_sign_hash_code_sign_info() {
   $signers = array();
 
   $signers['hash'] = array(
     'title' => t('Hash'),
-    'sign callback' => 'codesign_hash_sign',
-    'verify callback' => 'codesign_hash_verify',
-    'status callback' => 'codesign_hash_status',
-    'public keychain callback' => 'codesign_hash_get_public_keychain',
-    'private keychain callback' => 'codesign_hash_get_private_keychain',
-    'file' => backdrop_get_path('module', 'codesign_hash') . '/hash.codesign.inc',
+    'sign callback' => 'code_sign_hash_sign',
+    'verify callback' => 'code_sign_hash_verify',
+    'status callback' => 'code_sign_hash_status',
+    'public keychain callback' => 'code_sign_hash_get_public_keychain',
+    'private keychain callback' => 'code_sign_hash_get_private_keychain',
+    'file' => backdrop_get_path('module', 'code_sign_hash') . '/hash.code_sign.inc',
   );
 
   return $signers;
 }
 
-function codesign_hash_menu() {
+function code_sign_hash_menu() {
   $items = array();
 
-  $items['admin/config/system/codesign/hash'] = array(
+  $items['admin/config/system/code-sign/hash'] = array(
     'title' => 'Hash Signing',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('codesign_hash_admin_form'),
+    'page arguments' => array('code_sign_hash_admin_form'),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_LOCAL_TASK,
-    'file' => 'codesign_hash.admin.inc',
+    'file' => 'code_sign_hash.admin.inc',
   );
-  $items['admin/config/system/codesign/hash/add'] = array(
+  $items['admin/config/system/code-sign/hash/add'] = array(
     'title' => 'Add Hash Signature Profile',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('codesign_hash_edit_profile_form', NULL),
+    'page arguments' => array('code_sign_hash_edit_profile_form', NULL),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_LOCAL_ACTION,
-    'file' => 'codesign_hash.admin.inc',
+    'file' => 'code_sign_hash.admin.inc',
   );
-  $items['admin/config/system/codesign/hash/%/edit'] = array(
+  $items['admin/config/system/code-sign/hash/%/edit'] = array(
     'title' => 'Edit',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('codesign_hash_edit_profile_form', 5),
+    'page arguments' => array('code_sign_hash_edit_profile_form', 5),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'codesign_hash.admin.inc',
+    'file' => 'code_sign_hash.admin.inc',
   );
-  $items['admin/config/system/codesign/hash/%/delete'] = array(
+  $items['admin/config/system/code-sign/hash/%/delete'] = array(
     'title' => 'Delete',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('codesign_hash_delete_profile_form', 5),
+    'page arguments' => array('code_sign_hash_delete_profile_form', 5),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'codesign_hash.admin.inc',
+    'file' => 'code_sign_hash.admin.inc',
   );
 
   return $items;
 }
 
-function codesign_hash_algorithms() {
+function code_sign_hash_algorithms() {
   $algos = hash_algos();
   return array_combine($algos, $algos);
 }

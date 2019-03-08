@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Tests for codesign.module.
+ * Tests for code_sign.module.
  */
 
 /**
- * Tests the functionality of the Codesign module.
+ * Tests the functionality of the Code Sign module.
  */
-class CodesignTestCase extends BackdropWebTestCase {
+class CodeSignTestCase extends BackdropWebTestCase {
   /**
    * A user with permission to use the admin interface.
    *
@@ -17,51 +17,51 @@ class CodesignTestCase extends BackdropWebTestCase {
   protected $admin_user;
 
   function setUp() {
-    parent::setUp(array('codesign', 'codesign_hash'));
+    parent::setUp(array('code_sign', 'code_sign_hash'));
 
     $this->admin_user = $this->backdropCreateUser(array('administer site configuration'));
   }
 
-  function testCodesignSignature() {
+  function testCodeSignSignature() {
     $test_data = $this->randomString(1024);
     $good_sig = 'sha256:' . hash('sha256', $test_data);
     $bad_sig = 'sha256:' . hash('sha256', $good_sig);
 
-    $signature = codesign_sign('hash', 'default', $test_data);
+    $signature = code_sign_sign('hash', 'default', $test_data);
     $this->assertIdentical($signature, $good_sig, 'Valid signature.');
 
     // Test verification of both a good and a bad signature.
-    $this->assertTrue(codesign_verify('hash', $test_data, $signature), 'Verified signature.');
-    $this->assertIdentical(codesign_verify('hash', $test_data, $bad_sig), FALSE, 'Invalid signature.');
-    $this->assertIdentical(codesign_verify('hash', $this->randomString(1024), $signature), FALSE, 'Mismatched signature and data.');
+    $this->assertTrue(code_sign_verify('hash', $test_data, $signature), 'Verified signature.');
+    $this->assertIdentical(code_sign_verify('hash', $test_data, $bad_sig), FALSE, 'Invalid signature.');
+    $this->assertIdentical(code_sign_verify('hash', $this->randomString(1024), $signature), FALSE, 'Mismatched signature and data.');
 
-    // Test bad input to codesign_sign();
-    $this->assertNull(codesign_sign('bogus', 'default', $test_data), 'Invalid engine.');
-    $this->assertNull(codesign_sign('hash', 'bad_profile', $test_data), 'Invalid profile.');
+    // Test bad input to code_sign_sign();
+    $this->assertNull(code_sign_sign('bogus', 'default', $test_data), 'Invalid engine.');
+    $this->assertNull(code_sign_sign('hash', 'bad_profile', $test_data), 'Invalid profile.');
   }
 
-  function testCodesignKeychains() {
+  function testCodeSignKeychains() {
     $hashes = hash_algos();
-    $this->assertIdentical(codesign_get_public_keychain('hash'), array_combine($hashes, $hashes), 'Public keychain list.');
+    $this->assertIdentical(code_sign_get_public_keychain('hash'), array_combine($hashes, $hashes), 'Public keychain list.');
   }
 
-  function testCodesignAdminInterface() {
-    $this->backdropGet('admin/config/system/codesign');
-    $this->assertText('You are not authorized to access this page.', 'Access to codesign admin.');
+  function testCodeSignAdminInterface() {
+    $this->backdropGet('admin/config/system/code-sign');
+    $this->assertText('You are not authorized to access this page.', 'Access to code sign admin.');
 
-    $this->backdropGet('admin/config/system/codesign/hash');
-    $this->assertText('You are not authorized to access this page.', 'Access to codesign_hash admin.');
+    $this->backdropGet('admin/config/system/code-sign/hash');
+    $this->assertText('You are not authorized to access this page.', 'Access to code_sign_hash admin.');
 
     $this->backdropLogin($this->admin_user);
 
-    $this->backdropGet('admin/config/system/codesign');
+    $this->backdropGet('admin/config/system/code-sign');
     $this->assertText('A dummy admin page', 'Dummy admin page is present.');
     $this->assertText('Hash Signing', 'Hash signing module.');
 
-    $this->backdropGet('admin/config/system/codesign/hash');
+    $this->backdropGet('admin/config/system/code-sign/hash');
     $this->assertText('Default', 'Default signing algorithm is present.');
     $this->assertText('sha256', 'Hash algorithm.');
-    $this->assertLinkByHref('admin/config/system/codesign/hash/default/edit');
-    $this->assertLinkByHref('admin/config/system/codesign/hash/default/delete');
+    $this->assertLinkByHref('admin/config/system/code-sign/hash/default/edit');
+    $this->assertLinkByHref('admin/config/system/code-sign/hash/default/delete');
   }
 }

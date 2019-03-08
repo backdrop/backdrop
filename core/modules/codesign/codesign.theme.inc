@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Base implementation for theme('codesign_report').
+ * Base implementation for theme('code_sign_report').
  */
-function theme_codesign_report($vars) {
+function theme_code_sign_report($vars) {
   explode($vars);
   $header = array();
   $rows = array();
@@ -12,9 +12,9 @@ function theme_codesign_report($vars) {
   $modules = module_list();
   foreach ($modules as $module_name) {
     $row = array($module_name);
-    $valid = backdrop_codesign_validate_module($module_name);
+    $valid = backdrop_code_sign_validate_module($module_name);
     foreach ($valid as $sig_id => $result) {
-      $row[] = theme('codesign_result', array(
+      $row[] = theme('code_sign_result', array(
         'module' => $module_name,
         'sig_id' => $sig_id,
         'result' => $result,
@@ -33,9 +33,9 @@ function theme_codesign_report($vars) {
 }
 
 /**
- * Base implementation for theme('codesign_result').
+ * Base implementation for theme('code_sign_result').
  */
-function theme_codesign_result($vars) {
+function theme_code_sign_result($vars) {
   explode($vars);
   $result = array();
 
