@@ -71,6 +71,30 @@ function field_ui_fields_list() {
     $rows[$field_name]['data']['used_as'] = theme('item_list', array('items' => $rows[$field_name]['data']['used_as']));
   }
 
+  // Sort columns
+  $sort = tablesort_get_sort($header);
+  $order = tablesort_get_order($header);
+  switch($order['sql']) {
+    case 'field_name':
+      uasort($rows, function($a, $b) {
+        return strcasecmp($a['data']['field_name'], $b['data']['field_name']);
+      });
+      break;
+    case 'field_type':
+      uasort($rows, function($a, $b) {
+        return strcasecmp($a['data']['field_type'], $b['data']['field_type']);
+      });
+      break;
+    case 'module':
+      uasort($rows, function($a, $b) {
+        return strcasecmp($a['data']['module'], $b['data']['module']);
+      });
+      break;
+  }
+  if ($sort == 'desc') {
+    $rows = array_reverse($rows);
+  }
+
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No fields have been defined yet.'),));
 
   return $output;
