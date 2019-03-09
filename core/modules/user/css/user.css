@@ -51,7 +51,7 @@
   font-size: 80%;
 }
 [dir="rtl"] .password-toggle {
-  right: unset;
+  right: auto;
   left: 0;
 }
 
@@ -82,7 +82,8 @@
   float: right;
 }
 [dir="rtl"] .password-strength-text {
-  padding-right: 5px; /* LTR */
+  padding-left: 0;
+  padding-right: 5px;
 }
 .password-indicator {
   background-color: #EEE;
