@@ -165,8 +165,6 @@ function entityreference_update_7002() {
 }
 
 /**
- * Implements hook_update_N().
- *
  * Remove duplicate rows in the taxonomy_index table.
  */
 function entityreference_update_7100() {
