@@ -168,12 +168,12 @@ function entityreference_update_7002() {
  * Remove duplicate rows in the taxonomy_index table.
  */
 function entityreference_update_7100() {
-  if (db_table_exists('taxonomy_index')) {
+  if (db_table_exists('taxonomy_index') &&
+    ($tx_schema = drupal_get_schema('taxonomy_index'))) {
     if (db_table_exists('taxonomy_index_tmp')) {
       db_drop_table('taxonomy_index_tmp');
     }
 
-    $tx_schema = drupal_get_schema('taxonomy_index');
     db_create_table('taxonomy_index_tmp', $tx_schema);
     $select = db_select('taxonomy_index', 'tx');
     $select->fields('tx', array('nid', 'tid'));
