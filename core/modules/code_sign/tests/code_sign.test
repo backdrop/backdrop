@@ -64,4 +64,26 @@ class CodeSignTestCase extends BackdropWebTestCase {
     $this->assertLinkByHref('admin/config/system/code-sign/hash/default/edit');
     $this->assertLinkByHref('admin/config/system/code-sign/hash/default/delete');
   }
+
+  function testCodeSignAddDeleteHash() {
+    $this->backdropGet('admin/config/system/code-sign/hash/add');
+    $this->assertText('You are not authorized to access this page.', 'Access to code_sign_hash add hash.');
+
+    $this->backdropLogin($this->admin_user);
+
+    // Create a hash
+    $new_hash = array(
+        'profile[name]' => $this->randomString(),
+        'profile[machine_name]' => strtolower($this->randomName()),
+        'profile[hash_algorithm]' => 'md5',
+    );
+    $this->backdropGet('admin/config/system/code-sign/hash');
+    $this->assertNoText($new_hash['profile[name]']);
+    $this->backdropPost('admin/config/system/code-sign/hash/add', $new_hash, t('Save profile'));
+    $this->assertText($new_hash['profile[name]'], 'New hash added.');
+
+    // And delete it.
+    $this->backdropPost('admin/config/system/code-sign/hash/' . $new_hash['profile[machine_name]'] . '/delete', array(), t('Delete'));
+    $this->assertNoText($new_hash['profile[name]']);
+  }
 }
