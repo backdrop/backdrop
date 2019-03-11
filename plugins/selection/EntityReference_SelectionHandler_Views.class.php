@@ -56,7 +56,7 @@ class EntityReference_SelectionHandler_Views implements EntityReference_Selectio
       $description = t('Provide a comma separated list of arguments to pass to the view.') . '<br />' . t('This field supports tokens.');
 
       if (!module_exists('token')) {
-        $description .= '<br>' . t('Install the <a href="@url">token module</a> to get more tokens and display available once.', array('@url' => 'http://drupal.org/project/token'));
+        $description .= '<br>' . t('Install the <a href="@url">token module</a> to get more tokens and display available ones.', array('@url' => 'http://drupal.org/project/token'));
       }
 
       $form['view']['args'] = array(
