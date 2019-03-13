@@ -53,7 +53,7 @@
 
 [dir="rtl"] .breadcrumb li:after {
   left: 0;
-  right: unset;
+  right: auto;
   -webkit-transform:
     translate(0, -50%)
     rotate(225deg);
