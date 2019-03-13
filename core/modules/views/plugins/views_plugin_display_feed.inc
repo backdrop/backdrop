@@ -36,6 +36,9 @@ class views_plugin_display_feed extends views_plugin_display_page {
    */
   function execute() {
     $output = $this->view->render();
+    if (!empty($this->view->build_info['denied'])) {
+      return MENU_ACCESS_DENIED;
+    }
     if (empty($output)) {
       return backdrop_not_found();
     }
