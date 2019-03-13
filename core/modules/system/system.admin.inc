@@ -105,7 +105,7 @@ function system_admin_index() {
  */
 function system_themes_page() {
   // Inform the user if theme_debug is enabled.
-  theme_debug_enabled_warning();
+  system_theme_debug_enabled_warning();
 
   // Get current list of themes.
   $themes = system_rebuild_theme_data();
@@ -371,7 +371,7 @@ function system_theme_settings($form, &$form_state, $key) {
   $themes = list_themes();
 
   // Inform the user if theme_debug is enabled.
-  theme_debug_enabled_warning();
+  system_theme_debug_enabled_warning();
 
   $form['theme'] = array(
     '#type' => 'value',
