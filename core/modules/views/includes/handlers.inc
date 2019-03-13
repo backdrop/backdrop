@@ -816,57 +816,36 @@ class views_many_to_one_helper {
         return $this->handler->table_alias;
       }
 
-      // Case 2: it's an 'and' or an 'or'.
-      // We do one join per selected value.
-      if ($this->handler->operator != 'not') {
-        // Clone the join for each table:
-        $this->handler->table_aliases = array();
-        foreach ($this->handler->value as $value) {
-          $join = $this->get_join();
-          if ($this->handler->operator == 'and') {
-            $join->type = 'INNER';
+      // Case 2: it's anything but an 'or'.
+      // Clone the join for each table:
+      $this->handler->table_aliases = array();
+      foreach ($this->handler->value as $value) {
+        $join = $this->get_join();
+        if ($this->handler->operator == 'and') {
+          $join->type = 'INNER';
+        }
+        if (empty($join->extra)) {
+          $join->extra = array();
+        }
+        $join->extra[] = array(
+          'field' => $this->handler->real_field,
+          'value' => $value,
+          'numeric' => !empty($this->handler->definition['numeric']),
+        );
+        // The table alias needs to be unique to this value across the
+        // multiple times the filter or argument is called by the view.
+        if (!isset($this->handler->view->many_to_one_aliases[$field][$value])) {
+          if (!isset($this->handler->view->many_to_one_count[$this->handler->table])) {
+            $this->handler->view->many_to_one_count[$this->handler->table] = 0;
           }
-          $join->extra = array(
-            array(
-              'field' => $this->handler->real_field,
-              'value' => $value,
-              'numeric' => !empty($this->handler->definition['numeric']),
-            ),
-          );
-
-          // The table alias needs to be unique to this value across the
-          // multiple times the filter or argument is called by the view.
-          if (!isset($this->handler->view->many_to_one_aliases[$field][$value])) {
-            if (!isset($this->handler->view->many_to_one_count[$this->handler->table])) {
-              $this->handler->view->many_to_one_count[$this->handler->table] = 0;
-            }
-            $this->handler->view->many_to_one_aliases[$field][$value] = $this->handler->table . '_value_' . ($this->handler->view->many_to_one_count[$this->handler->table]++);
-          }
-          $alias = $this->handler->table_aliases[$value] = $this->add_table($join, $this->handler->view->many_to_one_aliases[$field][$value]);
-
+          $this->handler->view->many_to_one_aliases[$field][$value] = $this->handler->table . '_value_' . ($this->handler->view->many_to_one_count[$this->handler->table]++);
+          $alias = $this->handler->table_aliases[$value] = $this->add_table($join,
+            $this->handler->view->many_to_one_aliases[$field][$value]);
           // and set table_alias to the first of these.
           if (empty($this->handler->table_alias)) {
             $this->handler->table_alias = $alias;
           }
         }
-      }
-      // Case 3: it's a 'not'.
-      // We just do one join. We'll add a where clause during
-      // the query phase to ensure that $table.$field IS NULL.
-      else {
-        $join = $this->get_join();
-        $join->type = 'LEFT';
-        $join->extra = array();
-        $join->extra_type = 'OR';
-        foreach ($this->handler->value as $value) {
-          $join->extra[] = array(
-            'field' => $this->handler->real_field,
-            'value' => $value,
-            'numeric' => !empty($this->handler->definition['numeric']),
-          );
-        }
-
-        $this->handler->table_alias = $this->add_table($join);
       }
     }
     return $this->handler->table_alias;
@@ -898,12 +877,7 @@ class views_many_to_one_helper {
     // add_condition determines whether a single expression is enough(FALSE) or the
     // conditions should be added via an db_or()/db_and() (TRUE).
     $add_condition = TRUE;
-    if ($operator == 'not') {
-      $value = NULL;
-      $operator = 'IS NULL';
-      $add_condition = FALSE;
-    }
-    elseif ($operator == 'or' && empty($options['reduce_duplicates'])) {
+    if ($operator == 'or' && empty($options['reduce_duplicates'])) {
       if (count($value) > 1) {
         $operator = 'IN';
       }
@@ -937,6 +911,9 @@ class views_many_to_one_helper {
       $field = $this->handler->real_field;
       $clause = $operator == 'or' ? db_or() : db_and();
       foreach ($this->handler->table_aliases as $value => $alias) {
+        if ($operator == 'not') {
+          $value = NULL;
+        }
         $clause->condition("$alias.$field", $value);
       }
 
