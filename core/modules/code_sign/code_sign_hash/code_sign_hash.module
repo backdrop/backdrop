@@ -19,6 +19,9 @@ function code_sign_hash_code_sign_info() {
   return $signers;
 }
 
+/**
+ * Implements hook_menu().
+ */
 function code_sign_hash_menu() {
   $items = array();
 
@@ -56,6 +59,17 @@ function code_sign_hash_menu() {
   );
 
   return $items;
+}
+
+/**
+ * Implements hook_config_info().
+ */
+function code_sign_hash_config_info() {
+  $prefixes['code_sign_hash.settings'] = array(
+    'label' => t('Code Sign Hash settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
 }
 
 function code_sign_hash_algorithms() {
