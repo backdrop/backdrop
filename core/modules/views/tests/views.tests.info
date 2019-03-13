@@ -24,7 +24,7 @@ file = views_argument_default.test
 
 [ViewsArgumentValidatorTest]
 name = Argument validator
-description => Test argument validator tests.
+description = Test argument validator tests.
 group = Views Plugins
 file = views_argument_validator.test
 
