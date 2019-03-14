@@ -152,6 +152,13 @@ function code_sign_report_page() {
     $renderable[$key] = code_sign_get_signer_status($key);
   }
 
+  if (empty($renderable)) {
+    $renderable['empty'] = array(
+      '#type' => 'markup',
+      '#markup' => t('No algorithm modules have been enabled.  Try enabling !code_sign_hash.', array('!code_sign_hash' => l('Hahsing Code Sign', 'admin/modules/list'))),
+    );
+  }
+
   return $renderable;
 }
 
