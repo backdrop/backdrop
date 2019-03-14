@@ -40,7 +40,7 @@ function code_sign_hash_sign($profile, $data, $options = array()) {
  * @param  array $options
  *   Options for the signature.  Ignored in this module.
  * @return
- *   TRUE if it is valid, FALSE if it is not, NULL if it is invalid.
+ *   TRUE if it is valid, FALSE if it is invalid, NULL if it is malformed.
  */
 function code_sign_hash_verify($data, $signature = NULL, $options = array()) {
   $sig_parts = explode(':', $signature);
