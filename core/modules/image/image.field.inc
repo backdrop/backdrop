@@ -83,7 +83,7 @@ function image_field_instance_settings_form($field, $instance, $form, &$form_sta
   $settings = $instance['settings'];
 
   // Use the file field instance settings form as a basis.
-  $element = file_field_instance_settings_form($field, $instance);
+  $element = file_field_instance_settings_form($field, $instance, $form, $form_state);
 
   // Add maximum and minimum resolution settings.
   $max_dimensions = explode('x', $settings['max_dimensions']) + array('', '');
@@ -366,7 +366,7 @@ function image_field_widget_settings_form($field, $instance, $form, &$form_state
   $settings = $widget['settings'];
 
   // Use the file widget settings form.
-  $element = file_field_widget_settings_form($field, $instance);
+  $element = file_field_widget_settings_form($field, $instance, $form, $form_state);
 
   $element['preview_image_style'] = array(
     '#title' => t('Preview image style'),
