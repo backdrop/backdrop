@@ -540,7 +540,7 @@ function date_field_update($entity_type, $entity, $field, $instance, $langcode, 
  */
 function date_field_instance_settings_form($field, $instance, $form, &$form_state) {
   module_load_include('inc', 'date', 'date.admin');
-  return _date_field_instance_settings_form($field, $instance, $form, &$form_state);
+  return _date_field_instance_settings_form($field, $instance, $form, $form_state);
 }
 
 /**
@@ -548,7 +548,7 @@ function date_field_instance_settings_form($field, $instance, $form, &$form_stat
  */
 function date_field_widget_settings_form($field, $instance, $form, &$form_state) {
   module_load_include('inc', 'date', 'date.admin');
-  return _date_field_widget_settings_form($field, $instance, $form, &$form_state);
+  return _date_field_widget_settings_form($field, $instance, $form, $form_state);
 }
 
 /**
@@ -556,5 +556,5 @@ function date_field_widget_settings_form($field, $instance, $form, &$form_state)
  */
 function date_field_settings_form($field, $instance, $has_data, $form, &$form_state) {
   module_load_include('inc', 'date', 'date.admin');
-  return _date_field_settings_form($field, $instance, $has_data, $form, &$form_state);
+  return _date_field_settings_form($field, $instance, $has_data, $form, $form_state);
 }
