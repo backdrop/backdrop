@@ -48,7 +48,7 @@ function list_field_info() {
 /**
  * Implements hook_field_settings_form().
  */
-function list_field_settings_form($field, $instance, $has_data) {
+function list_field_settings_form($field, $instance, $has_data, $form, &$form_state) {
   $settings = $field['settings'];
 
   switch ($field['type']) {
@@ -60,7 +60,7 @@ function list_field_settings_form($field, $instance, $has_data) {
       // Toggled by default if options already set.
       $key_type_toggled = !empty($options);
 
-      $form['allowed_values'] = array(
+      $element['allowed_values'] = array(
         '#type' => 'options',
         '#title' => t('Allowed values list'),
         '#description' => '',
@@ -79,7 +79,7 @@ function list_field_settings_form($field, $instance, $has_data) {
       );
 
       // Set proper allowed values in $form_state.
-      $form['#validate'][] = 'options_field_settings_validate';
+      $element['#validate'][] = 'options_field_settings_validate';
       break;
 
     case 'list_boolean':
@@ -87,13 +87,13 @@ function list_field_settings_form($field, $instance, $has_data) {
       $off_value = array_shift($values);
       $on_value = array_shift($values);
 
-      $form['allowed_values'] = array(
+      $element['allowed_values'] = array(
         '#type' => 'value',
         '#description' => '',
         '#value_callback' => 'list_boolean_allowed_values_callback',
         '#access' => empty($settings['allowed_values_function']),
       );
-      $form['allowed_values']['on'] = array(
+      $element['allowed_values']['on'] = array(
         '#type' => 'textfield',
         '#title' => t('On value'),
         '#default_value' => $on_value,
@@ -103,7 +103,7 @@ function list_field_settings_form($field, $instance, $has_data) {
         // settings.
         '#parents' => array('on'),
       );
-      $form['allowed_values']['off'] = array(
+      $element['allowed_values']['off'] = array(
         '#type' => 'textfield',
         '#title' => t('Off value'),
         '#default_value' => $off_value,
@@ -116,32 +116,32 @@ function list_field_settings_form($field, $instance, $has_data) {
 
       // Link the allowed value to the on / off elements to prepare for the rare
       // case of an alter changing #parents.
-      $form['allowed_values']['#on_parents'] = &$form['allowed_values']['on']['#parents'];
-      $form['allowed_values']['#off_parents'] = &$form['allowed_values']['off']['#parents'];
+      $element['allowed_values']['#on_parents'] = &$form['allowed_values']['on']['#parents'];
+      $element['allowed_values']['#off_parents'] = &$form['allowed_values']['off']['#parents'];
 
       break;
   }
 
   // Alter the description for allowed values depending on the widget type.
   if ($instance['widget']['type'] == 'options_onoff') {
-    $form['allowed_values']['#description'] .= '<p>' . t("For a 'single on/off checkbox' widget, define the 'off' value first, then the 'on' value in the <strong>Allowed values</strong> section. Note that the checkbox will be labeled with the label of the 'on' value.") . '</p>';
+    $element['allowed_values']['#description'] .= '<p>' . t("For a 'single on/off checkbox' widget, define the 'off' value first, then the 'on' value in the <strong>Allowed values</strong> section. Note that the checkbox will be labeled with the label of the 'on' value.") . '</p>';
   }
   elseif ($instance['widget']['type'] == 'options_buttons') {
-    $form['allowed_values']['#description'] .= '<p>' . t("The 'checkboxes/radio buttons' widget will display checkboxes if the <em>Number of values</em> option is greater than 1 for this field, otherwise radios will be displayed.") . '</p>';
+    $element['allowed_values']['#description'] .= '<p>' . t("The 'checkboxes/radio buttons' widget will display checkboxes if the <em>Number of values</em> option is greater than 1 for this field, otherwise radios will be displayed.") . '</p>';
   }
 
-  $form['allowed_values_function'] = array(
+  $element['allowed_values_function'] = array(
     '#type' => 'value',
     '#value' => $settings['allowed_values_function'],
   );
-  $form['allowed_values_function_display'] = array(
+  $element['allowed_values_function_display'] = array(
     '#type' => 'item',
     '#title' => t('Allowed values list'),
     '#markup' => t('The value of this field is being determined by the %function function and may not be changed.', array('%function' => $settings['allowed_values_function'])),
     '#access' => !empty($settings['allowed_values_function']),
   );
 
-  return $form;
+  return $element;
 }
 
 /**
