@@ -2,6 +2,19 @@
 
 /**
  * Implements hook_code_sign_info().
+ *
+ * Returns an array of signing engines supported by this module, keyed by the
+ * machine name for the signing engine.  Each entry is an array with the
+ * following keys and values:
+ *
+ * - title - A human readable name for the module.
+ * - sign callback - The name of the function that signs some data.
+ * - verify callback - The name of the function that verifies some data.
+ * - status callback - The name of the function that returns some information
+ *   about the engine.  Typically, this is a list of available signing profiles.
+ * - public keychain callback - The name of the function that returns a list of
+ *   public keys.
+ * - file - The full path to the file that implements the callbacks.
  */
 function code_sign_hash_code_sign_info() {
   $signers = array();
@@ -72,6 +85,12 @@ function code_sign_hash_config_info() {
   return $prefixes;
 }
 
+/**
+ * Returns a list of supported hash algorithms suitable for form fields.
+ *
+ * @return
+ *   An array of supported hash algorithm names, keyed by the same.
+ */
 function code_sign_hash_algorithms() {
   $algos = hash_algos();
   return array_combine($algos, $algos);

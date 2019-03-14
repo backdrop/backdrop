@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Theming functions for code_sign.
+ */
+
+/**
  * Base implementation for theme('code_sign_report').
  */
 function theme_code_sign_report($vars) {
@@ -34,10 +39,17 @@ function theme_code_sign_report($vars) {
 
 /**
  * Base implementation for theme('code_sign_result').
+ *
+ * A signing module may overide this with a more complex item including links
+ * to the signing certificate or displaying the identity of the signer.
  */
 function theme_code_sign_result($vars) {
-  explode($vars);
-  $result = array();
+  $result_class = empty($vars['result']) ? 'code-sign-result-bad' : 'code-sign-result-good';
+  $result_text = t('@signer:@profile - @result', array(
+    '@signer' => $vars['signer'],
+    '@profile' => $vars['profile'],
+    '@result' => empty($vars['result']) ? t('Pass') : t('Fail'),
+  ));
 
-  return theme('image', array());
+  return '<div class="code-sign-result ' . $result_class .'>' . $result_text . '</div>';
 }
