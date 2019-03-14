@@ -22,10 +22,10 @@ DirectoryIndex index.php index.html index.htm
 # settings.php and backdrop_environment_initialize() in includes/bootstrap.inc
 # for settings that can be changed at runtime.
 <IfModule mod_php5.c>
-    SetEnv MOD_PHP 5
+  SetEnv MOD_PHP 5
 </IfModule>
 <IfModule mod_php7.c>
-    SetEnv MOD_PHP 7
+  SetEnv MOD_PHP 7
 </IfModule>
 <If "reqenv('MOD_PHP') != '' || reqenv('REDIRECT_MOD_PHP') != ''">
   php_flag session.auto_start               off
