@@ -1580,8 +1580,12 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
   // responsible for not returning settings that cannot be changed if
   // the field already has data.
   $form['field']['settings'] = array();
-  $additions = module_invoke($field['module'], 'field_settings_form', $field, $instance, $has_data);
-  if (is_array($additions)) {
+  $additions = array();
+  $function = $field['module'] . '_field_settings_form';
+  if (function_exists($function)) {
+    $additions = $function($field, $instance, $has_data, $form, $form_state);
+  }
+  if (!empty($additions)) {
     if ($has_data) {
       $form['field']['#description'] = '<div class="messages warning">' . t('There is data for this field in the database. Some field settings may no longer be changed.') . '</div>' . $form['field']['#description'];
     }
@@ -1890,14 +1894,22 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
   );
 
   // Add additional field instance settings from the field module.
-  $additions = module_invoke($field['module'], 'field_instance_settings_form', $field, $instance);
-  if (is_array($additions)) {
+  $additions = array();
+  $function = $field['module'] . '_field_instance_settings_form';
+  if (function_exists($function)) {
+    $additions = $function($field, $instance, $form, $form_state);
+  }
+  if (!empty($additions)) {
     $form['instance']['settings'] = $additions;
   }
 
   // Add additional widget settings from the widget module.
-  $additions = module_invoke($widget_type['module'], 'field_widget_settings_form', $field, $instance);
-  if (is_array($additions)) {
+  $additions = array();
+  $function = $widget_type['module'] . '_field_widget_settings_form';
+  if (function_exists($function)) {
+    $additions = $function($field, $instance, $form, $form_state);
+  }
+  if (!empty($additions)) {
     $form['instance']['widget']['settings'] = $additions;
     $form['instance']['widget']['active']['#value'] = 1;
   }
@@ -1966,8 +1978,12 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
   // Add additional field type settings. The field type module is
   // responsible for not returning settings that cannot be changed if
   // the field already has data.
-  $additions = module_invoke($field['module'], 'field_settings_form', $field, $instance, $has_data);
-  if (is_array($additions)) {
+  $additions = array();
+  $function = $field['module'] . '_field_settings_form';
+  if (function_exists($function)) {
+    $additions = $function($field, $instance, $has_data, $form, $form_state);
+  }
+  if (!empty($additions)) {
     $form['field']['settings'] = $additions;
   }
 
