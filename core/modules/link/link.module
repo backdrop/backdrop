@@ -51,23 +51,23 @@ function link_field_info() {
 /**
  * Implements hook_field_instance_settings_form().
  */
-function link_field_instance_settings_form($field, $instance) {
+function link_field_instance_settings_form($field, $instance, $form, &$form_state) {
   $entity_info = entity_get_info($instance['entity_type']);
   $token_types = !empty($entity_info['token type']) ? array($entity_info['token type']) : '';
   $token_link = ' ' . theme('token_tree_link', array('token_types' => $token_types));
 
-  $form = array(
+  $element = array(
     '#element_validate' => array('link_field_settings_form_validate'),
   );
 
-  $form['validate_url'] = array(
+  $element['validate_url'] = array(
     '#type' => 'checkbox',
     '#title' => t('Validate URL'),
     '#default_value' => $instance['settings']['validate_url'] !== '' ? $instance['settings']['validate_url'] : TRUE,
     '#description' => t('If checked, the URL field will be verified as a valid URL during validation.'),
   );
 
-  $form['url'] = array(
+  $element['url'] = array(
     '#type' => 'checkbox',
     '#title' => t('Optional URL'),
     '#default_value' => $instance['settings']['url'],
@@ -82,7 +82,7 @@ function link_field_instance_settings_form($field, $instance) {
     'none' => t('No Title'),
   );
 
-  $form['title'] = array(
+  $element['title'] = array(
     '#type' => 'radios',
     '#title' => t('Link Title'),
     '#default_value' => $instance['settings']['title'],
@@ -90,7 +90,7 @@ function link_field_instance_settings_form($field, $instance) {
     '#description' => t('If the link title is optional or required, a field will be displayed to the end user. If the link title is static, the link will always use the same title.'),
   );
 
-  $form['title_value'] = array(
+  $element['title_value'] = array(
     '#type' => 'textfield',
     '#title' => t('Static title'),
     '#default_value' => $instance['settings']['title_value'],
@@ -102,7 +102,7 @@ function link_field_instance_settings_form($field, $instance) {
     ),
   );
 
-  $form['title_label_use_field_label'] = array(
+  $element['title_label_use_field_label'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use field label for title label'),
     '#default_value' => $instance['settings']['title_label_use_field_label'],
@@ -114,7 +114,7 @@ function link_field_instance_settings_form($field, $instance) {
     ),
   );
 
-  $form['title_maxlength'] = array(
+  $element['title_maxlength'] = array(
     '#type' => 'textfield',
     '#title' => t('Max length of title field'),
     '#default_value' => $instance['settings']['title_maxlength'],
@@ -128,20 +128,20 @@ function link_field_instance_settings_form($field, $instance) {
     ),
   );
 
-  $form['advanced'] = array(
+  $element['advanced'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced Options'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#parents' => array('instance', 'settings'),
   );
-  $form['advanced']['enable_tokens'] = array(
+  $element['advanced']['enable_tokens'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow user-entered tokens'),
     '#default_value' => $instance['settings']['enable_tokens'],
     '#description' => t('Checking will allow users to enter tokens in URLs and Titles on the content form. This does not affect the field settings on this page, which always support tokens.'),
   );
-  $form['advanced']['display']['url_cutoff'] = array(
+  $element['advanced']['display']['url_cutoff'] = array(
     '#type' => 'textfield',
     '#title' => t('URL Display Cutoff'),
     '#default_value' => $instance['settings']['display']['url_cutoff'],
@@ -156,13 +156,13 @@ function link_field_instance_settings_form($field, $instance) {
     LINK_TARGET_NEW_WINDOW => t('Open link in new window'),
     LINK_TARGET_USER => t('Allow the user to choose'),
   );
-  $form['advanced']['attributes']['target'] = array(
+  $element['advanced']['attributes']['target'] = array(
     '#type' => 'radios',
     '#title' => t('Link Target'),
     '#default_value' => $instance['settings']['attributes']['target'],
     '#options' => $target_options,
   );
-  $form['advanced']['attributes']['rel'] = array(
+  $element['advanced']['attributes']['rel'] = array(
     '#type' => 'textfield',
     '#title' => t('Rel Attribute'),
     '#description' => t('When output, this link will have this rel attribute. The most common usage is <a href="http://en.wikipedia.org/wiki/Nofollow">rel=&quot;nofollow&quot;</a> which prevents some search engines from spidering entered links.'),
@@ -176,30 +176,30 @@ function link_field_instance_settings_form($field, $instance) {
     'rel_remove_external' => t('Remove rel if given link is external'),
     'rel_remove_internal' => t('Remove rel if given link is internal'),
   );
-  $form['advanced']['rel_remove'] = array(
+  $element['advanced']['rel_remove'] = array(
     '#type' => 'radios',
     '#title' => t('Remove rel attribute automatically'),
     '#default_value' => $instance['settings']['rel_remove'],
     '#description' => t('Turn on/off if rel attribute should be removed automatically, if user given link is internal/external'),
     '#options' => $rel_remove_options,
   );
-  $form['advanced']['attributes']['configurable_class'] = array(
+  $element['advanced']['attributes']['configurable_class'] = array(
     '#title' => t("Allow the user to enter a custom link class per link"),
     '#type' => 'checkbox',
     '#default_value' => $instance['settings']['attributes']['configurable_class'],
   );
-  $form['advanced']['attributes']['class'] = array(
+  $element['advanced']['attributes']['class'] = array(
     '#type' => 'textfield',
     '#title' => t('Additional CSS Classes'),
     '#description' => t('Add these classes on output (will be added to any user-provided classes). Multiple classes should be separated by spaces.'),
     '#default_value' => $instance['settings']['attributes']['class'],
   );
-  $form['advanced']['attributes']['configurable_title'] = array(
+  $element['advanced']['attributes']['configurable_title'] = array(
     '#title' => t("Allow the user to enter a link 'title' attribute"),
     '#type' => 'checkbox',
     '#default_value' => $instance['settings']['attributes']['configurable_title'],
   );
-  $form['advanced']['attributes']['title'] = array(
+  $element['advanced']['attributes']['title'] = array(
     '#type' => 'textfield',
     '#title' => t("Default link 'title' Attribute"),
     '#states' => array(
@@ -213,7 +213,7 @@ function link_field_instance_settings_form($field, $instance) {
     '#field_suffix' => '"',
     '#size' => 20,
   );
-  return $form;
+  return $element;
 }
 
 /**
