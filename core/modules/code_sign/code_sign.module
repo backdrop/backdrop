@@ -2,6 +2,9 @@
 
 /**
  * @file
+ * Provieds a framework for signing and verification of arbirary data.
+ *
+ * This module works with other modules that provide algorithm-specific support.
  */
 
 /**
@@ -48,7 +51,12 @@ function code_sign_theme() {
   // Display the short result of a signature verification check.  Signing
   // modules should implement their own versions of this theme function.
   $items['code_sign_result'] = array(
-    'variables' => array(),
+    'variables' => array(
+      'signer' => NULL,
+      'signature' => NULL,
+      'profile' => NULL,
+      'result' => NULL,
+    ),
     'file' => 'code_sign.theme.inc',
   );
 
@@ -58,13 +66,14 @@ function code_sign_theme() {
 /**
  * Implements hook_code_sign_info().
  *
- * No signing modules are implemented in core.  A site must include at least one
- * signing module to use code_sign.
+ * No signing modules are implemented in code_sign.  A site must include at
+ * least one signing module to use code_sign. See code_sign_hash for an example
+ * of a signing module.
  */
 function code_sign_code_sign_info() {
   $all_signers = array();
 
-  // None defined in core.  Use a contrib module.
+  // None defined in code_sign.  Use a contrib module.
 
   return $all_signers;
 }
@@ -156,7 +165,7 @@ function code_sign_report_page() {
  * @return
  *   Returns NULL on failure and te results of the callback otherwise.
  * @throws CodeSignException
- *   Throws an expception if the callback or signer are not specified.
+ *   Throws an exception if the callback or signer are not specified.
  */
 function code_sign_execute_callback() {
   $args = func_get_args();

@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Implement all the code_sign callbacks for the hash signing engine.
+ */
 
 /**
  * Sign data with the specified profile.
@@ -53,6 +57,9 @@ function code_sign_hash_verify($data, $signature = NULL, $options = array()) {
 /**
  * Provide a render array with whatever status the module wants to show.
  * This is used in the admin/reports/code-sign page.
+ *
+ * @return
+ *   A render array with the engine status.
  */
 function code_sign_hash_status() {
   $profiles = code_sign_hash_get_private_keychain();
