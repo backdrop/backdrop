@@ -105,10 +105,7 @@ function system_admin_index() {
  */
 function system_themes_page() {
   // Inform the user if theme_debug is enabled.
-  $theme_debug_enabled = config_get('system.core', 'theme_debug');
-  if ($theme_debug_enabled) {
-    backdrop_set_message(t('Theme debugging is enabled. See the <a href="!url">Status report</a> page for more info.', array('!url' => url('admin/reports/status'))), 'warning', FALSE);
-  }
+  system_theme_debug_enabled_warning();
 
   // Get current list of themes.
   $themes = system_rebuild_theme_data();
@@ -374,10 +371,7 @@ function system_theme_settings($form, &$form_state, $key) {
   $themes = list_themes();
 
   // Inform the user if theme_debug is enabled.
-  $theme_debug_enabled = config_get('system.core', 'theme_debug');
-  if ($theme_debug_enabled) {
-    backdrop_set_message(t('Theme debugging is enabled. See the <a href="!url">Status report</a> page for more info.', array('!url' => url('admin/reports/status'))), 'warning', FALSE);
-  }
+  system_theme_debug_enabled_warning();
 
   $form['theme'] = array(
     '#type' => 'value',
