@@ -131,7 +131,7 @@ function field_test_field_is_empty($item, $field) {
 /**
  * Implements hook_field_settings_form().
  */
-function field_test_field_settings_form($field, $instance, $has_data) {
+function field_test_field_settings_form($field, $instance, $has_data, $form, &$form_state) {
   $settings = $field['settings'];
 
   // Return no settings if so set to test skipping the field settings
@@ -140,7 +140,7 @@ function field_test_field_settings_form($field, $instance, $has_data) {
     return array();
   }
 
-  $form['test_field_setting'] = array(
+  $element['test_field_setting'] = array(
     '#type' => 'textfield',
     '#title' => t('Field test field setting'),
     '#default_value' => $settings['test_field_setting'],
@@ -148,16 +148,16 @@ function field_test_field_settings_form($field, $instance, $has_data) {
     '#description' => t('A dummy form element to simulate field setting.'),
   );
 
-  return $form;
+  return $element;
 }
 
 /**
  * Implements hook_field_instance_settings_form().
  */
-function field_test_field_instance_settings_form($field, $instance) {
+function field_test_field_instance_settings_form($field, $instance, $form, &$form_state) {
   $settings = $instance['settings'];
 
-  $form['test_instance_setting'] = array(
+  $element['test_instance_setting'] = array(
     '#type' => 'textfield',
     '#title' => t('Field test field instance setting'),
     '#default_value' => $settings['test_instance_setting'],
@@ -165,7 +165,7 @@ function field_test_field_instance_settings_form($field, $instance) {
     '#description' => t('A dummy form element to simulate field instance setting.'),
   );
 
-  return $form;
+  return $element;
 }
 
 /**
@@ -248,11 +248,11 @@ function field_test_field_widget_error($element, $error, $form, &$form_state) {
 /**
  * Implements hook_field_widget_settings_form().
  */
-function field_test_field_widget_settings_form($field, $instance) {
+function field_test_field_widget_settings_form($field, $instance, $form, &$form_state) {
   $widget = $instance['widget'];
   $settings = $widget['settings'];
 
-  $form['test_widget_setting'] = array(
+  $element['test_widget_setting'] = array(
     '#type' => 'textfield',
     '#title' => t('Field test field widget setting'),
     '#default_value' => $settings['test_widget_setting'],
@@ -260,7 +260,7 @@ function field_test_field_widget_settings_form($field, $instance) {
     '#description' => t('A dummy form element to simulate field widget setting.'),
   );
 
-  return $form;
+  return $element;
 }
 
 /**
