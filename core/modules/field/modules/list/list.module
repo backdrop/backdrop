@@ -116,8 +116,8 @@ function list_field_settings_form($field, $instance, $has_data, $form, &$form_st
 
       // Link the allowed value to the on / off elements to prepare for the rare
       // case of an alter changing #parents.
-      $element['allowed_values']['#on_parents'] = &$form['allowed_values']['on']['#parents'];
-      $element['allowed_values']['#off_parents'] = &$form['allowed_values']['off']['#parents'];
+      $element['allowed_values']['#on_parents'] = &$element['allowed_values']['on']['#parents'];
+      $element['allowed_values']['#off_parents'] = &$element['allowed_values']['off']['#parents'];
 
       break;
   }
