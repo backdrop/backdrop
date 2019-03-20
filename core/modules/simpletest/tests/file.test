@@ -1066,7 +1066,7 @@ class FileDirectoryTest extends FileTestCase {
     $this->assertEqual($path, FALSE, 'An error is returned when filepath destination already exists with FILE_EXISTS_ERROR.', 'File');
 
     try {
-      @file_destination("core/misc/a\xFFtest\x80€.txt", FILE_EXISTS_REPLACE);
+      file_destination("core/misc/a\xFFtest\x80€.txt", FILE_EXISTS_REPLACE);
       $this->fail('Expected exception not thrown');
     }
     catch (RuntimeException $e) {
