@@ -1028,7 +1028,8 @@ function file_build_uri($path) {
  */
 function file_destination($destination, $replace) {
   $basename = backdrop_basename($destination);
-  if (!backdrop_validate_utf8($basename)) {
+  // Suppress notices in validation, in the event we encounter unexpected data.
+  if (!@backdrop_validate_utf8($basename)) {
     throw new RuntimeException(sprintf("Invalid filename '%s'", $basename));
   }
   if (file_exists($destination)) {
