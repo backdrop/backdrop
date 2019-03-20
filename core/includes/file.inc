@@ -1289,7 +1289,7 @@ function file_create_filename($basename, $directory) {
   $original = $basename;
   // Strip control characters (ASCII value < 32). Though these are allowed in
   // some filesystems, not many applications handle them well.
-  $basename = preg_replace('/[\x00-\x1F]/u', '_', $basename);
+  $basename = @preg_replace('/[\x00-\x1F]/u', '_', $basename);
   if (preg_last_error() !== PREG_NO_ERROR) {
     throw new RuntimeException(sprintf("Invalid filename '%s'", $original));
   }
