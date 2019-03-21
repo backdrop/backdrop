@@ -149,6 +149,11 @@ abstract class Updater implements BackdropUpdaterInterface {
         unset($info_files[$info_file->uri]);
         continue;
       }
+      // Exclude info files for profiles.
+      if (strpos($info_file->uri, '/core/profiles/') !== FALSE) {
+        unset($info_files[$info_file->uri]);
+        continue;
+      }
       if (backdrop_substr($info_file->filename, 0, -5) == backdrop_basename($directory)) {
         // Info file Has the same name as the directory, return it.
         return $info_file->uri;
