@@ -2449,8 +2449,8 @@ function _filter_image_caption($text) {
     $attributes = array();
     $tag = $node->tagName;
     $classes = $node->getAttribute('class');
-    $node = ($node->parentNode->tagName === 'a') ? $node->parentNode : $node;
     $node->removeAttribute('class');
+    $node = ($node->parentNode->tagName === 'a') ? $node->parentNode : $node;
     if ($classes) {
       $attributes['class'] = explode(' ', $classes);
     }
