@@ -18,11 +18,11 @@
  * include settings that are safe to change.
  *
  * @todo: Only the field type module knows which settings will affect the
- * field's schema, but only the field storage module knows what schema
- * changes are permitted once a field already has data. Probably we need an
- * easy way for a field type module to ask whether an update to a new schema
- * will be allowed without having to build up a fake $prior_field structure
- * for hook_field_update_forbid().
+ * field's schema, but only the field storage module knows what schema changes
+ * are permitted once a field already has data. We probably need an easy way for
+ * a field type module to ask whether an update to a new schema will be allowed
+ * without having to build up a fake $prior_field structure for
+ * hook_field_update_forbid().
  *
  * @param $field
  *   The field structure being configured.
@@ -37,6 +37,12 @@
  *
  * @return
  *   The form definition for the field settings.
+ *
+ * @since 1.13.0 Added $form and $form_state parameters. This allows
+ *   implementations of this hook to support more complex behaviours (such as
+ *   dependencies and AJAX for example), and avoids having to resort to using
+ *   hook_form_alter().
+ *   See: https://github.com/backdrop/backdrop-issues/issues/3590
  */
 function hook_field_settings_form($field, $instance, $has_data, $form, &$form_state) {
   $settings = $field['settings'];
