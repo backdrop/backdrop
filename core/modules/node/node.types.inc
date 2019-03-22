@@ -132,12 +132,13 @@ function node_type_form($form, &$form_state, $type = NULL) {
     ),
   );
 
+  // Submission form settings.
   $form['submission'] = array(
     '#type' => 'fieldset',
     '#title' => t('Submission form settings'),
     '#collapsible' => TRUE,
     '#group' => 'additional_settings',
-    '#weight' => -10,
+    '#weight' => -15,
   );
   $form['submission']['title_label'] = array(
     '#title' => t('Title field label'),
@@ -167,13 +168,15 @@ function node_type_form($form, &$form_state, $type = NULL) {
       BACKDROP_OPTIONAL => t('Optional'),
     ),
   );
+
+  // Publishing settings.
   $form['workflow'] = array(
     '#type' => 'fieldset',
     '#title' => t('Publishing settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
-    '#weight' => -5,
+    '#weight' => -10,
   );
   $form['workflow']['status_default'] = array(
     '#type' => 'radios',
@@ -192,22 +195,11 @@ function node_type_form($form, &$form_state, $type = NULL) {
       'input[name="scheduling_enabled"]' => array('checked' => TRUE),
     ),
   );
-
   $form['workflow']['scheduling_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show option for scheduling'),
     '#default_value' => $type->settings['scheduling_enabled'],
   );
-
-  if (module_exists('language')) {
-    $form['workflow']['language'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Multilingual support'),
-      '#default_value' => $type->settings['language'],
-      '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new posts are saved with no defined language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
-    );
-  }
-
   $form['workflow']['sticky'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Sticky'),
@@ -227,7 +219,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#parents' => array('sticky_default'),
     '#return_value' => 1,
   );
-
   $form['workflow']['promote'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Promote'),
@@ -248,13 +239,46 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#return_value' => 1,
   );
 
+  // Multilingual support.
+  if (module_exists('language')) {
+    $form['multilingual'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Multilingual support'),
+      '#collapsible' => TRUE,
+      '#group' => 'additional_settings',
+      '#weight' => -5,
+    );
+    $form['multilingual']['language'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Multilingual support'),
+      '#default_value' => $type->settings['language'],
+      '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new posts are saved with no defined language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
+    );
+  }
+
+  // URL alias pattern.
+  // @see: path_pattern_settings_form().
+
+  // Content type permissions.
+  $form['permissions'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Permissions'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#access' => user_access('administer permissions'),
+    '#weight' => 0,
+  );
+  $form['permissions']['permissions'] = node_type_form_permissions($type->type);
+
+  // Revision settings.
   $form['revision'] = array(
     '#type' => 'fieldset',
     '#title' => t('Revision settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
-    '#weight' => 1,
+    '#weight' => 10,
   );
   $form['revision']['revision']['revision_enabled'] = array(
     '#type' => 'checkbox',
@@ -270,25 +294,17 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#parents' => array('revision_default'),
   );
 
-  // Node type permissions
-  $form['permissions'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Permissions'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#group' => 'additional_settings',
-    '#access' => user_access('administer permissions'),
-    '#weight' => -3,
-  );
-  $form['permissions']['permissions'] = node_type_form_permissions($type->type);
+  // Menu settings.
+  // @see: menu_form_node_type_form_alter().
 
+  // Display settings.
   $form['display'] = array(
     '#type' => 'fieldset',
     '#title' => t('Display settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
-    '#weight' => 10,
+    '#weight' => 20,
   );
   $form['display']['node_submitted'] = array(
     '#type' => 'checkbox',
@@ -316,6 +332,9 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->settings['hidden_path'],
     '#description' => t('If enabled, this content can be placed as a block or within a listing but will not be accessible at its URL without proper permissions. This facilitates "hidden path" content that is meant to be embedded with other content and never on its own. Users who have the "View hidden paths" permission will still be able to visit the full page URL, while those without this permission will receive a "Page not found" error.'),
   );
+
+  // Comment settings.
+  // @see: comment_form_node_type_form_alter().
 
   $form['old_type'] = array(
     '#type' => 'value',
