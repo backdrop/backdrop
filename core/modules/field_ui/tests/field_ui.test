@@ -615,8 +615,7 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
     $this->backdropPostAJAX(NULL, $edit, "field_test_formatter_settings_update");
 
     // Confirm that the settings are updated on the settings form.
-    $this->backdropPostAJAX(NULL, array(), "field_test_formatter_settings_edit");
-    $this->assertFieldByName($fieldname, 'foo');
+    $this->assertText(t('Display text: @text', array('@text' => 'foo')));
   }
 
   /**

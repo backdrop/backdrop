@@ -295,5 +295,16 @@ function field_test_field_formatter_settings_form_alter(&$element, &$form_state,
  * Implements hook_field_formatter_settings_summary_alter().
  */
 function field_test_field_formatter_settings_summary_alter(&$summary, $context) {
-  $summary .= '<br />field_test_field_formatter_settings_summary_alter';
+  $settings = $context['instance']['display'][$context['view_mode']]['settings'];
+
+  if (!empty($summary)) {
+    $summary .= '<br />';
+  }
+
+  if (!empty($settings['field_test_formatter_settings_form_alter'])) {
+    $summary .= t('Display text: @text', array('@text' => $settings['field_test_formatter_settings_form_alter']));
+  }
+  else {
+    $summary .= 'field_test_field_formatter_settings_summary_alter';
+  }
 }
