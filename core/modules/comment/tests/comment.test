@@ -1636,6 +1636,7 @@ class CommentApprovalTest extends CommentHelperCase {
     $this->backdropGet('admin/content/comment/approval');
     $this->assertText(t('Unapproved comments (@count)', array('@count' => 2)), 'Two unapproved comments waiting for approval.');
     $edit = array(
+      'operation' => 'publish',
       "comments[{$comments[0]->id}]" => 1,
       "comments[{$comments[1]->id}]" => 1,
     );
@@ -1644,7 +1645,7 @@ class CommentApprovalTest extends CommentHelperCase {
 
     // Delete multiple comments in one operation.
     $edit = array(
-      'operations' => 'delete',
+      'operation' => 'delete',
       "comments[{$comments[0]->id}]" => 1,
       "comments[{$comments[1]->id}]" => 1,
       "comments[{$anonymous_comment4->id}]" => 1,
