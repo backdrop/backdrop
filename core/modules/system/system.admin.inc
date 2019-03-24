@@ -322,7 +322,7 @@ function system_theme_default() {
     if (!empty($themes[$theme])) {
       // Enable the theme if it is currently disabled.
       if (empty($themes[$theme]->status)) {
-       theme_enable(array($theme));
+        theme_enable(array($theme));
       }
       // Set the default theme.
       config_set('system.core', 'theme_default', $theme);
@@ -330,21 +330,26 @@ function system_theme_default() {
       // Rebuild the menu. This duplicates the menu_rebuild() in theme_enable().
       // However, modules must know the current default theme in order to use
       // this information in hook_menu() or hook_menu_alter() implementations,
-      // and doing the config_set() before the theme_enable() could result
-      // in a race condition where the theme is default but not enabled.
+      // and doing the config_set() before the theme_enable() could result in a
+      // race condition where the theme is default but not enabled.
       menu_rebuild();
 
-      // The status message depends on whether an admin theme is currently in use:
-      // a value of 0 means the admin theme is set to be the default theme.
+      // The status message depends on whether an admin theme is currently in
+      // use: a value of 0 means the admin theme is set to be the default theme.
       $admin_theme = config_get('system.core', 'admin_theme');
+      backdrop_set_message(t('%theme is now the default theme.', array('%theme' => $themes[$theme]->info['name'])));
+
+      ///Clear caches after changing the theme.
+      cache_clear_all();
+      backdrop_set_message(t('All caches have been flushed.'));
+
+      // If the admin theme is set to a different theme than the one the user
+      // has just switched to, show an info message to explain why.
       if ($admin_theme && $admin_theme != $theme) {
         backdrop_set_message(t('Please note that the administration theme is still set to the %admin_theme theme; consequently, the theme on this page remains unchanged. All non-administrative sections of the site, however, will show the selected %selected_theme theme by default.', array(
           '%admin_theme' => $themes[$admin_theme]->info['name'],
           '%selected_theme' => $themes[$theme]->info['name'],
-        )));
-      }
-      else {
-        backdrop_set_message(t('%theme is now the default theme.', array('%theme' => $themes[$theme]->info['name'])));
+        )), 'info');
       }
     }
     else {
