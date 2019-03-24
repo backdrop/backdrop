@@ -71,7 +71,7 @@ function field_ui_fields_list() {
     $rows[$field_name]['data']['used_as'] = theme('item_list', array('items' => $rows[$field_name]['data']['used_as']));
   }
 
-  // Sort columns
+  // Sort columns.
   $sort = tablesort_get_sort($header);
   $order = tablesort_get_order($header);
   switch($order['sql']) {
