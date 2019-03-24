@@ -15,6 +15,19 @@
 }
 
 /**
+ * Prevent contextual links for views-generated blocks from overlapping with
+ * the first view item when rendering blocks of content/teasers.
+ * See: https://github.com/backdrop/backdrop-issues/issues/3615
+ */
+.block-content .view-content {
+  padding: 10px;
+}
+
+.block-content .view-content {
+  padding: 10px;
+}
+
+/**
  * Contextual links.
  */
 .contextual-links-wrapper {
