@@ -339,7 +339,7 @@ function system_theme_default() {
       $admin_theme = config_get('system.core', 'admin_theme');
       backdrop_set_message(t('%theme is now the default theme.', array('%theme' => $themes[$theme]->info['name'])));
 
-      ///Clear caches after changing the theme.
+      // Clear caches after changing the theme.
       cache_clear_all();
       backdrop_set_message(t('All caches have been flushed.'));
 
