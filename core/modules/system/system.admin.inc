@@ -235,6 +235,14 @@ function system_themes_admin_form($form, &$form_state, $theme_options) {
   $form['admin_theme'] = array(
     '#type' => 'fieldset',
     '#title' => t('Administration theme'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#attributes' => array(
+      'class' => array('admin-theme-form'),
+    ),
+    '#attached' => array(
+      'js' => array(backdrop_get_path('module', 'system') . '/js/themes.js'),
+    ),
   );
   $form['admin_theme']['admin_theme'] = array(
     '#type' => 'select',
