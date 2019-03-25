@@ -29,11 +29,12 @@ function field_ui_fields_list() {
   $modules = system_rebuild_module_data();
 
   $header = array(
-    array('data' => t('Field name'), 'field' => 'field_name', 'sort' => 'asc'),
+    array('data' => t('Field'), 'field' => 'field_name', 'sort' => 'asc'),
     array('data' => t('Field type'), 'field' => 'field_type', 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
     array('data' => t('Module'), 'field' => 'module', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
     t('Used as'),
   );
+
   $rows = array();
   foreach ($instances as $entity_type => $type_bundles) {
     foreach ($type_bundles as $bundle => $bundle_instances) {
@@ -43,10 +44,16 @@ function field_ui_fields_list() {
         // Initialize the row if we encounter the field for the first time.
         if (!isset($rows[$field_name])) {
           $module_name = $field_types[$field['type']]['module'];
-          $rows[$field_name]['class'] = $field['locked'] ? array('menu-disabled') : array('');
-          $rows[$field_name]['data']['field_name'] = $field['locked'] ? t('@field_name (Locked)', array('@field_name' => $field_name)) : $field_name;
+          $label = field_get_label($field_name);
+          $rows[$field_name]['class'] = array();
+          $rows[$field_name]['data']['field_name'] = t('@label <small>(Machine name: @field_name)</small>', array('@label' => $label, '@field_name' => $field_name));
           $rows[$field_name]['data']['field_type'] = $field_types[$field['type']]['label'];
           $rows[$field_name]['data']['module'] = $modules[$module_name]->info['name'];
+
+          if ($field['locked']) {
+            $rows[$field_name]['class'][] = 'menu-disabled';
+            $rows[$field_name]['data']['field_name'] .= ' - ' . t('Locked');
+          }
         }
 
         // Add the current instance.
