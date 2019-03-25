@@ -337,20 +337,24 @@ function system_theme_default() {
       // The status message depends on whether an admin theme is currently in
       // use: a value of 0 means the admin theme is set to be the default theme.
       $admin_theme = config_get('system.core', 'admin_theme');
-      backdrop_set_message(t('%theme is now the default theme.', array('%theme' => $themes[$theme]->info['name'])));
-
-      // Clear caches after changing the theme.
-      cache_clear_all();
-      backdrop_set_message(t('All caches have been flushed.'));
 
       // If the admin theme is set to a different theme than the one the user
       // has just switched to, show an info message to explain why.
       if ($admin_theme && $admin_theme != $theme) {
-        backdrop_set_message(t('Please note that the administration theme is still set to the %admin_theme theme; consequently, the theme on this page remains unchanged. All non-administrative sections of the site, however, will show the selected %selected_theme theme by default.', array(
+        backdrop_set_message(t('%theme is now the default theme for all non-administrative pages.', array('%theme' => $themes[$theme]->info['name'])));
+        backdrop_set_message(t('The administration theme is still set to the %admin_theme theme. <a href="@change_admin_theme_link">Change the administration theme', array(
           '%admin_theme' => $themes[$admin_theme]->info['name'],
-          '%selected_theme' => $themes[$theme]->info['name'],
+          '@change_admin_theme_link' => url('admin/appearance', $options = array('fragment' => 'system-themes-admin-form')),
         )), 'info');
       }
+      else {
+        backdrop_set_message(t('%theme is now the default theme.', array('%theme' => $themes[$theme]->info['name'])));
+      }
+
+      // Clear caches after changing the theme.
+      cache_clear_all();
+      backdrop_set_message(t('All caches have been cleared.'));
+
     }
     else {
       backdrop_set_message(t('The %theme theme was not found.', array('%theme' => $theme)), 'error');
