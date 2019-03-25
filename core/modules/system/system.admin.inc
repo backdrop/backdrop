@@ -221,7 +221,7 @@ function system_themes_page() {
 
   $admin_form = backdrop_get_form('system_themes_admin_form', $admin_theme_options);
 
-  return theme('system_themes_page', array('theme_groups' => $theme_groups, 'theme_group_titles' => $theme_group_titles)) . backdrop_render($admin_form);
+  return backdrop_render($admin_form) . theme('system_themes_page', array('theme_groups' => $theme_groups, 'theme_group_titles' => $theme_group_titles));
 }
 
 /**
