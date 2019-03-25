@@ -105,6 +105,21 @@ Backdrop.filterEditorDetach = function(field, format, trigger) {
 };
 
 /**
+ * Provides summary text for the "Editor details" fieldset, under each CKEditor
+ * instance.
+ */
+Backdrop.behaviors.filterFieldsetSummaries = {
+  attach: function (context) {
+    $(context).find('fieldset.filter-wrapper').backdropSetSummary(function (element) {
+      var $element = $(element);
+      var editor_name = $element.find('.filter-list.form-select.filterEditors-processed :selected').text();
+
+      return editor_name;
+    });
+  }
+};
+
+/**
  * Provides toggles for uploading an image, whether by URL or upload.
  */
 Backdrop.behaviors.editorImageDialog = {
