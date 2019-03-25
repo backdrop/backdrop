@@ -1247,7 +1247,7 @@ function filter_process_format($element) {
   $element['format'] = array(
     '#type' => 'fieldset',
     '#attributes' => array('class' => array('filter-wrapper')),
-    '#title' => t('Formatting options'),
+    '#title' => t('Editor details'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
