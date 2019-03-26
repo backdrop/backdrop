@@ -106,10 +106,10 @@ fieldset .fieldset-wrapper {
   display: none;
 }
 
-.fieldset-legend span.summary:before {
+.fieldset-legend span.summary:not(:empty):before {
   content: '(';
 }
-.fieldset-legend span.summary:after {
+.fieldset-legend span.summary:not(:empty):after {
   content: ')';
 }
 

@@ -1384,10 +1384,10 @@ fieldset legend a:active {
 fieldset legend span.summary {
   padding: 0 5px;
 }
-fieldset legend span.summary:before {
+fieldset legend span.summary:not(:empty):before {
   content: '(';
 }
-fieldset legend span.summary:after {
+fieldset legend span.summary:not(:empty):after {
   content: ')';
 }
 fieldset .fieldset-wrapper {
