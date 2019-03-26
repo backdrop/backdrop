@@ -1156,7 +1156,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
 
     // Turn on maintenance mode.
     $edit = array(
-      'maintenance_mode' => TRUE,
+      'maintenance_mode' => 1,
     );
     $this->backdropPost('admin/config/development/maintenance', $edit, 'Save configuration');
     $this->assertRaw('The site is currently in maintenance mode. Visitors will only see the maintenance mode message (as configured below).', 'Maintenance confirmation message shown.');
