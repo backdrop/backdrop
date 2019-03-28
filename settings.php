@@ -317,7 +317,9 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
  * Trusted host configuration.
  *
  * Backdrop core can use a trusted host mechanism to prevent HTTP Host header
- * spoofing. For more information, see https://www.drupal.org/node/1992030
+ * spoofing. For more information, see:
+ * - https://backdropcms.org/trusted-host-settings
+ * - https://www.drupal.org/node/1992030
  *
  * To enable the trusted host mechanism, you specify your allowable hosts
  * in $settings['trusted_host_patterns'] in your settings.php file. This should
