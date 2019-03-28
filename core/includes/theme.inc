@@ -2024,11 +2024,11 @@ function theme_breadcrumb($variables) {
  *       constant. Themes may hide columns with one of these two classes on
  *       narrow viewports to save horizontal space. Only one column should be
  *       given a default sort order because table sorting only applies to one
- *        column at a time.
+ *       column at a time.
  *     - Any HTML attributes, such as "colspan", to apply to the column header
  *       cell.
  *   - footer: An array of table rows, which will be printed within a <tfoot>
- *     tag, in the same format as the rows element (see above).
+ *     tag, in the same format as the rows element (see below).
  *   - rows: An array of table rows. Every row is an array of cells, or an
  *     associative array with the following keys:
  *     - "data": an array of cells.
@@ -2109,7 +2109,7 @@ function theme_table(array $variables) {
     $output .= '<caption>' . $caption . "</caption>\n";
   }
 
-  // Format the table columns:
+  // Format the table columns.
   if (!empty($colgroups)) {
     foreach ($colgroups as $colgroup) {
       $colgroup_attributes = array();
@@ -2199,6 +2199,7 @@ function theme_table(array $variables) {
   $variables['rows'] = $rows;
   foreach ($sections as $section => $tag) {
     if (!empty($variables[$section])) {
+      // <tbody> or <tfoot>.
       $output .= "<" . $tag . ">\n";
       $flip = array('even' => 'odd', 'odd' => 'even');
       $class = 'even';
@@ -2210,12 +2211,13 @@ function theme_table(array $variables) {
         // Check if we're dealing with a simple or complex row.
         if (isset($row['data'])) {
           $cells = $row['data'];
-          $no_striping = isset($row['no_striping']) ? $row['no_striping'] : $no_striping;
+          $no_striping = isset($row['no_striping']) ?
+            $row['no_striping'] : $no_striping;
 
           // Set the attributes array and exclude 'data' and 'no_striping'.
-          $attributes = $row;
-          unset($attributes['data']);
-          unset($attributes['no_striping']);
+          $tr_attributes = $row;
+          unset($tr_attributes['data']);
+          unset($tr_attributes['no_striping']);
         }
 
         // Add odd/even class.
@@ -2247,9 +2249,10 @@ function theme_table(array $variables) {
           $output .= " </tr>\n";
         }
       }
+      // <tbody> or <tfoot>.
       $output .= "</" . $tag . ">\n";
-    }
-  }
+     }
+   }
 
   // Add sticky headers if enabled.
   if (!empty($header) && $sticky) {
