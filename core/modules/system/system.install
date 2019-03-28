@@ -606,12 +606,14 @@ function system_requirements($phase) {
   if ($phase == 'runtime') {
     $trusted_host_patterns = settings_get('trusted_host_patterns', array());
     $more_info = $t('See <a href="@url">Protecting against HTTP HOST Header attacks</a> for more information.', array('@url' => 'https://backdropcms.org/trusted-host-settings'));
+    // @todo: upgrade this to an error when we provide a way to configure
+    // $trusted_host_patterns via the admin UI.
     if (empty($trusted_host_patterns)) {
       $requirements['trusted_host_patterns'] = array(
         'title' => $t('Trusted Host Settings'),
         'value' => $t('Not enabled'),
         'description' => $t('The <code>trusted_host_patterns</code> setting is not configured in settings.php. It is <strong>highly recommended</strong> that you configure this, otherwise it can lead to security vulnerabilities.') . ' ' . $more_info,
-        'severity' => REQUIREMENT_ERROR,
+        'severity' => REQUIREMENT_WARNING,
       );
     }
     else {
