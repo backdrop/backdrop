@@ -2211,8 +2211,7 @@ function theme_table(array $variables) {
         // Check if we're dealing with a simple or complex row.
         if (isset($row['data'])) {
           $cells = $row['data'];
-          $no_striping = isset($row['no_striping']) ?
-            $row['no_striping'] : $no_striping;
+          $no_striping = isset($row['no_striping']) ? $row['no_striping'] : $no_striping;
 
           // Set the attributes array and exclude 'data' and 'no_striping'.
           $tr_attributes = $row;
@@ -2251,8 +2250,8 @@ function theme_table(array $variables) {
       }
       // <tbody> or <tfoot>.
       $output .= "</" . $tag . ">\n";
-     }
-   }
+    }
+  }
 
   // Add sticky headers if enabled.
   if (!empty($header) && $sticky) {
