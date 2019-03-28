@@ -2006,7 +2006,7 @@ function theme_breadcrumb($variables) {
 /**
  * Returns HTML for a table.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - header: An array containing the table headers. Each element of the array
  *     can be either a localized string or an associative array with the
@@ -2022,17 +2022,19 @@ function theme_breadcrumb($variables) {
  *       medium+ wide screens should be marked up with a class of
  *       'priority-medium', referenced by with the RESPONSIVE_PRIORITY_MEDIUM
  *       constant. Themes may hide columns with one of these two classes on
- *       narrow viewports to save horizontal space. Only
- *       one column should be given a default sort order because table sorting
- *       only applies to one column at a time.
+ *       narrow viewports to save horizontal space. Only one column should be
+ *       given a default sort order because table sorting only applies to one
+ *        column at a time.
  *     - Any HTML attributes, such as "colspan", to apply to the column header
  *       cell.
+ *   - footer: An array of table rows, which will be printed within a <tfoot>
+ *     tag, in the same format as the rows element (see above).
  *   - rows: An array of table rows. Every row is an array of cells, or an
  *     associative array with the following keys:
- *     - "data": an array of cells
+ *     - "data": an array of cells.
  *     - Any HTML attributes, such as "class", to apply to the table row.
  *     - "no_striping": a boolean indicating that the row should receive no
- *       'even / odd' styling. Defaults to FALSE.
+ *       'even/odd' styling. Defaults to FALSE.
  *     Each cell can be either a string or an associative array with the
  *     following keys:
  *     - "data": The string to display in the table cell.
@@ -2087,8 +2089,11 @@ function theme_breadcrumb($variables) {
  *   - sticky: Use a "sticky" table header.
  *   - empty: The message to display in an extra row if table does not have any
  *     rows.
+ *
+ * @return string
+ *   The HTML output.
  */
-function theme_table($variables) {
+function theme_table(array $variables) {
   $header = (array) $variables['header'];
   $rows = (array) $variables['rows'];
   $attributes = $variables['attributes'];
@@ -2155,7 +2160,7 @@ function theme_table($variables) {
   }
 
   $responsive_columns = array();
-  // Format the table header:
+  // Format the table header.
   if (!empty($header)) {
     $ts = tablesort_init($header);
     // HTML requires that the thead tag has tr tags in it followed by tbody
@@ -2186,28 +2191,34 @@ function theme_table($variables) {
     $ts = array();
   }
 
-  // Format the table rows:
-  if (!empty($rows)) {
-    $output .= "<tbody>\n";
-    $flip = array('even' => 'odd', 'odd' => 'even');
-    $class = 'even';
-    foreach ($rows as $number => $row) {
-      // Check if we're dealing with a simple or complex row.
-      if (isset($row['data'])) {
-        $cells = $row['data'];
-        $no_striping = isset($row['no_striping']) ? $row['no_striping'] : FALSE;
-
-        // Set the attributes array and exclude 'data' and 'no_striping'.
-        $tr_attributes = $row;
-        unset($tr_attributes['data']);
-        unset($tr_attributes['no_striping']);
-      }
-      else {
+  // Rows and footer have the same structure.
+  $sections = array(
+    'rows' => 'tbody',
+    'footer' => 'tfoot',
+  );
+  $variables['rows'] = $rows;
+  foreach ($sections as $section => $tag) {
+    if (!empty($variables[$section])) {
+      $output .= "<" . $tag . ">\n";
+      $flip = array('even' => 'odd', 'odd' => 'even');
+      $class = 'even';
+      foreach ($variables[$section] as $number => $row) {
         $cells = $row;
         $tr_attributes = array();
-        $no_striping = FALSE;
-      }
-      if (!empty($cells)) {
+        $no_striping = $section === 'footer';
+
+        // Check if we're dealing with a simple or complex row.
+        if (isset($row['data'])) {
+          $cells = $row['data'];
+          $no_striping = isset($row['no_striping']) ?
+            $row['no_striping'] : $no_striping;
+
+          // Set the attributes array and exclude 'data' and 'no_striping'.
+          $attributes = $row;
+          unset($attributes['data']);
+          unset($attributes['no_striping']);
+        }
+
         // Add odd/even class.
         if (!$no_striping) {
           $class = $flip[$class];
@@ -2215,28 +2226,30 @@ function theme_table($variables) {
         }
 
         // Build row.
-        $output .= ' <tr' . backdrop_attributes($tr_attributes) . '>';
-        $i = 0;
-        foreach ($cells as $cell) {
-          // Add active class if needed for sortable tables.
-          $cell = tablesort_cell($cell, $header, $ts, $i);
-          $i++;
-          // Copy RESPONSIVE_PRIORITY_LOW/RESPONSIVE_PRIORITY_MEDIUM
-          // class from header to cell as needed.
-          if (isset($responsive_columns[$i])) {
-            if (is_array($cell)) {
-              $cell['class'][] = $responsive_columns[$i];
+        if (!empty($cells)) {
+          $output .= ' <tr' . backdrop_attributes($tr_attributes) . '>';
+          $i = 0;
+          foreach ($cells as $cell) {
+            // Add active class if needed for sortable tables.
+            $cell = tablesort_cell($cell, $header, $ts, $i);
+            $i++;
+            // Copy RESPONSIVE_PRIORITY_LOW/RESPONSIVE_PRIORITY_MEDIUM
+            // class from header to cell as needed.
+            if (isset($responsive_columns[$i])) {
+              if (is_array($cell)) {
+                $cell['class'][] = $responsive_columns[$i];
+              }
+              else {
+                $cell = array('data' => $cell, 'class' => array($responsive_columns[$i]));
+              }
             }
-            else {
-              $cell = array('data' => $cell, 'class' => array($responsive_columns[$i]));
-            }
+            $output .= _theme_table_cell($cell);
           }
-          $output .= _theme_table_cell($cell);
+          $output .= " </tr>\n";
         }
-        $output .= " </tr>\n";
       }
+      $output .= "</" . $tag . ">\n";
     }
-    $output .= "</tbody>\n";
   }
 
   // Add sticky headers if enabled.
