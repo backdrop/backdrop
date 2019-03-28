@@ -605,7 +605,7 @@ function system_requirements($phase) {
   // Warn the user if trusted hostnames have not been configured.
   if ($phase == 'runtime') {
     $trusted_host_patterns = settings_get('trusted_host_patterns', array());
-    $more_info = $t('See <a href="@url">Protecting against HTTP HOST Header attacks</a> for more information.', array('@url' => 'https://www.drupal.org/node/1992030'));
+    $more_info = $t('See <a href="@url">Protecting against HTTP HOST Header attacks</a> for more information.', array('@url' => 'https://backdropcms.org/trusted-host-settings'));
     if (empty($trusted_host_patterns)) {
       $requirements['trusted_host_patterns'] = array(
         'title' => $t('Trusted Host Settings'),
