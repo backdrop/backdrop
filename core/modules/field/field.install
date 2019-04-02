@@ -117,3 +117,25 @@ function field_update_1002() {
     $role_config->save();
   }
 }
+
+/**
+ * Check if the contrib module options_element is present, and uninstall it if
+ * so.
+ */
+function field_update_1003() {
+  // If the module is present on the site, it is already disabled (because it is
+  // included in backdrop_merged_modules()), so we cannot use module_exists().
+  $all_modules = system_rebuild_module_data();
+  // Cofirm that the module exists on the site, and uninstall it.
+  if ($all_modules['options_element']->status == 0) {
+    // We cannot use module_disable() or backdrop_uninstall_modules(), because
+    // they both throw php errors. So we need to remove the module directly from
+    // the system table in the database. This also removes the module from the
+    // list in /admin/modules/uninstall.
+    db_delete('system')
+      ->condition('name', 'options_element')
+      ->execute();
+
+    return t('The contributed module <em>Options Element</em> has been disabled and uninstalled, since its functionality is now included in Backdrop core. You can safely remove it from your site.');
+  }
+}
