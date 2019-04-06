@@ -124,18 +124,26 @@ function field_update_1002() {
  */
 function field_update_1003() {
   $module = db_select('system')
-    ->fields(NULL, array('name'))
-    ->condition('name', 'options_element')
+    ->fields('system', array('name'))
     ->condition('type', 'module')
+    ->condition('name', 'options_element')
     ->execute()
     ->fetchField();
   if ($module) {
     $path = backdrop_get_path('module', 'options_element');
     backdrop_set_message(t('The contributed module <em>Options Element</em> has been located at %path. The module has been disabled, since its functionlity is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
-    // Remove the entry for the options element module in the system table.
+    // Remove the entry for the Options Element module from the system table. As
+    // this module does not provide any config or settings, there doesn't seem
+    // to be anything else left to clean up or migrate.
+    // While the contrib module remains in the filesystem, this entry will be
+    // recreated, but it will have status 0 (disabled), and schema -1
+    // (uninstalled), so it is safe to remove.
     db_delete('system')
       ->condition('name', 'options_element')
       ->condition('type', 'module')
       ->execute();
+  }
+  else {
+    return t('<em>Options Element</em> not found. Nothing to be done.');
   }
 }
