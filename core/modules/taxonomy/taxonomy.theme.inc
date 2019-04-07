@@ -25,7 +25,9 @@ function theme_taxonomy_overview_vocabularies($variables) {
 
       $row = array();
       $row[] = backdrop_render($vocabulary['name']);
-      $row[] = backdrop_render($vocabulary['items']);
+      // Align these cells to the right. The align attribute of <td> elements is
+      // not supported in HTML5, so we use CSS instead.
+      $row[] = array('data' => backdrop_render($vocabulary['items']), 'style' => 'text-align: right');
       if (isset($vocabulary['weight'])) {
         $vocabulary['weight']['#attributes']['class'] = array('vocabulary-weight');
         $row[] = backdrop_render($vocabulary['weight']);
@@ -36,7 +38,9 @@ function theme_taxonomy_overview_vocabularies($variables) {
   }
 
   $header = array(t('Vocabulary name'));
-  $header[] = array('data' => t('Number of terms'), 'class' => array('priority-low'));
+  // Align the "Number of terms" column to the right. The align attribute of
+  // <th> elements is not supported in HTML5, so we use CSS instead.
+  $header[] = array('data' => t('Number of terms'), 'class' => array('priority-low'), 'style' => 'text-align: right');
   if (isset($form['actions'])) {
     $header[] = t('Weight');
     backdrop_add_tabledrag('taxonomy', 'order', 'sibling', 'vocabulary-weight');
