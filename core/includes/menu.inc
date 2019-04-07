@@ -1292,8 +1292,8 @@ function menu_tree_get_path($menu_name) {
  *
  * @return
  *   An array of menu links, in the order they should be rendered. The array
- *   is a list of associative arrays -- these have two keys, link and below.
- *   link is a menu item, ready for theming as a link. Below represents the
+ *   is a list of associative arrays -- these have two keys, 'link' and 'below'.
+ *   'link' is a menu item, ready for rendering as a link. 'below' represents the
  *   submenu below the link if there is one, and it is a subtree that has the
  *   same structure described for the top-level array.
  */

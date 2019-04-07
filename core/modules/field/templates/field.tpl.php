@@ -5,8 +5,8 @@
  *
  * This file is not used by core, which uses theme functions instead for
  * performance reasons. The markup is the same, though, so if you want to use
- * template files rather than functions to extend field theming, copy this to
- * your custom theme. See theme_field() for a discussion of performance.
+ * template files rather than functions to change field markup, copy this file
+ * to your custom theme. See theme_field() for a discussion of performance.
  *
  * Copy this file and place it inside your theme. You'll likely want to rename
  * the file so that it only affects the field you are trying to override.
@@ -23,7 +23,7 @@
  * - $label_hidden: Whether the label display is set to 'hidden'.
  * - $classes: Array of classes that can be used to style contextually through
  *   CSS. The default values can be one or more of the following:
- *   - field: The current template type, i.e., "theming hook".
+ *   - field: The current template type, i.e., "theme hook".
  *   - field-name-[field_name]: The current field name. For example, if the
  *     field name is "field_description" it would result in
  *     "field-name-field-description".

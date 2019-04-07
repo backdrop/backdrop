@@ -1363,7 +1363,7 @@ table.update {
   border-radius: 4px;
 }
 
-/* Maintenance theming */
+/* Maintenance page styles */
 body.maintenance-page {
   background: #E8E6E5;
   padding: 1em;
@@ -1528,7 +1528,7 @@ ol.task-list .done:before {
   display: none;
 }
 
-/* Shortcut theming */
+/* Shortcut styles */
 div.add-or-remove-shortcuts {
   float: left; /* LTR */
   padding-top: 6px;

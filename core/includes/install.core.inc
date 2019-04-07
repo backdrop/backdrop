@@ -708,8 +708,8 @@ function install_full_redirect_url($install_state) {
  * Displays themed installer output and ends the page request.
  *
  * Installation tasks should use backdrop_set_title() to set the desired page
- * title, but otherwise this function takes care of theming the overall page
- * output during every step of the installation.
+ * title, but otherwise this function takes care of generating the page output
+ * during every step of the installation.
  *
  * @param $output
  *   The content to display on the main part of the page.
@@ -737,7 +737,7 @@ function install_display_output($output, $install_state) {
   // request has ended before tasks have even been started, so there is nothing
   // meaningful to show.
   if (isset($install_state['active_task'])) {
-    // Let the theming function know when every step of the installation has
+    // Let the theme function know when every step of the installation has
     // been completed.
     $active_task = $install_state['installation_finished'] ? NULL : $install_state['active_task'];
     $task_list = theme('task_list', array('items' => install_tasks_to_display($install_state), 'active' => $active_task));
