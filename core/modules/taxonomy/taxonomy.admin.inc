@@ -840,9 +840,8 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   );
 
   $form['relations']['weight'] = array(
-    '#type' => 'textfield',
+    '#type' => 'number',
     '#title' => t('Weight'),
-    '#size' => 6,
     '#default_value' => $term->weight,
     '#description' => t('Terms are displayed in ascending order by weight.'),
     '#required' => TRUE,
@@ -905,11 +904,6 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
  */
 function taxonomy_form_term_validate($form, &$form_state) {
   entity_form_field_validate('taxonomy_term', $form, $form_state);
-
-  // Ensure numeric values.
-  if (isset($form_state['values']['weight']) && !is_numeric($form_state['values']['weight'])) {
-    form_set_error('weight', t('Weight value must be numeric.'));
-  }
 }
 
 /**
