@@ -718,6 +718,12 @@ fieldset .fieldset-wrapper {
   right: 2em;
   display: none;
 }
+.fieldset-legend span.summary:not(:empty):before {
+  content: '(';
+}
+.fieldset-legend span.summary:not(:empty):after {
+  content: ')';
+}
 @media (min-width: 450px) {
   .fieldset-legend span.summary {
     display: block;
