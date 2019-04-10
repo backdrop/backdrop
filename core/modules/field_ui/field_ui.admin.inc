@@ -26,13 +26,13 @@ function field_ui_fields_list() {
   $instances = field_info_instances();
   $field_types = field_info_field_types();
   $bundles = field_info_bundles();
-
   $modules = system_rebuild_module_data();
 
   $header = array(
-    t('Field name'),
-    array('data' => t('Field type'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
-    t('Used in'),
+    array('data' => t('Field name'), 'field' => 'field_name', 'sort' => 'asc'),
+    array('data' => t('Field type'), 'field' => 'field_type', 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
+    array('data' => t('Module'), 'field' => 'module', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    t('Used as'),
   );
   $rows = array();
   foreach ($instances as $entity_type => $type_bundles) {
@@ -42,29 +42,61 @@ function field_ui_fields_list() {
 
         // Initialize the row if we encounter the field for the first time.
         if (!isset($rows[$field_name])) {
-          $rows[$field_name]['class'] = $field['locked'] ? array('menu-disabled') : array('');
-          $rows[$field_name]['data'][0] = $field['locked'] ? t('@field_name (Locked)', array('@field_name' => $field_name)) : $field_name;
           $module_name = $field_types[$field['type']]['module'];
-          $rows[$field_name]['data'][1] = $field_types[$field['type']]['label'] . ' ' . t('(module: !module)', array('!module' => $modules[$module_name]->info['name']));
+          $rows[$field_name]['class'] = $field['locked'] ? array('menu-disabled') : array('');
+          $rows[$field_name]['data']['field_name'] = $field['locked'] ? t('@field_name (Locked)', array('@field_name' => $field_name)) : $field_name;
+          $rows[$field_name]['data']['field_type'] = $field_types[$field['type']]['label'];
+          $rows[$field_name]['data']['module'] = $modules[$module_name]->info['name'];
         }
 
         // Add the current instance.
         $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
-        $rows[$field_name]['data'][2][] = $admin_path ? l($bundles[$entity_type][$bundle]['label'], $admin_path . '/fields') : $bundles[$entity_type][$bundle]['label'];
+        $field_label = $instances[$entity_type][$bundle][$field_name]['label'];
+        $bundle_label = $bundles[$entity_type][$bundle]['label'];
+        if ($admin_path) {
+          $bundle_manage_fields_link = $admin_path . '/fields';
+          $field_configure_link = $bundle_manage_fields_link . '/' . $field_name;
+          $rows[$field_name]['data']['used_as'][] = t('<a href="@field_configure_link">%field_label</a> in <a href="@bundle_manage_fields_link">@bundle_label</a>', array('@field_configure_link' => url($field_configure_link), '%field_label' => $field_label, '@bundle_manage_fields_link' => url($bundle_manage_fields_link), '@bundle_label' => $bundle_label));
+        }
+        else {
+          $rows[$field_name]['data']['used_as'][] = t('%field_label in @bundle_label', array('%field_label' => $field_label, '@bundle_label' => $bundle_label));
+        }
+
       }
     }
   }
   foreach ($rows as $field_name => $cell) {
-    $rows[$field_name]['data'][2] = implode(', ', $cell['data'][2]);
+    // A reused field can have different labels across the various bundles it is
+    // being used in. So we render the items of the "Used as" column as a list.
+    $rows[$field_name]['data']['used_as'] = theme('item_list', array('items' => $rows[$field_name]['data']['used_as']));
   }
-  if (empty($rows)) {
-    $output = t('No fields have been defined yet.');
+
+  // Sort columns.
+  $sort = tablesort_get_sort($header);
+  $order = tablesort_get_order($header);
+  switch($order['sql']) {
+    case 'field_name':
+      uasort($rows, function($a, $b) {
+        return strcasecmp($a['data']['field_name'], $b['data']['field_name']);
+      });
+      break;
+    case 'field_type':
+      uasort($rows, function($a, $b) {
+        return strcasecmp($a['data']['field_type'], $b['data']['field_type']);
+      });
+      break;
+    case 'module':
+      uasort($rows, function($a, $b) {
+        return strcasecmp($a['data']['module'], $b['data']['module']);
+      });
+      break;
   }
-  else {
-    // Sort rows by field name.
-    ksort($rows);
-    $output = theme('table', array('header' => $header, 'rows' => $rows));
+  if ($sort == 'desc') {
+    $rows = array_reverse($rows);
   }
+
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No fields have been defined yet.'),));
+
   return $output;
 }
 
