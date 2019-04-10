@@ -119,8 +119,7 @@ function field_update_1002() {
 }
 
 /**
- * Check if the contrib module options_element is present, and uninstall it if
- * so.
+ * Uninstall the options_element contrib module, now part of core.
  */
 function field_update_1003() {
   $module = db_query("SELECT name FROM {system} WHERE name = 'options_element' AND type = 'module'")->fetchField();
