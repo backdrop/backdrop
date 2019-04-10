@@ -629,7 +629,8 @@ function system_menu() {
   );
   $items['admin/appearance/disable'] = array(
     'title' => 'Disable theme',
-    'page callback' => 'system_theme_disable',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('system_theme_disable_confirm'),
     'access arguments' => array('administer themes'),
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
