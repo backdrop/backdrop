@@ -117,3 +117,24 @@ function field_update_1002() {
     $role_config->save();
   }
 }
+
+/**
+ * Uninstall the options_element contrib module, now part of core.
+ */
+function field_update_1003() {
+  $module = db_query("SELECT name FROM {system} WHERE name = 'options_element' AND type = 'module'")->fetchField();
+  if ($module) {
+    $path = backdrop_get_path('module', 'options_element');
+    backdrop_set_message(t('The contributed module <em>Options Element</em> has been located at %path. The module has been disabled, since its functionlity is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    // Remove the entry for the Options Element module from the system table. As
+    // this module does not provide any config or settings, there doesn't seem
+    // to be anything else left to clean up or migrate.
+    // While the contrib module remains in the filesystem, this entry will be
+    // recreated, but it will have status 0 (disabled), and schema -1
+    // (uninstalled), so it is safe to remove.
+    db_query("DELETE FROM {system} WHERE name = 'options_element' AND type = 'module'");
+  }
+  else {
+    return t('<em>Options Element</em> not found. Nothing to be done.');
+  }
+}
