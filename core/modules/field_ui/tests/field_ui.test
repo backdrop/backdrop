@@ -412,7 +412,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
     $this->assertText("Saved $field_name configuration", 'The form was successfully submitted.');
     field_info_cache_clear();
     $instance = field_info_instance('node', $field_name, $this->type);
-    $this->assertEqual($instance['default_value'], NULL, 'The default value was correctly saved.');
+    $this->assertEqual($instance['default_value'], array(array('value' => '')), 'The default value was correctly saved.');
   }
 
   /**
