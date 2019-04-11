@@ -8,10 +8,19 @@ Backdrop.behaviors.Term = {
     // Relation settings.
     $context.find('#edit-relations').backdropSetSummary(function(context) {
       var vals = [];
-
       var info = Backdrop.t('No relations.');
-      if (parents = $(context).find('select[name="parent[]"] option:selected').text()) {
-        var info = 'Parent: ' + Backdrop.checkPlain(parents);
+
+      // Get a list of all selected options and concatenate with a comma.
+      var parents = $.map(
+        $context.find('select[name="parent[]"] option:selected'),
+        function(element) {
+          // Remove leading hyphens on indented terms.
+          return $(element).text().replace(/^(\-)+/, '');
+        })
+        .join(', ');
+
+      if (parents) {
+        info = Backdrop.t('Parents: @parents', { '@parent': parents });
       }
 
       vals.push(info);
