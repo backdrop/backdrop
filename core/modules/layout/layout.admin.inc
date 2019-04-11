@@ -2760,9 +2760,9 @@ function layout_configure_region_page($form, &$form_state, Layout $layout, $rend
     '#title' => t('CSS classes for inner wrapper'),
     '#type' => 'textfield',
     '#default_value' => isset($layout->settings[$region_name]['classes']) ? $layout->settings[$region_name]['classes'] : '',
-    '#description' => t('Separate multiple classes with spaces.'),
+    '#description' => t('Available only after selecting an HTML element. Separate multiple classes with spaces.'),
     '#states' => array(
-      'invisible' => array(
+      'disabled' => array(
         ':input[name="element"]' => array('value' => ''),
       ),
     ),
