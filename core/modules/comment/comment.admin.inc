@@ -39,11 +39,15 @@ function comment_admin($type = 'new') {
  * @see theme_comment_admin_overview()
  */
 function comment_admin_overview($form, &$form_state, $arg) {
-  // Build an 'Update options' form.
-  $form['options'] = array(
+  // Build the 'Operations' form.
+  $form['operations'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Update options'),
-    '#attributes' => array('class' => array('container-inline')),
+    '#title' => t('Operations'),
+    '#prefix' => '<div class="container-inline">',
+    '#suffix' => '</div>',
+    '#attributes' => array(
+      'class' => array('comment-operations')
+    ),
   );
 
   if ($arg == 'approval') {
@@ -54,16 +58,16 @@ function comment_admin_overview($form, &$form_state, $arg) {
   }
   $options['delete'] = t('Delete the selected comments');
 
-  $form['options']['operation'] = array(
+  $form['operations']['operation'] = array(
     '#type' => 'select',
-    '#title' => t('Operation'),
+    '#title' => t('Operations'),
     '#title_display' => 'invisible',
     '#options' => $options,
-    '#default_value' => 'publish',
+    '#empty_option' => '- ' . t('Choose an action') . ' -',
   );
-  $form['options']['submit'] = array(
+  $form['operations']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Update'),
+    '#value' => t('Execute'),
   );
 
   // Load the comments that need to be displayed.
@@ -155,7 +159,8 @@ function comment_admin_overview($form, &$form_state, $arg) {
  */
 function comment_admin_overview_validate($form, &$form_state) {
   $form_state['values']['comments'] = array_diff($form_state['values']['comments'], array(0));
-  // We can't execute any 'Update options' if no comments were selected.
+  // We can't execute any of the available operations if no comments were
+  // selected.
   if (count($form_state['values']['comments']) == 0) {
     form_set_error('', t('Select one or more comments to perform the update on.'));
   }
