@@ -358,6 +358,12 @@ description = Test the format_date() function.
 group = Common
 file = common.test
 
+[CommonBackdropFormatXmlElementsUnitTestCase]
+name = Format XML Elements
+description = Tests the format_xml_elements() functionality.
+group = Common
+file = common.test
+
 [CommonBackdropAttributesUnitTestCase]
 name = HTML Attributes
 description = Tests the backdrop_attributes() functionality.
