@@ -2326,13 +2326,15 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
  *   supported:
  *   - 'status': for "Yay! it worked." messages that need to be displayed as a
  *     direct result of a user action. Shown once, on the page where the user
- *     action finishes.
+ *     action finishes. Usually shown with a green ✓ (check) icon.
  *   - 'info': for "Did you know that ...?" messages that need to show generic
- *     information, persistently across various pages. Can be the result of a
- *     user action on another section of the site (excludes messages that should
- *     be warnings/errors).
- *   - 'warning': for "Careful! You should know that ..." messages.
- *   - 'error': for "Oh-oh, something went wrong." messages.
+ *     information, or help text that persists across various pages, This type
+ *     is to be used when the message is not a warning nor an error. Usually
+ *     shown with a blue or gray "i" (info) icon.
+ *   - 'warning': for "Careful! You should know that ..." messages. Usually
+ *     shown with a yellow or orange exclamation mark icon.
+ *   - 'error': for "Oh-oh, something went wrong." messages. Usually shown with
+ *     a red "x" icon.
  * @param bool $repeat
  *   (optional) If this is FALSE and the message is already set, then the
  *   message won't be repeated. Defaults to TRUE.
