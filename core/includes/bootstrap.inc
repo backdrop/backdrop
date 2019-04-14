@@ -2349,8 +2349,9 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
  *   - 'info': Messages used for displaying generic information, or help text
  *     that may persist across various pages. Can be the result of a user action
  *     on another section of the site (like enabling a module or a certain
- *     setting for example). This type is to be used when the message is not a
- *     warning nor an error. Usually shown with a blue or gray "i" (info) icon.
+ *     setting for example). This type is to be used when the message is not an
+ *     error, a warning, or a success message. Usually shown with a blue or gray
+ *     "i" (info) icon.
  *   - 'warning': Cautionary advice messages, used to inform of a possible
  *     problem, or other unexpected behavior. Usually shown with a yellow or
  *     orange exclamation mark icon.
