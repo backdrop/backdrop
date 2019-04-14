@@ -4439,8 +4439,8 @@ function backdrop_region_class($region) {
  *     - Then by weight.
  *     - Then by the order in which the JavaScript was added. For example, all
  *       else being the same, JavaScript added by a call to backdrop_add_js()
- *       that _region_class($region)
- *       which backdrop_add_js() happened earlier in the page request.
+ *       that happened later in the page request, gets added to the page after
+ *       one for which backdrop_add_js() happened earlier in the page request.
  *   - requires_jquery: Set this to FALSE if the JavaScript you are adding does
  *     not have a dependency on jQuery. Defaults to TRUE, except for JavaScript
  *     settings where it defaults to FALSE. This is used on sites that have the
