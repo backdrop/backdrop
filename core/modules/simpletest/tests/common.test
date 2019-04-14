@@ -1399,7 +1399,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     $this->backdropGet('');
     $this->assertRaw('core/misc/jquery.js', 'Default behavior: The front page of the site includes jquery.js.');
     $this->assertRaw('core/misc/backdrop.js', 'Default behavior: The front page of the site includes backdrop.js.');
-    $this->assertRaw('Backdrop.settings', 'Default behavior: The front page of the site includes Backdrop settings.');
+    $this->assertRaw('window.Backdrop', 'Default behavior: The front page of the site includes Backdrop settings.');
     $this->assertRaw('basePath', 'Default behavior: The front page of the site includes the basePath Backdrop setting.');
 
     // The default front page should not use jQuery and other standard scripts
@@ -1409,7 +1409,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     $this->backdropGet('');
     $this->assertNoRaw('core/misc/jquery.js', 'When "javascript_always_use_jquery" is FALSE: The front page of the site does not include jquery.js.');
     $this->assertNoRaw('core/misc/backdrop.js', 'When "javascript_always_use_jquery" is FALSE: The front page of the site does not include backdrop.js.');
-    $this->assertNoRaw('Backdrop.settings', 'When "javascript_always_use_jquery" is FALSE: The front page of the site does not include Backdrop settings.');
+    $this->assertNoRaw('window.Backdrop', 'When "javascript_always_use_jquery" is FALSE: The front page of the site does not include Backdrop settings.');
     $this->assertNoRaw('basePath', 'When "javascript_always_use_jquery" is FALSE: The front page of the site does not include the basePath Backdrop setting.');
     state_del('javascript_always_use_jquery');
 
