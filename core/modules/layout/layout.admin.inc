@@ -584,9 +584,14 @@ function layout_settings_form_update_layout($form, &$form_state) {
     $layout->name = $form_state['values']['name'];
   }
   if (isset($form_state['values']['layout_template'])) {
-    $new = $form_state['values']['layout_template'];
-    $region_mapping = layout_get_legacy_region_mapping($layout->layout_template, $new);
-    $layout->setLayoutTemplate($form_state['values']['layout_template'], $region_mapping);
+    $old_template = $layout->layout_template;
+    $new_template = $form_state['values']['layout_template'];
+    if ($old_template != $new_template) {
+      $region_mapping = layout_get_legacy_region_mapping($old_template, $new_template);
+      $layout->setLayoutTemplate($form_state['values']['layout_template'], $region_mapping);
+      // Clear theme cache, to ensure that the new template is loaded.
+      backdrop_theme_rebuild();
+    }
   }
   if (isset($form_state['values']['path'])) {
     $layout->setPath($form_state['values']['path']);
