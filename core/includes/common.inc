@@ -4513,7 +4513,7 @@ function backdrop_add_js($data = NULL, $options = NULL) {
     // setting is set to FALSE (indicating that the site does not want jQuery
     // automatically added on all pages) then only add it if a file or setting
     // that requires jQuery is being added also.
-    if (!$jquery_added && (setting_get('javascript_always_use_jquery', TRUE) || $options['requires_jquery'])) {
+    if (!$jquery_added && (settings_get('javascript_always_use_jquery', TRUE) || $options['requires_jquery'])) {
       $jquery_added = TRUE;
       // url() generates the prefix using hook_url_outbound_alter(). Instead of
       // running the hook_url_outbound_alter() again here, extract the prefix
