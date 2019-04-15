@@ -2821,7 +2821,7 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
  */
 class CommonBackdropFormatXmlElementsUnitTestCase extends BackdropUnitTestCase {
   /**
-   * Parse an example .info file, and verify the results.
+   * Provide a sample data structure and verify the XML results.
    */
   function testParseFormatXmlElements() {
     $structure = array(
