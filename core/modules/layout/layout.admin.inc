@@ -588,7 +588,7 @@ function layout_settings_form_update_layout($form, &$form_state) {
     $new_template = $form_state['values']['layout_template'];
     if ($old_template != $new_template) {
       $region_mapping = layout_get_legacy_region_mapping($old_template, $new_template);
-      $layout->setLayoutTemplate($form_state['values']['layout_template'], $region_mapping);
+      $layout->setLayoutTemplate($new_template, $region_mapping);
       // Clear theme cache, to ensure that the new template is loaded.
       backdrop_theme_rebuild();
     }
