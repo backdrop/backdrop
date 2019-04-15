@@ -1355,7 +1355,7 @@ function install_select_language(&$install_state) {
           $output .= '<li>Download a translation from the <a href="https://localize.backdropcms.org/translate/languages" target="_blank">translation server</a>.</li>';
           $output .= '<li>Place it into the following directory:<pre>' . $directory . '</pre></li>';
           $output .= '</ol>';
-          $output .= '<p>For more information on installing Backdrop in different languages, visit the <a href="https://backdropcms.org/user-guide/install-backdrop-another-language" target="_blank">Backdrop user guide page</a>.</p>';
+          $output .= '<p>For more information on installing Backdrop in different languages, visit the <a href="https://backdropcms.org/installing-in-other-languages" target="_blank">Backdrop user guide page</a>.</p>';
           $output .= '<p>How should the installation continue?</p>';
           $output .= '<ul>';
           $output .= '<li><a href="' . check_url(backdrop_current_script_url(array('translate' => NULL))) . '">Reload the language selection page after adding translations</a></li>';
