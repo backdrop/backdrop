@@ -190,6 +190,12 @@ description = Tests the core views_handler_filter_string handler.
 group = Views Handlers
 file = handlers/views_handler_filter_string.test
 
+[ViewsHandlerFilterStringTest]
+name = Handler: Many To One Helper
+description = Tests the many to one helper handler
+group = Views Handlers
+file = handlers/views_handler_manytoone.test
+
 [ViewsHandlerSortDateTest]
 name = Sort: date
 description = Test the core views_handler_sort_date handler.

@@ -832,6 +832,9 @@ class views_many_to_one_helper {
           'value' => $value,
           'numeric' => !empty($this->handler->definition['numeric']),
         );
+        if ($this->handler->is_a_group() && is_array($value)) {
+          $value = serialize($value);
+        }
         // The table alias needs to be unique to this value across the
         // multiple times the filter or argument is called by the view.
         if (!isset($this->handler->view->many_to_one_aliases[$field][$value])) {
@@ -845,6 +848,9 @@ class views_many_to_one_helper {
           if (empty($this->handler->table_alias)) {
             $this->handler->table_alias = $alias;
           }
+        }
+        else {
+          $this->handler->table_aliases[$value] = $this->handler->view->many_to_one_aliases[$field][$value];
         }
       }
     }
@@ -1083,15 +1089,18 @@ class views_join {
           }
 
           if (is_array($info['value'])) {
+            $value_placeholders = array();
+
             // With an array of values, we need multiple placeholders and the
             // 'IN' operator is implicit.
             foreach ($info['value'] as $value) {
-              $placeholder_i = ':views_join_condition_' . $select_query->nextPlaceholder();
+              $placeholder_i = $view_query->placeholder('views_join_condition_');
+              $value_placeholders[] = $placeholder_i;
               $arguments[$placeholder_i] = $value;
             }
 
             $operator = !empty($info['operator']) ? $info['operator'] : 'IN';
-            $placeholder = '( ' . implode(', ', array_keys($arguments)) . ' )';
+            $placeholder = '( ' . implode(', ', $value_placeholders) . ' )';
           }
           else {
             // With a single value, the '=' operator is implicit.
