@@ -516,7 +516,6 @@ function _book_add_form_elements(&$form, &$form_state, Node $node) {
   $form['book']['weight'] = array(
     '#type' => 'number',
     '#title' => t('Weight'),
-    '#max' => 1000000,
     '#default_value' => $node->book['weight'],
     '#weight' => 5,
     '#description' => t('Pages at a given level are ordered first by weight and then by title.'),
