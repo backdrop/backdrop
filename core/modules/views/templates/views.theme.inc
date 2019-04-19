@@ -441,7 +441,7 @@ function template_preprocess_views_view_summary_unformatted(&$variables) {
 /**
  * Display a view as a table style.
  */
-// Hide table header if all labels are empty.
+function template_preprocess_views_view_table(&$variables) {
   $view     = $variables['view'];
 
   // We need the raw data for this grouping, which is passed in as $variables['rows'].
