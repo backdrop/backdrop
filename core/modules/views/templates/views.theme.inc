@@ -441,7 +441,7 @@ function template_preprocess_views_view_summary_unformatted(&$variables) {
 /**
  * Display a view as a table style.
  */
-function template_preprocess_views_view_table(&$variables) {
+// Hide table header if all labels are empty.
   $view     = $variables['view'];
 
   // We need the raw data for this grouping, which is passed in as $variables['rows'].
@@ -453,9 +453,24 @@ function template_preprocess_views_view_table(&$variables) {
   $variables['rows'] = array();
   $variables['field_classes'] = array();
   $variables['header'] = array();
+  $variables['classes_array'] = array();
 
   $options  = $view->style_plugin->options;
   $handler  = $view->style_plugin;
+
+  if (!empty($handler->options['class'])) {
+    $classes = explode(' ', $handler->options['class']);
+    $classes = array_map('views_clean_css_identifier', $classes);
+
+    if (!empty($classes)) {
+      // Trim empty class entries.
+      foreach ($classes as $key => $class) {
+        if (!empty($class)) {
+          $vars['classes_array'][] = $class;
+        }
+      }
+    }
+  }
 
   $default_row_class = isset($options['default_row_class']) ? $options['default_row_class'] : TRUE;
   $row_class_special = isset($options['row_class_special']) ? $options['row_class_special'] : TRUE;
@@ -637,7 +652,7 @@ function template_preprocess_views_view_table(&$variables) {
     $variables['row_classes'][count($variables['row_classes']) - 1][] = 'last';
   }
 
-  $variables['classes'] = array('views-table');
+  $variables['classes'][] = 'views-table';
   if (empty($variables['rows']) && !empty($options['empty_table'])) {
     $variables['rows'][0][0] = $view->display_handler->render_area('empty');
     // Calculate the amounts of rows with output.
