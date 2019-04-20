@@ -492,9 +492,9 @@ function _date_field_settings_form($field, $instance, $has_data) {
   }
   $tz_handling = $settings['tz_handling'];
 
-  $description = t('Select the date attributes to collect and store.');
+  $description = '';
   if ($has_data) {
-    $description .= ' ' . t('Changes to date attributes only effects new or updated content.');
+    $description = t('Changes to date attributes only effects new or updated content.');
   }
   $options = date_granularity_names();
   $checkbox_year = array(
