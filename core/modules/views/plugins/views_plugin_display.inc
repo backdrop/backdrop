@@ -1791,6 +1791,7 @@ class views_plugin_display extends views_plugin {
           ),
         );
         break;
+
       case 'analyze-theme':
         $form['#title'] .= t('Theming information');
         $form['#help_topic'] = 'analyze-theme';
@@ -1908,14 +1909,16 @@ class views_plugin_display extends views_plugin {
         }
 
         $form['important'] = array(
-          '#markup' => '<div class="form-item description"><p>' . t('This section lists all possible templates for the display plugin and for the style plugins, ordered roughly from the least specific to the most specific. The active template for each plugin -- which is the most specific template found on the system -- is highlighted in bold.') . '</p></div>',
+          'message' => array(
+            '#markup' => '<div class="form-item description"><p>' . t('This section lists all possible templates for the display plugin and for the style plugins, ordered roughly from the least specific to the most specific. The active template for each plugin -- which is the most specific template found on the system -- is highlighted in bold.') . '</p></div>',
+          ),
         );
 
         if (isset($this->view->display[$this->view->current_display]->new_id)) {
           $form['important']['new_id'] = array(
             '#prefix' => '<div class="description">',
             '#suffix' => '</div>',
-            '#value' => t("<strong>Important!</strong> You have changed the display's machine name. Anything that attached to this display specifically, such as theming, may stop working until it is updated. To see theme suggestions for it, you need to save the view."),
+            '#markup' => t("<strong>Important!</strong> You have changed the display's machine name. Anything that attached to this display specifically, such as theming, may stop working until it is updated. To see theme suggestions for it, you need to save the view."),
           );
         }
 
