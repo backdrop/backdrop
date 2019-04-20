@@ -96,6 +96,30 @@ class ModuleTestCase extends WatchdogTestCase {
 }
 
 /**
+ * Test module filter.
+ */
+class FilterResetTestCase extends ModuleTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * Test that the search and reset functionality on the modules page works.
+   */
+  function testFilterReset() {
+    $edit = array();
+    $edit['search'] = 'image';
+    $this->backdropPost('admin/modules', $edit, t('Save configuration'));
+    $this->assertUrl('admin/modules', array(
+      'query' => array(
+        'search' => 'image',
+      ),
+    ));
+
+    $this->clickLink(t('Reset'));
+    $this->assertUrl('admin/modules');
+  }
+}
+
+/**
  * Test module enabling/disabling functionality.
  */
 class EnableDisableTestCase extends ModuleTestCase {

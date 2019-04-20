@@ -520,6 +520,16 @@ function system_modules($form, $form_state = array()) {
     ),
     '#default_value' => (isset($_GET['search'])) ? $_GET['search'] : '',
   );
+  $form['filter']['reset'] = array(
+    '#theme' => 'link',
+    '#text' => t('Reset'),
+    '#path' => 'admin/modules',
+    '#options' => array(
+      'attributes' => array(
+        'class' => array('button', 'button-secondary', 'search-reset'),
+      ),
+    ),
+  );
 
   // Get current list of modules.
   $files = system_rebuild_module_data();

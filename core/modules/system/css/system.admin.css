@@ -70,6 +70,14 @@ small .admin-link:after {
 /**
  * Modules page.
  */
+#system-modules .form-item-search {
+  display: inline-block;
+}
+#system-modules .search-reset {
+  line-height: 42px;
+  position: relative;
+  top: 1px;
+}
 #system-modules .table-filter {
   margin: 1em 0;
   padding: 7px 13px;
