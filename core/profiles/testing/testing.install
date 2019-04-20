@@ -11,7 +11,4 @@
  *
  * @see system_install()
  */
-function testing_install() {
-  // Allow visitor account creation, but with administrative approval.
-  config_set('system.core', 'user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
-}
+

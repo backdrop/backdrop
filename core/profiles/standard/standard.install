@@ -222,10 +222,6 @@ function standard_install() {
   );
   menu_link_save($item);
 
-
-  // Allow visitor account creation with administrative approval.
-  config_set('system.core', 'user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
-
   // Create a default vocabulary named "Tags", enabled for the 'post' content type.
   $description = st('Use tags to group posts on similar topics into categories.');
   $vocabulary = new TaxonomyVocabulary(array(
