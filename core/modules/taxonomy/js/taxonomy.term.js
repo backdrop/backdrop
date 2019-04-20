@@ -11,8 +11,9 @@ Backdrop.behaviors.Term = {
       var info = Backdrop.t('No relations.');
 
       // Get a list of all selected options and concatenate with a comma.
+      var $parentOptions = $context.find('select[name="parent[]"] option:selected');
       var parents = $.map(
-        $context.find('select[name="parent[]"] option:selected'),
+        $parentOptions,
         function(element) {
           // Remove leading hyphens on indented terms.
           return $(element).text().replace(/^(\-)+/, '');
@@ -20,7 +21,7 @@ Backdrop.behaviors.Term = {
         .join(', ');
 
       if (parents) {
-        info = Backdrop.t('Parents: @parents', { '@parent': parents });
+        info = Backdrop.formatPlural($parentOptions.length, 'Parent: @parents', 'Parents: @parents', { '@parents': parents });
       }
 
       vals.push(info);
