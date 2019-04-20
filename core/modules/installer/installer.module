@@ -10,8 +10,8 @@
 function installer_permission() {
   return array(
     'use installer browser' => array(
-      'title' => t('Install and update modules, themes & layouts'),
-      'description' => t('Allows the user to browse for and install new modules, themes and layouts.'),
+      'title' => t('Install and update modules, themes & layout templates'),
+      'description' => t('Allows the user to browse for and install new modules, themes and layout templates.'),
       'restrict access' => TRUE,
       'warning' => t('Allows <em>any</em> functionality to be added to the site.'),
     )
@@ -50,11 +50,11 @@ function installer_menu() {
   // Add menu titles with += for the translation extractor.
   $items['admin/modules/install'] += array('title' => 'Install new modules');
   $items['admin/appearance/install'] += array('title' => 'Install new themes');
-  $items['admin/structure/layouts/install'] += array('title' => 'Install new layouts');
+  $items['admin/structure/layouts/install'] += array('title' => 'Install new layout templates');
 
   $items['admin/config/system/updates'] = array(
     'title' => 'System updates',
-    'description' => 'Review and install updates for Backdrop core, modules, themes, and layouts..',
+    'description' => 'Review and install updates for Backdrop core, modules, themes, and layout templates..',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('installer_manager_update_form'),
     'access callback' => 'installer_update_access',

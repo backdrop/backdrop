@@ -31,7 +31,7 @@ function installer_browser_page($type) {
 
   switch($type) {
     case 'layout':
-      backdrop_set_title(t('Install layouts'));
+      backdrop_set_title(t('Install layout projects'));
       break;
     case 'module':
       backdrop_set_title(t('Install modules'));
