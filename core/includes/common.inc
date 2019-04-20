@@ -2079,29 +2079,52 @@ function format_rss_item($title, $link, $description, $args = array()) {
  *     - 'attributes': associative array of element attributes
  *     - 'encoded': TRUE if 'value' is already encoded
  *
- * In both cases, 'value' can be a simple string, or it can be another array
- * with the same format as $array itself for nesting.
+ *   In both cases, 'value' can be a simple string, or it can be another array
+ *   with the same format as $array itself for nesting.
  *
- * If 'encoded' is TRUE it is up to the caller to ensure that 'value' is either
- * entity-encoded or CDATA-escaped. Using this option is not recommended when
- * working with untrusted user input, since failing to escape the data
- * correctly has security implications.
+ *   If 'encoded' is TRUE it is up to the caller to ensure that 'value' is
+ *   either entity-encoded or CDATA-escaped. Using this option is not
+ *   recommended when working with untrusted user input, since failing to escape
+ *   the data correctly has security implications.
+ *
+ * @param int $indentation_level
+ *   Internal-use only indentation level. This function is called recursively
+ *   and this parameter is used to increase indentation in each nesting.
+ *
+ * @since 1.12.7 Added $indentation_level parameter.
  *
  * @return string
  *  A string of XML representing the elements passed in.
  */
-function format_xml_elements($array) {
+function format_xml_elements($array, $indentation_level = 0) {
   $output = '';
+
+  // Indent two spaces per level.
+  $indentation = str_repeat(' ', $indentation_level * 2);
+
   foreach ($array as $key => $value) {
     if (is_numeric($key)) {
       if ($value['key']) {
-        $output .= ' <' . $value['key'];
+        $output .= $indentation . '<' . $value['key'];
         if (isset($value['attributes']) && is_array($value['attributes'])) {
           $output .= backdrop_attributes($value['attributes']);
         }
 
         if (isset($value['value']) && $value['value'] != '') {
-          $output .= '>' . (is_array($value['value']) ? format_xml_elements($value['value']) : (!empty($value['encoded']) ? $value['value'] : check_plain($value['value']))) . '</' . $value['key'] . ">\n";
+          $output .= '>';
+          if (is_array($value['value'])) {
+            $output .= "\n" . format_xml_elements($value['value'], $indentation_level + 1);
+            $output .= $indentation . '</' . $value['key'] . ">\n";
+          }
+          else {
+            if (!empty($value['encoded'])) {
+              $output .= $value['value'];
+            }
+            else {
+              $output .= check_plain($value['value']);
+            }
+            $output .= '</' . $value['key'] . ">\n";
+          }
         }
         else {
           $output .= " />\n";
@@ -2109,7 +2132,14 @@ function format_xml_elements($array) {
       }
     }
     else {
-      $output .= ' <' . $key . '>' . (is_array($value) ? format_xml_elements($value) : check_plain($value)) . "</$key>\n";
+      $output .= $indentation . '<' . $key . '>';
+      if (is_array($value)) {
+        $output .= "\n" . format_xml_elements($value, $indentation_level + 1);
+        $output .= $indentation . "</$key>\n";
+      }
+      else {
+        $output .= check_plain($value) . "</$key>\n";
+      }
     }
   }
   return $output;
