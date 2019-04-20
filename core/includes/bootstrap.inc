@@ -2341,11 +2341,23 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
  *   consistency with other messages, it should begin with a capital letter and
  *   end with a period.
  * @param string $type
- *   (optional) The message's type. Defaults to 'status'. These values are
+ *   (optional) The type of the message. Defaults to 'status'. These values are
  *   supported:
- *   - 'status'
- *   - 'warning'
- *   - 'error'
+ *   - 'status': Success messages that need to be displayed as a direct result
+ *     of a user action. Shown once, on the page where the user action finishes.
+ *     Usually shown with a green ✓ (check) icon.
+ *   - 'info': Messages used for displaying generic information, or help text
+ *     that may persist across various pages. Can be the result of a user action
+ *     on another section of the site (like enabling a module or a certain
+ *     setting for example). This type is to be used when the message is not an
+ *     error, a warning, or a success message. Usually shown with a blue or gray
+ *     "i" (info) icon.
+ *   - 'warning': Cautionary advice messages, used to inform of a possible
+ *     problem, or other unexpected behavior. Usually shown with a yellow or
+ *     orange exclamation mark icon.
+ *   - 'error': The opposite of success messages. Used to inform of problems
+ *     that have been found, or have been caused as a direct result of a user
+ *     action. Usually shown with a red "x" icon.
  * @param bool $repeat
  *   (optional) If this is FALSE and the message is already set, then the
  *   message won't be repeated. Defaults to TRUE.
