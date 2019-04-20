@@ -100,6 +100,27 @@ interface EntityInterface {
    *   it inserts a new entity into the storage system.
    */
   public function createDuplicate();
+
+  /**
+   * Returns all values from a field on the entity.
+   *
+   * @param $field_name
+   *   The machine name of the field.
+   * @param $value_key
+   *   The key indicating the primary data value for the field. Defaults to
+   *   'value' which is used in both text and number fields. For fields which do
+   *   not have a 'value' key such as terms (which use a 'tid' key) or files
+   *   (which use a 'fid' key), the key must be specified.
+   * @param $langcode (optional)
+   *   The language code for the requested language. Defaults to the
+   *   current language.
+   *
+   * @return (array)
+   *   All field values, or an empty array if the field is empty, if the field does not
+   *   contain the $value_key specified, or if the entity does not contain the
+   *   $field_name specified.
+   */
+  public function getFieldValues($field_name, $value_key = 'value', $langcode = NULL);
 }
 
 /**
@@ -162,6 +183,21 @@ abstract class Entity extends stdClass implements EntityInterface {
       $duplicate->{$entity_info['entity keys']['revision']} = NULL;
     }
     return $duplicate;
+  }
+
+  /**
+   * Implements EntityInterface::getFieldValues().
+   */
+  public function getFieldValues($field_name, $value_key = 'value', $langcode = NULL) {
+    $values = array();
+    if ($field_items = field_get_items($this->entityType(), $this, $field_name, $langcode)) {
+      foreach ($field_items as $item) {
+        if (isset($item[$value_key])) {
+          $values[] = $item[$value_key];
+        }
+      }
+    }
+    return $values;
   }
 }
 
