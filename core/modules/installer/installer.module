@@ -55,7 +55,7 @@ function installer_menu() {
   $items['admin/appearance/install'] += array('title' => 'Install new themes');
   $items['admin/appearance/update'] += array('title' => 'Update themes');
 
-  $items['admin/structure/layouts/install'] += array('title' => 'Install new layouts');
+  $items['admin/structure/layouts/install'] += array('title' => 'Install new layouts templates');
   $items['admin/structure/layouts/update'] += array('title' => 'Update layouts');
 
   $items['admin/installer/manual'] = array(
