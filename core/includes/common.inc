@@ -2091,6 +2091,8 @@ function format_rss_item($title, $link, $description, $args = array()) {
  *   Internal use-only indentation level. This function is called recursively
  *   and this parameter is used to increase indentation in each nesting.
  *
+ * @since 1.12.7 Added $indentation_level parameter.
+ *
  * @return string
  *  A string of XML representing the elements passed in.
  */
