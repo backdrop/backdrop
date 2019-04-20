@@ -775,7 +775,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
 
     $this->backdropPost(NULL, array(), t('Save layout'));
-    $this->assertText(t('Layout content saved.'), 'Layout saved successfully after removing old content block.');
+    $this->assertText(t('Layout saved.'), 'Layout saved successfully after removing old content block.');
 
     // Check the front-end that the content is shown in the sidebar. Note that
     // the main content block does *not* have any wrappers, so we check directly
@@ -797,7 +797,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
 
     $this->backdropPost(NULL, array(), t('Save layout'));
-    $this->assertText(t('Layout content saved.'));
+    $this->assertText(t('Layout saved.'));
 
     // Check that the main content block is no longer displayed at all.
     $this->backdropGet($layout_path);
