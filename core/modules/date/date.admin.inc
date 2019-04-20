@@ -492,7 +492,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
   }
   $tz_handling = $settings['tz_handling'];
 
-  $description = t('');
+  $description = t();
   if ($has_data) {
     $description .= ' ' . t('Changes to date attributes only effects new or updated content.');
   }
