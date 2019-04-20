@@ -349,12 +349,22 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
 $settings['backdrop_drupal_compatibility'] = TRUE;
 
 /**
- * Include a local settings file.
+ * Include a local settings file, if available.
  *
- * To make local development easier, you can add a file that contains your local
- * database connection information. This local settings file can be ignored in
- * your Git repository so that any updates to settings.php can be pulled in 
- * without overwriting your local changes.
+ * To make local development easier, you can add a settings.local.php file that
+ * contains settings specific to your local installation, or to any secondary
+ * environment (staging, development, etc).
+ *
+ * Typically used to specify a different database connection information, to
+ * disable caching, JavaScript/CSS compression, re-routing of outgoing e-mails,
+ * Google Analytics, and other things that should not happen on development and
+ * testing sites.
+ *
+ * This local settings file can be ignored in your Git repository, so that any
+ * updates to settings.php can be pulled in without overwriting your local
+ * changes.
+ *
+ * Keep this code block at the end of this file to take full effect.
  */
 if (file_exists(__DIR__ . '/settings.local.php')) {
   include __DIR__ . '/settings.local.php';
