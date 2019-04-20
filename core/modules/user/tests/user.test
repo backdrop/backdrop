@@ -250,6 +250,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     field_create_instance($instance);
 
     // Check that the field does not appear on the registration form.
+    $config->set('user_register', USER_REGISTER_VISITORS)->save();
     $this->backdropGet('user/register');
     $this->assertNoText($instance['label'], 'The field does not appear on user registration form');
 
