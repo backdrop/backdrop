@@ -2195,7 +2195,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost($this->update_url, array(), t('Continue'), array('external' => TRUE));
     $this->assertText(t('No pending updates.'));
     $this->assertNoLink('Administration pages');
-    $this->clickLink('Front page');
+    $this->clickLink('Home page');
     $this->assertResponse(200);
 
     // Click through update.php with 'access administration pages' permission.
@@ -2220,7 +2220,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     $this->assertLink('site');
     $this->assertNoLink('Administration pages');
     $this->assertNoLink('logged');
-    $this->clickLink('Front page');
+    $this->clickLink('Home page');
     $this->assertResponse(200);
 
     backdrop_set_installed_schema_version('update_script_test', backdrop_get_installed_schema_version('update_script_test') - 1);
