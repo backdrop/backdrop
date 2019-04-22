@@ -69,6 +69,10 @@ class CommentHelperCase extends BackdropWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer content types', 'create post content', 'edit any post content', 'delete any post content', 'administer comments', 'administer layouts', 'administer fields'));
     $this->web_user = $this->backdropCreateUser(array('create post content', 'edit own comments'));
     $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'uid' => $this->web_user->uid));
+
+    // Disable safety cron run that can affect the updating of comment "new"
+    // status during shutdown functions when cron takes a long time.
+    config_get('system.core', 'cron_safe_threshold', 0);
   }
 
   /**
@@ -621,6 +625,10 @@ class CommentInterfaceTest extends CommentHelperCase {
         $comments = $this->xpath('//*[contains(@class, "comment-new")]');
         if ($case['user'] != 'anonymous') {
           $this->assertTrue(count($comments) == 1, 'comment-new class found.');
+
+          // node_tag_new() writes to the database after delivering the page,
+          // wait to ensure the record is written before reloading the page.
+          sleep(2);
 
           // Request the node again. The comment-new class should disappear.
           $this->backdropGet('node/' . $node->nid);
