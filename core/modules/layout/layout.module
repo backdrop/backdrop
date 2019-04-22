@@ -90,6 +90,18 @@ function layout_menu() {
     'weight' => 20,
   ) + $base;
 
+  // Put all code in separate file to make dev easier, because layout.admin is huge.
+  $items['admin/structure/layouts/settings/add'] = array(
+    'title' => 'Add flexible layout template',
+    'page callback' => 'layout_add_flexible_template',
+    'page arguments' => array(),
+    'type' => MENU_LOCAL_ACTION,
+    'weight' => -10,
+    'access arguments' => array('administer layouts'),
+    'file' => 'layout.flex.inc',
+    'theme callback' => 'ajax_base_page_theme',
+  );
+
   $items['admin/structure/layouts/reorder'] = array(
     'title' => 'Reorder',
     'page callback' => 'backdrop_get_form',
@@ -514,6 +526,10 @@ function layout_theme() {
     'layout_region_inner' => array(
       'variables' => array('blocks' => array(), 'tag' => '', 'classes' => array(), 'attributes' => array()),
     ) + $base,
+    'layout_flexible' => array(
+      'variables' => array('content' => NULL, 'settings' => NULL, 'layout' => NULL, 'layout_info' => NULL, 'renderer' => NULL, 'attributes' => array(), 'admin' => FALSE),
+    'file' => 'layout.flex.inc',
+    ),
   );
 
   // Register all layout templates.
@@ -685,7 +701,7 @@ function layout_autoload_info() {
 
     // Renderer handlers.
     'LayoutRendererEditor' => 'plugins/renderers/layout_renderer_editor.inc',
-    'LayoutRendererSimple' => 'plugins/renderers/layout_renderer_simple.inc',
+    'LayoutRendererFlexible' => 'plugins/renderers/layout_renderer_flexible.inc',
     'LayoutRendererStandard' => 'plugins/renderers/layout_renderer_standard.inc',
 
     // Styles.
