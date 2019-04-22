@@ -231,6 +231,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
    */
   function testRegistrationWithUserFields() {
     module_enable(array('field', 'field_test'));
+    $config_user_settings = config('system.core');
 
     // Create a field, and an instance on 'user' entity type.
     $field = array(
