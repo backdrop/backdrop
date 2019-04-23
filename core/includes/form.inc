@@ -4455,6 +4455,40 @@ function form_process_weight($element) {
 }
 
 /**
+ * Check if a configuration variable is overridden in settings file.
+ *
+ * @param string $config_path
+ *
+ * @return boolean
+ */
+function form_check_config_override($config_path) {
+  global $settings;
+  return isset($settings[$config_path]);
+}
+
+/**
+ * Display warning and disable element in form if configuration
+ * is overridden.
+ *
+ * @param array $element
+ *
+ * @return array
+ */
+function form_override_config_warning($element) {
+  if (form_check_config_override($element['#config_variable'])) {
+    $element['#prefix'] = '<div class="element-override">';
+    $element['#suffix'] = '</div>';
+    $override_message = t('Override enabled.');
+    $element['#description'] = isset($element['#description']) ? $element['#description'] . ' ' . $override_message : $override_message;
+
+    backdrop_set_message(t('Some settings in this form are overridden. Changing settings here will not affect the site unless override removed. Check your settings.php file.', array('@field_title' => $element['#title'])), 'warning', FALSE);
+  }
+
+  return $element;
+}
+
+
+/**
  * Returns HTML for a file upload form element.
  *
  * For assistance with handling the uploaded file correctly, see the API

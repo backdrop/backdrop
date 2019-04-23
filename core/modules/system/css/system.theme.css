@@ -150,6 +150,9 @@ abbr.ajax-changed {
 .form-type-checkboxes.form-error .form-type-checkbox.form-error {
   border: none;
 }
+.element-override {
+  background-color: #ffffea;
+}
 
 /**
  * Inline items.
