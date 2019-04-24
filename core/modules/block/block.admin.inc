@@ -139,11 +139,10 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
   );
   if ($delta) {
     $form['actions']['delete'] = array(
-        '#type' => 'link',
-        '#title' => t('Delete'),
-        '#href' => 'admin/structure/block/manage/' . $delta . '/delete',
-        
-        '#attributes' => array('class' => array('button', 'button-secondary', 'form-delete')),
+      '#type' => 'link',
+      '#title' => t('Delete'),
+      '#href' => 'admin/structure/block/manage/' . $delta . '/delete',
+      '#attributes' => array('class' => array('button', 'button-secondary', 'form-delete')),
     );
   }
   $form['actions']['cancel'] = array(
