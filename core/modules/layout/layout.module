@@ -91,10 +91,22 @@ function layout_menu() {
   ) + $base;
 
   // Put all code in separate file to make dev easier, because layout.admin is huge.
-  $items['admin/structure/layouts/settings/add'] = array(
+  $items['admin/structure/layouts/flexible-layout/add'] = array(
     'title' => 'Add flexible layout template',
-    'page callback' => 'layout_add_flexible_template',
-    'page arguments' => array(),
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_add_flexible_template'),
+    'type' => MENU_LOCAL_ACTION,
+    'weight' => -10,
+    'access arguments' => array('administer layouts'),
+    'file' => 'layout.flex.inc',
+    'theme callback' => 'ajax_base_page_theme',
+  );
+
+  // Put all code in separate file to make dev easier, because layout.admin is huge.
+  $items['admin/structure/layouts/flexible-layout/%/%/%/add-row'] = array(
+    'title' => 'Add flexible layout template',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_flexible_template_add_row', 4, 5, 6),
     'type' => MENU_LOCAL_ACTION,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
@@ -527,7 +539,7 @@ function layout_theme() {
       'variables' => array('blocks' => array(), 'tag' => '', 'classes' => array(), 'attributes' => array()),
     ) + $base,
     'layout_flexible' => array(
-      'variables' => array('content' => NULL, 'settings' => NULL, 'layout' => NULL, 'layout_info' => NULL, 'renderer' => NULL, 'attributes' => array(), 'admin' => FALSE),
+      'variables' => array('content' => NULL, 'settings' => NULL, 'layout' => NULL, 'layout_info' => NULL, 'renderer' => NULL, 'attributes' => array(), 'admin' => FALSE, 'template_data' => NULL),
     'file' => 'layout.flex.inc',
     ),
   );

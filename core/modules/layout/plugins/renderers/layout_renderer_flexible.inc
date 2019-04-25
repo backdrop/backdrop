@@ -20,7 +20,6 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
   function __construct(Layout $layout, array $default_template_info) {
     $this->layout = &$layout;
     $this->layout_info = $default_template_info;
-    dpm($this);
 
     // Set the page title region if not already.
     if (!isset($this->layout_info['regions']['title'])) {
@@ -154,7 +153,8 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
     $links = array();
     $links['add-above'] = array(
       'title' => t('Add row above'),
-      'href' => $this->getUrl('add-block', $region_id),
+      // 'href' => $this->getUrl('add-block', $region_id, $this->layout_info['name']),
+      'href' => 'admin/structure/layouts/flexible-layout/' . $this->layout_info['name'] . '/' . $region_id . '/above/add-row',
       'attributes' => array(
         'class' => array('use-ajax'),
         'data-dialog' => TRUE,
@@ -163,7 +163,8 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
     );
     $links['add'] = array(
       'title' => t('Add row below'),
-      'href' => $this->getUrl('add-block', $region_id),
+      // 'href' => $this->getUrl('add-row', $region_id),
+      'href' => 'admin/structure/layouts/flexible-layout/' . $this->layout_info['name'] . '/' . $region_id . '/below/add-row',
       'attributes' => array(
         'class' => array('use-ajax'),
         'data-dialog' => TRUE,
@@ -234,5 +235,41 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
     );
 
     return backdrop_render($dropbutton);
+  }
+
+  /**
+   * Perform display/layout-level render operations.
+   *
+   * This method triggers all the inner block/region rendering processes, passes
+   * that to the layout plugin's theme callback, and returns the rendered HTML.
+   *
+   * If display-level caching is enabled and that cache is warm, this method
+   * will not be called.
+   *
+   * @return string
+   *   The HTML string representing the entire rendered, themed layout.
+   */
+  function renderLayout() {
+    if (empty($this->prep_run)) {
+      $this->prepare();
+    }
+
+    $this->renderBlocks();
+
+    $this->renderRegions();
+
+    if ($this->page_title) {
+      backdrop_set_title($this->page_title);
+    }
+
+    module_load_include('inc', 'layout', 'layout.theme');
+    if (empty($this->layout_info['template'])) {
+      $theme = 'layout__' . $this->layout->layout_template;
+    }
+    else {
+      $theme = str_replace('-', '_', $this->layout_info['template']);
+    }
+    $this->rendered['layout'] = theme($theme, array('content' => $this->rendered['regions'], 'settings' => $this->layout->settings, 'layout' => $this->layout, 'layout_info' => $this->layout_info, 'renderer' => $this, 'admin' => $this->admin));
+    return $this->prefix . $this->rendered['layout'] . $this->suffix;
   }
 }
