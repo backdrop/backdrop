@@ -110,7 +110,7 @@ function layout_flexible_template_add_row($form, &$form_state, $flexible_templat
     '#type' => 'machine_name',
     '#maxlength' => 21,
     '#machine_name' => array(
-      'exists' => 'flexible_layout_row_name_exists',
+      'exists' => 'layout_flexible_row_name_exists',
     ),
   );
   $form['actions'] = array('#type' => 'actions');
@@ -129,7 +129,7 @@ function layout_flexible_template_add_row($form, &$form_state, $flexible_templat
   return $form;
 }
 
-function flexible_layout_row_name_exists($machine_name) {
+function layout_flexible_row_name_exists($machine_name) {
   return FALSE;
 }
 
@@ -162,7 +162,7 @@ function layout_flexible_template_add_row_submit($form, &$form_state) {
 
 /*
  * Inserts a new key/value before/after a key in the array.
- * Code copied from http://eosrei.net/comment/287
+ * Code modified from http://eosrei.net/comment/287
  *
  * @param $key
  *   The key to insert.
@@ -209,15 +209,6 @@ function layout_flexible_template_add_row_ajax($form, $form_state) {
 
   $update_ajax = layout_ajax_form_update($form, $form_state);
   $commands = array_merge($commands, $update_ajax['#commands']);
-
-  // Rerender our parent item links:
-  // $commands[] = ajax_command_replace('.flexible-links-' . $id, flexible_layout_render_item_links($renderer, $id, $parent));
-
-  // $commands[] = array(
-    // 'command' => 'flexible_fix_firstlast',
-    // 'selector' => '.' . $parent_class . '-inside',
-    // 'base' => 'flexible-layout-' . $item['type'],
-  // );
 
   return array(
     '#type' => 'ajax',
