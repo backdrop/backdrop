@@ -154,7 +154,7 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
     $links['add-above'] = array(
       'title' => t('Add row above'),
       // 'href' => $this->getUrl('add-block', $region_id, $this->layout_info['name']),
-      'href' => 'admin/structure/layouts/flexible-layout/' . $this->layout_info['name'] . '/' . $region_id . '/above/add-row',
+      'href' => 'admin/structure/layouts/flexible-layout/' . $this->layout_info['name'] . '/' . $region_id . '/before/add-row',
       'attributes' => array(
         'class' => array('use-ajax'),
         'data-dialog' => TRUE,
@@ -164,7 +164,7 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
     $links['add'] = array(
       'title' => t('Add row below'),
       // 'href' => $this->getUrl('add-row', $region_id),
-      'href' => 'admin/structure/layouts/flexible-layout/' . $this->layout_info['name'] . '/' . $region_id . '/below/add-row',
+      'href' => 'admin/structure/layouts/flexible-layout/' . $this->layout_info['name'] . '/' . $region_id . '/after/add-row',
       'attributes' => array(
         'class' => array('use-ajax'),
         'data-dialog' => TRUE,

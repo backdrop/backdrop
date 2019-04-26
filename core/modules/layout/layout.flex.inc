@@ -30,8 +30,7 @@ function layout_add_flexible_template($form, &$form_state, $flexible_template_id
     $layout->positions[$position] = array();
     $flexible_template_defaults['regions'][$position] = $info['name'];
   }
-dpm(layout_load('default'));
-dpm($layout);
+
   // Don't use layout_create_renderer() because we need to pass in template
   // info.
   $renderer = new LayoutRendererFlexible($layout, $flexible_template_defaults);
@@ -93,12 +92,27 @@ function layout_flexible_template_add_row($form, &$form_state, $flexible_templat
     $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
   }
   $form_state['flexible_template_id'] = $flexible_template_id;
+  $form_state['original_row'] = $original_row;
+  $form_state['position'] = $position;
   $form['hide_empty'] = array(
     '#title' => t('Hide element if empty'),
     '#type' => 'checkbox',
     '#default_value' => 0,
   );
-
+  $form['name'] = array(
+    '#title' => t('Row name'),
+    '#type' => 'textfield',
+    '#maxlength' => 128,
+    '#default_value' => '',
+    '#required' => TRUE,
+  );
+  $form['machine_name'] = array(
+    '#type' => 'machine_name',
+    '#maxlength' => 21,
+    '#machine_name' => array(
+      'exists' => 'flexible_layout_row_name_exists',
+    ),
+  );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -115,23 +129,75 @@ function layout_flexible_template_add_row($form, &$form_state, $flexible_templat
   return $form;
 }
 
+function flexible_layout_row_name_exists($machine_name) {
+  return FALSE;
+}
+
 /**
  * Submit handler for layout_configure_region_page().
  */
 function layout_flexible_template_add_row_submit($form, &$form_state) {
   $template_data = $form_state['template_data'];
+
+  $flexible_template_id = $form_state['flexible_template_id'];
+  $original_row = $form_state['original_row'];
+  $position = $form_state['position'];
+
   $new_row = array(
-      'name' => t('Header more'),
-      'contains' => 'three_column',
+    'name' => $form_state['values']['name'],
+    'contains' => 'three_column',
   );
-  $template_data['regions']['newtop'] = $new_row;
+
+  $newdata = layout_flexible_array_insert_key_value($original_row, $template_data['regions'], $form_state['values']['machine_name'], $new_row, $position);
+
+  $template_data['regions'] = $newdata;
   $form_state['template_data'] = $template_data;
-  dpm($form_state['template_data']);
+
 
   $form_state['ajax_rebuild_form'] = 'layout_add_flexible_template';
   $form_state['ajax_rebuild_args'] = array($form_state['flexible_template_id']);
   $form_state['ajax_update'] = array('content');
   layout_set_flex_tempstore($template_data, $form_state['flexible_template_id']);
+}
+
+/*
+ * Inserts a new key/value before/after a key in the array.
+ * Code copied from http://eosrei.net/comment/287
+ *
+ * @param $key
+ *   The key to insert.
+ * @param $array
+ *   An array to insert in to.
+ * @param $new_key
+ *   The key to insert.
+ * @param $new_value
+ *   An value to insert.
+ *
+ * @return
+ *   The new array if the key exists, FALSE otherwise.
+ */
+function layout_flexible_array_insert_key_value($key, array &$array, $new_key, $new_value, $position) {
+  if (array_key_exists($key, $array)) {
+    $new = array();
+    if ($position == 'before') {
+      foreach ($array as $k => $value) {
+        if ($k === $key) {
+          $new[$new_key] = $new_value;
+        }
+        $new[$k] = $value;
+      }
+    }
+    else {
+      foreach ($array as $k => $value) {
+        $new[$k] = $value;
+        if ($k === $key) {
+          $new[$new_key] = $new_value;
+        }
+      }
+    }
+    return $new;
+  }
+  return FALSE;
 }
 
 /**
@@ -141,9 +207,8 @@ function layout_flexible_template_add_row_ajax($form, $form_state) {
   $commands = array();
   $commands[] = ajax_command_close_modal_dialog();
 
-      $update_ajax = layout_ajax_form_update($form, $form_state);
-  dpm($update_ajax);
-      $commands = array_merge($commands, $update_ajax['#commands']);
+  $update_ajax = layout_ajax_form_update($form, $form_state);
+  $commands = array_merge($commands, $update_ajax['#commands']);
 
   // Rerender our parent item links:
   // $commands[] = ajax_command_replace('.flexible-links-' . $id, flexible_layout_render_item_links($renderer, $id, $parent));
@@ -240,7 +305,7 @@ function theme_layout_flexible($variables) {
   $content = $variables['content'];
   $template_id = $variables['layout_info']['name'];
   $data = layout_flexible_template_template($template_id);
-  dpm($content);
+
   $output = '<div class="layout--boxtonian">';
   foreach ($data['regions'] as $key => $region) {
     $row_class = 'flex-row-' . $key;
