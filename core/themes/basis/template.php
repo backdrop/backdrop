@@ -28,9 +28,9 @@ function basis_preprocess_page(&$variables) {
 }
 
 /**
- * Prepares variables for the maintenance page template.
+ * Prepares variables for maintenance page templates.
  *
- * @see page.tpl.php
+ * @see maintenance-page.tpl.php
  */
 function basis_preprocess_maintenance_page(&$variables) {
   $css_path = backdrop_get_path('theme', 'basis') . '/css/component/maintenance.css';
