@@ -420,16 +420,14 @@ function system_theme_settings($form, &$form_state, $key) {
     }
   }
 
-  if ($form_original === $form) {
-    // Nothing changed when we processed the theme settings.
-    if (isset($themes[$key]->info['settings']['color']) && !module_exists('color')) {
-      // Notify the user that the theme supports the color module.
-      backdrop_set_message(t('This theme supports custom color palettes. <a href="@url">Enable the Color module</a> to start customising it.', array(
-        '@url' =>   url('admin/modules', array('query' => array('search' => 'color')))
-      )), 'info');
-    }
+  if (isset($themes[$key]->info['settings']['color']) && !module_exists('color')) {
+    // Notify the user that the theme supports the color module.
+    backdrop_set_message(t('This theme supports custom color palettes. <a href="@url">Enable the Color module</a> to start customising it.', array(
+      '@url' =>   url('admin/modules', array('query' => array('search' => 'color')))
+    )), 'info');
   }
-  else {
+
+  if ($form_original !== $form) {
     // If the form was modified, add the submit button.
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
