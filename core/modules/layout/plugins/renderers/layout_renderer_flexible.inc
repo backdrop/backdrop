@@ -10,9 +10,9 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
   /**
    * Include rendered HTML prior to the layout.
    *
-   * @var string
+   * @var array
    */
-  //var $default_template;
+  var $region_buttons = array();
 
   /**
    * {@inheritdoc}
@@ -62,12 +62,11 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
     }
     else {
       $content = implode('', $blocks);
-      $region_buttons = $this->getRegionLinks($region_id);
+      $this->region_buttons[$region_id] = $this->getRegionLinks($region_id);
 
       $output = '<div class="layout-editor-region" id="layout-editor-region-' . $region_id . '" data-region-name="' . $region_id . '">';
       $output .= '<div class="layout-editor-region-title clearfix">';
       $output .= '<h2 class="label">' . check_plain($this->layout_info['regions'][$region_id]) . '</h2>';
-      $output .= $region_buttons;
       $output .= '</div>';
       $output .= '<div class="layout-editor-region-content">' . $content . '</div>';
       $output .= '</div>';
@@ -95,22 +94,7 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
   /**
    * {@inheritdoc}
    */
-  function renderBlock($block) {
-    $buttons = $this->getBlockLinks($block);
-    $content = $block->getAdminPreview();
-
-    $output = '<div class="layout-editor-block clearfix" id="layout-editor-block-' . $block->uuid . '" data-block-id="' . $block->uuid . '">';
-    $output .= '<div class="layout-editor-block-title clearfix">';
-    $output .= '<span class="handle"></span><span class="text">' . $block->getAdminTitle() . '</span>';
-    if ($buttons) {
-      $output .= '<span class="buttons">' . $buttons . '</span>';
-    }
-    $output .= '</div>'; // layout-block-title
-    $output .= '<div class="layout-editor-block-content">' . render($content) . '</div>';
-    $output .= '</div>'; // layout-block
-
-    return $output;
-  }
+  function renderBlock($block) {}
 
 
   /**
@@ -192,50 +176,7 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
   /**
    * Render the links to display when editing a block.
    */
-  protected function getBlockLinks($block) {
-    $links = array();
-
-    // Only render the "Configure" link if the block is not broken.
-    if (!is_a($block, 'BlockBroken')) {
-      $links['configure'] = array(
-        'title' => t('Configure'),
-        'href' => $this->getUrl('configure-block', $block->uuid),
-        'attributes' => array(
-          'class' => array('use-ajax'),
-          'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-        ),
-      );
-    }
-
-    if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta =='title_combo')) {
-      $links['title'] = array(
-        'title' => t('Page title settings'),
-        'href' => $this->getUrl('edit-title', 'title'),
-        'attributes' => array(
-          'class' => array('use-ajax'),
-          'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-        ),
-      );
-    }
-
-    $links['remove'] = array(
-      'title' => t('Remove'),
-      'href' => $this->getUrl('remove-block', $block->uuid),
-      'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
-      'attributes' => array(
-        'class' => array('remove-block', 'use-ajax'),
-      ),
-    );
-
-    $dropbutton = array(
-      '#type' => 'dropbutton',
-      '#links' => $links,
-    );
-
-    return backdrop_render($dropbutton);
-  }
+  protected function getBlockLinks($block) {}
 
   /**
    * Perform display/layout-level render operations.
@@ -269,7 +210,7 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
     else {
       $theme = str_replace('-', '_', $this->layout_info['template']);
     }
-    $this->rendered['layout'] = theme($theme, array('content' => $this->rendered['regions'], 'settings' => $this->layout->settings, 'layout' => $this->layout, 'layout_info' => $this->layout_info, 'renderer' => $this, 'admin' => $this->admin));
+    $this->rendered['layout'] = theme($theme, array('content' => $this->rendered['regions'], 'region_buttons' => $this->region_buttons, 'layout_info' => $this->layout_info));
     return $this->prefix . $this->rendered['layout'] . $this->suffix;
   }
 }

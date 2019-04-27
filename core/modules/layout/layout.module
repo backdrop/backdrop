@@ -539,7 +539,7 @@ function layout_theme() {
       'variables' => array('blocks' => array(), 'tag' => '', 'classes' => array(), 'attributes' => array()),
     ) + $base,
     'layout_flexible' => array(
-      'variables' => array('content' => NULL, 'settings' => NULL, 'layout' => NULL, 'layout_info' => NULL, 'renderer' => NULL, 'attributes' => array(), 'admin' => FALSE, 'template_data' => NULL),
+      'variables' => array('content' => NULL, 'layout_info' => NULL, 'region_buttons' => array()),
     'file' => 'layout.flex.inc',
     ),
   );

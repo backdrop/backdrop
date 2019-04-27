@@ -94,10 +94,18 @@ function layout_flexible_template_add_row($form, &$form_state, $flexible_templat
   $form_state['flexible_template_id'] = $flexible_template_id;
   $form_state['original_row'] = $original_row;
   $form_state['position'] = $position;
-  $form['hide_empty'] = array(
-    '#title' => t('Hide element if empty'),
-    '#type' => 'checkbox',
-    '#default_value' => 0,
+
+  $options = array();
+  $row_styles = layout_flexible_row_styles();
+  foreach ($row_styles as $name => $row_style) {
+    $options[$name] = $row_style['name'];
+  }
+
+  $form['row_style'] = array(
+    '#title' => t('Select row style'),
+    '#type' => 'select',
+    '#default_value' => 'column_50_25_25',
+    '#options' => $options,
   );
   $form['name'] = array(
     '#title' => t('Row name'),
@@ -145,7 +153,7 @@ function layout_flexible_template_add_row_submit($form, &$form_state) {
 
   $new_row = array(
     'name' => $form_state['values']['name'],
-    'contains' => 'three_column',
+    'contains' => $form_state['values']['row_style'],
   );
 
   $newdata = layout_flexible_array_insert_key_value($original_row, $template_data['regions'], $form_state['values']['machine_name'], $new_row, $position);
@@ -227,13 +235,7 @@ function layout_flexible_template_defaults() {
     'name' => 'flex_default',
     'version' => '1.13.x-dev',
     'backdrop' => '1.x',
-    'regions' => array(
-      'header' => 'Header',
-      'top' => 'Top',
-      'content' => 'Content',
-      'bottom' => 'Bottom',
-      'footer' => 'Footer',
-    ),
+    'regions' => array(),
     'default region' => 'content',
     'preview' => 'flex_default.png',
     'libraries' => array(
@@ -251,8 +253,6 @@ function layout_flexible_template_defaults() {
   );
   return $defaults;
 }
-  
-
 
 /**
  * Provides the default template for new layouts.
@@ -264,23 +264,11 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
       'regions' => array(
         'header' => array(
           'name' => t('Header'),
-          'contains' => 'two_column',
+          'contains' => 'column_50_50',
         ),
         'top' => array(
           'name' => t('Top'),
-          'contains' => 'three_column',
-        ),
-        'content' => array(
-          'name' => t('Content'),
-          'contains' => 'column',
-        ),
-        'bottom' => array(
-          'name' => t('Bottom'),
-          'contains' => 'column',
-        ),
-        'footer' => array(
-          'name' => t('Footer'),
-          'contains' => 'column',
+          'contains' => 'column_50_25_25',
         ),
       ),
     );
@@ -290,17 +278,54 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
 }
 
 /**
+ * Provides the default row styles.
+ */
+function layout_flexible_row_styles() {
+  $styles = array(
+    'column_50_50' => array(
+      'split' => '50:50',
+      'bootstrap' => '6:6',
+      'name' => 'Two column 50 50',
+    ),
+    'column_50_25_25' => array(
+      'split' => '50:25:25',
+      'bootstrap' => '6:3:3',
+      'name' => 'Three column 50 25 25',
+    ),
+  );
+
+  return $styles;
+}
+
+/**
  * Provides the default template for new layouts.
  */
 function theme_layout_flexible($variables) {
+  $region_buttons = $variables['region_buttons'];
   $content = $variables['content'];
   $template_id = $variables['layout_info']['name'];
   $data = layout_flexible_template_template($template_id);
+  $column_data = layout_flexible_row_styles();
 
   $output = '<div class="layout--boxtonian">';
   foreach ($data['regions'] as $key => $region) {
     $row_class = 'flex-row-' . $key;
-    $output .= '<div class="l-header-inner container container-fluid ' . $row_class . '">' . $content[$key] . '</div>';
+    $output .= '<div class="l-header-inner container container-fluid ' . $row_class . '">';
+    $output .= '<div class="layout-editor-region-title clearfix">';
+    $output .= $region_buttons[$key];
+    $output .= '</div>';
+    $output .= '<div class="l-flex-row row">';
+
+
+    // $output .= '<div class="l-flex-row">' . $region_buttons . '</div>';
+    $col_info = $column_data[$region['contains']];
+    $split = explode(':', $col_info['bootstrap']);
+    foreach ($split as $col) {
+      $output .= '<div class="l-split col-md-' . $col . '">' . $content[$key];
+      $output .= '</div>';
+    }
+    $output .= '</div>';
+    $output .= '</div>';
   }
   $output .= '</div>';
   return $output;
