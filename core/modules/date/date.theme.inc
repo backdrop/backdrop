@@ -463,15 +463,15 @@ function theme_date_display_remaining($variables) {
 /**
  * Preprocessor for Date Views filter form.
  */
-function template_preprocess_date_views_filter_form(&$vars) {
-  $form = $vars['form'];
-  $vars['date'] = backdrop_render($form['valuedate']);
-  $vars['mindate'] = backdrop_render($form['mindate']);
-  $vars['maxdate'] = backdrop_render($form['maxdate']);
-  $vars['adjustment'] = backdrop_render($form['valueadjustment']);
-  $vars['minadjustment'] = backdrop_render($form['minadjustment']);
-  $vars['maxadjustment'] = backdrop_render($form['maxadjustment']);
-  $vars['description'] = backdrop_render($form['description']) . backdrop_render($form);
+function template_preprocess_date_views_filter_form(&$variables) {
+  $form = $variables['form'];
+  $variables['date'] = backdrop_render($form['valuedate']);
+  $variables['mindate'] = backdrop_render($form['mindate']);
+  $variables['maxdate'] = backdrop_render($form['maxdate']);
+  $variables['adjustment'] = backdrop_render($form['valueadjustment']);
+  $variables['minadjustment'] = backdrop_render($form['minadjustment']);
+  $variables['maxadjustment'] = backdrop_render($form['maxadjustment']);
+  $variables['description'] = backdrop_render($form['description']) . backdrop_render($form);
 }
 
 /** @} End of addtogroup themeable */
