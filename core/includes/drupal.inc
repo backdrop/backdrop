@@ -2539,5 +2539,15 @@ function system_get_date_types($type = NULL) {
 }
 
 /**
+ * Drupal-compatible wrapper for creating safe CSS identifiers.
+ *
+ * @deprecated since 1.0.0
+ */
+function views_clean_css_identifier($identifier, $filter = array(' ' => '-', '/' => '-', '[' => '-', ']' => '')) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
+  backdrop_clean_css_identifier($identifier, $filter);
+}
+
+/**
  * @} End of "defgroup drupal_compatibility".
  */
