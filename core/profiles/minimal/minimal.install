@@ -22,9 +22,6 @@ function minimal_install() {
   // Set front page to "node".
   config_set('system.core', 'site_frontpage', 'node');
 
-  // Allow visitor account creation, but with administrative approval.
-  config_set('system.core', 'user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
-
   // Enable default permissions for system roles.
   user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access content'));
   user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('access content'));
