@@ -28,7 +28,7 @@ function basis_preprocess_page(&$variables) {
 }
 
 /**
- * Prepares variables for page templates.
+ * Prepares variables for the maintenance page template.
  *
  * @see page.tpl.php
  */
