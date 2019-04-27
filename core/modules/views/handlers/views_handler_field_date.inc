@@ -8,6 +8,9 @@
 /**
  * A handler to provide proper displays for dates.
  *
+ * This may be used on table fields that hold either UNIX timestamps or SQL
+ * datetime strings.
+ *
  * @ingroup views_field_handlers
  */
 class views_handler_field_date extends views_handler_field {
