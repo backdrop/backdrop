@@ -4828,7 +4828,7 @@ function _form_set_class(&$element, $class = array()) {
  *   are optional except as noted):
  *   - operations: (required) Array of operations to be performed, where each
  *     item is an array consisting of the name of an implementation of
- *     callback_batch_operation() and an array of parameter.
+ *     callback_batch_operation() and an array of parameters.
  *     Example:
  *     @code
  *     array(
