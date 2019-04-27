@@ -175,7 +175,7 @@ function update_script_selection_form($form, &$form_state) {
  */
 function update_helpful_links() {
   $links['front'] = array(
-    'title' => t('Front page'),
+    'title' => t('Home page'),
     'href' => '<front>',
   );
   if (user_access('access administration pages')) {
