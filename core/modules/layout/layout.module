@@ -91,11 +91,32 @@ function layout_menu() {
   ) + $base;
 
   // Put all code in separate file to make dev easier, because layout.admin is huge.
+  // todo change path to flexible-template
   $items['admin/structure/layouts/flexible-layout/add'] = array(
     'title' => 'Add flexible layout template',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_add_flexible_template'),
+    'page arguments' => array('layout_flexible_template_add_template'),
     'type' => MENU_LOCAL_ACTION,
+    'weight' => -10,
+    'access arguments' => array('administer layouts'),
+    'file' => 'layout.flex.inc',
+  );
+
+  $items['admin/structure/layouts/flexible-layout/%/edit'] = array(
+    'title' => 'Add flexible layout template',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_flexible_template_add_template', 4),
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => -10,
+    'access arguments' => array('administer layouts'),
+    'file' => 'layout.flex.inc',
+  );
+
+  $items['admin/structure/layouts/flexible-layout/%/configure'] = array(
+    'title' => 'Add flexible layout template',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_add_flexible_template', 4),
+    'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
     'file' => 'layout.flex.inc',
@@ -107,7 +128,7 @@ function layout_menu() {
     'title' => 'Add flexible layout template',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_add_row', 4, 5, 6),
-    'type' => MENU_LOCAL_ACTION,
+    'type' => MENU_CALLBACK,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
     'file' => 'layout.flex.inc',

@@ -8,11 +8,72 @@
 
 
 /**
+ * Form to add a row to a flexible template.
+ *
+ * @param $flexible_template_id
+ *   The template to which a row is being added.
+ * @param $original_row
+ *   The row above or below which a new row is being inserted.
+ * @param $position
+ *   Where the new row is being inserted.
+ *
+ * @ingroup forms
+ */
+function layout_flexible_template_add_template($form, &$form_state, $flexible_template_id = NULL) {
+  $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
+  $template_data = $form_state['template_data'];
+
+  $form['name'] = array(
+    '#title' => t('Template name'),
+    '#type' => 'textfield',
+    '#maxlength' => 128,
+    '#default_value' => $template_data['label'],
+    '#required' => TRUE,
+  );
+  $form['machine_name'] = array(
+    '#type' => 'machine_name',
+    '#maxlength' => 21,
+    '#default_value' => $template_data['name'],
+    '#machine_name' => array(
+      'exists' => 'layout_flexible_row_name_exists',
+    ),
+  );
+  $form['description'] = array(
+    '#title' => t('Description'),
+    '#type' => 'textfield',
+    '#default_value' => $template_data['description'],
+  );
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save and configure'),
+  );
+
+  return $form;
+}
+
+function layout_flexible_template_add_template_submit($form, &$form_state) {
+  $template_data = $form_state['template_data'];
+  $template_data['name'] = $form_state['values']['machine_name'];
+  $template_data['label'] = $form_state['values']['name'];
+  $template_data['description'] = $form_state['values']['description'];
+
+  $config = config('layout.flexible.' . $form_state['machine_name']);
+  $config->setData($template_data);
+  $config->save();
+
+  layout_set_flex_tempstore($template_data, $form_state['values']['machine_name']);
+  backdrop_set_message(t('Template saved.'));
+  $form_state['redirect'] = 'admin/structure/layouts/flexible-layout/' . $form_state['values']['machine_name'] . '/configure';
+}
+
+/**
  * Render the settings form for layout.
  *
  * @ingroup forms
  */
-function layout_add_flexible_template($form, &$form_state, $flexible_template_id = 'flextemp') {
+function layout_add_flexible_template($form, &$form_state, $flexible_template_id) {
   // $layout = layout_load('default');
   $config = array(
     'is_new' => TRUE,
@@ -22,8 +83,10 @@ function layout_add_flexible_template($form, &$form_state, $flexible_template_id
   $flexible_template_defaults['name'] = $flexible_template_id;
   $form_state['flexible_template_id'] = $flexible_template_id;
 
-  if (!isset($form_state['template_data'])) {
-    $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
+  $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
+
+  if (empty($form_state['template_data'])) {
+    return;
   }
 
   foreach ($form_state['template_data']['regions'] as $position => $info) {
@@ -70,7 +133,12 @@ function layout_add_flexible_template($form, &$form_state, $flexible_template_id
  * Submit handler for layout_settings_form() that saves in-progress changes.
  */
 function layout_add_flexible_template_submit($form, &$form_state) {
-  tempstore_clear('layout.flex', $form_state['flexible_template_id']);
+  dpm($form_state);
+  $config = config('layout.flexible.' . $form_state['flexible_template_id']);
+  $config->setData($form_state['template_data']);
+  $config->save();
+  // tempstore_clear('layout.flex', $form_state['flexible_template_id']);
+  // $form_state['redirect'] = 'admin/structure/layouts/settings';
 }
 
 /**
@@ -261,6 +329,9 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
   if (!$settings = layout_get_flex_tempstore($flexible_template_id)) {
     // set up a default
     $settings = array(
+      'name' => '',
+      'label' => '',
+      'description' => '',
       'regions' => array(
         'header' => array(
           'name' => t('Header'),
