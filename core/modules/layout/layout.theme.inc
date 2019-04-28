@@ -115,6 +115,18 @@ function theme_layout_template_option($variables) {
 }
 
 /**
+ * Outputs an individual option label for selecting a layout.
+ */
+function theme_layout_flexible_template_option($variables) {
+  $template_info = $variables['template_info'];
+  $output .= '<div class="layout-caption">' . check_plain($template_info['title']) . '</div>';
+  $output .= '<div class="layout-links">' . l(t('Edit'), 'admin/structure/layouts/flexible-layout/' . $template_info['name'] . '/edit') . '</div>';
+  $output .= '<div class="layout-links">' . l(t('Configure layout'), 'admin/structure/layouts/flexible-layout/' . $template_info['name'] . '/configure') . '</div>';
+  $output .= '</div>';
+  return $output;
+}
+
+/**
  * Output the arguments table for layout_menu_item_arguments_form().
  */
 function theme_layout_menu_item_arguments_table($variables) {

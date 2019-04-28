@@ -27,7 +27,7 @@ function layout_flexible_template_add_template($form, &$form_state, $flexible_te
     '#title' => t('Template name'),
     '#type' => 'textfield',
     '#maxlength' => 128,
-    '#default_value' => $template_data['label'],
+    '#default_value' => $template_data['title'],
     '#required' => TRUE,
   );
   $form['machine_name'] = array(
@@ -56,7 +56,7 @@ function layout_flexible_template_add_template($form, &$form_state, $flexible_te
 function layout_flexible_template_add_template_submit($form, &$form_state) {
   $template_data = $form_state['template_data'];
   $template_data['name'] = $form_state['values']['machine_name'];
-  $template_data['label'] = $form_state['values']['name'];
+  $template_data['title'] = $form_state['values']['name'];
   $template_data['description'] = $form_state['values']['description'];
 
   $config = config('layout.flexible.' . $form_state['machine_name']);
@@ -330,7 +330,7 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
     // set up a default
     $settings = array(
       'name' => '',
-      'label' => '',
+      'title' => '',
       'description' => '',
       'regions' => array(
         'header' => array(
@@ -428,9 +428,48 @@ function layout_set_flex_tempstore($item, $name) {
 function layout_get_flex_tempstore($name) {
   $caches = &backdrop_static(__FUNCTION__, array());
   if (!isset($caches[$name])) {
-    $item = tempstore_get('layout.flex', $name);
-    $caches[$name] = $item;
+    if (!$item = tempstore_get('layout.flex', $name)) {
+      $item = layout_flexible_template_load($name);
+      $caches[$name] = $item;
+    }
   }
 
   return $caches[$name];
 }
+
+function layout_flexible_template_load($flexible_template_id = NULL) {
+  $configs = &backdrop_static(__FUNCTION__, array());
+
+  if (empty($configs)) {
+    $cache = cache()->get('layout:flexible:config');
+    if ($cache && $cache->data) {
+      $configs = $cache->data;
+    }
+  }
+
+  if (empty($configs)) {
+    $config_names = config_get_names_with_prefix('layout.flexible.');
+    foreach ($config_names as $config_file) {
+      $config = config($config_file);
+      $data = $config->get();
+      $data += array(
+        'weight' => 0,
+      );
+      $configs[$data['name']] = $data;
+    }
+
+    cache()->set('layout:flexible:config', $configs);
+  }
+  if ($flexible_template_id) {
+    if (isset($configs[$flexible_template_id])) {
+      return $configs[$flexible_template_id];
+    }
+    else {
+      return FALSE;
+    }
+  }
+  else {
+    return $configs;
+  }
+}
+
