@@ -128,23 +128,25 @@ function _views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) 
   static $cache = NULL;
   if (!isset($cache) || $reset) {
     // Load necessary code once.
-    if (!isset($cache)) {
-      views_include('plugins');
-      views_include_handlers();
-    }
+    views_include_handlers();
+
     // Because plugin data contains translated strings, and as such can be
     // expensive to build, the results are cached per language.
     global $language;
-    $cache_key = 'views:plugin_data:' . $language->langcode;
-    if (!$reset) {
-      if ($cache = cache_get($cache_key)) {
-        $cache = $cache->data;
+    $cache_key = 'views_plugin_data:' . $language->langcode;
+    if ($reset) {
+      $cache = NULL;
+    }
+    else {
+      if ($cache_object = cache_get($cache_key, 'views')) {
+        $cache = $cache_object->data;
       }
     }
+
     // If not available in the cache, build it and cache it.
     if (!$cache) {
       $cache = views_discover_plugins();
-      cache_set($cache_key, $cache);
+      cache_set($cache_key, $cache, 'views');
     }
   }
 
