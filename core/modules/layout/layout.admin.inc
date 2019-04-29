@@ -1607,7 +1607,7 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
     else {
       $form['#title'] = t('Configure visibility condition for "@title" layout', array('@title' => $layout->title));
     }
-  $help = t('Limit the situations in which this layout will apply.');
+    $help = t('Limit the situations in which this layout will apply.');
     $handler = isset($layout->conditions[$condition_id]) ? $layout->conditions[$condition_id] : NULL;
   }
   $form['help'] = array(
