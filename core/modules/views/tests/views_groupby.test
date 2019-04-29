@@ -98,7 +98,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
   }
 
   /**
-   * * @param string|null $group_by
+   * @param string|null $group_by
    *   (optional) Which group_by function should be used, for example sum or
    *   count. If omitted, the aggregation is tested with no group function.
    * @param array|null $values
