@@ -460,7 +460,11 @@ function template_preprocess_views_view_table(&$variables) {
 
   if (!empty($handler->options['class'])) {
     $classes = explode(' ', $handler->options['class']);
-    $classes = array_map('views_clean_css_identifier', $classes);
+    // Views allows underscores to be used in classes.
+    $filter = array(' ' => '-', '/' => '-', '[' => '-', ']' => '');
+    foreach ($classes as $key => $class) {
+      $classes[$key] = backdrop_clean_css_identifier($class, $filter);
+    }
 
     if (!empty($classes)) {
       // Trim empty class entries.
