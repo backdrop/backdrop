@@ -1609,9 +1609,16 @@ function layout_context_required_by_path($path) {
     foreach ($context_info['menu paths'] as $context_path) {
       // Remove named placeholders to just match on % symbols.
       $cleaned_path = preg_replace('/%[a-z0-9_]+/', '%', $context_path);
+
+      // If it is an exact path match, assign the context without a position.
+      if ($path === $cleaned_path) {
+        $required_context_info[$context_info['name']] = array(
+          'plugin' => $context_info['name'],
+        );
+      }
       // If the path matches based on % wildcards, add this context as a
       // required context info in the correct order.
-      if (strpos($path, $cleaned_path) === 0) {
+      elseif (strpos($path, $cleaned_path) === 0) {
         // Determine the argument placement within the path.
         $parts = explode('/', $context_path);
         foreach ($parts as $part_index => $part) {

@@ -5,10 +5,23 @@
  * User accounts block which displays a summary of user statistics including:
  * - number of total user accounts.
  * - number of active user accounts.
- * - number ofblocked user accounts.
+ * - number of blocked user accounts.
  * - number of users in each role.
  */
 class DashboardOverviewUserBlock extends Block {
+
+  function __construct($plugin_name, array $data) {
+    parent::__construct($plugin_name, $data);
+
+    $role_options = user_roles(TRUE);
+    unset($role_options[BACKDROP_AUTHENTICATED_ROLE]);
+
+    // Set defaults.
+    $this->settings += array(
+      'user_counts' => array(),
+      'roles' => $role_options,
+    );
+  }
 
   /**
    *  Sets block subject on block view.
@@ -35,19 +48,52 @@ class DashboardOverviewUserBlock extends Block {
    * Run-time rendering of the body of the block.
    */
   function getContent() {
-    $user_data = dashboard_get_user_overview($this->settings);
+    $settings = $this->settings;
+
+    $user_data = array();
+    if ($cache = cache_get('dashboard_user_overview')) {
+      $user_data = $cache->data;
+    }
+    else {
+      // User Overview.
+      if ($settings['user_counts']) {
+        $user_data['all'] = db_query("SELECT count(*) FROM {users}")->fetchField();
+        $user_data['active'] = db_query("SELECT count(*) FROM {users} WHERE status = 1 AND login <> 0")->fetchField();
+        $user_data['blocked'] = db_query("SELECT count(*) FROM {users} WHERE status = 0")->fetchField();
+        // Account for UID 0. Faster than adding a where clause.
+        $user_data['all']--;
+        $user_data['blocked']--;
+      }
+      // Roles Overview.
+      $roles = user_roles(TRUE);
+      $user_data['roles'] = array();
+      foreach ($roles as $role_name => $role_label) {
+        if (($role_name != BACKDROP_AUTHENTICATED_ROLE) && (in_array($role_name, $settings['roles']))) {
+          $user_role_count = db_query("SELECT count(*) FROM {users} u INNER JOIN {users_roles} r on u.uid = r.uid WHERE r.role = :rid", array(':rid' => $role_name))->fetchField();
+          $user_data['roles'][$role_name] = array();
+          $user_data['roles'][$role_name]['name'] = $role_label;
+          $user_data['roles'][$role_name]['count'] = $user_role_count;
+        }
+      }
+
+      cache_set('dashboard_user_overview', $user_data, 'cache');
+    }
 
     $overview = array();
-    $overview['all'] = format_plural($user_data['all'], '1 user account', '@count total user accounts');
-    $overview['active'] = format_plural($user_data['active'], '1 active user account', '@count active user accounts');
-    $overview['blocked'] = format_plural($user_data['blocked'], '1 blocked user account', '@count blocked user accounts');
 
-    foreach ($user_data['roles'] as $rid => $data) {
-      $overview['roles_' . $rid] = format_plural(
-        $user_data['roles'][$rid]['count'],
+    if ($settings['user_counts']) {
+      $overview['all'] = format_plural($user_data['all'], '1 user account', '@count total user accounts');
+      $overview['active'] = format_plural($user_data['active'], '1 active user account', '@count active user accounts');
+      $overview['blocked'] = format_plural($user_data['blocked'], '1 blocked user account', '@count blocked user accounts');
+    }
+
+    foreach ($user_data['roles'] as $role_name => $data) {
+      $overview['roles_' . $role_name] = format_plural(
+        $user_data['roles'][$role_name]['count'],
         '1 user account with the role @role',
         '@count user accounts with the role @role',
-        array('@role' => check_plain($user_data['roles'][$rid]['name'])));
+        array('@role' => check_plain($user_data['roles'][$role_name]['name']))
+      );
     }
 
     return theme('dashboard_overview_user', array('overview' => $overview));
@@ -58,9 +104,24 @@ class DashboardOverviewUserBlock extends Block {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
+    $settings = $this->settings;
 
-    // Add user settings to form.
-    dashboard_add_user_block_settings($form, $this->settings);
+    $form['user_counts'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Include the total number of user accounts, including active and blocked.'),
+      '#default_value' => $settings['user_counts'],
+    );
+    $role_options = user_roles(TRUE);
+    unset($role_options[BACKDROP_AUTHENTICATED_ROLE]);
+
+    if (!empty($roles_options)) {
+      $form['roles'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('Include the number of user accounts with the following roles:'),
+        '#options' => $role_options,
+        '#default_value' => $settings['roles'],
+      );
+    }
   }
 
   /**
@@ -69,9 +130,7 @@ class DashboardOverviewUserBlock extends Block {
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
 
-    $this->settings['user'] = $form_state['values']['user'];
-    foreach (array_keys($form_state['values']['roles']) as $key) {
-      $this->settings['roles'][$key] = $form_state['values']['roles'][$key];
-    }
+    $this->settings['user_counts'] = (bool) $form_state['values']['user_counts'];
+    $this->settings['roles'] = array_keys(array_filter($form_state['values']['roles']));
   }
 }

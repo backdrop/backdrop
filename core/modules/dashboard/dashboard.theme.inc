@@ -17,6 +17,25 @@ function theme_dashboard_overview_content($variables) {
 }
 /**
  * Theme function for user overview.
+ *
+ * Available variables:
+ *   - overview: A structured array of items containing user data, in the
+ *     following format:
+ *
+ *     @code
+ *     $items = array(
+ *       'all' => 16,
+ *       'active' => 9,
+ *       'blocked' => 2,
+ *       'roles' => array(
+ *         3 => array(
+ *           'name' => 'Administrator',
+ *           'count' => 4,
+ *         ),
+ *       ),
+ *     );
+ *     @endcode
+ *
  */
 function theme_dashboard_overview_user($variables) {
   $overview = $variables['overview'];
@@ -25,6 +44,7 @@ function theme_dashboard_overview_user($variables) {
   $output .= '</div>';
   return $output;
 }
+
 /**
  * Theme function for create content Block.
  */
