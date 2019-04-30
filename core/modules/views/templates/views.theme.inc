@@ -442,35 +442,35 @@ function template_preprocess_views_view_summary_unformatted(&$variables) {
  * Display a view as a table style.
  */
 function template_preprocess_views_view_table(&$variables) {
-  $view     = $variables['view'];
+  $view = $variables['view'];
 
   // We need the raw data for this grouping, which is passed in as $variables['rows'].
   // However, the template also needs to use for the rendered fields.  We
   // therefore swap the raw data out to a new variable and reset $variables['rows']
   // so that it can get rebuilt.
   // Store rows so that they may be used by further preprocess functions.
-  $result   = $variables['result'] = $variables['rows'];
+  $result = $variables['result'] = $variables['rows'];
   $variables['rows'] = array();
   $variables['field_classes'] = array();
   $variables['header'] = array();
   $variables['classes_array'] = array();
 
-  $options  = $view->style_plugin->options;
-  $handler  = $view->style_plugin;
+  $options = $view->style_plugin->options;
+  $handler = $view->style_plugin;
 
   if (!empty($handler->options['class'])) {
     $classes = explode(' ', $handler->options['class']);
-    // Views allows underscores to be used in classes.
+    // Views allows underscores to be used in CSS classes. Since the default
+    // filter for backdrop_clean_css_identifier() replaces underscores, we use a
+    // custom filter here, which leaves underscores intact.
     $filter = array(' ' => '-', '/' => '-', '[' => '-', ']' => '');
-    foreach ($classes as $key => $class) {
-      $classes[$key] = backdrop_clean_css_identifier($class, $filter);
-    }
 
     if (!empty($classes)) {
       // Trim empty class entries.
       foreach ($classes as $key => $class) {
         if (!empty($class)) {
-          $vars['classes_array'][] = $class;
+          $classes[$key] = backdrop_clean_css_identifier($class, $filter);
+          $vars['classes_array'][] = $classes[$key];
         }
       }
     }
@@ -479,14 +479,14 @@ function template_preprocess_views_view_table(&$variables) {
   $default_row_class = isset($options['default_row_class']) ? $options['default_row_class'] : TRUE;
   $row_class_special = isset($options['row_class_special']) ? $options['row_class_special'] : TRUE;
 
-  $fields   = &$view->field;
-  $columns  = $handler->sanitize_columns($options['columns'], $fields);
+  $fields = &$view->field;
+  $columns = $handler->sanitize_columns($options['columns'], $fields);
 
-  $active   = !empty($handler->active) ? $handler->active : '';
-  $order    = !empty($handler->order) ? $handler->order : 'asc';
+  $active = !empty($handler->active) ? $handler->active : '';
+  $order = !empty($handler->order) ? $handler->order : 'asc';
   $responsive_columns = array();
 
-  $query    = tablesort_get_query_parameters();
+  $query = tablesort_get_query_parameters();
   if (isset($view->exposed_raw_input)) {
     $query += $view->exposed_raw_input;
   }
