@@ -6,6 +6,17 @@
  */
 class DashboardMenuBlock extends Block {
 
+  function __construct($plugin_name, array $data) {
+    parent::__construct($plugin_name, $data);
+
+    // Set defaults.
+    $all_menus = array_keys(menu_get_menus());
+    $excluded_menus = array('management', 'user-menu', 'devel');
+    $this->settings += array(
+      'menus' => array_diff($all_menus, $excluded_menus),
+    );
+  }
+
   /**
    *  Sets block subject on block view.
    */
@@ -34,7 +45,6 @@ class DashboardMenuBlock extends Block {
     if (!module_exists('menu')) {
       return;
     }
-    $items = array();
 
     $menus = menu_get_menus();
     $current_path = current_path();
@@ -48,35 +58,33 @@ class DashboardMenuBlock extends Block {
     $rows = array();
 
     if (user_access('administer menu')) {
-      foreach ($menus as $menu_name => $menu) {
-        if (array_key_exists($menu_name, $this->settings['menus'])) {
-          if ($this->settings['menus'][$menu_name] === $menu_name) {
-            $links['configure'] = array(
-              'title' => t('Configure'),
-              'href' => 'admin/structure/menu/manage/' . $menu_name . '/edit',
-              'query' => $options,
-            );
-            $links['manage'] = array(
-              'title' => t('Manage links'),
-              'href' => 'admin/structure/menu/manage/' . $menu_name,
-              'query' => $options,
-            );
-            $links['add'] = array(
-              'title' => t('Add new link'),
-              'href' => 'admin/structure/menu/manage/' . $menu_name . '/add',
-              'query' => $options,
-            );
-            $operations = array(
-              '#type' => 'dropbutton',
-              '#links' => $links,
-            );
-            $rows[] = array(
-              'data' => array(
-                check_plain($menu),
-                backdrop_render($operations),
-              ),
-            );
-          }
+      foreach ($menus as $menu_name => $menu_label) {
+        if (in_array($menu_name, $this->settings['menus'])) {
+          $links['configure'] = array(
+            'title' => t('Configure'),
+            'href' => 'admin/structure/menu/manage/' . $menu_name . '/edit',
+            'query' => $options,
+          );
+          $links['manage'] = array(
+            'title' => t('Manage links'),
+            'href' => 'admin/structure/menu/manage/' . $menu_name,
+            'query' => $options,
+          );
+          $links['add'] = array(
+            'title' => t('Add new link'),
+            'href' => 'admin/structure/menu/manage/' . $menu_name . '/add',
+            'query' => $options,
+          );
+          $operations = array(
+            '#type' => 'dropbutton',
+            '#links' => $links,
+          );
+          $rows[] = array(
+            'data' => array(
+              check_plain(t($menu_label)),
+              backdrop_render($operations),
+            ),
+          );
         }
       }
     }
@@ -107,7 +115,7 @@ class DashboardMenuBlock extends Block {
   }
 
   /**
-   * 'Edit form' callback for the content type.
+   * 'Edit form' callback for the block.
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
@@ -115,17 +123,11 @@ class DashboardMenuBlock extends Block {
       return $form;
     }
 
-    $menus = menu_get_menus();
-    foreach ($menus as $machine => $name) {
-      if (!in_array($machine, array('management', 'user-menu', 'devel'))) {
-        $menu_defaults[$machine] = $machine;
-      }
-    }
     $form['menus'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Show links for the following menus on the dashboard'),
-      '#options' => $menus,
-      '#default_value' => ($this->settings['menus']) ? $this->settings['menus'] : $menu_defaults,
+      '#options' => menu_get_menus(),
+      '#default_value' => $this->settings['menus'],
     );
   }
 
@@ -134,8 +136,7 @@ class DashboardMenuBlock extends Block {
    */
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
-    foreach (array_keys($form_state['values']['menus']) as $key) {
-      $this->settings['menus'][$key] = $form_state['values']['menus'][$key];
-    }
+
+    $this->settings['menus'] = array_keys(array_filter($form_state['values']['menus']));
   }
 }

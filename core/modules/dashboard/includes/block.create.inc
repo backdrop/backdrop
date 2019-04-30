@@ -41,7 +41,7 @@ class DashboardCreateBlock extends Block {
         // Check access, then add a link to create content.
         if (node_access('create', $type)) {
           $type_url_str = str_replace('_', '-', $object->type);
-          $create[] = l(t('Add new  ' . $object->name), 'node/add/' . $type_url_str);
+          $create[] = l(t('Add new @type', array('@type' => t($object->name))), 'node/add/' . $type_url_str);
         }
         else {
           $no_access = TRUE;

@@ -6,8 +6,16 @@
  */
 class DashboardContentTypesBlock extends Block {
 
+  function __construct($plugin_name, array $data) {
+    parent::__construct($plugin_name, $data);
+    // Set defaults.
+    $this->settings += array(
+      'types' => array(),
+    );
+  }
+
   /**
-   *  Sets block subject on block view.
+   * Sets block subject on block view.
    */
   function getTitle() {
     return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Content types');
@@ -31,37 +39,35 @@ class DashboardContentTypesBlock extends Block {
    * Run-time rendering of the body of the block.
    */
   function getContent() {
-    $types = node_type_get_types();
+    $node_types = node_type_get_types();
     $access = user_access('administer content types');
     $current_path = current_path();
     $options = array('destination' => $current_path);
     $header = array(
       array('data' => t('Content type')),
-      array(
-        'data' => t('Operations'),
-      ),
+      array('data' => t('Operations')),
     );
     $rows = array();
 
     // Check access, then add a link to create content.
     if ($access) {
-      foreach ($types as $type => $object) {
-        // Config data says to include the type.
-        if ((!array_key_exists($type, $this->settings['types'])) || (isset($this->settings['types']) && $this->settings['types'][$type]) == $type) {
-          $type_url_str = str_replace('_', '-', $object->type);
+      foreach ($node_types as $node_type_key => $node_type) {
+        // If no types are specified, show all types.
+        if (empty($this->settings['types']) || in_array($node_type_key, $this->settings['types'])) {
+          $type_url_string = str_replace('_', '-', $node_type->type);
           $links['configure'] = array(
             'title' => t('Configure'),
-            'href' => 'admin/structure/types/manage/' . $type_url_str,
+            'href' => 'admin/structure/types/manage/' . $type_url_string,
             'query' => $options,
           );
           $links['manage'] = array(
             'title' => t('Manage fields'),
-            'href' => 'admin/structure/types/manage/' . $type_url_str . '/fields',
+            'href' => 'admin/structure/types/manage/' . $type_url_string . '/fields',
             'query' => $options,
           );
           $links['add'] = array(
             'title' => t('Manage display'),
-            'href' => 'admin/structure/types/manage/' . $type_url_str . '/display',
+            'href' => 'admin/structure/types/manage/' . $type_url_string . '/display',
             'query' => $options,
           );
           $operations = array(
@@ -70,7 +76,7 @@ class DashboardContentTypesBlock extends Block {
           );
           $rows[] = array(
             'data' => array(
-              t($object->name),
+              check_plain(t($node_type->name)),
               backdrop_render($operations),
             ),
           );
@@ -105,18 +111,14 @@ class DashboardContentTypesBlock extends Block {
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
 
-    $types = node_type_get_types();
-      $type_options = array();
-      $type_defaults = array();
+    $node_types = node_type_get_types();
+    $type_options = array();
+    $type_defaults = array();
 
-    if (isset($this->settings['types'])) {
-      $type_defaults = $this->settings['types'];
-    }
-
-    foreach ($types as $type => $object) {
-      $type_options[$type] = $object->name;
-      if (!array_key_exists($type, $type_defaults)) {
-        $type_defaults[$type] = $type;
+    foreach ($node_types as $node_type_key => $node_type) {
+      $type_options[$node_type_key] = t($node_type->name);
+      if (empty($this->settings['types']) || in_array($node_type_key, $this->settings['types'])) {
+        $type_defaults[] = $node_type_key;
       }
     }
 
@@ -134,8 +136,13 @@ class DashboardContentTypesBlock extends Block {
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
 
-    foreach (array_keys($form_state['values']['types']) as $key) {
-      $this->settings['types'][$key] = $form_state['values']['types'][$key];
+    // If all types are checked, save nothing, indicating all types are allowed.
+    $checked_types = array_filter($form_state['values']['types']);
+    if (count($form['types']['#options']) === count($checked_types)) {
+      $this->settings['types'] = array();
+    }
+    else {
+      $this->settings['types'] = array_values($checked_types);
     }
   }
 }
