@@ -133,7 +133,6 @@ function layout_add_flexible_template($form, &$form_state, $flexible_template_id
  * Submit handler for layout_settings_form() that saves in-progress changes.
  */
 function layout_add_flexible_template_submit($form, &$form_state) {
-  dpm($form_state);
   $config = config('layout.flexible.' . $form_state['flexible_template_id']);
   $config->setData($form_state['template_data']);
   $config->save();
@@ -297,6 +296,7 @@ function layout_flexible_template_add_row_ajax($form, $form_state) {
  *
  * @ingroup forms
  */
+ // todo: get rid of this, since we're implementing hook_layout_info().
 function layout_flexible_template_defaults() {
   $defaults = array(
     'type' => 'layout',
@@ -403,6 +403,36 @@ function theme_layout_flexible($variables) {
 }
 
 /**
+ * Provides the default template for new layouts.
+ */
+function theme_layout_layout_flexible($variables) {
+  $content = $variables['content'];
+  $template_id = $variables['layout_info']['name'];
+  $data = layout_flexible_template_template($template_id);
+  $column_data = layout_flexible_row_styles();
+
+  $output = '<div class="layout--boxtonian">';
+  foreach ($data['regions'] as $key => $region) {
+    $row_class = 'flex-row-' . $key;
+    $output .= '<div class="container container-fluid ' . $row_class . '">';
+    $output .= '<div class="l-flex-row row">';
+
+    $col_info = $column_data[$region['contains']];
+    $split = explode(':', $col_info['bootstrap']);
+    $i = 0;
+    foreach ($split as $col) {
+      $output .= '<div class="l-split col-md-' . $col . '">' . $content[$key . '_' . $i];
+      $output .= '</div>';
+      $i++;
+    }
+    $output .= '</div>';
+    $output .= '</div>';
+  }
+  $output .= '</div>';
+  return $output;
+}
+
+/**
  * Store changes to a layout or menu item in the temporary store.
  *
  * @param Layout|LayoutMenuItem $item
@@ -473,3 +503,32 @@ function layout_flexible_template_load($flexible_template_id = NULL) {
   }
 }
 
+/**
+ * Implements layout_info().
+ */
+function layout_layout_info() {
+  $layouts = array();
+  $items = layout_flexible_template_load();
+  $styles = layout_flexible_row_styles();
+  foreach ($items as $item) {
+    $layouts[$item['name']] = array(
+      'title' => $item['title'],
+      'regions' => array(),
+      'default region' => '',
+      'template' => 'layout_layout_flexible',
+      'flexible' => TRUE,
+      'path' => '',
+    );
+    // todo: default region
+    foreach ($item['regions'] as $name => $region) {
+      $region_style = $styles[$region['contains']];
+      // todo: just add a col_count key to layout_flexible_row_styles()?
+      $col_count = count(explode(':', $region_style['split']));
+      for ($i = 0; $i < $col_count; $i++) {
+        $layouts[$item['name']]['regions'][$name . '_' . $i] = check_plain($region['name']) . ' ' . $i;
+      }
+    }
+  }
+
+  return $layouts;
+}
