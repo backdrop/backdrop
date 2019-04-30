@@ -6,6 +6,15 @@
  */
 class DashboardCreateBlock extends Block {
 
+  function __construct($plugin_name, array $data) {
+    parent::__construct($plugin_name, $data);
+
+    // Set defaults.
+    $this->settings += array(
+      'types' => array(),
+    );
+  }
+
   /**
    *  Sets block subject on block view.
    */
@@ -36,8 +45,8 @@ class DashboardCreateBlock extends Block {
     $create = array();
 
     foreach ($types as $type => $object) {
-      // Check against block this->settings for type.
-      if ((!array_key_exists($type, $this->settings['types'])) || (isset($this->settings['types']) && $this->settings['types'][$type])) {
+      // If enabled or all types are enabled.
+      if (in_array($type, $this->settings['types']) || empty($this->settings['types'])) {
         // Check access, then add a link to create content.
         if (node_access('create', $type)) {
           $type_url_str = str_replace('_', '-', $object->type);
@@ -68,26 +77,13 @@ class DashboardCreateBlock extends Block {
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
 
-    $types = node_type_get_types();
-    $type_options = array();
-    $type_defaults = array();
-
-    if (isset($this->settings['types'])) {
-      $type_defaults = $this->settings['types'];
-    }
-
-    foreach ($types as $type => $object) {
-      $type_options[$type] = $object->name;
-      if (!array_key_exists($type, $type_defaults)) {
-        $type_defaults[$type] = $type;
-      }
-    }
-
+    $type_options = node_type_get_names();
     $form['types'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Include "Create" links for content types'),
-      '#options' => $type_options,
-      '#default_value' => $type_defaults,
+      '#options' => array_map('t', $type_options),
+      // All types are enabled if types is an empty array.
+      '#default_value' => $this->settings['types'] ? $this->settings['types'] : array_keys($type_options),
     );
   }
 
@@ -97,8 +93,13 @@ class DashboardCreateBlock extends Block {
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
 
-    foreach (array_keys($form_state['values']['types']) as $key) {
-      $this->settings['types'][$key] = $form_state['values']['types'][$key];
+    // If all types are checked, save nothing, indicating all types are allowed.
+    $checked_types = array_filter($form_state['values']['types']);
+    if (count($form['types']['#options']) === count($checked_types)) {
+      $this->settings['types'] = array();
+    }
+    else {
+      $this->settings['types'] = array_values($checked_types);
     }
   }
 }
