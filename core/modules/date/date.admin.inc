@@ -507,7 +507,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
   unset($options['year']);
   $form['granularity'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Date attributes to collect'),
+    '#title' => t('Date granularity'),
     '#default_value' => $granularity,
     '#options' => $options,
     '#attributes' => array(
