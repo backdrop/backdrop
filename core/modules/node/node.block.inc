@@ -11,11 +11,11 @@ class NodeBlock extends Block {
     // Fallback for when the block title is set to "none".
     $admin_title = t('Existing content');
 
-    $node = node_load($this->settings['nid']);
     if ($this->settings['title_display'] === LAYOUT_TITLE_CUSTOM && $this->settings['title']) {
       $admin_title = check_plain($this->settings['title']);
     }
-    elseif ($this->settings['title_display'] === LAYOUT_TITLE_DEFAULT) {
+    elseif ($this->settings['title_display'] === LAYOUT_TITLE_DEFAULT && $this->settings['nid']) {
+      $node = node_load($this->settings['nid']);
       $admin_title = $node->title;
     }
 
