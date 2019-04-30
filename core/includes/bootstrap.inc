@@ -754,8 +754,11 @@ function backdrop_environment_initialize() {
 /**
  * Validates that a hostname (for example $_SERVER['HTTP_HOST']) is safe.
  *
+ * @param string $host
+ *   The host name to validate.
+ *
  * @return bool
- *   TRUE if only containing valid characters, or FALSE otherwise.
+ *   TRUE only if containing valid characters; FALSE otherwise.
  */
 function backdrop_valid_http_host($host) {
   // Limit the length of the host name to 1000 bytes to prevent DoS attacks with
