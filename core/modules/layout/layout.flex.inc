@@ -372,6 +372,7 @@ function layout_flexible_row_styles() {
  * Provides the default template for new layouts.
  */
 function theme_layout_flexible($variables) {
+dpm(layout_get_layout_template_info());
   $region_buttons = $variables['region_buttons'];
   $content = $variables['content'];
   $template_id = $variables['layout_info']['name'];
@@ -406,6 +407,7 @@ function theme_layout_flexible($variables) {
  * Provides the default template for new layouts.
  */
 function theme_layout_layout_flexible($variables) {
+  dpm(layout_get_layout_template_info());
   $content = $variables['content'];
   $template_id = $variables['layout_info']['name'];
   $data = layout_flexible_template_template($template_id);
@@ -518,6 +520,7 @@ function layout_layout_info() {
       'template' => 'layout_layout_flexible',
       'flexible' => TRUE,
       'path' => '',
+      'libraries' => array('bootstrap4-gs'),
     );
     // todo: default region
     foreach ($item['regions'] as $name => $region) {
