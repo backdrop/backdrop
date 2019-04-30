@@ -4,7 +4,6 @@
  * Provides an administrative dashboard.
  */
 
-
 /**
  * Implements hook_menu().
  */
@@ -189,7 +188,7 @@ function dashboard_user_login(&$edit, $account) {
     return;
   }
 
-  // Check access to any dashboard layouts and redirect.
+  // Check access to any dashboard layouts, and redirect.
   $dashboard_layouts = layout_load_multiple_by_path('admin/dashboard');
   foreach ($dashboard_layouts as $dashboard_layout) {
     if (!$dashboard_layout->disabled && $dashboard_layout->checkAccess()) {
@@ -206,7 +205,7 @@ function dashboard_preprocess_layout(&$variables) {
   /* @var Layout $layout */
   $layout = $variables['layout'];
   if ($layout->hasContexts(array('dashboard'))) {
-    // Include dashboard specific style sheet.
+    // Include a dashboard-specific style sheet.
     $css_path = backdrop_get_path('module', 'dashboard') . '/css/dashboard.css';
     backdrop_add_css($css_path);
     $variables['classes'][] = 'dashboard';
@@ -223,8 +222,8 @@ function dashboard_preprocess_block(&$variables) {
     $block = $variables['block'];
     $region_name = $layout->getBlockPosition($block->uuid);
     if (!in_array($region_name, array('header', 'footer'))) {
-      // Add the generic class for administration panels, same as on pages
-      // like /admin/config and /admin/structure. Helps place icons.
+      // Add the generic class for administration panels, same as on pages like
+      // admin/config and admin/structure. Helps place icons. Adds borders.
       $variables['classes'][] = 'admin-panel';
     }
   }
@@ -260,7 +259,7 @@ function dashboard_theme() {
  * Menu callback; Dashboard settings form.
  */
 function dashboard_admin_settings() {
-   $config = config('dashboard.settings');
+  $config = config('dashboard.settings');
   // Redirect on log in.
   $form['#config'] = 'dashboard.settings';
   $form['dashboard_login_redirect'] = array(

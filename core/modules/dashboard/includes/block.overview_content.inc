@@ -1,11 +1,10 @@
 <?php
 /**
  * @file
- *
- * Dashboard block which displays a summary of content statistics including:
+ * Dashboard block displaying informtion about content, including:
  * - number pieces of each type of content
  * - number of comments
- * - number of blocked comments (spam)
+ * - number of unapproved comments
  * - configuration links
  */
 class DashboardOverviewContentBlock extends Block {
@@ -16,9 +15,9 @@ class DashboardOverviewContentBlock extends Block {
     // Set defaults.
     $all_types = array_keys(node_type_get_names());
     $this->settings += array(
-      'spam' => TRUE,
       'types' => $all_types,
       'comments' => $all_types,
+      'unapproved' => TRUE,
     );
   }
 
@@ -55,30 +54,37 @@ class DashboardOverviewContentBlock extends Block {
     $items = array();
     $types = node_type_get_types();
     $comments_exist = module_exists('comment');
+
     foreach ($types as $type => $object) {
-      // Compare against type option on block settings.
+      // Compare against node type option on block settings.
       if (in_array($type, $settings['types']) || empty($settings['types'])) {
         $type_count = db_query("SELECT count(*) FROM {node} WHERE type = :type and status = 1", array(':type' => $type))->fetchField();
         $content_data[$type] = format_plural($type_count, '1 @type item', '@count @type items', array('@type' => $object->name));
+
         // Check if comments module is enabled.
         if ($comments_exist) {
+
           // Compare against comment options on block settings.
           if (in_array($type, $settings['comments'])) {
             $comment_count = db_query("SELECT count(DISTINCT cid) FROM {comment} c INNER JOIN {node} n ON c.nid = n.nid WHERE n.type = :type and c.status = 1 AND n.status = 1", array(':type' => $type))->fetchField();
-            $content_data[$type . '_comments'] =  format_plural($comment_count, '1 comment', '@count comments');
-            // Compare against spam option checkbox on block settings.
-            if (isset($settings['spam']) && $settings['spam'] == 1) {
-              $spam_count = db_query("SELECT count(DISTINCT c.cid) FROM {comment} c INNER JOIN {node} n ON c.nid = n.nid WHERE n.type = :type and c.status = 0 AND n.status = 1", array(':type' => $type))->fetchField();
-              $content_data[$type . '_comments_spam'] = format_plural($spam_count, '1 spam', '@count spam');
+
+            // Compare against unapproved option checkbox on block settings.
+            if (isset($settings['unapproved']) && $settings['unapproved'] == 1) {
+              $unapproved_count = db_query("SELECT count(DISTINCT c.cid) FROM {comment} c INNER JOIN {node} n ON c.nid = n.nid WHERE n.type = :type and c.status = 0 AND n.status = 1", array(':type' => $type))->fetchField();
+              $content_data[$type . '_comments_unapproved'] = format_plural($unapproved_count, '1 unapproved', '@count unapproved');
+              $comment_count += $unapproved_count;
             }
+
+            $content_data[$type . '_comments'] =  format_plural($comment_count, '1 comment', '@count comments');
           }
         }
         $line =  $content_data[$type];
         $line .= (isset($content_data[$type . '_comments'])) ? ' with ' . $content_data[$type . '_comments'] : '';
-        $line .= (isset($content_data[$type . '_comments_spam'])) ? ' (' . $content_data[$type . '_comments_spam'] . ')' : '';
+        $line .= (isset($content_data[$type . '_comments_unapproved'])) ? ' (' . $content_data[$type . '_comments_unapproved'] . ')' : '';
         $items[] = $line;
       }
     }
+
     return theme('dashboard_overview_content', array('overview' => $items));
   }
 
@@ -87,6 +93,7 @@ class DashboardOverviewContentBlock extends Block {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
+    $settings = $this->settings;
 
     $types = node_type_get_types();
     $type_options = array();
@@ -101,10 +108,12 @@ class DashboardOverviewContentBlock extends Block {
     }
     foreach ($types as $machine_type => $type) {
       $type_options[$machine_type] = $type->name;
+
       // Display new content types by default.
       if (!array_key_exists($machine_type, $type_defaults)) {
         $type_defaults[$machine_type] = $machine_type;
       }
+
       // Do not display comments on new types by default unless it's a blog or a forum.
       if (!array_key_exists($machine_type, $comment_defaults)) {
         if ($machine_type == 'blog' || $machine_type == 'forum topic') {
@@ -117,21 +126,21 @@ class DashboardOverviewContentBlock extends Block {
     }
     $form['types'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Show <strong>post</strong> counts for the following content types'),
+      '#title' => t('Display <strong>post</strong> counts for the following content types'),
       '#options' => $type_options,
       '#default_value' => $type_defaults,
     );
     if (module_exists('comment')) {
       $form['comments'] = array(
         '#type' => 'checkboxes',
-        '#title' => t('Show <strong>comment</strong> counts for the following content types'),
+        '#title' => t('Display <strong>comment</strong> counts for the following content types'),
         '#options' => $type_options,
         '#default_value' => $comment_defaults,
       );
-      $form['spam'] = array(
+      $form['unapproved'] = array(
         '#type' => 'checkbox',
-        '#title' => t('Include spam counts with comments'),
-        '#default_value' => $settings['spam'],
+        '#title' => t('Include unapproved comments in comment counts'),
+        '#default_value' => $settings['unapproved'],
       );
     }
   }
@@ -142,8 +151,8 @@ class DashboardOverviewContentBlock extends Block {
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
 
-    $this->settings['spam'] = $form_state['values']['spam'];
     $this->settings['types'] = array_keys(array_filter($form_state['values']['types']));
     $this->settings['comments'] = array_keys(array_filter($form_state['values']['comments']));
+    $this->settings['unapproved'] = $form_state['values']['unapproved'];
   }
 }

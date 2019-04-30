@@ -1,8 +1,7 @@
 <?php
 /**
  * @file
- *
- * Dashboard block displaying content types on the site.
+ * Dashboard block displaying informtion about content types.
  */
 class DashboardContentTypesBlock extends Block {
 
@@ -41,8 +40,7 @@ class DashboardContentTypesBlock extends Block {
   function getContent() {
     $node_types = node_type_get_types();
     $access = user_access('administer content types');
-    $current_path = current_path();
-    $options = array('destination' => $current_path);
+    $options = array('destination' => current_path());
     $header = array(
       array('data' => t('Content type')),
       array('data' => t('Operations')),
@@ -97,8 +95,8 @@ class DashboardContentTypesBlock extends Block {
     }
 
     $link = '';
-    if (user_access('administer content types')) {
-      $link = l(t('Content type administration'), 'admin/structure/types');
+    if ($access) {
+      $link = l(t('Manage content types'), 'admin/structure/types');
     }
 
     return theme('dashboard_admin_table', array('header' => $header, 'rows' => $rows, 'link' => $link));
@@ -111,13 +109,22 @@ class DashboardContentTypesBlock extends Block {
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
 
-    $type_options = node_type_get_names();
+    $node_types = node_type_get_types();
+    $type_options = array();
+    $type_defaults = array();
+
+    foreach ($node_types as $node_type_key => $node_type) {
+      $type_options[$node_type_key] = t($node_type->name);
+      if (empty($this->settings['types']) || in_array($node_type_key, $this->settings['types'])) {
+        $type_defaults[] = $node_type_key;
+      }
+    }
+
     $form['types'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Include "Configure" links for content types'),
-      '#options' => array_map('t', $type_options),
-      // All types are enabled if types is an empty array.
-      '#default_value' => $this->settings['types'] ? $this->settings['types'] : array_keys($type_options),
+      '#title' => t('Display links for the following content types:'),
+      '#options' => $type_options,
+      '#default_value' => $type_defaults,
     );
   }
 

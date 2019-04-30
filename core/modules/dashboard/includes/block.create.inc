@@ -1,7 +1,6 @@
 <?php
 /**
  * @file
- *
  * Dashboard block providing links to create new content.
  */
 class DashboardCreateBlock extends Block {
@@ -64,8 +63,9 @@ class DashboardCreateBlock extends Block {
       if ($no_access) {
         return array();
       }
-      return t('No content types have been configured');
+      return t('No content types have been configured yet.');
     }
+
     $content =  theme('dashboard_create', array('create' => $create));
 
     return $content;
@@ -80,7 +80,7 @@ class DashboardCreateBlock extends Block {
     $type_options = node_type_get_names();
     $form['types'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Include "Create" links for content types'),
+      '#title' => t('Display links to create content of the following types:'),
       '#options' => array_map('t', $type_options),
       // All types are enabled if types is an empty array.
       '#default_value' => $this->settings['types'] ? $this->settings['types'] : array_keys($type_options),

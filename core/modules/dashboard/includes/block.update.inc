@@ -82,7 +82,7 @@ class DashboardUpdateBlock extends Block {
 
     $form['display'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Include Vocabularies'),
+      '#title' => t('Display information about updates to the following:'),
       '#multiple' => TRUE,
       '#options' => array(
         'core' => t('Backdrop core'),

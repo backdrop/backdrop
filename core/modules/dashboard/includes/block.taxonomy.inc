@@ -1,9 +1,8 @@
 <?php
 /**
  * @file
- *
- * Dashboard "Taxonomy" block. Shows statistics and links to manage terms in
- * vocabularies on the site.
+ * Dashboard block displaying informtion about taxonomy, including:
+ * -
  */
 class DashboardTaxonomyBlock extends Block {
 
@@ -59,7 +58,7 @@ class DashboardTaxonomyBlock extends Block {
       if (in_array($vocabulary->machine_name, $this->settings['vocabularies'])) {
         $term_count = db_query("SELECT count(*) FROM {taxonomy_term_data} WHERE vocabulary = :name", array(':name' => $vocabulary->machine_name))->fetchField();
         if (user_access('administer taxonomy') || user_access('edit terms in ' . $vocabulary->machine_name)) {
-          $terms = format_plural($term_count, '1 categories', '@count categories');
+          $terms = format_plural($term_count, '1 term', '@count terms');
           $links['configure'] = array(
             'title' => t('Configure'),
             'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit',
@@ -108,7 +107,7 @@ class DashboardTaxonomyBlock extends Block {
 
     $link = '';
     if (user_access('administer taxonomy')) {
-      $link = l(t('Taxonomy administration'), 'admin/structure/taxonomy');
+      $link = l(t('Manage taxonomy'), 'admin/structure/taxonomy');
     }
 
     return theme('dashboard_admin_table', array('header' => $header, 'rows' => $rows, 'link' => $link));
@@ -132,7 +131,7 @@ class DashboardTaxonomyBlock extends Block {
 
     $form['vocabularies'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Include Vocabularies'),
+      '#title' => t('Display the following Vocabularies'),
       '#multiple' => TRUE,
       '#options' => $options,
       '#default_value' => $this->settings['vocabularies'],

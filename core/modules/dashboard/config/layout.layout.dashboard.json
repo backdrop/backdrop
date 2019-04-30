@@ -127,11 +127,7 @@
                     "style": "default",
                     "block_settings": [],
                     "contexts": [],
-                    "types": {
-                        "page": "page",
-                        "post": "post",
-                        "blog_post": "blog_post"
-                    }
+                    "types": []
                 },
                 "uuid": "5a4ec847-16c1-45dd-b168-58afed5081d4",
                 "style": {

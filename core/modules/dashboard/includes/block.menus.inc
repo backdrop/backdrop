@@ -1,7 +1,6 @@
 <?php
 /**
  * @file
- *
  * Dashboard block displaying menus on the site.
  */
 class DashboardMenuBlock extends Block {
@@ -106,7 +105,7 @@ class DashboardMenuBlock extends Block {
     // Build a link to the menu admin UI.
     $link = '';
     if (user_access('administer menu')) {
-      $link = l(t('Menu administration'), 'admin/structure/menu');
+      $link = l(t('Manage menus'), 'admin/structure/menu');
     }
 
     $content = theme('dashboard_admin_table', array('header' => $header, 'rows' => $rows, 'link' => $link));
@@ -125,7 +124,7 @@ class DashboardMenuBlock extends Block {
 
     $form['menus'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Show links for the following menus on the dashboard'),
+      '#title' => t('Display links for the following menus:'),
       '#options' => menu_get_menus(),
       '#default_value' => $this->settings['menus'],
     );

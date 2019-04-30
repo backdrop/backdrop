@@ -4,7 +4,6 @@
  * Install, update and uninstall functions for the Dashboard module.
  */
 
-
 /**
  * Implements hook_install().
  */
