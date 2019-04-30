@@ -36,6 +36,7 @@ function template_preprocess_book_all_books_block(&$variables) {
  * @see book-navigation.tpl.php
  */
 function template_preprocess_book_navigation(&$variables) {
+  $navigation_options = config_get('book.settings', 'book_navigation_options');
   $book_link = $variables['book_link'];
 
   // Provide extra variables for themers. Not needed by default.
@@ -46,23 +47,25 @@ function template_preprocess_book_navigation(&$variables) {
   $variables['tree'] = '';
 
   if ($book_link['mlid']) {
-    $variables['tree'] = book_children($book_link);
+    if (!empty($navigation_options['tree'])) {
+      $variables['tree'] = book_children($book_link);
+    }
 
-    if ($prev = book_prev($book_link)) {
+    if (!empty($navigation_options['prev']) && $prev = book_prev($book_link)) {
       $prev_href = url($prev['href']);
       backdrop_add_html_head_link(array('rel' => 'prev', 'href' => $prev_href));
       $variables['prev_url'] = $prev_href;
       $variables['prev_title'] = check_plain($prev['title']);
     }
 
-    if ($book_link['plid'] && $parent = book_link_load($book_link['plid'])) {
+    if (!empty($navigation_options['up']) && $book_link['plid'] && $parent = book_link_load($book_link['plid'])) {
       $parent_href = url($parent['href']);
       backdrop_add_html_head_link(array('rel' => 'up', 'href' => $parent_href));
       $variables['parent_url'] = $parent_href;
       $variables['parent_title'] = check_plain($parent['title']);
     }
 
-    if ($next = book_next($book_link)) {
+    if (!empty($navigation_options['next']) && $next = book_next($book_link)) {
       $next_href = url($next['href']);
       backdrop_add_html_head_link(array('rel' => 'next', 'href' => $next_href));
       $variables['next_url'] = $next_href;

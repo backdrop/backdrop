@@ -1,5 +1,9 @@
 {
     "_config_name": "book.settings",
     "book_allowed_types": ["book"],
-    "book_child_type": "book"
+    "book_child_type": "book",
+    "book_navigation_options": ["tree", "prev", "next", "up"],
+    "book_links": ["book_add_child"],
+    "book_remove_book_navigation": 0,
+    "book_menu_tree_set_path": 0
 }
