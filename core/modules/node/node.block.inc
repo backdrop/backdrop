@@ -44,10 +44,10 @@ class NodeBlock extends Block {
     $view_mode_path = 'admin/structure/types/manage/' . $node_type . '/display/' . $view_mode;
     $settings[] = t('Display mode:') . ' ' . l($view_mode_text, $view_mode_path, array('query' => backdrop_get_destination()));
 
-    if ($this->settings['links']) {
+    if ($this->settings['display_submitted']) {
       $settings[] = t('Show author and date information');
     }
-    if ($this->settings['display_submitted']) {
+    if ($this->settings['links']) {
       $settings[] = t('Include the links "add comment", "read more" etc.');
     }
 
