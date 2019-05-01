@@ -233,26 +233,12 @@ function dashboard_preprocess_block(&$variables) {
  * Implements hook_theme()
  */
 function dashboard_theme() {
-  $base = array(
-    'file' => 'dashboard.theme.inc',
+  return array(
+    'dashboard_panel' => array(
+      'render element' => 'panel',
+      'template' => 'templates/dashboard-panel',
+    ),
   );
-
-  $items = array(
-    'dashboard_create' => array(
-      'variables' => array('create' => array()),
-    ) + $base,
-    'dashboard_overview_content' => array(
-      'variables' => array('overview' => array()),
-    ) + $base,
-    'dashboard_overview_user' => array(
-      'variables' => array('overview' => array()),
-    ) + $base,
-    'dashboard_admin_table' => array(
-      'variables' => array('header' => array(), 'rows' => array(), 'link' => FALSE),
-    ) + $base,
-  );
-
-  return $items;
 }
 
 /**

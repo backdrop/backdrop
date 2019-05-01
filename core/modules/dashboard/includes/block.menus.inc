@@ -4,12 +4,14 @@
  * Dashboard block displaying menus on the site.
  */
 class DashboardMenuBlock extends Block {
-
+  /**
+   * {@inheritdoc}
+   */
   function __construct($plugin_name, array $data) {
     parent::__construct($plugin_name, $data);
 
     // Set defaults.
-    $all_menus = array_keys(menu_get_menus());
+    $all_menus = module_exists('menu') ? array_keys(menu_get_menus()) : array();
     $excluded_menus = array('management', 'user-menu', 'devel');
     $this->settings += array(
       'menus' => array_diff($all_menus, $excluded_menus),
@@ -17,28 +19,28 @@ class DashboardMenuBlock extends Block {
   }
 
   /**
-   *  Sets block subject on block view.
+   * {@inheritdoc}
    */
   function getTitle() {
     return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Menus');
   }
 
   /**
-   * 'Admin title' callback for the content type.
+   * {@inheritdoc}
    */
   function getAdminTitle() {
     return t('Manage menus');
   }
 
   /**
-   * 'Admin info' callback for the content type.
+   * {@inheritdoc}
    */
   function getAdminPreview() {
     return t('Links to manage menus.');
   }
 
   /**
-   * Run-time rendering of the body of the block.
+   * {@inheritdoc}
    */
   function getContent() {
     if (!module_exists('menu')) {
@@ -50,28 +52,26 @@ class DashboardMenuBlock extends Block {
     $options = array('destination' => $current_path);
     $header = array(
       array('data' => t('Menu')),
-      array(
-        'data' => t('Operations'),
-      ),
+      array('data' => t('Operations')),
     );
     $rows = array();
 
     if (user_access('administer menu')) {
       foreach ($menus as $menu_name => $menu_label) {
         if (in_array($menu_name, $this->settings['menus'])) {
-          $links['configure'] = array(
-            'title' => t('Configure'),
-            'href' => 'admin/structure/menu/manage/' . $menu_name . '/edit',
-            'query' => $options,
-          );
           $links['manage'] = array(
-            'title' => t('Manage links'),
+            'title' => t('Edit links'),
             'href' => 'admin/structure/menu/manage/' . $menu_name,
             'query' => $options,
           );
           $links['add'] = array(
             'title' => t('Add new link'),
             'href' => 'admin/structure/menu/manage/' . $menu_name . '/add',
+            'query' => $options,
+          );
+          $links['configure'] = array(
+            'title' => t('Configure'),
+            'href' => 'admin/structure/menu/manage/' . $menu_name . '/edit',
             'query' => $options,
           );
           $operations = array(
@@ -102,19 +102,28 @@ class DashboardMenuBlock extends Block {
       );
     }
 
-    // Build a link to the menu admin UI.
-    $link = '';
+    $panel = array(
+      '#theme' => 'dashboard_panel__menus',
+    );
+    $panel['table'] = array(
+      '#theme' => 'table',
+      '#header' => $header,
+      '#rows' => $rows,
+    );
+
     if (user_access('administer menu')) {
-      $link = l(t('Manage menus'), 'admin/structure/menu');
+      $panel['link'] = array(
+        '#theme' => 'link',
+        '#path' => 'admin/structure/menu',
+        '#text' => t('Manage menus'),
+      );
     }
 
-    $content = theme('dashboard_admin_table', array('header' => $header, 'rows' => $rows, 'link' => $link));
-
-    return $content;
+    return $panel;
   }
 
   /**
-   * 'Edit form' callback for the block.
+   * {@inheritdoc}
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
@@ -122,16 +131,22 @@ class DashboardMenuBlock extends Block {
       return $form;
     }
 
+
+    $menus = menu_get_menus();
+    foreach ($menus as $menu_key => $menu_label) {
+      $menus[$menu_key] = check_plain(t($menu_label));
+    }
+
     $form['menus'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Display links for the following menus:'),
-      '#options' => menu_get_menus(),
+      '#title' => t('Display links for the following menus'),
+      '#options' => $menus,
       '#default_value' => $this->settings['menus'],
     );
   }
 
   /**
-   * 'Edit form' submit callback for the content type.
+   * {@inheritdoc}
    */
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);

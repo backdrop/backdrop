@@ -5,39 +5,41 @@
  * -
  */
 class DashboardTaxonomyBlock extends Block {
-
+  /**
+   * {@inheritdoc}
+   */
   function __construct($plugin_name, array $data) {
     parent::__construct($plugin_name, $data);
 
     // Set defaults.
     $this->settings += array(
-      'vocabularies' => array_keys(taxonomy_get_vocabularies()),
+      'vocabularies' => array(),
     );
   }
 
   /**
-   *  Sets block subject on block view.
+   * {@inheritdoc}
    */
   function getTitle() {
-    return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Categories');
+    return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Vocabularies');
   }
 
   /**
-   * 'Admin title' callback for the content type.
+   * {@inheritdoc}
    */
   function getAdminTitle() {
-    return t('Manage taxonomy');
+    return t('Manage vocabularies');
   }
 
   /**
-   * 'Admin info' callback for the content type.
+   * {@inheritdoc}
    */
   function getAdminPreview() {
-    return t('Links to administer taxonomy.');
+    return t('Links to administer taxonomy vocabularies.');
   }
 
   /**
-   * Run-time rendering of the body of the block.
+   * {@inheritdoc}
    */
   function getContent() {
     if (!module_exists('taxonomy')) {
@@ -54,33 +56,35 @@ class DashboardTaxonomyBlock extends Block {
     $rows = array();
     $no_access = FALSE;
 
-    foreach ($vocabularies as $vocabulary) {
-      if (in_array($vocabulary->machine_name, $this->settings['vocabularies'])) {
+    foreach ($vocabularies as $machine_name => $vocabulary) {
+      if (in_array($machine_name, $this->settings['vocabularies']) || empty($this->settings['vocabularies'])) {
         $term_count = db_query("SELECT count(*) FROM {taxonomy_term_data} WHERE vocabulary = :name", array(':name' => $vocabulary->machine_name))->fetchField();
         if (user_access('administer taxonomy') || user_access('edit terms in ' . $vocabulary->machine_name)) {
           $terms = format_plural($term_count, '1 term', '@count terms');
-          $links['configure'] = array(
-            'title' => t('Configure'),
-            'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit',
-            'query' => $options,
-          );
-          $links['manage'] = array(
-            'title' => t('Manage categories'),
+          $links['list'] = array(
+            'title' => t('List terms'),
             'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name,
             'query' => $options,
           );
           $links['add'] = array(
-            'title' => t('Add new category'),
+            'title' => t('Add new term'),
             'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/add',
             'query' => $options,
           );
+          if (user_access('administer taxonomy')) {
+            $links['configure'] = array(
+              'title' => t('Configure'),
+              'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/edit',
+              'query' => $options,
+            );
+          }
           $operations = array(
             '#type' => 'dropbutton',
             '#links' => $links,
           );
           $rows[] = array(
             'data' => array(
-              t($vocabulary->name) . ': ' . $terms,
+              check_plain(t($vocabulary->name)) . ': ' . $terms,
               backdrop_render($operations),
             ),
           );
@@ -105,16 +109,27 @@ class DashboardTaxonomyBlock extends Block {
       );
     }
 
-    $link = '';
+    $panel = array(
+      '#theme' => 'dashboard_panel__taxonomy',
+    );
+    $panel['table'] = array(
+      '#theme' => 'table',
+      '#header' => $header,
+      '#rows' => $rows,
+    );
     if (user_access('administer taxonomy')) {
-      $link = l(t('Manage taxonomy'), 'admin/structure/taxonomy');
+      $panel['link'] = array(
+        '#theme' => 'link',
+        '#path' => 'admin/structure/taxonomy',
+        '#text' => t('Manage vocabularies'),
+      );
     }
 
-    return theme('dashboard_admin_table', array('header' => $header, 'rows' => $rows, 'link' => $link));
+    return $panel;
   }
 
   /**
-   * 'Edit form' callback for the content type.
+   * {@inheritdoc}
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
@@ -126,7 +141,7 @@ class DashboardTaxonomyBlock extends Block {
     $vocabularies = taxonomy_get_vocabularies();
     $options = array();
     foreach ($vocabularies as $machine_name => $vocabulary) {
-      $options[$machine_name] = $vocabulary->name;
+      $options[$machine_name] = check_plain(t($vocabulary->name));
     }
 
     $form['vocabularies'] = array(
@@ -134,18 +149,24 @@ class DashboardTaxonomyBlock extends Block {
       '#title' => t('Display the following Vocabularies'),
       '#multiple' => TRUE,
       '#options' => $options,
-      '#default_value' => $this->settings['vocabularies'],
+      // An empty array indicates enabled on all.
+      '#default_value' => empty($this->settings['vocabularies']) ? array_keys($options) : $this->settings['vocabularies'],
     );
   }
 
   /**
-   * 'Edit form' submit callback for the content type.
+   * {@inheritdoc}
    */
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
 
-    foreach (array_keys($form_state['values']['vocabularies']) as $key) {
-      $this->settings['vocabularies'][$key] = $form_state['values']['vocabularies'][$key];
+    // If all types are checked, save nothing, indicating all types are allowed.
+    $checked_vocabularies = array_filter($form_state['values']['vocabularies']);
+    if (count($form['vocabularies']['#options']) === count($checked_vocabularies)) {
+      $this->settings['vocabularies'] = array();
+    }
+    else {
+      $this->settings['vocabularies'] = array_values($checked_vocabularies);
     }
   }
 }

@@ -5,30 +5,46 @@
  */
 
 class DashboardUpdateBlock extends Block {
+  /**
+   * {@inheritdoc}
+   */
+  function __construct($plugin_name, array $data) {
+    parent::__construct($plugin_name, $data);
+
+    // Set defaults.
+    $this->settings += array(
+      'project_types' => array(
+        'core',
+        'modules',
+        'themes',
+        'layouts',
+      ),
+    );
+  }
 
   /**
-   *  Sets block subject on block view.
+   * {@inheritdoc}
    */
   function getTitle() {
     return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Available Updates');
   }
 
   /**
-   * 'Admin title' callback for the content type.
+   * {@inheritdoc}
    */
   function getAdminTitle() {
     return t('Available updates');
   }
 
   /**
-   * 'Admin info' callback for the content type.
+   * {@inheritdoc}
    */
   function getAdminPreview() {
     return t('Displays available updates for core, modules, themes, and layouts.');
   }
 
   /**
-   * Run-time rendering of the body of the block.
+   * {@inheritdoc}
    */
   function getContent() {
     if (!module_exists('update')) {
@@ -40,11 +56,9 @@ class DashboardUpdateBlock extends Block {
     module_load_include('inc', 'update', 'update.compare');
     $data = update_calculate_project_data($available);
 
-
     foreach ($data as $key => $project) {
       $type = $project['project_type'];
-      if ($this->settings['display'][$type] === $type) {
-
+      if (in_array($type, $this->settings['project_types'])) {
         $name = $project['info']['name'];
         if ($project['name'] == 'backdrop') {
           $name = t('Backdrop');
@@ -66,12 +80,19 @@ class DashboardUpdateBlock extends Block {
       }
     }
 
+    $panel = array(
+      '#theme' => 'dashboard_panel__update',
+    );
+    $panel['list'] = array(
+      '#theme' => 'item_list',
+      '#items' => $items,
+    );
 
-    return theme('item_list', array('items' => $items));
+    return $panel;
   }
 
   /**
-   * 'Edit form' callback for the content type.
+   * {@inheritdoc}
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
@@ -80,9 +101,9 @@ class DashboardUpdateBlock extends Block {
       return $form;
     }
 
-    $form['display'] = array(
+    $form['project_types'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Display information about updates to the following:'),
+      '#title' => t('Display information about updates to the following'),
       '#multiple' => TRUE,
       '#options' => array(
         'core' => t('Backdrop core'),
@@ -90,16 +111,16 @@ class DashboardUpdateBlock extends Block {
         'theme' => t('Themes'),
         'layout' => t('Layouts'),
       ),
-      '#default_value' => $this->settings['display'],
+      '#default_value' => $this->settings['project_types'],
     );
   }
 
   /**
-   * 'Edit form' submit callback for the content type.
+   * {@inheritdoc}
    */
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
 
-    $this->settings['display'] = $form_state['values']['display'];
+    $this->settings['project_types'] = array_keys(array_filter($form_state['values']['project_types']));
   }
 }

@@ -9,19 +9,57 @@
  * Tests that the dashboard functions correctly.
  */
 class DashboardTest extends BackdropWebTestCase {
-  protected $profile = 'standard';
+  protected $profile = 'testing';
   protected $admin_user;
 
   function setUp() {
-    parent::setUp(array('layout', 'dashboard', 'layout_test'));
+    parent::setUp(array('layout', 'layout_test', 'taxonomy', 'comment', 'node', 'dashboard', 'menu'));
+
+    $this->backdropCreateContentType(array(
+      'name' => '<XSS>Test Content Type 1</XSS>',
+      'type' => 'test_content_type_1',
+    ));
+    $this->backdropCreateContentType(array(
+      'name' => '<XSS>Test Content Type 2</XSS>',
+      'type' => 'test_content_type_2',
+    ));
+    user_role_save((object) array(
+      'name' => 'test_user_role_1',
+      'label' => '<XSS>Test User Role 1</XSS>',
+    ));
+    user_role_save((object) array(
+      'name' => 'test_user_role_2',
+      'label' => '<XSS>Test User Role 2</XSS>',
+    ));
+    $vocabulary1 = new TaxonomyVocabulary(array(
+      'machine_name' => 'test_vocabulary_1',
+      'name' => 'Test Vocabulary 1',
+    ));
+    $vocabulary1->save();
+    $vocabulary2 = new TaxonomyVocabulary(array(
+      'machine_name' => 'test_vocabulary_2',
+      'name' => '<XSS>Test Vocabulary 2</XSS>',
+    ));
+    $vocabulary2->save();
+
+    // Create some sample content.
+    $this->backdropCreateNode(array(
+      'type' => 'test_content_type_1',
+    ));
+    $this->backdropCreateNode(array(
+      'type' => 'test_content_type_1',
+    ));
+    $this->backdropCreateNode(array(
+      'type' => 'test_content_type_2',
+    ));
 
     // Create and login admin user.
     $this->admin_user = $this->backdropCreateUser(array(
       'access content',
-      'create page content',
       'administer layouts',
       'administer menu',
       'administer content types',
+      'administer nodes',
       'access dashboard',
       'administer taxonomy',
       'access administration pages',
@@ -35,6 +73,7 @@ class DashboardTest extends BackdropWebTestCase {
   function testDashboardLayout() {
     $this->backdropGet('admin/dashboard');
     $this->assertText('An overview of your website.');
+
     // The create content block exists with only one link.
     $page_link = $this->xpath('//*[contains(@class,:block)]//li/a', array(
       ':block' => 'block-dashboard-create',

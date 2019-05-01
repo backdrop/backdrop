@@ -4,7 +4,9 @@
  * Dashboard block displaying informtion about content types.
  */
 class DashboardContentTypesBlock extends Block {
-
+  /**
+   * {@inheritdoc}
+   */
   function __construct($plugin_name, array $data) {
     parent::__construct($plugin_name, $data);
     // Set defaults.
@@ -14,28 +16,28 @@ class DashboardContentTypesBlock extends Block {
   }
 
   /**
-   * Sets block subject on block view.
+   * {@inheritdoc}
    */
   function getTitle() {
     return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Content types');
   }
 
   /**
-   * 'Admin title' callback for the content type.
+   * {@inheritdoc}
    */
   function getAdminTitle() {
     return t('Manage content types');
   }
 
   /**
-   * 'Admin info' callback for the content type.
+   * {@inheritdoc}
    */
   function getAdminPreview() {
     return t('Links to administer content types.');
   }
 
   /**
-   * Run-time rendering of the body of the block.
+   * {@inheritdoc}
    */
   function getContent() {
     $node_types = node_type_get_types();
@@ -94,17 +96,28 @@ class DashboardContentTypesBlock extends Block {
       );
     }
 
-    $link = '';
+    $panel = array(
+      '#theme' => 'dashboard_panel__node_types',
+    );
+    $panel['table'] = array(
+      '#theme' => 'table',
+      '#header' => $header,
+      '#rows' => $rows,
+    );
+
     if ($access) {
-      $link = l(t('Manage content types'), 'admin/structure/types');
+      $panel['link'] = array(
+        '#theme' => 'link',
+        '#path' => 'admin/structure/types',
+        '#text' => t('Manage content types'),
+      );
     }
 
-    return theme('dashboard_admin_table', array('header' => $header, 'rows' => $rows, 'link' => $link));
-
+    return $panel;
   }
 
   /**
-   * 'Edit form' callback for the content type.
+   * {@inheritdoc}
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
@@ -114,7 +127,7 @@ class DashboardContentTypesBlock extends Block {
     $type_defaults = array();
 
     foreach ($node_types as $node_type_key => $node_type) {
-      $type_options[$node_type_key] = t($node_type->name);
+      $type_options[$node_type_key] = check_plain(t($node_type->name));
       if (empty($this->settings['types']) || in_array($node_type_key, $this->settings['types'])) {
         $type_defaults[] = $node_type_key;
       }
@@ -122,14 +135,14 @@ class DashboardContentTypesBlock extends Block {
 
     $form['types'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Display links for the following content types:'),
+      '#title' => t('Display links for the following content types'),
       '#options' => $type_options,
       '#default_value' => $type_defaults,
     );
   }
 
   /**
-   * Submit handler to save the form settings.
+   * {@inheritdoc}
    */
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);

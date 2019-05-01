@@ -8,43 +8,50 @@
  * - configuration links
  */
 class DashboardOverviewContentBlock extends Block {
-
+  /**
+   * {@inheritdoc}
+   */
   function __construct($plugin_name, array $data) {
     parent::__construct($plugin_name, $data);
 
     // Set defaults.
     $all_types = array_keys(node_type_get_names());
+
+    // Default status for comment types.
+    $enabled_comment_types = array('post', 'article', 'blog');
+    $enabled_comment_types = array_intersect_key($enabled_comment_types, $all_types);
+
     $this->settings += array(
-      'types' => $all_types,
-      'comments' => $all_types,
-      'unapproved' => TRUE,
+      'types' => array(),
+      'comment_enabled' => TRUE,
+      'comment_include_unapproved' => TRUE,
+      'comment_types' => $enabled_comment_types,
     );
   }
 
   /**
-   *  Sets block subject on block view.
+   * {@inheritdoc}
    */
   function getTitle() {
     return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Content');
   }
 
   /**
-   * 'Admin title' callback for the content type.
+   * {@inheritdoc}
    */
   function getAdminTitle() {
     return t('Overview of content');
   }
 
   /**
-   * 'Admin info' callback for the content type.
+   * {@inheritdoc}
    */
   function getAdminPreview() {
     return t('Displays a summary of content statistics.');
-
   }
 
   /**
-   * Run-time rendering of the body of the block.
+   * {@inheritdoc}
    */
   function getContent() {
     $settings = $this->settings;
@@ -53,7 +60,7 @@ class DashboardOverviewContentBlock extends Block {
     // frequent than Dashboard access events.
     $items = array();
     $types = node_type_get_types();
-    $comments_exist = module_exists('comment');
+    $comment_enabled = module_exists('comment') && $settings['comment_enabled'];
 
     foreach ($types as $type => $object) {
       // Compare against node type option on block settings.
@@ -61,15 +68,14 @@ class DashboardOverviewContentBlock extends Block {
         $type_count = db_query("SELECT count(*) FROM {node} WHERE type = :type and status = 1", array(':type' => $type))->fetchField();
         $content_data[$type] = format_plural($type_count, '1 @type item', '@count @type items', array('@type' => $object->name));
 
-        // Check if comments module is enabled.
-        if ($comments_exist) {
-
+        // Check if Comment module is enabled.
+        if ($comment_enabled) {
           // Compare against comment options on block settings.
-          if (in_array($type, $settings['comments'])) {
+          if (in_array($type, $settings['comment_types'])) {
             $comment_count = db_query("SELECT count(DISTINCT cid) FROM {comment} c INNER JOIN {node} n ON c.nid = n.nid WHERE n.type = :type and c.status = 1 AND n.status = 1", array(':type' => $type))->fetchField();
 
             // Compare against unapproved option checkbox on block settings.
-            if (isset($settings['unapproved']) && $settings['unapproved'] == 1) {
+            if ($settings['comment_include_unapproved']) {
               $unapproved_count = db_query("SELECT count(DISTINCT c.cid) FROM {comment} c INNER JOIN {node} n ON c.nid = n.nid WHERE n.type = :type and c.status = 0 AND n.status = 1", array(':type' => $type))->fetchField();
               $content_data[$type . '_comments_unapproved'] = format_plural($unapproved_count, '1 unapproved', '@count unapproved');
               $comment_count += $unapproved_count;
@@ -85,74 +91,99 @@ class DashboardOverviewContentBlock extends Block {
       }
     }
 
-    return theme('dashboard_overview_content', array('overview' => $items));
+    $panel = array(
+      '#theme' => 'dashboard_panel__overview_content',
+    );
+    $panel['list'] = array(
+      '#theme' => 'item_list',
+      '#items' => $items,
+    );
+    if (user_access('administer nodes')) {
+      $panel['link'] = array(
+        '#theme' => 'link',
+        '#path' => 'admin/content',
+        '#text' => t('Manage content'),
+      );
+    }
+
+    return $panel;
   }
 
   /**
-   * 'Edit form' callback for the content type.
+   * {@inheritdoc}
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
     $settings = $this->settings;
 
-    $types = node_type_get_types();
-    $type_options = array();
-    $type_defaults = array();
-    $comment_defaults = array();
-    // Set defaults based on block settings.
-    if (isset($settings['types'])) {
-      $type_defaults = $settings['types'];
+    $node_types = node_type_get_types();
+    $options = array();
+    foreach ($node_types as $machine_name => $node_type) {
+      $options[$machine_name] = check_plain(t($node_type->name));
     }
-    if (isset($settings['comments'])) {
-      $comment_defaults = $settings['comments'];
-    }
-    foreach ($types as $machine_type => $type) {
-      $type_options[$machine_type] = $type->name;
 
-      // Display new content types by default.
-      if (!array_key_exists($machine_type, $type_defaults)) {
-        $type_defaults[$machine_type] = $machine_type;
-      }
-
-      // Do not display comments on new types by default unless it's a blog or a forum.
-      if (!array_key_exists($machine_type, $comment_defaults)) {
-        if ($machine_type == 'blog' || $machine_type == 'forum topic') {
-          $comment_defaults[$machine_type] = $machine_type;
-        }
-        else {
-          $comment_defaults[$machine_type] = 0;
-        }
-      }
-    }
     $form['types'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Display <strong>post</strong> counts for the following content types'),
-      '#options' => $type_options,
-      '#default_value' => $type_defaults,
+      '#options' => $options,
+      '#default_value' => empty($settings['types']) ? array_keys($options) : $settings['types'],
     );
+
     if (module_exists('comment')) {
-      $form['comments'] = array(
-        '#type' => 'checkboxes',
-        '#title' => t('Display <strong>comment</strong> counts for the following content types'),
-        '#options' => $type_options,
-        '#default_value' => $comment_defaults,
+      $form['comment'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Comment counts'),
+        '#tree' => FALSE,
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
       );
-      $form['unapproved'] = array(
+      $form['comment']['comment_enabled'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Include comment counts'),
+        '#default_value' => $settings['comment_enabled'],
+      );
+      $form['comment']['comment_include_unapproved'] = array(
         '#type' => 'checkbox',
         '#title' => t('Include unapproved comments in comment counts'),
-        '#default_value' => $settings['unapproved'],
+        '#default_value' => $settings['comment_include_unapproved'],
+        '#states' => array(
+          'visible' => array(
+            '[name="comment_enabled"]' => array('checked' => TRUE),
+          ),
+        ),
+      );
+      $form['comment']['comment_types'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('Display <strong>comment</strong> counts for the following content types'),
+        '#options' => $options,
+        '#default_value' => empty($settings['comment_types']) ? array_keys($options) : $settings['comment_types'],
+        '#states' => array(
+          'visible' => array(
+            '[name="comment_enabled"]' => array('checked' => TRUE),
+          ),
+        ),
       );
     }
   }
 
   /**
-   * 'Edit form' submit callback for the content type.
+   * {@inheritdoc}
    */
   function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
 
     $this->settings['types'] = array_keys(array_filter($form_state['values']['types']));
-    $this->settings['comments'] = array_keys(array_filter($form_state['values']['comments']));
-    $this->settings['unapproved'] = $form_state['values']['unapproved'];
+    $this->settings['comment_enabled'] = (bool) $form_state['values']['comment_enabled'];
+    $this->settings['comment_include_unapproved'] = (bool) $form_state['values']['comment_include_unapproved'];
+    $this->settings['comment_types'] = array_keys(array_filter($form_state['values']['comment_types']));
+
+    // If all options are selected, save an empty array.
+    $type_count = count($form['types']['#options']);
+    if ($type_count == count($this->settings['types'])) {
+      $this->settings['types'] = array();
+    }
+    if ($type_count == count($this->settings['comment_types'])) {
+      $this->settings['comment_types'] = array();
+    }
   }
 }
