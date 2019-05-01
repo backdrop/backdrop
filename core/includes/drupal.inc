@@ -2496,7 +2496,7 @@ function drupal_var_export($var, $prefix = '') {
  * @deprecated since 1.0.0
  */
 function element_validate_integer() {
-  watchdog_deprecated_function('element_validate', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
 }
 
 /**
@@ -2506,7 +2506,7 @@ function element_validate_integer() {
  * @deprecated since 1.0.0
  */
 function element_validate_integer_positive() {
-  watchdog_deprecated_function('element_validate', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
 }
 
 /**
@@ -2516,7 +2516,7 @@ function element_validate_integer_positive() {
  * @deprecated since 1.0.0
  */
 function element_validate_number() {
-  watchdog_deprecated_function('element_validate', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
 }
 
 /**
