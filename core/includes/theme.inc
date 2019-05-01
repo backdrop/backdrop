@@ -2692,12 +2692,12 @@ function template_preprocess_page(&$variables) {
   if (backdrop_get_title()) {
     $head_title = array(
       'title' => strip_tags(backdrop_get_title()),
-      'name' => check_plain($site_config->get('site_name')),
+      'name' => check_plain($site_config->getTranslated('site_name')),
     );
   }
   else {
-    $head_title = array('name' => check_plain($site_config->get('site_name')));
-    if ($slogan = $site_config->get('site_slogan')) {
+    $head_title = array('name' => check_plain($site_config->getTranslated('site_name')));
+    if ($slogan = $site_config->getTranslated('site_slogan')) {
       $head_title['slogan'] = check_plain($slogan);
     }
   }
@@ -2792,8 +2792,8 @@ function template_preprocess_maintenance_page(&$variables) {
   // Load site config if available, fallback to the default.
   try {
     $site_config = config('system.core');
-    $site_name = filter_xss_admin($site_config->get('site_name'));
-    $site_slogan = filter_xss_admin($site_config->get('site_slogan'));
+    $site_name = filter_xss_admin($site_config->getTranslated('site_name'));
+    $site_slogan = filter_xss_admin($site_config->getTranslated('site_slogan'));
   }
   catch (ConfigException $e) {
     $site_name = 'Backdrop CMS';

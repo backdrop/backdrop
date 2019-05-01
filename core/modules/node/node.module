@@ -2208,7 +2208,7 @@ function node_feed($nids = FALSE, $channel = array()) {
 
   $channel_defaults = array(
     'version'     => '2.0',
-    'title'       => config_get('system.core', 'site_name'),
+    'title'       => config_get_translated('system.core', 'site_name'),
     'link'        => $base_url,
     'description' => $rss_config->get('rss_description'),
     'language'    => $language_content->langcode
@@ -2298,7 +2298,7 @@ function node_page_default() {
       $build = node_view_multiple($nodes);
 
       // 'rss.xml' is a path, not a file, registered in node_menu().
-      backdrop_add_feed('rss.xml', $site_config->get('site_name') . ' ' . t('RSS'));
+      backdrop_add_feed('rss.xml', $site_config->getTranslated('site_name') . ' ' . t('RSS'));
       $build['pager'] = array(
         '#theme' => 'pager',
         '#weight' => 5,
@@ -2306,7 +2306,7 @@ function node_page_default() {
       backdrop_set_title('');
     }
     else {
-      backdrop_set_title(t('Welcome to @site-name', array('@site-name' => $site_config->get('site_name'))), PASS_THROUGH);
+      backdrop_set_title(t('Welcome to @site-name', array('@site-name' => $site_config->getTranslated('site_name'))), PASS_THROUGH);
 
       $default_message = '<p>' . t('No content has been promoted yet.') . '</p>';
       $default_links = array();

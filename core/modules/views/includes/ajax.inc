@@ -164,7 +164,7 @@ function views_ajax_command_replace_title($title) {
   $command = array(
     'command' => 'viewsReplaceTitle',
     'title' => $title,
-    'siteName' => config_get('system.core', 'site_name'),
+    'siteName' => config_get_translated('system.core', 'site_name'),
   );
   return $command;
 }

@@ -1828,7 +1828,7 @@ function comment_form($form, &$form_state, $comment) {
       '#default_value' => $author,
       '#maxlength' => 60,
       '#size' => 30,
-      '#description' => t('Leave blank for %anonymous.', array('%anonymous' => config_get('system.core', 'anonymous'))),
+      '#description' => t('Leave blank for %anonymous.', array('%anonymous' => config_get_translated('system.core', 'anonymous'))),
       '#autocomplete_path' => 'user/autocomplete',
     );
   }
