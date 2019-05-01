@@ -453,7 +453,7 @@ function template_preprocess_views_view_table(&$variables) {
   $variables['rows'] = array();
   $variables['field_classes'] = array();
   $variables['header'] = array();
-  $variables['classes_array'] = array();
+  $variables['classes'] = array();
 
   $options = $view->style_plugin->options;
   $handler = $view->style_plugin;
@@ -470,7 +470,7 @@ function template_preprocess_views_view_table(&$variables) {
       foreach ($classes as $key => $class) {
         if (!empty($class)) {
           $classes[$key] = backdrop_clean_css_identifier($class, $filter);
-          $vars['classes_array'][] = $classes[$key];
+          $variables['classes'][] = $classes[$key];
         }
       }
     }
