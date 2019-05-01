@@ -21,14 +21,14 @@ class DashboardTaxonomyBlock extends Block {
    * {@inheritdoc}
    */
   function getTitle() {
-    return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Vocabularies');
+    return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Taxonomy');
   }
 
   /**
    * {@inheritdoc}
    */
   function getAdminTitle() {
-    return t('Manage vocabularies');
+    return t('Manage taxonomy');
   }
 
   /**
@@ -51,13 +51,14 @@ class DashboardTaxonomyBlock extends Block {
     $options = array('destination' => $current_path);
     $header = array(
       array('data' => t('Vocabulary')),
+      array('data' => t('Terms')),
       array('data' => t('Operations')),
     );
     $rows = array();
     $no_access = FALSE;
 
-    foreach ($vocabularies as $machine_name => $vocabulary) {
-      if (in_array($machine_name, $this->settings['vocabularies']) || empty($this->settings['vocabularies'])) {
+    foreach ($vocabularies as $machine => $vocabulary) {
+      if (in_array($machine, $this->settings['vocabularies']) || empty($this->settings['vocabularies'])) {
         $term_count = db_query("SELECT count(*) FROM {taxonomy_term_data} WHERE vocabulary = :name", array(':name' => $vocabulary->machine_name))->fetchField();
         if (user_access('administer taxonomy') || user_access('edit terms in ' . $vocabulary->machine_name)) {
           $terms = format_plural($term_count, '1 term', '@count terms');
@@ -84,7 +85,8 @@ class DashboardTaxonomyBlock extends Block {
           );
           $rows[] = array(
             'data' => array(
-              check_plain(t($vocabulary->name)) . ': ' . $terms,
+              check_plain(t($vocabulary->name)),
+              $terms,
               backdrop_render($operations),
             ),
           );
@@ -121,7 +123,7 @@ class DashboardTaxonomyBlock extends Block {
       $panel['link'] = array(
         '#theme' => 'link',
         '#path' => 'admin/structure/taxonomy',
-        '#text' => t('Manage vocabularies'),
+        '#text' => t('Manage taxonomy'),
       );
     }
 
@@ -140,8 +142,8 @@ class DashboardTaxonomyBlock extends Block {
 
     $vocabularies = taxonomy_get_vocabularies();
     $options = array();
-    foreach ($vocabularies as $machine_name => $vocabulary) {
-      $options[$machine_name] = check_plain(t($vocabulary->name));
+    foreach ($vocabularies as $machine => $vocabulary) {
+      $options[$machine] = check_plain(t($vocabulary->name));
     }
 
     $form['vocabularies'] = array(

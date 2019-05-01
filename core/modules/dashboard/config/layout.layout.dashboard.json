@@ -20,14 +20,12 @@
             "eb936b48-d2ec-4d9f-9dd9-ef24a1ad3493"
         ],
         "top": [],
-        "content": [
-            "a144d9d3-0cac-4c20-989e-75220ab686cb"
-        ],
+        "content": [],
         "half1": [
-            "aab75ee1-7a16-4137-b253-83a0f6323936",
             "5a4ec847-16c1-45dd-b168-58afed5081d4",
             "8ebebe78-4aa4-4d08-a79f-2463daf79863",
-            "f149b0ac-ff4c-46f5-8402-ee1aac572dfb"
+            "f149b0ac-ff4c-46f5-8402-ee1aac572dfb",
+            "aab75ee1-7a16-4137-b253-83a0f6323936"
         ],
         "half2": [
             "a4b4935d-e085-4d77-a522-ea805e172c1a",
@@ -52,60 +50,6 @@
                     "contexts": []
                 },
                 "uuid": "eb936b48-d2ec-4d9f-9dd9-ef24a1ad3493",
-                "style": {
-                    "plugin": "default",
-                    "data": {
-                        "settings": {
-                            "classes": ""
-                        }
-                    }
-                }
-            }
-        },
-        "a144d9d3-0cac-4c20-989e-75220ab686cb": {
-            "plugin": "layout:custom_block",
-            "data": {
-                "module": "layout",
-                "delta": "custom_block",
-                "settings": {
-                    "title_display": "default",
-                    "title": "",
-                    "style": "default",
-                    "block_settings": [],
-                    "contexts": [],
-                    "content": "<p>An overview of your website.</p>\r\n",
-                    "format": "filtered_html"
-                },
-                "uuid": "a144d9d3-0cac-4c20-989e-75220ab686cb",
-                "style": {
-                    "plugin": "default",
-                    "data": {
-                        "settings": {
-                            "classes": ""
-                        }
-                    }
-                }
-            }
-        },
-        "aab75ee1-7a16-4137-b253-83a0f6323936": {
-            "plugin": "dashboard:updates",
-            "data": {
-                "module": "dashboard",
-                "delta": "updates",
-                "settings": {
-                    "title_display": "default",
-                    "title": "",
-                    "style": "default",
-                    "block_settings": [],
-                    "contexts": [],
-                    "project_types": [
-                        "core",
-                        "module",
-                        "theme",
-                        "layout"
-                    ]
-                },
-                "uuid": "aab75ee1-7a16-4137-b253-83a0f6323936",
                 "style": {
                     "plugin": "default",
                     "data": {
@@ -153,7 +97,8 @@
                     "contexts": [],
                     "comment_enabled": true,
                     "comment_include_unapproved": true,
-                    "comment_types": []
+                    "comment_types": [],
+                    "types": []
                 },
                 "uuid": "8ebebe78-4aa4-4d08-a79f-2463daf79863",
                 "style": {
@@ -178,12 +123,43 @@
                     "block_settings": [],
                     "contexts": [],
                     "user": 1,
-                    "roles": [],
+                    "roles": [
+                        "administrator"
+                    ],
                     "user_counts": true,
                     "user_counts_active": true,
                     "user_counts_blocked": true
                 },
                 "uuid": "f149b0ac-ff4c-46f5-8402-ee1aac572dfb",
+                "style": {
+                    "plugin": "default",
+                    "data": {
+                        "settings": {
+                            "classes": ""
+                        }
+                    }
+                }
+            }
+        },
+        "aab75ee1-7a16-4137-b253-83a0f6323936": {
+            "plugin": "dashboard:updates",
+            "data": {
+                "module": "dashboard",
+                "delta": "updates",
+                "settings": {
+                    "title_display": "default",
+                    "title": "",
+                    "style": "default",
+                    "block_settings": [],
+                    "contexts": [],
+                    "project_types": [
+                        "core",
+                        "module",
+                        "theme",
+                        "layout"
+                    ]
+                },
+                "uuid": "aab75ee1-7a16-4137-b253-83a0f6323936",
                 "style": {
                     "plugin": "default",
                     "data": {
@@ -206,6 +182,7 @@
                     "block_settings": [],
                     "contexts": [],
                     "menus": [
+                        "menu-three",
                         "main-menu"
                     ]
                 },

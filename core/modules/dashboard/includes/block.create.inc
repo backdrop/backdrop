@@ -45,11 +45,11 @@ class DashboardCreateBlock extends Block {
     $no_access = FALSE;
     $create = array();
 
-    foreach ($node_types as $type_name => $node_type) {
+    foreach ($node_types as $machine => $node_type) {
       // If enabled or all types are enabled.
-      if (in_array($type_name, $this->settings['types']) || empty($this->settings['types'])) {
+      if (in_array($machine, $this->settings['types']) || empty($this->settings['types'])) {
         // Check access, then add a link to create content.
-        if (node_access('create', $type_name)) {
+        if (node_access('create', $machine)) {
           $type_url_str = str_replace('_', '-', $node_type->type);
           $create[] = l(t('Add new @type', array('@type' => t($node_type->name))), 'node/add/' . $type_url_str, array('html' => TRUE));
         }

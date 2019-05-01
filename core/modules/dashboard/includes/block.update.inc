@@ -64,17 +64,25 @@ class DashboardUpdateBlock extends Block {
           $name = t('Backdrop');
         }
 
-        $new = t('version @new available', array('@new' => $project['recommended']));
-        if (user_access('access_site_reports')) {
-          $new = l($new, 'admin/reports/updates');
+        $item = $name . ' ' . $type;
+
+        if ($project['recommended']) {
+          $new = t('version @new available', array('@new' => $project['recommended']));
+          if (user_access('access_site_reports')) {
+            $new = l($new, 'admin/reports/updates');
+          }
+          $item .= ' (' . $new . ')';
+
+          if (module_exists('installer') && user_access('administer software updates')) {
+            $options = array('attributes' => array('class' => array('hi')));
+            $item .= ' - ' . l(t('Update'), 'admin/modules/update', $options);
+          }
+        }
+        else {
+          // No updates available.
+          $item .= ' - ' . t('No recommended updates');
         }
 
-        $item = $name . ' ' . $type . ' (' . $new . ')';
-
-        if (module_exists('installer') && user_access('administer software updates')) {
-          $options = array('attributes' => array('class' => array('hi')));
-          $item .= ' - ' . l(t('Update'), 'admin/modules/update', $options);
-        }
 
         $items[] = $item;
       }

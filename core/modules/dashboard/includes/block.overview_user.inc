@@ -31,7 +31,7 @@ class DashboardOverviewUserBlock extends Block {
    * {@inheritdoc}
    */
   function getTitle() {
-    return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('User accounts');
+    return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('User account overview');
   }
 
   /**

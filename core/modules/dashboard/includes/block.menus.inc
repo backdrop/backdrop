@@ -57,21 +57,21 @@ class DashboardMenuBlock extends Block {
     $rows = array();
 
     if (user_access('administer menu')) {
-      foreach ($menus as $menu_name => $menu_label) {
-        if (in_array($menu_name, $this->settings['menus'])) {
+      foreach ($menus as $machine => $menu_label) {
+        if (in_array($machine, $this->settings['menus'])) {
           $links['manage'] = array(
             'title' => t('Edit links'),
-            'href' => 'admin/structure/menu/manage/' . $menu_name,
+            'href' => 'admin/structure/menu/manage/' . $machine,
             'query' => $options,
           );
           $links['add'] = array(
             'title' => t('Add new link'),
-            'href' => 'admin/structure/menu/manage/' . $menu_name . '/add',
+            'href' => 'admin/structure/menu/manage/' . $machine . '/add',
             'query' => $options,
           );
           $links['configure'] = array(
             'title' => t('Configure'),
-            'href' => 'admin/structure/menu/manage/' . $menu_name . '/edit',
+            'href' => 'admin/structure/menu/manage/' . $machine . '/edit',
             'query' => $options,
           );
           $operations = array(

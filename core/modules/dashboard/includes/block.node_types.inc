@@ -51,9 +51,9 @@ class DashboardContentTypesBlock extends Block {
 
     // Check access, then add a link to create content.
     if ($access) {
-      foreach ($node_types as $node_type_key => $node_type) {
+      foreach ($node_types as $machine => $node_type) {
         // If no types are specified, show all types.
-        if (empty($this->settings['types']) || in_array($node_type_key, $this->settings['types'])) {
+        if (empty($this->settings['types']) || in_array($machine, $this->settings['types'])) {
           $type_url_string = str_replace('_', '-', $node_type->type);
           $links['configure'] = array(
             'title' => t('Configure'),
@@ -126,10 +126,10 @@ class DashboardContentTypesBlock extends Block {
     $type_options = array();
     $type_defaults = array();
 
-    foreach ($node_types as $node_type_key => $node_type) {
-      $type_options[$node_type_key] = check_plain(t($node_type->name));
-      if (empty($this->settings['types']) || in_array($node_type_key, $this->settings['types'])) {
-        $type_defaults[] = $node_type_key;
+    foreach ($node_types as $machine => $node_type) {
+      $type_options[$machine] = check_plain(t($node_type->name));
+      if (empty($this->settings['types']) || in_array($machine, $this->settings['types'])) {
+        $type_defaults[] = $machine;
       }
     }
 
