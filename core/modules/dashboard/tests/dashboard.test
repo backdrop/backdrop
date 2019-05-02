@@ -138,7 +138,7 @@ class DashboardTest extends BackdropWebTestCase {
       'type' => 'foo',
       'name' => 'Foo',
       'settings' => array(
-        'comment_default' => COMMENT_NODE_OPEN,
+        'comment_default' => 2, // COMMENT_NODE_OPEN
       ),
     ));
     $this->backdropCreateContentType(array(
@@ -188,11 +188,11 @@ class DashboardTest extends BackdropWebTestCase {
     $this->assertLink('Add new Foo', 0, 'The create foo link was found.');
 
     // Create a new Foo item.
-    $nid = $this->backdropCreateNode(array(
+    $node = $this->backdropCreateNode(array(
       'type' => 'foo',
       'title' => $this->randomString(),
     ));
-    $this->backdropGet('node/' . $nid);
+    $this->backdropGet('node/' . $node->nid);
     // @todo post a comment.
 
     $this->backdropGet('admin/dashboard');

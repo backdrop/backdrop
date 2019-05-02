@@ -42,7 +42,7 @@ class DashboardCreateBlock extends Block {
    */
   function getContent() {
     $node_types = node_type_get_types();
-    $no_access = FALSE;
+    $no_access = TRUE;
     $create = array();
 
     foreach ($node_types as $machine => $node_type) {
@@ -52,9 +52,7 @@ class DashboardCreateBlock extends Block {
         if (node_access('create', $machine)) {
           $type_url_str = str_replace('_', '-', $node_type->type);
           $create[] = l(t('Add new @type', array('@type' => t($node_type->name))), 'node/add/' . $type_url_str, array('html' => TRUE));
-        }
-        else {
-          $no_access = TRUE;
+          $no_access = FALSE;
         }
       }
     }
