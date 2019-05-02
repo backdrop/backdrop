@@ -368,6 +368,9 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#placeholder' => ' ',
     '#default_value' => isset($values['href']) ? $values['href'] : NULL,
     '#parents' => array('attributes', 'href'),
+    '#wrapper_attributes' => array(
+      'data-editor-image-toggle' => t('Link to existing content'),
+    ),
     '#weight' => -10,
     '#autocomplete_path' => 'filter-link/autocomplete',
     '#description' => t('Start typing to see a list of suggestions, enter the relative path to another page, or enter an external URL.<br>Examples: <em>About Us</em>, <em>/about</em>, or <em>http://backdropcms.org</em>'),
@@ -545,6 +548,20 @@ function filter_format_editor_link_form_submit($form, &$form_state) {
     // Remove any reference to a data file.
     unset($form_state['values']['fid']);
     $form_state['values']['attributes']['data-file-id'] = NULL;
+  }
+
+  // Clean up optional attributes, if not specified, remove.
+  $more = array('class', 'target', 'id', 'title', 'rel', 'data-file-id');
+  foreach ($more as $attribute) {
+    if (isset($form_state['values']['attributes'][$attribute])) {
+      $value = trim($form_state['values']['attributes'][$attribute]);
+      if (strlen($value) === 0 || ($attribute === 'target' && empty($value))) {
+        unset($form_state['values']['attributes'][$attribute]);
+      }
+      else {
+        $form_state['values']['attributes'][$attribute] = $value;
+      }
+    }
   }
 }
 
