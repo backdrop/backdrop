@@ -119,9 +119,12 @@ function theme_layout_template_option($variables) {
  */
 function theme_layout_flexible_template_option($variables) {
   $template_info = $variables['template_info'];
+  $output = '';
+  $output .= '<div class="layout-icon">';
   $output .= '<div class="layout-caption">' . check_plain($template_info['title']) . '</div>';
-  $output .= '<div class="layout-links">' . l(t('Edit'), 'admin/structure/layouts/flexible-layout/' . $template_info['name'] . '/edit') . '</div>';
-  $output .= '<div class="layout-links">' . l(t('Configure layout'), 'admin/structure/layouts/flexible-layout/' . $template_info['name'] . '/configure') . '</div>';
+  $output .= '<div class="layout-links">' . l(t('Edit'), 'admin/structure/layouts/settings/' . $template_info['name'] . '/edit') . '</div>';
+  $output .= '<div class="layout-links">' . l(t('Configure'), 'admin/structure/layouts/settings/' . $template_info['name'] . '/configure') . '</div>';
+  $output .= '<div class="layout-links">' . t('Delete') . '</div>';
   $output .= '</div>';
   return $output;
 }
