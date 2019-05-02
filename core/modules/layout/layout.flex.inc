@@ -22,6 +22,7 @@
 function layout_flexible_template_add_template($form, &$form_state, $flexible_template_id = NULL) {
   $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
   $template_data = $form_state['template_data'];
+  dpm($form_state['template_data']);
 
   $form['name'] = array(
     '#title' => t('Template name'),
@@ -58,8 +59,9 @@ function layout_flexible_template_add_template_submit($form, &$form_state) {
   $template_data['name'] = $form_state['values']['machine_name'];
   $template_data['title'] = $form_state['values']['name'];
   $template_data['description'] = $form_state['values']['description'];
+  dpm($template_data);
 
-  $config = config('layout.flexible.' . $form_state['machine_name']);
+  $config = config('layout.flexible.' . $form_state['values']['machine_name']);
   $config->setData($template_data);
   $config->save();
 
@@ -79,8 +81,9 @@ function layout_add_flexible_template($form, &$form_state, $flexible_template_id
     'is_new' => TRUE,
   );
   $layout = new Layout($config);
-  $flexible_template_defaults = layout_flexible_template_defaults();
-  $flexible_template_defaults['name'] = $flexible_template_id;
+  $template = layout_get_layout_template_info($flexible_template_id);
+  $template['template'] = 'layout-flexible';
+  $template['regions'] = array();
   $form_state['flexible_template_id'] = $flexible_template_id;
 
   $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
@@ -91,12 +94,12 @@ function layout_add_flexible_template($form, &$form_state, $flexible_template_id
 
   foreach ($form_state['template_data']['regions'] as $position => $info) {
     $layout->positions[$position] = array();
-    $flexible_template_defaults['regions'][$position] = $info['name'];
+    $template['regions'][$position] = $info['name'];
   }
 
   // Don't use layout_create_renderer() because we need to pass in template
   // info.
-  $renderer = new LayoutRendererFlexible($layout, $flexible_template_defaults);
+  $renderer = new LayoutRendererFlexible($layout, $template);
   $form['#attached'] = array(
     'library' => array(
       array('system', 'backdrop.ajax'),
@@ -292,41 +295,10 @@ function layout_flexible_template_add_row_ajax($form, $form_state) {
 }
 
 /**
- * Render the settings form for layout.
- *
- * @ingroup forms
- */
- // todo: get rid of this, since we're implementing hook_layout_info().
-function layout_flexible_template_defaults() {
-  $defaults = array(
-    'type' => 'layout',
-    'name' => 'flex_default',
-    'version' => '1.13.x-dev',
-    'backdrop' => '1.x',
-    'regions' => array(),
-    'default region' => 'content',
-    'preview' => 'flex_default.png',
-    'libraries' => array(
-      'bootstrap4-gs',
-    ),
-    'path' => 'core/layouts/flex_default',
-    'title' => 'Flex default',
-    'hidden' => FALSE,
-    'stylesheets' => array(
-      'all' => array(
-        'flex_default.css',
-      ),
-    ),
-    'template' => 'layout-flexible',
-  );
-  return $defaults;
-}
-
-/**
  * Provides the default template for new layouts.
  */
 function layout_flexible_template_template($flexible_template_id = NULL) {
-  if (!$settings = layout_get_flex_tempstore($flexible_template_id)) {
+  if (!$flexible_template_id) {
     // set up a default
     $settings = array(
       'name' => '',
@@ -344,7 +316,9 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
       ),
     );
   }
-
+  else {
+    $settings = layout_get_flex_tempstore($flexible_template_id);
+  }
   return $settings;
 }
 
@@ -372,7 +346,6 @@ function layout_flexible_row_styles() {
  * Provides the default template for new layouts.
  */
 function theme_layout_flexible($variables) {
-dpm(layout_get_layout_template_info());
   $region_buttons = $variables['region_buttons'];
   $content = $variables['content'];
   $template_id = $variables['layout_info']['name'];
@@ -407,7 +380,6 @@ dpm(layout_get_layout_template_info());
  * Provides the default template for new layouts.
  */
 function theme_layout_layout_flexible($variables) {
-  dpm(layout_get_layout_template_info());
   $content = $variables['content'];
   $template_id = $variables['layout_info']['name'];
   $data = layout_flexible_template_template($template_id);
@@ -461,9 +433,10 @@ function layout_get_flex_tempstore($name) {
   $caches = &backdrop_static(__FUNCTION__, array());
   if (!isset($caches[$name])) {
     if (!$item = tempstore_get('layout.flex', $name)) {
+      dpm($name);
       $item = layout_flexible_template_load($name);
-      $caches[$name] = $item;
     }
+    $caches[$name] = $item;
   }
 
   return $caches[$name];
@@ -475,6 +448,7 @@ function layout_flexible_template_load($flexible_template_id = NULL) {
   if (empty($configs)) {
     $cache = cache()->get('layout:flexible:config');
     if ($cache && $cache->data) {
+  dpm($cache);
       $configs = $cache->data;
     }
   }
@@ -484,9 +458,6 @@ function layout_flexible_template_load($flexible_template_id = NULL) {
     foreach ($config_names as $config_file) {
       $config = config($config_file);
       $data = $config->get();
-      $data += array(
-        'weight' => 0,
-      );
       $configs[$data['name']] = $data;
     }
 
@@ -519,6 +490,7 @@ function layout_layout_info() {
       'default region' => '',
       'template' => 'layout_layout_flexible',
       'flexible' => TRUE,
+      'type' => 'layout',
       'path' => '',
       'libraries' => array('bootstrap4-gs'),
     );
@@ -534,4 +506,15 @@ function layout_layout_info() {
   }
 
   return $layouts;
+}
+
+/**
+ * Reset all caches provided by Layout module.
+ */
+function layout_flex_reset_caches() {
+  dpm(cache()->get('layout:flexible:config'));
+  cache()->delete('layout:flexible:config');
+
+  backdrop_static_reset('layout_flexible_template_load');
+  backdrop_static_reset('layout_get_flex_tempstore');
 }
