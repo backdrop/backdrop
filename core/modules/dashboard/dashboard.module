@@ -184,7 +184,9 @@ function dashboard_user_login(&$edit, $account) {
   }
 
   // Don't redirect if during installation.
-    // @todo
+  if (defined('MAINTENANCE_MODE') && MAINTENANCE_MODE === 'install') {
+    return;
+  }
 
   // Don't redirect for password reset forms.
   if (isset($_POST['form_id']) && $_POST['form_id'] == 'user_pass_reset') {

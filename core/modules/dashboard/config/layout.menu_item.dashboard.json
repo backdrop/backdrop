@@ -1,5 +1,5 @@
 {
-    "_config_name": "layout.menu_item.Dashboard",
+    "_config_name": "layout.menu_item.dashboard",
     "name": "Dashboard",
     "title": "",
     "path": "admin/dashboard",
