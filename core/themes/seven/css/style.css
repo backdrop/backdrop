@@ -648,6 +648,7 @@ fieldset .fieldset-legend {
   margin-top: .25em;
   padding-left: 1em; /* LTR */
   text-transform: uppercase;
+  box-sizing: border-box;
 }
 [dir="rtl"] fieldset .fieldset-legend {
   right: 0;
