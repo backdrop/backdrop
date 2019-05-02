@@ -278,8 +278,7 @@ class views_handler_field extends views_handler {
     if ($this->options['element_class']) {
       $classes = explode(' ', $this->options['element_class']);
       foreach ($classes as &$class) {
-        $class = $this->tokenize_value($class, $row_index);
-        $class = backdrop_clean_css_identifier($class);
+        $class = _views_tokenized_clean_css_identifier($class, $this, $row_index);
       }
       return implode(' ', $classes);
     }
@@ -330,8 +329,7 @@ class views_handler_field extends views_handler {
   function element_label_classes($row_index = NULL) {
     $classes = explode(' ', $this->options['element_label_class']);
     foreach ($classes as &$class) {
-      $class = $this->tokenize_value($class, $row_index);
-      $class = backdrop_clean_css_identifier($class);
+      $class = _views_tokenized_clean_css_identifier($class, $this, $row_index);
     }
     return implode(' ', $classes);
   }
@@ -342,8 +340,7 @@ class views_handler_field extends views_handler {
   function element_wrapper_classes($row_index = NULL) {
     $classes = explode(' ', $this->options['element_wrapper_class']);
     foreach ($classes as &$class) {
-      $class = $this->tokenize_value($class, $row_index);
-      $class = backdrop_clean_css_identifier($class);
+      $class = _views_tokenized_clean_css_identifier($class, $this, $row_index);
     }
     return implode(' ', $classes);
   }

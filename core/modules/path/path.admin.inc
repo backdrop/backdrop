@@ -658,7 +658,7 @@ function path_bulk_update_form($form, &$form_state) {
     }
   }
 
-  // Build the 'Update options' form.
+  // Build the 'Operations' form.
   $form['operations'] = array(
     '#type' => 'fieldset',
     '#title' => t('Operations'),
@@ -670,7 +670,8 @@ function path_bulk_update_form($form, &$form_state) {
   );
   $form['operations']['operation'] = array(
     '#type' => 'select',
-    '#title' => '',
+    '#title' => 'Operations',
+    '#title_display' => 'invisible',
     '#options' => array(
       'generate' => t('Generate URL aliases'),
       'update' => t('Update existing URL aliases'),

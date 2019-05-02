@@ -15,8 +15,10 @@ function taxonomy_overview_vocabularies($form) {
   $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
   $form['#tree'] = TRUE;
   foreach ($vocabularies as $vocabulary) {
+    $term_count = db_query("SELECT count(tid) FROM {taxonomy_term_data} WHERE vocabulary = :vocab", array(':vocab' => $vocabulary->machine_name))->fetchField();
     $form[$vocabulary->machine_name]['#vocabulary'] = $vocabulary;
     $form[$vocabulary->machine_name]['name'] = array('#markup' => check_plain($vocabulary->name));
+    $form[$vocabulary->machine_name]['items'] = array('#markup' => $term_count);
     $form[$vocabulary->machine_name]['weight'] = array(
       '#type' => 'weight',
       '#title' => t('Weight for @title', array('@title' => $vocabulary->name)),
@@ -37,6 +39,28 @@ function taxonomy_overview_vocabularies($form) {
       'title' => t('Configure'),
       'href' => "admin/structure/taxonomy/$vocabulary->machine_name/configure",
     );
+    if (module_exists('field_ui') && user_access('administer fields')) {
+      $links['fields'] = array(
+        'title' => t('Manage fields'),
+        'href' => "admin/structure/taxonomy/$vocabulary->machine_name/fields",
+        'weight' => 5,
+      );
+      $links['display'] = array(
+        'title' => t('Manage displays'),
+        'href' => "admin/structure/taxonomy/$vocabulary->machine_name/display",
+        'weight' => 10,
+        );
+      }
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Vocabularies',
+          'name' => 'taxonomy.vocabulary.' . $vocabulary->machine_name,
+        ),
+      );
+    }
     $links['delete'] = array(
       'title' => t('Delete'),
       'href' => "admin/structure/taxonomy/$vocabulary->machine_name/delete",
@@ -135,6 +159,7 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
     '#attached' => array(
       'js' => array(backdrop_get_path('module', 'taxonomy') . '/js/taxonomy.vocabulary.js'),
     ),
+    '#weight' => 99,
   );
 
   // Vocabulary permissions.
@@ -780,6 +805,14 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
     '#value' => isset($term->vocabulary) ? $term->vocabulary : $vocabulary->machine_name,
   );
 
+  $form['additional_settings'] = array(
+    '#type' => 'vertical_tabs',
+    '#attached' => array(
+      'js' => array(backdrop_get_path('module', 'taxonomy') . '/js/taxonomy.term.js'),
+    ),
+    '#weight' => 99,
+  );
+
   field_attach_form('taxonomy_term', $term, $form, $form_state);
 
   $form['relations'] = array(
@@ -787,7 +820,8 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
     '#title' => t('Relations'),
     '#collapsible' => TRUE,
     '#collapsed' => ($vocabulary->hierarchy != TAXONOMY_HIERARCHY_MULTIPLE),
-    '#weight' => 10,
+    '#weight' => -10,
+    '#group' => 'additional_settings',
   );
 
   $parent = array_keys(taxonomy_term_load_parents($term->tid));
@@ -818,9 +852,8 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   );
 
   $form['relations']['weight'] = array(
-    '#type' => 'textfield',
+    '#type' => 'number',
     '#title' => t('Weight'),
-    '#size' => 6,
     '#default_value' => $term->weight,
     '#description' => t('Terms are displayed in ascending order by weight.'),
     '#required' => TRUE,
@@ -883,11 +916,6 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
  */
 function taxonomy_form_term_validate($form, &$form_state) {
   entity_form_field_validate('taxonomy_term', $form, $form_state);
-
-  // Ensure numeric values.
-  if (isset($form_state['values']['weight']) && !is_numeric($form_state['values']['weight'])) {
-    form_set_error('weight', t('Weight value must be numeric.'));
-  }
 }
 
 /**

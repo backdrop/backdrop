@@ -250,7 +250,7 @@ function contact_show_personal_copy_checkbox() {
 function contact_mail($key, &$message, $params) {
   $language = $message['language'];
   $variables = array(
-    '!site-name' => config_get('system.core', 'site_name'),
+    '!site-name' => config_get_translated('system.core', 'site_name', array(), array('langcode' => $language->langcode)),
     '!subject' => $params['subject'],
     '!category' => isset($params['category']['category']) ? $params['category']['category'] : '',
     '!form-url' => url($_GET['q'], array('absolute' => TRUE, 'language' => $language)),

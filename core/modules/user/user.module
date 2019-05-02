@@ -539,7 +539,7 @@ function user_permission() {
     ),
     'cancel account' => array(
       'title' => t('Cancel own user account'),
-      'description' => t('Note: content may be kept, unpublished, deleted or transferred to the %anonymous-name user depending on the configured <a href="@user-settings-url">user settings</a>.', array('%anonymous-name' => config_get('system.core', 'anonymous'), '@user-settings-url' => url('admin/config/people/settings'))),
+      'description' => t('Note: content may be kept, unpublished, deleted or transferred to the %anonymous-name user depending on the configured <a href="@user-settings-url">user settings</a>.', array('%anonymous-name' => config_get_translated('system.core', 'anonymous'), '@user-settings-url' => url('admin/config/people/settings'))),
     ),
     'select account cancellation method' => array(
       'title' => t('Select method for cancelling own account'),
@@ -2184,7 +2184,7 @@ function _user_mail_text($key, $language = NULL, $variables = array()) {
 
   // We do not sanitize the token replacement, since the output of this
   // replacement is intended for an email message, not a web browser.
-  return token_replace(config('user.mail')->get($key), $variables, array('langcode' => $langcode, 'callback' => 'user_mail_tokens', 'sanitize' => FALSE, 'clear' => TRUE));
+  return token_replace(config('user.mail')->getTranslated($key, array(), array('langcode' => $langcode)), $variables, array('langcode' => $langcode, 'callback' => 'user_mail_tokens', 'sanitize' => FALSE, 'clear' => TRUE));
 }
 
 /**

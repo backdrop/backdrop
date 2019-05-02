@@ -1982,6 +1982,69 @@ class LayoutBlockTextTest extends BackdropWebTestCase {
 }
 
 /**
+ * Tests the interface for adding, removing, and moving blocks.
+ */
+class LayoutCloneTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp(array('layout', 'layout_test'));
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'access administration pages',
+      'administer layouts',
+      'view the administration theme',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  function testLayoutClone() {
+    // Create a new layout using the UI.
+    $edit = array(
+      'title' => 'Test layout 1',
+      'name' => 'test_layout_1',
+      'layout_template' => 'boxton',
+      'path' => 'test-layout-1',
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Add a few blocks via the API.
+    $test_layout_1 = layout_load('test_layout_1');
+    $test_layout_1->addBlock('layout_test', 'foo', 'content');
+    $test_layout_1->addBlock('layout_test', 'foo', 'sidebar');
+    $test_layout_1->save();
+
+    // Test cloning the layout.
+    $edit = array(
+      'title' => 'Test layout 2',
+      'name' => 'test_layout_2',
+    );
+    $this->backdropPost('admin/structure/layouts/manage/test_layout_1/clone', $edit, t('Clone layout'));
+
+    $success_message = t('Cloned layout @title created. You may now configure the cloned layout.', array('@title' => 'Test layout 2'));
+    $this->assertRaw($success_message);
+
+    $edit = array(
+      'path' => 'test-layout-2',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->backdropGet('admin/structure/layouts');
+    $this->assertRaw('test_layout_1');
+    $this->assertRaw('test_layout_2');
+
+    $this->backdropGet('test-layout-1');
+    $this->assertResponse(200);
+    $this->assertRaw('Foo subject', 'Testing block is present on original layout');
+
+    $this->backdropGet('test-layout-2');
+    $this->assertRaw('Foo subject', 'Testing block is present on cloned layout.');
+    $this->assertResponse(200);
+  }
+}
+
+/**
  * Tests the upgrade path from block-based regions to layouts.
  */
 class LayoutUpgradePathTest extends UpgradePathTestCase {

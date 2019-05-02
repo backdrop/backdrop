@@ -1381,6 +1381,15 @@ fieldset legend a:focus,
 fieldset legend a:active {
   color: #000;
 }
+fieldset legend span.summary {
+  padding: 0 5px;
+}
+fieldset legend span.summary:not(:empty):before {
+  content: '(';
+}
+fieldset legend span.summary:not(:empty):after {
+  content: ')';
+}
 fieldset .fieldset-wrapper {
   padding: 0 10px;
 }

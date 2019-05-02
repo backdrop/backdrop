@@ -364,7 +364,11 @@ function _views_ui_get_operations(view $view) {
   if (module_exists('config') && user_access('synchronize configuration')) {
     $links['export'] = array(
       'title' => t('Export'),
-      'href' => 'admin/config/development/configuration/single/export/Views/views.view.' . $view->name,
+      'href' => 'admin/config/development/configuration/single/export',
+      'query' => array(
+        'group' => 'Views',
+        'name' => 'views.view.' . $view->name,
+      ),
     );
   }
   return $links;
@@ -1172,7 +1176,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   // so that configurations work properly, and to try to get the user to save it
   // so that it's not using weird fixed up relationships.
   if (!empty($view->relationships_changed) && empty($_POST)) {
-    backdrop_set_message(t('This view has been automatically updated to fix missing relationships. While this View should continue to work, you should verify that the automatic updates are correct and save this view.'));
+    backdrop_set_message(t('Missing relationships have been fixed automatically. Please verify these changes before saving.'));
     views_ui_cache_set($view);
   }
   return $form;
@@ -1268,7 +1272,11 @@ function views_ui_render_display_top($view, $display_id) {
   if (module_exists('config') && user_access('synchronize configuration')) {
     $element['extra_actions']['#links']['export'] = array(
       'title' => t('export view'),
-      'href' => 'admin/config/development/configuration/single/export/Views/views.view.' . $view->name,
+      'href' => 'admin/config/development/configuration/single/export',
+      'query' => array(
+        'group' => 'Views',
+        'name' => 'views.view.' . $view->name,
+      ),
     );
   }
   else {

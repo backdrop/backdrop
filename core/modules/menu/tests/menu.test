@@ -83,6 +83,7 @@ class MenuTestCase extends BackdropWebTestCase {
     $this->resetMenuLink($item, $old_title);
 
     // Test for the correct behavior of user menu titles.
+    config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
     $this->addMenuLink(0, 'user/register', 'user-menu');
     $this->backdropLogout();
     $this->backdropGet('user/register');

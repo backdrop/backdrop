@@ -4,5 +4,5 @@
         "url": "https://projects.backdropcms.org",
         "name": "Backdrop"
     },
-    "core_update": false
+    "core_update": true
 }

@@ -589,7 +589,7 @@ function ajax_prepare_response($page_callback_result) {
         break;
 
       case MENU_SITE_OFFLINE:
-        $commands[] = ajax_command_alert(filter_xss_admin(token_replace(t(config_get('system.core', 'maintenance_mode_message')))));
+        $commands[] = ajax_command_alert(filter_xss_admin(token_replace(config_get_translated('system.core', 'maintenance_mode_message'))));
         break;
     }
   }

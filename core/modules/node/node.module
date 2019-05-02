@@ -765,6 +765,7 @@ function node_type_set_defaults($info = array()) {
     'name' => '',
     'base' => 'node_content',
     'module' => 'node',
+    'node_preview' => BACKDROP_OPTIONAL,
     'description' => '',
     'help' => '',
     'modified' => FALSE,
@@ -1789,8 +1790,8 @@ function node_menu() {
       'title callback' => 'check_plain',
       'page callback' => 'node_preview',
       'page arguments' => array(3, $type_url_str),
-      'access callback' => 'node_access',
-      'access arguments' => array('create', $type->type),
+      'access callback' => 'node_preview_access',
+      'access arguments' => array(3),
       'description' => $type->description,
       'type' => MENU_CALLBACK,
       'file' => 'node.pages.inc',
@@ -1884,18 +1885,19 @@ function node_menu() {
 /**
  * Access callback: Checks a user's permission for previewing a node.
  *
- * @param Node $node
- *   The node entity to be previewed.
+ * @param $node_tempstore_id
+ *   The node_tempstore_id of the node being created or updated.
  *
  * @return bool
  *   TRUE if the user has access to the preview, FALSE otherwise.
  *
  * @see node_menu()
  *
- * @since 1.11.0
+ * @since 1.12.0
  */
-function node_access_preview(Node $node) {
-  if (node_access('create', $node) || node_access('update', $node)) {
+function node_preview_access($node_tempstore_id) {
+  $node = node_get_node_tempstore($node_tempstore_id);
+  if (!empty($node) && (node_access('create', $node) || node_access('update', $node))) {
     return TRUE;
   }
   return FALSE;
@@ -2206,7 +2208,7 @@ function node_feed($nids = FALSE, $channel = array()) {
 
   $channel_defaults = array(
     'version'     => '2.0',
-    'title'       => config_get('system.core', 'site_name'),
+    'title'       => config_get_translated('system.core', 'site_name'),
     'link'        => $base_url,
     'description' => $rss_config->get('rss_description'),
     'language'    => $language_content->langcode
@@ -2240,7 +2242,7 @@ function node_feed($nids = FALSE, $channel = array()) {
  *   An array in the format expected by backdrop_render().
  */
 function node_view_multiple($nodes, $view_mode = 'teaser', $weight = 0, $langcode = NULL) {
-  $build = array();
+  $build = array('nodes' => array());
   $entities_by_view_mode = entity_view_mode_prepare('node', $nodes, $view_mode, $langcode);
   foreach ($entities_by_view_mode as $entity_view_mode => $entities) {
     field_attach_prepare_view('node', $entities, $entity_view_mode, $langcode);
@@ -2296,7 +2298,7 @@ function node_page_default() {
       $build = node_view_multiple($nodes);
 
       // 'rss.xml' is a path, not a file, registered in node_menu().
-      backdrop_add_feed('rss.xml', $site_config->get('site_name') . ' ' . t('RSS'));
+      backdrop_add_feed('rss.xml', $site_config->getTranslated('site_name') . ' ' . t('RSS'));
       $build['pager'] = array(
         '#theme' => 'pager',
         '#weight' => 5,
@@ -2304,7 +2306,7 @@ function node_page_default() {
       backdrop_set_title('');
     }
     else {
-      backdrop_set_title(t('Welcome to @site-name', array('@site-name' => $site_config->get('site_name'))), PASS_THROUGH);
+      backdrop_set_title(t('Welcome to @site-name', array('@site-name' => $site_config->getTranslated('site_name'))), PASS_THROUGH);
 
       $default_message = '<p>' . t('No content has been promoted yet.') . '</p>';
       $default_links = array();

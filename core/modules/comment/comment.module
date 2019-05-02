@@ -1125,7 +1125,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#attached' => array(
         'js' => array(backdrop_get_path('module', 'comment') . '/js/comment.admin.js'),
       ),
-      '#weight' => 20,
+      '#weight' => 25,
     );
     // Unlike coment_form_node_form_alter(), all of these settings are applied
     // as defaults to all new nodes. Therefore, it would be wrong to use #states
@@ -1835,7 +1835,7 @@ function comment_form($form, &$form_state, $comment) {
       '#default_value' => $author,
       '#maxlength' => 60,
       '#size' => 30,
-      '#description' => t('Leave blank for %anonymous.', array('%anonymous' => config_get('system.core', 'anonymous'))),
+      '#description' => t('Leave blank for %anonymous.', array('%anonymous' => config_get_translated('system.core', 'anonymous'))),
       '#autocomplete_path' => 'user/autocomplete',
     );
   }

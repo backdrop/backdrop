@@ -43,12 +43,8 @@ function system_admin_config_page() {
       $blocks[(50000 + $item['weight']) . ' ' . $item['title'] . ' ' . $item['mlid']] = $block;
     }
   }
-  if ($blocks) {
-    return theme('admin_page', array('blocks' => $blocks));
-  }
-  else {
-    return t('You do not have any administrative items.');
-  }
+
+  return theme('admin_page', array('blocks' => $blocks));
 }
 
 /**
@@ -109,10 +105,7 @@ function system_admin_index() {
  */
 function system_themes_page() {
   // Inform the user if theme_debug is enabled.
-  $theme_debug_enabled = config_get('system.core', 'theme_debug');
-  if ($theme_debug_enabled) {
-    backdrop_set_message(t('Theme debugging is enabled. See the <a href="!url">Status report</a> page for more info.', array('!url' => url('admin/reports/status'))), 'warning', FALSE);
-  }
+  system_theme_debug_enabled_warning();
 
   // Get current list of themes.
   $themes = system_rebuild_theme_data();
@@ -289,31 +282,46 @@ function system_theme_enable() {
 }
 
 /**
- * Menu callback; Disables a theme.
+ * Theme disable confirmation form.
+ *
+ * @see system_theme_disable_confirm_submit()
+ *
+ * @ingroup forms
  */
-function system_theme_disable() {
+function system_theme_disable_confirm($form, &$form_state) {
   if (isset($_REQUEST['theme']) && isset($_REQUEST['token']) && backdrop_valid_token($_REQUEST['token'], 'system-theme-operation-link')) {
-    $theme = $_REQUEST['theme'];
-    // Get current list of themes.
-    $themes = list_themes();
+    $form['theme'] = $_REQUEST['theme'];
 
-    // Check if the specified theme is one recognized by the system.
-    if (!empty($themes[$theme])) {
-      if ($theme == config_get('system.core', 'theme_default')) {
-        // Don't disable the default theme.
-        backdrop_set_message(t('%theme is the default theme and cannot be disabled.', array('%theme' => $themes[$theme]->info['name'])), 'error');
-      }
-      else {
-        theme_disable(array($theme));
-        backdrop_set_message(t('The %theme theme has been disabled.', array('%theme' => $themes[$theme]->info['name'])));
-      }
-    }
-    else {
-      backdrop_set_message(t('The %theme theme was not found.', array('%theme' => $theme)), 'error');
-    }
-    backdrop_goto('admin/appearance');
+    $confirm_question = t('Are you sure you want to disable this theme? All custom configuration will be lost.');
+    return confirm_form($form, $confirm_question, 'admin/appearance', t('This action cannot be undone.'), t('Disable'), t('Cancel'));
   }
   return MENU_ACCESS_DENIED;
+}
+
+/**
+ * Form submission handler for system_theme_disable_confirm_submit().
+ */
+function system_theme_disable_confirm_submit($form, &$form_state) {
+  $theme = $form_state['complete_form']['theme'];
+  // Get current list of themes.
+  $themes = list_themes();
+
+  // Check if the specified theme is one recognized by the system.
+  if (!empty($themes[$theme])) {
+    if ($theme == config_get('system.core', 'theme_default')) {
+      // Don't disable the default theme.
+      backdrop_set_message(t('%theme is the default theme and cannot be disabled.', array('%theme' => $themes[$theme]->info['name'])), 'error');
+    }
+    else {
+      theme_disable(array($theme));
+      backdrop_set_message(t('The %theme theme has been disabled.', array('%theme' => $themes[$theme]->info['name'])));
+    }
+  }
+  else {
+    backdrop_set_message(t('The %theme theme was not found.', array('%theme' => $theme)), 'error');
+  }
+
+  $form_state['redirect'] = 'admin/appearance';
 }
 
 /**
@@ -378,10 +386,7 @@ function system_theme_settings($form, &$form_state, $key) {
   $themes = list_themes();
 
   // Inform the user if theme_debug is enabled.
-  $theme_debug_enabled = config_get('system.core', 'theme_debug');
-  if ($theme_debug_enabled) {
-    backdrop_set_message(t('Theme debugging is enabled. See the <a href="!url">Status report</a> page for more info.', array('!url' => url('admin/reports/status'))), 'warning', FALSE);
-  }
+  system_theme_debug_enabled_warning();
 
   $form['theme'] = array(
     '#type' => 'value',
@@ -507,7 +512,7 @@ function system_modules($form, $form_state = array()) {
     '#type' => 'textfield',
     '#title' => t('Filter'),
     '#size' => 30,
-    '#placeholder' => t('Enter module name…'),
+    '#placeholder' => t('Search...'),
     '#attributes' => array(
       'class' => array('table-filter-text'),
       'autocomplete' => 'off',
@@ -515,13 +520,23 @@ function system_modules($form, $form_state = array()) {
     ),
     '#default_value' => (isset($_GET['search'])) ? $_GET['search'] : '',
   );
+  $form['filter']['reset'] = array(
+    '#theme' => 'link',
+    '#text' => t('Reset'),
+    '#path' => 'admin/modules',
+    '#options' => array(
+      'attributes' => array(
+        'class' => array('button', 'button-secondary', 'search-reset'),
+      ),
+    ),
+  );
 
   // Get current list of modules.
   $files = system_rebuild_module_data();
 
-  // Remove hidden modules from display list.
   $visible_files = $files;
   foreach ($visible_files as $filename => $file) {
+    // Remove hidden modules from the modules list.
     if (!empty($file->info['hidden'])) {
       unset($visible_files[$filename]);
     }
@@ -659,9 +674,6 @@ function system_modules($form, $form_state = array()) {
     );
   }
 
-  // Lastly, sort all fieldsets by title.
-  backdrop_sort($form['modules'], array('#title' => SORT_STRING));
-
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -696,6 +708,20 @@ function system_sort_themes($a, $b) {
  * Build a table row for the system modules page.
  */
 function _system_modules_build_row($info, $extra) {
+  // Prepare the tag list by ensuring all tags are lower case.
+  $tags = array();
+  if (isset($info['tags'])) {
+    foreach ($info['tags'] as $tag) {
+      $tags[] = check_plain($tag);
+    }
+  }
+  if (isset($info['package'])) {
+    $tags[] = check_plain($info['package']);
+  }
+  if (empty($tags)) {
+    $tags[] = 'Other';
+  }
+
   // Add in the defaults.
   $extra += array(
     'requires' => array(),
@@ -718,6 +744,10 @@ function _system_modules_build_row($info, $extra) {
   $form['version'] = array(
     '#markup' => $info['version'],
   );
+  $form['tags'] = array(
+    '#markup' => implode(', ', $tags),
+  );
+
   $form['#requires'] = $extra['requires'];
   $form['#required_by'] = $extra['required_by'];
   $form['#required_by_distribution'] = $extra['required_by_distribution'];
@@ -859,7 +889,6 @@ function system_modules_submit($form, &$form_state) {
     // the modules out of $form_state.
     $modules = $form_state['storage']['modules'];
   }
-
   // Collect data for all modules to be able to determine dependencies.
   $files = system_rebuild_module_data();
 
@@ -2269,7 +2298,7 @@ function system_date_time_formats() {
         // Prepare Operational links.
         $links = array();
         $links['edit'] = array(
-          'title' => t('Edit'),
+          'title' => t('Configure'),
           'href' => 'admin/config/regional/date-time/formats/' . $date_format_name . '/edit',
         );
         if (module_exists('locale')) {
