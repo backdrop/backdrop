@@ -134,7 +134,13 @@ class DashboardTest extends BackdropWebTestCase {
     $this->assertLink('Manage taxonomy', 0, 'The Manage taxonomy link was found.');
 
     // Add new content types.
-    $this->backdropCreateContentType(array('type' => 'foo', 'name' => 'Foo'));
+    $this->backdropCreateContentType(array(
+      'type' => 'foo',
+      'name' => 'Foo',
+      'settings' => array(
+        'comment_default' => COMMENT_NODE_OPEN,
+      ),
+    ));
     $this->backdropCreateContentType(array('type' => 'bar', 'name' => 'Bar'));
     $this->backdropGet('admin/dashboard');
 
@@ -143,8 +149,6 @@ class DashboardTest extends BackdropWebTestCase {
       ':block' => 'block-dashboard-create',
     ));
     $this->assertEqual(count($page_link), 2, 'Two create content links were found.');
-    $this->assertLink('Add new <XSS>Test Content Type 1</XSS>', 0, 'The create content1 link was found.');
-    $this->assertLink('Add new Test Content Type 2', 0, 'The create content2 link was found.');
 
     // But four content types should be listed.
     $content_type_admin_block = $this->xpath('//*[contains(@class,:block)]//tbody/tr', array(
@@ -155,7 +159,7 @@ class DashboardTest extends BackdropWebTestCase {
     // There should be no foo items.
     $this->assertText('0 Foo items', 'No Foo items found.');
 
-    // Create a new admin user with Foo and TWO access.
+    // Create a new admin user with Foo and 2 access.
     $this->new_admin_user = $this->backdropCreateUser(array(
       'access content',
       'access dashboard',
@@ -177,11 +181,17 @@ class DashboardTest extends BackdropWebTestCase {
       ':block' => 'block-dashboard-create',
     ));
     $this->assertEqual(count($page_link), 2, 'Two create content links found.');
+    $this->assertLink('Add new Test Content Type 2', 0, 'The create content2 link was found.');
+    $this->assertLink('Add new Foo', 0, 'The create foo link was found.');
+
     // Create a new Foo item.
-    $this->backdropCreateNode(array(
+    $nid = $this->backdropCreateNode(array(
       'type' => 'foo',
       'title' => $this->randomString(),
     ));
+    $this->backdropGet('node/' . $nid);
+    // @todo post a comment.
+
     $this->backdropGet('admin/dashboard');
     // There should be one foo item.
     $this->assertText('1 Foo item', 'One Foo item found.');

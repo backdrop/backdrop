@@ -173,6 +173,9 @@ function dashboard_user_login(&$edit, $account) {
     return;
   }
 
+  // Don't redirect if during installation.
+    // @todo
+
   // Don't redirect for password reset forms.
   if (isset($_POST['form_id']) && $_POST['form_id'] == 'user_pass_reset') {
     return;
