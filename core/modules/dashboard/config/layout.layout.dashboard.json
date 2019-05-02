@@ -7,7 +7,7 @@
     "renderer_name": "standard",
     "module": "dashboard",
     "weight": 0,
-    "storage": 2,
+    "storage": 4,
     "layout_template": "sutro",
     "disabled": false,
     "settings": {
