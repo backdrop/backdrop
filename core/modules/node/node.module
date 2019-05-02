@@ -1004,7 +1004,11 @@ function node_submit($node) {
 
 
   // Convert the date into a timestamp.
-  $date = new BackdropDateTime(!empty($node->date) && is_string($node->date) ? $node->date : 'now');
+  if (is_array($node->date) && isset($node->date['date']) && isset($node->date['time'])) {
+    $date = new BackdropDateTime($node->date['date'] . ' ' . $node->date['time']);
+  } else {
+    $date = new BackdropDateTime(!empty($node->date) && is_string($node->date) ? $node->date : 'now');
+  }
   $node->created = $date->format('U');
   $node->validated = TRUE;
 
