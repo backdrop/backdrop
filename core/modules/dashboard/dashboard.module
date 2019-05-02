@@ -157,20 +157,6 @@ function dashboard_layout_context_info() {
 }
 
 /**
- * Implements hook_user_presave().
- */
-function dashboard_user_presave($account) {
-  cache_clear_all('dashboard_user_overview', 'cache');
-}
-
-/**
- * Implements hook_user_delete().
- */
-function dashboard_user_delete($account) {
-  cache_clear_all('dashboard_user_overview', 'cache');
-}
-
-/**
  * Implements hook_user_login().
  */
 function dashboard_user_login(&$edit, $account) {
