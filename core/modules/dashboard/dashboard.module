@@ -63,14 +63,6 @@ function dashboard_permission() {
  * Implements hook_config_info().
  */
 function dashboard_config_info() {
-  $prefixes['layout.layout.dashboard'] = array(
-    'label' => t('Dashboard default layout'),
-    'group' => t('Layouts'),
-  );
-  $prefixes['layout.menu_item.dashboard'] = array(
-    'label' => t('Dashboard default menu item'),
-    'group' => t('Layout menu items'),
-  );
   $prefixes['dashboard.settings'] = array(
     'label' => t('Dashboard settings'),
     'group' => t('Configuration'),
