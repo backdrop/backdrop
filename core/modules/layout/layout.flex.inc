@@ -67,7 +67,7 @@ function layout_flexible_template_add_template_submit($form, &$form_state) {
 
   layout_set_flex_tempstore($template_data, $form_state['values']['machine_name']);
   backdrop_set_message(t('Template saved.'));
-  $form_state['redirect'] = 'admin/structure/layouts/flexible-layout/' . $form_state['values']['machine_name'] . '/configure';
+  $form_state['redirect'] = 'admin/structure/layouts/settings/' . $form_state['values']['machine_name'] . '/configure';
 }
 
 /**
