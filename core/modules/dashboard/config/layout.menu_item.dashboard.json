@@ -1,0 +1,20 @@
+{
+    "_config_name": "layout.menu_item.dashboard",
+    "name": "dashboard",
+    "title": "",
+    "path": "admin/dashboard",
+    "menu": {
+        "type": "normal",
+        "title": "Dashboard",
+        "name": "management",
+        "weight": "-20",
+        "parent": {
+            "type": "none",
+            "title": "",
+            "name": "main-menu",
+            "weight": "0"
+        }
+    },
+    "conditions": [],
+    "arguments": []
+}
