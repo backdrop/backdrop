@@ -66,7 +66,7 @@ class DashboardUpdateBlock extends Block {
 
         $item = $name . ' ' . $type;
 
-        if ($project['recommended']) {
+        if (isset($project['recommended'])) {
           $new = t('version @new available', array('@new' => $project['recommended']));
           if (user_access('access_site_reports')) {
             $new = l($new, 'admin/reports/updates');

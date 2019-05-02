@@ -141,7 +141,10 @@ class DashboardTest extends BackdropWebTestCase {
         'comment_default' => COMMENT_NODE_OPEN,
       ),
     ));
-    $this->backdropCreateContentType(array('type' => 'bar', 'name' => 'Bar'));
+    $this->backdropCreateContentType(array(
+      'type' => 'bar',
+      'name' => 'Bar',
+    ));
     $this->backdropGet('admin/dashboard');
 
     // The create content block exists, still with two links.
