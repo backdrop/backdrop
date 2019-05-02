@@ -34,6 +34,16 @@ function dashboard_menu() {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function dashboard_menu_alter(&$items) {
+  if (isset($items['admin/dashboard'])) {
+    // Add a description for the admin and admin/index pages.
+    $items['admin/dashboard']['description'] = 'Get an overview of your site and manage administrative tasks.';
+  }
+}
+
+/**
  * Implements hook_permission().
  */
 function dashboard_permission() {
