@@ -16,6 +16,7 @@ function dashboard_menu() {
   if ($dashboard_layout->hasContexts(array('dashboard')) && !$dashboard_layout->disabled) {
     $items['admin/dashboard/overview'] = array(
       'title' => 'Overview',
+      'access arguments' => array('access dashboard'),
       'type' => MENU_DEFAULT_LOCAL_TASK,
       'weight' => -100
     );
@@ -40,6 +41,7 @@ function dashboard_menu_alter(&$items) {
   if (isset($items['admin/dashboard'])) {
     // Add a description for the admin and admin/index pages.
     $items['admin/dashboard']['description'] = 'Get an overview of your site and manage administrative tasks.';
+    $items['admin/dashboard']['access arguments'] = array('access dashboard');
   }
 }
 
