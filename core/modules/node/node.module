@@ -1893,7 +1893,7 @@ function node_menu() {
  *
  * @see node_menu()
  *
- * @since 1.12.0
+ * @since 1.13.0
  */
 function node_preview_access($node_tempstore_id) {
   $node = node_get_node_tempstore($node_tempstore_id);

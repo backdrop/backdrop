@@ -14,7 +14,7 @@ class TestFieldEntity extends Entity {
   /**
    * Implements EntityInterface::entityType().
    *
-   * @since 1.12.0 This method is now static.
+   * @since 1.13.0 This method is now static.
    */
   public static function entityType() {
     return 'entity_test';

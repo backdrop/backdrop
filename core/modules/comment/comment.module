@@ -1521,8 +1521,8 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
  * @return bool
  *   TRUE if the current user has acces to the comment, FALSE otherwise.
  *
- * @since 1.12.0 The "create" $op option was added.
- * @since 1.12.0 The "edit" $op option is deprecated. Use "update" instead.
+ * @since 1.13.0 The "create" $op option was added.
+ * @since 1.13.0 The "edit" $op option is deprecated. Use "update" instead.
  */
 function comment_access($op, Comment $comment = NULL) {
   if ($op == 'edit') {

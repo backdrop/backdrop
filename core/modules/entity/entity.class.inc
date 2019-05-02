@@ -44,7 +44,7 @@ interface EntityInterface {
    * @return
    *   The type of the entity.
    *
-   * @since 1.12.0 This method is now static.
+   * @since 1.13.0 This method is now static.
    */
   public static function entityType();
 
