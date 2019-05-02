@@ -362,7 +362,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
 
   // Use a "textfield" rather than "url" to allow relative paths.
   $form['href'] = array(
-    '#title' => t('Link value'),
+    '#title' => t('Link destination'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => ' ',
@@ -373,7 +373,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     ),
     '#weight' => -10,
     '#autocomplete_path' => 'filter-link/autocomplete',
-    '#description' => t('Enter a known path, or start typing to get suggestions'),
+    '#description' => t('Start typing to see a list of suggestions, enter the relative path to another page, or enter an external URL.<br>Examples: <em>About Us</em>, <em>/about</em>, or <em>http://backdropcms.org</em>'),
   );
 
 
@@ -432,20 +432,52 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'text'),
   );
 
-  $form['target'] = array(
-    '#title' => t('Open in new window'),
+  $form['more'] = array(
+    '#title' => t('More link options'),
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['more']['target'] = array(
+    '#title' => t('Open the link destination in a new window'),
     '#type' => 'checkbox',
     '#return_value' => '_blank',
     '#default_value' => isset($values['target']) ? $values['target'] : FALSE,
     '#parents' => array('attributes', 'target'),
   );
 
-  $form['class'] = array(
+  $form['more']['class'] = array(
     '#title' => t('CSS classes'),
-    '#description' => t('Separate each additional CSS class with a space.'),
+    '#description' => t('Separate multiple CSS classes with spaces.'),
     '#type' => 'textfield',
     '#default_value' => isset($values['class']) ? $values['class'] : '',
     '#parents' => array('attributes', 'class'),
+  );
+
+  $fragment_info_link = l(t('fragment'), 'https://en.wikipedia.org/wiki/Fragment_identifier', array('attributes' => array('target' => '_blank')));
+  $form['more']['id'] = array(
+    '#title' => t('Unique Identifier'),
+    '#description' => t('Setting an ID allows linking to this part of the page using a URL !fragment.', array('!fragment' => $fragment_info_link)),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['id']) ? $values['id'] : '',
+    '#parents' => array('attributes', 'id'),
+  );
+
+  $form['more']['title'] = array(
+    '#title' => t('Link title'),
+    '#description' => t('The title attribute of the link. Usually shown as a small tooltip on hover.'),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['title']) ? $values['title'] : '',
+    '#parents' => array('attributes', 'title'),
+  );
+
+  $form['more']['rel'] = array(
+    '#title' => t('Relationship (rel)'),
+    '#description' => t('Specifies the relationship between the current page and the linked page.'),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['rel']) ? $values['rel'] : '',
+    '#parents' => array('attributes', 'rel'),
   );
 
   $form['actions']['#type'] = 'actions';
@@ -516,6 +548,20 @@ function filter_format_editor_link_form_submit($form, &$form_state) {
     // Remove any reference to a data file.
     unset($form_state['values']['fid']);
     $form_state['values']['attributes']['data-file-id'] = NULL;
+  }
+
+  // Clean up optional attributes, if not specified, remove.
+  $more = array('class', 'target', 'id', 'title', 'rel', 'data-file-id');
+  foreach ($more as $attribute) {
+    if (isset($form_state['values']['attributes'][$attribute])) {
+      $value = trim($form_state['values']['attributes'][$attribute]);
+      if (strlen($value) === 0 || ($attribute === 'target' && empty($value))) {
+        unset($form_state['values']['attributes'][$attribute]);
+      }
+      else {
+        $form_state['values']['attributes'][$attribute] = $value;
+      }
+    }
   }
 }
 
