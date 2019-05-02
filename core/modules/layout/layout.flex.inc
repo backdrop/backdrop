@@ -171,12 +171,6 @@ function layout_flexible_template_add_row($form, &$form_state, $flexible_templat
     $options[$name] = $row_style['name'];
   }
 
-  $form['row_style'] = array(
-    '#title' => t('Select row style'),
-    '#type' => 'select',
-    '#default_value' => 'column_50_25_25',
-    '#options' => $options,
-  );
   $form['name'] = array(
     '#title' => t('Row name'),
     '#type' => 'textfield',
@@ -190,6 +184,32 @@ function layout_flexible_template_add_row($form, &$form_state, $flexible_templat
     '#machine_name' => array(
       'exists' => 'layout_flexible_row_name_exists',
     ),
+  );
+  $form['row_style'] = array(
+    '#title' => t('Select row style'),
+    '#type' => 'select',
+    '#default_value' => 'column_50_25_25',
+    '#options' => $options,
+  );
+  $form['row_classes'] = array(
+    '#title' => t('Additional row classes'),
+    '#type' => 'textfield',
+    '#default_value' => '',
+  );
+  $options = array(
+    'div' => 'DIV',
+    'nav' => 'NAV',
+    'aside' => 'ASIDE',
+    'section' => 'SECTION',
+    'header' => 'HEADER',
+    'footer' => 'FOOTER',
+    'main' => 'MAIN',
+  );
+  $form['element'] = array(
+    '#title' => t('HTML element for row wrapper'),
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => isset($layout->settings[$region_name]['element']) ? $layout->settings[$region_name]['element'] : '',
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -224,6 +244,8 @@ function layout_flexible_template_add_row_submit($form, &$form_state) {
   $new_row = array(
     'name' => $form_state['values']['name'],
     'contains' => $form_state['values']['row_style'],
+    'element' => $form_state['values']['element'],
+    'classes' => $form_state['values']['classes'],
   );
 
   $newdata = layout_flexible_array_insert_key_value($original_row, $template_data['regions'], $form_state['values']['machine_name'], $new_row, $position);
@@ -308,10 +330,14 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
         'header' => array(
           'name' => t('Header'),
           'contains' => 'column_50_50',
+          'element' => '',
+          'classes' => '',
         ),
         'top' => array(
           'name' => t('Top'),
           'contains' => 'column_50_25_25',
+          'element' => '',
+          'classes' => '',
         ),
       ),
     );
@@ -352,10 +378,10 @@ function theme_layout_flexible($variables) {
   $data = layout_flexible_template_template($template_id);
   $column_data = layout_flexible_row_styles();
 
-  $output = '<div class="layout--boxtonian">';
+  $output = '<div class="layout--flexible layout">';
   foreach ($data['regions'] as $key => $region) {
-    $row_class = 'flex-row-' . $key;
-    $output .= '<div class="l-header-inner container container-fluid ' . $row_class . '">';
+    $row_class = 'flex-row-' . $key . ' ' . $region['contains'];
+    $output .= '<div class="container container-fluid ' . $row_class . '">';
     $output .= '<div class="layout-editor-region-title clearfix">';
     $output .= $region_buttons[$key];
     $output .= '</div>';
@@ -387,7 +413,7 @@ function theme_layout_layout_flexible($variables) {
 
   $output = '<div class="layout--boxtonian">';
   foreach ($data['regions'] as $key => $region) {
-    $row_class = 'flex-row-' . $key;
+    $row_class = 'flex-row-' . $key . ' ' . $region['contains'];
     $output .= '<div class="container container-fluid ' . $row_class . '">';
     $output .= '<div class="l-flex-row row">';
 
