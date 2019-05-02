@@ -550,7 +550,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
  */
 class FieldUIManageDisplayTestCase extends FieldUITestCase {
   function setUp() {
-    parent::setUp(array('search'));
+    parent::setUp(array('search', 'field_test'));
   }
 
   /**
@@ -599,6 +599,23 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
     $current_setting_value = $instance['display']['default']['settings'][$setting_name];
     $this->assertEqual($current_format, $format, 'The formatter was updated.');
     $this->assertEqual($current_setting_value, $setting_value, 'The setting was updated.');
+
+    // Assert that hook_field_formatter_settings_summary_alter() is called.
+    $this->assertText('field_test_field_formatter_settings_summary_alter');
+
+    // Click on the formatter settings button to open the formatter settings
+    // form.
+    $this->backdropPostAJAX(NULL, array(), "field_test_formatter_settings_edit");
+
+    // Assert that the field added in
+    // field_test_field_formatter_settings_form_alter() is present.
+    $fieldname = 'fields[field_test][settings_edit_form][settings][field_test_formatter_settings_form_alter]';
+    $this->assertField($fieldname, 'The field added in hook_field_formatter_settings_form_alter() is present on the settings form.');
+    $edit = array($fieldname => 'foo');
+    $this->backdropPostAJAX(NULL, $edit, "field_test_formatter_settings_update");
+
+    // Confirm that the settings are updated on the settings form.
+    $this->assertText(t('Display text: @text', array('@text' => 'foo')));
   }
 
   /**
