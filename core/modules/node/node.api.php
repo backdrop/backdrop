@@ -543,9 +543,9 @@ function hook_node_load($nodes, $types) {
  * @param string $op
  *   The operation to be performed. Possible values:
  *   - "create"
- *   - "delete"
- *   - "update"
  *   - "view"
+ *   - "update"
+ *   - "delete"
  * @param object $account
  *   The user object to perform the access check operation on.
  *

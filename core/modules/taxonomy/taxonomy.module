@@ -337,7 +337,7 @@ function taxonomy_menu() {
     // passed to taxonomy_form_term() as the vocabulary machine name argument.
     'page arguments' => array('taxonomy_form_term', 2, NULL),
     'access callback' => 'taxonomy_term_access',
-    'access arguments' => array('edit', 2),
+    'access arguments' => array('update', 2),
     'type' => MENU_LOCAL_TASK,
     'weight' => 10,
     'file' => 'taxonomy.admin.inc',
@@ -429,29 +429,51 @@ function taxonomy_admin_paths() {
 }
 
 /**
- * Access callback: Checks a user's permission for performing a taxonomy term
- * operation.
+ * Access callback: Checks a user's permission for performing a taxonomy term operation.
  *
- * @param $op
+ * @param string $op
  *   The operation to be performed on the taxonomy term. Possible values are:
- *   - "edit"
- *   - "delete"
- * @param $term
- *   The $term object on which the operation is to be performed.
+ *   - create
+ *   - view
+ *   - update
+ *   - delete
+ * @param TaxonomyTerm string $term
+ *   The $term object on which the operation is to be performed, or the
+ *   vocabulary for the 'create' operation.
  *
  * @return
  *   TRUE if the operation may be performed, FALSE otherwise.
  *
  * @see taxonomy_menu()
+ *
+ * @since 1.13.0 The "create" and "view" $op options were added.
+ * @since 1.13.0 The "edit" $op option is deprecated. Use "update" instead.
  */
 function taxonomy_term_access($op, $term) {
-  if (!$term || !in_array($op, array('edit', 'delete'), TRUE)) {
-    // If there was no term to check against, or the $op was not one of the
-    // supported ones, we return access denied.
-    return FALSE;
+  if ($op == 'edit') {
+    // Normalize edit op to update.
+    $op = 'update';
+    // Log to watchdog for DX. @todo add watchdog_deprecated_parameter().
+    $message = 'The function taxonomy_term_access() was called with the operation <em>edit</em>. This operation is now named <em>update</em>. The <em>edit</em> operation will be removed in the next major release of Backdrop.';
+    $variables = array();
+    watchdog('taxonomy', $message, $variables, WATCHDOG_DEPRECATED);
   }
 
-  return user_access("$op terms in $term->vocabulary") || user_access('administer taxonomy');
+  if ($op == 'create') {
+    // In some cases a TaxonomyTerm object, rather than a vocabulary string is
+    // provided.
+    if (is_string($term)) {
+      $bundle = $term;
+    }
+    else {
+      $bundle = $term->bundle();
+    }
+    return TaxonomyTerm::createAccess($bundle);
+  }
+  elseif ($term instanceof TaxonomyTerm) {
+    return $term->access($op);
+  }
+  return FALSE;
 }
 
 /**

@@ -51,6 +51,7 @@ function backdrop_class_list() {
     'Updater' => $path . 'updater.inc',
     'UpdaterException' => $path . 'updater.inc',
     'UpdaterFileTransferException' => $path . 'updater.inc',
+    'UserInterface' => $path . 'userinterface.inc',
     'Uuid' => $path . 'uuid.inc',
     'UuidPecl' => $path . 'uuid.inc',
     'UuidCom' => $path . 'uuid.inc',

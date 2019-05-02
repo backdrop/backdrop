@@ -43,8 +43,10 @@ interface EntityInterface {
    *
    * @return
    *   The type of the entity.
+   *
+   * @since 1.13.0 This method is now static.
    */
-  public function entityType();
+  public static function entityType();
 
   /**
    * Returns the bundle of the entity.
@@ -72,6 +74,37 @@ interface EntityInterface {
    *   has no URI of its own.
    */
   public function uri();
+
+  /**
+   * Determines whether the given user has access to create this type of entity.
+   *
+   * @param string $bundle
+   *   (optional) The entity's bundle to check create access against.
+   * @param User|AnonymousUser|object $account
+   *   (optional) The user to check for. Leave it to NULL to check for the
+   *   global user.
+   *
+   * @return bool
+   *   Whether access is allowed or not. If the entity type does not specify any
+   *   access information, NULL is returned.
+   */
+  public static function createAccess($bundle = NULL, $account = NULL);
+
+  /**
+   * Determines whether the given user has access to this entity.
+   *
+   * @param string $op
+   *   The operation being performed. One of 'view', 'update', 'create' or
+   *   'delete'.
+   * @param User|AnonymousUser|object $account
+   *   (optional) The user to check for. Leave it to NULL to check for the
+   *   global user.
+   *
+   * @return bool|NULL
+   *   Whether access is allowed or not. If the entity type does not specify any
+   *   access information, NULL is returned.
+   */
+  public function access($op, $account = NULL);
 
   /**
    * Saves an entity permanently.
@@ -152,6 +185,7 @@ interface EntityInterface {
  * Defines a base entity class.
  */
 abstract class Entity extends stdClass implements EntityInterface {
+
   /**
    * Constructs a new entity object.
    */
@@ -179,6 +213,20 @@ abstract class Entity extends stdClass implements EntityInterface {
    */
   public function bundle() {
     return $this->entityType();
+  }
+
+  /**
+   * Implements EntityInterface::createAccess().
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    return TRUE;
+  }
+
+  /**
+   * Implements EntityInterface::access().
+   */
+  public function access($op, $account = NULL) {
+    return TRUE;
   }
 
   /**
