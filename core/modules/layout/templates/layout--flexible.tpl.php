@@ -34,9 +34,11 @@
   <?php foreach ($regions as $name => $region): ?>
     <?php $row_class = 'flex-row-' . $name . ' ' . $region['contains']; ?>
     <div class="container container-fluid <?php print $row_class; ?>">
-      <div class="layout-editor-region-title clearfix">
-        <?php print $region_buttons[$name]; ?>
-      </div>
+      <?php if ($region_buttons): ?>
+        <div class="layout-editor-region-title clearfix">
+          <?php print $region_buttons[$name]; ?>
+        </div>
+      <?php endif; ?>
       <div class="l-flex-row row">
       <?php 
         $col_info = $column_data[$region['contains']];
@@ -45,7 +47,7 @@
       ?>
       <?php foreach ($split as $col): ?>
         <div class="l-split col-md-<?php print $col; ?>">
-          <?php $content_key = $admin ? $name : $name . '_' . $i; ?>
+          <?php $content_key = $flexible_editor ? $name : $name . '_' . $i; ?>
           <?php print $content[$content_key]; ?>
           <?php $i++; ?>
         </div>

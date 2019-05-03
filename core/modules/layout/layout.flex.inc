@@ -22,7 +22,6 @@
 function layout_flexible_template_add_template($form, &$form_state, $flexible_template_id = NULL) {
   $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
   $template_data = $form_state['template_data'];
-  dpm($form_state['template_data']);
 
   $form['name'] = array(
     '#title' => t('Template name'),
@@ -59,7 +58,6 @@ function layout_flexible_template_add_template_submit($form, &$form_state) {
   $template_data['name'] = $form_state['values']['machine_name'];
   $template_data['title'] = $form_state['values']['name'];
   $template_data['description'] = $form_state['values']['description'];
-  dpm($template_data);
 
   $config = config('layout.flexible.' . $form_state['values']['machine_name']);
   $config->setData($template_data);
@@ -82,7 +80,7 @@ function layout_add_flexible_template($form, &$form_state, $flexible_template_id
   );
   $layout = new Layout($config);
   $template = layout_get_layout_template_info($flexible_template_id);
-  // $template['template'] = 'layout-flexible';
+  $template['plugin'] = array('class' => 'LayoutRendererFlexible');
   $template['regions'] = array();
   $form_state['flexible_template_id'] = $flexible_template_id;
 
@@ -395,7 +393,6 @@ function layout_get_flex_tempstore($name) {
   $caches = &backdrop_static(__FUNCTION__, array());
   if (!isset($caches[$name])) {
     if (!$item = tempstore_get('layout.flex', $name)) {
-      dpm($name);
       $item = layout_flexible_template_load($name);
     }
     $caches[$name] = $item;
@@ -410,7 +407,6 @@ function layout_flexible_template_load($flexible_template_id = NULL) {
   if (empty($configs)) {
     $cache = cache()->get('layout:flexible:config');
     if ($cache && $cache->data) {
-  dpm($cache);
       $configs = $cache->data;
     }
   }
@@ -474,7 +470,6 @@ function layout_layout_info() {
  * Reset all caches provided by Layout module.
  */
 function layout_flex_reset_caches() {
-  dpm(cache()->get('layout:flexible:config'));
   cache()->delete('layout:flexible:config');
 
   backdrop_static_reset('layout_flexible_template_load');

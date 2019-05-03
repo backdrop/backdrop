@@ -18,6 +18,7 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
    * {@inheritdoc}
    */
   function __construct(Layout $layout, array $default_template_info) {
+    $this->plugin = $default_template_info['plugin'];
     $this->admin = TRUE;
     $this->layout = &$layout;
     $this->layout_info = $default_template_info;
