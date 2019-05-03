@@ -1257,6 +1257,8 @@ function hook_field_formatter_view($entity_type, $entity, $field, $instance, $la
  *     use here.
  *   - form_state: The form state of the (entire) configuration form.
  *
+ * @since 1.13.0
+ *
  * @see hook_field_formatter_settings()
  */
 function hook_field_formatter_settings_form_alter(&$settings_form, $context) {
@@ -1273,6 +1275,8 @@ function hook_field_formatter_settings_form_alter(&$settings_form, $context) {
  *   - field: The field structure.
  *   - instance: The instance structure.
  *   - view_mode: The view mode for which a settings summary is requested.
+ *
+ * @since 1.13.0
  *
  * @see hook_field_formatter_settings_summary()
  */

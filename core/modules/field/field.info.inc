@@ -597,6 +597,8 @@ function field_info_storage_types($storage_type = NULL) {
  * @param string $view_mode
  *
  * @return array
+ *
+ * @since 1.13.0
  */
 function field_formatter_settings_get_instance_display_settings($entity_type, $field_name, $bundle, $view_mode) {
   // There is no bundle for this entity type so the bundle name is the
