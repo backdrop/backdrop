@@ -18,6 +18,7 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
    * {@inheritdoc}
    */
   function __construct(Layout $layout, array $default_template_info) {
+    $this->admin = TRUE;
     $this->layout = &$layout;
     $this->layout_info = $default_template_info;
 
@@ -178,39 +179,4 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
    */
   protected function getBlockLinks($block) {}
 
-  /**
-   * Perform display/layout-level render operations.
-   *
-   * This method triggers all the inner block/region rendering processes, passes
-   * that to the layout plugin's theme callback, and returns the rendered HTML.
-   *
-   * If display-level caching is enabled and that cache is warm, this method
-   * will not be called.
-   *
-   * @return string
-   *   The HTML string representing the entire rendered, themed layout.
-   */
-  function renderLayout() {
-    if (empty($this->prep_run)) {
-      $this->prepare();
-    }
-
-    $this->renderBlocks();
-
-    $this->renderRegions();
-
-    if ($this->page_title) {
-      backdrop_set_title($this->page_title);
-    }
-
-    module_load_include('inc', 'layout', 'layout.theme');
-    if (empty($this->layout_info['template'])) {
-      $theme = 'layout__' . $this->layout->layout_template;
-    }
-    else {
-      $theme = str_replace('-', '_', $this->layout_info['template']);
-    }
-    $this->rendered['layout'] = theme($theme, array('content' => $this->rendered['regions'], 'region_buttons' => $this->region_buttons, 'layout_info' => $this->layout_info));
-    return $this->prefix . $this->rendered['layout'] . $this->suffix;
-  }
 }

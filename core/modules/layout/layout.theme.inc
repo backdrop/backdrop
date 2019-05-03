@@ -218,6 +218,7 @@ function theme_layout_region_inner($variables) {
  * modules.
  */
 function layout_preprocess_layout(&$variables) {
+  dpm($variables);
   $settings = $variables['layout']->settings;
 
   // Check if any Title Component blocks have been placed. These will override
@@ -258,6 +259,14 @@ function layout_preprocess_layout(&$variables) {
     if (!$block_exists['tabs']) {
       $variables['tabs'] =  menu_local_tabs();
     }
+  }
+
+  if ($variables['layout_info']['template'] == 'layout--flexible') {
+    $data = layout_flexible_template_template($variables['layout_info']['name']);
+    $variables['regions'] =  $data['regions'];
+    $variables['region_buttons'] =  $variables['renderer']->region_buttons;
+
+    $variables['column_data'] = layout_flexible_row_styles();
   }
 }
 

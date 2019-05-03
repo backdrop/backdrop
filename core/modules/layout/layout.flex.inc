@@ -82,7 +82,7 @@ function layout_add_flexible_template($form, &$form_state, $flexible_template_id
   );
   $layout = new Layout($config);
   $template = layout_get_layout_template_info($flexible_template_id);
-  $template['template'] = 'layout-flexible';
+  // $template['template'] = 'layout-flexible';
   $template['regions'] = array();
   $form_state['flexible_template_id'] = $flexible_template_id;
 
@@ -369,70 +369,6 @@ function layout_flexible_row_styles() {
 }
 
 /**
- * Provides the default template for new layouts.
- */
-function theme_layout_flexible($variables) {
-  $region_buttons = $variables['region_buttons'];
-  $content = $variables['content'];
-  $template_id = $variables['layout_info']['name'];
-  $data = layout_flexible_template_template($template_id);
-  $column_data = layout_flexible_row_styles();
-
-  $output = '<div class="layout--flexible layout">';
-  foreach ($data['regions'] as $key => $region) {
-    $row_class = 'flex-row-' . $key . ' ' . $region['contains'];
-    $output .= '<div class="container container-fluid ' . $row_class . '">';
-    $output .= '<div class="layout-editor-region-title clearfix">';
-    $output .= $region_buttons[$key];
-    $output .= '</div>';
-    $output .= '<div class="l-flex-row row">';
-
-
-    // $output .= '<div class="l-flex-row">' . $region_buttons . '</div>';
-    $col_info = $column_data[$region['contains']];
-    $split = explode(':', $col_info['bootstrap']);
-    foreach ($split as $col) {
-      $output .= '<div class="l-split col-md-' . $col . '">' . $content[$key];
-      $output .= '</div>';
-    }
-    $output .= '</div>';
-    $output .= '</div>';
-  }
-  $output .= '</div>';
-  return $output;
-}
-
-/**
- * Provides the default template for new layouts.
- */
-function theme_layout_layout_flexible($variables) {
-  $content = $variables['content'];
-  $template_id = $variables['layout_info']['name'];
-  $data = layout_flexible_template_template($template_id);
-  $column_data = layout_flexible_row_styles();
-
-  $output = '<div class="layout--boxtonian">';
-  foreach ($data['regions'] as $key => $region) {
-    $row_class = 'flex-row-' . $key . ' ' . $region['contains'];
-    $output .= '<div class="container container-fluid ' . $row_class . '">';
-    $output .= '<div class="l-flex-row row">';
-
-    $col_info = $column_data[$region['contains']];
-    $split = explode(':', $col_info['bootstrap']);
-    $i = 0;
-    foreach ($split as $col) {
-      $output .= '<div class="l-split col-md-' . $col . '">' . $content[$key . '_' . $i];
-      $output .= '</div>';
-      $i++;
-    }
-    $output .= '</div>';
-    $output .= '</div>';
-  }
-  $output .= '</div>';
-  return $output;
-}
-
-/**
  * Store changes to a layout or menu item in the temporary store.
  *
  * @param Layout|LayoutMenuItem $item
@@ -514,10 +450,10 @@ function layout_layout_info() {
       'title' => $item['title'],
       'regions' => array(),
       'default region' => '',
-      'template' => 'layout_layout_flexible',
+      'template' => 'layout--flexible',
       'flexible' => TRUE,
       'type' => 'layout',
-      'path' => '',
+      'path' => 'templates',
       'libraries' => array('bootstrap4-gs'),
     );
     // todo: default region

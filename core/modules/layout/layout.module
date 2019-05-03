@@ -564,34 +564,21 @@ function layout_theme() {
     'layout_region_inner' => array(
       'variables' => array('blocks' => array(), 'tag' => '', 'classes' => array(), 'attributes' => array()),
     ) + $base,
-    'layout_flexible' => array(
-      'variables' => array('content' => NULL, 'layout_info' => NULL, 'region_buttons' => array()),
-    'file' => 'layout.flex.inc',
-    ),
   );
 
   // Register all layout templates.
   $layout_templates = layout_get_layout_template_info();
   foreach ($layout_templates as $template) {
     if (!empty($template['template'])) {
-      if ($template['template'] != 'layout_layout_flexible') {
-        $theme_key = str_replace('-', '_', $template['template']);
-        $items[$theme_key] = array(
-          'variables' => array('content' => NULL, 'settings' => NULL, 'layout' => NULL, 'layout_info' => NULL, 'renderer' => NULL, 'attributes' => array(), 'admin' => FALSE),
-          'template' => $template['template'],
-          'path' => $template['path'],
-          'base hook' => 'layout',
-        );
-        if (isset($template['file'])) {
-          $items[$theme_key]['file'] = $template['file'];
-        }
-      }
-      else {
-        $items['layout_layout_flexible'] = array(
-          'variables' => array('content' => NULL, 'settings' => NULL, 'layout' => NULL, 'layout_info' => NULL, 'renderer' => NULL, 'attributes' => array(), 'admin' => FALSE),
-          'file' => 'layout.flex.inc',
-          'base hook' => 'layout',
-        );
+      $theme_key = str_replace('-', '_', $template['template']);
+      $items[$theme_key] = array(
+        'variables' => array('content' => NULL, 'settings' => NULL, 'layout' => NULL, 'layout_info' => NULL, 'renderer' => NULL, 'attributes' => array(), 'admin' => FALSE),
+        'template' => $template['template'],
+        'path' => $template['path'],
+        'base hook' => 'layout',
+      );
+      if (isset($template['file'])) {
+        $items[$theme_key]['file'] = $template['file'];
       }
     }
   }

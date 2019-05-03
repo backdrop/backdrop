@@ -383,12 +383,7 @@ class LayoutRendererStandard {
       $theme = 'layout__' . $this->layout->layout_template;
     }
     else {
-      if (isset($this->layout_info['flexible'])) {
-        $theme = $this->layout_info['template'];
-      }
-      else {
-        $theme = str_replace('-', '_', $this->layout_info['template']);
-      }
+      $theme = str_replace('-', '_', $this->layout_info['template']);
     }
     $this->rendered['layout'] = theme($theme, array('content' => $this->rendered['regions'], 'settings' => $this->layout->settings, 'layout' => $this->layout, 'layout_info' => $this->layout_info, 'renderer' => $this, 'admin' => $this->admin));
     return $this->prefix . $this->rendered['layout'] . $this->suffix;
