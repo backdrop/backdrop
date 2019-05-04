@@ -24,6 +24,10 @@ function layout_flexible_template_list_page() {
       'title' => t('Configure'),
       'href' => 'admin/structure/layouts/settings/' . $template['name'] . '/configure',
     );
+    $links['delete'] = array(
+      'title' => t('Delete'),
+      'href' => 'admin/structure/layouts/settings/' . $template['name'] . '/delete',
+    );
 
 
     $operations = array(
@@ -371,6 +375,38 @@ function layout_flexible_template_add_row_ajax($form, $form_state) {
 }
 
 /**
+ * Form callback; Delete a flexible template.
+ *
+ * @ingroup forms
+ */
+function layout_flexible_template_delete_form($form, &$form_state, $flexible_template_id) {
+  $template = layout_flexible_template_load($flexible_template_id);
+  $form_state['template'] = $template;
+
+  $question = t('Delete flexible template @title?', array('@title' => $template['title']));
+  $text = t('Deleting the template will affect any layouts using this template.');
+  $button_text = t('Delete template');
+
+  return confirm_form($form, $question, 'admin/structure/layouts/settings', $text, $button_text);
+}
+
+/**
+ * Submit handler for layout_flexible_template_delete_form(). Deletes a flexible template.
+ */
+function layout_flexible_template_delete_form_submit(&$form, &$form_state) {
+  $template = $form_state['template'];
+
+  $config = config('layout.flexible.' . $template['name']);
+  $config->delete();
+
+  layout_flex_reset_caches();
+  layout_reset_caches();
+
+  backdrop_set_message(t('The layout template has been deleted.'));
+  $form_state['redirect'] = 'admin/structure/layouts/settings';
+}
+
+/**
  * Provides the default template for new layouts.
  */
 function layout_flexible_template_template($flexible_template_id = NULL) {
@@ -525,6 +561,7 @@ function layout_layout_info() {
 /**
  * Reset all caches provided by Layout module.
  */
+// todo: merger into layout_flex_reset_caches().
 function layout_flex_reset_caches() {
   cache()->delete('layout:flexible:config');
 
