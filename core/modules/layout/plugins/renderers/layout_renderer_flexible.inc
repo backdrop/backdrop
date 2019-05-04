@@ -166,6 +166,13 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
         'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
       ),
     );
+    $links['delete'] = array(
+      'title' => t('Delete row'),
+      'href' => 'admin/structure/layouts/settings/' . $this->layout_info['name'] . '/' . $region_id . '/delete-row',
+      'attributes' => array(
+        'class' => array('use-ajax'),
+      ),
+    );
 
     $dropbutton = array(
       '#type' => 'dropbutton',

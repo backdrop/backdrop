@@ -34,9 +34,10 @@
   <?php foreach ($regions as $name => $region): ?>
     <?php 
       $row_class = 'flex-row-' . $name . ' ' . $region['contains'] . ' ' . $region['classes'];
+      $row_id = $flexible_editor ? 'id = "flex-row-id-' . $name . '"' : '';
       $element = !empty($region['element']) ? $region['element'] : 'div';
     ?>
-    <<?php print $element; ?> class="l-wrapper <?php print 'l-wrapper-' . $name; ?>">
+    <<?php print $element; ?> class="l-wrapper <?php print 'l-wrapper-' . $name; ?>" <?php print $row_id; ?>>
       <div class="container container-fluid <?php print $row_class; ?>">
         <?php if ($region_buttons): ?>
           <div class="layout-editor-region-title clearfix">

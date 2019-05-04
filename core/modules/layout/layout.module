@@ -148,6 +148,17 @@ function layout_menu() {
   );
 
   // Put all code in separate file to make dev easier, because layout.admin is huge.
+  $items['admin/structure/layouts/settings/%/%/delete-row'] = array(
+    'title' => 'Delete row',
+    'page callback' => 'layout_flexible_template_delete_row',
+    'page arguments' => array(4, 5),
+    'type' => MENU_CALLBACK,
+    'weight' => -10,
+    'access arguments' => array('administer layouts'),
+    'file' => 'layout.flex.inc',
+    'theme callback' => 'ajax_base_page_theme',
+  );
+
   $items['admin/structure/layouts/settings/%/%/%/add-row'] = array(
     'title' => 'Add flexible layout template',
     'page callback' => 'backdrop_get_form',

@@ -322,6 +322,7 @@ function layout_flexible_template_add_row_submit($form, &$form_state) {
   $form_state['ajax_rebuild_args'] = array($form_state['flexible_template_id']);
   $form_state['ajax_update'] = array('content');
   layout_set_flex_tempstore($template_data, $form_state['flexible_template_id']);
+  layout_flex_reset_caches();
 }
 
 /*
@@ -378,6 +379,38 @@ function layout_flexible_template_add_row_ajax($form, $form_state) {
     '#type' => 'ajax',
     '#commands' => $commands,
   );
+}
+
+/**
+ * Form to delete a row from a flexible template.
+ *
+ * @param $flexible_template_id
+ *   The template to which a row is being added.
+ * @param $original_row
+ *   The row above or below which a new row is being inserted.
+ *
+ * @ingroup forms
+ */
+function layout_flexible_template_delete_row($flexible_template_id, $original_row) {
+  // Todo use token, like in block add page.
+
+  $commands = array();
+  $template = layout_flexible_template_template($flexible_template_id);
+  unset($template['regions'][$original_row]);
+  layout_set_flex_tempstore($template, $flexible_template_id);
+
+  if (backdrop_is_ajax()) {
+    $commands[] = ajax_command_remove('#flex-row-id-' . $original_row);
+
+    return array(
+      '#type' => 'ajax',
+      '#commands' => $commands,
+    );
+  }
+  else {
+    backdrop_set_message(t('Row "@title" removed.', array('@title' => $template['title'])));
+    backdrop_goto('admin/structure/layouts/settings/' . $flexible_template_id . '/configure');
+  }
 }
 
 /**
