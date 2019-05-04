@@ -93,6 +93,17 @@ function layout_menu() {
   ) + $base;
 
   // Put all code in separate file to make dev easier, because layout.admin is huge.
+  $items['admin/structure/layouts/settings/flexible-templates'] = array(
+    'title' => 'Flexible layout templates',
+    'page callback' => 'layout_flexible_template_list_page',
+    // 'page arguments' => array('layout_flexible_template_add_template'),
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => -10,
+    'access arguments' => array('administer layouts'),
+    'file' => 'layout.flex.inc',
+  );
+
+  // Put all code in separate file to make dev easier, because layout.admin is huge.
   // todo change path to flexible-template
   $items['admin/structure/layouts/settings/add'] = array(
     'title' => 'Add flexible layout template',
