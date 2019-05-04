@@ -986,7 +986,8 @@ function backdrop_merged_modules() {
     'transliteration', // Backdrop 1.3.0.
     'project_browser', // Backdrop 1.4.0.
     'entity_view_mode', // Backdrop 1.6.0.
-    'options_element' // Backdrop 1.12.0.
+    'options_element', // Backdrop 1.12.0.
+    'field_formatter_settings', // Backdrop 1.13.0.
   );
 }
 
