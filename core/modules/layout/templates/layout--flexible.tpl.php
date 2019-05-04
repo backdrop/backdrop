@@ -33,7 +33,6 @@
 
   <?php foreach ($regions as $name => $region): ?>
     <?php 
-    dpm($region);
       $row_class = 'flex-row-' . $name . ' ' . $region['contains'] . ' ' . $region['classes'];
       $element = !empty($region['element']) ? $region['element'] : 'div';
     ?>

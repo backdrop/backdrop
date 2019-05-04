@@ -148,21 +148,20 @@ function layout_add_flexible_template_submit($form, &$form_state) {
  *   The template to which a row is being added.
  * @param $original_row
  *   The row above or below which a new row is being inserted.
- * @param $position
- *   Where the new row is being inserted.
+ * @param $op
+ *   The operation being performed on this row.
  *
  * @ingroup forms
  */
-function layout_flexible_template_add_row($form, &$form_state, $flexible_template_id, $original_row, $position) {
+function layout_flexible_template_add_row($form, &$form_state, $flexible_template_id, $original_row, $op) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
-  // Todo this must become stored and pulled from tempstore.
   if (!isset($form_state['template_data'])) {
     $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
   }
   $form_state['flexible_template_id'] = $flexible_template_id;
   $form_state['original_row'] = $original_row;
-  $form_state['position'] = $position;
-
+  $form_state['op'] = $op;
+  $row_data = $form_state['template_data']['regions'][$original_row];
   $options = array();
   $row_styles = layout_flexible_row_styles();
   foreach ($row_styles as $name => $row_style) {
@@ -173,12 +172,13 @@ function layout_flexible_template_add_row($form, &$form_state, $flexible_templat
     '#title' => t('Row name'),
     '#type' => 'textfield',
     '#maxlength' => 128,
-    '#default_value' => '',
+    '#default_value' => isset($row_data['name']) ? $row_data['name'] : '',
     '#required' => TRUE,
   );
   $form['machine_name'] = array(
     '#type' => 'machine_name',
     '#maxlength' => 21,
+    '#default_value' => isset($row_data['machine_name']) ? $row_data['machine_name'] : '',
     '#machine_name' => array(
       'exists' => 'layout_flexible_row_name_exists',
     ),
@@ -186,13 +186,13 @@ function layout_flexible_template_add_row($form, &$form_state, $flexible_templat
   $form['row_style'] = array(
     '#title' => t('Select row style'),
     '#type' => 'select',
-    '#default_value' => 'column_50_25_25',
+    '#default_value' => isset($row_data['contains']) ? $row_data['contains'] : 'column_50_25_25',
     '#options' => $options,
   );
   $form['row_classes'] = array(
     '#title' => t('Additional row classes'),
     '#type' => 'textfield',
-    '#default_value' => '',
+    '#default_value' => isset($row_data['classes']) ? $row_data['classes'] : '',
   );
   $options = array(
     'div' => 'DIV',
@@ -207,8 +207,9 @@ function layout_flexible_template_add_row($form, &$form_state, $flexible_templat
     '#title' => t('HTML element for row wrapper'),
     '#type' => 'select',
     '#options' => $options,
-    '#default_value' => isset($layout->settings[$region_name]['element']) ? $layout->settings[$region_name]['element'] : '',
+    '#default_value' => isset($row_data['element']) ? $row_data['element'] : '',
   );
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -237,7 +238,7 @@ function layout_flexible_template_add_row_submit($form, &$form_state) {
 
   $flexible_template_id = $form_state['flexible_template_id'];
   $original_row = $form_state['original_row'];
-  $position = $form_state['position'];
+  $op = $form_state['op'];
 
   $new_row = array(
     'name' => $form_state['values']['name'],
@@ -246,9 +247,13 @@ function layout_flexible_template_add_row_submit($form, &$form_state) {
     'classes' => $form_state['values']['row_classes'],
   );
 
-  $newdata = layout_flexible_array_insert_key_value($original_row, $template_data['regions'], $form_state['values']['machine_name'], $new_row, $position);
+  if ($op != 'configure') {
+    $template_data['regions'] = layout_flexible_array_insert_key_value($original_row, $template_data['regions'], $form_state['values']['machine_name'], $new_row, $op);
+  }
+  else {
+    $template_data['regions'][$original_row] = $new_row;
+  }
 
-  $template_data['regions'] = $newdata;
   $form_state['template_data'] = $template_data;
 
 
