@@ -243,7 +243,7 @@ function layout_flexible_template_add_row_submit($form, &$form_state) {
     'name' => $form_state['values']['name'],
     'contains' => $form_state['values']['row_style'],
     'element' => $form_state['values']['element'],
-    'classes' => $form_state['values']['classes'],
+    'classes' => $form_state['values']['row_classes'],
   );
 
   $newdata = layout_flexible_array_insert_key_value($original_row, $template_data['regions'], $form_state['values']['machine_name'], $new_row, $position);

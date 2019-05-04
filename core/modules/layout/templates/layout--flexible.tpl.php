@@ -32,27 +32,33 @@
   <?php endif; ?>
 
   <?php foreach ($regions as $name => $region): ?>
-    <?php $row_class = 'flex-row-' . $name . ' ' . $region['contains']; ?>
-    <div class="container container-fluid <?php print $row_class; ?>">
-      <?php if ($region_buttons): ?>
-        <div class="layout-editor-region-title clearfix">
-          <?php print $region_buttons[$name]; ?>
+    <?php 
+    dpm($region);
+      $row_class = 'flex-row-' . $name . ' ' . $region['contains'] . ' ' . $region['classes'];
+      $element = !empty($region['element']) ? $region['element'] : 'div';
+    ?>
+    <<?php print $element; ?> class="l-wrapper <?php print 'l-wrapper-' . $name; ?>">
+      <div class="container container-fluid <?php print $row_class; ?>">
+        <?php if ($region_buttons): ?>
+          <div class="layout-editor-region-title clearfix">
+            <?php print $region_buttons[$name]; ?>
+          </div>
+        <?php endif; ?>
+        <div class="l-flex-row row">
+        <?php 
+          $col_info = $column_data[$region['contains']];
+          $split = explode(':', $col_info['bootstrap']);
+          $i = 0;
+        ?>
+        <?php foreach ($split as $col): ?>
+          <div class="l-col col-md-<?php print $col; ?>">
+            <?php $content_key = $flexible_editor ? $name : $name . '_' . $i; ?>
+            <?php print $content[$content_key]; ?>
+            <?php $i++; ?>
+          </div>
+        <?php endforeach; ?>
         </div>
-      <?php endif; ?>
-      <div class="l-flex-row row">
-      <?php 
-        $col_info = $column_data[$region['contains']];
-        $split = explode(':', $col_info['bootstrap']);
-        $i = 0;
-      ?>
-      <?php foreach ($split as $col): ?>
-        <div class="l-split col-md-<?php print $col; ?>">
-          <?php $content_key = $flexible_editor ? $name : $name . '_' . $i; ?>
-          <?php print $content[$content_key]; ?>
-          <?php $i++; ?>
-        </div>
-      <?php endforeach; ?>
       </div>
-    </div>
+    </<?php print $element; ?>>
   <?php endforeach; ?>
 </div>
