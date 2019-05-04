@@ -265,6 +265,12 @@ function layout_flexible_template_add_row($form, &$form_state, $flexible_templat
     '#default_value' => isset($row_data['element']) ? $row_data['element'] : '',
   );
 
+  foreach (array('name', 'machine_name', 'row_classes', 'element') as $form_element) {
+    if ($op != 'configure') {
+      $form[$form_element]['#default_value'] = '';
+    }
+  }
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
