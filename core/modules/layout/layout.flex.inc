@@ -132,7 +132,7 @@ function layout_flexible_template_settings_form_submit($form, &$form_state) {
   $config->setData($template_data);
   $config->save();
 
-  layout_set_flex_tempstore($template_data, $form_state['values']['machine_name']);
+  layout_set_flexible_tempstore($template_data, $form_state['values']['machine_name']);
   backdrop_set_message(t('Template saved.'));
   $form_state['redirect'] = 'admin/structure/layouts/settings/' . $form_state['values']['machine_name'] . '/configure';
 }
@@ -365,8 +365,8 @@ function layout_flexible_template_edit_row_submit($form, &$form_state) {
   $form_state['ajax_rebuild_form'] = 'layout_flexible_template_configure_form';
   $form_state['ajax_rebuild_args'] = array($form_state['flexible_template_id']);
   $form_state['ajax_update'] = array('content');
-  layout_set_flex_tempstore($template_data, $form_state['flexible_template_id']);
-  layout_flex_reset_caches();
+  layout_set_flexible_tempstore($template_data, $form_state['flexible_template_id']);
+  layout_flexible_reset_caches();
 }
 
 /*
@@ -451,7 +451,7 @@ function layout_flexible_template_delete_row($flexible_template_id, $original_ro
   $commands = array();
   $template = layout_flexible_template_template($flexible_template_id);
   unset($template['regions'][$original_row]);
-  layout_set_flex_tempstore($template, $flexible_template_id);
+  layout_set_flexible_tempstore($template, $flexible_template_id);
 
   if (backdrop_is_ajax()) {
     $commands[] = ajax_command_remove('#flex-row-id-' . $original_row);
@@ -492,7 +492,7 @@ function layout_flexible_template_delete_form_submit(&$form, &$form_state) {
   $config = config('layout.flexible.' . $template['name']);
   $config->delete();
 
-  layout_flex_reset_caches();
+  layout_flexible_reset_caches();
   layout_reset_caches();
 
   backdrop_set_message(t('The layout template has been deleted.'));
@@ -526,7 +526,7 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
     );
   }
   else {
-    $settings = layout_get_flex_tempstore($flexible_template_id);
+    $settings = layout_get_flexible_tempstore($flexible_template_id);
   }
   return $settings;
 }
@@ -559,7 +559,7 @@ function layout_flexible_row_styles() {
  * @param string $type
  *   The type of item to save. Must be either "layout" or "menu_item".
  */
-function layout_set_flex_tempstore($item, $name) {
+function layout_set_flexible_tempstore($item, $name) {
   tempstore_set('layout.flex', $name, $item, 604800);
 }
 
@@ -574,7 +574,7 @@ function layout_set_flex_tempstore($item, $name) {
  * @param string $type
  *   The type of item to load. Must be either "layout" or "menu_item".
  */
-function layout_get_flex_tempstore($name) {
+function layout_get_flexible_tempstore($name) {
   $caches = &backdrop_static(__FUNCTION__, array());
   if (!isset($caches[$name])) {
     if (!$item = tempstore_get('layout.flex', $name)) {
@@ -654,10 +654,10 @@ function layout_layout_info() {
 /**
  * Reset all caches provided by Layout module.
  */
-// todo: merger into layout_flex_reset_caches().
-function layout_flex_reset_caches() {
+// todo: merger into layout_flexible_reset_caches().
+function layout_flexible_reset_caches() {
   cache()->delete('layout:flexible:config');
 
   backdrop_static_reset('layout_flexible_template_load');
-  backdrop_static_reset('layout_get_flex_tempstore');
+  backdrop_static_reset('layout_get_flexible_tempstore');
 }
