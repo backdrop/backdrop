@@ -90,7 +90,7 @@ function layout_flexible_template_settings_form($form, &$form_state, $flexible_t
     '#maxlength' => 21,
     '#default_value' => $template_data['name'],
     '#machine_name' => array(
-      'exists' => 'layout_flexible_row_name_exists',
+      'exists' => 'layout_flexible_template_name_exists',
     ),
   );
   $form['description'] = array(
@@ -115,6 +115,10 @@ function layout_flexible_template_settings_form($form, &$form_state, $flexible_t
   );
 
   return $form;
+}
+
+function layout_flexible_template_name_exists($machine_name) {
+  return layout_flexible_template_load($machine_name);
 }
 
 function layout_flexible_template_settings_form_cancel($form, &$form_state) {
@@ -321,19 +325,19 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
 }
 
 function layout_flexible_row_name_exists($machine_name) {
-  return layout_flexible_template_load($machine_name);
+  // Use validate function;
+  return FALSE;
 }
 
 /**
  * Submit handler for layout_configure_region_page().
  */
 function layout_flexible_template_edit_row_validate($form, &$form_state) {
-  if (layout_flexible_template_load($form_state['flexible_template_id'])) {
+  $machine_name = $form_state['values']['machine_name'];
+  if (isset($form_state['template_data']['regions'][$machine_name])) {
     form_error($form['machine_name'], t('This row name already exists.'));
   }
 }
-
-
 
 /**
  * Submit handler for layout_configure_region_page().
