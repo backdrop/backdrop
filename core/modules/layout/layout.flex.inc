@@ -306,6 +306,9 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
     '#type' => 'submit',
     '#value' => t('Save configuration'),
     '#attributes' => array('class' => array('layout-title-button')),
+    '#validate' => array(
+      'layout_flexible_template_edit_row_validate',
+    ),
     '#submit' => array(
       'layout_flexible_template_edit_row_submit',
     ),
@@ -319,8 +322,18 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
 
 function layout_flexible_row_name_exists($machine_name) {
   return layout_flexible_template_load($machine_name);
-;
 }
+
+/**
+ * Submit handler for layout_configure_region_page().
+ */
+function layout_flexible_template_edit_row_validate($form, &$form_state) {
+  if (layout_flexible_template_load($form_state['flexible_template_id'])) {
+    form_error($form['machine_name'], t('This row name already exists.'));
+  }
+}
+
+
 
 /**
  * Submit handler for layout_configure_region_page().
@@ -401,10 +414,20 @@ function layout_flexible_array_insert_key_value($key, array &$array, $new_key, $
  */
 function layout_flexible_template_edit_row_ajax($form, $form_state) {
   $commands = array();
-  $commands[] = ajax_command_close_modal_dialog();
+  // Display error messages in the form if any.
+  if (form_get_errors()) {
+    $html = '';
+    $html .= theme('status_messages');
+    $html .= backdrop_render($form);
+    $title = isset($form['#title']) ? $form['#title'] : backdrop_get_title();
+    $commands[] = ajax_command_open_modal_dialog($title, $html, array('dialogClass' => 'layout-dialog'));
+  }
+  else {
+    $commands[] = ajax_command_close_modal_dialog();
 
-  $update_ajax = layout_ajax_form_update($form, $form_state);
-  $commands = array_merge($commands, $update_ajax['#commands']);
+    $update_ajax = layout_ajax_form_update($form, $form_state);
+    $commands = array_merge($commands, $update_ajax['#commands']);
+  }
 
   return array(
     '#type' => 'ajax',
