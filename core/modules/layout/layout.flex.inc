@@ -104,9 +104,23 @@ function layout_flexible_template_add_template($form, &$form_state, $flexible_te
     '#type' => 'submit',
     '#value' => t('Save and configure'),
   );
+  $form['actions']['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#validate' => array(),
+    '#limit_validation_errors' => array(array('name', 'machine_name')),
+    '#submit' => array(
+      'layout_flexible_template_add_template_cancel',
+    ),
+  );
 
   return $form;
 }
+
+function layout_flexible_template_add_template_cancel($form, &$form_state) {
+  $form_state['redirect'] = 'admin/structure/layouts/settings';
+}
+
 
 function layout_flexible_template_add_template_submit($form, &$form_state) {
   $template_data = $form_state['template_data'];
@@ -179,10 +193,20 @@ function layout_add_flexible_template($form, &$form_state, $flexible_template_id
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
     '#value' => t('Cancel'),
-    '#validate' => array(),
+    '#submit' => array(
+      'layout_add_flexible_template_cancel',
+    ),
   );
 
   return $form;
+}
+
+/**
+ * Submit handler for layout_settings_form() that saves in-progress changes.
+ */
+function layout_add_flexible_template_cancel($form, &$form_state) {
+  tempstore_clear('layout.flex', $form_state['flexible_template_id']);
+  $form_state['redirect'] = 'admin/structure/layouts/settings';
 }
 
 /**
