@@ -45,18 +45,25 @@
           </div>
         <?php endif; ?>
         <div class="l-flexible-row row">
-        <?php 
-          $col_info = $column_data[$region['contains']];
-          $split = explode(':', $col_info['bootstrap']);
-          $i = 0;
-        ?>
-        <?php foreach ($split as $col): ?>
-          <div class="l-col col-md-<?php print $col; ?>">
-            <?php $content_key = $flexible_editor ? $name : $name . '_' . $i; ?>
-            <?php print $content[$content_key]; ?>
-            <?php $i++; ?>
-          </div>
-        <?php endforeach; ?>
+        <?php if ($region['contains'] == 'column_12'): ?>
+            <div class="l-col col-md-12">
+              <?php $content_key = $flexible_editor ? $name : $name . '_0'; ?>
+              <?php print $content[$content_key]; ?>
+            </div>
+        <?php else: ?>
+          <?php 
+            $col_info = $column_data[$region['contains']];
+            $split = explode(':', $col_info['bootstrap']);
+            $i = 0;
+          ?>
+          <?php foreach ($split as $col): ?>
+            <div class="l-col col-md-<?php print $col; ?>">
+              <?php $content_key = $flexible_editor ? $name : $name . '_' . $i; ?>
+              <?php print $content[$content_key]; ?>
+              <?php $i++; ?>
+            </div>
+          <?php endforeach; ?>
+        <?php endif; ?>
         </div>
       </div>
     </<?php print $element; ?>>
