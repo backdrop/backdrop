@@ -96,7 +96,6 @@ function layout_menu() {
   $items['admin/structure/layouts/settings/flexible-templates'] = array(
     'title' => 'Flexible layout templates',
     'page callback' => 'layout_flexible_template_list_page',
-    // 'page arguments' => array('layout_flexible_template_add_template'),
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
@@ -108,7 +107,7 @@ function layout_menu() {
   $items['admin/structure/layouts/settings/add'] = array(
     'title' => 'Add flexible layout template',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_flexible_template_add_template'),
+    'page arguments' => array('layout_flexible_template_settings_form'),
     'type' => MENU_LOCAL_ACTION,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
@@ -118,7 +117,7 @@ function layout_menu() {
   $items['admin/structure/layouts/settings/%/edit'] = array(
     'title' => 'Add flexible layout template',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_flexible_template_add_template', 4),
+    'page arguments' => array('layout_flexible_template_settings_form', 4),
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
@@ -128,7 +127,7 @@ function layout_menu() {
   $items['admin/structure/layouts/settings/%/configure'] = array(
     'title' => 'Add flexible layout template',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_add_flexible_template', 4),
+    'page arguments' => array('layout_flexible_template_configure_form', 4),
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
@@ -162,7 +161,7 @@ function layout_menu() {
   $items['admin/structure/layouts/settings/%/%/%/add-row'] = array(
     'title' => 'Add flexible layout template',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_flexible_template_add_row', 4, 5, 6),
+    'page arguments' => array('layout_flexible_template_edit_row', 4, 5, 6),
     'type' => MENU_CALLBACK,
     'weight' => -10,
     'access arguments' => array('administer layouts'),

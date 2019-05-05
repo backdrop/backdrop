@@ -74,7 +74,7 @@ function layout_flexible_template_list_page() {
  *
  * @ingroup forms
  */
-function layout_flexible_template_add_template($form, &$form_state, $flexible_template_id = NULL) {
+function layout_flexible_template_settings_form($form, &$form_state, $flexible_template_id = NULL) {
   $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
   $template_data = $form_state['template_data'];
 
@@ -110,19 +110,19 @@ function layout_flexible_template_add_template($form, &$form_state, $flexible_te
     '#validate' => array(),
     '#limit_validation_errors' => array(array('name', 'machine_name')),
     '#submit' => array(
-      'layout_flexible_template_add_template_cancel',
+      'layout_flexible_template_settings_form_cancel',
     ),
   );
 
   return $form;
 }
 
-function layout_flexible_template_add_template_cancel($form, &$form_state) {
+function layout_flexible_template_settings_form_cancel($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings';
 }
 
 
-function layout_flexible_template_add_template_submit($form, &$form_state) {
+function layout_flexible_template_settings_form_submit($form, &$form_state) {
   $template_data = $form_state['template_data'];
   $template_data['name'] = $form_state['values']['machine_name'];
   $template_data['title'] = $form_state['values']['name'];
@@ -138,12 +138,20 @@ function layout_flexible_template_add_template_submit($form, &$form_state) {
 }
 
 /**
- * Render the settings form for layout.
+ * Render the form for layout.
  *
  * @ingroup forms
  */
-function layout_add_flexible_template($form, &$form_state, $flexible_template_id) {
-  // $layout = layout_load('default');
+
+/**
+ * Form to manage adding and removing rows to a flexible template.
+ *
+ * @param $flexible_template_id
+ *   The template being edited.
+ *
+ * @ingroup forms
+ */
+function layout_flexible_template_configure_form($form, &$form_state, $flexible_template_id) {
   $config = array(
     'is_new' => TRUE,
   );
@@ -187,14 +195,14 @@ function layout_add_flexible_template($form, &$form_state, $flexible_template_id
     '#type' => 'submit',
     '#value' => t('Save layout'),
     '#submit' => array(
-      'layout_add_flexible_template_submit',
+      'layout_flexible_template_configure_form_submit',
     ),
   );
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
     '#value' => t('Cancel'),
     '#submit' => array(
-      'layout_add_flexible_template_cancel',
+      'layout_flexible_template_configure_form_cancel',
     ),
   );
 
@@ -204,7 +212,7 @@ function layout_add_flexible_template($form, &$form_state, $flexible_template_id
 /**
  * Submit handler for layout_settings_form() that saves in-progress changes.
  */
-function layout_add_flexible_template_cancel($form, &$form_state) {
+function layout_flexible_template_configure_form_cancel($form, &$form_state) {
   tempstore_clear('layout.flex', $form_state['flexible_template_id']);
   $form_state['redirect'] = 'admin/structure/layouts/settings';
 }
@@ -212,12 +220,10 @@ function layout_add_flexible_template_cancel($form, &$form_state) {
 /**
  * Submit handler for layout_settings_form() that saves in-progress changes.
  */
-function layout_add_flexible_template_submit($form, &$form_state) {
+function layout_flexible_template_configure_form_submit($form, &$form_state) {
   $config = config('layout.flexible.' . $form_state['flexible_template_id']);
   $config->setData($form_state['template_data']);
   $config->save();
-  // tempstore_clear('layout.flex', $form_state['flexible_template_id']);
-  // $form_state['redirect'] = 'admin/structure/layouts/settings';
 }
 
 /**
@@ -232,7 +238,7 @@ function layout_add_flexible_template_submit($form, &$form_state) {
  *
  * @ingroup forms
  */
-function layout_flexible_template_add_row($form, &$form_state, $flexible_template_id, $original_row, $op) {
+function layout_flexible_template_edit_row($form, &$form_state, $flexible_template_id, $original_row, $op) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   if (!isset($form_state['template_data'])) {
     $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
@@ -301,10 +307,10 @@ function layout_flexible_template_add_row($form, &$form_state, $flexible_templat
     '#value' => t('Save configuration'),
     '#attributes' => array('class' => array('layout-title-button')),
     '#submit' => array(
-      'layout_flexible_template_add_row_submit',
+      'layout_flexible_template_edit_row_submit',
     ),
     '#ajax' => array(
-      'callback' => 'layout_flexible_template_add_row_ajax',
+      'callback' => 'layout_flexible_template_edit_row_ajax',
     ),
   );
 
@@ -312,13 +318,14 @@ function layout_flexible_template_add_row($form, &$form_state, $flexible_templat
 }
 
 function layout_flexible_row_name_exists($machine_name) {
-  return FALSE;
+  return layout_flexible_template_load($machine_name);
+;
 }
 
 /**
  * Submit handler for layout_configure_region_page().
  */
-function layout_flexible_template_add_row_submit($form, &$form_state) {
+function layout_flexible_template_edit_row_submit($form, &$form_state) {
   $template_data = $form_state['template_data'];
 
   $flexible_template_id = $form_state['flexible_template_id'];
@@ -342,7 +349,7 @@ function layout_flexible_template_add_row_submit($form, &$form_state) {
   $form_state['template_data'] = $template_data;
 
 
-  $form_state['ajax_rebuild_form'] = 'layout_add_flexible_template';
+  $form_state['ajax_rebuild_form'] = 'layout_flexible_template_configure_form';
   $form_state['ajax_rebuild_args'] = array($form_state['flexible_template_id']);
   $form_state['ajax_update'] = array('content');
   layout_set_flex_tempstore($template_data, $form_state['flexible_template_id']);
@@ -392,7 +399,7 @@ function layout_flexible_array_insert_key_value($key, array &$array, $new_key, $
 /**
  * AJAX responder to add a new row, column or region to a flexible layout.
  */
-function layout_flexible_template_add_row_ajax($form, $form_state) {
+function layout_flexible_template_edit_row_ajax($form, $form_state) {
   $commands = array();
   $commands[] = ajax_command_close_modal_dialog();
 
