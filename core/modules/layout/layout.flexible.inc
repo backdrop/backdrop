@@ -182,7 +182,7 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
   );
   $form['content'] = array(
     '#type' => 'item',
-    '#id' => 'flex-content',
+    '#id' => 'flexible-content',
   );
   $form['content']['display'] = array(
     '#markup' => $renderer->render(),
@@ -213,7 +213,7 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
  * Submit handler for layout_settings_form() that saves in-progress changes.
  */
 function layout_flexible_template_configure_form_cancel($form, &$form_state) {
-  tempstore_clear('layout.flex', $form_state['flexible_template_id']);
+  tempstore_clear('layout.flexible', $form_state['flexible_template_id']);
   $form_state['redirect'] = 'admin/structure/layouts/settings';
 }
 
@@ -454,7 +454,7 @@ function layout_flexible_template_delete_row($flexible_template_id, $original_ro
   layout_set_flexible_tempstore($template, $flexible_template_id);
 
   if (backdrop_is_ajax()) {
-    $commands[] = ajax_command_remove('#flex-row-id-' . $original_row);
+    $commands[] = ajax_command_remove('#flexible-row-id-' . $original_row);
 
     return array(
       '#type' => 'ajax',
@@ -560,7 +560,7 @@ function layout_flexible_row_styles() {
  *   The type of item to save. Must be either "layout" or "menu_item".
  */
 function layout_set_flexible_tempstore($item, $name) {
-  tempstore_set('layout.flex', $name, $item, 604800);
+  tempstore_set('layout.flexible', $name, $item, 604800);
 }
 
 /**
@@ -577,7 +577,7 @@ function layout_set_flexible_tempstore($item, $name) {
 function layout_get_flexible_tempstore($name) {
   $caches = &backdrop_static(__FUNCTION__, array());
   if (!isset($caches[$name])) {
-    if (!$item = tempstore_get('layout.flex', $name)) {
+    if (!$item = tempstore_get('layout.flexible', $name)) {
       $item = layout_flexible_template_load($name);
     }
     $caches[$name] = $item;

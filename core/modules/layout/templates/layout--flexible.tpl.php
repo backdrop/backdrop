@@ -33,8 +33,8 @@
 
   <?php foreach ($regions as $name => $region): ?>
     <?php 
-      $row_class = 'flex-row-' . $name . ' ' . $region['contains'] . ' ' . $region['classes'];
-      $row_id = $flexible_editor ? 'id = "flex-row-id-' . $name . '"' : '';
+      $row_class = 'flexible-row-' . $name . ' ' . $region['contains'] . ' ' . $region['classes'];
+      $row_id = $flexible_editor ? 'id = "flexible-row-id-' . $name . '"' : '';
       $element = !empty($region['element']) ? $region['element'] : 'div';
     ?>
     <<?php print $element; ?> class="l-wrapper <?php print 'l-wrapper-' . $name; ?>" <?php print $row_id; ?>>
@@ -44,7 +44,7 @@
             <?php print $region_buttons[$name]; ?>
           </div>
         <?php endif; ?>
-        <div class="l-flex-row row">
+        <div class="l-flexible-row row">
         <?php 
           $col_info = $column_data[$region['contains']];
           $split = explode(':', $col_info['bootstrap']);

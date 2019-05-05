@@ -22,7 +22,7 @@
  * other blocks around the existing content.
  */
 
-  module_load_include('inc', 'layout', 'layout.flex');
+  module_load_include('inc', 'layout', 'layout.flexible');
 
 /**
  * Layouts constant for user-defined layouts.
@@ -99,7 +99,7 @@ function layout_menu() {
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
-    'file' => 'layout.flex.inc',
+    'file' => 'layout.flexible.inc',
   );
 
   // Put all code in separate file to make dev easier, because layout.admin is huge.
@@ -111,7 +111,7 @@ function layout_menu() {
     'type' => MENU_LOCAL_ACTION,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
-    'file' => 'layout.flex.inc',
+    'file' => 'layout.flexible.inc',
   );
 
   $items['admin/structure/layouts/settings/%/edit'] = array(
@@ -121,7 +121,7 @@ function layout_menu() {
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
-    'file' => 'layout.flex.inc',
+    'file' => 'layout.flexible.inc',
   );
 
   $items['admin/structure/layouts/settings/%/configure'] = array(
@@ -131,7 +131,7 @@ function layout_menu() {
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
-    'file' => 'layout.flex.inc',
+    'file' => 'layout.flexible.inc',
     'theme callback' => 'ajax_base_page_theme',
   );
 
@@ -142,7 +142,7 @@ function layout_menu() {
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
-    'file' => 'layout.flex.inc',
+    'file' => 'layout.flexible.inc',
     'theme callback' => 'ajax_base_page_theme',
   );
 
@@ -154,7 +154,7 @@ function layout_menu() {
     'type' => MENU_CALLBACK,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
-    'file' => 'layout.flex.inc',
+    'file' => 'layout.flexible.inc',
     'theme callback' => 'ajax_base_page_theme',
   );
 
@@ -165,7 +165,7 @@ function layout_menu() {
     'type' => MENU_CALLBACK,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
-    'file' => 'layout.flex.inc',
+    'file' => 'layout.flexible.inc',
     'theme callback' => 'ajax_base_page_theme',
   );
 
