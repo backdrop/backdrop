@@ -37,7 +37,7 @@
       $row_id = $flexible_editor ? 'id = "flexible-row-id-' . $name . '"' : '';
       $element = !empty($region['element']) ? $region['element'] : 'div';
     ?>
-    <<?php print $element; ?> class="l-wrapper <?php print 'l-wrapper-' . $name; ?>" <?php print $row_id; ?>>
+    <<?php print $element; ?> class="l-wrapper <?php print 'l-' . $name; ?>" <?php print $row_id; ?>>
       <div class="container container-fluid <?php print $row_class; ?>">
         <?php if ($region_buttons): ?>
           <div class="layout-editor-region-title clearfix">
