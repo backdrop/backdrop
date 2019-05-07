@@ -344,7 +344,7 @@ fieldset .fieldset-legend {
   }
 
   .menu-dropdown a span.sub-arrow {
-    border-top-color: #ffffff;
+    border-top-color: #fffffe;
   }
 
   .menu-dropdown ul {
@@ -356,7 +356,7 @@ fieldset .fieldset-legend {
   .menu-dropdown ul a:focus,
   .menu-dropdown ul a:active,
   .menu-dropdown ul a.highlighted {
-    color: #ffffff;
+    color: #fffffe;
   }
 
   .menu-dropdown ul a:hover,
@@ -367,17 +367,17 @@ fieldset .fieldset-legend {
   }
 
   .menu-dropdown ul a.disabled {
-    background: #ffffff;
+    background: #fffffe;
     color: #cccccc;
   }
 
   .menu-dropdown ul a span.sub-arrow {
-    border-left-color: #ffffff;
+    border-left-color: #fffffe;
   }
 
   .menu-dropdown span.scroll-up,
   .menu-dropdown span.scroll-down {
-    background: #ffffff;
+    background: #fffffe;
   }
 
   .menu-dropdown span.scroll-up:hover,

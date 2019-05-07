@@ -70,9 +70,9 @@ $info = array(
         'primarytabstext' => '#d0d0d0',
         'buttons' => '#014958',
 
-        'footer' => '#d0d0d2',
+        'footer' => '#ffffff',
         'footertext' => '#000100',
-        'footerborder' => '#24272c',
+        'footerborder' => '#c5c5c5',
       ),
     ),
     'plum' => array(
@@ -97,7 +97,7 @@ $info = array(
 
         'footer' => '#e7e7e7',
         'footertext' => '#000100',
-        'footerborder' => '#2c2c28',
+        'footerborder' => '#89297a',
       ),
     ),
     'goldfish' => array(
@@ -120,7 +120,7 @@ $info = array(
         'primarytabstext' => '#e0e4cc',
         'buttons' => '#4c5038',
 
-        'footer' => '#798054',
+        'footer' => '#cfd7b2',
         'footertext' => '#000100',
         'footerborder' => '#4c5036',
       ),
@@ -147,7 +147,7 @@ $info = array(
 
         'footer' => '#7e8f7c',
         'footertext' => '#000100',
-        'footerborder' => '#dec0b4',
+        'footerborder' => '#6b7d68',
       ),
     ),
   ),
