@@ -521,13 +521,19 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
         'header' => array(
           'name' => t('Header'),
           'contains' => 'column_12',
-          'element' => '',
+          'element' => 'header',
           'classes' => '',
         ),
         'top' => array(
           'name' => t('Top'),
           'contains' => 'column_12',
           'element' => '',
+          'classes' => '',
+        ),
+        'footer' => array(
+          'name' => t('Footer'),
+          'contains' => 'column_12',
+          'element' => 'footer',
           'classes' => '',
         ),
       ),
