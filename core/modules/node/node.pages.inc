@@ -330,9 +330,9 @@ function node_form($form, &$form_state, Node $node) {
     $form['options']['status'][NODE_SCHEDULED]['#access'] = FALSE;
   }
 
-  if ($node_type->settings['scheduling_enabled'] && user_access('administer nodes')) {
-    // Default the scheduled time to the current time + 1 day.
-    $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME + 86400;
+  // Default the scheduled time to the current time + 1 day.
+  $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME + 86400;
+  if ($node_type->settings['scheduling_enabled']) {
     $form['options']['scheduled'] = array(
       '#type' => module_exists('date') ? 'date_popup' : 'textfield',
       '#title' => t('Publish on'),
@@ -349,7 +349,8 @@ function node_form($form, &$form_state, Node $node) {
   }
   // If the user doesn't have access to scheduling, default to published.
   elseif ($form['options']['status']['#default_value'] == NODE_SCHEDULED) {
-    $form['options']['status']['#default_value'] = NODE_PUBLISHED;
+    $form['options']['scheduled']['#default_value'] = format_date($scheduled_date, 'custom', 'Y-m-d g:i a');
+    $form['options']['status']['#default_value'] = $node->nid ? $status : NODE_PUBLISHED;
   }
 
 
@@ -775,6 +776,9 @@ function node_form_submit_build_node($form, &$form_state) {
 
   // Convert the scheduled date into a timestamp.
   $form_state['values']['status'] = (int) $form_state['values']['status'];
+  if (is_array($form_state['values']['scheduled'])) {
+    $form_state['values']['scheduled'] = $form_state['values']['scheduled']['date'] . ' ' . $form_state['values']['scheduled']['time'];
+  }
   if ($form_state['values']['status'] === NODE_SCHEDULED) {
     $schedule_date = new BackdropDateTime($form_state['values']['scheduled']);
     $form_state['values']['scheduled'] = $schedule_date->format('U');
