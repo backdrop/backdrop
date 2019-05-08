@@ -444,11 +444,11 @@ function update_uninstall_merged_module($module) {
       // this entry will be recreated, but it will have status 0 (disabled), and
       // schema -1 (uninstalled). So it is safe to remove from the file system.
       db_query("DELETE FROM {system} WHERE name = :module AND type = 'module'", array(':module' => $module));
-      backdrop_set_message(t('The contributed module %module has been located at <code>@path</code>. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%module_name' => $module_name, '@path' => BACKDROP_ROOT . '/' . $module_path)), 'warning');
+      backdrop_set_message(t('The contributed module %module has been located at <code>@path</code>. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%module' => $module_name, '@path' => BACKDROP_ROOT . '/' . $module_path)), 'warning');
       // Throw a warning if the merged contrib module has not been added to the
       // list of modules returned by backdrop_merged_modules().
       if (!in_array($module, backdrop_merged_modules())) {
-        backdrop_set_message(t('The %module module is not included in <code>backdrop_merged_modules()</code>.', array('%module_name' => $module_name)), 'warning');
+        backdrop_set_message(t('The %module module is not included in <code>backdrop_merged_modules()</code>.', array('%module' => $module_name)), 'warning');
       }
       return TRUE;
     }
