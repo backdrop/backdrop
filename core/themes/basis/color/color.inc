@@ -120,9 +120,9 @@ $info = array(
         'primarytabstext' => '#e0e4cc',
         'buttons' => '#4c5038',
 
-        'footer' => '#cfd7b2',
+        'footer' => '#f0f1e3',
         'footertext' => '#000100',
-        'footerborder' => '#4c5036',
+        'footerborder' => '#cfd7b2',
       ),
     ),
     'mocha' => array(
