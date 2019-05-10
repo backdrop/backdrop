@@ -432,7 +432,7 @@ function update_variable_del($name) {
  */
 function update_uninstall_merged_module($module) {
   // If the contib module has been added to backdrop_merged_modules() (and it
-  // should), then it has been explicitly removed from the list of active
+  // should), then it has been explicitly removed from the list of enabled
   // modules returned by module_list(). So, we cannot use module_exists() here,
   // because that function calls module_list(). It is safer to use a direct
   // database query instead.
