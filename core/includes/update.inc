@@ -431,6 +431,11 @@ function update_variable_del($name) {
  *   TRUE if the module has been found and uninstalled; otherwise FALSE.
  */
 function update_uninstall_merged_module($module) {
+  // If the contib module has been added to backdrop_merged_modules() (and it
+  // should), then it has been explicitly removed from the list of active
+  // modules returned by module_list(). So, we cannot use module_exists() here,
+  // because that function calls module_list(). It is safer to use a direct
+  // database query instead.
   $module_exists = db_query("SELECT name FROM {system} WHERE name = :module AND type = 'module'", array(':module' => $module))->fetchField();
   if ($module_exists) {
     $module_info = system_get_info('module', $module);
@@ -439,16 +444,21 @@ function update_uninstall_merged_module($module) {
     $module_is_core = preg_match('#^core/#', $module_path) === 1 ? TRUE : FALSE;
     // Proceed only if not a core module.
     if (!$module_is_core) {
-      // Remove the entry for the module from the system table.
+      // Remove the entry of the contrib module from the system table.
+      // We are not using module_disable() here, because that would call
+      // hook_disable(), as well as allowing other modules to perform uninstall
+      // actions. Since we're replacing the contrib module with an equivalent,
+      // we don't want any modules to react to the change.
+      db_query("DELETE FROM {system} WHERE name = :module AND type = 'module'", array(':module' => $module));
       // While the contrib module folder and files remain in the filesystem,
       // this entry will be recreated, but it will have status 0 (disabled), and
-      // schema -1 (uninstalled). So it is safe to remove from the file system.
-      db_query("DELETE FROM {system} WHERE name = :module AND type = 'module'", array(':module' => $module));
+      // schema -1 (uninstalled). So it will be safe to remove the replaced
+      // contrib module from the file system.
       backdrop_set_message(t('The contributed module %module has been located at <code>@path</code>. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%module' => $module_name, '@path' => BACKDROP_ROOT . '/' . $module_path)), 'warning');
       // Throw a warning if the merged contrib module has not been added to the
       // list of modules returned by backdrop_merged_modules().
       if (!in_array($module, backdrop_merged_modules())) {
-        backdrop_set_message(t('The %module module is not included in <code>backdrop_merged_modules()</code>.', array('%module' => $module_name)), 'warning');
+        backdrop_set_message(t('The %module module should be included in <code>backdrop_merged_modules()</code>, but it is not.', array('%module' => $module_name)), 'warning');
       }
       return TRUE;
     }
