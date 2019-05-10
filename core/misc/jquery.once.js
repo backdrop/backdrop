@@ -1,5 +1,5 @@
 /*!
- * jQuery Once v2.2.1 - http://github.com/robloach/jquery-once
+ * jQuery Once v2.2.2 - http://github.com/robloach/jquery-once
  * @license MIT, GPL-2.0
  *   http://opensource.org/licenses/MIT
  *   http://opensource.org/licenses/GPL-2.0
@@ -48,6 +48,7 @@
     if (typeof id !== 'string') {
       throw new TypeError('The jQuery Once id parameter must be a string');
     }
+
     return id;
   };
 
