@@ -5,7 +5,7 @@
  * Class file to control the main Layout editor.
  */
 
-class LayoutRendererFlexible extends LayoutRendererStandard {
+class LayoutRendererFlexible extends LayoutRendererEditor {
 
   /**
    * Include rendered HTML prior to the layout.
@@ -34,33 +34,10 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
   /**
    * {@inheritdoc}
    */
-  function addMeta() {
-    parent::addMeta();
-    backdrop_add_library('system', 'ui.sortable');
-    backdrop_add_js(backdrop_get_path('module', 'layout') . '/js/layout.admin.js');
-    backdrop_add_css(backdrop_get_path('module', 'layout') . '/css/layout.admin.css');
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  function render() {
-    $this->addMeta();
-
-    $output = '<div id="layout-edit-main">';
-    $output .= $this->renderLayout();
-    $output .= '</div>';
-
-    return $output;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   function renderRegion($region_id, $blocks) {
     $output = '';
     if ($region_id == 'title') {
-      return $this->renderTitleRegion($region_id);
+      return '';
     }
     else {
       $content = implode('', $blocks);
@@ -78,37 +55,9 @@ class LayoutRendererFlexible extends LayoutRendererStandard {
   }
 
   /**
-   * Render the Page Title region in the Layout Editor.
-   */
-  function renderTitleRegion($region_id) {
-    $description = layout_get_title_description($this->layout);
-
-    $output  = '<div class="layout-editor-block" id="layout-editor-title" data-region-name="' . $region_id . '">';
-    $output .= '  <div class="layout-editor-block-title clearfix">';
-    $output .= '    <span class="text">' . check_plain($this->layout_info['regions'][$region_id]) . '</span>';
-    $output .= '    <span class="description">' . $description . '</span>';
-    $output .= '  </div>';
-    $output .= '</div>';
-
-    return $output;
-  }
-
-  /**
    * {@inheritdoc}
    */
   function renderBlock($block) {}
-
-
-  /**
-   * {@inheritdoc}
-   */
-  function renderBlocks() {
-    $this->rendered['blocks'] = array();
-    foreach ($this->prepared['blocks'] as $uuid => $block) {
-      $this->rendered['blocks'][$uuid] = $this->renderBlock($block);
-    }
-    return $this->rendered['blocks'];
-  }
 
   /**
    * Short-cut to generate a URL path to a particular action.
