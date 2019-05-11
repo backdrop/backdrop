@@ -303,6 +303,17 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
     '#default_value' => isset($row_data['element']) ? $row_data['element'] : '',
   );
 
+  $form['container'] = array(
+    '#title' => t('Container style'),
+    '#type' => 'select',
+    '#options' => array(
+      'container' => t('Container'),
+      'container_fluid' => t('Container fluid'),
+      'no_container' => t('No container'),
+    ),
+    '#default_value' => isset($row_data['container']) ? $row_data['container'] : 'container',
+  );
+
   foreach (array('name', 'machine_name', 'row_classes', 'element') as $form_element) {
     if ($op != 'configure') {
       $form[$form_element]['#default_value'] = '';
@@ -358,6 +369,7 @@ function layout_flexible_template_edit_row_submit($form, &$form_state) {
     'contains' => $form_state['values']['row_style'],
     'element' => $form_state['values']['element'],
     'classes' => $form_state['values']['row_classes'],
+    'container' => $form_state['values']['container'],
   );
 
   if ($op != 'configure') {
@@ -523,18 +535,21 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
           'contains' => 'column_12',
           'element' => 'header',
           'classes' => '',
+          'container' => 'container',
         ),
         'top' => array(
           'name' => t('Top'),
           'contains' => 'column_12',
           'element' => '',
           'classes' => '',
+          'container' => 'container',
         ),
         'footer' => array(
           'name' => t('Footer'),
           'contains' => 'column_12',
           'element' => 'footer',
           'classes' => '',
+          'container' => 'container',
         ),
       ),
     );

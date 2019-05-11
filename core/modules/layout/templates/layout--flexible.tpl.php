@@ -33,12 +33,13 @@
 
   <?php foreach ($regions as $name => $region): ?>
     <?php 
-      $row_class = 'flexible-row-' . $name . ' ' . $region['contains'] . ' ' . $region['classes'];
+      $container = ($region['container'] == 'container') ? 'container container-fluid' : (($region['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
+      $row_class = $container . ' flexible-row-' . $name . ' ' . $region['contains'] . ' ' . $region['classes'];
       $row_id = $flexible_editor ? 'id = "flexible-row-id-' . $name . '"' : '';
       $element = !empty($region['element']) ? $region['element'] : 'div';
     ?>
     <<?php print $element; ?> class="l-wrapper <?php print 'l-' . $name; ?>" <?php print $row_id; ?>>
-      <div class="container container-fluid <?php print $row_class; ?>">
+      <div class="<?php print $row_class; ?>">
         <?php if ($region_buttons): ?>
           <div class="layout-editor-region-title clearfix">
             <?php print $region_buttons[$name]; ?>
