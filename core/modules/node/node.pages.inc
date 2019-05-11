@@ -775,10 +775,10 @@ function node_form_submit_build_node($form, &$form_state) {
 
   // Convert the scheduled date into a timestamp.
   $form_state['values']['status'] = (int) $form_state['values']['status'];
-  if (is_array($form_state['values']['scheduled'])) {
-    $form_state['values']['scheduled'] = $form_state['values']['scheduled']['date'] . ' ' . $form_state['values']['scheduled']['time'];
-  }
   if ($form_state['values']['status'] === NODE_SCHEDULED) {
+    if (is_array($form_state['values']['scheduled'])) {
+      $form_state['values']['scheduled'] = $form_state['values']['scheduled']['date'] . ' ' . $form_state['values']['scheduled']['time'];
+    }
     $schedule_date = new BackdropDateTime($form_state['values']['scheduled']);
     $form_state['values']['scheduled'] = $schedule_date->format('U');
     $form_state['values']['status'] = NODE_NOT_PUBLISHED;
