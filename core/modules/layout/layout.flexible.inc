@@ -349,7 +349,7 @@ function layout_flexible_row_name_exists($machine_name) {
  */
 function layout_flexible_template_edit_row_validate($form, &$form_state) {
   $machine_name = $form_state['values']['machine_name'];
-  if (isset($form_state['template_data']['regions'][$machine_name])) {
+  if ($machine_name != $form_state['original_row'] && isset($form_state['template_data']['regions'][$machine_name])) {
     form_error($form['machine_name'], t('This row name already exists.'));
   }
 }
