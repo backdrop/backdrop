@@ -63,7 +63,7 @@ function dblog_overview() {
       $user_info = theme('username', array('account' => $dblog));
     }
 
-    $dblog_date_format = settings_get('dblog_date_format', 'Y-M-d h:i');
+    $dblog_date_format = settings_get('dblog_date_format', 'Y-M-d H:i');
     $rows[] = array('data' =>
       array(
         // Cells
