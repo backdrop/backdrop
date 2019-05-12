@@ -31,42 +31,22 @@
     </div>
   <?php endif; ?>
 
-  <?php foreach ($regions as $name => $region): ?>
-    <?php 
-      $container = ($region['container'] == 'container') ? 'container container-fluid' : (($region['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
-      $row_class = $container . ' flexible-row-' . $name . ' ' . $region['contains'] . ' ' . $region['classes'];
-      $row_id = $flexible_editor ? 'id = "flexible-row-id-' . $name . '"' : '';
-      $element = !empty($region['element']) ? $region['element'] : 'div';
-    ?>
-    <<?php print $element; ?> class="l-wrapper <?php print 'l-' . $name; ?>" <?php print $row_id; ?>>
-      <div class="<?php print $row_class; ?>">
+  <?php foreach ($region_data as $name => $region): ?>
+    <<?php print $region['element']; ?> class="l-wrapper <?php print 'l-' . $name; ?>" <?php print $row_id; ?>>
+      <div class="<?php print $region['row_class']; ?>">
         <?php if ($region_buttons): ?>
           <div class="layout-editor-region-title clearfix">
             <?php print $region_buttons[$name]; ?>
           </div>
         <?php endif; ?>
         <div class="l-flexible-row row">
-        <?php if ($region['contains'] == 'column_12'): ?>
-            <div class="l-col col-md-12">
-              <?php $content_key = $flexible_editor ? $name : $name . '_0'; ?>
-              <?php print $content[$content_key]; ?>
-            </div>
-        <?php else: ?>
-          <?php 
-            $col_info = $column_data[$region['contains']];
-            $split = explode(':', $col_info['bootstrap']);
-            $i = 0;
-          ?>
-          <?php foreach ($split as $col): ?>
-            <div class="l-col col-md-<?php print $col; ?>">
-              <?php $content_key = $flexible_editor ? $name : $name . '_' . $i; ?>
-              <?php print $content[$content_key]; ?>
-              <?php $i++; ?>
-            </div>
-          <?php endforeach; ?>
-        <?php endif; ?>
+        <?php foreach ($region['columns'] as $column): ?>
+          <div class="l-col col-md-<?php print $column['column_md']; ?>">
+            <?php print $content[$column['content_key']]; ?>
+          </div>
+        <?php endforeach; ?>
         </div>
       </div>
-    </<?php print $element; ?>>
+    </<?php print $region['element']; ?>>
   <?php endforeach; ?>
 </div>
