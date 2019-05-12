@@ -63,13 +63,13 @@ function dblog_overview() {
       $user_info = theme('username', array('account' => $dblog));
     }
 
-    $dblog_date_format = settings_get('dblog_date_format', 'Y-M-d H:i:s');
+    $log_date_format = config_get('system.core', 'log_date_format');
     $rows[] = array('data' =>
       array(
         // Cells
         array('class' => 'icon'),
         t($dblog->type),
-        format_date($dblog->timestamp, 'custom', $dblog_date_format),
+        format_date($dblog->timestamp, 'custom', $log_date_format),
         dblog_format_message($dblog, TRUE),
         $user_info,
         filter_xss($dblog->link),
