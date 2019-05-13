@@ -955,8 +955,8 @@ function hook_views_ajax_data_alter(&$commands, $view) {
   // Replace Views' method for scrolling to the top of the element with your
   // custom scrolling method.
   foreach ($commands as &$command) {
-    if ($command['method'] == 'viewsScrollTop') {
-      $command['method'] .= 'myScrollTop';
+    if ($command['command'] == 'viewsScrollTop') {
+      $command['command'] .= 'myScrollTop';
     }
   }
 }
