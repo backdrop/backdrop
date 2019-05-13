@@ -144,15 +144,6 @@ class Layout {
   var $positions = array();
 
   /**
-   * Orphaned blocks when changing templates. If the new template doesn't
-   * contain a region with the same name the blocks in the old region are
-   * orphaned.
-   *
-   * This is an array of block keys from the $content array.
-   */
-  var $orphaned_blocks = array();
-
-  /**
    * If editing a layout, general storage of in-progress changes.
    *
    * @var array
@@ -700,16 +691,16 @@ class Layout {
             $new_positions[$new_region_name][] = $uuid;
           }
           else {
-            $this->orphaned_blocks[] = $uuid;
+            $orphaned_blocks[] = $uuid;
           }
         }
       }
     }
-    if (!empty($this->orphaned_blocks)) {
+    if (!empty($orphaned_blocks)) {
       end($new_positions);
       $last_region_name = key($new_positions);
       // Assign orphan blocks to the last region.
-      foreach ($this->orphaned_blocks as $uuid) {
+      foreach ($orphaned_blocks as $uuid) {
         $new_positions[$last_region_name][] = $uuid;
         backdrop_set_message(t('The "@block" block has been reassigned to "@new_region" region because the old region does not exist in the new template. You may want to move it to a more appropriate region.', array(
             '@block' => $this->content[$uuid]->getAdminTitle(),
