@@ -1389,10 +1389,9 @@ class views_plugin_display extends views_plugin {
     }
     $form['#title'] = check_plain($this->display->display_title) . ': ';
 
-    // Set the 'section' to hilite on the form.
-    // If it's the item we're looking at is pulling from the default display,
-    // reflect that. Don't use is_defaulted since we want it to show up even
-    // on the default display.
+    // Set the 'section' to highlight on the form. If it's the item we're
+    // looking at is pulling from the default display, reflect that. Don't use
+    // is_defaulted() since we want it to show up even on the default display.
     if (!empty($this->options['defaults'][$form_state['section']])) {
       $form['#section'] = 'default-' . $form_state['section'];
     }
