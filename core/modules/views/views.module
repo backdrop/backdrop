@@ -860,7 +860,20 @@ function views_access() {
  * is used.
  */
 function views_check_perm($perm, $account = NULL) {
-  return user_access($perm, $account) || user_access('access all views', $account);
+  // Backward compatibility to ensure also a single permission string is
+  // properly processed.
+  $perms = is_array($perms) ? $perms : array($perms);
+  if (user_access('access all views', $account)) {
+    return TRUE;
+  }
+  // Perms are handled as OR; as soon one permission allows access, TRUE is
+  // returned.
+  foreach ($perms as $perm) {
+    if (user_access($perm, $account)) {
+      return TRUE;
+    }
+  }
+  return FALSE;
 }
 
 /**
