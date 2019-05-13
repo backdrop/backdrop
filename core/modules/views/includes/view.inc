@@ -1992,6 +1992,10 @@ class view {
    * Determine whether a view supports admin string translation.
    */
   function is_translatable() {
+    // Use translation no matter what type of view.
+    if (config_get('views.settings', 'localize_all')) {
+      return TRUE;
+    }
     // If the view is normal or overridden, use admin string translation.
     // A newly created view won't have a type. Accept this.
     return (!isset($this->type) || in_array($this->type, array(t('Normal'), t('Overridden')))) ? TRUE : FALSE;
