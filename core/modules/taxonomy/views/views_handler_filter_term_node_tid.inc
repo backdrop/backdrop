@@ -175,8 +175,8 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
             $keys = array_keys($options);
             $default_value = array_shift($keys);
           }
-          // Due to #1464174 there is a chance that array('') was saved in the admin ui.
-          // Let's choose a safe default value.
+          // Due to #1464174 there is a chance that array('') was saved in the
+          // admin ui. Let's choose a safe default value.
           elseif ($default_value == array('')) {
             $default_value = 'All';
           }
@@ -202,7 +202,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
 
 
     if (empty($form_state['exposed'])) {
-      // Retain the helper option
+      // Retain the helper option.
       $this->helper->options_form($form, $form_state);
     }
   }
@@ -226,10 +226,23 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       return TRUE;
     }
 
-    // If view is an attachment and is inheriting exposed filters, then assume
-    // exposed input has already been validated
+    // We need to know the operator, which is normally set in
+    // views_handler_filter::accept_exposed_input(), before we actually call
+    // the parent version.
+    if (!empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator_id']) && isset($input[$this->options['expose']['operator_id']])) {
+      $this->operator = $input[$this->options['expose']['operator_id']];
+    }
+
+    // If the view is an attachment and is inheriting exposed filters, then
+    // assume exposed input has already been validated.
     if (!empty($this->view->is_attachment) && $this->view->display_handler->uses_exposed()) {
       $this->validated_exposed_input = (array) $this->view->exposed_raw_input[$this->options['expose']['identifier']];
+    }
+
+    // If we're checking for EMPTY or NOT, we don't need any input, and we can
+    // say that our input conditions are met by just having the right operator.
+    if ($this->operator == 'empty' || $this->operator == 'not empty') {
+      return TRUE;
     }
 
     // If it's non-required and there's no value don't bother filtering.
@@ -276,9 +289,9 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
   }
 
   /**
-   * Validate the user string. Since this can come from either the form
-   * or the exposed filter, this is abstracted out a bit so it can
-   * handle the multiple input sources.
+   * Validate the user string. In order to handle multiple input sources, this
+   * is abstracted out a bit; since this can come from either the form, or the
+   * exposed filter.
    *
    * @param $form
    *   The form which is used, either the views ui or the exposed filters.
@@ -327,7 +340,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
   }
 
   function value_submit($form, &$form_state) {
-    // prevent array_filter from messing up our arrays in parent submit.
+    // Prevent array_filter from messing up our arrays in parent submit.
   }
 
   function expose_form(&$form, &$form_state) {
@@ -343,7 +356,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
   }
 
   function admin_summary() {
-    // set up $this->value_options for the parent summary
+    // Set up $this->value_options for the parent summary.
     $this->value_options = array();
 
     if ($this->value) {
