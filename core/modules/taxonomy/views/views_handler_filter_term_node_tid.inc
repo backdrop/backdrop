@@ -193,6 +193,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
         '#options' => $options,
         '#size' => min(9, count($options)),
         '#default_value' => $default_value,
+        '#description' => t('Leave blank for all. Otherwise, the first selected term will be the default instead of "Any".'),
       );
 
       if (!empty($form_state['exposed']) && isset($identifier) && !isset($form_state['input'][$identifier])) {
