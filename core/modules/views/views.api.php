@@ -535,7 +535,7 @@ function hook_views_data_alter(&$data) {
  *     - uses options: Set to TRUE to denote that the plugin has an additional
  *       options form.
  *     - help: A short help text, wrapped in t() used as description on the
-         plugin settings form.
+ *       plugin settings form.
  *     - help topic: The name of an entry by advanced help for the plugin.
  *     - theme: The name of a theme suggestion to use for the display.
  *     - js: An array with paths to js files that should be included for the
