@@ -859,7 +859,7 @@ function views_access() {
  * permissions. If the $account argument is omitted, the current user
  * is used.
  */
-function views_check_perm($perm, $account = NULL) {
+function views_check_perm($perms, $account = NULL) {
   // Backward compatibility to ensure also a single permission string is
   // properly processed.
   $perms = is_array($perms) ? $perms : array($perms);
