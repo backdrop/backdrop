@@ -14,14 +14,16 @@
 function taxonomy_overview_vocabularies($form) {
   $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
   $form['#tree'] = TRUE;
+  $term_counts = db_query("SELECT count(tid), vocabulary FROM {taxonomy_term_data} GROUP BY vocabulary")->fetchAllKeyed(1, 0);
   foreach ($vocabularies as $vocabulary) {
-    $term_count = db_query("SELECT count(tid) FROM {taxonomy_term_data} WHERE vocabulary = :vocab", array(':vocab' => $vocabulary->machine_name))->fetchField();
-    $form[$vocabulary->machine_name]['#vocabulary'] = $vocabulary;
-    $form[$vocabulary->machine_name]['name'] = array('#markup' => check_plain($vocabulary->name));
-    $form[$vocabulary->machine_name]['items'] = array('#markup' => $term_count);
-    $form[$vocabulary->machine_name]['weight'] = array(
+    $name = $vocabulary->machine_name;
+    $machine_name = $vocabulary->machine_name;
+    $form[$machine_name]['#vocabulary'] = $vocabulary;
+    $form[$machine_name]['name'] = array('#markup' => check_plain($name));
+    $form[$machine_name]['items'] = array('#markup' => $term_counts[$machine_name]);
+    $form[$machine_name]['weight'] = array(
       '#type' => 'weight',
-      '#title' => t('Weight for @title', array('@title' => $vocabulary->name)),
+      '#title' => t('Weight for @title', array('@title' => $name)),
       '#title_display' => 'invisible',
       '#delta' => 10,
       '#default_value' => $vocabulary->weight,
@@ -57,7 +59,7 @@ function taxonomy_overview_vocabularies($form) {
         'href' => 'admin/config/development/configuration/single/export',
         'query' => array(
           'group' => 'Vocabularies',
-          'name' => 'taxonomy.vocabulary.' . $vocabulary->machine_name,
+          'name' => 'taxonomy.vocabulary.' . $machine_name,
         ),
       );
     }
@@ -65,7 +67,7 @@ function taxonomy_overview_vocabularies($form) {
       'title' => t('Delete'),
       'href' => "admin/structure/taxonomy/$vocabulary->machine_name/delete",
     );
-    $form[$vocabulary->machine_name]['operations'] = array(
+    $form[$machine_name]['operations'] = array(
       '#type' => 'operations',
       '#links' => $links,
     );
@@ -78,7 +80,7 @@ function taxonomy_overview_vocabularies($form) {
     $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
   }
   elseif (isset($vocabulary)) {
-    unset($form[$vocabulary->machine_name]['weight']);
+    unset($form[$machine_name]['weight']);
   }
   return $form;
 }
