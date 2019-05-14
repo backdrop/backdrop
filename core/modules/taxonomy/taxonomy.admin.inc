@@ -16,14 +16,14 @@ function taxonomy_overview_vocabularies($form) {
   $form['#tree'] = TRUE;
   $term_counts = db_query("SELECT vocabulary, count(tid) FROM {taxonomy_term_data} GROUP BY vocabulary")->fetchAllKeyed();
   foreach ($vocabularies as $vocabulary) {
-    $name = $vocabulary->machine_name;
-    $machine_name = $vocabulary->machine_name;
-    $form[$machine_name]['#vocabulary'] = $vocabulary;
-    $form[$machine_name]['name'] = array('#markup' => check_plain($name));
-    $form[$machine_name]['items'] = array('#markup' => $term_counts[$machine_name]);
-    $form[$machine_name]['weight'] = array(
+    $vocabulary_name = $vocabulary->name;
+    $vocabulary_machine_name = $vocabulary->machine_name;
+    $form[$vocabulary_machine_name]['#vocabulary'] = $vocabulary;
+    $form[$vocabulary_machine_name]['name'] = array('#markup' => check_plain($vocabulary_name));
+    $form[$vocabulary_machine_name]['items'] = array('#markup' => $term_counts[$vocabulary_machine_name]);
+    $form[$vocabulary_machine_name]['weight'] = array(
       '#type' => 'weight',
-      '#title' => t('Weight for @title', array('@title' => $name)),
+      '#title' => t('Weight for @title', array('@title' => $vocabulary_name)),
       '#title_display' => 'invisible',
       '#delta' => 10,
       '#default_value' => $vocabulary->weight,
@@ -59,7 +59,7 @@ function taxonomy_overview_vocabularies($form) {
         'href' => 'admin/config/development/configuration/single/export',
         'query' => array(
           'group' => 'Vocabularies',
-          'name' => 'taxonomy.vocabulary.' . $machine_name,
+          'name' => 'taxonomy.vocabulary.' . $vocabulary_machine_name,
         ),
       );
     }
@@ -67,7 +67,7 @@ function taxonomy_overview_vocabularies($form) {
       'title' => t('Delete'),
       'href' => "admin/structure/taxonomy/$vocabulary->machine_name/delete",
     );
-    $form[$machine_name]['operations'] = array(
+    $form[$vocabulary_machine_name]['operations'] = array(
       '#type' => 'operations',
       '#links' => $links,
     );
@@ -80,7 +80,7 @@ function taxonomy_overview_vocabularies($form) {
     $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
   }
   elseif (isset($vocabulary)) {
-    unset($form[$machine_name]['weight']);
+    unset($form[$vocabulary_machine_name]['weight']);
   }
   return $form;
 }
