@@ -14,7 +14,7 @@
 function taxonomy_overview_vocabularies($form) {
   $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
   $form['#tree'] = TRUE;
-  $term_counts = db_query("SELECT count(tid), vocabulary FROM {taxonomy_term_data} GROUP BY vocabulary")->fetchAllKeyed(1, 0);
+  $term_counts = db_query("SELECT vocabulary, count(tid) FROM {taxonomy_term_data} GROUP BY vocabulary")->fetchAllKeyed();
   foreach ($vocabularies as $vocabulary) {
     $name = $vocabulary->machine_name;
     $machine_name = $vocabulary->machine_name;
