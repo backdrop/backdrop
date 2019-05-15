@@ -140,9 +140,9 @@ function views_update_1004() {
   $config_promoted = config('views.view.promoted');
   if ($config_promoted->isNew()) {
     // If not, create the new promoted view and mark it disabled.
-    $path = backdrop_get_path('module', 'views') . '/config/';
+    $path = backdrop_get_path('module', 'node') . '/config/';
     $contents = file_get_contents($path . 'views.view.promoted.json');
-    $data = json_decode($contents, true);
+    $data = json_decode($contents, TRUE);
     $config_promoted->setData($data);
     $config_promoted->set('disabled', TRUE);
     $config_promoted->save();

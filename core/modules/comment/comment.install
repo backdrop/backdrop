@@ -61,10 +61,16 @@ function comment_uninstall() {
     }
     node_type_save($node_type);
   }
-  
+
   // Remove comment closer override.
   if (db_field_exists('node', 'comment_close_override')) {
     db_drop_field('node', 'comment_close_override');
+  }
+
+  // Remove default, un-modified view.
+  $config = config('views.view.comments_recent');
+  if ($config->get('storage') != VIEWS_STORAGE_OVERRIDE) {
+    $config->delete();
   }
 }
 
@@ -413,6 +419,18 @@ function comment_update_1004() {
   );
 
   db_add_field('node', 'comment_close_override', $comment_close_override_column);
+}
+
+/**
+ * Move default comment view to comment module.
+ */
+function comment_update_1005() {
+  // If the views config has not been deleted, update it's module.
+  $config = config('views.view.comments_recent');
+  if (!$config->isNew()) {
+    $config->set('module', 'comment');
+    $config->save();
+  }
 }
 
 /**

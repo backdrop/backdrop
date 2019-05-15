@@ -15,6 +15,12 @@ function taxonomy_uninstall() {
     $vocabulary_name = str_replace('taxonomy.vocabulary.', '', $config_name);
     field_attach_delete_bundle('taxonomy_term', $vocabulary_name);
   }
+
+  // Remove default, un-modified view.
+  $config = config('views.view.taxonomy_term');
+  if ($config->get('storage') != VIEWS_STORAGE_OVERRIDE) {
+    $config->delete();
+  }
 }
 
 /**
@@ -334,6 +340,18 @@ function taxonomy_update_1006() {
     );
     db_add_field('taxonomy_term_data', 'langcode', $spec);
     db_query("UPDATE {taxonomy_term_data} SET langcode = 'und'");
+  }
+}
+
+/**
+ * Move default taxonomy term view to taxonomy module.
+ */
+function taxonomy_update_1007() {
+  // If the views config has not been deleted, update it's module.
+  $config = config('views.view.taxonomy_term');
+  if (!$config->isNew()) {
+    $config->set('module', 'taxonomy');
+    $config->save();
   }
 }
 
