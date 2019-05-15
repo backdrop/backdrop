@@ -17,6 +17,7 @@ Backdrop.toggleFieldset = function (fieldset) {
         Backdrop.collapseScrollIntoView(fieldset);
         $fieldset.trigger({ type: 'collapsed', value: false });
         $(window).triggerHandler('resize');
+        Backdrop.optimizedResize.trigger();
         fieldset.animating = false;
       },
       step: function () {
@@ -32,6 +33,7 @@ Backdrop.toggleFieldset = function (fieldset) {
         .find('> legend span.fieldset-legend-prefix').html(Backdrop.t('Show'));
       $fieldset.trigger({ type: 'collapsed', value: true });
       $(window).triggerHandler('resize');
+      Backdrop.optimizedResize.trigger();
       fieldset.animating = false;
     });
   }
