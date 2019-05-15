@@ -1,8 +1,6 @@
 .sm-simple {
   border: 1px solid #bbbbbb;
-  background: white;
-  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-  -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  background: #fff;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 }
 .sm-simple a, .sm-simple a:hover, .sm-simple a:focus, .sm-simple a:active {
@@ -18,12 +16,12 @@
 }
 .sm-simple a.current {
   background: #555555;
-  color: white;
+  color: #fff;
 }
 .sm-simple a.disabled {
   color: #cccccc;
 }
-.sm-simple a span.sub-arrow {
+.sm-simple a .sub-arrow {
   position: absolute;
   top: 50%;
   margin-top: -17px;
@@ -37,8 +35,10 @@
   text-shadow: none;
   background: rgba(0, 0, 0, 0.08);
 }
-.sm-simple a.highlighted span.sub-arrow:before {
-  display: block;
+.sm-simple a .sub-arrow::before {
+  content: '+';
+}
+.sm-simple a.highlighted .sub-arrow::before {
   content: '-';
 }
 .sm-simple li {
@@ -117,7 +117,7 @@
 
   /* ...end */
   .sm-simple {
-    background: white;
+    background: #fff;
   }
   .sm-simple a, .sm-simple a:hover, .sm-simple a:focus, .sm-simple a:active, .sm-simple a.highlighted {
     padding: 11px 20px;
@@ -128,16 +128,16 @@
   }
   .sm-simple a.current {
     background: #555555;
-    color: white;
+    color: #fff;
   }
   .sm-simple a.disabled {
-    background: white;
+    background: #fff;
     color: #cccccc;
   }
   .sm-simple a.has-submenu {
     padding-right: 32px;
   }
-  .sm-simple a span.sub-arrow {
+  .sm-simple a .sub-arrow {
     top: 50%;
     margin-top: -8px;
     right: 20px;
@@ -146,8 +146,8 @@
     font: 14px/16px monospace !important;
     background: transparent;
   }
-  .sm-simple a.highlighted span.sub-arrow:before {
-    display: none;
+  .sm-simple a.highlighted .sub-arrow::before {
+    content: '+';
   }
   .sm-simple > li {
     border-top: 0;
@@ -158,9 +158,7 @@
   }
   .sm-simple ul {
     border: 1px solid #bbbbbb;
-    background: white;
-    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-    -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    background: #fff;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
   }
   .sm-simple ul a {
@@ -169,9 +167,9 @@
   .sm-simple ul a.has-submenu {
     padding-right: 20px;
   }
-  .sm-simple ul a span.sub-arrow {
+  .sm-simple ul a .sub-arrow {
+    left: 8px;
     right: auto;
-    margin-left: -12px;
   }
   .sm-simple ul > li {
     border-left: 0;
@@ -180,16 +178,17 @@
   .sm-simple ul > li:first-child {
     border-top: 0;
   }
-  .sm-simple span.scroll-up,
-  .sm-simple span.scroll-down {
+  .sm-simple .scroll-up,
+  .sm-simple .scroll-down {
     position: absolute;
     display: none;
     visibility: hidden;
     overflow: hidden;
-    background: white;
+    background: #fff;
     height: 20px;
   }
-  .sm-simple span.scroll-up-arrow, .sm-simple span.scroll-down-arrow {
+  .sm-simple .scroll-up-arrow,
+  .sm-simple .scroll-down-arrow {
     position: absolute;
     top: -2px;
     left: 50%;
@@ -201,7 +200,7 @@
     border-style: dashed dashed solid dashed;
     border-color: transparent transparent #555555 transparent;
   }
-  .sm-simple span.scroll-down-arrow {
+  .sm-simple .scroll-down-arrow {
     top: 6px;
     border-style: solid dashed dashed dashed;
     border-color: #555555 transparent transparent transparent;
@@ -210,16 +209,16 @@
     padding-right: 20px;
     padding-left: 32px;
   }
-  .sm-simple.sm-rtl a span.sub-arrow {
-    right: auto;
+  .sm-simple.sm-rtl a .sub-arrow {
     left: 20px;
+    right: auto;
   }
   .sm-simple.sm-rtl.sm-vertical a.has-submenu {
     padding: 11px 20px;
   }
-  .sm-simple.sm-rtl.sm-vertical a span.sub-arrow {
-    right: 20px;
-    margin-right: -12px;
+  .sm-simple.sm-rtl.sm-vertical a .sub-arrow {
+    left: auto;
+    right: 8px;
   }
   .sm-simple.sm-rtl > li:first-child {
     border-left: 1px solid #eeeeee;
@@ -230,13 +229,13 @@
   .sm-simple.sm-rtl ul a.has-submenu {
     padding: 11px 20px;
   }
-  .sm-simple.sm-rtl ul a span.sub-arrow {
-    right: 20px;
-    margin-right: -12px;
+  .sm-simple.sm-rtl ul a .sub-arrow {
+    left: auto;
+    right: 8px;
   }
-  .sm-simple.sm-vertical a span.sub-arrow {
+  .sm-simple.sm-vertical a .sub-arrow {
+    left: 8px;
     right: auto;
-    margin-left: -12px;
   }
   .sm-simple.sm-vertical li {
     border-left: 0;
@@ -246,3 +245,5 @@
     border-top: 0;
   }
 }
+
+/*# sourceMappingURL=sm-simple.css.map */

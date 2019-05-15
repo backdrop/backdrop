@@ -1,5 +1,3 @@
-@import 'compass';
-
 // This file is best viewed with Tab size 4 code indentation
 
 
@@ -90,7 +88,7 @@ $sm-clean__desktop-border-radius:						100px !default;
 $sm-clean__desktop-padding-horizontal:					10px !default;
 
 // Items
-$sm-clean__desktop-item-color:							$sm-clean__gray_darker !default;
+$sm-clean__desktop-item-color:							$sm-clean__gray-darker !default;
 $sm-clean__desktop-item-hover-color:					$sm-clean__red !default;
 $sm-clean__desktop-item-current-color:					$sm-clean__red !default;
 $sm-clean__desktop-item-disabled-color:					darken($sm-clean__gray, 20%) !default;
@@ -125,7 +123,7 @@ $sm-clean__desktop-sub-padding-vertical:				5px !default;
 $sm-clean__desktop-sub-padding-horizontal:				0 !default;
 
 // Items
-$sm-clean__desktop-sub-item-color:						$sm-clean__gray_darker !default;
+$sm-clean__desktop-sub-item-color:						$sm-clean__gray-darker !default;
 $sm-clean__desktop-sub-item-hover-color:				$sm-clean__red !default;
 $sm-clean__desktop-sub-item-hover-bg:					$sm-clean__gray !default;
 $sm-clean__desktop-sub-item-current-color:				$sm-clean__red !default;
@@ -159,7 +157,7 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 // Main menu box
 .sm-clean {
 	background: $sm-clean__collapsible-bg;
-	@include border-radius($sm-clean__collapsible-border-radius);
+	border-radius: $sm-clean__collapsible-border-radius;
 
 	// Main menu items
 	a {
@@ -187,7 +185,7 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 		}
 
 		// Toggle buttons (sub menu indicators)
-		span.sub-arrow {
+		.sub-arrow {
 			position: absolute;
 			top: 50%;
 			margin-top: -(ceil($sm-clean__toggle-size / 2));
@@ -200,18 +198,19 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 			text-align: center;
 			text-shadow: none;
 			background: $sm-clean__collapsible-toggle-bg;
-			@include border-radius($sm-clean__border-radius);
+			border-radius: $sm-clean__border-radius;
 		}
-		// Change + to - on sub menu expand
-		&.highlighted span.sub-arrow:before {
-			display: block;
+		.sub-arrow::before {
+			content: '+';
+		}
+		&.highlighted .sub-arrow::before {
 			content: '-';
 		}
 	}
 
 	// round the corners of the first item
 	> li:first-child > a, > li:first-child > :not(ul) a {
-		@include border-radius($sm-clean__collapsible-border-radius $sm-clean__collapsible-border-radius 0 0);
+		border-radius: $sm-clean__collapsible-border-radius $sm-clean__collapsible-border-radius 0 0;
 	}
 	// round the corners of the last item
 	@include sm-clean__round-corners-last-item($sm-clean__collapsible-border-radius);
@@ -271,7 +270,7 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 	.sm-clean {
 		padding: 0 $sm-clean__desktop-padding-horizontal;
 		background: $sm-clean__desktop-bg;
-		@include border-radius($sm-clean__desktop-border-radius);
+		border-radius: $sm-clean__desktop-border-radius;
 
 		// Main menu items
 		a {
@@ -282,7 +281,7 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 			&.highlighted {
 				padding: $sm-clean__desktop-item-padding-vertical $sm-clean__desktop-item-padding-horizontal;
 				color: $sm-clean__desktop-item-color;
-				@include border-radius(0 !important);
+				border-radius: 0 !important;
 			}
 
 			&:hover,
@@ -306,7 +305,7 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 			}
 
 			// Sub menu indicators
-			span.sub-arrow {
+			.sub-arrow {
 				top: 50%;
 				margin-top: -(ceil($sm-clean__desktop-arrow-size / 2));
 				right: $sm-clean__desktop-item-padding-horizontal;
@@ -316,10 +315,10 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 				border-style: solid dashed dashed dashed;
 				border-color: $sm-clean__desktop-arrow-color transparent transparent transparent;
 				background: transparent;
-				@include border-radius(0);
+				border-radius: 0;
 			}
 			// reset mobile first style
-			&.highlighted span.sub-arrow:before {
+			.sub-arrow::before {
 				display: none;
 			}
 		}
@@ -330,8 +329,8 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 		}
 
 		// First sub level carets
-		> li > ul:before,
- 		> li > ul:after {
+		> li > ul::before,
+ 		> li > ul::after {
 			content: '';
 			position: absolute;
 			top: -($sm-clean__desktop-sub-caret-size * 2 + $sm-clean__border-width * 2);
@@ -341,9 +340,9 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 			overflow: hidden;
 			border-width: ($sm-clean__desktop-sub-caret-size + $sm-clean__border-width);
 			border-style: dashed dashed solid dashed;
-			border-color: transparent transparent $sm-clean__gray-dark transparent;
+			border-color: transparent transparent $sm-clean__desktop-sub-border-color transparent;
 		}
-		> li > ul:after {
+		> li > ul::after {
 			top: -($sm-clean__desktop-sub-caret-size * 2);
 			left: ($sm-clean__desktop-sub-caret-left + $sm-clean__border-width);
 			border-width: $sm-clean__desktop-sub-caret-size;
@@ -352,11 +351,11 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 
 		// Sub menus box
 		ul {
-			border: $sm-clean__border-width solid $sm-clean__gray-dark;
+			border: $sm-clean__border-width solid $sm-clean__desktop-sub-border-color;
 			padding: $sm-clean__desktop-sub-padding-vertical $sm-clean__desktop-sub-padding-horizontal;
 			background: $sm-clean__desktop-sub-bg;
-			@include border-radius($sm-clean__desktop-sub-border-radius !important);
-			@include box-shadow($sm-clean__desktop-sub-box-shadow);
+			border-radius: $sm-clean__desktop-sub-border-radius !important;
+			box-shadow: $sm-clean__desktop-sub-box-shadow;
 
 			// Sub menus items
 			a {
@@ -393,7 +392,7 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 				}
 
 				// Sub menu indicators
-				span.sub-arrow {
+				.sub-arrow {
 					right: 8px;
 					top: 50%;
 					margin-top: -$sm-clean__desktop-sub-arrow-size;
@@ -405,8 +404,8 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 		}
 
 		// Scrolling arrows containers for tall sub menus - test sub menu: "Sub test" -> "more..." in the default download package
-		span.scroll-up,
- 		span.scroll-down {
+		.scroll-up,
+ 		.scroll-down {
 			position: absolute;
 			display: none;
 			visibility: hidden;
@@ -419,13 +418,14 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 				background: $sm-clean__desktop-sub-item-hover-bg;
 			}
 		}
-		span.scroll-up:hover span.scroll-up-arrow {
+		.scroll-up:hover .scroll-up-arrow {
 			border-color: transparent transparent $sm-clean__desktop-sub-item-hover-color transparent;
 		}
-		span.scroll-down:hover span.scroll-down-arrow {
+		.scroll-down:hover .scroll-down-arrow {
 			border-color: $sm-clean__desktop-sub-item-hover-color transparent transparent transparent;
 		}
-		span.scroll-up-arrow {
+		.scroll-up-arrow,
+		.scroll-down-arrow {
 			position: absolute;
 			top: 0;
 			left: 50%;
@@ -438,8 +438,7 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 			border-style: dashed dashed solid dashed;
 			border-color: transparent transparent $sm-clean__desktop-sub-item-color transparent;
 		}
-		span.scroll-down-arrow {
-			@extend span.scroll-up-arrow;
+		.scroll-down-arrow {
 			top: 8px;
 			border-style: solid dashed dashed dashed;
 			border-color: $sm-clean__desktop-sub-item-color transparent transparent transparent;
@@ -461,7 +460,7 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 				}
 
 				// Sub menu indicators
-				span.sub-arrow {
+				.sub-arrow {
 					right: auto;
 					left: $sm-clean__desktop-item-padding-horizontal;
 				}
@@ -477,7 +476,7 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 					}
 
 					// Sub menu indicators
-					span.sub-arrow {
+					.sub-arrow {
 						right: auto;
 						left: 8px;
 						border-style: dashed solid dashed dashed;
@@ -487,11 +486,11 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 			}
 
 			// First sub level carets
-			> li > ul:before {
+			> li > ul::before {
 				left: auto;
 				right: $sm-clean__desktop-sub-caret-left;
 			}
-			> li > ul:after {
+			> li > ul::after {
 				left: auto;
 				right: ($sm-clean__desktop-sub-caret-left + $sm-clean__border-width);
 			}
@@ -506,7 +505,7 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 					}
 
 					// Sub menu indicators
-					span.sub-arrow {
+					.sub-arrow {
 						right: auto;
 						left: 8px;
 						border-style: dashed solid dashed dashed;
@@ -522,7 +521,7 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 		// Main menu box
 		&.sm-vertical {
 			padding: $sm-clean__desktop-vertical-padding-vertical 0;
-			@include border-radius($sm-clean__desktop-vertical-border-radius);
+			border-radius: $sm-clean__desktop-vertical-border-radius;
 
 			// Main menu items
 			a {
@@ -540,7 +539,7 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 				}
 
 				// Sub menu indicators
-				span.sub-arrow {
+				.sub-arrow {
 					right: 8px;
 					top: 50%;
 					margin-top: -$sm-clean__desktop-sub-arrow-size;
@@ -551,8 +550,8 @@ $sm-clean__toggle-spacing: floor($sm-clean__item-height * 0.1);
 			}
 
 			// No sub level carets
-			> li > ul:before,
-	 		> li > ul:after {
+			> li > ul::before,
+	 		> li > ul::after {
 				display: none;
 			}
 

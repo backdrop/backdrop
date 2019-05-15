@@ -1,5 +1,3 @@
-@import 'compass';
-
 // This file is best viewed with Tab size 4 code indentation
 
 
@@ -123,7 +121,7 @@ $sm-mint__desktop-sub-padding-horizontal:				0 !default;
 // Items
 $sm-mint__desktop-sub-item-color:						$sm-mint__black !default;
 $sm-mint__desktop-sub-item-hover-color:					$sm-mint__white !default;
-$sm-mint__desktop-sub-item-hover-bg:					$sm-mint__green_dark !default;
+$sm-mint__desktop-sub-item-hover-bg:					$sm-mint__green-dark !default;
 $sm-mint__desktop-sub-item-disabled-color:				lighten($sm-mint__black, 50%) !default;
 $sm-mint__desktop-sub-item-padding-vertical:			10px !default;
 $sm-mint__desktop-sub-item-padding-horizontal:			20px !default;
@@ -176,7 +174,7 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 		}
 
 		// Toggle buttons (sub menu indicators)
-		span.sub-arrow {
+		.sub-arrow {
 			position: absolute;
 			top: 50%;
 			margin-top: -(ceil($sm-mint__toggle-size / 2));
@@ -189,11 +187,12 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 			text-align: center;
 			text-shadow: none;
 			background: $sm-mint__collapsible-toggle-bg;
-			@include border-radius($sm-mint__border-radius-base);
+			border-radius: $sm-mint__border-radius-base;
 		}
-		// Change + to - on sub menu expand
-		&.highlighted span.sub-arrow:before {
-			display: block;
+		.sub-arrow::before {
+			content: '+';
+		}
+		&.highlighted .sub-arrow::before {
 			content: '-';
 		}
 	}
@@ -263,7 +262,7 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 			&.highlighted {
 				padding: $sm-mint__desktop-item-padding-vertical $sm-mint__desktop-item-padding-horizontal;
 				color: $sm-mint__desktop-item-color;
-				@include border-radius($sm-mint__border-radius-base $sm-mint__border-radius-base 0 0);
+				border-radius: $sm-mint__border-radius-base $sm-mint__border-radius-base 0 0;
 			}
 
 			&:hover,
@@ -276,13 +275,13 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 			&.highlighted {
 				background: $sm-mint__desktop-item-highlighted-bg;
 				color: $sm-mint__desktop-item-highlighted-color;
-				@include box-shadow($sm-mint__desktop-item-highlighted-box-shadow);
+				box-shadow: $sm-mint__desktop-item-highlighted-box-shadow;
 			}
 
 			&.disabled {
 				background: transparent;
 				color: $sm-mint__desktop-item-disabled-color;
-				@include box-shadow(none);
+				box-shadow: none;
 			}
 
 			// Make room for the sub arrows
@@ -291,7 +290,7 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 			}
 
 			// Sub menu indicators
-			span.sub-arrow {
+			.sub-arrow {
 				top: 50%;
 				margin-top: -(ceil($sm-mint__desktop-arrow-size / 2));
 				right: $sm-mint__desktop-item-padding-horizontal;
@@ -301,21 +300,21 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 				border-style: solid dashed dashed dashed;
 				border-color: $sm-mint__desktop-arrow-color transparent transparent transparent;
 				background: transparent;
-				@include border-radius(0);
+				border-radius: 0;
 			}
-			&:hover span.sub-arrow,
-			&:focus span.sub-arrow,
-			&:active span.sub-arrow {
+			&:hover .sub-arrow,
+			&:focus .sub-arrow,
+			&:active .sub-arrow {
 				border-color: $sm-mint__desktop-arrow-hover-color transparent transparent transparent;
 			}
-			&.highlighted span.sub-arrow {
+			&.highlighted .sub-arrow {
 				border-color: $sm-mint__desktop-arrow-highlighted-color transparent transparent transparent;
 			}
-			&.disabled span.sub-arrow {
+			&.disabled .sub-arrow {
 				border-color: $sm-mint__desktop-arrow-color transparent transparent transparent;
 			}
 			// reset mobile first style
-			&.highlighted span.sub-arrow:before {
+			.sub-arrow::before {
 				display: none;
 			}
 		}
@@ -330,12 +329,12 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 			border: 0;
 			padding: $sm-mint__desktop-sub-padding-vertical $sm-mint__desktop-sub-padding-horizontal;
 			background: $sm-mint__desktop-sub-bg;
-			@include border-radius(0 $sm-mint__border-radius-base $sm-mint__border-radius-base $sm-mint__border-radius-base);
-			@include box-shadow($sm-mint__desktop-sub-box-shadow);
+			border-radius: 0 $sm-mint__border-radius-base $sm-mint__border-radius-base $sm-mint__border-radius-base;
+			box-shadow: $sm-mint__desktop-sub-box-shadow;
 
 			// 2+ sub levels need rounding of all corners
 			ul {
-				@include border-radius($sm-mint__border-radius-base);
+				border-radius: $sm-mint__border-radius-base;
 			}
 
 			// Sub menus items
@@ -348,16 +347,16 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 					border: 0 !important;
 					padding: $sm-mint__desktop-sub-item-padding-vertical $sm-mint__desktop-sub-item-padding-horizontal;
 					color: $sm-mint__desktop-sub-item-color;
-					@include border-radius(0);
+					border-radius: 0;
 				}
 
 				&:hover,
 				&:focus,
 				&:active,
 				&.highlighted {
-					background: $sm-mint__desktop-item-hover-bg;
-					color: $sm-mint__desktop-item-hover-color;
-					@include box-shadow(none);
+					background: $sm-mint__desktop-sub-item-hover-bg;
+					color: $sm-mint__desktop-sub-item-hover-color;
+					box-shadow: none;
 				}
 
 				&.disabled {
@@ -371,28 +370,28 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 				}
 
 				// Sub menu indicators
-				span.sub-arrow {
+				.sub-arrow {
 					right: 10px;
 					margin-top: -($sm-mint__desktop-arrow-size * 0.67);
 					border-width: ($sm-mint__desktop-arrow-size * 0.67) 0 ($sm-mint__desktop-arrow-size * 0.67) $sm-mint__desktop-arrow-size;
 					border-style: dashed dashed dashed solid;
 					border-color: transparent transparent transparent $sm-mint__desktop-arrow-color;
 				}
-				&:hover span.sub-arrow,
-				&:focus span.sub-arrow,
-				&:active span.sub-arrow,
- 				&.highlighted span.sub-arrow {
+				&:hover .sub-arrow,
+				&:focus .sub-arrow,
+				&:active .sub-arrow,
+ 				&.highlighted .sub-arrow {
 					border-color: transparent transparent transparent $sm-mint__desktop-arrow-hover-color;
 				}
-				&.disabled span.sub-arrow {
+				&.disabled .sub-arrow {
 					border-color: transparent transparent transparent $sm-mint__desktop-arrow-color;
 				}
 			}
 		}
 
 		// Scrolling arrows containers for tall sub menus - test sub menu: "Sub test" -> "more..." in the default download package
-		span.scroll-up,
-		span.scroll-down {
+		.scroll-up,
+		.scroll-down {
 			position: absolute;
 			display: none;
 			visibility: hidden;
@@ -401,7 +400,8 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 			height: 20px;
 			// width and position will be set automatically by the script
 		}
-		span.scroll-up-arrow {
+		.scroll-up-arrow,
+		.scroll-down-arrow {
 			position: absolute;
 			top: 6px;
 			left: 50%;
@@ -414,8 +414,7 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 			border-style: dashed dashed solid dashed;
 			border-color: transparent transparent $sm-mint__desktop-arrow-color transparent;
 		}
-		span.scroll-down-arrow {
-			@extend span.scroll-up-arrow;
+		.scroll-down-arrow {
 			border-width: 8px 6px 0 6px;
 			border-style: solid dashed dashed dashed;
 			border-color: $sm-mint__desktop-arrow-color transparent transparent transparent;
@@ -437,7 +436,7 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 				}
 
 				// Sub menu indicators
-				span.sub-arrow {
+				.sub-arrow {
 					right: auto;
 					left: $sm-mint__desktop-item-padding-horizontal;
 				}
@@ -450,7 +449,7 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 
 				// Vertical main menu items
 				a {
-					@include border-radius(0 $sm-mint__border-radius-base $sm-mint__border-radius-base 0);
+					border-radius: 0 $sm-mint__border-radius-base $sm-mint__border-radius-base 0;
 
 					// No need for additional room for the sub arrows
 					&.has-submenu {
@@ -458,20 +457,20 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 					}
 
 					// Sub menu indicators
-					span.sub-arrow {
+					.sub-arrow {
 						right: auto;
 						left: 10px;
 						border-width: ($sm-mint__desktop-arrow-size * 0.67) $sm-mint__desktop-arrow-size ($sm-mint__desktop-arrow-size * 0.67) 0;
 						border-style: dashed solid dashed dashed;
 						border-color: transparent $sm-mint__desktop-arrow-color transparent transparent;
 					}
-					&:hover span.sub-arrow,
-					&:focus span.sub-arrow,
-					&:active span.sub-arrow,
-	 				&.highlighted span.sub-arrow {
+					&:hover .sub-arrow,
+					&:focus .sub-arrow,
+					&:active .sub-arrow,
+	 				&.highlighted .sub-arrow {
 						border-color: transparent $sm-mint__desktop-arrow-hover-color transparent transparent;
 					}
-					&.disabled span.sub-arrow {
+					&.disabled .sub-arrow {
 						border-color: transparent $sm-mint__desktop-arrow-color transparent transparent;
 					}
 				}
@@ -479,10 +478,10 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 
 			// Sub menus box
 			ul {
-				@include border-radius($sm-mint__border-radius-base 0 $sm-mint__border-radius-base $sm-mint__border-radius-base);
+				border-radius: $sm-mint__border-radius-base 0 $sm-mint__border-radius-base $sm-mint__border-radius-base;
 
 				a {
-					@include border-radius(0 !important);
+					border-radius: 0 !important;
 
 					// No need for additional room for the sub arrows
 					&.has-submenu {
@@ -490,20 +489,20 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 					}
 
 					// Sub menu indicators
-					span.sub-arrow {
+					.sub-arrow {
 						right: auto;
 						left: 10px;
 						border-width: ($sm-mint__desktop-arrow-size * 0.67) $sm-mint__desktop-arrow-size ($sm-mint__desktop-arrow-size * 0.67) 0;
 						border-style: dashed solid dashed dashed;
 						border-color: transparent $sm-mint__desktop-arrow-color transparent transparent;
 					}
-					&:hover span.sub-arrow,
-					&:focus span.sub-arrow,
-					&:active span.sub-arrow,
-	 				&.highlighted span.sub-arrow {
+					&:hover .sub-arrow,
+					&:focus .sub-arrow,
+					&:active .sub-arrow,
+	 				&.highlighted .sub-arrow {
 						border-color: transparent $sm-mint__desktop-arrow-hover-color transparent transparent;
 					}
-					&.disabled span.sub-arrow {
+					&.disabled .sub-arrow {
 						border-color: transparent $sm-mint__desktop-arrow-color transparent transparent;
 					}
 				}
@@ -521,7 +520,7 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 			// Main menu items
 			a {
 				padding: $sm-mint__desktop-vertical-item-padding-vertical $sm-mint__desktop-vertical-item-padding-horizontal;
-				@include border-radius($sm-mint__border-radius-base 0 0 $sm-mint__border-radius-base);
+				border-radius: $sm-mint__border-radius-base 0 0 $sm-mint__border-radius-base;
 
 				&:hover,
 				&:focus,
@@ -529,7 +528,7 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 				&.highlighted {
 					background: $sm-mint__desktop-item-hover-bg;
 					color: $sm-mint__desktop-item-hover-color;
-					@include box-shadow(none);
+					box-shadow: none;
 				}
 
 				&.disabled {
@@ -538,27 +537,27 @@ $sm-mint__toggle-spacing: floor($sm-mint__item-height * 0.1);
 				}
 
 				// Sub menu indicators
-				span.sub-arrow {
+				.sub-arrow {
 					right: 10px;
 					margin-top: -($sm-mint__desktop-arrow-size * 0.67);
 					border-width: ($sm-mint__desktop-arrow-size * 0.67) 0 ($sm-mint__desktop-arrow-size * 0.67) $sm-mint__desktop-arrow-size;
 					border-style: dashed dashed dashed solid;
 					border-color: transparent transparent transparent $sm-mint__desktop-arrow-color;
 				}
-				&:hover span.sub-arrow,
-				&:focus span.sub-arrow,
-				&:active span.sub-arrow,
- 				&.highlighted span.sub-arrow {
+				&:hover .sub-arrow,
+				&:focus .sub-arrow,
+				&:active .sub-arrow,
+ 				&.highlighted .sub-arrow {
 					border-color: transparent transparent transparent $sm-mint__desktop-arrow-hover-color;
 				}
-				&.disabled span.sub-arrow {
+				&.disabled .sub-arrow {
 					border-color: transparent transparent transparent $sm-mint__desktop-arrow-color;
 				}
 			}
 
 			// Sub menus box
 			ul {
-				@include border-radius($sm-mint__border-radius-base !important);
+				border-radius: $sm-mint__border-radius-base !important;
 
 				// Sub menus items
 				a {
