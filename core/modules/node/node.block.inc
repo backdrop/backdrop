@@ -73,7 +73,7 @@ class NodeBlock extends Block {
     }
 
     // Add theme hook suggestion.
-    $content['#theme'] = 'node__block-' . $this->settings['nid'];
+    $content['#theme'] = 'node__block_' . $this->settings['nid'];
 
     return $content;
   }
