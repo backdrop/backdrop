@@ -1964,6 +1964,18 @@ function node_update_1019() {
 }
 
 /**
+ * Move default promoted view to node module.
+ */
+function node_update_1020() {
+  // If the views config has not been deleted, update it's module.
+  $config = config('views.view.promoted');
+  if (!$config->isNew()) {
+    $config->set('module', 'node');
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

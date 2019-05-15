@@ -2,7 +2,7 @@
     "_config_name": "views.view.promoted",
     "name": "promoted",
     "description": "Provides a list of promoted content. Used by default on the front page.",
-    "module": "views",
+    "module": "node",
     "storage": 4,
     "tag": "default",
     "disabled": false,
