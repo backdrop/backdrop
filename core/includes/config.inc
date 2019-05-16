@@ -94,6 +94,40 @@ function config_get($config_file, $option = NULL) {
 }
 
 /**
+ * A shortcut function to load and retrieve a single translated value from a config file.
+ *
+ * @param string $config_file
+ *   The name of the configuration object to retrieve. The name corresponds to
+ *   an JSON configuration file. For @code config('book.admin') @endcode, the
+ *   config object returned will contain the contents of book.admin.json.
+ * @param string $option
+ *   The name of the config option within the file to read. The config option
+ *   may contain periods to indicate levels within the config file. If NULL is
+ *   passed in, the entire contents of the config file will be returned.
+ * @param array $args
+ *   An associative array of replacements to make. Replacements are made in the
+ *   same way as the t() function.
+ * @param array $options
+ *   An associative array of additional options, with the following elements:
+ *   - 'langcode' (defaults to the current language): The language code to
+ *     translate to a language other than what is used to display the page.
+ *   - 'context' (defaults to the empty context): The context the source string
+ *     belongs to.
+ *
+ * @return string
+ *   The translated contents of the requested config option. Returns default if no
+ *   translation is found. Returns NULL if the specified option was not found in
+ *   the file at all or if not a string.
+ *
+ * @see t()
+ * @see config_get()
+ */
+function config_get_translated($config_file, $option = NULL, $args = array(), $options = array()) {
+  $config = config($config_file);
+  return $config->getTranslated($option, $args, $options);
+}
+
+/**
  * A shortcut function to set and save a single value in a config file.
  *
  * Note that this function immediately writes the config file to disk and clears
@@ -548,6 +582,65 @@ class Config {
         return $key_exists ? $value : NULL;
       }
     }
+  }
+
+  /**
+   * Gets translated data from this configuration object.
+   *
+   * @param string $key
+   *   A string that maps to a key within the configuration data.
+   *   For instance in the following configuration array:
+   *   @code
+   *   array(
+   *     'foo' => array(
+   *       'bar' => 'baz',
+   *     ),
+   *   );
+   *   @endcode
+   *   A key of 'foo.bar' would return the string 'baz'. However, a key of 'foo'
+   *   would return array('bar' => 'baz').
+   *   If no key is specified, then an empty string is returned.
+   *   If the key is not 'translatable' key then the original string is returned.
+   *   If the key's value is not a string then an empty string is returned.
+   *
+   * @param array $args
+   *   An associative array of replacements to make. Replacements are made in
+   *   the same way as the t() function.
+   * @param array $options
+   *   An associative array of additional options, with the following elements:
+   *   - 'langcode' (defaults to the current language): The language code to
+   *     translate to a language other than what is used to display the page.
+   *   - 'context' (defaults to the empty context): The context the source string
+   *     belongs to.
+   *
+   * @return string|NULL
+   *   The translated data that was requested.
+   *
+   * @see t()
+   * @see get()
+   */
+  public function getTranslated($key = '', $args = array(), $options = array()) {
+    if (empty($key)) {
+      return NULL;
+    }
+    $value = $this->get($key);
+    if (!is_string($value)) {
+      return NULL;
+    }
+    if (!is_array($this->get('_config_translatables'))) {
+      return $value;
+    }
+    // Ensure that it's a translatable key.
+    if (!in_array($key, $this->get('_config_translatables'))) {
+      return $value;
+    }
+    // Set a default context so we can differentiate between config strings.
+    // Rather than by using isset() or empty(), checking by key existence
+    // allows a NULL context to be used.
+    if (!array_key_exists('context', $options)) {
+      $options['context'] = 'config:' . $this->getName() . ':' . $key;
+    }
+    return t($value, $args, $options);
   }
 
   /**

@@ -1791,6 +1791,7 @@ class views_plugin_display extends views_plugin {
           ),
         );
         break;
+
       case 'analyze-theme':
         $form['#title'] .= t('Theming information');
         $form['#help_topic'] = 'analyze-theme';
@@ -1908,14 +1909,16 @@ class views_plugin_display extends views_plugin {
         }
 
         $form['important'] = array(
-          '#markup' => '<div class="form-item description"><p>' . t('This section lists all possible templates for the display plugin and for the style plugins, ordered roughly from the least specific to the most specific. The active template for each plugin -- which is the most specific template found on the system -- is highlighted in bold.') . '</p></div>',
+          'message' => array(
+            '#markup' => '<div class="form-item description"><p>' . t('This section lists all possible templates for the display plugin and for the style plugins, ordered roughly from the least specific to the most specific. The active template for each plugin -- which is the most specific template found on the system -- is highlighted in bold.') . '</p></div>',
+          ),
         );
 
         if (isset($this->view->display[$this->view->current_display]->new_id)) {
           $form['important']['new_id'] = array(
             '#prefix' => '<div class="description">',
             '#suffix' => '</div>',
-            '#value' => t("<strong>Important!</strong> You have changed the display's machine name. Anything that attached to this display specifically, such as theming, may stop working until it is updated. To see theme suggestions for it, you need to save the view."),
+            '#markup' => t("<strong>Important!</strong> You have changed the display's machine name. Anything that attached to this display specifically, such as theming, may stop working until it is updated. To see theme suggestions for it, you need to save the view."),
           );
         }
 
@@ -1961,6 +1964,7 @@ class views_plugin_display extends views_plugin {
 
         $form_state['ok_button'] = TRUE;
         break;
+
       case 'analyze-theme-display':
         $form['#title'] .= t('Theming information (display)');
         $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theming information'), 'analyze-theme'))) . '</p>';
@@ -1970,13 +1974,13 @@ class views_plugin_display extends views_plugin {
         }
         else {
           $output .= '<p>' . t('This is the default theme template used for this display.') . '</p>';
-          $output .= '<pre>' . check_plain(file_get_contents('./' . $this->definition['theme path'] . '/' . strtr($this->definition['theme'], '_', '-') . '.tpl.php')) . '</pre>';
+          $output .= '<textarea readonly="readonly" rows="15" cols="82" class="code-sample">' . check_plain(file_get_contents('./' . $this->definition['theme path'] . '/' . strtr($this->definition['theme'], '_', '-') . '.tpl.php')) . '</textarea>';
         }
 
         if (!empty($this->definition['additional themes'])) {
           foreach ($this->definition['additional themes'] as $theme => $type) {
             $output .= '<p>' . t('This is an alternative template for this display.') . '</p>';
-            $output .= '<pre>' . check_plain(file_get_contents('./' . $this->definition['theme path'] . '/' . strtr($theme, '_', '-') . '.tpl.php')) . '</pre>';
+            $output .= '<textarea readonly="readonly" rows="15" cols="82" class="code-sample">' . check_plain(file_get_contents('./' . $this->definition['theme path'] . '/' . strtr($theme, '_', '-') . '.tpl.php')) . '</textarea>';
           }
         }
 
@@ -1997,13 +2001,13 @@ class views_plugin_display extends views_plugin {
         }
         else {
           $output .= '<p>' . t('This is the default theme template used for this style.') . '</p>';
-          $output .= '<pre>' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($plugin->definition['theme'], '_', '-') . '.tpl.php')) . '</pre>';
+          $output .= '<textarea readonly="readonly" rows="15" cols="82" class="code-sample">' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($plugin->definition['theme'], '_', '-') . '.tpl.php')) . '</textarea>';
         }
 
         if (!empty($plugin->definition['additional themes'])) {
           foreach ($plugin->definition['additional themes'] as $theme => $type) {
             $output .= '<p>' . t('This is an alternative template for this style.') . '</p>';
-            $output .= '<pre>' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($theme, '_', '-') . '.tpl.php')) . '</pre>';
+            $output .= '<textarea readonly="readonly" rows="15" cols="82" class="code-sample">' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($theme, '_', '-') . '.tpl.php')) . '</textarea>';
           }
         }
 
@@ -2024,13 +2028,13 @@ class views_plugin_display extends views_plugin {
         }
         else {
           $output .= '<p>' . t('This is the default theme template used for this row style.') . '</p>';
-          $output .= '<pre>' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($plugin->definition['theme'], '_', '-') . '.tpl.php')) . '</pre>';
+          $output .= '<textarea readonly="readonly" rows="15" cols="82" class="code-sample">' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($plugin->definition['theme'], '_', '-') . '.tpl.php')) . '</textarea>';
         }
 
         if (!empty($plugin->definition['additional themes'])) {
           foreach ($plugin->definition['additional themes'] as $theme => $type) {
             $output .= '<p>' . t('This is an alternative template for this row style.') . '</p>';
-            $output .= '<pre>' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($theme, '_', '-') . '.tpl.php')) . '</pre>';
+            $output .= '<textarea readonly="readonly" rows="15" cols="82" class="code-sample">' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($theme, '_', '-') . '.tpl.php')) . '</textarea>';
           }
         }
 
@@ -2048,7 +2052,7 @@ class views_plugin_display extends views_plugin {
 
         // Field templates aren't registered the normal way...and they're always
         // this one, anyhow.
-        $output .= '<pre>' . check_plain(file_get_contents(backdrop_get_path('module', 'views') . '/templates/views-view-field.tpl.php')) . '</pre>';
+        $output .= '<textarea readonly="readonly" rows="15" cols="82" class="code-sample">' . check_plain(file_get_contents(backdrop_get_path('module', 'views') . '/templates/views-view-field.tpl.php')) . '</textarea>';
 
         $form['analysis'] = array(
           '#markup' => '<div class="form-item">' . $output . '</div>',

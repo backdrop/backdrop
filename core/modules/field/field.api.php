@@ -213,8 +213,8 @@ function hook_field_info_alter(&$info) {
  *   An associative array with the following keys:
  *   - columns: An array of Schema API column specifications, keyed by column
  *     name. This specifies what comprises a value for a given field. For
- *     example, a value for a number field is simply 'value', while a value for
- *     a formatted text field is the combination of 'value' and 'format'. It is
+ *     example, a value for a number field is 'value', while a value for a
+ *     formatted text field is the combination of 'value' and 'format'. It is
  *     recommended to avoid having the column definitions depend on field
  *     settings when possible. No assumptions should be made on how storage
  *     engines internally use the original column name to structure their
@@ -850,11 +850,10 @@ function hook_field_widget_info_alter(&$info) {
  *   - #field_name: The name of the field.
  *   - #language: The language the field is being edited in.
  *   - #field_parents: The 'parents' space for the field in the form. Most
- *       widgets can simply overlook this property. This identifies the
- *       location where the field values are placed within
- *       $form_state['values'], and is used to access processing information
- *       for the field through the field_form_get_state() and
- *       field_form_set_state() functions.
+ *       widgets can overlook this property. This identifies the location where
+ *       the field values are placed within $form_state['values'], and is used
+ *       to access processing information for the field through the
+ *       field_form_get_state() and field_form_set_state() functions.
  *   - #columns: A list of field storage columns of the field.
  *   - #title: The sanitized element label for the field instance, ready for
  *     output.
@@ -1237,6 +1236,52 @@ function hook_field_formatter_view($entity_type, $entity, $field, $instance, $la
   }
 
   return $element;
+}
+
+/**
+ * Alter the form elements for a formatter's settings.
+ *
+ * @param $context
+ *   An array of additional context for the settings form, containing:
+ *   - module: The module providing the formatter being configured.
+ *   - formatter: The definition array of the formatter being configured. Note
+ *     that this does not contain the machine name of the formatter. This can
+ *     be found in:
+ *     @code
+ *     $context['instance']['display'][$context['view_mode']]['type']
+ *     @endcode
+ *   - field: The field structure being configured.
+ *   - instance: The instance structure being configured.
+ *   - view_mode: The view mode being configured.
+ *   - form: The (entire) configuration form array, which will usually have no
+ *     use here.
+ *   - form_state: The form state of the (entire) configuration form.
+ *
+ * @since 1.13.0
+ *
+ * @see hook_field_formatter_settings()
+ */
+function hook_field_formatter_settings_form_alter(&$settings_form, $context) {
+
+}
+
+/**
+ * Alter the short summary for the current formatter settings of an instance.
+ *
+ * @param $summary
+ *   A string containing a short summary of the formatter settings.
+ * @param $context
+ *   An array with additional context for the summary:
+ *   - field: The field structure.
+ *   - instance: The instance structure.
+ *   - view_mode: The view mode for which a settings summary is requested.
+ *
+ * @since 1.13.0
+ *
+ * @see hook_field_formatter_settings_summary()
+ */
+function hook_field_formatter_settings_summary_alter(&$summary, array $context) {
+
 }
 
 /**

@@ -37,10 +37,10 @@ function redirect_list_form($form, &$form_state) {
   $keys = implode('/', $keys);
   $form['redirect_list_filter_form'] = redirect_list_filter_form($keys);
 
-  // Build the 'Update options' form.
+  // Build the 'Operations' form.
   $form['operations'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Update options'),
+    '#title' => t('Operations'),
     '#prefix' => '<div class="container-inline">',
     '#suffix' => '</div>',
     '#attributes' => array(
@@ -53,12 +53,14 @@ function redirect_list_form($form, &$form_state) {
   }
   $form['operations']['operation'] = array(
     '#type' => 'select',
+    '#title' => 'Operations',
+    '#title_display' => 'invisible',
     '#options' => $operations,
-    '#default_value' => 'delete',
+    '#empty_option' => '- ' . t('Choose an action') . ' -',
   );
   $form['operations']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Update'),
+    '#value' => t('Execute'),
     '#validate' => array('redirect_list_form_operations_validate'),
     '#submit' => array('redirect_list_form_operations_submit'),
   );
@@ -339,6 +341,11 @@ function redirect_add_redirect_page() {
  */
 function redirect_edit_form($form, &$form_state, $redirect = NULL) {
   if (!isset($redirect)) {
+    // backdrop_set_title() used to "manually" change the page title. See:
+    // https://github.com/backdrop/backdrop-issues/issues/3315
+    // @todo Check if this is needed after/if this gets fixed in core
+    // menu.module. See: https://www.drupal.org/project/drupal/issues/891892
+    backdrop_set_title(t('Add redirect'));
     $redirect = new Redirect(array(
       'source' => isset($_GET['source']) ? urldecode($_GET['source']) : '',
       'source_options' => isset($_GET['source_options']) ? backdrop_get_query_array($_GET['source_options']) : array(),

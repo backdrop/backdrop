@@ -318,7 +318,9 @@ class ImageToolkitGdTestCase extends BackdropWebTestCase {
     );
 
     // Systems using non-bundled GD2 don't have imagerotate. Test if available.
-    if (function_exists('imagerotate')) {
+    // @todo Remove the version check once https://www.drupal.org/node/2918570
+    //   is resolved.
+    if (function_exists('imagerotate') && (version_compare(PHP_VERSION, '7.0.26', '<') || (version_compare(PHP_VERSION, '7.1', '>=') && version_compare(PHP_VERSION, '7.1.12', '<')))) {
       $operations += array(
         'rotate_5' => array(
           'function' => 'rotate',
@@ -359,8 +361,8 @@ class ImageToolkitGdTestCase extends BackdropWebTestCase {
           'arguments' => array(),
           'height' => 20,
           'width' => 40,
-          // Grayscale corners are a bit funky. Each of the corners are a shade of
-          // gray. The values of these were determined simply by looking at the
+          // Grayscale corners are a bit funky. Each of the corners are a shade
+          // of gray. The values of these were determined by looking at the
           // final image to see what desaturated colors end up being.
           'corners' => array(
             array_fill(0, 3, 76) + array(3 => 0),
@@ -407,7 +409,8 @@ class ImageToolkitGdTestCase extends BackdropWebTestCase {
         // dimensions. For the test images, the dimensions will be 1 pixel
         // smaller in both dimensions (though other tests have shown a
         // difference of 0 to 3 pixels in both dimensions.
-        // @todo: Add an upper limit version check if this is fixed in PHP.
+        // @todo: The PHP bug was fixed in PHP 7.0.26 and 7.1.12. Change the code
+        //   below to reflect that in https://www.drupal.org/node/2918570.
         if (version_compare(PHP_VERSION, '5.5', '>=') && $values['function'] === 'rotate' && $values['arguments'][0] % 90 != 0) {
           $values['height']--;
           $values['width']--;

@@ -144,8 +144,8 @@ define('MENU_NORMAL_ITEM', MENU_VISIBLE_IN_TREE | MENU_VISIBLE_IN_BREADCRUMB);
 /**
  * Menu type -- A hidden, internal callback, typically used for API calls.
  *
- * Callbacks simply register a path so that the correct function is fired
- * when the URL is accessed. They do not appear in menus or breadcrumbs.
+ * Callbacks register a path so that the correct function is fired when the URL
+ * is accessed. They do not appear in menus or breadcrumbs.
  */
 define('MENU_CALLBACK', 0x0000);
 
@@ -318,7 +318,7 @@ define('MENU_PREFERRED_LINK', '1cf698d64d1aa4b83907cf6ed55db3a7f8e92c91');
  *
  * @return
  *   An array which contains the ancestors and placeholders. Placeholders
- *   simply contain as many '%s' as the ancestors.
+ *   contain as many '%s' as the ancestors.
  */
 function menu_get_ancestors($parts) {
   $number_parts = count($parts);
@@ -4034,8 +4034,12 @@ function _menu_site_status($path = NULL, $display_messages = FALSE) {
     if (user_access('access site in maintenance mode')) {
       // Ensure that the maintenance mode message is displayed only once
       // (allowing for page redirects) and specifically suppress its display on
-      // the batch and maintenance mode settings pages.
-      if ($display_messages && !in_array(current_path(), array('batch', 'admin/config/development/maintenance'))) {
+      // the batch and maintenance mode settings pages. 'admin_bar/flush-cache'
+      // has been added to the list of excluded paths in order to suppress the
+      // warning on the maintenance mode settings page when clearing caches (see
+      // https://github.com/backdrop/backdrop-issues/issues/3313).
+      $excluded_paths = array('batch', 'admin/config/development/maintenance', 'admin_bar/flush-cache');
+      if ($display_messages && !in_array(current_path(), $excluded_paths)) {
         $message = t('The site is currently in maintenance mode.');
         if (user_access('administer site configuration')) {
           $message .= ' ' . l(t('Go online.'), 'admin/config/development/maintenance', array('query' => backdrop_get_destination()));

@@ -107,6 +107,9 @@ CKEDITOR.plugins.add('backdroplink', {
           // If an image widget is focused, we're not editing an independent
           // link, but we're wrapping an image widget in a link.
           if (focusedImageWidget) {
+            // Remove attributes that are inappropriate.
+            delete returnValues.attributes['data-file-id'];
+            delete returnValues.attributes.text;
             focusedImageWidget.setData('link', CKEDITOR.tools.extend(returnValues.attributes, focusedImageWidget.data.link));
             editor.fire('saveSnapshot');
             return;

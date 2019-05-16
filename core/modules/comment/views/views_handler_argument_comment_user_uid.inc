@@ -14,7 +14,7 @@
 class views_handler_argument_comment_user_uid extends views_handler_argument {
   function title() {
     if (!$this->argument) {
-      $title = config_get('system.core', 'anonymous');
+      $title = config_get_translated('system.core', 'anonymous');
     }
     else {
       $title = db_query('SELECT u.name FROM {users} u WHERE u.uid = :uid', array(':uid' => $this->argument))->fetchField();
