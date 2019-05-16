@@ -115,7 +115,7 @@ function layout_menu() {
   );
 
   $items['admin/structure/layouts/settings/%/edit'] = array(
-    'title' => 'Add flexible layout template',
+    'title' => 'Configure flexible layout template',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_settings_form', 4),
     'type' => MENU_NORMAL_ITEM,
@@ -125,7 +125,7 @@ function layout_menu() {
   );
 
   $items['admin/structure/layouts/settings/%/configure'] = array(
-    'title' => 'Add flexible layout template',
+    'title' => 'Configure flexible layout template',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_configure_form', 4),
     'type' => MENU_NORMAL_ITEM,
@@ -159,7 +159,7 @@ function layout_menu() {
   );
 
   $items['admin/structure/layouts/settings/%/%/%/add-row'] = array(
-    'title' => 'Add flexible layout template',
+    'title' => 'Add row',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_edit_row', 4, 5, 6),
     'type' => MENU_CALLBACK,

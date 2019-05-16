@@ -137,7 +137,7 @@ function layout_flexible_template_settings_form_submit($form, &$form_state) {
   $config->save();
 
   layout_set_flexible_tempstore($template_data, $form_state['values']['machine_name']);
-  backdrop_set_message(t('Template saved.'));
+  backdrop_set_message(t('Layout template saved.'));
   layout_flexible_reset_caches();
   layout_reset_caches();
   $form_state['redirect'] = 'admin/structure/layouts/settings/' . $form_state['values']['machine_name'] . '/configure';
@@ -199,7 +199,7 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
   );
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save layout'),
+    '#value' => t('Save layout template'),
     '#submit' => array(
       'layout_flexible_template_configure_form_submit',
     ),
@@ -254,11 +254,20 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
   $form_state['flexible_template_id'] = $flexible_template_id;
   $form_state['original_row'] = $original_row;
   $form_state['op'] = $op;
+
   $row_data = $form_state['template_data']['regions'][$original_row];
+
   $options = array();
   $row_styles = layout_flexible_row_styles();
   foreach ($row_styles as $name => $row_style) {
     $options[$name] = $row_style['name'];
+  }
+
+  if ($op == 'configure') {
+    backdrop_set_title(t('Configure row !original_row', array('!original_row' => $row_data['name'])));
+  }
+  else {
+    backdrop_set_title(t('Add row !op !original_row', array('!op' => $op, '!original_row' => $row_data['name'])));
   }
 
   $form['name'] = array(
@@ -537,8 +546,8 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
           'classes' => '',
           'container' => 'container',
         ),
-        'top' => array(
-          'name' => t('Top'),
+        'content' => array(
+          'name' => t('Content'),
           'contains' => 'column_12',
           'element' => '',
           'classes' => '',
