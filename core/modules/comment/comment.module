@@ -261,6 +261,17 @@ function comment_menu_alter(&$items) {
 }
 
 /**
+ * Implements hook_url_outbound_alter().
+ */
+function comment_url_outbound_alter(&$path, &$options, $original_path) {
+  // Include a security token in the query if approving from the
+  // manage comments pages.
+  if (preg_match('/comment\/[1-9]+\/approve/', $path)) {
+    $options['query']['token'] = backdrop_get_token($path);
+  }
+}
+
+/**
  * Loads the comment bundle name corresponding a given content type.
  *
  * This function is used as a menu loader callback in comment_menu().
