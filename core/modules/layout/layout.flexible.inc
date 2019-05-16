@@ -306,14 +306,14 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
     'main' => 'MAIN',
   );
   $form['element'] = array(
-    '#title' => t('HTML element for row wrapper'),
+    '#title' => t('Row wrapper tag'),
     '#type' => 'select',
     '#options' => $options,
     '#default_value' => isset($row_data['element']) ? $row_data['element'] : '',
   );
 
   $form['container'] = array(
-    '#title' => t('Container style'),
+    '#title' => t('Row width behavior'),
     '#type' => 'select',
     '#options' => array(
       'container' => t('Container'),
