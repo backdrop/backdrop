@@ -32,7 +32,7 @@
   <?php endif; ?>
 
   <?php foreach ($region_data as $name => $region): ?>
-    <<?php print $region['element']; ?> class="l-wrapper <?php print 'l-' . $name; ?>" <?php print $row_id; ?>>
+    <<?php print $region['element']; ?> class="l-wrapper <?php print 'l-' . $name; ?>" <?php print $region['row_id']; ?>>
       <div class="<?php print $region['row_class']; ?>">
         <?php if ($region_buttons): ?>
           <div class="layout-editor-region-title clearfix">

@@ -277,7 +277,7 @@ function layout_preprocess_layout(&$variables) {
     foreach ($variables['regions'] as $name => $region) {
       $container = ($region['container'] == 'container') ? 'container container-fluid' : (($region['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
       $region['row_class'] = $container . ' flexible-row-' . $name . ' ' . $region['contains'] . ' ' . $region['classes'];
-      $region['row_id'] = $flexible_editor ? 'id = "flexible-row-id-' . $name . '"' : '';
+      $region['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row-id-' . $name . '"' : '';
       $region['element'] = !empty($region['element']) ? $region['element'] : 'div';
       if ($region['contains'] == 'column_12') {
         $region['columns'][0]['column_md'] = '12';
