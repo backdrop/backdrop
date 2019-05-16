@@ -29,7 +29,7 @@ function field_ui_fields_list() {
   $modules = system_rebuild_module_data();
 
   $header = array(
-    array('data' => t('Field'), 'field' => 'field_name', 'sort' => 'asc'),
+    array('data' => t('Field name'), 'field' => 'field_name', 'sort' => 'asc'),
     array('data' => t('Field type'), 'field' => 'field_type', 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
     array('data' => t('Module'), 'field' => 'module', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
     t('Used as'),
