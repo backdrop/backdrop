@@ -67,6 +67,9 @@ class NodeBlock extends Block {
     // Use a clone of the node so we can hide the title safely.
     $clone = clone($node);
 
+    // Put a marker on the clone so we know that it is a block.
+    $clone->isBlock = TRUE;
+
     // Hide node title if not required.
     if (empty($this->settings['leave_node_title'])) {
       $clone->title = '';
@@ -80,8 +83,9 @@ class NodeBlock extends Block {
     }
 
     // Add 'submitted by' settings.
-    if (!empty($this->settings['display_submitted'])) {
+    if ($this->settings['display_submitted']) {
       $content['#display_submitted'] = TRUE;
+      $clone->display_submitted = TRUE;
     }
 
     // Add theme hook suggestion.

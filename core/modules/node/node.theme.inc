@@ -224,9 +224,12 @@ function template_preprocess_node(&$variables) {
   // Make the field variables available with the appropriate language.
   field_attach_preprocess('node', $node, $variables['content'], $variables);
 
-  // Display post information only on certain node types.
+  // Display post information only on certain node types or if it is a block
+  // that is configured to display 'node_submitted' info.
   $node_type = node_type_get_type($node->type);
-  if ($node_type->settings['node_submitted']) {
+  $isBlock = (property_exists($node, 'isBlock') && $node->isBlock) ? TRUE : FALSE;
+  $display_submitted = (property_exists($node, 'display_submitted') && $node->display_submitted) ? TRUE : FALSE;
+  if (($node_type->settings['node_submitted'] && !$isBlock) || ($isBlock && $display_submitted)) {
     if (!$variables['block'] || ($variables['block'] && !empty($variables['elements']['#display_submitted']))) {
       $variables['display_submitted'] = TRUE;
       $variables['submitted'] = t('Submitted by !username on !datetime', array('!username' => $variables['name'], '!datetime' => $variables['date']));
@@ -263,4 +266,3 @@ function template_preprocess_node(&$variables) {
   // Add an extra theme hook suggetion for node id.
   $variables['theme_hook_suggestions'][] = 'node__' . $node->nid;
 }
-
