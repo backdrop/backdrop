@@ -80,6 +80,7 @@ class NodeBlock extends Block {
     }
 
     // Add 'submitted by' settings.
+    $content['#display_submitted'] = FALSE;
     if (!empty($this->settings['display_submitted'])) {
       $content['#display_submitted'] = TRUE;
     }

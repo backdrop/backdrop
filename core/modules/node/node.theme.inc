@@ -205,7 +205,6 @@ function template_preprocess_node(&$variables) {
   $variables['node_url']  = url($uri['path'], $uri['options']);
   $variables['title']     = check_plain($node->title);
   $variables['page']      = ($variables['view_mode'] == 'full' && node_is_page($node)) || (!empty($node->in_preview));
-  $variables['block']     = $variables['view_mode'] == 'block';
 
   // Flatten the node entity's member fields.
   $variables = array_merge((array) $node, $variables);
@@ -226,8 +225,13 @@ function template_preprocess_node(&$variables) {
 
   // Display post information only on certain node types.
   $node_type = node_type_get_type($node->type);
+
+  $variables['display_submitted'] = FALSE;
+  $variables['submitted'] = '';
+  $variables['user_picture'] = '';
+
   if ($node_type->settings['node_submitted']) {
-    if (!$variables['block'] || ($variables['block'] && !empty($variables['elements']['#display_submitted']))) {
+    if (!isset($variables['elements']['#display_submitted']) || $variables['elements']['#display_submitted'] == TRUE) {
       $variables['display_submitted'] = TRUE;
       $variables['submitted'] = t('Submitted by !username on !datetime', array('!username' => $variables['name'], '!datetime' => $variables['date']));
       $variables['user_picture'] = '';
@@ -235,11 +239,6 @@ function template_preprocess_node(&$variables) {
         $variables['user_picture'] = theme('user_picture', array('account' => $node));
       }
     }
-  }
-  else {
-    $variables['display_submitted'] = FALSE;
-    $variables['submitted'] = '';
-    $variables['user_picture'] = '';
   }
 
   // Add article ARIA role.
