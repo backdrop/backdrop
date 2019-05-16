@@ -18,9 +18,10 @@ function taxonomy_overview_vocabularies($form) {
   foreach ($vocabularies as $vocabulary) {
     $vocabulary_name = $vocabulary->name;
     $vocabulary_machine_name = $vocabulary->machine_name;
+    $terms_count = array_key_exists($vocabulary_machine_name, $term_counts) ? $term_counts[$vocabulary_machine_name] : 0;
     $form[$vocabulary_machine_name]['#vocabulary'] = $vocabulary;
     $form[$vocabulary_machine_name]['name'] = array('#markup' => check_plain($vocabulary_name));
-    $form[$vocabulary_machine_name]['items'] = array('#markup' => $term_counts[$vocabulary_machine_name]);
+    $form[$vocabulary_machine_name]['items'] = array('#markup' => $terms_count);
     $form[$vocabulary_machine_name]['weight'] = array(
       '#type' => 'weight',
       '#title' => t('Weight for @title', array('@title' => $vocabulary_name)),
