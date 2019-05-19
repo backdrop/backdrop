@@ -263,6 +263,8 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
     $options[$name] = $row_style['name'];
   }
 
+  $column_data = $row_styles[$row_data['contains']];
+  $column_count = $column_data['column_count'];
   if ($op == 'configure') {
     backdrop_set_title(t('Configure row !original_row', array('!original_row' => $row_data['name'])));
   }
@@ -288,7 +290,7 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
   $form['row_style'] = array(
     '#title' => t('Select row style'),
     '#type' => 'select',
-    '#default_value' => isset($row_data['contains']) ? $row_data['contains'] : 'column_50_25_25',
+    '#default_value' => isset($row_data['contains']) ? $row_data['contains'] : 'column_12',
     '#options' => $options,
   );
   $form['row_classes'] = array(
@@ -322,6 +324,20 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
     ),
     '#default_value' => isset($row_data['container']) ? $row_data['container'] : 'container',
   );
+  $form['column_names'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Column titles'),
+    '#collapsed' => TRUE,
+    '#collapsible' => TRUE,
+    '#tree' => TRUE,
+  );
+  for ($i = 1; $i <= $column_count; $i++) {
+    $form['column_names']['column_name_' . $i] = array(
+      '#type' => 'textfield',
+      '#title' => t('Column ') . $i,
+      '#default_value' => !empty($row_data['column_names']['column_name_' . $i]) ? $row_data['column_names']['column_name_' . $i] : '',
+    );
+  }
 
   foreach (array('name', 'machine_name', 'row_classes', 'element') as $form_element) {
     if ($op != 'configure') {
@@ -379,6 +395,7 @@ function layout_flexible_template_edit_row_submit($form, &$form_state) {
     'element' => $form_state['values']['element'],
     'classes' => $form_state['values']['row_classes'],
     'container' => $form_state['values']['container'],
+    'column_names' => $form_state['values']['column_names'],
   );
 
   if ($op != 'configure') {
@@ -545,6 +562,7 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
           'element' => 'header',
           'classes' => '',
           'container' => 'container',
+          'column_names' => array(),
         ),
         'content' => array(
           'name' => t('Content'),
@@ -552,6 +570,7 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
           'element' => '',
           'classes' => '',
           'container' => 'container',
+          'column_names' => array(),
         ),
         'footer' => array(
           'name' => t('Footer'),
@@ -559,6 +578,7 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
           'element' => 'footer',
           'classes' => '',
           'container' => 'container',
+          'column_names' => array(),
         ),
       ),
     );
@@ -577,161 +597,193 @@ function layout_flexible_row_styles() {
     'column_12' => array(
       'split' => '12:0',
       'bootstrap' => '12:0',
+      'column_count' => 1,
       'name' => 'One column',
     ),
     'column_10_2' => array(
       'split' => '10:2',
       'bootstrap' => '10:2',
+      'column_count' => 2,
       'name' => 'Two columns 10:2',
     ),
     'column_9_3' => array(
       'split' => '9:3',
       'bootstrap' => '9:3',
+      'column_count' => 2,
       'name' => 'Two columns 9:3',
     ),
     'column_8_4' => array(
       'split' => '8:4',
       'bootstrap' => '8:4',
+      'column_count' => 2,
       'name' => 'Two columns 8:4',
     ),
     'column_6_6' => array(
       'split' => '6:6',
       'bootstrap' => '6:6',
+      'column_count' => 2,
       'name' => 'Two columns 6:6',
     ),
     'column_4_8' => array(
       'split' => '4:8',
       'bootstrap' => '4:8',
+      'column_count' => 2,
       'name' => 'Two columns 4:8',
     ),
     'column_3_9' => array(
       'split' => '3:9',
       'bootstrap' => '3:9',
+      'column_count' => 2,
       'name' => 'Two columns 3:9',
     ),
     'column_2_10' => array(
       'split' => '2:10',
       'bootstrap' => '2:10',
+      'column_count' => 2,
       'name' => 'Two columns 2:10',
     ),
     'column_4_4_4' => array(
       'split' => '4:4:4',
       'bootstrap' => '4:4:4',
+      'column_count' => 3,
       'name' => 'Three columns 4:4:4',
     ),
     'column_2_8_2' => array(
       'split' => '2:8:2',
       'bootstrap' => '2:8:2',
+      'column_count' => 3,
       'name' => 'Three columns 2:8:2',
     ),
     'column_2_2_8' => array(
       'split' => '2:2:8',
       'bootstrap' => '2:2:8',
+      'column_count' => 3,
       'name' => 'Three columns 2:2:8',
     ),
     'column_8_2_2' => array(
       'split' => '8:2:2',
       'bootstrap' => '8:2:2',
+      'column_count' => 3,
       'name' => 'Three columns 8:2:2',
     ),
     'column_3_6_3' => array(
       'split' => '3:6:3',
       'bootstrap' => '3:6:3',
+      'column_count' => 3,
       'name' => 'Three columns 3:6:3',
     ),
     'column_3_3_6' => array(
       'split' => '3:3:6',
       'bootstrap' => '3:3:6',
+      'column_count' => 3,
       'name' => 'Three columns 3:3:6',
     ),
     'column_6_3_3' => array(
       'split' => '6:3:3',
       'bootstrap' => '6:3:3',
+      'column_count' => 3,
       'name' => 'Three columns 6:3:3',
     ),
     'column_4_2_6' => array(
       'split' => '4:2:6',
       'bootstrap' => '4:2:6',
+      'column_count' => 3,
       'name' => 'Three columns 4:2:6',
     ),
     'column_4_6_2' => array(
       'split' => '4:6:2',
       'bootstrap' => '4:6:2',
+      'column_count' => 3,
       'name' => 'Three columns 4:6:2',
     ),
     'column_2_6_4' => array(
       'split' => '2:6:4',
       'bootstrap' => '2:6:4',
+      'column_count' => 3,
       'name' => 'Three columns 2:6:4',
     ),
     'column_2_4_6' => array(
       'split' => '2:4:6',
       'bootstrap' => '2:4:6',
+      'column_count' => 3,
       'name' => 'Three columns 2:4:6',
     ),
     'column_6_2_4' => array(
       'split' => '6:2:4',
       'bootstrap' => '6:2:4',
+      'column_count' => 3,
       'name' => 'Three columns 6:2:4',
     ),
     'column_6_4_2' => array(
       'split' => '6:4:2',
       'bootstrap' => '6:4:2',
+      'column_count' => 3,
       'name' => 'Three columns 6:4:2',
     ),
     'column_3_3_3_3' => array(
       'split' => '3:3:3:3',
       'bootstrap' => '3:3:3:3',
+      'column_count' => 4,
       'name' => 'Four columns 3:3:3:3',
     ),
     'column_3_3_4_2' => array(
       'split' => '3:3:4:2',
       'bootstrap' => '3:3:4:2',
+      'column_count' => 4,
       'name' => 'Four columns 3:3:4:2',
     ),
     'column_3_3_2_4' => array(
       'split' => '3:3:2:4',
       'bootstrap' => '3:3:2:4',
+      'column_count' => 4,
       'name' => 'Four columns 3:3:2:4',
     ),
     'column_4_3_3_2' => array(
       'split' => '4:3:3:2',
       'bootstrap' => '4:3:3:2',
+      'column_count' => 4,
       'name' => 'Four columns 4:3:3:2',
     ),
     'column_2_3_3_4' => array(
       'split' => '2:3:3:4',
       'bootstrap' => '2:3:3:4',
+      'column_count' => 4,
       'name' => 'Four columns 2:3:3:4',
     ),
     'column_2_4_3_3' => array(
       'split' => '2:4:3:3',
       'bootstrap' => '2:4:3:3',
+      'column_count' => 4,
       'name' => 'Four columns 2:4:3:3',
     ),
     'column_4_2_3_3' => array(
       'split' => '4:2:3:3',
       'bootstrap' => '4:2:3:3',
+      'column_count' => 4,
       'name' => 'Four columns 4:2:3:3',
     ),
     'column_2_4_4_2' => array(
       'split' => '2:4:4:2',
       'bootstrap' => '2:4:4:2',
+      'column_count' => 4,
       'name' => 'Four columns 2:4:4:2',
     ),
     'column_2_4_2_4' => array(
       'split' => '2:4:2:4',
       'bootstrap' => '2:4:2:4',
+      'column_count' => 4,
       'name' => 'Four columns 2:4:2:4',
     ),
     'column_4_2_2_4' => array(
       'split' => '4:2:2:4',
       'bootstrap' => '4:2:2:4',
+      'column_count' => 4,
       'name' => 'Four columns 4:2:2:4',
     ),
     'column_4_2_4_2' => array(
       'split' => '4:2:4:2',
       'bootstrap' => '4:2:4:2',
+      'column_count' => 4,
       'name' => 'Four columns 4:2:4:2',
     ),
   );

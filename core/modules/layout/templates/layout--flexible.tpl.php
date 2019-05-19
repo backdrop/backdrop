@@ -42,7 +42,17 @@
         <div class="l-flexible-row row">
         <?php foreach ($region['columns'] as $column): ?>
           <div class="l-col col-md-<?php print $column['column_md']; ?>">
-            <?php print $content[$column['content_key']]; ?>
+            <?php if ($region_buttons): ?>
+              <div class="layout-editor-region" id="layout-editor-region-<?php print $name; ?>" data-region-name="<?php print $name; ?>">
+              <div class="layout-editor-region-title clearfix">
+              <h2 class="label">COntent</h2>
+              </div>
+              <div class="layout-editor-region-content"></div>
+              </div>
+            <?php else: ?>
+              <?php print $content[$column['content_key']]; ?>
+            <?php endif; ?>
+
           </div>
         <?php endforeach; ?>
         </div>
