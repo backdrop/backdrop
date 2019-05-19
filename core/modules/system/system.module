@@ -2898,7 +2898,7 @@ function _system_rebuild_module_data() {
 
     // Invoke hook_system_info_alter() to give installed modules a chance to
     // modify the data in the .info files if necessary.
-    $type = 'module';
+    $type = $modules[$key]->info['type'];
     backdrop_alter('system_info', $modules[$key]->info, $modules[$key], $type);
   }
 
