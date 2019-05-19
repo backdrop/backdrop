@@ -260,7 +260,7 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
   $options = array();
   $row_styles = layout_flexible_row_styles();
   foreach ($row_styles as $name => $row_style) {
-    $options[$name] = $row_style['name'];
+    $options[$row_style['column_count']] = $row_style['column_count'];
   }
 
   $column_data = $row_styles[$row_data['contains']];
@@ -287,11 +287,29 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
       'exists' => 'layout_flexible_row_name_exists',
     ),
   );
-  $form['row_style'] = array(
-    '#title' => t('Select row style'),
+  $form['column_count'] = array(
+    '#title' => t('Number of columns'),
     '#type' => 'select',
     '#default_value' => isset($row_data['contains']) ? $row_data['contains'] : 'column_12',
     '#options' => $options,
+    '#ajax' => array(
+      'callback' => 'layout_flexible_template_edit_row_style_ajax',
+    ),
+  );
+  // todo
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+    '#attributes' => array('class' => array('layout-title-button')),
+    '#attributes' => array(
+      'class' => array('js-hide'),
+    ),
+    '#submit' => array(
+      'layout_flexible_template_edit_row_submit',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_flexible_template_edit_row_ajax',
+    ),
   );
   $form['row_classes'] = array(
     '#title' => t('Additional row classes'),
@@ -456,6 +474,109 @@ function layout_flexible_array_insert_key_value($key, array &$array, $new_key, $
 }
 
 /**
+ * Form to select column style for a flexible template.
+ *
+ * @param $flexible_template_id
+ *   The template to which a row is being added.
+ * @param $original_row
+ *   The row above or below which a new row is being inserted.
+ * @param $op
+ *   The operation being performed on this row.
+ * @param $column_count
+ *   The selected column count for this row.
+ *
+ * @ingroup forms
+ */
+function layout_flexible_template_column_style($form, &$form_state, $flexible_template_id, $original_row, $op, $column_count) {
+  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+
+  $form_state['flexible_template_id'] = $flexible_template_id;
+  $form_state['original_row'] = $original_row;
+  $form_state['op'] = $op;
+
+  $options = array();
+  $row_styles = layout_flexible_row_styles();
+  foreach ($row_styles as $name => $row_style) {
+    if ($row_style['column_count'] == $column_count) {
+      $options[$row_style['bootstrap']] = $row_style['bootstrap'];
+    }
+  }
+
+  $form['column_style'] = array(
+    '#title' => t('Column style'),
+    '#type' => 'select',
+    //'#default_value' => isset($row_data['contains']) ? $row_data['contains'] : 'column_12',
+    '#options' => $options,
+    '#ajax' => array(
+      'callback' => 'layout_flexible_template_edit_column_style_ajax',
+    ),
+  );
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+    '#attributes' => array('class' => array('layout-title-button')),
+    '#submit' => array(
+      'layout_flexible_template_column_style_submit',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_open_dialog',
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for layout_flexible_template_column_style().
+ */
+function layout_flexible_template_column_style_submit(&$form, &$form_state) {
+  $flexible_template_id = $form_state['flexible_template_id'];
+  $original_row = $form_state['original_row'];
+  $op = $form_state['op'];
+
+
+  $dialog_path = 'admin/structure/layouts/settings/' . $flexible_template_id . '/' . $original_row . '/' . $op . '/add-row';
+  $form_state['redirect'] = $dialog_path;
+}
+
+/**
+ * AJAX responder to add a new row, column or region to a flexible layout.
+ */
+function layout_flexible_template_edit_row_style_ajax($form, $form_state) {
+  $flexible_template_id = $form_state['flexible_template_id'];
+  $original_row = $form_state['original_row'];
+  $op = $form_state['op'];
+  $column_count = $form_state['values']['column_count'];
+
+dpm($form_state['values']);
+  $dialog_path = 'admin/structure/layouts/settings/' . $flexible_template_id . '/' . $original_row . '/' . $op . '/add-row/' . $column_count;
+  $page_callback_result = NULL;
+  if ($router_item = menu_get_item($dialog_path)) {
+    if ($router_item['access']) {
+      if ($router_item['include_file']) {
+        require_once BACKDROP_ROOT . '/' . $router_item['include_file'];
+      }
+      $page_callback_result = call_user_func_array($router_item['page_callback'], $router_item['page_arguments']);
+    }
+  }
+  $html = is_string($page_callback_result) ? $page_callback_result : backdrop_render($page_callback_result);
+  if (isset($page_callback_result['#title'])) {
+    $title = $page_callback_result['#title'];
+  }
+  else {
+    $title = $router_item['title'];
+  }
+  $commands[] = ajax_command_open_modal_dialog($title, $html, array('dialogClass' => 'layout-dialog'));
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+}
+
+/**
  * AJAX responder to add a new row, column or region to a flexible layout.
  */
 function layout_flexible_template_edit_row_ajax($form, $form_state) {
@@ -480,6 +601,7 @@ function layout_flexible_template_edit_row_ajax($form, $form_state) {
     '#commands' => $commands,
   );
 }
+
 
 /**
  * Form to delete a row from a flexible template.
