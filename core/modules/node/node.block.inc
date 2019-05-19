@@ -80,7 +80,7 @@ class NodeBlock extends Block {
     }
 
     // Add 'submitted by' settings.
-    $content['#display_submitted'] = !empty($this->settings['display_submitted'];
+    $content['#display_submitted'] = !empty($this->settings['display_submitted']);
 
     // Add theme hook suggestion.
     $content['#theme'] = 'node__block_' . $this->settings['nid'];
