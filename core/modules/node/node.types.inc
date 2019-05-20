@@ -204,7 +204,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'checkboxes',
     '#title' => t('Sticky'),
     '#options' => array(
-      'sticky_enabled' => t("Show option to make sticky"),
+      'sticky_enabled' => t('Show option to make sticky'),
       'sticky_default' => t('Make sticky by default'),
     ),
     '#description' => t('Sticky content may be shown at the top of listings.'),
