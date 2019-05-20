@@ -1,5 +1,5 @@
 /*!
- * jQuery Once v2.2.2 - http://github.com/robloach/jquery-once
+ * jQuery Once v2.2.3 - http://github.com/robloach/jquery-once
  * @license MIT, GPL-2.0
  *   http://opensource.org/licenses/MIT
  *   http://opensource.org/licenses/GPL-2.0
@@ -17,7 +17,7 @@
 (function (factory) {
   'use strict';
 
-  if (typeof exports === 'object') {
+  if (typeof exports === 'object' && typeof exports.nodeName !== 'string') {
     // CommonJS
     factory(require('jquery'));
   } else if (typeof define === 'function' && define.amd) {
