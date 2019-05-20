@@ -204,8 +204,8 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'checkboxes',
     '#title' => t('Sticky'),
     '#options' => array(
-      'sticky_enabled' => t('Show option to make content sticky'),
-      'sticky_default' => t('Make content sticky by default'),
+      'sticky_enabled' => t("Show option to make sticky"),
+      'sticky_default' => t('Make sticky by default'),
     ),
     '#description' => t('Sticky content may be shown at the top of listings.'),
   );
@@ -223,8 +223,8 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'checkboxes',
     '#title' => t('Promote'),
     '#options' => array(
-      'promote_enabled' => t('Show option to promote content'),
-      'promote_default' => t('Promote content by default'),
+      'promote_enabled' => t('Show option to promote'),
+      'promote_default' => t('Promote by default'),
     ),
     '#description' => t('Promoted content will often be shown on the main homepage or blog.'),
   );
