@@ -12,10 +12,12 @@
  */
 class views_plugin_pager_full extends views_plugin_pager {
   function summary_title() {
+    $settings_summary = format_plural($this->options['items_per_page'], '1 item per page', '@count items per page', array('@count' => $this->options['items_per_page']));
     if (!empty($this->options['offset'])) {
-      return format_plural($this->options['items_per_page'], '@count item, skip @skip', 'Paged, @count items, skip @skip', array('@count' => $this->options['items_per_page'], '@skip' => $this->options['offset']));
+      $settings_summary .= ', ' . t('skip the first @skip', array('@skip' => $this->options['offset']));
     }
-      return format_plural($this->options['items_per_page'], '@count item', 'Paged, @count items', array('@count' => $this->options['items_per_page']));
+
+    return $settings_summary;
   }
 
   function option_definition() {
