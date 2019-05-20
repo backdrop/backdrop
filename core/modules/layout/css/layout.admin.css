@@ -314,17 +314,15 @@
   border-bottom: 1px solid #ccc;
   padding: 0.1em 0.6em;
 }
-.layout-access-list .layout-condition {
-  display: flex;
-  flex-wrap: wrap;
+.layout-access-list .layout-condition .layout-operations {
+  display: inline-block;
 }
 
 @media (min-width: 768px) {
-  .layout-access-list .layout-condition .layout-access-remove {
-    margin-left: auto; /* LTR */
+  .layout-access-list .layout-condition .layout-operations {
+    float: right; /* LTR */
   }
-  [dir="rtl"] .layout-access-list .layout-condition .layout-access-remove {
-    margin-left: 0;
-    margin-right: auto;
+  [dir="rtl"] .layout-access-list .layout-condition .layout-operations {
+    float: left;
   }
 }
