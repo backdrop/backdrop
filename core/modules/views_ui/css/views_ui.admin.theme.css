@@ -292,8 +292,12 @@ input.form-radio {
   padding-left: 9px; /* LTR */
 }
 
-.views-ui-view-title {
+.views-ui-view-name {
   font-weight: bold;
+}
+
+.views-ui-view-machine-name {
+  font-size: smaller;
 }
 
 @media (max-width: 768px) {
@@ -376,15 +380,28 @@ th.views-ui-name {
 }
 
 th.views-ui-description {
-  width: 40%;
+  width: 30%;
 }
 
-th.views-ui-path {
-  width: auto;
+th.views-ui-displays {
+  width: 25%;
+}
+
+th.views-ui-storage {
+  width: 15%;
 }
 
 th.views-ui-operations {
   width: 15%;
+}
+
+td.views-ui-displays ul {
+  margin: 0.25em 0 0.25em 0;
+}
+
+.views-ui-view-tag,
+.views-ui-view-storage {
+  margin-top: 3px;
 }
 
 /* @end */

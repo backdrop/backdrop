@@ -46,7 +46,7 @@ function block_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('block_custom_block_delete', 4),
     'access arguments' => array('administer blocks'),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'context' => MENU_CONTEXT_NONE,
     'file' => 'block.admin.inc',
   );

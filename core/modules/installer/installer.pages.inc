@@ -925,7 +925,7 @@ function installer_browser_get_sort_widget($sort_options, $current_order, $curre
  */
 function installer_browser_get_sort_options($full = FALSE) {
   $sort_options = array(
-    'score' => array('method' => 'score', 'label' => t('Relevancy'), 'default_sort' => 'desc'),
+    'score' => array('method' => 'score', 'label' => t('Relevance'), 'default_sort' => 'desc'),
     'usage' => array('method' => 'usage', 'label' => t('Most installed'), 'default_sort' => 'desc'),
     'title' => array('method' => 'title', 'label' => t('Title'), 'default_sort' => 'asc'),
     'latest_release' => array('method' => 'latest_release', 'label' => t('Latest release'), 'default_sort' => 'desc'),

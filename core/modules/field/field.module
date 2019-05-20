@@ -671,6 +671,64 @@ function field_get_default_value($entity_type, $entity, $field, $instance, $lang
 }
 
 /**
+ * Returns the first value from a field.
+ *
+ * @param Entity $entity
+ *   The fully-loaded entity containing the field value requested.
+ * @param string $field_name
+ *   The machine name of the field.
+ * @param string $value_key
+ *   The key indicating the primary data value for the field. Defaults to
+ *   'value' which is used in both text and number fields. For fields which do
+ *   not have a 'value' key such as terms (which use a 'tid' key) or files
+ *   (which use a 'fid' key), the key must be specified.
+ * @param string $langcode (optional)
+ *   The language code for the requested language. Defaults to the
+ *   current language.
+ *
+ * @return
+ *   The first field value, or NULL if the field is empty, if the field does not
+ *   contain the $value_key specified, or if the entity does not contain the
+ *   $field_name specified.
+ *
+ * @since 1.13.0 Function added.
+ *
+ * @see field_get_values()
+ */
+function field_get_value(Entity $entity, $field_name, $value_key = 'value', $langcode = NULL) {
+  return $entity->getFieldValue($field_name, $value_key, $langcode);
+}
+
+/**
+ * Returns all values from a field.
+ *
+ * @param Entity $entity
+ *   The fully-loaded entity containing the field value requested.
+ * @param string $field_name
+ *   The machine name of the field.
+ * @param string $value_key
+ *   The key indicating the primary data value for the field. Defaults to
+ *   'value' which is used in both text and number fields. For fields which do
+ *   not have a 'value' key such as terms (which use a 'tid' key) or files
+ *   (which use a 'fid' key), the key must be specified.
+ * @param string $langcode (optional)
+ *   The language code for the requested language. Defaults to the
+ *   current language.
+ *
+ * @return (array)
+ *   All field values, or an empty array if the field is empty, if the field does not
+ *   contain the $value_key specified, or if the entity does not contain the
+ *   $field_name specified.
+ *
+ * @since 1.13.0 Function added.
+ *
+ * @see field_get_value()
+ */
+function field_get_values(Entity $entity, $field_name, $value_key = 'value', $langcode = NULL) {
+  return $entity->getFieldValues($field_name, $value_key, $langcode);
+}
+
+/**
  * Helper function to filter out empty field values.
  *
  * @param $field

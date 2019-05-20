@@ -231,6 +231,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
    */
   function testRegistrationWithUserFields() {
     module_enable(array('field', 'field_test'));
+    $config_user_settings = config('system.core');
 
     // Create a field, and an instance on 'user' entity type.
     $field = array(
@@ -250,6 +251,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     field_create_instance($instance);
 
     // Check that the field does not appear on the registration form.
+    $config_user_settings->set('user_register', USER_REGISTER_VISITORS)->save();
     $this->backdropGet('user/register');
     $this->assertNoText($instance['label'], 'The field does not appear on user registration form');
 

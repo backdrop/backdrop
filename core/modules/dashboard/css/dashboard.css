@@ -1,0 +1,10 @@
+/**
+ * @file
+ * Styles for Dashboard layouts and blocks.
+ */
+
+/* Shrink and align the manage links to the right */
+.dashboard-more-link {
+  text-align: right;
+  font-size: 0.923em;
+}

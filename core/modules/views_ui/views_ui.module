@@ -232,7 +232,13 @@ function views_ui_theme() {
     'views_ui_expose_filter_form' => array(
       'render element' => 'form',
     ) + $base,
-    'views_ui_view_info' => array(
+    'views_ui_view_name' => array(
+      'variables' => array('view' => NULL, 'base' => NULL),
+    ) + $base,
+    'views_ui_view_description' => array(
+      'variables' => array('view' => NULL, 'base' => NULL),
+    ) + $base,
+    'views_ui_view_storage' => array(
       'variables' => array('view' => NULL, 'base' => NULL),
     ) + $base,
     'views_ui_build_group_filter_form' => array(
@@ -899,7 +905,6 @@ function views_ui_ajax_get_form($form_id) {
 }
 // @todo move these when we can
 
-
 /**
  * Helper function to get a list of paths assigned to a view.
  *
@@ -915,7 +920,8 @@ function _views_ui_get_paths($view) {
     $all_paths[] = t('Configure this view to add a display.');
   }
   else {
-    $view->init_display();   // Make sure all the handlers are set up
+    // Make sure all the handlers are set up.
+    $view->init_display();
     foreach ($view->display as $display) {
       if (!empty($display->handler) && $display->handler->has_path()) {
         $one_path = $display->handler->get_option('path');
@@ -933,6 +939,62 @@ function _views_ui_get_paths($view) {
   }
 
   return array_unique($all_paths);
+}
+
+/**
+ * Helper function to get a list of displays assigned to a view, and their
+ * respective paths if any.
+ *
+ * @param $view
+ *   The view.
+ *
+ * @return
+ *   An array of displays and their respective paths.
+ */
+function _views_ui_get_displays($view) {
+  $show_master_display = config_get('views_ui.settings', 'show_master_display');
+  $all_displays = array();
+
+  if (empty($view->display)) {
+    $all_displays[] = t('Configure this view to add a display.');
+  }
+  else {
+    // Make sure all the handlers are set up.
+    $view->init_display();
+    // Start compiling a list of displays for each view.
+    foreach ($view->display as $display) {
+      if (!empty($display->handler)) {
+        // Add the Master (default) display to the list only if the "Always show
+        // the Master display" setting is enabled in the Views UI settings.
+        if ($display->display_plugin != 'default' || $show_master_display) {
+          $display_item = $display->display_title;
+          if (!empty($display->handler->options['block_description'])) {
+            $display_item .= ': <em>' . $display->handler->options['block_description'] . '</em>';
+          }
+          if ($display->handler->has_path()) {
+            $one_path = $display->handler->get_option('path');
+            if (empty($path_sort)) {
+              $path_sort = strtolower($one_path);
+            }
+            // If the view is not disabled, and the path does not contain
+            // argumet placeholders...
+            if (empty($view->disabled) && strpos($one_path, '%') === FALSE) {
+              // ...convert the display path to a link.
+              $display_path = l('/' . $one_path, $one_path);
+            }
+            else {
+              // Otherwise output the path as plain text.
+              $display_path = check_plain('/' . $one_path);
+            }
+            $display_item .= ": " . $display_path;
+          }
+          $all_displays[] = $display_item;
+        }
+      }
+    }
+  }
+
+  return array_unique($all_displays);
 }
 
 /**

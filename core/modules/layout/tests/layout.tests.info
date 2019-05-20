@@ -16,6 +16,12 @@ description = Tests the custom text block (BlockText) saving and converting to r
 group = Layout
 file = layout.test
 
+[LayoutCloneTest]
+name = Layout Clone Test
+description = Tests cloning a layout through the UI.
+group = Layout
+file = layout.test
+
 [LayoutSelectionTest]
 name = Layout Selection Test
 description = Tests that the correct layout is used in various situations.

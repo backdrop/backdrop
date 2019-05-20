@@ -589,6 +589,37 @@ function field_info_storage_types($storage_type = NULL) {
 }
 
 /**
+ * Get the formatter settings for a field instance and view mode.
+ *
+ * @param string $field_name
+ * @param string $display
+ * @param string $bundle
+ * @param string $view_mode
+ *
+ * @return array
+ *
+ * @since 1.13.0
+ */
+function field_formatter_settings_get_instance_display_settings($entity_type, $field_name, $bundle, $view_mode) {
+  // There is no bundle for this entity type so the bundle name is the
+  // entity_type name.
+  if (empty($bundle)) {
+    $bundle = $entity_type;
+  }
+
+  // Fetch the instance settings and default display settings.
+  $info = field_info_instance($entity_type, $field_name, $bundle);
+  $defaults = $info['display']['default']['settings'];
+
+  if (isset($info['display'][$view_mode]['settings'])) {
+    return $info['display'][$view_mode]['settings'] + $defaults;
+  }
+  else {
+    return $defaults;
+  }
+}
+
+/**
  * Returns information about existing bundles.
  *
  * @param $entity_type

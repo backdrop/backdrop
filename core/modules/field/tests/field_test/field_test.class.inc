@@ -3,19 +3,51 @@
  * Test class for the test_entity entity type.
  */
 class TestFieldEntity extends Entity {
-  function id() {
+
+  /**
+   * Implements EntityInterface::id().
+   */
+  public function id() {
     return $this->id;
   }
 
-  public function entityType() {
-    return 'test_field_entity';
+  /**
+   * Implements EntityInterface::entityType().
+   *
+   * @since 1.13.0 This method is now static.
+   */
+  public static function entityType() {
+    return 'entity_test';
   }
 
-  function label() {
-    return $this->label;
+  /**
+   * Implements EntityInterface::label().
+   */
+  public function label() {
+    return 'label';
   }
 
-  function uri() {
-    return 'test/' . $this->id;
+  /**
+   * Implements EntityInterface::uri().
+   */
+  public function uri() {
+    return array(
+      'path' => 'test/' . $this->id,
+    );
   }
+
+  /**
+   * Implements EntityInterface::createAccess().
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    return TRUE;
+  }
+
+  /**
+   * Implements EntityInterface::access().
+   */
+  public function access($op, $account = NULL) {
+    return TRUE;
+  }
+
 }
