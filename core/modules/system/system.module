@@ -2492,22 +2492,10 @@ function system_block_configure($delta, $settings) {
     return system_header_block_form($settings);
   }
   elseif ($delta === 'breadcrumb') {
-    $form['separator'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Separator'),
-      '#description' => t('The character(s) to display between breadcrumbs.'),
-      '#default_value' => !empty($settings['separator']) ? $settings['separator'] : '»',
-    );
-    $form['append'] = array(
-      '#type' => 'select',
-      '#title' => t('Append to the breadcrumb trail'),
-      '#description' => t('What to display at the end of the breadcrumb trail.'),
-      '#default_value' => !empty($settings['append']) ? $settings['append'] : '',
-      '#options' => array(
-        'current' => t('The current page title'),
-        'separator' => t('A separator'),
-      ),
-      '#empty_option' => t('Nothing'),
+    $form['current'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Display the current page title as the last breadcrumb'),
+      '#default_value' => !empty($settings['current']),
     );
     $form['hide'] = array(
       '#type' => 'checkbox',
@@ -3233,23 +3221,20 @@ function system_header_block($settings) {
 function system_breadcrumb_block($settings = array()) {
   $crumbs = backdrop_get_breadcrumb();
 
-  if (!empty($settings['append'])) {
-    $class = '';
-    if ($settings['append'] == 'separator') {
-      $class .= ' element-invisible';
+  $current_class = 'current';
+  if (isset($settings['current']) && $settings['current'] != TRUE) {
+    $current_class .= ' element-invisible';
+  }
+
+  $crumbs[] = '<span class="' . $current_class . '">' . backdrop_get_title() . '</span>';
+
+  if (isset($settings['hide']) && $settings['hide'] == TRUE) {
+    if (!isset($crumbs[2]) && isset($settings['current']) && $settings['current'] != TRUE) {
+      return;
     }
-    $crumbs[] = '<span class="current' . $class . '">' . backdrop_get_title() . '</span>';
   }
 
-  if (isset($settings['hide']) && $settings['hide'] == TRUE && !isset($crumbs[1])) {
-    return;
-  }
-
-  $options = array('breadcrumb' => $crumbs);
-  if (isset($settings['separator'])) {
-    $options['separator'] = $settings['separator'];
-  }
-  return theme('breadcrumb', $options);
+  return theme('breadcrumb', array('breadcrumb' => $crumbs));
 }
 
 /**

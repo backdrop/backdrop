@@ -1988,18 +1988,16 @@ function theme_image($variables) {
  * @param $variables
  *   An associative array containing:
  *   - breadcrumb: An array containing the breadcrumb links.
- *   - separator: The character(s) to display between breadcrumbs.
  */
 function theme_breadcrumb($variables) {
   $breadcrumb = $variables['breadcrumb'];
-  $separator = !empty($variables['separator']) ? $variables['separator'] : '»';
   $output = '';
   if (!empty($breadcrumb)) {
     $output .= '<nav role="navigation" class="breadcrumb">';
     // Provide a navigational heading to give context for breadcrumb links to
     // screen-reader users. Make the heading invisible with .element-invisible.
     $output .= '<h2 class="element-invisible">' . t('You are here') . '</h2>';
-    $output .= '<ol><li>' . implode(' ' . $separator . ' </li><li>', $breadcrumb) . '</li></ol>';
+    $output .= '<ol><li>' . implode('</li><li>', $breadcrumb) . '</li></ol>';
     $output .= '</nav>';
   }
   return $output;
