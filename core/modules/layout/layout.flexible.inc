@@ -257,14 +257,14 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
 
   $row_data = $form_state['template_data']['regions'][$original_row];
 
-  $options = array();
+  $options = array('none' => t('Select'));
   $row_styles = layout_flexible_row_styles();
   foreach ($row_styles as $name => $row_style) {
     $options[$row_style['column_count']] = $row_style['column_count'];
+    // $column_data = $row_styles[$row_data['contains']];
+    // $column_count = $column_data['column_count'];
   }
 
-  $column_data = $row_styles[$row_data['contains']];
-  $column_count = $column_data['column_count'];
   if ($op == 'configure') {
     backdrop_set_title(t('Configure row !original_row', array('!original_row' => $row_data['name'])));
   }
@@ -290,11 +290,14 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
   $form['column_count'] = array(
     '#title' => t('Number of columns'),
     '#type' => 'select',
-    '#default_value' => isset($row_data['contains']) ? $row_data['contains'] : 'column_12',
+    '#default_value' => 'none',
     '#options' => $options,
     '#ajax' => array(
       'callback' => 'layout_flexible_template_edit_row_style_ajax',
     ),
+  );
+  $form['column_style'] = array(
+    '#markup' => isset($row_data['contains']) ? $row_data['contains'] : 'column_12',
   );
   // todo
   $form['submit'] = array(
@@ -342,20 +345,6 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
     ),
     '#default_value' => isset($row_data['container']) ? $row_data['container'] : 'container',
   );
-  $form['column_names'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Column titles'),
-    '#collapsed' => TRUE,
-    '#collapsible' => TRUE,
-    '#tree' => TRUE,
-  );
-  for ($i = 1; $i <= $column_count; $i++) {
-    $form['column_names']['column_name_' . $i] = array(
-      '#type' => 'textfield',
-      '#title' => t('Column ') . $i,
-      '#default_value' => !empty($row_data['column_names']['column_name_' . $i]) ? $row_data['column_names']['column_name_' . $i] : '',
-    );
-  }
 
   foreach (array('name', 'machine_name', 'row_classes', 'element') as $form_element) {
     if ($op != 'configure') {
@@ -507,10 +496,21 @@ function layout_flexible_template_column_style($form, &$form_state, $flexible_te
     '#type' => 'select',
     //'#default_value' => isset($row_data['contains']) ? $row_data['contains'] : 'column_12',
     '#options' => $options,
-    '#ajax' => array(
-      'callback' => 'layout_flexible_template_edit_column_style_ajax',
-    ),
   );
+  $form['column_names'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Column titles'),
+    '#collapsed' => TRUE,
+    '#collapsible' => TRUE,
+    '#tree' => TRUE,
+  );
+  for ($i = 1; $i <= $column_count; $i++) {
+    $form['column_names']['column_name_' . $i] = array(
+      '#type' => 'textfield',
+      '#title' => t('Column ') . $i,
+      '#default_value' => !empty($row_data['column_names']['column_name_' . $i]) ? $row_data['column_names']['column_name_' . $i] : '',
+    );
+  }
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -535,8 +535,23 @@ function layout_flexible_template_column_style_submit(&$form, &$form_state) {
   $flexible_template_id = $form_state['flexible_template_id'];
   $original_row = $form_state['original_row'];
   $op = $form_state['op'];
+  $column_style = $form_state['values']['column_style'];
+  $column_names = $form_state['values']['column_names'];
 
+  $row_style = '';
+  foreach (layout_flexible_row_styles() as $row_style_name => $data) {
+    if ($data['bootstrap'] == $column_style) {
+      $row_style = $row_style_name;
+      break;
+    }
+  }
+  $template_data = layout_flexible_template_template($flexible_template_id);
 
+  $template_data['regions'][$original_row]['contains'] = $row_style;
+  $template_data['regions'][$original_row]['column_names'] = $column_names;
+  layout_set_flexible_tempstore($template_data, $flexible_template_id);
+
+  layout_flexible_reset_caches();
   $dialog_path = 'admin/structure/layouts/settings/' . $flexible_template_id . '/' . $original_row . '/' . $op . '/add-row';
   $form_state['redirect'] = $dialog_path;
 }
@@ -549,6 +564,9 @@ function layout_flexible_template_edit_row_style_ajax($form, $form_state) {
   $original_row = $form_state['original_row'];
   $op = $form_state['op'];
   $column_count = $form_state['values']['column_count'];
+  if ($column_count == 'none') {
+    return;
+  }
 
 dpm($form_state['values']);
   $dialog_path = 'admin/structure/layouts/settings/' . $flexible_template_id . '/' . $original_row . '/' . $op . '/add-row/' . $column_count;
