@@ -504,7 +504,7 @@ tr.even,
 tr.odd {
   border: 1px solid #f7f7f7;
   border-top: 0;
-  border-bottom: 0;
+  border-bottom: 1px solid #f7f7f7;
   background: #f7f7f7;
 }
 tr.odd {
@@ -529,7 +529,6 @@ th {
   background: #e9e8e8;
   color: #000;
   font-weight: 600;
-  border: 0;
 }
 th:first-child {
   -webkit-border-radius: 4px 0 0;
