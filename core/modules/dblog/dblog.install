@@ -99,3 +99,11 @@ function dblog_update_1000() {
     db_create_table('watchdog', backdrop_get_schema_unprocessed('dblog', 'watchdog'));
   }
 }
+
+/**
+ * Set the format for dates in the database log.
+ */
+function dblog_update_1001() {
+  $short = system_date_format_load('short');
+  config_set('system.core', 'log_date_format', $short['pattern']);
+}

@@ -1023,6 +1023,15 @@ class FileDirectoryTest extends FileTestCase {
     $path = file_create_filename($basename, $directory);
     $this->assertEqual($path, $expected, format_string('Creating a new filepath from %original equals %new (expected %expected).', array('%new' => $path, '%original' => $original, '%expected' => $expected)), 'File');
 
+    try {
+      $filename = "a\xFFtest\x80€.txt";
+      file_create_filename($filename, $directory);
+      $this->fail('Expected exception not thrown');
+    }
+    catch (RuntimeException $e) {
+      $this->assertEqual("Invalid filename '$filename'", $e->getMessage(), 'Invalid filename with escaped characters.');
+    }
+
     // @TODO: Finally we copy a file into a directory several times, to ensure a properly iterating filename suffix.
   }
 
@@ -1055,6 +1064,14 @@ class FileDirectoryTest extends FileTestCase {
     $this->assertNotEqual($path, $destination, 'A new filepath destination is created when filepath destination already exists with FILE_EXISTS_RENAME.', 'File');
     $path = file_destination($destination, FILE_EXISTS_ERROR);
     $this->assertEqual($path, FALSE, 'An error is returned when filepath destination already exists with FILE_EXISTS_ERROR.', 'File');
+
+    try {
+      file_destination("core/misc/a\xFFtest\x80€.txt", FILE_EXISTS_REPLACE);
+      $this->fail('Expected exception not thrown');
+    }
+    catch (RuntimeException $e) {
+      $this->assertEqual("Invalid filename 'a\xFFtest\x80€.txt'", $e->getMessage(), 'Invalid filename with escaped characters.');
+    }
   }
 
   /**

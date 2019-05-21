@@ -214,7 +214,7 @@ function comment_menu() {
     'page callback' => 'comment_edit_page',
     'page arguments' => array(1),
     'access callback' => 'comment_access',
-    'access arguments' => array('edit', 1),
+    'access arguments' => array('update', 1),
     'type' => MENU_LOCAL_TASK,
     'weight' => 0,
   );
@@ -639,7 +639,7 @@ function comment_node_view(Node $node, $view_mode) {
       }
       if ($node->comment == COMMENT_NODE_OPEN) {
         $comment_form_location = $node_type->settings['comment_form_location'];
-        if (user_access('post comments')) {
+        if (Comment::createAccess()) {
           $links['comment-add'] = array(
             'title' => t('Add comment'),
             'href' => "node/$node->nid",
@@ -665,7 +665,7 @@ function comment_node_view(Node $node, $view_mode) {
       // indexing or constructing a search result excerpt.
       if ($node->comment == COMMENT_NODE_OPEN) {
         $comment_form_location = $node_type->settings['comment_form_location'];
-        if (user_access('post comments')) {
+        if (Comment::createAccess()) {
           // Show the "post comment" link if the form is on another page, or
           // if there are existing comments that the link will skip past.
           if ($comment_form_location == COMMENT_FORM_SEPARATE_PAGE || (!empty($node->comment_count) && user_access('access comments'))) {
@@ -731,7 +731,7 @@ function comment_node_page_additions(Node $node) {
   }
 
   // Append comment form if needed.
-  if (user_access('post comments') && $node->comment == COMMENT_NODE_OPEN && ($node_type->settings['comment_form_location'] == COMMENT_FORM_BELOW)) {
+  if (Comment::createAccess() && $node->comment == COMMENT_NODE_OPEN && ($node_type->settings['comment_form_location'] == COMMENT_FORM_BELOW)) {
     $comment = entity_create('comment', array('nid' => $node->nid));
     $additions['comment_form'] = backdrop_get_form("comment_node_{$node->type}_form", $comment);
   }
@@ -1026,46 +1026,36 @@ function comment_build_content(Comment $comment, Node $node, $view_mode = 'full'
 function comment_links(Comment $comment, Node $node) {
   $links = array();
   if ($node->comment == COMMENT_NODE_OPEN) {
-    if (user_access('administer comments') && user_access('post comments')) {
+    if ($comment->access('delete')) {
       $links['comment-delete'] = array(
         'title' => t('delete'),
-        'href' => "comment/$comment->cid/delete",
-        'html' => TRUE,
+        'href'  => "comment/$comment->cid/delete",
+        'html'  => TRUE,
       );
+    }
+    if ($comment->access('edit')) {
       $links['comment-edit'] = array(
         'title' => t('edit'),
-        'href' => "comment/$comment->cid/edit",
-        'html' => TRUE,
-      );
-      $links['comment-reply'] = array(
-        'title' => t('reply'),
-        'href' => "comment/reply/$comment->nid/$comment->cid",
-        'html' => TRUE,
-      );
-      if ($comment->status == COMMENT_NOT_PUBLISHED) {
-        $links['comment-approve'] = array(
-          'title' => t('approve'),
-          'href' => "comment/$comment->cid/approve",
-          'html' => TRUE,
-          'query' => array('token' => backdrop_get_token("comment/$comment->cid/approve")),
-        );
-      }
-    }
-    elseif (user_access('post comments')) {
-      if (comment_access('edit', $comment)) {
-        $links['comment-edit'] = array(
-          'title' => t('edit'),
-          'href' => "comment/$comment->cid/edit",
-          'html' => TRUE,
-        );
-      }
-      $links['comment-reply'] = array(
-        'title' => t('reply'),
-        'href' => "comment/reply/$comment->nid/$comment->cid",
-        'html' => TRUE,
+        'href'  => "comment/$comment->cid/edit",
+        'html'  => TRUE,
       );
     }
-    else {
+    if (Comment::createAccess()) {
+      $links['comment-reply'] = array(
+        'title' => t('reply'),
+        'href'  => "comment/reply/$comment->nid/$comment->cid",
+        'html'  => TRUE,
+      );
+    }
+    if ($comment->status == COMMENT_NOT_PUBLISHED && $comment->access('approve')) {
+      $links['comment-approve'] = array(
+        'title' => t('approve'),
+        'href' => "comment/$comment->cid/approve",
+        'html' => TRUE,
+        'query' => array('token' => backdrop_get_token("comment/$comment->cid/approve")),
+      );
+    }
+    if (empty($links)) {
       $links['comment-forbidden']['title'] = theme('comment_post_forbidden', array('node' => $node));
       $links['comment-forbidden']['html'] = TRUE;
     }
@@ -1135,7 +1125,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#attached' => array(
         'js' => array(backdrop_get_path('module', 'comment') . '/js/comment.admin.js'),
       ),
-      '#weight' => 20,
+      '#weight' => 25,
     );
     // Unlike coment_form_node_form_alter(), all of these settings are applied
     // as defaults to all new nodes. Therefore, it would be wrong to use #states
@@ -1518,20 +1508,37 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
  * replied to. This prevents people from changing or revising their statements
  * based on the replies to their posts.
  *
- * @param $op
- *   The operation that is to be performed on the comment. Only 'edit' is
- *   recognized now.
- * @param $comment
- *   The comment object.
+ * @param string $op
+ *   The operation to be performed on the comment. Possible values are:
+ *   - create
+ *   - view
+ *   - update
+ *   - delete
+ *   - approve
+ * @param Comment $comment
+ *   (optional) The comment object, or NULL when using 'create' op.
  *
- * @return
+ * @return bool
  *   TRUE if the current user has acces to the comment, FALSE otherwise.
+ *
+ * @since 1.13.0 The "create" $op option was added.
+ * @since 1.13.0 The "edit" $op option is deprecated. Use "update" instead.
  */
-function comment_access($op, $comment) {
-  global $user;
-
+function comment_access($op, Comment $comment = NULL) {
   if ($op == 'edit') {
-    return ($user->uid && $user->uid == $comment->uid && $comment->status == COMMENT_PUBLISHED && user_access('edit own comments')) || user_access('administer comments');
+    // Normalize edit op to update.
+    $op = 'update';
+    // Log to watchdog for DX. @todo add watchdog_deprecated_parameter().
+    $message = 'The function comment_access() was called with the operation <em>edit</em>. This operation is now named <em>update</em>. The <em>edit</em> operation will be removed in the next major release of Backdrop.';
+    $variables = array();
+    watchdog('comment', $message, $variables, WATCHDOG_DEPRECATED);
+  }
+
+  if ($op == 'create') {
+    return Comment::createAccess();
+  }
+  else {
+    return $comment->access($op);
   }
 }
 
@@ -1828,7 +1835,7 @@ function comment_form($form, &$form_state, $comment) {
       '#default_value' => $author,
       '#maxlength' => 60,
       '#size' => 30,
-      '#description' => t('Leave blank for %anonymous.', array('%anonymous' => config_get('system.core', 'anonymous'))),
+      '#description' => t('Leave blank for %anonymous.', array('%anonymous' => config_get_translated('system.core', 'anonymous'))),
       '#autocomplete_path' => 'user/autocomplete',
     );
   }
@@ -2161,7 +2168,7 @@ function comment_form_submit_build_comment($form, &$form_state) {
 function comment_form_submit($form, &$form_state) {
   $node = node_load($form_state['values']['nid']);
   $comment = comment_form_submit_build_comment($form, $form_state);
-  if (user_access('post comments') && (user_access('administer comments') || $node->comment == COMMENT_NODE_OPEN)) {
+  if (Comment::createAccess() && (user_access('administer comments') || $node->comment == COMMENT_NODE_OPEN)) {
     // Save the anonymous user information to a cookie for reuse.
     if (user_is_anonymous()) {
       user_cookie_save(array_intersect_key($form_state['values'], array_flip(array('name', 'mail', 'homepage'))));

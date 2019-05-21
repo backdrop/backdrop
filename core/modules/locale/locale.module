@@ -135,6 +135,8 @@ function locale_autoload_info() {
   return array(
     'views_handler_field_node_language' => 'views/views_handler_field_node_language.inc',
     'views_handler_filter_node_language' => 'views/views_handler_filter_node_language.inc',
+    'views_handler_field_term_language' => 'views/views_handler_field_term_language.inc',
+    'views_handler_filter_term_language' => 'views/views_handler_filter_term_language.inc',
     'views_handler_argument_locale_group' => 'views/views_handler_argument_locale_group.inc',
     'views_handler_argument_locale_language' => 'views/views_handler_argument_locale_language.inc',
     'views_handler_field_locale_group' => 'views/views_handler_field_locale_group.inc',
@@ -1032,6 +1034,34 @@ function locale_preprocess_node(&$variables) {
         $dir = array('ltr', 'rtl');
         $variables['attributes']['dir'] = $dir[$node_language->direction];
       }
+    }
+  }
+}
+
+/**
+ * Implements hook_config_create().
+ */
+function locale_config_create($staging_config) {
+  _locale_get_config_translatables($staging_config);
+}
+
+/**
+ * Implements hook_config_update().
+ */
+function locale_config_update($staging_config, $active_config) {
+  _locale_get_config_translatables($staging_config);
+}
+
+/**
+ * Get translatable config strings.
+ *
+ * @param $config
+ *   Configuration object.
+ */
+function _locale_get_config_translatables($config) {
+  if ($config->get('_config_translatables') !== NULL) {
+    foreach ($config->get('_config_translatables') as $translatable) {
+      $translation = locale($config->get($translatable), $translatable);
     }
   }
 }

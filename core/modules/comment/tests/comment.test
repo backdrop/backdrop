@@ -69,6 +69,10 @@ class CommentHelperCase extends BackdropWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer content types', 'create post content', 'edit any post content', 'delete any post content', 'administer comments', 'administer layouts', 'administer fields'));
     $this->web_user = $this->backdropCreateUser(array('create post content', 'edit own comments'));
     $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'uid' => $this->web_user->uid));
+
+    // Disable safety cron run that can affect the updating of comment "new"
+    // status during shutdown functions when cron takes a long time.
+    config_get('system.core', 'cron_safe_threshold', 0);
   }
 
   /**
@@ -292,7 +296,7 @@ class CommentHelperCase extends BackdropWebTestCase {
     $edit = array();
     $edit['operation'] = $operation;
     $edit['comments[' . $comment->id . ']'] = TRUE;
-    $this->backdropPost('admin/content/comment' . ($approval ? '/approval' : ''), $edit, t('Update'));
+    $this->backdropPost('admin/content/comment' . ($approval ? '/approval' : ''), $edit, t('Execute'));
 
     if ($operation == 'delete') {
       $this->backdropPost(NULL, array(), t('Delete comments'));
@@ -572,7 +576,7 @@ class CommentInterfaceTest extends CommentHelperCase {
 
       // Wait a few seconds to ensure that the "comment-new" flag is allowed to
       // trigger (more than 1 second from the time the comment was created).
-      sleep(2);
+      sleep(3);
 
       // Request the node with the comment.
       $this->backdropGet('node/' . $node->nid);
@@ -621,6 +625,10 @@ class CommentInterfaceTest extends CommentHelperCase {
         $comments = $this->xpath('//*[contains(@class, "comment-new")]');
         if ($case['user'] != 'anonymous') {
           $this->assertTrue(count($comments) == 1, 'comment-new class found.');
+
+          // node_tag_new() writes to the database after delivering the page,
+          // wait to ensure the record is written before reloading the page.
+          sleep(2);
 
           // Request the node again. The comment-new class should disappear.
           $this->backdropGet('node/' . $node->nid);
@@ -1636,10 +1644,11 @@ class CommentApprovalTest extends CommentHelperCase {
     $this->backdropGet('admin/content/comment/approval');
     $this->assertText(t('Unapproved comments (@count)', array('@count' => 2)), 'Two unapproved comments waiting for approval.');
     $edit = array(
+      'operation' => 'publish',
       "comments[{$comments[0]->id}]" => 1,
       "comments[{$comments[1]->id}]" => 1,
     );
-    $this->backdropPost(NULL, $edit, t('Update'));
+    $this->backdropPost(NULL, $edit, t('Execute'));
     $this->assertText(t('Unapproved comments (@count)', array('@count' => 0)), 'All comments were approved.');
 
     // Delete multiple comments in one operation.
@@ -1649,7 +1658,7 @@ class CommentApprovalTest extends CommentHelperCase {
       "comments[{$comments[1]->id}]" => 1,
       "comments[{$anonymous_comment4->id}]" => 1,
     );
-    $this->backdropPost(NULL, $edit, t('Update'));
+    $this->backdropPost(NULL, $edit, t('Execute'));
     $this->assertText(t('Are you sure you want to delete these comments and all their children?'), 'Confirmation required.');
     $this->backdropPost(NULL, $edit, t('Delete comments'));
     $this->assertText(t('No comments available.'), 'All comments were deleted.');

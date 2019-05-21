@@ -1368,8 +1368,8 @@ function hook_boot() {
  *
  * This hook is not run on cached pages.
  *
- * To add CSS or JS that should be present on all pages, modules should not
- * implement this hook, but declare these files in their .info file.
+ * To add CSS or JS files that should be present on all pages, modules should
+ * not implement this hook, but declare these files in their .info file.
  *
  * @see hook_boot()
  */
@@ -3618,7 +3618,7 @@ function hook_tokens($type, $tokens, array $data = array(), array $options = arr
 
         // Default values for the chained tokens handled below.
         case 'author':
-          $name = ($node->uid == 0) ? config_get('system.core', 'anonymous') : $node->name;
+          $name = ($node->uid == 0) ? config_get_translated('system.core', 'anonymous') : $node->name;
           $replacements[$original] = $sanitize ? filter_xss($name) : $name;
           break;
 

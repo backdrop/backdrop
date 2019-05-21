@@ -3,7 +3,6 @@
  */
 .block {
   width: 100%;
-
   /* Clearfix */
   content: "";
   display: table;
@@ -441,12 +440,10 @@ ul.admin-list li {
 .admin-list li:first-child {
   border-top: none;
 }
-.admin-panel .item-list ul,
 .admin-list {
   margin: 0;
   padding: 0;
 }
-.admin-panel .item-list ul,
 .admin-list.compact {
   margin: 8px 0;
 }
@@ -519,7 +516,9 @@ tr.drag {
 tr.drag-previous {
   background: #ffb;
 }
-tr:hover {
+tr:hover,
+tr:hover td.active,
+tr.odd:hover td.active {
   background: #ffff99;
 }
 th {
@@ -633,14 +632,11 @@ fieldset {
   position: relative;
   max-width: 100%;
   margin: 1em 0;
-  padding: 3em 0 0 0; /* LTR */
+  padding: 3em 0 0 0;
   border-radius: 4px;
   background-color: #fff;
   border: 2px solid #EAEAEA;
   min-width: 0;
-}
-[dir="rtl"] fieldset {
-  padding: 2.5em 0 0;
 }
 fieldset .fieldset-legend {
   position: absolute;
@@ -648,12 +644,13 @@ fieldset .fieldset-legend {
   top: 0;
   width: 100%;
   margin-top: .25em;
-  padding-left: 15px; /* LTR */
+  padding-left: 1em; /* LTR */
   text-transform: uppercase;
+  box-sizing: border-box;
 }
 [dir="rtl"] fieldset .fieldset-legend {
   right: 0;
-  padding-right: 15px;
+  padding-right: 1em;
   padding-left: 0;
 }
 legend {
@@ -692,6 +689,13 @@ fieldset .fieldset-wrapper {
   border-radius: 4px;
   background: transparent;
 }
+.js[dir="rtl"] fieldset.collapsible .fieldset-title {
+  background-image: none;
+  padding: .3em 1.8em .3em .3em;
+}
+.js fieldset.collapsible .fieldset-legend {
+  font-size: 1em;
+}
 .js fieldset.collapsible .fieldset-legend a:before {
   content: "";
   position: absolute;
@@ -703,12 +707,21 @@ fieldset .fieldset-wrapper {
   border-top-color: #000;
   border-bottom: 0;
 }
-
+.js[dir="rtl"] fieldset.collapsible .fieldset-legend a:before {
+  left: auto;
+  right: .6em;
+}
 .fieldset-legend span.summary {
   position: absolute;
   top: .4em;
   right: 2em;
   display: none;
+}
+.fieldset-legend span.summary:not(:empty):before {
+  content: '(';
+}
+.fieldset-legend span.summary:not(:empty):after {
+  content: ')';
 }
 @media (min-width: 450px) {
   .fieldset-legend span.summary {
@@ -724,6 +737,12 @@ fieldset .fieldset-wrapper {
   top: .75em;
   border: .32em solid transparent;
   border-left-color: black;
+}
+.js[dir="rtl"] fieldset.collapsed .fieldset-legend a:before {
+  left: auto;
+  right: .8em;
+  border-left-color: transparent;
+  border-right-color: black;
 }
 
 /**
@@ -823,12 +842,22 @@ td.checkbox .form-item input {
 
 /* Filter */
 .filter-wrapper {
-  border-top: 0;
   padding: 10px 2px;
+  background-color: #f8f8f8;
+  border: 1px #d1d1d1;
+  border-style: none solid solid solid;
+  border-radius: 0;
+}
+.js fieldset.filter-wrapper.collapsed {
+  padding: 1.2em 0;
+}
+.js fieldset.filter-wrapper.collapsible .fieldset-legend {
+  font-size: .8333em;
+  text-transform: none;
 }
 .filter-wrapper .fieldset-wrapper {
-  padding: 0 6px;
-  margin-top: 45px;
+  padding: .6em 2.3em;
+  margin-top: 30px;
 }
 .filter-wrapper .form-item,
 .filter-wrapper .filter-guidelines,
@@ -919,13 +948,6 @@ input.form-submit:active {
   -moz-box-shadow: 0 0 5px rgb(220, 220, 220);
   box-shadow: 0 0 5px rgb(220, 220, 220);
 }
-input.form-button-disabled,
-input.form-button-disabled:active {
-  background: #eee none;
-  border-color: #eee;
-  text-shadow: none;
-  color: #999;
-}
 input.button-primary,
 button.button-primary {
   color: white;
@@ -976,6 +998,21 @@ button.button-danger:hover,
 button.button-danger:focus {
   color: white;
   background-color: #e7251b;
+}
+input.form-button-disabled,
+input.form-button-disabled:active,
+input.form-button-disabled:hover,
+input.form-button-disabled:focus,
+input.form-disabled,
+input.form-disabled:active,
+input.form-disabled:hover,
+input.form-disabled:focus {
+  background: #eee none;
+  border-color: #eee;
+  text-shadow: none;
+  color: #999;
+  box-shadow: none;
+  transition-property: none;
 }
 input.form-autocomplete,
 input.form-text,
@@ -1099,13 +1136,16 @@ div.filter-options select {
 }
 .admin-panel {
   margin: 0 0 20px;
-  padding: 9px;
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+.admin-panel .block-content {
+  padding: 0 9px 9px;
+}
+.admin-panel .block-title,
 .admin-panel h3 {
-  margin: 4px 0 4px 4px; /* LTR */
+  margin: 9px 9px 0;
   padding: 6px 0 6px 35px; /* LTR */
   font-size: 0.923em;
   text-transform: uppercase;
@@ -1113,16 +1153,27 @@ div.filter-options select {
   background: url('../images/chevron-circle-right--black--64.png') no-repeat left center; /* LTR */
   background-size: 23px;
 }
+[dir="rtl"] .admin-panel .block-title,
 [dir="rtl"] .admin-panel h3 {
   margin-left: 0;
-  margin-right: 4px;
-  padding-left: 0;
-  padding-right: 35px;
+  margin-right: 9px;
+  padding: 6px 35px 6px 0;
   background: url('../images/chevron-circle-left--black--64.png') no-repeat right center; /* LTR */
   background-size: 23px;
 }
+@media (min-width: 34em) { /* 544px @ 16px font size -- SM */
+  .admin-panel .block-content {
+    padding: 0 15px 15px;
+  }
+  .admin-panel .block-title,
+  .admin-panel h3 {
+    margin: 15px;
+  }
+}
+
+/* Add special icons for admin/config */
 .admin-panel-people h3 {
-  background-image: url('../images/user--black--64.png');
+  background-image: url('../images/users--black--64.png');
 }
 .admin-panel-content h3 {
   background-image: url('../images/pencil-square-o--black--64.png');
@@ -1150,6 +1201,20 @@ div.filter-options select {
 }
 .admin-panel-services h3 {
   background-image: url('../images/rss--black--64.png');
+}
+
+/* Add special icons for admin/dashboard */
+.block-dashboard-create .block-title {
+  background-image: url('../images/pencil-square-o--black--64.png');
+}
+.block-dashboard-overview-content .block-title {
+  background-image: url('../images/pencil-alt--black--64.png');
+}
+.block-dashboard-overview-user .block-title {
+  background-image: url('../images/users--black--64.png');
+}
+.block-dashboard-updates .block-title {
+  background-image: url('../images/info-circle--black--64.png');
 }
 
 /* admin/appearance */
@@ -1510,6 +1575,15 @@ div.add-or-remove-shortcuts {
 }
 [dir="rtl"] #block-node-recent .more-link {
   padding: 0 0 5px 5px;
+}
+
+/* Date picker */
+[dir="rtl"] .ui-datepicker {
+  width: auto;
+}
+[dir="rtl"] .ui-datepicker .ui-datepicker-next {
+  right: auto;
+  top: 4px;
 }
 
 /* Dropbutton */

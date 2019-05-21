@@ -1228,7 +1228,7 @@ class view {
     if (!empty($this->build_info['fail'])) {
       return;
     }
-    if (!empty($this->view->build_info['denied'])) {
+    if (!empty($this->build_info['denied'])) {
       return;
     }
 
@@ -1772,7 +1772,7 @@ class view {
     // Scroll through the queries until we get to our last query key.
     // Unset anything in our temp array.
     if (isset($this->last_query_key)) {
-      while (list($id, $query) = each($queries)) {
+      foreach ($queries as $id => $query) {
         if ($id == $this->last_query_key) {
           break;
         }

@@ -86,7 +86,7 @@ function filter_update_1001() {
 }
 
 /**
- * Import the image_library view
+ * Import the image_library view.
  */
 function filter_update_1002() {
   $view_config = array(
@@ -469,6 +469,15 @@ function filter_update_1002() {
     $config->setData($view_config);
     $config->save();
   }
+}
+
+/**
+ * Make the image_library view module-provided.
+ */
+function filter_update_1003() {
+  $config = config('views.view.image_library');
+  $config->set('module', 'filter');
+  $config->save();
 }
 
 /**

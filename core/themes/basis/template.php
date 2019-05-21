@@ -28,6 +28,16 @@ function basis_preprocess_page(&$variables) {
 }
 
 /**
+ * Prepares variables for maintenance page templates.
+ *
+ * @see maintenance-page.tpl.php
+ */
+function basis_preprocess_maintenance_page(&$variables) {
+  $css_path = backdrop_get_path('theme', 'basis') . '/css/component/maintenance.css';
+  backdrop_add_css($css_path);
+}
+
+/**
  * Prepares variables for layout templates.
  *
  * @see layout.tpl.php

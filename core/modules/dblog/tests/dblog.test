@@ -46,6 +46,9 @@ class DBLogTestCase extends BackdropWebTestCase {
 
     $row_limit = 1000;
     $this->verifyRowLimit($row_limit);
+    // Remove seconds from date so this test is more likely to always pass.
+    $date_format = 'M d, Y - j:ia';
+    $this->verifyDateFormat($date_format);
     $this->verifyCron($row_limit);
     $this->verifyEvents();
     $this->verifyReports();
@@ -71,6 +74,24 @@ class DBLogTestCase extends BackdropWebTestCase {
     // Check row limit variable.
     $current_limit = config_get('system.core', 'log_row_limit');
     $this->assertTrue($current_limit == $row_limit, format_string('[Cache] Row limit variable of @count equals row limit of @limit', array('@count' => $current_limit, '@limit' => $row_limit)));
+  }
+
+  /**
+   * Verifies setting of the database log date format.
+   *
+   * @param strong $date_format
+   *   The date format to display in the log.
+   */
+  private function verifyDateFormat($date_format) {
+    // Change the database log row limit.
+    $edit = array();
+    $edit['dblog_date_format'] = $date_format;
+    $this->backdropPost('admin/config/development/logging', $edit, t('Save configuration'));
+    $this->assertResponse(200);
+
+    // Check row limit variable.
+    $current_format = config_get('system.core', 'log_date_format');
+    $this->assertTrue($current_format == $date_format, format_string('[Cache] Date format of @current matches date format of @format', array('@current' => $current_format, '@format' => $date_format)));
   }
 
   /**
@@ -144,6 +165,7 @@ class DBLogTestCase extends BackdropWebTestCase {
 
     // View the database log report page.
     $this->backdropGet('admin/reports/dblog');
+
     $this->assertResponse($response);
     if ($response == 200) {
       $this->assertText(t('Recent log messages'), 'DBLog report was displayed');
@@ -169,6 +191,9 @@ class DBLogTestCase extends BackdropWebTestCase {
     if ($response == 200) {
       $this->assertText(t('Details'), 'DBLog event node was displayed');
     }
+
+    // Check the date format on the database log report page.
+    $this->backdropGet('admin/reports/dblog');
   }
 
   /**
@@ -201,6 +226,7 @@ class DBLogTestCase extends BackdropWebTestCase {
     $edit['pass'] = $pass;
     $edit['status'] = 1;
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
+    $new_user_time = time();
     $this->assertResponse(200);
     // Retrieve the user object.
     $user = user_load_by_name($name);
@@ -209,8 +235,10 @@ class DBLogTestCase extends BackdropWebTestCase {
     $user->pass_raw = $pass;
     // Login user.
     $this->backdropLogin($user);
+    $login_time = time();
     // Logout user.
     $this->backdropLogout();
+    $logout_time = time();
     // Fetch the row IDs in watchdog that relate to the user.
     $result = db_query('SELECT wid FROM {watchdog} WHERE uid = :uid', array(':uid' => $user->uid));
     foreach ($result as $row) {
@@ -234,10 +262,13 @@ class DBLogTestCase extends BackdropWebTestCase {
     // Default display includes name and email address; if too long, the email
     // address is replaced by three periods.
     $this->assertLogMessage(t('New user: %name (%email).', array('%name' => $name, '%email' => $user->mail)), 'DBLog event was recorded: [add user]');
+    $this->assertText(format_date($new_user_time, 'custom', 'M d, Y - j:ia'));
     // Login user.
     $this->assertLogMessage(t('Session opened for %name.', array('%name' => $name)), 'DBLog event was recorded: [login user]');
+    $this->assertText(format_date($login_time, 'custom', 'M d, Y - j:ia'));
     // Logout user.
     $this->assertLogMessage(t('Session closed for %name.', array('%name' => $name)), 'DBLog event was recorded: [logout user]');
+    $this->assertText(format_date($logout_time, 'custom', 'M d, Y - j:ia'));
     // Delete user.
     $message = t('Deleted user: %name %email.', array('%name' => $name, '%email' => '<' . $user->mail . '>'));
     $message_text = truncate_utf8(filter_xss($message, array()), 56, TRUE, TRUE);

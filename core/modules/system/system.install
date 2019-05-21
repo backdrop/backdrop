@@ -3030,6 +3030,22 @@ function system_update_1066() {
 }
 
 /**
+ * Add default value for form_cache_expiration.
+ */
+function system_update_1067() {
+  $config = config('system.core');
+  $config->set('form_cache_expiration', 21600);
+  $config->save();
+}
+
+/**
+ * Add 'jquery-extend-3.4.0.js' to the 'jquery' library.
+ */
+function system_update_1068() {
+  // Empty update to force a rebuild of hook_library() and JS aggregates.
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

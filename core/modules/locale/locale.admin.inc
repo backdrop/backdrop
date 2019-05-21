@@ -276,6 +276,10 @@ function language_negotiation_configure_url_form_submit($form, &$form_state) {
   locale_language_negotiation_url_prefixes_save($form_state['values']['prefix']);
   locale_language_negotiation_url_domains_save($form_state['values']['domain']);
 
+  // Clear menu caches, to ensure that admin bar links are updated to include
+  // any change in the path prefix (so not to 404).
+  menu_cache_clear_all();
+
   backdrop_set_message(t('Configuration saved.'));
 }
 
