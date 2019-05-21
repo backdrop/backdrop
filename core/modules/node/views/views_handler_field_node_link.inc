@@ -14,7 +14,6 @@ class views_handler_field_node_link extends views_handler_field_entity {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['type'] = array('default' => 'view');
     $options['url'] = array('default' => FALSE, 'bool' => TRUE);
     $options['absolute'] = array('default' => FALSE, 'bool' => TRUE);
     $options['text'] = array('default' => '', 'translatable' => TRUE);
@@ -22,16 +21,6 @@ class views_handler_field_node_link extends views_handler_field_entity {
   }
 
   function options_form(&$form, &$form_state) {
-    $form['type'] = array(
-      '#type' => 'select',
-      '#title' => t('Link type'),
-      '#default_value' => $this->options['type'],
-      '#options' => array(
-        'view' => t('View'),
-        'edit' => t('Edit'),
-        'delete' => t('Delete'),
-      ),
-    );
     $form['url'] = array(
       '#type' => 'checkbox',
       '#title' => t('Output URL as text'),
@@ -71,7 +60,7 @@ class views_handler_field_node_link extends views_handler_field_entity {
   function render_link($node, $values) {
     $options = &$this->options;
 
-    if ($options['type'] == 'view' && node_access('view', $node)) {
+    if (node_access('view', $node)) {
       if ($options['url']) {
         return url("node/$node->nid", array('absolute' => $options['absolute']));
       }
@@ -80,32 +69,6 @@ class views_handler_field_node_link extends views_handler_field_entity {
         $options['alter']['absolute'] = $options['absolute'];
         $options['alter']['path'] = "node/$node->nid";
         $text = !empty($options['text']) ? $options['text'] : t('View');
-        return $text;
-      }
-    }
-    elseif ($options['type'] == 'edit' && node_access('update', $node)) {
-      if ($options['url']) {
-        return url("node/$node->nid/edit", array('absolute' => $options['absolute']));
-      }
-      else {
-        $options['alter']['make_link'] = TRUE;
-        $options['alter']['absolute'] = $options['absolute'];
-        $options['alter']['path'] = "node/$node->nid/edit";
-        $options['alter']['query'] = backdrop_get_destination();
-        $text = !empty($options['text']) ? $options['text'] : t('Edit');
-        return $text;
-      }
-    }
-    elseif ($options['type'] == 'delete' && node_access('delete', $node)) {
-      if ($options['url']) {
-        return url("node/$node->nid/delete", array('absolute' => $options['absolute']));
-      }
-      else {
-        $options['alter']['make_link'] = TRUE;
-        $options['alter']['absolute'] = $options['absolute'];
-        $options['alter']['path'] = "node/$node->nid/delete";
-        $options['alter']['query'] = backdrop_get_destination();
-        $text = !empty($options['text']) ? $options['text'] : t('Delete');
         return $text;
       }
     }
