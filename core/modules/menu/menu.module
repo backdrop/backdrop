@@ -451,11 +451,21 @@ function menu_block_info() {
 
   $blocks = array();
   foreach ($menus as $name => $title) {
+    // If the menu title doesn't end with the word 'menu', we add it to the
+    // description.
+    $end = backdrop_strtolower(substr($title, -4));
+    if ($end == 'menu') {
+      $description = t('A list of links for the %title.', array('%title' => $title));
+    }
+    else {
+      $description = t('A list of links for the %title menu.', array('%title' => $title));
+    }
+
     $blocks[$name] = array(
       'info' => check_plain($title),
-      'description' => t('The hierarchical list of links for the @title menu.', array('@title' => $title)),
-      // Menu blocks can't be cached because each menu item can have
-      // a custom access callback. menu.inc manages its own caching.
+      'description' => $description,
+      // Menu blocks can't be cached because each menu item can have a custom
+      // access callback. menu.inc manages its own caching.
       'cache' => BACKDROP_NO_CACHE,
     );
   }

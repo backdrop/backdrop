@@ -2432,9 +2432,20 @@ function system_block_info() {
   $all_menus = function_exists('menu_get_menus') ? menu_get_menus() : array();
   foreach (menu_list_system_menus() as $menu_name => $title) {
     $custom_title = isset($all_menus[$menu_name]) ? $all_menus[$menu_name] : $title;
+
+    // If the menu title doesn't end with the word 'menu', we add it to the
+    // description.
+    $end = backdrop_strtolower(substr($custom_title, -4));
+    if ($end == 'menu') {
+      $description = t('A list of links for the %title.', array('%title' => $custom_title));
+    }
+    else {
+      $description = t('A list of links for the %title menu.', array('%title' => $custom_title));
+    }
+
     $blocks[$menu_name] = array(
-      'info' => check_plain(t($custom_title)),
-      'description' => t('A hierarchical list of links for the @menu.', array('@menu' => t($title))),
+      'info' => check_plain($custom_title),
+      'description' => $description,
     );
   }
   return $blocks;
