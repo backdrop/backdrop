@@ -500,6 +500,9 @@ table {
   border-spacing: 0;
   border: 0;
 }
+tbody {
+  border-bottom: 1px solid #eeeeee;
+}
 tr.even,
 tr.odd {
   border: 1px solid #f7f7f7;
