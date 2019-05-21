@@ -372,9 +372,6 @@ ul.inline li {
   margin: 0;
   padding: 0;
 }
-.breadcrumb li:after {
-  content: " » ";
-}
 .breadcrumb li:last-of-type:after {
   content: none;
 }

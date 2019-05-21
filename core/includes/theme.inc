@@ -1990,9 +1990,14 @@ function theme_image($variables) {
  *   - breadcrumb: An array containing the breadcrumb links.
  */
 function theme_breadcrumb($variables) {
-  $breadcrumb = $variables['breadcrumb'];
   $output = '';
+  $breadcrumb = $variables['breadcrumb'];
+
   if (!empty($breadcrumb)) {
+    // Add separator via CSS.
+    $separator = !empty($variables['separator']) ? $variables['separator'] : ' » ';
+    backdrop_add_css('.breadcrumb li:after {content: "' . $separator . '";}', 'inline');
+
     $output .= '<nav role="navigation" class="breadcrumb">';
     // Provide a navigational heading to give context for breadcrumb links to
     // screen-reader users. Make the heading invisible with .element-invisible.
@@ -2000,6 +2005,7 @@ function theme_breadcrumb($variables) {
     $output .= '<ol><li>' . implode('</li><li>', $breadcrumb) . '</li></ol>';
     $output .= '</nav>';
   }
+
   return $output;
 }
 
