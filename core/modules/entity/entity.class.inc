@@ -41,12 +41,13 @@ interface EntityInterface {
   /**
    * Returns the type of the entity.
    *
+   * Note: this function cannot be made static because a lot of contrib projects
+   * depend on it. Changing the function definition breaks contrib.
+   *
    * @return
    *   The type of the entity.
-   *
-   * @since 1.13.0 This method is now static.
    */
-  public static function entityType();
+  public function entityType();
 
   /**
    * Returns the bundle of the entity.
