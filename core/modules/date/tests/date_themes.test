@@ -106,16 +106,15 @@ class DateThemeTestCase extends BackdropWebTestCase {
 
     // Start and end date on same day, 7 days in future,
     // with timezone identifier, with remaining days.
-    $tz = 'Asia/Srednekolymsk';
+    $tz = 'Europe/Moscow';
     $dateTimeStart = new DateTime('now', new DateTimeZone($tz));
     $currentHour = $dateTimeStart->format('H');
     if ($currentHour > 22) {
       // Make sure start and end are the same day.
       $dateTimeStart->modify('- 1 hour');
-      $currentHour = 22;
     }
-    // Make sure we have 7 days remaining.
-    $offsetHours = (7 * 24) + $currentHour;
+    // We need 168 hours (7 days) remaining.
+    $offsetHours = 7 * 24;
     $dateTimeStart->modify("+ $offsetHours hours");
     $dateTimeEnd = clone $dateTimeStart;
     $dateTimeEnd->modify('+ 1 hour');
