@@ -1538,7 +1538,7 @@
                         "ui_name": "",
                         "label": "",
                         "empty": 0,
-                        "content": "There are <em>@total unapproved comments</em>."
+                        "content": "<em>Number of unapproved comments</em>: @total."
                     }
                 }
             }
