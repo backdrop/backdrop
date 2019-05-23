@@ -265,8 +265,9 @@ function comment_menu_alter(&$items) {
  */
 function comment_url_outbound_alter(&$path, &$options, $original_path) {
   // Include a security token in the query if approving from the
-  // manage comments pages.
-  if (preg_match('/comment\/[1-9]+\/approve/', $path)) {
+  // manage comments pages. Only if it doesn't already have a token.
+  if (preg_match('/comment\/[1-9]+\/approve/', $path) &&
+    !preg_match('/token=/', $path)) {
     $options['query']['token'] = backdrop_get_token($path);
   }
 }
