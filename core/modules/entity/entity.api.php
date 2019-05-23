@@ -20,7 +20,7 @@
  *   An array whose keys are entity type names and whose values identify
  *   properties of those types that the system needs to know about:
  *   - label: The human-readable name of the type.
- *   - entity class: A class that the controller will use for instantiating 
+ *   - entity class: A class that the controller will use for instantiating
  *     entities. Must extend the Entity class or implement EntityInterface.
  *   - controller class: The name of the class that is used to load the objects.
  *     The class has to implement the EntityControllerInterface interface.
@@ -422,7 +422,7 @@ function hook_entity_view_alter(&$build, $type) {
  *   The type of entities being loaded (i.e. node, user, comment).
  */
 function hook_entity_prepare_view($entities, $type) {
-  // Load a specific node into the user object for later theming.
+  // Load a specific node into the user object to theme later.
   if ($type == 'user') {
     $nodes = mymodule_get_user_nodes(array_keys($entities));
     foreach ($entities as $uid => $entity) {

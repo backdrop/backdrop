@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Preprocessors and helper functions to make theming easier.
+ * Preprocessors and helper functions to make theme development easier.
  */
 
 /**
