@@ -258,7 +258,7 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
     '#parents' => array('row_settings'),
   );
 
-  if (!isset($form_state['values']['column_count']) || $form_state['values']['column_count'] == 'none' || !empty($form_state['row_select'])) {
+  if (!isset($form_state['values']['column_count']) || $form_state['values']['column_count'] == 'none' || !empty($form_state['column_style_selected'])) {
     $form['row_settings']['content'] = layout_flexible_template_edit_row_form($form['row_settings'], $form_state);
   }
   else {
@@ -285,9 +285,13 @@ function layout_flexible_template_edit_row_form($form, &$form_state) {
   $flexible_template_id = $form_state['flexible_template_id'];
   $original_row = $form_state['original_row'];
   $op = $form_state['op'];
-  if (isset($form_state['storage'])) {
-    $row_data = $form_state['storage'];
+
+  // If we're returning from the column style selection form, re-load the stored
+  // form state data.
+  if (isset($form_state['storage']['row_data'])) {
+    $row_data = $form_state['storage']['row_data'];
   }
+  // If the form is loading for the first time, get fresh data.
   elseif (!isset($form_state['template_data'])) {
     $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
     $row_data = $form_state['template_data']['regions'][$original_row];
@@ -295,13 +299,24 @@ function layout_flexible_template_edit_row_form($form, &$form_state) {
   else {
     $row_data = $form_state['template_data']['regions'][$original_row];
   }
-    $form_state['column_data'] = $form_state['values'];
 
-  $options = array('none' => t('Select'));
+  // If we haven't visited the column style form yet, add defaults.
+  if (!empty($form_state['values']['column_style'])) {
+    $form_state['column_data']['column_style'] = $form_state['values']['column_style'];
+    $form_state['column_data']['column_names'] = $form_state['values']['column_names'];
+  }
+  else {
+    $form_state['column_data']['column_style'] = 'column_12';
+    $form_state['column_data']['column_names'] = array();
+  }
+
   $row_styles = layout_flexible_row_styles();
+  $options = array('none' => t('Select'));
   foreach ($row_styles as $name => $row_style) {
     $options[$row_style['column_count']] = $row_style['column_count'];
   }
+
+  $selected_style = $row_styles[$form_state['column_data']['column_style']]['name'];
 
   if ($op == 'configure') {
     backdrop_set_title(t('Configure row !original_row', array('!original_row' => $row_data['name'])));
@@ -332,12 +347,12 @@ function layout_flexible_template_edit_row_form($form, &$form_state) {
     '#default_value' => 'none',
     '#options' => $options,
     '#ajax' => array(
-      'callback' => 'layout_flexible_template_edit_row_style_ajax',
+      'callback' => 'layout_flexible_template_edit_column_style_ajax',
       'wrapper' => 'row_settings',
     ),
   );
   $form['column_style'] = array(
-    '#markup' => isset($row_data['contains']) ? $row_data['contains'] : 'column_12',
+    '#markup' => $selected_style,
   );
   // todo
   $form['submit_column_style'] = array(
@@ -384,7 +399,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state) {
   );
 
   foreach (array('name', 'machine_name', 'row_classes', 'element') as $form_element) {
-    if ($op != 'configure' && !isset($form_state['storage'])) {
+    if ($op != 'configure' && !isset($form_state['storage']['row_data'])) {
       $form[$form_element]['#default_value'] = '';
     }
   }
@@ -422,6 +437,14 @@ function layout_flexible_template_edit_row_validate($form, &$form_state) {
   if ($machine_name != $form_state['original_row'] && isset($form_state['template_data']['regions'][$machine_name])) {
     form_error($form['machine_name'], t('This row name already exists.'));
   }
+}
+
+/**
+ * Submit handler for layout_flexible_template_column_style().
+ */
+function layout_flexible_template_column_style_select_submit(&$form, &$form_state) {
+  $form_state['column_style_selected'] = FALSE;
+  $form_state['rebuild'] = TRUE;
 }
 
 /**
@@ -517,9 +540,9 @@ function layout_flexible_array_insert_key_value($key, array &$array, $new_key, $
 function layout_flexible_template_column_style($form, &$form_state) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
 
-  // $form_state['flexible_template_id'] = $flexible_template_id;
-  // $form_state['original_row'] = $original_row;
-  $form_state['storage'] = $form_state['values'];
+  // Store form state values from layout_flexible_template_edit_row_form().
+  $form_state['storage']['row_data'] = $form_state['values'];
+
   $column_count = $form_state['values']['column_count'];
 
   $options = array();
@@ -563,7 +586,7 @@ function layout_flexible_template_column_style($form, &$form_state) {
       'layout_flexible_template_column_style_submit',
     ),
     '#ajax' => array(
-      'callback' => 'layout_flexible_template_edit_row_style_ajax',
+      'callback' => 'layout_flexible_template_edit_column_style_ajax',
       'wrapper' => 'row_settings',
     ),
   );
@@ -574,24 +597,14 @@ function layout_flexible_template_column_style($form, &$form_state) {
 /**
  * Submit handler for layout_flexible_template_column_style().
  */
-function layout_flexible_template_column_style_select_submit(&$form, &$form_state) {
-  $form_state['row_select'] = FALSE;
-  $form_state['rebuild'] = TRUE;
-}
-
-/**
- * Submit handler for layout_flexible_template_column_style().
- */
 function layout_flexible_template_column_style_submit(&$form, &$form_state) {
-  $form_state['row_select'] = TRUE;
-  //$form_state['rebuild'] = TRUE;
+  $form_state['column_style_selected'] = TRUE;
 }
 
 /**
  * AJAX responder to add a new row, column or region to a flexible layout.
  */
-function layout_flexible_template_edit_row_style_ajax($form, &$form_state) {
-  $form_state['storage'] = $form_state['values'];
+function layout_flexible_template_edit_column_style_ajax($form, &$form_state) {
   return $form['row_settings'];
 }
 
