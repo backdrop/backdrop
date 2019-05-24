@@ -311,7 +311,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state) {
   }
 
   $row_styles = layout_flexible_row_styles();
-  $options = array('none' => t('Select'));
+  $options = array('none' => t('select number of columns'));
   foreach ($row_styles as $name => $row_style) {
     $options[$row_style['column_count']] = $row_style['column_count'];
   }
@@ -341,8 +341,13 @@ function layout_flexible_template_edit_row_form($form, &$form_state) {
       'source' => array('row_settings', 'content', 'name'),
     ),
   );
+  $form['column_style'] = array(
+    '#type' => 'item',
+    '#title' => t('Selected column style'),
+    '#markup' => $selected_style,
+  );
   $form['column_count'] = array(
-    '#title' => t('Number of columns'),
+    '#title' => t('Change column style'),
     '#type' => 'select',
     '#default_value' => 'none',
     '#options' => $options,
@@ -350,9 +355,6 @@ function layout_flexible_template_edit_row_form($form, &$form_state) {
       'callback' => 'layout_flexible_template_edit_column_style_ajax',
       'wrapper' => 'row_settings',
     ),
-  );
-  $form['column_style'] = array(
-    '#markup' => $selected_style,
   );
   // todo
   $form['submit_column_style'] = array(
@@ -566,7 +568,7 @@ function layout_flexible_template_column_style($form, &$form_state) {
     '#collapsible' => TRUE,
     '#tree' => TRUE,
   );
-  for ($i = 1; $i <= $column_count; $i++) {
+  for ($i = 0; $i < $column_count; $i++) {
     $form['column_names']['column_name_' . $i] = array(
       '#type' => 'textfield',
       '#title' => t('Column ') . $i,
@@ -1037,7 +1039,13 @@ function layout_layout_info() {
       // todo: just add a col_count key to layout_flexible_row_styles()?
       $col_count = count(explode(':', $region_style['split']));
       for ($i = 0; $i < $col_count; $i++) {
-        $layouts[$item['name']]['regions'][$name . '_' . $i] = check_plain($region['name']) . ' ' . $i;
+        if (!empty($region['column_names']['column_name_' . $i])) {
+          $column_name = $region['column_names']['column_name_' . $i];
+        }
+        else {
+          $column_name = check_plain($region['name']) . ' ' . $i;
+        }
+        $layouts[$item['name']]['regions'][$name . '_' . $i] = $column_name;
       }
     }
   }

@@ -269,6 +269,9 @@ function layout_preprocess_layout(&$variables) {
     if ($class == 'LayoutRendererFlexible') {
       $variables['flexible_editor'] = TRUE;
     }
+    if ($class == 'LayoutRendererEditor') {
+      $variables['editor'] = TRUE;
+    }
 
     $variables['column_data'] = layout_flexible_row_styles();
 
@@ -280,7 +283,14 @@ function layout_preprocess_layout(&$variables) {
       $region['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row-id-' . $name . '"' : '';
       $region['element'] = !empty($region['element']) ? $region['element'] : 'div';
       if ($region['contains'] == 'column_12') {
+        if (!empty($region['column_names']['column_name_0'])) {
+          $column_name = $region['column_names']['column_name_0'];
+        }
+        else {
+          $column_name = $name;
+        }
         $region['columns'][0]['column_md'] = '12';
+        $region['columns'][0]['column_name'] = $column_name;
         $region['columns'][0]['content_key'] = $variables['flexible_editor'] ? $name : $name . '_0';
       }
       else {
@@ -288,8 +298,15 @@ function layout_preprocess_layout(&$variables) {
         $split = explode(':', $col_info['bootstrap']);
         $i = 0;
         foreach ($split as $col) {
+          if (!empty($region['column_names']['column_name_' . $i])) {
+            $column_name = $region['column_names']['column_name_' . $i];
+          }
+          else {
+            $column_name = $name . ' ' . $i;
+          }
           $region['columns'][] = array(
             'column_md' => $col,
+            'column_name' => $column_name,
             'content_key' => $variables['flexible_editor'] ? $name : $name . '_' . $i,
           );
           $i++;

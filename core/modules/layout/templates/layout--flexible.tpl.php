@@ -45,7 +45,7 @@
             <?php if ($region_buttons): ?>
               <div class="layout-editor-region" id="layout-editor-region-<?php print $name; ?>" data-region-name="<?php print $name; ?>">
               <div class="layout-editor-region-title clearfix">
-              <h2 class="label">COntent</h2>
+              <h2 class="label"><?php print $column['column_name']; ?></h2>
               </div>
               <div class="layout-editor-region-content"></div>
               </div>
