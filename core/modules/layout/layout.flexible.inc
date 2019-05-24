@@ -251,7 +251,6 @@ function layout_flexible_template_edit_row($form, &$form_state, $flexible_templa
   $form_state['flexible_template_id'] = $flexible_template_id;
   $form_state['original_row'] = $original_row;
   $form_state['op'] = $op;
-  // $form_state['column_count'] = isset(2;
 
   $form['row_settings'] = array(
     '#type' => 'container',
@@ -419,10 +418,10 @@ function layout_flexible_row_name_exists($machine_name) {
  * Submit handler for layout_configure_region_page().
  */
 function layout_flexible_template_edit_row_validate($form, &$form_state) {
-  // $machine_name = $form_state['values']['machine_name'];
-  // if ($machine_name != $form_state['original_row'] && isset($form_state['template_data']['regions'][$machine_name])) {
-    // form_error($form['machine_name'], t('This row name already exists.'));
-  // }
+  $machine_name = $form_state['values']['machine_name'];
+  if ($machine_name != $form_state['original_row'] && isset($form_state['template_data']['regions'][$machine_name])) {
+    form_error($form['machine_name'], t('This row name already exists.'));
+  }
 }
 
 /**
