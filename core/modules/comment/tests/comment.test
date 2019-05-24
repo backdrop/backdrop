@@ -286,7 +286,7 @@ class CommentHelperCase extends BackdropWebTestCase {
    * Performs the specified action on the specified comment.
    *
    * @param int $position
-   *   Position of comment to perform operation on.
+   *   Position of comment in bulk form to perform operation on.
    * @param string $action
    *   Operation to perform.
    * @param string $assert_text

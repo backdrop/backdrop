@@ -31,7 +31,7 @@ function comment_multiple_delete_confirm($form, &$form_state) {
   if (empty($cids)) {
     $destination = isset($_GET['destination']) ? $_GET['destination'] : 'admin/content/comment';
     $form['empty']['#markup'] = '<p>' . t('Return to the <a href="!url">comment administration page</a>.', array('!url' => url($destination))) . '</p>';
-    backdrop_set_message(t('No comments has been selected for deletion.'), 'error');
+    backdrop_set_message(t('No comments have been selected for deletion.'), 'error');
     return $form;
   }
 
