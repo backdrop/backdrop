@@ -1387,7 +1387,7 @@ function user_menu_alter(&$items) {
   if (module_exists('field_ui')) {
     // Provide a parent menu item for managing fields.
     $items['admin/config/people/manage'] = $items['admin/config/people/manage/fields'];
-    $items['admin/config/people/manage']['type'] = MENU_NORMAL_ITEM;
+    $items['admin/config/people/manage']['type'] = MENU_LOCAL_TASK;
     $items['admin/config/people/manage']['weight'] = 1;
     $items['admin/config/people/manage']['description'] = 'Configure fields and display of fields on user accounts.';
 
