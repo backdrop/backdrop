@@ -262,15 +262,14 @@ function layout_preprocess_layout(&$variables) {
 
   if ($variables['layout_info']['template'] == 'layout--flexible') {
     $data = layout_flexible_template_template($variables['layout_info']['name']);
+    $variables['region_buttons'] = array();
+    $variables['flexible_editor'] = FALSE;
     if (isset($variables['renderer']->region_buttons)) {
       $variables['region_buttons'] =  $variables['renderer']->region_buttons;
     }
     $class = $variables['renderer']->plugin['class'];
     if ($class == 'LayoutRendererFlexible') {
       $variables['flexible_editor'] = TRUE;
-    }
-    if ($class == 'LayoutRendererEditor') {
-      $variables['editor'] = TRUE;
     }
 
     $variables['column_data'] = layout_flexible_row_styles();
