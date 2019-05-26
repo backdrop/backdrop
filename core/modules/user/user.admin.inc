@@ -134,9 +134,18 @@ function user_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('user_register'),
     '#options' => array(
       USER_REGISTER_ADMINISTRATORS_ONLY => t('Administrators only'),
-      USER_REGISTER_VISITORS => t('Visitors'),
-      USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL => t('Visitors, but administrator approval is required'),
+      USER_REGISTER_VISITORS => t('Anonymous visitors'),
+      USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL => t('Anonymous visitors, but administrator approval is required'),
     )
+  );
+  $form['registration_cancellation']['user_register'][USER_REGISTER_ADMINISTRATORS_ONLY] = array(
+    '#description' => t('Only users with the <em>Administer user accounts</em> permission can create accounts.'),
+  );
+  $form['registration_cancellation']['user_register'][USER_REGISTER_VISITORS] = array(
+    '#description' => t('New accounts will be active upon creation. No approval required.'),
+  );
+  $form['registration_cancellation']['user_register'][USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL] = array(
+    '#description' => t('New accounts will be created as inactive/blocked. A user with the <em>Administer user accounts</em> permission will need to review and enable them.'),
   );
   $form['registration_cancellation']['user_email_verification'] = array(
     '#type' => 'checkbox',
