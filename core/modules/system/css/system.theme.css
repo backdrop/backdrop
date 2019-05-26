@@ -105,6 +105,9 @@ label.option {
   display: inline;
   font-weight: normal;
 }
+.form-item-description-enable label.option {
+  font-weight: bold;
+}
 .form-checkboxes .form-item,
 .form-radios .form-item {
   margin-top: 0.4em;
