@@ -139,13 +139,15 @@ function user_admin_settings($form, &$form_state) {
     )
   );
   $form['registration_cancellation']['user_register'][USER_REGISTER_ADMINISTRATORS_ONLY] = array(
-    '#description' => t('Only users with the <em>Administer user accounts</em> permission can create accounts.'),
+    '#description' => t('Only users with the <a href="@permission-url">%administer-users permission</a> can create accounts.', array('%administer-users' => t('Administer user accounts'), '@permission-url' => url('admin/config/people/permissions', array(
+    'fragment' => 'edit-administer-users')))),
   );
   $form['registration_cancellation']['user_register'][USER_REGISTER_VISITORS] = array(
     '#description' => t('New accounts will be active upon creation. No approval required.'),
   );
   $form['registration_cancellation']['user_register'][USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL] = array(
-    '#description' => t('New accounts will be created as inactive/blocked. A user with the <em>Administer user accounts</em> permission will need to review and enable them.'),
+    '#description' => t('New accounts will be created as inactive/blocked. A user with the <a href="@permission-url">%administer-users permission</a> will need to review and enable them.', array('%administer-users' => t('Administer user accounts'), '@permission-url' => url('admin/config/people/permissions', array(
+    'fragment' => 'edit-administer-users')))),
   );
   $form['registration_cancellation']['user_email_verification'] = array(
     '#type' => 'checkbox',
