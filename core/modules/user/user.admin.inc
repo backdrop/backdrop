@@ -134,7 +134,7 @@ function user_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('user_register'),
     '#options' => array(
       USER_REGISTER_ADMINISTRATORS_ONLY => t('Anonymous visitors'),
-      USER_REGISTER_VISITORS => $visitors_label,
+      USER_REGISTER_VISITORS => t('Visitors'),
       USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL => t('Visitors, but administrator approval is required'),
     )
   );
