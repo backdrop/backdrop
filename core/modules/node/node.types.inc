@@ -120,7 +120,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
   $form['description_enable'] = array(
     '#type' => 'checkbox',
     '#title' => t('Provide description'),
-    '#default_value' => isset($type->description) ? 1 : 0,
+    '#default_value' => $type->description != '' ? 1 : 0,
   );
   $form['description'] = array(
     '#type' => 'textarea',
@@ -178,7 +178,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
   $form['submission']['help_enable'] = array(
     '#type' => 'checkbox',
     '#title' => t('Provide explanation or submission guidelines'),
-    '#default_value' => isset($type->help) ? 1 : 0,
+    '#default_value' => $type->help != '' ? 1 : 0,
   );
   $form['submission']['help']  = array(
     '#type' => 'textarea',
