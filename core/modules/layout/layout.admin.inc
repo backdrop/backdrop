@@ -2693,9 +2693,9 @@ function layout_settings_page($form, &$form_state) {
   );
 
   $header = array(
-    'icon' => array('data' => t('Author'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
-    'name' => array('data' => t('Posted in'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-    'type' => array('data' => t('Updated'), 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    'icon' => array('data' => t('Icon'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
+    'name' => array('data' => t('Name'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    'type' => array('data' => t('Type'), 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
     'operations' => t('Operations'),
   );
 
@@ -2707,7 +2707,7 @@ function layout_settings_page($form, &$form_state) {
   $default = array();
   $form_state['hidden_templates'] = array();
   $all_template_info = layout_get_layout_template_info(NULL, TRUE);
-  dpm($all_template_info);
+
   foreach ($all_template_info as $template_name => $template_info) {
     // Build the default values list.
     if (!in_array($template_name, $excluded)) {
@@ -2717,8 +2717,12 @@ function layout_settings_page($form, &$form_state) {
     // Build the list of possible options, either enabled or not hidden.
     $is_default = in_array($template_name, $default);
     if ($is_default || !$template_info['hidden']) {
+      $icon_path = $template_info['path'] . '/' . $template_info['preview'];
       $rows[$template_name] = array(
-        'icon' => theme('layout_template_option', array('template_info' => $template_info)),
+        'icon' => theme('image', array(
+          'uri' => $icon_path,
+          'attributes' => array('title' => $template_info['title']),
+        )),
         'name' => $template_info['title'],
         'type' => $template_info['flexible'] ? t('Flexible') : t('Standard'),
       );
@@ -2751,8 +2755,7 @@ function layout_settings_page($form, &$form_state) {
  * Ensures that active layouts are not disabled while in use.
  */
 function layout_settings_page_validate(&$form, &$form_state) {
-  dpm($form_state['hidden_templates']);
-/*   $options = array_keys($form_state['values']['templates']);
+  $options = array_keys($form_state['values']['templates']);
   $included = array_values($form_state['values']['templates']);
   $excluded = array_unique(array_diff($options, $included));
   $form_state['excluded_templates'] = array_values(array_merge($excluded, $form_state['hidden_templates']));
@@ -2769,13 +2772,12 @@ function layout_settings_page_validate(&$form, &$form_state) {
       form_set_error('templates', t('The "@layout" layout template is currently in use and may not be excluded.', array('@layout' => $info['title'])));
     }
   }
- */}
+}
 
 /**
  * Submit handler for layout advanced settings page.
  */
 function layout_settings_page_submit($form, &$form_state) {
-  dpm($form_state['values']);
   // config_set('layout.settings', 'excluded_templates', $form_state['excluded_templates']);
   backdrop_set_message(t('Your configuration has been saved.'));
 }
