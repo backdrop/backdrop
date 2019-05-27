@@ -6,4 +6,5 @@ version = BACKDROP_VERSION
 ; precedence over the version of the same module that is in the
 ; modules/simpletest/tests directory.
 backdrop = 0.x
+type = module
 hidden = TRUE
