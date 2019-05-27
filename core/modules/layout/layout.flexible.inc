@@ -7,62 +7,6 @@
  */
 
 /**
- * Output a list of flexible templates.
- */
-function layout_flexible_template_list_page() {
-  $templates = layout_flexible_template_load();
-  $rows = array();
-
-  foreach ($templates as $template) {
-    $links = array();
-
-    $links['edit'] = array(
-      'title' => t('Edit'),
-      'href' => 'admin/structure/layouts/settings/' . $template['name'] . '/edit',
-    );
-    $links['configure'] = array(
-      'title' => t('Configure'),
-      'href' => 'admin/structure/layouts/settings/' . $template['name'] . '/configure',
-    );
-    $links['delete'] = array(
-      'title' => t('Delete'),
-      'href' => 'admin/structure/layouts/settings/' . $template['name'] . '/delete',
-    );
-
-
-    $operations = array(
-      '#type' => 'dropbutton',
-      '#links' => $links,
-    );
-
-    $rows[] = array('name' => $template['title'], 'description' => $template['description'], 'operations' => backdrop_render($operations));
-  }
-
-  $header = array(
-    array('data' => 'Name', 'field' => 'name', 'sort' => 'ASC'),
-    array('data' => 'Description', 'field' => 'description', 'sort' => 'ASC'),
-    array('data' => 'Operations', 'field' => 'operations'),
-  );
-
-  $page['description_container'] = array(
-    '#type' => 'container',
-  );
-
-  $page['description_container']['description'] = array(
-    '#markup' => '<p>' . t("Provides a summary of all available templates.") . '<p>',
-  );
-
-  $page['table'] = array(
-    '#theme' => 'table',
-    '#header' => $header,
-    '#rows' => $rows,
-    '#empty' => t('There are no flexible templates.'),
-  );
-
-  return $page;
-}
-
-/**
  * Form to add a row to a flexible template.
  *
  * @param $flexible_template_id
