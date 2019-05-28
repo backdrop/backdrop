@@ -1044,7 +1044,7 @@ function comment_update_1006() {
               'description' => '',
               'use_operator' => 0,
               'operator' => 'combine_op',
-              'identifier' => 'combine',
+              'identifier' => 'contains',
               'required' => 0,
               'remember' => 0,
               'multiple' => FALSE,
@@ -1131,7 +1131,7 @@ function comment_update_1006() {
             'expose' => array(
               'use_operator' => FALSE,
               'operator' => 'name_op',
-              'identifier' => 'name',
+              'identifier' => 'author',
               'label' => 'Author',
               'description' => NULL,
               'remember' => FALSE,
@@ -1283,7 +1283,7 @@ function comment_update_1006() {
         ),
       ),
     ),
-    'page' => array(
+    'overview_page' => array(
       'display_title' => 'Overview Page',
       'display_plugin' => 'page',
       'display_options' => array(
@@ -1312,7 +1312,7 @@ function comment_update_1006() {
         ),
       ),
     ),
-    'page_1' => array(
+    'approval_page' => array(
       'display_title' => 'Approval Page',
       'display_plugin' => 'page',
       'display_options' => array(
@@ -1350,7 +1350,7 @@ function comment_update_1006() {
               'description' => '',
               'use_operator' => 0,
               'operator' => 'combine_op',
-              'identifier' => 'combine',
+              'identifier' => 'contains',
               'required' => 0,
               'remember' => 0,
               'multiple' => FALSE,
@@ -1437,7 +1437,7 @@ function comment_update_1006() {
             'expose' => array(
               'use_operator' => FALSE,
               'operator' => 'name_op',
-              'identifier' => 'name',
+              'identifier' => 'author',
               'label' => 'Author',
               'description' => NULL,
               'remember' => FALSE,
