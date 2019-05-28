@@ -10,7 +10,7 @@
  * @ingroup themeable
  */
 function theme_system_powered_by() {
-  return '<span>' . t('Powered by <a href="@poweredby">Backdrop CMS</a>', array('@poweredby' => 'https://backdropcms.org')) . '</span>';
+  return '<span>' . t('<a href="@backdrop" class="@class" title="Powered by Backdrop CMS">Powered by Backdrop CMS</a>', array('@backdrop' => 'https://backdropcms.org', '@class' => 'logo backdrop-mark')) . '</span>';
 }
 
 /**
