@@ -1139,7 +1139,7 @@ class CommentPreviewTest extends CommentHelperCase {
  * Tests anonymous commenting.
  */
 class CommentAnonymous extends CommentHelperCase {
-  function setUp() {
+  function setUp($modules = array()) {
     parent::setUp();
     config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
   }
@@ -1536,7 +1536,7 @@ class CommentPagerTest extends CommentHelperCase {
  * Tests comments with node access.
  */
 class CommentNodeAccessTest extends CommentHelperCase {
-  function setUp() {
+  function setUp($modules = array()) {
     parent::setUp('search', 'node_access_test');
 
     $web_user_role = $this->web_user->roles[count($this->web_user->roles) - 1];
@@ -1638,7 +1638,7 @@ class CommentApprovalTest extends CommentHelperCase {
     // Publish multiple comments in one operation.
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('admin/content/comment/approval');
-    $this->assertText(t('There are @count unapproved comments.', array('@count' => 2)), 'Two unapproved comments waiting for approval.');
+    $this->assertText(t('Number of unapproved comments: @count', array('@count' => 2)), 'Two unapproved comments waiting for approval.');
     $edit = array(
       'action' => 'comment_publish_action',
       'bulk_form[0]' => TRUE,
@@ -1655,7 +1655,7 @@ class CommentApprovalTest extends CommentHelperCase {
       'bulk_form[2]' => TRUE,
     );
     $this->backdropPost('admin/content/comment', $edit, t('Execute'));
-    $this->assertText(t('Are you sure you want to delete these comments and all their children?'), 'Confirmation required.');
+    $this->assertText(t('Are you sure you want to delete these comments and all their replies?'), 'Confirmation required.');
     $this->backdropPost(NULL, array(), t('Delete comments'));
     $this->assertText(t('No comments found.'), 'All comments were deleted.');
   }
@@ -1708,7 +1708,7 @@ class CommentApprovalTest extends CommentHelperCase {
  * Tests the Comment module blocks.
  */
 class CommentBlockFunctionalTest extends CommentHelperCase {
-  function setUp() {
+  function setUp($modules = array()) {
     parent::setUp(array('block'));
 
     $admin_user_role = $this->admin_user->roles[count($this->admin_user->roles) - 1];
@@ -1997,7 +1997,7 @@ class CommentActionsTestCase extends CommentHelperCase {
  * Tests fields on comments.
  */
 class CommentFieldsTest extends CommentHelperCase {
-  function setUp() {
+  function setUp($modules = array()) {
     parent::setUp(array('field_ui'));
   }
 
