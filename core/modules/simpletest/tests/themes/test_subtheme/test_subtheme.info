@@ -1,6 +1,7 @@
 name = Theme test subtheme
 description = Test theme which uses test_basetheme as the base theme.
 backdrop = 1.x
+type = theme
 base theme = test_basetheme
 hidden = TRUE
 
