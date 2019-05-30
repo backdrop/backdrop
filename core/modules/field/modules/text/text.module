@@ -185,7 +185,11 @@ function text_field_formatter_info() {
     'text_trimmed' => array(
       'label' => t('Trimmed'),
       'field types' => array('text', 'text_long', 'text_with_summary'),
-      'settings' => array('trim_length' => 600),
+      'settings' => array(
+        'trim_length' => 600,
+        'word_boundary' => FALSE,
+        'ellipsis' => FALSE,
+      ),
     ),
 
     // The 'summary or trimmed' field formatter for text_with_summary
@@ -195,7 +199,11 @@ function text_field_formatter_info() {
     'text_summary_or_trimmed' => array(
       'label' => t('Summary or trimmed'),
       'field types' => array('text_with_summary'),
-      'settings' => array('trim_length' => 600),
+      'settings' => array(
+        'trim_length' => 600,
+        'word_boundary' => FALSE,
+        'ellipsis' => FALSE,
+      ),
     ),
   );
 }
@@ -220,6 +228,23 @@ function text_field_formatter_settings_form($field, $instance, $view_mode, $form
       '#required' => TRUE,
       '#description' => t('If the summary is not set, the trimmed %label field will be shorter than this character limit.', array('%label' => $instance['label'])),
     );
+    $element['word_boundary'] = array(
+      '#title' => t('Trim on word boundary'),
+      '#type' => 'checkbox',
+      '#default_value' => $settings['word_boundary'],
+      '#description' => t('Trim to the nearest word, rather than the nearest paragraph, line break, or sentence.'),
+    );
+    $element['ellipsis'] = array(
+      '#title' => t('Add ellipsis'),
+      '#type' => 'checkbox',
+      '#default_value' => $settings['ellipsis'],
+      '#description' => t('Add an ellipsis (...) to the end of the trimmed text.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name$="[settings][word_boundary]"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
   }
 
   return $element;
@@ -232,13 +257,20 @@ function text_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
 
-  $summary = '';
+  $summary = array();
 
   if (strpos($display['type'], '_trimmed') !== FALSE) {
-    $summary = t('Trimmed limit: @trim_length characters', array('@trim_length' => $settings['trim_length']));
+    $summary[] = t('Trimmed limit: @trim_length characters', array('@trim_length' => $settings['trim_length']));
+    if ($settings['word_boundary']) {
+      $word_boundary = t('Trim on word boundary.');
+      if ($settings['ellipsis']) {
+        $word_boundary .= ' ' . t('Add ellipsis.');
+      }
+      $summary[] = $word_boundary;
+    }
   }
 
-  return $summary;
+  return implode('<br />', $summary);
 }
 
 /**
@@ -246,6 +278,7 @@ function text_field_formatter_settings_summary($field, $instance, $view_mode) {
  */
 function text_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
+  $settings = $display['settings'];
 
   switch ($display['type']) {
     case 'text_default':
@@ -253,7 +286,12 @@ function text_field_formatter_view($entity_type, $entity, $field, $instance, $la
       foreach ($items as $delta => $item) {
         $output = _text_sanitize($instance, $langcode, $item, 'value');
         if ($display['type'] == 'text_trimmed') {
-          $output = text_summary($output, $instance['settings']['text_processing'] ? $item['format'] : NULL, $display['settings']['trim_length']);
+          if ($settings['word_boundary']) {
+            $output = _filter_htmlcorrector(truncate_utf8($output, $settings['trim_length'], $settings['word_boundary'], $settings['ellipsis']));
+          }
+          else {
+            $output = text_summary($output, $instance['settings']['text_processing'] ? $item['format'] : NULL, $settings['trim_length']);
+          }
         }
         $element[$delta] = array('#markup' => $output);
       }
@@ -266,7 +304,12 @@ function text_field_formatter_view($entity_type, $entity, $field, $instance, $la
         }
         else {
           $output = _text_sanitize($instance, $langcode, $item, 'value');
-          $output = text_summary($output, $instance['settings']['text_processing'] ? $item['format'] : NULL, $display['settings']['trim_length']);
+          if ($settings['word_boundary']) {
+            $output = _filter_htmlcorrector(truncate_utf8($output, $settings['trim_length'], $settings['word_boundary'], $settings['ellipsis']));
+          }
+          else {
+            $output = text_summary($output, $instance['settings']['text_processing'] ? $item['format'] : NULL, $settings['trim_length']);
+          }
         }
         $element[$delta] = array('#markup' => $output);
       }
