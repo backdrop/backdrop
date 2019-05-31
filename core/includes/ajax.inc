@@ -382,7 +382,16 @@ function ajax_get_form() {
 function ajax_form_callback() {
   list($form, $form_state, $form_id, $form_build_id, $commands) = ajax_get_form();
   backdrop_process_form($form['#form_id'], $form, $form_state);
+  return ajax_form_return_commands($form, $form_state, $commands);
+}
 
+/**
+ * Return a set of AJAX commands for updating a form.
+ *
+ * @see ajax_form_callback()
+ * @see drupal_get_form()
+ */
+function ajax_form_return_commands($form, $form_state, $commands = array()) {
   // We need to return the part of the form (or some other content) that needs
   // to be re-rendered so the browser can update the page with changed content.
   // Since this is the generic menu callback used by many Ajax elements, it is
@@ -684,7 +693,7 @@ function ajax_footer() {
  */
 function ajax_process_form($element, &$form_state) {
   $element = ajax_pre_render_element($element);
-  if (!empty($element['#ajax_processed'])) {
+  if (!empty($element['#ajax_processed']) && !isset($element['#ajax']['no_form_cache'])) {
     $form_state['cache'] = TRUE;
   }
   return $element;
@@ -781,19 +790,33 @@ function ajax_pre_render_element($element) {
 
     $settings = $element['#ajax'];
 
-    // Assign default settings. When 'path' is set to NULL, ajax.js submits the
-    // Ajax request to the same URL as the form or link destination is for
-    // someone with JavaScript disabled. This is generally preferred as a way to
-    // ensure consistent server processing for js and no-js users, and Backdrop's
-    // content negotiation takes care of formatting the response appropriately.
-    // However, 'path' and 'options' may be set when wanting server processing
-    // to be substantially different for a JavaScript triggered submission.
-    // One such substantial difference is form elements that use
-    // #ajax['callback'] for determining which part of the form needs
-    // re-rendering. For that, we have a special 'system/ajax' route.
+    // When 'path' is set to NULL, ajax.js submits the Ajax request to the same
+    // URL as the form or link destination is for someone with JavaScript
+    // disabled. This is generally preferred as a way to ensure consistent
+    // server processing for js and no-js users, and Backdrop's content
+    // negotiation takes care of formatting the response appropriately. However,
+    // 'path' and 'options' may be set when wanting server processing to be
+    // substantially different for a JavaScript triggered submission. One such
+    // substantial difference is form elements that use #ajax['callback'] for
+    // determining which part of the form needs re-rendering. For that, we have
+    // a special 'system/ajax' route.
+    $path = isset($settings['callback']) ? 'system/ajax' : NULL;
+    $options = array();
+
+    $enabled_callbacks = variable_get('drupal_ajax_no_form_cache_enabled_callbacks', array());
+    if (isset($element['#ajax']['callback']) && isset($enabled_callbacks[$element['#ajax']['callback']]) && !isset($element['#ajax']['path'])) {
+      $query_parameters = drupal_get_query_parameters($_GET, array('q'));
+
+      $path = $_GET['q'];
+      $options['query'] = $query_parameters;
+
+      $element['#ajax']['no_form_cache'] = TRUE;
+    }
+
+    // Assign default settings.
     $settings += array(
-      'path' => isset($settings['callback']) ? 'system/ajax' : NULL,
-      'options' => array(),
+      'path' => $path,
+      'options' => $options,
     );
 
     if (isset($settings['method']) && $settings['method'] == 'replace') {

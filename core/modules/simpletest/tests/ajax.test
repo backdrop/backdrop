@@ -546,6 +546,63 @@ class AJAXFormPageCacheTestCase extends AJAXTestCase {
   }
 }
 
+/**
+ * Test Ajax forms when form cache is disabled for the ajax form.
+ */
+class AJAXFormNoCacheTestCase extends AJAXTestCase {
+  protected $profile = 'testing';
+
+  public function setUp() {
+    parent::setUp();
+
+    variable_set('backdrop_ajax_no_form_cache_enabled_callbacks', array(
+      'ajax_forms_test_simple_form_select_callback' => TRUE,
+      'ajax_forms_test_simple_form_checkbox_callback' => TRUE,
+    ));
+  }
+
+  /**
+   * Return the build id of the current form.
+   */
+  protected function getFormBuildId() {
+    $build_id_fields = $this->xpath('//input[@name="form_build_id"]');
+    $this->assertEqual(count($build_id_fields), 1, 'One form build id field on the page');
+    return (string) $build_id_fields[0]['value'];
+  }
+
+  /**
+   * Check for a given form build id in cache_form.
+   */
+  protected function getFormFromCache($form_build_id) {
+    return (bool) cache_get('form_' . $form_build_id, 'cache_form');
+  }
+
+  /**
+   * Create a simple ajax form, then validate form cache is disabled.
+   */
+  public function testSimpleAJAXFormValue() {
+    $this->backdropGet('ajax_forms_test_no_form_cache');
+    $build_id_initial = $this->getFormBuildId();
+
+    $edit = array('select' => 'green');
+    $commands = $this->backdropPostAJAX(NULL, $edit, 'select');
+    $build_id_first_ajax = $this->getFormBuildId();
+    $this->assertNotEqual($build_id_initial, $build_id_first_ajax, 'Build id is changed in the simpletest-DOM on first AJAX submission');
+    $expected = array(
+      'command' => 'updateBuildId',
+      'old' => $build_id_initial,
+      'new' => $build_id_first_ajax,
+    );
+    $this->assertCommand($commands, $expected, 'Build id change command issued on first AJAX submission');
+    $this->assertFalse($this->getFormFromCache($build_id_initial), 'AJAX form was not retrieved from cache_form.');
+
+    // Now disable all callbacks, allowing the ajax form to be cached.
+    variable_set('backdrop_ajax_no_form_cache_enabled_callbacks', array());
+    $this->backdropGet('ajax_forms_test_no_form_cache');
+    $build_id = $this->getFormBuildId();
+    $this->assertTrue($this->getFormFromCache($build_id), 'AJAX form was successfully retrieved from cache_form.');
+  }
+}
 
 /**
  * Miscellaneous Ajax tests using ajax_test module.

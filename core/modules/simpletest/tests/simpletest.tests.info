@@ -94,6 +94,12 @@ description = Tests that AJAX forms work properly for anonymous users on cached 
 group = AJAX
 file = ajax.test
 
+[AJAXFormNoCacheTestCase]
+name = AJAX forms with form cache disabled
+description = Tests that AJAX forms can have form cache disabled.
+group = AJAX
+file = ajax.test
+
 [AJAXElementValidation]
 name = Miscellaneous AJAX tests
 description = Various tests of AJAX behavior
