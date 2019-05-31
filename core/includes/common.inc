@@ -6725,6 +6725,15 @@ function render(&$element) {
  * rendered for the first time, as it will have no effect on subsequent
  * renderings of the parent tree.
  *
+ * Note that hide() should only be used when doing the final printing of a
+ * render element, such as in a template. If wanting to hide a form element
+ * earlier in the process, such as in hook_form_alter(), you should set #access
+ * instead, like this:
+ *
+ * @code
+ * $element['#access'] = FALSE
+ * @endcode
+ *
  * @param $element
  *   The element to be hidden.
  *
