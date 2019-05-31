@@ -974,7 +974,7 @@ function layout_layout_info() {
       'template' => 'layout--flexible',
       'flexible' => TRUE,
       'type' => 'layout',
-      'path' => 'images',
+      'path' => 'templates',
       'preview' => 'flexible_template.png',
       'libraries' => array('bootstrap4-gs'),
     );

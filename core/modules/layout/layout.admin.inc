@@ -2724,7 +2724,7 @@ function layout_settings_page($form, &$form_state) {
           'attributes' => array('title' => $template_info['title']),
         )),
         'name' => $template_info['title'],
-        'type' => $template_info['flexible'] ? t('Flexible') : t('Standard'),
+        'type' => !empty($template_info['flexible']) ? t('Flexible') : t('Standard'),
       );
       $rows[$template_name]['operations']['data'] = array(
         '#type' => 'dropbutton',
@@ -2800,7 +2800,7 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
       'href' => 'admin/structure/layouts/',
     );
   }
-  if ($template_info['flexible']) {
+  if (!empty($template_info['flexible'])) {
     $links['edit'] = array(
       'title' => t('Edit'),
       'href' => 'admin/structure/layouts/settings/' . $template_info['name'] . '/edit',
