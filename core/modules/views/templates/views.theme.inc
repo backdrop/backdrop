@@ -929,18 +929,18 @@ function template_preprocess_views_view_unformatted(&$variables) {
 function template_preprocess_views_view_list(&$variables) {
   $handler  = $variables['view']->style_plugin;
 
-  $class = explode(' ', $handler->options['class']);
-  foreach ($class as $key => $individual) {
-    $class[$key] = backdrop_clean_css_identifier($individual, array());
+  $classes = explode(' ', $handler->options['class']);
+  foreach ($classes as $key => $class) {
+    $classes[$key] = backdrop_clean_css_identifier($class, array());
   }
 
-  $wrapper_class = explode(' ', $handler->options['wrapper_class']);
-  foreach ($wrapper_class as $key => $individual) {
-    $wrapper_class[$key] = backdrop_clean_css_identifier($individual, array());
+  $wrapper_classes = explode(' ', $handler->options['wrapper_class']);
+  foreach ($wrapper_classes as $key => $class) {
+    $wrapper_classes[$key] = backdrop_clean_css_identifier($class, array());
   }
 
-  $variables['class'] = implode(' ', $class);
-  $variables['wrapper_class'] = implode(' ', $wrapper_class);
+  $variables['class'] = implode(' ', $classes);
+  $variables['wrapper_class'] = implode(' ', $wrapper_classes);
   $variables['wrapper_prefix'] = '';
   $variables['wrapper_suffix'] = '';
   $variables['list_type_prefix'] = '<' . $handler->options['type'] . '>';
