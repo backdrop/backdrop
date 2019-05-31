@@ -56,7 +56,7 @@ function template_preprocess_views_view(&$variables) {
 
   $variables['classes'] = array();
   $variables['classes'][] = 'view';
-  $variables['classes'][] = 'view-' . backdrop_clean_css_identifier($variables['name']);
+  $variables['classes'][] = 'view-' . $variables['css_name'];
   $variables['classes'][] = 'view-id-' . $variables['name'];
   $variables['classes'][] = 'view-display-id-' . $variables['display_id'];
 
@@ -930,10 +930,14 @@ function template_preprocess_views_view_list(&$variables) {
   $handler  = $variables['view']->style_plugin;
 
   $class = explode(' ', $handler->options['class']);
-  $class = array_map('backdrop_clean_css_identifier', $class, array(array()));
+  foreach ($class as $key => $individual) {
+    $class[$key] = backdrop_clean_css_identifier($individual, array());
+  }
 
   $wrapper_class = explode(' ', $handler->options['wrapper_class']);
-  $wrapper_class = array_map('backdrop_clean_css_identifier', $wrapper_class, array(array()));
+  foreach ($wrapper_class as $key => $individual) {
+    $wrapper_class[$key] = backdrop_clean_css_identifier($individual, array());
+  }
 
   $variables['class'] = implode(' ', $class);
   $variables['wrapper_class'] = implode(' ', $wrapper_class);
