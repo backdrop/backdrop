@@ -1950,7 +1950,7 @@ class InfoFileCoreTest extends BackdropUnitTestCase {
    */
   function testProjectInfoFileContents() {
     $projects = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'core');
-    $allowed_project_types = array('module', 'theme', 'layout', 'profile', 'test');
+    $allowed_project_types = array('module', 'theme', 'layout', 'profile');
     $type_fails = array();
     $version_fails = array();
     foreach($projects as $key => $project) {
