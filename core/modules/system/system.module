@@ -2433,8 +2433,7 @@ function system_block_info() {
   foreach (menu_list_system_menus() as $menu_name => $title) {
     $custom_title = isset($all_menus[$menu_name]) ? $all_menus[$menu_name] : $title;
     $blocks[$menu_name] = array(
-      // Keeping $custom_title wrapped in t(), to allow menu names to be
-      // translated.
+      // Names from menu_list_system_menus() need to be translated through t().
       'info' => check_plain(t($custom_title)),
       'description' => t('A list of links for the menu: %title.', array('%title' => t($custom_title))),
     );
