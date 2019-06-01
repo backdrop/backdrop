@@ -1373,7 +1373,7 @@ function system_library_info() {
   $libraries['smartmenus'] = array(
     'title' => 'SmartMenus',
     'website' => 'http://www.smartmenus.org',
-    'version' => '1.0.0',
+    'version' => '1.1.0',
     'css' => array(
       'core/misc/smartmenus/css/sm-core-css.css' => array(
         'group' => CSS_THEME,
