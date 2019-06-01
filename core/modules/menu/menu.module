@@ -452,8 +452,7 @@ function menu_block_info() {
   $blocks = array();
   foreach ($menus as $name => $title) {
     $blocks[$name] = array(
-      // No need to wrap $title in t(), since these menu titles are already
-      // translated.
+      // Names from menu_list_system_menus() need to be translated through t().
       'info' => check_plain($title),
       'description' => t('A list of links for the menu: %title.', array('%title' => $title)),
       // Menu blocks can't be cached because each menu item can have a custom
