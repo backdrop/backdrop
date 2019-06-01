@@ -424,7 +424,6 @@ ul.secondary li {
 }
 [dir="rtl"] ul.secondary li {
   border-right: none;
-  display: inline;
   padding: 0 1em;
 }
 ul.secondary a {
