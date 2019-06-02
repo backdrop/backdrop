@@ -2537,10 +2537,9 @@ class views_plugin_display extends views_plugin {
         if (!empty($this->view->exposed_raw_input)) {
           $url_options['query'] = $this->view->exposed_raw_input;
         }
-        $theme = views_theme_functions('views_more', $this->view, $this->display);
         $path = check_url(url($path, $url_options));
 
-        return theme($theme, array('more_url' => $path, 'link_text' => check_plain($this->use_more_text()), 'view' => $this->view));
+        return theme('more_link', array('url' => $path, 'title' => check_plain($this->use_more_text())));
       }
     }
   }
