@@ -368,7 +368,9 @@ function system_theme_default() {
 
       // Clear caches after changing the theme.
       cache_clear_all();
-      backdrop_set_message(t('All caches have been cleared.'));
+      if (user_access('flush caches')) {
+        backdrop_set_message(t('All caches have been cleared.'));
+      }
 
     }
     else {
