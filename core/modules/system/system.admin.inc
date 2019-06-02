@@ -305,7 +305,7 @@ function system_theme_disable_confirm($form, &$form_state) {
  * Form submission handler for system_theme_disable_confirm_submit().
  */
 function system_theme_disable_confirm_submit($form, &$form_state) {
-  $theme = $form_state['complete_form']['theme']["#value"];
+  $theme = $form_state['complete_form']['theme']['#value'];
   // Get current list of themes.
   $themes = list_themes();
 
