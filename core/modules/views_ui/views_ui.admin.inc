@@ -1090,14 +1090,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     '#access' => empty($view->locked),
   );
 
-  if (empty($view->changed)) {
-    $form['actions']['#attributes'] = array(
-      'class' => array(
-        'js-hide',
-      ),
-    );
-  }
-
   $form['actions']['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
@@ -1110,6 +1102,14 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     '#value' => t('Cancel'),
     '#submit' => array('views_ui_edit_view_form_cancel'),
   );
+
+  if (empty($view->changed)) {
+    $form['actions']['save']['#attributes'] = array(
+      'class' => array(
+        'js-hide',
+      ),
+    );
+  }
 
   $form['displays'] = array(
     '#prefix' => '<h1 class="unit-title">' . t('Displays') . '</h1>' . "\n" . '<div class="views-displays">',
