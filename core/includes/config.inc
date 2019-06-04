@@ -251,8 +251,7 @@ function config_load_multiple($names, $type = 'active') {
  */
 function config_install_default_config($module, $config_name = NULL) {
   $module_config_dir = backdrop_get_path('module', $module) . '/config';
-  $storage = new ConfigFileStorage($module_config_dir);
-  if (is_dir(backdrop_get_path('module', $module) . '/config')) {
+  if (is_dir($module_config_dir)) {
     $files = glob($module_config_dir . '/' . '*.json');
     foreach ($files as $file) {
       // Load config data into the active store and write it out to the
@@ -262,6 +261,7 @@ function config_install_default_config($module, $config_name = NULL) {
       $file = array_pop($parts);
       $file_config_name = str_replace('.json', '', $file);
       if (is_null($config_name) || $file_config_name === $config_name) {
+        $storage = new ConfigFileStorage($module_config_dir);
         $data = $storage->read($file_config_name);
         $config = config($file_config_name);
         // We only create new configs, and do not overwrite existing ones.
