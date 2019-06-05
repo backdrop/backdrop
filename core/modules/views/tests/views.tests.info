@@ -192,7 +192,7 @@ file = handlers/views_handler_filter_string.test
 
 [ViewsHandlerManyToOneTest]
 name = Handler: Many To One Helper
-description = Tests the many to one helper handler class.
+description = Tests the many to one helper handler.
 group = Views Handlers
 file = handlers/views_handler_manytoone.test.test
 
