@@ -22,21 +22,21 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
   /**
    * Nodes used by this test.
    *
-   * @var stdClass[]
+   * @var Node[]
    */
   protected $nodes;
 
   /**
    * Accounts used by this test.
    *
-   * @var stdClass[]
+   * @var User[]
    */
   protected $accounts;
 
   /**
    * Terms used by this test.
    *
-   * @var stdClass[]
+   * @var TaxonomyTerm[]
    */
   protected $terms;
 
