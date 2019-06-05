@@ -406,7 +406,7 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
     $handler->display->display_options['filters']['type']['table'] = 'node';
     $handler->display->display_options['filters']['type']['field'] = 'type';
     $handler->display->display_options['filters']['type']['value'] = array(
-      'article' => 'article',
+      'post' => 'post',
     );
     $handler->display->display_options['filters']['type']['group'] = 1;
     /* Filter criterion: Field: field_bool (field_bool) */
@@ -432,7 +432,7 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
     $handler->display->display_options['filters']['type_1']['table'] = 'node';
     $handler->display->display_options['filters']['type_1']['field'] = 'type';
     $handler->display->display_options['filters']['type_1']['value'] = array(
-      'article' => 'article',
+      'post' => 'post',
     );
     $handler->display->display_options['filters']['type_1']['group'] = 2;
     /* Filter criterion: Content: Published */
