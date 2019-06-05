@@ -182,7 +182,7 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
     $node[$this->fields[0]['field_name']][LANGUAGE_NONE][]['value'] = '1';
     $node[$this->fields[1]['field_name']][LANGUAGE_NONE][]['value'] = '1';
     $node['field_tags'][LANGUAGE_NONE][]['tid'] = $this->terms[1]->tid;
-    $this->nodes[0] = $this->drupalCreateNode($node);
+    $this->nodes[0] = $this->backdropCreateNode($node);
 
     // Create a node where the field_bool is not checked, field_list is empty
     // and tag is term 1.
@@ -191,12 +191,12 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
     $node[$this->fields[0]['field_name']] = array();
     $node[$this->fields[1]['field_name']] = array();
     $node['field_tags'][LANGUAGE_NONE][]['tid'] = $this->terms[0]->tid;
-    $this->nodes[1] = $this->drupalCreateNode($node);
+    $this->nodes[1] = $this->backdropCreateNode($node);
 
     // Create a user where field_bool is checked, field_list is '1' and tag is
     // term 1.
     $permissions = array('access content');
-    $account = $this->drupalCreateUser($permissions);
+    $account = $this->backdropCreateUser($permissions);
     $account->{$this->fields[0]['field_name']}[LANGUAGE_NONE][]['value'] = '1';
     $account->{$this->fields[1]['field_name']}[LANGUAGE_NONE][]['value'] = '1';
     $account->field_tags[LANGUAGE_NONE][]['tid'] = $this->terms[0]->tid;
