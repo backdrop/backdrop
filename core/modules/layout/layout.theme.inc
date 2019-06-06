@@ -117,15 +117,23 @@ function theme_layout_template_option($variables) {
 /**
  * Outputs an individual option label for selecting a layout.
  */
-function theme_layout_flexible_template_option($variables) {
-  $template_info = $variables['template_info'];
+function theme_layout_flexible_template_style_option($variables) {
+  $row_style = $variables['row_style'];
+  if ($row_style['column_count'] == 1) {
+    $columns = array('12');
+  }
+  else {
+    $columns = explode(':', $row_style['bootstrap']);
+  }
   $output = '';
-  $output .= '<div class="layout-icon">';
-  $output .= '<div class="layout-caption">' . check_plain($template_info['title']) . '</div>';
-  $output .= '<div class="layout-links">' . l(t('Edit'), 'admin/structure/layouts/settings/' . $template_info['name'] . '/edit') . '</div>';
-  $output .= '<div class="layout-links">' . l(t('Configure'), 'admin/structure/layouts/settings/' . $template_info['name'] . '/configure') . '</div>';
-  $output .= '<div class="layout-links">' . t('Delete') . '</div>';
+  $output .= '<div class="flexible-icon container">';
+  $output .= '<div class="flexible-icon-row row">';
+  foreach ($columns as $column) {
+    $output .= '<div class="flexible-icon-column col-md-' . $column . '">column</div>';
+  }
   $output .= '</div>';
+  $output .= '</div>';
+  $output .= '<div class="layout-caption">' . check_plain($row_style['name']) . '</div>';
   return $output;
 }
 

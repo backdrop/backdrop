@@ -305,3 +305,15 @@
   border: 1px dashed #ccc;
 }
 
+.flexible-icon {
+  border: 2px solid #ccc;
+  border-radius: 3px;
+  padding: 0.5rem;
+}
+
+.flexible-icon-column {
+  background-color: #ccc;
+  color: #ccc;
+  background-clip: content-box;
+}
+

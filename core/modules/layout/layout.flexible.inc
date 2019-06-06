@@ -225,7 +225,7 @@ function layout_flexible_template_column_style_select($form, &$form_state, $flex
   $row_styles = layout_flexible_row_styles();
   foreach ($row_styles as $name => $row_style) {
     if ($row_style['column_count'] == $column_count) {
-      $options[$name] = $row_style['bootstrap'];
+      $options[$name] = theme('layout_flexible_template_style_option', array('row_style' => $row_style));
     }
   }
 
@@ -235,7 +235,7 @@ function layout_flexible_template_column_style_select($form, &$form_state, $flex
 
   $form['row_settings']['column_style'] = array(
     '#title' => t('Column style'),
-    '#type' => 'select',
+    '#type' => 'radios',
     '#default_value' => '',
     '#options' => $options,
   );
@@ -256,7 +256,7 @@ function layout_flexible_template_column_style_select($form, &$form_state, $flex
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#name' => 'submit',
-    '#value' => t('Save configuration'),
+    '#value' => t('Continue'),
     '#attributes' => array('class' => array('layout-title-button')),
     '#submit' => array(
       'layout_flexible_template_edit_row_submit',
