@@ -96,7 +96,7 @@ class Node extends Entity {
   /**
    * The node promotion status.
    *
-   * Promoted nodes should be displayed on the front page of the site. The
+   * Promoted nodes should be displayed on the home page of the site. The
    * value is either NODE_PROMOTED or NODE_NOT_PROMOTED.
    *
    * @var integer

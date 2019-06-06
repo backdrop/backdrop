@@ -778,7 +778,7 @@ function admin_bar_flush_cache($name = NULL) {
 
   // The JavaScript injects a destination request parameter pointing to the
   // originating page, so the user is redirected back to that page. Without
-  // destination parameter, the redirect ends on the front page.
+  // destination parameter, the redirect ends on the home page.
   backdrop_goto();
 }
 

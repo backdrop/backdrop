@@ -145,11 +145,11 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
     // Make sure the taxonomy term view starts off as disabled.
     $edit_href = 'admin/structure/views/view/taxonomy_term';
     $this->backdropGet('admin/structure/views');
-    // TODO: Disabled default views do now appear on the front page. Test this
+    // TODO: Disabled default views do now appear on the home page. Test this
     // behavior with templates instead.
     // $this->assertNoLinkByHref($edit_href);
 
-    // Enable the front page view, and make sure it is now visible on the main
+    // Enable the home page view, and make sure it is now visible on the main
     // listing page.
     $this->backdropGet('admin/structure/views/templates');
     $this->clickViewsOperationLink(t('Enable'), '/taxonomy_term/');
@@ -553,7 +553,7 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
     $view['page[link_properties][title]'] = $this->randomName(16);
     $this->backdropPost('admin/structure/views/add', $view, t('Save & exit'));
 
-    // Make sure there is a link to the view from the front page (where we
+    // Make sure there is a link to the view from the home page (where we
     // expect the main menu to display).
     $this->backdropGet('');
     $this->assertLink($view['page[link_properties][title]']);

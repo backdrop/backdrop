@@ -314,7 +314,7 @@ function system_test_boot() {
 function system_test_init() {
   // Used by FrontPageTestCase to get the results of backdrop_is_front_page().
   if (config_get('system.core', 'front_page_output') && backdrop_is_front_page()) {
-    backdrop_set_message(t('On front page.'));
+    backdrop_set_message(t('On home page.'));
   }
 }
 

@@ -5,8 +5,8 @@ group = Node
 file = node.test
 
 [NodeFrontPageCallback]
-name = Custom front page
-description = Test changing front page to custom redirect /node to custom page.
+name = Custom home page
+description = Test changing home page to custom redirect /node to custom page.
 group = Node
 file = node.test
 
