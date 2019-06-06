@@ -149,9 +149,20 @@ function layout_menu() {
   );
 
   $items['admin/structure/layouts/settings/%/%/%/add-row'] = array(
+    'title' => 'Choose column style',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('layout_flexible_template_column_style_select', 4, 5, 6),
+    'type' => MENU_CALLBACK,
+    'weight' => -10,
+    'access arguments' => array('administer layouts'),
+    'file' => 'layout.flexible.inc',
+    'theme callback' => 'ajax_base_page_theme',
+  );
+
+  $items['admin/structure/layouts/settings/%/%/configure'] = array(
     'title' => 'Add row',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_flexible_template_edit_row', 4, 5, 6),
+    'page arguments' => array('layout_flexible_template_edit_row_form', 4, 5, 6),
     'type' => MENU_CALLBACK,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
@@ -160,9 +171,9 @@ function layout_menu() {
   );
 
   $items['admin/structure/layouts/settings/%/%/%/add-row/%'] = array(
-    'title' => 'Select column style',
+    'title' => 'Add row',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_flexible_template_column_style', 4, 5, 6, 8),
+    'page arguments' => array('layout_flexible_template_edit_row_form', 4, 5, 6, 8),
     'type' => MENU_CALLBACK,
     'weight' => -10,
     'access arguments' => array('administer layouts'),

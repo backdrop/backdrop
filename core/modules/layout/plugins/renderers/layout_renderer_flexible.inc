@@ -108,7 +108,7 @@ class LayoutRendererFlexible extends LayoutRendererEditor {
     );
     $links['configure'] = array(
       'title' => t('Configure row'),
-      'href' => 'admin/structure/layouts/settings/' . $this->layout_info['name'] . '/' . $region_id . '/configure/add-row',
+      'href' => 'admin/structure/layouts/settings/' . $this->layout_info['name'] . '/' . $region_id . '/configure',
       'attributes' => array(
         'class' => array('use-ajax'),
         'data-dialog' => TRUE,
