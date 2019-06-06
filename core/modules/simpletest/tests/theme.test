@@ -318,7 +318,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
       'plain text' => array(
         'title' => 'Plain "text"',
       ),
-      'home page' => array(
+      'front page' => array(
         'title' => 'Home page',
         'href' => '<front>',
       ),
