@@ -298,3 +298,10 @@
   margin: 1em 0;
   padding: 0 20px;
 }
+
+#layout-edit-main .flexible-row:hover {
+  margin: 0 5px;
+  background-color: #f0f0f0;
+  border: 1px dashed #ccc;
+}
+
