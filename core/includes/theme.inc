@@ -2394,11 +2394,13 @@ function theme_item_list($variables) {
  * Returns HTML for a help element.
  */
 function theme_help($variables) {
-  // Wrap in a paragraph tag if one is not present.
-  if (strpos($variables['markup'], '<p') === FALSE) {
-    $variables['markup'] = '<p>' . $variables['markup'] . '</p>';
+  if (isset($variables['markup'])) {
+    // Wrap in a paragraph tag if one is not present.
+    if (strpos($variables['markup'], '<p') === FALSE) {
+      $variables['markup'] = '<p>' . $variables['markup'] . '</p>';
+    }
+    return '<div class="help">' . $variables['markup'] . '</div>';
   }
-  return '<div class="help">' . $variables['markup'] . '</div>';
 }
 
 /**
