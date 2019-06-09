@@ -198,15 +198,16 @@ function layout_flexible_template_column_style_select($form, &$form_state, $flex
   $form_state['op'] = $op;
 
   $row_styles = layout_flexible_row_styles();
-  $options = array('none' => t('select number of columns'));
+  $count_options = array();
   foreach ($row_styles as $name => $row_style) {
-    $options[$row_style['column_count']] = $row_style['column_count'];
+    $count_options[$row_style['column_count']] = $row_style['column_count'];
   }
   $form['column_count'] = array(
-    '#title' => t('Change column style'),
+    '#title' => t('Number of columns'),
     '#type' => 'select',
-    '#default_value' => 'none',
-    '#options' => $options,
+    '#default_value' => '1',
+    '#parents' => array('column_count'),
+    '#options' => $count_options,
     '#ajax' => array(
       'callback' => 'layout_flexible_template_edit_column_style_ajax',
       'wrapper' => 'row_settings',
@@ -233,10 +234,16 @@ function layout_flexible_template_column_style_select($form, &$form_state, $flex
     $options['column_12'] = '12:0';
   }
 
+  // We want to set the default as the first option (so at least one option
+  // is always selected) but seems we cannot set #default_value for a field if
+  // its in $form_state['input']. https://drupal.stackexchange.com/questions/251056/set-default-form-values-after-ajax-callback
+  $default_value = key($options);
+  unset($form_state['input']['column_style']);
+
   $form['row_settings']['column_style'] = array(
     '#title' => t('Column style'),
     '#type' => 'radios',
-    '#default_value' => '',
+    '#default_value' => key($options),
     '#options' => $options,
   );
 
@@ -511,7 +518,7 @@ function layout_flexible_array_insert_key_value($key, array &$array, $new_key, $
 /**
  * AJAX responder to add a new row, column or region to a flexible layout.
  */
-function layout_flexible_template_edit_column_style_ajax($form, &$form_state) {
+function layout_flexible_template_edit_column_style_ajax($form, $form_state) {
   return $form['row_settings'];
 }
 
