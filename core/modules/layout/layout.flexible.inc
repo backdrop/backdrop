@@ -401,7 +401,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
   $form['column_names'] = array(
     '#type' => 'fieldset',
     '#title' => t('Column titles'),
-    '#collapsed' => TRUE,
+    '#collapsed' => FALSE,
     '#collapsible' => TRUE,
     '#tree' => TRUE,
   );
