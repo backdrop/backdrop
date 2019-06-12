@@ -276,14 +276,12 @@ function layout_flexible_template_column_style_select($form, &$form_state, $flex
   return $form;
 }
 
-
 /**
  * Submit handler for layout_flexible_template_column_style_select().
  */
 function layout_flexible_template_edit_row_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings/' . $form_state['flexible_template_id'] . '/' . $form_state['original_row'] . '/' . $form_state['op'] . '/add-row/' . $form_state['values']['column_style'];
 }
-
 
 /**
  * Form to add a row to a flexible template.
@@ -307,9 +305,10 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
   $form_state['op'] = $op;
   $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
 
-  $row_data = $form_state['template_data']['regions'][$original_row];
+  $row_data = array();
   if ($op == 'configure') {
-    $column_style = $row_data['contains'];
+    $row_data = $form_state['template_data']['regions'][$original_row];
+    $column_style = $column_style ? $column_style : $row_data['contains'];
   }
   $form_state['column_style'] = $column_style;
 
@@ -345,6 +344,22 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     '#title' => t('Selected column style'),
     '#markup' => $selected_style,
   );
+
+  if ($op == 'configure') {
+    $form['change_column_style'] = array(
+      '#type' => 'submit',
+      '#value' => t('Change column style'),
+      '#attributes' => array('class' => array('layout-link-button')),
+      '#limit_validation_errors' => array(array('name', 'machine_name')),
+      '#submit' => array(
+        'layout_flexible_template_change_column_style',
+      ),
+      '#ajax' => array(
+        'callback' => 'layout_ajax_form_open_dialog',
+      ),
+    );
+  }
+
   $form['row_classes'] = array(
     '#title' => t('Additional row classes'),
     '#type' => 'textfield',
@@ -378,7 +393,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
   );
 
   foreach (array('name', 'machine_name', 'row_classes', 'element') as $form_element) {
-    if ($op != 'configure' && !isset($form_state['storage']['row_data'])) {
+    if ($op != 'configure' && !$column_style) {
       $form[$form_element]['#default_value'] = '';
     }
   }
@@ -421,6 +436,13 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
 function layout_flexible_row_name_exists($machine_name) {
   // Use validate function;
   return FALSE;
+}
+
+/**
+ * Submit handler for layout_flexible_template_column_style_select().
+ */
+function layout_flexible_template_change_column_style($form, &$form_state) {
+  $form_state['redirect'] = 'admin/structure/layouts/settings/' . $form_state['flexible_template_id'] . '/' . $form_state['original_row'] . '/configure/add-row';
 }
 
 /**
