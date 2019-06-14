@@ -321,8 +321,7 @@ function layout_preprocess_layout(&$variables) {
       }
       $variables['region_data'][$name] = $region;
     }
-          
-      
+
   }
 }
 

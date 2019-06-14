@@ -31,16 +31,16 @@
     </div>
   <?php endif; ?>
 
-  <?php foreach ($region_data as $name => $region): ?>
-    <<?php print $region['element']; ?> class="flexible-row <?php print 'l-' . $name; ?>" <?php print $region['row_id']; ?>>
-      <div class="<?php print $region['row_class']; ?>">
+  <?php foreach ($region_data as $name => $row): ?>
+    <<?php print $row['element']; ?> class="flexible-row <?php print 'l-' . $name; ?>" <?php print $row['row_id']; ?>>
+      <div class="<?php print $row['row_class']; ?>">
         <?php if ($region_buttons): ?>
           <div class="layout-editor-region-title clearfix">
             <?php print $region_buttons[$name]; ?>
           </div>
         <?php endif; ?>
         <div class="l-flexible-row row">
-        <?php foreach ($region['regions'] as $region): ?>
+        <?php foreach ($row['regions'] as $region): ?>
           <div class="l-col col-md-<?php print $region['region_md']; ?>">
             <?php if ($region_buttons): ?>
               <div class="layout-editor-region" id="layout-editor-region-<?php print $name; ?>" data-region-name="<?php print $name; ?>">
@@ -57,6 +57,6 @@
         <?php endforeach; ?>
         </div>
       </div>
-    </<?php print $region['element']; ?>>
+    </<?php print $row['element']; ?>>
   <?php endforeach; ?>
 </div>
