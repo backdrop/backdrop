@@ -389,8 +389,11 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     '#tree' => TRUE,
   );
   for ($i = 0; $i < $column_count; $i++) {
+    // Todo: replace uniqid() with random readable words.
+    $form_state['placeholder']['column_name_' . $i] = uniqid();
     $form['column_names']['column_name_' . $i] = array(
       '#type' => 'textfield',
+      '#placeholder' => $form_state['placeholder']['column_name_' . $i],
       '#title' => t('Column ') . $i,
       '#default_value' => !empty($row_data['column_names']['column_name_' . $i]) ? $row_data['column_names']['column_name_' . $i] : '',
     );
@@ -402,6 +405,9 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     '#name' => 'submit',
     '#value' => t('Save configuration'),
     '#attributes' => array('class' => array('layout-title-button')),
+    '#validate' => array(
+      'layout_flexible_template_edit_row_validate',
+    ),
     '#submit' => array(
       'layout_flexible_template_edit_row_form_submit',
     ),
@@ -426,6 +432,21 @@ function layout_flexible_template_change_column_style($form, &$form_state) {
 function layout_flexible_template_column_count_load(&$form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
+
+/**
+ * Submit handler for layout_configure_region_page().
+ */
+function layout_flexible_template_edit_row_validate($form, &$form_state) {
+  foreach ($form_state['values']['column_names'] as $key => $column_name) {
+    if (empty($column_name)) {
+      $form_state['values']['column_names'][$key] = $form_state['placeholder'][$key];
+    }
+  }
+  // alternative
+  // array_filter($form_state['values']['column_names']);
+  // array_merge($form_state['values']['column_names'], $form_state['placeholder']);
+}
+
 
 /**
  * Submit handler for layout_configure_region_page().
@@ -616,21 +637,21 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
           'element' => 'header',
           'classes' => '',
           'container' => 'container',
-          'column_names' => array(),
+          'column_names' => array('header'),
         ),
         'content' => array(
           'contains' => 'column_12',
           'element' => '',
           'classes' => '',
           'container' => 'container',
-          'column_names' => array(),
+          'column_names' => array('content'),
         ),
         'footer' => array(
           'contains' => 'column_12',
           'element' => 'footer',
           'classes' => '',
           'container' => 'container',
-          'column_names' => array(),
+          'column_names' => array('footer'),
         ),
       ),
     );
