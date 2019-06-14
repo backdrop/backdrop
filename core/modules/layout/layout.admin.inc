@@ -263,10 +263,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   // Get the list of layout template options. The list needs to be rebuilt (see
   // https://github.com/backdrop/backdrop-issues/issues/984)
   $all_template_info = layout_get_layout_template_info(NULL, TRUE);
-  // Get flexible templates.
-  $all_flexible_template_info = layout_flexible_template_load();
 
-  $all_template_info = array_merge($all_template_info, $all_flexible_template_info);
   $excluded = config_get('layout.settings', 'excluded_templates');
   foreach ($all_template_info as $template_name => $template_info) {
     if (!in_array($template_name, $excluded)) {
