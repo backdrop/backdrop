@@ -191,7 +191,7 @@ function layout_flexible_template_configure_form_submit($form, &$form_state) {
  *
  * @ingroup forms
  */
-function layout_flexible_template_column_style_select($form, &$form_state, $flexible_template_id, $original_row, $op) {
+function layout_flexible_template_region_style_select($form, &$form_state, $flexible_template_id, $original_row, $op) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   $form_state['flexible_template_id'] = $flexible_template_id;
   $form_state['original_row'] = $original_row;
@@ -200,16 +200,16 @@ function layout_flexible_template_column_style_select($form, &$form_state, $flex
   $row_styles = layout_flexible_row_styles();
   $count_options = array();
   foreach ($row_styles as $name => $row_style) {
-    $count_options[$row_style['column_count']] = $row_style['column_count'];
+    $count_options[$row_style['region_count']] = $row_style['region_count'];
   }
-  $form['column_count'] = array(
-    '#title' => t('Number of columns'),
+  $form['region_count'] = array(
+    '#title' => t('Number of regions'),
     '#type' => 'select',
     '#default_value' => '1',
-    '#parents' => array('column_count'),
+    '#parents' => array('region_count'),
     '#options' => $count_options,
     '#ajax' => array(
-      'callback' => 'layout_flexible_template_edit_column_style_ajax',
+      'callback' => 'layout_flexible_template_edit_region_style_ajax',
       'wrapper' => 'row_settings',
     ),
   );
@@ -220,42 +220,42 @@ function layout_flexible_template_column_style_select($form, &$form_state, $flex
     '#parents' => array('row_settings'),
   );
 
-  $column_count = isset($form_state['values']['column_count']) ? $form_state['values']['column_count'] : 1;
+  $region_count = isset($form_state['values']['region_count']) ? $form_state['values']['region_count'] : 1;
 
   $options = array();
   $row_styles = layout_flexible_row_styles();
   foreach ($row_styles as $name => $row_style) {
-    if ($row_style['column_count'] == $column_count) {
+    if ($row_style['region_count'] == $region_count) {
       $options[$name] = theme('layout_flexible_template_style_option', array('row_style' => $row_style));
     }
   }
 
   if (empty($options)) {
-    $options['column_12'] = '12:0';
+    $options['region_12'] = '12:0';
   }
 
   // We want to set the default as the first option (so at least one option
   // is always selected) but seems we cannot set #default_value for a field if
   // its in $form_state['input']. https://drupal.stackexchange.com/questions/251056/set-default-form-values-after-ajax-callback
   $default_value = key($options);
-  unset($form_state['input']['column_style']);
+  unset($form_state['input']['region_style']);
 
-  $form['row_settings']['column_style'] = array(
-    '#title' => t('Column style'),
+  $form['row_settings']['region_style'] = array(
+    '#title' => t('Region style'),
     '#type' => 'radios',
     '#default_value' => key($options),
     '#options' => $options,
   );
 
-  $form['submit_column_style'] = array(
+  $form['submit_region_style'] = array(
     '#type' => 'submit',
-    '#value' => t('Choose column style'),
+    '#value' => t('Choose region style'),
     '#attributes' => array('class' => array('layout-title-button')),
     '#attributes' => array(
       'class' => array('js-hide'),
     ),
     '#submit' => array(
-      'layout_flexible_template_column_count_load',
+      'layout_flexible_template_region_count_load',
     ),
   );
 
@@ -277,10 +277,10 @@ function layout_flexible_template_column_style_select($form, &$form_state, $flex
 }
 
 /**
- * Submit handler for layout_flexible_template_column_style_select().
+ * Submit handler for layout_flexible_template_region_style_select().
  */
 function layout_flexible_template_edit_row_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/layouts/settings/' . $form_state['flexible_template_id'] . '/' . $form_state['original_row'] . '/' . $form_state['op'] . '/add-row/' . $form_state['values']['column_style'];
+  $form_state['redirect'] = 'admin/structure/layouts/settings/' . $form_state['flexible_template_id'] . '/' . $form_state['original_row'] . '/' . $form_state['op'] . '/add-row/' . $form_state['values']['region_style'];
 }
 
 /**
@@ -292,12 +292,12 @@ function layout_flexible_template_edit_row_submit($form, &$form_state) {
  *   The row above or below which a new row is being inserted.
  * @param $op
  *   The operation being performed on this row.
- * @param $column_style
- *   The selected column style.
+ * @param $region_style
+ *   The selected region style.
  *
  * @ingroup forms
  */
-function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_template_id, $original_row, $op, $column_style = NULL) {
+function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_template_id, $original_row, $op, $region_style = NULL) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
 
   $form_state['flexible_template_id'] = $flexible_template_id;
@@ -308,13 +308,13 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
   $row_data = array();
   if ($op == 'configure') {
     $row_data = $form_state['template_data']['regions'][$original_row];
-    $column_style = $column_style ? $column_style : $row_data['contains'];
+    $region_style = $region_style ? $region_style : $row_data['contains'];
   }
-  $form_state['column_style'] = $column_style;
+  $form_state['region_style'] = $region_style;
 
   $row_styles = layout_flexible_row_styles();
-  $selected_style = $row_styles[$column_style]['name'];
-  $column_count = $row_styles[$column_style]['column_count'];
+  $selected_style = $row_styles[$region_style]['name'];
+  $region_count = $row_styles[$region_style]['region_count'];
 
   if ($op == 'configure') {
     backdrop_set_title(t('Configure row !original_row', array('!original_row' => $original_row)));
@@ -323,19 +323,19 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     backdrop_set_title(t('Add row !op !original_row', array('!op' => $op, '!original_row' => $original_row)));
   }
 
-  $form['column_style'] = array(
+  $form['region_style'] = array(
     '#type' => 'item',
-    '#title' => t('Selected column style'),
+    '#title' => t('Selected region style'),
     '#markup' => $selected_style,
   );
 
   if ($op == 'configure') {
-    $form['change_column_style'] = array(
+    $form['change_region_style'] = array(
       '#type' => 'submit',
-      '#value' => t('Change column style'),
+      '#value' => t('Change region style'),
       '#attributes' => array('class' => array('layout-link-button')),
       '#submit' => array(
-        'layout_flexible_template_change_column_style',
+        'layout_flexible_template_change_region_style',
       ),
       '#ajax' => array(
         'callback' => 'layout_ajax_form_open_dialog',
@@ -376,26 +376,26 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
   );
 
   foreach (array('row_classes', 'element') as $form_element) {
-    if ($op != 'configure' && !$column_style) {
+    if ($op != 'configure' && !$region_style) {
       $form[$form_element]['#default_value'] = '';
     }
   }
 
-  $form['column_names'] = array(
+  $form['region_names'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Column titles'),
+    '#title' => t('Region titles'),
     '#collapsed' => FALSE,
     '#collapsible' => TRUE,
     '#tree' => TRUE,
   );
-  for ($i = 0; $i < $column_count; $i++) {
+  for ($i = 0; $i < $region_count; $i++) {
     // Todo: replace uniqid() with random readable words.
-    $form_state['placeholder']['column_name_' . $i] = uniqid();
-    $form['column_names']['column_name_' . $i] = array(
+    $form_state['placeholder']['region_name_' . $i] = uniqid();
+    $form['region_names']['region_name_' . $i] = array(
       '#type' => 'textfield',
-      '#placeholder' => $form_state['placeholder']['column_name_' . $i],
-      '#title' => t('Column ') . $i,
-      '#default_value' => !empty($row_data['column_names']['column_name_' . $i]) ? $row_data['column_names']['column_name_' . $i] : '',
+      '#placeholder' => $form_state['placeholder']['region_name_' . $i],
+      '#title' => t('Region ') . $i,
+      '#default_value' => !empty($row_data['region_names']['region_name_' . $i]) ? $row_data['region_names']['region_name_' . $i] : '',
     );
   }
 
@@ -420,16 +420,16 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
 }
 
 /**
- * Submit handler for layout_flexible_template_column_style_select().
+ * Submit handler for layout_flexible_template_region_style_select().
  */
-function layout_flexible_template_change_column_style($form, &$form_state) {
+function layout_flexible_template_change_region_style($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings/' . $form_state['flexible_template_id'] . '/' . $form_state['original_row'] . '/configure/add-row';
 }
 
 /**
- * Submit handler for layout_flexible_template_column_style().
+ * Submit handler for layout_flexible_template_region_style().
  */
-function layout_flexible_template_column_count_load(&$form, &$form_state) {
+function layout_flexible_template_region_count_load(&$form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
@@ -437,14 +437,14 @@ function layout_flexible_template_column_count_load(&$form, &$form_state) {
  * Submit handler for layout_configure_region_page().
  */
 function layout_flexible_template_edit_row_validate($form, &$form_state) {
-  foreach ($form_state['values']['column_names'] as $key => $column_name) {
-    if (empty($column_name)) {
-      $form_state['values']['column_names'][$key] = $form_state['placeholder'][$key];
+  foreach ($form_state['values']['region_names'] as $key => $region_name) {
+    if (empty($region_name)) {
+      $form_state['values']['region_names'][$key] = $form_state['placeholder'][$key];
     }
   }
   // alternative
-  // array_filter($form_state['values']['column_names']);
-  // array_merge($form_state['values']['column_names'], $form_state['placeholder']);
+  // array_filter($form_state['values']['region_names']);
+  // array_merge($form_state['values']['region_names'], $form_state['placeholder']);
 }
 
 
@@ -458,11 +458,11 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   $op = $form_state['op'];
 
   $new_row = array(
-    'contains' => $form_state['column_style'],
+    'contains' => $form_state['region_style'],
     'element' => $form_state['values']['element'],
     'classes' => $form_state['values']['row_classes'],
     'container' => $form_state['values']['container'],
-    'column_names' => $form_state['values']['column_names'],
+    'region_names' => $form_state['values']['region_names'],
   );
 
   if ($op != 'configure') {
@@ -524,14 +524,14 @@ function layout_flexible_array_insert_key_value($key, array &$array, $new_key, $
 }
 
 /**
- * AJAX responder to add a new row, column or region to a flexible layout.
+ * AJAX responder to add a new row, region or region to a flexible layout.
  */
-function layout_flexible_template_edit_column_style_ajax($form, $form_state) {
+function layout_flexible_template_edit_region_style_ajax($form, $form_state) {
   return $form['row_settings'];
 }
 
 /**
- * AJAX responder to add a new row, column or region to a flexible layout.
+ * AJAX responder to add a new row, region or region to a flexible layout.
  */
 function layout_flexible_template_edit_row_ajax($form, $form_state) {
   $commands = array();
@@ -633,25 +633,25 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
       'description' => '',
       'regions' => array(
         'header' => array(
-          'contains' => 'column_12',
+          'contains' => 'region_12',
           'element' => 'header',
           'classes' => '',
           'container' => 'container',
-          'column_names' => array('header'),
+          'region_names' => array('header'),
         ),
         'content' => array(
-          'contains' => 'column_12',
+          'contains' => 'region_12',
           'element' => '',
           'classes' => '',
           'container' => 'container',
-          'column_names' => array('content'),
+          'region_names' => array('content'),
         ),
         'footer' => array(
-          'contains' => 'column_12',
+          'contains' => 'region_12',
           'element' => 'footer',
           'classes' => '',
           'container' => 'container',
-          'column_names' => array('footer'),
+          'region_names' => array('footer'),
         ),
       ),
     );
@@ -667,197 +667,197 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
  */
 function layout_flexible_row_styles() {
   $styles = array(
-    'column_12' => array(
+    'region_12' => array(
       'split' => '12:0',
       'bootstrap' => '12:0',
-      'column_count' => 1,
-      'name' => 'One column',
+      'region_count' => 1,
+      'name' => 'One region',
     ),
-    'column_10_2' => array(
+    'region_10_2' => array(
       'split' => '10:2',
       'bootstrap' => '10:2',
-      'column_count' => 2,
-      'name' => 'Two columns 10:2',
+      'region_count' => 2,
+      'name' => 'Two regions 10:2',
     ),
-    'column_9_3' => array(
+    'region_9_3' => array(
       'split' => '9:3',
       'bootstrap' => '9:3',
-      'column_count' => 2,
-      'name' => 'Two columns 9:3',
+      'region_count' => 2,
+      'name' => 'Two regions 9:3',
     ),
-    'column_8_4' => array(
+    'region_8_4' => array(
       'split' => '8:4',
       'bootstrap' => '8:4',
-      'column_count' => 2,
-      'name' => 'Two columns 8:4',
+      'region_count' => 2,
+      'name' => 'Two regions 8:4',
     ),
-    'column_6_6' => array(
+    'region_6_6' => array(
       'split' => '6:6',
       'bootstrap' => '6:6',
-      'column_count' => 2,
-      'name' => 'Two columns 6:6',
+      'region_count' => 2,
+      'name' => 'Two regions 6:6',
     ),
-    'column_4_8' => array(
+    'region_4_8' => array(
       'split' => '4:8',
       'bootstrap' => '4:8',
-      'column_count' => 2,
-      'name' => 'Two columns 4:8',
+      'region_count' => 2,
+      'name' => 'Two regions 4:8',
     ),
-    'column_3_9' => array(
+    'region_3_9' => array(
       'split' => '3:9',
       'bootstrap' => '3:9',
-      'column_count' => 2,
-      'name' => 'Two columns 3:9',
+      'region_count' => 2,
+      'name' => 'Two regions 3:9',
     ),
-    'column_2_10' => array(
+    'region_2_10' => array(
       'split' => '2:10',
       'bootstrap' => '2:10',
-      'column_count' => 2,
-      'name' => 'Two columns 2:10',
+      'region_count' => 2,
+      'name' => 'Two regions 2:10',
     ),
-    'column_4_4_4' => array(
+    'region_4_4_4' => array(
       'split' => '4:4:4',
       'bootstrap' => '4:4:4',
-      'column_count' => 3,
-      'name' => 'Three columns 4:4:4',
+      'region_count' => 3,
+      'name' => 'Three regions 4:4:4',
     ),
-    'column_2_8_2' => array(
+    'region_2_8_2' => array(
       'split' => '2:8:2',
       'bootstrap' => '2:8:2',
-      'column_count' => 3,
-      'name' => 'Three columns 2:8:2',
+      'region_count' => 3,
+      'name' => 'Three regions 2:8:2',
     ),
-    'column_2_2_8' => array(
+    'region_2_2_8' => array(
       'split' => '2:2:8',
       'bootstrap' => '2:2:8',
-      'column_count' => 3,
-      'name' => 'Three columns 2:2:8',
+      'region_count' => 3,
+      'name' => 'Three regions 2:2:8',
     ),
-    'column_8_2_2' => array(
+    'region_8_2_2' => array(
       'split' => '8:2:2',
       'bootstrap' => '8:2:2',
-      'column_count' => 3,
-      'name' => 'Three columns 8:2:2',
+      'region_count' => 3,
+      'name' => 'Three regions 8:2:2',
     ),
-    'column_3_6_3' => array(
+    'region_3_6_3' => array(
       'split' => '3:6:3',
       'bootstrap' => '3:6:3',
-      'column_count' => 3,
-      'name' => 'Three columns 3:6:3',
+      'region_count' => 3,
+      'name' => 'Three regions 3:6:3',
     ),
-    'column_3_3_6' => array(
+    'region_3_3_6' => array(
       'split' => '3:3:6',
       'bootstrap' => '3:3:6',
-      'column_count' => 3,
-      'name' => 'Three columns 3:3:6',
+      'region_count' => 3,
+      'name' => 'Three regions 3:3:6',
     ),
-    'column_6_3_3' => array(
+    'region_6_3_3' => array(
       'split' => '6:3:3',
       'bootstrap' => '6:3:3',
-      'column_count' => 3,
-      'name' => 'Three columns 6:3:3',
+      'region_count' => 3,
+      'name' => 'Three regions 6:3:3',
     ),
-    'column_4_2_6' => array(
+    'region_4_2_6' => array(
       'split' => '4:2:6',
       'bootstrap' => '4:2:6',
-      'column_count' => 3,
-      'name' => 'Three columns 4:2:6',
+      'region_count' => 3,
+      'name' => 'Three regions 4:2:6',
     ),
-    'column_4_6_2' => array(
+    'region_4_6_2' => array(
       'split' => '4:6:2',
       'bootstrap' => '4:6:2',
-      'column_count' => 3,
-      'name' => 'Three columns 4:6:2',
+      'region_count' => 3,
+      'name' => 'Three regions 4:6:2',
     ),
-    'column_2_6_4' => array(
+    'region_2_6_4' => array(
       'split' => '2:6:4',
       'bootstrap' => '2:6:4',
-      'column_count' => 3,
-      'name' => 'Three columns 2:6:4',
+      'region_count' => 3,
+      'name' => 'Three regions 2:6:4',
     ),
-    'column_2_4_6' => array(
+    'region_2_4_6' => array(
       'split' => '2:4:6',
       'bootstrap' => '2:4:6',
-      'column_count' => 3,
-      'name' => 'Three columns 2:4:6',
+      'region_count' => 3,
+      'name' => 'Three regions 2:4:6',
     ),
-    'column_6_2_4' => array(
+    'region_6_2_4' => array(
       'split' => '6:2:4',
       'bootstrap' => '6:2:4',
-      'column_count' => 3,
-      'name' => 'Three columns 6:2:4',
+      'region_count' => 3,
+      'name' => 'Three regions 6:2:4',
     ),
-    'column_6_4_2' => array(
+    'region_6_4_2' => array(
       'split' => '6:4:2',
       'bootstrap' => '6:4:2',
-      'column_count' => 3,
-      'name' => 'Three columns 6:4:2',
+      'region_count' => 3,
+      'name' => 'Three regions 6:4:2',
     ),
-    'column_3_3_3_3' => array(
+    'region_3_3_3_3' => array(
       'split' => '3:3:3:3',
       'bootstrap' => '3:3:3:3',
-      'column_count' => 4,
-      'name' => 'Four columns 3:3:3:3',
+      'region_count' => 4,
+      'name' => 'Four regions 3:3:3:3',
     ),
-    'column_3_3_4_2' => array(
+    'region_3_3_4_2' => array(
       'split' => '3:3:4:2',
       'bootstrap' => '3:3:4:2',
-      'column_count' => 4,
-      'name' => 'Four columns 3:3:4:2',
+      'region_count' => 4,
+      'name' => 'Four regions 3:3:4:2',
     ),
-    'column_3_3_2_4' => array(
+    'region_3_3_2_4' => array(
       'split' => '3:3:2:4',
       'bootstrap' => '3:3:2:4',
-      'column_count' => 4,
-      'name' => 'Four columns 3:3:2:4',
+      'region_count' => 4,
+      'name' => 'Four regions 3:3:2:4',
     ),
-    'column_4_3_3_2' => array(
+    'region_4_3_3_2' => array(
       'split' => '4:3:3:2',
       'bootstrap' => '4:3:3:2',
-      'column_count' => 4,
-      'name' => 'Four columns 4:3:3:2',
+      'region_count' => 4,
+      'name' => 'Four regions 4:3:3:2',
     ),
-    'column_2_3_3_4' => array(
+    'region_2_3_3_4' => array(
       'split' => '2:3:3:4',
       'bootstrap' => '2:3:3:4',
-      'column_count' => 4,
-      'name' => 'Four columns 2:3:3:4',
+      'region_count' => 4,
+      'name' => 'Four regions 2:3:3:4',
     ),
-    'column_2_4_3_3' => array(
+    'region_2_4_3_3' => array(
       'split' => '2:4:3:3',
       'bootstrap' => '2:4:3:3',
-      'column_count' => 4,
-      'name' => 'Four columns 2:4:3:3',
+      'region_count' => 4,
+      'name' => 'Four regions 2:4:3:3',
     ),
-    'column_4_2_3_3' => array(
+    'region_4_2_3_3' => array(
       'split' => '4:2:3:3',
       'bootstrap' => '4:2:3:3',
-      'column_count' => 4,
-      'name' => 'Four columns 4:2:3:3',
+      'region_count' => 4,
+      'name' => 'Four regions 4:2:3:3',
     ),
-    'column_2_4_4_2' => array(
+    'region_2_4_4_2' => array(
       'split' => '2:4:4:2',
       'bootstrap' => '2:4:4:2',
-      'column_count' => 4,
-      'name' => 'Four columns 2:4:4:2',
+      'region_count' => 4,
+      'name' => 'Four regions 2:4:4:2',
     ),
-    'column_2_4_2_4' => array(
+    'region_2_4_2_4' => array(
       'split' => '2:4:2:4',
       'bootstrap' => '2:4:2:4',
-      'column_count' => 4,
-      'name' => 'Four columns 2:4:2:4',
+      'region_count' => 4,
+      'name' => 'Four regions 2:4:2:4',
     ),
-    'column_4_2_2_4' => array(
+    'region_4_2_2_4' => array(
       'split' => '4:2:2:4',
       'bootstrap' => '4:2:2:4',
-      'column_count' => 4,
-      'name' => 'Four columns 4:2:2:4',
+      'region_count' => 4,
+      'name' => 'Four regions 4:2:2:4',
     ),
-    'column_4_2_4_2' => array(
+    'region_4_2_4_2' => array(
       'split' => '4:2:4:2',
       'bootstrap' => '4:2:4:2',
-      'column_count' => 4,
-      'name' => 'Four columns 4:2:4:2',
+      'region_count' => 4,
+      'name' => 'Four regions 4:2:4:2',
     ),
   );
 
@@ -957,13 +957,13 @@ function layout_layout_info() {
       // todo: just add a col_count key to layout_flexible_row_styles()?
       $col_count = count(explode(':', $region_style['split']));
       for ($i = 0; $i < $col_count; $i++) {
-        if (!empty($region['column_names']['column_name_' . $i])) {
-          $column_name = $region['column_names']['column_name_' . $i];
+        if (!empty($region['region_names']['region_name_' . $i])) {
+          $region_name = $region['region_names']['region_name_' . $i];
         }
         else {
-          $column_name = check_plain($region['name']) . ' ' . $i;
+          $region_name = check_plain($region['name']) . ' ' . $i;
         }
-        $layouts[$item['name']]['regions'][$name . '_' . $i] = $column_name;
+        $layouts[$item['name']]['regions'][$name . '_' . $i] = $region_name;
       }
     }
   }

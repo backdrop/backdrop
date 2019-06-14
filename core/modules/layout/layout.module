@@ -149,9 +149,9 @@ function layout_menu() {
   );
 
   $items['admin/structure/layouts/settings/%/%/%/add-row'] = array(
-    'title' => 'Choose column style',
+    'title' => 'Choose region style',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_flexible_template_column_style_select', 4, 5, 6),
+    'page arguments' => array('layout_flexible_template_region_style_select', 4, 5, 6),
     'type' => MENU_CALLBACK,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
@@ -1389,8 +1389,8 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
  * compatibility. Should not be used in new code.
  *
  * @param string $layout_name
- *   The name of the layout template, e.g. "one_column" or
- *   "three_three_four_column". If no layout template is specified, all layout
+ *   The name of the layout template, e.g. "one_region" or
+ *   "three_three_four_region". If no layout template is specified, all layout
  *  info will be returned.
  * @return array|boolean
  *   The layout template information, as returned by either a stand-alone
