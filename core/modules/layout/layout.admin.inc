@@ -2799,11 +2799,11 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
   }
   if (!empty($template_info['flexible'])) {
     $links['edit'] = array(
-      'title' => t('Edit'),
+      'title' => t('Configure name'),
       'href' => 'admin/structure/layouts/settings/' . $template_info['name'] . '/edit',
     );
     $links['configure'] = array(
-      'title' => t('Configure'),
+      'title' => t('Configure regions'),
       'href' => 'admin/structure/layouts/settings/' . $template_info['name'] . '/configure',
     );
     $links['delete'] = array(
