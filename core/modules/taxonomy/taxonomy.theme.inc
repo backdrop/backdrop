@@ -31,7 +31,7 @@ function theme_taxonomy_overview_vocabularies($variables) {
         $row[] = backdrop_render($vocabulary['weight']);
       }
       $row[] = backdrop_render($vocabulary['operations']);
-      $rows[] = array('data' => $row, 'class' => array('draggable'));
+      $rows[] = array('data' => $row, 'class' => array(''));
     }
   }
 
@@ -103,7 +103,7 @@ function theme_taxonomy_overview_terms($variables) {
   foreach ($rows as $key => $row) {
     $rows[$key]['class'] = array();
     if (isset($form['#parent_fields'])) {
-      $rows[$key]['class'][] = 'draggable';
+      $rows[$key]['class'][] = '';
     }
 
     // Add classes that mark which terms belong to previous and next pages.
