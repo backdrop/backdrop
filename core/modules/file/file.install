@@ -855,3 +855,60 @@ function file_update_1003() {
     }
   }
 }
+
+/**
+ * Add a type column to the file_managed table. Add the file_metadata table.
+ */
+function file_update_1004() {
+  if (!db_field_exists('file_managed', 'type')) {
+    $spec = array(
+      'description' => 'The type of this file.',
+      'type' => 'varchar',
+      'length' => 50,
+      'not null' => TRUE,
+      // If the FILE_TYPE_NONE constant ever changes, then change the value here
+      // too, and add an update function to deal with existing records. The
+      // constant isn't used here, because there may be cases where this function
+      // runs without the module file loaded.
+      'default' => 'undefined',
+    );
+    $indexes_new = array('indexes' => array('file_type' => array('type')));
+    db_add_field('file_managed', 'type', $spec, $indexes_new);
+  }
+
+  if (!db_table_exists('file_metadata')) {
+    $schema = array(
+      'description' => 'Stores file metadata in a key/value store.',
+      'fields' => array(
+        'fid' => array(
+          'description' => 'The {file_managed}.fid of the metadata.',
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+        'name' => array(
+          'description' => "The name of the metadata (e.g. 'width').",
+          'type' => 'varchar',
+          'length' => '255',
+          'not null' => TRUE,
+        ),
+        'value' => array(
+          'description' => "The value of the metadata (e.g. '200px').",
+          'type' => 'blob',
+          'not null' => FALSE,
+          'size' => 'big',
+          'serialize' => TRUE,
+        ),
+      ),
+      'primary key' => array('fid', 'name'),
+      'foreign keys' => array(
+        'file_managed' => array(
+          'table' => 'file_managed',
+          'columns' => array('fid' => 'fid'),
+        ),
+      ),
+    );
+    db_create_table('file_metadata', $schema);
+  }
+}
