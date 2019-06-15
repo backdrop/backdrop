@@ -138,6 +138,12 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
     '#markup' => $renderer->render(),
   );
 
+  $form['content']['row_positions'] = array(
+    // Use 'hidden' instead of 'value' so the JS can access it.
+    '#type' => 'hidden',
+    '#default_value' => implode(',', array_keys($form_state['template_data']['regions'])),
+  );
+
   $form['actions'] = array(
     '#type' => 'actions',
   );
@@ -171,6 +177,15 @@ function layout_flexible_template_configure_form_cancel($form, &$form_state) {
  * Submit handler for layout_settings_form() that saves in-progress changes.
  */
 function layout_flexible_template_configure_form_submit($form, &$form_state) {
+    $positions = array();
+  if (!empty($form_state['values']['row_positions'])) {
+        $rows = array_filter(explode(',', $form_state['values']['row_positions']));
+    foreach ($rows as $position) {
+     $positions[$position] = $form_state['template_data']['regions'][$position];
+    }
+  }
+  $form_state['template_data']['regions'] = $positions;
+
   $config = config('layout.flexible.' . $form_state['flexible_template_id']);
   $config->setData($form_state['template_data']);
   $config->save();

@@ -303,6 +303,10 @@
   background-color: #ffff99;
 }
 
+.flexible-row .layout-editor-region {
+  cursor: move;
+}
+
 .flexible-icon {
   border: 2px solid #ccc;
   border-radius: 3px;

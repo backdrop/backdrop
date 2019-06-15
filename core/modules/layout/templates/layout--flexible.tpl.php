@@ -31,8 +31,9 @@
     </div>
   <?php endif; ?>
 
+  <div class="layout-flexible-content">
   <?php foreach ($region_data as $name => $row): ?>
-    <<?php print $row['element']; ?> class="flexible-row <?php print 'l-' . $name; ?>" <?php print $row['row_id']; ?>>
+    <<?php print $row['element']; ?> data-row-id="<?php print $name; ?>" class="flexible-row <?php print 'l-' . $name; ?>" <?php print $row['row_id']; ?>>
       <div class="<?php print $row['row_class']; ?>">
         <?php if ($region_buttons): ?>
           <div class="layout-editor-region-title clearfix">
@@ -59,4 +60,5 @@
       </div>
     </<?php print $row['element']; ?>>
   <?php endforeach; ?>
+</div>
 </div>

@@ -108,6 +108,18 @@ Backdrop.behaviors.layoutDisplayEditor = {
       }
     }
 
+    var $flexible_regions = $('.layout-flexible-content').once('layout-sortable');
+    if ($flexible_regions.length) {
+      $flexible_regions.sortable({
+        connectWith: '.layout-flexible-content',
+        tolerance: 'pointer',
+        update: Backdrop.behaviors.layoutDisplayEditor.updateFlexibleLayout,
+        items: '.flexible-row',
+        placeholder: 'layout-editor-placeholder layout-editor-block',
+        forcePlaceholderSize: true
+      });
+    }
+
     // Detect the addition of new blocks.
     if ($(context).hasClass('layout-editor-block')) {
       var regionName = $(context).closest('.layout-editor-region').data('regionName');
@@ -125,9 +137,21 @@ Backdrop.behaviors.layoutDisplayEditor = {
     var regionName = $(this).closest('.layout-editor-region').data('regionName');
     var blockList = [];
     $(this).find('.layout-editor-block').each(function() {
+      console.log($(this).data('blockId'));
       blockList.push($(this).data('blockId'));
     });
     $('input[name="content[positions][' + regionName + ']"]').val(blockList.join(','));
+  },
+  /**
+   * jQuery UI sortable update callback.
+   */
+  updateFlexibleLayout: function(event, ui) {
+    var blockList = [];
+    $(this).find('.flexible-row').each(function() {
+      console.log($(this).data('rowId'));
+      blockList.push($(this).data('rowId'));
+    });
+    $('input[name="row_positions"]').val(blockList.join(','));
   }
 };
 
