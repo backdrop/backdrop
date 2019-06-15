@@ -256,7 +256,7 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
   unset($form_state['input']['region_style']);
 
   $form['row_settings']['region_style'] = array(
-    '#title' => t('Region style'),
+    '#title' => t('Region widths'),
     '#type' => 'radios',
     '#default_value' => key($options),
     '#options' => $options,
@@ -264,7 +264,7 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
 
   $form['submit_region_style'] = array(
     '#type' => 'submit',
-    '#value' => t('Choose region style'),
+    '#value' => t('Choose region widths'),
     '#attributes' => array('class' => array('layout-title-button')),
     '#attributes' => array(
       'class' => array('js-hide'),
@@ -340,14 +340,14 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
 
   $form['region_style'] = array(
     '#type' => 'item',
-    '#title' => t('Selected region style'),
+    '#title' => t('Selected region widths'),
     '#markup' => $selected_style,
   );
 
   if ($op == 'configure') {
     $form['change_region_style'] = array(
       '#type' => 'submit',
-      '#value' => t('Change region style'),
+      '#value' => t('Change region widths'),
       '#attributes' => array('class' => array('layout-link-button')),
       '#submit' => array(
         'layout_flexible_template_change_region_style',
@@ -400,7 +400,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     '#type' => 'fieldset',
     '#title' => t('Region titles'),
     '#collapsed' => FALSE,
-    '#collapsible' => TRUE,
+    '#collapsible' => FALSE,
     '#tree' => TRUE,
   );
   for ($i = 0; $i < $region_count; $i++) {

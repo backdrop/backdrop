@@ -149,7 +149,7 @@ function layout_menu() {
   );
 
   $items['admin/structure/layouts/settings/%/%/%/add-row'] = array(
-    'title' => 'Choose region style',
+    'title' => 'Choose region widths',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_region_style_select', 4, 5, 6),
     'type' => MENU_CALLBACK,
