@@ -824,6 +824,10 @@ class views_many_to_one_helper {
         if ($this->handler->operator == 'and') {
           $join->type = 'INNER';
         }
+        elseif ($this->handler->operator == 'not') {
+          $join->type = 'LEFT';
+          $this->handler->table_alias = $this->add_table($join);
+        }
         if (empty($join->extra)) {
           $join->extra = array();
         }
@@ -885,6 +889,11 @@ class views_many_to_one_helper {
         $value = is_array($value) ? array_pop($value) : $value;
         $operator = '=';
       }
+      $add_condition = FALSE;
+    }
+    elseif ($operator == 'not') {
+      $value = NULL;
+      $operator = 'IS NULL';
       $add_condition = FALSE;
     }
 
