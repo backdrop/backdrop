@@ -88,7 +88,7 @@ function theme_taxonomy_overview_terms($variables) {
         $row[0] .= backdrop_render($term['parent']) . backdrop_render($term['tid']) . backdrop_render($term['depth']);
       }
       $term['weight']['#attributes']['class'] = array('term-weight');
-      if (module_exists('language')) {
+      if (module_exists('language') && $form['#vocabulary']->language == TAXONOMY_LANGUAGE_ENABLED) {
         $row[] = backdrop_render($term['langcode']);
       }
       $row[] = backdrop_render($term['weight']);
