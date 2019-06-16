@@ -321,7 +321,7 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
  *
  * Backdrop supports defining a list of trusted hosts, to prevent HTTP Host
  * header spoofing. For more information, see:
- * - https://backdropcms.org/protecting-against-http-host-header-attacks#trusted_hosts
+ * - https://api.backdropcms.org/documentation/trusted-host-settings#trusted_hosts
  *
  * To enable the trusted host mechanism, you specify your allowable hosts
  * in $settings['trusted_host_patterns'] in your settings.php file. This should
