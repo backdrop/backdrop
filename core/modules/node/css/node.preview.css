@@ -1,0 +1,98 @@
+
+/**
+ * @file
+ * Styles for preview pages.
+ */
+
+.node-preview-container {
+  font: normal 16px/1.538 "Open Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
+  background-color: #efefef;
+  z-index: 999;
+  width: 100%;
+  padding: 10px;
+  overflow: auto;
+}
+body .node-preview-container.node-preview-processed {
+  position: fixed;
+  bottom: 0;
+}
+a.node-preview-backlink {
+  color: #145285;
+}
+.node-preview-backlink {
+  text-decoration: none;
+  display: block;
+  margin: 10px 0px;
+}
+.preview-button.form-submit {
+  text-align: center;
+  text-transform: uppercase;
+  background: #145285;
+  letter-spacing: 0.4px;
+  line-height: 43px;
+  padding: 0 25px;
+  margin-bottom: 0;
+  margin-right: 1em;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  transition: background-color 0.6s ease 0s, color 0.6s ease 0s;
+  clear: both;
+  color: #fff;
+}
+input.node-preview-save-button.form-submit:hover {
+  border: 2px solid #d0d0d0;
+  color: #333;
+  background: #fff;
+}
+.node-preview-save-button.form-submit {
+  border: 2px solid #145285;
+}
+.node-preview-switch-button.form-submit {
+  color: #828188;
+  background: #fff;
+  -webkit-box-shadow: inset 0px 0px 0px 2px #97979e;
+  -moz-box-shadow: inset 0px 0px 0px 2px #97979e;
+  box-shadow: inset 0px 0px 0px 2px #97979e;
+}
+.node-preview-display-mode.form-select {
+  font-weight: 400;
+  border: 2px solid #d0d0d0;
+  padding: 10px;
+  box-sizing: border-box;
+  color: #444b53;
+  background: #fff;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  will-change: border-color;
+  height: 43px;
+}
+.page {
+  padding-bottom: 160px;
+}
+div.node-preview-banner-form-actions {
+  display: block;
+}
+.node-preview-banner-form-view-mode {
+  display: block;
+}
+@media (min-width: 34em) {
+  .node-preview-container {
+    height: 120px;
+  }
+  .page {
+    padding-bottom: 120px;
+  }
+  .node-preview-banner-form-actions {
+    float: left;
+  }
+  div.node-preview-banner-form-view-mode {
+    float: right;
+  }
+  .node-preview-backlink {
+    margin: 10px;
+    display: inline;
+    margin: 10px 0 10px 10px;
+  }
+}

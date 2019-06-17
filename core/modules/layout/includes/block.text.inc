@@ -79,12 +79,28 @@ class BlockText extends Block {
         '#description' => t('If enabled, this block will be made reusable across different layouts and be listed in on the !block_link page.', array('!block_link' => l(t('Custom blocks'), 'admin/structure/block'))),
         '#weight' => 1,
       );
+      // Add a notice for translation.
+      if (module_exists('locale')) {
+        $form['convert']['reusable']['#description'] .= ' ' . t('Reusable blocks may also be translated.');
+      }
       $form['convert']['label'] = array(
         '#type' => 'textfield',
         '#title' => t('Admin label'),
         '#maxlength' => 64,
-        '#description' => t('Used in administrative interfaces and not shown to end-users.'),
+        '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
         '#weight' => 2,
+        '#states' => array(
+          'visible' => array(
+            ':input[name="reusable"]' => array('checked' => TRUE),
+          ),
+        ),
+      );
+      $form['convert']['description'] = array(
+       '#type' => 'textfield',
+       '#title' => t('Admin description'),
+       '#maxlength' => 128,
+       '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
+       '#weight' => 4,
         '#states' => array(
           'visible' => array(
             ':input[name="reusable"]' => array('checked' => TRUE),
@@ -140,6 +156,7 @@ class BlockText extends Block {
       $edit = array(
         'info' => $form_state['values']['label'],
         'title' => $form_state['values']['title'],
+        'description' => $form_state['values']['description'],
         'body' => $form_state['values']['content'],
       );
       block_custom_block_save($edit, $delta);

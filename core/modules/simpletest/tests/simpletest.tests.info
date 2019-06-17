@@ -239,7 +239,7 @@ group = Common
 file = common.test
 
 [CommonURLUnitTestCase]
-name = URL checking tests
+name = URL checking unit tests
 description = Confirm URL parsing functions work correctly with various input.
 group = Common
 file = common.test
@@ -355,6 +355,12 @@ file = common.test
 [CommonFormatDateTestCase]
 name = Format date
 description = Test the format_date() function.
+group = Common
+file = common.test
+
+[CommonBackdropFormatXmlElementsUnitTestCase]
+name = Format XML Elements
+description = Tests the format_xml_elements() functionality.
 group = Common
 file = common.test
 

@@ -153,9 +153,14 @@ function theme_layout_settings_context_table($variables) {
   $rows = array();
   foreach (element_children($element) as $key) {
     $argument_parts = $parts;
-    $argument_parts[$key] = '<strong>' . $argument_parts[$key] . '</strong>';
     $row = array();
-    $row[] = t('Position @index:', array('@index' => $key + 1)) . ' ' . implode('/', $argument_parts);
+    if (is_numeric($key)) {
+      $argument_parts[$key] = '<strong>' . $argument_parts[$key] . '</strong>';
+      $row[] = t('Position @index:', array('@index' => $key + 1)) . ' ' . implode('/', $argument_parts);
+    }
+    else {
+      $row[] = t('Special context: @key', array('@key' => $key));
+    }
     $row[] = backdrop_render($element[$key]);
     $rows[] = $row;
   }
@@ -278,6 +283,10 @@ function template_preprocess_block(&$variables) {
   $variables['title_prefix'] = '';
   $variables['title_suffix'] = '';
 
+  // Basic classes.
+  $variables['classes'][] = 'block';
+  $variables['classes'][] = backdrop_html_class('block-' . $block->module . '-' . (isset($block->childDelta) ? $block->childDelta : $block->delta));
+
   // Add the hero background image inline. This could also be added in a
   // specific template_preprocess_block__layout__hero() function, but we add
   // it here just to cut down on unnecessary separation.
@@ -290,6 +299,15 @@ function template_preprocess_block(&$variables) {
     else {
       $variables['classes'][] = 'block-hero-no-image';
     }
+  }
+
+  // Add custom classes if sent in.
+  if (!empty($style->settings['classes'])) {
+    $new_classes = explode(' ', $style->settings['classes']);
+    foreach ($new_classes as $class) {
+      $variables['classes'][] = backdrop_clean_css_identifier($class, array());
+    }
+    $variables['classes'] = array_filter($variables['classes']);
   }
 
   if (module_exists('contextual') && user_access('access contextual links')) {
@@ -329,15 +347,6 @@ function template_preprocess_block(&$variables) {
     }
   }
 
-  // Basic classes.
-  $variables['classes'][] = 'block';
-  $variables['classes'][] = backdrop_html_class('block-' . $block->module . '-' . (isset($block->childDelta) ? $block->childDelta : $block->delta));
-
-  // Add custom classes if sent in.
-  if (!empty($style->settings['classes'])) {
-    $variables['classes'] = array_merge($variables['classes'], array_filter(explode(' ', $style->settings['classes'])));
-  }
-
   // Set up some placeholders for constructing template file names.
   $base = 'block';
   $delimiter = '__';
@@ -359,18 +368,28 @@ function template_preprocess_block_dynamic(&$variables) {
   $block = $variables['block'];
   $style = $block->style;
 
-  // Classes for the wrapper set in template_preprocess_block().
+  // Add the wrapper tag. Classes are set in template_preprocess_block().
   $variables['wrapper_tag'] = $style->settings['wrapper_tag'];
 
-  // Title tag and classes.
+  // Add title tag and classes.
+  $title_classes = explode(' ', $style->settings['title_classes']);
+  foreach ($title_classes as $n => $class) {
+    $title_classes[$n] = backdrop_clean_css_identifier($class, array());
+  }
+  $title_classes = array_filter($title_classes);
   $variables['title_tag'] = $style->settings['title_tag'];
   $variables['title_attributes'] = array(
-    'class' => array_filter(explode(' ', $style->settings['title_classes'])),
+    'class' => $title_classes,
   );
 
-  // Content tag and classes.
+  // Add content tag and classes.
+  $content_classes = explode(' ', $style->settings['content_classes']);
+  foreach ($content_classes as $n => $class) {
+    $content_classes[$n] = backdrop_clean_css_identifier($class, array());
+  }
+  $content_classes = array_filter($content_classes);
   $variables['content_tag'] = $style->settings['content_tag'];
   $variables['content_attributes'] = array(
-    'class' => array_filter(explode(' ', $style->settings['content_classes']))
+    'class' => $content_classes,
   );
 }

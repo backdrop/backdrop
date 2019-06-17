@@ -144,7 +144,7 @@
   box-sizing: border-box;
 }
 .layout-editor-region-title .label {
-  float: left;
+  float: left; /* LTR */
   margin: 0;
   padding: 4px 12px 4px 4px; /* LTR */
   line-height: 1.2;
@@ -153,6 +153,7 @@
   color: #908990;
 }
 [dir="rtl"] .layout-editor-region-title .label {
+  float: right;
   padding-right: 4px;
   padding-left: 12px;
 }
@@ -160,19 +161,28 @@
   min-height: 40px;
 }
 .layout-editor-region-title .dropbutton-wrapper {
-  float: left;
+  float: left; /* LTR */
   width: 140px;
   margin: 4px 0 10px
 }
-.layout-editor-region-title .buttons .dropbutton-wrapper {
+[dir="rtl"] .layout-editor-region-title .dropbutton-wrapper {
   float: right;
+}
+.layout-editor-region-title .buttons .dropbutton-wrapper {
+  float: right; /* LTR */
   width: auto;
   margin: 4px 4px 10px
+}
+[dir="rtl"] .layout-editor-region-title .buttons .dropbutton-wrapper {
+  float: left;
 }
 .layout-editor-region .dropbutton-wrapper a {
   display: inline-block;
   width: 100%;
-  text-align: left;
+  text-align: left; /* LTR */
+}
+[dir="rtl"] .layout-editor-region .dropbutton-wrapper a {
+  text-align: right;
 }
 .layout-editor-region .dropbutton-wrapper .ajax-progress {
   position: absolute;
@@ -295,6 +305,24 @@
 
 /* Layout Misc */
 .layout-access-list ul {
+  list-style: none;
   margin: 1em 0;
-  padding: 0 20px;
+  padding: 0;
+}
+.layout-access-list ul li {
+  background: #eee;
+  border-bottom: 1px solid #ccc;
+  padding: 0.1em 0.6em;
+}
+.layout-access-list .layout-condition .layout-operations {
+  display: inline-block;
+}
+
+@media (min-width: 768px) {
+  .layout-access-list .layout-condition .layout-operations {
+    float: right; /* LTR */
+  }
+  [dir="rtl"] .layout-access-list .layout-condition .layout-operations {
+    float: left;
+  }
 }

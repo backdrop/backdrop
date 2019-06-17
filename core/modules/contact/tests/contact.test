@@ -23,10 +23,11 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
    */
   function testSiteWideContact() {
     $flood_limit = 3;
-    $config = config('contact.settings');
-    $config->set('contact_threshold_limit', $flood_limit);
-    $config->set('contact_threshold_window', 600);
-    $config->save();
+    $edit = array(
+      'contact_threshold_limit' => $flood_limit,
+      'contact_threshold_window' => 600,
+    );
+    $this->backdropPost('admin/structure/contact/settings', $edit, t('Save configuration'));
 
     // Set settings.
     $edit = array();
@@ -63,20 +64,42 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
     // Create first valid category.
     $recipients = array('simpletest@example.com', 'simpletest2@example.com', 'simpletest3@example.com');
     $this->addCategory($category = $this->randomName(16), implode(',', array($recipients[0])), '', TRUE);
-    $this->assertRaw(t('Category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
+    $this->assertRaw(t('Contact form category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
 
     // Make sure the newly created category is included in the list of categories.
     $this->assertNoUniqueText($category, 'New category included in categories list.');
 
     // Test update contact form category.
     $categories = $this->getCategories();
-    $category_id = $this->updateCategory($categories, $category = $this->randomName(16), $recipients_str = implode(',', array($recipients[0], $recipients[1])), $reply = $this->randomName(30), FALSE);
+    $recipients_str = implode(',', $recipients);
+    $category_id = $this->updateCategory($categories, $category = $this->randomName(16), implode(', ', $recipients), $reply = $this->randomName(30), FALSE);
     $category_array = contact_load($category_id);
     $test_category = array_shift($categories);
     $this->assertEqual($category_array['category'], $category);
     $this->assertEqual($category_array['recipients'], $recipients_str);
     $this->assertEqual($category_array['reply'], $reply);
-    $this->assertRaw(t('Category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
+    $this->assertRaw(t('Contact form category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
+
+    // Test separating contacts with new lines.
+    $categories = $this->getCategories();
+    $category_id = $this->updateCategory($categories, $category = $this->randomName(16), implode("\n", $recipients), $this->randomName(30), FALSE);
+    $category_array = contact_load($category_id);
+    $this->assertEqual($category_array['recipients'], $recipients_str);
+    $this->assertRaw(t('Contact form category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
+
+    // Test separating contacts with spaces.
+    $categories = $this->getCategories();
+    $category_id = $this->updateCategory($categories, $category = $this->randomName(16), implode(' ', $recipients), $this->randomName(30), FALSE);
+    $category_array = contact_load($category_id);
+    $this->assertEqual($category_array['recipients'], $recipients_str);
+    $this->assertRaw(t('Contact form category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
+
+    // Test separating contacts with semicolons.
+    $categories = $this->getCategories();
+    $category_id = $this->updateCategory($categories, $category = $this->randomName(16), implode(';', $recipients), $this->randomName(30), FALSE);
+    $category_array = contact_load($category_id);
+    $this->assertEqual($category_array['recipients'], $recipients_str);
+    $this->assertRaw(t('Contact form category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
 
     // Ensure that the contact form is shown without a category selection input.
     user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access site-wide contact form'));
@@ -88,14 +111,14 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
 
     // Add more categories.
     $this->addCategory($category = $this->randomName(16), implode(',', array($recipients[0], $recipients[1])), '', FALSE);
-    $this->assertRaw(t('Category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
+    $this->assertRaw(t('Contact form category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
 
     $this->addCategory($category = $this->randomName(16), implode(',', array($recipients[0], $recipients[1], $recipients[2])), '', FALSE);
-    $this->assertRaw(t('Category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
+    $this->assertRaw(t('Contact form category %category has been saved.', array('%category' => $category)), 'Category successfully saved.');
 
     // Try adding a category that already exists.
     $this->addCategory($category, '', '', FALSE);
-    $this->assertNoRaw(t('Category %category has been saved.', array('%category' => $category)), 'Category not saved.');
+    $this->assertNoRaw(t('Contact form category %category has been saved.', array('%category' => $category)), 'Category not saved.');
     $this->assertRaw(t('A contact form with category %category already exists.', array('%category' => $category)), 'Duplicate category error found.');
 
     // Clear flood table in preparation for flood test and allow other checks to complete.
@@ -271,7 +294,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
       $category = contact_load($cid);
       $category_name = $category['category'];
       $this->backdropPost('admin/structure/contact/delete/' . $cid, array(), t('Delete'));
-      $this->assertRaw(t('Category %category has been deleted.', array('%category' => $category_name)), 'Category deleted successfully.');
+      $this->assertRaw(t('Contact form category %category has been deleted.', array('%category' => $category_name)), 'Category deleted successfully.');
     }
   }
 

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides a stub cache implementation to be used during installation.
@@ -11,8 +10,8 @@
  * The stub implementation is needed when database access is not yet available.
  * Because Backdrop's caching system never requires that cached data be present,
  * these stub functions can short-circuit the process and sidestep the need for
- * any persistent storage. Obviously, using this cache implementation during
- * normal operations would have a negative impact on performance.
+ * any persistent storage. Using this cache implementation during normal
+ * operations would have a negative impact on performance.
  */
 class BackdropFakeCache extends BackdropDatabaseCache implements BackdropCacheInterface {
 

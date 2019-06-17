@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * @todo.
@@ -1387,10 +1386,10 @@ class views_handler_filter extends views_handler {
   /**
    * Can this filter be used in OR groups?
    *
-   * Some filters have complicated where clauses that cannot be easily used
-   * with OR groups. Some filters must also use HAVING which also makes
-   * them not groupable. These filters will end up in a special group
-   * if OR grouping is in use.
+   * Some filters have complicated where clauses that cannot be used with OR
+   * groups. Some filters must also use HAVING which also makes them not
+   * groupable. These filters will end up in a special group if OR grouping is
+   * in use.
    *
    * @return bool
    */

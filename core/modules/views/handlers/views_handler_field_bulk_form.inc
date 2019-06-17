@@ -106,6 +106,7 @@ class views_handler_field_bulk_form extends views_handler_field {
         '#title_display' => 'invisible',
         '#return_value' => $row->{$this->field_alias},
         '#default_value' => !empty($form_state['values'][$this->options['id']][$row_index]) ? 1 : NULL,
+        '#attributes' => array('data-tableselect-id' => $this->options['id'])
       );
     }
 
@@ -121,7 +122,7 @@ class views_handler_field_bulk_form extends views_handler_field {
       '#attributes' => array('class' => array('views-bulk-form')),
     );
     $form['header'][$this->options['id']]['action'] = array(
-      '#title' => t('Operation'),
+      '#title' => t('Action'),
       '#title_display' => 'none',
       '#type' => 'select',
       '#options' => $this->get_bulk_options(),
@@ -166,6 +167,9 @@ class views_handler_field_bulk_form extends views_handler_field {
         if (isset($context['redirect'])) {
           actions_redirect($context['redirect']);
         }
+      }
+      else {
+        backdrop_set_message(t('No items selected.'), 'error');
       }
 
       if ($count) {

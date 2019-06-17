@@ -90,7 +90,7 @@ function node_views_data() {
     ),
   );
 
-  // created field
+  // Created date.
   $data['node']['created'] = array(
     'title' => t('Post date'), // The item it appears as on the UI,
     'help' => t('The date the content was posted.'), // The help that appears on the UI,
@@ -106,10 +106,26 @@ function node_views_data() {
     ),
   );
 
-  // changed field
+  // Changed date.
   $data['node']['changed'] = array(
     'title' => t('Updated date'), // The item it appears as on the UI,
     'help' => t('The date the content was last updated.'), // The help that appears on the UI,
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+
+  // Scheduled date.
+  $data['node']['scheduled'] = array(
+    'title' => t('Scheduled date'),
+    'help' => t('The date content is scheduled to be published in the future.'),
     'field' => array(
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
@@ -157,6 +173,20 @@ function node_views_data() {
       'label' => t('Published'),
       'type' => 'yes-no',
       'use equal' => TRUE, // Use status = 1 instead of status <> 0 in WHERE statment
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
+  // hidden path
+  $data['node']['hidden_path'] = array(
+    'title' => t('Hidden path'),
+    'help' => t('Whether or not the content has a hidden path.'),
+    'filter' => array(
+      'handler' => 'views_handler_filter_node_hidden_path',
+      'label' => t('Paths are hidden'),
+      'type' => 'yes-no',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',

@@ -6,11 +6,11 @@
  */
 
 /**
- * Fetch Views' data from the cache
+ * Fetch Views' data from the cache.
  *
  * @param $move
- *   Under certain circumstances it makes sense to not get the moved table, but the old one.
- *   One example is views_get_handler.
+ *   Under certain circumstances it makes sense to not get the moved table, but
+ *   the old one. One example is views_get_handler.
  */
 function _views_fetch_data($table = NULL, $move = TRUE, $reset = FALSE) {
   $cache = &backdrop_static(__FUNCTION__ . '_cache');
@@ -67,12 +67,11 @@ function _views_fetch_data($table = NULL, $move = TRUE, $reset = FALSE) {
   }
   else {
     if (!$fully_loaded) {
-      $data = views_cache_get('views_data', TRUE);
-      if (!empty($data->data)) {
+      if ($data = views_cache_get('views_data', TRUE)) {
         $cache = $data->data;
       }
-
-      if (empty($cache)) {
+      else {
+        // No cache entry; rebuild.
         $cache = _views_fetch_data_build();
       }
       $fully_loaded = TRUE;
@@ -101,7 +100,8 @@ function _views_fetch_data_build() {
 }
 
 /**
- * Links tables having an 'entity type' specified to the respective generic entity-type tables.
+ * Links tables having an 'entity type' specified to the respective, generic
+ * entity-type tables.
  */
 function _views_data_process_entity_types(&$data) {
   foreach ($data as $table_name => $table_info) {
@@ -156,8 +156,9 @@ function _views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) 
  * @param $cid
  *   The cache ID of the data to store.
  * @param $data
- *   The data to store in the cache. Complex data types will be automatically serialized before insertion.
- *   Strings will be stored as plain text and not serialized.
+ *   The data to store in the cache. Complex data types will be automatically
+ *   serialized before insertion. Strings will be stored as plain text and not
+ *   serialized.
  * @param $use_language
  *   If TRUE, the data will be cached specific to the currently active language.
  */
@@ -177,7 +178,8 @@ function views_cache_set($cid, $data, $use_language = FALSE) {
  * @param int $cid
  *   The cache ID of the data to retrieve.
  * @param bool $use_language
- *   If TRUE, the data will be requested specific to the currently active language.
+ *   If TRUE, the data will be requested specific to the currently active
+ *   language.
  *
  * @return stdClass|bool
  *   The cache or FALSE on failure.

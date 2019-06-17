@@ -1,6 +1,8 @@
 name = Theme test base theme
 description = Test theme which acts as a base theme for other test subthemes.
+version = BACKDROP_VERSION
 backdrop = 1.x
+type = theme
 hidden = TRUE
 
 settings[basetheme_only] = base theme value

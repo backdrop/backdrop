@@ -78,6 +78,8 @@ function file_menu() {
     'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,
   );
+
+  // @deprecated. Remove in Backdrop 2.0.
   $items['file/progress'] = array(
     'page callback' => 'file_ajax_progress',
     'delivery callback' => 'backdrop_json_deliver',
@@ -233,7 +235,7 @@ function file_file_download($uri, $field_type = 'file') {
   }
 
   // Find out which (if any) fields of this type contain the file.
-  $references = file_get_file_references($file, NULL, FIELD_LOAD_CURRENT, $field_type);
+  $references = file_get_file_references($file, NULL, FIELD_LOAD_CURRENT, $field_type, FALSE);
 
   // Stop processing if there are no references in order to avoid returning
   // headers for files controlled by other modules. Make an exception for
@@ -328,14 +330,34 @@ function file_file_download($uri, $field_type = 'file') {
  * @see file_menu()
  */
 function file_ajax_upload() {
-  $form_parents = func_get_args();
-  $form_build_id = (string) array_pop($form_parents);
+  $args = func_get_args();
+  // Token used to validate that the path values are unmodified.
+  $token = (string) array_pop($args);
+  // Form build key to pull from the form cache.
+  $form_build_id = (string) array_pop($args);
+  // All remaining arguments are the path to the form element in the form tree.
+  $form_parents = $args;
+  // Reassemble the #ajax['path'] property so we can validate the token.
+  $original_path = 'file/ajax/' . implode('/', $form_parents) . '/' . $form_build_id;
+  $original_token = backdrop_hmac_base64($original_path, backdrop_get_private_key() . backdrop_get_hash_salt());
+  if ($original_token !== $token) {
+    // Path has been tampered with. Reject the request.
+    backdrop_set_message(t('Invalid upload token.'), 'error');
+    $commands = array();
+    $commands[] = ajax_command_remove('.file-ajax-messages');
+    $commands[] = ajax_command_prepend(NULL, '<div class="file-ajax-messages">' . theme('status_messages') . '</div>');
+    return array('#type' => 'ajax', '#commands' => $commands);
+  }
+
+  // Sanitize form parents before using them.
+  $form_parents = array_filter($form_parents, 'element_child');
 
   if (empty($_POST['form_build_id']) || $form_build_id != $_POST['form_build_id']) {
     // Invalid request.
     backdrop_set_message(t('An unrecoverable error occurred. The uploaded file likely exceeded the maximum file size (@size) that this server supports.', array('@size' => format_size(file_upload_max_size()))), 'error');
     $commands = array();
-    $commands[] = ajax_command_replace(NULL, theme('status_messages'));
+    $commands[] = ajax_command_remove('.file-ajax-messages');
+    $commands[] = ajax_command_prepend(NULL, '<div class="file-ajax-messages">' . theme('status_messages') . '</div>');
     return array('#type' => 'ajax', '#commands' => $commands);
   }
 
@@ -345,16 +367,10 @@ function file_ajax_upload() {
     // Invalid form_build_id.
     backdrop_set_message(t('An unrecoverable error occurred. Use of this form has expired. Try reloading the page and submitting again.'), 'error');
     $commands = array();
-    $commands[] = ajax_command_replace(NULL, theme('status_messages'));
+    $commands[] = ajax_command_remove('.file-ajax-messages');
+    $commands[] = ajax_command_prepend(NULL, '<div class="file-ajax-messages">' . theme('status_messages') . '</div>');
     return array('#type' => 'ajax', '#commands' => $commands);
   }
-
-  // Get the current element and count the number of files.
-  $current_element = $form;
-  foreach ($form_parents as $parent) {
-    $current_element = $current_element[$parent];
-  }
-  $current_file_count = isset($current_element['#file_upload_delta']) ? $current_element['#file_upload_delta'] : 0;
 
   // Process user input. $form and $form_state are modified in the process.
   backdrop_process_form($form['#form_id'], $form, $form_state);
@@ -364,7 +380,7 @@ function file_ajax_upload() {
     $form = $form[$parent];
   }
 
-  $form['#prefix'] .= theme('status_messages');
+  $form['#prefix'] .= '<div class="file-ajax-messages">' . theme('status_messages') . '</div>';
   $output = backdrop_render($form);
   $js = backdrop_add_js();
   $settings = backdrop_array_merge_deep_array($js['settings']['data']);
@@ -378,6 +394,9 @@ function file_ajax_upload() {
  *
  * @param $key
  *   The unique key for this upload process.
+ *
+ * @since Backdrop 1.11: Deprecated. Upload progress is now handled client-side.
+ * @deprecated
  */
 function file_ajax_progress($key) {
   $progress = array(
@@ -408,15 +427,18 @@ function file_ajax_progress($key) {
 /**
  * Determines the preferred upload progress implementation.
  *
- * @return
- *   A string indicating which upload progress system is available. Either "apc"
- *   or "uploadprogress". If neither are available, returns FALSE.
+ * @return string
+ *   A string indicating which upload progress system is available. One of
+ *   "uploadprogress", "apc", or "client".
+ *
+ * @since Backdrop 1.11.0: Deprecated. Upload progress is handled client-side.
+ *   If uploadprogress and APC are unavailable, "client" will now always be
+ *   returned, as client-side uploading is always available.
+ * @deprecated
  */
 function file_progress_implementation() {
   static $implementation;
   if (!isset($implementation)) {
-    $implementation = FALSE;
-
     // We prefer the PECL extension uploadprogress because it supports multiple
     // simultaneous uploads. APC only supports one at a time.
     if (extension_loaded('uploadprogress')) {
@@ -424,6 +446,10 @@ function file_progress_implementation() {
     }
     elseif (extension_loaded('apc') && ini_get('apc.rfc1867')) {
       $implementation = 'apc';
+    }
+    // Client-side support is always available.
+    else {
+      $implementation = 'client';
     }
   }
   return $implementation;
@@ -469,8 +495,14 @@ function file_managed_file_process($element, &$form_state, $form) {
   $element['#file'] = $fid ? file_load($fid) : FALSE;
   $element['#tree'] = TRUE;
 
+  // Token here is not generated with backdrop_token() as it does not need to
+  // be session-based.
+  $path = 'file/ajax/' . implode('/', $element['#array_parents']) . '/' . $form['form_build_id']['#value'];
+  $token = backdrop_hmac_base64($path, backdrop_get_private_key() . backdrop_get_hash_salt());
+  $path .= '/' . $token;
+
   $ajax_settings = array(
-    'path' => 'file/ajax/' . implode('/', $element['#array_parents']) . '/' . $form['form_build_id']['#value'],
+    'path' => $path,
     'wrapper' => $element['#id'] . '-ajax-wrapper',
     'effect' => 'none',
     'progress' => array(
@@ -513,7 +545,11 @@ function file_managed_file_process($element, &$form_state, $form) {
     '#value' => $fid,
   );
 
-  // Add progress bar support to the upload if possible.
+  // Legacy server-side progress bar support. If not available, client-side
+  // upload progress will be used instead. Client-side support does not require
+  // a hidden field nor does it do AJAX requests to check on the progress,
+  // so no [#ajax][progress][path] is necessary.
+  // @todo: Remove in Backdrop 2.0.
   if ($element['#progress_indicator'] == 'bar' && $implementation = file_progress_implementation()) {
     $upload_progress_key = mt_rand();
 
@@ -539,7 +575,9 @@ function file_managed_file_process($element, &$form_state, $form) {
     }
 
     // Add the upload progress callback.
-    $element['upload_button']['#ajax']['progress']['path'] = 'file/progress/' . $upload_progress_key;
+    if ($implementation !== 'client') {
+      $element['upload_button']['#ajax']['progress']['path'] = 'file/progress/' . $upload_progress_key;
+    }
   }
 
   // The file upload field itself.
@@ -1055,6 +1093,13 @@ function file_upload_validators_pre_render($element) {
  * @param $field_type
  *   (optional) The name of a field type. If given, limits the reference check
  *   to fields of the given type.
+ * @param $check_access
+ *   (optional) A boolean that specifies whether the permissions of the current
+ *   user should be checked when retrieving references. If FALSE, all
+ *   references to the file are returned. If TRUE, only references from
+ *   entities that the current user has access to are returned. Defaults to
+ *   TRUE for backwards compatibility reasons, but FALSE is recommended for
+ *   most situations.
  *
  * @return array
  *   A nested array in the following format:
@@ -1068,7 +1113,7 @@ function file_upload_validators_pre_render($element) {
  * @see file_file_download()
  * @see file_file_predelete()
  */
-function file_get_file_references(File $file, $field = NULL, $age = FIELD_LOAD_REVISION, $field_type = 'file') {
+function file_get_file_references(File $file, $field = NULL, $age = FIELD_LOAD_REVISION, $field_type = 'file', $check_access = TRUE) {
   $references = backdrop_static(__FUNCTION__, array());
   $fields = isset($field) ? array($field['field_name'] => $field) : field_info_fields();
 
@@ -1079,6 +1124,11 @@ function file_get_file_references(File $file, $field = NULL, $age = FIELD_LOAD_R
       $query
         ->fieldCondition($file_field, 'fid', $file->fid)
         ->age($age);
+      if (!$check_access) {
+        // Neutralize the 'entity_field_access' query tag added by
+        // field_sql_storage_field_storage_query().
+        $query->addTag('DANGEROUS_ACCESS_CHECK_OPT_OUT');
+      }
       $references[$field_name] = $query->execute();
     }
   }

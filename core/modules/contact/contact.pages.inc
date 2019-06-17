@@ -101,7 +101,7 @@ function contact_site_form($form, &$form_state) {
   $form['copy'] = array(
     '#type' => 'checkbox',
     '#title' => t('Send yourself a copy.'),
-    '#access' => $user->uid,
+    '#access' => $user->uid && contact_show_personal_copy_checkbox(),
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -241,7 +241,7 @@ function contact_personal_form($form, &$form_state, $recipient) {
   $form['copy'] = array(
     '#type' => 'checkbox',
     '#title' => t('Send yourself a copy.'),
-    '#access' => $user->uid,
+    '#access' => $user->uid && contact_show_personal_copy_checkbox(),
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(

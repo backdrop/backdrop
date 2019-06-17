@@ -37,7 +37,7 @@ class LayoutStyle extends LayoutHandler {
         '#title' => t('Block classes'),
         '#type' => 'textfield',
         '#default_value' => $this->settings['classes'],
-        '#description' => t('Additional classes to be added to this block.'),
+        '#description' => t('Separate multiple classes with spaces.'),
       );
     }
   }

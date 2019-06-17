@@ -28,6 +28,12 @@ description = Create a node and test node edit functionality.
 group = Node
 file = node.test
 
+[PagePreviewTestCase]
+name = Node preview
+description = Test node preview functionality.
+group = Node
+file = node.test
+
 [NodeCreationTestCase]
 name = Node creation
 description = Create a node and test saving it.
@@ -201,3 +207,9 @@ name = Views node revision relationship
 description = Tests the Views integration of node_revision table of node module.
 group = Node
 file = node_views_revision_relations.test
+
+[NodePublishScheduling]
+name = Node publishing states tests
+description = Tests the new node states for Draft, Publish Now and Schedule Publish Time.
+group = Node
+file = node.test

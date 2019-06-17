@@ -347,8 +347,8 @@ function hook_layout_presave(Layout $layout) {
  * - Used to construct the default HTML ID of "block-MODULE-DELTA" applied to
  *   each block when it is rendered. This ID may then be used for CSS styling or
  *   JavaScript programming.
- * - Used to define a theming template suggestion of block__MODULE__DELTA, for
- *   advanced theming possibilities.
+ * - Used to define a theme template suggestion of block__MODULE__DELTA, for
+ *   advanced theme possibilities.
  * - Used by other modules to identify your block in hook_block_info_alter() and
  *   other alter hooks.
  * The values of delta can be strings or numbers, but because of the uses above
