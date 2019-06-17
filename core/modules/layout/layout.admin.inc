@@ -2661,7 +2661,7 @@ function layout_settings_page($form, &$form_state) {
     '#prefix' => '<div class="container-inline">',
     '#suffix' => '</div>',
     '#attributes' => array(
-      'class' => array('comment-operations')
+      'class' => array('layout-operations')
     ),
   );
 
@@ -2800,15 +2800,15 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
   if (!empty($template_info['flexible'])) {
     $links['edit'] = array(
       'title' => t('Configure name'),
-      'href' => 'admin/structure/layouts/settings/' . $template_info['name'] . '/edit',
+      'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/edit',
     );
     $links['configure'] = array(
       'title' => t('Configure regions'),
-      'href' => 'admin/structure/layouts/settings/' . $template_info['name'] . '/configure',
+      'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/configure',
     );
     $links['delete'] = array(
       'title' => t('Delete'),
-      'href' => 'admin/structure/layouts/settings/' . $template_info['name'] . '/delete',
+      'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/delete',
     );
   }
 

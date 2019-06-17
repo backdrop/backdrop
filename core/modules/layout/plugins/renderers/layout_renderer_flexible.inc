@@ -86,29 +86,9 @@ class LayoutRendererFlexible extends LayoutRendererEditor {
    */
   protected function getRegionLinks($region_id) {
     $links = array();
-    $links['add-above'] = array(
-      'title' => t('Add row above'),
-      // 'href' => $this->getUrl('add-block', $region_id, $this->layout_info['name']),
-      'href' => 'admin/structure/layouts/settings/' . $this->layout_info['name'] . '/' . $region_id . '/before/add-row',
-      'attributes' => array(
-        'class' => array('use-ajax'),
-        'data-dialog' => TRUE,
-        'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-      ),
-    );
-    $links['add'] = array(
-      'title' => t('Add row below'),
-      // 'href' => $this->getUrl('add-row', $region_id),
-      'href' => 'admin/structure/layouts/settings/' . $this->layout_info['name'] . '/' . $region_id . '/after/add-row',
-      'attributes' => array(
-        'class' => array('use-ajax'),
-        'data-dialog' => TRUE,
-        'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-      ),
-    );
     $links['configure'] = array(
       'title' => t('Configure row'),
-      'href' => 'admin/structure/layouts/settings/' . $this->layout_info['name'] . '/' . $region_id . '/configure',
+      'href' => 'admin/structure/layouts/settings/flexible-template/' . $this->layout_info['name'] . '/row/' . $region_id . '/configure',
       'attributes' => array(
         'class' => array('use-ajax'),
         'data-dialog' => TRUE,
@@ -117,7 +97,7 @@ class LayoutRendererFlexible extends LayoutRendererEditor {
     );
     $links['delete'] = array(
       'title' => t('Delete row'),
-      'href' => 'admin/structure/layouts/settings/' . $this->layout_info['name'] . '/' . $region_id . '/delete-row',
+      'href' => 'admin/structure/layouts/settings/flexible-template/' . $this->layout_info['name'] . '/row/' . $region_id . '/delete-row',
       'attributes' => array(
         'class' => array('use-ajax'),
       ),

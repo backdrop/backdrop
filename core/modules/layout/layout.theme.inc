@@ -280,7 +280,7 @@ function layout_preprocess_layout(&$variables) {
       $variables['flexible_editor'] = TRUE;
     }
 
-    $variables['region_data'] = layout_flexible_row_styles();
+    $variables['column_data'] = layout_flexible_row_styles();
 
     $variables['regions'] =  $data['regions'];
     $variables['region_data'] = array();
@@ -301,7 +301,7 @@ function layout_preprocess_layout(&$variables) {
         $region['regions'][0]['content_key'] = $variables['flexible_editor'] ? $name : $name . '_0';
       }
       else {
-        $col_info = $variables['region_data'][$region['contains']];
+        $col_info = $variables['column_data'][$region['contains']];
         $split = explode(':', $col_info['bootstrap']);
         $i = 0;
         foreach ($split as $col) {
