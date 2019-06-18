@@ -97,7 +97,7 @@ class LayoutRendererFlexible extends LayoutRendererEditor {
     );
     $links['delete'] = array(
       'title' => t('Delete row'),
-      'href' => 'admin/structure/layouts/settings/flexible-template/' . $this->layout_info['name'] . '/row/' . $region_id . '/delete-row',
+      'href' => 'admin/structure/layouts/settings/flexible-template/' . $this->layout_info['name'] . '/row/' . $region_id . '/delete',
       'attributes' => array(
         'class' => array('use-ajax'),
       ),
