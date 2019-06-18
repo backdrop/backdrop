@@ -181,7 +181,6 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
  */
 function layout_flexible_template_add_row($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/row/add/select-widths';
-  dpm($form_state['redirect']);
 }
 
 /**
@@ -521,7 +520,6 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   $template_data['regions'][$original_row] = $new_row;
 
   $form_state['template_data'] = $template_data;
-dpm($form_state);
 
   $form_state['ajax_rebuild_form'] = 'layout_flexible_template_configure_form';
   $form_state['ajax_rebuild_args'] = array($form_state['flexible_template_id']);
