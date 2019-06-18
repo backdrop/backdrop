@@ -102,6 +102,7 @@ function layout_flexible_template_settings_form_submit($form, &$form_state) {
  * @ingroup forms
  */
 function layout_flexible_template_configure_form($form, &$form_state, $flexible_template_id) {
+  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   $config = array(
     'is_new' => TRUE,
   );
@@ -117,7 +118,6 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
     return;
   }
 
-dpm($form_state['template_data']);
   foreach ($form_state['template_data']['regions'] as $position => $info) {
     $layout->positions[$position] = array();
     $template['regions'][$position] = $position;
@@ -145,11 +145,14 @@ dpm($form_state['template_data']);
     '#default_value' => implode(',', array_keys($form_state['template_data']['regions'])),
   );
 
-  $form['submit'] = array(
+  $form['add_row'] = array(
     '#type' => 'submit',
     '#value' => t('Add Row'),
     '#submit' => array(
-      'layout_flexible_template_configure_form_submit',
+      'layout_flexible_template_add_row',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_open_dialog',
     ),
   );
   $form['actions'] = array(
@@ -171,6 +174,14 @@ dpm($form_state['template_data']);
   );
 
   return $form;
+}
+
+/**
+ * Submit handler for layout_flexible_template_region_style_select().
+ */
+function layout_flexible_template_add_row($form, &$form_state) {
+  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/row/add/select-widths';
+  dpm($form_state['redirect']);
 }
 
 /**
@@ -324,8 +335,11 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
   $form_state['original_row'] = $original_row;
   $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
 
-  $row_data = $form_state['template_data']['regions'][$original_row];
-dpm($row_data);
+  $row_data = array();
+  if ($original_row != 'add') {
+    $row_data = $form_state['template_data']['regions'][$original_row];
+  }
+
   $region_style = $region_style ? $region_style : $row_data['contains'];
   $form_state['region_style'] = $region_style;
 
@@ -479,7 +493,7 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
     'region_names' => $form_state['values']['region_names'],
   );
 
-  if ($original_row == 'add-row') {
+  if ($original_row == 'add') {
     $original_row = uniqid();
   }
 
