@@ -121,19 +121,21 @@ function theme_layout_flexible_template_style_option($variables) {
   $row_style = $variables['row_style'];
   if ($row_style['region_count'] == 1) {
     $regions = array('12');
+    $percent = array('100');
   }
   else {
     $regions = explode(':', $row_style['bootstrap']);
+    $percent = explode(':', $row_style['split']);
   }
   $output = '';
   $output .= '<div class="flexible-icon container">';
   $output .= '<div class="flexible-icon-row row">';
-  foreach ($regions as $region) {
-    $output .= '<div class="flexible-icon-region col-md-' . $region . '">region</div>';
+  foreach ($regions as $index => $region) {
+    $output .= '<div class="flexible-icon-region col-md-' . $region . '">' . $percent[$index] . '%</div>';
   }
   $output .= '</div>';
   $output .= '</div>';
-  $output .= '<div class="layout-caption">' . check_plain($row_style['name']) . '</div>';
+  // $output .= '<div class="layout-caption">' . check_plain($row_style['name']) . '</div>';
   return $output;
 }
 

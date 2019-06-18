@@ -308,15 +308,16 @@
 }
 
 .flexible-icon {
-  border: 2px solid #ccc;
+  border: 2px solid #999;
   border-radius: 3px;
-  padding: 0.5rem;
+  padding: 1px;
 }
 
 .flexible-icon-region {
   background-color: #ccc;
-  color: #ccc;
+  color: #fff;
   background-clip: content-box;
+  text-align: center;
 }
 
 .form-item .form-item.form-item-region-count {
