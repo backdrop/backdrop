@@ -103,11 +103,15 @@ function layout_flexible_template_settings_form_submit($form, &$form_state) {
  */
 function layout_flexible_template_configure_form($form, &$form_state, $flexible_template_id) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+
   $config = array(
     'is_new' => TRUE,
   );
   $layout = new Layout($config);
   $template = layout_get_layout_template_info($flexible_template_id);
+
+  backdrop_set_title($template['title']);
+
   $template['plugin'] = array('class' => 'LayoutRendererFlexible');
   $template['regions'] = array();
   $form_state['flexible_template_id'] = $flexible_template_id;
@@ -234,7 +238,7 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
   }
   $form['region_count'] = array(
     '#title' => t('Number of regions'),
-    '#type' => 'select',
+    '#type' => 'radios',
     '#default_value' => '1',
     '#parents' => array('region_count'),
     '#options' => $count_options,

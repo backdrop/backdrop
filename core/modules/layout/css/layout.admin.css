@@ -319,3 +319,7 @@
   background-clip: content-box;
 }
 
+.form-item .form-item.form-item-region-count {
+  margin-right: 2em;
+  display: inline;
+}
