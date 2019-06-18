@@ -402,11 +402,11 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     '#title' => t('Row width behavior'),
     '#type' => 'select',
     '#options' => array(
-      'container' => t('Container'),
       'container_fluid' => t('Container fluid'),
+      'container' => t('Container'),
       'no_container' => t('No container'),
     ),
-    '#default_value' => isset($row_data['container']) ? $row_data['container'] : 'container',
+    '#default_value' => isset($row_data['container']) ? $row_data['container'] : 'container_fluid',
   );
 
   $form['region_names'] = array(
