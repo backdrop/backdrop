@@ -347,12 +347,12 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
   $selected_style = $row_styles[$region_style]['name'];
   $region_count = $row_styles[$region_style]['region_count'];
 
-  // if ($op == 'configure') {
-    // backdrop_set_title(t('Configure row !original_row', array('!original_row' => $original_row)));
-  // }
-  // else {
-    // backdrop_set_title(t('Add row !op !original_row', array('!op' => $op, '!original_row' => $original_row)));
-  // }
+  if ($original_row == 'add') {
+    backdrop_set_title(t('Add new row'));
+  }
+  else {
+    backdrop_set_title(t('Configure row !original_row', array('!original_row' => $original_row)));
+  }
 
   $form['region_style'] = array(
     '#type' => 'item',
@@ -406,12 +406,6 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     '#default_value' => isset($row_data['container']) ? $row_data['container'] : 'container',
   );
 
-  // foreach (array('row_classes', 'element') as $form_element) {
-    // if ($op != 'configure' && !$region_style) {
-      // $form[$form_element]['#default_value'] = '';
-    // }
-  // }
-
   $form['region_names'] = array(
     '#type' => 'fieldset',
     '#title' => t('Region titles'),
@@ -419,13 +413,13 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     '#collapsible' => FALSE,
     '#tree' => TRUE,
   );
+
+  $form_state['last_region_number'] = layout_flexible_template_get_last_region_number($form_state['template_data']);
   for ($i = 0; $i < $region_count; $i++) {
-    // Todo: replace uniqid() with random readable words.
-    // $form_state['placeholder']['region_name_' . $i] = uniqid();
     $form['region_names']['region_name_' . $i] = array(
       '#type' => 'textfield',
-      '#title' => t('Region ') . $i,
-      '#default_value' => !empty($row_data['region_names']['region_name_' . $i]) ? $row_data['region_names']['region_name_' . $i] : 'change this',
+      '#title' => t('Region') . ' ' . ($i + 1) . ' ' . t('name'),
+      '#default_value' => !empty($row_data['region_names']['region_name_' . $i]) ? $row_data['region_names']['region_name_' . $i] : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
     );
   }
 
@@ -450,6 +444,33 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
 }
 
 /**
+ * Returns the last number of all regions named "Region X" where X is a number.
+ */
+function layout_flexible_template_get_last_region_number($template_data, $form_state = NULL) {
+  $last = 0;
+  if ($form_state) {
+    $region_names = array_filter($form_state['values']['region_names']);
+    $last = $form_state['last_region_number'];
+  }
+  else {
+    foreach ($template_data['regions'] as $row) {
+      foreach ($row['region_names'] as $name) {
+        $region_names[] = $name;
+      }
+    }
+  }
+
+  foreach ($region_names as $region) {
+    $str = explode('Region ', $region);
+    if (!empty($str[1]) && is_numeric($str[1]) && $str[1] > $last) {
+      $last = $str[1];
+    }
+  }
+
+  return $last;
+}
+
+/**
  * Submit handler for layout_flexible_template_region_style_select().
  */
 function layout_flexible_template_change_region_style($form, &$form_state) {
@@ -467,14 +488,14 @@ function layout_flexible_template_region_count_load(&$form, &$form_state) {
  * Submit handler for layout_configure_region_page().
  */
 function layout_flexible_template_edit_row_validate($form, &$form_state) {
+  $last_region_number = layout_flexible_template_get_last_region_number($form_state['template_data'], $form_state);
+
   foreach ($form_state['values']['region_names'] as $key => $region_name) {
     if (empty($region_name)) {
-      $form_state['values']['region_names'][$key] = 'change this';
+      $form_state['values']['region_names'][$key] = t('Region') . ' ' . ($last_region_number + $key + 1);
+      $last_region_number++;
     }
   }
-  // alternative
-  // array_filter($form_state['values']['region_names']);
-  // array_merge($form_state['values']['region_names'], $form_state['placeholder']);
 }
 
 
