@@ -827,8 +827,11 @@ function image_style_create_derivative($style, $source, $destination) {
     return FALSE;
   }
 
-  foreach ($style['effects'] as $effect) {
-    image_effect_apply($image, $effect);
+  // Process any image besides SVG.
+  if ($image->info['extension'] != 'svg') {
+    foreach ($style['effects'] as $effect) {
+      image_effect_apply($image, $effect);
+    }
   }
 
   if (!image_save($image, $destination)) {
