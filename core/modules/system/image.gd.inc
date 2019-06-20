@@ -27,6 +27,24 @@ function image_gd_settings() {
       '#default_value' => config_get('system.core', 'image_jpeg_quality'),
       '#field_suffix' => t('%'),
     );
+    $form['image_svg_width'] = array(
+        '#type' => 'textfield',
+        '#title' => t('SVG width'),
+        '#description' => t('Define the default width of an SVG image. Changing this will only affect new uploads.'),
+        '#size' => 10,
+        '#maxlength' => 4,
+        '#default_value' => variable_get('image_svg_width', 480),
+        '#field_suffix' => t('px'),
+    );
+    $form['image_svg_height'] = array(
+        '#type' => 'textfield',
+        '#title' => t('SVG height'),
+        '#description' => t('Define the default height of an SVG image. Changing this will only affect new uploads.'),
+        '#size' => 10,
+        '#maxlength' => 4,
+        '#default_value' => variable_get('image_svg_height', 320),
+        '#field_suffix' => t('px'),
+    );
 
     return $form;
   }
@@ -232,6 +250,10 @@ function image_gd_load(stdClass $image) {
   if (function_exists($function)) {
     $image->resource = $function($image->source);
   }
+  elseif ($extension == 'svg') {
+    // Pass through SVG images.
+    return TRUE;
+  }
   return !empty($image->resource);
 }
 
@@ -263,11 +285,15 @@ function image_gd_save(stdClass $image, $destination) {
 
   $extension = str_replace('jpg', 'jpeg', $image->info['extension']);
   $function = 'image' . $extension;
-  if (!function_exists($function)) {
+  if (!function_exists($function) && $extension != 'svg') {
     return FALSE;
   }
   if ($extension == 'jpeg') {
     $success = $function($image->resource, $destination, config_get('system.core', 'image_jpeg_quality'));
+  }
+  elseif ($extension == 'svg') {
+    // Pass through SVG images.
+    $success = (bool) file_unmanaged_copy($image->source, $destination, FILE_EXISTS_REPLACE);
   }
   else {
     // Always save PNG images with full transparency.
@@ -354,6 +380,17 @@ function image_gd_get_info(stdClass $image) {
       'height'    => $data[1],
       'extension' => $extension,
       'mime_type' => $data['mime'],
+    );
+  }
+  elseif ($mimetype = file_get_mimetype($image->source) == 'image/svg+xml') {
+    // Pass throught SVG images.
+    $width = variable_get('image_svg_width', 480);
+    $height = variable_get('image_svg_height', 320);
+    $details = array(
+        'width'     => $width,
+        'height'    => $height,
+        'extension' => 'svg',
+        'mime_type' => $mimetype,
     );
   }
 
