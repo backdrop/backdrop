@@ -383,8 +383,9 @@ function image_gd_get_info(stdClass $image) {
   }
   elseif ($mimetype = file_get_mimetype($image->source) == 'image/svg+xml') {
     // Pass throught SVG images.
-    $width = variable_get('image_svg_width', 480);
-    $height = variable_get('image_svg_height', 320);
+    $config = config('system.core');
+    $width = $config->get('image_svg_width'),
+    $height = $config->get('image_svg_height'),
     $details = array(
         'width'     => $width,
         'height'    => $height,
