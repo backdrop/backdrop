@@ -3046,6 +3046,20 @@ function system_update_1068() {
 }
 
 /**
+ * Convert SVG default width/height variables to config.
+ */
+function system_update_1069() {
+  $config = config('system.core');
+  $config->set('image_svg_width', update_variable_get('image_svg_width', 480));
+  $config->set('image_svg_height', update_variable_get('image_svg_height', 320));
+  $config->save();
+
+  // Delete variables.
+  update_variable_del('image_svg_width');
+  update_variable_del('image_svg_height');
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
