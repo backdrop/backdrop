@@ -36,7 +36,7 @@
     <<?php print $row['element']; ?> data-row-id="<?php print $name; ?>" class="flexible-row <?php print 'l-' . $name; ?>" <?php print $row['row_id']; ?>>
       <div class="<?php print $row['row_class']; ?>">
         <?php if ($region_buttons): ?>
-          <div class="layout-editor-region-title clearfix">
+          <div class="layout-editor-region-buttons clearfix">
             <?php print $region_buttons[$name]; ?>
           </div>
         <?php endif; ?>
@@ -48,7 +48,6 @@
               <div class="layout-editor-region-title clearfix">
               <h2 class="label"><?php print $region['region_name']; ?></h2>
               </div>
-              <div class="layout-editor-region-content"></div>
               </div>
             <?php else: ?>
               <?php print $content[$region['content_key']]; ?>

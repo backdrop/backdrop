@@ -1008,7 +1008,7 @@ function layout_layout_info() {
           $region_name = $region['region_names']['region_name_' . $i];
         }
         else {
-          $region_name = check_plain($region['name']) . ' ' . $i;
+          $region_name = $name . ' ' . $i;
         }
         $layouts[$item['name']]['regions'][$name . '_' . $i] = $region_name;
       }

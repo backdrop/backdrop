@@ -47,7 +47,7 @@ class LayoutRendererFlexible extends LayoutRendererEditor {
       $output .= '<div class="layout-editor-region-title clearfix">';
       $output .= '<h2 class="label">' . check_plain($this->layout_info['regions'][$region_id]) . '</h2>';
       $output .= '</div>';
-      $output .= '<div class="layout-editor-region-content">' . $content . '</div>';
+      //$output .= '<div class="layout-editor-region-content">' . $content . '</div>';
       $output .= '</div>';
     }
 

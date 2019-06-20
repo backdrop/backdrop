@@ -301,10 +301,12 @@
 
 #layout-edit-main .flexible-row:hover {
   background-color: #ffff99;
+  border-bottom: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  cursor: move;
 }
 
 .flexible-row .layout-editor-region {
-  cursor: move;
 }
 
 .flexible-icon {
@@ -323,4 +325,8 @@
 .form-item .form-item.form-item-region-count {
   margin-right: 2em;
   display: inline;
+}
+
+.layout-editor-region-buttons {
+  padding: 5px;
 }
