@@ -17,7 +17,7 @@ function image_field_info() {
         'default_image' => '',
       ),
       'instance_settings' => array(
-        'file_extensions' => 'png gif jpg jpeg',
+        'file_extensions' => 'png gif jpg jpeg svg',
         'file_directory' => '',
         'max_filesize' => '',
         'alt_field' => 0,
@@ -403,7 +403,7 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     }
 
     // If not using custom extension validation, ensure this is an image.
-    $supported_extensions = array('png', 'gif', 'jpg', 'jpeg');
+    $supported_extensions = array('png', 'gif', 'jpg', 'jpeg', 'svg');
     $extensions = isset($elements[$delta]['#upload_validators']['file_validate_extensions'][0]) ? $elements[$delta]['#upload_validators']['file_validate_extensions'][0] : implode(' ', $supported_extensions);
     $extensions = array_intersect(explode(' ', $extensions), $supported_extensions);
     $elements[$delta]['#upload_validators']['file_validate_extensions'][0] = implode(' ', $extensions);
