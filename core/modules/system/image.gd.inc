@@ -18,31 +18,30 @@ function image_gd_settings() {
       '#markup' => t('The GD toolkit is installed and working properly.')
     );
 
+    $config = config('system.core');
     $form['image_jpeg_quality'] = array(
       '#type' => 'number',
       '#title' => t('JPEG quality'),
       '#description' => t('Define the image quality for JPEG manipulations. Ranges from 0 to 100. Higher values mean better image quality but bigger files.'),
       '#min' => 0,
       '#max' => 100,
-      '#default_value' => config_get('system.core', 'image_jpeg_quality'),
+      '#default_value' => $config->get('image_jpeg_quality'),
       '#field_suffix' => t('%'),
     );
     $form['image_svg_width'] = array(
-        '#type' => 'textfield',
+        '#type' => 'number',
         '#title' => t('SVG width'),
         '#description' => t('Define the default width of an SVG image. Changing this will only affect new uploads.'),
-        '#size' => 10,
-        '#maxlength' => 4,
-        '#default_value' => variable_get('image_svg_width', 480),
+        '#min' => 1,
+        '#default_value' => $config->get('image_svg_width'),
         '#field_suffix' => t('px'),
     );
     $form['image_svg_height'] = array(
-        '#type' => 'textfield',
+        '#type' => 'number',
         '#title' => t('SVG height'),
         '#description' => t('Define the default height of an SVG image. Changing this will only affect new uploads.'),
-        '#size' => 10,
-        '#maxlength' => 4,
-        '#default_value' => variable_get('image_svg_height', 320),
+        '#min' => 1,
+        '#default_value' => $config->get('image_svg_height'),
         '#field_suffix' => t('px'),
     );
 
