@@ -205,8 +205,8 @@ function system_requirements($phase) {
     $jquery_ui = backdrop_get_library('system', 'ui');
     $requirements['jquery'] = array(
       'title' => $t('jQuery'),
-      'severity' => REQUIREMENT_INFO,
-      'value' => $t('jQuery !jqv / jQuery UI !jquiv', array('!jqv' => $jquery['version'], '!jquiv' => $jquery_ui['version'])),
+      'severity' => REQUIREMENT_OK,
+      'value' => $t('jQuery version !jqv / jQuery UI version !jquiv', array('!jqv' => $jquery['version'], '!jquiv' => $jquery_ui['version'])),
     );
   }
 
