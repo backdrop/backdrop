@@ -5,6 +5,18 @@
  */
 
 /**
+ * Legacy wrapper function preserved for backwards-compatibility. This function
+ * is no longer used by Backdrop core.
+ *
+ * @deprecated since 1.0.0
+ * @see _backdrop_maintenance_theme()
+ */
+function _drupal_maintenance_theme() {
+  _backdrop_maintenance_theme();
+  watchdog_deprecated_function('theme.maintenance', __FUNCTION__);
+}
+
+/**
  * Sets up the theme system for the maintenance page.
  *
  * Used for site installs, updates and when the site is in maintenance mode.
