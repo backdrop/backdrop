@@ -14,9 +14,7 @@
  */
 function image_gd_settings() {
   if (image_gd_check_settings()) {
-    $form['status'] = array(
-      '#markup' => t('The GD toolkit is installed and working properly.')
-    );
+    backdrop_set_message(t('The GD toolkit is installed and working properly.'), 'info');
 
     $config = config('system.core');
     $form['image_jpeg_quality'] = array(
