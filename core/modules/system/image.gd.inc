@@ -29,20 +29,20 @@ function image_gd_settings() {
       '#field_suffix' => t('%'),
     );
     $form['image_svg_width'] = array(
-        '#type' => 'number',
-        '#title' => t('SVG width'),
-        '#description' => t('Define the default width of an SVG image. Changing this will only affect new uploads.'),
-        '#min' => 1,
-        '#default_value' => $config->get('image_svg_width'),
-        '#field_suffix' => t('px'),
+      '#type' => 'number',
+      '#title' => t('SVG width'),
+      '#description' => t('Define the default width of an SVG image. Changing this will only affect new uploads.'),
+      '#min' => 1,
+      '#default_value' => $config->get('image_svg_width'),
+      '#field_suffix' => t('px'),
     );
     $form['image_svg_height'] = array(
-        '#type' => 'number',
-        '#title' => t('SVG height'),
-        '#description' => t('Define the default height of an SVG image. Changing this will only affect new uploads.'),
-        '#min' => 1,
-        '#default_value' => $config->get('image_svg_height'),
-        '#field_suffix' => t('px'),
+      '#type' => 'number',
+      '#title' => t('SVG height'),
+      '#description' => t('Define the default height of an SVG image. Changing this will only affect new uploads.'),
+      '#min' => 1,
+      '#default_value' => $config->get('image_svg_height'),
+      '#field_suffix' => t('px'),
     );
 
     return $form;
