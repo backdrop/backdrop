@@ -12,8 +12,8 @@
  * @see _backdrop_maintenance_theme()
  */
 function _drupal_maintenance_theme() {
-  _backdrop_maintenance_theme();
   watchdog_deprecated_function('theme.maintenance', __FUNCTION__);
+  _backdrop_maintenance_theme();
 }
 
 /**
