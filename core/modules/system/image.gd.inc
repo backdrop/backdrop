@@ -385,10 +385,10 @@ function image_gd_get_info(stdClass $image) {
     $width = $config->get('image_svg_width');
     $height = $config->get('image_svg_height');
     $details = array(
-        'width'     => $width,
-        'height'    => $height,
-        'extension' => 'svg',
-        'mime_type' => $mimetype,
+      'width'     => $width,
+      'height'    => $height,
+      'extension' => 'svg',
+      'mime_type' => $mimetype,
     );
   }
 
