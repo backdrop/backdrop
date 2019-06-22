@@ -153,23 +153,41 @@ function theme_node_add_list($variables) {
 }
 
 /**
- * Returns HTML for a node type description for the content type admin page.
+ * Returns HTML for the content type name and its machine name.
  *
  * @param $variables
- *   An associative array containing:
- *   - name: The human-readable name of the content type.
+ *   An array containing:
  *   - type: An object containing the 'type' (machine name) and 'description' of
  *     the content type.
  *
  * @ingroup themeable
  */
-function theme_node_admin_overview($variables) {
-  $name = $variables['name'];
+function theme_node_type_name($variables) {
   $type = $variables['type'];
 
-  $output = check_plain($name);
-  $output .= ' <small>' . t('(Machine name: @type)', array('@type' => $type->type)) . '</small>';
-  $output .= '<div class="description">' . filter_xss_admin($type->description) . '</div>';
+  $output = '';
+  $output .= '<div class="content-type-label">' . check_plain($type->name) . '</div>';
+  $output .= '<div class="content-type-machine-name">(<span>' . check_plain($type->type) . '</span>)</div>';
+  return $output;
+}
+
+/**
+ * Returns HTML for the content type description.
+ *
+ * @param $variables
+ *   An array containing:
+ *   - type: An object containing the 'type' (machine name) and 'description' of
+ *     the content type.
+ *
+ * @ingroup themeable
+ */
+function theme_node_type_description($variables) {
+  $type = $variables['type'];
+
+  $output = '';
+  if ($type->description) {
+    $output = '<div class="content-type-description">' . check_plain($type->description) . '</div>';
+  }
   return $output;
 }
 
