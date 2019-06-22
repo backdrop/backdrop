@@ -1606,7 +1606,7 @@ function system_library_info() {
     ),
   );
   $libraries['ui.menu'] = array(
-    'title' => 'jQuery UI: Mouse',
+    'title' => 'jQuery UI: Menu',
     'website' => 'http://jqueryui.com/menu',
     'version' => $libraries['ui']['version'],
     'js' => array(
