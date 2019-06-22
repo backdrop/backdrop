@@ -186,7 +186,7 @@ function theme_node_type_description($variables) {
 
   $output = '';
   if ($type->description) {
-    $output = '<div class="content-type-description">' . check_plain($type->description) . '</div>';
+    $output = '<div class="content-type-description">' . filter_xss_admin($type->description) . '</div>';
   }
   return $output;
 }
