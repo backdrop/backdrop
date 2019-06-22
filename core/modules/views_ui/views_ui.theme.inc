@@ -5,11 +5,11 @@
  */
 
 /**
- * Returns HTML for the view human-readable name, its machine name.
+ * Returns HTML for the view human-readable name, and its machine name.
  *
  * @param $variables
  *   An array containing:
- *   - view: An object containing:
+ *   - 'view': An object containing:
  *     - 'name' (machine name)
  *
  * @ingroup themeable
@@ -28,7 +28,7 @@ function theme_views_ui_view_name($variables) {
  *
  * @param $variables
  *   An array containing:
- *   - view: An object containing:
+ *   - 'view': An object containing:
  *     - 'description'
  *     - 'tag' (all view tags)
  *     - 'type' (base table)
