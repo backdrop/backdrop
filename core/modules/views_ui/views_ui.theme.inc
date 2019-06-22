@@ -5,7 +5,14 @@
  */
 
 /**
- * Display the view name and its machine name.
+ * Returns HTML for the view human-readable name, its machine name.
+ *
+ * @param $variables
+ *   An array containing:
+ *   - view: An object containing:
+ *     - 'name' (machine name)
+ *
+ * @ingroup themeable
  */
 function theme_views_ui_view_name($variables) {
   $view = $variables['view'];
@@ -17,13 +24,22 @@ function theme_views_ui_view_name($variables) {
 }
 
 /**
- * Display the view description, tags, and type (base table).
+ * Returns HTML for the view description, tags, and type (base table).
+ *
+ * @param $variables
+ *   An array containing:
+ *   - view: An object containing:
+ *     - 'description'
+ *     - 'tag' (all view tags)
+ *     - 'type' (base table)
+ *
+ * @ingroup themeable
  */
 function theme_views_ui_view_description($variables) {
   $view = $variables['view'];
 
   $output = '';
-  $output = '<div class="views-ui-view-description">' . check_plain($view->description) . '</div>';
+  $output = '<div class="views-ui-view-description">' . filter_xss_admin($view->description) . '</div>';
   $output .= '<div class="views-ui-view-tag">' . t('Tags') . ': ' . check_plain($view->tag) . '</div>';
   $output .= '<div class="views-ui-view-storage">' . t('Type') . ': ' . check_plain($view->base_table). '</div>';
   return $output;
