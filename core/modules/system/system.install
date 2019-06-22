@@ -195,7 +195,7 @@ function system_requirements($phase) {
 
     $system_libraries = backdrop_get_library('system');
     $jquery_version = $system_libraries['jquery']['title'] . ' ' . $system_libraries['jquery']['version'];
-    $jquery_ui_version = $system_libraries['ui']['title'] . ' ' . $system_libraries['ui']['version'];
+    $jquery_ui_version = l($system_libraries['ui']['title'], $system_libraries['ui']['website'], array('attributes' => array('target'=>'_blank'))) . ' ' . $system_libraries['ui']['version'];
 
     $jquery_libraries = array(
       // This will hold all jQuery libraries.
@@ -212,12 +212,12 @@ function system_requirements($phase) {
 
     foreach ($system_libraries as $key => $system_library) {
       if (strpos($key, 'jquery.') !== FALSE) {
-        $jquery_libraries['items'][$key] = $system_library['title'] . ' ' . $system_library['version'];
+        $jquery_libraries['items'][$key] = l($system_library['title'], $system_library['website'], array('attributes' => array('target'=>'_blank'))) . ' ' . $system_library['version'];
       }
       if (strpos($key, 'ui.') !== FALSE || strpos($key, 'effects') !== FALSE) {
         // Add the plugin version only if different to the jQuery UI version.
         $library_version = $system_library['version'] != $system_libraries['ui']['version'] ? ' ' . $system_library['version'] : '';
-        $jquery_libraries['items']['ui']['children'][] = $system_library['title'] . $library_version;
+        $jquery_libraries['items']['ui']['children'][] = l($system_library['title'], $system_library['website'], array('attributes' => array('target'=>'_blank'))) . $library_version;
       }
     }
 
