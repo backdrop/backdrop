@@ -413,10 +413,9 @@ function views_ui_add_form($form, &$form_state) {
     '#title' => t('Description'),
   );
   $form['description'] = array(
-    '#type' => 'textfield',
+    '#type' => 'textarea',
     '#title' => t('Provide description'),
     '#title_display' => 'invisible',
-    '#size' => 64,
     '#default_value' => !empty($form_state['view']) ? $form_state['view']->description : '',
     '#states' => array(
       'visible' => array(
@@ -3093,7 +3092,7 @@ function views_ui_edit_details_form($form, &$form_state) {
     '#autocomplete_path' => 'admin/views/ajax/autocomplete/tag',
   );
   $form['details']['description'] = array(
-    '#type' => 'textfield',
+    '#type' => 'textarea',
     '#title' => t('View description'),
     '#description' => t('This description will appear on the Views administrative UI to tell you what the view is about.'),
     '#default_value' => $view->description,
