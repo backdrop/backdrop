@@ -5,7 +5,7 @@
  */
 
 /**
- * Page callback: Displays the content type admin overview page.
+ * Page callback at admin/structure/types to list all available content types.
  *
  * @see node_menu()
  */
