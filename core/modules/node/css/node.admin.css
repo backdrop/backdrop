@@ -10,3 +10,15 @@
 .revision-current {
   background: #ffc;
 }
+
+.content-type-label {
+  font-weight: bold;
+}
+
+.content-type-machine-name {
+  font-size: smaller;
+}
+
+#content-types-list tr.disabled td {
+  color: #999;
+}
