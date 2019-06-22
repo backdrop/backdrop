@@ -12,8 +12,13 @@
 function node_overview_types() {
   $types = node_type_get_types();
   $names = node_type_get_names();
-  $field_ui = module_exists('field_ui') && user_access('administer fields');
-  $header = array(t('Name'), t('Operations'));
+
+  $header = array(
+    array('data' => t('Name'), 'class' => array('content-type-name')),
+    array('data' => t('Description'), 'class' => array('content-type-description', 'priority-low')),
+    array('data' => t('Operations'), 'class' => array('content-type-operations')),
+  );
+
   $rows = array();
 
   // Sort the list of content types by label instead of machine name.
@@ -21,50 +26,82 @@ function node_overview_types() {
 
   foreach ($names as $key => $name) {
     $type = $types[$key];
-    $type_url_str = str_replace('_', '-', $type->type);
-    $row = array(theme('node_admin_overview', array('name' => $name, 'type' => $type)));
-    $links['configure'] = array(
-      'title' => t('Configure'),
-      'href' => 'admin/structure/types/manage/' . $type_url_str,
-      'weight' => 0,
+
+    $row = array();
+    $row[] = array(
+      'data' => theme('node_type_name', array('type' => $type)),
+      'class' => array('content-type-name'),
+      'data-label' => t('Name'),
     );
-    if ($field_ui) {
-      $links['fields'] = array(
-        'title' => t('Manage fields'),
-        'href' => 'admin/structure/types/manage/' . $type_url_str . '/fields',
-        'weight' => 5,
-      );
-      $links['display'] = array(
-        'title' => t('Manage displays'),
-        'href' => 'admin/structure/types/manage/' . $type_url_str . '/display',
-        'weight' => 10,
-      );
-    }
-    if ($type->module === 'node') {
-      $links['delete'] = array(
-        'title' => t('Delete'),
-        'href' => 'admin/structure/types/manage/' . $type_url_str . '/delete',
-        'weight' => 15,
-      );
-    }
+    $row[] = array(
+      'data' => theme('node_type_description', array('type' => $type)),
+      'class' => array('content-type-description'),
+      'data-label' => t('Description'),
+    );
     $row[] = array(
       'data' => array(
         '#type' => 'operations',
-        '#links' => $links,
+        '#links' => _node_type_get_operations($type),
       ),
+      'class' => array('content-type-operations'),
+      'data-label' => t('Operations'),
     );
 
-    $rows[] = $row;
+    $rows[] = array(
+      'data' => $row,
+      'class' => array($type->disabled ? 'disabled' : 'enabled'),
+    );
   }
 
-  $build['node_table'] = array(
-    '#theme' => 'table',
-    '#header' => $header,
-    '#rows' => $rows,
-    '#empty' => t('No content types available. <a href="@link">Add content type</a>.', array('@link' => url('admin/structure/types/add'))),
+  backdrop_add_css(backdrop_get_path('module', 'node') . '/css/node.admin.css');
+
+  $table = array(
+    'header' => $header,
+    'rows' => $rows,
+    'empty' => t('No content types available. <a href="@link">Add content type</a>.', array('@link' => url('admin/structure/types/add'))),
+    'attributes' => array(
+      'id' => 'content-types-list',
+      'class' => array('content-types-list'),
+    ),
   );
 
-  return $build;
+  return theme('table', $table);
+}
+
+/**
+ * Given a content type, return a list of operations that can be performed on
+ * it.
+ */
+function _node_type_get_operations($content_type) {
+  $links = array();
+  $type_url_str = str_replace('_', '-', $content_type->type);
+
+  $links['configure'] = array(
+    'title' => t('Configure'),
+    'href' => 'admin/structure/types/manage/' . $type_url_str,
+    'weight' => 0,
+  );
+  if (module_exists('field_ui') && user_access('administer fields')) {
+    $links['fields'] = array(
+      'title' => t('Manage fields'),
+      'href' => 'admin/structure/types/manage/' . $type_url_str . '/fields',
+      'weight' => 5,
+    );
+    $links['display'] = array(
+      'title' => t('Manage displays'),
+      'href' => 'admin/structure/types/manage/' . $type_url_str . '/display',
+      'weight' => 10,
+    );
+  }
+  if ($content_type->module === 'node') {
+    $links['delete'] = array(
+      'title' => t('Delete'),
+      'href' => 'admin/structure/types/manage/' . $type_url_str . '/delete',
+      'weight' => 15,
+    );
+  }
+
+  return $links;
 }
 
 /**
