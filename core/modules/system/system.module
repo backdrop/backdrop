@@ -1118,6 +1118,24 @@ function system_library_info() {
     ),
   );
 
+  // Backdrop's autocomplete widget.
+  $libraries['backdrop.autocomplete'] = array(
+    'title' => 'Backdrop autocomplete',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/autocomplete.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
+  // Autosubmit for forms.
+  $libraries['backdrop.autosubmit'] = array(
+    'title' => 'Backdrop autosubmit',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/autosubmit.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
   // Backdrop's batch API.
   $libraries['backdrop.batch'] = array(
     'title' => 'Backdrop batch API',
@@ -1130,21 +1148,16 @@ function system_library_info() {
     ),
   );
 
-  // Backdrop's progress indicator.
-  $libraries['backdrop.progress'] = array(
-    'title' => 'Backdrop progress indicator',
+  // Backdrop's collapsible fieldset.
+  $libraries['backdrop.collapse'] = array(
+    'title' => 'Backdrop collapsible fieldset',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      'core/misc/progress.js' => array('group' => JS_DEFAULT),
+      'core/misc/collapse.js' => array('group' => JS_DEFAULT),
     ),
-  );
-
-  // Backdrop's form library.
-  $libraries['backdrop.form'] = array(
-    'title' => 'Backdrop form library',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/form.js' => array('group' => JS_LIBRARY, 'weight' => 1),
+    'dependencies' => array(
+      // collapse.js relies on backdropGetSummary in form.js
+      array('system', 'backdrop.form'),
     ),
   );
 
@@ -1178,6 +1191,59 @@ function system_library_info() {
     ),
   );
 
+  // Dropbutton.
+  $libraries['backdrop.dropbutton'] = array(
+    'title' => 'Dropbutton',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/dropbutton.js' => array(),
+    ),
+    'css' => array(
+      'core/misc/dropbutton.css' => array(),
+      'core/misc/dropbutton.theme.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.once'),
+    ),
+  );
+
+  // Backdrop's form library.
+  $libraries['backdrop.form'] = array(
+    'title' => 'Backdrop form library',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/form.js' => array('group' => JS_LIBRARY, 'weight' => 1),
+    ),
+  );
+
+  $libraries['backdrop.menus'] = array(
+    'title' => 'Backdrop menu styles',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/menus.js' => array('group' => JS_DEFAULT),
+    ),
+    'css' => array(
+      backdrop_get_path('module', 'system') . '/css/menu-dropdown.theme.css' => array('group' => CSS_DEFAULT),
+    ),
+  );
+
+  $libraries['backdrop.modules'] = array(
+    'title' => 'Backdrop modules filter',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/modules.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
+  // Backdrop's progress indicator.
+  $libraries['backdrop.progress'] = array(
+    'title' => 'Backdrop progress indicator',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/progress.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
   // Backdrop's states library.
   $libraries['backdrop.states'] = array(
     'title' => 'Backdrop states',
@@ -1199,19 +1265,6 @@ function system_library_info() {
     ),
   );
 
-  // Backdrop's collapsible fieldset.
-  $libraries['backdrop.collapse'] = array(
-    'title' => 'Backdrop collapsible fieldset',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/collapse.js' => array('group' => JS_DEFAULT),
-    ),
-    'dependencies' => array(
-      // collapse.js relies on backdropGetSummary in form.js
-      array('system', 'backdrop.form'),
-    ),
-  );
-
   // Backdrop's resizable textarea.
   $libraries['backdrop.textarea'] = array(
     'title' => 'Backdrop resizable textarea',
@@ -1221,105 +1274,9 @@ function system_library_info() {
     ),
   );
 
-  // Backdrop's autocomplete widget.
-  $libraries['backdrop.autocomplete'] = array(
-    'title' => 'Backdrop autocomplete',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/autocomplete.js' => array('group' => JS_DEFAULT),
-    ),
-  );
-
-  // Autosubmit for forms.
-  $libraries['backdrop.autosubmit'] = array(
-    'title' => 'Backdrop autosubmit',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/autosubmit.js' => array('group' => JS_DEFAULT),
-    ),
-  );
-
-  $libraries['backdrop.modules'] = array(
-    'title' => 'Modules Filter',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      backdrop_get_path('module', 'system') . '/js/modules.js' => array('group' => JS_DEFAULT),
-    ),
-  );
-
-  $libraries['backdrop.menus'] = array(
-    'title' => 'Backdrop menu styles',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      backdrop_get_path('module', 'system') . '/js/menus.js' => array('group' => JS_DEFAULT),
-    ),
-    'css' => array(
-      backdrop_get_path('module', 'system') . '/css/menu-dropdown.theme.css' => array('group' => CSS_DEFAULT),
-    ),
-  );
-
-  // jQuery.
-  $libraries['jquery'] = array(
-    'title' => 'jQuery',
-    'website' => 'http://jquery.com',
-    'version' => '1.12.4',
-    'js' => array(
-      'core/misc/jquery.js' => array('group' => JS_LIBRARY, 'weight' => -20),
-      // This includes a security fix, so assign a weight that makes this load
-      // as soon after jquery.js is loaded as possible.
-      'core/misc/jquery-extend-3.4.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
-    ),
-  );
-
-  // jQuery Once.
-  $libraries['jquery.once'] = array(
-    'title' => 'jQuery Once',
-    'website' => 'http://plugins.jquery.com/project/once',
-    'version' => '1.2',
-    'js' => array(
-      'core/misc/jquery.once.js' => array('group' => JS_LIBRARY, 'weight' => -19),
-    ),
-  );
-
-  // jQuery Form Plugin.
-  $libraries['jquery.form'] = array(
-    'title' => 'jQuery Form Plugin',
-    'website' => 'https://github.com/jquery-form/form',
-    'version' => '4.2.1',
-    'js' => array(
-      'core/misc/jquery.form.js' => array(),
-    ),
-  );
-
-  // jQuery TimeEntry
-  $libraries['jquery.timeentry'] = array(
-    'title' => 'jQuery Time Entry Plugin',
-    'website' => 'http://keith-wood.name/timeEntry.html',
-    'version' => '1.5.2',
-    'js' => array(
-      'core/misc/jquery.timeentry.js' => array(),
-    ),
-  );
-
-  // Dropbutton.
-  $libraries['backdrop.dropbutton'] = array(
-    'title' => 'Dropbutton',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/dropbutton.js' => array(),
-    ),
-    'css' => array(
-      'core/misc/dropbutton.css' => array(),
-      'core/misc/dropbutton.theme.css' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'jquery.once'),
-    ),
-  );
-
   // Vertical Tabs.
   $libraries['backdrop.vertical-tabs'] = array(
-    'title' => 'Vertical Tabs',
+    'title' => 'Backdrop vertical tabs',
     'version' => BACKDROP_VERSION,
     'js' => array(
       'core/misc/vertical-tabs.js' => array(),
@@ -1333,19 +1290,10 @@ function system_library_info() {
     ),
   );
 
-  // Jump menu.
-  $libraries['jump-menu'] = array(
-    'title' => 'Jump Menu',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      backdrop_get_path('module', 'system') . '/js/system.jump-menu.js' => array('group' => JS_DEFAULT),
-    ),
-  );
-
   // Farbtastic.
   $libraries['farbtastic'] = array(
     'title' => 'Farbtastic',
-    'website' => 'http://code.google.com/p/farbtastic/',
+    'website' => 'https://acko.net/blog/farbtastic-jquery-color-picker-plug-in',
     'version' => '1.2',
     'js' => array(
       'core/misc/farbtastic/farbtastic.js' => array(),
@@ -1358,13 +1306,35 @@ function system_library_info() {
   // HTML5 Shiv.
   $libraries['html5shiv'] = array(
     'title' => 'html5shiv',
-    'website' => 'http://code.google.com/p/html5shiv/',
+    'website' => 'https://github.com/afarkas/html5shiv',
     'version' => '3.7.2',
     'js' => array(
       'core/misc/html5.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -21,
         'browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE),
+      ),
+    ),
+  );
+
+  // Jump menu.
+  $libraries['jump-menu'] = array(
+    'title' => 'Jump Menu',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/system.jump-menu.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
+  // OpenSans.
+  $libraries['opensans'] = array(
+    'title' => 'OpenSans',
+    'website' => 'https://fonts.google.com/specimen/Open+Sans',
+    'version' => '1.0',
+    'css' => array(
+      'core/misc/opensans/opensans.css' => array(
+        'group' => CSS_THEME,
+        'media' => 'screen',
       ),
     ),
   );
@@ -1389,26 +1359,86 @@ function system_library_info() {
     ),
   );
 
-  // OpenSans.
-  $libraries['opensans'] = array(
-    'title' => 'OpenSans',
-    'website' => 'https://fonts.google.com/specimen/Open+Sans',
+  // Tokens.
+  $libraries['token'] = array(
+    'title' => 'Token behaviors',
     'version' => '1.0',
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/token.js' => array(),
+    ),
     'css' => array(
-      'core/misc/opensans/opensans.css' => array(
-        'group' => CSS_THEME,
-        'media' => 'screen',
-      ),
+      backdrop_get_path('module', 'system') . '/css/token.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.treetable'),
+      array('system', 'backdrop.ajax'),
+    ),
+  );
+
+  // jQuery.
+  $libraries['jquery'] = array(
+    'title' => 'jQuery',
+    'website' => 'http://jquery.com',
+    'version' => '1.12.4',
+    'js' => array(
+      'core/misc/jquery.js' => array('group' => JS_LIBRARY, 'weight' => -20),
+      // This includes a security fix, so assign a weight that makes this load
+      // as soon after jquery.js is loaded as possible.
+      'core/misc/jquery-extend-3.4.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
     ),
   );
 
   // Cookie.
   $libraries['jquery.cookie'] = array(
-    'title' => 'Cookie',
-    'website' => 'http://plugins.jquery.com/project/cookie',
+    'title' => 'jQuery Cookie',
+    'website' => 'https://plugins.jquery.com/cookie',
     'version' => '1.0',
     'js' => array(
       'core/misc/jquery.cookie.js' => array(),
+    ),
+  );
+
+  // jQuery Form Plugin.
+  $libraries['jquery.form'] = array(
+    'title' => 'jQuery Form Plugin',
+    'website' => 'https://github.com/jquery-form/form',
+    'version' => '4.2.1',
+    'js' => array(
+      'core/misc/jquery.form.js' => array(),
+    ),
+  );
+
+  // jQuery Once.
+  $libraries['jquery.once'] = array(
+    'title' => 'jQuery Once',
+    'website' => 'https://plugins.jquery.com/once',
+    'version' => '1.2.0',
+    'js' => array(
+      'core/misc/jquery.once.js' => array('group' => JS_LIBRARY, 'weight' => -19),
+    ),
+  );
+
+  // jQuery TimeEntry
+  $libraries['jquery.timeentry'] = array(
+    'title' => 'jQuery Time Entry Plugin',
+    'website' => 'http://keith-wood.name/timeEntry.html',
+    'version' => '1.5.2',
+    'js' => array(
+      'core/misc/jquery.timeentry.js' => array(),
+    ),
+  );
+
+  // jQuery treeTable plugin.
+  $libraries['jquery.treetable'] = array(
+    'title' => 'jQuery treetable',
+    'website' => 'https://plugins.jquery.com/treetable',
+    'version' => '3.2.0',
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/jquery.treetable.js' => array(),
+    ),
+    'css' => array(
+      backdrop_get_path('module', 'system') . '/css/jquery.treetable.css' => array(),
+      backdrop_get_path('module', 'system') . '/css/jquery.treetable.theme.default.css' => array(),
     ),
   );
 
@@ -1930,36 +1960,6 @@ function system_library_info() {
     ),
     'dependencies' => array(
       array('system', 'effects'),
-    ),
-  );
-
-  // Tokens.
-  $libraries['token'] = array(
-    'title' => 'Token behaviors',
-    'version' => '1.0',
-    'js' => array(
-      backdrop_get_path('module', 'system') . '/js/token.js' => array(),
-    ),
-    'css' => array(
-      backdrop_get_path('module', 'system') . '/css/token.css' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'jquery.treetable'),
-      array('system', 'backdrop.ajax'),
-    ),
-  );
-
-  // jQuery treeTable plugin.
-  $libraries['jquery.treetable'] = array(
-    'title' => 'jQuery treetable',
-    'website' => 'http://plugins.jquery.com/project/treetable',
-    'version' => '3.2.0',
-    'js' => array(
-      backdrop_get_path('module', 'system') . '/js/jquery.treetable.js' => array(),
-    ),
-    'css' => array(
-      backdrop_get_path('module', 'system') . '/css/jquery.treetable.css' => array(),
-      backdrop_get_path('module', 'system') . '/css/jquery.treetable.theme.default.css' => array(),
     ),
   );
 
