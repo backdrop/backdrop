@@ -5,56 +5,98 @@
  */
 
 /**
- * Menu callback which shows an overview page of all the custom menus and their descriptions.
+ * Page callback at admin/structure/menu to list all available menus.
  */
 function menu_overview_page() {
   $menus = menu_load_all();
+
+  // Sort the list of menus by title instead of machine name.
   backdrop_sort($menus, array('title' => SORT_STRING));
-  $header = array(t('Title'), t('Operations'));
+
+  $header = array(
+    array('data' => t('Title'), 'class' => array('menu-title')),
+    array('data' => t('Description'), 'class' => array('menu-description', 'priority-low')),
+    array('data' => t('Operations'), 'class' => array('menu-operations')),
+  );
+
   $rows = array();
+
   foreach ($menus as $menu) {
     $row = array();
-    $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
-    $links = array();
-    $links['list'] = array(
-      'title' => t('Manage links'),
-      'href' => 'admin/structure/menu/manage/' . $menu['menu_name'],
+    $row[] = array(
+      'data' => theme('menu_name', array('menu' => $menu)),
+      'class' => array('menu-name'),
+      'data-label' => t('Title'),
     );
-    $links['add'] = array(
-      'title' => t('Add link'),
-      'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/add',
+    $row[] = array(
+      'data' => theme('menu_description', array('menu' => $menu)),
+      'class' => array('menu-description'),
+      'data-label' => t('Description'),
     );
-    $links['configure'] = array(
-      'title' => t('Configure'),
-      'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/configure',
-    );
-    $system_menus = menu_list_system_menus();
-    if (!isset($system_menus[$menu['menu_name']])) {
-      $links['delete'] = array(
-        'title' => t('Delete'),
-        'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/delete',
-      );
-    }
-    if (user_access('synchronize configuration')) {
-      $links['export'] = array(
-        'title' => t('Export'),
-        'href' => 'admin/config/development/configuration/single/export',
-        'query' => array(
-          'group' => 'Menus',
-          'name' => 'menu.menu.' . $menu['menu_name'],
-        ),
-      );
-    }
     $row[] = array(
       'data' => array(
         '#type' => 'operations',
-        '#links' => $links,
+        '#links' => _menu_get_operations($menu),
       ),
+      'class' => array('menu-operations'),
+      'data-label' => t('Operations'),
     );
+
     $rows[] = $row;
   }
 
-  return theme('table', array('header' => $header, 'rows' => $rows));
+  backdrop_add_css(backdrop_get_path('module', 'menu') . '/css/menu.css');
+
+  $table = array(
+    'header' => $header,
+    'rows' => $rows,
+    'empty' => t('No menus available. <a href="@link">Add menu</a>.', array('@link' => url('admin/structure/menu/add'))),
+    'attributes' => array(
+      'id' => 'menu-list',
+      'class' => array('menu-list'),
+    ),
+  );
+
+  return theme('table', $table);
+}
+
+/**
+ * Given a menu, return a list of operations that can be performed on it.
+ */
+function _menu_get_operations($menu) {
+  $links = array();
+
+  $links['list'] = array(
+    'title' => t('Manage links'),
+    'href' => 'admin/structure/menu/manage/' . $menu['menu_name'],
+  );
+  $links['add'] = array(
+    'title' => t('Add link'),
+    'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/add',
+  );
+  $links['configure'] = array(
+    'title' => t('Configure'),
+    'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/configure',
+  );
+  $system_menus = menu_list_system_menus();
+  if (!isset($system_menus[$menu['menu_name']])) {
+    $links['delete'] = array(
+      'title' => t('Delete'),
+      'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/delete',
+    );
+  }
+  if (user_access('synchronize configuration')) {
+    $links['export'] = array(
+      'title' => t('Export'),
+      'href' => 'admin/config/development/configuration/single/export',
+      'query' => array(
+        'group' => 'Menus',
+        'name' => 'menu.menu.' . $menu['menu_name'],
+      ),
+    );
+  }
+
+  return $links;
 }
 
 /**
