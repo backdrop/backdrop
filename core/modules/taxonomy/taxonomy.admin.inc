@@ -72,34 +72,7 @@ function taxonomy_overview_vocabularies($form) {
     );
   }
 
-  // Only make this form include a submit button and weight if more than one
-  // vocabulary exists.
-  if (count($vocabularies) > 1) {
-    $form['actions'] = array('#type' => 'actions');
-    $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
-  }
-  elseif (isset($vocabulary)) {
-    unset($form[$vocabulary->machine_name]['weight']);
-  }
   return $form;
-}
-
-/**
- * Submit handler for vocabularies overview. Updates changed vocabulary weights.
- *
- * @see taxonomy_overview_vocabularies()
- */
-function taxonomy_overview_vocabularies_submit($form, &$form_state) {
-  foreach ($form_state['values'] as $key => $value) {
-    if (isset($form[$key]['#vocabulary'])) {
-      $vocabulary = $form[$key]['#vocabulary'];
-      if ($vocabulary->weight != $form_state['values'][$key]['weight']) {
-        $vocabulary->weight = $form_state['values'][$key]['weight'];
-        $vocabulary->save();
-      }
-    }
-  }
-  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
