@@ -1,16 +1,18 @@
-
 /**
  * @file
  * Styles for administration pages.
  */
 
 /**
- * Revisions overview screen.
+ * Revisions overview page.
  */
 .revision-current {
   background: #ffc;
 }
 
+/**
+ * Content type listing page.
+ */
 .content-type-label {
   font-weight: bold;
 }
