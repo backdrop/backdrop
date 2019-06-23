@@ -5,36 +5,61 @@
  */
 
 /**
- * Returns HTML for the vocabulary overview page.
+ * Returns HTML for the vocabulary human readable name, and its machine name.
  *
  * @param $variables
  *   An associative array containing:
- *   - 'form': A render element representing the form.
+ *   - 'vocabulary': An object containing the human readable name, and the
+ *     machine name of the vocabulary.
  *
  * @see taxonomy_overview_vocabularies()
  * @ingroup themeable
  */
-function theme_taxonomy_overview_vocabularies($variables) {
-  $form = $variables['form'];
+function theme_taxonomy_vocabulary_name($variables) {
+  $vocabulary = $variables['vocabulary'];
 
-  $rows = array();
+  $output = '';
+  $output .= '<div class="vocabulary-label">' . check_plain($vocabulary->name) . '</div>';
+  $output .= '<div class="vocabulary-machine-name">(<span>' . check_plain($vocabulary->machine_name) . '</span>)</div>';
+  return $output;
+}
 
-  foreach (element_children($form) as $key) {
-    if (isset($form[$key]['name'])) {
-      $vocabulary = &$form[$key];
+/**
+ * Returns HTML for the vocabulary description.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - 'vocabulary': An object containing the description of the vocabulary.
+ *
+ * @see taxonomy_overview_vocabularies()
+ * @ingroup themeable
+ */
+function theme_taxonomy_vocabulary_description($variables) {
+  $vocabulary = $variables['vocabulary'];
 
-      $row = array();
-      $row[] = backdrop_render($vocabulary['name']);
-      $row[] = backdrop_render($vocabulary['items']);
-      $row[] = backdrop_render($vocabulary['operations']);
-      $rows[] = array('data' => $row);
-    }
+  $output = '';
+  if ($vocabulary->description) {
+    $output = '<div class="vocabulary-description">' . filter_xss_admin($vocabulary->description) . '</div>';
   }
+  return $output;
+}
 
-  $header = array(t('Vocabulary name'));
-  $header[] = array('data' => t('Number of terms'), 'class' => array('priority-low'));
-  $header[] = t('Operations');
-  return theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No vocabularies available. <a href="@link">Add vocabulary</a>.', array('@link' => url('admin/structure/taxonomy/add'))), 'attributes' => array('id' => 'taxonomy')));
+/**
+ * Returns HTML for the vocabulary term_count.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - 'term_count': the number of terms within the vocabulary.
+ *
+ * @see taxonomy_overview_vocabularies()
+ * @ingroup themeable
+ */
+function theme_taxonomy_vocabulary_term_count($variables) {
+  $vocabulary_term_count = $variables['term_count'];
+
+  $output = '';
+  $output .= '<div class="vocabulary-term-count">' . check_plain($vocabulary_term_count) . '</div>';
+  return $output;
 }
 
 /**
