@@ -272,8 +272,14 @@ function taxonomy_theme() {
   );
 
   return array(
-    'taxonomy_overview_vocabularies' => array(
-      'render element' => 'form',
+    'taxonomy_vocabulary_name' => array(
+      'variables' => array('vocabulary' => NULL),
+    ) + $base,
+    'taxonomy_vocabulary_description' => array(
+      'variables' => array('vocabulary' => NULL),
+    ) + $base,
+    'taxonomy_vocabulary_term_count' => array(
+      'variables' => array('term_count' => NULL),
     ) + $base,
     'taxonomy_overview_terms' => array(
       'render element' => 'form',
@@ -296,8 +302,7 @@ function taxonomy_menu() {
   $items['admin/structure/taxonomy'] = array(
     'title' => 'Taxonomy',
     'description' => 'Manage tagging, categorization, and classification of your content.',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('taxonomy_overview_vocabularies'),
+    'page callback' => 'taxonomy_overview_vocabularies',
     'access arguments' => array('administer taxonomy'),
     'file' => 'taxonomy.admin.inc',
   );
