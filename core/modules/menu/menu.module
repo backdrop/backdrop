@@ -134,8 +134,11 @@ function menu_theme() {
     'menu_overview_form' => array(
       'render element' => 'form',
     ) + $base,
-    'menu_admin_overview' => array(
-      'variables' => array('title' => NULL, 'name' => NULL, 'description' => NULL),
+    'menu_name' => array(
+      'variables' => array('menu' => NULL),
+    ) + $base,
+    'menu_description' => array(
+      'variables' => array('menu' => NULL),
     ) + $base,
   );
 }
