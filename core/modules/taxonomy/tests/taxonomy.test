@@ -176,33 +176,6 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
   }
 
   /**
-   * Changing weights on the vocabulary overview with two or more vocabularies.
-   */
-  function testTaxonomyAdminChangingWeights() {
-    // Create some vocabularies.
-    for ($i = 0; $i < 10; $i++) {
-      $this->createVocabulary();
-    }
-    // Get all vocabularies and change their weights.
-    $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
-    $edit = array();
-    foreach ($vocabularies as $key => $vocabulary) {
-      $edit[$key . '[weight]'] = -$vocabulary->weight;
-    }
-    // Saving the new weights via the interface.
-    $this->backdropPost('admin/structure/taxonomy', $edit, t('Save'));
-
-    // Load the vocabularies from the database.
-    backdrop_static_reset('taxonomy_vocabulary_load_multiple');
-    $new_vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
-
-    // Check that the weights are saved in the database correctly.
-    foreach ($vocabularies as $key => $vocabulary) {
-      $this->assertEqual($new_vocabularies[$key]->weight, $edit[$key . '[weight]'], 'The vocabulary weight was changed.');
-    }
-  }
-
-  /**
    * Test the vocabulary overview with no vocabularies.
    */
   function testTaxonomyAdminNoVocabularies() {
