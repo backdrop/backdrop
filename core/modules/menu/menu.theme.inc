@@ -13,6 +13,7 @@
  *   - 'menu_name': The menu's machine name.
  *   - 'description': The menu's description.
  *
+ * @see menu_overview_page()
  * @ingroup themeable
  */
 function theme_menu_name($variables) {
@@ -33,6 +34,7 @@ function theme_menu_name($variables) {
  *   - 'menu_name': The menu's machine name.
  *   - 'description': The menu's description.
  *
+ * @see menu_overview_page()
  * @ingroup themeable
  */
 function theme_menu_description($variables) {
