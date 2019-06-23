@@ -5,19 +5,43 @@
  */
 
 /**
- * Returns HTML for a menu title and description for the menu overview page.
+ * Returns HTML for the menu name and its machine name.
  *
  * @param $variables
  *   An associative array containing:
- *   - title: The menu's title.
- *   - description: The menu's description.
+ *   - 'title': The menu's human-readable title.
+ *   - 'menu_name': The menu's machine name.
+ *   - 'description': The menu's description.
  *
  * @ingroup themeable
  */
-function theme_menu_admin_overview($variables) {
-  $output = check_plain($variables['title']);
-  $output .= '<div class="description">' . filter_xss_admin($variables['description']) . '</div>';
+function theme_menu_name($variables) {
+  $menu = $variables['menu'];
 
+  $output = '';
+  $output .= '<div class="menu-label">' . check_plain($menu['title']) . '</div>';
+  $output .= '<div class="menu-machine-name">(<span>' . check_plain($menu['menu_name']) . '</span>)</div>';
+  return $output;
+}
+
+/**
+ * Returns HTML for the menu description.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - 'title': The menu's human-readable title.
+ *   - 'menu_name': The menu's machine name.
+ *   - 'description': The menu's description.
+ *
+ * @ingroup themeable
+ */
+function theme_menu_description($variables) {
+  $menu = $variables['menu'];
+
+  $output = '';
+  if (!empty($menu['description'])) {
+    $output = '<div class="menu-description">' . filter_xss_admin($menu['description']) . '</div>';
+  }
   return $output;
 }
 
