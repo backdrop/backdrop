@@ -2,8 +2,8 @@
  * Main JavaScript file for Backdrop CMS.
  *
  * This file provides central functionality to Backdrop, including attaching
- * behaviors (the main way of interacting with JS in Backdrop), theming
- * wrappers, and localization functions.
+ * behaviors (the main way of interacting with JS in Backdrop), theme wrappers,
+ * and localization functions.
  */
 (function ($, undefined) {
 
@@ -102,10 +102,10 @@ Backdrop.attachBehaviors = function (context, settings) {
  *     during a tabledrag row swap). After the move is completed,
  *     Backdrop.attachBehaviors() is called, so that the behavior can undo
  *     whatever it did in response to the move. Many behaviors won't need to
- *     do anything simply in response to the element being moved, but because
- *     IFRAME elements reload their "src" when being moved within the DOM,
- *     behaviors bound to IFRAME elements (like WYSIWYG editors) may need to
- *     take some action.
+ *     do anything in response to the element being moved, but because IFRAME
+ *     elements reload their "src" when being moved within the DOM, behaviors
+ *     bound to IFRAME elements (like WYSIWYG editors) may need to take some
+ *     action.
  *   - serialize: When an Ajax form is submitted, this is called with the
  *     form as the context. This provides every behavior within the form an
  *     opportunity to ensure that the field elements have correct content
@@ -184,6 +184,48 @@ Backdrop.formatString = function(str, args) {
     }
   }
   return Backdrop.stringReplace(str, args, null);
+};
+
+/**
+ * Generates a string representation for the given byte count.
+ *
+ * @param size
+ *   A size in bytes.
+ * @param langcode
+ *   Optional language code to translate to a language other than what is used
+ *   to display the page.
+ *
+ * @return
+ *   A translated string representation of the size.
+ *
+ * @since Backdrop 1.11.0
+ */
+Backdrop.formatSize = function(size, langcode) {
+  var kilobyte = 1024;
+  if (size < kilobyte) {
+    return Backdrop.formatPlural(size, '1 byte', '@count bytes', {}, {'langcode': langcode });
+  }
+  else {
+    // Convert bytes to kilobytes and round.
+    size = Number.parseFloat(size / kilobyte).toFixed(2);
+    var units = [
+      Backdrop.t('@size KB', {}, {'langcode': langcode}),
+      Backdrop.t('@size MB', {}, {'langcode': langcode}),
+      Backdrop.t('@size GB', {}, {'langcode': langcode}),
+      Backdrop.t('@size TB', {}, {'langcode': langcode})
+    ];
+    var unit;
+    for (var n = 0; n < units.length; n++) {
+      unit = units[n];
+      if (size >= kilobyte) {
+        size = Number.parseFloat(size / kilobyte).toFixed(2);
+      }
+      else {
+        break;
+      }
+    }
+    return unit.replace('@size', size);
+  }
 };
 
 /**
@@ -347,6 +389,28 @@ Backdrop.absoluteUrl = function (url) {
   // IE <= 7 normalizes the URL when assigned to the anchor node similar to
   // the other browsers.
   return urlParsingNode.cloneNode(false).href;
+};
+
+/**
+ * Returns the passed in URL as a relative URL to the current site.
+ *
+ * Relative URLs are returned only for local URLs. This will return the full
+ * URL for remote URLs.
+ *
+ * @param url
+ *   The URL string to be normalized to a relative URL.
+ *
+ * @return
+ *   The normalized, relative URL with a leading slash.
+ *
+ * @since 1.11.0
+ */
+Backdrop.relativeUrl = function (url) {
+  // Normalize to absolute first.
+  relativeUrl = Backdrop.absoluteUrl(url);
+  // Port is only present on non-HTTP(S) URLs.
+  var port = window.location.port ? (':' + window.location.port) : '';
+  return relativeUrl.replace(window.location.protocol + '//' + window.location.hostname + port, '');
 };
 
 /**
@@ -739,6 +803,9 @@ Backdrop.optimizedResize = (function() {
     },
     remove: function(callbackName) {
       removeCallback(callbackName);
+    },
+    trigger: function() {
+      runCallbacks();
     }
   }
 }());

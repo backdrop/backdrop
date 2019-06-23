@@ -4,7 +4,7 @@
  * Provides integration with the CKEditor WYSIWYG editor.
  */
 
-define('CKEDITOR_VERSION', '4.7.3+2018-04-18-security-patch');
+define('CKEDITOR_VERSION', '4.11.1');
 
 /**
  * Implements hook_menu().

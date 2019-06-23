@@ -46,7 +46,7 @@ function block_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('block_custom_block_delete', 4),
     'access arguments' => array('administer blocks'),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'context' => MENU_CONTEXT_NONE,
     'file' => 'block.admin.inc',
   );
@@ -110,10 +110,10 @@ function block_block_info() {
   $config_names = config_get_names_with_prefix('block.custom.');
   foreach ($config_names as $config_name) {
     $block = config_get($config_name);
-    $block_info = array(
-      'info' => $block['info'],
-      'description' => $block['description'],
-    );
+    $block_info = array();
+    $block_info['info'] = $block['info'];
+    $block_info['description'] = !empty($block['description']) ? $block['description'] : NULL;
+
     // If this block has been translated, return the translated information.
     if (isset($block['translations'][$langcode])) {
       $block_info['info'] = $block['translations'][$langcode]['info'];
@@ -258,7 +258,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#title' => t('Admin label'),
     '#default_value' => $edit['info'],
     '#maxlength' => 64,
-    '#description' => t('Used in administrative interfaces and not shown to end-users.'),
+    '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
     '#required' => TRUE,
     '#weight' => -20,
     '#id' => 'block-info',
@@ -268,7 +268,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#title' => t('Admin description'),
     '#default_value' => $edit['description'],
     '#maxlength' => 128,
-    '#description' => t('Used in administrative interfaces and not shown to end-users.'),
+    '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
     '#weight' => -18,
     '#id' => 'block-description',
   );

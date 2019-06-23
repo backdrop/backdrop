@@ -5,14 +5,35 @@
  */
 
 /**
- * Display basic administrative information about a view.
+ * Display the view name and its machine name.
  */
-function theme_views_ui_view_info($variables) {
+function theme_views_ui_view_name($variables) {
   $view = $variables['view'];
-  $title = $view->get_human_name();
 
-  $displays = _views_ui_get_displays_list($view);
-  $displays = empty($displays) ? t('None') : format_plural(count($displays), 'Display', 'Displays') . ': ' . '<em>' . implode(', ', $displays) . '</em>';
+  $output = '';
+  $output .= '<div class="views-ui-view-name">' . check_plain($view->get_human_name()) . '</div>';
+  $output .= '<div class="views-ui-view-machine-name">(<span>' . check_plain($view->name) . '</span>)</div>';
+  return $output;
+}
+
+/**
+ * Display the view description, tags, and type (base table).
+ */
+function theme_views_ui_view_description($variables) {
+  $view = $variables['view'];
+
+  $output = '';
+  $output = '<div class="views-ui-view-description">' . check_plain($view->description) . '</div>';
+  $output .= '<div class="views-ui-view-tag">' . t('Tags') . ': ' . check_plain($view->tag) . '</div>';
+  $output .= '<div class="views-ui-view-storage">' . t('Type') . ': ' . check_plain($view->base_table). '</div>';
+  return $output;
+}
+
+/**
+ * Display the storage status of the view.
+ */
+function theme_views_ui_view_storage($variables) {
+  $view = $variables['view'];
 
   switch ($view->type) {
     case t('Default'):
@@ -28,11 +49,7 @@ function theme_views_ui_view_info($variables) {
       $type = t('Overridden');
   }
 
-  $output = '';
-  $output .= '<div class="views-ui-view-title">' . check_plain($title) . "</div>\n";
-  $output .= '<div class="views-ui-view-displays">' . $displays . "</div>\n";
-  $output .= '<div class="views-ui-view-storage">' . $type . "</div>\n";
-  $output .= '<div class="views-ui-view-base">' . t('Type') . ': ' . check_plain($view->base_table). "</div>\n";
+  $output = '<div class="views-ui-view-storage">' . $type . '</div>';
   return $output;
 }
 

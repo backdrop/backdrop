@@ -98,7 +98,7 @@ function system_theme() {
     'page_components' => array(
       'variables' => array('settings' => NULL, 'child_delta' => NULL),
       'template' => 'templates/page-components',
-    ),
+    ) + $base,
     'system_admin_index' => array(
       'variables' => array('menu_items' => NULL),
     ) + $base,
@@ -257,7 +257,7 @@ function system_element_info() {
     '#button_type' => 'submit',
     '#executes_submit_callback' => TRUE,
     '#limit_validation_errors' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('ajax_process_form', 'form_process_button'),
     '#theme_wrappers' => array('button'),
   );
   $types['button'] = array(
@@ -266,7 +266,7 @@ function system_element_info() {
     '#button_type' => 'submit',
     '#executes_submit_callback' => FALSE,
     '#limit_validation_errors' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('ajax_process_form', 'form_process_button'),
     '#theme_wrappers' => array('button'),
   );
   $types['image_button'] = array(
@@ -274,7 +274,7 @@ function system_element_info() {
     '#button_type' => 'submit',
     '#executes_submit_callback' => TRUE,
     '#limit_validation_errors' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('ajax_process_form', 'form_process_button'),
     '#return_value' => TRUE,
     '#has_garbage_value' => TRUE,
     '#src' => NULL,
@@ -629,7 +629,8 @@ function system_menu() {
   );
   $items['admin/appearance/disable'] = array(
     'title' => 'Disable theme',
-    'page callback' => 'system_theme_disable',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('system_theme_disable_confirm'),
     'access arguments' => array('administer themes'),
     'type' => MENU_CALLBACK,
     'file' => 'system.admin.inc',
@@ -1264,6 +1265,9 @@ function system_library_info() {
     'version' => '1.12.4',
     'js' => array(
       'core/misc/jquery.js' => array('group' => JS_LIBRARY, 'weight' => -20),
+      // This includes a security fix, so assign a weight that makes this load
+      // as soon after jquery.js is loaded as possible.
+      'core/misc/jquery-extend-3.4.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
     ),
   );
 
@@ -2161,6 +2165,11 @@ function system_authorized_batch_process($redirect_callback = 'backdrop_goto') {
  */
 function system_updater_info() {
   return array(
+    'core' => array(
+      'class' => 'CoreUpdater',
+      'name' => t('Update Backdrop core'),
+      'weight' => 0,
+    ),
     'module' => array(
       'class' => 'ModuleUpdater',
       'name' => t('Update modules'),
@@ -2405,7 +2414,7 @@ function system_block_info() {
   );
   $blocks['breadcrumb'] = array(
     'info' => t('Breadcrumb'),
-    'description' => t('The current page breadcrumb trail.'),
+    'description' => t('A trail of links from the homepage to the current page.'),
     'render last' => TRUE,
   );
   $blocks['powered-by'] = array(
@@ -2424,8 +2433,9 @@ function system_block_info() {
   foreach (menu_list_system_menus() as $menu_name => $title) {
     $custom_title = isset($all_menus[$menu_name]) ? $all_menus[$menu_name] : $title;
     $blocks[$menu_name] = array(
+      // Names from menu_list_system_menus() need to be translated through t().
       'info' => check_plain(t($custom_title)),
-      'description' => t('A hierarchical list of links for the @menu.', array('@menu' => t($title))),
+      'description' => t('A list of links for the menu: %title.', array('%title' => t($custom_title))),
     );
   }
   return $blocks;
@@ -2795,9 +2805,13 @@ function _system_rebuild_module_data() {
 
   // Include the installation profile in modules that are loaded.
   $profile = backdrop_get_profile();
+  $profile_uri = 'profiles/' . $profile . '/' . $profile . '.profile';
+  if (file_exists(BACKDROP_ROOT . '/core/profiles/' . $profile . '/' . $profile . '.profile')) {
+    $profile_uri = 'core/' . $profile_uri;
+  }
   $modules[$profile] = new stdClass();
   $modules[$profile]->name = $profile;
-  $modules[$profile]->uri = 'profiles/' . $profile . '/' . $profile . '.profile';
+  $modules[$profile]->uri = $profile_uri;
   $modules[$profile]->filename = $profile . '.profile';
 
   // Installation profile hooks are always executed last.
@@ -2853,6 +2867,34 @@ function _system_rebuild_module_data() {
     // otherwise in the .info file.
     if ($key == $profile && !isset($modules[$key]->info['hidden'])) {
       $modules[$key]->info['hidden'] = TRUE;
+    }
+
+    // Apply best guess version information if this is a Git checkout.
+    if (empty($modules[$key]->info['version'])) {
+      $module_base_path = BACKDROP_ROOT . '/' . preg_replace('!(.*modules/[^/]+).*!', '$1', $module->uri);
+      $git_version = FALSE;
+      if (file_exists($module_base_path . '/.git/HEAD')) {
+        // Branches names are directly in the HEAD file.
+        $git_head_contents = trim(file_get_contents($module_base_path . '/.git/HEAD'));
+        if (strpos($git_head_contents, 'ref') === 0) {
+          $git_version = trim(preg_replace('!^.*refs/heads/(.*)$!', '$1', $git_head_contents));
+        }
+        // Tags are named by sha1 hash, loop through each tag file to match it.
+        elseif (is_dir($module_base_path . '/.git/refs/tags')) {
+          $tag_files = file_scan_directory($module_base_path . '/.git/refs/tags', '/.*/', array('key' => 'filename', 'recurse' => FALSE));
+          $tag_files = array_reverse($tag_files, TRUE);
+          foreach ($tag_files as $tag_name => $tag_file) {
+            if (trim(file_get_contents($tag_file->uri)) == $git_head_contents) {
+              $git_version = $tag_name;
+              break;
+            }
+          }
+        }
+        if ($git_version) {
+          $git_version = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $git_version);
+          $modules[$key]->info['version'] = $git_version . '-dev';
+        }
+      }
     }
 
     // Invoke hook_system_info_alter() to give installed modules a chance to
@@ -3050,6 +3092,22 @@ function system_rebuild_theme_data() {
 }
 
 /**
+ * Implements hook_themes_disabled().
+ *
+ * Remove the theme settings from config when the theme is disabled.
+ */
+function system_themes_disabled($theme_list) {
+  foreach ($theme_list as $theme_name) {
+    if (theme_has_settings($theme_name)) {
+      $config = config($theme_name . '.settings');
+      if (!$config->isNew()) {
+        $config->delete();
+      }
+    }
+  }
+}
+
+/**
  * Prefixes all values in an .info file array with a given path.
  *
  * This helper function is mainly used to prefix all array values of an .info
@@ -3144,8 +3202,8 @@ function system_header_block($settings) {
   $site_config = config('system.core');
   $variables['logo']        = $settings['logo'] ? backdrop_get_logo() : NULL;
   $variables['logo_attributes'] = $settings['logo'] ? array_diff_key(backdrop_get_logo_info(), array('path' => '')) : array();
-  $variables['site_name']   = $settings['site_name'] ? check_plain($site_config->get('site_name')) : '';
-  $variables['site_slogan'] = $settings['site_slogan'] ? filter_xss_admin($site_config->get('site_slogan')) : '';
+  $variables['site_name']   = $settings['site_name'] ? check_plain($site_config->getTranslated('site_name')) : '';
+  $variables['site_slogan'] = $settings['site_slogan'] ? filter_xss_admin($site_config->getTranslated('site_slogan')) : '';
   $variables['menu']        = $menu ? theme('links__header_menu', array('links' => $menu)) : NULL;
 
   return theme('header', $variables);
@@ -3557,7 +3615,7 @@ function system_cron() {
     ->execute();
 
   // Reset expired items in the default queue implementation table. If that's
-  // not used, this will simply be a no-op.
+  // not used, this will be a no-op.
   db_update('queue')
     ->fields(array(
       'expire' => 0,
@@ -3872,6 +3930,7 @@ function system_autoload_info() {
     'SystemQueue' => 'system.queue.inc',
     'MemoryQueue' => 'system.queue.inc',
     'Archive_Tar' => 'system.tar.inc',
+    'CoreUpdater' => 'system.updater.inc',
     'ModuleUpdater' => 'system.updater.inc',
     'ThemeUpdater' => 'system.updater.inc',
     'LayoutUpdater' => 'system.updater.inc',
@@ -3909,7 +3968,7 @@ function system_config_info() {
   $themes = list_themes();
   foreach ($themes as $theme_name => $theme) {
     // If the theme registers settings, it needs a config file.
-    if (isset($theme->info['settings'])) {
+    if (theme_has_settings($theme_name) && $theme->status == 1) {
       $prefixes[$theme_name . '.settings'] = array(
         'label' => t('!theme settings', array('!theme' => $theme->info['name'])),
         'group' => t('Configuration'),
@@ -4135,4 +4194,35 @@ function _system_sort_form_values_by_config($form, &$form_state, $inherited_buck
     }
   }
   return $configs;
+}
+
+/**
+ * Implements hook_admin_bar_cache_info().
+ */
+function system_admin_bar_cache_info() {
+  $caches = array(
+    'assets' => t('CSS and JavaScript'),
+    'cache' => t('Page and else'),
+    'layout' => t('Layout'),
+    'menu' => t('Menu'),
+    'theme' => t('Theme registry'),
+    'token' => t('Token registry'),
+  );
+  foreach ($caches as $name => $cache) {
+    $caches[$name] = array(
+      'title' => $cache,
+      'callback' => '_admin_bar_flush_cache',
+    );
+  }
+  return $caches;
+}
+
+/**
+ * Check if theme_debug is enabled, and throw a warning if so.
+ */
+function system_theme_debug_enabled_warning() {
+  $theme_debug_enabled = config_get('system.core', 'theme_debug');
+  if ($theme_debug_enabled) {
+    backdrop_set_message(t('Theme debugging is enabled. See the <a href="!url">Status report</a> page for more info.', array('!url' => url('admin/reports/status'))), 'warning', FALSE);
+  }
 }

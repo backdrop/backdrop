@@ -126,6 +126,50 @@ class File extends Entity {
       'options' => array(),
     );
   }
+
+  /**
+   * Overrides Entity::access().
+   *
+   * The "view" operation is not supported on the File Entity itself because it
+   * has no page callback (yet), but there is separately file_download_access()
+   * to check if a file is downloadable.
+   *
+   * @param string $op
+   *   The operation to be performed on the file. Possible values are:
+   *   - create
+   *   - update
+   *   - delete
+   * @param User|AnonymousUser|object $account
+   *   (optional) The user to check for. Leave it to NULL to check for the
+   *   global user.
+   *
+   * @return bool
+   *   TRUE if access is granted, FALSE otherwise.
+   */
+  public function access($op, $account = NULL) {
+    if ($op == 'create') {
+      return self::createAccess(NULL, $account);
+    }
+    elseif (!in_array($op, array('update', 'delete'), TRUE)) {
+      // If the $op was not one of the supported ones, we return access denied.
+      return FALSE;
+    }
+
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    if ($op == 'update') {
+      return user_access('manage files', $account);
+    }
+    elseif ($op == 'delete') {
+      return user_access('delete files', $account);
+    }
+
+    return FALSE;
+  }
+
 }
 
 /**

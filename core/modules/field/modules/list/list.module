@@ -55,31 +55,31 @@ function list_field_settings_form($field, $instance, $has_data) {
     case 'list_integer':
     case 'list_float':
     case 'list_text':
+      // Get default value.
+      $options = $field['settings']['allowed_values'];
+      // Toggled by default if options already set.
+      $key_type_toggled = !empty($options);
+
       $form['allowed_values'] = array(
-        '#type' => 'textarea',
+        '#type' => 'options',
         '#title' => t('Allowed values list'),
-        '#default_value' => list_allowed_values_string($settings['allowed_values']),
-        '#rows' => 10,
+        '#description' => '',
+        '#default_value' => '',
+        '#default_value_allowed' => FALSE,
+        '#options' => $options,
         '#element_validate' => array('list_allowed_values_setting_validate'),
         '#field_has_data' => $has_data,
         '#field' => $field,
         '#field_type' => $field['type'],
+        '#key_type' => 'mixed', // Optimal for now.
+        '#key_type_toggle' => t('Custom keys'),
+        '#key_type_toggled' => $key_type_toggled,
         '#access' => empty($settings['allowed_values_function']),
+        '#multiple' => !($field['cardinality'] == 1),
       );
 
-      $description = '<p>' . t('The possible values this field can contain. Enter one value per line, in the format key|label.');
-      if ($field['type'] == 'list_integer' || $field['type'] == 'list_float') {
-        $description .= '<br/>' . t('The key is the stored value, and must be numeric. The label will be used in displayed values and edit forms.');
-        $description .= '<br/>' . t('The label is optional: if a line contains a single number, it will be used as key and label.');
-        $description .= '<br/>' . t('Lists of labels are also accepted (one label per line), only if the field does not hold any values yet. Numeric keys will be automatically generated from the positions in the list.');
-      }
-      else {
-        $description .= '<br/>' . t('The key is the stored value. The label will be used in displayed values and edit forms.');
-        $description .= '<br/>' . t('The label is optional: if a line contains a single string, it will be used as key and label.');
-      }
-      $description .= '</p>';
-      $form['allowed_values']['#description'] = $description;
-
+      // Set proper allowed values in $form_state.
+      $form['#validate'][] = 'options_field_settings_validate';
       break;
 
     case 'list_boolean':
@@ -129,7 +129,6 @@ function list_field_settings_form($field, $instance, $has_data) {
   elseif ($instance['widget']['type'] == 'options_buttons') {
     $form['allowed_values']['#description'] .= '<p>' . t("The 'checkboxes/radio buttons' widget will display checkboxes if the <em>Number of values</em> option is greater than 1 for this field, otherwise radios will be displayed.") . '</p>';
   }
-  $form['allowed_values']['#description'] .= '<p>' . t('Allowed HTML tags in labels: @tags', array('@tags' => _field_filter_xss_display_allowed_tags())) . '</p>';
 
   $form['allowed_values_function'] = array(
     '#type' => 'value',
@@ -146,6 +145,29 @@ function list_field_settings_form($field, $instance, $has_data) {
 }
 
 /**
+ * Implements hook_form_FORM_ID_alter().
+ */
+
+function list_form_field_ui_field_edit_form_alter(&$form, &$form_state) {
+  $field = $form['#field'];
+
+  if (in_array($field['type'], array('list_integer', 'list_float', 'list_text'))) {
+
+    // Use options_element default widget instead of field widget.
+    $form['instance']['default_value_widget']['#access'] = FALSE;
+    // Language is hardcoded to 'und' in field_ui_default_value_widget().
+    $default_field_value = $form['instance']['default_value_widget'][$field['field_name']][LANGUAGE_NONE]['#default_value'];
+
+    // Overwrite 'allowed_values' element.
+    $form['field']['settings']['allowed_values']['#default_value_allowed'] = TRUE;
+    $form['field']['settings']['allowed_values']['#default_value'] = $default_field_value;
+
+    // Add proper default value inside validate callback.
+    $form['#validate'][] = 'options_field_instance_settings_validate';
+  }
+}
+
+/**
  * Element validate callback; check that the entered values are valid.
  */
 function list_allowed_values_setting_validate($element, &$form_state) {
@@ -153,8 +175,7 @@ function list_allowed_values_setting_validate($element, &$form_state) {
   $has_data = $element['#field_has_data'];
   $field_type = $field['type'];
   $generate_keys = ($field_type == 'list_integer' || $field_type == 'list_float') && !$has_data;
-
-  $values = list_extract_allowed_values($element['#value'], $field['type'], $generate_keys);
+  $values = list_extract_allowed_values($element['#value']['options_text'], $field['type'], $generate_keys);
 
   if (!is_array($values)) {
     form_error($element, t('Allowed values list: invalid input.'));
@@ -343,8 +364,29 @@ function list_extract_allowed_values($string, $field_type, $generate_keys) {
  */
 function list_allowed_values_string($values) {
   $lines = array();
+  $previous_key = FALSE;
+
   foreach ($values as $key => $value) {
-    $lines[] = "$key|$value";
+    // Convert groups.
+    if (is_array($value)) {
+      $lines[] = "<$key>";
+      foreach ($value as $subkey => $subvalue) {
+        $lines[] = "$subkey|$subvalue";
+      }
+      $previous_key = $key;
+    }
+    // Typical key|value pairs.
+    else {
+      // Exit out of any groups.
+      if (isset($values[$previous_key]) && is_array($values[$previous_key])) {
+        $lines[] = "<>";
+      }
+      // Skip empty rows.
+      if ($values[$key] !== '') {
+        $lines[] = "$key|$value";
+      }
+      $previous_key = $key;
+    }
   }
   return implode("\n", $lines);
 }

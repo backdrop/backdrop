@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Helper module for the Batch API tests.
@@ -50,7 +49,7 @@ function batch_test_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 3,
   );
-  // No form: fire a batch simply by accessing a page.
+  // No form: fire a batch by accessing a page.
   $items['batch-test/no-form'] = array(
     'title' => 'Simple page',
     'page callback' => 'batch_test_no_form',

@@ -13,10 +13,10 @@
 /**
  * Attach behaviors to managed file element upload fields.
  */
-Backdrop.behaviors.fileChangeValidate = {
+Backdrop.behaviors.fileUploadChange = {
   attach: function (context, settings) {
-    $(context).find('input[data-file-extensions]').on('change', Backdrop.file.validateExtension);
-    $(context).find('input[data-file-auto-upload]').on('change', Backdrop.file.autoUpload).each(function() {
+    $(context).find('input[data-file-extensions]').once('validate-extension').on('change', Backdrop.file.validateExtension);
+    $(context).find('input[data-file-auto-upload]').once('auto-upload').on('change', Backdrop.file.autoUpload).each(function() {
       $(this).closest('.form-item').find('.file-upload-button').hide();
     });
   },
@@ -31,8 +31,8 @@ Backdrop.behaviors.fileChangeValidate = {
  */
 Backdrop.behaviors.fileButtons = {
   attach: function (context) {
-    $('input.form-submit', context).bind('mousedown', Backdrop.file.disableFields);
-    $('div.form-managed-file input.form-submit', context).bind('mousedown', Backdrop.file.progressBar);
+    $('input.form-submit', context).once('file-disable-fields').bind('mousedown', Backdrop.file.disableFields);
+    $('div.form-managed-file input.form-submit', context).once('file-progress-bar').bind('mousedown', Backdrop.file.progressBar);
   },
   detach: function (context) {
     $('input.form-submit', context).unbind('mousedown', Backdrop.file.disableFields);
@@ -45,7 +45,7 @@ Backdrop.behaviors.fileButtons = {
  */
 Backdrop.behaviors.filePreviewLinks = {
   attach: function (context) {
-    $('div.form-managed-file .file a, .file-widget .file a', context).bind('click',Backdrop.file.openInNewWindow);
+    $('div.form-managed-file .file a, .file-widget .file a', context).once('file-preview-link').bind('click', Backdrop.file.openInNewWindow);
   },
   detach: function (context){
     $('div.form-managed-file .file a, .file-widget .file a', context).unbind('click', Backdrop.file.openInNewWindow);

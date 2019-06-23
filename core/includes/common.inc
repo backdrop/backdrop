@@ -1022,8 +1022,10 @@ function backdrop_http_request($url, array $options = array()) {
       // Make the socket connection to a proxy server.
       $socket = 'tcp://' . $proxy_server . ':' . settings_get('proxy_port', 8080);
       // The Host header still needs to match the real request.
-      $options['headers']['Host'] = $uri['host'];
-      $options['headers']['Host'] .= isset($uri['port']) && $uri['port'] != 80 ? ':' . $uri['port'] : '';
+      if (!isset($options['headers']['Host'])) {
+        $options['headers']['Host'] = $uri['host'];
+        $options['headers']['Host'] .= isset($uri['port']) && $uri['port'] != 80 ? ':' . $uri['port'] : '';
+      }
       break;
 
     case 'http':
@@ -1033,14 +1035,18 @@ function backdrop_http_request($url, array $options = array()) {
       // RFC 2616: "non-standard ports MUST, default ports MAY be included".
       // We don't add the standard port to prevent from breaking rewrite rules
       // checking the host that do not take into account the port number.
-      $options['headers']['Host'] = $uri['host'] . ($port != 80 ? ':' . $port : '');
+      if (!isset($options['headers']['Host'])) {
+        $options['headers']['Host'] = $uri['host'] . ($port != 80 ? ':' . $port : '');
+      }
       break;
 
     case 'https':
       // Note: Only works when PHP is compiled with OpenSSL support.
       $port = isset($uri['port']) ? $uri['port'] : 443;
       $socket = 'ssl://' . $uri['host'] . ':' . $port;
-      $options['headers']['Host'] = $uri['host'] . ($port != 443 ? ':' . $port : '');
+      if (!isset($options['headers']['Host'])) {
+        $options['headers']['Host'] = $uri['host'] . ($port != 443 ? ':' . $port : '');
+      }
       break;
 
     default:
@@ -1237,6 +1243,11 @@ function backdrop_http_request($url, array $options = array()) {
       elseif ($options['max_redirects']) {
         // Redirect to the new location.
         $options['max_redirects']--;
+        // Remove the automatically added Host header, as the redirect may
+        // be on a different domain name.
+        if (isset($options['headers']['Host'])) {
+          unset($options['headers']['Host']);
+        }
         $result = backdrop_http_request($location, $options);
         $result->redirect_code = $code;
       }
@@ -2068,29 +2079,52 @@ function format_rss_item($title, $link, $description, $args = array()) {
  *     - 'attributes': associative array of element attributes
  *     - 'encoded': TRUE if 'value' is already encoded
  *
- * In both cases, 'value' can be a simple string, or it can be another array
- * with the same format as $array itself for nesting.
+ *   In both cases, 'value' can be a simple string, or it can be another array
+ *   with the same format as $array itself for nesting.
  *
- * If 'encoded' is TRUE it is up to the caller to ensure that 'value' is either
- * entity-encoded or CDATA-escaped. Using this option is not recommended when
- * working with untrusted user input, since failing to escape the data
- * correctly has security implications.
+ *   If 'encoded' is TRUE it is up to the caller to ensure that 'value' is
+ *   either entity-encoded or CDATA-escaped. Using this option is not
+ *   recommended when working with untrusted user input, since failing to escape
+ *   the data correctly has security implications.
+ *
+ * @param int $indentation_level
+ *   Internal-use only indentation level. This function is called recursively
+ *   and this parameter is used to increase indentation in each nesting.
+ *
+ * @since 1.12.7 Added $indentation_level parameter.
  *
  * @return string
  *  A string of XML representing the elements passed in.
  */
-function format_xml_elements($array) {
+function format_xml_elements($array, $indentation_level = 0) {
   $output = '';
+
+  // Indent two spaces per level.
+  $indentation = str_repeat(' ', $indentation_level * 2);
+
   foreach ($array as $key => $value) {
     if (is_numeric($key)) {
       if ($value['key']) {
-        $output .= ' <' . $value['key'];
+        $output .= $indentation . '<' . $value['key'];
         if (isset($value['attributes']) && is_array($value['attributes'])) {
           $output .= backdrop_attributes($value['attributes']);
         }
 
         if (isset($value['value']) && $value['value'] != '') {
-          $output .= '>' . (is_array($value['value']) ? format_xml_elements($value['value']) : (!empty($value['encoded']) ? $value['value'] : check_plain($value['value']))) . '</' . $value['key'] . ">\n";
+          $output .= '>';
+          if (is_array($value['value'])) {
+            $output .= "\n" . format_xml_elements($value['value'], $indentation_level + 1);
+            $output .= $indentation . '</' . $value['key'] . ">\n";
+          }
+          else {
+            if (!empty($value['encoded'])) {
+              $output .= $value['value'];
+            }
+            else {
+              $output .= check_plain($value['value']);
+            }
+            $output .= '</' . $value['key'] . ">\n";
+          }
         }
         else {
           $output .= " />\n";
@@ -2098,7 +2132,14 @@ function format_xml_elements($array) {
       }
     }
     else {
-      $output .= ' <' . $key . '>' . (is_array($value) ? format_xml_elements($value) : check_plain($value)) . "</$key>\n";
+      $output .= $indentation . '<' . $key . '>';
+      if (is_array($value)) {
+        $output .= "\n" . format_xml_elements($value, $indentation_level + 1);
+        $output .= $indentation . "</$key>\n";
+      }
+      else {
+        $output .= check_plain($value) . "</$key>\n";
+      }
     }
   }
   return $output;
@@ -2564,7 +2605,10 @@ function url($path = NULL, array $options = array()) {
     $langcode = isset($options['language']) && isset($options['language']->langcode) ? $options['language']->langcode : '';
     $alias = backdrop_get_path_alias($original_path, $langcode);
     if ($alias != $original_path) {
-      $path = $alias;
+      // Strip leading slashes from internal path aliases to prevent them
+      // becoming external URLs without protocol. /example.com should not be
+      // turned into //example.com.
+      $path = ltrim($alias, '/');
     }
   }
 
@@ -2723,9 +2767,9 @@ function backdrop_attributes(array $attributes = array()) {
  * Formats an internal or external URL link as an HTML anchor tag.
  *
  * This function correctly handles aliased paths and adds an 'active' class
- * attribute to links that point to the current page (for theming), so all
- * internal links output by modules should be generated by this function if
- * possible.
+ * attribute to links that point to the current page (for theme development),
+ * so all internal links output by modules should be generated by this function
+ * if possible.
  *
  * However, for links enclosed in translatable text you should use t() and
  * embed the HTML anchor tag directly in the translated string. For example:
@@ -2988,7 +3032,7 @@ function backdrop_deliver_html_page($page_callback_result) {
         // Print a 503 page.
         backdrop_add_http_header('Status', '503 Service unavailable');
         backdrop_set_title(t('Site under maintenance'));
-        print theme('maintenance_page', array('content' => filter_xss_admin(token_replace(t(config_get('system.core', 'maintenance_mode_message'))))));
+        print theme('maintenance_page', array('content' => filter_xss_admin(token_replace(config_get_translated('system.core', 'maintenance_mode_message')))));
         break;
     }
   }
@@ -3395,8 +3439,8 @@ function backdrop_add_css($data = NULL, $options = NULL) {
  * Returns a themed representation of all stylesheets to attach to the page.
  *
  * It loads the CSS in order, with 'module' first, then 'theme' afterwards.
- * This ensures proper cascading of styles so themes can easily override
- * module styles through CSS selectors.
+ * This ensures proper cascading of styles so themes can override module styles
+ * through CSS selectors.
  *
  * Themes may replace module-defined CSS files by adding a stylesheet with the
  * same filename. For example, themes/bartik/system-menus.css would replace
@@ -3632,7 +3676,7 @@ function backdrop_aggregate_css(&$css_groups) {
  * (http://drupal.org/node/228818) and LINK tags are limited to one file per
  * tag, whereas STYLE tags can contain multiple @import statements allowing
  * multiple files to be loaded per tag. When CSS aggregation is disabled, a
- * Backdrop site can easily have more than 31 CSS files that need to be loaded, so
+ * Backdrop site can have more than 31 CSS files that need to be loaded, so
  * using LINK tags exclusively would result in a site that would display
  * incorrectly in IE. Depending on different needs, different strategies can be
  * employed to decide when to use LINK tags and when to use STYLE tags.
@@ -6022,12 +6066,16 @@ function backdrop_cron_run() {
  * @code
  * backdrop_system_listing("/\.module$/", "modules", 'name', 0);
  * @endcode
- * this function will search the site-wide modules directory (i.e., /modules/),
- * your installation profile's directory (i.e.,
- * /profiles/your_site_profile/modules/), the all-sites directory (i.e.,
- * /modules), and your site-specific directory (i.e.,
- * /modules), in that order, and return information about
- * all of the files ending in .module in those directories.
+ *
+ * The following directories will then be searched for modules:
+ * - /sites/[site_name]/modules
+ * - /modules
+ * - /profiles/[install_profile_name]/modules
+ * - /core/profiles/[install_profile_name]/modules
+ * - /core/modules
+ * Directories will be searched in that order. If a module of the same name
+ * exists in two places, the earlier locations will take precedence over the
+ * later ones.
  *
  * The information is returned in an associative array, which can be keyed on
  * the file name ($key = 'filename'), the file name without the extension ($key
@@ -6041,7 +6089,7 @@ function backdrop_cron_run() {
  *   The preg_match() regular expression for the files to find.
  * @param string $directory
  *   The subdirectory name in which the files are found. For example,
- *   'core/modules' will search in sub-directories of the /core/modules
+ *   'modules' will search in sub-directories of the /core/modules/
  *   directory, sub-directories of /modules/, etc.
  * @param string $key
  *   The key to be used for the associative array returned. Possible values are
@@ -6088,6 +6136,9 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
   // profile always has precedence.
   $profiles[] = $profile;
   foreach ($profiles as $profile) {
+    if (file_exists("core/profiles/$profile/$directory")) {
+      $searchdir[] = "core/profiles/$profile/$directory";
+    }
     if (file_exists("profiles/$profile/$directory")) {
       $searchdir[] = "profiles/$profile/$directory";
     }
@@ -6400,8 +6451,8 @@ function backdrop_pre_render_dropbutton($element) {
   }
   array_unshift($element['#theme_wrappers'], 'dropbutton_wrapper');
 
-  // Enable targeted theming of specific dropbuttons (e.g., 'operations' or
-  // 'operations__node').
+  // Enable targeted theme override of specific dropbuttons (e.g., 'operations'
+  // or 'operations__node').
   if (isset($element['#subtype'])) {
     $element['#theme'] .= '__' . $element['#subtype'];
   }
@@ -6489,8 +6540,8 @@ function backdrop_render_page($page) {
  * the element has been rendered, which allows individual elements of a given
  * array to be rendered independently and prevents them from being rendered
  * more than once on subsequent calls to backdrop_render() (e.g., as part of a
- * larger array). If the same array or array element is passed more than once
- * to backdrop_render(), it simply returns an empty string.
+ * larger array). If the same array or element is passed more than once to
+ * backdrop_render(), every use beyond the first will return an empty string.
  *
  * @param array $elements
  *   The structured array describing the data to be rendered.
@@ -6673,6 +6724,15 @@ function render(&$element) {
  * element, be sure to call hide() on the element before its parent tree is
  * rendered for the first time, as it will have no effect on subsequent
  * renderings of the parent tree.
+ *
+ * Note that hide() should only be used when doing the final printing of a
+ * render element, such as in a template. If wanting to hide a form element
+ * earlier in the process, such as in hook_form_alter(), you should set #access
+ * instead, like this:
+ *
+ * @code
+ * $element['#access'] = FALSE
+ * @endcode
  *
  * @param $element
  *   The element to be hidden.
@@ -8456,7 +8516,7 @@ function backdrop_parse_dependency($dependency) {
   $parts = explode('(', $dependency, 2);
   $value['name'] = trim($parts[0]);
   if (isset($parts[1])) {
-    $value['original_version'] = ' (' . $parts[1];
+    $value['original_version'] = '(' . $parts[1];
     foreach (explode(',', $parts[1]) as $version) {
       if (preg_match("/^\s*$p_op\s*$p_core$p_major\.$p_minor/", $version, $matches)) {
         $op = !empty($matches['operation']) ? $matches['operation'] : '=';
@@ -8486,10 +8546,10 @@ function backdrop_parse_dependency($dependency) {
 /**
  * Checks whether a version is compatible with a given dependency.
  *
- * @param $v
+ * @param array $dependency_info
  *   The parsed dependency structure from backdrop_parse_dependency().
- * @param $current_version
- *   The version to check against (like 4.2).
+ * @param string $current_version
+ *   The version to check against (like 4.2 or 1.10.0-beta4).
  *
  * @return string|NULL
  *   NULL if compatible, otherwise the original dependency version string that
@@ -8497,16 +8557,49 @@ function backdrop_parse_dependency($dependency) {
  *
  * @see backdrop_parse_dependency()
  */
-function backdrop_check_incompatibility($v, $current_version) {
-  if (!empty($v['versions'])) {
-    foreach ($v['versions'] as $required_version) {
-      if ((isset($required_version['op']) && !version_compare($current_version, $required_version['version'], $required_version['op']))) {
-        return $v['original_version'];
+function backdrop_check_incompatibility(array $dependency_info, $current_version) {
+  $current_version = _backdrop_version_compare_convert($current_version);
+  if (!empty($dependency_info['versions'])) {
+    foreach ($dependency_info['versions'] as $required_version) {
+      if ((isset($required_version['op']) && !version_compare($current_version, _backdrop_version_compare_convert($required_version['version']), $required_version['op']))) {
+        return $dependency_info['original_version'];
       }
     }
   }
   // No incompatibilities.
   return NULL;
+}
+
+/**
+ * Converts a Backdrop version string into numeric-only version string.
+ *
+ * @param string $version_string
+ *   A version string such as 1.10.0-beta4 or 1.4.x-dev.
+ * @return string
+ *   A converted string only containing numbers, for use in PHP's
+ *   version_compare() function.
+ */
+function _backdrop_version_compare_convert($version_string) {
+  // Convert "dev" releases to be the highest possible version number. For
+  // example 1.5.x-dev should be considered higher than any other 1.5 release,
+  // so we replace .x with 99999.
+  $version_string = str_replace('.x-dev', '.99999', $version_string);
+
+  // Replace common indicators with numeric equivalents for version_compare().
+  $indicator_order = array(
+    1 => 'alpha',
+    2 => 'beta',
+    3 => 'preview',
+    4 => 'rc',
+  );
+  foreach ($indicator_order as $order => $indicator) {
+    // Replace both before and after the indicator with dots, so that multiple
+    // alphas, betas, etc. would be ordered properly. For example, version
+    // 1.5.0-beta9 and 1.5.0-beta10 would become 1.5.0.2.9 and 1.5.0.2.10.
+    $version_string = str_replace('-' . $indicator, '.' . $order . '.', $version_string);
+    $version_string .= substr($version_string, -1) === '.' ? '0' : '';
+  }
+  return $version_string;
 }
 
 /**

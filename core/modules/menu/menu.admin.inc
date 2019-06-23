@@ -17,7 +17,7 @@ function menu_overview_page() {
     $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
     $links = array();
     $links['list'] = array(
-      'title' => t('Edit links'),
+      'title' => t('Manage links'),
       'href' => 'admin/structure/menu/manage/' . $menu['menu_name'],
     );
     $links['add'] = array(
@@ -33,6 +33,16 @@ function menu_overview_page() {
       $links['delete'] = array(
         'title' => t('Delete'),
         'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/delete',
+      );
+    }
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Menus',
+          'name' => 'menu.menu.' . $menu['menu_name'],
+        ),
       );
     }
     $row[] = array(
@@ -151,6 +161,7 @@ function _menu_overview_tree_form($tree, $langcode = NULL) {
       $form[$mlid]['langcode'] = array(
         '#type' => 'markup',
         '#markup' => check_plain($langcode_label),
+        '#access' => module_exists('language'),
       );
       $form[$mlid]['hidden'] = array(
         '#type' => 'checkbox',
@@ -485,6 +496,10 @@ function menu_edit_item_submit($form, &$form_state) {
  */
 function menu_edit_menu($form, &$form_state, $type, $menu = array()) {
   $system_menus = menu_list_system_menus();
+  if (empty($menu['menu_name'])) {
+    backdrop_set_title(t('Add menu'));
+  }
+
   $menu += array(
     'menu_name' => '',
     'old_name' => !empty($menu['menu_name']) ? $menu['menu_name'] : '',

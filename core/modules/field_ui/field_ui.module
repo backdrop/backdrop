@@ -148,11 +148,7 @@ function field_ui_menu() {
           // modes available for customization. So we define menu items for all
           // Display modes, and use an access callback to determine which ones
           // are actually visible for a given bundle.
-          $weight = 0;
-
           $items["$path/display/%"] = array(
-            'title callback' => 'field_ui_manage_display_title',
-            'title arguments' => array($entity_type, $view_mode_position),
             'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_display_form', $entity_type, $bundle_arg, $view_mode_position),
             // The access callback needs to check both the current 'custom
@@ -160,6 +156,7 @@ function field_ui_menu() {
             // rules for the bundle admin pages.
             'access callback' => '_field_ui_view_mode_menu_access',
             'access arguments' => array_merge(array($entity_type, $bundle_arg, $view_mode_position, $access['access callback']), $access['access arguments']),
+            'type' => MENU_LOCAL_TASK,
             'file' => 'field_ui.admin.inc',
           );
 

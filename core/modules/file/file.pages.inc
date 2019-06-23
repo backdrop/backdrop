@@ -89,7 +89,7 @@ function file_manage_form($form, &$form_state, File $file) {
   );
 
   // File user information for administrators.
-  $anonymous = config_get('system.core', 'anonymous');
+  $anonymous = config_get_translated('system.core', 'anonymous');
   $form['user'] = array(
     '#type' => 'fieldset',
     '#access' => user_access('administer files'),
@@ -105,7 +105,7 @@ function file_manage_form($form, &$form_state, File $file) {
         backdrop_get_path('module', 'file') . '/js/file.js',
         array(
           'type' => 'setting',
-          'data' => array('anonymous' => t($anonymous)),
+          'data' => array('anonymous' => $anonymous),
         ),
       ),
     ),

@@ -1,0 +1,10 @@
+name = Minimal
+description = Start with only a few modules enabled.
+version = BACKDROP_VERSION
+backdrop = 1.x
+type = profile
+hidden = TRUE
+
+dependencies[] = node
+dependencies[] = dblog
+dependencies[] = layout

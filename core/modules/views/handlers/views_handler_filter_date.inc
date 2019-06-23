@@ -146,7 +146,7 @@ class views_handler_filter_date extends views_handler_filter_numeric {
         return FALSE;
       }
     }
-    else {
+    elseif ($operators[$operator]['values'] == 2) {
       if ($this->value['min'] == '' || $this->value['max'] == '') {
         return FALSE;
       }

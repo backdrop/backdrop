@@ -473,7 +473,7 @@ abstract class DatabaseTasks {
             'required' => TRUE,
           );
           $settings['database_prefix'] = array(
-            'value' => $db_settings['prefix'],
+            'value' => $db_settings['prefix']['default'],
           );
           backdrop_rewrite_settings($settings);
         }
@@ -909,14 +909,13 @@ make this configuration active, see admin/config/development/configuration/sync.
  * @throws Exception
  */
 function backdrop_verify_profile($install_state) {
-  $profile = $install_state['parameters']['profile'];
-
   include_once BACKDROP_ROOT . '/core/includes/file.inc';
   include_once BACKDROP_ROOT . '/core/includes/common.inc';
 
-  $profile_file = BACKDROP_ROOT . "/profiles/$profile/$profile.profile";
+  $profile = $install_state['parameters']['profile'];
+  $profile_file = _install_find_profile_file($profile);
 
-  if (!isset($profile) || !file_exists($profile_file)) {
+  if (!isset($profile) || !$profile_file) {
     throw new Exception(install_no_profile_error());
   }
   $info = $install_state['profile_info'];
@@ -1326,9 +1325,9 @@ function st($string, array $args = array(), array $options = array()) {
 function backdrop_check_profile($profile) {
   include_once BACKDROP_ROOT . '/core/includes/file.inc';
 
-  $profile_file = BACKDROP_ROOT . "/profiles/$profile/$profile.profile";
+  $profile_file = _install_find_profile_file($profile);
 
-  if (!isset($profile) || !file_exists($profile_file)) {
+  if (!isset($profile) || !$profile_file) {
     throw new Exception(install_no_profile_error());
   }
 
@@ -1470,7 +1469,8 @@ function install_profile_info($profile, $langcode = 'en') {
       'hidden' => FALSE,
       'php' => BACKDROP_MINIMUM_PHP,
     );
-    $info = backdrop_parse_info_file("profiles/$profile/$profile.info") + $defaults;
+    $info_file = _install_find_profile_file($profile, 'info');
+    $info = backdrop_parse_info_file($info_file) + $defaults;
     $info['dependencies'] = array_unique(array_merge(
       backdrop_required_modules(),
       $info['dependencies'],
@@ -1484,6 +1484,43 @@ function install_profile_info($profile, $langcode = 'en') {
     $cache[$profile] = $info;
   }
   return $cache[$profile];
+}
+
+/**
+ * Searches for a profile directory and returns the profile path location.
+ *
+ * This searches in both the root directory and underneath the core directory.
+ * The root directory takes precedence in the event a profile exists there.
+ * Site-specific directories are not searched (e.g. sites/my_site_name/profiles)
+ *
+ * @param string $profile_name
+ *   The profile name to be found.
+ * @param bool $file_extension
+ *   The file type to find based on extension. May be one of the following:
+ *   - profile
+ *   - install
+ *   - info
+ *
+ * @return bool|string
+ *   The full path to the profile .install file.
+ */
+function _install_find_profile_file($profile_name, $file_extension = 'profile') {
+  $profile_files = array(
+    BACKDROP_ROOT . '/profiles/' . $profile_name . '/' . $profile_name . '.profile',
+    BACKDROP_ROOT . '/core/profiles/' . $profile_name . '/' . $profile_name . '.profile',
+  );
+  foreach ($profile_files as $profile_file) {
+    if (file_exists($profile_file)) {
+      if ($file_extension === 'profile') {
+        return $profile_file;
+      }
+      else {
+        $profile_other_file = str_replace('.profile', '.' . $file_extension, $profile_file);
+        return file_exists($profile_other_file) ? $profile_other_file : FALSE;
+      }
+    }
+  }
+  return FALSE;
 }
 
 /**
