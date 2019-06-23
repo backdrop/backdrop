@@ -160,6 +160,7 @@ function theme_node_add_list($variables) {
  *   - type: An object containing the 'type' (machine name) and 'description' of
  *     the content type.
  *
+ * @see node_overview_types()
  * @ingroup themeable
  */
 function theme_node_type_name($variables) {
@@ -179,6 +180,7 @@ function theme_node_type_name($variables) {
  *   - type: An object containing the 'type' (machine name) and 'description' of
  *     the content type.
  *
+ * @see node_overview_types()
  * @ingroup themeable
  */
 function theme_node_type_description($variables) {
