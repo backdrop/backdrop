@@ -17,10 +17,10 @@
     "prefer-stable": true,
     "extra": {
         "installer-paths": {
+             ".": ["type:backdorp-backdrop"],
              "modules/contrib/{$name}": ["type:backdrop-module"],
              "profiles/contrib/{$name}": ["type:backdrop-profile"],
              "themes/contrib/{$name}": ["type:backdrop-theme"],
-             "vendor/drush/drush/commands/backdrop": ["type:backdrop-drush"],
              "modules/custom/{$name}": ["type:backdrop-custom-module"],
              "themes/custom/{$name}": ["type:backdrop-custom-theme"]
         }
