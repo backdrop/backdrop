@@ -4,6 +4,7 @@
     "type": "backdrop-backdrop",
     "license": "GPL-2.0",
     "homepage": "https://backdropcms.org/",
+    "version": "1.13.2",
     "support": {
         "docs": "https://api.backdropcms.org",
         "issues": "https://github.com/backdrop/backdrop-issues",
