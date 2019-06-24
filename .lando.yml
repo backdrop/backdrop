@@ -1,0 +1,11 @@
+name: backdrop-composer
+recipe: backdrop
+config:
+  webroot: .
+  backdrush: false
+
+tooling:
+  drush:
+    service: appserver
+    cmd:
+      - /app/vendor/bin/drush --root=/app --uri=https://backdrop-composer.lndo.site
