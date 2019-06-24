@@ -47,7 +47,7 @@ class DashboardNewsBlock extends Block {
     foreach ($news->results as $key => $result) {
       $links[] = l(
         $result->node_title,
-        $base_url . '/' . $result->_field_data->nid->entity->path->alias
+        $this->settings['url'] . '/' . $result->_field_data->nid->entity->path->alias
       );
     }
 
