@@ -416,6 +416,7 @@ function views_ui_add_form($form, &$form_state) {
     '#type' => 'textarea',
     '#title' => t('Provide description'),
     '#title_display' => 'invisible',
+    '#description' => t('This description will appear on the Views administrative UI to tell you what the view is about.'),
     '#default_value' => !empty($form_state['view']) ? $form_state['view']->description : '',
     '#states' => array(
       'visible' => array(
