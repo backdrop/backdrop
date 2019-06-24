@@ -2,7 +2,7 @@
     "name": "backdrop/backdrop",
     "description": "The free and Open Source CMS that helps you build websites for businesses and non-profits.",
     "type": "backdrop-backdrop",
-    "license": "GPL-2.0",
+    "license": "GPL-2.0-or-later",
     "homepage": "https://backdropcms.org/",
     "support": {
         "docs": "https://api.backdropcms.org",
