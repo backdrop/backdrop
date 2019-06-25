@@ -57,6 +57,11 @@ class DashboardUpdateBlock extends Block {
     $data = update_calculate_project_data($available);
 
     foreach ($data as $key => $project) {
+      // Filter out projects which are up to date already.
+      if ($project['status'] == UPDATE_CURRENT) {
+        continue;
+      }
+
       $type = $project['project_type'];
       if (in_array($type, $this->settings['project_types'])) {
         $name = $project['info']['name'];
