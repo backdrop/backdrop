@@ -10,10 +10,6 @@ class DashboardNewsBlock extends Block {
    */
   public function __construct($plugin_name, array $data) {
     parent::__construct($plugin_name, $data);
-    $settings = array(
-      'title' => t('Backdrop News'),
-      'url' => 'https://backdropcms.org/api/news',
-    );
   }
 
   /**
@@ -41,14 +37,14 @@ class DashboardNewsBlock extends Block {
    * {@inheritdoc}
    */
   public function getContent() {
-    $feed = backdrop_http_request($this->settings['url']);
+    $feed = backdrop_http_request('https://backdropcms.org/api/backdrop-news');
     $news = json_decode($feed->data);
     $links = array();
-    foreach ($news->results as $key => $result) {
+    foreach ($news->nodes as $key => $node) {
       $links[] = l(
-        $result->node_title,
-        $this->settings['url'] . '/' . $result->_field_data->nid->entity->path->alias
-      );
+        $node->node->title,
+        $node->node->field_link
+      ) . ' - ' . $node->node->field_tagline;
     }
 
     $build = array(
@@ -76,11 +72,12 @@ class DashboardNewsBlock extends Block {
     parent::form($form, $form_state);
 
     $form['url'] = array(
-      '#type' => 'textfield',
-      '#size' => 60,
-      '#default_value' => $this->settings['url'],
-      '#title' => 'News API URL',
-      '#description' => "The source of the news feed.",
+      '#type' => 'markup',
+      '#markup' => t(
+        'This block is providing a news feed from BackdropCMS.org and the
+        contents can not be editted. You can remove it from the dashboard if you
+        wish.'
+      ),
     );
 
   }
@@ -90,8 +87,5 @@ class DashboardNewsBlock extends Block {
    */
   public function formSubmit($form, &$form_state) {
     parent::formSubmit($form, $form_state);
-
-    $this->settings['url'] = $form_state['values']['url'];
-
   }
 }
