@@ -1,7 +1,7 @@
 <?php
 
 /**
- *  TextBlock extends Block
+ *  BlockText extends Block
  *
  *  This class allows us to create text blocks.
  */

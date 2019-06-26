@@ -401,7 +401,11 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     $form['conditions']['active'][$access_key]['label'] = array(
       '#markup' => $layout_access->summary(),
     );
-    $form['conditions']['active'][$access_key]['remove'] = array(
+    $form['conditions']['active'][$access_key]['operations'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('layout-operations')),
+    );
+    $form['conditions']['active'][$access_key]['operations']['remove'] = array(
       '#type' => 'submit',
       '#value' => t('Remove'),
       '#attributes' => array('class' => array('layout-link-button', 'layout-access-remove')),
@@ -415,7 +419,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       ),
       '#name' => 'conditions_' . $access_key . '_remove',
     );
-    $form['conditions']['active'][$access_key]['configure'] = array(
+    $form['conditions']['active'][$access_key]['operations']['configure'] = array(
       '#type' => 'submit',
       '#value' => t('Configure'),
       '#attributes' => array('class' => array('layout-link-button', 'layout-access-configure')),

@@ -111,7 +111,7 @@ class DashboardOverviewUserBlock extends Block {
     if (user_access('administer users')) {
       $panel['link'] = array(
         '#theme' => 'link',
-        '#path' => 'admin/content',
+        '#path' => 'admin/people',
         '#text' => t('Manage user accounts'),
       );
     }
