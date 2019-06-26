@@ -97,8 +97,11 @@ function node_theme() {
     'node_add_list' => array(
       'variables' => array('content' => NULL),
     ) + $base,
-    'node_admin_overview' => array(
-      'variables' => array('name' => NULL, 'type' => NULL),
+    'node_type_name' => array(
+      'variables' => array('type' => NULL),
+    ) + $base,
+    'node_type_description' => array(
+      'variables' => array('type' => NULL),
     ) + $base,
     'node_recent_block' => array(
       'variables' => array('nodes' => NULL),
