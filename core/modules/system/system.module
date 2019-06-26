@@ -3245,27 +3245,13 @@ function system_breadcrumb_block($settings = array()) {
  * @see system_block_view()
  */
 function system_powered_by_block($settings = array()) {
-  if (isset($settings['color']) && $settings['color'] == 'black') {
-    $primary = '#000';
-    $secondary = '#fff';
-  }
-  else {
-    $primary = '#fff';
-    $secondary = '#000';
-  }
-  backdrop_add_css('
-    .block-system-powered-by .block-content .backdrop-mark,
-    .block-system-powered-by .block-content .backdrop-mark:after {
-      /* Primary Color */
-      background: ' . $primary . ';
-    }
-    .block-system-powered-by .block-content .backdrop-mark:before {
-      /* Secondary Color */
-      background: ' . $secondary . ';
-    }
-  ', 'inline');
+  $variables = array();
 
-  return theme('system_powered_by');
+  if (isset($settings['color'])) {
+    $variables['color'] = $settings['color'];
+  }
+
+  return theme('system_powered_by', $variables);
 }
 
 /**

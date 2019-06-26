@@ -242,6 +242,16 @@ abbr.ajax-changed {
   -webkit-transform-origin: bottom left;
           transform-origin: bottom left;
 }
+.block-system-powered-by .block-content .backdrop-mark.color-black,
+.block-system-powered-by .block-content .backdrop-mark.color-black:after,
+.block-system-powered-by .block-content .backdrop-mark.color-white:before {
+  background: #000;
+}
+.block-system-powered-by .block-content .backdrop-mark.color-white,
+.block-system-powered-by .block-content .backdrop-mark.color-white:after,
+.block-system-powered-by .block-content .backdrop-mark.color-black:before {
+  background: #fff;
+}
 
 /**
  * Autocomplete.
