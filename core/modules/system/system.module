@@ -2382,6 +2382,7 @@ function system_user_timezone(&$form, &$form_state) {
     '#title' => t('Locale settings'),
     '#weight' => 6,
     '#collapsible' => TRUE,
+    '#group' => 'additional_settings',
   );
   $form['timezone']['timezone'] = array(
     '#type' => 'select',
