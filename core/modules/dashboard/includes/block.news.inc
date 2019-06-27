@@ -30,7 +30,7 @@ class DashboardNewsBlock extends Block {
    * {@inheritdoc}
    */
   public function getAdminPreview() {
-    return t('Displays a feed of news from BackdropCMS.org.');
+    return t('Displays a news feed from BackdropCMS.org.');
   }
 
   /**
@@ -68,6 +68,7 @@ class DashboardNewsBlock extends Block {
 
     return $build;
   }
+
   /**
    * {@inheritdoc}
    */
@@ -75,11 +76,9 @@ class DashboardNewsBlock extends Block {
     parent::form($form, $form_state);
 
     $form['url'] = array(
-      '#type' => 'markup',
+      '#type' => 'help',
       '#markup' => t(
-        'This block is providing a news feed from BackdropCMS.org and the
-        contents can not be editted. You can remove it from the dashboard if you
-        wish.'
+        'This block is providing a news feed from BackdropCMS.org and the contents can not be editted. You can remove it from the dashboard if you wish.'
       ),
     );
 

@@ -108,7 +108,7 @@ class DashboardTest extends BackdropWebTestCase {
     // The manage user accounts link is present.
     $this->assertLink('Manage user accounts', 0, 'The Manage user accounts link was found.');
 
-    // The bckdrop-news block was found.
+    // The backdrop-news block was found.
     $this->assertText('Backdrop News', 'Backdrop News block found.');
 
     // The menu admin block was found.
