@@ -38,10 +38,10 @@ class DashboardNewsBlock extends Block {
    */
   public function getContent() {
     $feed = backdrop_http_request('https://backdropcms.org/api/backdrop-news');
-    $news = json_decode($feed->data);
     $links = array();
 
     if ($feed->code === '200') {
+      $news = json_decode($feed->data);
       foreach ($news->nodes as $key => $node) {
         $links[] = l(
           $node->node->title,
