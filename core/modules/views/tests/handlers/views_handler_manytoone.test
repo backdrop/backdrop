@@ -166,7 +166,7 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
     $this->clearViewsDataCache();
 
     // Create two tags.
-    $vocabulary = taxonomy_vocabulary_machine_name_load('tags');
+    $vocabulary = taxonomy_vocabulary_load('tags');
     $this->terms[] = $this->createTerm($vocabulary);
     $this->terms[] = $this->createTerm($vocabulary);
 
