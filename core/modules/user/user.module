@@ -835,45 +835,42 @@ function user_account_form(&$form, &$form_state) {
     '#weight' => 99,
   );
 
-  // Signature.
-  $form['signature_settings'] = array(
+  $form['personalization'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Signature settings'),
+    '#title' => t('Personalization settings'),
     '#weight' => 1,
-    '#access' => (!$register && config_get('system.core', 'user_signatures')),
+    '#access' => (!$register && (config_get('system.core', 'user_signatures') || config_get('system.core', 'user_pictures'))),
     '#group' => 'additional_settings',
   );
-
-  $form['signature_settings']['signature'] = array(
+  // Signature.
+  $form['personalization']['signature_heading'] = array(
+    '#markup' => '<h4>' . t('Signature settings') . '</h4>',
+  );
+  $form['personalization']['signature'] = array(
     '#type' => 'text_format',
     '#title' => t('Signature'),
     '#default_value' => isset($account->signature) ? $account->signature : '',
     '#description' => t('Your signature will be publicly displayed at the end of your comments.'),
     '#format' => isset($account->signature_format) ? $account->signature_format : NULL,
   );
-
   // Picture/avatar.
-  $form['picture'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Picture'),
-    '#weight' => 1,
-    '#access' => (!$register && config_get('system.core', 'user_pictures')),
-    '#group' => 'additional_settings',
+  $form['personalization']['picture_heading'] = array(
+    '#markup' => '<h4>' . t('Picture') . '</h4>',
   );
-  $form['picture']['picture'] = array(
+  $form['personalization']['picture'] = array(
     '#type' => 'value',
     '#value' => isset($account->picture) ? $account->picture : NULL,
   );
-  $form['picture']['picture_current'] = array(
+  $form['personalization']['picture_current'] = array(
     '#markup' => theme('user_picture', array('account' => $account)),
   );
-  $form['picture']['picture_delete'] = array(
+  $form['personalization']['picture_delete'] = array(
     '#type' => 'checkbox',
     '#title' => t('Delete picture'),
     '#access' => !empty($account->picture->fid),
     '#description' => t('Check this box to delete your current picture.'),
   );
-  $form['picture']['picture_upload'] = array(
+  $form['personalization']['picture_upload'] = array(
     '#type' => 'file',
     '#title' => t('Upload picture'),
     '#size' => 48,

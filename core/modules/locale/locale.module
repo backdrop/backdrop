@@ -180,6 +180,7 @@ function locale_language_selector_form($user) {
     '#type' => 'fieldset',
     '#title' => t('Language settings'),
     '#weight' => 1,
+    '#group' => 'additional_settings',
   );
   $form['locale']['language'] = array(
     '#type' => (count($language_options) <= 5 ? 'radios' : 'select'),
