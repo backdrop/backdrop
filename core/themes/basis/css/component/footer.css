@@ -48,12 +48,49 @@
 /**
  * Powered by Backdrop Block
  */
-.l-footer .block-system-powered-by a {
-  text-decoration: none;
+.l-footer .block-system-powered-by .block-content span {
+  display: block;
+  padding-top: 0.5em;
+  width: 30px;
 }
-
-.l-footer .block-system-powered-by a:hover {
-  text-decoration: underline;
+.l-footer .block-system-powered-by .block-content .backdrop-mark {
+  position: relative;
+  display: block;
+  text-indent: -9999em;
+  overflow: hidden;
+  width: 100%;
+  height: 0;
+  padding: 100% 0 0;
+}
+.l-footer .block-system-powered-by .block-content .backdrop-mark:before,
+.l-footer .block-system-powered-by .block-content .backdrop-mark:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: block;
+  width: 50%;
+  height: 50%;
+}
+.l-footer .block-system-powered-by .block-content .backdrop-mark:before {
+  z-index: 1;
+}
+.l-footer .block-system-powered-by .block-content .backdrop-mark:after {
+  z-index: 2;
+  -webkit-transform: rotate(45deg) scaleY(1.5);
+          transform: rotate(45deg) scaleY(1.5);
+  -webkit-transform-origin: bottom left;
+          transform-origin: bottom left;
+}
+.l-footer .block-system-powered-by .block-content .backdrop-mark.color-black,
+.l-footer .block-system-powered-by .block-content .backdrop-mark.color-black:after,
+.l-footer .block-system-powered-by .block-content .backdrop-mark.color-white:before {
+  background: #000;
+}
+.l-footer .block-system-powered-by .block-content .backdrop-mark.color-white,
+.l-footer .block-system-powered-by .block-content .backdrop-mark.color-white:after,
+.l-footer .block-system-powered-by .block-content .backdrop-mark.color-black:before {
+  background: #fff;
 }
 
 .drop-lounging {
