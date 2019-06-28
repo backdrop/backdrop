@@ -72,6 +72,12 @@ function image_style_form($form, &$form_state, $style) {
     ),
   );
 
+  // Note about SVG images and effects.
+  $form['effects_svg'] = array(
+    '#type' => 'item',
+    '#title' => t('Note regarding SVG!'),
+    '#description' => t('Effects don\'t apply to SVG images, except for the Scale effect.'),
+  );
   // Build the list of existing image effects for this image style.
   $form['effects'] = array(
     '#theme' => 'image_style_effects',

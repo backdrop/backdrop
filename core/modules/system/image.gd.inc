@@ -14,18 +14,33 @@
  */
 function image_gd_settings() {
   if (image_gd_check_settings()) {
-    $form['status'] = array(
-      '#markup' => t('The GD toolkit is installed and working properly.')
-    );
+    backdrop_set_message(t('The GD toolkit is installed and working properly.'), 'info');
 
+    $config = config('system.core');
     $form['image_jpeg_quality'] = array(
       '#type' => 'number',
       '#title' => t('JPEG quality'),
       '#description' => t('Define the image quality for JPEG manipulations. Ranges from 0 to 100. Higher values mean better image quality but bigger files.'),
       '#min' => 0,
       '#max' => 100,
-      '#default_value' => config_get('system.core', 'image_jpeg_quality'),
+      '#default_value' => $config->get('image_jpeg_quality'),
       '#field_suffix' => t('%'),
+    );
+    $form['image_svg_width'] = array(
+      '#type' => 'number',
+      '#title' => t('SVG width'),
+      '#description' => t('Define the default width of an SVG image. Changing this will only affect new uploads.'),
+      '#min' => 1,
+      '#default_value' => $config->get('image_svg_width'),
+      '#field_suffix' => t('px'),
+    );
+    $form['image_svg_height'] = array(
+      '#type' => 'number',
+      '#title' => t('SVG height'),
+      '#description' => t('Define the default height of an SVG image. Changing this will only affect new uploads.'),
+      '#min' => 1,
+      '#default_value' => $config->get('image_svg_height'),
+      '#field_suffix' => t('px'),
     );
 
     return $form;
@@ -232,6 +247,10 @@ function image_gd_load(stdClass $image) {
   if (function_exists($function)) {
     $image->resource = $function($image->source);
   }
+  elseif ($extension == 'svg') {
+    // Pass through SVG images.
+    return TRUE;
+  }
   return !empty($image->resource);
 }
 
@@ -263,11 +282,15 @@ function image_gd_save(stdClass $image, $destination) {
 
   $extension = str_replace('jpg', 'jpeg', $image->info['extension']);
   $function = 'image' . $extension;
-  if (!function_exists($function)) {
+  if (!function_exists($function) && $extension != 'svg') {
     return FALSE;
   }
   if ($extension == 'jpeg') {
     $success = $function($image->resource, $destination, config_get('system.core', 'image_jpeg_quality'));
+  }
+  elseif ($extension == 'svg') {
+    // Pass through SVG images.
+    $success = (bool) file_unmanaged_copy($image->source, $destination, FILE_EXISTS_REPLACE);
   }
   else {
     // Always save PNG images with full transparency.
@@ -354,6 +377,18 @@ function image_gd_get_info(stdClass $image) {
       'height'    => $data[1],
       'extension' => $extension,
       'mime_type' => $data['mime'],
+    );
+  }
+  elseif ($mimetype = file_get_mimetype($image->source) == 'image/svg+xml') {
+    // Pass throught SVG images.
+    $config = config('system.core');
+    $width = $config->get('image_svg_width');
+    $height = $config->get('image_svg_height');
+    $details = array(
+      'width'     => $width,
+      'height'    => $height,
+      'extension' => 'svg',
+      'mime_type' => $mimetype,
     );
   }
 
