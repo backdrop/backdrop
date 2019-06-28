@@ -185,8 +185,8 @@ function user_field_extra_fields() {
         'weight' => -10,
       ),
       'account_settings' => array(
-        'label' => t('Account settings'),
-        'description' => t('User module account setting form elements.'),
+        'label' => t('Account status and user roles'),
+        'description' => t('User module account settings form elements.'),
         'weight' => 1,
       ),
       'timezone' => array(
