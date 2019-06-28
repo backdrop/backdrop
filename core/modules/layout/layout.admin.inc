@@ -2691,7 +2691,7 @@ function layout_settings_page($form, &$form_state) {
 
   $header = array(
     'icon' => array('data' => t('Icon'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
-    'name' => array('data' => t('Name'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    'name' => array('data' => t('Name'), 'class' => array(RESPONSIVE_PRIORITY_HIGH)),
     'type' => array('data' => t('Type'), 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
     'operations' => t('Operations'),
   );
