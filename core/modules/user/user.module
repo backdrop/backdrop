@@ -714,7 +714,7 @@ function user_account_form(&$form, &$form_state) {
   $account = $form['#user'];
   $register = ($form['#user']->uid > 0 ? FALSE : TRUE);
 
-  $admin = user_access('administer users');
+  $admin_users = user_access('administer users');
   $admin_roles = user_access('assign roles');
 
   $form['#validate'][] = 'user_account_form_validate';
@@ -733,7 +733,7 @@ function user_account_form(&$form, &$form_state) {
     '#required' => TRUE,
     '#attributes' => array('class' => array('username')),
     '#default_value' => (!$register ? $account->name : ''),
-    '#access' => ($register || ($user->uid == $account->uid && user_access('change own username')) || $admin),
+    '#access' => ($register || ($user->uid == $account->uid && user_access('change own username')) || $admin_users),
     '#weight' => -10,
   );
 
@@ -792,7 +792,7 @@ function user_account_form(&$form, &$form_state) {
       $form['#validate'][] = 'user_validate_current_pass';
     }
   }
-  elseif (!config_get('system.core', 'user_email_verification') || $admin) {
+  elseif (!config_get('system.core', 'user_email_verification') || $admin_users) {
     $form['account']['pass'] = array(
       '#type' => 'password',
       '#title' => t('Password'),
@@ -807,11 +807,11 @@ function user_account_form(&$form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Account settings'),
     '#weight' => 1,
-    '#access' => $admin || $admin_roles,
+    '#access' => $admin_users || $admin_roles,
     '#group' => 'additional_settings',
   );
 
-  if ($admin) {
+  if ($admin_users) {
     $status = isset($account->status) ? $account->status : 1;
   }
   else {
@@ -822,7 +822,7 @@ function user_account_form(&$form, &$form_state) {
     '#title' => t('Status'),
     '#default_value' => $status,
     '#options' => array(t('Blocked'), t('Active')),
-    '#access' => $admin,
+    '#access' => $admin_users,
   );
 
   $roles = array_map('check_plain', user_roles(TRUE));
@@ -841,7 +841,7 @@ function user_account_form(&$form, &$form_state) {
   $form['account_settings']['notify'] = array(
     '#type' => 'checkbox',
     '#title' => t('Notify user of new account'),
-    '#access' => $register && $admin,
+    '#access' => $register && $admin_users,
   );
 
   // Signature.
