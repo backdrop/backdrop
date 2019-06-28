@@ -655,10 +655,10 @@ function filter_library_info() {
       $module_path . '/css/filter.css' => array(),
     ),
   );
-  $libraries['filter.filtered_html.admin'] = array(
+  $libraries['filter.basic.admin'] = array(
     'version' => BACKDROP_VERSION,
     'js' => array(
-      $module_path . '/js/filter.filtered_html.admin.js' => array('group' => JS_THEME, 'aggregate' => FALSE,),
+      $module_path . '/js/filter.basic.admin.js' => array('group' => JS_THEME, 'aggregate' => FALSE,),
     ),
     'dependencies' => array(
       array('filter', 'filter.admin'),
@@ -1860,7 +1860,7 @@ function filter_filter_info() {
  * Filter settings callback for the HTML content filter.
  */
 function _filter_html_settings($form, &$form_state, $filter, $format) {
-  $settings['#attached']['library'][] = array('filter', 'filter.filtered_html.admin');
+  $settings['#attached']['library'][] = array('filter', 'filter.basic.admin');
   $settings['allowed_html'] = array(
     '#type' => 'textfield',
     '#title' => t('Allowed HTML tags'),

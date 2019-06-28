@@ -561,7 +561,7 @@ function file_update_1000() {
               'label' => '',
               'empty' => true,
               'content' => '<p>No files available.</p>\n',
-              'format' => 'filtered_html',
+              'format' => 'basic',
               'tokenize' => 0,
             ),
           ),

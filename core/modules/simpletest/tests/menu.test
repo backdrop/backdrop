@@ -1052,7 +1052,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->assertBreadcrumb("admin/structure/types/manage/$type/fields/body/widget-type", $trail);
 
     // Verify Filter text format administration breadcrumbs.
-    $format = filter_format_load('filtered_html');
+    $format = filter_format_load('basic');
     $format_id = $format->format;
     $trail = $config + array(
       'admin/config/content' => t('Content authoring'),

@@ -147,7 +147,7 @@ for ($i = 0; $i < 24; $i++) {
       'parent' => $vocabulary->hierarchy == 2 && i == 1 ? array() : $parents,
       'name' => "term $term_id of vocabulary $voc_id (j=$j)",
       'description' => 'description of ' . $term->name,
-      'format' => 'filtered_html',
+      'format' => 'basic',
       'weight' => $i * 3 + $j,
     ));
     taxonomy_term_save($term);
@@ -173,7 +173,7 @@ for ($i = 0; $i < 24; $i++) {
   $body_text =  str_repeat("node body ($node->type) - $i", 100);
   $node->body[$node->language][0]['value'] = $body_text;
   $node->body[$node->language][0]['summary'] = text_summary($body_text);
-  $node->body[$node->language][0]['format'] = 'filtered_html';
+  $node->body[$node->language][0]['format'] = 'basic';
   $node->status = intval($i / 4) % 2;
   $node->revision = $i < 12;
   $node->promote = $i % 2;
@@ -203,7 +203,7 @@ for ($i = 0; $i < 24; $i++) {
     $body_text =  str_repeat("node revision body ($node->type) - $i", 100);
     $node->body[$node->language][0]['value'] = $body_text;
     $node->body[$node->language][0]['summary'] = text_summary($body_text);
-    $node->body[$node->language][0]['format'] = 'filtered_html';
+    $node->body[$node->language][0]['format'] = 'basic';
     $node->log = "added $i revision";
     $node_terms = $terms;
     unset($node_terms[$i], $node_terms[47 - $i]);
@@ -227,7 +227,7 @@ $node->title = "node title 24";
 $node->language = LANGUAGE_NONE;
 $node->body[$node->language][0]['value'] = $body_text;
 $node->body[$node->language][0]['summary'] = text_summary($body_text);
-$node->body[$node->language][0]['format']  = 'filtered_html';
+$node->body[$node->language][0]['format']  = 'basic';
 $node->status = 1;
 $node->revision = 0;
 $node->promote = 0;

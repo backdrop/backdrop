@@ -13,9 +13,9 @@
  */
 function standard_install() {
   // Add text formats.
-  $filtered_html_format = array(
-    'format' => 'filtered_html',
-    'name' => 'Filtered HTML',
+  $basic_format = array(
+    'format' => 'basic',
+    'name' => 'Basic',
     'weight' => 0,
     'editor' => 'ckeditor',
     'editor_settings' => array(
@@ -60,8 +60,8 @@ function standard_install() {
       ),
     ),
   );
-  $filtered_html_format = (object) $filtered_html_format;
-  filter_format_save($filtered_html_format);
+  $basic_format = (object) $basic_format;
+  filter_format_save($basic_format);
 
   $full_html_format = array(
     'format' => 'full_html',
@@ -345,21 +345,22 @@ function standard_install() {
   field_create_instance($instance);
 
   // Enable default permissions for system roles.
-  $filtered_html_permission = filter_permission_name($filtered_html_format);
+  $basic_permission = filter_permission_name($basic_format);
   $anonymous_permissions = array(
     'access content',
     'access comments',
-    $filtered_html_permission,
+    $basic_permission,
   );
+  user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $anonymous_permissions);
+
   $authenticated_permissions = array(
     'access content',
     'access comments',
     'post comments',
     'skip comment approval',
     'upload editor images',
-    $filtered_html_permission,
+    $basic_permission,
   );
-  user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $anonymous_permissions);
   user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, $authenticated_permissions);
 
   // Create a default editor role, for users who need to be able to edit
@@ -398,7 +399,7 @@ function standard_install() {
     'administer taxonomy',
     'search content',
     'use advanced search',
-    $filtered_html_permission,
+    $basic_permission,
   );
   user_role_grant_permissions('editor', $editor_permissions);
 

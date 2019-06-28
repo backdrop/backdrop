@@ -147,11 +147,11 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     parent::setUp();
 
     // Create users.
-    $filtered_html_format = filter_format_load('filtered_html');
+    $basic_format = filter_format_load('basic');
     $full_html_format = filter_format_load('full_html');
     $this->admin_user = $this->backdropCreateUser(array(
       'administer filters',
-      filter_permission_name($filtered_html_format),
+      filter_permission_name($basic_format),
       filter_permission_name($full_html_format),
     ));
 
@@ -234,7 +234,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     // Line filter.
     $second_filter = 'filter_autop';
 
-    $filtered = 'filtered_html';
+    $filtered = 'basic';
     $full = 'full_html';
     $plain = 'plain_text';
 
@@ -362,7 +362,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->backdropLogout();
     $this->backdropLogin($this->web_user);
 
-    // Use filtered HTML and see if it removes tags that are not allowed.
+    // Use Basic and see if it removes tags that are not allowed.
     $body = '<em>' . $this->randomName() . '</em>';
     $extra_text = 'text';
     $text = $body . '<random>' . $extra_text . '</random>';
@@ -404,8 +404,8 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $edit = array(
       'filters[filter_url][settings][filter_url_length]' => $this->randomName(4),
     );
-    $this->backdropPost('admin/config/content/formats/filtered_html', $edit, t('Save configuration'));
-    $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Filtered HTML')));
+    $this->backdropPost('admin/config/content/formats/basic', $edit, t('Save configuration'));
+    $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Basic')));
   }
 }
 
@@ -2028,7 +2028,7 @@ class FilterFileUsageTest extends BackdropWebTestCase {
         'und' => array(
           0 => array(
             'value' => '<p>Hello, world!</p><img src="awesome-llama.jpg" data-file-id="' . $image->fid . '" />',
-            'format' => 'filtered_html',
+            'format' => 'basic',
           ),
         ),
       ),
@@ -2095,31 +2095,31 @@ class FilterEditorAccessTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp(array('file'));
 
-    $filtered_html_format = array(
-      'format' => 'filtered_html',
-      'name' => 'Filtered HTML',
+    $basic_format = array(
+      'format' => 'basic',
+      'name' => 'Basic',
       'weight' => 0,
       'editor' => 'ckeditor',
       'filters' => array(),
     );
-    $filtered_html_format = (object) $filtered_html_format;
-    filter_format_save($filtered_html_format);
+    $basic_format = (object) $basic_format;
+    filter_format_save($basic_format);
 
-    $filtered_html_permission = filter_permission_name($filtered_html_format);
-    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array($filtered_html_permission));
-    user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array($filtered_html_permission));
+    $basic_permission = filter_permission_name($basic_format);
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array($basic_permission));
+    user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array($basic_permission));
   }
 
   /**
    * Checks access to editor dialogs for adding images and links.
    */
   function testDialogAccess() {
-    // Check that the dialog for filtered HTML is not directly accessible.
-    $this->backdropGet('editor/dialog/image/filtered_html');
+    // Check that the dialog for Basic is not directly accessible.
+    $this->backdropGet('editor/dialog/image/basic');
     $this->assertResponse(403, 'Access denied on image dialog without token.');
 
     // Generate a valid token.
-    $format = filter_format_load('filtered_html');
+    $format = filter_format_load('basic');
     $anonymous = new AnonymousUser();
     $dialog_token = filter_editor_dialog_token($format, 'image', $anonymous, 'some-path');
     $options = array(
@@ -2129,7 +2129,7 @@ class FilterEditorAccessTestCase extends BackdropWebTestCase {
       ),
     );
 
-    $this->backdropGet('editor/dialog/image/filtered_html', $options);
+    $this->backdropGet('editor/dialog/image/basic', $options);
     $this->assertResponse(200, 'Access granted on image dialog with token.');
 
     $this->assertNoField('files[fid]', 'File upload field not found when uploads are disabled.');
@@ -2140,17 +2140,17 @@ class FilterEditorAccessTestCase extends BackdropWebTestCase {
     );
     filter_format_save($format);
 
-    $this->backdropGet('editor/dialog/image/filtered_html', $options);
+    $this->backdropGet('editor/dialog/image/basic', $options);
     $this->assertNoField('files[fid]', 'File upload field not found when uploads are enabled but user missing upload permission.');
 
     user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('upload editor images'));
-    $this->backdropGet('editor/dialog/image/filtered_html', $options);
+    $this->backdropGet('editor/dialog/image/basic', $options);
     $this->assertField('files[fid]', 'File upload field found when uploads are enabled and user has upload permission.');
 
     // Revoke access to the format and check that access is denied.
-    $filtered_html_permission = filter_permission_name($format);
-    user_role_revoke_permissions(BACKDROP_ANONYMOUS_ROLE, array($filtered_html_permission));
-    $this->backdropGet('editor/dialog/image/filtered_html', $options);
+    $basic_permission = filter_permission_name($format);
+    user_role_revoke_permissions(BACKDROP_ANONYMOUS_ROLE, array($basic_permission));
+    $this->backdropGet('editor/dialog/image/basic', $options);
     $this->assertResponse(403, 'Access denied on image dialog when access to the format is not allowed.');
   }
 }

@@ -368,7 +368,7 @@
                         "label": "",
                         "empty": true,
                         "content": "<p>No available images.</p>\r\n",
-                        "format": "filtered_html",
+                        "format": "basic",
                         "tokenize": 0
                     }
                 }

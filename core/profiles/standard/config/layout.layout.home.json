@@ -99,7 +99,7 @@
                     "block_settings": [],
                     "contexts": [],
                     "content": "",
-                    "format": "filtered_html",
+                    "format": "basic",
                     "image": null,
                     "image_path": null
                 },

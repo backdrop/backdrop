@@ -1791,7 +1791,7 @@ function _form_test_disabled_elements($form, &$form_state) {
     ),
     '#test_hijack_value' => array(
       'value' => 'HIJACK',
-      'format' => 'filtered_html',
+      'format' => 'basic',
     ),
   );
 
