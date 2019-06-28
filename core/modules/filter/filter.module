@@ -2520,20 +2520,24 @@ function _filter_image_align($text) {
       else {
         $target = $node;
       }
-      $classes = $target->getAttribute('class');
-      $classes = (strlen($classes) > 0) ? explode(' ', $classes) : array();
-      $classes[] = 'align-' . $align;
-      $target->setAttribute('class', implode(' ', $classes));
 
       // Center aligned content requires an additional wrapper to set
       // text-align: center.
       if ($align === 'center') {
-        $wrapper_div = $dom->createElement('div');
-        $wrapper_attribute = $dom->createAttribute('class');
-        $wrapper_attribute->value = 'centered-wrapper';
-        $wrapper_div->appendChild($wrapper_attribute);
-        $wrapper_div->appendChild($target->cloneNode(TRUE));
-        $target->parentNode->replaceChild($wrapper_div, $target);
+        // Get closest p parent.
+        while ($target->nodeName !== 'p') {
+          $target = $target->parentNode;
+        }
+
+        $p_attribute = $dom->createAttribute('class');
+        $p_attribute->value = 'centered-wrapper';
+        $target->appendChild($p_attribute);
+      }
+      else {
+        $classes = $target->getAttribute('class');
+        $classes = (strlen($classes) > 0) ? explode(' ', $classes) : array();
+        $classes[] = 'align-' . $align;
+        $target->setAttribute('class', implode(' ', $classes));
       }
     }
   }
