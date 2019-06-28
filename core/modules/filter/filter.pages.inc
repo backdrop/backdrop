@@ -630,7 +630,7 @@ function _filter_get_file_id($href) {
   $result = 0;
   
   // Check URI for valid file scheme.
-  if(!file_valid_uri($href)){
+  if (!file_valid_uri($href)){
     return $result;
   }
 
