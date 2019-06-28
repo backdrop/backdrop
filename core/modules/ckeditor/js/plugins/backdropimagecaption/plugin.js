@@ -177,7 +177,6 @@ CKEDITOR.plugins.add('backdropimagecaption', {
             element.replaceWith(figure);
             figure.add(element);
             figure.add(caption);
-            figure.attributes['class'] = editor.config.image2_captionedClass;
             retElement = figure;
           }
         }
