@@ -167,11 +167,15 @@ function language_negotiation_configure_url_form($form, &$form_state) {
     '#markup' => t('Modifying this value may break existing URLs. Use with caution in a production environment.'),
   );
 
+  $description[] = t('For the default language, this value may be left blank.');
+  $description[] = t('Using language codes is the most common use case, but any arbitrary text may be used. For example, specifying the full name of the language (<strong><code>deutsch</code></strong>) as the path prefix code for German, results in URLs like <code>https://example.com/<strong>deutsch</strong>/contact</code>.');
+  $description = theme('item_list', array('items' => $description));
+
   $form['prefix'] = array(
     '#type' => 'fieldset',
     '#tree' => TRUE,
     '#title' => t('Path prefix configuration'),
-    '#description' => t('Language codes or other custom text to use as a path prefix for URL language detection. For the default language, this value may be left blank. Example: Specifying <strong><code>deutsch</code></strong> as the path prefix code for German results in URLs like <strong><code>https://example.com/deutsch/contact</code></strong>.'),
+    '#description' => t('Text to use as a path prefix for URL language detection.') . $description,
     '#states' => array(
       'visible' => array(
         ':input[name="language_negotiation_url_part"]' => array(
@@ -186,7 +190,7 @@ function language_negotiation_configure_url_form($form, &$form_state) {
     '#type' => 'fieldset',
     '#tree' => TRUE,
     '#title' => t('Domain configuration'),
-    '#description' => t('The domain names to use for these languages. Leave blank for the default language. Example: Specifying <strong><code>de.example.com</code></strong> as language domain for German will result in an URL like <strong><code>https://de.example.com/contact</code></strong>.'),
+    '#description' => t('The domain names to use for these languages.') . $description,
     '#states' => array(
       'visible' => array(
         ':input[name="language_negotiation_url_part"]' => array(
