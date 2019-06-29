@@ -16,6 +16,21 @@ function file_manage_form($form, &$form_state, File $file) {
   $form_state['file'] = $file;
   $form_state['temporary_upload'] = NULL;
 
+  // Add display of file details to the 'manage file' form.
+  $form['filedetail']['detail'] = array(
+    '#type' => 'item',
+    '#title' => t('File details:'),
+    '#markup' => '',
+  );
+  foreach ($file as $fieldname => $info) {
+    if ($fieldname == 'timestamp') {$info = date('Y-m-d H:i:s',$info);}
+    if ($fieldname == 'filesize') {$info = number_format($info);}
+    $form['filedetail'][$fieldname] = array(
+      '#type' => 'item',
+      '#markup' => '<em>'.$fieldname.'</em> : '.check_plain($info),
+    );
+  }
+
   $form['#attributes']['class'][] = 'file-form';
   if (!empty($file->type)) {
     $form['#attributes']['class'][] = 'file-' . $file->type . '-form';
