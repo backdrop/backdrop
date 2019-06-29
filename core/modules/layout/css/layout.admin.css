@@ -132,6 +132,12 @@
   border-bottom: none;
 }
 
+/* Layout columns */
+.layout-content-form .row > div,
+.layout-content-form .row > main {
+  display: flex;
+}
+
 /* Layout editor. */
 .layout-editor-region {
   width: 100%;
@@ -316,6 +322,9 @@
 }
 .layout-access-list .layout-condition .layout-operations {
   display: inline-block;
+}
+.layout-content-form main {
+  margin-bottom: 0; /* Override Seven's styling. */
 }
 
 @media (min-width: 768px) {
