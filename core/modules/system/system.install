@@ -3046,6 +3046,13 @@ function system_update_1068() {
 }
 
 /**
+ * Removes an unused state value.
+ */
+function system_update_1069() {
+  state_del('backdrop_utf8mb4_tables');
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
