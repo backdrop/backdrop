@@ -181,8 +181,7 @@
                     "title": "",
                     "style": "default",
                     "block_settings": [],
-                    "contexts": [],
-                    "url": "https://api.serundeputy.io/api/views/events_past_api"
+                    "contexts": []
                 },
                 "uuid": "271e8ac3-a2a9-4a0b-8d45-69e68e95938a",
                 "style": {
