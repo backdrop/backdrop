@@ -71,6 +71,11 @@
   background-size: 25px;
 }
 
+/* Messages may contain long URLs, which break the page. Force them to wrap. */
+.simpletest-message {
+  word-break: break-word;
+}
+
 /* Test results */
 .simpletest-pass {
   color: #234600;
