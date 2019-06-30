@@ -125,10 +125,10 @@ function seven_tablesort_indicator($variables) {
   $style = $variables['style'];
   $theme_path = backdrop_get_path('theme', 'seven');
   if ($style == 'asc') {
-    return theme('image', array('path' => $theme_path . '/images/sort-amount-asc--white--64.png', 'alt' => t('sort ascending'), 'width' => 16, 'height' => 16, 'title' => t('sort ascending')));
+    return theme('image', array('path' => $theme_path . '/images/sort-amount-up--white--64.png', 'alt' => t('sort ascending'), 'width' => 16, 'height' => 16, 'title' => t('sort ascending')));
   }
   else {
-    return theme('image', array('path' => $theme_path . '/images/sort-amount-desc--white--64.png', 'alt' => t('sort descending'), 'width' => 16, 'height' => 16, 'title' => t('sort descending')));
+    return theme('image', array('path' => $theme_path . '/images/sort-amount-down--white--64.png', 'alt' => t('sort descending'), 'width' => 16, 'height' => 16, 'title' => t('sort descending')));
   }
 }
 
