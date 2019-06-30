@@ -74,10 +74,12 @@ function simpletest_test_form_submit($form, &$form_state) {
  * Test results form for $test_id.
  */
 function simpletest_result_form($form, &$form_state, $test_id) {
-  // Make sure there are test results to display and a re-run is not being performed.
+  // Make sure there are test results to display, and a re-run is not being
+  // performed.
   $results = array();
+  $empty_message = t('No test results to display.');
   if (is_numeric($test_id) && !$results = simpletest_result_get($test_id)) {
-    backdrop_set_message(t('No test results to display.'), 'error');
+    backdrop_set_message($empty_message, 'error');
     backdrop_goto('admin/config/development/testing');
     return $form;
   }
@@ -105,7 +107,14 @@ function simpletest_result_form($form, &$form_state, $test_id) {
   );
 
   // Cycle through each test group.
-  $header = array(t('Message'), t('Group'), t('Filename'), t('Line'), t('Function'), array('colspan' => 2, 'data' => t('Status')));
+  $header = array(
+    array('data' => t('Status'), 'class' => array('simpletest-status')),
+    array('data' => t('Message'), 'class' => array('simpletest-message')),
+    array('data' => t('Group'), 'class' => array('simpletest-group')),
+    array('data' => t('File name'), 'class' => array('simpletest-filename')),
+    array('data' => t('Line'), 'class' => array('simpletest-line')),
+    array('data' => t('Function'), 'class' => array('simpletest-function')),
+  );
   $form['result']['results'] = array();
   foreach ($results as $group => $assertions) {
     // Create group fieldset with summary information.
@@ -123,12 +132,36 @@ function simpletest_result_form($form, &$form_state, $test_id) {
     $rows = array();
     foreach ($assertions as $assertion) {
       $row = array();
-      $row[] = strtoupper(str_replace('simpletest-', '', $assertion->status)) . ': ' . $assertion->message;
-      $row[] = $assertion->message_group;
-      $row[] = backdrop_basename($assertion->file);
-      $row[] = $assertion->line;
-      $row[] = $assertion->function;
-      $row[] = simpletest_result_status_image($assertion->status);
+      $row[] = array(
+        'data' => '<span hidden aria-hidden="false">' . $assertion->status . '</span>',
+        'class' => array('simpletest-status', 'icon'),
+        'data-label' => t('Status'),
+      );
+      $row[] = array(
+        'data' => strtoupper(str_replace('simpletest-', '', $assertion->status)) . ': ' . $assertion->message,
+        'class' => array('simpletest-message'),
+        'data-label' => t('Message'),
+      );
+      $row[] = array(
+        'data' => $assertion->message_group,
+        'class' => array('simpletest-group'),
+        'data-label' => t('Group'),
+      );
+      $row[] = array(
+        'data' => backdrop_basename($assertion->file),
+        'class' => array('simpletest-filename'),
+        'data-label' => t('File name'),
+      );
+      $row[] = array(
+        'data' => $assertion->line,
+        'class' => array('simpletest-line'),
+        'data-label' => t('Line'),
+      );
+      $row[] = array(
+        'data' => $assertion->function,
+        'class' => array('simpletest-function'),
+        'data-label' => t('Function'),
+      );
 
       $class = 'simpletest-' . $assertion->status;
       if ($assertion->message_group == 'Debug') {
@@ -143,6 +176,11 @@ function simpletest_result_form($form, &$form_state, $test_id) {
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
+      '#empty' => $empty_message,
+      '#attributes' => array(
+        'id' => 'admin-simpletest',
+        'class' => array('admin-simpletest'),
+      ),
     );
 
     // Set summary information.
@@ -257,30 +295,6 @@ function simpletest_result_get($test_id) {
     $test_results[$result->test_class][] = $result;
   }
   return $test_results;
-}
-
-/**
- * Get the appropriate image for the status.
- *
- * @param $status Status string, either: pass, fail, exception.
- * @return HTML image or false.
- */
-function simpletest_result_status_image($status) {
-  // $map does not use backdrop_static() as its value never changes.
-  static $map;
-
-  if (!isset($map)) {
-    $map = array(
-      'pass' => theme('image', array('path' => 'core/misc/watchdog-ok.png', 'width' => 18, 'height' => 18, 'alt' => t('Pass'))),
-      'fail' => theme('image', array('path' => 'core/misc/watchdog-error.png', 'width' => 18, 'height' => 18, 'alt' => t('Fail'))),
-      'exception' => theme('image', array('path' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('Exception'))),
-      'debug' => theme('image', array('path' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('Debug'))),
-    );
-  }
-  if (isset($map[$status])) {
-    return $map[$status];
-  }
-  return FALSE;
 }
 
 /**
