@@ -233,12 +233,9 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
 
     // Assert correct result set.
     $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
-    $this->assertEqual($result_count, 0, 'View has zero results.');
-
-    // This part of the Drupal 7 test does not work for Backdrop because the
-    // view above has zero results.
-    //$nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
-    //$this->assertIdentical($nid, (int) $this->nodes[1]->nid, 'View result has correct node id.');
+    $this->assertEqual($result_count, 1, 'View has one result.');
+    $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
+    $this->assertIdentical($nid, (int) $this->nodes[1]->nid, 'View result has correct node id.');
   }
 
   /**
@@ -283,8 +280,6 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
     $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
     $this->assertEqual($result_count, 1, 'Option 1: View has one result.');
     $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
-    debug($nid);
-    debug($this->nodes[1]->nid);
     $this->assertIdentical($nid, (int) $this->nodes[1]->nid, 'Option 1: View result has correct node id.');
 
     /* Option 2: Is one of 1. */
