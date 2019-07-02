@@ -2071,7 +2071,7 @@ function _filter_url_js_settings($filter, $format) {
  */
 function _filter_url($text, $filter) {
   // Tags to skip and not recurse into.
-  $ignore_tags = 'a|script|style|code|pre';
+  $ignore_tags = 'a|script|style|code|pre|nolink';
 
   // Pass length to regexp callback.
   _filter_url_trim(NULL, $filter->settings['filter_url_length']);
