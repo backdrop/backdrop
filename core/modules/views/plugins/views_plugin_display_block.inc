@@ -20,7 +20,12 @@ class views_plugin_display_block extends views_plugin_display {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['block_description'] = array('default' => '', 'translatable' => TRUE);
+    $description = '';
+    if (isset($this->view) && isset($this->display)) {
+      $description = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+    }
+
+    $options['block_description'] = array('default' => $description, 'translatable' => TRUE);
     $options['block_caching'] = array('default' => BACKDROP_NO_CACHE);
 
     $options['allow'] = array(
@@ -126,7 +131,7 @@ class views_plugin_display_block extends views_plugin_display {
 
     $block_description = strip_tags($this->get_option('block_description'));
     if (empty($block_description)) {
-      $block_description = t('None');
+      $block_description = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
     }
 
     $options['block_description'] = array(
