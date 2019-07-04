@@ -78,7 +78,7 @@ class DashboardNewsBlock extends Block {
     $form['url'] = array(
       '#type' => 'help',
       '#markup' => t(
-        'This block is providing a news feed from BackdropCMS.org and the contents can not be editted. You can remove it from the dashboard if you wish.'
+        'This block provides a news feed from BackdropCMS.org. Its contents can not be edited.'
       ),
     );
 
