@@ -676,10 +676,8 @@ function system_modules($form, $form_state = array()) {
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
-    '#type' => 'link',
+    '#type' => 'submit',
     '#value' => t('Save configuration'),
-    #href => 'admin/modules/uninstall',
-
   );
   $form['#action'] = url('admin/modules/list/confirm');
 
