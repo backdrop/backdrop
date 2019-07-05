@@ -999,15 +999,15 @@ function system_modules_submit($form, &$form_state) {
   }
 
   // Check if a previous search is present and preserve it on redirect.
-  if (!empty($form_state['values']['search']) && sizeof($actions['enable']) != 0)) {
+  if(sizeof($actions['enable']) != 0) {
+    $form_state['redirect'] = 'admin/modules';
+  }
+  elseif (!empty($form_state['values']['search']) && sizeof($actions['enable']) != 0) {
     $parameter = $form_state['values']['search'];
     $form_state['redirect'] = array(
       'admin/modules',
       array('query' => array('search' => $parameter))
     );
-  }
-  elseif(sizeof($actions['enable']) != 0)) {
-    $form_state['redirect'] = 'admin/modules';
   }
   else {
     $form_state['redirect'] = 'admin/modules/uninstall';
