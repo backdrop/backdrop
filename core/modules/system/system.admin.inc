@@ -1006,7 +1006,7 @@ function system_modules_submit($form, &$form_state) {
       array('query' => array('search' => $parameter))
     );
   }
-  elseif(sizeof($actions['enable']) != 0) {
+  elseif(sizeof($actions['enable']) != 0)) {
     $form_state['redirect'] = 'admin/modules';
   }
   else {
