@@ -679,7 +679,7 @@ function system_modules($form, $form_state = array()) {
     '#type' => 'submit',
     '#value' => t('Save configuration'),
   );
-  $form['#action'] = url('admin/modules/uninstall');
+  $form['#action'] = url('admin/modules/list/confirm');
   return $form;
 }
 
@@ -1009,6 +1009,7 @@ function system_modules_submit($form, &$form_state) {
   else {
     $form_state['redirect'] = 'admin/modules';
   }
+  $form_state['redirect'] = 'admin/modules/uninstall';
 }
 
 /**
