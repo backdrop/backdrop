@@ -402,9 +402,9 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     '#title' => t('Row width behavior'),
     '#type' => 'select',
     '#options' => array(
-      'container_fluid' => t('Container fluid'),
-      'container' => t('Container'),
-      'no_container' => t('No container'),
+      'container_fluid' => t("Maximum width for each screen size (adds the 'container-fluid' row class)"),
+      'container' => t("Fixed width for each screen size (adds the 'container' row class)"),
+      'no_container' => t('Always full width of page (no row classes added)'),
     ),
     '#default_value' => isset($row_data['container']) ? $row_data['container'] : 'container_fluid',
   );
