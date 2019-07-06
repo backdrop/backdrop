@@ -175,7 +175,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     // Remember this is editing, not inserting. In the event the image is
     // removed and re-uploaded.
     $form_state['storage']['editing_image'] = TRUE;
-    backdrop_set_title(t('Edit image details'));
+    backdrop_set_title(t('Edit image'));
     $submit_button_label = t('Update');
   }
   else {
