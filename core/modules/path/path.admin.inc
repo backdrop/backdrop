@@ -644,16 +644,10 @@ function path_bulk_update_form($form, &$form_state) {
       if (isset($path_info['pattern items'])) {
         foreach ($path_info['pattern items'] as $item => $item_label) {
           $human_name = $item;
-<<<<<<< HEAD
           if ($type == 'taxonomy_term') {
             //For vocabularies, use their human name in the checkbox label instead of their 
             //machine name.
             $human_name = $path_info[$item . '-human'];
-=======
-          // Use the human name in the row title for vocabularies, not the machine name they are keyed by.
-          if ($type == 'taxonomy_term') {
-            $human_name = substr(strip_tags($item_label), 26, -5);
->>>>>>> cef03a45637f8217ed72f291496ec095fd3d6747
           }
           $form['update'][$type][$item] = array(
             '#type' => 'checkbox',
