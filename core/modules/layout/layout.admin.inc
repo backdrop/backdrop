@@ -2654,33 +2654,6 @@ function layout_ajax_form_update($form, $form_state) {
  * Administrative form for layout settings.
  */
 function layout_settings_page($form, &$form_state) {
-  // Build the 'Operations' form.
-  $form['operations'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Operations'),
-    '#prefix' => '<div class="container-inline">',
-    '#suffix' => '</div>',
-    '#attributes' => array(
-      'class' => array('layout-operations')
-    ),
-  );
-
-    $options['enable'] = t('Enable the selected templates');
-    $options['disable'] = t('Disable the selected templates');
-
-  $form['operations']['operation'] = array(
-    '#type' => 'select',
-    '#title' => t('Operations'),
-    '#title_display' => 'invisible',
-    '#options' => $options,
-    '#empty_option' => '- ' . t('Choose an action') . ' -',
-  );
-  $form['operations']['submit'] = array(
-    '#type' => 'submit',
-    '#validate' => array('layout_settings_page_validate'),
-    '#value' => t('Execute'),
-  );
-
   $header = array(
     'layout_template_info' => array('data' => t('Template'), 'class' => array(RESPONSIVE_PRIORITY_HIGH)),
     'type' => array('data' => t('Type'), 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
@@ -2698,13 +2671,13 @@ function layout_settings_page($form, &$form_state) {
 
   foreach ($all_template_info as $template_name => $template_info) {
     // Build the default values list.
+    $is_default = FALSE;
     if (!in_array($template_name, $excluded)) {
-      $default[$template_name] = $is_default = TRUE;
+      $is_default = $default[$template_name] = TRUE;
     }
 
     // Build the list of possible options, either enabled or not hidden.
     if ($is_default || !$template_info['hidden']) {
-      $icon_path = $template_info['path'] . '/' . $template_info['preview'];
       $rows[$template_name] = array(
         'layout_template_info' => theme('layout_template_info', array('template_info' => $template_info)),
         'type' => !empty($template_info['flexible']) ? t('Flexible') : t('Standard'),
