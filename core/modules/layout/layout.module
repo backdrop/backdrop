@@ -593,6 +593,9 @@ function layout_theme() {
     'layout_template_option' => array(
       'variables' => array('template_info' => NULL),
     ) + $base,
+    'layout_template_info' => array(
+      'variables' => array('template_info' => NULL),
+    ) + $base,
     'layout_flexible_template_style_option' => array(
       'variables' => array('row_style' => NULL),
     ) + $base,

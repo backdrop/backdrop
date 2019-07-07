@@ -2682,16 +2682,8 @@ function layout_settings_page($form, &$form_state) {
   );
 
   $header = array(
-    array('data' => t('Enabled'), 'class' => array('layout-title')),
-    array('data' => t('Icon'), 'class' => array('layout-title')),
-    array('data' => t('Name'), 'class' => array('layout-conditions', 'priority-low')),
-    array('data' => t('Type'), 'class' => array('layout-status', 'priority-low')),
-    array('data' => t('Operations'), 'class' => array('layout-operations')),
-  );
-
-  $header = array(
-    'icon' => array('data' => t('Icon'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
-    'name' => array('data' => t('Name'), 'class' => array(RESPONSIVE_PRIORITY_HIGH)),
+    'layout_template_info' => array('data' => t('Template'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
+    //'name' => array('data' => t('Name'), 'class' => array(RESPONSIVE_PRIORITY_HIGH)),
     'type' => array('data' => t('Type'), 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
     'operations' => t('Operations'),
   );
@@ -2705,6 +2697,7 @@ function layout_settings_page($form, &$form_state) {
   $form_state['hidden_templates'] = array();
   $all_template_info = layout_get_layout_template_info(NULL, TRUE);
 
+dpm($all_template_info);
   foreach ($all_template_info as $template_name => $template_info) {
     // Build the default values list.
     if (!in_array($template_name, $excluded)) {
@@ -2716,11 +2709,7 @@ function layout_settings_page($form, &$form_state) {
     if ($is_default || !$template_info['hidden']) {
       $icon_path = $template_info['path'] . '/' . $template_info['preview'];
       $rows[$template_name] = array(
-        'icon' => theme('image', array(
-          'uri' => $icon_path,
-          'attributes' => array('title' => $template_info['title']),
-        )),
-        'name' => $template_info['title'],
+        'layout_template_info' => theme('layout_template_info', array('template_info' => $template_info)),
         'type' => !empty($template_info['flexible']) ? t('Flexible') : t('Standard'),
       );
       $rows[$template_name]['operations']['data'] = array(
@@ -2734,12 +2723,13 @@ function layout_settings_page($form, &$form_state) {
     }
   }
 
-
+  $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
   $form['table'] = array(
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $rows,
     '#empty' => t('There are no blocks.'),
+    '#attributes' => array('class' =>   array('layout-list')),
   );
 
   return $form;

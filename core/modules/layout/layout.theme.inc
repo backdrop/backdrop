@@ -117,6 +117,27 @@ function theme_layout_template_option($variables) {
 /**
  * Outputs an individual option label for selecting a layout.
  */
+function theme_layout_template_info($variables) {
+  $template_info = $variables['template_info'];
+
+  // Build template thumbnail preview
+  $preview_path = $template_info['path'] . '/' . $template_info['preview'];
+  $preview_img = theme('image', array('path' => $preview_path));
+
+  $output = '';
+  $output .= '<div class="layout-info">';
+  $output .= $preview_img;
+  $output .= '<div class="layout-detail">';
+  $output .= '  <div class="layout-title">' . check_plain($template_info['title']) . '</div>';
+  $output .= '  <div class="layout-template description">' . t('<span class="priority-low">Machine name: </span>!title', array('!title' => $template_info['name'])) . '</div>';
+  $output .= '</div></div>';
+
+  return $output;
+}
+
+/**
+ * Outputs an individual option label for selecting a layout.
+ */
 function theme_layout_flexible_template_style_option($variables) {
   $row_style = $variables['row_style'];
   if ($row_style['region_count'] == 1) {
