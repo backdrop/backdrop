@@ -227,8 +227,6 @@ function layout_flexible_template_configure_form_submit($form, &$form_state) {
  * @ingroup forms
  */
 function layout_flexible_template_region_style_select($form, &$form_state, $flexible_template_id, $original_row) {
-  dpm($flexible_template_id, 'fti');
-  dpm($original_row, 'or');
   $new_row = $original_row == 'add';
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   $form_state['flexible_template_id'] = $flexible_template_id;
