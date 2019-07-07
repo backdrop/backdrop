@@ -227,6 +227,9 @@ function layout_flexible_template_configure_form_submit($form, &$form_state) {
  * @ingroup forms
  */
 function layout_flexible_template_region_style_select($form, &$form_state, $flexible_template_id, $original_row) {
+  dpm($flexible_template_id, 'fti');
+  dpm($original_row, 'or');
+  $new_row = $original_row == 'add';
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   $form_state['flexible_template_id'] = $flexible_template_id;
   $form_state['original_row'] = $original_row;
@@ -293,11 +296,12 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
     ),
   );
 
+  $submit_button_value = $new_row ? t('Continue') : t('Save region widths');
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#name' => 'submit',
-    '#value' => t('Continue'),
+    '#value' => $submit_button_value,
     '#attributes' => array('class' => array('layout-title-button')),
     '#submit' => array(
       'layout_flexible_template_edit_row_submit',
@@ -306,8 +310,39 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
       'callback' => 'layout_ajax_form_open_dialog',
     ),
   );
+  $form['actions']['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#validate' => array(),
+    '#submit' => array(
+      'layout_flexible_template_cancel_dialog',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_flexible_template_cancel_dialog',
+    ),
+  );
 
   return $form;
+}
+
+/**
+ * Submit handler for the cancel button on layout_condition_add_form().
+ */
+function layout_flexible_template_cancel_dialog($form, &$form_state) {
+  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/configure';
+}
+
+/**
+ * AJAX handler that cancels the condition edit dialog.
+ */
+function layout_ajax_flexible_template_cancel_dialog($form, $form_state) {
+  $commands = array();
+  $commands[] = ajax_command_close_modal_dialog();
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
 }
 
 /**
@@ -440,6 +475,17 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     ),
     '#ajax' => array(
       'callback' => 'layout_flexible_template_edit_row_ajax',
+    ),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#validate' => array(),
+    '#submit' => array(
+      'layout_flexible_template_cancel_dialog',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_flexible_template_cancel_dialog',
     ),
   );
 
