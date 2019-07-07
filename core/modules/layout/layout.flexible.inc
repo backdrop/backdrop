@@ -410,7 +410,33 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     );
   }
 
-  $form['row_classes'] = array(
+  $form['region_names'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Regions'),
+    '#collapsed' => $original_row != 'add',
+    '#collapsible' => TRUE,
+    '#tree' => TRUE,
+  );
+
+  $form_state['last_region_number'] = layout_flexible_template_get_last_region_number($form_state['template_data']);
+  for ($i = 0; $i < $region_count; $i++) {
+    $form['region_names']['region_name_' . $i] = array(
+      '#type' => 'textfield',
+      '#title' => t('Region') . ' ' . ($i + 1) . ' ' . t('name'),
+      '#default_value' => !empty($row_data['region_names']['region_name_' . $i]) ? $row_data['region_names']['region_name_' . $i] : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
+    );
+  }
+
+  $form['region_styles'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Style'),
+    '#collapsed' => $original_row != 'add',
+    '#collapsible' => TRUE,
+    '#tree' => TRUE,
+  );
+
+
+  $form['region_styles']['row_classes'] = array(
     '#title' => t('Additional row classes'),
     '#type' => 'textfield',
     '#default_value' => isset($row_data['classes']) ? $row_data['classes'] : '',
@@ -424,40 +450,23 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     'footer' => 'FOOTER',
     'main' => 'MAIN',
   );
-  $form['element'] = array(
+  $form['region_styles']['element'] = array(
     '#title' => t('Row wrapper tag'),
     '#type' => 'select',
     '#options' => $options,
     '#default_value' => isset($row_data['element']) ? $row_data['element'] : '',
   );
 
-  $form['container'] = array(
+  $form['region_styles']['container'] = array(
     '#title' => t('Row width behavior'),
     '#type' => 'select',
     '#options' => array(
-      'container_fluid' => t("Maximum width for each screen size (adds the 'container-fluid' row class)"),
-      'container' => t("Fixed width for each screen size (adds the 'container' row class)"),
+      'container_fluid' => t("Maximum width (adds the 'container-fluid' row class)"),
+      'container' => t("Fixed width (adds the 'container' row class)"),
       'no_container' => t('Always full width of page (no row classes added)'),
     ),
     '#default_value' => isset($row_data['container']) ? $row_data['container'] : 'container_fluid',
   );
-
-  $form['region_names'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Region titles'),
-    '#collapsed' => FALSE,
-    '#collapsible' => FALSE,
-    '#tree' => TRUE,
-  );
-
-  $form_state['last_region_number'] = layout_flexible_template_get_last_region_number($form_state['template_data']);
-  for ($i = 0; $i < $region_count; $i++) {
-    $form['region_names']['region_name_' . $i] = array(
-      '#type' => 'textfield',
-      '#title' => t('Region') . ' ' . ($i + 1) . ' ' . t('name'),
-      '#default_value' => !empty($row_data['region_names']['region_name_' . $i]) ? $row_data['region_names']['region_name_' . $i] : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
-    );
-  }
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
