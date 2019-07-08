@@ -2698,7 +2698,7 @@ function layout_settings_page($form, &$form_state) {
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $rows,
-    '#empty' => t('There are no blocks.'),
+    '#empty' => t('There are no layout templates.'),
     '#default_value' => $default,
     '#attributes' => array('class' =>   array('layout-list')),
   );
