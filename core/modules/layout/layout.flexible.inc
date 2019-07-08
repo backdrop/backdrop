@@ -69,6 +69,49 @@ function layout_flexible_template_settings_form_cancel($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings';
 }
 
+/**
+ * Menu callback; Enable or disable a layout template.
+ */
+function layout_flexible_template_change_enabled_status($template, $status) {
+  if (backdrop_get_token('layout-template-' . $template) !== $_GET['token']) {
+    return MENU_ACCESS_DENIED;
+  }
+
+  $config = config('layout.settings');
+  $data = $config->get();
+  $errors = FALSE;
+  
+  if ($status == 'disable') {
+    if (!in_array($template, $data['excluded_templates'])) {
+      $data['excluded_templates'][] = $template;
+    }
+    // Check which layout templates are in use.
+    foreach (layout_load_all() as $layout) {
+      $info = layout_get_layout_template_info($layout->layout_template);
+      if (in_array($layout->layout_template, $data['excluded_templates'])) {
+        $errors = TRUE;
+        break;
+      }
+    }
+    if ($errors) {
+      backdrop_set_message(t('The "@layout" layout template is currently in use and may not be excluded.', array('@layout' => $info['title'])), 'error');
+    }
+    else {
+      backdrop_set_message(t('Layout template "@title" disabled.', array('@title' => $template)));
+    }
+  }
+  else {
+    $data['excluded_templates'] = array_diff($data['excluded_templates'], array($template));
+    backdrop_set_message(t('Layout "@title" enabled.', array('@title' => $template)));
+  }
+
+  if (!$errors) {
+    $config->setData($data);
+    $config->save();
+  }
+
+  backdrop_goto('admin/structure/layouts/settings');
+}
 
 function layout_flexible_template_settings_form_submit($form, &$form_state) {
   $template_data = $form_state['template_data'];

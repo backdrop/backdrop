@@ -2769,13 +2769,15 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
   if ($is_default) {
     $links['disable'] = array(
       'title' => t('Disable'),
-      'href' => 'admin/structure/layouts/',
+      'href' => 'admin/structure/layouts/settings/flexible-template-enable/' . $template_info['name'] . '/disable',
+      'query' => array('token' => backdrop_get_token('layout-template-' . $template_info['name'])),
     );
   }
   else {
     $links['enable'] = array(
       'title' => t('Enable'),
-      'href' => 'admin/structure/layouts/',
+      'href' => 'admin/structure/layouts/settings/flexible-template-enable/' . $template_info['name'] . '/enable',
+      'query' => array('token' => backdrop_get_token('layout-template-' . $template_info['name'])),
     );
   }
 
