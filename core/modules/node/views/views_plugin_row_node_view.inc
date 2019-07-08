@@ -59,7 +59,7 @@ class views_plugin_row_node_view extends views_plugin_row {
     );
     $form['links'] = array(
       '#type' => 'checkbox',
-      '#title' => t("Display links (e.g. 'Read more')"),
+      '#title' => t("Display links (e.g. 'Read more', 'Add comment', etc.)"),
       '#default_value' => $this->options['links'],
     );
     $form['comments'] = array(
