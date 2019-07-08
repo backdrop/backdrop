@@ -76,7 +76,7 @@ class BlockText extends Block {
       $form['convert']['reusable'] = array(
         '#type' => 'checkbox',
         '#title' => t('Make this block reusable'),
-        '#description' => t('If enabled, this block will be made reusable across different layouts and will be listed in the !link page. This option may not be unchecked once enabled.', array('!link' => l(t('Custom blocks'), 'admin/structure/block'))),
+        '#description' => t('If enabled, this block will be made reusable across different layouts, and will be listed in the !link page. This option may not be unchecked once enabled.', array('!link' => l(t('Custom blocks'), 'admin/structure/block'))),
         '#weight' => 1,
       );
       // Add a notice for translation.
@@ -111,7 +111,7 @@ class BlockText extends Block {
           'source' => array('convert', 'label'),
           'exists' => 'block_custom_block_load',
         ),
-        '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
+        '#description' => t('A unique machine-readable name, containing letters, numbers, and underscores.'),
         '#attributes' => array('class' => array('reusable-block-machine-name')),
         '#weight' => 3,
         // Workaround in order to make the field render as required, with a red
