@@ -88,6 +88,7 @@ class BlockText extends Block {
         '#title' => t('Admin label'),
         '#maxlength' => 64,
         '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
+        '#attributes' => array('class' => array('reusable-block-admin-label')),
         '#weight' => 2,
         '#states' => array(
           'visible' => array(
@@ -102,18 +103,6 @@ class BlockText extends Block {
           ),
         ),
       );
-      $form['convert']['description'] = array(
-       '#type' => 'textfield',
-       '#title' => t('Admin description'),
-       '#maxlength' => 128,
-       '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
-       '#weight' => 4,
-        '#states' => array(
-          'visible' => array(
-            ':input[name="reusable"]' => array('checked' => TRUE),
-          ),
-        ),
-      );
       $form['convert']['delta'] = array(
         '#type' => 'machine_name',
         '#title' => t('Machine name'),
@@ -123,6 +112,7 @@ class BlockText extends Block {
           'exists' => 'block_custom_block_load',
         ),
         '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
+        '#attributes' => array('class' => array('reusable-block-machine-name')),
         '#weight' => 3,
         // Workaround in order to make the field render as required, with a red
         // asterisk (when one clicks the "edit" link). Actual form validation
@@ -137,6 +127,19 @@ class BlockText extends Block {
         // errors when the 'Make this block reusable' checkbox is not checked.
         // Also see https://github.com/backdrop/backdrop-issues/issues/2732
         '#required' => FALSE,
+      );
+      $form['convert']['description'] = array(
+       '#type' => 'textfield',
+       '#title' => t('Admin description'),
+       '#maxlength' => 128,
+       '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
+       '#attributes' => array('class' => array('reusable-block-admin-description')),
+       '#weight' => 4,
+        '#states' => array(
+          'visible' => array(
+            ':input[name="reusable"]' => array('checked' => TRUE),
+          ),
+        ),
       );
     }
   }
