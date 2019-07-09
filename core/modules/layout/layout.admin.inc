@@ -178,7 +178,7 @@ function _layout_get_group_operations($path, array $group) {
   }
   if (count($group) > 1) {
     $links['reorder'] = array(
-      'title' => t('Reorder'),
+      'title' => t('Layout priority'),
       'href' => 'admin/structure/layouts/reorder',
       'query' => array('layouts' => array_keys($group)),
     );
@@ -1930,8 +1930,27 @@ function layout_reorder_form($form, &$form_state) {
 
   // Sanity check.
   if (empty($layouts)) {
-    backdrop_set_message(t('No layouts specified to reorder.'));
+    backdrop_set_message(t('No layouts specified to reorder.'), 'warning');
     return $form;
+  }
+  elseif (count($layouts) == 1) {
+    backdrop_set_message(t('Only a single layout specified, so nothing to reorder.'), 'warning');
+    return $form;
+  }
+  else {
+    foreach ($layouts as $layout) {
+      $layout_paths[] = $layout->getPath();
+    }
+    // All layouts listed in this form should have the same path.
+    $unique_paths = array_unique($layout_paths);
+    if (count($unique_paths) == 1) {
+      $layout_path = $unique_paths[0];
+      backdrop_set_title(t('Configure layout priority for the !layout_path path', array('!layout_path' => $layout_path)));
+    }
+    else {
+      backdrop_set_message(t('Layouts with non-matching paths specified.'), 'error');
+      return $form;
+    }
   }
 
   $form['help'] = array(
