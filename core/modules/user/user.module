@@ -742,16 +742,45 @@ function user_account_form(&$form, &$form_state) {
   // Display password field only for existing users or when user is allowed to
   // assign a password during registration.
   if (!$register) {
+    // The value of this checkbox is not to be saved, as it merely serves as a
+    // toggle for the visibility of the password fields.
+    $form['account']['change_password'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Change current password'),
+    );
     $form['account']['pass'] = array(
       '#title' => t('New password'),
       '#type' => 'password',
-      '#description' => t('Current password must be entered to set a new password.'),
+      '#description' => t('Use this field to change your current password to a new one.'),
       '#password_toggle' => TRUE,
       '#password_strength' => TRUE,
+      '#states' => array(
+        'visible' => array(
+          array(
+            // Only show the new password field if the option to change the
+            // current password has been selected.
+            ':input[name="change_password"]' => array('checked' => TRUE),
+          ),
+        ),
+        // This currently does not work. Its use is merely "cosmetic", as it
+        // adds the red asterisk which visually denotes a required field, but it
+        // does not do anything else validation-wise. So this field still needs
+        // a custom validation in user_account_form_validate(). See:
+        // https://www.drupal.org/project/drupal/issues/2855139
+        // https://www.drupal.org/node/2405271
+        // https://www.drupal.org/project/conditional_fields/issues/1561272
+        'required' => array(
+          array(
+            // Add a red "required" asterisk if the option to change the current
+            // password has been selected.
+            ':input[name="change_password"]' => array('checked' => TRUE),
+          ),
+        ),
+      ),
     );
     // To skip the current password field, the user must have logged in via a
-    // one-time link and have the token in the URL. Store this in $form_state
-    // so it persists even on subsequent Ajax requests.
+    // one-time link and have the token in the URL. Store this in $form_state so
+    // it persists even on subsequent Ajax requests.
     if (!isset($form_state['user_pass_reset'])) {
       $form_state['user_pass_reset'] = isset($_SESSION['pass_reset_' . $account->uid]) && isset($_GET['pass-reset-token']) && ($_GET['pass-reset-token'] == $_SESSION['pass_reset_' . $account->uid]);
     }
@@ -762,8 +791,7 @@ function user_account_form(&$form, &$form_state) {
     if (!$form_state['user_pass_reset']) {
       $protected_values['mail'] = $form['account']['mail']['#title'];
       $protected_values['pass'] = t('Password');
-      $request_new = l(t('Reset password'), 'user/password', array('attributes' => array('title' => t('Reset password via one-time login link.'))));
-      $current_pass_description = t('Required if you want to change the %mail or %pass below. !request_new.', array('%mail' => $protected_values['mail'], '%pass' => $protected_values['pass'], '!request_new' => $request_new));
+      $current_pass_description = t('Required if you want to change the e-mail address or specify a new password.<br>If you have forgotten your current password, you can <a href="!password_reset">reset it via email</a>.', array('!password_reset' => url('user/password')));
     }
     // The user must enter their current password to change to a new one.
     if ($user->uid == $account->uid) {
@@ -776,12 +804,43 @@ function user_account_form(&$form, &$form_state) {
         '#title' => t('Current password'),
         '#access' => !empty($protected_values),
         '#description' => $current_pass_description,
-        '#weight' => -5,
+        '#weight' => 5,
         '#password_toggle' => TRUE,
-        // Do not let web browsers remember this password, since we are
-        // trying to confirm that the person submitting the form actually
-        // knows the current one.
+        // Do not let web browsers remember this password, since we are trying
+        // to confirm that the person submitting the form actually knows the
+        // current one.
         '#attributes' => array('autocomplete' => 'off'),
+        '#states' => array(
+          'visible' => array(
+            array(
+              // Only show the current password field if the account email
+              // has been edited...
+              ':input[name="mail"]' => array('!value' => $account->mail),
+            ),
+            array(
+              // ...or if the option to change the password has been selected.
+              ':input[name="change_password"]' => array('checked' => TRUE),
+            ),
+          ),
+          // This currently does not work. Its use is merely "cosmetic", as it
+          // adds the red asterisk which visually denotes a required field, but
+          // it does not do anything else validation-wise. So
+          // user_validate_current_pass() is still required. See:
+          // https://www.drupal.org/project/drupal/issues/2855139
+          // https://www.drupal.org/node/2405271
+          // https://www.drupal.org/project/conditional_fields/issues/1561272
+          'required' => array(
+            array(
+              // Add a red "required" asterisk only if the account email has
+              // been changed...
+              ':input[name="mail"]' => array('!value' => $account->mail),
+            ),
+            array(
+              // or if the option to change the password has been selected.
+              ':input[name="change_password"]' => array('checked' => TRUE),
+            ),
+          ),
+        ),
       );
       $form['#validate'][] = 'user_validate_current_pass';
     }
@@ -809,6 +868,7 @@ function user_account_form(&$form, &$form_state) {
     '#default_value' => $status,
     '#options' => array(t('Blocked'), t('Active')),
     '#access' => $admin,
+    '#weight' => 10,
   );
 
   $roles = array_map('check_plain', user_roles(TRUE));
@@ -818,6 +878,7 @@ function user_account_form(&$form, &$form_state) {
     '#default_value' => (!$register && isset($account->roles) ? $account->roles : array()),
     '#options' => $roles,
     '#access' => $roles && user_access('assign roles'),
+    '#weight' => 15,
   );
   $form['account']['roles'][BACKDROP_AUTHENTICATED_ROLE] = array(
     '#disabled' => TRUE,
@@ -907,6 +968,12 @@ function user_validate_current_pass(&$form, &$form_state) {
 function user_account_form_validate($form, &$form_state) {
   $account = $form['#user'];
   $mail = $form_state['values']['mail'];
+
+  // If the option to change the password has been selected, the new password
+  // field should not be empty.
+  if (empty($form_state['values']['pass']) && $form_state['values']['change_password']) {
+    form_set_error('pass', t('The "New password" field cannot be left empty.'));
+  }
 
   // Validate new or changing username.
   if (isset($form_state['values']['name'])) {
