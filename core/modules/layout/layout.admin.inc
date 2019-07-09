@@ -965,19 +965,11 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
       $children = $parent_block->getChildren();
       if (is_array($children)) {
         foreach ($children as $child_id => $child_info) {
-          // Skip blocks that don't have context requirements met.
-          $required_contexts = isset($child_info['required contexts']) ? $child_info['required contexts'] : array();
-          if ($layout->hasContexts($required_contexts)) {
-            $block_list[$module . ':' . $delta . ':' . $child_id] = $child_info;
-          }
+          $block_list[$module . ':' . $delta . ':' . $child_id] = $child_info;
         }
       }
       else {
-        $required_contexts = isset($block_info['required contexts']) ? $block_info['required contexts'] : array();
-        // Skip blocks that don't have context requirements met.
-        if ($layout->hasContexts($required_contexts)) {
-          $block_list[$module . ':' . $delta] = $block_info;
-        }
+        $block_list[$module . ':' . $delta] = $block_info;
       }
     }
   }
@@ -1009,9 +1001,9 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
   );
 
   foreach ($block_list as $key => $block_info) {
-    $output['block_list']['block_list_inner'][$key] = array(
-      '#type' => 'item',
-      '#markup' => l(
+    $required_contexts = isset($block_info['required contexts']) ? $block_info['required contexts'] : array();
+    if ($layout->hasContexts($required_contexts)) {
+      $link = l(
         $block_info['info'],
         'admin/structure/layouts/manage/' . $layout->name . '/add-block/' . $renderer_name . '/' . $region_name . '/' . $key,
         array(
@@ -1021,8 +1013,48 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
             'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
           )
         )
-      ),
-      '#description' => isset($block_info['description']) ? $block_info['description'] : NULL,
+      );
+      $description = isset($block_info['description']) ? $block_info['description'] : NULL;
+    }
+    else {
+      // Remove the main page content block since it's special.
+      if ($block_info['info'] == 'Main page content') {
+        continue;
+      }
+
+      $link = $block_info['info'];
+      $description = isset($block_info['description']) ? $block_info['description'] . ' ': '';
+
+      if (count($required_contexts) == 1) {
+        $required_context = reset($required_contexts);
+        switch($required_context) {
+          case 'node':
+            $requirements_info = t('<strong>Requires:</strong> A layout with a <em>node</em> context available, for example: on the path node/%.');
+            break;
+          case 'term':
+            $requirements_info = t('<strong>Requires:</strong> A layout with a <em>user</em> context available, for example: on the path user/%.');
+            break;
+          case 'term':
+            $requirements_info = t('<strong>Requires:</strong> A layout with a <em>term</em> context available, for example: on the path taxonomy/term/%.');
+            break;
+            // Unknown path, not safe to use as an example.
+          default:
+            $requirements_info = t('<strong>Requires:</strong> A layout with a <em>!context</em> context available.', array('!context' => $required_context));;
+            break;
+        }
+      }
+      else {
+        // Multiple contexts required.
+        $context_string = implode(', ', array_keys($block_info['required contexts']));
+        $requirements_info = t('<strong>Requires:</strong> A layout with the contexts: !contexts available', array('!contexts' => $context_string));;
+      }
+      $description .= '<div class="requirement">' . $requirements_info . '</div>';
+    }
+
+    $output['block_list']['block_list_inner'][$key] = array(
+      '#type' => 'item',
+      '#markup' => $link,
+      '#description' => $description,
       '#wrapper_attributes' => array('class' => array('layout-block-add-row'))
     );
   }
