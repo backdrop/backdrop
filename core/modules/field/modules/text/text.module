@@ -72,10 +72,10 @@ function text_field_settings_form($field, $instance, $has_data) {
 /**
  * Implements hook_field_instance_settings_form().
  */
-function text_field_instance_settings_form($field, $instance) {
+function text_field_instance_settings_form($field, $instance, $form, &$form_state) {
   $settings = $instance['settings'];
 
-  $form['text_processing'] = array(
+  $element['text_processing'] = array(
     '#type' => 'radios',
     '#title' => t('Text processing'),
     '#default_value' => $settings['text_processing'],
@@ -85,7 +85,7 @@ function text_field_instance_settings_form($field, $instance) {
     ),
   );
   if ($field['type'] == 'text_with_summary') {
-    $form['display_summary'] = array(
+    $element['display_summary'] = array(
       '#type' => 'checkbox',
       '#title' => t('Summary input'),
       '#default_value' => $settings['display_summary'],
@@ -93,7 +93,7 @@ function text_field_instance_settings_form($field, $instance) {
     );
   }
 
-  return $form;
+  return $element;
 }
 
 /**
@@ -452,12 +452,12 @@ function text_field_widget_info() {
 /**
  * Implements hook_field_widget_settings_form().
  */
-function text_field_widget_settings_form($field, $instance) {
+function text_field_widget_settings_form($field, $instance, $form, &$form_state) {
   $widget = $instance['widget'];
   $settings = $widget['settings'];
 
   if ($widget['type'] == 'text_textfield') {
-    $form['size'] = array(
+    $element['size'] = array(
       '#type' => 'number',
       '#title' => t('Size of textfield'),
       '#default_value' => $settings['size'],
@@ -466,7 +466,7 @@ function text_field_widget_settings_form($field, $instance) {
     );
   }
   else {
-    $form['rows'] = array(
+    $element['rows'] = array(
       '#type' => 'number',
       '#title' => t('Rows'),
       '#description' => t('The number of visible lines in the text area.'),
@@ -476,7 +476,7 @@ function text_field_widget_settings_form($field, $instance) {
     );
   }
 
-  return $form;
+  return $element;
 }
 
 /**

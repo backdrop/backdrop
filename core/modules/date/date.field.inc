@@ -538,23 +538,23 @@ function date_field_update($entity_type, $entity, $field, $instance, $langcode, 
  * Wrapper functions for date administration, included only when processing
  * field settings.
  */
-function date_field_instance_settings_form($field, $instance) {
+function date_field_instance_settings_form($field, $instance, $form, &$form_state) {
   module_load_include('inc', 'date', 'date.admin');
-  return _date_field_instance_settings_form($field, $instance);
+  return _date_field_instance_settings_form($field, $instance, $form, $form_state);
 }
 
 /**
  * Implements hook_field_widget_settings_form().
  */
-function date_field_widget_settings_form($field, $instance) {
+function date_field_widget_settings_form($field, $instance, $form, &$form_state) {
   module_load_include('inc', 'date', 'date.admin');
-  return _date_field_widget_settings_form($field, $instance);
+  return _date_field_widget_settings_form($field, $instance, $form, $form_state);
 }
 
 /**
  * Implements hook_field_settings_form().
  */
-function date_field_settings_form($field, $instance, $has_data) {
+function date_field_settings_form($field, $instance, $has_data, $form, &$form_state) {
   module_load_include('inc', 'date', 'date.admin');
-  return _date_field_settings_form($field, $instance, $has_data);
+  return _date_field_settings_form($field, $instance, $has_data, $form, $form_state);
 }

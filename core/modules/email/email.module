@@ -113,11 +113,11 @@ function email_field_widget_info() {
 /**
  * Implements hook_field_widget_settings_form().
  */
-function email_field_widget_settings_form($field, $instance) {
+function email_field_widget_settings_form($field, $instance, $form, &$form_state) {
   $widget = $instance['widget'];
   $settings = $widget['settings'];
 
-  $form['size'] = array(
+  $element['size'] = array(
     '#type' => 'number',
     '#title' => t('Size of textfield'),
     '#default_value' => $settings['size'],
@@ -125,7 +125,7 @@ function email_field_widget_settings_form($field, $instance) {
     '#min' => 1,
   );
 
-  return $form;
+  return $element;
 }
 
 /**

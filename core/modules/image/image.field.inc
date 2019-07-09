@@ -79,17 +79,17 @@ function image_field_settings_form($field, $instance) {
 /**
  * Implements hook_field_instance_settings_form().
  */
-function image_field_instance_settings_form($field, $instance) {
+function image_field_instance_settings_form($field, $instance, $form, &$form_state) {
   $settings = $instance['settings'];
 
   // Use the file field instance settings form as a basis.
-  $form = file_field_instance_settings_form($field, $instance);
+  $element = file_field_instance_settings_form($field, $instance, $form, $form_state);
 
   // Add maximum and minimum resolution settings.
   $max_dimensions = explode('x', $settings['max_dimensions']) + array('', '');
   $max_dimensions[0] = empty($max_dimensions[0]) ? NULL : $max_dimensions[0];
   $max_dimensions[1] = empty($max_dimensions[1]) ? NULL : $max_dimensions[1];
-  $form['max_dimensions'] = array(
+  $element['max_dimensions'] = array(
     '#type' => 'item',
     '#title' => t('Maximum image dimensions'),
     '#element_validate' => array('_image_field_resolution_validate'),
@@ -98,7 +98,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#field_suffix' => '</div>',
     '#description' => t('The maximum allowed image dimensions expressed as WIDTHxHEIGHT. Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
   );
-  $form['max_dimensions']['x'] = array(
+  $element['max_dimensions']['x'] = array(
     '#type' => 'number',
     '#title' => t('Maximum width'),
     '#title_display' => 'invisible',
@@ -107,7 +107,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#max' => 100000,
     '#field_suffix' => ' x ',
   );
-  $form['max_dimensions']['y'] = array(
+  $element['max_dimensions']['y'] = array(
     '#type' => 'number',
     '#title' => t('Maximum height'),
     '#title_display' => 'invisible',
@@ -120,7 +120,7 @@ function image_field_instance_settings_form($field, $instance) {
   $min_dimensions = explode('x', $settings['min_dimensions']) + array('', '');
   $min_dimensions[0] = empty($min_dimensions[0]) ? NULL : $min_dimensions[0];
   $min_dimensions[1] = empty($min_dimensions[1]) ? NULL : $min_dimensions[1];
-  $form['min_dimensions'] = array(
+  $element['min_dimensions'] = array(
     '#type' => 'item',
     '#title' => t('Minimum image dimensions'),
     '#element_validate' => array('_image_field_resolution_validate'),
@@ -129,7 +129,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#field_suffix' => '</div>',
     '#description' => t('The minimum allowed image dimensions expressed as WIDTHxHEIGHT. Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
   );
-  $form['min_dimensions']['x'] = array(
+  $element['min_dimensions']['x'] = array(
     '#type' => 'number',
     '#title' => t('Minimum width'),
     '#title_display' => 'invisible',
@@ -138,7 +138,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#max' => 100000,
     '#field_suffix' => ' x ',
   );
-  $form['min_dimensions']['y'] = array(
+  $element['min_dimensions']['y'] = array(
     '#type' => 'number',
     '#title' => t('Minimum height'),
     '#title_display' => 'invisible',
@@ -149,24 +149,24 @@ function image_field_instance_settings_form($field, $instance) {
   );
 
   // Remove the description option.
-  unset($form['description_field']);
+  unset($element['description_field']);
 
   // Add title and alt configuration options.
-  $form['alt_field'] = array(
+  $element['alt_field'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable <em>Alt</em> field'),
     '#default_value' => $settings['alt_field'],
     '#description' => t('The alt attribute may be used by search engines, screen readers, and when the image cannot be loaded.'),
     '#weight' => 10,
   );
-  $form['title_field'] = array(
+  $element['title_field'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable <em>Title</em> field'),
     '#default_value' => $settings['title_field'],
     '#description' => t('The title attribute is used as a tooltip when the mouse hovers over the image.'),
     '#weight' => 11,
   );
-  $form['orientate'] = array(
+  $element['orientate'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable image re-orientation'),
     '#default_value' => $settings['orientate'],
@@ -174,30 +174,30 @@ function image_field_instance_settings_form($field, $instance) {
     '#description' => t('If EXIF data indicates the need, the image will be rotated appropriately before being saved.'),
   );
   // Add a second line of description.
-  $form['orientate']['#description'] .= '<br />' . t('Note that as with resizing, rotating images on upload will cause the loss of EXIF data in the image.');
+  $element['orientate']['#description'] .= '<br />' . t('Note that as with resizing, rotating images on upload will cause the loss of EXIF data in the image.');
   
   // Add the default image to the instance.
-  $form['default_image'] = array(
+  $element['default_image'] = array(
     '#element_validate' => array('_image_field_default_image_validate'),
     '#default_scheme' => $field['settings']['uri_scheme'],
     '#target' => array('instance', 'settings', 'default_image'),
   );
-  $form['default_image']['file'] = array(
+  $element['default_image']['file'] = array(
     '#title' => t('Default image'),
     '#type' => 'file',
     '#description' => t("If no image is uploaded, this image will be shown on display and will override the field's default image."),
   );
   if ($settings['default_image']) {
     $link = l(basename($settings['default_image']), file_create_url($settings['default_image']), array('attributes' => array('target' => '_blank')));
-    $form['default_image']['file']['#description'] .= '<br />' . t('Current image: !link', array('!link' => $link));
+    $element['default_image']['file']['#description'] .= '<br />' . t('Current image: !link', array('!link' => $link));
 
-    $form['default_image']['remove'] = array(
+    $element['default_image']['remove'] = array(
       '#type' => t('checkbox'),
       '#title' => t('Remove default image'),
     );
   }
 
-  return $form;
+  return $element;
 }
 
 /**
@@ -361,14 +361,14 @@ function image_field_widget_info() {
 /**
  * Implements hook_field_widget_settings_form().
  */
-function image_field_widget_settings_form($field, $instance) {
+function image_field_widget_settings_form($field, $instance, $form, &$form_state) {
   $widget = $instance['widget'];
   $settings = $widget['settings'];
 
   // Use the file widget settings form.
-  $form = file_field_widget_settings_form($field, $instance);
+  $element = file_field_widget_settings_form($field, $instance, $form, $form_state);
 
-  $form['preview_image_style'] = array(
+  $element['preview_image_style'] = array(
     '#title' => t('Preview image style'),
     '#type' => 'select',
     '#options' => image_style_options(FALSE, PASS_THROUGH),
@@ -378,7 +378,7 @@ function image_field_widget_settings_form($field, $instance) {
     '#weight' => 15,
   );
 
-  return $form;
+  return $element;
 }
 
 /**

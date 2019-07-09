@@ -76,10 +76,10 @@ function file_field_settings_form($field, $instance, $has_data) {
 /**
  * Implements hook_field_instance_settings_form().
  */
-function file_field_instance_settings_form($field, $instance) {
+function file_field_instance_settings_form($field, $instance, $form, &$form_state) {
   $settings = $instance['settings'];
 
-  $form['file_directory'] = array(
+  $element['file_directory'] = array(
     '#type' => 'textfield',
     '#title' => t('File directory'),
     '#default_value' => $settings['file_directory'],
@@ -91,7 +91,7 @@ function file_field_instance_settings_form($field, $instance) {
 
   // Make the extension list a little more human-friendly by comma-separation.
   $extensions = str_replace(' ', ', ', $settings['file_extensions']);
-  $form['file_extensions'] = array(
+  $element['file_extensions'] = array(
     '#type' => 'textfield',
     '#title' => t('Allowed file extensions'),
     '#default_value' => $extensions,
@@ -104,7 +104,7 @@ function file_field_instance_settings_form($field, $instance) {
     '#required' => TRUE,
   );
 
-  $form['max_filesize'] = array(
+  $element['max_filesize'] = array(
     '#type' => 'textfield',
     '#title' => t('Maximum upload size'),
     '#default_value' => $settings['max_filesize'],
@@ -114,7 +114,7 @@ function file_field_instance_settings_form($field, $instance) {
     '#weight' => 5,
   );
 
-  $form['description_field'] = array(
+  $element['description_field'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable <em>Description</em> field'),
     '#default_value' => isset($settings['description_field']) ? $settings['description_field'] : '',
@@ -123,7 +123,7 @@ function file_field_instance_settings_form($field, $instance) {
     '#weight' => 11,
   );
 
-  return $form;
+  return $element;
 }
 
 /**
@@ -384,11 +384,11 @@ function file_field_widget_info() {
 /**
  * Implements hook_field_widget_settings_form().
  */
-function file_field_widget_settings_form($field, $instance) {
+function file_field_widget_settings_form($field, $instance, $form, &$form_state) {
   $widget = $instance['widget'];
   $settings = $widget['settings'];
 
-  $form['progress_indicator'] = array(
+  $element['progress_indicator'] = array(
     '#type' => 'radios',
     '#title' => t('Progress indicator'),
     '#options' => array(
@@ -400,7 +400,7 @@ function file_field_widget_settings_form($field, $instance) {
     '#weight' => 16,
   );
 
-  return $form;
+  return $element;
 }
 
 /**

@@ -18,11 +18,11 @@
  * include settings that are safe to change.
  *
  * @todo: Only the field type module knows which settings will affect the
- * field's schema, but only the field storage module knows what schema
- * changes are permitted once a field already has data. Probably we need an
- * easy way for a field type module to ask whether an update to a new schema
- * will be allowed without having to build up a fake $prior_field structure
- * for hook_field_update_forbid().
+ * field's schema, but only the field storage module knows what schema changes
+ * are permitted once a field already has data. We probably need an easy way for
+ * a field type module to ask whether an update to a new schema will be allowed
+ * without having to build up a fake $prior_field structure for
+ * hook_field_update_forbid().
  *
  * @param $field
  *   The field structure being configured.
@@ -30,13 +30,23 @@
  *   The instance structure being configured.
  * @param $has_data
  *   TRUE if the field already has data, FALSE if not.
+ * @param $form
+ *   The (entire) configuration form array, which will usually have no use here.
+ * @param $form_state
+ *   The form state of the (entire) configuration form.
  *
  * @return
  *   The form definition for the field settings.
+ *
+ * @since 1.13.0 Added $form and $form_state parameters. This allows
+ *   implementations of this hook to support more complex behaviours (such as
+ *   dependencies and AJAX for example), and avoids having to resort to using
+ *   hook_form_alter().
+ *   See: https://github.com/backdrop/backdrop-issues/issues/3590
  */
-function hook_field_settings_form($field, $instance, $has_data) {
+function hook_field_settings_form($field, $instance, $has_data, $form, &$form_state) {
   $settings = $field['settings'];
-  $form['max_length'] = array(
+  $element['max_length'] = array(
     '#type' => 'number',
     '#title' => t('Maximum length'),
     '#default_value' => $settings['max_length'],
@@ -44,7 +54,7 @@ function hook_field_settings_form($field, $instance, $has_data) {
     '#min' => 1,
     '#description' => t('The maximum length of the field in characters. Leave blank for an unlimited size.'),
   );
-  return $form;
+  return $element;
 }
 
 /**
@@ -57,14 +67,18 @@ function hook_field_settings_form($field, $instance, $has_data) {
  *   The field structure being configured.
  * @param $instance
  *   The instance structure being configured.
+ * @param $form
+ *   The (entire) configuration form array, which will usually have no use here.
+ * @param $form_state
+ *   The form state of the (entire) configuration form.
  *
  * @return
  *   The form definition for the field instance settings.
  */
-function hook_field_instance_settings_form($field, $instance) {
+function hook_field_instance_settings_form($field, $instance, $form, &$form_state) {
   $settings = $instance['settings'];
 
-  $form['text_processing'] = array(
+  $element['text_processing'] = array(
     '#type' => 'radios',
     '#title' => t('Text processing'),
     '#default_value' => $settings['text_processing'],
@@ -74,7 +88,7 @@ function hook_field_instance_settings_form($field, $instance) {
     ),
   );
   if ($field['type'] == 'text_with_summary') {
-    $form['display_summary'] = array(
+    $element['display_summary'] = array(
       '#type' => 'select',
       '#title' => t('Display summary'),
       '#options' => array(
@@ -86,7 +100,7 @@ function hook_field_instance_settings_form($field, $instance) {
     );
   }
 
-  return $form;
+  return $$element;
 }
 
 /**
@@ -99,16 +113,20 @@ function hook_field_instance_settings_form($field, $instance) {
  *   The field structure being configured.
  * @param $instance
  *   The instance structure being configured.
+ * @param $form
+ *   The (entire) configuration form array, which will usually have no use here.
+ * @param $form_state
+ *   The form state of the (entire) configuration form.
  *
  * @return
  *   The form definition for the widget settings.
  */
-function hook_field_widget_settings_form($field, $instance) {
+function hook_field_widget_settings_form($field, $instance, $form, &$form_state) {
   $widget = $instance['widget'];
   $settings = $widget['settings'];
 
   if ($widget['type'] == 'text_textfield') {
-    $form['size'] = array(
+    $element['size'] = array(
       '#type' => 'number',
       '#title' => t('Size of textfield'),
       '#default_value' => $settings['size'],
@@ -117,7 +135,7 @@ function hook_field_widget_settings_form($field, $instance) {
     );
   }
   else {
-    $form['rows'] = array(
+    $element['rows'] = array(
       '#type' => 'number',
       '#title' => t('Rows'),
       '#default_value' => $settings['rows'],
@@ -126,9 +144,8 @@ function hook_field_widget_settings_form($field, $instance) {
     );
   }
 
-  return $form;
+  return $element;
 }
-
 
 /**
  * Specify the form elements for a formatter's settings.

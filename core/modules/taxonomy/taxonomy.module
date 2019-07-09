@@ -1879,7 +1879,7 @@ function taxonomy_field_settings_form($field, $instance, $has_data) {
 /**
  * Implements hook_field_widget_settings_form().
  */
-function taxonomy_field_widget_settings_form($field, $instance) {
+function taxonomy_field_widget_settings_form($field, $instance, $form, &$form_state) {
   $element = array(
     'follow_content_language' => array(
       '#type' => 'checkbox',

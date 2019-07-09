@@ -191,10 +191,10 @@ function date_interval_formatter_settings_summary($field, $instance, $view_mode)
  *
  * @see date_field_instance_settings_form_validate()
  */
-function _date_field_instance_settings_form($field, $instance) {
+function _date_field_instance_settings_form($field, $instance, $form, &$form_state) {
   $settings = $instance['settings'];
 
-  $form['default_value'] = array(
+  $element['default_value'] = array(
     '#type' => 'select',
     '#title' => t('Default date'),
     '#default_value' => $settings['default_value'],
@@ -208,7 +208,7 @@ function _date_field_instance_settings_form($field, $instance) {
   );
 
   $description = t("Describe a time by reference to the current day, like '+90 days' (90 days from the day the field is created) or '+1 Saturday' (the next Saturday). See !strtotime for more details.", array('!strtotime' => l(t('strtotime'), 'http://www.php.net/manual/en/function.strtotime.php')));
-  $form['default_value_code'] = array(
+  $element['default_value_code'] = array(
     '#type' => 'textfield',
     '#title' => t('Relative default value'),
     '#description' => $description,
@@ -223,7 +223,7 @@ function _date_field_instance_settings_form($field, $instance) {
     '#weight' => 1.1,
     '#fieldset' => 'default_values',
   );
-  $form['default_value2'] = array(
+  $element['default_value2'] = array(
     '#type' => !empty($field['settings']['todate']) ? 'select' : 'hidden',
     '#title' => t('Default end date'),
     '#default_value' => $settings['default_value2'],
@@ -236,7 +236,7 @@ function _date_field_instance_settings_form($field, $instance) {
     '#weight' => 2,
     '#fieldset' => 'default_values',
   );
-  $form['default_value_code2'] = array(
+  $element['default_value_code2'] = array(
     '#type' => !empty($field['settings']['todate']) ? 'textfield' : 'hidden',
     '#title' => t('Relative default value for end date'),
     '#description' => $description,
@@ -252,15 +252,15 @@ function _date_field_instance_settings_form($field, $instance) {
     '#fieldset' => 'default_values',
   );
 
-  $form['#element_validate'] = array('date_field_instance_settings_form_validate');
+  $element['#element_validate'] = array('date_field_instance_settings_form_validate');
 
   $context = array(
     'field' => $field,
     'instance' => $instance,
   );
-  backdrop_alter('date_field_instance_settings_form', $form, $context);
+  backdrop_alter('date_field_instance_settings_form', $element, $context);
 
-  return $form;
+  return $element;
 }
 
 /**
@@ -288,11 +288,11 @@ function date_field_instance_settings_form_validate(&$form, &$form_state) {
  *
  * @see date_field_widget_settings_form_validate()
  */
-function _date_field_widget_settings_form($field, $instance) {
+function _date_field_widget_settings_form($field, $instance, $form, &$form_state) {
   $widget = $instance['widget'];
   $settings = $widget['settings'];
 
-  $form = array(
+  $element = array(
     '#element_validate' => array('date_field_widget_settings_form_validate'),
   );
 
@@ -312,7 +312,7 @@ function _date_field_widget_settings_form($field, $instance) {
   foreach ($formats2 as $f) {
     $options[$f] = date_format_date($now, 'custom', $f) . '  ('. $f .')';
   }
-  $form['input_format'] = array(
+  $element['input_format'] = array(
     '#type' => 'select',
     '#title' => t('Date entry options'),
     '#default_value' => $settings['input_format'],
@@ -323,13 +323,13 @@ function _date_field_widget_settings_form($field, $instance) {
   );
 
   if ($widget['type'] === 'date_select') {
-    $form['input_format']['#description'] = t('The selected format will determine the order of the date part fields.');
+    $element['input_format']['#description'] = t('The selected format will determine the order of the date part fields.');
   }
 
   // Only a limited set of formats is available for the Date Popup module.
   if ($widget['type'] != 'date_popup') {
-    $form['input_format']['#options']['custom'] = t('Custom format');
-    $form['input_format_custom'] = array(
+    $element['input_format']['#options']['custom'] = t('Custom format');
+    $element['input_format_custom'] = array(
       '#type' => 'textfield',
       '#title' => t('Custom input format'),
       '#default_value' => $settings['input_format_custom'],
@@ -345,20 +345,20 @@ function _date_field_widget_settings_form($field, $instance) {
     );
   }
   else {
-    $form['input_format_custom'] = array(
+    $element['input_format_custom'] = array(
       '#type' => 'hidden',
       '#value' => '',
     );
   }
 
   if (in_array($widget['type'], array('date_select', 'date_popup'))) {
-    $form['year_range'] = array(
+    $element['year_range'] = array(
       '#type' => 'date_year_range',
       '#default_value' => $settings['year_range'],
       '#fieldset' => 'date_format',
       '#weight' => 6,
     );
-    $form['increment'] = array(
+    $element['increment'] = array(
       '#type' => 'select', '#title' => t('Time increments'),
       '#default_value' => $settings['increment'],
       '#options' => array(
@@ -372,25 +372,25 @@ function _date_field_widget_settings_form($field, $instance) {
     );
   }
   else {
-    $form['year_range'] = array(
+    $element['year_range'] = array(
       '#type' => 'hidden',
       '#value' => $settings['year_range'],
     );
-    $form['increment'] = array(
+    $element['increment'] = array(
       '#type' => 'hidden',
       '#value' => $settings['increment'],
     );
   }
 
-  $form['label_position'] = array(
+  $element['label_position'] = array(
     '#type' => 'value',
     '#value' => $settings['label_position'],
   );
-  $form['text_parts'] = array(
+  $element['text_parts'] = array(
     '#type' => 'value',
     '#value' => $settings['text_parts'],
   );
-  $form['advanced'] = array(
+  $element['advanced'] = array(
     '#fieldset' => 'date_format',
     '#weight' => 9,
   );
@@ -409,34 +409,34 @@ function _date_field_widget_settings_form($field, $instance) {
     );
     $description = t('The location of date part labels, like "Year", "Month", or "Day" . "Above" displays the label as titles above each date part. "Hidden" doesn\'t visually label any of the date parts.');
   }
-  $form['advanced']['label_position'] = array(
+  $element['advanced']['label_position'] = array(
     '#type' => 'radios',
     '#options' => $options,
     '#default_value' => $settings['label_position'],
     '#title' => t('Position of date part labels'),
     '#description' => $description,
   );
-  $form['advanced']['text_parts'] = array(
+  $element['advanced']['text_parts'] = array(
     '#theme' => $widget['type'] == 'date_select' ? 'date_text_parts' : '',
   );
   $text_parts = (array) $settings['text_parts'];
   foreach (date_granularity_names() as $key => $value) {
     if ($widget['type'] == 'date_select') {
-      $form['advanced']['text_parts'][$key] = array(
+      $element['advanced']['text_parts'][$key] = array(
         '#type' => 'radios',
         '#default_value' => in_array($key, $text_parts) ? 1 : 0,
         '#options' => array(0 => '', 1 => ''),
       );
     }
     else {
-      $form['advanced']['text_parts'][$key] = array(
+      $element['advanced']['text_parts'][$key] = array(
         '#type' => 'value',
         '#value' => (int) in_array($key, (array) $settings['text_parts']),
       );
     }
   }
 
-  $form['advanced']['no_fieldset'] = array(
+  $element['advanced']['no_fieldset'] = array(
     '#type' => 'checkbox',
     '#title' => t('Exclude wrapping fieldset'),
     '#default_value' => !empty($settings['no_fieldset']),
@@ -447,9 +447,9 @@ function _date_field_widget_settings_form($field, $instance) {
     'field' => $field,
     'instance' => $instance,
   );
-  backdrop_alter('date_field_widget_settings_form', $form, $context);
+  backdrop_alter('date_field_widget_settings_form', $element, $context);
 
-  return $form;
+  return $element;
 }
 
 /**
@@ -479,10 +479,10 @@ function date_field_widget_settings_form_validate(&$form, &$form_state) {
  *
  * @see date_field_settings_validate()
  */
-function _date_field_settings_form($field, $instance, $has_data) {
+function _date_field_settings_form($field, $instance, $has_data, $form, &$form_state) {
   $settings = $field['settings'];
 
-  $form = array(
+  $element = array(
     '#element_validate' => array('date_field_settings_validate'),
   );
 
@@ -505,7 +505,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#disabled' => TRUE,
   );
   unset($options['year']);
-  $form['granularity'] = array(
+  $element['granularity'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Date granularity'),
     '#default_value' => $granularity,
@@ -518,14 +518,14 @@ function _date_field_settings_form($field, $instance, $has_data) {
   );
 
   $description = t('End dates are used to collect duration, e.g. allow an event to start on September 15, and end on September 16.');
-  $form['enddate_get'] = array(
+  $element['enddate_get'] = array(
     '#type' => 'checkbox',
     '#title' => t('Collect an end date'),
     '#description' => $description,
     '#default_value' => (empty($settings['todate']) ? FALSE : TRUE),
     '#disabled' => $has_data,
   );
-  $form['enddate_required'] = array(
+  $element['enddate_required'] = array(
     '#type' => 'checkbox',
     '#title' => t('Required'),
     '#default_value' => ((isset($settings['todate']) && $settings['todate'] === 'required') ? TRUE : FALSE),
@@ -537,7 +537,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
     ),
   );
   $description = t('Select the timezone handling method for this date field.');
-  $form['tz_handling'] = array(
+  $element['tz_handling'] = array(
     '#type' => 'select',
     '#title' => t('Time zone handling'),
     '#default_value' => $tz_handling,
@@ -549,19 +549,19 @@ function _date_field_settings_form($field, $instance, $has_data) {
   );
   // Force this value to hidden because we don't want to allow it to be changed
   // right now, but allow it to be a variable if needed.
-  $form['timezone_db'] = array(
+  $element['timezone_db'] = array(
     '#type' => 'hidden',
     '#value' => date_get_timezone_db($tz_handling),
   );
 
-  $form['cache_enabled'] = array(
+  $element['cache_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Cache dates'),
     '#description' => t('Date objects can be created and cached as date fields are loaded rather than when they are displayed to improve performance.'),
     '#default_value' => !empty($settings['cache_enabled']),
     '#weight' => 10,
   );
-  $form['cache_count'] = array(
+  $element['cache_count'] = array(
     '#type' => 'textfield',
     '#title' => t('Maximum dates per field'),
     '#default_value' => (isset($settings['cache_count'])) ? $settings['cache_count'] : 4,
@@ -582,9 +582,9 @@ function _date_field_settings_form($field, $instance, $has_data) {
     'instance' => $instance,
     'has_data' => $has_data,
   );
-  backdrop_alter('date_field_settings_form', $form, $context);
+  backdrop_alter('date_field_settings_form', $element, $context);
 
-  return $form;
+  return $element;
 }
 
 /**
