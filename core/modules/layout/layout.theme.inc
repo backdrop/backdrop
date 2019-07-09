@@ -115,7 +115,14 @@ function theme_layout_template_option($variables) {
 }
 
 /**
- * Outputs an individual option label for selecting a layout.
+ * Outputs information about a layout template . Used in the layout template
+ * listing page.
+ *
+ * @param $variables
+ *   An array with a single value: "template_info", which contains information
+ *   about the layout template.
+ *
+ * @return string
  */
 function theme_layout_template_info($variables) {
   $template_info = $variables['template_info'];
@@ -136,7 +143,8 @@ function theme_layout_template_info($variables) {
 }
 
 /**
- * Outputs an individual option label for selecting a layout.
+ * Outputs a representation of the column widths of a flexible layout template
+ * row.
  */
 function theme_layout_flexible_template_style_option($variables) {
   $row_style = $variables['row_style'];
@@ -156,7 +164,6 @@ function theme_layout_flexible_template_style_option($variables) {
   }
   $output .= '</div>';
   $output .= '</div>';
-  // $output .= '<div class="layout-caption">' . check_plain($row_style['name']) . '</div>';
   return $output;
 }
 
