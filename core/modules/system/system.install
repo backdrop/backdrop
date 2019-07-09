@@ -27,13 +27,22 @@ function system_requirements($phase) {
     $profile = backdrop_get_profile();
     if ($profile != 'standard') {
       $info = system_get_info('module', $profile);
-      $requirements['install_profile'] = array(
-        'title' => $t('Install profile'),
-        'value' => $t('%profile_name (%profile-%version)', array(
+      if (!empty($info['version'])) {
+        $value = $t('%profile_name (%profile-%version)', array(
           '%profile_name' => $info['name'],
           '%profile' => $profile,
-          '%version' => $info['version']
-        )),
+          '%version' => $info['version'],
+        ));
+      }
+      else {
+        $value = $t('%profile_name (%profile)', array(
+          '%profile_name' => $info['name'],
+          '%profile' => $profile,
+        ));
+      }
+      $requirements['install_profile'] = array(
+        'title' => $t('Install profile'),
+        'value' => $value,
         'severity' => REQUIREMENT_INFO,
         'weight' => -9
       );
