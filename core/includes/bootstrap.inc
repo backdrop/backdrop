@@ -3069,6 +3069,7 @@ function _backdrop_bootstrap_page_cache() {
 
         // Load bootstrap modules.
         require_once BACKDROP_ROOT . '/core/includes/module.inc';
+        require_once BACKDROP_ROOT . '/core/includes/system.inc';
         module_load_all(TRUE);
         bootstrap_invoke_all('boot');
       }
@@ -3194,6 +3195,7 @@ function _backdrop_bootstrap_variables() {
 function _backdrop_bootstrap_page_header() {
   // Load all bootstrap modules.
   require_once BACKDROP_ROOT . '/core/includes/module.inc';
+  require_once BACKDROP_ROOT . '/core/includes/system.inc';
   module_load_all(TRUE);
 
   bootstrap_invoke_all('boot');

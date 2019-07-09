@@ -247,6 +247,7 @@ function install_begin_request(&$install_state) {
   // Load module basics (needed for hook invokes).
   include_once BACKDROP_ROOT . '/core/includes/module.inc';
   include_once BACKDROP_ROOT . '/core/includes/session.inc';
+  include_once BACKDROP_ROOT . '/core/includes/system.inc';
   require_once BACKDROP_ROOT . '/core/includes/theme.inc';
   require_once BACKDROP_ROOT . '/core/includes/tablesort.inc';
 
