@@ -10,6 +10,9 @@
 function seven_preprocess_page(&$variables) {
   // Add the OpenSans font from core on every page of the site.
   backdrop_add_library('system', 'opensans', TRUE);
+  if (arg(0) == 'node' && arg(1) == 'add' && !arg(2)) {
+    $variables['classes'][] = 'add-content';
+  }
 }
 
 /**

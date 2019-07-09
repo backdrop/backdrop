@@ -143,7 +143,7 @@ ul.menu li.expanded {
   height: 1em;
   vertical-align: middle;
   padding: 0 3px;
-  background: url(../images/chevron-right--gray--32.png) no-repeat center center;
+  background: url('../images/chevron-right--gray--32.png') no-repeat center center;
   background-size: 8px;
 }
 
@@ -487,6 +487,16 @@ ul.admin-list li {
 }
 div.submitted {
   color: #898989;
+}
+
+/* Special icons on the add-content page */
+body.add-content .admin-list li {
+  padding: 9px 25px;
+  background: url('../images/chevron-circle-right--gray--32.png') no-repeat 0 11px; /* LTR */
+  background-size: 20px;
+}
+[dir="rtl"] body.add-content ul.admin-list li {
+  background: url('../images/chevron-circle-left--gray--32.png') no-repeat right 11px;
 }
 
 /**
