@@ -75,7 +75,7 @@ function ckeditor_settings_form(&$form, $form_state, $format) {
     '#type' => 'textarea',
     '#rows' => 4,
     '#default_value' => $style_list,
-    '#description' => t('A list of tags that will be provided in the "Styles" dropdown. Enter one tag on each line in the format: "element[.class]|Label" (where the class is optional).') . '<br />' . t('Example: "code|Code" or "h1.title|Title".') . '<br />' . t('If the "Limit allowed HTML tags" filter is enabled, make sure to add these tags to the "Allowed HTML tags" list below. Each tag should be in your theme\'s main CSS as well as in your theme\'s ckeditor-iframe.css file.'),
+    '#description' => t('A list of tags that will be provided in the "Styles" dropdown. Enter one tag on each line in the format: "element[.class]|Label" (where the class is optional).') . '<br />' . t('Example: "code|Code" or "h1.title|Title".') . '<br />' . t('All tags entered here will be automatically added to the "Allowed HTML tags" list below (if the "Limit allowed HTML tags" filter is enabled). Each tag should be in your theme\'s main CSS as well as in your theme\'s ckeditor-iframe.css file.'),
   );
 
   array_unshift($form['#validate'], 'ckeditor_settings_form_validate');
