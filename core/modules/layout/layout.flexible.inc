@@ -1096,7 +1096,6 @@ function layout_layout_info() {
       'preview' => 'flexible_template.png',
       'libraries' => array('bootstrap4-gs'),
     );
-    // todo: default region
     foreach ($item['regions'] as $name => $region) {
       $region_style = $styles[$region['contains']];
       for ($i = 0; $i < $region_style['region_count']; $i++) {

@@ -22,7 +22,7 @@ class LayoutRendererFlexible extends LayoutRendererEditor {
     $this->admin = TRUE;
     $this->layout = &$layout;
     $this->layout_info = $default_template_info;
-    $this->admin = TRUE;
+    $this->flexible = TRUE;
 
   }
 

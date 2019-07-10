@@ -298,6 +298,7 @@ function layout_preprocess_layout(&$variables) {
     }
   }
 
+  // Build HTML for displaying flexible templates.
   if ($variables['layout_info']['template'] == 'layout--flexible') {
     $data = layout_flexible_template_template($variables['layout_info']['name']);
     $variables['region_buttons'] = array();
@@ -305,8 +306,8 @@ function layout_preprocess_layout(&$variables) {
     if (isset($variables['renderer']->region_buttons)) {
       $variables['region_buttons'] =  $variables['renderer']->region_buttons;
     }
-    $class = $variables['renderer']->plugin['class'];
-    if ($class == 'LayoutRendererFlexible') {
+
+    if ($variables['renderer']->flexible) {
       $variables['flexible_editor'] = TRUE;
     }
 
@@ -314,34 +315,35 @@ function layout_preprocess_layout(&$variables) {
 
     $variables['regions'] =  $data['regions'];
     $variables['region_data'] = array();
-    foreach ($variables['regions'] as $name => $region) {
-      $container = ($region['container'] == 'container') ? 'container container-fluid' : (($region['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
-      $region['row_class'] = $container . ' flexible-row-' . $name . ' ' . $region['contains'] . ' ' . $region['classes'];
-      $region['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row-id-' . $name . '"' : '';
-      $region['element'] = !empty($region['element']) ? $region['element'] : 'div';
-      if ($region['contains'] == 'region_12') {
-        if (!empty($region['region_names']['region_name_0'])) {
-          $region_name = $region['region_names']['region_name_0'];
+    foreach ($variables['regions'] as $name => $row) {
+      dpm($row);
+      $container = ($row['container'] == 'container') ? 'container container-fluid' : (($row['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
+      $row['row_class'] = $container . ' flexible-row-' . $name . ' ' . $row['contains'] . ' ' . $row['classes'];
+      $row['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row-id-' . $name . '"' : '';
+      $row['element'] = !empty($row['element']) ? $row['element'] : 'div';
+      if ($row['contains'] == 'region_12') {
+        if (!empty($row['region_names']['region_name_0'])) {
+          $region_name = $row['region_names']['region_name_0'];
         }
         else {
           $region_name = $name;
         }
-        $region['regions'][0]['region_md'] = '12';
-        $region['regions'][0]['region_name'] = $region_name;
-        $region['regions'][0]['content_key'] = $variables['flexible_editor'] ? $name : $name . '_0';
+        $row['regions'][0]['region_md'] = '12';
+        $row['regions'][0]['region_name'] = $region_name;
+        $row['regions'][0]['content_key'] = $variables['flexible_editor'] ? $name : $name . '_0';
       }
       else {
-        $col_info = $variables['column_data'][$region['contains']];
+        $col_info = $variables['column_data'][$row['contains']];
         $split = explode(':', $col_info['bootstrap']);
         $i = 0;
         foreach ($split as $col) {
-          if (!empty($region['region_names']['region_name_' . $i])) {
-            $region_name = $region['region_names']['region_name_' . $i];
+          if (!empty($row['region_names']['region_name_' . $i])) {
+            $region_name = $row['region_names']['region_name_' . $i];
           }
           else {
             $region_name = $name . ' ' . $i;
           }
-          $region['regions'][] = array(
+          $row['regions'][] = array(
             'region_md' => $col,
             'region_name' => $region_name,
             'content_key' => $variables['flexible_editor'] ? $name : $name . '_' . $i,
@@ -349,7 +351,7 @@ function layout_preprocess_layout(&$variables) {
           $i++;
         }
       }
-      $variables['region_data'][$name] = $region;
+      $variables['region_data'][$name] = $row;
     }
 
   }
