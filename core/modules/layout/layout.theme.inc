@@ -316,7 +316,6 @@ function layout_preprocess_layout(&$variables) {
     $variables['rows'] =  $data['rows'];
     $variables['row_data'] = array();
     foreach ($variables['rows'] as $name => $row) {
-      dpm($row);
       $container = ($row['container'] == 'container') ? 'container container-fluid' : (($row['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
       $row['row_class'] = $container . ' flexible-row-' . $name . ' ' . $row['contains'] . ' ' . $row['classes'];
       $row['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row-id-' . $name . '"' : '';

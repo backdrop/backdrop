@@ -149,14 +149,13 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
 
   $config = array(
     'is_new' => TRUE,
+    'layout_template' => $flexible_template_id,
   );
   $layout = new Layout($config);
   $template = layout_get_layout_template_info($flexible_template_id);
 
   backdrop_set_title($template['title']);
 
-  $template['plugin'] = array('class' => 'LayoutRendererFlexible');
-  $template['rows'] = array();
   $form_state['flexible_template_id'] = $flexible_template_id;
 
   $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
@@ -165,14 +164,8 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
     return;
   }
 
-  foreach ($form_state['template_data']['rows'] as $position => $info) {
-    $layout->positions[$position] = array();
-    $template['rows'][$position] = $position;
-  }
+  $renderer = layout_create_renderer('flexible', $layout);
 
-  // Don't use layout_create_renderer() because we need to pass in template
-  // info.
-  $renderer = new LayoutRendererFlexible($layout, $template);
   $form['#attached'] = array(
     'library' => array(
       array('system', 'backdrop.ajax'),
@@ -1110,7 +1103,6 @@ function layout_layout_info() {
     }
   }
 
-dpm($layouts);
   return $layouts;
 }
 
