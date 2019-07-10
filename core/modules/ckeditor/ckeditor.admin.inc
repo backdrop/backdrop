@@ -94,8 +94,16 @@ function ckeditor_settings_form_validate($form, &$form_state) {
     form_error($form['editor_settings']['toolbar'], t('The CKEditor toolbar configuration could not be saved.'));
   }
 
+  $filter_html = _filter_html_allowed_html($form['#filters']['filter_html'], NULL);
   $styles = _ckeditor_settings_parse_style_list($settings['plugins']['style']['style_list']);
   foreach ($styles as $style) {
+    // Add style tags to allowed tags list.
+    if (!empty($form_state['values']['filters']['filter_html'])) {
+      if (!in_array($style['element'], array_keys($filter_html['allowed']))) {
+        $form_state['values']['filters']['filter_html']['settings']['allowed_html'] .= ' <' . $style['element'] . '>';
+      }
+    }
+
     if (empty($style['name']) || empty($style['element'])) {
       form_error($form['editor_settings']['plugins']['style']['style_list'], t('The CKEditor list of styles is not formatted properly. Be sure to include one style per line, with the format "element[.class]|Label" (where the class is optional). Example: "code|Code" or "h1.title|Title".'));
     }
