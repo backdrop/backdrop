@@ -320,8 +320,6 @@ function callback_filter_process($text, $filter, $format, $langcode, $cache, $ca
  *
  * @param $filter
  *   The filter object containing settings for the given format.
- * @param $format
- *   The full text format object.
  *
  * @return array
  *   A nested array with the following keys:
@@ -402,7 +400,7 @@ function callback_filter_process($text, $filter, $format, $langcode, $cache, $ca
  *
  * @see filter_format_allowed_html()
  */
-function callback_filter_allowed_html($filter, $format) {
+function callback_filter_allowed_html($filter) {
   // This example is pulled from "filter_html" filter provided by core.
   $restrictions = array('allowed' => array());
   $tags = preg_split('/\s+|<|>/', $filter->settings['allowed_html'], -1, PREG_SPLIT_NO_EMPTY);

@@ -1884,7 +1884,7 @@ function _filter_html_settings($form, &$form_state, $filter, $format) {
 /**
  * Implements callback_filter_allowed_html().
  */
-function _filter_html_allowed_html($filter, $format) {
+function _filter_html_allowed_html($filter) {
   // This example is pulled from "filter_html" filter provided by core.
   $restrictions = array('allowed' => array());
   $tags = preg_split('/\s+|<|>/', $filter->settings['allowed_html'], -1, PREG_SPLIT_NO_EMPTY);
