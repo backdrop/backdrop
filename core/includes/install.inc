@@ -904,7 +904,7 @@ make this configuration active, see admin/config/development/configuration/sync.
  *   An array of information about the current installation state.
  *
  * @return
- *   The list of modules to install.
+ *   The list of projects to install/enable.
  *
  * @throws Exception
  */
@@ -920,31 +920,37 @@ function backdrop_verify_profile($install_state) {
   }
   $info = $install_state['profile_info'];
 
-  // Get a list of modules that exist in Backdrop's assorted subdirectories.
-  $present_modules = array();
+  // Get a list of projects that exist in Backdrop's assorted subdirectories.
+  $present_projects = array();
   foreach (backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.module$/', 'modules', 'name', 0) as $present_module) {
-    $present_modules[] = $present_module->name;
+    $present_projects[] = $present_module->name;
+  }
+  foreach (backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'themes', 'name', 0) as $present_theme) {
+    $present_projects[] = $present_theme->name;
+  }
+  foreach (backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'layouts', 'name', 0) as $present_layout) {
+    $present_projects[] = $present_layout->name;
   }
 
-  // The installation profile is also a module, which needs to be installed
+  // The installation profile is also a project, which needs to be installed
   // after all the other dependencies have been installed.
-  $present_modules[] = $profile;
+  $present_projects[] = $profile;
 
-  // Verify that all of the profile's required modules are present.
-  $missing_modules = array_diff($info['dependencies'], $present_modules);
+  // Verify that all of the profile's required projects are present.
+  $missing_projects = array_diff($info['dependencies'], $present_projects);
 
   $requirements = array();
 
-  if (count($missing_modules)) {
-    $modules = array();
-    foreach ($missing_modules as $module) {
-      $modules[] = '<span class="admin-missing">' . backdrop_ucfirst($module) . '</span>';
+  if (count($missing_projects)) {
+    $projects = array();
+    foreach ($missing_projects as $project) {
+      $projects[] = '<span class="admin-missing">' . $project . '</span>';
     }
     $requirements['required_modules'] = array(
-      'title'       => st('Required modules'),
-      'value'       => st('Required modules not found.'),
+      'title'       => st('Missing dependencies'),
+      'value'       => st('Required projects not found.'),
       'severity'    => REQUIREMENT_ERROR,
-      'description' => st('The following modules are required but were not found. Move them into the appropriate modules subdirectory, such as <em>/modules</em>. Missing modules: !modules', array('!modules' => implode(', ', $modules))),    );
+      'description' => st('The following projects are required, but were not found. Download and place them into the appropriate subdirectories, such as <code>/modules</code>, <code>/themes</code>, or <code>/layouts</code>.<br>Missing projects: !projects', array('!projects' => implode(', ', $projects))),    );
   }
   return $requirements;
 }
