@@ -32,7 +32,7 @@
   <?php endif; ?>
 
   <div class="layout-flexible-content">
-  <?php foreach ($region_data as $name => $row): ?>
+  <?php foreach ($row_data as $name => $row): ?>
     <<?php print $row['element']; ?> data-row-id="<?php print $name; ?>" class="flexible-row <?php print 'l-' . $name; ?>" <?php print $row['row_id']; ?>>
       <div class="<?php print $row['row_class']; ?>">
         <?php if ($region_buttons): ?>

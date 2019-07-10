@@ -313,9 +313,9 @@ function layout_preprocess_layout(&$variables) {
 
     $variables['column_data'] = layout_flexible_row_styles();
 
-    $variables['regions'] =  $data['regions'];
-    $variables['region_data'] = array();
-    foreach ($variables['regions'] as $name => $row) {
+    $variables['rows'] =  $data['rows'];
+    $variables['row_data'] = array();
+    foreach ($variables['rows'] as $name => $row) {
       dpm($row);
       $container = ($row['container'] == 'container') ? 'container container-fluid' : (($row['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
       $row['row_class'] = $container . ' flexible-row-' . $name . ' ' . $row['contains'] . ' ' . $row['classes'];
@@ -351,7 +351,7 @@ function layout_preprocess_layout(&$variables) {
           $i++;
         }
       }
-      $variables['region_data'][$name] = $row;
+      $variables['row_data'][$name] = $row;
     }
 
   }

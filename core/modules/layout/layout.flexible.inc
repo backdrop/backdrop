@@ -156,7 +156,7 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
   backdrop_set_title($template['title']);
 
   $template['plugin'] = array('class' => 'LayoutRendererFlexible');
-  $template['regions'] = array();
+  $template['rows'] = array();
   $form_state['flexible_template_id'] = $flexible_template_id;
 
   $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
@@ -165,9 +165,9 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
     return;
   }
 
-  foreach ($form_state['template_data']['regions'] as $position => $info) {
+  foreach ($form_state['template_data']['rows'] as $position => $info) {
     $layout->positions[$position] = array();
-    $template['regions'][$position] = $position;
+    $template['rows'][$position] = $position;
   }
 
   // Don't use layout_create_renderer() because we need to pass in template
@@ -189,7 +189,7 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
   $form['content']['row_positions'] = array(
     // Use 'hidden' instead of 'value' so the JS can access it.
     '#type' => 'hidden',
-    '#default_value' => implode(',', array_keys($form_state['template_data']['regions'])),
+    '#default_value' => implode(',', array_keys($form_state['template_data']['rows'])),
   );
 
   $form['add_row'] = array(
@@ -246,10 +246,10 @@ function layout_flexible_template_configure_form_submit($form, &$form_state) {
   if (!empty($form_state['values']['row_positions'])) {
         $rows = array_filter(explode(',', $form_state['values']['row_positions']));
     foreach ($rows as $position) {
-     $positions[$position] = $form_state['template_data']['regions'][$position];
+     $positions[$position] = $form_state['template_data']['rows'][$position];
     }
   }
-  $form_state['template_data']['regions'] = $positions;
+  $form_state['template_data']['rows'] = $positions;
 
   $config = config('layout.flexible.' . $form_state['flexible_template_id']);
   $config->setData($form_state['template_data']);
@@ -416,7 +416,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
 
   $row_data = array();
   if ($original_row != 'add') {
-    $row_data = $form_state['template_data']['regions'][$original_row];
+    $row_data = $form_state['template_data']['rows'][$original_row];
   }
 
   $region_style = $region_style ? $region_style : $row_data['contains'];
@@ -552,7 +552,7 @@ function layout_flexible_template_get_last_region_number($template_data, $form_s
     $last = $form_state['last_region_number'];
   }
   else {
-    foreach ($template_data['regions'] as $row) {
+    foreach ($template_data['rows'] as $row) {
       foreach ($row['region_names'] as $name) {
         $region_names[] = $name;
       }
@@ -617,7 +617,7 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
     $original_row = uniqid();
   }
 
-  $template_data['regions'][$original_row] = $new_row;
+  $template_data['rows'][$original_row] = $new_row;
 
   $form_state['template_data'] = $template_data;
 
@@ -717,7 +717,7 @@ function layout_flexible_template_delete_row($flexible_template_id, $original_ro
 
   $commands = array();
   $template = layout_flexible_template_template($flexible_template_id);
-  unset($template['regions'][$original_row]);
+  unset($template['rows'][$original_row]);
   layout_set_flexible_tempstore($template, $flexible_template_id);
 
   if (backdrop_is_ajax()) {
@@ -776,7 +776,7 @@ function layout_flexible_template_template($flexible_template_id = NULL) {
       'name' => '',
       'title' => '',
       'description' => '',
-      'regions' => array(
+      'rows' => array(
         'header' => array(
           'contains' => 'region_12',
           'element' => 'header',
@@ -1082,11 +1082,11 @@ function layout_flexible_template_load($flexible_template_id = NULL) {
  */
 function layout_layout_info() {
   $layouts = array();
-  $items = layout_flexible_template_load();
+  $flexible_templates = layout_flexible_template_load();
   $styles = layout_flexible_row_styles();
-  foreach ($items as $item) {
-    $layouts[$item['name']] = array(
-      'title' => $item['title'],
+  foreach ($flexible_templates as $flexible_template) {
+    $layouts[$flexible_template['name']] = array(
+      'title' => $flexible_template['title'],
       'regions' => array(),
       'default region' => '',
       'template' => 'layout--flexible',
@@ -1096,7 +1096,7 @@ function layout_layout_info() {
       'preview' => 'flexible_template.png',
       'libraries' => array('bootstrap4-gs'),
     );
-    foreach ($item['regions'] as $name => $region) {
+    foreach ($flexible_template['rows'] as $name => $region) {
       $region_style = $styles[$region['contains']];
       for ($i = 0; $i < $region_style['region_count']; $i++) {
         if (!empty($region['region_names']['region_name_' . $i])) {
@@ -1105,11 +1105,12 @@ function layout_layout_info() {
         else {
           $region_name = $name . ' ' . $i;
         }
-        $layouts[$item['name']]['regions'][$name . '_' . $i] = $region_name;
+        $layouts[$flexible_template['name']]['regions']['region_name_' . $i] = $region_name;
       }
     }
   }
 
+dpm($layouts);
   return $layouts;
 }
 
