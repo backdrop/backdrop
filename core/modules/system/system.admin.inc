@@ -1605,6 +1605,7 @@ function system_performance_settings($form, &$form_state) {
   $form['clear_cache'] = array(
     '#type' => 'fieldset',
     '#title' => t('Clear cache'),
+    '#access' => user_access('flush caches'),
   );
 
   $form['clear_cache']['clear'] = array(

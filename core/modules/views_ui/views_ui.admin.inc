@@ -4564,6 +4564,7 @@ function views_ui_admin_settings_advanced() {
   $form['cache'] = array(
     '#type' => 'fieldset',
     '#title' => t('Caching'),
+    '#access' => user_access('flush caches'),
   );
 
   $form['cache']['clear_cache'] = array(
