@@ -1568,6 +1568,18 @@ function system_cron_settings($form, &$form_state) {
   return system_settings_form($form);
 }
 
+/*
+ * Implementation of hook_form_alter()
+ */
+function system_form_alter(&$form, &$form_state, $form_id){
+  // Hide the form submit button if $settings['cron_safe_threshold'] is set in
+  // settings.php.
+  if($form_id == "system_cron_settings" && $form['cron']['cron_safe_threshold']['#disabled'] == TRUE){
+    unset($form['actions']);
+    unset($form['#submit']);
+  }
+}
+
 /**
  * Submit callback; run cron.
  *
