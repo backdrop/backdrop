@@ -348,6 +348,10 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
  *   '^.+\.example\.org',
  * );
  * @endcode
+ *
+ * @see backdrop_valid_http_host()
+ * @see backdrop_check_trusted_hosts()
+ * @see system_requirements()
 */
 
 /**
