@@ -221,7 +221,7 @@ function system_themes_page() {
 
   $admin_form = backdrop_get_form('system_themes_admin_form', $admin_theme_options);
 
-  return theme('system_themes_page', array('theme_groups' => $theme_groups, 'theme_group_titles' => $theme_group_titles)) . backdrop_render($admin_form);
+  return backdrop_render($admin_form) . theme('system_themes_page', array('theme_groups' => $theme_groups, 'theme_group_titles' => $theme_group_titles));
 }
 
 /**
@@ -235,6 +235,14 @@ function system_themes_admin_form($form, &$form_state, $theme_options) {
   $form['admin_theme'] = array(
     '#type' => 'fieldset',
     '#title' => t('Administration theme'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#attributes' => array(
+      'class' => array('admin-theme-form'),
+    ),
+    '#attached' => array(
+      'js' => array(backdrop_get_path('module', 'system') . '/js/themes.js'),
+    ),
   );
   $form['admin_theme']['admin_theme'] = array(
     '#type' => 'select',
@@ -256,7 +264,22 @@ function system_themes_admin_form($form, &$form_state, $theme_options) {
  */
 function system_themes_admin_form_submit($form, &$form_state) {
   backdrop_set_message(t('The configuration options have been saved.'));
-  config_set('system.core', 'admin_theme', $form_state['values']['admin_theme']);
+
+  $themes = list_themes();
+  $current_default_theme = config_get('system.core', 'theme_default');
+  $current_admin_theme = config_get('system.core', 'admin_theme');
+  $new_admin_theme = $form_state['values']['admin_theme'];
+
+  if (!$new_admin_theme) {
+    $current_default_theme_name = $themes[$current_default_theme]->info['name'];
+    backdrop_set_message(t('The administration theme will be the same as the rest of the site (currently %default_theme).', array('%default_theme' => $current_default_theme_name)));
+  }
+  elseif ($current_admin_theme != $new_admin_theme) {
+    $new_admin_theme_name = $themes[$new_admin_theme]->info['name'];
+    backdrop_set_message(t('The administration theme has been changed to %admin_theme.', array('%admin_theme' => $new_admin_theme_name)));
+  }
+
+  config_set('system.core', 'admin_theme', $new_admin_theme);
 }
 
 /**
@@ -337,7 +360,7 @@ function system_theme_default() {
     if (!empty($themes[$theme])) {
       // Enable the theme if it is currently disabled.
       if (empty($themes[$theme]->status)) {
-       theme_enable(array($theme));
+        theme_enable(array($theme));
       }
       // Set the default theme.
       config_set('system.core', 'theme_default', $theme);
@@ -345,22 +368,30 @@ function system_theme_default() {
       // Rebuild the menu. This duplicates the menu_rebuild() in theme_enable().
       // However, modules must know the current default theme in order to use
       // this information in hook_menu() or hook_menu_alter() implementations,
-      // and doing the config_set() before the theme_enable() could result
-      // in a race condition where the theme is default but not enabled.
+      // and doing the config_set() before the theme_enable() could result in a
+      // race condition where the theme is default but not enabled.
       menu_rebuild();
 
-      // The status message depends on whether an admin theme is currently in use:
-      // a value of 0 means the admin theme is set to be the default theme.
+      // The status message depends on whether an admin theme is currently in
+      // use: a value of 0 means the admin theme is set to be the default theme.
       $admin_theme = config_get('system.core', 'admin_theme');
+
+      // If the admin theme is set to a different theme than the one the user
+      // has just switched to, show an info message to explain why.
       if ($admin_theme && $admin_theme != $theme) {
-        backdrop_set_message(t('Please note that the administration theme is still set to the %admin_theme theme; consequently, the theme on this page remains unchanged. All non-administrative sections of the site, however, will show the selected %selected_theme theme by default.', array(
+        backdrop_set_message(t('%theme is now the default theme for all non-administrative pages.', array('%theme' => $themes[$theme]->info['name'])));
+        backdrop_set_message(t('The administration theme is still set to the %admin_theme theme.', array(
           '%admin_theme' => $themes[$admin_theme]->info['name'],
-          '%selected_theme' => $themes[$theme]->info['name'],
-        )));
+        )), 'info');
       }
       else {
         backdrop_set_message(t('%theme is now the default theme.', array('%theme' => $themes[$theme]->info['name'])));
       }
+
+      // Clear caches after changing the theme.
+      cache_clear_all();
+      backdrop_set_message(t('All caches have been cleared.'));
+
     }
     else {
       backdrop_set_message(t('The %theme theme was not found.', array('%theme' => $theme)), 'error');
