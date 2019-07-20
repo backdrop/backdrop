@@ -698,13 +698,14 @@ class Layout {
     }
     if (!empty($orphaned_blocks)) {
       end($new_positions);
-      $last_region_name = key($new_positions);
+      $default_region = isset($new_layout_info['default region']) ? $new_layout_info['default region'] : key($new_positions);
+
       // Assign orphan blocks to the last region.
       foreach ($orphaned_blocks as $uuid) {
-        $new_positions[$last_region_name][] = $uuid;
+        $new_positions[$default_region][] = $uuid;
         backdrop_set_message(t('The "@block" block has been reassigned to "@new_region" region because the old region does not exist in the new template. You may want to move it to a more appropriate region.', array(
             '@block' => $this->content[$uuid]->getAdminTitle(),
-            '@new_region' => $new_layout_info['regions'][$last_region_name],
+            '@new_region' => $new_layout_info['regions'][$default_region],
           )
         ), 'warning');
       }
