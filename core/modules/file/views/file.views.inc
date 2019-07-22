@@ -72,7 +72,7 @@ function file_views_data() {
   // uri
   $data['file_managed']['uri'] = array(
     'title' => t('Path'),
-    'help' => t('The path of the file.'),
+    'help' => t('The internal path (URI) of the file. May also display the file URL.'),
     'field' => array(
       'handler' => 'views_handler_field_file_uri',
       'click sortable' => TRUE,
@@ -85,6 +85,19 @@ function file_views_data() {
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_string',
+    ),
+  );
+
+  // Edit link.
+  $data['file_managed']['edit'] = array(
+    'title' => t('Manage link'),
+    'help' => t('A link to edit the file entity.'),
+    'field' => array(
+      'handler' => 'views_handler_field_file_link_edit',
+      'real field' => 'fid',
+      'additional fields' => array(
+        'fid',
+      ),
     ),
   );
 

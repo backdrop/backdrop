@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Field Info API, providing information about available fields and field types.
@@ -28,6 +27,7 @@
 function field_info_cache_clear() {
   backdrop_static_reset('field_view_mode_settings');
   backdrop_static_reset('field_available_languages');
+  backdrop_static_reset('field_info_field_map');
 
   // @todo: Remove this when field_attach_*_bundle() bundle management
   // functions are moved to the entity API.
@@ -335,7 +335,7 @@ function _field_info_prepare_instance($instance, $field) {
     $instance['display'][$view_mode] = _field_info_prepare_instance_display($field, $display);
   }
 
-  // Fallback to 'hidden' for view modes configured to use custom display
+  // Fallback to 'hidden' for display modes configured to use custom display
   // settings, and for which the instance has no explicit settings.
   $entity_info = entity_get_info($instance['entity_type']);
   $view_modes = array_merge(array('default'), array_keys($entity_info['view modes']));
@@ -345,7 +345,7 @@ function _field_info_prepare_instance($instance, $field) {
       if (!isset($instance['display'][$view_mode])) {
         $instance['display'][$view_mode] = array(
           'type' => 'hidden',
-          'label' => 'above',
+          'label' => 'hidden',
           'settings' => array(),
           'weight' => 0,
         );
@@ -370,7 +370,7 @@ function _field_info_prepare_instance_display($field, $display) {
 
   // Fill in default values.
   $display += array(
-    'label' => 'above',
+    'label' => 'hidden',
     'type' => $field_type['default_formatter'],
     'settings' => array(),
     'weight' => 0,
@@ -589,6 +589,37 @@ function field_info_storage_types($storage_type = NULL) {
 }
 
 /**
+ * Get the formatter settings for a field instance and view mode.
+ *
+ * @param string $field_name
+ * @param string $display
+ * @param string $bundle
+ * @param string $view_mode
+ *
+ * @return array
+ *
+ * @since 1.13.0
+ */
+function field_formatter_settings_get_instance_display_settings($entity_type, $field_name, $bundle, $view_mode) {
+  // There is no bundle for this entity type so the bundle name is the
+  // entity_type name.
+  if (empty($bundle)) {
+    $bundle = $entity_type;
+  }
+
+  // Fetch the instance settings and default display settings.
+  $info = field_info_instance($entity_type, $field_name, $bundle);
+  $defaults = $info['display']['default']['settings'];
+
+  if (isset($info['display'][$view_mode]['settings'])) {
+    return $info['display'][$view_mode]['settings'] + $defaults;
+  }
+  else {
+    return $defaults;
+  }
+}
+
+/**
  * Returns information about existing bundles.
  *
  * @param $entity_type
@@ -611,6 +642,50 @@ function field_info_bundles($entity_type = NULL) {
     $bundles[$type] = $entity_info['bundles'];
   }
   return $bundles;
+}
+
+/**
+ * Returns a lightweight map of fields across bundles.
+ *
+ * The function only returns active, non deleted fields.
+ *
+ * @return
+ *   An array keyed by field name. Each value is an array with two entries:
+ *   - type: The field type.
+ *   - bundles: The bundles in which the field appears, as an array with entity
+ *     types as keys and the array of bundle names as values.
+ * Example:
+ * @code
+ * array(
+ *   'body' => array(
+ *     'bundles' => array(
+ *       'node' => array('page', 'article'),
+ *     ),
+ *     'type' => 'text_with_summary',
+ *   ),
+ * );
+ * @endcode
+ *
+ * @since 1.9.0
+ */
+function field_info_field_map() {
+  // Read from the "static" cache.
+  $field_info_cache = backdrop_static(__FUNCTION__, array());
+
+  if (!empty($field_info_cache)) {
+    return $field_info_cache;
+  }
+
+  // Rebuild static cache
+  $field_info_cache = array();
+  $field_info_fields = field_info_fields();
+
+  foreach ($field_info_fields as $field_name => $field_info) {
+    $field_info_cache[$field_name]['type'] = $field_info['type'];
+    $field_info_cache[$field_name]['bundles'] = $field_info['bundles'];
+  }
+
+  return $field_info_cache;
 }
 
 /**
@@ -725,13 +800,13 @@ function field_info_instance($entity_type, $field_name, $bundle_name) {
  *     'name_of_pseudo_field_component' => array(
  *       'label' => The human readable name of the component,
  *       'description' => A short description of the component content,
- *       // One entry per view mode, including the 'default' mode:
+ *       // One entry per display mode, including the 'default' mode:
  *       'display' => array(
  *         'default' => array(
  *           'weight' => The weight of the component in displayed entities in
- *             this view mode,
+ *             this display mode,
  *           'visible' => TRUE if the component is visible, FALSE if hidden, in
- *             displayed entities in this view mode,
+ *             displayed entities in this display mode,
  *         ),
  *         'teaser' => array(
  *           // ...
@@ -775,7 +850,7 @@ function field_info_extra_fields($entity_type, $bundle, $context) {
  *   The bundle name.
  * @param $context
  *   The context for which the maximum weight is requested. Either 'form', or
- *   the name of a view mode.
+ *   the name of a display mode.
  * @return
  *   The maximum weight of the entity's components, or NULL if no components
  *   were found.

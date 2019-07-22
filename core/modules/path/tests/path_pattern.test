@@ -8,10 +8,25 @@
  * Helper test class with some added functions for testing.
  */
 class PathPatternTestHelper extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp(array $modules = array()) {
     $modules[] = 'path';
     $modules[] = 'taxonomy';
     parent::setUp($modules);
+
+    $this->backdropCreateContentType(array(
+      'type' => 'page',
+      'name' => 'Page',
+    ));
+    $this->backdropCreateContentType(array(
+      'type' => 'post',
+      'name' => 'Post',
+    ));
+    config('path.settings')
+      ->set('node_page_pattern', '[node:title]')
+      ->set('node_post_pattern', 'posts/[node:title]')
+      ->save();
   }
 
   function assertToken($type, $object, $token, $expected) {
@@ -170,11 +185,14 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $tests['this thing with that thing'] = 'thing-thing';
 
     // Test length truncation and duplicate separator removal.
-    $tests[' - Dave - Greg - Freso - Mike'] = 'dave-greg-freso-mike';
+    $tests[' - Dave – Greg — Freso - Mike'] = 'dave-greg-freso-mike';
 
     // Test that HTML tags are removed.
     $tests['This <span class="text">text</span> has <br /><a href="http://example.com"><strong>HTML tags</strong></a>.'] = 'text-has-html-tags';
     $tests[check_plain('This <span class="text">text</span> has <br /><a href="http://example.com"><strong>HTML tags</strong></a>.')] = 'text-has-html-tags';
+
+    // Test fancy single and double quotes are removed along with normal ones.
+    $tests['"double" “fancy” \'single\' ‘fancy’'] = 'double-fancy-single-fancy';
 
     foreach ($tests as $input => $expected) {
       $output = path_clean_string($input);
@@ -206,7 +224,6 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
       $output = path_clean_alias($input);
       $this->assertEqual($output, $expected, format_string("path_clean_alias('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
     }
-
   }
 
   /**
@@ -425,6 +442,8 @@ class PathPatternFunctionalTestHelper extends PathPatternTestHelper {
  * Test basic Path automatic URL alias functionality.
  */
 class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
+  protected $profile = 'standard';
+
   /**
    * Create a new content type with new path pattern.
    */
@@ -581,9 +600,9 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
 
     $edit = array(
       'action' => 'path_node_update_action',
-      "bulk_form[0]" => TRUE,
+      'bulk_form[1]' => TRUE,
     );
-    $this->backdropPost('admin/content', $edit, t('Execute'));
+    $this->backdropPost('admin/content', $edit, t('Execute'), array('query' => array('order' => 'type', 'sort' => 'asc')));
     $this->assertRaw(format_string('%action was applied to 1 item', array('%action' => 'Update content URL alias')));
 
     $this->assertEntityAlias('node', $node1, 'content/' . $node1->title);
@@ -835,6 +854,7 @@ class PathPatternLocaleTestCase extends PathPatternFunctionalTestHelper {
  * Bulk update functionality tests.
  */
 class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
+  protected $profile = 'standard';
   private $nodes;
 
   function testBulkUpdate() {

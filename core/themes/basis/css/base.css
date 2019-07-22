@@ -10,6 +10,7 @@
 body {
   font-size: 16px;
   line-height: 1.6;
+  color: #000001;
 }
 
 li {
@@ -21,11 +22,11 @@ figure {
 }
 
 blockquote {
-  border-left: 0.25rem solid #c6cad2; /* LTR */
+  border-left: 0.25rem solid #bbbbbb; /* LTR */
 }
 [dir="rtl"] blockquote {
   border-left: none;
-  border-right: 0.25rem solid #c6cad2;
+  border-right: 0.25rem solid #bbbbbb;
 }
 
 blockquote {
@@ -50,7 +51,7 @@ code {
 code {
   display: inline-block;
   padding: 0 0.375em;
-  border: 0.0625rem solid #c6cad2;
+  border: 0.0625rem solid #bbbbbb;
   background: #dee2ea;
 }
 
@@ -58,7 +59,7 @@ pre code {
   margin: 0;
   padding: 0.8em 1.3em;
   border: 0;
-  border-left: 0.25rem solid #c6cad2;
+  border-left: 0.25rem solid #bbbbbb;
   background: transparent;
 }
 
@@ -162,7 +163,7 @@ td {
 }
 
 th {
-  border-right: 0.0625rem solid #c6cad2;
+  border-right: 0.0625rem solid #bbbbbb;
   background: #dee2ea;
 }
 
@@ -179,12 +180,12 @@ table [aria-sort] a:after {
 }
 
 table [aria-sort="descending"] a:after {
-  border-top-color: #333;
+  border-top-color: #333333;
   border-bottom-width: 0;
 }
 
 table [aria-sort="ascending"] a:after {
-  border-bottom-color: #333;
+  border-bottom-color: #333333;
   border-top-width: 0;
 }
 
@@ -200,10 +201,20 @@ fieldset {
   max-width: 100%;
   margin: 1em 0;
   padding: 3.774em 0 0 0; /* LTR */
-  border: 0.125em solid #EAEAEA;
+  border: 0.125em solid #eaeaea;
   min-width: 0;
 }
 
 [dir="rtl"] fieldset {
   padding: 2.5em 0 0;
+}
+
+/**
+ * Clearfix text areas in case of floated contents
+ */
+.field-type-text-long:after,
+.field-type-text-with-summary:after {
+  content: '';
+  display: table;
+  clear: both;
 }

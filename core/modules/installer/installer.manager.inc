@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administrative screens and processing functions of the Installer module.
@@ -59,7 +58,7 @@
  * @see installer_menu()
  * @ingroup forms
  */
-function installer_manager_update_form($form, $form_state = array(), $context) {
+function installer_manager_update_form($form, $form_state, $context) {
   switch ($context) {
     case 'module':
       backdrop_set_title('Update modules');
@@ -176,7 +175,7 @@ function installer_manager_update_form($form, $form_state = array(), $context) {
     $entry['#attributes'] = array('class' => array('update-' . $type));
 
     // Backdrop CMS core needs to be upgraded manually.
-    $needs_manual = $project['project_type'] == 'core';
+    $needs_manual = ($project['project_type'] == 'core' && config_get('installer.settings', 'core_update') != TRUE);
 
     if ($needs_manual) {
       // There are no checkboxes in the 'Manual updates' table so it will be
@@ -201,10 +200,14 @@ function installer_manager_update_form($form, $form_state = array(), $context) {
     // appropriate subarray.
     switch ($project['project_type']) {
       case 'core':
-        // Core needs manual updates at this time.
-        $projects['manual'][$name] = $entry;
+        // Core needs manual updates if automatic not enabled.
+        if (config_get('installer.settings', 'core_update')) {
+          $projects['enabled'][$name] = $entry;
+        }
+        else {
+          $projects['manual'][$name] = $entry;
+        }
         break;
-
       case 'module':
       case 'theme':
       case 'layout':
@@ -269,7 +272,7 @@ function installer_manager_update_form($form, $form_state = array(), $context) {
 
   if (!empty($projects['manual'])) {
     $prefix = '<h2>' . t('Manual updates required') . '</h2>';
-    $prefix .= '<p>' . t('Updates of Backdrop CMS core using the web interface are not possible yet.') . '</p>';
+    $prefix .= '<p>' . t('Updates of Backdrop CMS core using the web interface are disabled.') . '</p>';
     $prefix .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org/" title="Home page with download option">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" title="Handbook article">Upgrading Backdrop CMS</a> document online.') . '</p>';
     $form['manual_updates'] = array(
       '#type' => 'markup',
@@ -668,7 +671,7 @@ function installer_manager_install_form_validate($form, &$form_state) {
       form_set_error('bulk', t('Sorry, none of the submitted names are valid.'));
     }
 
-    // This repetitious bit here exists because there is no way to query all 
+    // This repetitious bit here exists because there is no way to query all
     // projects at once from the server. So we compromise by searching each
     // project type using a large 'items_per_page' value to get all results.
     // Since we can only query the server by project, we ask for all modules
@@ -706,7 +709,7 @@ function installer_manager_install_form_validate($form, &$form_state) {
     }
 
     // If some of the submitted names were not valid projects first check to
-    // see if any at all were valid. If some were valid, we proceed with a 
+    // see if any at all were valid. If some were valid, we proceed with a
     // warning. If not were valid, we terminate with error.
     if ($not_found) {
       $project_names = array_diff($project_names, $not_found);

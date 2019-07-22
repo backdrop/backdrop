@@ -239,7 +239,7 @@ group = Common
 file = common.test
 
 [CommonURLUnitTestCase]
-name = URL checking tests
+name = URL checking unit tests
 description = Confirm URL parsing functions work correctly with various input.
 group = Common
 file = common.test
@@ -358,6 +358,12 @@ description = Test the format_date() function.
 group = Common
 file = common.test
 
+[CommonBackdropFormatXmlElementsUnitTestCase]
+name = Format XML Elements
+description = Tests the format_xml_elements() functionality.
+group = Common
+file = common.test
+
 [CommonBackdropAttributesUnitTestCase]
 name = HTML Attributes
 description = Tests the backdrop_attributes() functionality.
@@ -379,6 +385,12 @@ file = common.test
 [CommonBackdropAddFeedTestCase]
 name = backdrop_add_feed() tests
 description = Make sure that backdrop_add_feed() works correctly with various constructs.
+group = Common
+file = common.test
+
+[CommonBackdropSortUnitTest]
+name = backdrop_sort() tests
+description = Test that backdrop_sort() works correctly.
 group = Common
 file = common.test
 
@@ -949,6 +961,12 @@ file = form.test
 [FormUrlTestCase]
 name = Form API url
 description = Tests the form API url element.
+group = Form API
+file = form.test
+
+[FormTextareaTestCase]
+name = Form textarea
+description = Tests form textarea related functions.
 group = Form API
 file = form.test
 

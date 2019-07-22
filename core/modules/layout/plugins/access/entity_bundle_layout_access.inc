@@ -61,7 +61,7 @@ class EntityBundleLayoutAccess extends LayoutAccess {
       return t('Entity is a specific type.');
     }
 
-    return format_plural(count($names), '@entity is "@bundles"', '@entity is one of "@bundles"', array('@entity' => $entity_info['label'], '@bundles' => implode(', ', $names)));
+    return format_plural(count($names), '@entity is %bundles', '@entity is one of: %bundles', array('@entity' => $entity_info['bundle label'], '%bundles' => implode(', ', $names)));
   }
 
   /**

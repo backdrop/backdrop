@@ -16,19 +16,12 @@ class BlockLegacy extends Block {
    */
   protected function buildBlock() {
     if (!isset($this->content)) {
-      // The old block API does not expect fully built block objects, stub out a
-      // pseudo block for the time being.
-      $legacy_block = (object) array(
-        'module' => $this->module,
-        'delta' => $this->delta,
-      );
       // Simply contexts down to their raw data.
       $context_data = array();
       foreach ($this->contexts as $context_name => $context) {
         $context_data[$context_name] = $context->data;
       }
       $this->content = module_invoke($this->module, 'block_view', $this->delta, $this->settings['block_settings'], $context_data);
-      backdrop_alter(array('block_view', 'block_view_' . $this->module . '_' . str_replace('-', '_', $this->delta)), $this->content, $legacy_block, $this->settings['block_settings'], $context_data);
     }
     return $this->content;
   }

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the search module.
@@ -148,7 +147,7 @@ function search_schema() {
 /**
  * @addtogroup updates-7.x-to-1.x
  * @{
- */ 
+ */
 
 /**
  * Update search module to use the configuration system.
@@ -186,6 +185,20 @@ function search_update_1000() {
   update_variable_del('search_active_modules');
   update_variable_del('search_and_or_limit');
   update_variable_del('search_default_module');
+}
+
+/**
+ * Add the default value for the "search_logging" configuration value.
+ */
+function search_update_1001() {
+  $config = config('search.settings');
+  // Make loading search settings cache now that it may be used multiple times.
+  $config->set('_config_static', TRUE);
+  // Update the variable if upgrading from Drupal.
+  $config->set('search_logging', update_variable_get('search_logging', TRUE));
+  $config->save();
+
+  update_variable_del('search_logging');
 }
 
 /**

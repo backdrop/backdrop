@@ -43,10 +43,6 @@ function admin_bar_permission() {
       'title' => t('Access administration bar'),
       'description' => t('Display the administration bar at the top of each page.'),
     ),
-    'flush caches' => array(
-      'title' => t('Flush caches'),
-      'description' => t('Access links to flush caches in the administration bar.'),
-    ),
   );
 }
 

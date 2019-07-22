@@ -127,6 +127,15 @@ function template_preprocess_installer_browser_project_dialog(&$variables) {
   $variables['project_page'] = l(t('View on BackdropCMS.org'), 'https://backdropcms.org/project/' . $project['name']);
   $variables['description'] = _filter_htmlcorrector(filter_xss($project['description'], array('h2', 'p', 'a', 'ul', 'li', 'pre')));
   $variables['title'] = $project['title'];
+  $variables['image'] = FALSE;
+
+  // If the project has an image, render it.
+  if (!empty($project['image'])) {
+    $variables['image'] = theme('image', array(
+      'path' => $project['image'],
+      'alt' => $project['title'],
+    ));
+  }
 }
 
 /**
@@ -140,18 +149,38 @@ function template_preprocess_installer_browser_project(&$variables) {
   module_load_include('inc', 'installer', 'installer.browser');
   $project = $variables['project'];
 
+  $dialog_attributes = array(
+    'class' => array('use-ajax'),
+    'id' => 'title-ajax',
+    'data-dialog' => 'true',
+    'data-dialog-options' => json_encode(array('width' => 700, 'dialogClass' => 'project-dialog')),
+  );
+
+  // If the project has an image, render it.
+  $variables['image'] = FALSE;
+
+  if ($project['type'] == 'theme') {
+    if (!empty($project['image'])) {
+      $image = theme('image', array(
+        'path' => $project['image'],
+        'alt' => $project['title'],
+      ));
+    }
+    else {
+      // Add an element with a solid color a la google contacts.
+      $letter = mb_substr($project['title'], 0, 1);
+      $image = '<div class="placeholder">' . $letter . '</div>';
+    }
+
+    $variables['image'] = l($image,
+      'admin/installer/project/' . $project['name'],
+      array('attributes' => $dialog_attributes, 'html' => TRUE));
+  }
+
   $variables['title'] = l(
-    $project['title'], 
+    $project['title'],
     'admin/installer/project/' . $project['name'],
-    array(
-      'attributes' => array(
-        'class' => array('use-ajax'),
-        'id' => 'title-ajax',
-        'data-dialog' => 'true',
-        'data-dialog-options' => json_encode(array('width' => 700, 'dialogClass' => 'project-dialog')),
-      ), 
-    )
-  ); 
+    array('attributes' => $dialog_attributes));
   $variables['description'] = theme('installer_browser_project_description', array('project' => $project));
   $variables['last_updated'] = ($project['last updated']) ? t('Last Updated: @date', array('@date' => format_date($project['last updated'], 'long'))) : '';
 

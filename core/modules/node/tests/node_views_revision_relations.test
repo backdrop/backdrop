@@ -109,6 +109,11 @@ class NodeViewsRevisionRelationsTestCase extends ViewsSqlTest {
     $handler->display->display_options['fields']['nid']['table'] = 'node';
     $handler->display->display_options['fields']['nid']['field'] = 'nid';
     $handler->display->display_options['fields']['nid']['relationship'] = 'nid';
+    /* Sort by VID */
+    $handler->display->display_options['sorts']['vid']['id'] = 'vid';
+    $handler->display->display_options['sorts']['vid']['table'] = 'node_revision';
+    $handler->display->display_options['sorts']['vid']['field'] = 'vid';
+    $handler->display->display_options['sorts']['vid']['relationship'] = 'none';
     /* Contextual filter: Content revision: Nid */
     $handler->display->display_options['arguments']['nid']['id'] = 'nid';
     $handler->display->display_options['arguments']['nid']['table'] = 'node_revision';

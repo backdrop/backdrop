@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Interface translation summary, editing and deletion user interfaces.
@@ -172,12 +171,9 @@ function locale_translation_filters() {
 
   // Get all languages, except English
   backdrop_static_reset('language_list');
-  $languages = language_list(TRUE);
-  $language_options = array();
-  foreach ($languages as $langcode => $language) {
-    if ($langcode != 'en' || locale_translate_english()) {
-      $language_options[$langcode] = $language->name;
-    }
+  $language_options = language_list(TRUE, TRUE);
+  if (!locale_translate_english() && isset($language_options['en'])) {
+    unset($language_options['en']);
   }
 
   $filters['string'] = array(
@@ -237,7 +233,7 @@ function locale_translation_filter_form() {
   }
 
   $form['#attributes']['class'] = array('locale-translation-filter-form');
-  
+
   $form['filters']['actions'] = array(
     '#type' => 'actions',
     '#attributes' => array('class' => array('container-inline')),
@@ -358,7 +354,7 @@ function locale_translate_edit_form($form, &$form_state, $lid) {
  */
 function locale_translate_edit_form_validate($form, &$form_state) {
   require_once BACKDROP_ROOT . '/core/includes/locale.inc';
-  
+
   foreach ($form_state['values']['translations'] as $key => $value) {
     if (!locale_string_is_safe($value)) {
       form_set_error('translations', t('The submitted string contains disallowed HTML: %string', array('%string' => $value)));
@@ -380,7 +376,7 @@ function locale_translate_edit_form_submit($form, &$form_state) {
     $translation = db_query("SELECT translation FROM {locales_target} WHERE lid = :lid AND language = :language", array(':lid' => $lid, ':language' => $key))->fetchField();
     if (!empty($value)) {
       // Only update or insert if we have a value to use.
-      if (!empty($translation)) {
+      if (is_string($translation)) {
         db_update('locales_target')
           ->fields(array(
             'translation' => $value,
@@ -429,7 +425,7 @@ function locale_translate_delete_page($lid) {
     return backdrop_get_form('locale_translate_delete_form', $source);
   }
   else {
-    return backdrop_not_found();
+    return MENU_NOT_FOUND;
   }
 }
 

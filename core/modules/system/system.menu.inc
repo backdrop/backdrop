@@ -19,6 +19,7 @@ function system_menu_block_defaults($menu_name) {
     'level' => 1,
     'menu_name' => $menu_name,
     'style' => NULL,
+    'expand_all' => FALSE,
   );
   if ($menu_name == 'main-menu') {
     $defaults['depth'] = 1;
@@ -55,7 +56,6 @@ function system_menu_block_form($config) {
       'tree' => t('Hierarchical tree'),
     ),
     '#default_value' => empty($config['style']) ? 'tree' : $config['style'],
-    '#description' => t('The menu style may adjust how a menu is displayed, such as a tree of links or a dropdown.'),
   );
 
   $form['level'] = array(
@@ -73,7 +73,7 @@ function system_menu_block_form($config) {
       '8' => t('8th level'),
       '9' => t('9th level'),
     ),
-    '#description' => t('Blocks that start with the 1st level will always be visible. Blocks that start with the 2nd level or deeper will only be visible when the trail to the active menu item passes though the block’s starting level.'),
+    '#description' => t('The block will be visible only if the current page has its menu item at or below the level set here.'),
     '#states' => array(
       'visible' => array(
         'select[name="block_settings[style]"]' => array('value' => 'tree'),
@@ -100,6 +100,17 @@ function system_menu_block_form($config) {
     '#states' => array(
       'invisible' => array(
         'select[name="block_settings[style]"]' => array('value' => 'top_only'),
+      ),
+    ),
+  );
+  $form['expand_all'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show all menu links'),
+    '#default_value' => $config['expand_all'],
+    '#description' => t('When unchecked, only expanded or active trail menu links will be displayed.'),
+    '#states' => array(
+      'visible' => array(
+        'select[name="block_settings[style]"]' => array('value' => 'tree'),
       ),
     ),
   );
@@ -142,15 +153,19 @@ function system_menu_block_build(array $config) {
   }
 
   // Set defaults.
-  $config += array(
-    'style' => 'tree',
-    'level' => 1,
-    'depth' => 3,
-  );
+  $menu_name = str_replace('_', '-', $config['menu_name']);
+  $config += system_menu_block_defaults($menu_name);
+  if (empty($config['style'])) {
+    $config['style'] = 'tree';
+  }
+
+  // Always expand dropdown style output.
+  if ($config['style'] === 'dropdown') {
+    $config['expand_all'] = TRUE;
+  }
 
   // Get the default block name.
   backdrop_static_reset('menu_block_set_title');
-  $menu_name = str_replace('_', '-', $config['menu_name']);
   system_menu_block_set_title($menu_names[$menu_name]);
 
   // Get the raw menu tree data.

@@ -1,6 +1,7 @@
 
 #permissions td.module {
   font-weight: bold;
+  background: #dddddd;
 }
 #permissions td.permission {
   padding-left: 1.5em; /* LTR */
@@ -36,9 +37,28 @@
 }
 
 /**
+ * Password toggle.
+ */
+.password-toggle-wrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+.password-toggle {
+  position: absolute;
+  top: -2em;
+  right: 0; /* LTR */
+  font-size: 80%;
+}
+[dir="rtl"] .password-toggle {
+  right: auto;
+  left: 0;
+}
+
+/**
  * Password strength indicator.
  */
-.password-confirm-wrapper {
+.password-strength-wrapper {
   position: relative;
   display: inline-block;
   max-width: 100%;
@@ -51,6 +71,19 @@
 .password-strength.empty {
   visibility: hidden;
   display: none;
+}
+.password-strength-title {
+  float: left; /* LTR */
+}
+.password-strength-text {
+  padding-left: 5px; /* LTR */
+}
+[dir="rtl"] .password-strength-title {
+  float: right;
+}
+[dir="rtl"] .password-strength-text {
+  padding-left: 0;
+  padding-right: 5px;
 }
 .password-indicator {
   background-color: #EEE;
@@ -96,6 +129,10 @@
 .password-strength.strong .password-strength-text {
   color: #008000;
 }
+
+/**
+ * Password confirmation field.
+ */
 .password-match {
   display: block;
 }

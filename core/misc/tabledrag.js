@@ -20,7 +20,7 @@ Backdrop.behaviors.tableDrag = {
         Backdrop.tableDrag[base] = new Backdrop.tableDrag(table[0], settings.tableDrag[base]);
        }
      }
- 
+
      for (var base in settings.tableDrag) {
        if (settings.tableDrag.hasOwnProperty(base)) {
          initTableDrag($(context).find('#' + base).once('tabledrag'), base);
@@ -129,9 +129,9 @@ Backdrop.tableDrag = function (table, tableSettings) {
  * Initialize columns containing form elements to be hidden by default,
  * according to the settings for this tableDrag instance.
  *
- * Identify and mark each cell with a CSS class so we can easily toggle
- * show/hide it. Finally, hide columns if user does not have a
- * 'Backdrop.tableDrag.showWeight' cookie.
+ * Identify and mark each cell with a CSS class so we can toggle show/hide it.
+ * Finally, hide columns if user does not have a 'Backdrop.tableDrag.showWeight'
+ * cookie.
  */
 Backdrop.tableDrag.prototype.initColumns = function () {
   var $table = $(this.table), hidden, cell, columnIndex;
@@ -546,12 +546,12 @@ Backdrop.tableDrag.prototype.dragRow = function (event, self) {
     if (self.indentEnabled) {
       var xDiff = self.currentPointerCoords.x - self.dragObject.indentPointerPos.x;
       // Set the number of indentations the pointer has been moved left or right.
-      var indentDiff = Math.round(xDiff / self.indentAmount * self.rtl);
+      var indentDiff = Math.round(xDiff / self.indentAmount);
       // Indent the row with our estimated diff, which may be further
       // restricted according to the rows around this row.
       var indentChange = self.rowObject.indent(indentDiff);
       // Update table and pointer indentations.
-      self.dragObject.indentPointerPos.x += self.indentAmount * indentChange * self.rtl;
+      self.dragObject.indentPointerPos.x += self.indentAmount * indentChange;
       self.indentCount = Math.max(self.indentCount, self.rowObject.indents);
     }
 
@@ -623,12 +623,20 @@ Backdrop.tableDrag.prototype.dropRow = function (event, self) {
  * Get the coordinates from the event (allowing for browser differences).
  */
 Backdrop.tableDrag.prototype.pointerCoords = function (event) {
+  // Complete support for pointer events was only introduced to jQuery in
+  // version 1.11.1; between versions 1.7 and 1.11.0 pointer events have the
+  // clientX and clientY properties undefined. In those cases, the properties
+  // must be retrieved from the event.originalEvent object instead.
+  var clientX = event.clientX || event.originalEvent.clientX;
+  var clientY = event.clientY || event.originalEvent.clientY;
+
   if (event.pageX || event.pageY) {
     return { x: event.pageX, y: event.pageY };
   }
+
   return {
-    x: event.clientX + document.body.scrollLeft - document.body.clientLeft,
-    y: event.clientY + document.body.scrollTop  - document.body.clientTop
+    x: clientX + document.body.scrollLeft - document.body.clientLeft,
+    y: clientY + document.body.scrollTop  - document.body.clientTop
   };
 };
 

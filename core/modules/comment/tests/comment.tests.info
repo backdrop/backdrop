@@ -82,6 +82,12 @@ description = Tests that comments behave correctly when the node is changed.
 group = Comment
 file = comment.test
 
+[CommentNodeAutoCloserTestCase]
+name = Comment with auto closer
+description = Tests that comments behave correctly when the auto closer is enabled.
+group = Comment
+file = comment.test
+
 [CommentViewsHandlerArgumentUserUidTest]
 name = Tests handler argument_comment_user_uid
 description = Tests the user posted or commented argument Views handler.

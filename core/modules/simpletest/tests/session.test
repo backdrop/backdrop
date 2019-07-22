@@ -50,7 +50,7 @@ class SessionTestCase extends BackdropWebTestCase {
       'name' => $user->name,
       'pass' => $user->pass_raw
     );
-    $this->backdropPost('user', $edit, t('Log in'));
+    $this->backdropPost('user/login', $edit, t('Log in'));
     $this->backdropGet('user');
     $pass = $this->assertText($user->name, format_string('Found name: %name', array('%name' => $user->name)), 'User login');
     $this->_logged_in = $pass;
@@ -309,17 +309,17 @@ class SessionHttpsTestCase extends BackdropWebTestCase {
 
     // Test HTTPS session handling by altering the form action to submit the
     // login form through https.php, which creates a mock HTTPS request.
-    $this->backdropGet('user');
+    $this->backdropGet('user/login');
     $form = $this->xpath('//form[@id="user-login"]');
-    $form[0]['action'] = $this->httpsUrl('user');
+    $form[0]['action'] = $this->httpsUrl('user/login');
     $edit = array('name' => $user->name, 'pass' => $user->pass_raw);
     $this->backdropPost(NULL, $edit, t('Log in'));
 
     // Test a second concurrent session.
     $this->curlClose();
-    $this->backdropGet('user');
+    $this->backdropGet('user/login');
     $form = $this->xpath('//form[@id="user-login"]');
-    $form[0]['action'] = $this->httpsUrl('user');
+    $form[0]['action'] = $this->httpsUrl('user/login');
     $this->backdropPost(NULL, $edit, t('Log in'));
 
     // Check secure cookie on secure page.
@@ -352,9 +352,9 @@ class SessionHttpsTestCase extends BackdropWebTestCase {
     // login form through http.php, which creates a mock HTTP request on HTTPS
     // test environments.
     $this->curlClose();
-    $this->backdropGet('user');
+    $this->backdropGet('user/login');
     $form = $this->xpath('//form[@id="user-login"]');
-    $form[0]['action'] = $this->httpUrl('user');
+    $form[0]['action'] = $this->httpUrl('user/login');
     $edit = array('name' => $user->name, 'pass' => $user->pass_raw);
     $this->backdropPost(NULL, $edit, t('Log in'));
     $this->backdropGet($this->httpUrl('admin/config'));
@@ -396,13 +396,13 @@ class SessionHttpsTestCase extends BackdropWebTestCase {
     $this->backdropGet('user/password');
     $form = $this->xpath('//form[@id="user-pass"]');
     $this->assertNotEqual(substr($form[0]['action'], 0, 6), 'https:', 'Password request form action is not secure');
-    $form[0]['action'] = $this->httpsUrl('user');
+    $form[0]['action'] = $this->httpsUrl('user/login');
 
     // Check that user login form action is secure.
-    $this->backdropGet('user');
+    $this->backdropGet('user/login');
     $form = $this->xpath('//form[@id="user-login"]');
     $this->assertEqual(substr($form[0]['action'], 0, 6), 'https:', 'Login form action is secure');
-    $form[0]['action'] = $this->httpsUrl('user');
+    $form[0]['action'] = $this->httpsUrl('user/login');
 
     $edit = array(
       'name' => $user->name,
@@ -456,9 +456,9 @@ class SessionHttpsTestCase extends BackdropWebTestCase {
     $this->backdropGet($this->httpsUrl('session-test/set/1'));
 
     // Mock a login to the secure site using the secure session cookie.
-    $this->backdropGet('user');
+    $this->backdropGet('user/login');
     $form = $this->xpath('//form[@id="user-login"]');
-    $form[0]['action'] = $this->httpsUrl('user');
+    $form[0]['action'] = $this->httpsUrl('user/login');
     $this->backdropPost(NULL, $edit, t('Log in'));
 
     // Test that the user is also authenticated on the insecure site.
@@ -491,9 +491,9 @@ class SessionHttpsTestCase extends BackdropWebTestCase {
       'name' => $admin_user->name,
       'pass' => $admin_user->pass_raw
     );
-    $this->backdropGet('user');
+    $this->backdropGet('user/login');
     $form = $this->xpath('//form[@id="user-login"]');
-    $form[0]['action'] = $this->httpUrl('user');
+    $form[0]['action'] = $this->httpUrl('user/login');
     $this->backdropPost(NULL, $edit, t('Log in'));
 
     $this->curlClose();
@@ -503,14 +503,14 @@ class SessionHttpsTestCase extends BackdropWebTestCase {
       'name' => $standard_user->name,
       'pass' => $standard_user->pass_raw
     );
-    $this->backdropGet('user');
+    $this->backdropGet('user/login');
     $form = $this->xpath('//form[@id="user-login"]');
-    $form[0]['action'] = $this->httpsUrl('user');
+    $form[0]['action'] = $this->httpsUrl('user/login');
     $this->backdropPost(NULL, $edit, t('Log in'));
 
     // Make the secure session cookie blank.
     curl_setopt($this->curlHandle, CURLOPT_COOKIE, "$secure_session_name=");
-    $this->backdropGet($this->httpsUrl('user'));
+    $this->backdropGet($this->httpsUrl('user/login'));
     $this->assertNoText($admin_user->name, 'User is not logged in as admin');
     $this->assertNoText($standard_user->name, "The user's own name is not displayed because the invalid session cookie has logged them out.");
   }
@@ -541,7 +541,7 @@ class SessionHttpsTestCase extends BackdropWebTestCase {
    * Builds a URL for submitting a mock HTTPS request to HTTP test environments.
    *
    * @param $url
-   *   A Backdrop path such as 'user'.
+   *   A Backdrop path such as 'user/login'.
    *
    * @return
    *   An absolute URL.
@@ -555,7 +555,7 @@ class SessionHttpsTestCase extends BackdropWebTestCase {
    * Builds a URL for submitting a mock HTTP request to HTTPS test environments.
    *
    * @param $url
-   *   A Backdrop path such as 'user'.
+   *   A Backdrop path such as 'user/login'.
    *
    * @return
    *   An absolute URL.

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines numeric field types.
@@ -141,6 +140,13 @@ function number_field_presave($entity_type, $entity, $field, $instance, $langcod
     foreach ($items as $delta => $item) {
       if (isset($item['value'])) {
         $items[$delta]['value'] = round($item['value'], $field['settings']['scale']);
+      }
+    }
+  }
+  if ($field['type'] == 'number_float') {
+    foreach ($items as $delta => $item) {
+      if (isset($item['value'])) {
+        $items[$delta]['value'] = floatval($item['value']);
       }
     }
   }

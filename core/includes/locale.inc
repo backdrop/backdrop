@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administration functions for locale.module.
@@ -361,14 +360,14 @@ function locale_language_url_fallback($languages = NULL, $language_type = LANGUA
  */
 function locale_language_switcher_url($type, $path) {
   // Get the enabled languages only.
-  $languages = language_list(TRUE);
+  $language_list = language_list(TRUE, TRUE);
   $links = array();
 
-  foreach ($languages as $language) {
-    $links[$language->langcode] = array(
+  foreach ($language_list as $langcode => $label) {
+    $links[$langcode] = array(
       'href'       => $path,
-      'title'      => $language->name,
-      'language'   => $language,
+      'title'      => $label,
+      'language'   => language_load($langcode),
       'attributes' => array('class' => array('language-link')),
     );
   }
@@ -386,17 +385,16 @@ function locale_language_switcher_session($type, $path) {
   $language_query = isset($_SESSION[$param]) ? $_SESSION[$param] : $GLOBALS[$type]->langcode;
 
   // Get the enabled languages only.
-  $languages = language_list(TRUE);
+  $language_list = language_list(TRUE, TRUE);
   $links = array();
 
   $query = $_GET;
   unset($query['q']);
 
-  foreach ($languages as $language) {
-    $langcode = $language->langcode;
+  foreach ($language_list as $langcode => $label) {
     $links[$langcode] = array(
       'href'       => $path,
-      'title'      => $language->name,
+      'title'      => $label,
       'attributes' => array('class' => array('language-link')),
       'query'      => $query,
     );
@@ -443,11 +441,31 @@ function locale_language_url_rewrite_url(&$path, &$options) {
       case LANGUAGE_NEGOTIATION_URL_DOMAIN:
         $domains = locale_language_negotiation_url_domains();
         if (!empty($domains[$options['language']->langcode])) {
+          // Save the original base URL. If it contains a port, we need to
+          // retain it below.
+          if (!empty($options['base_url'])) {
+            // The colon in the URL scheme messes up the port checking below.
+            $normalized_base_url = str_replace(array('https://', 'http://'), '', $options['base_url']);
+          }
+
           // Ask for an absolute URL with our modified base_url.
           global $is_https;
           $url_scheme = ($is_https) ? 'https://' : 'http://';
           $options['absolute'] = TRUE;
           $options['base_url'] = $url_scheme . $domains[$options['language']->langcode];
+
+          // In case either the original base URL or the HTTP host contains a
+          // port, retain it.
+          $http_host = $_SERVER['HTTP_HOST'];
+          if (isset($normalized_base_url) && strpos($normalized_base_url, ':') !== FALSE) {
+            list($host, $port) = explode(':', $normalized_base_url);
+            $options['base_url'] .= ':' . $port;
+          }
+          elseif (strpos($http_host, ':') !== FALSE) {
+            list($host, $port) = explode(':', $http_host);
+            $options['base_url'] .= ':' . $port;
+          }
+
           if (isset($options['https']) && settings_get('https', FALSE)) {
             if ($options['https'] === TRUE) {
               $options['base_url'] = str_replace('http://', 'https://', $options['base_url']);

@@ -81,13 +81,20 @@ function image_menu() {
     'weight' => 2,
     'file' => 'image.admin.inc',
   );
-  $items['admin/config/media/image-styles/edit/%image_style'] = array(
-    'title' => 'Edit style',
+  $items['admin/config/media/image-styles/configure/%image_style'] = array(
+    'title' => 'Configure image style',
     'description' => 'Configure an image style.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('image_style_form', 5),
     'access arguments' => array('administer image styles'),
     'file' => 'image.admin.inc',
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/media/image-styles/edit/%image_style'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/media/image-styles/configure/%image_style'),
+    'access arguments' => array('administer image styles'),
+    'type' => MENU_CALLBACK,
   );
   $items['admin/config/media/image-styles/delete/%image_style'] = array(
     'title' => 'Delete style',
@@ -107,16 +114,24 @@ function image_menu() {
     'access arguments' => array('administer image styles'),
     'file' => 'image.admin.inc',
   );
-  $items['admin/config/media/image-styles/edit/%image_style/effects/%image_effect'] = array(
-    'title' => 'Edit image effect',
-    'description' => 'Edit an existing effect within a style.',
+  $items['admin/config/media/image-styles/configure/%image_style/effects/%image_effect'] = array(
+    'title' => 'Configure image effect',
+    'description' => 'Configure an existing effect within a style.',
     'load arguments' => array(5),
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('image_effect_form', 5, 7),
     'access arguments' => array('administer image styles'),
     'file' => 'image.admin.inc',
   );
-  $items['admin/config/media/image-styles/edit/%image_style/effects/%image_effect/delete'] = array(
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/media/image-styles/edit/%image_style/effects/%image_effect'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/media/image-styles/configure/%image_style/effects/%image_effect'),
+    'load arguments' => array(5),
+    'access arguments' => array('administer image styles'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/config/media/image-styles/configure/%image_style/effects/%image_effect/delete'] = array(
     'title' => 'Delete image effect',
     'description' => 'Delete an existing effect from a style.',
     'load arguments' => array(5),
@@ -125,7 +140,15 @@ function image_menu() {
     'access arguments' => array('administer image styles'),
     'file' => 'image.admin.inc',
   );
-  $items['admin/config/media/image-styles/edit/%image_style/add/%image_effect_definition'] = array(
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/media/image-styles/edit/%image_style/effects/%image_effect/delete'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/media/image-styles/configure/%image_style/effects/%image_effect/delete'),
+    'load arguments' => array(5),
+    'access arguments' => array('administer image styles'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/config/media/image-styles/configure/%image_style/add/%image_effect_definition'] = array(
     'title' => 'Add image effect',
     'description' => 'Add a new effect to a style.',
     'load arguments' => array(5),
@@ -133,6 +156,14 @@ function image_menu() {
     'page arguments' => array('image_effect_form', 5, 7),
     'access arguments' => array('administer image styles'),
     'file' => 'image.admin.inc',
+  );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
+  $items['admin/config/media/image-styles/edit/%image_style/add/%image_effect_definition'] = array(
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/media/image-styles/configure/%image_style/add/%image_effect_definition'),
+    'load arguments' => array(5),
+    'access arguments' => array('administer image styles'),
+    'type' => MENU_CALLBACK,
   );
 
   return $items;
@@ -437,7 +468,7 @@ function image_field_update_instance($instance, $prior_instance) {
  * Clear cached versions of a specific file in all styles.
  *
  * @param $path
- *   The Backdrop file path to the original image.
+ *   The URI or path to the original image.
  */
 function image_path_flush($path) {
   $styles = image_styles();

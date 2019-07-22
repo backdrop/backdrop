@@ -1,4 +1,6 @@
 name = Update test base theme
 description = Test theme which acts as a base theme for other test subthemes.
+type = theme
+version = BACKDROP_VERSION
 backdrop = 1.x
 hidden = TRUE

@@ -87,7 +87,7 @@ function theme_field_ui_table($variables) {
 }
 
 /**
- * Returns HTML for the entity view mode table.
+ * Returns HTML for the entity display mode table.
  *
  * @param $variables
  *   An associative array containing:
@@ -105,15 +105,15 @@ function theme_field_ui_view_modes($variables) {
   $rows = array();
 
   $header = array(
-    array('data' => t('View modes')),
+    array('data' => t('Display modes')),
     array('data' => t('Machine name'), 'class' => array('priority-low')),
     array('data' => t('Operations'), 'class' => array('operations')),
   );
 
   $label = t('Default');
-  $label_desc = t('Used for all view modes which are not customized');
+  $label_desc = t('Used for all display modes which are not customized');
 
-  // Add the row for the default view mode.
+  // Add the row for the default display mode.
   $row = array();
   $row['label'] = $label . '<div class="description">' . $label_desc . '</div>';
   $row['machine'] = t('default');
@@ -158,7 +158,7 @@ function theme_field_ui_view_modes($variables) {
     else {
       $default_count++;
       $row_classes[] = 'uses-default';
-      $row['label'] .= '&nbsp;<small>(<em>' . t('Uses the Default view mode') . '</em>)</small>';
+      $row['label'] .= '&nbsp;<small>(<em>' . t('Uses the Default display mode') . '</em>)</small>';
       if (user_access('administer view modes')) {
         $operations['enable'] = array(
           'title' => t('Enable'),

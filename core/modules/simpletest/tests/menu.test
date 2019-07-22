@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides SimpleTests for menu.inc.
@@ -190,7 +189,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     $this->backdropLogout();
 
     // Make sure the maintenance mode can be bypassed using hook_menu_site_status_alter().
-    $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.core', 'site_name')));
+    $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get_translated('system.core', 'site_name')));
     $this->backdropGet('node');
     $this->assertText($offline_message);
     $this->backdropGet('menu_login_callback');
@@ -229,8 +228,8 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     $this->backdropLogin($loggedInUser);
 
     $this->backdropGet('user/login');
-    // Check that we got to 'user'.
-    $this->assertTrue($this->url == url('user', array('absolute' => TRUE)), "Logged-in user redirected to q=user on accessing q=user/login");
+    // Check that we got to 'user/[UID]'.
+    $this->assertTrue($this->url == url('user/' . $loggedInUser->uid, array('absolute' => TRUE)), "Logged-in user redirected to q=user on accessing q=user/login");
 
     // user/register should redirect to user/UID/edit.
     $this->backdropGet('user/register');
@@ -1271,9 +1270,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       );
     }
 
-    // Verify breadcrumbs on user and user/%.
-    // We need to log back in and out below, and cannot simply grant the
-    // 'administer users' permission, since user_page() makes your head explode.
+    // Verify breadcrumbs on user/login and user/%.
     user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array(
       'access user profiles',
     ));
@@ -1282,12 +1279,11 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     // Verify that there is no breadcrumb on front page.
     $this->assertBreadcrumb('<front>', array());
 
-    // Verify breadcrumb on user pages (without menu link) for anonymous user.
+    // Verify breadcrumb on user pages for anonymous user.
     $trail = $home;
-    $this->assertBreadcrumb('user', $trail, t('Log in'));
     $this->assertBreadcrumb('user/' . $this->admin_user->uid, $trail, $this->admin_user->name);
 
-    // Verify breadcrumb on user pages (without menu link) for registered users.
+    // Verify breadcrumb on user pages for registered users.
     $this->backdropLogin($this->admin_user);
     $trail = $home;
     $this->assertBreadcrumb('user', $trail, $this->admin_user->name);
@@ -1304,8 +1300,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     ));
     $this->backdropLogin($this->web_user);
 
-    // Verify correct breadcrumb and page title on another user's account pages
-    // (without menu link).
+    // Verify correct breadcrumb and page title on another user's account pages.
     $trail = $home;
     $this->assertBreadcrumb('user/' . $this->admin_user->uid, $trail, $this->admin_user->name);
     $trail += array(
@@ -1313,8 +1308,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     );
     $this->assertBreadcrumb('user/' . $this->admin_user->uid . '/edit', $trail, $this->admin_user->name);
 
-    // Verify correct breadcrumb and page title when viewing own user account
-    // pages (without menu link).
+    // Verify correct breadcrumb and page title when viewing own user account.
     $trail = $home;
     $this->assertBreadcrumb('user/' . $this->web_user->uid, $trail, $this->web_user->name);
     $trail += array(
@@ -1322,20 +1316,8 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     );
     $this->assertBreadcrumb('user/' . $this->web_user->uid . '/edit', $trail, $this->web_user->name);
 
-    // Add a Main menu links for 'user' and $this->admin_user.
-    // Although it may be faster to manage these links via low-level API
-    // functions, there's a lot that can go wrong in doing so.
+    // Add a Main menu link for $this->admin_user.
     $this->backdropLogin($this->admin_user);
-    $edit = array(
-      'link_title' => 'Log in',
-      'link_path' => 'user',
-    );
-    $this->backdropPost("admin/structure/menu/manage/$menu/add", $edit, t('Save'));
-    $link_user = db_query('SELECT * FROM {menu_links} WHERE link_title = :title AND link_path = :href', array(
-      ':title' => $edit['link_title'],
-      ':href' => $edit['link_path'],
-    ))->fetchAssoc();
-
     $edit = array(
       'link_title' => $this->admin_user->name . ' link',
       'link_path' => 'user/' . $this->admin_user->uid,
@@ -1346,13 +1328,9 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       ':href' => $edit['link_path'],
     ))->fetchAssoc();
 
-    // Verify expected breadcrumbs for the two separate links.
+    // Verify expected breadcrumbs.
     $this->backdropLogout();
     $trail = $home;
-    $tree = array(
-      $link_user['link_path'] => $link_user['link_title'],
-    );
-    $this->assertBreadcrumb('user', $trail, $link_user['link_title'], $tree);
     $tree = array(
       $link_admin_user['link_path'] => $link_admin_user['link_title'],
     );
@@ -1364,25 +1342,30 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     );
     $this->assertBreadcrumb('user/' . $this->admin_user->uid . '/edit', $trail, $link_admin_user['link_title'], $tree, FALSE);
 
-    // Move 'user/%' below 'user' and verify again.
+    // Add 'user/%/edit' below 'user/%' and verify again.
+    $this->backdropLogin($this->admin_user);
+
     $edit = array(
-      'parent' => "$menu:{$link_user['mlid']}",
+      'link_title' => $this->admin_user->name . ' edit',
+      'link_path' => 'user/' . $this->admin_user->uid . '/edit',
     );
-    $this->backdropPost("admin/structure/menu/item/{$link_admin_user['mlid']}/edit", $edit, t('Save'));
+    $this->backdropPost("admin/structure/menu/manage/$menu/add", $edit, t('Save'));
+
+    $link_admin_user_edit = db_query('SELECT * FROM {menu_links} WHERE link_title = :title AND link_path = :href', array(
+      ':title' => $edit['link_title'],
+      ':href' => $edit['link_path'],
+    ))->fetchAssoc();
+
+    $edit = array(
+      'parent' => "$menu:{$link_admin_user['mlid']}",
+    );
+    $this->backdropPost("admin/structure/menu/item/{$link_admin_user_edit['mlid']}/edit", $edit, t('Save'));
 
     $this->backdropLogout();
     $trail = $home;
-    $tree = array(
-      $link_user['link_path'] => $link_user['link_title'],
-    );
-    $this->assertBreadcrumb('user', $trail, $link_user['link_title'], $tree);
-    $trail += array(
-      $link_user['link_path'] => $link_user['link_title'],
-    );
     $tree += array(
       $link_admin_user['link_path'] => $link_admin_user['link_title'],
     );
-    $this->assertBreadcrumb('user/' . $this->admin_user->uid, $trail, $link_admin_user['link_title'], $tree);
 
     $this->backdropLogin($this->admin_user);
     $trail += array(

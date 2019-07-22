@@ -108,6 +108,22 @@ function installer_browser_install_queue_remove($project_name) {
 }
 
 /**
+ * Removes a project from the list of recently installed projects.
+ *
+ * @param string[] $project_names
+ *   A list of projects to remove from the installed project list.
+ *
+ * @since 1.10.1
+ */
+function installer_browser_installed_projects_remove($project_names) {
+  foreach ($project_names as $project_name) {
+    if (isset($_SESSION['installer_browser_installed_projects'][$project_name])) {
+      unset($_SESSION['installer_browser_installed_projects'][$project_name]);
+    }
+  }
+}
+
+/**
  * Clears the install queue.
  *
  * Removes all projects from the $_SESSION variables.

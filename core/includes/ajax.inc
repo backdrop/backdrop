@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions for use with Backdrop's Ajax framework.
@@ -171,8 +170,8 @@
  * class to a link, the link will be loaded via an Ajax call. When using this
  * method, the href of the link can contain '/nojs/' as part of the path. When
  * the Ajax framework makes the request, it will convert this to '/ajax/'.
- * The server is then able to easily tell if this request was made through an
- * actual Ajax request or in a degraded state, and respond appropriately.
+ * The server is then able to tell if this request was made through an actual
+ * Ajax request or in a degraded state, and respond appropriately.
  *
  * Similarly, submit buttons can be given the class 'use-ajax-submit'. The
  * form will then be submitted via Ajax to the path specified in the #action.
@@ -251,7 +250,7 @@ function ajax_render($commands = array()) {
       $items[$type] = $function();
       backdrop_alter($type, $items[$type]);
       // @todo Inline CSS and JS items are indexed numerically. These can't be
-      //   reliably diffed with array_diff_key(), since the number can change
+      //   reliably differed with array_diff_key(), since the number can change
       //   due to factors unrelated to the inline content, so for now, we strip
       //   the inline items from Ajax responses, and can add support for them
       //   when backdrop_add_css() and backdrop_add_js() are changed to use a
@@ -590,7 +589,7 @@ function ajax_prepare_response($page_callback_result) {
         break;
 
       case MENU_SITE_OFFLINE:
-        $commands[] = ajax_command_alert(filter_xss_admin(t(config_get('system.core', 'maintenance_mode_message'), array('@site' => config_get('system.core', 'site_name')))));
+        $commands[] = ajax_command_alert(filter_xss_admin(token_replace(config_get_translated('system.core', 'maintenance_mode_message'))));
         break;
     }
   }

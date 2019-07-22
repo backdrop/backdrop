@@ -57,7 +57,9 @@ function user_pass() {
 }
 
 /**
- * Validate handler for user_pass().
+ * Form validation handler for user_pass().
+ *
+ * @see user_pass_submit()
  */
 function user_pass_validate($form, &$form_state) {
   $name = trim($form_state['values']['name']);
@@ -78,7 +80,9 @@ function user_pass_validate($form, &$form_state) {
 }
 
 /**
- * Submit handler for user_pass().
+ * Form submission handler for user_pass().
+ *
+ * @see user_pass_validate()
  */
 function user_pass_submit($form, &$form_state) {
   global $language;
@@ -300,14 +304,18 @@ function user_profile_form($form, &$form_state, $account) {
 }
 
 /**
- * Validate handler for user_profile_form().
+ * Form validation handler for user_profile_form().
+ *
+ * @see user_profile_form_submit()
  */
 function user_profile_form_validate($form, &$form_state) {
   entity_form_field_validate('user', $form, $form_state);
 }
 
 /**
- * Submit handler for user_profile_form().
+ * Form submission handler for user_profile_form().
+ *
+ * @see user_profile_form_validate()
  */
 function user_profile_form_submit($form, &$form_state) {
   $account = $form_state['user'];
@@ -321,7 +329,7 @@ function user_profile_form_submit($form, &$form_state) {
   $account->save();
   $form_state['values']['uid'] = $account->uid;
 
-  if (!empty($edit['pass'])) {
+  if (strlen(trim($form_state['values']['pass'])) > 0) {
     // Remove the password reset tag since a new password was saved.
     unset($_SESSION['pass_reset_'. $account->uid]);
   }
@@ -549,11 +557,19 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
  */
 function user_page() {
   global $user;
+
+  // To help users upgrading from versions of Backdrop prior to 1.9.0 where this
+  // menu callback was used on 'user/login' as well as 'user', rebuild the
+  // menu automatically if this page is loaded at 'user/login'.
+  // See https://github.com/backdrop/backdrop-issues/issues/260.
+  if ($_GET['q'] === 'user/login') {
+    menu_rebuild();
+  }
+
   if ($user->uid) {
-    menu_set_active_item('user/' . $user->uid);
-    return menu_execute_active_handler(NULL, FALSE, 'menu_default_route_handler');
+    backdrop_goto('user/' . $user->uid);
   }
   else {
-    return backdrop_get_form('user_login');
+    backdrop_goto('user/login');
   }
 }
