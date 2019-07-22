@@ -46,7 +46,7 @@ class DashboardCreateBlock extends Block {
 
     $header = array(
       array('data' => t('Content type')),
-      array('data' => t('Create')),
+      array('data' => t('Add new')),
       array('data' => t('Manage')),
     );
     $rows = array();
@@ -57,7 +57,7 @@ class DashboardCreateBlock extends Block {
         // If no types are specified, show all types.
         if (empty($this->settings['types']) || in_array($machine, $this->settings['types'])) {
           $type_url_string = str_replace('_', '-', $node_type->type);
-          $create = l(t('Create', array('@type' => t($node_type->name))), 'node/add/' . $type_url_string, array('html' => TRUE));
+          $create = l(t('Add new', array('@type' => t($node_type->name))), 'node/add/' . $type_url_string, array('html' => TRUE));
           $manage = l(t('Manage', array('@type' => t($node_type->name))), 'admin/content/node', array('html' => TRUE, 'query' => array('status' => 'All', 'type' => $type_url_string)));
           $rows[] = array(
             'data' => array(
