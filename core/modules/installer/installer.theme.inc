@@ -203,19 +203,97 @@ function template_preprocess_installer_browser_project(&$variables) {
   $variables['extras'] = implode(' | ', $extras);
 
   // Check if the project is installed.
-  $found = backdrop_get_filename($project['type'], $project['name']);
-  if (_installer_browser_is_project_enabled($project['type'], $project['name'])) {
-    $variables['status'] = '<div class="install-disabled">Already enabled</div>';
-    $variables['install'] = '';
+  $project_enabled = _installer_browser_is_project_enabled($project['type'], $project['name']);
+  $project_found = backdrop_get_filename($project['type'], $project['name']);
+
+  $action_options = array();
+
+  // The project is already enabled.
+  if ($project_enabled) {
+    $status_text = t('Already enabled');
+
+    // Set the action label and link based on project type.
+    switch ($project['type']) {
+      case 'module':
+        $all_modules_info = system_rebuild_module_data();
+        $project_info = $all_modules_info[$project['name']];
+        // The module has a coniguration path defined in its .info file.
+        if (isset($project_info->info['configure'])) {
+          $action_label = t('Configure');
+          $action_path = $project_info->info['configure'];
+        }
+        break;
+      case 'theme':
+        // The theme has settings.
+        if (backdrop_theme_access($project['name']) && theme_has_settings($project['name'])) {
+          $action_label = t('Settings');
+          $action_path = 'admin/appearance/settings/' . $project['name'];
+        }
+        break;
+      case 'layout':
+        // All layout themplates can be enabled/disabled in the "Layout
+        // settings" page.
+        $action_label = t('Settings');
+        $action_path = 'admin/structure/layouts/settings';
+        break;
+    }
+
+    // Do not render the "Add to/remove from the installation queue" link.
+    $install = '';
+
   }
-  elseif ($found) {
-    $variables['status'] = '<div class="install-disabled">Already downloaded</div>';
-    $variables['install'] = '';
+
+  // The project has been downloaded, but not enabled yet.
+  elseif ($project_found) {
+    $status_text = t('Already downloaded');
+
+    // Add an "Enable" action.
+    $action_label = t('Enable');
+    // Set the action path based on the respectove project type.
+    switch ($project['type']) {
+      case 'module':
+        $action_path = 'admin/modules';
+        break;
+      case 'theme':
+        $action_path = 'admin/appearance/list';
+        break;
+      case 'layout':
+        $action_path = 'admin/structure/layouts/settings';
+        break;
+    }
+    // Add a URL fragment that scrolls the page to the specific project.
+    $action_options = array('fragment' => $project['type'] . '-' . $project['name']);
+
+    // Do not render the "Add to/remove from the installation queue" link.
+    $install = '';
+
   }
+
+  // The project has not been downladed yet.
   else {
-    $variables['status'] = '';
-    $variables['install'] = installer_browser_add_remove_queue_link($project['name']);
+    // Instead of status text and action links, render the "Add to/remove from
+    // the installation queue" link.
+    $status = '';
+    $install = installer_browser_add_remove_queue_link($project['name']);
   }
+
+  // The project is either just downloaded, or downloaded and enabled.
+  if ($project_found || $project_enabled) {
+    // Render the project installation status instead of the "Add to/remove from
+    // the installation queue" link.
+    $status = '<span class="install-disabled">' . $status_text . '</span>';
+    // If there is an action, then render its link as well.
+    if (isset($action_label) && isset($action_url)) {
+      $action = l($action_label, $action_path, $action_options);
+      $action = '<span class="install-action">' . $action . '</span>';
+      $status .= ' | ' . $action;
+      //$status .= ' | <span class="install-action"><a href="' . $action_url . '">' . $action_label . '</a></span>';
+    }
+  }
+
+  $variables['status'] = $status;
+  $variables['install'] = $install;
+
 }
 
 /**
