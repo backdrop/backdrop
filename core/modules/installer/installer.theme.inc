@@ -283,7 +283,7 @@ function template_preprocess_installer_browser_project(&$variables) {
     // the installation queue" link.
     $status = '<span class="install-disabled">' . $status_text . '</span>';
     // If there is an action, then render its link as well.
-    if (isset($action_label) && isset($action_url)) {
+    if (isset($action_label) && isset($action_path)) {
       $action = l($action_label, $action_path, $action_options);
       $action = '<span class="install-action">' . $action . '</span>';
       $status .= ' | ' . $action;
