@@ -107,6 +107,7 @@ function theme_system_themes_page($variables) {
       // Style theme info
       $notes = count($theme->notes) ? ' (' . join(', ', $theme->notes) . ')' : '';
       $theme->classes[] = 'theme-selector';
+      $theme->classes[] = 'theme-' . $theme->name;
       $theme->classes[] = 'clearfix';
       $output .= '<div class="'. join(' ', $theme->classes) .'">' . $screenshot . '<div class="theme-info"><h3>' . $theme->info['name'] . ' ' . (isset($theme->info['version']) ? $theme->info['version'] : '') . $notes . '</h3><div class="theme-description">' . $description . '</div>';
 
