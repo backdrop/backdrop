@@ -287,7 +287,6 @@ function template_preprocess_installer_browser_project(&$variables) {
       $action = l($action_label, $action_path, $action_options);
       $action = '<span class="install-action">' . $action . '</span>';
       $status .= ' | ' . $action;
-      //$status .= ' | <span class="install-action"><a href="' . $action_url . '">' . $action_label . '</a></span>';
     }
   }
 
