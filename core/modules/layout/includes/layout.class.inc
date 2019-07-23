@@ -697,11 +697,11 @@ class Layout {
       }
     }
     if (!empty($orphaned_blocks)) {
+      // Assign orphan blocks to the default or last region,
+      // if the former doesn't exist.
       end($new_positions);
       $default_region = isset($new_layout_info['default region']) ? $new_layout_info['default region'] : key($new_positions);
       $orphaned_blocks_titles = array();
-
-      // Assign orphan blocks to the last region.
       foreach ($orphaned_blocks as $uuid) {
         $new_positions[$default_region][] = $uuid;
         $orphaned_blocks_titles[] = $this->content[$uuid]->getAdminTitle();
