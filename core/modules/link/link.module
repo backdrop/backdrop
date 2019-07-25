@@ -999,7 +999,9 @@ function link_field_formatter_view($entity_type, $entity, $field, $instance, $la
       '#theme' => 'link_formatter_' . $display['type'],
       '#element' => $item,
       '#field' => $instance,
-      '#display' => $display,
+      '#display' => array(
+        'settings' => $display['settings']
+      ),
     );
   }
   return $elements;
