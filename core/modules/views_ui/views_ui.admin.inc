@@ -799,14 +799,14 @@ function views_ui_add_form_save_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/views';
   if (!empty($view->display['page'])) {
     $display = $view->display['page'];
-    backdrop_set_message(t('Your view was saved. Click here to <a href="@configure_view_link">configure the view</a> or <a href="@views_listing_page_link">return to the views listing page.</a>', array(
-      '@configure_view_link' => url('admin/structure/views/view/' . $view->name . '/configure'),
-      '@views_listing_page_link' => url('admin/structure/views/list'),
-    )));
     if ($display->handler->has_path()) {
       $one_path = $display->handler->get_option('path');
       if (strpos($one_path, '%') === FALSE) {
-        $form_state['redirect'] = $one_path;  // PATH TO THE VIEW IF IT HAS ONE
+        backdrop_set_message(t('Your view was saved. Click here to <a href="@configure_view_link">configure the view</a> or <a href="@views_listing_page_link">return to the views listing page.</a>', array(
+          '@configure_view_link' => url('admin/structure/views/view/' . $view->name . '/configure'),
+          '@views_listing_page_link' => url('admin/structure/views/list'),
+        )));
+        $form_state['redirect'] = $one_path;  // Path to the view if it has one.
         return;
       }
     }
