@@ -1033,7 +1033,7 @@ function comment_links(Comment $comment, Node $node) {
         'html'  => TRUE,
       );
     }
-    if ($comment->access('edit')) {
+    if ($comment->access('update')) {
       $links['comment-edit'] = array(
         'title' => t('edit'),
         'href'  => "comment/$comment->cid/edit",
