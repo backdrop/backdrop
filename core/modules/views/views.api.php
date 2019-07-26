@@ -877,7 +877,7 @@ function hook_views_query_alter(&$view, &$query) {
     // Traverse through the 'where' part of the query.
     foreach ($query->where as &$condition_group) {
       foreach ($condition_group['conditions'] as &$condition) {
-        // If this is the part of the query filtering on title, chang the
+        // If this is the part of the query filtering on title, change the
         // condition to filter on node ID.
         if ($condition['field'] == 'node.title') {
           $condition = array(
