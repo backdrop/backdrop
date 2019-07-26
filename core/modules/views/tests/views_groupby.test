@@ -98,11 +98,14 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
   }
 
   /**
-   * @param $group_by
-   *   Which group_by function should be used, for example sum or count.
+   * @param string|null $group_by
+   *   (optional) Which group_by function should be used, for example sum or
+   *   count. If omitted, the aggregation is tested with no group function.
+   * @param array|null $values
+   *   (optional) Expected values.
    */
-  function GroupByTestHelper($group_by, $values) {
-    // Create 2 nodes of type1 and 3 nodes of type2
+  function GroupByTestHelper($group_by = NULL, $values = NULL) {
+    // Create 4 nodes of type1 and 3 nodes of type2.
     $type1 = $this->backdropCreateContentType();
     $type2 = $this->backdropCreateContentType();
 
@@ -126,6 +129,19 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $output = $view->execute_display();
 
     $this->assertEqual(count($view->result), 2, 'Make sure the count of items is right.');
+
+    $results = array();
+    // There's no need for a function in order to have aggregation.
+    if (empty($group_by)) {
+      $types = array($type1->type, $type2->type);
+      $results = array_map(function ($item) { return $item->node_type; }, $view->result);
+      sort($types);
+      sort($results);
+      $this->assertIdentical($results, $types);
+      // Exit here with no aggregation function.
+      return;
+    }
+
     // Group by nodetype to identify the right count.
     foreach ($view->result as $item) {
       $results[$item->node_type] = $item->nid;
@@ -134,7 +150,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $this->assertEqual($results[$type2->type], $values[1]);
   }
 
-  function viewsGroupByViewHelper($group_by) {
+  function viewsGroupByViewHelper($group_by = NULL) {
     $view = new view;
     $view->name = 'group_by_count';
     $view->description = '';
@@ -154,21 +170,27 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $handler->display->display_options['pager']['type'] = 'some';
     $handler->display->display_options['style_plugin'] = 'default';
     $handler->display->display_options['row_plugin'] = 'fields';
-    /* Field: Content: Nid */
-    $handler->display->display_options['fields']['nid']['id'] = 'nid';
-    $handler->display->display_options['fields']['nid']['table'] = 'node';
-    $handler->display->display_options['fields']['nid']['field'] = 'nid';
-    $handler->display->display_options['fields']['nid']['group_type'] = $group_by;
-    $handler->display->display_options['fields']['nid']['alter']['alter_text'] = 0;
-    $handler->display->display_options['fields']['nid']['alter']['make_link'] = 0;
-    $handler->display->display_options['fields']['nid']['alter']['trim'] = 0;
-    $handler->display->display_options['fields']['nid']['alter']['word_boundary'] = 1;
-    $handler->display->display_options['fields']['nid']['alter']['ellipsis'] = 1;
-    $handler->display->display_options['fields']['nid']['alter']['strip_tags'] = 0;
-    $handler->display->display_options['fields']['nid']['alter']['html'] = 0;
-    $handler->display->display_options['fields']['nid']['hide_empty'] = 0;
-    $handler->display->display_options['fields']['nid']['empty_zero'] = 0;
-    $handler->display->display_options['fields']['nid']['link_to_node'] = 0;
+
+    // The test view has 2 fields ('nid' and 'type'). Don't add 'nid' when
+    // having no aggregation function. We just want to aggregate on node type.
+    if (!empty($group_by)) {
+      /* Field: Content: Nid */
+      $handler->display->display_options['fields']['nid']['id'] = 'nid';
+      $handler->display->display_options['fields']['nid']['table'] = 'node';
+      $handler->display->display_options['fields']['nid']['field'] = 'nid';
+      $handler->display->display_options['fields']['nid']['group_type'] = $group_by;
+      $handler->display->display_options['fields']['nid']['alter']['alter_text'] = 0;
+      $handler->display->display_options['fields']['nid']['alter']['make_link'] = 0;
+      $handler->display->display_options['fields']['nid']['alter']['trim'] = 0;
+      $handler->display->display_options['fields']['nid']['alter']['word_boundary'] = 1;
+      $handler->display->display_options['fields']['nid']['alter']['ellipsis'] = 1;
+      $handler->display->display_options['fields']['nid']['alter']['strip_tags'] = 0;
+      $handler->display->display_options['fields']['nid']['alter']['html'] = 0;
+      $handler->display->display_options['fields']['nid']['hide_empty'] = 0;
+      $handler->display->display_options['fields']['nid']['empty_zero'] = 0;
+      $handler->display->display_options['fields']['nid']['link_to_node'] = 0;
+    }
+
     /* Field: Content: Type */
     $handler->display->display_options['fields']['type']['id'] = 'type';
     $handler->display->display_options['fields']['type']['table'] = 'node';
@@ -206,6 +228,10 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
 
   function testGroupByMax() {
     $this->GroupByTestHelper('max', array(4, 7));
+  }
+
+  function testGroupByNone() {
+    $this->GroupByTestHelper();
   }
 
   public function testGroupByCountOnlyFilters() {
