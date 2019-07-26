@@ -206,14 +206,14 @@ class views_plugin_cache extends views_plugin {
     // Slightly less simple for CSS:
     $css = backdrop_add_css();
     $css_start = isset($this->storage['css']) ? $this->storage['css'] : array();
-    $this->storage['css'] = $array_mapping_func($css, $css_start);
+    $this->storage['css'] = $this->assetDiff($css, $css_start, $array_mapping_func);
 
     // Get javascript after/before views renders.
     $js = backdrop_add_js();
     $js_start = isset($this->storage['js']) ? $this->storage['js'] : array();
     // If there are any differences between the old and the new javascript then
     // store them to be added later.
-    $this->storage['js'] = $array_mapping_func($js, $js_start);
+    $this->storage['js'] = $this->assetDiff($js, $js_start, $array_mapping_func);
 
     // Special case the settings key and get the difference of the data.
     $settings = isset($js['settings']['data']) ? $js['settings']['data'] : array();
@@ -222,6 +222,38 @@ class views_plugin_cache extends views_plugin {
 
     // Get difference of HTTP headers.
     $this->storage['headers'] = $array_mapping_func(backdrop_get_http_header(), $this->storage['headers']);
+  }
+
+  /**
+   * Computes the differences between two JS/CSS asset arrays.
+   *
+   * @param array $assets
+   *   The current asset array.
+   * @param array $start_assets
+   *   The original asset array.
+   * @param string $diff_function
+   *   The function that should be used for computing the diff.
+   *
+   * @return array
+   *   A CSS or JS asset array that contains all entries that are new/different
+   *   in $assets.
+   */
+  protected function assetDiff(array $assets, array $start_assets, $diff_function) {
+    $diff = $diff_function($assets, $start_assets);
+
+    // Clean the resulting array up, since backdrop_array_diff_assoc_recursive()
+    // can leave half-populated arrays behind.
+    foreach ($diff as $key => $entry) {
+      // If only the weight was different, we can remove this entry.
+      if (count($entry) == 1 && isset($entry['weight'])) {
+        unset($diff[$key]);
+      }
+      // If there are other differences, we override with the latest entry.
+      elseif ($entry != $assets[$key]) {
+        $diff[$key] = $assets[$key];
+      }
+    }
+    return $diff;
   }
 
   /**
