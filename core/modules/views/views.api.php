@@ -712,7 +712,7 @@ function hook_views_pre_view(&$view, &$display_id, &$args) {
     user_access('administer site configuration') &&
     $display_id == 'public_display'
   ) {
-    $display_id = 'private_display';
+    $view->set_display('private_display');
   }
 }
 
