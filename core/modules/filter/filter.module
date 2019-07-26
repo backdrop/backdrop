@@ -2071,7 +2071,8 @@ function _filter_url_js_settings($filter, $format) {
  */
 function _filter_url($text, $filter) {
   // Tags to skip and not recurse into.
-  $ignore_tags = 'a|script|style|code|pre|nolink';
+  $ignore_tags = 'a|script|style|code|pre';
+  $ignore_classes = 'nolink';
 
   // Pass length to regexp callback.
   _filter_url_trim(NULL, $filter->settings['filter_url_length']);
@@ -2159,6 +2160,10 @@ function _filter_url($text, $filter) {
         if ($open_tag == '') {
           // Check whether this tag is contained in $ignore_tags.
           if (preg_match("`<($ignore_tags)(?:\s|>)`i", $chunks[$i], $matches)) {
+            $open_tag = $matches[1];
+          }
+          // Check whether this tag has a class contained in $ignore_classes.
+          elseif (preg_match("`<([a-z0-9]+)\s+[\s\S]*?class=[\"'][\s\w-]*(?:$ignore_classes)[\"'\s]+(?:\s|>)`i", $chunks[$i], $matches)) {
             $open_tag = $matches[1];
           }
         }
