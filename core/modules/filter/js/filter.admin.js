@@ -266,7 +266,7 @@ Backdrop.EditorFeature.prototype.addHTMLRule = function (rule) {
  *
  * Examples:
  *  - required: true,
- *  - tags: ['<a>']
+ *  - tags: ['a']
  *  - attributes: ['href', 'alt']
  *  - styles: ['color', 'text-decoration']
  *  - classes: ['external', 'internal']

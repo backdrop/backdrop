@@ -5,6 +5,8 @@
 Backdrop.behaviors.ckeditorAdmin = {
   attach: function (context, settings) {
     var $context = $(context);
+
+    // Attach behavior for the drag-and-drop toolbar configuration.
     $context.find('.ckeditor-toolbar-configuration').once('ckeditor-toolbar', function() {
       var $wrapper = $(this);
       var $textareaWrapper = $(this).find('.form-item-editor-settings-toolbar').hide();
@@ -344,6 +346,33 @@ Backdrop.behaviors.ckeditorAdmin = {
           adminToolbarInitButton($button, feature, false);
         });
       }
+    });
+
+    // Attach behavior for the adding/remove of tags to the style list.
+    $context.find('.ckeditor-plugin-style textarea').once('ckeditor-style-list').each(function() {
+      var $textarea = $(this);
+
+      $textarea.on('change.ckeditorStyleChange', function() {
+        // Name matches that of the button when addedFeature() was called.
+        var stylesFeature = new Backdrop.EditorFeature('Styles');
+        var userInput = $(this).val().split("\n");
+        for (var n = 0; n < userInput.length; n++) {
+          // Each row is formatted as "tag.class|Label".
+          var row = userInput[n].split("|");
+          // Remove any white space.
+          var tagAndClass = row[0].replace(/\s/, '').split(".");
+          var tagName = tagAndClass[0];
+          var className = tagAndClass[1];
+          if (tagName) {
+            var featureRule = new Backdrop.EditorFeatureHTMLRule({
+              tags: [tagName],
+              classes: (typeof className !== 'undefined') ? [className] : []
+            });
+            stylesFeature.addHTMLRule(featureRule);
+          }
+        }
+        Backdrop.editorConfiguration.modifiedFeature(stylesFeature);
+      }).triggerHandler('change.ckeditorStyleChange');
     });
   }
 };
