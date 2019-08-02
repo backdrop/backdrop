@@ -247,7 +247,7 @@ function views_break_phrase($str, &$handler = NULL) {
  * Trim the field down to the specified length.
  *
  * @param $alter
- *   - max_length: Maximum lenght of the string, the rest gets truncated.
+ *   - max_length: Maximum length of the string, the rest gets truncated.
  *   - word_boundary: Trim only on a word boundary.
  *   - ellipsis: Show an ellipsis (...) at the end of the trimmed string.
  *   - html: Take sure that the html is correct.
