@@ -139,7 +139,7 @@
  * responsible for building the query. Instead, they are objects that are used
  * to display the view or make other modifications.
  *
- * There are 10 types of plugins in Views:
+ * There are several types of plugins in Views:
  * - Display: Display plugins are responsible for controlling *where* a view
  *   lives; that is, how they are being exposed to other parts of Backdrop. Page
  *   and block are the most common displays, as well as the ubiquitous 'master'
