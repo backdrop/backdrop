@@ -450,7 +450,7 @@ function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set
  */
 function views_discover_plugins() {
   $cache = array('display' => array(), 'style' => array(), 'row' => array(), 'argument default' => array(), 'argument validator' => array(), 'access' => array(), 'cache' => array(), 'exposed_form' => array());
-  // Get plugins from all mdoules.
+  // Get plugins from all modules.
   foreach (module_implements('views_plugins') as $module) {
     $function = $module . '_views_plugins';
     $result = $function();
