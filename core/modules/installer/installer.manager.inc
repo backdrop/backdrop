@@ -388,7 +388,7 @@ function installer_manager_update_ready_form($form, &$form_state) {
     return $form;
   }
 
-  backdrop_set_message(t('Back up your database and site before you continue. <a href="@backup_url">Learn how</a>.', array('@backup_url' => url('http://drupal.org/node/22281'))), 'warning');
+  backdrop_set_message(t('Back up your database and site before you continue. <a href="@backup_url">Learn how</a>.', array('@backup_url' => url('https://backdropcms.org/upgrade'))), 'warning');
 
   $form['maintenance_mode'] = array(
     '#title' => t('Perform updates with site in maintenance mode (<strong>strongly recommended</strong>)'),
