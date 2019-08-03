@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Callbacks and related functions invoked by authorize.php to update projects.
@@ -198,40 +197,29 @@ function installer_authorize_update_batch_finished($success, $results) {
   $offline = state_get('maintenance_mode', FALSE);
   if ($success) {
     // Now that the update completed, we need to clear the cache of available
-    // update data and recompute our status, so prevent show bogus results.
+    // update data and recompute our status to prevent inaccurate information.
     _installer_authorize_clear_update_status();
 
-    // Take the site out of maintenance mode if it was previously that way.
-    if ($offline && isset($_SESSION['maintenance_mode']) && $_SESSION['maintenance_mode'] == FALSE) {
-      state_set('maintenance_mode', FALSE);
-      $page_message = array(
-        'message' => t('Update was completed successfully. Your site has been taken out of maintenance mode.'),
-        'type' => 'status',
-      );
-    }
-    else {
-      $page_message = array(
-        'message' => t('Update was completed successfully.'),
-        'type' => 'status',
-      );
-    }
+    $page_message = array(
+      'message' => t('Code replaced successfully.'),
+      'type' => 'status',
+    );
   }
   elseif (!$offline) {
     $page_message = array(
-      'message' => t('Update failed! See the log below for more information.'),
+      'message' => t('Code replacement failed! See the log below for more information.'),
       'type' => 'error',
     );
   }
   else {
     $page_message = array(
-      'message' => t('Update failed! See the log below for more information. Your site is still in maintenance mode.'),
+      'message' => t('Code replacement failed! See the log below for more information. Your site is still in maintenance mode.'),
       'type' => 'error',
     );
   }
   // Since we're doing an update of existing code, always add a task for
   // running update.php.
-  $results['tasks'][] = t('Your projects have been downloaded and updated.');
-  $results['tasks'][] = t('<a href="@update">Run database updates</a>', array('@update' => base_path() . 'core/update.php'));
+  $results['tasks'][] = t('<a class="button button-primary" href="@update">Run database updates</a>', array('@update' => base_path() . 'core/update.php'));
 
   // Unset the variable since it is no longer needed.
   unset($_SESSION['maintenance_mode']);

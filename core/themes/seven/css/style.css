@@ -977,6 +977,7 @@ input.form-submit:active {
   -moz-box-shadow: 0 0 5px rgb(220, 220, 220);
   box-shadow: 0 0 5px rgb(220, 220, 220);
 }
+a.button-primary,
 input.button-primary,
 button.button-primary {
   color: white;

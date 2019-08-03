@@ -68,7 +68,7 @@ function installer_menu() {
     'file' => 'installer.manager.inc',
   );
   $items['admin/update/ready'] = array(
-    'title' => 'Ready to update',
+    'title' => 'Ready to replace code',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('installer_manager_update_ready_form'),
     'access callback' => 'installer_install_access',
