@@ -2395,18 +2395,20 @@ function _file_view_mode_menu_access($file_type, $view_mode, $access_callback) {
  * while preserving relative order of items that have equal weight.
  */
 function _file_sort_array_by_weight(&$a) {
-  $i = 0;
-  foreach ($a as $key => $item) {
-    if (!isset($a[$key]['weight'])) {
-      $a[$key]['weight'] = 0;
+  if (!empty($a)) {
+    $i = 0;
+    foreach ($a as $key => $item) {
+      if (!isset($a[$key]['weight'])) {
+        $a[$key]['weight'] = 0;
+      }
+      $original_weight[$key] = $a[$key]['weight'];
+      $a[$key]['weight'] += $i / 1000;
+      $i++;
     }
-    $original_weight[$key] = $a[$key]['weight'];
-    $a[$key]['weight'] += $i / 1000;
-    $i++;
-  }
-  backdrop_sort($a, array('weight' => SORT_NUMERIC));
-  foreach ($a as $key => $item) {
-    $a[$key]['weight'] = $original_weight[$key];
+    backdrop_sort($a, array('weight' => SORT_NUMERIC));
+    foreach ($a as $key => $item) {
+      $a[$key]['weight'] = $original_weight[$key];
+    }
   }
 }
 
