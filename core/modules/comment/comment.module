@@ -1033,7 +1033,7 @@ function comment_links(Comment $comment, Node $node) {
         'html'  => TRUE,
       );
     }
-    if ($comment->access('edit')) {
+    if ($comment->access('update')) {
       $links['comment-edit'] = array(
         'title' => t('edit'),
         'href'  => "comment/$comment->cid/edit",
@@ -1504,8 +1504,8 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
 /**
  * Determines whether the current user has access to a particular comment.
  *
- * Authenticated users can edit their comments as long they have not been
- * replied to. This prevents people from changing or revising their statements
+ * Authenticated users can edit their comments, as long they have not been
+ * replied to. This prevents people from changing or revising their statements,
  * based on the replies to their posts.
  *
  * @param string $op
@@ -1526,7 +1526,7 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
  */
 function comment_access($op, Comment $comment = NULL) {
   if ($op == 'edit') {
-    // Normalize edit op to update.
+    // Normalize 'edit' operation to 'update'.
     $op = 'update';
     // Log to watchdog for DX. @todo add watchdog_deprecated_parameter().
     $message = 'The function comment_access() was called with the operation <em>edit</em>. This operation is now named <em>update</em>. The <em>edit</em> operation will be removed in the next major release of Backdrop.';
