@@ -136,7 +136,7 @@ function update_script_selection_form($form, &$form_state) {
       '#links' => update_helpful_links(),
     );
 
-    // No updates to run, so caches won't get flushed later.  Clear them now.
+    // No updates to run, so caches won't get flushed later. Clear them now.
     backdrop_flush_all_caches();
   }
   else {
@@ -302,10 +302,21 @@ function update_info_page() {
   backdrop_set_title(t('Backdrop database update'));
 
   backdrop_set_message(t('This utility updates the database whenever Backdrop CMS or any module installed on your site is updated to a newer version. For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page.'), 'info');
-  backdrop_set_message(t('Back up your database and site before you continue. <a href="@backup_url">Learn how</a>.', array('@backup_url' => url('https://backdropcms.org/backup'))), 'warning');
 
-  $elements = backdrop_get_form('update_script_overview_form');
-  $output = backdrop_render($elements);
+  if (empty(update_get_update_list())) {
+    backdrop_set_message(t('No pending updates.'));
+
+    $output = theme('links', array('links' => update_helpful_links()));
+
+    // No updates to run, so caches won't get flushed later. Clear them now.
+    backdrop_flush_all_caches();
+  }
+  else {
+    backdrop_set_message(t('Back up your database and site before you continue. <a href="@backup_url">Learn how</a>.', array('@backup_url' => url('https://backdropcms.org/backup'))), 'warning');
+
+    $elements = backdrop_get_form('update_script_overview_form');
+    $output = backdrop_render($elements);
+  }
 
   update_task_list('info');
 
@@ -326,11 +337,20 @@ function update_info_page() {
  * @ingroup forms
  */
 function update_script_overview_form($form, &$form_state) {
+  $maintenance_mode = state_get('maintenance_mode');
+  // Store the current maintenance mode status so we can restore it when done.
+  $_SESSION['maintenance_mode'] = $maintenance_mode;
+
+  if ($maintenance_mode) {
+    backdrop_set_message(t('The site is already in maintenance mode.'));
+  }
+
   $form['maintenance_mode'] = array(
     '#type' => 'checkbox',
     '#id' => 'maintenance_mode',
     '#title' => t('Perform updates with site in maintenance mode (<strong>strongly recommended</strong>)'),
     '#default_value' => TRUE,
+    '#disabled' => $maintenance_mode,
   );
 
   $form['actions'] = array('#type' => 'actions');
