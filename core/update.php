@@ -299,8 +299,6 @@ function update_info_page() {
     cache('update')->flush();
   }
 
-  update_task_list('info');
-
   backdrop_set_title(t('Backdrop database update'));
 
   backdrop_set_message(t('This utility updates the database whenever Backdrop CMS or any module installed on your site is updated to a newer version. For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page.'), 'info');
@@ -308,6 +306,8 @@ function update_info_page() {
 
   $elements = backdrop_get_form('update_script_overview_form');
   $output = backdrop_render($elements);
+
+  update_task_list('info');
 
   return $output;
 }
@@ -357,15 +357,18 @@ function update_script_overview_form($form, &$form_state) {
  * @see update_script_overview_form()
  */
 function update_script_overview_form_submit($form, &$form_state) {
+  global $base_url;
+
   // Store maintenance_mode setting so we can restore it when done.
   $_SESSION['maintenance_mode'] = config_get('system.core', 'maintenance_mode');
   if ($form_state['values']['maintenance_mode'] == TRUE) {
     state_set('maintenance_mode', TRUE);
   }
 
+  // Clear previously set messages (info about update.php, and backup warning).
+  backdrop_get_messages();
   $token = backdrop_get_token('update');
-
-  $form_state['redirect'] = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
+  $form_state['redirect'] = $base_url . backdrop_strip_dangerous_protocols(backdrop_current_script_url(array('op' => 'Continue', 'token' => $token)));
 }
 
 /**
@@ -563,7 +566,7 @@ if (update_access_allowed()) {
   switch ($op) {
     // update.php ops.
 
-    case 'selection':
+    case 'Continue':
       if (isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update')) {
         $output = update_selection_page();
         break;
