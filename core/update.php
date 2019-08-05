@@ -51,7 +51,7 @@ define('MAINTENANCE_MODE', 'update');
  * Renders form with a list of available database updates.
  */
 function update_selection_page() {
-  backdrop_set_title('Backdrop database update');
+  backdrop_set_title(t('Backdrop database update'));
   $elements = backdrop_get_form('update_script_selection_form');
   $output = backdrop_render($elements);
 
@@ -163,7 +163,7 @@ function update_script_selection_form($form, &$form_state) {
     );
     $form['actions']['cancel'] = array(
       '#type' => 'link',
-      '#href' => '<front>',
+      '#href' => base_path(),
       '#title' => t('Cancel'),
     );
   }
@@ -176,7 +176,7 @@ function update_script_selection_form($form, &$form_state) {
 function update_helpful_links() {
   $links['front'] = array(
     'title' => t('Home page'),
-    'href' => '<front>',
+    'href' => base_path(),
   );
   if (module_exists('dashboard') && user_access('access dashboard')) {
     $links['dashboard'] = array(
@@ -292,8 +292,6 @@ function update_results_page() {
  *   Rendered HTML form.
  */
 function update_info_page() {
-  global $databases;
-
   // Change query-strings on css/js files to enforce reload for all users.
   _backdrop_flush_css_js();
   // Flush the cache of all data for the update status module.
@@ -301,37 +299,73 @@ function update_info_page() {
     cache('update')->flush();
   }
 
-  // Get database name
-  $db_name = $databases['default']['default']['database'];
-
-  // Get the config path
-  $config_dir = config_get_config_directory('active');
-
   update_task_list('info');
-  backdrop_set_title('Backdrop database update');
-  $token = backdrop_get_token('update');
-  $output = '<p>Use this utility to update your database whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
-  $output .= '<p>For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page. If you are unsure of what these terms mean, contact your hosting provider.</p>';
-  $output .= '<p>Before running updates, the following steps are recommended.</p>';
-  $output .= "<ol>\n";
-  $output .= "<li><strong>Create backups.</strong> This update utility will alter your database and config files. In case of an emergency you may need to revert to a recent backup; make sure you have one.\n";
-  $output .= "<ul>\n";
-  $output .= "<li><strong>Database:</strong> Create a database dump of the '" . $db_name . "' database.</li>\n";
-  $output .= "<li><strong>Config files:</strong> Back up the entire directory at '" . $config_dir . "'.</li>\n";
-  $output .= "</ul>\n";
-  $output .= '<li>Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a>.</li>' . "\n";
-  $output .= "<li>Install your new files into the appropriate location, as described in <a href=\"https://backdropcms.org/upgrade\">the handbook</a>.</li>\n";
-  $output .= "</ol>\n";
-  $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
-  $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
-  $output .= '<form method="post" action="' . $form_action . '">
-  <div class="form-actions">
-    <input type="submit" value="Continue" class="form-submit button-primary" />
-    <a href="' . base_path() . '">Cancel</a>
-  </div>
-  </form>';
-  $output .= "\n";
+
+  backdrop_set_title(t('Backdrop database update'));
+
+  backdrop_set_message(t('This utility updates the database whenever Backdrop CMS or any module installed on your site is updated to a newer version. For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page.'), 'info');
+  backdrop_set_message(t('Back up your database and site before you continue. <a href="@backup_url">Learn how</a>.', array('@backup_url' => url('https://backdropcms.org/backup'))), 'warning');
+
+  $elements = backdrop_get_form('update_script_overview_form');
+  $output = backdrop_render($elements);
+
   return $output;
+}
+
+/**
+ * Form constructor for the form in the "Overview" step of update.php.
+ *
+ * This form is an intermediary step in the database update script workflow. It
+ * is presented to the site administrator, after all the "Verify requirements"
+ * step (see update_check_requirements()). The point of this page is to
+ * encourage the user to backup their site, and give them the opportunity to put
+ * the site in maintenance mode. After this step, the user is redirected to the
+ * "Review updates" step (see update_selection_page()).
+ *
+ * @see update_script_overview_form_submit()
+ * @ingroup forms
+ */
+function update_script_overview_form($form, &$form_state) {
+  $form['maintenance_mode'] = array(
+    '#type' => 'checkbox',
+    '#id' => 'maintenance_mode',
+    '#title' => t('Perform updates with site in maintenance mode (<strong>strongly recommended</strong>)'),
+    '#default_value' => TRUE,
+  );
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Continue'),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => base_path(),
+  );
+
+  return $form;
+}
+
+/**
+ * Form submission handler for update_script_overview_form().
+ *
+ * If the site administrator selected the option to put the site in maintenance
+ * mode during the update, do so now. Then redirect to the "Review updates"
+ * step.
+ *
+ * @see update_script_overview_form()
+ */
+function update_script_overview_form_submit($form, &$form_state) {
+  // Store maintenance_mode setting so we can restore it when done.
+  $_SESSION['maintenance_mode'] = config_get('system.core', 'maintenance_mode');
+  if ($form_state['values']['maintenance_mode'] == TRUE) {
+    state_set('maintenance_mode', TRUE);
+  }
+
+  $token = backdrop_get_token('update');
+
+  $form_state['redirect'] = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
 }
 
 /**
@@ -388,11 +422,11 @@ function update_task_list($set_active = NULL) {
 
   // Default list of tasks.
   $tasks = array(
-    'requirements' => 'Verify requirements',
-    'info' => 'Overview',
-    'select' => 'Review updates',
-    'run' => 'Run updates',
-    'finished' => 'Review log',
+    'requirements' => t('Verify requirements'),
+    'info' => t('Overview'),
+    'select' => t('Review updates'),
+    'run' => t('Run updates'),
+    'finished' => t('Review log'),
   );
 
   // Only show the task list on the left sidebar if the logged-in user is has
