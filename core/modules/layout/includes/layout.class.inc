@@ -158,6 +158,20 @@ class Layout {
   var $renderer_name = 'standard';
 
   /**
+   * An array of orphaned blocks when changing templates.
+   *
+   * @var array
+   */
+  var $orphaned_blocks = array();
+
+  /**
+   * The region where orphaned blocks are placed in new template.
+   *
+   * @var string
+   */
+  var $refuge_region;
+
+  /**
    * An array of LayoutContext instances used by this menu item.
    *
    * @var LayoutContext[]
@@ -691,25 +705,19 @@ class Layout {
             $new_positions[$new_region_name][] = $uuid;
           }
           else {
-            $orphaned_blocks[] = $uuid;
+            $this->orphaned_blocks[] = $uuid;
           }
         }
       }
     }
-    if (!empty($orphaned_blocks)) {
+    if (!empty($this->orphaned_blocks)) {
       // Assign orphan blocks to the default or last region,
       // if the former doesn't exist.
       end($new_positions);
-      $default_region = isset($new_layout_info['default region']) ? $new_layout_info['default region'] : key($new_positions);
-      $orphaned_blocks_titles = array();
-      foreach ($orphaned_blocks as $uuid) {
-        $new_positions[$default_region][] = $uuid;
-        $orphaned_blocks_titles[] = $this->content[$uuid]->getAdminTitle();
+      $this->refuge_region = isset($new_layout_info['default region']) ? $new_layout_info['default region'] : key($new_positions);
+      foreach ($this->orphaned_blocks as $uuid) {
+        $new_positions[$this->refuge_region][] = $uuid;
       }
-      $message = t('The following blocks have been reassigned to the %new_region region. The regions they were placed in previously do not exist in the new layout template. You can move them to more appropriate regions:', array(
-        '%new_region' => $new_layout_info['regions'][$default_region]));
-      $message .= theme('item_list', array('items' => $orphaned_blocks_titles));
-      backdrop_set_message($message, 'warning');
     }
 
     $this->layout_template = $layout_name;
