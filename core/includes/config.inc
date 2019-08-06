@@ -1262,7 +1262,9 @@ class ConfigFileStorage implements ConfigStorageInterface {
 
     try {
       $archiver = new ArchiverTar($realpath);
-      $archiver->extract($this->directory, $archiver->listContents());
+      // Only extract JSON files, ignoring anything else in the archive.
+      $file_list = preg_grep('/.json$/', $archiver->listContents());
+      $archiver->extract($this->directory, $file_list);
     }
     catch (\Exception $e) {
       watchdog('config', 'Could not extract the archive @uri: @error', array('@uri' => $file_uri, '@error' => $e->getMessage()), WATCHDOG_ERROR);
