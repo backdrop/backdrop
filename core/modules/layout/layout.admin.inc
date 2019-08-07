@@ -591,6 +591,17 @@ function layout_settings_form_update_layout($form, &$form_state) {
     $new = $form_state['values']['layout_template'];
     $region_mapping = layout_get_legacy_region_mapping($layout->layout_template, $new);
     $layout->setLayoutTemplate($form_state['values']['layout_template'], $region_mapping);
+    if (!empty($layout->orphaned_blocks)) {
+      $orphaned_blocks_titles = array();
+      $layout_template_info = layout_get_layout_template_info($form_state['values']['layout_template']);
+      foreach ($layout->orphaned_blocks as $uuid) {
+        $orphaned_blocks_titles[] = $layout->content[$uuid]->getAdminTitle();
+      }
+      $message = t('The following blocks have been reassigned to the %new_region region. The regions they were placed in previously do not exist in the new layout template. You can move them to more appropriate regions:', array(
+        '%new_region' => $layout_template_info['regions'][$layout->refuge_region]));
+      $message .= theme('item_list', array('items' => $orphaned_blocks_titles));
+      backdrop_set_message($message, 'warning');
+    }
   }
   if (isset($form_state['values']['path'])) {
     $layout->setPath($form_state['values']['path']);
