@@ -607,7 +607,7 @@ function node_node_type_load(&$types) {
 
       // Submitted information.
       'node_submitted' => TRUE,
-      'node_submitted_format' => t('Submitted by [node:author] on [node:created:medium]'),
+      'node_submitted_format' => t('[node:created:medium] by [node:author]'),
       'node_user_picture' => TRUE,
 
       // Setting to prevent page from being accessed directly.
