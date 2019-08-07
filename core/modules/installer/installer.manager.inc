@@ -393,20 +393,20 @@ function installer_manager_update_ready_form($form, &$form_state) {
     return $form;
   }
 
-  switch ($_SESSION['project_type']) {
-    case 'module':
-      $cancel_redirect = 'admin/modules/update';
-      break;
-    case 'theme':
-      $cancel_redirect = 'admin/appearance/update';
-      break;
-    case 'layout':
-      $cancel_redirect = 'admin/structure/layouts/update';
-      break;
-    
-    default:
-      $cancel_redirect = base_path();
-      break;
+  if (isset($_SESSION['project_type'])) {
+    switch ($_SESSION['project_type']) {
+      case 'module':
+        $cancel_redirect = 'admin/modules/update';
+        break;
+      case 'theme':
+        $cancel_redirect = 'admin/appearance/update';
+        break;
+      case 'layout':
+        $cancel_redirect = 'admin/structure/layouts/update';
+    }
+  }
+  else {
+    $cancel_redirect = base_path();
   }
 
   backdrop_set_message(t('Back up your database and site before you continue. <a href="@backup_url">Learn how</a>.', array('@backup_url' => url('https://backdropcms.org/upgrade'))), 'warning');
