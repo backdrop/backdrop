@@ -178,7 +178,13 @@ function update_helpful_links() {
     'title' => t('Home page'),
     'href' => '<front>',
   );
-  if (user_access('access administration pages')) {
+  if (module_exists('dashboard') && user_access('access dashboard')) {
+    $links['dashboard'] = array(
+      'title' => t('Dashboard'),
+      'href' => 'admin/dashboard',
+    );
+  }
+  elseif (user_access('access administration pages')) {
     $links['admin-pages'] = array(
       'title' => t('Administration pages'),
       'href' => 'admin',

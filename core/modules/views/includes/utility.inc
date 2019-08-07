@@ -247,7 +247,7 @@ function views_break_phrase($str, &$handler = NULL) {
  * Trim the field down to the specified length.
  *
  * @param $alter
- *   - max_length: Maximum lenght of the string, the rest gets truncated.
+ *   - max_length: Maximum length of the string, the rest gets truncated.
  *   - word_boundary: Trim only on a word boundary.
  *   - ellipsis: Show an ellipsis (...) at the end of the trimmed string.
  *   - html: Take sure that the html is correct.
@@ -450,7 +450,7 @@ function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set
  */
 function views_discover_plugins() {
   $cache = array('display' => array(), 'style' => array(), 'row' => array(), 'argument default' => array(), 'argument validator' => array(), 'access' => array(), 'cache' => array(), 'exposed_form' => array());
-  // Get plugins from all mdoules.
+  // Get plugins from all modules.
   foreach (module_implements('views_plugins') as $module) {
     $function = $module . '_views_plugins';
     $result = $function();

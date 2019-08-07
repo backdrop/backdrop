@@ -290,7 +290,10 @@ function system_theme_enable() {
  */
 function system_theme_disable_confirm($form, &$form_state) {
   if (isset($_REQUEST['theme']) && isset($_REQUEST['token']) && backdrop_valid_token($_REQUEST['token'], 'system-theme-operation-link')) {
-    $form['theme'] = $_REQUEST['theme'];
+    $form['theme'] = array(
+      '#type' => 'hidden',
+      '#value' => $_REQUEST['theme'],
+    );
 
     $confirm_question = t('Are you sure you want to disable this theme? All custom configuration will be lost.');
     return confirm_form($form, $confirm_question, 'admin/appearance', t('This action cannot be undone.'), t('Disable'), t('Cancel'));
@@ -302,7 +305,7 @@ function system_theme_disable_confirm($form, &$form_state) {
  * Form submission handler for system_theme_disable_confirm_submit().
  */
 function system_theme_disable_confirm_submit($form, &$form_state) {
-  $theme = $form_state['complete_form']['theme'];
+  $theme = $form_state['complete_form']['theme']['#value'];
   // Get current list of themes.
   $themes = list_themes();
 
@@ -1605,6 +1608,7 @@ function system_performance_settings($form, &$form_state) {
   $form['clear_cache'] = array(
     '#type' => 'fieldset',
     '#title' => t('Clear cache'),
+    '#access' => user_access('flush caches'),
   );
 
   $form['clear_cache']['clear'] = array(

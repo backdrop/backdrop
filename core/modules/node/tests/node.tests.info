@@ -66,7 +66,7 @@ file = node.test
 
 [NodePostSettingsTestCase]
 name = Node post information display
-description = Check that the post information (submitted by Username on date) text displays appropriately.
+description = Check that the author and date information ('date by Username') text displays appropriately.
 group = Node
 file = node.test
 
