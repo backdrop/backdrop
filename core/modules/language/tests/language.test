@@ -18,7 +18,7 @@ class LanguageListTest extends BackdropWebTestCase {
   }
 
   /**
-   * Functional tests for adding, editing and deleting languages.
+   * Functional tests for adding, configuring, and deleting languages.
    */
   function testLanguageList() {
     global $base_url;
@@ -81,9 +81,9 @@ class LanguageListTest extends BackdropWebTestCase {
     $this->assertFieldChecked('edit-languages-en-enabled', t('Default language re-enabled.'));
 
     // Ensure 'edit' link works.
-    $this->clickLink(t('Edit'));
-    $this->assertTitle(t('Edit language | Backdrop CMS'), t('Page title is "Edit language".'));
-    // Edit a language.
+    $this->clickLink(t('Configure'));
+    $this->assertTitle(t('Configure language | Backdrop CMS'), t('Page title is "Configure language".'));
+    // Configre a language.
     $name = $this->randomName(16);
     $edit = array(
       'name' => $name,
