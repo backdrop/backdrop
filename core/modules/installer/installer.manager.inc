@@ -312,6 +312,11 @@ function installer_manager_update_form_validate($form, &$form_state) {
  * @see installer_manager_update_form_validate()
  */
 function installer_manager_update_form_submit($form, &$form_state) {
+  // Store the type of projects being updated; we use this later, to redirect
+  // back to the respective project type update page, if the user clicks the
+  // "Cancel" button (see installer_manager_update_ready_form()).
+  $_SESSION['project_type'] = $form_state['build_info']['args'][0];
+
   $projects = array();
   foreach (array('projects', 'disabled_projects') as $type) {
     if (!empty($form_state['values'][$type])) {
@@ -388,6 +393,22 @@ function installer_manager_update_ready_form($form, &$form_state) {
     return $form;
   }
 
+  switch ($_SESSION['project_type']) {
+    case 'module':
+      $cancel_redirect = 'admin/modules/update';
+      break;
+    case 'theme':
+      $cancel_redirect = 'admin/appearance/update';
+      break;
+    case 'layout':
+      $cancel_redirect = 'admin/structure/layouts/update';
+      break;
+    
+    default:
+      $cancel_redirect = base_path();
+      break;
+  }
+
   backdrop_set_message(t('Back up your database and site before you continue. <a href="@backup_url">Learn how</a>.', array('@backup_url' => url('https://backdropcms.org/upgrade'))), 'warning');
 
   $form['maintenance_mode'] = array(
@@ -400,6 +421,11 @@ function installer_manager_update_ready_form($form, &$form_state) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Continue'),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $cancel_redirect,
   );
 
   return $form;
