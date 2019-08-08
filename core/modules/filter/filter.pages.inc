@@ -175,7 +175,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     // Remember this is editing, not inserting. In the event the image is
     // removed and re-uploaded.
     $form_state['storage']['editing_image'] = TRUE;
-    backdrop_set_title(t('Edit image'));
+    backdrop_set_title(t('Edit image details'));
     $submit_button_label = t('Update');
   }
   else {
@@ -628,6 +628,11 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
  */
 function _filter_get_file_id($href) {
   $result = 0;
+  
+  // Check URI for valid file scheme.
+  if (!file_valid_uri($href)){
+    return $result;
+  }
 
   // Extract file name and directory from $href.
   $pos = strrpos($href, "/");
