@@ -101,7 +101,27 @@ function number_field_instance_settings_form($field, $instance) {
     '#description' => t("Define a string that should be suffixed to the value, like ' m', ' kb/s'. Leave blank for none. Separate singular and plural values with a pipe ('pound|pounds')."),
   );
 
+  $form['#element_validate'] = array('number_field_instance_settings_form_validate');
+
   return $form;
+}
+
+/**
+ * Form validation handler for number_field_instance_settings_form().
+ *
+ * Make sure the maximum setting is greater than or equal to the minimum
+ * setting.
+ */
+function number_field_instance_settings_form_validate($element, &$form_state, $form) {
+  $max = $element['max'];
+  $min = $element['min'];
+
+  if ($max['#value'] < $min['#value']) {
+    form_error($max, t('%max must be greater than, or equal to, %min.', array(
+      '%max' => $max['#title'],
+      '%min' => $min['#title'],
+    )));
+  }
 }
 
 /**

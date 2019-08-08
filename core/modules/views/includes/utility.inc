@@ -247,7 +247,7 @@ function views_break_phrase($str, &$handler = NULL) {
  * Trim the field down to the specified length.
  *
  * @param $alter
- *   - max_length: Maximum lenght of the string, the rest gets truncated.
+ *   - max_length: Maximum length of the string, the rest gets truncated.
  *   - word_boundary: Trim only on a word boundary.
  *   - ellipsis: Show an ellipsis (...) at the end of the trimmed string.
  *   - html: Take sure that the html is correct.
@@ -450,7 +450,7 @@ function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set
  */
 function views_discover_plugins() {
   $cache = array('display' => array(), 'style' => array(), 'row' => array(), 'argument default' => array(), 'argument validator' => array(), 'access' => array(), 'cache' => array(), 'exposed_form' => array());
-  // Get plugins from all mdoules.
+  // Get plugins from all modules.
   foreach (module_implements('views_plugins') as $module) {
     $function = $module . '_views_plugins';
     $result = $function();
@@ -518,4 +518,122 @@ function views_get_enabled_display_extenders() {
   }
 
   return $enabled;
+}
+
+/**
+ * Fetch a list of all fields available for a given base type.
+ *
+ * @param (array|string) $base
+ *   A list or a single base_table, for example node.
+ * @param string $type
+ *   The handler type, for example field or filter.
+ * @param bool $grouping
+ *   Should the result grouping by its 'group' label.
+ *
+ * @return array
+ *   A keyed array of in the form of 'base_table' => 'Description'.
+ */
+function views_fetch_fields($base, $type, $grouping = FALSE) {
+  static $fields = array();
+  if (empty($fields)) {
+    $data = views_fetch_data();
+    $start = microtime(TRUE);
+    // This constructs this ginormous multi dimensional array to
+    // collect the important data about fields. In the end,
+    // the structure looks a bit like this (using nid as an example)
+    // $strings['nid']['filter']['title'] = 'string'.
+    //
+    // This is constructed this way because the above referenced strings
+    // can appear in different places in the actual data structure so that
+    // the data doesn't have to be repeated a lot. This essentially lets
+    // each field have a cheap kind of inheritance.
+
+    foreach ($data as $table => $table_data) {
+      $bases = array();
+      $strings = array();
+      $skip_bases = array();
+      foreach ($table_data as $field => $info) {
+        // Collect table data from this table...
+        if ($field == 'table') {
+          // ...calculate what tables this table can join to...
+          if (!empty($info['join'])) {
+            $bases = array_keys($info['join']);
+          }
+          // ...and it joins to itself.
+          $bases[] = $table;
+          continue;
+        }
+        foreach (array('field', 'sort', 'filter', 'argument', 'relationship', 'area') as $key) {
+          if (!empty($info[$key])) {
+            if ($grouping && !empty($info[$key]['no group by'])) {
+              continue;
+            }
+            if (!empty($info[$key]['skip base'])) {
+              foreach ((array) $info[$key]['skip base'] as $base_name) {
+                $skip_bases[$field][$key][$base_name] = TRUE;
+              }
+            }
+            elseif (!empty($info['skip base'])) {
+              foreach ((array) $info['skip base'] as $base_name) {
+                $skip_bases[$field][$key][$base_name] = TRUE;
+              }
+            }
+            // Don't show old fields. The real field will be added right.
+            if (isset($info[$key]['moved to'])) {
+              continue;
+            }
+            foreach (array('title', 'group', 'help', 'base', 'aliases') as $string) {
+              // First, try the lowest possible level
+              if (!empty($info[$key][$string])) {
+                $strings[$field][$key][$string] = $info[$key][$string];
+              }
+              // Then try the field level
+              elseif (!empty($info[$string])) {
+                $strings[$field][$key][$string] = $info[$string];
+              }
+              // Finally, try the table level
+              elseif (!empty($table_data['table'][$string])) {
+                $strings[$field][$key][$string] = $table_data['table'][$string];
+              }
+              else {
+                if ($string != 'base' && $string != 'base') {
+                  $strings[$field][$key][$string] = t("Error: missing @component", array('@component' => $string));
+                }
+              }
+            }
+          }
+        }
+      }
+      foreach ($bases as $base_name) {
+        foreach ($strings as $field => $field_strings) {
+          foreach ($field_strings as $type_name => $type_strings) {
+            if (empty($skip_bases[$field][$type_name][$base_name])) {
+              $fields[$base_name][$type_name]["$table.$field"] = $type_strings;
+            }
+          }
+        }
+      }
+    }
+//    vsm('Views UI data build time: ' . (views_microtime() - $start) * 1000 . ' ms');
+  }
+
+  // If we have an array of base tables available, go through them
+  // all and add them together. Duplicate keys will be lost and that's
+  // Just Fine.
+  if (is_array($base)) {
+    $strings = array();
+    foreach ($base as $base_table) {
+      if (isset($fields[$base_table][$type])) {
+        $strings += $fields[$base_table][$type];
+      }
+    }
+    uasort($strings, '_views_sort_types');
+    return $strings;
+  }
+
+  if (isset($fields[$base][$type])) {
+    uasort($fields[$base][$type], '_views_sort_types');
+    return $fields[$base][$type];
+  }
+  return array();
 }

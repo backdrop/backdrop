@@ -14,6 +14,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   protected $web_user;
   protected $test_node1;
   protected $test_node2;
+  protected $orphaned_blocks = FALSE;
 
   function setUp() {
     parent::setUp('layout_test');
@@ -1133,14 +1134,29 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Save layout'));
 
-    $deleted_uuids = $default_layout->positions['sidebar'];
+    $orphaned_uuids = $default_layout->positions['sidebar'];
+    $this->orphaned_blocks = !empty($orphaned_uuids);
     layout_reset_caches();
     $layout = layout_load($layout_name);
     $this->assertBlocksMatch($layout, $default_layout);
-    $this->assertFalse(isset($layout->positions['sidebar']), 'Sidebar region blocks removed from layout when changing layout to single column.');
+    $this->assertFalse(isset($layout->positions['sidebar']), 'Sidebar region blocks moved out when changing layout to single column.');
 
-    $intersection = array_intersect(array_keys($layout->content), $deleted_uuids);
+    $intersection = array_intersect(array_keys($layout->content), $orphaned_uuids);
     $this->assertEqual($intersection, array(), 'The sidebar blocks have been removed from the layout content array.');
+    // Check that the sidebar and content region blocks in the old layout are
+    // the same number of blocks in the content region of the new layout.
+    $default_layout_sidebar_content_regions_count = count($default_layout->positions['sidebar']) + count($default_layout->positions['content']);
+    $new_content_region_count = count($layout->positions['content']);
+    // Count the system main block separately since it doesn't exist in the
+    // new layout.
+    if ($default_layout->positions['content'][0] == 'default') {
+      $new_content_region_count++;
+    }
+    $this->assertTrue($default_layout_sidebar_content_regions_count == $new_content_region_count, 'The blocks from the Sidebar and Default regions in the old layout all exist in the Default region of the new layout.');
+    // Make sure the moved block is part of the module we expect.
+    $moved_block_uuid = $layout->positions['content'][1];
+    $moved_block = $layout->content[$moved_block_uuid];
+    $this->assertTrue($moved_block->module == 'layout_test', 'The moved block is from the layout_test module.');
   }
 
   /**
@@ -1211,8 +1227,16 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Check that all the blocks in $layout match those in $copied_from_layout.
    */
-  protected function assertBlocksMatch($layout, $copied_from_layout) {
+  protected function assertBlocksMatch($layout, $copied_from_layout, $orphaned_uuids = array()) {
+    $layout_info = layout_get_layout_template_info($layout->layout_template);
+    $default_region = $layout_info['default region'];
     foreach ($layout->positions as $region_name => $blocks) {
+      // Don't compare if it's the default region since orphaned blocks might
+      // get reassigned here, which throws off the numbers.
+      if ($this->orphaned_blocks && $region_name == $default_region) {
+        $this->orphaned_blocks = FALSE;
+        continue;
+      }
       if (isset($copied_from_layout->positions[$region_name])) {
         $blocks_match = TRUE;
         $content_block_offset = 0;
