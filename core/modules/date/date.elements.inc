@@ -1161,12 +1161,15 @@ function _date_popup_process_time_part(&$element) {
       'fromTo' => isset($fromto),
       'spinnerImage' => '',
     );
-    // Determine if we are using lowercase or uppercase am/pm and translate.
+
+    // Determine if we are using lowercase or uppercase am/pm.
     if (strpos($element['#date_format'], 'a') !== FALSE) {
-      $settings['ampmNames'] = array(t('am'), t('pm'));
+      $options = date_ampm_options(FALSE, FALSE);
+      $settings['ampmNames'] = array($options['am'], $options['pm']);
     }
-    else {
-      $settings['ampmNames'] = array(t('AM'), t('PM'));
+    elseif (strpos($element['#date_format'], 'A') !== FALSE) {
+      $options = date_ampm_options(FALSE, TRUE);
+      $settings['ampmNames'] = array($options['am'], $options['pm']);
     }
     // Determine if we should have a leading space before the am/pm.
     if (strpos($element['#date_format'], ' A') !== FALSE || strpos($element['#date_format'], ' a') !== FALSE) {
