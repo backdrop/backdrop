@@ -191,7 +191,8 @@ Backdrop.verticalTab.prototype = {
  * @param settings
  *   An object with the following keys:
  *   - title: The name of the tab.
- * @return
+ *
+ * @return object
  *   This function has to return an object with at least these keys:
  *   - item: The root tab jQuery element
  *   - link: The anchor tag that acts as the clickable area of the tab

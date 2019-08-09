@@ -134,7 +134,7 @@ states.Dependent.prototype = {
    * @param state
    *   A State object describing the dependee's updated state.
    *
-   * @return
+   * @return bool
    *   true or false.
    */
   compare: function (reference, selector, state) {
@@ -199,7 +199,7 @@ states.Dependent.prototype = {
    *   selector that these constraints apply to. In that case, the keys of the
    *   object are interpreted as the selector if encountered.
    *
-   * @return
+   * @return bool
    *   true or false, depending on whether these constraints are satisfied.
    */
   verifyConstraints: function(constraints, selector) {
@@ -254,7 +254,7 @@ states.Dependent.prototype = {
    *   performed. This parameter is not a State object but a pristine state
    *   string.
    *
-   * @return
+   * @return bool
    *   true or false, depending on whether this constraint is satisfied.
    */
   checkConstraints: function(value, selector, state) {
