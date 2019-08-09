@@ -111,7 +111,7 @@ function contextual_preprocess(&$variables, $hook) {
  *     ))
  *   @endcode
  *
- * @return
+ * @return array
  *   A renderable array representing contextual links.
  *
  * @see menu_contextual_links()
