@@ -416,7 +416,7 @@ function admin_bar_get_user_count() {
  * @param $anonymous
  *   TRUE counts only anonymous users. FALSE counts only authenticated users.
  *
- * @return
+ * @return int
  *   The number of users with sessions.
  *
  * @todo There are mostly no anonymous sessions anymore. Split this into a

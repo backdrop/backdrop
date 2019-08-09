@@ -166,7 +166,7 @@ function admin_bar_tree($menu_name) {
  *   An array containing menu router path placeholder expansion argument
  *   mappings.
  *
- * @return
+ * @return array
  *   An associative array whose keys are the parent paths of the menu router
  *   paths given in $expand_map as well as the parent paths of any child link
  *   deeper down the tree. The parent paths are used in admin_bar_merge_tree()
@@ -463,7 +463,7 @@ function admin_bar_expand_args($arguments) {
  *   A data structure representing the administration bar tree as returned from
  *   menu_tree_all_data().
  *
- * @return
+ * @return array
  *   The complete administration bar, suitable for theme_admin_bar_links().
  *
  * @see theme_admin_bar_links()
