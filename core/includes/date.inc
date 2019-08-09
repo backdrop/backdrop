@@ -412,14 +412,14 @@ function date_ampm_options($key_upper, $label_upper) {
 
   if ($label_upper) {
     return array(
-      $am => t('AM', array(), array('context' => 'ampm')),
-      $pm => t('PM', array(), array('context' => 'ampm')),
+      $am => t('AM', array(), array('context' => 'Upper case am 12-hour period')),
+      $pm => t('PM', array(), array('context' => 'Upper case pm 12-hour period')),
     );
   }
   else {
     return array(
-      $am => t('am', array(), array('context' => 'ampm')),
-      $pm => t('pm', array(), array('context' => 'ampm')),
+      $am => t('am', array(), array('context' => 'Lower case case am 12-hour period')),
+      $pm => t('pm', array(), array('context' => 'Lower case case pm 12-hour period')),
     );
   }
 }
