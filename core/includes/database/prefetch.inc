@@ -136,7 +136,8 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
    *   An array of values with as many elements as there are bound parameters in the SQL statement being executed.
    * @param $options
    *   An array of options for this query.
-   * @return
+   *
+   * @return bool
    *   TRUE on success, or FALSE on failure.
    */
   public function execute($args = array(), $options = array()) {
@@ -262,7 +263,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
    * array position in $this->data and format it according to $this->fetchStyle
    * and $this->fetchMode.
    *
-   * @return
+   * @return array|object|null
    *  The current row formatted as requested.
    */
   public function current() {

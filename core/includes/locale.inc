@@ -107,7 +107,7 @@ define('LANGUAGE_NEGOTIATION_URL_DOMAIN', 'domain');
 /**
  * Identifies the language from the current interface language.
  *
- * @return
+ * @return string
  *   The current interface language code.
  */
 function locale_language_from_interface() {
@@ -124,7 +124,7 @@ function locale_language_from_interface() {
  * @param $languages
  *   An array of language objects for enabled languages ordered by weight.
  *
- * @return
+ * @return string|false
  *   A valid language code on success, FALSE otherwise.
  */
 function locale_language_from_browser($languages) {
@@ -206,7 +206,7 @@ function locale_language_from_browser($languages) {
  * @param $languages
  *   An array of valid language objects.
  *
- * @return
+ * @return string|false
  *   A valid language code on success, FALSE otherwise.
  */
 function locale_language_from_user($languages) {
@@ -227,7 +227,7 @@ function locale_language_from_user($languages) {
  * @param $languages
  *   An array of valid language objects.
  *
- * @return
+ * @return string|false
  *   A valid language code on success, FALSE otherwise.
  */
 function locale_language_from_session($languages) {
@@ -257,7 +257,7 @@ function locale_language_from_session($languages) {
  * @param $languages
  *   An array of valid language objects.
  *
- * @return
+ * @return string|false
  *   A valid language code on success, FALSE otherwise.
  */
 function locale_language_from_url($languages) {
@@ -333,7 +333,7 @@ function locale_language_from_url($languages) {
  *   (optional) The language type to fall back to. Defaults to the interface
  *   language.
  *
- * @return
+ * @return string
  *   A valid language code.
  */
 function locale_language_url_fallback($languages = NULL, $language_type = LANGUAGE_TYPE_INTERFACE) {
@@ -718,7 +718,7 @@ function _locale_parse_js_file($filepath) {
  * @param $langcode
  *   The language code for which the file needs to be refreshed.
  *
- * @return
+ * @return array
  *   New content of the 'javascript_parsed' variable.
  */
 function _locale_invalidate_js($langcode = NULL) {
@@ -865,7 +865,7 @@ function _locale_rebuild_js($langcode = NULL) {
 /**
  * Get list of all predefined and custom countries.
  *
- * @return
+ * @return array
  *   An array of all country code => country name pairs.
  */
 function country_get_list() {
@@ -879,7 +879,7 @@ function country_get_list() {
 /**
  * Get list of all predefined and custom timezone countries.
  *
- * @return
+ * @return array
  *   An array of all timezone => country code pairs.
  */
 function timezone_country_get_list() {

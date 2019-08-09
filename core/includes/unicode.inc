@@ -186,7 +186,7 @@ function unicode_requirements() {
  * @param $data
  *   The XML data which will be parsed later.
  *
- * @return
+ * @return object|false
  *   An XML parser object or FALSE on error.
  *
  * @ingroup php_wrappers
@@ -236,7 +236,7 @@ function backdrop_xml_parser_create(&$data) {
  * @param $encoding
  *   The encoding that the data is in.
  *
- * @return
+ * @return string|false
  *   Converted data or FALSE.
  */
 function backdrop_convert_to_utf8($data, $encoding) {
@@ -273,7 +273,7 @@ function backdrop_convert_to_utf8($data, $encoding) {
  * @param $len
  *   An upper limit on the returned string length.
  *
- * @return
+ * @return string
  *   The truncated string.
  */
 function backdrop_truncate_bytes($string, $len) {
@@ -464,7 +464,7 @@ function _mime_header_decode($matches) {
  * @param $text
  *   The text to decode entities in.
  *
- * @return
+ * @return string
  *   The input $text, with all HTML entities decoded once.
  */
 function decode_entities($text) {
@@ -566,7 +566,7 @@ function _unicode_caseflip($matches) {
  * @param $text
  *   The string to convert.
  *
- * @return
+ * @return string
  *   The string with the first letter as uppercase.
  *
  * @ingroup php_wrappers
@@ -590,7 +590,7 @@ function backdrop_ucfirst($text) {
  * @param $length
  *   The number of characters to read.
  *
- * @return
+ * @return string
  *   The shortened string.
  *
  * @ingroup php_wrappers

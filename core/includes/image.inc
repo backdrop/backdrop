@@ -35,7 +35,7 @@
 /**
  * Gets a list of available toolkits.
  *
- * @return
+ * @return array
  *   An array with the toolkit names as keys and the descriptions as values.
  */
 function image_get_available_toolkits() {
@@ -56,7 +56,7 @@ function image_get_available_toolkits() {
 /**
  * Gets the name of the currently used toolkit.
  *
- * @return
+ * @return string|false
  *   String containing the name of the selected toolkit, or FALSE on error.
  */
 function image_get_toolkit() {
@@ -86,7 +86,7 @@ function image_get_toolkit() {
  * @param $params
  *   An optional array of parameters to pass to the toolkit method.
  *
- * @return
+ * @return [varies]|false
  *   Mixed values (typically Boolean indicating successful operation).
  */
 function image_toolkit_invoke($method, stdClass $image, array $params = array()) {
@@ -111,7 +111,7 @@ function image_toolkit_invoke($method, stdClass $image, array $params = array())
  * @param $toolkit
  *   An optional image toolkit name to override the default.
  *
- * @return
+ * @return array|false
  *   FALSE, if the file could not be found or is not an image. Otherwise, a
  *   keyed array containing information about the image:
  *   - "width": Width, in pixels.
@@ -158,7 +158,7 @@ function image_get_info($filepath, $toolkit = FALSE) {
  * @param $height
  *   The target height, in pixels.
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_load()
@@ -194,7 +194,7 @@ function image_scale_and_crop(stdClass $image, $width, $height) {
  *   Boolean indicating that images smaller than the target dimensions will be
  *   scaled up. This generally results in a low quality image.
  *
- * @return
+ * @return bool
  *   TRUE if $dimensions was modified, FALSE otherwise.
  *
  * @see image_scale()
@@ -241,7 +241,7 @@ function image_dimensions_scale(array &$dimensions, $width = NULL, $height = NUL
  *   Boolean indicating that files smaller than the dimensions will be scaled
  *   up. This generally results in a low quality image.
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_dimensions_scale()
@@ -269,7 +269,7 @@ function image_scale(stdClass $image, $width = NULL, $height = NULL, $upscale = 
  * @param $height
  *   The target height, in pixels.
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_load()
@@ -296,7 +296,7 @@ function image_resize(stdClass $image, $width, $height) {
  *   transparency, this will default to transparent. Otherwise it will
  *   be white.
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_load()
@@ -341,7 +341,7 @@ function image_rotate(stdClass $image, $degrees, $background = NULL) {
  * @param $height
  *   The target height, in pixels.
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_load()
@@ -365,7 +365,7 @@ function image_crop(stdClass $image, $x, $y, $width, $height) {
  * @param $image
  *   An image object returned by image_load().
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_load()
@@ -385,7 +385,7 @@ function image_desaturate(stdClass $image) {
  * @param $toolkit
  *   An optional, image toolkit name to override the default.
  *
- * @return
+ * @return object|false
  *   An image object or FALSE if there was a problem loading the file. The
  *   image object has the following properties:
  *    - 'source' - The original file path.
@@ -428,7 +428,7 @@ function image_load($file, $toolkit = FALSE) {
  *   Destination path where the image should be saved. If it is empty the
  *   original image file will be overwritten.
  *
- * @return
+ * @return bool
  *   TRUE on success, FALSE on failure.
  *
  * @see image_load()
@@ -459,7 +459,7 @@ function image_save(stdClass $image, $destination = NULL) {
  *   'RGBA', '#RRGGBB', 'RRGGBB', '#RRGGBBAA', 'RRGGBBAA' or '0xRRGGBBAA'. The
  *   color is passed by reference to tidy up the string for consistency.
  *
- * @return
+ * @return array|false
  *   An associative array with 'red', 'green', 'blue' and 'alpha' as keys and corresponding
  *   color decimal integer as values or FALSE on an invalid color hex string.
  */

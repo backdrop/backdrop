@@ -35,7 +35,7 @@
  * @param $action_name
  *   (optional) The name of the action to retrieve.
  *
- * @return
+ * @return array|false
  *   An array of action info as provided by hook_action_info() If no action
  *   name is specified, all actions in the system will be returned as an array
  *   keyed by the action name.
@@ -78,8 +78,8 @@ function actions_get_info($action_name = NULL) {
  *   The entity object that the action will act upon, such as a node, user, or
  *   comment object.
  *
- * @return
- *   The result of the executed action callback.
+ * @return [varies]
+ *   The result of the executed action callback, or NULL.
  *
  * @ingroup actions
  */

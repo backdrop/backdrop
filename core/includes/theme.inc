@@ -55,7 +55,7 @@ define('RESPONSIVE_PRIORITY_LOW', 'priority-low');
  * @param $theme
  *   Either the name of a theme or a full theme object.
  *
- * @return
+ * @return bool
  *   Boolean TRUE if the theme is enabled or is the site administration theme;
  *   FALSE otherwise.
  */
@@ -327,7 +327,7 @@ function _theme_registry_callback($callback = NULL, array $arguments = array()) 
  *   Whether to load the complete theme registry or an instance of the
  *   ThemeRegistry class.
  *
- * @return
+ * @return array
  *   The theme registry array, or an instance of the ThemeRegistry class.
  */
 function _theme_load_registry($theme, $base_themes = NULL, $theme_engine = NULL, $complete = TRUE) {
@@ -419,7 +419,7 @@ class ThemeRegistry Extends BackdropCacheArray {
   /**
    * Initializes the full theme registry.
    *
-   * @return
+   * @return array
    *   An array with the keys of the full theme registry, but the values
    *   initialized to NULL.
    */
@@ -745,7 +745,7 @@ function _theme_build_registry($theme, $base_themes, $theme_engine) {
  * @param $refresh
  *   Whether to reload the list of themes from the database. Defaults to FALSE.
  *
- * @return
+ * @return array
  *   An associative array of the currently available themes. The keys are the
  *   themes' machine names and the values are objects having the following
  *   properties:
@@ -846,7 +846,7 @@ function list_themes($refresh = FALSE) {
  *   The name of the theme whose base we are looking for.
  * @param $used_keys
  *   A recursion parameter preventing endless loops.
- * @return
+ * @return array
  *   Returns an array of all of the theme's ancestors; the first element's value
  *   will be NULL if an error occurred.
  */
@@ -1439,7 +1439,7 @@ function backdrop_find_theme_templates($cache, $extension, $path) {
  * @param $theme
  *   The name of a given theme; defaults to the current theme.
  *
- * @return
+ * @return [varies]
  *   The value of the requested setting, NULL if the setting does not exist.
  */
 function theme_get_setting($setting_name, $theme = NULL) {
@@ -2528,7 +2528,7 @@ function theme_indentation($variables) {
  *   table cell. If $cell is an array with element 'header' set to TRUE, that
  *   will override the $header parameter.
  *
- * @return
+ * @return string
  *   HTML for the cell.
  */
 function _theme_table_cell($cell, $header = FALSE) {
@@ -2726,7 +2726,7 @@ function template_preprocess_page(&$variables) {
  *   of '__' is appropriate for theme hook suggestions. '-' is appropriate for
  *   extra classes.
  *
- * @return
+ * @return array
  *   An array of suggestions, suitable for adding to
  *   $variables['theme_hook_suggestions'] within a preprocess function or to
  *   $variables['classes'] if the suggestions represent extra CSS classes.

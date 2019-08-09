@@ -20,7 +20,7 @@
  *   not known at the time of transliteration, it is recommended to set this
  *   argument to the site default language to produce consistent results.
  *   Otherwise the current display language will be used.
- * @return
+ * @return string
  *   Transliterated text.
  */
 function _transliteration_process($string, $unknown = '?', $source_langcode = NULL) {
@@ -171,7 +171,7 @@ function _transliteration_process($string, $unknown = '?', $source_langcode = NU
  *   Optional ISO 639 language code that denotes the language of the input and
  *   is used to apply language-specific variations.  Defaults to the current
  *   display language.
- * @return
+ * @return string
  *   ASCII replacement character.
  */
 function _transliteration_replace($ord, $unknown = '?', $langcode = NULL) {
@@ -233,7 +233,7 @@ function _transliteration_replace($ord, $unknown = '?', $langcode = NULL) {
  *   not known at the time of transliteration, it is recommended to set this
  *   argument to the site default language to produce consistent results.
  *   Otherwise the current display language will be used.
- * @return
+ * @return string
  *   Sanitized file name, or array of sanitized file names.
  *
  * @see language_default()
@@ -276,7 +276,7 @@ function transliteration_clean_filename($filename, $source_langcode = NULL) {
  *   not known at the time of transliteration, it is recommended to set this
  *   argument to the site default language to produce consistent results.
  *   Otherwise the current display language will be used.
- * @return
+ * @return string
  *   Transliterated text.
  *
  * @see language_default()

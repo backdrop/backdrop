@@ -61,7 +61,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * $fields =& $query->getFields();
    * @endcode
    *
-   * @return
+   * @return array
    *   A reference to the fields array structure.
    */
   public function &getFields();
@@ -79,7 +79,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * $fields =& $query->getExpressions();
    * @endcode
    *
-   * @return
+   * @return array
    *   A reference to the expression array structure.
    */
   public function &getExpressions();
@@ -97,7 +97,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * $fields =& $query->getOrderBy();
    * @endcode
    *
-   * @return
+   * @return array
    *   A reference to the expression array structure.
    */
   public function &getOrderBy();
@@ -115,7 +115,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * $fields =& $query->getGroupBy();
    * @endcode
    *
-   * @return
+   * @return array
    *   A reference to the group-by array structure.
    */
   public function &getGroupBy();
@@ -133,7 +133,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * $fields =& $query->getTables();
    * @endcode
    *
-   * @return
+   * @return array
    *   A reference to the tables array structure.
    */
   public function &getTables();
@@ -152,7 +152,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * $fields =& $query->getUnion();
    * @endcode
    *
-   * @return
+   * @return array
    *   A reference to the union query array structure.
    */
   public function &getUnion();
@@ -164,7 +164,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *   When collecting the arguments of a subquery, the main placeholder
    *   object should be passed as this parameter.
    *
-   * @return
+   * @return array
    *   An associative array of all placeholder arguments for this query.
    */
   public function getArguments(QueryPlaceholderInterface $queryPlaceholder = NULL);
@@ -195,7 +195,8 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *   automatically based on the $table_alias and $field. The alias will be
    *   checked for uniqueness, so the requested alias may not be the alias
    *   that is assigned in all cases.
-   * @return
+   *
+   * @return string
    *   The unique alias that was assigned for this field.
    */
   public function addField($table_alias, $field, $alias = NULL);
@@ -473,7 +474,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
   /**
    * Indicates if preExecute() has already been called on that object.
    *
-   * @return
+   * @return bool
    *   TRUE is this query has already been prepared, FALSE otherwise.
    */
   public function isPrepared();
@@ -481,7 +482,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
   /**
    * Generic preparation and validation for a SELECT query.
    *
-   * @return
+   * @return bool
    *   TRUE if the validation was successful, FALSE if not.
    */
   public function preExecute(SelectQueryInterface $query = NULL);

@@ -309,7 +309,7 @@ function ajax_render($commands = array()) {
  * This will load a form from the form cache used during Ajax operations. It
  * pulls the form info from $_POST.
  *
- * @return
+ * @return array
  *   An array containing the $form, $form_state, $form_id, $form_build_id and an
  *   initial list of Ajax $commands. Use the list() function to break these
  *   apart:
@@ -569,7 +569,7 @@ function ajax_deliver_dialog($page_callback_result) {
  *   - A string of HTML content.
  *   - A renderable array of content.
  *
- * @return
+ * @return array
  *   An Ajax commands array that can be passed to ajax_render().
  */
 function ajax_prepare_response($page_callback_result) {
@@ -677,7 +677,7 @@ function ajax_footer() {
  * @param $element
  *   An associative array containing the properties of the element.
  *
- * @return
+ * @return array
  *   The processed element.
  *
  * @see ajax_pre_render_element()
@@ -709,7 +709,7 @@ function ajax_process_form($element, &$form_state) {
  *   - #ajax['parameters']
  *   - #ajax['effect']
  *
- * @return
+ * @return array
  *   The processed element with the necessary JavaScript attached to it.
  */
 function ajax_pre_render_element($element) {
@@ -889,7 +889,7 @@ function ajax_pre_render_element($element) {
  * @param $text
  *   The message string to display to the user.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  */
 function ajax_command_alert($text) {
@@ -917,7 +917,7 @@ function ajax_command_alert($text) {
  * @param $settings
  *   An optional array of settings that will be used for this command only.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  */
 function ajax_command_insert($selector, $html, $settings = NULL) {
@@ -948,7 +948,7 @@ function ajax_command_insert($selector, $html, $settings = NULL) {
  * @param $settings
  *   An optional array of settings that will be used for this command only.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  *
  * See
@@ -982,7 +982,7 @@ function ajax_command_replace($selector, $html, $settings = NULL) {
  * @param $settings
  *   An optional array of settings that will be used for this command only.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  *
  * @see http://docs.jquery.com/Attributes/html#val
@@ -1015,7 +1015,7 @@ function ajax_command_html($selector, $html, $settings = NULL) {
  * @param $settings
  *   An optional array of settings that will be used for this command only.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  *
  * @see http://docs.jquery.com/Manipulation/prepend#content
@@ -1048,7 +1048,7 @@ function ajax_command_prepend($selector, $html, $settings = NULL) {
  * @param $settings
  *   An optional array of settings that will be used for this command only.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  *
  * @see http://docs.jquery.com/Manipulation/append#content
@@ -1081,7 +1081,7 @@ function ajax_command_append($selector, $html, $settings = NULL) {
  * @param $settings
  *   An optional array of settings that will be used for this command only.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  *
  * @see http://docs.jquery.com/Manipulation/after#content
@@ -1114,7 +1114,7 @@ function ajax_command_after($selector, $html, $settings = NULL) {
  * @param $settings
  *   An optional array of settings that will be used for this command only.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  *
  * @see http://docs.jquery.com/Manipulation/before#content
@@ -1143,7 +1143,7 @@ function ajax_command_before($selector, $html, $settings = NULL) {
  *   A jQuery selector string. If the command is a response to a request from
  *   an #ajax form element then this value can be NULL.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  *
  * @see http://docs.jquery.com/Manipulation/remove#expr
@@ -1171,7 +1171,7 @@ function ajax_command_remove($selector) {
  *   An optional CSS selector which must be inside $selector. If specified,
  *   an asterisk will be appended to the HTML inside the $asterisk selector.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  */
 function ajax_command_changed($selector, $asterisk = '') {
@@ -1197,7 +1197,7 @@ function ajax_command_changed($selector, $asterisk = '') {
  * @param $argument
  *   An array of key/value pairs to set in the CSS for the selector.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  *
  * @see http://docs.jquery.com/CSS/css#properties
@@ -1230,7 +1230,7 @@ function ajax_command_css($selector, $argument) {
  *   are passed to Backdrop.attachBehaviors will not include the global
  *   Backdrop.settings.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  */
 function ajax_command_settings($argument, $merge = FALSE) {
@@ -1259,7 +1259,7 @@ function ajax_command_settings($argument, $merge = FALSE) {
  * @param $value
  *   The value of the data. Not just limited to strings can be any format.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  *
  * @see http://docs.jquery.com/Core/data#namevalue
@@ -1292,7 +1292,7 @@ function ajax_command_data($selector, $name, $value) {
  * @param $args
  *   (optional) A list of arguments to the jQuery $method, if any.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  */
 function ajax_command_invoke($selector, $method, array $args = array()) {
@@ -1316,7 +1316,7 @@ function ajax_command_invoke($selector, $method, array $args = array()) {
  * @param $selector
  *   A jQuery selector string.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  */
 function ajax_command_restripe($selector) {
@@ -1508,7 +1508,7 @@ function ajax_command_update_build_id($form) {
  * @param $styles
  *   A string that contains the styles to be added.
  *
- * @return
+ * @return array
  *   An array suitable for use with the ajax_render() function.
  *
  * @see misc/ajax.js

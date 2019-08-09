@@ -432,7 +432,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
    * @param $offset
    *   The offset that was requested.
    *
-   * @return
+   * @return [varies]
    *   The value of the offset, or NULL if no value was found.
    */
   abstract protected function resolveCacheMiss($offset);
@@ -498,7 +498,7 @@ function timer_start($name) {
  * @param $name
  *   The name of the timer.
  *
- * @return
+ * @return int
  *   The current timer value in ms.
  */
 function timer_read($name) {
@@ -522,7 +522,7 @@ function timer_read($name) {
  * @param $name
  *   The name of the timer.
  *
- * @return
+ * @return array
  *   A timer array. The array contains the number of times the timer has been
  *   started and stopped (count) and the accumulated timer value in ms (time).
  */
@@ -561,7 +561,7 @@ function timer_stop($name) {
  *   Force a full search for matching directories even if one had been
  *   found previously. Defaults to FALSE.
  *
- * @return
+ * @return string
  *   The path of the matching directory.
  *
  * @see settings.php
@@ -595,7 +595,7 @@ function conf_path($require_settings = TRUE, $reset = FALSE) {
  * @param $script_name
  *   The part of the url following the hostname, including the leading slash.
  *
- * @return
+ * @return string
  *   The relative path of the matching configuration directory.
  *
  * @see conf_path()
@@ -761,7 +761,7 @@ function backdrop_environment_initialize() {
 /**
  * Validates that a hostname (for example $_SERVER['HTTP_HOST']) is safe.
  *
- * @return
+ * @return bool
  *  TRUE if only containing valid characters, or FALSE otherwise.
  */
 function backdrop_valid_http_host($host) {
@@ -996,7 +996,7 @@ function backdrop_settings_initialize() {
  *   The filename of the item if it is to be set explicitly rather
  *   than by consulting the database.
  *
- * @return
+ * @return string|null
  *   The filename of the requested item or NULL if the item is not found.
  */
 function backdrop_get_filename($type, $name, $filename = NULL) {
@@ -1174,7 +1174,7 @@ function settings_get($name, $default = NULL) {
  * @param $default
  *   The default value to use if this variable has never been set.
  *
- * @return
+ * @return [varies]
  *   The value of the variable. Unserialization is taken care of as necessary.
  *
  * @see variable_del()
@@ -1307,7 +1307,7 @@ function state_initialize() {
  * @param $default
  *   The default value to use if this state has never been set.
  *
- * @return
+ * @return [varies]
  *   The value of the state. Complex data types such as objects and arrays are
  *   unserialized when returned.
  *
@@ -1426,7 +1426,7 @@ function backdrop_page_get_cache($check_only = FALSE, $return_stale = FALSE) {
  * @param $allow_caching
  *   Set to FALSE if you want to prevent this page from being cached.
  *
- * @return
+ * @return bool
  *   TRUE if the current page can be cached, FALSE otherwise.
  */
 function backdrop_page_is_cacheable($allow_caching = NULL) {
@@ -1470,7 +1470,7 @@ function bootstrap_invoke_all($hook) {
  * @param $name
  *   The name of the item to load.
  *
- * @return
+ * @return bool
  *   TRUE if the item is loaded or has already been loaded.
  */
 function backdrop_load($type, $name) {
@@ -1537,7 +1537,7 @@ function backdrop_add_http_header($name, $value, $append = FALSE) {
  *   An HTTP header name. If omitted, all headers are returned as name/value
  *   pairs. If an array value is FALSE, the header has been unset.
  *
- * @return
+ * @return string|false|null
  *   A string containing the header value, or FALSE if the header has been set,
  *   or NULL if the header has not been set.
  */
@@ -1561,7 +1561,7 @@ function backdrop_get_http_header($name = NULL) {
  * @param string $name
  *   Optional. A header name with the preferred capitalization, e.g.
  *   Cache-Control or Content-Type.
- * @return
+ * @return array
  *   The array of all current preferred header names. Keyed by a lower-case
  *   string of each header name.
  */
@@ -1910,7 +1910,7 @@ function backdrop_unpack($obj, $field = 'data') {
  *     that the source string belongs to. See @ref sec_context above for more
  *     information.
  *
- * @return
+ * @return string
  *   The translated string.
  *
  * @see st()
@@ -2071,7 +2071,7 @@ function check_plain($text) {
  * @param $text
  *   The text to check.
  *
- * @return
+ * @return bool
  *   TRUE if the text is valid UTF-8, FALSE if not.
  */
 function backdrop_validate_utf8($text) {
@@ -2459,7 +2459,7 @@ function backdrop_show_messages($show = NULL) {
  *
  * The title is displayed on the page and in the title bar.
  *
- * @return
+ * @return string
  *   The current page's title.
  */
 function backdrop_get_title() {
@@ -2487,7 +2487,7 @@ function backdrop_get_title() {
  *   from $title using a function like check_plain() or filter_xss(). With this
  *   flag the string will be passed through unchanged.
  *
- * @return
+ * @return string
  *   The updated title of the current page.
  */
 function backdrop_set_title($title = NULL, $output = CHECK_PLAIN) {
@@ -2629,7 +2629,7 @@ function backdrop_hmac_base64($data, $key) {
  * @param $data
  *   String to be hashed.
  *
- * @return
+ * @return string
  *   A base-64 encoded sha-256 hash, with + replaced with -, / with _ and
  *   any = padding characters removed.
  */
@@ -2661,7 +2661,7 @@ function backdrop_hash_base64($data) {
  * @param ...
  *   Arrays to merge.
  *
- * @return
+ * @return array
  *   The merged array.
  *
  * @see backdrop_array_merge_deep_array()
@@ -3307,7 +3307,7 @@ function backdrop_get_bootstrap_phase() {
 /**
  * Returns the test prefix if this is an internal request from SimpleTest.
  *
- * @return
+ * @return string|false
  *   Either the simpletest prefix (the string "simpletest" followed by any
  *   number of digits) or FALSE if the user agent does not contain a valid
  *   HMAC and timestamp.
@@ -3472,7 +3472,7 @@ function backdrop_language_initialize() {
 /**
  * Returns a list of the built-in language types.
  *
- * @return
+ * @return array
  *   An array of key-values pairs where the key is the language type name and
  *   the value is its configurability (TRUE/FALSE).
  */
@@ -3487,7 +3487,7 @@ function language_types_get_default() {
 /**
  * Returns TRUE if there is more than one language enabled.
  *
- * @return
+ * @return bool
  *   TRUE if more than one language is enabled.
  */
 function language_multilingual() {
@@ -3602,7 +3602,7 @@ function language_load($langcode) {
  * @param $langcode
  *   The language code.
  *
- * @return
+ * @return string
  *   The printed name of the language.
  */
 function language_name($langcode) {
@@ -3620,7 +3620,7 @@ function language_name($langcode) {
 /**
  * Returns the default language used on the site.
  *
- * @return
+ * @return object
  *   A language object.
  */
 function language_default() {
@@ -3677,7 +3677,7 @@ function language_default() {
  * - http://example.com/index.php returns an empty string (meaning: front page).
  * - http://example.com/index.php?page=1 returns an empty string.
  *
- * @return
+ * @return string
  *   The requested Backdrop URL path.
  *
  * @see current_path()
@@ -3783,7 +3783,7 @@ function arg($index = NULL, $path = NULL) {
  * the proxy server, and not the client's. The actual header name can be
  * configured by the reverse_proxy_header variable.
  *
- * @return
+ * @return string
  *   IP address of client machine, adjusted for reverse proxy and/or cluster
  *   environments.
  */
@@ -3971,7 +3971,7 @@ function backdrop_get_complete_schema($rebuild = FALSE) {
  * @param $class
  *   The name of the class to check or load.
  *
- * @return
+ * @return bool
  *   TRUE if the class is currently available, FALSE otherwise.
  */
 function backdrop_autoload($class) {
@@ -4114,7 +4114,7 @@ function backdrop_autoload($class) {
  *   internally and shouldn't be passed in; use backdrop_static_reset() instead.
  *   (This function's return value should not be used when TRUE is passed in.)
  *
- * @return
+ * @return array
  *   Returns a variable by reference.
  *
  * @see backdrop_static_reset()
@@ -4240,7 +4240,7 @@ function backdrop_is_background($is_background = NULL) {
  * @param $text
  *   The text to format (plain-text).
  *
- * @return
+ * @return string
  *   The formatted text (html).
  */
 function backdrop_placeholder($text) {
@@ -4258,7 +4258,7 @@ function backdrop_placeholder($text) {
  * @param ...
  *   Additional arguments to pass to the shutdown function.
  *
- * @return
+ * @return array
  *   Array of shutdown functions to be executed.
  *
  * @see register_shutdown_function()
@@ -4328,7 +4328,7 @@ function _backdrop_shutdown_function() {
  *   6GiB, 8bytes, 9mbytes). If no value is passed, the current PHP
  *   memory_limit will be used. Defaults to NULL.
  *
- * @return
+ * @return bool
  *   TRUE if there is sufficient memory to allow the operation, or FALSE
  *   otherwise.
  */

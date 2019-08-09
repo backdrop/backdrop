@@ -95,7 +95,7 @@ function _lock_id() {
  * @param $timeout
  *   A number of seconds (float) before the lock expires (minimum of 0.001).
  *
- * @return
+ * @return bool
  *   TRUE if the lock was acquired, FALSE if it failed.
  */
 function lock_acquire($name, $timeout = 30.0) {
@@ -159,7 +159,7 @@ function lock_acquire($name, $timeout = 30.0) {
  * @param $name
  *   The name of the lock.
  *
- * @return
+ * @return bool
  *   TRUE if there is no lock or it was removed, FALSE otherwise.
  */
 function lock_may_be_available($name) {
@@ -196,7 +196,7 @@ function lock_may_be_available($name) {
  * @param $delay
  *   The maximum number of seconds to wait, as an integer.
  *
- * @return
+ * @return bool
  *   TRUE if the lock holds, FALSE if it is available.
  */
 function lock_wait($name, $delay = 30) {

@@ -133,7 +133,7 @@ function authorize_filetransfer_form($form, &$form_state) {
  * @param $backend
  *   The name of the backend (e.g. 'ftp', 'ssh', etc).
  *
- * @return
+ * @return array
  *   Form API array of connection settings for the given backend.
  *
  * @see hook_filetransfer_backends()

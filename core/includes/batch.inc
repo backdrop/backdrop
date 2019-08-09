@@ -21,7 +21,7 @@
  *   The ID of the batch to load. When a progressive batch is being processed,
  *   the relevant ID is found in $_REQUEST['id'].
  *
- * @return
+ * @return array
  *   An array representing the batch, or FALSE if no batch was found.
  */
 function batch_load($id) {

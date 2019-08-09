@@ -130,7 +130,7 @@ interface QueryConditionInterface {
   /**
    * Gets a complete list of all values to insert into the prepared statement.
    *
-   * @return
+   * @return array
    *   An associative array of placeholders and values.
    */
   public function arguments();
@@ -152,7 +152,7 @@ interface QueryConditionInterface {
   /**
    * Check whether a condition has been previously compiled.
    *
-   * @return
+   * @return true
    *   TRUE if the condition has been previously compiled.
    */
   public function compiled();
@@ -187,7 +187,7 @@ interface QueryAlterableInterface {
    * @param $tag
    *   The tag to check.
    *
-   * @return
+   * @return bool
    *   TRUE if this query has been marked with this tag, FALSE otherwise.
    */
   public function hasTag($tag);
@@ -198,7 +198,7 @@ interface QueryAlterableInterface {
    * @param $tags
    *   A variable number of arguments, one for each tag to check.
    *
-   * @return
+   * @return bool
    *   TRUE if this query has been marked with all specified tags, FALSE
    *   otherwise.
    */
@@ -210,7 +210,7 @@ interface QueryAlterableInterface {
    * @param $tags
    *   A variable number of arguments, one for each tag to check.
    *
-   * @return
+   * @return bool
    *   TRUE if this query has been marked with at least one of the specified
    *   tags, FALSE otherwise.
    */
@@ -240,7 +240,7 @@ interface QueryAlterableInterface {
    * @param $key
    *   The unique identifier for the piece of metadata to retrieve.
    *
-   * @return
+   * @return [varies]|null
    *   The previously attached metadata object, or NULL if one doesn't exist.
    */
   public function getMetaData($key);
@@ -259,7 +259,7 @@ interface QueryPlaceholderInterface {
   /**
    * Returns the next placeholder ID for the query.
    *
-   * @return
+   * @return int
    *   The next available placeholder ID as an integer.
    */
   public function nextPlaceholder();
@@ -370,7 +370,7 @@ abstract class Query implements QueryPlaceholderInterface {
    * The toString operation is how we compile a query object to a prepared
    * statement.
    *
-   * @return
+   * @return string
    *   A prepared statement query string for this object.
    */
   abstract public function __toString();
@@ -426,7 +426,7 @@ abstract class Query implements QueryPlaceholderInterface {
    * $comments =& $query->getComments();
    * @endcode
    *
-   * @return
+   * @return array
    *   A reference to the comments array structure.
    */
   public function &getComments() {
@@ -610,7 +610,7 @@ class InsertQuery extends Query {
   /**
    * Executes the insert query.
    *
-   * @return
+   * @return [varies]
    *   The last insert ID of the query, if one exists. If the query
    *   was given multiple sets of values to insert, the return value is
    *   undefined. If no fields are specified, this method will do nothing and
@@ -693,7 +693,7 @@ class InsertQuery extends Query {
   /**
    * Preprocesses and validates the query.
    *
-   * @return
+   * @return bool
    *   TRUE if the validation was successful, FALSE if not.
    *
    * @throws FieldsOverlapException
@@ -927,7 +927,7 @@ class TruncateQuery extends Query {
   /**
    * Executes the TRUNCATE query.
    *
-   * @return
+   * @return [varies]
    *   Return value is dependent on the database type.
    */
   public function execute() {
@@ -1949,7 +1949,7 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
    * @param $operator
    *   The condition operator, such as "IN", "BETWEEN", etc. Case-sensitive.
    *
-   * @return
+   * @return array|null
    *   The extra handling directives for the specified operator, or NULL.
    */
   protected function mapConditionOperator($operator) {

@@ -109,7 +109,7 @@ define('FILE_STATUS_PERMANENT', 1);
  *   bits set are returned. Defaults to STREAM_WRAPPERS_ALL, which returns all
  *   registered stream wrappers.
  *
- * @return
+ * @return array
  *   An array keyed by scheme, with values containing an array of information
  *   about the stream wrapper, as returned by hook_stream_wrappers(). If $filter
  *   is omitted or set to STREAM_WRAPPERS_ALL, the entire Backdrop stream wrapper
@@ -175,7 +175,7 @@ function file_get_stream_wrappers($filter = STREAM_WRAPPERS_ALL) {
  * @param $scheme
  *   Stream scheme.
  *
- * @return
+ * @return string|false
  *   Return string if a scheme has a registered handler, or FALSE.
  */
 function file_stream_wrapper_get_class($scheme) {
@@ -189,7 +189,7 @@ function file_stream_wrapper_get_class($scheme) {
  * @param $uri
  *   A stream, referenced as "scheme://target".
  *
- * @return
+ * @return string|false
  *   A string containing the name of the scheme, or FALSE if none. For example,
  *   the URI "public://example.txt" would return "public".
  *
@@ -210,7 +210,7 @@ function file_uri_scheme($uri) {
  * @param $scheme
  *   A URI scheme, a stream is referenced as "scheme://target".
  *
- * @return
+ * @return bool
  *   Returns TRUE if the string is the name of a validated stream,
  *   or FALSE if the scheme does not have a registered handler.
  */
@@ -232,7 +232,7 @@ function file_stream_wrapper_valid_scheme($scheme) {
  * @param $uri
  *   A stream, referenced as "scheme://target".
  *
- * @return
+ * @return string|false
  *   A string containing the target (path), or FALSE if none.
  *   For example, the URI "public://sample/test.txt" would return
  *   "sample/test.txt".
@@ -249,7 +249,7 @@ function file_uri_target($uri) {
 /**
  * Gets the default file stream implementation.
  *
- * @return
+ * @return string
  *   'public', 'private' or any other file scheme defined as the default.
  */
 function file_default_scheme() {
@@ -275,7 +275,7 @@ function file_default_scheme() {
  * @param $uri
  *   String reference containing the URI to normalize.
  *
- * @return
+ * @return string
  *   The normalized URI.
  */
 function file_stream_wrapper_uri_normalize($uri) {
@@ -376,7 +376,7 @@ function file_stream_wrapper_get_instance_by_scheme($scheme) {
  *   The URI to a file for which we need an external URL, or the path to a
  *   shipped file.
  *
- * @return
+ * @return string|false
  *   A string containing a URL that may be used to access the file.
  *   If the provided string already contains a preceding 'http', 'https', or
  *   '/', nothing is done and the same string is returned. If a stream wrapper
@@ -438,7 +438,7 @@ function file_create_url($uri) {
  *   not exist (FILE_CREATE_DIRECTORY) or made writable if it is read-only
  *   (FILE_MODIFY_PERMISSIONS).
  *
- * @return
+ * @return bool
  *   TRUE if the directory exists (or was created) and is writable. FALSE
  *   otherwise.
  */
@@ -529,7 +529,7 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
  *   public directory. The default is TRUE, which returns the .htaccess lines
  *   for a private and protected directory.
  *
- * @return
+ * @return string
  *   A string representing the desired contents of the .htaccess file.
  *
  * @see file_create_htaccess()
@@ -636,7 +636,7 @@ function file_save(File $file) {
  * @param $file
  *   A file entity.
  *
- * @return
+ * @return array
  *   A nested array with usage data. The first level is keyed by module name,
  *   the second by object type and the third by the object id. The value
  *   of the third level contains the usage count.
@@ -789,7 +789,7 @@ function file_usage_delete(File $file, $module, $type = NULL, $id = NULL, $count
  *       unique.
  *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
  *
- * @return
+ * @return object|false
  *   File object if the copy is successful, or FALSE in the event of an error.
  *
  * @see file_unmanaged_copy()
@@ -847,7 +847,7 @@ function file_copy(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
  * @param $uri
  *   The URI to be tested.
  *
- * @return
+ * @return true
  *   TRUE if the URI is allowed.
  */
 function file_valid_uri($uri) {
@@ -887,7 +887,7 @@ function file_valid_uri($uri) {
  *       unique.
  *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
  *
- * @return
+ * @return string|false
  *   The path to the new file, or FALSE in the event of an error.
  *
  * @see file_copy()
@@ -934,7 +934,7 @@ function file_unmanaged_copy($source, $destination = NULL, $replace = FILE_EXIST
  *       unique.
  *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
  *
- * @return
+ * @return bool
  *   TRUE, or FALSE in the event of an error.
  *
  * @see file_unmanaged_copy()
@@ -1019,7 +1019,7 @@ function file_build_uri($path) {
  *       unique.
  *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
  *
- * @return
+ * @return string|false
  *   The destination filepath, or FALSE if the file already exists
  *   and FILE_EXISTS_ERROR is specified.
  *
@@ -1155,7 +1155,7 @@ function file_move(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
  *       unique.
  *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
  *
- * @return
+ * @return string|false
  *   The path to the new file, or FALSE in the event of an error.
  *
  * @see file_move()
@@ -1214,7 +1214,7 @@ function file_unmanaged_move($source, $destination = NULL, $replace = FILE_EXIST
  *   If TRUE, backdrop_set_message() will be called to display a message if the
  *   file name was changed.
  *
- * @return
+ * @return string
  *   The potentially modified $filename.
  */
 function file_munge_filename($filename, $extensions, $alerts = TRUE) {
@@ -1258,7 +1258,7 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
  * @param $filename
  *   String with the filename to be unmunged.
  *
- * @return
+ * @return string
  *   An unmunged filename string.
  */
 function file_unmunge_filename($filename) {
@@ -1276,7 +1276,7 @@ function file_unmunge_filename($filename) {
  * @param $directory
  *   String containing the directory or parent URI.
  *
- * @return
+ * @return string
  *   File path consisting of $directory and a unique filename based off
  *   of $basename.
  *
@@ -1372,7 +1372,7 @@ function file_delete_multiple(array $fids) {
  * @param $path
  *   A string containing a file path or (streamwrapper) URI.
  *
- * @return
+ * @return bool
  *   TRUE for success or path does not exist, or FALSE in the event of an
  *   error.
  *
@@ -1414,7 +1414,7 @@ function file_unmanaged_delete($path) {
  * @param $path
  *   A string containing either an URI or a file or directory path.
  *
- * @return
+ * @return bool
  *   TRUE for success or if path does not exist, FALSE in the event of an
  *   error.
  *
@@ -1447,7 +1447,7 @@ function file_unmanaged_delete_recursive($path) {
  *   Optional. The file status to consider. The default is to only
  *   consider files in status FILE_STATUS_PERMANENT.
  *
- * @return
+ * @return int
  *   An integer containing the number of bytes used.
  */
 function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
@@ -1695,7 +1695,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
  * @param $uri
  *   A string containing the destination URI of the file.
  *
- * @return
+ * @return bool
  *   TRUE on success, or FALSE on failure.
  *
  * @see move_uploaded_file()
@@ -1735,7 +1735,7 @@ function backdrop_move_uploaded_file($filename, $uri) {
  *   indicates that the file passed validation. The functions will be called in
  *   the order specified.
  *
- * @return
+ * @return array
  *   An array containing validation error messages.
  *
  * @see hook_file_validate()
@@ -1760,7 +1760,7 @@ function file_validate(File $file, $validators = array()) {
  * @param File $file
  *   A file entity.
  *
- * @return
+ * @return array
  *   An array. If the file name is too long, it will contain an error message.
  */
 function file_validate_name_length(File $file) {
@@ -1783,7 +1783,7 @@ function file_validate_name_length(File $file) {
  * @param $extensions
  *   A string with a space separated list of allowed extensions.
  *
- * @return
+ * @return array
  *   An array. If the file extension is not allowed, it will contain an error
  *   message.
  *
@@ -1811,7 +1811,7 @@ function file_validate_extensions(File $file, $extensions) {
  *   An integer specifying the maximum number of bytes the user is allowed.
  *   Zero indicates that no limit should be enforced.
  *
- * @return
+ * @return array
  *   An array. If the file size exceeds limits, it will contain an error
  *   message.
  *
@@ -1840,7 +1840,7 @@ function file_validate_size(File $file, $file_limit = 0, $user_limit = 0) {
  * @param File $file
  *   A file entity.
  *
- * @return
+ * @return array
  *   An array. If the file is not an image, it will contain an error message.
  *
  * @see hook_file_validate()
@@ -1873,7 +1873,7 @@ function file_validate_is_image(File $file) {
  *   An optional string in the form WIDTHxHEIGHT. This will check that the
  *   image meets a minimum size. A value of 0 indicates no restriction.
  *
- * @return
+ * @return array
  *   An array. If the file is an image and did not meet the requirements, it
  *   will contain an error message.
  *
@@ -1937,7 +1937,7 @@ function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $mi
  * @param $orientation
  *   A flag indicating that EXIF data should be checked and image rotated if necessary.
  *
- * @return
+ * @return array
  *   An array. If the file is an image and did not meet the requirements, it
  *   will contain an error message.
  *
@@ -2067,7 +2067,7 @@ function file_save_data($data, $destination = NULL, $replace = FILE_EXISTS_RENAM
  *                          unique.
  *   - FILE_EXISTS_ERROR - Do nothing and return FALSE.
  *
- * @return
+ * @return string|false
  *   A string with the path of the resulting file, or FALSE on error.
  *
  * @see file_save_data()
@@ -2159,7 +2159,7 @@ function file_download() {
  * @param $uri
  *   The URI for the file whose headers should be retrieved.
  *
- * @return
+ * @return array
  *   If access is allowed, headers for the file, suitable for passing to
  *   file_transfer(). If access is not allowed, an empty array will be returned.
  *
@@ -2203,7 +2203,7 @@ function file_download_headers($uri) {
  * @param $uri
  *   The URI for the file whose access should be retrieved.
  *
- * @return
+ * @return bool
  *   Boolean TRUE if access is allowed. FALSE if access is not allowed.
  *
  * @see file_download_headers()
@@ -2243,7 +2243,7 @@ function file_download_access($uri) {
  *   Current depth of recursion. This parameter is only used internally and
  *   should not be passed in.
  *
- * @return
+ * @return array
  *   An associative array (keyed on the chosen key) of objects with 'uri',
  *   'filename', and 'name' members corresponding to the matching files.
  */
@@ -2300,7 +2300,7 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
 /**
  * Determines the maximum file upload size by querying the PHP settings.
  *
- * @return
+ * @return int
  *   A file size limit in bytes based on the PHP upload_max_filesize and
  *   post_max_size
  */
@@ -2333,7 +2333,7 @@ function file_upload_max_size() {
  *      the key is the extension (lowercase) and the value is the mimetype
  *      identifier. If $mapping is NULL file_mimetype_mapping() is called.
  *
- * @return
+ * @return string
  *   The internet media type registered for the extension or
  *   application/octet-stream for unknown extensions.
  *
@@ -2371,7 +2371,7 @@ function file_get_mimetype($uri, $mapping = NULL) {
  *   Integer value for the permissions. Consult PHP chmod() documentation for
  *   more information.
  *
- * @return
+ * @return bool
  *   TRUE for success, FALSE in the event of an error.
  *
  * @ingroup php_wrappers
@@ -2415,7 +2415,7 @@ function backdrop_chmod($uri, $mode = NULL) {
  * @param $context
  *   Refer to http://php.net/manual/ref.stream.php
  *
- * @return
+ * @return bool
  *   Boolean TRUE on success, or FALSE on failure.
  *
  * @see unlink()
@@ -2478,7 +2478,7 @@ function backdrop_realpath($uri) {
  * @param $uri
  *   A URI or path.
  *
- * @return
+ * @return string
  *   A string containing the directory name.
  *
  * @see dirname()
@@ -2542,7 +2542,7 @@ function backdrop_basename($uri, $suffix = NULL) {
  * @param $context
  *   Refer to http://php.net/manual/ref.stream.php
  *
- * @return
+ * @return bool
  *   Boolean TRUE on success, or FALSE on failure.
  *
  * @see mkdir()
@@ -2573,7 +2573,7 @@ function backdrop_mkdir($uri, $mode = NULL, $recursive = FALSE, $context = NULL)
  * @param $context
  *   Refer to http://php.net/manual/ref.stream.php
  *
- * @return
+ * @return bool
  *   Boolean TRUE on success, or FALSE on failure.
  *
  * @see rmdir()
@@ -2607,7 +2607,7 @@ function backdrop_rmdir($uri, $context = NULL) {
  *   The prefix of the generated temporary filename.
  *   Note: Windows uses only the first three characters of prefix.
  *
- * @return
+ * @return string|false
  *   The new temporary filename, or FALSE on failure.
  *
  * @see tempnam()
@@ -2686,7 +2686,7 @@ function file_directory_temp() {
  * @param File $file
  *   A file entity.
  *
- * @return
+ * @return array
  *   An associative array of headers, as expected by file_transfer().
  */
 function file_get_content_headers(File $file) {

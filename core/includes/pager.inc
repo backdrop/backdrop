@@ -10,7 +10,7 @@
  * @param $element
  *  An optional integer to distinguish between multiple pagers on one page.
  *
- * @return
+ * @return int
  *  The number of the current requested page, within the pager represented by
  *  $element. This is determined from the URL query parameter $_GET['page'], or
  *  0 by default. Note that this number may differ from the actual page being
@@ -102,7 +102,7 @@ function pager_find_page($element = 0) {
  * @param $element
  *  An optional integer to distinguish between multiple pagers on one page.
  *
- * @return
+ * @return int
  *   The number of the current page, within the pager represented by $element.
  *   This is determined from the URL query parameter $_GET['page'], or 0 by
  *   default. However, if a page that does not correspond to the actual range
@@ -125,7 +125,7 @@ function pager_default_initialize($total, $limit, $element = 0) {
 /**
  * Compose a URL query parameter array for pager links.
  *
- * @return
+ * @return array
  *   A URL query parameter array that consists of all components of the current
  *   page request except for those pertaining to paging.
  */

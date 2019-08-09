@@ -154,7 +154,8 @@ function backdrop_get_schema_versions($module) {
  * @param $array
  *   Set to TRUE if you want to get information about all modules in the
  *   system.
- * @return
+ *
+ * @return int|array
  *   The currently installed schema version, or SCHEMA_UNINSTALLED if the
  *   module is not installed.
  */
@@ -202,7 +203,7 @@ function backdrop_set_installed_schema_version($module, $version) {
 /**
  * Loads the installation profile, extracting its defined distribution name.
  *
- * @return
+ * @return string
  *   The distribution name defined in the profile's .info file. Defaults to
  *   "Backdrop CMS" if none is explicitly provided by the installation profile.
  *
@@ -230,7 +231,7 @@ function backdrop_install_profile_distribution_name() {
  *   The name of the file calling this function so we can strip it out of
  *   the URI when generating the base_url.
  *
- * @return
+ * @return string
  *   The auto-detected $base_url that should be configured in settings.php
  */
 function backdrop_detect_baseurl($file = 'core/install.php') {
@@ -246,7 +247,7 @@ function backdrop_detect_baseurl($file = 'core/install.php') {
 /**
  * Returns all supported database installer objects that are compiled into PHP.
  *
- * @return
+ * @return array
  *  An array of database installer objects compiled into PHP.
  */
 function backdrop_load_database_driver() {
@@ -389,7 +390,7 @@ abstract class DatabaseTasks {
   /**
    * Return the minimum required version of the engine.
    *
-   * @return
+   * @return string
    *   A version string. If not NULL, it will be checked against the version
    *   reported by the Database engine using version_compare().
    */
@@ -580,7 +581,7 @@ abstract class DatabaseTasks {
    * @param $database
    *  An array of driver specific configuration options.
    *
-   * @return
+   * @return array
    *   The options form array.
    */
   public function getFormOptions($database) {
@@ -660,7 +661,7 @@ abstract class DatabaseTasks {
    * @param $database
    *   An array of driver specific configuration options.
    *
-   * @return
+   * @return array
    *   An array of driver configuration errors, keyed by form element name.
    */
   public function validateDatabaseSettings($database) {
@@ -907,7 +908,7 @@ make this configuration active, see admin/config/development/configuration/sync.
  * @param $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return array
  *   The list of modules to install.
  *
  * @throws Exception
@@ -1068,7 +1069,7 @@ function backdrop_uninstall_modules($module_list = array(), $uninstall_dependent
  * @param $type
  *   The type of file. Can be file (default), dir, or link.
  *
- * @return
+ * @return bool
  *   TRUE on success or FALSE on failure. A message is set for the latter.
  */
 function backdrop_verify_install_file($file, $mask = NULL, $type = 'file') {
@@ -1148,7 +1149,7 @@ function backdrop_verify_install_file($file, $mask = NULL, $type = 'file') {
  * @param $message
  *  (optional) Whether to output messages. Defaults to TRUE.
  *
- * @return
+ * @return bool
  *  TRUE/FALSE whether or not the directory was successfully created.
  */
 function backdrop_install_mkdir($file, $mask, $message = TRUE) {
@@ -1212,7 +1213,7 @@ function install_goto($path) {
  * @param $query
  *   (optional) An array of query parameters to merge in to the existing ones.
  *
- * @return
+ * @return string
  *   The URL of the current script, with query parameters modified by the
  *   passed-in $query. The URL is not sanitized, so it still needs to be run
  *   through check_url() if it will be used as an HTML attribute value.
@@ -1239,7 +1240,7 @@ function backdrop_current_script_url($query = array()) {
  *   The severity of the requirements problem, as returned by
  *   backdrop_requirements_severity().
  *
- * @return
+ * @return string
  *   A URL for attempting to proceed to the next step of the script. The URL is
  *   not sanitized, so it still needs to be run through check_url() if it will
  *   be used as an HTML attribute value.
@@ -1321,7 +1322,7 @@ function st($string, array $args = array(), array $options = array()) {
  * @param $profile
  *   Name of installation profile to check.
  *
- * @return
+ * @return array
  *   Array of the installation profile's requirements.
  *
  * @throws Exception
@@ -1355,7 +1356,7 @@ function backdrop_check_profile($profile) {
  * @param $requirements
  *   An array of requirements as returned by system_get_requirements().
  *
- * @return
+ * @return int
  *   The highest severity in the array.
  *
  * @see system_get_requirements().
@@ -1373,7 +1374,7 @@ function backdrop_requirements_severity(&$requirements) {
 /**
  * Get run-time requirements and status information.
  *
- * @return
+ * @return array
  *   An array of requirements in the same format as is returned by
  *   hook_requirements().
  */
@@ -1393,7 +1394,7 @@ function system_get_requirements() {
  * @param $module
  *   Machine name of module to check.
  *
- * @return
+ * @return bool
  *   TRUE or FALSE, depending on whether the requirements are met.
  */
 function backdrop_check_module($module) {
@@ -1457,7 +1458,7 @@ function backdrop_check_module($module) {
  * @param $langcode
  *   Language code (if any).
  *
- * @return
+ * @return array
  *   The info array.
  */
 function install_profile_info($profile, $langcode = 'en') {

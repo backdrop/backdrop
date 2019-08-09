@@ -229,7 +229,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @param $add_prefix
    *   Boolean that indicates whether the given table name should be prefixed.
    *
-   * @return
+   * @return array
    *   A keyed array with information about the schema, table name and prefix.
    */
   protected function getPrefixInfo($table = 'default', $add_prefix = TRUE) {
@@ -313,7 +313,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @param $table
    *   The name of the table in Backdrop (no prefixing).
    *
-   * @return
+   * @return bool
    *   TRUE if the given table exists, otherwise FALSE.
    */
   public function tableExists($table) {
@@ -334,7 +334,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    *   An SQL expression, for example "simpletest%" (without the quotes).
    *   BEWARE: this is not prefixed, the caller should take care of that.
    *
-   * @return
+   * @return array
    *   Array, both the keys and the values are the matching tables.
    */
   public function findTables($table_expression) {
@@ -357,7 +357,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @param $name
    *   The name of the column.
    *
-   * @return
+   * @return bool
    *   TRUE if the given column exists, otherwise FALSE.
    */
   public function fieldExists($table, $column) {
@@ -406,7 +406,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @param $table
    *   The table to be dropped.
    *
-   * @return
+   * @return bool
    *   TRUE if the table was successfully dropped, FALSE if there was no table
    *   by that name to begin with.
    */
@@ -448,7 +448,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @param $field
    *   The field to be dropped.
    *
-   * @return
+   * @return bool
    *   TRUE if the field was successfully dropped, FALSE if there was no field
    *   by that name to begin with.
    */
@@ -490,7 +490,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @param $name
    *   The name of the index in Backdrop (no prefixing).
    *
-   * @return
+   * @return bool
    *   TRUE if the given index exists, otherwise FALSE.
    */
   abstract public function indexExists($table, $name);
@@ -516,7 +516,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @param $table
    *   The table to be altered.
    *
-   * @return
+   * @return bool
    *   TRUE if the primary key was successfully dropped, FALSE if there was no
    *   primary key on this table to begin with.
    */
@@ -547,7 +547,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @param $name
    *   The name of the key.
    *
-   * @return
+   * @return bool
    *   TRUE if the key was successfully dropped, FALSE if there was no key by
    *   that name to begin with.
    */
@@ -578,7 +578,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @param $name
    *   The name of the index.
    *
-   * @return
+   * @return bool
    *   TRUE if the index was successfully dropped, FALSE if there was no index
    *   by that name to begin with.
    */
@@ -673,7 +673,8 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    *   The name of the table to create.
    * @param $table
    *   A Schema API table definition array.
-   * @return
+   *
+   * @return array
    *   An array of SQL statements to create the table.
    */
   abstract protected function createTableSql($name, $table);
@@ -687,7 +688,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @param $fields
    *   An array of key/index column specifiers.
    *
-   * @return
+   * @return array
    *   An array of field names.
    */
   public function fieldNames($fields) {
@@ -711,7 +712,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @param $length
    *   Optional upper limit on the returned string length.
    *
-   * @return
+   * @return string
    *   The prepared comment.
    */
   public function prepareComment($comment, $length = NULL) {

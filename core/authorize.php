@@ -58,7 +58,7 @@ function authorize_access_denied_page() {
  * The killswitch in settings.php overrides all else, otherwise, the user must
  * have access to the 'administer software updates' permission.
  *
- * @return
+ * @return bool
  *   TRUE if the current user can run authorize.php, and FALSE if not.
  */
 function authorize_access_allowed() {

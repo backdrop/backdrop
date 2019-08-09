@@ -480,7 +480,7 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $langcode =
  * @param $plural
  *   Optional plural value to use.
  *
- * @return
+ * @return string
  *   The string ID of the existing string modified or the new string added.
  */
 function _locale_import_one_string_db(&$report, $langcode, $context, $source, $translation, $location, $mode, $plid = 0, $plural = 0) {
@@ -577,7 +577,7 @@ function _locale_import_one_string_db(&$report, $langcode, $context, $source, $t
  * @param $header
  *   A string containing the complete header.
  *
- * @return
+ * @return array
  *   An associative array of key-value pairs.
  */
 function _locale_import_parse_header($header) {
@@ -600,7 +600,7 @@ function _locale_import_parse_header($header) {
  * @param $filepath
  *   A string containing the filepath.
  *
- * @return
+ * @return array
  *   An array containing the number of plurals and a
  *   formula in PHP for computing the plural form.
  */
@@ -645,7 +645,7 @@ function _locale_import_parse_plural_forms($pluralforms, $filepath) {
  * @param $string
  *   A string containing the arithmetic formula.
  *
- * @return
+ * @return string|false
  *   The PHP version of the formula.
  */
 function _locale_import_parse_arithmetic($string) {
@@ -744,7 +744,7 @@ function _locale_import_parse_arithmetic($string) {
  * @param $string
  *   A string containing the arithmetic formula.
  *
- * @return
+ * @return array
  *   The PHP version of the formula.
  */
 function _locale_import_tokenize_formula($formula) {
@@ -834,7 +834,7 @@ function _locale_import_append_plural($entry, $key) {
  * @param $comment
  *   An array of strings containing a comment.
  *
- * @return
+ * @return string
  *   Short one-string version of the comment.
  */
 function _locale_import_shorten_comments($comment) {
@@ -857,7 +857,7 @@ function _locale_import_shorten_comments($comment) {
  * @param $string
  *   A string specified with enclosing quotes.
  *
- * @return
+ * @return string
  *   The string parsed from inside the quotes.
  */
 function _locale_import_parse_quoted($string) {

@@ -115,7 +115,7 @@
  *   hook_form_alter() and hook_form_FORM_ID_alter() as the array
  *   $form_state['build_info']['args'].
  *
- * @return
+ * @return array
  *   The form array.
  *
  * @see backdrop_build_form()
@@ -304,7 +304,7 @@ function backdrop_get_form($form_id) {
  *   Information on how certain $form_state properties control redirection
  *   behavior after form submission may be found in backdrop_redirect_form().
  *
- * @return
+ * @return array
  *   The rendered form. This function may also perform a redirect and hence may
  *   not return at all, depending upon the $form_state flags that were set.
  *
@@ -454,7 +454,7 @@ function form_state_defaults() {
  *   'rebuild_info' needs to be a separate top-level property next to
  *   'build_info', since the contained data must not be cached.
  *
- * @return
+ * @return array
  *   The newly built form.
  *
  * @see backdrop_process_form()
@@ -649,7 +649,7 @@ function form_state_keys_no_cache() {
  *   (optional) The base file name (without the $type extension). If omitted,
  *   $module is used; i.e., resulting in "$module.$type" by default.
  *
- * @return
+ * @return string|false
  *   The filepath of the loaded include file, or FALSE if the include file was
  *   not found or has been loaded already.
  *
@@ -2336,7 +2336,7 @@ function form_state_values_clean(&$form_state) {
  * @param $form_state
  *   A keyed array containing the current state of the form.
  *
- * @return
+ * @return string|null
  *   The data that will appear in the $form_state['values'] collection
  *   for this element. Return nothing to use the default.
  */
@@ -2382,7 +2382,7 @@ function form_type_image_button_value($form, $input, $form_state) {
  *   The incoming input to populate the form element. If this is FALSE,
  *   the element's default value should be returned.
  *
- * @return
+ * @return string|int
  *   The data that will appear in the $element_state['values'] collection
  *   for this element. Return nothing to use the default.
  */
@@ -2423,7 +2423,7 @@ function form_type_checkbox_value($element, $input = FALSE) {
  *   The incoming input to populate the form element. If this is FALSE,
  *   the element's default value should be returned.
  *
- * @return
+ * @return array
  *   The data that will appear in the $element_state['values'] collection
  *   for this element. Return nothing to use the default.
  */
@@ -2464,7 +2464,7 @@ function form_type_checkboxes_value($element, $input = FALSE) {
  *   (optional) The incoming input to populate the form element. If FALSE, the
  *   element's default value is returned. Defaults to FALSE.
  *
- * @return
+ * @return [varies]
  *   The data that will appear in the $element_state['values'] collection for
  *   this element.
  */
@@ -2503,7 +2503,7 @@ function form_type_radios_value(&$element, $input = FALSE) {
  *   The incoming input to populate the form element. If this is FALSE,
  *   the element's default value should be returned.
  *
- * @return
+ * @return array
  *   The data that will appear in the $element_state['values'] collection
  *   for this element. Return nothing to use the default.
  */
@@ -2539,7 +2539,7 @@ function form_type_tableselect_value($element, $input = FALSE) {
  *   The incoming input to populate the form element. If this is FALSE,
  *   the element's default value should be returned.
  *
- * @return
+ * @return array
  *   The data that will appear in the $element_state['values'] collection
  *   for this element. Return nothing to use the default.
  */
@@ -2559,7 +2559,7 @@ function form_type_password_confirm_value($element, $input = FALSE) {
  *   The incoming input to populate the form element. If this is FALSE,
  *   the element's default value should be returned.
  *
- * @return
+ * @return [varies]
  *   The data that will appear in the $element_state['values'] collection
  *   for this element. Return nothing to use the default.
  */
@@ -2621,7 +2621,7 @@ function form_type_textarea_value($element, $input = FALSE) {
  *   The incoming input to populate the form element. If this is FALSE,
  *   the element's default value should be returned.
  *
- * @return
+ * @return string
  *   The data that will appear in the $element_state['values'] collection
  *   for this element. Return nothing to use the default.
  */
@@ -2642,7 +2642,7 @@ function form_type_textfield_value($element, $input = FALSE) {
  *   The incoming input to populate the form element. If this is FALSE,
  *   the element's default value should be returned.
  *
- * @return
+ * @return string
  *   The data that will appear in the $element_state['values'] collection
  *   for this element. Return nothing to use the default.
  */
@@ -2693,7 +2693,7 @@ function form_set_value($element, $value, &$form_state) {
  * @param $array
  *   The form options array to process.
  *
- * @return
+ * @return array
  *   An array with all hierarchical elements flattened to a single array.
  */
 function form_options_flatten($array) {
@@ -2912,7 +2912,7 @@ function form_select_options($element, $choices = NULL) {
  * @param $key
  *   The key to look for.
  *
- * @return
+ * @return array|false
  *   An array of indexes that match the given $key. Array will be
  *   empty if no elements were found. FALSE if optgroups were found.
  */
@@ -3357,7 +3357,7 @@ function form_process_checkboxes($element) {
  * @param $form_state
  *   The $form_state array for the form this element belongs to.
  *
- * @return
+ * @return array
  *   The processed element.
  */
 function form_process_actions($element, &$form_state) {
@@ -3402,7 +3402,7 @@ function form_process_actions($element, &$form_state) {
  * @param $form_state
  *   The $form_state array for the form this element belongs to.
  *
- * @return
+ * @return array
  *   The processed element.
  */
 function form_process_button($element, &$form_state) {
@@ -3421,7 +3421,7 @@ function form_process_button($element, &$form_state) {
  * @param $form_state
  *   The $form_state array for the form this element belongs to.
  *
- * @return
+ * @return array
  *   The processed element.
  */
 function form_process_container($element, &$form_state) {
@@ -3557,7 +3557,7 @@ function theme_tableselect($variables) {
  *   An associative array containing the properties and children of the
  *   tableselect element.
  *
- * @return
+ * @return array
  *   The processed element.
  */
 function form_process_tableselect($element) {
@@ -3783,7 +3783,7 @@ function form_validate_machine_name(&$element, &$form_state) {
  * @param $form_state
  *   The $form_state array for the form this fieldset belongs to.
  *
- * @return
+ * @return array
  *   The processed element.
  */
 function form_process_fieldset(&$element, &$form_state) {
@@ -3829,7 +3829,7 @@ function form_process_fieldset(&$element, &$form_state) {
  *   An associative array containing the properties and children of the
  *   fieldset.
  *
- * @return
+ * @return array
  *   The modified element with all group members.
  */
 function form_pre_render_fieldset($element) {
@@ -3887,7 +3887,7 @@ function form_pre_render_fieldset($element) {
  * @param $form_state
  *   The $form_state array for the form this vertical tab widget belongs to.
  *
- * @return
+ * @return array
  *   The processed element.
  */
 function form_process_vertical_tabs($element, &$form_state) {
@@ -5050,13 +5050,12 @@ function &batch_get() {
  * Depending on whether the batch is progressive or not, the BatchQueue or
  * BatchMemoryQueue handler classes will be used.
  *
+ * The name and class of the queue are added by reference to the batch set.
+ *
  * @param $batch
  *   The batch array.
  * @param $set_id
  *   The id of the set to process.
- *
- * @return
- *   The name and class of the queue are added by reference to the batch set.
  */
 function _batch_populate_queue(&$batch, $set_id) {
   $batch_set = &$batch['sets'][$set_id];

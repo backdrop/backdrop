@@ -38,7 +38,7 @@ function backdrop_path_initialize() {
  *   If there's no path defined for that language it will search paths without
  *   language.
  *
- * @return
+ * @return string|false
  *   Either a Backdrop system path, an aliased path, or FALSE if no path was
  *   found.
  */
@@ -212,7 +212,7 @@ function backdrop_cache_system_paths() {
  * @param $langcode
  *   An optional language code to look up the path in.
  *
- * @return
+ * @return string
  *   An aliased path if one was found, or the original path if no alias was
  *   found.
  */
@@ -236,7 +236,7 @@ function backdrop_get_path_alias($path = NULL, $langcode = NULL) {
  * @param $langcode
  *   An optional language code to look up the path in.
  *
- * @return
+ * @return string
  *   The internal path represented by the alias, or the original alias if no
  *   internal path was found.
  */
@@ -262,7 +262,7 @@ function backdrop_get_normal_path($path, $langcode = NULL) {
 /**
  * Check if the current page is the front page.
  *
- * @return
+ * @return bool
  *   Boolean value: TRUE if the current page is the front page; FALSE if otherwise.
  */
 function backdrop_is_front_page() {
@@ -290,7 +290,7 @@ function backdrop_is_front_page() {
  * @param $patterns
  *   String containing a set of patterns separated by \n, \r or \r\n.
  *
- * @return
+ * @return bool
  *   Boolean value: TRUE if the path matches a pattern, FALSE otherwise.
  */
 function backdrop_match_path($path, $patterns) {
@@ -330,7 +330,7 @@ function backdrop_match_path($path, $patterns) {
  * $_GET['q'] will contain "path/alias". If "node/306" is needed, calling
  * backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL) makes this function available.
  *
- * @return
+ * @return string
  *   The current Backdrop URL path. The path is untrusted user input and must be
  *   treated as such.
  *
@@ -347,7 +347,7 @@ function current_path() {
  *   A string representing the source, a number representing the pid, or an
  *   array of query conditions.
  *
- * @return
+ * @return array|false
  *   FALSE if no alias was found or an associative array containing the
  *   following keys:
  *   - source: The internal system path.
@@ -482,7 +482,7 @@ function path_delete($criteria) {
  * @param $path
  *   A Backdrop path.
  *
- * @return
+ * @return bool
  *   TRUE if the path is administrative, FALSE otherwise.
  *
  * @see path_get_admin_paths()
@@ -543,7 +543,7 @@ function path_get_admin_paths() {
  * @param $dynamic_allowed
  *   Whether paths with menu wildcards (like user/%) should be allowed.
  *
- * @return
+ * @return bool
  *   TRUE if it is a valid path AND the current user has access permission,
  *   FALSE otherwise.
  */
