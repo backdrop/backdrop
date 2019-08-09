@@ -339,7 +339,7 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
    * @param string $relative_id
    *   Form element ID to use for the relative date field.
    *
-   * @return
+   * @return array
    *   The form date part element for this instance.
    */
   function date_parts_form(&$form_state, $prefix, $source, $which, $operator_values, $identifier, $relative_id) {

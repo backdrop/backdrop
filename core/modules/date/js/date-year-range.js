@@ -36,7 +36,8 @@ Backdrop.dateYearRange.SelectListWithCustomOption = function ($textfield) {
  *
  * @param {String} type
  *   The type of the variable to be returned. Defaults to string.
- * @return
+ *
+ * @return string|int
  *   The original value of the textfield. Returned as an integer, if the type
  *   parameter was 'int'.
  */
