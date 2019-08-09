@@ -197,7 +197,7 @@ class BookTestCase extends BackdropWebTestCase {
    * @param array $nodes
    *   An array of nodes to check in outline.
    *
-   * @return
+   * @return string
    *   A regular expression that locates sub-nodes of the outline.
    */
   function generateOutlinePattern($nodes) {

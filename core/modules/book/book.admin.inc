@@ -226,7 +226,7 @@ function _book_admin_table(Node $node, &$form) {
  * @param $form
  *   The form that is being modified, passed by reference.
  *
- * @return
+ * @return array
  *   The modified form array.
  *
  * @see book_admin_edit()
