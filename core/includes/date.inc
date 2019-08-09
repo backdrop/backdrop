@@ -390,12 +390,38 @@ function date_seconds($format = 's', $required = FALSE, $increment = 1) {
  *   An array of AM and PM options.
  */
 function date_ampm($required = FALSE) {
-  $none = array('' => '');
-  $ampm = array(
-    'am' => t('am', array(), array('context' => 'ampm')),
-    'pm' => t('pm', array(), array('context' => 'ampm')),
-  );
-  return !$required ? $none + $ampm : $ampm;
+  $ampm = date_ampm_options(FALSE, FALSE);
+
+  return !$required ? array('' => '') + $ampm : $ampm;
+}
+
+/**
+ * Constructs an array of AM and PM options without empty option.
+ *
+ * @param bool $key_upper
+ *   If TRUE then the array key will be uppercase.
+ * @param bool $label_upper
+ *   If TRUE then the array value will be uppercase.
+ *
+ * @return array
+ *   An array of AM and PM options.
+ */
+function date_ampm_options($key_upper, $label_upper) {
+  $am = $key_upper ? 'AM' : 'am';
+  $pm = $key_upper ? 'PM' : 'pm';
+
+  if ($label_upper) {
+    return array(
+      $am => t('AM', array(), array('context' => 'ampm')),
+      $pm => t('PM', array(), array('context' => 'ampm')),
+    );
+  }
+  else {
+    return array(
+      $am => t('am', array(), array('context' => 'ampm')),
+      $pm => t('pm', array(), array('context' => 'ampm')),
+    );
+  }
 }
 
 /**
