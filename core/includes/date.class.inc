@@ -444,10 +444,15 @@ class BackdropDateTime extends DateTime {
     $regex1 = str_replace('a', '(.)', $regex1);
     preg_match('`^' . $regex1 . '$`', stripslashes($format), $letters);
     array_shift($letters);
-    // Extract values.
-    $regex2 = preg_replace($patterns, $repl2, $format_regexp, 1);
-    $regex2 = str_replace('A', '(AM|PM)', $regex2);
-    $regex2 = str_replace('a', '(am|pm)', $regex2);
+    $ampm_upper = date_ampm_options(FALSE, TRUE);
+    $ampm_lower = date_ampm_options(FALSE, FALSE);
+    $regex2 = strtr(
+      preg_replace($patterns, $repl2, $format_regexp, 1),
+      array(
+        'A' => '(' . preg_quote($ampm_upper['am'], '`') . '|' . preg_quote($ampm_upper['pm'], '`') . ')',
+        'a' => '(' . preg_quote($ampm_lower['am'], '`') . '|' . preg_quote($ampm_lower['pm'], '`') . ')',
+      )
+    );
     preg_match('`^' . $regex2 . '$`u', $date, $values);
     array_shift($values);
     // If we did not find all the values for the patterns in the format, abort.
@@ -507,8 +512,11 @@ class BackdropDateTime extends DateTime {
           break;
 
         case 'a':
+          $ampm = ($value == $ampm_lower['am'] ? 'am' : 'pm');
+          break;
+
         case 'A':
-          $ampm = strtolower($value);
+          $ampm = ($value == $ampm_upper['am'] ? 'am' : 'pm');
           break;
 
         case 'g':
@@ -541,11 +549,13 @@ class BackdropDateTime extends DateTime {
 
       }
     }
-    if (isset($ampm) && $ampm == 'pm' && $final_date['hour'] < 12) {
-      $final_date['hour'] += 12;
-    }
-    elseif (isset($ampm) && $ampm == 'am' && $final_date['hour'] == 12) {
-      $final_date['hour'] -= 12;
+    if (isset($ampm)) {
+      if ($ampm == 'pm' && $final_date['hour'] < 12) {
+        $final_date['hour'] += 12;
+      }
+      elseif ($ampm == 'am' && $final_date['hour'] == 12) {
+        $final_date['hour'] -= 12;
+      }
     }
 
     // Blank becomes current time, given TZ.
