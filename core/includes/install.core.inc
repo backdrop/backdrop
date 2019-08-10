@@ -1407,32 +1407,30 @@ function install_select_language_form($form, &$form_state, $files) {
     '#default_value' => !empty($browser_langcode) ? $browser_langcode : 'en',
   );
 
-  if (count($files) == 1) {
-    $directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
+  $directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
 
-    $steps = array();
-    $steps[] = st('Download translation files from the <a href="https://localize.backdropcms.org/translate/languages" target="_blank">translation server</a>.');
-    $steps[] = st('Place the downloaded <code>.po</code> files into the following directory: <pre>@dir</pre>', array('@dir' => $directory));
-    $steps[] = st('<a href="@reload_link">Reload this page</a>. The languages added in the previous step should now have become available in the select menu above.', array('@reload_link' => check_url(backdrop_current_script_url())));
+  $steps = array();
+  $steps[] = st('Download translation files from the <a href="https://localize.backdropcms.org/translate/languages" target="_blank">translation server</a>.');
+  $steps[] = st('Place the downloaded <code>.po</code> files into the following directory: <pre>@dir</pre>', array('@dir' => $directory));
+  $steps[] = st('<a href="@reload_link">Reload this page</a>. The languages added in the previous step should now have become available in the select menu above.', array('@reload_link' => check_url(backdrop_current_script_url())));
 
-    $more_info = st('For more information on installing Backdrop in different languages, visit the <a href="https://backdropcms.org/installing-in-other-languages" target="_blank">Backdrop user guide page</a>.');
+  $more_info = st('For more information on installing Backdrop in different languages, visit the <a href="https://backdropcms.org/installing-in-other-languages" target="_blank">Backdrop user guide page</a>.');
 
-    $markup = st('Follow these steps to enable other languages for the Backdrop installer:');
-    $markup = '<p>' . $markup . '</p>';
-    $markup .= theme('item_list', array('items' => $steps, 'type' => 'ol'));
-    $markup .= '<p>' . $more_info . '</p>';
+  $markup = st('Follow these steps to enable other languages for the Backdrop installer:');
+  $markup = '<p>' . $markup . '</p>';
+  $markup .= theme('item_list', array('items' => $steps, 'type' => 'ol'));
+  $markup .= '<p>' . $more_info . '</p>';
 
-    $form['languages_help'] = array(
-      '#type' => 'fieldset',
-      '#title' =>  st('Install in another language'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-    );
-    $form['languages_help']['help'] = array(
-      '#type' => 'help',
-      '#markup' => $markup,
-    );
-  }
+  $form['languages_help'] = array(
+    '#type' => 'fieldset',
+    '#title' =>  st('Install in another language'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['languages_help']['help'] = array(
+    '#type' => 'help',
+    '#markup' => $markup,
+  );
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] =  array(
