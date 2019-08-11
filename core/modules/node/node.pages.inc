@@ -282,11 +282,20 @@ function node_form($form, &$form_state, Node $node) {
     '#weight' => -1,
     '#description' => t('Leave blank for %anonymous.', array('%anonymous' => $config->getTranslated('anonymous'))),
   );
+  // Dynamic date input format depending on current language.
+  $format = system_get_date_formats('short');
+  global $language;
+  if (isset($format['locales'])) {
+    $pattern = $format['locales'][$language->langcode];
+  }
+  else {
+    $pattern = $format['pattern'];
+  }
   $form['author']['date'] = array(
     '#type' => module_exists('date') ? 'date_popup' : 'textfield',
     '#title' => t('Authored on'),
     // Note #date_format only applies if date module is enabled.
-    '#date_format' => 'Y-m-d g:i a',
+    '#date_format' => $pattern,
     '#default_value' => !empty($node->date) ? $node->date : NULL,
     '#description' => t('Leave blank to use the current time.'),
   );
@@ -332,7 +341,7 @@ function node_form($form, &$form_state, Node $node) {
       '#type' => module_exists('date') ? 'date_popup' : 'textfield',
       '#title' => t('Publish on'),
       // Note #date_ properties only apply if date module is enabled.
-      '#date_format' => 'Y-m-d g:i a',
+      '#date_format' => $pattern,
       '#date_increment' => 10,
       '#default_value' => format_date($scheduled_date, 'custom', 'Y-m-d g:i a'),
       '#states' => array(
