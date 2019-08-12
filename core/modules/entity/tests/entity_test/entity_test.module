@@ -59,7 +59,7 @@ function entity_test_load($id, $reset = FALSE) {
  * @param $reset
  *   A boolean indicating that the internal cache should be reset.
  *
- * @return
+ * @return array
  *   An array of test entity objects, indexed by ID.
  */
 function entity_test_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {

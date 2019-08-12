@@ -37,7 +37,7 @@ interface EntityControllerInterface {
    *   Values will be compared for equality. All the comparisons will be ANDed
    *   together. This parameter is deprecated; use an EntityFieldQuery instead.
    *
-   * @return
+   * @return array
    *   An array of entity objects indexed by their ids.
    */
   public function load($ids = array(), $conditions = array());
@@ -356,7 +356,7 @@ class DefaultEntityController implements EntityControllerInterface {
    * @param $conditions
    *   If set, return entities that match all of these conditions.
    *
-   * @return
+   * @return array
    *   Array of entities from the entity cache.
    */
   protected function cacheGet($ids, $conditions = array()) {

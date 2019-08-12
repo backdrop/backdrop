@@ -303,7 +303,7 @@ function entity_info_cache_clear() {
  * @param $entity
  *   The entity from which to extract values.
  *
- * @return
+ * @return array
  *   A numerically indexed array (not a hash table) containing these
  *   elements:
  *   - 0: Primary ID of the entity.
@@ -347,7 +347,7 @@ function entity_extract_ids($entity_type, $entity) {
  *   - 1: Revision ID of the entity, or NULL if $entity_type is not versioned.
  *   - 2: Bundle name of the entity, or NULL if $entity_type has no bundles.
  *
- * @return
+ * @return object
  *   An entity object, initialized with the IDs provided.
  */
 function entity_create_stub_entity($entity_type, $ids) {
@@ -453,7 +453,7 @@ function entity_load($entity_type, $id) {
  * @param $id
  *   The ID of the entity to load.
  *
- * @return
+ * @return object|false
  *   The unchanged entity, or FALSE if the entity cannot be loaded.
  */
 function entity_load_unchanged($entity_type, $id) {
@@ -565,7 +565,8 @@ function entity_prepare_view($entity_type, $entities) {
  * @param $langcode
  *   (optional) A language code to be used for rendering. Defaults to the global
  *   content language of the current request.
- * @return
+ *
+ * @return array
  *   An associative array with arrays of entities keyed by display mode.
  *
  * @see hook_entity_view_mode_alter()
@@ -606,7 +607,7 @@ function entity_view_mode_prepare($entity_type, $entities, $view_mode, $langcode
  * @param $entity
  *   The entity for which to generate a path.
  *
- * @return
+ * @return array|null
  *   An array containing the 'path' and 'options' keys used to build the URI of
  *   the entity, and matching the signature of url(). NULL if the entity has no
  *   URI of its own.
@@ -626,7 +627,7 @@ function entity_uri($entity_type, $entity) {
  * @param $entity
  *   The entity for which to generate the label.
  *
- * @return
+ * @return string|false
  *   The entity label, or FALSE if not found.
  */
 function entity_label($entity_type, $entity) {
