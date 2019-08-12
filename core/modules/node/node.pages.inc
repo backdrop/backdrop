@@ -284,12 +284,11 @@ function node_form($form, &$form_state, Node $node) {
   );
   // Dynamic date input format depending on current language.
   $format = system_get_date_formats('short');
+  $pattern = $format['pattern'];
   global $language;
-  if (isset($format['locales'])) {
-    $pattern = $format['locales'][$language->langcode];
-  }
-  else {
-    $pattern = $format['pattern'];
+  $langcode = $language->langcode;
+  if (isset($format['locales']) && isset($format['locales'][$langcode])) {
+    $pattern = $format['locales'][$langcode];
   }
   $form['author']['date'] = array(
     '#type' => module_exists('date') ? 'date_popup' : 'textfield',
