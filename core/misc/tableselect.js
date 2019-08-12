@@ -39,7 +39,7 @@ Backdrop.tableSelect = function () {
   });
 
   // For each of the checkboxes within the table that are not disabled.
-  checkboxes = $('td input[type="checkbox"]:enabled');
+  checkboxes = $('td input[data-tableselect-id]:enabled');
   $(table).on('click', checkboxes, function (e) {
     // Either add or remove the selected class based on the state of the check all checkbox.
     $(this).closest('tr').toggleClass('selected', this.checked);
@@ -58,7 +58,7 @@ Backdrop.tableSelect = function () {
     // Keep track of the last checked checkbox.
     lastChecked = e.target;
   });
-
+console.log(checkboxes)
   // Explicitly update the select-all checkbox at page load time.
   updateSelectAll((checkboxes.length == $(checkboxes).filter(':checked').length));
 };
