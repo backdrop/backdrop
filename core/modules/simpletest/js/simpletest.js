@@ -35,6 +35,7 @@ Backdrop.behaviors.simpleTestSelectAll = {
       $testCheckboxes.each(function(){
         $(this).attr('data-tableselect-id', $cell.attr('id'));
       });
+
       // Toggle the test checkboxes when the group checkbox is toggled.
       $groupCheckbox.on('change', function () {
         var checked = $(this).prop('checked');
