@@ -1150,7 +1150,7 @@ function system_modules_uninstall_submit($form, &$form_state) {
     // Call the uninstall routine for each selected module.
     $modules = array_keys($form_state['values']['uninstall']);
     backdrop_uninstall_modules($modules);
-    backdrop_set_message(t('The selected modules have been uninstalled.'));
+    backdrop_set_message(t('The selected modules have been uninstalled. Note: The module data has been reset but to delete it, you must do so through the filesystem.'));
 
     $form_state['redirect'] = 'admin/modules/uninstall';
   }
