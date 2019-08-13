@@ -3230,7 +3230,6 @@ function theme_checkbox($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'checkbox';
   element_set_attributes($element, array('id', 'name', '#return_value' => 'value'));
-  $element['#attributes']['data-tableselect-id'] = implode('-', $element['#parents']);
   // Unchecked checkbox has #value of integer 0.
   if (!empty($element['#checked'])) {
     $element['#attributes']['checked'] = 'checked';
