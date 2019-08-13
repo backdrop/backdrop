@@ -139,7 +139,7 @@
  * responsible for building the query. Instead, they are objects that are used
  * to display the view or make other modifications.
  *
- * There are 10 types of plugins in Views:
+ * There are several types of plugins in Views:
  * - Display: Display plugins are responsible for controlling *where* a view
  *   lives; that is, how they are being exposed to other parts of Backdrop. Page
  *   and block are the most common displays, as well as the ubiquitous 'master'
@@ -712,7 +712,7 @@ function hook_views_pre_view(&$view, &$display_id, &$args) {
     user_access('administer site configuration') &&
     $display_id == 'public_display'
   ) {
-    $display_id = 'private_display';
+    $view->set_display('private_display');
   }
 }
 
@@ -877,7 +877,7 @@ function hook_views_query_alter(&$view, &$query) {
     // Traverse through the 'where' part of the query.
     foreach ($query->where as &$condition_group) {
       foreach ($condition_group['conditions'] as &$condition) {
-        // If this is the part of the query filtering on title, chang the
+        // If this is the part of the query filtering on title, change the
         // condition to filter on node ID.
         if ($condition['field'] == 'node.title') {
           $condition = array(
