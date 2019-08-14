@@ -662,11 +662,6 @@ function date_format_date($date, $type = 'medium', $format = '', $langcode = NUL
         $date_string .= t($date->format('M'), array(), array('langcode' => $langcode));
         break;
 
-      case 'A':
-      case 'a':
-        $date_string .= t($date->format($c), array(), array('context' => 'ampm', 'langcode' => $langcode));
-        break;
-
       // The timezone name translations can use t().
       case 'e':
       case 'T':
@@ -674,6 +669,11 @@ function date_format_date($date, $type = 'medium', $format = '', $langcode = NUL
         break;
 
       // Remaining date parts need no translation.
+      case 'A':
+      case 'a':
+        $date_string .= $date->format($c);
+        break;
+
       case 'O':
         $date_string .= sprintf('%s%02d%02d', (date_offset_get($date) < 0 ? '-' : '+'), abs(date_offset_get($date) / 3600), abs(date_offset_get($date) % 3600) / 60);
         break;
