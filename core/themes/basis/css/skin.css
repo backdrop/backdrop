@@ -170,6 +170,7 @@ fieldset .fieldset-legend {
 .header-menu a:hover,
 .l-header a:active {
   text-decoration: underline;
+  background: unset;
 }
 
 .block-system-header {
