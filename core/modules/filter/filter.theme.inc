@@ -86,6 +86,7 @@ function theme_filter_admin_overview($variables) {
         backdrop_render($form['formats'][$id]['name']),
         backdrop_render($form['formats'][$id]['editor']),
         backdrop_render($form['formats'][$id]['roles']),
+        backdrop_render($form['formats'][$id]['status']),
         backdrop_render($form['formats'][$id]['weight']),
         backdrop_render($form['formats'][$id]['operations']),
       ),
@@ -93,7 +94,7 @@ function theme_filter_admin_overview($variables) {
     );
     $rows[] = $row;
   }
-  $header = array(t('Name'), t('Editor'), t('Roles'), t('Weight'), t('Operations'));
+  $header = array(t('Name'), t('Editor'), t('Roles'), t('Status'), t('Weight'), t('Operations'));
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'text-format-order')));
   $output .= backdrop_render_children($form);
 

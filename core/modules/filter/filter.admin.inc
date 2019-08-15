@@ -14,33 +14,32 @@
  */
 function filter_admin_overview($form) {
   // Overview of all formats.
-  $formats = filter_formats();
+  $formats = filter_formats(NULL, TRUE, TRUE);
   $fallback_format = filter_fallback_format();
   $editors = filter_get_editors();
 
   $form['#tree'] = TRUE;
   foreach ($formats as $id => $format) {
     $links = array();
+    if (!$format->status) {
+      $links['enable'] = array(
+        'title' => t('Enable'),
+        'href' => "admin/config/content/formats/$id/enable",
+      );
+    }
     $links['configure'] = array(
       'title' => t('Configure'),
       'href' => "admin/config/content/formats/$id",
     );
-    if (user_access('synchronize configuration')) {
-      $links['export'] = array(
-        'title' => t('Export'),
-        'href' => 'admin/config/development/configuration/single/export',
-        'query' => array(
-          'group' => 'Text formats',
-          'name' => 'filter.format.' . $id,
-        ),
-      );
-    }
     // Check whether this is the fallback text format. This format is available
     // to all roles and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
     if ($form['formats'][$id]['#is_fallback']) {
       $form['formats'][$id]['name'] = array('#markup' => $format->name);
       $roles_markup = t('Fallback format. Used if a role has access to no other formats.');
+      $form['formats'][$id]['status'] = array(
+        '#markup' => t('Locked'),
+      );
     }
     else {
       $form['formats'][$id]['name'] = array('#markup' => check_plain($format->name));
@@ -50,9 +49,24 @@ function filter_admin_overview($form) {
         $roles[] = check_plain($role->label);
       }
       $roles_markup = $roles ? implode(', ', $roles) : t('No roles may use this format');
-      $links['disable'] = array(
-        'title' => t('Disable'),
-        'href' => "admin/config/content/formats/$id/disable",
+      if ($format->status) {
+        $links['disable'] = array(
+          'title' => t('Disable'),
+          'href' => "admin/config/content/formats/$id/disable",
+        );
+      }
+      $form['formats'][$id]['status'] = array(
+        '#markup' => ($format->status) ? t('Enabled') : t('Disabled'),
+      );
+    }
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Text formats',
+          'name' => 'filter.format.' . $id,
+        ),
       );
     }
     $form['formats'][$id]['editor'] = array(
@@ -393,7 +407,7 @@ function filter_admin_format_form_validate($form, &$form_state) {
   form_set_value($form['format'], $format_format, $form_state);
   form_set_value($form['name'], $format_name, $form_state);
 
-  $formats = filter_formats();
+  $formats = filter_formats(NULL, TRUE, TRUE);
   foreach ($formats as $format) {
     if ($format->format !== $format_format && $format->name === $format_name) {
       form_set_error('name', t('Text format names must be unique. A format named %name already exists.', array('%name' => $format_name)));
@@ -490,7 +504,7 @@ function filter_admin_disable($form, &$form_state, $format) {
   return confirm_form($form,
     t('Are you sure you want to disable the text format %format?', array('%format' => $format->name)),
     'admin/config/content/formats',
-    t('Disabled text formats are completely removed from the administrative interface, and any content stored with that format will not be displayed. This action cannot be undone.'),
+    t('Any content stored with this format will not be displayed.'),
     t('Disable')
   );
 }

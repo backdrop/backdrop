@@ -128,6 +128,14 @@ function filter_menu() {
     'access arguments' => array('administer filters'),
     'file' => 'filter.admin.inc',
   );
+  $items['admin/config/content/formats/%filter_format/enable'] = array(
+    'title' => 'Enable text format',
+    'page callback' => 'filter_enable',
+    'page arguments' => array(4),
+    'access arguments' => array('administer filters'),
+    'type' => MENU_CALLBACK,
+    'file' => 'filter.pages.inc',
+  );
   $items['admin/config/content/formats/%filter_format/disable'] = array(
     'title' => 'Disable text format',
     'page callback' => 'backdrop_get_form',
@@ -692,6 +700,12 @@ function filter_modules_disabled($modules) {
  *   (optional) If provided, only those formats that are allowed for this user
  *   account will be returned. All formats will be returned otherwise. Defaults
  *   to NULL.
+ * @param bool $include_disabled
+ *   (optional) Whether or not to include disabled formats in the return array.
+ *   Defaults to FALSE.
+ * @param bool $reset
+ *   (optional) Whether or not to bypass the cache and reload all formats.
+ *   Defaults to FALSE.
  *
  * @return stdClass[]
  *   An array of text format objects, keyed by the format ID and ordered by
@@ -699,13 +713,13 @@ function filter_modules_disabled($modules) {
  *
  * @see filter_formats_reset()
  */
-function filter_formats($account = NULL) {
+function filter_formats($account = NULL, $include_disabled = FALSE, $reset = FALSE) {
   global $language;
   $formats = &backdrop_static(__FUNCTION__, array());
 
   // All available formats are cached for performance.
-  if (!isset($formats['all'])) {
-    if ($cache = cache()->get("filter_formats:{$language->langcode}")) {
+  if (!isset($formats['all']) || $reset) {
+    if (($cache = cache()->get("filter_formats:{$language->langcode}")) && !$reset) {
       $formats['all'] = $cache->data;
     }
     else {
@@ -725,8 +739,7 @@ function filter_formats($account = NULL) {
         );
         $filter_format = (object) $filter_format;
 
-        // We don't include disabled formats.
-        if (!$filter_format->status) {
+        if (!$include_disabled && !$filter_format->status) {
           continue;
         }
 
