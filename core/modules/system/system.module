@@ -2381,22 +2381,20 @@ function system_user_timezone(&$form, &$form_state) {
   global $user;
 
   $account = $form['#user'];
-  $form['timezone'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Locale settings'),
-    '#weight' => 6,
-    '#collapsible' => TRUE,
-    '#group' => 'additional_settings',
+  $form['regional_language']['regional_heading'] = array(
+    '#markup' => '<h4>' . t('Regional settings') . '</h4>',
+    '#weight' => 1,
   );
-  $form['timezone']['timezone'] = array(
+  $form['regional_language']['timezone'] = array(
     '#type' => 'select',
     '#title' => t('Time zone'),
     '#default_value' => isset($account->timezone) ? $account->timezone : ($account->uid == $user->uid ? config_get('system.date', 'default_timezone') : ''),
     '#options' => system_time_zones($account->uid != $user->uid),
     '#description' => t('Select the desired local time and time zone. Dates and times throughout this site will be displayed using this time zone.'),
+    '#weight' => 2,
   );
   if (!isset($account->timezone) && $account->uid == $user->uid && empty($form_state['input']['timezone'])) {
-    $form['timezone']['timezone']['#attributes'] = array('class' => array('timezone-detect'));
+    $form['regional_language']['timezone']['#attributes'] = array('class' => array('timezone-detect'));
     backdrop_add_js('core/misc/timezone.js');
   }
 }

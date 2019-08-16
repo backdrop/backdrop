@@ -892,6 +892,15 @@ function user_account_form(&$form, &$form_state) {
     '#description' => t('Your virtual face or picture. Pictures larger than @dimensions pixels will be scaled down.', array('@dimensions' => config_get('system.core', 'user_picture_dimensions'))) . ' ' . filter_xss_admin(config_get('system.core', 'user_picture_guidelines')),
   );
   $form['#validate'][] = 'user_validate_picture';
+
+  $form['regional_language'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Regional and language settings'),
+    '#weight' => 2,
+    '#collapsible' => TRUE,
+    '#access' => (config_get('system.date', 'user_configurable_timezones') || language_multilingual()),
+    '#group' => 'additional_settings',
+  );
 }
 
 /**
