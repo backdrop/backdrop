@@ -36,7 +36,7 @@ function filter_admin_overview($form) {
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
     if ($form['formats'][$id]['#is_fallback']) {
       $form['formats'][$id]['name'] = array('#markup' => $format->name);
-      $roles_markup = t('Fallback format. Used if a role has access to no other formats.');
+      $roles_markup = t('Fallback format.<br>Used if a role has access to no other formats.');
       $form['formats'][$id]['status'] = array(
         '#markup' => t('Locked'),
       );
@@ -48,7 +48,7 @@ function filter_admin_overview($form) {
         $role = user_role_load($role_name);
         $roles[] = check_plain($role->label);
       }
-      $roles_markup = $roles ? implode(', ', $roles) : t('No roles may use this format');
+      $roles_markup = $roles ? theme('item_list', array('items' => $roles, 'type' => 'ul')) : t('No roles may use this format');
       if ($format->status) {
         $links['disable'] = array(
           'title' => t('Disable'),
@@ -86,6 +86,7 @@ function filter_admin_overview($form) {
       '#default_value' => $format->weight,
     );
   }
+  $form['#attached']['library'][] = array('filter', 'filter.admin');
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save changes'));
   return $form;

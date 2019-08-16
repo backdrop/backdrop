@@ -77,24 +77,42 @@ function theme_filter_guidelines($variables) {
  */
 function theme_filter_admin_overview($variables) {
   $form = $variables['form'];
+  $formats = filter_formats(NULL, TRUE);
 
   $rows = array();
   foreach (element_children($form['formats']) as $id) {
     $form['formats'][$id]['weight']['#attributes']['class'] = array('text-format-order-weight');
     $row = array(
       'data' => array(
-        backdrop_render($form['formats'][$id]['name']),
-        backdrop_render($form['formats'][$id]['editor']),
-        backdrop_render($form['formats'][$id]['roles']),
-        backdrop_render($form['formats'][$id]['status']),
-        backdrop_render($form['formats'][$id]['weight']),
-        backdrop_render($form['formats'][$id]['operations']),
+        array('data' => backdrop_render($form['formats'][$id]['name'])),
+        array('data' => backdrop_render($form['formats'][$id]['editor']), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
+        array('data' => backdrop_render($form['formats'][$id]['roles'])),
+        array('data' => backdrop_render($form['formats'][$id]['status']), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+        array('data' => backdrop_render($form['formats'][$id]['weight'])),
+        array('data' => backdrop_render($form['formats'][$id]['operations'])),
       ),
-      'class' => array('draggable'),
+      'class' => array(
+        'draggable',
+        $formats[$id]->status ? 'enabled' : 'disabled',
+      ),
     );
     $rows[] = $row;
   }
-  $header = array(t('Name'), t('Editor'), t('Roles'), t('Status'), t('Weight'), t('Operations'));
+  // Display disabled formats at the bottom of the table.
+  foreach ($rows as $id => $row) {
+    if (in_array('disabled', $row['class'])) {
+      $rows[] = $row;
+      unset($rows[$id]);
+    }
+  }
+  $header = array(
+    array('data' => t('Name')),
+    array('data' => t('Editor'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
+    array('data' => t('Roles')),
+    array('data' => t('Status'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    array('data' => t('Weight')),
+    array('data' => t('Operations')),
+  );
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'text-format-order')));
   $output .= backdrop_render_children($form);
 

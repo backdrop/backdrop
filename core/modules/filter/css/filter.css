@@ -215,3 +215,10 @@ input#edit-filters-filter-html-settings-allowed-html {
 .view-image-library .view-header p {
   margin: 0;
 }
+
+#text-format-order tr.disabled td {
+  color: #999;
+}
+#text-format-order td .item-list ul {
+  margin-left: 0;
+}
