@@ -1098,7 +1098,7 @@ function layout_layout_info() {
         else {
           $region_name = $name . ' ' . $i;
         }
-        $layouts[$flexible_template['name']]['regions']['region_name_' . $i] = $region_name;
+        $layouts[$flexible_template['name']]['regions'][$name . '_' . $i] = $region_name;
       }
     }
   }
