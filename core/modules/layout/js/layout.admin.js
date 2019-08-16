@@ -108,7 +108,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
       }
     }
 
-    var $flexible_regions = $('.layout-flexible-content').once('layout-sortable');
+    var $flexible_regions = $('.layout-flexible-content.flexible-editor').once('layout-sortable');
     if ($flexible_regions.length) {
       $flexible_regions.sortable({
         connectWith: '.layout-flexible-content',

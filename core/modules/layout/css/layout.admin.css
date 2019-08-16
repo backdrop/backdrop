@@ -299,7 +299,7 @@
   padding: 0 20px;
 }
 
-#layout-edit-main .flexible-row:hover {
+#layout-edit-main .flexible-editor .flexible-row:hover {
   background-color: #ffff99;
   border-bottom: 1px solid #ccc;
   border-right: 1px solid #ccc;
