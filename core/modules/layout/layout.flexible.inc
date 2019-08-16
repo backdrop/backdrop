@@ -166,11 +166,6 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
 
   $renderer = layout_create_renderer('flexible', $layout);
 
-  $form['#attached'] = array(
-    'library' => array(
-      array('system', 'backdrop.ajax'),
-    ),
-  );
   $form['content'] = array(
     '#type' => 'item',
     '#id' => 'flexible-content',
