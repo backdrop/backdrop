@@ -181,7 +181,17 @@ function layout_menu() {
     'theme callback' => 'ajax_base_page_theme',
   );
 
-  $items['admin/structure/layouts/settings/flexible-template-enable/%/%'] = array(
+  $items['admin/structure/layouts/settings/flexible-template/%/enable'] = array(
+    'title' => 'Enable or disable flexible template',
+    'page callback' => 'layout_flexible_template_change_enabled_status',
+    'page arguments' => array(5, 6),
+    'type' => MENU_CALLBACK,
+    'file' => 'layout.flexible.inc',
+    'access arguments' => array('administer layouts'),
+    'theme callback' => 'ajax_base_page_theme',
+  );
+
+  $items['admin/structure/layouts/settings/flexible-template/%/disable'] = array(
     'title' => 'Enable or disable flexible template',
     'page callback' => 'layout_flexible_template_change_enabled_status',
     'page arguments' => array(5, 6),
