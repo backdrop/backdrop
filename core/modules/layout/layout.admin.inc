@@ -2694,8 +2694,9 @@ function layout_settings_page($form, &$form_state) {
   }
 
   $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
-  $form['table'] = array(
+  $form['templates'] = array(
     '#type' => 'tableselect',
+    '#js_select' => FALSE,
     '#header' => $header,
     '#options' => $rows,
     '#empty' => t('There are no layout templates.'),
@@ -2719,21 +2720,21 @@ function layout_settings_page($form, &$form_state) {
  * Ensures that active layouts are not disabled while in use.
  */
 function layout_settings_page_validate(&$form, &$form_state) {
-  $options = array_keys($form_state['values']['table']);
-  $included = array_values($form_state['values']['table']);
+  $options = array_keys($form_state['values']['templates']);
+  $included = array_values($form_state['values']['templates']);
   $excluded = array_unique(array_diff($options, $included));
   $form_state['excluded_templates'] = array_values(array_merge($excluded, $form_state['hidden_templates']));
 
   // Ensure all layouts are not disabled.
-  if (empty($form_state['values']['table'])) {
-    form_set_error('table', t('At least one layout template must be enabled.'));
+  if (empty($form_state['values']['templates'])) {
+    form_set_error('templates', t('At least one layout template must be enabled.'));
   }
 
   // Check which layout templates are in use.
   foreach (layout_load_all() as $layout) {
     $info = layout_get_layout_template_info($layout->layout_template);
     if (in_array($layout->layout_template, $excluded)) {
-      form_set_error('table', t('The "@layout" layout template is currently in use and may not be excluded.', array('@layout' => $info['title'])));
+      form_set_error('templates', t('The "@layout" layout template is currently in use and may not be excluded.', array('@layout' => $info['title'])));
     }
   }
 }
