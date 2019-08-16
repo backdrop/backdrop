@@ -233,7 +233,7 @@ function template_preprocess_node(&$variables) {
   if ($node_type->settings['node_submitted']) {
     if (!isset($variables['elements']['#display_submitted']) || $variables['elements']['#display_submitted'] == TRUE) {
       $variables['display_submitted'] = TRUE;
-      $variables['submitted'] = t('Submitted by !username on !datetime', array('!username' => $variables['name'], '!datetime' => $variables['date']));
+      $variables['submitted'] = t('!datetime by !username', array('!datetime' => $variables['date'], '!username' => $variables['name']));
       $variables['user_picture'] = '';
       if ($node_type->settings['node_user_picture']) {
         $variables['user_picture'] = theme('user_picture', array('account' => $node));
