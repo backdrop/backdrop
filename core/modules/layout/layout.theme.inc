@@ -286,7 +286,7 @@ function layout_preprocess_layout(&$variables) {
     }
   }
   else {
-    $variables['title'] = $variables['content']['title'];
+    $variables['title'] = isset($variables['content']['title']) ? $variables['content']['title'] : '';
   }
 
   if (!$variables['admin']) {

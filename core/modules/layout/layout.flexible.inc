@@ -478,7 +478,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     '#title' => t('Style'),
     '#collapsed' => $original_row != 'add',
     '#collapsible' => TRUE,
-    '#tree' => TRUE,
+    // '#tree' => TRUE,
   );
 
 
