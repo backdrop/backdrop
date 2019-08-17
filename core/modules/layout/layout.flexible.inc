@@ -607,7 +607,6 @@ function layout_flexible_template_edit_row_validate($form, &$form_state) {
 function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   $template_data = $form_state['template_data'];
   $original_row = $form_state['original_row'];
-  dpm($original_row, 'original_row');
 
   $new_row = array(
     'contains' => $form_state['region_style'],
@@ -623,7 +622,6 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   }
 
   $template_data['rows'][$original_row] = $new_row;
-  dpm($template_data, 'template_data');
 
   $form_state['template_data'] = $template_data;
 
