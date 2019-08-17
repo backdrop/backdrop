@@ -614,7 +614,8 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   );
 
   if ($original_row == 'add') {
-    $original_row = uniqid();
+    $uuid = new Uuid();
+    $original_row = $uuid->generate();
   }
 
   $template_data['rows'][$original_row] = $new_row;
@@ -627,6 +628,9 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   $form_state['ajax_update'] = array('content');
   layout_set_flexible_tempstore($template_data, $form_state['flexible_template_id']);
   layout_flexible_reset_caches();
+  if (!backdrop_is_ajax()) {
+    $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/configure';
+  }
 }
 
 /*
