@@ -96,25 +96,24 @@ function layout_menu() {
   // todo change path to flexible-template
   $items['admin/structure/layouts/settings/flexible-template/add'] = array(
     'title' => 'Add flexible layout template',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_flexible_template_settings_form'),
+    'page callback' => 'layout_flexible_template_settings_add_form',
     'type' => MENU_LOCAL_ACTION,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
     'file' => 'layout.flexible.inc',
   );
 
-  $items['admin/structure/layouts/settings/flexible-template/%/edit'] = array(
+  $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/edit'] = array(
     'title' => 'Configure flexible layout template',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_flexible_template_settings_form', 5),
+    'page arguments' => array('layout_flexible_template_settings_edit_form', 5),
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'access arguments' => array('administer layouts'),
     'file' => 'layout.flexible.inc',
   );
 
-  $items['admin/structure/layouts/settings/flexible-template/%/configure'] = array(
+  $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/configure'] = array(
     'title' => 'Configure flexible layout template',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_configure_form', 5),
@@ -125,7 +124,7 @@ function layout_menu() {
     'theme callback' => 'ajax_base_page_theme',
   );
 
-  $items['admin/structure/layouts/settings/flexible-template/%/delete'] = array(
+  $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/delete'] = array(
     'title' => 'Delete flexible layout template',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_delete_form', 5),
@@ -137,7 +136,7 @@ function layout_menu() {
   );
 
   // Put all code in separate file to make dev easier, because layout.admin is huge.
-  $items['admin/structure/layouts/settings/flexible-template/%/row/%/delete'] = array(
+  $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/row/%/delete'] = array(
     'title' => 'Delete row',
     'page callback' => 'layout_flexible_template_delete_row',
     'page arguments' => array(5,7),
@@ -148,7 +147,7 @@ function layout_menu() {
     'theme callback' => 'ajax_base_page_theme',
   );
 
-  $items['admin/structure/layouts/settings/flexible-template/%/row/%/select-widths'] = array(
+  $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/row/%/select-widths'] = array(
     'title' => 'Choose region widths',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_region_style_select', 5, 7),
@@ -159,7 +158,7 @@ function layout_menu() {
     'theme callback' => 'ajax_base_page_theme',
   );
 
-  $items['admin/structure/layouts/settings/flexible-template/%/row/%/configure'] = array(
+  $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/row/%/configure'] = array(
     'title' => 'Add row',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_edit_row_form', 5, 7),
@@ -170,7 +169,7 @@ function layout_menu() {
     'theme callback' => 'ajax_base_page_theme',
   );
 
-  $items['admin/structure/layouts/settings/flexible-template/%/row/%/configure/%'] = array(
+  $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/row/%/configure/%'] = array(
     'title' => 'Add row',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_edit_row_form', 5, 7, 9),
@@ -181,7 +180,7 @@ function layout_menu() {
     'theme callback' => 'ajax_base_page_theme',
   );
 
-  $items['admin/structure/layouts/settings/flexible-template/%/enable'] = array(
+  $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/enable'] = array(
     'title' => 'Enable or disable flexible template',
     'page callback' => 'layout_flexible_template_change_enabled_status',
     'page arguments' => array(5, 6),
@@ -191,7 +190,7 @@ function layout_menu() {
     'theme callback' => 'ajax_base_page_theme',
   );
 
-  $items['admin/structure/layouts/settings/flexible-template/%/disable'] = array(
+  $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/disable'] = array(
     'title' => 'Enable or disable flexible template',
     'page callback' => 'layout_flexible_template_change_enabled_status',
     'page arguments' => array(5, 6),

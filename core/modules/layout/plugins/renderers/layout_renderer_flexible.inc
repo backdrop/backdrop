@@ -65,7 +65,9 @@ class LayoutRendererFlexible {
     $template_id = $layout->layout_template;
 
     $template_info = layout_get_layout_template_info($template_id);
-    $template_data = layout_flexible_template_template($template_id);
+    $template_data = layout_flexible_tempstore_load($template_id);
+        dpm($template_data);
+
     foreach ($template_data['rows'] as $position => $info) {
       $layout->positions[$position] = array();
       $template_info['regions'][$position] = $position;

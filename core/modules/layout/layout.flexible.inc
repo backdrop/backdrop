@@ -7,19 +7,28 @@
  */
 
 /**
- * Form to add a row to a flexible template.
- *
- * @param $flexible_template_id
- *   The template to which a row is being added.
- * @param $original_row
- *   The row above or below which a new row is being inserted.
- * @param $position
- *   Where the new row is being inserted.
+ * Form to add a flexible template.
  *
  * @ingroup forms
  */
-function layout_flexible_template_settings_form($form, &$form_state, $flexible_template_id = NULL) {
-  $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
+function layout_flexible_template_settings_add_form() {
+  $flexible_template = layout_flexible_template_template_default();
+  backdrop_set_title(t('Add template'));
+  return backdrop_get_form('layout_flexible_template_settings_edit_form', $flexible_template);
+}
+
+
+
+/**
+ * Form to configure a flexible template.
+ *
+ * @param $flexible_template
+ *   The loaded flexible template object.
+ *
+ * @ingroup forms
+ */
+function layout_flexible_template_settings_edit_form($form, &$form_state, $flexible_template = NULL) {
+  $form_state['template_data'] = $flexible_template;
   $template_data = $form_state['template_data'];
 
   $form['name'] = array(
@@ -34,7 +43,7 @@ function layout_flexible_template_settings_form($form, &$form_state, $flexible_t
     '#maxlength' => 21,
     '#default_value' => $template_data['name'],
     '#machine_name' => array(
-      'exists' => 'layout_flexible_template_name_exists',
+      'exists' => 'layout_flexible_template_load',
     ),
   );
   $form['description'] = array(
@@ -46,6 +55,9 @@ function layout_flexible_template_settings_form($form, &$form_state, $flexible_t
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
+    '#submit' => array(
+      'layout_flexible_template_settings_form_submit',
+    ),
     '#value' => t('Save and configure'),
   );
   $form['actions']['cancel'] = array(
@@ -61,12 +73,25 @@ function layout_flexible_template_settings_form($form, &$form_state, $flexible_t
   return $form;
 }
 
-function layout_flexible_template_name_exists($machine_name) {
-  return layout_flexible_template_load($machine_name);
-}
-
 function layout_flexible_template_settings_form_cancel($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings';
+}
+
+function layout_flexible_template_settings_form_submit($form, &$form_state) {
+  $template_data = $form_state['template_data'];
+  $template_data['name'] = $form_state['values']['machine_name'];
+  $template_data['title'] = $form_state['values']['name'];
+  $template_data['description'] = $form_state['values']['description'];
+
+  $config = config('layout.flexible.' . $form_state['values']['machine_name']);
+  $config->setData($template_data);
+  $config->save();
+
+  layout_set_flexible_tempstore($template_data, $form_state['values']['machine_name']);
+  backdrop_set_message(t('Layout template saved.'));
+  layout_flexible_reset_caches();
+  layout_reset_caches();
+  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['values']['machine_name'] . '/configure';
 }
 
 /**
@@ -113,23 +138,6 @@ function layout_flexible_template_change_enabled_status($template, $status) {
   backdrop_goto('admin/structure/layouts/settings');
 }
 
-function layout_flexible_template_settings_form_submit($form, &$form_state) {
-  $template_data = $form_state['template_data'];
-  $template_data['name'] = $form_state['values']['machine_name'];
-  $template_data['title'] = $form_state['values']['name'];
-  $template_data['description'] = $form_state['values']['description'];
-
-  $config = config('layout.flexible.' . $form_state['values']['machine_name']);
-  $config->setData($template_data);
-  $config->save();
-
-  layout_set_flexible_tempstore($template_data, $form_state['values']['machine_name']);
-  backdrop_set_message(t('Layout template saved.'));
-  layout_flexible_reset_caches();
-  layout_reset_caches();
-  $form_state['redirect'] = 'admin/structure/layouts/settings/' . $form_state['values']['machine_name'] . '/configure';
-}
-
 /**
  * Render the form for layout.
  *
@@ -144,8 +152,11 @@ function layout_flexible_template_settings_form_submit($form, &$form_state) {
  *
  * @ingroup forms
  */
-function layout_flexible_template_configure_form($form, &$form_state, $flexible_template_id) {
+function layout_flexible_template_configure_form($form, &$form_state, $flexible_template) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+
+  $form_state['template_data'] = $flexible_template;
+  $flexible_template_id = $flexible_template['name'];
 
   $config = array(
     'is_new' => TRUE,
@@ -158,7 +169,6 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
 
   $form_state['flexible_template_id'] = $flexible_template_id;
 
-  $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
 
   if (empty($form_state['template_data'])) {
     return;
@@ -257,10 +267,10 @@ function layout_flexible_template_configure_form_submit($form, &$form_state) {
  *
  * @ingroup forms
  */
-function layout_flexible_template_region_style_select($form, &$form_state, $flexible_template_id, $original_row) {
+function layout_flexible_template_region_style_select($form, &$form_state, $flexible_template, $original_row) {
   $new_row = $original_row == 'add';
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
-  $form_state['flexible_template_id'] = $flexible_template_id;
+  $form_state['flexible_template_id'] = $flexible_template['name'];
   $form_state['original_row'] = $original_row;
 
   $row_styles = layout_flexible_row_styles();
@@ -395,12 +405,13 @@ function layout_flexible_template_edit_row_submit($form, &$form_state) {
  *
  * @ingroup forms
  */
-function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_template_id, $original_row, $region_style = NULL) {
+function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_template, $original_row, $region_style = NULL) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+  $form_state['template_data'] = $flexible_template;
+  $flexible_template_id = $flexible_template['name'];
 
   $form_state['flexible_template_id'] = $flexible_template_id;
   $form_state['original_row'] = $original_row;
-  $form_state['template_data'] = layout_flexible_template_template($flexible_template_id);
 
   $row_data = array();
   if ($original_row != 'add') {
@@ -592,6 +603,7 @@ function layout_flexible_template_edit_row_validate($form, &$form_state) {
 function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   $template_data = $form_state['template_data'];
   $original_row = $form_state['original_row'];
+  dpm($original_row, 'original_row');
 
   $new_row = array(
     'contains' => $form_state['region_style'],
@@ -606,11 +618,12 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   }
 
   $template_data['rows'][$original_row] = $new_row;
+  dpm($template_data, 'template_data');
 
   $form_state['template_data'] = $template_data;
 
   $form_state['ajax_rebuild_form'] = 'layout_flexible_template_configure_form';
-  $form_state['ajax_rebuild_args'] = array($form_state['flexible_template_id']);
+  $form_state['ajax_rebuild_args'] = array($template_data);
   $form_state['ajax_update'] = array('content');
   layout_set_flexible_tempstore($template_data, $form_state['flexible_template_id']);
   layout_flexible_reset_caches();
@@ -700,13 +713,14 @@ function layout_flexible_template_edit_row_ajax($form, $form_state) {
  *
  * @ingroup forms
  */
-function layout_flexible_template_delete_row($flexible_template_id, $original_row) {
+function layout_flexible_template_delete_row($flexible_template, $original_row) {
   // Todo use token, like in block add page.
 
   $commands = array();
-  $template = layout_flexible_template_template($flexible_template_id);
-  unset($template['rows'][$original_row]);
-  layout_set_flexible_tempstore($template, $flexible_template_id);
+  $flexible_template_id = $flexible_template['name'];
+
+  unset($flexible_template['rows'][$original_row]);
+  layout_set_flexible_tempstore($flexible_template, $flexible_template_id);
 
   if (backdrop_is_ajax()) {
     $commands[] = ajax_command_remove('#flexible-row-id-' . $original_row);
@@ -717,7 +731,7 @@ function layout_flexible_template_delete_row($flexible_template_id, $original_ro
     );
   }
   else {
-    backdrop_set_message(t('Row "@title" removed.', array('@title' => $template['title'])));
+    backdrop_set_message(t('Row "@title" removed.', array('@title' => $flexible_template['title'])));
     backdrop_goto('admin/structure/layouts/settings/' . $flexible_template_id . '/configure');
   }
 }
@@ -752,47 +766,6 @@ function layout_flexible_template_delete_form_submit(&$form, &$form_state) {
 
   backdrop_set_message(t('The layout template has been deleted.'));
   $form_state['redirect'] = 'admin/structure/layouts/settings';
-}
-
-/**
- * Provides the default template for new layouts.
- */
-function layout_flexible_template_template($flexible_template_id = NULL) {
-  if (!$flexible_template_id) {
-    // set up a default
-    $settings = array(
-      'name' => '',
-      'title' => '',
-      'description' => '',
-      'rows' => array(
-        'header' => array(
-          'contains' => 'region_12',
-          'element' => 'header',
-          'classes' => '',
-          'container' => 'container',
-          'region_names' => array('region_name_0' => t('Header')),
-        ),
-        'content' => array(
-          'contains' => 'region_12',
-          'element' => '',
-          'classes' => '',
-          'container' => 'container',
-          'region_names' => array('region_name_0' => t('Content')),
-        ),
-        'footer' => array(
-          'contains' => 'region_12',
-          'element' => 'footer',
-          'classes' => '',
-          'container' => 'container',
-          'region_names' => array('region_name_0' => t('Footer')),
-        ),
-      ),
-    );
-  }
-  else {
-    $settings = layout_get_flexible_tempstore($flexible_template_id);
-  }
-  return $settings;
 }
 
 /**
@@ -1010,26 +983,28 @@ function layout_set_flexible_tempstore($item, $name) {
 }
 
 /**
- * Get a layout or menu item currently being edited from the tempstore.
+ * Get a flexible template currently being edited from the tempstore.
  *
- * If a layout is not yet being edited, the layout will be loaded from
+ * If a template is not yet being edited, the template will be loaded from
  * configuration.
  *
- * @param string $name
- *   The machine name of the Layout item to load.
- * @param string $type
- *   The type of item to load. Must be either "layout" or "menu_item".
+ * @param string $flexible_template_id
+ *   The machine name of the flexible template to load.
  */
-function layout_get_flexible_tempstore($name) {
-  $caches = &backdrop_static(__FUNCTION__, array());
-  if (!isset($caches[$name])) {
-    if (!$item = tempstore_get('layout.flexible', $name)) {
-      $item = layout_flexible_template_load($name);
-    }
-    $caches[$name] = $item;
+function layout_flexible_tempstore_load($flexible_template_id = NULL) {
+  if (!$flexible_template_id) {
+    return layout_flexible_template_template_default();
   }
 
-  return $caches[$name];
+  $caches = &backdrop_static(__FUNCTION__, array());
+  if (!isset($caches[$flexible_template_id])) {
+    if (!$item = tempstore_get('layout.flexible', $flexible_template_id)) {
+      $item = layout_flexible_template_load($flexible_template_id);
+    }
+    $caches[$flexible_template_id] = $item;
+  }
+
+  return $caches[$flexible_template_id];
 }
 
 function layout_flexible_template_load($flexible_template_id = NULL) {
@@ -1063,6 +1038,42 @@ function layout_flexible_template_load($flexible_template_id = NULL) {
   else {
     return $configs;
   }
+}
+
+/**
+ * Provides the default template for new layouts.
+ */
+function layout_flexible_template_template_default() {
+  $settings = array(
+    'name' => '',
+    'title' => '',
+    'description' => '',
+    'rows' => array(
+      'header' => array(
+        'contains' => 'region_12',
+        'element' => 'header',
+        'classes' => '',
+        'container' => 'container',
+        'region_names' => array('region_name_0' => t('Header')),
+      ),
+      'content' => array(
+        'contains' => 'region_12',
+        'element' => '',
+        'classes' => '',
+        'container' => 'container',
+        'region_names' => array('region_name_0' => t('Content')),
+      ),
+      'footer' => array(
+        'contains' => 'region_12',
+        'element' => 'footer',
+        'classes' => '',
+        'container' => 'container',
+        'region_names' => array('region_name_0' => t('Footer')),
+      ),
+    ),
+  );
+
+  return $settings;
 }
 
 /**
@@ -1109,5 +1120,5 @@ function layout_flexible_reset_caches() {
   cache()->delete('layout:flexible:config');
 
   backdrop_static_reset('layout_flexible_template_load');
-  backdrop_static_reset('layout_get_flexible_tempstore');
+  backdrop_static_reset('layout_flexible_tempstore_load');
 }
