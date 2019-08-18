@@ -18,6 +18,12 @@ function filter_admin_overview($form) {
   $fallback_format = filter_fallback_format();
   $editors = filter_get_editors();
 
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('The order of the text formats here reflects the order in which they will show up in the <em>Editor</em> drop-down menu, when creating content (still subject to which text formats the user has access to).'),
+    '#weight' => -100,
+  );
+
   $form['#tree'] = TRUE;
   foreach ($formats as $id => $format) {
     $links = array();
@@ -32,14 +38,11 @@ function filter_admin_overview($form) {
       'href' => "admin/config/content/formats/$id",
     );
     // Check whether this is the fallback text format. This format is available
-    // to all roles and cannot be disabled via the admin interface.
+    // to all roles, and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
     if ($form['formats'][$id]['#is_fallback']) {
       $form['formats'][$id]['name'] = array('#markup' => $format->name);
-      $roles_markup = t('Fallback format.<br>Used if a role has access to no other formats.');
-      $form['formats'][$id]['status'] = array(
-        '#markup' => t('Locked'),
-      );
+      $roles_markup = t('Used as a fallback, if a role has access to no other formats.<br>Cannot be disabled');
     }
     else {
       $form['formats'][$id]['name'] = array('#markup' => check_plain($format->name));
@@ -48,16 +51,13 @@ function filter_admin_overview($form) {
         $role = user_role_load($role_name);
         $roles[] = check_plain($role->label);
       }
-      $roles_markup = $roles ? theme('item_list', array('items' => $roles, 'type' => 'ul')) : t('No roles may use this format');
+      $roles_markup = $roles ? theme('item_list', array('items' => $roles)) : t('No roles specified for this format.');
       if ($format->status) {
         $links['disable'] = array(
           'title' => t('Disable'),
           'href' => "admin/config/content/formats/$id/disable",
         );
       }
-      $form['formats'][$id]['status'] = array(
-        '#markup' => ($format->status) ? t('Enabled') : t('Disabled'),
-      );
     }
     if (user_access('synchronize configuration')) {
       $links['export'] = array(
@@ -284,7 +284,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#disabled' => $is_fallback,
   );
   if ($is_fallback) {
-    $form['roles']['#description'] = t('All roles for this text format must be enabled and cannot be changed.');
+    $form['roles']['#description'] = t('All roles have access to this format at all times, and this cannot be changed. It serves as a fallback, for when no other format has been assigned to a role.');
   }
   if (!empty($format->format)) {
     // If editing an existing text format, pre-select its current permissions.

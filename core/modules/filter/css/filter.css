@@ -216,9 +216,26 @@ input#edit-filters-filter-html-settings-allowed-html {
   margin: 0;
 }
 
+#text-format-order .filter-format-name {
+  font-weight: bold;
+  white-space: nowrap;
+}
+#text-format-order .filter-format-machine-name {
+  font-size: smaller;
+}
 #text-format-order tr.disabled td {
   color: #999;
 }
+/* For disabled formats, hide the tabledrag handle, as well as the weight select
+   drop-down. */
+#text-format-order tr.disabled td a.tabledrag-handle,
+#text-format-order tr.disabled td .text-format-order-weight {
+  visibility: hidden;
+}
 #text-format-order td .item-list ul {
   margin-left: 0;
+}
+#text-format-order .disabled-divider {
+  font-weight: bold;
+  background: #e9e8e8;
 }

@@ -16,6 +16,9 @@ function filter_theme() {
     'filter_admin_overview' => array(
       'render element' => 'form',
     ) + $base,
+    'filter_format_name' => array(
+      'variables' => array('format' => NULL),
+    ) + $base,
     'filter_admin_format_filter_order' => array(
       'render element' => 'element',
     ) + $base,

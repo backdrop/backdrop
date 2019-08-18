@@ -79,25 +79,62 @@ function theme_filter_admin_overview($variables) {
   $form = $variables['form'];
   $formats = filter_formats(NULL, TRUE);
 
+  $header = array(
+    array('data' => t('Name'), 'class' => array('format-name')),
+    array('data' => t('Editor'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    array('data' => t('Roles')),
+    array('data' => t('Weight')),
+    array('data' => t('Operations')),
+  );
+
   $rows = array();
   foreach (element_children($form['formats']) as $id) {
     $form['formats'][$id]['weight']['#attributes']['class'] = array('text-format-order-weight');
-    $row = array(
-      'data' => array(
-        array('data' => backdrop_render($form['formats'][$id]['name'])),
-        array('data' => backdrop_render($form['formats'][$id]['editor']), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
-        array('data' => backdrop_render($form['formats'][$id]['roles'])),
-        array('data' => backdrop_render($form['formats'][$id]['status']), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-        array('data' => backdrop_render($form['formats'][$id]['weight'])),
-        array('data' => backdrop_render($form['formats'][$id]['operations'])),
-      ),
-      'class' => array(
-        'draggable',
-        $formats[$id]->status ? 'enabled' : 'disabled',
-      ),
+    $row = array();
+
+    $row[] = array(
+      'data' => theme('filter_format_name', array('format' => $formats[$id])),
+      'class' => array('format-name'),
+      'data-label' => t('Name'),
     );
-    $rows[] = $row;
+    $row[] = array(
+      'data' => backdrop_render($form['formats'][$id]['editor']),
+      'class' => array('format-editor'),
+      'data-label' => t('Editor'),
+    );
+    $row[] = array(
+      'data' => backdrop_render($form['formats'][$id]['roles']),
+      'class' => array('format-roles'),
+      'data-label' => t('Roles'),
+    );
+    $row[] = array(
+      'data' => backdrop_render($form['formats'][$id]['weight']),
+      'class' => array('format-weight'),
+      'data-label' => t('Weight'),
+    );
+    $row[] = array(
+      'data' => backdrop_render($form['formats'][$id]['operations']),
+      'class' => array('format-operations'),
+      'data-label' => t('Operations'),
+    );
+
+    //$rows[] = $row;
+    $rows[] = array(
+      'data' => $row,
+      'class' => array('draggable', $formats[$id]->status ? 'enabled' : 'disabled'),
+    );
   }
+
+  // Add a divider row; for the disabled formats.
+  $rows[] = array(
+    'data' => array(
+      array(
+        'data' => t('Disabled formats'),
+        'colspan' => count($header),
+      ),
+    ),
+    'class' => array('disabled-divider'),
+  );
   // Display disabled formats at the bottom of the table.
   foreach ($rows as $id => $row) {
     if (in_array('disabled', $row['class'])) {
@@ -105,21 +142,32 @@ function theme_filter_admin_overview($variables) {
       unset($rows[$id]);
     }
   }
-  $header = array(
-    array('data' => t('Name')),
-    array('data' => t('Editor'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
-    array('data' => t('Roles')),
-    array('data' => t('Status'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-    array('data' => t('Weight')),
-    array('data' => t('Operations')),
-  );
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'text-format-order')));
+
+  $output = backdrop_render($form['help']);
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'text-format-order')));
+
+  // Do not render the 'formats' child element of the form.
+  unset($form['formats']);
+
   $output .= backdrop_render_children($form);
 
   backdrop_add_tabledrag('text-format-order', 'order', 'sibling', 'text-format-order-weight');
 
   return $output;
 }
+/**
+ * Display the format name and its machine name.
+ */
+function theme_filter_format_name($variables) {
+  $format = $variables['format'];
+
+  $output = '';
+  $output .= '<div class="filter-format-name">' . check_plain($format->name) . '</div>';
+  $output .= '<div class="filter-format-machine-name">(<span>' . check_plain($format->format) . '</span>)</div>';
+
+  return $output;
+}
+
 
 /**
  * Returns HTML for a text format's filter order form.
