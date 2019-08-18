@@ -226,9 +226,9 @@ input#edit-filters-filter-html-settings-allowed-html {
 #text-format-order tr.disabled td {
   color: #999;
 }
-/* For disabled formats, hide the tabledrag handle, as well as the weight select
-   drop-down. */
+/* For disabled formats, hide the tabledrag handle... */
 #text-format-order tr.disabled td a.tabledrag-handle,
+/* ...as well as the weight select drop-down menu. */
 #text-format-order tr.disabled td .text-format-order-weight {
   visibility: hidden;
 }
