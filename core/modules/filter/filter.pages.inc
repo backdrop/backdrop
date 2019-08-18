@@ -36,9 +36,6 @@ function filter_enable($format = NULL) {
   if (isset($format)) {
     filter_format_enable($format);
     backdrop_set_message(t('Enabled text format %format.', array('%format' => $format->name)));
-    // Clear caches, to avoid situations where trying to access content 404s
-    // after enabling a previously disabled text format (used in that content).
-    cache_clear_all();
   }
   else {
     backdrop_set_message(t('No text format provided.'), 'error');
