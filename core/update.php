@@ -470,6 +470,7 @@ if (empty($op) && update_access_allowed()) {
 
   // Load module basics.
   include_once BACKDROP_ROOT . '/core/includes/module.inc';
+  include_once BACKDROP_ROOT . '/core/includes/tablesort.inc';
   $module_list['system']['filename'] = 'core/modules/system/system.module';
   module_list(TRUE, FALSE, FALSE, $module_list);
   backdrop_load('module', 'system');
