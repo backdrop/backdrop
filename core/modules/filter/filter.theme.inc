@@ -81,10 +81,10 @@ function theme_filter_admin_overview($variables) {
 
   $header = array(
     array('data' => t('Name'), 'class' => array('format-name')),
-    array('data' => t('Editor'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-    array('data' => t('Roles')),
-    array('data' => t('Weight')),
-    array('data' => t('Operations')),
+    array('data' => t('Editor'), 'class' => array('format-editor', RESPONSIVE_PRIORITY_LOW)),
+    array('data' => t('Roles'), 'class' => array('format-roles')),
+    array('data' => t('Weight'), 'class' => array('format-weight')),
+    array('data' => t('Operations'), 'class' => array('format-operations')),
   );
 
   $rows = array();
