@@ -1,10 +1,9 @@
 <?php
 /**
  * @file
- * Template for a single region layout.
+ * Template for a flexible template.
  *
  * Variables:
- * - $title: The page title, for use in the actual HTML content.
  * - $messages: Status and error messages. Should be displayed prominently.
  * - $tabs: Tabs linking to any sub-pages beneath the current page
  *   (e.g., the view and edit tabs when displaying a node).
@@ -12,25 +11,20 @@
  *   the menu administration interface.
  * - $classes: Array of classes to be added to the layout wrapper.
  * - $attributes: Additional attributes to be added to the layout wrapper.
+ * - $row_data: An array of information about each row. Each item  in the array
+ *   contains the folowing information:
+ *   - $row_data['region_md']: the row region widths in Bootstrap format.
+ *   - $row_data['region_name']: the region name.
+ *   - $row_data['content_key']: The key of the $content array which contains
+ *     the HTML for that region.
  * - $content: An array of content, each item in the array is nameed to one
- *   region of the layout. This layout supports the following sections:
- *   - $content['header']
- *   - $content['top']
- *   - $content['content']
- *   - $content['footer']
+ *   region of the layout.
  */
 ?>
 <div class="layout--flexible layout <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <div id="skip-link">
     <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
   </div>
-  <!-- hardcoded here to dev stress free -->
-  <?php if ($messages): ?>
-    <div class="l-messages" role="status" aria-label="<?php print t('Status messages'); ?>">
-      <?php print $messages; ?>
-    </div>
-  <?php endif; ?>
-
   <div class="layout-flexible-content <?php $region_buttons ? print 'flexible-editor' : ''; ?>">
   <?php foreach ($row_data as $name => $row): ?>
     <<?php print $row['element']; ?> data-row-id="<?php print $name; ?>" class="flexible-row <?php print 'l-' . $name; ?>" <?php print $row['row_id']; ?>>
