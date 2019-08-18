@@ -118,7 +118,6 @@ function theme_filter_admin_overview($variables) {
       'data-label' => t('Operations'),
     );
 
-    //$rows[] = $row;
     $rows[] = array(
       'data' => $row,
       'class' => array('draggable', $formats[$id]->status ? 'enabled' : 'disabled'),

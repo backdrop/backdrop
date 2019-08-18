@@ -30,12 +30,12 @@ function filter_admin_overview($form) {
     if (!$format->status) {
       $links['enable'] = array(
         'title' => t('Enable'),
-        'href' => "admin/config/content/formats/$id/enable",
+        'href' => 'admin/config/content/formats/$id/enable'
       );
     }
     $links['configure'] = array(
       'title' => t('Configure'),
-      'href' => "admin/config/content/formats/$id",
+      'href' => 'admin/config/content/formats/$id',
     );
     // Check whether this is the fallback text format. This format is available
     // to all roles, and cannot be disabled via the admin interface.
@@ -55,7 +55,7 @@ function filter_admin_overview($form) {
       if ($format->status) {
         $links['disable'] = array(
           'title' => t('Disable'),
-          'href' => "admin/config/content/formats/$id/disable",
+          'href' => 'admin/config/content/formats/$id/disable',
         );
       }
     }
