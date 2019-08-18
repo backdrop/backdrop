@@ -73,10 +73,18 @@ function layout_flexible_template_settings_edit_form($form, &$form_state, $flexi
   return $form;
 }
 
+/**
+ * Submit handler for layout_flexible_template_settings_edit_form() that
+ * cancels the form.
+ */
 function layout_flexible_template_settings_form_cancel($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings';
 }
 
+/**
+ * Submit handler for layout_flexible_template_settings_edit_form() that
+ * submits the form.
+ */
 function layout_flexible_template_settings_form_submit($form, &$form_state) {
   $template_data = $form_state['template_data'];
   $template_data['name'] = $form_state['values']['machine_name'];
@@ -87,7 +95,7 @@ function layout_flexible_template_settings_form_submit($form, &$form_state) {
   $config->setData($template_data);
   $config->save();
 
-  layout_set_flexible_tempstore($template_data, $form_state['values']['machine_name']);
+  layout_set_flexible_tempstore($template_data);
   backdrop_set_message(t('Layout template saved.'));
   layout_flexible_reset_caches();
   layout_reset_caches();
@@ -137,12 +145,6 @@ function layout_flexible_template_change_enabled_status($template, $status) {
 
   backdrop_goto('admin/structure/layouts/settings');
 }
-
-/**
- * Render the form for layout.
- *
- * @ingroup forms
- */
 
 /**
  * Form to manage adding and removing rows to a flexible template.
@@ -226,22 +228,23 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
 }
 
 /**
- * Submit handler for layout_flexible_template_region_style_select().
+ * Handler for layout_flexible_template_configure_form() to add a new row.
  */
 function layout_flexible_template_add_row($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/row/add/select-widths';
 }
 
 /**
- * Submit handler for layout_settings_form() that saves in-progress changes.
+ * Submit handler for layout_flexible_template_configure_form() that cancels
+ * in-progress changes.
  */
 function layout_flexible_template_configure_form_cancel($form, &$form_state) {
   tempstore_clear('layout.flexible', $form_state['flexible_template_id']);
-  // $form_state['redirect'] = 'admin/structure/layouts/settings';
+  $form_state['redirect'] = 'admin/structure/layouts/settings';
 }
 
 /**
- * Submit handler for layout_settings_form() that saves in-progress changes.
+ * Submit handler for layout_flexible_template_configure_form().
  */
 function layout_flexible_template_configure_form_submit($form, &$form_state) {
     $positions = array();
@@ -262,10 +265,10 @@ function layout_flexible_template_configure_form_submit($form, &$form_state) {
 }
 
 /**
- * Form to add a row to a flexible template.
+ * Form to select the region widths for a flexible template.
  *
- * @param $flexible_template_id
- *   The template to which a row is being added.
+ * @param $flexible_template
+ *   The loaded flexible template object.
  * @param $original_row
  *   The row above or below which a new row is being inserted.
  *
@@ -369,14 +372,16 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
 }
 
 /**
- * Submit handler for the cancel button on layout_condition_add_form().
+ * Submit handler for the cancel button on the
+ * layout_flexible_template_region_style_select() form.
  */
 function layout_flexible_template_cancel_dialog($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/configure';
 }
 
 /**
- * AJAX handler that cancels the condition edit dialog.
+ * AJAX handler that cancels the layout_flexible_template_region_style_select()
+ * dialog.
  */
 function layout_ajax_flexible_template_cancel_dialog($form, $form_state) {
   $commands = array();
@@ -396,14 +401,12 @@ function layout_flexible_template_edit_row_submit($form, &$form_state) {
 }
 
 /**
- * Form to add a row to a flexible template.
+ * Form to add or edit a row on a flexible template.
  *
- * @param $flexible_template_id
- *   The template to which a row is being added.
+ * @param $flexible_template
+ *   The loaded flexible template object.
  * @param $original_row
  *   The row above or below which a new row is being inserted.
- * @param $op
- *   The operation being performed on this row.
  * @param $region_style
  *   The selected region style.
  *
@@ -478,9 +481,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     '#title' => t('Style'),
     '#collapsed' => $original_row != 'add',
     '#collapsible' => TRUE,
-    // '#tree' => TRUE,
   );
-
 
   $form['region_styles']['row_classes'] = array(
     '#title' => t('Additional row classes'),
@@ -573,21 +574,23 @@ function layout_flexible_template_get_last_region_number($template_data, $form_s
 }
 
 /**
- * Submit handler for layout_flexible_template_region_style_select().
+ * Submit handler for the change region style button on the
+ * layout_flexible_template_edit_row_form().
  */
 function layout_flexible_template_change_region_style($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/row/' . $form_state['original_row'] . '/select-widths';
 }
 
 /**
- * Submit handler for layout_flexible_template_region_style().
+ * Submit handler on the hidden button to change region widths on
+ * layout_flexible_template_edit_row_form() if AJAX is disabled.
  */
 function layout_flexible_template_region_count_load(&$form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
 /**
- * Submit handler for layout_configure_region_page().
+ * Validation handler for layout_flexible_template_edit_row_form().
  */
 function layout_flexible_template_edit_row_validate($form, &$form_state) {
   $last_region_number = layout_flexible_template_get_last_region_number($form_state['template_data'], $form_state);
@@ -600,9 +603,8 @@ function layout_flexible_template_edit_row_validate($form, &$form_state) {
   }
 }
 
-
 /**
- * Submit handler for layout_configure_region_page().
+ * Submit handler for layout_flexible_template_edit_row_form().
  */
 function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   $template_data = $form_state['template_data'];
@@ -628,62 +630,24 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   $form_state['ajax_rebuild_form'] = 'layout_flexible_template_configure_form';
   $form_state['ajax_rebuild_args'] = array($template_data);
   $form_state['ajax_update'] = array('content');
-  layout_set_flexible_tempstore($template_data, $form_state['flexible_template_id']);
+  layout_set_flexible_tempstore($template_data);
   layout_flexible_reset_caches();
   if (!backdrop_is_ajax()) {
     $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/configure';
   }
 }
 
-/*
- * Inserts a new key/value before/after a key in the array.
- * Code modified from http://eosrei.net/comment/287
- *
- * @param $key
- *   The key to insert.
- * @param $array
- *   An array to insert in to.
- * @param $new_key
- *   The key to insert.
- * @param $new_value
- *   An value to insert.
- *
- * @return
- *   The new array if the key exists, FALSE otherwise.
- */
-function layout_flexible_array_insert_key_value($key, array &$array, $new_key, $new_value, $position) {
-  if (array_key_exists($key, $array)) {
-    $new = array();
-    if ($position == 'before') {
-      foreach ($array as $k => $value) {
-        if ($k === $key) {
-          $new[$new_key] = $new_value;
-        }
-        $new[$k] = $value;
-      }
-    }
-    else {
-      foreach ($array as $k => $value) {
-        $new[$k] = $value;
-        if ($k === $key) {
-          $new[$new_key] = $new_value;
-        }
-      }
-    }
-    return $new;
-  }
-  return FALSE;
-}
-
 /**
- * AJAX responder to add a new row, region or region to a flexible layout.
+ * AJAX responder to change the region count on the
+ * layout_flexible_template_region_style_select() form.
  */
 function layout_flexible_template_edit_region_style_ajax($form, $form_state) {
   return $form['row_settings'];
 }
 
 /**
- * AJAX responder to add a new row, region or region to a flexible layout.
+ * AJAX responder on the submit button for
+ * layout_flexible_template_edit_row_form().
  */
 function layout_flexible_template_edit_row_ajax($form, $form_state) {
   $commands = array();
@@ -708,12 +672,11 @@ function layout_flexible_template_edit_row_ajax($form, $form_state) {
   );
 }
 
-
 /**
- * Form to delete a row from a flexible template.
+ * Menu callback to delete a row from a flexible template.
  *
- * @param $flexible_template_id
- *   The template to which a row is being added.
+ * @param $flexible_template
+ *   The loaded flexible template object.
  * @param $original_row
  *   The row above or below which a new row is being inserted.
  *
@@ -726,7 +689,7 @@ function layout_flexible_template_delete_row($flexible_template, $original_row) 
   $flexible_template_id = $flexible_template['name'];
 
   unset($flexible_template['rows'][$original_row]);
-  layout_set_flexible_tempstore($flexible_template, $flexible_template_id);
+  layout_set_flexible_tempstore($flexible_template);
 
   if (backdrop_is_ajax()) {
     $commands[] = ajax_command_remove('#flexible-row-id-' . $original_row);
@@ -743,7 +706,7 @@ function layout_flexible_template_delete_row($flexible_template, $original_row) 
 }
 
 /**
- * Form callback; Delete a flexible template.
+ * Menu callback; Delete a flexible template.
  *
  * @ingroup forms
  */
@@ -759,7 +722,8 @@ function layout_flexible_template_delete_form($form, &$form_state, $flexible_tem
 }
 
 /**
- * Submit handler for layout_flexible_template_delete_form(). Deletes a flexible template.
+ * Submit handler for layout_flexible_template_delete_form(). Deletes a 
+ * flexible template.
  */
 function layout_flexible_template_delete_form_submit(&$form, &$form_state) {
   $template = $form_state['template'];
@@ -977,15 +941,13 @@ function layout_flexible_row_styles() {
 }
 
 /**
- * Store changes to a layout or menu item in the temporary store.
+ * Store changes to a flexible layout template in the temporary store.
  *
- * @param Layout|LayoutMenuItem $item
- *   The Layout item to save into tempstore.
- * @param string $type
- *   The type of item to save. Must be either "layout" or "menu_item".
+ * @param $flexible_template
+ *   The loaded flexible template object.
  */
-function layout_set_flexible_tempstore($item, $name) {
-  tempstore_set('layout.flexible', $name, $item, 604800);
+function layout_set_flexible_tempstore($flexible_template) {
+  tempstore_set('layout.flexible', $flexible_template['name'], $flexible_template, 604800);
 }
 
 /**
@@ -1013,6 +975,14 @@ function layout_flexible_tempstore_load($flexible_template_id = NULL) {
   return $caches[$flexible_template_id];
 }
 
+/**
+ * Load an individual flexible template.
+ *
+ * @param string $flexible_template_id
+ *   The machine name of the template to load.
+ *
+ * @return Array
+ */
 function layout_flexible_template_load($flexible_template_id = NULL) {
   $configs = &backdrop_static(__FUNCTION__, array());
 
@@ -1047,7 +1017,7 @@ function layout_flexible_template_load($flexible_template_id = NULL) {
 }
 
 /**
- * Provides the default template for new layouts.
+ * Provides the default template for new flexible templates.
  */
 function layout_flexible_template_template_default() {
   $settings = array(
@@ -1083,7 +1053,7 @@ function layout_flexible_template_template_default() {
 }
 
 /**
- * Implements layout_info().
+ * Implements hook_layout_info().
  */
 function layout_layout_info() {
   $layouts = array();
