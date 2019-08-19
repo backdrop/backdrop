@@ -258,8 +258,9 @@ function system_themes_admin_form_submit($form, &$form_state) {
   backdrop_set_message(t('The configuration options have been saved.'));
 
   $themes = list_themes();
-  $current_default_theme = config_get('system.core', 'theme_default');
-  $current_admin_theme = config_get('system.core', 'admin_theme');
+  $config = config('system.core');
+  $current_default_theme = $config->get('theme_default');
+  $current_admin_theme = $config->get('admin_theme');
   $new_admin_theme = $form_state['values']['admin_theme'];
 
   if (!$new_admin_theme) {
@@ -271,7 +272,7 @@ function system_themes_admin_form_submit($form, &$form_state) {
     backdrop_set_message(t('The administration theme has been changed to %admin_theme.', array('%admin_theme' => $new_admin_theme_name)));
   }
 
-  config_set('system.core', 'admin_theme', $new_admin_theme);
+  $config->set('admin_theme', $new_admin_theme);
 }
 
 /**
