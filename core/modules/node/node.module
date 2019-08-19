@@ -3069,7 +3069,7 @@ function _node_search_query_alter(QueryAlterableInterface $query) {
   }
 
   if (in_array('view hidden paths', user_role_permissions($user->roles))) {
-    return $form;
+    return;
   }
 
   $search = FALSE;
