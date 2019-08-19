@@ -357,9 +357,9 @@ function system_theme_default() {
       // has just switched to, show an info message to explain why.
       if ($admin_theme && $admin_theme != $theme) {
         backdrop_set_message(t('%theme is now the default theme for all non-administrative pages.', array('%theme' => $themes[$theme]->info['name'])));
-        backdrop_set_message(t('The administration theme is still set to the %admin_theme theme. <a href="@change_admin_theme_link">Change the administration theme', array(
+        backdrop_set_message(t('The <a href="@admin_theme_setting">administration theme</a> is still set to the %admin_theme theme.', array(
           '%admin_theme' => $themes[$admin_theme]->info['name'],
-          '@change_admin_theme_link' => url('admin/appearance', $options = array('fragment' => 'system-themes-admin-form')),
+          '@admin_theme_setting' => url('admin/appearance', $options = array('fragment' => 'system-themes-admin-form')),
         )), 'info');
       }
       else {
