@@ -273,6 +273,7 @@ function system_themes_admin_form_submit($form, &$form_state) {
   }
 
   $config->set('admin_theme', $new_admin_theme);
+  $config->save();
 }
 
 /**
