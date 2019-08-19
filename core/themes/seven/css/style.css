@@ -135,6 +135,12 @@ ul.menu li.expanded {
 .breadcrumb li a,
 .breadcrumb li span {
   vertical-align: middle;
+  float: left; /* LTR */
+}
+[dir="rtl"] .breadcrumb li,
+[dir="rtl"] .breadcrumb li a,
+[dir="rtl"] .breadcrumb li span {
+  float: right;
 }
 .breadcrumb li:after {
   content: '';
@@ -143,10 +149,14 @@ ul.menu li.expanded {
   height: 1em;
   vertical-align: middle;
   padding: 0 3px;
-  background: url(../images/chevron-right--gray--32.png) no-repeat center center;
+  background-image: url(../images/chevron-right--gray--32.png); /* LTR */
+  background-repeat: no-repeat;
+  background-position: center;
   background-size: 8px;
 }
-
+[dir="rtl"] .breadcrumb li:after {
+  background-image: url(../images/chevron-left--gray--32.png);
+}
 .breadcrumb li.last:after {
   display: none;
 }
