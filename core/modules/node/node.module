@@ -2851,7 +2851,9 @@ function node_access_view_all_nodes($account = NULL) {
  */
 function node_query_node_access_alter(QueryAlterableInterface $query) {
   _node_query_node_access_alter($query, 'node');
-  _node_search_query_alter($query);
+  if (module_exists('search')) {
+    _node_search_query_alter($query);
+  }
 }
 
 /**
