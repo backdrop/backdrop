@@ -216,16 +216,16 @@ input#edit-filters-filter-html-settings-allowed-html {
   margin: 0;
 }
 
-#text-format-order .filter-format-name {
+.filter-admin-overview .filter-format-name {
   font-weight: bold;
   white-space: nowrap;
 }
-#text-format-order .filter-format-machine-name {
+.filter-admin-overview .filter-format-machine-name {
   font-size: smaller;
 }
-#text-format-order td .item-list ul {
+.filter-admin-overview td .item-list ul {
   margin-left: 0;
 }
-#disabled-text-formats tr.disabled td {
+.filter-admin-overview tr.disabled td {
   color: #999;
 }
