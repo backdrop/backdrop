@@ -13,52 +13,49 @@
  * @see filter_admin_overview_submit()
  */
 function filter_admin_overview($form) {
-  // Overview of all formats.
   $formats = filter_formats(NULL, TRUE, TRUE);
-  $fallback_format = filter_fallback_format();
   $editors = filter_get_editors();
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => t('The order of the text formats here reflects the order in which they will show up in the <em>Editor</em> drop-down menu, when creating content (still subject to which text formats the user has access to).'),
+    '#markup' => t('The order of the text formats here reflects the order in which they will show up in the <em>Editor</em> selector, when creating content (still subject to which text formats the user has access to).'),
     '#weight' => -100,
   );
 
   $form['#tree'] = TRUE;
+
   foreach ($formats as $id => $format) {
-    $links = array();
-    if (!$format->status) {
-      $links['enable'] = array(
-        'title' => t('Enable'),
-        'href' => "admin/config/content/formats/$id/enable",
-      );
+    // Prepare roles for each fomrat.
+    $roles = array();
+    foreach (filter_get_roles_by_format($format) as $role_name) {
+      $role = user_role_load($role_name);
+      $roles[] = check_plain($role->label);
     }
+    $roles_markup = $roles ? theme('item_list', array('items' => $roles)) : t('No roles specified for this format.');
+
+    // Prepare operations links for each format.
+    $links = array();
+
     $links['configure'] = array(
       'title' => t('Configure'),
       'href' => "admin/config/content/formats/$id",
     );
-    // Check whether this is the fallback text format. This format is available
-    // to all roles, and cannot be disabled via the admin interface.
-    $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
-    if ($form['formats'][$id]['#is_fallback']) {
-      $form['formats'][$id]['name'] = array('#markup' => $format->name);
-      $roles_markup = t('Used as a fallback, if a role has access to no other formats.<br>Cannot be disabled');
+
+    if ($format->status) {
+      $links['disable'] = array(
+        'title' => t('Disable'),
+        'href' => "admin/config/content/formats/$id/disable",
+      );
     }
     else {
-      $form['formats'][$id]['name'] = array('#markup' => check_plain($format->name));
-      $roles = array();
-      foreach (filter_get_roles_by_format($format) as $role_name) {
-        $role = user_role_load($role_name);
-        $roles[] = check_plain($role->label);
-      }
-      $roles_markup = $roles ? theme('item_list', array('items' => $roles)) : t('No roles specified for this format.');
-      if ($format->status) {
-        $links['disable'] = array(
-          'title' => t('Disable'),
-          'href' => "admin/config/content/formats/$id/disable",
-        );
-      }
+      $links['enable'] = array(
+        'title' => t('Enable'),
+        'href' => "admin/config/content/formats/$id/enable",
+      );
+      // Move "Enable" to be the first/default operation (for disabled formats).
+      $links = array_merge(['enable' => $links['enable']], $links);
     }
+
     if (user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
@@ -69,15 +66,24 @@ function filter_admin_overview($form) {
         ),
       );
     }
+
+    // Check whether this is the fallback text format. This format is available
+    // to all roles, and cannot be disabled/removed via the admin interface.
+    $fallback_format = filter_fallback_format();
+    if ($id == $fallback_format) {
+      unset($links['disable']);
+      unset($links['remove']);
+      $roles_markup = t('Used as a fallback, if a role has access to no other formats.<br>Cannot be disabled');
+    }
+
+    $form['formats'][$id]['name'] = array(
+      '#markup' => check_plain($format->name)
+    );
     $form['formats'][$id]['editor'] = array(
       '#markup' => isset($editors[$format->editor]) ? check_plain($editors[$format->editor]['label']) : t('None'),
     );
     $form['formats'][$id]['roles'] = array(
       '#markup' => $roles_markup,
-    );
-    $form['formats'][$id]['operations'] = array(
-      '#type' => 'operations',
-      '#links' => $links,
     );
     $form['formats'][$id]['weight'] = array(
       '#type' => 'weight',
@@ -85,10 +91,17 @@ function filter_admin_overview($form) {
       '#title_display' => 'invisible',
       '#default_value' => $format->weight,
     );
+    $form['formats'][$id]['operations'] = array(
+      '#type' => 'operations',
+      '#links' => $links,
+    );
   }
+
   $form['#attached']['library'][] = array('filter', 'filter.admin');
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save changes'));
+
   return $form;
 }
 
