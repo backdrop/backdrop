@@ -95,7 +95,7 @@ function theme_filter_admin_overview($variables) {
   );
 
   $rows = array();
-  $disabled_rows[] = array();
+  $disabled_rows = array();
 
   foreach (element_children($form['formats']) as $id) {
     $form['formats'][$id]['weight']['#attributes']['class'] = array('text-format-order-weight');
@@ -118,8 +118,13 @@ function theme_filter_admin_overview($variables) {
     );
 
     // If the format is enabled, add classes to make it draggable, keep it in
-    // the enabled formats section, and add a cell to the table row for weight.
-    if ($formats[$id]->status) {
+    // the enabled formats section, and add a cell to the table row for its
+    // weight.
+    // Note that we are checking for status value of 1 explicitly, as there are
+    // disabled text formats (with status value of -1), and removed text
+    // formats (with status value of 0). Removed text formats are to be
+    // completely excluded from the admin UI.
+    if ($formats[$id]->status == 1) {
       $row_classes = array('draggable', 'enabled');
 
       $row[] = array(
@@ -129,7 +134,7 @@ function theme_filter_admin_overview($variables) {
       );
     }
     // Otherwise, add a class to move it to the disabled formats section.
-    else {
+    elseif ($formats[$id]->status == -1) {
       $row_classes = array('disabled');
     }
 

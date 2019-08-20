@@ -13,8 +13,16 @@
  * @see filter_admin_overview_submit()
  */
 function filter_admin_overview($form) {
-  $formats = filter_formats(NULL, TRUE, TRUE);
   $editors = filter_get_editors();
+  $formats = filter_formats(NULL, TRUE, TRUE);
+
+  // Exclude removed text formats (disabled formats have a status of -1, while
+  // removed ones have a status of 0).
+  foreach ($formats as $format) {
+    if ($format->status == 0) {
+      unset($formats[$format->format]);
+    }
+  }
 
   $form['help'] = array(
     '#type' => 'help',
@@ -56,6 +64,11 @@ function filter_admin_overview($form) {
       $links = array_merge(['enable' => $links['enable']], $links);
     }
 
+    $links['remove'] = array(
+      'title' => t('Remove'),
+      'href' => "admin/config/content/formats/$id/remove",
+    );
+
     if (user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
@@ -69,15 +82,14 @@ function filter_admin_overview($form) {
 
     // Check whether this is the fallback text format. This format is available
     // to all roles, and cannot be disabled/removed via the admin interface.
-    $fallback_format = filter_fallback_format();
-    if ($id == $fallback_format) {
+    if ($id == filter_fallback_format()) {
       unset($links['disable']);
       unset($links['remove']);
-      $roles_markup = t('Used as a fallback, if a role has access to no other formats.<br>Cannot be disabled');
+      $roles_markup = t('Used as a fallback, if a role has access to no other formats.<br>Cannot be disabled nor removed.');
     }
 
     $form['formats'][$id]['name'] = array(
-      '#markup' => check_plain($format->name)
+      '#markup' => check_plain($format->name),
     );
     $form['formats'][$id]['editor'] = array(
       '#markup' => isset($editors[$format->editor]) ? check_plain($editors[$format->editor]['label']) : t('None'),
@@ -503,7 +515,7 @@ function filter_admin_format_form_submit($form, &$form_state) {
 }
 
 /**
- * Form constructor for the text format deletion confirmation form.
+ * Form constructor for the text format disabling confirmation form.
  *
  * @param $format
  *   An object representing a text format.
@@ -515,12 +527,12 @@ function filter_admin_format_form_submit($form, &$form_state) {
 function filter_admin_disable($form, &$form_state, $format) {
   $form_state['format'] = $format;
 
-  backdrop_set_message(t('Any existing content using this format will stop being displayed.'), 'warning');
+  backdrop_set_message(t('Any existing content using this text format will stop being displayed.'), 'warning');
 
   return confirm_form($form,
     t('Are you sure you want to disable the text format %format?', array('%format' => $format->name)),
     'admin/config/content/formats',
-    '',
+    t('The text format will no longer be avialble when creating new content; but it will be retained, so you can reenable it in the future.'),
     t('Disable')
   );
 }
@@ -534,6 +546,43 @@ function filter_admin_disable_submit($form, &$form_state) {
   filter_format_disable($format);
   backdrop_get_messages();
   backdrop_set_message(t('Disabled text format %format.', array('%format' => $format->name)));
+  $form_state['redirect'] = 'admin/config/content/formats';
+}
+
+/**
+ * Form constructor for the text format removal confirmation form.
+ *
+ * @param $format
+ *   An object representing a text format.
+ *
+ * @see filter_menu()
+ * @see filter_admin_remove_submit()
+ * @ingroup forms
+ */
+function filter_admin_remove($form, &$form_state, $format) {
+  $form_state['format'] = $format;
+
+  backdrop_set_message(t('Any existing content using this text format will stop being displayed.'), 'warning');
+  backdrop_set_message(t('The format will be <em>completely removed</em> from the administrative interface, and <strong>it will not be possible to restore it</strong>.'), 'warning');
+  backdrop_set_message(t('<strong>This action cannot be undone</strong>. Consider disabling the format instead of removing it.'), 'warning');
+
+  return confirm_form($form,
+    t('Are you sure you want to remove the text format %format?', array('%format' => $format->name)),
+    'admin/config/content/formats',
+    '',
+    t('Remove')
+  );
+}
+
+/**
+ * Form submission handler for filter_admin_remove().
+ */
+function filter_admin_remove_submit($form, &$form_state) {
+  $format = $form_state['format'];
+
+  filter_format_remove($format);
+  backdrop_get_messages();
+  backdrop_set_message(t('Removed text format %format.', array('%format' => $format->name)));
   $form_state['redirect'] = 'admin/config/content/formats';
 }
 

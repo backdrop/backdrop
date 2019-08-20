@@ -228,14 +228,14 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id);
     $this->assertNoLinkByHref('admin/config/content/formats/' . $format_id . '/enable');
 
-    //Remove the text format.
-    //$this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/remove');
-    //$this->backdropGet('admin/config/content/formats/' . $format_id . '/remove');
-    //$this->backdropPost(NULL, array(), t('Remove'));
+    // Remove the text format.
+    $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/remove');
+    $this->backdropGet('admin/config/content/formats/' . $format_id . '/remove');
+    $this->backdropPost(NULL, array(), t('Remove'));
 
     // Verify that the removed text format no longer exists.
-    //$this->backdropGet('admin/config/content/formats/' . $format_id);
-    //$this->assertResponse(404, 'Disabled text format no longer exists.');
+    $this->backdropGet('admin/config/content/formats/' . $format_id);
+    $this->assertResponse(404, 'Disabled text format no longer exists.');
 
     // Attempt to create a format of the same machine name as the disabled
     // format but with a different human readable name.
@@ -1961,7 +1961,8 @@ class FilterHooksTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/block/add', $custom_block, t('Save block'));
     $this->assertText(t('The block has been created.'), 'New block successfully created.');
 
-    // Check to see if the custom block was created by checking that it has a configuration file.
+    // Check to see if the custom block was created, by checking that it has a
+    // configuration file.
     $custom_block = config_get('block.custom.'.$custom_block['delta']);
     $this->assertNotNull($custom_block['delta'], 'New block found in configuration.');
 

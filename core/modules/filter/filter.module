@@ -147,6 +147,14 @@ function filter_menu() {
     'access arguments' => array(4),
     'file' => 'filter.admin.inc',
   );
+  $items['admin/config/content/formats/%filter_format/remove'] = array(
+    'title' => 'Remove text format',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('filter_admin_remove', 4),
+    'access callback' => '_filter_disable_format_access',
+    'access arguments' => array(4),
+    'file' => 'filter.admin.inc',
+  );
   $items['filter-link/autocomplete'] = array(
     'page callback' => '_filter_link_autocomplete',
     'access arguments' => array('access content'),
@@ -173,19 +181,19 @@ function filter_format_access($format) {
 }
 
 /**
- * Access callback: Checks access for disabling text formats.
+ * Access callback: Checks access for disabling and removing text formats.
  *
  * @param $format
  *   A text format object.
  *
  * @return
- *   TRUE if the text format can be disabled by the current user, FALSE
+ *   TRUE if the text format can be disabled/removed by the current user, FALSE
  *   otherwise.
  *
  * @see filter_menu()
  */
 function _filter_disable_format_access($format) {
-  // The fallback format can never be disabled.
+  // The fallback format can never be disabled or removed.
   return user_access('administer filters') && ($format->format != filter_fallback_format());
 }
 
@@ -365,12 +373,7 @@ function filter_format_save($format) {
 }
 
 /**
- * Enables a text format.
- *
- * There is no core facility to re-enable a disabled format. It is not deleted
- * to keep information for contrib and to make sure the format ID is never
- * reused. As there might be content using the disabled format, this would lead
- * to data corruption.
+ * Enables a disabled text format.
  *
  * @param $format
  *   The text format object to be enabled.
@@ -387,23 +390,46 @@ function filter_format_enable($format) {
 }
 
 /**
- * Disables a text format.
+ * Disables an enabled text format.
  *
- * There is no core facility to re-enable a disabled format. It is not deleted
- * to keep information for contrib and to make sure the format ID is never
- * reused. As there might be content using the disabled format, this would lead
- * to data corruption.
+ * The format will no longer be available in the "Editor" selector when
+ * creating/editing content, but it can still be enabled via the text formats
+ * listing in admin/config/content/formats.
  *
  * @param $format
  *   The text format object to be disabled.
  */
 function filter_format_disable($format) {
-  config_set('filter.format.' . $format->format, 'status', 0);
+  config_set('filter.format.' . $format->format, 'status', -1);
 
   // Allow modules to react on text format disablement.
   module_invoke_all('filter_format_disable', $format);
 
   // Clear the filter cache whenever a text format is disabled.
+  filter_formats_reset();
+  cache('filter')->deletePrefix($format->format . ':');
+}
+
+/**
+ * Removes a text format.
+ *
+ * The format is removed from the admin listing in admin/config/content/formats,
+ * and will not be available in the "Editor" selector when creating/editing
+ * content. Its configuration file is not deleted though, so to keep information
+ * for contrib, and to make sure that the format ID is never reused. As there
+ * might be existing content using the now-removed format, this would lead to
+ * data corruption.
+ *
+ * @param $format
+ *   The text format object to be removed.
+ */
+function filter_format_remove($format) {
+  config_set('filter.format.' . $format->format, 'status', 0);
+
+  // Allow modules to react on text format removal.
+  module_invoke_all('filter_format_remove', $format);
+
+  // Clear the filter cache whenever a text format is removed.
   filter_formats_reset();
   cache('filter')->deletePrefix($format->format . ':');
 }
@@ -1235,7 +1261,7 @@ function filter_process_format($element) {
   $element['value']['#type'] = $element['#base_type'];
   $element['value'] += element_info($element['#base_type']);
 
-  // Get a list of formats to which the current user has access.
+  // Get a list of enabled formats, to which the current user has access.
   $formats = filter_formats($user);
 
   // Turn original element into a text format wrapper.
