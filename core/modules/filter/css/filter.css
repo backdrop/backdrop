@@ -223,19 +223,9 @@ input#edit-filters-filter-html-settings-allowed-html {
 #text-format-order .filter-format-machine-name {
   font-size: smaller;
 }
-#text-format-order tr.disabled td {
-  color: #999;
-}
-/* For disabled formats, hide the tabledrag handle... */
-#text-format-order tr.disabled td a.tabledrag-handle,
-/* ...as well as the weight select drop-down menu. */
-#text-format-order tr.disabled td .text-format-order-weight {
-  visibility: hidden;
-}
 #text-format-order td .item-list ul {
   margin-left: 0;
 }
-#text-format-order .disabled-divider {
-  font-weight: bold;
-  background: #e9e8e8;
+#disabled-text-formats tr.disabled td {
+  color: #999;
 }

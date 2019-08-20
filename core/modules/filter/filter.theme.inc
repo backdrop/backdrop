@@ -86,8 +86,17 @@ function theme_filter_admin_overview($variables) {
     array('data' => t('Weight'), 'class' => array('format-weight')),
     array('data' => t('Operations'), 'class' => array('format-operations')),
   );
+  // Table to hold disabled text formats.
+  $disabled_header = array(
+    array(
+      'data' => t('Disabled text formats'),
+      'colspan' => count($header),
+    ),
+  );
 
   $rows = array();
+  $disabled_rows[] = array();
+
   foreach (element_children($form['formats']) as $id) {
     $form['formats'][$id]['weight']['#attributes']['class'] = array('text-format-order-weight');
     $row = array();
@@ -107,11 +116,23 @@ function theme_filter_admin_overview($variables) {
       'class' => array('format-roles'),
       'data-label' => t('Roles'),
     );
-    $row[] = array(
-      'data' => backdrop_render($form['formats'][$id]['weight']),
-      'class' => array('format-weight'),
-      'data-label' => t('Weight'),
-    );
+
+    // If the format is enabled, add classes to make it draggable, keep it in
+    // the enabled formats section, and add a cell to the table row for weight.
+    if ($formats[$id]->status) {
+      $row_classes = array('draggable', 'enabled');
+
+      $row[] = array(
+        'data' => backdrop_render($form['formats'][$id]['weight']),
+        'class' => array('format-weight'),
+        'data-label' => t('Weight'),
+      );
+    }
+    // Otherwise, add a class to move it to the disabled formats section.
+    else {
+      $row_classes = array('disabled');
+    }
+
     $row[] = array(
       'data' => backdrop_render($form['formats'][$id]['operations']),
       'class' => array('format-operations'),
@@ -120,30 +141,24 @@ function theme_filter_admin_overview($variables) {
 
     $rows[] = array(
       'data' => $row,
-      'class' => array('draggable', $formats[$id]->status ? 'enabled' : 'disabled'),
+      'class' => $row_classes,
     );
   }
 
-  // Add a divider row; for the disabled formats.
-  $rows[] = array(
-    'data' => array(
-      array(
-        'data' => t('Disabled formats'),
-        'colspan' => count($header),
-      ),
-    ),
-    'class' => array('disabled-divider'),
-  );
-  // Display disabled formats at the bottom of the table.
+  // Move disabled text formats to the "Disabled text formats" table.
   foreach ($rows as $id => $row) {
     if (in_array('disabled', $row['class'])) {
-      $rows[] = $row;
+      $disabled_rows[] = $row;
       unset($rows[$id]);
     }
   }
 
   $output = backdrop_render($form['help']);
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'text-format-order')));
+  // Only render the disabled formats section if there are disabled formats.
+  if (!empty($disabled_rows)) {
+    $output .= theme('table', array('header' => $disabled_header, 'rows' => $disabled_rows, 'attributes' => array('id' => 'disabled-text-formats')));
+  }
 
   // Do not render the 'formats' child element of the form.
   unset($form['formats']);

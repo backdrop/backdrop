@@ -502,10 +502,12 @@ function filter_admin_format_form_submit($form, &$form_state) {
 function filter_admin_disable($form, &$form_state, $format) {
   $form_state['format'] = $format;
 
+  backdrop_set_message(t('Any existing content using this format will stop being displayed.'), 'warning');
+
   return confirm_form($form,
     t('Are you sure you want to disable the text format %format?', array('%format' => $format->name)),
     'admin/config/content/formats',
-    t('Any content stored with this format will not be displayed.'),
+    '',
     t('Disable')
   );
 }
@@ -517,6 +519,7 @@ function filter_admin_disable_submit($form, &$form_state) {
   $format = $form_state['format'];
 
   filter_format_disable($format);
+  backdrop_get_messages();
   backdrop_set_message(t('Disabled text format %format.', array('%format' => $format->name)));
   $form_state['redirect'] = 'admin/config/content/formats';
 }
