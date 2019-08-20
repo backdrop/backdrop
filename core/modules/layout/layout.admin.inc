@@ -2655,7 +2655,7 @@ function layout_ajax_form_update($form, $form_state) {
  */
 function layout_settings_page($form, &$form_state) {
   $header = array(
-    'layout_template_info' => array('data' => t('Template'), 'class' => array(RESPONSIVE_PRIORITY_HIGH)),
+    'layout_template_info' => array('data' => t('Template')),
     'type' => array('data' => t('Type'), 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
     'operations' => t('Operations'),
   );

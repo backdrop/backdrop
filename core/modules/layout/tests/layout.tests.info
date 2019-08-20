@@ -51,3 +51,9 @@ name = Layout Renderer Test
 description = Tests that the correct renderer is used.
 group = Layout
 file = layout.test
+
+[LayoutFlexibleTemplateTest]
+name = Layout Flexible Template Test
+description = Tests that flexible layout templates perform correctly.
+group = Layout
+file = flexible_template.test

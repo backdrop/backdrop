@@ -97,6 +97,7 @@ function layout_flexible_template_settings_form_submit($form, &$form_state) {
 
   layout_set_flexible_tempstore($template_data);
   backdrop_set_message(t('Layout template saved.'));
+  backdrop_theme_rebuild();
   layout_flexible_reset_caches();
   layout_reset_caches();
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['values']['machine_name'] . '/configure';
@@ -198,7 +199,7 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
 
   $form['add_row'] = array(
     '#type' => 'submit',
-    '#value' => t('Add Row'),
+    '#value' => t('Add row'),
     '#submit' => array(
       'layout_flexible_template_add_row',
     ),
@@ -710,11 +711,10 @@ function layout_flexible_template_delete_row($flexible_template, $original_row) 
  *
  * @ingroup forms
  */
-function layout_flexible_template_delete_form($form, &$form_state, $flexible_template_id) {
-  $template = layout_flexible_template_load($flexible_template_id);
-  $form_state['template'] = $template;
+function layout_flexible_template_delete_form($form, &$form_state, $flexible_template) {
+  $form_state['template'] = $flexible_template;
 
-  $question = t('Delete flexible template @title?', array('@title' => $template['title']));
+  $question = t('Delete flexible template @title?', array('@title' => $flexible_template['title']));
   $text = t('Deleting the template will affect any layouts using this template.');
   $button_text = t('Delete template');
 
@@ -731,6 +731,7 @@ function layout_flexible_template_delete_form_submit(&$form, &$form_state) {
   $config = config('layout.flexible.' . $template['name']);
   $config->delete();
 
+  backdrop_theme_rebuild();
   layout_flexible_reset_caches();
   layout_reset_caches();
 

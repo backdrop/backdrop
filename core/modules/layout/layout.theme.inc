@@ -300,7 +300,7 @@ function layout_preprocess_layout(&$variables) {
 
   // Build HTML for displaying flexible templates.
   if ($variables['layout_info']['template'] == 'layout--flexible') {
-    if ($variables['renderer']->flexible) {
+    if (!empty($variables['renderer']->flexible)) {
       $variables['flexible_editor'] = TRUE;
       $data = layout_flexible_tempstore_load($variables['layout_info']['name']);
     }
