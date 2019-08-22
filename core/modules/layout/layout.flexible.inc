@@ -702,7 +702,7 @@ function layout_flexible_template_delete_row($flexible_template, $original_row) 
   }
   else {
     backdrop_set_message(t('Row "@title" removed.', array('@title' => $flexible_template['title'])));
-    backdrop_goto('admin/structure/layouts/settings/' . $flexible_template_id . '/configure');
+    backdrop_goto('admin/structure/layouts/settings/flexible-template/' . $flexible_template_id . '/configure');
   }
 }
 
