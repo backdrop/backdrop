@@ -310,6 +310,8 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#prefix' => '<div id="filters-status-wrapper">',
     '#suffix' => '</div>',
   );
+  $filter_order_states_visibility = array();
+  $filter_settings_states_visibility = array();
   foreach ($all_filter_info as $name => $filter_info) {
     $form['filters']['status'][$name] = array(
       '#type' => 'checkbox',
@@ -319,6 +321,18 @@ function filter_admin_format_form($form, &$form_state, $format) {
       '#description' => $filter_info['description'],
       '#weight' => $filter_info['weight'],
     );
+    // Prepare the #states visibility conditions array for the "Filter
+    // processing order" section.
+    $filter_order_states_visibility[] = array(
+      ':input[name="filters[' . $name . '][status]"]' => array('checked' => TRUE),
+    );
+    // Prepare the #states visibility conditions array for the "Filter settings"
+    // section. Only add a condition for filters that have settings.
+    if (isset($filter_info['settings callback'])) {
+      $filter_settings_states_visibility[] = array(
+        ':input[name="filters[' . $name . '][status]"]' => array('checked' => TRUE),
+      );
+    }
   }
 
   // Filter order (tabledrag).
@@ -326,6 +340,9 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#type' => 'item',
     '#title' => t('Filter processing order'),
     '#theme' => 'filter_admin_format_filter_order',
+    '#states' => array(
+      'visible' => array($filter_order_states_visibility),
+    ),
   );
   foreach ($all_filter_info as $name => $filter_info) {
     $form['filters']['order'][$name]['filter'] = array(
@@ -346,6 +363,9 @@ function filter_admin_format_form($form, &$form_state, $format) {
   $form['filter_settings_title'] = array(
     '#type' => 'item',
     '#title' => t('Filter settings'),
+    '#states' => array(
+      'visible' => array($filter_settings_states_visibility),
+    ),
   );
   $form['filter_settings'] = array(
     '#type' => 'vertical_tabs',
