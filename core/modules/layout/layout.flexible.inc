@@ -13,6 +13,7 @@
  */
 function layout_flexible_template_settings_add_form() {
   $flexible_template = layout_flexible_template_template_default();
+  $flexible_template['is_new'] = TRUE;
   backdrop_set_title(t('Add template'));
   return backdrop_get_form('layout_flexible_template_settings_edit_form', $flexible_template);
 }
@@ -30,6 +31,7 @@ function layout_flexible_template_settings_add_form() {
 function layout_flexible_template_settings_edit_form($form, &$form_state, $flexible_template = NULL) {
   $form_state['template_data'] = $flexible_template;
   $template_data = $form_state['template_data'];
+  $exists = layout_flexible_template_load($template_data['name']);
 
   $form['name'] = array(
     '#title' => t('Template name'),
@@ -42,6 +44,7 @@ function layout_flexible_template_settings_edit_form($form, &$form_state, $flexi
     '#type' => 'machine_name',
     '#maxlength' => 21,
     '#default_value' => $template_data['name'],
+    '#disabled' => ($exists && empty($template_data['is_new'])),
     '#machine_name' => array(
       'exists' => 'layout_flexible_template_load',
     ),
