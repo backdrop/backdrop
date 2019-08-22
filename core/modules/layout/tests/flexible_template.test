@@ -208,8 +208,9 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $this->backdropGet($layout_url);
 
     $string = format_string('The setting of count is @setting.', array('@setting' => 30));
-    $elements = $this->xpath('//main[contains(@class,:region)]//*[contains(text(),:string)]', array(
+    $elements = $this->xpath('//main[contains(@class,:region)]/div[contains(@class, :container_class)]//*[contains(text(),:string)]', array(
       ':region' => 'l-header',
+      ':container_class' => 'no-container',
       ':string' => $string,
     ));
     $this->assertEqual(count($elements), 1, "The header element has been changed to 'main'");
