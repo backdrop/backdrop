@@ -28,23 +28,22 @@ function layout_flexible_template_settings_add_form() {
  *
  * @ingroup forms
  */
-function layout_flexible_template_settings_edit_form($form, &$form_state, $flexible_template = NULL) {
-  $form_state['template_data'] = $flexible_template;
-  $template_data = $form_state['template_data'];
-  $exists = layout_flexible_template_load($template_data['name']);
+function layout_flexible_template_settings_edit_form($form, &$form_state, $flexible_template) {
+  $form_state['flexible_template'] = $flexible_template;
+  $exists = layout_flexible_template_load($flexible_template['name']);
 
   $form['name'] = array(
     '#title' => t('Template name'),
     '#type' => 'textfield',
     '#maxlength' => 128,
-    '#default_value' => $template_data['title'],
+    '#default_value' => $flexible_template['title'],
     '#required' => TRUE,
   );
   $form['machine_name'] = array(
     '#type' => 'machine_name',
     '#maxlength' => 21,
-    '#default_value' => $template_data['name'],
-    '#disabled' => ($exists && empty($template_data['is_new'])),
+    '#default_value' => $flexible_template['name'],
+    '#disabled' => ($exists && empty($flexible_template['is_new'])),
     '#machine_name' => array(
       'exists' => 'layout_flexible_template_load',
     ),
@@ -52,7 +51,7 @@ function layout_flexible_template_settings_edit_form($form, &$form_state, $flexi
   $form['description'] = array(
     '#title' => t('Description'),
     '#type' => 'textfield',
-    '#default_value' => $template_data['description'],
+    '#default_value' => $flexible_template['description'],
   );
 
   $form['actions'] = array('#type' => 'actions');
@@ -89,16 +88,16 @@ function layout_flexible_template_settings_form_cancel($form, &$form_state) {
  * submits the form.
  */
 function layout_flexible_template_settings_form_submit($form, &$form_state) {
-  $template_data = $form_state['template_data'];
-  $template_data['name'] = $form_state['values']['machine_name'];
-  $template_data['title'] = $form_state['values']['name'];
-  $template_data['description'] = $form_state['values']['description'];
+  $flexible_template = $form_state['flexible_template'];
+  $flexible_template['name'] = $form_state['values']['machine_name'];
+  $flexible_template['title'] = $form_state['values']['name'];
+  $flexible_template['description'] = $form_state['values']['description'];
 
   $config = config('layout.flexible.' . $form_state['values']['machine_name']);
-  $config->setData($template_data);
+  $config->setData($flexible_template);
   $config->save();
 
-  layout_set_flexible_tempstore($template_data);
+  layout_set_flexible_tempstore($flexible_template);
   backdrop_set_message(t('Layout template saved.'));
   backdrop_theme_rebuild();
   layout_flexible_reset_caches();
@@ -161,7 +160,7 @@ function layout_flexible_template_change_enabled_status($template, $status) {
 function layout_flexible_template_configure_form($form, &$form_state, $flexible_template) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
 
-  $form_state['template_data'] = $flexible_template;
+  $form_state['flexible_template'] = $flexible_template;
   $flexible_template_id = $flexible_template['name'];
 
   $config = array(
@@ -176,7 +175,7 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
   $form_state['flexible_template_id'] = $flexible_template_id;
 
 
-  if (empty($form_state['template_data'])) {
+  if (empty($form_state['flexible_template'])) {
     return;
   }
 
@@ -197,7 +196,7 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
   $form['content']['row_positions'] = array(
     // Use 'hidden' instead of 'value' so the JS can access it.
     '#type' => 'hidden',
-    '#default_value' => implode(',', array_keys($form_state['template_data']['rows'])),
+    '#default_value' => implode(',', array_keys($form_state['flexible_template']['rows'])),
   );
 
   $form['add_row'] = array(
@@ -255,13 +254,13 @@ function layout_flexible_template_configure_form_submit($form, &$form_state) {
   if (!empty($form_state['values']['row_positions'])) {
         $rows = array_filter(explode(',', $form_state['values']['row_positions']));
     foreach ($rows as $position) {
-     $positions[$position] = $form_state['template_data']['rows'][$position];
+     $positions[$position] = $form_state['flexible_template']['rows'][$position];
     }
   }
-  $form_state['template_data']['rows'] = $positions;
+  $form_state['flexible_template']['rows'] = $positions;
 
   $config = config('layout.flexible.' . $form_state['flexible_template_id']);
-  $config->setData($form_state['template_data']);
+  $config->setData($form_state['flexible_template']);
   $config->save();
   tempstore_clear('layout.flexible', $form_state['flexible_template_id']);
   layout_flexible_reset_caches();
@@ -418,7 +417,7 @@ function layout_flexible_template_edit_row_submit($form, &$form_state) {
  */
 function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_template, $original_row, $region_style = NULL) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
-  $form_state['template_data'] = $flexible_template;
+  $form_state['flexible_template'] = $flexible_template;
   $flexible_template_id = $flexible_template['name'];
 
   $form_state['flexible_template_id'] = $flexible_template_id;
@@ -426,7 +425,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
 
   $row_data = array();
   if ($original_row != 'add') {
-    $row_data = $form_state['template_data']['rows'][$original_row];
+    $row_data = $form_state['flexible_template']['rows'][$original_row];
   }
 
   $region_style = $region_style ? $region_style : $row_data['contains'];
@@ -471,7 +470,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     '#tree' => TRUE,
   );
 
-  $form_state['last_region_number'] = layout_flexible_template_get_last_region_number($form_state['template_data']);
+  $form_state['last_region_number'] = layout_flexible_template_get_last_region_number($form_state['flexible_template']);
   for ($i = 0; $i < $region_count; $i++) {
     $form['region_names']['region_name_' . $i] = array(
       '#type' => 'textfield',
@@ -553,14 +552,14 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
 /**
  * Returns the last number of all regions named "Region X" where X is a number.
  */
-function layout_flexible_template_get_last_region_number($template_data, $form_state = NULL) {
+function layout_flexible_template_get_last_region_number($flexible_template, $form_state = NULL) {
   $last = 0;
   if ($form_state) {
     $region_names = array_filter($form_state['values']['region_names']);
     $last = $form_state['last_region_number'];
   }
   else {
-    foreach ($template_data['rows'] as $row) {
+    foreach ($flexible_template['rows'] as $row) {
       foreach ($row['region_names'] as $name) {
         $region_names[] = $name;
       }
@@ -597,7 +596,7 @@ function layout_flexible_template_region_count_load(&$form, &$form_state) {
  * Validation handler for layout_flexible_template_edit_row_form().
  */
 function layout_flexible_template_edit_row_validate($form, &$form_state) {
-  $last_region_number = layout_flexible_template_get_last_region_number($form_state['template_data'], $form_state);
+  $last_region_number = layout_flexible_template_get_last_region_number($form_state['flexible_template'], $form_state);
 
   foreach ($form_state['values']['region_names'] as $key => $region_name) {
     if (empty($region_name)) {
@@ -611,7 +610,7 @@ function layout_flexible_template_edit_row_validate($form, &$form_state) {
  * Submit handler for layout_flexible_template_edit_row_form().
  */
 function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
-  $template_data = $form_state['template_data'];
+  $flexible_template = $form_state['flexible_template'];
   $original_row = $form_state['original_row'];
 
   $new_row = array(
@@ -627,14 +626,14 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
     $original_row = $uuid->generate();
   }
 
-  $template_data['rows'][$original_row] = $new_row;
+  $flexible_template['rows'][$original_row] = $new_row;
 
-  $form_state['template_data'] = $template_data;
+  $form_state['flexible_template'] = $flexible_template;
 
   $form_state['ajax_rebuild_form'] = 'layout_flexible_template_configure_form';
-  $form_state['ajax_rebuild_args'] = array($template_data);
+  $form_state['ajax_rebuild_args'] = array($flexible_template);
   $form_state['ajax_update'] = array('content');
-  layout_set_flexible_tempstore($template_data);
+  layout_set_flexible_tempstore($flexible_template);
   layout_flexible_reset_caches();
   if (!backdrop_is_ajax()) {
     $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/configure';
