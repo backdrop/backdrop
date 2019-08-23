@@ -56,4 +56,4 @@ file = layout.test
 name = Layout Flexible Template Test
 description = Tests that flexible layout templates perform correctly.
 group = Layout
-file = flexible_template.test
+file = layout.test
