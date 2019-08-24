@@ -775,7 +775,8 @@ function filter_formats($account = NULL, $include_disabled = FALSE, $reset = FAL
   if (isset($account) && !isset($formats['user'][$account->uid])) {
     $formats['user'][$account->uid] = array();
     foreach ($formats['all'] as $format) {
-      if (filter_access($format, $account)) {
+      // Include only enabled formats, to which the user has access to.
+      if ($format->status && filter_access($format, $account)) {
         $formats['user'][$account->uid][$format->format] = $format;
       }
     }
