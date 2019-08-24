@@ -4344,6 +4344,8 @@ function backdrop_clear_opcode_cache($filepath) {
  *
  * @return
  *   TRUE if the host can be trusted; FALSE otherwise.
+ *
+ * * @since Backdrop 1.14.0
  */
 function backdrop_check_trusted_hosts($host) {
   $trusted_hosts =& backdrop_static(__FUNCTION__, array());
