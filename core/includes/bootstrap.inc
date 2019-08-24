@@ -4336,6 +4336,15 @@ function backdrop_clear_opcode_cache($filepath) {
   }
 }
 
+/**
+ * Checks if a host matches the trusted host patterns in settings.php.
+ *
+ * @param string $host
+ *   The host to check against the patterns specified in settings.php.
+ *
+ * @return
+ *   TRUE if the host can be trusted; FALSE otherwise.
+ */
 function backdrop_check_trusted_hosts($host) {
   $trusted_hosts =& backdrop_static(__FUNCTION__, array());
   $trusted_host_patterns = settings_get('trusted_host_patterns', array());
