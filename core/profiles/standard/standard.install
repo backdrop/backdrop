@@ -353,7 +353,7 @@ function standard_install() {
   $admin_role = new stdClass();
   $admin_role->name = 'administrator';
   $admin_role->label = st('Administrator');
-  $admin_role->weight = 2;
+  $admin_role->weight = 3;
   $admin_role->permissions = array_keys(module_invoke_all('permission'));
   user_role_save($admin_role);
   // Set this as the administrator role.
@@ -363,6 +363,16 @@ function standard_install() {
   db_insert('users_roles')
     ->fields(array('uid' => 1, 'role' => $admin_role->name))
     ->execute();
+
+  // Create a default editor role for users who need to be able to edit content but do not need to access
+  // advanced admin features.
+  $admin_role = new stdClass();
+  $admin_role->name = 'editor';
+  $admin_role->label = st('Editor');
+  $admin_role->weight = 2;
+  user_role_save($admin_role);
+
+  user_role_grant_permissions("editor", array('view own unpublished content', 'view any unpublished content','view revisions', 'revert revisions', 'delete revisions', 'create page content', 'edit own page content', 'edit any page content', 'delete own page content', 'delete any page content', 'create post content', 'edit own post content', 'edit any post content', 'delete own post content', 'delete any post content', 'access dashboard', 'view the administration theme', 'access content overview'));
 
   // Create a Home link in the main menu.
   $item = array(
