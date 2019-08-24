@@ -346,8 +346,11 @@ function standard_install() {
 
   // Enable default permissions for system roles.
   $filtered_html_permission = filter_permission_name($filtered_html_format);
-  user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access content', 'access comments', $filtered_html_permission));
-  user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('access content', 'access comments', 'post comments', 'skip comment approval', 'upload editor images', $filtered_html_permission));
+  user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access content', 
+    'access comments', $filtered_html_permission));
+  user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('access content', 
+    'access comments', 'post comments', 'skip comment approval', 
+    'upload editor images', $filtered_html_permission));
 
   // Create a default role for site administrators, with all available permissions assigned.
   $admin_role = new stdClass();
@@ -372,7 +375,14 @@ function standard_install() {
   $admin_role->weight = 2;
   user_role_save($admin_role);
 
-  user_role_grant_permissions("editor", array('view own unpublished content', 'view any unpublished content','view revisions', 'revert revisions', 'delete revisions', 'create page content', 'edit own page content', 'edit any page content', 'delete own page content', 'delete any page content', 'create post content', 'edit own post content', 'edit any post content', 'delete own post content', 'delete any post content', 'access dashboard', 'view the administration theme', 'access content overview'));
+  user_role_grant_permissions("editor", array('view own unpublished content', 
+    'view any unpublished content', 'view revisions', 'revert revisions', 
+    'delete revisions', 'create page content', 'edit own page content', 
+    'edit any page content', 'delete own page content', 
+    'delete any page content', 'create post content', 'edit own post content', 
+    'edit any post content', 'delete own post content', 
+    'delete any post content', 'access dashboard', 
+    'view the administration theme', 'access content overview'));
 
   // Create a Home link in the main menu.
   $item = array(
