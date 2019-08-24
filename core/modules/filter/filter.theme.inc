@@ -95,7 +95,7 @@ function theme_filter_admin_overview($variables) {
   );
 
   $rows = array();
-  $disabled_rows[] = array();
+  $disabled_rows = array();
 
   foreach (element_children($form['formats']) as $id) {
     $form['formats'][$id]['weight']['#attributes']['class'] = array('text-format-order-weight');

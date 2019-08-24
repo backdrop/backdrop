@@ -206,11 +206,15 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/config/content/formats');
     $this->assertFieldByName("formats[$format_id][weight]", 5, 'Text format weight was retained.');
 
+    // Verify that the disabled section is not shown.
+    $this->assertNoRaw(t('Disabled text formats'), 'Disabled text format section is not shown.');
+
     // Disable the text format.
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
     $this->backdropGet('admin/config/content/formats/' . $format_id . '/disable');
     $this->backdropPost(NULL, array(), t('Disable'));
     $this->assertRaw(t('Disabled text format %name.', array('%name' => $name)), 'Text format has been disabled');
+    $this->assertRaw(t('Disabled text formats'), 'Disabled text format section is shown.');
 
     // Verify that the text format has been disabled. Links exist for it to be
     // enabled/configured...
