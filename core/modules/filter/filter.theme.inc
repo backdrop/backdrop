@@ -109,9 +109,10 @@ function theme_filter_admin_overview($variables) {
     $row[] = array(
       'data' => backdrop_render($form['formats'][$id]['editor']),
       // Responsive classes normally need only be specified in the header, and
-      // they are inherited by the rest of the cells in the same table column.
-      // We need to specifically add them here, because the disabled section has
-      // a single cell that spans across the entire header.
+      // they are then automatically inherited by the rest of the cells in the
+      // same table column. We need to specifically add them here though, as the
+      // disabled section has a single cell that spans across the entire header;
+      // so responsive classes cannot be specified there that way.
       'class' => array('format-editor', RESPONSIVE_PRIORITY_LOW),
       'data-label' => t('Editor'),
     );
