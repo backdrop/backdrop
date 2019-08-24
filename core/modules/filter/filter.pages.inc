@@ -30,20 +30,6 @@ function filter_tips_long($format = NULL) {
 }
 
 /**
- * Page callback: Enable a text format.
- */
-function filter_enable($format = NULL) {
-  if (isset($format)) {
-    filter_format_enable($format);
-    backdrop_set_message(t('Enabled text format %format.', array('%format' => $format->name)));
-  }
-  else {
-    backdrop_set_message(t('No text format provided.'), 'error');
-  }
-  backdrop_goto('admin/config/content/formats');
-}
-
-/**
  * Autocomplete callback for link textfield.
  */
 function _filter_link_autocomplete($string) {

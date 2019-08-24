@@ -130,11 +130,11 @@ function filter_menu() {
   );
   $items['admin/config/content/formats/%filter_format/enable'] = array(
     'title' => 'Enable text format',
-    'page callback' => 'filter_enable',
+    'page callback' => 'filter_admin_enable',
     'page arguments' => array(4),
     'access arguments' => array('administer filters'),
     'type' => MENU_CALLBACK,
-    'file' => 'filter.pages.inc',
+    'file' => 'filter.admin.inc',
   );
   $items['admin/config/content/formats/%filter_format/disable'] = array(
     'title' => 'Disable text format',

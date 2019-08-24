@@ -522,6 +522,20 @@ function filter_admin_disable_submit($form, &$form_state) {
 }
 
 /**
+ * Page callback: Enable a text format.
+ */
+function filter_admin_enable($format = NULL) {
+  if (isset($format)) {
+    filter_format_enable($format);
+    backdrop_set_message(t('Enabled text format %format.', array('%format' => $format->name)));
+  }
+  else {
+    backdrop_set_message(t('No text format provided.'), 'error');
+  }
+  backdrop_goto('admin/config/content/formats');
+}
+
+/**
  * Subform constructor to configure the text editor's image upload settings.
  *
  * Each text editor plugin that is configured to offer the ability to insert
