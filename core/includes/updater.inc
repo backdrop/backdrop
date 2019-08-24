@@ -186,8 +186,11 @@ abstract class Updater implements BackdropUpdaterInterface {
    * @throws UpdaterException
    */
   public static function getProjectType($directory) {
-    if ($directory == BACKDROP_ROOT) {
-      return 'core';
+    if (basename($directory) == 'backdrop') {
+      $realpath = backdrop_realpath($directory);
+      if (is_dir($realpath . '/core')) {
+        return 'core';
+      }
     }
     else {
       $info_file = self::findInfoFile($directory);
