@@ -353,6 +353,7 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
  * @see backdrop_check_trusted_hosts()
  * @see system_requirements()
 */
+// $settings['trusted_host_patterns'] = array('^www\.example\.com$');
 
 /**
  * Mixed-mode sessions:
