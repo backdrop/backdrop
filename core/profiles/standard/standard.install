@@ -411,7 +411,7 @@ function standard_install() {
     'edit terms in tags',
     'delete terms in tags',
     'administer taxonomy',
-    'use search',
+    'search content',
     'use advanced search'
   );
   user_role_grant_permissions("editor", $editor_permissions);
