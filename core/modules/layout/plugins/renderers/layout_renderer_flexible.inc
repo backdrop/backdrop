@@ -98,7 +98,7 @@ class LayoutRendererFlexible {
   /**
    * Perform display-level render operations.
    *
-   * This method renders the flexible editor rows, passes this  to the flexible
+   * This method renders the flexible editor rows, passes this to the flexible
    * template's theme callback, and returns the rendered HTML.
    *
    * @return string

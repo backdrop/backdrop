@@ -2701,7 +2701,7 @@ function layout_settings_page($form, &$form_state) {
     '#options' => $rows,
     '#empty' => t('There are no layout templates.'),
     '#default_value' => $default,
-    '#attributes' => array('class' =>   array('layout-list')),
+    '#attributes' => array('class' => array('layout-list')),
   );
 
   $form['actions']['#type'] = 'actions';

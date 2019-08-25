@@ -294,7 +294,7 @@ function layout_preprocess_layout(&$variables) {
       $variables['action_links'] = menu_local_actions();
     }
     if (!$block_exists['tabs']) {
-      $variables['tabs'] =  menu_local_tabs();
+      $variables['tabs'] = menu_local_tabs();
     }
   }
 
@@ -310,13 +310,13 @@ function layout_preprocess_layout(&$variables) {
     }
     $variables['region_buttons'] = array();
     if (isset($variables['renderer']->region_buttons)) {
-      $variables['region_buttons'] =  $variables['renderer']->region_buttons;
+      $variables['region_buttons'] = $variables['renderer']->region_buttons;
     }
 
 
     $variables['column_data'] = layout_flexible_row_styles();
 
-    $variables['rows'] =  $data['rows'];
+    $variables['rows'] = $data['rows'];
     $variables['row_data'] = array();
     foreach ($variables['rows'] as $name => $row) {
       $container = ($row['container'] == 'container') ? 'container container-fluid' : (($row['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');

@@ -30,7 +30,7 @@ function layout_flexible_template_settings_add_form() {
  */
 function layout_flexible_template_settings_edit_form($form, &$form_state, $flexible_template) {
   $form_state['flexible_template'] = $flexible_template;
-  $exists = layout_flexible_template_load($flexible_template['name']);
+  $template_exists = layout_flexible_template_load($flexible_template['name']);
 
   $form['name'] = array(
     '#title' => t('Template name'),
@@ -43,7 +43,7 @@ function layout_flexible_template_settings_edit_form($form, &$form_state, $flexi
     '#type' => 'machine_name',
     '#maxlength' => 21,
     '#default_value' => $flexible_template['name'],
-    '#disabled' => ($exists && empty($flexible_template['is_new'])),
+    '#disabled' => ($template_exists && empty($flexible_template['is_new'])),
     '#machine_name' => array(
       'exists' => 'layout_flexible_template_load',
     ),
