@@ -410,6 +410,7 @@ function standard_install() {
     'flush caches',
     'edit terms in tags',
     'delete terms in tags',
+    'administer taxonomy',
     'use search',
     'use advanced search'
   );
