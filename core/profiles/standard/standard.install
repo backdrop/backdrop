@@ -406,7 +406,12 @@ function standard_install() {
     'access administration bar',
     'access content overview',
     'access administration pages',
-    'access site in maintenance mode'
+    'access site in maintenance mode',
+    'flush caches',
+    'edit terms in tags',
+    'delete terms in tags',
+    'use search',
+    'use advanced search'
   );
   user_role_grant_permissions("editor", $editor_permissions);
 
