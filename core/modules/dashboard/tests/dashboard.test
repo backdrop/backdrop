@@ -79,6 +79,9 @@ class DashboardTest extends BackdropWebTestCase {
   function testDashboardLayout() {
     $this->backdropGet('admin/dashboard');
 
+    // The welcome to Backdrop block was found.
+    $this->assertText('Welcome to Backdrop!', 'Welcome to Backdrop block found.');
+
     // The create content block exists with two links.
     $page_link = $this->xpath('//*[contains(@class,:block)]//li/a', array(
       ':block' => 'block-dashboard-create',
