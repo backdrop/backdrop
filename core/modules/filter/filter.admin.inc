@@ -55,7 +55,7 @@ function filter_admin_overview($form) {
         'href' => "admin/config/content/formats/$id/enable",
       );
       // Move "Enable" to be the first/default operation (for disabled formats).
-      $links = array_merge(['enable' => $links['enable']], $links);
+      $links = array_merge(array('enable' => $links['enable']), $links);
     }
 
     if (user_access('synchronize configuration')) {
