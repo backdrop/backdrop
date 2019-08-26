@@ -1217,6 +1217,10 @@ div.filter-options select {
 }
 
 /* Add special icons for admin/dashboard */
+
+.block-dashboard-welcome .block-title {
+  background-image: url('../images/hand-spock--black--64.png');
+}
 .block-dashboard-create .block-title {
   background-image: url('../images/pencil-square-o--black--64.png');
 }
