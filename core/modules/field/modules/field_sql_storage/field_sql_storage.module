@@ -21,7 +21,8 @@ function field_sql_storage_field_storage_info() {
  *
  * @param $field
  *   The field structure.
- * @return
+ *
+ * @return string
  *   A string containing the generated name for the database table
  */
 function _field_sql_storage_tablename($field) {
@@ -33,7 +34,8 @@ function _field_sql_storage_tablename($field) {
  *
  * @param $name
  *   The field structure.
- * @return
+ *
+ * @return string
  *   A string containing the generated name for the database table
  */
 function _field_sql_storage_revision_tablename($field) {
@@ -53,7 +55,7 @@ function _field_sql_storage_revision_tablename($field) {
  * @param $query
  *   The EntityFieldQuery that is executed.
  *
- * @return
+ * @return string
  *   A string containing the generated table alias.
  */
 function _field_sql_storage_tablealias($tablename, $field_key, EntityFieldQuery $query) {
@@ -90,7 +92,8 @@ function _field_sql_storage_tablealias($tablename, $field_key, EntityFieldQuery 
  *   The name of the field
  * @param $column
  *   The name of the column
- * @return
+ *
+ * @return string
  *   A string containing a generated column name for a field data
  *   table that is unique among all other fields.
  */
@@ -105,7 +108,8 @@ function _field_sql_storage_columnname($name, $column) {
  *   The name of the field
  * @param $column
  *   The name of the index
- * @return
+ *
+ * @return string
  *   A string containing a generated index name for a field data
  *   table that is unique among all other fields.
  */
@@ -121,7 +125,8 @@ function _field_sql_storage_indexname($name, $index) {
  *
  * @param $field
  *   The field structure for which to generate a database schema.
- * @return
+ *
+ * @return array
  *   One or more tables representing the schema for the field.
  */
 function _field_sql_storage_schema($field) {
@@ -594,7 +599,7 @@ function field_sql_storage_field_storage_query(EntityFieldQuery $query) {
  *   Name of a table in $select_query. As only INNER JOINs are used, it does
  *   not matter which.
  *
- * @return
+ * @return string
  *   The name of the entity base table joined in.
  */
 function _field_sql_storage_query_join_entity(SelectQuery $select_query, $entity_type, $field_base_table) {

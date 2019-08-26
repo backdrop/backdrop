@@ -233,7 +233,8 @@ function field_test_create_stub_entity($id = 1, $vid = 1, $bundle = 'test_bundle
  * @param $ftvid
  *   (Optional) The revision id of the entity to load. If not specified, the
  *   current revision will be used.
- * @return
+ *
+ * @return array
  *   The loaded entity.
  */
 function field_test_entity_test_load($ftid, $ftvid = NULL) {

@@ -25,7 +25,7 @@
  *   The entity object the field is attached to, or NULL if no entity
  *   exists (e.g. in field settings page).
  *
- * @return
+ * @return array
  *   The array of options for the field. Array keys are the values to be
  *   stored, and should be of the data type (string, number...) expected by
  *   the first 'column' for the field type. Array values are the labels to

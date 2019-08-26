@@ -96,7 +96,7 @@ function field_language_delete() {
  * @param $field
  *   A field structure.
  *
- * @return
+ * @return array
  *   An array of valid language codes.
  */
 function field_available_languages($entity_type, $field) {
@@ -138,7 +138,7 @@ function field_available_languages($entity_type, $field) {
  * @param $field_name
  *   The name of the field being processed.
  *
- * @return
+ * @return array
  *   An array of valid language codes.
  */
 function _field_language_suggestion($available_languages, $language_suggestion, $field_name) {
@@ -164,7 +164,7 @@ function _field_language_suggestion($available_languages, $language_suggestion, 
  *
  * The languages that may be associated to fields include LANGUAGE_NONE.
  *
- * @return
+ * @return array
  *   An array of language codes.
  */
 function field_content_languages() {
@@ -182,7 +182,7 @@ function field_content_languages() {
  * @param $field
  *   A field data structure.
  *
- * @return
+ * @return true
  *   TRUE if the field can be translated.
  */
 function field_is_translatable($entity_type, $field) {
@@ -200,7 +200,7 @@ function field_is_translatable($entity_type, $field) {
  * @param $handler
  *   (optional) The name of the handler to be checked. Defaults to NULL.
  *
- * @return
+ * @return true
  *   TRUE, if the given handler is allowed to manage field translations. If no
  *   handler is passed, TRUE means there is at least one registered translation
  *   handler.
@@ -235,7 +235,8 @@ function field_has_translation_handler($entity_type, $handler = NULL) {
  * @param $default
  *   Whether to return the default language code or the current language code in
  *   case $langcode is invalid.
- * @return
+ *
+ * @return string
  *   A valid language code.
  */
 function field_valid_language($langcode, $default = TRUE) {
@@ -272,7 +273,7 @@ function field_valid_language($langcode, $default = TRUE) {
  *   (optional) The language code $entity has to be displayed in. Defaults to
  *   NULL. If no value is given the current language will be used.
  *
- * @return
+ * @return string|array
  *   A language code if a field name is specified, an array of language codes
  *   keyed by field name otherwise.
  */

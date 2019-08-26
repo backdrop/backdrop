@@ -356,7 +356,8 @@ function _options_form_to_storage($element) {
  * @param $array
  *   The array to be transposed. It must be at least two-dimensional, and
  *   the subarrays must all have the same keys or behavior is undefined.
- * @return
+ *
+ * @return array
  *   The transposed array.
  */
 function options_array_transpose($array) {
@@ -381,7 +382,8 @@ function options_array_transpose($array) {
  *
  * @param $array
  *   A single or multidimensional array.
- * @return
+ *
+ * @return array
  *   A flattened array.
  */
 function options_array_flatten($array) {
