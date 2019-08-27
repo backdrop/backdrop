@@ -182,10 +182,6 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
 
   $renderer = layout_create_renderer('flexible', $layout);
 
-  $form['help'] = array(
-    '#type' => 'help',
-    '#markup' => t('Got some help here.'),
-  );
   $form['content'] = array(
     '#type' => 'item',
     '#id' => 'flexible-content',
