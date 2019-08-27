@@ -940,7 +940,7 @@ function image_style_url($style_name, $uri) {
 
 /**
  * This function was never included in Backdrop. See:
- * - https://api.backdropcms.org/change-records/imagestylepathtoken-does-not-exist-backdrop
+ * - https://api.backdropcms.org/change-records/image_style_path_token-does-not-exist-backdrop
  * - https://github.com/backdrop/backdrop-issues/issues/34
  * - https://github.com/backdrop/backdrop-issues/issues/3989
  *
