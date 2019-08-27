@@ -2734,7 +2734,7 @@ function layout_settings_page_validate(&$form, &$form_state) {
   foreach (layout_load_all() as $layout) {
     $info = layout_get_layout_template_info($layout->layout_template);
     if (in_array($layout->layout_template, $excluded)) {
-      form_set_error('templates', t('The "@layout" layout template is currently in use and may not be excluded.', array('@layout' => $info['title'])));
+      form_set_error('templates', t('The "@layout" layout template is currently in use and may not be disabled.', array('@layout' => $info['title'])));
     }
   }
 }

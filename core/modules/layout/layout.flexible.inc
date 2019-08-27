@@ -740,12 +740,51 @@ function layout_flexible_template_delete_row($flexible_template, $original_row) 
  */
 function layout_flexible_template_delete_form($form, &$form_state, $flexible_template) {
   $form_state['template'] = $flexible_template;
-
   $question = t('Delete flexible template @title?', array('@title' => $flexible_template['title']));
-  $text = t('Deleting the template will affect any layouts using this template.');
-  $button_text = t('Delete template');
+  $description = t('This action cannot be undone.');;
+  backdrop_set_title($question, PASS_THROUGH);
 
-  return confirm_form($form, $question, 'admin/structure/layouts/settings', $text, $button_text);
+  // Check if this template is in use.
+  $errors = array();
+  foreach (layout_load_all() as $layout) {
+    if ($layout->layout_template == $flexible_template['name']) {
+      $errors[] = $layout->title;
+    }
+  }
+
+  if (!empty($errors)) {
+    $form['template_in_use'] = array(
+      '#title' => t('This template is in use in the following layouts') . ':',
+      '#type' => 'item',
+      '#markup' => theme('item_list', array('items' => $errors)),
+    );
+    backdrop_set_message(t('The "@layout" layout template is currently in use and may not be deleted.', array('@layout' => $flexible_template['title'])), 'error');
+  }
+  else {
+    $form['description'] = array(
+      '#markup' => $description
+    );
+  }
+
+  $form['actions'] = array(
+    '#type' => 'actions'
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#disabled' => !empty($errors),
+    '#value' => t('Delete template'),
+    '#attributes' => array('class' => array('button-danger')),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => 'admin/structure/layouts/settings',
+  );
+
+  $form['#attributes']['class'][] = 'confirmation';
+  $form['#theme'] = 'confirm_form';
+
+  return $form;
 }
 
 /**
