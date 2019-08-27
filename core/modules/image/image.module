@@ -947,7 +947,7 @@ function image_style_url($style_name, $uri) {
  * @deprecated since 1.0.0
  */
 function image_style_path_token($style_name, $uri) {
-  watchdog_deprecated_function('drupal', __FUNCTION__, t('Change record:') . ' ' . l(t('<code>image_style_path_token()</code> does not exist in Backdrop'), 'https://api.backdropcms.org/change-records/imagestylepathtoken-does-not-exist-backdrop', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('drupal', __FUNCTION__, t('Change record:') . ' ' . l(t('<code>image_style_path_token()</code> does not exist in Backdrop'), 'https://api.backdropcms.org/change-records/image_style_path_token-does-not-exist-backdrop', array('attributes' => array('target' => '_blank'))));
 }
 
 /**
