@@ -505,6 +505,9 @@ function user_is_blocked($name) {
  *
  * @return bool
  *   TRUE or FALSE.
+ *
+ * @since 1.14.0 First parameter changed from $rid (legacy numeric
+ * identifier) to $role_name.
  */
 function user_has_role($role_name, $account = NULL) {
   if (!$account) {
