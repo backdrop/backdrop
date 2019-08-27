@@ -92,6 +92,7 @@ function layout_flexible_template_settings_form_submit($form, &$form_state) {
   $flexible_template['name'] = $form_state['values']['machine_name'];
   $flexible_template['title'] = $form_state['values']['name'];
   $flexible_template['description'] = $form_state['values']['description'];
+  unset($flexible_template['is_new']);
 
   $config = config('layout.flexible.' . $form_state['values']['machine_name']);
   $config->setData($flexible_template);
@@ -353,21 +354,29 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
     '#value' => $submit_button_value,
     '#attributes' => array('class' => array('layout-title-button')),
     '#submit' => array(
-      'layout_flexible_template_edit_row_submit',
+      'layout_flexible_template_region_style_select_submit',
     ),
     '#ajax' => array(
       'callback' => 'layout_ajax_form_open_dialog',
     ),
   );
+  if (isset($flexible_template['rows'][$original_row]['in_progress'])) {
+    $cancel_submit_callback = 'layout_flexible_template_region_style_select_submit';
+    $cancel_ajax_callback = 'layout_ajax_form_open_dialog';
+  }
+  else {
+    $cancel_submit_callback = 'layout_flexible_template_cancel_dialog';
+    $cancel_ajax_callback = 'layout_ajax_flexible_template_cancel_dialog';
+  }
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
     '#value' => t('Cancel'),
     '#validate' => array(),
     '#submit' => array(
-      'layout_flexible_template_cancel_dialog',
+      $cancel_submit_callback,
     ),
     '#ajax' => array(
-      'callback' => 'layout_ajax_flexible_template_cancel_dialog',
+      'callback' => $cancel_ajax_callback,
     ),
   );
 
@@ -399,7 +408,7 @@ function layout_ajax_flexible_template_cancel_dialog($form, $form_state) {
 /**
  * Submit handler for layout_flexible_template_region_style_select().
  */
-function layout_flexible_template_edit_row_submit($form, &$form_state) {
+function layout_flexible_template_region_style_select_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/row/' . $form_state['original_row'] . '/configure/' . $form_state['values']['region_style'];
 }
 
@@ -425,7 +434,12 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
 
   $row_data = array();
   if ($original_row != 'add') {
-    $row_data = $form_state['flexible_template']['rows'][$original_row];
+    if(isset($form_state['flexible_template']['rows'][$original_row]['in_progress'])) {
+      $row_data = $form_state['flexible_template']['rows'][$original_row]['in_progress'];
+    }
+    else {
+      $row_data = $form_state['flexible_template']['rows'][$original_row];
+    }
   }
 
   $region_style = $region_style ? $region_style : $row_data['contains'];
@@ -581,6 +595,17 @@ function layout_flexible_template_get_last_region_number($flexible_template, $fo
  * layout_flexible_template_edit_row_form().
  */
 function layout_flexible_template_change_region_style($form, &$form_state) {
+  $old_row = array(
+    'contains' => $form_state['region_style'],
+    'element' => $form_state['values']['element'],
+    'classes' => $form_state['values']['row_classes'],
+    'container' => $form_state['values']['container'],
+    'region_names' => $form_state['values']['region_names'],
+  );
+  $form_state['flexible_template']['rows'][$form_state['original_row']]['in_progress'] = $old_row;
+
+  layout_set_flexible_tempstore($form_state['flexible_template']);
+
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/row/' . $form_state['original_row'] . '/select-widths';
 }
 
