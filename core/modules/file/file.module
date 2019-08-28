@@ -50,52 +50,45 @@ require_once BACKDROP_ROOT . '/core/modules/file/file.field.inc';
  */
 function file_hook_info() {
   $hooks = array(
-    'file_operations',
-    'file_type_info',
-    'file_type_info_alter',
-    'file_formatter_info',
-    'file_formatter_info_alter',
-    'file_view',
-    'file_view_alter',
-    'file_displays_alter',
-    'file_type',
-    'file_type_alter',
-    'file_download_headers_alter',
-    'file_entity_access',
-  );
-
-  return array_fill_keys($hooks, array('group' => 'file'));
-}
-
-/**
- * Implements hook_hook_info_alter().
- *
- * Add support for existing core hooks to be located in modulename.file.inc.
- */
-function file_hook_info_alter(&$info) {
-  $hooks = array(
     // File API hooks
     'file_copy',
     'file_move',
     'file_validate',
+    'file_type_info',
+    'file_type_info_alter',
+    'file_formatter_info',
+    'file_formatter_info_alter',
+    'file_displays_alter',
+    'file_type',
+    'file_type_alter',
+    'file_download_headers_alter',
+
     // File access
     'file_download',
     'file_download_access',
     'file_download_access_alter',
+    'file_entity_access',
+
     // File entity hooks
     'file_load',
     'file_presave',
     'file_insert',
     'file_update',
     'file_delete',
+    'file_view',
+    'file_view_alter',
+
     // Miscellaneous hooks
     'file_mimetype_mapping_alter',
     'file_url_alter',
+    'file_operations',
+
     // Stream wrappers
     'stream_wrappers',
     'stream_wrappers_alter',
   );
-  $info += array_fill_keys($hooks, array('group' => 'file'));
+
+  return array_fill_keys($hooks, array('group' => 'file'));
 }
 
 /**
@@ -206,8 +199,6 @@ function file_menu() {
   $items = array();
 
   // File Configuration
-  // @todo Move this back to admin/config/media/file-types if
-  // MENU_MAX_DEPTH is increased to a value higher than 9.
   $items['admin/structure/file-types'] = array(
     'title' => 'File types',
     'description' => 'Manage settings for the type of files used on your site.',
@@ -589,8 +580,8 @@ function file_file_formatter_info() {
       'label' => t('Image'),
       'default settings' => array(
         'image_style' => '',
-        'alt' => '[file:field_fiat]',
-        'title' => '[file:field_fitt]'
+        'alt' => '[file:field_file_image_alt_text]',
+        'title' => '[file:field_file_image_title_text]'
       ),
       'view callback' => 'file_file_formatter_file_image_view',
       'settings callback' => 'file_file_formatter_file_image_settings',

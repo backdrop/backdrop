@@ -2291,9 +2291,9 @@ class FileAltTitleTestCase extends FileTestHelper {
   function testFileAltTitle() {
     $file = $this->createFile(array('type' => 'image'));
     // Name of the default alt text field added to the image file type.
-    $alt_field_name = 'field_fiat';
+    $alt_field_name = 'field_file_image_alt_text';
     // Name of the default title text field added to the image file type.
-    $title_field_name = 'field_fitt';
+    $title_field_name = 'field_file_image_title_text';
 
     // Generate alt text containing HTML entities, spaces and non-latin characters.
     $alt = 'Quote&quot; Amp&amp; ' . 'Файл для тестирования ' . $this->randomName();

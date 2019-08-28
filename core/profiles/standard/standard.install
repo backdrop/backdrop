@@ -415,7 +415,7 @@ function _create_file_alt_title_fields() {
     'cardinality' => '1',
     'deleted' => '0',
     'entity_types' => array(),
-    'field_name' => 'field_fiat',
+    'field_name' => 'field_file_image_alt_text',
     'foreign keys' => array(
       'format' => array(
         'columns' => array(
@@ -475,7 +475,7 @@ function _create_file_alt_title_fields() {
       ),
     ),
     'entity_type' => 'file',
-    'field_name' => 'field_fiat',
+    'field_name' => 'field_file_image_alt_text',
     'label' => 'Alt text',
     'required' => 0,
     'settings' => array(
@@ -505,7 +505,7 @@ function _create_file_alt_title_fields() {
     'cardinality' => '1',
     'deleted' => '0',
     'entity_types' => array(),
-    'field_name' => 'field_fitt',
+    'field_name' => 'field_file_image_title_text',
     'foreign keys' => array(
       'format' => array(
         'columns' => array(
@@ -565,7 +565,7 @@ function _create_file_alt_title_fields() {
       ),
     ),
     'entity_type' => 'file',
-    'field_name' => 'field_fitt',
+    'field_name' => 'field_file_image_title_text',
     'label' => 'Title text',
     'required' => 0,
     'settings' => array(
