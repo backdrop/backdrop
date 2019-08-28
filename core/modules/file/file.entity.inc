@@ -136,7 +136,7 @@ class File extends Entity {
    */
   public function uri() {
     return array(
-      'path' => 'file/' . $this->fid,
+      'path' => $this->uri,
       'options' => array(),
     );
   }

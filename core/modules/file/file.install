@@ -182,7 +182,7 @@ function file_schema() {
   );
 
   $schema['file_metadata'] = array(
-    'description' => 'Cache images dimensions.',
+    'description' => 'Cache image metadata.',
     'fields' => array(
       'fid' => array(
         'description' => 'The {file_managed}.fid of the metadata.',
@@ -198,7 +198,7 @@ function file_schema() {
         'not null' => TRUE,
       ),
       'value' => array(
-        'description' => "The value of the metadata (e.g. '200px').",
+        'description' => "The value of the metadata (e.g. '200').",
         'type' => 'blob',
         'not null' => FALSE,
         'size' => 'big',
@@ -817,9 +817,6 @@ function file_update_1002() {
   foreach ($roles as $rid => $role) {
     user_role_grant_permissions($rid, array('view files'));
   }
-
-  // Create the title and alt text fields.
-  // _file_create_alt_title_fields();
 
   // Classify existing files according to the currently defined file types.
   // Queue all files to be classified during cron runs using the Queue API.
