@@ -21,7 +21,7 @@ function entity_modules_disabled() {
 /**
  * Implements hook_entity_info_alter().
  *
- * @since version 1.12.0
+ * @since version 1.14.0
  */
 function entity_entity_info_alter(&$info) {
   foreach (array_keys($info) as $entity_type) {
