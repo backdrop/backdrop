@@ -737,24 +737,19 @@ function layout_flexible_template_delete_row($flexible_template, $original_row) 
 function layout_flexible_template_delete_form($form, &$form_state, $flexible_template) {
   $form_state['template'] = $flexible_template;
   $question = t('Delete flexible template @title?', array('@title' => $flexible_template['title']));
-  $description = t('This action cannot be undone.');;
+  $description = t('This action cannot be undone.');
   backdrop_set_title($question, PASS_THROUGH);
 
   // Check if this template is in use.
   $errors = array();
   foreach (layout_load_all() as $layout) {
     if ($layout->layout_template == $flexible_template['name']) {
-      $errors[] = $layout->title;
+      $errors[] = check_plain($layout->title);
     }
   }
 
   if (!empty($errors)) {
-    $form['template_in_use'] = array(
-      '#title' => t('This template is in use in the following layouts') . ':',
-      '#type' => 'item',
-      '#markup' => theme('item_list', array('items' => $errors)),
-    );
-    backdrop_set_message(t('The "@layout" layout template is currently in use and may not be deleted.', array('@layout' => $flexible_template['title'])), 'error');
+    backdrop_set_message(t('The %layout layout template is currently in use in the following layouts and may not be deleted: !list', array('%layout' => $flexible_template['title'], '!list' => theme('item_list', array('items' => $errors)))), 'error');
   }
   else {
     $form['description'] = array(
