@@ -22,8 +22,6 @@
  * other blocks around the existing content.
  */
 
-  module_load_include('inc', 'layout', 'layout.flexible');
-
 /**
  * Layouts constant for user-defined layouts.
  */
@@ -66,7 +64,6 @@ function layout_menu() {
   $items = array();
   $base = array(
     'access arguments' => array('administer layouts'),
-    'file' => 'layout.admin.inc',
     'theme callback' => 'ajax_base_page_theme',
   );
 
@@ -75,12 +72,14 @@ function layout_menu() {
     'description' => 'Create new landing pages or modify the layout of existing pages on your site.',
     'page callback' => 'layout_list_page',
     'type' => MENU_NORMAL_ITEM,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/list'] = array(
     'title' => 'List layouts',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/settings'] = array(
@@ -90,18 +89,16 @@ function layout_menu() {
     'page arguments' => array('layout_settings_page'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 20,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
-  // Put all code in separate file to make dev easier, because layout.admin is huge.
-  // todo change path to flexible-template
   $items['admin/structure/layouts/settings/flexible-template/add'] = array(
     'title' => 'Add flexible layout template',
     'page callback' => 'layout_flexible_template_settings_add_form',
     'type' => MENU_LOCAL_ACTION,
     'weight' => -10,
-    'access arguments' => array('administer layouts'),
     'file' => 'layout.flexible.inc',
-  );
+  ) + $base;
 
   $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/edit'] = array(
     'title' => 'Configure flexible layout template',
@@ -109,9 +106,8 @@ function layout_menu() {
     'page arguments' => array('layout_flexible_template_settings_edit_form', 5),
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
-    'access arguments' => array('administer layouts'),
     'file' => 'layout.flexible.inc',
-  );
+  ) + $base;
 
   $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/configure'] = array(
     'title' => 'Configure flexible layout template',
@@ -119,10 +115,8 @@ function layout_menu() {
     'page arguments' => array('layout_flexible_template_configure_form', 5),
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
-    'access arguments' => array('administer layouts'),
     'file' => 'layout.flexible.inc',
-    'theme callback' => 'ajax_base_page_theme',
-  );
+  ) + $base;
 
   $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/delete'] = array(
     'title' => 'Delete flexible layout template',
@@ -130,22 +124,17 @@ function layout_menu() {
     'page arguments' => array('layout_flexible_template_delete_form', 5),
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
-    'access arguments' => array('administer layouts'),
     'file' => 'layout.flexible.inc',
-    'theme callback' => 'ajax_base_page_theme',
-  );
+  ) + $base;
 
-  // Put all code in separate file to make dev easier, because layout.admin is huge.
   $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/row/%/delete'] = array(
     'title' => 'Delete row',
     'page callback' => 'layout_flexible_template_delete_row',
     'page arguments' => array(5,7),
     'type' => MENU_CALLBACK,
     'weight' => -10,
-    'access arguments' => array('administer layouts'),
     'file' => 'layout.flexible.inc',
-    'theme callback' => 'ajax_base_page_theme',
-  );
+  ) + $base;
 
   $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/row/%/select-widths'] = array(
     'title' => 'Choose region widths',
@@ -153,10 +142,8 @@ function layout_menu() {
     'page arguments' => array('layout_flexible_template_region_style_select', 5, 7),
     'type' => MENU_CALLBACK,
     'weight' => -10,
-    'access arguments' => array('administer layouts'),
     'file' => 'layout.flexible.inc',
-    'theme callback' => 'ajax_base_page_theme',
-  );
+  ) + $base;
 
   $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/row/%/configure'] = array(
     'title' => 'Add row',
@@ -164,10 +151,8 @@ function layout_menu() {
     'page arguments' => array('layout_flexible_template_edit_row_form', 5, 7),
     'type' => MENU_CALLBACK,
     'weight' => -10,
-    'access arguments' => array('administer layouts'),
     'file' => 'layout.flexible.inc',
-    'theme callback' => 'ajax_base_page_theme',
-  );
+  ) + $base;
 
   $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/row/%/configure/%'] = array(
     'title' => 'Add row',
@@ -175,10 +160,8 @@ function layout_menu() {
     'page arguments' => array('layout_flexible_template_edit_row_form', 5, 7, 9),
     'type' => MENU_CALLBACK,
     'weight' => -10,
-    'access arguments' => array('administer layouts'),
     'file' => 'layout.flexible.inc',
-    'theme callback' => 'ajax_base_page_theme',
-  );
+  ) + $base;
 
   $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/enable'] = array(
     'title' => 'Enable or disable flexible template',
@@ -186,9 +169,7 @@ function layout_menu() {
     'page arguments' => array(5, 6),
     'type' => MENU_CALLBACK,
     'file' => 'layout.flexible.inc',
-    'access arguments' => array('administer layouts'),
-    'theme callback' => 'ajax_base_page_theme',
-  );
+  ) + $base;
 
   $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/disable'] = array(
     'title' => 'Enable or disable flexible template',
@@ -196,15 +177,14 @@ function layout_menu() {
     'page arguments' => array(5, 6),
     'type' => MENU_CALLBACK,
     'file' => 'layout.flexible.inc',
-    'access arguments' => array('administer layouts'),
-    'theme callback' => 'ajax_base_page_theme',
-  );
+  ) + $base;
 
   $items['admin/structure/layouts/reorder'] = array(
     'title' => 'Reorder',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_reorder_form'),
     'type' => MENU_CALLBACK,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/add'] = array(
@@ -213,6 +193,7 @@ function layout_menu() {
     'page arguments' => array(),
     'type' => MENU_LOCAL_ACTION,
     'weight' => -10,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore'] = array(
@@ -222,6 +203,7 @@ function layout_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_content_form', 4),
     'type' => MENU_NORMAL_ITEM,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
@@ -235,6 +217,7 @@ function layout_menu() {
     'title' => 'Manage blocks',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 0,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
@@ -250,24 +233,28 @@ function layout_menu() {
     'page arguments' => array('layout_settings_form', 4),
     'type' => MENU_LOCAL_TASK,
     'weight' => 10,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/add-block/%/%'] = array(
     'title' => 'Add block',
     'page callback' => 'layout_block_add_page',
     'page arguments' => array(4, 6, 7),
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/configure-region/%/%'] = array(
     'title' => 'Configure region',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_configure_region_page', 4, 6, 7),
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/edit-title/editor/title'] = array(
     'title' => 'Configure page title',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_title_settings_form', 4),
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/configure-block/%/%layout_tempstore_block'] = array(
@@ -275,6 +262,7 @@ function layout_menu() {
     'load arguments' => array(4),
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_block_configure_form', 4, 7, 6),
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   // This shortcut path does not use layout_tempstore, for efficiency when
@@ -288,6 +276,7 @@ function layout_menu() {
     'page arguments' => array(4, 6),
     'context' => MENU_CONTEXT_INLINE,
     'type' => MENU_DEFAULT_LOCAL_TASK,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/remove-block/%/%layout_tempstore_block'] = array(
@@ -295,6 +284,7 @@ function layout_menu() {
     'load arguments' => array(4),
     'page callback' => 'layout_block_remove_page',
     'page arguments' => array(4, 7, 6),
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/clone'] = array(
@@ -302,30 +292,35 @@ function layout_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_clone_form', 4),
     'type' => MENU_CALLBACK,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/enable'] = array(
     'page callback' => 'layout_enable_layout',
     'page arguments' => array(TRUE, 4),
     'type' => MENU_CALLBACK,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/disable'] = array(
     'page callback' => 'layout_enable_layout',
     'page arguments' => array(FALSE, 4),
     'type' => MENU_CALLBACK,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/delete'] = array(
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_delete_form', 4),
     'type' => MENU_CALLBACK,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/break-lock'] = array(
     'page callback' => 'layout_break_lock_page',
     'page arguments' => array(4, 'layout'),
     'type' => MENU_CALLBACK,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/condition/add'] = array(
@@ -333,6 +328,7 @@ function layout_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_condition_add_form', 4),
     'type' => MENU_CALLBACK,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/condition/edit/layout/%'] = array(
@@ -341,6 +337,7 @@ function layout_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_condition_add_form', 4, NULL, NULL, 8),
     'type' => MENU_CALLBACK,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/condition/add/%layout_tempstore_block'] = array(
@@ -349,6 +346,7 @@ function layout_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_condition_add_form', 4, 7),
     'type' => MENU_CALLBACK,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/condition/edit/%layout_tempstore_block/%'] = array(
@@ -357,6 +355,7 @@ function layout_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_condition_add_form', 4, 7, NULL, 8),
     'type' => MENU_CALLBACK,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/menu/%layout_tempstore_menu_item'] = array(
@@ -364,18 +363,21 @@ function layout_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_menu_item_form', 4),
     'type' => MENU_NORMAL_ITEM,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/menu/%layout_tempstore_menu_item/settings'] = array(
     'title' => 'Menu settings',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -1,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/menu/%layout_tempstore_menu_item/break-lock'] = array(
     'page callback' => 'layout_break_lock_page',
     'page arguments' => array(4, 'menu_item'),
     'type' => MENU_CALLBACK,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/menu/%layout_tempstore_menu_item/condition/add'] = array(
@@ -383,6 +385,7 @@ function layout_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_condition_add_form', NULL, NULL, 4),
     'type' => MENU_CALLBACK,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/menu/%layout_tempstore_menu_item/condition/edit/%'] = array(
@@ -390,6 +393,7 @@ function layout_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_condition_add_form', NULL, NULL, 4, 7),
     'type' => MENU_CALLBACK,
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   // Add menu entries for each custom layout path.
@@ -1911,4 +1915,364 @@ function layout_get_title_description(Layout $layout) {
   }
 
   return $description;
+}
+
+/**
+ * Store changes to a flexible layout template in the temporary store.
+ *
+ * @param $flexible_template
+ *   The loaded flexible template object.
+ */
+function layout_set_flexible_tempstore($flexible_template) {
+  tempstore_set('layout.flexible', $flexible_template['name'], $flexible_template, 604800);
+}
+
+/**
+ * Get a flexible template currently being edited from the tempstore.
+ *
+ * If a template is not yet being edited, the template will be loaded from
+ * configuration.
+ *
+ * @param string $flexible_template_id
+ *   The machine name of the flexible template to load.
+ */
+function layout_flexible_tempstore_load($flexible_template_id = NULL) {
+  if (!$flexible_template_id) {
+    return layout_flexible_template_template_default();
+  }
+
+  $caches = &backdrop_static(__FUNCTION__, array());
+  if (!isset($caches[$flexible_template_id])) {
+    if (!$item = tempstore_get('layout.flexible', $flexible_template_id)) {
+      $item = layout_flexible_template_load($flexible_template_id);
+    }
+    $caches[$flexible_template_id] = $item;
+  }
+
+  return $caches[$flexible_template_id];
+}
+
+/**
+ * Load an individual flexible template.
+ *
+ * @param string $flexible_template_id
+ *   The machine name of the template to load.
+ *
+ * @return Array
+ */
+function layout_flexible_template_load($flexible_template_id = NULL) {
+  $configs = &backdrop_static(__FUNCTION__, array());
+
+  if (empty($configs)) {
+    $cache = cache()->get('layout:flexible:config');
+    if ($cache && $cache->data) {
+      $configs = $cache->data;
+    }
+  }
+
+  if (empty($configs)) {
+    $config_names = config_get_names_with_prefix('layout.flexible.');
+    foreach ($config_names as $config_file) {
+      $config = config($config_file);
+      $data = $config->get();
+      $configs[$data['name']] = $data;
+    }
+
+    cache()->set('layout:flexible:config', $configs);
+  }
+  if ($flexible_template_id) {
+    if (isset($configs[$flexible_template_id])) {
+      return $configs[$flexible_template_id];
+    }
+    else {
+      return FALSE;
+    }
+  }
+  else {
+    return $configs;
+  }
+}
+
+/**
+ * Provides the default template for new flexible templates.
+ */
+function layout_flexible_template_template_default() {
+  $settings = array(
+    'name' => '',
+    'title' => '',
+    'description' => '',
+    'rows' => array(
+      'header' => array(
+        'contains' => 'region_12',
+        'element' => 'header',
+        'classes' => '',
+        'container' => 'container',
+        'region_names' => array('region_name_0' => t('Header')),
+      ),
+      'content' => array(
+        'contains' => 'region_12',
+        'element' => '',
+        'classes' => '',
+        'container' => 'container',
+        'region_names' => array('region_name_0' => t('Content')),
+      ),
+      'footer' => array(
+        'contains' => 'region_12',
+        'element' => 'footer',
+        'classes' => '',
+        'container' => 'container',
+        'region_names' => array('region_name_0' => t('Footer')),
+      ),
+    ),
+  );
+
+  return $settings;
+}
+
+/**
+ * Implements hook_layout_info().
+ */
+function layout_layout_info() {
+  $layouts = array();
+  $flexible_templates = layout_flexible_template_load();
+  $styles = layout_flexible_row_styles();
+  foreach ($flexible_templates as $flexible_template) {
+    $layouts[$flexible_template['name']] = array(
+      'title' => $flexible_template['title'],
+      'regions' => array(),
+      'default region' => '',
+      'template' => 'layout--flexible',
+      'flexible' => TRUE,
+      'type' => 'layout',
+      'path' => 'templates',
+      'preview' => 'flexible_template.png',
+      'libraries' => array('bootstrap4-gs'),
+    );
+    foreach ($flexible_template['rows'] as $name => $region) {
+      $region_style = $styles[$region['contains']];
+      for ($i = 0; $i < $region_style['region_count']; $i++) {
+        if (!empty($region['region_names']['region_name_' . $i])) {
+          $region_name = $region['region_names']['region_name_' . $i];
+        }
+        else {
+          $region_name = $name . ' ' . $i;
+        }
+        $layouts[$flexible_template['name']]['regions'][$name . '_' . $i] = $region_name;
+      }
+    }
+  }
+
+  return $layouts;
+}
+
+/**
+ * Reset all caches provided by Layout module.
+ */
+function layout_flexible_reset_caches() {
+  cache()->delete('layout:flexible:config');
+
+  backdrop_static_reset('layout_flexible_template_load');
+  backdrop_static_reset('layout_flexible_tempstore_load');
+}
+
+/**
+ * Provides the default row styles.
+ */
+function layout_flexible_row_styles() {
+  $styles = array(
+    'region_12' => array(
+      'split' => '100:0',
+      'bootstrap' => '12:0',
+      'region_count' => 1,
+      'name' => 'One full-width region',
+    ),
+    'region_10_2' => array(
+      'split' => '83:17',
+      'bootstrap' => '10:2',
+      'region_count' => 2,
+      'name' => 'Two regions 83% : 17%',
+    ),
+    'region_9_3' => array(
+      'split' => '75:25',
+      'bootstrap' => '9:3',
+      'region_count' => 2,
+      'name' => 'Two regions 75% : 25%',
+    ),
+    'region_8_4' => array(
+      'split' => '67:33',
+      'bootstrap' => '8:4',
+      'region_count' => 2,
+      'name' => 'Two regions 67% : 33%',
+    ),
+    'region_6_6' => array(
+      'split' => '50:50',
+      'bootstrap' => '6:6',
+      'region_count' => 2,
+      'name' => 'Two regions 50% : 50%',
+    ),
+    'region_4_8' => array(
+      'split' => '33:67',
+      'bootstrap' => '4:8',
+      'region_count' => 2,
+      'name' => 'Two regions 33% : 67%',
+    ),
+    'region_3_9' => array(
+      'split' => '25:75',
+      'bootstrap' => '3:9',
+      'region_count' => 2,
+      'name' => 'Two regions 25% : 75%',
+    ),
+    'region_2_10' => array(
+      'split' => '17:83',
+      'bootstrap' => '2:10',
+      'region_count' => 2,
+      'name' => 'Two regions 17% : 83%',
+    ),
+    'region_4_4_4' => array(
+      'split' => '33:33:33',
+      'bootstrap' => '4:4:4',
+      'region_count' => 3,
+      'name' => 'Three regions 33% : 33% : 33%',
+    ),
+    'region_2_8_2' => array(
+      'split' => '17:67:17',
+      'bootstrap' => '2:8:2',
+      'region_count' => 3,
+      'name' => 'Three regions 17% : 67% : 17%',
+    ),
+    'region_2_2_8' => array(
+      'split' => '17:17:67',
+      'bootstrap' => '2:2:8',
+      'region_count' => 3,
+      'name' => 'Three regions 17% : 17% : 67%',
+    ),
+    'region_8_2_2' => array(
+      'split' => '67:17:17',
+      'bootstrap' => '8:2:2',
+      'region_count' => 3,
+      'name' => 'Three regions 67% : 17% : 17%',
+    ),
+    'region_3_6_3' => array(
+      'split' => '25:50:25',
+      'bootstrap' => '3:6:3',
+      'region_count' => 3,
+      'name' => 'Three regions 25% : 50% : 25%',
+    ),
+    'region_3_3_6' => array(
+      'split' => '25:25:50',
+      'bootstrap' => '3:3:6',
+      'region_count' => 3,
+      'name' => 'Three regions 25% : 25% : 50%',
+    ),
+    'region_6_3_3' => array(
+      'split' => '50:25:25',
+      'bootstrap' => '6:3:3',
+      'region_count' => 3,
+      'name' => 'Three regions 50% : 25% : 25%',
+    ),
+    'region_4_2_6' => array(
+      'split' => '33:17:50',
+      'bootstrap' => '4:2:6',
+      'region_count' => 3,
+      'name' => 'Three regions 33% : 17% : 50%',
+    ),
+    'region_4_6_2' => array(
+      'split' => '33:50:17',
+      'bootstrap' => '4:6:2',
+      'region_count' => 3,
+      'name' => 'Three regions 33% : 50% : 17%',
+    ),
+    'region_2_6_4' => array(
+      'split' => '17:50:33',
+      'bootstrap' => '2:6:4',
+      'region_count' => 3,
+      'name' => 'Three regions 17% : 50% : 33%',
+    ),
+    'region_2_4_6' => array(
+      'split' => '17:33:50',
+      'bootstrap' => '2:4:6',
+      'region_count' => 3,
+      'name' => 'Three regions 17% : 33% : 50%',
+    ),
+    'region_6_2_4' => array(
+      'split' => '50:17:33',
+      'bootstrap' => '6:2:4',
+      'region_count' => 3,
+      'name' => 'Three regions 50% : 17% : 33%',
+    ),
+    'region_6_4_2' => array(
+      'split' => '50:33:17',
+      'bootstrap' => '6:4:2',
+      'region_count' => 3,
+      'name' => 'Three regions 50% : 33% : 17%',
+    ),
+    'region_3_3_3_3' => array(
+      'split' => '25:25:25:25',
+      'bootstrap' => '3:3:3:3',
+      'region_count' => 4,
+      'name' => 'Four regions 25% : 25% : 25% : 25%',
+    ),
+    'region_3_3_4_2' => array(
+      'split' => '25:25:33:17',
+      'bootstrap' => '3:3:4:2',
+      'region_count' => 4,
+      'name' => 'Four regions 25% : 25% : 33% : 17%',
+    ),
+    'region_3_3_2_4' => array(
+      'split' => '25:25:17:33',
+      'bootstrap' => '3:3:2:4',
+      'region_count' => 4,
+      'name' => 'Four regions 25% : 25% : 17% : 33%',
+    ),
+    'region_4_3_3_2' => array(
+      'split' => '33:25:25:17',
+      'bootstrap' => '4:3:3:2',
+      'region_count' => 4,
+      'name' => 'Four regions 33% : 25% : 25% : 17%',
+    ),
+    'region_2_3_3_4' => array(
+      'split' => '17:25:25:33',
+      'bootstrap' => '2:3:3:4',
+      'region_count' => 4,
+      'name' => 'Four regions 17% : 25% : 25% : 33%',
+    ),
+    'region_2_4_3_3' => array(
+      'split' => '17:33:25:25',
+      'bootstrap' => '2:4:3:3',
+      'region_count' => 4,
+      'name' => 'Four regions 17% : 33% : 25% : 25%',
+    ),
+    'region_4_2_3_3' => array(
+      'split' => '33:17:25:25',
+      'bootstrap' => '4:2:3:3',
+      'region_count' => 4,
+      'name' => 'Four regions 33% : 17% : 25% : 25%',
+    ),
+    'region_2_4_4_2' => array(
+      'split' => '17:33:33:17',
+      'bootstrap' => '2:4:4:2',
+      'region_count' => 4,
+      'name' => 'Four regions 17% : 33% : 33% : 17%',
+    ),
+    'region_2_4_2_4' => array(
+      'split' => '17:33:17:33',
+      'bootstrap' => '2:4:2:4',
+      'region_count' => 4,
+      'name' => 'Four regions 17% : 33% : 17% : 33%',
+    ),
+    'region_4_2_2_4' => array(
+      'split' => '33:17:17:33',
+      'bootstrap' => '4:2:2:4',
+      'region_count' => 4,
+      'name' => 'Four regions 33% : 17% : 17% : 33%',
+    ),
+    'region_4_2_4_2' => array(
+      'split' => '33:17:33:17',
+      'bootstrap' => '4:2:4:2',
+      'region_count' => 4,
+      'name' => 'Four regions 33% : 17% : 33% : 17%',
+    ),
+  );
+
+  return $styles;
 }
