@@ -61,7 +61,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'templates[simmons]' => TRUE,
     );
     $this->backdropPost(NULL, $edit, t('Save configuration'));
-    $this->assertText(t('The "Boxton" layout template is currently in use and may not be excluded.'));
+    $this->assertText(t('The "Boxton" layout template is currently in use and may not be disabled.'));
 
     // Check to see that the Simmons layout is an existing option.
     $this->backdropGet('admin/structure/layouts/manage/default/configure');
