@@ -2646,9 +2646,10 @@ function file_access($op, $file = NULL, $account = NULL) {
 
   // Fall back to default behaviors on view.
   if ($op == 'view' && is_object($file)) {
-    $wrappers = file_get_stream_wrappers();
+    $scheme = file_uri_scheme($file->uri);
+    $wrapper = file_get_stream_wrapper($scheme);
 
-    if (!empty($wrappers['private'])) {
+    if (!empty($wrapper['private'])) {
       // For private files, users can view private files if the
       // user has the 'view private files' permission.
       if (user_access('view private files', $account)) {
