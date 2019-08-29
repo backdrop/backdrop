@@ -192,8 +192,8 @@ abstract class Updater implements BackdropUpdaterInterface {
         return 'core';
       }
       else {
-        $message = 'Updating core from @directory was attempted, but either it doesn\'t contain a "core" directory, or it isn\'t accessible. You may need to update manually.';
-        throw new UpdaterException(t($message, array('@directory' => $directory)));
+        $message = t('Updating core from @directory was attempted, but either it doesn\'t contain a "core" directory, or it isn\'t accessible. You may need to update manually.', array('@directory' => $directory));
+        throw new UpdaterException($message);
       }
     }
     else {
