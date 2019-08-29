@@ -26,7 +26,6 @@ class FileTestHelper extends BackdropWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array(
       'access file overview',
       'manage files',
-      'bypass file access',
       'access content',
       'access administration pages',
       'administer site configuration',
