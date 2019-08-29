@@ -186,11 +186,16 @@ abstract class Updater implements BackdropUpdaterInterface {
    * @throws UpdaterException
    */
   public static function getProjectType($directory) {
-    $basename = basename($directory);
-    if (substr($basename, 0, 8) == 'backdrop') {
+    if (basename($directory) == 'backdrop') {
       $realpath = backdrop_realpath($directory);
       if (is_dir($realpath . '/core')) {
         return 'core';
+      }
+      else {
+        // If the check for "core" failed, an UpdaterException is thrown anyway,
+        // but we add more specific information to dblog.
+        $log_message = 'Updating core from @directory was attempted, but either it doesn\'t contain a "core" directory, or it isn\'t accessible. You may need to update manually.';
+        watchdog('update', $log_message, array('@directory' => $directory), WATCHDOG_ERROR);
       }
     }
     else {
