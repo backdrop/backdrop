@@ -192,10 +192,8 @@ abstract class Updater implements BackdropUpdaterInterface {
         return 'core';
       }
       else {
-        // If the check for "core" failed, an UpdaterException is thrown anyway,
-        // but we add more specific information to dblog.
-        $log_message = 'Updating core from @directory was attempted, but either it doesn\'t contain a "core" directory, or it isn\'t accessible. You may need to update manually.';
-        watchdog('update', $log_message, array('@directory' => $directory), WATCHDOG_ERROR);
+        $message = 'Updating core from @directory was attempted, but either it doesn\'t contain a "core" directory, or it isn\'t accessible. You may need to update manually.';
+        throw new UpdaterException(t($message, array('@directory' => $directory)));
       }
     }
     else {
