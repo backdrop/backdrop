@@ -2689,6 +2689,19 @@ function file_get_stream_wrapper($scheme) {
   return isset($wrappers[$scheme]) ? $wrappers[$scheme] : FALSE;
 }
 
+
+/**
+ * Implements hook_stream_wrappers_alter().
+ */
+function file_stream_wrappers_alter(&$wrappers) {
+  if (isset($wrappers['private'])) {
+    $wrappers['private']['private'] = TRUE;
+  }
+  if (isset($wrappers['temporary'])) {
+    $wrappers['temporary']['private'] = TRUE;
+  }
+}
+
 /**
  * Implements hook_file_access().
  */
