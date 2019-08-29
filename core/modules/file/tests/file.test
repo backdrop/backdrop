@@ -26,7 +26,6 @@ class FileTestHelper extends BackdropWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array(
       'access file overview',
       'manage files',
-      'bypass file access',
       'access content',
       'access administration pages',
       'administer site configuration',
@@ -1863,7 +1862,7 @@ class FileUnitTestCase extends FileTestHelper {
 
     // Test the entity URI callback.
     $uri = entity_uri('file', $file);
-    $this->assertEqual($uri['path'], "file/{$file->fid}");
+    $this->assertEqual($uri['path'], $file->uri);
   }
 
   /**
