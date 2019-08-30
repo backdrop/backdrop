@@ -72,7 +72,7 @@
  *     check_plain() or other appropriate scrubbing functions before displaying
  *     data to users.
  *
- * @return
+ * @return string
  *   Text with tokens replaced.
  */
 function token_replace($text, array $data = array(), array $options = array()) {
@@ -852,7 +852,7 @@ function token_render_array(array $array, array $options = array()) {
  *   Array of options for rendering.  Values can include:
  *   - sanitize: Runs check_plain() on the rendered output.
  *
- * @return
+ * @return string
  *   HTML of rendered item.
  *
  * @see token_render_array_value()

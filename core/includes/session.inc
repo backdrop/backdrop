@@ -25,7 +25,7 @@
  *
  * This function should not be called directly.
  *
- * @return
+ * @return true
  *   This function will always return TRUE.
  */
 function _backdrop_session_open() {
@@ -41,7 +41,7 @@ function _backdrop_session_open() {
  *
  * This function should not be called directly.
  *
- * @return
+ * @return true
  *   This function will always return TRUE.
  */
 function _backdrop_session_close() {
@@ -64,7 +64,7 @@ function _backdrop_session_close() {
  * @param $sid
  *   The session ID of the session to retrieve.
  *
- * @return
+ * @return string
  *   The user's session, or an empty string if no session exists.
  */
 function _backdrop_session_read($sid) {
@@ -151,7 +151,7 @@ function _backdrop_session_read($sid) {
  * @param $value
  *   Session data to write as a serialized string.
  *
- * @return
+ * @return true
  *   Always returns TRUE.
  */
 function _backdrop_session_write($sid, $value) {
@@ -535,7 +535,7 @@ function _backdrop_session_garbage_collection($lifetime) {
  *   Disables writing of session data when FALSE, (re-)enables
  *   writing when TRUE.
  *
- * @return
+ * @return bool
  *   FALSE if writing session data has been disabled. Otherwise, TRUE.
  */
 function backdrop_save_session($status = NULL) {

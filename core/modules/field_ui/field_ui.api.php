@@ -31,7 +31,7 @@
  * @param $has_data
  *   TRUE if the field already has data, FALSE if not.
  *
- * @return
+ * @return array
  *   The form definition for the field settings.
  */
 function hook_field_settings_form($field, $instance, $has_data) {
@@ -58,7 +58,7 @@ function hook_field_settings_form($field, $instance, $has_data) {
  * @param $instance
  *   The instance structure being configured.
  *
- * @return
+ * @return array
  *   The form definition for the field instance settings.
  */
 function hook_field_instance_settings_form($field, $instance) {
@@ -100,7 +100,7 @@ function hook_field_instance_settings_form($field, $instance) {
  * @param $instance
  *   The instance structure being configured.
  *
- * @return
+ * @return array
  *   The form definition for the widget settings.
  */
 function hook_field_widget_settings_form($field, $instance) {
@@ -144,7 +144,7 @@ function hook_field_widget_settings_form($field, $instance) {
  * @param $form_state
  *   The form state of the (entire) configuration form.
  *
- * @return
+ * @return array
  *   The form elements for the formatter settings.
  */
 function hook_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
@@ -182,7 +182,7 @@ function hook_field_formatter_settings_form($field, $instance, $view_mode, $form
  * @param $view_mode
  *   The Display mode for which a settings summary is requested.
  *
- * @return
+ * @return string
  *   A string containing a short summary of the formatter settings.
  */
 function hook_field_formatter_settings_summary($field, $instance, $view_mode) {

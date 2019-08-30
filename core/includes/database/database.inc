@@ -380,7 +380,7 @@ abstract class DatabaseConnection extends PDO {
    *   further up the call chain can take an appropriate action. To suppress
    *   that behavior and return NULL on failure, set this option to FALSE.
    *
-   * @return
+   * @return array
    *   An array of default query options.
    */
   protected function defaultOptions() {
@@ -400,7 +400,7 @@ abstract class DatabaseConnection extends PDO {
    * is for requesting the connection information of this specific
    * open connection object.
    *
-   * @return
+   * @return array
    *   An array of the connection information. The exact list of
    *   properties is driver-dependent.
    */
@@ -450,7 +450,7 @@ abstract class DatabaseConnection extends PDO {
    * @param $sql
    *   A string containing a partial or entire SQL query.
    *
-   * @return
+   * @return string
    *   The properly-prefixed string.
    */
   public function prefixTables($sql) {
@@ -513,7 +513,7 @@ abstract class DatabaseConnection extends PDO {
   /**
    * Returns the target this connection is associated with.
    *
-   * @return
+   * @return string
    *   The target string of this connection.
    */
   public function getTarget() {
@@ -535,7 +535,7 @@ abstract class DatabaseConnection extends PDO {
   /**
    * Returns the key this connection is associated with.
    *
-   * @return
+   * @return string
    *   The key of this connection.
    */
   public function getKey() {
@@ -574,7 +574,7 @@ abstract class DatabaseConnection extends PDO {
    * @param $field
    *   The field name to use for the sequence.
    *
-   * @return
+   * @return string
    *   A table prefix-parsed string for the sequence name.
    */
   public function makeSequenceName($table, $field) {
@@ -589,7 +589,7 @@ abstract class DatabaseConnection extends PDO {
    * @param $comments
    *   An array of query comment strings.
    *
-   * @return
+   * @return string
    *   A sanitized comment string.
    */
   public function makeComment($comments) {
@@ -631,7 +631,7 @@ abstract class DatabaseConnection extends PDO {
    * @param $comment
    *   A query comment string.
    *
-   * @return
+   * @return string
    *   A sanitized version of the query comment string.
    */
   protected function filterComment($comment = '') {
@@ -735,7 +735,7 @@ abstract class DatabaseConnection extends PDO {
    * @param $args
    *   The arguments for the query.
    *
-   * @return
+   * @return bool
    *   TRUE if the query was modified, FALSE otherwise.
    */
   protected function expandArguments(&$query, &$args) {
@@ -995,7 +995,7 @@ abstract class DatabaseConnection extends PDO {
    * @param $string
    *   The string to escape.
    *
-   * @return
+   * @return string
    *   The escaped string.
    */
   public function escapeLike($string) {
@@ -1005,7 +1005,7 @@ abstract class DatabaseConnection extends PDO {
   /**
    * Determines if there is an active transaction open.
    *
-   * @return
+   * @return bool
    *   TRUE if we're currently in a transaction, FALSE otherwise.
    */
   public function inTransaction() {
@@ -1204,7 +1204,7 @@ abstract class DatabaseConnection extends PDO {
   /**
    * Generates a temporary table name.
    *
-   * @return
+   * @return string
    *   A table name.
    */
   protected function generateTemporaryTableName() {
@@ -1231,7 +1231,7 @@ abstract class DatabaseConnection extends PDO {
    *   An associative array of options to control how the query is run. See
    *   the documentation for DatabaseConnection::defaultOptions() for details.
    *
-   * @return
+   * @return string
    *   The name of the temporary table.
    */
   abstract function queryTemporary($query, array $args = array(), array $options = array());
@@ -1256,7 +1256,7 @@ abstract class DatabaseConnection extends PDO {
   /**
    * Determines if this driver supports transactions.
    *
-   * @return
+   * @return bool
    *   TRUE if this connection supports transactions, FALSE otherwise.
    */
   public function supportsTransactions() {
@@ -1268,7 +1268,7 @@ abstract class DatabaseConnection extends PDO {
    *
    * DDL queries are those that change the schema, such as ALTER queries.
    *
-   * @return
+   * @return bool
    *   TRUE if this connection supports transactions for DDL queries, FALSE
    *   otherwise.
    */
@@ -1303,7 +1303,7 @@ abstract class DatabaseConnection extends PDO {
    * @param $operator
    *   The condition operator, such as "IN", "BETWEEN", etc. Case-sensitive.
    *
-   * @return
+   * @return array|null
    *   The extra handling directives for the specified operator, or NULL.
    *
    * @see DatabaseCondition::compile()
@@ -1338,7 +1338,7 @@ abstract class DatabaseConnection extends PDO {
    *   so by passing in the maximum existing id, it can be assured that we
    *   never issue the same id.
    *
-   * @return
+   * @return int
    *   An integer number larger than any number returned by earlier calls and
    *   also larger than the $existing_id if one was passed in.
    */
@@ -1545,7 +1545,7 @@ abstract class Database {
    * Note that this method will return FALSE if no connection has been
    * established yet, even if one could be.
    *
-   * @return
+   * @return bool
    *   TRUE if there is at least one database connection established, FALSE
    *   otherwise.
    */
@@ -1673,7 +1673,7 @@ abstract class Database {
    *   The old connection key.
    * @param $new_key
    *   The new connection key.
-   * @return
+   * @return bool
    *   TRUE in case of success, FALSE otherwise.
    */
   final public static function renameConnection($old_key, $new_key) {
@@ -1704,7 +1704,7 @@ abstract class Database {
    *
    * @param $key
    *   The connection key.
-   * @return
+   * @return bool
    *   TRUE in case of success, FALSE otherwise.
    */
   final public static function removeConnection($key) {
@@ -2035,7 +2035,7 @@ interface DatabaseStatementInterface extends Traversable {
    * @param $options
    *   An array of options for this query.
    *
-   * @return
+   * @return bool
    *   TRUE on success, or FALSE on failure.
    */
   public function execute($args = array(), $options = array());
@@ -2043,7 +2043,7 @@ interface DatabaseStatementInterface extends Traversable {
   /**
    * Gets the query string of this statement.
    *
-   * @return
+   * @return string
    *   The query string, in its form with placeholders.
    */
   public function getQueryString();
@@ -2051,7 +2051,7 @@ interface DatabaseStatementInterface extends Traversable {
   /**
    * Returns the number of rows affected by the last SQL statement.
    *
-   * @return
+   * @return int
    *   The number of rows affected by the last DELETE, INSERT, or UPDATE
    *   statement executed.
    */
@@ -2090,7 +2090,7 @@ interface DatabaseStatementInterface extends Traversable {
    * @param $cursor_offset
    *   Not implemented in all database drivers, don't use.
    *
-   * @return
+   * @return array
    *   A result, formatted according to $mode.
    */
   // public function fetch($mode = NULL, $cursor_orientation = NULL, $cursor_offset = NULL);
@@ -2101,7 +2101,7 @@ interface DatabaseStatementInterface extends Traversable {
    * @param $index
    *   The numeric index of the field to return. Defaults to the first field.
    *
-   * @return
+   * @return [varies]
    *   A single field from the next record, or FALSE if there is no next record.
    */
   public function fetchField($index = 0);
@@ -2121,7 +2121,7 @@ interface DatabaseStatementInterface extends Traversable {
    * arrays. For some reason PDOStatement does not have a corresponding array
    * helper method, so one is added.
    *
-   * @return
+   * @return array|false
    *   An associative array, or FALSE if there is no next row.
    */
   public function fetchAssoc();
@@ -2136,7 +2136,7 @@ interface DatabaseStatementInterface extends Traversable {
    * @param $constructor_arguments
    *   If $mode is PDO::FETCH_CLASS, the arguments to pass to the constructor.
    *
-   * @return
+   * @return array
    *   An array of results.
    */
   // function fetchAll($mode = NULL, $column_index = NULL, array $constructor_arguments);
@@ -2149,7 +2149,7 @@ interface DatabaseStatementInterface extends Traversable {
    * @param $index
    *   The index of the column number to fetch.
    *
-   * @return
+   * @return array
    *   An indexed array, or an empty array if there is no result set.
    */
   public function fetchCol($index = 0);
@@ -2169,7 +2169,7 @@ interface DatabaseStatementInterface extends Traversable {
    * @param $value_index
    *   The numeric index of the field to use as the array value.
    *
-   * @return
+   * @return array
    *   An associative array, or an empty array if there is no result set.
    */
   public function fetchAllKeyed($key_index = 0, $value_index = 1);
@@ -2188,7 +2188,7 @@ interface DatabaseStatementInterface extends Traversable {
    *   other value it will be an array of objects. By default, the fetch mode
    *   set for the query will be used.
    *
-   * @return
+   * @return array
    *   An associative array, or an empty array if there is no result set.
    */
   public function fetchAllAssoc($key, $fetch = NULL);
@@ -2469,7 +2469,7 @@ function db_query_range($query, $from, $count, array $args = array(), array $opt
  * @param $options
  *   An array of options to control how the query operates.
  *
- * @return
+ * @return string
  *   The name of the temporary table.
  *
  * @see DatabaseConnection::defaultOptions()
@@ -2618,7 +2618,7 @@ function db_transaction($name = NULL, array $options = array()) {
  * @param $key
  *   The key in the $databases array to set as the default database.
  *
- * @return
+ * @return string
  *   The key of the formerly active database.
  */
 function db_set_active($key = 'default') {
@@ -2633,7 +2633,7 @@ function db_set_active($key = 'default') {
  * @param $table
  *   The table name to escape.
  *
- * @return
+ * @return string
  *   The escaped table name as a string.
  */
 function db_escape_table($table) {
@@ -2648,7 +2648,7 @@ function db_escape_table($table) {
  * @param $field
  *   The field name to escape.
  *
- * @return
+ * @return string
  *   The escaped field name as a string.
  */
 function db_escape_field($field) {
@@ -2682,7 +2682,7 @@ function db_escape_field($field) {
  * @param $string
  *   The string to escape.
  *
- * @return
+ * @return string
  *   The escaped string.
  */
 function db_like($string) {
@@ -2692,7 +2692,7 @@ function db_like($string) {
 /**
  * Retrieves the name of the currently active database driver.
  *
- * @return
+ * @return string
  *   The name of the currently active database driver.
  */
 function db_driver() {
@@ -2725,7 +2725,7 @@ function db_close(array $options = array()) {
  *   by passing in a minimum ID, it can be assured that we never issue the same
  *   ID.
  *
- * @return
+ * @return int
  *   An integer number larger than any number returned before for this sequence.
  */
 function db_next_id($existing_id = 0) {
@@ -2804,7 +2804,7 @@ function db_create_table($name, $table) {
  * @param $fields
  *   An array of key/index column specifiers.
  *
- * @return
+ * @return array
  *   An array of field names.
  */
 function db_field_names($fields) {
@@ -2819,7 +2819,7 @@ function db_field_names($fields) {
  * @param $name
  *   The name of the index in Backdrop (no prefixing).
  *
- * @return
+ * @return bool
  *   TRUE if the given index exists, otherwise FALSE.
  */
 function db_index_exists($table, $name) {
@@ -2832,7 +2832,7 @@ function db_index_exists($table, $name) {
  * @param $table
  *   The name of the table in Backdrop (no prefixing).
  *
- * @return
+ * @return bool
  *   TRUE if the given table exists, otherwise FALSE.
  */
 function db_table_exists($table) {
@@ -2847,7 +2847,7 @@ function db_table_exists($table) {
  * @param $field
  *   The name of the field.
  *
- * @return
+ * @return bool
  *   TRUE if the given column exists, otherwise FALSE.
  */
 function db_field_exists($table, $field) {
@@ -2861,7 +2861,7 @@ function db_field_exists($table, $field) {
  *   An SQL expression, for example "simpletest%" (without the quotes).
  *   BEWARE: this is not prefixed, the caller should take care of that.
  *
- * @return
+ * @return array
  *   Array, both the keys and the values are the matching tables.
  */
 function db_find_tables($table_expression) {

@@ -402,7 +402,7 @@ function color_get_palette($theme, $default = FALSE) {
  * @param $form_state
  *   A keyed array containing the current state of the form.
  *
- * @return
+ * @return [varies]
  *   The data that will appear in the $form_state['values'] collection for this
  *   element. Return nothing to use the default.
  */
@@ -429,7 +429,7 @@ function color_palette_color_value($element, $input = FALSE, $form_state = array
  * @param $color
  *   The string to check.
  *
- * @return
+ * @return bool
  *   TRUE if the string is a valid hexadecimal CSS color string, or FALSE if it
  *   isn't.
  */

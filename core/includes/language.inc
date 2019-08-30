@@ -108,7 +108,7 @@ define('LANGUAGE_NEGOTIATION_DEFAULT', 'language-default');
  *   - language_content
  *   - language_url
  *
- * @return
+ * @return object
  *   The negotiated language object.
  */
 function language_types_initialize($type) {
@@ -141,7 +141,7 @@ function language_types_initialize($type) {
 /**
  * Returns all the defined language types.
  *
- * @return
+ * @return array
  *   An associative array of language type information arrays keyed by type
  *   names. Based on information from hook_language_types_info().
  *
@@ -166,7 +166,7 @@ function language_types_info() {
  * whose language negotiation providers are module-defined and not altered
  * through the user interface.
  *
- * @return
+ * @return array
  *   An array of language type names.
  */
 function language_types_get_configurable() {
@@ -197,7 +197,7 @@ function language_types_get_configurable() {
  * @param $provider_id
  *   The language negotiation provider ID.
  *
- * @return
+ * @return string|false
  *   The provider ID if it is enabled, FALSE otherwise.
  */
 function language_negotiation_get($type, $provider_id = NULL) {
@@ -224,7 +224,7 @@ function language_negotiation_get($type, $provider_id = NULL) {
  * @param $provider_id
  *   The language negotiation provider ID.
  *
- * @return
+ * @return bool
  *   TRUE if there is at least one language type for which the given language
  *   provider is enabled, FALSE otherwise.
  */
@@ -246,7 +246,7 @@ function language_negotiation_get_any($provider_id) {
  * @param $path
  *   The internal path the switch links will be relative to.
  *
- * @return
+ * @return array
  *   A keyed array of links ready to be themed.
  */
 function language_negotiation_get_switch_links($type, $path) {
@@ -374,7 +374,7 @@ function language_negotiation_order($type) {
 /**
  * Returns all the defined language negotiation providers.
  *
- * @return
+ * @return array
  *   An array of language negotiation providers.
  */
 function language_negotiation_info() {
@@ -410,7 +410,7 @@ function language_negotiation_info() {
  *   invoked (see hook_language_negotiation_info() for details). If not passed
  *   in, it will be loaded through language_negotiation_info().
  *
- * @return
+ * @return object
  *   A language object representing the language chosen by the provider.
  */
 function language_provider_invoke($provider_id, $provider = NULL) {
@@ -451,7 +451,7 @@ function language_provider_invoke($provider_id, $provider = NULL) {
 /**
  * Returns the default language negotiation provider.
  *
- * @return
+ * @return string
  *   The default language code.
  */
 function language_from_default() {
@@ -469,7 +469,7 @@ function language_from_default() {
  * @param $languages
  *   An array of valid languages.
  *
- * @return
+ * @return array
  *   An array composed of:
  *    - A language object corresponding to the identified prefix on success,
  *      FALSE otherwise.
@@ -497,7 +497,7 @@ function language_url_split_prefix($path, $languages) {
  * @param $type
  *   (optional) The language type. Defaults to LANGUAGE_TYPE_CONTENT.
  *
- * @return
+ * @return array
  *   The identifier of the first language negotiation method for the given
  *   language type, or the default method if none exists.
  */

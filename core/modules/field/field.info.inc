@@ -41,7 +41,7 @@ function field_info_cache_clear() {
 /**
  * Collates all information on field types, widget types and related structures.
  *
- * @return
+ * @return array
  *   An associative array containing:
  *   - 'field types': Array of hook_field_info() results, keyed by field_type.
  *     Each element has the following components: label, description, settings,
@@ -175,7 +175,7 @@ function _field_info_collate_types_reset() {
 /**
  * Collates all information on existing fields and instances.
  *
- * @return
+ * @return array
  *   An associative array containing:
  *   - fields: Array of existing fields, keyed by field name. This element
  *     lists deleted and non-deleted fields, but not inactive ones.
@@ -317,7 +317,7 @@ function _field_info_prepare_field($field) {
  * @param $field
  *   The field structure for the instance.
  *
- * @return
+ * @return array
  *   Field instance array.
  */
 function _field_info_prepare_instance($instance, $field) {
@@ -478,7 +478,7 @@ function _field_info_prepare_extra_fields($extra_fields, $entity_type, $bundle) 
  * @param $instance
  *   The field instance array.
  *
- * @return
+ * @return int
  *   One of these values:
  *   - FIELD_BEHAVIOR_NONE: Do nothing for this operation.
  *   - FIELD_BEHAVIOR_CUSTOM: Use the widget's callback function.
@@ -496,7 +496,7 @@ function field_behaviors_widget($op, $instance) {
  *   (optional) A field type name. If omitted, all field types will be
  *   returned.
  *
- * @return
+ * @return array
  *   Either a field type description, as provided by hook_field_info(), or an
  *   array of all existing field types, keyed by field type name.
  */
@@ -520,7 +520,7 @@ function field_info_field_types($field_type = NULL) {
  *   (optional) A widget type name. If omitted, all widget types will be
  *   returned.
  *
- * @return
+ * @return array
  *   Either a single widget type description, as provided by
  *   hook_field_widget_info(), or an array of all existing widget types, keyed
  *   by widget type name.
@@ -545,7 +545,7 @@ function field_info_widget_types($widget_type = NULL) {
  *   (optional) A formatter type name. If omitted, all formatter types will be
  *   returned.
  *
- * @return
+ * @return array
  *   Either a single formatter type description, as provided by
  *   hook_field_formatter_info(), or an array of all existing formatter types,
  *   keyed by formatter type name.
@@ -570,7 +570,7 @@ function field_info_formatter_types($formatter_type = NULL) {
  *   (optional) A storage type name. If omitted, all storage types will be
  *   returned.
  *
- * @return
+ * @return array
  *   Either a storage type description, as provided by
  *   hook_field_storage_info(), or an array of all existing storage types,
  *   keyed by storage type name.
@@ -625,7 +625,7 @@ function field_formatter_settings_get_instance_display_settings($entity_type, $f
  * @param $entity_type
  *   The type of entity; e.g. 'node' or 'user'.
  *
- * @return
+ * @return array
  *   An array of bundles for the $entity_type keyed by bundle name,
  *   or, if no $entity_type was provided, the array of all existing bundles,
  *   keyed by entity type.
@@ -649,7 +649,7 @@ function field_info_bundles($entity_type = NULL) {
  *
  * The function only returns active, non deleted fields.
  *
- * @return
+ * @return array
  *   An array keyed by field name. Each value is an array with two entries:
  *   - type: The field type.
  *   - bundles: The bundles in which the field appears, as an array with entity
@@ -691,7 +691,7 @@ function field_info_field_map() {
 /**
  * Returns all field definitions.
  *
- * @return
+ * @return array
  *   An array of field definitions, keyed by field name. Each field has an
  *   additional property, 'bundles', which is an array of all the bundles to
  *   which this field belongs keyed by entity type.
@@ -715,7 +715,7 @@ function field_info_fields($include_deleted = FALSE) {
  *   non-deleted field, but not inactive fields. To retrieve information about
  *   inactive fields, use field_read_fields().
  *
- * @return
+ * @return array
  *   The field array, as returned by field_read_fields(), with an
  *   additional element 'bundles', whose value is an array of all the bundles
  *   this field belongs to keyed by entity type. NULL if the field was not
@@ -736,11 +736,11 @@ function field_info_field($field_name) {
  * @param $bundle_name
  *   The bundle name for which to return instances.
  *
- * @return
+ * @return array
  *   If $entity_type is not set, return all instances keyed by entity type and
  *   bundle name. If $entity_type is set, return all instances for that entity
- *   type, keyed by bundle name. If $entity_type and $bundle_name are set, return
- *   all instances for that bundle.
+ *   type, keyed by bundle name. If $entity_type and $bundle_name are set,
+ *   return all instances for that bundle.
  */
 function field_info_instances($entity_type = NULL, $bundle_name = NULL) {
   $info = _field_info_collate_fields();
@@ -766,7 +766,7 @@ function field_info_instances($entity_type = NULL, $bundle_name = NULL) {
  * @param $bundle_name
  *   The bundle name for the instance.
  *
- * @return
+ * @return array|null
  *   An associative array of instance data for the specific field and bundle;
  *   NULL if the instance does not exist.
  */
@@ -827,7 +827,7 @@ function field_info_instance($entity_type, $field_name, $bundle_name) {
  *   The context for which the list of pseudo-fields is requested. Either
  *   'form' or 'display'.
  *
- * @return
+ * @return array
  *   The array of pseudo-field elements in the bundle.
  */
 function field_info_extra_fields($entity_type, $bundle, $context) {
@@ -851,7 +851,8 @@ function field_info_extra_fields($entity_type, $bundle, $context) {
  * @param $context
  *   The context for which the maximum weight is requested. Either 'form', or
  *   the name of a display mode.
- * @return
+ *
+ * @return int|null
  *   The maximum weight of the entity's components, or NULL if no components
  *   were found.
  */
@@ -885,7 +886,7 @@ function field_info_max_weight($entity_type, $bundle, $context) {
  * @param $type
  *   A field type name.
  *
- * @return
+ * @return array
  *   The field type's default settings, as provided by hook_field_info(), or an
  *   empty array if type or settings are not defined.
  */
@@ -900,7 +901,7 @@ function field_info_field_settings($type) {
  * @param $type
  *   A field type name.
  *
- * @return
+ * @return array
  *   The field type's default instance settings, as provided by
  *   hook_field_info(), or an empty array if type or settings are not defined.
  */
@@ -915,7 +916,7 @@ function field_info_instance_settings($type) {
  * @param $type
  *   A widget type name.
  *
- * @return
+ * @return array
  *   The widget type's default settings, as provided by
  *   hook_field_widget_info(), or an empty array if type or settings are
  *   undefined.
@@ -931,7 +932,7 @@ function field_info_widget_settings($type) {
  * @param $type
  *   A field formatter type name.
  *
- * @return
+ * @return array
  *   The formatter type's default settings, as provided by
  *   hook_field_formatter_info(), or an empty array if type or settings are
  *   undefined.
@@ -947,7 +948,7 @@ function field_info_formatter_settings($type) {
  * @param $type
  *   A field storage type name.
  *
- * @return
+ * @return array
  *   The storage type's default settings, as provided by
  *   hook_field_storage_info(), or an empty array if type or settings are
  *   undefined.

@@ -109,7 +109,7 @@ define('MAIL_LINE_ENDINGS', isset($_SERVER['WINDIR']) || (isset($_SERVER['SERVER
  *   implementing hook_mail_alter() may cancel sending by setting
  *   $message['send'] to FALSE.
  *
- * @return
+ * @return array
  *   The $message array structure containing all details of the
  *   message. If already sent ($send = TRUE), then the 'result' element
  *   will contain the success indicator of the e-mail, failure being already
@@ -302,7 +302,7 @@ interface MailSystemInterface {
    * @param $message
    *   A message array, as described in hook_mail_alter().
    *
-   * @return
+   * @return string
    *   The formatted $message.
    */
    public function format(array $message);
@@ -329,7 +329,7 @@ interface MailSystemInterface {
    *      defined by one of the other parameters.  PHP's mail() looks for Cc
    *      and Bcc headers and sends the mail to addresses in these headers too.
    *
-   * @return
+   * @return bool
    *   TRUE if the mail was successfully accepted for delivery, otherwise FALSE.
    */
    public function mail(array $message);
@@ -400,7 +400,7 @@ function backdrop_wrap_mail($text, $indent = '') {
  *   If supplied, a list of tags that will be transformed. If omitted, all
  *   all supported tags are transformed.
  *
- * @return
+ * @return string
  *   The transformed string.
  */
 function backdrop_html_to_text($string, $allowed_tags = NULL) {

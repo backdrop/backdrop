@@ -316,7 +316,8 @@ Backdrop.fieldUIDisplayOverview.field.prototype = {
    *
    * @param region
    *   The name of the new region for the row.
-   * @return
+   *
+   * @return object
    *   A hash object indicating which rows should be Ajax-updated as a result
    *   of the change, in the format expected by
    *   Backdrop.displayOverview.AJAXRefreshRows().

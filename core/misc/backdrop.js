@@ -132,8 +132,10 @@ Backdrop.detachBehaviors = function (context, settings, trigger) {
  *
  * @param str
  *   The string to be encoded.
- * @return
+ *
+ * @return string
  *   The encoded string.
+ *
  * @ingroup sanitization
  */
 Backdrop.checkPlain = function (str) {
@@ -195,7 +197,7 @@ Backdrop.formatString = function(str, args) {
  *   Optional language code to translate to a language other than what is used
  *   to display the page.
  *
- * @return
+ * @return string
  *   A translated string representation of the size.
  *
  * @since Backdrop 1.11.0
@@ -296,7 +298,7 @@ Backdrop.stringReplace = function (str, args, keys) {
  *   - 'context' (defaults to the empty context): The context the source string
  *     belongs to.
  *
- * @return
+ * @return string
  *   The translated string.
  */
 Backdrop.t = function (str, args, options) {
@@ -340,7 +342,8 @@ Backdrop.t = function (str, args, options) {
  *   This replacement is done automatically for the plural case.
  * @param options
  *   The options to pass to the Backdrop.t() function.
- * @return
+ *
+ * @return string
  *   A translated string.
  */
 Backdrop.formatPlural = function (count, singular, plural, args, options) {
@@ -368,7 +371,7 @@ Backdrop.formatPlural = function (count, singular, plural, args, options) {
  * @param url
  *   The URL string to be normalized to an absolute URL.
  *
- * @return
+ * @return string
  *   The normalized, absolute URL.
  *
  * @see https://github.com/angular/angular.js/blob/v1.4.4/src/ng/urlUtils.js
@@ -400,7 +403,7 @@ Backdrop.absoluteUrl = function (url) {
  * @param url
  *   The URL string to be normalized to a relative URL.
  *
- * @return
+ * @return string
  *   The normalized, relative URL with a leading slash.
  *
  * @since 1.11.0
@@ -419,7 +422,7 @@ Backdrop.relativeUrl = function (url) {
  * @param url
  *   The URL string to be tested.
  *
- * @return
+ * @return true
  *   Boolean true if local.
  *
  * @see https://github.com/jquery/jquery-ui/blob/1.11.4/ui/tabs.js#L58
@@ -466,7 +469,8 @@ Backdrop.urlIsLocal = function (url) {
  *   The name of the theme function to call.
  * @param ...
  *   Additional arguments to pass along to the theme function.
- * @return
+ *
+ * @return string|object
  *   Any data the theme function returns. This could be a plain HTML string,
  *   but also a complex object.
  */
@@ -692,7 +696,8 @@ Backdrop.theme.prototype = {
    *
    * @param str
    *   The text to format (plain-text).
-   * @return
+   *
+   * @return string
    *   The formatted text (html).
    */
   placeholder: function (str) {

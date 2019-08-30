@@ -339,7 +339,7 @@ function book_block_configure($delta = '', $settings = array()) {
  * This list may be used for generating a list of all the books, or for building
  * the options for a form select.
  *
- * @return
+ * @return array
  *   An array of all books.
  */
 function book_get_books() {
@@ -435,7 +435,7 @@ function book_pick_book_nojs_submit($form, &$form_state) {
  * @param $book_link
  *   A fully loaded menu link that is part of the book hierarchy.
  *
- * @return
+ * @return array
  *   A parent selection form element.
  */
 function _book_parent_select($book_link) {
@@ -567,7 +567,7 @@ function _book_add_form_elements(&$form, &$form_state, Node $node) {
  * This function is called via Ajax when the selected book is changed on a node
  * or book outline form.
  *
- * @return
+ * @return array
  *   The rendered parent page select element.
  */
 function book_form_update($form, $form_state) {
@@ -584,7 +584,7 @@ function book_form_update($form, $form_state) {
  * @param Node $node
  *   The node that is being saved, added, deleted, or moved.
  *
- * @return
+ * @return bool
  *   TRUE if the menu link was saved; FALSE otherwise.
  */
 function _book_update_outline(Node $node) {
@@ -675,7 +675,7 @@ function book_update_bid($book_link) {
  * @param $book_link
  *   A fully loaded menu link that is part of the book hierarchy.
  *
- * @return
+ * @return array
  *   A linear array of menu links in the order that the links are shown in the
  *   menu, so the previous and next pages are the elements before and after the
  *   element corresponding to the current node. The children of the current node
@@ -722,7 +722,7 @@ function _book_flatten_menu($tree, &$flat) {
  * @param $book_link
  *   A fully loaded menu link that is part of the book hierarchy.
  *
- * @return
+ * @return array
  *   A fully loaded menu link for the page before the one represented in
  *   $book_link.
  */
@@ -766,7 +766,7 @@ function book_prev($book_link) {
  * @param $book_link
  *   A fully loaded menu link that is part of the book hierarchy.
  *
- * @return
+ * @return array
  *   A fully loaded menu link for the page after the one represented in
  *   $book_link.
  */
@@ -790,7 +790,7 @@ function book_next($book_link) {
  * @param $book_link
  *   A fully loaded menu link that is part of the book hierarchy.
  *
- * @return
+ * @return string
  *   HTML for the links to the child pages of the current page.
  */
 function book_children($book_link) {
@@ -825,7 +825,7 @@ function book_children($book_link) {
  * @param $bid
  *   The book ID for which to make a menu name.
  *
- * @return
+ * @return string
  *   The menu name.
  */
 function book_menu_name($bid) {
@@ -988,7 +988,7 @@ function book_node_prepare(Node $node) {
  * @param $book_link
  *   A fully loaded menu link that is part of the book hierarchy.
  *
- * @return
+ * @return int
  *   The depth limit for items in the parent select.
  */
 function _book_parent_depth_limit($book_link) {
@@ -1019,7 +1019,7 @@ function book_form_node_delete_confirm_alter(&$form, $form_state) {
  * @param $nid
  *   The ID of the node whose menu link is being created.
  *
- * @return
+ * @return array
  *   The default values for the menu link.
  */
 function _book_link_defaults($nid) {
@@ -1085,7 +1085,7 @@ function _book_toc_recurse($tree, $indent, &$toc, $exclude, $depth_limit) {
  *   Optional array of menu link ID values. Any link whose menu link ID is in
  *   this array will be excluded (along with its children).
  *
- * @return
+ * @return array
  *   An array of (menu link ID, title) pairs for use as options for selecting a
  *   book page.
  */
@@ -1103,7 +1103,7 @@ function book_toc($bid, $depth_limit, $exclude = array()) {
  * @param $type
  *   A node type.
  *
- * @return
+ * @return bool
  *   A Boolean TRUE if the node type can be included in books; otherwise, FALSE.
  */
 function book_type_is_allowed($type) {
@@ -1147,7 +1147,7 @@ function book_node_type_update($type) {
  * @param $mlid
  *   The menu link ID of the book menu item.
  *
- * @return
+ * @return array|false
  *   A menu link, with the link translated for rendering and data added from the
  *   {book} table. EMPTY if there is no item. FALSE if there is an error.
  *
@@ -1184,7 +1184,7 @@ function book_link_load($mlid, $skip_access_check = FALSE) {
  * @param $link
  *   A fully loaded menu link.
  *
- * @return
+ * @return array
  *   A subtree of menu links in an array, in the order they should be rendered.
  */
 function book_menu_subtree_data($link) {

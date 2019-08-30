@@ -686,7 +686,7 @@ function field_get_default_value($entity_type, $entity, $field, $instance, $lang
  *   The language code for the requested language. Defaults to the
  *   current language.
  *
- * @return
+ * @return [varies]
  *   The first field value, or NULL if the field is empty, if the field does not
  *   contain the $value_key specified, or if the entity does not contain the
  *   $field_name specified.
@@ -715,10 +715,10 @@ function field_get_value(Entity $entity, $field_name, $value_key = 'value', $lan
  *   The language code for the requested language. Defaults to the
  *   current language.
  *
- * @return (array)
- *   All field values, or an empty array if the field is empty, if the field does not
- *   contain the $value_key specified, or if the entity does not contain the
- *   $field_name specified.
+ * @return array
+ *   All field values, or an empty array if the field is empty, if the field
+ *   does not contain the $value_key specified, or if the entity does not
+ *   contain the $field_name specified.
  *
  * @since 1.13.0 Function added.
  *
@@ -736,7 +736,7 @@ function field_get_values(Entity $entity, $field_name, $value_key = 'value', $la
  * @param $items
  *   The field values to filter.
  *
- * @return
+ * @return array
  *   The array of items without empty field values. The function also renumbers
  *   the array keys to ensure sequential deltas.
  */
@@ -863,7 +863,7 @@ function field_bundle_settings($entity_type, $bundle, $settings = NULL) {
  * @param $bundle
  *   The bundle name to return display mode settings for.
  *
- * @return
+ * @return array
  *   An array keyed by display mode, with the following key/value pairs:
  *   - custom_settings: Boolean specifying whether the display mode uses a
  *     dedicated set of display options (TRUE), or the 'default' options
@@ -900,7 +900,7 @@ function field_view_mode_settings($entity_type, $bundle) {
  * @param $entity
  *   The entity being displayed.
  *
- * @return
+ * @return array
  *   The display settings to be used when displaying the field values.
  */
 function field_get_display($instance, $view_mode, $entity) {
@@ -933,7 +933,7 @@ function field_get_display($instance, $view_mode, $entity) {
  * @param $view_mode
  *   The display mode.
  *
- * @return
+ * @return array
  *   The display settings to be used when viewing the bundle's pseudo-fields.
  */
 function field_extra_fields_get_display($entity_type, $bundle, $view_mode) {
@@ -1041,7 +1041,8 @@ function _field_filter_xss_display_allowed_tags() {
  * @param $langcode
  *   (Optional) The language of the value in $item. If not provided, the
  *   current language will be assumed.
- * @return
+ *
+ * @return array
  *   A renderable array for the field value.
  */
 function field_view_value($entity_type, $entity, $field_name, $item, $display = array(), $langcode = NULL) {
@@ -1117,7 +1118,8 @@ function field_view_value($entity_type, $entity, $field_name, $item, $display = 
  *   current language fallback logic will be applied no values are available
  *   for the language. If no language is provided the current language will be
  *   used.
- * @return
+ *
+ * @return array
  *   A renderable array for the field value.
  *
  * @see field_view_value()
@@ -1183,7 +1185,7 @@ function field_view_field($entity_type, $entity, $field_name, $display = array()
  *   (optional) The language code $entity->{$field_name} has to be displayed in.
  *   Defaults to the current language.
  *
- * @return
+ * @return array
  *   An array of field items keyed by delta if available, FALSE otherwise.
  */
 function field_get_items($entity_type, $entity, $field_name, $langcode = NULL) {
@@ -1196,7 +1198,8 @@ function field_get_items($entity_type, $entity, $field_name, $langcode = NULL) {
  *
  * @param $field
  *   A field structure.
- * @return
+ *
+ * @return bool
  *   TRUE if the field has data for any entity; FALSE otherwise.
  */
 function field_has_data($field) {
@@ -1232,7 +1235,7 @@ function field_has_data($field) {
  * @param $account
  *   (optional) The account to check, if not given use currently logged in user.
  *
- * @return
+ * @return bool
  *   TRUE if the operation is allowed;
  *   FALSE if the operation is denied.
  */
@@ -1261,7 +1264,8 @@ function field_access($op, $field, $entity_type, $entity = NULL, $account = NULL
  * @param $bundle
  *   The bundle object (or string if bundles for this entity type do not exist
  *   as standalone objects).
- * @return
+ *
+ * @return string
  *   The bundle name.
  */
 function field_extract_bundle($entity_type, $bundle) {

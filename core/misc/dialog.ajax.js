@@ -36,7 +36,8 @@ Backdrop.behaviors.dialog = {
    *
    * @param $dialog
    *   An jQuery object containing the element that is the dialog target.
-   * @return
+   *
+   * @return array
    *   An array of buttons that need to be added to the button area.
    */
   prepareDialogButtons: function ($dialog) {

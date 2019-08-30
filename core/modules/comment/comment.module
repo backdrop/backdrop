@@ -272,7 +272,7 @@ function comment_menu_alter(&$items) {
  *   to be edited. 'URL-formatted' means that underscores are replaced by
  *   hyphens.
  *
- * @return
+ * @return string
  *   The comment bundle name corresponding to the node type.
  *
  * @see comment_menu_alter()
@@ -478,7 +478,7 @@ function comment_block_view($delta = '', $settings = array()) {
  * @param $cid
  *   A comment identifier.
  *
- * @return
+ * @return string|int
  *   The comment listing set to the page on which the comment appears.
  */
 function comment_permalink($cid) {
@@ -504,7 +504,7 @@ function comment_permalink($cid) {
  * @param integer $number
  *   (optional) The maximum number of comments to find. Defaults to 10.
  *
- * @return
+ * @return array
  *   An array of comment objects or an empty array if there are no recent
  *   comments visible to the current user.
  */
@@ -537,7 +537,7 @@ function comment_get_recent($number = 10) {
  * @param Node $node
  *   The first new comment node.
  *
- * @return
+ * @return string
  *   "page=X" if the page number is greater than zero; empty string otherwise.
  */
 function comment_new_page_count($num_comments, $new_replies, Node $node) {
@@ -703,7 +703,7 @@ function comment_node_view(Node $node, $view_mode) {
  * @param Node $node
  *   The node entity for which to build the comment-related elements.
  *
- * @return
+ * @return array
  *   A renderable array representing the comment-related page elements for the
  *   node.
  */
@@ -749,7 +749,7 @@ function comment_node_page_additions(Node $node) {
  * @param $comments_per_page
  *   The amount of comments to display per page.
  *
- * @return
+ * @return array
  *   An array of the IDs of the comment to be displayed.
  *
  * To display threaded comments in the correct order we keep a 'thread' field
@@ -903,7 +903,7 @@ function comment_prepare_thread(&$comments) {
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
  *
- * @return
+ * @return array
  *   An array as expected by backdrop_render().
  */
 function comment_view(Comment $comment, Node $node, $view_mode = 'full', $langcode = NULL) {
@@ -1020,7 +1020,7 @@ function comment_build_content(Comment $comment, Node $node, $view_mode = 'full'
  * @param Node $node
  *   The node the comment is attached to.
  *
- * @return
+ * @return array
  *   A structured array of links.
  */
 function comment_links(Comment $comment, Node $node) {
@@ -1078,7 +1078,7 @@ function comment_links(Comment $comment, Node $node) {
  *   A string indicating the language field values are to be shown in. If no
  *   language is provided the current content language is used.
  *
- * @return
+ * @return array
  *   An array in the format expected by backdrop_render().
  *
  * @see backdrop_render()
@@ -1593,7 +1593,7 @@ function comment_delete_multiple($cids) {
  *   Whether to reset the internal static entity cache. Note that the static
  *   cache is disabled in comment_entity_info() by default.
  *
- * @return
+ * @return array
  *   An array of comment objects, indexed by comment ID.
  *
  * @see entity_load()
@@ -1612,7 +1612,7 @@ function comment_load_multiple($cids = array(), $conditions = array(), $reset = 
  *   Whether to reset the internal static entity cache. Note that the static
  *   cache is disabled in comment_entity_info() by default.
  *
- * @return
+ * @return object
  *   The comment object.
  */
 function comment_load($cid, $reset = FALSE) {
@@ -1629,7 +1629,7 @@ function comment_load($cid, $reset = FALSE) {
  *   Time to count from (defaults to time of last user access
  *   to node).
  *
- * @return
+ * @return int|false
  *   The number of new comments or FALSE if the user is not logged in.
  */
 function comment_num_new($nid, $timestamp = 0) {
@@ -1666,7 +1666,7 @@ function comment_num_new($nid, $timestamp = 0) {
  * @param string $node_type
  *   The node type of the comment's parent.
  *
- * @return
+ * @return int
  *   The display ordinal for the comment.
  *
  * @see comment_get_display_page()
@@ -1711,7 +1711,7 @@ function comment_get_display_ordinal($cid, $node_type) {
  * @param string $node_type
  *   The node type the comment is attached to.
  *
- * @return
+ * @return int
  *   The page number.
  */
 function comment_get_display_page($cid, $node_type) {

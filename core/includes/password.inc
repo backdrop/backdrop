@@ -50,7 +50,7 @@ function _password_itoa64() {
  * @param $count
  *   The number of characters (bytes) to encode.
  *
- * @return
+ * @return string
  *   Encoded string
  */
 function _password_base64_encode($input, $count) {
@@ -93,7 +93,7 @@ function _password_base64_encode($input, $count) {
  *   Integer that determines the number of iterations used in the hashing
  *   process. A larger value is more secure, but takes more time to complete.
  *
- * @return
+ * @return string
  *   A 12 character string containing the iteration count and a random salt.
  */
 function _password_generate_salt($count_log2) {
@@ -115,7 +115,7 @@ function _password_generate_salt($count_log2) {
  *   Integer that determines the number of iterations used in the hashing
  *   process. A larger value is more secure, but takes more time to complete.
  *
- * @return
+ * @return int
  *   Integer within set bounds that is closest to $count_log2.
  */
 function _password_enforce_log2_boundaries($count_log2) {
@@ -145,7 +145,7 @@ function _password_enforce_log2_boundaries($count_log2) {
  *   An existing hash or the output of _password_generate_salt().  Must be
  *   at least 12 characters (the settings and salt).
  *
- * @return
+ * @return string|false
  *   A string containing the hashed password (and salt) or FALSE on failure.
  *   The return string will be truncated at BACKDROP_HASH_LENGTH characters max.
  */
@@ -205,7 +205,7 @@ function _password_get_count_log2($setting) {
  *   Optional integer to specify the iteration count. Generally used only during
  *   mass operations where a value less than the default is needed for speed.
  *
- * @return
+ * @return string|false
  *   A string containing the hashed password (and a salt), or FALSE on failure.
  */
 function user_hash_password($password, $count_log2 = 0) {
@@ -228,7 +228,7 @@ function user_hash_password($password, $count_log2 = 0) {
  * @param $account
  *   A user object with at least the fields from the {users} table.
  *
- * @return
+ * @return bool
  *   TRUE or FALSE.
  */
 function user_check_password($password, $account) {
@@ -273,7 +273,7 @@ function user_check_password($password, $account) {
  * @param $account
  *   A user object with at least the fields from the {users} table.
  *
- * @return
+ * @return bool
  *   TRUE or FALSE.
  */
 function user_needs_new_hash($account) {

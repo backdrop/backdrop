@@ -739,7 +739,7 @@ class EntityFieldQuery {
    * a field ordering was requested. In every other case, the returned value
    * contains everything necessary for processing.
    *
-   * @return
+   * @return int|array
    *   Either a number if count() was called or an array of associative arrays
    *   of stub entities. The outer array keys are entity types, and the inner
    *   array keys are the relevant ID. (In most cases this will be the entity
@@ -778,7 +778,7 @@ class EntityFieldQuery {
   /**
    * Determines the query callback to use for this entity query.
    *
-   * @return
+   * @return string
    *   A callback that can be used with call_user_func().
    */
   public function queryCallback() {
@@ -815,7 +815,7 @@ class EntityFieldQuery {
    *
    * This method is only used if there are no field conditions and sorts.
    *
-   * @return
+   * @return array
    *   See EntityFieldQuery::execute().
    */
   protected function propertyQuery() {
@@ -928,7 +928,7 @@ class EntityFieldQuery {
    * @param $id_key
    *   Which field's values to use as the returned array keys.
    *
-   * @return
+   * @return array
    *   See EntityFieldQuery::execute().
    */
   function finishQuery($select_query, $id_key = 'entity_id') {

@@ -12,7 +12,7 @@
  * in ISO 3166-1 alpha-2. Originally from the location project
  * (http://drupal.org/project/location).
  *
- * @return
+ * @return array
  *   An array of country code => country name pairs.
  */
 function standard_country_list() {
@@ -54,7 +54,7 @@ function standard_country_list() {
     'BM' => $t('Bermuda'),
     'BN' => $t('Brunei'),
     'BO' => $t('Bolivia'),
-    'BQ' => $t('Caribbean Netherlands'),    
+    'BQ' => $t('Caribbean Netherlands'),
     'BR' => $t('Brazil'),
     'BS' => $t('Bahamas'),
     'BT' => $t('Bhutan'),
@@ -232,10 +232,10 @@ function standard_country_list() {
     'SN' => $t('Senegal'),
     'SO' => $t('Somalia'),
     'SR' => $t('Suriname'),
-    'SS' => $t('South Sudan'),    
+    'SS' => $t('South Sudan'),
     'ST' => $t('Sao Tome and Principe'),
     'SV' => $t('El Salvador'),
-    'SX' => $t('Sint Maarten'),    
+    'SX' => $t('Sint Maarten'),
     'SY' => $t('Syria'),
     'SZ' => $t('Swaziland'),
     'TC' => $t('Turks and Caicos Islands'),
@@ -298,7 +298,7 @@ function standard_country_list() {
  * make otherwise strange looking PHP syntax natural (to not be displayed in
  * right to left). See http://drupal.org/node/128866#comment-528929.
  *
- * @return
+ * @return array
  *   An array of language code to language name information.
  *   Language name information itself is an array of English and native names.
  */
@@ -414,7 +414,7 @@ function standard_language_list() {
 /**
  * Get an array of all timezones and their matching country code.
  *
- * @return
+ * @return array
  *   An array of timezone => country code pairs.
  */
 function standard_timezone_country_list() {

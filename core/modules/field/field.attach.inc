@@ -237,7 +237,7 @@ function _field_invoke($op, $entity_type, $entity, &$a = NULL, &$b = NULL, $opti
  *    by entity id and field name. It will be used to narrow down to a single
  *    value the available languages to act on.
  *
- * @return
+ * @return array
  *   An array of returned values keyed by entity id.
  */
 function _field_invoke_multiple($op, $entity_type, $entities, &$a = NULL, &$b = NULL, $options = array()) {
@@ -377,7 +377,7 @@ function _field_invoke_multiple_default($op, $entity_type, $entities, &$a = NULL
  *   - field_name
  *   See _field_invoke() for details.
  *
- * @return
+ * @return array
  *   The array of selected instance definitions.
  */
 function _field_invoke_get_instances($entity_type, $bundle, $options) {
@@ -881,13 +881,13 @@ function field_attach_presave($entity_type, $entity) {
  * Default values (if any) will be saved for fields not present in the
  * $entity.
  *
+ * Default values (if any) will be added to the $entity parameter for fields it
+ * leaves unspecified.
+ *
  * @param $entity_type
  *   The type of $entity; e.g. 'node' or 'user'.
  * @param $entity
  *   The entity with fields to save.
- * @return
- *   Default values (if any) will be added to the $entity parameter for fields
- *   it leaves unspecified.
  */
 function field_attach_insert($entity_type, $entity) {
   _field_invoke_default('insert', $entity_type, $entity);
@@ -1164,7 +1164,8 @@ function field_attach_prepare_view($entity_type, $entities, $view_mode, $langcod
  * @param array $options
  *   An associative array of additional options. See _field_invoke() for
  *   details.
- * @return
+ *
+ * @return array
  *   A renderable array for the field values.
  */
 function field_attach_view($entity_type, $entity, $view_mode, $langcode = NULL, $options = array()) {

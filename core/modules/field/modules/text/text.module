@@ -297,7 +297,7 @@ function text_field_formatter_view($entity_type, $entity, $field, $instance, $la
  * @param $column
  *   The column to sanitize (either 'value' or 'summary').
  *
- * @return
+ * @return string
  *  The sanitized string.
  */
 function _text_sanitize($instance, $langcode, $item, $column) {
@@ -331,7 +331,8 @@ function _text_sanitize($instance, $langcode, $item, $column) {
  *   The desired character length of the summary. If omitted, the default
  *   value will be used. Ignored if the special delimiter is present
  *   in $text.
- * @return
+ *
+ * @return string
  *   The generated summary.
  */
 function text_summary($text, $format_id = NULL, $size = 600) {

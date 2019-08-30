@@ -21,7 +21,7 @@ interface EntityInterface {
   /**
    * Returns the entity identifier (the entity's machine name or numeric ID).
    *
-   * @return
+   * @return string|int\null
    *   The identifier of the entity, or NULL if the entity does not yet have
    *   an identifier.
    */
@@ -33,7 +33,7 @@ interface EntityInterface {
    * Usually an entity is new if no ID exists for it yet. However, entities may
    * be enforced to be new with existing IDs too.
    *
-   * @return
+   * @return bool
    *   TRUE if the entity is new, or FALSE if the entity has already been saved.
    */
   public function isNew();
@@ -41,7 +41,7 @@ interface EntityInterface {
   /**
    * Returns the type of the entity.
    *
-   * @return
+   * @return string
    *   The type of the entity.
    */
   public function entityType();
@@ -49,7 +49,7 @@ interface EntityInterface {
   /**
    * Returns the bundle of the entity.
    *
-   * @return
+   * @return string
    *   The bundle of the entity. Defaults to the entity type if the entity type
    *   does not make use of different bundles.
    */
@@ -58,7 +58,7 @@ interface EntityInterface {
   /**
    * Returns the label of the entity.
    *
-   * @return
+   * @return string
    *   The label of the entity, or NULL if there is no label defined.
    */
   public function label();
@@ -66,7 +66,7 @@ interface EntityInterface {
   /**
    * Returns the URI elements of the entity.
    *
-   * @return
+   * @return array|null
    *   An array containing the 'path' and 'options' keys used to build the URI
    *   of the entity, and matching the signature of url(). NULL if the entity
    *   has no URI of its own.
@@ -107,7 +107,7 @@ interface EntityInterface {
   /**
    * Saves an entity permanently.
    *
-   * @return
+   * @return int
    *   Either SAVED_NEW or SAVED_UPDATED, depending on the operation performed.
    *
    * @throws EntityStorageException

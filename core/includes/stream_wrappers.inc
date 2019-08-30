@@ -137,7 +137,7 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
   /**
    * Returns the stream resource URI.
    *
-   * @return
+   * @return string
    *   Returns the current URI of the instance.
    */
   public function getUri();
@@ -150,7 +150,7 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
    * "youtube://xIpLd0WQKCY" might be
    * "http://www.youtube.com/watch?v=xIpLd0WQKCY".
    *
-   * @return
+   * @return string
    *   Returns a string containing a web accessible URL for the resource.
    */
   public function getExternalUrl();
@@ -166,7 +166,7 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
    *    - 'extensions': the mapping itself, an associative array in which
    *      the key is the extension and the value is the mimetype identifier.
    *
-   * @return
+   * @return string
    *   Returns a string containing the MIME type of the resource.
    */
   public static function getMimeType($uri, $mapping = NULL);
@@ -181,7 +181,7 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
    *   Integer value for the permissions. Consult PHP chmod() documentation
    *   for more information.
    *
-   * @return
+   * @return bool
    *   Returns TRUE on success or FALSE on failure.
    */
   public function chmod($mode);
@@ -193,7 +193,7 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
    * wrappers. We provide this as a default so that individual wrappers may
    * implement their own solutions.
    *
-   * @return
+   * @return string|false
    *   Returns a string with absolute pathname on success (implemented
    *   by core wrappers), or FALSE on failure or if the registered
    *   wrapper does not provide an implementation.
@@ -210,7 +210,7 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
    * @param $uri
    *   An optional URI.
    *
-   * @return
+   * @return string|false
    *   A string containing the directory name, or FALSE if not applicable.
    *
    * @see backdrop_dirname()
@@ -257,7 +257,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * Gets the path that the wrapper is responsible for.
    * @TODO: Review this method name per http://drupal.org/node/701358
    *
-   * @return
+   * @return string
    *   String specifying the path.
    */
   abstract function getDirectoryPath();
@@ -288,7 +288,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * @param $uri
    *   Optional URI.
    *
-   * @return
+   * @return string|false
    *   Returns a string representing a location suitable for writing of a file,
    *   or FALSE if unable to write to the file such as with read-only streams.
    */
@@ -396,7 +396,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * @param $opened_path
    *   A string containing the path actually opened.
    *
-   * @return
+   * @return bool
    *   Returns TRUE if file was opened successfully.
    *
    * @see http://php.net/manual/streamwrapper.stream-open.php
@@ -424,7 +424,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    *   - LOCK_NB if you don't want flock() to block while locking (not
    *     supported on Windows).
    *
-   * @return
+   * @return true
    *   Always returns TRUE at the present time.
    *
    * @see http://php.net/manual/streamwrapper.stream-lock.php
@@ -443,7 +443,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * @param $count
    *   Maximum number of bytes to be read.
    *
-   * @return
+   * @return string|false
    *   The string that was read, or FALSE in case of an error.
    *
    * @see http://php.net/manual/streamwrapper.stream-read.php
@@ -458,7 +458,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * @param $data
    *   The string to be written.
    *
-   * @return
+   * @return int
    *   The number of bytes written (integer).
    *
    * @see http://php.net/manual/streamwrapper.stream-write.php
@@ -470,7 +470,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   /**
    * Support for feof().
    *
-   * @return
+   * @return true
    *   TRUE if end-of-file has been reached.
    *
    * @see http://php.net/manual/streamwrapper.stream-eof.php
@@ -487,7 +487,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * @param $whence
    *   SEEK_SET, SEEK_CUR, or SEEK_END.
    *
-   * @return
+   * @return true
    *   TRUE on success.
    *
    * @see http://php.net/manual/streamwrapper.stream-seek.php
@@ -501,7 +501,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   /**
    * Support for fflush().
    *
-   * @return
+   * @return true
    *   TRUE if data was successfully stored (or there was no data to store).
    *
    * @see http://php.net/manual/streamwrapper.stream-flush.php
@@ -513,7 +513,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   /**
    * Support for ftell().
    *
-   * @return
+   * @return int
    *   The current offset in bytes from the beginning of file.
    *
    * @see http://php.net/manual/streamwrapper.stream-tell.php
@@ -525,7 +525,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   /**
    * Support for fstat().
    *
-   * @return
+   * @return array|false
    *   An array with file status, or FALSE in case of an error - see fstat()
    *   for a description of this array.
    *
@@ -538,7 +538,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   /**
    * Support for fclose().
    *
-   * @return
+   * @return true
    *   TRUE if stream was successfully closed.
    *
    * @see http://php.net/manual/streamwrapper.stream-close.php
@@ -702,7 +702,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * @param $uri
    *   A string containing the URI to the resource to delete.
    *
-   * @return
+   * @return true
    *   TRUE if resource was successfully deleted.
    *
    * @see http://php.net/manual/streamwrapper.unlink.php
@@ -720,7 +720,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * @param $to_uri
    *   The new URI for file.
    *
-   * @return
+   * @return true
    *   TRUE if file was successfully renamed.
    *
    * @see http://php.net/manual/streamwrapper.rename.php
@@ -739,7 +739,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * @param $uri
    *   A URI or path.
    *
-   * @return
+   * @return string
    *   A string containing the directory name.
    *
    * @see backdrop_dirname()
@@ -766,7 +766,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * @param $options
    *   A bit mask of STREAM_REPORT_ERRORS and STREAM_MKDIR_RECURSIVE.
    *
-   * @return
+   * @return true
    *   TRUE if directory was successfully created.
    *
    * @see http://php.net/manual/streamwrapper.mkdir.php
@@ -798,7 +798,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * @param $options
    *   A bit mask of STREAM_REPORT_ERRORS.
    *
-   * @return
+   * @return true
    *   TRUE if directory was successfully removed.
    *
    * @see http://php.net/manual/streamwrapper.rmdir.php
@@ -821,7 +821,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * @param $flags
    *   A bit mask of STREAM_URL_STAT_LINK and STREAM_URL_STAT_QUIET.
    *
-   * @return
+   * @return array|false
    *   An array with file status, or FALSE in case of an error - see fstat()
    *   for a description of this array.
    *
@@ -848,7 +848,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * @param $options
    *   Unknown (parameter is not documented in PHP Manual).
    *
-   * @return
+   * @return true
    *   TRUE on success.
    *
    * @see http://php.net/manual/streamwrapper.dir-opendir.php
@@ -863,7 +863,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   /**
    * Support for readdir().
    *
-   * @return
+   * @return string|false
    *   The next filename, or FALSE if there are no more files in the directory.
    *
    * @see http://php.net/manual/streamwrapper.dir-readdir.php
@@ -875,7 +875,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   /**
    * Support for rewinddir().
    *
-   * @return
+   * @return true
    *   TRUE on success.
    *
    * @see http://php.net/manual/streamwrapper.dir-rewinddir.php
@@ -891,7 +891,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   /**
    * Support for closedir().
    *
-   * @return
+   * @return true
    *   TRUE on success.
    *
    * @see http://php.net/manual/streamwrapper.dir-closedir.php

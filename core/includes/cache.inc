@@ -52,7 +52,7 @@ function cache($bin = 'cache') {
  *   "update", "views", and "views_data". Bin names may include the prefix of
  *   "cache_", but it is stripped out before execution.
  *
- * @return
+ * @return [varies]
  *   The cache or FALSE on failure.
  */
 function cache_get($cid, $bin = 'cache') {
@@ -72,7 +72,7 @@ function cache_get($cid, $bin = 'cache') {
  *   "update", "views", and "views_data". Bin names may include the prefix of
  *   "cache_", but it is stripped out before execution
  *
- * @return
+ * @return array
  *   An array of the items successfully returned from cache indexed by cid.
  */
 function cache_get_multiple(array &$cids, $bin = 'cache') {
@@ -203,7 +203,7 @@ function cache_clear_all($cid = NULL, $bin = NULL, $wildcard = FALSE) {
  * @param string $bin
  *   The cache bin to check.
  *
- * @return
+ * @return bool
  *   TRUE if the cache bin specified is empty.
  */
 function cache_is_empty($bin) {
@@ -258,7 +258,7 @@ interface BackdropCacheInterface {
    * @param string $cid
    *   The cache ID of the data to retrieve.
    *
-   * @return
+   * @return [varies]
    *   The cache or FALSE on failure.
    */
   function get($cid);
@@ -271,7 +271,7 @@ interface BackdropCacheInterface {
    *   reference, and will have the IDs successfully returned from cache
    *   removed.
    *
-   * @return
+   * @return array
    *   An array of the items successfully returned from cache indexed by cid.
    */
    function getMultiple(array &$cids);
@@ -343,7 +343,7 @@ interface BackdropCacheInterface {
    * A cache bin is considered empty if it does not contain any valid data for
    * any cache ID.
    *
-   * @return
+   * @return bool
    *   TRUE if the cache bin specified is empty.
    */
   function isEmpty();

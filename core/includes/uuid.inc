@@ -13,7 +13,7 @@ interface UuidInterface {
   /**
    * Generates a Universally Unique IDentifier (UUID).
    *
-   * @return
+   * @return string
    *   A 32 byte integer represented as a hex string formatted with 4 hypens.
    */
   public function generate();
@@ -59,7 +59,7 @@ class Uuid {
    * @param $uuid
    *   The string to test.
    *
-   * @return
+   * @return true
    *   TRUE if the string is well formed.
    */
   public function isValid($uuid) {
@@ -72,7 +72,7 @@ class Uuid {
    * The selection is made based on the enabled PHP extensions with the
    * most performant available option chosen.
    *
-   * @return
+   * @return string
    *  The class name for the optimal UUID generator.
    */
   protected function determinePlugin() {

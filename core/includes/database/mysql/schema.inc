@@ -26,7 +26,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
   /**
    * Get information about the table and database name from the prefix.
    *
-   * @return
+   * @return array
    *   A keyed array with information about the database, table name and prefix.
    */
   protected function getPrefixInfo($table = 'default', $add_prefix = TRUE) {
@@ -70,7 +70,8 @@ class DatabaseSchema_mysql extends DatabaseSchema {
    *   The name of the table to create.
    * @param $table
    *   A Schema API table definition array.
-   * @return
+   *
+   * @return array
    *   An array of SQL statements to create the table.
    */
   protected function createTableSql($name, $table) {

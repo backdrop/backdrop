@@ -80,7 +80,7 @@ function _backdrop_error_handler_real($error_level, $message, $filename, $line, 
  *   The exception or error object that was thrown. PHP 7 throws Error objects
  *   for PHP errors.
  *
- * @return
+ * @return array
  *   An error in the format expected by _backdrop_log_error().
  */
 function _backdrop_decode_exception($exception) {
@@ -127,7 +127,7 @@ function _backdrop_decode_exception($exception) {
  * @param $exception
  *   The exception object that was thrown.
  *
- * @return
+ * @return string
  *   An error message.
  */
 function _backdrop_render_exception_safe($exception) {
@@ -144,7 +144,7 @@ function _backdrop_render_exception_safe($exception) {
  * @param $error
  *   Optional error to examine for ERROR_REPORTING_DISPLAY_SOME.
  *
- * @return
+ * @return true
  *   TRUE if an error should be displayed.
  */
 function error_displayable($error = NULL) {
@@ -260,7 +260,7 @@ function _backdrop_log_error($error, $fatal = FALSE) {
  * @param $backtrace
  *   A standard PHP backtrace.
  *
- * @return
+ * @return array
  *   An associative array with keys 'file', 'line' and 'function'.
  */
 function _backdrop_get_last_caller($backtrace) {

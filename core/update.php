@@ -288,7 +288,7 @@ function update_results_page() {
  * This page provides cautionary suggestions that should happen before
  * proceeding with the update to ensure data integrity.
  *
- * @return
+ * @return string
  *   Rendered HTML form.
  */
 function update_info_page() {
@@ -337,7 +337,7 @@ function update_info_page() {
 /**
  * Renders a 403 access denied page for update.php.
  *
- * @return
+ * @return string
  *   Rendered HTML warning with 403 status.
  */
 function update_access_denied_page() {
@@ -364,7 +364,7 @@ function update_access_denied_page() {
 /**
  * Determines if the current user is allowed to run update.php.
  *
- * @return
+ * @return bool
  *   TRUE if the current user should be granted access, or FALSE otherwise.
  */
 function update_access_allowed() {

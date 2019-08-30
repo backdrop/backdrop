@@ -31,7 +31,7 @@
  *     $graph[3]['reverse_paths'][1] = 1;
  *   @endcode
  *
- * @return
+ * @return array
  *   The passed-in $graph with more secondary keys filled in:
  *   - 'paths': Contains a list of vertices than can be reached on a path from
  *     this vertex.

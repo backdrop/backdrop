@@ -45,7 +45,7 @@
  *     - settings: each omitted setting is given the default value specified in
  *       hook_field_storage_info().
  *
- * @return
+ * @return array
  *   The $field array with the id property filled in.
  *
  * @throws FieldException
@@ -138,14 +138,15 @@ function field_create_field($field) {
  * semantics, or if there are external dependencies on field settings
  * that cannot be updated.
  *
+ * Throws a FieldException if the update cannot be performed.
+ *
  * @param $field
  *   A field structure. $field['field_name'] must provided; it
  *   identifies the field that will be updated to match this
  *   structure. Any other properties of the field that are not
  *   specified in $field will be left unchanged, so it is not
  *   necessary to pass in a fully populated $field structure.
- * @return
- *   Throws a FieldException if the update cannot be performed.
+ *
  * @see field_create_field()
  */
 function field_update_field($field) {
@@ -301,7 +302,8 @@ function field_validate_field($field, $update = FALSE) {
  *   is inactive. Setting
  *   $include_additional['include_inactive'] to TRUE will override this
  *   behavior.
- * @return
+ *
+ * @return array|false
  *   A field definition array, or FALSE.
  */
 function field_read_field($field_name, $include_additional = array()) {
@@ -320,7 +322,8 @@ function field_read_field($field_name, $include_additional = array()) {
  *   $include_additional['include_inactive'] or
  *   $include_additional['include_deleted'] to TRUE will override this
  *   behavior.
- * @return
+ *
+ * @return array
  *   An array of fields matching $params. If
  *   $include_additional['include_deleted'] is TRUE, the array is keyed
  *   by field id, otherwise it is keyed by field name.
@@ -481,7 +484,7 @@ function field_delete_field($field_name) {
  *     Display modes not present in the definition are left empty, and the field
  *     will not be displayed in this mode.
  *
- * @return
+ * @return array
  *   The $instance array with the id property filled in.
  *
  * @throws FieldException
@@ -699,7 +702,8 @@ function _field_write_instance($instance, $update = FALSE) {
  *   $include_additional['include_inactive'] or
  *   $include_additional['include_deleted'] to TRUE will override this
  *   behavior.
- * @return
+ *
+ * @return array|false
  *   An instance structure, or FALSE.
  */
 function field_read_instance($entity_type, $field_name, $bundle, $include_additional = array()) {
@@ -722,7 +726,8 @@ function field_read_instance($entity_type, $field_name, $bundle, $include_additi
  *   Setting $include_additional['include_inactive'] or
  *   $include_additional['include_deleted'] to TRUE will override this
  *   behavior.
- * @return
+ *
+ * @return array
  *   An array of instances matching the arguments.
  */
 function field_read_instances($params = array(), $include_additional = array()) {

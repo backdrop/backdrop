@@ -218,7 +218,7 @@ function field_ui_menu() {
  * @param $map
  *   The translated menu router path argument map.
  *
- * @return
+ * @return array
  *   The field instance array.
  *
  * @ingroup field

@@ -154,7 +154,7 @@ Backdrop.behaviors.machineName = {
    *   - langcode: The language of the source string with which transliteration
    *     should be performed.
    *
-   * @return
+   * @return string
    *   The transliterated source string.
    */
   transliterate: function (source, settings) {
@@ -172,7 +172,7 @@ Backdrop.behaviors.machineName = {
       url: Backdrop.settings.basePath + "?q=" + Backdrop.encodePath("system/transliterate/" + urlAppend),
       data: transliterationOptions,
       dataType: "text"
-    }); 
+    });
   }
 };
 

@@ -16,7 +16,7 @@
  * can be loaded via entity_load() and, optionally, to which fields can be
  * attached).
  *
- * @return
+ * @return array
  *   An array whose keys are entity type names and whose values identify
  *   properties of those types that the system needs to know about:
  *   - label: The human-readable name of the type.

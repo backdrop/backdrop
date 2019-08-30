@@ -701,7 +701,7 @@ function _field_ui_field_overview_form_validate_add_new($form, &$form_state) {
  * @param $value
  *   The machine name, not prefixed with 'field_'.
  *
- * @return
+ * @return bool
  *   Whether or not the field machine name is taken.
  */
 function _field_ui_field_name_exists($value) {

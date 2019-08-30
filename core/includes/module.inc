@@ -11,7 +11,7 @@
  *   Whether to load only the reduced set of modules loaded in "bootstrap mode"
  *   for cached pages. See bootstrap.inc.
  *
- * @return
+ * @return bool
  *   If $bootstrap is NULL, return a boolean indicating whether all modules
  *   have been loaded.
  */
@@ -62,7 +62,7 @@ function module_load_all($bootstrap = FALSE) {
  *   parameter is primarily intended for internal use (e.g., in install.php and
  *   update.php).
  *
- * @return
+ * @return array
  *   An associative array whose keys and values are the names of the modules in
  *   the list.
  */
@@ -117,7 +117,7 @@ function module_list($refresh = FALSE, $bootstrap_refresh = FALSE, $sort = FALSE
  *   - bootstrap: All enabled modules required for bootstrap.
  *   - theme: All themes.
  *
- * @return
+ * @return array
  *   An associative array of modules or themes, keyed by name. For $type
  *   'bootstrap', the array values equal the keys. For $type 'module_enabled'
  *   or 'theme', the array values are objects representing the respective
@@ -238,7 +238,7 @@ function system_list_reset() {
  * @param $files
  *   The array of filesystem objects used to rebuild the cache.
  *
- * @return
+ * @return array
  *   The same array with the new keys for each module:
  *   - requires: An array with the keys being the modules that this module
  *     requires.
@@ -285,7 +285,7 @@ function module_exists($module) {
  * @param $module
  *   The name of the module (without the .module extension).
  *
- * @return
+ * @return string|false
  *   The name of the module's install file, if successful; FALSE otherwise.
  */
 function module_load_install($module) {
@@ -319,7 +319,7 @@ function module_load_install($module) {
  *   (optional) The base file name (without the $type extension). If omitted,
  *   $module is used; i.e., resulting in "$module.$type" by default.
  *
- * @return
+ * @return string|false
  *   The name of the included file, if successful; FALSE otherwise.
  */
 function module_load_include($type, $module, $name = NULL) {
@@ -679,7 +679,7 @@ function module_disable($module_list, $disable_dependents = TRUE) {
  * @param $hook
  *   The name of the hook (e.g. "help" or "menu").
  *
- * @return
+ * @return true
  *   TRUE if the module is both installed and enabled, and the hook is
  *   implemented in that module.
  */
@@ -832,7 +832,7 @@ function module_implements_reset() {
 /**
  * Retrieves a list of hooks that are declared through hook_hook_info().
  *
- * @return
+ * @return array
  *   An associative array whose keys are hook names and whose values are an
  *   associative array containing a group name. The structure of the array
  *   is the same as the return value of hook_hook_info().
@@ -941,7 +941,7 @@ function module_invoke($module, $hook) {
  * @param ...
  *   Arguments to pass to the hook.
  *
- * @return
+ * @return array
  *   An array of return values of the hook implementations. If modules return
  *   arrays from their implementations, those are merged into one array
  *   recursively. Note: integer keys in arrays will be lost, as the merge is

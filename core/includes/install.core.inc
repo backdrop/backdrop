@@ -322,7 +322,7 @@ function install_begin_request(&$install_state) {
  *   An array of information about the current installation state. This is
  *   passed along to each task, so it can be modified if necessary.
  *
- * @return
+ * @return string
  *   HTML output from the last completed task.
  */
 function install_run_tasks(&$install_state) {
@@ -494,7 +494,7 @@ function install_run_task($task, &$install_state) {
  * @param $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return array
  *   A list of tasks to be performed, with associated metadata as returned by
  *   hook_install_tasks().
  */
@@ -528,7 +528,7 @@ function install_tasks_to_perform($install_state) {
  * @param $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return array
  *   A list of tasks, with associated metadata.
  */
 function install_tasks($install_state) {
@@ -655,7 +655,7 @@ function install_tasks($install_state) {
  * @param $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return array
  *   A list of tasks, with keys equal to the machine-readable task name and
  *   values equal to the name that should be displayed.
  *
@@ -679,7 +679,7 @@ function install_tasks_to_display($install_state) {
  * @param $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return string
  *   The URL to redirect to.
  *
  * @see install_full_redirect_url()
@@ -694,7 +694,7 @@ function install_redirect_url($install_state) {
  * @param $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return string
  *   The complete URL to redirect to.
  *
  * @see install_redirect_url()
@@ -1294,7 +1294,7 @@ function install_find_translations() {
  *   want to find translation files. If omitted, information on all available
  *   files will be returned.
  *
- * @return
+ * @return array
  *   An associative array of file information objects keyed by file URIs as
  *   returned by file_scan_directory().
  *
@@ -1519,7 +1519,7 @@ function install_bootstrap_full(&$install_state) {
  * @param $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return array
  *   The batch definition.
  */
 function install_profile_modules(&$install_state) {
@@ -1655,7 +1655,7 @@ function install_configure_form($form, &$form_state, &$install_state) {
  * @param $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return array
  *   The batch definition, if there are language files to import.
  *
  * @todo
@@ -1674,7 +1674,7 @@ function install_import_translations_remaining(&$install_state) {
  * @param $install_state
  *   An array of information about the current installation state.
  *
- * @return
+ * @return string
  *   A message informing the user that the installation is complete.
  */
 function install_finished(&$install_state) {

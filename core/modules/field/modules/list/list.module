@@ -247,7 +247,7 @@ function list_field_delete_field($field) {
  * @param $entity
  *   (optional) The entity object. Defaults to NULL.
  *
- * @return
+ * @return array
  *   The array of allowed values. Keys of the array are the raw stored values
  *   (number or text), values of the array are the display labels.
  */
@@ -290,7 +290,7 @@ function list_allowed_values($field, $instance = NULL, $entity_type = NULL, $ent
  *   the value if a key is not manually specified, and if the value cannot be
  *   used as a key. This should only be TRUE for fields of type 'list_number'.
  *
- * @return
+ * @return array
  *   The array of extracted key/value pairs, or NULL if the string is invalid.
  *
  * @see list_allowed_values_string()
@@ -357,7 +357,7 @@ function list_extract_allowed_values($string, $field_type, $generate_keys) {
  *   An array of values, where array keys are values and array values are
  *   labels.
  *
- * @return
+ * @return string
  *   The string representation of the $values array:
  *    - Values are separated by a carriage return.
  *    - Each value is in the format "value|label" or "value".

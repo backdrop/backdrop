@@ -26,7 +26,7 @@
  * @see _field_extra_fields_pre_render()
  * @see hook_field_extra_fields_alter()
  *
- * @return
+ * @return array
  *   A nested array of 'pseudo-field' elements. Each list is nested within the
  *   following keys: entity type, bundle name, context (either 'form' or
  *   'display'). The keys are the name of the elements as appearing in the
@@ -114,7 +114,7 @@ function hook_field_extra_fields_alter(&$info) {
  * Along with this hook, you also need to implement other hooks. See
  * @link field_types Field Types API @endlink for more information.
  *
- * @return
+ * @return array
  *   An array whose keys are field type names and whose values are arrays
  *   describing the field type, with the following key/value pairs:
  *   - label: The human-readable name of the field type.
@@ -209,7 +209,7 @@ function hook_field_info_alter(&$info) {
  * @param $field
  *   A field structure.
  *
- * @return
+ * @return array
  *   An associative array with the following keys:
  *   - columns: An array of Schema API column specifications, keyed by column
  *     name. This specifies what comprises a value for a given field. For
@@ -670,7 +670,7 @@ function hook_field_prepare_translation($entity_type, $entity, $field, $instance
  * @param $field
  *   The field to which $item belongs.
  *
- * @return
+ * @return bool
  *   TRUE if $field's type considers $item not to contain any data;
  *   FALSE otherwise.
  */
@@ -709,7 +709,7 @@ function hook_field_is_empty($item, $field) {
 /**
  * Expose Field API widget types.
  *
- * @return
+ * @return array
  *   An array describing the widget types implemented by the module.
  *   The keys are widget type names. To avoid name clashes, widget type
  *   names should be prefixed with the name of the module that exposes them.
@@ -865,7 +865,7 @@ function hook_field_widget_info_alter(&$info) {
  *   - #delta: The order of this item in the array of subelements; see $delta
  *     above.
  *
- * @return
+ * @return array
  *   The form elements for a single widget for this field.
  *
  * @see field_widget_field()
@@ -1028,7 +1028,7 @@ function hook_field_widget_error($element, $error, $form, &$form_state) {
  * called by the Field Attach API field_attach_prepare_view() and
  * field_attach_view() functions.
  *
- * @return
+ * @return array
  *   An array describing the formatter types implemented by the module.
  *   The keys are formatter type names. To avoid name clashes, formatter type
  *   names should be prefixed with the name of the module that exposes them.
@@ -1108,6 +1108,9 @@ function hook_field_formatter_info_alter(&$info) {
  * For performance reasons, information for all available entities should be
  * loaded in a single query where possible.
  *
+ * Changes or additions to field values are done by altering the $items
+ * parameter by reference.
+ *
  * @param $entity_type
  *   The type of $entity.
  * @param $entities
@@ -1124,10 +1127,6 @@ function hook_field_formatter_info_alter(&$info) {
  *   Array of field values for the entities, keyed by entity ID.
  * @param $displays
  *   Array of display settings to use for each entity, keyed by entity ID.
- *
- * @return
- *   Changes or additions to field values are done by altering the $items
- *   parameter by reference.
  */
 function hook_field_formatter_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items, $displays) {
   $tids = array();
@@ -1190,7 +1189,7 @@ function hook_field_formatter_prepare_view($entity_type, $entities, $field, $ins
  *   - type: The name of the formatter to use.
  *   - settings: The array of formatter settings.
  *
- * @return
+ * @return array
  *   A renderable array for the $items, as an array of child elements keyed
  *   by numeric indexes starting from 0.
  */
@@ -1672,7 +1671,7 @@ function hook_field_attach_delete_bundle($entity_type, $bundle, $instances) {
 /**
  * Expose Field API storage backends.
  *
- * @return
+ * @return array
  *   An array describing the storage backends implemented by the module.
  *   The keys are storage backend names. To avoid name clashes, storage backend
  *   names should be prefixed with the name of the module that exposes them.
@@ -1721,7 +1720,7 @@ function hook_field_storage_info_alter(&$info) {
  * @param $field
  *   A field structure.
  *
- * @return
+ * @return array
  *   An array of details.
  *    - The first dimension is a store type (sql, solr, etc).
  *    - The second dimension indicates the age of the values in the store
@@ -2020,7 +2019,7 @@ function hook_field_storage_delete_revision($entity_type, $entity, $fields) {
  * @param EntityFieldQuery $query
  *   An EntityFieldQuery.
  *
- * @return
+ * @return int|array
  *   See EntityFieldQuery::execute() for the return values.
  */
 function hook_field_storage_query($query) {
@@ -2237,6 +2236,8 @@ function hook_field_storage_pre_load($entity_type, $entities, $age, &$skip_field
  * This hook allows modules to store data before the Field Storage API,
  * optionally preventing the field storage module from doing so.
  *
+ * Saved field IDs are set set as keys in $skip_fields.
+ *
  * @param $entity_type
  *   The type of $entity; for example, 'node' or 'user'.
  * @param $entity
@@ -2245,8 +2246,6 @@ function hook_field_storage_pre_load($entity_type, $entities, $age, &$skip_field
  *   An array keyed by field IDs whose data has already been written and
  *   therefore should not be written again. The values associated with these
  *   keys are not specified.
- * @return
- *   Saved field IDs are set set as keys in $skip_fields.
  */
 function hook_field_storage_pre_insert($entity_type, $entity, &$skip_fields) {
   if ($entity_type == 'node' && $entity->status) {
@@ -2274,6 +2273,8 @@ function hook_field_storage_pre_insert($entity_type, $entity, &$skip_fields) {
  * This hook allows modules to store data before the Field Storage API,
  * optionally preventing the field storage module from doing so.
  *
+ * Saved field IDs are set set as keys in $skip_fields.
+ *
  * @param $entity_type
  *   The type of $entity; for example, 'node' or 'user'.
  * @param $entity
@@ -2282,8 +2283,6 @@ function hook_field_storage_pre_insert($entity_type, $entity, &$skip_fields) {
  *   An array keyed by field IDs whose data has already been written and
  *   therefore should not be written again. The values associated with these
  *   keys are not specified.
- * @return
- *   Saved field IDs are set set as keys in $skip_fields.
  */
 function hook_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
   $first_call = &backdrop_static(__FUNCTION__, array());
@@ -2334,7 +2333,8 @@ function hook_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
  * @param $context
  *   The context for which the maximum weight is requested. Either 'form', or
  *   the name of a display mode.
- * @return
+ *
+ * @return int|null
  *   The maximum weight of the entity's components, or NULL if no components
  *   were found.
  *
@@ -2759,7 +2759,7 @@ function hook_field_storage_purge($entity_type, $entity, $field, $instance) {
  * @param $account
  *   (optional) The account to check; if not given use currently logged in user.
  *
- * @return
+ * @return bool
  *   TRUE if the operation is allowed, and FALSE if the operation is denied.
  *
  * @ingroup field_types
