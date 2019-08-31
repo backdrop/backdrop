@@ -157,12 +157,12 @@ function system_requirements($phase) {
         $pdo_message = $t('Your web server seems to have the wrong version of PDO installed. Backdrop CMS requires the PDO extension from PHP core. This system has the older PECL version. See the <a href="@link" target="_blank">System Requirements</a> page for more information.');
       }
     }
-    $pdo_message .= ' ' . $t('See the <a href="@link" target="_blank">System Requirements</a> page for more information.', array('@link' => 'https://backdropcms.org/requirements'));
 
     if (isset($pdo_message)) {
+      $pdo_more_info = $t('See the <a href="@link" target="_blank">System Requirements</a> page for more information.', array('@link' => 'https://backdropcms.org/requirements'));
       $requirements['database_extensions']['value'] = $t('Disabled');
       $requirements['database_extensions']['severity'] = REQUIREMENT_ERROR;
-      $requirements['database_extensions']['description'] = $pdo_message;
+      $requirements['database_extensions']['description'] = $pdo_message . ' ' . $pdo_more_info;
     }
     else {
       $requirements['database_extensions']['value'] = $t('Enabled');
@@ -402,7 +402,7 @@ function system_requirements($phase) {
       $requirements['update access'] = array(
         'value' => $t('Not protected'),
         'severity' => REQUIREMENT_ERROR,
-        'description' => $t('The <code>update.php</code> script is accessible to everyone without authentication check, which is a security risk. You must change the <code>$update_free_access</code> value in your <code>settings.php</code> back to <code>FALSE</code>.'),
+        'description' => $t('The <code>update.php</code> script is accessible to everyone without authentication check, which is a security risk. You must change the <code>update_free_access</code> value in your <code>settings.php</code> back to <code>FALSE</code>.'),
       );
     }
     else {
