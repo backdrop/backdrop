@@ -4,7 +4,7 @@
     "default": {
         "file_field_file_audio": {
             "status": 1,
-            "weight": "0",
+            "weight": "50",
             "settings": {
                 "controls": 1,
                 "autoplay": 0,
@@ -15,28 +15,28 @@
         },
         "file_field_file_download_link": {
             "status": 0,
-            "weight": "0",
+            "weight": "50",
             "settings": {
                 "text": "Download [file:name]"
             }
         },
         "file_field_file_default": {
             "status": 0,
-            "weight": "0"
+            "weight": "50"
         },
         "file_field_file_table": {
             "status": 0,
-            "weight": "0"
+            "weight": "50"
         },
         "file_field_file_url_plain": {
             "status": 0,
-            "weight": "0"
+            "weight": "50"
         }
     },
     "preview": {
         "file_field_file_audio": {
             "status": 0,
-            "weight": "0",
+            "weight": "50",
             "settings": {
                 "controls": 1,
                 "autoplay": 0,
@@ -47,22 +47,22 @@
         },
         "file_field_file_download_link": {
             "status": 0,
-            "weight": "0",
+            "weight": "50",
             "settings": {
                 "text": "Download [file:name]"
             }
         },
         "file_field_file_default": {
             "status": 1,
-            "weight": "0"
+            "weight": "50"
         },
         "file_field_file_table": {
             "status": 0,
-            "weight": "0"
+            "weight": "50"
         },
         "file_field_file_url_plain": {
             "status": 0,
-            "weight": "0"
+            "weight": "50"
         }
     }
 }

@@ -4,18 +4,18 @@
     "default": {
         "file_field_file_download_link": {
             "status": 0,
-            "weight": "0",
+            "weight": "50",
             "settings": {
                 "text": "Download [file:name]"
             }
         },
         "file_field_file_default": {
             "status": 1,
-            "weight": "0"
+            "weight": "50"
         },
         "file_field_image": {
             "status": 1,
-            "weight": "0",
+            "weight": "48",
             "settings": {
                 "image_style": "",
                 "image_link": "",
@@ -24,21 +24,21 @@
         },
         "file_field_file_table": {
             "status": 0,
-            "weight": "0"
+            "weight": "50"
         },
         "file_field_file_url_plain": {
             "status": 0,
-            "weight": "0"
+            "weight": "50"
         }
     },
     "preview": {
         "file_field_file_default": {
             "status": 1,
-            "weight": "0"
+            "weight": "50"
         },
         "file_field_image": {
             "status": 1,
-            "weight": "0",
+            "weight": "48",
             "settings": {
                 "image_style": "thumbnail",
                 "image_link": "",
@@ -47,11 +47,11 @@
         },
         "file_field_file_table": {
             "status": 0,
-            "weight": "0"
+            "weight": "50"
         },
         "file_field_file_url_plain": {
             "status": 0,
-            "weight": "0"
+            "weight": "50"
         }
     }
 }
