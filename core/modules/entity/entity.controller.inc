@@ -175,12 +175,12 @@ class DefaultEntityController implements EntityControllerInterface {
       $revision_id = FALSE;
     }
 
-    // Create a new variable which is either a prepared version of the $ids
-    // array for later comparison with the entity cache, or FALSE if no $ids
+    // Create a new variable, which is either a prepared version of the $ids
+    // array (for later comparison with the entity cache), or FALSE if no $ids
     // were passed. The $ids array is reduced as items are loaded from cache,
-    // and we need to know if it's empty for this reason to avoid querying the
+    // and we need to know if it's empty for this reason, to avoid querying the
     // database when all requested entities are loaded from cache.
-    $passed_ids = !empty($ids) ? array_flip($ids) : FALSE;
+    $passed_ids = is_array($ids) && !empty($ids) && !is_array(current($ids)) ? array_flip(array_filter($ids)) : FALSE;
     // Try to load entities from the static cache, if the entity type supports
     // static caching.
     if ($this->cache && !$revision_id) {
@@ -364,7 +364,8 @@ class DefaultEntityController implements EntityControllerInterface {
     // Load any available entities from the internal cache.
     if (!empty($this->entityCache)) {
       if ($ids) {
-        $entities += array_intersect_key($this->entityCache, array_flip($ids));
+        if (is_array(current($ids))) { $ids = current($ids); }
+        $entities += array_intersect_key($this->entityCache, array_flip(array_filter((array) $ids)));
       }
       // If loading entities only by conditions, fetch all available entities
       // from the cache. Entities which don't match are removed later.
