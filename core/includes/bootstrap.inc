@@ -703,8 +703,15 @@ function backdrop_environment_initialize() {
   }
 
   if (isset($_SERVER['HTTP_HOST'])) {
+    // As HTTP_HOST is user input, ensure it only contains characters allowed
+    // in hostnames. See RFC 952 (and RFC 2181).
     // $_SERVER['HTTP_HOST'] is lowercased here per specifications.
     $_SERVER['HTTP_HOST'] = strtolower($_SERVER['HTTP_HOST']);
+    if (!backdrop_valid_http_host($_SERVER['HTTP_HOST'])) {
+      // HTTP_HOST is invalid, e.g. if containing slashes it may be an attack.
+      header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request');
+      exit;
+    }
   }
   else {
     // Some pre-HTTP/1.1 clients will not send a Host header. Ensure the key is
@@ -768,8 +775,7 @@ function backdrop_valid_http_host($host) {
     // in conf_path().
     && substr_count($host, '.') <= 100
     && substr_count($host, ':') <= 100
-    && preg_match('/^\[?(?:[a-zA-Z0-9-:\]_]+\.?)+$/', $host)
-    && backdrop_check_trusted_hosts($host);
+    && preg_match('/^\[?(?:[a-zA-Z0-9-:\]_]+\.?)+$/', $host);
 }
 
 /**
@@ -3001,19 +3007,9 @@ function _backdrop_bootstrap_configuration() {
     install_goto('core/install.php');
   }
 
-  // As HTTP_HOST is user input, ensure it only contains characters allowed
-  // in hostnames. See RFC 952 (and RFC 2181).
-  if (!backdrop_valid_http_host($_SERVER['HTTP_HOST'])) {
-    // Untrusted host names, throw an exception for the end-user.
-    if (!backdrop_check_trusted_hosts($_SERVER['HTTP_HOST'])) {
-      throw new Exception(format_string('The HTTP Host "@hostname" is not white-listed for this site. Check the trusted_host_patterns setting in settings.php.', array('@hostname' => $_SERVER['HTTP_HOST'])));
-    }
-    else {
-      // HTTP_HOST is invalid, e.g. if containing slashes it may be an attack.
-      // Fail silently.
-      header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request');
-      exit();
-    }
+  // Untrusted host names, throw an exception for the end-user.
+  if (!defined('MAINTENANCE_MODE') && !backdrop_check_trusted_hosts($_SERVER['HTTP_HOST'])) {
+    throw new Exception(format_string('The HTTP Host "@hostname" is not white-listed for this site. Check the trusted_host_patterns setting in settings.php.', array('@hostname' => $_SERVER['HTTP_HOST'])));
   }
 
   // Check that the config directory is not empty.
