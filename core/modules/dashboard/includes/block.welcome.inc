@@ -130,7 +130,7 @@ class DashboardWelcomeBlock extends Block {
   private function filterAvailableLinks(array $links) {
     $html_links = array();
     foreach ($links as $path => $label) {
-      if (url_is_external($path)) {
+      if (url_is_external($path) || $path === '<front>') {
         $access = TRUE;
       }
       else {
