@@ -19,7 +19,9 @@
         "header": [
             "eb936b48-d2ec-4d9f-9dd9-ef24a1ad3493"
         ],
-        "top": [],
+        "top": [
+            "a314b689-83cf-460e-9635-946582740e22"
+        ],
         "content": [],
         "half1": [
             "5a4ec847-16c1-45dd-b168-58afed5081d4",
@@ -50,6 +52,30 @@
                     "contexts": []
                 },
                 "uuid": "eb936b48-d2ec-4d9f-9dd9-ef24a1ad3493",
+                "style": {
+                    "plugin": "default",
+                    "data": {
+                        "settings": {
+                            "classes": ""
+                        }
+                    }
+                }
+            }
+        },
+        "a314b689-83cf-460e-9635-946582740e22": {
+            "plugin": "dashboard:welcome",
+            "data": {
+                "module": "dashboard",
+                "delta": "welcome",
+                "settings": {
+                    "title_display": "default",
+                    "title": "",
+                    "style": "default",
+                    "block_settings": [],
+                    "contexts": [],
+                    "types": []
+                },
+                "uuid": "a314b689-83cf-460e-9635-946582740e22",
                 "style": {
                     "plugin": "default",
                     "data": {
