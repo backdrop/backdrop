@@ -303,43 +303,35 @@ function file_display_form($form, &$form_state, $file_type, $view_mode) {
     '#title' => t('Display type'),
     '#options' => array(),
     '#default_value' => config_get('file_display.' . $file_type->type, $view_mode . '.status'),
-    '#prefix' => '<div id="file-displays-status-wrapper">',
-    '#suffix' => '</div>',
   );
 
   $formatters = array_reverse($formatters);
+
   foreach ($formatters as $name => $formatter) {
     $form['displays']['status']['#options'][$name] = check_plain($formatter['label']);
     $form['displays']['status'][$name]['#description'] = isset($formatter['description']) ? filter_xss($formatter['description']) : NULL;
-  }
 
-
-  // Formatter settings.
-  $form['display_settings_title'] = array(
-    '#type' => 'item',
-    '#title' => t('Display settings'),
-  );
-  $form['display_settings'] = array(
-    '#type' => 'vertical_tabs',
-  );
-  $i = 0;
-  foreach ($formatters as $name => $formatter) {
     if (isset($formatter['settings callback']) && ($function = $formatter['settings callback']) && function_exists($function)) {
+
       $defaults = !empty($formatter['default settings']) ? $formatter['default settings'] : array();
       $settings = !empty($current_displays[$name]['settings']) ? $current_displays[$name]['settings'] : array();
       $settings += $defaults;
       $settings_form = $function($form, $form_state, $settings, $name, $file_type->type, $view_mode);
+
       if (!empty($settings_form)) {
         $form['displays']['settings'][$name] = array(
           '#type' => 'fieldset',
-          '#title' => check_plain($formatter['label']),
+          '#title' => check_plain($formatter['label']) . ' ' . t('settings'),
           '#parents' => array('displays', $name, 'settings'),
           '#group' => 'display_settings',
-          '#weight' => (isset($formatter['weight']) ? $formatter['weight'] : 0) + ($i / 1000),
+          '#states' => array(
+            'visible' => array(
+              ':input[name="displays[status]"]' => array('value' => $name),
+            ),
+          ),
         ) + $settings_form;
       }
     }
-    $i++;
   }
 
   $form['actions'] = array('#type' => 'actions');
