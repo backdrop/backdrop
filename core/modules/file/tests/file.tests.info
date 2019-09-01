@@ -100,12 +100,6 @@ description = Create a file and verify its usage.
 group = File
 file = file.test
 
-[FileAltTitleTestCase]
-name = File alt and title text
-description = Create an image file with alt and title text.
-group = File
-file = file.test
-
 [FileChangeSchemeTestCase]
 name = Changing file scheme
 description = Test changing the scheme of a file.

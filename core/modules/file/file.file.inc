@@ -160,35 +160,11 @@ function file_file_mimetype_mapping_alter(&$mapping) {
 function file_file_load($files) {
   // Add alt and title text to images.
   $config = config('file.settings');
-  $alt = $config->get('entity_alt');
-  $title = $config->get('entity_title');
 
   $replace_options = array(
     'clear' => TRUE,
     'sanitize' => FALSE,
   );
-
-  foreach ($files as $file) {
-    $file->metadata = array();
-
-    // Load alt and title text from fields.
-    if (!empty($alt)) {
-      $output = token_replace($alt, array('file' => $file), $replace_options);
-
-      // @todo Remove once https://www.drupal.org/node/1713164 is fixed.
-      // There is currently no way to get the raw alt text returned from the
-      // token so we revert the encoding done during tokenization.
-      $file->alt = decode_entities($output);
-    }
-    if (!empty($title)) {
-      $output = token_replace($title, array('file' => $file), $replace_options);
-
-      // @todo Remove once https://www.drupal.org/node/1713164 is fixed.
-      // There is currently no way to get the raw title text returned from the
-      // token so we revert the encoding done during tokenization.
-      $file->title = decode_entities($output);
-    }
-  }
 
   // Load and unserialize metadata.
   $results = db_query("SELECT * FROM {file_metadata} WHERE fid IN (:fids)", array(':fids' => array_keys($files)));

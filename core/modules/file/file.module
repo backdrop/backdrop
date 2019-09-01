@@ -526,8 +526,8 @@ function file_field_extra_fields() {
   if ($file_type_names = file_type_get_names()) {
     foreach ($file_type_names as $type => $name) {
       $info['file'][$type]['form']['filename'] = array(
-        'label' => t('File name'),
-        'description' => t('File name'),
+        'label' => t('Name'),
+        'description' => t('Name'),
         'weight' => -10,
       );
       $info['file'][$type]['form']['preview'] = array(
@@ -580,8 +580,6 @@ function file_file_formatter_info() {
       'label' => t('Image'),
       'default settings' => array(
         'image_style' => '',
-        'alt' => '[file:field_image_alt_text]',
-        'title' => '[file:field_image_title_text]'
       ),
       'view callback' => 'file_file_formatter_file_image_view',
       'settings callback' => 'file_file_formatter_file_image_settings',

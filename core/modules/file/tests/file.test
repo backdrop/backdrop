@@ -2274,50 +2274,6 @@ class FileUsageTestCase extends FileTestHelper {
 }
 
 /**
- * Tests image alt and title text.
- */
-class FileAltTitleTestCase extends FileTestHelper {
-
-  function setUp() {
-    parent::setUp();
-
-    $this->backdropLogin($this->admin_user);
-  }
-
-  /**
-   * Create an "image" file and verify its associated alt and title text.
-   */
-  function testFileAltTitle() {
-    $file = $this->createFile(array('type' => 'image'));
-    // Name of the default alt text field added to the image file type.
-    $alt_field_name = 'field_image_alt_text';
-    // Name of the default title text field added to the image file type.
-    $title_field_name = 'field_image_title_text';
-
-    // Generate alt text containing HTML entities, spaces and non-latin characters.
-    $alt = 'Quote&quot; Amp&amp; ' . 'Файл для тестирования ' . $this->randomName();
-    // Generate title text containing HTML entities, spaces and non-latin characters.
-    $title = 'Quote&quot; Amp&amp; ' . 'Файл для тестирования ' . $this->randomName();
-
-    $edit = array();
-    $edit[$alt_field_name . '[' . LANGUAGE_NONE . '][0][value]'] = $alt;
-    $edit[$title_field_name . '[' . LANGUAGE_NONE . '][0][value]'] = $title;
-    $this->backdropPost('file/' . $file->fid . '/manage', $edit, t('Save'));
-
-    // Check that the image file has been uploaded.
-    // $this->assertRaw(t('!type %name was uploaded.', array('!type' => 'Image', '%name' => $file->filename)), t('Image file uploaded.'));
-
-    // Check that the file exists in the database.
-    $file = $this->getFileByFilename($file->filename);
-    $this->assertTrue($file, t('File found in database.'));
-
-    // Check that the alt and title text was loaded from the fields.
-    $this->assertEqual($file->alt, $alt, t('Alt text was stored as file metadata.'));
-    $this->assertEqual($file->title, $title, t('Title text was stored as file metadata.'));
-  }
-}
-
-/**
  * Test changing the scheme of a file.
  */
 class FileChangeSchemeTestCase extends FileTestHelper {
