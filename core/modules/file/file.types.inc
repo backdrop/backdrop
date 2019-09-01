@@ -299,44 +299,20 @@ function file_display_form($form, &$form_state, $file_type, $view_mode) {
 
   // Formatter status.
   $form['displays']['status'] = array(
-    '#type' => 'item',
-    '#title' => t('Enabled displays'),
+    '#type' => 'radios',
+    '#title' => t('Display type'),
+    '#options' => array(),
+    '#default_value' => config_get('file_display.' . $file_type->type, $view_mode . '.status'),
     '#prefix' => '<div id="file-displays-status-wrapper">',
     '#suffix' => '</div>',
   );
-  $i = 0;
+
+  $formatters = array_reverse($formatters);
   foreach ($formatters as $name => $formatter) {
-    $form['displays']['status'][$name] = array(
-      '#type' => 'checkbox',
-      '#title' => check_plain($formatter['label']),
-      '#default_value' => !empty($current_displays[$name]['status']),
-      '#description' => isset($formatter['description']) ? filter_xss($formatter['description']) : NULL,
-      '#parents' => array('displays', $name, 'status'),
-      '#weight' => (isset($formatter['weight']) ? $formatter['weight'] : 0) + ($i / 1000),
-    );
-    $i++;
+    $form['displays']['status']['#options'][$name] = check_plain($formatter['label']);
+    $form['displays']['status'][$name]['#description'] = isset($formatter['description']) ? filter_xss($formatter['description']) : NULL;
   }
 
-  // Formatter order (tabledrag).
-  $form['displays']['order'] = array(
-    '#type' => 'item',
-    '#title' => t('Display precedence order'),
-    '#theme' => 'file_display_order',
-  );
-  foreach ($formatters as $name => $formatter) {
-    $form['displays']['order'][$name]['label'] = array(
-      '#markup' => check_plain($formatter['label']),
-    );
-    $form['displays']['order'][$name]['weight'] = array(
-      '#type' => 'weight',
-      '#title' => t('Weight for @title', array('@title' => $formatter['label'])),
-      '#title_display' => 'invisible',
-      '#delta' => 50,
-      '#default_value' => isset($current_displays[$name]['weight']) ? $current_displays[$name]['weight'] : 0,
-      '#parents' => array('displays', $name, 'weight'),
-    );
-    $form['displays']['order'][$name]['#weight'] = $form['displays']['order'][$name]['weight']['#default_value'];
-  }
 
   // Formatter settings.
   $form['display_settings_title'] = array(
