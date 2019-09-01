@@ -631,7 +631,7 @@ function system_requirements($phase) {
       $description .= $t('You can change this by editing the <code>trusted_host_patterns</code> setting in <code>settings.php</code>.') . ' ' . $more_info;
       $requirements['trusted_host_patterns'] = array(
         'title' => $t('Trusted Host Settings'),
-        'value' => $t('Enabled'),
+        'value' => $t('Current hostname is trusted'),
         'description' => $description,
       );
     }
