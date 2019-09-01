@@ -349,7 +349,7 @@ function standard_install() {
   $anonymous_permissions = array(
     'access content',
     'access comments',
-    $filtered_html_permission
+    $filtered_html_permission,
   );
   $authenticated_permissions = array(
     'access content',
@@ -357,27 +357,12 @@ function standard_install() {
     'post comments',
     'skip comment approval',
     'upload editor images',
-    $filtered_html_permission
+    $filtered_html_permission,
   );
   user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $anonymous_permissions);
   user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, $authenticated_permissions);
 
-  // Create a default role for site administrators, with all available permissions assigned.
-  $admin_role = new stdClass();
-  $admin_role->name = 'administrator';
-  $admin_role->label = st('Administrator');
-  $admin_role->weight = 3;
-  $admin_role->permissions = array_keys(module_invoke_all('permission'));
-  user_role_save($admin_role);
-  // Set this as the administrator role.
-  config_set('system.core', 'user_admin_role', $admin_role->name);
-
-  // Assign user 1 the "administrator" role.
-  db_insert('users_roles')
-    ->fields(array('uid' => 1, 'role' => $admin_role->name))
-    ->execute();
-
-  // Create a default editor role for users who need to be able to edit content 
+  // Create a default editor role for users who need to be able to edit content
   // but do not need to access advanced admin features.
   $editor_role = new stdClass();
   $editor_role->name = 'editor';
@@ -412,9 +397,26 @@ function standard_install() {
     'delete terms in tags',
     'administer taxonomy',
     'search content',
-    'use advanced search'
+    'use advanced search',
+    $filtered_html_permission,
   );
-  user_role_grant_permissions("editor", $editor_permissions);
+  user_role_grant_permissions('editor', $editor_permissions);
+
+  // Create a default role for site administrators, with all available
+  // permissions assigned.
+  $admin_role = new stdClass();
+  $admin_role->name = 'administrator';
+  $admin_role->label = st('Administrator');
+  $admin_role->weight = 3;
+  $admin_role->permissions = array_keys(module_invoke_all('permission'));
+  user_role_save($admin_role);
+  // Set this as the administrator role.
+  config_set('system.core', 'user_admin_role', $admin_role->name);
+
+  // Assign user 1 the "administrator" role.
+  db_insert('users_roles')
+    ->fields(array('uid' => 1, 'role' => $admin_role->name))
+    ->execute();
 
   // Create a Home link in the main menu.
   $item = array(
