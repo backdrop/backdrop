@@ -77,6 +77,12 @@ function dashboard_block_info() {
   $blocks = array();
 
   // Dashboard blocks.
+  $blocks['welcome'] = array(
+    'info' => t('Dashboard - Welcome to Backdrop CMS!'),
+    'description' => t('Provides a welcome message, and links to get people started using Backdrop'),
+    'class' => 'DashboardWelcomeBlock',
+    'required contexts' => array('dashboard'),
+  );
   $blocks['create'] = array(
     'info' => t('Dashboard - Create content'),
     'description' => t('Provides links to create new content'),
@@ -131,6 +137,7 @@ function dashboard_block_info() {
  */
 function dashboard_autoload_info() {
   return array(
+    'DashboardWelcomeBlock' => 'includes/block.welcome.inc',
     'DashboardCreateBlock' => 'includes/block.create.inc',
     'DashboardMenuBlock' => 'includes/block.menus.inc',
     'DashboardContentTypesBlock' => 'includes/block.node_types.inc',
