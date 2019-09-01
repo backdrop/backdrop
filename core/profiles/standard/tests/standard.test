@@ -20,9 +20,9 @@ class StandardInstallTestCase extends BackdropWebTestCase {
 
     // Create a user assigned to the editor role.
     $edit = array();
-    $edit['name']   = $this->randomName();
-    $edit['mail']   = $edit['name'] . '@example.com';
-    $edit['pass']   = user_password();
+    $edit['name'] = $this->randomName();
+    $edit['mail'] = $edit['name'] . '@example.com';
+    $edit['pass'] = user_password();
     $edit['status'] = 1;
     $edit['roles'] = array('editor');
 
@@ -30,7 +30,7 @@ class StandardInstallTestCase extends BackdropWebTestCase {
     $editor_account->save();
     $editor_account->pass_raw = $edit['pass'];
 
-    // Just check that thr role exists and that the user can see the dashboard.
+    // Just check that the role exists and that the user can see the dashboard.
     $this->backdropLogin($editor_account);
     $this->assertUrl('admin/dashboard');
   }

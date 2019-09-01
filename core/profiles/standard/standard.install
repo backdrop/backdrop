@@ -362,8 +362,8 @@ function standard_install() {
   user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $anonymous_permissions);
   user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, $authenticated_permissions);
 
-  // Create a default editor role for users who need to be able to edit content
-  // but do not need to access advanced admin features.
+  // Create a default editor role, for users who need to be able to edit
+  // content, but do not need to access advanced admin features.
   $editor_role = new stdClass();
   $editor_role->name = 'editor';
   $editor_role->label = st('Editor');
