@@ -602,39 +602,60 @@ function system_requirements($phase) {
 
   // Warn the user if trusted hostnames have not been configured.
   if ($phase == 'runtime') {
+    $current_host = $_SERVER['HTTP_HOST'];
     $trusted_host_patterns = settings_get('trusted_host_patterns', array());
-    $more_info = $t('See <a href="@url" target="_blank">Protecting against HTTP HOST Header attacks</a> for more information.', array('@url' => 'https://api.backdropcms.org/documentation/trusted-host-settings'));
-    // @todo: upgrade this to an error when we provide a way to configure
-    // $trusted_host_patterns via the admin UI.
+    $host_is_trusted = backdrop_valid_http_host($current_host);
+
+    // trusted_host_patterns not configured.
     if (empty($trusted_host_patterns)) {
-      $requirements['trusted_host_patterns'] = array(
-        'title' => $t('Trusted Host Settings'),
-        'value' => $t('Not enabled'),
-        'description' => $t('The <code>trusted_host_patterns</code> setting is not configured in <code>settings.php</code>. It is <strong>highly recommended</strong> that you configure this, otherwise it can lead to security vulnerabilities.') . ' ' . $more_info,
-        'severity' => REQUIREMENT_WARNING,
-      );
+      $value = $t('Not configured');
+      $description = $t('The <code>trusted_host_patterns</code> setting is not configured in <code>settings.php</code>. It is <strong>strongly recommended</strong> to configure this, otherwise your site may be exposed to security vulnerabilities.');
+      // @todo: upgrade this to an error when we provide a way to configure
+      // trusted_host_patterns via the admin UI.
+      $severity = REQUIREMENT_WARNING;
     }
+    // trusted_host_patterns is configured.
     else {
-      $description = format_plural(count($trusted_host_patterns), 'Configured to allow the following pattern:', 'Configured to allow the following patterns:');
-      // Wrap each pattern in <code> tags for when they are rendered later.
-      foreach ($trusted_host_patterns as $key => $trusted_host_pattern) {
-        $trusted_host_patterns[$key] = '<code>' . $trusted_host_pattern . '</code>';
+
+      // Prepare a list of patterns; to be used later in the description.
+      $patterns_list = $trusted_host_patterns;
+      foreach ($patterns_list as $key => $pattern) {
+        // Wrap each pattern in <code> tags.
+        $patterns_list[$key] = '<code>' . $pattern . '</code>';
+        // Denote any matching patterns.
+        if (preg_match('/' . $pattern . '/', $current_host)) {
+          $patterns_list[$key] = '<strong>' . $patterns_list[$key] . '</strong>' . ' ' . $t('(match)');
+        }
       }
-      // If only one trusted host pattern, render as is...
-      if (count($trusted_host_patterns) == 1) {
-        $description .= ' ' . $trusted_host_patterns[0] . '<br>';
+      $patterns_list = theme('item_list', array('items' => $patterns_list));
+
+      // Current hostname is trusted.
+      if ($host_is_trusted) {
+        $value = $t('Current hostname is trusted');
+        $description = format_plural(count($trusted_host_patterns), 'The current hostname matches the pattern specified in the <code>trusted_host_patterns</code> setting in <code>settings.php</code>:', 'The current hostname matches at least one of the patterns specified in the <code>trusted_host_patterns</code> setting in <code>settings.php</code>:');
+        $description .= $patterns_list;
       }
-      // ...otherwise, render the patterns as a list.
+      // Current hostname not trusted.
       else {
-        $description .= theme('item_list', array('items' => $trusted_host_patterns));
+        $value = $t('Current hostname not trusted');
+        $description = format_plural(count($trusted_host_patterns), 'The current hostname does not match the pattern specified in the <code>trusted_host_patterns</code> setting in <code>settings.php</code>:', 'The current hostname does not match any of the patterns specified in the <code>trusted_host_patterns</code> setting in <code>settings.php</code>:');
+        $description .= $patterns_list;
+        // @todo: upgrade this to an error when we provide a way to configure
+        // trusted_host_patterns via the admin UI.
+        $severity = REQUIREMENT_WARNING;
       }
-      $description .= $t('You can change this by editing the <code>trusted_host_patterns</code> setting in <code>settings.php</code>.') . ' ' . $more_info;
-      $requirements['trusted_host_patterns'] = array(
-        'title' => $t('Trusted Host Settings'),
-        'value' => $t('Enabled'),
-        'description' => $description,
-      );
+
     }
+
+    $more_info = $t('See <a href="@url" target="_blank">Protecting against HTTP HOST Header attacks</a> for more information.', array('@url' => 'https://api.backdropcms.org/documentation/trusted-host-settings'));
+
+    $requirements['trusted_host_patterns'] = array(
+      'title' => $t('Trusted Host Settings'),
+      'value' => $value,
+      'description' => $description . ' ' . $more_info,
+      'severity' => $severity,
+    );
+
   }
 
   return $requirements;
