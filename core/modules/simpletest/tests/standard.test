@@ -6,7 +6,7 @@
 
 
 /**
- * Verifies that tests bundled with installation profile modules are found.
+ * Verifies settings created in the Standard profile are correct.
  */
 class StandardInstallTestCase extends BackdropWebTestCase {
   protected $profile = 'standard';
