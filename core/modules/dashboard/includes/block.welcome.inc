@@ -69,7 +69,7 @@ class DashboardWelcomeBlock extends Block {
     }
 
     $next_steps_links = array();
-    $next_steps_links['node/add/post'] = t('Write your first article');
+    $next_steps_links['node/add/post'] = t('Create a new post');
     $about_node = node_load(2);
     if ($about_node) {
       $next_steps_links['node/2/edit'] = t('Edit the %title page', array('%title' => $about_node->title));
