@@ -609,7 +609,7 @@ function system_requirements($phase) {
     if (empty($trusted_host_patterns)) {
       $requirements['trusted_host_patterns'] = array(
         'title' => $t('Trusted Host Setting'),
-        'value' => $t('Not enabled'),
+        'value' => $t('Not configured'),
         'description' => $t('The <code>trusted_host_patterns</code> setting is not configured in <code>settings.php</code>. It is highly recommended that you configure this to protect your site.') . ' ' . $more_info,
         'severity' => $trusted_host_patterns === FALSE ? REQUIREMENT_INFO : REQUIREMENT_WARNING,
       );
