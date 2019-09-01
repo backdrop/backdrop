@@ -3066,10 +3066,6 @@ function _node_query_node_access_alter($query, $type) {
 function _node_search_query_alter(QueryAlterableInterface $query) {
   global $user;
 
-  if ($user->uid == 1) {
-    return;
-  }
-
   if (in_array('view hidden paths', user_role_permissions($user->roles))) {
     return;
   }
