@@ -38,9 +38,6 @@ function file_file_type($file) {
  * Implements hook_file_insert().
  */
 function file_file_insert($file) {
-  // Ensure field data is saved since file_save() does not in Drupal 7.
-  field_attach_insert('file', $file);
-
   // Save file metadata.
   if (!empty($file->metadata)) {
     $query = db_insert('file_metadata')->fields(array('fid', 'name', 'value'));
