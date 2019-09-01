@@ -189,10 +189,33 @@ span.admin-missing {
     white-space: nowrap;
   }
 }
-.system-status-report .report-error .status-summary {
-  color: #EC351C;
+.system-status-report .trusted-host-patterns-list li {
+  list-style: none;
 }
-
+.system-status-report .trusted-host-patterns-list li code {
+  margin: 0 10px;
+}
+.system-status-report .trusted-host-patterns-list li:before {
+  content: '';
+  display: inline-block;
+  height: 15px;
+  width: 15px;
+  border-radius: 15px;
+  background-size: 60%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.system-status-report .trusted-host-patterns-list .pattern-match {
+  font-weight: bold;
+}
+.system-status-report .trusted-host-patterns-list .pattern-match:before {
+  background-image: url('../../../misc/icon-ok.png');
+  background-color: #CFDE56;
+}
+.system-status-report .trusted-host-patterns-list .pattern-no-match:before {
+  background-image: url('../../../misc/icon-error.png');
+  background-color: #FCE400;
+}
 
 /**
  * Theme settings.

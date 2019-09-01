@@ -618,22 +618,41 @@ function system_requirements($phase) {
     else {
 
       // Prepare a list of patterns; to be used later in the description.
-      $patterns_list = $trusted_host_patterns;
-      foreach ($patterns_list as $key => $pattern) {
+      $pattern_list_items = array();
+      foreach ($trusted_host_patterns as $pattern) {
         // Wrap each pattern in <code> tags.
-        $patterns_list[$key] = '<code>' . $pattern . '</code>';
         // Denote any matching patterns.
-        if (preg_match('/' . $pattern . '/', $current_host)) {
-          $patterns_list[$key] = '<strong>' . $patterns_list[$key] . '</strong>' . ' ' . $t('(match)');
+        $pattern_formatted = sprintf('{%s}i', str_replace('}', '\\}', $pattern));
+
+        try {
+          $pattern_match = preg_match($pattern_formatted, $current_host);
         }
+        catch (Exception $e) {
+dpm($e);
+        }
+
+        if ($pattern_match === FALSE) {
+
+        }
+        elseif ($pattern_match === 1) {
+          $pattern_class = 'pattern-match';
+        }
+        elseif ($pattern_match === 0) {
+          $pattern_class = 'pattern-no-match';
+        }
+        $pattern_list_items[] = array(
+            'data' => '<code>' . $pattern . '</code>',
+            'class' => array($pattern_class),
+          );
       }
-      $patterns_list = theme('item_list', array('items' => $patterns_list));
+      $patterns_list = theme('item_list', array('attributes' => array('class' => 'trusted-host-patterns-list'), 'items' => $pattern_list_items));
 
       // Current hostname is trusted.
       if ($host_is_trusted) {
         $value = $t('Current hostname is trusted');
         $description = format_plural(count($trusted_host_patterns), 'The current hostname matches the pattern specified in the <code>trusted_host_patterns</code> setting in <code>settings.php</code>:', 'The current hostname matches at least one of the patterns specified in the <code>trusted_host_patterns</code> setting in <code>settings.php</code>:');
         $description .= $patterns_list;
+        $severity = '';
       }
       // Current hostname not trusted.
       else {
