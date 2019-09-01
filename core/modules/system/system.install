@@ -620,30 +620,18 @@ function system_requirements($phase) {
       // Prepare a list of patterns; to be used later in the description.
       $pattern_list_items = array();
       foreach ($trusted_host_patterns as $pattern) {
-        // Wrap each pattern in <code> tags.
-        // Denote any matching patterns.
         $pattern_formatted = sprintf('{%s}i', str_replace('}', '\\}', $pattern));
-
-        try {
-          $pattern_match = preg_match($pattern_formatted, $current_host);
-        }
-        catch (Exception $e) {
-dpm($e);
-        }
-
-        if ($pattern_match === FALSE) {
-
-        }
-        elseif ($pattern_match === 1) {
+        $pattern_match = preg_match($pattern_formatted, $current_host);
+        if ($pattern_match) {
           $pattern_class = 'pattern-match';
         }
-        elseif ($pattern_match === 0) {
+        else {
           $pattern_class = 'pattern-no-match';
         }
         $pattern_list_items[] = array(
-            'data' => '<code>' . $pattern . '</code>',
-            'class' => array($pattern_class),
-          );
+          'data' => '<code>' . $pattern . '</code>',
+          'class' => array($pattern_class),
+        );
       }
       $patterns_list = theme('item_list', array('attributes' => array('class' => 'trusted-host-patterns-list'), 'items' => $pattern_list_items));
 
