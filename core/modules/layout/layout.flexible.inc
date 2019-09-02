@@ -158,6 +158,7 @@ function layout_flexible_template_change_enabled_status($template, $status) {
  */
 function layout_flexible_template_configure_form($form, &$form_state, $flexible_template) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+  form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
 
   $messages = array();
   if ($flexible_template['locked']) {
@@ -290,8 +291,9 @@ function layout_flexible_template_configure_form_submit($form, &$form_state) {
  * @ingroup forms
  */
 function layout_flexible_template_region_style_select($form, &$form_state, $flexible_template, $original_row) {
-  $new_row = $original_row == 'add';
+  $new_row = ($original_row == 'add');
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+  form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
   $form_state['flexible_template_id'] = $flexible_template['name'];
   $form_state['original_row'] = $original_row;
 
@@ -300,10 +302,22 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
   foreach ($row_styles as $name => $row_style) {
     $count_options[$row_style['region_count']] = $row_style['region_count'];
   }
+
+  $row_style_in_use = 'region_12';
+  $default_region_count = 1;
+  if (!$new_row) {
+    if (isset($form_state['values']['region_style'])) {
+      $row_style_in_use = $form_state['values']['region_style'];
+    }
+    else {
+      $row_style_in_use = $flexible_template['rows'][$original_row]['contains'];
+    }
+    $default_region_count = $row_styles[$row_style_in_use]['region_count'];
+  }
   $form['region_count'] = array(
     '#title' => t('Number of regions'),
     '#type' => 'radios',
-    '#default_value' => '1',
+    '#default_value' => $default_region_count,
     '#parents' => array('region_count'),
     '#options' => $count_options,
     '#ajax' => array(
@@ -318,7 +332,7 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
     '#parents' => array('row_settings'),
   );
 
-  $region_count = isset($form_state['values']['region_count']) ? $form_state['values']['region_count'] : 1;
+  $region_count = isset($form_state['values']['region_count']) ? $form_state['values']['region_count'] : $default_region_count;
 
   $options = array();
   $row_styles = layout_flexible_row_styles();
@@ -341,7 +355,7 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
   $form['row_settings']['region_style'] = array(
     '#title' => t('Region widths'),
     '#type' => 'radios',
-    '#default_value' => key($options),
+    '#default_value' => $row_style_in_use,
     '#options' => $options,
   );
 
@@ -436,6 +450,7 @@ function layout_flexible_template_region_style_select_submit($form, &$form_state
  * @ingroup forms
  */
 function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_template, $original_row, $region_style = NULL) {
+  form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   $form_state['flexible_template'] = $flexible_template;
   $flexible_template_id = $flexible_template['name'];
@@ -646,6 +661,8 @@ function layout_flexible_template_edit_row_validate($form, &$form_state) {
  * Submit handler for layout_flexible_template_edit_row_form().
  */
 function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
+  form_load_include($form_state, 'inc', 'layout', 'layout.admin');
+  form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
   $flexible_template = $form_state['flexible_template'];
   $original_row = $form_state['original_row'];
 
