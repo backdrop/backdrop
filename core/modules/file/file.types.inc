@@ -311,10 +311,7 @@ function file_display_form($form, &$form_state, $file_type, $view_mode) {
       unset($formatters[$name]);
     }
   }
-  $current_displays = file_displays_load($file_type->type, $view_mode);
-  foreach ($current_displays as $name => $display) {
-    $current_displays[$name] = (array) $display;
-  }
+  $display = file_display_load($file_type->type, $view_mode);
 
   // Formatter status.
   $form['displays']['status'] = array(
@@ -384,10 +381,10 @@ function file_type_toggle_enable($type, $status) {
   $type->disabled = !$status;
   file_type_save($type);
   if ($status) {
-    $message = t('The file type %name has been enabled.', array('%name' => check_plain($type->name)));
+    $message = t('The file type %name has been enabled.', array('%name' => $type->name));
   }
   else {
-    $message = t('The file type %name has been disabled.', array('%name' => check_plain($type->name)));
+    $message = t('The file type %name has been disabled.', array('%name' => $type->name));
   }
   backdrop_set_message($message);
   backdrop_goto('admin/structure/file-types');

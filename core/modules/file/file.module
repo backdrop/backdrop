@@ -58,7 +58,6 @@ function file_hook_info() {
     'file_type_info_alter',
     'file_formatter_info',
     'file_formatter_info_alter',
-    'file_displays_alter',
     'file_type',
     'file_type_alter',
     'file_download_headers_alter',
@@ -69,7 +68,7 @@ function file_hook_info() {
     'file_download_access_alter',
     'file_entity_access',
 
-    // File entity hooks
+    // File operation hooks
     'file_load',
     'file_presave',
     'file_insert',
@@ -1940,25 +1939,13 @@ function file_get_file_references(File $file, $field = NULL, $age = FIELD_LOAD_R
  */
 
 /**
- * @defgroup file_displays File displays API
+ * @defgroup file_display File displays API
  * @{
  * Functions to load and save information about file displays.
  */
 
 /**
- * Returns an array of displays to use for a file type in a given view mode.
- *
- * It is common for a site to be configured with broadly defined file types
- * (e.g., 'video'), and to have different files of this type require different
- * displays (for example, the code required to display a YouTube video is
- * different than the code required to display a local QuickTime video).
- * Therefore, the site administrator can configure multiple displays for a given
- * file type. This function returns all of the displays that the administrator
- * enabled for the given file type in the given view mode. file_view_file() then
- * invokes each of these, and passes the specific file to display. Each display
- * implementation can inspect the file, and either return a render array (if it
- * is capable of displaying the file), or return nothing (if it is incapable of
- * displaying the file). The first render array returned is the one used.
+ * Returns the display to use for a file type in a given view mode.
  *
  * @param string $file_type
  *   The type of file.
@@ -1966,8 +1953,7 @@ function file_get_file_references(File $file, $field = NULL, $age = FIELD_LOAD_R
  *   The view mode.
  *
  * @return array
- *   An array keyed by the formatter type name. Each item in the array contains
- *   the following key/value pairs:
+ *   An array containing the following key/value pairs:
  *   - status: Whether this display is enabled. If not TRUE, file_view_file()
  *     skips over it.
  *   - weight: An integer that determines the order of precedence within the
@@ -1979,7 +1965,7 @@ function file_get_file_references(File $file, $field = NULL, $age = FIELD_LOAD_R
  * @see hook_file_formatter_info()
  * @see file_view_file()
  */
-function file_displays($file_type, $view_mode) {
+function file_display($file_type, $view_mode) {
   $cache = &backdrop_static(__FUNCTION__, array());
 
   // If the requested view mode isn't configured to use a custom display for its
@@ -1990,18 +1976,14 @@ function file_displays($file_type, $view_mode) {
   }
 
   if (!isset($cache[$file_type][$view_mode])) {
-    // Load the display configurations for the file type and view mode. If none
+    // Load the display configuration for the file type and view mode. If none
     // exist for the view mode, use the default view mode.
-    $displays = file_displays_load($file_type, $view_mode);
-    if (empty($displays) && $view_mode != 'default') {
-      $cache[$file_type][$view_mode] = file_displays($file_type, 'default');
+    $display = file_display_load($file_type, $view_mode);
+    if (empty($display) && $view_mode != 'default') {
+      $cache[$file_type][$view_mode] = file_display($file_type, 'default');
     }
     else {
-      // Convert the display objects to arrays and remove unnecessary keys.
-      foreach ($displays as $formatter_name => $display) {
-        $displays[$formatter_name] = array_intersect_key((array) $display, backdrop_map_assoc(array('status', 'weight', 'settings')));
-      }
-      $cache[$file_type][$view_mode] = $displays;
+      $cache[$file_type][$view_mode] = $display;
     }
   }
 
@@ -2009,27 +1991,47 @@ function file_displays($file_type, $view_mode) {
 }
 
 /**
- * Returns an array of {file_display} objects for the file type.
+ * Returns the display to use for a file type in a given view mode.
+ *
+ * @deprecated since 1.14.0.
  */
-function file_displays_load($file_type, $view_mode) {
-  $displays = config('file_display.' . $file_type)->get($view_mode);
-  return $displays;
+function file_displays($file_type, $view_mode) {
+  watchdog_deprecated_function('file', __FUNCTION__);
+  return file_display($file_type, $view_mode);
 }
 
 /**
- * Saves a {file_display} object to the database.
+ * Returns a single {file_display} array for the file type.
  */
-function file_display_save($file_type, $view_mode, $displays) {
+function file_display_load($file_type, $view_mode) {
+  $display = config('file_display.' . $file_type)->get($view_mode);
+  return $display;
+}
+
+/**
+ * Returns a single {file_display} array for the file type.
+ *
+ * @deprecated since 1.14.0.
+ */
+function file_displays_load($file_type, $view_mode) {
+  watchdog_deprecated_function('file', __FUNCTION__);
+  return file_display_load($file_type, $view_mode);
+}
+
+/**
+ * Saves a {file_display} array to config.
+ */
+function file_display_save($file_type, $view_mode, $display) {
   $config = config('file_display.' . $file_type);
   $config->set('type', $file_type);
-  $config->set($view_mode, $displays);
+  $config->set($view_mode, $display);
   $config->save();
 
   file_info_cache_clear();
 }
 
 /**
- * @} End of "defgroup file_displays".
+ * @} End of "defgroup file_display".
  */
 
 /**
@@ -2056,11 +2058,11 @@ function file_config_info() {
  * Menu argument loader: Loads a file type by string.
  *
  * @param $name
- *   The machine-readable name of a node type to load, where '_' is replaced
+ *   The machine-readable name of a file type to load, where '_' is replaced
  *   with '-'.
  *
  * @return stdClass|FALSE
- *   A node type object or FALSE if $name does not exist.
+ *   A file type object or FALSE if $name does not exist.
  */
 function file_type_load($name) {
   return file_type_get_type(strtr($name, array('-' => '_')));
@@ -2070,7 +2072,7 @@ function file_type_load($name) {
  * Returns the file type of the passed file or file type string.
  *
  * @param File|string $file
- *   A file entity or string that indicates the file type to return.
+ *   A file entity or the machine name of the file type to return.
  *
  * @return stdClass|FALSE
  *   A single file type, as an object, or FALSE if the file type is not found.
@@ -3185,7 +3187,7 @@ function file_build_content($file, $view_mode = 'full', $langcode = NULL) {
  * @param string|array $displays
  *   Can be either:
  *   - the name of a view mode;
- *   - or an array of custom display settings, as returned by file_displays().
+ *   - or custom display settings, as returned by file_display().
  * @param string $langcode
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
@@ -3193,52 +3195,42 @@ function file_build_content($file, $view_mode = 'full', $langcode = NULL) {
  * @return array
  *   An array as expected by backdrop_render().
  */
-function file_view_file($file, $displays = 'full', $langcode = NULL) {
+function file_view_file($file, $display = 'full', $langcode = NULL) {
   if (!isset($langcode)) {
     $langcode = $GLOBALS['language_content']->langcode;
   }
 
   // Prepare incoming display specifications.
-  if (is_string($displays)) {
+  if (is_string($display)) {
     // Allow modules to change the view mode.
-    $view_mode = key(entity_view_mode_prepare('file', array($file->fid => $file), $displays, $langcode));
-    $displays = file_displays($file->type, $view_mode);
+    $entity = array($file->fid => $file);
+    $view_mode = key(entity_view_mode_prepare('file', $entity, $display, $langcode));
+    $display = file_display($file->type, $view_mode);
   }
   else {
     $view_mode = '_custom_display';
   }
-  backdrop_alter('file_displays', $displays, $file, $view_mode);
-  _file_sort_array_by_weight($displays);
 
   // Attempt to display the file with each of the possible displays. Stop after
-  // the first successful one. See file_displays() for details.
+  // the first successful one. See file_display() for details.
   $element = NULL;
   module_load_include('inc', 'file', 'file.types');
-  foreach ($displays as $formatter_type => $display) {
-    if (!empty($display['status'])) {
-      $formatter_info = file_info_formatter_types($formatter_type);
-      // Under normal circumstances, the UI prevents enabling formatters for
-      // incompatible MIME types. In case this was somehow circumvented (for
-      // example, a module updated its formatter definition without updating
-      // existing display settings), perform an extra check here.
-      if (isset($formatter_info['mime types'])) {
-        if (!file_match_mimetypes($formatter_info['mime types'], $file->filemime)) {
-          continue;
+
+  if (!empty($display['status'])) {
+    $formatter_info = file_info_formatter_types($formatter_type);
+
+    $has_function = isset($formatter_info['view callback']);
+    $function = $formatter_info['view callback'];
+    $function_exists = function_exists($function);
+    if ($has_function && $function && $function_exists) {
+      $display['type'] = $formatter_type;
+      if (!empty($formatter_info['default settings'])) {
+        if (empty($display['settings'])) {
+          $display['settings'] = array();
         }
+        $display['settings'] += $formatter_info['default settings'];
       }
-      if (isset($formatter_info['view callback']) && ($function = $formatter_info['view callback']) && function_exists($function)) {
-        $display['type'] = $formatter_type;
-        if (!empty($formatter_info['default settings'])) {
-          if (empty($display['settings'])) {
-            $display['settings'] = array();
-          }
-          $display['settings'] += $formatter_info['default settings'];
-        }
-        $element = $function($file, $display, $langcode);
-        if (isset($element)) {
-          break;
-        }
-      }
+      $element = $function($file, $display, $langcode);
     }
   }
 
