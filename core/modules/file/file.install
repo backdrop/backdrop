@@ -790,19 +790,24 @@ function file_update_1002() {
   );
 
   // If another module (e.g., Media) had added a {file_managed}.type field,
-  // then change it to the expected specification. Otherwise, add the field.
+  // then change it to the expected specification.
   if (db_field_exists('file_managed', 'type')) {
     // db_change_field() will fail if any records have type=NULL, so update
     // them to the new default value.
-    db_update('file_managed')->fields(array('type' => $spec['default']))->isNull('type')->execute();
+    db_update('file_managed')->fields(array('type' => 'undefined'))->isNull('type')->execute();
 
     // Indexes using a field being changed must be dropped prior to calling
-    // db_change_field(). However, the database API doesn't provide a way to do
-    // this without knowing what the old indexes are. Therefore, it is the
-    // responsibility of the module that added them to drop them prior to
-    // allowing this module to be installed.
+    // db_change_field().
+    if (db_index_exists('file_managed', 'file_type')) {
+      db_drop_index('file_managed', 'file_type');
+    }
+
+    // Since the database API doesn't provide a way to drop indexes without
+    // knowing what the old indexes are, it is the responsibility of any module
+    // that adds them to drop them prior to this update..
     db_change_field('file_managed', 'type', 'type', $spec, $indexes_new);
   }
+  // Otherwise, add the field.
   else {
     db_add_field('file_managed', 'type', $spec, $indexes_new);
   }
@@ -834,7 +839,7 @@ function file_update_1002() {
 }
 
 /**
- * Switch the 'edit files' permission from file_entity to 'manage files'.
+ * Switch the 'edit files' permission to 'manage files'.
  */
 function file_update_1003() {
   $roles = user_roles(FALSE, 'edit files');
@@ -854,58 +859,132 @@ function file_update_1003() {
 }
 
 /**
- * Add a type column to the file_managed table. Add the file_metadata table.
+ * Convert file_entity variables to config for file.
  */
 function file_update_1004() {
-  if (!db_field_exists('file_managed', 'type')) {
-    $spec = array(
-      'description' => 'The type of this file.',
-      'type' => 'varchar',
-      'length' => 50,
-      'not null' => TRUE,
-      // If the FILE_TYPE_NONE constant ever changes, then change the value here
-      // too, and add an update function to deal with existing records. The
-      // constant isn't used here, because there may be cases where this function
-      // runs without the module file loaded.
-      'default' => 'undefined',
-    );
-    $indexes_new = array('indexes' => array('file_type' => array('type')));
-    db_add_field('file_managed', 'type', $spec, $indexes_new);
-  }
 
-  if (!db_table_exists('file_metadata')) {
-    $schema = array(
-      'description' => 'Stores file metadata in a key/value store.',
-      'fields' => array(
-        'fid' => array(
-          'description' => 'The {file_managed}.fid of the metadata.',
-          'type' => 'int',
-          'unsigned' => TRUE,
-          'not null' => TRUE,
-          'default' => 0,
-        ),
-        'name' => array(
-          'description' => "The name of the metadata (e.g. 'width').",
-          'type' => 'varchar',
-          'length' => '255',
-          'not null' => TRUE,
-        ),
-        'value' => array(
-          'description' => "The value of the metadata (e.g. '200px').",
-          'type' => 'blob',
-          'not null' => FALSE,
-          'size' => 'big',
-          'serialize' => TRUE,
-        ),
+  // Convert variables to config.
+  $config = config('file.settings');
+  $config->set('max_filesize', update_variable_get('file_entity_max_filesize', ''));
+  $config->set('default_allowed_extensions', update_variable_get('file_entity_default_allowed_extensions', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm'));
+  $config->set('default_file_directory', update_variable_get('file_entity_default_file_directory', ''));
+  $config->set('allow_insecure_download', update_variable_get('file_entity_allow_insecure_download', FALSE));
+  $config->set('file_upload_wizard_skip_file_type', update_variable_get('file_entity_file_upload_wizard_skip_file_type', FALSE));
+  $config->set('file_upload_wizard_skip_scheme', update_variable_get('file_entity_file_upload_wizard_skip_scheme', FALSE));
+  $config->set('file_upload_wizard_skip_fields', update_variable_get('file_entity_file_upload_wizard_skip_fields', FALSE));
+  $config->set('protect_repeated_render', update_variable_get('file_entity_protect_repeated_render', TRUE));
+  $config->save();
+
+  // Remove converted variables.
+  update_variable_del('file_entity_max_filesize');
+  update_variable_del('file_entity_default_allowed_extensions');
+  update_variable_del('file_entity_default_file_directory');
+  update_variable_del('file_entity_allow_insecure_download');
+  update_variable_del('file_entity_file_upload_wizard_skip_file_type');
+  update_variable_del('file_entity_file_upload_wizard_skip_scheme');
+  update_variable_del('file_entity_file_upload_wizard_skip_fields');
+  update_variable_del('file_entity_protect_repeated_render');
+
+  // Delete unused variables.
+  update_variable_del('file_entity_alt');
+  update_variable_del('file_entity_title');
+}
+
+/**
+ * Add the default file types, or convert from Drupal.
+ */
+function file_update_1005() {
+  $default_file_types = array(
+    'audio' => array(
+      'type' => 'audio',
+      'name' => 'Audio',
+      'description' => 'An Audio file is a sound recording.',
+      'mimetypes' => array(
+        'audio/*'
       ),
-      'primary key' => array('fid', 'name'),
-      'foreign keys' => array(
-        'file_managed' => array(
-          'table' => 'file_managed',
-          'columns' => array('fid' => 'fid'),
-        ),
+      'disabled' => FALSE,
+      'storage' => 4,
+      'module' => 'file'
+    ),
+    'document' => array(
+      'type' => 'document',
+      'name' => 'Document',
+      'description' => 'A document file is written information.',
+      'mimetypes' => array(
+          'text/plain',
+          'application/msword',
+          'application/vnd.ms-excel',
+          'application/pdf',
+          'application/vnd.ms-powerpoint',
+          'application/vnd.oasis.opendocument.text',
+          'application/vnd.oasis.opendocument.spreadsheet',
+          'application/vnd.oasis.opendocument.presentation',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       ),
-    );
-    db_create_table('file_metadata', $schema);
+      'disabled' => FALSE,
+      'storage' => 4,
+      'module' => 'file',
+    ),
+    'image' => array(
+      'type' => 'image',
+      'name' => 'Image',
+      'description' => 'An image file is a still visual.',
+      'mimetypes' => array(
+          'image/*',
+      ),
+      'disabled' => FALSE,
+      'storage' => 4,
+      'module' => 'file',
+    ),
+    'video' => array(
+      'type' => 'video',
+      'name' => 'Video',
+      'description' => 'A Video file is a moving visual recording.',
+      'mimetypes' => array(
+          'video/*',
+      ),
+      'disabled' => FALSE,
+      'storage' => 4,
+      'module' => 'file',
+    ),
+  );
+  foreach ($default_file_types as $machine => $type) {
+    if (!file_type_get_type($machine)) {
+      $config = config('file.type.' . $machine);
+      $config->setData($type);
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Convert saved file types from Drupal.
+ */
+function file_update_1006() {
+  // Check to see if there were file types in a D7 db.
+  if (db_table_exists('file_type')) {
+    $result = db_query("SELECT type, label, description, mimetypes FROM {file_type}")->fetchAll();
+    foreach ($result as $record) {
+      $mimetypes = unserialize($record->mimetypes);
+      $storage = FILE_TYPE_STORAGE_NORMAL;
+
+      if (file_type_load($record->type)) {
+        $storage = FILE_TYPE_STORAGE_OVERRIDE;
+      }
+
+      $config = config('file.type.' . $record->type);
+      $config->set('module', 'file');
+      $config->set('type', $record->type);
+      $config->set('name', $record->label);
+      $config->set('description', $record->description);
+      $config->set('mimetypes', $mimetypes);
+      $config->set('storage', $storage);
+      $config->save();
+    }
+
+    // Delete the file type table.
+    db_drop_table('file_type');
   }
 }
