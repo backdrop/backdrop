@@ -28,7 +28,7 @@ function file_list_types_page() {
       array(
         'data' => theme('file_type_overview',
           array(
-            'name' => $type->name,
+            'name' => check_plain($type->name),
             'description' => $type->description,
           )
         ),
@@ -77,6 +77,7 @@ function file_list_types_page() {
       $links['enable'] = array(
         'title' => t('Enable'),
         'href' => $path . '/enable',
+        'query' => array('token' => backdrop_get_token($type->type)),
         'weight' => -10,
       );
     }
@@ -84,6 +85,7 @@ function file_list_types_page() {
       $links['disable'] = array(
         'title' => t('Disable'),
         'href' => $path . '/disable',
+        'query' => array('token' => backdrop_get_token($type->type)),
         'weight' => 10,
       );
     }
@@ -374,13 +376,21 @@ function file_display_form_submit($form, &$form_state) {
 /**
  * Menu callback; disable or enable a single file type.
  */
-function file_type_status_confirm($form, &$form_state, $type, $operation) {
-  $form['type'] = array('#type' => 'value', '#value' => $type);
-  $form['name'] = array('#type' => 'value', '#value' => $type->name);
-  $form['operation'] = array('#type' => 'value', '#value' => $operation);
-  $title = ($operation == 'enable') ? t('Enable') : t('Disable');
-  $message = t('Are you sure you want to @operation the file type %type?', array('%type' => $type->name, '@operation' => $operation));
-  return confirm_form($form, $message, 'admin/structure/file-types', '', $title);
+function file_type_toggle_enable($type, $status) {
+  // Validate the token for this page.
+  if (empty($_GET['token']) || $_GET['token'] !== backdrop_get_token($type->type)) {
+    return MENU_ACCESS_DENIED;
+  }
+  $type->disabled = !$status;
+  file_type_save($type);
+  if ($status) {
+    $message = t('The file type %name has been enabled.', array('%name' => check_plain($type->name)));
+  }
+  else {
+    $message = t('The file type %name has been disabled.', array('%name' => check_plain($type->name)));
+  }
+  backdrop_set_message($message);
+  backdrop_goto('admin/structure/file-types');
 }
 
 /**

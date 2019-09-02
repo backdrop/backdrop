@@ -227,20 +227,20 @@ function file_menu() {
     'type' => MENU_CALLBACK,
   );
   $items['admin/structure/file-types/manage/%file_type/enable'] = array(
-    'title' => 'Enable',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('file_type_status_confirm', 4, 'enable'),
+    'title' => 'Enable file type',
+    'page callback' => 'file_type_toggle_enable',
+    'page arguments' => array(4, '1'),
     'access arguments' => array('administer file types'),
     'file' => 'file.types.inc',
-    'type' => MENU_CALLBACK,
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
   );
   $items['admin/structure/file-types/manage/%file_type/disable'] = array(
-    'title' => 'Disable',
-    'page callback' => 'backdrop_get_form',
-    'page arguments' => array('file_type_status_confirm', 4, 'disable'),
+    'title' => 'Disable file type',
+    'page callback' => 'file_type_toggle_enable',
+    'page arguments' => array(4, '0'),
     'access arguments' => array('administer file types'),
     'file' => 'file.types.inc',
-    'type' => MENU_CALLBACK,
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
   );
   $items['admin/structure/file-types/manage/%file_type/delete'] = array(
     'title' => 'Delete',
