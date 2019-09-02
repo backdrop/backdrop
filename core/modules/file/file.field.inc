@@ -1033,26 +1033,31 @@ function file_field_formatter_view($entity_type, $entity, $field, $instance, $la
         // Protect ourselves from recursive rendering.
         static $recursive_render_depth = array();
         if (!empty($item)) {
-          $recursive_render_id = $entity_type . $field['field_name'] . $item['fid'];
-          if (isset($recursive_render_depth[$recursive_render_id])) {
-            $recursive_render_depth[$recursive_render_id]++;
-          }
-          else {
-            $recursive_render_depth[$recursive_render_id] = 1;
-          }
+          // The repeat-rendering protection may be disabled if necessary.
+          if (config_get('file.sttings', 'protect_repeated_render')) {
+            // Protect ourselves from repeated rendering.
+            static $repeated_render_depth = array();
+            $repeated_render_id = $entity_type . $field['field_name'] . $item['fid'];
+            if (isset($repeated_render_depth[$repeated_render_id])) {
+              $repeated_render_depth[$repeated_render_id]++;
+            }
+            else {
+              $repeated_render_depth[$repeated_render_id] = 1;
+            }
 
-          if ($recursive_render_depth[$recursive_render_id] > 20) {
-            watchdog(
-              'file',
-              'Recursive rendering detected when rendering entity %entity_type: %entity_id, using the %field_name field. Aborting rendering.',
-              array(
-                '%entity_type' => 'file',
-                '%entity_id' => $item['fid'],
-                '%field_name' => $field['field_name'],
-              ),
-              WATCHDOG_ERROR
-            );
-            return $element;
+            if ($repeated_render_depth[$repeated_render_id] > 10) {
+              watchdog(
+                'file_entity',
+                'Repeated rendering detected when rendering entity %entity_type: %entity_id, using the %field_name field. Aborting rendering.',
+                array(
+                  '%entity_type' => 'file',
+                  '%entity_id' => $item['fid'],
+                  '%field_name' => $field['field_name'],
+                ),
+                WATCHDOG_ERROR
+              );
+              return $element;
+            }
           }
 
           $file = file_load($item['fid']);

@@ -477,6 +477,106 @@ function file_type_delete_confirm_submit($form, &$form_state) {
 }
 
 /**
+ * Form callback for file settings.
+ */
+function file_settings_form($form, &$form_state) {
+  $config = config('file.settings');
+
+  $form = array('#config' => 'file.settings');
+
+  $php_limit = format_size(file_upload_max_size());
+  $form['max_filesize'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum upload size'),
+    '#default_value' => $config->get('max_filesize'),
+    '#description' => t('Enter a value like "512" (bytes), "80 KB" (kilobytes) or "50 MB" (megabytes). If left empty, the file sizes will be limited only by PHP\'s maximum post and file upload sizes.'),
+    '#size' => 10,
+    '#element_validate' => array('_file_generic_settings_max_filesize'),
+    '#attributes' => array(
+      'placeholder' => $php_limit,
+    ),
+  );
+
+  $form['default_file_directory'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default file directory'),
+    '#description' => t('Subdirectory where files will be stored if the file is uploaded through the file/add page. This field supports tokens.'),
+    '#default_value' => $config->get('default_file_directory'),
+    '#maxlength' => NULL,
+    '#field_prefix' => 'files/',
+  );
+  $form['default_file_directory']['tokens'] = array(
+    '#theme' => 'token_tree',
+    '#dialog' => TRUE,
+  );
+
+  $form['default_allowed_extensions('] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default allowed file extensions'),
+    '#default_value' => $config->get('default_allowed_extensions('),
+    '#description' => t('Separate extensions with a space and do not include the leading dot.'),
+    '#maxlength' => NULL,
+  );
+
+  $form['file_upload_wizard'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('File upload wizard'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#description' => t('Configure the steps available when uploading a new file.'),
+  );
+  $form['file_upload_wizard']['upload_wizard_skip_file_type'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Skip filetype selection.'),
+    '#default_value' => $config->get('upload_wizard_skip_file_type'),
+    '#description' => t('The file type selection step is only available if the uploaded file falls into two or more file types. If this step is skipped, files with no available file type or two or more file types will not be assigned a file type.'),
+  );
+  $form['file_upload_wizard']['upload_wizard_skip_scheme'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Skip scheme selection.'),
+    '#default_value' => $config->get('upload_wizard_skip_scheme'),
+    '#description' => t('The scheme selection step is only available if two or more file destinations, such as public local files served by the webserver and private local files served by Drupal, are available. If this step is skipped, files will automatically be saved using the default download method.'),
+  );
+  $form['file_upload_wizard']['upload_wizard_skip_fields'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Skip available fields.'),
+    '#default_value' => $config->get('upload_wizard_skip_fields'),
+    '#description' => t('The field selection step is only available if the file type the file belongs to has any available fields. If this step is skipped, any fields on the file will be left blank.'),
+  );
+  $form['file_replace_options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('File replace optons'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#description' => t('Default settings for how to handle file name changes during replace.'),
+  );
+  $form['file_replace_options']['keep_original_filename'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Keep original file name'),
+    '#default_value' => $config->get('keep_original_filename'),
+    '#description' => t('Rename the newly uploaded file to the name of the original file. This action cannot be undone.'),
+  );
+
+  $form['protect_repeated_render'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Protect against repeat rendering'),
+    '#default_value' => $config->get('protect_repeated_render'),
+    '#description' => t('Avoid rendering the same entity more than 10 times. This can be a sign of an image entity getting caught in a recursive render, but it can also be triggered when the same image is rendered more than 20 times, e.g. in an long content list or data feed.'),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Validation handler for file_settings_form().
+ */
+function file_settings_form_validate(&$form, &$form_state) {
+  if (isset($form_state['values']['default_file_directory'])) {
+    $form_state['values']['default_file_directory'] = trim($form_state['values']['default_file_directory'], '/');
+  }
+}
+
+/**
  * Updates an existing file type or creates a new one.
  *
  * This function can be called on its own, or via the CTools exportables

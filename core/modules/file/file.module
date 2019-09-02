@@ -67,6 +67,7 @@ function file_hook_info() {
     'file_download_access',
     'file_download_access_alter',
     'file_entity_access',
+    'file_entity_access_alter',
 
     // File operation hooks
     'file_load',
@@ -203,7 +204,26 @@ function file_menu() {
     'description' => 'Manage settings for the type of files used on your site.',
     'page callback' => 'file_list_types_page',
     'access arguments' => array('administer file types'),
-    'file' => 'file_entity.admin.inc',
+    'file' => 'file.admin.inc',
+  );
+  // File Configuration
+  $items['admin/structure/file-types/list'] = array(
+    'title' => 'File types',
+    'description' => 'Manage settings for the type of files used on your site.',
+    'page callback' => 'file_list_types_page',
+    'access arguments' => array('administer file types'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'file' => 'file.admin.inc',
+  );
+  $items['admin/structure/file-types/settings'] = array(
+    'title' => 'File settings',
+    'description' => 'Configure allowed file extensions and the file upload wizard.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('file_settings_form'),
+    'access arguments' => array('administer file types'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+    'file' => 'file.admin.inc',
   );
   $items['admin/structure/file-types/add'] = array(
     'title' => 'Add file type',
@@ -2762,7 +2782,7 @@ function file_query_file_access_alter(QueryAlterableInterface $query) {
  * Implements hook_query_TAG_alter().
  *
  * This function implements the same functionality as
- * file_entity_query_file_access_alter() for the SQL field storage engine. File
+ * file_query_file_access_alter() for the SQL field storage engine. File
  * access conditions are added for field values belonging to files only.
  */
 function file_query_entity_field_access_alter(QueryAlterableInterface $query) {
@@ -2776,8 +2796,8 @@ function file_query_entity_field_access_alter(QueryAlterableInterface $query) {
  *   The query to add conditions to.
  * @param $type
  *   Either 'file' or 'entity' depending on what sort of query it is. See
- *   file_entity_query_file_entity_access_alter() and
- *   file_entity_query_entity_field_access_alter() for more.
+ *   file_query_file_access_alter() and
+ *   file_query_entity_field_access_alter() for more.
  */
 function _file_query_file_access_alter($query, $type) {
   global $user;
@@ -3006,7 +3026,7 @@ function file_list_permissions($type) {
  *
  * By default, this will include all file types in the system. To exclude a
  * specific file from getting permissions defined for it, set the
- * file_entity_permissions_$type variable to 0. File entity does not provide an
+ * file_permissions_$type variable to 0. File entity does not provide an
  * interface for doing so, however, contrib modules may exclude their own files
  * in hook_install(). Alternatively, contrib modules may configure all file
  * types at once, or decide to apply some other hook_file_entity_access()
