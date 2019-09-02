@@ -74,16 +74,18 @@ function layout_flexible_template_settings_edit_form($form, &$form_state, $flexi
 }
 
 /**
- * Submit handler for layout_flexible_template_settings_edit_form() that
- * cancels the form.
+ * Submit handler that cancels the flexible template form.
+ *
+ * @see layout_flexible_template_settings_edit_form()
  */
 function layout_flexible_template_settings_form_cancel($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings';
 }
 
 /**
- * Submit handler for layout_flexible_template_settings_edit_form() that
- * submits the form.
+ * Submit handler that saves a flexible template.
+ *
+ * @see layout_flexible_template_settings_edit_form()
  */
 function layout_flexible_template_settings_form_submit($form, &$form_state) {
   $flexible_template = $form_state['flexible_template'];
@@ -129,7 +131,7 @@ function layout_flexible_template_change_enabled_status($template, $status) {
       }
     }
     if ($errors) {
-      backdrop_set_message(t('The "@layout" layout template is currently in use and may not be excluded.', array('@layout' => $info['title'])), 'error');
+      backdrop_set_message(t('The "@layout" layout template is currently in use and may not be disabled.', array('@layout' => $info['title'])), 'error');
     }
     else {
       backdrop_set_message(t('Layout template "@title" disabled.', array('@title' => $template)));
@@ -161,11 +163,6 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
   form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
 
   $messages = array();
-  if (!empty($flexible_template['locked'])) {
-    $messages['warning'] = array(
-      layout_flexible_locked_message($flexible_template),
-    );
-  }
   $form['messages'] = array(
     '#theme' => 'status_messages',
     '#messages' => $messages,
@@ -189,9 +186,8 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
 
   $form_state['flexible_template_id'] = $flexible_template_id;
 
-
   if (empty($form_state['flexible_template'])) {
-    return;
+    return array();
   }
 
   $renderer = layout_create_renderer('flexible', $layout);
@@ -261,15 +257,14 @@ function layout_flexible_template_configure_form_cancel($form, &$form_state) {
  * Submit handler for layout_flexible_template_configure_form().
  */
 function layout_flexible_template_configure_form_submit($form, &$form_state) {
-    $positions = array();
+  $positions = array();
   if (!empty($form_state['values']['row_positions'])) {
-        $rows = array_filter(explode(',', $form_state['values']['row_positions']));
+    $rows = array_filter(explode(',', $form_state['values']['row_positions']));
     foreach ($rows as $position) {
      $positions[$position] = $form_state['flexible_template']['rows'][$position];
     }
   }
   $form_state['flexible_template']['rows'] = $positions;
-  unset($form_state['flexible_template']['locked']);
 
   $config = config('layout.flexible.' . $form_state['flexible_template_id']);
   $config->setData($form_state['flexible_template']);
@@ -323,6 +318,19 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
     '#ajax' => array(
       'callback' => 'layout_flexible_template_edit_region_style_ajax',
       'wrapper' => 'row_settings',
+      'trigger_as' => array('name' => 'region_count_update'),
+    ),
+  );
+  $form['region_count_update'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update regions'),
+    '#attributes' => array('class' => array('js-hide')),
+    '#name' => 'region_count_update',
+    '#validate' => array(),
+    '#submit' => array('layout_flexible_template_edit_region_style_submit'),
+    '#ajax' => array(
+      'callback' => 'layout_flexible_template_edit_region_style_ajax',
+      'wrapper' => 'row_settings',
     ),
   );
 
@@ -346,23 +354,20 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
     $options['region_12'] = '12:0';
   }
 
-  // We want to set the default as the first option (so at least one option
-  // is always selected) but seems we cannot set #default_value for a field if
-  // its in $form_state['input']. https://drupal.stackexchange.com/questions/251056/set-default-form-values-after-ajax-callback
-  $default_value = key($options);
-  unset($form_state['input']['region_style']);
-
+  $default_region_style = $row_style_in_use;
+  if (!isset($options[$row_style_in_use])) {
+    $default_region_style = key($options);
+  }
   $form['row_settings']['region_style'] = array(
     '#title' => t('Region widths'),
     '#type' => 'radios',
-    '#default_value' => $row_style_in_use,
+    '#default_value' => $default_region_style,
     '#options' => $options,
   );
 
   $form['submit_region_style'] = array(
     '#type' => 'submit',
     '#value' => t('Choose region widths'),
-    '#attributes' => array('class' => array('layout-title-button')),
     '#attributes' => array(
       'class' => array('js-hide'),
     ),
@@ -409,16 +414,18 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
 }
 
 /**
- * Submit handler for the cancel button on the
- * layout_flexible_template_region_style_select() form.
+ * Submit handler that cancels the region style selection form.
+ *
+ * @see layout_flexible_template_region_style_select().
  */
 function layout_flexible_template_cancel_dialog($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/configure';
 }
 
 /**
- * AJAX handler that cancels the layout_flexible_template_region_style_select()
- * dialog.
+ * AJAX handler to cancels the region style selection form.
+ *
+ * @see layout_flexible_template_region_style_select().
  */
 function layout_ajax_flexible_template_cancel_dialog($form, $form_state) {
   $commands = array();
@@ -431,7 +438,9 @@ function layout_ajax_flexible_template_cancel_dialog($form, $form_state) {
 }
 
 /**
- * Submit handler for layout_flexible_template_region_style_select().
+ * Submit handler that saves the region style selection form.
+ *
+ * @see layout_flexible_template_region_style_select().
  */
 function layout_flexible_template_region_style_select_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/row/' . $form_state['original_row'] . '/configure/' . $form_state['values']['region_style'];
@@ -599,6 +608,7 @@ function layout_flexible_template_get_last_region_number($flexible_template, $fo
     $last = $form_state['last_region_number'];
   }
   else {
+    $region_names = array();
     foreach ($flexible_template['rows'] as $row) {
       foreach ($row['region_names'] as $name) {
         $region_names[] = $name;
@@ -694,16 +704,29 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
 }
 
 /**
- * AJAX responder to change the region count on the
- * layout_flexible_template_region_style_select() form.
+ * AJAX callback to change the region count.
+ *
+ * @see layout_flexible_template_region_style_select()
  */
-function layout_flexible_template_edit_region_style_ajax($form, $form_state) {
+function layout_flexible_template_edit_region_style_ajax($form, &$form_state) {
   return $form['row_settings'];
 }
 
 /**
- * AJAX responder on the submit button for
- * layout_flexible_template_edit_row_form().
+ * Submit callback to change the region count.
+ *
+ * @see layout_flexible_template_region_style_select()
+ */
+function layout_flexible_template_edit_region_style_submit($form, &$form_state) {
+  // Remove the current region style when switching between region counts.
+  $form_state['input']['region_style'] = NULL;
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * AJAX callback on the submit button for editing a layout row.
+ *
+ * @see layout_flexible_template_edit_row_form().
  */
 function layout_flexible_template_edit_row_ajax($form, $form_state) {
   $commands = array();
@@ -765,6 +788,7 @@ function layout_flexible_template_delete_row($flexible_template, $original_row) 
   else {
     backdrop_set_message(t('Row "@title" removed.', array('@title' => $flexible_template['title'])));
     backdrop_goto('admin/structure/layouts/settings/flexible-template/' . $flexible_template_id . '/configure');
+    return array();
   }
 }
 
@@ -818,8 +842,9 @@ function layout_flexible_template_delete_form($form, &$form_state, $flexible_tem
 }
 
 /**
- * Submit handler for layout_flexible_template_delete_form(). Deletes a 
- * flexible template.
+ * Submit handler that deletes a flexible template.
+ *
+ * @see layout_flexible_template_delete_form()
  */
 function layout_flexible_template_delete_form_submit(&$form, &$form_state) {
   $template = $form_state['template'];
@@ -834,29 +859,3 @@ function layout_flexible_template_delete_form_submit(&$form, &$form_state) {
   backdrop_set_message(t('The layout template has been deleted.'));
   $form_state['redirect'] = 'admin/structure/layouts/settings';
 }
-
-/**
- * Prepare a message and link based on if a template is updated or locked.
- *
- * @see layout_flexible_break_lock_page()
- */
-function layout_flexible_locked_message($flexible_template) {
-  global $user;
-
-  $button_title = 'Save flexible template';
-
-  $message = '';
-  if (!empty($flexible_template['locked']) && $user->uid !== $flexible_template['locked']['uid']) {
-    $account = user_load($flexible_template['locked']['uid']);
-    $lock_user = theme('username', array('account' => $account));
-    $lock_age = format_interval(REQUEST_TIME - $item->locked['updated']);
-    $lock_break_url = url('admin/structure/layouts/flexible-template/' . $flexible_template['name'] . '/break-lock', array('query' => array('token' => backdrop_get_token($type . '-' . $item->name)) + backdrop_get_destination()));
-    $message = t('Settings on this page are being edited by user !user, and is therefore locked from editing by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.',  array('!user' => $lock_user, '!age' => $lock_age, '!break' => $lock_break_url));
-  }
-  elseif (!empty($flexible_template['locked']['updated'])) {
-    $message = t('This form has unsaved changes. Click "@button" to make changes permanent or "Cancel" to discard changes.', array('@button' => $button_title));
-  }
-
-  return $message;
-}
-
