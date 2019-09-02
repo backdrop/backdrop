@@ -1924,6 +1924,10 @@ function layout_get_title_description(Layout $layout) {
  *   The loaded flexible template object.
  */
 function layout_set_flexible_tempstore($flexible_template) {
+  $flexible_template['locked'] = array(
+    'uid' => $GLOBALS['user']->uid,
+    'updated' => REQUEST_TIME,
+  );
   tempstore_set('layout.flexible', $flexible_template['name'], $flexible_template, 604800);
 }
 

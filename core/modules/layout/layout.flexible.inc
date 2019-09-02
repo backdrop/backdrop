@@ -159,6 +159,21 @@ function layout_flexible_template_change_enabled_status($template, $status) {
 function layout_flexible_template_configure_form($form, &$form_state, $flexible_template) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
 
+  $messages = array();
+  if ($flexible_template['locked']) {
+    $messages['warning'] = array(
+      layout_flexible_locked_message($flexible_template),
+    );
+  }
+  $form['messages'] = array(
+    '#theme' => 'status_messages',
+    '#messages' => $messages,
+    '#weight' => -100,
+    // Prefix/suffix used to identify in AJAX requests.
+    '#prefix' => '<div id="layout-messages">',
+    '#suffix' => '</div>',
+  );
+
   $form_state['flexible_template'] = $flexible_template;
   $flexible_template_id = $flexible_template['name'];
 
@@ -253,10 +268,12 @@ function layout_flexible_template_configure_form_submit($form, &$form_state) {
     }
   }
   $form_state['flexible_template']['rows'] = $positions;
+  unset($form_state['flexible_template']['locked']);
 
   $config = config('layout.flexible.' . $form_state['flexible_template_id']);
   $config->setData($form_state['flexible_template']);
   $config->save();
+
   tempstore_clear('layout.flexible', $form_state['flexible_template_id']);
   layout_flexible_reset_caches();
   layout_reset_caches();
@@ -688,6 +705,13 @@ function layout_flexible_template_edit_row_ajax($form, $form_state) {
     $commands = array_merge($commands, $update_ajax['#commands']);
   }
 
+  // Update the messages area.
+  if ($message = layout_flexible_locked_message($form_state['flexible_template'])) {
+    backdrop_set_message($message, 'warning');
+  }
+  $commands[] = ajax_command_remove('#messages');
+  $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
+
   return array(
     '#type' => 'ajax',
     '#commands' => $commands,
@@ -793,3 +817,29 @@ function layout_flexible_template_delete_form_submit(&$form, &$form_state) {
   backdrop_set_message(t('The layout template has been deleted.'));
   $form_state['redirect'] = 'admin/structure/layouts/settings';
 }
+
+/**
+ * Prepare a message and link based on if a template is updated or locked.
+ *
+ * @see layout_flexible_break_lock_page()
+ */
+function layout_flexible_locked_message($flexible_template) {
+  global $user;
+
+  $button_title = 'Save flexible template';
+
+  $message = '';
+  if (!empty($flexible_template['locked']) && $user->uid !== $flexible_template['locked']['uid']) {
+    $account = user_load($flexible_template['locked']['uid']);
+    $lock_user = theme('username', array('account' => $account));
+    $lock_age = format_interval(REQUEST_TIME - $item->locked['updated']);
+    $lock_break_url = url('admin/structure/layouts/flexible-template/' . $flexible_template['name'] . '/break-lock', array('query' => array('token' => backdrop_get_token($type . '-' . $item->name)) + backdrop_get_destination()));
+    $message = t('Settings on this page are being edited by user !user, and is therefore locked from editing by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.',  array('!user' => $lock_user, '!age' => $lock_age, '!break' => $lock_break_url));
+  }
+  elseif (!empty($flexible_template['locked']['updated'])) {
+    $message = t('This form has unsaved changes. Click "@button" to make changes permanent or "Cancel" to discard changes.', array('@button' => $button_title));
+  }
+
+  return $message;
+}
+
