@@ -746,9 +746,6 @@ function layout_flexible_template_edit_row_ajax($form, $form_state) {
   }
 
   // Update the messages area.
-  if ($message = layout_flexible_locked_message($form_state['flexible_template'])) {
-    backdrop_set_message($message, 'warning');
-  }
   $commands[] = ajax_command_remove('#messages');
   $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
 
