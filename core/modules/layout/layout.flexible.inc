@@ -161,7 +161,7 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
   form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
 
   $messages = array();
-  if ($flexible_template['locked']) {
+  if (!empty($flexible_template['locked'])) {
     $messages['warning'] = array(
       layout_flexible_locked_message($flexible_template),
     );
