@@ -12,14 +12,16 @@ function file_list_types_page() {
   $types = file_type_get_types();
   $names = file_type_get_names();
   $field_ui = module_exists('field_ui') && user_access('administer fields');
-  $header = array(t('Name'), t('Status'), t('Operations'));
-  $rows = array();
+  $header = array(t('Name'), t('Storage state'), t('Operations'));
+  $rows_enabled = array();
+  $rows_disabled = array();
   $weight = 0;
 
   // Sort the list of content types by name instead of machine name.
   natcasesort($names);
 
   foreach ($names as $key => $type) {
+    $links = array();
     $type = $types[$key];
     $weight++;
     $row = array(
@@ -33,19 +35,18 @@ function file_list_types_page() {
       ),
     );
 
-    if ($type->disabled) {
-      $storage = t('Disabled');
-    }
-    elseif ($type->storage === FILE_TYPE_STORAGE_OVERRIDE) {
-      $storage = t('Overridden');
+
+    if ($type->storage === FILE_TYPE_STORAGE_OVERRIDE) {
+      $storage_state = t('Overridden');
     }
     elseif ($type->storage === FILE_TYPE_STORAGE_DEFAULT) {
-      $storage = t('Default (module-provided)');
+      $storage_state = t('Default (module-provided)');
     }
     else {
-      $storage = t('Custom');
+      $storage_state = t('Custom');
     }
-    $row[] = $storage;
+    $row[] = $storage_state;
+
 
     $path = isset($file_entity_info['bundles'][$type->type]['admin']['real path']) ? $file_entity_info['bundles'][$type->type]['admin']['real path'] : NULL;
 
@@ -54,6 +55,7 @@ function file_list_types_page() {
       'href' => $path,
       'weight' => 0,
     );
+
     if ($field_ui) {
       $links['fields'] = array(
         'title' => t('Manage fields'),
@@ -75,7 +77,7 @@ function file_list_types_page() {
       $links['enable'] = array(
         'title' => t('Enable'),
         'href' => $path . '/enable',
-        'weight' => 10,
+        'weight' => -10,
       );
     }
     else {
@@ -99,6 +101,8 @@ function file_list_types_page() {
         'weight' => 25,
       );
     }
+
+    backdrop_sort($links);
     $row[] = array(
       'data' => array(
         '#type' => 'operations',
@@ -106,8 +110,21 @@ function file_list_types_page() {
       ),
     );
 
-    $rows[] = $row;
+    if ($type->disabled) {
+      $rows_disabled[] = array(
+        'data' => $row,
+        'class' => array('disabled'),
+      );
+    }
+    else {
+      $rows_enabled[] = array(
+        'data' => $row,
+        'class' => array('enabled'),
+      );
+    }
   }
+
+  $rows = array_merge($rows_enabled, $rows_disabled);
 
   $build['file_table'] = array(
     '#theme' => 'table',
