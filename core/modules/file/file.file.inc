@@ -1,8 +1,7 @@
 <?php
-
 /**
  * @file
- * File hooks implemented by the File entity module.
+ * File hooks implemented by the Fil module.
  */
 
 /**

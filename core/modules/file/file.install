@@ -987,4 +987,11 @@ function file_update_1006() {
     // Delete the file type table.
     db_drop_table('file_type');
   }
+
+  if (db_table_exists('file_display')) {
+    // @todo this is hard: Figure out how to translate this to config.
+
+    // Delete the file type table.
+    //db_drop_table('file_display');
+  }
 }

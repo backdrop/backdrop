@@ -1,21 +1,20 @@
 {
     "_config_name": "file_display.image",
+    "_module": "file",
     "type": "image",
     "default": {
+        "status": "file_field_image",
         "file_field_image": {
-            "status": 1,
-            "weight": "48",
             "settings": {
-                "image_style": "",
+                "image_style": "large",
                 "image_link": "",
                 "image_float": ""
             }
         }
     },
     "preview": {
+        "status": "file_field_image",
         "file_field_image": {
-            "status": 1,
-            "weight": "48",
             "settings": {
                 "image_style": "thumbnail",
                 "image_link": "",

@@ -1,10 +1,10 @@
 {
     "_config_name": "file_display.audio",
+    "_module": "file",
     "type": "audio",
     "default": {
+        "status": "file_field_file_audio",
         "file_field_file_audio": {
-            "status": 1,
-            "weight": "50",
             "settings": {
                 "controls": 1,
                 "autoplay": 0,
@@ -15,9 +15,8 @@
         }
     },
     "preview": {
+        "status": "file_field_file_default",
         "file_field_file_audio": {
-            "status": 0,
-            "weight": "50",
             "settings": {
                 "controls": 1,
                 "autoplay": 0,

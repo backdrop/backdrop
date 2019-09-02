@@ -1964,7 +1964,8 @@ function file_get_file_references(File $file, $field = NULL, $age = FIELD_LOAD_R
  */
 
 /**
- * Returns the display to use for a file type in a given view mode.
+ * Returns an array containing a single display to use for a file type in a
+ * given view mode.
  *
  * @param string $file_type
  *   The type of file.
@@ -2020,10 +2021,11 @@ function file_displays($file_type, $view_mode) {
 }
 
 /**
- * Returns a single {file_display} array for the file type.
+ * Returns an array with a single value. The key is the formatter name, and the
+ * value is a {file_display} array for the file type.
  */
 function file_display_load($file_type, $view_mode) {
-  $display = config('file_display.' . $file_type)->get($view_mode);
+  $display = config_get('file_display.' . $file_type, $view_mode);
   return $display;
 }
 
@@ -3224,32 +3226,33 @@ function file_view_file($file, $display = 'full', $langcode = NULL) {
     // Allow modules to change the view mode.
     $entity = array($file->fid => $file);
     $view_mode = key(entity_view_mode_prepare('file', $entity, $display, $langcode));
-    $display = file_display($file->type, $view_mode);
+    $display_info = file_display($file->type, $view_mode);
   }
   else {
     $view_mode = '_custom_display';
   }
 
-  // Attempt to display the file with each of the possible displays. Stop after
-  // the first successful one. See file_display() for details.
+  // Attempt to display the file with the specified display.
+  // See file_display() for details.
   $element = NULL;
+  // Load the file that contains file_info_formatter_types().
   module_load_include('inc', 'file', 'file.admin');
 
-  if (!empty($display['status'])) {
-    $formatter_info = file_info_formatter_types($formatter_type);
-
-    $has_function = isset($formatter_info['view callback']);
-    $function = $formatter_info['view callback'];
-    $function_exists = function_exists($function);
-    if ($has_function && $function && $function_exists) {
-      $display['type'] = $formatter_type;
-      if (!empty($formatter_info['default settings'])) {
-        if (empty($display['settings'])) {
-          $display['settings'] = array();
+  if (!empty($display_info)) {
+    foreach ($display_info as $formatter_type => $display) {
+      if (!empty($display['status'])) {
+        $formatter_info = file_info_formatter_types($formatter_type);
+        if (isset($formatter_info['view callback']) && ($function = $formatter_info['view callback']) && function_exists($function)) {
+          $display['type'] = $formatter_type;
+          if (!empty($formatter_info['default settings'])) {
+            if (empty($display['settings'])) {
+              $display['settings'] = array();
+            }
+            $display['settings'] += $formatter_info['default settings'];
+          }
+          $element = $function($file, $display, $langcode);
         }
-        $display['settings'] += $formatter_info['default settings'];
       }
-      $element = $function($file, $display, $langcode);
     }
   }
 

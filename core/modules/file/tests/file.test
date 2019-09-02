@@ -2671,7 +2671,7 @@ class FileTypeTestCase extends FileTestHelper {
     $type_machine_label = 'foobar';
     $type = $this->createFileType(array('type' => $type_machine_type, 'name' => $type_machine_label));
     $loaded_type = file_type_load($type_machine_type);
-    $this->assertEqual($loaded_type->label, $type_machine_label, "Was able to create a type and retrieve it.");
+    $this->assertEqual($loaded_type->name, $type_machine_label, "Was able to create a type and retrieve it.");
   }
 
   /**
@@ -3132,9 +3132,6 @@ class FileAttributeOverrideTestCase extends FileTestHelper {
     $overrides = array(
       'width' => 40,
       'height' => 20,
-      'alt' => $this->randomName(),
-      'title' => $this->randomName(),
-
     );
 
     // Create an image file entity for testing.
@@ -3150,7 +3147,7 @@ class FileAttributeOverrideTestCase extends FileTestHelper {
 
     // Verify that all of the overrides replaced the attributes.
     foreach ($overrides as $attribute => $expected_value) {
-      $this->assertEqual($build['#file']->$attribute, $expected_value, format_string('The %attribute was overridden correctly.', array('%attribute' => $attribute)));
+      $this->assertEqual($build['#item'][$attribute], $expected_value, format_string('The %attribute was overridden correctly.', array('%attribute' => $attribute)));
     }
   }
 }

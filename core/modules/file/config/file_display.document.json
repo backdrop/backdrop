@@ -1,16 +1,21 @@
 {
     "_config_name": "file_display.document",
+    "_module": "file",
     "type": "document",
     "default": {
-        "file_field_file_default": {
-            "status": 1,
-            "weight": "50"
+        "status": "file_field_file_download_link",
+        "file_field_file_download_link": {
+            "settings": {
+                "text": "Download [file:name]"
+            }
         }
     },
     "preview": {
-        "file_field_file_default": {
-            "status": 1,
-            "weight": "50"
+        "status": "file_field_file_default",
+        "file_field_file_download_link": {
+            "settings": {
+                "text": "Download [file:name]"
+            }
         }
     }
 }

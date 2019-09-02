@@ -1,5 +1,6 @@
 {
     "_config_name": "file.type.audio",
+    "_module": "file",
     "type": "audio",
     "name": "Audio",
     "description": "An Audio file is a sound recording.",

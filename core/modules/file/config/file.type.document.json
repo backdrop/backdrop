@@ -1,5 +1,6 @@
 {
     "_config_name": "file.type.document",
+    "_module": "file",
     "type": "document",
     "name": "Document",
     "description": "A document file is written information.",

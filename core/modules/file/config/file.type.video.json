@@ -1,5 +1,6 @@
 {
     "_config_name": "file.type.video",
+    "_module": "file",
     "type": "video",
     "name": "Video",
     "description": "A Video file is a moving visual recording.",

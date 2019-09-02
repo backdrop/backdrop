@@ -1077,17 +1077,15 @@ function file_field_formatter_view($entity_type, $entity, $field, $instance, $la
           // Untranslatable fields are rendered with no language code, fall back
           // to the content language in that case.
           $element[$delta] = file_view($file, $settings['file_view_mode'], $langcode !== LANGUAGE_NONE ? $langcode : NULL);
-        } else {
-          watchdog(
-            'file',
-            'In the %referencing_entity_type, the %field_name field refers to a %entity_type which does not exist. Aborting the render for it.',
-            array(
-              '%referencing_entity_type' => $entity_type,
-              '%field_name' => $field['field_name'],
-              '%entity_type' => 'file',
-            ),
-            WATCHDOG_ERROR
+        }
+        else {
+          $variables = array(
+            '%referencing_entity_type' => $entity_type,
+            '%field_name' => $field['field_name'],
+            '%entity_type' => 'file',
           );
+          $message = 'In the %referencing_entity_type, the %field_name field refers to a %entity_type which does not exist. Aborting the render for it.';
+          watchdog('file', $message, $variables, WATCHDOG_ERROR);
         }
       }
       break;

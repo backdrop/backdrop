@@ -71,8 +71,9 @@ function file_list_types_page() {
     $links['file-display'] = array(
       'title' => t('Manage file display'),
       'href' => $path . '/file-display',
-      'weight' => 10,
+      'weight' => 11,
     );
+
     if ($type->disabled) {
       $links['enable'] = array(
         'title' => t('Enable'),
@@ -86,17 +87,18 @@ function file_list_types_page() {
         'title' => t('Disable'),
         'href' => $path . '/disable',
         'query' => array('token' => backdrop_get_token($type->type)),
-        'weight' => 10,
+        'weight' => 20,
       );
     }
+
     if ($type->storage == FILE_TYPE_STORAGE_OVERRIDE) {
       $links['revert'] = array(
         'title' => t('Revert'),
         'href' => $path . '/revert',
-        'weight' => 20,
+        'weight' => 15,
       );
     }
-    if ($type->storage == FILE_TYPE_STORAGE_NORMAL) {
+    elseif ($type->storage == FILE_TYPE_STORAGE_NORMAL) {
       $links['delete'] = array(
         'title' => t('Delete'),
         'href' => $path . '/delete',
