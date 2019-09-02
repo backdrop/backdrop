@@ -53,5 +53,5 @@
       </div>
     </<?php print $row['element']; ?>>
   <?php endforeach; ?>
-</div>
+  </div>
 </div>

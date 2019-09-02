@@ -163,20 +163,20 @@ function layout_menu() {
     'file' => 'layout.flexible.inc',
   ) + $base;
 
-  $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/enable'] = array(
-    'title' => 'Enable or disable flexible template',
-    'page callback' => 'layout_flexible_template_change_enabled_status',
-    'page arguments' => array(5, 6),
+  $items['admin/structure/layouts/settings/toggle/%/enable'] = array(
+    'title' => 'Enable layout template',
+    'page callback' => 'layout_enable_layout_template',
+    'page arguments' => array(TRUE, 5),
     'type' => MENU_CALLBACK,
-    'file' => 'layout.flexible.inc',
+    'file' => 'layout.admin.inc',
   ) + $base;
 
-  $items['admin/structure/layouts/settings/flexible-template/%layout_flexible_tempstore/disable'] = array(
-    'title' => 'Enable or disable flexible template',
-    'page callback' => 'layout_flexible_template_change_enabled_status',
-    'page arguments' => array(5, 6),
+  $items['admin/structure/layouts/settings/toggle/%/disable'] = array(
+    'title' => 'Disable layout template',
+    'page callback' => 'layout_enable_layout_template',
+    'page arguments' => array(FALSE, 5),
     'type' => MENU_CALLBACK,
-    'file' => 'layout.flexible.inc',
+    'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/reorder'] = array(

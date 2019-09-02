@@ -1892,7 +1892,7 @@ function layout_condition_edit_title(Layout $layout = NULL, Block $block = NULL,
 }
 
 /**
- * Menu callback; Enable or disable a layout.
+ * Menu callback; Enable or disable a layout configuration.
  */
 function layout_enable_layout($status, Layout $layout) {
   if (backdrop_get_token('layout-' . $layout->name) !== $_GET['token']) {
@@ -1908,6 +1908,54 @@ function layout_enable_layout($status, Layout $layout) {
     backdrop_set_message(t('Layout "@title" disabled.', array('@title' => $layout->title)));
   }
   backdrop_goto('admin/structure/layouts');
+}
+
+/**
+ * Menu callback; Enable or disable a layout template.
+ */
+function layout_enable_layout_template($status, $template_name) {
+  if (backdrop_get_token('layout-template-' . $template_name) !== $_GET['token']) {
+    return MENU_ACCESS_DENIED;
+  }
+  $template_info = layout_get_layout_template_info($template_name);
+  if (!$template_info) {
+    return MENU_NOT_FOUND;
+  }
+
+  $config = config('layout.settings');
+  $data = $config->get();
+  $errors = FALSE;
+
+  if (!$status) {
+    if (!in_array($template_name, $data['excluded_templates'])) {
+      $data['excluded_templates'][] = $template_name;
+    }
+    // Check which layout templates are in use.
+    foreach (layout_load_all() as $layout) {
+      $info = layout_get_layout_template_info($layout->layout_template);
+      if (in_array($layout->layout_template, $data['excluded_templates'])) {
+        $errors = TRUE;
+        break;
+      }
+    }
+    if ($errors) {
+      backdrop_set_message(t('The "@layout" layout template is currently in use and may not be disabled.', array('@layout' => $info['title'])), 'error');
+    }
+    else {
+      backdrop_set_message(t('Layout template "@title" disabled.', array('@title' => $template_info['title'])));
+    }
+  }
+  else {
+    $data['excluded_templates'] = array_diff($data['excluded_templates'], array($template_name));
+    backdrop_set_message(t('Layout template "@title" enabled.', array('@title' => $template_info['title'])));
+  }
+
+  if (!$errors) {
+    $config->setData($data);
+    $config->save();
+  }
+
+  backdrop_goto('admin/structure/layouts/settings');
 }
 
 /**
@@ -2734,7 +2782,7 @@ function layout_settings_page_validate(&$form, &$form_state) {
   foreach (layout_load_all() as $layout) {
     $info = layout_get_layout_template_info($layout->layout_template);
     if (in_array($layout->layout_template, $excluded)) {
-      form_set_error('templates', t('The "@layout" layout template is currently in use and may not be disabled.', array('@layout' => $info['title'])));
+      form_set_error('templates][' . $layout->layout_template, t('The "@layout" layout template is currently in use and may not be disabled.', array('@layout' => $info['title'])));
     }
   }
 }
@@ -2770,14 +2818,14 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
   if ($is_default) {
     $links['disable'] = array(
       'title' => t('Disable'),
-      'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/disable',
+      'href' => 'admin/structure/layouts/settings/toggle/' . $template_info['name'] . '/disable',
       'query' => array('token' => backdrop_get_token('layout-template-' . $template_info['name'])),
     );
   }
   else {
     $links['enable'] = array(
       'title' => t('Enable'),
-      'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/enable',
+      'href' => 'admin/structure/layouts/settings/toggle/' . $template_info['name'] . '/enable',
       'query' => array('token' => backdrop_get_token('layout-template-' . $template_info['name'])),
     );
   }

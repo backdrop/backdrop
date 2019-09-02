@@ -99,55 +99,12 @@ function layout_flexible_template_settings_form_submit($form, &$form_state) {
   $config->save();
 
   layout_set_flexible_tempstore($flexible_template);
-  backdrop_set_message(t('Layout template saved.'));
   backdrop_theme_rebuild();
   layout_flexible_reset_caches();
   layout_reset_caches();
+
+  backdrop_set_message(t('Layout template "@title" saved.', array('@title' => $flexible_template['title'])));
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['values']['machine_name'] . '/configure';
-}
-
-/**
- * Menu callback; Enable or disable a layout template.
- */
-function layout_flexible_template_change_enabled_status($template, $status) {
-  if (backdrop_get_token('layout-template-' . $template) !== $_GET['token']) {
-    return MENU_ACCESS_DENIED;
-  }
-
-  $config = config('layout.settings');
-  $data = $config->get();
-  $errors = FALSE;
-  
-  if ($status == 'disable') {
-    if (!in_array($template, $data['excluded_templates'])) {
-      $data['excluded_templates'][] = $template;
-    }
-    // Check which layout templates are in use.
-    foreach (layout_load_all() as $layout) {
-      $info = layout_get_layout_template_info($layout->layout_template);
-      if (in_array($layout->layout_template, $data['excluded_templates'])) {
-        $errors = TRUE;
-        break;
-      }
-    }
-    if ($errors) {
-      backdrop_set_message(t('The "@layout" layout template is currently in use and may not be disabled.', array('@layout' => $info['title'])), 'error');
-    }
-    else {
-      backdrop_set_message(t('Layout template "@title" disabled.', array('@title' => $template)));
-    }
-  }
-  else {
-    $data['excluded_templates'] = array_diff($data['excluded_templates'], array($template));
-    backdrop_set_message(t('Layout "@title" enabled.', array('@title' => $template)));
-  }
-
-  if (!$errors) {
-    $config->setData($data);
-    $config->save();
-  }
-
-  backdrop_goto('admin/structure/layouts/settings');
 }
 
 /**
@@ -273,6 +230,8 @@ function layout_flexible_template_configure_form_submit($form, &$form_state) {
   tempstore_clear('layout.flexible', $form_state['flexible_template_id']);
   layout_flexible_reset_caches();
   layout_reset_caches();
+
+  backdrop_set_message(t('Layout template "@title" saved.', array('@title' => $form_state['flexible_template']['title'])));
 }
 
 /**
@@ -391,12 +350,12 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
     ),
   );
   if (isset($flexible_template['rows'][$original_row]['in_progress'])) {
-    $cancel_submit_callback = 'layout_flexible_template_region_style_select_submit';
+    $cancel_submit_callback = 'layout_flexible_template_region_style_select_cancel';
     $cancel_ajax_callback = 'layout_ajax_form_open_dialog';
   }
   else {
-    $cancel_submit_callback = 'layout_flexible_template_cancel_dialog';
-    $cancel_ajax_callback = 'layout_ajax_flexible_template_cancel_dialog';
+    $cancel_submit_callback = 'layout_flexible_template_cancel';
+    $cancel_ajax_callback = 'layout_flexible_template_cancel_ajax';
   }
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
@@ -418,7 +377,7 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
  *
  * @see layout_flexible_template_region_style_select().
  */
-function layout_flexible_template_cancel_dialog($form, &$form_state) {
+function layout_flexible_template_cancel($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/configure';
 }
 
@@ -427,7 +386,7 @@ function layout_flexible_template_cancel_dialog($form, &$form_state) {
  *
  * @see layout_flexible_template_region_style_select().
  */
-function layout_ajax_flexible_template_cancel_dialog($form, $form_state) {
+function layout_flexible_template_cancel_ajax($form, $form_state) {
   $commands = array();
   $commands[] = ajax_command_close_modal_dialog();
 
@@ -435,6 +394,15 @@ function layout_ajax_flexible_template_cancel_dialog($form, $form_state) {
     '#type' => 'ajax',
     '#commands' => $commands,
   );
+}
+
+/**
+ * Submit handler that cancels the region style selection form.
+ *
+ * @see layout_flexible_template_region_style_select().
+ */
+function layout_flexible_template_region_style_select_cancel($form, &$form_state) {
+  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/row/' . $form_state['original_row'] . '/configure';
 }
 
 /**
@@ -513,7 +481,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
 
   $form['region_names'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Regions'),
+    '#title' => t('Region names'),
     '#collapsed' => $original_row != 'add',
     '#collapsible' => TRUE,
     '#tree' => TRUE,
@@ -588,10 +556,10 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     '#value' => t('Cancel'),
     '#validate' => array(),
     '#submit' => array(
-      'layout_flexible_template_cancel_dialog',
+      'layout_flexible_template_cancel',
     ),
     '#ajax' => array(
-      'callback' => 'layout_ajax_flexible_template_cancel_dialog',
+      'callback' => 'layout_flexible_template_cancel_ajax',
     ),
   );
 
@@ -809,7 +777,7 @@ function layout_flexible_template_delete_form($form, &$form_state, $flexible_tem
   }
 
   if (!empty($errors)) {
-    backdrop_set_message(t('The %layout layout template is currently in use in the following layouts and may not be deleted: !list', array('%layout' => $flexible_template['title'], '!list' => theme('item_list', array('items' => $errors)))), 'error');
+    backdrop_set_message(t('The "@title" layout template is currently in use in the following layouts and may not be deleted: !list', array('@title' => $flexible_template['title'], '!list' => theme('item_list', array('items' => $errors)))), 'error');
   }
   else {
     $form['description'] = array(
@@ -853,6 +821,6 @@ function layout_flexible_template_delete_form_submit(&$form, &$form_state) {
   layout_flexible_reset_caches();
   layout_reset_caches();
 
-  backdrop_set_message(t('The layout template has been deleted.'));
+  backdrop_set_message(t('The layout template "@title" has been deleted.', array('@title' => $template['title'])));
   $form_state['redirect'] = 'admin/structure/layouts/settings';
 }

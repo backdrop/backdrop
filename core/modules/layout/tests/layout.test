@@ -2538,7 +2538,7 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
       'description' => $template_description1,
     );
     $this->backdropPost(NULL, $edit, t('Save and configure'));
-    $this->assertText(t('Layout template saved.'));
+    $this->assertText(t('Layout template "@title" saved.', array('@title' => $template_name1)));
 
     // Check that the new template is found in the cached list of templates.
     $all_templates = layout_get_layout_template_info();
@@ -2561,7 +2561,7 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
       'description' => $template_description2,
     );
     $this->backdropPost(NULL, $edit, t('Save and configure'));
-    $this->assertText(t('Layout template saved.'));
+    $this->assertText(t('Layout template "@title" saved.', array('@title' => $template_name2)));
     $this->backdropGet('admin/structure/layouts/settings');
     $flexible_layout_edit_link = 'admin/structure/layouts/settings/flexible-template/' . $template_machine_name2 . '/edit';
     $edit = array(
