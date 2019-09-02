@@ -2140,7 +2140,6 @@ class FileUploadWizardTestCase extends FileTestHelper {
     $test_file = $this->getTestFile('image');
     $filename = $this->randomName();
 
-    debug($this->private_files_directory);
     // Ensure that the file is affected by every step.
     config_set('system.core', 'file_private_path', $this->private_files_directory);
 
@@ -2159,53 +2158,70 @@ class FileUploadWizardTestCase extends FileTestHelper {
     field_create_instance($instance);
 
     // Test skipping each upload wizard step.
+    $debug_i = 0;
     foreach (array('types', 'schemes', 'fields') as $skipped_step) {
       // Step to skip.
       switch ($skipped_step) {
         case 'types':
-          variable_set('file_entity_file_upload_wizard_skip_file_type', TRUE);
+          config_set('file.settings', 'upload_wizard_skip_file_type', TRUE);
           break;
         case 'schemes':
-          variable_set('file_entity_file_upload_wizard_skip_scheme', TRUE);
+          config_set('file.settings', 'upload_wizard_skip_scheme', TRUE);
           break;
         case 'fields':
-          variable_set('file_entity_file_upload_wizard_skip_fields', TRUE);
+          config_set('file.settings', 'upload_wizard_skip_fields', TRUE);
           break;
       }
 
-      // Step 1: Upload a basic image file.
+      // Step 0: Upload a basic image file.
+      debug('Step 0: Upload a basic image file.');
       $edit = array();
       $edit['files[upload]'] = backdrop_realpath($test_file->uri);
       $this->backdropPost('file/add', $edit, t('Next'));
 
-      // Step 2: File type selection.
+      $debug_i++;
+      debug('Step ' . $debug_i . ': ' . $skipped_step);
+
+      // Step 1: File type selection.
       if ($skipped_step != 'types') {
+        debug('Step 1: File type selection.');
         $this->assertText('File type', 'Types step confirmed.');
         $edit = array();
         $edit['type'] = 'image2';
         $this->backdropPost(NULL, $edit, t('Next'));
       }
+      else{
+        debug('Skipping types');
+      }
 
-      // Step 3: Scheme selection.
+      // Step 2: Scheme selection.
       if ($skipped_step != 'schemes') {
+        debug('Step 2: Scheme selection.');
         $this->assertText('Private local files', 'Schemes step confirmed.');
         $edit = array();
         $edit['scheme'] = 'private';
         $this->backdropPost(NULL, $edit, t('Next'));
       }
+      else {
+        debug('Skipping schemes');
+      }
 
-      // Step 4: Attached fields.
+      // Step 3: Attached fields.
       if ($skipped_step != 'fields') {
         // Skipping file type selection essentially skips this step as well
         // because the file will not be assigned a type so no fields will be
         // available.
         if ($skipped_step != 'types') {
+          debug('Step 3: Attached fields.');
           $this->assertText('Configure file fields', 'Fields step confirmed.');
           $edit = array();
           $edit['filename'] = $filename;
           $edit[$field_name . '[' . LANGUAGE_NONE . '][0][value]'] = $this->randomName();
           $this->backdropPost(NULL, $edit, t('Save'));
         }
+      }
+      else {
+        debug('Skipping fields');
       }
 
       // Check that the file exists in the database.
@@ -2219,9 +2235,11 @@ class FileUploadWizardTestCase extends FileTestHelper {
       $this->assertRaw(t('@type %name was uploaded.', array('@type' => $type->name, '%name' => $file->filename)), t('Image file uploaded.'));
 
       // Reset 'skip' variables.
-      variable_del('file_upload_wizard_skip_file_type');
-      variable_del('file_upload_wizard_skip_scheme');
-      variable_del('file_upload_wizard_skip_fields');
+      $config = config('file.settings');
+      $config->set('upload_wizard_skip_file_type', FALSE);
+      $config->set('upload_wizard_skip_scheme', FALSE);
+      $config->set('upload_wizard_skip_fields', FALSE);
+      $config->save();
     }
   }
 }
