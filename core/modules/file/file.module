@@ -203,7 +203,7 @@ function file_menu() {
     'description' => 'Manage settings for the type of files used on your site.',
     'page callback' => 'file_list_types_page',
     'access arguments' => array('administer file types'),
-    'file' => 'file.types.inc',
+    'file' => 'file_entity.admin.inc',
   );
   $items['admin/structure/file-types/add'] = array(
     'title' => 'Add file type',
@@ -211,7 +211,7 @@ function file_menu() {
     'page arguments' => array('file_type_form'),
     'access arguments' => array('administer file types'),
     'type' => MENU_LOCAL_ACTION,
-    'file' => 'file.types.inc',
+    'file' => 'file.admin.inc',
   );
   $items['admin/structure/file-types/manage/%file_type'] = array(
     'title' => 'Manage file types',
@@ -222,7 +222,7 @@ function file_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('file_type_revert_confirm', 4),
     'access arguments' => array('administer file types'),
-    'file' => 'file.types.inc',
+    'file' => 'file.admin.inc',
     'type' => MENU_CALLBACK,
   );
   $items['admin/structure/file-types/manage/%file_type/enable'] = array(
@@ -230,7 +230,7 @@ function file_menu() {
     'page callback' => 'file_type_toggle_enable',
     'page arguments' => array(4, '1'),
     'access arguments' => array('administer file types'),
-    'file' => 'file.types.inc',
+    'file' => 'file.admin.inc',
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
   );
   $items['admin/structure/file-types/manage/%file_type/disable'] = array(
@@ -238,7 +238,7 @@ function file_menu() {
     'page callback' => 'file_type_toggle_enable',
     'page arguments' => array(4, '0'),
     'access arguments' => array('administer file types'),
-    'file' => 'file.types.inc',
+    'file' => 'file.admin.inc',
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
   );
   $items['admin/structure/file-types/manage/%file_type/delete'] = array(
@@ -246,7 +246,7 @@ function file_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('file_type_delete_confirm', 4),
     'access arguments' => array('administer file types'),
-    'file' => 'file.types.inc',
+    'file' => 'file.admin.inc',
     'type' => MENU_CALLBACK,
   );
 
@@ -276,7 +276,7 @@ function file_menu() {
         'title arguments' => array(4),
         'page callback' => 'backdrop_get_form',
         'page arguments' => array('file_type_form', $file_type_argument),
-        'file' => 'file.types.inc',
+        'file' => 'file.admin.inc',
       ) + $access;
 
       // Add the 'File type settings' tab.
@@ -292,7 +292,7 @@ function file_menu() {
         'page arguments' => array('file_display_form', $file_type_argument, 'default'),
         'type' => MENU_LOCAL_TASK,
         'weight' => 3,
-        'file' => 'file.types.inc',
+        'file' => 'file.admin.inc',
       ) + $access;
 
       // Add a secondary tab for each view mode.
@@ -304,7 +304,7 @@ function file_menu() {
           'page arguments' => array('file_display_form', $file_type_argument, $view_mode),
           'type' => ($view_mode == 'default' ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
           'weight' => ($view_mode == 'default' ? -10 : $weight++),
-          'file' => 'file.types.inc',
+          'file' => 'file.admin.inc',
           // View modes for which the 'custom settings' flag isn't TRUE are
           // disabled via this access callback. This needs to extend, rather
           // than override normal $access rules.
@@ -2189,7 +2189,7 @@ function _file_types_build() {
   }
 
   $_file_types = (object) array('types' => array(), 'names' => array());
-  module_load_include('inc', 'file', 'file.types');
+  module_load_include('inc', 'file', 'file.admin');
 
   $config_names = config_get_names_with_prefix('file.type.');
   foreach ($config_names as $config_name) {
@@ -3214,7 +3214,7 @@ function file_view_file($file, $display = 'full', $langcode = NULL) {
   // Attempt to display the file with each of the possible displays. Stop after
   // the first successful one. See file_display() for details.
   $element = NULL;
-  module_load_include('inc', 'file', 'file.types');
+  module_load_include('inc', 'file', 'file.admin');
 
   if (!empty($display['status'])) {
     $formatter_info = file_info_formatter_types($formatter_type);
