@@ -154,28 +154,4 @@ $info = array(
 
   'blend_target' => '#ffffff',
 
-  // CSS files (excluding @import) to rewrite with new color scheme.
-  'css' => array(
-    'css/base.css',
-    'css/layout.css',
-    'css/component/small-text-components.css',
-    'css/component/header.css',
-    'css/component/footer.css',
-    'css/component/menu-dropdown.css',
-    'css/component/menu-toggle.css',
-    'css/component/backdrop-form.css',
-    'css/component/tabledrag.css',
-    'css/component/vertical-tabs.css',
-    'css/component/fieldset.css',
-    'css/component/dialog.css',
-    'css/component/progress.css',
-    'css/component/admin-tabs.css',
-    'css/component/breadcrumb.css',
-    'css/component/pager.css',
-    'css/component/hero.css',
-    'css/component/teasers.css',
-    'css/component/comment.css',
-    'css/component/caption.css',
-    'css/skin.css',
-  ),
 );

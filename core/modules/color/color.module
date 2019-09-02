@@ -365,6 +365,11 @@ function color_get_info($theme) {
     if ($path && file_exists($file)) {
       include $file;
       $theme_info[$theme] = $info;
+
+      if (!isset($theme_info[$theme]['css'])) {
+        $info = system_get_info('theme', $theme);
+        $theme_info[$theme]['css'] = array_keys($info['stylesheets']['all']);
+      }
     }
     else {
       $theme_info[$theme] = array();
