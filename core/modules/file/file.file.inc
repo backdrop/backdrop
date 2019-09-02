@@ -250,7 +250,7 @@ function _file_update_image_field_dimensions($file) {
         }
 
         // Save the updated field column values.
-        _file_entity_fields_update($entity_type, $entity);
+        _file_fields_update($entity_type, $entity);
       }
     }
   }
@@ -259,10 +259,10 @@ function _file_update_image_field_dimensions($file) {
 /**
  * Update an entity's field values without changing anything on the entity.
  */
-function _file_entity_fields_update($entity_type, $entity) {
+function _file_fields_update($entity_type, $entity) {
   $id = $entity->id();
   if (empty($id)) {
-    throw new Exception(t('Cannot call _file_entity_update_entity_fields() on a new entity.'));
+    throw new Exception(t('Cannot call _file_fields_update() on a new entity.'));
   }
 
   // Some modules use the original property.

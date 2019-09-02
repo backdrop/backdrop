@@ -2813,7 +2813,7 @@ class FileAccessTestCase extends FileTestHelper {
   }
 
   /**
-   * Runs basic tests for file_entity_access function.
+   * Runs basic tests for file_access function.
    */
   function testFileAccess() {
     $file = $this->createFile(array('type' => 'image'));
@@ -3156,7 +3156,7 @@ class FileAttributeOverrideTestCase extends FileTestHelper {
 }
 
 /**
- * Tests for file_entity views file usage handlers.
+ * Tests for file views file usage handlers.
  */
 class FileViewsFieldLinkUsageHandlerTest extends FileTestHelper {
 

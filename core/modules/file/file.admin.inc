@@ -407,7 +407,7 @@ function file_type_status_confirm_submit($form, &$form_state) {
   $title = ($operation == 'enable') ? t('enabled') : t('disabled');
   $t_args = array('%name' => $form_state['values']['name'], '@title' => $title);
   backdrop_set_message(t('The file type %name has been @title.', $t_args));
-  watchdog('file_entity', '@title file type %name.', $t_args, WATCHDOG_NOTICE);
+  watchdog('file', '@title file type %name.', $t_args, WATCHDOG_NOTICE);
   $form_state['redirect'] = 'admin/structure/file-types';
 }
 
@@ -561,7 +561,7 @@ function file_settings_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Protect against repeat rendering'),
     '#default_value' => $config->get('protect_repeated_render'),
-    '#description' => t('Avoid rendering the same entity more than 10 times. This can be a sign of an image entity getting caught in a recursive render, but it can also be triggered when the same image is rendered more than 20 times, e.g. in an long content list or data feed.'),
+    '#description' => t('Avoid rendering the same file more than 10 times. This can be a sign of an image getting caught in a recursive render, but it can also be triggered when the same image is rendered more than 20 times, e.g. in an long content list or data feed.'),
   );
 
   return system_settings_form($form);

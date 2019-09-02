@@ -5,19 +5,19 @@
  */
 
 /**
- * Modules should return this value from hook_file_entity_access() to allow
+ * Modules should return this value from hook_file_access() to allow
  * access to a file.
  */
 define('FILE_ACCESS_ALLOW', 'allow');
 
 /**
- * Modules should return this value from hook_file_entity_access() to deny
+ * Modules should return this value from hook_file_access() to deny
  * access to a file.
  */
 define('FILE_ACCESS_DENY', 'deny');
 
 /**
- * Modules should return this value from hook_file_entity_access() to not affect
+ * Modules should return this value from hook_file_access() to not affect
  * file access.
  */
 define('FILE_ACCESS_IGNORE', NULL);
@@ -58,16 +58,15 @@ function file_hook_info() {
     'file_type_info_alter',
     'file_formatter_info',
     'file_formatter_info_alter',
-    'file_type',
-    'file_type_alter',
     'file_download_headers_alter',
 
     // File access
     'file_download',
     'file_download_access',
     'file_download_access_alter',
-    'file_entity_access',
-    'file_entity_access_alter',
+    'file_access',
+    'file_access_alter',
+    'query_file_access_alter',
 
     // File operation hooks
     'file_load',
@@ -2562,11 +2561,11 @@ function file_get_type($file) {
  * @{
  * The file access system determines who can do what to which files.
  *
- * In determining access rights for a file, file_entity_access() first checks
+ * In determining access rights for a file, file_access() first checks
  * whether the user has the "bypass file access" permission. Such users have
  * unrestricted access to all files. user 1 will always pass this check.
  *
- * Next, all implementations of hook_file_entity_access() will be called. Each
+ * Next, all implementations of hook_file_access() will be called. Each
  * implementation may explicitly allow, explicitly deny, or ignore the access
  * request. If at least one module says to deny the request, it will be
  * rejected.
@@ -2576,15 +2575,15 @@ function file_get_type($file) {
  * There is no access grant system for files.
  *
  * In file listings, the process above is followed except that
- * hook_file_entity_access() is not called on each file for performance reasons
+ * hook_file_access() is not called on each file for performance reasons
  * and for proper functioning of the pager system. When adding a filelisting to
  * your module, be sure to use a dynamic query created by db_select()
- * and add a tag of "file_entity_access". This will allow modules dealing
+ * and add a tag of "file_access". This will allow modules dealing
  * with file access to ensure only files to which the user has access
  * are retrieved, through the use of hook_query_TAG_alter().
  *
  * Note: Even a single module returning FILE_ACCESS_DENY from
- * hook_file_entity_access() will block access to the file. Therefore,
+ * hook_file_access() will block access to the file. Therefore,
  * implementers should take care to not deny access unless they really intend
  * to.
  * Unless a module wishes to actively deny access it should return
@@ -3029,7 +3028,7 @@ function file_list_permissions($type) {
  * file_permissions_$type variable to 0. File entity does not provide an
  * interface for doing so, however, contrib modules may exclude their own files
  * in hook_install(). Alternatively, contrib modules may configure all file
- * types at once, or decide to apply some other hook_file_entity_access()
+ * types at once, or decide to apply some other hook_file_access()
  * implementation to some or all file types.
  *
  * @return

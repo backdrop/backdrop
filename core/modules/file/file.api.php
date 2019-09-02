@@ -232,7 +232,7 @@ function hook_file_operations() {
  *
  * Note that not all modules will want to influence access on all
  * file types. If your module does not want to actively grant or
- * block access, return FILE_ENTITY_ACCESS_IGNORE or simply return nothing.
+ * block access, return FILE_ACCESS_IGNORE or simply return nothing.
  * Blindly returning FALSE will break other file access modules.
  *
  * @param string $op
@@ -250,22 +250,22 @@ function hook_file_operations() {
  *   performed.
  *
  * @return string|null
- *   FILE_ENTITY_ACCESS_ALLOW if the operation is to be allowed;
- *   FILE_ENTITY_ACCESS_DENY if the operation is to be denied;
- *   FILE_ENTITY_ACCESS_IGNORE to not affect this operation at all.
+ *   FILE_ACCESS_ALLOW if the operation is to be allowed;
+ *   FILE_ACCESS_DENY if the operation is to be denied;
+ *   FILE_ACCESS_IGNORE to not affect this operation at all.
  *
- * @ingroup file_entity_access
+ * @ingroup file_access
  */
-function hook_file_entity_access($op, $file, $account) {
+function hook_file_access($op, $file, $account) {
   $type = is_string($file) ? $file : $file->type;
 
   if ($op !== 'create' && (REQUEST_TIME - $file->timestamp) < 3600) {
     // If the file was uploaded in the last hour, deny access to it.
-    return FILE_ENTITY_ACCESS_DENY;
+    return FILE_ACCESS_DENY;
   }
 
   // Returning nothing from this function would have the same effect.
-  return FILE_ENTITY_ACCESS_IGNORE;
+  return FILE_ACCESS_IGNORE;
 }
 
 /**
@@ -276,9 +276,9 @@ function hook_file_entity_access($op, $file, $account) {
  *   listing files.
  *
  * @see hook_query_TAG_alter()
- * @ingroup file_entity_access
+ * @ingroup file_access
  */
-function hook_query_file_entity_access_alter(QueryAlterableInterface $query) {
+function hook_query_file_access_alter(QueryAlterableInterface $query) {
   // Only show files that have been uploaded more than an hour ago.
   $query->condition('timestamp', REQUEST_TIME - 3600, '<=');
 }
@@ -286,7 +286,7 @@ function hook_query_file_entity_access_alter(QueryAlterableInterface $query) {
 /**
  * Act on a file being displayed as a search result.
  *
- * This hook is invoked from file_entity_search_execute(), after file_load()
+ * This hook is invoked from file_search_execute(), after file_load()
  * and file_view() have been called.
  *
  * @param object $file
@@ -300,9 +300,9 @@ function hook_query_file_entity_access_alter(QueryAlterableInterface $query) {
  * @see template_preprocess_search_result()
  * @see search-result.tpl.php
  *
- * @ingroup file_entity_api_hooks
+ * @ingroup file_api_hooks
  */
-function hook_file_entity_search_result($file) {
+function hook_file_search_result($file) {
   $file_usage_count = db_query('SELECT count FROM {file_usage} WHERE fid = :fid', array('fid' => $file->fid))->fetchField();
   return array(
     'file_usage_count' => format_plural($file_usage_count, '1 use', '@count uses'),
@@ -321,7 +321,7 @@ function hook_file_entity_search_result($file) {
  * @return string
  *   Additional file information to be indexed.
  *
- * @ingroup file_entity_api_hooks
+ * @ingroup file_api_hooks
  */
 function hook_file_update_index($file) {
   $text = '';
@@ -374,7 +374,7 @@ function hook_file_update_index($file) {
  *   - "arguments": if any arguments are required for the score, they can be
  *     specified in an array here.
  *
- * @ingroup file_entity_api_hooks
+ * @ingroup file_api_hooks
  */
 function hook_file_ranking() {
   // If voting is disabled, we can avoid returning the array, no hard feelings.

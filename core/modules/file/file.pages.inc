@@ -1073,11 +1073,11 @@ function file_get_upload_validators(array $options = array()) {
 
   // Cap the upload size according to the system or user defined limit.
   $max_filesize = parse_size(file_upload_max_size());
-  $file_entity_max_filesize = parse_size($config->get('max_filesize'));
+  $file_max_filesize = parse_size($config->get('max_filesize'));
 
   // If the user defined a size limit, use the smaller of the two.
-  if (!empty($file_entity_max_filesize)) {
-    $max_filesize = min($max_filesize, $file_entity_max_filesize);
+  if (!empty($file_max_filesize)) {
+    $max_filesize = min($max_filesize, $file_max_filesize);
   }
 
   if (!empty($options['max_filesize']) && $options['max_filesize'] < $max_filesize) {
