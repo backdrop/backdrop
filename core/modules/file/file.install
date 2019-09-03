@@ -952,8 +952,8 @@ function file_update_1005() {
     ),
   );
   foreach ($default_file_types as $machine => $type) {
-    if (!file_type_get_type($machine)) {
-      $config = config('file.type.' . $machine);
+    $config = config('file.type.' . $machine);
+    if ($config->isNew()) {
       $config->setData($type);
       $config->save();
     }
