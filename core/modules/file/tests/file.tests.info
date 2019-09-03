@@ -135,9 +135,3 @@ name = File attribute override
 description = Test overriding file entity attributes.
 group = File
 file = file.test
-
-[FileViewsFieldLinkUsageHandlerTest]
-name = File views integration: file link usage
-description = Test file usage Views field.
-group = File
-file = file.test
