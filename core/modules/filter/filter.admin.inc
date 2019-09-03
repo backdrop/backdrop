@@ -58,11 +58,6 @@ function filter_admin_overview($form) {
       $links = array_merge(array('enable' => $links['enable']), $links);
     }
 
-    $links['remove'] = array(
-      'title' => t('Remove'),
-      'href' => "admin/config/content/formats/$id/remove",
-    );
-
     if (user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
@@ -551,39 +546,6 @@ function filter_admin_disable_submit($form, &$form_state) {
 
   filter_format_disable($format);
   backdrop_set_message(t('Disabled text format %format.', array('%format' => $format->name)));
-  $form_state['redirect'] = 'admin/config/content/formats';
-}
-
-/**
- * Form constructor for the text format removal confirmation form.
- *
- * @param $format
- *   An object representing a text format.
- *
- * @see filter_menu()
- * @see filter_admin_remove_submit()
- * @ingroup forms
- */
-function filter_admin_remove($form, &$form_state, $format) {
-  $form_state['format'] = $format;
-  backdrop_set_message(t('Any existing content using this text format will stop being displayed.'), 'warning');
-  backdrop_set_message(t('The format will be <em>completely removed</em> from the administrative interface, and <strong>it will not be possible to restore it</strong>.'), 'warning');
-  backdrop_set_message(t('<strong>This action cannot be undone</strong>. Consider <em>disabling</em> the format instead of <em>removing</em> it.'), 'warning');
-  return confirm_form($form,
-    t('Are you sure you want to remove the text format %format?', array('%format' => $format->name)),
-    'admin/config/content/formats',
-    '',
-    t('Remove')
-  );
-}
-/**
- * Form submission handler for filter_admin_remove().
- */
-function filter_admin_remove_submit($form, &$form_state) {
-  $format = $form_state['format'];
-  filter_format_remove($format);
-  backdrop_get_messages();
-  backdrop_set_message(t('Removed text format %format.', array('%format' => $format->name)));
   $form_state['redirect'] = 'admin/config/content/formats';
 }
 

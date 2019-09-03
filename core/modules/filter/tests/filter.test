@@ -66,7 +66,7 @@ class FilterCRUDTestCase extends BackdropWebTestCase {
     $formats = filter_formats();
     $this->assertTrue(!isset($formats[$format->format]), 'filter_formats: Disabled text format no longer exists.');
 
-    // Add a new format to check for Xss in format name.
+    // Add a new format to check for XSS in format name.
     $format = new stdClass();
     $format->format = 'xss_format';
     $format->name = '<script>alert(123)</script>';
@@ -220,10 +220,9 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->assertRaw(t('Disabled text formats'), 'Disabled text format section is shown.');
 
     // Verify that the text format has been disabled. Links exist for it to be
-    // enabled/configured/removed...
+    // enabled/configured...
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/enable');
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id);
-    $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/remove');
     // ...but no link for it to be disabled.
     $this->assertNoLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
 
@@ -232,32 +231,20 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->assertRaw(t('Enabled text format %name.', array('%name' => $name)), 'Text format has been enabled.');
 
     // Verify that the text format has been enabled. Links exist for it to be
-    // disabled/configured/removed...
+    // disabled/configured...
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id);
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
-    $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/remove');
     // ...but no link for it to be enabled.
     $this->assertNoLinkByHref('admin/config/content/formats/' . $format_id . '/enable');
 
     // Attempt to create a format of the same machine name as the disabled
-    // format but with a different human readable name.
+    // format, but with a different human readable name.
     $edit = array(
       'format' => $format_id,
       'name' => 'New format',
     );
     $this->backdropPost('admin/config/content/formats/add', $edit, t('Save configuration'));
     $this->assertText('The machine-readable name is already in use. It must be unique.');
-
-    // Remove the text format.
-    $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/remove');
-    $this->backdropGet('admin/config/content/formats/' . $format_id . '/remove');
-    $this->backdropPost(NULL, array(), t('Remove'));
-    $this->assertRaw(t('Removed text format %name.', array('%name' => $name)), 'Text format has been removed.');
-
-    // Verify that the text format has been removed. There is no link to
-    // configure it, and it is not listed in the page.
-    $this->assertNoLinkByHref('admin/config/content/formats/' . $format_id);
-    $this->assertNoRaw($name, 'Text format has been removed.');
   }
 
   /**
