@@ -97,7 +97,7 @@ function layout_flexible_template_settings_form_submit($form, &$form_state) {
 
   $flexible_template->save();
 
-  layout_set_flexible_tempstore($flexible_template);
+  layout_flexible_tempstore_set($flexible_template);
 
   backdrop_set_message(t('Layout template "@title" saved.', array('@title' => $flexible_template->title)));
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['values']['machine_name'] . '/configure';
@@ -162,6 +162,7 @@ function layout_flexible_template_configure_form($form, &$form_state, LayoutFlex
   $form['content']['add_row'] = array(
     '#type' => 'submit',
     '#value' => t('Add row'),
+    '#attributes' => array('class' => array('flexible-layout-add-row')),
     '#submit' => array(
       'layout_flexible_template_add_row',
     ),
@@ -213,14 +214,17 @@ function layout_flexible_template_configure_form_cancel($form, &$form_state) {
  * @see layout_flexible_template_configure_form()
  */
 function layout_flexible_template_configure_form_submit($form, &$form_state) {
-  /* @var LayoutFlexibleTemplate $flexible_template */
-  $flexible_template = &$form_state['flexible_template'];
+  // Load from tempstore rather than using $form_state, in the event a row
+  // has been removed in an AJAX request.
+  $flexible_template = layout_flexible_tempstore_load($form_state['flexible_template_name']);
   $positions = array();
 
   if (!empty($form_state['values']['row_positions'])) {
     $rows = array_filter(explode(',', $form_state['values']['row_positions']));
     foreach ($rows as $position) {
-     $positions[$position] = $flexible_template->rows[$position];
+      if (isset($flexible_template->rows[$position])) {
+        $positions[$position] = $flexible_template->rows[$position];
+      }
     }
   }
 
@@ -435,7 +439,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
 
   $row_data = array();
   if ($original_row != 'add') {
-    if(isset($flexible_template->rows[$original_row]['in_progress'])) {
+    if (isset($flexible_template->rows[$original_row]['in_progress'])) {
       $row_data = $flexible_template->rows[$original_row]['in_progress'];
     }
     else {
@@ -606,7 +610,7 @@ function layout_flexible_template_change_region_style($form, &$form_state) {
   );
   $form_state['flexible_template']->rows[$form_state['original_row']]['in_progress'] = $old_row;
 
-  layout_set_flexible_tempstore($form_state['flexible_template']);
+  layout_flexible_tempstore_set($form_state['flexible_template']);
 
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/row/' . $form_state['original_row'] . '/select-widths';
 }
@@ -663,7 +667,7 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   $form_state['ajax_rebuild_form'] = 'layout_flexible_template_configure_form';
   $form_state['ajax_rebuild_args'] = array($flexible_template);
   $form_state['ajax_update'] = array('content');
-  layout_set_flexible_tempstore($flexible_template);
+  layout_flexible_tempstore_set($flexible_template);
   layout_flexible_reset_caches();
   if (!backdrop_is_ajax()) {
     $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/configure';
@@ -733,15 +737,18 @@ function layout_flexible_template_edit_row_ajax($form, $form_state) {
  * @ingroup forms
  */
 function layout_flexible_template_delete_row(LayoutFlexibleTemplate $flexible_template, $original_row) {
-  // @todo use token, like in block add page.
+  if (!isset($_GET['token']) || backdrop_valid_token($_GET['token'], 'backdrop-region-' . $original_row)) {
+    return MENU_ACCESS_DENIED;
+  }
+
   $commands = array();
   $flexible_template_name = $flexible_template->name;
 
   unset($flexible_template->rows[$original_row]);
-  layout_set_flexible_tempstore($flexible_template);
+  layout_flexible_tempstore_set($flexible_template);
 
   if (backdrop_is_ajax()) {
-    $commands[] = ajax_command_remove('#flexible-row-' . $original_row);
+    $commands[] = ajax_command_remove('#flexible-row--' . $original_row);
 
     return array(
       '#type' => 'ajax',

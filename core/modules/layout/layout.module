@@ -1924,7 +1924,7 @@ function layout_get_title_description(Layout $layout) {
  * @param LayoutFlexibleTemplate $flexible_template
  *   The loaded flexible template object.
  */
-function layout_set_flexible_tempstore(LayoutFlexibleTemplate $flexible_template) {
+function layout_flexible_tempstore_set(LayoutFlexibleTemplate $flexible_template) {
   tempstore_set('layout.flexible', $flexible_template->name, $flexible_template, 604800);
 }
 
@@ -1936,6 +1936,9 @@ function layout_set_flexible_tempstore(LayoutFlexibleTemplate $flexible_template
  *
  * @param string $flexible_template_name
  *   The machine name of the flexible template to load.
+ *
+ * @return LayoutFlexibleTemplate
+ *   The flexible template object.
  */
 function layout_flexible_tempstore_load($flexible_template_name = NULL) {
   if (!$flexible_template_name) {
