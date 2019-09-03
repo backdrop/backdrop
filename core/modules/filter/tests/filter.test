@@ -50,7 +50,7 @@ class FilterCRUDTestCase extends BackdropWebTestCase {
     $this->verifyTextFormat($format);
     $this->verifyFilters($format);
 
-    // Add a uncacheable filter and save again.
+    // Add an uncacheable filter and save again.
     $format->filters['filter_test_uncacheable'] = (object) array(
       'status' => 1,
     );
@@ -213,24 +213,26 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
     $this->backdropGet('admin/config/content/formats/' . $format_id . '/disable');
     $this->backdropPost(NULL, array(), t('Disable'));
-    $this->assertRaw(t('Disabled text format %name.', array('%name' => $name)), 'Text format has been disabled');
+    $this->assertRaw(t('Disabled text format %name.', array('%name' => $name)), 'Text format has been disabled.');
     $this->assertRaw(t('Disabled text formats'), 'Disabled text format section is shown.');
 
     // Verify that the text format has been disabled. Links exist for it to be
-    // enabled/configured...
+    // enabled/configured/removed...
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/enable');
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id);
+    $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/remove');
     // ...but no link for it to be disabled.
     $this->assertNoLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
 
     // Enable the text format.
     $this->backdropGet('admin/config/content/formats/' . $format_id . '/enable');
-    $this->assertRaw(t('Enabled text format %name.', array('%name' => $name)), 'Text format has been enabled');
+    $this->assertRaw(t('Enabled text format %name.', array('%name' => $name)), 'Text format has been enabled.');
 
     // Verify that the text format has been enabled. Links exist for it to be
-    // disabled/configured...
-    $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
+    // disabled/configured/removed...
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id);
+    $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
+    $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/remove');
     // ...but no link for it to be enabled.
     $this->assertNoLinkByHref('admin/config/content/formats/' . $format_id . '/enable');
 
@@ -242,6 +244,17 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/content/formats/add', $edit, t('Save configuration'));
     $this->assertText('The machine-readable name is already in use. It must be unique.');
+
+    // Remove the text format.
+    $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/remove');
+    $this->backdropGet('admin/config/content/formats/' . $format_id . '/remove');
+    $this->backdropPost(NULL, array(), t('Remove'));
+    $this->assertRaw(t('Removed text format %name.', array('%name' => $name)), 'Text format has been removed.');
+
+    // Verify that the text format has been removed. There is no link to
+    // configure it, and it is not listed in the page.
+    $this->assertNoLinkByHref('admin/config/content/formats/' . $format_id);
+    $this->assertNoRaw($name, 'Text format has been removed.');
   }
 
   /**
