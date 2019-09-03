@@ -320,8 +320,8 @@ function layout_preprocess_layout(&$variables) {
     $variables['row_data'] = array();
     foreach ($variables['rows'] as $name => $row) {
       $container = ($row['container'] == 'container') ? 'container container-fluid' : (($row['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
-      $row['row_class'] = $container . ' flexible-row-' . $name . ' ' . $row['contains'] . ' ' . $row['classes'];
-      $row['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row-id-' . $name . '"' : '';
+      $row['row_class'] = $container . ' flexible-row--' . $name . ' ' . $row['contains'] . ' ' . $row['classes'];
+      $row['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row-' . $name . '"' : '';
       $row['element'] = !empty($row['element']) ? $row['element'] : 'div';
       if ($row['contains'] == 'region_12') {
         if (!empty($row['region_names']['region_name_0'])) {

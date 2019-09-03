@@ -25,12 +25,12 @@
   <div id="skip-link">
     <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
   </div>
-  <div class="layout-flexible-content <?php $region_buttons ? print 'flexible-editor' : ''; ?>">
+  <div class="layout-flexible-content <?php $region_buttons ? print 'layout-flexible-editor' : ''; ?>">
   <?php foreach ($row_data as $name => $row): ?>
     <<?php print $row['element']; ?> data-row-id="<?php print $name; ?>" class="flexible-row <?php print 'l-' . $name; ?>" <?php print $row['row_id']; ?>>
       <div class="<?php print $row['row_class']; ?>">
         <?php if ($region_buttons): ?>
-          <div class="layout-editor-region-buttons clearfix">
+          <div class="layout-flexible-region-buttons clearfix">
             <?php print $region_buttons[$name]; ?>
           </div>
         <?php endif; ?>
@@ -39,14 +39,13 @@
           <div class="l-col col-md-<?php print $region['region_md']; ?>">
             <?php if ($region_buttons): ?>
               <div class="layout-editor-region" id="layout-editor-region-<?php print $name; ?>" data-region-name="<?php print $name; ?>">
-              <div class="layout-editor-region-title clearfix">
-              <h2 class="label"><?php print $region['region_name']; ?></h2>
-              </div>
+                <div class="layout-editor-region-title clearfix">
+                  <h2 class="label"><?php print $region['region_name']; ?></h2>
+                </div>
               </div>
             <?php else: ?>
               <?php print $content[$region['content_key']]; ?>
             <?php endif; ?>
-
           </div>
         <?php endforeach; ?>
         </div>

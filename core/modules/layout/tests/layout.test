@@ -2666,7 +2666,7 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Save configuration'));
 
-    $header_row = $this->xpath("//main[contains(@id, :row_id)]//h2[text()=:row_title]", array(':row_id' => 'flexible-row-id-header', ':row_title' => 'New header'));
+    $header_row = $this->xpath("//main[contains(@id, :row_id)]//h2[text()=:row_title]", array(':row_id' => 'flexible-row-header', ':row_title' => 'New header'));
     $this->assertEqual(count($header_row), 1, 'The header row has been renamed in the template editor.');
 
     $this->backdropPost(NULL, array(), t('Save layout template'));
@@ -2715,7 +2715,7 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
       ':class' => 'layout-flexible-content',
     ));
     $data_row_id = (string) $last_row_attr[0][0];
-    $last_row_id = 'flexible-row-id-' . $last_row_attr[0][0];
+    $last_row_id = 'flexible-row-' . $last_row_attr[0][0];
 
     // The last row has 3 regions.
     $row_count = $this->xpath('//div[contains(@id, :id)]//div[contains(@class, :class)]/div', array(

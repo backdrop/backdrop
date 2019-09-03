@@ -1231,6 +1231,16 @@ div.filter-options select {
 }
 
 /**
+ * Flexible layout template configuration.
+ */
+#layout-flexible-content {
+  padding: 20px 0;
+  border-radius: 4px;
+  background-color: #f7f7f7;
+  border: 2px solid #EAEAEA;
+}
+
+/**
  * Pretty block radios, `:not(#foo) >` rules out browsers that can't support this
  */
 :not(#foo) > .layout-settings-form .layout-options .form-type-radio input, .form-item-region-style .form-type-radio input {

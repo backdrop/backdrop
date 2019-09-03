@@ -151,7 +151,7 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
 
   $form['content'] = array(
     '#type' => 'item',
-    '#id' => 'flexible-content',
+    '#id' => 'layout-flexible-content',
   );
   $form['content']['display'] = array(
     '#markup' => $renderer->render(),
@@ -163,7 +163,7 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
     '#default_value' => implode(',', array_keys($form_state['flexible_template']['rows'])),
   );
 
-  $form['add_row'] = array(
+  $form['content']['add_row'] = array(
     '#type' => 'submit',
     '#value' => t('Add row'),
     '#submit' => array(
@@ -743,7 +743,7 @@ function layout_flexible_template_delete_row($flexible_template, $original_row) 
   layout_set_flexible_tempstore($flexible_template);
 
   if (backdrop_is_ajax()) {
-    $commands[] = ajax_command_remove('#flexible-row-id-' . $original_row);
+    $commands[] = ajax_command_remove('#flexible-row-' . $original_row);
 
     return array(
       '#type' => 'ajax',

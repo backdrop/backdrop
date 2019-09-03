@@ -88,7 +88,7 @@ class LayoutRendererFlexible {
   function render() {
     $this->addMeta();
 
-    $output = '<div id="layout-edit-main">';
+    $output = '<div id="layout-flexible-edit-main">';
     $output .= $this->renderEditor();
     $output .= '</div>';
 

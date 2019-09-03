@@ -299,11 +299,24 @@
   padding: 0 20px;
 }
 
-#layout-edit-main .flexible-editor .flexible-row:hover {
-  background-color: #ffff99;
-  border-bottom: 1px solid #ccc;
-  border-right: 1px solid #ccc;
+.layout-flexible-region-buttons {
+  padding-bottom: 5px;
+}
+
+.layout-flexible-editor .flexible-row {
+  padding: 15px 0 0;
+}
+
+.layout-flexible-editor .flexible-row:hover {
+  background-color: #ffffff;
+  -webkit-box-shadow: 2px 2px 0 0 #d0d0d0;
+  -moz-box-shadow: 2px 2px 0 0 #d0d0d0;
+  box-shadow: 2px 2px 0 0 #d0d0d0;
   cursor: move;
+}
+
+#layout-flexible-content #edit-add-row {
+  margin: 20px 40px 0;
 }
 
 .flexible-icon {
@@ -322,8 +335,4 @@
 .form-item .form-item.form-item-region-count {
   margin-right: 2em;
   display: inline;
-}
-
-.layout-editor-region-buttons {
-  padding: 5px;
 }

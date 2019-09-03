@@ -2001,26 +2001,27 @@ function layout_flexible_template_load($flexible_template_name = NULL) {
  * Provides the default template for new flexible templates.
  */
 function layout_flexible_template_template_default() {
+  $uuid = new Uuid();
   $settings = array(
     'name' => '',
     'title' => '',
     'description' => '',
     'rows' => array(
-      'header' => array(
+      $uuid->generate() => array(
         'contains' => 'region_12',
         'element' => 'header',
         'classes' => '',
         'container' => 'container',
         'region_names' => array('region_name_0' => t('Header')),
       ),
-      'content' => array(
+      $uuid->generate() => array(
         'contains' => 'region_12',
         'element' => '',
         'classes' => '',
         'container' => 'container',
         'region_names' => array('region_name_0' => t('Content')),
       ),
-      'footer' => array(
+      $uuid->generate() => array(
         'contains' => 'region_12',
         'element' => 'footer',
         'classes' => '',
