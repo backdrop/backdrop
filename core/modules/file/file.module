@@ -2597,7 +2597,7 @@ function file_get_type($file) {
  */
 
 /**
- * Determine if a user may perform the given operation on the specified file.
+ * Determines if a user may perform the given operation on the specified file.
  *
  * @param $op
  *   The operation to be performed on the file. Possible values are:
@@ -2695,6 +2695,18 @@ function file_access($op, $file = NULL, $account = NULL) {
   }
 
   return FALSE;
+}
+
+/**
+ * Deprecated wrapper function. Determines if a user may perform the given
+ * operation on the specified file.
+ *
+ * @see file_access()
+ * @deprecated since 1.14.0
+ */
+function file_entity_access($op, $file = NULL, $account = NULL) {
+  watchdog_deprecated_function('file', __FUNCTION__);
+  return file_access($op, $file, $account);
 }
 
 /**
