@@ -368,7 +368,9 @@ function color_get_info($theme) {
 
       if (!isset($theme_info[$theme]['css'])) {
         $info = system_get_info('theme', $theme);
-        $theme_info[$theme]['css'] = array_keys($info['stylesheets']['all']);
+        if (isset($info['stylesheets']['all'])) {
+          $theme_info[$theme]['css'] = array_keys($info['stylesheets']['all']);
+        }
       }
     }
     else {
