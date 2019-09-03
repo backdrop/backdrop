@@ -160,6 +160,43 @@ class FilterAdminTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Click a link to perform an operation on a text format.
+   *
+   * In general, we expect lots of links titled "Enable" or "Disable" on the
+   * text formats listing page, and the links might have tokens in them. So we
+   * need special code to find the correct link to click.
+   *
+   * @param $label
+   *   Text between the anchor tags of the desired link.
+   * @param $unique_href_part
+   *   A unique string that is expected to occur within the href of the desired
+   *   link. For example, if the link URL is expected to look like
+   *   "admin/config/content/formats/full_html/...", then "/full_html/" could be
+   *   passed as the expected unique string.
+   *
+   * @return
+   *   The page content that results from clicking on the link, or FALSE on
+   *   failure. Failure also results in a failed assertion.
+   */
+  function clickTextFormatOperationLink($label, $unique_href_part) {
+    $links = $this->xpath('//a[normalize-space(text())=:label]', array(':label' => $label));
+    foreach ($links as $link_index => $link) {
+      $position = strpos($link['href'], $unique_href_part);
+      if ($position !== FALSE) {
+        $index = $link_index;
+        break;
+      }
+    }
+    $this->assertTrue(isset($index), t('Link to "@label" containing @part found.', array('@label' => $label, '@part' => $unique_href_part)));
+    if (isset($index)) {
+      return $this->clickLink($label, $index);
+    }
+    else {
+      return FALSE;
+    }
+  }
+
+  /**
    * Tests the format administration functionality.
    */
   function testFormatAdmin() {
@@ -227,7 +264,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->assertNoLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
 
     // Enable the text format.
-    $this->backdropGet('admin/config/content/formats/' . $format_id . '/enable');
+    $this->clickTextFormatOperationLink(t('Enable'), 'admin/config/content/formats/' . $format_id . '/enable');
     $this->assertRaw(t('Enabled text format %name.', array('%name' => $name)), 'Text format has been enabled.');
 
     // Verify that the text format has been enabled. Links exist for it to be
