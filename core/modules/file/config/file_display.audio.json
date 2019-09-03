@@ -3,9 +3,9 @@
     "_module": "file",
     "type": "audio",
     "default": {
-        "status": "file_field_file_audio",
-        "file_field_file_audio": {
-            "settings": {
+        "formatter": "file_field_file_audio",
+        "settings": {
+            "file_field_file_audio": {
                 "controls": 1,
                 "autoplay": 0,
                 "loop": 0,
@@ -15,9 +15,9 @@
         }
     },
     "preview": {
-        "status": "file_field_file_default",
-        "file_field_file_audio": {
-            "settings": {
+        "formatter": "file_field_file_audio",
+        "settings": {
+            "file_field_file_audio": {
                 "controls": 1,
                 "autoplay": 0,
                 "loop": 0,

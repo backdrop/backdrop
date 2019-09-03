@@ -313,38 +313,40 @@ function file_display_form($form, &$form_state, $file_type, $view_mode) {
       unset($formatters[$name]);
     }
   }
+
   $display = file_display_load($file_type->type, $view_mode);
 
-  // Formatter status.
-  $form['displays']['status'] = array(
+  // Formatter type.
+  $form['display']['formatter'] = array(
     '#type' => 'radios',
     '#title' => t('Display type'),
     '#options' => array(),
-    '#default_value' => config_get('file_display.' . $file_type->type, $view_mode . '.status'),
+    '#default_value' => config_get('file_display.' . $file_type->type, $view_mode . '.formatter'),
   );
 
   $formatters = array_reverse($formatters);
 
   foreach ($formatters as $name => $formatter) {
-    $form['displays']['status']['#options'][$name] = check_plain($formatter['label']);
-    $form['displays']['status'][$name]['#description'] = isset($formatter['description']) ? filter_xss($formatter['description']) : NULL;
+    $form['display']['formatter']['#options'][$name] = check_plain($formatter['label']);
+    $form['display']['formatter'][$name]['#description'] = isset($formatter['description']) ? filter_xss($formatter['description']) : NULL;
 
     if (isset($formatter['settings callback']) && ($function = $formatter['settings callback']) && function_exists($function)) {
 
       $defaults = !empty($formatter['default settings']) ? $formatter['default settings'] : array();
-      $settings = !empty($current_displays[$name]['settings']) ? $current_displays[$name]['settings'] : array();
+      $settings = !empty($display['settings'][$name]) ? $display['settings'][$name] : array();
       $settings += $defaults;
+
       $settings_form = $function($form, $form_state, $settings, $name, $file_type->type, $view_mode);
 
       if (!empty($settings_form)) {
-        $form['displays']['settings'][$name] = array(
+        $form['display']['settings'][$name] = array(
           '#type' => 'fieldset',
           '#title' => check_plain($formatter['label']) . ' ' . t('settings'),
-          '#parents' => array('displays', $name, 'settings'),
+          '#parents' => array('display', 'settings', $name),
           '#group' => 'display_settings',
           '#states' => array(
             'visible' => array(
-              ':input[name="displays[status]"]' => array('value' => $name),
+              ':input[name="display[formatter]"]' => array('value' => $name),
             ),
           ),
         ) + $settings_form;
@@ -367,8 +369,13 @@ function file_display_form($form, &$form_state, $file_type, $view_mode) {
 function file_display_form_submit($form, &$form_state) {
   $file_type = $form['#file_type'];
   $view_mode = $form['#view_mode'];
-  $displays = isset($form_state['values']['displays']) ? $form_state['values']['displays'] : array();
-  file_display_save($form['#file_type'], $form['#view_mode'], $displays);
+
+  $display = array(
+    'formatter' => $form_state['values']['display']['formatter'],
+    'settings' => $form_state['values']['display']['settings'],
+  );
+
+  file_display_save($form['#file_type'], $form['#view_mode'], $display);
   backdrop_set_message(t('Your settings have been saved.'));
 }
 

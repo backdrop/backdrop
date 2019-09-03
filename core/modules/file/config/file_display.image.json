@@ -3,9 +3,9 @@
     "_module": "file",
     "type": "image",
     "default": {
-        "status": "file_field_image",
-        "file_field_image": {
-            "settings": {
+        "formatter": "file_field_image",
+        "settings": {
+            "file_field_image": {
                 "image_style": "large",
                 "image_link": "",
                 "image_float": ""
@@ -13,9 +13,9 @@
         }
     },
     "preview": {
-        "status": "file_field_image",
-        "file_field_image": {
-            "settings": {
+        "formatter": "file_field_image",
+        "settings": {
+            "file_field_image": {
                 "image_style": "thumbnail",
                 "image_link": "",
                 "image_float": ""

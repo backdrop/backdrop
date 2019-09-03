@@ -3,9 +3,9 @@
     "_module": "file",
     "type": "video",
     "default": {
-        "status": "file_field_file_video",
-        "file_field_file_video": {
-            "settings": {
+        "formatter": "file_field_file_video",
+        "settings": {
+            "file_field_file_video": {
                 "controls": 1,
                 "autoplay": 0,
                 "loop": 0,
@@ -18,9 +18,9 @@
         }
     },
     "preview": {
-        "status": "file_field_file_default",
-        "file_field_file_video": {
-            "settings": {
+        "formatter": "file_field_file_video",
+        "settings": {
+            "file_field_file_video" : {
                 "controls": 1,
                 "autoplay": 0,
                 "loop": 0,

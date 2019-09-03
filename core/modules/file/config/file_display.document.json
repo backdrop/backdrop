@@ -3,17 +3,17 @@
     "_module": "file",
     "type": "document",
     "default": {
-        "status": "file_field_file_download_link",
-        "file_field_file_download_link": {
-            "settings": {
+        "formatter": "file_field_file_download_link",
+        "settings": {
+            "file_field_file_download_link": {
                 "text": "Download [file:name]"
             }
         }
     },
     "preview": {
-        "status": "file_field_file_default",
-        "file_field_file_download_link": {
-            "settings": {
+        "formatter": "file_field_file_download_link",
+        "settings": {
+            "file_field_file_download_link": {
                 "text": "Download [file:name]"
             }
         }
