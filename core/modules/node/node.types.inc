@@ -23,6 +23,7 @@ function node_overview_types() {
     $type = $types[$key];
     $type_url_str = str_replace('_', '-', $type->type);
     $row = array(theme('node_admin_overview', array('name' => $name, 'type' => $type)));
+    $links = array();
     $links['configure'] = array(
       'title' => t('Configure'),
       'href' => 'admin/structure/types/manage/' . $type_url_str,
