@@ -2705,7 +2705,7 @@ function file_access($op, $file = NULL, $account = NULL) {
  * @deprecated since 1.14.0
  */
 function file_entity_access($op, $file = NULL, $account = NULL) {
-  watchdog_deprecated_function('file', __FUNCTION__);
+  watchdog_deprecated_function('file', __FUNCTION__, t('Change record:') . ' ' . l(t('File access functions have been renamed from <code>file_entity</code> module in Drupal 7'), 'https://api.backdropcms.org/change-records/file-access-functions-have-been-renamed-from-file_entity-module-in-drupal-7', array('attributes' => array('target' => '_blank'))));
   return file_access($op, $file, $account);
 }
 
