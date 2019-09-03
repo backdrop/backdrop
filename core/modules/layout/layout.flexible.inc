@@ -737,7 +737,7 @@ function layout_flexible_template_edit_row_ajax($form, $form_state) {
  * @ingroup forms
  */
 function layout_flexible_template_delete_row(LayoutFlexibleTemplate $flexible_template, $original_row) {
-  if (!isset($_GET['token']) || backdrop_valid_token($_GET['token'], 'backdrop-region-' . $original_row)) {
+  if (!isset($_GET['token']) || !backdrop_valid_token($_GET['token'], 'layout-region-' . $original_row)) {
     return MENU_ACCESS_DENIED;
   }
 
