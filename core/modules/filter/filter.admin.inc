@@ -20,7 +20,7 @@ function filter_admin_overview($form) {
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => t('The order of the text formats here reflects the order in which they will show up in the <em>Editor</em> selector, when creating content (still subject to which text formats the user has access to).'),
+    '#markup' => t('The order of the text formats here reflects the order in which they will show up in the <em>Editor</em> selector when creating content (subject to the text formats to which a user has access.'),
     '#weight' => -100,
   );
 
