@@ -165,16 +165,16 @@ function layout_menu() {
 
   $items['admin/structure/layouts/settings/toggle/%/enable'] = array(
     'title' => 'Enable layout template',
-    'page callback' => 'layout_enable_layout_template',
-    'page arguments' => array(TRUE, 5),
+    'page callback' => 'layout_template_toggle_enabled',
+    'page arguments' => array(5, TRUE),
     'type' => MENU_CALLBACK,
     'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/settings/toggle/%/disable'] = array(
     'title' => 'Disable layout template',
-    'page callback' => 'layout_enable_layout_template',
-    'page arguments' => array(FALSE, 5),
+    'page callback' => 'layout_template_toggle_enabled',
+    'page arguments' => array(5, FALSE),
     'type' => MENU_CALLBACK,
     'file' => 'layout.admin.inc',
   ) + $base;
@@ -296,15 +296,15 @@ function layout_menu() {
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/enable'] = array(
-    'page callback' => 'layout_enable_layout',
-    'page arguments' => array(TRUE, 4),
+    'page callback' => 'layout_toggle_enabled',
+    'page arguments' => array(4, TRUE),
     'type' => MENU_CALLBACK,
     'file' => 'layout.admin.inc',
   ) + $base;
 
   $items['admin/structure/layouts/manage/%layout_tempstore/disable'] = array(
-    'page callback' => 'layout_enable_layout',
-    'page arguments' => array(FALSE, 4),
+    'page callback' => 'layout_toggle_enabled',
+    'page arguments' => array(4, FALSE),
     'type' => MENU_CALLBACK,
     'file' => 'layout.admin.inc',
   ) + $base;

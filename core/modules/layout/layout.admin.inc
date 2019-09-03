@@ -1894,7 +1894,7 @@ function layout_condition_edit_title(Layout $layout = NULL, Block $block = NULL,
 /**
  * Menu callback; Enable or disable a layout configuration.
  */
-function layout_enable_layout($status, Layout $layout) {
+function layout_toggle_enabled(Layout $layout, $status) {
   if (backdrop_get_token('layout-' . $layout->name) !== $_GET['token']) {
     return MENU_ACCESS_DENIED;
   }
@@ -1913,7 +1913,7 @@ function layout_enable_layout($status, Layout $layout) {
 /**
  * Menu callback; Enable or disable a layout template.
  */
-function layout_enable_layout_template($status, $template_name) {
+function layout_template_toggle_enabled($template_name, $status) {
   if (backdrop_get_token('layout-template-' . $template_name) !== $_GET['token']) {
     return MENU_ACCESS_DENIED;
   }
