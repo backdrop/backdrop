@@ -1123,7 +1123,7 @@ function file_update_1006() {
 
       foreach ($view_modes as $name => $settings) {
         // Pick one formatter for each view mode. Select by lowest weight.
-        $weight_formatters = array_flip($formatter_weights[$filetype][$view_mode]);
+        $weight_formatters = array_flip($formatter_weights[$filetype][$name]);
         ksort($weight_formatters);
         $formatter = reset($weight_formatters);
 
