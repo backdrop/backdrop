@@ -960,7 +960,7 @@ function file_update_1005() {
 }
 
 /**
- * Convert saved file types from Drupal.
+ * Convert saved file types from Drupal 7 file_entity.
  */
 function file_update_1006() {
   // Check to see if there were file types in a D7 db.
@@ -987,11 +987,49 @@ function file_update_1006() {
     // Delete the file type table.
     db_drop_table('file_type');
   }
+}
 
+/**
+ * Convert saved file display settings from Drupal 7 file_entity.
+ */
+function file_update_1007() {
   if (db_table_exists('file_display')) {
-    // @todo this is hard: Figure out how to translate this to config.
+    $types = array();
+    $formatter_weights = array();
+    $result = db_query("SELECT name, weight, settings FROM {file_display} WHERE status = 1")->fetchAll();
+    foreach ($result as $record) {
+      $name_parts = explode('__', $record->name);
+      $filetype = $name_parts[0];
+      $view_mode = $name_parts[1];
+      $formatter = $name_parts[2];
+
+      $settings = unserialize($record->settings);
+      $types[$filetype][$view_mode]['settings'][$formatter] = $settings;
+
+      $formatter_weights[$filetype][$view_mode][$formatter] = $record->weight;
+    }
+
+    foreach ($types as $filetype => $view_modes) {
+      $config = config('file_display.' . $filetype);
+      $config->set('type', $filetype);
+
+      foreach ($view_modes as $name => $settings) {
+        // Pick one formatter for each view mode. Select by lowest weight.
+        $weight_formatters = array_flip($formatter_weights[$filetype][$view_mode]);
+        ksort($weight_formatters);
+        $formatter = reset($weight_formatters);
+
+        $view_mode_settings = array(
+          'formatter' => $formatter,
+          'settings' => $settings['settings'],
+        );
+        $config->set($name, $view_mode_settings);
+      }
+
+      $config->save();
+    }
 
     // Delete the file type table.
-    //db_drop_table('file_display');
+    db_drop_table('file_display');
   }
 }
