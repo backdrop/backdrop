@@ -122,6 +122,9 @@ function layout_layout_renderer_info() {
   $info['standard'] = array(
     'class' => 'LayoutRendererStandard',
   );
+  $info['flexible'] = array(
+    'class' => 'LayoutRendererFlexible',
+  );
   return $info;
 }
 
