@@ -860,7 +860,7 @@ function file_update_1003() {
 }
 
 /**
- * Convert file_entity variables to config for file.
+ * Convert file_entity variables to config.
  */
 function file_update_1004() {
 
@@ -892,7 +892,7 @@ function file_update_1004() {
 }
 
 /**
- * Add the default file types, or convert from Drupal.
+ * Add the default file types and convert custom or modified file types from Drupal 7 file_entity.
  */
 function file_update_1005() {
   $default_file_types = array(
@@ -958,12 +958,7 @@ function file_update_1005() {
       $config->save();
     }
   }
-}
 
-/**
- * Convert saved file types from Drupal 7 file_entity.
- */
-function file_update_1006() {
   // Check to see if there were file types in a D7 db.
   if (db_table_exists('file_type')) {
     $result = db_query("SELECT type, label, description, mimetypes FROM {file_type}")->fetchAll();
@@ -991,9 +986,121 @@ function file_update_1006() {
 }
 
 /**
- * Convert saved file display settings from Drupal 7 file_entity.
+ * Add the default file display settings and convert saved file display settings from Drupal 7 file_entity.
  */
-function file_update_1007() {
+function file_update_1006() {
+  $default_file_displays = array(
+    'audio' => array(
+      'type' => 'audio',
+      'default' => array(
+        'formatter' => 'file_field_file_audio',
+        'settings' => array(
+          'file_field_file_audio' => array(
+            'controls' => 1,
+            'autoplay' => 0,
+            'loop' => 0,
+            'preload' => '',
+            'multiple_file_behavior' => 'tags',
+          ),
+        ),
+      ),
+      'preview' => array(
+        'formatter' => 'file_field_file_audio',
+        'settings' => array(
+          'file_field_file_audio' => array(
+            'controls' => 1,
+            'autoplay' => 0,
+            'loop' => 0,
+            'preload' => '',
+            'multiple_file_behavior' => 'tags',
+          ),
+        ),
+      ),
+    ),
+    'document' => array(
+      'type' => 'document',
+      'default' => array(
+        'formatter' => 'file_field_file_download_link',
+        'settings' => array(
+          'file_field_file_download_link' => array(
+            'text' => 'Download [file:name]',
+          ),
+        ),
+      ),
+      'preview' => array(
+        'formatter' => 'file_field_file_download_link',
+        'settings' => array(
+          'file_field_file_download_link' => array(
+            'text' => 'Download [file:name]',
+          ),
+        ),
+      ),
+    ),
+    'image' => array(
+      'type' => 'image',
+      'default' => array(
+        'formatter' => 'file_field_image',
+        'settings' => array(
+          'file_field_image' => array(
+            'image_style' => '',
+            'image_link' => '',
+            'image_float' => '',
+          ),
+        ),
+      ),
+      'preview' => array(
+        'formatter' => 'file_field_image',
+        'settings' => array(
+          'file_field_image' => array(
+            'image_style' => 'thumbnail',
+            'image_link' => '',
+            'image_float' => '',
+          ),
+        ),
+      ),
+    ),
+    'video' => array(
+      'type' => 'video',
+      'default' => array(
+        'formatter' => 'file_field_file_video',
+        'settings' => array(
+          'file_field_file_video' => array(
+            'controls' => 1,
+            'autoplay' => 0,
+            'loop' => 0,
+            'muted' => 0,
+            'width' => '',
+            'height' => '',
+            'preload' => '',
+            'multiple_file_behavior' => 'tags',
+          ),
+        ),
+      ),
+      'preview' => array(
+        'formatter' => 'file_field_file_video',
+        'settings' => array(
+          'file_field_file_video' => array(
+            'controls' => 1,
+            'autoplay' => 0,
+            'loop' => 0,
+            'muted' => 0,
+            'width' => '',
+            'height' => '',
+            'preload' => '',
+            'multiple_file_behavior' => 'tags',
+          ),
+        ),
+      ),
+    ),
+  );
+  foreach ($default_file_displays as $machine => $display) {
+    $config = config('file_display.' . $machine);
+    if ($config->isNew()) {
+      $config->setData($display);
+      $config->save();
+    }
+  }
+
   if (db_table_exists('file_display')) {
     $types = array();
     $formatter_weights = array();

@@ -6,7 +6,7 @@
         "formatter": "file_field_image",
         "settings": {
             "file_field_image": {
-                "image_style": "large",
+                "image_style": "",
                 "image_link": "",
                 "image_float": ""
             }
