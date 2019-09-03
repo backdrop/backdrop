@@ -740,9 +740,29 @@ function file_update_1001() {
 }
 
 /**
- * Add {file_managed}.type field
+ * Switch the 'edit files' permission to 'manage files'.
  */
 function file_update_1002() {
+  $roles = user_roles(FALSE, 'edit files');
+  foreach ($roles as $role_name => $role_label) {
+    $config = config('user.role.' . $role_name);
+    $permissions = $config->get('permissions');
+    if ($key = array_search('edit files', $permissions)) {
+      // Add the new permission.
+      $permissions[] = 'manage files';
+      // Remove the old permission.
+      unset($permissions[$key]);
+      // Save the role.
+      $config->set('permissions', $permissions);
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Add a type column to the file_managed table, and add a file_metadata table.
+ */
+function file_update_1003() {
   $schema = array();
   $schema['file_metadata'] = array(
     'description' => 'Cache images dimensions.',
@@ -789,8 +809,8 @@ function file_update_1002() {
     ),
   );
 
-  // If another module (e.g., Media) had added a {file_managed}.type field,
-  // then change it to the expected specification.
+  // If another module (e.g., Media or File Entity) had added a
+  // {file_managed}.type field, then change it to the expected specification.
   if (db_field_exists('file_managed', 'type')) {
     // db_change_field() will fail if any records have type=NULL, so update
     // them to the new default value.
@@ -804,9 +824,10 @@ function file_update_1002() {
 
     // Since the database API doesn't provide a way to drop indexes without
     // knowing what the old indexes are, it is the responsibility of any module
-    // that adds them to drop them prior to this update..
+    // that adds them to drop them prior to running this update..
     db_change_field('file_managed', 'type', 'type', $spec, $indexes_new);
   }
+
   // Otherwise, add the field.
   else {
     db_add_field('file_managed', 'type', $spec, $indexes_new);
@@ -817,7 +838,7 @@ function file_update_1002() {
     db_create_table('file_metadata', $schema['file_metadata']);
   }
 
-  // Set permissions.
+  // Set permission to view files.
   $roles = user_roles();
   foreach ($roles as $rid => $role) {
     user_role_grant_permissions($rid, array('view files'));
@@ -835,26 +856,6 @@ function file_update_1002() {
   // has been processed.
   if ($queue->numberOfItems()) {
     backdrop_set_message(t('Existing files must be classified according to the currently defined file types. These files have been queued for processing and will have their file type determined during cron runs.'));
-  }
-}
-
-/**
- * Switch the 'edit files' permission to 'manage files'.
- */
-function file_update_1003() {
-  $roles = user_roles(FALSE, 'edit files');
-  foreach ($roles as $role_name => $role_label) {
-    $config = config('user.role.' . $role_name);
-    $permissions = $config->get('permissions');
-    if ($key = array_search('edit files', $permissions)) {
-      // Add the new permission.
-      $permissions[] = 'manage files';
-      // Remove the old permission.
-      unset($permissions[$key]);
-      // Save the role.
-      $config->set('permissions', $permissions);
-      $config->save();
-    }
   }
 }
 
