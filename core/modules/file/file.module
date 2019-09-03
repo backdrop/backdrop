@@ -3226,11 +3226,14 @@ function file_view_file($file, $display = 'full', $langcode = NULL) {
     // Allow modules to change the view mode.
     $entity = array($file->fid => $file);
     $view_mode = key(entity_view_mode_prepare('file', $entity, $display, $langcode));
-    $display_info = file_display($file->type, $view_mode);
+    $display = file_display($file->type, $view_mode);
   }
   else {
     $view_mode = '_custom_display';
   }
+
+  $formatter = $display['formatter'];
+  $settings = $display['settings'][$formatter];
 
   // Attempt to display the file with the specified display.
   // See file_display() for details.
@@ -3238,22 +3241,20 @@ function file_view_file($file, $display = 'full', $langcode = NULL) {
   // Load the file that contains file_info_formatter_types().
   module_load_include('inc', 'file', 'file.admin');
 
-  if (!empty($display_info)) {
-    foreach ($display_info as $formatter_type => $display) {
-      if (!empty($display['status'])) {
-        $formatter_info = file_info_formatter_types($formatter_type);
-        if (isset($formatter_info['view callback']) && ($function = $formatter_info['view callback']) && function_exists($function)) {
-          $display['type'] = $formatter_type;
-          if (!empty($formatter_info['default settings'])) {
-            if (empty($display['settings'])) {
-              $display['settings'] = array();
-            }
-            $display['settings'] += $formatter_info['default settings'];
-          }
-          $element = $function($file, $display, $langcode);
-        }
+  $formatter_info = file_info_formatter_types($formatter);
+  if (isset($formatter_info['view callback']) && ($function = $formatter_info['view callback']) && function_exists($function)) {
+
+    if (!empty($formatter_info['default settings'])) {
+      if (empty($display['settings'][$formatter])) {
+        $display['settings'] = array();
       }
+      $display['settings'][$formatter] += $formatter_info['default settings'];
     }
+    $display_info = array(
+      'type' => $formatter,
+      'settings' => $display['settings'][$formatter],
+    );
+    $element = $function($file, $display_info, $langcode);
   }
 
   // As a last resort, fall back to showing a link to the file.
