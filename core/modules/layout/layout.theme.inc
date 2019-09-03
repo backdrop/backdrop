@@ -313,7 +313,6 @@ function layout_preprocess_layout(&$variables) {
       $variables['region_buttons'] = $variables['renderer']->region_buttons;
     }
 
-
     $variables['column_data'] = layout_flexible_row_styles();
 
     $variables['rows'] = $data['rows'];
@@ -321,7 +320,7 @@ function layout_preprocess_layout(&$variables) {
     foreach ($variables['rows'] as $name => $row) {
       $container = ($row['container'] == 'container') ? 'container container-fluid' : (($row['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
       $row['row_class'] = $container . ' flexible-row--' . $name . ' ' . $row['contains'] . ' ' . $row['classes'];
-      $row['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row-' . $name . '"' : '';
+      $row['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row--' . $name . '"' : '';
       $row['element'] = !empty($row['element']) ? $row['element'] : 'div';
       if ($row['contains'] == 'region_12') {
         if (!empty($row['region_names']['region_name_0'])) {
@@ -332,7 +331,7 @@ function layout_preprocess_layout(&$variables) {
         }
         $row['regions'][0]['region_md'] = '12';
         $row['regions'][0]['region_name'] = $region_name;
-        $row['regions'][0]['content_key'] = $variables['flexible_editor'] ? $name : $name . '_0';
+        $row['regions'][0]['content_key'] = $variables['flexible_editor'] ? $name : $name . '--0';
       }
       else {
         $col_info = $variables['column_data'][$row['contains']];
@@ -348,7 +347,7 @@ function layout_preprocess_layout(&$variables) {
           $row['regions'][] = array(
             'region_md' => $col,
             'region_name' => $region_name,
-            'content_key' => $variables['flexible_editor'] ? $name : $name . '_' . $i,
+            'content_key' => $variables['flexible_editor'] ? $name : $name . '--' . $i,
           );
           $i++;
         }

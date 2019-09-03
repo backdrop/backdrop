@@ -2053,16 +2053,16 @@ function layout_layout_info() {
       'preview' => 'flexible_template.png',
       'libraries' => array('bootstrap4-gs'),
     );
-    foreach ($flexible_template['rows'] as $name => $region) {
+    foreach ($flexible_template['rows'] as $row_name => $region) {
       $region_style = $styles[$region['contains']];
       for ($i = 0; $i < $region_style['region_count']; $i++) {
         if (!empty($region['region_names']['region_name_' . $i])) {
           $region_name = $region['region_names']['region_name_' . $i];
         }
         else {
-          $region_name = $name . ' ' . $i;
+          $region_name = $row_name . ' ' . $i;
         }
-        $layouts[$flexible_template['name']]['regions'][$name . '_' . $i] = $region_name;
+        $layouts[$flexible_template['name']]['regions'][$row_name . '--' . $i] = $region_name;
       }
     }
   }
