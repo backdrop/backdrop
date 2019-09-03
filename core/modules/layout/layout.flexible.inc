@@ -12,8 +12,8 @@
  * @ingroup forms
  */
 function layout_flexible_template_settings_add_form() {
-  $flexible_template = layout_flexible_template_template_default();
-  $flexible_template['is_new'] = TRUE;
+  $flexible_template = new LayoutFlexibleTemplate();
+  $flexible_template->is_new = TRUE;
   backdrop_set_title(t('Add template'));
   return backdrop_get_form('layout_flexible_template_settings_edit_form', $flexible_template);
 }
@@ -21,27 +21,27 @@ function layout_flexible_template_settings_add_form() {
 /**
  * Form to configure a flexible template.
  *
- * @param $flexible_template
+ * @param LayoutFlexibleTemplate $flexible_template
  *   The loaded flexible template object.
  *
  * @ingroup forms
  */
-function layout_flexible_template_settings_edit_form($form, &$form_state, $flexible_template) {
+function layout_flexible_template_settings_edit_form($form, &$form_state, LayoutFlexibleTemplate $flexible_template) {
   $form_state['flexible_template'] = $flexible_template;
-  $template_exists = layout_flexible_template_load($flexible_template['name']);
+  $template_exists = layout_flexible_template_load($flexible_template->name);
 
   $form['name'] = array(
     '#title' => t('Template name'),
     '#type' => 'textfield',
     '#maxlength' => 128,
-    '#default_value' => $flexible_template['title'],
+    '#default_value' => $flexible_template->title,
     '#required' => TRUE,
   );
   $form['machine_name'] = array(
     '#type' => 'machine_name',
     '#maxlength' => 21,
-    '#default_value' => $flexible_template['name'],
-    '#disabled' => ($template_exists && empty($flexible_template['is_new'])),
+    '#default_value' => $flexible_template->name,
+    '#disabled' => ($template_exists && empty($flexible_template->is_new)),
     '#machine_name' => array(
       'exists' => 'layout_flexible_template_load',
     ),
@@ -49,7 +49,7 @@ function layout_flexible_template_settings_edit_form($form, &$form_state, $flexi
   $form['description'] = array(
     '#title' => t('Description'),
     '#type' => 'textfield',
-    '#default_value' => $flexible_template['description'],
+    '#default_value' => $flexible_template->description,
   );
 
   $form['actions'] = array('#type' => 'actions');
@@ -88,34 +88,30 @@ function layout_flexible_template_settings_form_cancel($form, &$form_state) {
  * @see layout_flexible_template_settings_edit_form()
  */
 function layout_flexible_template_settings_form_submit($form, &$form_state) {
+  /* @var LayoutFlexibleTemplate $flexible_template */
   $flexible_template = $form_state['flexible_template'];
-  $flexible_template['name'] = $form_state['values']['machine_name'];
-  $flexible_template['title'] = $form_state['values']['name'];
-  $flexible_template['description'] = $form_state['values']['description'];
-  unset($flexible_template['is_new']);
+  $flexible_template->name = $form_state['values']['machine_name'];
+  $flexible_template->title = $form_state['values']['name'];
+  $flexible_template->description = $form_state['values']['description'];
+  unset($flexible_template->is_new);
 
-  $config = config('layout.flexible.' . $form_state['values']['machine_name']);
-  $config->setData($flexible_template);
-  $config->save();
+  $flexible_template->save();
 
   layout_set_flexible_tempstore($flexible_template);
-  backdrop_theme_rebuild();
-  layout_flexible_reset_caches();
-  layout_reset_caches();
 
-  backdrop_set_message(t('Layout template "@title" saved.', array('@title' => $flexible_template['title'])));
+  backdrop_set_message(t('Layout template "@title" saved.', array('@title' => $flexible_template->title)));
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['values']['machine_name'] . '/configure';
 }
 
 /**
  * Form to manage adding and removing rows to a flexible template.
  *
- * @param array $flexible_template
+ * @param LayoutFlexibleTemplate $flexible_template
  *   The template configuration being edited.
  *
  * @ingroup forms
  */
-function layout_flexible_template_configure_form($form, &$form_state, $flexible_template) {
+function layout_flexible_template_configure_form($form, &$form_state, LayoutFlexibleTemplate $flexible_template) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
 
@@ -129,8 +125,8 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
     '#suffix' => '</div>',
   );
 
-  $form_state['flexible_template'] = $flexible_template;
-  $flexible_template_name = $flexible_template['name'];
+  $form_state['flexible_template'] = &$flexible_template;
+  $flexible_template_name = $flexible_template->name;
 
   $config = array(
     'is_new' => TRUE,
@@ -160,7 +156,7 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
   $form['content']['row_positions'] = array(
     // Use 'hidden' instead of 'value' so the JS can access it.
     '#type' => 'hidden',
-    '#default_value' => implode(',', array_keys($form_state['flexible_template']['rows'])),
+    '#default_value' => implode(',', array_keys($flexible_template->rows)),
   );
 
   $form['content']['add_row'] = array(
@@ -202,8 +198,9 @@ function layout_flexible_template_add_row($form, &$form_state) {
 }
 
 /**
- * Submit handler for layout_flexible_template_configure_form() that cancels
- * in-progress changes.
+ * Submit handler that cancels in-progress changes.
+ *
+ * @see layout_flexible_template_configure_form()
  */
 function layout_flexible_template_configure_form_cancel($form, &$form_state) {
   tempstore_clear('layout.flexible', $form_state['flexible_template_name']);
@@ -211,44 +208,45 @@ function layout_flexible_template_configure_form_cancel($form, &$form_state) {
 }
 
 /**
- * Submit handler for layout_flexible_template_configure_form().
+ * Submit handler that saves the configured flexible template.
+ *
+ * @see layout_flexible_template_configure_form()
  */
 function layout_flexible_template_configure_form_submit($form, &$form_state) {
+  /* @var LayoutFlexibleTemplate $flexible_template */
+  $flexible_template = &$form_state['flexible_template'];
   $positions = array();
+
   if (!empty($form_state['values']['row_positions'])) {
     $rows = array_filter(explode(',', $form_state['values']['row_positions']));
     foreach ($rows as $position) {
-     $positions[$position] = $form_state['flexible_template']['rows'][$position];
+     $positions[$position] = $flexible_template->rows[$position];
     }
   }
-  $form_state['flexible_template']['rows'] = $positions;
 
-  $config = config('layout.flexible.' . $form_state['flexible_template_name']);
-  $config->setData($form_state['flexible_template']);
-  $config->save();
+  $flexible_template->rows = $positions;
+  $flexible_template->save();
 
   tempstore_clear('layout.flexible', $form_state['flexible_template_name']);
-  layout_flexible_reset_caches();
-  layout_reset_caches();
 
-  backdrop_set_message(t('Layout template "@title" saved.', array('@title' => $form_state['flexible_template']['title'])));
+  backdrop_set_message(t('Layout template "@title" saved.', array('@title' => $flexible_template->title)));
 }
 
 /**
  * Form to select the region widths for a flexible template.
  *
- * @param $flexible_template
+ * @param LayoutFlexibleTemplate $flexible_template
  *   The loaded flexible template object.
- * @param $original_row
+ * @param string $original_row
  *   The row above or below which a new row is being inserted.
  *
  * @ingroup forms
  */
-function layout_flexible_template_region_style_select($form, &$form_state, $flexible_template, $original_row) {
+function layout_flexible_template_region_style_select($form, &$form_state, LayoutFlexibleTemplate $flexible_template, $original_row) {
   $new_row = ($original_row == 'add');
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
-  $form_state['flexible_template_name'] = $flexible_template['name'];
+  $form_state['flexible_template_name'] = $flexible_template->name;
   $form_state['original_row'] = $original_row;
 
   $row_styles = layout_flexible_row_styles();
@@ -264,7 +262,7 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
       $row_style_in_use = $form_state['values']['region_style'];
     }
     else {
-      $row_style_in_use = $flexible_template['rows'][$original_row]['contains'];
+      $row_style_in_use = $flexible_template->rows[$original_row]['contains'];
     }
     $default_region_count = $row_styles[$row_style_in_use]['region_count'];
   }
@@ -349,7 +347,7 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
       'callback' => 'layout_ajax_form_open_dialog',
     ),
   );
-  if (isset($flexible_template['rows'][$original_row]['in_progress'])) {
+  if (isset($flexible_template->rows[$original_row]['in_progress'])) {
     $cancel_submit_callback = 'layout_flexible_template_region_style_select_cancel';
     $cancel_ajax_callback = 'layout_ajax_form_open_dialog';
   }
@@ -417,31 +415,31 @@ function layout_flexible_template_region_style_select_submit($form, &$form_state
 /**
  * Form to add or edit a row on a flexible template.
  *
- * @param $flexible_template
+ * @param LayoutFlexibleTemplate $flexible_template
  *   The loaded flexible template object.
- * @param $original_row
+ * @param string $original_row
  *   The row above or below which a new row is being inserted.
- * @param $region_style
+ * @param string $region_style
  *   The selected region style.
  *
  * @ingroup forms
  */
-function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_template, $original_row, $region_style = NULL) {
+function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexibleTemplate $flexible_template, $original_row, $region_style = NULL) {
   form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
-  $form_state['flexible_template'] = $flexible_template;
-  $flexible_template_name = $flexible_template['name'];
+  $form_state['flexible_template'] = &$flexible_template;
+  $flexible_template_name = $flexible_template->name;
 
   $form_state['flexible_template_name'] = $flexible_template_name;
   $form_state['original_row'] = $original_row;
 
   $row_data = array();
   if ($original_row != 'add') {
-    if(isset($form_state['flexible_template']['rows'][$original_row]['in_progress'])) {
-      $row_data = $form_state['flexible_template']['rows'][$original_row]['in_progress'];
+    if(isset($flexible_template->rows[$original_row]['in_progress'])) {
+      $row_data = $flexible_template->rows[$original_row]['in_progress'];
     }
     else {
-      $row_data = $form_state['flexible_template']['rows'][$original_row];
+      $row_data = $flexible_template->rows[$original_row];
     }
   }
 
@@ -487,7 +485,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
     '#tree' => TRUE,
   );
 
-  $form_state['last_region_number'] = layout_flexible_template_get_last_region_number($form_state['flexible_template']);
+  $form_state['last_region_number'] = layout_flexible_template_get_last_region_number($flexible_template);
   for ($i = 0; $i < $region_count; $i++) {
     $form['region_names']['region_name_' . $i] = array(
       '#type' => 'textfield',
@@ -569,7 +567,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
 /**
  * Returns the last number of all regions named "Region X" where X is a number.
  */
-function layout_flexible_template_get_last_region_number($flexible_template, $form_state = NULL) {
+function layout_flexible_template_get_last_region_number(LayoutFlexibleTemplate $flexible_template, $form_state = NULL) {
   $last = 0;
   if ($form_state) {
     $region_names = array_filter($form_state['values']['region_names']);
@@ -577,7 +575,7 @@ function layout_flexible_template_get_last_region_number($flexible_template, $fo
   }
   else {
     $region_names = array();
-    foreach ($flexible_template['rows'] as $row) {
+    foreach ($flexible_template->rows as $row) {
       foreach ($row['region_names'] as $name) {
         $region_names[] = $name;
       }
@@ -606,7 +604,7 @@ function layout_flexible_template_change_region_style($form, &$form_state) {
     'container' => $form_state['values']['container'],
     'region_names' => $form_state['values']['region_names'],
   );
-  $form_state['flexible_template']['rows'][$form_state['original_row']]['in_progress'] = $old_row;
+  $form_state['flexible_template']->rows[$form_state['original_row']]['in_progress'] = $old_row;
 
   layout_set_flexible_tempstore($form_state['flexible_template']);
 
@@ -641,6 +639,7 @@ function layout_flexible_template_edit_row_validate($form, &$form_state) {
 function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
+  /* @var LayoutFlexibleTemplate $flexible_template */
   $flexible_template = $form_state['flexible_template'];
   $original_row = $form_state['original_row'];
 
@@ -657,7 +656,7 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
     $original_row = $uuid->generate();
   }
 
-  $flexible_template['rows'][$original_row] = $new_row;
+  $flexible_template->rows[$original_row] = $new_row;
 
   $form_state['flexible_template'] = $flexible_template;
 
@@ -726,20 +725,19 @@ function layout_flexible_template_edit_row_ajax($form, $form_state) {
 /**
  * Menu callback to delete a row from a flexible template.
  *
- * @param $flexible_template
+ * @param LayoutFlexibleTemplate $flexible_template
  *   The loaded flexible template object.
- * @param $original_row
+ * @param string $original_row
  *   The row above or below which a new row is being inserted.
  *
  * @ingroup forms
  */
-function layout_flexible_template_delete_row($flexible_template, $original_row) {
-  // Todo use token, like in block add page.
-
+function layout_flexible_template_delete_row(LayoutFlexibleTemplate $flexible_template, $original_row) {
+  // @todo use token, like in block add page.
   $commands = array();
-  $flexible_template_name = $flexible_template['name'];
+  $flexible_template_name = $flexible_template->name;
 
-  unset($flexible_template['rows'][$original_row]);
+  unset($flexible_template->rows[$original_row]);
   layout_set_flexible_tempstore($flexible_template);
 
   if (backdrop_is_ajax()) {
@@ -751,7 +749,7 @@ function layout_flexible_template_delete_row($flexible_template, $original_row) 
     );
   }
   else {
-    backdrop_set_message(t('Row "@title" removed.', array('@title' => $flexible_template['title'])));
+    backdrop_set_message(t('Row "@title" removed.', array('@title' => $flexible_template->title)));
     backdrop_goto('admin/structure/layouts/settings/flexible-template/' . $flexible_template_name . '/configure');
     return array();
   }
@@ -762,22 +760,22 @@ function layout_flexible_template_delete_row($flexible_template, $original_row) 
  *
  * @ingroup forms
  */
-function layout_flexible_template_delete_form($form, &$form_state, $flexible_template) {
-  $form_state['template'] = $flexible_template;
-  $question = t('Delete flexible template @title?', array('@title' => $flexible_template['title']));
+function layout_flexible_template_delete_form($form, &$form_state, LayoutFlexibleTemplate $flexible_template) {
+  $form_state['flexible_template'] = &$flexible_template;
+  $question = t('Delete flexible template @title?', array('@title' => $flexible_template->title));
   $description = t('This action cannot be undone.');
   backdrop_set_title($question, PASS_THROUGH);
 
   // Check if this template is in use.
   $errors = array();
   foreach (layout_load_all() as $layout) {
-    if ($layout->layout_template == $flexible_template['name']) {
+    if ($layout->layout_template == $flexible_template->name) {
       $errors[] = check_plain($layout->title);
     }
   }
 
   if (!empty($errors)) {
-    backdrop_set_message(t('The "@title" layout template is currently in use in the following layouts and may not be deleted: !list', array('@title' => $flexible_template['title'], '!list' => theme('item_list', array('items' => $errors)))), 'error');
+    backdrop_set_message(t('The "@title" layout template is currently in use in the following layouts and may not be deleted: !list', array('@title' => $flexible_template->title, '!list' => theme('item_list', array('items' => $errors)))), 'error');
   }
   else {
     $form['description'] = array(
@@ -812,15 +810,10 @@ function layout_flexible_template_delete_form($form, &$form_state, $flexible_tem
  * @see layout_flexible_template_delete_form()
  */
 function layout_flexible_template_delete_form_submit(&$form, &$form_state) {
-  $template = $form_state['template'];
+  /* @var LayoutFlexibleTemplate $flexible_template */
+  $flexible_template = &$form_state['flexible_template'];
+  $flexible_template->delete();
 
-  $config = config('layout.flexible.' . $template['name']);
-  $config->delete();
-
-  backdrop_theme_rebuild();
-  layout_flexible_reset_caches();
-  layout_reset_caches();
-
-  backdrop_set_message(t('The layout template "@title" has been deleted.', array('@title' => $template['title'])));
+  backdrop_set_message(t('The layout template "@title" has been deleted.', array('@title' => $flexible_template->title)));
   $form_state['redirect'] = 'admin/structure/layouts/settings';
 }

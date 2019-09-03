@@ -772,6 +772,7 @@ function layout_autoload_info() {
     'LayoutHandler' => 'includes/layout_handler.class.inc',
     'LayoutHandlerBroken' => 'includes/layout_handler.class.inc',
     'Layout' => 'includes/layout.class.inc',
+    'LayoutFlexibleTemplate' => 'includes/layout_flexible.class.inc',
     'Block' => 'includes/block.class.inc',
     'BlockBroken' => 'includes/block.class.inc',
     'BlockLegacy' => 'includes/block_legacy.class.inc',
@@ -1920,15 +1921,11 @@ function layout_get_title_description(Layout $layout) {
 /**
  * Store changes to a flexible layout template in the temporary store.
  *
- * @param $flexible_template
+ * @param LayoutFlexibleTemplate $flexible_template
  *   The loaded flexible template object.
  */
-function layout_set_flexible_tempstore($flexible_template) {
-  $flexible_template['locked'] = array(
-    'uid' => $GLOBALS['user']->uid,
-    'updated' => REQUEST_TIME,
-  );
-  tempstore_set('layout.flexible', $flexible_template['name'], $flexible_template, 604800);
+function layout_set_flexible_tempstore(LayoutFlexibleTemplate $flexible_template) {
+  tempstore_set('layout.flexible', $flexible_template->name, $flexible_template, 604800);
 }
 
 /**
@@ -1942,7 +1939,7 @@ function layout_set_flexible_tempstore($flexible_template) {
  */
 function layout_flexible_tempstore_load($flexible_template_name = NULL) {
   if (!$flexible_template_name) {
-    return layout_flexible_template_template_default();
+    return new LayoutFlexibleTemplate();
   }
 
   $caches = &backdrop_static(__FUNCTION__, array());
@@ -1962,76 +1959,49 @@ function layout_flexible_tempstore_load($flexible_template_name = NULL) {
  * @param string $flexible_template_name
  *   The machine name of the template to load.
  *
- * @return Array
+ * @return LayoutFlexibleTemplate
  */
 function layout_flexible_template_load($flexible_template_name = NULL) {
-  $configs = &backdrop_static(__FUNCTION__, array());
-
-  if (empty($configs)) {
-    $cache = cache()->get('layout:flexible:config');
-    if ($cache && $cache->data) {
-      $configs = $cache->data;
-    }
-  }
-
-  if (empty($configs)) {
-    $config_names = config_get_names_with_prefix('layout.flexible.');
-    foreach ($config_names as $config_file) {
-      $config = config($config_file);
-      $data = $config->get();
-      $configs[$data['name']] = $data;
-    }
-
-    cache()->set('layout:flexible:config', $configs);
-  }
-  if ($flexible_template_name) {
-    if (isset($configs[$flexible_template_name])) {
-      return $configs[$flexible_template_name];
-    }
-    else {
-      return FALSE;
-    }
+  $all_templates = layout_flexible_template_load_all();
+  if (isset($all_templates[$flexible_template_name])) {
+    return $all_templates[$flexible_template_name];
   }
   else {
-    return $configs;
+    return FALSE;
   }
 }
 
 /**
- * Provides the default template for new flexible templates.
+ * Load all flexible templates.
+ *
+ * @return LayoutFlexibleTemplate[]
  */
-function layout_flexible_template_template_default() {
-  $uuid = new Uuid();
-  $settings = array(
-    'name' => '',
-    'title' => '',
-    'description' => '',
-    'rows' => array(
-      $uuid->generate() => array(
-        'contains' => 'region_12',
-        'element' => 'header',
-        'classes' => '',
-        'container' => 'container',
-        'region_names' => array('region_name_0' => t('Header')),
-      ),
-      $uuid->generate() => array(
-        'contains' => 'region_12',
-        'element' => '',
-        'classes' => '',
-        'container' => 'container',
-        'region_names' => array('region_name_0' => t('Content')),
-      ),
-      $uuid->generate() => array(
-        'contains' => 'region_12',
-        'element' => 'footer',
-        'classes' => '',
-        'container' => 'container',
-        'region_names' => array('region_name_0' => t('Footer')),
-      ),
-    ),
-  );
+function layout_flexible_template_load_all() {
+  $templates = &backdrop_static(__FUNCTION__, array());
 
-  return $settings;
+  if (empty($templates)) {
+    $cache = cache()->get('layout:flexible:config');
+    if ($cache && $cache->data) {
+      $configs = $cache->data;
+    }
+    else {
+      $configs = array();
+      $config_names = config_get_names_with_prefix('layout.flexible.');
+      foreach ($config_names as $config_file) {
+        $config = config($config_file);
+        $data = $config->get();
+        $configs[$data['name']] = $data;
+      }
+
+      cache()->set('layout:flexible:config', $configs);
+    }
+
+    foreach ($configs as $template_name => $config) {
+      $templates[$template_name] = new LayoutFlexibleTemplate($config);
+    }
+  }
+
+  return $templates;
 }
 
 /**
@@ -2039,11 +2009,11 @@ function layout_flexible_template_template_default() {
  */
 function layout_layout_info() {
   $layouts = array();
-  $flexible_templates = layout_flexible_template_load();
+  $flexible_templates = layout_flexible_template_load_all();
   $styles = layout_flexible_row_styles();
   foreach ($flexible_templates as $flexible_template) {
-    $layouts[$flexible_template['name']] = array(
-      'title' => $flexible_template['title'],
+    $layouts[$flexible_template->name] = array(
+      'title' => $flexible_template->title,
       'regions' => array(),
       'default region' => '',
       'template' => 'layout--flexible',
@@ -2053,7 +2023,7 @@ function layout_layout_info() {
       'preview' => 'flexible_template.png',
       'libraries' => array('bootstrap4-gs'),
     );
-    foreach ($flexible_template['rows'] as $row_name => $region) {
+    foreach ($flexible_template->rows as $row_name => $region) {
       $region_style = $styles[$region['contains']];
       for ($i = 0; $i < $region_style['region_count']; $i++) {
         if (!empty($region['region_names']['region_name_' . $i])) {
@@ -2062,7 +2032,7 @@ function layout_layout_info() {
         else {
           $region_name = $row_name . ' ' . $i;
         }
-        $layouts[$flexible_template['name']]['regions'][$row_name . '--' . $i] = $region_name;
+        $layouts[$flexible_template->name]['regions'][$row_name . '--' . $i] = $region_name;
       }
     }
   }
@@ -2076,7 +2046,7 @@ function layout_layout_info() {
 function layout_flexible_reset_caches() {
   cache()->delete('layout:flexible:config');
 
-  backdrop_static_reset('layout_flexible_template_load');
+  backdrop_static_reset('layout_flexible_template_load_all');
   backdrop_static_reset('layout_flexible_tempstore_load');
 }
 

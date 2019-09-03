@@ -2635,7 +2635,7 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     // setting, and are in the right place.
     $this->backdropGet($layout_url);
     $layout_template = layout_flexible_template_load($template_machine_name1);
-    $layout_region_names = array_keys($layout_template['rows']);
+    $layout_region_names = array_keys($layout_template->rows);
     $region_block_settings = array(
       $layout_region_names[0] => 30,
       $layout_region_names[1] => 15,

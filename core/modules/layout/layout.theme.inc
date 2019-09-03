@@ -302,11 +302,11 @@ function layout_preprocess_layout(&$variables) {
   if ($variables['layout_info']['template'] == 'layout--flexible') {
     if (!empty($variables['renderer']->flexible)) {
       $variables['flexible_editor'] = TRUE;
-      $data = layout_flexible_tempstore_load($variables['layout_info']['name']);
+      $flexible_layout = layout_flexible_tempstore_load($variables['layout_info']['name']);
     }
     else {
       $variables['flexible_editor'] = FALSE;
-      $data = layout_flexible_template_load($variables['layout_info']['name']);
+      $flexible_layout = layout_flexible_template_load($variables['layout_info']['name']);
     }
     $variables['region_buttons'] = array();
     if (isset($variables['renderer']->region_buttons)) {
@@ -315,7 +315,7 @@ function layout_preprocess_layout(&$variables) {
 
     $variables['column_data'] = layout_flexible_row_styles();
 
-    $variables['rows'] = $data['rows'];
+    $variables['rows'] = $flexible_layout->rows;
     $variables['row_data'] = array();
     foreach ($variables['rows'] as $name => $row) {
       $container = ($row['container'] == 'container') ? 'container container-fluid' : (($row['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
