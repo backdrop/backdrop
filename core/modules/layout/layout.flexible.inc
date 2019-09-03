@@ -110,8 +110,8 @@ function layout_flexible_template_settings_form_submit($form, &$form_state) {
 /**
  * Form to manage adding and removing rows to a flexible template.
  *
- * @param $flexible_template_id
- *   The template being edited.
+ * @param array $flexible_template
+ *   The template configuration being edited.
  *
  * @ingroup forms
  */
@@ -130,18 +130,18 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
   );
 
   $form_state['flexible_template'] = $flexible_template;
-  $flexible_template_id = $flexible_template['name'];
+  $flexible_template_name = $flexible_template['name'];
 
   $config = array(
     'is_new' => TRUE,
-    'layout_template' => $flexible_template_id,
+    'layout_template' => $flexible_template_name,
   );
   $layout = new Layout($config);
-  $template = layout_get_layout_template_info($flexible_template_id);
+  $template = layout_get_layout_template_info($flexible_template_name);
 
   backdrop_set_title($template['title']);
 
-  $form_state['flexible_template_id'] = $flexible_template_id;
+  $form_state['flexible_template_name'] = $flexible_template_name;
 
   if (empty($form_state['flexible_template'])) {
     return array();
@@ -198,7 +198,7 @@ function layout_flexible_template_configure_form($form, &$form_state, $flexible_
  * Handler for layout_flexible_template_configure_form() to add a new row.
  */
 function layout_flexible_template_add_row($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/row/add/select-widths';
+  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/row/add/select-widths';
 }
 
 /**
@@ -206,7 +206,7 @@ function layout_flexible_template_add_row($form, &$form_state) {
  * in-progress changes.
  */
 function layout_flexible_template_configure_form_cancel($form, &$form_state) {
-  tempstore_clear('layout.flexible', $form_state['flexible_template_id']);
+  tempstore_clear('layout.flexible', $form_state['flexible_template_name']);
   $form_state['redirect'] = 'admin/structure/layouts/settings';
 }
 
@@ -223,11 +223,11 @@ function layout_flexible_template_configure_form_submit($form, &$form_state) {
   }
   $form_state['flexible_template']['rows'] = $positions;
 
-  $config = config('layout.flexible.' . $form_state['flexible_template_id']);
+  $config = config('layout.flexible.' . $form_state['flexible_template_name']);
   $config->setData($form_state['flexible_template']);
   $config->save();
 
-  tempstore_clear('layout.flexible', $form_state['flexible_template_id']);
+  tempstore_clear('layout.flexible', $form_state['flexible_template_name']);
   layout_flexible_reset_caches();
   layout_reset_caches();
 
@@ -248,7 +248,7 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
   $new_row = ($original_row == 'add');
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
-  $form_state['flexible_template_id'] = $flexible_template['name'];
+  $form_state['flexible_template_name'] = $flexible_template['name'];
   $form_state['original_row'] = $original_row;
 
   $row_styles = layout_flexible_row_styles();
@@ -378,7 +378,7 @@ function layout_flexible_template_region_style_select($form, &$form_state, $flex
  * @see layout_flexible_template_region_style_select().
  */
 function layout_flexible_template_cancel($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/configure';
+  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/configure';
 }
 
 /**
@@ -402,7 +402,7 @@ function layout_flexible_template_cancel_ajax($form, $form_state) {
  * @see layout_flexible_template_region_style_select().
  */
 function layout_flexible_template_region_style_select_cancel($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/row/' . $form_state['original_row'] . '/configure';
+  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/row/' . $form_state['original_row'] . '/configure';
 }
 
 /**
@@ -411,7 +411,7 @@ function layout_flexible_template_region_style_select_cancel($form, &$form_state
  * @see layout_flexible_template_region_style_select().
  */
 function layout_flexible_template_region_style_select_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/row/' . $form_state['original_row'] . '/configure/' . $form_state['values']['region_style'];
+  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/row/' . $form_state['original_row'] . '/configure/' . $form_state['values']['region_style'];
 }
 
 /**
@@ -430,9 +430,9 @@ function layout_flexible_template_edit_row_form($form, &$form_state, $flexible_t
   form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   $form_state['flexible_template'] = $flexible_template;
-  $flexible_template_id = $flexible_template['name'];
+  $flexible_template_name = $flexible_template['name'];
 
-  $form_state['flexible_template_id'] = $flexible_template_id;
+  $form_state['flexible_template_name'] = $flexible_template_name;
   $form_state['original_row'] = $original_row;
 
   $row_data = array();
@@ -610,7 +610,7 @@ function layout_flexible_template_change_region_style($form, &$form_state) {
 
   layout_set_flexible_tempstore($form_state['flexible_template']);
 
-  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/row/' . $form_state['original_row'] . '/select-widths';
+  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/row/' . $form_state['original_row'] . '/select-widths';
 }
 
 /**
@@ -667,7 +667,7 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   layout_set_flexible_tempstore($flexible_template);
   layout_flexible_reset_caches();
   if (!backdrop_is_ajax()) {
-    $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_id'] . '/configure';
+    $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/configure';
   }
 }
 
@@ -737,7 +737,7 @@ function layout_flexible_template_delete_row($flexible_template, $original_row) 
   // Todo use token, like in block add page.
 
   $commands = array();
-  $flexible_template_id = $flexible_template['name'];
+  $flexible_template_name = $flexible_template['name'];
 
   unset($flexible_template['rows'][$original_row]);
   layout_set_flexible_tempstore($flexible_template);
@@ -752,7 +752,7 @@ function layout_flexible_template_delete_row($flexible_template, $original_row) 
   }
   else {
     backdrop_set_message(t('Row "@title" removed.', array('@title' => $flexible_template['title'])));
-    backdrop_goto('admin/structure/layouts/settings/flexible-template/' . $flexible_template_id . '/configure');
+    backdrop_goto('admin/structure/layouts/settings/flexible-template/' . $flexible_template_name . '/configure');
     return array();
   }
 }

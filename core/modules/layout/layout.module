@@ -1937,34 +1937,34 @@ function layout_set_flexible_tempstore($flexible_template) {
  * If a template is not yet being edited, the template will be loaded from
  * configuration.
  *
- * @param string $flexible_template_id
+ * @param string $flexible_template_name
  *   The machine name of the flexible template to load.
  */
-function layout_flexible_tempstore_load($flexible_template_id = NULL) {
-  if (!$flexible_template_id) {
+function layout_flexible_tempstore_load($flexible_template_name = NULL) {
+  if (!$flexible_template_name) {
     return layout_flexible_template_template_default();
   }
 
   $caches = &backdrop_static(__FUNCTION__, array());
-  if (!isset($caches[$flexible_template_id])) {
-    if (!$item = tempstore_get('layout.flexible', $flexible_template_id)) {
-      $item = layout_flexible_template_load($flexible_template_id);
+  if (!isset($caches[$flexible_template_name])) {
+    if (!$item = tempstore_get('layout.flexible', $flexible_template_name)) {
+      $item = layout_flexible_template_load($flexible_template_name);
     }
-    $caches[$flexible_template_id] = $item;
+    $caches[$flexible_template_name] = $item;
   }
 
-  return $caches[$flexible_template_id];
+  return $caches[$flexible_template_name];
 }
 
 /**
  * Load an individual flexible template.
  *
- * @param string $flexible_template_id
+ * @param string $flexible_template_name
  *   The machine name of the template to load.
  *
  * @return Array
  */
-function layout_flexible_template_load($flexible_template_id = NULL) {
+function layout_flexible_template_load($flexible_template_name = NULL) {
   $configs = &backdrop_static(__FUNCTION__, array());
 
   if (empty($configs)) {
@@ -1984,9 +1984,9 @@ function layout_flexible_template_load($flexible_template_id = NULL) {
 
     cache()->set('layout:flexible:config', $configs);
   }
-  if ($flexible_template_id) {
-    if (isset($configs[$flexible_template_id])) {
-      return $configs[$flexible_template_id];
+  if ($flexible_template_name) {
+    if (isset($configs[$flexible_template_name])) {
+      return $configs[$flexible_template_name];
     }
     else {
       return FALSE;
