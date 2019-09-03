@@ -53,6 +53,9 @@ function filter_admin_overview($form) {
       $links['enable'] = array(
         'title' => t('Enable'),
         'href' => "admin/config/content/formats/$id/enable",
+        'query' => array(
+          'token' => backdrop_get_token('format-' . $format->format)
+        ),
       );
       // Move "Enable" to be the first/default operation (for disabled formats).
       $links = array_merge(array('enable' => $links['enable']), $links);
@@ -507,6 +510,10 @@ function filter_admin_format_form_submit($form, &$form_state) {
  * Page callback: Enable a text format.
  */
 function filter_admin_enable($format = NULL) {
+  if (!isset($_GET['token']) || !backdrop_valid_token($_GET['token'], 'format-' . $format->format)) {
+    return MENU_ACCESS_DENIED;
+  }
+
   if (isset($format)) {
     filter_format_enable($format);
     backdrop_set_message(t('Enabled text format %format.', array('%format' => $format->name)));
