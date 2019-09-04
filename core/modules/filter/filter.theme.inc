@@ -79,6 +79,7 @@ function theme_filter_admin_overview($variables) {
   $form = $variables['form'];
 
   $rows = array();
+  $first_disabled_row = TRUE;
   foreach (element_children($form['formats']) as $id) {
     $form['formats'][$id]['weight']['#attributes']['class'] = array('text-format-order-weight');
     $row = array(
@@ -89,13 +90,26 @@ function theme_filter_admin_overview($variables) {
         backdrop_render($form['formats'][$id]['weight']),
         backdrop_render($form['formats'][$id]['operations']),
       ),
-      'class' => array('draggable'),
     );
     if ($form['formats'][$id]['#status']) {
-      $row['class'][] = 'enabled';
+      $row['class'] = array('draggable', 'enabled');
     }
     else {
-      $row['class'][] = 'disabled';
+      // Add a heading above the first disabled row.
+      if ($first_disabled_row) {
+        $first_disabled_row = FALSE;
+        // Create a row that spans all columns.
+        $rows[] = array(
+          'data' => array(
+            array(
+              'data' => t('Disabled'),
+              'colspan' => 5,
+              'header' => TRUE,
+            ),
+          ),
+        );
+      }
+      $row['class'] = array('disabled');
     }
     $rows[] = $row;
   }
