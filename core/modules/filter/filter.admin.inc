@@ -29,6 +29,7 @@ function filter_admin_overview($form) {
     $links['configure'] = array(
       'title' => t('Configure'),
       'href' => "admin/config/content/formats/$id",
+      'weight' => 0,
     );
     if (user_access('synchronize configuration')) {
       $links['export'] = array(
@@ -38,6 +39,7 @@ function filter_admin_overview($form) {
           'group' => 'Text formats',
           'name' => 'filter.format.' . $id,
         ),
+        'weight' => 5,
       );
     }
 
@@ -46,33 +48,31 @@ function filter_admin_overview($form) {
     // Check whether this is the fallback text format. This format is available
     // to all roles and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
-
-    if ($form['formats'][$id]['#status'] && !$form['formats'][$id]['#is_fallback']) {
-      $links['disable'] = array(
-        'title' => t('Disable'),
-        'href' => 'admin/config/content/formats/' . $id . '/disable',
-        'query' => array(
-          'token' => backdrop_get_token('format-' . $format->format)
-        ),
-        'weight' => 10,
-      );
-    }
-    else {
-      $links['enable'] = array(
-        'title' => t('Enable'),
-        'href' => 'admin/config/content/formats/' . $id . '/enable',
-        'query' => array(
-          'token' => backdrop_get_token('format-' . $format->format)
-        ),
-        'weight' => -10,
-      );
-    }
-
     if ($form['formats'][$id]['#is_fallback']) {
       $form['formats'][$id]['name'] = array('#markup' => $format->name);
       $roles_markup = t('Fallback format. Used if a role has access to no other formats.');
     }
     else {
+      if ($form['formats'][$id]['#status']) {
+        $links['disable'] = array(
+          'title' => t('Disable'),
+          'href' => 'admin/config/content/formats/' . $id . '/disable',
+          'query' => array(
+            'token' => backdrop_get_token('format-' . $format->format)
+          ),
+          'weight' => 10,
+        );
+      }
+      else {
+        $links['enable'] = array(
+          'title' => t('Enable'),
+          'href' => 'admin/config/content/formats/' . $id . '/enable',
+          'query' => array(
+            'token' => backdrop_get_token('format-' . $format->format)
+          ),
+          'weight' => -10,
+        );
+      }
       $form['formats'][$id]['name'] = array('#markup' => check_plain($format->name));
       $roles = array();
       foreach (filter_get_roles_by_format($format) as $role_name) {
