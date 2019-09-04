@@ -628,7 +628,7 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
  */
 function _filter_get_file_id($href) {
   $result = 0;
-  
+
   // Check URI for valid file scheme.
   if (!file_valid_uri($href)){
     return $result;

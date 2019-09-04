@@ -16,6 +16,9 @@ function filter_theme() {
     'filter_admin_overview' => array(
       'render element' => 'form',
     ) + $base,
+    'filter_format_name' => array(
+      'variables' => array('format' => NULL),
+    ) + $base,
     'filter_admin_format_filter_order' => array(
       'render element' => 'element',
     ) + $base,
@@ -126,6 +129,14 @@ function filter_menu() {
     'page callback' => 'filter_admin_format_page',
     'page arguments' => array(4),
     'access arguments' => array('administer filters'),
+    'file' => 'filter.admin.inc',
+  );
+  $items['admin/config/content/formats/%filter_format/enable'] = array(
+    'title' => 'Enable text format',
+    'page callback' => 'filter_admin_enable',
+    'page arguments' => array(4),
+    'access arguments' => array('administer filters'),
+    'type' => MENU_CALLBACK,
     'file' => 'filter.admin.inc',
   );
   $items['admin/config/content/formats/%filter_format/disable'] = array(
@@ -354,12 +365,7 @@ function filter_format_save($format) {
 }
 
 /**
- * Enables a text format.
- *
- * There is no core facility to re-enable a disabled format. It is not deleted
- * to keep information for contrib and to make sure the format ID is never
- * reused. As there might be content using the disabled format, this would lead
- * to data corruption.
+ * Enables a disabled text format.
  *
  * @param $format
  *   The text format object to be enabled.
@@ -376,12 +382,11 @@ function filter_format_enable($format) {
 }
 
 /**
- * Disables a text format.
+ * Disables an enabled text format.
  *
- * There is no core facility to re-enable a disabled format. It is not deleted
- * to keep information for contrib and to make sure the format ID is never
- * reused. As there might be content using the disabled format, this would lead
- * to data corruption.
+ * The format will no longer be available in the "Editor" selector when
+ * creating/editing content, but it can still be enabled via the text formats
+ * listing in admin/config/content/formats.
  *
  * @param $format
  *   The text format object to be disabled.
@@ -692,6 +697,12 @@ function filter_modules_disabled($modules) {
  *   (optional) If provided, only those formats that are allowed for this user
  *   account will be returned. All formats will be returned otherwise. Defaults
  *   to NULL.
+ * @param bool $include_disabled
+ *   (optional) Whether or not to include disabled formats in the return array.
+ *   Defaults to FALSE.
+ * @param bool $reset
+ *   (optional) Whether or not to bypass the cache and reload all formats.
+ *   Defaults to FALSE.
  *
  * @return stdClass[]
  *   An array of text format objects, keyed by the format ID and ordered by
@@ -699,13 +710,13 @@ function filter_modules_disabled($modules) {
  *
  * @see filter_formats_reset()
  */
-function filter_formats($account = NULL) {
+function filter_formats($account = NULL, $include_disabled = FALSE, $reset = FALSE) {
   global $language;
   $formats = &backdrop_static(__FUNCTION__, array());
 
   // All available formats are cached for performance.
-  if (!isset($formats['all'])) {
-    if ($cache = cache()->get("filter_formats:{$language->langcode}")) {
+  if (!isset($formats['all']) || $reset) {
+    if (($cache = cache()->get("filter_formats:{$language->langcode}")) && !$reset) {
       $formats['all'] = $cache->data;
     }
     else {
@@ -725,8 +736,7 @@ function filter_formats($account = NULL) {
         );
         $filter_format = (object) $filter_format;
 
-        // We don't include disabled formats.
-        if (!$filter_format->status) {
+        if (!$include_disabled && !$filter_format->status) {
           continue;
         }
 
@@ -762,7 +772,8 @@ function filter_formats($account = NULL) {
   if (isset($account) && !isset($formats['user'][$account->uid])) {
     $formats['user'][$account->uid] = array();
     foreach ($formats['all'] as $format) {
-      if (filter_access($format, $account)) {
+      // Include only enabled formats, to which the user has access to.
+      if ($format->status && filter_access($format, $account)) {
         $formats['user'][$account->uid][$format->format] = $format;
       }
     }
@@ -1218,7 +1229,7 @@ function filter_process_format($element) {
   $element['value']['#type'] = $element['#base_type'];
   $element['value'] += element_info($element['#base_type']);
 
-  // Get a list of formats to which the current user has access.
+  // Get a list of enabled formats to which the current user has access.
   $formats = filter_formats($user);
 
   // Turn original element into a text format wrapper.

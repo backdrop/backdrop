@@ -14,17 +14,53 @@
  */
 function filter_admin_overview($form) {
   // Overview of all formats.
-  $formats = filter_formats();
+  $formats = filter_formats(NULL, TRUE, TRUE);
   $fallback_format = filter_fallback_format();
   $editors = filter_get_editors();
 
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('The order of the text formats here reflects the order in which they will show up in the <em>Editor</em> selector when creating content (subject to the text formats to which a user has access.'),
+    '#weight' => -100,
+  );
+
   $form['#tree'] = TRUE;
+
   foreach ($formats as $id => $format) {
+    // Prepare roles for each fomrat.
+    $roles = array();
+    foreach (filter_get_roles_by_format($format) as $role_name) {
+      $role = user_role_load($role_name);
+      $roles[] = check_plain($role->label);
+    }
+    $roles_markup = $roles ? theme('item_list', array('items' => $roles)) : t('No roles specified for this format.');
+
+    // Prepare operations links for each format.
     $links = array();
+
     $links['configure'] = array(
       'title' => t('Configure'),
       'href' => "admin/config/content/formats/$id",
     );
+
+    if ($format->status) {
+      $links['disable'] = array(
+        'title' => t('Disable'),
+        'href' => "admin/config/content/formats/$id/disable",
+      );
+    }
+    else {
+      $links['enable'] = array(
+        'title' => t('Enable'),
+        'href' => "admin/config/content/formats/$id/enable",
+        'query' => array(
+          'token' => backdrop_get_token('format-' . $format->format)
+        ),
+      );
+      // Move "Enable" to be the first/default operation (for disabled formats).
+      $links = array_merge(array('enable' => $links['enable']), $links);
+    }
+
     if (user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
@@ -35,35 +71,23 @@ function filter_admin_overview($form) {
         ),
       );
     }
+
     // Check whether this is the fallback text format. This format is available
-    // to all roles and cannot be disabled via the admin interface.
-    $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
-    if ($form['formats'][$id]['#is_fallback']) {
-      $form['formats'][$id]['name'] = array('#markup' => $format->name);
-      $roles_markup = t('Fallback format. Used if a role has access to no other formats.');
+    // to all roles, and cannot be disabled/removed via the admin interface.
+    if ($id == filter_fallback_format()) {
+      unset($links['disable']);
+      unset($links['remove']);
+      $roles_markup = t('Used as a fallback, if a role has access to no other formats.<br>Cannot be disabled or removed.');
     }
-    else {
-      $form['formats'][$id]['name'] = array('#markup' => check_plain($format->name));
-      $roles = array();
-      foreach (filter_get_roles_by_format($format) as $role_name) {
-        $role = user_role_load($role_name);
-        $roles[] = check_plain($role->label);
-      }
-      $roles_markup = $roles ? implode(', ', $roles) : t('No roles may use this format');
-      $links['disable'] = array(
-        'title' => t('Disable'),
-        'href' => "admin/config/content/formats/$id/disable",
-      );
-    }
+
+    $form['formats'][$id]['name'] = array(
+      '#markup' => check_plain($format->name),
+    );
     $form['formats'][$id]['editor'] = array(
       '#markup' => isset($editors[$format->editor]) ? check_plain($editors[$format->editor]['label']) : t('None'),
     );
     $form['formats'][$id]['roles'] = array(
       '#markup' => $roles_markup,
-    );
-    $form['formats'][$id]['operations'] = array(
-      '#type' => 'operations',
-      '#links' => $links,
     );
     $form['formats'][$id]['weight'] = array(
       '#type' => 'weight',
@@ -71,9 +95,17 @@ function filter_admin_overview($form) {
       '#title_display' => 'invisible',
       '#default_value' => $format->weight,
     );
+    $form['formats'][$id]['operations'] = array(
+      '#type' => 'operations',
+      '#links' => $links,
+    );
   }
+
+  $form['#attached']['library'][] = array('filter', 'filter.admin');
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save changes'));
+
   return $form;
 }
 
@@ -393,7 +425,7 @@ function filter_admin_format_form_validate($form, &$form_state) {
   form_set_value($form['format'], $format_format, $form_state);
   form_set_value($form['name'], $format_name, $form_state);
 
-  $formats = filter_formats();
+  $formats = filter_formats(NULL, TRUE, TRUE);
   foreach ($formats as $format) {
     if ($format->format !== $format_format && $format->name === $format_name) {
       form_set_error('name', t('Text format names must be unique. A format named %name already exists.', array('%name' => $format_name)));
@@ -475,6 +507,24 @@ function filter_admin_format_form_submit($form, &$form_state) {
 }
 
 /**
+ * Page callback: Enable a text format.
+ */
+function filter_admin_enable($format = NULL) {
+  if (!isset($_GET['token']) || !backdrop_valid_token($_GET['token'], 'format-' . $format->format)) {
+    return MENU_ACCESS_DENIED;
+  }
+
+  if (isset($format)) {
+    filter_format_enable($format);
+    backdrop_set_message(t('Enabled text format %format.', array('%format' => $format->name)));
+  }
+  else {
+    backdrop_set_message(t('No text format provided.'), 'error');
+  }
+  backdrop_goto('admin/config/content/formats');
+}
+
+/**
  * Form constructor for the text format deletion confirmation form.
  *
  * @param $format
@@ -490,7 +540,7 @@ function filter_admin_disable($form, &$form_state, $format) {
   return confirm_form($form,
     t('Are you sure you want to disable the text format %format?', array('%format' => $format->name)),
     'admin/config/content/formats',
-    t('Disabled text formats are completely removed from the administrative interface, and any content stored with that format will not be displayed. This action cannot be undone.'),
+    t('Any content stored with this format will not be displayed.'),
     t('Disable')
   );
 }

@@ -215,3 +215,17 @@ input#edit-filters-filter-html-settings-allowed-html {
 .view-image-library .view-header p {
   margin: 0;
 }
+
+.filter-admin-overview .filter-format-name {
+  font-weight: bold;
+  white-space: nowrap;
+}
+.filter-admin-overview .filter-format-machine-name {
+  font-size: smaller;
+}
+.filter-admin-overview td .item-list ul {
+  margin-left: 0;
+}
+.filter-admin-overview tr.disabled td {
+  color: #999;
+}
