@@ -126,7 +126,7 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
       $reset_link_account = user_load($uid);
       if (!empty($reset_link_account)) {
         backdrop_set_message(t('Another user (%other_user) is already logged into the site on this computer, but you tried to use a reset password link for user %resetting_user. Please <a href="!logout">logout</a> and try using the link again.',
-          array('%other_user' => $user->name, '%resetting_user' => $reset_link_account->name, '!logout' => url('user/logout'))), 'warning');
+          array('%other_user' => $user->name, '%resetting_user' => $reset_link_account->name, '!logout' => url('logout'))), 'warning');
       } else {
         // Invalid one-time link specifies an unknown user.
         backdrop_set_message(t('The one-time login link you clicked is invalid.'), 'error');
@@ -559,10 +559,10 @@ function user_page() {
   global $user;
 
   // To help users upgrading from versions of Backdrop prior to 1.9.0 where this
-  // menu callback was used on 'user/login' as well as 'user', rebuild the
-  // menu automatically if this page is loaded at 'user/login'.
+  // menu callback was used on 'login' as well as 'user', rebuild the
+  // menu automatically if this page is loaded at 'login'.
   // See https://github.com/backdrop/backdrop-issues/issues/260.
-  if ($_GET['q'] === 'user/login') {
+  if ($_GET['q'] === 'login') {
     menu_rebuild();
   }
 
@@ -570,6 +570,6 @@ function user_page() {
     backdrop_goto('user/' . $user->uid);
   }
   else {
-    backdrop_goto('user/login');
+    backdrop_goto('login');
   }
 }

@@ -61,11 +61,11 @@ function theme_comment_post_forbidden($variables) {
 
       if (config_get('system.core', 'user_register') != USER_REGISTER_ADMINISTRATORS_ONLY) {
         // Users can register themselves.
-        return t('<a href="@login">Log in</a> or <a href="@register">register</a> to post comments', array('@login' => url('user/login', array('query' => $destination)), '@register' => url('user/register', array('query' => $destination))));
+        return t('<a href="@login">Log in</a> or <a href="@register">register</a> to post comments', array('@login' => url('login', array('query' => $destination)), '@register' => url('user/register', array('query' => $destination))));
       }
       else {
         // Only admins can add new users, no public registration.
-        return t('<a href="@login">Log in</a> to post comments', array('@login' => url('user/login', array('query' => $destination))));
+        return t('<a href="@login">Log in</a> to post comments', array('@login' => url('login', array('query' => $destination))));
       }
     }
   }

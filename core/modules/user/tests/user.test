@@ -140,7 +140,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
       'name' => $name,
       'pass' => $pass,
     );
-    $this->backdropPost('user/login', $auth, t('Log in'));
+    $this->backdropPost('login', $auth, t('Log in'));
     $this->assertText(t('The account for @name has not been activated or is blocked.', array('@name' => $name)), 'User cannot login yet.');
 
     // Activate the new account.
@@ -155,7 +155,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $this->backdropLogout();
 
     // Login after administrator approval.
-    $this->backdropPost('user/login', $auth, t('Log in'));
+    $this->backdropPost('login', $auth, t('Log in'));
     $this->assertText(t('Member for'), 'User can log in after administrator approval.');
   }
 
@@ -1607,7 +1607,7 @@ class UserAccountLinksUnitTests extends BackdropWebTestCase {
 
     $link = $this->xpath('//*[contains(@class, :menu_id)]//a[contains(@href, :href) and text()=:text]', array(
       ':menu_id' => 'header-menu',
-      ':href' => 'user/logout',
+      ':href' => 'logout',
       ':text' => 'Log out',
     ));
     $this->assertEqual(count($link), 1, 'Log out link is in secondary menu.');

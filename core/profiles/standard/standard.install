@@ -430,7 +430,7 @@ function standard_install() {
   // Create a login link in the account menu.
   $item = array(
     'link_title' => st('Login'),
-    'link_path' => 'user/login',
+    'link_path' => 'login',
     'menu_name' => 'user-menu',
     'weight' => -1,
   );

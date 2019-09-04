@@ -220,16 +220,16 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test that an authenticated user hitting 'user/login' gets redirected to
+   * Test that an authenticated user hitting 'login' gets redirected to
    * 'user' and 'user/register' gets redirected to the user edit page.
    */
   function testAuthUserUserLogin() {
     $loggedInUser = $this->backdropCreateUser(array());
     $this->backdropLogin($loggedInUser);
 
-    $this->backdropGet('user/login');
+    $this->backdropGet('login');
     // Check that we got to 'user/[UID]'.
-    $this->assertTrue($this->url == url('user/' . $loggedInUser->uid, array('absolute' => TRUE)), "Logged-in user redirected to q=user on accessing q=user/login");
+    $this->assertTrue($this->url == url('user/' . $loggedInUser->uid, array('absolute' => TRUE)), "Logged-in user redirected to q=user on accessing q=login");
 
     // user/register should redirect to user/UID/edit.
     $this->backdropGet('user/register');
@@ -1270,7 +1270,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       );
     }
 
-    // Verify breadcrumbs on user/login and user/%.
+    // Verify breadcrumbs on login and user/%.
     user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array(
       'access user profiles',
     ));

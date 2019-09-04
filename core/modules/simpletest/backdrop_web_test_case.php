@@ -1428,7 +1428,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       'name' => $by_email ? $account->mail : $account->name,
       'pass' => $account->pass_raw
     );
-    $this->backdropPost('user/login', $edit, t('Log in'));
+    $this->backdropPost('login', $edit, t('Log in'));
 
     // Check for the logged-in class.
     $result = $this->xpath('/html/body[contains(@class, "logged-in")]');
@@ -1453,7 +1453,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Make a request to the logout page, and redirect to the user page, the
     // idea being if you were properly logged out you should be seeing a login
     // screen.
-    $this->backdropGet('user/logout');
+    $this->backdropGet('logout');
     $this->backdropGet('user');
     $pass = $this->assertField('name', t('Username field found.'), t('Logout'));
     $pass = $pass && $this->assertField('pass', t('Password field found.'), t('Logout'));
