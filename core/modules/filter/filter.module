@@ -245,15 +245,13 @@ function filter_config_data_validate(Config $config, array $config_info) {
  * @param $format_id
  *   The format ID.
  *
- * @return stdClass
- *   A fully-populated text format object, if the requested format exists and
- *   is enabled. If the format does not exist, or exists in the database but
- *   has been marked as disabled, FALSE is returned.
+ * @return stdClass|FALSE
+ *   A fully-populated text format object or FALSE if the format is not found.
  *
  * @see filter_format_exists()
  */
 function filter_format_load($format_id) {
-  $formats = filter_formats();
+  $formats = filter_formats(NULL, TRUE);
   return isset($formats[$format_id]) ? $formats[$format_id] : FALSE;
 }
 

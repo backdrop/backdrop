@@ -694,6 +694,27 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Tests loading of disabled formats.
+   */
+  function testFormatDisabledAccess() {
+    // Check filter_formats() in sequence loading both enabled and all formats.
+    filter_format_disable($this->disallowed_format);
+    $this->resetFilterCaches();
+
+    $enabled_formats = filter_formats();
+    $this->assertEqual(count($enabled_formats), 5);
+
+    $all_formats = filter_formats(NULL, TRUE);
+    $this->assertEqual(count($all_formats), 6);
+
+    $user_enabled_formats = filter_formats($this->admin_user);
+    $this->assertEqual(count($user_enabled_formats), 3);
+
+    $user_all_formats = filter_formats($this->admin_user, TRUE);
+    $this->assertEqual(count($user_all_formats), 4);
+  }
+
+  /**
    * Rebuilds text format and permission caches in the thread running the tests.
    */
   protected function resetFilterCaches() {
