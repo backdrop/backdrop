@@ -20,8 +20,7 @@ function filter_admin_overview($form) {
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => t('The order of the text formats below matches the order in which they will appear in the <em>Editor</em> selector when creating content (depending on the permissions for text formats.'),
-    '#weight' => -100,
+    '#markup' => t('The order of the text formats below determines the order in which they will appear in the <em>Editor</em> selector when creating content (depending on permissions for the text formats.'),
   );
 
   $form['#tree'] = TRUE;
@@ -118,7 +117,7 @@ function filter_admin_overview_submit($form, &$form_state) {
     }
   }
   filter_formats_reset();
-  backdrop_set_message(t('The text format ordering has been saved.'));
+  backdrop_set_message(t('The text format order has been saved.'));
 }
 
 /**

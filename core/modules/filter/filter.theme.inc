@@ -100,7 +100,8 @@ function theme_filter_admin_overview($variables) {
     $rows[] = $row;
   }
   $header = array(t('Name'), t('Editor'), t('Roles'), t('Weight'), t('Operations'));
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'text-format-order')));
+  $output = backdrop_render($form['help']);
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'text-format-order')));
   $output .= backdrop_render_children($form);
 
   backdrop_add_tabledrag('text-format-order', 'order', 'sibling', 'text-format-order-weight');
