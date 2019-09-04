@@ -14,7 +14,7 @@
  */
 function filter_admin_overview($form) {
   // Overview of all formats.
-  $formats = filter_formats(NULL, TRUE, TRUE);
+  $formats = filter_formats(NULL, TRUE);
   $fallback_format = filter_fallback_format();
   $editors = filter_get_editors();
 
