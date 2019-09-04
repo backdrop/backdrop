@@ -731,11 +731,6 @@ function filter_formats($account = NULL, $include_disabled = FALSE) {
         );
         $filter_format = (object) $filter_format;
 
-        // We don't include disabled formats.
-        if (!$include_disabled && !$filter_format->status) {
-          continue;
-        }
-
         // Sort the filters by weight.
         backdrop_sort($filter_format->filters);
 
@@ -764,17 +759,37 @@ function filter_formats($account = NULL, $include_disabled = FALSE) {
     }
   }
 
+  // Build a list of enabled formats based on the full list.
+  if (!isset($formats['enabled'])) {
+    foreach ($formats['all'] as $format) {
+      if ($format->status) {
+        $formats['enabled'][$format->format] = $format;
+      }
+    }
+  }
+
   // Build a list of user-specific formats.
   if (isset($account) && !isset($formats['user'][$account->uid])) {
     $formats['user'][$account->uid] = array();
     foreach ($formats['all'] as $format) {
       if (filter_access($format, $account)) {
-        $formats['user'][$account->uid][$format->format] = $format;
+        // Assemble a list of all formats (even disabled ones) for this user.
+        $formats['user'][$account->uid]['all'][$format->format] = $format;
+        // As well as a specific list of only enabled formats.
+        if ($format->status) {
+          $formats['user'][$account->uid]['enabled'][$format->format] = $format;
+        }
       }
     }
   }
 
-  return isset($account) ? $formats['user'][$account->uid] : $formats['all'];
+  $enabled_or_all = $include_disabled ? 'all' : 'enabled';
+  if (isset($account)) {
+    return $formats['user'][$account->uid][$enabled_or_all];
+  }
+  else {
+    return $formats[$enabled_or_all];
+  }
 }
 
 /**
