@@ -14,7 +14,7 @@
  */
 function filter_admin_overview($form) {
   // Overview of all formats.
-  $formats = filter_formats();
+  $formats = filter_formats(NULL, TRUE);
   $fallback_format = filter_fallback_format();
   $editors = filter_get_editors();
 
@@ -35,6 +35,30 @@ function filter_admin_overview($form) {
         ),
       );
     }
+
+    // Add status so we can sort by enabled/disabled.
+    $form['formats'][$id]['#status'] = $format->status;
+    if ($form['formats'][$id]['#status']) {
+      $links['disable'] = array(
+        'title' => t('Disable'),
+        'href' => 'admin/config/content/formats/' . $id . '/disable',
+        'query' => array(
+          'token' => backdrop_get_token('format-' . $format->format)
+        ),
+        'weight' => 10,
+      );
+    }
+    else {
+      $links['enable'] = array(
+        'title' => t('Enable'),
+        'href' => 'admin/config/content/formats/' . $id . '/enable',
+        'query' => array(
+          'token' => backdrop_get_token('format-' . $format->format)
+        ),
+        'weight' => -10,
+      );
+    }
+
     // Check whether this is the fallback text format. This format is available
     // to all roles and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
@@ -50,10 +74,6 @@ function filter_admin_overview($form) {
         $roles[] = check_plain($role->label);
       }
       $roles_markup = $roles ? implode(', ', $roles) : t('No roles may use this format');
-      $links['disable'] = array(
-        'title' => t('Disable'),
-        'href' => "admin/config/content/formats/$id/disable",
-      );
     }
     $form['formats'][$id]['editor'] = array(
       '#markup' => isset($editors[$format->editor]) ? check_plain($editors[$format->editor]['label']) : t('None'),
@@ -61,6 +81,7 @@ function filter_admin_overview($form) {
     $form['formats'][$id]['roles'] = array(
       '#markup' => $roles_markup,
     );
+    backdrop_sort($links, array('weight'));
     $form['formats'][$id]['operations'] = array(
       '#type' => 'operations',
       '#links' => $links,
@@ -72,6 +93,7 @@ function filter_admin_overview($form) {
       '#default_value' => $format->weight,
     );
   }
+  backdrop_sort($form['formats'], array('#status'), SORT_DESC);
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save changes'));
   return $form;
@@ -472,6 +494,23 @@ function filter_admin_format_form_submit($form, &$form_state) {
   }
 
   $form_state['redirect'] = 'admin/config/content/formats';
+}
+
+/**
+ * Page callback: Enable a text format.
+ */
+function filter_admin_enable($format = NULL) {
+  if (!isset($_GET['token']) || !backdrop_valid_token($_GET['token'], 'format-' . $format->format)) {
+    return MENU_ACCESS_DENIED;
+  }
+  if (isset($format)) {
+    filter_format_enable($format);
+    backdrop_set_message(t('Enabled text format %format.', array('%format' => $format->name)));
+  }
+  else {
+    backdrop_set_message(t('No text format provided.'), 'error');
+  }
+  backdrop_goto('admin/config/content/formats');
 }
 
 /**

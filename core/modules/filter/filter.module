@@ -128,6 +128,14 @@ function filter_menu() {
     'access arguments' => array('administer filters'),
     'file' => 'filter.admin.inc',
   );
+  $items['admin/config/content/formats/%filter_format/enable'] = array(
+      'title' => 'Enable text format',
+      'page callback' => 'filter_admin_enable',
+      'page arguments' => array(4),
+      'access arguments' => array('administer filters'),
+      'type' => MENU_CALLBACK,
+      'file' => 'filter.admin.inc',
+    );
   $items['admin/config/content/formats/%filter_format/disable'] = array(
     'title' => 'Disable text format',
     'page callback' => 'backdrop_get_form',
@@ -699,7 +707,7 @@ function filter_modules_disabled($modules) {
  *
  * @see filter_formats_reset()
  */
-function filter_formats($account = NULL) {
+function filter_formats($account = NULL, $include_disabled = FALSE) {
   global $language;
   $formats = &backdrop_static(__FUNCTION__, array());
 
@@ -726,7 +734,7 @@ function filter_formats($account = NULL) {
         $filter_format = (object) $filter_format;
 
         // We don't include disabled formats.
-        if (!$filter_format->status) {
+        if (!$include_disabled && !$filter_format->status) {
           continue;
         }
 

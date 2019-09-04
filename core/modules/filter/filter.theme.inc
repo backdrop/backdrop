@@ -91,6 +91,12 @@ function theme_filter_admin_overview($variables) {
       ),
       'class' => array('draggable'),
     );
+    if ($form['formats'][$id]['#status']) {
+      $row['class'][] = 'enabled';
+    }
+    else {
+      $row['class'][] = 'disabled';
+    }
     $rows[] = $row;
   }
   $header = array(t('Name'), t('Editor'), t('Roles'), t('Weight'), t('Operations'));
