@@ -251,11 +251,11 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/config/content/formats/' . $format_id . '/disable');
     $this->backdropPost(NULL, array(), t('Disable'));
     $this->assertRaw(t('Disabled text format %name.', array('%name' => $name)), 'Text format has been disabled.');
-    $this->assertRaw(t('Disabled text formats'), 'Disabled text format section is shown.');
+    $this->assertRaw(t('Enable'), 'Disabled text format is shown.');
 
     // Verify that the disabled section is shown.
     $this->backdropGet('admin/config/content/formats/' . $format_id);
-    $this->assertRaw(t('Disabled text formats'), 'Disabled text format section is shown.');
+    $this->assertRaw(t('Enable'), 'Disabled text format is shown.');
     $this->assertResponse(404, 'Disabled text format no longer exists.');
 
     // Verify that the text format has been disabled. Links exist for it to be
