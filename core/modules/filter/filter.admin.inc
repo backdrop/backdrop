@@ -20,7 +20,7 @@ function filter_admin_overview($form) {
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => t('The order of the text formats below determines the order in which they will appear in the <em>Editor</em> selector when creating content (depending on permissions for the text formats.'),
+    '#markup' => t('The order of the text formats below determines the order in which they will appear in the <em>Editor</em> selector when creating content (depending on permissions for the text formats).'),
   );
 
   $form['#tree'] = TRUE;
