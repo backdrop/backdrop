@@ -248,15 +248,13 @@ function filter_config_data_validate(Config $config, array $config_info) {
  * @param $format_id
  *   The format ID.
  *
- * @return stdClass
- *   A fully-populated text format object, if the requested format exists and
- *   is enabled. If the format does not exist, or exists in the database but
- *   has been marked as disabled, FALSE is returned.
+ * @return stdClass|FALSE
+ *   A fully-populated text format object or FALSE if the format is not found.
  *
  * @see filter_format_exists()
  */
 function filter_format_load($format_id) {
-  $formats = filter_formats();
+  $formats = filter_formats(NULL, TRUE);
   return isset($formats[$format_id]) ? $formats[$format_id] : FALSE;
 }
 
@@ -700,9 +698,6 @@ function filter_modules_disabled($modules) {
  * @param bool $include_disabled
  *   (optional) Whether or not to include disabled formats in the return array.
  *   Defaults to FALSE.
- * @param bool $reset
- *   (optional) Whether or not to bypass the cache and reload all formats.
- *   Defaults to FALSE.
  *
  * @return stdClass[]
  *   An array of text format objects, keyed by the format ID and ordered by
@@ -710,13 +705,13 @@ function filter_modules_disabled($modules) {
  *
  * @see filter_formats_reset()
  */
-function filter_formats($account = NULL, $include_disabled = FALSE, $reset = FALSE) {
+function filter_formats($account = NULL, $include_disabled = FALSE) {
   global $language;
   $formats = &backdrop_static(__FUNCTION__, array());
 
   // All available formats are cached for performance.
-  if (!isset($formats['all']) || $reset) {
-    if (($cache = cache()->get("filter_formats:{$language->langcode}")) && !$reset) {
+  if (!isset($formats['all'])) {
+    if ($cache = cache()->get("filter_formats:{$language->langcode}")) {
       $formats['all'] = $cache->data;
     }
     else {
@@ -735,10 +730,6 @@ function filter_formats($account = NULL, $include_disabled = FALSE, $reset = FAL
           'editor_settings' => array(),
         );
         $filter_format = (object) $filter_format;
-
-        if (!$include_disabled && !$filter_format->status) {
-          continue;
-        }
 
         // Sort the filters by weight.
         backdrop_sort($filter_format->filters);
@@ -768,18 +759,37 @@ function filter_formats($account = NULL, $include_disabled = FALSE, $reset = FAL
     }
   }
 
-  // Build a list of user-specific formats.
-  if (isset($account) && !isset($formats['user'][$account->uid])) {
-    $formats['user'][$account->uid] = array();
+  // Build a list of enabled formats based on the full list.
+  if (!isset($formats['enabled'])) {
     foreach ($formats['all'] as $format) {
-      // Include only enabled formats, to which the user has access to.
-      if ($format->status && filter_access($format, $account)) {
-        $formats['user'][$account->uid][$format->format] = $format;
+      if ($format->status) {
+        $formats['enabled'][$format->format] = $format;
       }
     }
   }
 
-  return isset($account) ? $formats['user'][$account->uid] : $formats['all'];
+  // Build a list of user-specific formats.
+  if (isset($account) && !isset($formats['user'][$account->uid])) {
+    $formats['user'][$account->uid] = array();
+    foreach ($formats['all'] as $format) {
+      if (filter_access($format, $account)) {
+        // Assemble a list of all formats (even disabled ones) for this user.
+        $formats['user'][$account->uid]['all'][$format->format] = $format;
+        // As well as a specific list of only enabled formats.
+        if ($format->status) {
+          $formats['user'][$account->uid]['enabled'][$format->format] = $format;
+        }
+      }
+    }
+  }
+
+  $enabled_or_all = $include_disabled ? 'all' : 'enabled';
+  if (isset($account)) {
+    return $formats['user'][$account->uid][$enabled_or_all];
+  }
+  else {
+    return $formats[$enabled_or_all];
+  }
 }
 
 /**

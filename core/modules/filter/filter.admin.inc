@@ -14,7 +14,7 @@
  */
 function filter_admin_overview($form) {
   // Overview of all formats.
-  $formats = filter_formats(NULL, TRUE, TRUE);
+  $formats = filter_formats(NULL, TRUE);
   $fallback_format = filter_fallback_format();
   $editors = filter_get_editors();
 
@@ -74,7 +74,7 @@ function filter_admin_overview($form) {
 
     // Check whether this is the fallback text format. This format is available
     // to all roles, and cannot be disabled/removed via the admin interface.
-    if ($id == filter_fallback_format()) {
+    if ($id == $fallback_format) {
       unset($links['disable']);
       unset($links['remove']);
       $roles_markup = t('Used as a fallback, if a role has access to no other formats.<br>Cannot be disabled or removed.');
@@ -425,7 +425,7 @@ function filter_admin_format_form_validate($form, &$form_state) {
   form_set_value($form['format'], $format_format, $form_state);
   form_set_value($form['name'], $format_name, $form_state);
 
-  $formats = filter_formats(NULL, TRUE, TRUE);
+  $formats = filter_formats(NULL, TRUE);
   foreach ($formats as $format) {
     if ($format->format !== $format_format && $format->name === $format_name) {
       form_set_error('name', t('Text format names must be unique. A format named %name already exists.', array('%name' => $format_name)));
