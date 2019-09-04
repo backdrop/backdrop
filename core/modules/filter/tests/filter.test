@@ -244,19 +244,14 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->assertFieldByName("formats[$format_id][weight]", 5, 'Text format weight was retained.');
 
     // Verify that the disabled section is not shown.
-    $this->assertNoRaw(t('Disabled text formats'), 'Disabled text format section is not shown.');
+    $this->assertNoRaw(t('Enable'), 'A disabled text format is NOT shown.');
 
     // Disable text format.
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
     $this->backdropGet('admin/config/content/formats/' . $format_id . '/disable');
     $this->backdropPost(NULL, array(), t('Disable'));
     $this->assertRaw(t('Disabled text format %name.', array('%name' => $name)), 'Text format has been disabled.');
-    $this->assertRaw(t('Enable'), 'Disabled text format is shown.');
-
-    // Verify that the disabled section is shown.
-    $this->backdropGet('admin/config/content/formats/' . $format_id);
-    $this->assertRaw(t('Enable'), 'Disabled text format is shown.');
-    $this->assertResponse(404, 'Disabled text format no longer exists.');
+    $this->assertRaw(t('Enable'), 'A disabled text format is shown.');
 
     // Verify that the text format has been disabled. Links exist for it to be
     // enabled/configured...
@@ -277,7 +272,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->assertNoLinkByHref('admin/config/content/formats/' . $format_id . '/enable');
 
     // Attempt to create a format of the same machine name as the disabled
-    // format, but with a different human readable name.
+    // format, but with a different human readable na
     $edit = array(
       'format' => $format_id,
       'name' => 'New format',

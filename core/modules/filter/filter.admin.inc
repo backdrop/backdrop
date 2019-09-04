@@ -43,7 +43,11 @@ function filter_admin_overview($form) {
 
     // Add status so we can sort by enabled/disabled.
     $form['formats'][$id]['#status'] = $format->status;
-    if ($form['formats'][$id]['#status']) {
+    // Check whether this is the fallback text format. This format is available
+    // to all roles and cannot be disabled via the admin interface.
+    $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
+
+    if ($form['formats'][$id]['#status'] && !$form['formats'][$id]['#is_fallback']) {
       $links['disable'] = array(
         'title' => t('Disable'),
         'href' => 'admin/config/content/formats/' . $id . '/disable',
@@ -64,9 +68,6 @@ function filter_admin_overview($form) {
       );
     }
 
-    // Check whether this is the fallback text format. This format is available
-    // to all roles and cannot be disabled via the admin interface.
-    $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
     if ($form['formats'][$id]['#is_fallback']) {
       $form['formats'][$id]['name'] = array('#markup' => $format->name);
       $roles_markup = t('Fallback format. Used if a role has access to no other formats.');
