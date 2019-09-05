@@ -55,10 +55,8 @@ function field_tokens($type, $tokens, array $data = array(), array $options = ar
     $field_value_token_type = $type_info['field-value-type'];
 
     foreach ($tokens as $name => $original) {
-      switch ($name) {
-        case 'field':
-          $replacements[$original] = $sanitize ? check_plain($field['instance']['label']) : $field['instance']['label'];
-          break;
+      if ($name == 'field') {
+        $replacements[$original] = $sanitize ? check_plain($field['instance']['label']) : $field['instance']['label'];
       }
     }
 
