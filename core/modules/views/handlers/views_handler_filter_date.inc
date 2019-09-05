@@ -163,10 +163,6 @@ class views_handler_filter_date extends views_handler_filter_numeric {
     $a = intval(strtotime($this->value['min'], $query_substitutions['***CURRENT_TIME***']));
     $b = intval(strtotime($this->value['max'], $query_substitutions['***CURRENT_TIME***']));
 
-    if ($this->value['type'] == 'offset') {
-      $a = '***CURRENT_TIME***' . sprintf('%+d', $a); // keep sign
-      $b = '***CURRENT_TIME***' . sprintf('%+d', $b); // keep sign
-    }
     // This is safe because we are manually scrubbing the values.
     // It is necessary to do it this way because $a and $b are formulas when using an offset.
     $operator = strtoupper($this->operator);
