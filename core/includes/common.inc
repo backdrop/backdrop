@@ -7093,6 +7093,11 @@ function element_info_property($type, $property_name, $default = NULL) {
  * @since 1.9.0 The $dir parameter was added.
  */
 function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT_ASC) {
+  // Don't sort empty arrays.
+  if (empty($array)) {
+    return;
+  }
+
   // Ensure all keys have a sort value.
   $new_keys = array();
   foreach ($keys as $index => $sort) {
@@ -7113,81 +7118,31 @@ function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT
   }
   $keys = $new_keys;
 
-  // If sorting on a single value, optimize the sorting to sort only on that
-  // specific key without the overhead of recursive handling.
-  if (count($keys) === 1) {
-    $key = key($keys);
-    $key_sort = reset($keys);
-
-    if ($key_sort === SORT_STRING) {
-      uasort($array, function($a, $b) use ($key, $dir) {
-        if (!is_array($a) || !is_array($b)) {
-          return 0;
-        }
-        if (!isset($a[$key])) {
-          $a[$key] = '';
-        }
-        if (!isset($b[$key])) {
-          $b[$key] = '';
-        }
-        $cmp = strnatcasecmp($a[$key], $b[$key]);
-        return ($dir == SORT_DESC) ? -$cmp : $cmp;
-      });
-    }
-    else {
-      uasort($array, function($a, $b) use ($key, $dir) {
-        if (!is_array($a) || !is_array($b)) {
-          return 0;
-        }
-        if (!isset($a[$key])) {
-          $a[$key] = 0;
-        }
-        if (!isset($b[$key])) {
-          $b[$key] = 0;
-        }
-        if ($a[$key] != $b[$key]) {
-          $cmp = $a[$key] < $b[$key] ? -1 : 1;
-          return ($dir == SORT_DESC) ? -$cmp : $cmp;
-        }
-        // Equal values, return 0.
-        return 0;
-      });
-    }
-  }
-  // If doing a multiple-key comparison, use a recursive callback.
-  else {
-    $keys_map = array_keys($keys);
-    $recursive_callback = function ($a, $b, $key_index = 0) use ($keys, $keys_map, $dir, &$recursive_callback) {
-      $key = $keys_map[$key_index];
-      if (!is_array($a) || !is_array($b)) {
-        return 0;
-      }
-      if (!isset($a[$key])) {
-        $a[$key] = 0;
-      }
-      if (!isset($b[$key])) {
-        $b[$key] = 0;
-      }
-      if ($a[$key] == $b[$key]) {
-        // Sort on the next key if one exists.
-        if (isset($keys_map[$key_index + 1])) {
-          return $recursive_callback($a, $b, $key_index + 1);
-        }
+  // Create an array to use for sorting by each key.
+  $sort = array();
+  foreach ($array as $k => $v) {
+    foreach ($keys as $key => $key_sort) {
+      if (isset($v[$key])) {
+        $sort[$key][$k] = $v[$key];
       }
       else {
-        $cmp = 0;
-        if ($keys[$key] === SORT_STRING) {
-          $cmp = strnatcasecmp($a[$key], $b[$key]);
-        }
-        else {
-          $cmp = ($a[$key] < $b[$key]) ? -1 : 1;
-        }
-        return ($dir == SORT_DESC) ? -$cmp : $cmp;
+        $sort[$key][$k] = ($key_sort === SORT_STRING) ? '' : 0;
       }
-      return 0;
-    };
-    uasort($array, $recursive_callback);
+    }
   }
+
+  // Prepare an array of parameters for use with array_multisort().
+  $param = array();
+  foreach ($keys as $key => $key_sort) {
+    $param[] = $sort[$key];
+    $param[] = $dir;
+    $param[] = $key_sort;
+  }
+  // Add the array we want to actually sort at the end (by reference).
+  $param[] = &$array;
+
+  // Perform the sort.
+  call_user_func_array('array_multisort', $param);
 }
 
 /**
