@@ -7121,6 +7121,7 @@ function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT
   // Create an array to use for sorting by each key.
   $sort = array();
   foreach ($array as $k => $v) {
+    $v = (array) $v;
     foreach ($keys as $key => $key_sort) {
       if (isset($v[$key])) {
         $sort[$key][$k] = $v[$key];
