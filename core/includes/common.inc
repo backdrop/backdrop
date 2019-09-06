@@ -7768,6 +7768,15 @@ function backdrop_common_theme() {
     'date' => array(
       'render element' => 'element',
     ),
+    'html_date' => array(
+      'render element' => 'element',
+    ),
+    'html_time' => array(
+      'render element' => 'element',
+    ),
+    'html_datetime' => array(
+      'render element' => 'element',
+    ),
     'exposed_filters' => array(
       'render element' => 'form',
     ),

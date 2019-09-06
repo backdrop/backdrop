@@ -444,6 +444,25 @@ function system_element_info() {
     '#theme' => 'date',
     '#theme_wrappers' => array('form_element'),
   );
+  $types['html_date'] = array(
+    '#input' => TRUE,
+    '#element_validate' => array('html_date_validate'),
+    '#theme' => 'html_date',
+    '#theme_wrappers' => array('form_element'),
+  );
+  $types['html_time'] = array(
+    '#input' => TRUE,
+    '#element_validate' => array('html_time_validate'),
+    '#theme' => 'html_time',
+    '#theme_wrappers' => array('form_element'),
+  );
+  $types['html_datetime'] = array(
+    '#input' => TRUE,
+    '#element_validate' => array('html_datetime_validate'),
+    '#process' => array('form_process_html_datetime'),
+    '#theme' => 'html_datetime',
+    '#theme_wrappers' => array('form_element'),
+  );
   $types['file'] = array(
     '#input' => TRUE,
     '#size' => 60,

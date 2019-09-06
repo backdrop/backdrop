@@ -3169,6 +3169,124 @@ function map_month($month) {
 }
 
 /**
+ * Returns html5 markup for a date input form element.
+ */
+function theme_html_date($variables) {
+  $element = $variables['element'];
+  $attributes = array();
+  if (isset($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  if (!empty($element['#attributes']['class'])) {
+    $attributes['class'] = (array) $element['#attributes']['class'];
+  }
+  $attributes['class'][] = 'html-datetime-date';
+  $attributes['type'] = 'date';
+  $attributes['value'] = $element['#value'];
+  $attributes['name'] = $element['#name'];
+
+  $output = '<input ' . backdrop_attributes($attributes) . ' />';
+  return $output;
+}
+
+/**
+ * Returns html5 markup for a time input form element.
+ */
+function theme_html_time($variables) {
+  $element = $variables['element'];
+  $attributes = array();
+  if (isset($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  if (!empty($element['#attributes']['class'])) {
+    $attributes['class'] = (array) $element['#attributes']['class'];
+  }
+  $attributes['class'][] = 'html-datetime-date';
+  $attributes['type'] = 'time';
+  $attributes['value'] = $element['#value'];
+  $attributes['name'] = $element['#name'];
+
+  $output = '<input ' . backdrop_attributes($attributes) . ' />';
+  return $output;
+}
+
+/**
+ * Returns html5 markup for a combined date and time form element.
+ */
+function theme_html_datetime($variables) {
+  $element = $variables['element'];
+  $attributes = array();
+  if (isset($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  if (!empty($element['#attributes']['class'])) {
+    $attributes['class'] = (array) $element['#attributes']['class'];
+  }
+  $attributes['class'][] = 'container-inline';
+  return '<div' . backdrop_attributes($attributes) . '>' . backdrop_render_children($element) . '</div>';
+}
+
+/**
+ * Combine html_date and html_time form elements.
+ */
+function form_process_html_datetime($element) {
+  if (empty($element['#value'])) {
+    $element['#value'] = array(
+      'date' => '',
+      'time' => '',
+    );
+  }
+  $element['#tree'] = TRUE;
+  $element['date'] = array(
+    '#type' => 'html_date',
+    '#default_value' => $element['#value']['date'],
+  );
+  $element['time'] = array(
+    '#type' => 'html_time',
+    '#default_value' => $element['#value']['time'],
+  );
+
+  return $element;
+}
+
+/**
+ * Validate a date string.
+ */
+function html_date_validate($element, &$form_state) {
+  $date = $element['#value'];
+  $valid_date = DateTime::createFromFormat(DATE_FORMAT_DATE, $date);
+  if (!$valid_date) {
+    form_error($element, t('%date is not a valid date.', array('%date' => $date)));
+  }
+}
+
+/**
+ * Validate a time string.
+ */
+function html_time_validate($element, &$form_state) {
+  $time = $element['#value'];
+  $valid_time = DateTime::createFromFormat(DATE_FORMAT_TIME, $time);
+  if (!$valid_time) {
+    form_error($element, t('%time is not a valid time.', array('%time' => $time)));
+  }
+}
+
+/**
+ * Validate a combined date and time array.
+ *
+ * This could be redundant, though.
+ */
+function html_datetime_validate($element, &$form_state) {
+  // Validation of parts actually happens in child fields.
+  // Node module handles timezones, but what if used somewhere else?
+  if (!is_array($element['#value'])) {
+    // When could this ever happen?
+    $element['#value']['date'] = '';
+    $element['#value']['time'] = '';
+  }
+}
+
+/**
  * Sets the value for a weight element, with zero as a default.
  */
 function weight_value(&$form) {
