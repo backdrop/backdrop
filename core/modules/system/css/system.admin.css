@@ -277,6 +277,16 @@ table.screenshot {
   border-top: 1px solid #cdcdcd;
   padding-top: 20px;
 }
+.system-themes-list-disabled-wrapper.flexbox {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+  /*width: calc(100vw - 60px); /* Fix flex-wrap issue with some browsers */
+}
 .system-themes-list h2 {
   margin: 0;
 }
@@ -328,12 +338,16 @@ table.screenshot {
 }
 .system-themes-list-disabled .theme-selector {
   width: 300px;
-  float: left; /* LTR */
   padding: 20px 20px 20px 0; /* LTR */
 }
 [dir="rtl"] .system-themes-list-disabled .theme-selector {
-  float: right;
   padding: 20px 0 20px 20px;
+}
+.system-themes-list-disabled.no-flexbox .theme-selector {
+  float: left; /* LTR */
+}
+[dir="rtl"] .system-themes-list-disabled.no-flexbox .theme-selector {
+  float: right;
 }
 .system-themes-list-enabled .theme-info {
   max-width: 940px;
