@@ -1488,11 +1488,8 @@ function file_managed_file_validate(&$element, &$form_state) {
   $clicked_button = end($form_state['triggering_element']['#parents']);
   if ($clicked_button != 'remove_button' && !empty($element['fid']['#value'])) {
     if ($file = file_load($element['fid']['#value'])) {
-      if ($file->status == FILE_STATUS_PERMANENT) {
-        $references = file_usage_list($file);
-        if (empty($references)) {
-          form_error($element, t('The file used in the !name field may not be referenced.', array('!name' => $element['#title'])));
-        }
+      if ($file->status != FILE_STATUS_PERMANENT) {
+        form_error($element, t('The file used in the !name field is temporary and may not be referenced.', array('!name' => $element['#title'])));
       }
     }
     else {
