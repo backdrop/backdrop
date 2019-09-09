@@ -552,7 +552,7 @@ function node_type_save($info) {
  * @return array
  *   Body field instance.
  */
-function node_add_body_field($type, $label = 'Body') {
+function node_add_body_field($type, $label = t('Body')) {
    // Add or remove the body field, as needed.
   $field = field_info_field('body');
   $instance = field_info_instance('node', 'body', $type->type);
@@ -771,7 +771,7 @@ function node_type_set_defaults($info = array()) {
     'modified' => FALSE,
     'disabled' => FALSE,
     'has_title' => TRUE,
-    'title_label' => 'Title',
+    'title_label' => t('Title'),
     'settings' => array(),
   );
   $new_type = (object) $new_type;
