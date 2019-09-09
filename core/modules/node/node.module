@@ -2122,7 +2122,7 @@ function node_syndicate_content($settings) {
  *   (optional) The maximum number of nodes to find. Defaults to 10.
  * @param $types
  *   (optional) Limit results to specific content types. Defaults to empty
- *    (content of all types is returned).
+ *   (content of all types is returned).
  *
  * @return
  *   An array of node entities or an empty array if there are no recent nodes
