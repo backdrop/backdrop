@@ -2009,7 +2009,6 @@ function node_block_info() {
  * Implements hook_block_view().
  */
 function node_block_view($delta = '', $settings = array()) {
-  // This example is adapted from node.module.
   $block = array();
 
   switch ($delta) {
@@ -2022,11 +2021,26 @@ function node_block_view($delta = '', $settings = array()) {
 
     case 'recent':
       if (user_access('access content')) {
+        $node_types = node_type_get_names();
+
+        // Remove excluded content types, so that they are not included in the
+        // db_query used in node_get_recent() later.
+        $node_types = backdrop_map_assoc(array_keys($node_types));
+        foreach ($node_types as $type => $value) {
+          if ($value == '0') {
+            unset($node_types[$type]);
+          }
+        }
+
         $settings += array(
           'node_count' => 10,
         );
+        $settings += array(
+          'node_types' => $node_types,
+        );
         $block['subject'] = t('Recent content');
-        if ($nodes = node_get_recent($settings['node_count'])) {
+
+        if ($nodes = node_get_recent($settings['node_count'], $settings['node_types'])) {
           $block['content'] = array(
             '#theme' => 'node_recent_block',
             '#nodes' => $nodes,
@@ -2049,14 +2063,24 @@ function node_block_view($delta = '', $settings = array()) {
 function node_block_configure($delta = '', $settings = array()) {
   $form = array();
   if ($delta == 'recent') {
+    $node_types = node_type_get_names();
     $settings += array(
       'node_count' => 10,
     );
+    $settings += array(
+      'node_types' => array_keys($node_types),
+    );
     $form['node_count'] = array(
-      '#type' => 'select',
+      '#type' => 'number',
       '#title' => t('Number of recent content items to display'),
       '#default_value' => $settings['node_count'],
-      '#options' => backdrop_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30)),
+      '#min' => 1,
+    );
+    $form['node_types'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Content types to display'),
+      '#default_value' => $settings['node_types'],
+      '#options' => $node_types,
     );
   }
   if ($delta == 'syndicate') {
@@ -2096,22 +2120,27 @@ function node_syndicate_content($settings) {
  *
  * @param $number
  *   (optional) The maximum number of nodes to find. Defaults to 10.
+ * @param $types
+ *   (optional) Limit results to specific content types. Defaults to empty
+ *    (content of all types is returned).
  *
  * @return
  *   An array of node entities or an empty array if there are no recent nodes
  *   visible to the current user.
  */
-function node_get_recent($number = 10) {
+function node_get_recent($number = 10, $types = array()) {
   $query = db_select('node', 'n');
 
   if (!user_access('bypass node access') && !user_access('view any unpublished content')) {
-    // If the user is able to view unpublished nodes, allow them to see these
+    // If the user is able to view unpublished nodes, allow them to see these,
     // in addition to published nodes. Check that they actually have some
-    // unpublished nodes to view before adding the condition.
+    // unpublished nodes to view, before adding the condition.
     // Note: this query still ignores unpublished by type permissions.
     // See: https://github.com/backdrop/backdrop-issues/issues/146.
-    $own_unpublished = db_query('SELECT nid FROM {node} WHERE uid = :uid AND status = :status',
-     array(':uid' => $GLOBALS['user']->uid, ':status' => NODE_NOT_PUBLISHED))->fetchCol();
+    $own_unpublished = db_query(
+      'SELECT nid FROM {node} WHERE uid = :uid AND status = :status',
+      array(':uid' => $GLOBALS['user']->uid, ':status' => NODE_NOT_PUBLISHED)
+    )->fetchCol();
     if (user_access('view own unpublished content') && $own_unpublished) {
       $query->condition(db_or()
         ->condition('n.status', NODE_PUBLISHED)
@@ -2123,6 +2152,11 @@ function node_get_recent($number = 10) {
       $query->condition('n.status', NODE_PUBLISHED);
     }
   }
+
+  if (!empty($types)) {
+    $query->condition('n.type', $types, 'IN');
+  }
+
   $nids = $query
     ->fields('n', array('nid'))
     ->orderBy('n.changed', 'DESC')

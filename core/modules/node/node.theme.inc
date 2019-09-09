@@ -95,7 +95,18 @@ function theme_node_recent_block($variables) {
   if ($rows) {
     $output = theme('table', array('rows' => $rows));
     if (user_access('access content overview')) {
-      $output .= theme('more_link', array('url' => 'admin/content', 'title' => t('Show more content')));
+      $output .= theme(
+        'more_link',
+        array(
+          'text' => t('All recent content'),
+          'url' => 'admin/content',
+          'query' => array(
+            'order' => 'changed',
+            'sort' => 'desc',
+          ),
+          'title' => t('View all content, listed by most recently-updated date/time'),
+        )
+      );
     }
   }
 

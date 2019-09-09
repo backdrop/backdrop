@@ -2472,11 +2472,23 @@ function theme_head_tag($variables) {
  *
  * @param $variables
  *   An associative array containing:
- *   - url: The URL of the main page.
- *   - title: A descriptive verb for the link, like 'Read more'.
+ *   - text (optional): The text of the link; defaults to "More".
+ *   - url: The URL of the link.
+ *   - query (optional): An array of query parameters to append to the URL.
+ *   - title (optional): A descriptive text for the link, like 'Read more'.
  */
 function theme_more_link($variables) {
-  return '<div class="more-link">' . l(t('More'), $variables['url'], array('attributes' => array('title' => $variables['title']))) . '</div>';
+  if (!isset($variables['text'])) {
+    $variables['text'] = t('More');
+  }
+  $options = array();
+  if (isset($variables['title'])) {
+    $options['attributes'] = array('title' => $variables['title']);
+  }
+  if (isset($variables['query'])) {
+    $options['query'] = $variables['query'];
+  }
+  return '<div class="more-link">' . l($variables['text'], $variables['url'], $options) . '</div>';
 }
 
 /**
