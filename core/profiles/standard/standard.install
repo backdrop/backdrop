@@ -15,7 +15,7 @@ function standard_install() {
   // Add text formats.
   $filtered_html_format = array(
     'format' => 'filtered_html',
-    'name' => 'Filtered HTML',
+    'name' => st('Filtered HTML'),
     'weight' => 0,
     'editor' => 'ckeditor',
     'editor_settings' => array(
@@ -65,7 +65,7 @@ function standard_install() {
 
   $full_html_format = array(
     'format' => 'full_html',
-    'name' => 'Full HTML',
+    'name' => st('Full HTML'),
     'weight' => 1,
     'editor' => NULL,
     'filters' => array(
@@ -217,7 +217,7 @@ function standard_install() {
   // Create an "About" link in the main menu.
   $item = array(
     'link_path' => 'node/' . $page->nid,
-    'link_title' => 'About',
+    'link_title' => st('About'),
     'weight' => 1,
   );
   menu_link_save($item);
@@ -251,7 +251,7 @@ function standard_install() {
   $instance = array(
     'field_name' => 'field_' . $vocabulary->machine_name,
     'entity_type' => 'node',
-    'label' => 'Tags',
+    'label' => st('Tags'),
     'bundle' => 'post',
     'description' => $help,
     'widget' => array(
@@ -299,7 +299,7 @@ function standard_install() {
   $instance = array(
     'field_name' => 'field_image',
     'entity_type' => 'node',
-    'label' => 'Image',
+    'label' => st('Image'),
     'bundle' => 'post',
     'description' => st('Upload an image to go with this post.'),
     'required' => FALSE,
