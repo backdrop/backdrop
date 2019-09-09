@@ -431,7 +431,7 @@ function locale_language_url_rewrite_url(&$path, &$options) {
     $options['language'] = $language_url;
   }
   // We allow only enabled languages here.
-  elseif (!isset($languages[$options['language']->langcode])) {
+  elseif (!isset($languages[$options['language']])) {
     unset($options['language']);
     return;
   }
