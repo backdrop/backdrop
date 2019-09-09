@@ -547,13 +547,20 @@ function node_type_save($info) {
  * @param $type
  *   A node type object.
  * @param $label
- *   (optional) The label for the body instance.
+ *   (optional) The label for the body instance. Make sure that the string
+ *   is wrapped in t() if you want to allow it to be translated.
  *
  * @return array
  *   Body field instance.
  */
-function node_add_body_field($type, $label = 'Body') {
-   // Add or remove the body field, as needed.
+function node_add_body_field($type, $label) {
+  // node_add_body_field() is also called during installation by
+  // core/profiles/standard/standard.install, so we should use get_t().
+  $t = get_t();
+  if (empty($label)) {
+    $label = $t('Body');
+  }
+  // Add or remove the body field, as needed.
   $field = field_info_field('body');
   $instance = field_info_instance('node', 'body', $type->type);
   if (empty($field)) {
@@ -759,6 +766,9 @@ function node_type_cache_reset() {
  *   A node type object, with missing values in $info set to their defaults.
  */
 function node_type_set_defaults($info = array()) {
+  // node_type_set_defaults() is also called during installation by
+  // core/profiles/standard/standard.install, so we should use get_t().
+  $t = get_t();
   $info = (array) $info;
   $new_type = $info + array(
     'type' => '',
@@ -771,7 +781,7 @@ function node_type_set_defaults($info = array()) {
     'modified' => FALSE,
     'disabled' => FALSE,
     'has_title' => TRUE,
-    'title_label' => 'Title',
+    'title_label' => $t('Title'),
     'settings' => array(),
   );
   $new_type = (object) $new_type;
