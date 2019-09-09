@@ -569,7 +569,7 @@ function node_add_body_field($type, $label = 'Body') {
       'field_name' => 'body',
       'entity_type' => 'node',
       'bundle' => $type->type,
-      'label' => $label,
+      'label' => t($label),
       'widget' => array('type' => 'text_textarea_with_summary'),
       'settings' => array('display_summary' => TRUE),
       'display' => array(
