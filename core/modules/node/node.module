@@ -569,7 +569,7 @@ function node_add_body_field($type, $label = 'Body') {
       'field_name' => 'body',
       'entity_type' => 'node',
       'bundle' => $type->type,
-      'label' => $label,
+      'label' => st($label),
       'widget' => array('type' => 'text_textarea_with_summary'),
       'settings' => array('display_summary' => TRUE),
       'display' => array(
@@ -771,7 +771,7 @@ function node_type_set_defaults($info = array()) {
     'modified' => FALSE,
     'disabled' => FALSE,
     'has_title' => TRUE,
-    'title_label' => 'Title',
+    'title_label' => st('Title'),
     'settings' => array(),
   );
   $new_type = (object) $new_type;
