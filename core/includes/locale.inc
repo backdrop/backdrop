@@ -424,9 +424,8 @@ function locale_language_url_rewrite_url(&$path, &$options) {
     $languages = language_list(TRUE);
     $languages = array_flip(array_keys($languages));
   }
-
   // Language can be passed as an option, or we go for current URL language.
-  if (!isset($options['language'])) {
+  if (!isset($options['language']) || $options['language'] === FALSE) {
     global $language_url;
     $options['language'] = $language_url;
   }
