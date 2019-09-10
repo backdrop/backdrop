@@ -2822,6 +2822,16 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
       'title' => t('Configure name'),
       'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/edit',
     );
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Flexible layout templates',
+          'name' => 'layout.flexible.' . $template_info['name'],
+        ),
+      );
+    }
     $links['delete'] = array(
       'title' => t('Delete'),
       'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/delete',
