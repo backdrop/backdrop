@@ -675,7 +675,7 @@ class Layout {
 
     $old_layout_info = layout_get_layout_template_info($this->layout_template);
     $new_layout_info = layout_get_layout_template_info($layout_name);
-     // Set up the array with region names for the new layout.
+    // Set up the array with region names for the new layout.
     $new_positions = array();
     $new_regions = array_keys($new_layout_info['regions']);
     foreach ($new_regions as $new_region_name) {
