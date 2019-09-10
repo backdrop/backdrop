@@ -714,7 +714,7 @@ class Layout {
     }
 
     // Assign orphan blocks to the default or last region, if the former doesn't
-    // if the former doesn't exist.
+    // exist.
     if (!empty($this->orphaned_blocks)) {
       end($new_positions);
       $this->refuge_region = !empty($new_layout_info['default region']) ? $new_layout_info['default region'] : key($new_positions);
