@@ -713,7 +713,7 @@ class Layout {
       }
     }
 
-    // Assign orphan blocks to the default or last region,
+    // Assign orphan blocks to the default or last region, if the former doesn't
     // if the former doesn't exist.
     if (!empty($this->orphaned_blocks)) {
       end($new_positions);
