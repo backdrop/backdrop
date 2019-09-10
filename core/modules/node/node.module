@@ -553,7 +553,7 @@ function node_type_save($info) {
  * @return array
  *   Body field instance.
  */
-function node_add_body_field($type, $label) {
+function node_add_body_field($type, $label = '') {
   // node_add_body_field() is also called during installation by
   // core/profiles/standard/standard.install, so we should use get_t().
   $t = get_t();
