@@ -422,20 +422,26 @@ function locale_language_url_rewrite_url(&$path, &$options) {
   if (!isset($languages)) {
     // Get the enabled languages only.
     $languages = language_list(TRUE);
-    $languages = array_flip(array_keys($languages));
   }
-  // Language can be passed as an option, or we go for current URL language.
-  if (!isset($options['language']) || $options['language'] === FALSE) {
+
+  // Array key doesn't even exist in the options.
+  if (!isset($options['language'])) {
+    $options['language'] = FALSE;
+  }
+  // If language isn't provided as an option, we go for current URL language.
+  if (!is_object($options['language'])) {
     global $language_url;
     $options['language'] = $language_url;
   }
-  // We allow only enabled languages here.
-  elseif (is_object($options['language']) && !array_key_exists($options['language']->langcode, $languages)) {
-    unset($options['language']);
-    return;
+  else {
+    // Sort out disabled languages.
+    if (!in_array($options['language']->langcode, $languages)) {
+      unset($options['language']);
+      return;
+    }
   }
 
-  if (isset($options['language'])) {
+  if (is_object($options['language'])) {
     switch (config_get('locale.settings', 'language_negotiation_url_part')) {
       case LANGUAGE_NEGOTIATION_URL_DOMAIN:
         $domains = locale_language_negotiation_url_domains();
