@@ -422,6 +422,7 @@ function locale_language_url_rewrite_url(&$path, &$options) {
   if (!isset($languages)) {
     // Get the enabled languages only.
     $languages = language_list(TRUE);
+    $languages = array_keys($languages);
   }
 
   // Array key doesn't even exist in the options.
