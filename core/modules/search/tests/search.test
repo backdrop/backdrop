@@ -677,6 +677,7 @@ class SearchExactTestCase extends BackdropWebTestCase {
  */
 class SearchCommentTestCase extends BackdropWebTestCase {
   protected $admin_user;
+  protected $profile = 'testing';
 
   function setUp() {
     parent::setUp('comment', 'search');
@@ -684,14 +685,46 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     // Disable cache.
     config_set('system.core', 'cache', '0');
 
+    // Create a simple content type and text format.
+    $this->backdropCreateContentType(array(
+      'type' => 'post',
+      'name' => 'Post',
+      'settings' => array(
+        'comment_default' => COMMENT_NODE_OPEN,
+        'comment_preview' => BACKDROP_OPTIONAL,
+        'comment_subject_field' => TRUE,
+      ),
+    ));
+    $full_html_format = (object) array(
+      'format' => 'full_html',
+      'name' => 'Full HTML',
+      'weight' => 1,
+      'editor' => NULL,
+      'filters' => array(),
+    );
+    filter_format_save($full_html_format);
+    $this->checkPermissions(array(), TRUE);
+
+    $anonymous_permissions = array(
+      'access content',
+      'access comments',
+    );
+    $authenticated_permissions = array(
+      'access content',
+      'access comments',
+      'post comments',
+    );
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $anonymous_permissions);
+    user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, $authenticated_permissions);
+
     // Create and log in an administrative user having access to the Full HTML
     // text format.
-    $full_html_format = filter_format_load('full_html');
     $permissions = array(
       'administer filters',
       filter_permission_name($full_html_format),
       'administer permissions',
-      'create page content',
+      'create post content',
+      'post comments',
       'skip comment approval',
       'access comments',
     );
@@ -710,17 +743,6 @@ class SearchCommentTestCase extends BackdropWebTestCase {
   function testSearchResultsComment() {
     $comment_body = 'Test comment body';
 
-    $node_type = node_type_get_type('post');
-    $node_type->settings['comment_preview'] = BACKDROP_OPTIONAL;
-    $node_type->settings['comment_subject_field'] = TRUE;
-    node_type_save($node_type);
-
-    // Enable check_plain() for 'Filtered HTML' text format.
-    $filtered_html_format_id = 'filtered_html';
-    $edit = array(
-      'filters[filter_html_escape][status]' => TRUE,
-    );
-    $this->backdropPost('admin/config/content/formats/' . $filtered_html_format_id, $edit, t('Save configuration'));
     // Allow anonymous users to search content.
     $edit = array(
       BACKDROP_ANONYMOUS_ROLE . '[search content]' => 1,
@@ -785,11 +807,6 @@ class SearchCommentTestCase extends BackdropWebTestCase {
     $this->comment_subject = 'Test comment subject';
     $roles = array_diff($this->admin_user->roles, array(BACKDROP_AUTHENTICATED_ROLE));
     $this->admin_role = reset($roles);
-
-    $node_type = node_type_get_type('post');
-    $node_type->settings['comment_preview'] = BACKDROP_OPTIONAL;
-    $node_type->settings['comment_subject_field'] = TRUE;
-    node_type_save($node_type);
 
     // Create a node.
     $this->node = $this->backdropCreateNode(array('type' => 'post'));

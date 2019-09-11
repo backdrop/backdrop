@@ -6,7 +6,7 @@
  */
 
 /**
- * Field handler to present a link node edit.
+ * Field handler to present a link to edit a comment.
  *
  * @ingroup views_field_handlers
  */

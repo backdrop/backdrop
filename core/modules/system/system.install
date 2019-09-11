@@ -125,7 +125,7 @@ function system_requirements($phase) {
   }
 
   if (!empty($missing_extensions)) {
-    $description = $t('Backdrop requires you to enable the PHP extensions in the following list (see the <a href="@system_requirements">system requirements page</a> for more information):', array(
+    $description = $t('Backdrop requires you to enable the PHP extensions in the following list (see the <a href="@system_requirements" target="_blank">system requirements page</a> for more information):', array(
       '@system_requirements' => 'https://backdropcms.org/requirements',
     ));
 
@@ -148,24 +148,21 @@ function system_requirements($phase) {
 
     // Make sure PDO is available.
     if (!extension_loaded('pdo')) {
-      $pdo_message = $t('Your web server does not appear to support PDO (PHP Data Objects). Ask your hosting provider if they support the native PDO extension. See the <a href="@link">system requirements</a> page for more information.', array(
-        '@link' => 'https://backdropcms.org/requirements',
-      ));
+      $pdo_message = $t('Your web server does not appear to support PDO (PHP Data Objects). Ask your hosting provider if they support the native PDO extension.');
     }
     else {
       // Make sure the native PDO extension is available, not the older PEAR
       // version. (See install_verify_pdo() for details.)
       if (!defined('PDO::ATTR_DEFAULT_FETCH_MODE')) {
-        $pdo_message = $t('Your web server seems to have the wrong version of PDO installed. Backdrop CMS requires the PDO extension from PHP core. This system has the older PECL version. See the <a href="@link">System Requirements</a> page for more information.', array(
-          '@link' => 'https://backdropcms.org/requirements',
-        ));
+        $pdo_message = $t('Your web server seems to have the wrong version of PDO installed. Backdrop CMS requires the PDO extension from PHP core. This system has the older PECL version. See the <a href="@link" target="_blank">System Requirements</a> page for more information.');
       }
     }
 
     if (isset($pdo_message)) {
+      $pdo_more_info = $t('See the <a href="@link" target="_blank">System Requirements</a> page for more information.', array('@link' => 'https://backdropcms.org/requirements'));
       $requirements['database_extensions']['value'] = $t('Disabled');
       $requirements['database_extensions']['severity'] = REQUIREMENT_ERROR;
-      $requirements['database_extensions']['description'] = $pdo_message;
+      $requirements['database_extensions']['description'] = $pdo_message . ' ' . $pdo_more_info;
     }
     else {
       $requirements['database_extensions']['value'] = $t('Enabled');
@@ -228,7 +225,7 @@ function system_requirements($phase) {
         $description .= ' ' . $t('Contact your system administrator or hosting provider for assistance with increasing your PHP memory limit.');
       }
 
-      $requirements['php_memory_limit']['description'] = $description . ' ' . $t('See the <a href="@url">Backdrop requirements</a> for more information.', array('@url' => 'https://backdropcms.org/requirements'));
+      $requirements['php_memory_limit']['description'] = $description . ' ' . $t('See the <a href="@url" target="_blank">Backdrop requirements</a> for more information.', array('@url' => 'https://backdropcms.org/requirements'));
       $requirements['php_memory_limit']['severity'] = REQUIREMENT_WARNING;
     }
   }
@@ -260,7 +257,7 @@ function system_requirements($phase) {
           'title' => $info['title'],
           'value' => $t('Not fully protected'),
           'severity' => REQUIREMENT_ERROR,
-          'description' => $t('See <a href="@url">@url</a> for information about the recommended .htaccess file which should be added to the %directory directory to help protect against arbitrary code execution.', array('@url' => 'http://drupal.org/SA-CORE-2013-003', '%directory' => $info['directory'])),
+          'description' => $t('See <a href="@url" target="_blank">@url</a> for information about the recommended <code>.htaccess</code> file which should be added to the <code>%directory</code> directory to help protect against arbitrary code execution.', array('@url' => 'http://drupal.org/SA-CORE-2013-003', '%directory' => $info['directory'])),
         );
       }
     }
@@ -274,7 +271,7 @@ function system_requirements($phase) {
     // Cron error threshold defaults to two weeks.
     $threshold_error = $config->get('cron_threshold_error');
     // Cron configuration help text.
-    $help = $t('For more information, see the online handbook entry for <a href="@cron-handbook">configuring cron jobs</a>.', array('@cron-handbook' => 'http://drupal.org/cron'));
+    $help = $t('For more information, see the online handbook entry for <a href="@cron-handbook" target="_blank">configuring cron jobs</a>.', array('@cron-handbook' => 'http://drupal.org/cron'));
 
     // Determine when cron last ran.
     $cron_last = state_get('cron_last');
@@ -352,11 +349,12 @@ function system_requirements($phase) {
         // For the installer UI, we need different wording. 'value' will
         // be treated as version, so provide none there.
         if ($is_directory && !$is_writable) {
-          $description = $error . ' ' . $t('To proceed with installation, you must modify the permissions of this directory to make it writable by the web server. If you are unsure how to do this, please see the <a href="@handbook_url">Installation Instructions</a> page.', array('@handbook_url' => 'https://backdropcms.org/installation'));
+          $description = $error . ' ' . $t('To proceed with installation, you must modify the permissions of this directory to make it writable by the web server.');
         }
         else {
-          $description = $error . ' ' . $t('An automated attempt to create this directory failed. To proceed with the installation, either create the directory and modify its permissions to make it writable or adjust the permissions on the parent directory to allow the installer to create it automatically. If you are unsure how to do this, see the <a href="@handbook_url">Installation Instructions</a> page.', array('@handbook_url' => 'https://backdropcms.org/installation'));
+          $description = $error . ' ' . $t('An automated attempt to create this directory failed. To proceed with the installation, either create the directory and modify its permissions to make it writable or adjust the permissions on the parent directory to allow the installer to create it automatically.');
         }
+        $description .= ' ' . $t('If you are unsure how to do this, see the <a href="@handbook_url" target="_blank">Installation Instructions</a> page.', array('@handbook_url' => 'https://backdropcms.org/installation'));
         $requirements['file system']['value'] = '';
       }
       if (!empty($description)) {
@@ -404,7 +402,7 @@ function system_requirements($phase) {
       $requirements['update access'] = array(
         'value' => $t('Not protected'),
         'severity' => REQUIREMENT_ERROR,
-        'description' => $t('The update.php script is accessible to everyone without authentication check, which is a security risk. You must change the $update_free_access value in your settings.php back to FALSE.'),
+        'description' => $t('The <code>update.php</code> script is accessible to everyone without authentication check, which is a security risk. You must change the <code>update_free_access</code> value in your <code>settings.php</code> back to <code>FALSE</code>.'),
       );
     }
     else {
@@ -473,7 +471,7 @@ function system_requirements($phase) {
       $requirements['update status'] = array(
         'value' => $t('Not enabled'),
         'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Update notifications are not enabled. It is <strong>highly recommended</strong> that you enable the Update Manager module from the <a href="@module">module administration page</a> in order to stay up-to-date on new releases. For more information, <a href="@update">Update status handbook page</a>.', array('@update' => 'http://drupal.org/handbook/modules/update', '@module' => url('admin/modules'))),
+        'description' => $t('Update notifications are not enabled. It is <strong>highly recommended</strong> that you enable the Update Manager module from the <a href="@module">module administration page</a> in order to stay up-to-date on new releases. For more information, <a href="@update" target="_blank">Update status handbook page</a>.', array('@update' => 'http://drupal.org/handbook/modules/update', '@module' => url('admin/modules'))),
       );
     }
     else {
@@ -516,7 +514,7 @@ function system_requirements($phase) {
         'title' => $t('CKEditor'),
         'value' => $t('Duplicate module detected'),
         'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/42827">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+        'description' => $t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/42827" target="_blank">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
       );
     }
 
@@ -527,7 +525,7 @@ function system_requirements($phase) {
         'title' => $t('Email'),
         'value' => $t('Duplicate module detected'),
         'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Backdrop core now provides a bundled Email module. A different copy of Email module has been located at %path. Remove this module from your installation to use the core Email module. For more information see the <a href="https://api.backdropcms.org/node/42928">Email module change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+        'description' => $t('Backdrop core now provides a bundled Email module. A different copy of Email module has been located at %path. Remove this module from your installation to use the core Email module. For more information see the <a href="https://api.backdropcms.org/node/42928" target="_blank">Email module change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
       );
     }
 
@@ -538,7 +536,7 @@ function system_requirements($phase) {
         'title' => $t('Link'),
         'value' => $t('Duplicate module detected'),
         'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Backdrop core now provides a bundled Link module. A different copy of Link module has been located at %path. Remove this module from your installation to use the new Link module. For more information see the <a href="https://api.backdropcms.org/node/42930">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+        'description' => $t('Backdrop core now provides a bundled Link module. A different copy of Link module has been located at %path. Remove this module from your installation to use the new Link module. For more information see the <a href="https://api.backdropcms.org/node/42930" target="_blank">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
       );
     }
 
@@ -549,7 +547,7 @@ function system_requirements($phase) {
         'title' => $t('Date'),
         'value' => $t('Duplicate module detected'),
         'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://api.backdropcms.org/node/43066">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+        'description' => $t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://api.backdropcms.org/node/43066" target="_blank">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
       );
     }
 
@@ -560,7 +558,7 @@ function system_requirements($phase) {
         'title' => $t('Redirect'),
         'value' => $t('Duplicate module detected'),
         'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://api.backdropcms.org/node/43994">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
+        'description' => $t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://api.backdropcms.org/node/43994" target="_blank">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)),
       );
     }
   }
@@ -598,6 +596,43 @@ function system_requirements($phase) {
         'value' => $t('Enabled'),
         'severity' => REQUIREMENT_WARNING,
         'description' => $t('Theme debugging is currently enabled, and should be disabled on a live site. This setting can be changed using the <a href="!url">Devel module</a>.', array('!url' => module_exists('devel') ? url('admin/config/development/devel') : 'https://backdropcms.org/project/devel')),
+      );
+    }
+  }
+
+  // Warn the user if trusted hostnames have not been configured.
+  if ($phase == 'runtime') {
+    $trusted_host_patterns = settings_get('trusted_host_patterns', array());
+    $more_info = $t('See <a href="@url" target="_blank">Protecting against HTTP HOST Header attacks</a> for more information.', array('@url' => 'https://api.backdropcms.org/documentation/trusted-host-settings'));
+    // @todo: upgrade this to an error when we provide a way to configure
+    // $trusted_host_patterns via the admin UI.
+    if (empty($trusted_host_patterns)) {
+      $requirements['trusted_host_patterns'] = array(
+        'title' => $t('Trusted Host Setting'),
+        'value' => $t('Not configured'),
+        'description' => $t('The <code>trusted_host_patterns</code> setting is not configured in <code>settings.php</code>. It is highly recommended that you configure this to protect your site.') . ' ' . $more_info,
+        'severity' => $trusted_host_patterns === FALSE ? REQUIREMENT_INFO : REQUIREMENT_WARNING,
+      );
+    }
+    else {
+      $description = format_plural(count($trusted_host_patterns), 'Configured to allow the following pattern:', 'Configured to allow the following patterns:');
+      // Wrap each pattern in <code> tags for when they are rendered later.
+      foreach ($trusted_host_patterns as $key => $trusted_host_pattern) {
+        $trusted_host_patterns[$key] = '<code>' . $trusted_host_pattern . '</code>';
+      }
+      // If only one trusted host pattern, render as is...
+      if (count($trusted_host_patterns) == 1) {
+        $description .= ' ' . $trusted_host_patterns[0] . '<br>';
+      }
+      // ...otherwise, render the patterns as a list.
+      else {
+        $description .= theme('item_list', array('items' => $trusted_host_patterns));
+      }
+      $description .= $t('You can change this by editing the <code>trusted_host_patterns</code> setting in <code>settings.php</code>.') . ' ' . $more_info;
+      $requirements['trusted_host_patterns'] = array(
+        'title' => $t('Trusted Host Settings'),
+        'value' => $t('Current hostname is trusted'),
+        'description' => $description,
       );
     }
   }
@@ -656,7 +691,7 @@ function _system_check_db_utf8mb4_requirements($phase) {
     else {
       // Not supported, active.
       $requirements['value'] = $t('Not supported');
-      $requirements['description'] .= ' ' . $t('This feature is enabled, but not supported on your system. Please turn this off in settings.php, or ensure that all database-related requirements are met. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
+      $requirements['description'] .= ' ' . $t('This feature is enabled, but not supported on your system. Please turn this off in <code>settings.php</code>, or ensure that all database-related requirements are met. See the <a href="@url" target="_blank">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
       $requirements['severity'] = REQUIREMENT_ERROR;
     }
   }
@@ -664,13 +699,13 @@ function _system_check_db_utf8mb4_requirements($phase) {
     if ($utf8mb4_supported) {
       // Supported, not active.
       $requirements['value'] = $t('Not enabled');
-      $requirements['description'] .= ' ' . $t('This feature is not enabled, but it is supported on your system. See the <a href="@url">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
+      $requirements['description'] .= ' ' . $t('This feature is not enabled, but it is supported on your system. See the <a href="@url" target="_blank">documentation on adding 4 byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
       $requirements['severity'] = REQUIREMENT_INFO;
     }
     else {
       // Not supported, not active.
       $requirements['value'] = $t('Not available');
-      $requirements['description'] .= ' ' . $t('This feature is not supported on your system. See the <a href="@url">documentation on adding 4-byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
+      $requirements['description'] .= ' ' . $t('This feature is not supported on your system. See the <a href="@url" target="_blank">documentation on adding 4-byte UTF-8 support</a> for more information.', array('@url' => $documentation_url));
       $requirements['severity'] = REQUIREMENT_INFO;
     }
   }
@@ -2603,7 +2638,7 @@ function system_update_1039() {
 function system_update_1040() {
   $path = backdrop_get_path('module', 'ckeditor');
   if ($path && strpos($path, 'core/modules/ckeditor') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/42827">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled CKEditor module. A different copy of CKEditor module has been located at %path. To use the new CKEditor module, disable and then uninstall the current module, remove it from your installation, and then enable the new CKEditor module from the modules page. For more information see the <a href="https://api.backdropcms.org/node/42827" target="_blank">CKEditor change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 
@@ -2613,7 +2648,7 @@ function system_update_1040() {
 function system_update_1041() {
   $path = backdrop_get_path('module', 'email');
   if ($path && strpos($path, 'core/modules/email') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled Email module. A different copy of Email module has been located at %path. Remove this module from your installation to use the core Email module. For more information see the <a href="https://api.backdropcms.org/node/42928">Email module change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled Email module. A different copy of Email module has been located at %path. Remove this module from your installation to use the core Email module. For more information see the <a href="https://api.backdropcms.org/node/42928" target="_blank">Email module change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 
@@ -2623,7 +2658,7 @@ function system_update_1041() {
 function system_update_1042() {
   $path = backdrop_get_path('module', 'link');
   if ($path && strpos($path, 'core/modules/link') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled Link module. A different copy of Link module has been located at %path. Remove this module from your installation to use new Link module. For more information see the <a href="https://api.backdropcms.org/node/42930">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled Link module. A different copy of Link module has been located at %path. Remove this module from your installation to use new Link module. For more information see the <a href="https://api.backdropcms.org/node/42930" target="_blank">Link change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 
@@ -2664,7 +2699,7 @@ function system_update_1043() {
 function system_update_1044() {
   $path = backdrop_get_path('module', 'date');
   if ($path && strpos($path, 'core/modules/date') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://api.backdropcms.org/node/43066">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled Date module. A different copy of Date module has been located at %path. Remove this module from your installation to use new Date module. For more information see the <a href="https://api.backdropcms.org/node/43066" target="_blank">Date change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 
@@ -2763,7 +2798,7 @@ function system_update_1050() {
 function system_update_1051() {
   $path = backdrop_get_path('module', 'redirect');
   if ($path && strpos($path, 'core/modules/redirect') === FALSE) {
-    backdrop_set_message(t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://api.backdropcms.org/node/43994">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    backdrop_set_message(t('Backdrop core now provides a bundled Redirect module. A different copy of Redirect module has been located at %path. Remove this module from your installation to use the new Redirect module. For more information see the <a href="https://api.backdropcms.org/node/43994" target="_blank">Redirect change notice</a>.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 
@@ -3043,6 +3078,13 @@ function system_update_1067() {
  */
 function system_update_1068() {
   // Empty update to force a rebuild of hook_library() and JS aggregates.
+}
+
+/**
+ * Removes an unused state value.
+ */
+function system_update_1069() {
+  state_del('backdrop_utf8mb4_tables');
 }
 
 /**

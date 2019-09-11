@@ -2449,7 +2449,12 @@ function node_form_search_form_alter(&$form, $form_state) {
     );
 
     // Node types:
-    $types = array_map('check_plain', node_type_get_names());
+    $types = array();
+    foreach (node_type_get_types() as $type => $detail) {
+      if (!$detail->settings['hidden_path'] || user_access('view hidden paths') ) {
+        $types[$type] = $detail->name;
+      }
+    }
     $form['advanced']['type'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Only of the type(s)'),
@@ -2537,6 +2542,15 @@ function node_form_system_themes_admin_form_alter(&$form, &$form_state, $form_id
     '#type' => 'checkbox',
     '#title' => t('Use the administration theme when editing or creating content'),
     '#default_value' => config_get('system.core', 'node_admin_theme'),
+    '#states' => array(
+      'visible' => array(
+        array(
+          // Hide this checkbox if "Default theme" has been selected from the
+          // "Administration theme" dropdown menu.
+          ':input[name="admin_theme"]' => array('!value' => 0),
+        ),
+      ),
+    ),
   );
   $form['#submit'][] = 'node_form_system_themes_admin_form_submit';
 }
@@ -2846,6 +2860,9 @@ function node_access_view_all_nodes($account = NULL) {
  */
 function node_query_node_access_alter(QueryAlterableInterface $query) {
   _node_query_node_access_alter($query, 'node');
+  if (module_exists('search')) {
+    _node_search_query_alter($query);
+  }
 }
 
 /**
@@ -3049,6 +3066,43 @@ function _node_query_node_access_alter($query, $type) {
     $query->condition($or);
   }
 
+}
+
+/**
+ * Exclude nodes from the search query where the node has a hidden path
+ * and the current user doesn't have permission to bypass the restriction.
+ */
+function _node_search_query_alter(QueryAlterableInterface $query) {
+  global $user;
+
+  if (in_array('view hidden paths', user_role_permissions($user->roles))) {
+    return;
+  }
+
+  $search = FALSE;
+  $node = FALSE;
+
+  foreach ($query->getTables() as $alias => $table) {
+    if ($table['table'] == 'search_index') {
+      $search = $alias;
+    }
+    elseif ($table['table'] == 'node') {
+      $node = $alias;
+    }
+  }
+
+  if ($node && $search) {
+    $excluded_content_types = array();
+    foreach (node_type_get_types() as $type => $detail) {
+      if ($detail->settings['hidden_path']) {
+        $excluded_content_types[] = $type;
+      }
+    }
+
+    if (!empty($excluded_content_types)) {
+      $query->condition($node . '.type', array($excluded_content_types), 'NOT IN');
+    }
+  }
 }
 
 /**
