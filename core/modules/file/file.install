@@ -105,11 +105,23 @@ function file_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'type' => array(
+        'description' => 'The type of this file.',
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        // If the FILE_TYPE_NONE constant ever changes, then change the value here
+        // too, and add an update function to deal with existing records. The
+        // constant isn't used here, because there may be cases where this function
+        // runs without the module file loaded.
+        'default' => 'undefined',
+      ),
     ),
     'indexes' => array(
       'uid' => array('uid'),
       'status' => array('status'),
       'timestamp' => array('timestamp'),
+      'file_type' => array('type'),
     ),
     'unique keys' => array(
       'uri' => array('uri'),
@@ -166,6 +178,39 @@ function file_schema() {
       'type_id' => array('type', 'id'),
       'fid_count' => array('fid', 'count'),
       'fid_module' => array('fid', 'module'),
+    ),
+  );
+
+  $schema['file_metadata'] = array(
+    'description' => 'Cache image metadata.',
+    'fields' => array(
+      'fid' => array(
+        'description' => 'The {file_managed}.fid of the metadata.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => "The name of the metadata (e.g. 'width').",
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'value' => array(
+        'description' => "The value of the metadata (e.g. '200').",
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('fid', 'name'),
+    'foreign keys' => array(
+      'file_managed' => array(
+        'table' => 'file_managed',
+        'columns' => array('fid' => 'fid'),
+      ),
     ),
   );
 
@@ -695,7 +740,7 @@ function file_update_1001() {
 }
 
 /**
- * Switch the 'edit files' permission from file_entity to 'manage files'.
+ * Switch the 'edit files' permission to 'manage files'.
  */
 function file_update_1002() {
   $roles = user_roles(FALSE, 'edit files');
@@ -711,5 +756,388 @@ function file_update_1002() {
       $config->set('permissions', $permissions);
       $config->save();
     }
+  }
+}
+
+/**
+ * Add a type column to the file_managed table, and add a file_metadata table.
+ */
+function file_update_1003() {
+  $schema = array();
+  $schema['file_metadata'] = array(
+    'description' => 'Cache images dimensions.',
+    'fields' => array(
+      'fid' => array(
+        'description' => 'The {file_managed}.fid of the metadata.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => "The name of the metadata (e.g. 'width').",
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'value' => array(
+        'description' => "The value of the metadata (e.g. '200px').",
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('fid', 'name'),
+    'foreign keys' => array(
+      'file_managed' => array(
+        'table' => 'file_managed',
+        'columns' => array('fid' => 'fid'),
+      ),
+    ),
+  );
+  $spec = array(
+    'description' => 'The type of this file.',
+    'type' => 'varchar',
+    'length' => 50,
+    'not null' => TRUE,
+    'default' => 'undefined',
+  );
+  $indexes_new = array(
+    'indexes' => array(
+      'file_type' => array('type'),
+    ),
+  );
+
+  // If another module (e.g., Media or File Entity) had added a
+  // {file_managed}.type field, then change it to the expected specification.
+  if (db_field_exists('file_managed', 'type')) {
+    // db_change_field() will fail if any records have type=NULL, so update
+    // them to the new default value.
+    db_update('file_managed')->fields(array('type' => 'undefined'))->isNull('type')->execute();
+
+    // Indexes using a field being changed must be dropped prior to calling
+    // db_change_field().
+    if (db_index_exists('file_managed', 'file_type')) {
+      db_drop_index('file_managed', 'file_type');
+    }
+
+    // Since the database API doesn't provide a way to drop indexes without
+    // knowing what the old indexes are, it is the responsibility of any module
+    // that adds them to drop them prior to running this update..
+    db_change_field('file_managed', 'type', 'type', $spec, $indexes_new);
+  }
+
+  // Otherwise, add the field.
+  else {
+    db_add_field('file_managed', 'type', $spec, $indexes_new);
+  }
+
+  // Create the {file_metadata} database table.
+  if (!db_table_exists('file_metadata')) {
+    db_create_table('file_metadata', $schema['file_metadata']);
+  }
+
+  // Set permission to view files.
+  $roles = user_roles();
+  foreach ($roles as $rid => $role) {
+    user_role_grant_permissions($rid, array('view files'));
+  }
+
+  // Classify existing files according to the currently defined file types.
+  // Queue all files to be classified during cron runs using the Queue API.
+  $queue = BackdropQueue::get('file_type_determine');
+  $result = db_query('SELECT fid FROM {file_managed}');
+  foreach ($result as $record) {
+    $queue->createItem($record->fid);
+  }
+
+  // Warn users that existing files will not have a file type until the queue
+  // has been processed.
+  if ($queue->numberOfItems()) {
+    backdrop_set_message(t('Existing files must be classified according to the currently defined file types. These files have been queued for processing and will have their file type determined during cron runs.'));
+  }
+}
+
+/**
+ * Convert file_entity variables to config.
+ */
+function file_update_1004() {
+
+  // Convert variables to config.
+  $config = config('file.settings');
+  $config->set('max_filesize', update_variable_get('file_entity_max_filesize', ''));
+  $config->set('default_allowed_extensions', update_variable_get('file_entity_default_allowed_extensions', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm'));
+  $config->set('default_file_directory', update_variable_get('file_entity_default_file_directory', ''));
+  $config->set('allow_insecure_download', update_variable_get('file_entity_allow_insecure_download', FALSE));
+  $config->set('file_upload_wizard_skip_file_type', update_variable_get('file_entity_file_upload_wizard_skip_file_type', FALSE));
+  $config->set('file_upload_wizard_skip_scheme', update_variable_get('file_entity_file_upload_wizard_skip_scheme', FALSE));
+  $config->set('file_upload_wizard_skip_fields', update_variable_get('file_entity_file_upload_wizard_skip_fields', FALSE));
+  $config->set('protect_repeated_render', update_variable_get('file_entity_protect_repeated_render', TRUE));
+  $config->save();
+
+  // Remove converted variables.
+  update_variable_del('file_entity_max_filesize');
+  update_variable_del('file_entity_default_allowed_extensions');
+  update_variable_del('file_entity_default_file_directory');
+  update_variable_del('file_entity_allow_insecure_download');
+  update_variable_del('file_entity_file_upload_wizard_skip_file_type');
+  update_variable_del('file_entity_file_upload_wizard_skip_scheme');
+  update_variable_del('file_entity_file_upload_wizard_skip_fields');
+  update_variable_del('file_entity_protect_repeated_render');
+
+  // Delete unused variables.
+  update_variable_del('file_entity_alt');
+  update_variable_del('file_entity_title');
+}
+
+/**
+ * Add the default file types and convert custom or modified file types from Drupal 7 file_entity.
+ */
+function file_update_1005() {
+  $default_file_types = array(
+    'audio' => array(
+      'type' => 'audio',
+      'name' => 'Audio',
+      'description' => 'An Audio file is a sound recording.',
+      'mimetypes' => array(
+        'audio/*'
+      ),
+      'disabled' => FALSE,
+      'storage' => 4,
+      'module' => 'file'
+    ),
+    'document' => array(
+      'type' => 'document',
+      'name' => 'Document',
+      'description' => 'A document file is written information.',
+      'mimetypes' => array(
+          'text/plain',
+          'application/msword',
+          'application/vnd.ms-excel',
+          'application/pdf',
+          'application/vnd.ms-powerpoint',
+          'application/vnd.oasis.opendocument.text',
+          'application/vnd.oasis.opendocument.spreadsheet',
+          'application/vnd.oasis.opendocument.presentation',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ),
+      'disabled' => FALSE,
+      'storage' => 4,
+      'module' => 'file',
+    ),
+    'image' => array(
+      'type' => 'image',
+      'name' => 'Image',
+      'description' => 'An image file is a still visual.',
+      'mimetypes' => array(
+          'image/*',
+      ),
+      'disabled' => FALSE,
+      'storage' => 4,
+      'module' => 'file',
+    ),
+    'video' => array(
+      'type' => 'video',
+      'name' => 'Video',
+      'description' => 'A Video file is a moving visual recording.',
+      'mimetypes' => array(
+          'video/*',
+      ),
+      'disabled' => FALSE,
+      'storage' => 4,
+      'module' => 'file',
+    ),
+  );
+  foreach ($default_file_types as $machine => $type) {
+    $config = config('file.type.' . $machine);
+    if ($config->isNew()) {
+      $config->setData($type);
+      $config->save();
+    }
+  }
+
+  // Check to see if there were file types in a D7 db.
+  if (db_table_exists('file_type')) {
+    $result = db_query("SELECT type, label, description, mimetypes FROM {file_type}")->fetchAll();
+    foreach ($result as $record) {
+      $mimetypes = unserialize($record->mimetypes);
+      $storage = FILE_TYPE_STORAGE_NORMAL;
+
+      if (file_type_load($record->type)) {
+        $storage = FILE_TYPE_STORAGE_OVERRIDE;
+      }
+
+      $config = config('file.type.' . $record->type);
+      $config->set('module', 'file');
+      $config->set('type', $record->type);
+      $config->set('name', $record->label);
+      $config->set('description', $record->description);
+      $config->set('mimetypes', $mimetypes);
+      $config->set('storage', $storage);
+      $config->save();
+    }
+
+    // Delete the file type table.
+    db_drop_table('file_type');
+  }
+}
+
+/**
+ * Add the default file display settings and convert saved file display settings from Drupal 7 file_entity.
+ */
+function file_update_1006() {
+  $default_file_displays = array(
+    'audio' => array(
+      'type' => 'audio',
+      'default' => array(
+        'formatter' => 'file_field_file_audio',
+        'settings' => array(
+          'file_field_file_audio' => array(
+            'controls' => 1,
+            'autoplay' => 0,
+            'loop' => 0,
+            'preload' => '',
+            'multiple_file_behavior' => 'tags',
+          ),
+        ),
+      ),
+      'preview' => array(
+        'formatter' => 'file_field_file_audio',
+        'settings' => array(
+          'file_field_file_audio' => array(
+            'controls' => 1,
+            'autoplay' => 0,
+            'loop' => 0,
+            'preload' => '',
+            'multiple_file_behavior' => 'tags',
+          ),
+        ),
+      ),
+    ),
+    'document' => array(
+      'type' => 'document',
+      'default' => array(
+        'formatter' => 'file_field_file_download_link',
+        'settings' => array(
+          'file_field_file_download_link' => array(
+            'text' => 'Download [file:name]',
+          ),
+        ),
+      ),
+      'preview' => array(
+        'formatter' => 'file_field_file_download_link',
+        'settings' => array(
+          'file_field_file_download_link' => array(
+            'text' => 'Download [file:name]',
+          ),
+        ),
+      ),
+    ),
+    'image' => array(
+      'type' => 'image',
+      'default' => array(
+        'formatter' => 'file_field_image',
+        'settings' => array(
+          'file_field_image' => array(
+            'image_style' => '',
+            'image_link' => '',
+            'image_float' => '',
+          ),
+        ),
+      ),
+      'preview' => array(
+        'formatter' => 'file_field_image',
+        'settings' => array(
+          'file_field_image' => array(
+            'image_style' => 'thumbnail',
+            'image_link' => '',
+            'image_float' => '',
+          ),
+        ),
+      ),
+    ),
+    'video' => array(
+      'type' => 'video',
+      'default' => array(
+        'formatter' => 'file_field_file_video',
+        'settings' => array(
+          'file_field_file_video' => array(
+            'controls' => 1,
+            'autoplay' => 0,
+            'loop' => 0,
+            'muted' => 0,
+            'width' => '',
+            'height' => '',
+            'preload' => '',
+            'multiple_file_behavior' => 'tags',
+          ),
+        ),
+      ),
+      'preview' => array(
+        'formatter' => 'file_field_file_video',
+        'settings' => array(
+          'file_field_file_video' => array(
+            'controls' => 1,
+            'autoplay' => 0,
+            'loop' => 0,
+            'muted' => 0,
+            'width' => '',
+            'height' => '',
+            'preload' => '',
+            'multiple_file_behavior' => 'tags',
+          ),
+        ),
+      ),
+    ),
+  );
+  foreach ($default_file_displays as $machine => $display) {
+    $config = config('file_display.' . $machine);
+    if ($config->isNew()) {
+      $config->setData($display);
+      $config->save();
+    }
+  }
+
+  if (db_table_exists('file_display')) {
+    $types = array();
+    $formatter_weights = array();
+    $result = db_query("SELECT name, weight, settings FROM {file_display} WHERE status = 1")->fetchAll();
+    foreach ($result as $record) {
+      $name_parts = explode('__', $record->name);
+      $filetype = $name_parts[0];
+      $view_mode = $name_parts[1];
+      $formatter = $name_parts[2];
+
+      $settings = unserialize($record->settings);
+      $types[$filetype][$view_mode]['settings'][$formatter] = $settings;
+
+      $formatter_weights[$filetype][$view_mode][$formatter] = $record->weight;
+    }
+
+    foreach ($types as $filetype => $view_modes) {
+      $config = config('file_display.' . $filetype);
+      $config->set('type', $filetype);
+
+      foreach ($view_modes as $name => $settings) {
+        // Pick one formatter for each view mode. Select by lowest weight.
+        $weight_formatters = array_flip($formatter_weights[$filetype][$name]);
+        ksort($weight_formatters);
+        $formatter = reset($weight_formatters);
+
+        $view_mode_settings = array(
+          'formatter' => $formatter,
+          'settings' => $settings['settings'],
+        );
+        $config->set($name, $view_mode_settings);
+      }
+
+      $config->save();
+    }
+
+    // Delete the file type table.
+    db_drop_table('file_display');
   }
 }

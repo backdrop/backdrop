@@ -249,7 +249,7 @@ class LayoutRendererStandard {
       // If it wants to render first, add it to the $first array. This is used
       // by blocks that need to do some processing before other blocks are
       // rendered.
-      else if (!empty($block_info['render first'])) {
+      elseif (!empty($block_info['render first'])) {
         $first[$uuid] = $block;
       }
       // Otherwise, render it in the normal order.

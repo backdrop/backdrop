@@ -64,10 +64,60 @@ $settings['update_free_access'] = FALSE;
  * with any backups of your Backdrop files and database.
  *
  * Example:
- *   $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
+ * @code
+ * $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
+ * @endcode
  *
  */
 $settings['hash_salt'] = '';
+
+/**
+ * Trusted host configuration (optional but highly recommended).
+ *
+ * Since the HTTP Host header can be set by the user making the request, it
+ * is possible for malicious users to override it and create an attack vector.
+ * To protect against these sort of attacks, Backdrop supports checking a list
+ * of trusted hosts.
+ *
+ * To enable the trusted host protection, specify the allowable hosts below.
+ * This should be an array of regular expression patterns representing the hosts
+ * you would like to allow.
+ *
+ * For example, this will allow the site to only run from www.example.com:
+ * @code
+ * $settings['trusted_host_patterns'] = array(
+ *   '^www\.example\.com$',
+ * );
+ * @endcode
+ *
+ * If you are running a site on multiple domain names, you should specify all of
+ * the host patterns that are allowed by your site. For example, this will allow
+ * the site to run off of all variants of example.com and example.org, with all
+ * subdomains included:
+ * @code
+ * $settings['trusted_host_patterns'] = array(
+ *   '^example\.com$',
+ *   '^.+\.example\.com$',
+ *   '^example\.org',
+ *   '^.+\.example\.org',
+ * );
+ * @endcode
+ *
+ * If you do not need this functionality (such as in development environments or
+ * if protection is at another layer), you can suppress the status report
+ * warning by setting this value to FALSE:
+ * @code
+ * $settings['trusted_host_patterns'] = FALSE;
+ * @endcode
+ *
+ * For more information about trusted host patterns, see the documentation at
+ * https://api.backdropcms.org/documentation/trusted-host-settings
+ *
+ * @see backdrop_valid_http_host()
+ * @see backdrop_check_trusted_hosts()
+ * @see system_requirements()
+ */
+// $settings['trusted_host_patterns'] = array('^www\.example\.com$');
 
 /**
  * Base URL (optional).

@@ -2122,7 +2122,7 @@ class views_plugin_display extends views_plugin {
           '#default_value' => $pager['type'],
         );
 
-        $pager_plugin = views_fetch_plugin_data('pager', $pager['type'], array($this->view->base_table));
+        $pager_plugin = views_fetch_plugin_data('pager', $pager['type']);
         if (!empty($pager_plugin['uses options'])) {
           $form['markup'] = array(
             '#prefix' => '<div class="form-item description">',

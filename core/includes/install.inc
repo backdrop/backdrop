@@ -305,6 +305,10 @@ abstract class DatabaseTasks {
       'arguments'   => array(),
     ),
     array(
+      'function'    => 'checkUtf8mb4',
+      'arguments'   => array(),
+    ),
+    array(
       'arguments'   => array(
         'CREATE TABLE {backdrop_install_test} (id int NULL)',
         'Backdrop can use CREATE TABLE database commands.',

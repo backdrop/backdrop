@@ -263,6 +263,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   // Get the list of layout template options. The list needs to be rebuilt (see
   // https://github.com/backdrop/backdrop-issues/issues/984)
   $all_template_info = layout_get_layout_template_info(NULL, TRUE);
+
   $excluded = config_get('layout.settings', 'excluded_templates');
   foreach ($all_template_info as $template_name => $template_info) {
     if (!in_array($template_name, $excluded)) {
@@ -591,6 +592,17 @@ function layout_settings_form_update_layout($form, &$form_state) {
     $new = $form_state['values']['layout_template'];
     $region_mapping = layout_get_legacy_region_mapping($layout->layout_template, $new);
     $layout->setLayoutTemplate($form_state['values']['layout_template'], $region_mapping);
+    if (!empty($layout->orphaned_blocks)) {
+      $orphaned_blocks_titles = array();
+      $layout_template_info = layout_get_layout_template_info($form_state['values']['layout_template']);
+      foreach ($layout->orphaned_blocks as $uuid) {
+        $orphaned_blocks_titles[] = $layout->content[$uuid]->getAdminTitle();
+      }
+      $message = t('The following blocks have been reassigned to the %new_region region. The regions they were placed in previously do not exist in the new layout template. You can move them to more appropriate regions:', array(
+        '%new_region' => $layout_template_info['regions'][$layout->refuge_region]));
+      $message .= theme('item_list', array('items' => $orphaned_blocks_titles));
+      backdrop_set_message($message, 'warning');
+    }
   }
   if (isset($form_state['values']['path'])) {
     $layout->setPath($form_state['values']['path']);
@@ -1022,7 +1034,7 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
           )
         )
       ),
-      '#description' => isset($block_info['description']) ? $block_info['description'] : NULL,
+      '#description' => isset($block_info['description']) ? check_plain($block_info['description']) : NULL,
       '#wrapper_attributes' => array('class' => array('layout-block-add-row'))
     );
   }
@@ -1892,9 +1904,9 @@ function layout_condition_edit_title(Layout $layout = NULL, Block $block = NULL,
 }
 
 /**
- * Menu callback; Enable or disable a layout.
+ * Menu callback; Enable or disable a layout configuration.
  */
-function layout_enable_layout($status, Layout $layout) {
+function layout_toggle_enabled(Layout $layout, $status) {
   if (backdrop_get_token('layout-' . $layout->name) !== $_GET['token']) {
     return MENU_ACCESS_DENIED;
   }
@@ -1908,6 +1920,54 @@ function layout_enable_layout($status, Layout $layout) {
     backdrop_set_message(t('Layout "@title" disabled.', array('@title' => $layout->title)));
   }
   backdrop_goto('admin/structure/layouts');
+}
+
+/**
+ * Menu callback; Enable or disable a layout template.
+ */
+function layout_template_toggle_enabled($template_name, $status) {
+  if (backdrop_get_token('layout-template-' . $template_name) !== $_GET['token']) {
+    return MENU_ACCESS_DENIED;
+  }
+  $template_info = layout_get_layout_template_info($template_name);
+  if (!$template_info) {
+    return MENU_NOT_FOUND;
+  }
+
+  $config = config('layout.settings');
+  $data = $config->get();
+  $errors = FALSE;
+
+  if (!$status) {
+    if (!in_array($template_name, $data['excluded_templates'])) {
+      $data['excluded_templates'][] = $template_name;
+    }
+    // Check which layout templates are in use.
+    foreach (layout_load_all() as $layout) {
+      $info = layout_get_layout_template_info($layout->layout_template);
+      if (in_array($layout->layout_template, $data['excluded_templates'])) {
+        $errors = TRUE;
+        break;
+      }
+    }
+    if ($errors) {
+      backdrop_set_message(t('The "@layout" layout template is currently in use and may not be disabled.', array('@layout' => $info['title'])), 'error');
+    }
+    else {
+      backdrop_set_message(t('Layout template "@title" disabled.', array('@title' => $template_info['title'])));
+    }
+  }
+  else {
+    $data['excluded_templates'] = array_diff($data['excluded_templates'], array($template_name));
+    backdrop_set_message(t('Layout template "@title" enabled.', array('@title' => $template_info['title'])));
+  }
+
+  if (!$errors) {
+    $config->setData($data);
+    $config->save();
+  }
+
+  backdrop_goto('admin/structure/layouts/settings');
 }
 
 /**
@@ -2654,30 +2714,38 @@ function layout_ajax_form_update($form, $form_state) {
  * Administrative form for layout settings.
  */
 function layout_settings_page($form, &$form_state) {
+  $header = array(
+    'layout_template_info' => array('data' => t('Template')),
+    'type' => array('data' => t('Type'), 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    'operations' => t('Operations'),
+  );
+
   backdrop_set_title(t('Layout settings'));
   $excluded = config_get('layout.settings', 'excluded_templates');
 
-  $form = array();
-
-  $form['#attached']['js'][] = backdrop_get_path('module', 'layout') . '/js/layout.admin.js';
-  $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
-  $form['#attributes']['class'] = array('layout-settings-page');
-
-  // Get the list of layout template options. The list needs to be rebuilt (see
-  // https://github.com/backdrop/backdrop-issues/issues/984)
-  $all_template_info = layout_get_layout_template_info(NULL, TRUE);
+  $rows = array();
   $options = array();
   $default = array();
   $form_state['hidden_templates'] = array();
+  $all_template_info = layout_get_layout_template_info(NULL, TRUE);
+
   foreach ($all_template_info as $template_name => $template_info) {
     // Build the default values list.
+    $is_default = FALSE;
     if (!in_array($template_name, $excluded)) {
-      $default[] = $template_name;
+      $is_default = $default[$template_name] = TRUE;
     }
 
     // Build the list of possible options, either enabled or not hidden.
-    if (in_array($template_name, $default) || !$template_info['hidden']) {
-      $options[$template_name] = theme('layout_template_option', array('template_info' => $template_info));
+    if ($is_default || !$template_info['hidden']) {
+      $rows[$template_name] = array(
+        'layout_template_info' => theme('layout_template_info', array('template_info' => $template_info)),
+        'type' => !empty($template_info['flexible']) ? t('Flexible') : t('Standard'),
+      );
+      $rows[$template_name]['operations']['data'] = array(
+        '#type' => 'dropbutton',
+        '#links' => _layout_settings_get_group_operations($template_info, $is_default),
+       );
     }
     // For disabled and hidden templates, save the fact they are disabled.
     elseif ($template_info['hidden']) {
@@ -2685,13 +2753,15 @@ function layout_settings_page($form, &$form_state) {
     }
   }
 
+  $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
   $form['templates'] = array(
-    '#title' => t('Available layout templates'),
-    '#description' => t('Only templates that are selected here will be available when configuring layouts.'),
-    '#type' => 'checkboxes',
+    '#type' => 'tableselect',
+    '#js_select' => FALSE,
+    '#header' => $header,
+    '#options' => $rows,
+    '#empty' => t('There are no layout templates.'),
     '#default_value' => $default,
-    '#options' => $options,
-    '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
+    '#attributes' => array('class' => array('layout-list')),
   );
 
   $form['actions']['#type'] = 'actions';
@@ -2699,8 +2769,10 @@ function layout_settings_page($form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Save configuration'),
   );
+
   return $form;
 }
+
 
 /**
  * Validation for layout settings page.
@@ -2722,7 +2794,7 @@ function layout_settings_page_validate(&$form, &$form_state) {
   foreach (layout_load_all() as $layout) {
     $info = layout_get_layout_template_info($layout->layout_template);
     if (in_array($layout->layout_template, $excluded)) {
-      form_set_error('templates', t('The "@layout" layout template is currently in use and may not be excluded.', array('@layout' => $info['title'])));
+      form_set_error('templates][' . $layout->layout_template, t('The "@layout" layout template is currently in use and may not be disabled.', array('@layout' => $info['title'])));
     }
   }
 }
@@ -2733,6 +2805,44 @@ function layout_settings_page_validate(&$form, &$form_state) {
 function layout_settings_page_submit($form, &$form_state) {
   config_set('layout.settings', 'excluded_templates', $form_state['excluded_templates']);
   backdrop_set_message(t('Your configuration has been saved.'));
+}
+
+/**
+ * Given a path, return a list of operations for a group of layouts.
+ */
+function _layout_settings_get_group_operations($template_info, $is_default) {
+  $links = array();
+
+  if (!empty($template_info['flexible'])) {
+    $links['configure'] = array(
+      'title' => t('Configure regions'),
+      'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/configure',
+    );
+    $links['edit'] = array(
+      'title' => t('Configure name'),
+      'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/edit',
+    );
+    $links['delete'] = array(
+      'title' => t('Delete'),
+      'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/delete',
+    );
+  }
+  if ($is_default) {
+    $links['disable'] = array(
+      'title' => t('Disable'),
+      'href' => 'admin/structure/layouts/settings/toggle/' . $template_info['name'] . '/disable',
+      'query' => array('token' => backdrop_get_token('layout-template-' . $template_info['name'])),
+    );
+  }
+  else {
+    $links['enable'] = array(
+      'title' => t('Enable'),
+      'href' => 'admin/structure/layouts/settings/toggle/' . $template_info['name'] . '/enable',
+      'query' => array('token' => backdrop_get_token('layout-template-' . $template_info['name'])),
+    );
+  }
+
+  return $links;
 }
 
 /**

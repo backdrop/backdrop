@@ -4,8 +4,91 @@
  * Defines a "managed_file" Form API field and a "file" field for Field module.
  */
 
+/**
+ * Modules should return this value from hook_file_access() to allow
+ * access to a file.
+ */
+define('FILE_ACCESS_ALLOW', 'allow');
+
+/**
+ * Modules should return this value from hook_file_access() to deny
+ * access to a file.
+ */
+define('FILE_ACCESS_DENY', 'deny');
+
+/**
+ * Modules should return this value from hook_file_access() to not affect
+ * file access.
+ */
+define('FILE_ACCESS_IGNORE', NULL);
+
+/**
+ * The {file_managed}.type value when the file type has not yet been determined.
+ */
+define('FILE_TYPE_NONE', 'undefined');
+
+/**
+ * File types constant for user-defined file types.
+ */
+define('FILE_TYPE_STORAGE_NORMAL', 1);
+
+/**
+ * File type constant for file types that override module-defined presets.
+ */
+define('FILE_TYPE_STORAGE_OVERRIDE', 2);
+
+/**
+ * File type constant for module-defined file types.
+ */
+define('FILE_TYPE_STORAGE_DEFAULT', 4);
+
 // Load all Field module hooks for File.
 require_once BACKDROP_ROOT . '/core/modules/file/file.field.inc';
+
+/**
+ * Implements hook_hook_info().
+ */
+function file_hook_info() {
+  $hooks = array(
+    // File API hooks
+    'file_copy',
+    'file_move',
+    'file_validate',
+    'file_type_info',
+    'file_type_info_alter',
+    'file_formatter_info',
+    'file_formatter_info_alter',
+    'file_download_headers_alter',
+
+    // File access
+    'file_download',
+    'file_download_access',
+    'file_download_access_alter',
+    'file_access',
+    'file_access_alter',
+    'query_file_access_alter',
+
+    // File operation hooks
+    'file_load',
+    'file_presave',
+    'file_insert',
+    'file_update',
+    'file_delete',
+    'file_view',
+    'file_view_alter',
+
+    // Miscellaneous hooks
+    'file_mimetype_mapping_alter',
+    'file_url_alter',
+    'file_operations',
+
+    // Stream wrappers
+    'stream_wrappers',
+    'stream_wrappers_alter',
+  );
+
+  return array_fill_keys($hooks, array('group' => 'file'));
+}
 
 /**
  * Implements hook_action_info().
@@ -38,8 +121,11 @@ function file_autoload_info() {
     'views_handler_field_file_filemime' => 'views/views_handler_field_file_filemime.inc',
     'views_handler_field_file_uri' => 'views/views_handler_field_file_uri.inc',
     'views_handler_field_file_status' => 'views/views_handler_field_file_status.inc',
+    'views_handler_field_file_type' => 'views/views_handler_field_file_type.inc',
     'views_handler_filter_file_status' => 'views/views_handler_filter_file_status.inc',
+    'views_handler_filter_file_type' => 'views/views_handler_filter_file_type.inc',
     'views_handler_field_file_link' => 'views/views_handler_field_file_link.inc',
+    'views_handler_field_file_rendered' => 'views/views_handler_field_file_rendered.inc',
   );
 }
 
@@ -47,10 +133,35 @@ function file_autoload_info() {
  * Implements hook_permission().
  */
 function file_permission() {
-  return array(
+  $permissions = array(
     'access file overview' => array(
       'title' => t('Access the manage files overview'),
       'description' => t('The <a href="@url">manage files overview page</a> shows all files uploaded to the site.', array('@url' => url('admin/content/files'))),
+    ),
+    'bypass file access' => array(
+      'title' => t('Bypass file access control'),
+      'description' => t('View, edit and delete all files regardless of permission restrictions.'),
+      'restrict access' => TRUE,
+    ),
+    'administer file types' => array(
+      'title' => t('Administer file types'),
+      'restrict access' => TRUE,
+    ),
+    'create files' => array(
+      'title' => t('Add and upload new files'),
+    ),
+    'view own private files' => array(
+      'title' => t('View own private files'),
+    ),
+    'view own files' => array(
+      'title' => t('View own files'),
+    ),
+    'view private files' => array(
+      'title' => t('View private files'),
+      'restrict access' => TRUE,
+    ),
+    'view files' => array(
+      'title' => t('View files'),
     ),
     'manage files' => array(
       'title' => t('Manage or replace any file'),
@@ -63,6 +174,21 @@ function file_permission() {
       'restrict access' => TRUE,
     ),
   );
+
+  // Add description for the 'View file details' and 'View own private file
+  // details' permissions to show which stream wrappers they apply to.
+  $wrappers = file_get_public_and_private_stream_wrapper_names();
+  $wrappers += array('public' => array(t('None')), 'private' => array(t('None')));
+
+  $permissions['view files']['description'] = t('Includes the following stream wrappers: %wrappers.', array('%wrappers' => implode(', ', $wrappers['public'])));
+  $permissions['view own private files']['description'] = t('Includes the following stream wrappers: %wrappers.', array('%wrappers' => implode(', ', $wrappers['private'])));
+
+  // Generate standard file permissions for all applicable file types.
+  foreach (file_permissions_get_configured_types() as $type) {
+    $permissions += file_list_permissions($type);
+  }
+
+  return $permissions;
 }
 
 /**
@@ -70,6 +196,143 @@ function file_permission() {
  */
 function file_menu() {
   $items = array();
+
+  // File Configuration
+  $items['admin/structure/file-types'] = array(
+    'title' => 'File types',
+    'description' => 'Manage settings for the type of files used on your site.',
+    'page callback' => 'file_list_types_page',
+    'access arguments' => array('administer file types'),
+    'file' => 'file.admin.inc',
+  );
+  // File Configuration
+  $items['admin/structure/file-types/list'] = array(
+    'title' => 'File types',
+    'description' => 'Manage settings for the type of files used on your site.',
+    'page callback' => 'file_list_types_page',
+    'access arguments' => array('administer file types'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'file' => 'file.admin.inc',
+  );
+  $items['admin/structure/file-types/settings'] = array(
+    'title' => 'File settings',
+    'description' => 'Configure allowed file extensions and the file upload wizard.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('file_settings_form'),
+    'access arguments' => array('administer file types'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+    'file' => 'file.admin.inc',
+  );
+  $items['admin/structure/file-types/add'] = array(
+    'title' => 'Add file type',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('file_type_form'),
+    'access arguments' => array('administer file types'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'file.admin.inc',
+  );
+  $items['admin/structure/file-types/manage/%file_type'] = array(
+    'title' => 'Manage file types',
+    'description' => 'Manage settings for the type of files used on your site.',
+  );
+  $items['admin/structure/file-types/manage/%file_type/revert'] = array(
+    'title' => 'Revert',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('file_type_revert_confirm', 4),
+    'access arguments' => array('administer file types'),
+    'file' => 'file.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/structure/file-types/manage/%file_type/enable'] = array(
+    'title' => 'Enable file type',
+    'page callback' => 'file_type_toggle_enable',
+    'page arguments' => array(4, '1'),
+    'access arguments' => array('administer file types'),
+    'file' => 'file.admin.inc',
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+  );
+  $items['admin/structure/file-types/manage/%file_type/disable'] = array(
+    'title' => 'Disable file type',
+    'page callback' => 'file_type_toggle_enable',
+    'page arguments' => array(4, '0'),
+    'access arguments' => array('administer file types'),
+    'file' => 'file.admin.inc',
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+  );
+  $items['admin/structure/file-types/manage/%file_type/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('file_type_delete_confirm', 4),
+    'access arguments' => array('administer file types'),
+    'file' => 'file.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  // Attach a "Manage file display" tab to each file type in the same way that
+  // Field UI attaches "Manage fields" and "Manage display" tabs. Note that
+  // Field UI does not have to be enabled; we're just using the same IA pattern
+  // here for attaching the "Manage file display" page.
+  $entity_info = entity_get_info('file');
+  foreach ($entity_info['bundles'] as $file_type => $bundle_info) {
+    if (isset($bundle_info['admin'])) {
+      // Get the base path and access.
+      $path = $bundle_info['admin']['path'];
+      $access = array_intersect_key($bundle_info['admin'], backdrop_map_assoc(array('access callback', 'access arguments')));
+      $access += array(
+        'access callback' => 'user_access',
+        'access arguments' => array('administer file types'),
+      );
+
+      // The file type must be passed to the page callbacks. It might be
+      // configured as a wildcard (multiple file types sharing the same menu
+      // router path).
+      $file_type_argument = isset($bundle_info['admin']['bundle argument']) ? $bundle_info['admin']['bundle argument'] : $file_type;
+
+      $items[$path] = array(
+        'title' => 'Configure file type',
+        'title callback' => 'file_type_get_name',
+        'title arguments' => array(4),
+        'page callback' => 'backdrop_get_form',
+        'page arguments' => array('file_type_form', $file_type_argument),
+        'file' => 'file.admin.inc',
+      ) + $access;
+
+      // Add the 'File type settings' tab.
+      $items["$path/configure"] = array(
+        'title' => 'Configure',
+        'type' => MENU_DEFAULT_LOCAL_TASK,
+      );
+
+      // Add the 'Manage file display' tab.
+      $items["$path/file-display"] = array(
+        'title' => 'Manage file display',
+        'page callback' => 'backdrop_get_form',
+        'page arguments' => array('file_display_form', $file_type_argument, 'default'),
+        'type' => MENU_LOCAL_TASK,
+        'weight' => 3,
+        'file' => 'file.admin.inc',
+      ) + $access;
+
+      // Add a secondary tab for each view mode.
+      $weight = 0;
+      $view_modes = array('default' => array('label' => t('Default'))) + $entity_info['view modes'];
+      foreach ($view_modes as $view_mode => $view_mode_info) {
+        $items["$path/file-display/$view_mode"] = array(
+          'title' => $view_mode_info['label'],
+          'page arguments' => array('file_display_form', $file_type_argument, $view_mode),
+          'type' => ($view_mode == 'default' ? MENU_DEFAULT_LOCAL_TASK : MENU_LOCAL_TASK),
+          'weight' => ($view_mode == 'default' ? -10 : $weight++),
+          'file' => 'file.admin.inc',
+          // View modes for which the 'custom settings' flag isn't TRUE are
+          // disabled via this access callback. This needs to extend, rather
+          // than override normal $access rules.
+          'access callback' => '_file_view_mode_menu_access',
+          'access arguments' => array_merge(array($file_type_argument, $view_mode, $access['access callback']), $access['access arguments']),
+        );
+      }
+    }
+  }
 
   $items['file/ajax'] = array(
     'page callback' => 'file_ajax_upload',
@@ -87,26 +350,71 @@ function file_menu() {
     'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,
   );
-
+  $items['file/add'] = array(
+    'title' => 'Add a file',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('file_add_form'),
+    'access arguments' => array('create files'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'file.pages.inc',
+    'weight' => -10,
+  );
+  $items['file/%file'] = array(
+    'title callback' => 'entity_label',
+    'title arguments' => array('file', 1),
+    // The page callback also invokes backdrop_set_title() in case
+    // the menu router's title is overridden by a menu link.
+    'page callback' => 'file_view_page',
+    'page arguments' => array(1),
+    'access callback' => 'file_access',
+    'access arguments' => array('view', 1),
+    'file' => 'file.pages.inc',
+  );
+  $items['file/%file/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['file/%file/usage'] = array(
+    'title' => 'Usage',
+    'page callback' => 'file_usage_page',
+    'page arguments' => array(1),
+    'access callback' => 'file_access',
+    'access arguments' => array('update', 1),
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE,
+    'file' => 'file.pages.inc',
+  );
+  $items['file/%file/download'] = array(
+    'title' => 'Download',
+    'page callback' => 'file_download_page',
+    'page arguments' => array(1),
+    'access callback' => 'file_access',
+    'access arguments' => array('download', 1),
+    'file' => 'file.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
   $items['file/%file/manage'] = array(
     'title' => 'Manage',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('file_manage_form', 1),
-    'access arguments' => array('manage files'),
+    'access callback' => 'file_access',
+    'access arguments' => array('update', 1),
     'weight' => 0,
-    'type' => MENU_CALLBACK,
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'file' => 'file.pages.inc',
   );
   $items['file/%file/delete'] = array(
     'title' => 'Delete',
     'page callback' => 'backdrop_get_form',
     'page arguments'  => array('file_delete_form', 1),
-    'access arguments' => array('delete files'),
+    'access callback' => 'file_access',
+    'access arguments' => array('delete', 1),
     'weight' => 1,
     'type' => MENU_CALLBACK,
     'file' => 'file.pages.inc',
   );
-
   $items['admin/content/files/delete'] = array(
     'title' => 'Confirm deleting multiple files',
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
@@ -120,21 +428,79 @@ function file_menu() {
 }
 
 /**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function file_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // Add action link for 'file/add' on 'admin/content/files' page.
+  if ($root_path == 'admin/content/files') {
+    $item = menu_get_item('file/add');
+    if ($item['access']) {
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
+}
+
+/**
  * Implements hook_entity_info().
  */
 function file_entity_info() {
+  $bundles = array();
+  file_type_cache_reset();
+  foreach (file_type_get_types() as $type) {
+    $bundles[$type->type] = array(
+      'label' => $type->name,
+      'admin' => array(
+        'path' => 'admin/structure/file-types/manage/%file_type',
+        'real path' => 'admin/structure/file-types/manage/' . str_replace('_', '-', $type->type),
+        'bundle argument' => 4,
+        'access arguments' => array('administer file types'),
+      ),
+    );
+  }
+
   return array(
     'file' => array(
       'label' => t('File'),
+      'bundle label' => t('Type'),
       'base table' => 'file_managed',
       'controller class' => 'FileStorageController',
+      'fieldable' => TRUE,
       'entity class' => 'File',
       'entity keys' => array(
         'id' => 'fid',
+        'bundle' => 'type'
+      ),
+      'bundle keys' => array(
+        'bundle' => 'type'
+      ),
+      'bundles' => $bundles,
+      'uri callback' => 'file_uri',
+      'view modes' => array(
+        'teaser' => array(
+          'label' => t('Teaser'),
+        ),
+        'full' => array(
+          'label' => t('Full content'),
+        ),
+        'preview' => array(
+          'label' => t('Preview'),
+          'custom settings' => TRUE,
+        ),
       ),
       'static cache' => FALSE,
     ),
   );
+}
+
+/**
+ * URI callback for file entities.
+ */
+function file_uri($file) {
+  $uri['path'] = 'file/' . $file->fid;
+  return $uri;
 }
 
 /**
@@ -167,6 +533,284 @@ function file_element_info() {
 }
 
 /**
+ * Implements hook_field_extra_fields().
+ *
+ * Adds 'file' as an extra field, so that its display and form component can be
+ * weighted relative to the fields that are added to file entity bundles.
+ */
+function file_field_extra_fields() {
+  $info = array();
+
+  if ($file_type_names = file_type_get_names()) {
+    foreach ($file_type_names as $type => $name) {
+      $info['file'][$type]['form']['filename'] = array(
+        'label' => t('Name'),
+        'description' => t('Name'),
+        'weight' => -10,
+      );
+      $info['file'][$type]['form']['preview'] = array(
+        'label' => t('File'),
+        'description' => t('File preview'),
+        'weight' => -5,
+      );
+      $info['file'][$type]['display']['file'] = array(
+        'label' => t('File'),
+        'description' => t('File display'),
+        'weight' => 0,
+      );
+    }
+  }
+
+  return $info;
+}
+
+/**
+ * Implements hook_file_formatter_info().
+ */
+function file_file_formatter_info() {
+  $formatters = array();
+
+  // Allow file field formatters to be reused for displaying the file entity's
+  // file pseudo-field.
+  foreach (field_info_formatter_types() as $key => $formatter) {
+    if (array_intersect($formatter['field types'], array('file', 'image'))) {
+      $key = 'file_field_' . $key;
+      $formatters[$key] = array(
+        'label' => $formatter['label'],
+        'description' => !empty($formatter['description']) ? $formatter['description'] : '',
+        'view callback' => 'file_file_formatter_file_field_view',
+      );
+      if (!empty($formatter['settings'])) {
+        $formatters[$key] += array(
+          'default settings' => $formatter['settings'],
+          'settings callback' => 'file_file_formatter_file_field_settings',
+        );
+      }
+      if (!empty($formatter['file formatter'])) {
+        $formatters[$key] += $formatter['file formatter'];
+      }
+    }
+  }
+
+  // Add a simple file formatter for displaying an image in a chosen style.
+  if (module_exists('image')) {
+    $formatters['file_image'] = array(
+      'label' => t('Image'),
+      'default settings' => array(
+        'image_style' => '',
+      ),
+      'view callback' => 'file_file_formatter_file_image_view',
+      'settings callback' => 'file_file_formatter_file_image_settings',
+      'hidden' => TRUE,
+      'mime types' => array('image/*'),
+    );
+  }
+
+  return $formatters;
+}
+
+/**
+ * Implements hook_file_formatter_FORMATTER_view().
+ *
+ * This function provides a bridge to the field formatter API, so that file
+ * field formatters can be reused for displaying the file entity's file
+ * pseudo-field.
+ */
+function file_file_formatter_file_field_view($file, $display, $langcode) {
+  if (strpos($display['type'], 'file_field_') === 0) {
+    $field_formatter_type = substr($display['type'], strlen('file_field_'));
+    $field_formatter_info = field_info_formatter_types($field_formatter_type);
+    if (isset($field_formatter_info['module'])) {
+      // Set $display['type'] to what hook_field_formatter_*() expects.
+      $display['type'] = $field_formatter_type;
+
+      // Allow any attribute overrides (e.g. from the Media module) to be
+      // respected.
+      $item = (array) $file;
+      if (!empty($file->override['attributes'])) {
+        $item = array_merge($item, $file->override['attributes']);
+      }
+
+      // Set $items to what file field formatters expect. See file_field_load(),
+      // and note that, here, $file is already a fully loaded entity.
+      $items = array($item);
+
+      // Invoke hook_field_formatter_prepare_view() and
+      // hook_field_formatter_view(). Note that we are reusing field formatter
+      // functions, but we are not displaying a Field API field, so we set
+      // $field and $instance accordingly, and do not invoke
+      // hook_field_prepare_view(). This assumes that the formatter functions do
+      // not rely on $field or $instance. A module that implements formatter
+      // functions that rely on $field or $instance (and therefore, can only be
+      // used for real fields) can prevent this formatter from being used on the
+      // pseudo-field by removing it within hook_file_formatter_info_alter().
+      $field = $instance = NULL;
+      if (($function = ($field_formatter_info['module'] . '_field_formatter_prepare_view')) && function_exists($function)) {
+        $fid = $file->fid;
+        // hook_field_formatter_prepare_view() alters $items by reference.
+        $grouped_items = array($fid => &$items);
+        $function('file', array($fid => $file), $field, array($fid => $instance), $langcode, $grouped_items, array($fid => $display));
+      }
+      if (($function = ($field_formatter_info['module'] . '_field_formatter_view')) && function_exists($function)) {
+        $element = $function('file', $file, $field, $instance, $langcode, $items, $display);
+        // We passed the file as $items[0], so return the corresponding element.
+        if (isset($element[0])) {
+          return $element[0];
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_file_formatter_FORMATTER_settings().
+ *
+ * This function provides a bridge to the field formatter API, so that file
+ * field formatters can be reused for displaying the file entity's file
+ * pseudo-field.
+ */
+function file_file_formatter_file_field_settings($form, &$form_state, $settings, $formatter_type, $file_type, $view_mode) {
+  if (strpos($formatter_type, 'file_field_') === 0) {
+    $field_formatter_type = substr($formatter_type, strlen('file_field_'));
+    $field_formatter_info = field_info_formatter_types($field_formatter_type);
+
+    // Invoke hook_field_formatter_settings_form(). We are reusing field
+    // formatter functions, but we are not working with a Field API field, so
+    // set $field accordingly. Unfortunately, the API is for $settings to be
+    // transferred via the $instance parameter, so we must mock it.
+    if (isset($field_formatter_info['module']) && ($function = ($field_formatter_info['module'] . '_field_formatter_settings_form')) && function_exists($function)) {
+      $field = NULL;
+      $mock_instance = array(
+        'display' => array(
+          $view_mode => array(
+            'type' => $field_formatter_type,
+            'settings' => $settings,
+          ),
+        ),
+        'entity_type' => 'file',
+        'bundle' => $file_type,
+      );
+      return $function($field, $mock_instance, $view_mode, $form, $form_state);
+    }
+  }
+}
+
+/**
+ * Implements hook_file_formatter_FORMATTER_view().
+ *
+ * Returns a backdrop_render() array to display an image of the chosen style.
+ *
+ * This formatter is only capable of displaying local images. If the passed in
+ * file is either not local or not an image, nothing is returned, so that
+ * file_view_file() can try another formatter.
+ */
+function file_file_formatter_file_image_view($file, $display, $langcode) {
+  // Prevent PHP notices when trying to read empty files.
+  // @see http://drupal.org/node/681042
+  if (!$file->filesize) {
+    return;
+  }
+
+  // Do not bother proceeding if this file does not have an image mime type.
+  if (file_get_mimetype_type($file) != 'image') {
+    return;
+  }
+
+  if (file_file_is_readable($file)) {
+    // We don't sanitize here.
+    // @see http://drupal.org/node/1553094#comment-6257382
+    // Theme function will take care of escaping.
+    if (!isset($file->metadata)) {
+      $file->metadata = array();
+    }
+    $file->metadata += array('width' => NULL, 'height' => NULL);
+    $replace_options = array(
+      'clear' => TRUE,
+      'sanitize' => FALSE,
+    );
+    if (!empty($display['settings']['image_style'])) {
+      $element = array(
+        '#theme' => 'image_style',
+        '#style_name' => $display['settings']['image_style'],
+        '#path' => $file->uri,
+        '#width' => isset($file->override['attributes']['width']) ? $file->override['attributes']['width'] : $file->metadata['width'],
+        '#height' => isset($file->override['attributes']['height']) ? $file->override['attributes']['height'] : $file->metadata['height'],
+        '#alt' => token_replace($display['settings']['alt'], array('file' => $file), $replace_options),
+        '#title' => token_replace($display['settings']['title'], array('file' => $file), $replace_options),
+      );
+    }
+    else {
+      $element = array(
+        '#theme' => 'image',
+        '#path' => $file->uri,
+        '#width' => isset($file->override['attributes']['width']) ? $file->override['attributes']['width'] : $file->metadata['width'],
+        '#height' => isset($file->override['attributes']['height']) ? $file->override['attributes']['height'] : $file->metadata['height'],
+        '#alt' => token_replace($display['settings']['alt'], array('file' => $file), $replace_options),
+        '#title' => token_replace($display['settings']['title'], array('file' => $file), $replace_options),
+      );
+    }
+    return $element;
+  }
+}
+
+/**
+ * Check if a file entity is readable or not.
+ *
+ * @param object $file
+ *   A file entity object from file_load().
+ *
+ * @return boolean
+ *   TRUE if the file is using a readable stream wrapper, or FALSE otherwise.
+ */
+function file_file_is_readable($file) {
+  $scheme = file_uri_scheme($file->uri);
+  $wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_READ);
+  return !empty($wrappers[$scheme]);
+}
+
+/**
+ * Implements hook_file_formatter_FORMATTER_settings().
+ *
+ * Returns form elements for configuring the 'file_image' formatter.
+ */
+function file_file_formatter_file_image_settings($form, &$form_state, $settings) {
+  $element = array();
+  $element['image_style'] = array(
+    '#title' => t('Image style'),
+    '#type' => 'select',
+    '#options' => image_style_options(FALSE),
+    '#default_value' => $settings['image_style'],
+    '#empty_option' => t('None (original image)'),
+  );
+
+  // For image files we allow the alt attribute (required in HTML).
+  $element['alt'] = array(
+    '#title' => t('Alt attribute'),
+    '#description' => t('The text to use as value for the <em>img</em> tag <em>alt</em> attribute.'),
+    '#type' => 'textfield',
+    '#default_value' => $settings['alt'],
+  );
+
+  // Allow the setting of the title attribute.
+  $element['title'] = array(
+    '#title' => t('Title attribute'),
+    '#description' => t('The text to use as value for the <em>img</em> tag <em>title</em> attribute.'),
+    '#type' => 'textfield',
+    '#default_value' => $settings['title'],
+  );
+
+  $element['alt']['#description'] .= t('This field supports tokens.');
+  $element['title']['#description'] .= t('This field supports tokens.');
+  $element['tokens'] = array(
+    '#theme' => 'token_tree',
+    '#token_types' => array('file'),
+    '#dialog' => TRUE,
+  );
+
+  return $element;
+}
+
+/**
  * Implements hook_theme().
  */
 function file_theme() {
@@ -175,6 +819,10 @@ function file_theme() {
   );
 
   return array(
+    'file_entity' => array(
+      'render element' => 'elements',
+      'template' => 'templates/file',
+    ) + $base,
     'file_link' => array(
       'variables' => array('file' => NULL, 'icon_directory' => NULL),
     ) + $base,
@@ -196,7 +844,116 @@ function file_theme() {
     'file_upload_help' => array(
       'variables' => array('description' => NULL, 'upload_validators' => NULL),
     ) + $base,
+    'file_type_overview' => array(
+      'variables' => array('name' => NULL, 'description' => NULL),
+    ) + $base,
+    'file_display_order' => array(
+      'render element' => 'element',
+    ) + $base,
+    'file_download_link' => array(
+      'variables' => array('file' => NULL, 'icon_directory' => NULL, 'text' => NULL),
+    ) + $base,
+    'file_audio' => array(
+      'variables' => array(
+        'files' => array(),
+        'controls' => TRUE,
+        'autoplay' => FALSE,
+        'loop' => FALSE,
+        'preload' => NULL,
+      ),
+    ) + $base,
+    'file_video' => array(
+      'variables' => array(
+        'files' => array(),
+        'controls' => TRUE,
+        'autoplay' => FALSE,
+        'loop' => FALSE,
+        'muted' => FALSE,
+        'width' => NULL,
+        'height' => NULL,
+        'preload' => NULL,
+      ),
+    ) + $base,
   );
+}
+
+/**
+ * Returns whether the current page is the full page view of the passed-in file.
+ *
+ * @param $file
+ *   A file object.
+ */
+function file_is_page($file) {
+  $page_file = menu_get_object('file', 1);
+  return (!empty($page_file) ? $page_file->fid == $file->fid : FALSE);
+}
+
+/**
+ * Process variables for file.tpl.php
+ *
+ * The $variables array contains the following arguments:
+ * - $file
+ * - $view_mode
+ *
+ * @see file.tpl.php
+ */
+function template_preprocess_file_entity(&$variables) {
+  $view_mode = $variables['view_mode'] = $variables['elements']['#view_mode'];
+  $variables['file'] = $variables['elements']['#file'];
+  $file = $variables['file'];
+
+  $variables['id'] = backdrop_html_id('file-'. $file->fid);
+  $variables['date'] = format_date($file->timestamp);
+  $account = user_load($file->uid);
+  $variables['name'] = theme('username', array('account' => $account));
+
+  $uri = entity_uri('file', $file);
+  $variables['file_url']  = url($uri['path'], $uri['options']);
+  $label = entity_label('file', $file);
+  $variables['label'] = check_plain($label);
+  $variables['page'] = $view_mode == 'full' && file_is_page($file);
+
+  // Hide the file name from being displayed until we can figure out a better
+  // way to control this. We cannot simply not output the title since
+  // contextual links require $title_suffix to be output in the template.
+  // @see http://drupal.org/node/1245266
+  if (!$variables['page']) {
+    $variables['title_attributes']['class'][] = 'element-invisible';
+  }
+
+  // Flatten the file object's member fields.
+  $variables = array_merge((array) $file, $variables);
+
+  // Helpful $content variable for templates.
+  $variables += array('content' => array());
+  foreach (element_children($variables['elements']) as $key) {
+    $variables['content'][$key] = $variables['elements'][$key];
+  }
+
+  // Make the field variables available with the appropriate language.
+  field_attach_preprocess('file', $file, $variables['content'], $variables);
+
+  // Attach the file object to the content element.
+  $variables['content']['file']['#file'] = $file;
+
+  // Gather file classes.
+  $variables['classes'][] = backdrop_html_class('file-' . $file->type);
+  if ($file->status != FILE_STATUS_PERMANENT) {
+    $variables['classes'][] = 'file-temporary';
+  }
+
+  // Change the 'file-entity' class into 'file'
+  if ($variables['classes'][0] == 'file-entity') {
+    $variables['classes'][0] = 'file';
+  }
+
+  // Clean up name so there are no underscores.
+  $variables['theme_hook_suggestions'][] = 'file__' . $file->type;
+  $variables['theme_hook_suggestions'][] = 'file__' . $file->type . '__' . $view_mode;
+  $variables['theme_hook_suggestions'][] = 'file__' . str_replace(array('/', '-'), array('__', '_'), $file->filemime);
+  $variables['theme_hook_suggestions'][] = 'file__' . str_replace(array('/', '-'), array('__', '_'), $file->filemime) . '__' . $view_mode;
+  $variables['theme_hook_suggestions'][] = 'file__' . $file->fid;
+  $variables['theme_hook_suggestions'][] = 'file__' . $file->fid . '__' . $view_mode;
 }
 
 /**
@@ -234,6 +991,11 @@ function file_file_download($uri, $field_type = 'file') {
     return;
   }
 
+  // Allow the user to download the file if they have appropriate permissions.
+  if (file_access('view', $file)) {
+    return file_get_content_headers($file);
+  }
+
   // Find out which (if any) fields of this type contain the file.
   $references = file_get_file_references($file, NULL, FIELD_LOAD_CURRENT, $field_type, FALSE);
 
@@ -249,6 +1011,7 @@ function file_file_download($uri, $field_type = 'file') {
 
   // Default to allow access.
   $denied = FALSE;
+
   // Loop through all references of this file. If a reference explicitly allows
   // access to the field to which this file belongs, no further checks are done
   // and download access is granted. If a reference denies access, eventually
@@ -471,6 +1234,9 @@ function file_admin_paths() {
     $paths = array(
       'file/*/delete' => TRUE,
       'file/*/manage' => TRUE,
+      'file/add' => TRUE,
+      'file/add/*' => TRUE,
+      'file/*/usage' => TRUE,
     );
     return $paths;
   }
@@ -1054,22 +1820,73 @@ function file_icon_map(File $file) {
 }
 
 /**
- * Pre-render callback for adding validation descriptions to file upload fields.
+ * Checks if pattern(s) match mimetype(s).
  */
-function file_upload_validators_pre_render($element) {
-  if (!empty($element['#upload_validators'])) {
-    if (!isset($element['#description'])) {
-      $element['#description'] = '';
-    }
-    if ($element['#description'] !== FALSE) {
-      $element['#description'] = theme('file_upload_help', array(
-        'description' => $element['#description'],
-        'upload_validators' => $element['#upload_validators'],
-      ));
+function file_match_mimetypes($needle, $haystack) {
+  $needle = is_array($needle) ? $needle : array($needle);
+  $haystack = is_array($haystack) ? $haystack : array($haystack);
+
+  foreach ($haystack as $mimetype) {
+    foreach ($needle as $search) {
+      if (file_fnmatch($search, $mimetype) || file_fnmatch($mimetype, $search)) {
+        return TRUE;
+      }
     }
   }
 
-  return $element;
+  return FALSE;
+}
+
+/**
+ * A wrapper function for the PHP function fnmatch().
+ *
+ * We include this, because Windows servers do not implement fnmatch() until
+ * PHP Version 5.3. See: http://php.net/manual/en/function.fnmatch.php
+ */
+function file_fnmatch($pattern, $string) {
+  if (!function_exists('fnmatch')) {
+    return preg_match("#^" . strtr(preg_quote($pattern, '#'), array('\*' => '.*', '\?' => '.', '\[' => '[', '\]' => ']')) . "$#", $string);
+  }
+  return fnmatch($pattern, $string);
+}
+
+function file_get_mimetype_type($file) {
+  if (is_array($file)) {
+    $file = (object) $file;
+  }
+  list($type, $subtype) = explode('/', $file->filemime, 2);
+  return $type;
+}
+
+/**
+ * Return an URI for a file download.
+ */
+function file_download_uri($file) {
+  $uri = array('path' => "file/{$file->fid}/download", 'options' => array());
+  $uri['options']['query']['token'] = file_get_download_token($file);
+  return $uri;
+}
+
+/*
+ * Generates a token to protect a file download URL.
+ *
+ * This prevents unauthorized crawling of all file download URLs since the
+ * {file_managed}.fid column is an auto-incrementing serial field and is easy
+ * to guess or attempt many at once. This can be costly both in CPU time
+ * and bandwidth.
+ *
+ * @see image_style_path_token()
+ *
+ * @param object $file
+ *   A file entity object.
+ *
+ * @return string
+ *   An eight-character token which can be used to protect file downloads
+ *   against denial-of-service attacks.
+ */
+function file_get_download_token($file) {
+  // Return the first eight characters.
+  return substr(backdrop_hmac_base64("file/$file->fid/download:" . $file->uri, backdrop_get_private_key() . backdrop_get_hash_salt()), 0, 8);
 }
 
 /**
@@ -1139,3 +1956,1333 @@ function file_get_file_references(File $file, $field = NULL, $age = FIELD_LOAD_R
 /**
  * @} End of "defgroup file-module-api".
  */
+
+/**
+ * @defgroup file_display File displays API
+ * @{
+ * Functions to load and save information about file displays.
+ */
+
+/**
+ * Returns an array containing a single display to use for a file type in a
+ * given view mode.
+ *
+ * @param string $file_type
+ *   The type of file.
+ * @param string $view_mode
+ *   The view mode.
+ *
+ * @return array
+ *   An array containing the following key/value pairs:
+ *   - status: Whether this display is enabled. If not TRUE, file_view_file()
+ *     skips over it.
+ *   - weight: An integer that determines the order of precedence within the
+ *     returned array. The lowest weight display capable of displaying the file
+ *     is used.
+ *   - settings: An array of key/value pairs specific to the formatter type. See
+ *     hook_file_formatter_info() for details.
+ *
+ * @see hook_file_formatter_info()
+ * @see file_view_file()
+ */
+function file_display($file_type, $view_mode) {
+  $cache = &backdrop_static(__FUNCTION__, array());
+
+  // If the requested view mode isn't configured to use a custom display for its
+  // fields, then don't use a custom display for its file either.
+  if ($view_mode != 'default') {
+    $view_mode_settings = field_view_mode_settings('file', $file_type);
+    $view_mode = !empty($view_mode_settings[$view_mode]['custom_settings']) ? $view_mode : 'default';
+  }
+
+  if (!isset($cache[$file_type][$view_mode])) {
+    // Load the display configuration for the file type and view mode. If none
+    // exist for the view mode, use the default view mode.
+    $display = file_display_load($file_type, $view_mode);
+    if (empty($display) && $view_mode != 'default') {
+      $cache[$file_type][$view_mode] = file_display($file_type, 'default');
+    }
+    else {
+      $cache[$file_type][$view_mode] = $display;
+    }
+  }
+
+  return $cache[$file_type][$view_mode];
+}
+
+/**
+ * Returns the display to use for a file type in a given view mode.
+ *
+ * @deprecated since 1.14.0.
+ */
+function file_displays($file_type, $view_mode) {
+  watchdog_deprecated_function('file', __FUNCTION__);
+  return file_display($file_type, $view_mode);
+}
+
+/**
+ * Returns an array with a single value. The key is the formatter name, and the
+ * value is a {file_display} array for the file type.
+ */
+function file_display_load($file_type, $view_mode) {
+  $display = config_get('file_display.' . $file_type, $view_mode);
+  return $display;
+}
+
+/**
+ * Returns a single {file_display} array for the file type.
+ *
+ * @deprecated since 1.14.0.
+ */
+function file_displays_load($file_type, $view_mode) {
+  watchdog_deprecated_function('file', __FUNCTION__);
+  return file_display_load($file_type, $view_mode);
+}
+
+/**
+ * Saves a {file_display} array to config.
+ */
+function file_display_save($file_type, $view_mode, $display) {
+  $config = config('file_display.' . $file_type);
+  $config->set('type', $file_type);
+  $config->set($view_mode, $display);
+  $config->save();
+
+  file_info_cache_clear();
+}
+
+/**
+ * @} End of "defgroup file_display".
+ */
+
+/**
+ * Implements hook_config_info().
+ */
+function file_config_info() {
+  $prefixes['file.type'] = array(
+    'name_key' => 'type',
+    'label_key' => 'name',
+    'group' => t('File types'),
+  );
+  $prefixes['file_display'] = array(
+    'name_key' => 'type',
+    'group' => t('File displays'),
+  );
+  $prefixes['file.settings'] = array(
+    'label' => t('File settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
+ * Menu argument loader: Loads a file type by string.
+ *
+ * @param $name
+ *   The machine-readable name of a file type to load, where '_' is replaced
+ *   with '-'.
+ *
+ * @return stdClass|FALSE
+ *   A file type object or FALSE if $name does not exist.
+ */
+function file_type_load($name) {
+  return file_type_get_type(strtr($name, array('-' => '_')));
+}
+
+/**
+ * Returns the file type of the passed file or file type string.
+ *
+ * @param File|string $file
+ *   A file entity or the machine name of the file type to return.
+ *
+ * @return stdClass|FALSE
+ *   A single file type, as an object, or FALSE if the file type is not found.
+ *   The file type is an object containing fields from a file type's config
+ *   file.
+ */
+function file_type_get_type($file) {
+  $type = is_object($file) ? $file->type : $file;
+  $types = _file_types_build()->types;
+
+  return isset($types[$type]) ? $types[$type] : FALSE;
+}
+
+/**
+ * Returns a list of all the available file types.
+ *
+ * This list can include types that are queued for addition or deletion.
+ * See _file_types_build() for details.
+ *
+ * @return stdClass[]
+ *   An array of file types, as objects, keyed by the type.
+ *
+ * @see file_type_get_type()
+ */
+function file_type_get_types() {
+  return _file_types_build()->types;
+}
+
+/**
+ * Returns a list of available file type names.
+ *
+ * This list can include types that are queued for addition or deletion.
+ * See _file_types_build() for details.
+ *
+ * @return array
+ *   An array of file type names, keyed by the type.
+ */
+function file_type_get_names() {
+  return _file_types_build()->names;
+}
+
+/**
+ * Returns the file type name of the passed file or file type string.
+ *
+ * @param $file
+ *   A file object or string that indicates the file type to return.
+ *
+ * @return
+ *   The file type name or FALSE if the file type is not found.
+ */
+function file_type_get_name($file) {
+  $type = is_object($file) ? $file->type : $file;
+  $info = entity_get_info('file');
+
+  return isset($info['bundles'][$type]['label']) ? $info['bundles'][$type]['label'] : FALSE;
+}
+
+/**
+ * Return an array of available view modes for file entities.
+ */
+function file_view_mode_labels() {
+  $labels = &backdrop_static(__FUNCTION__);
+
+  if (!isset($options)) {
+    $entity_info = entity_get_info('file');
+    $labels = array('default' => t('Default'));
+    foreach ($entity_info['view modes'] as $machine_name => $mode) {
+      $labels[$machine_name] = $mode['label'];
+    }
+  }
+
+  return $labels;
+}
+
+/**
+ * Return the label for a specific file entity view mode.
+ */
+function file_view_mode_label($view_mode, $default = FALSE) {
+  $labels = file_view_mode_labels();
+  return isset($labels[$view_mode]) ? $labels[$view_mode] : $default;
+}
+
+/**
+ * Builds and returns the list of available file types.
+ *
+ * This function reads from disk individual config files that define the
+ * available content types in the system. Modules may bundle a file type with
+ * their module by including a "file.type.[type_name].json" config file in their
+ * module's config directory. Each file should contain:
+ *   - type: (required)
+ *   - name: (required) The human-readable name of the file type.
+ *   - description: (required) A brief description of the file type.
+ *   - mimetypes: (required)
+ *
+ * @return
+ *   An object with two properties:
+ *   - names: Associative array of the names of file types, keyed by the type.
+ *   - types: Associative array of file type objects, keyed by the type.
+ *   These arrays will also include obsolete types: types that were previously
+ *   defined by modules that have been disabled, likely by a module that was
+ *   provided a file type and then was disabled. These are indicated in the
+ *   type object by $type->disabled being set to TRUE.
+ */
+function _file_types_build() {
+  $cid = 'file_types:' . $GLOBALS['language']->langcode;
+
+  $_file_types = &backdrop_static(__FUNCTION__);
+  if (isset($_file_types)) {
+    return $_file_types;
+  }
+  if ($cache = cache()->get($cid)) {
+    $_file_types = $cache->data;
+    return $_file_types;
+  }
+
+  $_file_types = (object) array('types' => array(), 'names' => array());
+  module_load_include('inc', 'file', 'file.admin');
+
+  $config_names = config_get_names_with_prefix('file.type.');
+  foreach ($config_names as $config_name) {
+    $file_type_data = config($config_name)->get();
+
+    // Check if the file type is disabled or the module is enabled.
+    $module = $file_type_data['module'];
+    $module_disabled = TRUE;
+    if ($module === 'file' || module_exists($module)) {
+      $module_disabled = FALSE;
+    }
+
+    // If the module is enabled, $disabled is forced to TRUE.
+    $file_type_data['disabled'] = !empty($file_type_data['disabled']) || $module_disabled;
+
+    $type = str_replace('file.type.', '', $config_name);
+    $_file_types->types[$type] = (object) $file_type_data;
+    $_file_types->names[$type] = $file_type_data['name'];
+  }
+
+  // Allow modules to load their defaults into the file type info.
+  foreach (module_implements('file_type_load') as $module) {
+    $function = $module . '_file_type_load';
+    $function($_file_types->types);
+  }
+
+  cache()->set($cid, $_file_types);
+
+  return $_file_types;
+}
+
+/**
+ * Clears the file type cache.
+ */
+function file_type_cache_reset() {
+  cache()->deletePrefix('file_types:');
+  backdrop_static_reset('_file_types_build');
+  entity_info_cache_clear();
+}
+
+/**
+ * Clears caches that are related to file entity.
+ *
+ * Clears all cached configuration related to file types, formatters, and
+ * display settings.
+ */
+function file_info_cache_clear() {
+  // Clear the formatter type cache, managed by file_info_formatter_types().
+  backdrop_static_reset('file_info_formatter_types');
+
+  // Clear file type caches.
+  backdrop_static_reset('_file_types_build');
+}
+
+/**
+ * Clear the field cache for any entities referencing a specific file.
+ *
+ * @param object $file
+ *   A file object.
+ */
+function file_invalidate_field_caches($file) {
+  $entity_types = &backdrop_static(__FUNCTION__);
+
+  // Gather the list of entity types which support field caching.
+  if (!isset($entity_types)) {
+    $entity_types = array();
+    foreach (entity_get_info() as $entity_type => $entity_info) {
+      if (!empty($entity_info['fieldable']) && !empty($entity_info['field cache'])) {
+        $entity_types[] = $entity_type;
+      }
+    }
+  }
+
+  // If no entity types support field caching, then there is no work to be done.
+  if (empty($entity_types)) {
+    return;
+  }
+
+  $records = db_query("SELECT DISTINCT type, id FROM {file_usage} WHERE fid = :fid AND type IN (:types) AND id > 0", array(':fid' => $file->fid, ':types' => $entity_types))->fetchAll();
+  if (!empty($records)) {
+    $cids = array();
+    foreach ($records as $record) {
+      $cids[] = 'field:' . $record->type . ':' . $record->id;
+    }
+    cache_clear_all($cids, 'cache_field');
+  }
+}
+
+/**
+ * Returns an array of valid file extensions.
+ */
+function file_type_get_valid_extensions($type) {
+  include_once BACKDROP_ROOT . '/core/includes/file.mimetypes.inc';
+  $mapping = file_mimetype_mapping();
+
+  $type_extensions = array();
+  $type_ext_keys = array();
+  if (!empty($type->mimetypes)) {
+    foreach ($mapping['mimetypes'] as $ext_key => $mimetype) {
+      if (file_match_mimetypes($mimetype, $type->mimetypes)) {
+        $type_ext_keys[] = $ext_key;
+      }
+    }
+
+    if ($type_ext_keys) {
+      $type_extensions = array_intersect($mapping['extensions'], $type_ext_keys);
+      $type_extensions = array_keys($type_extensions);
+    }
+  }
+
+  return $type_extensions;
+}
+
+/**
+ * Check if a file entity is considered local or not.
+ *
+ * @param object $file
+ *   A file entity object from file_load().
+ *
+ * @return
+ *   TRUE if the file is using a local stream wrapper, or FALSE otherwise.
+ */
+function file_is_local($file) {
+  $scheme = file_uri_scheme($file->uri);
+  $wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_LOCAL);
+  return !empty($wrappers[$scheme]) && empty($wrappers[$scheme]['remote']);
+}
+
+/**
+ * Check if a file entity is considered writeable or not.
+ *
+ * @param object $file
+ *   A file entity object from file_load().
+ *
+ * @return
+ *   TRUE if the file is using a visible, readable and writeable stream wrapper,
+ *   or FALSE otherwise.
+ */
+function file_is_writeable($file) {
+  $scheme = file_uri_scheme($file->uri);
+  $wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
+  return !empty($wrappers[$scheme]);
+}
+
+/**
+ * Pre-render callback for adding validation descriptions to file upload fields.
+ */
+function file_upload_validators_pre_render($element) {
+  if (!empty($element['#upload_validators'])) {
+    if (!isset($element['#description'])) {
+      $element['#description'] = '';
+    }
+    if ($element['#description'] !== FALSE) {
+      $element['#description'] = theme('file_upload_help', array(
+        'description' => $element['#description'],
+        'upload_validators' => $element['#upload_validators'],
+      ));
+    }
+  }
+
+  return $element;
+}
+
+/**
+ * Menu access callback for the 'view mode file display settings' pages.
+ *
+ * Based on _field_ui_view_mode_menu_access(), but the Field UI module might not
+ * be enabled.
+ */
+function _file_view_mode_menu_access($file_type, $view_mode, $access_callback) {
+  // Deny access if the view mode isn't configured to use custom display
+  // settings.
+  $view_mode_settings = field_view_mode_settings('file', $file_type->type);
+  $visibility = ($view_mode == 'default') || !empty($view_mode_settings[$view_mode]['custom_settings']);
+  if (!$visibility) {
+    return FALSE;
+  }
+
+  // Otherwise, continue to an $access_callback check.
+  $args = array_slice(func_get_args(), 3);
+  $callback = empty($access_callback) ? 0 : trim($access_callback);
+  if (is_numeric($callback)) {
+    return (bool) $callback;
+  }
+  elseif (function_exists($access_callback)) {
+    return call_user_func_array($access_callback, $args);
+  }
+}
+
+/**
+ * Sorts an array by weight.
+ *
+ * Helper function to sort an array by the value of each item's 'weight' key,
+ * while preserving relative order of items that have equal weight.
+ */
+function _file_sort_array_by_weight(&$a) {
+  if (!empty($a)) {
+    $i = 0;
+    foreach ($a as $key => $item) {
+      if (!isset($a[$key]['weight'])) {
+        $a[$key]['weight'] = 0;
+      }
+      $original_weight[$key] = $a[$key]['weight'];
+      $a[$key]['weight'] += $i / 1000;
+      $i++;
+    }
+    backdrop_sort($a, array('weight' => SORT_NUMERIC));
+    foreach ($a as $key => $item) {
+      $a[$key]['weight'] = $original_weight[$key];
+    }
+  }
+}
+
+/*
+ * Implements hook_cron_queue_info().
+ */
+function file_cron_queue_info() {
+  $queues['file_type_determine'] = array(
+    'worker callback' => 'file_type_determine',
+  );
+  return $queues;
+}
+
+/*
+ * Determines file type for a given file ID and saves the file.
+ *
+ * @param $fid
+ *   A file ID.
+ */
+function file_type_determine($fid) {
+  if ($file = file_load($fid)) {
+    // The file type will be automatically determined when saving the file.
+    file_save($file);
+  }
+}
+
+/**
+ * Implements hook_admin_menu_map().
+ */
+function file_admin_bar_map() {
+  if (!user_access('administer file types')) {
+    return;
+  }
+  $map['admin/structure/file-types/manage/%file_type'] = array(
+    'parent' => 'admin/structure/file-types',
+    'arguments' => array(
+      array('%file_type' => array_keys(file_type_get_names())),
+    ),
+  );
+  return $map;
+}
+
+/**
+ * Find all fields that are of a certain field type.
+ *
+ * @param string $field_type
+ *   A field type.
+ *
+ * @return array
+ *   An array of field names that match the type $field_type.
+ */
+function _file_get_fields_by_type($field_type) {
+  $return = array();
+  if (function_exists('field_info_field_map')) {
+    foreach (field_info_field_map() as $field_name => $field) {
+      if ($field['type'] == $field_type) {
+        $return[$field_name] = $field_name;
+      }
+    }
+  }
+  else {
+    foreach (field_info_fields() as $field_name => $field) {
+      if ($field['type'] == $field_type) {
+        $return[$field_name] = $field_name;
+      }
+    }
+  }
+  return $return;
+}
+
+/**
+ * Implements hook_field_attach_load().
+ */
+function file_field_attach_load($entity_type, $entities, $age, $options) {
+  // Loop over all the entities looking for entities with attached images.
+  foreach ($entities as $entity) {
+    // field_purge_batch() calls hook_field_attach_load() on a stub entity,
+    // which causes this to error as there is no ->bundle() property on these
+    // stubs.
+    if (method_exists($entity, 'bundle')) {
+      $bundle = $entity->bundle();
+    }
+    else {
+      return;
+    }
+    // Examine every image field instance attached to this entity's bundle.
+    $instances = array_intersect_key(field_info_instances($entity_type, $bundle), _file_get_fields_by_type('image'));
+    foreach ($instances as $field_name => $instance) {
+      if (!empty($entity->{$field_name})) {
+        foreach ($entity->{$field_name} as $langcode => $items) {
+          foreach ($items as $delta => $item) {
+            // If alt and title text is not specified, fall back to alt and
+            // title text on the file.
+            if (!empty($item['fid']) && (empty($item['alt']) || empty($item['title']))) {
+              $file = file_load($item['fid']);
+              foreach (array('alt', 'title') as $key) {
+                if (empty($item[$key]) && !empty($file->{$key})) {
+                  $entity->{$field_name}[$langcode][$delta][$key] = $file->{$key};
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+function file_get_public_and_private_stream_wrapper_names($flag = STREAM_WRAPPERS_VISIBLE) {
+  $wrappers = array();
+  foreach (file_get_stream_wrappers($flag) as $key => $wrapper) {
+    if (empty($wrapper['private'])) {
+      $wrappers['public'][$key] = $wrapper['name'];
+    }
+    else {
+      $wrappers['private'][$key] = $wrapper['name'];
+    }
+  }
+  return $wrappers;
+}
+
+/**
+ * Determines file type for a given file.
+ *
+ * @param object $file
+ *   File object.
+ *
+ * @return string
+ *   Machine name of file type that should be used for given file.
+ */
+function file_get_type($file) {
+  $types = module_invoke_all('file_type', $file);
+  backdrop_alter('file_type', $types, $file);
+
+  return empty($types) ? NULL : reset($types);
+}
+
+/**
+ * @defgroup file_access File access rights
+ * @{
+ * The file access system determines who can do what to which files.
+ *
+ * In determining access rights for a file, file_access() first checks
+ * whether the user has the "bypass file access" permission. Such users have
+ * unrestricted access to all files. user 1 will always pass this check.
+ *
+ * Next, all implementations of hook_file_access() will be called. Each
+ * implementation may explicitly allow, explicitly deny, or ignore the access
+ * request. If at least one module says to deny the request, it will be
+ * rejected.
+ * If no modules deny the request and at least one says to allow it, the request
+ * will be permitted.
+ *
+ * There is no access grant system for files.
+ *
+ * In file listings, the process above is followed except that
+ * hook_file_access() is not called on each file for performance reasons
+ * and for proper functioning of the pager system. When adding a filelisting to
+ * your module, be sure to use a dynamic query created by db_select()
+ * and add a tag of "file_access". This will allow modules dealing
+ * with file access to ensure only files to which the user has access
+ * are retrieved, through the use of hook_query_TAG_alter().
+ *
+ * Note: Even a single module returning FILE_ACCESS_DENY from
+ * hook_file_access() will block access to the file. Therefore,
+ * implementers should take care to not deny access unless they really intend
+ * to.
+ * Unless a module wishes to actively deny access it should return
+ * FILE_ACCESS_IGNORE (or simply return nothing)
+ * to allow other modules to control access.
+ *
+ * Stream wrappers that are considered private should implement a 'private'
+ * flag equal to TRUE in hook_stream_wrappers().
+ */
+
+/**
+ * Determines if a user may perform the given operation on the specified file.
+ *
+ * @param $op
+ *   The operation to be performed on the file. Possible values are:
+ *   - "view"
+ *   - "download"
+ *   - "update"
+ *   - "delete"
+ *   - "create"
+ * @param $file
+ *   The file object on which the operation is to be performed, or file type
+ *   (e.g. 'image') for "create" operation.
+ * @param $account
+ *   Optional, a user object representing the user for whom the operation is to
+ *   be performed. Determines access for a user other than the current user.
+ *
+ * @return
+ *   TRUE if the operation may be performed, FALSE otherwise.
+ */
+function file_access($op, $file = NULL, $account = NULL) {
+  $rights = &backdrop_static(__FUNCTION__, array());
+
+  if (!$file && !in_array($op, array('view', 'download', 'update', 'delete', 'create'), TRUE)) {
+    // If there was no file to check against, and the $op was not one of the
+    // supported ones, we return access denied.
+    return FALSE;
+  }
+
+  // If no user object is supplied, the access check is for the current user.
+  if (empty($account)) {
+    $account = $GLOBALS['user'];
+  }
+
+  // $file may be either an object or a file type. Since file types cannot be
+  // an integer, use either fid or type as the static cache id.
+  $cache_id = NULL;
+  if (!empty($file->id)) {
+    $cache_id = $file->id;
+  }
+  elseif (is_string($file) && $op == 'create') {
+    $cache_id = $file;
+  }
+  else {
+    $cache_id = backdrop_hash_base64(serialize($file));
+  }
+
+  // If we've already checked access for this file, user and op, return from
+  // cache.
+  if (isset($rights[$account->uid][$cache_id][$op])) {
+    return $rights[$account->uid][$cache_id][$op];
+  }
+
+  if (user_access('bypass file access', $account)) {
+    return $rights[$account->uid][$cache_id][$op] = TRUE;
+  }
+
+  // We grant access to the file if both of the following conditions are met:
+  // - No modules say to deny access.
+  // - At least one module says to grant access.
+  $access = module_invoke_all('file_access', $op, $file, $account);
+  if (in_array(FILE_ACCESS_DENY, $access, TRUE)) {
+    return $rights[$account->uid][$cache_id][$op] = FALSE;
+  }
+  elseif (in_array(FILE_ACCESS_ALLOW, $access, TRUE)) {
+    return $rights[$account->uid][$cache_id][$op] = TRUE;
+  }
+
+
+  // Fall back to default behaviors on view.
+  if ($op == 'view' && is_object($file)) {
+    $scheme = file_uri_scheme($file->uri);
+    $wrapper = file_get_stream_wrapper($scheme);
+
+    if (!empty($wrapper['private'])) {
+      // For private files, users can view private files if the
+      // user has the 'view private files' permission.
+      if (user_access('view private files', $account)) {
+        return $rights[$account->uid][$cache_id][$op] = TRUE;
+      }
+
+      // For private files, users can view their own private files if the
+      // user is not anonymous, and has the 'view own private files' permission.
+      if (!empty($account->uid) && $file->uid == $account->uid && user_access('view own private files', $account)) {
+        return $rights[$account->uid][$cache_id][$op] = TRUE;
+      }
+    }
+    elseif ($file->status == FILE_STATUS_PERMANENT && $file->uid == $account->uid && user_access('view own files', $account)) {
+      // For non-private files, allow to see if user owns the file.
+      return $rights[$account->uid][$cache_id][$op] = TRUE;
+    }
+    elseif ($file->status == FILE_STATUS_PERMANENT && user_access('view files', $account)) {
+      // For non-private files, users can view if they have the 'view files'
+      // permission.
+      return $rights[$account->uid][$cache_id][$op] = TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Deprecated wrapper function. Determines if a user may perform the given
+ * operation on the specified file.
+ *
+ * @see file_access()
+ * @deprecated since 1.14.0
+ */
+function file_entity_access($op, $file = NULL, $account = NULL) {
+  watchdog_deprecated_function('file', __FUNCTION__, t('Change record:') . ' ' . l(t('File access functions have been renamed from <code>file_entity</code> module in Drupal 7'), 'https://api.backdropcms.org/change-records/file-access-functions-have-been-renamed-from-file_entity-module-in-drupal-7', array('attributes' => array('target' => '_blank'))));
+  return file_access($op, $file, $account);
+}
+
+/**
+ * Return a specific stream wrapper's registry information.
+ *
+ * @param $scheme
+ *   A URI scheme, a stream is referenced as "scheme://target".
+ *
+ * @see file_get_stream_wrappers()
+ */
+function file_get_stream_wrapper($scheme) {
+  $wrappers = file_get_stream_wrappers();
+  return isset($wrappers[$scheme]) ? $wrappers[$scheme] : FALSE;
+}
+
+
+/**
+ * Implements hook_stream_wrappers_alter().
+ */
+function file_stream_wrappers_alter(&$wrappers) {
+  if (isset($wrappers['private'])) {
+    $wrappers['private']['private'] = TRUE;
+  }
+  if (isset($wrappers['temporary'])) {
+    $wrappers['temporary']['private'] = TRUE;
+  }
+}
+
+/**
+ * Implements hook_file_access().
+ */
+function file_file_access($op, $file, $account) {
+  // If the file URI is invalid, deny access.
+  if (is_object($file) && isset($file->uri) && !file_valid_uri($file->uri)) {
+    if(isset($file->is_new) && $file->is_new == true && user_access('create files', $account)) {
+      return FILE_ACCESS_ALLOW;
+    }
+    return FILE_ACCESS_DENY;
+  }
+
+  if ($op == 'create') {
+    if (user_access('create files', $account)) {
+      return FILE_ACCESS_ALLOW;
+    }
+  }
+
+  if (!empty($file)) {
+    $type = is_string($file) ? $file : $file->type;
+
+    if (in_array($type, file_permissions_get_configured_types())) {
+      if ($op == 'download') {
+        if (user_access('download any ' . $type . ' files', $account) || is_object($file) && user_access('download own ' . $type . ' files', $account) && ($account->uid == $file->uid)) {
+          return FILE_ACCESS_ALLOW;
+        }
+      }
+
+      if ($op == 'update') {
+        if (user_access('manage files', $account) || user_access('edit any ' . $type . ' files', $account) || (is_object($file) && user_access('edit own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
+          return FILE_ACCESS_ALLOW;
+        }
+      }
+
+      if ($op == 'delete') {
+        if (user_access('delete files', $account) || user_access('delete any ' . $type . ' files', $account) || (is_object($file) && user_access('delete own ' . $type . ' files', $account) && ($account->uid == $file->uid))) {
+          return FILE_ACCESS_ALLOW;
+        }
+      }
+    }
+  }
+
+  return FILE_ACCESS_IGNORE;
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ *
+ * This is the hook_query_alter() for queries tagged with 'file_access'. It adds
+ * file access checks for the user account given by the 'account' meta-data (or
+ * global $user if not provided).
+ */
+function file_query_file_access_alter(QueryAlterableInterface $query) {
+  _file_query_file_access_alter($query, 'file');
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ *
+ * This function implements the same functionality as
+ * file_query_file_access_alter() for the SQL field storage engine. File
+ * access conditions are added for field values belonging to files only.
+ */
+function file_query_entity_field_access_alter(QueryAlterableInterface $query) {
+  _file_query_file_access_alter($query, 'entity');
+}
+
+/**
+ * Helper for file entity access functions.
+ *
+ * @param $query
+ *   The query to add conditions to.
+ * @param $type
+ *   Either 'file' or 'entity' depending on what sort of query it is. See
+ *   file_query_file_access_alter() and
+ *   file_query_entity_field_access_alter() for more.
+ */
+function _file_query_file_access_alter($query, $type) {
+  global $user;
+
+  // Read meta-data from query, if provided.
+  if (!$account = $query->getMetaData('account')) {
+    $account = $user;
+  }
+
+  // If $account can bypass file access, we don't need to alter the query.
+  if (user_access('bypass file access', $account)) {
+    return;
+  }
+
+  $tables = $query->getTables();
+  $base_table = $query->getMetaData('base_table');
+  // Do not use the base table for general entity queries unless this is
+  // querying the file_managed table directly.
+  if ($base_table && $type == 'entity' && $base_table != 'file_managed') {
+    $base_table = '';
+  }
+
+  // If no base table is specified explicitly, search for one.
+  if (!$base_table) {
+    $fallback = '';
+    foreach ($tables as $alias => $table_info) {
+      if (!($table_info instanceof SelectQueryInterface || $table_info['table'] instanceof SelectQueryInterface)) {
+        $table = $table_info['table'];
+        // If the file_managed table is in the query, it wins immediately.
+        if ($table == 'file_managed') {
+          $base_table = $table;
+          break;
+        }
+        // Check whether the table has a foreign key to file_managed.fid. If it
+        // does, do not run this check again as we found a base table and only
+        // file_managed can triumph that.
+        if (!$base_table) {
+          // The schema is cached.
+          $schema = backdrop_get_schema($table);
+          if (isset($schema['fields']['fid'])) {
+            if (isset($schema['foreign keys'])) {
+              foreach ($schema['foreign keys'] as $relation) {
+                if ($relation['table'] === 'file_managed' && $relation['columns'] === array('fid' => 'fid')) {
+                  $base_table = $table;
+                }
+              }
+            }
+            else {
+              // At least it's a fid. A table with a field called fid is very
+              // very likely to be a file_managed.fid in a file access query.
+              $fallback = $table;
+            }
+          }
+          elseif (isset($schema['fields']['entity_id']) && isset($schema['fields']['entity_type']) && isset($schema['fields']['deleted']) && isset($schema['fields']['delta'])) {
+            // The table is a field data table, use it as fallback.
+            $base_table = $table;
+          }
+        }
+      }
+    }
+    // If there is nothing else, use the fallback.
+    if (!$base_table) {
+      if ($fallback) {
+        watchdog('security', 'Your file listing query is using @fallback as a base table in a query tagged for file access. This might not be secure and might not even work. Specify foreign keys in your schema to file_managed.fid ', array('@fallback' => $fallback), WATCHDOG_WARNING);
+        $base_table = $fallback;
+      }
+      else {
+        // Ignore this query as it was a general field query and no
+        // relationships were found to the file_managed table.
+        if ($type == 'entity') {
+          return;
+        }
+        throw new Exception(t('Query tagged for file access but there is no fid. Add foreign keys to file_managed.fid in schema to fix.'));
+      }
+    }
+  }
+
+  if ($type == 'entity') {
+    // The original query looked something like:
+    // @code
+    //  SELECT fid FROM sometable s
+    //  WHERE ($file_access_conditions)
+    // @endcode
+    //
+    // Our query will look like:
+    // @code
+    //  SELECT entity_type, entity_id
+    //  FROM field_data_something s
+    //  WHERE (entity_type = 'file' AND $file_access_conditions) OR (entity_type <> 'file')
+    // @endcode
+    //
+    // So instead of directly adding to the query object, we need to collect
+    // all of the file access conditions in a separate db_and() object and
+    // then add it to the query at the end.
+    $file_conditions = db_and();
+  }
+  foreach ($tables as $falias => $tableinfo) {
+    $table = $tableinfo['table'];
+    if (!($table instanceof SelectQueryInterface) && $table == $base_table) {
+      $subquery = db_select('file_managed', 'fm_access')->fields('fm_access', array('fid'));
+      $subquery_conditions = db_or();
+
+      $wrappers = file_get_public_and_private_stream_wrapper_names();
+      if (!empty($wrappers['public'])) {
+        if (user_access('view files', $account)) {
+          foreach (array_keys($wrappers['public']) as $wrapper) {
+            $subquery_conditions->condition('fm_access.uri', $wrapper . '%', 'LIKE');
+          }
+        }
+        elseif (user_access('view own files', $account)) {
+          foreach (array_keys($wrappers['public']) as $wrapper) {
+            $subquery_conditions->condition(db_and()
+              ->condition('fm_access.uri', $wrapper . '%', 'LIKE')
+              ->condition('fm_access.uid', $account->uid)
+            );
+          }
+        }
+      }
+      if (!empty($wrappers['private'])) {
+        if (user_access('view private files', $account)) {
+          foreach (array_keys($wrappers['private']) as $wrapper) {
+            $subquery_conditions->condition('fm_access.uri', $wrapper . '%', 'LIKE');
+          }
+        }
+        elseif (user_access('view own private files', $account)) {
+          foreach (array_keys($wrappers['private']) as $wrapper) {
+            $subquery_conditions->condition(db_and()
+              ->condition('fm_access.uri', $wrapper . '%', 'LIKE')
+              ->condition('fm_access.uid', $account->uid)
+            );
+          }
+        }
+      }
+
+      // If there is no subquery conditions, the query is likely for file usage.
+      // Or user can only access public files.
+      // If there are subquery conditions then add them to the subquery.
+      if ($subquery_conditions->count() >= 1) {
+        $subquery->condition($subquery_conditions);
+      }
+
+      $field = 'fid';
+      // Now handle entities.
+      if ($type == 'entity') {
+        // Set a common alias for entities.
+        $base_alias = $falias;
+        $field = ($falias == 'file_managed' ? 'fid' : 'entity_id');
+      }
+      $subquery->where("$falias.$field = fm_access.fid");
+
+      // For an entity query, attach the subquery to entity conditions.
+      if ($type == 'entity') {
+        $file_conditions->exists($subquery);
+      }
+      // Otherwise attach it to the node query itself.
+      elseif ($table == 'file_managed') {
+        // Fix for https://drupal.org/node/2073085
+        $db_or = db_or();
+        $db_or->exists($subquery);
+        $db_or->isNull($falias . '.' . $field);
+        $query->condition($db_or);
+      }
+      else {
+        $query->exists($subquery);
+      }
+    }
+  }
+
+  if ($type == 'entity' && $file_conditions->count()) {
+    // All the file access conditions are only for field values belonging to
+    // files.
+    if ($base_alias !== 'file_managed') {
+      $file_conditions->condition("$base_alias.entity_type", 'file');
+      $or = db_or();
+      $or->condition($file_conditions);
+      // If the field value belongs to a non-file entity type then this function
+      // does not do anything with it.
+      $or->condition("$base_alias.entity_type", 'file', '<>');
+      // Add the compiled set of rules to the query.
+      $query->condition($or);
+    }
+    else {
+      $query->condition($file_conditions);
+    }
+  }
+}
+
+/**
+ * Helper function to generate standard file permission list for a given type.
+ *
+ * @param $type
+ *   The machine-readable name of the file type.
+ * @return array
+ *   An array of permission names and descriptions.
+ */
+function file_list_permissions($type) {
+  $info = file_type_load($type);
+
+  // Build standard list of file permissions for this type.
+  $permissions = array(
+    "edit own $type files" => array(
+      'title' => t('%type_name: Edit own files', array('%type_name' => $info->name)),
+    ),
+    "edit any $type files" => array(
+      'title' => t('%type_name: Edit any files', array('%type_name' => $info->name)),
+    ),
+    "delete own $type files" => array(
+      'title' => t('%type_name: Delete own files', array('%type_name' => $info->name)),
+    ),
+    "delete any $type files" => array(
+      'title' => t('%type_name: Delete any files', array('%type_name' => $info->name)),
+    ),
+    "download own $type files" => array(
+      'title' => t('%type_name: Download own files', array('%type_name' => $info->name)),
+    ),
+    "download any $type files" => array(
+      'title' => t('%type_name: Download any files', array('%type_name' => $info->name)),
+    ),
+  );
+
+  return $permissions;
+}
+
+/**
+ * Returns an array of file types that should be managed by permissions.
+ *
+ * By default, this will include all file types in the system. To exclude a
+ * specific file from getting permissions defined for it, set the
+ * file_permissions_$type variable to 0. File entity does not provide an
+ * interface for doing so, however, contrib modules may exclude their own files
+ * in hook_install(). Alternatively, contrib modules may configure all file
+ * types at once, or decide to apply some other hook_file_access()
+ * implementation to some or all file types.
+ *
+ * @return
+ *   An array of file types managed by this module.
+ */
+function file_permissions_get_configured_types() {
+
+  $configured_types = array();
+
+  /* @todo: Make configuration for this*/
+  foreach (file_type_get_types() as $type => $info) {
+    $configured_types[] = $info->type;
+  }
+
+  return $configured_types;
+}
+
+/**
+ * @} End of "defgroup file_access".
+ *
+ * Construct a backdrop_render() style array from an array of loaded files.
+ *
+ * @param array $files
+ *   An array of files as returned by file_load_multiple().
+ * @param string $view_mode
+ *   View mode.
+ * @param int $weight
+ *   An integer representing the weight of the first file in the list.
+ * @param string $langcode
+ *   A string indicating the language field values are to be shown in. If no
+ *   language is provided the current content language is used.
+ *
+ * @return array
+ *   An array in the format expected by backdrop_render().
+ */
+function file_view_multiple($files, $view_mode = 'full', $weight = 0, $langcode = NULL) {
+  $build = array();
+
+  $entities_by_view_mode = entity_view_mode_prepare('file', $files, $view_mode, $langcode);
+  foreach ($entities_by_view_mode as $entity_view_mode => $entities) {
+    field_attach_prepare_view('file', $entities, $entity_view_mode, $langcode);
+    entity_prepare_view('file', $entities, $langcode);
+
+    foreach ($entities as $entity) {
+      $build['files'][$entity->fid] = file_view($entity, $entity_view_mode, $langcode);
+    }
+  }
+
+  foreach ($files as $file) {
+    $build['files'][$file->fid]['#weight'] = $weight;
+    $weight++;
+  }
+  // Sort here, to preserve the input order of the entities that were passed to
+  // this function.
+  uasort($build['files'], 'element_sort');
+  $build['files']['#sorted'] = TRUE;
+
+  return $build;
+}
+
+/**
+ * Generate an array for rendering the given file.
+ *
+ * @param object $file
+ *   A file object.
+ * @param string $view_mode
+ *   View mode.
+ * @param string $langcode
+ *   (optional) A language code to use for rendering. Defaults to the global
+ *   content language of the current request.
+ *
+ * @return array
+ *   An array as expected by backdrop_render().
+ */
+function file_view($file, $view_mode = 'full', $langcode = NULL) {
+  if (!isset($langcode)) {
+    $langcode = $GLOBALS['language_content']->langcode;
+  }
+
+  // Populate $file->content with a render() array.
+  file_build_content($file, $view_mode, $langcode);
+
+  $build = $file->content;
+  // We don't need duplicate rendering info in $file->content.
+  unset($file->content);
+
+  $build += array(
+    '#theme' => 'file_entity',
+    '#file' => $file,
+    '#view_mode' => $view_mode,
+    '#language' => $langcode,
+  );
+
+  // Add contextual links for this file, except when the file is already being
+  // displayed on its own page. Modules may alter this behavior (for example,
+  // to restrict contextual links to certain view modes) by implementing
+  // hook_file_view_alter().
+  if (!empty($file->fid) && !($view_mode == 'full' && file_is_page($file))) {
+    $build['#contextual_links']['file'] = array('file', array($file->fid));
+  }
+
+  // Allow modules to modify the structured file.
+  $type = 'file';
+  backdrop_alter(array('file_view', 'entity_view'), $build, $type);
+
+  return $build;
+}
+
+/**
+ * Builds a structured array representing the file's content.
+ *
+ * @param object $file
+ *   A file object.
+ * @param string $view_mode
+ *   View mode, e.g. 'default', 'full', etc.
+ * @param string $langcode
+ *   (optional) A language code to use for rendering. Defaults to the global
+ *   content language of the current request.
+ */
+function file_build_content($file, $view_mode = 'full', $langcode = NULL) {
+  if (!isset($langcode)) {
+    $langcode = $GLOBALS['language_content']->language;
+  }
+
+  // Remove previously built content, if exists.
+  $file->content = array();
+
+  // In case of a multiple view, file_view_multiple() already ran the
+  // 'prepare_view' step. An internal flag prevents the operation from running
+  // twice.
+  // Allow modules to change the view mode.
+  $view_mode = key(entity_view_mode_prepare('file', array($file->fid => $file), $view_mode, $langcode));
+  field_attach_prepare_view('file', array($file->fid => $file), $view_mode, $langcode);
+  entity_prepare_view('file', array($file->fid => $file), $langcode);
+
+  // Build the actual file display.
+  // @todo Figure out how to clean this crap up.
+  $file->content['file'] = file_view_file($file, $view_mode, $langcode);
+  if (isset($file->content['file'])) {
+    if (isset($file->content['file']['#theme']) && $file->content['file']['#theme'] != 'file_link') {
+      unset($file->content['file']['#file']);
+    }
+    unset($file->content['file']['#view_mode']);
+    unset($file->content['file']['#language']);
+  }
+  else {
+    unset($file->content['file']);
+  }
+
+  // Build fields content.
+  $file->content += field_attach_view('file', $file, $view_mode, $langcode);
+
+  $links = array();
+  $file->content['links'] = array(
+    '#theme' => 'links__file',
+    '#pre_render' => array('backdrop_pre_render_links'),
+    '#attributes' => array('class' => array('links', 'inline')),
+  );
+  $file->content['links']['file'] = array(
+    '#theme' => 'links__file__file',
+    '#links' => $links,
+    '#attributes' => array('class' => array('links', 'inline')),
+  );
+
+  // Allow modules to make their own additions to the file.
+  module_invoke_all('file_view', $file, $view_mode, $langcode);
+  module_invoke_all('entity_view', $file, 'file', $view_mode, $langcode);
+}
+
+/**
+ * Generate an array for rendering just the file portion of a file entity.
+ *
+ * @param object $file
+ *   A file object.
+ * @param string|array $displays
+ *   Can be either:
+ *   - the name of a view mode;
+ *   - or custom display settings, as returned by file_display().
+ * @param string $langcode
+ *   (optional) A language code to use for rendering. Defaults to the global
+ *   content language of the current request.
+ *
+ * @return array
+ *   An array as expected by backdrop_render().
+ */
+function file_view_file($file, $display = 'full', $langcode = NULL) {
+  if (!isset($langcode)) {
+    $langcode = $GLOBALS['language_content']->langcode;
+  }
+
+  // Prepare incoming display specifications.
+  if (is_string($display)) {
+    // Allow modules to change the view mode.
+    $entity = array($file->fid => $file);
+    $view_mode = key(entity_view_mode_prepare('file', $entity, $display, $langcode));
+    $display = file_display($file->type, $view_mode);
+  }
+  else {
+    $view_mode = '_custom_display';
+  }
+
+  $formatter = $display['formatter'];
+  $settings = $display['settings'][$formatter];
+
+  // Attempt to display the file with the specified display.
+  // See file_display() for details.
+  $element = NULL;
+  // Load the file that contains file_info_formatter_types().
+  module_load_include('inc', 'file', 'file.admin');
+
+  $formatter_info = file_info_formatter_types($formatter);
+  if (isset($formatter_info['view callback']) && ($function = $formatter_info['view callback']) && function_exists($function)) {
+
+    if (!empty($formatter_info['default settings'])) {
+      if (empty($display['settings'][$formatter])) {
+        $display['settings'] = array();
+      }
+      $display['settings'][$formatter] += $formatter_info['default settings'];
+    }
+    $display_info = array(
+      'type' => $formatter,
+      'settings' => $display['settings'][$formatter],
+    );
+    $element = $function($file, $display_info, $langcode);
+  }
+
+  // As a last resort, fall back to showing a link to the file.
+  if (!isset($element)) {
+    $element = array(
+      '#theme' => 'file_link',
+      '#file' => $file,
+    );
+  }
+
+  // Add defaults and return the element.
+  $element += array(
+    '#file' => $file,
+    '#view_mode' => $view_mode,
+    '#language' => $langcode,
+  );
+
+  return $element;
+}

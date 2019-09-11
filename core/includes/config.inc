@@ -251,8 +251,8 @@ function config_load_multiple($names, $type = 'active') {
  */
 function config_install_default_config($module, $config_name = NULL) {
   $module_config_dir = backdrop_get_path('module', $module) . '/config';
-  $storage = new ConfigFileStorage($module_config_dir);
-  if (is_dir(backdrop_get_path('module', $module) . '/config')) {
+  if (is_dir($module_config_dir)) {
+    $storage = new ConfigFileStorage($module_config_dir);
     $files = glob($module_config_dir . '/' . '*.json');
     foreach ($files as $file) {
       // Load config data into the active store and write it out to the
@@ -1262,7 +1262,9 @@ class ConfigFileStorage implements ConfigStorageInterface {
 
     try {
       $archiver = new ArchiverTar($realpath);
-      $archiver->extract($this->directory, $archiver->listContents());
+      // Only extract JSON files, ignoring anything else in the archive.
+      $file_list = preg_grep('/.json$/', $archiver->listContents());
+      $archiver->extract($this->directory, $file_list);
     }
     catch (\Exception $e) {
       watchdog('config', 'Could not extract the archive @uri: @error', array('@uri' => $file_uri, '@error' => $e->getMessage()), WATCHDOG_ERROR);
