@@ -293,12 +293,35 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
     $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
     $this->assertEqual($result_count, 1, 'Option 2: View has one result.');
     $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
-    $this->assertIdentical($nid, (int) $this->nodes[0]->nid, 'Option 2: View result has correct node id.');
+    $this->assertIdentical($nid, (int) $this->nodes[0]->nid, 'Option 2: View result has correct node ID.');
 
-    // @todo: Add test for Option 3: Is one of 1 or 2.
-    // @todo: Add test for Option 4: Is all of 1 and 2.
+    // Option 3: Is one of 1 or 2.
+    $view = $this->getReducedExposedGroupedOptionsTestView();
+    $view->set_exposed_input(array(
+      'field_list_value' => '3',
+    ));
+    $this->executeView($view);
 
-    /* Option 5: Is empty. */
+    // Assert correct result set.
+    $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
+    $this->assertEqual($result_count, 1, 'Option 3: View has one result.');
+    $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
+    $this->assertIdentical($nid, (int) $this->nodes[0]->nid, 'Option 3: View result has correct node ID.');
+
+    /* @todo: Fix and uncomment in issue #3045168.
+     * // Option 4: Is all of 1 and 2.
+     * $view = $this->getReducedExposedGroupedOptionsTestView();
+     * $view->set_exposed_input(array(
+     *   'field_list_value' => '4',
+     * ));
+     * $this->executeView($view);
+     *
+     * // Assert correct result set.
+     * $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 1;
+     * $this->assertEqual($result_count, 0, 'Option 4: View has empty result.');
+     */
+
+    // Option 5: Is empty.
     $view = $this->getReducedExposedGroupedOptionsTestView();
     $view->set_exposed_input(array(
       'field_list_value' => '5',
@@ -322,7 +345,154 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
     $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
     $this->assertEqual($result_count, 1, 'Option 6: View has one result.');
     $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
-    $this->assertIdentical($nid, (int) $this->nodes[0]->nid, 'Option 6: View result has correct node id.');
+    $this->assertIdentical($nid, (int) $this->nodes[0]->nid, 'Option 6: View result has correct node ID.');
+  }
+
+  /**
+   * Tests exposed filter on term ID with grouped options.
+   */
+  public function testTermIdExposedGroupedOptions() {
+    // Assert that nodes have been created and have expected field values.
+    $value = field_get_items('node', $this->nodes[0], 'field_tags', LANGUAGE_NONE);
+    $value = isset($value[0]['tid']) ? (int) $value[0]['tid'] : 0;
+    $this->assertIdentical($value, 2, 'First node has been created and tags field references term 2.');
+
+    $value = field_get_items('node', $this->nodes[1], 'field_tags', LANGUAGE_NONE);
+    $value = isset($value[0]['tid']) ? (int) $value[0]['tid'] : 0;
+    $this->assertIdentical($value, 1, 'Second node has been created and tags field references term 1.');
+
+    // Assert that user has been created and has expected field values.
+    $value = field_get_items('user', $this->accounts[0], 'field_tags', LANGUAGE_NONE);
+    $value = isset($value[0]['tid']) ? (int) $value[0]['tid'] : 0;
+    $this->assertIdentical($value, 1, 'User has been created and tags field references term 1.');
+
+    // Assert that node ID with empty field value matches user ID so that the
+    // node would be excluded from the result option 1, if the joins are missing
+    // extras.
+    $this->assertIdentical((int) $this->accounts[0]->uid, (int) $this->nodes[1]->nid, 'Node ID of second node matches UID of first user.');
+
+    // Default option: Any.
+    $view = $this->getTermIdExposedGroupedOptionsTestView();
+    $this->executeView($view);
+
+    // Assert correct result set.
+    $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
+    $this->assertEqual($result_count, 3, 'Default option: View has three results.');
+    $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
+    $result1 = ($nid === (int) $this->nodes[0]->nid);
+    $nid = isset($view->result[1]->nid) ? (int) $view->result[1]->nid : 0;
+    $result2 = ($nid === (int) $this->nodes[1]->nid);
+    $nid = isset($view->result[2]->nid) ? (int) $view->result[2]->nid : 0;
+    $result3 = ($nid === (int) $this->nodes[2]->nid);
+    $this->assertTrue($result1 && $result2 && $result3, 'Default option: View result has correct node ID.');
+
+    // Option 1: Is none of 2.
+    $view = $this->getTermIdExposedGroupedOptionsTestView();
+    $view->set_exposed_input(array(
+      'field_tags_tid' => '1',
+    ));
+    $this->executeView($view);
+
+    // Assert correct result set.
+    $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
+    $this->assertEqual($result_count, 1, 'Option 1: View has one result.');
+    $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
+    $this->assertIdentical($nid, (int) $this->nodes[1]->nid, 'Option 1: View result has correct node ID.');
+
+    // Option 2: Is none of 1 or 2.
+    $view = $this->getTermIdExposedGroupedOptionsTestView();
+    $view->set_exposed_input(array(
+      'field_tags_tid' => '2',
+    ));
+    $this->executeView($view);
+
+    // Assert correct result set.
+    $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 1;
+    $this->assertEqual($result_count, 0, 'Option 2: View has empty result.');
+
+    // Option 3: Is one of 1.
+    $view = $this->getTermIdExposedGroupedOptionsTestView();
+    $view->set_exposed_input(array(
+      'field_tags_tid' => '3',
+    ));
+    $this->executeView($view);
+
+    // Assert correct result set.
+    $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
+    $this->assertEqual($result_count, 2, 'Option 3: View has two results.');
+    $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
+    $result1 = ($nid === (int) $this->nodes[1]->nid);
+    $nid = isset($view->result[1]->nid) ? (int) $view->result[1]->nid : 0;
+    $result2 = ($nid === (int) $this->nodes[2]->nid);
+    $this->assertTrue($result1 && $result2, 'Option 3: View result has correct node ID.');
+
+    // Option 4: Is one of 1 or 2.
+    $view = $this->getTermIdExposedGroupedOptionsTestView();
+    $view->set_exposed_input(array(
+      'field_tags_tid' => '4',
+    ));
+    $this->executeView($view);
+
+    // Assert correct result set.
+    $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
+    $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
+    $result1 = ($nid === (int) $this->nodes[0]->nid);
+    $nid = isset($view->result[1]->nid) ? (int) $view->result[1]->nid : 0;
+    $result2 = ($nid === (int) $this->nodes[1]->nid);
+    $nid = isset($view->result[2]->nid) ? (int) $view->result[2]->nid : 0;
+    $result3 = ($nid === (int) $this->nodes[2]->nid);
+    $nid = isset($view->result[3]->nid) ? (int) $view->result[3]->nid : 0;
+    $result4 = ($nid === (int) $this->nodes[2]->nid);
+    $this->assertTrue($result1 && $result2 && $result3 && $result4, 'Option 4: View result has correct node ID.');
+    $this->verbose($view->result);
+    $this->assertEqual($result_count, 4, 'Option 4: View has four results.');
+
+    /* @todo: Fix and uncomment in issue #3045168.
+     * // Option 5: Is all of 1 and 2.
+     * $view = $this->getTermIdExposedGroupedOptionsTestView();
+     * $view->set_exposed_input(array(
+     *   'field_tags_tid' => '5',
+     * ));
+     * $this->executeView($view);
+     *
+     * // Assert correct result set.
+     * $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
+     * $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
+     * $this->assertIdentical($nid, (int) $this->nodes[2]->nid, 'Option 5: View result has correct node ID.');
+     * $this->assertIdentical($result_count, 1, 'Option 5: View has one result.');
+     */
+
+    // Option 6: Is empty.
+    $view = $this->getTermIdExposedGroupedOptionsTestView();
+    $view->set_exposed_input(array(
+      'field_tags_tid' => '6',
+    ));
+    $this->executeView($view);
+
+    // Assert correct result set.
+    $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 1;
+    $this->assertIdentical($result_count, 0, 'Option 6: View has empty result.');
+
+    // Option 7: Is not empty.
+    $view = $this->getTermIdExposedGroupedOptionsTestView();
+    $view->set_exposed_input(array(
+      'field_tags_tid' => '7',
+    ));
+    $this->executeView($view);
+
+    // Assert correct result set.
+    $result_count = isset($view->result) && is_array($view->result) ? count($view->result) : 0;
+    $nid = isset($view->result[0]->nid) ? (int) $view->result[0]->nid : 0;
+    $result1 = ($nid === (int) $this->nodes[0]->nid);
+    $nid = isset($view->result[1]->nid) ? (int) $view->result[1]->nid : 0;
+    $result2 = ($nid === (int) $this->nodes[1]->nid);
+    $nid = isset($view->result[2]->nid) ? (int) $view->result[2]->nid : 0;
+    $result3 = ($nid === (int) $this->nodes[2]->nid);
+    $nid = isset($view->result[3]->nid) ? (int) $view->result[3]->nid : 0;
+    $result4 = ($nid === (int) $this->nodes[2]->nid);
+    $this->assertTrue($result1 && $result2 && $result3 && $result4, 'Option 7: View result has correct node ID.');
+    $this->verbose($view->result);
+    $this->assertIdentical($result_count, 4, 'Option 7: View has four results.');
   }
 
   /**
@@ -356,11 +526,10 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
     $handler->display->display_options['fields']['title']['label'] = '';
     $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
     $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
-    /* Sort criterion: Content: Post date */
-    $handler->display->display_options['sorts']['created']['id'] = 'created';
-    $handler->display->display_options['sorts']['created']['table'] = 'node';
-    $handler->display->display_options['sorts']['created']['field'] = 'created';
-    $handler->display->display_options['sorts']['created']['order'] = 'DESC';
+    /* Sort criterion: Content: Nid */
+    $handler->display->display_options['sorts']['nid']['id'] = 'nid';
+    $handler->display->display_options['sorts']['nid']['table'] = 'node';
+    $handler->display->display_options['sorts']['nid']['field'] = 'nid';
     $handler->display->display_options['filter_groups']['operator'] = 'OR';
     $handler->display->display_options['filter_groups']['groups'] = array(
       1 => 'AND',
@@ -391,7 +560,7 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
   }
 
   /**
-   * Generates test_not view.
+   * Generates test_oneof view.
    */
   protected function getReducedExposedGroupedOptionsTestView() {
     $view = new view();
@@ -421,11 +590,10 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
     $handler->display->display_options['fields']['title']['label'] = '';
     $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
     $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
-    /* Sort criterion: Content: Post date */
-    $handler->display->display_options['sorts']['created']['id'] = 'created';
-    $handler->display->display_options['sorts']['created']['table'] = 'node';
-    $handler->display->display_options['sorts']['created']['field'] = 'created';
-    $handler->display->display_options['sorts']['created']['order'] = 'DESC';
+    /* Sort criterion: Content: Nid */
+    $handler->display->display_options['sorts']['nid']['id'] = 'nid';
+    $handler->display->display_options['sorts']['nid']['table'] = 'node';
+    $handler->display->display_options['sorts']['nid']['field'] = 'nid';
     /* Filter criterion: Content: Published */
     $handler->display->display_options['filters']['status']['id'] = 'status';
     $handler->display->display_options['filters']['status']['table'] = 'node';
@@ -488,6 +656,128 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
         'value' => array(),
       ),
     );
+    return $view;
+  }
+
+  /**
+   * Generates test_tid_exposed_grouped_options view.
+   */
+  protected function getTermIdExposedGroupedOptionsTestView() {
+    $view = new view();
+    $view->name = 'test_tid_exposed_grouped_options';
+    $view->description = '';
+    $view->tag = 'default';
+    $view->base_table = 'node';
+    $view->human_name = 'test_tid_exposed_grouped_options';
+    $view->core = 7;
+    $view->api_version = '3.0';
+    $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+    /* Display: Master */
+    $handler = $view->new_display('default', 'Master', 'default');
+    $handler->display->display_options['use_more_always'] = FALSE;
+    $handler->display->display_options['access']['type'] = 'perm';
+    $handler->display->display_options['cache']['type'] = 'none';
+    $handler->display->display_options['query']['type'] = 'views_query';
+    $handler->display->display_options['exposed_form']['type'] = 'basic';
+    $handler->display->display_options['pager']['type'] = 'full';
+    $handler->display->display_options['style_plugin'] = 'default';
+    $handler->display->display_options['row_plugin'] = 'fields';
+    /* Field: Content: Title */
+    $handler->display->display_options['fields']['title']['id'] = 'title';
+    $handler->display->display_options['fields']['title']['table'] = 'node';
+    $handler->display->display_options['fields']['title']['field'] = 'title';
+    $handler->display->display_options['fields']['title']['label'] = '';
+    $handler->display->display_options['fields']['title']['alter']['word_boundary'] = FALSE;
+    $handler->display->display_options['fields']['title']['alter']['ellipsis'] = FALSE;
+    /* Sort criterion: Content: Nid */
+    $handler->display->display_options['sorts']['nid']['id'] = 'nid';
+    $handler->display->display_options['sorts']['nid']['table'] = 'node';
+    $handler->display->display_options['sorts']['nid']['field'] = 'nid';
+    /* Filter criterion: Content: Published */
+    $handler->display->display_options['filters']['status']['id'] = 'status';
+    $handler->display->display_options['filters']['status']['table'] = 'node';
+    $handler->display->display_options['filters']['status']['field'] = 'status';
+    $handler->display->display_options['filters']['status']['value'] = 1;
+    $handler->display->display_options['filters']['status']['group'] = 1;
+    $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
+    /* Filter criterion: Content: Tags (field_tags) */
+    $handler->display->display_options['filters']['field_tags_tid']['id'] = 'field_tags_tid';
+    $handler->display->display_options['filters']['field_tags_tid']['table'] = 'field_data_field_tags';
+    $handler->display->display_options['filters']['field_tags_tid']['field'] = 'field_tags_tid';
+    $handler->display->display_options['filters']['field_tags_tid']['value'] = array(
+      1 => '1',
+      2 => '2',
+    );
+    $handler->display->display_options['filters']['field_tags_tid']['exposed'] = TRUE;
+    $handler->display->display_options['filters']['field_tags_tid']['expose']['operator_id'] = 'field_tags_tid_op';
+    $handler->display->display_options['filters']['field_tags_tid']['expose']['label'] = 'Tags (field_tags)';
+    $handler->display->display_options['filters']['field_tags_tid']['expose']['operator'] = 'field_tags_tid_op';
+    $handler->display->display_options['filters']['field_tags_tid']['expose']['identifier'] = 'field_tags_tid';
+    $handler->display->display_options['filters']['field_tags_tid']['expose']['remember_roles'] = array(
+      2 => '2',
+    );
+    $handler->display->display_options['filters']['field_tags_tid']['is_grouped'] = TRUE;
+    $handler->display->display_options['filters']['field_tags_tid']['group_info']['label'] = 'Tags (field_tags)';
+    $handler->display->display_options['filters']['field_tags_tid']['group_info']['identifier'] = 'field_tags_tid';
+    $handler->display->display_options['filters']['field_tags_tid']['group_info']['group_items'] = array(
+      1 => array(
+        'title' => 'Is none of 2',
+        'operator' => 'not',
+        'value' => array(
+          2 => '2',
+        ),
+      ),
+      2 => array(
+        'title' => 'Is none of 1 or 2',
+        'operator' => 'not',
+        'value' => array(
+          1 => '1',
+          2 => '2',
+        ),
+      ),
+      3 => array(
+        'title' => 'Is one of 1',
+        'operator' => 'or',
+        'value' => array(
+          1 => '1',
+        ),
+      ),
+      4 => array(
+        'title' => 'Is one of 1 or 2',
+        'operator' => 'or',
+        'value' => array(
+          1 => '1',
+          2 => '2',
+        ),
+      ),
+      5 => array(
+        'title' => 'Is all of 1 and 2',
+        'operator' => 'and',
+        'value' => array(
+          1 => '1',
+          2 => '2',
+        ),
+      ),
+      6 => array(
+        'title' => 'Is empty',
+        'operator' => 'empty',
+        'value' => array(
+          1 => '1',
+          2 => '2',
+        ),
+      ),
+      7 => array(
+        'title' => 'Is not empty',
+        'operator' => 'not empty',
+        'value' => array(
+          1 => '1',
+          2 => '2',
+        ),
+      ),
+    );
+    $handler->display->display_options['filters']['field_tags_tid']['type'] = 'select';
+    $handler->display->display_options['filters']['field_tags_tid']['vocabulary'] = 'tags';
     return $view;
   }
 

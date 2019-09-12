@@ -887,7 +887,12 @@ class views_many_to_one_helper {
       }
       else {
         $value = is_array($value) ? array_pop($value) : $value;
-        $operator = '=';
+        if (is_array($value) && count($value) > 1) {
+          $operator = 'IN';
+        }
+        else {
+          $operator = '=';
+        }
       }
       $add_condition = FALSE;
     }
