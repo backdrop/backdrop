@@ -38,7 +38,7 @@ function field_token_info_alter(&$info) {
       );
 
       // Provide taxonomy term reference chained tokens
-      if ($field['field_type'] === 'taxonomy_term_reference') {
+      if (isset($field['field_type']) && $field['field_type'] === 'taxonomy_term_reference') {
         $info['tokens'][$token_type][$field_name]['type'] = 'term';
       }
     }
