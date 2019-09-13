@@ -1109,11 +1109,22 @@ function file_details_page($file) {
   $rows = array();
 
   foreach ($file as $fieldname => $info) {
-    if ($fieldname == 'timestamp') {
-      $info = date('Y-m-d H:i:s', $info);
-    }
-    if ($fieldname == 'filesize') {
-      $info = number_format($info);
+    switch ($fieldname) {
+      case "timestamp":
+        $info = date('Y-m-d H:i:s', $info);
+        break;
+      case "filesize":
+        $info = format_size($info);
+        break;
+      case "width":
+        $info .= " px";
+        break;
+      case "height":
+        $info .= " px";
+        break;
+      case "status":
+        $info == 1 ? $info = "permanent" : $info = "temporary";
+        break;
     }
     $rows[] = array($fieldname, check_plain($info));
   }
