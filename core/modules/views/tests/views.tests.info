@@ -321,3 +321,9 @@ name = Test the view class
 description = Tests some  functionality of the view class.
 group = Views
 file = views_view.test
+
+[ViewsHandlerManyToOneTest]
+name = Many To One
+description = Tests the many_to_one_helper handler.
+group = Views Handlers
+file = handlers/views_handler_manytoone.test
