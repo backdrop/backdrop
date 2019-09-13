@@ -1488,7 +1488,7 @@ function file_managed_file_validate(&$element, &$form_state) {
   $clicked_button = end($form_state['triggering_element']['#parents']);
   if ($clicked_button != 'remove_button' && !empty($element['fid']['#value'])) {
     $file = file_load($element['fid']['#value']);
-    if ($file = false) {
+    if ($file == false) {
       form_error($element, t('The file referenced by the !name field does not exist.', array('!name' => $element['#title'])));
     }
   }
