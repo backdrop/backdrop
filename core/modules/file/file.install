@@ -855,7 +855,7 @@ function file_update_1003() {
   // Warn users that existing files will not have a file type until the queue
   // has been processed.
   if ($queue->numberOfItems()) {
-    backdrop_set_message(t('Existing files must be classified according to the currently defined file types. These files have been queued for processing and will have their file type determined during cron runs.'));
+    backdrop_set_message(t('All files must now be classified according to file types. Your files have been queued for processing, and will have their file type determined during cron runs.'));
   }
 }
 
