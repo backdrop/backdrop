@@ -4,7 +4,7 @@
  * Provides integration with the CKEditor WYSIWYG editor.
  */
 
-define('CKEDITOR_VERSION', '4.11.1');
+define('CKEDITOR_VERSION', '4.12.1');
 
 /**
  * Implements hook_menu().
