@@ -1141,3 +1141,24 @@ function file_update_1006() {
     db_drop_table('file_display');
   }
 }
+
+/**
+ * Grant the admin role permission to manage files and file types.
+ */
+function file_update_1007() {
+  $admin_role = config_get('system.core', 'user_admin_role');
+
+  $config = config('user.role.' . $admin_role);
+  $permissions = $config->get('permissions');
+  // Add the new permissions.
+  $permissions[] = 'bypass file access';
+  $permissions[] = 'administer file types';
+  $permissions[] = 'create files';
+  $permissions[] = 'view own private files';
+  $permissions[] = 'view own files';
+  $permissions[] = 'view private files';
+  $permissions[] = 'view files';
+  // Save the role.
+  $config->set('permissions', $permissions);
+  $config->save();
+}
