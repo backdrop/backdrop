@@ -714,6 +714,11 @@ function layout_config_info() {
     'label_key' => 'path',
     'group' => t('Layout menu items'),
   );
+  $prefixes['layout.flexible'] = array(
+    'name_key' => 'name',
+    'label_key' => 'title',
+    'group' => t('Flexible layout templates'),
+  );
   return $prefixes;
 }
 
