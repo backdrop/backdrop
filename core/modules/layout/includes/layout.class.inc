@@ -675,7 +675,12 @@ class Layout {
 
     $old_layout_info = layout_get_layout_template_info($this->layout_template);
     $new_layout_info = layout_get_layout_template_info($layout_name);
+    // Set up the array with region names for the new layout.
     $new_positions = array();
+    $new_regions = array_keys($new_layout_info['regions']);
+    foreach ($new_regions as $new_region_name) {
+      $new_positions[$new_region_name] = array();
+    }
 
     // Do the mapping in the order provided (if any).
     if ($region_mapping) {
@@ -695,9 +700,6 @@ class Layout {
       else {
         $new_region_name = FALSE;
       }
-      if ($new_region_name && !array_key_exists($new_region_name, $new_positions)) {
-        $new_positions[$new_region_name] = array();
-      }
 
       if (isset($this->positions[$old_region_name])) {
         foreach ($this->positions[$old_region_name] as $uuid) {
@@ -710,11 +712,12 @@ class Layout {
         }
       }
     }
+
+    // Assign orphan blocks to the default or last region, if the former doesn't
+    // exist.
     if (!empty($this->orphaned_blocks)) {
-      // Assign orphan blocks to the default or last region,
-      // if the former doesn't exist.
       end($new_positions);
-      $this->refuge_region = isset($new_layout_info['default region']) ? $new_layout_info['default region'] : key($new_positions);
+      $this->refuge_region = !empty($new_layout_info['default region']) ? $new_layout_info['default region'] : key($new_positions);
       foreach ($this->orphaned_blocks as $uuid) {
         $new_positions[$this->refuge_region][] = $uuid;
       }
