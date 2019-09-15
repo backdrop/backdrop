@@ -1,0 +1,209 @@
+/* Import "Lora" font from Google fonts */
+@import url(http://fonts.googleapis.com/css?family=Lora:400,700);
+
+html, body {
+	background:#fbf3e8;
+}
+body {
+	margin:0;
+	padding:2em 5px;
+	font:100% Lora,Georgia,'Times New Roman',Times,serif;
+	color:#222;
+}
+#content {
+	padding:0 5px;
+}
+#content p a {
+	word-wrap:break-word;
+}
+h1, h2, h3 {
+	font-family:"PT Sans Narrow","Arial Narrow",Arial,Helvetica,sans-serif;
+	font-weight:bold;
+	color:#1675A1;
+}
+h1 {
+	margin-top:1em;
+	margin-bottom:0.36em;
+	font-size:2.26em;
+}
+h2 {
+	font-size:1.667em;
+}
+h2, h3, h4 {
+	margin-top:0;
+	margin-bottom:0.416em;
+}
+p, ul, dl {
+	margin-bottom:1.5em;
+	line-height:1.625em;
+}
+ul {
+	list-style:circle;
+	padding-left:1.3em;
+}
+a {
+	color:#D23600;
+	text-decoration:none;
+}
+a:hover, a:focus, a:active {
+	color:#980000;
+}
+small {
+	font-size:0.8em;
+}
+#themes {
+	margin:2.5625em 0 2em 0;
+	border:1px solid;
+ 	border-color:#ebe3d9;
+ 	border-color:rgba(0,0,0,0.04);
+	padding:2.5%;
+	background:#f4ece1;
+	background:rgba(0,0,0,0.03);
+	-moz-border-radius:8px;
+	-webkit-border-radius:8px;
+	border-radius:8px;
+}
+#themes p:last-child {
+	margin-bottom:0;
+}
+#themes select {
+	display:block;
+	width:100%;
+	height:24px;
+	line-height:24px;
+	background:#fff;
+}
+#themes label {
+	margin-left:0.3em;
+}
+.right-column h2 {
+	margin-top:0;
+}
+.right-column h4 {
+	font-size:1em;
+	font-weight:normal;
+}
+dl.docs-terms dt {
+	margin:0 0 0.5em 0;
+	font-weight:bold;
+}
+dl.docs-terms dd {
+	margin:0 0 1.5em 1.3em;
+}
+dl.docs-arguments {
+	margin:0 0 0 1.3em;
+}
+dl.docs-arguments dt, dl.docs-arguments dd {
+	margin:0;
+}
+pre.sh_sourceCode {
+	border:1px solid;
+	border-color:#e1ddd8;
+	border-color:rgba(0,0,0,0.10);
+	padding:0.5em;
+	background:#f9f5f0;
+	background:rgba(255,255,255,0.5);
+	overflow:auto;
+	min-width:0;
+	font:0.89em Consolas,'Lucida Console',Monaco,'Courier New',Courier,monospace;
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	border-radius:3px;
+}
+code {
+	background:#f9f5f0;
+	background:rgba(255,255,255,0.5);
+	-moz-border-radius:3px;
+	-webkit-border-radius:3px;
+	border-radius:3px;
+}
+kbd {
+	/* Thanks to: https://github.com/michaelhue/keyscss */
+	display: inline;
+	display: inline-block;
+	min-width: 1em;
+	padding: .2em .3em;
+	font: normal .85em/1 "Arial Unicode MS", "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, sans-serif;
+	text-align: center;
+	-moz-border-radius: .3em;
+	-webkit-border-radius: .3em;
+	border-radius: .3em;
+	cursor: default;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	user-select: none;
+	background: #555;
+	background-image:-moz-linear-gradient(top,rgb(70,70,70) 0%,rgb(90,90,90) 100%);
+	background-image:-webkit-gradient(linear,left top,left bottom,color-stop(0%,rgb(70,70,70)),color-stop(100%,rgb(90,90,90)));
+	background-image:-webkit-linear-gradient(top,rgb(70,70,70) 0%,rgb(90,90,90) 100%);
+	background-image:-o-linear-gradient(top,rgb(70,70,70) 0%,rgb(90,90,90) 100%);
+	background-image:-ms-linear-gradient(top,rgb(70,70,70) 0%,rgb(90,90,90) 100%);
+	background-image:linear-gradient(top,rgb(70,70,70) 0%,rgb(90,90,90) 100%);
+	color: #fff;
+	text-shadow: -1px -1px 0 rgb(70, 70, 70);
+	-moz-box-shadow: inset 0 0 1px rgb(150, 150, 150), inset 0 -.05em .4em rgb(80, 80, 80), 0 .1em 0 rgb(30, 30, 30), 0 .1em .1em rgba(0, 0, 0, .3);
+	-webkit-box-shadow: inset 0 0 1px rgb(150, 150, 150), inset 0 -.05em .4em rgb(80, 80, 80), 0 .1em 0 rgb(30, 30, 30), 0 .1em .1em rgba(0, 0, 0, .3);
+	box-shadow: inset 0 0 1px rgb(150, 150, 150), inset 0 -.05em .4em rgb(80, 80, 80), 0 .1em 0 rgb(30, 30, 30), 0 .1em .1em rgba(0, 0, 0, .3);
+}
+.pagination {
+	text-align:center;
+}
+.pagination a {
+	margin:1em 0.5em 0 0.5em;
+	display:inline-block;
+	border:1px solid #dad3c9;
+	border-color:rgba(0,0,0,0.10);
+	padding:0.111em 0.666em;
+	text-decoration:none;
+	color:#1675A1;
+	-moz-border-radius:50px;
+	-webkit-border-radius:50px;
+	border-radius:50px;
+}
+.pagination a:hover, .pagination a:focus, .pagination a:active {
+	color:#d23600;
+}
+.gray-button {
+	display:inline-block;
+	border:1px solid #dad3c9;
+	padding:0.111em 0.666em;
+	text-decoration:none;
+	background:transparent;
+	color:#1675A1;
+	white-space:nowrap;
+	font-family:inherit;
+	font-size:1em;
+	font-weight:bold;
+	line-height:1.61em;
+	-moz-border-radius:50px;
+	-webkit-border-radius:50px;
+	border-radius:50px;
+	cursor:pointer;
+	outline:none;
+}
+.gray-button:hover, .gray-button:focus, .gray-button:active {
+	color:#d23600;
+}
+@media (min-width: 640px) {
+	body {
+		padding:2em;
+		font-size:112.5%;
+	}
+	.columns {
+		overflow:hidden;
+	}
+	.left-column, .right-column {
+		float:left;
+		width:50%;
+	}
+	.right-column {
+		float:right;
+	}
+	#content {
+		margin:0 24px;
+		padding:0;
+	}
+	#themes {
+		margin:2.5625em 24px 2em 24px;
+	}
+}

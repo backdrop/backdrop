@@ -1385,9 +1385,10 @@ function system_library_info() {
       ),
     ),
     'js' => array(
-      // Backdrop includes a "combined" file that bundles together both the
-      // main library and the keyboard support file.
-      'core/misc/smartmenus/jquery.smartmenus.combined.js' => array(
+      'core/misc/smartmenus/jquery.smartmenus.js' => array(
+        'group' => JS_LIBRARY,
+      ),
+      'core/misc/smartmenus/addons/keyboard/jquery.smartmenus.keyboard.js' => array(
         'group' => JS_LIBRARY,
       ),
     ),

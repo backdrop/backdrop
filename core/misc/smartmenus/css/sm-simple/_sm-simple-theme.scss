@@ -1,5 +1,3 @@
-@import 'compass';
-
 // This file is best viewed with Tab size 4 code indentation
 
 
@@ -88,7 +86,7 @@ $sm-simple__collapsible-sub-item-indentation:			8px !default;
 $sm-simple__desktop-bg:									$sm-simple__white !default;
 
 // Items
-$sm-simple__desktop-item-color:							$sm-simple__gray_darker !default;
+$sm-simple__desktop-item-color:							$sm-simple__gray-darker !default;
 $sm-simple__desktop-item-hover-bg:						$sm-simple__gray !default;
 $sm-simple__desktop-item-current-color:					$sm-simple__white !default;
 $sm-simple__desktop-item-current-bg:					$sm-simple__gray-darker !default;
@@ -123,7 +121,7 @@ $sm-simple__toggle-spacing: floor($sm-simple__item-height * 0.1);
 .sm-simple {
 	border: $sm-simple__border-width solid $sm-simple__collapsible-border-color;
 	background: $sm-simple__collapsible-bg;
-	@include box-shadow($sm-simple__collapsible-box-shadow);
+	box-shadow: $sm-simple__collapsible-box-shadow;
 
 	// Main menu items
 	a {
@@ -152,7 +150,7 @@ $sm-simple__toggle-spacing: floor($sm-simple__item-height * 0.1);
 		}
 
 		// Toggle buttons (sub menu indicators)
-		span.sub-arrow {
+		.sub-arrow {
 			position: absolute;
 			top: 50%;
 			margin-top: -(ceil($sm-simple__toggle-size / 2));
@@ -166,9 +164,10 @@ $sm-simple__toggle-spacing: floor($sm-simple__item-height * 0.1);
 			text-shadow: none;
 			background: $sm-simple__collapsible-toggle-bg;
 		}
-		// Change + to - on sub menu expand
-		&.highlighted span.sub-arrow:before {
-			display: block;
+		.sub-arrow::before {
+			content: '+';
+		}
+		&.highlighted .sub-arrow::before {
 			content: '-';
 		}
 	}
@@ -262,7 +261,7 @@ $sm-simple__toggle-spacing: floor($sm-simple__item-height * 0.1);
 			}
 
 			// Sub menu indicators
-			span.sub-arrow {
+			.sub-arrow {
 				top: 50%;
 				margin-top: -8px;
 				right: $sm-simple__desktop-item-padding-horizontal;
@@ -272,8 +271,8 @@ $sm-simple__toggle-spacing: floor($sm-simple__item-height * 0.1);
 				background: transparent;
 			}
 			// reset mobile first style
-			&.highlighted span.sub-arrow:before {
-				display: none;
+			&.highlighted .sub-arrow::before {
+				content: '+';
 			}
 		}
 
@@ -291,7 +290,7 @@ $sm-simple__toggle-spacing: floor($sm-simple__item-height * 0.1);
 		ul {
 			border: $sm-simple__border-width solid $sm-simple__collapsible-border-color;
 			background: $sm-simple__desktop-bg;
-			@include box-shadow($sm-simple__collapsible-box-shadow);
+			box-shadow: $sm-simple__collapsible-box-shadow;
 
 			// Sub menus items
 			a {
@@ -303,9 +302,9 @@ $sm-simple__toggle-spacing: floor($sm-simple__item-height * 0.1);
 				}
 
 				// Sub menu indicators
-				span.sub-arrow {
+				.sub-arrow {
+					left: $sm-simple__desktop-item-padding-horizontal - 8px - $sm-simple__desktop-arrow-spacing;
 					right: auto;
-					margin-left: -$sm-simple__desktop-arrow-spacing - 8px;
 				}
 			}
 
@@ -321,8 +320,8 @@ $sm-simple__toggle-spacing: floor($sm-simple__item-height * 0.1);
 		}
 
 		// Scrolling arrows containers for tall sub menus - test sub menu: "Sub test" -> "more..." in the default download package
-		span.scroll-up,
-		span.scroll-down {
+		.scroll-up,
+		.scroll-down {
 			position: absolute;
 			display: none;
 			visibility: hidden;
@@ -331,7 +330,8 @@ $sm-simple__toggle-spacing: floor($sm-simple__item-height * 0.1);
 			height: 20px;
 			// width and position will be set automatically by the script
 		}
-		span.scroll-up-arrow {
+		.scroll-up-arrow,
+		.scroll-down-arrow {
 			position: absolute;
 			top: -2px;
 			left: 50%;
@@ -344,8 +344,7 @@ $sm-simple__toggle-spacing: floor($sm-simple__item-height * 0.1);
 			border-style: dashed dashed solid dashed;
 			border-color: transparent transparent $sm-simple__desktop-item-color transparent;
 		}
-		span.scroll-down-arrow {
-			@extend span.scroll-up-arrow;
+		.scroll-down-arrow {
 			top: 6px;
 			border-style: solid dashed dashed dashed;
 			border-color: $sm-simple__desktop-item-color transparent transparent transparent;
@@ -367,9 +366,9 @@ $sm-simple__toggle-spacing: floor($sm-simple__item-height * 0.1);
 				}
 
 				// Sub menu indicators
-				span.sub-arrow {
-					right: auto;
+				.sub-arrow {
 					left: $sm-simple__desktop-item-padding-horizontal;
+					right: auto;
 				}
 			}
 
@@ -383,9 +382,9 @@ $sm-simple__toggle-spacing: floor($sm-simple__item-height * 0.1);
 					}
 
 					// Sub menu indicators
-					span.sub-arrow {
-						right: $sm-simple__desktop-item-padding-horizontal;
-						margin-right: -$sm-simple__desktop-arrow-spacing - 8px;
+					.sub-arrow {
+						left: auto;
+						right: $sm-simple__desktop-item-padding-horizontal - 8px - $sm-simple__desktop-arrow-spacing;
 					}
 				}
 			}
@@ -410,9 +409,9 @@ $sm-simple__toggle-spacing: floor($sm-simple__item-height * 0.1);
 					}
 
 					// Sub menu indicators
-					span.sub-arrow {
-						right: $sm-simple__desktop-item-padding-horizontal;
-						margin-right: -$sm-simple__desktop-arrow-spacing - 8px;
+					.sub-arrow {
+						left: auto;
+						right: $sm-simple__desktop-item-padding-horizontal - 8px - $sm-simple__desktop-arrow-spacing;
 					}
 				}
 			}
@@ -428,9 +427,9 @@ $sm-simple__toggle-spacing: floor($sm-simple__item-height * 0.1);
 			a {
 
 				// Sub menu indicators
-				span.sub-arrow {
+				.sub-arrow {
+					left: $sm-simple__desktop-item-padding-horizontal - 8px - $sm-simple__desktop-arrow-spacing;
 					right: auto;
-					margin-left: -$sm-simple__desktop-arrow-spacing - 8px;
 				}
 			}
 
@@ -439,7 +438,7 @@ $sm-simple__toggle-spacing: floor($sm-simple__item-height * 0.1);
 				border-left: 0;
 				border-top: $sm-simple__desktop-separators-size solid $sm-simple__desktop-separators-color;
 			}
-		        > li:first-child {
+			> li:first-child {
 				border-top: 0;
 			}
 		}
