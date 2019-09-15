@@ -170,6 +170,50 @@ function layout_flexible_template_configure_form($form, &$form_state, LayoutFlex
       'callback' => 'layout_ajax_form_open_dialog',
     ),
   );
+
+  $region_names = array();
+  $content_value = FALSE;
+  $row_count = 1;
+  foreach ($flexible_template->rows as $key => $row) {
+    $count = 0;
+    $row_label = t('Row @count', array('@count' => $row_count));
+    foreach ($row['region_names'] as $machine => $human) {
+      $region = $key . '--' . $count;
+      $region_names[$row_label][$region] = $human;
+      if (strtolower($human) == 'content') {
+        $content_value = $region;
+      }
+      $count++;
+    }
+    $row_count++;
+  }
+
+  // Use a specified default region.
+  if ($flexible_template->default_region) {
+    $default_value = $flexible_template->default_region;
+  }
+  // Use a region named 'Content'.
+  elseif ($content_value) {
+    $default_value = $content_value;
+  }
+  // Fall back to the last region.
+  else {
+    $default_value = $last_region;
+  }
+
+  $form['settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Layout template settings'),
+    '#collapsible' => TRUE,
+  );
+  $form['settings']['default_region'] = array(
+    '#type' => 'select',
+    '#title' => t('Default region'),
+    '#description' => t('The default region is the one where blocks will be placed when not assigned to a specific region, for example, when changing Layout templates, or when overriding an existing page.'),
+    '#options' => $region_names,
+    '#default_value' => $default_value,
+  );
+
   $form['actions'] = array(
     '#type' => 'actions',
   );
@@ -218,6 +262,8 @@ function layout_flexible_template_configure_form_submit($form, &$form_state) {
   // has been removed in an AJAX request.
   $flexible_template = layout_flexible_tempstore_load($form_state['flexible_template_name']);
   $positions = array();
+
+  $flexible_template->default_region = $form_state['values']['default_region'];
 
   if (!empty($form_state['values']['row_positions'])) {
     $rows = array_filter(explode(',', $form_state['values']['row_positions']));
@@ -287,7 +333,7 @@ function layout_flexible_template_region_style_select($form, &$form_state, Layou
     '#value' => t('Update regions'),
     '#attributes' => array('class' => array('js-hide')),
     '#name' => 'region_count_update',
-    '#validate' => array(),
+    '#validate' => array('layout_flexible_template_edit_region_style_validate'),
     '#submit' => array('layout_flexible_template_edit_region_style_submit'),
     '#ajax' => array(
       'callback' => 'layout_flexible_template_edit_region_style_ajax',
@@ -684,6 +730,31 @@ function layout_flexible_template_edit_region_style_ajax($form, &$form_state) {
 }
 
 /**
+ * Validate callback to change the region count.
+ *
+ * @see layout_flexible_template_region_style_select()
+ */
+function layout_flexible_template_edit_region_style_validate($form, &$form_state) {
+  $previous_count = $form['region_count']['#default_value'];
+  $new_count = $form_state['values']['region_count'];
+
+  if ($new_count < $previous_count) {
+    $template_name = $form_state['flexible_template_name'];
+    $default_region = config_get('layout.flexible.' . $template_name, 'default_region');
+    $row = $form_state['original_row'];
+    if (strstr($default_region, $row)) {
+      $default_region_info = explode('--', $default_region);
+      $default_region_posiiton = $default_region_info[1] + 1;
+
+      if ($default_region_posiiton >= $new_count) {
+        $message = t('Your default region has been deleted, Please select a new one.', array('@title' => $flexible_template->title));
+        backrop_set_message($message, 'warning');
+      }
+    }
+  }
+}
+
+/**
  * Submit callback to change the region count.
  *
  * @see layout_flexible_template_region_style_select()
@@ -744,11 +815,28 @@ function layout_flexible_template_delete_row(LayoutFlexibleTemplate $flexible_te
   $commands = array();
   $flexible_template_name = $flexible_template->name;
 
+  if (strstr($flexible_template->default_region, $original_row)) {
+    $message = t('Row "@title" contains a default region, and cannot be removed. Select a new default region before you remove this row.', array('@title' => $flexible_template->title));
+    backdrop_set_message($message, 'error');
+
+    // Update the messages area.
+    $commands[] = ajax_command_remove('#messages');
+    $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
+
+    return array(
+      '#type' => 'ajax',
+      '#commands' => $commands,
+    );
+  }
+
   unset($flexible_template->rows[$original_row]);
   layout_flexible_tempstore_set($flexible_template);
 
   if (backdrop_is_ajax()) {
+    // Remove the row.
     $commands[] = ajax_command_remove('#flexible-row--' . $original_row);
+    // Remove all default region options within this row.
+    $commands[] = ajax_command_remove('#edit-default-region option:contains("' . $original_row . '")');
 
     return array(
       '#type' => 'ajax',

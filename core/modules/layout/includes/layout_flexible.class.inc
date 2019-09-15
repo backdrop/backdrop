@@ -40,6 +40,15 @@ class LayoutFlexibleTemplate {
   var $rows = array();
 
   /**
+   * The region to be used when a region is not specified.
+   *
+   * A string containing region information.
+   *
+   * @var string
+   */
+  var $default_region = '';
+
+  /**
    * Constructor for a LayoutFlexibleTemplate class.
    *
    * @param array $config
@@ -85,6 +94,7 @@ class LayoutFlexibleTemplate {
       'title' => $this->title,
       'description' => $this->description,
       'rows' => $this->rows,
+      'default_region' => $this->default_region,
     );
 
     config('layout.flexible.' . $this->name)
