@@ -3428,18 +3428,5 @@ class NodePublishScheduling extends BackdropWebTestCase {
     );
     $this->backdropPost('node/add/foobsee', $edit, t('Save'));
     $this->assertText(t('Scheduled publish time cannot be in the past.'));
-
-    // Test successful submission and scheduling.
-    $edit = array(
-      'title' => $name,
-      'status' => NODE_SCHEDULED,
-      'scheduled[date]' => format_date(REQUEST_TIME + 300, 'custom', 'Y-m-d', $web_user->timezone),
-      'scheduled[time]' => format_date(REQUEST_TIME + 300, 'custom', 'H:i:s', $web_user->timezone),
-    );
-    $this->backdropPost('node/add/foobsee', $edit, t('Save'));
-
-    $node = $this->backdropGetNodeByTitle($name);
-    $this->assertEqual($node->status, '0', 'The node is in the state Unpublished.');
-    $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero scheduled date.');
   }
 }
