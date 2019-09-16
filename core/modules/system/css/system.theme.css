@@ -497,22 +497,6 @@ tr:hover del.diffchange {
 }
 
 /**
- * External link indicators.
- */
-span.external {
-  display: inline-block;
-  margin-left: .33em; /* LTR */
-  width: 1em;
-  height: 1em;
-  background: transparent url(../../../misc/external-link-blue-32.png) bottom left;
-  background-size: 1em;
-}
-[dir="rtl"] span.external {
-  margin-left: 0;
-  margin-right: .33em;
-}
-
-/**
  * Floated images.
  */
 img {
