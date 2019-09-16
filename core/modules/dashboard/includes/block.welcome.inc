@@ -9,14 +9,14 @@ class DashboardWelcomeBlock extends Block {
    * {@inheritdoc}
    */
   function getTitle() {
-    return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Welcome to Backdrop!');
+    return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Welcome to Backdrop CMS!');
   }
 
   /**
    * {@inheritdoc}
    */
   function getAdminTitle() {
-    return t('Welcome to Backdrop!');
+    return t('Welcome to Backdrop CMS!');
   }
 
   /**
@@ -35,7 +35,7 @@ class DashboardWelcomeBlock extends Block {
     );
     $build['welcome'] = array(
       '#type' => 'help',
-      '#markup' => t('Here are some links to get you started:'),
+      '#markup' => t('Here are some links to help get you started:'),
     );
 
     $build['steps'] = array(
@@ -45,16 +45,29 @@ class DashboardWelcomeBlock extends Block {
       ),
     );
 
-    $get_started_links = array();
-    $get_started_links['<front>'] = t('View your site');
-    $get_started_links['admin/appearance/settings/basis'] = t('Customize the look of your site');
-    $get_started_links['admin/structure/layouts/manage/home'] = t('Configure the layout of your home page');
-    $get_started_links['admin/appearance'] = t('Change the theme used by your site');
-    $get_started_links['admin/appearance/install'] = t('Find more themes to install');
-    $get_started_links = $this->filterAvailableLinks($get_started_links);
+    // Add the first column of links.
+    $links_col1 = array();
+    $links_col1['<front>'] = t('View the home page');
+    $links_col1['admin/config/system/site-information'] = t('Add a logo or change the site name');
+    $default_theme = config_get('system.core', 'theme_default');
+    if (theme_has_settings($default_theme)) {
+      $themes = list_themes();
+      $color_support = $themes[$default_theme]->info['settings']['color'];
+      if (module_exists('color') && $color_support) {
+        $theme_link_label = t('Change colors for the current theme');
+      }
+      else {
+        $theme_link_label = t('Change settings for the current theme');
+      }
+      $links_col1['admin/appearance/settings/' . $default_theme] = $theme_link_label;
+    }
+    if (module_exists('installer')) {
+      $links_col1['admin/appearance/install'] = t('Find a new theme for your site');
+    }
+    $links_col1 = $this->filterAvailableLinks($links_col1);
 
-    if ($get_started_links) {
-      $welcome_start_content = theme('item_list', array('items' => $get_started_links));
+    if ($links_col1) {
+      $welcome_start_content = theme('item_list', array('items' => $links_col1));
       $build['steps']['start'] = array(
         '#type' => 'container',
         '#attributes' => array(
@@ -68,18 +81,28 @@ class DashboardWelcomeBlock extends Block {
       );
     }
 
-    $next_steps_links = array();
-    $next_steps_links['node/add/post'] = t('Create a new post');
+    // Add the second column of links.
+    $links_col2 = array();
     $about_node = node_load(2);
     if ($about_node) {
-      $next_steps_links['node/2/edit'] = t('Edit the %title page', array('%title' => $about_node->title));
+      $links_col2['node/2/edit'] = t('Edit the %title page', array('%title' => $about_node->title));
     }
-    $next_steps_links['admin/structure/menu/manage/main-menu'] = t('Manage the main menu');
-    $next_steps_links['admin/config/system/site-information'] = t('Update your site information');
-    $next_steps_links = $this->filterAvailableLinks($next_steps_links);
-
-    if ($next_steps_links) {
-      $welcome_next_content = theme('item_list', array('items' => $next_steps_links));
+    $node_types = node_type_get_types();
+    if (isset($node_types['post'])) {
+      $links_col2['node/add/post'] = t('Create a new @post_label', array('@post_label' => $node_types['post']->name));
+    }
+    $system_menus = menu_list_system_menus();
+    if (isset($system_menus['main-menu'])) {
+      $links_col2['admin/structure/menu/manage/main-menu'] = t('Update the %menu_name menu', array('%menu_name' => $system_menus['main-menu']));
+    }
+    $home_page_path = config_get('system.core', 'site_frontpage');
+    $home_layout = layout_load('home');
+    if ($home_layout && !$home_layout->disabled && $home_page_path == 'home') {
+      $links_col2['admin/structure/layouts/manage/home'] = t('Modify the layout for your home page');
+    }
+    $links_col2 = $this->filterAvailableLinks($links_col2);
+    if ($links_col2) {
+      $welcome_next_content = theme('item_list', array('items' => $links_col2));
       $build['steps']['next'] = array(
         '#type' => 'container',
         '#attributes' => array(
@@ -93,15 +116,18 @@ class DashboardWelcomeBlock extends Block {
       );
     }
 
-    $more_actions_links = array();
-    $more_actions_links['admin/modules'] = t('Turn existing features on or off');
-    $more_actions_links['admin/modules/install'] = t('Add more functionality');
-    $more_actions_links['https://backdropcms.org/user-guide'] = t('Read the online user guide');
-    $more_actions_links['https://forum.backdropcms.org'] = t('Visit the Backdrop CMS Forum');
-    $more_actions_links = $this->filterAvailableLinks($more_actions_links);
+    // Add the third column of links.
+    $links_col3 = array();
+    $links_col3['admin/modules'] = t('Turn existing modules on or off');
+    if (module_exists('installer')) {
+      $links_col3['admin/modules/install'] = t('Add new modules for more functionality');
+    }
+    $links_col3['https://backdropcms.org/user-guide'] = t('Read the online user guide');
+    $links_col3['https://forum.backdropcms.org'] = t('Visit the Backdrop CMS Forum');
+    $links_col3 = $this->filterAvailableLinks($links_col3);
 
-    if ($more_actions_links) {
-      $welcome_more_content = theme('item_list', array('items' => $more_actions_links));
+    if ($links_col3) {
+      $welcome_more_content = theme('item_list', array('items' => $links_col3));
       $build['steps']['more'] = array(
         '#type' => 'container',
         '#attributes' => array(
@@ -131,6 +157,9 @@ class DashboardWelcomeBlock extends Block {
     $html_links = array();
     foreach ($links as $path => $label) {
       if (url_is_external($path) || $path === '<front>') {
+        if ($path !== '<front>') {
+          $label .= '<span class="dashboard-external"></span>';
+        }
         $access = TRUE;
       }
       else {
