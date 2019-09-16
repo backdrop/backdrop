@@ -1151,14 +1151,23 @@ function file_update_1007() {
   $config = config('user.role.' . $admin_role);
   $permissions = $config->get('permissions');
   if ($permissions) {
+    backdrop_set_message(print_r($permissions, 1));
     // Add the new permissions.
-    $permissions[] = 'bypass file access';
-    $permissions[] = 'administer file types';
-    $permissions[] = 'create files';
-    $permissions[] = 'view own private files';
-    $permissions[] = 'view own files';
-    $permissions[] = 'view private files';
-    $permissions[] = 'view files';
+    $new_permissions = array(
+      'bypass file access',
+      'administer file types',
+      'create files',
+      'view own private files',
+      'view own files',
+      'view private files ',
+      'view files',
+    );
+    foreach ($new_permissions as $new_permission) {
+      if (!in_array($new_permission, $permissions)) {
+        $permissions[] = $new_permission;
+        backdrop_set_message($new_permission);
+      }
+    }
     // Save the role.
     $config->set('permissions', $permissions);
     $config->save();
