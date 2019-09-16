@@ -678,7 +678,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $edit[$title_key] = $name;
     $edit['status'] = 2;
     $edit['scheduled[date]'] = format_date(REQUEST_TIME + 360, 'custom', 'Y-m-d', $web_user->timezone);
-    $edit['scheduled[time]'] = format_date(REQUEST_TIME + 360, 'custom', 'g:i a', $web_user->timezone);
+    $edit['scheduled[time]'] = format_date(REQUEST_TIME + 360, 'custom', 'H:i:s', $web_user->timezone);
     $this->backdropPost(NULL, $edit, t('Preview'));
     $this->backdropPost(NULL, array(), t('Save'));
     $node = $this->backdropGetNodeByTitle($name);
