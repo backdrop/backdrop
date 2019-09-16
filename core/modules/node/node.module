@@ -947,12 +947,20 @@ function node_validate($node, $form, &$form_state) {
   }
 
   // Validate the "Authored on" field.
-  if (!empty($node->date) && is_string($node->date) && strtotime($node->date) === FALSE) {
-    form_set_error('date', t('You have to specify a valid date.'));
+  if (!empty($node->date)) {
+    if (is_array($node->date)) {
+      $node->date = implode(' ', $node->date);
+    }
+    if (strtotime($node->date) === FALSE) {
+      form_set_error('date', t('You have to specify a valid date.'));
+    }
   }
 
   // Validate the "Publish on" date.
-  if ($node->status == NODE_SCHEDULED && !empty($node->scheduled) && is_string($node->scheduled)) {
+  if ($node->status == NODE_SCHEDULED && !empty($node->scheduled)) {
+    if (is_array($node->scheduled)) {
+      $node->scheduled = implode(' ', $node->scheduled);
+    }
     // Validate the entire string is valid.
     if (strtotime($node->scheduled) === FALSE) {
       form_set_error('scheduled', t('You have to specify a valid date.'));
