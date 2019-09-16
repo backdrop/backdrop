@@ -208,7 +208,7 @@ function dashboard_user_login(&$edit, $account) {
 function dashboard_preprocess_layout(&$variables) {
   /* @var Layout $layout */
   $layout = $variables['layout'];
-  if ($layout->hasContexts(array('dashboard'))) {
+  if (is_a($layout, 'Layout') && $layout->hasContexts(array('dashboard'))) {
     // Include a dashboard-specific style sheet.
     $css_path = backdrop_get_path('module', 'dashboard') . '/css/dashboard.css';
     backdrop_add_css($css_path);
@@ -222,7 +222,7 @@ function dashboard_preprocess_layout(&$variables) {
 function dashboard_preprocess_block(&$variables) {
   /* @var Layout $layout */
   $layout = $variables['layout'];
-  if ($layout->hasContexts(array('dashboard'))) {
+  if (is_a($layout, 'Layout') && $layout->hasContexts(array('dashboard'))) {
     $block = $variables['block'];
     $region_name = $layout->getBlockPosition($block->uuid);
     if (!in_array($region_name, array('header', 'footer'))) {
