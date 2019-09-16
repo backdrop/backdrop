@@ -96,13 +96,11 @@ class DashboardWelcomeBlock extends Block {
       $links_col2['admin/structure/menu/manage/main-menu'] = t('Update the %menu_name menu', array('%menu_name' => $system_menus['main-menu']));
     }
     $home_page_path = config_get('system.core', 'site_frontpage');
-
     $home_layout = layout_load('home');
     if ($home_layout && !$home_layout->disabled && $home_page_path == 'home') {
       $links_col2['admin/structure/layouts/manage/home'] = t('Modify the layout for your home page');
     }
     $links_col2 = $this->filterAvailableLinks($links_col2);
-
     if ($links_col2) {
       $welcome_next_content = theme('item_list', array('items' => $links_col2));
       $build['steps']['next'] = array(
@@ -120,9 +118,9 @@ class DashboardWelcomeBlock extends Block {
 
     // Add the third column of links.
     $links_col3 = array();
-    $links_col3['admin/modules'] = t('Turn existing features on or off');
+    $links_col3['admin/modules'] = t('Turn existing modules on or off');
     if (module_exists('installer')) {
-      $links_col3['admin/modules/install'] = t('Add new features or more functionality');
+      $links_col3['admin/modules/install'] = t('Add new modules for more functionality');
     }
     $links_col3['https://backdropcms.org/user-guide'] = t('Read the online user guide');
     $links_col3['https://forum.backdropcms.org'] = t('Visit the Backdrop CMS Forum');
@@ -160,7 +158,7 @@ class DashboardWelcomeBlock extends Block {
     foreach ($links as $path => $label) {
       if (url_is_external($path) || $path === '<front>') {
         if ($path !== '<front>') {
-          $label .= '<span class="external"></span>';
+          $label .= '<span class="dashboard-external"></span>';
         }
         $access = TRUE;
       }
