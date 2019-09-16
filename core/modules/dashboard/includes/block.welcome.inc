@@ -119,7 +119,7 @@ class DashboardWelcomeBlock extends Block {
 
     // Add the third column of links.
     $links_col3 = array();
-    $links_col3['admin/modules'] = t('Turn existing features on or off');
+    $links_col3['admin/modules'] = t('Turn existing modules on or off');
     if (module_exists('installer')) {
       $links_col3['admin/modules/install'] = t('Add new features or more functionality');
     }
