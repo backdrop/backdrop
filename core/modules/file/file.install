@@ -1175,7 +1175,6 @@ function file_update_1007() {
     foreach ($new_permissions as $new_permission) {
       if (!in_array($new_permission, $permissions)) {
         $permissions[] = $new_permission;
-        backdrop_set_message($new_permission);
       }
     }
 
