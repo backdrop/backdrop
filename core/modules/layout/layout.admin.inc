@@ -1967,7 +1967,7 @@ function layout_template_toggle_enabled($template_name, $status) {
     $config->save();
   }
 
-  backdrop_goto('admin/structure/layouts/settings');
+  backdrop_goto('admin/structure/layouts/templates');
 }
 
 /**
@@ -2713,7 +2713,7 @@ function layout_ajax_form_update($form, $form_state) {
 /**
  * Administrative form for layout settings.
  */
-function layout_settings_page($form, &$form_state) {
+function layout_templates_page($form, &$form_state) {
   $header = array(
     'layout_template_info' => array('data' => t('Template')),
     'type' => array('data' => t('Type'), 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
@@ -2779,7 +2779,7 @@ function layout_settings_page($form, &$form_state) {
  *
  * Ensures that active layouts are not disabled while in use.
  */
-function layout_settings_page_validate(&$form, &$form_state) {
+function layout_templates_page_validate(&$form, &$form_state) {
   $options = array_keys($form_state['values']['templates']);
   $included = array_values($form_state['values']['templates']);
   $excluded = array_unique(array_diff($options, $included));
@@ -2802,7 +2802,7 @@ function layout_settings_page_validate(&$form, &$form_state) {
 /**
  * Submit handler for layout advanced settings page.
  */
-function layout_settings_page_submit($form, &$form_state) {
+function layout_templates_page_submit($form, &$form_state) {
   config_set('layout.settings', 'excluded_templates', $form_state['excluded_templates']);
   backdrop_set_message(t('Your configuration has been saved.'));
 }
@@ -2816,11 +2816,11 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
   if (!empty($template_info['flexible'])) {
     $links['configure'] = array(
       'title' => t('Configure regions'),
-      'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/configure',
+      'href' => 'admin/structure/layouts/templates/flexible/' . $template_info['name'] . '/configure',
     );
     $links['edit'] = array(
       'title' => t('Configure name'),
-      'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/edit',
+      'href' => 'admin/structure/layouts/templates/flexible/' . $template_info['name'] . '/edit',
     );
     if (user_access('synchronize configuration')) {
       $links['export'] = array(
@@ -2834,20 +2834,20 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
     }
     $links['delete'] = array(
       'title' => t('Delete'),
-      'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/delete',
+      'href' => 'admin/structure/layouts/templates/flexible/' . $template_info['name'] . '/delete',
     );
   }
   if ($is_default) {
     $links['disable'] = array(
       'title' => t('Disable'),
-      'href' => 'admin/structure/layouts/settings/toggle/' . $template_info['name'] . '/disable',
+      'href' => 'admin/structure/layouts/templates/toggle/' . $template_info['name'] . '/disable',
       'query' => array('token' => backdrop_get_token('layout-template-' . $template_info['name'])),
     );
   }
   else {
     $links['enable'] = array(
       'title' => t('Enable'),
-      'href' => 'admin/structure/layouts/settings/toggle/' . $template_info['name'] . '/enable',
+      'href' => 'admin/structure/layouts/templates/toggle/' . $template_info['name'] . '/enable',
       'query' => array('token' => backdrop_get_token('layout-template-' . $template_info['name'])),
     );
   }

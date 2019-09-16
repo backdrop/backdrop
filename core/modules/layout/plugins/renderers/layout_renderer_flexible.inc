@@ -146,7 +146,7 @@ class LayoutRendererFlexible {
     $links = array();
     $links['configure'] = array(
       'title' => t('Configure row'),
-      'href' => 'admin/structure/layouts/settings/flexible-template/' . $this->layout_info['name'] . '/row/' . $region_id . '/configure',
+      'href' => 'admin/structure/layouts/templates/flexible/' . $this->layout_info['name'] . '/row/' . $region_id . '/configure',
       'attributes' => array(
         'class' => array('use-ajax'),
         'data-dialog' => TRUE,
@@ -155,7 +155,7 @@ class LayoutRendererFlexible {
     );
     $links['delete'] = array(
       'title' => t('Delete row'),
-      'href' => 'admin/structure/layouts/settings/flexible-template/' . $this->layout_info['name'] . '/row/' . $region_id . '/delete',
+      'href' => 'admin/structure/layouts/templates/flexible/' . $this->layout_info['name'] . '/row/' . $region_id . '/delete',
       'query' => array(
         'token' => backdrop_get_token('layout-region-' . $region_id)
       ),

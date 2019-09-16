@@ -79,7 +79,7 @@ function layout_flexible_template_settings_edit_form($form, &$form_state, Layout
  * @see layout_flexible_template_settings_edit_form()
  */
 function layout_flexible_template_settings_form_cancel($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/layouts/settings';
+  $form_state['redirect'] = 'admin/structure/layouts/templates';
 }
 
 /**
@@ -100,7 +100,7 @@ function layout_flexible_template_settings_form_submit($form, &$form_state) {
   layout_flexible_tempstore_set($flexible_template);
 
   backdrop_set_message(t('Layout template "@title" saved.', array('@title' => $flexible_template->title)));
-  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['values']['machine_name'] . '/configure';
+  $form_state['redirect'] = 'admin/structure/layouts/templates/flexible/' . $form_state['values']['machine_name'] . '/configure';
 }
 
 /**
@@ -195,7 +195,7 @@ function layout_flexible_template_configure_form($form, &$form_state, LayoutFlex
  * Handler for layout_flexible_template_configure_form() to add a new row.
  */
 function layout_flexible_template_add_row($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/row/add/select-widths';
+  $form_state['redirect'] = 'admin/structure/layouts/templates/flexible/' . $form_state['flexible_template_name'] . '/row/add/select-widths';
 }
 
 /**
@@ -205,7 +205,7 @@ function layout_flexible_template_add_row($form, &$form_state) {
  */
 function layout_flexible_template_configure_form_cancel($form, &$form_state) {
   tempstore_clear('layout.flexible', $form_state['flexible_template_name']);
-  $form_state['redirect'] = 'admin/structure/layouts/settings';
+  $form_state['redirect'] = 'admin/structure/layouts/templates';
 }
 
 /**
@@ -380,7 +380,7 @@ function layout_flexible_template_region_style_select($form, &$form_state, Layou
  * @see layout_flexible_template_region_style_select().
  */
 function layout_flexible_template_cancel($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/configure';
+  $form_state['redirect'] = 'admin/structure/layouts/templates/flexible/' . $form_state['flexible_template_name'] . '/configure';
 }
 
 /**
@@ -404,7 +404,7 @@ function layout_flexible_template_cancel_ajax($form, $form_state) {
  * @see layout_flexible_template_region_style_select().
  */
 function layout_flexible_template_region_style_select_cancel($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/row/' . $form_state['original_row'] . '/configure';
+  $form_state['redirect'] = 'admin/structure/layouts/templates/flexible/' . $form_state['flexible_template_name'] . '/row/' . $form_state['original_row'] . '/configure';
 }
 
 /**
@@ -413,7 +413,7 @@ function layout_flexible_template_region_style_select_cancel($form, &$form_state
  * @see layout_flexible_template_region_style_select().
  */
 function layout_flexible_template_region_style_select_submit($form, &$form_state) {
-  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/row/' . $form_state['original_row'] . '/configure/' . $form_state['values']['region_style'];
+  $form_state['redirect'] = 'admin/structure/layouts/templates/flexible/' . $form_state['flexible_template_name'] . '/row/' . $form_state['original_row'] . '/configure/' . $form_state['values']['region_style'];
 }
 
 /**
@@ -612,7 +612,7 @@ function layout_flexible_template_change_region_style($form, &$form_state) {
 
   layout_flexible_tempstore_set($form_state['flexible_template']);
 
-  $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/row/' . $form_state['original_row'] . '/select-widths';
+  $form_state['redirect'] = 'admin/structure/layouts/templates/flexible/' . $form_state['flexible_template_name'] . '/row/' . $form_state['original_row'] . '/select-widths';
 }
 
 /**
@@ -670,7 +670,7 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   layout_flexible_tempstore_set($flexible_template);
   layout_flexible_reset_caches();
   if (!backdrop_is_ajax()) {
-    $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['flexible_template_name'] . '/configure';
+    $form_state['redirect'] = 'admin/structure/layouts/templates/flexible/' . $form_state['flexible_template_name'] . '/configure';
   }
 }
 
@@ -757,7 +757,7 @@ function layout_flexible_template_delete_row(LayoutFlexibleTemplate $flexible_te
   }
   else {
     backdrop_set_message(t('Row "@title" removed.', array('@title' => $flexible_template->title)));
-    backdrop_goto('admin/structure/layouts/settings/flexible-template/' . $flexible_template_name . '/configure');
+    backdrop_goto('admin/structure/layouts/templates/flexible/' . $flexible_template_name . '/configure');
     return array();
   }
 }
@@ -802,7 +802,7 @@ function layout_flexible_template_delete_form($form, &$form_state, LayoutFlexibl
   $form['actions']['cancel'] = array(
     '#type' => 'link',
     '#title' => t('Cancel'),
-    '#href' => 'admin/structure/layouts/settings',
+    '#href' => 'admin/structure/layouts/templates',
   );
 
   $form['#attributes']['class'][] = 'confirmation';
@@ -822,5 +822,5 @@ function layout_flexible_template_delete_form_submit(&$form, &$form_state) {
   $flexible_template->delete();
 
   backdrop_set_message(t('The layout template "@title" has been deleted.', array('@title' => $flexible_template->title)));
-  $form_state['redirect'] = 'admin/structure/layouts/settings';
+  $form_state['redirect'] = 'admin/structure/layouts/templates';
 }
