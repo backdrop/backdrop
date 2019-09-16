@@ -1151,7 +1151,6 @@ function file_update_1007() {
   $config = config('user.role.' . $admin_role);
   $permissions = $config->get('permissions');
   if ($permissions) {
-    backdrop_set_message(print_r($permissions, 1));
     // Add the new permissions.
     $new_permissions = array(
       'bypass file access',
@@ -1159,15 +1158,27 @@ function file_update_1007() {
       'create files',
       'view own private files',
       'view own files',
-      'view private files ',
+      'view private files',
       'view files',
     );
+    // Permissions for each file type.
+    $config_file_names = config_get_names_with_prefix('file.type.');
+    foreach ($config_file_names as $config_file_name) {
+      $file_type = str_replace('file.type.', '', $config_file_name);
+      $new_permissions[] = "edit own $file_type files";
+      $new_permissions[] = "edit any $file_type files";
+      $new_permissions[] = "delete own $file_type files";
+      $new_permissions[] = "delete any $file_type files";
+      $new_permissions[] = "download own $file_type files";
+      $new_permissions[] = "download any $file_type files";
+    }
     foreach ($new_permissions as $new_permission) {
       if (!in_array($new_permission, $permissions)) {
         $permissions[] = $new_permission;
         backdrop_set_message($new_permission);
       }
     }
+
     // Save the role.
     $config->set('permissions', $permissions);
     $config->save();
