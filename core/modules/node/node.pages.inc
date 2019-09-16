@@ -334,8 +334,8 @@ function node_form($form, &$form_state, Node $node) {
       '#title' => t('Publish on'),
       // TODO: replacement option for "#date_increment"?
       '#default_value' => array(
-        'date' => format_date($node->created, 'custom', DATE_FORMAT_DATE),
-        'time' => format_date($node->created, 'custom', DATE_FORMAT_TIME),
+        'date' => format_date($scheduled_date, 'custom', DATE_FORMAT_DATE),
+        'time' => format_date($scheduled_date, 'custom', DATE_FORMAT_TIME),
       ),
       '#states' => array(
         'visible' => array(
