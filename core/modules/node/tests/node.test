@@ -3392,10 +3392,11 @@ class NodePublishScheduling extends BackdropWebTestCase {
     $edit = array(
       'title' => $name,
       // Schedule five minutes into the future to be sure we past the current time.
-      'scheduled[date]' => format_date(REQUEST_TIME + 360, 'custom', 'Y-m-d', $web_user->timezone),
-      'scheduled[time]' => format_date(REQUEST_TIME + 360, 'custom', 'g:i a', $web_user->timezone),
+      'scheduled[date]' => format_date(REQUEST_TIME + 300, 'custom', 'Y-m-d', $web_user->timezone),
+      'scheduled[time]' => format_date(REQUEST_TIME + 300, 'custom', 'H:i:s', $web_user->timezone),
     );
     $this->backdropPost('node/add/foobsee', $edit, t('Save'));
+
     $node = $this->backdropGetNodeByTitle($name);
     $this->assertEqual($node->status, '0', 'The node is in the state Unpublished.');
     $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero scheduled date.');
@@ -3407,25 +3408,23 @@ class NodePublishScheduling extends BackdropWebTestCase {
     $node = node_load($node->nid);
     $this->assertEqual($node->status, '1', 'The node is in the state Published.');
 
-    // Ensure scheduled dates without date module also are validated and saved.
-    module_disable(array('date'), FALSE);
-
-    // Without Date module doing the validation, ensure Node module still
-    // checks the date is valid.
+    // Ensure Node module still checks the date is valid.
     $name = $this->randomName(9);
     $edit = array(
       'title' => $name,
       'status' => NODE_SCHEDULED,
-      'scheduled' => format_date(REQUEST_TIME, 'custom', 'dddY-m-d g:i a', $web_user->timezone),
+      'scheduled[date]' => format_date(REQUEST_TIME, 'custom', 'dddY-m-d', $web_user->timezone),
+      'scheduled[time]' => format_date(REQUEST_TIME, 'custom', 'H:i', $web_user->timezone),
     );
     $this->backdropPost('node/add/foobsee', $edit, t('Save'));
     $this->assertText(t('You have to specify a valid date.'));
 
-    // Ensure scheduling in the past is still not allowed without Date module.
+    // Ensure scheduling in the past is not allowed.
     $edit = array(
       'title' => $name,
       'status' => NODE_SCHEDULED,
-      'scheduled' => format_date(REQUEST_TIME - 300, 'custom', 'Y-m-d g:i a', $web_user->timezone),
+      'scheduled[date]' => format_date(REQUEST_TIME - 300, 'custom', 'Y-m-d', $web_user->timezone),
+      'scheduled[time]' => format_date(REQUEST_TIME - 300, 'custom', 'H:i:s', $web_user->timezone),
     );
     $this->backdropPost('node/add/foobsee', $edit, t('Save'));
     $this->assertText(t('Scheduled publish time cannot be in the past.'));
@@ -3434,7 +3433,8 @@ class NodePublishScheduling extends BackdropWebTestCase {
     $edit = array(
       'title' => $name,
       'status' => NODE_SCHEDULED,
-      'scheduled' => format_date(REQUEST_TIME + 300, 'custom', 'Y-m-d g:i a', $web_user->timezone),
+      'scheduled[date]' => format_date(REQUEST_TIME + 300, 'custom', 'Y-m-d', $web_user->timezone),
+      'scheduled[time]' => format_date(REQUEST_TIME + 300, 'custom', 'H:i:s', $web_user->timezone),
     );
     $this->backdropPost('node/add/foobsee', $edit, t('Save'));
 
