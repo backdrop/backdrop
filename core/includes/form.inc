@@ -3185,6 +3185,13 @@ function theme_html_date($variables) {
   $attributes['value'] = $element['#value'];
   $attributes['name'] = $element['#name'];
 
+  if (!empty($element['#attributes']['min'])) {
+    $attributes['min'] = $element['#attributes']['min'];
+  }
+  if (!empty($element['#attributes']['max'])) {
+    $attributes['max'] = $element['#attributes']['max'];
+  }
+
   $output = '<input ' . backdrop_attributes($attributes) . ' />';
   return $output;
 }
@@ -3231,10 +3238,13 @@ function theme_html_datetime($variables) {
  * Combine html_date and html_time form elements.
  */
 function form_process_html_datetime($element) {
-  if (empty($element['#value'])) {
+  // Conversion to a timestamp has happened, possibly in a preview.
+  // Get it back into an array for the form.
+  if (ctype_digit($element['#value'])) {
+    $timestamp = $element['#value'];
     $element['#value'] = array(
-      'date' => '',
-      'time' => '',
+      'date' => format_date($timestamp, 'custom', DATE_FORMAT_DATE),
+      'time' => format_date($timestamp, 'custom', DATE_FORMAT_TIME),
     );
   }
   $element['#tree'] = TRUE;
@@ -3242,6 +3252,11 @@ function form_process_html_datetime($element) {
     '#type' => 'html_date',
     '#default_value' => $element['#value']['date'],
   );
+  $attributes = $element['#attributes'];
+  if (isset($attributes['date'])) {
+    $element['date']['#attributes'] = $attributes['date'];
+  }
+
   $element['time'] = array(
     '#type' => 'html_time',
     '#default_value' => $element['#value']['time'],
@@ -3281,11 +3296,13 @@ function html_time_validate($element, &$form_state) {
  */
 function html_datetime_validate($element, &$form_state) {
   // Validation of parts actually happens in child fields.
-  if (!empty($element['#value'])) {
+  if (is_array($element['#value'])) {
     // If either is set, both are needed.
-    $dt_string = implode(' ', $element['#value']);
-    if (strlen($dt_string) < 19) {
-      form_error($element, t('You need to set both, date and time.'));
+    if (!empty($element['#value']['date']) || !empty($element['#value']['time'])) {
+      $dt_string = implode(' ', $element['#value']);
+      if (strlen($dt_string) < 19) {
+        form_error($element, t('You need to set both, date and time.'));
+      }
     }
   }
 }
