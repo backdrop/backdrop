@@ -949,9 +949,9 @@ function node_validate($node, $form, &$form_state) {
   // Validate the "Authored on" field.
   if (!empty($node->date)) {
     if (is_array($node->date)) {
-      $node->date = implode(' ', $node->date);
+      $node_date = implode(' ', $node->date);
     }
-    if (strtotime($node->date) === FALSE) {
+    if (strtotime($node_date) === FALSE) {
       form_set_error('date', t('You have to specify a valid date.'));
     }
   }
@@ -959,15 +959,15 @@ function node_validate($node, $form, &$form_state) {
   // Validate the "Publish on" date.
   if ($node->status == NODE_SCHEDULED && !empty($node->scheduled)) {
     if (is_array($node->scheduled)) {
-      $node->scheduled = implode(' ', $node->scheduled);
+      $node_scheduled = implode(' ', $node->scheduled);
     }
     // Validate the entire string is valid.
-    if (strtotime($node->scheduled) === FALSE) {
+    if (strtotime($node_scheduled) === FALSE) {
       form_set_error('scheduled', t('You have to specify a valid date.'));
     }
     // Validate the date/time is not in the past.
     else {
-      $scheduled_date = new DateTime($node->scheduled, date_default_timezone_object());
+      $scheduled_date = new DateTime($node_scheduled, date_default_timezone_object());
       if ($scheduled_date && $scheduled_date->format('U') < REQUEST_TIME) {
         form_set_error('scheduled', t('Scheduled publish time cannot be in the past.'));
       }

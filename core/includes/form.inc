@@ -3205,6 +3205,7 @@ function theme_html_time($variables) {
   $attributes['type'] = 'time';
   $attributes['value'] = $element['#value'];
   $attributes['name'] = $element['#name'];
+  $attributes['step'] = 1;
 
   $output = '<input ' . backdrop_attributes($attributes) . ' />';
   return $output;
@@ -3254,9 +3255,11 @@ function form_process_html_datetime($element) {
  */
 function html_date_validate($element, &$form_state) {
   $date = $element['#value'];
-  $valid_date = DateTime::createFromFormat(DATE_FORMAT_DATE, $date);
-  if (!$valid_date) {
-    form_error($element, t('%date is not a valid date.', array('%date' => $date)));
+  if (!empty($date)) {
+    $valid_date = DateTime::createFromFormat(DATE_FORMAT_DATE, $date);
+    if (!$valid_date) {
+      form_error($element, t('%date is not a valid date.', array('%date' => $date)));
+    }
   }
 }
 
@@ -3265,24 +3268,25 @@ function html_date_validate($element, &$form_state) {
  */
 function html_time_validate($element, &$form_state) {
   $time = $element['#value'];
-  $valid_time = DateTime::createFromFormat(DATE_FORMAT_TIME, $time);
-  if (!$valid_time) {
-    form_error($element, t('%time is not a valid time.', array('%time' => $time)));
+  if (!empty($time)) {
+    $valid_time = DateTime::createFromFormat(DATE_FORMAT_TIME, $time);
+    if (!$valid_time) {
+      form_error($element, t('%time is not a valid time.', array('%time' => $time)));
+    }
   }
 }
 
 /**
  * Validate a combined date and time array.
- *
- * This could be redundant, though.
  */
 function html_datetime_validate($element, &$form_state) {
   // Validation of parts actually happens in child fields.
-  // Node module handles timezones, but what if used somewhere else?
-  if (!is_array($element['#value'])) {
-    // When could this ever happen?
-    $element['#value']['date'] = '';
-    $element['#value']['time'] = '';
+  if (!empty($element['#value'])) {
+    // If either is set, both are needed.
+    $dt_string = implode(' ', $element['#value']);
+    if (strlen($dt_string) < 19) {
+      form_error($element, t('You need to set both, date and time.'));
+    }
   }
 }
 
