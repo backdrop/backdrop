@@ -27,3 +27,9 @@ name = Link validation unit tests
 description = Tests the link_validate_url() function by itself, without invoking the full Backdrop bootstrap.
 group = Link
 file = link.validate.test
+
+[LinkEntityTokenTest]
+name = Link entity tokens test
+description = Tests that a link field appears properly in entity tokens
+group = Link
+file = link.entity_token.test
