@@ -763,12 +763,12 @@ function layout_settings_form_save_submit($form, &$form_state) {
 }
 
 /**
- * Form callback; Main form for editing a layout's content.
+ * Form callback; Main form for editing a layout's content ("Manage blocks").
  *
- * No validation function is necessary, as all 'validation' is handled
- * either in the lead-up to form rendering (through the selection of
- * specified content types) or by the validation functions specific to
- * the ajax modals & content types.
+ * No validation function is necessary, as all 'validation' is handled either in
+ * the lead-up to form rendering (through the selection of specified content
+ * types) or by the validation functions specific to the AJAX modals & content
+ * types.
  *
  * @ingroup forms
  */
@@ -893,9 +893,8 @@ function layout_content_form_validate($form, &$form_state) {
 /**
  * Handle form submission of the display content editor.
  *
- * This reads the location of the various blocks from the form, which will
- * have been modified via JavaScript, rearranges them and then saves
- * the display.
+ * This reads the location of the various blocks from the form, which will have
+ * been modified via JavaScript, rearranges them and then saves the display.
  */
 function layout_content_form_submit($form, &$form_state) {
   /* @var Layout $layout */
@@ -2924,6 +2923,7 @@ function layout_configure_region_page_submit($form, &$form_state) {
 function layout_block_list() {
   $rows = array();
 
+  $module_info = system_get_info('module');
   $module_blocks = layout_get_block_info();
   $usage = layout_get_block_usage();
 
@@ -2947,7 +2947,7 @@ function layout_block_list() {
         }
         $usage_list = $usages ? theme('item_list', array('items' => $usages)) : t('Not in use');
         $block_name = check_plain($block['info']) . ' (' . $delta . ')';
-        $rows[] = array('name' => $block_name, 'usage' => $usage_list, 'module' => $module, 'contexts' => $contexts);
+        $rows[] = array('name' => $block_name, 'usage' => $usage_list, 'module' => $module_info[$module]['name'], 'contexts' => $contexts);
       }
     }
   }
@@ -2963,14 +2963,14 @@ function layout_block_list() {
   $sort = tablesort_get_sort($header);
 
   backdrop_sort($rows, array($order['sql'] => SORT_STRING));
-  $rows = ($sort == 'asc') ? $rows : array_reverse($rows);
+  $rows = ($sort == 'asc') ? array_reverse($rows) : $rows;
 
   $page['description_container'] = array(
     '#type' => 'container',
   );
 
   $page['description_container']['description'] = array(
-    '#markup' => '<p>' . t("Provides a summary of all available blocks. The 'Usage' column shows which layout and region to which blocks are currently assigned in the format 'Layout name (region)'.") . '<p>',
+    '#markup' => '<p>' . t("Provides a summary of all available blocks. The 'Usage' column shows the layouts and respective regions to which each block is currently placed, in the format 'Layout name (region)'.") . '<p>',
   );
 
   $page['table'] = array(
@@ -2999,9 +2999,28 @@ function layout_block_list() {
  */
 function layout_get_block_usage($module = NULL, $delta = NULL) {
   $blocks = &backdrop_static(__FUNCTION__, array());
+
+  $all_template_info = layout_get_layout_template_info(NULL, TRUE);
+
   if (empty($blocks)) {
     $layout_info = layout_load_all();
     foreach ($layout_info as $layout) {
+
+      $layout_template = $layout->layout_template;
+      $layout_has_flexible_template = !empty($all_template_info[$layout_template]['flexible']);
+
+      // Layouts that use flexible templates return cryptic UUIDs as region
+      // names. Replace these UUIDs with the respective user-friendly labels.
+      if ($layout_has_flexible_template) {
+        $flexi_regions = array_flip($all_template_info[$layout_template]['regions']);
+
+        foreach ($flexi_regions as $flexi_region_name => $uuid) {
+          $flexi_regions[$flexi_region_name] = $layout->positions[$uuid];
+        }
+
+        $layout->positions = $flexi_regions;
+      }
+
       foreach ($layout->positions as $position => $uuids) {
         foreach ($uuids as $uuid) {
           $block = $layout->content[$uuid];
