@@ -63,6 +63,15 @@ class BootstrapIPAddressTestCase extends BackdropWebTestCase {
       'Proxy forwarding with trusted proxy got forwarded IP address.'
     );
 
+    // Proxy forwarding on and proxy address trusted and visiting from proxy.
+    $_SERVER['REMOTE_ADDR'] = $this->proxy_ip;
+    $_SERVER['HTTP_X_FORWARDED_FOR'] = $this->proxy_ip;
+    backdrop_static_reset('ip_address');
+    $this->assertTrue(
+      ip_address() == $this->proxy_ip,
+      'Visiting from trusted proxy got proxy IP address.'
+    );
+
     // Multi-tier architecture with comma separated values in header.
     $_SERVER['REMOTE_ADDR'] = $this->proxy_ip;
     $_SERVER['HTTP_X_FORWARDED_FOR'] = implode(', ', array($this->untrusted_ip, $this->forwarded_ip, $this->proxy2_ip));
@@ -107,12 +116,14 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
    */
   function testConditionalRequests() {
     config_set('system.core', 'cache', 1);
+    config_set('system.core', 'page_cache_background_fetch', 0);
     config_set('system.core', 'page_cache_maximum_age', 300);
 
     // Fill the cache.
     $test_path = 'system-test/hello-world';
     $this->backdropGet($test_path);
 
+    sleep(5);
     $this->backdropHead($test_path);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $etag = $this->backdropGetHeader('ETag');
@@ -147,6 +158,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
    */
   function testPageCache() {
     config_set('system.core', 'cache', 1);
+    config_set('system.core', 'page_cache_background_fetch', 0);
     config_set('system.core', 'page_cache_maximum_age', 300);
 
     // Emulate a browser's support for keep-alive so that we can check
@@ -163,6 +175,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('Connection'), 'close', 'Connection header set to closed when hitting an uncached page.');
 
     // Check cache.
+    sleep(5); // Delay to ensure caches are set.
     $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')), $headers);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary: Cookie header was sent.');
@@ -177,6 +190,16 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Vary', 'value' => 'User-Agent')), $headers);
     $this->assertEqual($this->backdropGetHeader('Vary'), 'User-Agent,Accept-Encoding', 'Default header was replaced.');
 
+    // Check setting the cache via an HTTP HEAD request.
+    $this->backdropHead('system-test/hello-world', array('query' => array('cache' => 'test')));
+    $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Cache miss on first request via HTTP HEAD request.');
+
+    sleep(5); // Delay to ensure caches are set.
+    $this->backdropGet('system-test/hello-world', array('query' => array('cache' => 'test')));
+
+    $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Cache hit on second request via HTTP GET request.');
+    $this->assertText('Hello world!', 'Page contents shown from cached page that was set via an HTTP HEAD request.');
+
     // Test that the initial load does not wait for shutdown functions.
     // This request will wait 10 seconds, but it should return faster than this
     // because Backdrop does not wait for shutdown functions after the page
@@ -187,6 +210,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Initial page request was miss.');
     $this->assertTrue($total < 5, 'Initial page requests returned before shutdown functions are executed.');
 
+    sleep(5); // Delay to ensure caches are set.
     $start = microtime(TRUE);
     $this->backdropGet('system-test/sleep/shutdown/5', array(), $headers);
     $total = microtime(TRUE) - $start;
@@ -251,9 +275,44 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')), $headers);
     $this->assertFalse($this->backdropGetHeader('X-Backdrop-Cache'), 'Caching was bypassed.');
     $this->assertTrue(strpos($this->backdropGetHeader('Vary'), 'Cookie') === FALSE, 'Vary: Cookie header was not sent.');
-    $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate, post-check=0, pre-check=0', 'Cache-Control header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate', 'Cache-Control header was sent.');
     $this->assertEqual($this->backdropGetHeader('Expires'), 'Sun, 19 Nov 1978 05:00:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
+    $this->backdropLogout();
+
+    // Check that 403 pages are refreshed properly after caches expire.
+    $this->backdropGet('system-test/access');
+    $this->assertResponse(200, 'Access granted by default on first page load.');
+
+    // Disable access.
+    state_set('system_test_access', FALSE);
+
+    // Wait 6 seconds to wait past the maximum age (5). Stale copy expected.
+    sleep(6);
+    $this->backdropGet('system-test/access');
+    $this->assertResponse(200, 'Background fetch copy served after blocking access.');
+    $this->assertText(t('Access granted'), 'Access granted page title shown.');
+
+    // Fresh copy should now be a 403.
+    sleep(2);
+    $this->backdropGet('system-test/access');
+    $this->assertResponse(403, 'Access denied on basic callback on fresh copy.');
+    $this->assertText(t('Access denied'), 'Access denied page title shown.');
+
+    // Enable access.
+    state_set('system_test_access', TRUE);
+
+    // Wait 6 seconds to wait past the maximum age (5). Stale copy expected.
+    sleep(6);
+    $this->backdropGet('system-test/access');
+    $this->assertResponse(403, 'Background fetch copy served after granting access.');
+    $this->assertText(t('Access denied'), 'Access denied page title shown.');
+
+    // Fresh copy should now be a 200.
+    sleep(2);
+    $this->backdropGet('system-test/access');
+    $this->assertResponse(200, 'Access granted on basic callback on fresh copy.');
+    $this->assertText(t('Access granted'), 'Access granted page title shown.');
   }
 
   /**
@@ -265,6 +324,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
    */
   function testPageCompression() {
     config_set('system.core', 'cache', 1);
+    config_set('system.core', 'page_cache_background_fetch', 0);
     config_set('system.core', 'page_cache_maximum_age', 300);
     $test_path = 'system-test/hello-world';
 
@@ -275,6 +335,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertRaw('</html>', 'Page was gzip compressed.');
 
     // Verify that cached output is compressed.
+    sleep(5); // Delay to ensure caches are set.
     $this->backdropGet($test_path, array(), array('Accept-Encoding: gzip,deflate'));
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Content-Encoding'), 'gzip', 'A Content-Encoding header was sent.');
@@ -285,7 +346,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->backdropGet($test_path);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertFalse($this->backdropGetHeader('Content-Encoding'), 'A Content-Encoding header was not sent.');
-    $this->assertTitle(t('Hello world! | @site-name', array('@site-name' => config_get('system.core', 'site_name'))), 'Site title matches.');
+    $this->assertTitle(t('Hello world! | @site-name', array('@site-name' => config_get_translated('system.core', 'site_name'))), 'Site title matches.');
     $this->assertRaw('</html>', 'Page was not compressed.');
 
     // Disable compression mode.
@@ -417,11 +478,11 @@ class BootstrapGetFilenameTestCase extends BackdropUnitTestCase {
     $this->assertIdentical(backdrop_get_filename('theme_engine', 'phptemplate'), 'core/themes/engines/phptemplate/phptemplate.engine', t('Retrieve theme engine location.'));
 
     // Retrieving the location of a layout.
-    $this->assertIdentical(backdrop_get_filename('layout', 'one_column'), 'core/layouts/one_column/one_column.info', t('Retrieve layout location.'));
+    $this->assertIdentical(backdrop_get_filename('layout', 'boxton'), 'core/layouts/boxton/boxton.info', t('Retrieve layout location.'));
 
     // Retrieving the location of a profile. Profiles are a special case with
     // a fixed location and naming.
-    $this->assertIdentical(backdrop_get_filename('profile', 'standard'), 'profiles/standard/standard.profile', t('Retrieve install profile location.'));
+    $this->assertIdentical(backdrop_get_filename('profile', 'standard'), 'core/profiles/standard/standard.profile', t('Retrieve install profile location.'));
 
     // When a file is not found in the database cache, backdrop_get_filename()
     // searches several locations on the filesystem, including the core/
@@ -566,16 +627,12 @@ class BootstrapOverrideServerVariablesTestCase extends BackdropUnitTestCase {
    * Tests that the backdrop_check_memory_limit() function works as expected.
    */
   function testCheckMemoryLimit() {
-    $memory_limit = ini_get('memory_limit');
     // Test that a very reasonable amount of memory is available.
     $this->assertTrue(backdrop_check_memory_limit('30MB'), '30MB of memory tested available.');
 
-    // Get the available memory and multiply it by two to make it unreasonably
-    // high.
-    $twice_avail_memory = ($memory_limit * 2) . 'MB';
-
+    // Test an unlimited memory limit.
     // The function should always return true if the memory limit is set to -1.
-    $this->assertTrue(backdrop_check_memory_limit($twice_avail_memory, -1), 'backdrop_check_memory_limit() returns TRUE when a limit of -1 (none) is supplied');
+    $this->assertTrue(backdrop_check_memory_limit('9999999999YB', -1), 'backdrop_check_memory_limit() returns TRUE when a limit of -1 (none) is supplied');
 
     // Test that even though we have 30MB of memory available - the function
     // returns FALSE when given an upper limit for how much memory can be used.
@@ -660,5 +717,100 @@ class BootstrapDestinationTestCase extends BackdropWebTestCase {
       ->save();
     $this->backdropGet('http://example.com', array('external' => FALSE));
     $this->assertIdentical('', $this->backdropGetContent(), 'External URL is not allowed on 404 pages.');
+  }
+}
+
+
+/**
+ * Helper class for watchdog test cases.
+ */
+
+class WatchdogTestCase extends BackdropWebTestCase {
+  /**
+   * Verify a log entry was entered.  Called in the same way of theme
+   * expected original watchdog() execution.
+   *
+   * @param $type
+   *   The category to which this message belongs.
+   * @param $message
+   *   The message to store in the log. Keep $message translatable
+   *   by not concatenating dynamic values into it! Variables in the
+   *   message should be added by using placeholder strings alongside
+   *   the variables argument to declare the value of the placeholders.
+   *   See t() for documentation on how $message and $variables interact.
+   * @param $variables
+   *   Array of variables to replace in the message on display or
+   *   NULL if message is already translated or not possible to
+   *   translate.
+   * @param $severity
+   *   The severity of the message, as per RFC 3164.
+   * @param $link
+   *   A link to associate with the message.
+   */
+  function assertLogMessage($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE, $link = '') {
+    $count = db_select('watchdog', 'w')
+      ->condition('type', $type)
+      ->condition('message', $message)
+      ->condition('variables', serialize($variables))
+      ->condition('severity', $severity)
+      ->condition('link', $link)
+      ->countQuery()
+      ->execute()
+      ->fetchField();
+    $this->assertTrue($count > 0, format_string('watchdog table contains @count rows for @message', array('@count' => $count, '@message' => $message)));
+  }
+
+  /**
+   * Verify no log entry was entered.  Called in the same way of the
+   * expected original watchdog() execution.
+   *
+   * @param $type
+   *   The category to which this message belongs.
+   * @param $message
+   *   The message to store in the log. Keep $message translatable
+   *   by not concatenating dynamic values into it! Variables in the
+   *   message should be added by using placeholder strings alongside
+   *   the variables argument to declare the value of the placeholders.
+   *   See t() for documentation on how $message and $variables interact.
+   * @param $variables
+   *   Array of variables to replace in the message on display or
+   *   NULL if message is already translated or not possible to
+   *   translate.
+   * @param $severity
+   *   The severity of the message, as per RFC 3164.
+   * @param $link
+   *   A link to associate with the message.
+   */
+  function assertNoLogMessage($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE, $link = '') {
+    $count = db_select('watchdog', 'w')
+      ->condition('type', $type)
+      ->condition('message', $message)
+      ->condition('variables', serialize($variables))
+      ->condition('severity', $severity)
+      ->condition('link', $link)
+      ->countQuery()
+      ->execute()
+      ->fetchField();
+    $this->assertTrue($count == 0, format_string('watchdog table contains @count rows for @message', array('@count' => $count, '@message' => $message)));
+  }
+}
+
+class BootstrapWatchdogTestCase extends WatchdogTestCase {
+  function testWatchdogLogging() {
+    // Check the basic watchdog calls work.
+    watchdog('testing', 'test @severity message', array('@severity' => 'notice'), WATCHDOG_NOTICE, 'http://example.org');
+    $this->assertLogMessage('testing', 'test @severity message', array('@severity' => 'notice'), WATCHDOG_NOTICE, 'http://example.org');
+
+    // By default, no WATCHDOG_DEPRECATED log messages should be entered.
+    watchdog('testing', 'test @severity message', array('@severity' => 'deprecated'), WATCHDOG_DEPRECATED);
+    $this->assertNoLogMessage('testing', 'test @severity message', array('@severity' => 'deprecated'), WATCHDOG_DEPRECATED);
+
+    // Enable WATCHDOG_DEPRECATED logging
+    $wesl = config('system.core')->get('watchdog_enabled_severity_levels');
+    $wesl[] = WATCHDOG_DEPRECATED;
+    config('system.core')->set('watchdog_enabled_severity_levels', $wesl);
+
+    watchdog('testing', 'test @severity message', array('@severity' => 'deprecated'), WATCHDOG_DEPRECATED);
+    $this->assertLogMessage('testing', 'test @severity message', array('@severity' => 'deprecated'), WATCHDOG_DEPRECATED);
   }
 }

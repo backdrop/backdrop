@@ -79,6 +79,16 @@ function search_admin_settings($form, &$form_state) {
     '#options' => $module_options,
     '#description' => t('Only one type of item will be searched by default. This selection will determine what appears at http://www.example.com/search.')
   );
+  $form['logging'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Logging')
+  );
+  $form['logging']['search_logging'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Log all searches'),
+    '#default_value' => $config->get('search_logging'),
+    '#description' => t('This setting may affect performance. Enable only if actively inspecting logs of search queries.'),
+  );
   $form['#validate'][] = 'search_admin_settings_validate';
   $form['#submit'][] = 'search_admin_settings_submit';
 
@@ -192,6 +202,8 @@ function search_admin_settings_submit($form, &$form_state) {
   }
   $config->set('search_cron_limit', $form_state['values']['search_cron_limit']);
   $config->set('search_default_module', $form_state['values']['search_default_module']);
+  $config->set('search_logging', (bool) $form_state['values']['search_logging']);
+
   // Check whether we are resetting the values.
   if ($form_state['triggering_element']['#value'] == t('Reset to defaults')) {
     $new_modules = array('node', 'user');

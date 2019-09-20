@@ -51,7 +51,7 @@ function views_views_data() {
 
   $data['views']['area'] = array(
     'title' => t('Text area'),
-    'help' => t('Provide markup text for the area.'),
+    'help' => t('Add custom text or markup.'),
     'area' => array(
       'handler' => 'views_handler_area_text',
     ),
@@ -157,7 +157,7 @@ function views_views_plugins() {
         'handler' => 'views_plugin_display_page',
         'theme' => 'views_view',
         'uses hook menu' => TRUE,
-        'contextual links locations' => array('page'),
+        'contextual links locations' => array('view'),
         'use ajax' => TRUE,
         'use pager' => TRUE,
         'use more' => TRUE,
@@ -208,6 +208,7 @@ function views_views_plugins() {
         'handler' => 'views_plugin_display_embed',
         'theme' => 'views_view',
         'uses hook menu' => FALSE,
+        'contextual links locations' => array('view'),
         'use ajax' => TRUE,
         'use pager' => TRUE,
         'accept attachments' => FALSE,

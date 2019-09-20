@@ -25,6 +25,16 @@ function filter_admin_overview($form) {
       'title' => t('Configure'),
       'href' => "admin/config/content/formats/$id",
     );
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Text formats',
+          'name' => 'filter.format.' . $id,
+        ),
+      );
+    }
     // Check whether this is the fallback text format. This format is available
     // to all roles and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
@@ -107,7 +117,7 @@ function filter_admin_overview_submit($form, &$form_state) {
  */
 function filter_admin_format_page($format = NULL) {
   if (!isset($format->name)) {
-    backdrop_set_title(t('Add text editor'));
+    backdrop_set_title(t('Add text format'));
     $format = (object) array(
       'format' => NULL,
       'name' => '',
@@ -254,7 +264,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
   // Add user role access selection.
   $form['roles'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Roles'),
+    '#title' => t('Roles allowed to use this text format'),
     '#options' => array_map('check_plain', user_roles()),
     '#disabled' => $is_fallback,
   );
@@ -521,8 +531,8 @@ function filter_editor_image_upload_settings_form($format) {
     'directory' => 'inline-images',
     'max_size' => '',
     'max_dimensions' => array('width' => '', 'height' => ''),
+    'orientate' => FALSE,
   );
-
   $form['status'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable image uploads'),
@@ -543,6 +553,19 @@ function filter_editor_image_upload_settings_form($format) {
   foreach ($stream_wrappers as $scheme => $info) {
     $options[$scheme] = $info['description'];
   }
+
+  $form['orientate'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable image re-orientation'),
+    '#description' => t('If EXIF data indicates the need, the image will be rotated appropriately before being saved.'),
+    '#default_value' => $settings['orientate'],
+    '#attributes' => array(
+      'data-editor-image-rotate' => 'orientate',
+    ),
+    '#states' => $show_if_image_uploads_enabled,
+    '#access' => function_exists('exif_read_data'),
+  );
+
   if (!empty($options)) {
     $form['scheme'] = array(
       '#type' => 'radios',
@@ -564,7 +587,7 @@ function filter_editor_image_upload_settings_form($format) {
     '#type' => 'textfield',
     '#default_value' => $settings['directory'],
     '#title' => t('Upload directory'),
-    '#description' => t("A directory relative to Drupal's files directory where uploaded images will be stored."),
+    '#description' => t("A directory relative to the files directory where uploaded images will be stored."),
     '#states' => $show_if_image_uploads_enabled,
   );
 
@@ -613,6 +636,108 @@ function filter_editor_image_upload_settings_form($format) {
     '#placeholder' => 'height',
     '#field_suffix' => 'pixels',
     '#states' => $show_if_image_uploads_enabled,
+  );
+
+  return $form;
+}
+
+
+/**
+ * Subform constructor to configure the text editor's file upload settings.
+ *
+ * Each text editor plugin that is configured to offer the ability to insert
+ * images and uses EditorImageDialog for that, should use this form to update
+ * the text editor's configuration so that EditorImageDialog can also be used
+ * to upload files.
+ *
+ * @param $format
+ *   The text format that is being edited.
+ *
+ * @return array
+ *   The file upload settings form.
+ *
+ * @ingroup forms
+ */
+function filter_editor_file_upload_settings_form($format) {
+  // Defaults.
+  $settings = isset($format->editor_settings['file_upload']) ? $format->editor_settings['file_upload'] : array();
+  $settings += array(
+    'status' => FALSE,
+    'scheme' => file_default_scheme(),
+    'directory' => 'inline-files',
+    'max_size' => '',
+    'file_extensions' => 'txt pdf',
+  );
+
+  $form['status'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable file uploads'),
+    '#default_value' => $settings['status'],
+    '#attributes' => array(
+      'data-editor-file-upload' => 'status',
+    ),
+  );
+  $show_if_file_uploads_enabled = array(
+    'visible' => array(
+      ':input[data-editor-file-upload="status"]' => array('checked' => TRUE),
+    ),
+  );
+
+  // Any visible, writable wrapper can potentially be used for uploads,
+  // including a remote file system that integrates with a CDN.
+  $stream_wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE);
+  foreach ($stream_wrappers as $scheme => $info) {
+    $options[$scheme] = $info['description'];
+  }
+  if (!empty($options)) {
+    $form['scheme'] = array(
+      '#type' => 'radios',
+      '#title' => t('File storage'),
+      '#default_value' => $settings['scheme'],
+      '#options' => $options,
+      '#states' => $show_if_file_uploads_enabled,
+      '#access' => count($options) > 1,
+    );
+  }
+  // Set data- attributes with human-readable names for all possible stream
+  // wrappers, so that drupal.ckeditor.drupalimage.admin's summary rendering
+  // can use that.
+  foreach ($stream_wrappers as $scheme => $info) {
+    $form['scheme'][$scheme]['#attributes']['data-label'] = t('Storage: @name', array('@name' => $info['name']));
+  }
+
+  $form['directory'] = array(
+    '#type' => 'textfield',
+    '#default_value' => $settings['directory'],
+    '#title' => t('Upload directory'),
+    '#description' => t("A directory relative to the files directory where uploaded files will be stored."),
+    '#states' => $show_if_file_uploads_enabled,
+  );
+
+  $default_max_size = format_size(file_upload_max_size());
+  $form['max_size'] = array(
+    '#type' => 'textfield',
+    '#default_value' => $settings['max_size'],
+    '#title' => t('Maximum file size'),
+    '#description' => t('If this is left empty, then the file size will be limited by the PHP maximum upload size of @size.', array('@size' => $default_max_size)),
+    '#maxlength' => 20,
+    '#size' => 10,
+    '#placeholder' => $default_max_size,
+    '#states' => $show_if_file_uploads_enabled,
+  );
+
+  $form['file_extensions'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Allowed file extensions'),
+    '#default_value' => $settings['file_extensions'],
+    '#description' => t('Separate extensions with a space or comma and do not include the leading dot.'),
+    '#element_validate' => array('_file_generic_settings_extensions'),
+    '#weight' => 1,
+    '#maxlength' => 256,
+    // By making this field required, we prevent a potential security issue
+    // that would allow files of any type to be uploaded.
+    '#required' => TRUE,
+    '#states' => $show_if_file_uploads_enabled,
   );
 
   return $form;

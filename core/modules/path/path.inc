@@ -135,6 +135,25 @@ function path_clean_string($string, array $options = array()) {
       }
     }
 
+    // Copy settings from hyphen, single, and double-quotes to simple versions.
+    $fancy_character_map = array(
+      '‘' => '\'', // Single opening curly quote.
+      '’' => '\'', // Single closing curly quote.
+      '‚' => '\'', // Single low-quote.
+      '′' => '"', // Single prime.
+      '“' => '"', // Double opening curly quote.
+      '”' => '"', // Double closing curly quote.
+      '„' => '"', // Double low-quote.
+      '″' => '"', // Double prime.
+      '–' => '-', // En dash.
+      '—' => '-', // Em dash.
+    );
+    foreach ($fancy_character_map as $fancy_character => $simple_character) {
+      if (!isset($cache['punctuation'][$fancy_character])) {
+        $cache['punctuation'][$fancy_character] =  $cache['punctuation'][$simple_character];
+      }
+    }
+
     // Generate and cache the ignored words regular expression.
     $ignore_words = $config->get('ignore_words');
     $ignore_words_regex = preg_replace(array('/^[,\s]+|[,\s]+$/', '/[,\s]+/'), array('', '\b|\b'), $ignore_words);

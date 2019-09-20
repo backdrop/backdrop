@@ -327,6 +327,7 @@ function backdrop_session_commit() {
     // Write the session data.
     session_write_close();
   }
+  return TRUE;
 }
 
 /**
@@ -369,10 +370,20 @@ function backdrop_session_regenerate() {
 
   if (backdrop_session_started()) {
     $old_session_id = session_id();
+    // PHP 7.3 requires closing the session before setting a new session ID.
+    $original_session_saving = backdrop_save_session();
+    backdrop_save_session(FALSE);
+    session_write_close();
+    backdrop_session_started(FALSE);
   }
   session_id(backdrop_random_key());
 
   if (isset($old_session_id)) {
+    // Preserve and restore user object, as starting session will reset it.
+    $original_user = $user;
+    backdrop_session_start();
+    $user = $original_user;
+    backdrop_save_session($original_session_saving);
     $params = session_get_cookie_params();
     $expire = $params['lifetime'] ? REQUEST_TIME + $params['lifetime'] : 0;
     setcookie(session_name(), session_id(), $expire, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
@@ -418,6 +429,9 @@ function backdrop_session_regenerate() {
  *
  * @param $sid
  *   Session ID.
+ *
+ * @return TRUE
+ *   The session destroy handler must always return TRUE.
  */
 function _backdrop_session_destroy($sid) {
   global $user, $is_https;
@@ -493,6 +507,9 @@ function backdrop_session_destroy_uid($uid) {
  * @param $lifetime
  *   The value of session.gc_maxlifetime, passed by PHP.
  *   Sessions not updated for more than $lifetime seconds will be removed.
+ *
+ * @return TRUE
+ *   The garbage collection handler must always return TRUE.
  */
 function _backdrop_session_garbage_collection($lifetime) {
   // Be sure to adjust 'php_value session.gc_maxlifetime' to a large enough

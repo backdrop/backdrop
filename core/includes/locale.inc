@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administration functions for locale.module.
@@ -361,14 +360,14 @@ function locale_language_url_fallback($languages = NULL, $language_type = LANGUA
  */
 function locale_language_switcher_url($type, $path) {
   // Get the enabled languages only.
-  $languages = language_list(TRUE);
+  $language_list = language_list(TRUE, TRUE);
   $links = array();
 
-  foreach ($languages as $language) {
-    $links[$language->langcode] = array(
+  foreach ($language_list as $langcode => $label) {
+    $links[$langcode] = array(
       'href'       => $path,
-      'title'      => $language->name,
-      'language'   => $language,
+      'title'      => $label,
+      'language'   => language_load($langcode),
       'attributes' => array('class' => array('language-link')),
     );
   }
@@ -386,17 +385,16 @@ function locale_language_switcher_session($type, $path) {
   $language_query = isset($_SESSION[$param]) ? $_SESSION[$param] : $GLOBALS[$type]->langcode;
 
   // Get the enabled languages only.
-  $languages = language_list(TRUE);
+  $language_list = language_list(TRUE, TRUE);
   $links = array();
 
   $query = $_GET;
   unset($query['q']);
 
-  foreach ($languages as $language) {
-    $langcode = $language->langcode;
+  foreach ($language_list as $langcode => $label) {
     $links[$langcode] = array(
       'href'       => $path,
-      'title'      => $language->name,
+      'title'      => $label,
       'attributes' => array('class' => array('language-link')),
       'query'      => $query,
     );
@@ -443,11 +441,31 @@ function locale_language_url_rewrite_url(&$path, &$options) {
       case LANGUAGE_NEGOTIATION_URL_DOMAIN:
         $domains = locale_language_negotiation_url_domains();
         if (!empty($domains[$options['language']->langcode])) {
+          // Save the original base URL. If it contains a port, we need to
+          // retain it below.
+          if (!empty($options['base_url'])) {
+            // The colon in the URL scheme messes up the port checking below.
+            $normalized_base_url = str_replace(array('https://', 'http://'), '', $options['base_url']);
+          }
+
           // Ask for an absolute URL with our modified base_url.
           global $is_https;
           $url_scheme = ($is_https) ? 'https://' : 'http://';
           $options['absolute'] = TRUE;
           $options['base_url'] = $url_scheme . $domains[$options['language']->langcode];
+
+          // In case either the original base URL or the HTTP host contains a
+          // port, retain it.
+          $http_host = $_SERVER['HTTP_HOST'];
+          if (isset($normalized_base_url) && strpos($normalized_base_url, ':') !== FALSE) {
+            list($host, $port) = explode(':', $normalized_base_url);
+            $options['base_url'] .= ':' . $port;
+          }
+          elseif (strpos($http_host, ':') !== FALSE) {
+            list($host, $port) = explode(':', $http_host);
+            $options['base_url'] .= ':' . $port;
+          }
+
           if (isset($options['https']) && settings_get('https', FALSE)) {
             if ($options['https'] === TRUE) {
               $options['base_url'] = str_replace('http://', 'https://', $options['base_url']);
@@ -551,6 +569,22 @@ function locale_language_url_rewrite_session(&$path, &$options) {
  * possible attack vector (img).
  */
 function locale_string_is_safe($string) {
+  // Some strings have tokens in them. For tokens in the first part of href or
+  // src HTML attributes, filter_xss() removes part of the token, the part
+  // before the first colon.  filter_xss() assumes it could be an attempt to
+  // inject javascript. When filter_xss() removes part of tokens, it causes the
+  // string to not be translatable when it should be translatable. See
+  // LocaleStringIsSafeTest::testLocaleStringIsSafe().
+  //
+  // We can recognize tokens since they are wrapped with brackets and are only
+  // composed of alphanumeric characters, colon, underscore, and dashes. We can
+  // be sure these strings are safe to strip out before the string is checked in
+  // filter_xss() because no dangerous javascript will match that pattern.
+  //
+  // @todo Do not strip out the token. Fix filter_xss() to not incorrectly
+  //   alter the string. https://www.drupal.org/node/2372127
+  $string = preg_replace('/\[[a-z0-9_-]+(:[a-z0-9_-]+)+\]/i', '', $string);
+
   return decode_entities($string) == decode_entities(filter_xss($string, array('a', 'abbr', 'acronym', 'address', 'b', 'bdo', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'dd', 'del', 'dfn', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'ins', 'kbd', 'li', 'ol', 'p', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul', 'var')));
 }
 
@@ -712,13 +746,15 @@ function _locale_invalidate_js($langcode = NULL) {
 /**
  * (Re-)Creates the JavaScript translation file for a language.
  *
- * @param $langcode
- *   The language, the translation file should be (re)created for.
+ * @param string $langcode
+ *   The language code for which the translation file should be (re)created.
+ *
+ * @return bool
+ *   TRUE if the translation file was created successfully, FALSE otherwise.
  */
 function _locale_rebuild_js($langcode = NULL) {
   if (!isset($langcode)) {
-    global $language;
-    $language = $language;
+    $language = $GLOBALS['language'];
   }
   else {
     // Get information about the locale.

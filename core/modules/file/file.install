@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for File module.
@@ -44,6 +43,181 @@ function file_field_schema($field) {
 }
 
 /**
+ * Implements hook_schema().
+ */
+function file_schema() {
+  $schema['file_managed'] = array(
+    'description' => 'Stores information for uploaded files.',
+    'fields' => array(
+      'fid' => array(
+        'description' => 'File ID.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'The {users}.uid of the user who is associated with the file.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'filename' => array(
+        'description' => 'Name of the file with no path components. This may differ from the basename of the URI if the file is renamed to avoid overwriting an existing file.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'uri' => array(
+        'description' => 'The URI to access the file (either local or remote).',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'filemime' => array(
+        'description' => "The file's MIME type.",
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'filesize' => array(
+        'description' => 'The size of the file in bytes.',
+        'type' => 'int',
+        'size' => 'big',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'status' => array(
+        'description' => 'A field indicating the status of the file. Two status are defined in core: temporary (0) and permanent (1). Temporary files older than BACKDROP_MAXIMUM_TEMP_FILE_AGE will be removed during a cron run.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+      ),
+      'timestamp' => array(
+        'description' => 'UNIX timestamp for when the file was added.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'type' => array(
+        'description' => 'The type of this file.',
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        // If the FILE_TYPE_NONE constant ever changes, then change the value here
+        // too, and add an update function to deal with existing records. The
+        // constant isn't used here, because there may be cases where this function
+        // runs without the module file loaded.
+        'default' => 'undefined',
+      ),
+    ),
+    'indexes' => array(
+      'uid' => array('uid'),
+      'status' => array('status'),
+      'timestamp' => array('timestamp'),
+      'file_type' => array('type'),
+    ),
+    'unique keys' => array(
+      'uri' => array('uri'),
+    ),
+    'primary key' => array('fid'),
+    'foreign keys' => array(
+      'file_owner' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+    ),
+  );
+
+  $schema['file_usage'] = array(
+    'description' => 'Track where a file is used.',
+    'fields' => array(
+      'fid' => array(
+        'description' => 'File ID.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'module' => array(
+        'description' => 'The name of the module that is using the file.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'type' => array(
+        'description' => 'The name of the object type in which the file is used.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'id' => array(
+        'description' => 'The primary key of the object using the file.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'count' => array(
+        'description' => 'The number of times this file is used by this object.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('fid', 'type', 'id', 'module'),
+    'indexes' => array(
+      'type_id' => array('type', 'id'),
+      'fid_count' => array('fid', 'count'),
+      'fid_module' => array('fid', 'module'),
+    ),
+  );
+
+  $schema['file_metadata'] = array(
+    'description' => 'Cache image metadata.',
+    'fields' => array(
+      'fid' => array(
+        'description' => 'The {file_managed}.fid of the metadata.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => "The name of the metadata (e.g. 'width').",
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'value' => array(
+        'description' => "The value of the metadata (e.g. '200').",
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('fid', 'name'),
+    'foreign keys' => array(
+      'file_managed' => array(
+        'table' => 'file_managed',
+        'columns' => array('fid' => 'fid'),
+      ),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
  * Implements hook_requirements().
  *
  * Display information about getting upload progress bars working.
@@ -58,20 +232,11 @@ function file_requirements($phase) {
     $server_software = $_SERVER['SERVER_SOFTWARE'];
 
     // Test the web server identity.
-    if (preg_match("/nginx/i", $server_software)) {
-      $is_nginx = TRUE;
-      $is_apache = FALSE;
-      $fastcgi = FALSE;
-    }
-    elseif (preg_match("/apache/i", $server_software)) {
-      $is_nginx = FALSE;
-      $is_apache = TRUE;
+    $is_nginx = backdrop_is_nginx();
+    $is_apache = backdrop_is_apache();
+    $fastcgi = FALSE;
+    if ($is_apache) {
       $fastcgi = strpos($server_software, 'mod_fastcgi') !== FALSE || strpos($server_software, 'mod_fcgi') !== FALSE;
-    }
-    else {
-      $is_nginx = FALSE;
-      $is_apache = FALSE;
-      $fastcgi = FALSE;
     }
 
     $description = NULL;
@@ -85,16 +250,6 @@ function file_requirements($phase) {
       $description = t('Your server is not capable of displaying file upload progress. File upload progress requires PHP be run with mod_php in Apache or with PHP-FPM and not as FastCGI.');
       $severity = REQUIREMENT_INFO;
     }
-    elseif (!$implementation && extension_loaded('apc')) {
-      $value = t('Not enabled');
-      $description = t('Your server is capable of displaying file upload progress through APC, but it is not enabled. Add <code>apc.rfc1867 = 1</code> to your php.ini configuration. Alternatively, it is recommended to use <a href="http://pecl.php.net/package/uploadprogress">PECL uploadprogress</a>, which supports more than one simultaneous upload.');
-      $severity = REQUIREMENT_INFO;
-    }
-    elseif (!$implementation) {
-      $value = t('Not enabled');
-      $description = t('Your server is capable of displaying file upload progress, but does not have the required libraries. It is recommended to install the <a href="http://pecl.php.net/package/uploadprogress">PECL uploadprogress library</a> (preferred) or to install <a href="http://us2.php.net/apc">APC</a>.');
-      $severity = REQUIREMENT_INFO;
-    }
     elseif ($implementation == 'apc') {
       $value = t('Enabled (<a href="http://php.net/manual/en/apc.configuration.php#ini.apc.rfc1867">APC RFC1867</a>)');
       $description = t('Your server is capable of displaying file upload progress using APC RFC1867. Note that only one upload at a time is supported. It is recommended to use the <a href="http://pecl.php.net/package/uploadprogress">PECL uploadprogress library</a> if possible.');
@@ -102,6 +257,10 @@ function file_requirements($phase) {
     }
     elseif ($implementation == 'uploadprogress') {
       $value = t('Enabled (<a href="http://pecl.php.net/package/uploadprogress">PECL uploadprogress</a>)');
+      $severity = REQUIREMENT_OK;
+    }
+    elseif ($implementation == 'client') {
+      $value = t('Client-side upload progress enabled');
       $severity = REQUIREMENT_OK;
     }
     $requirements['file_progress'] = array(
@@ -113,4 +272,914 @@ function file_requirements($phase) {
   }
 
   return $requirements;
+}
+
+/**
+ * Add a view for managing files.
+ */
+function file_update_1000() {
+  $view_config = array(
+    'name' => 'file_admin',
+    'description' => 'Administrative listing for managing files.',
+    'module' => 'file',
+    'storage' => 4,
+    'tag' => 'default',
+    'disabled' => FALSE,
+    'base_table' => 'file_managed',
+    'human_name' => 'Administer files',
+    'core' => '1.6',
+    'display' => array(
+      'default' => array(
+        'display_title' => 'Master',
+        'display_plugin' => 'default',
+        'display_options' => array(
+          'query' => array(
+            'type' => 'views_query',
+            'options' =>  array(),
+          ),
+          'access' => array(
+            'type' => 'perm',
+            'perm' => 'access file overview',
+          ),
+          'cache' => array(
+            'type' => 'none',
+          ),
+          'exposed_form' => array(
+            'type' => 'basic',
+            'options' => array(
+              'submit_button' => 'Filter',
+              'reset_button' => 0,
+              'reset_button_label' => 'Reset',
+              'exposed_sorts_label' => 'Sort by',
+              'expose_sort_order' => 1,
+              'sort_asc_label' => 'Asc',
+              'sort_desc_label' => 'Desc',
+              'autosubmit' => 0,
+              'autosubmit_hide' => 1,
+            ),
+          ),
+          'pager' => array(
+            'type' => 'full',
+            'options' => array(
+              'items_per_page' => '50',
+              'offset' => '0',
+              'id' => '0',
+              'total_pages' => '',
+              'quantity' => '9',
+              'tags' => array(
+                'first' => '« first',
+                'previous' => '‹ previous',
+                'next' => 'next ›',
+                'last' => 'last »',
+              ),
+              'expose' => array(
+                'items_per_page' => 0,
+                'items_per_page_label' => 'Items per page',
+                'items_per_page_options' => '5, 10, 20, 40, 60',
+                'items_per_page_options_all' => 0,
+                'items_per_page_options_all_label' => '- All -',
+                'offset' => 0,
+                'offset_label' => 'Offset',
+              ),
+            ),
+          ),
+          'style_plugin' => 'table',
+          'row_plugin' => 'fields',
+          'fields' => array(
+            'bulk_form' => array(
+              'id' => 'bulk_form',
+              'table' => 'file_managed',
+              'field' => 'bulk_form',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => 'Operations',
+              'element_label_colon' => 0,
+              'element_default_classes' => 0,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'include_exclude' => 'exclude',
+              'selected_actions' =>  array(),
+            ),
+            'filename' => array(
+              'id' => 'filename',
+              'table' => 'file_managed',
+              'field' => 'filename',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'link_to_file' => 1,
+            ),
+            'filemime' => array(
+              'id' => 'filemime',
+              'table' => 'file_managed',
+              'field' => 'filemime',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => 'Type',
+              'exclude' => 0,
+              'element_label_colon' => 0,
+              'element_default_classes' => 1,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'link_to_file' => 0,
+              'filemime_image' => 0,
+            ),
+            'timestamp' => array(
+              'id' => 'timestamp',
+              'table' => 'file_managed',
+              'field' => 'timestamp',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => 'Uploaded',
+              'exclude' => 0,
+              'element_label_colon' => 0,
+              'element_default_classes' => 1,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'date_format' => 'short',
+              'custom_date_format' => '',
+              'timezone' => '',
+            ),
+            'filesize' => array(
+              'id' => 'filesize',
+              'table' => 'file_managed',
+              'field' => 'filesize',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => 'Size',
+              'exclude' => 0,
+              'element_label_colon' => 0,
+              'element_default_classes' => 1,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'file_size_display' => 'formatted',
+            ),
+            'status' => array(
+              'id' => 'status',
+              'table' => 'file_managed',
+              'field' => 'status',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => 'Status',
+              'exclude' => 0,
+              'element_label_colon' => 0,
+              'element_default_classes' => 1,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+            ),
+            'count' => array(
+              'id' => 'count',
+              'table' => 'file_usage',
+              'field' => 'count',
+              'relationship' => 'none',
+              'group_type' => 'sum',
+              'ui_name' => '',
+              'label' => 'Use count',
+              'exclude' => 0,
+              'element_label_colon' => 0,
+              'element_default_classes' => 1,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'set_precision' => false,
+              'precision' => 0,
+              'decimal' => '.',
+              'separator' => ',',
+            ),
+            'delete' => array(
+              'id' => 'delete',
+              'table' => 'file_managed',
+              'field' => 'delete',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'exclude' => 1,
+              'element_label_colon' => 0,
+              'element_default_classes' => 0,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'text' => '',
+            ),
+            'dropbutton' => array(
+              'id' => 'dropbutton',
+              'table' => 'views',
+              'field' => 'dropbutton',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => 'Operations',
+              'exclude' => 0,
+              'element_label_colon' => 0,
+              'element_default_classes' => 0,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'fields' => array(
+                'delete' => 'delete',
+                'bulk_form' => 0,
+                'filename' => 0,
+                'filemime' => 0,
+                'timestamp' => 0,
+                'filesize' => 0,
+                'status' => 0,
+              ),
+              'destination' => 1,
+            ),
+          ),
+          'filters' => array(
+            'filename' => array(
+              'id' => 'filename',
+              'table' => 'file_managed',
+              'field' => 'filename',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'operator' => 'contains',
+              'value' => '',
+              'group' => '1',
+              'exposed' => true,
+              'expose' => array(
+                'operator_id' => 'filename_op',
+                'label' => 'File name contains',
+                'description' => '',
+                'use_operator' => 0,
+                'operator' => 'filename_op',
+                'identifier' => 'filename',
+                'required' => 0,
+                'remember' => 0,
+                'multiple' => false,
+                'remember_roles' => array(
+                  'authenticated' => 'authenticated',
+                  'anonymous' => 0,
+                  'administrator' => 0,
+                ),
+              ),
+              'is_grouped' => false,
+              'group_info' => array(
+                'label' => '',
+                'description' => '',
+                'identifier' => '',
+                'optional' => true,
+                'widget' => 'select',
+                'multiple' => false,
+                'remember' => 0,
+                'default_group' => 'All',
+                'default_group_multiple' =>  array(),
+                'group_items' =>  array(),
+              ),
+            ),
+          ),
+          'sorts' =>  array(),
+          'title' => 'Content',
+          'empty' => array(
+            'area' => array(
+              'id' => 'area',
+              'table' => 'views',
+              'field' => 'area',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'empty' => true,
+              'content' => '<p>No files available.</p>\n',
+              'format' => 'filtered_html',
+              'tokenize' => 0,
+            ),
+          ),
+          'group_by' => 1,
+          'style_options' => array(
+            'grouping' =>  array(),
+            'row_class' => '',
+            'default_row_class' => 1,
+            'row_class_special' => 1,
+            'override' => 1,
+            'sticky' => 0,
+            'caption' => '',
+            'summary' => '',
+            'columns' => array(
+              'bulk_form' => 'bulk_form',
+              'filename' => 'filename',
+              'filemime' => 'filemime',
+              'timestamp' => 'timestamp',
+              'filesize' => 'filesize',
+              'status' => 'status',
+              'count' => 'count',
+              'delete' => 'delete',
+              'dropbutton' => 'dropbutton',
+            ),
+            'info' => array(
+              'bulk_form' => array(
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'filename' => array(
+                'sortable' => 1,
+                'default_sort_order' => 'asc',
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'filemime' => array(
+                'sortable' => 0,
+                'default_sort_order' => 'asc',
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'timestamp' => array(
+                'sortable' => 1,
+                'default_sort_order' => 'desc',
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'filesize' => array(
+                'sortable' => 1,
+                'default_sort_order' => 'desc',
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'status' => array(
+                'sortable' => 1,
+                'default_sort_order' => 'asc',
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'count' => array(
+                'sortable' => 1,
+                'default_sort_order' => 'desc',
+                'align' => 'views-align-center',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'delete' => array(
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'dropbutton' => array(
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+            ),
+            'default' => 'timestamp',
+            'empty_table' => 1,
+          ),
+        ),
+      ),
+      'page' => array(
+        'display_title' => 'Page',
+        'display_plugin' => 'page',
+        'display_options' => array(
+          'query' => array(
+            'type' => 'views_query',
+            'options' =>  array(),
+          ),
+          'path' => 'admin/content/files',
+          'menu' => array(
+            'type' => 'tab',
+            'title' => 'Manage files',
+            'description' => 'Find and manage files.',
+            'name' => 'management',
+            'weight' => '0',
+            'context' => 0,
+            'context_only_inline' => 0,
+          ),
+        ),
+      ),
+    ),
+  );
+  $config = config('views.view.file_admin');
+  if ($config->isNew()) {
+    $config->setData($view_config);
+    $config->save();
+  }
+}
+
+/**
+ * Add a Manage file link to the admin files view.
+ */
+function file_update_1001() {
+  $config = config('views.view.file_admin');
+  if ($config) {
+    // Get all the fields.
+    $fields = $config->get('display.default.display_options.fields');
+
+    // If the file field is not already there...
+    if (!array_key_exists('edit', $fields)) {
+
+      // Remove the delete and drop-button fields.
+      $delete = $fields['delete'];
+      unset($fields['delete']);
+      $dropbutton = $fields['dropbutton'];
+      unset($fields['dropbutton']);
+
+      // Add the Manage file field.
+      $fields['edit'] = array(
+        'id' => 'edit',
+        'table' => 'file_managed',
+        'field' => 'edit',
+        'relationship' => 'none',
+        'group_type' => 'group',
+        'ui_name' => '',
+        'label' => 'Manage link',
+        'exclude' => TRUE,
+        'alter' => array(),
+        'element_type' => '',
+        'element_class' => '',
+        'element_label_type' => '',
+        'element_label_class' => '',
+        'element_label_colon' => TRUE,
+        'element_wrapper_type' => '',
+        'element_wrapper_class' => '',
+        'element_default_classes' => TRUE,
+        'empty' => '',
+        'hide_empty' => 0,
+        'empty_zero' => 0,
+        'hide_alter_empty' => TRUE,
+        'text' => 'Manage',
+      );
+
+      // Put delete field back, after edit.
+      $fields['delete'] = $delete;
+
+      // Add the Manage file field to the drop-button set.
+      $dropbutton['fields'] = array('edit' => 'edit') + $dropbutton['fields'];
+
+      // Add the dropbutton field back to the view.
+      $fields['dropbutton'] = $dropbutton;
+
+      // Save the view.
+      $config->set('display.default.display_options.fields', $fields);
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Switch the 'edit files' permission to 'manage files'.
+ */
+function file_update_1002() {
+  $roles = user_roles(FALSE, 'edit files');
+  foreach ($roles as $role_name => $role_label) {
+    $config = config('user.role.' . $role_name);
+    $permissions = $config->get('permissions');
+    if ($key = array_search('edit files', $permissions)) {
+      // Add the new permission.
+      $permissions[] = 'manage files';
+      // Remove the old permission.
+      unset($permissions[$key]);
+      // Save the role.
+      $config->set('permissions', $permissions);
+      $config->save();
+    }
+  }
+}
+
+/**
+ * Add a type column to the file_managed table, and add a file_metadata table.
+ */
+function file_update_1003() {
+  $schema = array();
+  $schema['file_metadata'] = array(
+    'description' => 'Cache images dimensions.',
+    'fields' => array(
+      'fid' => array(
+        'description' => 'The {file_managed}.fid of the metadata.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => "The name of the metadata (e.g. 'width').",
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'value' => array(
+        'description' => "The value of the metadata (e.g. '200px').",
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('fid', 'name'),
+    'foreign keys' => array(
+      'file_managed' => array(
+        'table' => 'file_managed',
+        'columns' => array('fid' => 'fid'),
+      ),
+    ),
+  );
+  $spec = array(
+    'description' => 'The type of this file.',
+    'type' => 'varchar',
+    'length' => 50,
+    'not null' => TRUE,
+    'default' => 'undefined',
+  );
+  $indexes_new = array(
+    'indexes' => array(
+      'file_type' => array('type'),
+    ),
+  );
+
+  // If another module (e.g., Media or File Entity) had added a
+  // {file_managed}.type field, then change it to the expected specification.
+  if (db_field_exists('file_managed', 'type')) {
+    // db_change_field() will fail if any records have type=NULL, so update
+    // them to the new default value.
+    db_update('file_managed')->fields(array('type' => 'undefined'))->isNull('type')->execute();
+
+    // Indexes using a field being changed must be dropped prior to calling
+    // db_change_field().
+    if (db_index_exists('file_managed', 'file_type')) {
+      db_drop_index('file_managed', 'file_type');
+    }
+
+    // Since the database API doesn't provide a way to drop indexes without
+    // knowing what the old indexes are, it is the responsibility of any module
+    // that adds them to drop them prior to running this update..
+    db_change_field('file_managed', 'type', 'type', $spec, $indexes_new);
+  }
+
+  // Otherwise, add the field.
+  else {
+    db_add_field('file_managed', 'type', $spec, $indexes_new);
+  }
+
+  // Create the {file_metadata} database table.
+  if (!db_table_exists('file_metadata')) {
+    db_create_table('file_metadata', $schema['file_metadata']);
+  }
+
+  // Set permission to view files.
+  $roles = user_roles();
+  foreach ($roles as $rid => $role) {
+    user_role_grant_permissions($rid, array('view files'));
+  }
+
+  // Classify existing files according to the currently defined file types.
+  // Queue all files to be classified during cron runs using the Queue API.
+  $queue = BackdropQueue::get('file_type_determine');
+  $result = db_query('SELECT fid FROM {file_managed}');
+  foreach ($result as $record) {
+    $queue->createItem($record->fid);
+  }
+
+  // Warn users that existing files will not have a file type until the queue
+  // has been processed.
+  if ($queue->numberOfItems()) {
+    backdrop_set_message(t('All files must now be classified according to file types. Your files have been queued for processing, and will have their file type determined during cron runs.'));
+  }
+}
+
+/**
+ * Convert file_entity variables to config.
+ */
+function file_update_1004() {
+
+  // Convert variables to config.
+  $config = config('file.settings');
+  $config->set('max_filesize', update_variable_get('file_entity_max_filesize', ''));
+  $config->set('default_allowed_extensions', update_variable_get('file_entity_default_allowed_extensions', 'jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm'));
+  $config->set('default_file_directory', update_variable_get('file_entity_default_file_directory', ''));
+  $config->set('allow_insecure_download', update_variable_get('file_entity_allow_insecure_download', FALSE));
+  $config->set('file_upload_wizard_skip_file_type', update_variable_get('file_entity_file_upload_wizard_skip_file_type', FALSE));
+  $config->set('file_upload_wizard_skip_scheme', update_variable_get('file_entity_file_upload_wizard_skip_scheme', FALSE));
+  $config->set('file_upload_wizard_skip_fields', update_variable_get('file_entity_file_upload_wizard_skip_fields', FALSE));
+  $config->set('protect_repeated_render', update_variable_get('file_entity_protect_repeated_render', TRUE));
+  $config->save();
+
+  // Remove converted variables.
+  update_variable_del('file_entity_max_filesize');
+  update_variable_del('file_entity_default_allowed_extensions');
+  update_variable_del('file_entity_default_file_directory');
+  update_variable_del('file_entity_allow_insecure_download');
+  update_variable_del('file_entity_file_upload_wizard_skip_file_type');
+  update_variable_del('file_entity_file_upload_wizard_skip_scheme');
+  update_variable_del('file_entity_file_upload_wizard_skip_fields');
+  update_variable_del('file_entity_protect_repeated_render');
+
+  // Delete unused variables.
+  update_variable_del('file_entity_alt');
+  update_variable_del('file_entity_title');
+}
+
+/**
+ * Add the default file types and convert custom or modified file types from Drupal 7 file_entity.
+ */
+function file_update_1005() {
+  $default_file_types = array(
+    'audio' => array(
+      'type' => 'audio',
+      'name' => 'Audio',
+      'description' => 'An Audio file is a sound recording.',
+      'mimetypes' => array(
+        'audio/*'
+      ),
+      'disabled' => FALSE,
+      'storage' => 4,
+      'module' => 'file'
+    ),
+    'document' => array(
+      'type' => 'document',
+      'name' => 'Document',
+      'description' => 'A document file is written information.',
+      'mimetypes' => array(
+          'text/plain',
+          'application/msword',
+          'application/vnd.ms-excel',
+          'application/pdf',
+          'application/vnd.ms-powerpoint',
+          'application/vnd.oasis.opendocument.text',
+          'application/vnd.oasis.opendocument.spreadsheet',
+          'application/vnd.oasis.opendocument.presentation',
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      ),
+      'disabled' => FALSE,
+      'storage' => 4,
+      'module' => 'file',
+    ),
+    'image' => array(
+      'type' => 'image',
+      'name' => 'Image',
+      'description' => 'An image file is a still visual.',
+      'mimetypes' => array(
+          'image/*',
+      ),
+      'disabled' => FALSE,
+      'storage' => 4,
+      'module' => 'file',
+    ),
+    'video' => array(
+      'type' => 'video',
+      'name' => 'Video',
+      'description' => 'A Video file is a moving visual recording.',
+      'mimetypes' => array(
+          'video/*',
+      ),
+      'disabled' => FALSE,
+      'storage' => 4,
+      'module' => 'file',
+    ),
+  );
+  foreach ($default_file_types as $machine => $type) {
+    $config = config('file.type.' . $machine);
+    if ($config->isNew()) {
+      $config->setData($type);
+      $config->save();
+    }
+  }
+
+  // Check to see if there were file types in a D7 db.
+  if (db_table_exists('file_type')) {
+    $result = db_query("SELECT type, label, description, mimetypes FROM {file_type}")->fetchAll();
+    foreach ($result as $record) {
+      $mimetypes = unserialize($record->mimetypes);
+      $storage = FILE_TYPE_STORAGE_NORMAL;
+
+      if (file_type_load($record->type)) {
+        $storage = FILE_TYPE_STORAGE_OVERRIDE;
+      }
+
+      $config = config('file.type.' . $record->type);
+      $config->set('module', 'file');
+      $config->set('type', $record->type);
+      $config->set('name', $record->label);
+      $config->set('description', $record->description);
+      $config->set('mimetypes', $mimetypes);
+      $config->set('storage', $storage);
+      $config->save();
+    }
+
+    // Delete the file type table.
+    db_drop_table('file_type');
+  }
+}
+
+/**
+ * Add the default file display settings and convert saved file display settings from Drupal 7 file_entity.
+ */
+function file_update_1006() {
+  $default_file_displays = array(
+    'audio' => array(
+      'type' => 'audio',
+      'default' => array(
+        'formatter' => 'file_field_file_audio',
+        'settings' => array(
+          'file_field_file_audio' => array(
+            'controls' => 1,
+            'autoplay' => 0,
+            'loop' => 0,
+            'preload' => '',
+            'multiple_file_behavior' => 'tags',
+          ),
+        ),
+      ),
+      'preview' => array(
+        'formatter' => 'file_field_file_audio',
+        'settings' => array(
+          'file_field_file_audio' => array(
+            'controls' => 1,
+            'autoplay' => 0,
+            'loop' => 0,
+            'preload' => '',
+            'multiple_file_behavior' => 'tags',
+          ),
+        ),
+      ),
+    ),
+    'document' => array(
+      'type' => 'document',
+      'default' => array(
+        'formatter' => 'file_field_file_download_link',
+        'settings' => array(
+          'file_field_file_download_link' => array(
+            'text' => 'Download [file:name]',
+          ),
+        ),
+      ),
+      'preview' => array(
+        'formatter' => 'file_field_file_download_link',
+        'settings' => array(
+          'file_field_file_download_link' => array(
+            'text' => 'Download [file:name]',
+          ),
+        ),
+      ),
+    ),
+    'image' => array(
+      'type' => 'image',
+      'default' => array(
+        'formatter' => 'file_field_image',
+        'settings' => array(
+          'file_field_image' => array(
+            'image_style' => '',
+            'image_link' => '',
+            'image_float' => '',
+          ),
+        ),
+      ),
+      'preview' => array(
+        'formatter' => 'file_field_image',
+        'settings' => array(
+          'file_field_image' => array(
+            'image_style' => 'thumbnail',
+            'image_link' => '',
+            'image_float' => '',
+          ),
+        ),
+      ),
+    ),
+    'video' => array(
+      'type' => 'video',
+      'default' => array(
+        'formatter' => 'file_field_file_video',
+        'settings' => array(
+          'file_field_file_video' => array(
+            'controls' => 1,
+            'autoplay' => 0,
+            'loop' => 0,
+            'muted' => 0,
+            'width' => '',
+            'height' => '',
+            'preload' => '',
+            'multiple_file_behavior' => 'tags',
+          ),
+        ),
+      ),
+      'preview' => array(
+        'formatter' => 'file_field_file_video',
+        'settings' => array(
+          'file_field_file_video' => array(
+            'controls' => 1,
+            'autoplay' => 0,
+            'loop' => 0,
+            'muted' => 0,
+            'width' => '',
+            'height' => '',
+            'preload' => '',
+            'multiple_file_behavior' => 'tags',
+          ),
+        ),
+      ),
+    ),
+  );
+  foreach ($default_file_displays as $machine => $display) {
+    $config = config('file_display.' . $machine);
+    if ($config->isNew()) {
+      $config->setData($display);
+      $config->save();
+    }
+  }
+
+  if (db_table_exists('file_display')) {
+    $types = array();
+    $formatter_weights = array();
+    $result = db_query("SELECT name, weight, settings FROM {file_display} WHERE status = 1")->fetchAll();
+    foreach ($result as $record) {
+      $name_parts = explode('__', $record->name);
+      $filetype = $name_parts[0];
+      $view_mode = $name_parts[1];
+      $formatter = $name_parts[2];
+
+      $settings = unserialize($record->settings);
+      $types[$filetype][$view_mode]['settings'][$formatter] = $settings;
+
+      $formatter_weights[$filetype][$view_mode][$formatter] = $record->weight;
+    }
+
+    foreach ($types as $filetype => $view_modes) {
+      $config = config('file_display.' . $filetype);
+      $config->set('type', $filetype);
+
+      foreach ($view_modes as $name => $settings) {
+        // Pick one formatter for each view mode. Select by lowest weight.
+        $weight_formatters = array_flip($formatter_weights[$filetype][$name]);
+        ksort($weight_formatters);
+        $formatter = reset($weight_formatters);
+
+        $view_mode_settings = array(
+          'formatter' => $formatter,
+          'settings' => $settings['settings'],
+        );
+        $config->set($name, $view_mode_settings);
+      }
+
+      $config->save();
+    }
+
+    // Delete the file type table.
+    db_drop_table('file_display');
+  }
+}
+
+/**
+ * Grant the admin role permission to manage files and file types.
+ */
+function file_update_1007() {
+  $admin_role = config_get('system.core', 'user_admin_role');
+
+  $config = config('user.role.' . $admin_role);
+  $permissions = $config->get('permissions');
+  if ($permissions) {
+    // Add the new permissions.
+    $new_permissions = array(
+      'bypass file access',
+      'administer file types',
+      'create files',
+      'view own private files',
+      'view own files',
+      'view private files',
+      'view files',
+    );
+    // Permissions for each file type.
+    $config_file_names = config_get_names_with_prefix('file.type.');
+    foreach ($config_file_names as $config_file_name) {
+      $file_type = str_replace('file.type.', '', $config_file_name);
+      $new_permissions[] = "edit own $file_type files";
+      $new_permissions[] = "edit any $file_type files";
+      $new_permissions[] = "delete own $file_type files";
+      $new_permissions[] = "delete any $file_type files";
+      $new_permissions[] = "download own $file_type files";
+      $new_permissions[] = "download any $file_type files";
+    }
+    foreach ($new_permissions as $new_permission) {
+      if (!in_array($new_permission, $permissions)) {
+        $permissions[] = $new_permission;
+      }
+    }
+
+    // Save the role.
+    $config->set('permissions', $permissions);
+    $config->save();
+  }
 }

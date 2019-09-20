@@ -39,8 +39,8 @@ function theme_update_manager_update_form($variables) {
 function theme_update_last_check($variables) {
   $last = $variables['last'];
   $output = '<div class="update checked">';
-  $output .= $last ? t('Last checked: @time ago', array('@time' => format_interval(REQUEST_TIME - $last))) : t('Last checked: never');
-  $output .= ' <span class="check-manually">(' . l(t('Check manually'), 'admin/reports/updates/check', array('query' => backdrop_get_destination())) . ')</span>';
+  $output .= $last ? t('Last checked: @time ago', array('@time' => format_interval(REQUEST_TIME - $last))) : t('Last checked: never') . ' ';
+  $output .= l(t('Check manually'), 'admin/reports/updates/check', array('attributes' => array('class' => array('button', 'button-secondary')), 'query' => backdrop_get_destination()));
   $output .= "</div>\n";
   return $output;
 }
@@ -78,54 +78,73 @@ function theme_update_report($variables) {
   }
 
   foreach ($data as $project) {
+    // Don't show a link to the "Update modules" page for core.
+    $update_link = ($project['name'] != 'backdrop' || config_get('installer.settings', 'core_update'));
     switch ($project['status']) {
-      case UPDATE_CURRENT:
-        $class = 'status';
-        $icon = theme('image', array('uri' => 'core/misc/watchdog-ok.png', 'width' => 18, 'height' => 18, 'alt' => t('ok'), 'title' => t('ok')));
+      case UPDATE_NOT_SECURE:
+      case UPDATE_REVOKED:
+      case UPDATE_NOT_SUPPORTED:
+        $title = 'Not secure';
+        $class = 'report-error';
+        break;
+      case UPDATE_NOT_CURRENT:
+      default:
+        $title = 'Update available';
+        $class = 'report-warning';
         break;
       case UPDATE_UNKNOWN:
       case UPDATE_NOT_CHECKED:
       case UPDATE_FETCH_PENDING:
       case UPDATE_NOT_FETCHED:
-        $class = 'unknown';
-        $icon = '';
+        $title = 'Unknown';
+        $class = 'report-unknown';
+        $update_link = 0;
         break;
-      case UPDATE_NOT_SECURE:
-      case UPDATE_REVOKED:
-      case UPDATE_NOT_SUPPORTED:
-        $class = 'error';
-        $icon = theme('image', array('uri' => 'core/misc/watchdog-error.png', 'width' => 18, 'height' => 18, 'alt' => t('error'), 'title' => t('error')));
-        break;
-      case UPDATE_NOT_CURRENT:
-      default:
-        $class = 'warning';
-        $icon = theme('image', array('uri' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('warning'), 'title' => t('warning')));
+      case UPDATE_CURRENT:
+        $title = 'Current';
+        $class = 'report-status';
+        $update_link = 0;
         break;
     }
 
-    $row = '<div class="version-status">';
     $status_label = theme('update_status_label', array('status' => $project['status']));
-    $row .= !empty($status_label) ? $status_label : check_plain($project['reason']);
-    $row .= '<span class="icon">' . $icon . '</span>';
-    $row .= "</div>\n";
+    if (empty($status_label)) {
+      $status_label = check_plain($project['reason']);
+    }
+    if ($update_link && module_exists('installer')) {
+      switch ($project['project_type']) {
+        case 'theme':
+          $updatepath = 'admin/appearance/update';
+          break;
 
-    $row .= '<div class="project">';
+        case 'layout':
+          $updatepath = 'admin/layouts/update';
+          break;
+
+        case 'core':
+        case 'module':
+        default:
+          $updatepath = 'admin/modules/update';
+      }
+      $status_label = l($status_label, $updatepath, array('html' => TRUE));
+    }
+
+    $project_section = '';
     if (isset($project['title'])) {
       if (isset($project['link'])) {
-        $row .= l($project['title'], $project['link']);
+        $project_section .= l($project['title'], $project['link']);
       }
       else {
-        $row .= check_plain($project['title']);
+        $project_section .= check_plain($project['title']);
       }
     }
     else {
-      $row .= check_plain($project['name']);
+      $project_section .= check_plain($project['name']);
     }
-    $row .= ' ' . check_plain($project['existing_version']);
+    $project_section .= ' ' . check_plain($project['existing_version']);
     if ($project['install_type'] == 'dev' && !empty($project['datestamp'])) {
-      $row .= ' <span class="version-date">(' . format_date($project['datestamp'], 'custom', 'Y-M-d') . ')</span>';
+      $project_section .= ' <span class="version-date">(' . format_date($project['datestamp'], 'custom', 'Y-M-d') . ')</span>';
     }
-    $row .= "</div>\n";
 
     $versions_inner = '';
     $security_class = array();
@@ -185,65 +204,85 @@ function theme_update_report($variables) {
       }
     }
 
-    if (!empty($versions_inner)) {
-      $row .= "<div class=\"versions\">\n" . $versions_inner . "</div>\n";
-    }
-    $row .= "<div class=\"info\">\n";
-    if (!empty($project['extra'])) {
-      $row .= '<div class="extra">' . "\n";
-      foreach ($project['extra'] as $key => $value) {
-        $row .= '<div class="' . implode(' ', $value['class']) . '">';
-        $row .= check_plain($value['label']) . ': ';
-        $row .= backdrop_placeholder($value['data']);
-        $row .= "</div>\n";
-      }
-      $row .= "</div>\n";  // extra div.
-    }
+    $info_section = '';
+    // Render the .project-info div only if there is something to be rendered in
+    // it.
+    if (!empty($project['extra']) || count($project['includes']) > 1 || !empty($project['base_themes']) || !empty($project['sub_themes'])) {
+      $extra_section = $includes_section = $base_section = $sub_section ='';
 
-    $row .= '<div class="includes">';
-    sort($project['includes']);
-    if (!empty($project['disabled'])) {
-      sort($project['disabled']);
-      // Make sure we start with a clean slate for each project in the report.
-      $includes_items = array();
-      $row .= t('Includes:');
-      $includes_items[] = t('Enabled: %includes', array('%includes' => implode(', ', $project['includes'])));
-      $includes_items[] = t('Disabled: %disabled', array('%disabled' => implode(', ', $project['disabled'])));
-      $row .= theme('item_list', array('items' => $includes_items));
-    }
-    else {
-      $row .= t('Includes: %includes', array('%includes' => implode(', ', $project['includes'])));
-    }
-    $row .= "</div>\n";
-
-    if (!empty($project['base_themes'])) {
-      $row .= '<div class="basethemes">';
-      asort($project['base_themes']);
-      $base_themes = array();
-      foreach ($project['base_themes'] as $base_key => $base_theme) {
-        switch ($status[$base_key]) {
-          case UPDATE_NOT_SECURE:
-          case UPDATE_REVOKED:
-          case UPDATE_NOT_SUPPORTED:
-            $base_themes[] = t('%base_theme (!base_label)', array('%base_theme' => $base_theme, '!base_label' => theme('update_status_label', array('status' => $status[$base_key]))));
-            break;
-
-          default:
-            $base_themes[] = backdrop_placeholder($base_theme);
+      if (!empty($project['extra'])) {
+        $extra_section = '<div class="extra">' . "\n";
+        foreach ($project['extra'] as $key => $value) {
+          $extra_section .= '<div class="' . implode(' ', $value['class']) . '">';
+          $extra_section .= check_plain($value['label']) . ': ';
+          $extra_section .= backdrop_placeholder($value['data']);
+          $extra_section .= "</div>\n";
         }
+        $extra_section .= "</div>\n";  // .extra div
       }
-      $row .= t('Depends on: !basethemes', array('!basethemes' => implode(', ', $base_themes)));
-      $row .= "</div>\n";
+
+      // Render the includes info only if the project has more than one
+      // submodule.
+      if (count($project['includes']) > 1) {
+        $includes_section = '<div class="includes">';
+        sort($project['includes']);
+        // If the project has both enabled and disabled submodules, then render
+        // them as a list with two items, one holding enabled and one holding
+        // disabled submodules.
+        if (!empty($project['disabled'])) {
+          sort($project['disabled']);
+          // Make sure we start with a clean slate for each project in the
+          // report.
+          $includes_items = array();
+          $includes_section .= t('Includes:');
+          $includes_items[] = t('Enabled: %includes', array('%includes' => implode(', ', $project['includes'])));
+          $includes_items[] = t('Disabled: %disabled', array('%disabled' => implode(', ', $project['disabled'])));
+          $includes_section .= theme('item_list', array('items' => $includes_items));
+        }
+        // ...otherwise, render the included modules in a single row.
+        else {
+          $includes_section .= t('Includes: %includes', array('%includes' => implode(', ', $project['includes'])));
+        }
+        $includes_section .= "</div>\n";  // .includes div
+      }
+
+      if (!empty($project['base_themes'])) {
+        $base_section = '<div class="basethemes">';
+        asort($project['base_themes']);
+        $base_themes = array();
+        foreach ($project['base_themes'] as $base_key => $base_theme) {
+          switch ($status[$base_key]) {
+            case UPDATE_NOT_SECURE:
+            case UPDATE_REVOKED:
+            case UPDATE_NOT_SUPPORTED:
+              $base_themes[] = t('%base_theme (!base_label)', array('%base_theme' => $base_theme, '!base_label' => theme('update_status_label', array('status' => $status[$base_key]))));
+              break;
+
+            default:
+              $base_themes[] = backdrop_placeholder($base_theme);
+          }
+        }
+        $base_section .= t('Depends on: !basethemes', array('!basethemes' => implode(', ', $base_themes)));
+        $base_section .= "</div>\n";  // .basethemes div
+      }
+
+      if (!empty($project['sub_themes'])) {
+        $sub_section = '<div class="subthemes">';
+        sort($project['sub_themes']);
+        $sub_section .= t('Required by: %subthemes', array('%subthemes' => implode(', ', $project['sub_themes'])));
+        $sub_section .= "</div>\n";  // .subthemes div
+      }
+
+      $info_section = '<div class="project-info">' . $extra_section . $includes_section . $base_section . $sub_section . '</div>';
     }
 
-    if (!empty($project['sub_themes'])) {
-      $row .= '<div class="subthemes">';
-      sort($project['sub_themes']);
-      $row .= t('Required by: %subthemes', array('%subthemes' => implode(', ', $project['sub_themes'])));
-      $row .= "</div>\n";
+    $row = '';
+    $row .= '<div class="project">' . $project_section . '</div>';
+    $row .= '<div class="version-status">' . $status_label . '</div>';
+    if (!empty($versions_inner)) {
+      $row .= '<div class="versions">' . $versions_inner . '</div>';
     }
-
-    $row .= "</div>\n"; // info div.
+    $row .= $info_section;
 
     if (!isset($rows[$project['project_type']])) {
       $rows[$project['project_type']] = array();
@@ -251,7 +290,10 @@ function theme_update_report($variables) {
     $row_key = isset($project['title']) ? backdrop_strtolower($project['title']) : backdrop_strtolower($project['name']);
     $rows[$project['project_type']][$row_key] = array(
       'class' => array($class),
-      'data' => array($row),
+      'data' => array(
+        array('data' => '<div title="' . $title . '"><span class="element-invisible">' . $title . '</span></div>', 'class' => 'report-icon'),
+        array('data' => $row, 'class' => 'update-data'),
+      ),
     );
   }
 
@@ -295,15 +337,10 @@ function theme_update_version($variables) {
   $tag = $variables['tag'];
   $class = implode(' ', $variables['class']);
 
-  $output = '';
-  $output .= '<table class="version ' . $class . '">';
-  $output .= '<tr>';
-  $output .= '<td class="version-title">' . $tag . "</td>\n";
-  $output .= '<td class="version-details">';
-  $output .= l($version['version'], $version['release_link']);
-  $output .= ' <span class="version-date">(' . format_date($version['date'], 'custom', 'Y-M-d') . ')</span>';
-  $output .= "</td>\n";
-  $output .= '<td class="version-links">';
+  $version_date = '<span class="version-date">(' . format_date($version['date'], 'custom', 'Y-M-d') . ')</span>';
+  $version_details = '<span class="version-details">' . l($version['version'], $version['release_link']) . ' ' . $version_date . '</span></span>';
+  $version_title = '<span class="version-title">' . $tag . '</span>';
+
   $links = array();
   $links['update-download'] = array(
     'title' => t('Download'),
@@ -313,10 +350,13 @@ function theme_update_version($variables) {
     'title' => t('Release notes'),
     'href' => $version['release_link'],
   );
-  $output .= theme('links__update_version', array('links' => $links));
-  $output .= '</td>';
-  $output .= '</tr>';
-  $output .= "</table>\n";
+  $update_links = theme('links__update_version', array('links' => $links));
+
+  $output  = '<div class="version ' . $class . '">';
+  $output .= '  <div class="version-info">' . $version_title . ' ' . $version_details . '</div>';
+  $output .= '  <div class="version-links">' . $update_links . '</div>';
+  $output .= '</div>';
+
   return $output;
 }
 
@@ -349,4 +389,3 @@ function theme_update_status_label($variables) {
 
   }
 }
-

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for number.module.
@@ -17,7 +16,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
 
   function setUp() {
     parent::setUp('field_test');
-    $this->web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content', 'administer content types'));
+    $this->web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content', 'administer content types', 'administer fields'));
     $this->backdropLogin($this->web_user);
   }
 
@@ -63,7 +62,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
     preg_match('|test-entity/manage/(\d+)/edit|', $this->url, $match);
     $id = $match[1];
     $this->assertRaw(t('test_entity @id has been created.', array('@id' => $id)), 'Entity was created');
-    $this->assertRaw(round($value, 2), 'Value is displayed.');
+    $this->assertRaw($value, 'Value is displayed.');
 
     // Try to create entries with more than one decimal separator; assert fail.
     $wrong_entries = array(
@@ -128,7 +127,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
 
     // Set the formatter to "number_integer" and to "unformatted", and just
     // check that the settings summary does not generate warnings.
-    $this->backdropGet("admin/structure/types/manage/$type/display");
+    $this->backdropGet("admin/structure/types/manage/$type/display/default");
     $edit = array(
       "fields[field_$field_name][type]" => 'number_integer',
     );
@@ -138,4 +137,50 @@ class NumberFieldTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Save'));
   }
+
+  /**
+   * Test number_float field.
+   */
+  function testNumberFloatField() {
+    $this->field = array(
+      'field_name' => backdrop_strtolower($this->randomName()),
+      'type' => 'number_float',
+      'settings' => array(
+        'precision' => 8, 'scale' => 4, 'decimal_separator' => '.',
+      )
+    );
+    field_create_field($this->field);
+    $this->instance = array(
+      'field_name' => $this->field['field_name'],
+      'entity_type' => 'test_entity',
+      'bundle' => 'test_bundle',
+      'widget' => array(
+        'type' => 'number',
+      ),
+      'display' => array(
+        'default' => array(
+          'type' => 'number_float',
+        ),
+      ),
+    );
+    field_create_instance($this->instance);
+
+    $langcode = LANGUAGE_NONE;
+    $value = array(
+      '9.' => '9',
+      '.' => '0',
+      '123.55' => '123.55',
+      '.55' => '0.55',
+      '-0.55' => '-0.55',
+    );
+    foreach($value as $key => $value) {
+      $edit = array(
+        "{$this->field['field_name']}[$langcode][0][value]" => $key,
+      );
+      $this->backdropPost('test-entity/add/test-bundle', $edit, t('Save'));
+      $this->assertNoText("PDOException");
+      $this->assertRaw($value, 'Correct value is displayed.');
+    }
+  }
+
 }

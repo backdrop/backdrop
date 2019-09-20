@@ -34,3 +34,7 @@ function layout_disable() {
 function layout_install() {
   db_query("UPDATE {system} SET weight = 60 WHERE name = 'layout' AND type = 'module'");
 }
+
+// IMPORTANT NOTE: hook_update_X() functions added to this file will not be
+// called when upgrading from Drupal 7 to Backdrop. As such, most updates
+// dealing with layouts should be added to system.install instead.

@@ -74,7 +74,7 @@ class BackdropQueue {
    *   TRUE if the ordering of items and guaranteeing every item executes at
    *   least once is important, FALSE if scalability is the main concern.
    *
-   * @return
+   * @return BackdropQueueInterface
    *   The queue object for a given name.
    */
   public static function get($name, $reliable = FALSE) {
@@ -325,6 +325,7 @@ class MemoryQueue implements BackdropQueueInterface {
     $item->created = time();
     $item->expire = 0;
     $this->queue[$item->item_id] = $item;
+    return TRUE;
   }
 
   public function numberOfItems() {

@@ -123,7 +123,7 @@ function simpletest_result_form($form, &$form_state, $test_id) {
     $rows = array();
     foreach ($assertions as $assertion) {
       $row = array();
-      $row[] = $assertion->message;
+      $row[] = strtoupper(str_replace('simpletest-', '', $assertion->status)) . ': ' . $assertion->message;
       $row[] = $assertion->message_group;
       $row[] = backdrop_basename($assertion->file);
       $row[] = $assertion->line;
@@ -167,7 +167,7 @@ function simpletest_result_form($form, &$form_state, $test_id) {
 
   $form['action']['filter'] = array(
     '#type' => 'select',
-    '#title' => 'Filter',
+    '#title' => t('Filter'),
     '#options' => array(
       'all' => t('All (@count)', array('@count' => count($filter['pass']) + count($filter['fail']))),
       'pass' => t('Pass (@count)', array('@count' => count($filter['pass']))),
@@ -271,10 +271,10 @@ function simpletest_result_status_image($status) {
 
   if (!isset($map)) {
     $map = array(
-      'pass' => theme('image', array('uri' => 'core/misc/watchdog-ok.png', 'width' => 18, 'height' => 18, 'alt' => t('Pass'))),
-      'fail' => theme('image', array('uri' => 'core/misc/watchdog-error.png', 'width' => 18, 'height' => 18, 'alt' => t('Fail'))),
-      'exception' => theme('image', array('uri' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('Exception'))),
-      'debug' => theme('image', array('uri' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('Debug'))),
+      'pass' => theme('image', array('path' => 'core/misc/watchdog-ok.png', 'width' => 18, 'height' => 18, 'alt' => t('Pass'))),
+      'fail' => theme('image', array('path' => 'core/misc/watchdog-error.png', 'width' => 18, 'height' => 18, 'alt' => t('Fail'))),
+      'exception' => theme('image', array('path' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('Exception'))),
+      'debug' => theme('image', array('path' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('Debug'))),
     );
   }
   if (isset($map[$status])) {
@@ -366,6 +366,7 @@ function simpletest_settings_form_submit($form, &$form_state) {
     ->set('simpletest_username', $form_state['values']['simpletest_httpauth_username'])
     ->set('simpletest_password', $form_state['values']['simpletest_httpauth_password'])
     ->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**

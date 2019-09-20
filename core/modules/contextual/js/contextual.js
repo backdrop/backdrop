@@ -12,7 +12,7 @@ Backdrop.contextualLinks = Backdrop.contextualLinks || {};
  */
 Backdrop.behaviors.contextualLinks = {
   attach: function (context) {
-    $('div.contextual-links-wrapper', context).once('contextual-links', function () {
+    $('.contextual-links-wrapper', context).once('contextual-links', function () {
       var $wrapper = $(this);
       var $region = $wrapper.closest('.contextual-links-region');
       var $links = $wrapper.find('ul.contextual-links');

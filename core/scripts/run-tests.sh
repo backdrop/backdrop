@@ -31,6 +31,12 @@
  *
  *              Run tests in parallel, up to [num] tests at a time.
  *
+ * --split [fraction]
+ *
+ *              Run a portion of the specified tests. e.g. "1/4" would run the
+ *              first quarter of the tests. "2/4" would run the second quarter.
+ *              Intended to be used when running tests across multiple hosts.
+ *
  *  --force     Enable the Simpletest module if it's not enabled already.
  *
  *  --all       Run all available tests.
@@ -41,6 +47,11 @@
  *              Specify the path and the extension
  *              (i.e. 'core/modules/user/user.test').
  *
+ *
+ *  --directory <path>
+ *
+ *              Run all tests found within the specified file directory.
+ *
  *  --xml       <path>
  *
  *              If provided, test results will be written as xml files to this path.
@@ -48,6 +59,10 @@
  *  --color     Output text format results with color highlighting.
  *
  *  --verbose   Output detailed assertion messages in addition to summary.
+ *
+ *  --summary [file]
+ *
+ *              Output errors and exception messages to summary file.
  *
  *  <test1>[ <test2>[ <test3> ...]]
  *
@@ -120,6 +135,27 @@ if ($args['clean']) {
   foreach ($messages as $text) {
     echo " - " . $text . "\n";
   }
+
+  // Clean up profiles cache tables.
+  simpletest_script_clean_profile_cache_tables();
+  echo "\nProfile cache tables cleaned.\n";
+
+  // Get the status messages and print them.
+  $messages = array_pop(backdrop_get_messages('status'));
+  foreach ($messages as $text) {
+    echo " - " . $text . "\n";
+  }
+
+  // Clean up profiles cache folders.
+  simpletest_script_clean_profile_cache_folders();
+  echo "\nProfile cache folders cleaned.\n";
+
+  // Get the status messages and print them.
+  $messages = array_pop(backdrop_get_messages('status'));
+  foreach ($messages as $text) {
+    echo " - " . $text . "\n";
+  }
+
   exit(0);
 }
 
@@ -142,6 +178,24 @@ if ($args['list']) {
     }
   }
   exit(0);
+}
+
+// Generate cache tables for profiles.
+if ($args['cache']) {
+  $profiles = array(
+    'minimal',
+    'standard',
+    'testing',
+  );
+
+  simpletest_script_init(NULL);
+
+  echo "\nPreparing database and configuration cache for profiles\n";
+  foreach($profiles as $profile){
+    simpletest_script_prepare_profile_cache($profile);
+    echo " - " . $profile . " - " . "ready\n";
+
+  }
 }
 
 $test_list = simpletest_script_get_test_list();
@@ -173,6 +227,10 @@ simpletest_script_reporter_display_results();
 
 if ($args['xml']) {
   simpletest_script_reporter_write_xml_results();
+}
+
+if($args['summary']) {
+  simpletest_script_write_summary($args['summary']);
 }
 
 // Cleanup our test results.
@@ -223,6 +281,10 @@ All arguments are long options.
   --file      Run tests identified by specific file names, instead of class names.
               Specify the path and the extension
               (i.e. 'core/modules/user/user.test').
+              
+  --directory <path>
+
+              Run all tests found within the specified file directory.
 
   --xml       <path>
 
@@ -231,6 +293,13 @@ All arguments are long options.
   --color     Output text format results with color highlighting.
 
   --verbose   Output detailed assertion messages in addition to summary.
+
+  --cache     Generate cache for instalation profiles to boost tests speed.
+
+  --summary [file]
+
+              Output errors and exception messages to summary file.
+
 
   <test1>[ <test2>[ <test3> ...]]
 
@@ -263,6 +332,8 @@ function simpletest_script_parse_args() {
     'url' => '',
     'php' => '',
     'concurrency' => 1,
+    'cache' => FALSE,
+    'split' => '',
     'force' => FALSE,
     'all' => FALSE,
     'class' => FALSE,
@@ -275,6 +346,8 @@ function simpletest_script_parse_args() {
     'test-id' => 0,
     'execute-test' => '',
     'xml' => '',
+    'summary' => '',
+    'directory' => NULL,
   );
 
   // Override with set values.
@@ -289,18 +362,21 @@ function simpletest_script_parse_args() {
     }
     // Convert each option into a ordered set of arguments.
     if (preg_match('/--(\S+)/', $arg, $matches)) {
+      $arg_name = $matches[1];
       // Argument found.
-      if (array_key_exists($matches[1], $args)) {
+      if (array_key_exists($arg_name, $args)) {
         // Argument found in list.
-        $previous_arg = $matches[1];
-        if (is_bool($args[$previous_arg])) {
-          $args[$matches[1]] = TRUE;
+        // Convert incoming boolean flags based on the default values.
+        if (is_bool($args[$arg_name])) {
+          $args[$arg_name] = TRUE;
         }
+        // If using = assignment, use the value.
         elseif (!is_null($arg_value)) {
-          $args[$matches[1]] = $arg_value;
+          $args[$arg_name] = $arg_value;
         }
+        // Otherwise, a space was used for assignment, pull the next argument.
         else {
-          $args[$matches[1]] = array_shift($_SERVER['argv']);
+          $args[$arg_name] = array_shift($_SERVER['argv']);
         }
         $count++;
       }
@@ -317,10 +393,19 @@ function simpletest_script_parse_args() {
     }
   }
 
-  // Validate the concurrency argument
+  // Validate the concurrency argument.
   if (!is_numeric($args['concurrency']) || $args['concurrency'] <= 0) {
     simpletest_script_print_error("--concurrency must be a strictly positive integer.");
     exit(1);
+  }
+
+  // Validate the split argument.
+  if ($args['split']) {
+    @list($part, $total) = explode('/', $args['split']);
+    if (!is_numeric($part) || !is_numeric($total)) {
+      simpletest_script_print_error("--split must be specified as a fraction, e.g. 1/4, 2/4, etc.");
+      exit(1);
+    }
   }
 
   return array($args, $count);
@@ -387,8 +472,21 @@ function simpletest_script_init($server_software) {
     }
   }
 
-  chdir(realpath(__DIR__ . '/../..'));
-  define('BACKDROP_ROOT', getcwd());
+  /**
+   * Defines the root directory of the Backdrop installation.
+   *
+   * The dirname() function is used to get path to Backdrop root folder, which
+   * avoids resolving of symlinks. This allows the code repository to be a symlink
+   * and hosted outside of the web root. See issue #1297.
+   *
+   * The realpath is important here to avoid FAILURE with filetransfer.tests. 
+   * When realpath used, BACKDROP_ROOT contain full path to backdrop root folder.
+   */
+  define('BACKDROP_ROOT', realpath(dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])))));
+
+  // Change the directory to the Backdrop root.
+  chdir(BACKDROP_ROOT);
+
   require_once BACKDROP_ROOT . '/core/includes/bootstrap.inc';
 }
 
@@ -521,6 +619,31 @@ function simpletest_script_get_test_list() {
         }
       }
     }
+    elseif ($args['directory']) {
+      // Extract test case class names from specified directory.
+      $files = array();
+      if ($args['directory'][0] === '/') {
+        $directory = $args['directory'];
+      }
+      else {
+        $directory = BACKDROP_ROOT . "/" . $args['directory'];
+      }
+      
+      $all_classes = array();
+      foreach ($groups as $group) {
+        $all_classes = array_merge($all_classes, array_keys($group));
+      }
+
+      foreach (file_scan_directory($directory, '/\.test$/') as $file) {
+        $content = file_get_contents($file->uri);
+        preg_match_all('@^class ([^ ]+)@m', $content, $matches);
+        foreach ($matches[1] as $test_class) {
+          if(in_array($test_class, $all_classes)) {
+            $test_list[] = $test_class;
+          }
+        }
+      }
+    }
     elseif ($args['group']) {
       // Check for valid group names and get all valid classes in group.
       foreach ($args['test_names'] as $group_name) {
@@ -555,6 +678,24 @@ function simpletest_script_get_test_list() {
     }
   }
 
+  // Split into the fraction portion. e.g 1/4 would run the first quarter, or
+  // 2/4 would run the second quarter.
+  if ($args['split']) {
+    list($current_part, $part_total) = explode('/', $args['split']);
+    $part_length = ceil(count($test_list) * (1/$part_total));
+    $part_start = ($current_part - 1) * $part_length;
+    $part_end = $current_part * $part_length;
+    // Ensure part end isn't more than the total test count.
+    $part_end = ($part_end > count($test_list)) ? count($test_list) : $part_end;
+    $current = $part_start;
+    $partial_test_list = array();
+    while ($current < $part_end) {
+      $partial_test_list[$current] = $test_list[$current];
+      $current++;
+    }
+    $test_list = $partial_test_list;
+  }
+
   if (empty($test_list)) {
     simpletest_script_print_error('No valid tests were specified.');
     exit(0);
@@ -581,7 +722,12 @@ function simpletest_script_reporter_init() {
 
   // Tell the user about what tests are to be run.
   if ($args['all']) {
-    echo "All tests will run.\n\n";
+    $part_message = '';
+    if ($args['split']) {
+      list($part, $total) = explode('/', $args['split']);
+      $part_message = " (part $part of $total)";
+    }
+    echo "All tests will run$part_message.\n\n";
   }
   else {
     echo "Tests to be run:\n";
@@ -600,6 +746,52 @@ function simpletest_script_reporter_init() {
   echo "Test summary\n";
   echo "------------\n";
   echo "\n";
+}
+
+/**
+ * Write a summary of any test failures to a separate file.
+ *
+ * @param string $summary_file
+ *   The path to a file to which the summary will be written.
+ */
+function simpletest_script_write_summary($summary_file) {
+  global $test_list, $args, $test_id, $results_map;
+
+  $summary = '';
+  $results = db_query("SELECT * FROM {simpletest} WHERE test_id = :test_id AND (status = 'exception' OR status = 'fail') ORDER BY test_class, message_id", array(':test_id' => $test_id));
+  $test_class = '';
+  $count = 0;
+  foreach ($results as $result) {
+    if (isset($results_map[$result->status])) {
+      if ($result->test_class != $test_class) {
+        // Display test class every time results are for new test class.
+        $test_class = $result->test_class;
+        $info = simpletest_test_get_by_class($test_class);
+        $test_group = $info['group'];
+        $test_name = $info['name'];
+        $summary .= "\n$test_group: $test_name ($test_class)\n";
+        $test_class = $result->test_class;
+      }
+      
+      if($count < 10 ){
+        $summary .= " - `" . $result->status . "` " . trim(strip_tags($result->message)) . ' **' . basename($result->file) . '**:' . $result->line . "\n";
+      }
+      $count++;
+    }
+  }
+  
+  if($count > 10 ){
+    $summary .= "\nResult limited to first 10 items. More details are available from the full log.\n";
+  }
+  
+  $total_count = db_query("SELECT COUNT(*) FROM {simpletest} WHERE test_id = :test_id AND status IN ('fail', 'pass')", array(':test_id' => $test_id))->fetchField();
+  if(!empty($summary)){
+    $summary = format_plural($count, '1 of !total_count tests failed', '@count of !total_count tests failed.', array('!total_count' => $total_count)) . "\n" . $summary;
+  } 
+  else{
+    $summary = format_plural($total_count, '1 test passed', '@count tests passed.');
+  }
+  file_put_contents($summary_file, $summary);
 }
 
 /**
@@ -740,7 +932,7 @@ function simpletest_script_format_result($result) {
 
   simpletest_script_print($summary, $result->status);
 
-  $lines = explode("\n", wordwrap(trim(strip_tags($result->message)), 76));
+  $lines = explode("\n", wordwrap(trim(strip_tags(decode_entities($result->message))), 76));
   foreach ($lines as $line) {
     echo "    $line\n";
   }
@@ -831,5 +1023,66 @@ function simpletest_script_print_alternatives($string, $array, $degree = 4) {
     foreach ($alternatives as $alternative) {
       simpletest_script_print("  - $alternative\n", SIMPLETEST_SCRIPT_COLOR_FAIL);
     }
+  }
+}
+
+/**
+ * Removes cached profile tables from the database.
+ */
+function simpletest_script_clean_profile_cache_tables(){
+  $tables = db_find_tables(Database::getConnection()->prefixTables('{simpletest_cache_}') . '%');
+  $count = 0;
+  foreach ($tables as $table) {
+    db_drop_table($table);
+    $count++;
+  }
+
+  if ($count > 0) {
+    backdrop_set_message(format_plural($count, 'Removed 1 profile cache table.', 'Removed @count profile cache tables.'));
+  }
+  else {
+    backdrop_set_message(t('No profile cache tables to remove.'));
+  }
+}
+
+/**
+ * Removes cached profile folders from the database.
+ */
+function simpletest_script_clean_profile_cache_folders(){
+  $profiles = array(
+    'minimal',
+    'standard',
+    'testing',
+  );
+
+  $file_public_path = config_get('system.core', 'file_public_path', 'files');
+
+  foreach($profiles as $profile) {
+    // Delete temporary files directory.
+    file_unmanaged_delete_recursive($file_public_path . '/simpletest/simpletest_cache_' . $profile);
+    backdrop_set_message(t('Cleared cache folder for profile !profile.', array('!profile' => $profile)));
+  }
+}
+
+/**
+ * Removed profile cached tables from the database.
+ */
+function simpletest_script_prepare_profile_cache($profile){
+  try {
+    backdrop_page_is_cacheable(FALSE);
+    backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
+    backdrop_page_is_cacheable(TRUE);
+
+    require_once BACKDROP_ROOT . '/core/modules/simpletest/backdrop_web_test_case_cache.php';
+
+    $test = new BackdropWebTestCaseCache();
+    $test->setProfile($profile);
+    if (!$test->isCached()) {
+      $test->prepareCache();
+    }
+  }
+  catch (Exception $e) {
+    simpletest_script_print_error($e->getMessage());
+    exit(1);
   }
 }

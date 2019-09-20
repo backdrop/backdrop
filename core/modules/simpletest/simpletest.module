@@ -78,6 +78,14 @@ function simpletest_config_info() {
     'label' => t('Testing settings'),
     'group' => t('Configuration'),
   );
+  $prefixes['simpletest.testconfig'] = array(
+    'label' => t('Configuration file for testing purposes'),
+    'group' => t('Test Data'),
+  );
+  $prefixes['simpletest.secondconfig'] = array(
+    'label' => t('Second configuration file for testing purposes'),
+    'group' => t('Test Data'),
+  );
   return $prefixes;
 }
 
@@ -215,14 +223,19 @@ function _simpletest_batch_finished($success, $results, $operations, $elapsed) {
     backdrop_set_message(t('The test run finished in @elapsed.', array('@elapsed' => $elapsed)));
   }
   else {
-    // Use the test_id passed as a parameter to _simpletest_batch_operation().
-    $test_id = $operations[0][1][1];
+    // If any uncompleted operations are left, we can use the next item to pull
+    // the test_id and report any errors from the test log.
+    if (!empty($operations)) {
+      // Use the test_id passed as a parameter to _simpletest_batch_operation().
+      $next_operation = reset($operations);
+      $test_id = $next_operation[1][1];
 
-    // Retrieve the last database prefix used for testing and the last test
-    // class that was run from. Use the information to read the lgo file
-    // in case any fatal errors caused the test to crash.
-    list($last_prefix, $last_test_class) = simpletest_last_test_get($test_id);
-    simpletest_log_read($test_id, $last_prefix, $last_test_class);
+      // Retrieve the last database prefix used for testing and the last test
+      // class that was run from. Use the information to read the lgo file
+      // in case any fatal errors caused the test to crash.
+      list($last_prefix, $last_test_class) = simpletest_last_test_get($test_id);
+      simpletest_log_read($test_id, $last_prefix, $last_test_class);
+    }
 
     backdrop_set_message(t('The test run did not successfully finish.'), 'error');
     backdrop_set_message(t('Use the <em>Clean environment</em> button to clean-up temporary files and tables.'), 'warning');
@@ -477,6 +490,12 @@ function simpletest_clean_temporary_directories() {
         $count++;
       }
     }
+  }
+
+  // Delete the verbose output directory if present.
+  $verbose_directory = 'public://simpletest/verbose';
+  if (is_dir($verbose_directory)) {
+    file_unmanaged_delete_recursive($verbose_directory);
   }
 
   if ($count > 0) {

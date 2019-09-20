@@ -12,7 +12,7 @@ class TranslationTestCase extends BackdropWebTestCase {
   protected $book;
 
   function setUp() {
-    parent::setUp('language', 'locale', 'translation', 'translation_test');
+    parent::setUp('node', 'language', 'locale', 'translation', 'translation_test');
 
     // Setup users.
     $this->admin_user = $this->backdropCreateUser(array('bypass node access', 'administer nodes', 'administer languages', 'administer content types', 'administer blocks', 'access administration pages', 'translate content'));
@@ -60,9 +60,9 @@ class TranslationTestCase extends BackdropWebTestCase {
     // Unpublish the original node to check that this has no impact on the
     // translation overview page, publish it again afterwards.
     $this->backdropLogin($this->admin_user);
-    $this->backdropPost('node/' . $node->nid . '/edit', array('status' => FALSE), t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', array('status' => 0), t('Save'));
     $this->backdropGet('node/' . $node->nid . '/translate');
-    $this->backdropPost('node/' . $node->nid . '/edit', array('status' => NODE_PUBLISHED), t('Save'));
+    $this->backdropPost('node/' . $node->nid . '/edit', array('status' => 1), t('Save'));
     $this->backdropLogin($this->translator);
 
     // Check that the "Add translation" link uses a localized path.
@@ -165,7 +165,7 @@ class TranslationTestCase extends BackdropWebTestCase {
     // Unpublish the Spanish translation to check that the related language
     // switch link is not shown.
     $this->backdropLogin($this->admin_user);
-    $edit = array('status' => FALSE);
+    $edit = array('status' => 0);
     $this->backdropPost("node/$translation_es->nid/edit", $edit, t('Save'));
     $this->backdropLogin($this->translator);
     $this->assertLanguageSwitchLinks($node, $translation_es, FALSE);
@@ -176,7 +176,7 @@ class TranslationTestCase extends BackdropWebTestCase {
     $edit = array('language[locale-url][enabled]' => FALSE);
     $this->backdropPost('admin/config/regional/language/detection', $edit, t('Save settings'));
     $this->resetCaches();
-    $edit = array('status' => TRUE);
+    $edit = array('status' => 1);
     $this->backdropPost("node/$translation_es->nid/edit", $edit, t('Save'));
     $this->backdropLogin($this->translator);
     $this->assertLanguageSwitchLinks($node, $translation_es, TRUE, 'node');

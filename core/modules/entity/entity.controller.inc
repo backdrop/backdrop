@@ -507,7 +507,7 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
     catch (Exception $e) {
       $transaction->rollback();
       watchdog_exception($this->entityType, $e);
-      throw new EntityStorageException($e->getMessage, (int) $e->getCode(), $e);
+      throw new EntityStorageException($e->getMessage(), (int) $e->getCode(), $e);
     }
   }
 

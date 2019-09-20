@@ -18,8 +18,16 @@ class views_handler_filter_in_operator extends views_handler_filter {
   var $value_form_type = 'checkboxes';
 
   /**
-   * @var array
+   * The title used when display this filter as an HTML form field.
+   *
+   * @var string
+   */
+  var $value_title;
+
+  /**
    * Stores all operations which are available on the form.
+   *
+   * @var array
    */
   var $value_options = NULL;
 

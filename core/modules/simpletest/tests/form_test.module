@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Helper module for the form API tests.
@@ -34,6 +33,13 @@ function form_test_menu() {
     'title' => 'Form #required validation without #title',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('form_test_validate_required_form_no_title'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['form-test/validate-no-token'] = array(
+    'title' => 'Form validation without a CSRF token',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('form_test_validate_no_token'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -93,6 +99,7 @@ function form_test_menu() {
   $items['form_test/form-storage-legacy'] = array(
     'title' => 'Emulate legacy AHAH-style ajax callback',
     'page callback' => 'form_test_storage_legacy_handler',
+    'delivery callback' => 'backdrop_json_deliver',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -491,6 +498,27 @@ function form_test_validate_required_form_no_title_submit($form, &$form_state) {
 }
 
 /**
+ * Form builder for testing submission of a form without a CSRF token.
+ */
+function form_test_validate_no_token($form, &$form_state) {
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save',
+  );
+
+  $form['#token'] = FALSE;
+
+  return $form;
+}
+
+/**
+ * Form submission handler for form_test_validate_no_token().
+ */
+function form_test_validate_no_token_submit($form, &$form_state) {
+  backdrop_set_message('The form_test_validate_no_token form has been submitted successfully.');
+}
+
+/**
  * Builds a simple form with a button triggering partial validation.
  */
 function form_test_limit_validation_errors_form($form, &$form_state) {
@@ -625,11 +653,17 @@ function _form_test_tableselect_form_builder($form, $form_state, $element_proper
   $form['tableselect'] = $element_properties;
 
   $form['tableselect'] += array(
+    '#prefix' => '<div id="tableselect-wrapper">',
+    '#suffix' => '</div>',
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $options,
     '#multiple' => FALSE,
     '#empty' => t('Empty text.'),
+    '#ajax' => array(
+      'callback' => '_form_test_tableselect_ajax_callback',
+      'wrapper' => 'tableselect-wrapper',
+    ),
   );
 
   $form['submit'] = array(
@@ -731,6 +765,13 @@ function _form_test_vertical_tabs_form($form, &$form_state) {
     '#type' => 'textfield',
   );
   return $form;
+}
+
+/**
+* Ajax callback that returns the form element.
+*/
+function _form_test_tableselect_ajax_callback($form, &$form_state) {
+  return $form['tableselect'];
 }
 
 /**
@@ -915,6 +956,24 @@ function form_test_storage_page_cache_old_build_id($form) {
  */
 function form_test_storage_page_cache_rebuild($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * A simple form for testing form caching.
+ */
+function form_test_cache_form($form, &$form_state) {
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Title',
+    '#required' => TRUE,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save',
+  );
+
+  return $form;
 }
 
 /**
@@ -2270,4 +2329,51 @@ function form_test_html_id($form, &$form_state) {
     '#value' => 'Save',
   );
   return $form;
+}
+
+/**
+ * A form to test system_settings_form().
+ */
+function form_test_system_config_form() {
+  $config = config('simpletest.testconfig');
+  $form['#config'] = 'simpletest.testconfig';
+  $form['abc'] = array(
+    '#type' => 'textfield',
+    '#title' => 'abc',
+    '#default_value' => $config->get('abc'),
+  );
+  $form['def'] = array(
+    '#type' => 'textfield',
+    '#title' => 'def',
+    '#default_value' => $config->get('def'),
+  );
+
+  // Test single-element overrrides
+  $sysconfig = config('system.core');
+  $form['rss_description'] = array(
+    '#type' => 'textfield',
+    '#title' => 'xyz',
+    '#default_value' => $sysconfig->get('rss_description'),
+    '#config' => 'system.core',
+  );
+
+  // Test fieldsets of overrides.
+  $second_config = config('simpletest.secondconfig');
+  $form['second_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Second Settings',
+    '#config' => 'simpletest.secondconfig',
+  );
+  $form['second_settings']['ghi'] = array(
+    '#type' => 'textfield',
+    '#title' => 'ghi',
+    '#default_value' => $second_config->get('ghi')
+  );
+  $form['second_settings']['jkl'] = array(
+    '#type' => 'textfield',
+    '#title' => 'jkl',
+    '#default_value' => $second_config->get('jkl')
+  );
+
+  return system_settings_form($form);
 }

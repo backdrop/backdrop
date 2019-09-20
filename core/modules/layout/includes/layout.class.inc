@@ -63,6 +63,14 @@ class Layout {
   var $storage;
 
   /**
+   * Deprecated. Now replaced by $layout_template.
+   *
+   * @var NULL
+   * @deprecated since 1.4.0
+   */
+  var $layout;
+
+  /**
    * The name of the layout template used by this configuration.
    *
    * Although this property may be retrieved and set directly, if changing a
@@ -71,7 +79,7 @@ class Layout {
    *
    * @var string
    */
-  var $layout;
+  var $layout_template;
 
   /**
    * Whether this layout is disabled.
@@ -88,16 +96,9 @@ class Layout {
   var $locked = FALSE;
 
   /**
-   * An array of all contexts used by this layout.
-   *
-   * @var array
-   */
-  var $context = array();
-
-  /**
    * An array of all conditional rules used by this layout.
    *
-   * @var array
+   * @var LayoutAccess[]
    */
   var $conditions = array();
 
@@ -128,7 +129,7 @@ class Layout {
   /**
    * The main array of configured blocks, keyed by a generated ID per instance.
    *
-   * @var array
+   * @var Block[]
    */
   var $content = array();
 
@@ -143,9 +144,37 @@ class Layout {
   var $positions = array();
 
   /**
-   * An array of LayoutContext instances used by this menu item.
+   * If editing a layout, general storage of in-progress changes.
    *
    * @var array
+   */
+  var $in_progress;
+
+  /**
+   * The display renderer class used to handle this layout.
+   *
+   * @var string
+   */
+  var $renderer_name = 'standard';
+
+  /**
+   * An array of orphaned blocks when changing templates.
+   *
+   * @var array
+   */
+  var $orphaned_blocks = array();
+
+  /**
+   * The region where orphaned blocks are placed in new template.
+   *
+   * @var string
+   */
+  var $refuge_region;
+
+  /**
+   * An array of LayoutContext instances used by this menu item.
+   *
+   * @var LayoutContext[]
    */
   private $contexts;
 
@@ -166,6 +195,14 @@ class Layout {
       'title_display' => LAYOUT_TITLE_DEFAULT,
       'title_block' => NULL,
     );
+
+    // Adjust for the renaming of "layout" to "layout_template".
+    // See https://github.com/backdrop/backdrop-issues/issues/998
+    // @todo: Remove in 2.x.
+    if (isset($this->layout) && !isset($this->layout_template)) {
+      $this->layout_template = $this->layout;
+      unset($this->layout);
+    }
 
     // Set the storage type.
     if (isset($config['module'])) {
@@ -202,16 +239,24 @@ class Layout {
     if ($this->storage === LAYOUT_STORAGE_DEFAULT) {
       $this->storage = LAYOUT_STORAGE_OVERRIDE;
     }
+    $is_new = !empty($this->is_new);
+
+    // Allow modules to act on layout data before saving.
+    foreach (module_implements('layout_presave') as $module) {
+      $function = $module . '_layout_presave';
+      $function($this);
+    }
 
     $data = array(
       'path' => $this->path,
       'name' => $this->name,
       'title' => $this->title,
       'description' => $this->description,
+      'renderer_name' => $this->renderer_name,
       'module' => $this->module,
       'weight' => $this->weight,
       'storage' => $this->storage,
-      'layout' => $this->layout,
+      'layout_template' => $this->layout_template,
       'disabled' => $this->disabled,
       'settings' => $this->settings,
       'positions' => $this->positions,
@@ -219,7 +264,7 @@ class Layout {
 
     // Basic validation to prevent data corruption.
     if (empty($this->name)) {
-      throw LayoutSaveException(t('The layout must have a name specified to save.'));
+      throw new LayoutSaveException(t('The layout must have a name specified to save.'));
     }
 
     // Convert all stored conditions to arrays.
@@ -240,12 +285,6 @@ class Layout {
       }
     }
 
-    // Allow modules to act on layout data before saving.
-    foreach (module_implements('layout_presave') as $module) {
-      $function = $module . '_layout_presave';
-      $function($this->name, $data);
-    }
-
     if (isset($this->original_name) && $this->original_name != $this->name) {
       config('layout.layout.' . $this->original_name)->delete();
     }
@@ -253,11 +292,25 @@ class Layout {
       ->setData($data)
       ->save();
 
-    if (!empty($this->is_new)) {
-      $this->invokeHook('insert');
+    // Parse each BlockText block for file IDs.
+    $fids = array();
+    foreach ($this->content as $content) {
+      if (is_a($content, 'BlockText')) {
+        $block_content = $content->settings['content'];
+        $block_fids = filter_parse_file_fids($block_content);
+        if (isset($block_fids)) {
+          $fids = array_merge($fids, $block_fids);
+        }
+      }
     }
-    else {
-      $this->invokeHook('update');
+    $files = file_load_multiple($fids);
+    foreach ($files as $fid => $file) {
+      if ($file && $file->status !== FILE_STATUS_PERMANENT) {
+        // This makes the file "self-referencing", so it will never be deleted.
+        // File usages are not removed for text blocks currently.
+        // See https://github.com/backdrop/backdrop-issues/issues/2137.
+        file_usage_add($file, 'file', 'file', $file->fid);
+      }
     }
 
     // If this layout overrides an existing module path, reassign or delete
@@ -291,6 +344,14 @@ class Layout {
       }
     }
     layout_reset_caches();
+
+    $new_this = layout_load($this->name);
+    if ($is_new) {
+      $new_this->invokeHook('insert');
+    }
+    else {
+      $new_this->invokeHook('update');
+    }
   }
 
   /**
@@ -452,7 +513,6 @@ class Layout {
    *   The UUID of the block being removed.
    */
   function removeBlock($block_uuid) {
-    $block = $this->content[$block_uuid];
     unset($this->content[$block_uuid]);
     foreach ($this->positions as $region => $positions) {
       $key = array_search($block_uuid, $positions);
@@ -602,20 +662,25 @@ class Layout {
    *   one to the other. To discard the contents of a region, set the value
    *   to FALSE.
    */
-  function setLayout($layout_name, $region_mapping = array()) {
+  function setLayoutTemplate($layout_name, $region_mapping = array()) {
     // If not changing anything, return as a no-op.
-    if ($layout_name === $this->layout && empty($region_mapping)) {
+    if ($layout_name === $this->layout_template && empty($region_mapping)) {
       return;
     }
     // If no layout has yet been set, then we have no copying to do.
-    if (!isset($this->layout)) {
-      $this->layout = $layout_name;
+    if (!isset($this->layout_template)) {
+      $this->layout_template = $layout_name;
       return;
     }
 
-    $old_layout_info = layout_get_layout_info($this->layout);
-    $new_layout_info = layout_get_layout_info($layout_name);
+    $old_layout_info = layout_get_layout_template_info($this->layout_template);
+    $new_layout_info = layout_get_layout_template_info($layout_name);
+    // Set up the array with region names for the new layout.
     $new_positions = array();
+    $new_regions = array_keys($new_layout_info['regions']);
+    foreach ($new_regions as $new_region_name) {
+      $new_positions[$new_region_name] = array();
+    }
 
     // Do the mapping in the order provided (if any).
     if ($region_mapping) {
@@ -635,9 +700,6 @@ class Layout {
       else {
         $new_region_name = FALSE;
       }
-      if ($new_region_name && !array_key_exists($new_region_name, $new_positions)) {
-        $new_positions[$new_region_name] = array();
-      }
 
       if (isset($this->positions[$old_region_name])) {
         foreach ($this->positions[$old_region_name] as $uuid) {
@@ -645,19 +707,31 @@ class Layout {
             $new_positions[$new_region_name][] = $uuid;
           }
           else {
-            unset($this->content[$uuid]);
+            $this->orphaned_blocks[] = $uuid;
           }
         }
       }
     }
 
-    $this->layout = $layout_name;
+    // Assign orphan blocks to the default or last region, if the former doesn't
+    // exist.
+    if (!empty($this->orphaned_blocks)) {
+      end($new_positions);
+      $this->refuge_region = !empty($new_layout_info['default region']) ? $new_layout_info['default region'] : key($new_positions);
+      foreach ($this->orphaned_blocks as $uuid) {
+        $new_positions[$this->refuge_region][] = $uuid;
+      }
+    }
+
+    $this->layout_template = $layout_name;
     $this->positions = $new_positions;
     module_invoke_all('layout_template_change', $this, $old_layout_info['name']);
   }
 
   /**
    * Return all contexts (from both the layout and menu item) for this Layout.
+   *
+   * return LayoutContext[]
    */
   function getContexts() {
     if (is_null($this->contexts)) {

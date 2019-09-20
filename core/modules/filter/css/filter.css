@@ -39,6 +39,12 @@ input#edit-filters-filter-html-settings-allowed-html {
   width: 100%;
   max-width: 500px;
   z-index: 9996 !important; /* To come above the full-screen CKEditor button. */
+  -webkit-transition: max-width .5s, left .5s, right .5s; /* For Safari 3.1 to 6.0 */
+  transition: max-width .5s, left .5s, right .5s;
+}
+.editor-dialog-with-library {
+  max-width: 92%;
+  left: 4% !important;
 }
 .editor-dialog .form-managed-file .form-file,
 .editor-dialog .form-managed-file .file {
@@ -48,20 +54,34 @@ input#edit-filters-filter-html-settings-allowed-html {
   overflow: hidden;
   vertical-align: middle;
 }
-.editor-image-size div {
+/* Make sure image size items fall in line. */
+.editor-image-size .form-item {
+  display: inline;
+}
+.editor-image-size .form-type-number input {
+  display: inline;
+}
+.editor-image-size .form-type-number span{
   display: inline;
 }
 .editor-image-size .form-number {
   width: 30%;
   max-width: 120px;
 }
-.editor-image-align div {
+/* Make sure image alignment items fall in line. */
+.editor-image-align .form-item {
   display: inline;
 }
-.editor-image-align .option {
+.editor-image-align .form-item input {
+  display: inline;
+}
+.editor-image-align .form-item label {
+  display: inline;
+}
+.editor-image-align label.option {
   margin-right: 20px; /* LTR */
 }
-[dir="rtl"] .editor-image-align .option {
+[dir="rtl"] .editor-image-align label.option {
   margin-right: 0;
   margin-left: 20px;
 }
@@ -86,4 +106,112 @@ input#edit-filters-filter-html-settings-allowed-html {
 }
 [dir="rtl"] .editor-image-toggle.last {
   border-left: none;
+}
+.editor-image-fields .form-item {
+  margin: 0 0 1em;
+}
+.editor-image-fields input.form-text {
+  padding: 5px;
+}
+.editor-image-fields input.form-number {
+  padding: 5px;
+}
+.editor-image-fields .form-item .description {
+  font-size: 0.85rem;
+}
+.editor-image-fields .form-item {
+  margin-top: 0;
+}
+.form-item label.editor-image-toggle {
+  display: inline-block !important;
+  padding-bottom: 10px;
+}
+.image-library-filename {
+  margin: 0;
+  max-width: 125px;
+  max-height: 18px;
+  font-size: 0.7rem;
+  overflow: hidden;
+  text-align: center;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.image-library-image {
+  max-width: 100px;
+  max-height: 100px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  box-shadow: 2px 2px #bbbbbb;
+}
+
+.library-view.form-item {
+  margin-top: 0;
+}
+.image-library-choose-file {
+  float: left;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin-bottom: 10px;
+  height: 125px;
+  width: 115px;
+  position: relative;
+  border: 1px solid #ffffff;
+  background-color: #ffffff;
+  border-radius: 3px;
+}
+.image-library-choose-file:hover {
+  background-color: #e5f3ff;
+  border: 1px solid #e5f3ff;
+  border-radius: 3px;
+}
+
+.image-library-choose-file.image-library-image-selected {
+  background-color: #cce8ff;
+  border: 1px solid #99d1ff;
+}
+
+.image-form-wrapper {
+  display: flex;
+  flex-direction: row;
+}
+.editor-image-fields {
+  width: 350px;
+  flex-grow: 0;
+  padding-top: 0;
+}
+.editor-image-library {
+  padding: 0 0 0 20px; /* LTR */
+  min-width: 525px;
+  flex-grow: 1;
+}
+[dir="rtl"] .editor-image-library {
+  padding: 0 20px 0 0;
+}
+@media (max-width: 1030px) {
+  .image-form-wrapper {
+    flex-direction: column;
+    justify-content: center;
+  }
+  .editor-image-fields {
+    max-width: 800px;
+    padding-top: 30px;
+    align-self: center;
+  }
+}
+.editor-image-library .form-item label {
+  margin: 0;
+}
+.form-item-image-directory {
+  display: none;
+}
+.view-image-library .view-header p {
+  margin: 0;
 }

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the User module.
@@ -301,7 +300,7 @@ function hook_user_logout($account) {
  * @param $account
  *   The user object on which the operation is being performed.
  * @param $view_mode
- *   View mode, e.g. 'full'.
+ *   Display mode, e.g. 'full' or 'teaser'.
  * @param $langcode
  *   The language code used for rendering.
  *

@@ -1,3 +1,9 @@
+[FilterResetTestCase]
+name = Filter modules and reset filter
+description = Filter the modules list, then reset the filter.
+group = Module
+file = tests/system.test
+
 [EnableDisableTestCase]
 name = Enable/disable modules
 description = Enable/disable core module and confirm table creation/deletion.
@@ -184,6 +190,13 @@ description = Tests that the confirm form does not use external destinations.
 group = System
 file = tests/system.test
 
+
+[BackdropRequestSanitizerUnitTestCase]
+name = Request sanitizer
+description = Ensure early bootstrap sanitization routines filter dangerous input.
+group = Bootstrap
+file = tests/system.test
+
 [UuidUnitTestCase]
 name = UUID handling
 description = Test the handling of Universally Unique IDentifiers (UUIDs).
@@ -193,5 +206,11 @@ file = tests/system.test
 [BackdropSetMessageTest]
 name = Messages
 description = Tests that messages can be displayed using backdrop_set_message().
+group = System
+file = tests/system.test
+
+[MenuBlockTestCase]
+name = Menu Block tests
+description = Tests limiting menu block level and depth.
 group = System
 file = tests/system.test

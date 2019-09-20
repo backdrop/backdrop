@@ -93,7 +93,7 @@ function _batch_page() {
     case 'finished':
       // Show messages on the completion page.
       backdrop_show_messages(TRUE);
-      $output = _batch_finished();
+      _batch_finished();
       break;
   }
 
@@ -150,7 +150,7 @@ function _batch_progress_page() {
     print $fallback;
 
     // Perform actual processing.
-    list($percentage, $message) = _batch_process($batch);
+    list($percentage, $message) = _batch_process();
     if ($percentage == 100) {
       $new_op = 'finished';
     }
@@ -199,12 +199,14 @@ function _batch_progress_page() {
  * exceeded. It will continue with the next operation of the same batch set in
  * the next request.
  *
- * @return
+ * @return array
  *   An array containing a completion value (in percent) and a status message.
  */
 function _batch_process() {
   $batch       = &batch_get();
   $current_set = &_batch_current_set();
+  $old_set     = array();
+
   // Indicate that this batch set needs to be initialized.
   $set_changed = TRUE;
 
@@ -221,6 +223,7 @@ function _batch_process() {
   }
 
   $queue = _batch_queue($current_set);
+  $finished = 0;
 
   while (!$current_set['success']) {
     // If this is the first time we iterate this batch set in the current
@@ -329,7 +332,8 @@ function _batch_process() {
   }
   else {
     // If we are not in progressive mode, the entire batch has been processed.
-    return _batch_finished();
+    _batch_finished();
+    return array('100', '');
   }
 }
 
@@ -344,7 +348,7 @@ function _batch_process() {
  *   yet complete; in that case, the fractional part of $current represents the
  *   fraction of the operation that has been completed.
  *
- * @return
+ * @return string
  *   The properly formatted percentage, as a string. We output percentages
  *   using the correct number of decimal places so that we never print "100%"
  *   until we are finished, but we also never print more decimal places than
@@ -391,8 +395,8 @@ function &_batch_current_set() {
  * process and execute its form submit handler (if defined), which may add
  * further sets to this batch.
  *
- * @return
- *   TRUE if a subsequent set was found in the batch.
+ * @return bool
+ *   TRUE if a subsequent set was found in the batch, FALSE if not found.
  */
 function _batch_next_set() {
   $batch = &batch_get();
@@ -406,6 +410,7 @@ function _batch_next_set() {
     }
     return TRUE;
   }
+  return FALSE;
 }
 
 /**

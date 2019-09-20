@@ -14,6 +14,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   protected $web_user;
   protected $test_node1;
   protected $test_node2;
+  protected $orphaned_blocks = FALSE;
 
   function setUp() {
     parent::setUp('layout_test');
@@ -47,6 +48,64 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title' => $this->randomString(),
     ));
   }
+
+  /**
+   * Test that layout templates may be enabled and disabled.
+   */
+  function testLayoutTemplates() {
+    // Attempt to disable the 1 column layout (should fail).
+    $this->backdropGet('admin/structure/layouts/settings');
+    $edit = array(
+      'templates[boxton]' => FALSE,
+      'templates[moscone]' => TRUE,
+      'templates[moscone_flipped]' => TRUE,
+      'templates[simmons]' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->assertText(t('The "Boxton" layout template is currently in use and may not be disabled.'));
+
+    // Check to see that the Simmons layout is an existing option.
+    $this->backdropGet('admin/structure/layouts/manage/default/configure');
+    $this->assertText('Simmons');
+
+    // Disable the Bartik layout.
+    $edit = array(
+      'templates[boxton]' => TRUE,
+      'templates[moscone]' => TRUE,
+      'templates[moscone_flipped]' => TRUE,
+      'templates[simmons]' => FALSE,
+    );
+    $this->backdropPost('admin/structure/layouts/settings', $edit, t('Save configuration'));
+    $this->assertText(t('Your configuration has been saved.'));
+
+    // Check to see that the Simmons layout is no longer an option.
+    $this->backdropGet('admin/structure/layouts/manage/default/configure');
+    $this->assertNoText('Simmons');
+
+    // Check that hidden templates are not shown by default.
+    $this->assertNoText('3/3/4 columns');
+
+    // Enable hidden layouts manually.
+    config_set('layout.settings', 'excluded_templates', array());
+
+    // Check that the hidden templates are now available.
+    $this->backdropGet('admin/structure/layouts/manage/default/configure');
+    $this->assertText('3/3/4 columns');
+    $this->backdropGet('admin/structure/layouts/settings');
+    $this->assertText('3/3/4 columns');
+
+    // Disable the legacy Bartik layout.
+    $edit = array(
+      'templates[three_three_four_column]' => FALSE,
+    );
+    $this->backdropPost('admin/structure/layouts/settings', $edit, t('Save configuration'));
+    $this->assertNoText('3/3/4 columns');
+
+    // Post again just make sure the hidden option doesn't return.
+    $this->backdropPost('admin/structure/layouts/settings', array(), t('Save configuration'));
+    $this->assertNoText('3/3/4 columns');
+  }
+
   /**
    * Add and remove blocks from a custom layout path.
    */
@@ -55,13 +114,13 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->clickLink(t('Add layout'));
 
     // Create a new layout at a new path.
-    $layout_name = strtolower($this->randomName());
-    $layout_title = $this->randomString();
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
     $layout_url = 'layout-test-path';
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_url,
     );
     $this->backdropPost(NULL, $edit, t('Create layout'));
@@ -113,7 +172,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => $block_new_title,
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save configuration'));
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet($layout_url);
     $this->assertText(check_plain($block_new_title));
@@ -122,7 +181,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title_display' => LAYOUT_TITLE_NONE,
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save configuration'));
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
     $this->backdropGet($layout_url);
     $this->assertNoText('Foo subject');
@@ -134,7 +193,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_DEFAULT,
       'style_settings[classes]' => $custom_class,
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save configuration'));
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet($layout_url);
@@ -154,7 +213,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'style' => 'dynamic',
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save configuration'));
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $edit = array(
       'style_settings[wrapper_tag]' => 'aside',
       'style_settings[title_tag]' => 'h3',
@@ -162,7 +221,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'style_settings[content_tag]' => 'p',
       'style_settings[content_classes]' => $content_class,
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save configuration'));
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet($layout_url);
@@ -181,6 +240,22 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       $this->assertEqual($content_element[0]['class'], $content_class, 'The sample block content has the correct class.');
     }
 
+    // Try injecting XSS into the classes.
+    $xss = '"><svg onload="alert(\'XSS hole\')">';
+    // The filtered string after running through backdrop_html_class().
+    $filtered_xss = 'svg onloadalertXSS hole';
+    $edit = array(
+      'style_settings[classes]' => $xss,
+      'style_settings[title_classes]' => $xss,
+      'style_settings[content_classes]' => $xss,
+    );
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet($layout_url);
+    $this->assertNoRaw($xss);
+    $this->assertRaw($filtered_xss);
+
     // Try moving the block to a different position within the layout.
     $edit = array(
       'content[positions][content]' => $block_uuid,
@@ -198,7 +273,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'region' => 'footer',
     );
-    $this->backdropPost($block_edit_url, $edit, t('Save configuration'));
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet($layout_url);
@@ -250,125 +325,22 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   }
 
   /**
-   * Test Custom Text blocks.
+   * Test block path and type conditions.
    */
-  function testCustomTextBlocks() {
-    $this->backdropGet('admin/structure/layouts/manage/default');
-    $block_title_1 = 'Title of block one';
-    $block_content_1 = 'Content of block one';
-    $block_content_2 = 'Content of block two';
-    $block_title_3 = 'Title of block three';
-
-    // Add a Custom Text block to the sidebar.
-    $this->clickLink(t('Add block'), 3);
-    $this->clickLink(t('Add a custom block'));
-    $edit = array(
-      'title' => $block_title_1,
-      'content[value]' => $block_content_1,
-    );
-    $this->backdropPost(NULL, $edit, t('Add block'));
-    $first_block = $this->xpath('(//*[@id="layout-content-form"]//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
-      ':region' => 'l-sidebar',
-    ));
-    $first_block_uuid = (string) $first_block[0]['data-block-id'];
-
-    // Add a Custom Text block without subject.
-    $this->clickLink(t('Add block'), 3);
-    $this->clickLink(t('Add a custom block'));
-    $edit = array(
-      'content[value]' => $block_content_2,
-    );
-    $this->backdropPost(NULL, $edit, t('Add block'));
-
-    // Add a Custom Text block without content.
-    $this->clickLink(t('Add block'), 3);
-    $this->clickLink(t('Add a custom block'));
-    $edit = array(
-      'title' => $block_title_3,
-    );
-    $this->backdropPost(NULL, $edit, t('Add block'));
-
-    // Save the layout.
-    $this->backdropPost(NULL, array(), t('Save layout'));
-
-    // Go to the front page and check that the text shows.
-    $this->backdropGet('<front>');
-
-    $elements = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
-      ':region' => 'l-sidebar',
-      ':block' => 'block-layout-custom-block',
-    ));
-    $this->assertEqual(count($elements), 2, 'Two custom text blocks were found in the sidebar.');
-
-    // Both title and content are visible for block one.
-    $this->assertText(t($block_title_1));
-    $this->assertText(t($block_content_1));
-
-    // Block two content is visible.
-    $this->assertText(t($block_content_2));
-    // Block two has no title.
-    $title_2 = $this->xpath('(//div[contains(@class, "block-layout-text-block")])[2]//h2');
-    $this->assertFalse($title_2);
-
-    // Block three doesn't appear.
-    $this->assertNoText(t($block_title_3));
-    $block_3 = $this->xpath('(//div[contains(@class, "block-layout-text-block")])[3]');
-    $this->assertFalse($block_3);
-
-    // Convert the first block from being a text block into a custom block.
-    module_enable(array('block'));
-    $edit = array(
-      'reusable' => TRUE,
-    );
-    $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $edit, t('Save configuration'));
-    $this->assertText(t('Admin label is required when making a block reusable.'));
-    $edit['label'] = 'My custom block label';
-    $this->backdropPost(NULL, $edit, t('Save configuration'));
-    $this->assertText(t('An internal name is required when making a block reusable.'));
-    $edit['delta'] = 'my_custom_block';
-    $this->backdropPost(NULL, $edit, t('Save configuration'));
-
-    // Now back on the layout main page. Check the new admin label is shown.
-    $this->assertText('My custom block label');
-    $this->backdropPost(NULL, array(), t('Save layout'));
-
-    // Check that the new block.module provided configuration form is now used.
-    $this->backdropGet('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid);
-    // The reusable checkbox should exist but be disabled.
-    $this->assertFieldByXPath('//input[@name="block_settings[reusable]"][@disabled="disabled"]');
-
-    // Go to the front page and check that the converted block shows up.
-    $this->backdropGet('<front>');
-    $custom_block = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
-      ':region' => 'l-sidebar',
-      ':block' => 'block-block-my-custom-block',
-    ));
-    $this->assertEqual(count($custom_block), 1, 'Converted custom block found.');
-    if (count($custom_block)) {
-      $custom_block_title = $custom_block[0]->xpath('.//*[contains(@class, "block-title")]');
-      $custom_block_content = $custom_block[0]->xpath('.//*[contains(@class, "block-content")]/p');
-      $this->assertEqual((string) $custom_block_title[0], $block_title_1, 'Converted custom block title found.');
-      $this->assertEqual((string) $custom_block_content[0], $block_content_1, 'Converted custom block content.');
-    }
-  }
-
-  /**
-   * Test block conditions.
-   */
-  function testBlockConditions() {
+  function testBlockPathTypeConditions() {
     // Create a new layout overriding node/%.
-    $layout_name = strtolower($this->randomName());
-    $layout_title = $this->randomString();
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
     $layout_url = 'node/%';
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_url,
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
-    // Add a testing block, shown only on post nodes.
+    // Add a testing block, shown only on page nodes.
     $this->clickLink(t('Add block'), 3);
     $this->clickLink(t('Layout foo block'));
     $block_title = $this->randomString();
@@ -380,12 +352,40 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'condition' => 'node_type',
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Load condition'));
     $edit = array(
-      'bundles[post]' => TRUE,
+      'bundles[page]' => TRUE,
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-    $this->backdropPost(Null, array(), t('Save configuration'));
+    $this->backdropPost(Null, array(), t('Update block'));
+    $this->backdropPost(Null, array(), t('Save layout'));
+
+    $this->backdropGet('node/' . $this->test_node1->nid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown on post content.');
+
+    $this->backdropGet('node/' . $this->test_node2->nid);
+    $this->assertText(check_plain($block_title), 'Block shown on page content.');
+
+    // Get the block UUID.
+    layout_reset_caches();
+    $layout = layout_load($layout_name);
+    $block_uuid = end($layout->positions['sidebar']);
+
+    // Edit condition to show this block only on post nodes.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid);
+    $this->backdropPost(NULL, array(), t('Configure'));
+    $this->assertRaw('<label for="edit-bundles">Node Type </label>');
+
+    $edit = array(
+      'condition' => 'node_type',
+    );
+    $this->backdropPost(NULL, $edit, t('Load condition'));
+    $edit = array(
+      'bundles[post]' => TRUE,
+      'bundles[page]' => FALSE,
+    );
+    $this->backdropPost(NULL, $edit, t('Save visibility condition'));
+    $this->backdropPost(Null, array(), t('Update block'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
@@ -394,23 +394,18 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet('node/' . $this->test_node2->nid);
     $this->assertNoText(check_plain($block_title), 'Block not shown on page content.');
 
-    // Get the block UUID.
-    layout_reset_caches();
-    $layout = layout_load($layout_name);
-    $block_uuid = end($layout->positions['sidebar']);
-
     // Add another condition to show this block only on a single node path.
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid);
     $this->backdropPost(NULL, array(), t('Add visibility condition'));
     $edit = array(
       'condition' => 'path',
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Load condition'));
     $edit = array(
       'paths' => 'node/' . $this->test_node1->nid,
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-    $this->backdropPost(NULL, array(), t('Save configuration'));
+    $this->backdropPost(NULL, array(), t('Update block'));
     $this->backdropPost(Null, array(), t('Save layout'));
 
     // Create another post node and check the combination of conditions work.
@@ -426,17 +421,100 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   }
 
   /**
+   * Test block entity ID conditions.
+   */
+  function testBlockEntityIDConditions() {
+    // Create a new layout overriding node/%.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_url = 'node/%';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_url,
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Create another post node.
+    $second_post = $this->backdropCreateNode(array(
+      'type' => 'post',
+      'title' => $this->randomString(),
+    ));
+
+    // Add another testing block.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Layout foo block'));
+    $block_title = $this->randomString();
+    $edit = array(
+      'title_display' => LAYOUT_TITLE_CUSTOM,
+      'title' => $block_title,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $edit = array(
+      'condition' => 'node_nid',
+    );
+    $this->backdropPost(NULL, $edit, t('Load condition'));
+    $edit = array(
+      'entity_id' => $this->test_node1->nid,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(Null, array(), t('Update block'));
+    $this->backdropPost(Null, array(), t('Save layout'));
+
+    $this->backdropGet('node/' . $this->test_node1->nid);
+    $this->assertText(check_plain($block_title), 'Block shown and node ID matches.');
+
+    $this->backdropGet('node/' . $second_post->nid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when node ID does not match.');
+
+    // Get the block UUID.
+    layout_reset_caches();
+    $layout = layout_load($layout_name);
+    $block_uuid = end($layout->positions['sidebar']);
+
+    // Add another condition to show this block only for a particular user ID.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid);
+    $this->backdropPost(NULL, array(), t('Add visibility condition'));
+    $edit = array(
+      'condition' => 'user_uid',
+    );
+    $this->backdropPost(NULL, $edit, t('Load condition'));
+    $edit = array(
+      'entity_id' => $this->web_user->uid,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+    $this->backdropPost(Null, array(), t('Save layout'));
+
+    $this->backdropGet('node/' . $this->test_node1->nid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when user ID does not match.');
+
+    $this->backdropGet('node/' . $second_post->nid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when user ID does not match.');
+
+    // Login as a the web user and test that the block is now shown.
+    $this->backdropLogin($this->web_user);
+
+    $this->backdropGet('node/' . $this->test_node1->nid);
+    $this->assertText(check_plain($block_title), 'Block shown when user ID and node ID matches.');
+
+    $this->backdropGet('node/' . $second_post->nid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when user ID and node ID does not match.');
+  }
+
+  /**
    * Test the support for contexts within conditions and blocks.
    */
   function testContexts() {
     // Make a new layout that creates a custom path with wildcards.
-    $layout_name = strtolower($this->randomName());
     $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
     $layout_path = 'node/%/foo/%';
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_path,
     );
     // Check the path first to populate available contexts.
@@ -473,7 +551,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'path' => 'foo/%/bar/%',
     );
-    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/settings', $edit, t('Check path'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Check path'));
     $edit = array(
       'context[required][1][plugin]' => 'node',
     );
@@ -488,7 +566,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'context[required][3][plugin]' => 'node',
     );
-    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/settings', $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Save layout'));
 
     // Now the page should show the current user instead of the one in the URL.
     $this->backdropGet('foo/' . $this->test_node1->nid . '/bar/' . $this->test_node2->nid);
@@ -503,7 +581,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'contexts[my_node]' => '3',
     );
-    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropPost(NULL, $edit, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Now the second node should be used as the title in the page.
@@ -512,6 +590,29 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Delete the layout to prevent it interfering with following tests.
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/delete', array(), t('Delete layout'));
+
+    // Make a new layout that creates a custom path with a string pass-through.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_path = 'passthrough/%';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'boxton',
+      'path' => $layout_path,
+    );
+    // Create with the default context (string pass-through).
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Add the test block that requires both node and user contexts.
+    $this->clickLink(t('Add block'), 2);
+    $this->clickLink(t('String pass-through test'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $argument_string = 'argument-value-from-url';
+    $this->backdropGet('passthrough/' . $argument_string);
+    $this->assertText(format_string('The page argument is @string', array('@string' => $argument_string)));
   }
 
   /**
@@ -525,7 +626,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_path,
     );
     // Save directly without checking contexts.
@@ -540,14 +641,15 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $last_block = $this->xpath('(//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
       ':region' => 'l-sidebar',
     ));
-    $block_uuid = (string) $last_block[0]['data-block-id'];
+    //$block_uuid = (string) $last_block[0]['data-block-id'];
 
-    // Save the layout.
+    // Change the title type to custom.
     $edit = array(
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => 'Generic node title',
     );
-    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/edit-title/editor/title', $edit, t('Save configuration'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
 
     // Visit the sample node page and check that the block is visible.
     $this->backdropGet('node/1');
@@ -565,26 +667,33 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title' => 'Post node',
     );
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/clone', $edit, t('Clone layout'));
-    $this->assertText('You may now update the cloned settings.', 'Layout cloned and landed on settings page.');
+    $this->assertText('You may now configure the cloned layout.', 'Layout cloned and landed on settings page.');
     $this->backdropPost(NULL, array(), t('Add visibility condition'));
     $edit = array(
       'condition' => 'node_type',
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Load condition'));
     $edit = array(
       'bundles[post]' => TRUE,
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
+    // Record the UUID for the same block in this layout.
+    $last_block = $this->xpath('(//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
+    ));
+    $block_uuid = (string) $last_block[0]['data-block-id'];
+
     $edit = array(
-      'title_display' => LAYOUT_TITLE_CUSTOM,
-      'title' => 'Post node title',
+      'title_display' => LAYOUT_TITLE_BLOCK,
+      'title_block' => $block_uuid,
     );
-    $this->backdropPost('admin/structure/layouts/manage/' . $clone_layout_name, $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $clone_layout_name . '/edit-title/editor/title', $edit, t('Save configuration'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $clone_layout_name, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
-    $this->assertText('Post node title', 'The node-type specific layout is used over the generic layout.');
+    $this->assertText('Node title', 'The node-type specific layout is used over the generic layout, and the page title is copied from the block title.');
 
     $this->backdropGet('node/' . $this->test_node2->nid);
     $this->assertText('Generic node title', 'The generic layout is used when there is not a more specific layout.');
@@ -621,13 +730,13 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
    */
   function testMainContentBlock() {
     // Make a new layout that overrides an existing path.
-    $layout_name = strtolower($this->randomName());
-    $layout_title = $this->randomString();
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
     $layout_path = 'layout-test-path'; // Provided by layout_test.module.
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_path,
     );
     // Save directly without checking contexts.
@@ -649,7 +758,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => 'Generic node title',
     );
-    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/edit-title/editor/title', $edit, t('Save configuration'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
 
     // Check that the validation prevented two main content blocks.
     $this->assertText(t('The "@block" block may only be added once to this layout.', array('@block' => t('Main page content'))));
@@ -732,7 +842,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $layout_name,
       'title' => $layout_name,
       'path' => $layout_path,
-      'layout' => 'two_column',
+      'layout_template' => 'moscone_flipped',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -740,7 +850,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => 'Menu item test',
     );
-    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/edit-title/editor/title', $edit, t('Save configuration'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
     $this->backdropGet($layout_path);
     $this->assertResponse(200, 'Layout displayed at the given path.');
 
@@ -769,7 +880,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'condition' => 'path',
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Load condition'));
 
     // This condition will make the menu item available on the front page, and
     // on the layout path itself. Note that the "layout_name" is the first part
@@ -811,7 +922,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $tab_layout_name,
       'title' => $tab_layout_name,
       'path' => $tab_layout_path,
-      'layout' => 'two_column',
+      'layout_template' => 'moscone_flipped',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -842,7 +953,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $subtab_layout_name,
       'title' => $subtab_layout_name,
       'path' => $subtab_layout_path_last,
-      'layout' => 'two_column',
+      'layout_template' => 'moscone_flipped',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -862,7 +973,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'path' => $subtab_layout_path_last,
     );
-    $this->backdropPost('admin/structure/layouts/manage/' . $tab_layout_name . '/settings', $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $tab_layout_name . '/configure', $edit, t('Save layout'));
 
     // Now we should have an active tab with subtabs, the first one is active.
     $this->backdropGet($subtab_layout_path);
@@ -891,6 +1002,24 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   }
 
   /**
+   * Test region styles.
+   */
+  function testRegionStyles() {
+    $this->backdropGet('admin/structure/layouts/manage/default/configure-region/editor/header');
+    $edit = array(
+      'element' => 'aside',
+      'classes' => 'new-test-class',
+    );
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('node');
+    $style_exists = $this->xpath('//header[contains(@class,"l-header")]//aside[contains(@class,"new-test-class")]');
+    $this->assertTrue($style_exists, 'Style exists on header div.');
+  }
+
+  /**
    * Ensure that reassignment of menu items works when deleting layouts.
    */
   function testMenuItemReassignment() {
@@ -901,7 +1030,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $layout_name,
       'title' => $layout_name,
       'path' => $layout_path,
-      'layout' => 'two_column',
+      'layout_template' => 'moscone_flipped',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -928,7 +1057,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $second_layout_name,
       'title' => $second_layout_name,
       'path' => $layout_path,
-      'layout' => 'two_column',
+      'layout_template' => 'moscone_flipped',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -981,7 +1110,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'name' => $layout_name,
       'title' => $layout_name,
       'path' => $layout_path,
-      'layout' => 'two_column',
+      'layout_template' => 'moscone_flipped',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -991,35 +1120,123 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Change the layout to the test layout, which has identical regions.
     $edit = array(
-      'layout' => 'layout_test_layout',
+      'layout_template' => 'layout_test_layout',
     );
-    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/settings', $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Save layout'));
 
     layout_reset_caches();
     $layout = layout_load($layout_name);
     $this->assertBlocksMatch($layout, $default_layout);
 
-    // Change the layout to the one_column layout, eliminating the sidebar.
+    // Change the layout to the boxton layout, eliminating the sidebar.
     $edit = array(
-      'layout' => 'one_column',
+      'layout_template' => 'boxton',
     );
-    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/settings', $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Save layout'));
 
-    $deleted_uuids = $default_layout->positions['sidebar'];
+    $orphaned_uuids = $default_layout->positions['sidebar'];
+    $this->orphaned_blocks = !empty($orphaned_uuids);
     layout_reset_caches();
     $layout = layout_load($layout_name);
     $this->assertBlocksMatch($layout, $default_layout);
-    $this->assertFalse(isset($layout->positions['sidebar']), 'Sidebar region blocks removed from layout when changing layout to single column.');
+    $this->assertFalse(isset($layout->positions['sidebar']), 'Sidebar region blocks moved out when changing layout to single column.');
 
-    $intersection = array_intersect(array_keys($layout->content), $deleted_uuids);
+    $intersection = array_intersect(array_keys($layout->content), $orphaned_uuids);
     $this->assertEqual($intersection, array(), 'The sidebar blocks have been removed from the layout content array.');
+    // Check that the sidebar and content region blocks in the old layout are
+    // the same number of blocks in the content region of the new layout.
+    $default_layout_sidebar_content_regions_count = count($default_layout->positions['sidebar']) + count($default_layout->positions['content']);
+    $new_content_region_count = count($layout->positions['content']);
+    // Count the system main block separately since it doesn't exist in the
+    // new layout.
+    if ($default_layout->positions['content'][0] == 'default') {
+      $new_content_region_count++;
+    }
+    $this->assertTrue($default_layout_sidebar_content_regions_count == $new_content_region_count, 'The blocks from the Sidebar and Default regions in the old layout all exist in the Default region of the new layout.');
+    // Make sure the moved block is part of the module we expect.
+    $moved_block_uuid = $layout->positions['content'][1];
+    $moved_block = $layout->content[$moved_block_uuid];
+    $this->assertTrue($moved_block->module == 'layout_test', 'The moved block is from the layout_test module.');
+  }
+
+  /**
+   * Tests Taxonomy contexts within layouts.
+   */
+  function testTaxonomyContext() {
+    module_enable(array('taxonomy'));
+
+    // Create a default vocabulary named "Tags", enabled for the 'post' content type.
+    $vocabulary = new TaxonomyVocabulary(array(
+      'name' => 'Tags',
+      'description' => 'Use tags to group posts on similar topics into categories.',
+      'machine_name' => 'tags',
+    ));
+    taxonomy_vocabulary_save($vocabulary);
+
+    $field = array(
+      'field_name' => 'field_' . $vocabulary->machine_name,
+      'type' => 'taxonomy_term_reference',
+      // Set cardinality to unlimited for tagging.
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'settings' => array(
+        'allowed_values' => array(
+          array(
+            'vocabulary' => $vocabulary->machine_name,
+            'parent' => 0,
+          ),
+        ),
+      ),
+    );
+    field_create_field($field);
+
+    $instance = array(
+      'field_name' => 'field_' . $vocabulary->machine_name,
+      'entity_type' => 'node',
+      'label' => 'Tags',
+      'bundle' => 'post',
+      'widget' => array(
+        'type' => 'taxonomy_autocomplete',
+      ),
+    );
+    field_create_instance($instance);
+
+    // Make a new layout that creates a custom path with wildcards.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_path = 'taxonomy/term/%';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_path,
+    );
+    // Check the path first to populate available contexts.
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Check path'));
+
+    // Try to add a condition to the layout itself to only show on the Tag
+    // vocabulary.
+    $this->backdropPost(NULL, array(), t('Add visibility condition'));
+
+    $this->backdropPost(NULL, array('condition' => 'taxonomy_term_vocabulary'), t('Load condition'));
+    $this->backdropPost(NULL, array('bundles[tags]' => TRUE), t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Create layout'));
+
+    $this->assertText(t('Layout created. Blocks may now be added to this layout.'));
   }
 
   /**
    * Check that all the blocks in $layout match those in $copied_from_layout.
    */
-  protected function assertBlocksMatch($layout, $copied_from_layout) {
+  protected function assertBlocksMatch($layout, $copied_from_layout, $orphaned_uuids = array()) {
+    $layout_info = layout_get_layout_template_info($layout->layout_template);
+    $default_region = $layout_info['default region'];
     foreach ($layout->positions as $region_name => $blocks) {
+      // Don't compare if it's the default region since orphaned blocks might
+      // get reassigned here, which throws off the numbers.
+      if ($this->orphaned_blocks && $region_name == $default_region) {
+        $this->orphaned_blocks = FALSE;
+        continue;
+      }
       if (isset($copied_from_layout->positions[$region_name])) {
         $blocks_match = TRUE;
         $content_block_offset = 0;
@@ -1042,12 +1259,519 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
             $blocks_match = FALSE;
           }
         }
-        $this->assertTrue($blocks_match, format_string('Blocks copied from @layout1 into @layout2 match in the @region region.', array('@layout1' => $copied_from_layout->layout, '@layout2' => $layout->layout, '@region' => $region_name)));
+        $this->assertTrue($blocks_match, format_string('Blocks copied from @layout1 into @layout2 match in the @region region.', array('@layout1' => $copied_from_layout->layout_template, '@layout2' => $layout->layout_template, '@region' => $region_name)));
       }
       else {
-        debug(format_string('The new layout @layout does not have the region @region, so no blocks are being copied.', array('@layout' => $layout->layout, '@region' => $region_name)));
+        debug(format_string('The new layout @layout does not have the region @region, so no blocks are being copied.', array('@layout' => $layout->layout_template, '@region' => $region_name)));
       }
     }
+  }
+
+  /**
+   * Tests layout_modules_uninstalled().
+   */
+  function testBlockUninstall() {
+    $this->backdropGet('admin/structure/layouts');
+    $this->clickLink(t('Add layout'));
+
+    // Create a new layout at a new path.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_url = 'layout-test-path';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_url,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+
+    // Add a block to the sidebar.
+    $this->clickLink(t('Add block'), 3);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 5,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check that the new block is on the edit page.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $this->assertText(t('A testing block for layouts.'));
+
+    // Add the same block to the default layout.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+
+    // Add the same block to the sidebar.
+    $this->clickLink(t('Add block'), 3);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 5,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check that the new block is on the edit page.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $this->assertText(t('A testing block for layouts.'));
+
+    // Uninstall the module providing the block.
+    module_disable(array('layout_test'));
+    backdrop_uninstall_modules(array('layout_test'));
+    $this->assertFalse(module_exists('layout_test'), 'The module has been uninstalled.');
+
+    // Check that the new block is on none of the layout edit pages.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $this->assertNoText(t('A testing block for layouts.'));
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $this->assertNoText(t('A testing block for layouts.'));
+  }
+}
+
+/**
+ * Tests the blocks title, content, and display settings.
+ */
+class LayoutBlockTest extends BackdropWebTestCase {
+    protected $profile = 'minimal';
+    protected $admin_user;
+
+    function setUp() {
+      parent::setUp(array('file'));
+      // Create content types for testing.
+      $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+
+      // Create and login admin user.
+      $this->admin_user = $this->backdropCreateUser(array(
+        'access administration pages',
+        'administer layouts',
+        'access user profiles',
+        'edit any page content',
+        'administer nodes',
+      ));
+      $this->backdropLogin($this->admin_user);
+    }
+
+  /**
+   * Test Custom Text blocks.
+   */
+  function testCustomTextBlocks() {
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $block_title_1 = 'Title of block one';
+    $block_content_1 = 'Content of block one';
+    $block_content_2 = 'Content of block two';
+    $block_title_3 = 'Title of block three';
+
+    // Add a Custom Text block to the sidebar.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Custom block'));
+    $edit = array(
+      'title' => $block_title_1,
+      'content[value]' => $block_content_1,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+    $first_block = $this->xpath('(//*[@id="layout-content-form"]//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
+    ));
+    $first_block_uuid = (string) $first_block[0]['data-block-id'];
+
+    // Add a Custom Text block without subject.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Custom block'));
+    $edit = array(
+      'content[value]' => $block_content_2,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Add a Custom Text block without content.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Custom block'));
+    $edit = array(
+      'title' => $block_title_3,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Go to the front page and check that the text shows.
+    $this->backdropGet('<front>');
+
+    $elements = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
+      ':region' => 'l-sidebar',
+      ':block' => 'block-layout-custom-block',
+    ));
+    $this->assertEqual(count($elements), 2, 'Two custom text blocks were found in the sidebar.');
+
+    // Both title and content are visible for block one.
+    $this->assertText($block_title_1);
+    $this->assertText($block_content_1);
+
+    // Block two content is visible.
+    $this->assertText($block_content_2);
+    // Block two has no title.
+    $title_2 = $this->xpath('(//div[contains(@class, "block-layout-text-block")])[2]//h2');
+    $this->assertFalse($title_2);
+
+    // Block three doesn't appear.
+    $this->assertNoText($block_title_3);
+    $block_3 = $this->xpath('(//div[contains(@class, "block-layout-text-block")])[3]');
+    $this->assertFalse($block_3);
+
+    // Convert the first block from being a text block into a custom block.
+    module_enable(array('block'));
+    $edit = array(
+      'reusable' => TRUE,
+    );
+    $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $edit, t('Update block'));
+    $this->assertText(t('Admin label is required when making a block reusable.'));
+    $edit['label'] = 'My custom block label';
+    $this->backdropPost(NULL, $edit, t('Update block'));
+    $this->assertText(t('An internal name is required when making a block reusable.'));
+    $edit['delta'] = 'my_custom_block';
+    $this->backdropPost(NULL, $edit, t('Update block'));
+
+    // Now back on the layout main page. Check the new admin label is shown.
+    $this->assertText('My custom block label');
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check that the new block.module provided configuration form is now used.
+    $this->backdropGet('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid);
+    // The reusable checkbox should exist but be disabled.
+    $this->assertFieldByXPath('//input[@name="block_settings[reusable]"][@disabled="disabled"]');
+
+    // Go to the front page and check that the converted block shows up.
+    $this->backdropGet('<front>');
+    $custom_block = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
+      ':region' => 'l-sidebar',
+      ':block' => 'block-block-my-custom-block',
+    ));
+    $this->assertEqual(count($custom_block), 1, 'Converted custom block found.');
+    if (count($custom_block)) {
+      $custom_block_title = $custom_block[0]->xpath('.//*[contains(@class, "block-title")]');
+      $custom_block_content = $custom_block[0]->xpath('.//*[contains(@class, "block-content")]/p');
+      $this->assertEqual((string) $custom_block_title[0], $block_title_1, 'Converted custom block title found.');
+      $this->assertEqual((string) $custom_block_content[0], $block_content_1, 'Converted custom block content.');
+    }
+  }
+
+  /**
+   * Test Hero blocks.
+   */
+  function testHeroBlocks() {
+    $hero_title_1 = 'Wonderwoman';
+    $hero_content_1 = 'Youth is your greatest weapon, your greatest tool.';
+    $hero_title_2 = 'Black Widow';
+    $hero_content_2 = "This isnt gonna end well...";
+
+    // Create some sample images.
+    $good_image = imagecreate(2400, 400);
+    $good_filename = 'good.jpg';
+    $good_realpath_filename = backdrop_realpath('temporary://' . $good_filename);
+    imagejpeg($good_image, $good_realpath_filename);
+
+    $bad_image =  imagecreate(1024, 260);
+    imagecolorallocate($bad_image, 255, 0, 0); // Red image.
+    $bad_filename = 'bad.jpg';
+    $bad_realpath_filename = backdrop_realpath('temporary://' . $bad_filename);
+    imagejpeg($bad_image, $bad_realpath_filename);
+
+    $good_image2 = imagecreate(2400, 400);
+    $good_filename2 = 'good2.jpg';
+    $good_realpath_filename2 = backdrop_realpath('temporary://' . $good_filename2);
+    imagejpeg($good_image2, $good_realpath_filename2);
+
+    $this->backdropGet('admin/structure/layouts/manage/default');
+
+    // Block 1: Add a hero block with no image to the content area.
+    $this->clickLink(t('Add block'), 2);
+    $this->clickLink(t('Hero block'));
+    $edit = array(
+      'title' => $hero_title_1,
+      'content[value]' => $hero_content_1,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Block 2: Add a hero block with only content and an image.
+    $this->clickLink(t('Add block'), 2);
+    $this->clickLink(t('Hero block'));
+    $edit = array(
+      'content[value]' => $hero_content_2,
+      'files[image]' => $good_realpath_filename,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Block 3: Add a hero block with only an image.
+    $this->clickLink(t('Add block'), 2);
+    $this->clickLink(t('Hero block'));
+
+    // Confirm a too-small background image fails validation.
+    $edit = array(
+      'files[image]' => $bad_realpath_filename,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+    $error_message = t('The specified file %name could not be uploaded.', array('%name' => $bad_filename));
+    $error_message .= ' ' . t('The image is too small; the minimum dimensions are %dimensions pixels.', array('%dimensions' => '1200x300'));
+    $this->assertRaw($error_message);
+
+    // Resubmit using the good image.
+    $edit['files[image]'] = $good_realpath_filename2;
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Go to the user page and check for all hero blocks.
+    $this->backdropGet('user');
+
+    // Get all hero blocks on the user page and confirm the correct number.
+    $elements = $this->xpath('//*[contains(@class,:region)]//*[contains(@class,:block)]', array(
+      ':region' => 'l-content',
+      ':block' => 'block-layout-hero',
+    ));
+    $this->assertEqual(count($elements), 3, 'Three hero blocks were found in the content area.');
+
+    // Get all the hero block elements for testing. Order matters here.
+    $elements = $this->xpath('(//div[contains(@class, "block-layout-hero")])');
+
+    // Block 1: Confirm both title and content are visible.
+    $this->assertText($hero_title_1);
+    $this->assertText($hero_content_1);
+    // Block 1: Confirm handy `block-hero-no-image` class is present.
+    $classes_1 = (string)$elements[0]['class'];
+    $this->assertTrue(strstr($classes_1, 'block-hero-no-image'));
+    // Block 1: Confirm that no background image is present.
+    $this->assertNull($elements[0]['style'], 'No image present for 1st hero block.');
+
+    // Block 2: no title present.
+    $title_2 = $elements[1]->xpath('.//h2');
+    $this->assertIdentical($title_2, array(), 'No title present for 2nd hero block.');
+    // Block 2: content is visible.
+    $this->assertText($hero_content_2);
+    // Block 2: Confirm handy `block-hero-image` class is present.
+    $classes_2 = (string)$elements[1]['class'];
+    $this->assertTrue(strstr($classes_2, 'block-hero-image'));
+    // Block 2: Background image present.
+    $style_2 = (string)$elements[1]['style'];
+    $this->assertTrue(strstr($style_2, $good_filename), 'Image present for 2nd hero block.');
+
+    // Block 3: no title present.
+    $title_3 = $elements[2]->xpath('.//h2');
+    $this->assertIdentical($title_3, array(), 'No title present for 3rd hero block.');
+    // Block 3: no content present.
+    $content_3_element = $elements[2]->xpath('.//div[contains(@class, "block-content")]');
+    $this->assertEqual(count($content_3_element), 1, '3rd hero block content found.');
+    // Extract the content.
+    $content_3 = (string)$content_3_element[0];
+
+    // We inserted an HTML non-breaking space, but SimpleXML will return a
+    // unicode non-breaking space (\u00a0). PHP <7.0.0 does not have native
+    // unicode strings, so we encode as JSON which will encode the character.
+    // In PHP 7 this could be represented as $content_3 === "\u00a0".
+    $unicode_nbsp = trim(json_encode(trim($content_3)), '"');
+    $this->assertEqual($unicode_nbsp, '\u00a0', '3rd hero block contains only a non-breaking space.');
+
+    // Background image present for block three.
+    $style_3 = (string)$elements[2]['style'];
+    $this->assertTrue(strstr($style_3, $good_filename2), 'Image present for 3rd hero block.');
+  }
+
+  /**
+   * Test Page component blocks.
+   */
+  function testPageComponentBlocks() {
+    // Create a node page.
+    $page_node = $this->backdropCreateNode(array(
+      'type' => 'page',
+      'title' => "Test node title",
+    ));
+
+    // Check page title exists.
+    $this->backdropGet('node/1');
+
+    $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1');
+    $this->assertEqual(count($page_title), 1, 'The page title was found.');
+    $this->assertEqual((string) $page_title[0], 'Test node title');
+
+    $this->backdropGet('admin/structure/layouts/manage/default');
+
+    // Add a Page title block to the header.
+    $this->clickLink(t('Add block'), 0);
+    $this->clickLink(t('Page title'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+    $title_block = $this->xpath('(//*[@id="layout-content-form"]//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'header',
+    ));
+    $title_block_uuid = (string) $title_block[0]['data-block-id'];
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Go to the welcome page and check that the title div is absent.
+    $this->backdropGet('node/1');
+    $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1');
+    $this->assertEqual(count($page_title), 0, 'The page title was not found.');
+
+    // Check the title block shows.
+    $page_title = $this->xpath('(//div[contains(@class, "block-system-title")])//h1');
+    $this->assertEqual((string) $page_title[0], 'Test node title');
+
+    // Configure the block to use a custom title that overrides the normal title.
+    $data = array(
+      'title_display' => 'custom',
+      'title' => 'A & "custom" title',
+    );
+    $this->backdropPost('admin/structure/layouts/manage/default/edit-title/editor/title', $data, t('Save configuration'));
+    $this->backdropPost('admin/structure/layouts/manage/default/blocks', array(), t('Save layout'));
+    $this->backdropGet('node/1');
+    $title = $this->xpath('(//div[contains(@class, "block-system-title")])//h1');
+    $this->assertEqual((string) $title[0], 'A & "custom" title');
+
+    // Configure the block to copy a title title from another block.
+    // Find the first block within the select list (usually breadcrumb).
+    $this->backdropGet('admin/structure/layouts/manage/default/edit-title/editor/title');
+    $block_value = $this->xpath('//select[@name="title_block"]/option[@selected]');
+    $first_block_uuid = $block_value[0]['value'];
+    $data = array(
+      'title_display' => 'block',
+    );
+    $this->backdropPost(NULL, $data, t('Save configuration'));
+
+    // Set a custom title on the first block and confirm it is copied into
+    // the title block.
+    $data = array(
+      'title_display' => 'custom',
+      'title' => 'A title from a different block',
+    );
+    $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $data, t('Update block'));
+    $this->backdropPost('admin/structure/layouts/manage/default/blocks', array(), t('Save layout'));
+    $this->backdropGet('node/1');
+    $title = $this->xpath('(//div[contains(@class, "block-system-title")])//h1');
+    $this->assertEqual((string)$title[0], 'A title from a different block');
+
+    // Try with no page title at all (should use the default title within the
+    // HEAD tag).
+    $data = array(
+      'title_display' => 'none',
+    );
+    $this->backdropPost('admin/structure/layouts/manage/default/edit-title/editor/title', $data, t('Save configuration'));
+    $this->backdropPost('admin/structure/layouts/manage/default/blocks', array(), t('Save layout'));
+    $this->backdropGet('node/1');
+    $title = $this->xpath('(//div[contains(@class, "block-system-title")])');
+    $this->assertEqual(count($title), 0, 'The entire title block is hidden when title is not displayed.');
+    $head_title = $this->xpath('//head//title');
+    $this->assertIdentical(strpos((string) $head_title[0], 'Test node title'), 0, 'Default title found in HEAD when title is hidden on page.');
+
+    // Remove the title block.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $remove_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(
+      ':uuid' => $title_block_uuid,
+    ));
+    $remove_url_parts = backdrop_parse_url($remove_link[0]['href']);
+    $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Restore the default title settings.
+    $this->backdropGet('admin/structure/layouts/manage/default/edit-title/editor/title');
+    $data = array(
+      'title_display' => 'default',
+    );
+    $this->backdropPost(NULL, $data, t('Save configuration'));
+    $this->backdropPost('admin/structure/layouts/manage/default', array(), t('Save layout'));
+
+    // Check the normal page title exists again.
+    $this->backdropGet('node/1');
+    $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1');
+    $this->assertEqual(count($page_title), 1, 'The page title was found.');
+    $this->assertEqual((string) $page_title[0], 'Test node title');
+
+    // Edit the node to get a system message.
+    $this->backdropPost("node/1/edit", array(), t('Save'));
+
+    // Check the system message shows.
+    $messages = $this->xpath('(//div[contains(@class, "l-messages")])//div[contains(@class, "messages")]');
+    $this->assertEqual(count($messages), 1, 'The Page messages DIV was found.');
+
+    // Check the tabs show.
+    $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//ul[contains(@class, "tabs")]');
+    $this->assertEqual(count($tabs), 1, 'The tabs nav element was found.');
+
+    // Go back to the default layout.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+
+    // Add a Title combo block to the header.
+    $this->clickLink(t('Add block'), 0);
+    $this->clickLink(t('Page title combo'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+    $title_combo_block = $this->xpath('(//*[@id="layout-content-form"]//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'header',
+    ));
+    $title_combo_block_uuid = (string) $title_combo_block[0]['data-block-id'];
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Go to the welcome page and check the hardcoded page elements are absent.
+    $this->backdropGet('node/1');
+    $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1["Your first post!"]');
+    $this->assertEqual(count($page_title), 0, 'The page title was not found.');
+    $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//div[contains(@class, "tabs")]');
+    $this->assertEqual(count($tabs), 0, 'The tabs DIV was not found.');
+
+    // Edit the node to get a system mesage.
+    $this->backdropPost("node/1/edit", array(), t('Save'));
+    $messages = $this->xpath('(//div[contains(@class, "l-wrapper")])//div[contains(@class, "l-messages")]');
+    $this->assertEqual(count($messages), 0, 'The messages DIV was not found.');
+
+    // Check that the Combo block elements show.
+    $combo_page_title = $this->xpath('(//div[contains(@class, "block-system-title-combo")])//h1[contains(@class, "title")]');
+    $this->assertEqual(count($combo_page_title), 1, 'The Title combo title DIV was found.');
+    $combo_tabs = $this->xpath('(//div[contains(@class, "block-system-title-combo")])//nav[contains(@class, "tabs")]');
+    $this->assertEqual(count($combo_tabs), 1, 'The Title combo tabs DIV was found.');
+    $combo_messages = $this->xpath('(//div[contains(@class, "block-system-title-combo")])//div[contains(@class, "l-messages")]');
+    $this->assertEqual(count($combo_messages), 1, 'The Title combo messages DIV was found.');
+
+    // Remove the Title combo block.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $remove_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(
+      ':uuid' => $title_combo_block_uuid,
+    ));
+    $remove_url_parts = backdrop_parse_url($remove_link[0]['href']);
+    $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Add a Local actions block to the header.
+    $this->clickLink(t('Add block'), 0);
+    $this->clickLink(t('Page local actions'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+
+    // Add a Page messages block to the header.
+    $this->clickLink(t('Add block'), 0);
+    $this->clickLink(t('Page messages'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check that the system message DIV no longer shows but the messages block
+    // does.
+    $messages = $this->xpath('(//div[contains(@class, "l-wrapper")])//div[contains(@class, "l-messages")]');
+    $this->assertEqual(count($messages), 0, 'The messages DIV was not found.');
+    $block_messages = $this->xpath('(//div[contains(@class, "block-system-messages")])//div[contains(@class, "l-messages")]');
+    $this->assertEqual(count($block_messages), 1, 'The Page messages block was found.');
+
+    // Go to the layouts list and check that the Local actions DIV no longer
+    // shows but the block does.
+    $this->backdropGet('admin/structure/layouts');
+    $actions = $this->xpath('(//div[contains(@class, "l-wrapper")])//div[contains(@class, "l-action-links")]');
+    $this->assertEqual(count($actions), 0, 'The messages DIV was not found.');
+    $block_actions = $this->xpath('(//div[contains(@class, "block-system-action-links")])//ul[contains(@class, "action-links")]');
+    $this->assertEqual(count($block_actions), 1, 'The Page messages block was found.');
   }
 }
 
@@ -1151,7 +1875,7 @@ class LayoutSelectionTest extends BackdropWebTestCase {
       'name' => $layout_name,
       'title' => $layout_name,
       'path' => $layout_path,
-      'layout' => 'two_column',
+      'layout_template' => 'moscone_flipped',
     );
 
     // Note that this adds a condition, not saving the layout yet.
@@ -1161,7 +1885,7 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     $edit = array(
       'condition' => 'user_role',
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Load condition'));
 
     // Allow authenticated users to see the layout only.
     $edit = array(
@@ -1189,13 +1913,158 @@ class LayoutSelectionTest extends BackdropWebTestCase {
   }
 
   private function assertIsDefaultLayout($message = '') {
-    $result = $this->xpath('//div[contains(@class, "layout--two-column")]');
+    $result = $this->xpath('//div[contains(@class, "layout--moscone-flipped")]');
     $this->assertEqual(count($result), 1, $message ? $message : format_string('Admin layout used at @path', array('@path' => $this->getUrl())));
   }
 
   private function assertIsAdminLayout($message = '') {
-    $result = $this->xpath('//div[contains(@class, "layout--one-column")]');
+    $result = $this->xpath('//div[contains(@class, "layout--boxton")]');
     $this->assertEqual(count($result), 1, $message ? $message : format_string('Admin layout used at @path', array('@path' => $this->getUrl())));
+  }
+}
+
+/**
+ * Tests the BlockTest (custom text) block functionality.
+ */
+class LayoutBlockTextTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp(array('layout', 'block'));
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'access administration pages',
+      'administer layouts',
+      'view the administration theme',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Tests the BlockText class functionality.
+   */
+  function testBlockText() {
+    // Save a file to test file usage saving.
+    $files = $this->backdropGetTestFiles('image');
+    $file_info = (array) array_pop($files);
+    $file_info['status'] = 0;
+    $file = new File($file_info);
+    $file->save();
+    $fid = $file->fid;
+    $file_info['attributes']['data-file-id'] = $fid;
+    $image_string = theme('image', $file_info);
+
+    $this->backdropGet('admin/structure/layouts/manage/default/add-block/editor/sidebar');
+    $this->clickLink(t('Custom block'));
+    $this->backdropPost(NULL, array(
+      'title' => 'Custom block test',
+      'content[value]' => '<p>Some content with an image in the middle.</p><p>' . $image_string . '</p><p>End of content.</p>',
+    ), t('Add block'));
+
+    // Get the block UUID.
+    $last_block = $this->xpath('(//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
+    ));
+    $block_uuid = (string) $last_block[0]['data-block-id'];
+
+    // Check that file usage is not added by the act of adding the block, as the
+    // layout has not yet been saved.
+    $usage = file_usage_list($file);
+    $this->assertEqual($usage, array(), 'No file usages recorded (as correct) when adding block to layout.');
+
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check that a file usage was recorded for the file within the block.
+    entity_get_controller('file')->resetCache();
+    $file = file_load($fid);
+    $references = file_usage_list($file);
+    $this->assertEqual($references['file']['file'][$fid], 1, 'File usage recorded for the file within the block.');
+    $this->assertEqual($file->status, 1, 'File has been marked permanent by its file usage.');
+
+    // Visit the front-end and check the block is displayed.
+    $this->backdropGet('user');
+    $this->assertRaw('Custom block test', 'Custom block found on front-end.');
+
+    // Removing the block.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $remove_link = $this->xpath('//*[@data-block-id=:uuid]//a[contains(@class,"remove-block")]', array(
+      ':uuid' => $block_uuid,
+    ));
+    $remove_url_parts = backdrop_parse_url($remove_link[0]['href']);
+    $this->backdropGet($remove_url_parts['path'], $remove_url_parts);
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check the file usage is left in place.
+    entity_get_controller('file')->resetCache();
+    $file = file_load($fid);
+    $references = file_usage_list($file);
+    $this->assertEqual($references['file']['file'][$fid], 1, 'File usage is unaffected by removing the block from the layout.');
+    $this->assertEqual($file->status, 1, 'File still exists and is marked as permanent after removing the block from the layout.');
+  }
+}
+
+/**
+ * Tests the interface for adding, removing, and moving blocks.
+ */
+class LayoutCloneTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp(array('layout', 'layout_test'));
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'access administration pages',
+      'administer layouts',
+      'view the administration theme',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  function testLayoutClone() {
+    // Create a new layout using the UI.
+    $edit = array(
+      'title' => 'Test layout 1',
+      'name' => 'test_layout_1',
+      'layout_template' => 'boxton',
+      'path' => 'test-layout-1',
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Add a few blocks via the API.
+    $test_layout_1 = layout_load('test_layout_1');
+    $test_layout_1->addBlock('layout_test', 'foo', 'content');
+    $test_layout_1->addBlock('layout_test', 'foo', 'sidebar');
+    $test_layout_1->save();
+
+    // Test cloning the layout.
+    $edit = array(
+      'title' => 'Test layout 2',
+      'name' => 'test_layout_2',
+    );
+    $this->backdropPost('admin/structure/layouts/manage/test_layout_1/clone', $edit, t('Clone layout'));
+
+    $success_message = t('Cloned layout @title created. You may now configure the cloned layout.', array('@title' => 'Test layout 2'));
+    $this->assertRaw($success_message);
+
+    $edit = array(
+      'path' => 'test-layout-2',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->backdropGet('admin/structure/layouts');
+    $this->assertRaw('test_layout_1');
+    $this->assertRaw('test_layout_2');
+
+    $this->backdropGet('test-layout-1');
+    $this->assertResponse(200);
+    $this->assertRaw('Foo subject', 'Testing block is present on original layout');
+
+    $this->backdropGet('test-layout-2');
+    $this->assertRaw('Foo subject', 'Testing block is present on cloned layout.');
+    $this->assertResponse(200);
   }
 }
 
@@ -1218,7 +2087,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
   public function testLayoutUpgrade() {
     $this->assertTrue($this->performUpgrade(), 'The upgrade was completed successfully.');
 
-    $this->backdropGet('<front>');
+    $this->backdropGet('user');
     $blocks = array(
       'l-header' => array(
         'block-system-header',
@@ -1328,7 +2197,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
   }
 
   protected function assertNoBlocks($blocks) {
-    return $this->assertBlocks($blocks, TRUE);
+    $this->assertBlocks($blocks, TRUE);
   }
 }
 
@@ -1390,28 +2259,28 @@ class LayoutHookTestCase extends BackdropWebTestCase {
    */
   public function testLayoutHooks() {
     state_set('layout_test', array());
-    
+
     $this->backdropGet('admin/structure/layouts');
     $this->clickLink(t('Add layout'));
 
     // Create a new layout at a new path.
-    $layout_name = strtolower($this->randomName());
-    $layout_title = $this->randomString();
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
     $layout_url = 'layout-test-path';
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
-      'layout' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_url,
     );
     $this->backdropPost(NULL, $edit, t('Create layout'));
 
     // We should be taken to the layout content page next.
     $this->assertText(t('Layout created. Blocks may now be added to this layout.'));
-    
+
     // Save the layout.
     $this->backdropPost(NULL, array(), t('Save layout'));
-    
+
     $this->assertHookMessageOrder(array(
       'layout_test_layout_presave called',
       'layout_test_layout_insert called',
@@ -1430,6 +2299,7 @@ class LayoutHookTestCase extends BackdropWebTestCase {
 
     // Disable the layout via the dropbutton link.
     state_set('layout_test', array());
+    $this->backdropGet('admin/structure/layouts');
     $disable_link = $this->xpath('//*[contains(@class, "disable")]//a');
     $disable_url_parts = backdrop_parse_url($disable_link[0]['href']);
     $this->backdropGet($disable_url_parts['path'], $disable_url_parts);
@@ -1455,13 +2325,13 @@ class LayoutHookTestCase extends BackdropWebTestCase {
       'layout_test_layout_delete called',
     ));
 
-    // Go to the Default layout's edit page and change the layout to the 
-    // one_column layout.
+    // Go to the Default layout's edit page and change the layout to the
+    // boxton layout.
     state_set('layout_test', array());
     $edit = array(
-      'layout' => 'one_column',
+      'layout_template' => 'boxton',
     );
-    $this->backdropPost('admin/structure/layouts/manage/default/settings', $edit, t('Save layout'));
+    $this->backdropPost('admin/structure/layouts/manage/default/configure', $edit, t('Save layout'));
     $this->assertHookMessageOrder(array(
       'layout_test_layout_template_change called',
     ));
@@ -1475,6 +2345,540 @@ class LayoutHookTestCase extends BackdropWebTestCase {
     $this->assertHookMessageOrder(array(
       'layout_test_layout_revert called',
     ));
+  }
+}
+
+
+/**
+ * Tests layout_get_block_usage().
+ */
+class LayoutBlockUsageTestCase extends BackdropWebTestCase {
+  protected $admin_user;
+  protected $profile = 'testing';
+
+  function setUp() {
+    parent::setUp('layout', 'menu');
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'administer layouts',
+    ));
+    $this->backdropLogin($this->admin_user);
 
   }
+
+  /**
+   * Tests layout_get_block_usage().
+   */
+  public function testBlockUsage() {
+
+    // By default, the header block should be found in the default layout in
+    // header position.
+    $this->checkBlockUsage('header', 'default', 'header');
+
+    // Check that the header block is not in the sidebar.
+    $this->checkBlockNoUsage('header', 'default', 'sidebar');
+
+    $this->backdropGet('admin/structure/layouts');
+    $this->clickLink(t('Add layout'));
+
+    // Create a new layout at a new path.
+    $layout_name = 'block_usage_test_layout';
+    $layout_title = 'Block usage test layout';
+    $layout_url = 'layout-usage-test-path';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_url,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // The new layout should have the header block in the header position.
+    $this->checkBlockUsage('header', $layout_name, 'header');
+
+    // Return to the layout edit page and add another header block.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $this->clickLink(t('Add block'), 0);
+    $this->clickLink(t('Header block'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // The new layout should have the header block in the header position.
+    $count = $this->checkBlockUsage('header', $layout_name, 'header');
+    $this->assertTrue($count == 2, 'Function returns two header blocks in this position.');
+
+    // Check that the header block is not in the sidebar.
+    $this->checkBlockNoUsage('header', $layout_name, 'sidebar');
+
+    // Add the header block to the sidebar and check again.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Header block'));
+    $this->backdropPost(NULL, array(), t('Add block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->checkBlockUsage('header', $layout_name, 'sidebar');
+  }
+
+  /**
+   * Checks block usage.
+   */
+  protected function checkBlockUsage($delta, $layout, $position) {
+    backdrop_static_reset('layout_get_block_usage');
+    layout_reset_caches();
+    module_load_include('inc', 'layout', 'layout.admin');
+    $usage = layout_get_block_usage();
+    $this->assertTrue(isset($usage['system'][$delta][$layout][$position]), 'Block usage returned correctly. Block found in array.');
+    if (isset($usage['system'][$delta][$layout][$position])) {
+      return count($usage['system'][$delta][$layout][$position]);
+    }
+    return FALSE;
+  }
+
+  /**
+   * Checks block not in usage.
+   */
+  protected function checkBlockNoUsage($delta, $layout, $position) {
+    backdrop_static_reset('layout_get_block_usage');
+    layout_reset_caches();
+    module_load_include('inc', 'layout', 'layout.admin');
+    $usage = layout_get_block_usage();
+    $this->assertFalse(isset($usage[$delta][$layout][$position]), 'Block usage returned correctly. Block not found in array.');
+    return TRUE;
+  }
+}
+
+/**
+ * Tests that the correct renderer is used.
+ */
+class LayoutRendererTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp(array('layout', 'layout_test'));
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'administer layouts',
+      'access user profiles',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Test that the correct renderer is used
+   */
+  function testRendererSelection() {
+    // Create a new layout at a new path.
+    $this->backdropGet('admin/structure/layouts');
+    $this->clickLink(t('Add layout'));
+    $layout_name = strtolower($this->randomName());
+    $layout_title = $this->randomString();
+    $layout_url = 'layout-test-path';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_url,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    // Go the new layout path and test that it is not using the new renderer.
+    $this->backdropGet($layout_url);
+    $this->assertNoText('This layout uses the Test renderer');
+    // Load the layout and save the new renderer.
+    $test_layout = layout_get_layout_by_path($layout_url);
+    $test_layout->renderer_name = 'test_renderer';
+    $test_layout->save();
+    // Go the new layout path and test that it is now using the new renderer.
+    $this->backdropGet($layout_url);
+    $this->assertText('This layout uses the Test renderer');
+
+    // Create a new layout at an existing path.
+    $this->backdropGet('admin/structure/layouts');
+    $this->clickLink(t('Add layout'));
+    $layout_name = strtolower($this->randomName());
+    $layout_title = $this->randomString();
+    $layout_url = 'user/1';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => 'user/%',
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    // Go the new layout path and test that it is not using the new renderer.
+    $this->backdropGet($layout_url);
+    $this->assertNoText('This layout uses the Test renderer');
+    // Load the layout and save the new renderer.
+    $test_layout = layout_get_layout_by_path($layout_url);
+    $test_layout->renderer_name = 'test_renderer';
+    $test_layout->save();
+    // Go the new layout path and test that it is now using the new renderer.
+    $this->backdropGet($layout_url);
+    $this->assertText('This layout uses the Test renderer');
+  }
+}
+
+/**
+ * Tests the interface for flexible layouts.
+ */
+class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp('layout', 'layout_test');
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'administer site configuration',
+      'administer layouts',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Test that layout templates may be enabled and disabled.
+   */
+  function testLayoutFlexibleTemplates() {
+    $this->backdropGet('admin/structure/layouts/settings');
+    $this->clickLink(t('Add flexible layout template'));
+
+    // Test creating a new flexible layout.
+    $template_name1 = $this->randomName();
+    $template_machine_name1 = strtolower($template_name1);
+    $template_description1 = $this->randomName();
+
+    $edit = array(
+      'name' => $template_name1,
+      'machine_name' => $template_machine_name1,
+      'description' => $template_description1,
+    );
+    $this->backdropPost(NULL, $edit, t('Save and configure'));
+    $this->assertText(t('Layout template "@title" saved.', array('@title' => $template_name1)));
+
+    // Check that the new template is found in the cached list of templates.
+    $all_templates = layout_get_layout_template_info();
+    $this->assertTrue(isset($all_templates[$template_machine_name1]), 'The flexible template is found in the cache of templates.');
+
+    // Check that its in the list of templates.
+    $this->backdropGet('admin/structure/layouts/settings');
+    $title = $this->xpath("//td//div[text()=:name]", array(':name' => $template_name1));
+    $this->assertTrue($title, 'The flexible template is found in the UI list of templates.');
+
+    // Add another, edit it, then delete it.
+    $this->clickLink(t('Add flexible layout template'));
+    $template_name2 = $this->randomName();
+    $template_machine_name2 = strtolower($template_name2);
+    $template_description2 = $this->randomName();
+
+    $edit = array(
+      'name' => $template_name2,
+      'machine_name' => $template_machine_name2,
+      'description' => $template_description2,
+    );
+    $this->backdropPost(NULL, $edit, t('Save and configure'));
+    $this->assertText(t('Layout template "@title" saved.', array('@title' => $template_name2)));
+    $this->backdropGet('admin/structure/layouts/settings');
+    $flexible_layout_edit_link = 'admin/structure/layouts/settings/flexible-template/' . $template_machine_name2 . '/edit';
+    $edit = array(
+      'name' => 'To be deleted',
+      'description' => $template_description2,
+    );
+    $this->backdropPost($flexible_layout_edit_link, $edit, t('Save and configure'));
+    $this->backdropGet('admin/structure/layouts/settings');
+    $title = $this->xpath("//td//div[text()=:name]", array(':name' => 'To be deleted'));
+    $this->assertTrue($title, 'The flexible template is found in the UI list of templates with the new name.');
+    $flexible_layout_delete_link = 'admin/structure/layouts/settings/flexible-template/' . $template_machine_name2 . '/delete';
+    $edit = array();
+    $this->backdropPost($flexible_layout_delete_link, $edit, t('Delete template'));
+    $this->backdropGet('admin/structure/layouts/settings');
+    $title = $this->xpath("//td//div[text()=:name]", array(':name' => 'To be deleted'));
+    $this->assertFalse($title, 'The flexible template is not found in the UI list of templates with the new name.');
+
+    $this->backdropGet('admin/structure/layouts');
+    $this->clickLink(t('Add layout'));
+
+    // Create a new layout at a new path using the new template.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_url = 'layout-test-path';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => $template_machine_name1,
+      'path' => $layout_url,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+
+    // We should be taken to the layout content page next.
+    $this->assertText(t('Layout created. Blocks may now be added to this layout.'));
+
+    // Add a block to the first row.
+    $this->clickLink(t('Add block'), 0);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 30,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Add a block to the second row.
+    $this->clickLink(t('Add block'), 1);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 15,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Add a block to the third row.
+    $this->clickLink(t('Add block'), 2);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 5,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check that the layout is in the listing of layouts.
+    $this->backdropGet('admin/structure/layouts');
+    $this->assertText(check_plain($layout_title));
+
+    // Go to the the layout path and confirm the blocks exist, have the right
+    // setting, and are in the right place.
+    $this->backdropGet($layout_url);
+    $layout_template = layout_flexible_template_load($template_machine_name1);
+    $layout_region_names = array_keys($layout_template->rows);
+    $region_block_settings = array(
+      $layout_region_names[0] => 30,
+      $layout_region_names[1] => 15,
+      $layout_region_names[2] => 5,
+    );
+    foreach ($region_block_settings as $region_name => $setting) {
+      $string = format_string('The setting of count is @setting.', array('@setting' => $setting));
+      $elements = $this->xpath('//*[contains(@class,:region)]//*[contains(text(),:string)]', array(
+        ':region' => 'l-' . $region_name,
+        ':string' => $string,
+      ));
+      $this->assertEqual(count($elements), 1, "The sample block was found in the $region_name region.");
+    }
+
+    // Configure the first template.
+    $flexible_layout_configure_link = 'admin/structure/layouts/settings/flexible-template/' . $template_machine_name1 . '/configure';
+    $this->backdropGet($flexible_layout_configure_link);
+    // Check for the default three rows.
+    $rows = $this->xpath("//*[@id=:id]//*[contains(@id, :row_id)]", array(':id' => 'layout-flexible-content', ':row_id' => 'flexible-row'));
+    $this->assertEqual(count($rows), 3, 'Three rows are found in the template');
+
+    // Edit the header row and check that the changes are reflected on the
+    // template editor page and the layout path.
+    $this->clickLink(t('Configure row'), 0);
+    $edit = array(
+      'region_names[region_name_0]' => 'New header',
+      'row_classes' => 'new-class another-class',
+      'element' => 'main',
+      'container' => 'no_container',
+    );
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
+
+    $header_row = $this->xpath("//main[contains(@id, :row_id)]//h2[text()=:row_title]", array(':row_id' => 'flexible-row--' . $layout_region_names[0], ':row_title' => 'New header'));
+    $this->assertEqual(count($header_row), 1, 'The header row has been renamed in the template editor.');
+
+    $this->backdropPost(NULL, array(), t('Save layout template'));
+
+    // Go to the block add page and check that the header region was renamed.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $header_row = $this->xpath("//main[contains(@class, :row_class)]//h2[text()=:row_title]", array(':row_class' => 'l-' . $layout_region_names[0], ':row_title' => 'New header'));
+    $this->assertEqual(count($header_row), 1, 'The header row has been renamed in the block add page.');
+
+    // Go to the layout path and check that the header region was renamed and
+    // the block is still in the header region.
+    $this->backdropGet($layout_url);
+
+    $string = format_string('The setting of count is @setting.', array('@setting' => 30));
+    $elements = $this->xpath('//main[contains(@class,:region)]/div[contains(@class, :container_class)]//*[contains(text(),:string)]', array(
+      ':region' => 'l-' . $layout_region_names[0],
+      ':container_class' => 'no-container',
+      ':string' => $string,
+    ));
+    $this->assertEqual(count($elements), 1, "The header element has been changed to 'main'");
+
+    // Go to the template editor and add a new row.
+    $flexible_layout_configure_link = 'admin/structure/layouts/settings/flexible-template/' . $template_machine_name1 . '/configure';
+    $this->backdropGet($flexible_layout_configure_link);
+    $this->backdropPost(NULL, array(), t('Add row'));
+    $edit = array(
+      'region_count' => 3,
+    );
+    $this->backdropPost(NULL, $edit, t('Choose region widths'));
+    $edit = array(
+      'region_style' => 'region_4_4_4',
+    );
+    $this->backdropPost(NULL, $edit, t('Continue'));
+    // Rename just the first region.
+    $edit = array(
+      'region_names[region_name_0]' => 'First region',
+    );
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropPost(NULL, array(), t('Save layout template'));
+
+    $row_count = $this->xpath("//*[@id=:id]//*[contains(@id, :row_id)]", array(':id' => 'layout-flexible-content', ':row_id' => 'flexible-row'));
+    $this->assertEqual(count($row_count), 4, 'Four rows are found in the template');
+
+    // Get the id of the last (new) row.
+    $last_row_attr = $this->xpath('//div[contains(@class, :class)]/*[4]/@data-row-id', array(
+      ':class' => 'layout-flexible-content',
+    ));
+    $data_row_id = (string) $last_row_attr[0][0];
+    $last_row_id = 'flexible-row--' . $last_row_attr[0][0];
+
+    // The last row has 3 regions.
+    $row_count = $this->xpath('//div[contains(@id, :id)]//div[contains(@class, :class)]/div', array(
+      ':id' => $last_row_id,
+      ':class' => 'l-flexible-row row',
+    ));
+    $this->assertEqual(count($row_count), 3, 'The last row has 3 regions.');
+
+    // Check that the first region has the expected title.
+    $fourth_row_first_region_title = $this->xpath('//div[contains(@id, :id)]//div[contains(@class, :class)]/div[1]//h2[text()=:region_title]', array(
+      ':id' => $last_row_id,
+      ':class' => 'l-flexible-row row',
+      ':region_title' => 'First region',
+    ));
+    $this->assertTrue($fourth_row_first_region_title, 'The region has the correct title.');
+
+    // Go to the block add page and check that the new row shows correctly.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+
+    // The last row has 3 regions.
+    $row_count = $this->xpath('//div[contains(@data-row-id, :id)]//div[contains(@class, :class)]/div', array(
+      ':id' => $data_row_id,
+      ':class' => 'l-flexible-row row',
+    ));
+    $this->assertEqual(count($row_count), 3, 'The last row has 3 regions.');
+
+    // Check that the first region has the expected title.
+    $fourth_row_first_region_title = $this->xpath('//div[contains(@data-row-id, :id)]//div[contains(@class, :class)]/div[1]//h2[text()=:region_title]', array(
+      ':id' => $data_row_id,
+      ':class' => 'l-flexible-row row',
+      ':region_title' => 'First region',
+    ));
+    $this->assertTrue($fourth_row_first_region_title, 'The region has the correct title.');
+
+    // Add a block to the new row first region.
+    $this->clickLink(t('Add block'), 3);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 19,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Add a block to the new row first region.
+    $this->clickLink(t('Add block'), 4);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 18,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Add a block to the new row first region.
+    $this->clickLink(t('Add block'), 5);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 17,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Go to the the layout path and confirm the blocks exist, have the right
+    // setting, and are in the right place.
+    $this->backdropGet($layout_url);
+    $region_block_settings = array('19', '18', '17');
+    foreach ($region_block_settings as $index => $setting) {
+      $string = format_string('The setting of count is @setting.', array('@setting' => $setting));
+      $elements = $this->xpath('//*[contains(@data-row-id,:id)]//div[contains(@class,:row)]/div[:index]//div[normalize-space(text())=:string]', array(
+        ':id' => $data_row_id,
+        ':row' => 'l-flexible-row row',
+        ':index' => $index + 1,
+        ':string' => $string,
+      ));
+      $this->assertEqual(count($elements), 1, "The sample block was found in the correct region.");
+    }
+
+    // Configure the template and move the footer row to the bottom.
+    $this->backdropGet($flexible_layout_configure_link);
+    $edit = array(
+      'row_positions' => "{$layout_region_names[0]},{$layout_region_names[1]},$data_row_id,{$layout_region_names[2]}",
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout template'));
+    $last_row_attr = $this->xpath('//div[contains(@class, :class)]/*[4]/@data-row-id', array(
+      ':class' => 'layout-flexible-content',
+    ));
+    $last_row_attr = (string) $last_row_attr[0][0];
+    $this->assertEqual($last_row_attr, $layout_region_names[2], 'The last row is footer.');
+
+    // Go to the block add page and check.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $last_row_attr = $this->xpath('//div[contains(@class, :class)]/*[4]/@data-row-id', array(
+      ':class' => 'layout-flexible-content',
+    ));
+    $last_row_attr = (string) $last_row_attr[0][0];
+    $this->assertEqual($last_row_attr, $layout_region_names[2], 'The last row is footer.');
+
+    // Go to the the layout path and check.
+    $this->backdropGet($layout_url);
+    $last_row_attr = $this->xpath('//div[contains(@class, :class)]/*[4]/@data-row-id', array(
+      ':class' => 'layout-flexible-content',
+    ));
+    $last_row_attr = (string) $last_row_attr[0][0];
+    $this->assertEqual($last_row_attr, $layout_region_names[2], 'The last row is footer.');
+
+    // Configure the template and delete the footer row.
+    $this->backdropGet($flexible_layout_configure_link);
+    $this->clickLink(t('Delete row'), 3);
+    $this->backdropPost(NULL, array(), t('Save layout template'));
+
+    // Check for the default three rows.
+    $rows = $this->xpath("//*[@id=:id]//*[contains(@id, :row_id)]", array(':id' => 'layout-flexible-content', ':row_id' => 'flexible-row'));
+    $this->assertEqual(count($rows), 3, 'Three rows are found in the template');
+
+    $last_row_attr = $this->xpath('//div[contains(@class, :class)]/*[last()]/@data-row-id', array(
+      ':class' => 'layout-flexible-content',
+    ));
+    $last_row_attr = (string) $last_row_attr[0][0];
+    $this->assertEqual($last_row_attr, $data_row_id, 'The last row is the new row.');
+
+    // Go to the block add page and check.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $last_row_attr = $this->xpath('//div[contains(@class, :class)]/*[last()]/@data-row-id', array(
+      ':class' => 'layout-flexible-content',
+    ));
+    $last_row_attr = (string) $last_row_attr[0][0];
+    $this->assertEqual($last_row_attr, $data_row_id, 'The last row is the new row.');
+
+    // Go to the the layout path and check.
+    $this->backdropGet($layout_url);
+    $last_row_attr = $this->xpath('//div[contains(@class, :class)]/*[last()]/@data-row-id', array(
+      ':class' => 'layout-flexible-content',
+    ));
+    $last_row_attr = (string) $last_row_attr[0][0];
+    $this->assertEqual($last_row_attr, $data_row_id, 'The last row is the new row.');
+  }
+
 }

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Gettext parsing and generating API.
@@ -26,11 +25,11 @@
  * @param $mode
  *   Should existing translations be replaced LOCALE_IMPORT_KEEP or
  *   LOCALE_IMPORT_OVERWRITE.
+ *
+ * @return bool
+ *   TRUE if the import was successful, FALSE otherwise.
  */
 function _locale_import_po($file, $langcode, $mode) {
-  // Try to allocate enough time to parse and import the data.
-  backdrop_set_time_limit(240);
-
   // Check if we have the language already in the database.
   if (!language_load($langcode)) {
     backdrop_set_message(t('The language selected for import is not supported.'), 'error');
@@ -76,17 +75,20 @@ function _locale_import_po($file, $langcode, $mode) {
 /**
  * Parses a Gettext Portable Object file into an array.
  *
- * @param $op
+ * @param string $op
  *   Storage operation type: db-store or mem-store.
- * @param $file
+ * @param stdClass $file
  *   Backdrop file object corresponding to the PO file to import.
- * @param $mode
+ * @param int $mode
  *   Should existing translations be replaced LOCALE_IMPORT_KEEP or
  *   LOCALE_IMPORT_OVERWRITE.
- * @param $lang
+ * @param string $langcode
  *   Language code.
+ *
+ * @return NULL|FALSE
+ *   NULL return value on success. FALSE upon failure.
  */
-function _locale_import_read_po($op, $file, $mode = NULL, $lang = NULL) {
+function _locale_import_read_po($op, $file, $mode = NULL, $langcode = NULL) {
 
   // The file will get closed by PHP on returning from this function.
   $fd = fopen($file->uri, 'rb');
@@ -116,6 +118,11 @@ function _locale_import_read_po($op, $file, $mode = NULL, $lang = NULL) {
   $lineno = 0;
 
   while (!feof($fd)) {
+    // Refresh time limit every 10 parsed rows.
+    if (!($lineno % 10)) {
+      backdrop_set_time_limit(30);
+    }
+
     // A line should not be longer than 10 * 1024.
     $line = fgets($fd, 10 * 1024);
 
@@ -138,7 +145,7 @@ function _locale_import_read_po($op, $file, $mode = NULL, $lang = NULL) {
       }
       elseif (($context == 'MSGSTR') || ($context == 'MSGSTR_ARR')) {
         // We are currently in string token, close it out.
-        _locale_import_one_string($op, $current, $mode, $lang, $file);
+        _locale_import_one_string($op, $current, $mode, $langcode, $file);
 
         // Start a new entry for the comment.
         $current         = array();
@@ -182,7 +189,7 @@ function _locale_import_read_po($op, $file, $mode = NULL, $lang = NULL) {
 
       if (($context == 'MSGSTR') || ($context == 'MSGSTR_ARR')) {
         // We are currently in a message string, close it out.
-        _locale_import_one_string($op, $current, $mode, $lang, $file);
+        _locale_import_one_string($op, $current, $mode, $langcode, $file);
 
         // Start a new context for the id.
         $current = array();
@@ -212,7 +219,7 @@ function _locale_import_read_po($op, $file, $mode = NULL, $lang = NULL) {
 
       if (($context == 'MSGSTR') || ($context == 'MSGSTR_ARR')) {
         // We are currently in a message, start a new one.
-        _locale_import_one_string($op, $current, $mode, $lang, $file);
+        _locale_import_one_string($op, $current, $mode, $langcode, $file);
         $current = array();
       }
       elseif (!empty($current['msgctxt'])) {
@@ -326,12 +333,13 @@ function _locale_import_read_po($op, $file, $mode = NULL, $lang = NULL) {
 
   // End of PO file, closed out the last entry.
   if (($context == 'MSGSTR') || ($context == 'MSGSTR_ARR')) {
-    _locale_import_one_string($op, $current, $mode, $lang, $file);
+    _locale_import_one_string($op, $current, $mode, $langcode, $file);
   }
   elseif ($context != 'COMMENT') {
     _locale_import_message('The translation file %filename ended unexpectedly at line %line.', $file, $lineno);
     return FALSE;
   }
+  return NULL;
 }
 
 /**
@@ -356,20 +364,24 @@ function _locale_import_message($message, $file, $lineno = NULL) {
 /**
  * Performs the specified operation for one string.
  *
- * @param $op
+ * @param string $op
  *   Operation to perform: 'db-store', 'db-report', 'mem-store' or 'mem-report'.
- * @param $value
+ * @param array $value
  *   Details of the string stored.
- * @param $mode
+ * @param int $mode
  *   Should existing translations be replaced LOCALE_IMPORT_KEEP or
  *   LOCALE_IMPORT_OVERWRITE.
- * @param $lang
+ * @param $langcode
  *   Language to store the string in.
- * @param $file
+ * @param stdClass $file
  *   Object representation of file being imported, only required when op is
  *   'db-store'.
+ *
+ * @return NULL|array
+ *   If the operation is a "report" operation, an array is returned with
+ *   information about currently stored strings. Other operations return NULL.
  */
-function _locale_import_one_string($op, $value = NULL, $mode = NULL, $lang = NULL, $file = NULL) {
+function _locale_import_one_string($op, $value = NULL, $mode = NULL, $langcode = NULL, $file = NULL) {
   $report = &backdrop_static(__FUNCTION__, array('additions' => 0, 'updates' => 0, 'deletes' => 0, 'skips' => 0));
   $header_done = &backdrop_static(__FUNCTION__ . ':header_done', FALSE);
   $strings = &backdrop_static(__FUNCTION__ . ':strings', array());
@@ -382,7 +394,7 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $lang = NUL
     // Store string in memory (only supports single strings)
     case 'mem-store':
       $strings[isset($value['msgctxt']) ? $value['msgctxt'] : ''][$value['msgid']] = $value['msgstr'];
-      return;
+      return NULL;
 
     // Called at end of import to inform the user
     case 'db-report':
@@ -393,7 +405,7 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $lang = NUL
       // We got header information.
       if ($value['msgid'] == '') {
         $locale_plurals = state_get('locale_translation_plurals', array());
-        if (($mode != LOCALE_IMPORT_KEEP) || empty($locale_plurals[$lang]['plurals'])) {
+        if (($mode != LOCALE_IMPORT_KEEP) || empty($locale_plurals[$langcode]['plurals'])) {
           // Since we only need to parse the header if we ought to update the
           // plural formula, only run this if we don't need to keep existing
           // data untouched or if we don't have an existing plural formula.
@@ -402,7 +414,7 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $lang = NUL
           // Get and store the plural formula if available.
           if (isset($header["Plural-Forms"]) && $p = _locale_import_parse_plural_forms($header["Plural-Forms"], $file->uri)) {
             list($nplurals, $formula) = $p;
-            $locale_plurals[$lang] = array(
+            $locale_plurals[$langcode] = array(
               'plurals' => $nplurals,
               'formula' => $formula,
             );
@@ -429,7 +441,7 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $lang = NUL
             if ($key == 0) {
               $plid = 0;
             }
-            $plid = _locale_import_one_string_db($report, $lang, isset($value['msgctxt']) ? $value['msgctxt'] : '', $english[$key], $trans, $comments, $mode, $plid, $key);
+            $plid = _locale_import_one_string_db($report, $langcode, isset($value['msgctxt']) ? $value['msgctxt'] : '', $english[$key], $trans, $comments, $mode, $plid, $key);
           }
         }
 
@@ -437,10 +449,12 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $lang = NUL
           // A simple string to import.
           $english = $value['msgid'];
           $translation = $value['msgstr'];
-          _locale_import_one_string_db($report, $lang, isset($value['msgctxt']) ? $value['msgctxt'] : '', $english, $translation, $comments, $mode);
+          _locale_import_one_string_db($report, $langcode, isset($value['msgctxt']) ? $value['msgctxt'] : '', $english, $translation, $comments, $mode);
         }
       }
   } // end of db-store operation
+
+  return NULL;
 }
 
 /**
@@ -651,7 +665,7 @@ function _locale_import_parse_arithmetic($string) {
   foreach ($tokens as $token) {
     $current_token = $token;
 
-    // Numbers and the $n variable are simply pushed into $element_stack
+    // Numbers and the $n variable are pushed into $element_stack.
     if (is_numeric($token)) {
       $element_stack[] = $current_token;
     }
@@ -700,7 +714,6 @@ function _locale_import_parse_arithmetic($string) {
     for ($i = 2; $i < count($element_stack); $i++) {
       $op = $element_stack[$i];
       if (!empty($precedence[$op])) {
-        $f = "";
         if ($op == ":") {
           $f = $element_stack[$i - 2] . "):" . $element_stack[$i - 1] . ")";
         }
@@ -795,10 +808,14 @@ function _locale_import_tokenize_formula($formula) {
  *
  * Callback for array_map() within _locale_import_one_string().
  *
- * @param $entry
+ * @param array $entry
  *   An array element.
- * @param $key
+ * @param int $key
  *   Index of the array element.
+ *
+ * @return array
+ *   The modified $entry parameter with "@count" strings replaced with the given
+ *   $key value.
  */
 function _locale_import_append_plural($entry, $key) {
   // No modifications for 0, 1
@@ -863,11 +880,11 @@ function _locale_import_parse_quoted($string) {
 /**
  * Generates a structured array of all translated strings for the language.
  *
- * @param $language
+ * @param stdClass $language
  *   Language object to generate the output for, or NULL if generating
  *   translation template.
  *
- * @return
+ * @return array
  *   An array of translated strings that can be used to generate an export.
  */
 function _locale_export_get_strings($language = NULL) {
@@ -901,15 +918,18 @@ function _locale_export_get_strings($language = NULL) {
 /**
  * Generates the PO(T) file contents for the given strings.
  *
- * @param $language
+ * @param stdClass $language
  *   Language object to generate the output for, or NULL if generating
  *   translation template.
- * @param $strings
+ * @param array $strings
  *   Array of strings to export. See _locale_export_get_strings()
  *   on how it should be formatted.
- * @param $header
+ * @param string $header
  *   The header portion to use for the output file. Defaults
  *   are provided for PO and POT files.
+ *
+ * @return string
+ *   The generated PO(T) file contents.
  */
 function _locale_export_po_generate($language = NULL, $strings = array(), $header = NULL) {
   global $user;
@@ -998,10 +1018,10 @@ function _locale_export_po_generate($language = NULL, $strings = array(), $heade
 /**
  * Writes a generated PO or POT file to the output.
  *
- * @param $language
+ * @param stdClass $language
  *   Language object to generate the output for, or NULL if generating
  *   translation template.
- * @param $output
+ * @param string $output
  *   The PO(T) file to output as a string. See _locale_export_generate_po()
  *   on how it can be generated.
  */

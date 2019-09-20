@@ -11,8 +11,11 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests the core views_handler_filter_date handler.
  */
 class ViewsHandlerFilterDateTest extends ViewsSqlTest {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp();
+
     // Add some basic test nodes.
     $this->nodes = array();
     $this->nodes[] = $this->backdropCreateNode(array('created' => 100000));
@@ -44,6 +47,21 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $expected_result, $this->map);
     $view->destroy();
 
+    // Test "first day of" type of relative dates for simple operator.
+    $view->set_display('default');
+    $view->init_handlers();
+    $view->filter['created']->operator = '<';
+    $view->filter['created']->value['type'] = 'offset';
+    $view->filter['created']->value['value'] = 'last day of January 1970';
+    $view->execute_display('default');
+    $expected_result = array(
+      array('nid' => $this->nodes[0]->nid),
+      array('nid' => $this->nodes[1]->nid),
+      array('nid' => $this->nodes[2]->nid),
+    );
+    $this->assertIdenticalResultset($view, $expected_result, $this->map);
+    $view->destroy();
+
     // Test offset for between operator.
     $view->set_display('default');
     $view->init_handlers();
@@ -57,8 +75,23 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
     );
     $this->assertIdenticalResultset($view, $expected_result, $this->map);
     $view->destroy();
-  }
 
+    // Test "first day of" type of relative dates for between operator.
+    $view->set_display('default');
+    $view->init_handlers();
+    $view->filter['created']->operator = 'between';
+    $view->filter['created']->value['type'] = 'offset';
+    $view->filter['created']->value['max'] = 'last day of January 1970';
+    $view->filter['created']->value['min'] = 'first day of January 1970';
+    $view->execute_display('default');
+    $expected_result = array(
+      array('nid' => $this->nodes[0]->nid),
+      array('nid' => $this->nodes[1]->nid),
+      array('nid' => $this->nodes[2]->nid),
+    );
+    $this->assertIdenticalResultset($view, $expected_result, $this->map);
+    $view->destroy();
+  }
 
   /**
    * Tests the filter operator between/not between.

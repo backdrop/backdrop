@@ -61,13 +61,13 @@ class DrupalWebTestCase extends BackdropWebTestCase {
     return $this->backdropCreateRole($permissions, $name);
   }
   protected function drupalLogin($user) {
-    return $this->backdropLogin($user);
+    $this->backdropLogin($user);
   }
   protected function drupalGetToken($value = '') {
     return $this->backdropGetToken($value);
   }
   protected function drupalLogout() {
-    return $this->backdropLogout();
+    $this->backdropLogout();
   }
   protected function drupalGet($path, array $options = array(), array $headers = array()) {
     return $this->backdropGet($path, $options, $headers);
@@ -97,10 +97,10 @@ class DrupalWebTestCase extends BackdropWebTestCase {
     return $this->backdropGetMails($filter);
   }
   protected function drupalSetContent($content, $url = 'internal:') {
-    return $this->backdropSetContent($content, $url);
+    $this->backdropSetContent($content, $url);
   }
   protected function drupalSetSettings($settings) {
-    return $this->backdropSetSettings($settings);
+    $this->backdropSetSettings($settings);
   }
   protected function drupalHead($path, array $options = array(), array $headers = array()) {
     return $this->backdropHead($path, $options, $headers);

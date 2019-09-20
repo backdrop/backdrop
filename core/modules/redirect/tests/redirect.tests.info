@@ -1,0 +1,11 @@
+[RedirectUnitTest]
+name = Redirect unit tests
+description = Test basic functions and functionality.
+group = Redirect
+file = redirect.test
+
+[RedirectFunctionalTest]
+name = Redirect functional tests
+description = Test interface functionality.
+group = Redirect
+file = redirect.test

@@ -2,14 +2,61 @@
 
 /**
  * @file
- * Subclasses of the Updater class to update Backdrop core knows how to update.
- * At this time, only modules, themes and layouts are supported.
+ * Subclasses of the Updater class to update Backdrop core, modules, themes, and layouts.
  */
+
+/**
+ * Class for updating Backdrop core using FileTransfer classes via authorize.php.
+ */
+class CoreUpdater extends Updater {
+
+  /**
+   * Return the Backdrop core directory.
+   */
+  public function getInstallDirectory() {
+    return BACKDROP_ROOT;
+  }
+
+  public function isInstalled() {
+    return (bool) file_exists($this->getInstallDirectory());
+  }
+
+  public static function canUpdateDirectory($directory) {
+    return (self::getProjectType($directory) == 'core');
+  }
+
+  static function canUpdate($project_name) {
+    return (bool) $this->isInstalled();
+  }
+
+  /**
+   * List of post install actions.
+   */
+  public function postInstall() {
+    $project = array();
+    $project['name'] = $this->name;
+    $project['type'] = 'core';
+    $_SESSION['project_browser_installed_projects'][$this->name] = $project;
+  }
+
+  /**
+   * List of post install actions.
+   */
+  public function postInstallTasks() {
+    return array();
+  }
+
+  public function postUpdateTasks() {
+    // We don't want to check for DB updates here, we do that once for all
+    // updated modules on the landing page.
+  }
+
+}
 
 /**
  * Class for updating modules using FileTransfer classes via authorize.php.
  */
-class ModuleUpdater extends Updater implements BackdropUpdaterInterface {
+class ModuleUpdater extends Updater {
 
   /**
    * Return the directory where a module should be installed.
@@ -27,6 +74,9 @@ class ModuleUpdater extends Updater implements BackdropUpdaterInterface {
     if ($relative_path = backdrop_get_path('module', $this->name)) {
       $relative_path = dirname($relative_path);
     }
+    elseif (file_exists(BACKDROP_ROOT . '/modules/contrib')) {
+      $relative_path = 'modules/contrib';
+    }
     else {
       $relative_path = 'modules';
     }
@@ -38,36 +88,21 @@ class ModuleUpdater extends Updater implements BackdropUpdaterInterface {
   }
 
   public static function canUpdateDirectory($directory) {
-    return (update_get_package_type($directory) == 'module');
+    return (self::getProjectType($directory) == 'module');
   }
 
-  public static function canUpdate($project_name) {
+  static function canUpdate($project_name) {
     return (bool) backdrop_get_path('module', $project_name);
   }
 
   /**
-   * Return available database schema updates one a new version is installed.
+   * List of post install actions.
    */
-  public function getSchemaUpdates() {
-    require_once BACKDROP_ROOT . '/core/includes/install.inc';
-    require_once BACKDROP_ROOT . '/core/includes/update.inc';
-
-    if (_update_get_project_type($project) != 'module') {
-      return array();
-    }
-    module_load_include('install', $project);
-
-    if (!$updates = backdrop_get_schema_versions($project)) {
-      return array();
-    }
-    $updates_to_run = array();
-    $modules_with_updates = update_get_update_list();
-    if ($updates = $modules_with_updates[$project]) {
-      if ($updates['start']) {
-        return $updates['pending'];
-      }
-    }
-    return array();
+  public function postInstall() {
+    $project = array();
+    $project['name'] = $this->name;
+    $project['type'] = 'module';
+    $_SESSION['project_browser_installed_projects'][$this->name] = $project;
   }
 
   /**
@@ -75,9 +110,8 @@ class ModuleUpdater extends Updater implements BackdropUpdaterInterface {
    */
   public function postInstallTasks() {
     return array(
-      l(t('Install another module'), 'admin/modules/install'),
       l(t('Enable newly added modules'), 'admin/modules'),
-      l(t('Administration pages'), 'admin'),
+      l(t('Browse more modules'), 'admin/modules/install'),
     );
   }
 
@@ -91,7 +125,7 @@ class ModuleUpdater extends Updater implements BackdropUpdaterInterface {
 /**
  * Class for updating themes using FileTransfer classes via authorize.php.
  */
-class ThemeUpdater extends Updater implements BackdropUpdaterInterface {
+class ThemeUpdater extends Updater {
 
   /**
    * Return the directory where a theme should be installed.
@@ -109,6 +143,9 @@ class ThemeUpdater extends Updater implements BackdropUpdaterInterface {
     if ($relative_path = backdrop_get_path('theme', $this->name)) {
       $relative_path = dirname($relative_path);
     }
+    elseif (file_exists(BACKDROP_ROOT . '/themes/contrib')) {
+      $relative_path = 'themes/contrib';
+    }
     else {
       $relative_path = 'themes';
     }
@@ -119,8 +156,8 @@ class ThemeUpdater extends Updater implements BackdropUpdaterInterface {
     return (bool) backdrop_get_path('theme', $this->name);
   }
 
-  static function canUpdateDirectory($directory) {
-    return (update_get_package_type($directory) == 'theme');
+  public static function canUpdateDirectory($directory) {
+    return (self::getProjectType($directory) == 'theme');
   }
 
   public static function canUpdate($project_name) {
@@ -136,7 +173,7 @@ class ThemeUpdater extends Updater implements BackdropUpdaterInterface {
   public function postInstallTasks() {
     return array(
       l(t('Enable newly added themes'), 'admin/appearance'),
-      l(t('Administration pages'), 'admin'),
+      l(t('Browse more themes'), 'admin/appearance/install'),
     );
   }
 }
@@ -144,7 +181,7 @@ class ThemeUpdater extends Updater implements BackdropUpdaterInterface {
 /**
  * Class for updating layouts using FileTransfer classes via authorize.php.
  */
-class LayoutUpdater extends Updater implements BackdropUpdaterInterface {
+class LayoutUpdater extends Updater {
 
   /**
    * Return the directory where a layout should be installed.
@@ -162,6 +199,9 @@ class LayoutUpdater extends Updater implements BackdropUpdaterInterface {
     if ($relative_path = backdrop_get_path('layout', $this->name)) {
       $relative_path = dirname($relative_path);
     }
+    elseif (file_exists(BACKDROP_ROOT . '/layouts/contrib')) {
+      $relative_path = 'layouts/contrib';
+    }
     else {
       $relative_path = 'layouts';
     }
@@ -172,8 +212,8 @@ class LayoutUpdater extends Updater implements BackdropUpdaterInterface {
     return (bool) backdrop_get_path('layout', $this->name);
   }
 
-  static function canUpdateDirectory($directory) {
-    return (update_get_package_type($directory) == 'layout');
+  public static function canUpdateDirectory($directory) {
+    return (self::getProjectType($directory) == 'layout');
   }
 
   public static function canUpdate($project_name) {
@@ -188,7 +228,7 @@ class LayoutUpdater extends Updater implements BackdropUpdaterInterface {
   public function postInstallTasks() {
     return array(
       l(t('Use newly added layouts'), 'admin/structure/layouts'),
-      l(t('Administration pages'), 'admin'),
+      l(t('Browse more layouts'), 'admin/structure/layouts/install'),
     );
   }
 }

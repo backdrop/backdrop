@@ -17,14 +17,14 @@
  * file location so that CKEditor may add the plugin. Available properties for
  * each plugin include:
  *
- * - location: Required for all external plugins. String path to the plugin
+ * - path: Required for all external plugins. String path to the plugin
  *   directory relative to the Backdrop installation root. Do not include a
  *   trailing slash.
  * - file: Required for all external plugins. String file name of the plugin in
- *   the "location" directory.
+ *   the "path" directory.
  * - internal: Boolean value indicating if the plugin is part of the compressed
  *   CKEditor library package and already loaded on all instances. If TRUE,
- *   the "location" and "file" properties are not needed.
+ *   the "path" and "file" properties are not needed.
  * - css: An array of CSS files that should be added by CKEditor. These files
  *   are used only when CKEditor is using an iframe wrapper around its content.
  *   If a plugin needs to include CSS for inline and iframe versions, it should
@@ -52,7 +52,6 @@
  *   - required_html: If this button requires certain HTML tags or attributes
  *     to be allowed, specify an nested array for each set of tags that should
  *     be allowed. For example:
- *
  *     @code
  *     array(
  *       array(
@@ -63,9 +62,11 @@
  *       ),
  *     );
  *     @endcode
- *
  *     Note that this must be a nested array, to allow for the button to require
  *     different attributes on different tags.
+ *   - dependencies: An array of other plugin names on which this button
+ *     depends. A common use is to add the "contextmenu" plugin, if the button
+ *     makes options available only via contextual menu.
  *   - optional_html: If this button can work with or without certain tags or
  *     attributes in a reduced manner, then specify additional values that can
  *     be used to provide the full functionality. This should match the same
@@ -83,12 +84,16 @@ function hook_ckeditor_plugins() {
     'file' => 'plugin.js',
     'css' => array(backdrop_get_path('module', 'mymodule') . '/css/myplugin.css'),
     'enabled callback' => 'mymodule_myplugin_plugin_check',
-    'required_html' => array(
-      array(
-        'tags' => array('a'),
-        'attributes' => array('href', 'alt'),
-        'styles' => array('color', 'text-decoration'),
-        'classes' => array('external', 'internal'),
+    'buttons' => array(
+      'MyPlugin' => array(
+        'label' => t('My custom button'),
+        'required_html' => array(
+          'tags' => array('a'),
+          'attributes' => array('href', 'alt'),
+          'styles' => array('color', 'text-decoration'),
+          'classes' => array('external', 'internal'),
+        ),
+        'dependencies' => array('contextmenu'),
       ),
     ),
   );

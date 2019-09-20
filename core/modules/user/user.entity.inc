@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity classes and controllers for User module.
@@ -8,7 +7,7 @@
 /**
  * Defines the user entity class.
  */
-class User extends Entity {
+class User extends Entity implements UserInterface {
 
   /**
    * The user ID.
@@ -104,11 +103,14 @@ class User extends Entity {
   public $preferred_langcode = LANGUAGE_NONE;
 
   /**
-   * The file ID of the user's picture.
+   * The file entity for the user's picture.
    *
-   * @var integer
+   * Early in loading a user object, the picture property will contain the file
+   * ID only. It is expanded to be the full file entity in User::attachLoad().
+   *
+   * @var File|int
    */
-  public $picture = 0;
+  public $picture;
 
   /**
    * The email address used for initial account creation.
@@ -161,6 +163,91 @@ class User extends Entity {
   }
 
   /**
+   * Overrides Entity::createAccess().
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    return user_access('administer users', $account);
+  }
+
+  /**
+   * Overrides Entity::access().
+   *
+   * @param string $op
+   *   The operation to be performed on the user. Possible values are:
+   *   - create
+   *   - view
+   *   - update
+   *   - delete
+   * @param User $account
+   *   (optional) The user to check for. Leave it to NULL to check for the
+   *   global user.
+   *
+   * @return bool
+   *   TRUE if access is granted, FALSE otherwise.
+   */
+  public function access($op, $account = NULL) {
+    // Casting class with private property causes errors due to added prefix.
+    // e.g. "\0" . 'User' . "\0". So use static array instead.
+    $rights = &backdrop_static(__METHOD__, array());
+
+    // We can't always count on Backdrop to provide an AnonymousUser for
+    // anonymous users, so test explicitly.
+    if (!$this->uid) {
+      return FALSE;
+    }
+
+    if ($op == 'create') {
+      return self::createAccess(NULL, $account);
+    }
+    elseif (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
+      // If the $op was not one of the supported ones, we return access denied.
+      return FALSE;
+    }
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    $cid = $this->id();
+
+    // If we've already checked access for this node, user and op, return from
+    // cache.
+    if (isset($rights[$account->uid][$cid][$op])) {
+      return $rights[$account->uid][$cid][$op];
+    }
+
+    if ($op == 'view') {
+      // Admins can view all, users can view own profiles at all times.
+      if ($account->uid == $this->uid || user_access('administer users', $account)) {
+        $rights[$account->uid][$cid][$op] = TRUE;
+        return $rights[$account->uid][$cid][$op];
+      }
+      elseif (user_access('access user profiles', $account)) {
+        $rights[$account->uid][$cid][$op] = $account->status;
+        return $rights[$account->uid][$cid][$op];
+      }
+      $rights[$account->uid][$cid][$op] = FALSE;
+      return $rights[$account->uid][$cid][$op];
+    }
+    elseif ($op == 'update') {
+      $rights[$account->uid][$cid][$op] = (($account->uid == $this->uid) || user_access('administer users', $account)) && $this->uid > 0;
+      return $rights[$account->uid][$cid][$op];
+    }
+    elseif ($op == 'delete') {
+      $rights[$account->uid][$cid][$op] = ((($account->uid == $this->uid) && user_access('cancel account', $account)) || user_access('administer users', $account)) && $this->uid > 0;
+      return $rights[$account->uid][$cid][$op];
+    }
+
+    $rights[$account->uid][$cid][$op] = FALSE;
+    return $rights[$account->uid][$cid][$op];
+  }
+
+  /**
    * Implements EntityInterface::save().
    */
   public function save() {
@@ -173,6 +260,7 @@ class User extends Entity {
 
     return $return;
   }
+
 }
 
 
@@ -186,6 +274,9 @@ class UserStorageController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::attachLoad().
+   *
+   * @param User[] $queried_users
+   *   The user entities for which fields should be attached.
    */
   function attachLoad(&$queried_users, $revision_id = FALSE) {
     // Build an array of user picture IDs so that these can be fetched later.
@@ -239,6 +330,9 @@ class UserStorageController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::save().
+   *
+   * @param User $entity
+   *   The user entity to be saved.
    */
   public function save(EntityInterface $entity) {
     if (empty($entity->uid)) {
@@ -250,13 +344,17 @@ class UserStorageController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::preSave().
+   *
+   * @param User $entity
+   *   The user entity about to be saved.
    */
   protected function preSave(EntityInterface $entity) {
     // Update the user password if it has changed.
-    if ($entity->isNew() || (!empty($entity->pass) && $entity->pass != $entity->original->pass)) {
+    $new_pass = isset($entity->pass) && strlen(trim($entity->pass)) > 0 ? trim($entity->pass) : NULL;
+    if ($entity->isNew() || !is_null($new_pass) && $new_pass !== $entity->original->pass) {
       // Allow alternate password hashing schemes.
       require_once BACKDROP_ROOT . '/' . settings_get('password_inc', 'core/includes/password.inc');
-      $entity->pass = user_hash_password(trim($entity->pass));
+      $entity->pass = user_hash_password($new_pass);
       // Abort if the hashing failed and returned FALSE.
       if (!$entity->pass) {
         throw new EntityMalformedException('The entity does not have a password.');
@@ -277,7 +375,7 @@ class UserStorageController extends EntityDatabaseStorageController {
     // Delete the picture if the submission indicates that it should be deleted
     // and no replacement was submitted.
     elseif (!empty($entity->picture_delete)) {
-      $entity->picture = 0;
+      $entity->picture = NULL;
       file_usage_delete($entity->original->picture, 'user', 'user', $entity->uid);
       file_delete($entity->original->picture->fid);
     }
@@ -308,7 +406,7 @@ class UserStorageController extends EntityDatabaseStorageController {
           file_delete($entity->original->picture->fid);
         }
       }
-      $entity->picture = empty($entity->picture->fid) ? 0 : $entity->picture->fid;
+      $entity->picture = empty($entity->picture->fid) ? NULL : $entity->picture->fid;
 
       // If the password is empty, that means it was not changed, so use the
       // original password.
@@ -332,6 +430,9 @@ class UserStorageController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::postSave().
+   *
+   * @param User $entity
+   *   The user entity that has just been saved.
    */
   protected function postSave(EntityInterface $entity, $update) {
 

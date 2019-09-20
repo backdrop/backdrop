@@ -198,3 +198,26 @@ function theme_filter_tips($variables) {
 
   return $output;
 }
+
+function theme_filter_format_editor_image_form($variables) {
+  $form = $variables['form'];
+
+  $library = backdrop_render($form['library_view']);
+  $actions = backdrop_render($form['actions']);
+
+  $output = '';
+  $output .= '<div class="image-form-wrapper">';
+
+  $output .= '<div class="editor-image-fields">';
+  $output .= backdrop_render_children($form);
+  $output .= '</div>';
+
+  $output .= '<div class="editor-image-library">';
+  $output .= $library;
+  $output .= '</div>';
+
+  $output .= '</div>';
+
+  $output .= $actions;
+  return $output;
+}

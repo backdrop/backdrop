@@ -8,6 +8,9 @@
 /**
  * A handler to provide proper displays for dates.
  *
+ * This may be used on table fields that hold either UNIX timestamps or SQL
+ * datetime strings.
+ *
  * @ingroup views_field_handlers
  */
 class views_handler_field_date extends views_handler_field {
@@ -25,8 +28,8 @@ class views_handler_field_date extends views_handler_field {
 
     $date_formats = array();
     $date_types = system_get_date_formats();
-    foreach ($date_types as $machine_name => $value) {
-      $date_formats[$machine_name] = check_plain(t('@name format', array('@name' => $value['name'])) . ': ' . format_date(REQUEST_TIME, $machine_name));
+    foreach ($date_types as $machine_name => $date_type) {
+      $date_formats[$machine_name] = $date_type['label'] . ': ' . format_date(REQUEST_TIME, $machine_name);
     }
 
     $form['date_format'] = array(
@@ -68,6 +71,12 @@ class views_handler_field_date extends views_handler_field {
 
   function render($values) {
     $value = $this->get_value($values);
+
+    if (!is_numeric($value)) {
+      // If the value isn't numeric, assume it's an SQL DATETIME.
+      $value = strtotime($value);
+    }
+
     $format = $this->options['date_format'];
     if (in_array($format, array('custom', 'raw time ago', 'time ago', 'raw time hence', 'time hence', 'raw time span', 'time span', 'raw time span', 'inverse time span', 'time span'))) {
       $custom_format = $this->options['custom_date_format'];

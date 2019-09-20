@@ -5,13 +5,17 @@
  * Handles incoming requests to fire off regularly-scheduled tasks (cron jobs).
  */
 
-// Change the directory to the Backdrop root.
-chdir('..');
-
 /**
- * Root directory of Backdrop installation.
+ * Defines the root directory of the Backdrop installation.
+ *
+ * The dirname() function is used to get path to Backdrop root folder, which
+ * avoids resolving of symlinks. This allows the code repository to be a symlink
+ * and hosted outside of the web root. See issue #1297.
  */
-define('BACKDROP_ROOT', getcwd());
+define('BACKDROP_ROOT', dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
+
+// Change the directory to the Backdrop root.
+chdir(BACKDROP_ROOT);
 
 include_once BACKDROP_ROOT . '/core/includes/bootstrap.inc';
 backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);

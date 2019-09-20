@@ -189,7 +189,6 @@ Backdrop.adminBar.behaviors.collapseWidth = function (context, settings, $adminB
   var menuWidth;
   var extraWidth;
   var availableWidth;
-  var resizeTimeout;
 
   var adjustItems = function () {
     // Expand the menu items to their full width to check their size.
@@ -200,7 +199,12 @@ Backdrop.adminBar.behaviors.collapseWidth = function (context, settings, $adminB
 
     menuWidth = $menu.width();
     extraWidth = $extra.width();
-    availableWidth = $adminBar.width() - $adminBar.find('#admin-bar-icon').width();
+
+    // Available width is anything except the menus that may be collapsed.
+    availableWidth = $adminBar.width();
+    $adminBar.children().children().not($menu).not($extra).each(function() {
+      availableWidth -= $(this).width();
+    });
 
     // Collapse the extra items first if needed.
     if (availableWidth - menuWidth - extraWidth < 20) {
@@ -214,13 +218,11 @@ Backdrop.adminBar.behaviors.collapseWidth = function (context, settings, $adminB
     $adminBar.trigger('afterResize');
   };
 
-  // Adjust items once now.
+
   adjustItems();
-  // Re-adjust items when window is resized.
-  $(window).on('resize.adminBar', function (event) {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(adjustItems, 50);
-  });
+  // Adjust items when window is resized.
+  Backdrop.optimizedResize.add(adjustItems);
+
 };
 
 /**
@@ -391,7 +393,8 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
         result = categoryText + ': ' + result;
       }
 
-      var $result = $('<li><a href="' + $element.attr('href') + '">' + result + '</a></li>');
+      var $result = $('<li><a href="' + $element.attr('href') + '"> </a></li>');
+      $result.children().text(result);
       $result.data('original-link', $(this.element).parent());
       $html.append($result);
     });
@@ -446,7 +449,7 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
   }
   function updateSearchDisplay(e) {
     // Build the list of extra items to be hidden if in small window mode.
-    $hideItems = $adminBar.find('#admin-bar-extra > li > ul > li:not(li.admin-bar-search)').css('display', '');
+    var $hideItems = $adminBar.find('#admin-bar-extra > li > ul > li:not(li.admin-bar-search)').css('display', '');
     if ($results.children().length) {
       if ($adminBar.find('#admin-bar-extra').hasClass('dropdown')) {
         $hideItems.css('display', 'none');

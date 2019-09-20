@@ -14,20 +14,24 @@
  * back to its original state!
  */
 
-// Change the directory to the Backdrop root.
-chdir('..');
-
 /**
  * Defines the root directory of the Backdrop installation.
+ *
+ * The dirname() function is used to get path to Backdrop root folder, which
+ * avoids resolving of symlinks. This allows the code repository to be a symlink
+ * and hosted outside of the web root. See issue #1297.
  */
-define('BACKDROP_ROOT', getcwd());
+define('BACKDROP_ROOT', dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
+
+// Change the directory to the Backdrop root.
+chdir(BACKDROP_ROOT);
 
 // Exit early if running an incompatible PHP version to avoid fatal errors.
 // The minimum version is specified explicitly, as BACKDROP_MINIMUM_PHP is not
 // yet available. It is defined in bootstrap.inc, but it is not possible to
 // load that file yet as it would cause a fatal error on older versions of PHP.
 if (version_compare(PHP_VERSION, '5.3.2') < 0) {
-  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.3.2. See the <a href="http://backdropcms.org/guide/requirements">system requirements</a> page for more information.';
+  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.3.2. See the <a href="https://backdropcms.org/guide/requirements">System Requirements</a> page for more information.';
   exit;
 }
 
@@ -137,7 +141,8 @@ function update_script_selection_form($form, &$form_state) {
   }
   else {
     $form['help'] = array(
-      '#markup' => '<p>Updates have been found that need to be applied. You may review the updates below before executing them.</p>',
+      '#type' => 'help',
+      '#markup' => 'Updates have been found that need to be applied. You may review the updates below before executing them.',
       '#weight' => -5,
     );
     if ($incompatible_count) {
@@ -154,7 +159,12 @@ function update_script_selection_form($form, &$form_state) {
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
-      '#value' => 'Apply pending updates',
+      '#value' => t('Apply pending updates'),
+    );
+    $form['actions']['cancel'] = array(
+      '#type' => 'link',
+      '#href' => '<front>',
+      '#title' => t('Cancel'),
     );
   }
   return $form;
@@ -165,10 +175,16 @@ function update_script_selection_form($form, &$form_state) {
  */
 function update_helpful_links() {
   $links['front'] = array(
-    'title' => t('Front page'),
+    'title' => t('Home page'),
     'href' => '<front>',
   );
-  if (user_access('access administration pages')) {
+  if (module_exists('dashboard') && user_access('access dashboard')) {
+    $links['dashboard'] = array(
+      'title' => t('Dashboard'),
+      'href' => 'admin/dashboard',
+    );
+  }
+  elseif (user_access('access administration pages')) {
     $links['admin-pages'] = array(
       'title' => t('Administration pages'),
       'href' => 'admin',
@@ -294,19 +310,26 @@ function update_info_page() {
   update_task_list('info');
   backdrop_set_title('Backdrop database update');
   $token = backdrop_get_token('update');
-  $output = '<p>Use this utility to update your database whenever you install a new version of Backdrop CMS and/or one of the site\'s modules.</p><p>For more detailed information, see the <a href="http://backdropcms.org/guide/upgrade">upgrading handbook</a>. If you are unsure of what these terms mean you should probably contact your hosting provider.</p>';
+  $output = '<p>Use this utility to update your database whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
+  $output .= '<p>For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page. If you are unsure of what these terms mean, contact your hosting provider.</p>';
+  $output .= '<p>Before running updates, the following steps are recommended.</p>';
   $output .= "<ol>\n";
-  $output .= "<li><strong>Make any necessary backups.</strong> This update utility will alter your database and config files. In case of an emergency you may need to revert to a recent backup; make sure you have one.\n";
+  $output .= "<li><strong>Create backups.</strong> This update utility will alter your database and config files. In case of an emergency you may need to revert to a recent backup; make sure you have one.\n";
   $output .= "<ul>\n";
-  $output .= "<li><strong>Database:</strong> Back up a dump of the '" . $db_name . "' database.</li>\n";
-  $output .= "<li><strong>Config files:</strong> Back up the entire '" . $config_dir . "' directory.</li>\n";
+  $output .= "<li><strong>Database:</strong> Create a database dump of the '" . $db_name . "' database.</li>\n";
+  $output .= "<li><strong>Config files:</strong> Back up the entire directory at '" . $config_dir . "'.</li>\n";
   $output .= "</ul>\n";
-  $output .= '<li>Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a> (optional but recommended).</li>' . "\n";
-  $output .= "<li>Install your new files into the appropriate location, as described in the handbook.</li>\n";
+  $output .= '<li>Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a>.</li>' . "\n";
+  $output .= "<li>Install your new files into the appropriate location, as described in <a href=\"https://backdropcms.org/upgrade\">the handbook</a>.</li>\n";
   $output .= "</ol>\n";
-  $output .= "<p>When you have performed the above steps you may proceed.</p>\n";
+  $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
   $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
-  $output .= '<form method="post" action="' . $form_action . '"><p><input type="submit" value="Continue" class="form-submit" /></p></form>';
+  $output .= '<form method="post" action="' . $form_action . '">
+  <div class="form-actions">
+    <input type="submit" value="Continue" class="form-submit button-primary" />
+    <a href="' . base_path() . '">Cancel</a>
+  </div>
+  </form>';
   $output .= "\n";
   return $output;
 }
@@ -320,14 +343,22 @@ function update_info_page() {
 function update_access_denied_page() {
   backdrop_add_http_header('Status', '403 Forbidden');
   watchdog('access denied', 'update.php', NULL, WATCHDOG_WARNING);
-  backdrop_set_title('Access denied');
-  return '<p>Access denied. You are not authorized to access this page. Log in using either an account with the <em>administer software updates</em> permission or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:</p>
-<ol>
- <li>With a text editor find the settings.php file on your system and open it.</li>
- <li>There is a line inside your settings.php file that says <code>$settings[&#39;update_free_access&#39;] = FALSE;</code>. Change it to <code>$settings[&#39;update_free_access&#39;] = TRUE;</code>.</li>
- <li>As soon as the update.php script is done, you must change the settings.php file back to its original form with <code>$settings[&#39;update_free_access&#39;] = FALSE;</code>.</li>
- <li>To avoid having this problem in the future, remember to log in to your website using either an account with the <em>administer software updates</em> permission or the site maintenance account (the account you created during installation) before you backup your database at the beginning of the update process.</li>
-</ol>';
+  backdrop_set_title(t('Access denied'));
+
+  $output = '';
+  $steps = array();
+
+  $output .= t('You are not authorized to access this page. Log in using either an account with the <em>administer software updates</em> permission, or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:');
+  $output = '<p>' . $output . '</p>';
+
+  $steps[] = t('Find the <code>settings.php</code> file on your system, and open it with a text editor.');
+  $steps[] = t('There is a line inside your <code>settings.php</code> file that says <code>$settings[\'update_free_access\'] = FALSE</code>. Change it to <code>$settings[\'update_free_access\'] = TRUE</code>.');
+  $steps[] = t('Reload this page. The database update script should be able to run now.');
+  $steps[] = t('As soon as the update script is done, you must change the <code>update_free_access</code> setting in the <code>settings.php</code> file back to <code>FALSE</code>: <code>$settings[\'update_free_access\'] = FALSE;</code>.');
+
+  $output .= theme('item_list', array('items' => $steps, 'type' => 'ol'));
+
+  return $output;
 }
 
 /**
@@ -357,7 +388,12 @@ function update_access_allowed() {
 /**
  * Adds the update task list to the current page.
  */
-function update_task_list($active = NULL) {
+function update_task_list($set_active = NULL) {
+  static $active;
+  if ($set_active) {
+    $active = $set_active;
+  }
+
   // Default list of tasks.
   $tasks = array(
     'requirements' => 'Verify requirements',
@@ -367,7 +403,12 @@ function update_task_list($active = NULL) {
     'finished' => 'Review log',
   );
 
-  backdrop_add_region_content('sidebar_first', theme('task_list', array('items' => $tasks, 'active' => $active)));
+  // Only show the task list on the left sidebar if the logged-in user is has
+  // permission to perform updates, or if the update_free_access' setting in
+  // settings.php has been set to TRUE.
+  if (settings_get('update_free_access') || user_access('administer software updates')) {
+    return theme('task_list', array('items' => $tasks, 'active' => $active));
+  }
 }
 
 /**
@@ -398,11 +439,11 @@ function update_check_requirements($skip_warnings = FALSE) {
   // If there are errors, always display them. If there are only warnings, skip
   // them if the caller has indicated they should be skipped.
   if ($severity == REQUIREMENT_ERROR || ($severity == REQUIREMENT_WARNING && !$skip_warnings)) {
-    update_task_list('requirements');
     backdrop_set_title('Requirements problem');
+    $task_list = update_task_list('requirements');
     $status_report = theme('status_report', array('requirements' => $requirements));
     $status_report .= 'Check the messages and <a href="' . check_url(backdrop_requirements_url($severity)) . '">try again</a>.';
-    print theme('update_page', array('content' => $status_report));
+    print theme('update_page', array('content' => $status_report, 'sidebar' => $task_list));
     exit();
   }
 }
@@ -437,6 +478,7 @@ if (empty($op) && update_access_allowed()) {
 
   // Load module basics.
   include_once BACKDROP_ROOT . '/core/includes/module.inc';
+  include_once BACKDROP_ROOT . '/core/includes/tablesort.inc';
   $module_list['system']['filename'] = 'core/modules/system/system.module';
   module_list(TRUE, FALSE, FALSE, $module_list);
   backdrop_load('module', 'system');
@@ -536,5 +578,6 @@ if (isset($output) && $output) {
   backdrop_session_start();
   // We defer the display of messages until all updates are done.
   $progress_page = ($batch = batch_get()) && isset($batch['running']);
-  print theme('update_page', array('content' => $output, 'show_messages' => !$progress_page));
+  $task_list = update_task_list();
+  print theme('update_page', array('content' => $output, 'sidebar' => $task_list, 'show_messages' => !$progress_page));
 }

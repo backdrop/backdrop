@@ -1,43 +1,88 @@
 /* Layout listing form. */
-#layout-list .layout-group td {
+.layout-list .layout-group td {
   background: #dddddd;
 }
-#layout-list .layout-group td:first-child {
+.layout-list .layout-group td:first-child {
   font-weight: bold;
 }
-#layout-list .layout-row td:first-child {
+.layout-list .layout-row td:first-child {
   padding-left: 24px;
 }
-#layout-list tr.disabled td {
+.layout-list tr.disabled td {
   color: #999;
+}
+.layout-list td:last-child {
+  min-width: 160px;
+}
+
+@media (min-width: 768px) {
+  .layout-list span.priority-low {
+    display: inline;
+  }
+}
+
+.layout-list img {
+  display: none;
+  float: left; /* LTR */
+  margin-right: 10px;
+  max-width: 37px;
+  height: auto;
+}
+[dir="rtl"] .layout-list img {
+  float: right; /* LTR */
+  margin-right: 0;
+  margin-left: 10px;
+}
+@media (min-width: 768px) {
+  .layout-list img {
+    display: inline;
+  }
+}
+
+.layout-list .layout-conditions-list ul {
+  margin-left: 0;
+}
+
+.layout-list .layout-title {
+  font-weight: bold;
 }
 
 /* Individual layout settings form. */
+.layout-settings-page .form-type-checkboxes,
 .layout-settings-form .form-type-radios {
   width: 100%;
 }
+.layout-settings-page .layout-options .form-checkboxes,
 .layout-settings-form .layout-options .form-radios {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
   -webkit-flex-wrap: wrap;
-      -ms-flex-wrap: wrap;
-          flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
   line-height: 1.3;
   max-width: calc(100vw - 60px); /* Fix flex-wrap issue in some browsers */
 }
+.layout-settings-page .layout-options.no-flexbox .form-checkboxes,
 .layout-settings-form .layout-options.no-flexbox .form-radios {
   display: block;
 }
+.layout-settings-page .layout-options .form-type-checkbox,
 .layout-settings-form .layout-options .form-type-radio {
   width: 100px;
   margin: 0 5px 5px 0;
   padding: 0;
   text-align: center;
 }
+.layout-settings-page .layout-options.no-flexbox .form-type-checkbox,
 .layout-settings-form .layout-options.no-flexbox .form-type-radio {
   float: left;
+}
+.layout-settings-page .layout-options .form-item input.form-checkbox {
+  /* Needed to override Seven's style.css */
+  margin-right: 0;
+  margin-left: 0;
 }
 
 /* Menu item argument settings. */
@@ -87,36 +132,63 @@
   border-bottom: none;
 }
 
+/* Layout columns */
+.layout-content-form .row > div,
+.layout-content-form .row > main {
+  display: flex;
+}
+
 /* Layout editor. */
 .layout-editor-region {
+  width: 100%;
   min-height: 70px;
   margin: 0 0 15px;
-  padding: 8px;
+  padding: 8px 8px 16px 8px;
   border: 1px dashed #CCC;
   background: white;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
 }
 .layout-editor-region-title .label {
-  float: left;
-  margin: 0 12px 0 0; /* LTR */
-  padding: 4px 0;
+  float: left; /* LTR */
+  margin: 0;
+  padding: 4px 12px 4px 4px; /* LTR */
   line-height: 1.2;
+  text-transform: uppercase;
+  font-weight: normal;
+  color: #908990;
+}
+[dir="rtl"] .layout-editor-region-title .label {
+  float: right;
+  padding-right: 4px;
+  padding-left: 12px;
 }
 .layout-editor-region-content {
   min-height: 40px;
 }
-[dir="rtl"] .layout-editor-region-title .label {
-  margin-right: 0;
-  margin-left: 12px;
-}
 .layout-editor-region-title .dropbutton-wrapper {
-  float: left;
-  width: 105px;
+  float: left; /* LTR */
+  width: 140px;
   margin: 4px 0 10px
+}
+[dir="rtl"] .layout-editor-region-title .dropbutton-wrapper {
+  float: right;
+}
+.layout-editor-region-title .buttons .dropbutton-wrapper {
+  float: right; /* LTR */
+  width: auto;
+  margin: 4px 4px 10px
+}
+[dir="rtl"] .layout-editor-region-title .buttons .dropbutton-wrapper {
+  float: left;
 }
 .layout-editor-region .dropbutton-wrapper a {
   display: inline-block;
   width: 100%;
-  text-align: left;
+  text-align: left; /* LTR */
+}
+[dir="rtl"] .layout-editor-region .dropbutton-wrapper a {
+  text-align: right;
 }
 .layout-editor-region .dropbutton-wrapper .ajax-progress {
   position: absolute;
@@ -126,20 +198,39 @@
   cursor: move;
 }
 .layout-editor-block {
-  margin: -1px -1px 10px -1px;
+  margin: -1px 1px 15px -1px;
   background: #FFF;
+  border-radius: 4px;
+  -webkit-box-shadow: 2px 2px 0 0 #d0d0d0;
+  -moz-box-shadow: 2px 2px 0 0 #d0d0d0;
+  box-shadow: 2px 2px 0 0 #d0d0d0;
 }
 .layout-editor-block:last-child {
   margin-bottom: 0;
 }
 .layout-editor-block-title {
-  border: 1px solid #CCC;
-  background: #F3F4EE;
-  padding: 0.4em 1em;
+  border: 0;
+  background: #e9e8e8;
+  border-radius: 4px 4px 0 0;
+  padding: 0.4em 0.5em;
+}
+.layout-editor-block-title .handle {
+  background: url(../../../misc/draggable.png) no-repeat 6px 9px;
+  height: 13px;
+  width: 13px;
+  margin: 0 0.5em 0 0; /* LTR */
+  padding: 0.25em 0.75em;
+  box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+  -o-box-sizing: content-box;
+}
+[dir="rtl"] .layout-editor-block-title .handle {
+  margin: 0 0 0 0.5em;
 }
 .layout-editor-block-title .text {
   font-size: 1.1em;
-  line-height: 1.5;
+  line-height: 1.75;
   font-weight: bold;
 }
 .layout-editor-block-title .buttons {
@@ -150,11 +241,13 @@
   float: left;
 }
 .layout-editor-block-content {
-  border: 1px solid #CCC;
+  border: 1px solid #f7f7f7;
   border-top: none;
   border-bottom-width: 2px;
+  border-radius: 0 0 4px 4px;
   padding: 0.4em 1em;
   min-height: 20px;
+  background: #f7f7f7;
   font-size: 90%;
   line-height: 1.5;
 }
@@ -189,14 +282,95 @@
   margin: 0 12px 0 0;
 }
 .layout-editor-placeholder {
-  background-color: #EFEFEF;
+  background-color: #bdf;
+  border-radius: 4px;
+}
+
+.layout-content-form h1.page-title,
+.layout-content-form h1.title {
+  font-size: 1em;
+}
+.layout-content-form .page-title div.description,
+.layout-content-form .title div.description {
+  clear: both;
+}
+/* Remove the drop shadow indicating this item is movable */
+.layout-content-form .page-title .layout-editor-block {
+  box-shadow: none;
+  background-color: #e9e8e8;
+  padding: 0.4em 1em;
+}
+.layout-content-form .page-title .layout-editor-block-title {
+  background-color: transparent;
+  padding: 0;
+}
+.layout-content-form .page-title .layout-editor-block-title .description {
+  padding: 0 0.8em;
+  font-size: 90%;
 }
 
 /* Layout Misc */
-#layout-edit h1 {
-  margin: 1em 0 .6em;
-}
 .layout-access-list ul {
-  margin: 1em 0px;
-  padding: 0px 20px;
+  list-style: none;
+  margin: 1em 0;
+  padding: 0;
+}
+.layout-access-list ul li {
+  background: #eee;
+  border-bottom: 1px solid #ccc;
+  padding: 0.1em 0.6em;
+}
+.layout-access-list .layout-condition .layout-operations {
+  display: inline-block;
+}
+.layout-content-form main {
+  /* Override Seven's styling. */
+  margin-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .layout-access-list .layout-condition .layout-operations {
+    float: right; /* LTR */
+  }
+  [dir="rtl"] .layout-access-list .layout-condition .layout-operations {
+    float: left;
+  }
+}
+
+.layout-flexible-region-buttons {
+  padding-bottom: 5px;
+}
+
+.layout-flexible-editor .flexible-row {
+  padding: 15px 0 0;
+}
+
+.layout-flexible-editor .flexible-row:hover {
+  background-color: #ffffff;
+  -webkit-box-shadow: 2px 2px 0 0 #d0d0d0;
+  -moz-box-shadow: 2px 2px 0 0 #d0d0d0;
+  box-shadow: 2px 2px 0 0 #d0d0d0;
+  cursor: move;
+}
+
+.flexible-layout-add-row {
+  margin: 20px 40px 0;
+}
+
+.flexible-icon {
+  border: 2px solid #999;
+  border-radius: 3px;
+  padding: 1px;
+}
+
+.flexible-icon-region {
+  background-color: #ccc;
+  color: #fff;
+  background-clip: content-box;
+  text-align: center;
+}
+
+.form-item .form-item.form-item-region-count {
+  margin-right: 2em;
+  display: inline;
 }

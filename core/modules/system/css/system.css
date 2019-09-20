@@ -10,10 +10,11 @@
  */
 /* Suggestion list */
 #autocomplete {
-  border: 1px solid;
+  background: #eee;
+  border: 1px solid #ddd;
   overflow: hidden;
-  position: absolute;
-  z-index: 100;
+  position: fixed;
+  z-index: 9997;
 }
 #autocomplete ul {
   list-style: none;
@@ -22,7 +23,6 @@
   padding: 0;
 }
 #autocomplete li {
-  background: #fff;
   color: #000;
   cursor: default;
   white-space: pre;
@@ -121,6 +121,10 @@ a.tabledrag-handle .handle {
   margin: -0.4em 0.5em; /* LTR */
   padding: 0.42em 0.5em; /* LTR */
   width: 13px;
+  box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+  -o-box-sizing: content-box;
 }
 [dir="rtl"] a.tabledrag-handle .handle {
   margin: -0.4em 0.5em;

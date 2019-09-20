@@ -1,3 +1,9 @@
+/**
+ * Styles for collapsible, responsive tabs.
+ */
+.responsive-tabs-processed {
+  position: relative;
+}
 .responsive-tabs-processed ul.primary {
   height: 2.6em;
   overflow: hidden;

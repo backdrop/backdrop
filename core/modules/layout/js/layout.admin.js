@@ -18,7 +18,7 @@ Backdrop.behaviors.layoutList = {
   attach: function(context) {
     var $element = $(context).find('.layout-options');
     if ($element.length) {
-      if ($element.css('flex-wrap')) {
+      if (Backdrop.featureDetect.flexbox()) {
         $element.addClass('flexbox');
       }
       else {
@@ -83,6 +83,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
     if ($regions.length) {
       $regions.sortable({
         connectWith: '.layout-editor-region-content',
+        tolerance: 'pointer',
         update: Backdrop.behaviors.layoutDisplayEditor.updateLayout,
         items: '.layout-editor-block',
         placeholder: 'layout-editor-placeholder layout-editor-block',
@@ -96,7 +97,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
           $('[data-block-id="' + blockUuid + '"]').find('li.configure > a').triggerHandler('click');
           // Clear out the hash. Use history if available, preventing another
           // entry (which would require two back button clicks). Fallback to
-          // directlty updating the URL in the location bar.
+          // directly updating the URL in the location bar.
           if (window.history && window.history.replaceState) {
             window.history.replaceState({}, '', '#');
           }
@@ -105,6 +106,18 @@ Backdrop.behaviors.layoutDisplayEditor = {
           }
         }, 100);
       }
+    }
+
+    var $flexible_regions = $('.layout-flexible-editor').once('layout-sortable');
+    if ($flexible_regions.length) {
+      $flexible_regions.sortable({
+        connectWith: '.layout-flexible-content',
+        tolerance: 'pointer',
+        update: Backdrop.behaviors.layoutDisplayEditor.updateFlexibleLayout,
+        items: '.flexible-row',
+        placeholder: 'layout-editor-placeholder layout-editor-block',
+        forcePlaceholderSize: true
+      });
     }
 
     // Detect the addition of new blocks.
@@ -127,6 +140,16 @@ Backdrop.behaviors.layoutDisplayEditor = {
       blockList.push($(this).data('blockId'));
     });
     $('input[name="content[positions][' + regionName + ']"]').val(blockList.join(','));
+  },
+  /**
+   * jQuery UI sortable update callback.
+   */
+  updateFlexibleLayout: function(event, ui) {
+    var blockList = [];
+    $(this).find('.flexible-row').each(function() {
+      blockList.push($(this).data('rowId'));
+    });
+    $('input[name="row_positions"]').val(blockList.join(','));
   }
 };
 
@@ -140,7 +163,7 @@ Backdrop.behaviors.blockListFilterByText = {
     var $rows, zebraClass;
     var zebraCounter = 0;
 
-    // Fliter the list of layouts by provided search string.
+    // Filter the list of layouts by provided search string.
     function filterBlockList() {
       var query = $input.val().toLowerCase();
 

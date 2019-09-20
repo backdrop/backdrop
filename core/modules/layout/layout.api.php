@@ -127,25 +127,29 @@ function hook_layout_context_info() {
  *   include:
  *   - title: The translated title of the style.
  *   - description: The translated description of the style.
- *   - region theme: Optional. If this style needs to modify the display of an
- *     entire region, specify the theme function/template key that would be
- *     passed into the theme() function.
  *   - block theme: Optional. If this style modifies the display of blocks,
- *     specify the theme function/template key that would be passed into the
+ *     specify the theme function or template key that would be passed into the
  *     theme function.
  *   - class: Optional. The name of a class which contains any advanced methods
  *     to configure and save settings for this display style. If not specified,
  *     the default class of LayoutStyle will be used. Each class must also be
  *     registered in hook_autoload_info().
- *   - file: Optional. If using theme or preprocess functions, specify the path
- *     to the containing file. This file path is NOT the path to the class.
- *     Class paths and loading is done through hook_autoload_info().
- *   - path: The relative path from this module to the directory containing any
- *     templates or include files needed by this style.
+ *   - file: Optional. The name of the file the implementation resides in. This
+ *     file path is NOT the path to the class. Class paths and loading is done
+ *     through hook_autoload_info().
+ *   - path: Optional. Override the path to the file to be used. Ordinarily
+ *     theme functions are located in a file in the module path (for example:
+ *     mymodule/mymodule.theme.inc) and template files are located in a
+ *     subdirectory named templates (for example: mymodule/templates/), but if
+ *     your file will not be in the default location, include it here. This
+ *     path should be relative to the Backdrop root directory.
+ *   - template: If specified, this theme implementation is a template, and
+ *     this is the template file name without an extension. Do not include the
+ *     extension .tpl.php; it will be added automatically. If 'path' is
+ *     specified, then the template should be located in this path.
  *   - hook theme: Optional. If specified, additional information to be merged
  *     into hook_theme() on behalf of this style. This may be necessary if the
- *     values provided for "region theme" and "block theme" have not already
- *     been registered.
+ *     values provided for "block theme" have not already been registered.
  *
  * @see LayoutStyle
  * @see hook_autoload_info()
@@ -155,16 +159,15 @@ function hook_layout_style_info() {
   $info['custom_style'] = array(
     'title' => t('A new style'),
     'description' => t('An advanced style with settings.'),
-    // The theme key indicating what theme function/template will be used.
-    'region theme' => 'mymodule_layout_region',
     // The theme key for rendering an individual block.
     'block theme' => 'mymodule_block',
     // Provide a class name if this style has settings. The class should extend
     // the LayoutStyle class.
     'class' => 'MyModuleLayoutStyle',
-    // If nesting templates or a theme include file in a directory, the relative
-    // path can be specified.
-    'path' => 'templates',
+    // Override the path to the file to be used.
+    'path' => 'templates/subdir',
+    // Name of template file (with or without path).
+    'template' => 'templates/my-filename',
   );
   return $info;
 }
@@ -200,11 +203,11 @@ function hook_layout_renderer_info() {
  *
  * Layouts can be reverted only if the configuration is provided
  * by a module. Layouts created in the Layout Builder User Interface
- * cannot be reverted. 
+ * cannot be reverted.
  * A layout revert operation results in deletion of the existing
  * layout configuration and replacement with the default configuration
- * from the providing module. 
- * This hook is invoked from Layout::revert() after a layout has been 
+ * from the providing module.
+ * This hook is invoked from Layout::revert() after a layout has been
  * reverted and the new configuration has been inserted into the live
  * config directory and the layout cache has been cleared.
  *
@@ -224,7 +227,7 @@ function hook_layout_revert(Layout $old_layout) {
 /**
  * Respond to a layout being deleted.
  *
- * This hook is invoked from Layout::delete() after a layout has been 
+ * This hook is invoked from Layout::delete() after a layout has been
  * deleted.
  *
  * @param Layout $layout
@@ -233,7 +236,7 @@ function hook_layout_revert(Layout $old_layout) {
  * @ingroup layout_api_hooks
  */
 function hook_layout_delete(Layout $layout) {
-  if ($layout->path == 'my_path') {
+  if ($layout->getPath() == 'my_path') {
     my_custom_function();
   }
 }
@@ -241,7 +244,7 @@ function hook_layout_delete(Layout $layout) {
 /**
  * Respond to a layout being enabled.
  *
- * This hook is invoked from Layout::enable() after a layout has been 
+ * This hook is invoked from Layout::enable() after a layout has been
  * enabled.
  *
  * @param Layout $layout
@@ -252,7 +255,7 @@ function hook_layout_delete(Layout $layout) {
  * @ingroup layout_api_hooks
  */
 function hook_layout_enable(Layout $layout) {
-  if ($layout->path == 'my_path') {
+  if ($layout->getPath() == 'my_path') {
     my_custom_function();
   }
 }
@@ -260,10 +263,10 @@ function hook_layout_enable(Layout $layout) {
 /**
  * Respond to a layout being disabled.
  *
- * This hook is invoked from Layout::disable() after a layout has been 
+ * This hook is invoked from Layout::disable() after a layout has been
  * disabled.
- * A layout configuration may be disabled by a user from the administrative 
- * list of layouts. A disabled layout will not affect pages at its configured 
+ * A layout configuration may be disabled by a user from the administrative
+ * list of layouts. A disabled layout will not affect pages at its configured
  * path, but will retain its configuration so that it may be enabled later.
  *
  * @param Layout $layout
@@ -274,7 +277,7 @@ function hook_layout_enable(Layout $layout) {
  * @ingroup layout_api_hooks
  */
 function hook_layout_disable(Layout $layout) {
-  if ($layout->path == 'my_path') {
+  if ($layout->getPath() == 'my_path') {
     my_custom_function();
   }
 }
@@ -291,7 +294,7 @@ function hook_layout_disable(Layout $layout) {
  * @ingroup layout_api_hooks
  */
 function hook_layout_update(Layout $layout) {
-  if ($layout->path == 'my_path') {
+  if ($layout->getPath() == 'my_path') {
     my_custom_function();
   }
 }
@@ -308,7 +311,7 @@ function hook_layout_update(Layout $layout) {
  * @ingroup layout_api_hooks
  */
 function hook_layout_insert(Layout $layout) {
-  if ($layout->path == 'my_path') {
+  if ($layout->getPath() == 'my_path') {
     my_custom_function();
   }
 }
@@ -327,7 +330,7 @@ function hook_layout_insert(Layout $layout) {
 function hook_layout_presave(Layout $layout) {
   if ($layout->name == 'default') {
     $my_block_uuid = get_my_uuid();
-    $my_block = $layout->content[$uuid];
+    $my_block = $layout->content[$my_block_uuid];
     $my_block->data['settings']['title'] = 'New Title';
   }
 }
@@ -344,8 +347,8 @@ function hook_layout_presave(Layout $layout) {
  * - Used to construct the default HTML ID of "block-MODULE-DELTA" applied to
  *   each block when it is rendered. This ID may then be used for CSS styling or
  *   JavaScript programming.
- * - Used to define a theming template suggestion of block__MODULE__DELTA, for
- *   advanced theming possibilities.
+ * - Used to define a theme template suggestion of block__MODULE__DELTA, for
+ *   advanced theme possibilities.
  * - Used by other modules to identify your block in hook_block_info_alter() and
  *   other alter hooks.
  * The values of delta can be strings or numbers, but because of the uses above
@@ -366,13 +369,13 @@ function hook_layout_presave(Layout $layout) {
  *     be no longer than a short sentence or two.
  *   - required contexts: (optional) An array of contexts that this block
  *     requires to display. These contexts are keyed by their internal name that
- *     this block will receive as the key in the $context paramater of
+ *     this block will receive as the key in the $context parameter of
  *     hook_block_view(). The value of each item should be the type of context,
  *     as listed by hook_layout_context_info().
  *   - class: (optional) A class that provides the settings form, save routine,
  *     and display of this block. If specified, the class will be used instead
  *     of the hooks for hook_block_configure(), hook_block_save(), and
- *     hook_block_view(). This class should be a sub-classs of the Block class.
+ *     hook_block_view(). This class should be a sub-class of the Block class.
  *
  * For a detailed usage example, see block_example.module.
  *
@@ -566,35 +569,32 @@ function hook_block_view($delta = '', $settings = array(), $contexts = array()) 
 /**
  * Perform alterations to the content of a block.
  *
- * This hook allows you to modify any data returned by hook_block_view().
+ * This hook allows you to modify blocks before they are rendered.
  *
  * Note that instead of hook_block_view_alter(), which is called for all
  * blocks, you can also use hook_block_view_MODULE_DELTA_alter() to alter a
  * specific block.
  *
  * @param $data
- *   The data as returned from the hook_block_view() implementation of the
- *   module that defined the block. This could be an empty array or NULL value
- *   (if the block is empty) or an array containing:
- *   - subject: The default localized title of the block.
+ *   The block title and content as returned by the module that defined the
+ *   block. This could be an empty array or NULL value (if the block is empty)
+ *   or an array containing the following:
+ *   - title: The (localized) title of the block.
  *   - content: Either a string or a renderable array representing the content
  *     of the block. You should check that the content is an array before trying
  *     to modify parts of the renderable structure.
  * @param $block
- *   The block object, as loaded from the database, having the main properties:
+ *   The Block object. It will have have at least the following properties:
  *   - module: The name of the module that defined the block.
  *   - delta: The unique identifier for the block within that module, as defined
  *     in hook_block_info().
- * @param array $settings
- *   An array of settings for this block.
- * @param array $contexts
- *   An array of contexts required by this block. Each context will be keyed
- *   by the string specified in this module's hook_block_info().
+ *   - settings: All block settings as defined for this instance of the block.
+ *   - contexts: All layout contexts available for the layout.
  *
  * @see hook_block_view_MODULE_DELTA_alter()
  * @see hook_block_view()
  */
-function hook_block_view_alter(&$data, $block, $settings = array(), $contexts = array()) {
+function hook_block_view_alter(&$data, $block) {
   // Remove the contextual links on all blocks that provide them.
   if (is_array($data['content']) && isset($data['content']['#contextual_links'])) {
     unset($data['content']['#contextual_links']);
@@ -616,7 +616,7 @@ function hook_block_view_alter(&$data, $block, $settings = array(), $contexts = 
  *   The data as returned from the hook_block_view() implementation of the
  *   module that defined the block. This could be an empty array or NULL value
  *   (if the block is empty) or an array containing:
- *   - subject: The localized title of the block.
+ *   - title: The localized title of the block.
  *   - content: Either a string or a renderable array representing the content
  *     of the block. You should check that the content is an array before trying
  *     to modify parts of the renderable structure.
@@ -631,14 +631,14 @@ function hook_block_view_alter(&$data, $block, $settings = array(), $contexts = 
  * @see hook_block_view_alter()
  * @see hook_block_view()
  */
-function hook_block_view_MODULE_DELTA_alter(&$data, $block, $settings = array()) {
+function hook_block_view_MODULE_DELTA_alter(&$data, $block) {
   // This code will only run for a specific block. For example, if MODULE_DELTA
   // in the function definition above is set to "mymodule_somedelta", the code
   // will only run on the "somedelta" block provided by the "mymodule" module.
 
   // Change the title of the "somedelta" block provided by the "mymodule"
   // module.
-  $data['subject'] = t('New title of the block');
+  $data['title'] = t('New title of the block');
 }
 
 /**

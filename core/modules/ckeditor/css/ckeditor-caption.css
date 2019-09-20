@@ -9,9 +9,12 @@
  * Responsive figure elements, based on http://stackoverflow.com/a/13363408.
  */
 .caption {
-  display: inline-block;
+  display: table;
+  max-width: 100%;
   margin: 0 12px 10px;
-  border: 1px solid #ccc;
+}
+.caption .cke_image_resizer_wrapper {
+  display: block !important;
 }
 .cke_widget_wrapper.align-center {
   text-align: center;
@@ -19,12 +22,15 @@
 .caption > * {
   display: block;
   max-width: 100%;
+  border: 1px solid #ccc;
 }
 .caption > figcaption {
-  display: block;
-  /* Compensate for the space required by the CKEditor drag handle. */
-  margin-top: -3px;
+  display: table-caption;
+  caption-side: bottom;
+  max-width: none;
   padding: 3px 6px;
+  border: 1px solid #CCC;
+  border-top: none;
   background-color: #eee;
 }
 

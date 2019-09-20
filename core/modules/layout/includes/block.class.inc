@@ -43,12 +43,14 @@ class Block extends LayoutHandler {
   /**
    * An array of all access rules (of type LayoutAccess), keyed by ID.
    *
-   * @var array
+   * @var LayoutAccess[]
    */
   var $conditions = array();
 
   /**
    * An array of LayoutContext instances used by this block.
+   *
+   * @var LayoutContext[]
    */
   var $contexts = array();
 
@@ -102,6 +104,15 @@ class Block extends LayoutHandler {
     // All other settings.
     $this->settings = $data['settings'];
   }
+
+  /**
+   * Do any processing prior to getTitle() and getContent() being called.
+   *
+   * The contexts will have been set on the object at this point, just prior to
+   * the block being rendered. This method is useful to save duplicate
+   * processing if both getTitle() and getContent() need to use the same data.
+   */
+  function prepare() {}
 
   /**
    * Return the title of a block as configured in the layout.
@@ -341,7 +352,7 @@ class Block extends LayoutHandler {
     }
     return TRUE;
   }
-  
+
   /**
    * Allows an array of "child blocks" for display in the "Add Block" dialog.
    *

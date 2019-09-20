@@ -13,29 +13,11 @@ body.sidebar-second,
 body {
   width: 640px;
 }
-#sidebar-first,
-#sidebar-second,
-.navigation,
 #admin_menu,
-#footer-wrapper,
-.tabs,
-.add-or-remove-shortcuts {
+#footer,
+.tabs {
   display: none;
 }
-.one-sidebar #content,
-.two-sidebars #content {
-  width: 100%;
-}
-#triptych-wrapper {
-  width: 960px;
-  margin: 0;
-  padding: 0;
-  border: none;
-}
-#triptych-first, #triptych-middle, #triptych-last {
-  width: 250px;
-}
-
 /* ---------- Node Pages ---------- */
 
 #comments .title,

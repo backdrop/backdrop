@@ -38,7 +38,7 @@ function taxonomy_term_page(TaxonomyTerm $term) {
   $canonical_secure = config_get('system.core', 'canonical_secure') == 1 ? TRUE : FALSE;
   $uri_options = array('absolute' => TRUE, 'https' => $canonical_secure);
   backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], array_merge($uri['options'], $uri_options))), TRUE);
-  
+
   // Normally we would call taxonomy_term_show() here, but for backwards
   // compatibility in Drupal 7 we do not want to do that (it produces different
   // data structures and HTML markup than what Drupal 7 released with). Calling
@@ -65,6 +65,9 @@ function taxonomy_term_page(TaxonomyTerm $term) {
       '#suffix' => '</p>',
     );
   }
+
+  backdrop_alter('taxonomy_term_page', $build);
+
   return $build;
 }
 
@@ -76,11 +79,11 @@ function taxonomy_term_page(TaxonomyTerm $term) {
  */
 function taxonomy_term_feed(TaxonomyTerm $term) {
   $channel['link'] = url('taxonomy/term/' . $term->tid, array('absolute' => TRUE));
-  $channel['title'] = config_get('system.core', 'site_name') . ' - ' . $term->name;
+  $channel['title'] = config_get_translated('system.core', 'site_name') . ' - ' . $term->name;
   // Only display the description if we have a single term, to avoid clutter and confusion.
   // HTML will be removed from feed description.
   $channel['description'] = check_markup($term->description, $term->format, '', TRUE);
-  $nids = taxonomy_select_nodes($term->tid, FALSE, config_get('system.rss', 'rss_limit'));
+  $nids = taxonomy_select_nodes($term->tid, FALSE, config_get('system.core', 'rss_limit'));
 
   node_feed($nids, $channel);
 }
@@ -131,7 +134,7 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
   if ($tag_last != '') {
     $query = db_select('taxonomy_term_data', 't');
     $query->addTag('translatable');
-    $query->addTag('term_access');
+    $query->addTag('taxonomy_term_access');
 
     // Do not select already entered terms.
     if (!empty($tags_typed)) {
@@ -159,5 +162,6 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
     }
   }
 
-  backdrop_json_output($term_matches);
+  // Displayed as JSON by delivery callback backdrop_json_deliver().
+  return $term_matches;
 }

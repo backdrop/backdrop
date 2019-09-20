@@ -13,18 +13,23 @@ class ConfigurationTest extends BackdropWebTestCase {
   }
 
   /**
-   * Tests that a setting can be written and read from a non-existent config.
+   * Tests that a config setting can be written, read and deleted.
    */
-  public function testReadWriteConfig() {
-    // Long-hand setting and getting.
+  public function testReadWriteClearConfig() {
+    // Long-hand setting, getting and deleting.
     $config = config('foo.bar');
     $config->set('foo', 'bar');
     $config->save();
     $this->assertEqual('bar', config('foo.bar')->get('foo'), 'Content retrieved from written config data using Config classes.');
+    $config->clear('foo');
+    $config->save();
+    $this->assertNull(config('foo.bar')->get('foo'), 'Deleted config data cannot be retrieved using Config classes.');
 
-    // Short-hand setting and getting.
+    // Short-hand setting, getting and deleting.
     config_set('foo.bar', 'foo', 'baz');
     $this->assertEqual('baz', config_get('foo.bar', 'foo'), 'Content retrieved from written config data using short cut functions.');
+    config_clear('foo.bar', 'foo');
+    $this->assertNull(config_get('foo.bar', 'foo'), 'Deleted config data cannot be retrieved using shortcut functions.');
   }
 
   /**
@@ -309,7 +314,7 @@ class ConfigurationUITest extends BackdropWebTestCase {
     $this->assert(!empty($archive_files), 'Downloaded archive file is not empty.');
 
     // Prepare the list of config files from active storage.
-    $storage_active = new ConfigFileStorage(config_get_config_directory('active'));
+    $storage_active = config_get_config_storage('active');
     $config_files = array();
     foreach ($storage_active->listAll() as $config_name) {
       $config_files[] = $config_name . '.json';
@@ -404,8 +409,8 @@ class ConfigurationUITest extends BackdropWebTestCase {
    *   The target config storage name.
    */
   public function copyConfig($source = 'active', $target = 'staging') {
-    $source_storage = new ConfigFileStorage(config_get_config_directory($source));
-    $target_storage = new ConfigFileStorage(config_get_config_directory($target));
+    $source_storage = config_get_config_storage($source);
+    $target_storage = config_get_config_storage($target);
     $target_storage->deleteAll();
     foreach ($source_storage->listAll() as $name) {
       $target_storage->write($name, $source_storage->read($name));

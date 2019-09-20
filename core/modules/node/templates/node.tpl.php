@@ -19,7 +19,7 @@
  *   template_preprocess_node().
  * - $classes: Array of classes that can be used to style contextually through
  *   CSS. The default values can be one or more of the following:
- *   - node: The current template type; for example, "theming hook".
+ *   - node: The current template type; for example, "theme hook".
  *   - node-[type]: The current node type. For example, if the node is a
  *     "Post" it would result in "node-post". Note that the machine
  *     name will often be in a short form of the human readable label.
@@ -58,7 +58,7 @@
  *   - COMMENT_MODE_THREADED
  *
  * Node status variables:
- * - $view_mode: View mode; for example, "full", "teaser".
+ * - $view_mode: Display mode, e.g. 'full', or 'teaser'.
  * - $teaser: Flag for the teaser state (shortcut for $view_mode == 'teaser').
  * - $page: Flag for the full page state.
  * - $promote: Flag for front page promotion state.
@@ -87,7 +87,7 @@
 <article id="node-<?php print $node->nid; ?>" class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?>>
 
   <?php print render($title_prefix); ?>
-  <?php if (!$page): ?>
+  <?php if (!$page && !empty($title)): ?>
     <h2><a href="<?php print $node_url; ?>" rel="bookmark"><?php print $title; ?></a></h2>
   <?php endif; ?>
   <?php print render($title_suffix); ?>
@@ -99,7 +99,7 @@
     </footer>
   <?php endif; ?>
 
-  <div class="content"<?php print backdrop_attributes($content_attributes); ?>>
+  <div class="content clearfix"<?php print backdrop_attributes($content_attributes); ?>>
     <?php
       // We hide the links now so that we can render them later.
       hide($content['links']);
@@ -109,15 +109,15 @@
 
   <?php print render($content['links']); ?>
 
-  <?php if ($page && isset($comments['comments'])): ?>
-    <section class="comments">  
+  <?php if ($comments): ?>
+    <section class="comments" id="comments">
       <?php if ($comments['comments']): ?>
         <h2 class="title"><?php print t('Comments'); ?></h2>
         <?php print render($comments['comments']); ?>
       <?php endif; ?>
 
       <?php if ($comments['comment_form']): ?>
-        <h2 class="title comment-form"><?php print t('Add new comment'); ?></h2>
+        <h2 class="title comment-form"><?php print t('Add comment'); ?></h2>
         <?php print render($comments['comment_form']); ?>
       <?php endif; ?>
     </section>

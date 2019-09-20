@@ -194,7 +194,7 @@ function config_sync_validate_file($config_name, $config_change_type, $all_chang
  *   The type of change occurring to this config file. Must be one of the
  *   following values: "create", "update", or "delete".
  * @param string $config_contents
- *
+ *   The configuration file's contents.
  *
  * @see hook_config_create().
  * @see hook_config_update().

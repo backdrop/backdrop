@@ -64,10 +64,60 @@ $settings['update_free_access'] = FALSE;
  * with any backups of your Backdrop files and database.
  *
  * Example:
- *   $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
+ * @code
+ * $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
+ * @endcode
  *
  */
 $settings['hash_salt'] = '';
+
+/**
+ * Trusted host configuration (optional but highly recommended).
+ *
+ * Since the HTTP Host header can be set by the user making the request, it
+ * is possible for malicious users to override it and create an attack vector.
+ * To protect against these sort of attacks, Backdrop supports checking a list
+ * of trusted hosts.
+ *
+ * To enable the trusted host protection, specify the allowable hosts below.
+ * This should be an array of regular expression patterns representing the hosts
+ * you would like to allow.
+ *
+ * For example, this will allow the site to only run from www.example.com:
+ * @code
+ * $settings['trusted_host_patterns'] = array(
+ *   '^www\.example\.com$',
+ * );
+ * @endcode
+ *
+ * If you are running a site on multiple domain names, you should specify all of
+ * the host patterns that are allowed by your site. For example, this will allow
+ * the site to run off of all variants of example.com and example.org, with all
+ * subdomains included:
+ * @code
+ * $settings['trusted_host_patterns'] = array(
+ *   '^example\.com$',
+ *   '^.+\.example\.com$',
+ *   '^example\.org',
+ *   '^.+\.example\.org',
+ * );
+ * @endcode
+ *
+ * If you do not need this functionality (such as in development environments or
+ * if protection is at another layer), you can suppress the status report
+ * warning by setting this value to FALSE:
+ * @code
+ * $settings['trusted_host_patterns'] = FALSE;
+ * @endcode
+ *
+ * For more information about trusted host patterns, see the documentation at
+ * https://api.backdropcms.org/documentation/trusted-host-settings
+ *
+ * @see backdrop_valid_http_host()
+ * @see backdrop_check_trusted_hosts()
+ * @see system_requirements()
+ */
+// $settings['trusted_host_patterns'] = array('^www\.example\.com$');
 
 /**
  * Base URL (optional).
@@ -221,6 +271,23 @@ ini_set('session.cookie_lifetime', 2000000);
 // $settings['omit_vary_cookie'] = TRUE;
 
 /**
+ * Expiration of cache_form entries:
+ *
+ * Backdrop's Form API stores details of forms in cache_form and these entries
+ * are kept for at least 6 hours by default. Expired entries are cleared by
+ * cron. Busy sites can encounter problems with the cache_form table becoming
+ * very large. It's possible to mitigate this by setting a shorter expiration
+ * for cached forms. In some cases it may be desirable to set a longer cache
+ * expiration. For example to prolong cache_form entries for Ajax forms in
+ * cached HTML.
+ *
+ * @see form_set_cache()
+ * @see system_cron()
+ * @see ajax_get_form()
+ */
+// $settings['form_cache_expiration'] = 21600;
+
+/**
  * String overrides:
  *
  * To override specific strings on your site with or without enabling locale
@@ -330,3 +397,25 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
  * built for Backdrop.
  */
 $settings['backdrop_drupal_compatibility'] = TRUE;
+
+/**
+ * Include a local settings file, if available.
+ *
+ * To make local development easier, you can add a settings.local.php file that
+ * contains settings specific to your local installation, or to any secondary
+ * environment (staging, development, etc).
+ *
+ * Typically used to specify a different database connection information, to
+ * disable caching, JavaScript/CSS compression, re-routing of outgoing e-mails,
+ * Google Analytics, and other things that should not happen on development and
+ * testing sites.
+ *
+ * This local settings file can be ignored in your Git repository, so that any
+ * updates to settings.php can be pulled in without overwriting your local
+ * changes.
+ *
+ * Keep this code block at the end of this file to take full effect.
+ */
+if (file_exists(__DIR__ . '/settings.local.php')) {
+  include __DIR__ . '/settings.local.php';
+}

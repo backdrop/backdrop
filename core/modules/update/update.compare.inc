@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Code required only when comparing available updates to existing data.
@@ -87,7 +86,7 @@ function update_get_projects() {
  *   An associative array of layout information.
  */
 function _update_build_layout_data() {
-  $layout_data = layout_get_layout_info();
+  $layout_data = layout_get_layout_template_info();
   foreach($layout_data as $layout) {
     $name = $layout['name'];
     $layouts[$name] = new stdClass();
@@ -126,7 +125,13 @@ function _update_build_layout_data() {
  * @see update_get_projects()
  */
 function _update_process_info_list(&$projects, $list, $project_type, $status) {
+  $admin_theme = config_get('system.core', 'admin_theme');
   foreach ($list as $file) {
+    // The admin theme is a special case. It should always be considered enabled
+    // for the purposes of update checking.
+    if ($file->name === $admin_theme) {
+      $file->status = TRUE;
+    }
     // A disabled base theme of an enabled sub-theme still has all of its code
     // run by the sub-theme, so we include it in our "enabled" projects list.
     if ($status && !$file->status && !empty($file->sub_themes)) {

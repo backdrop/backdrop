@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions for form and batch generation and processing.
@@ -106,7 +105,8 @@
  *   generate the same form (or very similar forms) using different $form_ids
  *   can implement hook_forms(), which maps different $form_id values to the
  *   proper form constructor function. Examples may be found in node_forms(),
- *   and search_forms().
+ *   and search_forms(). hook_forms() can also be used to define forms in
+ *   classes.
  * @param ...
  *   Any additional arguments are passed on to the functions called by
  *   backdrop_get_form(), including the unique form constructor function. For
@@ -512,6 +512,9 @@ function backdrop_rebuild_form($form_id, &$form_state, $old_form = NULL) {
 
 /**
  * Fetches a form from the cache.
+ *
+ * @return array|NULL
+ *   The form array retrieved from cache if found. NULL otherwise.
  */
 function form_get_cache($form_build_id, &$form_state) {
   if ($form = tempstore_get('form', $form_build_id)) {
@@ -547,14 +550,22 @@ function form_get_cache($form_build_id, &$form_state) {
       return $form;
     }
   }
+
+  return NULL;
 }
 
 /**
  * Stores a form in the cache.
+ *
+ * The default cache_form expiration is 6 hours. On busy sites, the cache_form
+ * table can become very large. A shorter cache lifetime can help to keep the
+ * table's size under control.
  */
 function form_set_cache($form_build_id, $form, $form_state) {
-  // 6 hours cache life time for forms should be plenty.
-  $expire = 21600;
+  // Try to read the 'form_cache_expiration' setting from settings.php. If not
+  // set in settings.php, then default to the value set in 'system.core' config
+  // (via system_update_1067 - setting not exposed in the admin UI currently).
+  $expire = settings_get('form_cache_expiration', config_get('system.core', 'form_cache_expiration'));
 
   // Ensure that the form build_id embedded in the form structure is the same as
   // the one passed in as a parameter. This is an additional safety measure to
@@ -759,6 +770,9 @@ function backdrop_form_submit($form_id, &$form_state) {
  *   A keyed array containing the current state of the form, including the
  *   additional arguments to backdrop_get_form() or backdrop_form_submit() in the
  *   'args' component of the array.
+ *
+ * @return array
+ *   The form structure as a renderable array.
  */
 function backdrop_retrieve_form($form_id, &$form_state) {
   $forms = &backdrop_static(__FUNCTION__);
@@ -787,7 +801,7 @@ function backdrop_retrieve_form($form_id, &$form_state) {
   $args = $form_state['build_info']['args'];
 
   // We first check to see if there's a function named after the $form_id.
-  // If there is, we simply pass the arguments on to it to get the form.
+  // If there is, we pass the arguments on to it to get the form.
   if (!function_exists($form_id)) {
     // In cases where many form_ids need to share a central constructor function,
     // such as the node editing form, modules can implement hook_forms(). It
@@ -809,7 +823,7 @@ function backdrop_retrieve_form($form_id, &$form_state) {
     }
     if (isset($form_definition['callback'])) {
       $callback = $form_definition['callback'];
-      $form_state['build_info']['base_form_id'] = $callback;
+      $form_state['build_info']['base_form_id'] = isset($form_definition['base_form_id']) ? $form_definition['base_form_id'] : $callback;
     }
     // In case $form_state['wrapper_callback'] is not defined already, we also
     // allow hook_forms() to define one.
@@ -839,7 +853,7 @@ function backdrop_retrieve_form($form_id, &$form_state) {
   // the actual form builder function ($callback) expects. This allows for
   // pre-populating a form with common elements for certain forms, such as
   // back/next/save buttons in multi-step form wizards. See backdrop_build_form().
-  if (isset($form_state['wrapper_callback'])) {
+  if (isset($form_state['wrapper_callback']) && is_callable($form_state['wrapper_callback'])) {
     $form = call_user_func_array($form_state['wrapper_callback'], $args);
     // Put the prepopulated $form into $args.
     $args[0] = $form;
@@ -1003,7 +1017,7 @@ function backdrop_process_form($form_id, &$form, &$form_state) {
  *
  * @param $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  * @param $form
  *   An associative array containing the structure of the form.
  * @param $form_state
@@ -1154,7 +1168,7 @@ function _backdrop_invalid_token_set_form_error() {
  *
  * @param $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  * @param $form
  *   An associative array containing the structure of the form, which is passed
  *   by reference. Form validation handlers are able to alter the form structure
@@ -1184,7 +1198,7 @@ function backdrop_validate_form($form_id, &$form, &$form_state) {
   // If the session token was set by backdrop_prepare_form(), ensure that it
   // matches the current user's session. This is duplicate to code in
   // form_builder() but left to protect any custom form handling code.
-  if (isset($form['#token'])) {
+  if (!empty($form['#token'])) {
     if (!backdrop_valid_token($form_state['values']['form_token'], $form['#token']) || !empty($form_state['invalid_token'])) {
       _backdrop_invalid_token_set_form_error();
       // Stop here and don't run any further validation handlers, because they
@@ -1348,7 +1362,7 @@ function backdrop_redirect_form($form_state) {
  *   not be repeated in the submission step.
  * @param $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  */
 function _form_validate(&$elements, &$form_state, $form_id = NULL) {
   // Also used in the installer, pre-database setup.
@@ -1381,8 +1395,8 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
           $value = in_array($elements['#type'], array('checkboxes', 'tableselect')) ? array_keys($elements['#value']) : $elements['#value'];
           foreach ($value as $v) {
             if (!isset($options[$v])) {
-              form_error($elements, $t('An illegal choice has been detected. Please contact the site administrator.'));
-              watchdog('form', 'Illegal choice %choice in !name element.', array('%choice' => $v, '!name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']), WATCHDOG_ERROR);
+              form_error($elements, $t('Invalid option %choice in %name element.', array('%choice' => $v, '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title'])));
+              watchdog('form', 'Invalid option %choice in %name element.', array('%choice' => $v, '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']), WATCHDOG_ERROR);
             }
           }
         }
@@ -1400,8 +1414,8 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
           form_set_value($elements, NULL, $form_state);
         }
         elseif (!isset($options[$elements['#value']])) {
-          form_error($elements, $t('An illegal choice has been detected. Please contact the site administrator.'));
-          watchdog('form', 'Illegal choice %choice in %name element.', array('%choice' => $elements['#value'], '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']), WATCHDOG_ERROR);
+          form_error($elements, $t('Invalid option %choice in %name element.', array('%choice' => $elements['#value'], '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title'])));
+          watchdog('form', 'Invalid option %choice in %name element.', array('%choice' => $elements['#value'], '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']), WATCHDOG_ERROR);
         }
       }
     }
@@ -1446,10 +1460,12 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
       // length if it's a string, and the item count if it's an array.
       // An unchecked checkbox has a #value of integer 0, different than string
       // '0', which could be a valid value.
-      $is_empty_multiple = (!count($elements['#value']));
+      $is_countable = is_array($elements['#value']) || $elements['#value'] instanceof Countable;
+      $is_empty_multiple = $is_countable && count($elements['#value']) == 0;
       $is_empty_string = (is_string($elements['#value']) && backdrop_strlen(trim($elements['#value'])) == 0);
       $is_empty_value = ($elements['#value'] === 0);
-      if ($is_empty_multiple || $is_empty_string || $is_empty_value) {
+      $is_empty_null = is_null($elements['#value']);
+      if ($is_empty_multiple || $is_empty_string || $is_empty_value || $is_empty_null) {
         // Although discouraged, a #title is not mandatory for form elements. In
         // case there is no #title, we cannot set a form error message.
         // Instead of setting no #title, form constructors are encouraged to set
@@ -1498,6 +1514,12 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
  *   A keyed array containing the current state of the form. If the user
  *   submitted the form by clicking a button with custom handler functions
  *   defined, those handlers will be stored here.
+ *
+ * @return bool
+ *   TRUE if any handlers were executed at all. FALSE if no handlers were found
+ *   to execute. This return value only indicates if handlers were fired, it
+ *   does not represent all validations passed or all submit values were saved.
+ *   The result of those actions will be stored in the $form_state array.
  */
 function form_execute_handlers($type, &$form, &$form_state) {
   $return = FALSE;
@@ -1621,7 +1643,7 @@ function form_execute_handlers($type, &$form, &$form_state) {
  *   Internal use only. The #limit_validation_errors property of the clicked
  *   button, if it exists.
  *
- * @return
+ * @return array
  *   Return value is for internal use only. To get a list of errors, use
  *   form_get_errors() or form_get_error().
  *
@@ -1680,12 +1702,16 @@ function form_clear_error() {
 
 /**
  * Returns an associative array of all errors.
+ *
+ * @return array|NULL
+ *   An array of any errors that have been set. NULL if no errors occurred.
  */
 function form_get_errors() {
-  $form = form_set_error();
-  if (!empty($form)) {
-    return $form;
+  $errors = form_set_error();
+  if (!empty($errors)) {
+    return $errors;
   }
+  return NULL;
 }
 
 /**
@@ -1693,17 +1719,22 @@ function form_get_errors() {
  *
  * Form errors higher up in the form structure override deeper errors as well as
  * errors on the element itself.
+ *
+ * @return string|NULL
+ *   The error message against the given element. NULL if no error was flagged.
  */
 function form_get_error($element) {
-  $form = form_set_error();
+  $errors = form_set_error();
   $parents = array();
   foreach ($element['#parents'] as $parent) {
     $parents[] = $parent;
     $key = implode('][', $parents);
-    if (isset($form[$key])) {
-      return $form[$key];
+    if (isset($errors[$key])) {
+      return $errors[$key];
     }
   }
+
+  return NULL;
 }
 
 /**
@@ -1794,16 +1825,19 @@ function form_error(&$element, $message = '') {
  *   within functions that run during the rendering phase (#pre_render, #theme,
  *   #theme_wrappers, and #post_render).
  *
- * @param $form_id
+ * @param string $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
- * @param $element
+ *   theme overrides, and hook_form_alter functions.
+ * @param array $element
  *   An associative array containing the structure of the current element.
- * @param $form_state
+ * @param array $form_state
  *   A keyed array containing the current state of the form. In this
  *   context, it is used to accumulate information about which button
  *   was clicked when the form was submitted, as well as the sanitized
  *   $_POST data.
+ *
+ * @return array
+ *   The element with it an all of its children processed.
  */
 function form_builder($form_id, &$element, &$form_state) {
   // Initialize as unprocessed.
@@ -1845,7 +1879,7 @@ function form_builder($form_id, &$element, &$form_state) {
       // If the session token was set by backdrop_prepare_form(), ensure that it
       // matches the current user's session.
       $form_state['invalid_token'] = FALSE;
-      if (isset($element['#token'])) {
+      if (!empty($element['#token'])) {
         if (empty($form_state['input']['form_token']) || !backdrop_valid_token($form_state['input']['form_token'], $element['#token'])) {
           // Set an early form error to block certain input processing since that
           // opens the door for CSRF vulnerabilities.
@@ -2447,8 +2481,8 @@ function form_type_radios_value(&$element, $input = FALSE) {
     return $input;
   }
   else {
-    // For default value handling, simply return #default_value. Additionally,
-    // for a NULL default value, set #has_garbage_value to prevent
+    // For default value handling, return #default_value. Additionally, for a
+    // NULL default value, set #has_garbage_value to prevent
     // _form_builder_handle_input_element() converting the NULL to an empty
     // string, so that code can distinguish between nothing selected and the
     // selection of a radio button whose value is an empty string.
@@ -2554,6 +2588,27 @@ function form_type_select_value($element, $input = FALSE) {
     else {
       return $input;
     }
+  }
+}
+
+/**
+ * Determines the value for a textarea form element.
+ *
+ * @param array $element
+ *   The form element whose value is being populated.
+ * @param mixed $input
+ *   The incoming input to populate the form element. If this is FALSE,
+ *   the element's default value should be returned.
+ *
+ * @return string
+ *   The data that will appear in the $element_state['values'] collection
+ *   for this element. Return nothing to use the default.
+ */
+function form_type_textarea_value($element, $input = FALSE) {
+  if ($input !== FALSE && $input !== NULL) {
+    // This should be a string, but allow other scalars since they might be
+    // valid input in programmatic form submissions.
+    return is_scalar($input) ? (string) $input : '';
   }
 }
 
@@ -2950,6 +3005,9 @@ function form_process_password_confirm($element) {
     '#value' => empty($element['#value']) ? NULL : $element['#value']['pass1'],
     '#required' => $element['#required'],
     '#attributes' => array('class' => array('password-field')),
+    '#password_strength' => TRUE,
+    '#password_shown' => FALSE,
+    '#password_toggle' => FALSE,
   );
   $element['pass2'] =  array(
     '#type' => 'password',
@@ -2957,6 +3015,9 @@ function form_process_password_confirm($element) {
     '#value' => empty($element['#value']) ? NULL : $element['#value']['pass2'],
     '#required' => $element['#required'],
     '#attributes' => array('class' => array('password-confirm')),
+    '#password_strength' => FALSE,
+    '#password_shown' => FALSE,
+    '#password_toggle' => FALSE,
   );
   $element['#element_validate'] = array('password_confirm_validate');
   $element['#tree'] = TRUE;
@@ -2974,7 +3035,7 @@ function form_process_password_confirm($element) {
 function password_confirm_validate($element, &$element_state) {
   $pass1 = trim($element['pass1']['#value']);
   $pass2 = trim($element['pass2']['#value']);
-  if (!empty($pass1) || !empty($pass2)) {
+  if (strlen($pass1) > 0 || strlen($pass2) > 0) {
     if (strcmp($pass1, $pass2)) {
       form_error($element, t('The specified passwords do not match.'));
     }
@@ -3180,7 +3241,8 @@ function theme_checkbox($variables) {
 }
 
 /**
- * Adds form element theming to an element if its title or description is set.
+ * Adds additional customization to a form element when its title or description
+ * is set.
  *
  * This is used as a pre render function for checkboxes and radios.
  */
@@ -3203,6 +3265,9 @@ function form_pre_render_conditional_form_element($element) {
   // Add the element type to the wrapping container.
   if (isset($element['#type'])) {
     $element['#attributes']['class'][] = 'form-' . $element['#type'];
+    if (isset($element['#parents']) && form_get_error($element) !== NULL && !empty($element['#validated'])) {
+      $element['#attributes']['class'][] = 'form-error';
+    }
   }
 
   // The disabled attribute is only shown on the children, not on the wrapper.
@@ -3300,7 +3365,12 @@ function form_process_actions($element, &$form_state) {
 
   $first_button = NULL;
   $primary_set = FALSE;
-  foreach (element_children($element) as $key) {
+  foreach (element_children($element, TRUE) as $key) {
+    // Don't add automatic classes to non-buttons.
+    if (!isset($element[$key]['#type']) || !in_array($element[$key]['#type'], array('button', 'submit'))) {
+      continue;
+    }
+
     $button = $element[$key];
     if (!$first_button && $button['#type'] === 'submit') {
       $first_button = $key;
@@ -3320,6 +3390,25 @@ function form_process_actions($element, &$form_state) {
     $element[$first_button]['#attributes']['class'] = array_diff($element[$first_button]['#attributes']['class'], array('button-secondary'));
   }
 
+  return $element;
+}
+
+/**
+ * Processes a form button element.
+ *
+ * @param $element
+ *   An associative array containing the properties and children of the
+ *   form button.
+ * @param $form_state
+ *   The $form_state array for the form this element belongs to.
+ *
+ * @return
+ *   The processed element.
+ */
+function form_process_button($element, &$form_state) {
+  // We normally want to add backdrop.form so that the double submit protection
+  // can be added to the site.
+  $element['#attached']['library'][] = array('system', 'backdrop.form');
   return $element;
 }
 
@@ -3508,6 +3597,7 @@ function form_process_tableselect($element) {
             '#return_value' => $key,
             '#default_value' => isset($value[$key]) ? $key : NULL,
             '#attributes' => $element['#attributes'],
+            '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
           );
         }
         else {
@@ -3525,6 +3615,7 @@ function form_process_tableselect($element) {
             '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
           );
         }
+        $element[$key]['#attributes']['data-tableselect-id'] = implode('-', $element['#parents']);
         if (isset($element['#options'][$key]['#weight'])) {
           $element[$key]['#weight'] = $element['#options'][$key]['#weight'];
         }
@@ -3570,6 +3661,9 @@ function form_process_tableselect($element) {
  *     machine name. Defaults to 64.
  *   - #disabled: (optional) Should be set to TRUE in case an existing machine
  *     name must not be changed after initial creation.
+ *
+ * @return array
+ *   The expanded $element populated with defaults.
  */
 function form_process_machine_name($element, &$form_state) {
   // Apply default form element properties.
@@ -3634,6 +3728,7 @@ function form_process_machine_name($element, &$form_state) {
 
   $js_settings = $element['#machine_name'];
   $js_settings['source'] = '#' . $source['#id'];
+  $js_settings['replace_token'] = backdrop_get_token($element['#machine_name']['replace_pattern']);
   $element['#attributes']['data-machine-name'] = json_encode($js_settings);
   $element['#attached']['js'][] = 'core/misc/machine-name.js';
 
@@ -3767,11 +3862,11 @@ function form_pre_render_fieldset($element) {
     // If this element belongs to a group, but the group-holding element does
     // not exist, we need to render it (at its original location).
     if (!isset($element['#groups'][$group]['#group_exists'])) {
-      // Intentionally empty to clarify the flow; we simply return $element.
+      // Intentionally empty to clarify the flow. Return $element.
     }
     // If we injected this element into the group, then we want to render it.
     elseif (!empty($element['#group_fieldset'])) {
-      // Intentionally empty to clarify the flow; we simply return $element.
+      // Intentionally empty to clarify the flow. Return $element.
     }
     // Otherwise, this element belongs to a group and the group exists, so we do
     // not render it.
@@ -4467,6 +4562,9 @@ function theme_form_element($variables) {
   $attributes['class'][] = 'form-item';
   if (!empty($element['#type'])) {
     $attributes['class'][] = 'form-type-' . strtr($element['#type'], '_', '-');
+    if (isset($element['#parents']) && form_get_error($element) !== NULL && !empty($element['#validated'])) {
+      $attributes['class'][] = 'form-error';
+    }
   }
   if (!empty($element['#name'])) {
     $attributes['class'][] = 'form-item-' . strtr($element['#name'], array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
@@ -4750,7 +4848,7 @@ function _form_set_class(&$element, $class = array()) {
  *   are optional except as noted):
  *   - operations: (required) Array of operations to be performed, where each
  *     item is an array consisting of the name of an implementation of
- *     callback_batch_operation() and an array of parameter.
+ *     callback_batch_operation() and an array of parameters.
  *     Example:
  *     @code
  *     array(
@@ -4821,7 +4919,7 @@ function batch_set($batch_definition) {
 
     // Add the set to the batch.
     if (empty($batch['id'])) {
-      // The batch is not running yet. Simply add the new set.
+      // The batch is not running yet. Add the new set.
       $batch['sets'][] = $batch_set;
     }
     else {
@@ -4919,8 +5017,9 @@ function batch_process($redirect = NULL, $url = 'batch', $redirect_callback = 'b
       $_SESSION['batches'][$batch['id']] = TRUE;
 
       // Redirect for processing.
-      $function = $batch['redirect_callback'];
-      $function($batch['url'], array('query' => array('op' => 'start', 'id' => $batch['id'])));
+      if ($function = $batch['redirect_callback']) {
+        $function($batch['url'], array('query' => array('op' => 'start', 'id' => $batch['id'])));
+      }
     }
     else {
       // Non-progressive execution: bypass the whole progressbar workflow
@@ -4986,7 +5085,7 @@ function _batch_populate_queue(&$batch, $set_id) {
  * @param $batch_set
  *   The batch set.
  *
- * @return
+ * @return BatchQueue
  *   The queue object.
  */
 function _batch_queue($batch_set) {

@@ -41,6 +41,7 @@ function menu_menu() {
   $items['admin/structure/menu/parents'] = array(
     'title' => 'Parent menu items',
     'page callback' => 'menu_parent_options_js',
+    'delivery callback' => 'backdrop_json_deliver',
     'type' => MENU_CALLBACK,
     'access arguments' => array('administer menu'),
   );
@@ -78,15 +79,16 @@ function menu_menu() {
     'page arguments' => array('menu_edit_item', 'add', NULL, 4),
     'access arguments' => array('administer menu'),
     'type' => MENU_LOCAL_ACTION,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'file' => 'menu.admin.inc',
   );
   $items['admin/structure/menu/manage/%menu/configure'] = array(
-    'title' => 'Configure',
+    'title' => 'Configure menu',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('menu_edit_menu', 'configure', 4),
     'access arguments' => array('administer menu'),
     'type' => MENU_LOCAL_TASK,
-    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'context' => MENU_CONTEXT_PAGE,
     'file' => 'menu.admin.inc',
   );
   $items['admin/structure/menu/manage/%menu/delete'] = array(
@@ -306,7 +308,7 @@ function menu_delete($menu) {
   menu_delete_links($menu['menu_name']);
 
   // Remove menu from active menus variable.
-  $active_menus = $config->get('active_menus_default') ?: array_keys(menu_get_menus());  
+  $active_menus = $config->get('active_menus_default') ?: array_keys(menu_get_menus());
   foreach ($active_menus as $i => $menu_name) {
     if ($menu['menu_name'] == $menu_name) {
       unset($active_menus[$i]);
@@ -372,7 +374,8 @@ function menu_parent_options_js() {
   }
   $options = _menu_get_options(menu_get_menus(), $available_menus, array('mlid' => 0));
 
-  backdrop_json_output($options);
+  // Displayed as JSON by delivery callback backdrop_json_deliver().
+  return $options;
 }
 
 /**
@@ -449,10 +452,12 @@ function menu_block_info() {
   $blocks = array();
   foreach ($menus as $name => $title) {
     $blocks[$name] = array(
+      // No need to wrap $title in t(), since these menu titles are already
+      // translated.
       'info' => check_plain($title),
-      'description' => t('The hierarchical list of links for the @title menu.', array('@title' => $title)),
-      // Menu blocks can't be cached because each menu item can have
-      // a custom access callback. menu.inc manages its own caching.
+      'description' => t('A list of links for the menu: %title.', array('%title' => $title)),
+      // Menu blocks can't be cached because each menu item can have a custom
+      // access callback. menu.inc manages its own caching.
       'cache' => BACKDROP_NO_CACHE,
     );
   }
@@ -462,15 +467,29 @@ function menu_block_info() {
 /**
  * Implements hook_block_view().
  */
-function menu_block_view($delta = '') {
-  $menus = menu_get_menus(FALSE);
-  $data['subject'] = check_plain($menus[$delta]);
-  $data['content'] = menu_tree($delta);
+function menu_block_view($delta = '', $settings = array()) {
+  module_load_include('inc', 'system', 'system.menu');
+  $settings += system_menu_block_defaults($delta);
+  $data = system_menu_block_build($settings);
+  $block['subject'] = $data['subject'];
+  $block['content'] = $data['content'];
   // Add contextual links for this block.
-  if (!empty($data['content'])) {
-    $data['content']['#contextual_links']['menu'] = array('admin/structure/menu/manage', array($delta));
+  if (!empty($block['content'])) {
+    $block['content']['#contextual_links']['menu'] = array('admin/structure/menu/manage', array($delta));
   }
-  return $data;
+  return $block;
+}
+
+/**
+ * Implements hook_block_configure().
+ */
+function menu_block_configure($delta, $settings) {
+  foreach (menu_get_menus(FALSE) as $menu_name => $title) {
+    if ($delta === $menu_name) {
+      module_load_include('inc', 'system', 'system.menu');
+      return _system_block_configure($delta, $settings);
+    }
+  }
 }
 
 /**
@@ -482,6 +501,23 @@ function menu_block_view_alter(&$data, $block) {
     $system_menus = menu_list_system_menus();
     if (isset($system_menus[$block->delta])) {
       $data['content']['#contextual_links']['menu'] = array('admin/structure/menu/manage', array($block->delta));
+    }
+  }
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function menu_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // Add language code to the "Add link" action link under
+  // admin/structure/menu/manage/[menu-name].
+  if ($root_path == 'admin/structure/menu/manage/%') {
+    foreach ($data['actions']['output'] as $key => $action_link) {
+      if ($action_link['#link']['path'] === 'admin/structure/menu/manage/%/add') {
+        $default_langcode = isset($_GET['langcode']) ? $_GET['langcode'] : LANGUAGE_NONE;
+        $query['langcode'] = $default_langcode;
+        $data['actions']['output'][$key]['#link']['localized_options'] = array('query' => $query);
+      }
     }
   }
 }
@@ -514,6 +550,7 @@ function menu_node_save(Node $node) {
     elseif (trim($link['link_title'])) {
       $link['link_title'] = trim($link['link_title']);
       $link['link_path'] = "node/$node->nid";
+      $link['langcode'] = $node->langcode;
       if (trim($link['description'])) {
         $link['options']['attributes']['title'] = trim($link['description']);
       }
@@ -659,6 +696,7 @@ function menu_form_node_form_alter(&$form, $form_state) {
   $form['menu']['link']['link_title'] = array(
     '#type' => 'textfield',
     '#title' => t('Menu link title'),
+    '#maxlength' => 255,
     '#default_value' => $link['link_title'],
   );
 
@@ -725,7 +763,7 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
       'js' => array(backdrop_get_path('module', 'menu') . '/js/menu.admin.js'),
     ),
     '#group' => 'additional_settings',
-    '#weight' => 8,
+    '#weight' => 15,
   );
   $form['menu']['menu_options'] = array(
     '#type' => 'checkboxes',

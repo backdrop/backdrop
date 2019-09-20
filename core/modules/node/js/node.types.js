@@ -14,12 +14,8 @@ Backdrop.behaviors.contentTypes = {
     // Publishing settings.
     $context.find('#edit-workflow').backdropSetSummary(function() {
       var vals = [];
-      if (parseInt($context.find('input[name="status_default"]:checked').val())) {
-        vals.push(Backdrop.t('Published'));
-      }
-      else {
-        vals.push(Backdrop.t('Unpublished'));
-      }
+      var defaultStatus = $context.find('input[name="status_default"]:checked').parent().text();
+      vals.push(Backdrop.checkPlain($.trim(defaultStatus)));
       if ($context.find('input[name="sticky_default"]:checked').length) {
         vals.push(Backdrop.t('Sticky'));
       }
@@ -29,6 +25,22 @@ Backdrop.behaviors.contentTypes = {
       return vals.join(', ');
     });
 
+    // Multilingual support.
+    $context.find('#edit-multilingual').backdropSetSummary(function() {
+      var vals = [];
+      var multilingualSupport = $context.find('input[name="language"]:checked').parent().find('label').text();
+      vals.push(Backdrop.checkPlain($.trim(multilingualSupport)));
+      return vals.join(', ');
+    });
+
+    // Uncheck the "Schedule for later" option if scheduling is disabled.
+    $context.find('input[name="scheduling_enabled"]').once().on('change', function() {
+      var $checkedStatusDefault = $context.find('input[name="status_default"]:checked');
+      if ($checkedStatusDefault.val() === '2') {
+        $checkedStatusDefault.prop('checked', false);
+        $context.find('input[name="status_default"]:first').prop('checked', true);
+      }
+    });
 
     // Revision settings.
     $context.find('#edit-revision').backdropSetSummary(function() {
@@ -96,8 +108,14 @@ Backdrop.behaviors.contentTypes = {
     // Path settings.
     $context.find('#edit-path').backdropSetSummary(function(context) {
       var vals = [];
-      vals.push(Backdrop.checkPlain($(context).find('input[name="path_pattern"]').val()) || Backdrop.t('No URL pattern set'));
+      vals.push(Backdrop.checkPlain($(context).find('input[name="path_pattern"]').val()) || Backdrop.t('No URL alias pattern set'));
       return vals.join(', ');
+    });
+
+    // Focus the input#edit-path-pattern field when clicking on the token
+    // browser on the /admin/structure/types/add pages (add a content type).
+    $context.find('#edit-path .token-browser-link').once().on('click', function(){
+      $('input#edit-path-pattern').focus();
     });
   }
 };

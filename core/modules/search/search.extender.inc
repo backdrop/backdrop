@@ -344,7 +344,7 @@ class SearchQuery extends SelectQueryExtender {
     $this->parseSearchExpression();
 
     if (count($this->words) == 0) {
-      form_set_error('keys', format_plural(config_get('search.settings', 'search_minimum_word_size'), 'You must include at least one positive keyword with 1 character or more.', 'You must include at least one positive keyword with @count characters or more.'));
+      form_set_error('keys', format_plural(config_get('search.settings', 'search_minimum_word_size'), 'You must include at least one keyword to match in the content. Keyword must be at least 1 character, and punctuation is ignored.', 'You must include at least one keyword to match in the content. Keywords must be at least @count characters, and punctuation is ignored.'));
       return FALSE;
     }
     if ($this->expressionsIgnored) {

@@ -11,7 +11,13 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    */
   function __construct(Layout $layout, array $renderer_plugin) {
     parent::__construct($layout, $renderer_plugin);
+
+    // Set the page title region if not already.
+    if (!isset($this->layout_info['regions']['title'])) {
+      $this->layout_info['regions']['title'] = t('Page title');
+    }
     $this->admin = TRUE;
+
   }
 
   /**
@@ -41,16 +47,53 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    * {@inheritdoc}
    */
   function renderRegion($region_id, $blocks) {
-    $content = implode('', $blocks);
+    $render_title_region = TRUE;
+    $all_layout_blocks = $this->layout->content;
+    foreach ($all_layout_blocks as $block) {
+      if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta =='title_combo')) {
+        $render_title_region = FALSE;
+        break;
+      }
+    }
 
+    $output = '';
+    if ($region_id == 'title') {
+      if ($render_title_region) {
+        return $this->renderTitleRegion($region_id);
+      }
+      else {
+        $output = '<div id="layout-title-region-empty"></div>';
+      }
+    }
+    else {
+      $content = implode('', $blocks);
+      $region_buttons = $this->getRegionLinks($region_id);
+
+      $output = '<div class="layout-editor-region" id="layout-editor-region-' . $region_id . '" data-region-name="' . $region_id . '">';
+      $output .= '<div class="layout-editor-region-title clearfix">';
+      $output .= '<h2 class="label">' . check_plain($this->layout_info['regions'][$region_id]) . '</h2>';
+      $output .= $region_buttons;
+      $output .= '</div>';
+      $output .= '<div class="layout-editor-region-content">' . $content . '</div>';
+      $output .= '</div>';
+    }
+
+    return $output;
+  }
+
+  /**
+   * Render the Page Title region in the Layout Editor.
+   */
+  function renderTitleRegion($region_id) {
     $region_buttons = $this->getRegionLinks($region_id);
+    $description = layout_get_title_description($this->layout);
 
-    $output = '<div class="layout-editor-region" id="layout-editor-region-' . $region_id . '" data-region-name="' . $region_id . '">';
-    $output .= '<div class="layout-editor-region-title clearfix">';
-    $output .= '<h2 class="label">' . check_plain($this->layout_info['regions'][$region_id]) . '</h2>';
-    $output .= $region_buttons;
-    $output .= '</div>';
-    $output .= '<div class="layout-editor-region-content">' . $content . '</div>';
+    $output  = '<div class="layout-editor-block" id="layout-editor-title" data-region-name="' . $region_id . '">';
+    $output .= '  <div class="layout-editor-block-title clearfix">';
+    $output .= '    <span class="text">' . check_plain($this->layout_info['regions'][$region_id]) . '</span>';
+    $output .= '    <span class="description">' . $description . '</span>';
+    $output .= '    <span class="buttons">' . $region_buttons . '</span>';
+    $output .= '  </div>';
     $output .= '</div>';
 
     return $output;
@@ -63,15 +106,9 @@ class LayoutRendererEditor extends LayoutRendererStandard {
     $buttons = $this->getBlockLinks($block);
     $content = $block->getAdminPreview();
 
-    $class = 'layout-editor-block';
-    if (isset($this->layout->title_block) && $this->layout->title_block == $block->uuid) {
-      $class .= ' layout-editor-block-is-title';
-    }
-    $class .= ' clearfix';
-
-    $output = '<div class="' . $class . '" id="layout-editor-block-' . $block->uuid . '" data-block-id="' . $block->uuid . '">';
+    $output = '<div class="layout-editor-block clearfix" id="layout-editor-block-' . $block->uuid . '" data-block-id="' . $block->uuid . '">';
     $output .= '<div class="layout-editor-block-title clearfix">';
-    $output .= '<span class="text">' . $block->getAdminTitle() . '</span>';
+    $output .= '<span class="handle"></span><span class="text">' . $block->getAdminTitle() . '</span>';
     if ($buttons) {
       $output .= '<span class="buttons">' . $buttons . '</span>';
     }
@@ -102,6 +139,9 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    *   "remove-block", or "add-block".
    * @param ...
    *   Any additional parameters to be tacked on the end of the URL.
+   *
+   * @return string
+   *   A Backdrop menu path.
    */
   function getUrl($command) {
     $args = func_get_args();
@@ -118,15 +158,37 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    */
   protected function getRegionLinks($region_id) {
     $links = array();
-    $links['add'] = array(
-      'title' => t('Add block'),
-      'href' => $this->getUrl('add-block', $region_id),
-      'attributes' => array(
-        'class' => array('use-ajax'),
-        'data-dialog' => TRUE,
-        'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-      ),
-    );
+    if ($region_id == 'title') {
+      $links['title'] = array(
+        'title' => t('Configure'),
+        'href' => $this->getUrl('edit-title', $region_id),
+        'attributes' => array(
+          'class' => array('use-ajax'),
+          'data-dialog' => TRUE,
+          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+        ),
+      );
+    }
+    else {
+      $links['add'] = array(
+        'title' => t('Add block'),
+        'href' => $this->getUrl('add-block', $region_id),
+        'attributes' => array(
+          'class' => array('use-ajax'),
+          'data-dialog' => TRUE,
+          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+        ),
+      );
+      $links['configure'] = array(
+        'title' => t('Configure region'),
+        'href' => $this->getUrl('configure-region', $region_id),
+        'attributes' => array(
+          'class' => array('use-ajax'),
+          'data-dialog' => TRUE,
+          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+        ),
+      );
+    }
 
     $dropbutton = array(
       '#type' => 'dropbutton',
@@ -141,15 +203,31 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    */
   protected function getBlockLinks($block) {
     $links = array();
-    $links['configure'] = array(
-      'title' => t('Configure'),
-      'href' => $this->getUrl('configure-block', $block->uuid),
-      'attributes' => array(
-        'class' => array('use-ajax'),
-        'data-dialog' => TRUE,
-        'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-      ),
-    );
+
+    // Only render the "Configure" link if the block is not broken.
+    if (!is_a($block, 'BlockBroken')) {
+      $links['configure'] = array(
+        'title' => t('Configure'),
+        'href' => $this->getUrl('configure-block', $block->uuid),
+        'attributes' => array(
+          'class' => array('use-ajax'),
+          'data-dialog' => TRUE,
+          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+        ),
+      );
+    }
+
+    if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta =='title_combo')) {
+      $links['title'] = array(
+        'title' => t('Page title settings'),
+        'href' => $this->getUrl('edit-title', 'title'),
+        'attributes' => array(
+          'class' => array('use-ajax'),
+          'data-dialog' => TRUE,
+          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+        ),
+      );
+    }
 
     $links['remove'] = array(
       'title' => t('Remove'),

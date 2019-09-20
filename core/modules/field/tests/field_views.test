@@ -275,7 +275,10 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
   protected function setUp() {
     parent::setUp();
 
-    // Setup basic fields.
+    // Setup basic fields. When field render is tested in these tests with
+    // $view->style_plugin->get_field() the loop counter will need to be
+    // incremented by two each time to account for the two existing welcome
+    // nodes in the standard install profile.
     $this->setUpFields(3);
 
     // Setup a field with cardinality > 1.
@@ -305,7 +308,6 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
       $this->nodes[$i] = $this->backdropCreateNode($edit);
     }
   }
-
   public function testFieldRender() {
     $this->_testSimpleFieldRender();
     $this->_testFormatterSimpleFieldRender();
@@ -320,7 +322,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     for ($i = 0; $i < 3; $i++) {
       for ($key = 0; $key < 2; $key++) {
         $field = $this->fields[$key];
-        $rendered_field = $view->style_plugin->get_field($i, $field['field_name']);
+        $rendered_field = $view->style_plugin->get_field($i+2, $field['field_name']);
         $expected_field = $this->nodes[$i]->{$field['field_name']}[LANGUAGE_NONE][0]['value'];
         $this->assertEqual($rendered_field, $expected_field);
       }
@@ -341,7 +343,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     // Take sure that the formatter works as expected.
     // @TODO: actually there should be a specific formatter.
     for ($i = 0; $i < 2; $i++) {
-      $rendered_field = $view->style_plugin->get_field($i, $this->fields[0]['field_name']);
+      $rendered_field = $view->style_plugin->get_field($i+2, $this->fields[0]['field_name']);
       $this->assertEqual(strlen($rendered_field), 3);
     }
   }
@@ -355,7 +357,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     $this->executeView($view);
 
     for ($i = 0; $i < 3; $i++) {
-      $rendered_field = $view->style_plugin->get_field($i, $this->fields[3]['field_name']);
+      $rendered_field = $view->style_plugin->get_field($i+2, $this->fields[3]['field_name']);
       $items = array();
       $pure_items = $this->nodes[$i]->{$this->fields[3]['field_name']}[LANGUAGE_NONE];
       $pure_items = array_splice($pure_items, 0, 3);
@@ -377,7 +379,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     $this->executeView($view);
 
     for ($i = 0; $i < 3; $i++) {
-      $rendered_field = $view->style_plugin->get_field($i, $this->fields[3]['field_name']);
+      $rendered_field = $view->style_plugin->get_field($i+2, $this->fields[3]['field_name']);
       $items = array();
       $pure_items = $this->nodes[$i]->{$this->fields[3]['field_name']}[LANGUAGE_NONE];
       $pure_items = array_splice($pure_items, 1, 3);
@@ -396,7 +398,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     $this->executeView($view);
 
     for ($i = 0; $i < 3; $i++) {
-      $rendered_field = $view->style_plugin->get_field($i, $this->fields[3]['field_name']);
+      $rendered_field = $view->style_plugin->get_field($i+2, $this->fields[3]['field_name']);
       $items = array();
       $pure_items = $this->nodes[$i]->{$this->fields[3]['field_name']}[LANGUAGE_NONE];
       array_splice($pure_items, 0, -3);
@@ -416,7 +418,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     $this->executeView($view);
 
     for ($i = 0; $i < 3; $i++) {
-      $rendered_field = $view->style_plugin->get_field($i, $this->fields[3]['field_name']);
+      $rendered_field = $view->style_plugin->get_field($i+2, $this->fields[3]['field_name']);
       $items = array();
       $pure_items = $this->nodes[$i]->{$this->fields[3]['field_name']}[LANGUAGE_NONE];
       $items[] = $pure_items[0]['value'];
@@ -433,7 +435,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
     $this->executeView($view);
 
     for ($i = 0; $i < 3; $i++) {
-      $rendered_field = $view->style_plugin->get_field($i, $this->fields[3]['field_name']);
+      $rendered_field = $view->style_plugin->get_field($i+2, $this->fields[3]['field_name']);
       $items = array();
       $pure_items = $this->nodes[$i]->{$this->fields[3]['field_name']}[LANGUAGE_NONE];
       $pure_items = array_splice($pure_items, 0, 3);

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Hooks provided the Entity module.
+ * Hooks provided by the Entity module.
  */
 
 /**
@@ -20,6 +20,8 @@
  *   An array whose keys are entity type names and whose values identify
  *   properties of those types that the system needs to know about:
  *   - label: The human-readable name of the type.
+ *   - entity class: A class that the controller will use for instantiating
+ *     entities. Must extend the Entity class or implement EntityInterface.
  *   - controller class: The name of the class that is used to load the objects.
  *     The class has to implement the EntityControllerInterface interface.
  *     Leave blank to use the DefaultEntityController implementation.
@@ -38,8 +40,11 @@
  *     translation handlers. Array keys are the module names, array values
  *     can be any data structure the module uses to provide field translation.
  *     Any empty value disallows the module to appear as a translation handler.
- *   - entity keys: (optional) An array describing how the Field API can extract
- *     the information it needs from the objects of the type. Elements:
+ *   - entity keys: An array describing additional information about the entity.
+ *     This is used by both the EntityFieldQuery class and the Field API.
+ *     EntityFieldQuery assumes at the very least that the id is always present.
+ *     The Field API uses this array to extract the information it needs from
+ *     the objects of the type. Elements:
  *     - id: The name of the property that contains the primary id of the
  *       entity. Every entity object passed to the Field API must have this
  *       property and its value must be numeric.
@@ -80,27 +85,28 @@
  *       - access callback: As in hook_menu(). 'user_access' will be assumed if
  *         no value is provided.
  *       - access arguments: As in hook_menu().
- *   - view modes: An array describing the view modes for the entity type. View
- *     modes let entities be displayed differently depending on the context.
- *     For instance, a node can be displayed differently on its own page
- *     ('full' mode), on the home page or taxonomy listings ('teaser' mode), or
- *     in an RSS feed ('rss' mode). Modules taking part in the display of the
- *     entity (notably the Field API) can adjust their behavior depending on
- *     the requested view mode. An additional 'default' view mode is available
- *     for all entity types. This view mode is not intended for actual entity
- *     display, but holds default display settings. For each available view
- *     mode, administrators can configure whether it should use its own set of
- *     field display settings, or just replicate the settings of the 'default'
- *     view mode, thus reducing the amount of display configurations to keep
- *     track of. Keys of the array are view mode names. Each view mode is
- *     described by an array with the following key/value pairs:
- *     - label: The human-readable name of the view mode
- *     - custom settings: A boolean specifying whether the view mode should by
- *       default use its own custom field display settings. If FALSE, entities
- *       displayed in this view mode will reuse the 'default' display settings
- *       by default (e.g. right after the module exposing the view mode is
- *       enabled), but administrators can later use the Field UI to apply custom
- *       display settings specific to the view mode.
+ *   - view modes: An array describing the display modes for the entity type.
+ *     Display modes let entities be displayed differently depending on the
+ *     context. For instance, a node can be displayed differently on its own
+ *     page ('full' mode), on the home page or taxonomy listings ('teaser'
+ *     mode), or in an RSS feed ('rss' mode). Modules taking part in the display
+ *     of the entity (notably the Field API) can adjust their behavior depending
+ *     on the requested display mode. An additional 'default' display mode is
+ *     available for all entity types. This display mode is not intended for
+ *     actual entity display, but holds default display settings. For each
+ *     available display mode, administrators can configure whether it should use
+ *     its own set of field display settings, or just replicate the settings of
+ *     the 'default' display mode, thus reducing the amount of display
+ *     configurations to keep track of. Keys of the array are display mode
+ *     names. Each display mode is described by an array with the following
+ *     key/value pairs:
+ *     - label: The human-readable name of the display mode
+ *     - custom settings: A boolean specifying whether the display mode should
+ *       by default use its own custom field display settings. If FALSE,
+ *       entities displayed in this display mode will reuse the 'default'
+ *       display settings by default (e.g. right after the module exposing the
+ *       display mode is enabled), but administrators can later use the Field UI
+ *       to apply custom display settings specific to the display mode.
  *
  * @see entity_load()
  * @see hook_entity_info_alter()
@@ -110,6 +116,7 @@ function hook_entity_info() {
     'node' => array(
       'label' => t('Node'),
       'controller class' => 'NodeController',
+      'entity class' => 'Node',
       'base table' => 'node',
       'revision table' => 'node_revision',
       'fieldable' => TRUE,
@@ -143,7 +150,7 @@ function hook_entity_info() {
   );
 
   // Search integration is provided by node.module, so search-related
-  // view modes for nodes are defined here and not in search.module.
+  // display modes for nodes are defined here and not in search.module.
   if (module_exists('search')) {
     $return['node']['view modes'] += array(
       'search_index' => array(
@@ -348,7 +355,7 @@ function hook_entity_query_alter($query) {
  * @param $type
  *   The type of entity being rendered (i.e. node, user, comment).
  * @param $view_mode
- *   The view mode the entity is rendered in.
+ *   The display mode the entity is rendered in.
  * @param $langcode
  *   The language code used for rendering.
  *
@@ -415,11 +422,147 @@ function hook_entity_view_alter(&$build, $type) {
  *   The type of entities being loaded (i.e. node, user, comment).
  */
 function hook_entity_prepare_view($entities, $type) {
-  // Load a specific node into the user object for later theming.
+  // Load a specific node into the user object to theme later.
   if ($type == 'user') {
     $nodes = mymodule_get_user_nodes(array_keys($entities));
     foreach ($entities as $uid => $entity) {
       $entity->user_node = $nodes[$uid];
     }
   }
+}
+
+/**
+ * Describe the display modes for entity types.
+ *
+ * Display modes let entities be displayed differently depending on the context.
+ * For instance, a node can be displayed differently on its own page ('full'
+ * mode), on the home page or taxonomy listings ('teaser' mode), or in an RSS
+ * feed ('rss' mode). Modules taking part in the display of the entity (notably
+ * the Field API) can adjust their behavior depending on the requested view
+ * mode. An additional 'default' display mode is available for all entity types.
+ * This display mode is not intended for actual entity display, but holds
+ * default display settings. For each available display mode, administrators
+ * can configure whether it should use its own set of field display settings,
+ * or just replicate the settings of the 'default' display mode, thus reducing
+ * the amount of display configurations to keep track of.
+ *
+ * Note: This hook is invoked inside an implementation of
+ * hook_entity_info_alter() so care must be taken not to call anything that
+ * will result in an additional (and hence recursive) call to entity_get_info().
+ *
+ * @return array
+ *   An associative array of all entity display modes, keyed by the entity
+ *   type name, and then the display mode name, with the following keys:
+ *   - label: The human-readable name of the display mode.
+ *   - custom_settings: A boolean specifying whether the display mode should by
+ *     default use its own custom field display settings. If FALSE, entities
+ *     displayed in this display mode will reuse the 'default' display settings
+ *     by default (e.g. right after the module exposing the display mode is
+ *     enabled), but administrators can later use the Field UI to apply custom
+ *     display settings specific to the display mode.
+ *
+ * @see entity_view_mode_entity_info_alter()
+ * @see hook_entity_view_mode_info_alter()
+ */
+function hook_entity_view_mode_info() {
+  $view_modes['user']['full'] = array(
+    'label' => t('User account'),
+  );
+  $view_modes['user']['compact'] = array(
+    'label' => t('Compact'),
+    'custom_settings' => TRUE,
+  );
+  return $view_modes;
+}
+
+/**
+ * Alter the display modes for entity types.
+ *
+ * Note: This hook is invoked inside an implementation of
+ * hook_entity_info_alter() so care must be taken not to call anything that
+ * will result in an additional (and hence recursive) call to entity_get_info().
+ *
+ * @param array $view_modes
+ *   An array of display modes, keyed first by entity type, then by display
+ *   mode name.
+ *
+ * @see entity_view_mode_entity_info_alter()
+ * @see hook_entity_view_mode_info()
+ */
+function hook_entity_view_mode_info_alter(&$view_modes) {
+  $view_modes['user']['full']['custom_settings'] = TRUE;
+}
+
+/**
+ * Change the display mode of an entity that is being displayed.
+ *
+ * @param string $view_mode
+ *   The display mode that is to be used to display the entity. Note: this
+ *     variable is passed by reference, and changing the value will change the
+ *     display mode that is used by the calling function.
+ * @param array $context
+ *   Array with contextual information, including:
+ *   - entity_type: The type of the entity that is being viewed.
+ *   - entity: The entity object.
+ *   - langcode: The langcode the entity is being viewed in.
+ */
+function hook_entity_view_mode_alter(&$view_mode, $context) {
+  // For nodes, change the display mode when it is teaser.
+  if ($context['entity_type'] == 'node' && $view_mode == 'teaser') {
+    $view_mode = 'my_custom_view_mode';
+  }
+}
+
+/**
+ * Act on a display mode before it is created or updated.
+ *
+ * @param string $view_mode
+ *   The display mode that is to be used to display the entity.
+ * @param $entity_type
+ *   The type of entity being saved (i.e. node, user, comment).
+ */
+function hook_entity_view_mode_presave($view_mode, $entity_type) {
+  // Force all display modes to be saved with custom settings.
+  $view_mode['custom settings'] = TRUE;
+  return $view_mode;
+}
+
+/**
+ * Respond to creation of a new display mode.
+ *
+ * @param string $view_mode
+ *   The display mode that is to be used to display the entity.
+ * @param $entity_type
+ *   The type of entity being saved (i.e. node, user, comment).
+ */
+function hook_entity_view_mode_insert($view_mode, $entity_type) {
+  config_set('my_module.view_modes', 'view_mode_list', array($entity_type => $view_mode));
+}
+
+/**
+ * Respond to update of a display mode.
+ *
+ * @param string $view_mode
+ *   The display mode that is to be used to display the entity.
+ * @param $entity_type
+ *   The type of entity being saved (i.e. node, user, comment).
+ */
+function hook_entity_view_mode_update($view_mode, $entity_type) {
+  config_set('my_module.view_modes', 'view_mode_list', array($entity_type => $view_mode));
+}
+
+/**
+ * Respond to deletion of a display mode.
+ *
+ * @param string $view_mode
+ *   The display mode that is to be used to display the entity.
+ * @param $entity_type
+ *   The type of entity being saved (i.e. node, user, comment).
+ */
+function hook_entity_view_mode_delete($view_mode, $entity_type) {
+  $config = config('my_module.view_modes');
+  $view_mode_list = $config->get('view_mode_list');
+  unset($view_mode_list[$view_mode['machine_name']]);
+  $config->set('view_mode_list', $view_mode_list);
+  $config->save();
 }

@@ -4,7 +4,7 @@
  * @file
  * Tests date popup in Views
  */
- 
+
 require_once BACKDROP_ROOT . '/core/modules/date/tests/date_field.test';
 
 class DateViewsTestCase extends DateFieldBasic {
@@ -85,4 +85,59 @@ class DateViewsTestCase extends DateFieldBasic {
     $this->assertField('field_test_date_popup_value[value][date]');
     $this->assertNoField('field_test_date_popup_value[value][time]');
   }
+
+  public function testDateViewsFields() {
+    // Create date fields with simple values.
+    $expected_keys = array();
+    foreach (array('date', 'datestamp', 'datetime') as $field_type) {
+      foreach (array('date_select', 'date_popup', 'date_text') as $widget_type) {
+        $field_name = "field_test_{$field_type}_{$widget_type}";
+        $label = 'Test ' . $field_type . '-' . $widget_type;
+        $options = array(
+          'label' => $label,
+          'widget_type' => $widget_type,
+          'field_name' => $field_name,
+          'field_type' => $field_type,
+          'input_format' => 'm/d/Y - g:ia',
+        );
+        $this->createDateField($options);
+        $expected_keys[] = 'field_data_' . $field_name . '.' . $field_name . '_value';
+        $expected_keys[] = 'field_data_' . $field_name . '.' . $field_name . '_value2';
+      }
+    }
+    sort($expected_keys);
+
+    $this->clearViewsCaches();
+    // Ensure we can get a list of all the date fields.
+    module_load_include('inc', 'views_ui','views_ui.admin');
+    $fields = date_views_fields();
+
+    // Check all the created fields are present.
+    // The date fields from the testDateViews() test show up here, so we need
+    // to filter out any fields that we don't expect.
+    $fields_keys = array_keys($fields['name']);
+    $our_keys = array_intersect($fields_keys, $expected_keys);
+    sort($our_keys);
+    $this->assertEqual($our_keys, $expected_keys, 'Call date_views_fields().');
+
+    // Cleanup
+    foreach (array('date', 'datestamp', 'datetime') as $field_type) {
+      foreach (array('date_select', 'date_popup', 'date_text') as $widget_type) {
+        $field_name = "field_test_{$field_type}_{$widget_type}";
+        $label = 'Test ' . $field_type . '-' . $widget_type;
+        $this->deleteDateField($label, $field_name);
+      }
+    }
+  }
+
+  /**
+   * Clear all views caches and static caches which are required for the patch.
+   */
+  function clearViewsCaches() {
+    // Reset views data cache.
+    backdrop_static_reset('_views_fetch_data_cache');
+    backdrop_static_reset('_views_fetch_data_recursion_protected');
+    backdrop_static_reset('_views_fetch_data_fully_loaded');
+  }
+
 }

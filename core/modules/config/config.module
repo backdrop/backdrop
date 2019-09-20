@@ -152,8 +152,7 @@ function config_get_prefix_groups($type = 'active') {
   $groups = array();
   $ungrouped = t('Ungrouped');
 
-  $config_dir = config_get_config_directory($type);
-  $config_storage = new ConfigFileStorage($config_dir);
+  $config_storage = config_get_config_storage($type);
   foreach ($config_info_all as $prefix => $config_info) {
     $group = isset($config_info['group']) ? $config_info['group'] : $ungrouped;
     if (isset($config_info['label_callback']) || isset($config_info['label_key'])) {

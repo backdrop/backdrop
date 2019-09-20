@@ -138,14 +138,10 @@ $settings = array(
     ),
     'install_configure_form' => array(
       'site_name' => $options['site-name'],
-      'site_mail' => $options['site-mail'],
       'account' => array(
         'name' => $options['account-name'],
         'mail' => $options['account-mail'],
-        'pass' => array(
-          'pass1' => $options['account-pass'],
-          'pass2' => $options['account-pass'],
-        ),
+        'pass' => $options['account-pass'],
       ),
       'update_status_module' => array(
         1 => TRUE,
@@ -173,9 +169,12 @@ require_once './core/includes/install.core.inc';
 try {
   print "Installing Backdrop. This may take a moment...\n";
   install_backdrop($settings);
+  config_set('system.core', 'site_mail', $options['site-mail']);
   print "Backdrop installed successfully.\n";
+  exit(0);
 }
 catch (Exception $e) {
   print "An error occurred. Output of installation attempt is as follows:\n";
   print $e->getMessage() . "\n";
+  exit(1);
 }

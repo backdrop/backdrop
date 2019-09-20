@@ -62,7 +62,7 @@ class LayoutMenuItem {
   /**
    * An array of all conditional rules used by this menu item.
    *
-   * @var array
+   * @var LayoutAccess[]
    */
   var $conditions = array();
 
@@ -85,9 +85,23 @@ class LayoutMenuItem {
   var $locked = FALSE;
 
   /**
+   * Whether this menu item has just been created and not yet saved.
+   *
+   * @var bool
+   */
+  var $is_new = FALSE;
+
+  /**
+   * The module that originally provided this layout menu item (if any).
+   *
+   * @var string
+   */
+  var $module;
+
+  /**
    * An array of LayoutContext instances used by this menu item.
    *
-   * @var array
+   * @var LayoutContext[]
    */
   private $contexts;
 
@@ -211,6 +225,8 @@ class LayoutMenuItem {
 
   /**
    * Get all contexts required or configured for this menu path.
+   *
+   * return LayoutContext[]
    */
   function getContexts() {
     if (is_null($this->contexts)) {

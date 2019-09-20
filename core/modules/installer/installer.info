@@ -1,0 +1,9 @@
+type = module
+name = Project Installer
+description = Provides a user interface for installing and updating modules, themes, and layouts.
+version = BACKDROP_VERSION
+package = Development
+tags[] = User interface
+tags[] = System
+backdrop = 1.x
+dependencies[] = update

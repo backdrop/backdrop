@@ -91,8 +91,17 @@ Backdrop.viewsUi.FormFieldFiller = function ($target, replace, suffix) {
   this.replace = replace || '';
   this.suffix = suffix || '';
 
+  // Copy the transliteration options from the machine name element.
+  var machineNameData = $('[data-machine-name]').data('machine-name');
+  this.transliterationOptions = {
+    replace: machineNameData.replace,
+    replace_pattern: machineNameData.replace_pattern,
+    replace_token: machineNameData.replace_token,
+    langcode: machineNameData.langcode
+  };
+
   // Create bound versions of this instance's object methods to use as event
-  // handlers. This will let us easily unbind those specific handlers later on.
+  // handlers. This will let us unbind those specific handlers later on.
   // NOTE: $.proxy will not work for this because it assumes we want only
   // one bound version of an object method, whereas we need one version per
   // object instance.
@@ -115,7 +124,7 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
     // Quit populating the field as soon as it gets focus.
     this.target.on('focus.viewsUi', this.unbind);
   },
-  
+
   /**
    * Get the source form field value as altered by the passed-in parameters.
    */
@@ -123,11 +132,11 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
     var self = this;
     return $.ajax({
       url: Backdrop.settings.basePath + "?q=" + Backdrop.encodePath("system/transliterate/" + self.source.val().toLowerCase()),
-      data: { replace: self.replace },
+      data: self.transliterationOptions,
       dataType: "text"
     });
   },
-  
+
   /**
    * Use the title for populating the fields, or send a request
    * for a translitarated version of the source field value when needed.
@@ -140,11 +149,14 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
       var transliterated = this.getTransliterated();
       var self = this;
       transliterated.done(function(machine) {
+        // Replace the machine name placeholder with the specific one for this
+        // field. e.g. A hyphen instead of an underscore for the path.
+        machine = machine.replace(new RegExp(self.transliterationOptions.replace,  'g'), self.replace);
         self.target.val(machine + self.suffix);
       });
     }
   },
-  
+
   /**
    * Stop prepopulating the form fields.
    */
@@ -152,7 +164,7 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
     this.source.off('keyup.viewsUi change.viewsUi', this.populate);
     this.target.off('focus.viewsUi', this.unbind);
   },
-  
+
   /**
    * Bind event handlers to the new form fields, after they're replaced via AJAX.
    */
@@ -171,7 +183,7 @@ Backdrop.behaviors.addItemForm = {
       new Backdrop.viewsUi.AddItemForm($form);
     });
   }
-}
+};
 
 Backdrop.viewsUi.AddItemForm = function ($form) {
   $form.on('click', '.views-filterable-options :checkbox', $.proxy(this.handleCheck, this));
@@ -181,7 +193,7 @@ Backdrop.viewsUi.AddItemForm = function ($form) {
   this.$selected_div = this.$form.find('.views-selected-options').parent();
   this.$selected_div.hide();
   this.checkedItems = [];
-}
+};
 
 Backdrop.viewsUi.AddItemForm.prototype.handleCheck = function (event) {
   var $target = $(event.target);
@@ -207,7 +219,7 @@ Backdrop.viewsUi.AddItemForm.prototype.handleCheck = function (event) {
     }
   }
   this.refreshCheckedItems();
-}
+};
 
 /**
  * Refresh the display of the checked items.
@@ -217,7 +229,7 @@ Backdrop.viewsUi.AddItemForm.prototype.refreshCheckedItems = function () {
   this.$selected_div.find('.views-selected-options')
     .html(this.checkedItems.join(', '))
     .trigger('dialogContentResize');
-}
+};
 
 /**
  * The input field items that add displays must be rendered as <input> elements.
@@ -272,7 +284,7 @@ Backdrop.behaviors.viewsUiRenderAddViewButton = {
 
 Backdrop.behaviors.viewsUiRenderAddViewButton.toggleMenu = function ($trigger) {
   $trigger.parent().toggleClass('open');
-  $trigger.next().slideToggle('fast');
+  $trigger.next().toggle();
 };
 
 Backdrop.behaviors.viewsUiSearchOptions = {
@@ -408,7 +420,7 @@ Backdrop.behaviors.viewsUiPreview = {
    if ($contextualFiltersBucket.length === 0) {
      return;
    }
-  
+
    // If the display has no contextual filters, hide the form where you enter
    // the contextual filters for the live preview. If it has contextual filters,
    // show the form.
@@ -419,7 +431,7 @@ Backdrop.behaviors.viewsUiPreview = {
    else {
      $('#preview-args').parent().hide();
    }
-  
+
    // Executes an initial preview.
    if ($('#edit-displays-live-preview').once('edit-displays-live-preview').is(':checked')) {
      $('#preview-submit').once('edit-displays-live-preview').trigger('click');

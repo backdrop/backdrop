@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @addtogroup database
  * @{
@@ -22,12 +21,21 @@ interface QueryExtendableInterface {
   /**
    * Enhance this object by wrapping it in an extender object.
    *
+   * The core implementations of QueryExtendableInterface include:
+   *   - TableSort: Extend a query to sort based on query strings.
+   *   - PagerDefault: Extend a query to limit results based on query strings.
+   *   - SearchQuery: Extend a query to join on the search index tables.
+   *
+   * Other implementations may be added by other modules, but for the sake of
+   * code validation, these core extenders are specified as possible return
+   * values of this interface.
+   *
    * @param $extender_name
    *   The base name of the extending class.  The base name will be checked
    *   against the current database connection to allow driver-specific subclasses
    *   as well, using the same logic as the query objects themselves.  For example,
    *   PagerDefault_mysql is the MySQL-specific override for PagerDefault.
-   * @return QueryExtendableInterface
+   * @return QueryExtendableInterface|SelectQueryInterface|TableSort|PagerDefault|SearchQuery
    *   The extender object, which now contains a reference to this object.
    */
   public function extend($extender_name);
@@ -193,14 +201,14 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
   public function addField($table_alias, $field, $alias = NULL);
 
   /**
-   * Add multiple fields from the same table to be SELECTed.
+   * Add multiple fields from the same table to be selected.
    *
    * This method does not return the aliases set for the passed fields. In the
    * majority of cases that is not a problem, as the alias will be the field
    * name. However, if you do need to know the alias you can call getFields()
    * and examine the result to determine what alias was created. Alternatively,
-   * simply use addField() for the few fields you care about and this method for
-   * the rest.
+   * use addField() for the few fields you care about and this method for the
+   * rest.
    *
    * @param $table_alias
    *   The name of the table from which the field comes, as an alias. Generally
@@ -216,7 +224,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
   public function fields($table_alias, array $fields = array());
 
   /**
-   * Adds an expression to the list of "fields" to be SELECTed.
+   * Adds an expression to the list of "fields" to be selected.
    *
    * An expression can be any arbitrary string that is valid SQL. That includes
    * various functions, which may in some cases be database-dependent. This
@@ -231,7 +239,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *   in all cases.
    * @param $arguments
    *   Any placeholder arguments needed for this expression.
-   * @return
+   * @return string|NULL
    *   The unique alias that was assigned for this expression.
    */
   public function addExpression($expression, $alias = NULL, $arguments = array());
@@ -256,7 +264,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *   system, for example, when joining the same table more than once.
    * @param $arguments
    *   An array of arguments to replace into the $condition of this join.
-   * @return
+   * @return string
    *   The unique alias that was assigned for this table.
    */
   public function join($table, $alias = NULL, $condition = NULL, $arguments = array());
@@ -279,7 +287,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *   system, for example, when joining the same table more than once.
    * @param $arguments
    *   An array of arguments to replace into the $condition of this join.
-   * @return
+   * @return string
    *   The unique alias that was assigned for this table.
    */
   public function innerJoin($table, $alias = NULL, $condition = NULL, $arguments = array());
@@ -302,7 +310,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *   system, for example, when joining the same table more than once.
    * @param $arguments
    *   An array of arguments to replace into the $condition of this join.
-   * @return
+   * @return string
    *   The unique alias that was assigned for this table.
    */
   public function leftJoin($table, $alias = NULL, $condition = NULL, $arguments = array());
@@ -325,7 +333,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *   system, for example, when joining the same table more than once.
    * @param $arguments
    *   An array of arguments to replace into the $condition of this join.
-   * @return
+   * @return string
    *   The unique alias that was assigned for this table.
    */
   public function rightJoin($table, $alias = NULL, $condition = NULL, $arguments = array());
@@ -356,7 +364,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *   system, for example, when joining the same table more than once.
    * @param $arguments
    *   An array of arguments to replace into the $condition of this join.
-   * @return
+   * @return string
    *   The unique alias that was assigned for this table.
    */
   public function addJoin($type, $table, $alias = NULL, $condition = NULL, $arguments = array());
@@ -535,7 +543,7 @@ class SelectQueryExtender implements SelectQueryInterface {
   /**
    * The SelectQuery object we are extending/decorating.
    *
-   * @var SelectQueryInterface
+   * @var SelectQuery
    */
   protected $query;
 
@@ -625,7 +633,7 @@ class SelectQueryExtender implements SelectQueryInterface {
   }
 
   public function compile(DatabaseConnection $connection, QueryPlaceholderInterface $queryPlaceholder) {
-    return $this->query->compile($connection, $queryPlaceholder);
+    $this->query->compile($connection, $queryPlaceholder);
   }
 
   public function compiled() {
@@ -653,7 +661,7 @@ class SelectQueryExtender implements SelectQueryInterface {
   }
 
   public function havingCompile(DatabaseConnection $connection) {
-    return $this->query->havingCompile($connection);
+    $this->query->havingCompile($connection);
   }
 
   /* Implementations of QueryExtendableInterface. */
@@ -708,6 +716,11 @@ class SelectQueryExtender implements SelectQueryInterface {
     return $this->query->preExecute($query);
   }
 
+  /**
+   * Implements SelectQueryInterface::execute().
+   *
+   * @return NULL|DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch|stdClass[]
+   */
   public function execute() {
     // By calling preExecute() here, we force it to preprocess the extender
     // object rather than just the base query object.  That means
@@ -955,6 +968,20 @@ class SelectQuery extends Query implements SelectQueryInterface {
   protected $prepared = FALSE;
 
   /**
+   * A list of tags by which this query may be altered.
+   *
+   * @var array
+   */
+  protected $alterTags = array();
+
+  /**
+   * A list of arbitrary metadata that may be attached to the query.
+   *
+   * @var array
+   */
+  protected $alterMetaData = array();
+
+  /**
    * The FOR UPDATE status
    */
   protected $forUpdate = FALSE;
@@ -969,43 +996,78 @@ class SelectQuery extends Query implements SelectQueryInterface {
 
   /* Implementations of QueryAlterableInterface. */
 
+  /**
+   * Implements QueryAlterableInterface::addTag().
+   *
+   * @return SelectQuery
+   */
   public function addTag($tag) {
     $this->alterTags[$tag] = 1;
     return $this;
   }
 
+  /**
+   * Implements QueryAlterableInterface::hasTag().
+   */
   public function hasTag($tag) {
     return isset($this->alterTags[$tag]);
   }
 
+  /**
+   * Implements QueryAlterableInterface::hasAllTags().
+   */
   public function hasAllTags() {
     return !(boolean)array_diff(func_get_args(), array_keys($this->alterTags));
   }
 
+  /**
+   * Implements QueryAlterableInterface::hasAnyTag().
+   */
   public function hasAnyTag() {
     return (boolean)array_intersect(func_get_args(), array_keys($this->alterTags));
   }
 
+  /**
+   * Implements QueryAlterableInterface::addMetaData().
+   *
+   * @return SelectQuery
+   */
   public function addMetaData($key, $object) {
     $this->alterMetaData[$key] = $object;
     return $this;
   }
 
+  /**
+   * Implements QueryAlterableInterface::getMetaData().
+   *
+   * @return SelectQuery
+   */
   public function getMetaData($key) {
     return isset($this->alterMetaData[$key]) ? $this->alterMetaData[$key] : NULL;
   }
 
   /* Implementations of QueryConditionInterface for the WHERE clause. */
 
+  /**
+   * Implements QueryConditionInterface::condition().
+   *
+   * @return SelectQuery
+   */
   public function condition($field, $value = NULL, $operator = NULL) {
     $this->where->condition($field, $value, $operator);
     return $this;
   }
 
+  /**
+   * Implements QueryConditionInterface::conditions().
+   */
   public function &conditions() {
     return $this->where->conditions();
   }
 
+  /**
+   * Implements QueryConditionInterface::arguments().
+   */
   public function arguments() {
     if (!$this->compiled()) {
       return NULL;
@@ -1038,31 +1100,59 @@ class SelectQuery extends Query implements SelectQueryInterface {
     return $args;
   }
 
+  /**
+   * Implements QueryConditionInterface::where().
+   *
+   * @return SelectQuery
+   */
   public function where($snippet, $args = array()) {
     $this->where->where($snippet, $args);
     return $this;
   }
 
+  /**
+   * Implements QueryConditionInterface::isNull().
+   *
+   * @return SelectQuery
+   */
   public function isNull($field) {
     $this->where->isNull($field);
     return $this;
   }
 
+  /**
+   * Implements QueryConditionInterface::isNotNull().
+   *
+   * @return SelectQuery
+   */
   public function isNotNull($field) {
     $this->where->isNotNull($field);
     return $this;
   }
 
+  /**
+   * Implements QueryConditionInterface::exists().
+   *
+   * @return SelectQuery
+   */
   public function exists(SelectQueryInterface $select) {
     $this->where->exists($select);
     return $this;
   }
 
+  /**
+   * Implements QueryConditionInterface::notExists().
+   *
+   * @return SelectQuery
+   */
   public function notExists(SelectQueryInterface $select) {
     $this->where->notExists($select);
     return $this;
   }
 
+  /**
+   * Implements QueryConditionInterface::compile().
+   */
   public function compile(DatabaseConnection $connection, QueryPlaceholderInterface $queryPlaceholder) {
     $this->where->compile($connection, $queryPlaceholder);
     $this->having->compile($connection, $queryPlaceholder);
@@ -1080,6 +1170,9 @@ class SelectQuery extends Query implements SelectQueryInterface {
     }
   }
 
+  /**
+   * Implements QueryConditionInterface::compiled().
+   */
   public function compiled() {
     if (!$this->where->compiled() || !$this->having->compiled()) {
       return FALSE;
@@ -1105,30 +1198,54 @@ class SelectQuery extends Query implements SelectQueryInterface {
 
   /* Implementations of QueryConditionInterface for the HAVING clause. */
 
+  /**
+   * Implements QueryConditionInterface::havingCondition().
+   *
+   * @return SelectQuery
+   */
   public function havingCondition($field, $value = NULL, $operator = NULL) {
     $this->having->condition($field, $value, $operator);
     return $this;
   }
 
+  /**
+   * Implements QueryConditionInterface::havingConditions().
+   */
   public function &havingConditions() {
     return $this->having->conditions();
   }
 
+  /**
+   * Implements QueryConditionInterface::havingArguments().
+   */
   public function havingArguments() {
     return $this->having->arguments();
   }
 
+  /**
+   * Implements QueryConditionInterface::having().
+   *
+   * @return SelectQuery
+   */
   public function having($snippet, $args = array()) {
     $this->having->where($snippet, $args);
     return $this;
   }
 
+  /**
+   * Implements QueryConditionInterface::havingCompile().
+   */
   public function havingCompile(DatabaseConnection $connection) {
-    return $this->having->compile($connection, $this);
+    $this->having->compile($connection, $this);
   }
 
   /* Implementations of QueryExtendableInterface. */
 
+  /**
+   * Implements QueryExtendableInterface::extend().
+   *
+   * @return SelectQueryInterface
+   */
   public function extend($extender_name) {
     $override_class = $extender_name . '_' . $this->connection->driver();
     if (class_exists($override_class)) {
@@ -1137,26 +1254,51 @@ class SelectQuery extends Query implements SelectQueryInterface {
     return new $extender_name($this, $this->connection);
   }
 
+  /**
+   * Implements QueryExtendableInterface::havingIsNull().
+   *
+   * @return SelectQuery
+   */
   public function havingIsNull($field) {
     $this->having->isNull($field);
     return $this;
   }
 
+  /**
+   * Implements QueryExtendableInterface::havingIsNotNull().
+   *
+   * @return SelectQuery
+   */
   public function havingIsNotNull($field) {
     $this->having->isNotNull($field);
     return $this;
   }
 
+  /**
+   * Implements QueryExtendableInterface::havingExists().
+   *
+   * @return SelectQuery
+   */
   public function havingExists(SelectQueryInterface $select) {
     $this->having->exists($select);
     return $this;
   }
 
+  /**
+   * Implements QueryExtendableInterface::havingNotExists().
+   *
+   * @return SelectQuery
+   */
   public function havingNotExists(SelectQueryInterface $select) {
     $this->having->notExists($select);
     return $this;
   }
 
+  /**
+   * Implements QueryExtendableInterface::forUpdate().
+   *
+   * @return SelectQuery
+   */
   public function forUpdate($set = TRUE) {
     if (isset($set)) {
       $this->forUpdate = $set;
@@ -1166,30 +1308,51 @@ class SelectQuery extends Query implements SelectQueryInterface {
 
   /* Alter accessors to expose the query data to alter hooks. */
 
+  /**
+   * Implements SelectQueryInterface::getFields().
+   */
   public function &getFields() {
     return $this->fields;
   }
 
+  /**
+   * Implements SelectQueryInterface::getExpressions().
+   */
   public function &getExpressions() {
     return $this->expressions;
   }
 
+  /**
+   * Implements SelectQueryInterface::getOrderBy().
+   */
   public function &getOrderBy() {
     return $this->order;
   }
 
+  /**
+   * Implements SelectQueryInterface::getGroupBy().
+   */
   public function &getGroupBy() {
     return $this->group;
   }
 
+  /**
+   * Implements SelectQueryInterface::getTables().
+   */
   public function &getTables() {
     return $this->tables;
   }
 
+  /**
+   * Implements SelectQueryInterface::getUnion().
+   */
   public function &getUnion() {
     return $this->union;
   }
 
+  /**
+   * Implements SelectQueryInterface::getArguments().
+   */
   public function getArguments(QueryPlaceholderInterface $queryPlaceholder = NULL) {
     if (!isset($queryPlaceholder)) {
       $queryPlaceholder = $this;
@@ -1199,17 +1362,14 @@ class SelectQuery extends Query implements SelectQueryInterface {
   }
 
   /**
-   * Indicates if preExecute() has already been called on that object.
+   * Implements SelectQueryInterface::isPrepared().
    */
   public function isPrepared() {
     return $this->prepared;
   }
 
   /**
-   * Generic preparation and validation for a SELECT query.
-   *
-   * @return
-   *   TRUE if the validation was successful, FALSE if not.
+   * Implements SelectQueryInterface::preExecute().
    */
   public function preExecute(SelectQueryInterface $query = NULL) {
     // If no query object is passed in, use $this.
@@ -1223,7 +1383,21 @@ class SelectQuery extends Query implements SelectQueryInterface {
     }
 
     // Modules may alter all queries or only those having a particular tag.
-    if (isset($this->alterTags)) {
+    if (!empty($this->alterTags)) {
+      // Many contrib modules (wrongly) assume that query tags used for
+      // access-checking purposes follow the pattern $entity_type . '_access'.
+      // But this is not the case for taxonomy terms, since core used to add
+      // term_access instead of taxonomy_term_access to its queries. Provide
+      // backwards compatibility by adding both tags here instead of attempting
+      // to fix all contrib modules in a coordinated effort.
+      // TODO:
+      // - Extract this mechanism into a hook as part of a public (non-security)
+      //   issue.
+      // - Emit E_USER_DEPRECATED if term_access is used.
+      $term_access_tags = array('term_access' => 1, 'taxonomy_term_access' => 1);
+      if (array_intersect_key($this->alterTags, $term_access_tags)) {
+        $this->alterTags += $term_access_tags;
+      }
       $hooks = array('query');
       foreach ($this->alterTags as $tag => $value) {
         $hooks[] = 'query_' . $tag;
@@ -1247,8 +1421,13 @@ class SelectQuery extends Query implements SelectQueryInterface {
     return $this->prepared;
   }
 
+  /**
+   * Implements SelectQueryInterface::execute().
+   *
+   * @return NULL|DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch|stdClass[]
+   */
   public function execute() {
-    // If validation fails, simply return NULL.
+    // If validation fails return NULL.
     // Note that validation routines in preExecute() may throw exceptions instead.
     if (!$this->preExecute()) {
       return NULL;
@@ -1258,11 +1437,17 @@ class SelectQuery extends Query implements SelectQueryInterface {
     return $this->connection->query((string) $this, $args, $this->queryOptions);
   }
 
+  /**
+   * Implements SelectQueryInterface::distinct().
+   */
   public function distinct($distinct = TRUE) {
     $this->distinct = $distinct;
     return $this;
   }
 
+  /**
+   * Implements SelectQueryInterface::addField().di
+   */
   public function addField($table_alias, $field, $alias = NULL) {
     // If no alias is specified, first try the field name itself.
     if (empty($alias)) {
@@ -1291,6 +1476,11 @@ class SelectQuery extends Query implements SelectQueryInterface {
     return $alias;
   }
 
+  /**
+   * Implements SelectQueryInterface::fields().
+   *
+   * @return SelectQuery
+   */
   public function fields($table_alias, array $fields = array()) {
 
     if ($fields) {
@@ -1307,6 +1497,9 @@ class SelectQuery extends Query implements SelectQueryInterface {
     return $this;
   }
 
+  /**
+   * Implements SelectQueryInterface::addExpression().
+   */
   public function addExpression($expression, $alias = NULL, $arguments = array()) {
     if (empty($alias)) {
       $alias = 'expression';
@@ -1328,22 +1521,37 @@ class SelectQuery extends Query implements SelectQueryInterface {
     return $alias;
   }
 
+  /**
+   * Implements SelectQueryInterface::join().
+   */
   public function join($table, $alias = NULL, $condition = NULL, $arguments = array()) {
     return $this->addJoin('INNER', $table, $alias, $condition, $arguments);
   }
 
+  /**
+   * Implements SelectQueryInterface::innerJoin().
+   */
   public function innerJoin($table, $alias = NULL, $condition = NULL, $arguments = array()) {
     return $this->addJoin('INNER', $table, $alias, $condition, $arguments);
   }
 
+  /**
+   * Implements SelectQueryInterface::leftJoin().
+   */
   public function leftJoin($table, $alias = NULL, $condition = NULL, $arguments = array()) {
     return $this->addJoin('LEFT OUTER', $table, $alias, $condition, $arguments);
   }
 
+  /**
+   * Implements SelectQueryInterface::rightJoin().
+   */
   public function rightJoin($table, $alias = NULL, $condition = NULL, $arguments = array()) {
     return $this->addJoin('RIGHT OUTER', $table, $alias, $condition, $arguments);
   }
 
+  /**
+   * Implements SelectQueryInterface::addJoin().
+   */
   public function addJoin($type, $table, $alias = NULL, $condition = NULL, $arguments = array()) {
 
     if (empty($alias)) {
@@ -1377,6 +1585,11 @@ class SelectQuery extends Query implements SelectQueryInterface {
     return $alias;
   }
 
+  /**
+   * Implements SelectQueryInterface::orderBy().
+   *
+   * return SelectQuery
+   */
   public function orderBy($field, $direction = 'ASC') {
     // Only allow ASC and DESC, default to ASC.
     $direction = strtoupper($direction) == 'DESC' ? 'DESC' : 'ASC';
@@ -1384,17 +1597,32 @@ class SelectQuery extends Query implements SelectQueryInterface {
     return $this;
   }
 
+  /**
+   * Implements SelectQueryInterface::orderRandom().
+   *
+   * return SelectQuery
+   */
   public function orderRandom() {
     $alias = $this->addExpression('RAND()', 'random_field');
     $this->orderBy($alias);
     return $this;
   }
 
+  /**
+   * Implements SelectQueryInterface::range().
+   *
+   * return SelectQuery
+   */
   public function range($start = NULL, $length = NULL) {
     $this->range = func_num_args() ? array('start' => $start, 'length' => $length) : array();
     return $this;
   }
 
+  /**
+   * Implements SelectQueryInterface::union().
+   *
+   * return SelectQuery
+   */
   public function union(SelectQueryInterface $query, $type = '') {
     // Handle UNION aliasing.
     switch ($type) {
@@ -1417,11 +1645,21 @@ class SelectQuery extends Query implements SelectQueryInterface {
     return $this;
   }
 
+  /**
+   * Implements SelectQueryInterface::groupBy().
+   *
+   * return SelectQuery
+   */
   public function groupBy($field) {
     $this->group[$field] = $field;
     return $this;
   }
 
+  /**
+   * Implements SelectQueryInterface::countQuery().
+   *
+   * return SelectQuery
+   */
   public function countQuery() {
     // Create our new query object that we will mutate into a count query.
     $count = clone($this);

@@ -59,24 +59,6 @@ function hook_hook_info_alter(&$hooks) {
 }
 
 /**
- * Change the view mode of an entity that is being displayed.
- *
- * @param string $view_mode
- *   The view_mode that is to be used to display the entity.
- * @param array $context
- *   Array with contextual information, including:
- *   - entity_type: The type of the entity that is being viewed.
- *   - entity: The entity object.
- *   - langcode: The langcode the entity is being viewed in.
- */
-function hook_entity_view_mode_alter(&$view_mode, $context) {
-  // For nodes, change the view mode when it is teaser.
-  if ($context['entity_type'] == 'node' && $view_mode == 'teaser') {
-    $view_mode = 'my_custom_view_mode';
-  }
-}
-
-/**
  * Define administrative paths.
  *
  * Modules may specify whether or not the paths they define in hook_menu() are
@@ -193,28 +175,6 @@ function hook_cron_queue_info_alter(&$queues) {
   // This site has many feeds so let's spend 90 seconds on each cron run
   // updating feeds instead of the default 60.
   $queues['aggregator_feeds']['time'] = 90;
-}
-
- /**
- * Work on a single queue item.
- *
- * Callback for hook_queue_info().
- *
- * @param $queue_item_data
- *   The data that was passed to BackdropQueue::createItem() when the item was
- *   queued.
- *
- * @throws \Exception
- *   The worker callback may throw an exception to indicate there was a problem.
- *   The cron process will log the exception, and leave the item in the queue to
- *   be processed again later.
- *
- * @see backdrop_cron_run()
- */
-function callback_queue_worker($queue_item_data) {
-  $node = node_load($queue_item_data);
-  $node->title = 'Updated title';
-  $node->save();
 }
 
 /**
@@ -710,7 +670,22 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     backdrop_deliver_html_page() unless a value is inherited from a parent menu
  *     item. Note that this function is called even if the access checks fail,
  *     so any custom delivery callback function should take that into account.
- *     See backdrop_deliver_html_page() for an example.
+ *     Backdrop includes the following delivery callbacks in core:
+ *     - backdrop_deliver_html_page(): The default used for printing HTML pages.
+ *       Menu items with this callback may be wrapped in a layout template by
+ *       Layout module. See layout_route_handler().
+ *     - backdrop_json_deliver: The value of the menu callback will be rendered
+ *       as JSON without any further processing. This delivery callback should
+ *       be used on any path that should return a JSON response at all times,
+ *       even on access denied or 404 pages.
+ *     - ajax_deliver: This delivery callback is used when returning AJAX
+ *       commands that will be interpreted by Backdrop core's ajax.js file. This
+ *       delivery callback is set automatically if the menu callback returns a
+ *       renderable element with the #type property "ajax_commands".
+ *     - ajax_deliver_dialog: This delivery callback is used when the contents
+ *       of a menu callback should be returned as AJAX commands to open as a
+ *       dialog. This delivery callback is set automatically if the requesting
+ *       AJAX call requested a dialog. See system_page_delivery_callback_alter().
  *   - "access callback": A function returning TRUE if the user has access
  *     rights to this menu item, and FALSE if not. It can also be a boolean
  *     constant instead of a function, and you can also use numeric values
@@ -747,6 +722,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     "file". This defaults to the path to the module implementing the hook.
  *   - "load arguments": An array of arguments to be passed to each of the
  *     wildcard object loaders in the path, after the path argument itself.
+ *
  *     For example, if a module registers path node/%node/revisions/%/view
  *     with load arguments set to array(3), the '%node' in the path indicates
  *     that the loader function node_load() will be called with the second
@@ -754,6 +730,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     indicates that the fourth path component will also be passed to
  *     node_load() (numbering of path components starts at zero). So, if path
  *     node/12/revisions/29/view is requested, node_load(12, 29) will be called.
+ *
  *     There are also two "magic" values that can be used in load arguments.
  *     "%index" indicates the index of the wildcard path component. "%map"
  *     indicates the path components as an array. For example, if a module
@@ -801,7 +778,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     Many shortcut bitmasks are provided as constants in menu.inc:
  *     - MENU_NORMAL_ITEM: Normal menu items show up in the menu tree and can be
  *       moved/hidden by the administrator.
- *     - MENU_CALLBACK: Callbacks simply register a path so that the correct
+ *     - MENU_CALLBACK: Callbacks register a path so that the correct
  *       information is generated when the path is accessed.
  *     - MENU_SUGGESTED_ITEM: Modules may "suggest" menu items that the
  *       administrator may enable.
@@ -1013,11 +990,11 @@ function hook_menu_local_tasks_alter(&$data, $router_item, $root_path) {
   $data['actions']['output'][] = array(
     '#theme' => 'menu_local_task',
     '#link' => array(
-      'title' => t('Add new content'),
+      'title' => t('Add content'),
       'href' => 'node/add',
       'localized_options' => array(
         'attributes' => array(
-          'title' => t('Add new content'),
+          'title' => t('Add content'),
         ),
       ),
     ),
@@ -1031,7 +1008,7 @@ function hook_menu_local_tasks_alter(&$data, $router_item, $root_path) {
       'href' => 'node/add',
       'localized_options' => array(
         'attributes' => array(
-          'title' => t('Add new content'),
+          'title' => t('Add content'),
         ),
       ),
     ),
@@ -1275,14 +1252,14 @@ function hook_form_BASE_FORM_ID_alter(&$form, &$form_state, $form_id) {
  * function with the same name as the form ID, and use that function to build
  * the form. If no such function is found, Backdrop calls this hook. Modules
  * implementing this hook can then provide their own instructions for mapping
- * form IDs to constructor functions. As a result, you can easily map multiple
- * form IDs to a single form constructor (referred to as a 'base' form).
+ * form IDs to constructor functions. As a result, you can map multiple form IDs
+ * to a single form constructor (referred to as a 'base' form).
  *
  * Using a base form can help to avoid code duplication, by allowing many
  * similar forms to use the same code base. Another benefit is that it becomes
  * much easier for other modules to apply a general change to the group of
- * forms; hook_form_BASE_FORM_ID_alter() can be used to easily alter multiple
- * forms at once by directly targeting the shared base form.
+ * forms; hook_form_BASE_FORM_ID_alter() can be used to alter multiple forms at
+ * once by directly targeting the shared base form.
  *
  * Two example use cases where base forms may be useful are given below.
  *
@@ -1298,6 +1275,8 @@ function hook_form_BASE_FORM_ID_alter(&$form, &$form_state, $form_id) {
  * the $form_id input matched your module's format for dynamically-generated
  * form IDs, and if so, act appropriately.
  *
+ * Third, forms defined in classes can be defined this way.
+ *
  * @param $form_id
  *   The unique string identifying the desired form.
  * @param $args
@@ -1308,22 +1287,25 @@ function hook_form_BASE_FORM_ID_alter(&$form, &$form_state, $form_id) {
  * @return
  *   An associative array whose keys define form_ids and whose values are an
  *   associative array defining the following keys:
- *   - callback: The name of the form builder function to invoke. This will be
- *     used for the base form ID, for example, to target a base form using
- *     hook_form_BASE_FORM_ID_alter().
+ *   - callback: The callable returning the form array. If it is the name of
+ *     the form builder function then this will be used for the base
+ *     form ID, for example, to target a base form using
+ *     hook_form_BASE_FORM_ID_alter(). Otherwise use the base_form_id key to
+ *     define the base form id.
  *   - callback arguments: (optional) Additional arguments to pass to the
  *     function defined in 'callback', which are prepended to $args.
- *   - wrapper_callback: (optional) The name of a form builder function to
- *     invoke before the form builder defined in 'callback' is invoked. This
- *     wrapper callback may prepopulate the $form array with form elements,
- *     which will then be already contained in the $form that is passed on to
- *     the form builder defined in 'callback'. For example, a wrapper callback
- *     could setup wizard-alike form buttons that are the same for a variety of
- *     forms that belong to the wizard, which all share the same wrapper
- *     callback.
+ *   - base_form_id: The base form id can be specified explicitly. This is
+ *     required when callback is not the name of a function.
+ *   - wrapper_callback: (optional) Any callable to invoke before the form
+ *     builder defined in 'callback' is invoked. This wrapper callback may
+ *     prepopulate the $form array with form elements, which will then be
+ *     already contained in the $form that is passed on to the form builder
+ *     defined in 'callback'. For example, a wrapper callback could setup
+ *     wizard-alike form buttons that are the same for a variety of forms that
+ *     belong to the wizard, which all share the same wrapper callback.
  */
 function hook_forms($form_id, $args) {
-  // Simply reroute the (non-existing) $form_id 'mymodule_first_form' to
+  // Reroute the (non-existing) $form_id 'mymodule_first_form' to
   // 'mymodule_main_form'.
   $forms['mymodule_first_form'] = array(
     'callback' => 'mymodule_main_form',
@@ -1342,6 +1324,15 @@ function hook_forms($form_id, $args) {
   $forms['mymodule_wrapped_form'] = array(
     'callback' => 'mymodule_main_form',
     'wrapper_callback' => 'mymodule_main_form_wrapper',
+  );
+
+  // Build a form with a static class callback.
+  $forms['mymodule_class_generated_form'] = array(
+    // This will call: MyClass::generateMainForm().
+    'callback' => array('MyClass', 'generateMainForm'),
+    // The base_form_id is required when the callback is a static function in
+    // a class. This can also be used to keep newer code backwards compatible.
+    'base_form_id' => 'mymodule_main_form',
   );
 
   return $forms;
@@ -1377,8 +1368,8 @@ function hook_boot() {
  *
  * This hook is not run on cached pages.
  *
- * To add CSS or JS that should be present on all pages, modules should not
- * implement this hook, but declare these files in their .info file.
+ * To add CSS or JS files that should be present on all pages, modules should
+ * not implement this hook, but declare these files in their .info file.
  *
  * @see hook_boot()
  */
@@ -1646,14 +1637,13 @@ function hook_permission() {
  *   array are the internal names of the hooks, and the values are arrays
  *   containing information about the hook. Each information array must contain
  *   either a 'variables' element or a 'render element' element, but not both.
- *   Use 'render element' if you are theming a single element or element tree
- *   composed of elements, such as a form array, a page array, or a single
- *   checkbox element. Use 'variables' if your theme implementation is
- *   intended to be called directly through theme() and has multiple arguments
- *   for the data and style; in this case, the variables not supplied by the
- *   calling function will be given default values and passed to the template
- *   or theme function. The returned theme information array can contain the
- *   following key/value pairs:
+ *   Use 'render element' if you are rendering a single element or element tree
+ *   composed of elements, such as a form array, or a single checkbox element.
+ *   Use 'variables' if your theme implementation is intended to be called
+ *   directly through theme() and has multiple arguments for the data and style;
+ *   in this case, the variables not supplied by the calling function will be
+ *   given default values and passed to the template or theme function. The
+ *   returned theme information array can contain the following key/value pairs:
  *   - variables: (see above) Each array key is the name of the variable, and
  *     the value given is used as the default value if the function calling
  *     theme() does not supply it. Template implementations receive each array
@@ -1667,16 +1657,15 @@ function hook_permission() {
  *   - file: The file the implementation resides in. This file will be included
  *     prior to the theme being rendered, to make sure that the function or
  *     preprocess function (as needed) is actually loaded; this makes it
- *     possible to split theme functions out into separate files quite easily.
+ *     possible to split theme functions out into separate files.
  *   - path: Override the path of the file to be used. Ordinarily the module or
  *     theme path will be used, but if the file will not be in the default
  *     path, include it here. This path should be relative to the Backdrop root
  *     directory.
  *   - template: If specified, this theme implementation is a template, and
- *     this is the template file without an extension. Do not put .tpl.php on
- *     this file; that extension will be added automatically by the default
- *     rendering engine (which is PHPTemplate). If 'path', above, is specified,
- *     the template should also be in this path.
+ *     this is the template file name without an extension. Do not include the
+ *     extension .tpl.php; it will be added automatically. If 'path' is
+ *     specified, then the template should be located in this path.
  *   - function: If specified, this will be the function name to invoke for
  *     this implementation. If neither 'template' nor 'function' is specified,
  *     a default function name will be assumed. For example, if a module
@@ -1794,7 +1783,7 @@ function hook_theme_registry_alter(&$theme_registry) {
  * @return
  *   The machine-readable name of the theme that should be used for the current
  *   page request. The value returned from this function will only have an
- *   effect if it corresponds to a currently-active theme on the site. Do not 
+ *   effect if it corresponds to a currently-active theme on the site. Do not
  *   return a value if you do not wish to set a custom theme.
  */
 function hook_custom_theme() {
@@ -1830,6 +1819,7 @@ function hook_custom_theme() {
  *     - WATCHDOG_NOTICE: Normal but significant conditions.
  *     - WATCHDOG_INFO: Informational messages.
  *     - WATCHDOG_DEBUG: Debug-level messages.
+ *     - WATCHDOG_DEPRECATED: Deprecated use of a function or feature.
  *   - link: An optional link provided by the module that called the watchdog()
  *     function.
  *   - message: The text of the message to be logged. Variables in the message
@@ -1844,14 +1834,15 @@ function hook_watchdog(array $log_entry) {
   global $base_url, $language;
 
   $severity_list = array(
-    WATCHDOG_EMERGENCY     => t('Emergency'),
-    WATCHDOG_ALERT     => t('Alert'),
-    WATCHDOG_CRITICALI     => t('Critical'),
-    WATCHDOG_ERROR       => t('Error'),
-    WATCHDOG_WARNING   => t('Warning'),
-    WATCHDOG_NOTICE    => t('Notice'),
-    WATCHDOG_INFO      => t('Info'),
-    WATCHDOG_DEBUG     => t('Debug'),
+    WATCHDOG_EMERGENCY  => t('Emergency'),
+    WATCHDOG_ALERT      => t('Alert'),
+    WATCHDOG_CRITICAL   => t('Critical'),
+    WATCHDOG_ERROR      => t('Error'),
+    WATCHDOG_WARNING    => t('Warning'),
+    WATCHDOG_NOTICE     => t('Notice'),
+    WATCHDOG_INFO       => t('Info'),
+    WATCHDOG_DEBUG      => t('Debug'),
+    WATCHDOG_DEPRECATED => t('Deprecated Use'),
   );
 
   $to = 'someone@example.com';
@@ -2123,31 +2114,31 @@ function hook_stream_wrappers() {
     'public' => array(
       'name' => t('Public files'),
       'class' => 'BackdropPublicStreamWrapper',
-      'description' => t('Public local files served by the webserver.'),
+      'description' => t('Public local files served by the webserver'),
       'type' => STREAM_WRAPPERS_LOCAL_NORMAL,
     ),
     'private' => array(
       'name' => t('Private files'),
       'class' => 'BackdropPrivateStreamWrapper',
-      'description' => t('Private local files served by Backdrop.'),
+      'description' => t('Private local files served by Backdrop'),
       'type' => STREAM_WRAPPERS_LOCAL_NORMAL,
     ),
     'temp' => array(
       'name' => t('Temporary files'),
       'class' => 'BackdropTempStreamWrapper',
-      'description' => t('Temporary local files for upload and previews.'),
+      'description' => t('Temporary local files for upload and previews'),
       'type' => STREAM_WRAPPERS_LOCAL_HIDDEN,
     ),
     'cdn' => array(
       'name' => t('Content delivery network files'),
       'class' => 'MyModuleCDNStreamWrapper',
-      'description' => t('Files served by a content delivery network.'),
+      'description' => t('Files served by a content delivery network'),
       // 'type' can be omitted to use the default of STREAM_WRAPPERS_NORMAL
     ),
     'youtube' => array(
       'name' => t('YouTube video'),
       'class' => 'MyModuleYouTubeStreamWrapper',
-      'description' => t('Video streamed from YouTube.'),
+      'description' => t('Video streamed from YouTube'),
       // A module implementing YouTube integration may decide to support using
       // the YouTube API for uploading video, but here, we assume that this
       // particular module only supports playing YouTube video.
@@ -2817,7 +2808,7 @@ function hook_install() {
  * A good rule of thumb is to remove updates older than two major releases of
  * Backdrop. See hook_update_last_removed() to notify Backdrop about the
  * removals. For further information about releases and release numbers see the
- * @link http://backdropcms.org/about/releases Backdrop CMS Release Cycle handbook page @endlink
+ * @link https://backdropcms.org/about/releases Backdrop CMS Release Cycle handbook page @endlink
  *
  * Because Backdrop keeps track of the last ran update based on the function
  * name, you should never renumber update functions. It may result in updates
@@ -2863,8 +2854,7 @@ function hook_install() {
  * @see update_get_update_list()
  */
 function hook_update_N(&$sandbox) {
-  // For non-multipass updates, the signature can simply be;
-  // function hook_update_N() {
+  // For non-multipass updates the signature can be `function hook_update_N() {`
 
   // For most updates, the following is sufficient.
   db_add_field('mytable1', 'newcol', array('type' => 'int', 'not null' => TRUE, 'description' => 'My new integer column.'));
@@ -2902,10 +2892,10 @@ function hook_update_N(&$sandbox) {
   $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
 
   // To display a message to the user when the update is completed, return it.
-  // If you do not want to display a completion message, simply return nothing.
+  // If you do not want to display a completion message, return nothing.
   return t('The update did what it was supposed to do.');
 
-  // In case of an error, simply throw an exception with an error message.
+  // In case of an error, throw an exception with an error message.
   throw new BackdropUpdateException('Something went wrong; here is what you should do.');
 }
 
@@ -3058,7 +3048,7 @@ function hook_disable() {
  * Class names in Backdrop are typically CamelCase, with uppercase letters at
  * the start of each word (including the first letter) and no underscores.
  * The file names for classes are typically either [module_name].[class_name].inc
- * or simply [ModuleNameClassName].php.
+ * or [ModuleNameClassName].php.
  *
  * For more information about class naming conventions see the
  * @link https://api.backdropcms.org/php-standards Backdrop Coding Standards @endlink
@@ -3118,13 +3108,13 @@ function hook_autoload_info_alter(&$class_registry) {
  * installer to pause and display a page to the user by returning any themed
  * output that should be displayed on that page (but see below for tasks that
  * use the form API or batch API; the return values of these task functions are
- * handled differently). You should also use backdrop_set_title() within the task
- * callback function to set a custom page title. For some tasks, however, you
- * may want to simply do some processing and pass control to the next task
- * without ending the page request; to indicate this, simply do not send back
- * a return value from your task function at all. This can be used, for
- * example, by installation profiles that need to configure certain site
- * settings in the database without obtaining any input from the user.
+ * handled differently). You should also use backdrop_set_title() within the
+ * task callback function to set a custom page title. For some tasks, however,
+ * you may want to do some processing and pass control to the next task without
+ * ending the page request; to indicate this, do not send back a return value
+ * from your task function at all. This can be used, for example, by
+ * installation profiles that need to configure certain site settings in the
+ * database without obtaining any input from the user.
  *
  * The task function is treated specially if it defines a form or requires
  * batch processing; in that case, you should return either the form API
@@ -3145,7 +3135,7 @@ function hook_autoload_info_alter(&$class_registry) {
  * inspect later. It is important to remove any temporary variables using
  * state_del() before your last task has completed and control is handed
  * back to the installer.
- * 
+ *
  * @param array $install_state
  *   An array of information about the current installation state.
  *
@@ -3225,8 +3215,8 @@ function hook_install_tasks(&$install_state) {
     // handlers. This form might be used to collect and save additional
     // information from the user that your profile needs. There are no extra
     // steps required for your profile to act as an "installation wizard"; you
-    // can simply define as many tasks of type 'form' as you wish to execute,
-    // and the forms will be presented to the user, one after another.
+    // can define as many tasks of type 'form' as you wish to execute, and the
+    // forms will be presented to the user, one after another.
     'myprofile_settings_form' => array(
       'display_name' => st('Additional options'),
       'type' => 'form',
@@ -3627,7 +3617,7 @@ function hook_tokens($type, $tokens, array $data = array(), array $options = arr
 
         // Default values for the chained tokens handled below.
         case 'author':
-          $name = ($node->uid == 0) ? config_get('system.core', 'anonymous') : $node->name;
+          $name = ($node->uid == 0) ? config_get_translated('system.core', 'anonymous') : $node->name;
           $replacements[$original] = $sanitize ? filter_xss($name) : $name;
           break;
 

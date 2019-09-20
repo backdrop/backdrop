@@ -34,6 +34,9 @@ function filter_theme() {
     'filter_guidelines' => array(
       'variables' => array('format' => NULL),
     ) + $base,
+    'filter_format_editor_image_form' => array(
+        'render element' => 'form',
+    ) + $base,
   );
 }
 
@@ -45,6 +48,12 @@ function filter_theme() {
  */
 function filter_element_info() {
   $type['text_format'] = array(
+    // The text format selected by default for this element.
+    '#format' => NULL,
+    // Whether file uploads are permitted through the editor (if supported).
+    // Disable by default, modules must specifically implement saving files as
+    // permanent when they save their text data. See filter_entity_insert().
+    '#editor_uploads' => FALSE,
     '#process' => array('filter_process_format'),
     '#base_type' => 'textarea',
     '#theme_wrappers' => array('text_format_wrapper'),
@@ -67,8 +76,8 @@ function filter_menu() {
     'title' => 'Edit image',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('filter_format_editor_link_form', 3),
-    'access callback' => 'filter_format_access',
-    'access arguments' => array(3),
+    'access callback' => 'filter_dialog_access',
+    'access arguments' => array(3, 'link'),
     'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
@@ -77,8 +86,8 @@ function filter_menu() {
     'title' => 'Edit image',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('filter_format_editor_image_form', 3),
-    'access callback' => 'filter_format_access',
-    'access arguments' => array(3),
+    'access callback' => 'filter_dialog_access',
+    'access arguments' => array(3, 'image'),
     'theme callback' => 'ajax_base_page_theme',
     'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
@@ -104,7 +113,7 @@ function filter_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/config/content/formats/add'] = array(
-    'title' => 'Add text editor',
+    'title' => 'Add text format',
     'page callback' => 'filter_admin_format_page',
     'access arguments' => array('administer filters'),
     'type' => MENU_LOCAL_ACTION,
@@ -126,6 +135,12 @@ function filter_menu() {
     'access callback' => '_filter_disable_format_access',
     'access arguments' => array(4),
     'file' => 'filter.admin.inc',
+  );
+  $items['filter-link/autocomplete'] = array(
+    'page callback' => '_filter_link_autocomplete',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'filter.pages.inc',
   );
   return $items;
 }
@@ -164,6 +179,29 @@ function _filter_disable_format_access($format) {
 }
 
 /**
+ * Access callback: Generic dialog access check callback.
+ *
+ * Ensures that a dialog is only opened from a safe calling page and via an
+ * AJAX request from the same site.
+ */
+function filter_dialog_access($format, $dialog_name, $account = NULL, $calling_path = NULL) {
+  if (!isset($account)) {
+    $account = $GLOBALS['user'];
+  }
+  if (!isset($calling_path) && isset($_GET['token'])) {
+    $calling_path = $_GET['calling_path'];
+  }
+
+  $format_access = filter_access($format, $account);
+  $tokens_match = FALSE;
+  if (isset($_GET['token'])) {
+    $tokens_match = ($_GET['token'] === filter_editor_dialog_token($format, $dialog_name, $account, $calling_path));
+  }
+
+  return $format_access && $tokens_match;
+}
+
+/**
  * Implements hook_config_info().
  */
 function filter_config_info() {
@@ -199,7 +237,7 @@ function filter_config_data_validate(Config $config, array $config_info) {
  * @param $format_id
  *   The format ID.
  *
- * @return
+ * @return stdClass
  *   A fully-populated text format object, if the requested format exists and
  *   is enabled. If the format does not exist, or exists in the database but
  *   has been marked as disabled, FALSE is returned.
@@ -546,6 +584,16 @@ function filter_permission() {
     'restrict access' => TRUE,
   );
 
+  $perms['upload editor images'] = array(
+    'title' => t('Upload images through editor dialogs'),
+    'description' => t('Allow users with access to image dialogs to upload files.'),
+  );
+
+  $perms['upload editor files'] = array(
+    'title' => t('Upload files through editor dialogs'),
+    'description' => t('Allow users with access to editor dialogs to upload files.'),
+  );
+
   // Generate permissions for each text format. Warn the administrator that any
   // of them are potentially unsafe.
   foreach (filter_formats() as $format) {
@@ -645,7 +693,7 @@ function filter_modules_disabled($modules) {
  *   account will be returned. All formats will be returned otherwise. Defaults
  *   to NULL.
  *
- * @return array
+ * @return stdClass[]
  *   An array of text format objects, keyed by the format ID and ordered by
  *   weight.
  *
@@ -764,6 +812,41 @@ function filter_editor_load($editor_name) {
 }
 
 /**
+ * Generate a URL token for checking access to an editor dialog.
+ *
+ * Note that we do not use backdrop_get_token() because it requires an active
+ * session.
+ *
+ * @param stdClass $format
+ *   An object representing the text format.
+ * @param string $dialog_name
+ *   The type of dialog that will be opened.
+ * @param User $account
+ *   The user account that will be opening the dialog.
+ * @param string $path
+ *   The path from which the dialog will be opened. Defaults to the current
+ *   path.
+ *
+ * @return string
+ *   A token intended to be used in a query string.
+ */
+function filter_editor_dialog_token($format, $dialog_name, $account = NULL, $path = NULL) {
+  if (!isset($account)) {
+    $account = $GLOBALS['user'];
+  }
+  if (!isset($path)) {
+    $path = $_GET['q'];
+  }
+  $values = array(
+    $path,
+    $format->format,
+    $dialog_name,
+    $account->uid,
+  );
+  return backdrop_hmac_base64(implode('-', $values), backdrop_get_private_key() . backdrop_get_hash_salt());
+}
+
+/**
  * Retrieves a list of roles that are allowed to use a given text format.
  *
  * @param $format
@@ -854,11 +937,10 @@ function filter_default_format($account = NULL) {
  * administrators have the freedom to configure it further.
  *
  * Note that the fallback format is completely distinct from the default format,
- * which differs per user and is simply the first format which that user has
- * access to. The default and fallback formats are only guaranteed to be the
- * same for users who do not have access to any other format; otherwise, the
- * fallback format's weight determines its placement with respect to the user's
- * other formats.
+ * which differs per user and is the first format which that user has access to.
+ * The default and fallback formats are only guaranteed to be the same for users
+ * who do not have access to any other format; otherwise, the fallback format's
+ * weight determines its placement with respect to the user's other formats.
  *
  * Any modules implementing a format deletion functionality must not delete this
  * format.
@@ -980,6 +1062,7 @@ function _filter_format_is_cacheable($format) {
  * @deprecated since 1.0
  */
 function filter_list_format($format_id) {
+  watchdog_deprecated_function('Filter', __FUNCTION__);
   if ($format = filter_format_load($format_id)) {
     return $format->filters;
   }
@@ -1146,6 +1229,9 @@ function filter_process_format($element) {
     $element['#attached'] = filter_get_attached($formats);
   }
 
+  // Specify if uploads are allowed by using a data attribute.
+  $element['value']['#attributes']['data-editor-uploads'] = empty($element['#editor_uploads']) ? 'false' : 'true';
+
   // Use the default format for this user if none was selected.
   if (!isset($element['#format'])) {
     $element['#format'] = filter_default_format($user);
@@ -1161,8 +1247,8 @@ function filter_process_format($element) {
   $element['format'] = array(
     '#type' => 'fieldset',
     '#attributes' => array('class' => array('filter-wrapper')),
-    '#title' => 'Formatting options',
-    '#collapsible' => TRUE, 
+    '#title' => t('Formatting options'),
+    '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
 
@@ -1431,7 +1517,7 @@ function _filter_tips($format_id, $long = FALSE) {
  * @param $text
  *   The partial (X)HTML snippet to load. Invalid mark-up will be corrected on
  *   import.
- * @return
+ * @return DOMDocument
  *   A DOMDocument that represents the loaded (X)HTML snippet.
  */
 function filter_dom_load($text) {
@@ -1539,31 +1625,33 @@ function filter_entity_update(EntityInterface $entity) {
   // deletion of previous file usages are necessary.
   $entity_info = entity_get_info($entity->entityType());
   $vid_key = isset($entity_info['entity keys']['revision']) ? $entity_info['entity keys']['revision'] : NULL;
-  if (!empty($entity->original) && $vid_key && $entity->$vid_key != $entity->original->$vid_key) {
-    $referenced_files_by_field = _filter_get_file_ids_by_field($entity);
-    foreach ($referenced_files_by_field as $field => $fids) {
-      _filter_record_file_usage($fids, $entity);
-    }
-  }
-
-  // On modified revisions, detect which file references have been added (and
-  // record their usage) and which ones have been removed (delete their usage).
-  // File references that existed both in the previous version of the revision
-  // and in the new one don't need their usage to be updated.
-  else {
-    $original_fids_by_field = _filter_get_file_ids_by_field($entity->original);
-    $fids_by_field = _filter_get_file_ids_by_field($entity);
-
-    // Detect file usages that should be incremented.
-    foreach ($fids_by_field as $field => $fids) {
-      $added_files = array_diff($fids_by_field[$field], $original_fids_by_field[$field]);
-      _filter_record_file_usage($added_files, $entity);
+  if (!empty($entity->original)) {
+    if ($vid_key && $entity->$vid_key != $entity->original->$vid_key) {
+      $referenced_files_by_field = _filter_get_file_ids_by_field($entity);
+      foreach ($referenced_files_by_field as $field => $fids) {
+        _filter_record_file_usage($fids, $entity);
+      }
     }
 
-    // Detect file usages that should be decremented.
-    foreach ($original_fids_by_field as $field => $fids) {
-      $removed_files = array_diff($original_fids_by_field[$field], $fids_by_field[$field]);
-      _filter_delete_file_usage($removed_files, $entity, 1);
+    // On modified revisions, detect which file references have been added (and
+    // record their usage) and which ones have been removed (delete their usage).
+    // File references that existed both in the previous version of the revision
+    // and in the new one don't need their usage to be updated.
+    else {
+      $original_fids_by_field = _filter_get_file_ids_by_field($entity->original);
+      $fids_by_field = _filter_get_file_ids_by_field($entity);
+
+      // Detect file usages that should be incremented.
+      foreach ($fids_by_field as $field => $fids) {
+        $added_files = array_diff($fids_by_field[$field], $original_fids_by_field[$field]);
+        _filter_record_file_usage($added_files, $entity);
+      }
+
+      // Detect file usages that should be decremented.
+      foreach ($original_fids_by_field as $field => $fids) {
+        $removed_files = array_diff($original_fids_by_field[$field], $fids_by_field[$field]);
+        _filter_delete_file_usage($removed_files, $entity, 1);
+      }
     }
   }
 }
@@ -1605,7 +1693,7 @@ function filter_node_revision_delete(Node $node) {
 function _filter_record_file_usage(array $fids, EntityInterface $entity) {
   foreach ($fids as $fid) {
     $file = file_load($fid);
-    if ($file->status != FILE_STATUS_PERMANENT) {
+    if ($file && $file->status != FILE_STATUS_PERMANENT) {
       $file->status = FILE_STATUS_PERMANENT;
       $file->save();
     }
@@ -1626,8 +1714,9 @@ function _filter_record_file_usage(array $fids, EntityInterface $entity) {
  */
 function _filter_delete_file_usage(array $fids, EntityInterface $entity, $count) {
   foreach ($fids as $fid) {
-    $file = file_load($fid);
-    file_usage_delete($file, 'filter', $entity->entityType(), $entity->id(), $count);
+    if ($file = file_load($fid)) {
+      file_usage_delete($file, 'filter', $entity->entityType(), $entity->id(), $count);
+    }
   }
 }
 
@@ -1650,10 +1739,10 @@ function _filter_get_file_ids_by_field(EntityInterface $entity) {
       foreach ($entity->$processed_text_field as $langcode => $values) {
         foreach ($values as $delta => $text) {
           if (isset($text['value'])) {
-            $fids[$processed_text_field] = array_merge($fids[$processed_text_field], _filter_parse_file_fids($text['value']));
+            $fids[$processed_text_field] = array_merge($fids[$processed_text_field], filter_parse_file_fids($text['value']));
           }
           if (isset($text['summary'])) {
-            $fids[$processed_text_field] = array_merge($fids[$processed_text_field], _filter_parse_file_fids($text['summary']));
+            $fids[$processed_text_field] = array_merge($fids[$processed_text_field], filter_parse_file_fids($text['summary']));
           }
         }
       }
@@ -1693,7 +1782,7 @@ function _filter_get_processed_text_fields(EntityInterface $entity) {
  * @return array
  *   An array of all found FIDs.
  */
-function _filter_parse_file_fids($text) {
+function filter_parse_file_fids($text) {
   $dom = filter_dom_load($text);
   $xpath = new DOMXPath($dom);
   $fids = array();
@@ -2165,7 +2254,7 @@ function _filter_url_escape_comments($match, $escape = NULL) {
   // Replace all HTML coments with a '<!-- [hash] -->' placeholder.
   if ($mode) {
     $content = $match[1];
-    $hash = md5($content);
+    $hash = hash('sha256', $content);
     $comments[$hash] = $content;
     return "<!-- $hash -->";
   }
@@ -2298,7 +2387,7 @@ function _filter_autop_tips($filter, $format, $long = FALSE) {
   }
 
   if ($long) {
-    return t('Lines and paragraphs are automatically recognized. The &lt;br /&gt; line break, &lt;p&gt; paragraph and &lt;/p&gt; close paragraph tags are inserted automatically. If paragraphs are not recognized simply add a couple blank lines.');
+    return t('Lines and paragraphs are automatically recognized. The &lt;br /&gt; line break, &lt;p&gt; paragraph and &lt;/p&gt; close paragraph tags are inserted automatically. If paragraphs are not recognized, add a couple blank lines.');
   }
   else {
     return t('Lines and paragraphs break automatically.');
@@ -2358,17 +2447,19 @@ function _filter_image_caption($text) {
     // bubble up the value of the class attribute of the captioned element,
     // this allows it to collaborate with e.g. the filter_align filter.
     $attributes = array();
+    $tag = $node->tagName;
     $classes = $node->getAttribute('class');
+    $node->removeAttribute('class');
+    $node = ($node->parentNode->tagName === 'a') ? $node->parentNode : $node;
     if ($classes) {
       $attributes['class'] = explode(' ', $classes);
     }
     $attributes['class'][] = 'caption';
     $attributes['class'][] = 'caption-' . $node->tagName;
-    $node->removeAttribute('class');
 
     $theme_parameters = array(
-      'item' => $node->ownerDocument->saveHTML($node),
-      'tag' => $node->tagName,
+      'item' => $node->ownerDocument->saveXML($node),
+      'tag' => $tag,
       'caption' => $caption,
       'attributes' => $attributes,
     );
@@ -2393,7 +2484,7 @@ function _filter_image_caption($text) {
     // one, importing also the child nodes of the updated node.
     $updated_node = $dom->importNode($updated_node, TRUE);
 
-    // Finally, replace the original image node with the new image node.
+    // Finally, replace the original node with the new node.
     $node->parentNode->replaceChild($updated_node, $node);
   }
 
@@ -2453,3 +2544,5 @@ function _filter_image_align($text) {
 /**
  * @} End of "Standard filters".
  */
+
+

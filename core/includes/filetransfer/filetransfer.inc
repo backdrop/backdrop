@@ -36,8 +36,11 @@ abstract class FileTransfer {
    *   An array of connection settings for the FileTransfer subclass. If the
    *   getSettingsForm() method uses any nested settings, the same structure
    *   will be assumed here.
-   * @return object
+   *
+   * @return FileTransfer
    *   New instance of the appropriate FileTransfer subclass.
+   *
+   * @throws FileTransferException
    */
   static function factory($jail, $settings) {
     throw new FileTransferException('FileTransfer::factory() static method not overridden by FileTransfer subclass.');
@@ -60,12 +63,14 @@ abstract class FileTransfer {
       $this->setChroot();
       return $this->chroot;
     }
+
+    return NULL;
   }
 
   /**
    * Connects to the server.
    */
-  abstract protected function connect();
+  abstract public function connect();
 
   /**
    * Copies a directory.
@@ -86,8 +91,10 @@ abstract class FileTransfer {
    * @see http://php.net/chmod
    *
    * @param string $path
-   * @param long $mode
+   * @param int $mode
    * @param bool $recursive
+   *
+   * @throws FileTransferException
    */
   public final function chmod($path, $mode, $recursive = FALSE) {
     if (!in_array('FileTransferChmodInterface', class_implements(get_class($this)))) {
@@ -155,6 +162,9 @@ abstract class FileTransfer {
    *
    * @param $path
    *   A path to check against the jail.
+   *
+   * @throws FileTransferException
+   *
    */
   protected final function checkPath($path) {
     $full_jail = $this->chroot . $this->jail;
@@ -382,7 +392,7 @@ interface FileTransferChmodInterface {
    *
    * @param string $path
    *   Path to change permissions of.
-   * @param long $mode
+   * @param int $mode
    *   The new file permission mode to be passed to chmod().
    * @param boolean $recursive
    *   Pass TRUE to recursively chmod the entire directory specified in $path.

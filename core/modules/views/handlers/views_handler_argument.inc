@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * @todo.
@@ -737,8 +736,7 @@ class views_handler_argument extends views_handler {
   /**
    * Default action: ignore.
    *
-   * If an argument was expected and was not given, in this case, simply
-   * ignore the argument entirely.
+   * If an argument was expected and not given, ignore the argument entirely.
    */
   function default_ignore() {
     return TRUE;

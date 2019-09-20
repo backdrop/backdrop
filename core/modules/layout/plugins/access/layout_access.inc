@@ -61,6 +61,7 @@ class LayoutAccess extends LayoutHandler {
    * Settings form for configuring this access item.
    */
   function form(&$form, &$form_state) {
+    /* @var Layout|LayoutMenuItem $item */
     if ($form_state['menu_item']) {
       $item = $form_state['menu_item'];
     }
@@ -85,7 +86,7 @@ class LayoutAccess extends LayoutHandler {
    * Submit handler for the settings form for this access item.
    */
   function formSubmit($form, &$form_state) {
-    $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op'));
+    $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'condition'));
     $settings = array_diff_key($form_state['values'], $excluded);
     $this->settings = array_merge($this->settings, $settings);
   }

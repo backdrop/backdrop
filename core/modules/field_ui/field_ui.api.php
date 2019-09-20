@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the Field UI module.
@@ -139,7 +138,7 @@ function hook_field_widget_settings_form($field, $instance) {
  * @param $instance
  *   The instance structure being configured.
  * @param $view_mode
- *   The view mode being configured.
+ *   The Display mode being configured.
  * @param $form
  *   The (entire) configuration form array, which will usually have no use here.
  * @param $form_state
@@ -181,7 +180,7 @@ function hook_field_formatter_settings_form($field, $instance, $view_mode, $form
  * @param $instance
  *   The instance structure.
  * @param $view_mode
- *   The view mode for which a settings summary is requested.
+ *   The Display mode for which a settings summary is requested.
  *
  * @return
  *   A string containing a short summary of the formatter settings.

@@ -710,7 +710,7 @@ class views_plugin_display extends views_plugin {
   function uses_link_display() { return !$this->has_path(); }
 
   /**
-   * Check to see if the display can put the exposed formin a block.
+   * Check to see if the display can put the exposed form in a block.
    *
    * By default, displays that do not have a path cannot disconnect
    * the exposed form and put it in a block, because the form has no
@@ -1077,13 +1077,20 @@ class views_plugin_display extends views_plugin {
         'title' => t('Format'),
         'column' => 'first',
       ),
+      'fields' => array(
+        'title' => t('Fields'),
+        'column' => 'first',
+      ),
       'filters' => array(
         'title' => t('Filters'),
         'column' => 'first',
       ),
-      'fields' => array(
-        'title' => t('Fields'),
-        'column' => 'first',
+      'access' => array(
+        'title' => t('Access'),
+        'column' => 'second',
+        'build' => array(
+          '#weight' => -5,
+        ),
       ),
       'pager' => array(
         'title' => t('Pager'),
@@ -1094,13 +1101,6 @@ class views_plugin_display extends views_plugin {
         'column' => 'third',
         'build' => array(
           '#weight' => 1,
-        ),
-      ),
-      'access' => array(
-        'title' => '',
-        'column' => 'second',
-        'build' => array(
-          '#weight' => -5,
         ),
       ),
       'other' => array(
@@ -1329,7 +1329,7 @@ class views_plugin_display extends views_plugin {
     if ($this->uses_exposed_form_in_block()) {
       $options['exposed_block'] = array(
         'category' => 'exposed',
-        'title' => t('Exposed form in block'),
+        'title' => t('Create exposed form block'),
         'value' => $this->get_option('exposed_block') ? t('Yes') : t('No'),
         'desc' => t('Allow the exposed form to appear in a block instead of the view.'),
       );
@@ -1791,8 +1791,9 @@ class views_plugin_display extends views_plugin {
           ),
         );
         break;
+
       case 'analyze-theme':
-        $form['#title'] .= t('Theming information');
+        $form['#title'] .= t('Theme developer information');
         $form['#help_topic'] = 'analyze-theme';
 
         if (isset($_POST['theme'])) {
@@ -1908,14 +1909,16 @@ class views_plugin_display extends views_plugin {
         }
 
         $form['important'] = array(
-          '#markup' => '<div class="form-item description"><p>' . t('This section lists all possible templates for the display plugin and for the style plugins, ordered roughly from the least specific to the most specific. The active template for each plugin -- which is the most specific template found on the system -- is highlighted in bold.') . '</p></div>',
+          'message' => array(
+            '#markup' => '<div class="form-item description"><p>' . t('This section lists all possible templates for the display plugin and for the style plugins, ordered roughly from the least specific to the most specific. The active template for each plugin -- which is the most specific template found on the system -- is highlighted in bold.') . '</p></div>',
+          ),
         );
 
         if (isset($this->view->display[$this->view->current_display]->new_id)) {
           $form['important']['new_id'] = array(
             '#prefix' => '<div class="description">',
             '#suffix' => '</div>',
-            '#value' => t("<strong>Important!</strong> You have changed the display's machine name. Anything that attached to this display specifically, such as theming, may stop working until it is updated. To see theme suggestions for it, you need to save the view."),
+            '#markup' => t("<strong>Important!</strong> You have changed the display's machine name. Anything that attached to this display specifically (a template file, for example) may stop working until it is updated. To see updated theme suggestions, save the view."),
           );
         }
 
@@ -1961,22 +1964,23 @@ class views_plugin_display extends views_plugin {
 
         $form_state['ok_button'] = TRUE;
         break;
+
       case 'analyze-theme-display':
-        $form['#title'] .= t('Theming information (display)');
-        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theming information'), 'analyze-theme'))) . '</p>';
+        $form['#title'] .= t('Theme developer information (display)');
+        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theme developer information'), 'analyze-theme'))) . '</p>';
 
         if (empty($this->definition['theme'])) {
-          $output .= t('This display has no theming information');
+          $output .= t('This display has no theme developer information');
         }
         else {
           $output .= '<p>' . t('This is the default theme template used for this display.') . '</p>';
-          $output .= '<pre>' . check_plain(file_get_contents('./' . $this->definition['theme path'] . '/' . strtr($this->definition['theme'], '_', '-') . '.tpl.php')) . '</pre>';
+          $output .= '<textarea readonly="readonly" rows="15" cols="82" class="code-sample">' . check_plain(file_get_contents('./' . $this->definition['theme path'] . '/' . strtr($this->definition['theme'], '_', '-') . '.tpl.php')) . '</textarea>';
         }
 
         if (!empty($this->definition['additional themes'])) {
           foreach ($this->definition['additional themes'] as $theme => $type) {
             $output .= '<p>' . t('This is an alternative template for this display.') . '</p>';
-            $output .= '<pre>' . check_plain(file_get_contents('./' . $this->definition['theme path'] . '/' . strtr($theme, '_', '-') . '.tpl.php')) . '</pre>';
+            $output .= '<textarea readonly="readonly" rows="15" cols="82" class="code-sample">' . check_plain(file_get_contents('./' . $this->definition['theme path'] . '/' . strtr($theme, '_', '-') . '.tpl.php')) . '</textarea>';
           }
         }
 
@@ -1987,23 +1991,23 @@ class views_plugin_display extends views_plugin {
         $form_state['ok_button'] = TRUE;
         break;
       case 'analyze-theme-style':
-        $form['#title'] .= t('Theming information (style)');
-        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theming information'), 'analyze-theme'))) . '</p>';
+        $form['#title'] .= t('Theme developer information (style)');
+        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theme developer information'), 'analyze-theme'))) . '</p>';
 
         $plugin = $this->get_plugin();
 
         if (empty($plugin->definition['theme'])) {
-          $output .= t('This display has no style theming information');
+          $output .= t('This display has no style theme developer information');
         }
         else {
           $output .= '<p>' . t('This is the default theme template used for this style.') . '</p>';
-          $output .= '<pre>' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($plugin->definition['theme'], '_', '-') . '.tpl.php')) . '</pre>';
+          $output .= '<textarea readonly="readonly" rows="15" cols="82" class="code-sample">' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($plugin->definition['theme'], '_', '-') . '.tpl.php')) . '</textarea>';
         }
 
         if (!empty($plugin->definition['additional themes'])) {
           foreach ($plugin->definition['additional themes'] as $theme => $type) {
             $output .= '<p>' . t('This is an alternative template for this style.') . '</p>';
-            $output .= '<pre>' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($theme, '_', '-') . '.tpl.php')) . '</pre>';
+            $output .= '<textarea readonly="readonly" rows="15" cols="82" class="code-sample">' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($theme, '_', '-') . '.tpl.php')) . '</textarea>';
           }
         }
 
@@ -2014,23 +2018,23 @@ class views_plugin_display extends views_plugin {
         $form_state['ok_button'] = TRUE;
         break;
       case 'analyze-theme-row':
-        $form['#title'] .= t('Theming information (row style)');
-        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theming information'), 'analyze-theme'))) . '</p>';
+        $form['#title'] .= t('Theme developer information (row style)');
+        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theme developer information'), 'analyze-theme'))) . '</p>';
 
         $plugin = $this->get_plugin('row');
 
         if (empty($plugin->definition['theme'])) {
-          $output .= t('This display has no row style theming information');
+          $output .= t('This display has no row style theme developer information');
         }
         else {
           $output .= '<p>' . t('This is the default theme template used for this row style.') . '</p>';
-          $output .= '<pre>' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($plugin->definition['theme'], '_', '-') . '.tpl.php')) . '</pre>';
+          $output .= '<textarea readonly="readonly" rows="15" cols="82" class="code-sample">' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($plugin->definition['theme'], '_', '-') . '.tpl.php')) . '</textarea>';
         }
 
         if (!empty($plugin->definition['additional themes'])) {
           foreach ($plugin->definition['additional themes'] as $theme => $type) {
             $output .= '<p>' . t('This is an alternative template for this row style.') . '</p>';
-            $output .= '<pre>' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($theme, '_', '-') . '.tpl.php')) . '</pre>';
+            $output .= '<textarea readonly="readonly" rows="15" cols="82" class="code-sample">' . check_plain(file_get_contents('./' . $plugin->definition['theme path'] . '/' . strtr($theme, '_', '-') . '.tpl.php')) . '</textarea>';
           }
         }
 
@@ -2041,14 +2045,14 @@ class views_plugin_display extends views_plugin {
         $form_state['ok_button'] = TRUE;
         break;
       case 'analyze-theme-field':
-        $form['#title'] .= t('Theming information (row style)');
-        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theming information'), 'analyze-theme'))) . '</p>';
+        $form['#title'] .= t('Theme developer information (row style)');
+        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theme developer information'), 'analyze-theme'))) . '</p>';
 
         $output .= '<p>' . t('This is the default theme template used for this row style.') . '</p>';
 
         // Field templates aren't registered the normal way...and they're always
         // this one, anyhow.
-        $output .= '<pre>' . check_plain(file_get_contents(backdrop_get_path('module', 'views') . '/templates/views-view-field.tpl.php')) . '</pre>';
+        $output .= '<textarea readonly="readonly" rows="15" cols="82" class="code-sample">' . check_plain(file_get_contents(backdrop_get_path('module', 'views') . '/templates/views-view-field.tpl.php')) . '</textarea>';
 
         $form['analysis'] = array(
           '#markup' => '<div class="form-item">' . $output . '</div>',
@@ -2118,7 +2122,7 @@ class views_plugin_display extends views_plugin {
           '#default_value' => $pager['type'],
         );
 
-        $pager_plugin = views_fetch_plugin_data('pager', $pager['type'], array($this->view->base_table));
+        $pager_plugin = views_fetch_plugin_data('pager', $pager['type']);
         if (!empty($pager_plugin['uses options'])) {
           $form['markup'] = array(
             '#prefix' => '<div class="form-item description">',
@@ -2758,11 +2762,13 @@ class views_plugin_display extends views_plugin {
 
     if ($this->uses_exposed_form_in_block()) {
       $delta = '-exp-' . $this->view->name . '-' . $this->display->id;
-      $desc = t('Exposed form: @view-@display_id', array('@view' => $this->view->name, '@display_id' => $this->display->id));
+      $title = t('Exposed form: @view (@display_id)', array('@view' => $this->view->get_human_name(), '@display_id' => $this->display->id));
 
       $blocks[$delta] = array(
-        'info' => $desc,
+        'info' => $title,
+        'description' => t('Provides filters that a user may change to adjust the results of a view.'),
         'cache' => BACKDROP_NO_CACHE,
+        'class' => 'ViewsSpecialBlock',
       );
     }
 

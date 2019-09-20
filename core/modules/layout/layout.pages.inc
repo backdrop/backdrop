@@ -15,6 +15,7 @@ function layout_page_callback() {
   // Determine the correct layout to use at this path.
   $layouts = layout_load_multiple_by_path($menu_item->path);
   $match_found = FALSE;
+  $layout = NULL;
   foreach ($layouts as $layout) {
     if ($layout->disabled) {
       continue;
@@ -41,7 +42,7 @@ function layout_page_callback() {
   }
 
   // Use the selected layout and render it.
-  $renderer = layout_create_renderer('standard', $layout);
+  $renderer = layout_create_renderer($layout->renderer_name, $layout);
   return $renderer->render();
 }
 

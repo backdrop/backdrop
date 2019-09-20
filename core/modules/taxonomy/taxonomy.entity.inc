@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity classes and controllers for Taxonomy module.
@@ -30,6 +29,13 @@ class TaxonomyTerm extends Entity {
    * @var string
    */
   public $name;
+
+  /**
+   * Language of the term.
+   *
+   * @var string
+   */
+  public $langcode = LANGUAGE_NONE;
 
   /**
    * (optional) Description of the term.
@@ -104,6 +110,59 @@ class TaxonomyTerm extends Entity {
       'options' => array(),
     );
   }
+
+  /**
+   * Overrides Entity::createAccess().
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    return user_access('administer taxonomy', $account);
+  }
+
+  /**
+   * Overrides Entity::access().
+   *
+   * @param string $op
+   *   The operation to be performed on the taxonomy term. Possible values are:
+   *   - create
+   *   - view
+   *   - update
+   *   - delete
+   * @param User|AnonymousUser|object $account
+   *   (optional) The user to check for. Leave it to NULL to check for the
+   *   global user.
+   *
+   * @return bool
+   *   TRUE if access is granted, FALSE otherwise.
+   */
+  public function access($op, $account = NULL) {
+    if ($op == 'create') {
+      return self::createAccess($this->bundle(), $account);
+    }
+    elseif (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
+      // If the $op was not one of the supported ones, we return access denied.
+      return FALSE;
+    }
+
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    if ($op == 'view') {
+      return user_access('access content', $account);
+    }
+    elseif ($op == 'update' || $op == 'delete') {
+      return user_access("$op terms in $this->vocabulary", $account) || user_access('administer taxonomy', $account);
+    }
+
+    return FALSE;
+  }
+
 }
 
 /**
@@ -134,7 +193,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
   protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
     $query = parent::buildQuery($ids, $conditions, $revision_id);
     $query->addTag('translatable');
-    $query->addTag('term_access');
+    $query->addTag('taxonomy_term_access');
     // When name is passed as a condition use LIKE.
     if (isset($conditions['name'])) {
       $query_conditions = &$query->conditions();
@@ -165,6 +224,9 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::postDelete().
+   *
+   * @param TaxonomyTerm[] $entities
+   *   An array of term entities that were just deleted.
    */
   protected function postDelete($entities) {
     // See if any of the term's children are about to be become orphans.
@@ -196,6 +258,9 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
 
   /**
    * Overrides EntityDatabaseStorageController::postSave().
+   *
+   * @param TaxonomyTerm $entity
+   *   The term entity that was just saved.
    */
   protected function postSave(EntityInterface $entity, $update) {
     if (isset($entity->parent)) {

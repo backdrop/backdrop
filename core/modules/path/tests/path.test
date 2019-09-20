@@ -8,11 +8,22 @@
  * Provides a base class for testing the Path module.
  */
 class PathTestCase extends BackdropWebTestCase {
-  function setUp() {
-    parent::setUp('path');
+  protected $profile = 'minimal';
+
+  function setUp($modules = array()) {
+    $modules[] = 'path';
+    parent::setUp($modules);
+
+    $this->backdropCreateContentType(array(
+      'type' => 'page',
+      'name' => 'Page',
+    ));
+
+    // Set a default path pattern for all node types.
+    config_set('path.settings', 'node_pattern', '[node:content-type]/[node:title]');
 
     // Create test user and login.
-    $web_user = $this->backdropCreateUser(array('create page content', 'edit own page content', 'create post content', 'edit own post content', 'administer url aliases', 'create url aliases'));
+    $web_user = $this->backdropCreateUser(array('access content', 'create page content', 'edit own page content', 'administer url aliases', 'create url aliases', 'access content overview'));
     $this->backdropLogin($web_user);
   }
 
@@ -27,7 +38,7 @@ class PathTestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['source'] = 'node/' . $node1->nid;
     $edit['alias'] = $this->randomName(8);
-    $this->backdropPost('admin/config/search/path/add', $edit, t('Save URL alias'));
+    $this->backdropPost('admin/config/urls/path/add', $edit, t('Save URL alias'));
 
     // Visit the system path for the node and confirm a cache entry is
     // created.
@@ -54,7 +65,7 @@ class PathTestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['source'] = 'node/' . $node1->nid;
     $edit['alias'] = $this->randomName(8);
-    $this->backdropPost('admin/config/search/path/add', $edit, t('Save URL alias'));
+    $this->backdropPost('admin/config/urls/path/add', $edit, t('Save URL alias'));
 
     // Confirm that the alias works.
     $this->backdropGet($edit['alias']);
@@ -68,7 +79,7 @@ class PathTestCase extends BackdropWebTestCase {
     $edit['alias'] = "- ._~!$'\"()*@[]?&+%#,;=:" . // "Special" ASCII characters.
       "%23%25%26%2B%2F%3F" . // Characters that look like a percent-escaped string.
       "éøïвβ中國書۞"; // Characters from various non-ASCII alphabets.
-    $this->backdropPost('admin/config/search/path/edit/' . $pid, $edit, t('Save URL alias'));
+    $this->backdropPost('admin/config/urls/path/edit/' . $pid, $edit, t('Save URL alias'));
 
     // Confirm that the alias works.
     $this->backdropGet($edit['alias']);
@@ -87,18 +98,46 @@ class PathTestCase extends BackdropWebTestCase {
     // Set alias to second test node.
     $edit['source'] = 'node/' . $node2->nid;
     // leave $edit['alias'] the same
-    $this->backdropPost('admin/config/search/path/add', $edit, t('Save URL alias'));
+    $this->backdropPost('admin/config/urls/path/add', $edit, t('Save URL alias'));
 
     // Confirm no duplicate was created.
     $this->assertRaw(t('The alias %alias is already in use in this language.', array('%alias' => $edit['alias'])), 'Attempt to move alias was rejected.');
 
     // Delete alias.
-    $this->backdropPost('admin/config/search/path/edit/' . $pid, array(), t('Delete'));
+    $this->backdropPost('admin/config/urls/path/edit/' . $pid, array(), t('Delete'));
     $this->backdropPost(NULL, array(), t('Confirm'));
 
     // Confirm that the alias no longer works.
     $this->backdropGet($edit['alias']);
     $this->assertNoText($node1->title, 'Alias was successfully deleted.');
+    $this->assertResponse(404);
+
+    // Create third test node.
+    $node3 = $this->backdropCreateNode();
+
+    // Create an invalid alias with a leading slash and verify that the slash
+    // is removed when the link is generated. This ensures that URL aliases
+    // cannot be used to inject external URLs.
+    // @todo The user interface should either display an error message or
+    //   automatically trim these invalid aliases, rather than allowing them to
+    //   be silently created, at which point the functional aspects of this
+    //   test will need to be moved elsewhere and switch to using a
+    //   programmatically-created alias instead.
+    $alias = $this->randomName(8);
+    $edit = array('source' => 'node/' . $node3->nid, 'alias' => '/' . $alias);
+    $this->backdropPost('admin/config/urls/path/add', $edit, t('Save URL alias'));
+    $this->backdropGet('admin/content');
+    // This checks the link href before clicking it, rather than using
+    // BackdropWebTestCase::assertUrl() after clicking it, because the test
+    // browser does not always preserve the correct number of slashes in the
+    // URL when it visits internal links; using BackdropWebTestCase::assertUrl()
+    // would actually make the test pass unconditionally on the testbot (or
+    // anywhere else where Backdrop is installed in a subdirectory).
+    $link_xpath = $this->xpath('//a[normalize-space(text())=:label]', array(':label' => $node3->title));
+    $link_href = (string) $link_xpath[0]['href'];
+    $link_prefix = base_path() . (config_get('system.core', 'clean_url') ? '' : '?q=');
+    $this->assertEqual($link_href, $link_prefix . $alias);
+    $this->clickLink($node3->title);
     $this->assertResponse(404);
   }
 
@@ -107,12 +146,11 @@ class PathTestCase extends BackdropWebTestCase {
    */
   function testNodeAlias() {
     // Create test node.
-    $node1 = $this->backdropCreateNode(array(
-      'type' => 'post',
-    ));
+    $node1 = $this->backdropCreateNode();
 
     // Create alias.
     $edit = array();
+    $edit['path[auto]'] = FALSE;
     $edit['path[alias]'] = $this->randomName(8);
     $this->backdropPost('node/' . $node1->nid . '/edit', $edit, t('Save'));
 
@@ -122,6 +160,7 @@ class PathTestCase extends BackdropWebTestCase {
     $this->assertResponse(200);
 
     // Change alias to one containing "exotic" characters.
+    $edit['path[auto]'] = FALSE;
     $previous = $edit['path[alias]'];
     $edit['path[alias]'] = "- ._~!$'\"()*@[]?&+%#,;=:" . // "Special" ASCII characters.
       "%23%25%26%2B%2F%3F" . // Characters that look like a percent-escaped string.
@@ -177,8 +216,8 @@ class PathTestCase extends BackdropWebTestCase {
     // Create one node with a random alias.
     $node_one = $this->backdropCreateNode();
     $edit = array();
-    $edit['path[alias]'] = $this->randomName();
     $edit['path[auto]'] = FALSE;
+    $edit['path[alias]'] = $this->randomName();
     $this->backdropPost('node/' . $node_one->nid . '/edit', $edit, t('Save'));
 
     // Now create another node and try to set the same alias.
@@ -195,6 +234,11 @@ class PathTestCase extends BackdropWebTestCase {
 class PathTaxonomyTermTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp('path', 'taxonomy');
+
+    // Redirect module is not tested with aliases in these tests. Redirect does
+    // its own testing in RedirectFunctionalTest.
+    module_disable(array('redirect'));
+    menu_rebuild();
 
     // Create and login user.
     $web_user = $this->backdropCreateUser(array('administer url aliases', 'administer taxonomy', 'access administration pages'));
@@ -251,11 +295,29 @@ class PathTaxonomyTermTestCase extends BackdropWebTestCase {
  * Tests URL aliases for translated nodes.
  */
 class PathLanguageTestCase extends BackdropWebTestCase {
-  function setUp() {
-    parent::setUp('path', 'locale', 'translation');
+  protected $profile = 'testing';
+
+  /**
+   * The user account of the logged in user for these tests.
+   *
+   * @var User
+   */
+  protected $web_user;
+
+  function setUp($modules = array()) {
+    $modules[] = 'node';
+    $modules[] = 'path';
+    $modules[] = 'locale';
+    $modules[] = 'translation';
+    parent::setUp($modules);
+
+    $this->backdropCreateContentType(array(
+      'type' => 'page',
+      'name' => 'Page',
+    ));
 
     // Create and login user.
-    $this->web_user = $this->backdropCreateUser(array('edit any page content', 'create page content', 'administer url aliases', 'create url aliases', 'administer languages', 'translate content', 'access administration pages'));
+    $this->web_user = $this->backdropCreateUser(array('access content', 'edit any page content', 'create page content', 'administer url aliases', 'create url aliases', 'administer languages', 'translate content', 'access administration pages'));
     $this->backdropLogin($this->web_user);
 
     // Enable French language.
@@ -422,9 +484,9 @@ class PathLanguageUITestCase extends BackdropWebTestCase {
   function testLanguageNeutralURLs() {
     $name = $this->randomName(8);
     $edit = array();
-    $edit['source'] = 'admin/config/search/path';
+    $edit['source'] = 'admin/config/urls/path';
     $edit['alias'] = $name;
-    $this->backdropPost('admin/config/search/path/add', $edit, t('Save URL alias'));
+    $this->backdropPost('admin/config/urls/path/add', $edit, t('Save URL alias'));
 
     $this->backdropGet($name);
     $this->assertText(t('Filter aliases'), 'Language-neutral URL alias works');
@@ -436,10 +498,10 @@ class PathLanguageUITestCase extends BackdropWebTestCase {
   function testDefaultLanguageURLs() {
     $name = $this->randomName(8);
     $edit = array();
-    $edit['source'] = 'admin/config/search/path';
+    $edit['source'] = 'admin/config/urls/path';
     $edit['alias'] = $name;
     $edit['langcode'] = 'en';
-    $this->backdropPost('admin/config/search/path/add', $edit, t('Save URL alias'));
+    $this->backdropPost('admin/config/urls/path/add', $edit, t('Save URL alias'));
 
     $this->backdropGet($name);
     $this->assertText(t('Filter aliases'), 'English URL alias works');
@@ -451,10 +513,10 @@ class PathLanguageUITestCase extends BackdropWebTestCase {
   function testNonDefaultURLs() {
     $name = $this->randomName(8);
     $edit = array();
-    $edit['source'] = 'admin/config/search/path';
+    $edit['source'] = 'admin/config/urls/path';
     $edit['alias'] = $name;
     $edit['langcode'] = 'fr';
-    $this->backdropPost('admin/config/search/path/add', $edit, t('Save URL alias'));
+    $this->backdropPost('admin/config/urls/path/add', $edit, t('Save URL alias'));
 
     $this->backdropGet('fr/' . $name);
     $this->assertText(t('Filter aliases'), 'Foreign URL alias works');
@@ -516,5 +578,66 @@ class PathMonolingualTestCase extends BackdropWebTestCase {
     $this->clickLink(t('Languages'));
     $this->assertResponse(200, 'Clicked link results in a valid page');
     $this->assertText(t('Add language'), 'Page contains the add language text');
+  }
+}
+
+/**
+ * Tests that path hooks are invoked.
+ */
+class PathHooksTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  function setUp() {
+    parent::setUp(array('node', 'path', 'path_test'));
+    // Disable default path patterns for nodes.
+    config_set('path.settings', 'node_pattern', '');
+    config_set('path.settings', 'node_post_pattern', '');
+
+    $this->backdropCreateContentType(array(
+      'type' => 'page',
+      'name' => 'Page',
+    ));
+    $web_user = $this->backdropCreateUser(array('access content', 'create page content', 'delete own page content', 'administer url aliases', 'create url aliases'));
+    $this->backdropLogin($web_user);
+  }
+
+  function testPathHooks() {
+    // Create test node.
+    $node1 = $this->backdropCreateNode();
+
+    // Generate two test aliases.
+    $alias1 = $this->randomName(8);
+    $alias2 = $this->randomName(8);
+
+    // Insert aliases and test that hook_path_insert() is called.
+    $edit = array();
+    $edit['source'] = 'node/' . $node1->nid;
+    $edit['alias'] = $alias1;
+    $this->backdropPost('admin/config/urls/path/add', $edit, t('Save URL alias'));
+    $this->assertRaw('path_test_path_insert(): ' . $edit['alias'] . ' => ' . $edit['source'], t('hook_path_insert() was called.'));
+
+    $edit['alias'] = $alias2;
+    $this->backdropPost('admin/config/urls/path/add', $edit, t('Save URL alias'));
+
+    // Extract the path ID from the second path alias.
+    $inserted_path = state_get('path_test_inserted_path', array());
+    $pid2 = $inserted_path['pid'];
+
+    // Update the second path alias and test that hook_path_update() is called.
+    $edit['alias'] = $alias2 = $this->randomName(8);
+    $this->backdropPost('admin/config/urls/path/edit/' . $pid2, $edit, t('Save URL alias'));
+    $this->assertRaw('path_test_path_update(): ' . $edit['alias'] . ' => ' . $edit['source'], t('hook_path_update() was called.'));
+
+    // Delete the node and test that hook_path_delete() is called once for each
+    // path alias.
+    $this->backdropPost('node/' . $node1->nid . '/delete', array(), t('Delete'));
+    $this->assertRaw('path_test_path_delete(): ' . $alias1 . ' => node/' . $node1->nid, t('hook_path_delete() was called for the first path alias.'));
+    $this->assertRaw('path_test_path_delete(): ' . $alias2 . ' => node/' . $node1->nid, t('hook_path_delete() was called for the second path alias.'));
+
+    // Test that hook_path_delete() is not called if the node has no path
+    // aliases.
+    $node2 = $this->backdropCreateNode();
+    $this->backdropPost('node/' . $node2->nid . '/delete', array(), t('Delete'));
+    $this->assertNoRaw('path_test_path_delete()', t('hook_path_delete() was not called.'));
   }
 }

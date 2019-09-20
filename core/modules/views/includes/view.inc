@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides the view object type and associated methods.
@@ -178,7 +177,7 @@ class view {
   /**
    * Stores all display handlers of this view.
    *
-   * @var array[views_display]
+   * @var views_display[]
    */
   var $display;
 
@@ -1185,7 +1184,7 @@ class view {
       $cache = $this->display_handler->get_plugin('cache');
     }
     if ($cache && $cache->cache_get('results')) {
-      if($this->query->pager->use_pager()) {
+      if($this->query->pager->use_pager() || !empty($this->get_total_rows)) {
         $this->query->pager->total_items = $this->total_rows;
         $this->query->pager->update_page_info();
       }
@@ -1229,7 +1228,7 @@ class view {
     if (!empty($this->build_info['fail'])) {
       return;
     }
-    if (!empty($this->view->build_info['denied'])) {
+    if (!empty($this->build_info['denied'])) {
       return;
     }
 
@@ -1364,7 +1363,7 @@ class view {
    * have other side effects that are only intended for the 'proper'
    * use of the display, such as setting page titles and breadcrumbs.
    *
-   * If you simply want to view the display, use view::preview() instead.
+   * If you only want to view the display, use view::preview() instead.
    */
   function execute_display($display_id = NULL, $args = array()) {
     if (empty($this->current_display) || $this->current_display != $this->choose_display($display_id)) {
@@ -1773,7 +1772,7 @@ class view {
     // Scroll through the queries until we get to our last query key.
     // Unset anything in our temp array.
     if (isset($this->last_query_key)) {
-      while (list($id, $query) = each($queries)) {
+      foreach ($queries as $id => $query) {
         if ($id == $this->last_query_key) {
           break;
         }
@@ -2009,7 +2008,7 @@ class view {
    *   The id to use.
    * @return
    *   The key to the display in $view->display, so that the new display
-   *   can be easily located.
+   *   can be located.
    */
   function add_display($type = 'page', $title = NULL, $id = NULL) {
     if (empty($type)) {
@@ -2271,6 +2270,13 @@ class views_display {
    * @var array
    */
   var $display_options;
+
+  /**
+   * The position of this display relative to other displays.
+   *
+   * @var int
+   */
+  var $position = 0;
 
   function __construct($type, $id, $title, $display_options = array()) {
     $this->display_plugin = $type;

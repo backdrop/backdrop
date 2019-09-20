@@ -50,12 +50,12 @@ function path_admin_overview($keys = NULL) {
     $operations = array();
     $operations['edit'] = array(
       'title' => t('Edit'),
-      'href' => "admin/config/search/path/edit/$data->pid",
+      'href' => "admin/config/urls/path/edit/$data->pid",
       'query' => $destination,
     );
     $operations['delete'] = array(
       'title' => t('Delete'),
-      'href' => "admin/config/search/path/delete/$data->pid",
+      'href' => "admin/config/urls/path/delete/$data->pid",
       'query' => $destination,
     );
     $row['data']['operations'] = array(
@@ -78,7 +78,7 @@ function path_admin_overview($keys = NULL) {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
-    '#empty' => t('No URL aliases available. <a href="@link">Add URL alias</a>.', array('@link' => url('admin/config/search/path/add'))),
+    '#empty' => t('No URL aliases available. <a href="@link">Add URL alias</a>.', array('@link' => url('admin/config/urls/path/add'))),
   );
   $build['path_pager'] = array('#theme' => 'pager');
 
@@ -98,10 +98,11 @@ function path_admin_overview($keys = NULL) {
  */
 function path_admin_edit($path = array()) {
   if ($path) {
-    backdrop_set_title($path['alias']);
+    backdrop_set_title(t('Edit URL alias %alias', array('%alias' => $path['alias'])), PASS_THROUGH);
     $output = backdrop_get_form('path_admin_form', $path);
   }
   else {
+    backdrop_set_title(t('Add URL alias'));
     $output = backdrop_get_form('path_admin_form');
   }
 
@@ -109,7 +110,7 @@ function path_admin_edit($path = array()) {
 }
 
 /**
- * Form builder; Main URL pattern administration form.
+ * Form builder; Main URL alias pattern administration form.
  *
  * @param $path
  *   An array containing the path ID, source, alias, and language code.
@@ -126,7 +127,7 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
     '#default_value' => $path['source'],
     '#maxlength' => 255,
     '#size' => 45,
-    '#description' => t('Specify the existing path you wish to alias. For example: node/28 or taxonomy/term/1.'),
+    '#description' => t('Specify the existing path you wish to alias. For example: <code>node/28</code> or <code>taxonomy/term/1</code>.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
     '#required' => TRUE,
   );
@@ -143,11 +144,7 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
 
   // A hidden value unless language.module is enabled.
   if (module_exists('language')) {
-    $languages = language_list(TRUE);
-    foreach ($languages as $langcode => $language) {
-      $language_options[$langcode] = $language->name;
-    }
-
+    $language_options = language_list(TRUE, TRUE);
     $form['langcode'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
@@ -180,8 +177,14 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
       '#type' => 'submit',
       '#value' => t('Delete'),
       '#submit' => array('path_admin_form_delete_submit'),
+      '#limit_validation_errors' => array(array('actions'), array('pid')),
     );
   }
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => isset($_GET['destination']) ? $_GET['destination'] : 'admin/config/urls/path',
+  );
 
   return $form;
 }
@@ -198,7 +201,7 @@ function path_admin_form_delete_submit($form, &$form_state) {
     $destination = backdrop_get_destination();
     unset($_GET['destination']);
   }
-  $form_state['redirect'] = array('admin/config/search/path/delete/' . $form_state['values']['pid'], array('query' => $destination));
+  $form_state['redirect'] = array('admin/config/urls/path/delete/' . $form_state['values']['pid'], array('query' => $destination));
 }
 
 /**
@@ -227,7 +230,7 @@ function path_admin_form_validate($form, &$form_state) {
     form_set_error('alias', t('The alias %alias is already in use in this language.', array('%alias' => $alias)));
   }
   if (!backdrop_valid_path($source)) {
-    form_set_error('source', t("The path '@link_path' is either invalid or you do not have access to it.", array('@link_path' => $source)));
+    form_set_error('source', t('The path <code>@link_path</code> is either invalid or you do not have access to it.', array('@link_path' => $source)));
   }
 }
 
@@ -244,7 +247,7 @@ function path_admin_form_submit($form, &$form_state) {
   path_save($form_state['values']);
 
   backdrop_set_message(t('The alias has been saved.'));
-  $form_state['redirect'] = 'admin/config/search/path';
+  $form_state['redirect'] = 'admin/config/urls/path';
 }
 
 /**
@@ -262,7 +265,7 @@ function path_admin_delete_confirm($form, &$form_state, $path) {
       $form,
       t('Are you sure you want to delete path alias %title?',
       array('%title' => $path['alias'])),
-      'admin/config/search/path'
+      'admin/config/urls/path'
     );
   }
   return array();
@@ -274,7 +277,7 @@ function path_admin_delete_confirm($form, &$form_state, $path) {
 function path_admin_delete_confirm_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
     path_delete($form_state['path']['pid']);
-    $form_state['redirect'] = 'admin/config/search/path';
+    $form_state['redirect'] = 'admin/config/urls/path';
   }
 }
 
@@ -287,13 +290,14 @@ function path_admin_delete_confirm_submit($form, &$form_state) {
  */
 function path_admin_filter_form($form, &$form_state, $keys = '') {
   $form['#attributes'] = array('class' => array('search-form'));
-  $form['basic'] = array('#type' => 'fieldset',
+  $form['basic'] = array(
+    '#type' => 'fieldset',
     '#title' => t('Filter aliases'),
     '#attributes' => array('class' => array('container-inline')),
   );
   $form['basic']['filter'] = array(
     '#type' => 'search',
-    '#title' => 'URL alias',
+    '#title' => t('URL alias'),
     '#title_display' => 'invisible',
     '#default_value' => $keys,
     '#maxlength' => 128,
@@ -320,7 +324,7 @@ function path_admin_filter_form($form, &$form_state, $keys = '') {
  * @see path_admin_filter_form_submit_reset()
  */
 function path_admin_filter_form_submit_filter($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/search/path/list/' . trim($form_state['values']['filter']);
+  $form_state['redirect'] = 'admin/config/urls/path/list/' . trim($form_state['values']['filter']);
 }
 
 /**
@@ -329,7 +333,7 @@ function path_admin_filter_form_submit_filter($form, &$form_state) {
  * @see path_admin_filter_form_submit_filter()
  */
 function path_admin_filter_form_submit_reset($form, &$form_state) {
-  $form_state['redirect'] = 'admin/config/search/path/list';
+  $form_state['redirect'] = 'admin/config/urls/path/list';
 }
 
 /**
@@ -342,13 +346,14 @@ function path_patterns_form($form, $form_state) {
   $config = config('path.settings');
 
   $form['help'] = array(
-    '#markup' => '<p>' . t('URL patterns automatically alias new content based on wildcards called "tokens". For example the URL "node/10" might be automatically aliased to "blog/my-first-post" using the pattern "blog/[node:title]".') . '</p>',
+    '#type' => 'help',
+    '#markup' => t('URL patterns automatically alias new content based on wildcards called <em>tokens</em>. For example the URL <code>node/10</code> might be automatically aliased to <code>blog/my-first-post</code> using the pattern <code>blog/[node:title]</code>.'),
   );
 
   $all_path_info = path_get_info();
   foreach ($all_path_info as $path_type => $path_info) {
     $pattern_description = $path_info['pattern description'];
-    $group_header = t('!label URL patterns', array('!label' => $path_info['label']));
+    $group_header = t('!label URL alias patterns', array('!label' => $path_info['label']));
     $token_types = array();
     if (isset($path_info['entity type'])) {
       $entity_type = entity_get_info($path_info['entity type']);
@@ -364,7 +369,7 @@ function path_patterns_form($form, $form_state) {
       '#collapsed' => FALSE,
     );
 
-    // Prompt for the default pattern for this path type.
+    // Prompt for the default URL alias pattern for this path type.
     $variable = $path_type . '_pattern';
     $form[$path_type][$variable] = array(
       '#type' => 'textfield',
@@ -425,7 +430,7 @@ function path_patterns_form_submit($form, &$form_state) {
 
   $all_path_info = path_get_info();
   foreach ($all_path_info as $path_type => $path_info) {
-    // Save default pattern per path type.
+    // Save default URL alias pattern per path type.
     $variable = $path_type . '_pattern';
     $config->set($variable, $values[$variable]);
 
@@ -443,7 +448,7 @@ function path_patterns_form_submit($form, &$form_state) {
 }
 
 /**
- * Form builder; Configure the URL pattern settings.
+ * Form builder; Configure the URL alias pattern settings.
  *
  * @see path_patterns_settings_form_validate()
  * @see path_patterns_settings_form_submit()
@@ -453,11 +458,13 @@ function path_patterns_settings_form($form) {
   module_load_include('inc', 'path');
   $config = config('path.settings');
 
+  $form['#config'] = 'path.settings';
+  
   $form['verbose'] = array(
     '#type' => 'checkbox',
     '#title' => t('Verbose'),
     '#default_value' => $config->get('verbose'),
-    '#description' => t('Display alias changes (except during bulk updates).'),
+    '#description' => t('Display URL alias pattern changes (except during bulk updates).'),
   );
 
   $form['separator'] = array(
@@ -483,12 +490,12 @@ function path_patterns_settings_form($form) {
 
   $form['max_length'] = array(
     '#type' => 'number',
-    '#title' => t('Maximum alias length'),
+    '#title' => t('Maximum URL alias length'),
     '#default_value' => $config->get('max_length'),
     '#step' => 1,
     '#min' => 1,
     '#max' => $max_length,
-    '#description' => t('Maximum length of aliases to generate. 100 is the recommended length. @max is the maximum possible length.', array('@max' => $max_length)),
+    '#description' => t('Maximum length of URL aliases to generate. 100 is the recommended length. @max is the maximum possible length.', array('@max' => $max_length)),
   );
   $form['max_component_length'] = array(
     '#type' => 'number',
@@ -497,47 +504,52 @@ function path_patterns_settings_form($form) {
     '#step' => 1,
     '#min' => 1,
     '#max' => $max_length,
-    '#description' => t('Maximum text length of any component in the alias (e.g., [title]). 100 is the recommended length. @max is the maximum possible length.', array('@max' => $max_length)),
+    '#description' => t('Maximum text length of any component in the URL alias (e.g., <code>[title]</code>). 100 is the recommended length. @max is the maximum possible length.', array('@max' => $max_length)),
   );
 
-  $description = t('What should be done when updating an existing content item which already has an alias?');
+  $description = t('The action taken when an item already has a URL alias.');
+  $delete_label = t('Create a new URL alias. Delete the old URL alias.');
   if (module_exists('redirect')) {
-    $description .= ' ' . t('The <a href="!url">Redirect module settings</a> affect whether a redirect is created when an alias is deleted.', array('!url' => url('admin/config/search/redirect/settings')));
+    $auto_redirect = config_get('redirect.settings', 'auto_redirect');
+    $description .= ' ' . t('The <a href="!url">Redirect module settings</a> affect whether a redirect is created when a URL alias is deleted.', array('!url' => url('admin/config/urls/redirect/settings')));
+    if ($auto_redirect) {
+      $delete_label = t('Create a new URL alias. Replace the old URL alias with a redirect.');
+    }
   }
   else {
-    $description .= ' ' . t('Considering installing the <a href="!url">Redirect module</a> to get redirects when your aliases change.', array('!url' => 'https://github.com/backdrop-contrib/redirect'));
+    $description .= ' ' . t('Considering enabling the Redirect module on the <a href="!url">modules page</a> to create redirects when your aliases change.', array('!url' => url('admin/modules')));
   }
   $form['update_action'] = array(
     '#type' => 'radios',
     '#title' => t('Update action'),
     '#default_value' => $config->get('update_action'),
     '#options' => array(
-      PATH_UPDATE_ACTION_NO_NEW => t('Do nothing. Leave the old alias intact.'),
-      PATH_UPDATE_ACTION_LEAVE => t('Create a new alias. Leave the existing alias functioning.'),
-      PATH_UPDATE_ACTION_DELETE => t('Create a new alias. Delete the old alias.'),
+      PATH_UPDATE_ACTION_DELETE => $delete_label,
+      PATH_UPDATE_ACTION_LEAVE => t('Create a new URL alias. Leave the existing URL alias functioning.'),
+      PATH_UPDATE_ACTION_NO_NEW => t('Do nothing. Leave the old URL alias intact.'),
     ),
     '#description' => $description,
   );
 
   $form['transliterate'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Transliterate prior to creating alias'),
+    '#title' => t('Transliterate prior to creating URL aliases'),
     '#default_value' => $config->get('transliterate'),
-    '#description' => t('When a pattern includes certain characters (such as those with accents) should these characters be converted into the US-ASCII alphabet?'),
+    '#description' => t('When the new URL alias includes certain characters (such as those with accents) should these characters be converted into the US-ASCII alphabet?'),
   );
 
   $form['reduce_ascii'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Reduce strings to letters and numbers'),
+    '#title' => t('Reduce URL alias characters to letters and numbers'),
     '#default_value' => $config->get('reduce_ascii'),
-    '#description' => t('Filters the new alias to only letters and numbers found in the ASCII-96 set.'),
+    '#description' => t('Filters the new URL alias to only letters and numbers found in the ASCII-96 set.'),
   );
 
   $form['ignore_words'] = array(
     '#type' => 'textarea',
     '#title' => t('Strings to Remove'),
     '#default_value' => $config->get('ignore_words'),
-    '#description' => t('Words to strip out of the URL alias, separated by commas. Do not use this to remove punctuation.'),
+    '#description' => t('Words to strip out of the URL alias, separated by commas. Do not use this to remove punctuation - use the punctuation section below.'),
     '#wysiwyg' => FALSE,
   );
 
@@ -566,13 +578,7 @@ function path_patterns_settings_form($form) {
     );
   }
 
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save configuration'),
-  );
-
-  return $form;
+  return system_settings_form($form);
 }
 
 /**
@@ -594,35 +600,10 @@ function path_patterns_settings_form_validate($form, &$form_state) {
     if ($details['value'] == $separator) {
       $action = $form_state['values']['punctuation_' . $name];
       if ($action == PATH_PUNCTUATION_REMOVE) {
-        backdrop_set_message(t('You have configured the @name to be the separator and to be removed when encountered in strings. This can cause problems with your patterns and especially with the term:path token. You should probably set the action for @name to be "replace by separator".', array('@name' => $details['name'])), 'error');
+        backdrop_set_message(t('You have configured the @name to be the separator and to be removed when encountered in strings. This can cause problems with your patterns and especially with the <code>[term:path]</code> token. You should probably set the action for @name to be "replace by separator".', array('@name' => $details['name'])), 'error');
       }
     }
   }
-}
-
-/**
- * Submit handler for path_patterns_settings_form().
- */
-function path_patterns_settings_form_submit($form, &$form_state) {
-  $config = config('path.settings');
-  $values = $form_state['values'];
-  $config->set('verbose', $values['verbose']);
-  $config->set('separator', $values['separator']);
-  $config->set('case', $values['case']);
-  $config->set('max_length', $values['max_length']);
-  $config->set('max_component_length', $values['max_component_length']);
-  $config->set('update_action', $values['update_action']);
-  $config->set('transliterate', $values['transliterate']);
-  $config->set('reduce_ascii', $values['reduce_ascii']);
-  $config->set('ignore_words', $values['ignore_words']);
-
-  $punctuation = path_punctuation_chars();
-  foreach ($punctuation as $name => $details) {
-    $config->set('punctuation_' . $name, $values['punctuation_' . $name]);
-  }
-
-  $config->save();
-  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**
@@ -631,53 +612,171 @@ function path_patterns_settings_form_submit($form, &$form_state) {
  * @see path_bulk_update_form_submit()
  * @ingroup forms
  */
-function path_bulk_update_form() {
+function path_bulk_update_form($form, &$form_state) {
+  // Return a confirm form if submitting aliases to be deleted.
+  if (isset($form_state['storage']['delete'])) {
+    return path_admin_bulk_delete_confirm($form, $form_state);
+  }
+
   $form['#update_callbacks'] = array();
-
-  $form['generate'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Bulk generate'),
-    '#collapsible' => FALSE,
-    '#collapsed' => FALSE,
-    '#tree' => TRUE,
-  );
-
-  $form['generate']['update'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Generate URL aliases for the following types of un-aliased paths:'),
-    '#options' => array(),
-    '#default_value' => array(),
-  );
+  $form['#tree'] = TRUE;
 
   $all_path_info = path_get_info();
-  foreach ($all_path_info as $path_info) {
+
+  $rows = array();
+
+  foreach ($all_path_info as $type => $path_info) {
     if (!empty($path_info['batch update callback'])) {
-      $form['#update_callbacks'][$path_info['batch update callback']] = $path_info;
-      $form['generate']['update']['#options'][$path_info['batch update callback']] = t('!label URL aliases', array('!label' => $path_info['label']));
+      $form['update'][$type]['base'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('!label URL aliases', array('!label' => $path_info['label'])),
+        '#attributes' => array(
+          'class' => array('path-base'),
+          'data-path-type' => array($type),
+          'data-path-name' => array('base'),
+        ),
+      );
+      $form['#update_callbacks'][$type] = $path_info;
+      // Check if this entity provides bundle types as pattern items and create
+      // a row for each of these bundle types. For the Node entity the pattern
+      // items would be keyed by be node types; for taxonomy, these would be
+      // vocabularies.
+      if (isset($path_info['pattern items'])) {
+        foreach ($path_info['pattern items'] as $item => $item_label) {
+          $form['update'][$type][$item] = array(
+            '#type' => 'checkbox',
+            '#title' => t('All !label URL aliases', array('!label' => $item)),
+            '#attributes' => array(
+              'class' => array('path-type', 'path-' . $type),
+              'data-path-type' => array($type),
+              'data-path-name' => array($item),
+            '#parents' => array('update'),
+            ),
+          );
+        }
+      }
     }
   }
 
-  $form['generate']['help'] = array(
-    '#markup' => '<p>' . t('URL aliases will only be created for items that do not already have URL aliases.') . '</p>',
+  // Build the 'Operations' form.
+  $form['operations'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Operations'),
+    '#prefix' => '<div class="container-inline">',
+    '#suffix' => '</div>',
+    '#attributes' => array(
+      'class' => array('path-bulk-operations'),
+    ),
   );
-
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
+  $form['operations']['operation'] = array(
+    '#type' => 'select',
+    '#title' => 'Operations',
+    '#title_display' => 'invisible',
+    '#options' => array(
+      'generate' => t('Generate URL aliases'),
+      'update' => t('Update existing URL aliases'),
+      'delete' => t('Delete URL aliases'),
+    ),
+    '#empty_option' => '- ' . t('Choose an action') . ' -',
+  );
+  $form['operations']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Generate URL aliases'),
+    '#value' => t('Execute'),
+    '#submit' => array('path_bulk_update_form_rebuild_submit'),
+    '#validate' => array('path_bulk_update_form_validate'),
   );
 
   return $form;
 }
 
 /**
+ * Returns HTML for the Path bulk update page.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - form: A render element representing the form.
+ *
+ * @ingroup themeable
+ */
+function theme_path_bulk_update_form($variables) {
+  backdrop_add_css(backdrop_get_path('module', 'path') . '/css/path.admin.css');
+  backdrop_add_js(backdrop_get_path('module', 'path') . '/js/path.admin.js');
+  $form = $variables['form'];
+
+  foreach (element_children($form['update']) as $base) {
+    foreach (element_children($form['update'][$base]) as $key) {
+      $row = array();
+        $row[] = array(
+          'data' => backdrop_render($form['update'][$base][$key]),
+          'class' => array('path-alias-generate'),
+        );
+      $rows[] = $row;
+    }
+  }
+  $header = array(
+    'alias' => array('data' => t('All URL aliases'), 'class' => 'path-alias-generate'),
+  );
+
+  $output = '';
+  $output .= backdrop_render($form['operations']);
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'path-bulk-alias')));
+  $output .= backdrop_render_children($form);
+  return $output;
+}
+
+/**
  * Form submit handler for path alias bulk update form.
  *
  * @see path_bulk_update_form()
- * @see path_bulk_update_batch_finished()
+ * @see path_admin_bulk_delete_confirm()
  */
-function path_bulk_update_form_submit($form, &$form_state) {
-  $batch = array(
+function path_bulk_update_form_rebuild_submit($form, &$form_state) {
+  // If aliases are being deleted, rebuild the form to show the confirm form.
+  // Otherwise aliases are being generated or updated, call the
+  // path_bulk_update_form_generate_submit() form.
+  if ($form_state['values']['operations']['operation'] == 'delete') {
+    $form_state['storage']['delete'] = TRUE;
+    $form_state['rebuild'] = TRUE;
+  }
+  elseif ($form_state['values']['operations']['operation'] == 'generate') {
+    path_bulk_update_form_generate_submit($form, $form_state, 'generate');
+  }
+  elseif ($form_state['values']['operations']['operation'] == 'update') {
+    path_bulk_update_form_generate_submit($form, $form_state, 'update');
+  }
+}
+
+/**
+ * Validate handler for path alias bulk generate form.
+ *
+ * @see path_bulk_update_form()
+ * @see path_bulk_update_form_generate_submit()
+ */
+function path_bulk_update_form_validate($form, &$form_state) {
+  $selected = array();
+  $reset_errors = array();
+  // At least one update checkbox must be checked.
+  if (isset($form_state['values']['update'])) {
+    foreach ($form_state['values']['update'] as $entity_type) {
+      $values = array_filter($entity_type);
+      if (!empty($values)) {
+        $selected[] = $values;
+      }
+    }
+    if (!$selected) {
+      form_set_error('update', t('You must select an alias to update.'));
+    }
+  }
+}
+
+/**
+ * Submit handler for path alias bulk generate form.
+ *
+ * @see path_bulk_update_form()
+ * @see path_bulk_update_form_rebuild_submit()
+ */
+function path_bulk_update_form_generate_submit($form, &$form_state, $op = 'generate') {
+    $batch = array(
     'title' => t('Bulk updating URL aliases'),
     'operations' => array(
       array('path_bulk_update_batch_start', array()),
@@ -686,9 +785,19 @@ function path_bulk_update_form_submit($form, &$form_state) {
     'file' => backdrop_get_path('module', 'path') . '/path.admin.inc',
   );
 
-  foreach ($form_state['values']['generate']['update'] as $callback) {
-    if (!empty($callback)) {
-      $path_info = $form['#update_callbacks'][$callback];
+  foreach ($form_state['values']['update'] as $entity_types => $entities) {
+    $choices = array();
+    $entities = array_filter($entities);
+    // Build an array of selected entity/bundle choices.
+    foreach ($entities as $label => $choice) {
+      $choices[$label] = $label;
+    }
+    if (!empty($choices)) {
+      $path_info = $form['#update_callbacks'][$entity_types];
+      $path_info['choices'] = empty($choices['base']) ? $choices : array();
+      $path_info['op'] = $op;
+      $callback = $path_info['batch update callback'];
+
       if (!empty($path_info['batch file'])) {
         $batch['operations'][] = array('path_bulk_update_batch_process', array($callback, $path_info));
       }
@@ -705,6 +814,9 @@ function path_bulk_update_form_submit($form, &$form_state) {
  * Batch callback; count the current number of URL aliases for comparison later.
  */
 function path_bulk_update_batch_start(&$context) {
+  $context['results']['total']['node'] = 0;
+  $context['results']['total']['taxonomy_term'] = 0;
+  $context['results']['total']['user'] = 0;
   $context['results']['count_before'] = db_select('url_alias')->countQuery()->execute()->fetchField();
 }
 
@@ -716,6 +828,8 @@ function path_bulk_update_batch_start(&$context) {
 function path_bulk_update_batch_process($callback, $path_info, &$context) {
   if (!empty($path_info['batch file'])) {
     require_once BACKDROP_ROOT . '/' . $path_info['batch file path'] . '/' . $path_info['batch file'];
+    $context['choices'] = array_keys($path_info['choices']);
+    $context['op'] = $path_info['op'];
   }
   return $callback($context);
 }
@@ -732,6 +846,9 @@ function path_bulk_update_batch_finished($success, $results, $operations) {
     if ($results['count_changed']) {
       backdrop_set_message(format_plural($results['count_changed'], 'Generated 1 URL alias.', 'Generated @count URL aliases.'));
     }
+    elseif (isset($results['total'])) {
+      backdrop_set_message(format_plural(array_sum($results['total']), 'No new URL aliases generated; 1 alias was updated.', 'No new URL aliases generated; @count aliases were updated.'));
+    }
     else {
       backdrop_set_message(t('No new URL aliases to generate.'));
     }
@@ -743,112 +860,105 @@ function path_bulk_update_batch_finished($success, $results, $operations) {
 }
 
 /**
- * Menu callback; select certain alias types to delete.
+ * Confirm form for path alias bulk deletion.
+ *
+ * @see path_bulk_update_form()
+ * @see path_bulk_update_form_rebuild_submit()
  */
-function path_admin_bulk_delete($form, $form_state) {
+function path_admin_bulk_delete_confirm($form, $form_state) {
   $all_path_info = path_get_info();
+  $delete_list = array();
 
-  // Confirmation form action.
-  if (isset($form_state['values']['delete'])) {
-    $delete_list = array();
-    foreach ($form_state['values']['delete'] as $key => $value) {
-      if ($value) {
-        $label = $key === 'all_aliases' ? t('All URL aliases') : $all_path_info[$key]['label'];
-        $delete_list[] = $label;
+  foreach ($form_state['values']['update'] as $key => $value) {
+    $value = array_filter($value);
+    if ($value) {
+      if (isset($value['base'])) {
+        $delete_list[] = t('All %type aliases', array('%type' => $all_path_info[$key]['label']));
+      }
+      else {
+        foreach (array_keys($value) as $type) {
+          $delete_list[] = $all_path_info[$key]['pattern items'][$type];
+        }
       }
     }
-    $form['delete'] = array(
-      '#type' => 'value',
-      '#value' => $form_state['values']['delete'],
-    );
-    $form['delete_list'] = array(
-      '#markup' => theme('item_list', array('items' => $delete_list)),
-    );
-
-    $question = t('Delete all the following aliases?');
-    $path = 'admin/config/search/path/bulk-delete';
-    $description = t('Deleting these aliases cannot be undone.');
-    $yes = t('Delete aliases');
-    return confirm_form($form, $question, $path, $description, $yes);
   }
-
-  /* TODO:
-   1) all - DONE
-   2) all node aliases - DONE
-   4) all user aliases - DONE
-   5) all taxonomy aliases - DONE
-   6) by node type
-   7) by taxonomy vocabulary
-   8) no longer existing aliases (see http://drupal.org/node/128366)
-   9) where src like 'pattern' - DON'T DO
-   10) where dst like 'pattern' - DON'T DO
-  */
 
   $form['delete'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Choose aliases to bulk delete'),
-    '#collapsible' => FALSE,
-    '#collapsed' => FALSE,
-    '#tree' => TRUE,
+    '#type' => 'value',
+    '#value' => $form_state['values']['update'],
+  );
+  $form['delete_list'] = array(
+    '#markup' => theme('item_list', array('items' => $delete_list)),
   );
 
-  // First we do the "all" case.
-  $total_count = db_query('SELECT count(1) FROM {url_alias}')->fetchField();
-  $form['delete']['all_aliases'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('All URL aliases'),
-    '#default_value' => FALSE,
-    '#description' => t('Number of aliases which will be deleted: %count.', array('%count' => $total_count)),
-  );
+  $form['#submit'][] = 'path_bulk_update_form_bulk_delete_submit';
 
-  // Next, provide checkboxes for each alias type.
-  foreach ($all_path_info as $internal_name => $path_info) {
-    $count = db_query("SELECT count(1) FROM {url_alias} WHERE source LIKE :src", array(':src' => "$internal_name%"))->fetchField();
-    $form['delete'][$internal_name] = array(
-      '#type' => 'checkbox',
-      '#title' => t('!label URL aliases', array('!label' => $path_info['label'])),
-      '#default_value' => FALSE,
-      '#description' => t('Number of aliases which will be deleted: %count.', array('@label' => $path_info['label'], '%count' => $count)),
-    );
+  $question = t('Delete all the following URL aliases?');
+  $path = 'admin/config/urls/path/bulk-update';
+  $description = t('This action cannot be undone.');
+  $yes = t('Delete URL aliases');
+
+  return confirm_form($form, $question, $path, $description, $yes);
+}
+
+/**
+ * Submit handler for path_admin_bulk_delete().
+ */
+function path_bulk_update_form_bulk_delete_submit($form, &$form_state) {
+  $values = array();
+  $count_base = 0;
+
+  // Filter out empty choices and count how many entity types had all subtypes
+  // selected.
+  foreach ($form_state['values']['delete'] as $key => $value) {
+    $value = array_filter($value);
+    if ($value) {
+      if (isset($value['base'])) {
+        $count_base++;
+      }
+      $values[$key] = $value;
+    }
   }
 
-  $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Delete URL aliases'),
-    '#submit' => array('path_admin_bulk_delete_confirm_submit'),
-  );
+  if ($values) {
+    $all_path_info = path_get_info();
+    // If all entities are to have all aliases deleted, skip straight to delete.
+    if ($count_base === count($all_path_info)) {
+      db_delete('url_alias')
+        ->execute();
+      backdrop_set_message(t('All of your path aliases have been deleted.'));
+    }
+    else {
+      foreach ($values as $key => $value) {
+        // For those entities where all aliases need to be deleted, delete using
+        // a LIKE query.
+        if (isset($value['base'])) {
+          if (array_key_exists($key, $all_path_info)) {
+            $path_prefix = isset($all_path_info[$key]['source prefix']) ? $all_path_info[$key]['source prefix'] : $key . '/';
+            db_delete('url_alias')
+              ->condition('source', db_like($path_prefix) . '%', 'LIKE')
+              ->execute();
+            backdrop_set_message(t('All aliases for %type have been deleted.', array('%type' => $all_path_info[$key]['label'])));
+          }
+        }
+        else {
+          // At this point the user want to delete a particular type. We cannot
+          // be certain for each entity what the source string will look like
+          // so use a callback per entity.
+          if (isset($all_path_info[$key]['type delete callback'])) {
+            $delete_callback = $all_path_info[$key]['type delete callback'];
+            $delete_callback(array_keys($value));
 
-  return $form;
-}
-
-/**
- * Submit handler for path_admin_bulk_delete().
- */
-function path_admin_bulk_delete_confirm_submit($form, &$form_state) {
-  $form_state['rebuild'] = TRUE;
-}
-
-/**
- * Submit handler for path_admin_bulk_delete().
- */
-function path_admin_bulk_delete_submit($form, &$form_state) {
-  foreach ($form_state['values']['delete'] as $key => $value) {
-    if ($value) {
-      if ($key === 'all_aliases') {
-        db_delete('url_alias')
-          ->execute();
-        backdrop_set_message(t('All of your path aliases have been deleted.'));
-      }
-      $all_path_info = path_get_info();
-      if (array_key_exists($key, $all_path_info)) {
-        $path_prefix = isset($all_path_info[$key]['source prefix']) ? $all_path_info[$key]['source prefix'] : $key . '/';
-        db_delete('url_alias')
-          ->condition('source', db_like($path_prefix) . '%', 'LIKE')
-          ->execute();
-        backdrop_set_message(t('All aliases for %type have been deleted.', array('%type' => $all_path_info[$key]['label'])));
+            $delete_list = array();
+            foreach (array_keys($value) as $type) {
+              $delete_list[] = $all_path_info[$key]['pattern items'][$type];
+            }
+            backdrop_set_message(t('Aliases have been deleted: !type', array('!type' => theme('item_list', array('items' => $delete_list)))));
+          }
+        }
       }
     }
   }
-  $form_state['redirect'] = 'admin/config/search/path/bulk-delete';
+
+  $form_state['redirect'] = 'admin/config/urls/path/bulk-update';
 }

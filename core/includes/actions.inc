@@ -93,7 +93,7 @@ function actions_execute($action_name, Entity $entity = NULL, &$context) {
   }
   if ($stack > $recursion_limit) {
     watchdog('actions', 'Stack overflow: recursion limit for actions_execute() has been reached. Stack is limited by %limit calls.', array('%limit' => $recursion_limit), WATCHDOG_ERROR);
-    return;
+    return NULL;
   }
 
   $action_info = actions_get_info($action_name);

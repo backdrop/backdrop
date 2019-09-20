@@ -44,12 +44,11 @@ interface BackdropUpdaterInterface {
   /**
    * Determine if the Updater can handle the project provided in $directory.
    *
-   * @todo: Provide something more rational here, like a project spec file.
-   *
    * @param string $directory
+   *   The full path to the package directory.
    *
    * @return bool
-   *   TRUE if the project is installed, FALSE if not.
+   *   TRUE if the project within the directory is supported by this updater.
    */
   public static function canUpdateDirectory($directory);
 
@@ -67,7 +66,7 @@ interface BackdropUpdaterInterface {
 /**
  * Base class for Updaters used in Backdrop.
  */
-class Updater {
+abstract class Updater implements BackdropUpdaterInterface {
 
   /**
    * @var string $source Directory to install from.
@@ -90,6 +89,8 @@ class Updater {
    *   Directory of a Backdrop project.
    *
    * @return Updater
+   *
+   * @throws UpdaterException
    */
   public static function factory($source) {
     if (is_dir($source)) {
@@ -109,6 +110,8 @@ class Updater {
    *
    * @return string
    *   The class name which can work with this project type.
+   *
+   * @throws UpdaterException
    */
   public static function getUpdaterFromDirectory($directory) {
     // Gets a list of possible implementing classes.
@@ -141,6 +144,11 @@ class Updater {
       return FALSE;
     }
     foreach ($info_files as $info_file) {
+      // Exclude info files for tests.
+      if (backdrop_substr($info_file->filename, -11) == '.tests.info') {
+        unset($info_files[$info_file->uri]);
+        continue;
+      }
       if (backdrop_substr($info_file->filename, 0, -5) == backdrop_basename($directory)) {
         // Info file Has the same name as the directory, return it.
         return $info_file->uri;
@@ -167,6 +175,42 @@ class Updater {
   }
 
   /**
+   * Return the project type from a Backdrop info file or directory.
+   *
+   * @param string $directory
+   *   Stream wrapper to directory to get the type from.
+   *
+   * @return string
+   *   The type of the project, either "core", "module", "theme", or "layout".
+   *
+   * @throws UpdaterException
+   */
+  public static function getProjectType($directory) {
+    if (basename($directory) == 'backdrop') {
+      $realpath = backdrop_realpath($directory);
+      if (is_dir($realpath . '/core')) {
+        return 'core';
+      }
+      else {
+        $message = t('Updating core from @directory was attempted, but either it doesn\'t contain a "core" directory, or it isn\'t accessible. You may need to update manually.', array('@directory' => $directory));
+        throw new UpdaterException($message);
+      }
+    }
+    else {
+      $info_file = self::findInfoFile($directory);
+      $info = backdrop_parse_info_file($info_file);
+      if (empty($info)) {
+        throw new UpdaterException(t('Unable to parse info file: %info_file.', array('%info_file' => $info_file)));
+      }
+      if (empty($info['type'])) {
+        throw new UpdaterException(t("The info file (%info_file) does not define a 'type' attribute.", array('%info_file' => $info_file)));
+      }
+
+      return $info['type'];
+    }
+  }
+
+  /**
    * Return the project name from a Backdrop info file.
    *
    * @param string $directory
@@ -174,6 +218,8 @@ class Updater {
    *
    * @return string
    *   The title of the project.
+   *
+   * @throws UpdaterException
    */
   public static function getProjectTitle($directory) {
     $info_file = self::findInfoFile($directory);
@@ -216,6 +262,9 @@ class Updater {
    *
    * @return array
    *   An array of links which the user may need to complete the update
+   *
+   * @throws UpdaterException
+   * @throws UpdaterFileTransferException
    */
   public function update(&$filetransfer, $overrides = array()) {
     try {
@@ -224,7 +273,7 @@ class Updater {
 
       // Take a Backup.
       if ($args['make_backup']) {
-        $this->makeBackup($args['install_dir'], $args['backup_dir']);
+        $this->makeBackup($filetransfer, $args['install_dir'], $args['backup_dir']);
       }
 
       if (!$this->name) {
@@ -244,10 +293,19 @@ class Updater {
       }
 
       // Copy the directory in place.
-      $filetransfer->copyDirectory($this->source, $args['install_dir']);
+      // Check for core udpate.
+      if ($this->name == 'backdrop') {
+        $source = $this->source . '/core';
+        $name = 'core';
+      }
+      else {
+        $source = $this->source;
+        $name = $this->name;
+      }
+      $filetransfer->copyDirectory($source, $args['install_dir']);
 
       // Make sure what we just installed is readable by the web server.
-      $this->makeWorldReadable($filetransfer, $args['install_dir'] . '/' . $this->name);
+      $this->makeWorldReadable($filetransfer, $args['install_dir'] . '/' . $name);
 
       // Run the updates.
       // @TODO: decide if we want to implement this.
@@ -271,6 +329,8 @@ class Updater {
    *
    * @return array
    *   An array of links which the user may need to complete the install.
+   *
+   * @throws UpdaterFileTransferException
    */
   public function install(&$filetransfer, $overrides = array()) {
     try {
@@ -304,6 +364,8 @@ class Updater {
    *   Object which is a child of FileTransfer.
    * @param string $directory
    *   The installation directory to prepare.
+   *
+   * @throws UpdaterException
    */
   public function prepareInstallDirectory(&$filetransfer, $directory) {
     // Make the parent dir writable if need be and create the dir.

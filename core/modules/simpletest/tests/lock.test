@@ -4,6 +4,8 @@
  * Tests for the lock system.
  */
 class LockFunctionalTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('system_test');
   }

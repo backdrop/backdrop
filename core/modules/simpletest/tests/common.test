@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for common.inc functionality.
@@ -65,7 +64,9 @@ class CommonBackdropAlterTestCase extends BackdropWebTestCase {
  * url() calls module_implements(), which may issue a db query, which requires
  * inheriting from a web test case rather than a unit test case.
  */
-class CommonURLUnitTestCase extends BackdropWebTestCase {
+class CommonURLWebTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   /**
    * Confirm that invalid text given as $path is filtered.
    */
@@ -97,141 +98,6 @@ class CommonURLUnitTestCase extends BackdropWebTestCase {
 
   private function hasClass($link, $class) {
     return preg_match('|class="([^\"\s]+\s+)*' . $class . '|', $link);
-  }
-
-  /**
-   * Test backdrop_get_query_parameters().
-   */
-  function testBackdropGetQueryParameters() {
-    $original = array(
-      'a' => 1,
-      'b' => array(
-        'd' => 4,
-        'e' => array(
-          'f' => 5,
-        ),
-      ),
-      'c' => 3,
-      'q' => 'foo/bar',
-    );
-
-    // Default arguments.
-    $result = $_GET;
-    unset($result['q']);
-    $this->assertEqual(backdrop_get_query_parameters(), $result, "\$_GET['q'] was removed.");
-
-    // Default exclusion.
-    $result = $original;
-    unset($result['q']);
-    $this->assertEqual(backdrop_get_query_parameters($original), $result, "'q' was removed.");
-
-    // First-level exclusion.
-    $result = $original;
-    unset($result['b']);
-    $this->assertEqual(backdrop_get_query_parameters($original, array('b')), $result, "'b' was removed.");
-
-    // Second-level exclusion.
-    $result = $original;
-    unset($result['b']['d']);
-    $this->assertEqual(backdrop_get_query_parameters($original, array('b[d]')), $result, "'b[d]' was removed.");
-
-    // Third-level exclusion.
-    $result = $original;
-    unset($result['b']['e']['f']);
-    $this->assertEqual(backdrop_get_query_parameters($original, array('b[e][f]')), $result, "'b[e][f]' was removed.");
-
-    // Multiple exclusions.
-    $result = $original;
-    unset($result['a'], $result['b']['e'], $result['c']);
-    $this->assertEqual(backdrop_get_query_parameters($original, array('a', 'b[e]', 'c')), $result, "'a', 'b[e]', 'c' were removed.");
-  }
-
-  /**
-   * Test backdrop_http_build_query().
-   */
-  function testBackdropHttpBuildQuery() {
-    $this->assertEqual(backdrop_http_build_query(array('a' => ' &#//+%20@۞')), 'a=%20%26%23//%2B%2520%40%DB%9E', 'Value was properly encoded.');
-    $this->assertEqual(backdrop_http_build_query(array(' &#//+%20@۞' => 'a')), '%20%26%23//%2B%2520%40%DB%9E=a', 'Key was properly encoded.');
-    $this->assertEqual(backdrop_http_build_query(array('a' => '1', 'b' => '2', 'c' => '3')), 'a=1&b=2&c=3', 'Multiple values were properly concatenated.');
-    $this->assertEqual(backdrop_http_build_query(array('a' => array('b' => '2', 'c' => '3'), 'd' => 'foo')), 'a[b]=2&a[c]=3&d=foo', 'Nested array was properly encoded.');
-  }
-
-  /**
-   * Test backdrop_parse_url().
-   */
-  function testBackdropParseUrl() {
-    // Relative URL.
-    $url = 'foo/bar?foo=bar&bar=baz&baz#foo';
-    $result = array(
-      'path' => 'foo/bar',
-      'query' => array('foo' => 'bar', 'bar' => 'baz', 'baz' => ''),
-      'fragment' => 'foo',
-    );
-    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL parsed correctly.');
-
-    // Relative URL that is known to confuse parse_url().
-    $url = 'foo/bar:1';
-    $result = array(
-      'path' => 'foo/bar:1',
-      'query' => array(),
-      'fragment' => '',
-    );
-    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL parsed correctly.');
-
-    // Absolute URL.
-    $url = '/foo/bar?foo=bar&bar=baz&baz#foo';
-    $result = array(
-      'path' => '/foo/bar',
-      'query' => array('foo' => 'bar', 'bar' => 'baz', 'baz' => ''),
-      'fragment' => 'foo',
-    );
-    $this->assertEqual(backdrop_parse_url($url), $result, 'Absolute URL parsed correctly.');
-
-    // External URL testing.
-    $url = 'http://backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
-
-    // Test that Backdrop can recognize an absolute URL. Used to prevent attack
-    // vectors.
-    $this->assertTrue(url_is_external($url), 'Correctly identified an external URL.');
-
-    // External URL without an explicit protocol.
-    $url = '//backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
-    $this->assertTrue(url_is_external($url), 'Correctly identified an external URL without a protocol part.');
-
-    // Internal URL starting with a slash.
-    $url = '/backdropcms.org';
-    $this->assertFalse(url_is_external($url), 'Correctly identified an internal URL with a leading slash.');
-
-    // Test the parsing of absolute URLs.
-    $url = 'http://backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
-    $result = array(
-      'path' => 'http://backdropcms.org/foo/bar',
-      'query' => array('foo' => 'bar', 'bar' => 'baz', 'baz' => ''),
-      'fragment' => 'foo',
-    );
-    $this->assertEqual(backdrop_parse_url($url), $result, 'External URL parsed correctly.');
-
-    // Verify proper parsing of URLs when clean URLs are disabled.
-    $result = array(
-      'path' => 'foo/bar',
-      'query' => array('bar' => 'baz'),
-      'fragment' => 'foo',
-    );
-    // Non-clean URLs #1: Absolute URL generated by url().
-    $url = $GLOBALS['base_url'] . '/?q=foo/bar&bar=baz#foo';
-    $this->assertEqual(backdrop_parse_url($url), $result, 'Absolute URL with clean URLs disabled parsed correctly.');
-
-    // Non-clean URLs #2: Relative URL generated by url().
-    $url = '?q=foo/bar&bar=baz#foo';
-    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL with clean URLs disabled parsed correctly.');
-
-    // Non-clean URLs #3: URL generated by url() on non-Apache webserver.
-    $url = 'index.php?q=foo/bar&bar=baz#foo';
-    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL on non-Apache webserver with clean URLs disabled parsed correctly.');
-
-    // Test that backdrop_parse_url() does not allow spoofing a URL to force a malicious redirect.
-    $parts = backdrop_parse_url('forged:http://cwe.mitre.org/data/definitions/601.html');
-    $this->assertFalse(valid_url($parts['path'], TRUE), 'backdrop_parse_url() correctly parsed a forged URL.');
   }
 
   /**
@@ -316,7 +182,7 @@ class CommonURLUnitTestCase extends BackdropWebTestCase {
    * Test external URL handling.
    */
   function testExternalUrls() {
-    $test_url = 'http://backdropcms.org/';
+    $test_url = 'https://backdropcms.org/';
 
     // Verify external URL can contain a fragment.
     $url = $test_url . '#backdrop';
@@ -356,6 +222,192 @@ class CommonURLUnitTestCase extends BackdropWebTestCase {
     $url = '//backdropcms.org';
     $result = url($url);
     $this->assertEqual($url, $result, 'External URL without protocol is not altered.');
+  }
+
+  /**
+   * Tests the url() function on internal paths which mimic external URLs.
+   */
+  function testInternalPathMimicsExternal() {
+    module_enable(array('common_test'));
+    // Ensure that calling url(current_path()) on "/http://example.com" (an
+    // internal path which mimics an external URL) always links to the internal
+    // path, not the external URL. This helps protect against external URL link
+    // injection vulnerabilities.
+    state_set('common_test_link_to_current_path', TRUE);
+    $this->backdropGet('/http://example.com');
+    $this->clickLink('link which should point to the current path');
+    $this->assertUrl('/http://example.com');
+    $this->assertText('link which should point to the current path');
+  }
+}
+
+/**
+ * All URL testing that does not require a Backdrop bootstrap.
+ */
+class CommonURLUnitTestCase extends BackdropUnitTestCase {
+  /**
+   * Test backdrop_get_query_parameters().
+   */
+  function testBackdropGetQueryParameters() {
+    $original = array(
+      'a' => 1,
+      'b' => array(
+        'd' => 4,
+        'e' => array(
+          'f' => 5,
+        ),
+      ),
+      'c' => 3,
+      'q' => 'foo/bar',
+    );
+
+    // Default arguments.
+    $result = $_GET;
+    unset($result['q']);
+    $this->assertEqual(backdrop_get_query_parameters(), $result, "\$_GET['q'] was removed.");
+
+    // Default exclusion.
+    $result = $original;
+    unset($result['q']);
+    $this->assertEqual(backdrop_get_query_parameters($original), $result, "'q' was removed.");
+
+    // First-level exclusion.
+    $result = $original;
+    unset($result['b']);
+    $this->assertEqual(backdrop_get_query_parameters($original, array('b')), $result, "'b' was removed.");
+
+    // Second-level exclusion.
+    $result = $original;
+    unset($result['b']['d']);
+    $this->assertEqual(backdrop_get_query_parameters($original, array('b[d]')), $result, "'b[d]' was removed.");
+
+    // Third-level exclusion.
+    $result = $original;
+    unset($result['b']['e']['f']);
+    $this->assertEqual(backdrop_get_query_parameters($original, array('b[e][f]')), $result, "'b[e][f]' was removed.");
+
+    // Multiple exclusions.
+    $result = $original;
+    unset($result['a'], $result['b']['e'], $result['c']);
+    $this->assertEqual(backdrop_get_query_parameters($original, array('a', 'b[e]', 'c')), $result, "'a', 'b[e]', 'c' were removed.");
+  }
+
+  /**
+   * Test backdrop_http_build_query().
+   */
+  function testBackdropHttpBuildQuery() {
+    $this->assertEqual(backdrop_http_build_query(array('a' => ' &#//+%20@۞')), 'a=%20%26%23//%2B%2520%40%DB%9E', 'Value was properly encoded.');
+    $this->assertEqual(backdrop_http_build_query(array(' &#//+%20@۞' => 'a')), '%20%26%23//%2B%2520%40%DB%9E=a', 'Key was properly encoded.');
+    $this->assertEqual(backdrop_http_build_query(array('a' => '1', 'b' => '2', 'c' => '3')), 'a=1&b=2&c=3', 'Multiple values were properly concatenated.');
+    $this->assertEqual(backdrop_http_build_query(array('a' => array('b' => '2', 'c' => '3'), 'd' => 'foo')), 'a%5Bb%5D=2&a%5Bc%5D=3&d=foo', 'Nested array was properly encoded.');
+  }
+
+  /**
+   * Test backdrop_get_bare_domain().
+   */
+   function testBackdropGetBareDomain() {
+     // Input => Expected Output.
+     $tests = array(
+       'http://www.example.com/path-to-page' => 'example.com',
+       'http://example.com/path-to-page' => 'example.com',
+       'http://beta.example.com/path-to-page' => 'example.com',
+       'https://www.beta.example.co.uk/path-to-page' => 'example.co.uk',
+       'http://example.co.uk/path-to-page' => 'example.co.uk',
+       'http://beta.example.co.uk/path-to-page' => 'example.co.uk',
+       '//example.co.uk/path-to-page' => 'example.co.uk',
+
+       'example.co.uk' => 'example.co.uk',
+       'example.com' => 'example.com',
+       'beta.example.com' => 'example.com',
+       'alpha.beta.example.com' => 'example.com',
+       'bbc.co.uk' => 'bbc.co.uk',
+       'foo.bbc.co.uk' => 'bbc.co.uk',
+       'bar.foo.bbc.co.uk' => 'bbc.co.uk',
+       'bar.foo.abc.com' => 'abc.com',
+       'lb.cm' => 'lb.cm',
+     );
+
+     foreach ($tests as $input => $expected_output) {
+       $this->assertIdentical($expected_output, backdrop_get_bare_domain($input));
+     }
+   }
+
+  /**
+   * Test backdrop_parse_url().
+   */
+  function testBackdropParseUrl() {
+    // Relative URL.
+    $url = 'foo/bar?foo=bar&bar=baz&baz#foo';
+    $result = array(
+      'path' => 'foo/bar',
+      'query' => array('foo' => 'bar', 'bar' => 'baz', 'baz' => ''),
+      'fragment' => 'foo',
+    );
+    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL parsed correctly.');
+
+    // Relative URL that is known to confuse parse_url().
+    $url = 'foo/bar:1';
+    $result = array(
+      'path' => 'foo/bar:1',
+      'query' => array(),
+      'fragment' => '',
+    );
+    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL parsed correctly.');
+
+    // Absolute URL.
+    $url = '/foo/bar?foo=bar&bar=baz&baz#foo';
+    $result = array(
+      'path' => '/foo/bar',
+      'query' => array('foo' => 'bar', 'bar' => 'baz', 'baz' => ''),
+      'fragment' => 'foo',
+    );
+    $this->assertEqual(backdrop_parse_url($url), $result, 'Absolute URL parsed correctly.');
+
+    // External URL testing.
+    $url = 'https://backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
+
+    // Test that Backdrop can recognize an absolute URL. Used to prevent attack
+    // vectors.
+    $this->assertTrue(url_is_external($url), 'Correctly identified an external URL.');
+
+    // External URL without an explicit protocol.
+    $url = '//backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
+    $this->assertTrue(url_is_external($url), 'Correctly identified an external URL without a protocol part.');
+
+    // Internal URL starting with a slash.
+    $url = '/backdropcms.org';
+    $this->assertFalse(url_is_external($url), 'Correctly identified an internal URL with a leading slash.');
+
+    // Test the parsing of absolute URLs.
+    $url = 'https://backdropcms.org/foo/bar?foo=bar&bar=baz&baz#foo';
+    $result = array(
+      'path' => 'https://backdropcms.org/foo/bar',
+      'query' => array('foo' => 'bar', 'bar' => 'baz', 'baz' => ''),
+      'fragment' => 'foo',
+    );
+    $this->assertEqual(backdrop_parse_url($url), $result, 'External URL parsed correctly.');
+
+    // Verify proper parsing of URLs when clean URLs are disabled.
+    $result = array(
+      'path' => 'foo/bar',
+      'query' => array('bar' => 'baz'),
+      'fragment' => 'foo',
+    );
+    // Non-clean URLs #1: Absolute URL generated by url().
+    $url = $GLOBALS['base_url'] . '/?q=foo/bar&bar=baz#foo';
+    $this->assertEqual(backdrop_parse_url($url), $result, 'Absolute URL with clean URLs disabled parsed correctly.');
+
+    // Non-clean URLs #2: Relative URL generated by url().
+    $url = '?q=foo/bar&bar=baz#foo';
+    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL with clean URLs disabled parsed correctly.');
+
+    // Non-clean URLs #3: URL generated by url() on non-Apache webserver.
+    $url = 'index.php?q=foo/bar&bar=baz#foo';
+    $this->assertEqual(backdrop_parse_url($url), $result, 'Relative URL on non-Apache webserver with clean URLs disabled parsed correctly.');
+
+    // Test that backdrop_parse_url() does not allow spoofing a URL to force a malicious redirect.
+    $parts = backdrop_parse_url('forged:http://cwe.mitre.org/data/definitions/601.html');
+    $this->assertFalse(valid_url($parts['path'], TRUE), 'backdrop_parse_url() correctly parsed a forged URL.');
   }
 }
 
@@ -960,7 +1012,7 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     $result = backdrop_http_request(url('node', array('absolute' => TRUE)));
     $this->assertEqual($result->code, 200, 'Fetched page successfully.');
     $this->backdropSetContent($result->data);
-    $this->assertTitle(t('Welcome to @site-name | @site-name', array('@site-name' => config_get('system.core', 'site_name'))), 'Site title matches.');
+    $this->assertTitle(t('Home | @site-name', array('@site-name' => config_get_translated('system.core', 'site_name'))), 'Site title matches.');
 
     // Test that code and status message is returned.
     $result = backdrop_http_request(url('pagedoesnotexist', array('absolute' => TRUE)));
@@ -1198,6 +1250,7 @@ class CommonBackdropGotoTestCase extends BackdropWebTestCase {
  * Tests for the JavaScript system.
  */
 class CommonJavaScriptTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
   /**
    * Store configured value for JavaScript preprocessing.
    */
@@ -1527,6 +1580,154 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Tests adding JavaScript files with additional attributes.
+   */
+  public function testAttributes() {
+    // Disable aggregation.
+    config_set('system.core', 'preprocess_js', 0);
+    // Add internal and external JavaScript files that add the 'async' and
+    // 'defer' attributes, and check that these attributes appear on the
+    // <script> tags.
+    $js_internal = 'core/misc/collapse.js';
+    $js_external = 'http://example.com/script.js';
+    backdrop_add_js($js_internal, array('attributes' => array('async' => 'async'), 'defer' => 'defer'));
+    backdrop_add_js($js_external, array(
+      'attributes' => array(
+        'async' => 'async',
+      ),
+      'defer' => 'defer',
+      'type' => 'external',
+    ));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @async="async" and @defer="defer"]'), 'Rendered internal JavaScript with correct defer and async attributes.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @async="async" and @defer="defer"]'), 'Rendered external JavaScript with correct defer and async attributes.');
+
+    // Only 'defer' attribute is set.
+    backdrop_add_js($js_internal, array('defer' => 'defer'));
+    backdrop_add_js($js_external, array('defer' => 'defer', 'type' => 'external'));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @defer="defer"]'), 'Rendered internal JavaScript with correct defer attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @defer="defer"]'), 'Rendered external JavaScript with correct defer attribute.');
+
+    // Only 'async' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('async' => 'async')));
+    backdrop_add_js($js_external, array('attributes' => array('async' => 'async'), 'type' => 'external'));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @async="async"]'), 'Rendered internal JavaScript with correct async attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @async="async"]'), 'Rendered external JavaScript with correct async attribute.');
+
+    // Only 'custom' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('custom' => 'foo')));
+    backdrop_add_js($js_external, array('attributes' => array('custom' => 'foo'), 'type' => 'external'));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @custom="foo"]'), 'Rendered internal JavaScript with correct custom attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @custom="foo"]'), 'Rendered external JavaScript with correct custom attribute.');
+
+    // Only 'defer' and 'custom' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('custom' => 'foo'), 'defer' => 'defer'));
+    backdrop_add_js($js_external, array(
+      'attributes' => array(
+        'custom' => 'foo',
+      ),
+      'defer' => 'defer',
+      'type' => 'external',
+    ));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @custom="foo" and @defer="defer"]'), 'Rendered internal JavaScript with correct custom attribute and defer attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @custom="foo" and @defer="defer"]'), 'Rendered external JavaScript with correct custom attribute and defer attribute.');
+
+    // Only 'async' and 'custom' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('custom' => 'foo', 'async' => 'async')));
+    backdrop_add_js($js_external, array(
+      'attributes' => array(
+        'custom' => 'foo',
+        'async' => 'async',
+      ),
+      'type' => 'external',
+    ));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @custom="foo" and @async="async"]'), 'Rendered internal JavaScript with custom attribute and async attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @custom="foo" and @async="async"]'), 'Rendered external JavaScript with correct custom attribute and async attribute.');
+  }
+
+  /**
+   * Tests that attributes are maintained when JS aggregation is enabled.
+   */
+  public function testAggregatedAttributes() {
+    // Enable aggregation.
+    config_set('system.core', 'preprocess_js', TRUE);
+    // Add internal and external JavaScript files that add the 'async' and
+    // 'defer' attributes, and check that these attributes appear on the
+    // <script> tags.
+    $js_internal = 'core/misc/collapse.js';
+    $js_external = 'http://example.com/script.js';
+    backdrop_add_js($js_internal, array('attributes' => array('async' => 'async'), 'defer' => 'defer'));
+    backdrop_add_js($js_external, array('attributes' => array('async' => 'async'), 'defer' => 'defer', 'type' => 'external'));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @async="async" and @defer="defer"]'), 'Rendered internal JavaScript with correct defer and async attributes.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @async="async" and @defer="defer"]'), 'Rendered external JavaScript with correct defer and async attributes.');
+
+    // Only 'defer' attribute is set.
+    backdrop_add_js($js_internal, array('defer' => 'defer'));
+    backdrop_add_js($js_external, array('defer' => 'defer', 'type' => 'external'));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @defer="defer"]'), 'Rendered internal JavaScript with correct defer attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @defer="defer"]'), 'Rendered external JavaScript with correct defer attribute.');
+
+    // Only 'async' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('async' => 'async')));
+    backdrop_add_js($js_external, array('attributes' => array('async' => 'async'), 'type' => 'external'));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @async="async"]'), 'Rendered internal JavaScript with correct async attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @async="async"]'), 'Rendered external JavaScript with correct async attribute.');
+
+    // Only 'custom' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('custom' => 'foo')));
+    backdrop_add_js($js_external, array('attributes' => array('custom' => 'foo'), 'type' => 'external'));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @custom="foo"]'), 'Rendered internal JavaScript with correct custom attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @custom="foo"]'), 'Rendered external JavaScript with correct custom attribute.');
+
+    // Only 'defer' and 'custom' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('custom' => 'foo'), 'defer' => 'defer'));
+    backdrop_add_js($js_external, array(
+      'attributes' => array(
+        'custom' => 'foo',
+      ),
+      'defer' => 'defer',
+      'type' => 'external',
+    ));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @custom="foo" and @defer="defer"]'), 'Rendered internal JavaScript with custom attribute and defer attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @custom="foo" and @defer="defer"]'), 'Rendered external JavaScript with correct custom attribute and defer attribute.');
+
+    // Only 'async' and 'custom' attribute is set.
+    backdrop_add_js($js_internal, array('attributes' => array('custom' => 'foo', 'async' => 'async')));
+    backdrop_add_js($js_external, array(
+      'attributes' => array(
+        'custom' => 'foo',
+        'async' => 'async',
+      ),
+      'type' => 'external',
+    ));
+    $javascript = backdrop_get_js();
+    $this->backdropSetContent($javascript);
+    $this->assertTrue($this->xpath('//script[starts-with(@src, "' . file_create_url($js_internal) . '") and @custom="foo" and @async="async"]'), 'Rendered internal JavaScript with custom attribute and async attribute.');
+    $this->assertTrue($this->xpath('//script[@src="' . $js_external . '" and @custom="foo" and @async="async"]'), 'Rendered external JavaScript with correct custom attribute and async attribute.');
+  }
+
+  /**
    * Test altering a JavaScript's weight via hook_js_alter().
    *
    * @see simpletest_js_alter()
@@ -1640,6 +1841,8 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
  * Tests for backdrop_render().
  */
 class CommonBackdropRenderTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp('common_test');
   }
@@ -2452,12 +2655,12 @@ class CommonBackdropSystemListingTestCase extends BackdropWebTestCase {
       // precedence.
       'backdrop_system_listing_incompatible_test' => array(
         'core/modules/simpletest/tests',
-        'profiles/testing/modules',
+        'core/profiles/testing/modules',
       ),
       // When both copies of the module are compatible with Backdrop core, the
       // copy in the profile directory takes precedence.
       'backdrop_system_listing_compatible_test' => array(
-        'profiles/testing/modules',
+        'core/profiles/testing/modules',
         'core/modules/simpletest/tests',
       ),
     );
@@ -2610,6 +2813,76 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
     // Restore default time zone.
     date_default_timezone_set(backdrop_get_user_timezone());
     backdrop_save_session(TRUE);
+  }
+}
+
+/**
+ * Tests the format_xml_elements() API function.
+ */
+class CommonBackdropFormatXmlElementsUnitTestCase extends BackdropUnitTestCase {
+  /**
+   * Provide a sample data structure and verify the XML results.
+   */
+  function testParseFormatXmlElements() {
+    $structure = array(
+      // Test normal key => value pairs.
+      'key-value-pairs' => array(
+        'second-1' => 'foo',
+        'second-2' => 'bar',
+      ),
+      // Test normal key => value pairs.
+      'attributes' => array(
+        array(
+          'key' => 'second',
+          'value' => 'baz',
+          'attributes' => array(
+            'attr-1' => 'foo',
+            'attr-2' => 'bar',
+          ),
+        ),
+      ),
+      // Test encoded vs. normal.
+      'encoding' => array(
+        array(
+          'key' => 'second',
+          'value' => '<foo>',
+        ),
+        array(
+          'key' => 'second',
+          'value' => check_plain('<bar>'),
+          'encoded' => TRUE,
+        ),
+      ),
+      // Test nesting multiple levels.
+      'nested' => array(
+        array(
+          'key' => 'second',
+          'value' => array(
+            'third' => 'foo'
+          ),
+        ),
+      ),
+    );
+    $expected_output = <<<EOF
+<key-value-pairs>
+  <second-1>foo</second-1>
+  <second-2>bar</second-2>
+</key-value-pairs>
+<attributes>
+  <second attr-1="foo" attr-2="bar">baz</second>
+</attributes>
+<encoding>
+  <second>&lt;foo&gt;</second>
+  <second>&lt;bar&gt;</second>
+</encoding>
+<nested>
+  <second>
+    <third>foo</third>
+  </second>
+</nested>
+
+EOF;
+    $this->assertIdentical($expected_output, format_xml_elements($structure));
   }
 }
 
@@ -2789,7 +3062,7 @@ class CommonJSONUnitTestCase extends BackdropUnitTestCase {
 
     // Verify reversibility for structured data. Also verify that necessary
     // characters are escaped.
-    $source = array(TRUE, FALSE, 0, 1, '0', '1', $str, array('key1' => $str, 'key2' => array('nested' => TRUE)));
+    $source = array(TRUE, FALSE, 0, 1, '0', '1', '[ ]', '\'', "\"", '\\', $str, array('key1' => $str, 'key2' => array('nested' => TRUE)));
     $json = backdrop_json_encode($source);
     foreach ($html_unsafe as $char) {
       $this->assertTrue(strpos($json, $char) === FALSE, format_string('A JSON encoded string does not contain @s.', array('@s' => $char)));
@@ -2801,6 +3074,11 @@ class CommonJSONUnitTestCase extends BackdropUnitTestCase {
     $json_decoded = backdrop_json_decode($json);
     $this->assertNotIdentical($source, $json, 'An array encoded in JSON is not identical to the source.');
     $this->assertIdentical($source, $json_decoded, 'Encoding structured data to JSON and decoding back results in the original data.');
+
+    // Do an additional check on structured data when pretty printing.
+    $json = backdrop_json_encode($source, TRUE);
+    $json_decoded = backdrop_json_decode($json);
+    $this->assertIdentical($source, $json_decoded, 'Encoding structured data to pretty-printed JSON and decoding back results in the original data.');
 
     // Unicode test strings.
     $unicode_decoded = 'üéåâ';
@@ -2899,6 +3177,117 @@ class CommonBackdropAddFeedTestCase extends BackdropWebTestCase {
     $generated_pattern = '%<link +rel="alternate" +type="application/rss.xml" +title="' . $title . '" +href="' . $url . '" */>%';
     return $generated_pattern;
   }
+}
+
+/**
+ * Test that backdrop_sort() works correctly.
+ */
+class CommonBackdropSortUnitTest extends BackdropUnitTestCase {
+
+  /**
+   * Array to use for testing.
+   *
+   * @var array
+   */
+  protected $test_array;
+
+  function setUp() {
+    parent::setUp();
+
+    $this->test_array = array(
+      'breadcrumb' => array(
+        'info' => 'Breadcrumb',
+        'weight' => 4,
+        'description' => 'A trail of links from the homepage to the current page.',
+        'render last' => TRUE,
+      ),
+      'main-menu' => array(
+        'info' => 'Primary navigation',
+        'weight' => 2,
+        'description' => 'A hierarchical list of links for the Primary navigation.',
+      ),
+      'recent' => array(
+        'info' => 'Recent content',
+        'weight' => 3,
+        'description' => 'A list of recently published content.',
+      ),
+      'content' => array(
+        'info' => 'Content block',
+        'weight' => 1,
+        'description' => 'Displays a node in a block.',
+        'class' => 'NodeBlock',
+      ),
+      'form' => array(
+        'info' => 'Search form',
+        'weight' => -2,
+        'description' => 'The search form for searching site content.',
+      ),
+      'custom_block' => array(
+        'info' => 'Add a custom block',
+        'weight' => -1,
+        'description' => 'A basic block for adding custom text.',
+        'class' => 'BlockText',
+      ),
+    );
+  }
+
+  /**
+   * Tests backdrop_sort().
+   */
+  public function testBackdropSort() {
+    $expected = array(
+      'form',
+      'custom_block',
+      'content',
+      'main-menu',
+      'recent',
+      'breadcrumb',
+    );
+
+    // Sort by a single numeric key.
+    backdrop_sort($this->test_array, array('weight' => SORT_NUMERIC));
+    $this->assertIdentical(array_keys($this->test_array), $expected);
+
+    // Sort by direction.
+    backdrop_sort($this->test_array, array('weight' => SORT_NUMERIC), SORT_DESC);
+    $this->assertIdentical(array_keys($this->test_array), array_reverse($expected));
+
+    $expected = array(
+      'custom_block',
+      'main-menu',
+      'recent',
+      'breadcrumb',
+      'content',
+      'form',
+    );
+
+    // Sort by a single string key.
+    backdrop_sort($this->test_array, array('description' => SORT_STRING));
+    $this->assertIdentical(array_keys($this->test_array), $expected);
+
+    // Sort by direction.
+    backdrop_sort($this->test_array, array('description' => SORT_STRING), SORT_DESC);
+    $this->assertIdentical(array_keys($this->test_array), array_reverse($expected));
+
+    $expected = array(
+      'form',
+      'custom_block',
+      'content',
+      'main-menu',
+      'recent',
+      'breadcrumb',
+    );
+
+    // Sort by numeric and string keys.
+    backdrop_sort($this->test_array, array('weight' => SORT_NUMERIC, 'info' => SORT_STRING));
+    $this->assertIdentical(array_keys($this->test_array), $expected);
+
+    // Sort by direction.
+    backdrop_sort($this->test_array, array('weight' => SORT_NUMERIC, 'info' => SORT_STRING), SORT_DESC);
+    $this->assertIdentical(array_keys($this->test_array), array_reverse($expected));
+
+  }
+
 }
 
 /**

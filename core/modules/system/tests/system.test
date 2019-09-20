@@ -4,11 +4,15 @@
  * Tests for system.module.
  */
 
+// Include class WatchdogTestCase from Simpletest.
+require_once BACKDROP_ROOT . '/core/modules/simpletest/tests/bootstrap.test';
+
 /**
  * Helper class for module test cases.
  */
-class ModuleTestCase extends BackdropWebTestCase {
+class ModuleTestCase extends WatchdogTestCase {
   protected $admin_user;
+  protected $profile = 'testing';
 
   function setUp() {
     parent::setUp('system_test');
@@ -89,39 +93,29 @@ class ModuleTestCase extends BackdropWebTestCase {
       $this->assertEqual(module_exists($module), $enabled, format_string($message, array('@module' => $module)));
     }
   }
+}
+
+/**
+ * Test module filter.
+ */
+class FilterResetTestCase extends ModuleTestCase {
+  protected $profile = 'testing';
 
   /**
-   * Verify a log entry was entered for a module's status change.
-   * Called in the same way of the expected original watchdog() execution.
-   *
-   * @param $type
-   *   The category to which this message belongs.
-   * @param $message
-   *   The message to store in the log. Keep $message translatable
-   *   by not concatenating dynamic values into it! Variables in the
-   *   message should be added by using placeholder strings alongside
-   *   the variables argument to declare the value of the placeholders.
-   *   See t() for documentation on how $message and $variables interact.
-   * @param $variables
-   *   Array of variables to replace in the message on display or
-   *   NULL if message is already translated or not possible to
-   *   translate.
-   * @param $severity
-   *   The severity of the message, as per RFC 3164.
-   * @param $link
-   *   A link to associate with the message.
+   * Test that the search and reset functionality on the modules page works.
    */
-  function assertLogMessage($type, $message, $variables = array(), $severity = WATCHDOG_NOTICE, $link = '') {
-    $count = db_select('watchdog', 'w')
-      ->condition('type', $type)
-      ->condition('message', $message)
-      ->condition('variables', serialize($variables))
-      ->condition('severity', $severity)
-      ->condition('link', $link)
-      ->countQuery()
-      ->execute()
-      ->fetchField();
-    $this->assertTrue($count > 0, format_string('watchdog table contains @count rows for @message', array('@count' => $count, '@message' => $message)));
+  function testFilterReset() {
+    $edit = array();
+    $edit['search'] = 'image';
+    $this->backdropPost('admin/modules', $edit, t('Save configuration'));
+    $this->assertUrl('admin/modules', array(
+      'query' => array(
+        'search' => 'image',
+      ),
+    ));
+
+    $this->clickLink(t('Reset'));
+    $this->assertUrl('admin/modules');
   }
 }
 
@@ -150,7 +144,7 @@ class EnableDisableTestCase extends ModuleTestCase {
     if (isset($modules['dblog'])) {
       $modules = array('dblog' => $modules['dblog']) + $modules;
     }
- 
+
     // Set a variable so that the hook implementations in system_test.module
     // will display messages via backdrop_set_message().
     state_set('test_verbose_module_hooks', TRUE);
@@ -429,6 +423,11 @@ class ModuleDependencyTestCase extends ModuleTestCase {
    * Tests enabling a module that depends on a module which fails hook_requirements().
    */
   function testEnableRequirementsFailureDependency() {
+    // Enable comment module before testing the dependencies.
+    $edit = array();
+    $edit['modules[Comments][comment][enable]'] = TRUE;
+    $this->backdropPost('admin/modules', $edit, t('Save configuration'));
+
     $this->assertModules(array('requirements1_test'), FALSE);
     $this->assertModules(array('requirements2_test'), FALSE);
 
@@ -556,47 +555,93 @@ class ModuleVersionTestCase extends ModuleTestCase {
    */
   function testModuleVersions() {
     $dependencies = array(
-      // Alternating between being compatible and incompatible with 1.x-2.4-beta3.
-      // The first is always a compatible.
-      'common_test',
+      // All comparisons are done against 1.x-2.4-beta3.
+      'common_test' => TRUE,
       // Branch incompatibility.
-      'common_test (1.x)',
+      'common_test (1.x)' => FALSE,
       // Branch compatibility.
-      'common_test (2.x)',
+      'common_test (2.x)' => TRUE,
       // Another branch incompatibility.
-      'common_test (>2.x)',
+      'common_test (>2.x)' => FALSE,
       // Another branch compatibility.
-      'common_test (<=2.x)',
+      'common_test (<=2.x)' => TRUE,
       // Another branch incompatibility.
-      'common_test (<2.x)',
+      'common_test (<2.x)' => FALSE,
       // Another branch compatibility.
-      'common_test (>=2.x)',
+      'common_test (>=2.x)' => TRUE,
+      // Higher rc version. Incompatible.
+      'common_test (>=1.x-2.4-rc1)' => FALSE,
+      // Higher beta version. Incompatible.
+      'common_test (>=1.x-2.4-beta4)' => FALSE,
+      // Lower beta version. Compatible.
+      'common_test (>=1.x-2.4-beta2)' => TRUE,
+      // Lower alpha version. Compatible.
+      'common_test (>=1.x-2.4-alpha8)' => TRUE,
       // Nonsense, misses a dash. Incompatible with everything.
-      'common_test (=1.x2.x, >=2.4)',
+      'common_test (=1.x2.x, >=2.4)' => FALSE,
       // Core version is optional. Compatible.
-      'common_test (=1.x-2.x, >=2.4-alpha2)',
+      'common_test (=1.x-2.x, >=2.4-alpha2)' => TRUE,
       // Test !=, explicitly incompatible.
-      'common_test (=2.x, !=2.4-beta3)',
+      'common_test (=2.x, !=2.4-beta3)' => FALSE,
       // Three operations. Compatible.
-      'common_test (=2.x, !=2.3, <2.5)',
+      'common_test (=2.x, !=2.3, <2.5)' => TRUE,
       // Testing extra version. Incompatible.
-      'common_test (<=2.4-beta2)',
+      'common_test (<=2.4-beta2)' => FALSE,
       // Testing extra version. Compatible.
-      'common_test (>2.4-beta2)',
+      'common_test (>2.4-beta2)' => TRUE,
       // Testing extra version. Incompatible.
-      'common_test (>2.4-rc0)',
+      'common_test (>2.4-rc0)' => FALSE,
     );
-    state_set('system_test_dependencies', $dependencies);
-    $n = count($dependencies);
-    for ($i = 0; $i < $n; $i++) {
+    foreach ($dependencies as $version_string => $compatible) {
+      // Each request, one dependency is shifted off the front and added to
+      // module_test's dependencies. See system_test_system_info_alter().
+      state_set('system_test_dependency', $version_string);
       $this->backdropGet('admin/modules');
       $checkbox = $this->xpath('//input[@id="edit-modules-testing-module-test-enable"]');
-      $this->assertEqual(!empty($checkbox[0]['disabled']), $i % 2, $dependencies[$i]);
+      $this->assertEqual(empty($checkbox[0]['disabled']), $compatible, $version_string);
+    }
+
+    $dev_dependencies = array(
+      // Compare again against a the dev version 1.x-2.x-dev.
+      'common_test' => TRUE,
+      // Branch incompatibility.
+      'common_test (1.x)' => FALSE,
+      // Branch compatibility.
+      'common_test (2.x)' => TRUE,
+      // Another branch incompatibility.
+      'common_test (>2.x)' => FALSE,
+      // Any alpha version
+      'common_test (>=1.x-2.x-alpha4)' => TRUE,
+      // Any beta version
+      'common_test (>=1.x-2.x-beta4)' => TRUE,
+      // Any rc version
+      'common_test (>=1.x-2.x-rc4)' => TRUE,
+      // Any preview version
+      'common_test (>=1.x-2.x-preview)' => TRUE,
+      // Complex version string.
+      'common_test (>=1.x-2.4-beta2)' => TRUE,
+      // Dev versions are later than any minor number.
+      'common_test (>=2.4.0)' => TRUE,
+      // Next version is not compatible.
+      'common_test (>=3.0.0)' => FALSE,
+    );
+
+    // Same testing approach as above, only against a different version number.
+    foreach ($dev_dependencies as $version_string => $compatible) {
+      // Each request, one dependency is shifted off the front and added to
+      // module_test's dependencies. See system_test_system_info_alter().
+      state_set('system_test_dev_dependency', $version_string);
+      $this->backdropGet('admin/modules');
+
+      $checkbox = $this->xpath('//input[@id="edit-modules-testing-module-test-enable"]');
+      $this->assertEqual(empty($checkbox[0]['disabled']), $compatible, 'Dev dependency: ' . $version_string);
     }
   }
 }
 
 class CronRunTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp(array('common_test', 'common_test_cron_helper'));
   }
@@ -749,6 +794,8 @@ class CronRunTestCase extends BackdropWebTestCase {
  * Test execution of the cron queue.
  */
 class CronQueueTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     parent::setUp(array('common_test', 'common_test_cron_helper', 'cron_queue_test'));
   }
@@ -795,7 +842,7 @@ class MetaTagsTestCase extends BackdropWebTestCase {
   public function testMetaTag() {
     list($version, ) = explode('.', BACKDROP_VERSION);
     $meta_tags = array(
-      'generator' => '<meta name="Generator" content="Backdrop CMS ' . $version . ' (http://backdropcms.org)" />',
+      'generator' => '<meta name="Generator" content="Backdrop CMS ' . $version . ' (https://backdropcms.org)" />',
       'viewport' => '<meta name="viewport" content="width=device-width, initial-scale=1" />',
     );
 
@@ -817,9 +864,13 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
 
     // Create an administrative user.
     $this->admin_user = $this->backdropCreateUser(array('access administration pages', 'administer site configuration', 'administer blocks'));
+
+    // Disable caching.
+    config_set('system.core', 'cache', '0');
   }
 
   function testAccessDenied() {
+    $this->backdropLogout();
     $this->backdropGet('admin');
     $this->assertText(t('Access denied'), 'Found the default 403 page');
     $this->assertResponse(403);
@@ -843,7 +894,7 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
 
     $this->backdropGet('admin');
     $this->assertText($node->title, 'Found the custom 403 page');
-    $this->assertText(t('User login'), 'Blocks are shown on the custom 403 page');
+    $this->assertText('Powered by Backdrop CMS', 'Blocks are shown on the custom 403 page');
 
     // Log back in and remove the custom 403 page.
     $this->backdropLogin($this->admin_user);
@@ -855,11 +906,11 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin');
     $this->assertText(t('Access denied'), 'Found the default 403 page');
     $this->assertResponse(403);
-    $this->assertText(t('User login'), 'Blocks are shown on the default 403 page');
+    $this->assertText('Powered by Backdrop CMS', 'Blocks are shown on the default 403 page');
 
     // Log back in, set the custom 403 page to /user and remove the block
     $this->backdropLogin($this->admin_user);
-    config_set('system.core', 'site_403', 'user');
+    config_set('system.core', 'site_403', 'user/login');
 
     // Check that we can log in from the 403 page.
     $this->backdropLogout();
@@ -871,6 +922,28 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
 
     // Check that we're still on the same page.
     $this->assertText(t('Site information'));
+  }
+
+  function test403PathOnSystemForm() {
+    $this->backdropLogin($this->admin_user);
+    $edit = array(
+      'title' => $this->randomName(10),
+      'body' => array(LANGUAGE_NONE => array(array('value' => $this->randomName(100)))),
+      'path' => array(
+        'alias' => $this->randomName(8),
+      ),
+    );
+    $node = $this->backdropCreateNode($edit);
+    // Use a custom 403 page.
+    $this->backdropPost('admin/config/system/site-information', array('site_403' => $node->path['alias']), t('Save configuration'));
+    $this->backdropGet('admin/config/system/site-information');
+    $this->assertRaw($node->path['alias'], t("Found the alias for the custom 403 page path."));
+
+    // Now set a new alias on the node and make sure the new alias is on the 403 field.
+    $node->title = $this->randomName(7);
+    node_save($node);
+    $this->backdropGet('admin/config/system/site-information');
+    $this->assertRaw($node->path['alias'], t("Found the alias for the custom 403 page path after it has been changed."));
   }
 }
 
@@ -903,6 +976,28 @@ class PageNotFoundTestCase extends BackdropWebTestCase {
 
     $this->backdropGet($this->randomName(10));
     $this->assertText($node->title, 'Found the custom 404 page');
+  }
+
+  function test404PathOnSystemForm() {
+    $this->backdropLogin($this->admin_user);
+    $edit = array(
+      'title' => $this->randomName(10),
+      'body' => array(LANGUAGE_NONE => array(array('value' => $this->randomName(100)))),
+      'path' => array(
+        'alias' => $this->randomName(8),
+      ),
+    );
+    $node = $this->backdropCreateNode($edit);
+    // Use a custom 404 page.
+    $this->backdropPost('admin/config/system/site-information', array('site_404' => $node->path['alias']), t('Save configuration'));
+    $this->backdropGet('admin/config/system/site-information');
+    $this->assertRaw($node->path['alias'], t("Found the alias for the custom 404 page path."));
+
+    // Now set a new alias on the node and make sure the new alias is on the 404 field.
+    $node->title = $this->randomName(7);
+    node_save($node);
+    $this->backdropGet('admin/config/system/site-information');
+    $this->assertRaw($node->path['alias'], t("Found the alias for the custom 404 page path after it has been changed."));
   }
 }
 
@@ -1091,11 +1186,12 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/config/development/maintenance', $edit, 'Save configuration');
     $this->assertRaw('The site is now in maintenance mode. Only users with the "Access site in maintenance mode" permission will be able to access the site.', 'Maintenance confirmation message shown.');
 
-    $admin_message = format_string('Operating in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance')));
-    $user_message = 'Operating in maintenance mode.';
+    $path = config_get('system.core', 'site_frontpage');
+    $admin_message = format_string('The site is currently in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance', array('query' => array('destination' => $path)))));
+    $user_message = 'The site is currently in maintenance mode.';
     $offline_message = format_string('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.core', 'site_name')));
 
-    $this->backdropGet('');
+    $this->backdropGet($path);
     $this->assertRaw($admin_message, 'Found the site maintenance mode message.');
 
     // Logout and verify that offline message is displayed.
@@ -1258,7 +1354,7 @@ class DateTimeFunctionalTest extends BackdropWebTestCase {
 
     // Edit custom date format.
     $this->backdropGet('admin/config/regional/date-time/formats');
-    $this->clickLink(t('Edit'));
+    $this->clickLink(t('Configure'));
     $edit = array(
       'pattern' => 'Y m',
     );
@@ -1365,7 +1461,7 @@ class PageTitleFiltering extends BackdropWebTestCase {
     $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
 
     // Load frontpage.
-    $this->backdropGet('');
+    $this->backdropGet('<front>');
 
     // Test the title.
     $this->assertNoRaw($title, 'Check for the unfiltered version of the title.');
@@ -1400,10 +1496,28 @@ class FrontPageTestCase extends BackdropWebTestCase {
   function testBackdropIsFrontPage() {
     $this->backdropGet('');
     $this->assertText(t('On front page.'), 'Path is the front page.');
+    config_set('system.core', 'site_frontpage', 'node');
     $this->backdropGet('node');
     $this->assertText(t('On front page.'), 'Path is the front page.');
     $this->backdropGet($this->node_path);
     $this->assertNoText(t('On front page.'), 'Path is not the front page.');
+
+    // Test that the default_nodes_main setting is saved and works from
+    // Site information form: /admin/config/system/site-information
+    $node1 = $this->backdropCreateNode(array('title' => $this->randomName(20), 'promote' => 1));
+    $node2 = $this->backdropCreateNode(array('title' => $this->randomName(20), 'promote' => 1));
+    $node3 = $this->backdropCreateNode(array('title' => $this->randomName(20), 'promote' => 1));
+    $this->backdropGet('');
+    // Check that all three promoted nodes are on the frontpage.
+    $this->assertText($node1->title, 'node1 title found on front page.');
+    $this->assertText($node2->title, 'node2 title found on front page.');
+    $this->assertText($node3->title, 'node3 title found on front page.');
+    // Change the number of nodes allowed on frontpage.
+    config_set('system.core', 'default_nodes_main', 2);
+    backdrop_flush_all_caches();
+    // Make sure that the 3rd node is no longer on frontpage.
+    $this->backdropGet('');
+    $this->assertNoText($node1->title, 'node3 title not on frontpage after setting forntpage listing to 2 nodes.');
 
     // Change the front page to an invalid path.
     $edit = array('site_frontpage' => 'kittens');
@@ -1417,8 +1531,12 @@ class FrontPageTestCase extends BackdropWebTestCase {
 
     $this->backdropGet('');
     $this->assertText(t('On front page.'), 'Path is the front page.');
+    // Check that the path /node is redirected to the custom frontpage.
     $this->backdropGet('node');
-    $this->assertNoText(t('On front page.'), 'Path is not the front page.');
+    $node_alias = current_path();
+    $this->backdropGet($this->node_path);
+    $this_alias = current_path();
+    $this->assertEqual($node_alias, $this_alias, 'Path /node is redirected to custom frontpage.');
     $this->backdropGet($this->node_path);
     $this->assertText(t('On front page.'), 'Path is the front page.');
   }
@@ -1516,6 +1634,8 @@ class SystemMainContentFallback extends BackdropWebTestCase {
   function testMainContentFallback() {
     // Disable the layout module.
     module_disable(array('layout'));
+    // Remove the old layout path from the menu.
+    menu_rebuild();
     $this->assertFalse(module_exists('layout'), 'Layout module disabled.');
 
     // At this point, no region is filled and fallback should be triggered.
@@ -1551,6 +1671,29 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array('access administration pages', 'view the administration theme', 'administer themes', 'bypass node access', 'administer blocks'));
     $this->backdropLogin($this->admin_user);
     $this->node = $this->backdropCreateNode();
+  }
+
+  /**
+   * Test the individual per-theme settings form.
+   */
+  function testPerThemeSettings() {
+    // Enable the test theme and the module that controls it. Clear caches in
+    // between so that the module's hook_system_theme_info() implementation is
+    // correctly registered.
+    module_enable(array('theme_test'));
+    backdrop_flush_all_caches();
+    theme_enable(array('test_theme'));
+
+    // Test that the theme-specific settings form can be saved and that the
+    // theme-specific checkbox is checked and unchecked as appropriate.
+    $this->backdropGet('admin/appearance/settings/test_theme');
+    $this->assertNoFieldChecked('edit-test-theme-checkbox', 'The test_theme_checkbox setting is unchecked.');
+    $this->backdropPost(NULL, array('test_theme_checkbox' => TRUE), t('Save theme settings'));
+    $this->assertText('The configuration options have been saved.');
+    $this->assertFieldChecked('edit-test-theme-checkbox', 'The test_theme_checkbox setting is checked.');
+    $this->backdropPost(NULL, array('test_theme_checkbox' => FALSE), t('Save theme settings'));
+    $this->assertText('The configuration options have been saved.');
+    $this->assertNoFieldChecked('edit-test-theme-checkbox', 'The test_theme_checkbox setting is unchecked.');
   }
 
   /**
@@ -1591,7 +1734,7 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     $this->assertRaw('core/themes/stark', 'Site default theme used on the add content page.');
 
     // Reset to the default theme settings.
-    config_set('system.core', 'theme_default', 'bartik');
+    config_set('system.core', 'theme_default', 'basis');
     $edit = array(
       'admin_theme' => '0',
       'node_admin_theme' => FALSE,
@@ -1599,10 +1742,10 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/appearance', $edit, t('Save configuration'));
 
     $this->backdropGet('admin');
-    $this->assertRaw('core/themes/bartik', 'Site default theme used on administration page.');
+    $this->assertRaw('core/themes/basis', 'Site default theme used on administration page.');
 
     $this->backdropGet('node/add');
-    $this->assertRaw('core/themes/bartik', 'Site default theme used on the add content page.');
+    $this->assertRaw('core/themes/basis', 'Site default theme used on the add content page.');
 
     // Check that Stark does not show up on the Appearance page.
     $this->backdropGet('admin/appearance');
@@ -1618,19 +1761,39 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
    * Test switching the default theme.
    */
   function testSwitchDefaultTheme() {
-    // Enable Bartik and set it as the default theme.
-    theme_enable(array('bartik'));
+    // Enable Basis and set it as the default theme.
+    theme_enable(array('basis'));
     $this->backdropGet('admin/appearance');
     $this->clickLink(t('Set default'));
-    $this->assertEqual(config_get('system.core', 'theme_default'), 'bartik');
+    $this->assertEqual(config_get('system.core', 'theme_default'), 'basis');
 
-    // Switch back to Seven and test again.
+    // Enable the first disabled theme (Bartik) and check again.
     $this->backdropGet('admin/appearance');
     $this->clickLink(t('Enable and set default'), 0);
-    $this->assertEqual(config_get('system.core', 'theme_default'), 'seven');
+    $this->assertEqual(config_get('system.core', 'theme_default'), 'bartik');
+  }
+
+  /**
+   * Test theme settings.
+   */
+  function testThemeSettings() {
+    theme_enable(array('basis'));
+    // Change Basis settings so config file is created.
+    $edit = array();
+    $this->backdropPost('admin/appearance/settings/basis', $edit, t('Save theme settings'));
+
+    // Ensure config file exists.
+    $config_before = config('basis.settings');
+
+    $this->assertFalse($config_before->isNew(), 'Basis config file exists.');
+
+    theme_disable(array('basis'));
+
+    // Check that config file no longer exists.
+    $config_after = config('basis.settings');
+    $this->assertTrue($config_after->isNew(), 'Basis config file does not exist.');
   }
 }
-
 
 /**
  * Test the basic queue functionality.
@@ -1783,81 +1946,30 @@ array_space[a b] = Value';
  */
 class InfoFileCoreTest extends BackdropUnitTestCase {
   /**
-   * Tests that all core modules' .info files have the project type string set to "module".
+   * Tests that the .info files of all core projects specify a project type.
    */
-  function testModuleInfoFileContents() {
-    $modules = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.module$/', 'core/modules', 'name', 0);
+  function testProjectInfoFileContents() {
+    $projects = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'core');
+    $allowed_project_types = array('module', 'theme', 'layout', 'profile');
     $type_fails = array();
     $version_fails = array();
-    foreach($modules as $key => $module) {
-      $info = backdrop_parse_info_file(dirname($module->uri) . '/' . $module->name . '.info');
+    foreach($projects as $key => $project) {
+      $info = backdrop_parse_info_file(dirname($project->uri) . '/' . $project->name . '.info');
       if (!isset($info['type'])) {
         $type_fails[] = $key;
-        $this->fail(format_string('%key does not have project type set to "module".', array('%key' => $key)));
+        $this->fail(format_string('%key does not specify a project type in the .info file.', array('%key' => $key)));
       }
-      elseif ($info['type'] != 'module') {
+      elseif (!in_array($info['type'], $allowed_project_types)) {
         $type_fails[] = $key;
-        $this->fail(format_string('Project type for %key is not set to "module".', array('%key' => $key)));
+        $this->fail(format_string('Invalid project type specified for %key in the .info file.', array('%key' => $key)));
       }
       if (!isset($info['version'])) {
         $version_fails[] = $key;
         $this->fail(format_string('%key does not have a version string in the .info file.', array('%key' => $key)));
       }
     }
-    $this->assertFalse($type_fails, 'Project type string set to "module" for all core modules.');
-    $this->assertFalse($version_fails, 'Version set for all core modules.');
-  }
-
-  /**
-   * Tests that all core themes' .info files have the project type string set to "theme".
-   */
-  function testThemeInfoFileContents() {
-    $themes = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'core/themes');
-    $type_fails = array();
-    $version_fails = array();
-    foreach($themes as $key => $theme) {
-      $info = backdrop_parse_info_file(dirname($theme->uri) . '/' . $theme->name . '.info');
-      if (!isset($info['type'])) {
-        $type_fails[] = $key;
-        $this->fail(format_string('%key does not have project type set to "theme".', array('%key' => $key)));
-      }
-      elseif ($info['type'] != 'theme') {
-        $type_fails[] = $key;
-        $this->fail(format_string('Project type for %key is not set to "theme".', array('%key' => $key)));
-      }
-      if (!isset($info['version'])) {
-        $version_fails[] = $key;
-        $this->fail(format_string('%key does not have a version string in the .info file.', array('%key' => $key)));
-      }
-    }
-    $this->assertFalse($type_fails, 'Project type string set to "theme" for all core themes.');
-    $this->assertFalse($version_fails, 'Version set for all core themes.');
-  }
-
-  /**
-   * Tests that all core layouts' .info files have the project type string set to "layout".
-   */
-  function testLayoutInfoFileContents() {
-    $layouts = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'core/layouts', 'name', 0);
-    $type_fails = array();
-    $version_fails = array();
-    foreach($layouts as $key => $layout) {
-      $info = backdrop_parse_info_file(dirname($layout->uri) . '/' . $layout->name . '.info');
-      if (!isset($info['type'])) {
-        $type_fails[] = $key;
-        $this->fail(format_string('%key does not have project type set to "layout".', array('%key' => $key)));
-      }
-      elseif ($info['type'] != 'layout') {
-        $type_fails[] = $key;
-        $this->fail(format_string('Project type for %key is not set to "layout".', array('%key' => $key)));
-      }
-      if (!isset($info['version'])) {
-        $version_fails[] = $key;
-        $this->fail(format_string('%key does not have a version string in the .info file.', array('%key' => $key)));
-      }
-    }
-    $this->assertFalse($type_fails, 'Project type string set to "layout" for all core layouts.');
-    $this->assertFalse($version_fails, 'Version set for all core layouts.');
+    $this->assertFalse($type_fails, 'Proper project type set for all core projects.');
+    $this->assertFalse($version_fails, 'Version set for all core projects.');
   }
 }
 
@@ -1927,6 +2039,20 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     parent::setUp(array('update_script_test', 'dblog'));
     $this->update_url = $GLOBALS['base_url'] . '/core/update.php';
     $this->update_user = $this->backdropCreateUser(array('administer software updates'));
+  }
+
+  /**
+   * Tests that there are no pending updates for the first test method.
+   */
+  function testNoPendingUpdates() {
+    // Ensure that for the first test method in a class, there are no pending
+    // updates. This tests a backdrop_get_schema_versions() bug that previously
+    // led to the wrong schema version being recorded for the initial install
+    // of a child site during automated testing.
+    $this->backdropLogin($this->update_user);
+    $this->backdropGet($this->update_url, array('external' => TRUE));
+    $this->backdropPost(NULL, array(), t('Continue'));
+    $this->assertText(t('No pending updates.'), 'End of update process was reached.');
   }
 
   /**
@@ -2011,6 +2137,12 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     $this->assertText('This is a requirements error provided by the update_script_test module.');
     $this->clickLink('try again');
     $this->assertText('This is a requirements error provided by the update_script_test module.');
+
+    // Check if the optional 'value' key displays without a notice.
+    $config->set('update_requirement_type', REQUIREMENT_INFO)->save();
+    $this->backdropGet($this->update_url, array('external' => TRUE));
+    $this->assertText('This is a requirements info provided by the update_script_test module.');
+    $this->assertNoText('Notice: Undefined index: value in theme_status_report()');
   }
 
   /**
@@ -2036,7 +2168,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost($this->update_url, array(), t('Continue'), array('external' => TRUE));
     $this->assertText(t('No pending updates.'));
     $this->assertNoLink('Administration pages');
-    $this->clickLink('Front page');
+    $this->clickLink('Home page');
     $this->assertResponse(200);
 
     // Click through update.php with 'access administration pages' permission.
@@ -2061,7 +2193,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     $this->assertLink('site');
     $this->assertNoLink('Administration pages');
     $this->assertNoLink('logged');
-    $this->clickLink('Front page');
+    $this->clickLink('Home page');
     $this->assertResponse(200);
 
     backdrop_set_installed_schema_version('update_script_test', backdrop_get_installed_schema_version('update_script_test') - 1);
@@ -2311,7 +2443,7 @@ class SystemAuthorizeCase extends BackdropWebTestCase {
   function testFileTransferHooks() {
     $page_title = $this->randomName(16);
     $this->backdropGetAuthorizePHP($page_title);
-    $this->assertTitle(strtr('@title | Backdrop', array('@title' => $page_title)), 'authorize.php page title is correct.');
+    $this->assertTitle(strtr('@title | Backdrop CMS', array('@title' => $page_title)), 'authorize.php page title is correct.');
     $this->assertNoText('It appears you have reached this page in error.');
     $this->assertText('To continue, provide your server connection details');
     // Make sure we see the new connection method added by system_test.
@@ -2325,14 +2457,14 @@ class SystemAuthorizeCase extends BackdropWebTestCase {
  * Test the handling of requests containing 'index.php'.
  */
 class SystemIndexPhpTest extends BackdropWebTestCase {
-  function setUp() {
-    parent::setUp();
-  }
 
   /**
    * Test index.php handling.
    */
   function testIndexPhpHandling() {
+    $this->backdropGet('<front>');
+    $this->assertResponse(200, 'Make sure the front page returns a valid page.');
+
     $index_php = $GLOBALS['base_url'] . '/index.php';
 
     $this->backdropGet($index_php, array('external' => TRUE));
@@ -2438,6 +2570,72 @@ class ConfirmFormTest extends BackdropWebTestCase {
 }
 
 /**
+ * Tests request sanitation used in early bootstrap.
+ */
+class BackdropRequestSanitizerUnitTestCase extends BackdropUnitTestCase {
+  protected $testCases = array();
+
+  function setUp() {
+    // Set up an array of test cases.
+    $this->testCases = array(
+      'invalid_param_get' => array(
+        'setup' => array('_GET' => array('#q' => 'blah', 'destination' => 'whatever?foo=bar'), '_POST' => array('foo' => 'bar')),
+        'expected' => array('_GET' => array('destination' => 'whatever?foo=bar'), '_POST' => array('foo' => 'bar')),
+      ),
+      'invalid_param_post' => array(
+        'setup' => array('_POST' => array('#q' => 'blah')),
+        'expected' => array('_POST' => array()),
+      ),
+      'invalid_param_cookie' => array(
+        'setup' => array('_COOKIE' => array('#q' => 'blah')),
+        'expected' => array('_COOKIE' => array()),
+      ),
+      'invalid_param_request' => array(
+        'setup' => array('_REQUEST' => array('#q' => 'blah')),
+        'expected' => array('_REQUEST' => array()),
+      ),
+      'invalid_destination_get' => array(
+        'setup' => array('_GET' => array('destination' => 'whatever?%23test=value')),
+        'expected' => array('_GET' => array()),
+      ),
+      'invalid_destination_get_subkey' => array(
+        'setup' => array('_GET' => array('destination' => 'whatever?blah[%23test]=value')),
+        'expected' => array('_GET' => array()),
+      ),
+      'invalid_destination_get_q' => array(
+        'setup' => array('_GET' => array('destination' => 'whatever?q[%23test]=value&foo=bar')),
+        'expected' => array('_GET' => array()),
+      ),
+      'invalid_destination_zero_bytes_get' => array(
+        'setup' => array('_GET' => array('destination' => "whatever?[\x00bar]=base&%23test=value")),
+        'expected' => array('_GET' => array()),
+      ),
+      'valid_destination' => array(
+        'setup' => array('_GET' => array('destination' => 'whatever')),
+        'expected' => array('_GET' => array('destination' => 'whatever')),
+      ),
+    );
+    parent::setUp();
+  }
+
+  /**
+   * Tests request sanitation used in early bootstrap.
+   */
+  function testBackdropRequestSanitizer() {
+    foreach ($this->testCases as $provider_name => $arguments) {
+      foreach ($arguments['setup'] as $global_name => $value) {
+        $GLOBALS[$global_name] = $value;
+      }
+      // Suppress errors so the resulting globals can be checked.
+      @_backdrop_bootstrap_sanitize_request();
+      foreach ($arguments['expected'] as $global_name => $value) {
+        $this->assertEqual($GLOBALS[$global_name], $value);
+      }
+    }
+  }
+}
+
+/**
  * Tests uuid.inc and related functions.
  */
 class UuidUnitTestCase extends BackdropUnitTestCase {
@@ -2492,5 +2690,224 @@ class UuidUnitTestCase extends BackdropUnitTestCase {
     $this->assertFalse($this->uuid->isValid($invalid_format), t('@uuid is not a valid UUID', array('@uuid' => $invalid_format)));
     $this->assertFalse($this->uuid->isValid($invalid_length), t('@uuid is not a valid UUID', array('@uuid' => $invalid_length)));
 
+  }
+}
+
+/**
+ * Test menu block settings.
+ */
+class MenuBlockTestCase extends BackdropWebTestCase {
+  function setUp() {
+    parent::setUp('menu');
+
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'administer content types',
+      'administer menu',
+      'administer layouts',
+      'create page content',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Test Menu Block functionality with a system menu.
+   */
+  function testMainMenuBlocks() {
+    $this->doMenuBlockTests('main-menu', 'Primary navigation');
+  }
+
+  /**
+   * Test Menu Block functionality with custom menu.
+   */
+  function testCustomMenuBlocks() {
+    // Add a new custom menu.
+    $menu_name = substr(hash('sha256', $this->randomName(16)), 0, MENU_MAX_MENU_NAME_LENGTH_UI);
+    $title = $this->randomName(16);
+
+    $menu = array(
+      'menu_name' => $menu_name,
+      'title' => $title,
+      'description' => 'Description text',
+    );
+    menu_save($menu);
+    $this->doMenuBlockTests($menu_name, $title);
+  }
+
+  /**
+   * Test Menu Block functionality.
+   */
+  function doMenuBlockTests($menu_name, $menu_title) {
+
+    // Add nodes to use as links for menu links.
+    $node1 = $this->backdropCreateNode(array('type' => 'post'));
+    $node2 = $this->backdropCreateNode(array('type' => 'post'));
+    $node3 = $this->backdropCreateNode(array('type' => 'post'));
+    $node4 = $this->backdropCreateNode(array('type' => 'post'));
+    $node5 = $this->backdropCreateNode(array('type' => 'post'));
+
+    // Add menu links.
+    $item1 = $this->addMenuLink($menu_name, 0);
+    $item2 = $this->addMenuLink($menu_name, $item1['mlid'], 'node/' . $node1->nid);
+    $item3 = $this->addMenuLink($menu_name, $item2['mlid'], 'node/' . $node2->nid);
+    $item4 = $this->addMenuLink($menu_name, $item3['mlid'], 'node/' . $node3->nid);
+    $item5 = $this->addMenuLink($menu_name, $item4['mlid'], 'node/' . $node4->nid);
+    $item6 = $this->addMenuLink($menu_name, 0, 'node/' . $node5->nid);
+
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    // Remove the default main-menu block to prevent mixed up checks.
+    $this->clickLink(t('Remove'), 1);
+    // Remove the breadcrumb prevent mixed up checks.
+    $this->clickLink(t('Remove'), 1);
+    // Add a block to the sidebar (the fourth region).
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink($menu_title);
+    $edit = array();
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Record the UUID for the newly added block.
+    $last_block = $this->xpath('(//*[contains(@class,:region)]//*[@data-block-id])[last()]', array(
+      ':region' => 'l-sidebar',
+    ));
+    $block_uuid = (string) $last_block[0]['data-block-id'];
+    $block_edit_url = 'admin/structure/layouts/manage/default/configure-block/editor/' . $block_uuid;
+
+    // Save the layout and return to the front page.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('user');
+
+    // Verify menu links. By default the main menu should only show first-level
+    // links.
+    $this->assertLink($item1['link_title']);
+    $this->assertLink($item6['link_title']);
+    if ($menu_name == 'main-menu') {
+      $this->assertNoLink($item2['link_title']);
+    }
+    else {
+      $this->assertLink($item2['link_title']);
+    }
+
+    // Go to the configure page and change the depth to 3.
+    $this->backdropGet($block_edit_url);
+    $edit = array(
+      'block_settings[depth]' => 3,
+    );
+    $this->backdropPost(NULL, $edit, t('Update block'));
+
+    // Save the layout and return to the front page.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('user');
+
+    // Verify level 3 links are shown, but not level 4.
+    $this->assertLink($item1['link_title']);
+    $this->assertLink($item2['link_title']);
+    $this->assertLink($item3['link_title']);
+    $this->assertLink($item6['link_title']);
+    $this->assertNoLink($item4['link_title']);
+
+    // Go to the configure page and change the depth to unlimited.
+    $this->backdropGet($block_edit_url);
+    $edit = array(
+      'block_settings[depth]' => 0,
+    );
+    $this->backdropPost(NULL, $edit, t('Update block'));
+
+    // Save the layout and return to the front page.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('user');
+
+    // Verify level 5 links are shown.
+    $this->assertLink($item5['link_title']);
+
+    // Go to the configure page and change the starting level to 2.
+    $this->backdropGet($block_edit_url);
+    $edit = array(
+      'block_settings[level]' => 2,
+    );
+    $this->backdropPost(NULL, $edit, t('Update block'));
+
+    // Save the layout and return to the front page.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('user');
+    $this->assertNoLink($item1['link_title']);
+
+    // Go to the level 2 node and verify the menu links are shown.
+    $this->backdropGet('node/' . $node1->nid);
+
+    // Verify level 2 links are shown, but not level 1.
+    // We use item 6 here since item 1, although not in the menu, is in the
+    // breadcrumb.
+    $this->assertNoLink($item6['link_title']);
+    $this->assertLink($item2['link_title']);
+    $this->assertLink($item3['link_title']);
+
+    // All above tests have been done using the default "hierarchical" style.
+    // Switch to the "top-only" style and check available links.
+    $edit = array(
+      'block_settings[style]' => 'top_only',
+    );
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Verify only top level links are shown even when on a 3rd-level link.
+    $this->backdropGet($item3['link_path']);
+    $this->assertLink($item1['link_title']);
+    $this->assertLink($item6['link_title']);
+    $this->assertNoLink($item2['link_title']);
+    $this->assertNoLink($item3['link_title']);
+    $this->assertNoLink($item4['link_title']);
+    $this->assertNoLink($item5['link_title']);
+
+    // Switch to the "dropdown" style and check that all links are expanded, even
+    // though each individual link is not expanded.
+    $edit = array(
+      'block_settings[style]' => 'dropdown',
+    );
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet($item2['link_path']);
+    $this->assertLink($item1['link_title']);
+    $this->assertLink($item2['link_title']);
+    $this->assertLink($item3['link_title']);
+    $this->assertLink($item4['link_title']);
+    $this->assertLink($item5['link_title']);
+    $this->assertLink($item6['link_title']);
+  }
+
+  /**
+   * Add a menu link using the menu module UI.
+   *
+   * @param integer $plid Parent menu link id.
+   * @param string $link Link path.
+   * @param string $menu_name Menu name.
+   * @return array Menu link created.
+   */
+  function addMenuLink($menu_name, $plid = 0, $link = 'user') {
+    // View add menu link page.
+    $this->backdropGet("admin/structure/menu/manage/$menu_name/add");
+    $this->assertResponse(200);
+
+    $title = '!link_' . $this->randomName(16);
+    $edit = array(
+      'link_path' => $link,
+      'link_title' => $title,
+      'description' => '',
+      'enabled' => TRUE,
+      'expanded' => TRUE,
+      'parent' =>  $menu_name . ':' . $plid,
+      'weight' => '0',
+    );
+
+    // Add menu link.
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->assertResponse(200);
+    // Unlike most other modules, there is no confirmation message displayed.
+    $this->assertText($title, 'Menu link was added');
+
+    $item = db_query('SELECT * FROM {menu_links} WHERE link_title = :title', array(':title' => $title))->fetchAssoc();
+    $this->assertTrue(t('Menu link was found in database.'));
+
+    return $item;
   }
 }

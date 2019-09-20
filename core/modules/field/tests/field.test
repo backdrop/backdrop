@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for field.module.
@@ -1387,9 +1386,9 @@ class FieldInfoTestCase extends FieldTestCase {
 
     // Check that display settings are set for the 'default' mode.
     $display = $instance['display']['default'];
-    $this->assertIdentical($display['type'], $field_type['default_formatter'], "Formatter is set for the 'default' view mode");
+    $this->assertIdentical($display['type'], $field_type['default_formatter'], "Formatter is set for the 'default' display mode");
     $formatter_type = field_info_formatter_types($display['type']);
-    $this->assertIdentical($display['settings'], $formatter_type['settings'] , "Formatter settings are set for the 'default' view mode");
+    $this->assertIdentical($display['settings'], $formatter_type['settings'] , "Formatter settings are set for the 'default' display mode");
   }
 
   /**
@@ -2030,14 +2029,14 @@ class FieldDisplayAPITestCase extends FieldTestCase {
     $this->backdropSetContent(backdrop_render($output));
     $settings = field_info_formatter_settings('field_test_default');
     $setting = $settings['test_formatter_setting'];
-    $this->assertText($this->label, 'Label was displayed.');
+    $this->assertNoText($this->label, 'Label was not displayed.');
     foreach ($this->values as $delta => $value) {
       $this->assertText($setting . '|' . $value['value'], format_string('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
 
     // Check that explicit display settings are used.
     $display = array(
-      'label' => 'hidden',
+      'label' => 'above',
       'type' => 'field_test_multiple',
       'settings' => array(
         'test_formatter_setting_multiple' => $this->randomName(),
@@ -2047,7 +2046,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
     $output = field_view_field('test_entity', $this->entity, $this->field_name, $display);
     $this->backdropSetContent(backdrop_render($output));
     $setting = $display['settings']['test_formatter_setting_multiple'];
-    $this->assertNoText($this->label, 'Label was not displayed.');
+    $this->assertText($this->label, 'Label was displayed.');
     $this->assertText('field_test_field_attach_view_alter', 'Alter fired, display passed.');
     $array = array();
     foreach ($this->values as $delta => $value) {
@@ -2057,7 +2056,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
 
     // Check the prepare_view steps are invoked.
     $display = array(
-      'label' => 'hidden',
+      'label' => 'above',
       'type' => 'field_test_with_prepare_view',
       'settings' => array(
         'test_formatter_setting_additional' => $this->randomName(),
@@ -2067,28 +2066,28 @@ class FieldDisplayAPITestCase extends FieldTestCase {
     $view = backdrop_render($output);
     $this->backdropSetContent($view);
     $setting = $display['settings']['test_formatter_setting_additional'];
-    $this->assertNoText($this->label, 'Label was not displayed.');
+    $this->assertText($this->label, 'Label was displayed.');
     $this->assertNoText('field_test_field_attach_view_alter', 'Alter not fired.');
     foreach ($this->values as $delta => $value) {
       $this->assertText($setting . '|' . $value['value'] . '|' . ($value['value'] + 1), format_string('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
 
-    // View mode: check that display settings specified in the instance are
+    // Display mode: check that display settings specified in the instance are
     // used.
     $output = field_view_field('test_entity', $this->entity, $this->field_name, 'teaser');
     $this->backdropSetContent(backdrop_render($output));
     $setting = $this->instance['display']['teaser']['settings']['test_formatter_setting'];
-    $this->assertText($this->label, 'Label was displayed.');
+    $this->assertNoText($this->label, 'Label was not displayed.');
     foreach ($this->values as $delta => $value) {
       $this->assertText($setting . '|' . $value['value'], format_string('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
 
-    // Unknown view mode: check that display settings for 'default' view mode
-    // are used.
+    // Unknown display mode: check that display settings for 'default' display
+    // mode are used.
     $output = field_view_field('test_entity', $this->entity, $this->field_name, 'unknown_view_mode');
     $this->backdropSetContent(backdrop_render($output));
     $setting = $this->instance['display']['default']['settings']['test_formatter_setting'];
-    $this->assertText($this->label, 'Label was displayed.');
+    $this->assertNoText($this->label, 'Label was not displayed.');
     foreach ($this->values as $delta => $value) {
       $this->assertText($setting . '|' . $value['value'], format_string('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
@@ -2138,7 +2137,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
       $this->assertText($setting . '|' . $value['value'] . '|' . ($value['value'] + 1), format_string('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
 
-    // View mode: check that display settings specified in the instance are
+    // Display mode: check that display settings specified in the instance are
     // used.
     $setting = $this->instance['display']['teaser']['settings']['test_formatter_setting'];
     foreach ($this->values as $delta => $value) {
@@ -2148,8 +2147,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
       $this->assertText($setting . '|' . $value['value'], format_string('Value @delta was displayed with expected setting.', array('@delta' => $delta)));
     }
 
-    // Unknown view mode: check that display settings for 'default' view mode
-    // are used.
+    // Unknown display mode: check that display settings for 'default' are used.
     $setting = $this->instance['display']['default']['settings']['test_formatter_setting'];
     foreach ($this->values as $delta => $value) {
       $item = $this->entity->{$this->field_name}[LANGUAGE_NONE][$delta];
@@ -2596,8 +2594,8 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
   // TODO : test creation with
   // - a full fledged $instance structure, check that all the values are there
   // - a minimal $instance structure, check all default values are set
-  // defer actual $instance comparison to a helper function, used for the two cases above,
-  // and for testUpdateFieldInstance
+  // defer actual $instance comparison to a helper function, used for the two
+  // cases above, and for testUpdateFieldInstance
 
   /**
    * Test the creation of a field instance.
@@ -2722,7 +2720,7 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
     $this->assertEqual($instance['display']['default']['settings']['test_formatter_setting'], $instance_new['display']['default']['settings']['test_formatter_setting'], 'Formatter setting change is saved');
     $this->assertEqual($instance['display']['default']['weight'], $instance_new['display']['default']['weight'], 'Widget weight change is saved');
 
-    // Check that changing widget and formatter types updates the default settings.
+    // Check that changing widget & formatter types updates default settings.
     $instance = field_read_instance('test_entity', $this->instance_definition['field_name'], $this->instance_definition['bundle']);
     $instance['widget']['type'] = 'test_field_widget_multiple';
     $instance['display']['default']['type'] = 'field_test_multiple';
@@ -2737,7 +2735,7 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
     $settings = $info['settings'];
     $this->assertIdentical($settings, array_intersect_key($instance_new['display']['default']['settings'], $settings) , 'Changing formatter type updates default settings.');
 
-    // Check that adding a new view mode is saved and gets default settings.
+    // Check that adding a new display mode is saved and gets default settings.
     $instance = field_read_instance('test_entity', $this->instance_definition['field_name'], $this->instance_definition['bundle']);
     $instance['display']['teaser'] = array();
     field_update_instance($instance);
@@ -3494,7 +3492,7 @@ class FieldBlockTestCase extends FieldTestCase {
     $edit = array(
       'title' => 'Post layout',
       'name' => 'node_post',
-      'layout' => 'two_column',
+      'layout_template' => 'moscone_flipped',
       'path' => $layout_path,
     );
     // Save directly without checking contexts.
@@ -3544,7 +3542,7 @@ class FieldBlockTestCase extends FieldTestCase {
       'title_display' => 'none',
       'label' => 'above',
     );
-    $this->backdropPost(NULL, $block_settings, t('Save configuration'));
+    $this->backdropPost(NULL, $block_settings, t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Check the block title settings are shown on the front-end.
@@ -3559,5 +3557,120 @@ class FieldBlockTestCase extends FieldTestCase {
     $field_label = ($frontend_block[0]->xpath('.//*[contains(@class, "field-label-above")]/*[contains(@class, "field-label")]'));
     $this->assertIdentical(array(), $block_title, 'Block title not shown when set to "None".');
     $this->assertTrue(strpos($field_label[0], $this->instance['label']) !== FALSE, 'Block label shown above the field content in the block.');
+  }
+}
+
+/**
+ * Test field_get_value().
+ */
+class FieldGetValueTestCase extends FieldTestCase {
+  protected $profile = 'testing';
+  protected $content_type;
+  protected $field_name;
+  protected $field;
+  protected $instance;
+  protected $admin_user;
+  protected $node;
+
+  function setUp() {
+    parent::setUp(array('node', 'field', 'field_test', 'email'));
+
+    $this->content_type = $this->backdropCreateContentType(array(
+      'type' => 'post',
+      'name' => 'Post',
+    ));
+    $this->admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer nodes', 'administer layouts'));
+
+    // Create a test_field field.
+    $this->test_field_name = backdrop_strtolower($this->randomName() . '_field_name');
+    $this->field = field_create_field(array(
+      'field_name' => $this->test_field_name,
+      'type' => 'test_field',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+    ));
+    $this->instance = field_create_instance(array(
+      'label' => $this->randomName(),
+      'field_name' => $this->test_field_name,
+      'entity_type' => 'node',
+      'bundle' => 'post',
+    ));
+
+    // Create an 'email' field.
+    $this->test_email_field_name = backdrop_strtolower($this->randomName() . '_email_field_name');
+    $this->field = field_create_field(array(
+      'field_name' => $this->test_email_field_name,
+      'settings' => array(),
+      'type' => 'email',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+    ));
+    $this->instance = field_create_instance(array(
+      'settings' => array(),
+      'label' => $this->randomName(),
+      'field_name' => $this->test_email_field_name,
+      'entity_type' => 'node',
+      'bundle' => 'post',
+    ));
+
+    $this->value1 = 11;
+    $this->value2 = 22;
+    $this->value_email1 = 'email1@example.com';
+    $this->value_email2 = 'email2@example.com';
+
+    // Create a dummy node.
+    $this->node = $this->backdropCreateNode(array(
+      'type' => 'post',
+      $this->test_field_name => array(LANGUAGE_NONE => array(
+        array('value' => $this->value1),
+        array('value' => $this->value2),
+      )),
+      $this->test_email_field_name => array(LANGUAGE_NONE => array(
+        array('email' => $this->value_email1),
+        array('email' => $this->value_email2),
+      )),
+    ));
+  }
+
+  /**
+   * Test field_get_value().
+   */
+  function testFieldGetValue() {
+    // Test single 'value' return.
+    $single_value = field_get_value($this->node, $this->test_field_name);
+    $this->assertEqual($this->value1, $single_value, 'The first value in test_field is returned.');
+
+    // Test single 'value' return with $entity->getFieldValue() directly.
+    $single_value = $this->node->getFieldValue($this->test_field_name);
+    $this->assertEqual($this->value1, $single_value, 'The first value in test_field is returned.');
+
+    // Test multiple 'value' return
+    $multiple_value = field_get_values($this->node, $this->test_field_name, 'value', FALSE);
+    $this->assertEqual(2, count($multiple_value), 'An array containing both test_field values is returned.');
+    $this->assertEqual($this->value2, $multiple_value[1], 'Returned value at array position 1 is correct.');
+
+    // Test multiple 'value' return with $entity->getFieldValues() directly.
+    $multiple_value = $this->node->getFieldValues($this->test_field_name, 'value', FALSE);
+    $this->assertEqual(2, count($multiple_value), 'An array containing both test_field values is returned.');
+    $this->assertEqual($this->value2, $multiple_value[1], 'Returned value at array position 1 is correct.');
+
+    // Test 'email' as key.
+    $email_value = field_get_value($this->node, $this->test_email_field_name, 'email');
+    $this->assertEqual($this->value_email1, $email_value, 'The correct item key is returned.');
+
+    // Test an invalid key.
+    $invalid_key = field_get_value($this->node, $this->test_email_field_name, 'wrong_key');
+    $this->assertNull($invalid_key, 'Null is returned with an invalid key.');
+
+    // Test an invalid field name.
+    $invalid_field = field_get_value($this->node, 'no_field');
+    $this->assertNull($invalid_field, 'Null is returned with an invalid field name.');
+
+    // Test an invalid key.
+    $invalid_key = field_get_values($this->node, $this->test_email_field_name, 'wrong_key');
+    $this->assertEqual(array(), $invalid_key, 'Empty array is returned with an invalid field name.');
+
+    // Test an invalid field name.
+    $invalid_field = field_get_values($this->node, 'no_field');
+    $this->assertEqual(array(), $invalid_field, 'Empty array is returned with an invalid field name.');
+
   }
 }

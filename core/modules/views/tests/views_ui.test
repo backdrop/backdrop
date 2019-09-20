@@ -13,7 +13,7 @@ class ViewsUIWizardHelper extends BackdropWebTestCase {
     parent::setUp('views_ui');
 
     // Create and log in a user with administer views permission.
-    $views_admin = $this->backdropCreateUser(array('administer views', 'administer blocks', 'bypass node access', 'access user profiles', 'view revisions'));
+    $views_admin = $this->backdropCreateUser(array('administer views', 'administer blocks', 'bypass node access', 'access user profiles', 'view revisions', 'synchronize configuration'));
     $this->backdropLogin($views_admin);
   }
 }
@@ -25,6 +25,8 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
   function testViewsWizardAndListing() {
     // Check if we can access the main views admin page.
     $this->backdropGet('admin/structure/views');
+    $this->assertLinkByHref(url('admin/config/development/configuration/single/export'));
+
     $this->assertText(t('Add view'));
 
     // Create a simple and not at all useful view.
@@ -40,6 +42,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     foreach (array('/delete', '/clone', '') as $operation) {
       $this->assertLinkByHref(url('admin/structure/views/view/' . $view1['name'] . $operation));
     }
+    $this->assertLinkByHref(url('admin/config/development/configuration/single/export'));
 
     // This view should not have a block.
     $this->backdropGet('admin/structure/block');
@@ -139,9 +142,8 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
    * Tests default views.
    */
   function testDefaultViews() {
-    // Make sure the front page view starts off as disabled (does not appear on
-    // the listing page).
-    $edit_href = 'admin/structure/views/view/frontpage';
+    // Make sure the taxonomy term view starts off as disabled.
+    $edit_href = 'admin/structure/views/view/taxonomy_term';
     $this->backdropGet('admin/structure/views');
     // TODO: Disabled default views do now appear on the front page. Test this
     // behavior with templates instead.
@@ -150,33 +152,44 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
     // Enable the front page view, and make sure it is now visible on the main
     // listing page.
     $this->backdropGet('admin/structure/views/templates');
-    $this->clickViewsOperationLink(t('Enable'), '/frontpage/');
+    $this->clickViewsOperationLink(t('Enable'), '/taxonomy_term/');
     $this->assertUrl('admin/structure/views');
     $this->assertLinkByHref($edit_href);
 
-    // Configure the view and change the title. Make sure that the new title is
-    // displayed.
-    $new_title = $this->randomName(16);
-    $edit = array('title' => $new_title);
-    $this->backdropPost('admin/structure/views/nojs/display/frontpage/page/title', $edit, t('Apply'));
-    $this->backdropPost('admin/structure/views/view/frontpage/configure/page', array(), t('Save'));
-    $this->backdropGet('frontpage');
-    $this->assertText($new_title);
+    // Configure the view and add a class. Make sure that the new class is
+    // added correctly.
+    $new_class = $this->randomName(16);
+    $edit = array('css_class' => $new_class);
+    $this->backdropPost('admin/structure/views/nojs/display/taxonomy_term/page/css_class', $edit, t('Apply'));
+    $this->backdropPost('admin/structure/views/view/taxonomy_term/configure/page', array(), t('Save'));
+
+    // Add a term so we can visit this page to test the view.
+    $term = entity_create('taxonomy_term', array(
+      'name' => $this->randomName(),
+      'description' => $this->randomName(),
+      'format' => filter_default_format(),
+      'vocabulary' => 'tags',
+      'langcode' => LANGUAGE_NONE,
+    ));
+    taxonomy_term_save($term);
+
+    $this->backdropGet('taxonomy/term/' . $term->tid);
+    $this->assertRaw($new_class);
 
     // It should now be possible to revert the view. Do that, and make sure the
     // view title we added above no longer is displayed.
     $this->backdropGet('admin/structure/views');
     $this->assertLink(t('Revert'));
-    $revert_href = 'admin/structure/views/view/frontpage/revert';
+    $revert_href = 'admin/structure/views/view/taxonomy_term/revert';
     $this->assertLinkByHref($revert_href);
     $this->backdropPost($revert_href, array(), t('Revert'));
-    $this->backdropGet('frontpage');
-    $this->assertNoText($new_title);
+    $this->backdropGet('taxonomy/term/' . $term->tid);
+    $this->assertNoRaw($new_class);
 
     // After reverting, the view will be disabled again. Try to click the
     // "enable" link from there again.
     $this->backdropGet('admin/structure/views/templates');
-    $this->clickViewsOperationLink(t('Enable'), '/frontpage/');
+    $this->clickViewsOperationLink(t('Enable'), '/taxonomy_term/');
     $this->assertUrl('admin/structure/views');
     $this->assertLinkByHref($edit_href);
   }
@@ -563,6 +576,14 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
  * Tests the ability of the views wizard to create views with a jump menu style plugin.
  */
 class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
+
+  function setup() {
+    parent::setup();
+
+    // Make sure we're using UTC
+    date_default_timezone_set('UTC');
+  }
+
   /**
    * Tests the jump menu style plugin.
    */
@@ -718,7 +739,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
 /**
  * Tests that displays can be correctly overridden via the user interface.
  */
-class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
+class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
   /**
    * Tests that displays can be overridden via the UI.
    */
@@ -764,7 +785,7 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     // Make sure the title appears in both the page and the block.
     $this->backdropGet($view_path);
     $this->assertText($original_title);
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertText($original_title);
 
     // Change the title for the page display only, and make sure that is the
@@ -777,7 +798,7 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $this->backdropGet($view_path);
     $this->assertText($new_title);
     $this->assertNoText($original_title);
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertText($original_title);
     $this->assertNoText($new_title);
   }
@@ -827,7 +848,7 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $this->backdropGet($view['page[feed_properties][path]']);
     $this->assertText($view['page[title]']);
     $this->assertNoText($view['block[title]']);
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertText($view['block[title]']);
     $this->assertNoText($view['page[title]']);
 
@@ -845,7 +866,7 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $this->assertText($new_default_title);
     $this->assertNoText($view['page[title]']);
     $this->assertNoText($view['block[title]']);
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertText($view['block[title]']);
     $this->assertNoText($new_default_title);
     $this->assertNoText($view['page[title]']);
@@ -862,7 +883,7 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $this->backdropGet($view['page[feed_properties][path]']);
     $this->assertText($new_default_title);
     $this->assertNoText($new_block_title);
-    $this->backdropGet('');
+    $this->backdropGet('user');
     $this->assertText($new_block_title);
     $this->assertNoText($view['block[title]']);
   }
@@ -892,5 +913,41 @@ class ViewsUIWizardOverrideDisplaysTestCase extends ViewsUIWizardHelper {
     $this->backdropPost("admin/structure/views/nojs/display/{$view['name']}/block/title", $edit, t('Apply'));
     $this->backdropPost("admin/structure/views/view/{$view['name']}/configure/block", array(), t('Save'));
     $this->assertText($view['page[title]']);
+  }
+
+  /**
+   * Test reordering of displays.
+   */
+  function testReorderDisplays() {
+    // Create a basic view with a page, block.
+    $view['human_name'] = $this->randomName(16);
+    $view['name'] = strtolower($this->randomName(16));
+    $view['page[create]'] = 1;
+    $view['page[title]'] = $this->randomName(16);
+    $view['page[path]'] = $this->randomName(16);
+    $view['block[create]'] = 1;
+    $view['block[title]'] = $this->randomName(16);
+    $this->backdropPost('admin/structure/views/add', $view, t('Continue & configure'));
+
+    // Displays should list Page first and Block second.
+    $display_links = $this->xpath('//*[@id="views-display-menu-tabs"]//a');
+    $this->assertEqual((string) $display_links[0], t('Page'));
+    $this->assertEqual((string) $display_links[1], t('Block'));
+
+    $this->clickLink('reorder displays');
+
+    $edit = array(
+      'page[weight]' => 1,
+      'block[weight]' => 0,
+    );
+
+    $this->backdropPost(NULL, $edit, t('Apply'));
+
+    // Now after reordering, Block should be first and Page should be second.
+    $display_links = $this->xpath('//*[@id="views-display-menu-tabs"]//a');
+    $this->assertEqual((string) $display_links[0], t('Block'));
+    $this->assertEqual((string) $display_links[1], t('Page'));
+
+    $this->backdropPost(NULL, array(), t('Save'));
   }
 }

@@ -13,7 +13,7 @@ Download additional themes
 Contributed themes from the Backdrop community may be downloaded at
 https://www.backdropcms.org/themes
 
-Organizing modules in this directory
+Organizing themes in this directory
 ------------------------------------
 
 It is safe to organize themes into subdirectories to ensure easy maintenance

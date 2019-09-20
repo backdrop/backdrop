@@ -47,8 +47,20 @@ Backdrop.behaviors.contentTypes = {
     // Path settings.
     $context.find('#edit-path').backdropSetSummary(function(context) {
       var vals = [];
-      vals.push(Backdrop.checkPlain($(context).find('input[name="path_pattern"]').val()) || Backdrop.t('No URL pattern set'));
+      vals.push(Backdrop.checkPlain($(context).find('input[name="path_pattern"]').val()) || Backdrop.t('No URL alias pattern set'));
       return vals.join(', ');
+    });
+
+    // Multilingual settings.
+    $context.find('#edit-multilingual').backdropSetSummary(function(context) {
+      var vals = [];
+      if ($context.find('input[name="language"]:checked').length) {
+        vals.push(Backdrop.t('Enabled'));
+      }
+      else {
+        vals.push(Backdrop.t('Not enabled'));
+      }
+      return Backdrop.checkPlain(vals.join(', '));
     });
   }
 };

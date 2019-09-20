@@ -5,6 +5,34 @@
  */
 
 /**
+ * Returns HTML for node_preview_banner_form().
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - form: A render element representing the form.
+ *
+ * @see node_preview_banner_form()
+ * @ingroup themeable
+ */
+function theme_node_preview_banner_form($variables) {
+  $form = $variables['form'];
+
+  $output = '<div class="node-preview-banner-form">';
+  $output .= '<div class="node-preview-banner-form-actions">';
+  $output .= backdrop_render($form['preview_node_submit']);
+  $output .= backdrop_render($form['backlink']);
+  $output .= '</div>';
+  $output .= '<div class="node-preview-banner-form-view-mode">';
+  $output .= backdrop_render($form['view_mode']);
+  $output .= backdrop_render($form['view_mode_submit']);
+  $output .= '</div>';
+  $output .= '</div>';
+
+  $output .= backdrop_render_children($form);
+  return $output;
+}
+
+/**
  * Returns HTML for the content ranking part of the search settings admin page.
  *
  * @param $variables
@@ -176,7 +204,7 @@ function template_preprocess_node(&$variables) {
   $uri = entity_uri('node', $node);
   $variables['node_url']  = url($uri['path'], $uri['options']);
   $variables['title']     = check_plain($node->title);
-  $variables['page']      = $variables['view_mode'] == 'full' && node_is_page($node);
+  $variables['page']      = ($variables['view_mode'] == 'full' && node_is_page($node)) || (!empty($node->in_preview));
 
   // Flatten the node entity's member fields.
   $variables = array_merge((array) $node, $variables);
@@ -187,23 +215,30 @@ function template_preprocess_node(&$variables) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
 
+  // Comments are coded directly into the node template, but comment module
+  // may not be enabled. Set a variable to ensure it exists. Comment module will
+  // add it's own replacements over the top of this.
+  $variables['comments'] = FALSE;
+
   // Make the field variables available with the appropriate language.
   field_attach_preprocess('node', $node, $variables['content'], $variables);
 
   // Display post information only on certain node types.
   $node_type = node_type_get_type($node->type);
+
+  $variables['display_submitted'] = FALSE;
+  $variables['submitted'] = '';
+  $variables['user_picture'] = '';
+
   if ($node_type->settings['node_submitted']) {
-    $variables['display_submitted'] = TRUE;
-    $variables['submitted'] = t('Submitted by !username on !datetime', array('!username' => $variables['name'], '!datetime' => $variables['date']));
-    $variables['user_picture'] = '';
-    if ($node_type->settings['node_user_picture']) {
-      $variables['user_picture'] = theme('user_picture', array('account' => $node));
+    if (!isset($variables['elements']['#display_submitted']) || $variables['elements']['#display_submitted'] == TRUE) {
+      $variables['display_submitted'] = TRUE;
+      $variables['submitted'] = t('!datetime by !username', array('!datetime' => $variables['date'], '!username' => $variables['name']));
+      $variables['user_picture'] = '';
+      if ($node_type->settings['node_user_picture']) {
+        $variables['user_picture'] = theme('user_picture', array('account' => $node));
+      }
     }
-  }
-  else {
-    $variables['display_submitted'] = FALSE;
-    $variables['submitted'] = '';
-    $variables['user_picture'] = '';
   }
 
   // Add article ARIA role.
@@ -224,8 +259,7 @@ function template_preprocess_node(&$variables) {
     $variables['classes'][] = backdrop_html_class('view-mode-' . $variables['view_mode']);
   }
 
-  // Clean up name so there are no underscores.
-  $variables['theme_hook_suggestions'][] = 'node__' . $node->type;
+  // Add an extra theme hook suggetion for node id.
   $variables['theme_hook_suggestions'][] = 'node__' . $node->nid;
 }
 

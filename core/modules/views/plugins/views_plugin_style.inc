@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_plugin_style.
@@ -122,15 +121,23 @@ class views_plugin_style extends views_plugin {
    */
   function get_row_class($row_index) {
     if ($this->uses_row_class() && $this->options['row_class']) {
-      $class = $this->options['row_class'];
+
+      $has_tokens = FALSE;
       if ($this->uses_fields() && $this->view->field) {
-        $class = strip_tags($this->tokenize_value($class, $row_index));
+        $has_tokens = TRUE;
       }
 
-      $classes = explode(' ', $class);
+      $classes = explode(' ', $this->options['row_class']);
       foreach ($classes as &$class) {
-        $class = backdrop_clean_css_identifier($class);
+        if ($has_tokens) {
+          $class = _views_tokenized_clean_css_identifier($class, $this, $row_index);
+        }
+        else {
+          // No tokens, all valid CSS characters allowed.
+          $class = backdrop_clean_css_identifier($class, array());
+        }
       }
+
       return implode(' ', $classes);
     }
   }

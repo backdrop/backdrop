@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for simpletest.module.
@@ -36,7 +35,6 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
    * Test the internal browsers functionality.
    */
   function testInternalBrowser() {
-    global $conf;
     if (!$this->inCURL()) {
       $this->backdropGet('node');
       $this->assertTrue($this->backdropGetHeader('Date'), 'An HTTP header was received.');
@@ -58,6 +56,11 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
       $this->assertEqual($this->getUrl(), $headers[0]['location'], 'HTTP redirect was followed');
       $this->assertFalse($this->backdropGetHeader('Location'), 'Headers from intermediate request were reset.');
       $this->assertResponse(200, 'Response code from intermediate request was reset.');
+
+      // Add login block to the default layout. Needed for the redirect loop.
+      $layout = layout_load('default');
+      $layout->addBlock('user', 'login', 'sidebar');
+      $layout->save();
 
       // Test the maximum redirection option.
       $this->backdropLogout();
@@ -204,7 +207,7 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
    */
   function getTestIdFromResults() {
     foreach ($this->childTestResults['assertions'] as $assertion) {
-      if (preg_match('@^Test ID is ([0-9]*)\.$@', $assertion['message'], $matches)) {
+      if (preg_match('@^PASS: Test ID is ([0-9]*)\.$@', $assertion['message'], $matches)) {
         return $matches[1];
       }
     }
@@ -430,6 +433,8 @@ class SimpleTestMailCaptureTestCase extends BackdropWebTestCase {
  * Test Folder creation
  */
 class SimpleTestFolderTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
   function setUp() {
     return parent::setUp('image');
   }
@@ -525,12 +530,12 @@ class SimpleTestMissingCheckedRequirements extends BackdropWebTestCase {
    * Overrides checkRequirements().
    */
   protected function checkRequirements() {
+    $errors = parent::checkRequirements();
+
     if (backdrop_valid_test_ua()) {
-      return array(
-        'Test is not allowed to run.'
-      );
+      $errors[] = 'Test is not allowed to run.';
     }
-    return parent::checkRequirements();
+    return $errors;
   }
 
   /**

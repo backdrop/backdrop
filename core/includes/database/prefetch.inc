@@ -29,7 +29,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
   /**
    * Driver-specific options. Can be used by child classes.
    *
-   * @var Array
+   * @var array
    */
   protected $driverOptions;
 
@@ -45,14 +45,14 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
   /**
    * Main data store.
    *
-   * @var Array
+   * @var array
    */
   protected $data = array();
 
   /**
    * The current row, retrieved in PDO::FETCH_ASSOC format.
    *
-   * @var Array
+   * @var array
    */
   protected $currentRow = NULL;
 
@@ -66,7 +66,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
   /**
    * The list of column names in this result set.
    *
-   * @var Array
+   * @var array
    */
   protected $columnNames = NULL;
 
@@ -95,7 +95,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
   /**
    * Holds supplementary current fetch options (which will be used by the next fetch).
    *
-   * @var Array
+   * @var array
    */
   protected $fetchOptions = array(
     'class' => 'stdClass',
@@ -114,7 +114,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
   /**
    * Holds supplementary default fetch options.
    *
-   * @var Array
+   * @var array
    */
   protected $defaultFetchOptions = array(
     'class' => 'stdClass',
@@ -281,9 +281,6 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
           // PDO::FETCH_OBJ.
         case PDO::FETCH_OBJ:
           return (object) $this->currentRow;
-        case PDO::FETCH_CLASS | PDO::FETCH_CLASSTYPE:
-          $class_name = array_unshift($this->currentRow);
-          // Deliberate no break.
         case PDO::FETCH_CLASS:
           if (!isset($class_name)) {
             $class_name = $this->fetchOptions['class'];
@@ -306,13 +303,14 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
           return $this->fetchOptions['object'];
         case PDO::FETCH_COLUMN:
           if (isset($this->columnNames[$this->fetchOptions['column']])) {
-            return $this->currentRow[$k][$this->columnNames[$this->fetchOptions['column']]];
+            return $this->currentRow[$this->columnNames[$this->fetchOptions['column']]];
           }
           else {
-            return;
+            return NULL;
           }
       }
     }
+    return NULL;
   }
 
   /* Implementations of Iterator. */
@@ -449,7 +447,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
       $result = array();
       // Traverse the array as PHP would have done.
       while (isset($this->currentRow)) {
-        $result[] = $this->currentRow[$this->columnNames[$index]];
+        $result[] = $this->currentRow[$column];
         $this->next();
       }
       return $result;
@@ -486,7 +484,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
       $row = $this->currentRow;
       // Grab the row in the format specified above.
       $result_row = $this->current();
-      $result[$this->currentRow[$key]] = $result_row;
+      $result[$row[$key]] = $result_row;
       $this->next();
     }
 

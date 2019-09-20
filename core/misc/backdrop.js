@@ -2,8 +2,8 @@
  * Main JavaScript file for Backdrop CMS.
  *
  * This file provides central functionality to Backdrop, including attaching
- * behaviors (the main way of interacting with JS in Backdrop), theming
- * wrappers, and localization functions.
+ * behaviors (the main way of interacting with JS in Backdrop), theme wrappers,
+ * and localization functions.
  */
 (function ($, undefined) {
 
@@ -17,7 +17,16 @@ if (Backdrop.settings.drupalCompatibility) {
   window.Drupal = Backdrop;
 }
 
-/**
+// Pre-filter Ajax requests to guard against XSS attacks.
+// This is similar to the fix that is built in to jQuery 3.0 and higher.
+// See https://github.com/jquery/jquery/issues/2432
+$.ajaxPrefilter(function (s) {
+  if (s.crossDomain) {
+    s.contents.script = false;
+  }
+});
+
+  /**
  * Attach all registered behaviors to a page element.
  *
  * Behaviors are event-triggered actions that attach to page elements, enhancing
@@ -93,10 +102,10 @@ Backdrop.attachBehaviors = function (context, settings) {
  *     during a tabledrag row swap). After the move is completed,
  *     Backdrop.attachBehaviors() is called, so that the behavior can undo
  *     whatever it did in response to the move. Many behaviors won't need to
- *     do anything simply in response to the element being moved, but because
- *     IFRAME elements reload their "src" when being moved within the DOM,
- *     behaviors bound to IFRAME elements (like WYSIWYG editors) may need to
- *     take some action.
+ *     do anything in response to the element being moved, but because IFRAME
+ *     elements reload their "src" when being moved within the DOM, behaviors
+ *     bound to IFRAME elements (like WYSIWYG editors) may need to take some
+ *     action.
  *   - serialize: When an Ajax form is submitted, this is called with the
  *     form as the context. This provides every behavior within the form an
  *     opportunity to ensure that the field elements have correct content
@@ -130,6 +139,7 @@ Backdrop.detachBehaviors = function (context, settings, trigger) {
 Backdrop.checkPlain = function (str) {
   str = str.toString()
     .replace(/&/g, '&amp;')
+    .replace(/'/g, '&#39;')
     .replace(/"/g, '&quot;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
@@ -157,24 +167,117 @@ Backdrop.formatString = function(str, args) {
   // Transform arguments before inserting them.
   for (var key in args) {
     if (args.hasOwnProperty(key)) {
-       switch (key.charAt(0)) {
-         // Escaped only.
-         case '@':
-           args[key] = Backdrop.checkPlain(args[key]);
-        break;
+      switch (key.charAt(0)) {
+        // Escaped only.
+        case '@':
+          args[key] = Backdrop.checkPlain(args[key]);
+          break;
         // Pass-through.
-         case '!':
-           break;
-         // Escaped and placeholder.
-         case '%':
-         default:
-           args[key] = Backdrop.theme('placeholder', args[key]);
-           break;
-       }
-       str = str.replace(key, args[key]);
+        case '!':
+          break;
+        // Escaped and placeholder.
+        case '%':
+          default:
+          args[key] = Backdrop.theme('placeholder', args[key]);
+          break;
+      }
     }
   }
-  return str;
+  return Backdrop.stringReplace(str, args, null);
+};
+
+/**
+ * Generates a string representation for the given byte count.
+ *
+ * @param size
+ *   A size in bytes.
+ * @param langcode
+ *   Optional language code to translate to a language other than what is used
+ *   to display the page.
+ *
+ * @return
+ *   A translated string representation of the size.
+ *
+ * @since Backdrop 1.11.0
+ */
+Backdrop.formatSize = function(size, langcode) {
+  var kilobyte = 1024;
+  if (size < kilobyte) {
+    return Backdrop.formatPlural(size, '1 byte', '@count bytes', {}, {'langcode': langcode });
+  }
+  else {
+    // Convert bytes to kilobytes and round.
+    size = Number.parseFloat(size / kilobyte).toFixed(2);
+    var units = [
+      Backdrop.t('@size KB', {}, {'langcode': langcode}),
+      Backdrop.t('@size MB', {}, {'langcode': langcode}),
+      Backdrop.t('@size GB', {}, {'langcode': langcode}),
+      Backdrop.t('@size TB', {}, {'langcode': langcode})
+    ];
+    var unit;
+    for (var n = 0; n < units.length; n++) {
+      unit = units[n];
+      if (size >= kilobyte) {
+        size = Number.parseFloat(size / kilobyte).toFixed(2);
+      }
+      else {
+        break;
+      }
+    }
+    return unit.replace('@size', size);
+  }
+};
+
+/**
+ * Replace substring.
+ *
+ * The longest keys will be tried first. Once a substring has been replaced,
+ * its new value will not be searched again.
+ *
+ * @param {String} str
+ *   A string with placeholders.
+ * @param {Object} args
+ *   Key-value pairs.
+ * @param {Array|null} keys
+ *   Array of keys from the "args".  Internal use only.
+ *
+ * @return {String}
+ *   Returns the replaced string.
+ */
+Backdrop.stringReplace = function (str, args, keys) {
+  if (str.length === 0) {
+    return str;
+  }
+
+  // If the array of keys is not passed then collect the keys from the args.
+  if (!$.isArray(keys)) {
+    keys = [];
+    for (var k in args) {
+      if (args.hasOwnProperty(k)) {
+        keys.push(k);
+      }
+    }
+
+    // Order the keys by the character length. The shortest one is the first.
+    keys.sort(function (a, b) { return a.length - b.length; });
+  }
+
+  if (keys.length === 0) {
+    return str;
+  }
+
+  // Take next longest one from the end.
+  var key = keys.pop();
+  var fragments = str.split(key);
+
+  if (keys.length) {
+    for (var i = 0; i < fragments.length; i++) {
+      // Process each fragment with a copy of remaining keys.
+      fragments[i] = Backdrop.stringReplace(fragments[i], args, keys.slice(0));
+    }
+  }
+
+  return fragments.join(args[key]);
 };
 
 /**
@@ -286,6 +389,28 @@ Backdrop.absoluteUrl = function (url) {
   // IE <= 7 normalizes the URL when assigned to the anchor node similar to
   // the other browsers.
   return urlParsingNode.cloneNode(false).href;
+};
+
+/**
+ * Returns the passed in URL as a relative URL to the current site.
+ *
+ * Relative URLs are returned only for local URLs. This will return the full
+ * URL for remote URLs.
+ *
+ * @param url
+ *   The URL string to be normalized to a relative URL.
+ *
+ * @return
+ *   The normalized, relative URL with a leading slash.
+ *
+ * @since 1.11.0
+ */
+Backdrop.relativeUrl = function (url) {
+  // Normalize to absolute first.
+  relativeUrl = Backdrop.absoluteUrl(url);
+  // Port is only present on non-HTTP(S) URLs.
+  var port = window.location.port ? (':' + window.location.port) : '';
+  return relativeUrl.replace(window.location.protocol + '//' + window.location.hostname + port, '');
 };
 
 /**
@@ -404,6 +529,29 @@ Backdrop.getSelection = function (element) {
 };
 
 /**
+ * Add a global variable which determines if the window is being unloaded.
+ *
+ * This is primarily used by Backdrop.displayAjaxError().
+ */
+Backdrop.beforeUnloadCalled = false;
+$(window).bind('beforeunload pagehide', function () {
+    Backdrop.beforeUnloadCalled = true;
+});
+
+/**
+ * Displays a JavaScript error from an Ajax response when appropriate to do so.
+ */
+Backdrop.displayAjaxError = function (message) {
+  // Skip displaying the message if the user deliberately aborted (for example,
+  // by reloading the page or navigating to a different page) while the Ajax
+  // request was still ongoing. See, for example, the discussion at
+  // http://stackoverflow.com/questions/699941/handle-ajax-error-when-a-user-clicks-refresh.
+  if (!Backdrop.beforeUnloadCalled) {
+    alert(message);
+  }
+};
+
+/**
  * Build an error message from an Ajax response.
  */
 Backdrop.ajaxError = function (xmlhttp, uri, customMessage) {
@@ -446,6 +594,72 @@ Backdrop.ajaxError = function (xmlhttp, uri, customMessage) {
   return message;
 };
 
+/**
+ * Run a callback after the given font has been loaded.
+ *
+ * If the font is already loaded, the callback will be executed immediately.
+ *
+ * @param fontName
+ *   Font name as shown in CSS.
+ * @param callback
+ *   Function to run once font has loaded.
+ *
+ * @since 1.4.5
+ */
+Backdrop.isFontLoaded = function(fontName, callback) {
+  if (typeof fontName === 'undefined') {
+    return false;
+  }
+
+  if (typeof Backdrop.fontsLoaded[fontName] === 'undefined') {
+    Backdrop.fontsLoaded[fontName] = false;
+  }
+  else if (Backdrop.fontsLoaded[fontName]) {
+    // Fonts loaded, run the callback and don't run anything else.
+    if (typeof callback !== 'undefined') {
+      callback();
+    }
+    return true;
+  }
+
+  var $body = $('body');
+  var checkFontCounter = 0;
+  // Append an invisible element that will be monospace font or our desired
+  // font. We're using a repeating i because the characters width will
+  // drastically change when it's monospace vs. proportional font.
+  var $checkFontElement = $('<span id="check-font" style="font-family: \'' + fontName + '\', monospace;">iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii</span>');
+  // Control is the same but it will always be our 'control' font, monospace.
+  var $checkFontElementControl = $checkFontElement.clone().attr('id', 'check-font-control').css('font-family', 'monospace');
+  var $checkFontElements = $('<span id="check-font-wrapper" aria-hidden="true" style="visibility: hidden; position: absolute; z-index: -100;"></span>').append($checkFontElement).append($checkFontElementControl);
+  $body.append($checkFontElements);
+
+  // Function to check the width of the font, if it's substantially different
+  // we'll know we our real font has loaded
+  function checkFont() {
+    var currentWidth = $checkFontElement.width();
+    var controlWidth = $checkFontElementControl.width();
+    if (controlWidth !== currentWidth || checkFontCounter >= 60) {
+      Backdrop.fontsLoaded[fontName] = true;
+      // If our font has loaded, or it's been 6 seconds
+      if (typeof callback !== 'undefined') {
+        callback();
+      }
+      // Clean up after ourselves
+      clearInterval(checkFontInterval);
+      $checkFontElements.remove();
+    }
+    checkFontCounter++;
+  }
+  var checkFontInterval = setInterval(checkFont, 100);
+
+  // If we got here, font is not yet loaded, but the callback will be fired
+  // when it is ready.
+  return false;
+};
+if (typeof Backdrop.fontsLoaded === 'undefined') {
+  Backdrop.fontsLoaded = {};
+}
+
 // Class indicating that JS is enabled; used for styling purpose.
 $('html').addClass('js');
 
@@ -485,5 +699,115 @@ Backdrop.theme.prototype = {
     return '<em class="placeholder">' + Backdrop.checkPlain(str) + '</em>';
   }
 };
+
+/**
+ * Add helper functions for feature detection
+ */
+Backdrop.featureDetect = {};
+
+/**
+ * Tests for flex-wrap as it's typically most important in flexbox layouts.
+ *
+ * @return {boolean} True if browser supports flex-wrap.
+ *
+ * @since 1.4.4
+ */
+Backdrop.featureDetect.flexbox = function() {
+  var $body = $('body'),
+      $flexboxTestElement = $('<div style="display: flex; flex-wrap: wrap; width: 0; height: 0;"></div>');
+
+  if ($body.hasClass('has-flexbox')) {
+    return true;
+  } else if ($body.hasClass('no-flexbox')) {
+    return false;
+  } else {
+    $body.append($flexboxTestElement);
+    if ($flexboxTestElement.css('display') === 'flex' && $flexboxTestElement.css('flex-wrap') === 'wrap') {
+      $body.addClass('has-flexbox');
+      $flexboxTestElement.remove();
+      return true;
+    }
+    else {
+      $body.addClass('no-flexbox');
+      $flexboxTestElement.remove();
+      return false;
+    }
+  }
+};
+
+/**
+ * Resource friendly window resize function
+ * Groups all window resize functions and runs them only when a frame comes up
+ * From: developer.mozilla.org/en-US/docs/Web/Events/resize#requestAnimationFrame_customEvent
+ *
+ * Example use:
+ * @code
+ *   Backdrop.optimizedResize.add(function() {
+ *     console.log('Smooth AND resource effecient!');
+ *   });
+ * @endcode
+ */
+Backdrop.optimizedResize = (function() {
+  // Set defaults.
+  var callbacks = {};
+  var running = false;
+  var counter = 0;
+
+  // Fired on resize event.
+  function resize() {
+    if (!running) {
+      running = true;
+      // Provide setTimeout fallback to old browsers.
+      if (window.requestAnimationFrame) {
+        window.requestAnimationFrame(runCallbacks);
+      } else {
+        setTimeout(runCallbacks, 66);
+      }
+    }
+  }
+
+  // Run the actual callbacks.
+  function runCallbacks() {
+    for (var callbackName in callbacks) {
+      if (callbacks.hasOwnProperty(callbackName)) {
+        callbacks[callbackName]();
+      }
+    }
+    running = false;
+  }
+
+  // Adds callback to loop.
+  function addCallback(callback, callbackName) {
+    // Populate a unique callback name if one is not provided.
+    callbackName = callbackName || ('callback-' + (counter++));
+    if (callback) {
+      callbacks[callbackName] = callback;
+    }
+  }
+
+  // Removes a callback from the list of resize handlers.
+  function removeCallback(callbackName) {
+    if (callbacks[callbackName]) {
+      delete callbacks[callbackName];
+    }
+  }
+
+  return {
+    // Public methods to add/remove callbacks.
+    add: function(callback, callbackName) {
+      if (!callbacks.length) {
+        window.addEventListener('resize', resize);
+        window.addEventListener('scroll', resize);
+      }
+      addCallback(callback, callbackName);
+    },
+    remove: function(callbackName) {
+      removeCallback(callbackName);
+    },
+    trigger: function() {
+      runCallbacks();
+    }
+  }
+}());
 
 })(jQuery);

@@ -43,10 +43,11 @@ function TableResponsive (table) {
 
   this.$table.before($('<div class="tableresponsive-toggle-columns"></div>').append(this.$link));
 
-  // Attach a resize handler to the window.
-  $(window)
-    .on('resize.tableresponsive', $.proxy(this, 'eventhandlerEvaluateColumnVisibility'))
-    .trigger('resize.tableresponsive');
+  var _this = this;
+  Backdrop.optimizedResize.add(function() {
+    $.proxy(_this, 'eventhandlerEvaluateColumnVisibility');
+    $(window).trigger('resize.tableresponsive');
+  });
 }
 
 /**
@@ -66,6 +67,13 @@ $.extend(TableResponsive.prototype, {
   eventhandlerEvaluateColumnVisibility: function (e) {
     var pegged = parseInt(this.$link.data('pegged'), 10);
     var hiddenLength = this.$headers.filter('.priority-medium:hidden, .priority-low:hidden').length;
+
+    // If the table is not at all visible, do not manipulate the link.
+    var tableVisible = this.$table.is(':visible');
+    if (!tableVisible) {
+      return;
+    }
+
     // If the table has hidden columns, associate an action link with the table
     // to show the columns.
     if (hiddenLength > 0) {

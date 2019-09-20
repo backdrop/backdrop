@@ -63,3 +63,9 @@ name = Serialization
 description = Test serialization of DOMDocument objects.
 group = Filter
 file = filter.test
+
+[FilterEditorAccessTestCase]
+name = Editor access
+description = Tests access to editors and their associated dialogs.
+group = Filter
+file = filter.test

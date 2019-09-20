@@ -1,9 +1,10 @@
 <?php
-
 /**
  * @file
  * Unit tests for the Backdrop Form API.
  */
+
+include_once(dirname(__FILE__) . '/system_config_test.inc');
 
 class FormsTestCase extends BackdropWebTestCase {
   function setUp() {
@@ -109,7 +110,7 @@ class FormsTestCase extends BackdropWebTestCase {
             }
             if ($type == 'select') {
               // Select elements are going to have validation errors with empty
-              // input, since those are illegal choices. Just make sure the
+              // input, since those are invalid choices. Just make sure the
               // error is not "field is required".
               $this->assertTrue((empty($errors[$element]) || strpos('field is required', $errors[$element]) === FALSE), "Optional '$type' field '$element' is not treated as a required element");
             }
@@ -573,7 +574,8 @@ class FormsTestCase extends BackdropWebTestCase {
     $checkbox = $this->xpath('//input[@name="checkboxes[two]"]');
     $checkbox[0]['value'] = 'FORGERY';
     $this->backdropPost(NULL, array('checkboxes[one]' => TRUE, 'checkboxes[two]' => TRUE), t('Submit'));
-    $this->assertText('An illegal choice has been detected.', 'Input forgery was detected.');
+    $message = t('Invalid option %choice in %name element', array('%choice' => 'FORGERY', '%name' => 'checkboxes'));
+    $this->assertRaw($message, 'Input forgery was detected.');
   }
 }
 
@@ -737,6 +739,14 @@ class FormValidationTestCase extends BackdropWebTestCase {
     $this->assertNoFieldByName('name', '#value changed by #validate', 'Form element #value was not altered.');
     $this->assertNoText('Name value: value changed by form_set_value() in #validate', 'Form element value in $form_state was not altered.');
     $this->assertText('The form has become outdated. Copy any unsaved work in the form below');
+  }
+
+  /**
+   * Tests that a form with a disabled CSRF token can be validated.
+   */
+  function testDisabledToken() {
+    $this->backdropPost('form-test/validate-no-token', array(), 'Save');
+    $this->assertText('The form_test_validate_no_token form has been submitted successfully.');
   }
 
   /**
@@ -1034,6 +1044,26 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
     $this->assertTrue(isset($errors['tableselect']), 'Option checker disallows invalid values for radio buttons.');
   }
 
+  /**
+   * Test presence of ajax functionality
+   */
+  function testAjax() {
+    $rows = array('row1', 'row2', 'row3');
+    // Test checkboxes (#multiple == TRUE).
+    foreach ($rows as $row) {
+      $element = 'tableselect[' . $row . ']';
+      $edit = array($element => TRUE);
+      $result = $this->backdropPostAJAX('form_test/tableselect/multiple-true', $edit, $element);
+      $this->assertFalse(empty($result), t('Ajax triggers on checkbox for @row.', array('@row' => $row)));
+    }
+    // Test radios (#multiple == FALSE).
+    $element = 'tableselect';
+    foreach ($rows as $row) {
+      $edit = array($element => $row);
+      $result = $this->backdropPostAjax('form_test/tableselect/multiple-false', $edit, $element);
+      $this->assertFalse(empty($result), t('Ajax triggers on radio for @row.', array('@row' => $row)));
+    }
+  }
 
   /**
    * Helper function for the option check test to submit a form while collecting errors.
@@ -1409,6 +1439,59 @@ class FormsFormStoragePageCacheTestCase extends BackdropWebTestCase {
     $this->assertText($build_id_first_rebuild, 'First build id as old build id on the page');
     $build_id_second_rebuild = $this->getFormBuildId();
     $this->assertNotEqual($build_id_first_rebuild, $build_id_second_rebuild, 'Build id changes on second rebuild.');
+  }
+}
+
+/**
+ * Test cache_form.
+ */
+class FormsFormCacheTestCase extends DrupalWebTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Form caching',
+      'description' => 'Tests storage and retrieval of forms from cache.',
+      'group' => 'Form API',
+    );
+  }
+
+  function setUp() {
+    parent::setUp('form_test');
+  }
+
+  /**
+   * Tests storing and retrieving the form from cache.
+   */
+  function testCacheForm() {
+    $form = backdrop_get_form('form_test_cache_form');
+    $form_state = array('foo' => 'bar', 'build_info' => array('baz'));
+    form_set_cache($form['#build_id'], $form, $form_state);
+
+    $cached_form_state = array();
+    $cached_form = form_get_cache($form['#build_id'], $cached_form_state);
+
+    $this->assertEqual($cached_form['#build_id'], $form['#build_id'], 'Form retrieved from cache_form successfully.');
+    $this->assertEqual($cached_form_state['foo'], 'bar', 'Data retrieved from cache_form successfully.');
+  }
+
+  /**
+   * Tests changing form_cache_expiration.
+   */
+  function testCacheFormCustomExpiration() {
+    config_set('system.core', 'form_cache_expiration', -1 * (24 * 60 * 60));
+
+    $form = backdrop_get_form('form_test_cache_form');
+    $form_state = array('foo' => 'bar', 'build_info' => array('baz'));
+    form_set_cache($form['#build_id'], $form, $form_state);
+
+    // Clear expired entries from cache_form, which should include the entry we
+    // just stored. Without this, the form will still be retrieved from cache.
+    cache_clear_all(NULL, 'cache_form');
+
+    $cached_form_state = array();
+    $cached_form = form_get_cache($form['#build_id'], $cached_form_state);
+
+    $this->assertNull($cached_form, 'Expired form was not returned from cache.');
+    $this->assertTrue(empty($cached_form_state), 'No data retrieved from cache for expired form.');
   }
 }
 
@@ -1846,8 +1929,8 @@ class FormsTriggeringElementTestCase extends BackdropWebTestCase {
     $this->backdropGet($path . '/rs/s');
 
     // Submit the form with 'button1=button1' in the POST data, which someone
-    // trying to get around security safeguards could easily do. We have to do
-    // a little trickery here, to work around the safeguards in backdropPost(): by
+    // trying to get around security safeguards could do. We have to do a little
+    // trickery here, to work around the safeguards in backdropPost(): by
     // renaming the text field that is in the form to 'button1', we can get the
     // data we want into $_POST.
     $elements = $this->xpath('//form[@id="' . $form_html_id . '"]//input[@name="text"]');
@@ -2116,9 +2199,73 @@ class FormUrlTestCase extends BackdropWebTestCase {
 
     $edit = array();
     $edit['url'] = 'http://foo.bar.example.com/';
-    $edit['url_required'] = 'http://backdropcms.org/example?page=0&foo=bar#new';
+    $edit['url_required'] = 'https://backdropcms.org/example?page=0&foo=bar#new';
     $values = backdrop_json_decode($this->backdropPost('form-test/url', $edit, 'Submit'));
     $this->assertEqual($values['url'], $edit['url']);
     $this->assertEqual($values['url_required'], $edit['url_required']);
+  }
+}
+
+/**
+ * Tests for form textarea.
+ */
+class FormTextareaTestCase extends BackdropUnitTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * Tests that textarea value is properly set.
+   */
+  public function testValueCallback() {
+    $element = array();
+    $form_state = array();
+    $test_cases = array(
+      array(NULL, FALSE),
+      array(NULL, NULL),
+      array('', array('test')),
+      array('test', 'test'),
+      array('123', 123),
+    );
+    foreach ($test_cases as $test_case) {
+      list($expected, $input) = $test_case;
+      $this->assertIdentical($expected, form_type_textarea_value($element, $input, $form_state));
+    }
+  }
+}
+
+class SystemSettingsFormTest extends SystemConfigFormCase {
+  protected $profile = 'testing';
+
+  public function setUp() {
+    parent::setUp(array('form_test'));
+    $this->form_id = 'form_test_system_config_form';
+    $this->values = array(
+      'abc' => array(
+        '#value' => $this->randomString(),
+        '#config_name' => 'simpletest.testconfig',
+        '#config_key' => 'abc',
+      ),
+      'def' => array(
+        '#value' => $this->randomString(),
+        '#config_name' => 'simpletest.testconfig',
+        '#config_key' => 'def',
+      ),
+      // Test single-element overrrides
+      'rss_description' => array(
+        '#value' => $this->randomString(),
+        '#config_name' => 'system.core',
+        '#config_key' => 'rss_description',
+      ),
+      // Test fieldsets of overrides.
+      'ghi' => array(
+        '#value' => $this->randomString(),
+        '#config_name' => 'simpletest.secondconfig',
+        '#config_key' => 'ghi',
+      ),
+      'jkl' => array(
+        '#value' => $this->randomString(),
+        '#config_name' => 'simpletest.secondconfig',
+        '#config_key' => 'jkl',
+      ),
+    );
   }
 }

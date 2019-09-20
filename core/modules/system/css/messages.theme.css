@@ -1,0 +1,126 @@
+/**
+ * @file
+ * Status messages styling.
+ */
+.messages {
+  position: relative;
+  box-sizing: border-box;
+  margin: 0.375rem 0;
+  padding: 0.9em 0.625em 1em 3.438em; /* LTR */
+  border-radius: 4px;
+  min-height: 3.2em;
+  overflow: hidden;
+}
+[dir="rtl"] .messages {
+  padding: .625em 3.438em .625em .625em;
+}
+.messages:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0; /* LTR */
+  width: 2.375em;
+  height: 100%;
+  background-position: center .625em;
+  background-repeat: no-repeat;
+  background-size: 32px;
+}
+.messages :nth-child(2) {
+  margin-top: 0;
+  padding-top: 0;
+}
+.messages :last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+@media only screen and (min-width: 34em) {
+  .messages {
+    padding-left: 4.375em;
+  }
+  [dir="rtl"] .messages {
+    padding-left: .625em;
+    padding-right: 4.375em;
+  }
+  .messages:before {
+    width: 3em;
+  }
+}
+[dir="rtl"] .messages:before {
+  left: auto;
+  right: 0;
+}
+.messages ul,
+.messages .item-list ul {
+  margin-bottom: 0;
+  margin-left: 0;
+}
+
+.messages a {
+  text-decoration: underline;
+}
+.messages a:hover {
+  text-decoration: none;
+}
+
+.messages.status {
+  color: #234600;
+  background-color: #e9eebc;
+}
+.messages.status a {
+  color: #234600;
+}
+div.messages.status:before {
+  background-image: url(../../../misc/message-32-ok.png);
+  background-color: #cfde56;
+}
+
+.messages.warning {
+  color: #525252;
+  background-color: #faf5c9;
+}
+.messages.warning a {
+  color: #525252;
+}
+div.messages.warning:before {
+  background-image: url(../../../misc/message-32-warning.png);
+  background-color: #fce400;
+}
+
+.messages.error {
+  color: #9c1d0d;
+  background-color: #f9edec;
+}
+.messages.error a {
+  color: #9c1d0d;
+}
+div.messages.error:before {
+  background-image: url(../../../misc/message-32-error.png);
+  background-color: #ee3d23;
+}
+
+.messages.info {
+  color: #004570;
+  background-color: #bdf;
+}
+.messages.info a {
+  color: #004570;
+}
+div.messages.info:before {
+  background-image: url(../../../misc/message-32-info.png);
+  background-color: #0074bd;
+}
+
+/* SVG overrides */
+div.messages.status:before {
+  background-image: linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg);
+}
+div.messages.warning:before {
+  background-image: linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg);
+}
+div.messages.error:before {
+  background-image: linear-gradient(transparent, transparent), url(../../../misc/message-error.svg);
+}
+div.messages.info:before {
+  background-image: linear-gradient(transparent, transparent), url(../../../misc/message-info.svg);
+}
+

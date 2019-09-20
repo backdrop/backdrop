@@ -403,7 +403,11 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
     // Create an associative array with weights as values.
     $module_list = array_flip(array_values($module_list));
 
-    while (list($module) = each($module_list)) {
+    // The array is iterated over manually (instead of using a foreach) because
+    // modules may be added to the list within the loop and we need to process
+    // them.
+    while ($module = key($module_list)) {
+      next($module_list);
       if (!isset($module_data[$module])) {
         // This module is not found in the filesystem, abort.
         return FALSE;
@@ -470,6 +474,8 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
       backdrop_get_schema(NULL, TRUE);
       // Update the theme registry to include it.
       backdrop_theme_rebuild();
+      // Refresh Entity info static cache.
+      entity_info_cache_clear();
 
       // Allow modules to react prior to the installation of a module.
       module_invoke_all('modules_preinstall', array($module));
@@ -546,7 +552,11 @@ function module_disable($module_list, $disable_dependents = TRUE) {
     $module_list = array_flip(array_values($module_list));
 
     $profile = backdrop_get_profile();
-    while (list($module) = each($module_list)) {
+    // The array is iterated over manually (instead of using a foreach) because
+    // modules may be added to the list within the loop and we need to process
+    // them.
+    while ($module = key($module_list)) {
+      next($module_list);
       if (!isset($module_data[$module]) || !$module_data[$module]->status) {
         // This module doesn't exist or is already disabled, skip it.
         unset($module_list[$module]);
@@ -567,6 +577,9 @@ function module_disable($module_list, $disable_dependents = TRUE) {
     asort($module_list);
     $module_list = array_keys($module_list);
   }
+
+  // Refresh Entity info static cache.
+  entity_info_cache_clear();
 
   $invoke_modules = array();
 
@@ -605,12 +618,12 @@ function module_disable($module_list, $disable_dependents = TRUE) {
  * @{
  * Allow modules to interact with the Backdrop core.
  *
- * Backdrop's module system is based on the concept of "hooks". A hook is a PHP
- * function that is named foo_bar(), where "foo" is the name of the module
+ * Backdrop's module system is based on the concept of "hooks". A hook is simply
+ * a PHP function that is named foo_bar(), where "foo" is the name of the module
  * (whose filename is thus foo.module) and "bar" is the name of the hook. Each
  * hook has a defined set of parameters and a specified result type.
  *
- * To extend Backdrop, a module need simply implement a hook. When Backdrop wishes
+ * To extend Backdrop, a module needs to implement a hook. When Backdrop wishes
  * to allow intervention from modules, it determines which modules implement a
  * hook and calls that hook in all enabled modules that implement it.
  *
@@ -900,8 +913,9 @@ function module_implements_write_cache() {
  * @param ...
  *   Arguments to pass to the hook implementation.
  *
- * @return
- *   The return value of the hook implementation.
+ * @return mixed|NULL
+ *   The return value of the hook implementation. NULL if the module does not
+ *   implement the given hook.
  *
  * @see backdrop_alter()
  */
@@ -912,6 +926,8 @@ function module_invoke($module, $hook) {
   if (module_hook($module, $hook)) {
     return call_user_func_array($module . '_' . $hook, $args);
   }
+
+  return NULL;
 }
 
 /**
@@ -927,7 +943,9 @@ function module_invoke($module, $hook) {
  *
  * @return
  *   An array of return values of the hook implementations. If modules return
- *   arrays from their implementations, those are merged into one array.
+ *   arrays from their implementations, those are merged into one array
+ *   recursively. Note: integer keys in arrays will be lost, as the merge is
+ *   done using array_merge_recursive().
  *
  * @see backdrop_alter()
  */
@@ -958,12 +976,23 @@ function module_invoke_all($hook) {
 
 /**
  * Returns an array of modules that have been merged into Backdrop core.
+ *
+ * Modules that have been merged into core may not be enabled on newer
+ * installations of Backdrop. Note that some modules have been merged into core
+ * but kept the same name as they did previously. For example "redirect" module
+ * existed both as a contrib module and then later as a core module. Because
+ * the core module shares the same name, it's not included in this list.
+ * Including it would prevent the core module from being enabled.
  */
 function backdrop_merged_modules() {
   return array(
     'token', // Backdrop 1.1.0.
     'pathauto', // Backdrop 1.1.0.
     'transliteration', // Backdrop 1.3.0.
+    'project_browser', // Backdrop 1.4.0.
+    'entity_view_mode', // Backdrop 1.6.0.
+    'options_element', // Backdrop 1.12.0.
+    'field_formatter_settings', // Backdrop 1.13.0.
   );
 }
 

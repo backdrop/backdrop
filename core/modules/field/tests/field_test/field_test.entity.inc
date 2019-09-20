@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines an entity type.

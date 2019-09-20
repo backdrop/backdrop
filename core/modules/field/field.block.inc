@@ -1,8 +1,7 @@
 <?php
-
 /**
  *  FieldBlock extends Block
- *  
+ *
  *  Provides entity field values in configurable blocks.
  */
 class FieldBlock extends Block {
@@ -166,7 +165,7 @@ class FieldBlock extends Block {
     // Provide an instance array for hook_field_formatter_settings_form().
     $pseudo_instance = $this->createPseudoInstance($formatter_name, $formatter_settings);
 
-    // Store the settings in a '_custom' view mode.
+    // Store the settings in a '_custom' display mode.
     $pseudo_instance['display']['_custom'] = array(
       'type' => $formatter_name,
       'settings' => $formatter_settings,
@@ -222,7 +221,7 @@ class FieldBlock extends Block {
       );
     }
   }
-  
+
   /**
    * Submit handler to save the form settings.
    */

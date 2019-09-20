@@ -120,20 +120,37 @@ class LayoutRendererStandard {
   var $suffix = '';
 
   /**
+   * The title that should be displayed on the page.
+   *
+   * The page title can come from a number of places: copied from a block, a
+   * menu callback (within the main page content block), or a custom layout
+   * title. We track this separately from backdrop_set_title() to avoid double-
+   * setting or getting the title within a single request.
+   *
+   * This value is not escaped and should be run through check_plain() when
+   * adding to the page. The title should already be translated when set.
+   *
+   * @var string
+   */
+  protected $page_title = NULL;
+
+  /**
    * Construct the object that will be used to render the layout.
    *
    * @param Layout $layout
    *   The layout object to be rendered.
    * @param array $plugin
    *   The definition of the renderer plugin.
+   *
+   * @throws LayoutMissingException
    */
   function __construct(Layout $layout, array $renderer_plugin) {
     $this->plugin = $renderer_plugin;
-    $layout_info = layout_get_layout_info($layout->layout);
+    $layout_info = layout_get_layout_template_info($layout->layout_template);
     $this->layout = &$layout;
 
     if (empty($layout_info)) {
-      throw new LayoutMissingException(t('The layout plugin "@plugin" could not been found to display the "@title" layout.', array('@plugin' => $layout->layout, '@title' => $layout->title)));
+      throw new LayoutMissingException(t('The layout plugin "@plugin" could not been found to display the "@title" layout.', array('@plugin' => $layout->layout_template, '@title' => $layout->title)));
     }
     else {
       $this->layout_info = $layout_info;
@@ -151,6 +168,15 @@ class LayoutRendererStandard {
    * method via parent::prepare(), or manually set $this->prep_run = TRUE.
    */
   function prepare() {
+    // Set the custom page title. Note this may be overridden in prepareBlocks()
+    // by copying a title from a block.
+    if ($this->layout->settings['title_display'] === LAYOUT_TITLE_CUSTOM) {
+      $this->page_title = t($this->layout->settings['title']);
+    }
+    elseif ($this->layout->settings['title_display'] === LAYOUT_TITLE_NONE) {
+      $this->page_title = FALSE;
+    }
+
     $this->prepareBlocks($this->layout->content);
     $this->prepareRegions($this->layout->positions, $this->layout->settings);
     $this->prep_run = TRUE;
@@ -200,7 +226,17 @@ class LayoutRendererStandard {
         if (!$has_contexts || !$block->checkAccess()) {
           continue;
         }
+
+        // Set the page title from the block.
+        if ($this->layout->settings['title_display'] === LAYOUT_TITLE_BLOCK) {
+          if ($block->uuid === $this->layout->settings['title_block']) {
+            $this->page_title = $block->getTitle();
+          }
+        }
       }
+
+      // Let the block prepare any data before rendering.
+      $block->prepare();
 
       $block_info = layout_get_block_info($block->module, $block->delta);
 
@@ -213,7 +249,7 @@ class LayoutRendererStandard {
       // If it wants to render first, add it to the $first array. This is used
       // by blocks that need to do some processing before other blocks are
       // rendered.
-      else if (!empty($block_info['render first'])) {
+      elseif (!empty($block_info['render first'])) {
         $first[$uuid] = $block;
       }
       // Otherwise, render it in the normal order.
@@ -265,7 +301,6 @@ class LayoutRendererStandard {
       'style' => !empty($settings['style']) ? $settings['style'] : 'default',
       'style settings' => isset($settings['style_settings']['default']) ? $settings['style_settings']['default'] : array(),
     );
-
     $regions = array();
     if (empty($settings)) {
       // No region settings exist, init all with the defaults.
@@ -281,18 +316,19 @@ class LayoutRendererStandard {
       }
     }
     else {
-      // @todo: Region style settings are not fully implemented yet.
       // Some settings exist; iterate through each region and set individually.
       foreach ($this->layout_info['regions'] as $region_id => $title) {
         // Ensure this region has at least an empty blocks array.
         $blocks = !empty($region_block_list[$region_id]) ? $region_block_list[$region_id] : array();
+
         if (empty($settings[$region_id]['style']) || $settings[$region_id]['style'] == -1) {
           $regions[$region_id] = $default;
         }
         else {
           $regions[$region_id]['style'] = $settings[$region_id]['style'];
-          $regions[$region_id]['style settings'] = isset($settings['style_settings'][$region_id]) ? $settings['style_settings'][$region_id] : array();
         }
+
+        $regions[$region_id]['style settings'] = isset($settings[$region_id]) ? $settings[$region_id] : array();
         $regions[$region_id]['uuids'] = $blocks;
       }
     }
@@ -328,6 +364,7 @@ class LayoutRendererStandard {
     if (empty($this->prep_run)) {
       $this->prepare();
     }
+
     $this->renderBlocks();
 
     // Return 404 or 403 if set by the main content block.
@@ -337,9 +374,13 @@ class LayoutRendererStandard {
 
     $this->renderRegions();
 
+    if ($this->page_title) {
+      backdrop_set_title($this->page_title);
+    }
+
     module_load_include('inc', 'layout', 'layout.theme');
     if (empty($this->layout_info['template'])) {
-      $theme = 'layout__' . $this->layout->layout;
+      $theme = 'layout__' . $this->layout->layout_template;
     }
     else {
       $theme = str_replace('-', '_', $this->layout_info['template']);
@@ -360,6 +401,11 @@ class LayoutRendererStandard {
         foreach ($file_names as $file_name) {
           $this->addCss($this->layout_info['path'] . '/' . $file_name, array('media' => $media));
         }
+      }
+    }
+    if (!empty($this->layout_info['libraries'])) {
+      foreach ($this->layout_info['libraries'] as $library) {
+        $this->addLibrary('layout', $library);
       }
     }
   }
@@ -386,6 +432,13 @@ class LayoutRendererStandard {
         $this->prefix .= '<link rel="stylesheet" href="' . $url . '" />' . "\n";
         break;
     }
+  }
+
+  /**
+   * Add Library information to the renderer.
+   */
+  function addLibrary($module, $name) {
+    backdrop_add_library($module, $name);
   }
 
   /**
@@ -438,12 +491,16 @@ class LayoutRendererStandard {
    *
    * @param Block $block
    *   The block to be rendered.
+   *
+   * @return string
+   *   The rendered block as HTML.
    */
   function renderBlock($block) {
-    if ($this->layout->settings['title_display'] === LAYOUT_TITLE_BLOCK) {
-      if ($block->uuid === $this->layout->settings['title_block']) {
-        $this->layout->settings['title'] = $block->getTitle();
-      }
+    // Pass any page title to the page components block before rendering it.
+    if (method_exists($block, 'setPageTitle')) {
+      /* @var $block PageComponents */
+      $page_title = isset($this->page_title) ? $this->page_title : backdrop_get_title();
+      $block->setPageTitle($page_title);
     }
 
     $output = '';
@@ -466,10 +523,18 @@ class LayoutRendererStandard {
         $title = $block->getTitle();
       }
 
-      // Assemble a structured content array.
-      $content = (object) array(
+      $data = array(
         'title' => $title,
         'content' => $content,
+      );
+
+      // Allow altering of the title and content by other modules.
+      backdrop_alter(array('block_view', 'block_view_' . $block->module . '_' . str_replace('-', '_', $block->delta)), $data, $block);
+
+      // Assemble a structured content array.
+      $content = (object) array(
+        'title' => $data['title'],
+        'content' => $data['content'],
       );
 
       if (isset($style) && isset($style['block theme'])) {
@@ -526,18 +591,18 @@ class LayoutRendererStandard {
    *   The rendered, HTML string output of the passed-in region.
    */
   function renderRegion($region_id, $blocks) {
-    $style_name = $this->prepared['regions'][$region_id]['style'];
     $style_settings = $this->prepared['regions'][$region_id]['style settings'];
-    $style = layout_get_style_info($style_name);
-
-    if ($style['region theme']) {
-      $output = theme($style['region theme'], array('layout' => $this->layout, 'blocks' => $blocks, 'settings' => $style_settings, 'style' => $style));
+    $tag = isset($style_settings['element']) ? $style_settings['element'] : '';
+    $classes = array();
+    if (isset($style_settings['classes'])) {
+      $classes = explode(' ', $style_settings['classes']);
+      foreach ($classes as $n => $class) {
+        $classes[$n] = backdrop_clean_css_identifier($class, array());
+      }
+      $classes = array_filter($classes);
     }
-    else {
-      $output = implode('', $blocks);
-    }
 
-    return $output;
+    return theme('layout_region_inner', array('blocks' => $blocks, 'tag' => $tag, 'classes' => $classes));
   }
 
   /**

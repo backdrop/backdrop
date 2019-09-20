@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the 'taxonomy term' argument validator plugin.
@@ -96,7 +95,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
         $query = db_select('taxonomy_term_data', 'td');
         $query->fields('td');
         $query->condition('td.tid', $argument);
-        $query->addTag('term_access');
+        $query->addTag('taxonomy_term_access');
         $term = $query->execute()->fetchObject();
         if (!$term) {
           return FALSE;
@@ -138,6 +137,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
         // if unverified tids left - verify them and cache results
         if (count($test)) {
           $query = db_select('taxonomy_term_data', 'td');
+          $query->addTag('taxonomy_term_access');
           $query->fields('td');
           $query->condition('td.tid', $test);
 
@@ -164,6 +164,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
       case 'name':
       case 'convert':
         $query = db_select('taxonomy_term_data', 'td');
+        $query->addTag('taxonomy_term_access');
         $query->fields('td');
         if (!empty($vocabularies)) {
           $query->condition('td.vocabulary', $vocabularies);
@@ -176,7 +177,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
         }
         $term = $query->execute()->fetchObject();
 
-        if ($term && (empty($vocabularies) || !empty($vocabularies[$term->machine_name]))) {
+        if ($term && (empty($vocabularies) || !empty($vocabularies[$term->vocabulary]))) {
           if ($type == 'convert') {
             $this->argument->argument = $term->tid;
           }
@@ -197,7 +198,8 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
       $arg_keys = array_flip($args);
 
       $query = db_select('taxonomy_term_data', 'td');
-      $query->condition('tid', $args);
+      $query->addTag('taxonomy_term_access');
+      $query->condition('td.tid', $args);
       $query->addField('td', 'tid', 'tid');
       if (!empty($vocabularies)) {
         $query->condition('td.vocabulary', $vocabularies);
