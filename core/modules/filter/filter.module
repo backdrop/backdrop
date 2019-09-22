@@ -50,6 +50,7 @@ function filter_element_info() {
   $type['text_format'] = array(
     // The text format selected by default for this element.
     '#format' => NULL,
+    '#allowed_formats' => array(),
     // Whether file uploads are permitted through the editor (if supported).
     // Disable by default, modules must specifically implement saving files as
     // permanent when they save their text data. See filter_entity_insert().
@@ -1218,8 +1219,13 @@ function filter_process_format($element) {
   $element['value']['#type'] = $element['#base_type'];
   $element['value'] += element_info($element['#base_type']);
 
-  // Get a list of formats to which the current user has access.
+  // Get a list of allowed formats to which the current user has access.
   $formats = filter_formats($user);
+  foreach ($formats as $format) {
+    if (!in_array($format->format, array_filter($element['#allowed_formats']))) {
+      unset($formats[$format->format]);
+    }
+  }
 
   // Turn original element into a text format wrapper.
   if (isset($element['#attached'])) {
