@@ -3208,7 +3208,7 @@ function theme_html_time($variables) {
   if (!empty($element['#attributes']['class'])) {
     $attributes['class'] = (array) $element['#attributes']['class'];
   }
-  $attributes['class'][] = 'html-datetime-date';
+  $attributes['class'][] = 'html-datetime-time';
   $attributes['type'] = 'time';
   $attributes['value'] = $element['#value'];
   $attributes['name'] = $element['#name'];
