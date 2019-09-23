@@ -3015,7 +3015,8 @@ function system_update_1062() {
  */
 function system_update_1063() {
   $config = config('system.core');
-  $config->set('x_frame_options', 'SAMEORIGIN');
+  $config->set('x_frame_options', update_variable_get('x_frame_options', 'SAMEORIGIN'));
+  update_variable_del('x_frame_options');
   $config->save();
 }
 
