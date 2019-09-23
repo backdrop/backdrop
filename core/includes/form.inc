@@ -3238,19 +3238,26 @@ function theme_html_datetime($variables) {
  * Combine html_date and html_time form elements.
  */
 function form_process_html_datetime($element) {
+  $value = $element['#value'];
   // Conversion to a timestamp has happened, possibly in a preview.
   // Get it back into an array for the form.
-  if (ctype_digit($element['#value'])) {
-    $timestamp = $element['#value'];
-    $element['#value'] = array(
-      'date' => format_date($timestamp, 'custom', DATE_FORMAT_DATE),
-      'time' => format_date($timestamp, 'custom', DATE_FORMAT_TIME),
+  if (is_numeric($value) && (int) $value == $value) {
+    $value = array(
+      'date' => format_date($value, 'custom', DATE_FORMAT_DATE),
+      'time' => format_date($value, 'custom', DATE_FORMAT_TIME),
+    );
+  }
+  // Catch possible problems.
+  if (!is_array($value) || !isset($value['date']) || !isset($value['time'])) {
+    $value = array(
+      'date' => '',
+      'time' => '',
     );
   }
   $element['#tree'] = TRUE;
   $element['date'] = array(
     '#type' => 'html_date',
-    '#default_value' => $element['#value']['date'],
+    '#default_value' => $value['date'],
   );
   $attributes = $element['#attributes'];
   if (isset($attributes['date'])) {
@@ -3259,7 +3266,7 @@ function form_process_html_datetime($element) {
 
   $element['time'] = array(
     '#type' => 'html_time',
-    '#default_value' => $element['#value']['time'],
+    '#default_value' => $value['time'],
   );
 
   return $element;
