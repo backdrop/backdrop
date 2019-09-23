@@ -948,6 +948,7 @@ function node_validate($node, $form, &$form_state) {
 
   // Validate the "Authored on" field.
   if (!empty($node->date)) {
+    $node_date = $node->date;
     if (is_array($node->date)) {
       $node_date = implode(' ', $node->date);
     }
@@ -958,6 +959,7 @@ function node_validate($node, $form, &$form_state) {
 
   // Validate the "Publish on" date.
   if ($node->status == NODE_SCHEDULED && !empty($node->scheduled)) {
+    $node_scheduled = $node->scheduled;
     if (is_array($node->scheduled)) {
       $node_scheduled = implode(' ', $node->scheduled);
     }
