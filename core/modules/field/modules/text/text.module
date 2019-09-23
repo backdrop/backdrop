@@ -19,9 +19,7 @@
 function text_field_info() {
   $formats = array();
   foreach (filter_formats() as $format) {
-    if ($format->format != filter_fallback_format()) {
-      $formats[$format->format] = $format->format;
-    }
+    $formats[$format->format] = $format->format;
   }
 
   return array(
@@ -94,9 +92,7 @@ function text_field_instance_settings_form($field, $instance) {
   $settings = $instance['settings'];
   $formats = array();
   foreach (filter_formats() as $format) {
-    if ($format->format != filter_fallback_format()) {
-      $formats[$format->format] = $format->name;
-    }
+    $formats[$format->format] = $format->name;
   }
 
   $form['text_processing'] = array(
@@ -120,6 +116,8 @@ function text_field_instance_settings_form($field, $instance) {
       ),
     ),
   );
+  $form['allowed_formats'][filter_fallback_format()]['#disabled'] = TRUE;
+
   if ($field['type'] == 'text_with_summary') {
     $form['display_summary'] = array(
       '#type' => 'checkbox',

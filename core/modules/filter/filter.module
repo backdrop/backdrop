@@ -1264,6 +1264,7 @@ function filter_process_format($element) {
     '#attributes' => array('class' => array('filter-guidelines')),
     '#weight' => 20,
   );
+  $options = array();
   foreach ($formats as $format) {
     $options[$format->format] = $format->name;
     $element['format']['guidelines'][$format->format] = array(
