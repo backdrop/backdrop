@@ -3291,6 +3291,11 @@ function html_date_validate($element, &$form_state) {
 function html_time_validate($element, &$form_state) {
   $time = $element['#value'];
   if (!empty($time)) {
+    // Pad time if seconds were omitted regardless of the "step" attribute.
+    // Some browsers do so, but our date pattern contains seconds.
+    if (preg_match('/^\d{2}:\d{2}$/', $time)) {
+      $time .= ':00';
+    }
     $valid_time = DateTime::createFromFormat(DATE_FORMAT_TIME, $time);
     if (!$valid_time) {
       form_error($element, t('%time is not a valid time.', array('%time' => $time)));
@@ -3307,7 +3312,7 @@ function html_datetime_validate($element, &$form_state) {
     // If either is set, both are needed.
     if (!empty($element['#value']['date']) || !empty($element['#value']['time'])) {
       $dt_string = implode(' ', $element['#value']);
-      if (strlen($dt_string) < 19) {
+      if (!preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/', $dt_string)) {
         form_error($element, t('You need to set both, date and time.'));
       }
     }
