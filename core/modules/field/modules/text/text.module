@@ -103,18 +103,20 @@ function text_field_instance_settings_form($field, $instance) {
       t('Plain text'),
       t('Filtered text (user selects text format)'),
     ),
+    '#weight' => 0,
   );
   $form['allowed_formats'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Allowed text formats'),
     '#default_value' => $settings['allowed_formats'],
-    '#description' => t("Choose which text formats should be available for authors to select from. If an existing field uses a text format not selected here, authors' access will be denied."),
+    '#description' => t("Choose which <a href=\"@text_formats\">text formats</a> should be available for authors to select from. If an existing field uses a text format not selected here, authors' access will be denied.", array('@text_formats' => '/admin/config/content/formats')),
     '#options' => $formats,
     '#states' => array(
       'visible' => array(
         'input[name="instance[settings][text_processing]"]' => array('value' => 1),
       ),
     ),
+    '#weight' => 0,
   );
   $form['allowed_formats'][filter_fallback_format()]['#disabled'] = TRUE;
 
@@ -124,6 +126,7 @@ function text_field_instance_settings_form($field, $instance) {
       '#title' => t('Summary input'),
       '#default_value' => $settings['display_summary'],
       '#description' => t('This allows authors to input an explicit summary, to be displayed instead of the automatically trimmed text when using the "Summary or trimmed" display type.'),
+      '#weight' => 0,
     );
   }
 
