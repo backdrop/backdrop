@@ -3174,23 +3174,15 @@ function map_month($month) {
 function theme_html_date($variables) {
   $element = $variables['element'];
   $attributes = array();
+  if (isset($element['#attributes'])) {
+    $attributes = $element['#attributes'];
+  }
   if (isset($element['#id'])) {
     $attributes['id'] = $element['#id'];
   }
-  if (!empty($element['#attributes']['class'])) {
-    $attributes['class'] = (array) $element['#attributes']['class'];
-  }
-  $attributes['class'][] = 'html-datetime-date';
   $attributes['type'] = 'date';
   $attributes['value'] = $element['#value'];
   $attributes['name'] = $element['#name'];
-
-  if (!empty($element['#attributes']['min'])) {
-    $attributes['min'] = $element['#attributes']['min'];
-  }
-  if (!empty($element['#attributes']['max'])) {
-    $attributes['max'] = $element['#attributes']['max'];
-  }
 
   $output = '<input ' . backdrop_attributes($attributes) . ' />';
   return $output;
@@ -3202,13 +3194,12 @@ function theme_html_date($variables) {
 function theme_html_time($variables) {
   $element = $variables['element'];
   $attributes = array();
+  if (isset($element['#attributes'])) {
+    $attributes = $element['#attributes'];
+  }
   if (isset($element['#id'])) {
     $attributes['id'] = $element['#id'];
   }
-  if (!empty($element['#attributes']['class'])) {
-    $attributes['class'] = (array) $element['#attributes']['class'];
-  }
-  $attributes['class'][] = 'html-datetime-time';
   $attributes['type'] = 'time';
   $attributes['value'] = $element['#value'];
   $attributes['name'] = $element['#name'];
@@ -3268,6 +3259,9 @@ function form_process_html_datetime($element) {
     '#type' => 'html_time',
     '#default_value' => $value['time'],
   );
+  if (isset($attributes['time'])) {
+    $element['time']['#attributes'] = $attributes['time'];
+  }
 
   return $element;
 }

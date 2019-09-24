@@ -293,6 +293,14 @@ function node_form($form, &$form_state, Node $node) {
       'date' => array(
         'min' => '1970-01-01',
         'max' => '2037-12-31',
+        'placeholder' => t('e.g. @date', array(
+          '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_DATE)
+        )),
+      ),
+      'time' => array(
+        'placeholder' => t('e.g. @date', array(
+          '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_TIME)
+        )),
       ),
     ),
     '#description' => t('Leave blank to use the current time.'),
@@ -347,6 +355,14 @@ function node_form($form, &$form_state, Node $node) {
         'date' => array(
           'min' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_DATE),
           'max' => '2037-12-31',
+          'placeholder' => t('e.g. @date', array(
+            '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_DATE)
+          )),
+        ),
+        'time' => array(
+          'placeholder' => t('e.g. @date', array(
+            '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_TIME)
+          )),
         ),
       ),
       '#states' => array(
