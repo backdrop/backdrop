@@ -1647,7 +1647,7 @@ function _form_test_disabled_elements($form, &$form_state) {
     );
   }
 
-  // Multiple values option elements.
+  // Multiple values option elements, disabled as a whole.
   foreach (array('checkboxes', 'select') as $type) {
     $form[$type . '_multiple'] = array(
       '#type' => $type,
@@ -1664,6 +1664,30 @@ function _form_test_disabled_elements($form, &$form_state) {
       '#disabled' => TRUE,
     );
   }
+ 
+  // Multiple values option elements, only single options disabled.
+  $form['checkboxes_single_select'] = array(
+    '#type' => 'checkboxes',
+    '#title' => 'checkboxes (multiple)',
+    '#options' => array(
+      'test_1' => 'Test 1',
+      'test_2' => 'Test 2',
+    ),
+    '#multiple' => TRUE,
+    '#default_value' => array('test_2' => 'test_2'),
+    'test_1' => array('#disabled' => TRUE),
+  );
+  $form['checkboxes_single_unselect'] = array(
+    '#type' => 'checkboxes',
+    '#title' => 'checkboxes (multiple)',
+    '#options' => array(
+      'test_1' => 'Test 1',
+      'test_2' => 'Test 2',
+    ),
+    '#multiple' => TRUE,
+    '#default_value' => array('test_2' => 'test_2'),
+    'test_2' => array('#disabled' => TRUE),
+  );
 
   // Single values option elements.
   foreach (array('radios', 'select') as $type) {

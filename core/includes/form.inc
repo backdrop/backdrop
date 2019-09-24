@@ -2448,6 +2448,15 @@ function form_type_checkboxes_value($element, $input = FALSE) {
         unset($input[$key]);
       }
     }
+    // Because disabled checkboxes don't receive their input from the form
+    // submission, we use their default value.
+    if (!empty($element['#default_value'])) {
+      foreach ($element['#default_value'] as $key) {
+        if (isset($element[$key]['#disabled'])) {
+          $input[$key] = $key;
+        }
+      }
+    }
     return backdrop_map_assoc($input);
   }
   else {
@@ -3333,12 +3342,19 @@ function form_process_checkboxes($element) {
       // sub-elements.
       $weight += 0.001;
 
+      // Only enabled checkboxes receive their values from the form submission;
+      // disabled checkboxes use their default value.
+      $default_value = NULL;
+      if (isset($value[$key]) || (in_array($key, $element['#default_value']) && isset($element[$key]['#disabled']))) {
+        $default_value = $key;
+      }
+
       $element += array($key => array());
       $element[$key] += array(
         '#type' => 'checkbox',
         '#title' => $choice,
         '#return_value' => $key,
-        '#default_value' => isset($value[$key]) ? $key : NULL,
+        '#default_value' => $default_value,
         '#attributes' => $element['#attributes'],
         '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
         '#weight' => $weight,
