@@ -3410,14 +3410,15 @@ class NodePublishScheduling extends BackdropWebTestCase {
 
     // Ensure Node module still checks the date is valid.
     $name = $this->randomName(9);
+    $invalid_date = format_date(REQUEST_TIME, 'custom', 'dddY-m-d', $web_user->timezone);
     $edit = array(
       'title' => $name,
       'status' => NODE_SCHEDULED,
-      'scheduled[date]' => format_date(REQUEST_TIME, 'custom', 'dddY-m-d', $web_user->timezone),
+      'scheduled[date]' => $invalid_date,
       'scheduled[time]' => format_date(REQUEST_TIME, 'custom', 'H:i', $web_user->timezone),
     );
     $this->backdropPost('node/add/foobsee', $edit, t('Save'));
-    $this->assertText(t('You have to specify a valid date.'));
+    $this->assertText(t('@date is not a valid date.', array('@date' => $invalid_date)));
 
     // Ensure scheduling in the past is not allowed.
     $edit = array(
