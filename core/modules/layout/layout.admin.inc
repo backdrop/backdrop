@@ -2066,10 +2066,10 @@ function layout_locked_message($item, $type = 'layout') {
 
   // The path varies based on the item type.
   $path_type = 'manage';
-  $button_title = 'Save layout';
+  $button_title = t('Save layout');
   if ($type === 'menu_item') {
     $path_type = 'menu';
-    $button_title = 'Save menu settings';
+    $button_title = t('Save menu settings');
   }
 
   $message = '';
