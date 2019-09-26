@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Class providing forms and settings for the default Layout block style.
+ * Class providing forms and settings for the Default layout block style.
  */
 class LayoutStyle extends LayoutHandler {
   /**

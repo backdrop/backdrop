@@ -195,5 +195,13 @@ function layout_layout_style_info() {
     'template' => 'templates/block-dynamic',
     'file' => 'layout.theme.inc',
   );
+  $info['message'] = array(
+    'title' => t('Message'),
+    'description' => t('Renders the block styled as a message. Available only for custom text blocks.'),
+    'block theme' => 'block_message',
+    'class' => 'LayoutStyleMessage',
+    'template' => 'templates/block-message',
+    'file' => 'layout.theme.inc',
+  );
   return $info;
 }

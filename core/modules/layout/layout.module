@@ -817,6 +817,7 @@ function layout_autoload_info() {
     // Styles.
     'LayoutStyle' => 'plugins/styles/layout_style_default.inc',
     'LayoutStyleDynamic' => 'plugins/styles/layout_style_dynamic.inc',
+    'LayoutStyleMessage' => 'plugins/styles/layout_style_message.inc',
   );
 }
 

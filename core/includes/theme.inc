@@ -1728,12 +1728,7 @@ function theme_status_messages($variables) {
   $message_types = (empty($variables['messages']))? backdrop_get_messages($display) : $variables['messages'];
   $output = '';
 
-  $status_heading = array(
-    'status' => t('Status message'),
-    'error' => t('Error message'),
-    'warning' => t('Warning message'),
-    'info' => t('Info message'),
-  );
+  $status_heading = backdrop_get_message_types();
 
   foreach ($message_types as $type => $messages) {
     $output .= "<div class=\"messages $type\">\n";

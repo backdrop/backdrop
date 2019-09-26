@@ -70,6 +70,8 @@ class BlockText extends Block {
 
     if (module_exists('block')) {
       $form['convert'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Reusable block'),
         '#weight' => 2,
         '#parents' => array(),
       );
@@ -77,7 +79,6 @@ class BlockText extends Block {
         '#type' => 'checkbox',
         '#title' => t('Make this block reusable'),
         '#description' => t('If enabled, this block will be made reusable across different layouts and be listed in on the !block_link page.', array('!block_link' => l(t('Custom blocks'), 'admin/structure/block'))),
-        '#weight' => 1,
       );
       // Add a notice for translation.
       if (module_exists('locale')) {
@@ -88,26 +89,12 @@ class BlockText extends Block {
         '#title' => t('Admin label'),
         '#maxlength' => 64,
         '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
-        '#weight' => 2,
         '#states' => array(
           'visible' => array(
             ':input[name="reusable"]' => array('checked' => TRUE),
           ),
         ),
-      );
-      $form['convert']['description'] = array(
-       '#type' => 'textfield',
-       '#title' => t('Admin description'),
-       '#maxlength' => 128,
-       '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
-       '#weight' => 4,
-        '#states' => array(
-          'visible' => array(
-            ':input[name="reusable"]' => array('checked' => TRUE),
-          ),
-        ),
-      );
-      $form['convert']['delta'] = array(
+      );$form['convert']['delta'] = array(
         '#type' => 'machine_name',
         '#title' => t('Internal name'),
         '#maxlength' => 64,
@@ -116,9 +103,19 @@ class BlockText extends Block {
           'exists' => 'block_custom_block_load',
         ),
         '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
-        '#weight' => 3,
         '#required' => FALSE,
       );
+      $form['convert']['description'] = array(
+       '#type' => 'textfield',
+       '#title' => t('Admin description'),
+       '#maxlength' => 128,
+       '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
+        '#states' => array(
+          'visible' => array(
+            ':input[name="reusable"]' => array('checked' => TRUE),
+          ),
+        ),
+      ); 
     }
   }
 

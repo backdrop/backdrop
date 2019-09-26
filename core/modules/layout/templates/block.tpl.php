@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Template for outputting the default block styling within a Layout.
+ * Template for outputting the default block styling within a layout.
  *
  * Variables available:
  * - $classes: Array of classes that should be displayed on the block's wrapper.

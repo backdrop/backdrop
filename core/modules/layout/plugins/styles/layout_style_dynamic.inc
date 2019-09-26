@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Class providing forms and settings for the default Layout block style.
+ * Class providing forms and settings for the Dynamic layout block style.
  */
 class LayoutStyleDynamic extends LayoutStyle {
   /**

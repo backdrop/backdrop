@@ -505,3 +505,16 @@ function template_preprocess_block_dynamic(&$variables) {
     'class' => $content_classes,
   );
 }
+
+/**
+ * Prepares variables for block-message templates.
+ */
+function template_preprocess_block_message(&$variables) {
+  // Re-use all the preprocessing provided by the default block template.
+  template_preprocess_block($variables);
+
+  $block = $variables['block'];
+  $style = $block->style;
+
+  $variables['message_type'] = $style->settings['message_type'];
+}

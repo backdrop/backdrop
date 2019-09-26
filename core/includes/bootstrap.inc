@@ -2329,6 +2329,26 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
 }
 
 /**
+ * Get all available message types.
+ *
+ * @return array
+ *   An array of all the avaialble message types. The keys are the machine
+ *   names, and values are the human-readable labels.
+ *
+ * @see theme_status_messages()
+ *
+ * @since 1.12.0
+ */
+function backdrop_get_message_types() {
+  return array(
+    'info' => t('Info message'),
+    'status' => t('Status message'),
+    'warning' => t('Warning message'),
+    'error' => t('Error message'),
+  );
+}
+
+/**
  * Sets a message to display to the user.
  *
  * Messages are stored in a session variable and displayed in page.tpl.php via
