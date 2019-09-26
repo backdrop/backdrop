@@ -1667,7 +1667,7 @@ function _form_test_disabled_elements($form, &$form_state) {
  
   // Multiple checkboxes; testing all possible scenarios of
   // checked/unchecked/enabled/disabled.
-  $form['checkboxes_single_select'] = array(
+  $form['checkboxes_all_scenarios'] = array(
     '#type' => 'checkboxes',
     '#title' => 'checkboxes (multiple)',
     '#options' => array(
@@ -1678,8 +1678,8 @@ function _form_test_disabled_elements($form, &$form_state) {
     ),
     '#default_value' => array('test_1', 'test_3'),
   );
-  $form['checkboxes_single_select']['test_3']['#disabled'] = TRUE;
-  $form['checkboxes_single_select']['test_4']['#disabled'] = TRUE;
+  $form['checkboxes_all_scenarios']['test_3']['#disabled'] = TRUE;
+  $form['checkboxes_all_scenarios']['test_4']['#disabled'] = TRUE;
 
   // Single values option elements.
   foreach (array('radios', 'select') as $type) {
