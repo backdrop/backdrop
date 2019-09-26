@@ -179,6 +179,11 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#group' => 'additional_settings',
     '#weight' => -10,
   );
+  $form['workflow']['scheduling_enabled'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show option for scheduling'),
+    '#default_value' => $type->settings['scheduling_enabled'],
+  );
   $form['workflow']['status_default'] = array(
     '#type' => 'radios',
     '#title' => t('Default status'),
@@ -195,11 +200,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
     'visible' => array(
       'input[name="scheduling_enabled"]' => array('checked' => TRUE),
     ),
-  );
-  $form['workflow']['scheduling_enabled'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Show option for scheduling'),
-    '#default_value' => $type->settings['scheduling_enabled'],
   );
   $form['workflow']['sticky'] = array(
     '#type' => 'checkboxes',
