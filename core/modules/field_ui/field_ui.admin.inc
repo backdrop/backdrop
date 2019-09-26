@@ -1915,7 +1915,7 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
     '#title' => t('Help text'),
     '#default_value' => !empty($instance['description']) ? $instance['description'] : '',
     '#rows' => 5,
-    '#description' => t('Instructions to present to the user below this field on the editing form.<br />Allowed HTML tags: @tags <br />This field supports tokens.', array('@tags' => _field_filter_xss_display_allowed_tags())) . $token_link,
+    '#description' => t('Instructions to present to the user below this field on the editing form.<br />Allowed HTML tags: !tags <br />This field supports tokens.', array('!tags' => theme('field_allowed_tags', array('allowed_tags' => _field_filter_xss_allowed_tags())))) . $token_link,
     '#weight' => -10,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array(),

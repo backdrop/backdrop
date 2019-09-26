@@ -86,6 +86,38 @@ function theme_field($variables) {
 }
 
 /**
+ * Returns HTML for the "Allowed HTML tags" list, for display in help texts.
+ *
+ * This theme function is used as a workaround to an issue where @code<@endcode
+ * and @code>@endcode would be treated as punctuation in RTL languages, which
+ * would result in weirdness when the list of tags would wrap in multiple lines.
+ * This function ensures that the list of allowed tags is wrapped in
+ * @code<bdi>@endcode tags when rendered, which solves the issue in most modern
+ * browsers (IE does not support this tag).
+ * @see: https://github.com/backdrop/backdrop-issues/issues/3526
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - allowed_tags: An array of HTML tags (without the @code<@endcode and
+ *     @code>@endcode).
+ *
+ * @ingroup themeable
+ */
+function theme_field_allowed_tags($variables) {
+  $allowed_tags = $variables['allowed_tags'];
+
+  if (!empty($allowed_tags)) {
+    $output = '&lt;' . implode('&gt; &lt;', $allowed_tags) . '&gt;';
+    $output = '<bdi>' . $output . '</bdi>';
+  }
+  else {
+    $output = t('No allowed tags specified.');
+  }
+
+  return $output;
+}
+
+/**
  * Returns HTML for an individual form element.
  *
  * Combine multiple values into a table with drag-n-drop reordering.
