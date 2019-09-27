@@ -140,7 +140,7 @@ Backdrop.behaviors.contentTypes = {
     $context.find('#edit-display').backdropSetSummary(function(context) {
       var vals = [];
       $('input:checked', context).next('label').each(function() {
-        vals.push(Backdrop.checkPlain($(this).text()));
+        vals.push(Backdrop.checkPlain($(this).text()).trim());
       });
       if (!$('#edit-node-submitted', context).is(':checked')) {
         vals.unshift(Backdrop.t("Don't display post information"));
