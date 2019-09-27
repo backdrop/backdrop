@@ -53,8 +53,12 @@ Backdrop.behaviors.contentTypes = {
     // Multilingual support.
     $context.find('#edit-multilingual').backdropSetSummary(function() {
       var vals = [];
-      var multilingualSupport = $context.find('input[name="language"]:checked').parent().find('label').text();
-      vals.push(Backdrop.checkPlain($.trim(multilingualSupport)));
+      if ($context.find('input[name="language"]:checked').length) {
+        vals.push(Backdrop.t('Enabled'));
+      }
+      else {
+        vals.push(Backdrop.t('Disabled'));
+      }
       return vals.join(', ');
     });
 
@@ -113,11 +117,21 @@ Backdrop.behaviors.contentTypes = {
     // Revision settings.
     $context.find('#edit-revision').backdropSetSummary(function() {
       var vals = [];
-      if ($context.find('input[name="revision_enabled"]:checked').length) {
-        vals.push(Backdrop.t('Revisions enabled'));
+      var revisionsOn = $context.find('input[name="revision_enabled"]:checked').length;
+      var revisionsByDefault = $context.find('input[name="revision_default"]:checked').length;
+      if (!revisionsOn && !revisionsByDefault) {
+        vals.push(Backdrop.t('Disabled'));
+      }
+      else if (revisionsOn && revisionsByDefault) {
+        vals.push(Backdrop.t('Created by default (optional)'));
       }
       else {
-        vals.push(Backdrop.t('Revisions disabled'));
+        if (revisionsOn) {
+          vals.push(Backdrop.t('Optional'));
+        }
+        if (revisionsByDefault) {
+          vals.push(Backdrop.t('Allways created by default'));
+        }
       }
       return vals.join(', ');
     });
