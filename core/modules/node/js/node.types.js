@@ -4,6 +4,7 @@ Backdrop.behaviors.contentTypes = {
   // Provide the vertical tab summaries.
   attach: function (context) {
     var $context = $(context);
+
     // Submission form settings.
     $context.find('fieldset#edit-submission').backdropSetSummary(function() {
       var vals = [];
@@ -12,17 +13,41 @@ Backdrop.behaviors.contentTypes = {
     });
 
     // Publishing settings.
-    $context.find('#edit-workflow').backdropSetSummary(function() {
-      var vals = [];
-      var defaultStatus = $context.find('input[name="status_default"]:checked').parent().text();
-      vals.push(Backdrop.checkPlain($.trim(defaultStatus)));
-      if ($context.find('input[name="sticky_default"]:checked').length) {
-        vals.push(Backdrop.t('Sticky'));
+    // This is implemented as a function, because it is needed once for the
+    // initial page load, but then again if the "Schedule for later" checkbox
+    // gets unticked.
+    function updatePublishVtabSummary() {
+      $context.find('#edit-workflow').backdropSetSummary(function () {
+        var vals = [];
+        var defaultStatus = $context.find('input[name="status_default"]:checked').parent().find('label').text();
+        vals.push(Backdrop.checkPlain($.trim(defaultStatus)));
+        if ($context.find('input[name="sticky_default"]:checked').length) {
+          vals.push(Backdrop.t('Sticky'));
+        }
+        if ($context.find('input[name="promote_default"]:checked').length) {
+          vals.push(Backdrop.t('Promoted'));
+        }
+        return vals.join(', ');
+      });
+    }
+
+    // We call this once, to update the "Publishing settings" summary initially.
+    updatePublishVtabSummary();
+
+    // Uncheck the "Schedule for later" option if scheduling is disabled.
+    $context.find('input[name="scheduling_enabled"]').once().on('change', function() {
+      var $checkedStatusDefault = $context.find('input[name="status_default"]:checked');
+      if ($checkedStatusDefault.val() === '2') {
+        $checkedStatusDefault.prop('checked', false);
+        $context.find('input[name="status_default"]:first').prop('checked', true);
+        // If the previous selection for "Default status" was "Schedule for
+        // later", then unticking the "Show option for scheduling" checkbox
+        // would still show "Schedule for later" as the vtab summary - even
+        // though the default has been switched to "Published". So we also need
+        // to update the "Publishing settings" summary again.
+        // See https://github.com/backdrop/backdrop-issues/issues/4098
+        updatePublishVtabSummary();
       }
-      if ($context.find('input[name="promote_default"]:checked').length) {
-        vals.push(Backdrop.t('Promoted'));
-      }
-      return vals.join(', ');
     });
 
     // Multilingual support.
@@ -33,41 +58,8 @@ Backdrop.behaviors.contentTypes = {
       return vals.join(', ');
     });
 
-    // Uncheck the "Schedule for later" option if scheduling is disabled.
-    $context.find('input[name="scheduling_enabled"]').once().on('change', function() {
-      var $checkedStatusDefault = $context.find('input[name="status_default"]:checked');
-      if ($checkedStatusDefault.val() === '2') {
-        $checkedStatusDefault.prop('checked', false);
-        $context.find('input[name="status_default"]:first').prop('checked', true);
-      }
-    });
-
-    // Revision settings.
-    $context.find('#edit-revision').backdropSetSummary(function() {
-      var vals = [];
-      if ($context.find('input[name="revision_enabled"]:checked').length) {
-        vals.push(Backdrop.t('Revisions enabled'));
-      }
-      else {
-        vals.push(Backdrop.t('Revisions disabled'));
-      }
-      return vals.join(', ');
-    });
-
-    // Display settings.
-    $context.find('#edit-display').backdropSetSummary(function(context) {
-      var vals = [];
-      $('input:checked', context).next('label').each(function() {
-        vals.push(Backdrop.checkPlain($(this).text()));
-      });
-      if (!$('#edit-node-submitted', context).is(':checked')) {
-        vals.unshift(Backdrop.t("Don't display post information"));
-      }
-      return vals.join(', ');
-    });
-
-    // Permissions settings. List any permission name that has at least one
-    // permission checked.
+    // Permissions settings.
+    // List any permission name that has at least one permission checked.
     $context.find('#edit-permissions').backdropSetSummary(function(context) {
       var permissionNames = [];
       var checkedColumns = [];
@@ -117,6 +109,31 @@ Backdrop.behaviors.contentTypes = {
     $context.find('#edit-path .token-browser-link').once().on('click', function(){
       $('input#edit-path-pattern').focus();
     });
+
+    // Revision settings.
+    $context.find('#edit-revision').backdropSetSummary(function() {
+      var vals = [];
+      if ($context.find('input[name="revision_enabled"]:checked').length) {
+        vals.push(Backdrop.t('Revisions enabled'));
+      }
+      else {
+        vals.push(Backdrop.t('Revisions disabled'));
+      }
+      return vals.join(', ');
+    });
+
+    // Display settings.
+    $context.find('#edit-display').backdropSetSummary(function(context) {
+      var vals = [];
+      $('input:checked', context).next('label').each(function() {
+        vals.push(Backdrop.checkPlain($(this).text()));
+      });
+      if (!$('#edit-node-submitted', context).is(':checked')) {
+        vals.unshift(Backdrop.t("Don't display post information"));
+      }
+      return vals.join(', ');
+    });
+
   }
 };
 
