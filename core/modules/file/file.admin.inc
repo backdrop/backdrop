@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * File type editing user interface.
+ * Admin page callbacks for the File module.
  */
 
 /**

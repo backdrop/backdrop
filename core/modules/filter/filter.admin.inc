@@ -1,8 +1,7 @@
 <?php
-
 /**
  * @file
- * Administrative page callbacks for the Filter module.
+ * Admin page callbacks for the Filter module.
  */
 
 /**

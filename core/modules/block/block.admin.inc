@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Admin page callbacks for the block module.
+ * Admin page callbacks for the Block module.
  */
 
 /**

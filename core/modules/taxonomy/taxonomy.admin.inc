@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative page callbacks for the taxonomy module.
+ * Admin page callbacks for the Taxonomy module.
  */
 
 /**

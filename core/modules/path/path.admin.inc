@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative page callbacks for the path module.
+ * Admin page callbacks for the Path module.
  */
 
 /**
@@ -459,7 +459,7 @@ function path_patterns_settings_form($form) {
   $config = config('path.settings');
 
   $form['#config'] = 'path.settings';
-  
+
   $form['verbose'] = array(
     '#type' => 'checkbox',
     '#title' => t('Verbose'),

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Administrative interface for custom field type creation.
+ * Admin page callbacks for the Field UI module.
  */
 
 /**
