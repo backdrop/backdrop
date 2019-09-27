@@ -130,7 +130,7 @@ Backdrop.behaviors.contentTypes = {
           vals.push(Backdrop.t('Optional'));
         }
         if (revisionsByDefault) {
-          vals.push(Backdrop.t('Allways created by default'));
+          vals.push(Backdrop.t('Always created by default'));
         }
       }
       return vals.join(', ');
