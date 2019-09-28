@@ -1016,6 +1016,10 @@ function hook_field_widget_error($element, $error, $form, &$form_state) {
  * choose which formatter to use. Field formatters are defined by implementing
  * hook_field_formatter_info().
  *
+ * Developers implementing field formatters in their module should also consider
+ * implementing hook_field_formatter_settings_form() and
+ * hook_field_formatter_settings_summary().
+ *
  * @see field
  * @see field_types
  * @see field_widget
