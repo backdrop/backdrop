@@ -519,10 +519,10 @@ function file_settings_form($form, &$form_state) {
     '#dialog' => TRUE,
   );
 
-  $form['default_allowed_extensions('] = array(
+  $form['default_allowed_extensions'] = array(
     '#type' => 'textfield',
     '#title' => t('Default allowed file extensions'),
-    '#default_value' => $config->get('default_allowed_extensions('),
+    '#default_value' => $config->get('default_allowed_extensions'),
     '#description' => t('Separate extensions with a space and do not include the leading dot.'),
     '#maxlength' => NULL,
   );
