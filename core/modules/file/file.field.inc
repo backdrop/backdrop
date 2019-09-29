@@ -82,27 +82,6 @@ function file_field_instance_settings_form($field, $instance) {
   // Make the extension list a little more human-friendly by comma-separation.
   $extensions = str_replace(' ', ', ', $settings['file_extensions']);
 
-//  $document_extensions = array('txt', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pps', 'ppsx', 'odt', 'ods', 'odp', 'pdf');
-//  $image_extensions = array('jpg', 'jpeg', 'gif', 'png', 'bmp', 'img', 'webp');
-//  $audio_extensions = array('mp3', 'ogg', 'oga', 'm4a', 'wav', 'weba');
-//  $video_extensions = array('mp4', 'mov', 'ogv', 'm4v', 'mpeg', 'mpg', 'avi', 'webm');  
-//  $form['common_file_extensions'] = array(
-//    '#type' => 'checkboxes',
-//    '#title' => t('Common file extension sets'),
-//    //'#default_value' => $extensions,
-//    //'#description' => t('Separate extensions with a space or comma and do not include the leading dot.'),
-//    '#options' => array(
-//      'documents' => t('Document files'),
-//      'image' => t('Image files'),
-//      'audio' => t('Audio files'),
-//      'video' => t('Video files'),
-//      'custom' => t('Custom file extensions'),
-//    ),
-//    '#weight' => -6,
-//    // By making this field required, we prevent a potential security issue
-//    // that would allow files of any type to be uploaded.
-//    '#required' => TRUE,
-//  );
   $form['file_extensions'] = array(
     '#type' => 'textfield',
     '#title' => t('Allowed file extensions'),
