@@ -110,10 +110,10 @@ function file_schema() {
         'type' => 'varchar',
         'length' => 50,
         'not null' => TRUE,
-        // If the FILE_TYPE_NONE constant ever changes, then change the value here
-        // too, and add an update function to deal with existing records. The
-        // constant isn't used here, because there may be cases where this function
-        // runs without the module file loaded.
+        // If the FILE_TYPE_NONE constant ever changes, then change the value
+        // here too, and add an update function to deal with existing records.
+        // The constant isn't used here, because there may be cases where this
+        // function runs without the module file loaded.
         'default' => 'undefined',
       ),
     ),
@@ -824,7 +824,7 @@ function file_update_1003() {
 
     // Since the database API doesn't provide a way to drop indexes without
     // knowing what the old indexes are, it is the responsibility of any module
-    // that adds them to drop them prior to running this update..
+    // that adds them to drop them prior to running this update.
     db_change_field('file_managed', 'type', 'type', $spec, $indexes_new);
   }
 
@@ -892,7 +892,8 @@ function file_update_1004() {
 }
 
 /**
- * Add the default file types and convert custom or modified file types from Drupal 7 file_entity.
+ * Add the default file types and convert custom or modified file types from
+ * Drupal 7 file_entity.
  */
 function file_update_1005() {
   $default_file_types = array(
@@ -986,7 +987,8 @@ function file_update_1005() {
 }
 
 /**
- * Add the default file display settings and convert saved file display settings from Drupal 7 file_entity.
+ * Add the default file display settings and convert saved file display settings
+ * from Drupal 7 file_entity.
  */
 function file_update_1006() {
   $default_file_displays = array(
@@ -1182,4 +1184,30 @@ function file_update_1007() {
     $config->set('permissions', $permissions);
     $config->save();
   }
+}
+
+/**
+ * Convert file size limits for the global file types setting, and for all file
+ * field instances to bytes.
+ */
+function file_update_1008() {
+  $config_file_names = config_get_names_with_prefix('field.instance.');
+
+  foreach ($config_file_names as $config_file_name) {
+    $config = config($config_file_name);
+    $field_instance_max_filesize = $config->get('settings.max_filesize');
+    if (isset($field_instance_max_filesize) && !empty($field_instance_max_filesize)) {
+      $field_instance_max_filesize = parse_size($field_instance_max_filesize);
+      $config->set('settings.max_filesize', $field_instance_max_filesize);
+    }
+    $config->save();
+  }
+
+  $config = config('file.settings');
+  $file_types_max_filesize = $config->get('max_filesize');
+  if (isset($file_types_max_filesize) && !empty($file_types_max_filesize)) {
+    $$file_types_max_filesize = parse_size($file_types_max_filesize);
+    $config->set('max_filesize', $file_types_max_filesize);
+  }
+  $config->save();
 }

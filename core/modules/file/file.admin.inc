@@ -493,23 +493,66 @@ function file_settings_form($form, &$form_state) {
 
   $form = array('#config' => 'file.settings');
 
-  $php_limit = format_size(file_upload_max_size());
-  $form['max_filesize'] = array(
-    '#type' => 'textfield',
+  $max_filesize_setting = $config->get('max_filesize');
+
+  if ($max_filesize_setting) {
+    $max_filesize_setting = explode(' ', format_size($max_filesize_setting));
+    $filesize_number = $max_filesize_setting[0];
+    $filesize_unit = $max_filesize_setting[1];
+  }
+
+  $form['max_filesize']['filesize_limit'] = array(
+    '#type' => 'radios',
     '#title' => t('Maximum upload size'),
-    '#default_value' => $config->get('max_filesize'),
-    '#description' => t('Enter a value like "512" (bytes), "80 KB" (kilobytes) or "50 MB" (megabytes). If left empty, the file sizes will be limited only by PHP\'s maximum post and file upload sizes.'),
-    '#size' => 10,
-    '#element_validate' => array('_file_generic_settings_max_filesize'),
-    '#attributes' => array(
-      'placeholder' => $php_limit,
+    '#options' => array(
+      'unlimited' => t('Only limited by PHP (current limit: <strong>@limit</strong>)', array('@limit' => format_size(file_upload_max_size()))),
+      'limited' => t('Limit to a specific size:'),
+    ),
+    '#default_value' => $max_filesize_setting ? 'limited' : 'unlimited',
+  );
+  $form['max_filesize_combo']['filesize_container'] = array(
+    '#type' => 'item',
+    // Reset #parents to 'max_filesize_combo', so the additional container does
+    // not appear.
+    '#parents' => array('max_filesize_combo'),
+    '#field_prefix' => '<div class="container-inline">',
+    '#field_suffix' => '</div>',
+  );
+  $form['max_filesize_combo']['filesize_container']['filesize_number'] = array(
+    '#type' => 'number',
+    '#title' => t('Number'),
+    '#title_display' => 'invisible',
+    '#default_value' => isset($filesize_number) ? $filesize_number : '',
+    '#min' => 1,
+    '#step' => 1,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="filesize_limit"]' => array('value' => 'limited'),
+      ),
+    ),
+  );
+  $form['max_filesize_combo']['filesize_container']['filesize_unit'] = array(
+    '#type' => 'select',
+    '#title' => t('Unit'),
+    '#title_display' => 'invisible',
+    '#options' => array(
+      'GB' => t('GB'),
+      'MB' => t('MB'),
+      'KB' => t('KB'),
+      'bytes' => t('bytes'),
+    ),
+    '#default_value' => isset($filesize_unit) ? $filesize_unit : 'MB',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="filesize_limit"]' => array('value' => 'limited'),
+      ),
     ),
   );
 
   $form['default_file_directory'] = array(
     '#type' => 'textfield',
     '#title' => t('Default file directory'),
-    '#description' => t('Subdirectory where files will be stored if the file is uploaded through the file/add page. This field supports tokens.'),
+    '#description' => t('Subdirectory where files will be stored, if the file is uploaded through the file/add page. This field supports tokens.'),
     '#default_value' => $config->get('default_file_directory'),
     '#maxlength' => NULL,
     '#field_prefix' => 'files/',
@@ -519,11 +562,11 @@ function file_settings_form($form, &$form_state) {
     '#dialog' => TRUE,
   );
 
-  $form['default_allowed_extensions('] = array(
+  $form['default_allowed_extensions'] = array(
     '#type' => 'textfield',
     '#title' => t('Default allowed file extensions'),
-    '#default_value' => $config->get('default_allowed_extensions('),
-    '#description' => t('Separate extensions with a space and do not include the leading dot.'),
+    '#default_value' => $config->get('default_allowed_extensions'),
+    '#description' => t('Separate extensions with a space, and do not include the leading dot.'),
     '#maxlength' => NULL,
   );
 
@@ -536,21 +579,21 @@ function file_settings_form($form, &$form_state) {
   );
   $form['file_upload_wizard']['upload_wizard_skip_file_type'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Skip filetype selection.'),
+    '#title' => t('Skip filetype selection'),
     '#default_value' => $config->get('upload_wizard_skip_file_type'),
-    '#description' => t('The file type selection step is only available if the uploaded file falls into two or more file types. If this step is skipped, files with no available file type or two or more file types will not be assigned a file type.'),
+    '#description' => t('The file type selection step is only available if the uploaded file falls into two or more file types. If this step is skipped, files with no available file type, or two or more file types, will not be assigned a file type.'),
   );
   $form['file_upload_wizard']['upload_wizard_skip_scheme'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Skip scheme selection.'),
+    '#title' => t('Skip scheme selection'),
     '#default_value' => $config->get('upload_wizard_skip_scheme'),
-    '#description' => t('The scheme selection step is only available if two or more file destinations, such as public local files served by the webserver and private local files served by Drupal, are available. If this step is skipped, files will automatically be saved using the default download method.'),
+    '#description' => t('The scheme selection step is only available if two or more file destinations are available; such as public local files served by the webserver, and private local files served by Drupal. If this step is skipped, files will automatically be saved using the default download method.'),
   );
   $form['file_upload_wizard']['upload_wizard_skip_fields'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Skip available fields.'),
+    '#title' => t('Skip available fields'),
     '#default_value' => $config->get('upload_wizard_skip_fields'),
-    '#description' => t('The field selection step is only available if the file type the file belongs to has any available fields. If this step is skipped, any fields on the file will be left blank.'),
+    '#description' => t('The field selection step is only available if the file type to which the file belongs has any available fields. If this step is skipped, any fields on the file will be left blank.'),
   );
   $form['file_replace_options'] = array(
     '#type' => 'fieldset',
@@ -568,7 +611,7 @@ function file_settings_form($form, &$form_state) {
 
   $form['protect_repeated_render'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Protect against repeat rendering'),
+    '#title' => t('Protect against repeated rendering'),
     '#default_value' => $config->get('protect_repeated_render'),
     '#description' => t('Avoid rendering the same file more than 10 times. This can be a sign of an image getting caught in a recursive render, but it can also be triggered when the same image is rendered more than 20 times, e.g. in an long content list or data feed.'),
   );
@@ -583,6 +626,19 @@ function file_settings_form_validate(&$form, &$form_state) {
   if (isset($form_state['values']['default_file_directory'])) {
     $form_state['values']['default_file_directory'] = trim($form_state['values']['default_file_directory'], '/');
   }
+
+  if ($form_state['values']['filesize_limit'] == 'limited') {
+    $form_state['values']['max_filesize'] = parse_size($form_state['values']['filesize_number'] . ' ' . $form_state['values']['filesize_unit']);
+  }
+  else {
+    $form_state['values']['max_filesize'] = '';
+  }
+  // Unset all the helper form elements that create the "Maximum upload size"
+  // element, as we don't want them to be saved in config ("max_filesize" is
+  // what gets saved).
+  unset($form_state['values']['filesize_limit']);
+  unset($form_state['values']['filesize_number']);
+  unset($form_state['values']['filesize_unit']);
 }
 
 /**

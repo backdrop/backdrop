@@ -1609,12 +1609,12 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
 
   backdrop_set_title($instance['label']);
 
-  $description = '<p>' . t('These settings apply to the %field field everywhere it is used. These settings impact the way that data is stored in the database and cannot be changed once data has been created.', array('%field' => $instance['label'])) . '</p>';
+  $description = '<p>' . t('These settings apply to the %field field everywhere it is used. These settings impact the way that data is stored in the database, and cannot be changed once data has been created.', array('%field' => $instance['label'])) . '</p>';
 
   // Create a form structure for the field values.
   $form['field'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Field settings'),
+    '#title' => t('Global field settings'),
     '#description' => $description,
     '#tree' => TRUE,
   );
@@ -1874,7 +1874,7 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
     '#tree' => TRUE,
     '#type' => 'fieldset',
     '#title' => t('%type settings', array('%type' => $bundles[$entity_type][$bundle]['label'])),
-    '#description' => t('These settings apply only to the %field field when used in the %type type.', array(
+    '#description' => t('These settings apply only to the %field field, when used in the %type content type.', array(
       '%field' => $instance['label'],
       '%type' => $bundles[$entity_type][$bundle]['label'],
     )),
@@ -1910,22 +1910,34 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
     '#weight' => -20,
   );
 
+  $form['instance']['provide_description'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Provide help text'),
+    '#weight' => -10,
+    '#default_value' => !empty($instance['description']),
+  );
   $form['instance']['description'] = array(
     '#type' => 'textarea',
     '#title' => t('Help text'),
+    '#title_display' => 'invisible',
     '#default_value' => !empty($instance['description']) ? $instance['description'] : '',
     '#rows' => 5,
     '#description' => t('Instructions to present to the user below this field on the editing form.<br />Allowed HTML tags: @tags <br />This field supports tokens.', array('@tags' => _field_filter_xss_display_allowed_tags())) . $token_link,
-    '#weight' => -10,
+    '#weight' => -9,
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array(),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="instance[provide_description]"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   $form['instance']['required'] = array(
     '#type' => 'checkbox',
     '#title' => t('Required field'),
     '#default_value' => !empty($instance['required']),
-    '#weight' => -5,
+    '#weight' => -8,
   );
 
   // Build the widget component of the instance.
@@ -2160,8 +2172,24 @@ function field_ui_field_edit_form_validate($form, &$form_state) {
  * @see field_ui_field_edit_form_validate().
  */
 function field_ui_field_edit_form_submit($form, &$form_state) {
-  $instance = $form_state['values']['instance'];
   $field = $form_state['values']['field'];
+  $instance = $form_state['values']['instance'];
+
+  if ($instance['settings']['filesize_limit'] == 'limited') {
+    $instance_max_filesize = $form_state['values']['max_filesize_combo']['filesize_number'] . ' ' . $form_state['values']['max_filesize_combo']['filesize_unit'];
+    $instance['settings']['max_filesize'] = parse_size($instance_max_filesize);
+  }
+  else {
+    $instance['settings']['max_filesize'] = '';
+  }
+  // Remove values coming from all the helper form elements that create the
+  // "Maximum upload size" element, as we don't want them to be saved in config
+  // ("max_filesize" is what gets saved).
+  unset($instance['settings']['filesize_limit']);
+
+  if (!$instance['provide_description']) {
+    $instance['description'] = '';
+  }
 
   // Save field cardinality.
   $cardinality = $field['cardinality'];
