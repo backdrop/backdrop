@@ -2175,9 +2175,9 @@ function field_ui_field_edit_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $field = $values['field'];
   $instance = $values['instance'];
-  $max_filesize = $values['max_filesize'];
 
-  if (isset($max_filesize['limit'])) {
+  if (isset($values['max_filesize'])) {
+    $max_filesize = $values['max_filesize'];
     if ($max_filesize['limit'] == 'limited') {
       $instance_max_filesize = $max_filesize['number'] . ' ' . $max_filesize['unit'];
       $instance['settings']['max_filesize'] = parse_size($instance_max_filesize);
