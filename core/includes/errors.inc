@@ -247,8 +247,9 @@ function _backdrop_log_error($error, $fatal = FALSE) {
     if ($fatal) {
       backdrop_set_title(t('Error'));
       // We fallback to a maintenance page at this point, because the page generation
-      // itself can generate errors.
-      print theme('maintenance_page', array('content' => t('The website encountered an unexpected error. Please try again later.')));
+      // itself can generate errors. Provide the error message to the end-user
+      // but exclude PHP error information.
+      print theme('maintenance_page', array('content' => $error['!message']));
       exit;
     }
   }

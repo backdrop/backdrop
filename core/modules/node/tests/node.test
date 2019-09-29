@@ -1645,8 +1645,22 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     // Add a node of type foo; make sure we can visit it with 200 response..
     $foo_settings = array('uid' => $web_user->uid, 'type' => 'foo');
     $foo_node = $this->backdropCreateNode($foo_settings);
+
+    $web_user = $this->backdropCreateUser(array('search content', 'use advanced search'));
+    $this->backdropLogin($web_user);
+
     $this->backdropGet('/node/' . $foo_node->nid);
     $this->assertResponse(200, 'Received 200 response from node type foo with hidden_path disabled.');
+
+    // Check that node is listed in /search.
+    $this->cronRun();
+
+    // Search for node title. Should be one result.
+    $this->backdropPost('search/node', array('keys' => $foo_node->title), t('Search'));
+    $this->assertText($foo_node->title, 'Node found in search results.');
+
+    // Ensure content type is available as option.
+    $this->assertFieldByXPath("//input[@name='type[foo]']", 'foo', 'Content type of foo is available as filter for search.');
 
     // Edit content type foo to hidden_path = 1 and check the setting.
     $config->set('settings.hidden_path', '1');
@@ -1656,6 +1670,16 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     backdrop_flush_all_caches();
     $this->backdropGet('/node/' . $foo_node2->nid);
     $this->assertResponse(404, 'Received 404 response from node type foo where user restricted from viewing full page.');
+
+    // Check that node is not listed in /search.
+    $this->cronRun();
+
+    // Search for node title. Should be zero results.
+    $this->backdropPost('search/node', array('keys' => $foo_node->title), t('Search'));
+    $this->assertNoText($foo_node->title, 'Node not found in search results.');
+
+    // Ensure content type is not available as option.
+    $this->assertNoFieldByXPath("//input[@name='type[foo]']", 'foo', 'Content type of foo is not available as filter for search.');
 
     // Ensure publishing settings are loaded correctly even when using boolean
     // values for "status_default".

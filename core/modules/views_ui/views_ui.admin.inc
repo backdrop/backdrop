@@ -294,7 +294,7 @@ function views_ui_list_page() {
     $row[] = array(
       'data' => theme('views_ui_view_storage', array('view' => $view)),
       'class' => array('views-ui-storage'),
-      'data-label' => t('Storage status'),
+      'data-label' => t('Storage state'),
     );
     $row[] = array(
       'data' => array(
@@ -304,6 +304,7 @@ function views_ui_list_page() {
       'class' => array('views-ui-operations'),
       'data-label' => t('Operations'),
     );
+
     $rows[] = array(
       'data' => $row,
       'class' => array(empty($view->disabled) ? 'enabled' : 'disabled'),

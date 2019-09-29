@@ -346,14 +346,68 @@ function standard_install() {
 
   // Enable default permissions for system roles.
   $filtered_html_permission = filter_permission_name($filtered_html_format);
-  user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access content', 'access comments', $filtered_html_permission));
-  user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('access content', 'access comments', 'post comments', 'skip comment approval', 'upload editor images', $filtered_html_permission));
+  $anonymous_permissions = array(
+    'access content',
+    'access comments',
+    $filtered_html_permission,
+  );
+  $authenticated_permissions = array(
+    'access content',
+    'access comments',
+    'post comments',
+    'skip comment approval',
+    'upload editor images',
+    $filtered_html_permission,
+  );
+  user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $anonymous_permissions);
+  user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, $authenticated_permissions);
 
-  // Create a default role for site administrators, with all available permissions assigned.
+  // Create a default editor role, for users who need to be able to edit
+  // content, but do not need to access advanced admin features.
+  $editor_role = new stdClass();
+  $editor_role->name = 'editor';
+  $editor_role->label = st('Editor');
+  $editor_role->weight = 2;
+  user_role_save($editor_role);
+
+  $editor_permissions = array(
+    'view own unpublished content',
+    'view any unpublished content',
+    'view revisions',
+    'revert revisions',
+    'delete revisions',
+    'create page content',
+    'edit own page content',
+    'edit any page content',
+    'delete own page content',
+    'delete any page content',
+    'create post content',
+    'edit own post content',
+    'edit any post content',
+    'delete own post content',
+    'delete any post content',
+    'access dashboard',
+    'view the administration theme',
+    'access administration bar',
+    'access content overview',
+    'access administration pages',
+    'access site in maintenance mode',
+    'flush caches',
+    'edit terms in tags',
+    'delete terms in tags',
+    'administer taxonomy',
+    'search content',
+    'use advanced search',
+    $filtered_html_permission,
+  );
+  user_role_grant_permissions('editor', $editor_permissions);
+
+  // Create a default role for site administrators, with all available
+  // permissions assigned.
   $admin_role = new stdClass();
   $admin_role->name = 'administrator';
   $admin_role->label = st('Administrator');
-  $admin_role->weight = 2;
+  $admin_role->weight = 3;
   $admin_role->permissions = array_keys(module_invoke_all('permission'));
   user_role_save($admin_role);
   // Set this as the administrator role.
