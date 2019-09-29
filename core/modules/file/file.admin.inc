@@ -496,11 +496,17 @@ function file_settings_form($form, &$form_state) {
   $max_filesize_setting = $config->get('max_filesize');
 
   if ($max_filesize_setting) {
+    // Convert the current "max_filesize" setting from bytes to a readable
+    // number/unit pair.
     $max_filesize_setting = explode(' ', format_size($max_filesize_setting));
+    // Place the number and unit in two separate variables, for later use in the
+    // respective "Number" and "Unit" fields.
     $filesize_number = $max_filesize_setting[0];
     $filesize_unit = $max_filesize_setting[1];
   }
 
+  // Helper form elements for the "max_filesize" setting. None of these gets
+  // saved in config.
   $form['max_filesize']['filesize_limit'] = array(
     '#type' => 'radios',
     '#title' => t('Maximum upload size'),
@@ -509,16 +515,17 @@ function file_settings_form($form, &$form_state) {
       'limited' => t('Limit to a specific size:'),
     ),
     '#default_value' => $max_filesize_setting ? 'limited' : 'unlimited',
+    '#parents' => array('filesize_limit', 'limit'),
   );
-  $form['max_filesize_combo']['filesize_container'] = array(
+  $form['max_filesize']['filesize_container'] = array(
     '#type' => 'item',
-    // Reset #parents to 'max_filesize_combo', so the additional container does
-    // not appear.
-    '#parents' => array('max_filesize_combo'),
+    // Reset #parents to 'filesize_limit', so the additional container does not
+    // appear.
+    '#parents' => array('filesize_limit'),
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
   );
-  $form['max_filesize_combo']['filesize_container']['filesize_number'] = array(
+  $form['max_filesize']['filesize_container']['number'] = array(
     '#type' => 'number',
     '#title' => t('Number'),
     '#title_display' => 'invisible',
@@ -527,11 +534,12 @@ function file_settings_form($form, &$form_state) {
     '#step' => 1,
     '#states' => array(
       'visible' => array(
-        ':input[name="filesize_limit"]' => array('value' => 'limited'),
+        ':input[name="filesize_limit[limit]"]' => array('value' => 'limited'),
       ),
     ),
+    '#parents' => array('filesize_limit', 'number'),
   );
-  $form['max_filesize_combo']['filesize_container']['filesize_unit'] = array(
+  $form['max_filesize']['filesize_container']['unit'] = array(
     '#type' => 'select',
     '#title' => t('Unit'),
     '#title_display' => 'invisible',
@@ -544,9 +552,10 @@ function file_settings_form($form, &$form_state) {
     '#default_value' => isset($filesize_unit) ? $filesize_unit : 'MB',
     '#states' => array(
       'visible' => array(
-        ':input[name="filesize_limit"]' => array('value' => 'limited'),
+        ':input[name="filesize_limit[limit]"]' => array('value' => 'limited'),
       ),
     ),
+    '#parents' => array('filesize_limit', 'unit'),
   );
 
   $form['default_file_directory'] = array(
@@ -623,12 +632,14 @@ function file_settings_form($form, &$form_state) {
  * Validation handler for file_settings_form().
  */
 function file_settings_form_validate(&$form, &$form_state) {
+  $max_filesize = $form_state['values']['filesize_limit'];
+
   if (isset($form_state['values']['default_file_directory'])) {
     $form_state['values']['default_file_directory'] = trim($form_state['values']['default_file_directory'], '/');
   }
 
-  if ($form_state['values']['filesize_limit'] == 'limited') {
-    $form_state['values']['max_filesize'] = parse_size($form_state['values']['filesize_number'] . ' ' . $form_state['values']['filesize_unit']);
+  if ($max_filesize['limit'] == 'limited') {
+    $form_state['values']['max_filesize'] = parse_size($max_filesize['number'] . ' ' . $max_filesize['unit']);
   }
   else {
     $form_state['values']['max_filesize'] = '';
@@ -637,8 +648,6 @@ function file_settings_form_validate(&$form, &$form_state) {
   // element, as we don't want them to be saved in config ("max_filesize" is
   // what gets saved).
   unset($form_state['values']['filesize_limit']);
-  unset($form_state['values']['filesize_number']);
-  unset($form_state['values']['filesize_unit']);
 }
 
 /**

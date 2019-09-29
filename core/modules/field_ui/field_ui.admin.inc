@@ -2172,21 +2172,19 @@ function field_ui_field_edit_form_validate($form, &$form_state) {
  * @see field_ui_field_edit_form_validate().
  */
 function field_ui_field_edit_form_submit($form, &$form_state) {
-  $field = $form_state['values']['field'];
-  $instance = $form_state['values']['instance'];
+  $values = $form_state['values'];
+  $field = $values['field'];
+  $instance = $values['instance'];
+  $max_filesize = $values['max_filesize'];
 
-  if (isset($instance['settings']['filesize_limit'])) {
-    if ($instance['settings']['filesize_limit'] == 'limited') {
-      $instance_max_filesize = $form_state['values']['max_filesize_combo']['filesize_number'] . ' ' . $form_state['values']['max_filesize_combo']['filesize_unit'];
+  if (isset($max_filesize['limit'])) {
+    if ($max_filesize['limit'] == 'limited') {
+      $instance_max_filesize = $max_filesize['number'] . ' ' . $max_filesize['unit'];
       $instance['settings']['max_filesize'] = parse_size($instance_max_filesize);
     }
     else {
       $instance['settings']['max_filesize'] = '';
     }
-    // Remove values coming from all the helper form elements that create the
-    // "Maximum upload size" element, as we don't want them to be saved in config
-    // ("max_filesize" is what gets saved).
-    unset($instance['settings']['filesize_limit']);
   }
 
   if (!$instance['provide_description']) {

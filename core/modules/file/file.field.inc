@@ -81,6 +81,28 @@ function file_field_instance_settings_form($field, $instance) {
 
   // Make the extension list a little more human-friendly by comma-separation.
   $extensions = str_replace(' ', ', ', $settings['file_extensions']);
+
+//  $document_extensions = array('txt', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pps', 'ppsx', 'odt', 'ods', 'odp', 'pdf');
+//  $image_extensions = array('jpg', 'jpeg', 'gif', 'png', 'bmp', 'img', 'webp');
+//  $audio_extensions = array('mp3', 'ogg', 'oga', 'm4a', 'wav', 'weba');
+//  $video_extensions = array('mp4', 'mov', 'ogv', 'm4v', 'mpeg', 'mpg', 'avi', 'webm');  
+//  $form['common_file_extensions'] = array(
+//    '#type' => 'checkboxes',
+//    '#title' => t('Common file extension sets'),
+//    //'#default_value' => $extensions,
+//    //'#description' => t('Separate extensions with a space or comma and do not include the leading dot.'),
+//    '#options' => array(
+//      'documents' => t('Document files'),
+//      'image' => t('Image files'),
+//      'audio' => t('Audio files'),
+//      'video' => t('Video files'),
+//      'custom' => t('Custom file extensions'),
+//    ),
+//    '#weight' => -6,
+//    // By making this field required, we prevent a potential security issue
+//    // that would allow files of any type to be uploaded.
+//    '#required' => TRUE,
+//  );
   $form['file_extensions'] = array(
     '#type' => 'textfield',
     '#title' => t('Allowed file extensions'),
@@ -107,14 +129,18 @@ function file_field_instance_settings_form($field, $instance) {
   $max_filesize_setting = $settings['max_filesize'];
 
   if ($max_filesize_setting) {
+    // Convert the current "max_filesize" setting from bytes to a readable
+    // number/unit pair.
     $max_filesize_setting = explode(' ', format_size($max_filesize_setting));
+    // Place the number and unit in two separate variables, for later use in the
+    // respective "Number" and "Unit" fields.
     $filesize_number = $max_filesize_setting[0];
     $filesize_unit = $max_filesize_setting[1];
   }
 
   // Helper form elements for the "max_filesize" setting. None of these gets
   // saved in config.
-  $form['filesize_limit'] = array(
+  $form['max_filesize']['filesize_limit'] = array(
     '#type' => 'radios',
     '#title' => t('Maximum upload size'),
     '#options' => array(
@@ -122,16 +148,17 @@ function file_field_instance_settings_form($field, $instance) {
       'limited' => t('Limit to a specific size:'),
     ),
     '#default_value' => $settings['max_filesize'] ? 'limited' : 'unlimited',
+    '#parents' => array('max_filesize', 'limit'),
   );
-  $form['max_filesize_combo']['filesize_container'] = array(
+  $form['max_filesize']['filesize_container'] = array(
     '#type' => 'item',
-    // Reset #parents to 'max_filesize_combo', so the additional container does
-    // not appear.
-    '#parents' => array('max_filesize_combo'),
+    // Reset #parents to 'max_filesize', so the additional container does not
+    // appear.
+    '#parents' => array('max_filesize'),
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
   );
-  $form['max_filesize_combo']['filesize_container']['filesize_number'] = array(
+  $form['max_filesize']['filesize_container']['number'] = array(
     '#type' => 'number',
     '#title' => t('Number'),
     '#title_display' => 'invisible',
@@ -140,11 +167,11 @@ function file_field_instance_settings_form($field, $instance) {
     '#step' => 1,
     '#states' => array(
       'visible' => array(
-        ':input[name="instance[settings][filesize_limit]"]' => array('value' => 'limited'),
+        ':input[name="max_filesize[limit]"]' => array('value' => 'limited'),
       ),
     ),
   );
-  $form['max_filesize_combo']['filesize_container']['filesize_unit'] = array(
+  $form['max_filesize']['filesize_container']['unit'] = array(
     '#type' => 'select',
     '#title' => t('Unit'),
     '#title_display' => 'invisible',
@@ -157,14 +184,9 @@ function file_field_instance_settings_form($field, $instance) {
     '#default_value' => isset($filesize_unit) ? $filesize_unit : 'MB',
     '#states' => array(
       'visible' => array(
-        ':input[name="instance[settings][filesize_limit]"]' => array('value' => 'limited'),
+        ':input[name="max_filesize[limit]"]' => array('value' => 'limited'),
       ),
     ),
-  );
-  // This is what actually gets saved in config.
-  $form['max_filesize'] = array(
-    '#type' => 'value',
-    '#value' => $settings['max_filesize'],
   );
 
   $form['description_field'] = array(
