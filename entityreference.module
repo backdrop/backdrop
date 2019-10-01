@@ -1424,7 +1424,7 @@ function entityreference_field_formatter_view($entity_type, $entity, $field, $in
         unset($target_entity->content);
         $result[$delta] = entity_view($target_type, array($item[$column] => $target_entity), $settings['view_mode'], $target_langcode, !empty($settings['hide_title']));
 
-        if (empty($settings['links']) && isset($result[$delta][$target_type][$column]['links'])) {
+        if (empty($settings['links']) && isset($result[$delta][$target_type][$item[$column]]['links'])) {
           $result[$delta][$target_type][$item[$column]]['links']['#access'] = FALSE;
         }
         $depth = 0;

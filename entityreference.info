@@ -27,4 +27,5 @@ files[] = tests/entityreference.handlers.test
 files[] = tests/entityreference.taxonomy.test
 files[] = tests/entityreference.admin.test
 files[] = tests/entityreference.feeds.test
+files[] = tests/entityreference.field.test
 files[] = tests/entityreference.entity_translation.test
