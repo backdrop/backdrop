@@ -783,10 +783,10 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
       $localpath = $this->getLocalPath($uri);
     }
     if ($options & STREAM_REPORT_ERRORS) {
-      return mkdir($localpath, $mode, $recursive);
+      return backdrop_mkdir($localpath, $mode, $recursive);
     }
     else {
-      return @mkdir($localpath, $mode, $recursive);
+      return @backdrop_mkdir($localpath, $mode, $recursive);
     }
   }
 
