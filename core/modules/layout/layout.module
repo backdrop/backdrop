@@ -2035,7 +2035,7 @@ function layout_layout_info() {
       'flexible' => TRUE,
       'type' => 'layout',
       'path' => 'templates',
-      'preview' => isset($flexible_template->thumbnail) ? $flexible_template->thumbnail : layout_template_generate_thumbnail($flexible_template),
+      'preview' => layout_template_generate_thumbnail($flexible_template),
       'libraries' => array('bootstrap4-gs'),
     );
     foreach ($flexible_template->rows as $row_name => $region) {
@@ -2053,6 +2053,100 @@ function layout_layout_info() {
   }
 
   return $layouts;
+}
+
+/**
+ * Generate an image to be used as a layout template thumbnail.
+ *
+ * @param $template
+ *   A layout template object.
+ *
+ * @return string $destination
+ *   The URI of the generated thumbnail image.
+ *
+ * This function only works with the GD toolkit. ImageMagick is not supported.
+ */
+function layout_template_generate_thumbnail($template) {
+  $template_rows = $template->rows;
+
+  $flexi_styles = layout_flexible_row_styles();
+
+  $thumbnail = array();
+  foreach ($template_rows as $row) {
+    $thumbnail[] = $flexi_styles[$row['contains']]['split'];
+  }
+
+  if ($tmp_file = backdrop_tempnam('temporary://', 'temp_layout_template_thumb_')) {
+
+    $default_scheme = file_default_scheme();
+    $thumbnails_dir = $default_scheme . '://layout_template_thumbnails/';
+    if (file_prepare_directory($thumbnails_dir, FILE_CREATE_DIRECTORY)) {
+      $destination = $thumbnails_dir . $template->name . '.png';
+    }
+    else {
+      $destination = $default_scheme .'://layout_template_thumb-' . $template->name . '.png';
+    }
+
+    file_unmanaged_move($tmp_file, $destination, FILE_EXISTS_REPLACE);
+
+    $thumb_width = 50;
+    $thumb_height = 75;
+
+    $image = imagecreate($thumb_width, $thumb_height);
+    $row_color = imagecolorallocate($image, 102, 102, 102);
+    $separator_color = imagecolorallocate($image, 255, 255, 255);
+
+    $separator_size = 2;
+
+    $rows_count = count($thumbnail);
+    $horizontal_separator_count = $rows_count - 1;
+    // Set the first and last rows to be fixed width, as the thumbnail looks
+    // better that way when there is a small number or rows.
+    $first_last_row_height = 7;
+    $available_vertical_space = $thumb_height - ($horizontal_separator_count * $separator_size) - ($first_last_row_height * 2);
+    // Devide the remaining vertical space among the rest of the rows
+    // (excluding the first and last ones).
+    $row_height = $available_vertical_space/($rows_count - 2);
+    
+    $startng_y = 0;
+    foreach ($thumbnail as $index => $region_split) {
+
+      $splits = explode(':', $region_split);
+
+      $regions_count = count($splits);
+      $vertical_separator_count = $regions_count - 1;
+      $available_horizontal_space = $thumb_width - ($vertical_separator_count * $separator_size);
+
+      // If this is the first or last row.
+      if ($index == 0 || $index == $rows_count - 1) {
+        $current_row_height = $first_last_row_height;
+      }
+      // All other rows.
+      else {
+        $current_row_height = $row_height;
+      }
+
+      $starting_x = 0;
+      foreach ($splits as $split) {
+        $split_width = ($split * $thumb_width)/100;
+
+        imagefilledrectangle($image, $starting_x, $startng_y, $starting_x + $split_width, $startng_y + $current_row_height, $row_color);
+        $starting_x += $split_width;
+        // Draw a vertical region separator line.
+        imagefilledrectangle($image, $starting_x, $startng_y, $starting_x + $separator_size, $startng_y + $current_row_height, $separator_color);
+        $starting_x += $separator_size;
+      }
+
+      $startng_y += $current_row_height;
+      // Draw a horizontal row separator line.
+      imagefilledrectangle($image, 0, $startng_y, $thumb_width, $startng_y + $separator_size, $separator_color);
+      $startng_y += $separator_size;
+    }
+
+    imagepng($image, backdrop_realpath($destination));
+  }
+
+  return $destination;
 }
 
 /**
