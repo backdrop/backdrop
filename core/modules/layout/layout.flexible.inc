@@ -279,7 +279,7 @@ function layout_template_generate_thumbnail($template) {
     $row_color = imagecolorallocate($image, 102, 102, 102);
     $separator_color = imagecolorallocate($image, 255, 255, 255);
 
-    $separator_size = 1;
+    $separator_size = 2;
 
     $rows_count = count($thumbnail);
     $horizontal_separator_count = $rows_count - 1;

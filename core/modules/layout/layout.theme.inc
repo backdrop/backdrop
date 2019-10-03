@@ -128,7 +128,7 @@ function theme_layout_template_info($variables) {
   $template_info = $variables['template_info'];
 
   // Build template thumbnail preview.
-  if ($template_info['flexible']) {
+  if (!empty($template_info['flexible'])) {
     $preview_path = $template_info['preview'];
   }
   else {
