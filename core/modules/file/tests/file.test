@@ -1917,8 +1917,9 @@ class FileUnitTestCase extends FileTestHelper {
     $this->assertEqual($file->metadata['width'], $width, 'Updated image width retrieved by file_load().');
 
     // Verify that the image dimension metadata is removed on file deletion.
+    $this->assertTrue(db_query('SELECT COUNT(*) FROM {file_metadata} WHERE fid = :fid', array(':fid' => $file->fid))->fetchField(), 'Row exists in {file_metadata} before file_delete().');
     file_delete($file->fid);
-    $this->assertFalse(db_query('SELECT COUNT(*) FROM {file_metadata} WHERE fid = :fid', array(':fid' => 'fid'))->fetchField(), 'Row deleted in {file_metadata} on file_delete().');
+    $this->assertFalse(db_query('SELECT COUNT(*) FROM {file_metadata} WHERE fid = :fid', array(':fid' => $file->fid))->fetchField(), 'Row deleted in {file_metadata} on file_delete().');
   }
 }
 
