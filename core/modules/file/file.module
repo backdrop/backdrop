@@ -1092,7 +1092,9 @@ function file_file_download($uri, $field_type = 'file') {
  *
  * @see file_menu()
  *
- * @deprecated Since 1.15.0. This is no longer used by the managed_file element.
+ * @deprecated Since 1.15.0.
+ *   This is no longer used by the managed_file element as the #ajax['path']
+ *   value. Instead file_managed_file_ajax() is used in #ajax['callback'].
  */
 function file_ajax_upload() {
   watchdog_deprecated_function('file', __FUNCTION__);

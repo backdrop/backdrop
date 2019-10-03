@@ -2019,7 +2019,7 @@ class FormsFileInclusionTestCase extends BackdropWebTestCase {
    * Tests loading an include specified in hook_menu().
    */
   function testLoadMenuInclude() {
-    $this->backdropPostAJAX('form-test/load-include-menu', array(), array('op' => t('Save')), 'system/ajax', array(), array(), 'form-test-load-include-menu');
+    $this->backdropPostAJAX('form-test/load-include-menu', array(), array('op' => t('Save')), NULL, array(), array(), 'form-test-load-include-menu');
     $this->assertText('Submit callback called.');
   }
 
