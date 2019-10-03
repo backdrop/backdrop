@@ -684,6 +684,17 @@ function _color_save_stylesheet($file, $style, &$paths) {
   backdrop_chmod($file);
 }
 
+/**
+ * Finds the original file path of a CSS file from the color configuration.
+ *
+ * @param $file
+ *   The file name that we are searching for.
+ * @param $theme
+ *   The name of the theme that is being modified.
+ *
+ * @return string
+ *   Returns the original file path of the CSS file.
+ */
 function _color_get_file_path($file, $theme) {
   $theme_path = backdrop_get_path('theme', $theme);
   $filename = $theme_path . '/' . $file;
@@ -697,6 +708,17 @@ function _color_get_file_path($file, $theme) {
   }
 }
 
+/**
+ * Finds which theme a CSS file came from.
+ *
+ * @param $file
+ *   The file name that we are searching for.
+ * @param $theme
+ *   The name of the theme that is being modified.
+ *
+ * @return string
+ *   Returns the name of the theme that the CSS file came from.
+ */
 function _color_get_theme_from_file($file, $theme) {
   $theme_path = backdrop_get_path('theme', $theme);
   $filename = $theme_path . '/' . $file;
