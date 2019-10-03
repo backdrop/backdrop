@@ -283,11 +283,16 @@ function layout_template_generate_thumbnail($template) {
 
     $rows_count = count($thumbnail);
     $horizontal_separator_count = $rows_count - 1;
-    $available_vertical_space = $thumb_height - ($horizontal_separator_count * $separator_size);
-    $row_height = $available_vertical_space/$rows_count;
+    // Set the first and last rows to be fixed width, as the thumbnail looks
+    // better that way when there is a small number or rows.
+    $first_last_row_height = 5;
+    $available_vertical_space = $thumb_height - ($horizontal_separator_count * $separator_size) - ($first_last_row_height * 2);
+    // Devide the remaining vertical space among the rest of the rows
+    // (excluding the first and last ones).
+    $row_height = $available_vertical_space/($rows_count - 2);
     
     $startng_y = 0;
-    foreach ($thumbnail as $region_split) {
+    foreach ($thumbnail as $index => $region_split) {
 
       $splits = explode(':', $region_split);
 
@@ -295,18 +300,27 @@ function layout_template_generate_thumbnail($template) {
       $vertical_separator_count = $regions_count - 1;
       $available_horizontal_space = $thumb_width - ($vertical_separator_count * $separator_size);
 
+      // If this is the first or last row.
+      if ($index == 0 || $index == $rows_count - 1) {
+        $current_row_height = $first_last_row_height;
+      }
+      // All other rows.
+      else {
+        $current_row_height = $row_height;
+      }
+
       $starting_x = 0;
       foreach ($splits as $split) {
         $split_width = ($split * $thumb_width)/100;
 
-        imagefilledrectangle($image, $starting_x, $startng_y, $starting_x + $split_width, $startng_y + $row_height, $row_color);
+        imagefilledrectangle($image, $starting_x, $startng_y, $starting_x + $split_width, $startng_y + $current_row_height, $row_color);
         $starting_x += $split_width;
         // Draw a vertical region separator line.
-        imagefilledrectangle($image, $starting_x, $startng_y, $starting_x + $separator_size, $startng_y + $row_height, $separator_color);
+        imagefilledrectangle($image, $starting_x, $startng_y, $starting_x + $separator_size, $startng_y + $current_row_height, $separator_color);
         $starting_x += $separator_size;
       }
 
-      $startng_y += $row_height;
+      $startng_y += $current_row_height;
       // Draw a horizontal row separator line.
       imagefilledrectangle($image, 0, $startng_y, $thumb_width, $startng_y + $separator_size, $separator_color);
       $startng_y += $separator_size;
