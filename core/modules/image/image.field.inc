@@ -446,6 +446,7 @@ function image_field_widget_process($element, &$form_state, $form) {
     $variables = array(
       'style_name' => $widget_settings['preview_image_style'],
       'uri' => $element['#file']->uri,
+      'timestamp' => $element['#file']->timestamp,
     );
 
     // Determine image dimensions.
