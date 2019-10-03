@@ -237,6 +237,88 @@ function layout_flexible_template_configure_form_submit($form, &$form_state) {
 }
 
 /**
+ * Generate an image to be used as a layout template thumbnail.
+ *
+ * @param $template
+ *   A layout template object.
+ *
+ * @return string $destination
+ *   The URI of the generated thumbnail image.
+ *
+ * This function only works with the GD toolkit. ImageMagick is not supported.
+ *
+ * @to-do: consider moving this to layout.module (?).
+ */
+function layout_template_generate_thumbnail($template) {
+  $template_rows = $template->rows;
+
+  $flexi_styles = layout_flexible_row_styles();
+
+  $thumbnail = array();
+  foreach ($template_rows as $row) {
+    $thumbnail[] = $flexi_styles[$row['contains']]['split'];
+  }
+
+  if ($tmp_file = backdrop_tempnam('temporary://', 'temp_layout_template_thumb_')) {
+
+    $default_scheme = file_default_scheme();
+    $thumbnails_dir = $default_scheme . '://layout_template_thumbnails/';
+    if (file_prepare_directory($thumbnails_dir, FILE_CREATE_DIRECTORY)) {
+      $destination = $thumbnails_dir . $template->name . '.png';
+    }
+    else {
+      $destination = $default_scheme .'://layout_template_thumb-' . $template->name . '.png';
+    }
+
+    file_unmanaged_move($tmp_file, $destination, FILE_EXISTS_REPLACE);
+
+    $thumb_width = 50;
+    $thumb_height = 75;
+
+    $image = imagecreate($thumb_width, $thumb_height);
+    $row_color = imagecolorallocate($image, 102, 102, 102);
+    $separator_color = imagecolorallocate($image, 255, 255, 255);
+
+    $separator_size = 1;
+
+    $rows_count = count($thumbnail);
+    $horizontal_separator_count = $rows_count - 1;
+    $available_vertical_space = $thumb_height - ($horizontal_separator_count * $separator_size);
+    $row_height = $available_vertical_space/$rows_count;
+    
+    $startng_y = 0;
+    foreach ($thumbnail as $region_split) {
+
+      $splits = explode(':', $region_split);
+
+      $regions_count = count($splits);
+      $vertical_separator_count = $regions_count - 1;
+      $available_horizontal_space = $thumb_width - ($vertical_separator_count * $separator_size);
+
+      $starting_x = 0;
+      foreach ($splits as $split) {
+        $split_width = ($split * $thumb_width)/100;
+
+        imagefilledrectangle($image, $starting_x, $startng_y, $starting_x + $split_width, $startng_y + $row_height, $row_color);
+        $starting_x += $split_width;
+        // Draw a vertical region separator line.
+        imagefilledrectangle($image, $starting_x, $startng_y, $starting_x + $separator_size, $startng_y + $row_height, $separator_color);
+        $starting_x += $separator_size;
+      }
+
+      $startng_y += $row_height;
+      // Draw a horizontal row separator line.
+      imagefilledrectangle($image, 0, $startng_y, $thumb_width, $startng_y + $separator_size, $separator_color);
+      $startng_y += $separator_size;
+    }
+
+    imagepng($image, backdrop_realpath($destination));
+  }
+
+  return $destination;
+}
+
+/**
  * Form to select the region widths for a flexible template.
  *
  * @param LayoutFlexibleTemplate $flexible_template

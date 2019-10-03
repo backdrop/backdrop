@@ -2035,7 +2035,7 @@ function layout_layout_info() {
       'flexible' => TRUE,
       'type' => 'layout',
       'path' => 'templates',
-      'preview' => 'flexible_template.png',
+      'preview' => isset($flexible_template->thumbnail) ? $flexible_template->thumbnail : layout_template_generate_thumbnail($flexible_template),
       'libraries' => array('bootstrap4-gs'),
     );
     foreach ($flexible_template->rows as $row_name => $region) {

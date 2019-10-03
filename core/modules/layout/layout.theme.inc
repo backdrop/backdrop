@@ -127,8 +127,13 @@ function theme_layout_template_option($variables) {
 function theme_layout_template_info($variables) {
   $template_info = $variables['template_info'];
 
-  // Build template thumbnail preview
-  $preview_path = $template_info['path'] . '/' . $template_info['preview'];
+  // Build template thumbnail preview.
+  if ($template_info['flexible']) {
+    $preview_path = $template_info['preview'];
+  }
+  else {
+    $preview_path = $template_info['path'] . '/' . $template_info['preview'];
+  }
   $preview_img = theme('image', array('path' => $preview_path));
 
   $output = '';
