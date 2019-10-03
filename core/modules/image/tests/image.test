@@ -731,10 +731,14 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
 
     // Test that the default formatter is being used.
     $image_uri = $node->{$field_name}[LANGUAGE_NONE][0]['uri'];
+    $image_files = file_load_multiple(array(), array('uri' => $image_uri));
+    $image_file = reset($image_files);
+    $timestamp = $image_file->timestamp;
     $image_info = array(
       'uri' => $image_uri,
       'width' => 40,
       'height' => 20,
+      'timestamp' => $timestamp,
     );
     $default_output = theme('image', $image_info);
     $this->assertRaw($default_output, 'Default formatter displaying correctly on full node view.');
