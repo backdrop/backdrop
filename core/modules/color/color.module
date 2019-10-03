@@ -367,7 +367,8 @@ function color_get_info($theme) {
       include $file;
     }
 
-    $theme_info = list_themes()[$theme];
+    $themes = list_themes();
+    $theme_info = $themes[$theme];
 
     if (empty($info) || !isset($info['css'])) {
       $info['css'] = array();
