@@ -693,7 +693,10 @@ function ajax_footer() {
  */
 function ajax_process_form($element, &$form_state) {
   $element = ajax_pre_render_element($element);
-  if (!empty($element['#ajax_processed']) && !isset($element['#ajax']['no_form_cache'])) {
+  // Custom callback paths set in $element['#ajax']['path'] are assumed to
+  // require form caching. Using $element['#ajax']['callback'] on the other hand
+  // does not require the form to be cached, and is the preferred method.
+  if (!empty($element['#ajax_processed']) && !isset($element['#ajax']['callback'])) {
     $form_state['cache'] = TRUE;
   }
   return $element;
