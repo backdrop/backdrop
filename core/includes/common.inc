@@ -1769,7 +1769,10 @@ function filter_xss_admin($string) {
  *
  * @see backdrop_validate_utf8()
  */
-function filter_xss($string, $allowed_tags = array('a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd')) {
+function filter_xss($string, $allowed_tags = array()) {
+  if (empty($allowed_tags)) {
+    $allowed_tags = _filter_xss_allowed_tags();
+  }
   // Only operate on valid UTF-8 strings. This is necessary to prevent cross
   // site scripting issues on Internet Explorer 6.
   if (!backdrop_validate_utf8($string)) {
@@ -1802,6 +1805,21 @@ function filter_xss($string, $allowed_tags = array('a', 'em', 'strong', 'cite', 
     |                 # or
     >                 # just a >
     )%x', '_filter_xss_split', $string);
+}
+
+/**
+ * List of tags allowed by filter_xss().
+ */
+function _filter_xss_allowed_tags() {
+  return array('a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd');
+}
+
+/**
+ * Human-readable list of tags allowed by filter_xss(), for display in help
+ * texts.
+ */
+function _filter_xss_display_allowed_tags() {
+  return '<' . implode('> <', _filter_xss_allowed_tags()) . '>';
 }
 
 /**
