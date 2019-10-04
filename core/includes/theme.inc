@@ -1941,10 +1941,7 @@ function template_preprocess_image(&$variables) {
   $variables['attributes']['src'] = file_create_url($path_or_uri);
 
   if (isset($variables['timestamp'])) {
-    $variables['attributes']['src'] = $variables['attributes']['src'] . (strpos($variables['attributes']['src'], '?') !== FALSE ? '&' : '?') . backdrop_http_build_query(array('timestamp' => $variables['timestamp']));
-  }
-  else {
-    $variables['attributes']['src'] = file_create_url($path_or_uri);
+    $variables['attributes']['src'] .= (strpos($variables['attributes']['src'], '?') !== FALSE ? '&' : '?') . backdrop_http_build_query(array('timestamp' => $variables['timestamp']));
   }
 
   // Convert all other variables into the attributes array.
