@@ -1771,7 +1771,6 @@ function filter_xss_admin($string) {
  * @see backdrop_validate_utf8()
  */
 function filter_xss($string, $allowed_tags = NULL) {
-  //if (!is_array($allowed_tags) && $allowed_tags == NULL) {
   if ($allowed_tags === NULL) {
     $allowed_tags = _filter_xss_allowed_tags();
   }
