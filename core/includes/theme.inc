@@ -1989,6 +1989,9 @@ function template_preprocess_image(&$variables) {
  *
  * @since 1.8.0 Added support for $variables['path']. All variables are now
  *   populated into $variables['attributes'] in template_preprocess_image().
+ * @since 1.14.1 Added support for $variables['timestamp']. Allows appending a
+ *   unique string to the image src attribute, as a query parameter. That in
+ *   turn prevents stale versions of images being served by browser cache.
  */
 function theme_image($variables) {
   return '<img' . backdrop_attributes($variables['attributes']) . ' />';
