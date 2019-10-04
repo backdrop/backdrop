@@ -1761,7 +1761,8 @@ function filter_xss_admin($string) {
  *   The string with raw HTML in it. It will be stripped of everything that can
  *   cause an XSS attack.
  * @param $allowed_tags
- *   An array of allowed tags.
+ *   An array of allowed tags. Defaults to the array returned by
+ *   _filter_xss_allowed_tags().
  *
  * @return
  *   An XSS safe version of $string, or an empty string if $string is not
@@ -1808,15 +1809,15 @@ function filter_xss($string, $allowed_tags = array()) {
 }
 
 /**
- * List of tags allowed by filter_xss().
+ * List of the default tags allowed by filter_xss().
  */
 function _filter_xss_allowed_tags() {
   return array('a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd');
 }
 
 /**
- * Human-readable list of tags allowed by filter_xss(), for display in help
- * texts.
+ * Human-readable list of the default tags allowed by filter_xss(), for display
+ * in help texts.
  */
 function _filter_xss_display_allowed_tags() {
   return '<' . implode('> <', _filter_xss_allowed_tags()) . '>';
