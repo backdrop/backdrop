@@ -1000,9 +1000,9 @@ function field_cache_clear() {
 /**
  * Like filter_xss_admin(), but with a shorter list of allowed tags.
  *
- * Used for items entered by administrators, like field descriptions,
- * allowed values, where some (mainly inline) mark-up may be desired
- * (so check_plain() is not acceptable).
+ * Used for items entered by administrators, like field descriptions, allowed
+ * values, where some (mainly inline) mark-up may be desired (so check_plain()
+ * is not acceptable).
  */
 function field_filter_xss($string) {
   return filter_xss($string, _field_filter_xss_allowed_tags());
@@ -1016,7 +1016,8 @@ function _field_filter_xss_allowed_tags() {
 }
 
 /**
- * Human-readable list of allowed tags, for display in help texts.
+ * Human-readable list of tags allowed tags by field_filter_xss(), for display
+ * in help texts.
  */
 function _field_filter_xss_display_allowed_tags() {
   return '<' . implode('> <', _field_filter_xss_allowed_tags()) . '>';
