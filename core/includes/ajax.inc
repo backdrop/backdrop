@@ -696,7 +696,8 @@ function ajax_process_form($element, &$form_state) {
   // Custom callback paths set in $element['#ajax']['path'] are assumed to
   // require form caching. Using $element['#ajax']['callback'] on the other hand
   // does not require the form to be cached, and is the preferred method.
-  if (!empty($element['#ajax_processed']) && !isset($element['#ajax']['callback'])) {
+  $has_ajax_path = isset($element['#ajax']['path']) && $element['#ajax']['path'] !== $_GET['q'];
+  if (!empty($element['#ajax_processed']) && $has_ajax_path) {
     $form_state['cache'] = TRUE;
   }
   return $element;

@@ -611,6 +611,7 @@ function views_ui_add_ajax_trigger(&$wrapping_element, $trigger_key, $refresh_pa
 
   // Add the AJAX behavior to the triggering element.
   $triggering_element = &$wrapping_element[$trigger_key];
+  $triggering_element['#ajax']['path'] = 'system/ajax';
   $triggering_element['#ajax']['callback'] = 'views_ui_ajax_update_form';
   // We do not use backdrop_html_id() to get an ID for the AJAX wrapper, because
   // it remembers IDs across AJAX requests (and won't reuse them), but in our
@@ -669,6 +670,7 @@ function views_ui_add_ajax_trigger(&$wrapping_element, $trigger_key, $refresh_pa
   // Attach custom data to the triggering element and submit button, so we can
   // use it in both the process function and AJAX callback.
   $ajax_data = array(
+    'path' => 'system/ajax',
     'wrapper' => $triggering_element['#ajax']['wrapper'],
     'trigger_key' => $trigger_key,
     'refresh_parents' => $refresh_parents,
