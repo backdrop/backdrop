@@ -1939,10 +1939,25 @@ function template_preprocess_image(&$variables) {
   // Accept either URI or path key. But both are handled by file_create_url().
   $path_or_uri = $variables['uri'] ? $variables['uri'] : $variables['path'];
   $variables['attributes']['src'] = file_create_url($path_or_uri);
+  $image_real_path = backdrop_realpath($path_or_uri);
 
-  if (isset($variables['timestamp'])) {
-    $variables['attributes']['src'] .= (strpos($variables['attributes']['src'], '?') !== FALSE ? '&' : '?') . backdrop_http_build_query(array('timestamp' => $variables['timestamp']));
+  // If the image does not have a timestamp attribute, generate one for it.
+  if (!isset($variables['timestamp'] && file_exists($image_real_path))) {
+    // Get all managed files that match either the image URI, or its path.
+    $files = file_load_multiple(array(), array('uri' => $variables['uri'], 'path' => $variables['path']));
+    // If empty, $image_file will be false, otherwise will contain the required
+    // image file.
+    $image_file = reset($files);
+    // If the image is an unmanaged file, it will not have an entry in the
+    // managed files table, hence no timestanp either. In that case, get the
+    // timestamp from the file system.
+    $variables['timestamp'] = $image_file->timestamp ? $image_file->timestamp : filemtime($image_real_path);
   }
+
+  // Append the timestamp of the image to its src attribute, as a URL query.
+  // This prevents situations where browser cache may serve stale versions of
+  // images.
+  $variables['attributes']['src'] .= (strpos($variables['attributes']['src'], '?') !== FALSE ? '&' : '?') . backdrop_http_build_query(array('timestamp' => $variables['timestamp']));
 
   // Convert all other variables into the attributes array.
   foreach (array('width', 'height', 'alt', 'title') as $key) {
