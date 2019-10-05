@@ -731,10 +731,14 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
 
     // Test that the default formatter is being used.
     $image_uri = $node->{$field_name}[LANGUAGE_NONE][0]['uri'];
+    $image_files = file_load_multiple(array(), array('uri' => $image_uri));
+    $image_file = reset($image_files);
+    $timestamp = $image_file->timestamp;
     $image_info = array(
       'uri' => $image_uri,
       'width' => 40,
       'height' => 20,
+      'timestamp' => $timestamp,
     );
     $default_output = theme('image', $image_info);
     $this->assertRaw($default_output, 'Default formatter displaying correctly on full node view.');
@@ -832,22 +836,28 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     // Verify that the attached image is being previewed using the 'medium'
     // style.
     $node = node_load($nid, NULL, TRUE);
+    $image_uri = $node->{$field_name}[LANGUAGE_NONE][0]['uri'];
+    $image_files = file_load_multiple(array(), array('uri' => $image_uri));
+    $image_file = reset($image_files);
+    $timestamp = $image_file->timestamp;
     $image_info = array(
       'style_name' => 'medium',
-      'uri' => $node->{$field_name}[LANGUAGE_NONE][0]['uri'],
+      'uri' => $image_uri,
       'width' => '300',
       'height' => '150',
+      'timestamp' => $timestamp,
     );
     $default_output = theme('image_style', $image_info);
     $this->assertRaw($default_output, "Preview image is displayed using 'medium' style.");
 
     // Add alt/title fields to the image and verify that they are displayed.
     $image_info = array(
-      'uri' => $node->{$field_name}[LANGUAGE_NONE][0]['uri'],
+      'uri' => $image_uri,
       'alt' => $this->randomName(),
       'title' => $this->randomName(),
       'width' => 40,
       'height' => 20,
+      'timestamp' => $timestamp,
     );
     $edit = array(
       $field_name . '[' . LANGUAGE_NONE . '][0][alt]' => $image_info['alt'],
@@ -908,10 +918,15 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     // is not displayed.
     $nid = $this->uploadNodeImage($images[1], $field_name, 'post');
     $node = node_load($nid, NULL, TRUE);
+    $image_uri = $node->{$field_name}[LANGUAGE_NONE][0]['uri'];
+    $image_files = file_load_multiple(array(), array('uri' => $image_uri));
+    $image_file = reset($image_files);
+    $timestamp = $image_file->timestamp;
     $image_info = array(
       'uri' => $node->{$field_name}[LANGUAGE_NONE][0]['uri'],
       'width' => 40,
       'height' => 20,
+      'timestamp' => $timestamp,
     );
     $image_output = theme('image', $image_info);
     $this->backdropGet('node/' . $nid);
