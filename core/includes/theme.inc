@@ -1940,6 +1940,10 @@ function template_preprocess_image(&$variables) {
   $path_or_uri = $variables['uri'] ? $variables['uri'] : $variables['path'];
   $variables['attributes']['src'] = file_create_url($path_or_uri);
 
+  if (isset($variables['timestamp'])) {
+    $variables['attributes']['src'] .= (strpos($variables['attributes']['src'], '?') !== FALSE ? '&' : '?') . backdrop_http_build_query(array('timestamp' => $variables['timestamp']));
+  }
+
   // Convert all other variables into the attributes array.
   foreach (array('width', 'height', 'alt', 'title') as $key) {
     if (isset($variables[$key])) {
@@ -1973,12 +1977,18 @@ function template_preprocess_image(&$variables) {
  *     - http://dev.w3.org/html5/spec/Overview.html#alt
  *   - title: The title text is displayed when the image is hovered in some
  *     popular browsers.
+ *   - timestamp: The changed date of the image file. It busts the browser
+ *     cache, if the image file has been modified, by appending the date in the
+ *     query string.
  *   - attributes: Associative array of attributes to be placed in the img tag.
  *     All attributes should be populated with the correct values that match
  *     the other input variables.
  *
  * @since 1.8.0 Added support for $variables['path']. All variables are now
  *   populated into $variables['attributes'] in template_preprocess_image().
+ * @since 1.14.1 Added support for $variables['timestamp']. Allows appending a
+ *   unique string to the image src attribute, as a query parameter. That in
+ *   turn prevents stale versions of images being served by browser cache.
  */
 function theme_image($variables) {
   return '<img' . backdrop_attributes($variables['attributes']) . ' />';
