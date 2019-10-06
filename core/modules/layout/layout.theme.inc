@@ -127,7 +127,7 @@ function theme_layout_template_option($variables) {
 function theme_layout_template_info($variables) {
   $template_info = $variables['template_info'];
 
-  // Build template thumbnail preview.
+  // Build template thumbnail preview
   $preview_path = $template_info['path'] . '/' . $template_info['preview'];
   $preview_img = theme('image', array('path' => $preview_path));
 

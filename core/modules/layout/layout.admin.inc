@@ -2738,7 +2738,6 @@ function layout_settings_page($form, &$form_state) {
 
     // Build the list of possible options, either enabled or not hidden.
     if ($is_default || !$template_info['hidden']) {
-
       $rows[$template_name] = array(
         'layout_template_info' => theme('layout_template_info', array('template_info' => $template_info)),
         'type' => !empty($template_info['flexible']) ? t('Flexible') : t('Standard'),
