@@ -1034,7 +1034,7 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
           )
         )
       ),
-      '#description' => isset($block_info['description']) ? check_plain($block_info['description']) : NULL,
+      '#description' => isset($block_info['description']) ? filter_xss($block_info['description']) : NULL,
       '#wrapper_attributes' => array('class' => array('layout-block-add-row'))
     );
   }
