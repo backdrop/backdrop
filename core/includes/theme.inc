@@ -1938,20 +1938,14 @@ function theme_dropbutton_wrapper($variables) {
 function template_preprocess_image(&$variables) {
   // Accept either URI or path key. But both are handled by file_create_url().
   $path_or_uri = $variables['uri'] ? $variables['uri'] : $variables['path'];
-  $variables['attributes']['src'] = file_create_url($path_or_uri);
   $image_real_path = backdrop_realpath($path_or_uri);
+  $variables['attributes']['src'] = file_create_url($path_or_uri);
 
-  // If the image does not have a timestamp attribute, generate one for it.
+  // If the image is an unmanaged file, it will not have an entry in the
+  // file_managed table, hence no timestanp attribute either.
   if (!isset($variables['timestamp']) && file_exists($image_real_path)) {
-    // Get all managed files that match either the image URI, or its path.
-    $files = file_load_multiple(array(), array('uri' => $variables['uri'], 'path' => $variables['path']));
-    // If empty, $image_file will be false, otherwise will contain the required
-    // image file.
-    $image_file = reset($files);
-    // If the image is an unmanaged file, it will not have an entry in the
-    // managed files table, hence no timestanp either. In that case, get the
-    // timestamp from the file system.
-    $variables['timestamp'] = $image_file->timestamp ? $image_file->timestamp : filemtime($image_real_path);
+    // In that case, get the timestamp from the file system.
+    $variables['timestamp'] = filemtime($image_real_path);
   }
 
   // Append the timestamp of the image to its src attribute, as a URL query.
