@@ -19,7 +19,6 @@
  *     the HTML for that region.
  * - $content: An array of content, each item in the array is named to one
  *   region of the layout.
- *
  */
 ?>
 <div class="layout--flexible layout <?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
