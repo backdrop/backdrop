@@ -27,8 +27,13 @@
   </div>
   <div class="layout-flexible-content <?php $region_buttons ? print 'layout-flexible-editor' : ''; ?>">
   <?php foreach ($row_data as $name => $row): ?>
-    <<?php print $row['element']; ?> data-row-id="<?php print $name; ?>" class="flexible-row <?php print 'l-' . $name;
-    if ($row['element'] == 'header' || $row['element'] == 'footer'){print ' l-' . $row['element'];} ?>" <?php print $row['row_id']; ?>>
+      <?php
+        $row_classes = array('flexible-row', 'l-' . $name);
+        if ($row['element'] == 'header' || $row['element'] == 'footer') {
+            $row_classes[] = 'l-' . $row['element'];
+        }
+      ?>
+      <<?php print $row['element']; ?> data-row-id="<?php print $name; ?>" class="<?php print implode(' ', $row_classes); ?>" <?php print $row['row_id']; ?>>
       <div class="<?php print $row['row_class']; ?>">
         <?php if ($region_buttons): ?>
           <div class="layout-flexible-region-buttons clearfix">
