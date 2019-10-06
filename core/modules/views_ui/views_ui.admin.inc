@@ -609,7 +609,10 @@ function views_ui_add_ajax_trigger(&$wrapping_element, $trigger_key, $refresh_pa
   $seen_ids = &backdrop_static(__FUNCTION__ . ':seen_ids', array());
   $seen_buttons = &backdrop_static(__FUNCTION__ . ':seen_buttons', array());
 
-  // Add the AJAX behavior to the triggering element.
+  // Add the AJAX behavior to the triggering element. We specifically set
+  // 'system/ajax' as the path to use the legacy way of building the form.
+  // @todo: Remove the 'system/ajax' path to use the new rebuilding approach
+  // introduced in https://github.com/backdrop/backdrop-issues/issues/3833.
   $triggering_element = &$wrapping_element[$trigger_key];
   $triggering_element['#ajax']['path'] = 'system/ajax';
   $triggering_element['#ajax']['callback'] = 'views_ui_ajax_update_form';
@@ -669,6 +672,10 @@ function views_ui_add_ajax_trigger(&$wrapping_element, $trigger_key, $refresh_pa
 
   // Attach custom data to the triggering element and submit button, so we can
   // use it in both the process function and AJAX callback.
+  // @todo: Remove the 'system/ajax' path to use the new rebuilding approach
+  // introduced in https://github.com/backdrop/backdrop-issues/issues/3833.
+  // When switching to the new approach, we should be able to remove the
+  // "duplicate_wrapper" specialized code used below.
   $ajax_data = array(
     'path' => 'system/ajax',
     'wrapper' => $triggering_element['#ajax']['wrapper'],

@@ -129,8 +129,8 @@ function backdrop_get_form($form_id) {
   $form_state['build_info']['args'] = $args;
 
   // Disable redirection if the request was made via AJAX.
-  $ajax_post = isset($_POST['ajax_page_state']) && $_POST['form_id'] === $form_id;
-  if ($ajax_post) {
+  $ajax_form_post = isset($_POST['ajax_page_state']) && isset($_POST['form_id']) && $_POST['form_id'] === $form_id;
+  if ($ajax_form_post) {
     $form_state['no_redirect'] = TRUE;
     $form_state['rebuild_info']['copy']['#build_id'] = TRUE;
     $form_state['rebuild_info']['copy']['#action'] = TRUE;
@@ -141,7 +141,7 @@ function backdrop_get_form($form_id) {
   // In the event that this form was submitted via AJAX, we need to return a
   // set of AJAX commands to update the original form. Generate the JSON
   // response and end the request.
-  if ($ajax_post && $form_state['process_input']) {
+  if ($ajax_form_post && $form_state['process_input']) {
     $commands = array();
     if (isset($form['#build_id_old']) && $form['#build_id_old'] !== $form['#build_id']) {
       $commands[] = ajax_command_update_build_id($form);
