@@ -1942,7 +1942,7 @@ function template_preprocess_image(&$variables) {
   $image_real_path = backdrop_realpath($path_or_uri);
 
   // If the image does not have a timestamp attribute, generate one for it.
-  if (!isset($variables['timestamp'] && file_exists($image_real_path))) {
+  if (!isset($variables['timestamp']) && file_exists($image_real_path)) {
     // Get all managed files that match either the image URI, or its path.
     $files = file_load_multiple(array(), array('uri' => $variables['uri'], 'path' => $variables['path']));
     // If empty, $image_file will be false, otherwise will contain the required
