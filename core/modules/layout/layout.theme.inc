@@ -129,12 +129,15 @@ function theme_layout_template_info($variables) {
 
   // Build template thumbnail preview.
   if (!empty($template_info['flexible'])) {
-    $preview_path = $template_info['preview'];
+    // Flexible layout templates provide a URI to their thumbnails.
+    $preview_uri = $template_info['preview'];
+    $preview_img = theme('image', array('uri' => $preview_uri));
   }
   else {
+    // Standard layout templates provide a path to their thumbnails.
     $preview_path = $template_info['path'] . '/' . $template_info['preview'];
+    $preview_img = theme('image', array('path' => $preview_path));
   }
-  $preview_img = theme('image', array('path' => $preview_path));
 
   $output = '';
   $output .= '<div class="layout-info">';
