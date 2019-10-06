@@ -1942,7 +1942,7 @@ function template_preprocess_image(&$variables) {
   $variables['attributes']['src'] = file_create_url($path_or_uri);
 
   // If the image is an unmanaged file, it will not have an entry in the
-  // file_managed table, hence no timestanp attribute either.
+  // file_managed table, hence no timestamp attribute either.
   if (!isset($variables['timestamp']) && file_exists($image_real_path)) {
     // In that case, get the timestamp from the file system.
     $variables['timestamp'] = filemtime($image_real_path);
