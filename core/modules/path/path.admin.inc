@@ -347,7 +347,7 @@ function path_patterns_form($form, $form_state) {
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => t('URL patterns automatically alias new content based on wildcards called <em>tokens</em>. For example the URL <code>node/10</code> might be automatically aliased to <code>blog/my-first-post</code> using the pattern <code>blog/[node:title]</code>.'),
+    '#markup' => t('URL patterns automatically alias new content, based on wildcards called <em>tokens</em>. For example, the URL <code>node/10</code> might be automatically aliased to <code>blog/my-first-post</code>, by using the pattern <code>blog/[node:title]</code>.'),
   );
 
   $all_path_info = path_get_info();
@@ -386,7 +386,7 @@ function path_patterns_form($form, $form_state) {
       '#parents' => array($variable),
     );
 
-    // Set up specialized patterns for this path type (e.g. node types).
+    // Set up specialized patterns for this path type (e.g. content types).
     if (isset($path_info['pattern items'])) {
       foreach ($path_info['pattern items'] as $item_name => $item_label) {
         $variable = $path_type . '_' . $item_name . '_pattern';
@@ -405,13 +405,21 @@ function path_patterns_form($form, $form_state) {
       }
     }
 
-    // Display the user documentation of placeholders supported by this path
-    // type as a description on the last pattern.
+    // Display the user documentation of tokens supported by this path type.
     $variables = array(
       'token_types' => $token_types,
       'text' => t('Browse available tokens for @type.', array('@type' => $path_info['label'])),
     );
-    $form[$path_type]['#description'] = '<p>' . t('Each of the fields below support tokens.') . ' ' . theme('token_tree_link', $variables) . '</p>';
+    // If this path type has multiple alias pattern fields, then render the
+    // token support help text as description in the fieldset.
+    if (isset($all_path_info[$path_type]['pattern items'])) {
+      $form[$path_type]['#description'] = '<p>' . t('Each of the fields below support tokens.') . ' ' . theme('token_tree_link', $variables) . '</p>';
+    }
+    // If the path type only has the default alias pattern field, then render
+    // the token support help text as description in the field.
+    else {
+      $form[$path_type][$variable]['#description'] = t('This field supports tokens.') . ' ' . theme('token_tree_link', $variables);
+    }
   }
 
   $form['actions']['#type'] = 'actions';
