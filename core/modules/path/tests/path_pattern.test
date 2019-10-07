@@ -762,7 +762,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit['node_pattern'] = '[node:title]/[user:name]/[term:name]';
     $edit['node_page_pattern'] = 'page';
     $this->backdropPost('admin/config/urls/path/patterns', $edit, 'Save configuration');
-    $this->assertText('The Default URL alias pattern (applies to all content types with blank URL alias patterns below) is using the following invalid tokens: [user:name], [term:name].');
+    $this->assertText('The Default URL alias pattern for content is using the following invalid tokens: [user:name], [term:name].');
     $this->assertText('The URL alias pattern for all Page URLs cannot contain fewer than one token.');
     $this->assertNoText('The configuration options have been saved.');
 
