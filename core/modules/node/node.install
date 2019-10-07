@@ -306,6 +306,10 @@ function node_schema() {
     ),
   );
 
+  $cache_schema = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_node'] = $cache_schema;
+  $schema['cache_entity_node']['description'] = "Cache table used to store Node entity records.";
+
   return $schema;
 }
 

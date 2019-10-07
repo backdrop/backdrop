@@ -151,6 +151,8 @@ function node_entity_info() {
       'revision table' => 'node_revision',
       'fieldable' => TRUE,
       'redirect support' => TRUE,
+      'entity cache' => TRUE,
+      'field cache' => FALSE,
       'entity keys' => array(
         'id' => 'nid',
         'revision' => 'vid',

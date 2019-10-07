@@ -28,6 +28,15 @@ interface EntityControllerInterface {
   public function resetCache(array $ids = NULL);
 
   /**
+   * Resets the internal, static entity cache.
+   *
+   * @param string[] $ids
+   *   (optional) If specified, the cache is reset for the entities with the
+   *   given ids only.
+   */
+  public function resetStaticCache(array $ids = NULL);
+
+  /**
    * Loads one or more entities.
    *
    * @param $ids
@@ -149,6 +158,22 @@ class DefaultEntityController implements EntityControllerInterface {
    * Implements EntityControllerInterface::resetCache().
    */
   public function resetCache(array $ids = NULL) {
+    // Reset the persistent cache.
+    if (!empty($ids)) {
+      cache_clear_all($ids, 'cache_entity_' . $this->entityType);
+    }
+    else {
+      // Force all cached entries to be deleted.
+      cache_clear_all('*', 'cache_entity_' . $this->entityType, TRUE);
+    }
+
+    $this->resetStaticCache($ids);
+  }
+
+  /**
+   * Implements EntityControllerInterface::resetStaticCache().
+   */
+  public function resetStaticCache(array $ids = NULL) {
     if (isset($ids)) {
       foreach ($ids as $id) {
         unset($this->entityCache[$id]);
@@ -181,6 +206,40 @@ class DefaultEntityController implements EntityControllerInterface {
     // and we need to know if it's empty for this reason to avoid querying the
     // database when all requested entities are loaded from cache.
     $passed_ids = !empty($ids) ? array_flip($ids) : FALSE;
+
+    // Use an entity field query to transform the list of conditions into
+    // the set of entity IDs which the conditions admit, then re-enter this
+    // method with that set as the $ids constraint.
+    if ($conditions) {
+      $query = new EntityFieldQuery();
+      $query->entityCondition('entity_type', $this->entityType);
+      foreach ($conditions as $property_name => $condition) {
+        // Note $condition might be multiple values, which are treated as OR
+        // by default.
+        $query->propertyCondition($property_name, $condition);
+      }
+
+      // Limit the result set also by the passed in IDs.
+      if ($passed_ids) {
+        $query->propertyCondition($this->idKey, array_keys($passed_ids));
+      }
+
+      $result = $query->execute();
+      if (isset($result[$this->entityType])) {
+        $entity_ids = array_keys($result[$this->entityType]);
+        if ($revision_id) {
+          return $this->load($entity_ids, array($this->revisionKey => $revision_id));
+        }
+        else {
+          return $this->load($entity_ids);
+        }
+      }
+      else {
+        // No results found.
+        return array();
+      }
+    }
+
     // Try to load entities from the static cache, if the entity type supports
     // static caching.
     if ($this->cache && !$revision_id) {
@@ -188,6 +247,32 @@ class DefaultEntityController implements EntityControllerInterface {
       // If any entities were loaded, remove them from the ids still to load.
       if ($passed_ids) {
         $ids = array_keys(array_diff_key($passed_ids, $entities));
+      }
+    }
+
+    // Try to load entities from the persistent cache.
+    if ($this->entityInfo['entity cache'] && !$revision_id && $ids && !$conditions) {
+      $cached_entities = array();
+      if ($ids && !$conditions) {
+        $cached = cache_get_multiple($ids, 'cache_entity_' . $this->entityType);
+
+        if ($cached) {
+          foreach ($cached as $item) {
+            $cached_entities[$item->cid] = $item->data;
+          }
+        }
+      }
+
+      $entities += $cached_entities;
+
+      // If any entities were loaded, remove them from the ids still to load.
+      $ids = array_diff($ids, array_keys($cached_entities));
+
+      if ($this->cache) {
+        // Add entities to the cache if we are not loading a revision.
+        if (!empty($cached_entities) && !$revision_id) {
+          $this->cacheSet($cached_entities);
+        }
       }
     }
 
@@ -213,6 +298,21 @@ class DefaultEntityController implements EntityControllerInterface {
     if (!empty($queried_entities)) {
       $this->attachLoad($queried_entities, $revision_id);
       $entities += $queried_entities;
+    }
+
+    // Add entities to the entity cache if we are not loading a revision.
+    if ($this->entityInfo['entity cache'] && !empty($queried_entities) && !$revision_id) {
+      // Only cache the entities which were loaded by ID. Entities that were
+      // loaded based on conditions will never be found via cacheGet() and we
+      // would keep on caching them.
+      if ($passed_ids) {
+        $queried_entities_by_id = array_intersect_key($queried_entities, $passed_ids);
+        if (!empty($queried_entities_by_id)) {
+          foreach ($queried_entities_by_id as $id => $item) {
+            cache_set($id, $item, 'cache_entity_' . $this->entityType);
+          }
+        }
+      }
     }
 
     if ($this->cache) {

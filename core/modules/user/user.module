@@ -113,6 +113,7 @@ function user_entity_info() {
       'base table' => 'users',
       'fieldable' => TRUE,
       'redirect support' => TRUE,
+      'entity cache' => TRUE,
       'entity class' => 'User',
       'entity keys' => array(
         'id' => 'uid',
