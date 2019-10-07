@@ -352,7 +352,8 @@ function path_patterns_form($form, $form_state) {
 
   $all_path_info = path_get_info();
   foreach ($all_path_info as $path_type => $path_info) {
-    $pattern_description = $path_info['pattern description'];
+    $pattern_label = isset($path_info['pattern label']) ? $path_info['pattern label'] : '';
+    $pattern_description = isset($path_info['pattern description']) ? $path_info['pattern description'] : '';
     $group_header = t('!label URL alias patterns', array('!label' => $path_info['label']));
     $token_types = array();
     if (isset($path_info['entity type'])) {
@@ -373,7 +374,8 @@ function path_patterns_form($form, $form_state) {
     $variable = $path_type . '_pattern';
     $form[$path_type][$variable] = array(
       '#type' => 'textfield',
-      '#title' => $pattern_description,
+      '#title' => $pattern_label,
+      '#description' => $pattern_description,
       '#default_value' => $config->get($variable),
       '#size' => 65,
       '#maxlength' => 1280,

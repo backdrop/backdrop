@@ -11,7 +11,8 @@ function node_path_info() {
   $info['node'] = array(
     'entity type' => 'node',
     'label' => t('Content'),
-    'pattern description' => t('Default URL alias pattern (applies to all content types with blank URL alias patterns below)'),
+    'pattern label' => t('Default URL alias pattern for content'),
+    'pattern description' => t('Fallback pattern for all content types with blank URL alias patterns below.'),
     'pattern default' => 'content/[node:title]',
     'type delete callback' => 'node_path_type_delete_callback',
     'batch update callback' => 'node_path_bulk_update_batch_process',

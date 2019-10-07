@@ -11,7 +11,8 @@ function taxonomy_path_info() {
   $info['taxonomy_term'] = array(
     'entity type' => 'taxonomy_term',
     'label' => t('Taxonomy term'),
-    'pattern description' => t('Default URL alias pattern (applies to all vocabularies with blank URL alias patterns below)'),
+    'pattern label' => t('Default URL alias pattern for vocabularies'),
+    'pattern description' => t('Fallback pattern for all vocabularies with blank URL alias patterns below.'),
     'pattern default' => '[term:vocabulary]/[term:name]',
     'type delete callback' => 'taxonomy_path_type_delete_callback',
     'batch update callback' => 'taxonomy_path_bulk_update_batch_process',
