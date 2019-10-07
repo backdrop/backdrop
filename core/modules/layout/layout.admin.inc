@@ -3018,10 +3018,13 @@ function layout_get_block_usage($module = NULL, $delta = NULL) {
           $flexi_regions[$flexi_region_name] = $layout->positions[$uuid];
         }
 
-        $layout->positions = $flexi_regions;
+        $layout_positions = $flexi_regions;
+      }
+      else {
+        $layout_positions = $layout->positions;
       }
 
-      foreach ($layout->positions as $position => $uuids) {
+      foreach ($layout_positions as $position => $uuids) {
         foreach ($uuids as $uuid) {
           $block = $layout->content[$uuid];
           $block->layout_title = $layout->title;
