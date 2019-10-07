@@ -2604,7 +2604,7 @@ function backdrop_mkdir($uri, $mode = NULL, $recursive = FALSE, $context = NULL)
  * @see backdrop_mkdir()
  */
 function _backdrop_mkdir_call($uri, $mode, $recursive, $context) {
-  if (is_null($context)) 
+  if (is_null($context)) {
     return mkdir($uri, $mode, $recursive);
   }
   else {
