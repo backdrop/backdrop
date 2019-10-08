@@ -155,6 +155,10 @@ function user_schema() {
     ),
   );
 
+  $cache_schema = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_user'] = $cache_schema;
+  $schema['cache_entity_user']['description'] = "Cache table used to store Users entity records.";
+
   return $schema;
 }
 
@@ -1190,6 +1194,15 @@ function user_update_1015() {
     $config->set('display.default.display_options.filters.name.expose.identifier', 'username');
   }
   $config->save();
+}
+
+/**
+ * Creates the table to enable caching of User entities.
+ */
+function user_update_1016() {
+  $table = backdrop_get_schema_unprocessed('system', 'cache');
+  $table['description'] = "Cache table used to store User entity records.";
+  db_create_table('cache_entity_user', $table);
 }
 
 /**

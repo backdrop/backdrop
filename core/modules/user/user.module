@@ -105,7 +105,7 @@ function user_theme() {
  * Implements hook_entity_info().
  */
 function user_entity_info() {
-  return array(
+  $return = array(
     'user' => array(
       'label' => t('User account'),
       'bundle label' => t('Type'),
@@ -113,7 +113,6 @@ function user_entity_info() {
       'base table' => 'users',
       'fieldable' => TRUE,
       'redirect support' => TRUE,
-      'entity cache' => TRUE,
       'entity class' => 'User',
       'entity keys' => array(
         'id' => 'uid',
@@ -135,6 +134,14 @@ function user_entity_info() {
       ),
     ),
   );
+
+  // If the cache table has been created, then enable entity caching on nodes.
+  if (db_table_exists('cache_entity_user')) {
+    $return['user']['entity cache'] = TRUE;
+    $return['user']['field cache'] = FALSE;
+  }
+
+  return $return;
 }
 
 /**

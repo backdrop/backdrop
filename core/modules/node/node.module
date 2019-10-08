@@ -151,8 +151,6 @@ function node_entity_info() {
       'revision table' => 'node_revision',
       'fieldable' => TRUE,
       'redirect support' => TRUE,
-      'entity cache' => TRUE,
-      'field cache' => FALSE,
       'entity keys' => array(
         'id' => 'nid',
         'revision' => 'vid',
@@ -178,6 +176,12 @@ function node_entity_info() {
       ),
     ),
   );
+
+  // If the cache table has been created, then enable entity caching on nodes.
+  if (db_table_exists('cache_entity_node')) {
+    $return['node']['entity cache'] = TRUE;
+    $return['node']['field cache'] = FALSE;
+  }
 
   // Search integration is provided by node.module, so search-related
   // display modes for nodes are defined here and not in search.module.

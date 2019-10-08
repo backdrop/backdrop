@@ -94,6 +94,12 @@ function comment_entity_info() {
     ),
   );
 
+  // If the cache table has been created, then enable entity caching.
+  if (db_table_exists('cache_entity_comment')) {
+    $return['comment']['entity cache'] = TRUE;
+    $return['comment']['field cache'] = FALSE;
+  }
+
   foreach (node_type_get_names() as $type => $name) {
     $return['comment']['bundles']['comment_node_' . $type] = array(
       'label' => t('@node_type comment', array('@node_type' => $name)),

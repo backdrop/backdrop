@@ -26,7 +26,7 @@ function entity_flush_caches() {
 
   $entities = entity_get_info();
   foreach ($entities as $type => $info) {
-    if ($info['entity cache']) {
+    if (isset($info['entity cache']) && $info['entity cache']) {
       $bins[] = 'cache_entity_' . $type;
     }
   }
