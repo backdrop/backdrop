@@ -184,6 +184,11 @@ function user_field_extra_fields() {
         'description' => t('User module account form elements.'),
         'weight' => -10,
       ),
+      'account_settings' => array(
+        'label' => t('Account status and user roles'),
+        'description' => t('User module account settings form elements.'),
+        'weight' => 1,
+      ),
       'timezone' => array(
         'label' => t('Timezone'),
         'description' => t('User module timezone form element.'),
@@ -493,20 +498,22 @@ function user_is_blocked($name) {
 /**
  * Checks if a user has a role.
  *
- * @param int $rid
- *   A role ID.
+ * @param string $role_name
+ *   A string representing the role name.
  * @param User $account
  *   (optional) A user account. Defaults to the current user.
  *
  * @return bool
  *   TRUE or FALSE.
+ *
+ * @since 1.14.0 First parameter changed from $rid to $role_name.
  */
-function user_has_role($rid, $account = NULL) {
+function user_has_role($role_name, $account = NULL) {
   if (!$account) {
     $account = $GLOBALS['user'];
   }
 
-  return isset($account->roles[$rid]);
+  return in_array($role_name, $account->roles);
 }
 
 /**
@@ -709,7 +716,8 @@ function user_account_form(&$form, &$form_state) {
   $account = $form['#user'];
   $register = ($form['#user']->uid > 0 ? FALSE : TRUE);
 
-  $admin = user_access('administer users');
+  $admin_users = user_access('administer users');
+  $admin_roles = user_access('assign roles');
 
   $form['#validate'][] = 'user_account_form_validate';
 
@@ -727,7 +735,7 @@ function user_account_form(&$form, &$form_state) {
     '#required' => TRUE,
     '#attributes' => array('class' => array('username')),
     '#default_value' => (!$register ? $account->name : ''),
-    '#access' => ($register || ($user->uid == $account->uid && user_access('change own username')) || $admin),
+    '#access' => ($register || ($user->uid == $account->uid && user_access('change own username')) || $admin_users),
     '#weight' => -10,
   );
 
@@ -786,7 +794,7 @@ function user_account_form(&$form, &$form_state) {
       $form['#validate'][] = 'user_validate_current_pass';
     }
   }
-  elseif (!config_get('system.core', 'user_email_verification') || $admin) {
+  elseif (!config_get('system.core', 'user_email_verification') || $admin_users) {
     $form['account']['pass'] = array(
       '#type' => 'password',
       '#title' => t('Password'),
@@ -797,44 +805,53 @@ function user_account_form(&$form, &$form_state) {
     );
   }
 
-  if ($admin) {
+  $form['account_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Account settings'),
+    '#weight' => 1,
+    '#access' => $admin_users || $admin_roles,
+    '#collapsible' => TRUE,
+    '#group' => 'additional_settings',
+  );
+
+  if ($admin_users) {
     $status = isset($account->status) ? $account->status : 1;
   }
   else {
     $status = $register ? config_get('system.core', 'user_register') == USER_REGISTER_VISITORS : $account->status;
   }
-  $form['account']['status'] = array(
+  $form['account_settings']['status'] = array(
     '#type' => 'radios',
     '#title' => t('Status'),
     '#default_value' => $status,
     '#options' => array(t('Blocked'), t('Active')),
-    '#access' => $admin,
+    '#access' => $admin_users,
   );
 
   $roles = array_map('check_plain', user_roles(TRUE));
-  $form['account']['roles'] = array(
+  $form['account_settings']['roles'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Roles'),
     '#default_value' => (!$register && isset($account->roles) ? $account->roles : array()),
     '#options' => $roles,
-    '#access' => $roles && user_access('assign roles'),
+    '#access' => $roles && $admin_roles,
   );
-  $form['account']['roles'][BACKDROP_AUTHENTICATED_ROLE] = array(
+  $form['account_settings']['roles'][BACKDROP_AUTHENTICATED_ROLE] = array(
     '#disabled' => TRUE,
     '#value' => 'authenticated',
   );
 
-  $form['account']['notify'] = array(
+  $form['account_settings']['notify'] = array(
     '#type' => 'checkbox',
     '#title' => t('Notify user of new account'),
-    '#access' => $register && $admin,
+    '#access' => $register && $admin_users,
   );
 
   // Signature.
   $form['signature_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Signature settings'),
-    '#weight' => 1,
+    '#weight' => 2,
     '#access' => (!$register && config_get('system.core', 'user_signatures')),
   );
 
@@ -850,7 +867,7 @@ function user_account_form(&$form, &$form_state) {
   $form['picture'] = array(
     '#type' => 'fieldset',
     '#title' => t('Picture'),
-    '#weight' => 1,
+    '#weight' => 2,
     '#access' => (!$register && config_get('system.core', 'user_pictures')),
   );
   $form['picture']['picture'] = array(
