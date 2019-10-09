@@ -139,7 +139,7 @@ class NodeLoadHooksTestCase extends BackdropWebTestCase {
     // node_test_node_load() are correctly updated.
     $nodes = node_load_multiple(array(), array('status' => NODE_NOT_PUBLISHED));
     $loaded_node = end($nodes);
-    $this->assertEqual($loaded_node->node_test_loaded_nids, array($node4->nid, $node3->nid), 'hook_node_load() received the correct list of node IDs the second time it was called.');
+    $this->assertEqual($loaded_node->node_test_loaded_nids, array($node3->nid, $node4->nid), 'hook_node_load() received the correct list of node IDs the second time it was called.');
     $this->assertEqual($loaded_node->node_test_loaded_types, array('page', 'post'), 'hook_node_load() received the correct list of node types the second time it was called.');
   }
 }

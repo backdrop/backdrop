@@ -810,6 +810,10 @@ class FilterSecurityTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/content/formats/' . $format_id, $edit, t('Save configuration'));
 
+    // Remove the entity cache entry for the node so that field_attach_load can
+    // run again and the filters can be re-applied.
+    cache_clear_all($node->nid, 'cache_entity_node');
+
     // Verify that filter_test_replace filter replaced the content.
     $this->backdropGet('node/' . $node->nid);
     $this->assertNoText($body_raw, 'Node body not found.');
@@ -817,6 +821,10 @@ class FilterSecurityTestCase extends BackdropWebTestCase {
 
     // Disable the text format entirely.
     $this->backdropPost('admin/config/content/formats/' . $format_id . '/disable', array(), t('Disable'));
+
+    // Remove the entity cache entry for the node so that field_attach_load can
+    // run again and the filters can be re-applied.
+    cache_clear_all($node->nid, 'cache_entity_node');
 
     // Verify that the content is empty, because the text format does not exist.
     $this->backdropGet('node/' . $node->nid);
