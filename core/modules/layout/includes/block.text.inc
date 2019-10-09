@@ -99,7 +99,7 @@ class BlockText extends Block {
        '#type' => 'textfield',
        '#title' => t('Admin description'),
        '#maxlength' => 128,
-       '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
+       '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
        '#weight' => 4,
         '#states' => array(
           'visible' => array(

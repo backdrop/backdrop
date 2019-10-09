@@ -109,8 +109,8 @@ function file_field_instance_settings_form($field, $instance) {
     '#default_value' => $extensions,
     '#description' => t('Separate extensions with a space or comma and do not include the leading dot.'),
     '#element_validate' => array('_file_generic_settings_extensions'),
-    '#weight' => -6,
-    '#maxlength' => 256,
+    '#weight' => 1,
+    '#maxlength' => 512,
     // By making this field required, we prevent a potential security issue
     // that would allow files of any type to be uploaded.
     '#required' => TRUE,
