@@ -496,7 +496,7 @@ function file_settings_form($form, &$form_state) {
   $max_filesize_setting = $config->get('max_filesize');
 
   if ($max_filesize_setting) {
-    // Convert the current "max_filesize" setting from bytes to a readable
+    // Convert the current "max_filesize" setting from bytes to a human-readable
     // number/unit pair.
     $max_filesize_setting = explode(' ', format_size($max_filesize_setting));
     // Place the number and unit in two separate variables, for later use in the
@@ -529,7 +529,7 @@ function file_settings_form($form, &$form_state) {
     '#type' => 'number',
     '#title' => t('Number'),
     '#title_display' => 'invisible',
-    '#default_value' => isset($filesize_number) ? $filesize_number : '',
+    '#default_value' => isset($filesize_number) ? $filesize_number : 1,
     '#min' => 1,
     '#step' => 1,
     '#states' => array(
