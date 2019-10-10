@@ -106,8 +106,8 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
 
     // Generate and test sanitized tokens.
     $tests = array();
-    $tests['[site:name]'] = check_plain(config_get('system.core', 'site_name'));
-    $tests['[site:slogan]'] = check_plain(config_get('system.core', 'site_slogan'));
+    $tests['[site:name]'] = check_plain(config_get_translated('system.core', 'site_name'));
+    $tests['[site:slogan]'] = check_plain(config_get_translated('system.core', 'site_slogan'));
     $tests['[site:mail]'] = 'simpletest@example.com';
     $tests['[site:url]'] = url('<front>', $url_options);
     $tests['[site:url-brief]'] = preg_replace(array('!^https?://!', '!/$!'), '', url('<front>', $url_options));
@@ -123,8 +123,8 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
     }
 
     // Generate and test unsanitized tokens.
-    $tests['[site:name]'] = config_get('system.core', 'site_name');
-    $tests['[site:slogan]'] = config_get('system.core', 'site_slogan');
+    $tests['[site:name]'] = config_get_translated('system.core', 'site_name');
+    $tests['[site:slogan]'] = config_get_translated('system.core', 'site_slogan');
 
     foreach ($tests as $input => $expected) {
       $output = token_replace($input, array(), array('language' => $language, 'sanitize' => FALSE));

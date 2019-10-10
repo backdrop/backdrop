@@ -146,7 +146,7 @@ class ViewsBlock extends Block {
       if ($allow['path_override'] && !empty($this->settings['path'])) {
         $view->override_path = $this->settings['path'];
       }
-      else if ($path = $view->display_handler->get_option('inherit_path')) {
+      elseif ($path = $view->display_handler->get_option('inherit_path')) {
         $view->override_path = $_GET['q'];
       }
 

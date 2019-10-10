@@ -1791,8 +1791,9 @@ class views_plugin_display extends views_plugin {
           ),
         );
         break;
+
       case 'analyze-theme':
-        $form['#title'] .= t('Theming information');
+        $form['#title'] .= t('Theme developer information');
         $form['#help_topic'] = 'analyze-theme';
 
         if (isset($_POST['theme'])) {
@@ -1908,14 +1909,16 @@ class views_plugin_display extends views_plugin {
         }
 
         $form['important'] = array(
-          '#markup' => '<div class="form-item description"><p>' . t('This section lists all possible templates for the display plugin and for the style plugins, ordered roughly from the least specific to the most specific. The active template for each plugin -- which is the most specific template found on the system -- is highlighted in bold.') . '</p></div>',
+          'message' => array(
+            '#markup' => '<div class="form-item description"><p>' . t('This section lists all possible templates for the display plugin and for the style plugins, ordered roughly from the least specific to the most specific. The active template for each plugin -- which is the most specific template found on the system -- is highlighted in bold.') . '</p></div>',
+          ),
         );
 
         if (isset($this->view->display[$this->view->current_display]->new_id)) {
           $form['important']['new_id'] = array(
             '#prefix' => '<div class="description">',
             '#suffix' => '</div>',
-            '#value' => t("<strong>Important!</strong> You have changed the display's machine name. Anything that attached to this display specifically, such as theming, may stop working until it is updated. To see theme suggestions for it, you need to save the view."),
+            '#markup' => t("<strong>Important!</strong> You have changed the display's machine name. Anything that attached to this display specifically (a template file, for example) may stop working until it is updated. To see updated theme suggestions, save the view."),
           );
         }
 
@@ -1963,11 +1966,11 @@ class views_plugin_display extends views_plugin {
         break;
 
       case 'analyze-theme-display':
-        $form['#title'] .= t('Theming information (display)');
-        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theming information'), 'analyze-theme'))) . '</p>';
+        $form['#title'] .= t('Theme developer information (display)');
+        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theme developer information'), 'analyze-theme'))) . '</p>';
 
         if (empty($this->definition['theme'])) {
-          $output .= t('This display has no theming information');
+          $output .= t('This display has no theme developer information');
         }
         else {
           $output .= '<p>' . t('This is the default theme template used for this display.') . '</p>';
@@ -1988,13 +1991,13 @@ class views_plugin_display extends views_plugin {
         $form_state['ok_button'] = TRUE;
         break;
       case 'analyze-theme-style':
-        $form['#title'] .= t('Theming information (style)');
-        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theming information'), 'analyze-theme'))) . '</p>';
+        $form['#title'] .= t('Theme developer information (style)');
+        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theme developer information'), 'analyze-theme'))) . '</p>';
 
         $plugin = $this->get_plugin();
 
         if (empty($plugin->definition['theme'])) {
-          $output .= t('This display has no style theming information');
+          $output .= t('This display has no style theme developer information');
         }
         else {
           $output .= '<p>' . t('This is the default theme template used for this style.') . '</p>';
@@ -2015,13 +2018,13 @@ class views_plugin_display extends views_plugin {
         $form_state['ok_button'] = TRUE;
         break;
       case 'analyze-theme-row':
-        $form['#title'] .= t('Theming information (row style)');
-        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theming information'), 'analyze-theme'))) . '</p>';
+        $form['#title'] .= t('Theme developer information (row style)');
+        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theme developer information'), 'analyze-theme'))) . '</p>';
 
         $plugin = $this->get_plugin('row');
 
         if (empty($plugin->definition['theme'])) {
-          $output .= t('This display has no row style theming information');
+          $output .= t('This display has no row style theme developer information');
         }
         else {
           $output .= '<p>' . t('This is the default theme template used for this row style.') . '</p>';
@@ -2042,8 +2045,8 @@ class views_plugin_display extends views_plugin {
         $form_state['ok_button'] = TRUE;
         break;
       case 'analyze-theme-field':
-        $form['#title'] .= t('Theming information (row style)');
-        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theming information'), 'analyze-theme'))) . '</p>';
+        $form['#title'] .= t('Theme developer information (row style)');
+        $output = '<p>' . t('Back to !info.', array('!info' => $this->option_link(t('theme developer information'), 'analyze-theme'))) . '</p>';
 
         $output .= '<p>' . t('This is the default theme template used for this row style.') . '</p>';
 
@@ -2119,7 +2122,7 @@ class views_plugin_display extends views_plugin {
           '#default_value' => $pager['type'],
         );
 
-        $pager_plugin = views_fetch_plugin_data('pager', $pager['type'], array($this->view->base_table));
+        $pager_plugin = views_fetch_plugin_data('pager', $pager['type']);
         if (!empty($pager_plugin['uses options'])) {
           $form['markup'] = array(
             '#prefix' => '<div class="form-item description">',

@@ -100,6 +100,18 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $this->backdropGet('admin/structure/taxonomy/don_t_panic');
     $this->assertTitle(t('Don\'t Panic | @site-name', array('@site-name' => $site_name)));
     $this->assertNoTitle(t('Don&#039;t Panic | @site-name', array('@site-name' => $site_name)));
+
+    // Ensure the term counts on the vocabulary list page are accurate.
+    $vocabulary = $this->createVocabulary();
+    $this->backdropGet('admin/structure/taxonomy');
+    $this->assertText($vocabulary->name, 'Vocabulary created.');
+    $this->assertText('0', 'Vocabulary has term count of zero.');
+    $this->createTerm($vocabulary);
+    $this->backdropGet('admin/structure/taxonomy');
+    $this->assertText('1', 'Vocabulary has term count of one.');
+    $this->createTerm($vocabulary);
+    $this->backdropGet('admin/structure/taxonomy');
+    $this->assertText('2', 'Vocabulary has term count of two.');
   }
 
   /**

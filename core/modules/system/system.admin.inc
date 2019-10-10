@@ -256,7 +256,24 @@ function system_themes_admin_form($form, &$form_state, $theme_options) {
  */
 function system_themes_admin_form_submit($form, &$form_state) {
   backdrop_set_message(t('The configuration options have been saved.'));
-  config_set('system.core', 'admin_theme', $form_state['values']['admin_theme']);
+
+  $themes = list_themes();
+  $config = config('system.core');
+  $current_default_theme = $config->get('theme_default');
+  $current_admin_theme = $config->get('admin_theme');
+  $new_admin_theme = $form_state['values']['admin_theme'];
+
+  if (!$new_admin_theme) {
+    $current_default_theme_name = $themes[$current_default_theme]->info['name'];
+    backdrop_set_message(t('The administration theme will be the same as the rest of the site (currently %default_theme).', array('%default_theme' => $current_default_theme_name)));
+  }
+  elseif ($current_admin_theme != $new_admin_theme) {
+    $new_admin_theme_name = $themes[$new_admin_theme]->info['name'];
+    backdrop_set_message(t('The administration theme has been changed to %admin_theme.', array('%admin_theme' => $new_admin_theme_name)));
+  }
+
+  $config->set('admin_theme', $new_admin_theme);
+  $config->save();
 }
 
 /**
@@ -290,7 +307,10 @@ function system_theme_enable() {
  */
 function system_theme_disable_confirm($form, &$form_state) {
   if (isset($_REQUEST['theme']) && isset($_REQUEST['token']) && backdrop_valid_token($_REQUEST['token'], 'system-theme-operation-link')) {
-    $form['theme'] = $_REQUEST['theme'];
+    $form['theme'] = array(
+      '#type' => 'hidden',
+      '#value' => $_REQUEST['theme'],
+    );
 
     $confirm_question = t('Are you sure you want to disable this theme? All custom configuration will be lost.');
     return confirm_form($form, $confirm_question, 'admin/appearance', t('This action cannot be undone.'), t('Disable'), t('Cancel'));
@@ -302,7 +322,7 @@ function system_theme_disable_confirm($form, &$form_state) {
  * Form submission handler for system_theme_disable_confirm_submit().
  */
 function system_theme_disable_confirm_submit($form, &$form_state) {
-  $theme = $form_state['complete_form']['theme'];
+  $theme = $form_state['complete_form']['theme']['#value'];
   // Get current list of themes.
   $themes = list_themes();
 
@@ -337,7 +357,7 @@ function system_theme_default() {
     if (!empty($themes[$theme])) {
       // Enable the theme if it is currently disabled.
       if (empty($themes[$theme]->status)) {
-       theme_enable(array($theme));
+        theme_enable(array($theme));
       }
       // Set the default theme.
       config_set('system.core', 'theme_default', $theme);
@@ -345,22 +365,33 @@ function system_theme_default() {
       // Rebuild the menu. This duplicates the menu_rebuild() in theme_enable().
       // However, modules must know the current default theme in order to use
       // this information in hook_menu() or hook_menu_alter() implementations,
-      // and doing the config_set() before the theme_enable() could result
-      // in a race condition where the theme is default but not enabled.
+      // and doing the config_set() before the theme_enable() could result in a
+      // race condition where the theme is default but not enabled.
       menu_rebuild();
 
-      // The status message depends on whether an admin theme is currently in use:
-      // a value of 0 means the admin theme is set to be the default theme.
+      // The status message depends on whether an admin theme is currently in
+      // use: a value of 0 means the admin theme is set to be the default theme.
       $admin_theme = config_get('system.core', 'admin_theme');
+
+      // If the admin theme is set to a different theme than the one the user
+      // has just switched to, show an info message to explain why.
       if ($admin_theme && $admin_theme != $theme) {
-        backdrop_set_message(t('Please note that the administration theme is still set to the %admin_theme theme; consequently, the theme on this page remains unchanged. All non-administrative sections of the site, however, will show the selected %selected_theme theme by default.', array(
+        backdrop_set_message(t('%theme is now the default theme for all non-administrative pages.', array('%theme' => $themes[$theme]->info['name'])));
+        backdrop_set_message(t('The <a href="@admin_theme_setting">administration theme</a> is still set to the %admin_theme theme.', array(
           '%admin_theme' => $themes[$admin_theme]->info['name'],
-          '%selected_theme' => $themes[$theme]->info['name'],
-        )));
+          '@admin_theme_setting' => url('admin/appearance', $options = array('fragment' => 'system-themes-admin-form')),
+        )), 'info');
       }
       else {
         backdrop_set_message(t('%theme is now the default theme.', array('%theme' => $themes[$theme]->info['name'])));
       }
+
+      // Clear caches after changing the theme.
+      cache_clear_all();
+      if (user_access('flush caches')) {
+        backdrop_set_message(t('All caches have been cleared.'));
+      }
+
     }
     else {
       backdrop_set_message(t('The %theme theme was not found.', array('%theme' => $theme)), 'error');
@@ -766,7 +797,7 @@ function _system_modules_build_row($info, $extra) {
   // Check the core compatibility.
   elseif (!isset($info['backdrop']) || $info['backdrop'] != BACKDROP_CORE_COMPATIBILITY) {
     $compatible = FALSE;
-    $status_short .= t('Incompatible with Backdrop CMS !core_version.') . ' ';
+    $status_short .= t('Incompatible with Backdrop CMS !core_version.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . ' ';
     $status_long .= t('This version is not compatible with Backdrop CMS !core_version.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . ' ';
   }
 
@@ -795,7 +826,7 @@ function _system_modules_build_row($info, $extra) {
   }
   else {
     $form['enable'] = array(
-      '#markup' =>  theme('image', array('path' => 'core/misc/watchdog-error.png', 'alt' => t('Unable to enable'), 'title' => trim($status_short))),
+      '#markup' => '<span class="modules-error"><span class="element-invisible">' . t('Unable to enable') . '</span></span>',
     );
     $form['description']['#markup'] .= theme('system_modules_incompatible', array('message' => trim($status_long)));
   }
@@ -1263,21 +1294,21 @@ function system_site_information_settings($form, &$form_state) {
 
   $form['front_page'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Front page'),
+    '#title' => t('Home page'),
   );
   $form['front_page']['site_frontpage'] = array(
     '#type' => 'textfield',
-    '#title' => t('Default front page'),
+    '#title' => t('Default home page'),
     '#default_value' => ($site_config->get('site_frontpage') != 'user' ? backdrop_get_path_alias($site_config->get('site_frontpage')) : ''),
     '#size' => 40,
-    '#description' => t('Optionally, specify a relative URL to display as the front page.  Leave blank to display the default content feed.'),
+    '#description' => t('Optionally, specify a relative URL to display as the home page. Leave this blank to display the default content feed.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
   );
   $form['front_page']['default_nodes_main'] = array(
-    '#type' => 'select', '#title' => t('Number of posts on front page'),
+    '#type' => 'select', '#title' => t('Number of posts on home page'),
     '#default_value' => $site_config->get('default_nodes_main'),
     '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
-    '#description' => t('The maximum number of posts displayed on overview pages such as the front page.'),
+    '#description' => t('The maximum number of posts displayed on overview pages such as the home page.'),
     '#access' => (config_get('system.core', 'site_frontpage') == 'node'),
   );
   $form['error_page'] = array(
@@ -1387,16 +1418,16 @@ function system_site_information_settings_validate($form, &$form_state) {
     }
   }
 
-  // Check for empty front page path.
+  // Check for empty home page path.
   if (empty($form_state['values']['site_frontpage'])) {
     // Set to default "user".
     form_set_value($form['front_page']['site_frontpage'], 'user', $form_state);
   }
   else {
-    // Get the normal path of the front page.
+    // Get the normal path of the home page.
     form_set_value($form['front_page']['site_frontpage'], backdrop_get_normal_path($form_state['values']['site_frontpage']), $form_state);
   }
-  // Validate front page path.
+  // Validate home page path.
   if (!backdrop_valid_path($form_state['values']['site_frontpage'])) {
     form_set_error('site_frontpage', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_frontpage'])));
   }
@@ -1605,6 +1636,7 @@ function system_performance_settings($form, &$form_state) {
   $form['clear_cache'] = array(
     '#type' => 'fieldset',
     '#title' => t('Clear cache'),
+    '#access' => user_access('flush caches'),
   );
 
   $form['clear_cache']['clear'] = array(

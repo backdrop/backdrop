@@ -103,8 +103,8 @@ class views_plugin_style_rss extends views_plugin_style {
     }
     $rows = '';
 
-    // This will be filled in by the row plugin and is used later on in the
-    // theming output.
+    // This will be filled in by the row plugin, and will be used later on in
+    // the theme process.
     $this->namespaces = array(
       'xmlns:dc' => 'http://purl.org/dc/elements/1.1/',
       'xmlns:atom' => 'http://www.w3.org/2005/Atom',

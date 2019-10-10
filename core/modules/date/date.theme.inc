@@ -182,7 +182,6 @@ function theme_date_display_combination($variables) {
   $show_remaining_days = $variables['show_remaining_days'];
 
   $output = '';
-
   // If date_id is set for this field and delta doesn't match, don't display it.
   if (!empty($entity->date_id)) {
     foreach ((array) $entity->date_id as $key => $id) {
@@ -225,11 +224,19 @@ function theme_date_display_combination($variables) {
   // Pull the timezone, if any, out of the formatted result and tack it back on
   // at the end, if it is in the current formatted date.
   $timezone = $dates['value']['formatted_timezone'];
-  if ($timezone) {
+  if (date_timezone_is_valid($timezone) && $date1 !== $date2) {
+    // We only handle timezone identifiers.
+    // Start and end can have different offsets (DST).
+    // Removing an offset in seconds (Z) creates false positives.
+    // And we only do this, if we really have a range,
+    // single dates are left untouched.
+    $date1 = str_replace($timezone, '', $date1);
+    $date2 = str_replace($timezone, '', $date2);
     $timezone = ' ' . $timezone;
   }
-  $date1 = str_replace($timezone, '', $date1);
-  $date2 = str_replace($timezone, '', $date2);
+  else {
+    $timezone = '';
+  }
   $time1 = preg_replace('`^([\(\[])`', '', $dates['value']['formatted_time']);
   $time1 = preg_replace('([\)\]]$)', '', $time1);
   $time2 = preg_replace('`^([\(\[])`', '', $dates['value2']['formatted_time']);
@@ -284,7 +291,7 @@ function theme_date_display_combination($variables) {
       'timezone' => $timezone,
       'attributes' => $attributes,
       'dates' => $dates,
-      'show_remaining_days' => $show_remaining_days,
+      'show_remaining_days' => '',
     ));
     $replaced = str_replace($time1, $time, $date1);
     $output .= theme('date_display_single', array(
@@ -292,6 +299,7 @@ function theme_date_display_combination($variables) {
       'timezone' => $timezone,
       'attributes' => array(),
       'dates' => $dates,
+      'show_remaining_days' => $show_remaining_days,
     ));
   }
   // Different days, display both in their entirety.
@@ -314,17 +322,11 @@ function theme_date_display_combination($variables) {
  */
 function theme_date_display_single($variables) {
   $date = $variables['date'];
-  $timezone = $variables['timezone'];
-
-  $format = $variables['dates']['format'];
-  // If timezone is already included in format, suppress it from display
-  if ($format == 'Y-m-d\TH:iO') {$timezone = '';}
-
   $attributes = $variables['attributes'];
   $show_remaining_days = isset($variables['show_remaining_days']) ? $variables['show_remaining_days'] : '';
 
   // Wrap the result with the attributes.
-  $output = '<span class="date-display-single"' . backdrop_attributes($attributes) . '>' . $date . $timezone . '</span>';
+  $output = '<span class="date-display-single"' . backdrop_attributes($attributes) . '>' . $date . '</span>';
 
   // Add remaining message and return.
   return $output . $show_remaining_days;
@@ -463,15 +465,15 @@ function theme_date_display_remaining($variables) {
 /**
  * Preprocessor for Date Views filter form.
  */
-function template_preprocess_date_views_filter_form(&$vars) {
-  $form = $vars['form'];
-  $vars['date'] = backdrop_render($form['valuedate']);
-  $vars['mindate'] = backdrop_render($form['mindate']);
-  $vars['maxdate'] = backdrop_render($form['maxdate']);
-  $vars['adjustment'] = backdrop_render($form['valueadjustment']);
-  $vars['minadjustment'] = backdrop_render($form['minadjustment']);
-  $vars['maxadjustment'] = backdrop_render($form['maxadjustment']);
-  $vars['description'] = backdrop_render($form['description']) . backdrop_render($form);
+function template_preprocess_date_views_filter_form(&$variables) {
+  $form = $variables['form'];
+  $variables['date'] = backdrop_render($form['valuedate']);
+  $variables['mindate'] = backdrop_render($form['mindate']);
+  $variables['maxdate'] = backdrop_render($form['maxdate']);
+  $variables['adjustment'] = backdrop_render($form['valueadjustment']);
+  $variables['minadjustment'] = backdrop_render($form['minadjustment']);
+  $variables['maxadjustment'] = backdrop_render($form['maxadjustment']);
+  $variables['description'] = backdrop_render($form['description']) . backdrop_render($form);
 }
 
 /** @} End of addtogroup themeable */

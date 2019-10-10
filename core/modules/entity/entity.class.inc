@@ -74,6 +74,37 @@ interface EntityInterface {
   public function uri();
 
   /**
+   * Determines whether the given user has access to create this type of entity.
+   *
+   * @param string $bundle
+   *   (optional) The entity's bundle to check create access against.
+   * @param User|AnonymousUser|object $account
+   *   (optional) The user to check for. Leave it to NULL to check for the
+   *   global user.
+   *
+   * @return bool
+   *   Whether access is allowed or not. If the entity type does not specify any
+   *   access information, NULL is returned.
+   */
+  public static function createAccess($bundle = NULL, $account = NULL);
+
+  /**
+   * Determines whether the given user has access to this entity.
+   *
+   * @param string $op
+   *   The operation being performed. One of 'view', 'update', 'create' or
+   *   'delete'.
+   * @param User|AnonymousUser|object $account
+   *   (optional) The user to check for. Leave it to NULL to check for the
+   *   global user.
+   *
+   * @return bool|NULL
+   *   Whether access is allowed or not. If the entity type does not specify any
+   *   access information, NULL is returned.
+   */
+  public function access($op, $account = NULL);
+
+  /**
    * Saves an entity permanently.
    *
    * @return
@@ -102,16 +133,16 @@ interface EntityInterface {
   public function createDuplicate();
 
   /**
-   * Returns all values from a field on the entity.
+   * Returns a single value from a field on the entity.
    *
-   * @param $field_name
+   * @param string $field_name
    *   The machine name of the field.
-   * @param $value_key
+   * @param string $value_key
    *   The key indicating the primary data value for the field. Defaults to
    *   'value' which is used in both text and number fields. For fields which do
    *   not have a 'value' key such as terms (which use a 'tid' key) or files
    *   (which use a 'fid' key), the key must be specified.
-   * @param $langcode (optional)
+   * @param string $langcode (optional)
    *   The language code for the requested language. Defaults to the
    *   current language.
    *
@@ -119,6 +150,31 @@ interface EntityInterface {
    *   All field values, or an empty array if the field is empty, if the field does not
    *   contain the $value_key specified, or if the entity does not contain the
    *   $field_name specified.
+   *
+   * @since 1.13.0 Method added.
+   */
+  public function getFieldValue($field_name, $value_key = 'value', $langcode = NULL);
+
+  /**
+   * Returns all values from a field on the entity.
+   *
+   * @param string $field_name
+   *   The machine name of the field.
+   * @param string $value_key
+   *   The key indicating the primary data value for the field. Defaults to
+   *   'value' which is used in both text and number fields. For fields which do
+   *   not have a 'value' key such as terms (which use a 'tid' key) or files
+   *   (which use a 'fid' key), the key must be specified.
+   * @param string $langcode (optional)
+   *   The language code for the requested language. Defaults to the
+   *   current language.
+   *
+   * @return (array)
+   *   All field values, or an empty array if the field is empty, if the field does not
+   *   contain the $value_key specified, or if the entity does not contain the
+   *   $field_name specified.
+   *
+   * @since 1.13.0 Method added.
    */
   public function getFieldValues($field_name, $value_key = 'value', $langcode = NULL);
 }
@@ -127,6 +183,7 @@ interface EntityInterface {
  * Defines a base entity class.
  */
 abstract class Entity extends stdClass implements EntityInterface {
+
   /**
    * Constructs a new entity object.
    */
@@ -157,6 +214,20 @@ abstract class Entity extends stdClass implements EntityInterface {
   }
 
   /**
+   * Implements EntityInterface::createAccess().
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    return TRUE;
+  }
+
+  /**
+   * Implements EntityInterface::access().
+   */
+  public function access($op, $account = NULL) {
+    return TRUE;
+  }
+
+  /**
    * Implements EntityInterface::save().
    */
   public function save() {
@@ -183,6 +254,14 @@ abstract class Entity extends stdClass implements EntityInterface {
       $duplicate->{$entity_info['entity keys']['revision']} = NULL;
     }
     return $duplicate;
+  }
+
+  /**
+   * Implements EntityInterface::getFieldValue().
+   */
+  public function getFieldValue($field_name, $value_key = 'value', $langcode = NULL) {
+    $values = $this->getFieldValues($field_name, $value_key, $langcode);
+    return empty($values) ? NULL : reset($values);
   }
 
   /**

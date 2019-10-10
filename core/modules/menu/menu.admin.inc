@@ -17,7 +17,7 @@ function menu_overview_page() {
     $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
     $links = array();
     $links['list'] = array(
-      'title' => t('Edit links'),
+      'title' => t('Manage links'),
       'href' => 'admin/structure/menu/manage/' . $menu['menu_name'],
     );
     $links['add'] = array(

@@ -1322,6 +1322,10 @@ class views_plugin_query_default extends views_plugin_query {
     if (count($this->having)) {
       $this->has_aggregate = TRUE;
     }
+    elseif (!$this->has_aggregate) {
+      // Allow 'GROUP BY' even no aggregation function has been set.
+      $this->has_aggregate = $this->view->display_handler->get_option('group_by');
+    }
     if ($this->has_aggregate && (!empty($this->groupby) || !empty($non_aggregates))) {
       $groupby = array_unique(array_merge($this->groupby, $non_aggregates));
       foreach ($groupby as $field) {

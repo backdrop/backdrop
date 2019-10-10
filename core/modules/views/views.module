@@ -69,7 +69,7 @@ function views_api_minimum_version() {
 }
 
 /**
- * Implement hook_theme(). Register views theming functions.
+ * Implement hook_theme(). Register views theme functions.
  */
 function views_theme($existing, $type, $theme, $path) {
   $path = backdrop_get_path('module', 'views');

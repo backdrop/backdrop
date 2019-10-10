@@ -25,6 +25,7 @@ function theme_taxonomy_overview_vocabularies($variables) {
 
       $row = array();
       $row[] = backdrop_render($vocabulary['name']);
+      $row[] = backdrop_render($vocabulary['items']);
       if (isset($vocabulary['weight'])) {
         $vocabulary['weight']['#attributes']['class'] = array('vocabulary-weight');
         $row[] = backdrop_render($vocabulary['weight']);
@@ -35,6 +36,7 @@ function theme_taxonomy_overview_vocabularies($variables) {
   }
 
   $header = array(t('Vocabulary name'));
+  $header[] = array('data' => t('Number of terms'), 'class' => array('priority-low'));
   if (isset($form['actions'])) {
     $header[] = t('Weight');
     backdrop_add_tabledrag('taxonomy', 'order', 'sibling', 'vocabulary-weight');

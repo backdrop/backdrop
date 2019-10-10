@@ -1017,7 +1017,7 @@ function backdrop_process_form($form_id, &$form, &$form_state) {
  *
  * @param $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  * @param $form
  *   An associative array containing the structure of the form.
  * @param $form_state
@@ -1168,7 +1168,7 @@ function _backdrop_invalid_token_set_form_error() {
  *
  * @param $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  * @param $form
  *   An associative array containing the structure of the form, which is passed
  *   by reference. Form validation handlers are able to alter the form structure
@@ -1362,7 +1362,7 @@ function backdrop_redirect_form($form_state) {
  *   not be repeated in the submission step.
  * @param $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  */
 function _form_validate(&$elements, &$form_state, $form_id = NULL) {
   // Also used in the installer, pre-database setup.
@@ -1827,7 +1827,7 @@ function form_error(&$element, $message = '') {
  *
  * @param string $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  * @param array $element
  *   An associative array containing the structure of the current element.
  * @param array $form_state
@@ -3241,7 +3241,8 @@ function theme_checkbox($variables) {
 }
 
 /**
- * Adds form element theming to an element if its title or description is set.
+ * Adds additional customization to a form element when its title or description
+ * is set.
  *
  * This is used as a pre render function for checkboxes and radios.
  */
@@ -3389,6 +3390,25 @@ function form_process_actions($element, &$form_state) {
     $element[$first_button]['#attributes']['class'] = array_diff($element[$first_button]['#attributes']['class'], array('button-secondary'));
   }
 
+  return $element;
+}
+
+/**
+ * Processes a form button element.
+ *
+ * @param $element
+ *   An associative array containing the properties and children of the
+ *   form button.
+ * @param $form_state
+ *   The $form_state array for the form this element belongs to.
+ *
+ * @return
+ *   The processed element.
+ */
+function form_process_button($element, &$form_state) {
+  // We normally want to add backdrop.form so that the double submit protection
+  // can be added to the site.
+  $element['#attached']['library'][] = array('system', 'backdrop.form');
   return $element;
 }
 
@@ -4828,7 +4848,7 @@ function _form_set_class(&$element, $class = array()) {
  *   are optional except as noted):
  *   - operations: (required) Array of operations to be performed, where each
  *     item is an array consisting of the name of an implementation of
- *     callback_batch_operation() and an array of parameter.
+ *     callback_batch_operation() and an array of parameters.
  *     Example:
  *     @code
  *     array(

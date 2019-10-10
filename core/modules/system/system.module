@@ -176,6 +176,10 @@ function system_permission() {
     'access site reports' => array(
       'title' => t('View site reports'),
     ),
+    'flush caches' => array(
+      'title' => t('Flush caches'),
+      'description' => t('Provides access to manually flush caches.'),
+    ),
   );
 }
 
@@ -254,7 +258,7 @@ function system_element_info() {
     '#button_type' => 'submit',
     '#executes_submit_callback' => TRUE,
     '#limit_validation_errors' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('ajax_process_form', 'form_process_button'),
     '#theme_wrappers' => array('button'),
   );
   $types['button'] = array(
@@ -263,7 +267,7 @@ function system_element_info() {
     '#button_type' => 'submit',
     '#executes_submit_callback' => FALSE,
     '#limit_validation_errors' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('ajax_process_form', 'form_process_button'),
     '#theme_wrappers' => array('button'),
   );
   $types['image_button'] = array(
@@ -271,7 +275,7 @@ function system_element_info() {
     '#button_type' => 'submit',
     '#executes_submit_callback' => TRUE,
     '#limit_validation_errors' => FALSE,
-    '#process' => array('ajax_process_form'),
+    '#process' => array('ajax_process_form', 'form_process_button'),
     '#return_value' => TRUE,
     '#has_garbage_value' => TRUE,
     '#src' => NULL,
@@ -1378,9 +1382,10 @@ function system_library_info() {
       ),
     ),
     'js' => array(
-      // Backdrop includes a "combined" file that bundles together both the
-      // main library and the keyboard support file.
-      'core/misc/smartmenus/jquery.smartmenus.combined.js' => array(
+      'core/misc/smartmenus/jquery.smartmenus.js' => array(
+        'group' => JS_LIBRARY,
+      ),
+      'core/misc/smartmenus/addons/keyboard/jquery.smartmenus.keyboard.js' => array(
         'group' => JS_LIBRARY,
       ),
     ),
@@ -2430,8 +2435,9 @@ function system_block_info() {
   foreach (menu_list_system_menus() as $menu_name => $title) {
     $custom_title = isset($all_menus[$menu_name]) ? $all_menus[$menu_name] : $title;
     $blocks[$menu_name] = array(
+      // Names from menu_list_system_menus() need to be translated through t().
       'info' => check_plain(t($custom_title)),
-      'description' => t('A hierarchical list of links for the @menu.', array('@menu' => t($title))),
+      'description' => t('A list of links for the menu: %title.', array('%title' => t($custom_title))),
     );
   }
   return $blocks;
@@ -3198,8 +3204,8 @@ function system_header_block($settings) {
   $site_config = config('system.core');
   $variables['logo']        = $settings['logo'] ? backdrop_get_logo() : NULL;
   $variables['logo_attributes'] = $settings['logo'] ? array_diff_key(backdrop_get_logo_info(), array('path' => '')) : array();
-  $variables['site_name']   = $settings['site_name'] ? check_plain($site_config->get('site_name')) : '';
-  $variables['site_slogan'] = $settings['site_slogan'] ? filter_xss_admin($site_config->get('site_slogan')) : '';
+  $variables['site_name']   = $settings['site_name'] ? check_plain($site_config->getTranslated('site_name')) : '';
+  $variables['site_slogan'] = $settings['site_slogan'] ? filter_xss_admin($site_config->getTranslated('site_slogan')) : '';
   $variables['menu']        = $menu ? theme('links__header_menu', array('links' => $menu)) : NULL;
 
   return theme('header', $variables);

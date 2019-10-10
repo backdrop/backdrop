@@ -62,7 +62,7 @@ function template_preprocess_ckeditor_settings_toolbar(&$variables) {
     elseif (isset($button['image_alternative'])) {
       $value = filter_xss_admin($button['image_alternative']);
     }
-    elseif (isset($button['image'])) {
+    elseif (isset($button['image']) || isset($button['image' . $rtl])) {
       $value = '<img src="'. file_create_url($button['image' . $rtl]) . '" title="' . check_plain($button['label']) . '" />';
       $value = '<a href="#" role="button" title="' . $button['label'] . '" aria-label="' . $button['label'] . '"><span class="cke_button_icon">' . $value . '</span></a>';
     }
@@ -107,12 +107,13 @@ function template_preprocess_ckeditor_settings_toolbar(&$variables) {
   $variables['active_buttons'] = array();
   foreach ($active_buttons as $row_number => $button_row) {
     foreach ($button_groups[$row_number] as $group_name) {
+      $group_name = (string) $group_name;
       $variables['active_buttons'][$row_number][$group_name] = array(
         'group_name_class' => backdrop_clean_css_identifier($group_name),
         'buttons' => array(),
       );
       $buttons = array_filter($button_row, function ($button) use ($group_name) {
-        return $button['group'] === $group_name;
+        return (string) $button['group'] === $group_name;
       });
       foreach ($buttons as $button) {
         $variables['active_buttons'][$row_number][$group_name]['buttons'][] = $build_button_item($button, $rtl);

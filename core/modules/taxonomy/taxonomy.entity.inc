@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity classes and controllers for Taxonomy module.
@@ -111,6 +110,59 @@ class TaxonomyTerm extends Entity {
       'options' => array(),
     );
   }
+
+  /**
+   * Overrides Entity::createAccess().
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    return user_access('administer taxonomy', $account);
+  }
+
+  /**
+   * Overrides Entity::access().
+   *
+   * @param string $op
+   *   The operation to be performed on the taxonomy term. Possible values are:
+   *   - create
+   *   - view
+   *   - update
+   *   - delete
+   * @param User|AnonymousUser|object $account
+   *   (optional) The user to check for. Leave it to NULL to check for the
+   *   global user.
+   *
+   * @return bool
+   *   TRUE if access is granted, FALSE otherwise.
+   */
+  public function access($op, $account = NULL) {
+    if ($op == 'create') {
+      return self::createAccess($this->bundle(), $account);
+    }
+    elseif (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
+      // If the $op was not one of the supported ones, we return access denied.
+      return FALSE;
+    }
+
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    if ($op == 'view') {
+      return user_access('access content', $account);
+    }
+    elseif ($op == 'update' || $op == 'delete') {
+      return user_access("$op terms in $this->vocabulary", $account) || user_access('administer taxonomy', $account);
+    }
+
+    return FALSE;
+  }
+
 }
 
 /**
