@@ -165,7 +165,7 @@ class DefaultEntityController implements EntityControllerInterface {
       }
       else {
         // Force all cached entries to be deleted.
-        cache_clear_all('*', 'cache_entity_' . $this->entityType, TRUE);
+        cache_flush('cache_entity_' . $this->entityType);
       }
     }
 
@@ -176,7 +176,7 @@ class DefaultEntityController implements EntityControllerInterface {
    * Implements EntityControllerInterface::resetStaticCache().
    */
   public function resetStaticCache(array $ids = NULL) {
-    if (isset($ids)) {
+    if (isset($ids) && !empty($ids)) {
       foreach ($ids as $id) {
         unset($this->entityCache[$id]);
       }
@@ -212,7 +212,7 @@ class DefaultEntityController implements EntityControllerInterface {
     // Use an entity field query to transform the list of conditions into
     // the set of entity IDs which the conditions admit, then re-enter this
     // method with that set as the $ids constraint.
-    if ($conditions) {
+    if ($conditions && !$revision_id) {
       $query = new EntityFieldQuery();
       $query->entityCondition('entity_type', $this->entityType);
       foreach ($conditions as $property_name => $condition) {
@@ -229,12 +229,7 @@ class DefaultEntityController implements EntityControllerInterface {
       $result = $query->execute();
       if (isset($result[$this->entityType])) {
         $entity_ids = array_keys($result[$this->entityType]);
-        if ($revision_id) {
-          return $this->load($entity_ids, array($this->revisionKey => $revision_id));
-        }
-        else {
-          return $this->load($entity_ids);
-        }
+        return $this->load($entity_ids);
       }
       else {
         // No results found.

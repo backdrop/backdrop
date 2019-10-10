@@ -223,6 +223,11 @@ function user_logout() {
 
   module_invoke_all('user_logout', $user);
 
+  $entity_info = entity_get_info('user');
+  if (isset($entity_info['entity cache']) && $entity_info['entity cache']) {
+    cache_clear_all($user->uid, 'cache_entity_user');
+  }
+
   // Destroy the current session, and reset $user to the anonymous user.
   session_destroy();
 

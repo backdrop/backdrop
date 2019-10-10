@@ -390,7 +390,7 @@ class PageEditTestCase extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Save'));
 
     // Ensure that the node revision has been created.
-    $revised_node = $this->backdropGetNodeByTitle($edit['title']);
+    $revised_node = $this->backdropGetNodeByTitle($edit['title'], TRUE);
     $this->assertNotIdentical($node->vid, $revised_node->vid, 'A new revision has been created.');
     // Ensure that the node author is preserved when it was not changed in the
     // edit form.
@@ -681,7 +681,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $edit['scheduled[time]'] = format_date(REQUEST_TIME + 360, 'custom', 'H:i:s', $web_user->timezone);
     $this->backdropPost(NULL, $edit, t('Preview'));
     $this->backdropPost(NULL, array(), t('Save'));
-    $node = $this->backdropGetNodeByTitle($name);
+    $node = $this->backdropGetNodeByTitle($name, TRUE);
     $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
 
     $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');
