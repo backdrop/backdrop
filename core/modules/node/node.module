@@ -141,7 +141,7 @@ function node_cron() {
  * Implements hook_entity_info().
  */
 function node_entity_info() {
-  $return = array(
+  $entity_info = array(
     'node' => array(
       'label' => t('Node'),
       'bundle label' => t('Type'),
@@ -179,14 +179,14 @@ function node_entity_info() {
 
   // If the cache table has been created, then enable entity caching on nodes.
   if (db_table_exists('cache_entity_node')) {
-    $return['node']['entity cache'] = TRUE;
-    $return['node']['field cache'] = FALSE;
+    $entity_info['node']['entity cache'] = TRUE;
+    $entity_info['node']['field cache'] = FALSE;
   }
 
   // Search integration is provided by node.module, so search-related
   // display modes for nodes are defined here and not in search.module.
   if (module_exists('search')) {
-    $return['node']['view modes'] += array(
+    $entity_info['node']['view modes'] += array(
       'search_index' => array(
         'label' => t('Search index'),
         'custom settings' => FALSE,
@@ -202,7 +202,7 @@ function node_entity_info() {
   // messages, and the path to attach Field admin pages to.
   node_type_cache_reset();
   foreach (node_type_get_names() as $type => $name) {
-    $return['node']['bundles'][$type] = array(
+    $entity_info['node']['bundles'][$type] = array(
       'label' => $name,
       'admin' => array(
         'path' => 'admin/structure/types/manage/%node_type',
@@ -213,7 +213,7 @@ function node_entity_info() {
     );
   }
 
-  return $return;
+  return $entity_info;
 }
 
 /**

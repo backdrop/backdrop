@@ -105,7 +105,7 @@ function user_theme() {
  * Implements hook_entity_info().
  */
 function user_entity_info() {
-  $return = array(
+  $entity_info = array(
     'user' => array(
       'label' => t('User account'),
       'bundle label' => t('Type'),
@@ -137,11 +137,11 @@ function user_entity_info() {
 
   // If the cache table has been created, then enable entity caching on nodes.
   if (db_table_exists('cache_entity_user')) {
-    $return['user']['entity cache'] = TRUE;
-    $return['user']['field cache'] = FALSE;
+    $entity_info['user']['entity cache'] = TRUE;
+    $entity_info['user']['field cache'] = FALSE;
   }
 
-  return $return;
+  return $entity_info;
 }
 
 /**

@@ -71,7 +71,7 @@ define('COMMENT_NODE_OPEN', 2);
  * Implements hook_entity_info().
  */
 function comment_entity_info() {
-  $return = array(
+  $entity_info = array(
     'comment' => array(
       'label' => t('Comment'),
       'bundle label' => t('Node type'),
@@ -96,12 +96,12 @@ function comment_entity_info() {
 
   // If the cache table has been created, then enable entity caching.
   if (db_table_exists('cache_entity_comment')) {
-    $return['comment']['entity cache'] = TRUE;
-    $return['comment']['field cache'] = FALSE;
+    $entity_info['comment']['entity cache'] = TRUE;
+    $entity_info['comment']['field cache'] = FALSE;
   }
 
   foreach (node_type_get_names() as $type => $name) {
-    $return['comment']['bundles']['comment_node_' . $type] = array(
+    $entity_info['comment']['bundles']['comment_node_' . $type] = array(
       'label' => t('@node_type comment', array('@node_type' => $name)),
       // Provide the node type/bundle name for other modules, so it does not
       // have to be extracted manually from the bundle name.
@@ -121,7 +121,7 @@ function comment_entity_info() {
     );
   }
 
-  return $return;
+  return $entity_info;
 }
 
 /**
