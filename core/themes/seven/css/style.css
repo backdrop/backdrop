@@ -661,7 +661,6 @@ fieldset .fieldset-legend {
   width: 100%;
   margin-top: .25em;
   padding-left: 1em; /* LTR */
-  text-transform: uppercase;
   box-sizing: border-box;
 }
 [dir="rtl"] fieldset .fieldset-legend {
@@ -671,7 +670,6 @@ fieldset .fieldset-legend {
 }
 legend {
   font-size: 120%;
-  font-weight: normal;
 }
 .fieldset-description {
   margin-bottom: 1em;
