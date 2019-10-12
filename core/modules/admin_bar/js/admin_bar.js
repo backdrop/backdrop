@@ -418,6 +418,7 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
     else {
       $(this).removeClass('active-search-item');
     }
+    $adminBar.find('[class=""]').removeAttr('class');
     $this.trigger(show ? 'showPath' : 'hidePath', [this]);
   }
 
