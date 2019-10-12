@@ -1304,7 +1304,7 @@ function install_find_translation_files($langcode = NULL) {
   $directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
   // @todo: Remove the "drupal" check in 2.x (assuming we have a localization
   //   server by then).
-  $files = file_scan_directory($directory, '!(install|drupal-\d+\.\d+|backdrop(cms)?-\d+\.\d+\.\d+)\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
+  $files = file_scan_directory($directory, '!(install|drupal|backdrop(cms)?)(-[\d\.]+)?\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
   return $files;
 }
 
@@ -1401,9 +1401,16 @@ function install_select_language_form($form, &$form_state, $files) {
 
   $browser_langcode = locale_language_from_browser($languages);
   $form['langcode'] = array(
-    '#type' => 'select',
+    // The most likely scenario is to be adding another 1 or 2 languages. In
+    // that case, we render the language selection as a set of radio options.
+    // This also fixes the UX issue where having only the default language
+    // renders the select as a dropdown, implying that there are more languages
+    // to select from; when there aren't. If 4 or more languages are available,
+    // we fall back to a dropdown.
+    '#type' => count($select_options) > 3 ? 'select' : 'radios',
     '#options' => $select_options,
-    // Use the browser detected language as default or English if nothing found.
+    // Use the browser-detected language as default, or English if nothing
+    // found.
     '#default_value' => !empty($browser_langcode) ? $browser_langcode : 'en',
   );
 
@@ -1412,7 +1419,7 @@ function install_select_language_form($form, &$form_state, $files) {
   $steps = array();
   $steps[] = st('Download translation files from the <a href="https://localize.backdropcms.org/translate/languages" target="_blank">translation server</a>.');
   $steps[] = st('Place the downloaded <code>.po</code> files into the following directory: <pre>@dir</pre>', array('@dir' => $directory));
-  $steps[] = st('<a href="@reload_link">Reload this page</a>. The languages added in the previous step should now have become available in the select menu above.', array('@reload_link' => check_url(backdrop_current_script_url())));
+  $steps[] = st('<a href="@reload_link">Reload this page</a> to make the newly-added languages become available in the list above.', array('@reload_link' => check_url(backdrop_current_script_url())));
 
   $more_info = st('For more information on installing Backdrop in different languages, visit the <a href="https://backdropcms.org/installing-in-other-languages" target="_blank">Backdrop user guide page</a>.');
 
@@ -1423,7 +1430,7 @@ function install_select_language_form($form, &$form_state, $files) {
 
   $form['languages_help'] = array(
     '#type' => 'fieldset',
-    '#title' =>  st('Install in another language'),
+    '#title' => st('Make more languages available'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
