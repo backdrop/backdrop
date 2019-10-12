@@ -431,13 +431,13 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
     $this.trigger(show ? 'showPath' : 'hidePath', [this]);
   }
 
-  /**	
-   * Closes the search results and clears the search input.	
-   */	
-  function resultsClickHandler(e, link) {	
-    var $original = $(this).data('original-link');	
-    $original.trigger('mouseleave');	
-    $input.val('').trigger('keyup');	
+  /**
+   * Closes the search results and clears the search input.
+   */
+  function resultsClickHandler(e, link) {
+    var $original = $(this).data('original-link');
+    $original.trigger('mouseleave');
+    $input.val('').trigger('keyup');
   }
 
   /**
