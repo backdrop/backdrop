@@ -412,22 +412,23 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
       e.preventDefault();
     }
     if (show) {
-      $adminBar.find('.active-search-item').removeClass('active-search-item');
+      if ($adminBar.find('.active-search-item').classList.length === 1) {
+        $adminBar.find('.active-search-item').removeAttr('class');
+      }
+      else {
+        $adminBar.find('.active-search-item').removeClass('active-search-item');
+      }
       $(this).addClass('active-search-item');
     }
     else {
-      $(this).removeClass('active-search-item');
+      if ($(this).classList.length === 1) {
+        $(this).removeAttr('class');
+      }
+      else {
+        $(this).removeClass('active-search-item');
+      }
     }
     $this.trigger(show ? 'showPath' : 'hidePath', [this]);
-  }
-
-  /**
-   * Closes the search results and clears the search input.
-   */
-  function resultsClickHandler(e, link) {
-    var $original = $(this).data('original-link');
-    $original.trigger('mouseleave');
-    $input.val('').trigger('keyup');
   }
 
   /**
