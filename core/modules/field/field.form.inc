@@ -185,7 +185,7 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
   switch ($field['cardinality']) {
     case FIELD_CARDINALITY_UNLIMITED:
       $field_state = field_form_get_state($parents, $field_name, $langcode, $form_state);
-      $max = $field_state['items_count'];
+      $max = $field_state['items_count'] -1;
       break;
 
     default:
