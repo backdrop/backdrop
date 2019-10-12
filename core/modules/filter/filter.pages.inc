@@ -32,7 +32,7 @@ function filter_tips_long($format = NULL) {
 /**
  * Autocomplete callback for link textfield.
  */
-function _filter_link_autocomplete($string) {
+function _filter_link_autocomplete($string = '') {
   $matches = array();
   $match_count = 0;
   if ($string) {

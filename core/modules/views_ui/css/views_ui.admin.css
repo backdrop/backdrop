@@ -20,14 +20,6 @@
 
 /* @end */
 
-/* @group Views listing page */
-
-#views-list tr.disabled td {
-  color: #999;
-}
-
-/* @end */
-
 /* @group Columns */
 
 @media (min-width:768px) {

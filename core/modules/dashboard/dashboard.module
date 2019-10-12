@@ -77,6 +77,12 @@ function dashboard_block_info() {
   $blocks = array();
 
   // Dashboard blocks.
+  $blocks['welcome'] = array(
+    'info' => t('Dashboard - Welcome to Backdrop CMS!'),
+    'description' => t('Provides a welcome message, and links to get people started using Backdrop'),
+    'class' => 'DashboardWelcomeBlock',
+    'required contexts' => array('dashboard'),
+  );
   $blocks['create'] = array(
     'info' => t('Dashboard - Create content'),
     'description' => t('Provides links to create new content'),
@@ -131,6 +137,7 @@ function dashboard_block_info() {
  */
 function dashboard_autoload_info() {
   return array(
+    'DashboardWelcomeBlock' => 'includes/block.welcome.inc',
     'DashboardCreateBlock' => 'includes/block.create.inc',
     'DashboardMenuBlock' => 'includes/block.menus.inc',
     'DashboardContentTypesBlock' => 'includes/block.node_types.inc',
@@ -201,7 +208,7 @@ function dashboard_user_login(&$edit, $account) {
 function dashboard_preprocess_layout(&$variables) {
   /* @var Layout $layout */
   $layout = $variables['layout'];
-  if ($layout->hasContexts(array('dashboard'))) {
+  if (is_a($layout, 'Layout') && $layout->hasContexts(array('dashboard'))) {
     // Include a dashboard-specific style sheet.
     $css_path = backdrop_get_path('module', 'dashboard') . '/css/dashboard.css';
     backdrop_add_css($css_path);
@@ -215,7 +222,7 @@ function dashboard_preprocess_layout(&$variables) {
 function dashboard_preprocess_block(&$variables) {
   /* @var Layout $layout */
   $layout = $variables['layout'];
-  if ($layout->hasContexts(array('dashboard'))) {
+  if (is_a($layout, 'Layout') && $layout->hasContexts(array('dashboard'))) {
     $block = $variables['block'];
     $region_name = $layout->getBlockPosition($block->uuid);
     if (!in_array($region_name, array('header', 'footer'))) {

@@ -11,8 +11,8 @@
  */
 
 /**
- * @license Copyright (c) 2003-2018, CKSource - Frederico Knabben. All rights
- * reserved. For licensing, see LICENSE.md or http://ckeditor.com/license
+ * @license Copyright (c) 2003-2019, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see LICENSE.md or https://ckeditor.com/license
  */
 
 /**
@@ -22,16 +22,14 @@
  * If you would like to build CKEditor online again
  * (for example to upgrade), visit one the following links:
  *
- * (1) http://ckeditor.com/builder
+ * (1) https://ckeditor.com/cke4/builder
  *     Visit online builder to build CKEditor from scratch.
  *
- * (2) http://ckeditor.com/builder/58989eabf7abd2158a32dcce585c9e95
- *     Visit online builder to build CKEditor, starting with the same setup as
- *     before.
+ * (2) https://ckeditor.com/cke4/builder/d9ae29706664fe564be56faa2a12e4f4
+ *     Visit online builder to build CKEditor, starting with the same setup as before.
  *
- * (3) http://ckeditor.com/builder/download/58989eabf7abd2158a32dcce585c9e95
- *     Straight download link to the latest version of CKEditor (Optimized) with
- *     the same setup as before.
+ * (3) https://ckeditor.com/cke4/builder/download/d9ae29706664fe564be56faa2a12e4f4
+ *     Straight download link to the latest version of CKEditor (Optimized) with the same setup as before.
  *
  * NOTE:
  *    This file is not used by CKEditor, you may remove it.
@@ -54,7 +52,6 @@ var CKBUILDER_CONFIG = {
 		'.mailmap',
 		'.npm',
 		'.travis.yml',
-		'README.md',
 		'bender-err.log',
 		'bender-out.log',
 		'bender.ci.js',

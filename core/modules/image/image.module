@@ -939,6 +939,18 @@ function image_style_url($style_name, $uri) {
 }
 
 /**
+ * This function was never included in Backdrop. See:
+ * - https://api.backdropcms.org/change-records/image_style_path_token-does-not-exist-backdrop
+ * - https://github.com/backdrop/backdrop-issues/issues/34
+ * - https://github.com/backdrop/backdrop-issues/issues/3989
+ *
+ * @deprecated since 1.0.0
+ */
+function image_style_path_token($style_name, $uri) {
+  watchdog_deprecated_function('drupal', __FUNCTION__, t('Change record:') . ' ' . l(t('<code>image_style_path_token()</code> does not exist in Backdrop'), 'https://api.backdropcms.org/change-records/image_style_path_token-does-not-exist-backdrop', array('attributes' => array('target' => '_blank'))));
+}
+
+/**
  * Return the URI of an image when using a style.
  *
  * The path returned by this function may not exist. The default generation
