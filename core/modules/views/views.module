@@ -1150,7 +1150,7 @@ function views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) {
  *   Either 'display', 'style' or 'row'
  * @param $key
  *   For style plugins, this is an optional type to restrict to. May be 'normal',
- *   'summary', 'feed' or others based on the neds of the display.
+ *   'summary', 'feed' or others based on the needs of the display.
  * @param $base
  *   An array of possible base tables.
  *
