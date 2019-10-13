@@ -822,9 +822,6 @@ div.teaser-checkbox .form-item,
 .form-item label {
   margin: 0 0 10px;
 }
-fieldset label {
-  font-weight: normal;
-}
 .field-label label {
   margin: 0;
   padding: 0;
@@ -1855,8 +1852,4 @@ div.add-or-remove-shortcuts {
 }
 @keyframes animate-stripes {
   0% { background-position: 0 0; } 100% { background-position: 50px 50px; }
-}
-
-.layout-flexible-template-edit-row-form fieldset label {
-  font-weight: bold;
 }
