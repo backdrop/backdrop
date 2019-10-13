@@ -83,7 +83,7 @@ function layout_menu() {
   ) + $base;
 
   $items['admin/structure/layouts/settings'] = array(
-    'title' => 'Settings',
+    'title' => 'Templates',
     'description' => 'Manage layout templates.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_settings_page'),
@@ -1192,7 +1192,7 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
     // If the path is a node preview path, check if a custom layout exists for
     // nodes and use that instead.
     // @ todo: This adds very specific code for node previews which too closely
-    // couples Node and Layout modules. This needs to be reverted in a future 
+    // couples Node and Layout modules. This needs to be reverted in a future
     // commit.
     $data = NULL;
     $node_types = node_type_get_types();
@@ -1219,7 +1219,7 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
 
           // Check for an object loaded by the menu router. Use a preview from
           // Tempstore if on a node preview page.
-          // @ todo: This is also specific code for node previews which needs 
+          // @ todo: This is also specific code for node previews which needs
           // to be reverted in a future commit.
           if (isset($router_item['map'][$context->position])) {
             $data = isset($data) ? $data : $router_item['map'][$context->position];
@@ -1340,14 +1340,14 @@ function _layout_get_all_info($data_type, $init = array()) {
  *   Optionally specify a name of a single layout template, e.g. "boxton" or
  *   "simmons". If no layout template name is specified, information for all
  *   layout templates will be returned.
- * 
+ *
  * @param boolean $rebuild
  *   Whether or not the list of layout template info needs to be rebuilt (see
  *   https://github.com/backdrop/backdrop-issues/issues/984). The rebuild is
  *   required only on specific cases, so this defaults to FALSE. That way, the
  *   rest of the times the layout cache is used (when available) for performance
  *   reasons.
- * 
+ *
  * @return array|boolean
  *   The layout template information, as returned by either a stand-alone
  *   template .info file, or through a module's hook_layout_info().
