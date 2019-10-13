@@ -173,6 +173,17 @@ function views_update_1005() {
 }
 
 /**
+ * Convert the views_localize_all variable to config.
+ */
+function views_update_1006() {
+  $config = config('views.settings');
+  $config->set('localize_all', update_variable_get('views_localize_all', FALSE));
+  $config->save();
+
+  update_variable_del('views_localize_all');
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

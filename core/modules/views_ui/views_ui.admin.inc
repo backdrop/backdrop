@@ -4615,6 +4615,18 @@ function views_ui_admin_settings_advanced() {
     ),
   );
 
+  $form['locale'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Localization'),
+  );
+
+  $form['locale']['views_localize_all'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use same translation method for exported views'),
+    '#description' => t('Exported views will use Backdrop core translation by default. Enable this to always use the configured translation method.'),
+    '#default_value' => $config->get('localize_all'),
+  );
+
   $options = views_fetch_plugin_names('display_extender');
   $form['extenders'] = array(
     '#type' => 'fieldset',
