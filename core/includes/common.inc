@@ -2391,7 +2391,12 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
   }
 
   // Create a DateTime object from the timestamp.
-  $date_time = date_create('@' . $timestamp);
+  if ($timestamp != NULL && !empty($timestamp)) {
+    $date_time = date_create('@' . intval($timestamp));
+  }
+  else {
+    $date_time = date_create('@' . time());
+  }
   // Set the time zone for the DateTime object.
   date_timezone_set($date_time, $timezones[$timezone]);
 
