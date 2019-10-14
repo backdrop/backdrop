@@ -353,6 +353,14 @@
   max-width: 100%;
 }
 
+#views-page-path {
+  display: inline-block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 100%;
+}
+
 /* @end */
 
 /* @group Settings forms */
