@@ -277,7 +277,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     // This will create a new revision that is not "front facing".
     $new_node_revision = clone $node;
     $new_body = $this->randomName();
-    $new_node_revision->body[LANGUAGE_NOT_SPECIFIED][0]['value'] = $new_body;
+    $new_node_revision->body[LANGUAGE_NONE][0]['value'] = $new_body;
     // Save this as a non-default revision.
     $new_node_revision->revision = TRUE;
     $new_node_revision->isDefaultRevision = FALSE;
