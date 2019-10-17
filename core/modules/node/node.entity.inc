@@ -393,7 +393,7 @@ class Node extends Entity {
   }
 
   /**
-   * Overrides Drupal\entity\Entity::getRevisionId().
+   * Overrides Backdrop\entity\Entity::getRevisionId().
    */
   public function getRevisionId() {
     return $this->vid;
@@ -481,7 +481,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
         // Update the base node table, but only if this revision is marked as
         // the default.
         if ($entity->isDefaultRevision()) {
-          $return = drupal_write_record($this->entityInfo['base table'], $entity, $this->idKey);
+          $return = backdrop_write_record($this->entityInfo['base table'], $entity, $this->idKey);
         }
         else {
           // @todo, should a different value be returned when saving an entity

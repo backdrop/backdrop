@@ -283,11 +283,11 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     $new_node_revision->isDefaultRevision = FALSE;
     node_save($new_node_revision);
 
-    $this->drupalGet("node/$node->nid");
+    $this->backdropGet("node/$node->nid");
     $this->assertNoText($new_body, t('Revision body text is not present on default version of node.'));
 
     // Verify that the new body text is present on the revision.
-    $this->drupalGet("node/$node->nid/revisions/" . $new_node_revision->vid . "/view");
+    $this->backdropGet("node/$node->nid/revisions/" . $new_node_revision->vid . "/view");
     $this->assertText($new_body, t('Revision body text is present when loading specific revision.'));
 
     // Verify that the non-default revision vid is greater than the default
