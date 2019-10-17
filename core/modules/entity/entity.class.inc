@@ -307,14 +307,14 @@ abstract class Entity extends stdClass implements EntityInterface {
   }
 
   /**
-   * Implements Drupal\entity\EntityInterface::getRevisionId().
+   * Implements Backdrop\entity\EntityInterface::getRevisionId().
    */
   public function getRevisionId() {
     return NULL;
   }
 
   /**
-   * Implements Drupal\entity\EntityInterface::isDefaultRevision().
+   * Implements Backdrop\entity\EntityInterface::isDefaultRevision().
    */
   public function isDefaultRevision($new_value = NULL) {
     $return = $this->isDefaultRevision;
