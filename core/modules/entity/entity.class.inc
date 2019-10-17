@@ -188,12 +188,15 @@ interface EntityInterface {
   public function getRevisionId();
 
   /**
-   * Checks if this entity is the current revision.
+   * Checks if this entity is the default revision.
+   *
+   * @param bool $new_value
+   *   (optional) A Boolean to (re)set the isDefaultRevision flag.
    *
    * @return bool
-   *   TRUE if the entity is the current revision, FALSE otherwise.
+   *   TRUE if the entity is the default revision, FALSE otherwise.
    */
-  public function isCurrentRevision();
+  public function isDefaultRevision($new_value = NULL);
 }
 
 /**
@@ -202,11 +205,11 @@ interface EntityInterface {
 abstract class Entity extends stdClass implements EntityInterface {
 
   /**
-   * Indicates whether this is the current revision.
+   * Indicates whether this is the default revision.
    *
    * @var bool
    */
-  public $isCurrentRevision = TRUE;
+  public $isDefaultRevision = TRUE;
 
   /**
    * Constructs a new entity object.
@@ -311,10 +314,14 @@ abstract class Entity extends stdClass implements EntityInterface {
   }
 
   /**
-   * Implements Drupal\entity\EntityInterface::isCurrentRevision().
+   * Implements Drupal\entity\EntityInterface::isDefaultRevision().
    */
-  public function isCurrentRevision() {
-    return $this->isCurrentRevision;
+  public function isDefaultRevision($new_value = NULL) {
+    $return = $this->isDefaultRevision;
+    if (isset($new_value)) {
+      $this->isDefaultRevision = (bool) $new_value;
+    }
+    return $return;
   }
 }
 
