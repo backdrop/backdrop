@@ -177,12 +177,36 @@ interface EntityInterface {
    * @since 1.13.0 Method added.
    */
   public function getFieldValues($field_name, $value_key = 'value', $langcode = NULL);
+
+  /**
+   * Returns the revision identifier of the entity.
+   *
+   * @return
+   *   The revision identifier of the entity, or NULL if the entity does not
+   *   have a revision identifier.
+   */
+  public function getRevisionId();
+
+  /**
+   * Checks if this entity is the current revision.
+   *
+   * @return bool
+   *   TRUE if the entity is the current revision, FALSE otherwise.
+   */
+  public function isCurrentRevision();
 }
 
 /**
  * Defines a base entity class.
  */
 abstract class Entity extends stdClass implements EntityInterface {
+
+  /**
+   * Indicates whether this is the current revision.
+   *
+   * @var bool
+   */
+  public $isCurrentRevision = TRUE;
 
   /**
    * Constructs a new entity object.
@@ -277,6 +301,20 @@ abstract class Entity extends stdClass implements EntityInterface {
       }
     }
     return $values;
+  }
+
+  /**
+   * Implements Drupal\entity\EntityInterface::getRevisionId().
+   */
+  public function getRevisionId() {
+    return NULL;
+  }
+
+  /**
+   * Implements Drupal\entity\EntityInterface::isCurrentRevision().
+   */
+  public function isCurrentRevision() {
+    return $this->isCurrentRevision;
   }
 }
 
