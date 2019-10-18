@@ -13,11 +13,21 @@ function dashboard_menu() {
   // Check if any dashboard is present and is not disabled.
   $dashboard_layouts = layout_load_multiple_by_path('admin/dashboard');
   $dashboard_layout = array_pop($dashboard_layouts);
-  if ($dashboard_layout->hasContexts(array('dashboard')) && !$dashboard_layout->disabled) {
+
+  if (!$dashboard_layout->disabled && $dashboard_layout->hasContexts(array('dashboard'))) {
+    $items['admin/dashboard'] = array(
+      'title' => 'Dashboard',
+      'type' => MENU_NORMAL_ITEM,
+      'weight' => -100,
+      'access arguments' => array('access dashboard'),
+      'description' => 'Get an overview of your site and manage administrative tasks.',
+    );
     $items['admin/dashboard/overview'] = array(
       'title' => 'Overview',
       'type' => MENU_DEFAULT_LOCAL_TASK,
-      'weight' => -100
+      'weight' => -100,
+      'access arguments' => array('access dashboard'),
+      'description' => 'Get an overview of your site and manage administrative tasks.',
     );
     $items['admin/dashboard/settings'] = array(
       'title' => 'Settings',
@@ -31,16 +41,6 @@ function dashboard_menu() {
   }
 
   return $items;
-}
-
-/**
- * Implements hook_menu().
- */
-function dashboard_menu_alter(&$items) {
-  if (isset($items['admin/dashboard'])) {
-    // Add a description for the admin and admin/index pages.
-    $items['admin/dashboard']['description'] = 'Get an overview of your site and manage administrative tasks.';
-  }
 }
 
 /**
