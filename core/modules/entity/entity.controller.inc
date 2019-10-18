@@ -118,13 +118,22 @@ class DefaultEntityController implements EntityControllerInterface {
   protected $revisionTable;
 
   /**
+   * Whether this entity type should use the persistent entity cache.
+   *
+   * Set by entity info.
+   *
+   * @var boolean
+   */
+  protected $persistanctCache;
+
+  /**
    * Whether this entity type should use the static cache.
    *
    * Set by entity info.
    *
    * @var boolean
    */
-  protected $cache;
+  protected $staticCache;
 
   /**
    * Implements EntityControllerInterface::__construct().
@@ -151,7 +160,17 @@ class DefaultEntityController implements EntityControllerInterface {
     }
 
     // Check if the entity type supports static caching of loaded entities.
-    $this->cache = !empty($this->entityInfo['static cache']);
+    $this->staticCache = !empty($this->entityInfo['static cache']);
+
+    // Check if the entity type supports usage of the persistant entity cache.
+    if (isset($this->entityInfo['entity cache'])
+      && $this->entityInfo['entity cache']
+      && db_table_exists('cache_entity_' . $this->entityType)) {
+      $this->persistanctCache = TRUE;
+    }
+    else {
+      $this->entityCache = FALSE;
+    }
   }
 
   /**
@@ -159,7 +178,7 @@ class DefaultEntityController implements EntityControllerInterface {
    */
   public function resetCache(array $ids = NULL) {
     // Reset the persistent cache.
-    if (isset($this->entityInfo['entity cache']) && $this->entityInfo['entity cache']) {
+    if ($this->persistanctCache) {
       if (!empty($ids)) {
         cache_clear_all($ids, 'cache_entity_' . $this->entityType);
       }
@@ -239,7 +258,7 @@ class DefaultEntityController implements EntityControllerInterface {
 
     // Try to load entities from the static cache, if the entity type supports
     // static caching.
-    if ($this->cache && !$revision_id) {
+    if ($this->staticCache && !$revision_id) {
       $entities += $this->cacheGet($ids, $conditions);
       // If any entities were loaded, remove them from the ids still to load.
       if ($passed_ids) {
@@ -248,7 +267,7 @@ class DefaultEntityController implements EntityControllerInterface {
     }
 
     // Try to load entities from the persistent cache.
-    if (isset($this->entityInfo['entity cache']) && $this->entityInfo['entity cache'] && !$revision_id && $ids && !$conditions) {
+    if ($this->persistanctCache && !$revision_id && $ids && !$conditions) {
       $cached_entities = array();
       if ($ids && !$conditions) {
         $cached = cache_get_multiple($ids, 'cache_entity_' . $this->entityType);
@@ -265,7 +284,7 @@ class DefaultEntityController implements EntityControllerInterface {
       // If any entities were loaded, remove them from the ids still to load.
       $ids = array_diff($ids, array_keys($cached_entities));
 
-      if ($this->cache) {
+      if ($this->staticCache) {
         // Add entities to the cache if we are not loading a revision.
         if (!empty($cached_entities) && !$revision_id) {
           $this->cacheSet($cached_entities);
@@ -298,7 +317,7 @@ class DefaultEntityController implements EntityControllerInterface {
     }
 
     // Add entities to the entity cache if we are not loading a revision.
-    if (isset($this->entityInfo['entity cache']) && $this->entityInfo['entity cache'] && !empty($queried_entities) && !$revision_id) {
+    if ($this->persistanctCache && !empty($queried_entities) && !$revision_id) {
       // Only cache the entities which were loaded by ID. Entities that were
       // loaded based on conditions will never be found via cacheGet() and we
       // would keep on caching them.
@@ -312,7 +331,7 @@ class DefaultEntityController implements EntityControllerInterface {
       }
     }
 
-    if ($this->cache) {
+    if ($this->staticCache) {
       // Add entities to the cache if we are not loading a revision.
       if (!empty($queried_entities) && !$revision_id) {
         $this->cacheSet($queried_entities);
