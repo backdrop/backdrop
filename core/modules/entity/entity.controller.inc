@@ -169,7 +169,7 @@ class DefaultEntityController implements EntityControllerInterface {
       $this->persistanctCache = TRUE;
     }
     else {
-      $this->entityCache = FALSE;
+      $this->persistanctCache = FALSE;
     }
   }
 
