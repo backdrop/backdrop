@@ -351,16 +351,16 @@ function entity_extract_ids($entity_type, $entity) {
  *   An entity object, initialized with the IDs provided.
  */
 function entity_create_stub_entity($entity_type, $ids) {
-  $entity = new stdClass();
   $info = entity_get_info($entity_type);
-  $entity->{$info['entity keys']['id']} = $ids[0];
+  $entity_class = $info['entity class'];
+  $data[$info['entity keys']['id']] = $ids[0];
   if (!empty($info['entity keys']['revision']) && isset($ids[1])) {
-    $entity->{$info['entity keys']['revision']} = $ids[1];
+    $data[$info['entity keys']['revision']] = $ids[1];
   }
   if (!empty($info['entity keys']['bundle']) && isset($ids[2])) {
-    $entity->{$info['entity keys']['bundle']} = $ids[2];
+    $data[$info['entity keys']['bundle']] = $ids[2];
   }
-  return $entity;
+  return new $entity_class($data);
 }
 
 /**

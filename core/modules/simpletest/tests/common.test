@@ -20,8 +20,8 @@ class CommonBackdropAlterTestCase extends BackdropWebTestCase {
     $base_theme_info = array();
 
     $array = array('foo' => 'bar');
-    $entity = new stdClass();
-    $entity->foo = 'bar';
+    $object = new stdClass();
+    $object->foo = 'bar';
 
     // Verify alteration of a single argument.
     $array_copy = $array;
@@ -29,23 +29,23 @@ class CommonBackdropAlterTestCase extends BackdropWebTestCase {
     backdrop_alter('backdrop_alter', $array_copy);
     $this->assertEqual($array_copy, $array_expected, 'Single array was altered.');
 
-    $entity_copy = clone $entity;
-    $entity_expected = clone $entity;
-    $entity_expected->foo = 'Backdrop theme';
-    backdrop_alter('backdrop_alter', $entity_copy);
-    $this->assertEqual($entity_copy, $entity_expected, 'Single object was altered.');
+    $object_copy = clone $object;
+    $object_expected = clone $object;
+    $object_expected->foo = 'Backdrop theme';
+    backdrop_alter('backdrop_alter', $object_copy);
+    $this->assertEqual($object_copy, $object_expected, 'Single object was altered.');
 
     // Verify alteration of multiple arguments.
     $array_copy = $array;
     $array_expected = array('foo' => 'Backdrop theme');
-    $entity_copy = clone $entity;
-    $entity_expected = clone $entity;
-    $entity_expected->foo = 'Backdrop theme';
+    $object_copy = clone $object;
+    $object_expected = clone $object;
+    $object_expected->foo = 'Backdrop theme';
     $array2_copy = $array;
     $array2_expected = array('foo' => 'Backdrop theme');
-    backdrop_alter('backdrop_alter', $array_copy, $entity_copy, $array2_copy);
+    backdrop_alter('backdrop_alter', $array_copy, $object_copy, $array2_copy);
     $this->assertEqual($array_copy, $array_expected, 'First argument to backdrop_alter() was altered.');
-    $this->assertEqual($entity_copy, $entity_expected, 'Second argument to backdrop_alter() was altered.');
+    $this->assertEqual($object_copy, $object_expected, 'Second argument to backdrop_alter() was altered.');
     $this->assertEqual($array2_copy, $array2_expected, 'Third argument to backdrop_alter() was altered.');
 
     // Verify alteration order when passing an array of types to backdrop_alter().
