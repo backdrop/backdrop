@@ -360,6 +360,14 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     backdrop_set_title(t('Insert link'));
   }
 
+  $form['text'] = array(
+    '#title' => t('Link text'),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['text']) ? $values['text'] : '',
+    '#parents' => array('attributes', 'text'),
+    '#weight' => -11,
+  );
+
   // Use a "textfield" rather than "url" to allow relative paths.
   $form['href'] = array(
     '#title' => t('Link destination'),
@@ -424,13 +432,6 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
   else {
     $form['file']['src']['#weight'] = -10;
   }
-
-  $form['text'] = array(
-    '#title' => t('Link text'),
-    '#type' => 'textfield',
-    '#default_value' => isset($values['text']) ? $values['text'] : '',
-    '#parents' => array('attributes', 'text'),
-  );
 
   $form['more'] = array(
     '#title' => t('More link options'),
@@ -628,7 +629,7 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
  */
 function _filter_get_file_id($href) {
   $result = 0;
-  
+
   // Check URI for valid file scheme.
   if (!file_valid_uri($href)){
     return $result;
