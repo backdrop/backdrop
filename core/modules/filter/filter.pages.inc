@@ -234,6 +234,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
       'data-editor-image-toggle' => t('Select from library'),
     ),
     '#weight' => -8,
+    '#maxlength' => 256,
   );
 
   // If no current value or an existing file exists, default to showing
@@ -372,6 +373,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
       'data-editor-image-toggle' => t('Link to existing content'),
     ),
     '#weight' => -10,
+    '#maxlength' => 256,
     '#autocomplete_path' => 'filter-link/autocomplete',
     '#description' => t('Start typing to see a list of suggestions, enter the relative path to another page, or enter an external URL.<br>Examples: <em>About Us</em>, <em>/about</em>, or <em>http://backdropcms.org</em>'),
   );
@@ -628,7 +630,7 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
  */
 function _filter_get_file_id($href) {
   $result = 0;
-  
+
   // Check URI for valid file scheme.
   if (!file_valid_uri($href)){
     return $result;
