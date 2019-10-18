@@ -1233,6 +1233,15 @@ div.filter-options select {
 .block-dashboard-updates .block-title {
   background-image: url('../images/info-circle--black--64.png');
 }
+.block-dashboard-menu .block-title {
+  background-image: url('../images/stream--black--64.png');
+}
+.block-dashboard-node-types .block-title {
+  background-image: url('../images/cubes--black--64.png');
+}
+.block-dashboard-taxonomy .block-title {
+  background-image: url('../images/tags--black--64.png');
+}
 
 /* admin/appearance */
 #system-themes-page h2 {
