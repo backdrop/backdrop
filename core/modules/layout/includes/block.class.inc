@@ -154,10 +154,30 @@ class Block extends LayoutHandler {
    */
   function getAdminPreview() {
     $info = $this->getBlockInfo();
+    if (isset($this->settings['content'])) {
+      $block_content = $this->settings['content'];
+    }
+
     $preview = '';
-    if (isset($info['description'])) {
+
+    // If the block has no content (not a custom block), show its description.
+    if (isset($info['description']) && empty($block_content)) {
       $preview .= '<p>' . $info['description'] . '</p>';
     }
+
+    // If the block is a custom block with content, then show a summary of its
+    // content instead of its description.
+    if (!empty($block_content)) {
+      $block_content = check_plain(strip_tags($block_content));
+      $summary_length = 100;
+      $preview .= '<p>' . substr($block_content, 0, $summary_length);
+      // If the content was trimmed down, add an elipsis at the end of the text.
+      if (strlen($block_content) > $summary_length) {
+        $preview .= '...';
+      }
+      $preview .= '</p>';
+    }
+
     $preview .= $this->getAdminConditionsPreview();
 
     return $preview;
