@@ -6,7 +6,7 @@
  */
 
 require_once BACKDROP_ROOT . '/core/modules/field/tests/field.test';
-require_once BACKDROP_ROOT . '/core/modules/field/modules/list/tests/list.test';
+require_once BACKDROP_ROOT . '/core/modules/list/tests/list.test';
 
 class OptionsWidgetsTestCase extends FieldTestCase {
   function setUp() {
