@@ -156,6 +156,118 @@ function _node_mass_update_batch_finished($success, $results, $operations) {
 }
 
 /**
+ * Multiple node scheduling form.
+ *
+ * @see node_multiple_schedule_form_submit()
+ *
+ * @ingroup forms
+ */
+function node_multiple_schedule_form($form, &$form_state) {
+  if (isset($form_state['nids'])) {
+    $nids = $form_state['nids'];
+  }
+  elseif (isset($_SESSION['node_schedule_action']['timestamp']) && (REQUEST_TIME - $_SESSION['node_schedule_action']['timestamp'] < 6000)) {
+    $nids = $_SESSION['node_schedule_action']['nids'];
+    $form_state['nids'] = $nids;
+    $form_state['cache'] = TRUE;
+    unset($_SESSION['node_schedule_action']);
+  }
+  else {
+    $nids = array();
+  }
+
+  $form['#tree'] = TRUE;
+
+  if (empty($nids)) {
+    $destination = isset($_GET['destination']) ? $_GET['destination'] : 'admin/content';
+    $form['empty']['#markup'] = '<p>' . t('Return to the <a href="!url">content administration page</a>.', array('!url' => url($destination))) . '</p>';
+    backdrop_set_message(t('No content has been selected for scheduling.'), 'error');
+    return $form;
+  }
+
+  $form['node_list'] = array(
+    '#theme' => 'item_list',
+    '#items' => array(),
+  );
+
+  $rows = db_query('SELECT nid, title, status FROM {node} WHERE nid IN (:nids)', array(':nids' => $nids))->fetchAllAssoc('nid');
+  $already_published_count = 0;
+  foreach ($rows as $nid => $node) {
+    $form['nodes'][$nid] = array(
+      '#type' => 'hidden',
+      '#value' => $nid,
+    );
+    $form['node_list']['#items'][] = check_plain($node->title) . ($node->status ? ' (' . t('already published') . ')' : '');
+    if ($node->status) {
+      $already_published_count++;
+    }
+  }
+
+  // Default the scheduled time to the current time + 1 day.
+  $form['scheduled'] = array(
+    '#type' => module_exists('date') ? 'date_popup' : 'textfield',
+    '#title' => t('Publish on'),
+    // Note #date_ properties only apply if date module is enabled.
+    '#date_format' => 'Y-m-d g:i a',
+    '#date_increment' => 10,
+    '#default_value' => format_date(REQUEST_TIME + 86400, 'custom', 'Y-m-d g:i a'),
+  );
+
+  $form['unpublish'] = array(
+    '#title' => t('Unpublish any published posts'),
+    '#type' => 'checkbox',
+    '#description' => t('If content is already published, it will not be scheduled. Check this option to unpublish this content.'),
+    '#access' => $already_published_count > 0,
+  );
+
+  // Prepare cancel destination.
+  if (isset($_GET['destination'])) {
+    $options = backdrop_parse_url($_GET['destination']);
+  }
+  else {
+    $options = array('path' => 'admin/content');
+  }
+
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Schedule publishing'),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $options['path'],
+    '#options' => $options,
+  );
+
+  return $form;
+}
+
+/**
+ * Form submission handler for node_multiple_schedule_form().
+ */
+function node_multiple_schedule_form_submit($form, &$form_state) {
+  $schedule_date = new BackdropDateTime($form_state['values']['scheduled']);
+  $scheduled_timestamp = $schedule_date->format('U');
+  $scheduled_count = 0;
+
+  $nodes = node_load_multiple($form_state['values']['nodes']);
+  foreach ($nodes as $node) {
+    if ($form_state['values']['unpublish']) {
+      $node->status = NODE_NOT_PUBLISHED;
+    }
+    if ($node->status == NODE_NOT_PUBLISHED) {
+      $node->scheduled = $scheduled_timestamp;
+      $scheduled_count++;
+    }
+  }
+  watchdog('content', 'Scheduled @count posts.', array('@count' => $scheduled_count));
+
+  backdrop_set_message(format_plural($scheduled_count, 'Scheduled 1 post.', 'Scheduled @count posts.'));
+  $form_state['redirect'] = 'admin/content';
+}
+
+/**
  * Multiple node deletion confirmation form.
  *
  * @see node_multiple_delete_confirm_submit()
@@ -179,7 +291,7 @@ function node_multiple_delete_confirm($form, &$form_state) {
   $form['#tree'] = TRUE;
 
   if (empty($nids)) {
-    $destination = isset($_GET['destination']) ? $_GET['destination'] : 'admin/content/node';
+    $destination = isset($_GET['destination']) ? $_GET['destination'] : 'admin/content';
     $form['empty']['#markup'] = '<p>' . t('Return to the <a href="!url">content administration page</a>.', array('!url' => url($destination))) . '</p>';
     backdrop_set_message(t('No content has been selected for deletion.'), 'error');
     return $form;

@@ -1686,6 +1686,14 @@ function node_layout_context_info() {
  * Implements hook_menu().
  */
 function node_menu() {
+  $items['admin/content/node/schedule'] = array(
+    'title' => 'Schedule content publishing',
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('node_multiple_schedule_form'),
+    'access arguments' => array('access content overview'),
+    'file' => 'node.admin.inc',
+  );
   $items['admin/content/node/delete'] = array(
     'title' => 'Confirm content deletion',
     'type' => MENU_VISIBLE_IN_BREADCRUMB,
@@ -3418,6 +3426,11 @@ function node_action_info() {
       'label' => t('Unpublish content'),
       'callback' => 'node_unpublish_action'
     ),
+    'node_schedule_action' => array(
+      'type' => 'node',
+      'label' => t('Schedule publishing'),
+      'callback' => 'node_schedule_action'
+    ),
     'node_make_sticky_action' => array(
       'type' => 'node',
       'label' => t('Make content sticky'),
@@ -3474,6 +3487,34 @@ function node_publish_action(Node $node, &$context) {
 function node_unpublish_action(Node $node, &$context) {
   $node->status = NODE_NOT_PUBLISHED;
   $node->save();
+}
+
+/**
+ * Sets the scheduled property of a node to a specified timestamp.
+ *
+ * @param Node $node
+ *   A node entity.
+ * @param $context
+ *   Contextual information about the triggered action.
+ *
+ * @ingroup actions
+ */
+function node_schedule_action(Node $node, &$context) {
+  // Save the list of nodes to be deleted in the session. Append to the existing
+  // list if within the last minute, otherwise start a new list of nodes.
+  $last_action_time = 0;
+  if (isset($_SESSION['node_schedule_action']['timestamp'])) {
+    $last_action_time = $_SESSION['node_schedule_action']['timestamp'];
+  }
+  if (REQUEST_TIME - $last_action_time > 60) {
+    $_SESSION['node_schedule_action'] = array(
+      'timestamp' => REQUEST_TIME,
+      'nids' => array(),
+    );
+  }
+
+  $_SESSION['node_schedule_action']['nids'][] = $node->nid;
+  $context['redirect'] = 'admin/content/node/schedule';
 }
 
 /**
