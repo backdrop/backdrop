@@ -184,7 +184,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     $node = $this->backdropCreateNode();
     $settings = get_object_vars($node);
     $settings['revision'] = 1;
-    $settings['isDefaultRevision'] = TRUE;
+    $settings['is_default_revision'] = TRUE;
 
     $nodes = array();
     $logs = array();
@@ -202,7 +202,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
       // Make sure we get revision information.
       $node = node_load($node->nid);
       $settings = get_object_vars($node);
-      $settings['isDefaultRevision'] = TRUE;
+      $settings['is_default_revision'] = TRUE;
 
       $nodes[] = $node;
     }
@@ -280,7 +280,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     $new_node_revision->body[LANGUAGE_NONE][0]['value'] = $new_body;
     // Save this as a non-default revision.
     $new_node_revision->revision = TRUE;
-    $new_node_revision->isDefaultRevision = FALSE;
+    $new_node_revision->is_default_revision = FALSE;
     node_save($new_node_revision);
 
     $this->backdropGet("node/$node->nid");
