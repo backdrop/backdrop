@@ -295,6 +295,7 @@ class DefaultEntityController implements EntityControllerInterface {
       // Compare revision id of the base and revision table, if equal then this
       // is the default revision.
       $query->addExpression('base.' . $this->revisionKey . ' = revision.' . $this->revisionKey, 'isDefaultRevision');
+      $query->addField('base', $this->revisionKey, 'default_revision');
     }
 
     $query->fields('base', $entity_fields);
