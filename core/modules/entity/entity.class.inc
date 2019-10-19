@@ -191,7 +191,7 @@ interface EntityInterface {
    * Checks if this entity is the default revision.
    *
    * @param bool $new_value
-   *   (optional) A Boolean to (re)set the isDefaultRevision flag.
+   *   (optional) A Boolean to (re)set the is_default_revision flag.
    *
    * @return bool
    *   TRUE if the entity is the default revision, FALSE otherwise.
@@ -209,7 +209,7 @@ abstract class Entity extends stdClass implements EntityInterface {
    *
    * @var bool
    */
-  public $isDefaultRevision = TRUE;
+  public $is_default_revision = TRUE;
 
   /**
    * Constructs a new entity object.
@@ -317,9 +317,9 @@ abstract class Entity extends stdClass implements EntityInterface {
    * Implements Backdrop\entity\EntityInterface::isDefaultRevision().
    */
   public function isDefaultRevision($new_value = NULL) {
-    $return = $this->isDefaultRevision;
+    $return = $this->is_default_revision;
     if (isset($new_value)) {
-      $this->isDefaultRevision = (bool) $new_value;
+      $this->is_default_revision = (bool) $new_value;
     }
     return $return;
   }

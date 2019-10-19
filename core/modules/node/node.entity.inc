@@ -31,7 +31,7 @@ class Node extends Entity {
    *
    * @var boolean
    */
-  public $isDefaultRevision = TRUE;
+  public $is_default_revision = TRUE;
 
   /**
    * The node content type (bundle).
@@ -485,7 +485,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
         }
         else {
           // @todo, should a different value be returned when saving an entity
-          // with $isDefaultRevision = FALSE?
+          // with $is_default_revision = FALSE?
           $return = FALSE;
         }
       }
