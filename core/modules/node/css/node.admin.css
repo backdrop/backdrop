@@ -7,6 +7,6 @@
 /**
  * Revisions overview screen.
  */
-.revision-current {
+table tr.revision-default {
   background: #ffc;
 }

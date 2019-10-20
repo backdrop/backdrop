@@ -885,15 +885,43 @@ function node_revision_overview($node) {
   }
   foreach ($revisions as $revision) {
     $row = array();
-    if ($revision->current_vid > 0) {
-      $row[] = array('data' => t('!date by !username', array('!date' => l(format_date($revision->timestamp, 'short'), "node/$node->nid"), '!username' => theme('username', array('account' => $revision))))
-                               . (($revision->log != '') ? '<p class="revision-log">' . filter_xss($revision->log) . '</p>' : ''),
-                     'class' => array('revision-current'));
-      $row[] = array('data' => backdrop_placeholder(t('current revision')), 'class' => array('revision-current'));
+    $is_default_revision = ($revision->vid == $node->default_revision);
+    $links = array();
+    $row_class = '';
+    if ($is_default_revision) {
+      $row_class = 'revision-default';
+      $row['revision'] = t('!date by !username', array('!date' => l('<strong>#' . $revision->vid . ':</strong> ' . format_date($revision->timestamp, 'short'), "node/$node->nid", array('html' => TRUE)), '!username' => theme('username', array('account' => $revision))))
+                               . (($revision->log != '') ? '<p class="revision-log">' . filter_xss($revision->log) . '</p>' : '');
+      $publish_action = ($revision->status == NODE_PUBLISHED) ? 'unpublish' : 'pubish';
+      // @todo: Add proper permissions check.
+      if (TRUE) {
+        $links['edit'] = array(
+          'title' => t('Edit'),
+          'href' => "node/$node->nid/edit",
+        );
+      }
+      if (TRUE) {
+        $links[$publish_action] = array(
+          'title' => t($publish_action),
+          'href' => "node/$node->nid/view/publish",
+        );
+      }
+      if (!$isEditRevision && $revert_permission) {
+        $links['revert'] = array(
+          'title' => t('revert'),
+          'href' => "node/$node->nid/revisions/$revision->vid/revert",
+        );
+      }
     }
     else {
-      $row[] = t('!date by !username', array('!date' => l(format_date($revision->timestamp, 'short'), "node/$node->nid/revisions/$revision->vid/view"), '!username' => theme('username', array('account' => $revision))))
+      $row['revision'] = t('!date by !username', array('!date' => l('<strong>#' . $revision->vid . ':</strong> ' . format_date($revision->timestamp, 'short'), "node/$node->nid/revisions/$revision->vid/view", array('html' => TRUE)), '!username' => theme('username', array('account' => $revision))))
                . (($revision->log != '') ? '<p class="revision-log">' . filter_xss($revision->log) . '</p>' : '');
+      if (TRUE) {
+        $links['edit'] = array(
+          'title' => t('Edit'),
+          'href' => "node/$node->nid/revisions/$revision->vid/edit",
+        );
+      }
       if ($revert_permission) {
         $links['revert'] = array(
           'title' => t('Revert'),
@@ -906,14 +934,14 @@ function node_revision_overview($node) {
           'href' => "node/$node->nid/revisions/$revision->vid/delete",
         );
       }
-      $row[] = array(
-        'data' => array(
-          '#type' => 'operations',
-          '#links' => $links,
-        ),
-      );
     }
-    $rows[] = $row;
+    $row[] = array(
+      'data' => array(
+        '#type' => 'operations',
+        '#links' => $links,
+      ),
+    );
+    $rows[] = array('data' => $row, 'class' => array($row_class));
   }
 
   $build['node_revisions_table'] = array(
