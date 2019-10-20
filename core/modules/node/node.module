@@ -1847,13 +1847,30 @@ function node_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'node.pages.inc',
   );
-  $items['node/%node/revisions/%/view'] = array(
-    'title' => 'Revisions',
+  $items['node/%node/revisions/%'] = array(
+    'title' => 'View draft',
     'load arguments' => array(3),
     'page callback' => 'node_show',
     'page arguments' => array(1, TRUE),
     'access callback' => '_node_revision_access',
     'access arguments' => array(1),
+  );
+  $items['node/%node/revisions/%/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['node/%node/revisions/%/edit'] = array(
+    'title' => 'Edit draft',
+    'load arguments' => array(3),
+    'page callback' => 'node_page_edit',
+    'page arguments' => array(1),
+    'access callback' => '_node_revision_access',
+    'access arguments' => array(1),
+    'weight' => 2,
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'file' => 'node.pages.inc',
   );
   $items['node/%node/revisions/%/revert'] = array(
     'title' => 'Revert to earlier revision',
