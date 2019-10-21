@@ -244,7 +244,24 @@ function file_field_insert($entity_type, $entity, $field, $instance, $langcode, 
  * Checks for files that have been removed from the object.
  */
 function file_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  $id = $entity->id();
+  if (method_exists($entity, 'id')) {
+    $id = $entity->id();
+  }
+  else {
+    // @todo Remove backwards-compatibility and logging in Backdrop 2.0.
+    $variables = array('%type' => $entity_type);
+    if (property_exists($entity, 'id')) {
+      $id = $entity->id;
+      watchdog('file', 'The entity type %type does not have an ID method, but does have an ID property', $variables, WATCHDOG_WARNING);
+    }
+    elseif (isset($entity['id']))  {
+      $id = $entity['id'];
+      watchdog('file', 'The entity type %type does not have an ID method, but does have an ID key', $variables, WATCHDOG_WARNING);
+    }
+    else {
+      watchdog('file', 'The entity type %type has no ID', $variables, WATCHDOG_ERROR);
+    }
+  }
 
   // On new revisions, all files are considered to be a new usage and no
   // deletion of previous file usages are necessary.
