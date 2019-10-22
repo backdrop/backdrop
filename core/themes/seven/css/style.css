@@ -1102,6 +1102,27 @@ textarea.form-textarea:focus {
   color: #000;
   border-color: #43afe4;
 }
+input[type=color] {
+  border-radius: 100%;
+  height: 35px;
+  width: 35px;
+  padding: 0px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+/* Styles to control the color inputs in Firefox. */
+input[type=color]::-moz-color-swatch {
+  border: none;
+  border-radius: 100%;
+}
+/* Styles to control the color inputs in Chrome. */
+input[type=color]::-webkit-color-swatch {
+  border: none;
+  border-radius: 100%;
+}
+input[type=color]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
 ul.action-links {
   margin: 1em 0;
   padding: 0 20px 0 20px; /* LTR */
