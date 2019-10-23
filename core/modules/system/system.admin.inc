@@ -1270,7 +1270,7 @@ function system_site_information_settings($form, &$form_state) {
     '#title' => t('Default front page'),
     '#default_value' => ($site_config->get('site_frontpage') != 'node' ? backdrop_get_path_alias($site_config->get('site_frontpage')) : ''),
     '#size' => 40,
-    '#description' => t('Optionally, specify a relative URL to display as the front page.  Leave blank to display the default content feed.'),
+    '#description' => t('Optionally, specify a relative URL to display as the front page. If left blank the URL will default to home. The front page will use whichever layout is currently associated with this path.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($site_config->get('clean_url') ? '' : '?q='),
   );
   $form['front_page']['default_nodes_main'] = array(
