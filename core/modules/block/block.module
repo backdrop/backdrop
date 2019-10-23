@@ -260,17 +260,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#maxlength' => 64,
     '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
     '#required' => TRUE,
-    '#weight' => -20,
     '#id' => 'block-info',
-  );
-  $form['description'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Admin description'),
-    '#default_value' => $edit['description'],
-    '#maxlength' => 128,
-    '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
-    '#weight' => -18,
-    '#id' => 'block-description',
   );
   $form['delta'] = array(
     '#type' => 'machine_name',
@@ -281,8 +271,15 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
       'source' => array('info'),
     ),
     '#description' => t('A unique machine-readable name for this Block. It must only contain lowercase letters, numbers, and underscores.'),
-    '#weight' => -19,
     '#disabled' => isset($edit['delta']),
+  );
+  $form['description'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Admin description'),
+    '#default_value' => $edit['description'],
+    '#maxlength' => 128,
+    '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
+    '#id' => 'block-description',
   );
   $form['title'] = array(
     '#type' => 'textfield',
@@ -290,7 +287,6 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#default_value' => $edit['title'],
     '#maxlength' => 255,
     '#description' => t('The title of the block as shown to the user. This will affect all places where this block is used.'),
-    '#weight' => -17,
   );
   $form['body'] = array(
     '#type' => 'text_format',
@@ -300,7 +296,6 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#editor_uploads' => TRUE,
     '#rows' => 8,
     '#required' => TRUE,
-    '#weight' => -16,
   );
 
   // Add default language select dropdown on the stand-alone config form only.
@@ -327,7 +322,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
       $form['translation_help'] = array(
         '#type' => 'help',
         '#markup' => '<strong>' . t('Translation notice') . ':</strong> ' . t('The settings in this form are for the source translation only. Translations may be modified on the <a href="!url">block\'s translation settings page</a>.', array('!url' => url('admin/structure/block/manage/' . $edit['delta'] . '/translation'))),
-        '#weight' => -21,
+        '#weight' => -99,
       );
     }
 
@@ -336,10 +331,6 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
         '[name=title_display]' => array('value' => LAYOUT_TITLE_DEFAULT),
       ),
     );
-    $form['info']['#weight'] = 5;
-    $form['delta']['#weight'] = 6;
-    $form['delta']['#machine_name']['source'] = array('block_settings', 'info');
-    $form['description']['#weight'] = 7;
     $form['reusable'] = array(
       '#type' => 'checkbox',
       '#title' => t('Make this block reusable'),
@@ -348,6 +339,10 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
       '#default_value' => TRUE,
       '#disabled' => TRUE,
     );
+    $form['info']['#weight'] = 5;
+    $form['delta']['#weight'] = 6;
+    $form['delta']['#machine_name']['source'] = array('block_settings', 'info');
+    $form['description']['#weight'] = 7;
   }
 
   return $form;

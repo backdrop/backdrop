@@ -1017,7 +1017,7 @@ function backdrop_process_form($form_id, &$form, &$form_state) {
  *
  * @param $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  * @param $form
  *   An associative array containing the structure of the form.
  * @param $form_state
@@ -1168,7 +1168,7 @@ function _backdrop_invalid_token_set_form_error() {
  *
  * @param $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  * @param $form
  *   An associative array containing the structure of the form, which is passed
  *   by reference. Form validation handlers are able to alter the form structure
@@ -1362,7 +1362,7 @@ function backdrop_redirect_form($form_state) {
  *   not be repeated in the submission step.
  * @param $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  */
 function _form_validate(&$elements, &$form_state, $form_id = NULL) {
   // Also used in the installer, pre-database setup.
@@ -1827,7 +1827,7 @@ function form_error(&$element, $message = '') {
  *
  * @param string $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  * @param array $element
  *   An associative array containing the structure of the current element.
  * @param array $form_state
@@ -3241,7 +3241,8 @@ function theme_checkbox($variables) {
 }
 
 /**
- * Adds form element theming to an element if its title or description is set.
+ * Adds additional customization to a form element when its title or description
+ * is set.
  *
  * This is used as a pre render function for checkboxes and radios.
  */

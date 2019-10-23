@@ -132,6 +132,12 @@
   border-bottom: none;
 }
 
+/* Layout columns */
+.layout-content-form .row > div,
+.layout-content-form .row > main {
+  display: flex;
+}
+
 /* Layout editor. */
 .layout-editor-region {
   width: 100%;
@@ -305,6 +311,66 @@
 
 /* Layout Misc */
 .layout-access-list ul {
+  list-style: none;
   margin: 1em 0;
-  padding: 0 20px;
+  padding: 0;
+}
+.layout-access-list ul li {
+  background: #eee;
+  border-bottom: 1px solid #ccc;
+  padding: 0.1em 0.6em;
+}
+.layout-access-list .layout-condition .layout-operations {
+  display: inline-block;
+}
+.layout-content-form main {
+  /* Override Seven's styling. */
+  margin-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .layout-access-list .layout-condition .layout-operations {
+    float: right; /* LTR */
+  }
+  [dir="rtl"] .layout-access-list .layout-condition .layout-operations {
+    float: left;
+  }
+}
+
+.layout-flexible-region-buttons {
+  padding-bottom: 5px;
+}
+
+.layout-flexible-editor .flexible-row {
+  padding: 15px 0 0;
+}
+
+.layout-flexible-editor .flexible-row:hover {
+  background-color: #ffffff;
+  -webkit-box-shadow: 2px 2px 0 0 #d0d0d0;
+  -moz-box-shadow: 2px 2px 0 0 #d0d0d0;
+  box-shadow: 2px 2px 0 0 #d0d0d0;
+  cursor: move;
+}
+
+.flexible-layout-add-row {
+  margin: 20px 40px 0;
+}
+
+.flexible-icon {
+  border: 2px solid #999;
+  border-radius: 3px;
+  padding: 1px;
+}
+
+.flexible-icon-region {
+  background-color: #ccc;
+  color: #fff;
+  background-clip: content-box;
+  text-align: center;
+}
+
+.form-item .form-item.form-item-region-count {
+  margin-right: 2em;
+  display: inline;
 }

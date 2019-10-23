@@ -179,6 +179,10 @@ function system_permission() {
     'block IP addresses' => array(
       'title' => t('Block IP addresses'),
     ),
+    'flush caches' => array(
+      'title' => t('Flush caches'),
+      'description' => t('Provides access to manually flush caches.'),
+    ),
   );
 }
 
@@ -1381,9 +1385,10 @@ function system_library_info() {
       ),
     ),
     'js' => array(
-      // Backdrop includes a "combined" file that bundles together both the
-      // main library and the keyboard support file.
-      'core/misc/smartmenus/jquery.smartmenus.combined.js' => array(
+      'core/misc/smartmenus/jquery.smartmenus.js' => array(
+        'group' => JS_LIBRARY,
+      ),
+      'core/misc/smartmenus/addons/keyboard/jquery.smartmenus.keyboard.js' => array(
         'group' => JS_LIBRARY,
       ),
     ),
@@ -2433,8 +2438,9 @@ function system_block_info() {
   foreach (menu_list_system_menus() as $menu_name => $title) {
     $custom_title = isset($all_menus[$menu_name]) ? $all_menus[$menu_name] : $title;
     $blocks[$menu_name] = array(
+      // Names from menu_list_system_menus() need to be translated through t().
       'info' => check_plain(t($custom_title)),
-      'description' => t('A hierarchical list of links for the @menu.', array('@menu' => t($title))),
+      'description' => t('A list of links for the menu: %title.', array('%title' => t($custom_title))),
     );
   }
   return $blocks;

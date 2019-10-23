@@ -479,7 +479,7 @@ function token_type_load($token_type) {
 }
 
 /**
- * Build a tree array of tokens used for theming or information.
+ * Build a tree array of tokens, commonly used for rendering the token browser.
  *
  * @param string $token_type
  *   The token type.

@@ -37,9 +37,9 @@ function admin_bar_output($complete = FALSE) {
     $content['#components'] = $components;
     $content['#complete'] = $complete;
 
-    // Add site name as CSS class for development/staging theming purposes. We
-    // leverage the cookie domain instead of HTTP_HOST to account for many (but
-    // not all) multi-domain setups (e.g. language-based sub-domains).
+    // Add site name as CSS class for development/staging purposes. We leverage
+    // the cookie domain instead of HTTP_HOST to account for many (but not all)
+    // multi-domain setups (e.g. language-based sub-domains).
     $classes = 'admin-bar-site' . backdrop_strtolower(preg_replace('/[^a-zA-Z0-9-]/', '-', $GLOBALS['cookie_domain']));
 
     // @todo Always output container to harden JS-less support.

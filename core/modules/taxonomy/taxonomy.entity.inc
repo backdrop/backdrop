@@ -96,10 +96,8 @@ class TaxonomyTerm extends Entity {
 
   /**
    * Implements EntityInterface::entityType().
-   *
-   * @since 1.13.0 This method is now static.
    */
-  public static function entityType() {
+  public function entityType() {
     return 'taxonomy_term';
   }
 

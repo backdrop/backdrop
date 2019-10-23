@@ -178,7 +178,13 @@ function update_helpful_links() {
     'title' => t('Home page'),
     'href' => '<front>',
   );
-  if (user_access('access administration pages')) {
+  if (module_exists('dashboard') && user_access('access dashboard')) {
+    $links['dashboard'] = array(
+      'title' => t('Dashboard'),
+      'href' => 'admin/dashboard',
+    );
+  }
+  elseif (user_access('access administration pages')) {
     $links['admin-pages'] = array(
       'title' => t('Administration pages'),
       'href' => 'admin',
@@ -337,14 +343,22 @@ function update_info_page() {
 function update_access_denied_page() {
   backdrop_add_http_header('Status', '403 Forbidden');
   watchdog('access denied', 'update.php', NULL, WATCHDOG_WARNING);
-  backdrop_set_title('Access denied');
-  return '<p>Access denied. You are not authorized to access this page. Log in using either an account with the <em>administer software updates</em> permission or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:</p>
-<ol>
- <li>With a text editor find the settings.php file on your system and open it.</li>
- <li>There is a line inside your settings.php file that says <code>$settings[&#39;update_free_access&#39;] = FALSE;</code>. Change it to <code>$settings[&#39;update_free_access&#39;] = TRUE;</code>.</li>
- <li>As soon as the update.php script is done, you must change the settings.php file back to its original form with <code>$settings[&#39;update_free_access&#39;] = FALSE;</code>.</li>
- <li>To avoid having this problem in the future, remember to log in to your website using either an account with the <em>administer software updates</em> permission or the site maintenance account (the account you created during installation) before you backup your database at the beginning of the update process.</li>
-</ol>';
+  backdrop_set_title(t('Access denied'));
+
+  $output = '';
+  $steps = array();
+
+  $output .= t('You are not authorized to access this page. Log in using either an account with the <em>administer software updates</em> permission, or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:');
+  $output = '<p>' . $output . '</p>';
+
+  $steps[] = t('Find the <code>settings.php</code> file on your system, and open it with a text editor.');
+  $steps[] = t('There is a line inside your <code>settings.php</code> file that says <code>$settings[\'update_free_access\'] = FALSE</code>. Change it to <code>$settings[\'update_free_access\'] = TRUE</code>.');
+  $steps[] = t('Reload this page. The database update script should be able to run now.');
+  $steps[] = t('As soon as the update script is done, you must change the <code>update_free_access</code> setting in the <code>settings.php</code> file back to <code>FALSE</code>: <code>$settings[\'update_free_access\'] = FALSE;</code>.');
+
+  $output .= theme('item_list', array('items' => $steps, 'type' => 'ol'));
+
+  return $output;
 }
 
 /**
@@ -464,6 +478,7 @@ if (empty($op) && update_access_allowed()) {
 
   // Load module basics.
   include_once BACKDROP_ROOT . '/core/includes/module.inc';
+  include_once BACKDROP_ROOT . '/core/includes/tablesort.inc';
   $module_list['system']['filename'] = 'core/modules/system/system.module';
   module_list(TRUE, FALSE, FALSE, $module_list);
   backdrop_load('module', 'system');

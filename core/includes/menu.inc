@@ -1129,7 +1129,7 @@ function menu_tree_output($tree, $_current_depth = 0) {
     // Add the active class to the wrapper itself if necessary as the l()
     // function would.
     if (($data['link']['href'] == $_GET['q'] || ($data['link']['href'] == '<front>' && backdrop_is_front_page())) &&
-      (empty($data['link']['language']) || $data['link']['language']->langcode == $language_url->langcode)) {
+      (empty($data['link']['langcode']) || $data['link']['langcode'] == $language_url->langcode)) {
       $class[] = 'active';
     }
     $class[] = 'menu-mlid-' . $data['link']['mlid'];
@@ -1292,8 +1292,8 @@ function menu_tree_get_path($menu_name) {
  *
  * @return
  *   An array of menu links, in the order they should be rendered. The array
- *   is a list of associative arrays -- these have two keys, link and below.
- *   link is a menu item, ready for theming as a link. Below represents the
+ *   is a list of associative arrays -- these have two keys, 'link' and 'below'.
+ *   'link' is a menu item, ready for rendering as a link. 'below' represents the
  *   submenu below the link if there is one, and it is a subtree that has the
  *   same structure described for the top-level array.
  */
