@@ -530,9 +530,9 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     '#title' => t('Row width behavior'),
     '#type' => 'select',
     '#options' => array(
-      'container' => t("Fixed maximum width. Row class container."),
-      'container_fluid' => t("Fluid width (no max-width but padding). Row class container-fluid."),
-      'no_container' => t('Full width (e.g. for Hero blocks). No container class.'),
+      'container' => t("Fixed maximum width - adds the 'container' row class."),
+      'container_fluid' => t("Fluid width - adds the 'container-fluid' row class (no max-width but padding)."),
+      'no_container' => t("Full width - no row classes added (e.g. for Hero blocks)."),
     ),
     '#default_value' => isset($row_data['container']) ? $row_data['container'] : 'container_fluid',
   );
