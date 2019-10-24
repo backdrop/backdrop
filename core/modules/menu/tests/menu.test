@@ -662,17 +662,17 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     $edit = array(
       'menu_options[main-menu]' => 1,
     );
-    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    $this->backdropPost('admin/structure/types/manage/post', $edit, t('Save content type'));
 
     // Change default parent item to Main menu, so we can assert more easily.
     $edit = array(
       'menu_parent' => 'main-menu:0',
     );
-    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    $this->backdropPost('admin/structure/types/manage/post', $edit, t('Save content type'));
 
     // Verify that the menu link title on the node add form has the correct
     // maxlength.
-    $this->backdropGet('node/add/page');
+    $this->backdropGet('node/add/post');
     $this->assertPattern('/<input .* id="edit-menu-link-title" .* maxlength="255" .* \/>/', 'Menu link title field has correct maxlength in node add form.');
 
     // Create a node with menu link disabled.
@@ -683,7 +683,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
       "body[$language][0][value]" => $this->randomString(),
       "menu[enabled]" => 0,
     );
-    $this->backdropPost('node/add/page', $edit, t('Save'));
+    $this->backdropPost('node/add/post', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($node_title);
     // Assert that there is no link for the node.
     $this->backdropGet('user');
@@ -717,7 +717,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     $edit = array(
       'menu_options[main-menu]' => 0,
     );
-    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    $this->backdropPost('admin/structure/types/manage/post', $edit, t('Save content type'));
     $this->backdropPost('node/' . $node->nid . '/edit', array(), t('Save'));
 
     // Check that the link is still present.
@@ -728,7 +728,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     $edit = array(
       'menu_options[main-menu]' => 1,
     );
-    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    $this->backdropPost('admin/structure/types/manage/post', $edit, t('Save content type'));
 
     // Verify that the menu link title on the node edit form has the correct
     // maxlength.
@@ -752,7 +752,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     );
     menu_link_save($item);
 
-    // Assert that disabled Administration menu is not shown on the node/$nid/edit page.
+    // Assert that disabled Administration menu is not shown on the node/$nid/edit post.
     $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertText('Provide a menu link', 'Link in not allowed menu not shown in node edit form');
     // Assert that the link is still in the Administration menu after save.
