@@ -241,6 +241,7 @@ fieldset .fieldset-legend {
 
 @media (min-width: 34em) {
   .header-site-name-link {
+    background: #20252e;
     display: inline-block;
   }
 }
