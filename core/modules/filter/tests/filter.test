@@ -538,7 +538,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
     $this->assertResponse(200);
     $this->backdropGet('filter/tips/invalid-format');
     $this->assertResponse(404);
-    
+
     // Check admin user access to the filter tips pages.
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('filter/tips/' . $this->allowed_format->format);
@@ -576,17 +576,17 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests editing a page using a disallowed text format.
+   * Tests editing a post using a disallowed text format.
    *
-   * Verifies that regular users and administrators are able to edit a page, but
+   * Verifies that regular users and administrators are able to edit a post, but
    * not allowed to change the fields which use an inaccessible text format.
    * Also verifies that fields which use a text format that does not exist can
    * be edited by administrators only, but that the administrator is forced to
-   * choose a new format before saving the page.
+   * choose a new format before saving the post.
    */
   function testFormatWidgetPermissions() {
     config_set('path.settings', 'node_pattern', '');
-    config_set('path.settings', 'node_page_pattern', '');
+    config_set('path.settings', 'node_post_pattern', '');
 
     $langcode = LANGUAGE_NONE;
     $title_key = "title";
@@ -599,7 +599,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
     $edit['title'] = $this->randomName(8);
     $edit[$body_value_key] = $this->randomName(16);
     $edit[$body_format_key] = $this->disallowed_format->format;
-    $this->backdropPost('node/add/page', $edit, t('Save'));
+    $this->backdropPost('node/add/post', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($edit['title']);
 
     // Try to edit with a less privileged user.
