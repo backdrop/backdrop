@@ -8,8 +8,8 @@
  * @mainpage Views 3 API Manual
  *
  * Much of this information is actually stored in the advanced help; please
- * check the API topic. This help will primarily be aimed at documenting
- * classes and function calls.
+ * check the API topic. This help will primarily be aimed at documenting classes
+ * and function calls.
  *
  * Topics:
  * - @link views_lifetime The life of a view @endlink
@@ -157,9 +157,9 @@
  *   URL.
  * - Argument validator: Validator plugins can ensure arguments are valid, and
  *   even do transformations on the arguments. They can also provide replacement
- *   patterns for the view title. For example, the 'content' validator
- *   verifies verifies that the argument value corresponds to a node, loads
- *   that node and provides the node title as a replacement pattern.
+ *   patterns for the view title. For example, the 'content' validator verifies
+ *   that the argument value corresponds to a node, loads that node and provides
+ *   the node title as a replacement pattern.
  * - Access: Access plugins are responsible for controlling access to the view.
  *   Views includes plugins for checking user roles and individual permissions.
  * - Query: Query plugins generate and execute a query, so they can be seen as
@@ -169,20 +169,20 @@
  * - Cache: Cache plugins control the storage and loading of caches. Currently
  *   they can do both result and render caching, but maybe one day cache the
  *   generated query.
- * - Pager plugins: Pager plugins take care of everything regarding pagers.
- *   From getting and setting the total amount of items to render the pager and
+ * - Pager plugins: Pager plugins take care of everything regarding pagers. From
+ *   getting and setting the total amount of items to render the pager and
  *   setting the global pager arrays.
  * - Exposed form plugins: Exposed form plugins are responsible for building,
  *   rendering and controlling exposed forms. They can expose new parts of the
  *   view to the user and more.
  * - Display extenders: Display extender plugins allow scaling of views options
- *   horizontally. This means that you can add options and do stuff on all
- *   views displays. One theoretical example is metatags for views.
+ *   horizontally. This means that you can add options and do stuff on all views
+ *   displays. One theoretical example is metatags for views.
  *
  * Plugins are registered by implementing hook_views_plugins() in your
- * modulename.views.inc file and returning an array of data.
- * For examples please look at views_views_plugins() in
- * views/includes/plugins.inc as it has examples for all of them.
+ * modulename.views.inc file and returning an array of data. For examples please
+ * look at views_views_plugins() in views/includes/plugins.inc as it has
+ * examples for all of them.
  *
  * Similar to handlers, make sure that you add your plugin files to the
  * module.info file.
@@ -288,9 +288,9 @@
  * .module file, if 'path' is unspecified.
  *
  * @return
- *   An associative array describing the data structure. Primary key is the
- *   name used internally by Views for the table(s) – usually the actual table
- *   name. The values for the key entries are described in detail below.
+ *   An associative array describing the data structure. Primary key is the name
+ *   used internally by Views for the table(s) – usually the actual table name.
+ *   The values for the key entries are described in detail below.
  */
 function hook_views_data() {
   // This example describes how to write hook_views_data() for the following
@@ -309,7 +309,7 @@ function hook_views_data() {
   // the actual table – not its content.
 
   // The 'group' index will be used as a prefix in the UI for any of this
-  // table's fields, sort criteria, etc. so it's easy to tell where they came
+  // table's fields, sort criteria, etc.; so it's easy to tell where they came
   // from.
   $data['example_table']['table']['group'] = t('Example table');
 
@@ -349,7 +349,7 @@ function hook_views_data() {
   //   - filter: A description of any filter handler for the table field.
   //   - argument: A description of any argument handler for the table field.
   //   - area: A description of any handler for adding content to header,
-  //     footer or as no result behaviour.
+  //     footer, or as no result behaviour.
   //
   // The handler descriptions are described with examples below.
 
@@ -357,10 +357,10 @@ function hook_views_data() {
   $data['example_table']['nid'] = array(
     'title' => t('Example content'),
     'help' => t('Some example content that references a node.'),
-    // Define a relationship to the {node} table, so example_table views can
-    // add a relationship to nodes. If you want to define a relationship the
-    // other direction, use hook_views_data_alter(), or use the 'implicit' join
-    // method described above.
+    // Define a relationship to the {node} table, so example_table views can add
+    // a relationship to nodes. If you want to define a relationship the other
+    // direction, use hook_views_data_alter(), or use the 'implicit' join method
+    // described above.
     'relationship' => array(
       'base' => 'node', // The name of the table to join with.
       'base field' => 'nid', // The name of the field on the joined table.
@@ -421,7 +421,7 @@ function hook_views_data() {
       'label' => t('Published'),
       // This setting is used by the boolean filter handler, as possible option.
       'type' => 'yes-no',
-      // use boolean_field = 1 instead of boolean_field <> 0 in WHERE statment.
+      // Use boolean_field = 1 instead of boolean_field <> 0 in WHERE statement.
       'use equal' => TRUE,
     ),
     'sort' => array(
@@ -477,9 +477,8 @@ function hook_views_data_alter(&$data) {
     ),
   );
 
-  // This example changes the handler of the node title field.
-  // In this handler you could do stuff, like preview of the node when clicking
-  // the node title.
+  // This example changes the handler of the node title field. In this handler
+  // you could do stuff, like preview of the node when clicking the node title.
   $data['node']['title']['field']['handler'] = 'modulename_handler_field_node_title';
 
   // This example adds a relationship to table {foo}, so that 'foo' views can
@@ -518,7 +517,7 @@ function hook_views_data_alter(&$data) {
  *   must be one of row, display, display_extender, style, argument default,
  *   argument validator, access, query, cache, pager, exposed_form or
  *   localization. The plugin name should be prefixed with your module name.
- *   The value for each entry is an associateive array that may contain the
+ *   The value for each entry is an associative array that may contain the
  *   following entries:
  *   - Used by all plugin types:
  *     - title (required): The name of the plugin, as shown in Views. Wrap in
@@ -535,16 +534,16 @@ function hook_views_data_alter(&$data) {
  *       selectable in the ui, though on the api side they still exists.
  *     - uses options: Set to TRUE to denote that the plugin has an additional
  *       options form.
- *     - help: A short help text, wrapped in t() used as description on the plugin settings form.
+ *     - help: A short help text, wrapped in t() used as description on the
+ *       plugin settings form.
  *     - help topic: The name of an entry by advanced help for the plugin.
  *     - theme: The name of a theme suggestion to use for the display.
  *     - js: An array with paths to js files that should be included for the
  *       display. Note that the path should be relative Backdrop root, not
  *       module root.
- *     - type: Each plugin can specify a type parameter to group certain
- *       plugins together. For example all row plugins related to feeds are
- *       grouped together, because a rss style plugin only accepts feed row
- *       plugins.
+ *     - type: Each plugin can specify a type parameter to group certain plugins
+ *       together. For example all row plugins related to feeds are grouped
+ *       together, because a rss style plugin only accepts feed row plugins.
  *
  *   - Used by display plugins:
  *     - admin: The administrative name of the display, as displayed on the
@@ -562,8 +561,8 @@ function hook_views_data_alter(&$data) {
  *       should be added. Can for example be 'page' or 'block'. If you don't
  *       specify it there will be contextual links around the rendered view. If
  *       this is not set or regions have been specified, views will display an
- *       option to 'hide contextual links'. Use an empty array if you do not want
- *       this.
+ *       option to 'hide contextual links'. Use an empty array if you do not
+ *       want this.
  *     - uses hook menu: Set to TRUE to have the display included by
  *       views_menu_alter(). views_menu_alter executes then execute_hook_menu
  *       on the display object.
@@ -580,11 +579,11 @@ function hook_views_data_alter(&$data) {
  *     - uses fields: Set to TRUE to have the style plugin accept field
  *       handlers.
  *     - uses grouping: Set to TRUE to allow the grouping settings for rows.
- *     - even empty: May have the value 'even empty' to tell Views that the style
- *       should be rendered even if there are no results.
+ *     - even empty: May have the value 'even empty' to tell Views that the
+ *       style should be rendered even if there are no results.
  *     - theme file: Name of the file containing theme or preprocess functions.
- *     - theme path: Location of the theme file and template files needed
- *         relative to the Backdrop root.
+ *     - theme path: Location of the theme file and template files needed,
+ *       relatively to the Backdrop root.
  *
  *   - Used by row plugins:
  *     - uses fields: Set to TRUE to have the row plugin accept field handlers.
@@ -642,7 +641,7 @@ function hook_views_plugins_alter(&$plugins) {
  *   - path: (optional) If includes are stored somewhere other than within the
  *     root module directory, specify its path here.
  *   - template path: (optional) A path where the module has stored it's views
- *     template files. When you have specificed this key views automatically
+ *     template files. When you have specified this key views automatically
  *     uses the template files for the views. You can use the same naming
  *     conventions like for normal views template files.
  */
@@ -661,7 +660,7 @@ function hook_views_api() {
  *   The View being executed.
  * @return
  *   An array with keys being the strings to replace, and the values the strings
- *   to replace them with. The strings to replace are ofted surrounded with
+ *   to replace them with. The strings to replace are often surrounded with
  *   '***', as illustrated in the example implementation.
  */
 function hook_views_query_substitutions($view) {
@@ -704,9 +703,9 @@ function hook_views_form_substitutions() {
  */
 function hook_views_pre_view(&$view, &$display_id, &$args) {
   // Change the display if the acting user has 'administer site configuration'
-  // permission, to display something radically different.
-  // (Note that this is not necessarily the best way to solve that task. Feel
-  // free to contribute another example!)
+  // permission, to display something radically different. Note that this is
+  // not necessarily the best way to solve that task. Feel free to contribute
+  // another example!.
   if (
     $view->name == 'my_special_view' &&
     user_access('administer site configuration') &&
@@ -717,8 +716,8 @@ function hook_views_pre_view(&$view, &$display_id, &$args) {
 }
 
 /**
- * This hook is called right before the build process, but after displays
- * are attached and the display performs its pre_execute phase.
+ * This hook is called right before the build process, but after displays are
+ * attached and the display performs its pre_execute phase.
  *
  * Adding output to the view can be accomplished by placing text on
  * $view->attachment_before and $view->attachment_after.
@@ -726,9 +725,9 @@ function hook_views_pre_view(&$view, &$display_id, &$args) {
  *   The view object about to be processed.
  */
 function hook_views_pre_build(&$view) {
-  // Because of some unexplicable business logic, we should remove all
-  // attachments from all views on Mondays.
-  // (This alter could be done later in the execution process as well.)
+  // Because of some inexplicable business logic, we should remove all
+  // attachments from all views on Mondays. This alter could be done later in
+  // the execution process as well.
   if (date('D') == 'Mon') {
     unset($view->attachment_before);
     unset($view->attachment_after);
@@ -746,10 +745,10 @@ function hook_views_pre_build(&$view) {
  */
 function hook_views_post_build(&$view) {
   // If the exposed field 'type' is set, hide the column containing the content
-  // type. (Note that this is a solution for a particular view, and makes
+  // type. Note that this is a solution for a particular view, and makes
   // assumptions about both exposed filter settings and the fields in the view.
   // Also note that this alter could be done at any point before the view being
-  // rendered.)
+  // rendered.
   if ($view->name == 'my_view' && isset($view->exposed_raw_input['type']) && $view->exposed_raw_input['type'] != 'All') {
     // 'Type' should be interpreted as content type.
     if (isset($view->field['type'])) {
@@ -769,30 +768,27 @@ function hook_views_post_build(&$view) {
  */
 function hook_views_pre_execute(&$view) {
   // Whenever a view queries more than two tables, show a message that notifies
-  // view administrators that the query might be heavy.
-  // (This action could be performed later in the execution process, but not
-  // earlier.)
+  // view administrators that the query might be heavy. This action could be
+  // performed later in the execution process, but not earlier.
   if (count($view->query->tables) > 2 && user_access('administer views')) {
     backdrop_set_message(t('The view %view may be heavy to execute.', array('%view' => $view->name)), 'warning');
   }
 }
 
 /**
- * This hook is called right after the execute process. The query has
- * been executed, but the pre_render() phase has not yet happened for
- * handlers.
+ * This hook is called right after the execute process. The query has been
+ * executed, but the pre_render() phase has not yet happened for handlers.
  *
  * Adding output to the view can be accomplished by placing text on
- * $view->attachment_before and $view->attachment_after. Altering the
- * content can be achieved by editing the items of $view->result.
+ * $view->attachment_before and $view->attachment_after. Altering the content
+ * can be achieved by editing the items of $view->result.
  * @param $view
  *   The view object about to be processed.
  */
 function hook_views_post_execute(&$view) {
   // If there are more than 100 results, show a message that encourages the user
-  // to change the filter settings.
-  // (This action could be performed later in the execution process, but not
-  // earlier.)
+  // to change the filter settings. This action could be performed later in the
+  // execution process, but not earlier..
   if ($view->total_rows > 100) {
     backdrop_set_message(t('You have more than 100 hits. Use the filter settings to narrow down your list.'));
   }
@@ -812,9 +808,8 @@ function hook_views_post_execute(&$view) {
  *   The view object about to be processed.
  */
 function hook_views_pre_render(&$view) {
-  // Scramble the order of the rows shown on this result page.
-  // Note that this could be done earlier, but not later in the view execution
-  // process.
+  // Scramble the order of the rows shown on this result page. Note that this
+  // could be done earlier, but not later in the view execution process.
   shuffle($view->result);
 }
 
@@ -830,8 +825,8 @@ function hook_views_pre_render(&$view) {
  *
  * <!--post-FIELD-NID-->
  *
- * And then in the post render, create an array with the text that should
- * go there:
+ * And then in the post render, create an array with the text that should go
+ * there:
  *
  * strtr($output, array('<!--post-FIELD-1-->' => 'output for FIELD of nid 1');
  *
@@ -955,8 +950,8 @@ function hook_views_ajax_data_alter(&$commands, $view) {
   // Replace Views' method for scrolling to the top of the element with your
   // custom scrolling method.
   foreach ($commands as &$command) {
-    if ($command['method'] == 'viewsScrollTop') {
-      $command['method'] .= 'myScrollTop';
+    if ($command['command'] == 'viewsScrollTop') {
+      $command['command'] .= 'myScrollTop';
     }
   }
 }
@@ -964,8 +959,8 @@ function hook_views_ajax_data_alter(&$commands, $view) {
 /**
  * Allow modules to respond to the Views cache being invalidated.
  *
- * This hook should fire whenever a view is enabled, disabled, created,
- * updated, or deleted.
+ * This hook should fire whenever a view is enabled, disabled, created, updated,
+ * or deleted.
  *
  * @see views_invalidate_cache()
  */
