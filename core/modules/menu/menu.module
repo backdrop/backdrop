@@ -821,7 +821,6 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
 function menu_node_type_load(&$types) {
   foreach ($types as $type_name => $type) {
     $types[$type_name]->settings += array(
-      // Pages have a menu item by default.
       'menu_default' => FALSE,
       'menu_title' => '[node:title]',
       'menu_options' => array(),
