@@ -701,11 +701,12 @@ function menu_form_node_form_alter(&$form, $form_state) {
   );
 
   $form['menu']['link']['description'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Description'),
+    '#type' => 'textfield',
+    '#size' => 120,
+    '#title' => t('Description or clarification'),
     '#default_value' => isset($link['options']['attributes']['title']) ? $link['options']['attributes']['title'] : '',
     '#rows' => 1,
-    '#description' => t('Shown when hovering over the menu link.'),
+    '#description' => t('Shown when hovering over the menu link.') . ' ' . t('Often read by screen readers.'),
   );
 
   $default = ($link['mlid'] ? $link['menu_name'] . ':' . $link['plid'] : $node_type->settings['menu_parent']);
@@ -767,16 +768,14 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
   );
   $form['menu']['menu_default'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Provide a default menu link'),
-    '#description' => t("Set the default value of the 'Provide a menu link' checkbox on the content authoring form."),
+    '#title' => t('Add a link into the menu for new content of this type'),
     '#default_value' => $node_type->settings['menu_default'],
   );
   $form['menu']['menu_options'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Available menus'),
+    '#title' => t('Menus where this content may be placed'),
     '#default_value' => $node_type->settings['menu_options'],
     '#options' => $menu_options,
-    '#description' => t('The menus available to place links in for this content type.'),
   );
   // To avoid an 'illegal option' error after saving the form we have to load
   // all available menu items.
@@ -788,7 +787,7 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
     '#title' => t('Default parent item'),
     '#default_value' => $node_type->settings['menu_parent'],
     '#options' => $options,
-    '#description' => t('Choose the menu item to be the default parent for a new link in the content authoring form.'),
+    '#description' => t('Links to content will be placed below this item in the menu.'),
     '#attributes' => array('class' => array('menu-title-select')),
   );
 
