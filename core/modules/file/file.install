@@ -855,7 +855,7 @@ function file_update_1003() {
   // Warn users that existing files will not have a file type until the queue
   // has been processed.
   if ($queue->numberOfItems()) {
-    backdrop_set_message(t('Existing files must be classified according to the currently defined file types. These files have been queued for processing and will have their file type determined during cron runs.'));
+    backdrop_set_message(t('All files must now be classified according to file types. Your files have been queued for processing, and will have their file type determined during cron runs.'));
   }
 }
 
@@ -1139,5 +1139,47 @@ function file_update_1006() {
 
     // Delete the file type table.
     db_drop_table('file_display');
+  }
+}
+
+/**
+ * Grant the admin role permission to manage files and file types.
+ */
+function file_update_1007() {
+  $admin_role = config_get('system.core', 'user_admin_role');
+
+  $config = config('user.role.' . $admin_role);
+  $permissions = $config->get('permissions');
+  if ($permissions) {
+    // Add the new permissions.
+    $new_permissions = array(
+      'bypass file access',
+      'administer file types',
+      'create files',
+      'view own private files',
+      'view own files',
+      'view private files',
+      'view files',
+    );
+    // Permissions for each file type.
+    $config_file_names = config_get_names_with_prefix('file.type.');
+    foreach ($config_file_names as $config_file_name) {
+      $file_type = str_replace('file.type.', '', $config_file_name);
+      $new_permissions[] = "edit own $file_type files";
+      $new_permissions[] = "edit any $file_type files";
+      $new_permissions[] = "delete own $file_type files";
+      $new_permissions[] = "delete any $file_type files";
+      $new_permissions[] = "download own $file_type files";
+      $new_permissions[] = "download any $file_type files";
+    }
+    foreach ($new_permissions as $new_permission) {
+      if (!in_array($new_permission, $permissions)) {
+        $permissions[] = $new_permission;
+      }
+    }
+
+    // Save the role.
+    $config->set('permissions', $permissions);
+    $config->save();
   }
 }

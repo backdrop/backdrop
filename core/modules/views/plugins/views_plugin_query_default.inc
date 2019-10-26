@@ -890,17 +890,17 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Add a complex WHERE clause to the query.
    *
-   * The caller is reponsible for ensuring that all fields are fully qualified
-   * (TABLE.FIELD) and that the table already exists in the query.
-   * Internally the dbtng method "where" is used.
+   * The caller is responsible for ensuring that all fields are fully qualified
+   * (TABLE.FIELD) and that the table already exists in the query. Internally,
+   * the dbtng method "where" is used.
    *
    * @param $group
    *   The WHERE group to add these to; groups are used to create AND/OR
    *   sections. Groups cannot be nested. Use 0 as the default group.
    *   If the group does not yet exist it will be created as an AND group.
    * @param $snippet
-   *   The snippet to check. This can be either a column or
-   *   a complex expression like "UPPER(table.field) = 'value'"
+   *   The snippet to check. This can be either a column or a complex expression
+   *   like "UPPER(table.field) = 'value'".
    * @param $args
    *   An associative array of arguments.
    *

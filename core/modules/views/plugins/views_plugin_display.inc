@@ -1121,7 +1121,7 @@ class views_plugin_display extends views_plugin {
       );
     }
 
-    $display_comment = check_plain(backdrop_substr($this->get_option('display_comment'), 0, 10));
+    $display_comment = check_plain(views_ui_truncate($this->get_option('display_comment'), 80));
     $options['display_comment'] = array(
       'category' => 'other',
       'title' => t('Comment'),
@@ -1389,10 +1389,9 @@ class views_plugin_display extends views_plugin {
     }
     $form['#title'] = check_plain($this->display->display_title) . ': ';
 
-    // Set the 'section' to hilite on the form.
-    // If it's the item we're looking at is pulling from the default display,
-    // reflect that. Don't use is_defaulted since we want it to show up even
-    // on the default display.
+    // Set the 'section' to highlight on the form. If it's the item we're
+    // looking at is pulling from the default display, reflect that. Don't use
+    // is_defaulted() since we want it to show up even on the default display.
     if (!empty($this->options['defaults'][$form_state['section']])) {
       $form['#section'] = 'default-' . $form_state['section'];
     }
@@ -1547,8 +1546,12 @@ class views_plugin_display extends views_plugin {
         $plugin = $this->get_plugin('access');
         $form['#title'] .= t('Access options');
         if ($plugin) {
-          $form['#help_topic'] = $plugin->definition['help topic'];
-          $form['#help_module'] = $plugin->definition['module'];
+          if (!empty($plugin->definition['help topic'])) {
+            $form['#help_topic'] = $plugin->definition['help topic'];
+          }
+          if (!empty($plugin->definition['module'])) {
+            $form['#help_module'] = $plugin->definition['module'];
+          }
 
           $form['access_options'] = array(
             '#tree' => TRUE,
@@ -1589,8 +1592,12 @@ class views_plugin_display extends views_plugin {
         $plugin = $this->get_plugin('cache');
         $form['#title'] .= t('Caching options');
         if ($plugin) {
-          $form['#help_topic'] = $plugin->definition['help topic'];
-          $form['#help_module'] = $plugin->definition['module'];
+          if (!empty($plugin->definition['help topic'])) {
+            $form['#help_topic'] = $plugin->definition['help topic'];
+          }
+          if (!empty($plugin->definition['module'])) {
+            $form['#help_module'] = $plugin->definition['module'];
+          }
 
           $form['cache_options'] = array(
             '#tree' => TRUE,
@@ -1609,11 +1616,10 @@ class views_plugin_display extends views_plugin {
         $form['#title'] .= t('Query options');
         $this->view->init_query();
         if ($this->view->query) {
-          if (isset($this->view->query->definition['help topic'])) {
+          if (!empty($this->view->query->definition['help topic'])) {
             $form['#help_topic'] = $this->view->query->definition['help topic'];
           }
-
-          if (isset($this->view->query->definition['module'])) {
+          if (!empty($this->view->query->definition['module'])) {
             $form['#help_module'] = $this->view->query->definition['module'];
           }
 
@@ -1708,8 +1714,10 @@ class views_plugin_display extends views_plugin {
         }
         $plugin = $this->get_plugin(empty($style) ? 'row' : 'style');
         if ($plugin) {
-          if (isset($plugin->definition['help topic'])) {
+          if (!empty($plugin->definition['help topic'])) {
             $form['#help_topic'] = $plugin->definition['help topic'];
+          }
+          if (!empty($plugin->definition['module'])) {
             $form['#help_module'] = $plugin->definition['module'];
           }
           $form[$form_state['section']] = array(
@@ -2099,7 +2107,12 @@ class views_plugin_display extends views_plugin {
         $plugin = $this->get_plugin('exposed_form');
         $form['#title'] .= t('Exposed form options');
         if ($plugin) {
-          $form['#help_topic'] = $plugin->definition['help topic'];
+          if (!empty($plugin->definition['help topic'])) {
+            $form['#help_topic'] = $plugin->definition['help topic'];
+          }
+          if (!empty($plugin->definition['module'])) {
+            $form['#help_module'] = $plugin->definition['module'];
+          }
 
           $form['exposed_form_options'] = array(
             '#tree' => TRUE,
@@ -2136,7 +2149,12 @@ class views_plugin_display extends views_plugin {
         $plugin = $this->get_plugin('pager');
         $form['#title'] .= t('Pager options');
         if ($plugin) {
-          $form['#help_topic'] = $plugin->definition['help topic'];
+          if (!empty($plugin->definition['help topic'])) {
+            $form['#help_topic'] = $plugin->definition['help topic'];
+          }
+          if (!empty($plugin->definition['module'])) {
+            $form['#help_module'] = $plugin->definition['module'];
+          }
 
           $form['pager_options'] = array(
             '#tree' => TRUE,
