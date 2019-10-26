@@ -446,7 +446,7 @@ function image_field_widget_process($element, &$form_state, $form) {
   $element['image_library']['imagesrc'] = array(
     '#type' => 'textfield',
     '#title' => t('Image file'),
-    '#default_value' => $element['#file']->uri,
+    '#default_value' => isset($element['#file']->uri) ? $element['#file']->uri : '',
     '#description' => t('The local source of the image file'),
     '#maxlength' => 1024,
     '#weight' => -1,
