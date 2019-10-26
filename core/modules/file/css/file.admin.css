@@ -24,3 +24,61 @@
 .form-managed-file div.ajax-progress-bar .bar {
   margin: 0;
 }
+
+/**
+ * New styles for image upload with library
+ */
+a.upload-image-toggle {
+  padding-left: 0;
+  padding-bottom: 10px;
+  padding-right: 1em;
+  padding-top: 1em;
+  display: inline-block !important;
+  border: none;
+  text-decoration: underline;
+}
+a.image-library-toggle {
+  display: inline-block;
+  padding: 0 1em;
+  border-left: 1px solid #CCC;
+  border-right: none;
+  margin-left: 1em;
+}
+a.library-selected, a.upload-selected {
+  font-weight: bold;
+  text-decoration: none;
+}
+.image-select {
+  display: flex;
+}
+.image-detail {
+  border: 1px solid #CCC;
+  padding: 10px;
+  display: inline-block;
+  min-width: 32%;
+  font-size: 0.8rem;
+}
+.image-detail p span{
+  width: 120px;
+}
+.image-library {
+  border: 1px solid #CCC;
+  padding: 10px;
+  display: inline-block;
+}
+.library-view .views-exposed-form label {
+    font-size: 0.8rem;
+    font-weight: normal;
+}
+
+.field-widget-image-image {
+  border: 1px solid #CCC;
+  padding: 10px;
+}
+.image-confirm {
+  border: 1px solid #CCC;
+  padding: 10px;
+}
+.selected-image-preview img {
+  width: 300px;
+}

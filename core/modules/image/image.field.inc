@@ -441,6 +441,27 @@ function image_field_widget_process($element, &$form_state, $form) {
   $element['#theme'] = 'image_widget';
   $element['#attached']['css'][] = backdrop_get_path('module', 'image') . '/css/image.css';
 
+  // Add for image library.
+  $element['image_library'] = array();
+  $element['image_library']['imagesrc'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Image file'),
+    '#default_value' => $element['#file']->uri,
+    '#description' => t('The local source of the image file'),
+    '#maxlength' => 1024,
+    '#weight' => -1,
+    );
+
+  $element['image_library']['confirm'] = array(
+    '#name' => implode('_', $element['#array_parents']) . '_confirm',
+    '#type' => 'submit',
+    '#value' => t('Confirm selection'),
+    '#validate' => array(),
+    '#submit' => array('image_field_widget_submit'),
+    '#limit_validation_errors' => array($element['#parents']),
+  );
+
+
   // Add the image preview.
   if ($element['#file'] && $widget_settings['preview_image_style']) {
     $variables = array(
@@ -491,7 +512,7 @@ function image_field_widget_process($element, &$form_state, $form) {
     // @see http://www.gawds.org/show.php?contentid=28
     '#maxlength' => 512,
     '#weight' => -2,
-    '#access' => (bool) $item['fid'] && $settings['alt_field'],
+    '#access' => $settings['alt_field'],
   );
   $element['title'] = array(
     '#type' => 'textfield',
@@ -500,9 +521,13 @@ function image_field_widget_process($element, &$form_state, $form) {
     '#description' => t('The title is used as a tool tip when the user hovers the mouse over the image.'),
     '#maxlength' => 1024,
     '#weight' => -1,
-    '#access' => (bool) $item['fid'] && $settings['title_field'],
+    '#access' => $settings['title_field'],
   );
 
+  // Incorporate the Library View in the editor dialog form.
+  $element['library_view'] = array(
+    '#markup' => '<div class="library-view" data-upload-library-view="true">' . views_embed_view('image_library') . '</div>',
+  );
   return $element;
 }
 
@@ -645,4 +670,37 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
   }
 
   return $element;
+}
+
+/**
+ * A submit handler for image library selection.
+ */
+function image_field_widget_submit(&$form, &$form_state)
+{
+  $parents = array_slice($form_state['triggering_element']['#array_parents'], 0, -3);
+  $element = backdrop_array_get_nested_value($form, $parents);
+  $field_name = $element['#field_name'];
+  $langcode = $element['#language'];
+
+  // Get existing file values.
+  // File Field items are stored in the field state
+  $field_state = field_form_get_state($element['#field_parents'], $field_name, $langcode, $form_state);
+  $field_values = backdrop_array_get_nested_value($form_state['values'], $parents);
+
+  if (isset($field_values)) {
+    // Update sort order according to weight. Note that this is always stored in
+    // form state. Sort does not work using regular upload, but that is a core
+    // bug.
+    usort($field_values, '_field_sort_items_helper');
+
+    // Update form_state values.
+    backdrop_array_set_nested_value($form_state['values'], $parents, $field_values);
+
+    $field_state['items'] = $field_values;
+    field_form_set_state($element['#field_parents'], $field_name, $langcode, $form_state, $field_state);
+  }
+
+  // Clear out input as it will need to be rebuildt.
+  backdrop_array_set_nested_value($form_state['input'], $element['#parents'], NULL);
+  $form_state['rebuild'] = TRUE;
 }

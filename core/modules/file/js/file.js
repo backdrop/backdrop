@@ -137,7 +137,7 @@ Backdrop.file = Backdrop.file || {
     // do not get enabled when we re-enable these fields at the end of behavior
     // processing. Re-enable in a setTimeout set to a relatively short amount
     // of time (1 second). All the other mousedown handlers (like Backdrop's
-    // Ajax behaviors) are excuted before any timeout functions are called, so
+    // Ajax behaviors) are executed before any timeout functions are called, so
     // we don't have to worry about the fields being re-enabled too soon.
     // @todo If the previous sentence is true, why not set the timeout to 0?
     var $fieldsToTemporarilyDisable = $('div.form-managed-file input.form-file').not($enabledFields).not(':disabled');
@@ -179,3 +179,143 @@ Backdrop.file = Backdrop.file || {
 };
 
 })(jQuery);
+
+/**
+ * Provides toggles for uploading an image, whether by URL or upload.
+ * Derived from behavior in filter.js
+ */
+Backdrop.behaviors.ImageUploadDialog = {
+
+  attach: function (context, settings) {
+    // select image fields (there may be more than one).
+    $imageFields = $('.field-type-image');
+    // derive code for replacing label with pair of toggled links.
+    $imageFields.each(function(addLibrary) {
+      var $this = $(this);
+      var $fieldID = $(this).attr('id');
+      var str = '<div class="image-toggles"><a class="upload-image-toggle">Upload an image</a><a href="#';
+      var $replacementLabel = str.concat($fieldID , '" class = "image-library-toggle">Select from Library</a></div>');
+
+
+      // we need the internal system name of each image field,
+      // e.g. field_image[und][0] or field_second_image[und][0]
+      // select label element with attribute 'for' starting edit-field-image
+      var str = '.field-widget-image-image ';
+      var $xLabel = str.concat("label[for='", $fieldID , "-und-0']");
+      $uploadLabel = $($xLabel);
+      var $uploadLabelText = $uploadLabel.text();
+      $this.find(".image-field-name").replaceWith($uploadLabelText);
+      // replace Upload an image label with pair of toggled links.
+      $uploadLabel.replaceWith($replacementLabel);
+
+      // check value of fid.
+      var $thisFid = $this.find('[name*= "[fid]"]').val();
+
+      if ($thisFid > 0){
+        // image already uploaded so show image-current part of form.
+        $this.find(".image-toggles").hide();
+        $this.find(".image-select").hide();
+        $this.find(".image-upload").hide();
+        $this.find(".image-confirm").hide();
+        $this.find(".image-current").show();
+        $this.find('[ID*= "library-confirm"]').hide();
+        // replace current image preview.
+        var $currentImgURI = $this.find('[name*= "[imagesrc]"]').val();
+        $currentImgURI = '/files' + $currentImgURI.substring(8);
+        var relativeImgSrc = Backdrop.absoluteUrl($currentImgURI);
+        $this.find('div[class= "selected-image-preview"] img').replaceWith('<img src="' + relativeImgSrc + '">');
+        $this.find(".description").hide();
+        // Get image width and height from hidden input fields.
+        var $width = $this.find('input[name*= "[width]"]').val();
+        var $height = $this.find('input[name*= "[height]"]').val();
+        var $widthHTML = "<div>Width = " + $width + "px</div>";
+        var $heightHTML = "<div>Height = " + $height + "px</div>";
+        $this.find('[class*= "library-imagesrc"]').append($widthHTML + $heightHTML);
+      }
+      else {
+        // fid is not set so initialise with 'Upload an image' part of form.
+        $this.find(".image-select").hide();
+        $this.find(".image-confirm").hide();
+        $this.find(".image-current").hide();
+        $this.find(".image-widget").show();
+        $this.find(".description").show();
+        $this.find("a.upload-image-toggle").addClass("upload-selected");
+        $this.find('[class*= "library-imagesrc"]').hide();
+        $this.find('[ID*= "library-confirm"]').hide();
+        $this.find('div[class*= "-alt"]').hide();
+        $this.find('div[class*= "-title"]').hide();
+      }
+
+      // When 'Select from library' is clicked change to image library part of form.
+      $this.find("a.image-library-toggle").on("click", ChangeToLibrary);
+      function ChangeToLibrary() {
+        $this.find(".image-select").show();
+        $this.find(".image-upload").hide();
+        $this.find(".image-confirm").hide();
+        $this.find(".image-current").hide();
+        $this.find("a.image-library-toggle").addClass("library-selected");
+        $this.find("a.upload-image-toggle").removeClass("upload-selected");
+        $this.find(".description").hide();
+
+        // Set link 'Upload an image' for return when clicked:
+        $this.find("a.upload-image-toggle").on("click", ChangeBack);
+        function ChangeBack() {
+          $this.find(".image-select").hide();
+          $this.find(".image-upload").show();
+          $this.find(".description").show();
+          $this.find("a.image-library-toggle").removeClass("library-selected");
+          $this.find("a.upload-image-toggle").addClass("upload-selected");
+        }
+      }
+
+      // Now add events to images
+      $this.find('.image-library').once('image-library')
+      // first process mousoever (hover)
+      .on('mouseover', '.image-library-choose-file', function () {
+        var $currentImg = $(this).find('img');
+        var $currentImgFid = $currentImg.data('fid');
+        var $currentImgURI = $currentImg.data('file-url');
+        var relativeImgSrc = Backdrop.relativeUrl($currentImgURI);
+        var $currentImgName = $currentImg.data('filename');
+        var $currentImgSize = $currentImg.data('filesize');
+        $this.find(".image-fid").text($currentImgFid);
+        $this.find(".image-uri").text(relativeImgSrc);
+        $this.find('[ID*= "library-imagesrc"]').val(relativeImgSrc);
+        $this.find(".image-name").text($currentImgName);
+        $this.find(".image-size").text($currentImgSize);
+      })
+
+      // now process click (select).
+      .on('click', '.image-library-choose-file', function () {
+        var $selectedImg = $(this).find('img');
+        var absoluteImgSrc = $selectedImg.data('file-url');
+        var relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
+        var $selectedImgFid = $selectedImg.data('fid');
+
+        // make image-confirm part of form visible.
+        $this.find(".image-select").hide();
+        $this.find(".image-confirm").show();
+        $this.find(".image-current").hide();
+        $this.find(".image-upload").hide();
+        $this.find(".description").hide();
+        $this.find(".image-toggles").hide();
+
+        // show imagesrc field.
+        $this.find('div[class*= "library-imagesrc"]').show();
+        // show 'confirm selected' button.
+        $this.find('[ID*= "library-confirm"]').show();
+        // hide image upload file field.
+        $this.find('[ID*= "upload"]').hide();
+        // replace selected image preview.
+        $this.find('div[class= "selected-image-preview"] img').replaceWith('<img src="' + relativeImgSrc + '">');
+        // add value of fid to form.
+        $this.find('input[name*= "[fid]"]').val($selectedImgFid);
+        // make alt and title fields visible.
+        $this.find('div[class*= "-alt"]').show();
+        $this.find('div[class*= "-title"]').show();
+        // make field descriptions visible.
+        $this.find(".description").show();
+      });
+    });
+  }
+};

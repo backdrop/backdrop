@@ -347,19 +347,62 @@ function theme_image_widget($variables) {
   $output = '';
   $output .= '<div class="image-widget form-managed-file clearfix">';
 
+  // Extract upload_button from data for use only in form part #1.
+  $upload_button = backdrop_render($element['upload_button']);
+
+  // Extract library_view from data for use in form part #2.
+  $library_view = backdrop_render($element['library_view']);
+
+  // image-widget form part #1 - upload.
+  $output .= '<div class="image-upload">';
+  $output .='<h2><i>Field name: </i><span class="image-field-name">Temporary</span></h2>';
+  $image_preview = backdrop_render($element['preview']);
   if (isset($element['preview'])) {
     $output .= '<div class="image-preview">';
     $output .= backdrop_render($element['preview']);
     $output .= '</div>';
   }
+  $rendered_image_data = backdrop_render_children($element);
+  $output .= $rendered_image_data;
+  $output .= $upload_button;
+  $output .= '</div>'; // end of div image-upload.
 
+  // image-widget form part #2 - select.
+  $output .= '<div class="image-select">';
+  $output .= '<div class="image-detail">';
+  $output .= '<h4>File properties</h4>';
+  $output .= '<p>ID: <span class="image-fid"> ......</span></p>';
+  $output .= '<p>Name: <span class="image-name"> ......</span></p>';
+  $output .= '<p>Src: <span class="image-uri"> ......</span></p>';
+  $output .= '<p>Size: <span class="image-size"> ......</span></p>';
+  $output .= '<p><i>Click an image to select it.</i></p>';
+  $output .= '</div>'; // end of image-detail.
+  $output .= '<div class="image-library">';
+  $output .= $library_view;
+  $output .= '</div>'; // end of div image-library.
+  $output .= '</div>'; // end of div image-select.
+
+  // image-widget form part #3 - confirm.
+  $output .= '<div class="image-confirm">';
+  $output .= '<h3>Confirm image</h3>';
+  $output .= '<div class="selected-image-preview"><img src="/core/modules/image/images/sample.png"></div>';
+  $output .= $rendered_image_data;
+  $output .= '</div>'; // end of image-confirm.
+
+  // image-widget form part #4 - current file, if applicable.
+  $output .= '<div class="image-current">';
+  $output .='<h2><i>Field name: </i><span class="image-field-name">Temporary</span></h2>';
+  $output .= '<h3>Current image</h3>';
+  $output .= '<div class="selected-image-preview"><img src="/core/modules/image/images/sample.png"></div>';
+  $output .= $rendered_image_data;
   $output .= '<div class="image-widget-data">';
   if ($element['fid']['#value'] != 0) {
     $element['filename']['#markup'] .= ' <span class="file-size">(' . format_size($element['#file']->filesize) . ')</span> ';
   }
-  $output .= backdrop_render_children($element);
-  $output .= '</div>';
-  $output .= '</div>';
+  $output .= '</div>'; // end of image-widget-data
+  $output .= '</div>'; // image-current
+
+  $output .= '</div>'; // end of image-widget
 
   return $output;
 }
