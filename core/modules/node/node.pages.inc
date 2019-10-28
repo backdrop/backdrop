@@ -15,7 +15,7 @@
  */
 function node_page_edit(Node $node) {
   $type_name = node_type_get_name($node);
-  backdrop_set_title(t('<em>Edit @type</em> @title', array('@type' => $type_name, '@title' => $node->title)), PASS_THROUGH);
+  backdrop_set_title(t('Edit @type %title', array('@type' => $type_name, '%title' => $node->title)), PASS_THROUGH);
   return backdrop_get_form($node->type . '_node_form', $node);
 }
 
@@ -124,6 +124,7 @@ function node_form($form, &$form_state, Node $node) {
   $node_type = node_type_get_type($node->type);
 
   $status = $node->nid ? $node->status : $node_type->settings['status_default'];
+  $node_preview = $node_type->settings['node_preview'];
 
   // Check if we can retrieve a node from the tempstore.
   $node_tempstore_id = isset($form_state['node_tempstore_id']) ? $form_state['node_tempstore_id'] : node_build_tempstore_id();
@@ -279,7 +280,7 @@ function node_form($form, &$form_state, Node $node) {
     '#autocomplete_path' => 'user/autocomplete',
     '#default_value' => !empty($node->name) ? $node->name : '',
     '#weight' => -1,
-    '#description' => t('Leave blank for %anonymous.', array('%anonymous' => $config->get('anonymous'))),
+    '#description' => t('Leave blank for %anonymous.', array('%anonymous' => $config->getTranslated('anonymous'))),
   );
   $form['author']['date'] = array(
     '#type' => module_exists('date') ? 'date_popup' : 'textfield',
@@ -324,12 +325,7 @@ function node_form($form, &$form_state, Node $node) {
   // Adjustments to the status radios if scheduling is enabled/disabled.
   if ($node_type->settings['scheduling_enabled']) {
     $form['options']['status']['#description'] .= ' ' . t('Content set to "Schedule for later" will be saved as draft when the content is created, but will be automatically published on the date and time selected.');
-  }
-  else {
-    $form['options']['status'][NODE_SCHEDULED]['#access'] = FALSE;
-  }
 
-  if ($node_type->settings['scheduling_enabled'] && user_access('administer nodes')) {
     // Default the scheduled time to the current time + 1 day.
     $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME + 86400;
     $form['options']['scheduled'] = array(
@@ -346,9 +342,8 @@ function node_form($form, &$form_state, Node $node) {
       ),
     );
   }
-  // If the user doesn't have access to scheduling, default to published.
-  elseif ($form['options']['status']['#default_value'] == NODE_SCHEDULED) {
-    $form['options']['status']['#default_value'] = NODE_PUBLISHED;
+  else {
+    $form['options']['status'][NODE_SCHEDULED]['#access'] = FALSE;
   }
 
 
@@ -402,7 +397,7 @@ function node_form($form, &$form_state, Node $node) {
   );
   $form['actions']['preview'] = array(
     '#type' => 'submit',
-    '#access' => (!form_get_errors()),
+    '#access' => (!form_get_errors() && $node_preview != BACKDROP_DISABLED),
     '#value' => t('Preview'),
     '#weight' => 6,
     '#submit' => array('node_form_preview'),
@@ -462,7 +457,6 @@ function node_form_preview($form, &$form_state) {
   if (isset($_GET['destination'])) {
     $_GET['destination'] = $form_state['redirect'];
   }
-  backdrop_set_message(t('This is a preview. All changes are stored temporarily. Click Save to make your changes permanent, or click "Back to content editing".'));
 }
 
 /**
@@ -641,6 +635,12 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
   // Get the view mode to render the preview in.
   $view_mode = empty($_GET['view_mode']) ? 'full' : $_GET['view_mode'];
 
+  // We render this message here instead of in node_form_preview() in order to
+  // make it persistent across page refreshes while still in preview mode, and
+  // also while switching to different display modes.
+  backdrop_set_message(t('This is a preview. Links within the page are disabled.'), 'warning', FALSE);
+  backdrop_set_message(t('<strong>Changes are stored temporarily</strong>. Click <em>Save</em> to make your changes permanent, or click <em>Back to content editing</em> to make additional changes.'), 'warning', FALSE);
+
   $form['node'] = array(
     '#type' => 'value',
     '#value' => $node,
@@ -668,8 +668,8 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
       'class' => array('node-preview-display-mode', 'preview-button'),
     )
   );
-  // This must be the first submit function so the 'onChange' event in
-  // calls it before any other submit.
+  // This must be the first submit function so the 'onChange' event calls it
+  // before any other submit.
   $form['view_mode_submit'] = array(
     '#type' => 'submit',
     '#name' => 'op',
@@ -770,6 +770,9 @@ function node_form_submit_build_node($form, &$form_state) {
   // Convert the scheduled date into a timestamp.
   $form_state['values']['status'] = (int) $form_state['values']['status'];
   if ($form_state['values']['status'] === NODE_SCHEDULED) {
+    if (is_array($form_state['values']['scheduled'])) {
+      $form_state['values']['scheduled'] = $form_state['values']['scheduled']['date'] . ' ' . $form_state['values']['scheduled']['time'];
+    }
     $schedule_date = new BackdropDateTime($form_state['values']['scheduled']);
     $form_state['values']['scheduled'] = $schedule_date->format('U');
     $form_state['values']['status'] = NODE_NOT_PUBLISHED;

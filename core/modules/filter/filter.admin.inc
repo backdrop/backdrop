@@ -25,6 +25,16 @@ function filter_admin_overview($form) {
       'title' => t('Configure'),
       'href' => "admin/config/content/formats/$id",
     );
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Text formats',
+          'name' => 'filter.format.' . $id,
+        ),
+      );
+    }
     // Check whether this is the fallback text format. This format is available
     // to all roles and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
@@ -107,7 +117,7 @@ function filter_admin_overview_submit($form, &$form_state) {
  */
 function filter_admin_format_page($format = NULL) {
   if (!isset($format->name)) {
-    backdrop_set_title(t('Add text editor'));
+    backdrop_set_title(t('Add text format'));
     $format = (object) array(
       'format' => NULL,
       'name' => '',
@@ -543,7 +553,7 @@ function filter_editor_image_upload_settings_form($format) {
   foreach ($stream_wrappers as $scheme => $info) {
     $options[$scheme] = $info['description'];
   }
-  
+
   $form['orientate'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable image re-orientation'),
@@ -555,7 +565,7 @@ function filter_editor_image_upload_settings_form($format) {
     '#states' => $show_if_image_uploads_enabled,
     '#access' => function_exists('exif_read_data'),
   );
-  
+
   if (!empty($options)) {
     $form['scheme'] = array(
       '#type' => 'radios',

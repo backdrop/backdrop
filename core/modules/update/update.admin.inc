@@ -13,49 +13,92 @@
  */
 function update_settings($form, &$form_state) {
   $config = config('update.settings');
-  $form['update_check_frequency'] = array(
+
+  $form['check'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Check for available updates'),
+    '#description' =>  t('This website will check for new releases of Backdrop core, as well as contributed modules, themes, and layouts. If there are updates available, a message will appear on the <a href="@status_report">status report</a> page. An error message will appear if there is a security update available.',
+      array('@status_report' => url('admin/reports/status'))),
+  );
+  $form['check']['update_check_frequency'] = array(
     '#type' => 'radios',
-    '#title' => t('Check for updates'),
+    '#title' => t('How frequently should this website check for updates?'),
     '#default_value' => $config->get('update_interval_days'),
     '#options' => array(
-      '1' => t('Daily'),
-      '7' => t('Weekly'),
-      '0' => t('Manually only'),
+      '1' => t('Check daily'),
+      '7' => t('Check weekly'),
+      '0' => t('Do not check automatically'),
     ),
-    '#description' => t('Select how frequently you want to automatically check for new releases of your currently installed modules, themes, and layouts.'),
   );
-
-  $form['update_check_disabled'] = array(
+  $form['check']['update_check_disabled'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Check for updates of disabled and uninstalled modules, themes, and layouts.'),
+    '#title' => t('Also check for updates of disabled modules, themes, and layouts'),
     '#default_value' => $config->get('update_disabled_extensions'),
   );
 
+  $form['email'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Update Notifications'),
+    '#description' => t('This website can send notifications via e-mail when updates are available.'),
+    '#states' => array(
+      'visible' => array(
+        'input[name=update_check_frequency]' => array('!value' => 0),
+      ),
+    ),
+  );
+  $form['email']['update_notification_threshold'] = array(
+    '#type' => 'radios',
+    '#title' => t('When should this website send e-mail notifications?'),
+    '#default_value' => $config->get('update_threshold'),
+    '#options' => array(
+      'all' => t('When any update is available'),
+      'security' => t('Only if a security update is available'),
+      'none' => t('Do not send email notifications'),
+    ),
+  );
   $notify_emails = $config->get('update_emails');
   if (empty($notify_emails)) {
     $notify_emails = array();
   }
-  $form['update_notify_emails'] = array(
+  $form['email']['update_notify_emails'] = array(
     '#type' => 'textarea',
     '#title' => t('E-mail addresses to notify when updates are available'),
     '#rows' => 4,
     '#default_value' => implode("\n", $notify_emails),
-    '#description' => t('Whenever your site checks for available updates and finds new releases, it can notify a list of users via e-mail. Put each address on a separate line. If blank, no e-mails will be sent.'),
-  );
-
-  $form['update_notification_threshold'] = array(
-    '#type' => 'radios',
-    '#title' => t('E-mail notification threshold'),
-    '#default_value' => $config->get('update_threshold'),
-    '#options' => array(
-      'all' => t('All newer versions'),
-      'security' => t('Only security updates'),
+    '#description' => t('Put each email address on a separate line. If blank, no e-mails will be sent.'),
+    '#states' => array(
+      'visible' => array(
+        'input[name=update_notification_threshold]' => array('!value' => 'none'),
+      ),
     ),
-    '#description' => t('You can choose to send e-mail only if a security update is available, or to be notified about all newer versions. If there are updates available of Backdrop CMS or any of your installed modules, themes, and layouts, your site will always print a message on the <a href="@status_report">status report</a> page, and will also display an error message on administration pages if there is a security update.', array('@status_report' => url('admin/reports/status')))
   );
 
-  // Custom validation callback for the email notification setting.
-  $form['#validate'][] = 'update_settings_validate';
+  $docs = l('File permissions and ownership', 'https://backdropcms.org/file-permissions-and-ownership');
+  $form['self_update'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Self-updates'),
+    '#description' => t('This website has the ability to update itself, but the file system permissions must be set properly. For more details, see !link.',
+      array('!link' => $docs)),
+  );
+  $core_update = config_get('installer.settings', 'core_update');
+  $form['self_update']['core_update'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Manual self-update'),
+    '#default_value' => $core_update,
+    '#description' => t('When updating manually, allow this website to delete the old version of core, and then replace it with the new version.'),
+  );
+  $form['self_update']['automatic_update'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Automatic self-update (coming soon!)'),
+    '#description' => t('When updates are available, allow this website to <strong>automatically</strong> delete the old version of core, and then replace it with the new version.'),
+    '#default_value' => FALSE, // @todo update when #414 goes in
+    '#disabled' => TRUE, // @todo update when #414 goes in
+    '#states' => array(
+      'visible' => array(
+        'input[name=update_check_frequency]' => array('!value' => 0),
+      ),
+    ),
+  );
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
@@ -128,6 +171,9 @@ function update_settings_submit($form, $form_state) {
     ->set('update_emails', $form_state['notify_emails'])
     ->set('update_threshold', $form_state['values']['update_notification_threshold'])
     ->save();
+
+  // Save the installer setting.
+  config_set('installer.settings', 'core_update', $form_state['values']['core_update']);
 
   // Display status messages for this form.
   backdrop_set_message(t('The configuration options have been saved.'));

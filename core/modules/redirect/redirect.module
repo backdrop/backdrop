@@ -1335,7 +1335,7 @@ function redirect_field_attach_form($entity_type, $entity, &$form, &$form_state,
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#access' => user_access('administer redirects'),
-    '#weight' => 30,
+    '#weight' => 31,
     '#attributes' => array('class' => array('redirect-list')),
   );
 

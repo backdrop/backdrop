@@ -49,14 +49,20 @@ file = simpletest.test
 [SimpleTestInstallationProfileModuleTestsTestCase]
 name = Installation profile module tests
 description = Verifies that tests bundled with installation profile modules are found.
-group = SimpleTest
+group = Installation profiles
 file = simpletest.test
 
 [SimpleTestOtherInstallationProfileModuleTestsTestCase]
 name = Other Installation profiles
 description = Verifies that tests in other installation profiles are not found.
-group = SimpleTest
+group = Installation profiles
 file = simpletest.test
+
+[StandardInstallTestCase]
+name = Standard Installation Tests
+description = Verifies configuration added by the Standard install profile.
+group = Installation profiles
+file = standard.test
 
 [ActionLoopTestCase]
 name = Actions executing in a potentially infinite loop
@@ -355,6 +361,12 @@ file = common.test
 [CommonFormatDateTestCase]
 name = Format date
 description = Test the format_date() function.
+group = Common
+file = common.test
+
+[CommonBackdropFormatXmlElementsUnitTestCase]
+name = Format XML Elements
+description = Tests the format_xml_elements() functionality.
 group = Common
 file = common.test
 

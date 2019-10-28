@@ -165,7 +165,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
   function testFormatAdmin() {
     // Add text format.
     $this->backdropGet('admin/config/content/formats');
-    $this->clickLink('Add text editor');
+    $this->clickLink('Add text format');
     $format_id = backdrop_strtolower($this->randomName());
     $name = $this->randomName();
     $edit = array(

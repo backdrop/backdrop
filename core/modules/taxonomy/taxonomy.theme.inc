@@ -25,6 +25,7 @@ function theme_taxonomy_overview_vocabularies($variables) {
 
       $row = array();
       $row[] = backdrop_render($vocabulary['name']);
+      $row[] = backdrop_render($vocabulary['items']);
       if (isset($vocabulary['weight'])) {
         $vocabulary['weight']['#attributes']['class'] = array('vocabulary-weight');
         $row[] = backdrop_render($vocabulary['weight']);
@@ -35,6 +36,7 @@ function theme_taxonomy_overview_vocabularies($variables) {
   }
 
   $header = array(t('Vocabulary name'));
+  $header[] = array('data' => t('Number of terms'), 'class' => array('priority-low'));
   if (isset($form['actions'])) {
     $header[] = t('Weight');
     backdrop_add_tabledrag('taxonomy', 'order', 'sibling', 'vocabulary-weight');
@@ -86,6 +88,9 @@ function theme_taxonomy_overview_terms($variables) {
         $row[0] .= backdrop_render($term['parent']) . backdrop_render($term['tid']) . backdrop_render($term['depth']);
       }
       $term['weight']['#attributes']['class'] = array('term-weight');
+      if (module_exists('language')) {
+        $row[] = backdrop_render($term['langcode']);
+      }
       $row[] = backdrop_render($term['weight']);
       $row[] = backdrop_render($term['operations']);
       $row = array('data' => $row);
@@ -128,8 +133,21 @@ function theme_taxonomy_overview_terms($variables) {
     $rows[] = array(array('data' => $form['#empty_text'], 'colspan' => '3'));
   }
 
-  $header = array(t('Name'), t('Weight'), t('Operations'));
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'taxonomy')));
+  $output = '';
+
+  if (module_exists('language') && $form['#vocabulary']->language == TAXONOMY_LANGUAGE_ENABLED) {
+    $form['langcode_term']['#field_suffix'] = backdrop_render($form['langcode_filter']);
+    $output .= backdrop_render($form['langcode_term']);
+  }
+
+  $header = array();
+  $header[] = t('Name');
+  if (module_exists('language') && $form['#vocabulary']->language == TAXONOMY_LANGUAGE_ENABLED) {
+    $header[] = t('Language');
+  }
+  $header[] = t('Weight');
+  $header[] = t('Operations');
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'taxonomy')));
   $output .= backdrop_render_children($form);
   $output .= theme('pager');
 

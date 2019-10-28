@@ -556,10 +556,16 @@ function form_get_cache($form_build_id, &$form_state) {
 
 /**
  * Stores a form in the cache.
+ *
+ * The default cache_form expiration is 6 hours. On busy sites, the cache_form
+ * table can become very large. A shorter cache lifetime can help to keep the
+ * table's size under control.
  */
 function form_set_cache($form_build_id, $form, $form_state) {
-  // 6 hours cache life time for forms should be plenty.
-  $expire = 21600;
+  // Try to read the 'form_cache_expiration' setting from settings.php. If not
+  // set in settings.php, then default to the value set in 'system.core' config
+  // (via system_update_1067 - setting not exposed in the admin UI currently).
+  $expire = settings_get('form_cache_expiration', config_get('system.core', 'form_cache_expiration'));
 
   // Ensure that the form build_id embedded in the form structure is the same as
   // the one passed in as a parameter. This is an additional safety measure to
@@ -1011,7 +1017,7 @@ function backdrop_process_form($form_id, &$form, &$form_state) {
  *
  * @param $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  * @param $form
  *   An associative array containing the structure of the form.
  * @param $form_state
@@ -1162,7 +1168,7 @@ function _backdrop_invalid_token_set_form_error() {
  *
  * @param $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  * @param $form
  *   An associative array containing the structure of the form, which is passed
  *   by reference. Form validation handlers are able to alter the form structure
@@ -1356,7 +1362,7 @@ function backdrop_redirect_form($form_state) {
  *   not be repeated in the submission step.
  * @param $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  */
 function _form_validate(&$elements, &$form_state, $form_id = NULL) {
   // Also used in the installer, pre-database setup.
@@ -1454,10 +1460,11 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
       // length if it's a string, and the item count if it's an array.
       // An unchecked checkbox has a #value of integer 0, different than string
       // '0', which could be a valid value.
-      $is_empty_multiple = (is_array($elements['#value']) || $elements['#value'] instanceof Countable) && count($elements['#value']) === 0;
-      $is_empty_null = $elements['#value'] === NULL;
+      $is_countable = is_array($elements['#value']) || $elements['#value'] instanceof Countable;
+      $is_empty_multiple = $is_countable && count($elements['#value']) == 0;
       $is_empty_string = (is_string($elements['#value']) && backdrop_strlen(trim($elements['#value'])) == 0);
       $is_empty_value = ($elements['#value'] === 0);
+      $is_empty_null = is_null($elements['#value']);
       if ($is_empty_multiple || $is_empty_string || $is_empty_value || $is_empty_null) {
         // Although discouraged, a #title is not mandatory for form elements. In
         // case there is no #title, we cannot set a form error message.
@@ -1820,7 +1827,7 @@ function form_error(&$element, $message = '') {
  *
  * @param string $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  * @param array $element
  *   An associative array containing the structure of the current element.
  * @param array $form_state
@@ -3234,7 +3241,8 @@ function theme_checkbox($variables) {
 }
 
 /**
- * Adds form element theming to an element if its title or description is set.
+ * Adds additional customization to a form element when its title or description
+ * is set.
  *
  * This is used as a pre render function for checkboxes and radios.
  */
@@ -3359,7 +3367,7 @@ function form_process_actions($element, &$form_state) {
   $primary_set = FALSE;
   foreach (element_children($element, TRUE) as $key) {
     // Don't add automatic classes to non-buttons.
-    if (!in_array($element[$key]['#type'], array('button', 'submit'))) {
+    if (!isset($element[$key]['#type']) || !in_array($element[$key]['#type'], array('button', 'submit'))) {
       continue;
     }
 
@@ -3382,6 +3390,25 @@ function form_process_actions($element, &$form_state) {
     $element[$first_button]['#attributes']['class'] = array_diff($element[$first_button]['#attributes']['class'], array('button-secondary'));
   }
 
+  return $element;
+}
+
+/**
+ * Processes a form button element.
+ *
+ * @param $element
+ *   An associative array containing the properties and children of the
+ *   form button.
+ * @param $form_state
+ *   The $form_state array for the form this element belongs to.
+ *
+ * @return
+ *   The processed element.
+ */
+function form_process_button($element, &$form_state) {
+  // We normally want to add backdrop.form so that the double submit protection
+  // can be added to the site.
+  $element['#attached']['library'][] = array('system', 'backdrop.form');
   return $element;
 }
 
@@ -4821,7 +4848,7 @@ function _form_set_class(&$element, $class = array()) {
  *   are optional except as noted):
  *   - operations: (required) Array of operations to be performed, where each
  *     item is an array consisting of the name of an implementation of
- *     callback_batch_operation() and an array of parameter.
+ *     callback_batch_operation() and an array of parameters.
  *     Example:
  *     @code
  *     array(

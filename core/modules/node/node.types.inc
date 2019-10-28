@@ -23,6 +23,7 @@ function node_overview_types() {
     $type = $types[$key];
     $type_url_str = str_replace('_', '-', $type->type);
     $row = array(theme('node_admin_overview', array('name' => $name, 'type' => $type)));
+    $links = array();
     $links['configure'] = array(
       'title' => t('Configure'),
       'href' => 'admin/structure/types/manage/' . $type_url_str,
@@ -132,12 +133,13 @@ function node_type_form($form, &$form_state, $type = NULL) {
     ),
   );
 
+  // Submission form settings.
   $form['submission'] = array(
     '#type' => 'fieldset',
     '#title' => t('Submission form settings'),
     '#collapsible' => TRUE,
     '#group' => 'additional_settings',
-    '#weight' => -10,
+    '#weight' => -15,
   );
   $form['submission']['title_label'] = array(
     '#title' => t('Title field label'),
@@ -158,13 +160,24 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->help,
     '#description' => t('This text will be displayed at the top of the page when creating or editing content of this type.'),
   );
+  $form['submission']['node_preview'] = array(
+    '#type' => 'radios',
+    '#title' => t('Preview before submitting'),
+    '#default_value' => $type->settings['node_preview'],
+    '#options' => array(
+      BACKDROP_DISABLED => t('Disabled'),
+      BACKDROP_OPTIONAL => t('Optional'),
+    ),
+  );
+
+  // Publishing settings.
   $form['workflow'] = array(
     '#type' => 'fieldset',
     '#title' => t('Publishing settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
-    '#weight' => -5,
+    '#weight' => -10,
   );
   $form['workflow']['status_default'] = array(
     '#type' => 'radios',
@@ -183,22 +196,11 @@ function node_type_form($form, &$form_state, $type = NULL) {
       'input[name="scheduling_enabled"]' => array('checked' => TRUE),
     ),
   );
-
   $form['workflow']['scheduling_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show option for scheduling'),
     '#default_value' => $type->settings['scheduling_enabled'],
   );
-
-  if (module_exists('language')) {
-    $form['workflow']['language'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Multilingual support'),
-      '#default_value' => $type->settings['language'],
-      '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new posts are saved with no defined language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
-    );
-  }
-
   $form['workflow']['sticky'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Sticky'),
@@ -218,7 +220,6 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#parents' => array('sticky_default'),
     '#return_value' => 1,
   );
-
   $form['workflow']['promote'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Promote'),
@@ -239,13 +240,46 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#return_value' => 1,
   );
 
+  // Multilingual support.
+  if (module_exists('language')) {
+    $form['multilingual'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Multilingual support'),
+      '#collapsible' => TRUE,
+      '#group' => 'additional_settings',
+      '#weight' => -5,
+    );
+    $form['multilingual']['language'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Multilingual support'),
+      '#default_value' => $type->settings['language'],
+      '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new posts are saved with no defined language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
+    );
+  }
+
+  // URL alias pattern.
+  // @see: path_pattern_settings_form().
+
+  // Content type permissions.
+  $form['permissions'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Permissions'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#access' => user_access('administer permissions'),
+    '#weight' => 0,
+  );
+  $form['permissions']['permissions'] = node_type_form_permissions($type->type);
+
+  // Revision settings.
   $form['revision'] = array(
     '#type' => 'fieldset',
     '#title' => t('Revision settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
-    '#weight' => 1,
+    '#weight' => 10,
   );
   $form['revision']['revision']['revision_enabled'] = array(
     '#type' => 'checkbox',
@@ -261,25 +295,17 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#parents' => array('revision_default'),
   );
 
-  // Node type permissions
-  $form['permissions'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Permissions'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#group' => 'additional_settings',
-    '#access' => user_access('administer permissions'),
-    '#weight' => -3,
-  );
-  $form['permissions']['permissions'] = node_type_form_permissions($type->type);
+  // Menu settings.
+  // @see: menu_form_node_type_form_alter().
 
+  // Display settings.
   $form['display'] = array(
     '#type' => 'fieldset',
     '#title' => t('Display settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
-    '#weight' => 10,
+    '#weight' => 20,
   );
   $form['display']['node_submitted'] = array(
     '#type' => 'checkbox',
@@ -307,6 +333,9 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->settings['hidden_path'],
     '#description' => t('If enabled, this content can be placed as a block or within a listing but will not be accessible at its URL without proper permissions. This facilitates "hidden path" content that is meant to be embedded with other content and never on its own. Users who have the "View hidden paths" permission will still be able to visit the full page URL, while those without this permission will receive a "Page not found" error.'),
   );
+
+  // Comment settings.
+  // @see: comment_form_node_type_form_alter().
 
   $form['old_type'] = array(
     '#type' => 'value',
@@ -395,6 +424,7 @@ function node_type_form_submit($form, &$form_state) {
   $type->old_type = isset($form_state['values']['old_type']) ? $form_state['values']['old_type'] : $type->type;
 
   $type->description = $form_state['values']['description'];
+  $type->node_preview = $form_state['values']['node_preview'];
   $type->help = $form_state['values']['help'];
   $type->title_label = $form_state['values']['title_label'];
   // title_label is required in core; has_title will always be true, unless a
@@ -558,6 +588,7 @@ function node_node_type_load(&$types) {
       'sticky_default' => FALSE,
       'revision_enabled' => TRUE,
       'revision_default' => FALSE,
+      'node_preview' => TRUE,
 
       // Submitted information.
       'node_submitted' => TRUE,

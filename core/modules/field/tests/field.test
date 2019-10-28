@@ -3559,3 +3559,118 @@ class FieldBlockTestCase extends FieldTestCase {
     $this->assertTrue(strpos($field_label[0], $this->instance['label']) !== FALSE, 'Block label shown above the field content in the block.');
   }
 }
+
+/**
+ * Test field_get_value().
+ */
+class FieldGetValueTestCase extends FieldTestCase {
+  protected $profile = 'testing';
+  protected $content_type;
+  protected $field_name;
+  protected $field;
+  protected $instance;
+  protected $admin_user;
+  protected $node;
+
+  function setUp() {
+    parent::setUp(array('node', 'field', 'field_test', 'email'));
+
+    $this->content_type = $this->backdropCreateContentType(array(
+      'type' => 'post',
+      'name' => 'Post',
+    ));
+    $this->admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer nodes', 'administer layouts'));
+
+    // Create a test_field field.
+    $this->test_field_name = backdrop_strtolower($this->randomName() . '_field_name');
+    $this->field = field_create_field(array(
+      'field_name' => $this->test_field_name,
+      'type' => 'test_field',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+    ));
+    $this->instance = field_create_instance(array(
+      'label' => $this->randomName(),
+      'field_name' => $this->test_field_name,
+      'entity_type' => 'node',
+      'bundle' => 'post',
+    ));
+
+    // Create an 'email' field.
+    $this->test_email_field_name = backdrop_strtolower($this->randomName() . '_email_field_name');
+    $this->field = field_create_field(array(
+      'field_name' => $this->test_email_field_name,
+      'settings' => array(),
+      'type' => 'email',
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+    ));
+    $this->instance = field_create_instance(array(
+      'settings' => array(),
+      'label' => $this->randomName(),
+      'field_name' => $this->test_email_field_name,
+      'entity_type' => 'node',
+      'bundle' => 'post',
+    ));
+
+    $this->value1 = 11;
+    $this->value2 = 22;
+    $this->value_email1 = 'email1@example.com';
+    $this->value_email2 = 'email2@example.com';
+
+    // Create a dummy node.
+    $this->node = $this->backdropCreateNode(array(
+      'type' => 'post',
+      $this->test_field_name => array(LANGUAGE_NONE => array(
+        array('value' => $this->value1),
+        array('value' => $this->value2),
+      )),
+      $this->test_email_field_name => array(LANGUAGE_NONE => array(
+        array('email' => $this->value_email1),
+        array('email' => $this->value_email2),
+      )),
+    ));
+  }
+
+  /**
+   * Test field_get_value().
+   */
+  function testFieldGetValue() {
+    // Test single 'value' return.
+    $single_value = field_get_value($this->node, $this->test_field_name);
+    $this->assertEqual($this->value1, $single_value, 'The first value in test_field is returned.');
+
+    // Test single 'value' return with $entity->getFieldValue() directly.
+    $single_value = $this->node->getFieldValue($this->test_field_name);
+    $this->assertEqual($this->value1, $single_value, 'The first value in test_field is returned.');
+
+    // Test multiple 'value' return
+    $multiple_value = field_get_values($this->node, $this->test_field_name, 'value', FALSE);
+    $this->assertEqual(2, count($multiple_value), 'An array containing both test_field values is returned.');
+    $this->assertEqual($this->value2, $multiple_value[1], 'Returned value at array position 1 is correct.');
+
+    // Test multiple 'value' return with $entity->getFieldValues() directly.
+    $multiple_value = $this->node->getFieldValues($this->test_field_name, 'value', FALSE);
+    $this->assertEqual(2, count($multiple_value), 'An array containing both test_field values is returned.');
+    $this->assertEqual($this->value2, $multiple_value[1], 'Returned value at array position 1 is correct.');
+
+    // Test 'email' as key.
+    $email_value = field_get_value($this->node, $this->test_email_field_name, 'email');
+    $this->assertEqual($this->value_email1, $email_value, 'The correct item key is returned.');
+
+    // Test an invalid key.
+    $invalid_key = field_get_value($this->node, $this->test_email_field_name, 'wrong_key');
+    $this->assertNull($invalid_key, 'Null is returned with an invalid key.');
+
+    // Test an invalid field name.
+    $invalid_field = field_get_value($this->node, 'no_field');
+    $this->assertNull($invalid_field, 'Null is returned with an invalid field name.');
+
+    // Test an invalid key.
+    $invalid_key = field_get_values($this->node, $this->test_email_field_name, 'wrong_key');
+    $this->assertEqual(array(), $invalid_key, 'Empty array is returned with an invalid field name.');
+
+    // Test an invalid field name.
+    $invalid_field = field_get_values($this->node, 'no_field');
+    $this->assertEqual(array(), $invalid_field, 'Empty array is returned with an invalid field name.');
+
+  }
+}

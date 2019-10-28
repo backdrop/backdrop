@@ -15,6 +15,12 @@ function taxonomy_uninstall() {
     $vocabulary_name = str_replace('taxonomy.vocabulary.', '', $config_name);
     field_attach_delete_bundle('taxonomy_term', $vocabulary_name);
   }
+
+  // Remove default, un-modified view.
+  $config = config('views.view.taxonomy_term');
+  if ($config->get('storage') != VIEWS_STORAGE_OVERRIDE) {
+    $config->delete();
+  }
 }
 
 /**
@@ -57,6 +63,13 @@ function taxonomy_schema() {
         'length' => 255,
         'not null' => FALSE,
         'description' => 'The {filter_format}.format of the description.',
+      ),
+      'langcode' => array(
+        'description' => 'The language code for this term; if \'und\', the term will be shown in all languages.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
       ),
       'weight' => array(
         'type' => 'int',
@@ -102,7 +115,7 @@ function taxonomy_schema() {
     ),
     'primary key' => array('tid', 'parent'),
   );
-  
+
   $schema['taxonomy_index'] = array(
     'description' => 'Maintains denormalized information about node/term relationships.',
     'fields' => array(
@@ -310,6 +323,35 @@ function taxonomy_update_1004() {
 function taxonomy_update_1005() {
   if (db_table_exists('taxonomy_vocabulary')) {
     db_drop_table('taxonomy_vocabulary');
+  }
+}
+
+/**
+ * Add langcode column to {taxonomy_term_data} table.
+ */
+function taxonomy_update_1006() {
+  if (!db_field_exists('taxonomy_term_data', 'langcode')) {
+    $spec = array(
+      'description' => 'The language code for this term; if \'und\', the term will be shown in all languages.',
+      'type' => 'varchar',
+      'length' => 12,
+      'not null' => TRUE,
+      'default' => '',
+    );
+    db_add_field('taxonomy_term_data', 'langcode', $spec);
+    db_query("UPDATE {taxonomy_term_data} SET langcode = 'und'");
+  }
+}
+
+/**
+ * Move default taxonomy term view to taxonomy module.
+ */
+function taxonomy_update_1007() {
+  // If the views config has not been deleted, update it's module.
+  $config = config('views.view.taxonomy_term');
+  if (!$config->isNew()) {
+    $config->set('module', 'taxonomy');
+    $config->save();
   }
 }
 

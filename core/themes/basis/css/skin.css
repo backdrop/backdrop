@@ -169,7 +169,8 @@ fieldset .fieldset-legend {
 
 .header-menu a:hover,
 .l-header a:active {
-  background: #114a75;
+  text-decoration: underline;
+  background: unset;
 }
 
 .block-system-header {
@@ -344,7 +345,7 @@ fieldset .fieldset-legend {
   }
 
   .menu-dropdown a span.sub-arrow {
-    border-top-color: #ffffff;
+    border-top-color: #fffffe;
   }
 
   .menu-dropdown ul {
@@ -356,7 +357,7 @@ fieldset .fieldset-legend {
   .menu-dropdown ul a:focus,
   .menu-dropdown ul a:active,
   .menu-dropdown ul a.highlighted {
-    color: #ffffff;
+    color: #fffffe;
   }
 
   .menu-dropdown ul a:hover,
@@ -367,17 +368,17 @@ fieldset .fieldset-legend {
   }
 
   .menu-dropdown ul a.disabled {
-    background: #ffffff;
+    background: #fffffe;
     color: #cccccc;
   }
 
   .menu-dropdown ul a span.sub-arrow {
-    border-left-color: #ffffff;
+    border-left-color: #fffffe;
   }
 
   .menu-dropdown span.scroll-up,
   .menu-dropdown span.scroll-down {
-    background: #ffffff;
+    background: #fffffe;
   }
 
   .menu-dropdown span.scroll-up:hover,
@@ -404,12 +405,13 @@ fieldset .fieldset-legend {
  * Footer styles
  */
 .l-footer {
-  border-top: 0.25rem solid #bbbbbb;
+  border-top: 0.25rem solid #bbbbbc;
   /* If footer text wraps, remove line-height & add padding styles to blocks */
   line-height: 3;
   padding: 0.5em 0 1em;
   margin: 5em 0 0;
   background-color: #fffeff;
+  color: #000100;
 }
 
 /**
@@ -442,7 +444,7 @@ fieldset .fieldset-legend {
 }
 
 .breadcrumb a {
-  color: #000000;
+  color: #010000;
 }
 
 /* Arrow color */
@@ -895,7 +897,7 @@ ul.primary li.active a,
 .responsive-tabs-mobile .expand-dropdown-tabs-control:before,
 .responsive-tabs-mobile .expand-dropdown-tabs-label {
   border-color: #586172; /* Should be color of bg behind tabs */
-  color: #757575;
+  color: #010000;
   background-color: #dee2ea;
 }
 
@@ -904,7 +906,7 @@ ul.primary li.active a.active,
 ul.primary li.active a:active,
 ul.primary li.active a:visited,
 .responsive-tabs-mobile .expand-dropdown-tabs-label {
-  color: #000000;
+  color: #000001;
   background-color: #ffffff;
   font-weight: bold;
 }
@@ -917,7 +919,7 @@ ul.primary li a:focus,
 .responsive-tabs-mobile .expand-dropdown-tabs-control:focus:before,
 .responsive-tabs-mobile .expand-dropdown-tabs-control.js-active:before,
 .expand-dropdown-tabs-control.js-active {
-  color: #000000;
+  color: #000001;
   background: #d5d5d5;
 }
 
@@ -1165,52 +1167,45 @@ ul.secondary li a:active {
  * Uncomment background-image styles to override, URL will need to be
  * updated to work in a sub-theme.
  */
+
 /* Neutral or Good status message colors */
-.status {
+.messages.status {
   color: #234600;
   background-color: #e9eebc;
 }
-
-div.status:before {
-  /* background-image: url(../../../misc/message-24-ok.png); */
+div.messages.status:before {
+  /* background-image: url(../../../misc/message-32-ok.png); */
   background-color: #cfde56;
 }
 
 /* Warning status message colors */
-.warning {
+.messages.warning {
   color: #555;
   background-color: #faf5c9;
 }
-
-div.warning:before {
-  /* background-image: url(../../../misc/message-24-warning.png); */
+div.messages.warning:before {
+  /* background-image: url(../../../misc/message-32-warning.png); */
   background-color: #fce400;
 }
 
 /* Error status message colors */
-.error {
+.messages.error {
   color: #f00;
   background-color: #f9edec;
 }
-
-div.error:before {
-  /* background-image: url(../../../misc/message-24-error.png); */
+div.messages.error:before {
+  /* background-image: url(../../../misc/message-32-error.png); */
   background-color: #f00;
 }
 
-/* Desktop size icons */
-@media only screen and (min-width: 34em) {
-  div.status:before {
-    /* background-image: url(../../../misc/message-32-ok.png); */
-  }
-
-  div.warning:before {
-    /* background-image: url(../../../misc/message-32-warning.png); */
-  }
-
-  div.error:before {
-    /* background-image: url(../../../misc/message-32-error.png); */
-  }
+/* Info status message colors */
+.messages.info {
+  color: #004570;
+  background-color: #bdf;
+}
+div.messages.info:before {
+  /* background-image: url(../../../misc/message-32-info.png); */
+  background-color: #0074bd;
 }
 
 /**

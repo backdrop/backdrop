@@ -113,7 +113,7 @@ function filter_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/config/content/formats/add'] = array(
-    'title' => 'Add text editor',
+    'title' => 'Add text format',
     'page callback' => 'filter_admin_format_page',
     'access arguments' => array('administer filters'),
     'type' => MENU_LOCAL_ACTION,
@@ -2449,8 +2449,8 @@ function _filter_image_caption($text) {
     $attributes = array();
     $tag = $node->tagName;
     $classes = $node->getAttribute('class');
-    $node = ($node->parentNode->tagName === 'a') ? $node->parentNode : $node;
     $node->removeAttribute('class');
+    $node = ($node->parentNode->tagName === 'a') ? $node->parentNode : $node;
     if ($classes) {
       $attributes['class'] = explode(' ', $classes);
     }
@@ -2458,7 +2458,7 @@ function _filter_image_caption($text) {
     $attributes['class'][] = 'caption-' . $node->tagName;
 
     $theme_parameters = array(
-      'item' => $node->ownerDocument->saveHTML($node),
+      'item' => $node->ownerDocument->saveXML($node),
       'tag' => $tag,
       'caption' => $caption,
       'attributes' => $attributes,

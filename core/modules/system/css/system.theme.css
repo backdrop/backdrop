@@ -29,13 +29,11 @@ hr {
 }
 th {
   border-bottom: 3px solid #ccc;
-  padding-right: 1em; /* LTR */
+  padding: 0 1em;
   text-align: left; /* LTR */
 }
 [dir="rtl"] th {
   text-align: right;
-  padding-left: 1em;
-  padding-right: 0;
 }
 tr.even,
 tr.odd {
@@ -240,6 +238,7 @@ abbr.ajax-changed {
 .js[dir="rtl"] fieldset.collapsed .fieldset-title {
   background-image: url(../../../misc/menu-collapsed-rtl.png);
   background-position: 98% 50%;
+  background-repeat: no-repeat;
 }
 .fieldset-legend span.summary {
   color: #999;
@@ -425,7 +424,6 @@ ul.secondary li {
 }
 [dir="rtl"] ul.secondary li {
   border-right: none;
-  display: inline;
   padding: 0 1em;
 }
 ul.secondary a {
@@ -543,11 +541,11 @@ img.align-right {
 }
 
 /**
- * Clearfix text areas in case of floated contents
+ * Clear text areas in case of floated contents.
+ *
+ * @see https://meiert.com/en/blog/no-clearfix/
  */
-.field-type-text-long:after,
-.field-type-text-with-summary:after {
-  content: '';
-  display: table;
-  clear: both;
+.field-type-text-long,
+.field-type-text-with-summary {
+  overflow: auto;
 }

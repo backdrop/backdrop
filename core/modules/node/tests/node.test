@@ -470,7 +470,12 @@ class PagePreviewTestCase extends BackdropWebTestCase {
   function setUp() {
     parent::setUp(array('taxonomy', 'node', 'email'));
 
-    $web_user = $this->backdropCreateUser(array('edit own page content', 'create page content', 'administer nodes'));
+    $web_user = $this->backdropCreateUser(array(
+      'administer content types',
+      'edit own page content',
+      'create page content',
+      'administer nodes'
+    ));
     $this->backdropLogin($web_user);
 
     // Add a vocabulary so we can test different view modes.
@@ -561,6 +566,24 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $body_key = "body[$langcode][0][value]";
     $term_key = "{$this->field_name}[$langcode]";
     $email_key = "{$this->field_email_name}[$langcode][0][email]";
+
+    // Test turning off preview.
+    $edit = array(
+      'node_preview' => 0,
+    );
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    // Refresh the field information for the rest of the test.
+    field_info_cache_clear();
+    $this->backdropGet('node/add/page');
+    $this->assertNoFieldById('edit-preview',  t('Preview'), 'Preview button not found.');
+
+    // Turn it back on and test functionality.
+    $edit = array(
+      'node_preview' => 1,
+    );
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    // Refresh the field information for the rest of the test.
+    field_info_cache_clear();
 
     // Fill in node creation form and preview node.
     $edit = array();
@@ -662,6 +685,50 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
 
     $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');
+
+    // Test that a user with permissions to create, but not edit, can still 
+    // access preview.
+    $no_edit_user = $this->backdropCreateUser(array(
+      'create page content',
+      'access content',
+    ));
+    $this->backdropLogin($no_edit_user);
+
+    // Fill in node creation form and preview node.
+    $name = $this->randomName(8);
+    $edit = array();
+    $edit[$title_key] = $name;
+    $edit[$body_key] = $this->randomName(16);
+
+    $this->backdropPost('node/add/page', $edit, t('Preview'));
+    $this->assertText($edit[$title_key], 'Title displayed.');
+
+    // Test that a user with permissions to edit, but not create, can still 
+    // access preview.
+    $no_create_user = $this->backdropCreateUser(array(
+      'edit any page content',
+      'access content',
+    ));
+    $this->backdropLogin($no_create_user);
+
+    $name = $this->randomName(8);
+    $node = $this->backdropCreateNode(array('type' => 'page', 'title' => $name));
+    $this->backdropGet('node/' . $node->nid);
+    $this->clickLink('Edit');
+    $this->backdropPost(NULL, array(), t('Preview'));
+    $this->assertText($name, 'Title displayed.');
+    $url = $this->getUrl();
+
+    // Test that a user with no create or edit permissions cannot access
+    // preview.
+    $no_create_edit_user = $this->backdropCreateUser(array(
+      'access content',
+    ));
+    $this->backdropLogin($no_create_edit_user);
+
+    $this->backdropGet($url);
+    $this->assertResponse(403, 'Received 404 response from user attempting to directly access preview.');
+
   }
 
 }
@@ -876,7 +943,7 @@ class NodeTitleXSSTestCase extends BackdropWebTestCase {
  */
 class NodeBlockTestCase extends BackdropWebTestCase {
   function setUp() {
-    parent::setUp();
+    parent::setUp('node_test');
 
     // Create and login user
     $admin_user = $this->backdropCreateUser(array('administer blocks'));
@@ -884,9 +951,10 @@ class NodeBlockTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests that the "Syndicate" block is shown when enabled.
+   * Tests the "Syndicate" block settings.
    */
   function testSyndicateBlock() {
+    // Test default promoted nodes feed shown if default block settings.
     $layout = layout_load('home');
     $layout->addBlock('node', 'syndicate', 'footer');
     $layout->save();
@@ -896,10 +964,49 @@ class NodeBlockTestCase extends BackdropWebTestCase {
     $this->backdropGet('<front>');
     $elements = $this->xpath($syndicate_selector);
     $this->assertEqual(count($elements), 1, 'Syndicate block found on front page.');
+    $view_feed = $this->xpath('//a[contains(@href,"test-view-feed")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($view_feed), 0, 'View feed not found on front page.');
+    $promote_feed = $this->xpath('//a[contains(@href,"rss.xml")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($promote_feed), 1, 'Promoted nodes feed found on front page.');
 
+    // Check block not shown if not on the layout page.
     $this->backdropGet('user');
     $elements = $this->xpath($syndicate_selector);
     $this->assertEqual(count($elements), 0, 'Syndicate block not shown on /user.');
+
+    // Test block shows the RSS feed of an RSS-enabled view if set to show page
+    // content.
+    $layout = layout_load('default');
+    $block = $layout->addBlock('node', 'syndicate', 'footer');
+    $block->settings['block_settings'] = array(
+      'syndicate_settings' => 'page_content',
+    );
+    $layout->save();
+    cache_clear_all();
+
+    $this->backdropGet('test-view-view');
+    $elements = $this->xpath($syndicate_selector);
+    $this->assertEqual(count($elements), 1, 'Syndicate block found on test View page.');
+    $view_feed = $this->xpath('//a[contains(@href,"test-view-feed")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($view_feed), 1, 'View feed found on test View page.');
+    $promote_feed = $this->xpath('//a[contains(@href,"rss.xml")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($promote_feed), 0, 'Promoted nodes feed not found on test View page.');
+
+    // Test block shows the promoted nodes view if set to show this, even on a
+    // RSS enabled view's page.
+    $block->settings['block_settings'] = array(
+      'syndicate_settings' => 'promoted',
+    );
+    $layout->save();
+    cache_clear_all();
+
+    $this->backdropGet('test-view-view');
+    $elements = $this->xpath($syndicate_selector);
+    $this->assertEqual(count($elements), 1, 'Syndicate block found on test View page.');
+    $view_feed = $this->xpath('//a[contains(@href,"test-view-feed")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($view_feed), 0, 'View feed not found on test View page.');
+    $promote_feed = $this->xpath('//a[contains(@href,"rss.xml")]//img[contains(@src,"feed.png")]');
+    $this->assertEqual(count($promote_feed), 1, 'Promoted nodes feed found on test View page.');
   }
 }
 
@@ -1538,8 +1645,22 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     // Add a node of type foo; make sure we can visit it with 200 response..
     $foo_settings = array('uid' => $web_user->uid, 'type' => 'foo');
     $foo_node = $this->backdropCreateNode($foo_settings);
+
+    $web_user = $this->backdropCreateUser(array('search content', 'use advanced search'));
+    $this->backdropLogin($web_user);
+
     $this->backdropGet('/node/' . $foo_node->nid);
     $this->assertResponse(200, 'Received 200 response from node type foo with hidden_path disabled.');
+
+    // Check that node is listed in /search.
+    $this->cronRun();
+
+    // Search for node title. Should be one result.
+    $this->backdropPost('search/node', array('keys' => $foo_node->title), t('Search'));
+    $this->assertText($foo_node->title, 'Node found in search results.');
+
+    // Ensure content type is available as option.
+    $this->assertFieldByXPath("//input[@name='type[foo]']", 'foo', 'Content type of foo is available as filter for search.');
 
     // Edit content type foo to hidden_path = 1 and check the setting.
     $config->set('settings.hidden_path', '1');
@@ -1549,6 +1670,16 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     backdrop_flush_all_caches();
     $this->backdropGet('/node/' . $foo_node2->nid);
     $this->assertResponse(404, 'Received 404 response from node type foo where user restricted from viewing full page.');
+
+    // Check that node is not listed in /search.
+    $this->cronRun();
+
+    // Search for node title. Should be zero results.
+    $this->backdropPost('search/node', array('keys' => $foo_node->title), t('Search'));
+    $this->assertNoText($foo_node->title, 'Node not found in search results.');
+
+    // Ensure content type is not available as option.
+    $this->assertNoFieldByXPath("//input[@name='type[foo]']", 'foo', 'Content type of foo is not available as filter for search.');
 
     // Ensure publishing settings are loaded correctly even when using boolean
     // values for "status_default".
@@ -2334,6 +2465,106 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
 
     // Read more text now found.
     $this->assertText('Read more');
+  }
+}
+
+/**
+ * Test translation settings on existing content block.
+ */
+class NodeTranslateBlockFunctionalTest extends BackdropWebTestCase {
+
+  function setUp() {
+    parent::setUp('node', 'block', 'locale', 'language', 'translation');
+
+    // Create users and test node.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'administer content types',
+      'administer nodes',
+      'administer blocks',
+      'administer layouts',
+      'translate content',
+      'administer languages',
+      'access content',
+      'create page content',
+    ));
+
+    // Delete the two default nodes.
+    node_delete_multiple(array(1, 2));
+  }
+
+  /**
+   * Tests the Existing content block.
+   */
+  function testNodeTranslateBlock() {
+    $this->backdropLogin($this->admin_user);
+
+    $langcode = 'es';
+    // Add languages.
+    $edit['predefined_langcode'] = $langcode;
+    $this->backdropPost('admin/config/regional/language/add', $edit, t('Add language'));
+
+    // Set "Page" content type to use multilingual support with
+    // translation.
+    $this->backdropGet('admin/structure/types/manage/page');
+    $edit = array();
+    $edit['language'] = TRANSLATION_ENABLED;
+    $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
+    $this->assertRaw(t('The content type %type has been updated.', array('%type' => 'Page')), 'Page content type has been updated.');
+
+    // Add some test nodes.
+    $node1_settings = array('uid' => $this->admin_user->uid, 'type' => 'page');
+    $node1 = $this->backdropCreateNode($node1_settings);
+
+    // Add node in default language.
+    $field_langcode = LANGUAGE_NONE;
+    $title_en = 'English title';
+    $node2_settings["title"] = $title_en;
+    $node2_settings["body[$field_langcode][0][value]"] = 'English. Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
+    $node2_settings['langcode'] = 'en';
+
+    $this->backdropPost('node/add/page', $node2_settings, t('Save'));
+    $node2 = $this->backdropGetNodeByTitle($title_en);
+
+    // Add translated node.
+    $this->backdropGet('node/add/page', array('query' => array('translation' => $node2->nid, 'target' => $langcode)));
+
+    $title_es = 'Título en español';
+    $node3_settings["title"] = $title_es;
+    $node3_settings["body[$field_langcode][0][value]"] = 'Spanish. Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
+    $node2_settings['langcode'] = $langcode;
+    $this->backdropPost(NULL, $node3_settings, t('Save'));
+    $node3 = $this->backdropGetNodeByTitle($title_es);
+
+    $this->assertRaw(t('Page %title has been created.', array('%title' => $node3->title)), 'Translation created.');
+
+    // Check that $node2 does not appear on $node1 path.
+    $this->backdropGet('node/' . $node1->nid);
+    $this->assertNoText($node2->title, t('Node 2 title not found on Node 1.'));
+
+    // Add an Existing content block with default settings.
+    $this->backdropGet('admin/structure/layouts/manage/default');
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Existing content'));
+    $edit = array(
+      'nid' => $node2->nid,
+      'leave_node_title' => TRUE,
+      'link_node_title' => TRUE,
+      'links' => TRUE,
+      'translate' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('node/' . $node1->nid);
+
+    // Check the title is in English.
+    $this->assertText('English title', 'The English node appears on the page.');
+
+    // Switch language
+    $this->backdropGet('es/node/' . $node1->nid);
+
+    // Check that translated node appears.
+    $this->assertText('Título en español', 'The translated node appears on the page.');
   }
 }
 

@@ -38,7 +38,7 @@ class CKEditorTestCase extends BackdropWebTestCase {
    */
   function testLibrary() {
     $this->backdropGet('admin/config/content/formats');
-    $this->clickLink(t('Add text editor'));
+    $this->clickLink(t('Add text format'));
 
     // Select CKEditor and refresh the page.
     $this->backdropPost(NULL, array(

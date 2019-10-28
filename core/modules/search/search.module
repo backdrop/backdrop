@@ -112,12 +112,92 @@ function search_block_info() {
 }
 
 /**
+ * Implements hook_block_configure().
+ */
+function search_block_configure($delta = '', $settings = array()) {
+  $form = array();
+  if ($delta == 'form') {
+    $search_settings = !empty($settings['search'])? $settings['search'] : array();
+    $search_settings += array(
+      'label' => '',
+      'label_hide' => TRUE,
+      'placeholder' => '',
+      'button_text' => 'Search',
+    );
+
+    $form['search'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Search form settings'),
+      '#collapsible' => TRUE,
+    );
+
+    $form['search']['label'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Search box label'),
+      '#default_value' => check_plain($search_settings['label']),
+    );
+    $form['search']['label_hide'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Hide the search box label'),
+      '#default_value' => $search_settings['label_hide'],
+    );
+    $form['search']['placeholder'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Placeholder text'),
+      '#default_value' => check_plain(trim($search_settings['placeholder'])),
+      '#description' => t('This text will appear in the search box until text is entered.'),
+    );
+    $form['search']['button_text'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Button text'),
+      '#default_value' => check_plain(trim($search_settings['button_text'])),
+      '#description' => t('Leave this field empty to hide the submit button.'),
+    );
+  }
+  return $form;
+}
+
+/**
  * Implements hook_block_view().
  */
-function search_block_view($delta = '') {
+function search_block_view($delta = '', $settings = array(), $contexts = array()) {
   if (user_access('search content')) {
+    $search_settings = !empty($settings['search'])? $settings['search'] : array();
+    $search_settings += array(
+      'label' => '',
+      'label_hide' => TRUE,
+      'placeholder' => '',
+      'button_text' => 'Search',
+    );
+    $form = backdrop_get_form('search_block_form');
+
+    // Show the label.
+    if (!$search_settings['label_hide']) {
+      $form['search_block_form']['#title_display'] = 'before';
+
+      // Update the label text.
+      if ($search_settings['label'] != '') {
+        $form['search_block_form']['#title'] = t(check_plain($search_settings['label']));
+      }
+    }
+
+    // Add a placeholder.
+    if ($search_settings['placeholder'] != '') {
+      $form['search_block_form']['#attributes']['placeholder'] = t(trim($search_settings['placeholder']));
+    }
+
+    // Change the button text.
+    if ($search_settings['button_text'] != 'Search') {
+      if ($search_settings['button_text'] == '') {
+        $form['actions']['submit']['#access'] = FALSE;
+      }
+      else {
+        $form['actions']['submit']['#value'] = t(check_plain(trim($search_settings['button_text'])));
+      }
+    }
+
     $block['subject'] = t('Search');
-    $block['content'] = backdrop_get_form('search_block_form');
+    $block['content'] = $form;
     return $block;
   }
 }
