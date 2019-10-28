@@ -739,7 +739,7 @@ function node_type_delete_confirm_submit($form, &$form_state) {
 
   if (!empty($nids)) {
     node_delete_multiple($nids);
-    $message = t(format_plural(count($nids), 'Deleted 1 piece of content of type %type.', 'Deleted @count pieces of content of type %type.'), array('%type' => $type->name));
+    $message = t(format_plural(count($nids), 'Deleted 1 content item of type %type.', 'Deleted @count content items of type %type.'), array('%type' => $type->name));
     drupal_set_message($message);
     watchdog('node', $message, WATCHDOG_NOTICE);
   }
