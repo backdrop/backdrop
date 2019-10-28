@@ -251,11 +251,11 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
   }
 
   /**
-   * Tests node type links.
+   * Tests content type links.
    */
   function testNode() {
     $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
-    // Create a content-type with special characters.
+    // Create a content type with special characters.
     $this->backdropCreateContentType(array('type' => 'special', 'name' => 'Cool & Special'));
 
     $permissions = $this->basePermissions + array(
@@ -289,7 +289,7 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
       ), "Structure » Content types » $title link found.");
     }
 
-    // Verify Add content links.
+    // Verify "Add content" links.
     $links = array(
       'node/add/post' => 'Post',
       'node/add/special' => 'Cool & Special',
@@ -301,16 +301,17 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
       ), "Add content » $title link found.");
     }
 
-    // Remove the node/add items from the management menu and check that the add
-    // links are still added to the menu.
+    // Remove the node/add items from the management menu, and check that the
+    // "Add content" links are still added to the menu.
     module_load_include('inc', 'admin_bar');
     $link = db_query("SELECT * FROM {menu_links} WHERE router_path LIKE 'node/add%' AND module = 'system'")->fetchAssoc();
     $link = menu_link_load($link['mlid']);
     $link['menu_name'] = 'main-menu';
     menu_link_save($link);
 
-    // Delete the special type and check that the link disappears.
-    $this->backdropPost('admin/structure/types/manage/special/delete', array(), t('Delete all content and the content type'));
+    // Delete the special content type, and check that the respective "Add
+    // content" link disappears.
+    $this->backdropPost('admin/structure/types/manage/special/delete', array(), t('Delete content type'));
     $this->backdropGet('js/admin_bar/cache/' . $hash);
 
     $this->assertElementByXPath('//div[@id="admin-bar"]//a[contains(@href, :path) and text()=:title]', array(
