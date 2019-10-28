@@ -668,9 +668,9 @@ function node_type_delete_confirm($form, &$form_state, $type) {
 
   $num_nodes = db_query("SELECT COUNT(*) FROM {node} WHERE type = :type", array(':type' => $type->type))->fetchField();
   if ($num_nodes) {
-    $description = '<p>' . format_plural($num_nodes, 'There is 1 piece of content of type %type on your site.', 'There are @count pieces of content of type %type on your site.', array('%type' => $type->name));
-    $description .= ' ' . t('To delete this content type, you must also delete all content of that type.') . '</p>';
-    $yes = t('Delete all content and the content type');
+    $description = '<p>' . format_plural($num_nodes, 'There is 1 content item of type %type on your site.', 'There are @count content items of type %type on your site.', array('%type' => $type->name));
+    $description .= ' ' . t('To delete this content type, you must also delete all content items of that type.') . '</p>';
+    $yes = t('Delete content items and the content type');
   }
   else {
     $description = NULL;
@@ -699,7 +699,7 @@ function node_form_node_type_delete_confirm_alter(&$form, &$form_state, $form_id
       '#weight' => -10,
     );
     $warnings = array(
-      array('data' => '<strong>' . t('All content of type %type will be deleted!', array('%type' => $type->name)) . '</strong>'),
+      array('data' => '<strong>' . t('All content of type %type will also be deleted!', array('%type' => $type->name)) . '</strong>'),
       array('data' => t('This action cannot be undone.')),
     );
     $form['delete_content_warning']['warning1'] = array(
@@ -708,7 +708,7 @@ function node_form_node_type_delete_confirm_alter(&$form, &$form_state, $form_id
 
     $form['delete_content'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Delete <bold>all content</bold> of type %type', array('%type' => $type->name)),
+      '#title' => t('Delete <strong>all content items</strong> of type %type', array('%type' => $type->name)),
       '#default_value' => 0,
     );
     $form['actions']['submit'] += array(
