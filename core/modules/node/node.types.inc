@@ -643,10 +643,10 @@ function node_type_delete_confirm($form, &$form_state, $type) {
   }
   else {
     $description = NULL;
-    $yes = t('Delete');
+    $yes = t('Delete content type');
   }
 
-  return confirm_form($form, $message, 'admin/structure/types', $description, t('Delete all content and the content type'), NULL);
+  return confirm_form($form, $message, 'admin/structure/types', $description, $yes, NULL);
 }
 
 /**
@@ -668,8 +668,8 @@ function node_form_node_type_delete_confirm_alter(&$form, &$form_state, $form_id
       '#weight' => -10,
     );
     $warnings = array(
-      array('data' => t('<strong>All content of type %type will be deleted!</strong>', array('%type' => $type->name))),
-      array('data' => t('This action cannot be undone!')),
+      array('data' => '<strong>' . t('All content of type %type will be deleted!', array('%type' => $type->name)) . '</strong>'),
+      array('data' => t('This action cannot be undone.')),
     );
     $form['delete_content_warning']['warning1'] = array(
       '#markup' => theme('item_list', array('items' => $warnings)),
