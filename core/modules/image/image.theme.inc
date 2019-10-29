@@ -375,6 +375,7 @@ function theme_image_widget($variables) {
   $output .= '<p>Name: <span class="image-name"> ......</span></p>';
   $output .= '<p>Src: <span class="image-uri"> ......</span></p>';
   $output .= '<p>Size: <span class="image-size"> ......</span></p>';
+  $output .= '<p><i>Point at an image to reveal its properties.</i></p>';
   $output .= '<p><i>Click an image to select it.</i></p>';
   $output .= '</div>'; // end of image-detail.
   $output .= '<div class="image-library">';
