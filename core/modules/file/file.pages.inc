@@ -495,7 +495,8 @@ function file_manage_form($form, &$form_state, File $file) {
 
   $form['filename'] = array(
     '#type' => 'textfield',
-    '#title' => t('File name'),
+    '#title' => t('File display title'),
+    '#description' => t('This text will be used in links to the uploaded file.'),
     '#default_value' => $file->filename,
     '#required' => TRUE,
     '#maxlength' => 255,
