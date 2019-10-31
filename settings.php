@@ -351,12 +351,12 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
  * proxy_exceptions variable is an array of host names to be accessed directly,
  * not via proxy.
  */
-# $settings['proxy_server'] = '';
-# $settings['proxy_port'] = 8080;
-# $settings['proxy_username'] = '';
-# $settings['proxy_password'] = '';
-# $settings['proxy_user_agent'] = '';
-# $settings['proxy_exceptions'] = array('127.0.0.1', 'localhost');
+// $settings['proxy_server'] = '';
+// $settings['proxy_port'] = 8080;
+// $settings['proxy_username'] = '';
+// $settings['proxy_password'] = '';
+// $settings['proxy_user_agent'] = '';
+// $settings['proxy_exceptions'] = array('127.0.0.1', 'localhost');
 
 /**
  * Authorized file system operations:
