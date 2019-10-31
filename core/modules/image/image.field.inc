@@ -695,7 +695,6 @@ function image_field_widget_submit(&$form, &$form_state)
 
     // Update form_state values.
     backdrop_array_set_nested_value($form_state['values'], $parents, $field_values);
-
     $field_state['items'] = $field_values;
     field_form_set_state($element['#field_parents'], $field_name, $langcode, $form_state, $field_state);
   }
@@ -704,3 +703,4 @@ function image_field_widget_submit(&$form, &$form_state)
   backdrop_array_set_nested_value($form_state['input'], $element['#parents'], NULL);
   $form_state['rebuild'] = TRUE;
 }
+

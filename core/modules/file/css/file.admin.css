@@ -82,3 +82,11 @@ a.library-selected, a.upload-selected {
 .selected-image-preview img {
   width: 300px;
 }
+.image-widget-properties p {
+  margin: 0 0.2em;
+}
+.image-widget-properties h4 {
+  margin: 0;
+  margin-top: 1em;
+  font-size: 1rem;
+}

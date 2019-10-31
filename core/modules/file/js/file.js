@@ -222,15 +222,12 @@ Backdrop.behaviors.ImageUploadDialog = {
         // replace current image preview.
         var $currentImgURI = $this.find('[name*= "[imagesrc]"]').val();
         $currentImgURI = '/files' + $currentImgURI.substring(8);
-        var relativeImgSrc = Backdrop.absoluteUrl($currentImgURI);
-        $this.find('div[class= "selected-image-preview"] img').replaceWith('<img src="' + relativeImgSrc + '">');
+        var $relativeImgSrc = Backdrop.absoluteUrl($currentImgURI);
+        $this.find('div[class= "selected-image-preview"] img').replaceWith('<img src="' + $relativeImgSrc + '">');
         $this.find(".description").hide();
-        // Get image width and height from hidden input fields.
-        var $width = $this.find('input[name*= "[width]"]').val();
-        var $height = $this.find('input[name*= "[height]"]').val();
-        var $widthHTML = "<div>Width = " + $width + "px</div>";
-        var $heightHTML = "<div>Height = " + $height + "px</div>";
-        $this.find('[class*= "library-imagesrc"]').append($widthHTML + $heightHTML);
+        $this.find('[class*= "library-imagesrc"]').hide();
+        $this.find('div[class*= "-title"]').hide();
+        $this.find('div[class*= "-alt"]').hide();
       }
       else {
         // fid is not set so initialise with 'Upload an image' part of form.
@@ -300,8 +297,8 @@ Backdrop.behaviors.ImageUploadDialog = {
         $this.find(".description").hide();
         $this.find(".image-toggles").hide();
 
-        // show imagesrc field.
-        $this.find('div[class*= "library-imagesrc"]').show();
+        // hide imagesrc field.
+        $this.find('div[class*= "library-imagesrc"]').hide();
         // show 'confirm selected' button.
         $this.find('[ID*= "library-confirm"]').show();
         // hide image upload file field.

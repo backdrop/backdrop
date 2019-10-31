@@ -388,6 +388,7 @@ function theme_image_widget($variables) {
   $output .= '<h3>Confirm image</h3>';
   $output .= '<div class="selected-image-preview"><img src="/core/modules/image/images/sample.png"></div>';
   $output .= $rendered_image_data;
+  $output .= '<div><em>File details to appear here.</em></div>';
   $output .= '</div>'; // end of image-confirm.
 
   // image-widget form part #4 - current file, if applicable.
@@ -396,16 +397,31 @@ function theme_image_widget($variables) {
   $output .= '<h3>Current image</h3>';
   $output .= '<div class="selected-image-preview"><img src="/core/modules/image/images/sample.png"></div>';
   $output .= $rendered_image_data;
-  $output .= '<div class="image-widget-data">';
-  if ($element['fid']['#value'] != 0) {
-    $element['filename']['#markup'] .= ' <span class="file-size">(' . format_size($element['#file']->filesize) . ')</span> ';
-  }
-  $output .= '</div>'; // end of image-widget-data
+  $output .= _theme_image_widget_detail($element);
   $output .= '</div>'; // image-current
 
   $output .= '</div>'; // end of image-widget
 
   return $output;
+}
+
+function _theme_image_widget_detail($element){
+  $detail = '<div class="image-widget-properties">';
+  if ($element['#image_detail']['fid'] != 0) {
+    $detail .= '<h4>Image properties:</h4>';
+    $detail .= '<p>File ID = ' . $element['#image_detail']['fid'] . '</p>';
+    $detail .= '<p>File name = ' . $element['#image_detail']['filename'] . '</p>';
+    $detail .= '<p>File size = ' . format_size($element['#image_detail']['filesize']) . '</p>';
+    $detail .= '<p>File URI = ' . $element['#image_detail']['uri'] . '</p>';
+    $detail .= '<p>Image width = ' . $element['#image_detail']['width'] . 'px</p>';
+    $detail .= '<p>Image height = ' . $element['#image_detail']['height'] . 'px</p>';
+    !empty($element['alt']['#value']) ? $altText = $element['#image_detail']['alt'] : $altText = 'Not yet set';
+    $detail .= '<p>Alternate text = ' . $altText . '</p>';
+    !empty($element['title']['#value']) ? $titleText = $element['#image_detail']['title'] : $titleText = 'Not yet set';
+    $detail .= '<p>Title text = ' . $titleText . '</p>';
+  }
+  $detail .= '</div>'; // end of image-widget-properties
+  return $detail;
 }
 
 /**
