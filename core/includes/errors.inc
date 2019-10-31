@@ -150,6 +150,7 @@ function _backdrop_render_exception_safe($exception) {
 function error_displayable($error = NULL) {
   try {
     $error_level = function_exists('config_get') ? config_get('system.core', 'error_level') : ERROR_REPORTING_DISPLAY_ALL;
+    $error_level = function_exists('settings_get') ? settings_get('system.core.error_level') : $error_level;
   }
   catch (ConfigException $e) {}
   if (empty($error_level)) {
