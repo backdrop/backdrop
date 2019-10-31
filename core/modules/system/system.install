@@ -565,7 +565,7 @@ function system_requirements($phase) {
 
   if ($phase == 'runtime') {
     // Inform user about status of display error messages.
-    $error_level = settings_get('system.core.error_level', config_get('system.core', 'error_level'));
+    $error_level = settings_get('error_level', config_get('system.core', 'error_level'));
     $description = $t('Backdrop CMS provides the ability to display error messages, which can be useful while a site is in development.');
     $logging_url = url('admin/config/development/logging');
     if ($error_level != ERROR_REPORTING_HIDE) {
