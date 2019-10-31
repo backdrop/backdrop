@@ -7,7 +7,7 @@
 include_once(BACKDROP_ROOT . '/core/modules/simpletest/tests/system_config_test.inc');
 
 class UserLoginTestBase extends BackdropWebTestCase {
-  protected $profile = 'minimal';
+  protected $profile = 'testing';
 
   /**
    * Make an unsuccessful login attempt.
@@ -961,7 +961,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
 }
 
 class UserPictureTestCase extends BackdropWebTestCase {
-  protected $profile = 'minimal';
+  protected $profile = 'testing';
   protected $user;
   protected $_directory_test;
 
@@ -1282,7 +1282,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
 
 
 class UserPermissionsTestCase extends BackdropWebTestCase {
-  protected $profile = 'minimal';
+  protected $profile = 'testing';
   protected $admin_user;
   protected $role_name;
 
@@ -1626,7 +1626,7 @@ class UserAccountLinksUnitTests extends BackdropWebTestCase {
  * Test user blocks.
  */
 class UserBlocksUnitTests extends BackdropWebTestCase {
-  protected $profile = 'minimal';
+  protected $profile = 'testing';
 
   /**
    * Tests the secondary menu.

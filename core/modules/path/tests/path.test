@@ -8,7 +8,7 @@
  * Provides a base class for testing the Path module.
  */
 class PathTestCase extends BackdropWebTestCase {
-  protected $profile = 'minimal';
+  protected $profile = 'testing';
 
   function setUp($modules = array()) {
     $modules[] = 'path';

@@ -364,7 +364,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
 }
 
 class BootstrapVariableTestCase extends BackdropWebTestCase {
-  protected $profile = 'minimal';
+  protected $profile = 'testing';
 
   function setUp() {
     parent::setUp('system_test');

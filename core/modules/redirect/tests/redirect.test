@@ -6,7 +6,7 @@
  */
 
 class RedirectTestHelper extends BackdropWebTestCase {
-  protected $profile = 'minimal';
+  protected $profile = 'testing';
 
   function setUp(array $modules = array()) {
     $modules[] = 'node';

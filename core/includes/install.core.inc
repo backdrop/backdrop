@@ -1237,13 +1237,6 @@ function install_select_profile_form($form, &$form_state, $profile_files) {
   // Display radio buttons alphabetically by human-readable name, but always
   // put the core profiles first (if they are present in the filesystem).
   natcasesort($names);
-  if (isset($names['minimal'])) {
-    // If the expert ("Minimal") core profile is present, put it in front of
-    // any non-core profiles rather than including it with them alphabetically,
-    // since the other profiles might be intended to group together in a
-    // particular way.
-    $names = array('minimal' => $names['minimal']) + $names;
-  }
   if (isset($names['standard'])) {
     // If the default ("Standard") core profile is present, put it at the very
     // top of the list. This profile will have its radio button pre-selected,
