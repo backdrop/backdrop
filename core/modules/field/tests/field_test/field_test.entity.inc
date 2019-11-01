@@ -27,7 +27,8 @@ function field_test_entity_info() {
       'field cache' => FALSE,
       'base table' => 'test_entity',
       'revision table' => 'test_entity_revision',
-      'class' => 'TestEntity',
+      'entity class' => 'TestEntity',
+      'controller class' => 'EntityDatabaseStorageController',
       'entity keys' => array(
         'id' => 'ftid',
         'revision' => 'ftvid',
