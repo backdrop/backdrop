@@ -1607,10 +1607,14 @@ function system_run_cron_submit($form, &$form_state) {
  */
 function system_logging_settings($form, &$form_state) {
   $form['#config'] = 'system.core';
+
+  $config_error_level = config_get('system.core', 'error_level');
+  $settings_error_level = settings_get('error_level', $config_error_level);
+
   $form['error_level'] = array(
     '#type' => 'radios',
     '#title' => t('Error messages to display'),
-    '#default_value' => config_get('system.core', 'error_level'),
+    '#default_value' => $settings_error_level,
     '#options' => array(
       ERROR_REPORTING_HIDE => t('None'),
       ERROR_REPORTING_DISPLAY_SOME => t('Errors and warnings'),
@@ -1618,6 +1622,11 @@ function system_logging_settings($form, &$form_state) {
     ),
     '#description' => t('It is recommended that sites running on production environments do not display any errors.'),
   );
+
+  if ($settings_error_level != $config_error_level) {
+    $form['error_level']['#disabled'] = TRUE;
+    backdrop_set_message(t('Some settings in this form are disabled because they have been overridden. These settings will not affect the site until the override has been removed. Please check the <em>settings.php</em> file for overrides.'), 'warning');
+  }
 
   return system_settings_form($form);
 }
