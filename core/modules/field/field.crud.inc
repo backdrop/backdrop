@@ -978,7 +978,7 @@ function field_purge_batch($batch_size) {
           $entities[$ids->entity_id] = _field_create_entity_from_ids($ids);
         }
 
-        field_attach_load($entity_type, $entities, FIELD_LOAD_CURRENT, array('field_id' => $field['id'], 'deleted' => 1));
+        field_attach_load($entity_type, $entities, FIELD_LOAD_CURRENT, array('field_name' => $field['field_name'], 'deleted' => 1));
         foreach ($entities as $entity) {
            // Purge the data for the entity.
           field_purge_data($entity_type, $entity, $field, $instance);
