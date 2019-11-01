@@ -1606,8 +1606,6 @@ function system_run_cron_submit($form, &$form_state) {
  * @see system_logging_settings_submit()
  */
 function system_logging_settings($form, &$form_state) {
-  global $settings;
-
   $form['#config'] = 'system.core';
   $form['error_level'] = array(
     '#type' => 'radios',
@@ -1619,12 +1617,7 @@ function system_logging_settings($form, &$form_state) {
       ERROR_REPORTING_DISPLAY_ALL => t('All messages'),
     ),
     '#description' => t('It is recommended that sites running on production environments do not display any errors.'),
-    '#disabled' => isset($settings['error_level']),
   );
-
-  if (isset($settings['error_level'])) {
-    backdrop_set_message(t('Some settings in this form are disabled because they have been overridden. These settings will not affect the site until the override has been removed. Please check the <em>settings.php</em> file for overrides.'), 'warning');
-  }
 
   return system_settings_form($form);
 }
@@ -1636,8 +1629,6 @@ function system_logging_settings($form, &$form_state) {
  * @see system_performance_settings_submit().
  */
 function system_performance_settings($form, &$form_state) {
-  global $settings;
-
   backdrop_add_js(backdrop_get_path('module', 'system') . '/js/system.admin.js');
   $config = config('system.core');
 
@@ -1664,7 +1655,6 @@ function system_performance_settings($form, &$form_state) {
     '#title' => t('Cache pages for anonymous users'),
     '#default_value' => $config->get('cache'),
     '#weight' => -2,
-    '#disabled' => isset($settings['cache']),
   );
   $form['caching']['page_cache_background_fetch'] = array(
     '#type' => 'checkbox',
@@ -1725,13 +1715,13 @@ function system_performance_settings($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Aggregate and compress CSS files.'),
     '#default_value' => $config->get('preprocess_css'),
-    '#disabled' => $disabled || isset($settings['preprocess_css']),
+    '#disabled' => $disabled,
   );
   $form['bandwidth_optimization']['preprocess_js'] = array(
     '#type' => 'checkbox',
     '#title' => t('Aggregate JavaScript files.'),
     '#default_value' => $config->get('preprocess_js'),
-    '#disabled' => $disabled || isset($settings['preprocess_js']),
+    '#disabled' => $disabled,
   );
 
   $form['#submit'][] = 'backdrop_clear_css_cache';
@@ -1739,10 +1729,6 @@ function system_performance_settings($form, &$form_state) {
   // This form allows page compression settings to be changed, which can
   // invalidate the page cache, so it needs to be cleared on form submit.
   $form['#submit'][] = 'system_clear_page_cache_submit';
-
-  if (array_diff_key($settings, array('cache', 'preprocess_css', 'preprocess_js'))) {
-    backdrop_set_message(t('Some settings in this form are disabled because they have been overridden. These settings will not affect the site until the override has been removed. Please check the <em>settings.php</em> file for overrides.'), 'warning');
-  }
 
   return system_settings_form($form);
 }
