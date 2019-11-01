@@ -4221,7 +4221,7 @@ function system_admin_bar_cache_info() {
  * Check if theme_debug is enabled, and throw a warning if so.
  */
 function system_theme_debug_enabled_warning() {
-  $theme_debug_enabled = config_get('system.core', 'theme_debug');
+  $theme_debug_enabled = settings_get('theme_debug', config_get('system.core', 'theme_debug'));
   if ($theme_debug_enabled) {
     backdrop_set_message(t('Theme debugging is enabled. See the <a href="!url">Status report</a> page for more info.', array('!url' => url('admin/reports/status'))), 'warning', FALSE);
   }

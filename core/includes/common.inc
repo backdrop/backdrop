@@ -3649,7 +3649,7 @@ function backdrop_group_css($css) {
  * @see system_element_info()
  */
 function backdrop_aggregate_css(&$css_groups) {
-  $preprocess_css = !defined('MAINTENANCE_MODE') && config_get('system.core', 'preprocess_css');
+  $preprocess_css = !defined('MAINTENANCE_MODE') && settings_get('preprocess_css', config_get('system.core', 'preprocess_css'));
 
   // For each group that needs aggregation, aggregate its items.
   foreach ($css_groups as $key => $group) {
@@ -4935,7 +4935,7 @@ function backdrop_group_js($javascript) {
  * @see backdrop_pre_render_scripts()
  */
 function backdrop_aggregate_js(&$js_groups) {
-  if (!defined('MAINTENANCE_MODE') && config_get('system.core', 'preprocess_js')) {
+  if (!defined('MAINTENANCE_MODE') && settings_get('preprocess_js', config_get('system.core', 'preprocess_js'))) {
     foreach ($js_groups as $key => $group) {
       if ($group['type'] == 'file' && $group['preprocess']) {
         $js_groups[$key]['data'] = backdrop_build_js_cache($group['items']);
