@@ -102,7 +102,19 @@ unset($options['root']);
 
 // Set the site URL.
 if ($options['url']) {
-  $_SERVER['HTTP_HOST'] = $options['url'];
+  $url_parts = parse_url($options['url']);
+  if (!empty($url_parts['host'])) {
+    // E.g.: 'http://example.com/'
+    $_SERVER['HTTP_HOST'] = $url_parts['host'];
+  }
+  elseif (!empty($url_parts['path'])) {
+    // E.g.: 'example.com'
+    $_SERVER['HTTP_HOST'] = $url_parts['path'];
+  }
+  else {
+    print "--url option is invalid. Specify the URL of your site as --url=http://example.com/ or --url=example.com.\n";
+    exit;
+  }
 }
 unset($options['url']);
 
