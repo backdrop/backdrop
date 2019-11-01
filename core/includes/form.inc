@@ -3305,9 +3305,11 @@ function html_datetime_validate($element, &$form_state) {
   if (is_array($element['#value'])) {
     // If either is set, both are needed.
     if (!empty($element['#value']['date']) || !empty($element['#value']['time'])) {
-      $dt_string = implode(' ', $element['#value']);
-      if (!preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/', $dt_string)) {
-        form_error($element, t('You need to set both, date and time.'));
+      if (empty($element['#value']['date'])) {
+        $element['#value']['date'] = format_date(REQUEST_TIME, DATE_FORMAT_DATE);
+      }
+      elseif (empty($element['#value']['time'])) {
+        $element['#value']['time'] = '00:00:00';
       }
     }
   }
