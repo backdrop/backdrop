@@ -477,7 +477,7 @@ function file_ensure_htaccess() {
   }
 
   file_save_htaccess('public://', FALSE);
-  if (config_get('system.core', 'file_private_path')) {
+  if (settings_get('file_private_path', config_get('system.core', 'file_private_path'))) {
     file_save_htaccess('private://', TRUE);
   }
   file_save_htaccess('temporary://', TRUE);
@@ -2637,7 +2637,7 @@ function backdrop_tempnam($directory, $prefix) {
  * Gets the path of system-appropriate temporary directory.
  */
 function file_directory_temp() {
-  $temporary_directory = config_get('system.core', 'file_temporary_path');
+  $temporary_directory = settings_get('file_temporary_path', config_get('system.core', 'file_temporary_path'));
 
   if (empty($temporary_directory)) {
     $directories = array();
@@ -2667,7 +2667,7 @@ function file_directory_temp() {
 
     if (empty($temporary_directory)) {
       // If no directory has been found default to 'files/tmp'.
-      $temporary_directory = config_get('system.core', 'file_public_path') . '/tmp';
+      $temporary_directory = settings_get('file_public_path', config_get('system.core', 'file_public_path')) . '/tmp';
 
       // Windows accepts paths with either slash (/) or backslash (\), but will
       // not accept a path which contains both a slash and a backslash. Since

@@ -237,9 +237,9 @@ function system_requirements($phase) {
     file_ensure_htaccess();
     $htaccess_files['public://.htaccess'] = array(
       'title' => $t('Public files directory'),
-      'directory' => config_get('system.core', 'file_public_path'),
+      'directory' => settings_get('file_public_path', config_get('system.core', 'file_public_path')),
     );
-    if ($private_files_directory = config_get('system.core', 'file_private_path')) {
+    if ($private_files_directory = settings_get('file_private_path', config_get('system.core', 'file_private_path'))) {
       $htaccess_files['private://.htaccess'] = array(
         'title' => $t('Private files directory'),
         'directory' => $private_files_directory,
@@ -311,8 +311,8 @@ function system_requirements($phase) {
   // Test files directories.
   $directories = array();
   if ($phase == 'runtime') {
-    $directories[] = config_get('system.core', 'file_public_path');
-    $directories[] = config_get('system.core', 'file_private_path');
+    $directories[] = settings_get('file_public_path', config_get('system.core', 'file_public_path'));
+    $directories[] = settings_get('file_private_path', config_get('system.core', 'file_private_path'));
     $directories[] = file_directory_temp();
   }
   else {

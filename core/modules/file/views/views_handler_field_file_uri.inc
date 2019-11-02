@@ -45,7 +45,7 @@ class views_handler_field_file_uri extends views_handler_field_file {
       if (!empty($this->options['image_style'])) {
         // $data contains url of image.
         // Get public file system path and its length.
-        $file_public_path = '/' . config_get('system.core', 'file_public_path');
+        $file_public_path = '/' . settings_get('file_public_path', config_get('system.core', 'file_public_path'));
         $file_public_path_strlen = strlen($file_public_path);
         // Find insertion position of public file system path.
         $insert_at = strpos($data, $file_public_path);
