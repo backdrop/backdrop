@@ -595,7 +595,7 @@ function system_requirements($phase) {
         'title' => $t('Theme debug'),
         'value' => $t('Enabled'),
         'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Theme debugging is currently enabled, and should be disabled on a live site. This setting can be changed using the <a href="!url">Devel module</a> or, if set in the settings.php file, by removing it from the settings.php file.', array('!url' => module_exists('devel') ? url('admin/config/development/devel') : 'https://backdropcms.org/project/devel')),
+        'description' => $t('Theme debugging is currently enabled, and should be disabled on a live site. This setting can be changed using the <a href="!url">Devel module</a>.', array('!url' => module_exists('devel') ? url('admin/config/development/devel') : 'https://backdropcms.org/project/devel')),
       );
     }
   }
