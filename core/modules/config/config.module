@@ -6,6 +6,12 @@
 
 /**
  * Implements hook_menu().
+ * 
+ * @see config_set()
+ * @see config_get()
+ * @see config_clear()
+ * @see config_diff()
+ *
  */
 function config_menu() {
   $items['admin/config/development/configuration'] = array(
