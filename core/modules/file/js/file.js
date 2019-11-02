@@ -223,7 +223,7 @@ Backdrop.behaviors.ImageUploadDialog = {
         var $currentImgURI = $this.find('[name*= "[imagesrc]"]').val();
         $currentImgURI = '/files/styles/medium/public' + $currentImgURI.substring(8);
         var $relativeImgSrc = Backdrop.absoluteUrl($currentImgURI);
-        $this.find('div[class= "selected-image-preview"] img').replaceWith('<img src="' + $relativeImgSrc + '">');
+        $this.find('div.selected-image-preview img').replaceWith('<img src="' + $relativeImgSrc + '">');
         $this.find(".description").hide();
         $this.find('[class*= "library-imagesrc"]').hide();
         $this.find('div[class*= "-title"]').hide();
@@ -272,12 +272,12 @@ Backdrop.behaviors.ImageUploadDialog = {
         var $currentImg = $(this).find('img');
         var $currentImgFid = $currentImg.data('fid');
         var $currentImgURI = $currentImg.data('file-url');
-        var relativeImgSrc = Backdrop.relativeUrl($currentImgURI);
+        var $relativeImgSrc = Backdrop.relativeUrl($currentImgURI);
         var $currentImgName = $currentImg.data('filename');
         var $currentImgSize = $currentImg.data('filesize');
         $this.find(".image-fid").text($currentImgFid);
-        $this.find(".image-uri").text(relativeImgSrc);
-        $this.find('[ID*= "library-imagesrc"]').val(relativeImgSrc);
+        $this.find(".image-uri").text($relativeImgSrc);
+        $this.find('[ID*= "library-imagesrc"]').val($relativeImgSrc);
         $this.find(".image-name").text($currentImgName);
         $this.find(".image-size").text($currentImgSize);
       })
@@ -286,7 +286,8 @@ Backdrop.behaviors.ImageUploadDialog = {
       .on('click', '.image-library-choose-file', function () {
         var $selectedImg = $(this).find('img');
         var absoluteImgSrc = $selectedImg.data('file-url');
-        var relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
+        var $relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
+        var $modifiedImgSrc = '/files/styles/medium/public' + $relativeImgSrc.substring(6);
         var $selectedImgFid = $selectedImg.data('fid');
 
         // make image-confirm part of form visible.
@@ -303,7 +304,7 @@ Backdrop.behaviors.ImageUploadDialog = {
         // hide image upload file field.
         $this.find('[ID*= "upload"]').hide();
         // replace selected image preview.
-        $this.find('div[class= "selected-image-preview"] img').replaceWith('<img src="' + relativeImgSrc + '">');
+        $this.find('div.selected-image-preview img').replaceWith('<img src="' + $modifiedImgSrc + '">');
         // add value of fid to form.
         $this.find('input[name*= "[fid]"]').val($selectedImgFid);
         // make alt and title fields visible.
