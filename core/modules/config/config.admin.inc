@@ -131,6 +131,12 @@ function config_sync_form_submit(array &$form, array &$form_state) {
  *
  * @return string
  *   Table showing a two-way diff between the active and staged configuration.
+ * 
+ * @see config_set()
+ * @see config_get()
+ * @see config_clear()
+ * @see config_menu()
+ *
  */
 function config_diff_page($config_file) {
   $diff = config_diff($config_file);
