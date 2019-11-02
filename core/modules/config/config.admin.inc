@@ -131,12 +131,6 @@ function config_sync_form_submit(array &$form, array &$form_state) {
  *
  * @return string
  *   Table showing a two-way diff between the active and staged configuration.
- * 
- * @see config_set()
- * @see config_get()
- * @see config_clear()
- * @see config_menu()
- *
  */
 function config_diff_page($config_file) {
   $diff = config_diff($config_file);
@@ -548,6 +542,12 @@ function config_get_modified_times() {
  *
  * @return array
  *   An array of formatted strings showing the diffs between the two storages.
+ * 
+ * @see config_set()
+ * @see config_get()
+ * @see config_clear()
+ * @see config_menu()
+ *
  */
 function config_diff($name) {
   $active_storage = config_get_config_storage('active');
