@@ -221,7 +221,7 @@ Backdrop.behaviors.ImageUploadDialog = {
         $this.find('[ID*= "library-confirm"]').hide();
         // replace current image preview.
         var $currentImgURI = $this.find('[name*= "[imagesrc]"]').val();
-        $currentImgURI = '/files' + $currentImgURI.substring(8);
+        $currentImgURI = '/files/styles/medium/public' + $currentImgURI.substring(8);
         var $relativeImgSrc = Backdrop.absoluteUrl($currentImgURI);
         $this.find('div[class= "selected-image-preview"] img').replaceWith('<img src="' + $relativeImgSrc + '">');
         $this.find(".description").hide();
@@ -294,7 +294,6 @@ Backdrop.behaviors.ImageUploadDialog = {
         $this.find(".image-confirm").show();
         $this.find(".image-current").hide();
         $this.find(".image-upload").hide();
-        $this.find(".description").hide();
         $this.find(".image-toggles").hide();
 
         // hide imagesrc field.
@@ -312,6 +311,8 @@ Backdrop.behaviors.ImageUploadDialog = {
         $this.find('div[class*= "-title"]').show();
         // make field descriptions visible.
         $this.find(".description").show();
+        // except hide the field description.
+        $this.find("div.form-type-managed-file > div.description").hide();
       });
     });
   }

@@ -79,9 +79,6 @@ a.library-selected, a.upload-selected {
   border: 1px solid #CCC;
   padding: 10px;
 }
-.selected-image-preview img {
-  width: 300px;
-}
 .image-widget-properties p {
   margin: 0 0.2em;
 }
