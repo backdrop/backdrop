@@ -97,7 +97,6 @@ function config_clear($config_file, $option) {
  * @see config_diff()
  * @see config_clear()
  * @see config_menu()
- *
  */
 function config_get($config_file, $option = NULL) {
   $config = config($config_file);
@@ -161,7 +160,6 @@ function config_get_translated($config_file, $option = NULL, $args = array(), $o
  * @see config_diff()
  * @see config_clear()
  * @see config_menu()
- *
  */
 function config_set($config_file, $option, $value) {
   $config = config($config_file);
