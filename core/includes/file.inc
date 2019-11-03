@@ -2675,6 +2675,10 @@ function file_directory_temp() {
       // everything to use slash which is supported on all platforms.
       $temporary_directory = str_replace('\\', '/', $temporary_directory);
     }
+    
+    // Now when the temporary directory is found, we need to save it to
+    // the configuration file.
+    config_set('system.core', 'file_temporary_path', $temporary_directory);
   }
 
   return $temporary_directory;
