@@ -475,6 +475,7 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
     }
     return new $class($values);
   }
+
   /**
    * Implements EntityStorageControllerInterface::delete().
    */
