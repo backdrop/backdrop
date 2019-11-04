@@ -652,12 +652,20 @@ class views_handler_field extends views_handler {
       '#fieldset' => 'style_settings',
     );
 
+    $options = $this->option_definition();
     $form['alter'] = array(
       '#title' => t('Rewrite results'),
       '#type' => 'fieldset',
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#weight' => 100,
+      '#defaults' => array(
+        'alter_text' => $options['alter']['contains']['alter_text']['default'],
+        'make_link' => $options['alter']['contains']['make_link']['default'],
+        'trim' => $options['alter']['contains']['trim']['default'],
+        'strip_tags' => $options['alter']['contains']['strip_tags']['default'],
+        'nl2br' => $options['alter']['contains']['nl2br']['default'],
+      ),
     );
 
     if ($this->allow_advanced_render()) {

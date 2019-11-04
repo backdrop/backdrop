@@ -3814,8 +3814,22 @@ function form_process_fieldset(&$element, &$form_state) {
   if (!empty($element['#collapsible'])) {
     $element['#attached']['library'][] = array('system', 'backdrop.collapse');
     $element['#attributes']['class'][] = 'collapsible';
+    $add_class = TRUE;
+
     if (!empty($element['#collapsed'])) {
-      $element['#attributes']['class'][] = 'collapsed';
+      if (!empty($element['#defaults'])) {
+        foreach ($element['#defaults'] as $key => $value) {
+          if (in_array($key, element_children($element))) {
+            if ($element[$key]['#default_value'] != $value) {
+              $add_class = FALSE;
+            }
+          }
+        }
+      }
+
+      if ($add_class) {
+        $element['#attributes']['class'][] = 'collapsed';
+      }
     }
   }
 
