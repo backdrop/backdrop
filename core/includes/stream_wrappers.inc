@@ -967,11 +967,7 @@ class BackdropTemporaryStreamWrapper extends BackdropLocalStreamWrapper {
    * Implements abstract public function getDirectoryPath()
    */
   public function getDirectoryPath() {
-    $temp = config_get('system.core', 'file_temporary_path');
-    if (empty($temp)) {
-      $temp = file_directory_temp();
-    }
-    return $temp;
+    return config_get('system.core', 'file_temporary_path');
   }
 
   /**
