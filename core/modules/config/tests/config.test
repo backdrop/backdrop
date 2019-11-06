@@ -304,7 +304,8 @@ class ConfigurationUITest extends BackdropWebTestCase {
     file_put_contents($uri, $archive_data);
 
     // Extract the archive and verify it's not empty.
-    $file_path = file_directory_temp() . '/' . file_uri_target($uri);
+    $temp = config_get('system.core', 'file_temporary_path');
+    $file_path = $temp . '/' . file_uri_target($uri);
     $archiver = new Archive_Tar($file_path);
     $archive_contents = $archiver->listContent();
     $archive_files = array();
