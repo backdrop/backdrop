@@ -113,6 +113,10 @@ class DateThemeTestCase extends BackdropWebTestCase {
       // Make sure start and end are the same day.
       $dateTimeStart->modify('- 1 hour');
     }
+    elseif ($currentHour < 1) {
+      // Make sure it's really 7 days.
+      $dateTimeStart->modify('- 2 hours');
+    }
     // We need 168 hours (7 days) remaining.
     $offsetHours = 7 * 24;
     $dateTimeStart->modify("+ $offsetHours hours");
