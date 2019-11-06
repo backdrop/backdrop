@@ -245,9 +245,11 @@ function system_requirements($phase) {
         'directory' => $private_files_directory,
       );
     }
+    $temporary_directory = file_directory_temp();
+    config_set('system.core', 'file_temporary_path', $temporary_directory);
     $htaccess_files['temporary://.htaccess'] = array(
       'title' => $t('Temporary files directory'),
-      'directory' => file_directory_temp(),
+      'directory' => $temporary_directory,
     );
     foreach ($htaccess_files as $htaccess_file => $info) {
       // Check for the string which was added to the recommended .htaccess file
