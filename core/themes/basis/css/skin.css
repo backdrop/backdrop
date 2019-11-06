@@ -178,11 +178,6 @@ fieldset .fieldset-legend {
   text-align: center;
 }
 
-.header-identity-wrapper {
-  /* BG color for slogan, and logo/site name if they don't have a bg */
-  background: #000000;
-}
-
 @media (min-width: 34em) {
   .header-identity-wrapper {
     /* Helps center .header-identity-wrapper on smaller screens */
@@ -241,6 +236,7 @@ fieldset .fieldset-legend {
 
 @media (min-width: 34em) {
   .header-site-name-link {
+    background: transparent;
     display: inline-block;
   }
 }
