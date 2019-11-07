@@ -2168,7 +2168,6 @@ class FormH5datetimeTestCase extends BackdropWebTestCase {
     $values = backdrop_json_decode($this->backdropPost('form-test/h5datetime', $edit, 'Submit'));
     $this->assertEqual($values['h5date'], '2002-02-01', 'Correct h5date input validates');
     $this->assertEqual($values['h5time'], '10:33:00', 'Correct h5time input validates');
-    $datestring = implode(' ', $values['h5datetime']);
     $message = 'Correct h5 date and time combined input validates';
     $this->assertEqual($values['h5datetime'], array('date' => '1990-03-22', 'time' => '10:30:20'), $message);
 
