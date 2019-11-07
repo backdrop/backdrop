@@ -3272,7 +3272,14 @@ function form_process_html_datetime($element) {
 function html_date_validate($element, &$form_state) {
   $date = $element['#value'];
   if (!empty($date)) {
-    $valid_date = DateTime::createFromFormat(DATE_FORMAT_DATE, $date);
+    $valid_date = FALSE;
+    $created_date = DateTime::createFromFormat(DATE_FORMAT_DATE, $date);
+    if (is_object($created_date)) {
+      // DateTime::createFromFormat alone is too permissive.
+      if ($created_date->format(DATE_FORMAT_DATE) == $date) {
+        $valid_date = TRUE;
+      }
+    }
     if (!$valid_date) {
       form_error($element, t('%date is not a valid date.', array('%date' => $date)));
     }
@@ -3290,7 +3297,14 @@ function html_time_validate($element, &$form_state) {
     if (preg_match('/^\d{2}:\d{2}$/', $time)) {
       $time .= ':00';
     }
-    $valid_time = DateTime::createFromFormat(DATE_FORMAT_TIME, $time);
+    $valid_time = FALSE;
+    $created_time = DateTime::createFromFormat(DATE_FORMAT_TIME, $time);
+    if (is_object($created_time)) {
+      // DateTime::createFromFormat alone is too permissive.
+      if ($created_time->format(DATE_FORMAT_TIME) == $time) {
+        $valid_time = TRUE;
+      }
+    }
     if (!$valid_time) {
       form_error($element, t('%time is not a valid time.', array('%time' => $time)));
     }
