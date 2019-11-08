@@ -2455,7 +2455,7 @@ function _filter_image_caption($text) {
       $attributes['class'] = explode(' ', $classes);
     }
     $attributes['class'][] = 'caption';
-    $attributes['class'][] = 'caption-' . $node->tagName;
+    $attributes['class'][] = 'caption-' . $tag;
 
     $theme_parameters = array(
       'item' => $node->ownerDocument->saveXML($node),
@@ -2512,10 +2512,16 @@ function _filter_image_align($text) {
 
     // If one of the allowed alignments, add the corresponding class.
     if (in_array($align, array('left', 'center', 'right'))) {
-      // If the image is under a figure, apply the class to the wrapper.
-      $parent = $node->parentNode;
-      if ($parent && $parent->nodeName === 'figure') {
-        $target = $parent;
+      // Get closest wrapping block tag. If we hit "body" there is no wrapping
+      // element at all.
+      $closest_block_wrapper = $node;
+      while (!in_array($closest_block_wrapper->nodeName, array('p', 'figure', 'body'))) {
+        $closest_block_wrapper = $closest_block_wrapper->parentNode;
+      }
+
+      // If the content is under a figure, apply the class to the wrapper.
+      if ($closest_block_wrapper->nodeName === 'figure') {
+        $target = $closest_block_wrapper;
       }
       else {
         $target = $node;
@@ -2527,16 +2533,9 @@ function _filter_image_align($text) {
       $classes[] = 'align-' . $align;
       $target->setAttribute('class', implode(' ', $classes));
 
-      // Center aligned images require an additional wrapper to set
+      // Center aligned content requires an additional wrapper to set
       // text-align: center.
       if ($align === 'center' && !in_array($target->nodeName, array('p', 'figure'))) {
-        // Get closest paragraph tag. If we hit "body" there is no wrapping
-        // element at all.
-        $closest_block_wrapper = $target;
-        while (!in_array($closest_block_wrapper->nodeName, array('p', 'body'))) {
-          $closest_block_wrapper = $closest_block_wrapper->parentNode;
-        }
-
         // If no wrapper tag at all, create a paragraph and put the img inside.
         if ($closest_block_wrapper->nodeName === 'body') {
           $new_paragraph = $dom->createElement('p');

@@ -1647,10 +1647,15 @@ EOF;
 <img data-caption="The caption with a &lt;a href=&quot;/foo&quot;&gt; link&lt;/a&gt;.&lt;strong&gt; Bold tag.&lt;/strong&gt;" src="foo.png" />
 <img data-caption="The caption with a &lt;div&gt;not allowed tag&lt;/div&gt;." src="foo.png" />
 
-<img data-caption="Centered" src="foo.png" data-align="center" />
-<img data-caption="Left" src="foo.png" data-align="left" />
-<img data-caption="Right" src="foo.png" data-align="right" />
-<img data-caption="Invalid" src="foo.png" data-align="invalid" />
+<img data-caption="Centered Content" src="foo.png" data-align="center" />
+<img data-caption="Left Content" src="foo.png" data-align="left" />
+<img data-caption="Right Content" src="foo.png" data-align="right" />
+<img data-caption="Invalid Content" src="foo.png" data-align="invalid" />
+
+
+<a href="#foo"><img data-caption="Centered Link" src="foo.png" data-align="center" /></a>
+<a href="#foo"><img data-caption="Left Link" src="foo.png" data-align="left" /></a>
+<a href="#foo"><img data-caption="Right Link" src="foo.png" data-align="right" /></a>
 
 EOF;
 
@@ -1662,11 +1667,15 @@ EOF;
         '<figure class="caption caption-img"><img src="foo.png" /><figcaption>The caption with a <div>not allowed tag</div>.</figcaption></figure>' => FALSE,
 
         // Alignment checks.
-        '<figure class="caption caption-img align-center"><img src="foo.png" /><figcaption>Centered</figcaption></figure>' => TRUE,
-        '<figure class="caption caption-img align-left"><img src="foo.png" /><figcaption>Left</figcaption></figure>' => TRUE,
-        '<figure class="caption caption-img align-right"><img src="foo.png" /><figcaption>Right</figcaption></figure>' => TRUE,
-        '<figure class="caption caption-img"><img src="foo.png" /><figcaption>Invalid</figcaption></figure>' => TRUE,
+        '<figure class="caption caption-img align-center"><img src="foo.png" /><figcaption>Centered Content</figcaption></figure>' => TRUE,
+        '<figure class="caption caption-img align-left"><img src="foo.png" /><figcaption>Left Content</figcaption></figure>' => TRUE,
+        '<figure class="caption caption-img align-right"><img src="foo.png" /><figcaption>Right Content</figcaption></figure>' => TRUE,
+        '<figure class="caption caption-img"><img src="foo.png" /><figcaption>Invalid Content</figcaption></figure>' => TRUE,
 
+        // Alignment checks with links.
+        '<figure class="caption caption-img align-center"><a href="#foo"><img src="foo.png" /></a><figcaption>Centered Link</figcaption></figure>' => TRUE,
+        '<figure class="caption caption-img align-left"><a href="#foo"><img src="foo.png" /></a><figcaption>Left Link</figcaption></figure>' => TRUE,
+        '<figure class="caption caption-img align-right"><a href="#foo"><img src="foo.png" /></a><figcaption>Right Link</figcaption></figure>' => TRUE,
         // Ensure the temporarily wrapped body tag is stripped before output.
         '<body>' => FALSE,
       ),
