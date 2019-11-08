@@ -43,7 +43,7 @@ class ListFieldTestCase extends FieldTestCase {
     $langcode = LANGUAGE_NONE;
 
     // All three options appear.
-    $entity = field_test_create_stub_entity();
+    $entity = field_test_create_entity();
     $form = backdrop_get_form('field_test_entity_form', $entity);
     $this->assertTrue(!empty($form[$this->field_name][$langcode][1]), 'Option 1 exists');
     $this->assertTrue(!empty($form[$this->field_name][$langcode][2]), 'Option 2 exists');
@@ -51,7 +51,7 @@ class ListFieldTestCase extends FieldTestCase {
 
     // Use one of the values in an actual entity, and check that this value
     // cannot be removed from the list.
-    $entity = field_test_create_stub_entity();
+    $entity = field_test_create_entity();
     $entity->{$this->field_name}[$langcode][0] = array('value' => 1);
     field_test_entity_save($entity);
     $this->field['settings']['allowed_values'] = array(2 => 'Two');
@@ -69,7 +69,7 @@ class ListFieldTestCase extends FieldTestCase {
     // Removed options do not appear.
     $this->field['settings']['allowed_values'] = array(2 => 'Two');
     field_update_field($this->field);
-    $entity = field_test_create_stub_entity();
+    $entity = field_test_create_entity();
     $form = backdrop_get_form('field_test_entity_form', $entity);
     $this->assertTrue(empty($form[$this->field_name][$langcode][1]), t('Option 1 does not exist'));
     $this->assertTrue(!empty($form[$this->field_name][$langcode][2]), 'Option 2 exists');
@@ -99,7 +99,7 @@ class ListFieldTestCase extends FieldTestCase {
       ),
     );
     $this->instance = field_create_instance($this->instance);
-    $entity = field_test_create_stub_entity();
+    $entity = field_test_create_entity();
     $form = backdrop_get_form('field_test_entity_form', $entity);
     $this->assertTrue(!empty($form[$this->field_name][$langcode][1]), 'Option 1 exists');
     $this->assertTrue(!empty($form[$this->field_name][$langcode][2]), 'Option 2 exists');
@@ -141,7 +141,7 @@ class ListDynamicValuesTestCase extends FieldTestCase {
       'bundle' => 'test_bundle',
       'label' => $this->randomName(),
     );
-    $this->entity = call_user_func_array('field_test_create_stub_entity', $this->test);
+    $this->entity = call_user_func_array('field_test_create_entity', $this->test);
   }
 }
 
