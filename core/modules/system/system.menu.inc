@@ -20,6 +20,7 @@ function system_menu_block_defaults($menu_name) {
     'menu_name' => $menu_name,
     'style' => NULL,
     'expand_all' => FALSE,
+    'clickdown' => FALSE,
   );
   if ($menu_name == 'main-menu') {
     $defaults['depth'] = 1;
@@ -119,6 +120,18 @@ function system_menu_block_form($config) {
     '#title' => t('Display menu toggle button on small screens'),
     '#default_value' => $config['toggle'],
     '#description' => t('On devices with small screens, this option reduces the menu to a toggle button, commonly known as <a href="https://en.wikipedia.org/wiki/Hamburger_button" target="_blank"><em>hamburger button</em></a>. Clicking the icon reveals or hides the menu, saving screen space.'),
+  );
+  
+  $form['clickdown'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use a click to open instead of a hover'),
+    '#default_value' => $config['clickdown'],
+    '#description' => t('When checked, the menu will expand when clicked rather than when hovered.'),
+    '#states' => array(
+      'visible' => array(
+        'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
+      ),
+    ),
   );
 
   return $form;
