@@ -1357,7 +1357,7 @@ class TaxonomyTermFieldTestCase extends TaxonomyWebTestCase {
   function testTaxonomyTermFieldValidation() {
     // Test valid and invalid values with field_attach_validate().
     $langcode = LANGUAGE_NONE;
-    $entity = field_test_create_stub_entity();
+    $entity = field_test_create_entity();
     $term = $this->createTerm($this->vocabulary);
     $entity->{$this->field_name}[$langcode][0]['tid'] = $term->tid;
     try {
@@ -1368,7 +1368,7 @@ class TaxonomyTermFieldTestCase extends TaxonomyWebTestCase {
       $this->fail('Correct term does not cause validation error.');
     }
 
-    $entity = field_test_create_stub_entity();
+    $entity = field_test_create_entity();
     $bad_term = $this->createTerm($this->createVocabulary());
     $entity->{$this->field_name}[$langcode][0]['tid'] = $bad_term->tid;
     try {
@@ -1839,6 +1839,10 @@ class TaxonomyEFQTestCase extends TaxonomyWebTestCase {
     $result = $result['taxonomy_term'];
     asort($result);
     $this->assertEqual(array_keys($terms), array_keys($result), 'Taxonomy terms were retrieved by EntityFieldQuery.');
+ 
+    $first_result = reset($result);
+    $term = _field_create_entity_from_ids($first_result);
+    $this->assertEqual($term->tid, $first_result->entity_id, 'Taxonomy term can be created based on the IDs');
 
     // Create a second vocabulary and five more terms.
     $vocabulary2 = $this->createVocabulary();
