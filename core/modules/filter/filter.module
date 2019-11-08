@@ -2521,23 +2521,37 @@ function _filter_image_align($text) {
         $target = $node;
       }
 
-      // Center aligned content requires an additional wrapper to set
+      // Apply the align-* class to the target element.
+      $classes = $target->getAttribute('class');
+      $classes = (strlen($classes) > 0) ? explode(' ', $classes) : array();
+      $classes[] = 'align-' . $align;
+      $target->setAttribute('class', implode(' ', $classes));
+
+      // Center aligned images require an additional wrapper to set
       // text-align: center.
-      if ($align === 'center') {
-        // Get closest p parent.
-        while ($target->nodeName !== 'p') {
-          $target = $target->parentNode;
+      if ($align === 'center' && !in_array($target->nodeName, array('p', 'figure'))) {
+        // Get closest paragraph tag. If we hit "body" there is no wrapping
+        // element at all.
+        $closest_block_wrapper = $target;
+        while (!in_array($closest_block_wrapper->nodeName, array('p', 'body'))) {
+          $closest_block_wrapper = $closest_block_wrapper->parentNode;
         }
 
-        $p_attribute = $dom->createAttribute('class');
-        $p_attribute->value = 'centered-wrapper';
-        $target->appendChild($p_attribute);
-      }
-      else {
-        $classes = $target->getAttribute('class');
-        $classes = (strlen($classes) > 0) ? explode(' ', $classes) : array();
-        $classes[] = 'align-' . $align;
-        $target->setAttribute('class', implode(' ', $classes));
+        // If no wrapper tag at all, create a paragraph and put the img inside.
+        if ($closest_block_wrapper->nodeName === 'body') {
+          $new_paragraph = $dom->createElement('p');
+          $new_paragraph->setAttribute('class', 'centered-wrapper');
+          // Wrap the img tag with the new P.
+          $target->parentNode->replaceChild($new_paragraph, $target);
+          $new_paragraph->appendChild($target);
+        }
+        // Parent wrapper found. Add the centered-wrapper class.
+        elseif ($closest_block_wrapper->nodeName === 'p') {
+          $classes = $closest_block_wrapper->getAttribute('class');
+          $classes = (strlen($classes) > 0) ? explode(' ', $classes) : array();
+          $classes[] = 'centered-wrapper';
+          $closest_block_wrapper->setAttribute('class', implode(' ', $classes));
+        }
       }
     }
   }

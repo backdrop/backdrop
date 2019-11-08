@@ -1499,8 +1499,8 @@ www.example.com with a newline in comments -->
   /**
    * Asserts multiple filter output expectations for multiple input strings.
    *
-   * @param $filter
-   *   A input filter object.
+   * @param stdClass[]|stdClass $filters
+   *   An array of input filter objects, or a single filter object.
    * @param $tests
    *   An associative array, whereas each key is an arbitrary input string and
    *   each value is again an associative array whose keys are filter output
@@ -1517,10 +1517,18 @@ www.example.com with a newline in comments -->
    * );
    * @endcode
    */
-  function assertFilteredString($filter, $tests) {
+  function assertFilteredString($filters, $tests) {
+    if (!is_array($filters)) {
+      $filters = array($filters);
+    }
+
     foreach ($tests as $source => $tasks) {
-      $function = $filter->callback;
-      $result = $function($source, $filter);
+      // Run each of the filters on the input data.
+      $result = $source;
+      foreach ($filters as $filter) {
+        $function = $filter->callback;
+        $result = $function($result, $filter);
+      }
       foreach ($tasks as $value => $is_expected) {
         // Not using assertIdentical, since combination with strpos() is hard to grok.
         if ($is_expected) {
@@ -1606,7 +1614,7 @@ EOF;
       $input => array(
         '<img src="foo.png" width="100" height="100" class="align-right" />' => TRUE,
         '<img src="foo.png" width="100" height="100" class="align-left" />' => TRUE,
-        '<img src="foo.png" width="100" height="100" class="align-center" />' => TRUE,
+        '<p class="centered-wrapper"><img src="foo.png" width="100" height="100" class="align-center" /></p>' => TRUE,
         // An unknown alignment (bottom) should be removed.
         '<img src="foo.png" width="100" height="100" />' => TRUE,
         '<img src="foo.png" width="100" height="100" class="align-bottom" />' => FALSE,
@@ -1630,13 +1638,20 @@ EOF;
    */
   function testImageAlignCaption() {
     // Set up dummy filter object.
-    $filter = new stdClass();
-    $filter->callback = '_filter_image_caption';
+    $filters = array();
+    $filters[] = (object) array('callback' => '_filter_image_caption');
+    $filters[] = (object) array('callback' => '_filter_image_align');
 
     $input = <<<EOF
 <img data-caption="Simple caption" src="foo.png" />
 <img data-caption="The caption with a &lt;a href=&quot;/foo&quot;&gt; link&lt;/a&gt;.&lt;strong&gt; Bold tag.&lt;/strong&gt;" src="foo.png" />
 <img data-caption="The caption with a &lt;div&gt;not allowed tag&lt;/div&gt;." src="foo.png" />
+
+<img data-caption="Centered" src="foo.png" data-align="center" />
+<img data-caption="Left" src="foo.png" data-align="left" />
+<img data-caption="Right" src="foo.png" data-align="right" />
+<img data-caption="Invalid" src="foo.png" data-align="invalid" />
+
 EOF;
 
     $tests = array(
@@ -1645,11 +1660,18 @@ EOF;
         '<figure class="caption caption-img"><img src="foo.png" /><figcaption>The caption with a <a href="/foo"> link</a>.<strong> Bold tag.</strong></figcaption></figure>' => TRUE,
         '<figure class="caption caption-img"><img src="foo.png" /><figcaption>The caption with a not allowed tag.</figcaption></figure>' => TRUE,
         '<figure class="caption caption-img"><img src="foo.png" /><figcaption>The caption with a <div>not allowed tag</div>.</figcaption></figure>' => FALSE,
+
+        // Alignment checks.
+        '<figure class="caption caption-img align-center"><img src="foo.png" /><figcaption>Centered</figcaption></figure>' => TRUE,
+        '<figure class="caption caption-img align-left"><img src="foo.png" /><figcaption>Left</figcaption></figure>' => TRUE,
+        '<figure class="caption caption-img align-right"><img src="foo.png" /><figcaption>Right</figcaption></figure>' => TRUE,
+        '<figure class="caption caption-img"><img src="foo.png" /><figcaption>Invalid</figcaption></figure>' => TRUE,
+
         // Ensure the temporarily wrapped body tag is stripped before output.
         '<body>' => FALSE,
       ),
     );
-    $this->assertFilteredString($filter, $tests);
+    $this->assertFilteredString($filters, $tests);
   }
 
   /**

@@ -8,6 +8,11 @@
 .caption {
   display: table;
   max-width: 100%;
+  margin: 0 1em 1em;
+}
+.caption.align-center {
+  margin-left: auto;
+  margin-right: auto;
 }
 .caption > * {
   display: block;
