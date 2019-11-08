@@ -195,6 +195,7 @@ function system_menu_block_build(array $config) {
     if (!empty($config['style'])) {
       $data['content']['#wrapper_attributes']['class'][] = 'menu-' . str_replace('_', '-', $config['style']);
       $data['content']['#wrapper_attributes']['data-menu-style'] = $config['style'];
+      $data['content']['#wrapper_attributes']['data-clickdown'] = $config['clickdown'];
       $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
       if ($config['style'] === 'dropdown') {
         $data['content']['#attached']['library'][] = array('system', 'smartmenus');
