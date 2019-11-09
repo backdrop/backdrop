@@ -97,6 +97,9 @@ function node_theme() {
     'node_add_list' => array(
       'variables' => array('content' => NULL),
     ) + $base,
+    'node_revision_info' => array(
+      'variables' => array('revision' => NULL, 'default' => FALSE),
+    ) + $base,
     'node_admin_overview' => array(
       'variables' => array('name' => NULL, 'type' => NULL),
     ) + $base,
