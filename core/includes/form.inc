@@ -3180,6 +3180,7 @@ function theme_html_date($variables) {
   if (isset($element['#id'])) {
     $attributes['id'] = $element['#id'];
   }
+  $attributes['class'][] = 'form-date';
   $attributes['type'] = 'date';
   $attributes['value'] = $element['#value'];
   $attributes['name'] = $element['#name'];
@@ -3200,10 +3201,17 @@ function theme_html_time($variables) {
   if (isset($element['#id'])) {
     $attributes['id'] = $element['#id'];
   }
+  $attributes['class'][] = 'form-time';
   $attributes['type'] = 'time';
   $attributes['value'] = $element['#value'];
   $attributes['name'] = $element['#name'];
   $attributes['step'] = 1;
+  if (isset($element['#attributes']['step'])) {
+    // Allow to set cardinality to "minute".
+    if ($element['#attributes']['step'] == 60) {
+      $attributes['step'] = 60;
+    }
+  }
 
   $output = '<input ' . backdrop_attributes($attributes) . ' />';
   return $output;
@@ -3292,8 +3300,8 @@ function html_date_validate($element, &$form_state) {
 function html_time_validate($element, &$form_state) {
   $time = $element['#value'];
   if (!empty($time)) {
-    // Pad time if seconds were omitted regardless of the "step" attribute.
-    // Some browsers do so, but our date pattern contains seconds.
+    // Pad time if seconds were omitted because of the step attribute,
+    // or a browser skipped it. Our date pattern contains seconds.
     if (preg_match('/^\d{2}:\d{2}$/', $time)) {
       $time .= ':00';
     }
