@@ -346,7 +346,6 @@ function node_form($form, &$form_state, Node $node) {
     $form['options']['scheduled'] = array(
       '#type' => 'html_datetime',
       '#title' => t('Publish on'),
-      // TODO: replacement option for "#date_increment"?
       '#default_value' => array(
         'date' => format_date($scheduled_date, 'custom', DATE_FORMAT_DATE),
         'time' => format_date($scheduled_date, 'custom', DATE_FORMAT_TIME),
