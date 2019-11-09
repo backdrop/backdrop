@@ -869,8 +869,7 @@ function node_revision_overview($node) {
     $row_class = '';
     if ($is_default_revision) {
       $row_class = 'revision-default';
-      $row['revision'] = t('!date by !username', array('!date' => l('<strong>#' . $revision->vid . ':</strong> ' . format_date($revision->timestamp, 'short'), "node/$node->nid", array('html' => TRUE)), '!username' => theme('username', array('account' => $revision))))
-                               . (($revision->log != '') ? '<p class="revision-log">' . filter_xss($revision->log) . '</p>' : '');
+      $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'default' => $is_default_revision));
       $publish_action = ($revision->status == NODE_PUBLISHED) ? 'unpublish' : 'pubish';
       // @todo: Add proper permissions check.
       if (TRUE) {
@@ -893,8 +892,7 @@ function node_revision_overview($node) {
       }
     }
     else {
-      $row['revision'] = t('!date by !username', array('!date' => l('<strong>#' . $revision->vid . ':</strong> ' . format_date($revision->timestamp, 'short'), "node/$node->nid/revisions/$revision->vid/view", array('html' => TRUE)), '!username' => theme('username', array('account' => $revision))))
-               . (($revision->log != '') ? '<p class="revision-log">' . filter_xss($revision->log) . '</p>' : '');
+      $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'default' => $is_default_revision));
       if (TRUE) {
         $links['edit'] = array(
           'title' => t('Edit'),
