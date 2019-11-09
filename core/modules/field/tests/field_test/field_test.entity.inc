@@ -321,7 +321,7 @@ function field_test_entity_save(&$entity) {
  */
 function field_test_entity_add($fttype) {
   $fttype = str_replace('-', '_', $fttype);
-  $entity = (object)array('fttype' => $fttype);
+  $entity = entity_create('test_entity', array('fttype' => $fttype));
   backdrop_set_title(t('Create test_entity @bundle', array('@bundle' => $fttype)), PASS_THROUGH);
   return backdrop_get_form('field_test_entity_form', $entity, TRUE);
 }
