@@ -399,6 +399,23 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
 $settings['backdrop_drupal_compatibility'] = TRUE;
 
 /**
+ * Configuration overrides.
+ *
+ * These settings allow you to specify values for anything stored in config
+ * within the files stored in the $config_directories variable above.
+ * This can be useful to store per-environment values or sensitive data that
+ * is undesirable to store in the config storage.
+ *
+ * There are particular configuration values that are risky to override. For
+ * example overriding field storage will create errors because associated
+ * database changes are necessary. Modifying values within complicated objects
+ * such as views, content types, vocabularies, etc. may not work as expected.
+ * Use any available API functions for complex systems instead.
+ */
+//$config['system.core']['site_name'] = 'My Backdrop site';
+//$config['system.core']['file_temporary_path'] = '/tmp';
+
+/**
  * Include a local settings file, if available.
  *
  * To make local development easier, you can add a settings.local.php file that
