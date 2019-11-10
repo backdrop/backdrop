@@ -884,12 +884,6 @@ function node_revision_overview($node) {
           'href' => "node/$node->nid/view/publish",
         );
       }
-      if (!$isEditRevision && $revert_permission) {
-        $links['revert'] = array(
-          'title' => t('revert'),
-          'href' => "node/$node->nid/revisions/$revision->vid/revert",
-        );
-      }
     }
     else {
       $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'default' => $is_default_revision));
@@ -901,13 +895,13 @@ function node_revision_overview($node) {
       }
       if ($revert_permission) {
         $links['revert'] = array(
-          'title' => t('Revert'),
+          'title' => t('Set as default'),
           'href' => "node/$node->nid/revisions/$revision->vid/revert",
         );
       }
       if ($delete_permission) {
         $links['delete'] = array(
-          'title' => t('Delete'),
+          'title' => t('Delete revision'),
           'href' => "node/$node->nid/revisions/$revision->vid/delete",
         );
       }
