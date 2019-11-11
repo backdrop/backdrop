@@ -48,7 +48,7 @@ function theme_node_revision_info($variables) {
   $revision = $variables['revision'];
   $default = $variables['default'];
 
-  $revision_link = $default ? "node/$node->nid" : "node/$node->nid/revisions/$revision->vid/view";
+  $revision_link = $default ? "node/$revision->nid" : "node/$revision->nid/revisions/$revision->vid/view";
   $output = '<div class="node-revision-wrapper">';
   $output .= '<div class="node-revision-detail">';
   $output .= t('!date by !username', array('!date' => l('<strong>#' . $revision->vid . ':</strong> ' . format_date($revision->timestamp, 'short'), $revision_link, array('html' => TRUE)), '!username' => theme('username', array('account' => $revision))));
