@@ -3019,6 +3019,7 @@ class NodeRevisionPermissionsTestCase extends BackdropWebTestCase {
       // Create a revision for the same nid and settings with a random log.
       $revision = clone $node;
       $revision->revision = 1;
+      $revision->is_default_revision = FALSE;
       $revision->log = $this->randomName(32);
       node_save($revision);
       $this->node_revisions[] = $revision;
