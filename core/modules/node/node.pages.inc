@@ -16,6 +16,9 @@
 function node_page_edit(Node $node) {
   $type_name = node_type_get_name($node);
   backdrop_set_title(t('Edit @type %title', array('@type' => $type_name, '%title' => $node->title)), PASS_THROUGH);
+  if (!$node->isDefaultRevision()) {
+    backdrop_set_title(t('Revision of %title from %date', array('%title' => $node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
+  }
   return backdrop_get_form($node->type . '_node_form', $node);
 }
 
