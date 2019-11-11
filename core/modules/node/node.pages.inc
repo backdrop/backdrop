@@ -540,6 +540,11 @@ function node_form_submit($form, &$form_state) {
     if (node_access('view', $node)) {
       $form_state['redirect'] = 'node/' . $node->nid;
 
+      // If editing a revision, go to the revision view.
+      if (!$node->isDefaultRevision()) {
+        $form_state['redirect'] = 'node/' . $node->nid . '/revisions/' . $node->vid . '/view';
+      }
+
       // If node type set to prevent direct viewing of full page URL
       // stay on edit page if user is not permitted.
       $type = node_type_get_type($node);
