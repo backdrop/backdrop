@@ -915,6 +915,10 @@ function node_revision_overview($node) {
   if ((user_access('delete revisions') || user_access('administer nodes')) && node_access('delete', $node)) {
     $delete_permission = TRUE;
   }
+  $edit_permission = FALSE;
+  if ((user_access('update revisions') || user_access('administer nodes')) && node_access('update', $node)) {
+    $edit_permission = TRUE;
+  }
   foreach ($revisions as $revision) {
     $row = array();
     $is_default_revision = ($revision->vid == $node->default_revision);
@@ -925,22 +929,16 @@ function node_revision_overview($node) {
       $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'default' => $is_default_revision));
       $publish_action = ($revision->status == NODE_PUBLISHED) ? 'unpublish' : 'pubish';
       // @todo: Add proper permissions check.
-      if (TRUE) {
+      if (node_access('update', $node)) {
         $links['edit'] = array(
           'title' => t('Edit'),
           'href' => "node/$node->nid/edit",
         );
       }
-      if (TRUE) {
-        $links[$publish_action] = array(
-          'title' => t($publish_action),
-          'href' => "node/$node->nid/view/publish",
-        );
-      }
     }
     else {
       $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'default' => $is_default_revision));
-      if (TRUE) {
+      if ($edit_permission) {
         $links['edit'] = array(
           'title' => t('Edit'),
           'href' => "node/$node->nid/revisions/$revision->vid/edit",
