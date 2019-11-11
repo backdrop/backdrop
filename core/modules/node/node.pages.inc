@@ -422,17 +422,19 @@ function node_form($form, &$form_state, Node $node) {
       $delete_href = 'node/' . $node->nid . '/revisions/' . $node->vid . '/delete';
     }
 
-    // Use a link for the delete button so the form doesn't need to validate.
-    $form['actions']['delete'] = array(
-      '#type' => 'link',
-      '#title' => t('Delete'),
-      '#href' => $delete_href,
-      '#options' => array(
-        'query' => isset($_GET['destination']) ? backdrop_get_destination() : array(),
-        'attributes' => array('class' => array('button', 'button-secondary', 'form-delete'))
-      ),
-      '#weight' => 15,
-    );
+    if (!empty($delete_href)) {
+      // Use a link for the delete button so the form doesn't need to validate.
+      $form['actions']['delete'] = array(
+        '#type' => 'link',
+        '#title' => t('Delete'),
+        '#href' => $delete_href,
+        '#options' => array(
+          'query' => isset($_GET['destination']) ? backdrop_get_destination() : array(),
+          'attributes' => array('class' => array('button', 'button-secondary', 'form-delete'))
+        ),
+        '#weight' => 15,
+      );
+    }
   }
   $form['actions']['cancel'] = array(
     '#type' => 'link',
