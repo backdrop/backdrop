@@ -1231,7 +1231,11 @@ function node_build_content(Node $node, $view_mode = 'full', $langcode = NULL) {
  */
 function node_show(Node $node, $message = FALSE) {
   if ($message) {
-    backdrop_set_title(t('Revision of %title from %date', array('%title' => $node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
+    $title_node = $node;
+    if (!$node->isDefaultRevision()) {
+      $title_node = node_load($node->nid);
+    }
+    backdrop_set_title(t('Revision of %title from %date', array('%title' => $title_node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
   }
 
   // For markup consistency with other pages, use node_view_multiple() rather than node_view().
