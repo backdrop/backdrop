@@ -410,12 +410,20 @@ function node_form($form, &$form_state, Node $node) {
     '#weight' => 6,
     '#submit' => array('node_form_preview'),
   );
-  if (!empty($node->nid) && node_access('delete', $node)) {
+  if (!empty($node->nid)) {
+    // If editing a revision, go to the revision view.
+    if ($node->isDefaultRevision() && node_access('delete', $node)) {
+      $delete_href = "node/{$node->nid}/delete";
+    }
+    elseif (!$node->isDefaultRevision() && _node_revision_access($node, 'delete')) {
+      $delete_href = 'node/' . $node->nid . '/revisions/' . $node->vid . '/delete';
+    }
+
     // Use a link for the delete button so the form doesn't need to validate.
     $form['actions']['delete'] = array(
       '#type' => 'link',
       '#title' => t('Delete'),
-      '#href' => "node/{$node->nid}/delete",
+      '#href' => $delete_href,
       '#options' => array(
         'query' => isset($_GET['destination']) ? backdrop_get_destination() : array(),
         'attributes' => array('class' => array('button', 'button-secondary', 'form-delete'))
@@ -512,7 +520,7 @@ function node_form_submit($form, &$form_state) {
       $form_state['redirect'] = 'node/' . $node->nid;
 
       // If editing a revision, go to the revision view.
-      if (!$node->isDefaultRevision()) {
+      if (!$node->isDefaultRevision() && _node_revision_access($node)) {
         $form_state['redirect'] = 'node/' . $node->nid . '/revisions/' . $node->vid . '/view';
       }
 
@@ -736,7 +744,7 @@ function node_preview_banner_form_node_submit(array $form, array &$form_state) {
       $destination = 'node/' . $node->nid;
 
       // If editing a revision, go to the revision view.
-      if (!$node->isDefaultRevision()) {
+      if (!$node->isDefaultRevision() && _node_revision_access($node)) {
         $destination = 'node/' . $node->nid . '/revisions/' . $node->vid . '/view';
       }
 
