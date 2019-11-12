@@ -124,7 +124,7 @@ function system_menu_block_form($config) {
   
   $form['clickdown'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Use a click to open instead of a hover'),
+    '#title' => t('Use a click to open, instead of a hover'),
     '#default_value' => $config['clickdown'],
     '#description' => t('When checked, the menu will expand when clicked rather than when hovered.'),
     '#states' => array(
