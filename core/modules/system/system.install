@@ -3091,6 +3091,16 @@ function system_update_1069() {
 }
 
 /**
+ * Set file_temporary_path on existing sites, if not already set.
+ */
+function system_update_1070() {
+  $config = config('system.core');
+  $file_temporary_path = $config->get('file_temporary_path') ? $config->get('file_temporary_path') : file_directory_temp();
+  $config->set('file_temporary_path', $file_temporary_path);
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
