@@ -391,7 +391,7 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 
   $elements = file_field_widget_form($form, $form_state, $field, $instance, $langcode, $items, $delta, $element);
   $settings = $instance['settings'];
-
+  
   foreach (element_children($elements) as $delta) {
     // Add adjustment of orientation before resizing because EXIF data is needed.
     if ($settings['orientate']) {
@@ -456,16 +456,6 @@ function image_field_widget_process($element, &$form_state, $form) {
     '#weight' => -1,
     );
 
-  $element['image_library']['confirm'] = array(
-    '#name' => implode('_', $element['#array_parents']) . '_confirm',
-    '#type' => 'submit',
-    '#value' => t('Confirm selection'),
-    '#validate' => array(),
-    '#submit' => array('image_field_widget_submit'),
-    '#limit_validation_errors' => array($element['#parents']),
-  );
-
-
   // Add the image preview.
   if ($element['#file'] && $widget_settings['preview_image_style']) {
     $variables = array(
@@ -484,6 +474,7 @@ function image_field_widget_process($element, &$form_state, $form) {
       if (is_array($info)) {
         $variables['width'] = $info['width'];
         $variables['height'] = $info['height'];
+        $variables['filesize'] = $info['file_size'];
       }
       else {
         $variables['width'] = $variables['height'] = NULL;
@@ -504,6 +495,10 @@ function image_field_widget_process($element, &$form_state, $form) {
     $element['height'] = array(
       '#type' => 'hidden',
       '#value' => $variables['height'],
+    );
+    $element['filesize'] = array(
+      '#type' => 'hidden',
+      '#value' => $variables['filesize'],
     );
   }
 
@@ -675,36 +670,3 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
 
   return $element;
 }
-
-/**
- * A submit handler for image library selection.
- */
-function image_field_widget_submit(&$form, &$form_state)
-{
-  $parents = array_slice($form_state['triggering_element']['#array_parents'], 0, -3);
-  $element = backdrop_array_get_nested_value($form, $parents);
-  $field_name = $element['#field_name'];
-  $langcode = $element['#language'];
-
-  // Get existing file values.
-  // File Field items are stored in the field state
-  $field_state = field_form_get_state($element['#field_parents'], $field_name, $langcode, $form_state);
-  $field_values = backdrop_array_get_nested_value($form_state['values'], $parents);
-
-  if (isset($field_values)) {
-    // Update sort order according to weight. Note that this is always stored in
-    // form state. Sort does not work using regular upload, but that is a core
-    // bug.
-    usort($field_values, '_field_sort_items_helper');
-
-    // Update form_state values.
-    backdrop_array_set_nested_value($form_state['values'], $parents, $field_values);
-    $field_state['items'] = $field_values;
-    field_form_set_state($element['#field_parents'], $field_name, $langcode, $form_state, $field_state);
-  }
-
-  // Clear out input as it will need to be rebuildt.
-  backdrop_array_set_nested_value($form_state['input'], $element['#parents'], NULL);
-  $form_state['rebuild'] = TRUE;
-}
-

@@ -196,7 +196,6 @@ Backdrop.behaviors.ImageUploadDialog = {
       var str = '<div class="image-toggles"><a class="upload-image-toggle">Upload an image</a><a href="#';
       var $replacementLabel = str.concat($fieldID , '" class = "image-library-toggle">Select from Library</a></div>');
 
-
       // we need the internal system name of each image field,
       // e.g. field_image[und][0] or field_second_image[und][0]
       // select label element with attribute 'for' starting edit-field-image
@@ -216,29 +215,31 @@ Backdrop.behaviors.ImageUploadDialog = {
         $this.find(".image-toggles").hide();
         $this.find(".image-select").hide();
         $this.find(".image-upload").hide();
-        $this.find(".image-confirm").hide();
         $this.find(".image-current").show();
-        $this.find('[ID*= "library-confirm"]').hide();
-        // replace current image preview.
-        var $currentImgURI = $this.find('[name*= "[imagesrc]"]').val();
-        $currentImgURI = '/files/styles/medium/public' + $currentImgURI.substring(8);
-        var $relativeImgSrc = Backdrop.absoluteUrl($currentImgURI);
-        $this.find('div.selected-image-preview img').replaceWith('<img src="' + $relativeImgSrc + '">');
-        $this.find(".description").hide();
+        // Set image properties and replace current image preview.
+        var $thisImgURI = $this.find('[name*= "[imagesrc]"]').val();
+        $this.find(".file-uri").text($thisImgURI);
+        var $thisImgName = $this.find('div.image-current a.file-preview-link-processed').text();
+        $this.find(".file-name").text($thisImgName);
+        $previewImgURI = '/files/styles/medium/public' + $thisImgURI.substring(8);
+        var $previewImgSrc = Backdrop.absoluteUrl($previewImgURI);
+        $this.find('div.selected-image-preview img').replaceWith('<img src="' + $previewImgSrc + '">');
         $this.find('[class*= "library-imagesrc"]').hide();
-        $this.find('div[class*= "-title"]').hide();
-        $this.find('div[class*= "-alt"]').hide();
+        $this.find('div[class*= "-title"]').show();
+        $this.find('div[class*= "-alt"]').show();
+        // make field descriptions visible.
+        $this.find(".description").show();
+        // except hide the field description.
+        $this.find("div.form-type-managed-file > div.description").hide();
       }
       else {
         // fid is not set so initialise with 'Upload an image' part of form.
         $this.find(".image-select").hide();
-        $this.find(".image-confirm").hide();
         $this.find(".image-current").hide();
         $this.find(".image-widget").show();
         $this.find(".description").show();
         $this.find("a.upload-image-toggle").addClass("upload-selected");
         $this.find('[class*= "library-imagesrc"]').hide();
-        $this.find('[ID*= "library-confirm"]').hide();
         $this.find('div[class*= "-alt"]').hide();
         $this.find('div[class*= "-title"]').hide();
       }
@@ -248,7 +249,6 @@ Backdrop.behaviors.ImageUploadDialog = {
       function ChangeToLibrary() {
         $this.find(".image-select").show();
         $this.find(".image-upload").hide();
-        $this.find(".image-confirm").hide();
         $this.find(".image-current").hide();
         $this.find("a.image-library-toggle").addClass("library-selected");
         $this.find("a.upload-image-toggle").removeClass("upload-selected");
@@ -265,9 +265,9 @@ Backdrop.behaviors.ImageUploadDialog = {
         }
       }
 
-      // Now add events to images
+      // Now add events to images appearing in library.
       $this.find('.image-library').once('image-library')
-      // first process mousoever (hover)
+      // first process mouseover (hover)
       .on('mouseover', '.image-library-choose-file', function () {
         var $currentImg = $(this).find('img');
         var $currentImgFid = $currentImg.data('fid');
@@ -289,18 +289,25 @@ Backdrop.behaviors.ImageUploadDialog = {
         var $relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
         var $modifiedImgSrc = '/files/styles/medium/public' + $relativeImgSrc.substring(6);
         var $selectedImgFid = $selectedImg.data('fid');
+        var $selectedImgName = $selectedImg.data('filename');
+        var $selectedImgSize = $selectedImg.data('filesize');
 
-        // make image-confirm part of form visible.
+        // make the image-current part of form visible.
         $this.find(".image-select").hide();
-        $this.find(".image-confirm").show();
-        $this.find(".image-current").hide();
+        $this.find(".image-current").show();
         $this.find(".image-upload").hide();
         $this.find(".image-toggles").hide();
 
+        // show the available image properties data.
+        $this.find(".file-id").text($selectedImgFid);
+        $this.find(".file-name").text($selectedImgName);
+        $this.find(".file-size").text($selectedImgSize);
+        $this.find(".file-uri").text($relativeImgSrc);
+        $this.find(".image-width").text("");
+        $this.find(".image-height").text("");
+
         // hide imagesrc field.
         $this.find('div[class*= "library-imagesrc"]').hide();
-        // show 'confirm selected' button.
-        $this.find('[ID*= "library-confirm"]').show();
         // hide image upload file field.
         $this.find('[ID*= "upload"]').hide();
         // replace selected image preview.

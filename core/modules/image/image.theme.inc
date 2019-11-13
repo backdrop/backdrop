@@ -367,10 +367,11 @@ function theme_image_widget($variables) {
   $output .= $upload_button;
   $output .= '</div>'; // end of div image-upload.
 
-  // image-widget form part #2 - select.
+  // image-widget form part #2 - select from library.
   $output .= '<div class="image-select">';
   $output .= '<div class="image-detail">';
   $output .= '<h4>File properties</h4>';
+  // Make placeholders for properties to be added by file.js
   $output .= '<p>ID: <span class="image-fid"> ......</span></p>';
   $output .= '<p>Name: <span class="image-name"> ......</span></p>';
   $output .= '<p>Src: <span class="image-uri"> ......</span></p>';
@@ -383,45 +384,27 @@ function theme_image_widget($variables) {
   $output .= '</div>'; // end of div image-library.
   $output .= '</div>'; // end of div image-select.
 
-  // image-widget form part #3 - confirm.
-  $output .= '<div class="image-confirm">';
-  $output .= '<h3>Confirm image</h3>';
-  $output .= '<div class="selected-image-preview"><img src="/core/modules/image/images/sample.png"></div>';
-  $output .= $rendered_image_data;
-  $output .= '<div><em>File details to appear here.</em></div>';
-  $output .= '</div>'; // end of image-confirm.
-
-  // image-widget form part #4 - current file, if applicable.
+  // image-widget form part #3 - current file, if applicable.
   $output .= '<div class="image-current">';
+  // Placeholders for field name and for preview image.
   $output .='<h2><i>Field name: </i><span class="image-field-name">Temporary</span></h2>';
-  $output .= '<h3>Current image</h3>';
   $output .= '<div class="selected-image-preview"><img src="/core/modules/image/images/sample.png"></div>';
   $output .= $rendered_image_data;
-  $output .= _theme_image_widget_detail($element);
+  // Display of image properties.
+  $output .= '<div class="image-widget-properties">';
+  // ($element['#value'],'Values at ITI 395');
+  $output .= '<h4>Image properties:</h4>';
+  $output .= '<p>File ID = <span class="file-id">' . $element['#value']['fid']  . '</span></p>';
+  $output .= '<p>File name = <span class="file-name">' . $element['#value']['filename'] . '</span></p>';
+  $output .= '<p>File size = <span class="file-size">' . format_size($element['#value']['filesize']) . '</span></p>';
+  $output .= '<p>File URI = <span class="file-uri">' . $element['#value']['uri'] . '</span></p>';
+  $output .= '<p class="image-width">Image width = ' . $element['#value']['width'] . 'px</p>';
+  $output .= '<p class="image-height">Image height = ' . $element['#value']['height'] . 'px</p>';
+  $output .= '</div>'; // end of image-widget-properties
   $output .= '</div>'; // image-current
 
   $output .= '</div>'; // end of image-widget
-
   return $output;
-}
-
-function _theme_image_widget_detail($element){
-  $detail = '<div class="image-widget-properties">';
-  if ($element['#image_detail']['fid'] != 0) {
-    $detail .= '<h4>Image properties:</h4>';
-    $detail .= '<p>File ID = ' . $element['#image_detail']['fid'] . '</p>';
-    $detail .= '<p>File name = ' . $element['#image_detail']['filename'] . '</p>';
-    $detail .= '<p>File size = ' . format_size($element['#image_detail']['filesize']) . '</p>';
-    $detail .= '<p>File URI = ' . $element['#image_detail']['uri'] . '</p>';
-    $detail .= '<p>Image width = ' . $element['#image_detail']['width'] . 'px</p>';
-    $detail .= '<p>Image height = ' . $element['#image_detail']['height'] . 'px</p>';
-    !empty($element['alt']['#value']) ? $altText = $element['#image_detail']['alt'] : $altText = 'Not yet set';
-    $detail .= '<p>Alternate text = ' . $altText . '</p>';
-    !empty($element['title']['#value']) ? $titleText = $element['#image_detail']['title'] : $titleText = 'Not yet set';
-    $detail .= '<p>Title text = ' . $titleText . '</p>';
-  }
-  $detail .= '</div>'; // end of image-widget-properties
-  return $detail;
 }
 
 /**
