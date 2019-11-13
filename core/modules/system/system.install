@@ -3091,7 +3091,7 @@ function system_update_1069() {
 }
 
 /**
- * Removes an unused state value.
+ * Set file_temporary_path on existing sites, if not already set.
  */
 function system_update_1070() {
   $config = config('system.core');
