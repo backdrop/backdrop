@@ -3095,9 +3095,13 @@ function system_update_1069() {
  */
 function system_update_1070() {
   $config = config('system.core');
-  $file_temporary_path = $config->get('file_temporary_path') ? $config->get('file_temporary_path') : file_directory_temp();
-  $config->set('file_temporary_path', $file_temporary_path);
-  $config->save();
+  if ($config->get('file_temporary_path')) {
+    $file_temporary_path = $config->get('file_temporary_path');
+  }
+  else {
+    $config->set('file_temporary_path', file_directory_temp());
+    $config->save();
+  }  
 }
 
 /**
