@@ -88,3 +88,6 @@ a.library-selected, a.upload-selected {
   padding: 5px;
   width: 400px;
 }
+.selected-image-preview {
+  max-width: 300px;
+}

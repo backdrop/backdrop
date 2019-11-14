@@ -392,14 +392,19 @@ function theme_image_widget($variables) {
   $output .= $rendered_image_data;
   // Display of image properties.
   $output .= '<div class="image-widget-properties">';
-  // ($element['#value'],'Values at ITI 395');
   $output .= '<h4>Image properties:</h4>';
-  $output .= '<p>File ID = <span class="file-id">' . $element['#value']['fid']  . '</span></p>';
-  $output .= '<p>File name = <span class="file-name">' . $element['#value']['filename'] . '</span></p>';
-  $output .= '<p>File size = <span class="file-size">' . format_size($element['#value']['filesize']) . '</span></p>';
-  $output .= '<p>File URI = <span class="file-uri">' . $element['#value']['uri'] . '</span></p>';
-  $output .= '<p class="image-width">Image width = ' . $element['#value']['width'] . 'px</p>';
-  $output .= '<p class="image-height">Image height = ' . $element['#value']['height'] . 'px</p>';
+  $fid = isset($element['#value']['fid']) ? $element['#value']['fid'] : "";
+  $filename = isset($element['#value']['filename']) ? $element['#value']['filename'] : "";
+  $filesize = isset($element['#value']['filesize']) ? $element['#value']['filesize'] : "";
+  $fileuri = isset($element['#value']['uri']) ? $element['#value']['uri'] : "";
+  $width = isset($element['#value']['width']) ? ($element['#value']['width'] . "px") : "";
+  $height = isset($element['#value']['height']) ? ($element['#value']['height'] . "px") : "";
+  $output .= '<p>File ID = <span class="file-id">' . $fid  . '</span></p>';
+  $output .= '<p>File name = <span class="file-name">' . $filename . '</span></p>';
+  $output .= '<p>File size = <span class="file-size">' . format_size($filesize) . '</span></p>';
+  $output .= '<p>File URI = <span class="file-uri">' . $fileuri . '</span></p>';
+  $output .= '<p class="image-width">Image width = ' . $width . '</p>';
+  $output .= '<p class="image-height">Image height = ' . $height . '</p>';
   $output .= '</div>'; // end of image-widget-properties
   $output .= '</div>'; // image-current
 

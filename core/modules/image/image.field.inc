@@ -434,10 +434,12 @@ function image_field_widget_process($element, &$form_state, $form) {
   $item['fid'] = $element['fid']['#value'];
 
   $instance = field_widget_instance($element, $form_state);
-
-  $image_detail = $element['#entity']->field_image;
-  $image_detail = $image_detail['und'][0];
-  $element['#image_detail'] = $image_detail;
+  $image_detail = array();
+  if (isset($element['#entity']->field_image)){
+    $image_detail = $element['#entity']->field_image;
+    $image_detail = $image_detail['und'][0];
+    $element['#image_detail'] = $image_detail;
+  }
 
   $settings = $instance['settings'];
   $widget_settings = $instance['widget']['settings'];
