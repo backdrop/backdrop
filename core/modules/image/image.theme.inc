@@ -388,7 +388,7 @@ function theme_image_widget($variables) {
   $output .= '<div class="image-current">';
   // Placeholders for field name and for preview image.
   $output .='<h2><i>Field name: </i><span class="image-field-name">Temporary</span></h2>';
-  $output .= '<div class="selected-image-preview"><img src="/core/modules/image/images/sample.png"></div>';
+  $output .= '<div class="medium selected-image-preview"><img src="/core/modules/image/images/sample.png"></div>';
   $output .= $rendered_image_data;
   // Display of image properties.
   $output .= '<div class="image-widget-properties">';

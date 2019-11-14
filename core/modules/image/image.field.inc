@@ -493,7 +493,7 @@ function image_field_widget_process($element, &$form_state, $form) {
     );
     $element['filesize'] = array(
       '#type' => 'hidden',
-      '#value' => $variables['filesize'],
+      '#value' => isset($variables['filesize']) ? $variables['filesize'] : 0,
     );
   }
 
