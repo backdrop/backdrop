@@ -48,13 +48,11 @@ function _search_get_module_names() {
  *
  * @ingroup forms
  *
- * @see search_admin_settings_validate()
  * @see search_admin_settings_submit()
  * @see search_admin_reindex_submit()
  */
 function search_admin_settings($form, &$form_state) {
   $config = config('search.settings');
-
 
   $form['active'] = array(
     '#type' => 'fieldset',
@@ -66,19 +64,33 @@ function search_admin_settings($form, &$form_state) {
     $module_options[$module] = $info['title'];
   }
   $form['active']['search_active_modules'] = array(
-    '#title' => t('Available search items'),
+    '#prefix' => '<label>' . t('Available search items') . '</label>',
     '#type' => 'checkboxes',
     '#default_value' => $config->get('search_active_modules'),
     '#options' => $module_options,
-    '#description' => t('Several modules expose items to the search system. Use this setting to limit what can be searched.')
+    '#value_callback' => 'search_admin_settings_form_type_checkboxes_value',
+    '#pre_render' => array('search_admin_settings_disable_options_element'),
+    '#suffix' => '<div class="description">' . t('Multiple modules can expose items to the search system. Use this setting to limit what can be searched.') . '</div>',
   );
-  $form['active']['search_default_module'] = array(
-    '#title' => t('Default search'),
-    '#type' => 'radios',
-    '#default_value' => $config->get('search_default_module'),
-    '#options' => $module_options,
-    '#description' => t('Only one type of item will be searched by default. This selection will determine what appears at http://www.example.com/search.')
-  );
+
+  // Display default search setting for only multiple active search modules.
+  if (count($config->get('search_active_modules')) > 1) {
+    $form['active']['search_default_module'] = array(
+      '#title' => t('Default search'),
+      '#type' => 'radios',
+      '#default_value' => $config->get('search_default_module'),
+      '#options' => $module_options,
+      '#description' => t('Only one type of item will be searched by default. This selection will determine what appears at http://www.example.com/search.')
+    );
+  }
+  else {
+    // Silently set the only active search module as the default one.
+    $form['active']['search_default_module'] = array(
+      '#type' => 'hidden',
+      '#default_value' => $config->get('search_default_module'),
+    );
+  }
+
   $form['logging'] = array(
     '#type' => 'fieldset',
     '#title' => t('Logging')
@@ -89,7 +101,6 @@ function search_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('search_logging'),
     '#description' => t('This setting may affect performance. Enable only if actively inspecting logs of search queries.'),
   );
-  $form['#validate'][] = 'search_admin_settings_validate';
   $form['#submit'][] = 'search_admin_settings_submit';
 
   // Per module settings
@@ -111,7 +122,6 @@ function search_admin_settings($form, &$form_state) {
     '#title' => t('Indexing'),
     '#description' => t('<p><em>The search index is not cleared immediately when invalidated, instead it will be systematically updated during cron runs. Searching will continue to work but new content won\'t be indexed until all existing content has been re-indexed.</em></p>'),
   );
-
 
   // Collect some stats
   $remaining = 0;
@@ -175,17 +185,29 @@ function search_admin_settings($form, &$form_state) {
 }
 
 /**
- * Form validation handler for search_admin_settings().
+ * Handler for disabling checkbox for the default search module.
  */
-function search_admin_settings_validate($form, &$form_state) {
-  // Check whether we selected a valid default.
-  if ($form_state['triggering_element']['#value'] != t('Reset to defaults')) {
-    $new_modules = array_filter($form_state['values']['search_active_modules']);
-    $default = $form_state['values']['search_default_module'];
-    if (!in_array($default, $new_modules, TRUE)) {
-      form_set_error('search_default_module', t('Your default search module is not selected as an active module.'));
+function search_admin_settings_disable_options_element($element) {
+  $config = config('search.settings');
+  $search_default_module = $config->get('search_default_module');
+  foreach (element_children($element) as $key) {
+    if ($key == $search_default_module) {
+      $element[$key]['#attributes']['disabled'] = TRUE;
     }
   }
+  return $element;
+}
+
+/**
+ * Handler for returning value for disabled checkbox.
+ */
+function search_admin_settings_form_type_checkboxes_value($element, $input = FALSE) {
+  $config = config('search.settings');
+  if ($input !== FALSE) {
+    $search_default_module = $config->get('search_default_module');
+    $input[$search_default_module] = $search_default_module;
+  }
+  return form_type_checkboxes_value($element, $input);
 }
 
 /**
