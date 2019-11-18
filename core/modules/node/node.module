@@ -2372,27 +2372,29 @@ function node_update_index() {
 
   // Index selected content types.
   $content_types = config_get('search.settings', 'content_types');
-  $content_types = array_shift($content_types);
-  foreach ($content_types as $type => $included) {
-    if ($included == TRUE) {
-      // Only selected types.
-      $selected_types[] = $type;
+  if (!empty($content_types)) {
+    $content_types = array_shift($content_types);
+    foreach ($content_types as $type => $included) {
+      if ($included == TRUE) {
+        // Only selected types.
+        $selected_types[] = $type;
+      }
+      // All content types in case if none selected.
+      $all_types[] = $type;
     }
-    // All content types in case if none selected.
-    $all_types[] = $type;
-  }
-  if (empty($selected_types)) {
-    $selected_types = $all_types;
-  }
+    if (empty($selected_types)) {
+      $selected_types = $all_types;
+    }
 
-  $result = db_query_range("SELECT n.nid FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE (d.sid IS NULL OR d.reindex <> 0) AND n.type IN (:selected_types) ORDER BY d.reindex ASC, n.nid ASC", 0, $limit, array(':selected_types' => $selected_types), array('target' => 'slave'));
-  $nids = $result->fetchCol();
-  if (!$nids) {
-    return;
-  }
+    $result = db_query_range("SELECT n.nid FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE (d.sid IS NULL OR d.reindex <> 0) AND n.type IN (:selected_types) ORDER BY d.reindex ASC, n.nid ASC", 0, $limit, array(':selected_types' => $selected_types), array('target' => 'slave'));
+    $nids = $result->fetchCol();
+    if (!$nids) {
+      return;
+    }
 
-  foreach (node_load_multiple($nids) as $node) {
-    _node_index_node($node);
+    foreach (node_load_multiple($nids) as $node) {
+      _node_index_node($node);
+    }
   }
 }
 
@@ -3888,4 +3890,3 @@ function node_build_tempstore_id() {
   }
   return $node_tempstore_id;
 }
-
