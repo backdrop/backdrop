@@ -55,7 +55,8 @@ function _search_get_module_names() {
 function search_admin_settings($form, &$form_state) {
   $config = config('search.settings');
   $node_type_get_types = node_type_get_types();
-  $content_types = $config->get('content_types')['types'];
+  $content_types = $config->get('content_types');
+  $content_types = array_shift($content_types);
 
   $form['active'] = array(
     '#type' => 'fieldset',

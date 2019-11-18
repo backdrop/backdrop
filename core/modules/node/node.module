@@ -2371,7 +2371,8 @@ function node_update_index() {
   $limit = (int)config_get('search.settings', 'search_cron_limit');
 
   // Index selected content types.
-  $content_types = config_get('search.settings', 'content_types')['types'];
+  $content_types = config_get('search.settings', 'content_types');
+  $content_types = array_shift($content_types);
   foreach ($content_types as $type => $included) {
     if ($included == TRUE) {
       // Only selected types.
