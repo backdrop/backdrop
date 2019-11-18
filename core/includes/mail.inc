@@ -151,7 +151,10 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
     $headers['From'] = $headers['Sender'] = $headers['Return-Path'] = $from;
   }
   if ($reply) {
-    $headers['Reply-to'] = $reply;
+    // The "To" bit in the "Reply-To" header needs to be capitalized.
+    // See: https://tools.ietf.org/html/rfc5322 and
+    // https://github.com/backdrop/backdrop-issues/issues/4214
+    $headers['Reply-To'] = $reply;
   }
   $message['headers'] = $headers;
 
