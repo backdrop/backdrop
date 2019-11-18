@@ -57,6 +57,7 @@ function search_admin_settings($form, &$form_state) {
   $node_type_get_types = node_type_get_types();
   $content_types = $config->get('content_types');
   $content_types = array_shift($content_types);
+  
   $form['active'] = array(
     '#type' => 'fieldset',
     '#title' => t('Search items')
