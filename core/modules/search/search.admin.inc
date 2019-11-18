@@ -57,7 +57,7 @@ function search_admin_settings($form, &$form_state) {
   $node_type_get_types = node_type_get_types();
   $content_types = $config->get('content_types');
   $content_types = array_shift($content_types);
-  
+
   $form['active'] = array(
     '#type' => 'fieldset',
     '#title' => t('Search items')
@@ -235,12 +235,14 @@ function search_admin_settings_validate($form, &$form_state) {
 function search_admin_settings_submit($form, &$form_state) {
   $config = config('search.settings');
   // If these settings change, the index needs to be rebuilt.
-  if (($config->get('search_minimum_word_size') != $form_state['values']['search_minimum_word_size']) || ($config->get('search_overlap_cjk') != $form_state['values']['search_overlap_cjk'])) {
+  if (($config->get('search_minimum_word_size') != $form_state['values']['search_minimum_word_size']) || ($config->get('search_overlap_cjk') != $form_state['values']['search_overlap_cjk']) || ($config->get('content_types') != $form_state['values']['content_types'])) {
     $config->set('search_minimum_word_size', $form_state['values']['search_minimum_word_size']);
     $config->set('search_overlap_cjk', $form_state['values']['search_overlap_cjk']);
+    $config->set('content_types', $form_state['values']['content_types']['types']);
     backdrop_set_message(t('The index will be rebuilt.'));
     search_reindex();
   }
+
   $config->set('search_cron_limit', $form_state['values']['search_cron_limit']);
   $config->set('search_default_module', $form_state['values']['search_default_module']);
   $config->set('search_logging', (bool) $form_state['values']['search_logging']);
@@ -257,8 +259,6 @@ function search_admin_settings_submit($form, &$form_state) {
     backdrop_set_message(t('The active search modules have been changed.'));
     state_set('menu_rebuild_needed', TRUE);
   }
-  // Save indexed content types.
-  $config->set('content_types', $form_state['values']['content_types']['types']);
 
   // Save all other settings provided by any other modules.
   form_state_values_clean($form_state);
