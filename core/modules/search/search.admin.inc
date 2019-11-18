@@ -54,7 +54,8 @@ function _search_get_module_names() {
  */
 function search_admin_settings($form, &$form_state) {
   $config = config('search.settings');
-
+  $node_type_get_types = node_type_get_types();
+  $content_types = $config->get('content_types')['types'];
 
   $form['active'] = array(
     '#type' => 'fieldset',
@@ -112,8 +113,28 @@ function search_admin_settings($form, &$form_state) {
     '#description' => t('<p><em>The search index is not cleared immediately when invalidated, instead it will be systematically updated during cron runs. Searching will continue to work but new content won\'t be indexed until all existing content has been re-indexed.</em></p>'),
   );
 
+  // Collect indexing stats per included content type.
+  $report = '';
+  foreach ($content_types as $type => $included) {
+    if ($included == TRUE) {
+      $total = db_query('SELECT COUNT(*) FROM {node} WHERE type = :type', array(':type' => $type))->fetchField();
+      $remaining = db_query("SELECT COUNT(*) FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE (d.sid IS NULL OR d.reindex <> 0) AND n.type = :type", array(':type' => $type))->fetchField();
+      $count = format_plural($remaining, '<strong><em>1</em></strong> node of the content type left to index or excluded from indexing.', '<strong><em>@count</em></strong> nodes of the content type left to index or excluded from indexing.');
+      $percentage = ((int) min(100, 100 * ($total - $remaining) / max(1, $total))) . '%';
+      // Finally output all the stats.
+      $report .= '<p>' . t(
+        '<strong>%percentage</strong> of total <strong>%total</strong>  <em>@content-type</em> type nodes have been indexed.',
+        array(
+        '%percentage' => $percentage,
+        '%total' => $total,
+        '@content-type' => $node_type_get_types[$type]->name,
+      )
+      )
+      . ' ' . $count . '</p>';
+    }
+  }
 
-  // Collect some stats
+  // Collect total indexing stats.
   $remaining = 0;
   $total = 0;
   foreach ($config->get('search_active_modules') as $module) {
@@ -122,12 +143,11 @@ function search_admin_settings($form, &$form_state) {
       $total += $status['total'];
     }
   }
+  $remaining_count = format_plural($remaining, '<strong>1</strong> node left to index or excluded from indexing.', '<strong>@count</strong> nodes left to index or excluded from indexing.');
+  $percentage = ((int) min(100, 100 * ($total - $remaining) / max(1, $total))) . '%';
+  $report .= '<p>' . t('<strong>%percentage</strong> of total <strong>%total</strong> nodes have been indexed.', array('%percentage' => $percentage, '%total' => $total)) . ' ' . $remaining_count . '</p>';
+  $form['indexing']['report'] = array('#markup' => $report);
 
-  $count = format_plural($remaining, 'There is 1 item left to index.', 'There are @count items left to index.');
-  $percentage = ((int)min(100, 100 * ($total - $remaining) / max(1, $total))) . '%';
-  $status = '<p><strong>' . t('%percentage of the site has been indexed.', array('%percentage' => $percentage)) . ' ' . $count . '</strong></p>';
-
-  $form['indexing']['status'] = array('#markup' => $status);
   $form['indexing']['wipe'] = array(
     '#type' => 'submit',
     '#value' => t('Invalidate search index'),
@@ -163,6 +183,26 @@ function search_admin_settings($form, &$form_state) {
     '#title' => t('Simple CJK handling'),
     '#default_value' => $config->get('search_overlap_cjk'),
     '#description' => t('Whether to apply a simple Chinese/Japanese/Korean tokenizer based on overlapping sequences. Turn this off if you want to use an external preprocessor for this instead. Does not affect other languages. <strong>Changing this setting will invalidate the search index.</strong>')
+  );
+
+  // Content type level indexing.
+  foreach ($node_type_get_types as $type => $content_type) {
+    $default_value = FALSE;
+    if (isset($content_types[$type])) {
+      $default_value = $content_types[$type];
+    }
+    $types[$type] = array(
+      '#type' => 'checkbox',
+      '#title' => check_plain($content_type->name),
+      '#default_value' => $default_value
+    );
+  }
+  $form['content_types'] = array(
+    '#tree' => TRUE,
+    '#type' => 'fieldset',
+    '#title' => 'Content types',
+    '#description' => t("Nodes of only selected content types are indexed. If none selected, then all nodes are indexed."),
+    'types' => $types
   );
 
   $form['actions']['#type'] = 'actions';
@@ -216,6 +256,8 @@ function search_admin_settings_submit($form, &$form_state) {
     backdrop_set_message(t('The active search modules have been changed.'));
     state_set('menu_rebuild_needed', TRUE);
   }
+  // Save indexed content types.
+  $config->set('content_types', $form_state['values']['content_types']['types']);
 
   // Save all other settings provided by any other modules.
   form_state_values_clean($form_state);

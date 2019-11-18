@@ -2370,7 +2370,21 @@ function node_page_view(Node $node) {
 function node_update_index() {
   $limit = (int)config_get('search.settings', 'search_cron_limit');
 
-  $result = db_query_range("SELECT n.nid FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE d.sid IS NULL OR d.reindex <> 0 ORDER BY d.reindex ASC, n.nid ASC", 0, $limit, array(), array('target' => 'slave'));
+  // Index selected content types.
+  $content_types = config_get('search.settings', 'content_types')['types'];
+  foreach ($content_types as $type => $included) {
+    if ($included == TRUE) {
+      // Only selected types.
+      $selected_types[] = $type;
+    }
+    // All content types in case if none selected.
+    $all_types[] = $type;
+  }
+  if (empty($selected_types)) {
+    $selected_types = $all_types;
+  }
+
+  $result = db_query_range("SELECT n.nid FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE (d.sid IS NULL OR d.reindex <> 0) AND n.type IN (:selected_types) ORDER BY d.reindex ASC, n.nid ASC", 0, $limit, array(':selected_types' => $selected_types), array('target' => 'slave'));
   $nids = $result->fetchCol();
   if (!$nids) {
     return;
@@ -3873,4 +3887,3 @@ function node_build_tempstore_id() {
   }
   return $node_tempstore_id;
 }
-
