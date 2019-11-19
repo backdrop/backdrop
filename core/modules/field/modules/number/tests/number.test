@@ -24,7 +24,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
    * Test number_decimal field.
    */
   function testNumberDecimalField() {
-    // Create a field with settings to validate.
+    // Create a decimal number field with settings to validate.
     $this->field = array(
       'field_name' => backdrop_strtolower($this->randomName()),
       'type' => 'number_decimal',
@@ -48,10 +48,10 @@ class NumberFieldTestCase extends BackdropWebTestCase {
     );
     field_create_instance($this->instance);
 
-    // Display creation form.
+    // Display the entity creation form.
     $this->backdropGet('test-entity/add/test-bundle');
     $langcode = LANGUAGE_NONE;
-    $this->assertFieldByName("{$this->field['field_name']}[$langcode][0][value]", '', 'Widget is displayed');
+    $this->assertFieldByName("{$this->field['field_name']}[$langcode][0][value]", '', 'Widget for decimal number field is displayed');
 
     // Submit a signed decimal value within the allowed precision and scale.
     $value = '-1234.5678';
@@ -105,28 +105,34 @@ class NumberFieldTestCase extends BackdropWebTestCase {
    * Test number_integer field.
    */
   function testNumberIntegerField() {
-    // Display the "Add content type" form.
-    $this->backdropGet('admin/structure/types/add');
-
-    // Add a content type.
-    $name = $this->randomName();
-    $type = backdrop_strtolower($name);
-    $edit = array('name' => $name, 'type' => $type);
-    $this->backdropPost(NULL, $edit, t('Save and add fields'));
-
-    // Add an integer field to the newly-created type.
-    $label = $this->randomName();
-    $field_name = backdrop_strtolower($label);
-    $edit = array(
-      'fields[_add_new_field][label]'=> $label,
-      'fields[_add_new_field][field_name]' => $field_name,
-      'fields[_add_new_field][type]' => 'number_integer',
-      'fields[_add_new_field][widget_type]' => 'number',
+    // Create an integer number field.
+    $this->field = array(
+      'field_name' => backdrop_strtolower($this->randomName()),
+      'type' => 'number_integer',
     );
-    $this->backdropPost(NULL, $edit, t('Save'));
+    field_create_field($this->field);
+    $this->instance = array(
+      'field_name' => $this->field['field_name'],
+      'entity_type' => 'test_entity',
+      'bundle' => 'test_bundle',
+      'widget' => array(
+        'type' => 'number',
+      ),
+      'display' => array(
+        'default' => array(
+          'type' => 'number_integer',
+        ),
+      ),
+    );
+    field_create_instance($this->instance);
 
-    // Set the formatter to "number_integer" and to "unformatted", and just
-    // check that the settings summary does not generate warnings.
+    // Display the entity creation form.
+    $this->backdropGet('test-entity/add/test-bundle');
+    $langcode = LANGUAGE_NONE;
+    $this->assertFieldByName("{$this->field['field_name']}[$langcode][0][value]", '', 'Widget for integer number field is displayed');
+
+    // Set the formatter to "number_integer" and to "unformatted", and check
+    // that the settings summary does not generate warnings.
     $this->backdropGet("admin/structure/types/manage/$type/display/default");
     $edit = array(
       "fields[field_$field_name][type]" => 'number_integer',
@@ -142,6 +148,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
    * Test number_float field.
    */
   function testNumberFloatField() {
+    // Create a float number field.
     $this->field = array(
       'field_name' => backdrop_strtolower($this->randomName()),
       'type' => 'number_float',
@@ -165,7 +172,11 @@ class NumberFieldTestCase extends BackdropWebTestCase {
     );
     field_create_instance($this->instance);
 
+    // Display the entity creation form.
+    $this->backdropGet('test-entity/add/test-bundle');
     $langcode = LANGUAGE_NONE;
+    $this->assertFieldByName("{$this->field['field_name']}[$langcode][0][value]", '', 'Widget for float number field is displayed');
+
     $value = array(
       '9.' => '9',
       '.' => '0',
