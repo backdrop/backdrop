@@ -24,7 +24,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
    * Test number_decimal field.
    */
   function testNumberDecimalField() {
-    // Create a decimal number field with settings to validate.
+    // Create a decimal number field, with settings to validate.
     $this->field = array(
       'field_name' => backdrop_strtolower($this->randomName()),
       'type' => 'number_decimal',
@@ -133,13 +133,13 @@ class NumberFieldTestCase extends BackdropWebTestCase {
 
     // Set the formatter to "number_integer" and to "unformatted", and check
     // that the settings summary does not generate warnings.
-    $this->backdropGet("admin/structure/types/manage/$type/display/default");
+    $this->backdropGet("admin/structure/types/manage/test-bundle/display/default");
     $edit = array(
-      "fields[field_$field_name][type]" => 'number_integer',
+      "fields[$this->field['field_name']][type]" => 'number_integer',
     );
     $this->backdropPost(NULL, $edit, t('Save'));
     $edit = array(
-      "fields[field_$field_name][type]" => 'number_unformatted',
+      "fields[$this->field['field_name']][type]" => 'number_unformatted',
     );
     $this->backdropPost(NULL, $edit, t('Save'));
   }
