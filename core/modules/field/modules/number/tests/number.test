@@ -135,11 +135,11 @@ class NumberFieldTestCase extends BackdropWebTestCase {
     // that the settings summary does not generate warnings.
     $this->backdropGet("admin/structure/types/manage/test-bundle/display/default");
     $edit = array(
-      "fields[$this->field['field_name']][type]" => 'number_integer',
+      "fields[{$this->field['field_name']}][type]" => 'number_integer',
     );
     $this->backdropPost(NULL, $edit, t('Save'));
     $edit = array(
-      "fields[$this->field['field_name']][type]" => 'number_unformatted',
+      "fields[{$this->field['field_name']}][type]" => 'number_unformatted',
     );
     $this->backdropPost(NULL, $edit, t('Save'));
   }
