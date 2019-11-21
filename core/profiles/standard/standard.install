@@ -130,6 +130,7 @@ function standard_install() {
         'node_submitted' => FALSE,
         'node_user_picture' => FALSE,
         'comment_default' => COMMENT_NODE_CLOSED,
+        'menu_default' => TRUE,
         'menu_options' => array('main-menu'),
       ),
       'is_new' => TRUE,
