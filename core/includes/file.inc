@@ -1343,6 +1343,13 @@ function file_create_filename($basename, $directory) {
  * @see file_usage_list()
  */
 function file_delete($fid) {
+  // Add backwards-compatible parameter handling.
+  global $settings;
+  if ($settings['backdrop_drupal_compatibility'] && is_a($fid, 'File')) {
+    // @todo once https://github.com/backdrop/backdrop-issues/issues/4220 is
+    // resolved, notify developers of this change.
+    $fid = $fid->fid;
+  }
   file_delete_multiple(array($fid));
 }
 
