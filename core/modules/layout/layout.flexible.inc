@@ -528,14 +528,17 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
 
   $form['region_styles']['container'] = array(
     '#title' => t('Row width behavior'),
-    '#type' => 'select',
+    '#type' => 'radios',
     '#options' => array(
-      'container' => t("Fixed maximum width - adds the 'container' row class."),
-      'container_fluid' => t("Fluid width - adds the 'container-fluid' row class (no max-width but padding)."),
-      'no_container' => t("Full width - no row classes added (e.g. for Hero blocks)."),
+      'container' => t('Fixed maximum width'),
+      'container_fluid' => t('Fluid width'),
+      'no_container' => t('Full width'),
     ),
     '#default_value' => isset($row_data['container']) ? $row_data['container'] : 'container_fluid',
   );
+  $form['region_styles']['container']['container']['#description'] = t('Adds the <code>container</code> class to the row.');
+  $form['region_styles']['container']['container_fluid']['#description'] = t('Adds the <code>container-fluid</code> class to the row (no max-width, but padding).');
+  $form['region_styles']['container']['no_container']['#description'] = t('No additional width behavior classes added to the row (e.g. for Hero blocks).');
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
