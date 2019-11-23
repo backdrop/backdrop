@@ -2702,8 +2702,8 @@ function template_preprocess_page(&$variables) {
     'name' => check_plain($site_config->getTranslated('site_name')),
   );
 
-  // A page title have some parts of it emphasized, so we strip any HTML tags
-  // from it.
+  // A page title may have some parts of it emphasized, so we strip any HTML
+  // tags from it.
   $current_page_title = backdrop_get_title() ? strip_tags(backdrop_get_title()) : NULL;
 
   // If both a primary and a secondary tab are present, then construct the head
