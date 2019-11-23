@@ -1559,7 +1559,7 @@ function system_logging_settings($form, &$form_state) {
   );
   $form['watchdog_enabled_severity_levels'] = array(
     '#type' => 'checkboxes',
-    '#title' => t("Enabled severity levels"),
+    '#title' => t('Types of messages to log'),
     '#options' => array(
       WATCHDOG_EMERGENCY => t('Emergency'),
       WATCHDOG_ALERT => t('Alert'),
@@ -1572,7 +1572,6 @@ function system_logging_settings($form, &$form_state) {
       WATCHDOG_DEPRECATED => t('Deprecated'),
     ),
     '#default_value' => config_get('system.core', 'watchdog_enabled_severity_levels'),
-    '#description' => t('Which type of messages to log in watchdog.'),
   );
 
   return system_settings_form($form);
