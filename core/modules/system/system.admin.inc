@@ -1559,7 +1559,7 @@ function system_logging_settings($form, &$form_state) {
   );
   $form['watchdog_enabled_severity_levels'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Types of messages to log'),
+    '#title' => t('Severity of messages to log'),
     '#options' => array(
       WATCHDOG_EMERGENCY => t('Emergency'),
       WATCHDOG_ALERT => t('Alert'),
