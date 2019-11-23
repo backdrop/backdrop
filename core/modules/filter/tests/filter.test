@@ -1008,6 +1008,28 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
 
     $f = filter_xss('<img src=javascript:alert(0)>', array('img'));
     $this->assertNoNormalized($f, 'javascript', 'HTML scheme clearing evasion -- no quotes.');
+ 
+    // Check that strings in HTML attributes are processed correctly.
+    $f = filter_xss('<img src="http://example.com/foo.jpg" title="Example: title" alt="Example: alt">', array('img'));
+    $this->assertIdentical($f, '<img src="http://example.com/foo.jpg" title="Example: title" alt="Example: alt">', 'No HTML scheme clearing on allowed attributes.');
+
+    $f = filter_xss('<img src="http://example.com/foo.jpg" data-caption="Example: data-caption.">', array('img'));
+    $this->assertIdentical($f, '<img src="http://example.com/foo.jpg" data-caption="Example: data-caption.">', 'No HTML scheme clearing on allowed data attributes.');
+
+    // Test XSS filtering on data-attributes.
+    $output = filter_xss('<img src="butterfly.jpg" data-caption="&lt;script&gt;alert();&lt;/script&gt;" />', array('img'));
+    $f = filter_xss_data_attributes($output);
+    $this->assertIdentical($f, '<img src="butterfly.jpg" data-caption="alert();" />', 'HTML-encoded value in data-attributes decoded, filtered and re-saved.');
+
+    $output = filter_xss('<img src="butterfly.jpg" data-caption="&lt;EMBED SRC=&quot;http://ha.ckers.org/xss.swf&quot; AllowScriptAccess=&quot;always&quot;&gt;&lt;/EMBED&gt;" />', array('img'));
+    $f = filter_xss_data_attributes($output);
+    $this->assertIdentical($f, '<img src="butterfly.jpg" data-caption="" />', 'HTML-encoded value in data-attributes decoded, filtered and re-saved.');
+
+    // When including HTML-tags as visible content, they are double-escaped.
+    // This test case ensures that we leave that content unchanged.
+    $output = filter_xss('<img src="butterfly.jpg" data-caption="&amp;lt;script&amp;gt;alert();&amp;lt;/script&amp;gt;" />', array('img'));
+    $f = filter_xss_data_attributes($output);
+    $this->assertIdentical($f, '<img src="butterfly.jpg" data-caption="&amp;lt;script&amp;gt;alert();&amp;lt;/script&amp;gt;" />', 'Doubled-escaped HTML-tags left unchanged.');
 
     // A bit like CVE-2006-0070.
     $f = filter_xss('<img src="javascript:confirm(0)">', array('img'));
