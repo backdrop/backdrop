@@ -2692,21 +2692,50 @@ function template_preprocess_page(&$variables) {
   backdrop_add_html_head_link(array('rel' => 'shortcut icon', 'href' => $favicon['path'], 'type' => $favicon['type']));
 
   $site_config = config('system.core');
-  // Construct head <title>.
-  if (backdrop_get_title()) {
-    $head_title = array(
-      'title' => strip_tags(backdrop_get_title()),
-      'name' => check_plain($site_config->getTranslated('site_name')),
-    );
+
+  $menu_active_title = menu_get_active_title();
+  $active_primary_tab = menu_local_tasks_get_active_title(0);
+  $active_secondary_tab = menu_local_tasks_get_active_title(1);
+
+  // Construct the head <title>.
+  $head_title = array(
+    'name' => check_plain($site_config->getTranslated('site_name')),
+  );
+
+  // A page title have some parts of it emphasized, so we strip any HTML tags
+  // from it.
+  $current_page_title = backdrop_get_title() ? strip_tags(backdrop_get_title()) : NULL;
+
+  // If both a primary and a secondary tab are present, then construct the head
+  // <title> using them - do not prepend the page title to the head <title>.
+  if ($active_primary_tab && $active_secondary_tab) {
+    $head_title['title'] = $active_primary_tab . ': ' . $active_secondary_tab;
   }
+  // Otherwise, check if there is no primary tab at all, or if there is only a
+  // single primary tab (which will be hidden by design); in which case, have
+  // the head <title> be the same as the current page title.
+  elseif (!$active_primary_tab || menu_local_tasks(0)['tabs']['count'] == 1) {
+    $head_title['title'] = $current_page_title;
+  }
+  // Only a primary tab is present - no secondary tabs.
   else {
-    $head_title = array('name' => check_plain($site_config->getTranslated('site_name')));
-    if ($slogan = $site_config->getTranslated('site_slogan')) {
-      $head_title['slogan'] = check_plain($slogan);
+    // If the active primary tab is the same as the current page title, then
+    // prepend the parent menu item title to the head <title>.
+    if ($active_primary_tab === $current_page_title) {
+      $head_title['title'] = $menu_active_title . ': ' . $active_primary_tab;
+    }
+    else {
+      $head_title['title'] = $current_page_title . ': ' . $active_primary_tab;
     }
   }
+  
+  if ($slogan = $site_config->getTranslated('site_slogan')) {
+    $head_title['slogan'] = check_plain($slogan);
+    $head_title['title'] .= ', ' . $head_title['slogan'];
+  }
+
   $variables['head_title_array'] = $head_title;
-  $variables['head_title'] = implode(' | ', $head_title);
+  $variables['head_title'] = $head_title['title'] . ' | ' . $head_title['name'];
 }
 
 /**

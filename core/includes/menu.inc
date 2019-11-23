@@ -2778,6 +2778,32 @@ function menu_get_active_title() {
 }
 
 /**
+ * Gets the title of the active local task (primary or secondary tab).
+ * 
+ * @param $level
+ *   The level of tasks (tabs) you ask for. Primary tabs are 0, secondary are 1
+ *   (defaults to 0 for primary tabs). This matches the $level argument that is
+ *   passed to the menu_local_tasks() function.
+ *
+ * @return
+ *   A string containing the label/title of the active primary or secondary tab
+ *   (depends on the value of the $level argument passed to the function), or
+ *   NULL if no primary/secondary tabs are present.
+ */
+function menu_local_tasks_get_active_title($level = 0) {
+  $local_tasks = menu_local_tasks($level);
+
+  $active_local_task_title = NULL;
+  foreach ($local_tasks['tabs']['output'] as $local_task) {
+    if (isset($local_task['#active'])) {
+      $active_local_task_title = $local_task['#link']['title'];
+    }
+  }
+
+  return $active_local_task_title;
+}
+
+/**
  * Gets a translated menu link that is ready for rendering.
  *
  * This function should never be called from within node_load() or any other
