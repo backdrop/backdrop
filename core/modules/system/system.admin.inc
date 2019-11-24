@@ -1572,6 +1572,7 @@ function system_logging_settings($form, &$form_state) {
       WATCHDOG_DEPRECATED => t('Deprecated'),
     ),
     '#default_value' => config_get('system.core', 'watchdog_enabled_severity_levels'),
+    '#description' => t('The <em>debug</em> and <em>deprecated</em> severity levels are recommended for developer environments, but not on production sites.'),
   );
 
   return system_settings_form($form);
