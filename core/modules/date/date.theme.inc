@@ -254,8 +254,8 @@ function theme_date_display_combination($variables) {
   if (!empty($variables['show_remaining_days'])) {
     // Create a date object from the timestamp.
     $date = new DateTime('@' . strtotime($variables['dates']['value']['formatted_iso']));
-    // Using date_diff() allows to get the days diff without having to manually
-    // calculate them; and it also takes into accoutn leap years.
+    // Using date_diff()->days allows to get the days diff, without having to
+    // use complex math to calculate it. It also takes into account leap years.
     $remaining_days = date_diff($date, date_now())->days;
     // Show remaining days only for future events.
     if ($remaining_days >= 0) {
