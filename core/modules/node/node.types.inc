@@ -471,6 +471,13 @@ function node_type_form_submit($form, &$form_state) {
     watchdog('node', 'Added content type %name.', array('%name' => $type->name), WATCHDOG_NOTICE, l(t('view'), 'admin/structure/types'));
   }
 
+  // Make the new content type indexable by default if Search module is enabled.
+  if (module_exists('search')) {
+    $search_content_types = config_get('search.settings', 'content_types');
+    $search_content_types[$type->type] = $type->type;
+    config_set('search.settings', 'content_types', $search_content_types);
+  }
+
   $form_state['redirect'] = 'admin/structure/types';
   return;
 }
