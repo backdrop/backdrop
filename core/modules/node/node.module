@@ -2373,9 +2373,8 @@ function node_update_index() {
   // Index selected content types.
   $content_types = config_get('search.settings', 'content_types');
   if (!empty($content_types)) {
-    $content_types = array_shift($content_types);
-    foreach ($content_types as $type => $included) {
-      if ($included == TRUE) {
+    foreach ($content_types as $type => $search) {
+      if ($search == TRUE) {
         // Only selected types.
         $selected_types[] = $type;
       }
