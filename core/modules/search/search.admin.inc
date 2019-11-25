@@ -56,7 +56,6 @@ function search_admin_settings($form, &$form_state) {
   $config = config('search.settings');
   $node_type_get_types = node_type_get_types();
   $content_types = $config->get('content_types');
-  $content_types = array_shift($content_types);
 
   $form['active'] = array(
     '#type' => 'fieldset',
@@ -80,6 +79,16 @@ function search_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('search_default_module'),
     '#options' => $module_options,
     '#description' => t('Only one type of item will be searched by default. This selection will determine what appears at http://www.example.com/search.')
+  );
+  foreach ($node_type_get_types as $content_type) {
+    $content_type_options[$content_type->type] = $content_type->name;
+  }
+  $form['active']['content_types'] = array(
+    '#title' => t('Content types'),
+    '#type' => 'checkboxes',
+    '#default_value' => $config->get('content_types'),
+    '#options' => $content_type_options,
+    '#description' => t('Only nodes of selected content types will be indexed.')
   );
   $form['logging'] = array(
     '#type' => 'fieldset',
@@ -114,10 +123,10 @@ function search_admin_settings($form, &$form_state) {
     '#description' => t('<p><em>The search index is not cleared immediately when invalidated, instead it will be systematically updated during cron runs. Searching will continue to work but new content won\'t be indexed until all existing content has been re-indexed.</em></p>'),
   );
 
-  // Collect indexing stats per included content type.
+  // Collect indexing stats per content type.
   $report = '';
-  foreach ($content_types as $type => $included) {
-    if ($included == TRUE) {
+  foreach ($content_types as $type => $search) {
+    if ($search == TRUE) {
       $total = db_query('SELECT COUNT(*) FROM {node} WHERE type = :type', array(':type' => $type))->fetchField();
       $remaining = db_query("SELECT COUNT(*) FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE (d.sid IS NULL OR d.reindex <> 0) AND n.type = :type", array(':type' => $type))->fetchField();
       $count = format_plural($remaining, '<strong><em>1</em></strong> node of the content type left to index or excluded from indexing.', '<strong><em>@count</em></strong> nodes of the content type left to index or excluded from indexing.');
@@ -186,26 +195,6 @@ function search_admin_settings($form, &$form_state) {
     '#description' => t('Whether to apply a simple Chinese/Japanese/Korean tokenizer based on overlapping sequences. Turn this off if you want to use an external preprocessor for this instead. Does not affect other languages. <strong>Changing this setting will invalidate the search index.</strong>')
   );
 
-  // Content type level indexing.
-  foreach ($node_type_get_types as $type => $content_type) {
-    $default_value = FALSE;
-    if (isset($content_types[$type])) {
-      $default_value = $content_types[$type];
-    }
-    $types[$type] = array(
-      '#type' => 'checkbox',
-      '#title' => check_plain($content_type->name),
-      '#default_value' => $default_value
-    );
-  }
-  $form['content_types'] = array(
-    '#tree' => TRUE,
-    '#type' => 'fieldset',
-    '#title' => 'Content types',
-    '#description' => t("Nodes of only selected content types are indexed. If none selected, then all nodes are indexed."),
-    'types' => $types
-  );
-
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -226,6 +215,9 @@ function search_admin_settings_validate($form, &$form_state) {
     if (!in_array($default, $new_modules, TRUE)) {
       form_set_error('search_default_module', t('Your default search module is not selected as an active module.'));
     }
+    if (!in_array(TRUE, $form_state['values']['content_types'])) {
+      form_set_error('content_types', t('Select at least one content type to search or consider to completely disable the Search module.'));
+    }
   }
 }
 
@@ -235,10 +227,9 @@ function search_admin_settings_validate($form, &$form_state) {
 function search_admin_settings_submit($form, &$form_state) {
   $config = config('search.settings');
   // If these settings change, the index needs to be rebuilt.
-  if (($config->get('search_minimum_word_size') != $form_state['values']['search_minimum_word_size']) || ($config->get('search_overlap_cjk') != $form_state['values']['search_overlap_cjk']) || ($config->get('content_types') != $form_state['values']['content_types'])) {
+  if (($config->get('search_minimum_word_size') != $form_state['values']['search_minimum_word_size']) || ($config->get('search_overlap_cjk') != $form_state['values']['search_overlap_cjk']) || ($config->get('content_types') !== $form_state['values']['content_types'])) {
     $config->set('search_minimum_word_size', $form_state['values']['search_minimum_word_size']);
     $config->set('search_overlap_cjk', $form_state['values']['search_overlap_cjk']);
-    $config->set('content_types', $form_state['values']['content_types']['types']);
     backdrop_set_message(t('The index will be rebuilt.'));
     search_reindex();
   }
