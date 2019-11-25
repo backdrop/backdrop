@@ -149,9 +149,9 @@ function search_schema() {
  */
 function search_install() {
   foreach (node_type_get_types() as $type => $content_type) {
-    $types['types'][$type] = '0';
+    $content_types[$type] = $type;
   }
-  config_set('search.settings', 'content_types', $types);
+  config_set('search.settings', 'content_types', $content_types);
 }
 
 /**
