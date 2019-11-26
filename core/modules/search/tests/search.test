@@ -298,6 +298,8 @@ class SearchPageText extends BackdropWebTestCase {
  */
 class SearchAdvancedSearchForm extends BackdropWebTestCase {
   protected $node;
+  
+  config_set('search.settings', 'content_types', array('page' => 'page'));
 
   function setUp() {
     parent::setUp('search');
