@@ -2468,7 +2468,7 @@ function node_form_search_form_alter(&$form, $form_state) {
     $types = array();
     $search_content_types = config_get('search.settings', 'content_types');
     foreach (node_type_get_types() as $type => $detail) {
-      if ($search_content_types[$type] != FALSE) {
+      if (isset($search_content_types[$type]) && $search_content_types[$type] != FALSE) {
         if (!$detail->settings['hidden_path'] || user_access('view hidden paths') ) {
           $types[$type] = $detail->name;
         }
