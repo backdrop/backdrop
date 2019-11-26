@@ -416,8 +416,9 @@ function search_cron() {
   // to date.
   backdrop_register_shutdown_function('search_update_totals');
 
-  if (isset(config_get('search.settings', 'search_active_modules'))) {
-    foreach (config_get('search.settings', 'search_active_modules') as $module) {
+  $search_active_modules = config_get('search.settings', 'search_active_modules');
+  if (isset($search_active_modules)) {
+    foreach ($search_active_modules as $module) {
       // Update word index
       module_invoke($module, 'update_index');
     }
