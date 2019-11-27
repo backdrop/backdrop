@@ -154,6 +154,14 @@ function number_field_validate($entity_type, $entity, $field, $instance, $langco
  * Implements hook_field_presave().
  */
 function number_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  // Until https://github.com/backdrop/backdrop-issues/issues/3873
+  // is fully addressed.
+  // Workaround to get number fields with empty values working.
+  if (empty($items)) {
+    $field_name = $field['field_name'];
+    $entity->$field_name = array();
+    return;
+  }
   if ($field['type'] == 'number_decimal') {
     // Let PHP round the value to ensure consistent behavior across storage
     // backends.
