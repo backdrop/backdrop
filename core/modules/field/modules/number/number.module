@@ -158,8 +158,7 @@ function number_field_presave($entity_type, $entity, $field, $instance, $langcod
   // is fully addressed.
   // Workaround to get number fields with empty values working.
   if (empty($items)) {
-    $field_name = $field['field_name'];
-    $entity->$field_name = array();
+    $entity->{$field['field_name']} = array();
     return;
   }
   if ($field['type'] == 'number_decimal') {
