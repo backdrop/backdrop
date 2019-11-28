@@ -73,12 +73,13 @@ function search_admin_settings($form, &$form_state) {
     '#options' => $module_options,
     '#description' => t('Several modules expose items to the search system. Use this setting to limit what can be searched.')
   );
+  global $base_url;
   $form['active']['search_default_module'] = array(
     '#title' => t('Default search'),
     '#type' => 'radios',
     '#default_value' => $config->get('search_default_module'),
     '#options' => $module_options,
-    '#description' => t('Only one type of item will be searched by default. This selection will determine what appears at http://www.example.com/search.')
+    '#description' => t('Only one type of item will be searched by default. This selection will determine what appears at <a href="@search">@search</a>.', array('@search' => $base_url.'/search'))
   );
   if (in_array('node', $config->get('search_active_modules'), TRUE)) {
     foreach ($node_type_get_types as $content_type) {
