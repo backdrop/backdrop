@@ -151,10 +151,10 @@ function search_install() {
   // Node types are created in the install profile after search module is enabled,
   // so we preset the initial search configurations here.
    $config = config('search.settings');
-  $config->set('search_minimum_word_size', update_variable_get('minimum_word_size', 3));
-  $config->set('search_overlap_cjk', update_variable_get('overlap_cjk', 1));
-  $config->set('search_cron_limit', update_variable_get('search_cron_limit', 100));
-  $config->set('search_tag_weights', update_variable_get('search_tag_weights', array(
+  $config->set('search_minimum_word_size', 3);
+  $config->set('search_overlap_cjk', 1);
+  $config->set('search_cron_limit', 100);
+  $config->set('search_tag_weights', array(
     'h1' => 25,
     'h2' => 18,
     'h3' => 15,
@@ -167,10 +167,10 @@ function search_install() {
     'strong' => 3,
     'em' => 3,
     'a' => 10
-  )));
-  $config->set('search_active_modules', update_variable_get('search_active_modules', array('node', 'user')));
-  $config->set('search_and_or_limit', update_variable_get('search_and_or_limit', 7));
-  $config->set('search_default_module', update_variable_get('search_default_module', 'node'));
+  ));
+  $config->set('search_active_modules', array('node', 'user'));
+  $config->set('search_and_or_limit', 7);
+  $config->set('search_default_module', 'node');
   $config->set('content_types', array('page' => 'page', 'post' => 'post'));
   $config->save();
 }
