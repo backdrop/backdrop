@@ -150,7 +150,7 @@ function search_schema() {
 function search_install() {
   // Node types are created in the install profile after search module is enabled,
   // so have just hard-code two initial content types in the configuration file.
-  config_set('search.settings', 'content_types', array('page', 'post'));
+  config_set('search.settings', 'content_types', array('page' => 1, 'post' => 1));
 }
 
 /**
