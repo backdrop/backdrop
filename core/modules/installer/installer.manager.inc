@@ -271,14 +271,27 @@ function installer_manager_update_form($form, $form_state, $context) {
   }
 
   if (!empty($projects['manual'])) {
-    $prefix = '<h2>' . t('Manual updates required') . '</h2>';
-    $prefix .= '<p>' . t('Updates of Backdrop CMS core using the web interface are disabled.') . '</p>';
-    $prefix .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org/" title="Home page with download option">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" title="Handbook article">Upgrading Backdrop CMS</a> document online.') . '</p>';
+    $destination = backdrop_get_destination();
+    if (user_access('administer site configuration')) {
+      $form['core_self_updates_tip'] = array(
+        '#type' => 'container',
+        '#attributes' => array('class' => array('messages', 'info')),
+        '#weight' => 7,
+      );
+      $form['core_self_updates_tip']['message'] = array(
+        '#type' => 'markup',
+        '#markup' => t('Backdrop CMS core can be updated using the admin interface. You can enable this feature in the <a href="@link">Available Updates Settings</a> page.', array('@link' => url('admin/  reports/updates/settings', array('fragment' => 'edit-self-update', 'query' => $destination)))),
+      );
+    }
+    $form['manual_updates_help'] = array(
+      '#type' => 'help',
+      '#markup' => '<strong>' . t('Manual core updates') . '</strong>: ' . t('Replace the existing <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org" target="_blank" title="Backdrop CMS home page with download link">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" target="_blank" title="Handbook article">Upgrading Backdrop CMS</a> document online.'),
+      '#weight' => 8,
+    );
     $form['manual_updates'] = array(
       '#type' => 'markup',
       '#markup' => theme('table', array('header' => $headers, 'rows' => $projects['manual'])),
-      '#prefix' => $prefix,
-      '#weight' => 120,
+      '#weight' => 9,
     );
   }
 
