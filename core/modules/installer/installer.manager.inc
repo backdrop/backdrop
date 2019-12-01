@@ -280,7 +280,7 @@ function installer_manager_update_form($form, $form_state, $context) {
       );
       $form['core_self_updates_tip']['message'] = array(
         '#type' => 'markup',
-        '#markup' => t('Backdrop CMS core can be updated using the admin interface. You can enable this feature in the <a href="@link">Available Updates Settings</a> page.', array('@link' => url('admin/  reports/updates/settings', array('fragment' => 'edit-self-update', 'query' => $destination)))),
+        '#markup' => t('Backdrop CMS core can be updated using the admin interface. You can enable this feature in the <a href="@link">Available Updates Settings</a> page.', array('@link' => url('admin/reports/updates/settings', array('fragment' => 'edit-self-update', 'query' => $destination)))),
       );
     }
     $form['manual_updates_help'] = array(
