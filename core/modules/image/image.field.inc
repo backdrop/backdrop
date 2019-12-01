@@ -85,6 +85,10 @@ function image_field_instance_settings_form($field, $instance) {
   // Use the file field instance settings form as a basis.
   $form = file_field_instance_settings_form($field, $instance);
 
+  $form = array(
+    '#element_validate' => array('image_field_settings_form_validate'),
+  );
+
   // Add maximum and minimum resolution settings.
   $max_dimensions = explode('x', $settings['max_dimensions']) + array('', '');
   $max_dimensions[0] = empty($max_dimensions[0]) ? NULL : $max_dimensions[0];
@@ -96,7 +100,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#weight' => 4.1,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The maximum allowed image dimensions expressed as WIDTHxHEIGHT. Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
+    '#description' => t('The maximum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
   );
   $form['max_dimensions']['x'] = array(
     '#type' => 'number',
@@ -127,7 +131,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#weight' => 4.2,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The minimum allowed image dimensions expressed as WIDTHxHEIGHT. Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
+    '#description' => t('The minimum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
   );
   $form['min_dimensions']['x'] = array(
     '#type' => 'number',
@@ -198,6 +202,23 @@ function image_field_instance_settings_form($field, $instance) {
   }
 
   return $form;
+}
+
+/**
+ * #element_validate handler for image_field_instance_settings_form().
+ */
+function image_field_settings_form_validate($element, &$form_state, $complete_form) {
+  $max_dimensions_x = $form_state['input']['instance']['settings']['max_dimensions']['x'];
+  $max_dimensions_y = $form_state['input']['instance']['settings']['max_dimensions']['y'];
+  $min_dimensions_x = $form_state['input']['instance']['settings']['min_dimensions']['x'];
+  $min_dimensions_y = $form_state['input']['instance']['settings']['min_dimensions']['y'];
+
+  // Ensure that min dimentions are not set to be bigger than max dimentions,
+  // but only if max dimentions have been specified. This allows to set min
+  // dimentions, without having to restrict max dimentions.
+  if (!empty($max_dimensions_x) && $min_dimensions_x > $max_dimensions_x || !empty($max_dimensions_y) && $min_dimensions_y > $max_dimensions_y) {
+    form_set_error('', t('The minimum image dimentions cannot be bigger than its maximum dimentions.'));
+  }
 }
 
 /**
