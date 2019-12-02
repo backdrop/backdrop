@@ -282,18 +282,6 @@ function theme_file_upload_help($variables) {
     $max = $upload_validators['file_validate_image_resolution'][0];
     $min = $upload_validators['file_validate_image_resolution'][1];
     // Check for cases where only one dimension is specified.
-    if ($max) {
-      list($width, $height) = explode('x', $max);
-      if (empty($height)) {
-        $descriptions[] = t('Images wider than !width pixels will be scaled down.', array('!width' => '<strong>' . $width . '</strong>'));
-      }
-      elseif (empty($width)) {
-        $descriptions[] = t('Images taller than !height pixels will be scaled down.', array('!height' => '<strong>' . $height . '</strong>'));
-      }
-      else {
-        $descriptions[] = t('Images larger than !size pixels will be scaled down.', array('!size' => '<strong>' . $max . '</strong>'));
-      }
-    }
     if ($min) {
       list($width, $height) = explode('x', $min);
       if (empty($height)) {
@@ -304,6 +292,18 @@ function theme_file_upload_help($variables) {
       }
       else {
         $descriptions[] = t('Images must be at least !min pixels.', array('!min' => '<strong>' . $min . '</strong>'));
+      }
+    }
+    if ($max) {
+      list($width, $height) = explode('x', $max);
+      if (empty($height)) {
+        $descriptions[] = t('Images wider than !width pixels will be scaled down.', array('!width' => '<strong>' . $width . '</strong>'));
+      }
+      elseif (empty($width)) {
+        $descriptions[] = t('Images taller than !height pixels will be scaled down.', array('!height' => '<strong>' . $height . '</strong>'));
+      }
+      else {
+        $descriptions[] = t('Images larger than !size pixels will be scaled down.', array('!size' => '<strong>' . $max . '</strong>'));
       }
     }
   }
