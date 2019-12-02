@@ -213,11 +213,11 @@ function image_field_settings_form_validate($element, &$form_state, $complete_fo
   $min_dimensions_x = $form_state['input']['instance']['settings']['min_dimensions']['x'];
   $min_dimensions_y = $form_state['input']['instance']['settings']['min_dimensions']['y'];
 
-  // Ensure that min dimentions are not set to be bigger than max dimentions,
-  // but only if max dimentions have been specified. This allows to set min
-  // dimentions, without having to restrict max dimentions.
+  // Ensure that min dimensions are not set to be bigger than max dimensions,
+  // but only if max dimensions have been specified. This allows to set min
+  // dimensions, without having to restrict max dimensions.
   if (!empty($max_dimensions_x) && $min_dimensions_x > $max_dimensions_x || !empty($max_dimensions_y) && $min_dimensions_y > $max_dimensions_y) {
-    form_set_error('', t('The minimum image dimentions cannot be bigger than its maximum dimentions.'));
+    form_set_error('instance][settings][min_dimensions', t('The minimum image dimensions cannot be bigger than its maximum dimensions.'));
   }
 }
 
