@@ -11,7 +11,7 @@
   padding: 0 0 10px 10px;
 }
 div.image-widget-data {
-  float: left; /* LTR */
+  /* float: left; /* LTR */ /* - temporarily disable */
   max-width: 100%;
 }
 [dir="rtl"] .image-widget-data {

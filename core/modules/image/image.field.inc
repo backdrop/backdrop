@@ -503,6 +503,29 @@ function image_field_widget_process($element, &$form_state, $form) {
     '#access' => (bool) $item['fid'] && $settings['title_field'],
   );
 
+  // add the additional fieldset and container for optional use of Image Library.
+  // Note: its callback uses an Ajax modal dialog.
+  $element['image_library_fieldset'] = array(
+    '#type' => 'fieldset',
+    '#title' => t("or select from the Image Library"),
+    '#prefix' => '<div class="image-library-option">',
+    '#suffix' => '</div>',
+  );
+
+  $element['image_library_fieldset']['library_modal'] = array(
+    '#type' => 'submit',
+    '#description' => t('Select from Image Library'),
+    '#value' => t('Open library'),
+    '#ajax' => array(
+      'callback' => 'image_field_library_modal_callback',
+      'wrapper' => 'image',
+    ),
+  );
+  $element['container'] = array(
+    '#prefix' => '<div id="image-library-here">',
+    '#suffix' => '</div>',
+  );
+
   return $element;
 }
 
@@ -645,4 +668,23 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
   }
 
   return $element;
+}
+
+/**
+ * Callback for 'image library modal'.
+ *
+ */
+function image_field_library_modal_callback($form, $form_state) {
+  $view = views_embed_view('image_library');
+  $title = 'Select from Image Library';
+  $options = array(
+    'dialogClass' => 'views-ui-dialog',
+    'width' => '90%',
+    'height' => '80%',
+  );
+  $html = '<p>Use this name field to search for part or all of a file name.</p>';
+  $html .= '<div>' . $view . '</div>';
+  $commands = array();
+  $commands[] = ajax_command_open_modal_dialog($title, $html, $options);
+  return array('#type' => 'ajax', '#commands' => $commands);
 }

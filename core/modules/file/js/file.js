@@ -179,3 +179,25 @@ Backdrop.file = Backdrop.file || {
 };
 
 })(jQuery);
+
+/**
+ * Modify display of image upload fields in node add/edit form.
+ */
+Backdrop.behaviors.ImageUploadDialog = {
+  attach: function (context, settings) {
+    // select image fields (there may be more than one).
+    // for each image field, if there is an existing image
+    // hide the select image library option.
+    $imageFields = $(".field-type-image").find(".image-widget");
+    $imageFields.each(function(addLibrary) {
+      var $thisImage = $(this);
+      // check for presence of image file
+      var $thisData = $thisImage.find(".image-widget-data");
+      var $thisSize = $thisData.find("span.file-size").length;
+      if ($thisSize > 0) {
+        // hide 'select from image library' option for this field.
+        $thisImage.find(".image-library-option").hide();
+      }
+    })
+  }
+};
