@@ -56,3 +56,18 @@ div.image-widget-data .text-field {
 .image-detail p span{
   width: 120px;
 }
+.image-library-option legend {
+  font-size: 16px;
+}
+.image-library-option fieldset {
+  margin-top: 5px;
+  padding-top: 2em;
+}
+.image-library-option .fieldset-legend {
+  text-transform: none;
+  font-weight: bold;
+}
+.image-library-option input.form-submit {
+  line-height: 30px;
+  padding: 0 15px;
+}
