@@ -178,12 +178,12 @@ Backdrop.file = Backdrop.file || {
   }
 };
 
-})(jQuery);
+
 
 /**
  * Modify display of image upload fields in node add/edit form.
  */
-Backdrop.behaviors.ImageUploadDialog = {
+Backdrop.behaviors.ImageLibraryOption = {
   attach: function (context, settings) {
     // select image fields (there may be more than one).
     // for each image field, if there is an existing image
@@ -199,5 +199,38 @@ Backdrop.behaviors.ImageUploadDialog = {
         $thisImage.find(".image-library-option").hide();
       }
     })
+
   }
 };
+
+
+/**
+ * Provides toggles for uploading an image, whether by URL or upload.
+ */
+Backdrop.behaviors.editorImageDialog = {
+  attach: function (context, settings) {
+    // Listen for the dialog creation event.
+    $(window).on('dialog:aftercreate', function() {
+      // Add events to images appearing in library.
+      var $galleryContainer = $(".image-library")
+
+      // first process mouseover (hover)
+          .on('mouseover', '.image-library-choose-file', function () {
+            // Get values from view.
+            var $currentImg = $(this).find('img');
+            var $currentImgFid = $currentImg.data('fid');
+            var $currentImgURI = $currentImg.data('file-url');
+            var $relativeImgSrc = Backdrop.relativeUrl($currentImgURI);
+            var $currentImgName = $currentImg.data('filename');
+            var $currentImgSize = $currentImg.data('filesize');
+            // Enter values in placeholders.
+            $galleryContainer.find(".image-fid").text($currentImgFid);
+            $galleryContainer.find(".image-uri").text($relativeImgSrc);
+            // $this.find('[ID*= "library-imagesrc"]').val($relativeImgSrc);
+            $galleryContainer.find(".image-name").text($currentImgName);
+            $galleryContainer.find(".image-size").text($currentImgSize);
+          })
+    })
+  }
+}
+})(jQuery);

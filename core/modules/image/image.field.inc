@@ -521,10 +521,6 @@ function image_field_widget_process($element, &$form_state, $form) {
       'wrapper' => 'image',
     ),
   );
-  $element['container'] = array(
-    '#prefix' => '<div id="image-library-here">',
-    '#suffix' => '</div>',
-  );
 
   return $element;
 }
@@ -678,12 +674,23 @@ function image_field_library_modal_callback($form, $form_state) {
   $view = views_embed_view('image_library');
   $title = 'Select from Image Library';
   $options = array(
-    'dialogClass' => 'views-ui-dialog',
+    'dialogClass' => 'image-library-container',
     'width' => '90%',
-    'height' => '80%',
   );
-  $html = '<p>Use this name field to search for part or all of a file name.</p>';
-  $html .= '<div>' . $view . '</div>';
+  $html = '<div class="image-library">';
+  $html .= '<div class="image-library-view">';
+  $html .= '<p>Use this name field to search for part or all of a file name.</p>';
+  $html .= $view;
+  $html .= '</div><div class="image-detail"><h3>Image details</h3>';
+  // Make placeholders for properties to be added by file.js
+  $html .= '<p>ID: <span class="image-fid"> ......</span></p>';
+  $html .= '<p>Name: <span class="image-name"> ......</span></p>';
+  $html .= '<p>Src: <span class="image-uri"> ......</span></p>';
+  $html .= '<p>Size: <span class="image-size"> ......</span></p>';
+  $html .= '<p><i>Point at an image to reveal its properties.</i></p>';
+  $html .= '<p><i>Click an image to select it.</i></p>';
+  $html .= '</div>'; // end of image-detail.
+  $html .= '</div>';
   $commands = array();
   $commands[] = ajax_command_open_modal_dialog($title, $html, $options);
   return array('#type' => 'ajax', '#commands' => $commands);

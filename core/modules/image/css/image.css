@@ -20,3 +20,39 @@ div.image-widget-data {
 div.image-widget-data .text-field {
   width: auto;
 }
+.image-library-container .backdrop-modal div {
+
+}
+.image-library {
+  display: flex;
+}
+.image-library-view {
+  border: 1px solid #CCC;
+  padding: 10px;
+  display: inline-block;
+}
+.image-library-view p {
+  margin: 0;
+  line-height: 1.1;
+}
+.image-library-view .views-exposed-form {
+  margin: 0;
+  border: 0;
+  font-size: 0.9rem;
+}
+.image-library-view .views-exposed-form input.form-text {
+  padding: 5px;
+}
+.image-library-view .views-exposed-form input.form-submit {
+  line-height: 30px;
+}
+.image-detail {
+  border: 1px solid #CCC;
+  padding: 10px;
+  display: inline-block;
+  min-width: 250px;
+  font-size: 0.8rem;
+}
+.image-detail p span{
+  width: 120px;
+}
