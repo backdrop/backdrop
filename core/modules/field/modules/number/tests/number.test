@@ -216,8 +216,13 @@ class NumberFieldTestCase extends BackdropWebTestCase {
     // Default value should still be NULL.
     $config = config("field.instance.node.{$bundle}.field_{$field_name}");
     $this->assertEqual($config->get('default_value'), NULL, 'Default value of number field is NULL');
-    // @see https://github.com/backdrop/backdrop-issues/issues/3873
-    // Unfortunately it seems impossible to get the Exception in a test case.
+    $node_user = $this->backdropCreateUser(array('bypass node access'));
+    $this->backdropLogin($node_user);
+    // Save the same empty value in a node entity (node needs a title).
+    $edit['title'] = $this->randomName();
+    $this->backdropGet("node/add/{$bundle}");
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->assertResponse(200, 'Post to create new node with empty number value returned 200 OK');
   }
 
 }
