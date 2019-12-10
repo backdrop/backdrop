@@ -645,6 +645,7 @@ function list_field_formatter_settings_form($field, $instance, $view_mode, $form
 function list_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
+  $summary = array();
 
   switch ($display['type']) {
     case 'boolean_yes_no':
