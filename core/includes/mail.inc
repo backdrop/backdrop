@@ -137,7 +137,8 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
     'body'     => array()
   );
 
-  // Build the default headers
+  // Build the default headers. Note that the first letter of each word is
+  // always capitalized. See: https://tools.ietf.org/html/rfc5322
   $headers = array(
     'MIME-Version'              => '1.0',
     'Content-Type'              => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
@@ -151,9 +152,6 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
     $headers['From'] = $headers['Sender'] = $headers['Return-Path'] = $from;
   }
   if ($reply) {
-    // The "To" bit in the "Reply-To" header needs to be capitalized.
-    // See: https://tools.ietf.org/html/rfc5322 and
-    // https://github.com/backdrop/backdrop-issues/issues/4214
     $headers['Reply-To'] = $reply;
   }
   $message['headers'] = $headers;
