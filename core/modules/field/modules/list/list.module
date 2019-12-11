@@ -611,7 +611,12 @@ function list_field_formatter_settings_form($field, $instance, $view_mode, $form
         '#default_value' => $settings['custom_on'],
         '#states' => array(
           'visible' => array(
-            'select[name="fields[' . $field['field_name'] . '][settings_edit_form][settings][format]"],select[name="options[settings][format]"]' => array('value' => 'custom'),
+            array(
+              'select[name="fields[' . $field['field_name'] . '][settings_edit_form][settings][format]"]' => array('value' => 'custom'),
+            ),
+            array(
+              'select[name="options[settings][format]"]' => array('value' => 'custom'),
+            ),
           ),
         ),
       );
@@ -622,7 +627,12 @@ function list_field_formatter_settings_form($field, $instance, $view_mode, $form
         '#default_value' => $settings['custom_off'],
         '#states' => array(
           'visible' => array(
-            'select[name="fields[' . $field['field_name'] . '][settings_edit_form][settings][format]"],select[name="options[settings][format]"]' => array('value' => 'custom'),
+            array(
+              'select[name="fields[' . $field['field_name'] . '][settings_edit_form][settings][format]"]' => array('value' => 'custom'),
+            ),
+            array(
+              'select[name="options[settings][format]"]' => array('value' => 'custom'),
+            ),
           ),
         ),
       );
