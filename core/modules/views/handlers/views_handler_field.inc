@@ -872,6 +872,9 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
               ':input[name="options[alter][alter_text]"]' => array('checked' => TRUE),
             ),
             array(
+              ':input[name="options[alter][text]"]' => array('filled' => TRUE),
+            ),
+            array(
               ':input[name="options[alter][more_link]"]' => array('checked' => TRUE),
             ),
           ),
