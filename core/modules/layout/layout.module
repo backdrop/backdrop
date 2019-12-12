@@ -2056,6 +2056,20 @@ function layout_layout_info() {
 }
 
 /**
+ * Implements hook_layout_block_remove().
+ */
+function layout_layout_block_remove($block) {
+  if (is_a($block, 'BlockHero')) {
+    if (!empty($block->settings['image'])) {
+      $image = file_load($block->settings['image']);
+      if ($image) {
+        file_usage_delete($image, 'layout', 'block', $image->fid);
+      }
+    }
+  }
+}
+
+/**
  * Reset all caches provided by Layout module.
  */
 function layout_flexible_reset_caches() {

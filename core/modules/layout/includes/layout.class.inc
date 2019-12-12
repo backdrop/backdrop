@@ -513,6 +513,12 @@ class Layout {
    *   The UUID of the block being removed.
    */
   function removeBlock($block_uuid) {
+    // Let modules act on block data before it gets removed.
+    foreach (module_implements('layout_block_remove') as $module) {
+      $function = $module . '_layout_block_remove';
+      $function($this->content[$block_uuid]);
+    }
+
     unset($this->content[$block_uuid]);
     foreach ($this->positions as $region => $positions) {
       $key = array_search($block_uuid, $positions);
