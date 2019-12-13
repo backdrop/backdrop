@@ -177,6 +177,12 @@ class Layout {
    * @var LayoutContext[]
    */
   private $contexts;
+  /**
+   * An array of deleted Blocks, keyed by their UUID.
+   *
+   * @var array
+   */
+  var $deleted_blocks = array();
 
   /**
    * Constructor for a Layout class.
@@ -513,6 +519,9 @@ class Layout {
    *   The UUID of the block being removed.
    */
   function removeBlock($block_uuid) {
+    // Keep info about deleted blocks.
+    $this->deleted_blocks[$block_uuid] = $this->content[$block_uuid];
+
     unset($this->content[$block_uuid]);
     foreach ($this->positions as $region => $positions) {
       $key = array_search($block_uuid, $positions);
