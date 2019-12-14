@@ -2059,8 +2059,8 @@ function layout_layout_info() {
  * Implements hook_layout_presave().
  */
 function layout_layout_presave($layout) {
-  if (!empty($layout->deleted_blocks)) {
-    foreach($layout->deleted_blocks as $uuid => $block) {
+  if (!empty($layout->removed_blocks)) {
+    foreach($layout->removed_blocks as $uuid => $block) {
       if (is_a($block, 'BlockHero')) {
         if (!empty($block->settings['image'])) {
           $image = file_load($block->settings['image']);
