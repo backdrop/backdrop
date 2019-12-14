@@ -519,7 +519,7 @@ class Layout {
    *   The UUID of the block being removed.
    */
   function removeBlock($block_uuid) {
-    // Keep info about deleted blocks.
+    // Keep info about removed blocks.
     $this->removed_blocks[$block_uuid] = $this->content[$block_uuid];
 
     unset($this->content[$block_uuid]);
