@@ -580,6 +580,28 @@ class UserLoginTestCase extends UserLoginTestBase {
     $this->backdropPost('user', $edit, t('Log in'));
     $this->assertText(t('Sorry, unrecognized username.'));
   }
+
+  /**
+   * Attempt to login with an invalid array users and passwords.
+   */
+  function testArrayLoginValues() {
+    $edit = array(
+      'name[0]' => $this->randomName(8),
+      'name[1]' => $this->randomName(8),
+      'pass' => $this->randomName(8),
+    );
+    $this->backdropPost('user', $edit, t('Log in'));
+    $this->assertText(t('Sorry, unrecognized username.'));
+
+    $account = $this->backdropCreateUser(array());
+    $edit = array(
+      'name' => $account->name,
+      'pass[0]' => $this->randomName(8),
+      'pass[1]' => $this->randomName(8),
+    );
+    $this->backdropPost('user', $edit, t('Log in'));
+    $this->assertText(t('Sorry, incorrect password.'));
+  }
 }
 
 /**
