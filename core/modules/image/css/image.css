@@ -52,6 +52,7 @@ div.image-widget-data .text-field {
   display: inline-block;
   min-width: 250px;
   font-size: 0.8rem;
+  margin-left: 20px;
 }
 .image-detail p span{
   width: 120px;
@@ -70,4 +71,24 @@ div.image-widget-data .text-field {
 .image-library-option input.form-submit {
   line-height: 30px;
   padding: 0 15px;
+}
+.image-selection-option fieldset {
+  margin-top: 5px;
+  padding-top: 2em;
+}
+.image-selection-option .fieldset-legend {
+  text-transform: none;
+  font-weight: bold;
+  font-size: 16px;
+}
+.image-selection-option input.form-submit {
+  line-height: 30px;
+  padding: 0 15px;
+}
+.image-modal-preview {
+  display: flex;
+}
+.preview-cancel {
+  display: inline;
+  padding-left: 40px;
 }
