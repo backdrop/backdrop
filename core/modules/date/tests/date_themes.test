@@ -106,8 +106,8 @@ class DateThemeTestCase extends BackdropWebTestCase {
 
     // Start and end date on same day, 7 days in future,
     // with timezone identifier, with remaining days.
-    $tz = 'Europe/Moscow';
-    $dateTimeStart = new DateTime('now', new DateTimeZone($tz));
+    $timezone = date_default_timezone();
+    $dateTimeStart = new DateTime('now', new DateTimeZone($timezone));
     $currentHour = $dateTimeStart->format('G');
     if ($currentHour > 22) {
       // Make sure start and end are the same day.
@@ -120,7 +120,7 @@ class DateThemeTestCase extends BackdropWebTestCase {
     $variables['dates']['value']['formatted'] = $dateTimeStart->format('d.m.Y - H:i e');
     $variables['dates']['value']['formatted_date'] = $dateTimeStart->format('d.m.Y');
     $variables['dates']['value']['formatted_time'] = $dateTimeStart->format('H:i');
-    $variables['dates']['value']['formatted_timezone'] = $tz;
+    $variables['dates']['value']['formatted_timezone'] = $timezone;
     $variables['dates']['value']['formatted_iso'] = $dateTimeStart->format('Y-m-d\TH:i:sO');
     $variables['dates']['value2']['formatted'] = $dateTimeEnd->format('d.m.Y - H:i e');
     $variables['dates']['value2']['formatted_date'] = $dateTimeEnd->format('d.m.Y');
