@@ -341,7 +341,7 @@ function theme_file_formatter_table($variables) {
  * Specifically, this returns HTML for a file type name and description.
  */
 function theme_file_type_overview($variables) {
-  return check_plain($variables['name']) . '<div class="description">' . $variables['description'] . '</div>';
+  return check_plain($variables['name']) . '<div class="description">' . filter_xss_admin($variables['description']) . '</div>';
 }
 
 /**
