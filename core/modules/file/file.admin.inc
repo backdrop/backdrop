@@ -28,7 +28,7 @@ function file_list_types_page() {
       array(
         'data' => theme('file_type_overview',
           array(
-            'name' => check_plain($type->name),
+            'name' => $type->name,
             'description' => $type->description,
           )
         ),
