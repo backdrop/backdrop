@@ -35,7 +35,7 @@ function node_add_page() {
       $content[$node_type->type] = array(
         'title' => t($node_type->name),
         'href'=>'node/add/' . $href_url_friendly,
-        'localized_options' => array('html' => TRUE),
+        'localized_options' => array('html' => FALSE),
         'description' => t($node_type->description),
       );
     }
