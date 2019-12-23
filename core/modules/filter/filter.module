@@ -770,15 +770,11 @@ function filter_get_all_text_formats($account = NULL) {
       if (filter_access($format, $account)) {
         // Assemble a list of all formats (even disabled ones) for this user.
         $formats['user'][$account->uid]['all'][$format->format] = $format;
-        // As well as a specific list of only enabled formats.
-        if ($format->status) {
-          $formats['user'][$account->uid]['enabled'][$format->format] = $format;
-        }
       }
     }
   }
 
-  return isset($account) ? $formats['user'][$account->uid] : $formats['all'];
+  return isset($account) ? $formats['user'][$account->uid]['all'] : $formats['all'];
 }
 
 /**
@@ -786,7 +782,6 @@ function filter_get_all_text_formats($account = NULL) {
  */
 function filter_get_enabled_text_formats($account = NULL) {
   $formats = filter_get_all_text_formats($account);
-  //return array_filter($views, 'views_view_is_enabled');
   return array_filter($formats, 'filter_text_format_is_enabled');
 }
 
@@ -795,7 +790,6 @@ function filter_get_enabled_text_formats($account = NULL) {
  */
 function filter_get_disabled_text_formats($account = NULL) {
   $formats = filter_get_all_text_formats($account);
-  //return array_filter($views, 'views_view_is_disabled');
   return array_filter($formats, 'filter_text_format_is_disabled');
 }
 
