@@ -532,7 +532,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     '#default_value' => isset($row_data['container']) ? $row_data['container'] : 'container_fluid',
   );
   $form['region_styles']['container']['container']['#description'] = t('Adds the <code>container</code> class to the row.');
-  $form['region_styles']['container']['container_fluid']['#description'] = t('Adds the <code>container-fluid</code> class to the row (no max-width, but padding).');
+  $form['region_styles']['container']['container_fluid']['#description'] = t('Adds the <code>container-fluid</code> class to the row (no <code>max-width</code>, but <code>padding</code>).');
   $form['region_styles']['container']['no_container']['#description'] = t('No container-related classes added to the row (e.g. for Hero blocks).');
 
   $form['region_styles']['row_classes'] = array(
