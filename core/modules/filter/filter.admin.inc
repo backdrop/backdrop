@@ -13,15 +13,14 @@
  * @see filter_admin_overview_submit()
  */
 function filter_admin_overview($form) {
-  // Overview of all formats.
-  $formats = filter_formats(NULL, TRUE);
+  // Overview of all text formats.
+  $formats = filter_get_all_text_formats();
   $fallback_format = filter_fallback_format();
   $editors = filter_get_editors();
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => t('The order of the text formats here reflects the order in which they will show up in the <em>Editor</em> selector when creating content (subject to the text formats to which a user has access.'),
-    '#weight' => -100,
+    '#markup' => t('The order of the text formats below determines the order in which they will appear in the <em>Editor</em> selector when creating content (depending on permissions for the text formats).'),
   );
 
   $form['#tree'] = TRUE;
@@ -40,25 +39,29 @@ function filter_admin_overview($form) {
 
     $links['configure'] = array(
       'title' => t('Configure'),
-      'href' => "admin/config/content/formats/$id",
+      'href' => 'admin/config/content/formats/' . $id,
+      'weight' => 0,
     );
 
     if ($format->status) {
       $links['disable'] = array(
         'title' => t('Disable'),
-        'href' => "admin/config/content/formats/$id/disable",
+        'href' => 'admin/config/content/formats/' . $id . '/disable',
+        'query' => array(
+          'token' => backdrop_get_token('format-' . $format->format),
+        ),
+        'weight' => 10,
       );
     }
     else {
       $links['enable'] = array(
         'title' => t('Enable'),
-        'href' => "admin/config/content/formats/$id/enable",
+        'href' => 'admin/config/content/formats/' . $id . '/enable',
         'query' => array(
-          'token' => backdrop_get_token('format-' . $format->format)
+          'token' => backdrop_get_token('format-' . $format->format),
         ),
+        'weight' => -10,
       );
-      // Move "Enable" to be the first/default operation (for disabled formats).
-      $links = array_merge(array('enable' => $links['enable']), $links);
     }
 
     if (user_access('synchronize configuration')) {
@@ -69,8 +72,11 @@ function filter_admin_overview($form) {
           'group' => 'Text formats',
           'name' => 'filter.format.' . $id,
         ),
+        'weight' => 5,
       );
     }
+
+    backdrop_sort($links);
 
     // Check whether this is the fallback text format. This format is available
     // to all roles, and cannot be disabled/removed via the admin interface.
@@ -113,7 +119,7 @@ function filter_admin_overview($form) {
  * Form submission handler for filter_admin_overview().
  */
 function filter_admin_overview_submit($form, &$form_state) {
-  $formats = filter_formats();
+  $formats = filter_get_all_text_formats();
   foreach ($form_state['values']['formats'] as $id => $data) {
     if (is_array($data) && isset($data['weight']) && $data['weight'] != $formats[$id]->weight) {
       // Update the weight of this filter.
@@ -425,7 +431,7 @@ function filter_admin_format_form_validate($form, &$form_state) {
   form_set_value($form['format'], $format_format, $form_state);
   form_set_value($form['name'], $format_name, $form_state);
 
-  $formats = filter_formats(NULL, TRUE);
+  $formats = filter_get_all_text_formats();
   foreach ($formats as $format) {
     if ($format->format !== $format_format && $format->name === $format_name) {
       form_set_error('name', t('Text format names must be unique. A format named %name already exists.', array('%name' => $format_name)));
@@ -525,7 +531,7 @@ function filter_admin_enable($format = NULL) {
 }
 
 /**
- * Form constructor for the text format deletion confirmation form.
+ * Confirmation form constructor for disabling text formats.
  *
  * @param $format
  *   An object representing a text format.

@@ -4,7 +4,7 @@
  * Drag and drop table rows with field manipulation.
  *
  * Using the backdrop_add_tabledrag() function, any table with weights or parent
- * relationships may be made into draggable tables. Columns containing a field
+ * relationships may be made into draggable table. Columns containing a field
  * may optionally be hidden, providing a better user experience.
  *
  * Created tableDrag instances may be modified with custom behaviors by
@@ -217,7 +217,9 @@ Backdrop.tableDrag.prototype.hideColumns = function () {
   // Hide weight/parent cells and headers.
   $('.tabledrag-hide', 'table.tabledrag-processed').css('display', 'none');
   // Show TableDrag handles.
-  $('.tabledrag-handle', 'table.tabledrag-processed').css('display', '');
+  $('.tabledrag-handle', 'table.tabledrag-processed').css('display', '').filter('[style=""]').removeAttr('style');
+  // Add a class to the table, to denote TableDrag handles are shown.
+  $('tbody', 'table.tabledrag-processed').addClass('tabledrag-handles-on');
   // Reduce the colspan of any effected multi-span columns.
   $('.tabledrag-has-colspan', 'table.tabledrag-processed').each(function () {
     this.colSpan = this.colSpan - 1;
@@ -240,9 +242,11 @@ Backdrop.tableDrag.prototype.hideColumns = function () {
  */
 Backdrop.tableDrag.prototype.showColumns = function () {
   // Show weight/parent cells and headers.
-  $('.tabledrag-hide', 'table.tabledrag-processed').css('display', '');
+  $('.tabledrag-hide', 'table.tabledrag-processed').css('display', '').filter('[style=""]').removeAttr('style');
   // Hide TableDrag handles.
   $('.tabledrag-handle', 'table.tabledrag-processed').css('display', 'none');
+  // Remove the class that denotes TableDrag handles are shown.
+  $('tbody', 'table.tabledrag-processed').removeClass('tabledrag-handles-on').filter('[class=""]').removeAttr('class');
   // Increase the colspan for any columns where it was previously reduced.
   $('.tabledrag-has-colspan', 'table.tabledrag-processed').each(function () {
     this.colSpan = this.colSpan + 1;

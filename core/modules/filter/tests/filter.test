@@ -243,18 +243,11 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/config/content/formats');
     $this->assertFieldByName("formats[$format_id][weight]", 5, 'Text format weight was retained.');
 
-    // Verify that the disabled section is not shown.
-    $this->assertNoRaw(t('Disabled text formats'), 'Disabled text format section is not shown.');
-
     // Disable the text format.
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
     $this->backdropGet('admin/config/content/formats/' . $format_id . '/disable');
     $this->backdropPost(NULL, array(), t('Disable'));
     $this->assertRaw(t('Disabled text format %name.', array('%name' => $name)), 'Text format has been disabled.');
-    $this->assertRaw(t('Disabled text formats'), 'Disabled text format section is shown.');
-
-    // Verify that the disabled section is shown.
-    $this->assertRaw(t('Disabled text formats'), 'Disabled text format section is shown.');
 
     // Verify that the text format has been disabled. Links exist for it to be
     // enabled/configured...
@@ -756,21 +749,26 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
    * Tests loading of disabled formats.
    */
   function testFormatDisabledAccess() {
-    // Check filter_formats() in sequence loading both enabled and all formats.
     filter_format_disable($this->disallowed_format);
     $this->resetFilterCaches();
 
-    $enabled_formats = filter_formats();
-    $this->assertEqual(count($enabled_formats), 5);
-
-    $all_formats = filter_formats(NULL, TRUE);
+    $all_formats = filter_get_all_text_formats();
     $this->assertEqual(count($all_formats), 6);
 
-    $user_enabled_formats = filter_formats($this->admin_user);
+    $enabled_formats = filter_get_enabled_text_formats();
+    $this->assertEqual(count($enabled_formats), 5);
+
+    $enabled_formats = filter_get_disabled_text_formats();
+    $this->assertEqual(count($enabled_formats), 1);
+
+    $user_all_formats = filter_get_enabled_text_formats($this->admin_user);
+    $this->assertEqual(count($user_all_formats), 4);
+
+    $user_enabled_formats = filter_get_enabled_text_formats($this->admin_user);
     $this->assertEqual(count($user_enabled_formats), 3);
 
-    $user_all_formats = filter_formats($this->admin_user, TRUE);
-    $this->assertEqual(count($user_all_formats), 4);
+    $user_enabled_formats = filter_get_disabled_text_formats($this->admin_user);
+    $this->assertEqual(count($user_enabled_formats), 1);
   }
 
   /**

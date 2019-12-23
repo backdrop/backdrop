@@ -249,12 +249,12 @@ function filter_config_data_validate(Config $config, array $config_info) {
  *   The format ID.
  *
  * @return stdClass|FALSE
- *   A fully-populated text format object or FALSE if the format is not found.
+ *   A fully-populated text format object, or FALSE if the format is not found.
  *
  * @see filter_format_exists()
  */
 function filter_format_load($format_id) {
-  $formats = filter_formats(NULL, TRUE);
+  $formats = filter_get_all_text_formats();
   return isset($formats[$format_id]) ? $formats[$format_id] : FALSE;
 }
 
@@ -689,15 +689,19 @@ function filter_modules_disabled($modules) {
 }
 
 /**
- * Retrieves a list of text formats, ordered by weight.
+ * Retrieves a list of enabled text formats, ordered by weight.
+ */
+function filter_formats($account = NULL) {
+  return filter_get_enabled_text_formats($account);
+}
+
+/**
+ * Retrieves a list of all text formats, ordered by weight.
  *
  * @param User $account
  *   (optional) If provided, only those formats that are allowed for this user
  *   account will be returned. All formats will be returned otherwise. Defaults
  *   to NULL.
- * @param bool $include_disabled
- *   (optional) Whether or not to include disabled formats in the return array.
- *   Defaults to FALSE.
  *
  * @return stdClass[]
  *   An array of text format objects, keyed by the format ID and ordered by
@@ -705,7 +709,7 @@ function filter_modules_disabled($modules) {
  *
  * @see filter_formats_reset()
  */
-function filter_formats($account = NULL, $include_disabled = FALSE) {
+function filter_get_all_text_formats($account = NULL) {
   global $language;
   $formats = &backdrop_static(__FUNCTION__, array());
 
@@ -759,15 +763,6 @@ function filter_formats($account = NULL, $include_disabled = FALSE) {
     }
   }
 
-  // Build a list of enabled formats based on the full list.
-  if (!isset($formats['enabled'])) {
-    foreach ($formats['all'] as $format) {
-      if ($format->status) {
-        $formats['enabled'][$format->format] = $format;
-      }
-    }
-  }
-
   // Build a list of user-specific formats.
   if (isset($account) && !isset($formats['user'][$account->uid])) {
     $formats['user'][$account->uid] = array();
@@ -783,13 +778,39 @@ function filter_formats($account = NULL, $include_disabled = FALSE) {
     }
   }
 
-  $enabled_or_all = $include_disabled ? 'all' : 'enabled';
-  if (isset($account)) {
-    return $formats['user'][$account->uid][$enabled_or_all];
-  }
-  else {
-    return $formats[$enabled_or_all];
-  }
+  return isset($account) ? $formats['user'][$account->uid] : $formats['all'];
+}
+
+/**
+ * Returns an array of all enabled text formats.
+ */
+function filter_get_enabled_text_formats($account = NULL) {
+  $formats = filter_get_all_text_formats($account);
+  //return array_filter($views, 'views_view_is_enabled');
+  return array_filter($formats, 'filter_text_format_is_enabled');
+}
+
+/**
+ * Returns an array of all disabled text formats.
+ */
+function filter_get_disabled_text_formats($account = NULL) {
+  $formats = filter_get_all_text_formats($account);
+  //return array_filter($views, 'views_view_is_disabled');
+  return array_filter($formats, 'filter_text_format_is_disabled');
+}
+
+/**
+ * Returns TRUE if a text format is enabled, FALSE otherwise.
+ */
+function filter_text_format_is_enabled($text_format) {
+  return $text_format->status ? TRUE : FALSE;
+}
+
+/**
+ * Returns TRUE if a text format is disabled, FALSE otherwise.
+ */
+function filter_text_format_is_disabled($text_format) {
+  return $text_format->status ? FALSE : TRUE;
 }
 
 /**
@@ -1239,8 +1260,8 @@ function filter_process_format($element) {
   $element['value']['#type'] = $element['#base_type'];
   $element['value'] += element_info($element['#base_type']);
 
-  // Get a list of enabled formats to which the current user has access.
-  $formats = filter_formats($user);
+  // Get a list of enabled formats, to which the current user has access.
+  $formats = filter_get_enabled_text_formats($user);
 
   // Turn original element into a text format wrapper.
   if (isset($element['#attached'])) {
@@ -2565,5 +2586,3 @@ function _filter_image_align($text) {
 /**
  * @} End of "Standard filters".
  */
-
-
