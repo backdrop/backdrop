@@ -768,13 +768,12 @@ function filter_get_all_text_formats($account = NULL) {
     $formats['user'][$account->uid] = array();
     foreach ($formats['all'] as $format) {
       if (filter_access($format, $account)) {
-        // Assemble a list of all formats (even disabled ones) for this user.
-        $formats['user'][$account->uid]['all'][$format->format] = $format;
+        $formats['user'][$account->uid][$format->format] = $format;
       }
     }
   }
 
-  return isset($account) ? $formats['user'][$account->uid]['all'] : $formats['all'];
+  return isset($account) ? $formats['user'][$account->uid] : $formats['all'];
 }
 
 /**
