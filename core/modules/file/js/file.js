@@ -10,6 +10,9 @@
 
 (function ($) {
 
+  // Placeholder for image field name.
+  var $thisImageFieldName = 'placeholder';
+
 /**
  * Attach behaviors to managed file element upload fields.
  */
@@ -178,4 +181,104 @@ Backdrop.file = Backdrop.file || {
   }
 };
 
+/**
+ * Modify display of image upload fields in node add/edit form.
+ */
+Backdrop.behaviors.ImageLibraryOption = {
+  attach: function (context, settings) {
+    // select image fields (there may be more than one).
+    // for each image field, if there is an existing image
+    // hide the select image library option.
+    var $imageFields = $(".field-type-image");
+    // Check whether this has already been done.
+    if (!$imageFields.find(".image-widget").hasClass("image-library-option-processed")) {
+      // Add a 'processed' class to prevent unnecessary repetition.
+      var $imageWidgets = $imageFields.find(".image-widget").addClass("image-library-option-processed");
+      $imageWidgets.each(function (addLibrary) {
+        // check each image field for existence of an image file.
+        var $thisImage = $(this);
+        var $thisData = $thisImage.find(".image-widget-data");
+        var $thisSize = $thisData.find("span.file-size").length;
+        if ($thisSize > 0) {
+          // if there is an image file
+          // hide 'select from image library' option for this field.
+          $thisImage.find(".image-library-option").hide();
+          // hide image selection option div.
+          $thisImage.find(".image-selection-option").hide();
+        }
+        else {
+          // Add a mouseover function to the 'Open Library' button's wrapper
+          // for this image.
+          $thisImage.find(".fieldset-wrapper").mouseover(function () {
+            // Find the field name for this image and assign to
+            // placeholder for image field name.
+            $thisImageFieldName = $thisImage.find('[name*= "[field_name]"]').val();
+            // Find the FID field and add image field name as a class
+            // in order to select it later.
+            $thisImage.find('input[name$= "[fid]"]').addClass("current-image");
+          });
+        }
+      });
+    }
+  }
+};
+
+
+
+
+  /**
+ * Provide mouseover and click event functions for images in library.
+ */
+Backdrop.behaviors.ImageFieldDialog = {
+  attach: function (context, settings) {
+    // Listen for the dialog creation event.
+    $(window).on('dialog:aftercreate', function() {
+        // Add events to images appearing in library.
+        var $galleryContainer = $(".image-library")
+        // first process mouseover (hover)
+        .on('mouseover', '.image-library-choose-file', function () {
+          // Get values from view.
+          var $currentImg = $(this).find('img');
+          var $currentImgFid = $currentImg.data('fid');
+          var $currentImgURI = $currentImg.data('file-url');
+          var $relativeImgSrc = Backdrop.relativeUrl($currentImgURI);
+          var $currentImgName = $currentImg.data('filename');
+          var $currentImgSize = $currentImg.data('filesize');
+
+          // Enter values in placeholders.
+          $galleryContainer.find(".image-fid").text($currentImgFid);
+          $galleryContainer.find(".image-uri").text($relativeImgSrc);
+          $galleryContainer.find(".image-name").text($currentImgName);
+          $galleryContainer.find(".image-size").text($currentImgSize);
+          $galleryContainer.find(".field-name").text($thisImageFieldName);
+
+        })
+        // Find 'insert' button.
+
+        // now process click (select).
+        .on('click', '.image-library-choose-file', function () {
+          var $selectedImg = $(this).find('img');
+          var absoluteImgSrc = $selectedImg.data('file-url');
+          var $relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
+
+          // $thisField.find('[ID*= "library-imagesrc"]').val($relativeImgSrc);
+          var $modifiedImgSrc = '/files/styles/medium/public' + $relativeImgSrc.substring(6);
+          var $selectedImgFid = $selectedImg.data('fid');
+
+          // Enter fid value in node edit form.
+          // First identify the FID field for the current image.
+
+          var $widgetdata = $(".l-wrapper").find(".image-widget-data");
+          var $relevantFields = $widgetdata.find("input[name$='[fid]']");
+          var $specificField = $relevantFields.find(".current-image");
+          $specificField.val($selectedImgFid);
+          $specificField.removeClass('current-image');
+          var $selectedImgName = $selectedImg.data('filename');
+          var $selectedImgSize = $selectedImg.data('filesize');
+
+          // Close modal. To do.
+        });
+    });
+  }
+};
 })(jQuery);

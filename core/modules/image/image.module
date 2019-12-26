@@ -157,6 +157,12 @@ function image_menu() {
     'access arguments' => array('administer image styles'),
     'file' => 'image.admin.inc',
   );
+  $items['image-file/autocomplete'] = array(
+    'page callback' => '_image_file_autocomplete',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'image.field.inc',
+  );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/media/image-styles/edit/%image_style/add/%image_effect_definition'] = array(
     'page callback' => 'backdrop_goto_deprecated',

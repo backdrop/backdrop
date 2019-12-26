@@ -11,7 +11,7 @@
   padding: 0 0 10px 10px;
 }
 div.image-widget-data {
-  float: left; /* LTR */
+  /* float: left; /* LTR */ /* - temporarily disable */
   max-width: 100%;
 }
 [dir="rtl"] .image-widget-data {
@@ -19,4 +19,76 @@ div.image-widget-data {
 }
 div.image-widget-data .text-field {
   width: auto;
+}
+.image-library-container .backdrop-modal div {
+
+}
+.image-library {
+  display: flex;
+}
+.image-library-view {
+  border: 1px solid #CCC;
+  padding: 10px;
+  display: inline-block;
+}
+.image-library-view p {
+  margin: 0;
+  line-height: 1.1;
+}
+.image-library-view .views-exposed-form {
+  margin: 0;
+  border: 0;
+  font-size: 0.9rem;
+}
+.image-library-view .views-exposed-form input.form-text {
+  padding: 5px;
+}
+.image-library-view .views-exposed-form input.form-submit {
+  line-height: 30px;
+}
+.image-detail {
+  border: 1px solid #CCC;
+  padding: 10px;
+  display: inline-block;
+  min-width: 250px;
+  font-size: 0.8rem;
+  margin-left: 20px;
+}
+.image-detail p span{
+  width: 120px;
+}
+.image-library-option legend {
+  font-size: 16px;
+}
+.image-library-option fieldset {
+  margin-top: 5px;
+  padding-top: 2em;
+}
+.image-library-option .fieldset-legend {
+  text-transform: none;
+  font-weight: bold;
+}
+.image-library-option input.form-submit {
+  line-height: 30px;
+  padding: 0 15px;
+}
+.image-selection-option fieldset {
+  margin-top: 5px;
+  padding-top: 2em;
+}
+.image-selection-option .fieldset-legend {
+  text-transform: none;
+  font-weight: bold;
+  font-size: 16px;
+}
+.image-selection-option input.form-submit {
+  line-height: 30px;
+  padding: 0 15px;
+}
+.image-modal-preview {
+  display: flex;
+}
+.preview-cancel {
+  display: inline;
+  padding-left: 40px;
 }
