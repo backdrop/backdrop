@@ -68,10 +68,6 @@ div.image-widget-data .text-field {
   text-transform: none;
   font-weight: bold;
 }
-.image-library-option input.form-submit {
-  line-height: 30px;
-  padding: 0 15px;
-}
 .image-selection-option fieldset {
   margin-top: 5px;
   padding-top: 2em;
@@ -91,4 +87,34 @@ div.image-widget-data .text-field {
 .preview-cancel {
   display: inline;
   padding-left: 40px;
+}
+.image-upload, .image-reference, .image-select {
+  display: inline;
+  font-weight: bold;
+}
+.image-upload {
+  color: #0000cd;
+}
+.image-upload:hover {
+  color: #0000cd;
+}
+.image-reference:hover {
+  color: #0000cd;
+}
+.image-select:hover {
+  color: #0000cd;
+}
+.image-label {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.image-selection-option {
+  display: none;
+}
+.image-library-option {
+  display: none;
+}
+.image-widget {
+  margin-top: 10px;
 }

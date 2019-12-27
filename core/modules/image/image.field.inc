@@ -442,7 +442,7 @@ function image_field_widget_process($element, &$form_state, $form) {
   // Add for image library.
   $element['image_selection_fieldset'] = array(
     '#type' => 'fieldset',
-    '#title' => t('or enter the first part of a file name or a full URL'),
+    '#title' => t('Enter the first part of a file name or a full URL'),
     '#prefix' => '<div class="image-selection-option">',
     '#suffix' => '</div>',
   );
@@ -469,9 +469,8 @@ function image_field_widget_process($element, &$form_state, $form) {
     '#description' => t('Select this file'),
     '#value' => t('Preview'),
     '#name' => 'op_' . $element['#field_name'],
-    '#submit' => array('image_field_file_submit'),
     '#ajax' => array(
-      'callback' => 'image_field_image_preview_open',
+      'callback' => 'image_field_ajax_form_open_dialog',
       'wrapper' => 'image_preview_wrapper' ,
     ),
   );
@@ -542,7 +541,7 @@ function image_field_widget_process($element, &$form_state, $form) {
   // Note: its callback uses an Ajax modal dialog.
   $element['image_library_fieldset'] = array(
     '#type' => 'fieldset',
-    '#title' => t("or select by thumbnail from the Image Library"),
+    '#title' => t("Select by thumbnail from the Image Library"),
     '#prefix' => '<div class="image-library-option">',
     '#suffix' => '</div>',
   );
@@ -717,7 +716,7 @@ function image_field_library_modal_open($form, $form_state) {
   $html .= '<p>Use this name field to search for part or all of a file name.</p>';
   $html .= $view;
   $html .= '<div class="ui-dialog-buttonset form-actions">';
-  $html .= '<button type="button" class="button-primary form-submit ajax-processed file-disable-fields-processed ui-button ui-corner-all ui-widget">Insert</button>';
+  $html .= '<button type="button" class="button-primary form-submit ajax-processed file-disable-fields-processed ui-button ui-corner-all ui-widget">Confirm</button>';
   $html .= '</div></div><div class="image-detail"><h3>Image details</h3>';
   // Make placeholders for properties to be added by file.js
   $html .= '<p>ID: <span class="image-fid"> ......</span></p>';
@@ -739,19 +738,52 @@ function image_field_library_modal_open($form, $form_state) {
  * Callback for 'image preview modal'.
  *
  */
-function image_field_image_preview_open($form, $form_state) {
-  $fieldname = $form_state['clicked_button']['#attributes']['fieldname'];
+function _image_field_image_details($form, $form_state) {
+  // FID is not yet set for the image to be selected
+  // so find the image field identity from form state
+  // item prefixed 'op_' then use it to find value input for imagesrc.
+  // dpm($form_state,'Form state IFI 747');
+  $field_name = '';
+  foreach ($form_state['values'] as $key => $value) {
+    $key_prefix = substr($key,0, 3);
+    if ($key_prefix == 'op_') {
+      $field_name = substr($key, 3);
+    }
+  }
+
+  // In some cases there will be more than one image in this field.
+  // The file being selected will not have its fid set in the datatable yet.
+  $imageHolders = $form_state['values'][$field_name]['und'];
+  // dpm($imageHolders,'Image holders');
+  foreach ($imageHolders as $rowNumber => $fieldset) {
+    $thisFID = $fieldset['fid'];
+    if ($thisFID == 0){
+      $rowFound = $rowNumber;
+    }
+  }
+  $src = $form_state['values'][$field_name]['und'][$rowFound]['image_selection_fieldset']['imagesrc'];
+  // dpm($src,'SRC');
+
+  // Now find this file name in uri field to get fid.
+  if (!empty($src)) {
+    $results = db_select('file_managed')
+      ->fields('file_managed', array('fid', 'uri', 'filesize'))
+      ->condition('uri', '%' . $src, 'LIKE')
+      ->orderBy('fid', 'DESC')
+      ->execute();
+
+    foreach ($results as $found) {
+      // dpm($found,'FOUND');
+      $result = $found->fid;
+    }
+    $fid = $found->fid;
+    $uri = $found->uri;
+    $filesize = $found->filesize;
+    $fieldname = $field_name;
+    $filename = $src;
+  }
+  // $fieldname = $form_state['clicked_button']['#attributes']['fieldname'];
   $title = 'Image detail';
-  $options = array(
-    'dialogClass' => 'image-preview-container',
-    'width' => '50%',
-  );
-  $image_details = $form_state['values']['#attributes'];
-  $fid = $image_details['fid'];
-  $uri = $image_details['uri'];
-  $filesize = $image_details['filesize'];
-  $filename = $image_details['filename'];
-  $fieldname = $image_details['fieldname'];
   $imageinfo = image_get_info($uri);
   if (is_array($imageinfo)) {
     $imagewidth= $imageinfo['width'];
@@ -765,23 +797,19 @@ function image_field_image_preview_open($form, $form_state) {
   $html .= "<p><img src='/files/styles/medium/public/";
   $html .= "$filename' /></p>";
   $html .= '<div class="ui-dialog-buttonset form-actions">';
-  $html .= '<button type="button" class="button-primary form-submit ajax-processed file-disable-fields-processed ui-button ui-corner-all ui-widget">Confirm</button>';
-  $html .= '<p class="preview-cancel">Cancel</p>';
   $html .= '</div></div>';
   $html .= '<div class="image-detail"><h3>Image details</h3>';
   // Make placeholders for properties to be added by file.js
-  $html .= "<p>ID: $fid </p>";
+  $html .= "<p>ID: <span class='img-fid'>$fid</span></p>";
   $html .= "<p>Name: $filename</p>";
-  $html .= "<p>Src: $uri</p>";
+  $html .= "<p>Src: <span class='img-src'>$uri</span></p>";
   $html .= "<p>Size: $filesize</p>";
   $html .= "<p>Width: $imagewidth px</p>";
   $html .= "<p>Height: $imageheight px</p>";
   $html .= "<p>Field name: $fieldname</p>";
   $html .= '</div>'; // end of image-detail.
   $html .= '</div>';
-  $commands = array();
-  $commands[] = ajax_command_open_modal_dialog($title, $html, $options);
-  return array('#type' => 'ajax', '#commands' => $commands);
+  return $html;
 }
 
 
@@ -858,48 +886,139 @@ function _image_file_autocomplete($string = '')
   backdrop_json_output($matches);
 }
 
+
+
+function image_field_image_confirmation_form() {
+  $form['actions'] = array('#type' => 'actions');
+
+  $form['src'] = array(
+    '#type' => 'textfield',
+    '#title' => t('File src to save'),
+    '#prefix' => '<div class="field-src">',
+    '#suffix' => '</div>',
+    '#weight' => -2,
+  );
+  $form['fid'] = array(
+    '#type' => 'textfield',
+    '#title' => t('File id'),
+    '#prefix' => '<div class="field-id">',
+    '#suffix' => '</div>',
+    '#weight' => -3,
+  );
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('A title for this image'),
+    '#weight' => -4,
+  );
+  $form['alt'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Alternate text for this image'),
+    '#weight' => -5,
+  );
+
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save and close'),
+    '#ajax' => array(
+      'callback' => 'image_field_confirm',
+    ),
+  );
+
+  $form['actions']['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#validate' => array(),
+    '#submit' => array(
+      'image_field_confirm_cancel',
+    ),
+    '#ajax' => array(
+      'callback' => 'image_field_confirm_cancel_ajax',
+    ),
+  );
+
+  return $form;
+}
+
+
 /**
- * Submit handler for image file selection.
+ * AJAX handler that opens a form in a dialog.
  *
  */
-function image_field_file_submit($form, &$form_state) {
-    // FID is not yet set for the image to be selected
-    // so find the image field identity from form state
-    // item prefixed 'op_' then use it to find value input for imagesrc.
-    $field_name = '';
-    foreach ($form_state['values'] as $key => $value) {
-      $key_prefix = substr($key,0, 3);
-      if ($key_prefix == 'op_') {
-        $field_name = substr($key, 3);
+function image_field_ajax_form_open_dialog($form, &$form_state) {
+  // Ensure that no errors have occurred before opening the dialog.
+  if (form_get_errors()) {
+    $commands[] = ajax_command_remove('#messages');
+    $commands[] = ajax_command_html('#image-field-messages', theme('status_messages'));
+  }
+  else {
+    // Get the dialog path as set in the redirect.
+    // $dialog_path = $form_state['redirect'];
+    $dialog_path = 'image-file/confirmation';
+    $page_callback_result = NULL;
+    if ($router_item = menu_get_item($dialog_path)) {
+      if ($router_item['access']) {
+        if ($router_item['include_file']) {
+          require_once BACKDROP_ROOT . '/' . $router_item['include_file'];
+        }
+        $page_callback_result = call_user_func_array($router_item['page_callback'], $router_item['page_arguments']);
       }
     }
-
-    // In some cases there will be more than one image in this field.
-    // The file being selected will not have its fid set in the datatable yet.
-    $imageHolders = $form_state['values'][$field_name]['und'];
-    foreach ($imageHolders as $rowNumber => $fieldset) {
-      $thisFID = $fieldset['fid'];
-      if ($thisFID == 0){
-        $rowFound = $rowNumber;
-      }
+    $imageDetails = _image_field_image_details($form,$form_state);
+    $html = $imageDetails;
+    // now add form components to modal.
+    $html .= is_string($page_callback_result) ? $page_callback_result : backdrop_render($page_callback_result);
+    if (isset($page_callback_result['#title'])) {
+      $title = $page_callback_result['#title'];
     }
-    $src = $form_state['values'][$field_name]['und'][$rowFound]['image_selection_fieldset']['imagesrc'];
-
-    // Now find this file name in uri field to get fid.
-    if (!empty($src)) {
-      $results = db_select('file_managed')
-        ->fields('file_managed', array('fid', 'uri', 'filesize'))
-        ->condition('uri', '%' . $src, 'LIKE')
-        ->orderBy('fid', 'DESC')
-        ->execute();
-
-      foreach ($results as $found) {
-        $result = $found->fid;
-      }
-      $form_state['values']['#attributes']['fid'] = $found->fid;
-      $form_state['values']['#attributes']['uri'] = $found->uri;
-      $form_state['values']['#attributes']['filesize'] = $found->filesize;
-      $form_state['values']['#attributes']['fieldname'] = $field_name;
-      $form_state['values']['#attributes']['filename'] = $src;
+    else {
+      $title = $router_item['title'];
     }
+    $options = array(
+      'dialogClass' => 'image-preview-container',
+      'width' => '50%',
+    );
+    $commands[] = ajax_command_open_modal_dialog($title, $html, $options);
+  }
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+}
+
+
+
+/**
+ * Submit handler that cancels the confirm image form.
+ *
+ */
+
+function image_field_confirm_cancel($form, $form_state) {
+  watchdog('Image field', 'Cancel');
+  $form_state['redirect'] = 'node/2/edit?destination=admin/content';
+}
+
+
+/**
+ * AJAX handler that cancels the confirm image form.
+ *
+ */
+
+function image_field_confirm_cancel_ajax($form, $form_state) {
+  watchdog('Image field', 'Cancel ajax');
+  $commands = array();
+  $commands[] = ajax_command_close_modal_dialog();
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
+}
+
+/**
+ * AJAX handler that saves the image field URL and closes the confirm image form.
+ *
+ */
+function image_field_ajax_form_save_image_dialog($form, &$form_state) {
+
 }

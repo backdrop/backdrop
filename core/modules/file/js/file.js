@@ -217,24 +217,53 @@ Backdrop.behaviors.ImageLibraryOption = {
             // in order to select it later.
             $thisImage.find('input[name$= "[fid]"]').addClass("current-image");
           });
+          var $thisItem = $thisImage.parent().find("Label");
+          var $selection = $thisItem.parent();
+          var $fieldLabelText = $thisItem.text();
+          var $newLabelText = '<div class="image-label">Add ';
+          var $addText = '<div class="image-upload">Upload image | </div><div class="image-reference">Reference existing | </div><div class="image-select">Select from image library</div>';
+          $newLabelText = $newLabelText.concat($fieldLabelText,'</div>',$addText);
+          $thisItem.replaceWith($newLabelText);
+          // Add on click functions to the selection options.
+          $selection.find(".image-upload").click(function () {
+            $(".image-selection-option").hide();
+            $(".form-file").show();
+            $(".image-library-option").hide();
+            $(".image-upload").css({"color" : "mediumblue"});
+            $(".image-reference").css({"color" : "black"});
+            $(".image-select").css({"color" : "black"});
+          });
+          $selection.find(".image-reference").click(function () {
+            $(".image-selection-option").show();
+            $(".form-file").hide();
+            $(".image-library-option").hide();
+            $(".image-upload").css({"color" : "black"});
+            $(".image-reference").css({"color" : "mediumblue"});
+            $(".image-select").css({"color" : "black"});
+          });
+          $selection.find(".image-select").click(function () {
+            $(".image-selection-option").hide();
+            $(".form-file").hide();
+            $(".image-library-option").show();
+            $(".image-upload").css({"color" : "black"});
+            $(".image-reference").css({"color" : "black"});
+            $(".image-select").css({"color" : "mediumblue"});
+          });
         }
       });
     }
   }
 };
 
-
-
-
   /**
  * Provide mouseover and click event functions for images in library.
  */
 Backdrop.behaviors.ImageFieldDialog = {
   attach: function (context, settings) {
-    // Listen for the dialog creation event.
+    // Listen for a dialog creation event.
     $(window).on('dialog:aftercreate', function() {
-        // Add events to images appearing in library.
-        var $galleryContainer = $(".image-library")
+      // Add events to images appearing in library.
+      var $galleryContainer = $(".image-library")
         // first process mouseover (hover)
         .on('mouseover', '.image-library-choose-file', function () {
           // Get values from view.
@@ -258,11 +287,6 @@ Backdrop.behaviors.ImageFieldDialog = {
         // now process click (select).
         .on('click', '.image-library-choose-file', function () {
           var $selectedImg = $(this).find('img');
-          var absoluteImgSrc = $selectedImg.data('file-url');
-          var $relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
-
-          // $thisField.find('[ID*= "library-imagesrc"]').val($relativeImgSrc);
-          var $modifiedImgSrc = '/files/styles/medium/public' + $relativeImgSrc.substring(6);
           var $selectedImgFid = $selectedImg.data('fid');
 
           // Enter fid value in node edit form.
@@ -273,12 +297,26 @@ Backdrop.behaviors.ImageFieldDialog = {
           var $specificField = $relevantFields.find(".current-image");
           $specificField.val($selectedImgFid);
           $specificField.removeClass('current-image');
-          var $selectedImgName = $selectedImg.data('filename');
-          var $selectedImgSize = $selectedImg.data('filesize');
 
-          // Close modal. To do.
         });
     });
   }
 };
+
+  /**
+   * Set field values in image confirmation form.
+   */
+  Backdrop.behaviors.ImageConfirmation = {
+    attach: function (context, settings) {
+      // Listen for a dialog creation event.
+      $(window).on('dialog:aftercreate', function() {
+        var $imageDetails = $(".image-preview-container");
+        var $imageFID = $imageDetails.find("span.img-fid").text();
+        var $imageSRC = $imageDetails.find("span.img-src").text();
+        $imageDetails.find(".field-id").find("input").val($imageFID);
+        $imageDetails.find(".field-src").find("input").val($imageSRC);
+
+      });
+    }
+  };
 })(jQuery);
