@@ -1233,6 +1233,9 @@ div.filter-options select {
 .block-dashboard-updates .block-title {
   background-image: url('../images/info-circle--black--64.png');
 }
+.block-dashboard-news .block-title {
+  background-image: url('../images/bell--black--64.png');
+}
 
 /* admin/appearance */
 #system-themes-page h2 {
