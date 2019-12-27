@@ -182,54 +182,9 @@ Backdrop.file = Backdrop.file || {
 };
 
 /**
- * Modify display of image upload fields in node add/edit form.
+ * Provide mouseover and click event functions for images in the file browser.
  */
-Backdrop.behaviors.ImageLibraryOption = {
-  attach: function (context, settings) {
-    // select image fields (there may be more than one).
-    // for each image field, if there is an existing image
-    // hide the select image library option.
-    var $imageFields = $(".field-type-image");
-    // Check whether this has already been done.
-    if (!$imageFields.find(".image-widget").hasClass("image-library-option-processed")) {
-      // Add a 'processed' class to prevent unnecessary repetition.
-      var $imageWidgets = $imageFields.find(".image-widget").addClass("image-library-option-processed");
-      $imageWidgets.each(function (addLibrary) {
-        // check each image field for existence of an image file.
-        var $thisImage = $(this);
-        var $thisData = $thisImage.find(".image-widget-data");
-        var $thisSize = $thisData.find("span.file-size").length;
-        if ($thisSize > 0) {
-          // if there is an image file
-          // hide 'select from image library' option for this field.
-          $thisImage.find(".image-library-option").hide();
-          // hide image selection option div.
-          $thisImage.find(".image-selection-option").hide();
-        }
-        else {
-          // Add a mouseover function to the 'Open Library' button's wrapper
-          // for this image.
-          $thisImage.find(".fieldset-wrapper").mouseover(function () {
-            // Find the field name for this image and assign to
-            // placeholder for image field name.
-            $thisImageFieldName = $thisImage.find('[name*= "[field_name]"]').val();
-            // Find the FID field and add image field name as a class
-            // in order to select it later.
-            $thisImage.find('input[name$= "[fid]"]').addClass("current-image");
-          });
-        }
-      });
-    }
-  }
-};
-
-
-
-
-  /**
- * Provide mouseover and click event functions for images in library.
- */
-Backdrop.behaviors.ImageFieldDialog = {
+Backdrop.behaviors.fileBrowserDialog = {
   attach: function (context, settings) {
     // Listen for the dialog creation event.
     $(window).on('dialog:aftercreate', function() {
@@ -262,22 +217,23 @@ Backdrop.behaviors.ImageFieldDialog = {
           var $relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
 
           // $thisField.find('[ID*= "library-imagesrc"]').val($relativeImgSrc);
-          var $modifiedImgSrc = '/files/styles/medium/public' + $relativeImgSrc.substring(6);
-          var $selectedImgFid = $selectedImg.data('fid');
-
-          // Enter fid value in node edit form.
-          // First identify the FID field for the current image.
-
-          var $widgetdata = $(".l-wrapper").find(".image-widget-data");
-          var $relevantFields = $widgetdata.find("input[name$='[fid]']");
-          var $specificField = $relevantFields.find(".current-image");
-          $specificField.val($selectedImgFid);
-          $specificField.removeClass('current-image');
-          var $selectedImgName = $selectedImg.data('filename');
-          var $selectedImgSize = $selectedImg.data('filesize');
-
-          // Close modal. To do.
+          var selectedFid = $selectedImg.data('fid');
+          // Set the FID in the modal submit form.
+          $('form.file-managed-file-browser-form [name="fid"]').val(selectedFid);
         });
+    });
+    // Listen for the dialog creation event.
+    $(window).on('dialog:afterclose', function() {
+      var selectedFid = Backdrop.settings.file.browser.selectedFid;
+      var $fidElement = $(Backdrop.settings.file.browser.currentFidElement);
+
+      $fidElement.val(selectedFid);
+      $fidElement
+        .closest('.form-type-managed-file')
+        .find('.file-upload-button')
+        .trigger('mousedown')
+        .trigger('click')
+        .trigger('mouseup');
     });
   }
 };
