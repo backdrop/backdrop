@@ -280,24 +280,19 @@ Backdrop.behaviors.ImageFieldDialog = {
           $galleryContainer.find(".image-name").text($currentImgName);
           $galleryContainer.find(".image-size").text($currentImgSize);
           $galleryContainer.find(".field-name").text($thisImageFieldName);
-
         })
-        // Find 'insert' button.
 
         // now process click (select).
         .on('click', '.image-library-choose-file', function () {
-          var $selectedImg = $(this).find('img');
-          var $selectedImgFid = $selectedImg.data('fid');
-
-          // Enter fid value in node edit form.
-          // First identify the FID field for the current image.
+          // Enter src value in image confirmation form.
+          // Get the value for the current image.
+          $thisSrc = $galleryContainer.find(".image-uri").text();
 
           var $widgetdata = $(".l-wrapper").find(".image-widget-data");
           var $relevantFields = $widgetdata.find("input[name$='[fid]']");
           var $specificField = $relevantFields.find(".current-image");
-          $specificField.val($selectedImgFid);
           $specificField.removeClass('current-image');
-
+          $galleryContainer.find(".field-src").find("input").val($thisSrc);
         });
     });
   }
@@ -315,7 +310,6 @@ Backdrop.behaviors.ImageFieldDialog = {
         var $imageSRC = $imageDetails.find("span.img-src").text();
         $imageDetails.find(".field-id").find("input").val($imageFID);
         $imageDetails.find(".field-src").find("input").val($imageSRC);
-
       });
     }
   };
