@@ -178,11 +178,10 @@ function image_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'image.field.inc',
   );
-  $items['image-file/confirmation2'] = array(
+  $items['image-field/library-confirmation'] = array(
     'title' => 'Confirm image selection',
-    'page callback' => 'image_field_image_confirmation_form',
+    'page callback' => 'image_field_library_confirmation_form',
     'access arguments' => array('access content'),
-
     'type' => MENU_CALLBACK,
     'file' => 'image.field.inc',
   );
