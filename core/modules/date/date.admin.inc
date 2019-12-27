@@ -400,22 +400,22 @@ function _date_field_widget_settings_form($field, $instance) {
       'within' => t('Within'),
       'none' => t('None'),
     );
-    $description = t("The location of date part labels, like 'Year', 'Month', or 'Day' . 'Above' displays the label as titles above each date part. 'Within' inserts the label as the first option in the select list and in blank textfields. 'None' doesn't visually label any of the date parts.");
   }
   else {
     $options = array(
-      'none' => t('Hidden'),
       'above' => t('Above'),
+      'none' => t('Hidden'),
     );
-    $description = t('The location of date part labels, like "Year", "Month", or "Day" . "Above" displays the label as titles above each date part. "Hidden" doesn\'t visually label any of the date parts.');
   }
   $form['advanced']['label_position'] = array(
     '#type' => 'radios',
     '#options' => $options,
     '#default_value' => $settings['label_position'],
     '#title' => t('Position of date part labels'),
-    '#description' => $description,
   );
+  $form['advanced']['label_position']['above']['#description'] = t("Displays the label as titles above each date part (like 'Year', 'Month', or 'Day').");
+  $form['advanced']['label_position']['within']['#description'] = t("Inserts the label as the first option in the select list and in blank textfields.");
+  $form['advanced']['label_position']['none']['#description'] = t("Doesn't visually label any of the date parts.");
   $form['advanced']['text_parts'] = array(
     '#theme' => $widget['type'] == 'date_select' ? 'date_text_parts' : '',
   );
@@ -440,7 +440,7 @@ function _date_field_widget_settings_form($field, $instance) {
     '#type' => 'checkbox',
     '#title' => t('Exclude wrapping fieldset'),
     '#default_value' => !empty($settings['no_fieldset']),
-    '#description' => t('If using simple inputs such a a single textfield or the date popup, omitting the fieldset may provide simpler styling.'),
+    '#description' => t('Simplify styling when using simple inputs, such as a single text field or the date popup.'),
   );
 
   $context = array(
@@ -557,7 +557,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
   $form['cache_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Cache dates'),
-    '#description' => t('Date objects can be created and cached as date fields are loaded rather than when they are displayed to improve performance.'),
+    '#description' => t('Create and cache date objects when date fields are being loaded, rather than when they are being displayed. This improves performance.'),
     '#default_value' => !empty($settings['cache_enabled']),
     '#weight' => 10,
   );
