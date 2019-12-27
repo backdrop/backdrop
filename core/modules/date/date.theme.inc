@@ -252,9 +252,11 @@ function theme_date_display_combination($variables) {
   // Check remaining days.
   $show_remaining_days = '';
   if (!empty($variables['show_remaining_days'])) {
-    $remaining_days = floor((strtotime($variables['dates']['value']['formatted_iso'])
-    - strtotime('now')) / (24 * 3600));
-
+    // Create a date object from the timestamp.
+    $date = new DateTime('@' . strtotime($variables['dates']['value']['formatted_iso']));
+    // Using date_diff()->days allows to get the days diff, without having to
+    // use complex math to calculate it. It also takes into account leap years.
+    $remaining_days = date_diff($date, date_now())->days;
     // Show remaining days only for future events.
     if ($remaining_days >= 0) {
       $show_remaining_days = theme('date_display_remaining', array(
@@ -454,9 +456,11 @@ function theme_date_popup($variables) {
  */
 function theme_date_display_remaining($variables) {
   $remaining_days = $variables['remaining_days'];
-  $show_remaining_text = t('The upcoming date less then 1 day.');
   if ($remaining_days) {
-    $show_remaining_text = format_plural($remaining_days, 'To event remaining 1 day', 'To event remaining @count days');
+    $show_remaining_text = format_plural($remaining_days, '1 day remaining to event.', '@count days remaining to event.');
+  }
+  else {
+    $show_remaining_text = t('Less then 1 day remaining to event.');
   }
 
   return '<div class="date-display-remaining"><span class="date-display-remaining">' . $show_remaining_text . '</span></div>';
