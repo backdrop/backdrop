@@ -41,8 +41,8 @@ class DashboardNewsBlock extends Block {
     $feed = backdrop_http_request('https://backdropcms.org/api/notifications');
     $links = array();
     if ($feed->code === '200') {
-      $news = json_decode($feed->data);
-      foreach ($news->nodes as $key => $node) {
+      $news = json_decode($feed->api);
+      foreach ($news->notifications as $key => $notification) {
         $links[] = l(
             $notifications->notification->title,
             $notifications->notification->url
