@@ -220,7 +220,7 @@ Backdrop.behaviors.ImageLibraryOption = {
           var $thisItem = $thisImage.parent().find("Label");
           var $selection = $thisItem.parent();
           var $fieldLabelText = $thisItem.text();
-          var $newLabelText = '<div class="image-label">Add ';
+          var $newLabelText = '<div class="image-label">';
           var $addText = '<div class="image-upload">Upload image | </div><div class="image-reference">Reference existing | </div><div class="image-select">Select from image library</div>';
           $newLabelText = $newLabelText.concat($fieldLabelText,'</div>',$addText);
           $thisItem.replaceWith($newLabelText);
