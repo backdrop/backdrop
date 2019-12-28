@@ -581,15 +581,15 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
         $result[$hook] += array_intersect_key($cache[$hook], $hook_defaults);
       }
 
-      // The following apply only to theming hooks implemented as templates.
+      // The following apply only to theme hooks implemented as templates.
       if (isset($info['template'])) {
-        // Prepend the current theming path when none is set.
+        // Prepend the current theme path when none is set.
         if (!isset($info['path'])) {
           $result[$hook]['template'] = $path . '/' . $info['template'];
         }
       }
 
-      // Allow variable preprocessors for all theming hooks, whether the hook is
+      // Allow variable preprocessors for all theme hooks, whether the hook is
       // implemented as a template or as a function.
       // Check for existing variable preprocessors. Ensure arrayness.
       if (!isset($info['preprocess functions']) || !is_array($info['preprocess functions'])) {
@@ -619,7 +619,7 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
         }
 
         foreach ($prefixes as $prefix) {
-          // Only use non-hook-specific variable preprocessors for theming hooks
+          // Only use non-hook-specific variable preprocessors for theme hooks
           // implemented as templates. See theme().
           if (isset($info['template']) && function_exists($prefix . '_preprocess')) {
             $info['preprocess functions'][] = $prefix . '_preprocess';
@@ -655,7 +655,7 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
         if (!isset($info['preprocess functions'])) {
           $cache[$hook]['preprocess functions'] = array();
         }
-        // Only use non-hook-specific variable preprocessors for theming hooks
+        // Only use non-hook-specific variable preprocessors for theme hooks
         // implemented as templates. See theme().
         if (isset($info['template']) && function_exists($name . '_preprocess')) {
           $cache[$hook]['preprocess functions'][] = $name . '_preprocess';
@@ -1214,12 +1214,14 @@ function theme($hook, $variables = array()) {
 /**
  * Returns the path to the current themed element.
  *
- * It can point to the active theme or the module handling a themed
- * implementation. For example, when invoked within the scope of a theming call
- * it will depend on where the theming function is handled. If implemented from
- * a module, it will point to the module. If implemented from the active theme,
- * it will point to the active theme. When called outside the scope of a
- * theming call, it will always point to the active theme.
+ * It can point to the active theme or the module that handles the theme
+ * implementation. For example:
+ * - When invoked within the scope of a theme function it will depend on where
+ *   where that theme function is being handled.
+ * - If implemented from a module, it will point to the module.
+ * - If implemented from the active theme, it will point to the active theme.
+ * - When called outside the scope of a theme function call, it will always
+ *   point to the active theme.
  */
 function path_to_theme() {
   global $theme_path;
@@ -2661,7 +2663,9 @@ function template_preprocess_header(&$variables) {
  */
 function template_preprocess_page(&$variables) {
   // Compile a list of classes that are going to be applied to the body element.
-  // This allows advanced theming based on context (home page, node of certain type, etc.).
+  // This allows for easy CSS overrides based on context (home page, node of
+  // certain type, etc.).
+
   // Add a class that tells us whether we're on the front page or not.
   if ($variables['is_front']) {
     $variables['classes'][] = 'front';
@@ -2692,12 +2696,12 @@ function template_preprocess_page(&$variables) {
   if (backdrop_get_title()) {
     $head_title = array(
       'title' => strip_tags(backdrop_get_title()),
-      'name' => check_plain($site_config->get('site_name')),
+      'name' => check_plain($site_config->getTranslated('site_name')),
     );
   }
   else {
-    $head_title = array('name' => check_plain($site_config->get('site_name')));
-    if ($slogan = $site_config->get('site_slogan')) {
+    $head_title = array('name' => check_plain($site_config->getTranslated('site_name')));
+    if ($slogan = $site_config->getTranslated('site_slogan')) {
       $head_title['slogan'] = check_plain($slogan);
     }
   }
@@ -2792,8 +2796,8 @@ function template_preprocess_maintenance_page(&$variables) {
   // Load site config if available, fallback to the default.
   try {
     $site_config = config('system.core');
-    $site_name = filter_xss_admin($site_config->get('site_name'));
-    $site_slogan = filter_xss_admin($site_config->get('site_slogan'));
+    $site_name = filter_xss_admin($site_config->getTranslated('site_name'));
+    $site_slogan = filter_xss_admin($site_config->getTranslated('site_slogan'));
   }
   catch (ConfigException $e) {
     $site_name = 'Backdrop CMS';

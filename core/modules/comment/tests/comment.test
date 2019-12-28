@@ -69,6 +69,10 @@ class CommentHelperCase extends BackdropWebTestCase {
     $this->admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer content types', 'create post content', 'edit any post content', 'delete any post content', 'administer comments', 'administer layouts', 'administer fields'));
     $this->web_user = $this->backdropCreateUser(array('create post content', 'edit own comments'));
     $this->node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1, 'uid' => $this->web_user->uid));
+
+    // Disable safety cron run that can affect the updating of comment "new"
+    // status during shutdown functions when cron takes a long time.
+    config_get('system.core', 'cron_safe_threshold', 0);
   }
 
   /**
@@ -621,6 +625,10 @@ class CommentInterfaceTest extends CommentHelperCase {
         $comments = $this->xpath('//*[contains(@class, "comment-new")]');
         if ($case['user'] != 'anonymous') {
           $this->assertTrue(count($comments) == 1, 'comment-new class found.');
+
+          // node_tag_new() writes to the database after delivering the page,
+          // wait to ensure the record is written before reloading the page.
+          sleep(2);
 
           // Request the node again. The comment-new class should disappear.
           $this->backdropGet('node/' . $node->nid);
@@ -1901,9 +1909,9 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
     $tests['[comment:parent:title]'] = check_plain($parent_comment->subject);
     $tests['[comment:node:nid]'] = $comment->nid;
     $tests['[comment:node:title]'] = check_plain($node->title);
-    $tests['[comment:author]'] = check_plain(format_username($this->admin_user));
+    $tests['[comment:author]'] = check_plain(user_format_name($this->admin_user));
     $tests['[comment:author:uid]'] = $comment->uid;
-    $tests['[comment:author:name]'] = check_plain(format_username($this->admin_user));
+    $tests['[comment:author:name]'] = check_plain(user_format_name($this->admin_user));
 
     // Test to make sure that we generated something for each token.
     $this->assertFalse(in_array(0, array_map('strlen', $tests)), 'No empty tokens generated.');
@@ -1922,8 +1930,8 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
     $tests['[comment:body]'] = $comment->comment_body[LANGUAGE_NONE][0]['value'];
     $tests['[comment:parent:title]'] = $parent_comment->subject;
     $tests['[comment:node:title]'] = $node->title;
-    $tests['[comment:author]'] = format_username($this->admin_user);
-    $tests['[comment:author:name]'] = format_username($this->admin_user);
+    $tests['[comment:author]'] = user_format_name($this->admin_user);
+    $tests['[comment:author:name]'] = user_format_name($this->admin_user);
 
     foreach ($tests as $input => $expected) {
       $output = token_replace($input, array('comment' => $comment), array('language' => $language, 'sanitize' => FALSE));

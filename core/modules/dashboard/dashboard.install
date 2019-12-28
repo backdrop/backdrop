@@ -1,0 +1,33 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the Dashboard module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function dashboard_install() {
+  layout_reset_caches();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function dashboard_disable() {
+  // Disable the dashboard on module disable.
+  config_set('layout.layout.dashboard', 'disabled', TRUE);
+  layout_reset_caches();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function dashboard_uninstall() {
+  // Delete the dashboard and menu item on module uninstall.
+  $config = config('layout.layout.dashboard');
+  $config->delete();
+  $config = config('layout.menu_item.dashboard');
+  $config->delete();
+  layout_reset_caches();
+}

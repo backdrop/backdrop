@@ -1004,6 +1004,9 @@ function node_submit($node) {
 
 
   // Convert the date into a timestamp.
+  if (isset($node->date) && is_array($node->date)) {
+    $node->date = $node->date['date'] . ' ' . $node->date['time'];
+  }
   $date = new BackdropDateTime(!empty($node->date) && is_string($node->date) ? $node->date : 'now');
   $node->created = $date->format('U');
   $node->validated = TRUE;
@@ -1893,7 +1896,7 @@ function node_menu() {
  *
  * @see node_menu()
  *
- * @since 1.12.0
+ * @since 1.13.0
  */
 function node_preview_access($node_tempstore_id) {
   $node = node_get_node_tempstore($node_tempstore_id);
@@ -2208,7 +2211,7 @@ function node_feed($nids = FALSE, $channel = array()) {
 
   $channel_defaults = array(
     'version'     => '2.0',
-    'title'       => config_get('system.core', 'site_name'),
+    'title'       => config_get_translated('system.core', 'site_name'),
     'link'        => $base_url,
     'description' => $rss_config->get('rss_description'),
     'language'    => $language_content->langcode
@@ -2298,7 +2301,7 @@ function node_page_default() {
       $build = node_view_multiple($nodes);
 
       // 'rss.xml' is a path, not a file, registered in node_menu().
-      backdrop_add_feed('rss.xml', $site_config->get('site_name') . ' ' . t('RSS'));
+      backdrop_add_feed('rss.xml', $site_config->getTranslated('site_name') . ' ' . t('RSS'));
       $build['pager'] = array(
         '#theme' => 'pager',
         '#weight' => 5,
@@ -2306,7 +2309,7 @@ function node_page_default() {
       backdrop_set_title('');
     }
     else {
-      backdrop_set_title(t('Welcome to @site-name', array('@site-name' => $site_config->get('site_name'))), PASS_THROUGH);
+      backdrop_set_title(t('Welcome to @site-name', array('@site-name' => $site_config->getTranslated('site_name'))), PASS_THROUGH);
 
       $default_message = '<p>' . t('No content has been promoted yet.') . '</p>';
       $default_links = array();
@@ -2446,7 +2449,12 @@ function node_form_search_form_alter(&$form, $form_state) {
     );
 
     // Node types:
-    $types = array_map('check_plain', node_type_get_names());
+    $types = array();
+    foreach (node_type_get_types() as $type => $detail) {
+      if (!$detail->settings['hidden_path'] || user_access('view hidden paths') ) {
+        $types[$type] = $detail->name;
+      }
+    }
     $form['advanced']['type'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Only of the type(s)'),
@@ -2534,6 +2542,15 @@ function node_form_system_themes_admin_form_alter(&$form, &$form_state, $form_id
     '#type' => 'checkbox',
     '#title' => t('Use the administration theme when editing or creating content'),
     '#default_value' => config_get('system.core', 'node_admin_theme'),
+    '#states' => array(
+      'visible' => array(
+        array(
+          // Hide this checkbox if "Default theme" has been selected from the
+          // "Administration theme" dropdown menu.
+          ':input[name="admin_theme"]' => array('!value' => 0),
+        ),
+      ),
+    ),
   );
   $form['#submit'][] = 'node_form_system_themes_admin_form_submit';
 }
@@ -2596,124 +2613,38 @@ function node_form_system_themes_admin_form_submit($form, &$form_state) {
 /**
  * Access callback: Checks a user's permission for performing a node operation.
  *
- * @param $op
+ * @param string $op
  *   The operation to be performed on the node. Possible values are:
- *   - "view"
- *   - "update"
- *   - "delete"
- *   - "create"
- * @param Node $node
+ *   - create
+ *   - view
+ *   - update
+ *   - delete
+ * @param Node|string $node
  *   The node entity on which the operation is to be performed, or the node type
  *   (e.g., 'post') for the 'create' operation.
  * @param User $account
  *   (optional) A user object representing the user for whom the operation is to
  *   be performed. Determines access for a user other than the current user.
  *
- * @return
+ * @return bool
  *   TRUE if the operation may be performed, FALSE otherwise.
  *
  * @see node_menu()
  */
 function node_access($op, $node, $account = NULL) {
-  $rights = &backdrop_static(__FUNCTION__, array());
-
-  if (!$node || !in_array($op, array('view', 'update', 'delete', 'create'), TRUE)) {
-    // If there was no node to check against, or the $op was not one of the
-    // supported ones, we return access denied.
-    return FALSE;
-  }
-  // If no user object is supplied, the access check is for the current user.
-  if (empty($account)) {
-    $account = $GLOBALS['user'];
-  }
-
-  // $node may be either an object or a node type. Since node types cannot be
-  // an integer, use either nid or type as the static cache id.
-
-  $cid = is_object($node) ? $node->nid : $node;
-
-  // If we've already checked access for this node, user and op, return from
-  // cache.
-  if (isset($rights[$account->uid][$cid][$op])) {
-    return $rights[$account->uid][$cid][$op];
-  }
-
-  if (user_access('bypass node access', $account)) {
-    $rights[$account->uid][$cid][$op] = TRUE;
-    return TRUE;
-  }
-  if (!user_access('access content', $account)) {
-    $rights[$account->uid][$cid][$op] = FALSE;
-    return FALSE;
-  }
-
-  // We grant access to the node if both of the following conditions are met:
-  // - No modules say to deny access.
-  // - At least one module says to grant access.
-  // If no module specified either allow or deny, we fall back to the
-  // node_access table.
-  $access = module_invoke_all('node_access', $node, $op, $account);
-  if (in_array(NODE_ACCESS_DENY, $access, TRUE)) {
-    $rights[$account->uid][$cid][$op] = FALSE;
-    return FALSE;
-  }
-  elseif (in_array(NODE_ACCESS_ALLOW, $access, TRUE)) {
-    $rights[$account->uid][$cid][$op] = TRUE;
-    return TRUE;
-  }
-
-  // Check if user can view any unpublished nodes.
-  if ($op == 'view' && !$node->status && user_access('view any unpublished content', $account) && $account->uid != 0) {
-    $rights[$account->uid][$cid][$op] = TRUE;
-    return TRUE;
-  }
-
-  // Check if authors can view their own unpublished nodes.
-  if ($op == 'view' && !$node->status && user_access('view own unpublished content', $account) && $account->uid == $node->uid && $account->uid != 0) {
-    $rights[$account->uid][$cid][$op] = TRUE;
-    return TRUE;
-  }
-
-  // If the module did not override the access rights, use those set in the
-  // node_access table.
-  if ($op != 'create' && $node->nid) {
-    if (module_implements('node_grants')) {
-      $query = db_select('node_access');
-      $query->addExpression('1');
-      $query->condition('grant_' . $op, 1, '>=');
-      $nids = db_or()->condition('nid', $node->nid);
-      if ($node->status) {
-        $nids->condition('nid', 0);
-      }
-      $query->condition($nids);
-      $query->range(0, 1);
-
-      $grants = db_or();
-      foreach (node_access_grants($op, $account) as $realm => $gids) {
-        foreach ($gids as $gid) {
-          $grants->condition(db_and()
-            ->condition('gid', $gid)
-            ->condition('realm', $realm)
-          );
-        }
-      }
-      if (count($grants) > 0) {
-        $query->condition($grants);
-      }
-      $result =  (bool) $query
-        ->execute()
-        ->fetchField();
-      $rights[$account->uid][$cid][$op] = $result;
-      return $result;
+  if ($op == 'create') {
+    // In some cases a node object, rather than a bundle string is provided.
+    if (is_string($node)) {
+      $bundle = $node;
     }
-    elseif (is_object($node) && $op == 'view' && $node->status) {
-      // If no modules implement hook_node_grants(), the default behavior is to
-      // allow all users to view published nodes, so reflect that here.
-      $rights[$account->uid][$cid][$op] = TRUE;
-      return TRUE;
+    else {
+      $bundle = $node->bundle();
     }
+    return Node::createAccess($bundle, $account);
   }
-
+  elseif ($node instanceof Node) {
+    return $node->access($op, $account);
+  }
   return FALSE;
 }
 
@@ -2721,8 +2652,15 @@ function node_access($op, $node, $account = NULL) {
  * Implements hook_node_access().
  *
  * @param Node|string $node
+ *   The loaded Node object.
  * @param string $op
- * $param User $account
+ *   The operation to be performed on the node. Possible values are:
+ *   - create
+ *   - view
+ *   - update
+ *   - delete
+ * @param User $account
+ *   The User account for the person performing the operation.
  *
  * @return string
  */
@@ -2922,6 +2860,9 @@ function node_access_view_all_nodes($account = NULL) {
  */
 function node_query_node_access_alter(QueryAlterableInterface $query) {
   _node_query_node_access_alter($query, 'node');
+  if (module_exists('search')) {
+    _node_search_query_alter($query);
+  }
 }
 
 /**
@@ -3125,6 +3066,43 @@ function _node_query_node_access_alter($query, $type) {
     $query->condition($or);
   }
 
+}
+
+/**
+ * Exclude nodes from the search query where the node has a hidden path
+ * and the current user doesn't have permission to bypass the restriction.
+ */
+function _node_search_query_alter(QueryAlterableInterface $query) {
+  global $user;
+
+  if (in_array('view hidden paths', user_role_permissions($user->roles))) {
+    return;
+  }
+
+  $search = FALSE;
+  $node = FALSE;
+
+  foreach ($query->getTables() as $alias => $table) {
+    if ($table['table'] == 'search_index') {
+      $search = $alias;
+    }
+    elseif ($table['table'] == 'node') {
+      $node = $alias;
+    }
+  }
+
+  if ($node && $search) {
+    $excluded_content_types = array();
+    foreach (node_type_get_types() as $type => $detail) {
+      if ($detail->settings['hidden_path']) {
+        $excluded_content_types[] = $type;
+      }
+    }
+
+    if (!empty($excluded_content_types)) {
+      $query->condition($node . '.type', array($excluded_content_types), 'NOT IN');
+    }
+  }
 }
 
 /**

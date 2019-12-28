@@ -96,6 +96,30 @@ class ModuleTestCase extends WatchdogTestCase {
 }
 
 /**
+ * Test module filter.
+ */
+class FilterResetTestCase extends ModuleTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * Test that the search and reset functionality on the modules page works.
+   */
+  function testFilterReset() {
+    $edit = array();
+    $edit['search'] = 'image';
+    $this->backdropPost('admin/modules', $edit, t('Save configuration'));
+    $this->assertUrl('admin/modules', array(
+      'query' => array(
+        'search' => 'image',
+      ),
+    ));
+
+    $this->clickLink(t('Reset'));
+    $this->assertUrl('admin/modules');
+  }
+}
+
+/**
  * Test module enabling/disabling functionality.
  */
 class EnableDisableTestCase extends ModuleTestCase {
@@ -1922,81 +1946,30 @@ array_space[a b] = Value';
  */
 class InfoFileCoreTest extends BackdropUnitTestCase {
   /**
-   * Tests that all core modules' .info files have the project type string set to "module".
+   * Tests that the .info files of all core projects specify a project type.
    */
-  function testModuleInfoFileContents() {
-    $modules = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.module$/', 'core/modules', 'name', 0);
+  function testProjectInfoFileContents() {
+    $projects = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'core');
+    $allowed_project_types = array('module', 'theme', 'layout', 'profile');
     $type_fails = array();
     $version_fails = array();
-    foreach($modules as $key => $module) {
-      $info = backdrop_parse_info_file(dirname($module->uri) . '/' . $module->name . '.info');
+    foreach($projects as $key => $project) {
+      $info = backdrop_parse_info_file(dirname($project->uri) . '/' . $project->name . '.info');
       if (!isset($info['type'])) {
         $type_fails[] = $key;
-        $this->fail(format_string('%key does not have project type set to "module".', array('%key' => $key)));
+        $this->fail(format_string('%key does not specify a project type in the .info file.', array('%key' => $key)));
       }
-      elseif ($info['type'] != 'module') {
+      elseif (!in_array($info['type'], $allowed_project_types)) {
         $type_fails[] = $key;
-        $this->fail(format_string('Project type for %key is not set to "module".', array('%key' => $key)));
+        $this->fail(format_string('Invalid project type specified for %key in the .info file.', array('%key' => $key)));
       }
       if (!isset($info['version'])) {
         $version_fails[] = $key;
         $this->fail(format_string('%key does not have a version string in the .info file.', array('%key' => $key)));
       }
     }
-    $this->assertFalse($type_fails, 'Project type string set to "module" for all core modules.');
-    $this->assertFalse($version_fails, 'Version set for all core modules.');
-  }
-
-  /**
-   * Tests that all core themes' .info files have the project type string set to "theme".
-   */
-  function testThemeInfoFileContents() {
-    $themes = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'core/themes');
-    $type_fails = array();
-    $version_fails = array();
-    foreach($themes as $key => $theme) {
-      $info = backdrop_parse_info_file(dirname($theme->uri) . '/' . $theme->name . '.info');
-      if (!isset($info['type'])) {
-        $type_fails[] = $key;
-        $this->fail(format_string('%key does not have project type set to "theme".', array('%key' => $key)));
-      }
-      elseif ($info['type'] != 'theme') {
-        $type_fails[] = $key;
-        $this->fail(format_string('Project type for %key is not set to "theme".', array('%key' => $key)));
-      }
-      if (!isset($info['version'])) {
-        $version_fails[] = $key;
-        $this->fail(format_string('%key does not have a version string in the .info file.', array('%key' => $key)));
-      }
-    }
-    $this->assertFalse($type_fails, 'Project type string set to "theme" for all core themes.');
-    $this->assertFalse($version_fails, 'Version set for all core themes.');
-  }
-
-  /**
-   * Tests that all core layouts' .info files have the project type string set to "layout".
-   */
-  function testLayoutInfoFileContents() {
-    $layouts = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'core/layouts', 'name', 0);
-    $type_fails = array();
-    $version_fails = array();
-    foreach($layouts as $key => $layout) {
-      $info = backdrop_parse_info_file(dirname($layout->uri) . '/' . $layout->name . '.info');
-      if (!isset($info['type'])) {
-        $type_fails[] = $key;
-        $this->fail(format_string('%key does not have project type set to "layout".', array('%key' => $key)));
-      }
-      elseif ($info['type'] != 'layout') {
-        $type_fails[] = $key;
-        $this->fail(format_string('Project type for %key is not set to "layout".', array('%key' => $key)));
-      }
-      if (!isset($info['version'])) {
-        $version_fails[] = $key;
-        $this->fail(format_string('%key does not have a version string in the .info file.', array('%key' => $key)));
-      }
-    }
-    $this->assertFalse($type_fails, 'Project type string set to "layout" for all core layouts.');
-    $this->assertFalse($version_fails, 'Version set for all core layouts.');
+    $this->assertFalse($type_fails, 'Proper project type set for all core projects.');
+    $this->assertFalse($version_fails, 'Version set for all core projects.');
   }
 }
 
@@ -2195,7 +2168,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost($this->update_url, array(), t('Continue'), array('external' => TRUE));
     $this->assertText(t('No pending updates.'));
     $this->assertNoLink('Administration pages');
-    $this->clickLink('Front page');
+    $this->clickLink('Home page');
     $this->assertResponse(200);
 
     // Click through update.php with 'access administration pages' permission.
@@ -2220,7 +2193,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     $this->assertLink('site');
     $this->assertNoLink('Administration pages');
     $this->assertNoLink('logged');
-    $this->clickLink('Front page');
+    $this->clickLink('Home page');
     $this->assertResponse(200);
 
     backdrop_set_installed_schema_version('update_script_test', backdrop_get_installed_schema_version('update_script_test') - 1);

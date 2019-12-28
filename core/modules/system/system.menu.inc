@@ -73,7 +73,7 @@ function system_menu_block_form($config) {
       '8' => t('8th level'),
       '9' => t('9th level'),
     ),
-    '#description' => t('Blocks that start with the 1st level will always be visible. Blocks that start with the 2nd level or deeper will only be visible when the trail to the active menu item passes though the block’s starting level.'),
+    '#description' => t('The block will be visible only if the current page has its menu item at or below the level set here.'),
     '#states' => array(
       'visible' => array(
         'select[name="block_settings[style]"]' => array('value' => 'tree'),

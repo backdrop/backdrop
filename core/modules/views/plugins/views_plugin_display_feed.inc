@@ -30,9 +30,9 @@ class views_plugin_display_feed extends views_plugin_display_page {
   function get_style_type() { return 'feed'; }
 
   /**
-   * Feeds do not go through the normal page theming mechanism. Instead, they
-   * go through their own little theme function and then return NULL so that
-   * Backdrop believes that the page has already rendered itself...which it has.
+   * Feeds do not go through the standard page theme hooks. Instead, they
+   * go through their own theme function and then return NULL so that Backdrop
+   * believes that the page has already rendered itself... which it has.
    */
   function execute() {
     $output = $this->view->render();

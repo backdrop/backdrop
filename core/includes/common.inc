@@ -1761,7 +1761,8 @@ function filter_xss_admin($string) {
  *   The string with raw HTML in it. It will be stripped of everything that can
  *   cause an XSS attack.
  * @param $allowed_tags
- *   An array of allowed tags.
+ *   An array of allowed tags. Defaults to the array returned by
+ *   _filter_xss_allowed_tags().
  *
  * @return
  *   An XSS safe version of $string, or an empty string if $string is not
@@ -1769,7 +1770,10 @@ function filter_xss_admin($string) {
  *
  * @see backdrop_validate_utf8()
  */
-function filter_xss($string, $allowed_tags = array('a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd')) {
+function filter_xss($string, $allowed_tags = NULL) {
+  if ($allowed_tags === NULL) {
+    $allowed_tags = _filter_xss_allowed_tags();
+  }
   // Only operate on valid UTF-8 strings. This is necessary to prevent cross
   // site scripting issues on Internet Explorer 6.
   if (!backdrop_validate_utf8($string)) {
@@ -1802,6 +1806,21 @@ function filter_xss($string, $allowed_tags = array('a', 'em', 'strong', 'cite', 
     |                 # or
     >                 # just a >
     )%x', '_filter_xss_split', $string);
+}
+
+/**
+ * List of the default tags allowed by filter_xss().
+ */
+function _filter_xss_allowed_tags() {
+  return array('a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd');
+}
+
+/**
+ * Human-readable list of the default tags allowed by filter_xss(), for display
+ * in help texts.
+ */
+function _filter_xss_display_allowed_tags() {
+  return '<' . implode('> <', _filter_xss_allowed_tags()) . '>';
 }
 
 /**
@@ -2079,29 +2098,52 @@ function format_rss_item($title, $link, $description, $args = array()) {
  *     - 'attributes': associative array of element attributes
  *     - 'encoded': TRUE if 'value' is already encoded
  *
- * In both cases, 'value' can be a simple string, or it can be another array
- * with the same format as $array itself for nesting.
+ *   In both cases, 'value' can be a simple string, or it can be another array
+ *   with the same format as $array itself for nesting.
  *
- * If 'encoded' is TRUE it is up to the caller to ensure that 'value' is either
- * entity-encoded or CDATA-escaped. Using this option is not recommended when
- * working with untrusted user input, since failing to escape the data
- * correctly has security implications.
+ *   If 'encoded' is TRUE it is up to the caller to ensure that 'value' is
+ *   either entity-encoded or CDATA-escaped. Using this option is not
+ *   recommended when working with untrusted user input, since failing to escape
+ *   the data correctly has security implications.
+ *
+ * @param int $indentation_level
+ *   Internal-use only indentation level. This function is called recursively
+ *   and this parameter is used to increase indentation in each nesting.
+ *
+ * @since 1.12.7 Added $indentation_level parameter.
  *
  * @return string
  *  A string of XML representing the elements passed in.
  */
-function format_xml_elements($array) {
+function format_xml_elements($array, $indentation_level = 0) {
   $output = '';
+
+  // Indent two spaces per level.
+  $indentation = str_repeat(' ', $indentation_level * 2);
+
   foreach ($array as $key => $value) {
     if (is_numeric($key)) {
       if ($value['key']) {
-        $output .= ' <' . $value['key'];
+        $output .= $indentation . '<' . $value['key'];
         if (isset($value['attributes']) && is_array($value['attributes'])) {
           $output .= backdrop_attributes($value['attributes']);
         }
 
         if (isset($value['value']) && $value['value'] != '') {
-          $output .= '>' . (is_array($value['value']) ? format_xml_elements($value['value']) : (!empty($value['encoded']) ? $value['value'] : check_plain($value['value']))) . '</' . $value['key'] . ">\n";
+          $output .= '>';
+          if (is_array($value['value'])) {
+            $output .= "\n" . format_xml_elements($value['value'], $indentation_level + 1);
+            $output .= $indentation . '</' . $value['key'] . ">\n";
+          }
+          else {
+            if (!empty($value['encoded'])) {
+              $output .= $value['value'];
+            }
+            else {
+              $output .= check_plain($value['value']);
+            }
+            $output .= '</' . $value['key'] . ">\n";
+          }
         }
         else {
           $output .= " />\n";
@@ -2109,7 +2151,14 @@ function format_xml_elements($array) {
       }
     }
     else {
-      $output .= ' <' . $key . '>' . (is_array($value) ? format_xml_elements($value) : check_plain($value)) . "</$key>\n";
+      $output .= $indentation . '<' . $key . '>';
+      if (is_array($value)) {
+        $output .= "\n" . format_xml_elements($value, $indentation_level + 1);
+        $output .= $indentation . "</$key>\n";
+      }
+      else {
+        $output .= check_plain($value) . "</$key>\n";
+      }
     }
   }
   return $output;
@@ -2737,9 +2786,9 @@ function backdrop_attributes(array $attributes = array()) {
  * Formats an internal or external URL link as an HTML anchor tag.
  *
  * This function correctly handles aliased paths and adds an 'active' class
- * attribute to links that point to the current page (for theming), so all
- * internal links output by modules should be generated by this function if
- * possible.
+ * attribute to links that point to the current page (for theme development),
+ * so all internal links output by modules should be generated by this function
+ * if possible.
  *
  * However, for links enclosed in translatable text you should use t() and
  * embed the HTML anchor tag directly in the translated string. For example:
@@ -3002,7 +3051,7 @@ function backdrop_deliver_html_page($page_callback_result) {
         // Print a 503 page.
         backdrop_add_http_header('Status', '503 Service unavailable');
         backdrop_set_title(t('Site under maintenance'));
-        print theme('maintenance_page', array('content' => filter_xss_admin(token_replace(t(config_get('system.core', 'maintenance_mode_message'))))));
+        print theme('maintenance_page', array('content' => filter_xss_admin(token_replace(config_get_translated('system.core', 'maintenance_mode_message')))));
         break;
     }
   }
@@ -6421,8 +6470,8 @@ function backdrop_pre_render_dropbutton($element) {
   }
   array_unshift($element['#theme_wrappers'], 'dropbutton_wrapper');
 
-  // Enable targeted theming of specific dropbuttons (e.g., 'operations' or
-  // 'operations__node').
+  // Enable targeted theme override of specific dropbuttons (e.g., 'operations'
+  // or 'operations__node').
   if (isset($element['#subtype'])) {
     $element['#theme'] .= '__' . $element['#subtype'];
   }
@@ -6694,6 +6743,15 @@ function render(&$element) {
  * element, be sure to call hide() on the element before its parent tree is
  * rendered for the first time, as it will have no effect on subsequent
  * renderings of the parent tree.
+ *
+ * Note that hide() should only be used when doing the final printing of a
+ * render element, such as in a template. If wanting to hide a form element
+ * earlier in the process, such as in hook_form_alter(), you should set #access
+ * instead, like this:
+ *
+ * @code
+ * $element['#access'] = FALSE
+ * @endcode
  *
  * @param $element
  *   The element to be hidden.

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity controller and class for comments.
@@ -117,6 +116,81 @@ class Comment extends Entity {
       'options' => array('fragment' => 'comment-' . $this->cid),
     );
   }
+
+  /**
+   * Overrides Entity::createAccess().
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    return user_access('post comments', $account);
+  }
+
+  /**
+   * Overrides Entity::access().
+   *
+   * @param string $op
+   *   The operation to be performed on the node. Possible values are:
+   *   - view
+   *   - update
+   *   - approve
+   *   - delete
+   * @param User|AnonymousUser|object $account
+   *   (optional) The user to check for. Leave it to NULL to check for the
+   *   global user.
+   *
+   * @return bool
+   *   TRUE if access is granted, FALSE otherwise.
+   */
+  public function access($op, $account = NULL) {
+    // Casting class with private property causes errors due to added prefix.
+    // e.g. "\0" . 'Comment' . "\0". So use static array instead.
+    $rights = &backdrop_static(__METHOD__, array());
+
+    if ($op == 'create') {
+      return self::createAccess(NULL, $account);
+    }
+    elseif (!in_array($op, array('view', 'update', 'approve', 'delete'), TRUE)) {
+      // If the $op was not one of the supported ones, we return access denied.
+      return FALSE;
+    }
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    $cid = $this->id();
+
+    // If we've already checked access for this node, user and op, return from
+    // cache.
+    if (isset($rights[$account->uid][$cid][$op])) {
+      return $rights[$account->uid][$cid][$op];
+    }
+
+    if ($op == 'view') {
+      $rights[$account->uid][$cid][$op] = user_access('access comments', $account);
+      return $rights[$account->uid][$cid][$op];
+    }
+    elseif ($op == 'update') {
+      $rights[$account->uid][$cid][$op] = ($account->uid && $account->uid == $this->uid && $this->status == COMMENT_PUBLISHED && user_access('edit own comments', $account)) || user_access('administer comments', $account);
+      return $rights[$account->uid][$cid][$op];
+    }
+    elseif ($op == 'approve') {
+      $rights[$account->uid][$cid][$op] = user_access('administer comments', $account);
+      return $rights[$account->uid][$cid][$op];
+    }
+    elseif ($op == 'delete') {
+      $rights[$account->uid][$cid][$op] = user_access('administer comments', $account);
+      return $rights[$account->uid][$cid][$op];
+    }
+
+    $rights[$account->uid][$cid][$op] = FALSE;
+    return $rights[$account->uid][$cid][$op];
+  }
+
 }
 
 /**

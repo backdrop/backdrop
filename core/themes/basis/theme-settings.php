@@ -19,6 +19,7 @@ if (module_exists('color')) {
     'slogan',
     'titleslogan',
     'hovermenu',
+    'menutoggle',
   );
   foreach ($fields as $field) {
     $form['header'][$field] = color_get_color_element('basis', $field, $form);
@@ -33,21 +34,40 @@ if (module_exists('color')) {
     'bg',
     'text',
     'link',
-    'primarytabs',
     'borders',
     'formfocusborder',
-    'buttons',
   );
   foreach ($fields as $field) {
     $form['general'][$field] = color_get_color_element('basis', $field, $form);
+  }
+
+  $form['primary_tabs'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Tabs and Breadcrumb'),
+    '#collapsible' => TRUE,
+  );
+  $fields = array(
+    'primarytabs',
+    'primarytabstext',
+    'buttons',
+  );
+  foreach ($fields as $field) {
+    $form['primary_tabs'][$field] = color_get_color_element('basis', $field, $form);
   }
 
   $form['footer'] = array(
     '#type' => 'fieldset',
     '#title' => t('Footer Settings'),
     '#collapsible' => TRUE,
-    'color_footer' => color_get_color_element('basis', 'footer', $form),
   );
+  $fields = array(
+    'footerborder',
+    'footer',
+    'footertext',
+  );
+  foreach ($fields as $field) {
+    $form['footer'][$field] = color_get_color_element('basis', $field, $form);
+  }
 }
 else {
   $form['color'] = array(

@@ -64,10 +64,60 @@ $settings['update_free_access'] = FALSE;
  * with any backups of your Backdrop files and database.
  *
  * Example:
- *   $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
+ * @code
+ * $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
+ * @endcode
  *
  */
 $settings['hash_salt'] = '';
+
+/**
+ * Trusted host configuration (optional but highly recommended).
+ *
+ * Since the HTTP Host header can be set by the user making the request, it
+ * is possible for malicious users to override it and create an attack vector.
+ * To protect against these sort of attacks, Backdrop supports checking a list
+ * of trusted hosts.
+ *
+ * To enable the trusted host protection, specify the allowable hosts below.
+ * This should be an array of regular expression patterns representing the hosts
+ * you would like to allow.
+ *
+ * For example, this will allow the site to only run from www.example.com:
+ * @code
+ * $settings['trusted_host_patterns'] = array(
+ *   '^www\.example\.com$',
+ * );
+ * @endcode
+ *
+ * If you are running a site on multiple domain names, you should specify all of
+ * the host patterns that are allowed by your site. For example, this will allow
+ * the site to run off of all variants of example.com and example.org, with all
+ * subdomains included:
+ * @code
+ * $settings['trusted_host_patterns'] = array(
+ *   '^example\.com$',
+ *   '^.+\.example\.com$',
+ *   '^example\.org',
+ *   '^.+\.example\.org',
+ * );
+ * @endcode
+ *
+ * If you do not need this functionality (such as in development environments or
+ * if protection is at another layer), you can suppress the status report
+ * warning by setting this value to FALSE:
+ * @code
+ * $settings['trusted_host_patterns'] = FALSE;
+ * @endcode
+ *
+ * For more information about trusted host patterns, see the documentation at
+ * https://api.backdropcms.org/documentation/trusted-host-settings
+ *
+ * @see backdrop_valid_http_host()
+ * @see backdrop_check_trusted_hosts()
+ * @see system_requirements()
+ */
+// $settings['trusted_host_patterns'] = array('^www\.example\.com$');
 
 /**
  * Base URL (optional).
@@ -152,7 +202,8 @@ ini_set('session.cookie_lifetime', 2000000);
  * is explicitly set to maintenance mode through the administration page or when
  * the database is inactive due to an error. It can be set through the
  * 'maintenance_theme' key. The template file should also be copied into the
- * theme. It is located inside 'core/modules/system/maintenance-page.tpl.php'.
+ * theme. It is located inside
+ * 'core/modules/system/templates/maintenance-page.tpl.php'.
  * Note: This setting does not apply to installation and update pages.
  */
 // $settings['maintenance_theme'] = 'bartik';
@@ -301,12 +352,12 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
  * proxy_exceptions variable is an array of host names to be accessed directly,
  * not via proxy.
  */
-# $settings['proxy_server'] = '';
-# $settings['proxy_port'] = 8080;
-# $settings['proxy_username'] = '';
-# $settings['proxy_password'] = '';
-# $settings['proxy_user_agent'] = '';
-# $settings['proxy_exceptions'] = array('127.0.0.1', 'localhost');
+// $settings['proxy_server'] = '';
+// $settings['proxy_port'] = 8080;
+// $settings['proxy_username'] = '';
+// $settings['proxy_password'] = '';
+// $settings['proxy_user_agent'] = '';
+// $settings['proxy_exceptions'] = array('127.0.0.1', 'localhost');
 
 /**
  * Authorized file system operations:
@@ -349,12 +400,22 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
 $settings['backdrop_drupal_compatibility'] = TRUE;
 
 /**
- * Include a local settings file.
+ * Include a local settings file, if available.
  *
- * To make local development easier, you can add a file that contains your local
- * database connection information. This local settings file can be ignored in
- * your Git repository so that any updates to settings.php can be pulled in 
- * without overwriting your local changes.
+ * To make local development easier, you can add a settings.local.php file that
+ * contains settings specific to your local installation, or to any secondary
+ * environment (staging, development, etc).
+ *
+ * Typically used to specify a different database connection information, to
+ * disable caching, JavaScript/CSS compression, re-routing of outgoing e-mails,
+ * Google Analytics, and other things that should not happen on development and
+ * testing sites.
+ *
+ * This local settings file can be ignored in your Git repository, so that any
+ * updates to settings.php can be pulled in without overwriting your local
+ * changes.
+ *
+ * Keep this code block at the end of this file to take full effect.
  */
 if (file_exists(__DIR__ . '/settings.local.php')) {
   include __DIR__ . '/settings.local.php';

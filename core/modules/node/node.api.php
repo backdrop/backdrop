@@ -543,9 +543,9 @@ function hook_node_load($nodes, $types) {
  * @param string $op
  *   The operation to be performed. Possible values:
  *   - "create"
- *   - "delete"
- *   - "update"
  *   - "view"
+ *   - "update"
+ *   - "delete"
  * @param object $account
  *   The user object to perform the access check operation on.
  *
@@ -613,7 +613,7 @@ function hook_node_prepare(Node $node) {
  *   Extra information to be displayed with search result. This information
  *   should be presented as an associative array. It will be concatenated with
  *   the post information (last updated, author) in the default search result
- *   theming.
+ *   markup.
  *
  * @ingroup node_api_hooks
  */

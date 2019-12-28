@@ -1112,6 +1112,18 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
         $settings_form = $function($field, $instance, $view_mode, $form, $form_state);
       }
 
+      // Allow other modules to alter the formatter settings form.
+      $context = array(
+        'module' => $formatter['module'],
+        'formatter' => $formatter,
+        'field' => $field,
+        'instance' => $instance,
+        'view_mode' => $view_mode,
+        'form' => $form,
+        'form_state' => $form_state,
+      );
+      backdrop_alter('field_formatter_settings_form', $settings_form, $context);
+
       if ($settings_form) {
         $table[$name]['format']['#cell_attributes'] = array('colspan' => 3);
         $table[$name]['format']['settings_edit_form'] = array(
@@ -1147,6 +1159,15 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
     else {
       // Display a summary of the current formatter settings.
       $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $instance, $view_mode);
+
+      // Allow other modules to alter the formatter summary.
+      $context = array(
+        'field' => $field,
+        'instance' => $instance,
+        'view_mode' => $view_mode,
+      );
+      backdrop_alter('field_formatter_settings_summary', $summary, $context);
+
       $table[$name]['settings_summary'] = array();
       $table[$name]['settings_edit'] = array();
       if ($summary) {

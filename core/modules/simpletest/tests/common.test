@@ -1012,7 +1012,7 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     $result = backdrop_http_request(url('node', array('absolute' => TRUE)));
     $this->assertEqual($result->code, 200, 'Fetched page successfully.');
     $this->backdropSetContent($result->data);
-    $this->assertTitle(t('Home | @site-name', array('@site-name' => config_get('system.core', 'site_name'))), 'Site title matches.');
+    $this->assertTitle(t('Home | @site-name', array('@site-name' => config_get_translated('system.core', 'site_name'))), 'Site title matches.');
 
     // Test that code and status message is returned.
     $result = backdrop_http_request(url('pagedoesnotexist', array('absolute' => TRUE)));
@@ -2813,6 +2813,76 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
     // Restore default time zone.
     date_default_timezone_set(backdrop_get_user_timezone());
     backdrop_save_session(TRUE);
+  }
+}
+
+/**
+ * Tests the format_xml_elements() API function.
+ */
+class CommonBackdropFormatXmlElementsUnitTestCase extends BackdropUnitTestCase {
+  /**
+   * Provide a sample data structure and verify the XML results.
+   */
+  function testParseFormatXmlElements() {
+    $structure = array(
+      // Test normal key => value pairs.
+      'key-value-pairs' => array(
+        'second-1' => 'foo',
+        'second-2' => 'bar',
+      ),
+      // Test normal key => value pairs.
+      'attributes' => array(
+        array(
+          'key' => 'second',
+          'value' => 'baz',
+          'attributes' => array(
+            'attr-1' => 'foo',
+            'attr-2' => 'bar',
+          ),
+        ),
+      ),
+      // Test encoded vs. normal.
+      'encoding' => array(
+        array(
+          'key' => 'second',
+          'value' => '<foo>',
+        ),
+        array(
+          'key' => 'second',
+          'value' => check_plain('<bar>'),
+          'encoded' => TRUE,
+        ),
+      ),
+      // Test nesting multiple levels.
+      'nested' => array(
+        array(
+          'key' => 'second',
+          'value' => array(
+            'third' => 'foo'
+          ),
+        ),
+      ),
+    );
+    $expected_output = <<<EOF
+<key-value-pairs>
+  <second-1>foo</second-1>
+  <second-2>bar</second-2>
+</key-value-pairs>
+<attributes>
+  <second attr-1="foo" attr-2="bar">baz</second>
+</attributes>
+<encoding>
+  <second>&lt;foo&gt;</second>
+  <second>&lt;bar&gt;</second>
+</encoding>
+<nested>
+  <second>
+    <third>foo</third>
+  </second>
+</nested>
+
+EOF;
+    $this->assertIdentical($expected_output, format_xml_elements($structure));
   }
 }
 
