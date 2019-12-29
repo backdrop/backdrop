@@ -207,15 +207,21 @@ Backdrop.behaviors.ImageLibraryOption = {
           $thisImage.find(".image-selection-option").hide();
         }
         else {
+          // Find the field name for this image and assign to
+          // placeholder for image field name.
+          $thisImageFieldName = $thisImage.find('[name*= "[field_name]"]').val();
+          var $thisImageFid = $thisImage.find('[name*= "[fid]"]').val();
+
           // Add a mouseover function to the 'Open Library' button's wrapper
           // for this image.
           $thisImage.find(".fieldset-wrapper").mouseover(function () {
-            // Find the field name for this image and assign to
-            // placeholder for image field name.
-            $thisImageFieldName = $thisImage.find('[name*= "[field_name]"]').val();
-            // Find the FID field and add image field name as a class
-            // in order to select it later.
+            // Find the FID field and add marker'current-image' as a class
+            // in order to be able to select it later.
             $thisImage.find('input[name$= "[fid]"]').addClass("current-image");
+          });
+          // Add a mouseout function to remove 'current-image' marker.
+          $thisImage.find(".fieldset-wrapper").mouseout(function () {
+            $thisImage.find('input[name$= "[fid]"]').removeClass("current-image");
           });
           var $thisItem = $thisImage.parent().find("Label");
           var $selection = $thisItem.parent();
@@ -224,31 +230,33 @@ Backdrop.behaviors.ImageLibraryOption = {
           var $addText = '<div class="image-upload">Upload image | </div><div class="image-reference">Reference existing | </div><div class="image-select">Select from image library</div>';
           $newLabelText = $newLabelText.concat($fieldLabelText,'</div>',$addText);
           $thisItem.replaceWith($newLabelText);
-          // Add on click functions to the selection options.
-          $selection.find(".image-upload").click(function () {
-            $(".image-selection-option").hide();
-            $(".form-file").show();
-            $(".image-library-option").hide();
-            $(".image-upload").css({"color" : "mediumblue"});
-            $(".image-reference").css({"color" : "black"});
-            $(".image-select").css({"color" : "black"});
-          });
-          $selection.find(".image-reference").click(function () {
-            $(".image-selection-option").show();
-            $(".form-file").hide();
-            $(".image-library-option").hide();
-            $(".image-upload").css({"color" : "black"});
-            $(".image-reference").css({"color" : "mediumblue"});
-            $(".image-select").css({"color" : "black"});
-          });
-          $selection.find(".image-select").click(function () {
-            $(".image-selection-option").hide();
-            $(".form-file").hide();
-            $(".image-library-option").show();
-            $(".image-upload").css({"color" : "black"});
-            $(".image-reference").css({"color" : "black"});
-            $(".image-select").css({"color" : "mediumblue"});
-          });
+          // Add click functions to the selection options for relevant images.
+          if ($thisImageFid == 0) {
+            $selection.find(".image-upload").click(function () {
+              $(".image-selection-option").hide();
+              $(".form-file").show();
+              $(".image-library-option").hide();
+              $(".image-upload").css({"color" : "mediumblue"});
+              $(".image-reference").css({"color" : "black"});
+              $(".image-select").css({"color" : "black"});
+            });
+            $selection.find(".image-reference").click(function () {
+              $selection.find(".image-selection-option").show();
+              $(".form-file").hide();
+              $(".image-library-option").hide();
+              $(".image-upload").css({"color" : "black"});
+              $(".image-reference").css({"color" : "mediumblue"});
+              $(".image-select").css({"color" : "black"});
+            });
+            $selection.find(".image-select").click(function () {
+              $(".image-selection-option").hide();
+              $(".form-file").hide();
+              $selection.find(".image-library-option").show();
+              $(".image-upload").css({"color" : "black"});
+              $(".image-reference").css({"color" : "black"});
+              $(".image-select").css({"color" : "mediumblue"});
+            });
+          }
         }
       });
     }
@@ -285,14 +293,20 @@ Backdrop.behaviors.ImageFieldDialog = {
         // now process click (select).
         .on('click', '.image-library-choose-file', function () {
           // Enter src value in image confirmation form.
-          // Get the value for the current image.
+          // Get the values for the current image and copy to form.
           $thisSrc = $galleryContainer.find(".image-uri").text();
+          $thisFid = $galleryContainer.find(".image-fid").text();
+          $thisName = $galleryContainer.find(".image-name").text();
+          $thisSize = $galleryContainer.find(".image-size").text();
+
 
           var $widgetdata = $(".l-wrapper").find(".image-widget-data");
           var $relevantFields = $widgetdata.find("input[name$='[fid]']");
           var $specificField = $relevantFields.find(".current-image");
           $specificField.removeClass('current-image');
           $galleryContainer.find(".field-src").find("input").val($thisSrc);
+          $galleryContainer.find(".field-id").find("input").val($thisFid);
+
         });
     });
   }

@@ -705,7 +705,8 @@ function image_field_library_confirmation_form() {
 
   $form['src'] = array(
     '#type' => 'textfield',
-    '#title' => t('src of file to save - temporarily shown here'),
+    '#title' => t('src of file to save'),
+    '#description' => "[Note: this field will be hidden once 'confirm' button is operational]",
     '#prefix' => '<div class="field-src">',
     '#suffix' => '</div>',
     '#weight' => -2,
@@ -731,7 +732,7 @@ function image_field_library_confirmation_form() {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#description' => t('Select this file'),
-    '#value' => t('Preview'),
+    '#value' => t('Confirm'),
     '#ajax' => array(
       'callback' => 'image_field_ajax_form_open_dialog',
       'wrapper' => 'image_preview_wrapper' ,
@@ -766,7 +767,7 @@ function image_field_library_modal_open($form, $form_state) {
   else {
     // Get the dialog path as set in the redirect.
     // $dialog_path = $form_state['redirect'];
-    $dialog_path = 'image-field/library-confirmation';
+    $dialog_path = 'image-field/confirm-image-selection';
     $page_callback_result = NULL;
     if ($router_item = menu_get_item($dialog_path)) {
       if ($router_item['access']) {
@@ -963,8 +964,11 @@ function _image_file_autocomplete($string = '')
 }
 
 
-
-function image_field_image_confirmation_form() {
+/**
+ * Form AJAX callback for confirming the image
+ * selected from image library.
+ */
+function image_field_library_ajax_confirmation_form() {
   $form['actions'] = array('#type' => 'actions');
 
   $form['src'] = array(
@@ -1029,7 +1033,7 @@ function image_field_ajax_form_open_dialog($form, &$form_state) {
   else {
     // Get the dialog path as set in the redirect.
     // $dialog_path = $form_state['redirect'];
-    $dialog_path = 'image-file/confirmation';
+    $dialog_path = 'image-field/confirm-image-selection';
     $page_callback_result = NULL;
     if ($router_item = menu_get_item($dialog_path)) {
       if ($router_item['access']) {
