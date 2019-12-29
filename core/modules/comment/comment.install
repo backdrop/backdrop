@@ -350,7 +350,7 @@ function comment_update_1001() {
   foreach ($node_types as $node_type) {
     // Move the comment variables into each node type's config.
     $settings = array(
-      'comment_default' => update_variable_get('comment_' . $node_type->type, COMMENT_NODE_CLOSED),
+      'comment_default' => update_variable_get('comment_' . $node_type->type, COMMENT_NODE_OPEN),
       'comment_per_page' => update_variable_get('comment_default_per_page_' . $node_type->type, 50),
       'comment_mode' => update_variable_get('comment_default_mode_' . $node_type->type, COMMENT_MODE_THREADED),
       'comment_anonymous' => update_variable_get('comment_anonymous_' . $node_type->type, COMMENT_ANONYMOUS_MAYNOT_CONTACT),
