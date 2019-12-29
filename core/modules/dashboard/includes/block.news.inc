@@ -5,13 +5,6 @@
  */
 
 class DashboardNewsBlock extends Block {
-  /**
-   * {@inheritdoc}
-   */
-
-  public function __construct($plugin_name, array $data) {
-    parent::__construct($plugin_name, $data);
-  }
 
   /**
    * {@inheritdoc}
@@ -50,9 +43,7 @@ class DashboardNewsBlock extends Block {
       }
     }
 
-    $build = array(
-      '#theme' => 'dashboard_panel__news',
-    );
+    $build = array();
     if (empty($links)) {
       $build['list'] = array(
         '#type' => 'markup',
@@ -81,13 +72,5 @@ class DashboardNewsBlock extends Block {
         'This block provides a news feed from BackdropCMS.org. Its contents can not be edited.'
       ),
     );
-
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function formSubmit($form, &$form_state) {
-    parent::formSubmit($form, $form_state);
   }
 }
