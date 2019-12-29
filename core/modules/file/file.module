@@ -1664,31 +1664,22 @@ function file_managed_file_browser_open($form, $form_state) {
 
   $title = t('Select from Image Library');
   $options = array(
-    'dialogClass' => 'image-library-container',
+    'dialogClass' => 'file-browser-container',
     'width' => '90%',
   );
   $html = '';
   $html .= theme('status_messages');
-  $html .= '<div class="image-library">';
-  $html .= '<div class="image-library-view">';
+  $html .= '<div class="file-browser">';
+  $html .= '<div class="file-browser-view">';
   $html .= $view;
+  $html .= '</div>';
   $html .= backdrop_render($submit_form);
-  $html .= '</div><div class="image-detail"><h3>Image details</h3>';
-  // Make placeholders for properties to be added by file.js
-  $html .= '<p>ID: <span class="image-fid"> ......</span></p>';
-  $html .= '<p>Name: <span class="image-name"> ......</span></p>';
-  $html .= '<p>Src: <span class="image-uri"> ......</span></p>';
-  $html .= '<p>Size: <span class="image-size"> ......</span></p>';
-  // Provide name of image field to be used by file.js.
-  $html .= '<span>Field name: <span class="field-name" .....</span></p>';
-  $html .= '<p><i>Point at an image to reveal its properties.</i></p>';
-  $html .= '<p><i>Click an image to select it.</i></p>';
-  $html .= '</div>'; // end of image-detail.
   $html .= '</div>';
 
   $settings = array(
     'file' => array(
       'browser' => array(
+        'selectedFid' => NULL,
         'currentFidElement' => '[name="' . $element['fid']['#name'] . '"]',
       ),
     ),
@@ -1704,6 +1695,9 @@ function file_managed_file_browser_open($form, $form_state) {
  * Form to submit a file selected in the file browser.
  */
 function file_managed_file_browser_form($form, &$form_state) {
+  // FID is set via JavaScript on the client-side. As such, this is a "hidden"
+  // element, rather than "value". And we use #default_value, not #value, to
+  // allow client-side changes.
   $form['fid'] = array(
     '#type' => 'hidden',
     '#default_value' => '',
@@ -1722,7 +1716,16 @@ function file_managed_file_browser_form($form, &$form_state) {
       ),
     ),
   );
-  // TODO: Add cancel link/button.
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => '',
+    '#attributes' => array(
+      // Adding button classes puts the link in the button area of the dialog,
+      // while the special "dialog-cancel" class closes the dialog.
+      'class' => array('button', 'button-secondary', 'form-submit', 'dialog-cancel'),
+    ),
+  );
 
   return $form;
 }

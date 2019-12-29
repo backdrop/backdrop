@@ -10,9 +10,6 @@
 
 (function ($) {
 
-  // Placeholder for image field name.
-  var $thisImageFieldName = 'placeholder';
-
 /**
  * Attach behaviors to managed file element upload fields.
  */
@@ -178,63 +175,65 @@ Backdrop.file = Backdrop.file || {
     $(this).attr('target', '_blank');
     window.open(this.href, 'filePreview', 'toolbar=0,scrollbars=1,location=1,statusbar=1,menubar=0,resizable=1,width=500,height=550');
     return false;
+  },
+
+  /**
+   * Provide events for files in the file browser dialog.
+   */
+  dialogOpenEvent: function(e, dialoog, $element, settings) {
+    var $browserContainer = $element.find(".file-browser");
+    $browserContainer.once('file-browser').on('click', '[data-fid]', function () {
+      var $selectedElement = $(this);
+      if ($selectedElement.is('img')) {
+        $browserContainer.find('.image-library-image-selected').removeClass('image-library-image-selected');
+        $selectedElement.parent('.image-library-choose-file').addClass('image-library-image-selected');
+      }
+      else {
+        $browserContainer.find('.file-browser-selected').removeClass('file-browser-selected');
+        $selectedElement.parent('.file-browser-file').addClass('file-browser-selected');
+      }
+      var selectedFid = $(this).data('fid');
+      // Set the FID in the modal submit form.
+      $('form.file-managed-file-browser-form [name="fid"]').val(selectedFid);
+    })
+  },
+
+  /**
+   * After closing a dialog, check if the file ID needs to be updated..
+   */
+  dialogCloseEvent: function(e, dialog, $element) {
+    var $browserContainer = $element.find(".file-browser");
+    if ($browserContainer) {
+      // These two variables are set server-side when submitting the dialog, in
+      // file_managed_file_browser_submit().
+      var selectedFid = Backdrop.settings.file.browser.selectedFid;
+      var $fidElement = $(Backdrop.settings.file.browser.currentFidElement);
+
+      var $parentElement = $fidElement.closest('.form-type-managed-file');
+      var $fileInputField = $parentElement.find('input[type="file"]');
+      var $uploadButton = $parentElement.find('.file-upload-button');
+
+      if ($fidElement.length && selectedFid) {
+        // Clear any selected file (in the event it was selected before opening).
+        $fileInputField.val('');
+
+        // Set this hidden FID value to the selected file.
+        $fidElement.val(selectedFid);
+
+        // Then click the "Upload" button, which will utilize the given file.
+        $uploadButton
+          .trigger('mousedown')
+          .trigger('click')
+          .trigger('mouseup');
+      }
+    }
   }
 };
 
 /**
- * Provide mouseover and click event functions for images in the file browser.
+ * Attach dialog behaviors for the file browser.
  */
-Backdrop.behaviors.fileBrowserDialog = {
-  attach: function (context, settings) {
-    // Listen for the dialog creation event.
-    $(window).on('dialog:aftercreate', function() {
-        // Add events to images appearing in library.
-        var $galleryContainer = $(".image-library")
-        // first process mouseover (hover)
-        .on('mouseover', '.image-library-choose-file', function () {
-          // Get values from view.
-          var $currentImg = $(this).find('img');
-          var $currentImgFid = $currentImg.data('fid');
-          var $currentImgURI = $currentImg.data('file-url');
-          var $relativeImgSrc = Backdrop.relativeUrl($currentImgURI);
-          var $currentImgName = $currentImg.data('filename');
-          var $currentImgSize = $currentImg.data('filesize');
+$(window).on('dialog:aftercreate.fileBrowser', Backdrop.file.dialogOpenEvent);
+$(window).on('dialog:afterclose.fileBrowser', Backdrop.file.dialogCloseEvent);
 
-          // Enter values in placeholders.
-          $galleryContainer.find(".image-fid").text($currentImgFid);
-          $galleryContainer.find(".image-uri").text($relativeImgSrc);
-          $galleryContainer.find(".image-name").text($currentImgName);
-          $galleryContainer.find(".image-size").text($currentImgSize);
-          $galleryContainer.find(".field-name").text($thisImageFieldName);
-
-        })
-        // Find 'insert' button.
-
-        // now process click (select).
-        .on('click', '.image-library-choose-file', function () {
-          var $selectedImg = $(this).find('img');
-          var absoluteImgSrc = $selectedImg.data('file-url');
-          var $relativeImgSrc = Backdrop.relativeUrl(absoluteImgSrc);
-
-          // $thisField.find('[ID*= "library-imagesrc"]').val($relativeImgSrc);
-          var selectedFid = $selectedImg.data('fid');
-          // Set the FID in the modal submit form.
-          $('form.file-managed-file-browser-form [name="fid"]').val(selectedFid);
-        });
-    });
-    // Listen for the dialog creation event.
-    $(window).on('dialog:afterclose', function() {
-      var selectedFid = Backdrop.settings.file.browser.selectedFid;
-      var $fidElement = $(Backdrop.settings.file.browser.currentFidElement);
-
-      $fidElement.val(selectedFid);
-      $fidElement
-        .closest('.form-type-managed-file')
-        .find('.file-upload-button')
-        .trigger('mousedown')
-        .trigger('click')
-        .trigger('mouseup');
-    });
-  }
-};
 })(jQuery);
