@@ -157,6 +157,41 @@ function image_menu() {
     'access arguments' => array('administer image styles'),
     'file' => 'image.admin.inc',
   );
+  $items['image-file/image-library-modal'] = array(
+    'title' => 'Select from image library',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('image_field_library_modal_open'),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'image.field.inc',
+  );
+  $items['image-file/autocomplete'] = array(
+    'page callback' => '_image_file_autocomplete',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'image.field.inc',
+  );
+  $items['image-field/confirm-image-selection'] = array(
+    'title' => 'Confirm image selection',
+    'page callback' => 'image_field_library_confirmation_form',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'image.field.inc',
+  );
+  $items['image-field/cancel'] = array(
+    'title' => 'Close image confirmation form',
+    'page callback' => 'image_field_confirm_cancel',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'image.field.inc',
+  );
+  $items['image-field/cancel-ajax'] = array(
+    'title' => 'Close image confirmation form',
+    'page callback' => 'image_field_confirm_cancel_ajax',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'image.field.inc',
+  );
   // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/media/image-styles/edit/%image_style/add/%image_effect_definition'] = array(
     'page callback' => 'backdrop_goto_deprecated',

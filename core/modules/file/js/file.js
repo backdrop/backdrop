@@ -10,6 +10,9 @@
 
 (function ($) {
 
+  // Placeholder for image field name.
+  var $thisImageFieldName = 'placeholder';
+
 /**
  * Attach behaviors to managed file element upload fields.
  */
@@ -178,4 +181,150 @@ Backdrop.file = Backdrop.file || {
   }
 };
 
+/**
+ * Modify display of image upload fields in node add/edit form.
+ */
+Backdrop.behaviors.ImageLibraryOption = {
+  attach: function (context, settings) {
+    // select image fields (there may be more than one).
+    // for each image field, if there is an existing image
+    // hide the select image library option.
+    var $imageFields = $(".field-type-image");
+    // Check whether this has already been done.
+    if (!$imageFields.find(".image-widget").hasClass("image-library-option-processed")) {
+      // Add a 'processed' class to prevent unnecessary repetition.
+      var $imageWidgets = $imageFields.find(".image-widget").addClass("image-library-option-processed");
+      $imageWidgets.each(function (addLibrary) {
+        // check each image field for existence of an image file.
+        var $thisImage = $(this);
+        var $thisData = $thisImage.find(".image-widget-data");
+        var $thisSize = $thisData.find("span.file-size").length;
+        if ($thisSize > 0) {
+          // if there is an image file
+          // hide 'select from image library' option for this field.
+          $thisImage.find(".image-library-option").hide();
+          // hide image selection option div.
+          $thisImage.find(".image-selection-option").hide();
+        }
+        else {
+          // Find the field name for this image and assign to
+          // placeholder for image field name.
+          $thisImageFieldName = $thisImage.find('[name*= "[field_name]"]').val();
+          var $thisImageFid = $thisImage.find('[name*= "[fid]"]').val();
+
+          // Add a mouseover function to the 'Open Library' button's wrapper
+          // for this image.
+          $thisImage.find(".fieldset-wrapper").mouseover(function () {
+            // Find the FID field and add marker'current-image' as a class
+            // in order to be able to select it later.
+            $thisImage.find('input[name$= "[fid]"]').addClass("current-image");
+          });
+          // Add a mouseout function to remove 'current-image' marker.
+          $thisImage.find(".fieldset-wrapper").mouseout(function () {
+            $thisImage.find('input[name$= "[fid]"]').removeClass("current-image");
+          });
+          var $thisItem = $thisImage.parent().find("Label");
+          var $selection = $thisItem.parent();
+          var $fieldLabelText = $thisItem.text();
+          var $newLabelText = '<div class="image-label">';
+          var $addText = '<div class="image-upload">Upload image | </div><div class="image-reference">Reference existing | </div><div class="image-select">Select from image library</div>';
+          $newLabelText = $newLabelText.concat($fieldLabelText,'</div>',$addText);
+          $thisItem.replaceWith($newLabelText);
+          // Add click functions to the selection options for relevant images.
+          if ($thisImageFid == 0) {
+            $selection.find(".image-upload").click(function () {
+              $(".image-selection-option").hide();
+              $(".form-file").show();
+              $(".image-library-option").hide();
+              $(".image-upload").css({"color" : "mediumblue"});
+              $(".image-reference").css({"color" : "black"});
+              $(".image-select").css({"color" : "black"});
+            });
+            $selection.find(".image-reference").click(function () {
+              $selection.find(".image-selection-option").show();
+              $(".form-file").hide();
+              $(".image-library-option").hide();
+              $(".image-upload").css({"color" : "black"});
+              $(".image-reference").css({"color" : "mediumblue"});
+              $(".image-select").css({"color" : "black"});
+            });
+            $selection.find(".image-select").click(function () {
+              $(".image-selection-option").hide();
+              $(".form-file").hide();
+              $selection.find(".image-library-option").show();
+              $(".image-upload").css({"color" : "black"});
+              $(".image-reference").css({"color" : "black"});
+              $(".image-select").css({"color" : "mediumblue"});
+            });
+          }
+        }
+      });
+    }
+  }
+};
+
+  /**
+ * Provide mouseover and click event functions for images in library.
+ */
+Backdrop.behaviors.ImageFieldDialog = {
+  attach: function (context, settings) {
+    // Listen for a dialog creation event.
+    $(window).on('dialog:aftercreate', function() {
+      // Add events to images appearing in library.
+      var $galleryContainer = $(".image-library")
+        // first process mouseover (hover)
+        .on('mouseover', '.image-library-choose-file', function () {
+          // Get values from view.
+          var $currentImg = $(this).find('img');
+          var $currentImgFid = $currentImg.data('fid');
+          var $currentImgURI = $currentImg.data('file-url');
+          var $relativeImgSrc = Backdrop.relativeUrl($currentImgURI);
+          var $currentImgName = $currentImg.data('filename');
+          var $currentImgSize = $currentImg.data('filesize');
+
+          // Enter values in placeholders.
+          $galleryContainer.find(".image-fid").text($currentImgFid);
+          $galleryContainer.find(".image-uri").text($relativeImgSrc);
+          $galleryContainer.find(".image-name").text($currentImgName);
+          $galleryContainer.find(".image-size").text($currentImgSize);
+          $galleryContainer.find(".field-name").text($thisImageFieldName);
+        })
+
+        // now process click (select).
+        .on('click', '.image-library-choose-file', function () {
+          // Enter src value in image confirmation form.
+          // Get the values for the current image and copy to form.
+          $thisSrc = $galleryContainer.find(".image-uri").text();
+          $thisFid = $galleryContainer.find(".image-fid").text();
+          $thisName = $galleryContainer.find(".image-name").text();
+          $thisSize = $galleryContainer.find(".image-size").text();
+
+
+          var $widgetdata = $(".l-wrapper").find(".image-widget-data");
+          var $relevantFields = $widgetdata.find("input[name$='[fid]']");
+          var $specificField = $relevantFields.find(".current-image");
+          $specificField.removeClass('current-image');
+          $galleryContainer.find(".field-src").find("input").val($thisSrc);
+          $galleryContainer.find(".field-id").find("input").val($thisFid);
+
+        });
+    });
+  }
+};
+
+  /**
+   * Set field values in image confirmation form.
+   */
+  Backdrop.behaviors.ImageConfirmation = {
+    attach: function (context, settings) {
+      // Listen for a dialog creation event.
+      $(window).on('dialog:aftercreate', function() {
+        var $imageDetails = $(".image-preview-container");
+        var $imageFID = $imageDetails.find("span.img-fid").text();
+        var $imageSRC = $imageDetails.find("span.img-src").text();
+        $imageDetails.find(".field-id").find("input").val($imageFID);
+        $imageDetails.find(".field-src").find("input").val($imageSRC);
+      });
+    }
+  };
 })(jQuery);
