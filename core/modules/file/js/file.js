@@ -128,7 +128,7 @@ Backdrop.file = Backdrop.file || {
 
     // Check if we're working with an "Upload" button.
     var $enabledFields = [];
-    if ($(this).closest('div.form-managed-file').length > 0) {
+    if ($(this).is('.file-upload-button')) {
       $enabledFields = $(this).closest('div.form-managed-file').find('input.form-file');
     }
 

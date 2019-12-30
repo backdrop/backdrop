@@ -1313,7 +1313,7 @@ function file_managed_file_process($element, &$form_state, $form) {
     '#type' => 'submit',
     '#value' => t('Select existing file'),
     '#validate' => array(),
-    '#submit' => array('file_managed_file_submit'),
+    '#submit' => array(),
     '#limit_validation_errors' => array($element['#parents']),
     '#ajax' => array(
       'callback' => 'file_managed_file_browser_open',
