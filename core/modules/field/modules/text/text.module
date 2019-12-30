@@ -158,7 +158,16 @@ function text_field_load($entity_type, $entities, $field, $instances, $langcode,
  */
 function text_field_is_empty($item, $field) {
   if (!isset($item['value']) || $item['value'] === '') {
-    return !isset($item['summary']) || $item['summary'] === '';
+    if (isset($item['format']) && $item['format'] !== '') {
+      // If this text field has a text format setting,
+      // save it regardless of empty value to keep the format.
+      return FALSE;
+    }
+    elseif (!isset($item['summary']) || $item['summary'] === '') {
+      // Neither value nor summary nor format are set,
+      // no need to save to database.
+      return TRUE;
+    }
   }
   return FALSE;
 }
