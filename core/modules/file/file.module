@@ -1091,8 +1091,14 @@ function file_file_download($uri, $field_type = 'file') {
  * or processing.
  *
  * @see file_menu()
+ *
+ * @deprecated Since 1.15.0.
+ *   This is no longer used by the managed_file element as the #ajax['path']
+ *   value. Instead file_managed_file_ajax() is used in #ajax['callback'].
  */
 function file_ajax_upload() {
+  watchdog_deprecated_function('file', __FUNCTION__);
+
   $args = func_get_args();
   // Token used to validate that the path values are unmodified.
   $token = (string) array_pop($args);
@@ -1261,14 +1267,8 @@ function file_managed_file_process($element, &$form_state, $form) {
   $element['#file'] = $fid ? file_load($fid) : FALSE;
   $element['#tree'] = TRUE;
 
-  // Token here is not generated with backdrop_token() as it does not need to
-  // be session-based.
-  $path = 'file/ajax/' . implode('/', $element['#array_parents']) . '/' . $form['form_build_id']['#value'];
-  $token = backdrop_hmac_base64($path, backdrop_get_private_key() . backdrop_get_hash_salt());
-  $path .= '/' . $token;
-
   $ajax_settings = array(
-    'path' => $path,
+    'callback' => 'file_managed_file_ajax',
     'wrapper' => $element['#id'] . '-ajax-wrapper',
     'effect' => 'none',
     'progress' => array(
@@ -1585,6 +1585,44 @@ function file_managed_file_save_upload($element) {
   }
 
   return $file;
+}
+
+/**
+ * AJAX callback for managed file elements.
+ *
+ * @since 1.15.0
+ */
+function file_managed_file_ajax($form, $form_state) {
+  $button = $form_state['triggering_element'];
+
+  // Get the list of parents, minus the button pressed and field delta.
+  $parents = $button['#array_parents'];
+  $button_key = array_pop($parents); // Button pressed.
+  $delta_key = array_pop($parents); // The delta for the pressed button.
+
+  // Drill down to the element being updated.
+  $element = $form;
+  foreach ($parents as $parent_key) {
+    $element = $element[$parent_key];
+  }
+
+  // Add the special Ajax class if a new file was added.
+  if (isset($element['#file_upload_delta']) && $delta_key < $element['#file_upload_delta']) {
+    $element[$delta_key]['#attributes']['class'][] = 'ajax-new-content';
+  }
+  // Otherwise just add the new content class on a placeholder.
+  else {
+    $element[$delta_key][$button_key]['#suffix'] = '<span class="ajax-new-content"></span>';
+  }
+
+  $output = backdrop_render($element);
+  $commands = array();
+  $commands[] = ajax_command_replace('#' . $button['#ajax']['wrapper'], $output);
+  $commands[] = ajax_command_prepend(NULL, theme('status_messages'));
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
 }
 
 /**

@@ -2195,7 +2195,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   case, this value needs to be an array with the following keys:
    *   - path: A path to submit the form values to for Ajax-specific processing,
    *     which is likely different than the $path parameter used for retrieving
-   *     the initial form. Defaults to 'system/ajax'.
+   *     the initial form. Defaults to the current path.
    *   - triggering_element: If the value for the 'path' key is 'system/ajax' or
    *     another generic Ajax processing path, this needs to be set to the name
    *     of the element. If the name doesn't identify the element uniquely, then
@@ -2222,18 +2222,29 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   the form, which is typically the same thing but with hyphens replacing
    *   the underscores.
    * @param $extra_post
-   *   (optional) A string of additional data to append to the POST submission.
+   *   (optional) An array of additional data to append to the POST submission.
    *   This can be used to add POST data for which there are no HTML fields, as
-   *   is done by backdropPostAJAX(). This string is literally appended to the
-   *   POST data, so it must already be urlencoded and contain a leading "&"
-   *   (e.g., "&extra_var1=hello+world&extra_var2=you%26me").
+   *   is done by drupalPostAJAX().
    *
    * @return string|FALSE
    *   The returned HTML content from the response.
    */
-  protected function backdropPost($path, $edit, $submit, array $options = array(), array $headers = array(), $form_html_id = NULL, $extra_post = NULL) {
+  protected function backdropPost($path, $edit, $submit, array $options = array(), array $headers = array(), $form_html_id = NULL, $extra_post = array()) {
     $submit_matches = FALSE;
     $ajax = is_array($submit);
+
+    // Backwards-compatibility, convert $extra_post string to an array.
+    if (is_string($extra_post)) {
+      $extra_post_array = explode('&', $extra_post);
+      $extra_post = array();
+      foreach ($extra_post_array as $value) {
+        if ($value) {
+          list($key, $value) = explode('=', $value);
+          $extra_post[urldecode($key)] = urldecode($value);
+        }
+      }
+    }
+
     if (isset($path)) {
       $this->backdropGet($path, $options);
     }
@@ -2251,9 +2262,12 @@ class BackdropWebTestCase extends BackdropTestCase {
         $post = array();
         $upload = array();
         $submit_matches = $this->handleForm($post, $edit, $upload, $ajax ? NULL : $submit, $form);
+        $post += $extra_post;
         $action = isset($form['action']) ? $this->getAbsoluteUrl((string) $form['action']) : $this->getUrl();
         if ($ajax) {
-          $action = $this->getAbsoluteUrl(!empty($submit['path']) ? $submit['path'] : 'system/ajax');
+          if (!empty($submit['path'])) {
+            $action = $this->getAbsoluteUrl($submit['path']);
+          }
           // Ajax callbacks verify the triggering element if necessary, so while
           // we may eventually want extra code that verifies it in the
           // handleForm() function, it's not currently a requirement.
@@ -2263,7 +2277,6 @@ class BackdropWebTestCase extends BackdropTestCase {
         // We post only if we managed to handle every field in edit and the
         // submit button matches.
         if (!$edit && ($submit_matches || !isset($submit))) {
-          $post_array = $post;
           if ($upload) {
             // TODO: cURL handles file uploads for us, but the implementation
             // is broken. This is a less than elegant workaround. Alternatives
@@ -2289,7 +2302,7 @@ class BackdropWebTestCase extends BackdropTestCase {
               // http://www.w3.org/TR/html4/interact/forms.html#h-17.13.4.1
               $post[$key] = urlencode($key) . '=' . urlencode($value);
             }
-            $post = implode('&', $post) . $extra_post;
+            $post = implode('&', $post);
           }
           $out = $this->curlExec(array(CURLOPT_URL => $action, CURLOPT_POST => TRUE, CURLOPT_POSTFIELDS => $post, CURLOPT_HTTPHEADER => $headers));
           // Ensure that any changes to variables in the other thread are picked up.
@@ -2301,7 +2314,7 @@ class BackdropWebTestCase extends BackdropTestCase {
           }
           $this->verbose('POST request to: ' . $path .
                          '<hr />Ending URL: ' . ($this->getUrl()) .
-                         '<hr />Fields: ' . highlight_string('<?php ' . var_export($post_array, TRUE), TRUE) .
+                         '<hr />Fields: ' . highlight_string('<?php ' . var_export($post, TRUE), TRUE) .
                          '<hr />' . $out);
           return $out;
         }
@@ -2340,7 +2353,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @param $ajax_path
    *   (optional) Override the path set by the Ajax settings of the triggering
    *   element. In the absence of both the triggering element's Ajax path and
-   *   $ajax_path 'system/ajax' will be used.
+   *   $ajax_path, the current path will be used.
    * @param $options
    *   (optional) Options to be forwarded to url().
    * @param $headers
@@ -2369,6 +2382,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
     $content = $this->content;
     $backdrop_settings = $this->backdropSettings;
+    $current_url = $this->url;
 
     // Get the Ajax settings bound to the triggering element.
     if (!isset($ajax_settings)) {
@@ -2387,31 +2401,31 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
 
     // Add extra information to the POST data as ajax.js does.
-    $extra_post = '';
+    $extra_post = array();
     if (isset($ajax_settings['submit'])) {
       foreach ($ajax_settings['submit'] as $key => $value) {
-        $extra_post .= '&' . urlencode($key) . '=' . urlencode($value);
+        $extra_post[$key] = $value;
       }
     }
-    foreach ($this->xpath('//*[@id]') as $element) {
+    foreach ($this->xpath('//*[@id]') as $key => $element) {
       $id = (string) $element['id'];
-      $extra_post .= '&' . urlencode('ajax_html_ids[]') . '=' . urlencode($id);
+      $extra_post["ajax_html_ids[$key]"] = $id;
     }
     if (isset($backdrop_settings['ajaxPageState'])) {
-      $extra_post .= '&' . urlencode('ajax_page_state[theme]') . '=' . urlencode($backdrop_settings['ajaxPageState']['theme']);
-      $extra_post .= '&' . urlencode('ajax_page_state[theme_token]') . '=' . urlencode($backdrop_settings['ajaxPageState']['theme_token']);
+      $extra_post['ajax_page_state[theme]'] = $backdrop_settings['ajaxPageState']['theme'];
+      $extra_post['ajax_page_state[theme_token]'] = $backdrop_settings['ajaxPageState']['theme_token'];
       foreach ($backdrop_settings['ajaxPageState']['css'] as $key => $value) {
-        $extra_post .= '&' . urlencode("ajax_page_state[css][$key]") . '=1';
+        $extra_post["ajax_page_state[css][$key]"] = '1';
       }
       foreach ($backdrop_settings['ajaxPageState']['js'] as $key => $value) {
-        $extra_post .= '&' . urlencode("ajax_page_state[js][$key]") . '=1';
+        $extra_post["ajax_page_state[js][$key]"] = '1';
       }
     }
 
     // Unless a particular path is specified, use the one specified by the
-    // Ajax settings, or else 'system/ajax'.
+    // Ajax settings, or else the current system path.
     if (!isset($ajax_path)) {
-      $ajax_path = isset($ajax_settings['url']) ? $ajax_settings['url'] : 'system/ajax';
+      $ajax_path = isset($ajax_settings['url']) ? $ajax_settings['url'] : NULL;
     }
 
     // Submit the POST request.
@@ -2443,8 +2457,14 @@ class BackdropWebTestCase extends BackdropTestCase {
             $wrapperNode = NULL;
             // When a command doesn't specify a selector, use the
             // #ajax['wrapper'] which is always an HTML ID.
-            if (!isset($command['selector'])) {
-              $wrapperNode = $xpath->query('//*[@id="' . $ajax_settings['wrapper'] . '"]')->item(0);
+            if (isset($ajax_settings['wrapper'])) {
+              $wrapper_id = $ajax_settings['wrapper'];
+            }
+            elseif (strpos($command['selector'], '#') === 0) {
+              $wrapper_id = str_replace('#', '', $command['selector']);
+            }
+            if (isset($wrapper_id)) {
+              $wrapperNode = $xpath->query('//*[@id="' . $wrapper_id . '"]')->item(0);
             }
             // @todo Ajax commands can target any jQuery selector, but these are
             //   hard to fully emulate with XPath. For now, just handle 'head'
@@ -2452,12 +2472,15 @@ class BackdropWebTestCase extends BackdropTestCase {
             elseif (in_array($command['selector'], array('head', 'body'))) {
               $wrapperNode = $xpath->query('//' . $command['selector'])->item(0);
             }
+            else {
+              $this->fail(format_string('The Ajax selector %string is not supported by the testing framework.', array('%string' => $command['selector'])));
+            }
             if ($wrapperNode) {
               // ajax.js adds an enclosing DIV to work around a Safari bug.
               $newDom = new DOMDocument();
               // DOM can load HTML soup. But, HTML soup can throw warnings,
               // suppress them.
-              $newDom->loadHTML('<div>' . $command['data'] . '</div>');
+              @$newDom->loadHTML('<div>' . $command['data'] . '</div>');
               // Suppress warnings thrown when duplicate HTML IDs are
               // encountered. This probably means we are replacing an element
               // with the same ID.
@@ -2520,7 +2543,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       }
       $content = $dom->saveHTML();
     }
-    $this->backdropSetContent($content);
+    $this->backdropSetContent($content, $current_url);
     $this->backdropSetSettings($backdrop_settings);
 
     $verbose = 'AJAX POST request to: ' . $path;

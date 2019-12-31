@@ -128,7 +128,36 @@ function backdrop_get_form($form_id) {
   array_shift($args);
   $form_state['build_info']['args'] = $args;
 
-  return backdrop_build_form($form_id, $form_state);
+  // Disable redirection if the request was made via AJAX.
+  $ajax_form_post = isset($_POST['ajax_page_state']) && isset($_POST['form_id']) && $_POST['form_id'] === $form_id;
+  if ($ajax_form_post) {
+    $form_state['no_redirect'] = TRUE;
+    $form_state['rebuild_info']['copy']['#build_id'] = TRUE;
+    $form_state['rebuild_info']['copy']['#action'] = TRUE;
+  }
+
+  $form = backdrop_build_form($form_id, $form_state);
+
+  // In the event that this form was submitted via AJAX, we need to return a
+  // set of AJAX commands to update the original form. Generate the JSON
+  // response and end the request.
+  if ($ajax_form_post && $form_state['process_input']) {
+    $commands = array();
+    if (isset($form['#build_id_old']) && $form['#build_id_old'] !== $form['#build_id']) {
+      $commands[] = ajax_command_update_build_id($form);
+    }
+    $commands = ajax_form_return_commands($form, $form_state, $commands);
+
+    $status = ob_get_status();
+    if (!empty($status)) {
+      ob_clean();
+    }
+
+    ajax_deliver($commands);
+    exit();
+  }
+
+  return $form;
 }
 
 /**
@@ -408,6 +437,7 @@ function form_state_defaults() {
     'build_info' => array(
       'args' => array(),
       'files' => array(),
+      'from_cache' => FALSE,
     ),
     'temporary' => array(),
     'submitted' => FALSE,
@@ -463,6 +493,15 @@ function form_state_defaults() {
 function backdrop_rebuild_form($form_id, &$form_state, $old_form = NULL) {
   $form = backdrop_retrieve_form($form_id, $form_state);
 
+  $copy_build_id = !empty($form_state['rebuild_info']['copy']['#build_id']);
+
+  // If this form was not built from cache but needs to maintain the same build
+  // ID, copy the value from input onto the old form.
+  if (empty($form_state['build_info']['from_cache']) && isset($form_state['input']['form_build_id'])) {
+    $old_form['#build_id'] = $form_state['input']['form_build_id'];
+    $copy_build_id = FALSE;
+  }
+
   // If only parts of the form will be returned to the browser (e.g., Ajax or
   // RIA clients), or if the form already had a new build ID regenerated when it
   // was retrieved from the form cache, reuse the existing #build_id.
@@ -470,7 +509,7 @@ function backdrop_rebuild_form($form_id, &$form_state, $old_form = NULL) {
   // build's data in the form cache; also allowing the user to go back to an
   // earlier build, make changes, and re-submit.
   // @see backdrop_prepare_form()
-  $enforce_old_build_id = isset($old_form['#build_id']) && !empty($form_state['rebuild_info']['copy']['#build_id']);
+  $enforce_old_build_id = isset($old_form['#build_id']) && $copy_build_id;
   $old_form_is_mutable_copy = isset($old_form['#build_id_old']);
   if ($enforce_old_build_id || $old_form_is_mutable_copy) {
     $form['#build_id'] = $old_form['#build_id'];
@@ -524,6 +563,9 @@ function form_get_cache($form_build_id, &$form_state) {
       if ($cached_form_state = tempstore_get('form_state', $form_build_id)) {
         // Re-populate $form_state for subsequent rebuilds.
         $form_state = $cached_form_state + $form_state;
+
+        // Indicate this build was loaded from the cache, not a fresh build.
+        $form_state['build_info']['from_cache'] = TRUE;
 
         // If the original form is contained in include files, load the files.
         // @see form_load_include()

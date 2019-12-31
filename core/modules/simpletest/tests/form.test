@@ -1661,7 +1661,7 @@ class FormsRebuildTestCase extends BackdropWebTestCase {
     // submission and verify it worked by ensuring the updated page has two text
     // field items in the field for which we just added an item.
     $this->backdropGet('node/add/page');
-    $this->backdropPostAJAX(NULL, array(), array('field_ajax_test_add_more' => t('Add another item')), 'system/ajax', array(), array(), 'page-node-form');
+    $this->backdropPostAJAX(NULL, array(), array('field_ajax_test_add_more' => t('Add another item')), NULL, array(), array(), 'page-node-form');
     $this->assert(count($this->xpath('//div[contains(@class, "field-name-field-ajax-test")]//input[@type="text"]')) == 2, 'AJAX submission succeeded.');
 
     // Submit the form with the non-Ajax "Save" button, leaving the title field
@@ -2019,7 +2019,7 @@ class FormsFileInclusionTestCase extends BackdropWebTestCase {
    * Tests loading an include specified in hook_menu().
    */
   function testLoadMenuInclude() {
-    $this->backdropPostAJAX('form-test/load-include-menu', array(), array('op' => t('Save')), 'system/ajax', array(), array(), 'form-test-load-include-menu');
+    $this->backdropPostAJAX('form-test/load-include-menu', array(), array('op' => t('Save')), NULL, array(), array(), 'form-test-load-include-menu');
     $this->assertText('Submit callback called.');
   }
 
