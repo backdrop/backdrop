@@ -1324,7 +1324,7 @@ function file_managed_file_process($element, &$form_state, $form) {
     ),
     '#weight' => -5,
     '#attributes' => array('class' => array('file-browse-button')),
-    '#prefix' => '<span class="file-browse-text"> ' . t('or') . ' ',
+    '#prefix' => '<span class="file-browse-text js-show"> ' . t('or') . ' ',
     '#suffix' => '</span>',
     '#access' => !empty($element['#browser_view']),
   );
@@ -1659,6 +1659,12 @@ function file_managed_file_browser_open($form, $form_state) {
   // Pull the view to open off of the managed_file #browser_view property.
   $view_name = $element['#browser_view'];
   $view = views_embed_view($view_name);
+  if (empty($view)) {
+    $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
+    if (user_access('administer views')) {
+      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
+    }
+  }
 
   $submit_form = backdrop_get_form('file_managed_file_browser_form');
 
