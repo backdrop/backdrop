@@ -300,7 +300,7 @@ function comment_node_type_load(&$types) {
   foreach ($types as $type_name => $type) {
     $types[$type_name]->settings += array(
       'comment_enabled' => FALSE,
-      'comment_default' => COMMENT_NODE_OPEN,
+      'comment_default' => COMMENT_NODE_CLOSED,
       'comment_per_page' => 50,
       'comment_mode' => COMMENT_MODE_THREADED,
       'comment_anonymous' => COMMENT_ANONYMOUS_MAYNOT_CONTACT,
