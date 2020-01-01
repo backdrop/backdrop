@@ -446,6 +446,8 @@ function system_element_info() {
   );
   $types['file'] = array(
     '#input' => TRUE,
+    '#multiple' => FALSE,
+    '#process' => array('form_process_file'),
     '#size' => 60,
     '#theme' => 'file',
     '#theme_wrappers' => array('form_element'),

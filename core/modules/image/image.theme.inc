@@ -354,9 +354,9 @@ function theme_image_widget($variables) {
   }
 
   $output .= '<div class="image-widget-data">';
-  if ($element['fid']['#value'] != 0) {
-    $element['filename']['#markup'] .= ' <span class="file-size">(' . format_size($element['#file']->filesize) . ')</span> ';
-  }
+  if (!empty($element['fids']['#value'])) {
+    $file = reset($element['#files']);
+    $element['file_' . $file->fid]['filename']['#markup'] .= ' <span class="file-size">(' . format_size($file->filesize) . ')</span> ';  }
   $output .= backdrop_render_children($element);
   $output .= '</div>';
   $output .= '</div>';

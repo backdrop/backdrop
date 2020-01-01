@@ -14,7 +14,7 @@ function image_field_info() {
       'description' => t('This field stores the ID of an image file as an integer value.'),
       'settings' => array(
         'uri_scheme' => config_get('system.core', 'file_default_scheme'),
-        'default_image' => '',
+        'default_image' => array(),
       ),
       'instance_settings' => array(
         'file_extensions' => 'png gif jpg jpeg',
@@ -24,7 +24,7 @@ function image_field_info() {
         'title_field' => 0,
         'max_dimensions' => '',
         'min_dimensions' => '',
-        'default_image' => '',
+        'default_image' => array(),
         'orientate' => 0,
       ),
       'default_widget' => 'image_image',
@@ -231,10 +231,10 @@ function _image_field_default_image_validate($element, &$form_state) {
     // IDs, we only track the URI.
     $directory = $element['#default_scheme'] . '://default_images/';
     file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
-    $uri = file_unmanaged_move($file->uri, $directory);
+    $uri = file_unmanaged_move($file[0]->uri, $directory);
 
     // Delete the file entity record.
-    file_delete($file->fid);
+    file_delete($file[0]->fid);
   }
   if (isset($element['remove']) && $element['remove']['#value']) {
     $uri = '';
@@ -414,12 +414,12 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 
   if ($field['cardinality'] == 1) {
     // If there's only one field, return it as delta 0.
-    if (empty($elements[0]['#default_value']['fid'])) {
-      $elements[0]['#description'] = theme('file_upload_help', array('description' => field_filter_xss($instance['description']), 'upload_validators' => $elements[0]['#upload_validators']));
+    if (empty($elements[0]['#default_value']['fids'])) {
+      $elements[0]['#description'] = theme('file_upload_help', array('description' => field_filter_xss($instance['description']), 'upload_validators' => $elements[0]['#upload_validators'], 'cardinality' => $field['cardinality']));
     }
   }
   else {
-    $elements['#file_upload_description'] = theme('file_upload_help', array('upload_validators' => $elements[0]['#upload_validators']));
+    $elements['#file_upload_description'] = theme('file_upload_help', array('upload_validators' => $elements[0]['#upload_validators'], 'cardinality' => $field['cardinality']));
   }
   return $elements;
 }
@@ -442,10 +442,11 @@ function image_field_widget_process($element, &$form_state, $form) {
   $element['#attached']['css'][] = backdrop_get_path('module', 'image') . '/css/image.css';
 
   // Add the image preview.
-  if ($element['#file'] && $widget_settings['preview_image_style']) {
+  if (!empty($element['#files']) && $widget_settings['preview_image_style']) {
+    $file = reset($element['#files']);
     $variables = array(
       'style_name' => $widget_settings['preview_image_style'],
-      'uri' => $element['#file']->uri,
+      'uri' => $file->uri,
     );
 
     // Determine image dimensions.
@@ -454,7 +455,7 @@ function image_field_widget_process($element, &$form_state, $form) {
       $variables['height'] = $element['#value']['height'];
     }
     else {
-      $info = image_get_info($element['#file']->uri);
+      $info = image_get_info($file->uri);
 
       if (is_array($info)) {
         $variables['width'] = $info['width'];
