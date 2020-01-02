@@ -19,16 +19,18 @@
       "84c43df4-1165-4faf-8700-c362a7153c0b",
       "13b2f325-af26-40bb-8c61-97fe1d93f19f"
     ],
+    "top": [
+      "09f11b4e-877e-45ab-9000-a4c6254faa04",
+      "701c6a05-8ed2-484d-ae08-8b44cb39869e",
+      "19289308-b903-45f1-9600-fc1ba3a845f8"
+    ],
     "content": [
       "default"
     ],
     "footer": [
       "cd4d033d-3f67-4191-8655-85ee758877c0"
     ],
-    "sidebar": [],
-    "top": [
-      "09f11b4e-877e-45ab-9000-a4c6254faa04"
-    ]
+    "sidebar": []
   },
   "content": {
     "84c43df4-1165-4faf-8700-c362a7153c0b": {
@@ -107,6 +109,58 @@
           ]
         },
         "uuid": "09f11b4e-877e-45ab-9000-a4c6254faa04",
+        "style": {
+          "plugin": "default",
+          "data": {
+            "settings": {
+              "classes": ""
+            }
+          }
+        }
+      }
+    },
+    "701c6a05-8ed2-484d-ae08-8b44cb39869e": {
+      "plugin": "system:page_components:tabs",
+      "data": {
+        "module": "system",
+        "delta": "page_components",
+        "settings": {
+          "title_display": "none",
+          "title": "",
+          "style": "default",
+          "block_settings": [],
+          "contexts": [],
+          "title_tag": "h1",
+          "title_classes": "page-title",
+          "tab_type": "both"
+        },
+        "uuid": "701c6a05-8ed2-484d-ae08-8b44cb39869e",
+        "style": {
+          "plugin": "default",
+          "data": {
+            "settings": {
+              "classes": ""
+            }
+          }
+        }
+      }
+    },
+    "19289308-b903-45f1-9600-fc1ba3a845f8": {
+      "plugin": "system:page_components:title",
+      "data": {
+        "module": "system",
+        "delta": "page_components",
+        "settings": {
+          "title_display": "none",
+          "title": "",
+          "style": "default",
+          "block_settings": [],
+          "contexts": [],
+          "title_tag": "h1",
+          "title_classes": "page-title",
+          "tab_type": "both"
+        },
+        "uuid": "19289308-b903-45f1-9600-fc1ba3a845f8",
         "style": {
           "plugin": "default",
           "data": {
