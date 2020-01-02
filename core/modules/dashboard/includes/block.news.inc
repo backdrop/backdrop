@@ -39,7 +39,7 @@ class DashboardNewsBlock extends Block {
         $links[] = '<p>' . l(
             $notifications->notification->title,
             $notifications->notification->url
-          ) . ' - ' . $notifications->notification->summary . '</p>';
+          ) . ' - ' . filter_xss($notifications->notification->summary) . '</p>';
       }
     }
 
