@@ -853,7 +853,7 @@ function file_field_widget_process($element, &$form_state, $form) {
     $field_element = backdrop_array_get_nested_value($form, $parents);
     $new_wrapper = $field_element['#id'] . '-ajax-wrapper';
     foreach (element_children($element) as $key) {
-      if (isset($element[$key]['#ajax'])) {
+      if (isset($element[$key]['#ajax']['path'])) {
         $element[$key]['#ajax']['path'] = $new_path;
         $element[$key]['#ajax']['wrapper'] = $new_wrapper;
       }
