@@ -1761,6 +1761,13 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Use the test mail class instead of the default mail handler class.
     config_set('system.mail', 'default-system', 'TestingMailSystem');
 
+    // Disable news checking against BackdropCMS.org.
+    $dashboard_config = config('dashboard.settings');
+    if (!$dashboard_config->isNew()) {
+      $dashboard_config->set('news_feed_url', FALSE);
+      $dashboard_config->save();
+    }
+
     backdrop_set_time_limit($this->timeLimit);
     $this->setup = TRUE;
     return TRUE;
