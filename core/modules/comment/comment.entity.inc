@@ -335,7 +335,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
     // If entity caching is enabled on nodes, clear the cache for the node.
     $node_info = entity_get_info('node');
     if (isset($node_info['entity cache']) && $node_info['entity cache']) {
-      cache_clear_all($comment->nid, 'cache_entity_node');
+      cache('entity_node')->delete($comment->nid);
     }
   }
 
@@ -359,7 +359,9 @@ class CommentStorageController extends EntityDatabaseStorageController {
     // the deleted comments were on.
     $node_info = entity_get_info('node');
     if (isset($node_info['entity cache']) && $node_info['entity cache']) {
-      cache_clear_all(array_unique($nodes), 'cache_entity_node');
+      foreach (array_unique($nodes) as $nid) {
+        cache('entity_node')->delete($nid);
+      }
     }
 
   }

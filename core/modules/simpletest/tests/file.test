@@ -1597,7 +1597,7 @@ class FileDeleteTest extends FileHookTestCase {
       ->execute();
     // Remove the entity cache entry for this file so that hook_file_load will
     // be called again.
-    cache_clear_all($file->fid, 'cache_entity_file');
+    cache('entity_file')->delete($file->fid);
 
     backdrop_cron_run();
 
@@ -1966,7 +1966,7 @@ class FileLoadTest extends FileHookTestCase {
 
     // Remove the entity cache entry for this file so that hook_file_load will
     // be called again.
-    cache_clear_all($file->fid, 'cache_entity_file');
+    cache('entity_file')->delete($file->fid);
 
     // Load by fid.
     file_test_reset();
