@@ -254,14 +254,6 @@ function node_form($form, &$form_state, Node $node) {
     '#description' => t('Briefly describe the changes you have made.'),
   );
 
-  $form['revision_information']['is_default_revision'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Make default'),
-    '#description' => t('Select to make this the default revision.'),
-    '#default_value' => $node->is_default_revision,
-    '#access' => !$node->isNew() && user_access('administer nodes'),
-  );
-
   // Node author information for administrators
   $form['author'] = array(
     '#type' => 'fieldset',
@@ -525,7 +517,7 @@ function node_form_submit($form, &$form_state) {
   $watchdog_args = array('@type' => $node->type, '%title' => $node->title);
   $t_args = array('@type' => $type, '%title' => $node->title, '@scheduled' => format_date($node->scheduled), '@interval' => format_interval($node->scheduled - REQUEST_TIME));
   $message = '';
-    
+
   if ($node->scheduled) {
     if (!empty($original_status)) {
       $message = t('@type has been unpublished. It is scheduled to be republished on @scheduled (@interval from now).', $t_args);
