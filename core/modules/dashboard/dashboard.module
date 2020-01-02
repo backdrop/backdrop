@@ -253,6 +253,18 @@ function dashboard_theme() {
 }
 
 /**
+ * Implements hook_cron().
+ */
+function dashboard_cron() {
+  $last_news_fetch = state_get('dashboard_news_timestamp');
+  $fetch_interval = 21600; // 6 hours.
+  if (REQUEST_TIME - $last_news_fetch > $fetch_interval) {
+    DashboardNewsBlock::refreshNewsFeed();
+    state_set('dashboard_news_timestamp', REQUEST_TIME);
+  }
+}
+
+/**
  * Menu callback; Dashboard settings form.
  */
 function dashboard_admin_settings() {
