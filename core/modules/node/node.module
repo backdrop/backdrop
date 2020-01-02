@@ -98,7 +98,7 @@ function node_theme() {
       'variables' => array('content' => NULL),
     ) + $base,
     'node_revision_info' => array(
-      'variables' => array('revision' => NULL, 'default' => FALSE),
+      'variables' => array('revision' => NULL, 'active' => FALSE),
     ) + $base,
     'node_admin_overview' => array(
       'variables' => array('name' => NULL, 'type' => NULL),
@@ -1075,9 +1075,9 @@ function node_delete_multiple($nids) {
  */
 function node_revision_delete($revision_id) {
   if ($revision = node_load(NULL, $revision_id)) {
-    // Prevent deleting the default revision.
+    // Prevent deleting the active revision.
     $node = node_load($revision->nid);
-    if ($revision->isDefaultRevision()) {
+    if ($revision->isActiveRevision()) {
       return FALSE;
     }
 
@@ -1242,7 +1242,7 @@ function node_build_content(Node $node, $view_mode = 'full', $langcode = NULL) {
 function node_show(Node $node, $message = FALSE) {
   if ($message) {
     $title_node = $node;
-    if (!$node->isDefaultRevision()) {
+    if (!$node->isActiveRevision()) {
       $title_node = node_load($node->nid);
     }
     backdrop_set_title(t('Revision of %title from %date', array('%title' => $title_node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
@@ -1528,7 +1528,7 @@ function node_ranking() {
 function node_user_cancel($edit, $account, $method) {
   switch ($method) {
     case 'user_cancel_block_unpublish':
-      // Unpublish nodes (default revisions).
+      // Unpublish nodes (active revisions).
       module_load_include('inc', 'node', 'node.admin');
       $nodes = db_select('node', 'n')
         ->fields('n', array('nid'))
@@ -1539,7 +1539,7 @@ function node_user_cancel($edit, $account, $method) {
       break;
 
     case 'user_cancel_reassign':
-      // Anonymize nodes (default revisions).
+      // Anonymize nodes (active revisions).
       module_load_include('inc', 'node', 'node.admin');
       $nodes = db_select('node', 'n')
         ->fields('n', array('nid'))
@@ -1564,7 +1564,7 @@ function node_user_cancel($edit, $account, $method) {
  * Implements hook_user_predelete().
  */
 function node_user_predelete($account) {
-  // Delete nodes (default revisions).
+  // Delete nodes (active revisions).
   // @todo Introduce node_mass_delete() or make node_mass_update() more flexible.
   $nodes = db_select('node', 'n')
     ->fields('n', array('nid'))
@@ -1628,12 +1628,12 @@ function _node_revision_access(Node $node, $op = 'view', $account = NULL) {
     }
 
     $node_current_revision = node_load($node->nid);
-    $is_current_revision = $node->isDefaultRevision();
+    $is_current_revision = $node->isActiveRevision();
 
     // There should be at least two revisions. If the vid of the given node
-    // and the vid of the default revision differ, then we already have two
+    // and the vid of the active revision differ, then we already have two
     // different revisions so there is no need for a separate database check.
-    // Also, if you try to revert to or delete the default revision, that's
+    // Also, if you try to revert to or delete the active revision, that's
     // not good.
     if ($is_current_revision && (db_query('SELECT COUNT(vid) FROM {node_revision} WHERE nid = :nid', array(':nid' => $node->nid))->fetchField() == 1 || $op == 'update' || $op == 'delete')) {
       $access[$cid] = FALSE;
@@ -1642,8 +1642,8 @@ function _node_revision_access(Node $node, $op = 'view', $account = NULL) {
       $access[$cid] = TRUE;
     }
     else {
-      // First check the access to the default revision and finally, if the
-      // node passed in is not the default revision then access to that, too.
+      // First check the access to the active revision and finally, if the
+      // node passed in is not the active revision then access to that, too.
       $access[$cid] = node_access($op, $node_current_revision, $account) && ($is_current_revision || node_access($op, $node, $account));
     }
   }
@@ -1864,30 +1864,13 @@ function node_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'node.pages.inc',
   );
-  $items['node/%node/revisions/%'] = array(
-    'title' => 'View draft',
+  $items['node/%node/revisions/%/view'] = array(
+    'title' => 'Revisions',
     'load arguments' => array(3),
     'page callback' => 'node_show',
     'page arguments' => array(1, TRUE),
     'access callback' => '_node_revision_access',
     'access arguments' => array(1),
-  );
-  $items['node/%node/revisions/%/view'] = array(
-    'title' => 'View',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
-  $items['node/%node/revisions/%/edit'] = array(
-    'title' => 'Edit draft',
-    'load arguments' => array(3),
-    'page callback' => 'node_page_edit',
-    'page arguments' => array(1),
-    'access callback' => '_node_revision_access',
-    'access arguments' => array(1),
-    'weight' => 2,
-    'type' => MENU_LOCAL_TASK,
-    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-    'file' => 'node.pages.inc',
   );
   $items['node/%node/revisions/%/revert'] = array(
     'title' => 'Revert to earlier revision',

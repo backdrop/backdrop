@@ -188,15 +188,15 @@ interface EntityInterface {
   public function getRevisionId();
 
   /**
-   * Checks if this entity is the default revision.
+   * Checks if this entity is the active revision.
    *
    * @param bool $new_value
-   *   (optional) A Boolean to (re)set the is_default_revision flag.
+   *   (optional) A Boolean to (re)set the is_active_revision flag.
    *
    * @return bool
-   *   TRUE if the entity is the default revision, FALSE otherwise.
+   *   TRUE if the entity is the active revision, FALSE otherwise.
    */
-  public function isDefaultRevision($new_value = NULL);
+  public function isActiveRevision($new_value = NULL);
 }
 
 /**
@@ -205,11 +205,11 @@ interface EntityInterface {
 abstract class Entity extends stdClass implements EntityInterface {
 
   /**
-   * Indicates whether this is the default revision.
+   * Indicates whether this is the active revision.
    *
    * @var bool
    */
-  public $is_default_revision = TRUE;
+  public $is_active_revision = TRUE;
 
   /**
    * Constructs a new entity object.
@@ -314,12 +314,12 @@ abstract class Entity extends stdClass implements EntityInterface {
   }
 
   /**
-   * Implements Backdrop\entity\EntityInterface::isDefaultRevision().
+   * Implements Backdrop\entity\EntityInterface::isActiveRevision().
    */
-  public function isDefaultRevision($new_value = NULL) {
-    $return = $this->is_default_revision;
+  public function isActiveRevision($new_value = NULL) {
+    $return = $this->is_active_revision;
     if (isset($new_value)) {
-      $this->is_default_revision = (bool) $new_value;
+      $this->is_active_revision = (bool) $new_value;
     }
     return $return;
   }

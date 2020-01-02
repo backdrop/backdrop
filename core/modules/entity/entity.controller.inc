@@ -256,7 +256,7 @@ class DefaultEntityController implements EntityControllerInterface {
    *   together. This parameter is deprecated; use an EntityFieldQuery instead.
    * @param $revision_id
    *   The ID of the revision to load, or FALSE if this query is asking for the
-   *   most default revision(s).
+   *   active revision(s).
    *
    * @return SelectQuery
    *   A SelectQuery object for loading the entity.
@@ -293,9 +293,9 @@ class DefaultEntityController implements EntityControllerInterface {
       $query->fields('revision', $entity_revision_fields);
 
       // Compare revision id of the base and revision table, if equal then this
-      // is the default revision.
-      $query->addExpression('base.' . $this->revisionKey . ' = revision.' . $this->revisionKey, 'is_default_revision');
-      $query->addField('base', $this->revisionKey, 'default_revision');
+      // is the active revision.
+      $query->addExpression('base.' . $this->revisionKey . ' = revision.' . $this->revisionKey, 'is_active_revision');
+      $query->addField('base', $this->revisionKey, 'active_revision');
     }
 
     $query->fields('base', $entity_fields);
@@ -325,7 +325,7 @@ class DefaultEntityController implements EntityControllerInterface {
    * @param $queried_entities
    *   Associative array of query results, keyed on the entity ID.
    * @param $revision_id
-   *   ID of the revision that was loaded, or FALSE if the most default revision
+   *   ID of the revision that was loaded, or FALSE if the active revision
    *   was loaded.
    */
   protected function attachLoad(&$queried_entities, $revision_id = FALSE) {

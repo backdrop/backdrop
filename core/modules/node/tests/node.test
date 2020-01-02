@@ -184,7 +184,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     $node = $this->backdropCreateNode();
     $settings = get_object_vars($node);
     $settings['revision'] = 1;
-    $settings['is_default_revision'] = TRUE;
+    $settings['is_active_revision'] = TRUE;
 
     $nodes = array();
     $logs = array();
@@ -202,7 +202,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
       // Make sure we get revision information.
       $node = node_load($node->nid);
       $settings = get_object_vars($node);
-      $settings['is_default_revision'] = TRUE;
+      $settings['is_active_revision'] = TRUE;
 
       $nodes[] = $node;
     }
@@ -230,9 +230,9 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     foreach ($logs as $log) {
       $this->assertText($log, t('Log message found.'));
     }
- 
-    // Confirm that this is the default revision.
-    $this->assertTrue($node->isDefaultRevision(), 'Third node revision is the current one.');
+
+    // Confirm that this is the active revision.
+    $this->assertTrue($node->isActiveRevision(), 'Third node revision is the current one.');
 
     // Confirm that revisions revert properly.
     $this->backdropPost("node/$node->nid/revisions/{$nodes[1]->vid}/revert", array(), t('Revert'));
@@ -243,10 +243,10 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     )), 'Revision reverted.');
     $reverted_node = node_load($node->nid);
     $this->assertTrue(($nodes[1]->body[LANGUAGE_NONE][0]['value'] == $reverted_node->body[LANGUAGE_NONE][0]['value']), 'Node reverted correctly.');
- 
+
     // Confirm that this is not the current version.
     $node = node_load($node->nid, $node->vid);
-    $this->assertFalse($node->isDefaultRevision(), 'Third node revision is not the current one.');
+    $this->assertFalse($node->isActiveRevision(), 'Third node revision is not the current one.');
 
     // Confirm revisions delete properly.
     $this->backdropPost("node/$node->nid/revisions/{$nodes[1]->vid}/delete", array(), t('Delete'));
@@ -278,9 +278,9 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     $new_node_revision = clone $node;
     $new_body = $this->randomName();
     $new_node_revision->body[LANGUAGE_NONE][0]['value'] = $new_body;
-    // Save this as a non-default revision.
+    // Save this as a non-active revision.
     $new_node_revision->revision = TRUE;
-    $new_node_revision->is_default_revision = FALSE;
+    $new_node_revision->is_active_revision = FALSE;
     node_save($new_node_revision);
 
     $this->backdropGet("node/$node->nid");
@@ -290,15 +290,15 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     $this->backdropGet("node/$node->nid/revisions/" . $new_node_revision->vid . "/view");
     $this->assertText($new_body, t('Revision body text is present when loading specific revision.'));
 
-    // Verify that the non-default revision vid is greater than the default
+    // Verify that the non-active revision vid is greater than the default
     // revision vid.
-    $default_revision = db_select('node', 'n')
+    $active_revision = db_select('node', 'n')
       ->fields('n', array('vid'))
       ->condition('nid', $node->nid)
       ->execute()
       ->fetchCol();
-    $default_revision_vid = $default_revision[0];
-    $this->assertTrue($new_node_revision->vid > $default_revision_vid, 'Revision vid is greater than default revision vid.');
+    $active_revision_vid = $active_revision[0];
+    $this->assertTrue($new_node_revision->vid > $active_revision_vid, 'Revision vid is greater than active revision vid.');
   }
 
   /**
@@ -723,7 +723,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
 
     $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');
 
-    // Test that a user with permissions to create, but not edit, can still 
+    // Test that a user with permissions to create, but not edit, can still
     // access preview.
     $no_edit_user = $this->backdropCreateUser(array(
       'create page content',
@@ -740,7 +740,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/page', $edit, t('Preview'));
     $this->assertText($edit[$title_key], 'Title displayed.');
 
-    // Test that a user with permissions to edit, but not create, can still 
+    // Test that a user with permissions to edit, but not create, can still
     // access preview.
     $no_create_user = $this->backdropCreateUser(array(
       'edit any page content',
@@ -3019,7 +3019,7 @@ class NodeRevisionPermissionsTestCase extends BackdropWebTestCase {
       // Create a revision for the same nid and settings with a random log.
       $revision = clone $node;
       $revision->revision = 1;
-      $revision->is_default_revision = FALSE;
+      $revision->is_active_revision = FALSE;
       $revision->log = $this->randomName(32);
       node_save($revision);
       $this->node_revisions[] = $revision;

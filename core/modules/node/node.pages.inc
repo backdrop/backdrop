@@ -16,7 +16,7 @@
 function node_page_edit(Node $node) {
   $type_name = node_type_get_name($node);
   backdrop_set_title(t('Edit @type %title', array('@type' => $type_name, '%title' => $node->title)), PASS_THROUGH);
-  if (!$node->isDefaultRevision()) {
+  if (!$node->isActiveRevision()) {
     backdrop_set_title(t('Revision of %title from %date', array('%title' => $node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
   }
   return backdrop_get_form($node->type . '_node_form', $node);
@@ -436,10 +436,10 @@ function node_form($form, &$form_state, Node $node) {
   );
   if (!empty($node->nid)) {
     // If editing a revision, go to the revision view.
-    if ($node->isDefaultRevision() && node_access('delete', $node)) {
+    if ($node->isActiveRevision() && node_access('delete', $node)) {
       $delete_href = "node/{$node->nid}/delete";
     }
-    elseif (!$node->isDefaultRevision() && _node_revision_access($node, 'delete')) {
+    elseif (!$node->isActiveRevision() && _node_revision_access($node, 'delete')) {
       $delete_href = 'node/' . $node->nid . '/revisions/' . $node->vid . '/delete';
     }
 
@@ -546,7 +546,7 @@ function node_form_submit($form, &$form_state) {
       $form_state['redirect'] = 'node/' . $node->nid;
 
       // If editing a revision, go to the revision view.
-      if (!$node->isDefaultRevision() && _node_revision_access($node)) {
+      if (!$node->isActiveRevision() && _node_revision_access($node)) {
         $form_state['redirect'] = 'node/' . $node->nid . '/revisions/' . $node->vid . '/view';
       }
 
@@ -770,7 +770,7 @@ function node_preview_banner_form_node_submit(array $form, array &$form_state) {
       $destination = 'node/' . $node->nid;
 
       // If editing a revision, go to the revision view.
-      if (!$node->isDefaultRevision() && _node_revision_access($node)) {
+      if (!$node->isActiveRevision() && _node_revision_access($node)) {
         $destination = 'node/' . $node->nid . '/revisions/' . $node->vid . '/view';
       }
 
@@ -913,12 +913,13 @@ function node_revision_overview($node) {
   }
   foreach ($revisions as $revision) {
     $row = array();
-    $is_default_revision = ($revision->vid == $node->default_revision);
+    $is_active_revision = ($revision->vid == $node->active_revision);
     $links = array();
     $row_class = '';
-    if ($is_default_revision) {
-      $row_class = 'revision-default';
-      $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'default' => $is_default_revision));
+    if ($is_active_revision) {
+      // @todo remove the revision-current class in 2.x
+      $row_class = 'revision-active revision-current';
+      $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'active' => $is_active_revision));
       $publish_action = ($revision->status == NODE_PUBLISHED) ? 'unpublish' : 'pubish';
       // @todo: Add proper permissions check.
       if (node_access('update', $node)) {
@@ -929,8 +930,8 @@ function node_revision_overview($node) {
       }
     }
     else {
-      $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'default' => $is_default_revision));
-      if ($edit_permission) {
+      $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'active' => $is_active_revision));
+      if ($is_active_revision && $edit_permission) {
         $links['edit'] = array(
           'title' => t('Edit'),
           'href' => "node/$node->nid/revisions/$revision->vid/edit",
@@ -938,13 +939,13 @@ function node_revision_overview($node) {
       }
       if ($revert_permission) {
         $links['revert'] = array(
-          'title' => t('Set as default'),
+          'title' => t('Revert'),
           'href' => "node/$node->nid/revisions/$revision->vid/revert",
         );
       }
       if ($delete_permission) {
         $links['delete'] = array(
-          'title' => t('Delete revision'),
+          'title' => t('Delete'),
           'href' => "node/$node->nid/revisions/$revision->vid/delete",
         );
       }
@@ -995,8 +996,8 @@ function node_revision_revert_confirm($form, $form_state, $node_revision) {
 function node_revision_revert_confirm_submit($form, &$form_state) {
   $node_revision = $form['#node_revision'];
   $node_revision->revision = 1;
-  // Make this the new default revision for the node.
-  $node_revision->is_default_revision = TRUE;
+  // Make this the new active revision for the node.
+  $node_revision->is_active_revision = TRUE;
 
   // The revision timestamp will be updated when the revision is saved. Keep the
   // original one for the confirmation message.

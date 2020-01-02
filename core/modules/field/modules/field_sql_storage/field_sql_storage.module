@@ -388,9 +388,9 @@ function field_sql_storage_field_storage_write($entity_type, $entity, $op, $fiel
       // Delete all languages if $entity->$field_name is empty.
       $languages = !empty($entity->$field_name) ? $field_languages : $all_languages;
       if ($languages) {
-        // Only overwrite the field's base table if saving the default revision
+        // Only overwrite the field's base table if saving the active revision
         // of an entity.
-        if ($entity->isDefaultRevision()) {
+        if ($entity->isActiveRevision()) {
           db_delete($table_name)
             ->condition('entity_type', $entity_type)
             ->condition('entity_id', $id)
@@ -445,9 +445,9 @@ function field_sql_storage_field_storage_write($entity_type, $entity, $op, $fiel
 
     // Execute the query if we have values to insert.
     if ($do_insert) {
-      // Only overwrite the field's base table if saving the default revision
+      // Only overwrite the field's base table if saving the active revision
       // of an entity.
-      if ($entity->isDefaultRevision()) {
+      if ($entity->isActiveRevision()) {
         $query->execute();
       }
       $revision_query->execute();

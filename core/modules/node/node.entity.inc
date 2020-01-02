@@ -24,14 +24,14 @@ class Node extends Entity {
   public $vid;
 
   /**
-   * Indicates whether this is the default node revision.
+   * Indicates whether this is the active revision of the node.
    *
-   * The default revision of a node is the one loaded when no specific revision
-   * has been specified. Only default revisions are saved to the node table.
+   * The active revision of a node is the one loaded when no specific revision
+   * has been specified. Only active revisions are saved to the node table.
    *
    * @var boolean
    */
-  public $is_default_revision = TRUE;
+  public $is_active_revision = TRUE;
 
   /**
    * The node content type (bundle).
@@ -478,14 +478,13 @@ class NodeStorageController extends EntityDatabaseStorageController {
       }
       else {
         $op = 'update';
-        // Update the base node table, but only if this revision is marked as
-        // the default.
-        if ($entity->isDefaultRevision()) {
+        // Update the base node table if this revision is marked as active.
+        if ($entity->isActiveRevision()) {
           $return = backdrop_write_record($this->entityInfo['base table'], $entity, $this->idKey);
         }
         else {
           // @todo, should a different value be returned when saving an entity
-          // with $is_default_revision = FALSE?
+          // with $is_active_revision = FALSE?
           $return = FALSE;
         }
       }
@@ -526,8 +525,8 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
     if (empty($entity->{$this->revisionKey}) || !empty($entity->revision)) {
       backdrop_write_record($this->revisionTable, $record);
-      // Only update the base node table if this revision is the default.
-      if ($entity->isDefaultRevision()) {
+      // Only update the base node table if this revision is active.
+      if ($entity->isActiveRevision()) {
         db_update($this->entityInfo['base table'])
           ->fields(array($this->revisionKey => $record->{$this->revisionKey}))
           ->condition($this->idKey, $entity->{$this->idKey})
@@ -665,9 +664,9 @@ class NodeStorageController extends EntityDatabaseStorageController {
    */
   function postSave(EntityInterface $node, $update) {
     // Update the node access table for this node, but only if it is the
-    // default revision. There's no need to delete existing records if the node
+    // active revision. There's no need to delete existing records if the node
     // is new.
-    if ($node->isDefaultRevision()) {
+    if ($node->isActiveRevision()) {
       node_access_acquire_grants($node, $update);
     }
   }
