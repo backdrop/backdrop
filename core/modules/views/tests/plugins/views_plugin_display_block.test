@@ -11,7 +11,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Basic test class for Views query builder tests.
  */
 class ViewsPluginDisplayBlockTestCase extends ViewsSqlTest {
-  protected $profile = 'minimal';
+  protected $profile = 'testing';
   protected $admin_user;
   protected $test_content = array();
 

@@ -12,7 +12,7 @@ class BackdropSystemListingCompatibleTestCase extends BackdropWebTestCase {
    *
    * @see SimpleTestInstallationProfileModuleTestsTestCase
    */
-  protected $profile = 'minimal';
+  protected $profile = 'standard';
 
   function setUp() {
     // Attempt to install a module in Testing profile, while this test runs with

@@ -5,7 +5,7 @@
  */
 
 class SimpleTestFunctionalTest extends BackdropWebTestCase {
-  protected $profile = 'minimal';
+  protected $profile = 'testing';
 
   /**
    * The results array that has been parsed by getTestResults().
@@ -596,35 +596,35 @@ class SimpleTestInstallationProfileModuleTestsTestCase extends BackdropWebTestCa
   }
 }
 
-/**
- * Verifies that tests in other installation profiles are not found.
- *
- * @see SimpleTestInstallationProfileModuleTestsTestCase
- */
-class SimpleTestOtherInstallationProfileModuleTestsTestCase extends BackdropWebTestCase {
-  /**
-   * Use the Minimal profile.
-   *
-   * The Testing profile contains backdrop_system_listing_compatible_test.test,
-   * which should not be found.
-   *
-   * @see SimpleTestInstallationProfileModuleTestsTestCase
-   * @see BackdropSystemListingCompatibleTestCase
-   */
-  protected $profile = 'minimal';
-
-  function setUp() {
-    parent::setUp(array('simpletest'));
-
-    $this->admin_user = $this->backdropCreateUser(array('administer unit tests'));
-    $this->backdropLogin($this->admin_user);
-  }
-
-  /**
-   * Tests that tests located in another installation profile do not appear.
-   */
-  function testOtherInstallationProfile() {
-    $this->backdropGet('admin/config/development/testing');
-    $this->assertNoText('Installation profile module tests helper');
-  }
-}
+///**
+// * Verifies that tests in other installation profiles are not found.
+// *
+// * @see SimpleTestInstallationProfileModuleTestsTestCase
+// */
+//class SimpleTestOtherInstallationProfileModuleTestsTestCase extends BackdropWebTestCase {
+//  /**
+//   * Use the Minimal profile.
+//   *
+//   * The Testing profile contains backdrop_system_listing_compatible_test.test,
+//   * which should not be found.
+//   *
+//   * @see SimpleTestInstallationProfileModuleTestsTestCase
+//   * @see BackdropSystemListingCompatibleTestCase
+//   */
+//  protected $profile = 'minimal';
+//
+//  function setUp() {
+//    parent::setUp(array('simpletest'));
+//
+//    $this->admin_user = $this->backdropCreateUser(array('administer unit tests'));
+//    $this->backdropLogin($this->admin_user);
+//  }
+//
+//  /**
+//   * Tests that tests located in another installation profile do not appear.
+//   */
+//  function testOtherInstallationProfile() {
+//    $this->backdropGet('admin/config/development/testing');
+//    $this->assertNoText('Installation profile module tests helper');
+//  }
+//}

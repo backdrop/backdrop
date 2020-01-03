@@ -183,7 +183,6 @@ if ($args['list']) {
 // Generate cache tables for profiles.
 if ($args['cache']) {
   $profiles = array(
-    'minimal',
     'standard',
     'testing',
   );
@@ -1050,7 +1049,6 @@ function simpletest_script_clean_profile_cache_tables(){
  */
 function simpletest_script_clean_profile_cache_folders(){
   $profiles = array(
-    'minimal',
     'standard',
     'testing',
   );

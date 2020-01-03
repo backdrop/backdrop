@@ -121,7 +121,7 @@ class MenuWebTestCase extends BackdropWebTestCase {
 }
 
 class MenuRouterTestCase extends BackdropWebTestCase {
-  protected $profile = 'minimal';
+  protected $profile = 'testing';
 
   function setUp() {
     // Enable dummy module that implements hook_menu.

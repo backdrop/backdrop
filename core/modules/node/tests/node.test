@@ -3239,7 +3239,7 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
  * Tests the cache invalidation of node operations.
  */
 class NodePageCacheTest extends NodeWebTestCase {
-  protected $profile = 'minimal';
+  protected $profile = 'testing';
 
   /**
    * An admin user with administrative permissions for nodes.

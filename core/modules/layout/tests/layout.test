@@ -9,7 +9,7 @@ require_once BACKDROP_ROOT . '/core/modules/simpletest/tests/upgrade/upgrade.tes
  * Tests the interface for adding, removing, and moving blocks.
  */
 class LayoutInterfaceTest extends BackdropWebTestCase {
-  protected $profile = 'minimal';
+  protected $profile = 'testing';
   protected $admin_user;
   protected $web_user;
   protected $test_node1;
@@ -1338,7 +1338,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
  * Tests the blocks title, content, and display settings.
  */
 class LayoutBlockTest extends BackdropWebTestCase {
-    protected $profile = 'minimal';
+    protected $profile = 'testing';
     protected $admin_user;
 
     function setUp() {
