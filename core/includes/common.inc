@@ -7117,6 +7117,14 @@ function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT
     return;
   }
 
+  // Prefix array keys to prevent numeric keys being re-indexed (and un-prefix
+  // them again after sorting).
+  foreach ($array as $key => $value) {
+    $prefixed['#' . $key] = $value;
+  }
+  $array = $prefixed;
+  unset($prefixed);
+
   // Ensure all keys have a sort value.
   $new_keys = array();
   foreach ($keys as $index => $sort) {
@@ -7163,6 +7171,13 @@ function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT
 
   // Perform the sort.
   call_user_func_array('array_multisort', $param);
+
+  // Un-prefix array keys.
+  foreach ($array as $key => $value) {
+    $unprefixed[substr($key, 1)] = $value;
+  }
+  $array = $unprefixed;
+  unset($unprefixed);
 }
 
 /**
