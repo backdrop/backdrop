@@ -43,7 +43,7 @@ class ListFieldTestCase extends FieldTestCase {
     $langcode = LANGUAGE_NONE;
 
     // All three options appear.
-    $entity = field_test_create_stub_entity();
+    $entity = field_test_create_entity();
     $form = backdrop_get_form('field_test_entity_form', $entity);
     $this->assertTrue(!empty($form[$this->field_name][$langcode][1]), 'Option 1 exists');
     $this->assertTrue(!empty($form[$this->field_name][$langcode][2]), 'Option 2 exists');
@@ -51,7 +51,7 @@ class ListFieldTestCase extends FieldTestCase {
 
     // Use one of the values in an actual entity, and check that this value
     // cannot be removed from the list.
-    $entity = field_test_create_stub_entity();
+    $entity = field_test_create_entity();
     $entity->{$this->field_name}[$langcode][0] = array('value' => 1);
     field_test_entity_save($entity);
     $this->field['settings']['allowed_values'] = array(2 => 'Two');
@@ -69,7 +69,7 @@ class ListFieldTestCase extends FieldTestCase {
     // Removed options do not appear.
     $this->field['settings']['allowed_values'] = array(2 => 'Two');
     field_update_field($this->field);
-    $entity = field_test_create_stub_entity();
+    $entity = field_test_create_entity();
     $form = backdrop_get_form('field_test_entity_form', $entity);
     $this->assertTrue(empty($form[$this->field_name][$langcode][1]), t('Option 1 does not exist'));
     $this->assertTrue(!empty($form[$this->field_name][$langcode][2]), 'Option 2 exists');
@@ -99,7 +99,7 @@ class ListFieldTestCase extends FieldTestCase {
       ),
     );
     $this->instance = field_create_instance($this->instance);
-    $entity = field_test_create_stub_entity();
+    $entity = field_test_create_entity();
     $form = backdrop_get_form('field_test_entity_form', $entity);
     $this->assertTrue(!empty($form[$this->field_name][$langcode][1]), 'Option 1 exists');
     $this->assertTrue(!empty($form[$this->field_name][$langcode][2]), 'Option 2 exists');
@@ -141,7 +141,7 @@ class ListDynamicValuesTestCase extends FieldTestCase {
       'bundle' => 'test_bundle',
       'label' => $this->randomName(),
     );
-    $this->entity = call_user_func_array('field_test_create_stub_entity', $this->test);
+    $this->entity = call_user_func_array('field_test_create_entity', $this->test);
   }
 }
 
@@ -435,4 +435,110 @@ class ListFieldUITestCase extends FieldTestCase {
       $this->assertIdentical($field['settings']['allowed_values'], $result, $message);
     }
   }
+}
+
+/**
+ * Tests that formatters are working properly.
+ */
+class ListFieldDisplayTestCase extends FieldTestCase {
+  function setUp() {
+    parent::setUp('field_test', 'field_ui');
+
+    // Create test user.
+    $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer taxonomy', 'administer fields'));
+    $this->backdropLogin($admin_user);
+
+    // Create content type, with underscores.
+    $type_name = 'test_' . strtolower($this->randomName());
+    $type = $this->backdropCreateContentType(array('name' => $type_name, 'type' => $type_name));
+    $this->type = $type->type;
+    // Store a valid URL name, with hyphens instead of underscores.
+    $this->hyphen_type = str_replace('_', '-', $this->type);
+  }
+
+    /**
+   * Helper function to create list field of a given type.
+   *
+   * @param string $type
+   *   'list_integer', 'list_float', 'list_text' or 'list_boolean'
+   */
+  protected function createListField($type) {
+    // Create a test field and instance.
+    $field = array(
+      'field_name' => $this->field_name,
+      'type' => $type,
+    );
+    field_create_field($field);
+    $instance = array(
+      'field_name' => $this->field_name,
+      'entity_type' => 'node',
+      'bundle' => $this->type,
+    );
+    field_create_instance($instance);
+
+    $this->admin_path = 'admin/structure/types/manage/' . $this->hyphen_type . '/fields/' . $this->field_name;
+  }
+
+  /**
+   * List (boolen) : test 'On/Off' values input.
+   */
+  function testListDisplayFormatterBoolean() {
+    $this->field_name = 'field_list_boolean';
+    $this->createListField('list_boolean');
+
+    $on = $this->randomName();
+    $off = $this->randomName();
+    $allowed_values = array(1 => $on, 0 => $off);
+    $edit = array(
+      'on' => $on,
+      'off' => $off,
+    );
+    $this->backdropPost($this->admin_path, $edit, t('Save settings'));
+    $this->assertText("Saved field_list_boolean configuration.", "The 'On' and 'Off' form fields work for boolean fields.");
+
+    $settings = array(
+      'type' => $this->type,
+      $this->field_name => array(LANGUAGE_NONE => array(array('value' => 1))),
+    );
+    $node = $this->backdropCreateNode($settings);
+
+    // Test display on/off values set by user
+    $edit = array(
+      "fields[{$this->field_name}][type]" => 'list_default',
+    );
+    $this->backdropPost("admin/structure/types/manage/{$this->type}/display/default", $edit, t('Save'));
+
+    $this->backdropGet('node/' . $node->nid);
+    $this->assertText($on, format_string('On value is present.'));
+
+    // Test Yes/No output format.
+    $instance_info = field_info_instance('node', $this->field_name, $this->type);
+    $instance_info['display']['default']['type'] = 'boolean_yes_no';
+    field_update_instance($instance_info);
+
+    $this->backdropGet('node/' . $node->nid);
+    $this->assertText(t('Yes'), format_string('On value is present.'));
+
+    // Enable the default setting to use custom on/off text.
+    $instance_info = field_info_instance('node', $this->field_name, $this->type);
+    $instance_info['display']['default']['type'] = 'boolean_yes_no';
+    $instance_info['display']['default']['settings']['format'] = 'custom';
+    $on = $this->randomName();
+    $off = $this->randomName();
+    $instance_info['display']['default']['settings']['custom_on'] = $on;
+    $instance_info['display']['default']['settings']['custom_off'] = $off;
+    field_update_instance($instance_info);
+
+    $this->backdropGet('node/' . $node->nid);
+    $this->assertText($on, format_string('Custom on value is present.'));
+
+    // Enable the default setting to use custom reverse on/off text.
+    $instance_info = field_info_instance('node', $this->field_name, $this->type);
+    $instance_info['display']['default']['settings']['reverse'] = TRUE;
+    field_update_instance($instance_info);
+
+    $this->backdropGet('node/' . $node->nid);
+    $this->assertText($off, format_string('Custom reversed on value is present.'));
+  }
+
 }

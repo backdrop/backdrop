@@ -1034,7 +1034,7 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
           )
         )
       ),
-      '#description' => isset($block_info['description']) ? check_plain($block_info['description']) : NULL,
+      '#description' => isset($block_info['description']) ? filter_xss($block_info['description']) : NULL,
       '#wrapper_attributes' => array('class' => array('layout-block-add-row'))
     );
   }
@@ -2066,10 +2066,10 @@ function layout_locked_message($item, $type = 'layout') {
 
   // The path varies based on the item type.
   $path_type = 'manage';
-  $button_title = 'Save layout';
+  $button_title = t('Save layout');
   if ($type === 'menu_item') {
     $path_type = 'menu';
-    $button_title = 'Save menu settings';
+    $button_title = t('Save menu settings');
   }
 
   $message = '';
@@ -2822,6 +2822,16 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
       'title' => t('Configure name'),
       'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/edit',
     );
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Flexible layout templates',
+          'name' => 'layout.flexible.' . $template_info['name'],
+        ),
+      );
+    }
     $links['delete'] = array(
       'title' => t('Delete'),
       'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/delete',

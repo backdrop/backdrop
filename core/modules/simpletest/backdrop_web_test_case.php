@@ -2618,6 +2618,8 @@ class BackdropWebTestCase extends BackdropTestCase {
           case 'range':
           case 'text':
           case 'tel':
+          case 'date':
+          case 'time':
           case 'textarea':
           case 'url':
           case 'password':

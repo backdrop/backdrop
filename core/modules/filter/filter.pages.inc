@@ -32,7 +32,7 @@ function filter_tips_long($format = NULL) {
 /**
  * Autocomplete callback for link textfield.
  */
-function _filter_link_autocomplete($string) {
+function _filter_link_autocomplete($string = '') {
   $matches = array();
   $match_count = 0;
   if ($string) {
@@ -296,8 +296,17 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   );
 
   // Incorporate the Library View in the editor dialog form.
+  $view_name = 'image_library';
+  $view = views_embed_view($view_name);
+  if (empty($view)) {
+    $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
+    if (user_access('administer views')) {
+      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
+    }
+  }
+
   $form['library_view'] = array(
-    '#markup' => '<div class="library-view" data-editor-library-view="true">' . views_embed_view('image_library') . '</div>',
+    '#markup' => '<div class="library-view" data-editor-library-view="true">' . $view . '</div>',
   );
 
   $form['actions']['#type'] = 'actions';
