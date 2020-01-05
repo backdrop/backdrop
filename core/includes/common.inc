@@ -7127,18 +7127,18 @@ function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT
 
   // Ensure all keys have a sort value.
   $new_keys = array();
-  foreach ($keys as $index => $sort) {
-    if (is_string($sort) && is_int($index)) {
-      $new_keys[$sort] = SORT_NUMERIC;
+  foreach ($keys as $key => $key_sort) {
+    if (is_string($key_sort) && is_int($key)) {
+      $new_keys[$key_sort] = SORT_NUMERIC;
     }
     else {
-      if ($sort === SORT_NUMERIC || $sort === SORT_STRING) {
-        $new_keys[$index] = $sort;
+      if ($key_sort === SORT_NUMERIC || $key_sort === SORT_STRING) {
+        $new_keys[$key] = $key_sort;
       }
       else {
         // Fallback behavior for unexpected values. Untranslated to allow this
         // function to be used anywhere within Backdrop.
-        $new_keys[$index] = SORT_NUMERIC;
+        $new_keys[$key] = SORT_NUMERIC;
         trigger_error('backdrop_sort() expects the second parameter to be an array keyed by strings and each value of the array to be either SORT_NUMERIC or SORT_STRING.', E_USER_WARNING);
       }
     }
@@ -7151,7 +7151,7 @@ function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT
     $v = (array) $v;
     foreach ($keys as $key => $key_sort) {
       if (isset($v[$key])) {
-        $sort[$key][$k] = $v[$key];
+        $sort[$key][$k] = ($key_sort === SORT_STRING) ? backdrop_strtolower($v[$key]) : $v[$key];
       }
       else {
         $sort[$key][$k] = ($key_sort === SORT_STRING) ? '' : 0;
