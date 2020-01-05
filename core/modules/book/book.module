@@ -44,6 +44,9 @@ function book_permission() {
     'add content to books' => array(
       'title' => t('Add content and child pages to books'),
     ),
+    'bypass content types for books' => array(
+      'title' => t('Bypass content type restrictions for book outlines'),
+    ),
   );
 }
 
