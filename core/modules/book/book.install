@@ -117,7 +117,7 @@ function book_update_1000() {
  * outlines' permission to all roles that already have the 'Administer book
  * outlines' (to retain current functionality).
  */
-function book_update_1000() {
+function book_update_1001() {
   foreach (user_roles() as $rid => $role) {
     $role = array($role => $rid);
     $role_permissions = user_role_permissions($role);
