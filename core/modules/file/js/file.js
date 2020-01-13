@@ -203,7 +203,7 @@ Backdrop.file = Backdrop.file || {
    */
   dialogCloseEvent: function(e, dialog, $element) {
     var $browserContainer = $element.find(".file-browser");
-    if ($browserContainer) {
+    if ($browserContainer.length > 0) {
       // These two variables are set server-side when submitting the dialog, in
       // file_managed_file_browser_submit().
       var selectedFid = Backdrop.settings.file.browser.selectedFid;
