@@ -1737,10 +1737,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Reset/rebuild all data structures after enabling the modules.
     $this->resetAll();
 
-    // Run cron once in that environment, as install.php does at the end of
-    // the installation process.
-    backdrop_cron_run();
-
     // Ensure that the session is not written to the new environment and replace
     // the global $user session with uid 1 from the new test site.
     backdrop_save_session(FALSE);
@@ -1767,6 +1763,10 @@ class BackdropWebTestCase extends BackdropTestCase {
       $dashboard_config->set('news_feed_url', FALSE);
       $dashboard_config->save();
     }
+
+    // Run cron once in that environment, as install.php does at the end of
+    // the installation process.
+    backdrop_cron_run();
 
     backdrop_set_time_limit($this->timeLimit);
     $this->setup = TRUE;
