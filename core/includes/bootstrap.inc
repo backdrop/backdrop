@@ -611,6 +611,7 @@ function find_conf_path($http_host, $script_name, $require_settings = TRUE) {
 
   if ($sites) {
     $uri = explode('/', $script_name);
+    $uri[0] = ($uri[0] == '.') ? '' : $uri[0];
     $server = explode('.', implode('.', array_reverse(explode(':', rtrim($http_host, '.')))));
     for ($i = count($uri) - 1; $i > 0; $i--) {
       for ($j = count($server); $j > 0; $j--) {
