@@ -932,10 +932,20 @@ function backdrop_verify_profile($install_state) {
 
   // The installation profile is also a module, which needs to be installed
   // after all the other dependencies have been installed.
+  if (!empty($install_state['base_profile'])) {
+    foreach (array_reverse(array_keys($install_state['base_profile'])) as $base_profile) {
+      $present_modules[] = $base_profile;
+    }
+  }
   $present_modules[] = $profile;
 
   // Verify that all of the profile's required modules are present.
   $missing_modules = array_diff($info['dependencies'], $present_modules);
+  if (!empty($install_state['base_profile'])) {
+    foreach ($install_state['base_profile'] as $base_profile) {
+      $missing_modules = array_unique(array_merge($missing_modules, array_diff($base_profile['dependencies'], $present_modules)));
+    }
+  }
 
   $requirements = array();
 
