@@ -1942,9 +1942,9 @@ function _filter_xss_attributes($attr) {
       case 2:
         // Attribute value, a URL after href= for instance.
         if (preg_match('/^"([^"]*)"(\s+|$)/', $attr, $match)) {
-          // Do not strip protocol information out from data attributes,
-          // which may be mangled if they contain JSON.
-          if (strpos($attrname, 'data-') === 0) {
+          // Prevent filtering for some attribute values, where performing
+          // the filtering would cause valid and safe data to be mangled.
+          if (strpos($attrname, 'data-') === 0 || $attrname == 'alt' || $attrname == 'title') {
             $thisval = $match[1];
           }
           // Strip bad protocols from all other attributes, e.g. href, src.
