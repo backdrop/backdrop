@@ -2757,12 +2757,12 @@ class views_plugin_display extends views_plugin {
       foreach ($this->get_handlers($type) as $key => $handler) {
         if ($handler->can_expose() && $handler->is_exposed()) {
           if ($handler->is_a_group()) {
-            if ($id != $key && $identifier == $handler->options['group_info']['identifier']) {
+            if ($id != $key && isset($handler->options['group_info']['identifier']) && $identifier == $handler->options['group_info']['identifier']) {
               return FALSE;
             }
           }
           else {
-            if ($id != $key && $identifier == $handler->options['expose']['identifier']) {
+            if ($id != $key && isset($handler->options['expose']['identifier']) && $identifier == $handler->options['expose']['identifier']) {
               return FALSE;
             }
           }
