@@ -281,6 +281,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->assertTrue(!empty($elements), 'Reorder confirmed in admin interface.');
 
     $config_filters = config_get('filter.format.' . $filtered, 'filters');
+    backdrop_sort($config_filters, array('weight'));
     $filters = array();
     foreach ($config_filters as $filter_name => $filter) {
       if ($filter_name == $second_filter || $filter_name == $first_filter) {
@@ -538,7 +539,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
     $this->assertResponse(200);
     $this->backdropGet('filter/tips/invalid-format');
     $this->assertResponse(404);
-    
+
     // Check admin user access to the filter tips pages.
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('filter/tips/' . $this->allowed_format->format);
