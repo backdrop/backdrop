@@ -720,7 +720,7 @@ select.form-select[disabled] {
 }
 
 ul.action-links a {
-  background: transparent url(../images/add.png) no-repeat 0 center;
+  background-color: transparent;
   line-height: 1.875;
 }
 
