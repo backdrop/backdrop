@@ -469,7 +469,10 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
    * Implements EntityStorageControllerInterface::create().
    */
   public function create(array $values) {
-    $class = isset($this->entityInfo['entity class']) ? $this->entityInfo['entity class'] : 'Entity';
+    $class = isset($this->entityInfo['entity class']) ? $this->entityInfo['entity class'] : NULL;
+    if (empty($class)) {
+      throw new EntityMalformedException(t('Missing "entity class" property on @entity_type entity.', array('@entity_type' => $this->entityType)));
+    }
     return new $class($values);
   }
 
