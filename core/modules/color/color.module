@@ -390,8 +390,10 @@ function color_get_info($theme) {
 
     if (isset($theme_info->base_theme) && !empty($theme_info->base_theme)) {
       $base_info = color_get_info($theme_info->base_theme);
-      $info = array_merge_recursive($info, $base_info);
+      $info = backdrop_array_merge_deep($info, $base_info);
     }
+
+    $info['css'] = array_unique($info['css']);
 
     $color_info[$theme] = $info;
   }
