@@ -43,13 +43,13 @@ function file_field_settings_form($field, $instance, $has_data) {
     '#type' => 'checkbox',
     '#title' => t('Enable <em>Display</em> field'),
     '#default_value' => $settings['display_field'],
-    '#description' => t('This option allows users to choose if the uploaded files should be shown or hidden when viewing the content.'),
+    '#description' => t('This option allows users to choose if the uploaded files should be shown or hidden, when viewing the content.'),
   );
   $form['display_default'] = array(
     '#type' => 'checkbox',
     '#title' => t('Files displayed by default'),
     '#default_value' => $settings['display_default'],
-    '#description' => t('This option sets the default behavior for uploaded files for this field. Users are still allowed to change this setting individually for each file before saving their content.'),
+    '#description' => t('This option sets the default behavior for uploaded files for this field. Users are still allowed to change this setting individually for each file, before saving their content.'),
     '#states' => array(
       'visible' => array(
         'input[name="field[settings][display_field]"]' => array('checked' => TRUE),
@@ -79,18 +79,30 @@ function file_field_settings_form($field, $instance, $has_data) {
 function file_field_instance_settings_form($field, $instance) {
   $settings = $instance['settings'];
 
-  $form['file_directory'] = array(
-    '#type' => 'textfield',
-    '#title' => t('File directory'),
-    '#default_value' => $settings['file_directory'],
-    '#field_prefix' => $field['settings']['uri_scheme'] == 'public' ? config_get('system.core', 'file_public_path') . '/' : '',
-    '#description' => t('Optional subdirectory within the upload destination where files will be stored. Do not include preceding or trailing slashes.'),
-    '#element_validate' => array('_file_generic_settings_file_directory_validate'),
-    '#weight' => 3,
-  );
-
   // Make the extension list a little more human-friendly by comma-separation.
   $extensions = str_replace(' ', ', ', $settings['file_extensions']);
+
+//  $document_extensions = array('txt', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'pps', 'ppsx', 'odt', 'ods', 'odp', 'pdf');
+//  $image_extensions = array('jpg', 'jpeg', 'gif', 'png', 'bmp', 'img', 'webp');
+//  $audio_extensions = array('mp3', 'ogg', 'oga', 'm4a', 'wav', 'weba');
+//  $video_extensions = array('mp4', 'mov', 'ogv', 'm4v', 'mpeg', 'mpg', 'avi', 'webm');  
+//  $form['common_file_extensions'] = array(
+//    '#type' => 'checkboxes',
+//    '#title' => t('Common file extension sets'),
+//    //'#default_value' => $extensions,
+//    //'#description' => t('Separate extensions with a space or comma and do not include the leading dot.'),
+//    '#options' => array(
+//      'documents' => t('Document files'),
+//      'image' => t('Image files'),
+//      'audio' => t('Audio files'),
+//      'video' => t('Video files'),
+//      'custom' => t('Custom file extensions'),
+//    ),
+//    '#weight' => -6,
+//    // By making this field required, we prevent a potential security issue
+//    // that would allow files of any type to be uploaded.
+//    '#required' => TRUE,
+//  );
   $form['file_extensions'] = array(
     '#type' => 'textfield',
     '#title' => t('Allowed file extensions'),
@@ -104,14 +116,77 @@ function file_field_instance_settings_form($field, $instance) {
     '#required' => TRUE,
   );
 
-  $form['max_filesize'] = array(
+  $form['file_directory'] = array(
     '#type' => 'textfield',
+    '#title' => t('File directory'),
+    '#default_value' => $settings['file_directory'],
+    '#field_prefix' => $field['settings']['uri_scheme'] == 'public' ? config_get('system.core', 'file_public_path') . '/' : '',
+    '#description' => t('Optional subdirectory within the upload destination where files will be stored. Do not include preceding or trailing slashes.'),
+    '#element_validate' => array('_file_generic_settings_file_directory_validate'),
+    '#weight' => -5,
+  );
+
+  $max_filesize_setting = $settings['max_filesize'];
+
+  if ($max_filesize_setting) {
+    // Convert the current "max_filesize" setting from bytes to a human-readable
+    // number/unit pair.
+    $max_filesize_setting = explode(' ', format_size($max_filesize_setting));
+    // Place the number and unit in two separate variables, for later use in the
+    // respective "Number" and "Unit" fields.
+    $filesize_number = $max_filesize_setting[0];
+    $filesize_unit = $max_filesize_setting[1];
+  }
+
+  // Helper form elements for the "max_filesize" setting. None of these gets
+  // saved in config.
+  $form['max_filesize']['filesize_limit'] = array(
+    '#type' => 'radios',
     '#title' => t('Maximum upload size'),
-    '#default_value' => $settings['max_filesize'],
-    '#description' => t('Enter a value like "512" (bytes), "80 KB" (kilobytes) or "50 MB" (megabytes) in order to restrict the allowed file size. If left empty the file sizes will be limited only by PHP\'s maximum post and file upload sizes (current limit <strong>%limit</strong>).', array('%limit' => format_size(file_upload_max_size()))),
-    '#size' => 10,
-    '#element_validate' => array('_file_generic_settings_max_filesize'),
-    '#weight' => 5,
+    '#options' => array(
+      'unlimited' => t('Only limited by PHP (current limit: <strong>@limit</strong>)', array('@limit' => format_size(file_upload_max_size()))),
+      'limited' => t('Limit to a specific size:'),
+    ),
+    '#default_value' => $settings['max_filesize'] ? 'limited' : 'unlimited',
+    '#parents' => array('max_filesize', 'limit'),
+  );
+  $form['max_filesize']['filesize_container'] = array(
+    '#type' => 'item',
+    // Reset #parents to 'max_filesize', so the additional container does not
+    // appear.
+    '#parents' => array('max_filesize'),
+    '#field_prefix' => '<div class="container-inline">',
+    '#field_suffix' => '</div>',
+  );
+  $form['max_filesize']['filesize_container']['number'] = array(
+    '#type' => 'number',
+    '#title' => t('Number'),
+    '#title_display' => 'invisible',
+    '#default_value' => isset($filesize_number) ? $filesize_number : 1,
+    '#min' => 1,
+    '#step' => 1,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="max_filesize[limit]"]' => array('value' => 'limited'),
+      ),
+    ),
+  );
+  $form['max_filesize']['filesize_container']['unit'] = array(
+    '#type' => 'select',
+    '#title' => t('Unit'),
+    '#title_display' => 'invisible',
+    '#options' => array(
+      'GB' => t('GB'),
+      'MB' => t('MB'),
+      'KB' => t('KB'),
+      'bytes' => t('bytes'),
+    ),
+    '#default_value' => isset($filesize_unit) ? $filesize_unit : 'MB',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="max_filesize[limit]"]' => array('value' => 'limited'),
+      ),
+    ),
   );
 
   $form['description_field'] = array(
@@ -124,21 +199,6 @@ function file_field_instance_settings_form($field, $instance) {
   );
 
   return $form;
-}
-
-/**
- * Render API callback: Validates the maximum uplodad size field.
- *
- * Ensures that a size has been entered and that it can be parsed by
- * parse_size().
- *
- * This function is assigned as an #element_validate callback in
- * file_field_instance_settings_form().
- */
-function _file_generic_settings_max_filesize($element, &$form_state) {
-  if (!empty($element['#value']) && !is_numeric(parse_size($element['#value']))) {
-    form_error($element, t('The "!name" option must contain a valid value. You may either leave the text field empty or enter a string like "512" (bytes), "80 KB" (kilobytes) or "50 MB" (megabytes).', array('!name' => t($element['title']))));
-  }
 }
 
 /**
@@ -629,9 +689,10 @@ function file_field_widget_settings_form($field, $instance) {
       'bar' => t('Bar with progress meter'),
     ),
     '#default_value' => $settings['progress_indicator'],
-    '#description' => t('The throbber display does not show the status of uploads but takes up less space. The progress bar is helpful for monitoring progress on large uploads.'),
     '#weight' => 16,
   );
+  $form['progress_indicator']['throbber']['#description'] = t('Takes up less space, but does not show the progress of uploads.');
+  $form['progress_indicator']['bar']['#description'] = t('Helpful for monitoring progress on large uploads.');
 
   return $form;
 }
