@@ -20,6 +20,15 @@
 }
 
 /**
+ * CSS-only workaround to mitigate the issue with the sticky table header
+ * overlapping the permission row when using URL fragments.
+ * See: https://github.com/backdrop/backdrop-issues/issues/3414
+ */
+#permissions tr:target td {
+  padding-top: 50px;
+}
+
+/**
  * Override default textfield float to put the "Add role" button next to
  * the input textfield.
  */

@@ -105,12 +105,24 @@ function theme_user_admin_permissions($variables) {
   $roles = user_roles();
   foreach (element_children($form['permission']) as $key) {
     $row = array();
-    // Module name
+    // Module grouping row.
     if (is_numeric($key)) {
-      $row[] = array('data' => backdrop_render($form['permission'][$key]), 'class' => array('module'), 'id' => 'module-' . $form['permission'][$key]['#id'], 'colspan' => count($form['roles']['#value']) + 1);
+      $row[] = array(
+        'data' => backdrop_render($form['permission'][$key]),
+        'class' => array('module'),
+        'colspan' => count($form['roles']['#value']) + 1,
+      );
+      $row_id = 'module-' . $form['permission'][$key]['#id'];
     }
+    // Permission row.
     else {
-      // Permission row.
+      // Add the CSS ID for the permission in the table row (instead of the
+      // table cell). Used as a URL fragment, to allow links that auto-scroll to
+      // a specific part of the permissions page.
+      $row_id = $form['permission'][$key]['#id'];
+      // Remove the permission CSS ID from the table cell. It will be added to
+      // the table row instead (see above).
+      unset($form['permission'][$key]['#id']);
       $row[] = array(
         'data' => backdrop_render($form['permission'][$key]),
         'class' => array('permission'),
@@ -121,12 +133,14 @@ function theme_user_admin_permissions($variables) {
         $row[] = array('data' => backdrop_render($form['checkboxes'][$role_name][$key]), 'class' => array('checkbox'));
       }
     }
-    $rows[] = $row;
+    $rows[] = array('data' => $row, 'id' => $row_id);
   }
+
   $header[] = (t('Permission'));
   foreach (element_children($form['role_names']) as $role_name) {
     $header[] = array('data' => backdrop_render($form['role_names'][$role_name]), 'class' => array('checkbox'));
   }
+
   $output = '';
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
   $output .= backdrop_render_children($form);
