@@ -607,7 +607,7 @@ function admin_bar_links_account() {
     '#title' => t('Log out'),
     '#weight' => 51,
     '#attributes' => array('class' => array('admin-bar-logout')),
-    '#href' => 'user/logout',
+    '#href' => 'logout',
   );
   return $links;
 }

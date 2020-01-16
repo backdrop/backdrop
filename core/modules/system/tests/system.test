@@ -910,7 +910,7 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
 
     // Log back in, set the custom 403 page to /user and remove the block
     $this->backdropLogin($this->admin_user);
-    config_set('system.core', 'site_403', 'user/login');
+    config_set('system.core', 'site_403', 'login');
 
     // Check that we can log in from the 403 page.
     $this->backdropLogout();
@@ -1224,7 +1224,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
     $this->backdropGet('user/password');
     $this->assertResponse(200);
     $this->assertNoText($offline_message);
-    $this->backdropGet('user/login');
+    $this->backdropGet('login');
     $this->assertResponse(200);
     $this->assertNoText($offline_message);
 

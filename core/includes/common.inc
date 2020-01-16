@@ -794,11 +794,11 @@ function backdrop_goto_deprecated($path = '', array $options = array(), $http_re
  * If a destination was specified in the current request's URI (i.e.,
  * $_GET['destination']) then it will override the $path and $options values
  * passed to this function. This provides the flexibility to build a link to
- * user/login and override the default redirection so that the user is
- * redirected to a specific path after logging in:
+ * login and override the default redirection so that the user is redirected to
+ * a specific path after logging in:
  * @code
  *   $query = array('destination' => "node/$node->nid");
- *   $link = l(t('Log in'), 'user/login', array('query' => $query));
+ *   $link = l(t('Log in'), 'login', array('query' => $query));
  * @endcode
  *
  * Backdrop will ensure that messages set by backdrop_set_message() and other

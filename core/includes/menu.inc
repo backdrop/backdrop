@@ -4008,8 +4008,8 @@ function _menu_router_save($menu, $masks) {
  * if the current user has no 'access site in maintenance mode' permission.
  *
  * @param string $path
- *   The path at which to check site status. Some pages (such as user/login) may
- *   be considered online while the rest of the site is offline. If empty, the
+ *   The path at which to check site status. Some pages (such as login) may be
+ *   considered online while the rest of the site is offline. If empty, the
  *   current path will be used.
  * @param bool $display_messages
  *   If set to TRUE, messages will be displayed indicating the site is in

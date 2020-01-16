@@ -90,7 +90,7 @@ class MenuTestCase extends BackdropWebTestCase {
     $this->assertTitle('Create new account | Backdrop CMS');
     $this->backdropGet('user/password');
     $this->assertTitle('Reset password | Backdrop CMS');
-    $this->backdropGet('user/login');
+    $this->backdropGet('login');
     $this->assertTitle('Log in | Backdrop CMS');
     $this->backdropGet('user');
     $this->assertTitle('Log in | Backdrop CMS');
@@ -576,7 +576,7 @@ class MenuTestCase extends BackdropWebTestCase {
    */
   private function getStandardMenuLink() {
     // Retrieve menu link id of the Log out menu link, which will always be on the front page.
-    $mlid = db_query("SELECT mlid FROM {menu_links} WHERE module = 'system' AND router_path = 'user/logout'")->fetchField();
+    $mlid = db_query("SELECT mlid FROM {menu_links} WHERE module = 'system' AND router_path = 'logout'")->fetchField();
     $this->assertTrue($mlid > 0, 'Standard menu link id was found');
     // Load menu link.
     // Use api function so that link is translated for rendering.

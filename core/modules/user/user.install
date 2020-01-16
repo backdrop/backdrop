@@ -184,6 +184,20 @@ function user_install() {
       'data' => NULL,
     ))
     ->execute();
+
+  // Add redirects for login/logout URLs.
+  if (module_exists('redirect')) {
+    foreach (array('login', 'logout') as $action) {
+      $redirect = new Redirect(array(
+        'source' => "user/$action",
+        'redirect' => $action,
+      ));
+      $hash = redirect_hash($redirect);
+      if (!redirect_load_by_hash($hash)) {
+        redirect_save($redirect);
+      }
+    }
+  }
 }
 
 /**
@@ -1190,6 +1204,24 @@ function user_update_1015() {
     $config->set('display.default.display_options.filters.name.expose.identifier', 'username');
   }
   $config->save();
+}
+
+/**
+ * Add redirects for login & logout URLs.
+ */
+function user_update_1016() {
+  if (module_exists('redirect')) {
+    foreach (array('login', 'logout') as $action) {
+      $redirect = new Redirect(array(
+        'source' => "user/$action",
+        'redirect' => $action,
+      ));
+      $hash = redirect_hash($redirect);
+      if (!redirect_load_by_hash($hash)) {
+        redirect_save($redirect);
+      }
+    }
+  }
 }
 
 /**

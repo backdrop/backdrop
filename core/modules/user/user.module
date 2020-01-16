@@ -1208,7 +1208,7 @@ function user_menu() {
     'menu_name' => 'user-menu',
   );
 
-  $items['user/login'] = array(
+  $items['login'] = array(
     'title' => 'Log in',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_login'),
@@ -1241,7 +1241,7 @@ function user_menu() {
     'file' => 'user.pages.inc',
   );
 
-  $items['user/logout'] = array(
+  $items['logout'] = array(
     'title' => 'Log out',
     'access callback' => 'user_is_logged_in',
     'page callback' => 'user_logout',
@@ -1433,8 +1433,8 @@ function user_menu_site_status_alter(&$menu_site_status, $path) {
       switch ($path) {
         case 'user':
           // Forward anonymous user to login page.
-          backdrop_goto('user/login');
-        case 'user/login':
+          backdrop_goto('login');
+        case 'login':
         case 'user/password':
           // Disable offline mode.
           $menu_site_status = MENU_SITE_ONLINE;
@@ -1449,7 +1449,7 @@ function user_menu_site_status_alter(&$menu_site_status, $path) {
     }
   }
   if (user_is_logged_in()) {
-    if ($path == 'user/login') {
+    if ($path == 'login') {
       // If user is logged in, redirect to 'user' instead of giving 403.
       backdrop_goto('user');
     }
@@ -1474,7 +1474,7 @@ function user_menu_link_alter(&$link) {
 
   // Force the Logout link to appear on the top-level of 'user-menu' menu by
   // default (i.e., unless it has been customized).
-  if ($link['link_path'] == 'user/logout' && isset($link['module']) && $link['module'] == 'system' && empty($link['customized'])) {
+  if ($link['link_path'] == 'logout' && isset($link['module']) && $link['module'] == 'system' && empty($link['customized'])) {
     $link['plid'] = 0;
   }
 }
@@ -3137,7 +3137,7 @@ function user_modules_uninstalled($modules) {
 function user_login_destination() {
   global $user;
   $destination = backdrop_get_destination();
-  if ($destination['destination'] == 'user/login') {
+  if ($destination['destination'] == 'login') {
     $destination['destination'] = 'user/' . $user->uid;
   }
   return $destination;
