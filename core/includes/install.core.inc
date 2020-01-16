@@ -543,6 +543,17 @@ function install_tasks($install_state) {
   }
   $display_select_profile = $hidden_profile_count > 1 && count($install_state['profiles']) != 1;
 
+  // Generate list of base profiles if necessary.
+  if (!empty($install_state['parameters']['profile'])) {
+    $langcode = !empty($install_state['parameters']['langcode']) ? $install_state['parameters']['langcode'] : NULL;
+    $info = install_profile_info($install_state['parameters']['profile'], $langcode);
+    while (isset($info['base'])) {
+      $base_name = $info['base'];
+      $info = install_profile_info($base_name, $langcode);
+      $install_state['base_profile'][$base_name] = $info;
+    }
+  }
+
   // Start with the core installation tasks that run before handing control
   // to the installation profile.
   $tasks = array(
@@ -632,12 +643,14 @@ function install_tasks($install_state) {
 
   // Allow the installation profile to modify the full list of tasks.
   if (!empty($profiles)) {
-    $profile_file = _install_find_profile_file($profile);
-    if ($profile_file) {
-      include_once $profile_file;
-      $function = $profile . '_install_tasks_alter';
-      if (function_exists($function)) {
-        $function($tasks, $install_state);
+    foreach ($profiles as $profile) {
+      $profile_file = _install_find_profile_file($profile);
+      if ($profile_file) {
+        include_once $profile_file;
+        $function = $profile . '_install_tasks_alter';
+        if (function_exists($function)) {
+          $function($tasks, $install_state);
+        }
       }
     }
   }
@@ -1516,25 +1529,32 @@ function install_load_profile(&$install_state) {
   if ($profile_file) {
     include_once $profile_file;
     $install_state['profile_info'] = install_profile_info($install_state['parameters']['profile'], $install_state['parameters']['langcode']);
-
-    // Include any base profile(s).
-    $info = $install_state['profile_info'];
-    while (isset($info['base'])) {
-      $base_file = _install_find_profile_file($info['base']);
-      if ($base_file) {
-        include_once $base_file;
-        $base_name = $info['base'];
-        $info = install_profile_info($base_name, $install_state['parameters']['langcode']);
-        $install_state['base_profile'][$base_name] = $info;
-      }
-      else {
-        throw new Exception(st('Sorry, the base profile cannot be loaded.'));
-        break;
-      }
-    }
   }
   else {
     throw new Exception(st('Sorry, the profile you have chosen cannot be loaded.'));
+  }
+
+  // Generate list of base profiles if necessary.
+  if (empty($install_state['base_profile'])) {
+    $info = $install_state['profile_info'];
+    while (isset($info['base'])) {
+      $base_name = $info['base'];
+      $info = install_profile_info($base_name, $install_state['parameters']['langcode']);
+      $install_state['base_profile'][$base_name] = $info;
+    }
+  }
+
+  // Include any base profile(s).
+  if (!empty($install_state['base_profile'])) {
+    foreach ($install_state['base_profile'] as $base_name => $base_profile) {
+      $base_file = _install_find_profile_file($base_name);
+      if ($base_file) {
+        include_once $base_file;
+      }
+      else {
+        throw new Exception(st('Sorry, the base profile cannot be loaded.'));
+      }
+    }
   }
 }
 

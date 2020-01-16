@@ -2829,17 +2829,34 @@ function _system_rebuild_module_data() {
 
   // Include the installation profile in modules that are loaded.
   $profile = backdrop_get_profile();
-  $profile_uri = 'profiles/' . $profile . '/' . $profile . '.profile';
-  if (file_exists(BACKDROP_ROOT . '/core/profiles/' . $profile . '/' . $profile . '.profile')) {
-    $profile_uri = 'core/' . $profile_uri;
-  }
-  $modules[$profile] = new stdClass();
-  $modules[$profile]->name = $profile;
-  $modules[$profile]->uri = $profile_uri;
-  $modules[$profile]->filename = $profile . '.profile';
+  $weight = 1000;
+  $has_base = FALSE;
+  do {
+    $profile_uri = 'profiles/' . $profile . '/' . $profile . '.profile';
+    if (file_exists(BACKDROP_ROOT . '/core/' . $profile_uri)) {
+      $profile_uri = 'core/' . $profile_uri;
+    }
+    $modules[$profile] = new stdClass();
+    $modules[$profile]->name = $profile;
+    $modules[$profile]->uri = $profile_uri;
+    $modules[$profile]->filename = $profile . '.profile';
 
-  // Installation profile hooks are always executed last.
-  $modules[$profile]->weight = 1000;
+    // Installation profile hooks are always executed last.
+    $modules[$profile]->weight = $weight;
+    $weight--;
+
+    // Get base profile, if any.
+    $profile_info = install_profile_info($profile);
+    if (isset($profile_info['base'])) {
+      $profile = $profile_info['base'];
+      $has_base = TRUE;
+    }
+    else {
+      $profile = backdrop_get_profile();
+      $has_base = FALSE;
+    }
+  }
+  while ($has_base);
 
   // Set defaults for module info.
   $defaults = array(
