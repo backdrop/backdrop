@@ -173,6 +173,20 @@ function views_update_1005() {
 }
 
 /**
+ * Remove headers field from cache tables.
+ *
+ * @see https://www.drupal.org/node/1154830.
+ */
+function views_update_1006() {
+  if (db_field_exists('cache_views', 'headers')) {
+    db_drop_field('cache_views', 'headers');
+  }
+  if (db_field_exists('cache_views_data', 'headers')) {
+    db_drop_field('cache_views_data', 'headers');
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

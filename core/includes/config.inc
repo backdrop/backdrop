@@ -63,6 +63,9 @@ function config($config_file, $type = 'active') {
  * @param string $option
  *   The name of the config option within the file to delete. The config option
  *   may contain periods to indicate levels within the config file.
+ * 
+ * @see config_set()
+ * @see config_get()
  *
  * @since 1.7.0
  */
@@ -87,6 +90,9 @@ function config_clear($config_file, $option) {
  * @return mixed
  *   The contents of the requested config option. Returns NULL if the specified
  *   option was not found in the file at all.
+ *
+ * @see config_set()
+ * @see config_clear()
  */
 function config_get($config_file, $option = NULL) {
   $config = config($config_file);
@@ -145,6 +151,9 @@ function config_get_translated($config_file, $option = NULL, $args = array(), $o
  *   may contain periods to indicate levels within the config file.
  * @param mixed $value
  *   The value to save into the config file.
+ *
+ * @see config_get()
+ * @see config_clear()
  */
 function config_set($config_file, $option, $value) {
   $config = config($config_file);
@@ -1264,7 +1273,9 @@ class ConfigFileStorage implements ConfigStorageInterface {
       $archiver = new ArchiverTar($realpath);
       // Only extract JSON files, ignoring anything else in the archive.
       $file_list = preg_grep('/.json$/', $archiver->listContents());
-      $archiver->extract($this->directory, $file_list);
+      if ($file_list) {
+        $archiver->extract($this->directory, $file_list);
+      }
     }
     catch (\Exception $e) {
       watchdog('config', 'Could not extract the archive @uri: @error', array('@uri' => $file_uri, '@error' => $e->getMessage()), WATCHDOG_ERROR);

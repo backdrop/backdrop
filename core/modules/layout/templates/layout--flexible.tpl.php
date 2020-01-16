@@ -17,7 +17,7 @@
  *   - $row_data['region_name']: the region name.
  *   - $row_data['content_key']: The key of the $content array which contains
  *     the HTML for that region.
- * - $content: An array of content, each item in the array is nameed to one
+ * - $content: An array of content, each item in the array is named to one
  *   region of the layout.
  */
 ?>
@@ -27,7 +27,13 @@
   </div>
   <div class="layout-flexible-content <?php $region_buttons ? print 'layout-flexible-editor' : ''; ?>">
   <?php foreach ($row_data as $name => $row): ?>
-    <<?php print $row['element']; ?> data-row-id="<?php print $name; ?>" class="flexible-row <?php print 'l-' . $name; ?>" <?php print $row['row_id']; ?>>
+      <?php
+        $row_classes = array('flexible-row', 'l-' . $name);
+        if ($row['element'] == 'header' || $row['element'] == 'footer') {
+            $row_classes[] = 'l-' . $row['element'];
+        }
+      ?>
+      <<?php print $row['element']; ?> data-row-id="<?php print $name; ?>" class="<?php print implode(' ', $row_classes); ?>" <?php print $row['row_id']; ?>>
       <div class="<?php print $row['row_class']; ?>">
         <?php if ($region_buttons): ?>
           <div class="layout-flexible-region-buttons clearfix">

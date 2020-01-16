@@ -1603,7 +1603,7 @@ function system_run_cron_submit($form, &$form_state) {
  * Form builder; Configure error reporting settings.
  *
  * @ingroup forms
- * @see system_logging_settings_submit()
+ * @see system_logging_settings_validate()
  */
 function system_logging_settings($form, &$form_state) {
   $form['#config'] = 'system.core';
@@ -1618,8 +1618,34 @@ function system_logging_settings($form, &$form_state) {
     ),
     '#description' => t('It is recommended that sites running on production environments do not display any errors.'),
   );
+  $form['watchdog_enabled_severity_levels'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Severity of messages to log'),
+    '#options' => array(
+      WATCHDOG_EMERGENCY => t('Emergency'),
+      WATCHDOG_ALERT => t('Alert'),
+      WATCHDOG_CRITICAL => t('Critial'),
+      WATCHDOG_ERROR => t('Error'),
+      WATCHDOG_WARNING => t('Warning'),
+      WATCHDOG_NOTICE => t('Notice'),
+      WATCHDOG_INFO => t('Info'),
+      WATCHDOG_DEBUG => t('Debug'),
+      WATCHDOG_DEPRECATED => t('Deprecated'),
+    ),
+    '#default_value' => config_get('system.core', 'watchdog_enabled_severity_levels'),
+    '#description' => t('The <em>debug</em> and <em>deprecated</em> severity levels are recommended for developer environments, but not on production sites.'),
+  );
 
   return system_settings_form($form);
+}
+
+/**
+ * Validates the submitted logging form.
+ */
+function system_logging_settings_validate($form, &$form_state) {
+  // Cleanup enabled severity levels. Form API sets the value of unselected
+  // checkboxes to 0.
+  $form_state['values']['watchdog_enabled_severity_levels'] = array_keys(array_filter($form_state['values']['watchdog_enabled_severity_levels'], function($v){return $v !== 0;}));
 }
 
 /**

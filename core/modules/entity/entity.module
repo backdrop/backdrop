@@ -349,18 +349,22 @@ function entity_extract_ids($entity_type, $entity) {
  *
  * @return
  *   An entity object, initialized with the IDs provided.
+ *
+ * @deprecated since 1.15.0.
  */
 function entity_create_stub_entity($entity_type, $ids) {
-  $entity = new stdClass();
+  watchdog_deprecated_function('entity', __FUNCTION__);
+
+  $values = array();
   $info = entity_get_info($entity_type);
-  $entity->{$info['entity keys']['id']} = $ids[0];
+  $values[$info['entity keys']['id']] = $ids[0];
   if (!empty($info['entity keys']['revision']) && isset($ids[1])) {
-    $entity->{$info['entity keys']['revision']} = $ids[1];
+    $values[$info['entity keys']['revision']] = $ids[1];
   }
   if (!empty($info['entity keys']['bundle']) && isset($ids[2])) {
-    $entity->{$info['entity keys']['bundle']} = $ids[2];
+    $values[$info['entity keys']['bundle']] = $ids[2];
   }
-  return $entity;
+  return isset($info['entity class']) ? entity_create($entity_type, $values) : (object) $values;
 }
 
 /**

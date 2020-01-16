@@ -202,7 +202,8 @@ ini_set('session.cookie_lifetime', 2000000);
  * is explicitly set to maintenance mode through the administration page or when
  * the database is inactive due to an error. It can be set through the
  * 'maintenance_theme' key. The template file should also be copied into the
- * theme. It is located inside 'core/modules/system/maintenance-page.tpl.php'.
+ * theme. It is located inside
+ * 'core/modules/system/templates/maintenance-page.tpl.php'.
  * Note: This setting does not apply to installation and update pages.
  */
 // $settings['maintenance_theme'] = 'bartik';
@@ -351,12 +352,12 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
  * proxy_exceptions variable is an array of host names to be accessed directly,
  * not via proxy.
  */
-# $settings['proxy_server'] = '';
-# $settings['proxy_port'] = 8080;
-# $settings['proxy_username'] = '';
-# $settings['proxy_password'] = '';
-# $settings['proxy_user_agent'] = '';
-# $settings['proxy_exceptions'] = array('127.0.0.1', 'localhost');
+// $settings['proxy_server'] = '';
+// $settings['proxy_port'] = 8080;
+// $settings['proxy_username'] = '';
+// $settings['proxy_password'] = '';
+// $settings['proxy_user_agent'] = '';
+// $settings['proxy_exceptions'] = array('127.0.0.1', 'localhost');
 
 /**
  * Authorized file system operations:

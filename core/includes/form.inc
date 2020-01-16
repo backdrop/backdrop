@@ -3169,6 +3169,175 @@ function map_month($month) {
 }
 
 /**
+ * Returns html5 markup for a date input form element.
+ */
+function theme_html_date($variables) {
+  $element = $variables['element'];
+  $attributes = array();
+  if (isset($element['#attributes'])) {
+    $attributes = $element['#attributes'];
+  }
+  if (isset($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  $attributes['class'][] = 'form-date';
+  $attributes['type'] = 'date';
+  $attributes['value'] = $element['#value'];
+  $attributes['name'] = $element['#name'];
+
+  $output = '<input ' . backdrop_attributes($attributes) . ' />';
+  return $output;
+}
+
+/**
+ * Returns html5 markup for a time input form element.
+ */
+function theme_html_time($variables) {
+  $element = $variables['element'];
+  $attributes = array();
+  if (isset($element['#attributes'])) {
+    $attributes = $element['#attributes'];
+  }
+  if (isset($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  $attributes['class'][] = 'form-time';
+  $attributes['type'] = 'time';
+  $attributes['value'] = $element['#value'];
+  $attributes['name'] = $element['#name'];
+  $attributes['step'] = 1;
+  if (isset($element['#attributes']['step'])) {
+    // Allow to set cardinality to "minute".
+    if ($element['#attributes']['step'] == 60) {
+      $attributes['step'] = 60;
+    }
+  }
+
+  $output = '<input ' . backdrop_attributes($attributes) . ' />';
+  return $output;
+}
+
+/**
+ * Returns html5 markup for a combined date and time form element.
+ */
+function theme_html_datetime($variables) {
+  $element = $variables['element'];
+  $attributes = array();
+  if (isset($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  if (!empty($element['#attributes']['class'])) {
+    $attributes['class'] = (array) $element['#attributes']['class'];
+  }
+  $attributes['class'][] = 'container-inline';
+  return '<div' . backdrop_attributes($attributes) . '>' . backdrop_render_children($element) . '</div>';
+}
+
+/**
+ * Combine html_date and html_time form elements.
+ */
+function form_process_html_datetime($element) {
+  $value = $element['#value'];
+  // Conversion to a timestamp has happened, possibly in a preview.
+  // Get it back into an array for the form.
+  if (is_numeric($value) && (int) $value == $value) {
+    $value = array(
+      'date' => format_date($value, 'custom', DATE_FORMAT_DATE),
+      'time' => format_date($value, 'custom', DATE_FORMAT_TIME),
+    );
+  }
+  // Catch possible problems.
+  if (!is_array($value) || !isset($value['date']) || !isset($value['time'])) {
+    $value = array(
+      'date' => '',
+      'time' => '',
+    );
+  }
+  $element['#tree'] = TRUE;
+  $element['date'] = array(
+    '#type' => 'html_date',
+    '#default_value' => $value['date'],
+  );
+  $attributes = $element['#attributes'];
+  if (isset($attributes['date'])) {
+    $element['date']['#attributes'] = $attributes['date'];
+  }
+
+  $element['time'] = array(
+    '#type' => 'html_time',
+    '#default_value' => $value['time'],
+  );
+  if (isset($attributes['time'])) {
+    $element['time']['#attributes'] = $attributes['time'];
+  }
+
+  return $element;
+}
+
+/**
+ * Validate a date string.
+ */
+function html_date_validate($element, &$form_state) {
+  $date = $element['#value'];
+  if (!empty($date)) {
+    $valid_date = FALSE;
+    $created_date = DateTime::createFromFormat(DATE_FORMAT_DATE, $date);
+    if (is_object($created_date)) {
+      // DateTime::createFromFormat alone is too permissive.
+      if ($created_date->format(DATE_FORMAT_DATE) == $date) {
+        $valid_date = TRUE;
+      }
+    }
+    if (!$valid_date) {
+      form_error($element, t('%date is not a valid date.', array('%date' => $date)));
+    }
+  }
+}
+
+/**
+ * Validate a time string.
+ */
+function html_time_validate($element, &$form_state) {
+  $time = $element['#value'];
+  if (!empty($time)) {
+    // Pad time if seconds were omitted because of the step attribute,
+    // or a browser skipped it. Our date pattern contains seconds.
+    if (preg_match('/^\d{2}:\d{2}$/', $time)) {
+      $time .= ':00';
+    }
+    $valid_time = FALSE;
+    $created_time = DateTime::createFromFormat(DATE_FORMAT_TIME, $time);
+    if (is_object($created_time)) {
+      // DateTime::createFromFormat alone is too permissive.
+      if ($created_time->format(DATE_FORMAT_TIME) == $time) {
+        $valid_time = TRUE;
+      }
+    }
+    if (!$valid_time) {
+      form_error($element, t('%time is not a valid time.', array('%time' => $time)));
+    }
+  }
+}
+
+/**
+ * Validate a combined date and time array.
+ */
+function html_datetime_validate($element, &$form_state) {
+  // Validation of parts actually happens in child fields.
+  if (is_array($element['#value'])) {
+    // If either is set, both are needed.
+    if (!empty($element['#value']['date']) || !empty($element['#value']['time'])) {
+      if (empty($element['#value']['date'])) {
+        $element['#value']['date'] = format_date(REQUEST_TIME, DATE_FORMAT_DATE);
+      }
+      elseif (empty($element['#value']['time'])) {
+        $element['#value']['time'] = '00:00:00';
+      }
+    }
+  }
+}
+
+/**
  * Sets the value for a weight element, with zero as a default.
  */
 function weight_value(&$form) {
