@@ -378,6 +378,10 @@ function theme_image_widget($variables) {
 function theme_image_formatter($variables) {
   $item = $variables['item'];
 
+  if (!empty($item['timestamp'])) {
+    $image['timestamp'] = $item['timestamp'];
+  }
+
   // Do not output an empty 'title' attribute.
   if (isset($item['title']) && backdrop_strlen($item['title']) == 0) {
     unset($item['title']);
