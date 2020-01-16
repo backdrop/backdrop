@@ -84,6 +84,7 @@ class LayoutFlexibleTemplate {
       'name' => $this->name,
       'title' => $this->title,
       'description' => $this->description,
+      'thumbnail' => layout_template_generate_thumbnail($this),
       'rows' => $this->rows,
     );
 
