@@ -133,7 +133,7 @@ class EnableDisableTestCase extends ModuleTestCase {
     // hidden or required, or testing-only modules.
     $modules = system_rebuild_module_data();
     foreach ($modules as $name => $module) {
-      if ($module->info['package'] == 'Testing' || !empty($module->info['hidden']) || !empty($module->info['required'])) {
+      if ($module->info['package'] == 'Testing' || !empty($module->info['hidden']) || !empty($module->info['required']) || (strpos($module->filename, 'core/') !== 0)) {
         unset($modules[$name]);
       }
     }
