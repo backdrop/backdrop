@@ -2827,10 +2827,11 @@ function _system_rebuild_module_data() {
   // Find modules
   $modules = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.module$/', 'modules', 'name', 0);
 
-  // Include the installation profile in modules that are loaded.
+  // Include the installation profile(s) in modules that are loaded.
+  // This will include the current profile, then loop through any base profiles
+  // as well.
   $profile = backdrop_get_profile();
   $weight = 1000;
-  $has_base = FALSE;
   do {
     $profile_uri = 'profiles/' . $profile . '/' . $profile . '.profile';
     if (file_exists(BACKDROP_ROOT . '/core/' . $profile_uri)) {
@@ -2843,15 +2844,17 @@ function _system_rebuild_module_data() {
 
     // Installation profile hooks are always executed last.
     $modules[$profile]->weight = $weight;
+    // Execute base profile hooks before sub-profile hooks.
     $weight--;
 
     // Get base profile, if any.
     $profile_info = install_profile_info($profile);
-    if (isset($profile_info['base'])) {
-      $profile = $profile_info['base'];
+    if (isset($profile_info['base profile'])) {
+      $profile = $profile_info['base profile'];
       $has_base = TRUE;
     }
     else {
+      // Set $profile back to the current one for use later in this function.
       $profile = backdrop_get_profile();
       $has_base = FALSE;
     }

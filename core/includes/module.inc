@@ -256,8 +256,8 @@ function _module_build_dependencies($files) {
       }
     }
     // Make sure sub-install profiles list their base profile as a dependency.
-    if ($file->info['type'] == 'profile' && isset($file->info['base'])) {
-      $dependency_data = backdrop_parse_dependency($file->info['base']);
+    if ($file->info['type'] == 'profile' && isset($file->info['base profile'])) {
+      $dependency_data = backdrop_parse_dependency($file->info['base profile']);
       $graph[$file->name]['edges'][$dependency_data['name']] = $dependency_data;
     }
   }
