@@ -2824,6 +2824,8 @@ function system_get_info($type, $name = NULL) {
  *   An associative array of module information.
  */
 function _system_rebuild_module_data() {
+  require_once BACKDROP_ROOT . '/core/includes/install.inc';
+
   // Find modules
   $modules = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.module$/', 'modules', 'name', 0);
 
