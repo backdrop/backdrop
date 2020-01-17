@@ -320,6 +320,20 @@ function user_save($account) {
 }
 
 /**
+ * Set a default value if one-time login link goes out,
+ * set a form error if not and password value is empty.
+ */
+function user_pass_required_validate($element, &$form_state, $form) {
+  if ($form_state['values']['notify'] == 0 && empty($form_state['values']['pass'])) {
+    $message = t('!name field is required.', array('!name' => $element['#title']));
+    form_set_error('pass', $message);
+  }
+  else {
+    $form_state['values']['pass'] = backdrop_random_key(16);
+  }
+}
+
+/**
  * Verify the syntax of the given name.
  */
 function user_validate_name($name) {
@@ -794,15 +808,43 @@ function user_account_form(&$form, &$form_state) {
       $form['#validate'][] = 'user_validate_current_pass';
     }
   }
-  elseif (!config_get('system.core', 'user_email_verification') || $admin_users) {
-    $form['account']['pass'] = array(
-      '#type' => 'password',
-      '#title' => t('Password'),
-      '#description' => t('Provide a password for the new account.'),
-      '#password_toggle' => TRUE,
-      '#password_strength' => TRUE,
-      '#required' => TRUE,
-    );
+  else {
+    if (!config_get('system.core', 'user_email_verification') && !$admin_users) {
+      // Someone registers a new account and may set a password directly.
+      $form['account']['pass'] = array(
+        '#type' => 'password',
+        '#title' => t('Password'),
+        '#description' => t('Provide a password for the new account.'),
+        '#password_toggle' => TRUE,
+        '#password_strength' => TRUE,
+        '#required' => TRUE,
+      );
+    }
+    if ($admin_users) {
+      // An admin creates an account.
+      $form['account']['notify'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Notify user of new account'),
+        '#default_value' => 1,
+      );
+      $form['account']['pass'] = array(
+        '#type' => 'password',
+        '#title' => t('Password'),
+        '#description' => t('Provide a password for the new account.'),
+        '#password_toggle' => TRUE,
+        '#password_strength' => TRUE,
+        '#required' => FALSE,
+        '#element_validate' => array('user_pass_required_validate'),
+        '#states' => array(
+          'visible' => array(
+            ':input[name="notify"]' => array('checked' => FALSE),
+          ),
+          'required' => array(
+            ':input[name="notify"]' => array('checked' => FALSE),
+          ),
+        ),
+      );
+    }
   }
 
   $form['account_settings'] = array(
@@ -839,12 +881,6 @@ function user_account_form(&$form, &$form_state) {
   $form['account_settings']['roles'][BACKDROP_AUTHENTICATED_ROLE] = array(
     '#disabled' => TRUE,
     '#value' => 'authenticated',
-  );
-
-  $form['account_settings']['notify'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Notify user of new account'),
-    '#access' => $register && $admin_users,
   );
 
   // Signature.
