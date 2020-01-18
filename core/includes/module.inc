@@ -255,10 +255,20 @@ function _module_build_dependencies($files) {
         $graph[$file->name]['edges'][$dependency_data['name']] = $dependency_data;
       }
     }
-    // Make sure sub-install profiles list their base profile as a dependency.
-    if ($file->info['type'] == 'profile' && isset($file->info['base profile'])) {
-      $dependency_data = backdrop_parse_dependency($file->info['base profile']);
-      $graph[$file->name]['edges'][$dependency_data['name']] = $dependency_data;
+    // Make sure sub-install profiles list their base profile as a dependency,
+    // but only during installation.
+    if (backdrop_installation_attempted()) {
+      if ($file->info['type'] == 'profile' && isset($file->info['base profile'])) {
+        $dependency_data = backdrop_parse_dependency($file->info['base profile']);
+        $graph[$file->name]['edges'][$dependency_data['name']] = $dependency_data;
+      }
+    }
+    else {
+      if ($file->info['type'] == 'profile') {
+        if ($file->name != backdrop_get_profile()) {
+          unset($graph[$file->name]);
+        }
+      }
     }
   }
   backdrop_depth_first_search($graph);
