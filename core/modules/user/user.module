@@ -829,6 +829,7 @@ function user_account_form(&$form, &$form_state) {
         '#type' => 'checkbox',
         '#title' => t('Notify user of new account'),
         '#default_value' => 1,
+        '#description' => t('The user will receive an email with a one-time login link which leads to a page where they can set their new password.'),
       );
       $form['account']['pass'] = array(
         '#type' => 'password',
