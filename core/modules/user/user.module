@@ -324,12 +324,15 @@ function user_save($account) {
  * set a form error if not and password value is empty.
  */
 function user_pass_required_validate($element, &$form_state, $form) {
-  if ($form_state['values']['notify'] == 0 && empty($form_state['values']['pass'])) {
-    $message = t('!name field is required.', array('!name' => $element['#title']));
-    form_set_error('pass', $message);
+  $values = $form_state['values'];
+  if ($values['notify'] == 1) {
+    $form_state['values']['pass'] = user_password(22);
   }
   else {
-    $form_state['values']['pass'] = backdrop_random_key(16);
+    if (empty($values['pass']) && $values['pass'] !== '0') {
+      $message = t('!name field is required.', array('!name' => $element['#title']));
+      form_set_error('pass', $message);
+    }
   }
 }
 
