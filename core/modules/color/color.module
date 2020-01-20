@@ -191,8 +191,6 @@ function color_css_alter(&$css) {
           $base = base_path() . dirname($filename) . '/';
           _backdrop_build_css_path(NULL, $base);
 
-          $paths['source'] = backdrop_get_path('theme', _color_get_theme_from_file($file, $preview_theme));
-
           $stylesheet = preg_replace_callback('/url\([\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\)/i', '_backdrop_build_css_path', $stylesheet);
           $stylesheet = _color_rewrite_stylesheet($preview_theme, $theme_info, $paths, $preview_data['palette'], $stylesheet);
 
