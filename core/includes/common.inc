@@ -2983,18 +2983,19 @@ function backdrop_deliver_html_page($page_callback_result) {
   global $language;
   backdrop_add_http_header('Content-Language', $language->langcode);
 
+  $config = config('system.core');
+  
   // By default, do not allow the site to be rendered in an iframe on another
-  // domain, but provide a variable to override this. If the code running for
-  // this page request already set the X-Frame-Options header earlier, don't
-  // overwrite it here.
-  $frame_options = config_get('system.core', 'x_frame_options');
+  // domain, but provide a variable in settings.php to override this. If the
+  // code running for this page request already set the X-Frame-Options header
+  // earlier, don't overwrite it here.
+  $frame_options = settings_get('x_frame_options', $config->get('x_frame_options'));
   if ($frame_options && is_null(backdrop_get_http_header('X-Frame-Options'))) {
     backdrop_add_http_header('X-Frame-Options', $frame_options);
   }
 
   // Menu status constants are integers; page content is a string or array.
   if (is_int($page_callback_result)) {
-    $site_config = config('system.core');
     // @todo: Break these up into separate functions?
     switch ($page_callback_result) {
       case MENU_NOT_FOUND:
@@ -3014,7 +3015,7 @@ function backdrop_deliver_html_page($page_callback_result) {
           }
         }
 
-        $path = backdrop_get_normal_path($site_config->get('site_404'));
+        $path = backdrop_get_normal_path($config->get('site_404'));
         if (empty($path)) {
           $path = 'system/404';
         }
@@ -3036,7 +3037,7 @@ function backdrop_deliver_html_page($page_callback_result) {
           }
         }
 
-        $path = backdrop_get_normal_path($site_config->get('site_403'));
+        $path = backdrop_get_normal_path($config->get('site_403'));
         if (empty($path)) {
           $path = 'system/403';
         }
