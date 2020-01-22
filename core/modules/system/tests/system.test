@@ -1268,7 +1268,12 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
     $path = substr($mails[0]['body'], $start, 66 + strlen($this->user->uid));
 
     // Log in with temporary login link.
-    $this->backdropPost($path, array(), 'Save password & log in');
+    $pass = user_password();
+    $pass_edit = array(
+      'pass[pass1]' => $pass,
+      'pass[pass2]' => $pass,
+    );
+    $this->backdropPost($path, $pass_edit, 'Save password & log in');
     $this->assertText($user_message);
     $this->backdropLogout();
 
