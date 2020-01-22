@@ -799,12 +799,7 @@ class Layout {
 
     // Add on the current user context, which is always available.
     if (!isset($this->contexts['current_user'])) {
-      $this->contexts['current_user'] = layout_create_context('user', array(
-        'name' => 'current_user',
-        'label' => t('Current user'),
-        'locked' => TRUE,
-      ));
-      $this->contexts['current_user']->setData($GLOBALS['user']);
+      $this->contexts['current_user'] = layout_current_user_context();
     }
 
     // Add on the overrides path context, which is always available.
