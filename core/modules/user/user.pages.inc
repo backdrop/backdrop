@@ -185,6 +185,7 @@ function user_pass_reset_form($form, &$form_state, $account) {
   );
   $form['pass'] = array(
     '#type' => 'password_confirm',
+    '#required' => TRUE,
   );
   $form['actions'] = array(
     '#type' => 'actions',
