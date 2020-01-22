@@ -253,12 +253,7 @@ class LayoutMenuItem {
     }
 
     // Add on the current user context, which is always available.
-    $contexts['current_user'] = layout_create_context('user', array(
-      'name' => 'current_user',
-      'label' => t('Current user'),
-      'locked' => TRUE,
-    ));
-    $contexts['current_user']->setData($GLOBALS['user']);
+    $contexts['current_user'] = layout_current_user_context();
 
     $this->contexts += $contexts;
 
