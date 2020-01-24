@@ -10,7 +10,6 @@
  * Messages are truncated at 56 chars. Full-length messages can be viewed on the
  * message details page.
  *
- * @see dblog_clear_log_form()
  * @see dblog_event()
  * @see dblog_filter_form()
  * @see dblog_menu()
@@ -30,7 +29,6 @@ function dblog_overview() {
     WATCHDOG_DEPRECATED => 'dblog-deprecated',
   );
 
-  $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
   $build['dblog_filter_form'] = backdrop_get_form('dblog_filter_form');
 
   $header = array(
@@ -88,6 +86,16 @@ function dblog_overview() {
   );
   $build['dblog_pager'] = array('#theme' => 'pager');
 
+  return $build;
+}
+
+/**
+ * Page callback to clear all dblog messages.
+ *
+ * @see dblog_clear_log_form()
+ */
+function dblog_clear() {
+  $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
   return $build;
 }
 
@@ -416,17 +424,16 @@ function dblog_filter_form_submit($form, &$form_state) {
  */
 function dblog_clear_log_form($form) {
   $form['dblog_clear'] = array(
-    '#type' => 'fieldset',
+    '#type' => 'item',
     '#title' => t('Clear log messages'),
-    '#description' => t('This action will permanently delete the log messages from the database.'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#markup' => '<p>' . t('This action will permanently delete the log messages from the database.') . '</p>',
   );
-  $form['dblog_clear']['clear'] = array(
+  $form['dblog_clear_submit'] = array(
     '#type' => 'submit',
     '#value' => t('Clear log messages'),
     '#submit' => array('dblog_clear_log_submit'),
     '#attributes' => array('class' => array('button-danger')),
+    '#weight' => 1,
   );
 
   return $form;

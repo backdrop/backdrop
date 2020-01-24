@@ -19,8 +19,21 @@ function dblog_menu() {
     'description' => 'View events that have recently been logged.',
     'page callback' => 'dblog_overview',
     'access arguments' => array('access site reports'),
-    'weight' => -1,
     'file' => 'dblog.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/reports/dblog/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/reports/dblog/clear'] = array(
+    'title' => 'Clear',
+    'description' => 'Clear all events that have been logged.',
+    'page callback' => 'dblog_clear',
+    'access arguments' => array('access site reports'),
+    'file' => 'dblog.admin.inc',
+    'weight' => 1,
+    'type' => MENU_LOCAL_TASK,
   );
   $items['admin/reports/page-not-found'] = array(
     'title' => "Top 'page not found' errors",
