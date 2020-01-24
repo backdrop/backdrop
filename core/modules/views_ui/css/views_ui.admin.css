@@ -128,7 +128,8 @@
 
 .views-display-disabled > fieldset > legend,
 .views-display-disabled .fieldset-wrapper > .views-ui-display-tab-bucket > *,
-.views-display-disabled .views-display-columns {
+.views-display-disabled .views-display-columns,
+a.views-display-disabled-link {
   opacity: 0.5;
 }
 
