@@ -255,11 +255,8 @@ function node_form($form, &$form_state, Node $node) {
   );
 
   $form['revision_information']['is_default_revision'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Make default'),
-    '#description' => t('Select to make this the default revision.'),
-    '#default_value' => $node->is_default_revision,
-    '#access' => !$node->isNew() && user_access('administer nodes'),
+    '#type' => 'value',
+    '#value' => $node->is_default_revision,
   );
 
   // Node author information for administrators
