@@ -442,8 +442,9 @@ function dblog_clear_log_form($form) {
 /**
  * Form submission handler for dblog_clear_log_form().
  */
-function dblog_clear_log_submit() {
+function dblog_clear_log_submit($form, &$form_state) {
   $_SESSION['dblog_overview_filter'] = array();
   db_truncate('watchdog')->execute();
-  backdrop_set_message(t('Database log cleared.'));
+  backdrop_set_message(t('The log messages have been cleared.'));
+  $form_state['redirect'] = 'admin/reports/dblog/view';
 }

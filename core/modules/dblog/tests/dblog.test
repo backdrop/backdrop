@@ -525,7 +525,7 @@ class DBLogTestCase extends BackdropWebTestCase {
 
     // Clear all logs and make sure the confirmation message is found.
     $this->backdropPost('admin/reports/dblog/clear', array(), t('Clear log messages'));
-    $this->assertText(t('Database log cleared.'), 'Confirmation message found');
+    $this->assertText(t('The log messages have been cleared.'), 'Confirmation message found');
   }
 
   /**
