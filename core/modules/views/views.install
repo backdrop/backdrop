@@ -86,7 +86,6 @@ function views_update_1002() {
  */
 function views_update_1003() {
   $update_variables = array(
-    'views_no_javascript' => FALSE,
     'views_exposed_filter_any_label' => 'new_any',
     'views_show_additional_queries' => FALSE,
     'views_sql_signature' => FALSE,
@@ -190,3 +189,10 @@ function views_update_1006() {
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
+
+/**
+ * Remove obsolete variable from config.
+ */
+function views_update_2000() {
+  config_clear('views.settings', 'no_javascript');
+}

@@ -1013,10 +1013,6 @@ function views_add_css($file) {
  * Include views .js files.
  */
 function views_add_js($file) {
-  // If javascript has been disabled by the user, never add js files.
-  if (config_get('views.settings', 'no_javascript')) {
-    return;
-  }
   static $base = TRUE, $ajax = TRUE;
   if ($base) {
     backdrop_add_js(backdrop_get_path('module', 'views') . "/js/base.js");
