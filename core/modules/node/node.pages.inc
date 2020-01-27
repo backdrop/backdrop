@@ -231,7 +231,7 @@ function node_form($form, &$form_state, Node $node) {
     '#access' => $node->nid && $node_type->settings['revision_enabled'] && ($node->revision || user_access('administer nodes')),
   );
   // Enforce a new revision if editing an old revision.
-  if ($node->default_revision <= $node->vid) {
+  if (isset($node->default_revision) && ($node->default_revision <= $node->vid)) {
     $form['revision_information']['revision'] = array(
       '#type' => 'checkbox',
       '#title' => t('Create new revision'),
