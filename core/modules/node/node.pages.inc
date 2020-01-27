@@ -230,20 +230,29 @@ function node_form($form, &$form_state, Node $node) {
     '#weight' => 20,
     '#access' => $node->nid && $node_type->settings['revision_enabled'] && ($node->revision || user_access('administer nodes')),
   );
-  $form['revision_information']['revision'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Create new revision'),
-    '#default_value' => $node->revision,
-    '#access' => user_access('administer nodes'),
-  );
-  // Check the revision log checkbox when the log textarea is filled in.
-  // This must not happen if "Create new revision" is enabled by default, since
-  // the state would auto-disable the checkbox otherwise.
-  if (!$node->revision) {
-    $form['revision_information']['revision']['#states'] = array(
-      'checked' => array(
-        'textarea[name="log"]' => array('empty' => FALSE),
-      ),
+  // Enforce a new revision if editing an old revision.
+  if ($node->default_revision <= $node->vid) {
+    $form['revision_information']['revision'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Create new revision'),
+      '#default_value' => $node->revision,
+      '#access' => user_access('administer nodes'),
+    );
+    // Check the revision log checkbox when the log textarea is filled in.
+    // This must not happen if "Create new revision" is enabled by default, since
+    // the state would auto-disable the checkbox otherwise.
+    if (!$node->revision) {
+      $form['revision_information']['revision']['#states'] = array(
+        'checked' => array(
+          'textarea[name="log"]' => array('empty' => FALSE),
+        ),
+      );
+    }
+  }
+  else {
+    $node->revision = TRUE;
+    $form['revision_information']['mandatory_revision_message'] = array(
+      '#markup' => t('A new revision is required when editing past revisions.'),
     );
   }
   $form['revision_information']['log'] = array(
