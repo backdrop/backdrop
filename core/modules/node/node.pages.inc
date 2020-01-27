@@ -898,7 +898,7 @@ function node_revision_overview($node) {
   }
   foreach ($revisions as $revision) {
     $row = array();
-    $is_default_revision = ($revision->vid == $node->default_revision);
+    $is_default_revision = $node->isDefaultRevision();
     $links = array();
     $row_class = '';
     if ($is_default_revision) {
