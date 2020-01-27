@@ -1149,7 +1149,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#type' => 'checkbox',
       '#title' => t('Show comment replies in a threaded list'),
       '#default_value' => $node_type->settings['comment_mode'],
-      '#description' => t('A threaded list differs from chronological in that each comment follows it\'s parent, and is usually indented.'),
+      '#description' => t('A threaded list differs from a chronological list in that each comment follows its parent, and is usually indented.'),
     );
     $form['comment']['comment_anonymous'] = array(
       '#type' => 'select',
