@@ -483,6 +483,9 @@ class NodeStorageController extends EntityDatabaseStorageController {
         if ($entity->isDefaultRevision()) {
           $return = backdrop_write_record($this->entityInfo['base table'], $entity, $this->idKey);
         }
+        else {
+          $return = SAVED_REVISION;
+        }
       }
 
       if ($this->revisionKey) {

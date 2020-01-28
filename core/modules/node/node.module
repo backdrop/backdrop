@@ -76,6 +76,12 @@ define('NODE_ACCESS_DENY', 'deny');
 define('NODE_ACCESS_IGNORE', NULL);
 
 /**
+ * Return status for saving which involved an update to an existing node which
+ * was not the default revision.
+ */
+define('SAVED_REVISION', 4);
+
+/**
  * Implements hook_theme().
  */
 function node_theme() {
