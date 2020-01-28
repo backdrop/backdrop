@@ -168,6 +168,31 @@ function user_admin_settings($form, &$form_state) {
     }
   }
 
+  // Password settings.
+  $form['pass_constraints'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Password constraints'),
+    '#weight' => -1,
+    '#tree' => TRUE,
+  );
+  $form['pass_constraints']['pass_minlength'] = array(
+    '#type' => 'number',
+    '#title' => t('Minimum length'),
+    '#min' => 1,
+    '#max' => 128,
+    '#default_value' => $config->get('pass_constraints.pass_minlength'),
+  );
+  $form['pass_constraints']['pass_not_username'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Not same as username'),
+    '#default_value' => $config->get('pass_constraints.pass_not_username'),
+  );
+  $form['pass_constraints']['pass_not_email'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Not same as account e-mail'),
+    '#default_value' => $config->get('pass_constraints.pass_not_email'),
+  );
+
   // Account settings.
   $form['personalization'] = array(
     '#type' => 'fieldset',

@@ -1203,6 +1203,17 @@ function user_update_1016() {
   $table = backdrop_get_schema_unprocessed('system', 'cache');
   $table['description'] = "Cache table used to store User entity records.";
   db_create_table('cache_entity_user', $table);
+
+/**
+ * Set default values for core password constraints.
+ */
+function user_update_1016() {
+  $constraints = array(
+    'pass_minlength' => 5,
+    'pass_not_username' => TRUE,
+    'pass_not_email' => TRUE,
+  );
+  config_set('system.core', 'pass_constraints', $constraints);
 }
 
 /**

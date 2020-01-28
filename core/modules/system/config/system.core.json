@@ -89,5 +89,10 @@
     "user_picture_file_size": "800",
     "user_picture_guidelines": "",
     "watchdog_enabled_severity_levels": [0, 1, 2, 3, 4, 5, 6],
-    "x_frame_options": "SAMEORIGIN"
+    "x_frame_options": "SAMEORIGIN",
+    "pass_constraints": {
+        "pass_minlength": "5",
+        "pass_not_username": 1,
+        "pass_not_email": 1
+    }
 }
