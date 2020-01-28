@@ -140,17 +140,17 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $this->assertText($role_name, "$role_name is found on vocabulary form.");
 
     // Check that the new role does not have a permission which wasn't granted.
-    $this->assertFieldByName($role_name . '[edit terms in tags]', 'edit terms in tags', "Role $role_name does not have edit terms in tags permission.");
+    $this->assertFieldByName($role_name . '[update terms in tags]', 'update terms in tags', "Role $role_name does not have update terms in tags permission.");
 
     // On the Vocabulary page: change permissions.
     $edit = array(
-      $role_name . '[edit terms in tags]' => TRUE,
+      $role_name . '[update terms in tags]' => TRUE,
     );
     $this->backdropPost('admin/structure/taxonomy/tags/configure', $edit, t('Save'));
 
     // Check that the permission changes are saved on the permissions page.
     $this->backdropGet('admin/config/people/permissions');
-    $this->assertFieldByName($role_name . '[edit terms in tags]', 'edit terms in tags', "Role $role_name has edit terms in tags permission.");
+    $this->assertFieldByName($role_name . '[update terms in tags]', 'update terms in tags', "Role $role_name has update terms in tags permission.");
 
     // Check that the new role does not have a permission which wasn't granted.
     $this->assertFieldByName($role_name . '[delete terms in tags]', 'delete terms in tags', "Role $role_name does not have delete terms in tags permission.");
@@ -171,7 +171,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     backdrop_static_reset('user_access');
 
     $account = user_load($web_user->uid, TRUE);
-    $this->assertTrue(user_access('edit terms in tags', $account), "Web user has edit terms in tags permission.");
+    $this->assertTrue(user_access('update terms in tags', $account), "Web user has update terms in tags permission.");
     $this->assertTrue(user_access('delete terms in tags', $account), "Web user has delete terms in tags permission.");
   }
 

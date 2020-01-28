@@ -356,6 +356,28 @@ function taxonomy_update_1007() {
 }
 
 /**
+ * Update per vocabulary permissions by role.
+ */
+function taxonomy_update_1008() {
+  // Get all permissions "edit terms in ..." and replace "edit" with "update".
+  $config_names = config_get_names_with_prefix('user.role');
+  foreach ($config_names as $name) {
+    $permissions = config_get($name, 'permissions');
+    $needs_update = FALSE;
+    foreach ($permissions as $key => $perm) {
+      if (strpos($perm, 'edit terms in ') === 0) {
+        $newperm = str_replace('edit', 'update', $perm);
+        $permissions[$key] = $newperm;
+        $needs_update = TRUE;
+      }
+    }
+    if ($needs_update) {
+      config_set($name, 'permissions', $permissions);
+    }
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

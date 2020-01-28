@@ -60,7 +60,7 @@ class DashboardTaxonomyBlock extends Block {
     foreach ($vocabularies as $machine => $vocabulary) {
       if (in_array($machine, $this->settings['vocabularies']) || empty($this->settings['vocabularies'])) {
         $term_count = db_query("SELECT count(*) FROM {taxonomy_term_data} WHERE vocabulary = :name", array(':name' => $vocabulary->machine_name))->fetchField();
-        if (user_access('administer taxonomy') || user_access('edit terms in ' . $vocabulary->machine_name)) {
+        if (user_access('administer taxonomy') || user_access('update terms in ' . $vocabulary->machine_name)) {
           $terms = format_plural($term_count, '1 term', '@count terms');
           $links['list'] = array(
             'title' => t('List terms'),

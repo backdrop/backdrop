@@ -394,7 +394,7 @@ function standard_install() {
     'access administration pages',
     'access site in maintenance mode',
     'flush caches',
-    'edit terms in tags',
+    'update terms in tags',
     'delete terms in tags',
     'administer taxonomy',
     'search content',

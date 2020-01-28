@@ -323,7 +323,7 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
       // Save new permissions
       foreach ($form_state['values']['roles'] as $role_name => $role) {
         $valid_perms = array();
-        // Create the permissions string in the format 'edit terms in $vocab'.
+        // Create the permissions string in the format 'update terms in $vocab'.
         foreach ($form_state['values'][$role->name] as $string => $perm) {
           if ($perm) {
             $parts = explode(' terms in ', $string);
