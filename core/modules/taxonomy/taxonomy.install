@@ -366,7 +366,7 @@ function taxonomy_update_1008() {
     $needs_update = FALSE;
     foreach ($permissions as $key => $perm) {
       if (strpos($perm, 'edit terms in ') === 0) {
-        $newperm = str_replace('edit', 'update', $perm);
+        $newperm = str_replace('edit terms', 'update terms', $perm);
         $permissions[$key] = $newperm;
         $needs_update = TRUE;
       }
