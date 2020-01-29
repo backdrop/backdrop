@@ -30,9 +30,6 @@ function dblog_overview() {
     WATCHDOG_DEPRECATED => 'dblog-deprecated',
   );
 
-  $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
-  $build['dblog_filter_form'] = backdrop_get_form('dblog_filter_form');
-
   $header = array(
     '', // Icon column.
     array('data' => t('Type'), 'field' => 'w.type', 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
@@ -55,6 +52,12 @@ function dblog_overview() {
     ->orderByHeader($header)
     ->execute();
 
+  // Do not show the "Clear log messages" button if there are no log messages.
+  if ($result->rowCount() != 0) {
+    $build['dblog_clear_log_form'] = backdrop_get_form('dblog_clear_log_form');
+  }
+  $build['dblog_filter_form'] = backdrop_get_form('dblog_filter_form');
+
   foreach ($result as $dblog) {
     if (!empty($dblog->uid) && empty($dblog->name)) {
       $user_info = t('Deleted User');
@@ -66,7 +69,7 @@ function dblog_overview() {
     $log_date_format = config_get('system.core', 'log_date_format');
     $rows[] = array('data' =>
       array(
-        // Cells
+        // Populate the various cells for each row.
         array('class' => 'icon'),
         t($dblog->type),
         format_date($dblog->timestamp, 'custom', $log_date_format),
@@ -74,7 +77,7 @@ function dblog_overview() {
         $user_info,
         filter_xss($dblog->link),
       ),
-      // Attributes for tr
+      // Attributes for each table row.
       'class' => array(backdrop_html_class('dblog-' . $dblog->type), $classes[$dblog->severity]),
     );
   }
@@ -418,25 +421,37 @@ function dblog_clear_log_form($form) {
   $form['dblog_clear'] = array(
     '#type' => 'fieldset',
     '#title' => t('Clear log messages'),
-    '#description' => t('This action will permanently delete the log messages from the database.'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
   );
   $form['dblog_clear']['clear'] = array(
     '#type' => 'submit',
-    '#value' => t('Clear log messages'),
-    '#submit' => array('dblog_clear_log_submit'),
-    '#attributes' => array('class' => array('button-danger')),
+    '#value' => t('Clear all log messages'),
+    //'#submit' => array('dblog_clear_log_confirm'),
   );
+  // #submit does not work as expected here, so we use $form['#action'] instead.
+  $form['#action'] = url('admin/reports/dblog/clear');
 
   return $form;
 }
 
 /**
- * Form submission handler for dblog_clear_log_form().
+ * Page callback: Form constructor for the confirmation form when clearing the
+ * database log messages.
+ *
+ * @see dblog_clear_log_form()
+ * @see dblog_clear_log_confirm_submit()
  */
-function dblog_clear_log_submit() {
+function dblog_clear_log_confirm($form, &$form_state) {
+  return confirm_form( $form, t('Permanently delete all log messages from the database?'), 'admin/reports/dblog', t('This action cannot be undone.'), t('Delete'), t('Cancel'));
+}
+
+/**
+ * Form submission handler for dblog_clear_log_confirm().
+ *
+ * @see dblog_clear_log_confirm()
+ */
+function dblog_clear_log_confirm_submit($form, &$form_state) {
   $_SESSION['dblog_overview_filter'] = array();
   db_truncate('watchdog')->execute();
-  backdrop_set_message(t('Database log cleared.'));
+  $form_state['redirect'] = 'admin/reports/dblog';
+  backdrop_set_message(t('All log messages have been cleared.'));
 }
