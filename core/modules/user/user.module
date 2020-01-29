@@ -1058,9 +1058,15 @@ function user_password_constraints_validate($form, &$form_state) {
     // if mail verification is required.
     return;
   }
+  $password = trim($form_state['values']['pass']);
+  if ($form['#form_id'] == 'user_profile_form') {
+    if (strlen($password) == 0) {
+      // On profile form and no new password has been set.
+      return;
+    }
+  }
   $constraints = config_get('system.core', 'pass_constraints');
   $messages = array();
-  $password = $form_state['values']['pass'];
   if ($form['#form_id'] == 'user_pass_reset_form') {
     $account = $form['#account'];
     $username = $account->name;
