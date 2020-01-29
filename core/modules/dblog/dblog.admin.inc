@@ -419,15 +419,9 @@ function dblog_filter_form_submit($form, &$form_state) {
  */
 function dblog_clear_log_form($form) {
   $form['dblog_clear'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Clear log messages'),
-  );
-  $form['dblog_clear']['clear'] = array(
     '#type' => 'submit',
     '#value' => t('Clear all log messages'),
-    //'#submit' => array('dblog_clear_log_confirm'),
   );
-  // #submit does not work as expected here, so we use $form['#action'] instead.
   $form['#action'] = url('admin/reports/dblog/clear');
 
   return $form;
