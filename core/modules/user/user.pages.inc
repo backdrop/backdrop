@@ -201,7 +201,6 @@ function user_pass_reset_form($form, &$form_state, $account) {
     '#type' => 'submit',
     '#value' => t('Save password & log in'),
   );
-  $form['#validate'][] = 'user_password_constraints_validate';
 
   return $form;
 }
