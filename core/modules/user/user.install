@@ -1209,7 +1209,8 @@ function user_update_1016() {
  */
 function user_update_1016() {
   $constraints = array(
-    'pass_minlength' => 5,
+    'constraints_active' => FALSE,
+    'pass_minlength' => 8,
     'pass_not_username' => TRUE,
     'pass_not_email' => TRUE,
   );

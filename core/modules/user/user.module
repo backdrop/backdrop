@@ -752,7 +752,10 @@ function user_account_form(&$form, &$form_state) {
   $admin_roles = user_access('assign roles');
 
   $form['#validate'][] = 'user_account_form_validate';
-  $form['#validate'][] = 'user_password_constraints_validate';
+  $constraints_active = config_get('system.core', 'pass_constraints.constraints_active');
+  if ($constraints_active) {
+    $form['#validate'][] = 'user_password_constraints_validate';
+  }
 
   // Account information.
   $form['account'] = array(
@@ -830,10 +833,16 @@ function user_account_form(&$form, &$form_state) {
   else {
     if (!config_get('system.core', 'user_email_verification') && !$admin_users) {
       // Someone registers a new account and may set a password directly.
+      if ($constraints_active) {
+        $description = _user_password_constraints_help();
+      }
+      else {
+        $description = t('Provide a password for the new account.');
+      }
       $form['account']['pass'] = array(
         '#type' => 'password',
         '#title' => t('Password'),
-        '#description' => _user_password_constraints_help(),
+        '#description' => $description,
         '#password_toggle' => TRUE,
         '#password_strength' => TRUE,
         '#required' => TRUE,

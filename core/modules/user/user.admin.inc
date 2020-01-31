@@ -169,11 +169,25 @@ function user_admin_settings($form, &$form_state) {
   }
 
   // Password settings.
+  $settings_state = array(
+    'visible' => array(
+      ':input[name="pass_constraints[constraints_active]"]' => array('value' => 1),
+    ),
+  );
   $form['pass_constraints'] = array(
     '#type' => 'fieldset',
     '#title' => t('Password constraints'),
     '#weight' => -1,
     '#tree' => TRUE,
+  );
+  $form['pass_constraints']['constraints_active'] = array(
+    '#type' => 'radios',
+    '#title' => '',
+    '#options' => array(
+      0 => t('Only indicate poor password strength'),
+      1 => t('Enforce minimum constraints on user passwords'),
+    ),
+    '#default_value' => $config->get('pass_constraints.constraints_active'),
   );
   $form['pass_constraints']['pass_minlength'] = array(
     '#type' => 'number',
@@ -181,16 +195,19 @@ function user_admin_settings($form, &$form_state) {
     '#min' => 1,
     '#max' => 128,
     '#default_value' => $config->get('pass_constraints.pass_minlength'),
+    '#states' => $settings_state,
   );
   $form['pass_constraints']['pass_not_username'] = array(
     '#type' => 'checkbox',
     '#title' => t('Not same as username'),
     '#default_value' => $config->get('pass_constraints.pass_not_username'),
+    '#states' => $settings_state,
   );
   $form['pass_constraints']['pass_not_email'] = array(
     '#type' => 'checkbox',
     '#title' => t('Not same as account e-mail'),
     '#default_value' => $config->get('pass_constraints.pass_not_email'),
+    '#states' => $settings_state,
   );
 
   // Account settings.

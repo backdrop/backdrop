@@ -91,7 +91,8 @@
     "watchdog_enabled_severity_levels": [0, 1, 2, 3, 4, 5, 6],
     "x_frame_options": "SAMEORIGIN",
     "pass_constraints": {
-        "pass_minlength": "5",
+        "constraints_active": "1",
+        "pass_minlength": "8",
         "pass_not_username": 1,
         "pass_not_email": 1
     }
