@@ -18,7 +18,7 @@ Backdrop.behaviors.passwordStrength = {
       // Check the password strength.
       var passwordCheck = function () {
         // Evaluate the password strength.
-        var result = Backdrop.evaluatePasswordStrength($passwordInput.val(), passwordStrengthSettings.username);
+        var result = Backdrop.evaluatePasswordStrength($passwordInput.val(), passwordStrengthSettings.username, passwordStrengthSettings.email);
 
         // Adjust the length of the strength indicator.
         $indicatorBar.css('width', result.strength + '%');
@@ -143,7 +143,7 @@ Backdrop.behaviors.passwordConfirm = {
  *
  * Returns the estimated strength and the relevant output message.
  */
-Backdrop.evaluatePasswordStrength = function (password, username) {
+Backdrop.evaluatePasswordStrength = function (password, username, email) {
   var strength = 0;
   var level = 'empty';
   var hasLowercase = /[a-z]+/.test(password);
@@ -151,11 +151,15 @@ Backdrop.evaluatePasswordStrength = function (password, username) {
   var hasNumbers = /[0-9]+/.test(password);
   var hasPunctuation = /[^a-zA-Z0-9]+/.test(password);
 
-  // If there is a username edit box on the page, compare password to that, otherwise
-  // use value from the database.
+  // If there's a username or email edit box on the page,
+  // compare password to that, otherwise use value from the database.
   var usernameBox = $('input.username');
   if (usernameBox.length > 0) {
     username = usernameBox.val();
+  }
+  var emailBox = $('input.form-email');
+  if (emailBox.length > 0) {
+    email = emailBox.val();
   }
 
   // Calculate the number of unique character sets within a string.
@@ -166,9 +170,11 @@ Backdrop.evaluatePasswordStrength = function (password, username) {
   // its length. Again, adapted from zxcvbn.
   strength = (Math.log(cardinality) / Math.log(2)) * password.length + 1;
 
-  // Check if password is the same as the username.
-  if (password !== '' && password.toLowerCase() === username.toLowerCase()) {
-    strength = 5;
+  // Check if password is the same as the username or email.
+  if (password !== '') {
+    if (password.toLowerCase() === username.toLowerCase() || password.toLowerCase() === email.toLowerCase()) {
+      strength = 5;
+    }
   }
 
   // Based on the strength, work out what text should be shown by the password strength meter.

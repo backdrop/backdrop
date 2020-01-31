@@ -2859,6 +2859,7 @@ function user_form_process_password($element) {
       'good' => t('good'),
       'strong' => t('excellent'),
       'username' => (isset($user->name) ? $user->name : ''),
+      'email' => (isset($user->mail) ? $user->mail : ''),
     );
 
     $element['#attributes']['data-password-strength'] = backdrop_json_encode($strength_settings, FALSE);
