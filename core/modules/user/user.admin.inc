@@ -193,7 +193,7 @@ function user_admin_settings($form, &$form_state) {
     '#type' => 'number',
     '#title' => t('Minimum length'),
     '#min' => 1,
-    '#max' => 128,
+    '#max' => 32,
     '#default_value' => $config->get('pass_constraints.pass_minlength'),
     '#states' => $settings_state,
   );

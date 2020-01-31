@@ -1978,13 +1978,13 @@ function user_cancel_url($account) {
 }
 
 /**
- * Generates help text for core password constraint settings.
+ * Generates help text for core password constraints on forms.
  */
 function _user_password_constraints_help() {
   $constraints = config_get('system.core', 'pass_constraints');
   $min = $constraints['pass_minlength'];
   $help = array();
-  $help[] = t('The password must be a least :min characters long.', array(':min' => $min));
+  $help[] = t('The password must be at least :min characters long.', array(':min' => $min));
   if ($constraints['pass_not_username']) {
     $help[] = t("Don't use the username as password.");
   }
