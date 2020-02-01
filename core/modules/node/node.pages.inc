@@ -912,12 +912,18 @@ function node_revision_overview($node) {
           'href' => "node/$node->nid/edit",
         );
       }
+      if ($edit_permission) {
+        $links['clone'] = array(
+          'title' => t('Clone'),
+          'href' => "node/$node->nid/revisions/$revision->vid/edit",
+        );
+      }
     }
     else {
       $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'default' => $is_default_revision));
       if ($edit_permission) {
-        $links['edit'] = array(
-          'title' => t('Edit'),
+        $links['clone'] = array(
+          'title' => t('Clone'),
           'href' => "node/$node->nid/revisions/$revision->vid/edit",
         );
       }
@@ -979,7 +985,6 @@ function node_revision_revert_confirm($form, $form_state, $node_revision) {
  */
 function node_revision_revert_confirm_submit($form, &$form_state) {
   $node_revision = $form['#node_revision'];
-  $node_revision->revision = 1;
   // Make this the new default revision for the node.
   $node_revision->is_default_revision = TRUE;
 
