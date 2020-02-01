@@ -1936,42 +1936,6 @@ function system_image_toolkit_settings_submit($form, &$form_state) {
 }
 
 /**
- * Form builder; Configure how the site handles RSS feeds.
- *
- * @ingroup forms
- */
-function system_rss_feeds_settings() {
-  $rss_config = config('system.core');
-  $form['#config'] = 'system.core';
-  $form['rss_description'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Feed description'),
-    '#default_value' => $rss_config->get('rss_description'),
-    '#description' => t('Description of your site, included in each feed.')
-  );
-  $form['rss_limit'] = array(
-    '#type' => 'select',
-    '#title' => t('Number of items in each feed'),
-    '#default_value' => $rss_config->get('rss_limit'),
-    '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
-    '#description' => t('Default number of items to include in each feed.')
-  );
-  $form['rss_viewmode'] = array(
-    '#type' => 'select',
-    '#title' => t('Feed content'),
-    '#default_value' => $rss_config->get('rss_viewmode'),
-    '#options' => array(
-      'title' => t('Titles only'),
-      'teaser' => t('Titles plus teaser'),
-      'fulltext' => t('Full text'),
-    ),
-    '#description' => t('Global setting for the default display of content items in each feed.')
-  );
-
-  return system_settings_form($form);
-}
-
-/**
  * Form builder; Configure the site regional settings.
  *
  * @ingroup forms
