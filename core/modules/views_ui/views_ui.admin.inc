@@ -86,7 +86,7 @@ function views_ui_preview($view, $display_id, $args = array()) {
     $view->views_ui_context = TRUE;
 
     // AJAX happens via $_POST but everything expects exposed data to
-    // be in GET. Copy stuff but remove ajax-framework specific keys.
+    // be in GET. Copy stuff but remove AJAX-framework specific keys.
     // If we're clicking on links in a preview, though, we could actually
     // still have some in $_GET, so we use $_REQUEST to ensure we get it all.
     $exposed_input = $_REQUEST;
@@ -1007,9 +1007,9 @@ function views_ui_build_preview($view, $display_id, $render = TRUE) {
  */
 function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   // Do not allow the form to be cached, because $form_state['view'] can become
-  // stale between page requests.
-  // See views_ui_ajax_get_form() for how this affects #ajax.
-  // @todo To remove this and allow the form to be cacheable:
+  // stale between page requests. See views_ui_ajax_get_form() for how this
+  // affects #ajax.
+  // @todo Remove this, and allow the form to be cacheable:
   //   - Change $form_state['view'] to $form_state['temporary']['view'].
   //   - Add a #process function to initialize $form_state['temporary']['view']
   //     on cached form submissions.
@@ -1017,7 +1017,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
 
   if ($display_id) {
     if (!$view->set_display($display_id)) {
-      $form['#markup'] = t('Invalid display id @display', array('@display' => $display_id));
+      backdrop_set_message(t('Invalid display id @display', array('@display' => $display_id)), 'warning');
       return $form;
     }
 
@@ -1034,7 +1034,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
   $form['#attached']['library'][] = array('system', 'ui.dialog');
   $form['#attached']['library'][] = array('system', 'backdrop.ajax');
   $form['#attached']['library'][] = array('system', 'jquery.form');
-  // TODO: This should be getting added to the page when an ajax popup calls
+  // TODO: This should be getting added to the page when an AJAX popup calls
   // for it, instead of having to add it manually here.
   $form['#attached']['js'][] = 'core/misc/tabledrag.js';
 
@@ -1130,11 +1130,11 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#attributes' => array(),
     );
 
-    // Add a text that the display is disabled.
+    // Add a warning if the display is disabled.
     if (!empty($view->display[$display_id]->handler)) {
       $enabled = $view->display[$display_id]->handler->get_option('enabled');
       if (empty($enabled)) {
-        $form['displays']['settings']['disabled']['#markup'] = t('This display is disabled.');
+        backdrop_set_message(t('This display is disabled. It can still be configured, but it will need to be enabled before it can become available.'), 'warning');
       }
     }
     $form['displays']['settings']['settings_content']= array(
@@ -1236,7 +1236,7 @@ function views_ui_preview_form($form, &$form_state, $view, $display_id = 'defaul
 }
 
 /**
- * Render the top of the display so it can be updated during ajax operations.
+ * Render the top of the display, so it can be updated during AJAX operations.
  */
 function views_ui_render_display_top($view, $display_id) {
   $element['#theme_wrappers'] = array('views_container');
@@ -1253,17 +1253,17 @@ function views_ui_render_display_top($view, $display_id) {
         'attributes' => array('class' => array('views-ajax-link')),
       ),
       'analyze' => array(
-        'title' => t('analyze view'),
+        'title' => t('Analyze view'),
         'href' => "admin/structure/views/nojs/analyze/$view->name/$display_id",
         'attributes' => array('class' => array('views-ajax-link')),
       ),
       'clone' => array(
-        'title' => t('clone view'),
+        'title' => t('Clone view'),
         'href' => "admin/structure/views/view/$view->name/clone",
       ),
       'export' => array(),  // Placeholder for export
       'reorder' => array(
-        'title' => t('reorder displays'),
+        'title' => t('Reorder displays'),
         'href' => "admin/structure/views/nojs/reorder-displays/$view->name/$display_id",
         'attributes' => array('class' => array('views-ajax-link')),
       ),
@@ -1272,7 +1272,7 @@ function views_ui_render_display_top($view, $display_id) {
 
   if (module_exists('config') && user_access('synchronize configuration')) {
     $element['extra_actions']['#links']['export'] = array(
-      'title' => t('export view'),
+      'title' => t('Export view'),
       'href' => 'admin/config/development/configuration/single/export',
       'query' => array(
         'group' => 'Views',
@@ -1290,14 +1290,14 @@ function views_ui_render_display_top($view, $display_id) {
   if (isset($view->storage) && $view->storage != VIEWS_STORAGE_DEFAULT) {
     if ($view->type == t('Overridden')) {
       $element['extra_actions']['#links']['revert'] = array(
-        'title' => t('revert view'),
+        'title' => t('Revert view'),
         'href' => "admin/structure/views/view/$view->name/revert",
         'query' => array('destination' => "admin/structure/views/view/$view->name"),
       );
     }
     else {
       $element['extra_actions']['#links']['delete'] = array(
-        'title' => t('delete view'),
+        'title' => t('Delete view'),
         'href' => "admin/structure/views/view/$view->name/delete",
       );
     }
@@ -1471,7 +1471,7 @@ function views_ui_edit_form_submit_delay_destination($form, &$form_state) {
 }
 
 /**
- * Adds tabs for navigating across Displays when configuring a View.
+ * Adds tabs for navigating across displays when configuring a view.
  *
  * This function can be called from hook_menu_local_tasks_alter() to implement
  * these tabs as secondary local tasks, or it can be called from elsewhere if
@@ -1589,20 +1589,20 @@ function views_ui_get_display_tab_details($view, $display) {
     $build['top']['#attributes']['id'] = 'edit-display-settings-top';
     $build['top']['#attributes']['class'] = array('views-ui-display-tab-actions', 'views-ui-display-tab-bucket', 'clearfix');
 
-    // The Delete, Duplicate and Undo Delete buttons.
+    // The "Delete", "Duplicate", and "Undo delete" buttons.
     $build['top']['actions'] = array(
       '#theme_wrappers' => array('dropbutton_wrapper'),
     );
 
     // Because some of the 'links' are actually submit buttons, we have to
-    // manually wrap each item in <li> and the whole list in <ul>.
+    // manually wrap each item in <li>, and the whole list in <ul>.
     $build['top']['actions']['prefix']['#markup'] = '<ul class="dropbutton">';
 
     if (!$is_display_deleted) {
       if (!$is_enabled) {
         $build['top']['actions']['enable'] = array(
           '#type' => 'submit',
-          '#value' => t('enable @display_title', array('@display_title' => $display_title)),
+          '#value' => t('Enable @display_title', array('@display_title' => $display_title)),
           '#limit_validation_errors' => array(),
           '#submit' => array('views_ui_edit_form_submit_enable_display', 'views_ui_edit_form_submit_delay_destination'),
           '#prefix' => '<li class="enable">',
@@ -1615,7 +1615,7 @@ function views_ui_get_display_tab_details($view, $display) {
         if (strpos($path, '%') === FALSE) {
           $build['top']['actions']['path'] = array(
             '#type' => 'link',
-            '#title' => t('view @display', array('@display' => $display->display_title)),
+            '#title' => t('View @display', array('@display' => $display->display_title)),
             '#options' => array('alt' => array(t("Go to the real page for this display"))),
             '#href' => $path,
             '#prefix' => '<li class="view">',
@@ -1626,7 +1626,7 @@ function views_ui_get_display_tab_details($view, $display) {
       if (!$is_default) {
         $build['top']['actions']['duplicate'] = array(
           '#type' => 'submit',
-          '#value' => t('clone @display_title', array('@display_title' => $display_title)),
+          '#value' => t('Clone @display_title', array('@display_title' => $display_title)),
           '#limit_validation_errors' => array(),
           '#submit' => array('views_ui_edit_form_submit_duplicate_display', 'views_ui_edit_form_submit_delay_destination'),
           '#prefix' => '<li class="duplicate">',
@@ -1636,7 +1636,7 @@ function views_ui_get_display_tab_details($view, $display) {
       if ($is_deletable) {
         $build['top']['actions']['delete'] = array(
           '#type' => 'submit',
-          '#value' => t('delete @display_title', array('@display_title' => $display_title)),
+          '#value' => t('Delete @display_title', array('@display_title' => $display_title)),
           '#limit_validation_errors' => array(),
           '#submit' => array('views_ui_edit_form_submit_delete_display', 'views_ui_edit_form_submit_delay_destination'),
           '#prefix' => '<li class="delete">',
@@ -1646,7 +1646,7 @@ function views_ui_get_display_tab_details($view, $display) {
       if ($is_enabled) {
         $build['top']['actions']['disable'] = array(
           '#type' => 'submit',
-          '#value' => t('disable @display_title', array('@display_title' => $display_title)),
+          '#value' => t('Disable @display_title', array('@display_title' => $display_title)),
           '#limit_validation_errors' => array(),
           '#submit' => array('views_ui_edit_form_submit_disable_display', 'views_ui_edit_form_submit_delay_destination'),
           '#prefix' => '<li class="disable">',
@@ -1657,7 +1657,7 @@ function views_ui_get_display_tab_details($view, $display) {
     else {
       $build['top']['actions']['undo_delete'] = array(
         '#type' => 'submit',
-        '#value' => t('undo delete of @display_title', array('@display_title' => $display_title)),
+        '#value' => t('Undo delete of @display_title', array('@display_title' => $display_title)),
         '#limit_validation_errors' => array(),
         '#submit' => array('views_ui_edit_form_submit_undo_delete_display', 'views_ui_edit_form_submit_delay_destination'),
         '#prefix' => '<li class="undo-delete">',
@@ -2444,7 +2444,7 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
   // Finally, we never want these cached -- our object cache does that for us.
   $form['#no_cache'] = TRUE;
 
-  // If this isn't an ajaxy form, then we want to set the title.
+  // If this isn't an AJAXy form, then we want to set the title.
   if (!empty($form['#title'])) {
     backdrop_set_title($form['#title']);
   }
@@ -2768,7 +2768,7 @@ function views_ui_build_form_path($form_state) {
 
 /**
  * Add another form to the stack; clicking 'apply' will go to this form
- * rather than closing the ajax popup.
+ * rather than closing the AJAX popup.
  */
 function views_ui_add_form_to_stack($key, &$view, $display_id, $args, $top = FALSE, $rebuild_keys = FALSE) {
   if (empty($view->stack)) {
@@ -4060,7 +4060,7 @@ function views_ui_config_item_form_validate($form, &$form_state) {
 
 /**
  * A submit handler that is used for storing temporary items when using
- * multi-step changes, such as ajax requests.
+ * multi-step changes, such as AJAX requests.
  */
 function views_ui_config_item_form_submit_temporary($form, &$form_state) {
   // Run it through the handler's submit function.
@@ -4780,6 +4780,10 @@ function _views_sort_types($a, $b) {
 function views_ui_get_display_label($view, $display_id, $check_changed = TRUE) {
   $title = $display_id == 'default' ? t('Master') : $view->display[$display_id]->display_title;
   $title = views_ui_truncate($title, 25);
+
+  if (isset($view->display[$display_id]->display_options['enabled']) && $view->display[$display_id]->display_options['enabled'] == FALSE) {
+    $title .= ' ' . t('(disabled)');
+  }
 
   if ($check_changed && !empty($view->changed_display[$display_id])) {
     $changed = '*';
