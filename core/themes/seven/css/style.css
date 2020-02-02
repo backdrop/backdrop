@@ -854,6 +854,9 @@ div.teaser-checkbox .form-item,
 td.checkbox .form-item input {
   margin: 0;
 }
+.field-suffix {
+  white-space: nowrap;
+}
 
 /* Filter */
 .filter-wrapper {

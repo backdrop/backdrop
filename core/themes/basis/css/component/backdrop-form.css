@@ -126,6 +126,7 @@ td.checkbox .form-item input {
 .field-suffix {
   display: block;
   padding: 0.5em 0 0;
+  white-space: nowrap;
 }
 
 .field-suffix .machine-name-value {
