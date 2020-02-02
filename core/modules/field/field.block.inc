@@ -23,7 +23,7 @@ class FieldBlock extends Block {
    */
   function getAdminTitle() {
     list($entity_type, $field_name) = explode('-', $this->childDelta, 2);
-    return t('Field %field', array('%field' => $field_name));
+    return t('%field field', array('%field' => $field_name));
   }
 
   /**
@@ -32,11 +32,13 @@ class FieldBlock extends Block {
   function getAdminPreview() {
     list($entity_type, $field_name) = explode('-', $this->childDelta, 2);
     $field = field_info_field($field_name);
+    $field_cardinality = $field['cardinality'];
     $formatter = field_info_formatter_types($this->settings['formatter']);
     $pseudo_instance = $this->createPseudoInstance($this->settings['formatter'], $this->settings['formatter_settings']);
     $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $pseudo_instance, '_custom');
 
-    $preview = '<p>' . t('Displays values of "%field" field.', array('%field' => $field_name)) . '</p>';
+    $preview = format_plural($field_cardinality, 'Displays the value of the %field field.', 'Displays values of the %field field.', array('%field' => $field_name));
+    $preview = '<p>' . $preview . '</p>';
     $preview .= '<div class="field-formatter-summary">' . $summary . '</div>';
     $preview .= $this->getAdminConditionsPreview();
     return $preview;
