@@ -32,13 +32,13 @@ class ViewsAnalyzeTest extends ViewsSqlTest {
     $view->save();
 
     $this->backdropGet('admin/structure/views/view/taxonomy_term/configure');
-    $this->assertLink(t('analyze view'));
+    $this->assertLink(t('Analyze view'));
 
     // This redirects the user to the form.
-    $this->clickLink(t('analyze view'));
+    $this->clickLink(t('Analyze view'));
     $this->assertText(t('View analysis'));
 
     // This redirects the user back to the main views configure page.
-    $this->backdropPost(NULL, array(), t('Ok'));
+    $this->backdropPost(NULL, array(), t('OK'));
   }
 }
