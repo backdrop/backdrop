@@ -1087,16 +1087,16 @@ function user_password_constraints_validate($form, &$form_state) {
   }
   if (strlen($password) < $constraints['pass_minlength']) {
     $min = $constraints['pass_minlength'];
-    $messages[] = t('The password is too short, please use at least :min characters.', array(':min' => $min));
+    $messages[] = t('The password is too short. At least :min characters required.', array(':min' => $min));
   }
   if ($constraints['pass_not_username']) {
     if ($password == $username) {
-      $messages[] = t("Please don't use the username as password.");
+      $messages[] = t('The username cannot be used as password.');
     }
   }
   if ($constraints['pass_not_email']) {
     if ($password == $email) {
-      $messages[] = t("Please don't use the account e-mail as password.");
+      $messages[] = t('The e-mail cannot be used as password.');
     }
   }
   if (!empty($messages)) {
@@ -1986,10 +1986,10 @@ function _user_password_constraints_help() {
   $help = array();
   $help[] = t('The password must be at least :min characters long.', array(':min' => $min));
   if ($constraints['pass_not_username']) {
-    $help[] = t("Don't use the username as password.");
+    $help[] = t('The password cannot be the same as the username.');
   }
   if ($constraints['pass_not_email']) {
-    $help[] = t("Don't use the account e-mail address as password.");
+    $help[] = t('The password cannot be the same as the e-mail.');
   }
   $variables = array(
     'items' => $help,
