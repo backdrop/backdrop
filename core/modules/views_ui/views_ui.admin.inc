@@ -1130,11 +1130,17 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
       '#attributes' => array(),
     );
 
-    // Add a warning if the display is disabled.
+    // Add an info message if the display is disabled.
     if (!empty($view->display[$display_id]->handler)) {
       $enabled = $view->display[$display_id]->handler->get_option('enabled');
       if (empty($enabled)) {
-        backdrop_set_message(t('This display is disabled. It can still be configured, but it will need to be enabled before it can become available.'), 'info');
+        $form['displays']['settings']['disabled'] = array(
+          '#type' => 'container',
+          '#attributes' => array('class' => array('messages', 'info')),
+        );
+        $form['displays']['settings']['disabled']['message'] = array(
+          '#markup' => t('This display is disabled. It can still be configured, but it will need to be enabled before it can become available.'),
+        );
       }
     }
     $form['displays']['settings']['settings_content']= array(
