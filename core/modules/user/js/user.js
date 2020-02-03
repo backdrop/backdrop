@@ -8,7 +8,7 @@ Backdrop.behaviors.passwordStrength = {
     $('input[data-password-strength]', context).once('password-strength', function () {
       var $passwordInput = $(this);
       var passwordStrengthSettings = $passwordInput.data('passwordStrength');
-      var passwordMeter = '<span class="password-strength"><span class="password-strength-title">' + passwordStrengthSettings.strengthTitle + '</span><span class="password-strength-text" aria-live="assertive"></span><span class="password-indicator"><span class="indicator"></span></span></span>';
+      var passwordMeter = '<span class="password-strength"><span class="password-strength-title">' + passwordStrengthSettings.labels.strengthTitle + '</span><span class="password-strength-text" aria-live="assertive"></span><span class="password-indicator"><span class="indicator"></span></span></span>';
       $passwordInput.wrap('<span class="password-strength-wrapper"></span>').after(passwordMeter);
       var $innerWrapper = $passwordInput.parent();
       var $indicatorBar = $innerWrapper.find('.indicator');
@@ -18,13 +18,13 @@ Backdrop.behaviors.passwordStrength = {
       // Check the password strength.
       var passwordCheck = function () {
         // Evaluate the password strength.
-        var result = Backdrop.evaluatePasswordStrength($passwordInput.val(), passwordStrengthSettings.username, passwordStrengthSettings.email);
+        var result = Backdrop.evaluatePasswordStrength($passwordInput.val(), passwordStrengthSettings.data, passwordStrengthSettings.config);
 
         // Adjust the length of the strength indicator.
         $indicatorBar.css('width', result.strength + '%');
 
         // Update the strength indication text.
-        $strengthText.html(passwordStrengthSettings[result.level]);
+        $strengthText.html(passwordStrengthSettings.labels[result.level]);
 
         // Give a class to the strength.
         $strengthWrapper.attr('class', 'password-strength ' + result.level);
@@ -143,9 +143,11 @@ Backdrop.behaviors.passwordConfirm = {
  *
  * Returns the estimated strength and the relevant output message.
  */
-Backdrop.evaluatePasswordStrength = function (password, username, email) {
+Backdrop.evaluatePasswordStrength = function (password, data, config) {
   var strength = 0;
   var level = 'empty';
+  var username = data.username;
+  var email = data.email;
   var hasLowercase = /[a-z]+/.test(password);
   var hasUppercase = /[A-Z]+/.test(password);
   var hasNumbers = /[0-9]+/.test(password);
@@ -172,8 +174,20 @@ Backdrop.evaluatePasswordStrength = function (password, username, email) {
 
   // Check if password is the same as the username or email.
   if (password !== '') {
-    if (password.toLowerCase() === username.toLowerCase() || password.toLowerCase() === email.toLowerCase()) {
+    if (password === username || password === email) {
       strength = 5;
+    }
+    // Consider admin password constraint settings if active.
+    if (config.constraints_active === "1") {
+      if (config.pass_not_username === 1 && password === username) {
+        strength = -1;
+      }
+      if (config.pass_not_email === 1 && password === email) {
+        strength = -1;
+      }
+      if (password.length < config.pass_minlength) {
+        strength = -1;
+      }
     }
   }
 
@@ -189,6 +203,9 @@ Backdrop.evaluatePasswordStrength = function (password, username, email) {
   }
   else if (strength > 0) {
     level = 'weak';
+  }
+  else if (strength < 0) {
+    level = 'notAllowed';
   }
 
   // Cap at 100 and round to the nearest integer.

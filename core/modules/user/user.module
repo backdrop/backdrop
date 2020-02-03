@@ -2857,18 +2857,35 @@ function _user_mail_notify($op, $account, $language = NULL) {
  * Form element process handler for client-side password hide/show and strength.
  * @param $element
  */
-function user_form_process_password($element) {
+function user_form_process_password($element, $form_state) {
   global $user;
 
   if ($element['#password_strength']) {
+    if (isset($form_state['user']) && is_a($form_state['user'], 'User')) {
+      // Existing account, not the current user if an admin edits an account.
+      $username = $form_state['user']->name;
+      $email = $form_state['user']->mail;
+    }
+    else {
+      // AnonymousUser object has no mail property, name is NULL,
+      // User object has both set.
+      $username = (isset($user->name) ? $user->name : '');
+      $email = (isset($user->mail) ? $user->mail : '');
+    }
     $strength_settings = array(
-      'strengthTitle' => t('Password strength: '),
-      'weak' => t('poor'),
-      'fair' => t('fair'),
-      'good' => t('good'),
-      'strong' => t('excellent'),
-      'username' => (isset($user->name) ? $user->name : ''),
-      'email' => (isset($user->mail) ? $user->mail : ''),
+      'labels' => array(
+        'strengthTitle' => t('Password strength: '),
+        'notAllowed' => t('not allowed'),
+        'weak' => t('poor'),
+        'fair' => t('fair'),
+        'good' => t('good'),
+        'strong' => t('excellent'),
+      ),
+      'data' => array(
+        'username' => $username,
+        'email' => $email,
+      ),
+      'config' => config_get('system.core', 'pass_constraints'),
     );
 
     $element['#attributes']['data-password-strength'] = backdrop_json_encode($strength_settings, FALSE);
