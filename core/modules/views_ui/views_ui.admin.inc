@@ -1134,7 +1134,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     if (!empty($view->display[$display_id]->handler)) {
       $enabled = $view->display[$display_id]->handler->get_option('enabled');
       if (empty($enabled)) {
-        backdrop_set_message(t('This display is disabled. It can still be configured, but it will need to be enabled before it can become available.'), 'warning');
+        backdrop_set_message(t('This display is disabled. It can still be configured, but it will need to be enabled before it can become available.'), 'info');
       }
     }
     $form['displays']['settings']['settings_content']= array(
