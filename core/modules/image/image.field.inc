@@ -456,6 +456,9 @@ function image_field_widget_process($element, &$form_state, $form) {
   $element['#theme'] = 'image_widget';
   $element['#attached']['css'][] = backdrop_get_path('module', 'image') . '/css/image.css';
 
+  // Since this is an image field accept only images.
+  $element['upload']['#attributes']['accept'] = 'image/*,capture=camera';
+
   // Add the image preview.
   if ($element['#file'] && $widget_settings['preview_image_style']) {
     $variables = array(
