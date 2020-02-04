@@ -66,7 +66,7 @@ function taxonomy_permission() {
 function taxonomy_vocabulary_list_permissions($vocabulary) {
   $permissions = array(
     'update terms in ' . $vocabulary->machine_name => array(
-      'title' => t('%vocabulary: Update terms', array('%vocabulary' => $vocabulary->name)),
+      'title' => t('%vocabulary: Edit terms', array('%vocabulary' => $vocabulary->name)),
     ),
     'delete terms in ' . $vocabulary->machine_name => array(
       'title' => t('%vocabulary: Delete terms', array('%vocabulary' => $vocabulary->name)),
