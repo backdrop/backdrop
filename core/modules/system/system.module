@@ -593,6 +593,15 @@ function system_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  $items['path/autocomplete'] = array(
+    'title' => 'Path autocomplete',
+    'page callback' => 'path_autocomplete',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file path' => 'core/includes',
+    'file' => 'path.inc',
+  );
 
   $items['admin'] = array(
     'title' => 'Administration',

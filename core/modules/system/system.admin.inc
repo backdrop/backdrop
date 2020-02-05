@@ -1303,6 +1303,7 @@ function system_site_information_settings($form, &$form_state) {
     '#size' => 40,
     '#description' => t('Optionally, specify a relative URL to display as the home page. Leave this blank to display the default content feed.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
+    '#autocomplete_path' => 'path/autocomplete',
   );
   $form['front_page']['default_nodes_main'] = array(
     '#type' => 'select', '#title' => t('Number of posts on home page'),
