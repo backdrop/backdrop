@@ -711,7 +711,7 @@ function path_autocomplete($string = '') {
         ->execute();
       foreach ($results as $result) {
         $path = backdrop_get_path_alias($result->link_path);
-        if (!isset($matches[$path])) {
+        if (!isset($matches[$path]) && !path_is_admin($path)) {
           $matches[$path] = check_plain($result->link_title) . ' [' . check_plain($path) . '] (' . t('Menu item') . ')';
           $match_count++;
         }
