@@ -1120,7 +1120,7 @@ function taxonomy_term_load_multiple($tids = array(), $conditions = array()) {
  *
  * @see entity_load()
  *
- * @param $vocabulary_names
+ * @param $machine_names
  *  An array of taxonomy vocabulary machine names, or FALSE to load all
  *  vocabularies.
  *
