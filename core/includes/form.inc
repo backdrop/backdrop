@@ -3890,9 +3890,14 @@ function form_process_machine_name($element, &$form_state) {
     // the live preview of the machine name.
     $source += array('#field_suffix' => '');
     $source['#field_suffix'] .= ' <small id="' . $suffix_id . '">&nbsp;</small>';
+    $source['#field_suffix_type'] = 'machine_name_preview';
 
+    // Add suffix.
     $parents = array_merge($element['#machine_name']['source'], array('#field_suffix'));
     backdrop_array_set_nested_value($form_state['complete_form'], $parents, $source['#field_suffix']);
+    // Add suffix type (machine name preview).
+    $parents = array_merge($element['#machine_name']['source'], array('#field_suffix_type'));
+    backdrop_array_set_nested_value($form_state['complete_form'], $parents, $source['#field_suffix_type']);
   }
 
   $js_settings = $element['#machine_name'];
@@ -4748,8 +4753,18 @@ function theme_form_element($variables) {
   if (!isset($element['#title'])) {
     $element['#title_display'] = 'none';
   }
+
   $prefix = isset($element['#field_prefix']) ? '<span class="field-prefix">' . $element['#field_prefix'] . '</span> ' : '';
-  $suffix = isset($element['#field_suffix']) ? ' <span class="field-suffix">' . $element['#field_suffix'] . '</span>' : '';
+  if (isset($element['#field_suffix'])) {
+    // Set default class for all field suffixes.
+    $suffix_classes = array('field-suffix');
+    // Add a class to machine name preview suffixes, to help target them.
+    if (isset($element['#field_suffix_type']) && $element['#field_suffix_type'] == 'machine_name_preview') {
+      $suffix_classes[] = 'machine-name-preview';
+    }
+    $suffix_classes = implode(' ', $suffix_classes);
+  }
+  $suffix = isset($suffix_classes) ? ' <span class="'. $suffix_classes . '">' . $element['#field_suffix'] . '</span>' : '';
 
   switch ($element['#title_display']) {
     case 'before':
