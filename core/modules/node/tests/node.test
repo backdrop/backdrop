@@ -139,7 +139,7 @@ class NodeLoadHooksTestCase extends BackdropWebTestCase {
     // node_test_node_load() are correctly updated.
     $nodes = node_load_multiple(array(), array('status' => NODE_NOT_PUBLISHED));
     $loaded_node = end($nodes);
-    $this->assertEqual($loaded_node->node_test_loaded_nids, array($node4->nid, $node3->nid), 'hook_node_load() received the correct list of node IDs the second time it was called.');
+    $this->assertEqual($loaded_node->node_test_loaded_nids, array($node3->nid, $node4->nid), 'hook_node_load() received the correct list of node IDs the second time it was called.');
     $this->assertEqual($loaded_node->node_test_loaded_types, array('page', 'post'), 'hook_node_load() received the correct list of node types the second time it was called.');
   }
 }
@@ -390,7 +390,7 @@ class PageEditTestCase extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Save'));
 
     // Ensure that the node revision has been created.
-    $revised_node = $this->backdropGetNodeByTitle($edit['title']);
+    $revised_node = $this->backdropGetNodeByTitle($edit['title'], TRUE);
     $this->assertNotIdentical($node->vid, $revised_node->vid, 'A new revision has been created.');
     // Ensure that the node author is preserved when it was not changed in the
     // edit form.
@@ -681,7 +681,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $edit['scheduled[time]'] = format_date(REQUEST_TIME + 360, 'custom', 'H:i:s', $web_user->timezone);
     $this->backdropPost(NULL, $edit, t('Preview'));
     $this->backdropPost(NULL, array(), t('Save'));
-    $node = $this->backdropGetNodeByTitle($name);
+    $node = $this->backdropGetNodeByTitle($name, TRUE);
     $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
 
     $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');

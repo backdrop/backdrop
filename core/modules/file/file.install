@@ -214,6 +214,10 @@ function file_schema() {
     ),
   );
 
+  $cache_schema = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_file'] = $cache_schema;
+  $schema['cache_entity_file']['description'] = "Cache table used to store File entity records.";
+
   return $schema;
 }
 
@@ -1182,4 +1186,13 @@ function file_update_1007() {
     $config->set('permissions', $permissions);
     $config->save();
   }
+}
+
+/**
+ * Creates the table to enable caching of Comment entities.
+ */
+function file_update_1008() {
+  $table = backdrop_get_schema_unprocessed('system', 'cache');
+  $table['description'] = "Cache table used to store File entity records.";
+  db_create_table('cache_entity_file', $table);
 }

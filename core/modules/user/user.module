@@ -105,7 +105,7 @@ function user_theme() {
  * Implements hook_entity_info().
  */
 function user_entity_info() {
-  return array(
+  $entity_info = array(
     'user' => array(
       'label' => t('User account'),
       'bundle label' => t('Type'),
@@ -134,6 +134,14 @@ function user_entity_info() {
       ),
     ),
   );
+
+  // If the cache table has been created, then enable entity caching on nodes.
+  if (db_table_exists('cache_entity_user')) {
+    $entity_info['user']['entity cache'] = TRUE;
+    $entity_info['user']['field cache'] = FALSE;
+  }
+
+  return $entity_info;
 }
 
 /**
@@ -1799,6 +1807,12 @@ function user_login_finalize(&$edit = array()) {
   // This is called before hook_user in case one of those functions fails
   // or incorrectly does a redirect which would leave the old session in place.
   backdrop_session_regenerate();
+
+  // If entity caching is enabled, clear the cache entry for the user.
+  $entity_info = entity_get_info('user');
+  if (isset($entity_info['entity cache']) && $entity_info['entity cache']) {
+    cache('entity_user')->delete($user->uid);
+  }
 
   user_module_invoke('login', $edit, $user);
 }
