@@ -235,7 +235,6 @@ function node_form($form, &$form_state, Node $node) {
   if ($node->isDefaultRevision() && arg(4) == 'edit') {
     $clone_default = TRUE;
   }
-  dpm($clone_default);
   // Enforce a new revision if editing an old revision.
   if (isset($node->default_revision) && ($node->default_revision <= $node->vid) && !$clone_default) {
     $form['revision_information']['revision'] = array(
@@ -323,7 +322,7 @@ function node_form($form, &$form_state, Node $node) {
   // Node options for administrators
   $form['options'] = array(
     '#type' => 'fieldset',
-    '#access' => user_access('administer nodes'),
+    '#access' => user_access('administer nodes') && $node->isDefaultRevision(),
     '#title' => t('Publishing options'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
