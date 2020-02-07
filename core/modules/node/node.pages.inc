@@ -990,7 +990,7 @@ function node_revision_overview($node) {
  */
 function node_revision_revert_confirm($form, $form_state, $node_revision) {
   $form['#node_revision'] = $node_revision;
-  return confirm_form($form, t('Are you sure you want to revert to the revision from %revision-date?', array('%revision-date' => format_date($node_revision->revision_timestamp))), 'node/' . $node_revision->nid . '/revisions', '', t('Revert'), t('Cancel'));
+  return confirm_form($form, t('Are you sure you want to make the revision from %revision-date the default revision?', array('%revision-date' => format_date($node_revision->revision_timestamp))), 'node/' . $node_revision->nid . '/revisions', '', t('Make default'), t('Cancel'));
 }
 
 /**
@@ -1009,8 +1009,8 @@ function node_revision_revert_confirm_submit($form, &$form_state) {
 
   $node_revision->save();
 
-  watchdog('content', '@type: reverted %title revision %revision.', array('@type' => $node_revision->type, '%title' => $node_revision->title, '%revision' => $node_revision->vid));
-  backdrop_set_message(t('@type %title has been reverted back to the revision from %revision-date.', array('@type' => node_type_get_name($node_revision), '%title' => $node_revision->title, '%revision-date' => format_date($original_revision_timestamp))));
+  watchdog('content', '@type: revision %revision for node title %title set as default.', array('@type' => $node_revision->type, '%title' => $node_revision->title, '%revision' => $node_revision->vid));
+  backdrop_set_message(t('The revision from %revision-date for @type %title has been set as the default revision.', array('@type' => node_type_get_name($node_revision), '%title' => $node_revision->title, '%revision-date' => format_date($original_revision_timestamp))));
   $form_state['redirect'] = 'node/' . $node_revision->nid . '/revisions';
 }
 
