@@ -321,7 +321,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     if (!empty($edit['translations'])) {
       $form['translation_help'] = array(
         '#type' => 'help',
-        '#markup' => '<strong>' . t('Translation notice') . ':</strong> ' . t('The settings in this form are for the source translation only. Translations may be modified on the <a href="!url">block\'s translation settings page</a>.', array('!url' => url('admin/structure/block/manage/' . $edit['delta'] . '/translation'))),
+        '#markup' => '<strong>' . t('Translation notice') . ':</strong> ' . t('The settings in this form are for the source translation only. Translations may be modified on the !block_translation_link page</a>.', array('!block_translation_link' => l(t('block\'s translation settings'), 'admin/structure/block/manage/' . $edit['delta'] . '/translation'))),
         '#weight' => -99,
       );
     }
@@ -331,13 +331,13 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
         '[name=title_display]' => array('value' => LAYOUT_TITLE_DEFAULT),
       ),
     );
-    $form['reusable'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Make this block reusable'),
-      '#description' => t('This option may not be unchecked once enabled. You may configure or delete this reusable block from the !block_link page.', array('!block_link' => l(t('Custom blocks'), 'admin/structure/block'))),
+    $form['reusable_block_message'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('messages', 'info')),
       '#weight' => 4,
-      '#default_value' => TRUE,
-      '#disabled' => TRUE,
+    );
+    $form['reusable_block_message']['message'] = array(
+      '#markup' => t('This is a reusable block. You may configure or delete all its copies from a single place, in the !block_link listing.', array('!block_link' => l(t('Custom blocks'), 'admin/structure/block'))),
     );
     $form['info']['#weight'] = 5;
     $form['delta']['#weight'] = 6;

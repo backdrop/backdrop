@@ -76,7 +76,7 @@ class BlockText extends Block {
       $form['convert']['reusable'] = array(
         '#type' => 'checkbox',
         '#title' => t('Make this block reusable'),
-        '#description' => t('If enabled, this block will be made reusable across different layouts, and will be listed in the !link page. This option may not be unchecked once enabled.', array('!link' => l(t('Custom blocks'), 'admin/structure/block'))),
+        '#description' => t('Once a block is made reusable, all copies of it can configured from a single place, in the !link listing. <strong>A reusable block can never be converted back into a stand-alone block</strong>.', array('!link' => l(t('Custom blocks'), 'admin/structure/block'))),
         '#weight' => 1,
       );
       // Add a notice for translation.
@@ -114,11 +114,11 @@ class BlockText extends Block {
         '#description' => t('A unique machine-readable name, containing letters, numbers, and underscores.'),
         '#attributes' => array('class' => array('reusable-block-machine-name')),
         '#weight' => 3,
-        // Workaround in order to make the field render as required, with a red
-        // asterisk (when one clicks the "edit" link). Actual form validation
-        // happens in formValidate() below.
-        // See https://github.com/backdrop/backdrop-issues/issues/2732
         '#states' => array(
+          // Workaround in order to make the field render as required, with a
+          // red asterisk (when one clicks the "edit" link). Actual form
+          // validation happens in formValidate() below.
+          // See https://github.com/backdrop/backdrop-issues/issues/2732
           'required' => array(
             'input[name="reusable"]' => array('checked' => TRUE),
           ),
