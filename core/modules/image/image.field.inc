@@ -534,17 +534,10 @@ function image_field_widget_process($element, &$form_state, $form) {
   $token_tree_link = theme('token_tree_link', array(
     'token_types' => array($instance['entity_type']),
   ));
-  $alt_default = '';
-  if (isset($item['alt'])) {
-    $alt_default = $item['alt'];
-  }
-  elseif ($settings['alt_default_value']) {
-    $alt_default = $settings['alt_default_value'];
-  }
   $element['alt'] = array(
     '#title' => t('Alternate text'),
     '#type' => 'textfield',
-    '#default_value' => $alt_default,
+    '#default_value' => isset($item['alt']) ? $item['alt'] : $settings['alt_default_value'],
     '#description' => t('This text will be used by screen readers, search engines, or when the image cannot be loaded. This field supports tokens.') . ' ' . $token_tree_link,
     // @see https://web.archive.org/web/20121120150943/http://www.gawds.org/show.php?contentid=28
     '#maxlength' => 512,
@@ -553,17 +546,10 @@ function image_field_widget_process($element, &$form_state, $form) {
     '#element_validate' => array('token_element_validate'),
     '#token_types' => array($instance['entity_type']),
   );
-  $title_default = '';
-  if (isset($item['title'])) {
-    $title_default = $item['title'];
-  }
-  elseif ($settings['title_default_value']) {
-    $title_default = $settings['title_default_value'];
-  }
   $element['title'] = array(
     '#type' => 'textfield',
     '#title' => t('Title'),
-    '#default_value' => $title_default,
+    '#default_value' => isset($item['title']) ? $item['title'] : $settings['title_default_value'],
     '#description' => t('The title is used as a tool tip when the user hovers the mouse over the image. This field supports tokens.') . ' ' . $token_tree_link,
     '#maxlength' => 1024,
     '#weight' => -1,
