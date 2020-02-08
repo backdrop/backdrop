@@ -337,11 +337,6 @@
   }
 }
 
-/* Make sure that the machine name wraps under the "Admin label" field. */
-.layout-block-configure-form .form-item-label span.field-suffix {
-  display: block;
-}
-
 .layout-block-configure-form .form-item-label,
 .layout-block-configure-form .form-item-delta,
 .layout-block-configure-form .form-item-description {
