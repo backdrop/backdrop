@@ -156,8 +156,11 @@ class TaxonomyTerm extends Entity {
     if ($op == 'view') {
       return user_access('access content', $account);
     }
-    elseif ($op == 'update' || $op == 'delete') {
-      return user_access("$op terms in $this->vocabulary", $account) || user_access('administer taxonomy', $account);
+    elseif ($op == 'update') {
+      return user_access("edit terms in $this->vocabulary", $account) || user_access('administer taxonomy', $account);
+    }
+    elseif ($op == 'delete') {
+      return user_access("delete terms in $this->vocabulary", $account) || user_access('administer taxonomy', $account);
     }
 
     return FALSE;
