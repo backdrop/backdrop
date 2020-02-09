@@ -76,7 +76,7 @@ class BlockText extends Block {
       $form['convert']['reusable'] = array(
         '#type' => 'checkbox',
         '#title' => t('Make this block reusable'),
-        '#description' => t('Once a block is made reusable, all copies of it can configured from a single place, in the !link listing. <strong>A reusable block can never be converted back into a stand-alone block</strong>.', array('!link' => l(t('Custom blocks'), 'admin/structure/block'))),
+        '#description' => t('Once a block is made reusable, all copies of it can be configured from a single place, in the !link listing. <strong>A reusable block can never be converted back into a stand-alone block</strong>.', array('!link' => l(t('Custom blocks'), 'admin/structure/block'))),
         '#weight' => 1,
       );
       // Add a notice for translation.
