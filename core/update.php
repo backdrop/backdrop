@@ -73,6 +73,21 @@ function update_script_selection_form($form, &$form_state) {
     '#collapsible' => TRUE,
   );
 
+  // Look for configuration updates
+  $config_changes = config_all_defaults_changed();
+  if ($config_changes) {
+    $form['start']['_config_updates'] = array(
+      '#type' => 'hidden',
+      '#value' => serialize($config_changes),
+    );
+    $form['start']['_config'] = array(
+      '#theme' => 'item_list',
+      '#title' => t('Configuration defaults'),
+      '#items' => array_keys($config_changes),
+    );
+    $count++;
+  }
+
   // Ensure system.module's updates appear first.
   $form['start']['system'] = array();
 

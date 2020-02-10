@@ -276,11 +276,122 @@ function config_install_default_config($module, $config_name = NULL) {
         // We only create new configs, and do not overwrite existing ones.
         if ($config->isNew()) {
           $config->setData($data);
+          $config->setDefaultHash();
           $config->save();
         }
       }
     }
   }
+}
+
+/**
+ * Adds new default config options supplied by a module to the active config
+ * directory.
+ *
+ * This will not overwrite existing settings in the active config.  This means
+ * that if a module creates a setting "foo" that defaults to a string, then
+ * changes the default for "foo" to an array of strings, this function will
+ * leave the previous default version and $config->get('foo') will still return
+ * a string.
+ *
+ * @param string $module
+ *   The name of the module we are installing.
+ * @param string|NULL $config_name
+ *   (optional) If wanting to update just a single configuration file from the
+ *   module, specify the configuration file name without the extension.
+ */
+function config_update_default_config($module, $config_name = NULL) {
+  $module_config_dir = backdrop_get_path('module', $module) . '/config';
+  $storage = new ConfigFileStorage($module_config_dir);
+  if (is_dir(backdrop_get_path('module', $module) . '/config')) {
+    $files = glob($module_config_dir . '/' . '*.json');
+    foreach ($files as $file) {
+      // Load config data into the active store and add new options to the
+      // file system in the Backdrop config directory. Note the config name
+      // needs to be the same as the file name WITHOUT the extension.
+      $parts = explode('/', $file);
+      $file = array_pop($parts);
+      $file_config_name = str_replace('.json', '', $file);
+      // mergeDefaultData() is non-destructive.  Only missing items are added.
+      if (is_null($config_name) || $file_config_name === $config_name) {
+        $data = $storage->read($file_config_name);
+        $config = config($file_config_name);
+        // mergeDefaultData() will update the default hash.
+        $config->mergeDefaultData($data);
+        $config->save();
+      }
+    }
+  }
+}
+
+/**
+ * Return a array of changed default configuration files, indexed by the
+ * module that owns them.
+ *
+ * This method is used to create a list of pending default configuration
+ * updates during the update process.
+ *
+ * @return array
+ *   An array where the keys are the names of the changed modules and the values
+ *   are a list of default config files that have changed since the last time
+ *   we called $this->setDefaultHash().
+ *
+ * @see config_defaults_changed
+ */
+function config_all_defaults_changed() {
+  $active_modules = system_list('module_enabled');
+  $config_changes = array();
+  foreach ($active_modules as $module) {
+    $config_changes[$module->name] = config_defaults_changed($module->name);
+  }
+  return array_filter($config_changes);
+}
+
+/**
+ * Checks the hash signature of the default config options against the signature
+ * from the last time defaults were installed or updated.
+ *
+ * Files are considered changed if:
+ *   * a default value is changed (e.g, "foo": 0 to "foo": 1) OR
+ *   * a new default value is added OR
+ *   * an existing default value is removed
+ *
+ * Files are *not* considered changed if:
+ *   * the order of the default settings is changed
+ *   * changes are made to the active configuration
+ *
+ * @param string $module
+ *   The name of the module we are installing.
+ * @param string|NULL $config_name
+ *   (optional) If wanting to check just a single configuration file from the
+ *   module, specify the configuration file name without the extension.
+ *
+ * @return array
+ *   The list of config files that have changed, or an empty array if none.
+ */
+function config_defaults_changed($module, $config_name = NULL) {
+  $changed_files = array();
+  $module_config_dir = backdrop_get_path('module', $module) . '/config';
+  $storage = new ConfigFileStorage($module_config_dir);
+  if (is_dir(backdrop_get_path('module', $module) . '/config')) {
+    $files = glob($module_config_dir . '/' . '*.json');
+    foreach ($files as $file) {
+      // Compare the saved hash value created when we last called
+      // $config->setDefultHash() against the hash value of the data in the
+      // current file.
+      $parts = explode('/', $file);
+      $file = array_pop($parts);
+      $file_config_name = str_replace('.json', '', $file);
+      if (is_null($config_name) || $file_config_name === $config_name) {
+        $data = $storage->read($file_config_name);
+        $config = config($file_config_name);
+        if (Config::hash($data) !== $config->getDefaultHash()) {
+          $changed_files[] = $file_config_name;
+        }
+      }
+    }
+  }
+  return $changed_files;
 }
 
 /**
@@ -364,6 +475,14 @@ class Config {
   const MAX_NAME_LENGTH = 250;
 
   /**
+   * The default hash aglorithm
+   *
+   * @see http://php.net/manual/en/function.hash.php
+   * @see Config::hash
+   */
+  const DEFAULT_HASH_ALGORITHM = 'sha256';
+
+  /**
    * The name of the configuration object.
    *
    * @var string
@@ -382,7 +501,7 @@ class Config {
    *
    * @var array
    */
-  protected $data;
+  protected $data = array();
 
   /**
    * The state of validation on this object.
@@ -412,6 +531,11 @@ class Config {
    * @var bool
    */
   protected $isLoaded = FALSE;
+
+  /**
+   * Signature of the default values so we can tell when the defaults change.
+   */
+  protected $defaultHashData = array();
 
   /**
    * Constructs a configuration object.
@@ -669,6 +793,39 @@ class Config {
   }
 
   /**
+   * Merge new defaults with this configuration object and update the default
+   * hash signature.  This method will not overwrite existing configuration
+   * settings.  It only adds settings that are missing.
+   *
+   * @param array $data
+   *   The new default configuration data.
+   *
+   * @return Config
+   *   The configuration object.
+   */
+  public function mergeDefaultData(array $data) {
+    $this->replaceData($this->data + $data);
+    $this->setDefaultHash($data);
+    // A load would destroy the data just set (for example on import).
+    $this->isLoaded = TRUE;
+    return $this;
+  }
+
+  /**
+   * Computes the hash signature of the given config data or the current config
+   * data and save it in the _default_hashes section.
+   *
+   * @param array $data
+   *   The data to hash.  Uses the current configuration data set if NULL.
+   */
+  public function setDefaultHash($data=NULL) {
+    if ($data === NULL) {
+      $data = $this->data;
+    }
+    $algo = self::DEFAULT_HASH_ALGORITHM;
+    $this->defaultHashData[$algo] = Config::hash($data, $algo);
+  }
+  /**
    * Replaces the data of this configuration object.
    *
    * This function is separate from setData() to avoid load() state tracking.
@@ -790,6 +947,12 @@ class Config {
       $this->isNew = FALSE;
       $this->replaceData($data);
     }
+    // Remove the signatures from the data block so we don't confuse any of the
+    // tests or modules that want to interate through the values.
+    if (array_key_exists('_default_hash_data', $this->data)) {
+      $this->defaultHashData = $this->data['_default_hash_data'];
+      unset($this->data['_default_hash_data']);
+    }
     $this->isLoaded = TRUE;
     return $this;
   }
@@ -807,7 +970,10 @@ class Config {
       $this->load();
     }
     // Ensure config name is saved in the result.
-    $this->data = array_merge(array('_config_name' => $this->name), $this->data);
+    $this->data = array_merge(array(
+      '_config_name' => $this->name,
+      '_default_hash_data' => $this->defaultHashData,
+    ), $this->data);
     $this->storage->write($this->name, $this->data);
     $this->isNew = FALSE;
 
@@ -844,6 +1010,48 @@ class Config {
    */
   public function getStorage() {
     return $this->storage;
+  }
+
+  /**
+   * Generate a hash of the given configuration data.
+   *
+   * This function supports any algorithm string supported by the PHP hash()
+   * function.
+   *
+   * @param array $data
+   *   The data to hash.
+   *
+   * @param  string $algo
+   *   The hashing algorithm to use. Defaults to Config::DEFAULT_HASH_ALGORITHM.
+   *
+   * @return string
+   *   The hash of the data.
+   *
+   * @see Config::DEFAULT_HASH_ALGORITHM
+   */
+  public static function hash($data, $algo = self::DEFAULT_HASH_ALGORITHM) {
+    // Don't hash the hash.
+    unset($data['_default_hash_data']);
+
+    // Sort by key to ensure the order vaules are set doesn't change the hash.
+    ksort($data);
+
+    return hash($algo, serialize($data));
+  }
+
+  /**
+   * Return the previously computed hash signature of the default options.
+   *
+   * @param  string $algo
+   *   The algorithm to return.  Defaults to Config::DEFAULT_HASH_ALGORITHM
+   *
+   * @return string
+   *   The hash requested or empty string if not set.
+   */
+  public function getDefaultHash($algo = self::DEFAULT_HASH_ALGORITHM) {
+    return !empty($this->defaultHashData[$algo]) ?
+      $this->defaultHashData[$algo] :
+      '';
   }
 }
 

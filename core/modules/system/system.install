@@ -1785,17 +1785,7 @@ function system_update_1009() {
   update_module_enable(array('admin_bar'));
 
   // Install default config.
-  $config = config('admin_bar.settings');
-  $config->set('margin_top', 1);
-  $config->set('position_fixed', 0);
-  $config->set('components', array(
-    'admin_bar.icon',
-    'admin_bar.menu',
-    'admin_bar.search',
-    'admin_bar.users',
-    'admin_bar.account',
-  ));
-  $config->save();
+  config_update_default_config('admin_bar');
 
   // Manually install schema, as update_module_enable() does not do this for us.
   if (!db_table_exists('cache_admin_bar')) {
@@ -2176,6 +2166,7 @@ function system_update_1024() {
  */
 function system_update_1025() {
   update_module_enable(array('layout'));
+  config_update_default_config('layout');
 
   // When upgrading from Drupal 7 disable legacy layouts initially.
   $layout_settings_config = config('layout.settings');

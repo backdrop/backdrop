@@ -9,7 +9,26 @@
  */
 class ConfigurationTest extends BackdropWebTestCase {
   protected function setUp() {
+
+    // Create a throw-away JSON file for testing config file updates
+    $pre_config_test_settings = array(
+      '_config_name' => 'config_test.update_test',
+      'alpha' => 'beta',
+      'first' => 'second',
+      'fred' => 'derf',
+    );
+    $config_filename = backdrop_get_path('module', 'config_test') . '/config/config_test.update_test.json';
+    $config_json = backdrop_json_encode($pre_config_test_settings);
+    file_put_contents($config_filename, $config_json);
+
+
     parent::setUp(array('config_test'));
+  }
+
+  protected function tearDown() {
+    @unlink(backdrop_get_path('module', 'config_test') . '/config/config_test.update_test.json');
+    @unlink(backdrop_get_path('module', 'config_test') . '/config/config_test.new_file_test.json');
+    parent::tearDown();
   }
 
   /**
@@ -88,6 +107,92 @@ class ConfigurationTest extends BackdropWebTestCase {
       'favorite_color' => 'blue',
     );
     $this->assertEqual($config->get(), $expected_config, 'The configuration file contained the expected configuration.');
+  }
+
+  /**
+   * Tests automatically updating configuration defaults
+   */
+  public function testConfigUpdates() {
+    $config = config('config_test.update_test');
+    $original_config = array(
+      'alpha' => 'beta',
+      'first' => 'second',
+      'fred' => 'derf',
+    );
+    $this->assertEqual($config->get(), $original_config, 'The original configuration file was loaded during install.');
+
+    // Change the file such that nothing really changes
+    $expected_config = $original_config;
+    $pre_config_test_settings = array(
+      '_config_name' => 'config_test.update_test',
+      'fred' => 'derf',
+      'first' => 'second',
+      'alpha' => 'beta',
+    );
+    $config_filename = backdrop_get_path('module', 'config_test') . '/config/config_test.update_test.json';
+    $config_json = backdrop_json_encode($pre_config_test_settings);
+    file_put_contents($config_filename, $config_json);
+    $config->set('alpha', 'omega');
+    $config->save();
+    $this->assertEqual(config_all_defaults_changed(), array(), 'No material changes were detected.');
+
+    // Make material changes to the file
+    $expected_changed_configs = array('config_test' => array('config_test.update_test'));
+    $config_filename = backdrop_get_path('module', 'config_test') . '/config/config_test.update_test.json';
+    $updated_defaults = $original_config;
+
+    // Case 1: A default value is changed
+    $updated_defaults['fred'] = 'lucy';
+    $config_json = backdrop_json_encode($updated_defaults + array('_config_name' => 'config_test.update_test'));
+    file_put_contents($config_filename, $config_json);
+    $this->assertEqual(config_all_defaults_changed(), $expected_changed_configs, 'Defaults with a changed value were detected.');
+
+    // Case 2: A new default value is added
+    $updated_defaults['newkey'] = 'new value';
+    $config_json = backdrop_json_encode($updated_defaults + array('_config_name' => 'config_test.update_test'));
+    file_put_contents($config_filename, $config_json);
+    $this->assertEqual(config_all_defaults_changed(), $expected_changed_configs, 'Defaults with a new value were detected.');
+
+    // Case 3: A default value is removed
+    unset($updated_defaults['first']);
+    $config_json = backdrop_json_encode($updated_defaults + array('_config_name' => 'config_test.update_test'));
+    file_put_contents($config_filename, $config_json);
+    $this->assertEqual(config_all_defaults_changed(), $expected_changed_configs, 'Defaults with a missing value were detected.');
+
+    // Case 4: A new default file is created
+    $expected_changed_configs['config_test'] = array(
+      'config_test.new_file_test',
+      'config_test.update_test',
+    );
+    $new_file_test_settings = array(
+      'a' => 'b',
+      'c' => 'd',
+    );
+    $config_filename = backdrop_get_path('module', 'config_test') . '/config/config_test.new_file_test.json';
+    $config_json = backdrop_json_encode($new_file_test_settings + array('_config_name' => 'config_test.new_file_test'));
+    file_put_contents($config_filename, $config_json);
+    $this->assertEqual(config_all_defaults_changed(), $expected_changed_configs, 'A new defaults file was detected.');
+
+
+    // But the internal config has not yet changed (accouting for the $config->set() above).
+    $original_config['alpha'] = 'omega';
+    $config = config('config_test.update_test');
+    $this->assertEqual($config->get(), $original_config, 'The original configuration file was still in effect after looking for new / changed configurations.');
+    $new_config = config('config_test.new_file_test');
+    $this->assertEqual($new_config->get(), array(), 'The new default file was not active after looking for new / changed configurations.');
+
+    // Apply new defaults
+    config_update_default_config('config_test');
+    $config = config('config_test.update_test');
+    $new_config = config('config_test.new_file_test');
+    $expected_config = array(
+      'alpha' => 'omega',
+      'first' => 'second',
+      'fred' => 'derf',
+      'newkey' => 'new value',
+    );
+    $this->assertEqual($config->get(), $expected_config, 'The new config contains the new items and existing settings are left alone.');
+    $this->assertEqual($new_config->get(), $new_file_test_settings, 'The new default file was loaded.');
   }
 }
 
@@ -274,9 +379,9 @@ class ConfigurationUITest extends BackdropWebTestCase {
     // Load the diff UI and verify that the diff reflects the changes.
     $this->backdropGet('admin/config/development/configuration/sync/diff/' . $config_name);
     $deleted_words = $this->xpath('//td[contains(@class, :class)]//del', array(':class' => 'diff-deletedline'));
-    $this->assertEqual($original_data[$change_key], (string) $deleted_words[0]);
-    $this->assertEqual($remove_key, (string) $deleted_words[1]);
-    $this->assertEqual($original_data[$remove_key], (string) $deleted_words[2]);
+    $this->assertEqual($original_data[$change_key], (string) $deleted_words[3]);
+    $this->assertEqual($remove_key, (string) $deleted_words[4]);
+    $this->assertEqual($original_data[$remove_key], (string) $deleted_words[5]);
 
     $added_words = $this->xpath('//td[contains(@class, :class)]//ins', array(':class' => 'diff-addedline'));
     $this->assertEqual($change_data, (string) $added_words[0]);
