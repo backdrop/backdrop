@@ -2986,8 +2986,8 @@ function layout_block_list() {
  * @param string $module
  *   The module providing the required blocks.
  * @param string $delta
- *   The block delta. If $delta is provided, $module is also required since
- *   block deltas are not required to be unique.
+ *   The block delta. If $delta is provided, then $module is also required
+ *   (since block deltas are not required to be unique).
  *
  * @return array
  *   An array of block usage instances keyed by block module, delta, layout
@@ -2996,36 +2996,16 @@ function layout_block_list() {
  */
 function layout_get_block_usage($module = NULL, $delta = NULL) {
   $blocks = &backdrop_static(__FUNCTION__, array());
-
-  $all_template_info = layout_get_layout_template_info(NULL, TRUE);
-
   if (empty($blocks)) {
     $layout_info = layout_load_all();
     foreach ($layout_info as $layout) {
-
-      $layout_template = $layout->layout_template;
-      $layout_has_flexible_template = !empty($all_template_info[$layout_template]['flexible']);
-
-      // Layouts that use flexible templates return cryptic UUIDs as region
-      // names. Replace these UUIDs with the respective user-friendly labels.
-      if ($layout_has_flexible_template) {
-        $flexi_regions = array_flip($all_template_info[$layout_template]['regions']);
-
-        foreach ($flexi_regions as $flexi_region_name => $uuid) {
-          $flexi_regions[$flexi_region_name] = $layout->positions[$uuid];
-        }
-
-        $layout_positions = $flexi_regions;
-      }
-      else {
-        $layout_positions = $layout->positions;
-      }
-
-      foreach ($layout_positions as $position => $uuids) {
+      $layout_template = layout_get_layout_template_info($layout->layout_template);
+      $regions = $layout_template['regions'];
+      foreach ($layout->positions as $position => $uuids) {
         foreach ($uuids as $uuid) {
           $block = $layout->content[$uuid];
           $block->layout_title = $layout->title;
-          $blocks[$block->module][$block->delta][$layout->name][$position][] = $block;
+          $blocks[$block->module][$block->delta][$layout->name][$regions[$position]][] = $block;
         }
       }
     }
