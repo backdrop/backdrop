@@ -592,3 +592,36 @@ function installer_browser_check_zip_loaded() {
   }
   return $zip_loaded;
 }
+
+/**
+ *
+ * Checks if relevant system folder is writable
+ *
+ * @param $type
+ *   Type of project to view. Must be one of 'module', 'theme' or 'layout'.
+ */
+function installer_browser_check_folder_writable($type) {
+  // luckily these are simple words to plural
+  $plural = "{$type}s";
+  $path = BACKDROP_ROOT."/{$plural}";
+  $test = $path.'/'.uniqid('test-');
+
+  if (backdrop_mkdir($test)){
+    backdrop_rmdir($test);
+  }
+  else {
+    backdrop_set_message(t('The following directory is not writable by the server: "@path" You may have trouble installing @plural', array('@plural' => $plural, '@path' => $path,)), 'warning', false);
+  }
+}
+
+/**
+ *
+ * Checks if the backdrop contrib repo is accessible
+ */
+function installer_browser_check_repo_accessible() {
+  $response = backdrop_http_request('http://example.com/', array('method' => 'HEAD'));
+
+  if (!$response || $response->code != '200'){
+    backdrop_set_message(t('Unable to access the internet. The installer is unlikely to work.'), 'warning', false);
+  }
+}

@@ -20,6 +20,12 @@ function installer_browser_page($type) {
   // select to view available releases. Install blocked on select versions page.
   installer_browser_check_zip_loaded();
 
+  // Show a warning if provided backdrop repo is not accessible.
+  installer_browser_check_repo_accessible();
+
+  // Show a warning if the $type folder is not writable
+  installer_browser_check_folder_writable($type);
+
   // Show link to enable page if recently installed modules were not yet 
   // enabled.
   $recent_projects = installer_browser_get_installed_projects();
