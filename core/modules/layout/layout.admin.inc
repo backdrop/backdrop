@@ -2967,7 +2967,7 @@ function layout_block_list() {
 
   $page['description'] = array(
     '#type' => 'help',
-    '#markup' => t('A summary of all available blocks. The <em>Usage</em> column shows the layouts and regions to which blocks are currently assigned, in the format <em>Layout name (region)</em>.'),
+    '#markup' => t('A summary of all available blocks. The <em>Usage</em> column shows the layouts and regions to which each block is currently placed, in the format <em>Layout name (region)</em>.'),
   );
 
   $page['table'] = array(
