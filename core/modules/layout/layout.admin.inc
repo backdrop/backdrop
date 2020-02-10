@@ -2941,7 +2941,7 @@ function layout_block_list() {
                 $instances[$position][] = $instance;
               }
             }
-            $positions = implode(', ', array_map('ucfirst', array_keys($instances)));
+            $positions = implode(', ', array_keys($instances));
             $usages[] = l($instance->layout_title . ' (' . $positions . ')', 'admin/structure/layouts/manage/' . $layout);
           }
         }
