@@ -3,6 +3,16 @@
 .field .field-label {
   font-weight: bold;
 }
+
+/**
+ * Do not wrap machine name preview text.
+ *
+ * @see https://github.com/backdrop/backdrop-issues/issues/1349
+ */
+.field-suffix.machine-name-preview {
+  white-space: nowrap;
+}
+
 /**
  * Clear fields with inline labels, as the label and field items are floated.
  *
