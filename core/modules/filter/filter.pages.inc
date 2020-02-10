@@ -50,6 +50,25 @@ function _filter_link_autocomplete($string = '') {
       $matches['/' . $path] = check_plain($result->title) . ' (' . t('Content') . ')';
       $match_count++;
     }
+    
+    // Get file matches.
+    $results = db_select('file_managed')
+      ->fields('file_managed', array('fid', 'filename', 'uri', 'filemime', 'status'))
+      ->condition('filename', db_like($string) . '%', 'LIKE')
+      ->condition('status', 1)
+      ->condition('filemime', 'image%', 'NOT LIKE')
+      ->orderBy('fid', 'DESC')
+      ->range(0, 10 - $match_count)
+      ->execute();
+    foreach ($results as $result) {
+      // Try to make a local path if possible for better portability.
+      $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
+      $url = file_create_url($result->uri);
+      $path = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
+      
+      $matches[$path] = check_plain($result->filename) . ' (' . t('File') . ')';
+      $match_count++;
+    }
 
     // Get file matches.
     if (user_access('manage files') && $match_count < 10) {
