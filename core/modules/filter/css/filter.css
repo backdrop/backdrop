@@ -215,3 +215,30 @@ input#edit-filters-filter-html-settings-allowed-html {
 .view-image-library .view-header p {
   margin: 0;
 }
+
+/** Account for the missing tabledrag handler in disabled text format rows, but
+ *  only add padding when the tabledrag handlers are shown (i.e. when the "Hide"
+ *  row weights" toggle is on).
+ */
+.filter-admin-overview .tabledrag-handles-on .disabled .format-name {
+  padding-left: 3em; /* LTR */
+}
+[dir="rtl"] .filter-admin-overview .tabledrag-handles-on .disabled .format-name {
+  padding-right: 3em;
+}
+.filter-admin-overview .filter-format-name {
+  font-weight: bold;
+  white-space: nowrap;
+}
+.filter-admin-overview .filter-format-machine-name {
+  font-size: smaller;
+}
+.filter-admin-overview td .item-list ul {
+  margin-left: 0; /* LTR */
+}
+[dir="rtl"] .filter-admin-overview td .item-list ul {
+  margin-right: 0;
+}
+.filter-admin-overview tr.disabled td {
+  color: #999;
+}

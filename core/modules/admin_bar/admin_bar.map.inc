@@ -9,7 +9,7 @@
  */
 
 /**
- * Implements hook_admin_bar_map() on behalf of Layout module.
+ * Implements hook_admin_bar_map() on behalf of the Layout module.
  */
 function layout_admin_bar_map() {
   if (!user_access('administer layouts')) {
@@ -31,7 +31,7 @@ function layout_admin_bar_map() {
 }
 
 /**
- * Implements hook_admin_bar_map() on behalf of Filter module.
+ * Implements hook_admin_bar_map() on behalf of the Filter module.
  */
 function filter_admin_bar_map() {
   if (!user_access('administer filters')) {
@@ -47,7 +47,7 @@ function filter_admin_bar_map() {
 }
 
 /**
- * Implements hook_admin_bar_map() on behalf of Menu module.
+ * Implements hook_admin_bar_map() on behalf of the Menu module.
  */
 function menu_admin_bar_map() {
   if (!user_access('administer menu')) {
@@ -63,7 +63,7 @@ function menu_admin_bar_map() {
 }
 
 /**
- * Implements hook_admin_bar_map() on behalf of Node module.
+ * Implements hook_admin_bar_map() on behalf of the Node module.
  */
 function node_admin_bar_map() {
   if (!user_access('administer content types')) {
@@ -85,7 +85,7 @@ function node_admin_bar_map() {
 }
 
 /**
- * Implements hook_admin_bar_map() on behalf of Field UI module.
+ * Implements hook_admin_bar_map() on behalf of the Field UI module.
  *
  * @todo Figure out how to fix the comment entity bundle mappings.
  */
@@ -136,7 +136,7 @@ function field_ui_admin_bar_map() {
 }
 
 /**
- * Implements hook_admin_bar_map() on behalf of Taxonomy module.
+ * Implements hook_admin_bar_map() on behalf of the Taxonomy module.
  */
 function taxonomy_admin_bar_map() {
   if (!user_access('administer taxonomy')) {
@@ -152,7 +152,7 @@ function taxonomy_admin_bar_map() {
 }
 
 /**
- * Implements hook_admin_bar_map() on behalf of Views UI module.
+ * Implements hook_admin_bar_map() on behalf of the Views UI module.
  */
 function views_ui_admin_bar_map() {
   if (!user_access('administer views')) {
