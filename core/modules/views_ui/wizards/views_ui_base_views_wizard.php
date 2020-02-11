@@ -602,7 +602,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
     // Display: Page
     if (isset($display_options['page'])) {
-      $display = $view->new_display('page', 'Page', 'page');
+      $display = $view->new_display('page', 'Page', 'page_1');
       // The page display is usually the main one (from the user's point of
       // view). Its options should therefore become the overall view defaults,
       // so that new displays which are added later automatically inherit them.
@@ -610,14 +610,14 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
 
       // Display: Feed (attached to the page)
       if (isset($display_options['feed'])) {
-        $display = $view->new_display('feed', 'Feed', 'feed');
+        $display = $view->new_display('feed', 'Feed', 'feed_1');
         $this->set_override_options($display_options['feed'], $display, $default_display);
       }
     }
 
     // Display: Block
     if (isset($display_options['block'])) {
-      $display = $view->new_display('block', 'Block', 'block');
+      $display = $view->new_display('block', 'Block', 'block_1');
       // When there is no page, the block display options should become the
       // overall view defaults.
       if (!isset($display_options['page'])) {
