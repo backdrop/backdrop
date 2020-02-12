@@ -833,7 +833,7 @@ function link_field_process($element, $form_state, $complete_form) {
     '#title' => t('URL'),
     '#required' => ($element['#delta'] == 0 && $settings['url'] !== 'optional') ? $element['#required'] : FALSE,
     '#default_value' => isset($element['#value']['url']) ? $element['#value']['url'] : NULL,
-    '#autocomplete_path' => 'path/autocomplete',
+    '#autocomplete_path' => 'path-autocomplete',
   );
   if ($settings['title'] !== 'none' && $settings['title'] !== 'value') {
     // Figure out the label of the title field.

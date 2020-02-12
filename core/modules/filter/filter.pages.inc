@@ -262,7 +262,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     ),
     '#weight' => -10,
     '#maxlength' => 256,
-    '#autocomplete_path' => 'path/autocomplete',
+    '#autocomplete_path' => 'path-autocomplete',
     '#description' => t('Start typing to see a list of suggestions, enter the relative path to another page, or enter an external URL.<br>Examples: <em>About Us</em>, <em>/about</em>, or <em>http://backdropcms.org</em>'),
   );
 

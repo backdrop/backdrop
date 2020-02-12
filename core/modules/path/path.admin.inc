@@ -130,7 +130,7 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
     '#description' => t('Specify the existing path you wish to alias. For example: <code>node/28</code> or <code>taxonomy/term/1</code>.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
     '#required' => TRUE,
-    '#autocomplete_path' => 'path/autocomplete',
+    '#autocomplete_path' => 'path-autocomplete',
   );
   $form['alias'] = array(
     '#type' => 'textfield',
