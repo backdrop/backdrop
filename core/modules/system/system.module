@@ -4159,7 +4159,7 @@ function path_autocomplete($string = '') {
               if ($found_match) {
                 $matches[$path] = t('@title (View: %display)', array(
                   '@title' => $view_title,
-                  '%display' => $view->human_name . ': ' . $display_id,
+                  '%display' => $view->human_name . ' - ' . $display->display_title,
                 ));
                 $match_count++;
               }
