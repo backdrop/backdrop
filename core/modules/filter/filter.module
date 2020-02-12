@@ -123,19 +123,21 @@ function filter_menu() {
   $items['admin/config/content/formats/%filter_format'] = array(
     'title callback' => 'filter_admin_format_title',
     'title arguments' => array(4),
+    'load arguments' => array(TRUE),
     'page callback' => 'filter_admin_format_page',
     'page arguments' => array(4),
     'access arguments' => array('administer filters'),
     'file' => 'filter.admin.inc',
   );
   $items['admin/config/content/formats/%filter_format/enable'] = array(
-      'title' => 'Enable text format',
-      'page callback' => 'filter_admin_enable',
-      'page arguments' => array(4),
-      'access arguments' => array('administer filters'),
-      'type' => MENU_CALLBACK,
-      'file' => 'filter.admin.inc',
-    );
+    'title' => 'Enable text format',
+    'load arguments' => array(TRUE),
+    'page callback' => 'filter_admin_enable',
+    'page arguments' => array(4),
+    'access arguments' => array('administer filters'),
+    'type' => MENU_CALLBACK,
+    'file' => 'filter.admin.inc',
+  );
   $items['admin/config/content/formats/%filter_format/disable'] = array(
     'title' => 'Disable text format',
     'page callback' => 'backdrop_get_form',
@@ -244,14 +246,16 @@ function filter_config_data_validate(Config $config, array $config_info) {
  *
  * @param $format_id
  *   The format ID.
+ * @param boolean $load_if_disabled
+ *   If TRUE the format will be loaded when disabled.
  *
  * @return stdClass|FALSE
  *   A fully-populated text format object or FALSE if the format is not found.
  *
  * @see filter_format_exists()
  */
-function filter_format_load($format_id) {
-  $formats = filter_formats(NULL, TRUE);
+function filter_format_load($format_id, $load_if_disabled = FALSE) {
+  $formats = filter_formats(NULL, $load_if_disabled);
   return isset($formats[$format_id]) ? $formats[$format_id] : FALSE;
 }
 
@@ -698,6 +702,8 @@ function filter_modules_disabled($modules) {
  *   (optional) If provided, only those formats that are allowed for this user
  *   account will be returned. All formats will be returned otherwise. Defaults
  *   to NULL.
+ * @param Boolean $include_disabled
+ *   (optional) If TRUE, will return all formats, including disabled formats.
  *
  * @return stdClass[]
  *   An array of text format objects, keyed by the format ID and ordered by
