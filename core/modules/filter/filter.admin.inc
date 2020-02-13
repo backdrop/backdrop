@@ -18,6 +18,11 @@ function filter_admin_overview($form) {
   $fallback_format = filter_fallback_format();
   $editors = filter_get_editors();
 
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('<p>Text formats define how text is filtered for output and how HTML tags and other text is displayed, replaced, or removed.</p><p>Text formats are presented on content editing pages in the order defined on this page. The first format available to a user will be selected by default.</p>'),
+  );
+
   $form['#tree'] = TRUE;
   foreach ($formats as $id => $format) {
     $links = array();
