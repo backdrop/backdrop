@@ -4105,7 +4105,7 @@ function path_autocomplete($string = '') {
         $users = user_load_multiple($uids);
         foreach ($users as $user) {
           $path = backdrop_get_path_alias('user/' . $user->uid);
-          $matches[$path] = t('@name (User)', array(
+          $matches[$path] = t('@name (User account)', array(
             '@name' => user_format_name($user),
           ));
           $match_count++;
