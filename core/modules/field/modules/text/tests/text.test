@@ -271,7 +271,50 @@ class TextSummaryTestCase extends BackdropWebTestCase {
 
     // The summaries we expect text_summary() to return when $size is the index
     // of each array item.
+    // Using no text format:
     $expected = array(
+      "<p>\nHi\n</p>\n<p>\nfolks\n<br />\n!\n</p>",
+      "",
+      "<p></p>",
+      "<p></p>",
+      "<p>\n</p>",
+      "<p>\nH</p>",
+      "<p>\nHi</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>\n<p>\nfolks\n<br />\n!\n</p>",
+      "<p>\nHi\n</p>\n<p>\nfolks\n<br />\n!\n</p>",
+      "<p>\nHi\n</p>\n<p>\nfolks\n<br />\n!\n</p>",
+    );
+
+    // And using a text format WITH the line-break and htmlcorrector filters.
+    $expected_lb = array(
       "<p>\nHi\n</p>\n<p>\nfolks\n<br />\n!\n</p>",
       "",
       "<p></p>",
@@ -315,7 +358,7 @@ class TextSummaryTestCase extends BackdropWebTestCase {
     // Test text_summary() for different sizes.
     for ($i = 0; $i <= 37; $i++) {
       $this->assertTextSummary($text, $expected[$i], NULL, $i);
-      $this->assertTextSummary($text, $expected[$i], 'filtered_html', $i);
+      $this->assertTextSummary($text, $expected_lb[$i], 'filtered_html', $i);
     }
   }
 
