@@ -427,8 +427,8 @@ function text_summary($text, $format_id = NULL, $size = 600) {
     }
   }
 
-  // If the htmlcorrector filter is present, apply it to the generated summary.
-  if (isset($format->filters['filter_htmlcorrector'])) {
+  // Clean up any invalid HTML.
+  if (function_exists('_filter_htmlcorrector')) {
     $summary = _filter_htmlcorrector($summary);
   }
 
