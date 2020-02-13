@@ -113,23 +113,40 @@ function theme_filter_admin_overview($variables) {
  */
 function theme_filter_admin_format_filter_order($variables) {
   $element = $variables['element'];
+  $filters = $element['filters']['#value'];
+  unset($element['filters']);
 
   // Filter order (tabledrag).
   $rows = array();
+  $disabled = array();
   foreach (element_children($element, TRUE) as $name) {
     $element[$name]['weight']['#attributes']['class'][] = 'filter-order-weight';
+    $row_class =  $filters[$name]->status ? 'draggable' : 'draggable disabled-row';
+
     $rows[] = array(
       'data' => array(
         backdrop_render($element[$name]['filter']),
+        backdrop_render($element[$name]['status']),
+        backdrop_render($element[$name]['configure_button']),
         backdrop_render($element[$name]['weight']),
       ),
-      'class' => array('draggable'),
+      'class' => array($row_class),
     );
   }
   $output = backdrop_render_children($element);
-  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'filter-order')));
-  backdrop_add_tabledrag('filter-order', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
+  $header = array(t('Filter'), t('Enabled'), t('Configure'), '');
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'filterorder')));
+  backdrop_add_tabledrag('filterorder', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
 
+  return $output;
+}
+
+function theme_filter_admin_format_filter_display($variables) {
+  $element = $variables['element'];
+  $output = '<div class="filter-title">' . backdrop_render($element['title']) . '</div>';
+  $output .= '<div class="filter-details description">' . backdrop_render($element['details']) . '</div>';
+  $output .= '<div class="filter-configure">' . backdrop_render($element['configure']) . '</div>';
+  $output .= backdrop_render_children($element);
   return $output;
 }
 

@@ -168,6 +168,9 @@ function filter_admin_format_form($form, &$form_state, $format) {
   $form['#submit'] = array();
   $form['#tree'] = TRUE;
   $form['#attached']['library'][] = array('filter', 'filter.admin');
+  $form['#attached']['js'][] = backdrop_get_path('module', 'filter') . '/js/filter.admin.js';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'filter') . '/css/filter.css';
+  $form['#attached']['library'][] = array('system', 'backdrop.dialog');
 
   $form['name'] = array(
     '#type' => 'textfield',
@@ -264,7 +267,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
   // Add user role access selection.
   $form['roles'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Roles allowed to use this text format'),
+    '#title' => t('Roles'),
     '#options' => array_map('check_plain', user_roles()),
     '#disabled' => $is_fallback,
   );
@@ -287,6 +290,16 @@ function filter_admin_format_form($form, &$form_state, $format) {
   $all_filter_info = filter_get_filters();
   $filters = $format->filters;
 
+  // Get filter tips.
+  $format_tips = array();
+  global $user;
+  $formats = filter_formats($user);
+  // This is not always set during rebuild.
+  if(!empty($format->format) && !empty($formats[$format->format])) {
+    $tips = _filter_tips($format->format);
+    $format_tips = reset($tips);
+  }
+
   // Prepare filters for form sections.
   foreach ($all_filter_info as $name => $filter_info) {
     // Create an empty filter object for new/unconfigured filters.
@@ -303,35 +316,73 @@ function filter_admin_format_form($form, &$form_state, $format) {
   }
   $form['#filters'] = $filters;
 
-  // Filter status.
-  $form['filters']['status'] = array(
-    '#type' => 'item',
-    '#title' => t('Enabled filters'),
-    '#prefix' => '<div id="filters-status-wrapper">',
-    '#suffix' => '</div>',
-  );
-  foreach ($all_filter_info as $name => $filter_info) {
-    $form['filters']['status'][$name] = array(
-      '#type' => 'checkbox',
-      '#title' => $filter_info['title'],
-      '#default_value' => $filters[$name]->status,
-      '#parents' => array('filters', $name, 'status'),
-      '#description' => $filter_info['description'],
-      '#weight' => $filter_info['weight'],
-    );
-  }
-
   // Filter order (tabledrag).
-  $form['filters']['order'] = array(
+  $form['filters'] = array(
     '#type' => 'item',
-    '#title' => t('Filter processing order'),
+    '#title' => t('Filter settings'),
     '#theme' => 'filter_admin_format_filter_order',
   );
+    $form['filters']['#prefix'] = '<div id="filter-admin-format-configure-wrapper">';
+    $form['filters']['#suffix'] = '</div>';
+  $form['filters']['filters'] = array(
+    '#type' => 'value',
+    '#value' => $filters,
+  );
   foreach ($all_filter_info as $name => $filter_info) {
-    $form['filters']['order'][$name]['filter'] = array(
+    $configure_form = _filter_build_configure_form($form, $form_state, $name, $format);
+    
+    $form['filters'][$name]['status'] = array(
+      '#type' => 'checkbox',
+      '#default_value' => $filters[$name]->status,
+      '#attributes' => array('class' => array('filter-status')),
+    );
+    if (!empty($configure_form) && empty($form_state['show_settings'][$name])) {
+      $form['filters'][$name]['configure_button'] = array(
+        '#type' => 'submit',
+        '#name' => $name,
+        '#op' => 'configure',
+        '#submit' => array('filter_admin_format_configure_submit'),
+        '#ajax' => array(
+          'callback' => 'filter_admin_format_configure_ajax',
+          'wrapper' => 'filter-admin-format-configure-wrapper',
+          'effect' => 'fade',
+        ),
+        '#value' => t('Configure'),
+      );
+    }
+    $form['filters'][$name]['filter'] = array(
+      '#theme' => 'filter_admin_format_filter_display',
+      '#type' => 'item',
+      '#prefix' => '<div class="filter-td">',
+      '#suffix' => '</div>',
+    );
+    $form['filters'][$name]['filter']['title'] = array(
       '#markup' => $filter_info['title'],
     );
-    $form['filters']['order'][$name]['weight'] = array(
+    $form['filters'][$name]['filter']['details'] = array(
+      '#markup' => isset($format_tips[$name]['tip']) ? $format_tips[$name]['tip'] : '',
+    );
+    $form['filters'][$name]['filter']['settings_container'] = array(
+      '#type' => 'container',
+    );
+    if (!empty($form_state['show_settings'][$name])) {
+      $form['filters'][$name]['filter']['settings_container']['configure'] = $configure_form;
+      $form['filters'][$name]['filter']['settings_container']['configure']['actions'] = array('#type' => 'actions');
+      $form['filters'][$name]['filter']['settings_container']['configure']['actions']['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Save configuration'),
+        '#name' => $name,
+        '#op' => 'update',
+        '#submit' => array('filter_admin_format_configure_submit'),
+        '#ajax' => array(
+          'callback' => 'filter_admin_format_configure_ajax',
+          'wrapper' => 'filter-admin-format-configure-wrapper',
+          'effect' => 'fade',
+        ),
+      );
+    }
+
+    $form['filters'][$name]['weight'] = array(
       '#type' => 'weight',
       '#title' => t('Weight for @title', array('@title' => $filter_info['title'])),
       '#title_display' => 'invisible',
@@ -339,33 +390,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
       '#default_value' => $filters[$name]->weight,
       '#parents' => array('filters', $name, 'weight'),
     );
-    $form['filters']['order'][$name]['#weight'] = $filters[$name]->weight;
-  }
-
-  // Filter settings.
-  $form['filter_settings_title'] = array(
-    '#type' => 'item',
-    '#title' => t('Filter settings'),
-  );
-  $form['filter_settings'] = array(
-    '#type' => 'vertical_tabs',
-  );
-
-  foreach ($all_filter_info as $name => $filter_info) {
-    if (isset($filter_info['settings callback'])) {
-      $function = $filter_info['settings callback'];
-      $settings_form = $function($form, $form_state, $filters[$name], $format);
-      if (!empty($settings_form)) {
-        $form['filters']['settings'][$name] = array(
-          '#type' => 'fieldset',
-          '#title' => $filter_info['title'],
-          '#parents' => array('filters', $name, 'settings'),
-          '#weight' => $filter_info['weight'],
-          '#group' => 'filter_settings',
-        );
-        $form['filters']['settings'][$name] += $settings_form;
-      }
-    }
+    $form['filters'][$name]['#weight'] = $filters[$name]->weight;
   }
 
   $form['#validate'][] = 'filter_admin_format_form_validate';
@@ -378,6 +403,57 @@ function filter_admin_format_form($form, &$form_state, $format) {
   );
 
   return $form;
+}
+
+/**
+ * Ajax handler: Handles multistep buttons in field_ui_display_overview_form().
+ */
+function filter_admin_format_configure_ajax($form, &$form_state) {
+  $trigger = $form_state['triggering_element'];
+
+  return  $form['filters'];
+}
+
+/**
+ * Form submission handler for configure buttons in filter_admin_format_form().
+ */
+function filter_admin_format_configure_submit($form, &$form_state) {
+  $trigger = $form_state['triggering_element'];
+  $op = $trigger['#op'];
+
+  switch ($op) {
+    case 'configure':
+      $form_state['show_settings'][$trigger['#name']] = $trigger;
+      break;
+
+    case 'update':
+      $form_state['show_settings'][$trigger['#name']] = array();
+      break;
+  }
+
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Returns the configuration form for configurable filters.
+ */
+function _filter_build_configure_form($form, $form_state, $filter, $format) {
+  $all_filter_info = filter_get_filters();
+  if(isset($all_filter_info[$filter]['settings callback'])) {
+    // $format->filters isn't always built yet.
+    if(!empty($format->filters)) {
+      $filters = $format->filters;
+      $function = $all_filter_info[$filter]['settings callback'];
+      // This is not always set during rebuild.
+      if(empty($filters[$filter])) {
+        return array();
+      }
+      $filter = $filters[$filter];
+      $settings_form = $function($form, $form_state, $filter, $format);
+      return $settings_form;
+    }
+  }
+  return array();
 }
 
 /**

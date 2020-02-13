@@ -37,6 +37,9 @@ function filter_theme() {
     'filter_format_editor_image_form' => array(
         'render element' => 'form',
     ) + $base,
+    'filter_admin_format_filter_display' => array(
+      'render element' => 'element',
+    ) + $base,
   );
 }
 
