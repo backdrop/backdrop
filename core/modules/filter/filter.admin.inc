@@ -395,10 +395,9 @@ function filter_admin_format_form($form, &$form_state, $format) {
     );
     if (!empty($form_state['show_settings'][$name])) {
       $form['filters'][$name]['filter']['settings_container']['configure'] = $configure_form;
-      $form['filters'][$name]['filter']['settings_container']['configure']['actions'] = array('#type' => 'actions');
-      $form['filters'][$name]['filter']['settings_container']['configure']['actions']['submit'] = array(
+      $form['filters'][$name]['filter']['settings_container']['configure']['submit'] = array(
         '#type' => 'submit',
-        '#value' => t('Save configuration'),
+        '#value' => t('Cancel'),
         '#name' => $name,
         '#op' => 'update',
         '#submit' => array('filter_admin_format_configure_submit'),
