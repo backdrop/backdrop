@@ -215,3 +215,9 @@ input#edit-filters-filter-html-settings-allowed-html {
 .view-image-library .view-header p {
   margin: 0;
 }
+#filterorder .description, .filter-details.description {
+  white-space: normal;
+}
+tr.disabled-row, tr.disabled-row div.description {
+  color: #ccc;
+}
