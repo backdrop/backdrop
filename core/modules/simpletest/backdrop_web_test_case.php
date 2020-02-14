@@ -74,6 +74,7 @@ abstract class BackdropTestCase {
     '#fail' => 0,
     '#exception' => 0,
     '#debug' => 0,
+    '#duration' => 0,
   );
 
   /**
@@ -567,6 +568,9 @@ abstract class BackdropTestCase {
    *   methods during debugging.
    */
   public function run(array $methods = array()) {
+    // Get start time so that we can see how long tests are taking.
+    $start = microtime(TRUE);
+
     $config = config('simpletest.settings');
     // Initialize verbose debugging.
     simpletest_verbose(NULL, config_get('system.core', 'file_public_path'), get_class($this));
@@ -629,6 +633,10 @@ abstract class BackdropTestCase {
     // Clear out the error messages and restore error handler.
     backdrop_get_messages();
     restore_error_handler();
+
+    // Get the stop time and put it in the results to display later.
+    $end = microtime(TRUE);
+    $this->results['#duration'] = round($end - $start, 3);
   }
 
   /**
