@@ -308,6 +308,12 @@ function simpletest_settings_form($form, &$form_state) {
     '#description' => t('The verbose data will be printed along with the standard assertions and is useful for debugging. The verbose data will be erased between each test suite run. The verbose data output is very detailed and should only be used when debugging.'),
     '#default_value' => $config->get('simpletest_verbose'),
   );
+  $form['general']['simpletest_cache'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Cache instal profiles'),
+    '#description' => t('Saves the database tables and config files from each instal profile so that each one only has to be run once. If you are making database changes, you will need to clean the test environment for the changes to show up in the tests.'),
+    '#default_value' => $config->get('simpletest_cache'),
+  );
 
   $form['httpauth'] = array(
     '#type' => 'fieldset',
