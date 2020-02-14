@@ -123,7 +123,6 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $test_path = 'system-test/hello-world';
     $this->backdropGet($test_path);
 
-    sleep(5);
     $this->backdropHead($test_path);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $etag = $this->backdropGetHeader('ETag');
@@ -175,7 +174,6 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('Connection'), 'close', 'Connection header set to closed when hitting an uncached page.');
 
     // Check cache.
-    sleep(5); // Delay to ensure caches are set.
     $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')), $headers);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary: Cookie header was sent.');
@@ -194,7 +192,6 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->backdropHead('system-test/hello-world', array('query' => array('cache' => 'test')));
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Cache miss on first request via HTTP HEAD request.');
 
-    sleep(5); // Delay to ensure caches are set.
     $this->backdropGet('system-test/hello-world', array('query' => array('cache' => 'test')));
 
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Cache hit on second request via HTTP GET request.');
@@ -210,7 +207,6 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Initial page request was miss.');
     $this->assertTrue($total < 5, 'Initial page requests returned before shutdown functions are executed.');
 
-    sleep(5); // Delay to ensure caches are set.
     $start = microtime(TRUE);
     $this->backdropGet('system-test/sleep/shutdown/5', array(), $headers);
     $total = microtime(TRUE) - $start;
@@ -219,17 +215,17 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
 
     // Check when background fetch is disabled that a delay takes place when
     // generating a new cache entry.
-    config_set('system.core', 'page_cache_maximum_age', 5);
+    config_set('system.core', 'page_cache_maximum_age', 1);
     config_set('system.core', 'page_cache_background_fetch', 0);
 
     // Create a new cache entry.
     $this->backdropGet('system-test/sleep/0', array(), $headers);
-    $this->assertIdentical($this->backdropGetHeader('Cache-Control'), 'public, max-age=5');
+    $this->assertIdentical($this->backdropGetHeader('Cache-Control'), 'public, max-age=1');
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time1 = (string) $start_element[0];
 
-    // Wait 6 seconds to wait past the maximum age (5). Fresh copy expected.
-    sleep(6);
+    // Wait 2 seconds to wait past the maximum age (1). Fresh copy expected.
+    sleep(2);
     $this->backdropGet('system-test/sleep/6', array('query' => array('cache' => $this->randomName())));
 
     $this->backdropGet('system-test/sleep/0', array(), $headers);
@@ -247,8 +243,8 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time1 = (string) $start_element[0];
 
-    // Wait 6 seconds to wait past the maximum age (5). Stale copy expected.
-    sleep(6);
+    // Wait 2 seconds to wait past the maximum age (1). Stale copy expected.
+    sleep(2);
     $this->backdropGet('system-test/sleep/0', array(), $headers);
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time2 = (string) $start_element[0];
@@ -287,14 +283,14 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     // Disable access.
     state_set('system_test_access', FALSE);
 
-    // Wait 6 seconds to wait past the maximum age (5). Stale copy expected.
-    sleep(6);
+    // Wait 2 seconds to wait past the maximum age (1). Stale copy expected.
+    sleep(2);
     $this->backdropGet('system-test/access');
     $this->assertResponse(200, 'Background fetch copy served after blocking access.');
     $this->assertText(t('Access granted'), 'Access granted page title shown.');
 
     // Fresh copy should now be a 403.
-    sleep(2);
+    sleep(1);
     $this->backdropGet('system-test/access');
     $this->assertResponse(403, 'Access denied on basic callback on fresh copy.');
     $this->assertText(t('Access denied'), 'Access denied page title shown.');
@@ -302,14 +298,14 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     // Enable access.
     state_set('system_test_access', TRUE);
 
-    // Wait 6 seconds to wait past the maximum age (5). Stale copy expected.
-    sleep(6);
+    // Wait 2 seconds to wait past the maximum age (1). Stale copy expected.
+    sleep(2);
     $this->backdropGet('system-test/access');
     $this->assertResponse(403, 'Background fetch copy served after granting access.');
     $this->assertText(t('Access denied'), 'Access denied page title shown.');
 
     // Fresh copy should now be a 200.
-    sleep(2);
+    sleep(1);
     $this->backdropGet('system-test/access');
     $this->assertResponse(200, 'Access granted on basic callback on fresh copy.');
     $this->assertText(t('Access granted'), 'Access granted page title shown.');
@@ -335,7 +331,6 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertRaw('</html>', 'Page was gzip compressed.');
 
     // Verify that cached output is compressed.
-    sleep(5); // Delay to ensure caches are set.
     $this->backdropGet($test_path, array(), array('Accept-Encoding: gzip,deflate'));
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Content-Encoding'), 'gzip', 'A Content-Encoding header was sent.');
@@ -422,9 +417,6 @@ class HookBootExitTestCase extends BackdropWebTestCase {
 
     $this->backdropGet('');
 
-    // Sleep to allow time for hook_exit() after the page has been delivered.
-    sleep(3);
-
     $calls = 1;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with disabled cache.'));
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, t('hook_exit called with disabled cache.'));
@@ -436,9 +428,6 @@ class HookBootExitTestCase extends BackdropWebTestCase {
 
     $this->backdropGet('');
 
-    // Sleep to allow time for hook_exit() after the page has been delivered.
-    sleep(3);
-
     $calls++;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with normal cache.'));
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, t('hook_exit called with normal cache.'));
@@ -446,9 +435,6 @@ class HookBootExitTestCase extends BackdropWebTestCase {
     // Test with page cache cleared, boot and exit should be called.
     $this->assertTrue(db_delete('cache_page')->execute(), t('Page cache cleared.'));
     $this->backdropGet('');
-
-    // Sleep to allow time for hook_exit() after the page has been delivered.
-    sleep(3);
 
     $calls++;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with aggressive cache and no cached page.'));

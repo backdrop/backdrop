@@ -574,10 +574,6 @@ class CommentInterfaceTest extends CommentHelperCase {
           break;
       }
 
-      // Wait a few seconds to ensure that the "comment-new" flag is allowed to
-      // trigger (more than 1 second from the time the comment was created).
-      sleep(3);
-
       // Request the node with the comment.
       $this->backdropGet('node/' . $node->nid);
 
@@ -625,10 +621,6 @@ class CommentInterfaceTest extends CommentHelperCase {
         $comments = $this->xpath('//*[contains(@class, "comment-new")]');
         if ($case['user'] != 'anonymous') {
           $this->assertTrue(count($comments) == 1, 'comment-new class found.');
-
-          // node_tag_new() writes to the database after delivering the page,
-          // wait to ensure the record is written before reloading the page.
-          sleep(2);
 
           // Request the node again. The comment-new class should disappear.
           $this->backdropGet('node/' . $node->nid);
