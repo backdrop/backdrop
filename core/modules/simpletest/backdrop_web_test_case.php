@@ -1060,7 +1060,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Whether the files were copied to the test files directory.
    */
-  protected $generatedTestFiles = FALSE;
+  protected $generatedTestFiles = array();
 
   /**
    * The maximum number of redirects to follow when handling responses.
@@ -1225,34 +1225,44 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   List of files that match filter.
    */
   protected function backdropGetTestFiles($type, $size = NULL) {
-    if (empty($this->generatedTestFiles)) {
-      // Generate binary test files.
-      $lines = array(64, 1024);
-      $count = 0;
-      foreach ($lines as $line) {
-        simpletest_generate_file('binary-' . $count++, 64, $line, 'binary');
-      }
-
-      // Generate text test files.
-      $lines = array(16, 256, 1024, 2048, 20480);
-      $count = 0;
-      foreach ($lines as $line) {
-        simpletest_generate_file('text-' . $count++, 64, $line, 'text');
-      }
-
-      // Copy other test files from simpletest.
-      $original = backdrop_get_path('module', 'simpletest') . '/files';
-      $files = file_scan_directory($original, '/(html|image|javascript|php|sql)-.*/');
-      foreach ($files as $file) {
-        file_unmanaged_copy($file->uri, config_get('system.core', 'file_public_path'));
-      }
-
-      $this->generatedTestFiles = TRUE;
-    }
-
     $files = array();
     // Make sure type is valid.
     if (in_array($type, array('binary', 'html', 'image', 'javascript', 'php', 'sql', 'text'))) {
+
+      if (!in_array($type, $this->generatedTestFiles)) {
+        switch ($type) {
+          case 'binary':
+            // Generate binary test files.
+            $lines = array(64, 1024);
+            $count = 0;
+            foreach ($lines as $line) {
+              simpletest_generate_file('binary-' . $count++, 64, $line, 'binary');
+            }
+            $this->generatedTestFiles[] = 'binary';
+            break;
+
+          case 'text':
+            // Generate text test files.
+            $lines = array(16, 256, 1024, 2048, 20480);
+            $count = 0;
+            foreach ($lines as $line) {
+              simpletest_generate_file('text-' . $count++, 64, $line, 'text');
+            }
+            $this->generatedTestFiles[] = 'text';
+            break;
+
+          default:
+            // Copy other test files from simpletest.
+            $original = backdrop_get_path('module', 'simpletest') . '/files';
+            $files = file_scan_directory($original, '/' . $type . '-.*/');
+            foreach ($files as $file) {
+              file_unmanaged_copy($file->uri, config_get('system.core', 'file_public_path'));
+            }
+            $this->generatedTestFiles[] = $type;
+            break;
+        }
+      }
+
       $files = file_scan_directory('public://', '/' . $type . '\-.*/');
 
       // If size is set then remove any files that are not of that size.
@@ -1558,7 +1568,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     file_prepare_directory($this->public_files_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     file_prepare_directory($this->private_files_directory, FILE_CREATE_DIRECTORY);
     file_prepare_directory($this->temp_files_directory, FILE_CREATE_DIRECTORY);
-    $this->generatedTestFiles = FALSE;
+    $this->generatedTestFiles = array();
 
     // Set the new config directories. During test execution, these values are
     // manually set directly in config_get_config_directory().

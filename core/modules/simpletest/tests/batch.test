@@ -97,7 +97,7 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
 
     // Allow space for the timestamp to increment, so items are inserted in a
     // way that they'll be pulled out correctly.
-    sleep(2);
+    sleep(1);
 
     // Check that result messages are present and in the correct order.
     $this->assertBatchMessages($this->_resultMessages('chained'), t('Batches defined in separate submit handlers performed successfully.'));
