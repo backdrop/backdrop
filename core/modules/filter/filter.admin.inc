@@ -362,12 +362,9 @@ function filter_admin_format_form($form, &$form_state, $format) {
     $form['filters'][$name]['filter']['details'] = array(
       '#markup' => isset($format_tips[$name]['tip']) ? $format_tips[$name]['tip'] : '',
     );
-    $form['filters'][$name]['filter']['settings_container'] = array(
-      '#type' => 'container',
-    );
     if (!empty($form_state['show_settings'][$name])) {
-      $form['filters'][$name]['filter']['settings_container']['configure'] = $configure_form;
-      $form['filters'][$name]['filter']['settings_container']['configure']['submit'] = array(
+      $form['filters'][$name]['filter']['configure'] = $configure_form;
+      $form['filters'][$name]['filter']['configure']['submit'] = array(
         '#type' => 'submit',
         '#value' => t('Cancel'),
         '#name' => $name,
@@ -515,6 +512,15 @@ function filter_admin_format_form_submit($form, &$form_state) {
   form_state_values_clean($form_state);
   unset($form_state['values']['filter_settings']);
   unset($form_state['values']['actions']);
+  unset($form_state['values']['filters']['filters']);
+
+  // Add settings to $form_state.
+  foreach ($form_state['values']['filters'] as $key => $value) {
+    if(isset($value['filter'])) {
+      $form_state['values']['filters'][$key]['settings'] = $value['filter']['configure'];
+      unset($form_state['values']['filters'][$key]['filter']);
+    }
+  }
 
   // Add the submitted form values to the text format, and save it.
   $format = $form_state['format'];
