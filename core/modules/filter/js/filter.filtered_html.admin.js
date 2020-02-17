@@ -14,7 +14,7 @@
 if (Backdrop.filterConfiguration) {
   Backdrop.filterConfiguration.liveSettingParsers.filter_html = {
     getRules: function () {
-      var currentValue = $('#edit-filters-filter-html-settings-allowed-html').val();
+      var currentValue = $('#edit-filters-filter-html-filter-configure-container-configure-allowed-html').val();
       var rules = [];
       var rule;
 
