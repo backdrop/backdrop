@@ -350,8 +350,8 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#title' => t('Filter settings'),
     '#theme' => 'filter_admin_format_filter_order',
   );
-    $form['filters']['#prefix'] = '<div id="filter-admin-format-configure-wrapper">';
-    $form['filters']['#suffix'] = '</div>';
+  $form['filters']['#prefix'] = '<div id="filter-admin-format-configure-wrapper">';
+  $form['filters']['#suffix'] = '</div>';
   $form['filters']['filters'] = array(
     '#type' => 'value',
     '#value' => $filters,
@@ -369,10 +369,9 @@ function filter_admin_format_form($form, &$form_state, $format) {
         '#type' => 'submit',
         '#name' => $name,
         '#op' => 'configure',
-        '#submit' => array('filter_admin_format_configure_submit'),
+        '#submit' => array(),
         '#ajax' => array(
           'callback' => 'filter_admin_format_configure_ajax',
-          'wrapper' => 'filter-admin-format-configure-wrapper',
           'effect' => 'fade',
         ),
         '#value' => t('Configure'),
@@ -390,21 +389,28 @@ function filter_admin_format_form($form, &$form_state, $format) {
     $form['filters'][$name]['filter']['details'] = array(
       '#markup' => isset($format_tips[$name]['tip']) ? $format_tips[$name]['tip'] : '',
     );
-    if (!empty($form_state['show_settings'][$name])) {
-      $form['filters'][$name]['filter']['configure'] = $configure_form;
-      $form['filters'][$name]['filter']['configure']['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('Cancel'),
-        '#name' => $name,
-        '#op' => 'update',
-        '#submit' => array('filter_admin_format_configure_submit'),
-        '#ajax' => array(
-          'callback' => 'filter_admin_format_configure_ajax',
-          'wrapper' => 'filter-admin-format-configure-wrapper',
-          'effect' => 'fade',
+    $form['filters'][$name]['filter']['configure_container'] = array(
+      '#type' => 'container',
+      '#id' => 'filter-configure-container',
+      '#attributes' => array(
+        'class' => array(
+          'filter-container',
+          'filter-' . $name . '-configure-container',
         ),
-      );
-    }
+      ),
+    );
+    $form['filters'][$name]['filter']['configure_container']['configure'] = $configure_form;
+    $form['filters'][$name]['filter']['configure_container']['configure']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Update'),
+      '#name' => $name,
+      '#op' => 'update',
+      '#submit' => array(),
+      '#ajax' => array(
+        'callback' => 'filter_admin_format_configure_ajax',
+        'effect' => 'fade',
+      ),
+    );
 
     $form['filters'][$name]['weight'] = array(
       '#type' => 'weight',
@@ -434,28 +440,13 @@ function filter_admin_format_form($form, &$form_state, $format) {
  */
 function filter_admin_format_configure_ajax($form, &$form_state) {
   $trigger = $form_state['triggering_element'];
+  $name = $trigger['#name'];
 
-  return  $form['filters'];
-}
+  $selector = '.filter-container.filter-' . $name . '-configure-container';
 
-/**
- * Form submission handler for configure buttons in filter_admin_format_form().
- */
-function filter_admin_format_configure_submit($form, &$form_state) {
-  $trigger = $form_state['triggering_element'];
-  $op = $trigger['#op'];
-
-  switch ($op) {
-    case 'configure':
-      $form_state['show_settings'][$trigger['#name']] = $trigger;
-      break;
-
-    case 'update':
-      $form_state['show_settings'][$trigger['#name']] = array();
-      break;
-  }
-
-  $form_state['rebuild'] = TRUE;
+  $commands = array();
+  $commands[] = ajax_command_invoke($selector, 'toggleClass', array('filter-container-visible'));
+  return array('#type' => 'ajax', '#commands' => $commands);
 }
 
 /**
@@ -545,7 +536,9 @@ function filter_admin_format_form_submit($form, &$form_state) {
   // Add settings to $form_state.
   foreach ($form_state['values']['filters'] as $key => $value) {
     if(isset($value['filter'])) {
-      $form_state['values']['filters'][$key]['settings'] = $value['filter']['configure'];
+      if(!empty($value['filter']['configure_container']['configure'])) {
+        $form_state['values']['filters'][$key]['settings'] = $value['filter']['configure_container']['configure'];
+      }
       unset($form_state['values']['filters'][$key]['filter']);
     }
   }
