@@ -12,6 +12,10 @@ Backdrop.behaviors.filterStatus = {
       return;
     }
 
+  $('.filter-container', context).each(function() {
+    $(this).addClass('filter-container-initial');
+  });
+
     // A custom message for the filters page specifically.
     Backdrop.theme.tableDragChangedWarning = function () {
       return '<div class="messages warning">' + Backdrop.theme('tableDragChangedMarker') + ' ' + Backdrop.t('The changes to these filters will not be saved until the <em>Save configuration</em> button is clicked.') + '</div>';
