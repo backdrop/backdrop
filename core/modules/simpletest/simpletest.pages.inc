@@ -310,8 +310,8 @@ function simpletest_settings_form($form, &$form_state) {
   );
   $form['general']['simpletest_cache'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Cache instal profiles'),
-    '#description' => t('Saves the database tables and config files from each instal profile so that each one only has to be run once. If you are making database changes, you will need to clean the test environment for the changes to show up in the tests.'),
+    '#title' => t('Cache installation profiles'),
+    '#description' => t('Instead of multiple installations of Backdrop once for each test, each installation profile is installed only once, and its initial state (database tables and config files) is cached and reused. If you are making database changes, you will need to clean the test environment for the changes to show up in the tests.'),
     '#default_value' => $config->get('simpletest_cache'),
   );
 
