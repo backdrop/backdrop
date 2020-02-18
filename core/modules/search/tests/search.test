@@ -552,7 +552,7 @@ class SearchRankingTestCase extends BackdropWebTestCase {
  */
 class SearchBlockTestCase extends BackdropWebTestCase {
   function setUp() {
-    parent::setUp('search');
+    parent::setUp('block', 'search');
 
     // Create and login user
     $admin_user = $this->backdropCreateUser(array('administer blocks', 'search content'));
@@ -992,7 +992,7 @@ class SearchCommentCountToggleTestCase extends BackdropWebTestCase {
   protected $searchable_nodes;
 
   function setUp() {
-    parent::setUp('search');
+    parent::setUp('comment', 'search');
 
     // Create searching user.
     $this->searching_user = $this->backdropCreateUser(array('search content', 'access content', 'access comments', 'skip comment approval'));
@@ -1145,7 +1145,7 @@ class SearchSimplifyTestCase extends BackdropWebTestCase {
  */
 class SearchKeywordsConditions extends BackdropWebTestCase {
   function setUp() {
-    parent::setUp('search', 'search_extra_type');
+    parent::setUp('comment', 'search', 'search_extra_type');
     // Create searching user.
     $this->searching_user = $this->backdropCreateUser(array('search content', 'access content', 'access comments', 'skip comment approval'));
     // Login with sufficient privileges.
@@ -1345,7 +1345,7 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
   public $search_node;
 
   function setUp() {
-    parent::setUp('search', 'search_extra_type');
+    parent::setUp('block', 'search', 'search_extra_type');
 
     // Login as a user that can create and search content.
     $this->search_user = $this->backdropCreateUser(array('search content', 'administer search', 'administer nodes', 'bypass node access', 'access user profiles', 'administer users', 'administer blocks', 'access site reports'));

@@ -12,7 +12,7 @@ class TranslationTestCase extends BackdropWebTestCase {
   protected $book;
 
   function setUp() {
-    parent::setUp('node', 'language', 'locale', 'translation', 'translation_test');
+    parent::setUp('block', 'node', 'language', 'locale', 'translation', 'translation_test');
 
     // Setup users.
     $this->admin_user = $this->backdropCreateUser(array('bypass node access', 'administer nodes', 'administer languages', 'administer content types', 'administer blocks', 'access administration pages', 'translate content'));

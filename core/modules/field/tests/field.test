@@ -1449,7 +1449,7 @@ class FieldFormTestCase extends FieldTestCase {
   protected $field_unlimited;
 
   function setUp() {
-    parent::setUp('field_test');
+    parent::setUp('list', 'field_test');
 
     $web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content'));
     $this->backdropLogin($web_user);

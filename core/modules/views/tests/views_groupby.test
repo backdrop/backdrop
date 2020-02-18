@@ -10,8 +10,6 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests aggregate functionality of views, for example count.
  */
 class ViewsQueryGroupByTest extends ViewsSqlTest {
-  protected $profile = 'testing';
-
   /**
    * Tests aggregate count feature.
    */
@@ -306,7 +304,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
 class viewsUiGroupbyTestCase extends BackdropWebTestCase {
   function setUp() {
     // Enable views_ui.
-    parent::setUp('views_ui', 'views_test');
+    parent::setUp('block', 'views_ui', 'views_test');
 
     // Create and log in a user with administer views permission.
     $views_admin = $this->backdropCreateUser(array('administer views', 'administer blocks', 'bypass node access', 'access user profiles', 'view revisions'));

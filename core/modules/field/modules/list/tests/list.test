@@ -12,7 +12,7 @@ require_once BACKDROP_ROOT . '/core/modules/field/tests/field.test';
  */
 class ListFieldTestCase extends FieldTestCase {
   function setUp() {
-    parent::setUp('field_test');
+    parent::setUp('comment', 'list', 'field_test');
 
     $this->field_name = 'test_list';
     $this->field = array(
@@ -112,7 +112,7 @@ class ListFieldTestCase extends FieldTestCase {
  */
 class ListDynamicValuesTestCase extends FieldTestCase {
   function setUp() {
-    parent::setUp(array('list', 'field_test', 'list_test'));
+    parent::setUp(array('comment', 'list', 'field_test', 'list_test'));
 
     $this->field_name = 'test_list';
     $this->field = array(
@@ -442,7 +442,7 @@ class ListFieldUITestCase extends FieldTestCase {
  */
 class ListFieldDisplayTestCase extends FieldTestCase {
   function setUp() {
-    parent::setUp('field_test', 'field_ui');
+    parent::setUp('field_test', 'field_ui', 'list', 'taxonomy');
 
     // Create test user.
     $admin_user = $this->backdropCreateUser(array('access content', 'administer content types', 'administer taxonomy', 'administer fields'));

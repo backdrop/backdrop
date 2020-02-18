@@ -1339,7 +1339,7 @@ class LocaleUninstallFrenchFunctionalTest extends LocaleUninstallFunctionalTest 
  */
 class LocaleLanguageSwitchingFunctionalTest extends BackdropWebTestCase {
   function setUp() {
-    parent::setUp('locale');
+    parent::setUp('block', 'locale');
 
     // Create and login user.
     $admin_user = $this->backdropCreateUser(array('administer blocks', 'administer languages', 'translate interface', 'access administration pages'));
@@ -2049,6 +2049,8 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
  *          UI language in Chinese
  */
 class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
+  protected $profile = 'standard';
+
   function setUp() {
     parent::setUp('locale', 'locale_test');
     require_once BACKDROP_ROOT . '/core/includes/language.inc';
@@ -2598,7 +2600,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
  */
 class LocaleCommentLanguageFunctionalTest extends BackdropWebTestCase {
   function setUp() {
-    parent::setUp('locale', 'locale_test');
+    parent::setUp('comment', 'locale', 'locale_test');
 
     // Create and login user.
     $admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer languages', 'access administration pages', 'administer content types', 'create post content'));

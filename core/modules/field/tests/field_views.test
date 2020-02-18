@@ -106,7 +106,7 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
   var $fields;
 
   function setUp() {
-    parent::setUp();
+    parent::setUp('comment');
 
     $langcode = LANGUAGE_NONE;
 
@@ -172,7 +172,7 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
    */
   function testViewsData() {
     $data = views_fetch_data();
-    
+
     // Check the table and the joins of the first field.
     // Attached to node only.
     $field = $this->fields[0];
@@ -364,7 +364,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
       foreach ($pure_items as $j => $item) {
         $items[] = $pure_items[$j]['value'];
       }
-      $this->assertEqual($rendered_field, implode(', ', $items), 'Take sure that the amount of items are limited.');
+      $this->assertEqual($rendered_field, implode(', ', $items), 'Make sure that the amount of items are limited.');
     }
 
     // Test that an empty field is rendered without error.
@@ -386,7 +386,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
       foreach ($pure_items as $j => $item) {
         $items[] = $pure_items[$j]['value'];
       }
-      $this->assertEqual($rendered_field, implode(', ', $items), 'Take sure that the amount of items are limited.');
+      $this->assertEqual($rendered_field, implode(', ', $items), 'Make sure that the amount of items are limited.');
     }
     $view->destroy();
 
@@ -406,7 +406,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
       foreach ($pure_items as $j => $item) {
         $items[] = $pure_items[$j]['value'];
       }
-      $this->assertEqual($rendered_field, implode(', ', $items), 'Take sure that the amount of items are limited.');
+      $this->assertEqual($rendered_field, implode(', ', $items), 'Make sure that the amount of items are limited.');
     }
     $view->destroy();
 
@@ -423,7 +423,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
       $pure_items = $this->nodes[$i]->{$this->fields[3]['field_name']}[LANGUAGE_NONE];
       $items[] = $pure_items[0]['value'];
       $items[] = $pure_items[4]['value'];
-      $this->assertEqual($rendered_field, implode(', ', $items), 'Take sure that the amount of items are limited.');
+      $this->assertEqual($rendered_field, implode(', ', $items), 'Make sure that the amount of items are limited.');
     }
     $view->destroy();
 
@@ -442,7 +442,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
       foreach ($pure_items as $j => $item) {
         $items[] = $pure_items[$j]['value'];
       }
-      $this->assertEqual($rendered_field, implode(':', $items), 'Take sure that the amount of items are limited.');
+      $this->assertEqual($rendered_field, implode(':', $items), 'Make sure that the amount of items are limited.');
     }
   }
 

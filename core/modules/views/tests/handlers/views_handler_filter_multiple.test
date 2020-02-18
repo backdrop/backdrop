@@ -17,12 +17,35 @@ class ViewsHandlerFilterMultipleTest extends ViewsSqlTest {
    */
   protected function setUp() {
     // The Views and Views UI modules will be enabled with this.
-    parent::setUp();
+    parent::setUp('taxonomy');
 
     // Assign vocabulary 'tags' to user entity.
-    $field_definition = field_read_field('field_tags');
+    $description = t('Use tags to group posts on similar topics into categories.');
+    $vocabulary = new TaxonomyVocabulary(array(
+      'name' => t('Tags'),
+      'description' => $description,
+      'machine_name' => 'tags',
+    ));
+    taxonomy_vocabulary_save($vocabulary);
+
+    $field = array(
+      'field_name' => 'field_' . $vocabulary->machine_name,
+      'type' => 'taxonomy_term_reference',
+      // Set cardinality to unlimited for tagging.
+      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      'settings' => array(
+        'allowed_values' => array(
+          array(
+            'vocabulary' => $vocabulary->machine_name,
+            'parent' => 0,
+          ),
+        ),
+      ),
+    );
+    field_create_field($field);
+
     $instance_definition = array(
-      'field_name' => $field_definition['field_name'],
+      'field_name' => 'field_' . $vocabulary->machine_name,
       'entity_type' => 'user',
       'bundle' => 'user',
       'widget' => array(
@@ -39,6 +62,10 @@ class ViewsHandlerFilterMultipleTest extends ViewsSqlTest {
         ),
       ),
     );
+    field_create_instance($instance_definition);
+
+    $instance_definition['entity_type'] = 'node';
+    $instance_definition['bundle'] = 'post';
     field_create_instance($instance_definition);
   }
 

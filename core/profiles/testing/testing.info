@@ -6,3 +6,4 @@ type = profile
 hidden = TRUE
 
 dependencies[] = layout
+dependencies[] = node

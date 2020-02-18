@@ -26,12 +26,16 @@ class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
   }
 
   function setUp() {
-    parent::setUp();
+    parent::setUp('taxonomy');
 
-    //$web_user = $this->backdropCreateUser(array('create post content'));
-    //$this->backdropLogin($web_user);
+    $description = t('Use tags to group posts on similar topics into categories.');
+    $vocabulary = new TaxonomyVocabulary(array(
+      'name' => t('Tags'),
+      'description' => $description,
+      'machine_name' => 'tags',
+    ));
+    taxonomy_vocabulary_save($vocabulary);
 
-    $vocabulary = taxonomy_vocabulary_load('tags');
     $this->term_1 = $this->createTerm($vocabulary);
     $this->term_2 = $this->createTerm($vocabulary);
 

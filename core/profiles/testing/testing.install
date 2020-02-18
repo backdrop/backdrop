@@ -3,3 +3,240 @@
  * @file
  * Install, update and uninstall functions for the testing profile.
  */
+
+/**
+ * Implements hook_install().
+ *
+ * Perform actions to set up the site for this profile.
+ *
+ * @see system_install()
+ */
+function testing_install() {
+  // Add text formats.
+  $filtered_html_format = array(
+    'format' => 'filtered_html',
+    'name' => 'Filtered HTML',
+    'weight' => 0,
+    'editor' => 'ckeditor',
+    'editor_settings' => array(
+      'image_upload' => array(
+        'status' => 1,
+        'dimensions' => array('max_width' => '', 'max_height' => ''),
+        'max_size' => NULL,
+        'scheme' => 'public',
+        'directory' => 'inline-images',
+      ),
+    ),
+    'filters' => array(
+      // URL filter.
+      'filter_url' => array(
+        'weight' => 0,
+        'status' => 1,
+      ),
+      // HTML filter.
+      'filter_html' => array(
+        'weight' => 1,
+        'status' => 1,
+      ),
+      // Line break filter.
+      'filter_autop' => array(
+        'weight' => 2,
+        'status' => 1,
+      ),
+      // Image captions.
+      'filter_image_caption' => array(
+        'weight' => 4,
+        'status' => 1,
+      ),
+      // Image alignment.
+      'filter_image_align' => array(
+        'weight' => 4,
+        'status' => 1,
+      ),
+      // HTML corrector filter.
+      'filter_htmlcorrector' => array(
+        'weight' => 10,
+        'status' => 1,
+      ),
+    ),
+  );
+  $filtered_html_format = (object) $filtered_html_format;
+  filter_format_save($filtered_html_format);
+
+  $full_html_format = array(
+    'format' => 'full_html',
+    'name' => 'Full HTML',
+    'weight' => 1,
+    'editor' => NULL,
+    'filters' => array(
+      // URL filter.
+      'filter_url' => array(
+        'weight' => 0,
+        'status' => 1,
+      ),
+      // Line break filter.
+      'filter_autop' => array(
+        'weight' => 1,
+        'status' => 1,
+      ),
+      // Image captions.
+      'filter_image_caption' => array(
+        'weight' => 4,
+        'status' => 1,
+      ),
+      // Image alignment.
+      'filter_image_align' => array(
+        'weight' => 4,
+        'status' => 1,
+      ),
+      // HTML corrector filter.
+      'filter_htmlcorrector' => array(
+        'weight' => 10,
+        'status' => 1,
+      ),
+    ),
+  );
+  $full_html_format = (object) $full_html_format;
+  filter_format_save($full_html_format);
+
+  // Create default pre-defined node types. For a complete list of available
+  // node type attributes please refer to the node type API documentation at:
+  // https://api.backdropcms.org/api/backdrop/core!modules!node!node.module/function/node_type_save
+  $types = array(
+    array(
+      'type' => 'page',
+      'name' => st('Page'),
+      'description' => st("Add a page with static content, like the 'About' page."),
+      'settings' => array(
+        'status_default' => NODE_PUBLISHED,
+        'promote_enabled' => FALSE,
+        'node_preview' => TRUE,
+        'promote_default' => FALSE,
+        'sticky_enabled' => FALSE,
+        'sticky_default' => FALSE,
+        'revision_enabled' => TRUE,
+        'revision_default' => FALSE,
+        'node_submitted' => FALSE,
+        'node_user_picture' => FALSE,
+        'comment_default' => COMMENT_NODE_CLOSED,
+        'menu_default' => TRUE,
+        'menu_options' => array('main-menu'),
+      ),
+      'is_new' => TRUE,
+    ),
+    array(
+      'type' => 'post',
+      'name' => st('Post'),
+      'description' => st('Add a blog post, news article, or press release.'),
+      'settings' => array(
+        'status_default' => NODE_PUBLISHED,
+        'node_preview' => TRUE,
+        'promote_enabled' => TRUE,
+        'promote_default' => TRUE,
+        'sticky_enabled' => TRUE,
+        'sticky_default' => FALSE,
+        'revision_enabled' => TRUE,
+        'revision_default' => FALSE,
+        'show_submitted_info' => TRUE,
+        'comment_default' => COMMENT_NODE_OPEN,
+        'node_submitted' => TRUE,
+        'node_user_picture' => TRUE,
+      ),
+      'is_new' => TRUE,
+    ),
+  );
+
+  foreach ($types as $type) {
+    $type = node_type_set_defaults($type);
+    node_type_save($type);
+    node_add_body_field($type);
+  }
+
+  // Add default alias for page content types.
+  config('path.settings')
+    ->set('node_page_pattern', '[node:title]')
+    ->set('node_post_pattern', 'posts/[node:title]')
+    ->save();
+
+  // Enable user picture support and set the default to a square thumbnail option.
+  config('system.core')
+    ->set('user_pictures', '1')
+    ->set('user_picture_dimensions', '1024x1024')
+    ->set('user_picture_file_size', '800')
+    ->set('user_picture_style', 'thumbnail')
+    ->save();
+
+  // Enable default permissions for system roles.
+  $filtered_html_permission = filter_permission_name($filtered_html_format);
+  $anonymous_permissions = array(
+    'access content',
+    'access comments',
+    $filtered_html_permission,
+  );
+  $authenticated_permissions = array(
+    'access content',
+    'access comments',
+    'post comments',
+    'skip comment approval',
+    'upload editor images',
+    $filtered_html_permission,
+  );
+  user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $anonymous_permissions);
+  user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, $authenticated_permissions);
+
+  // Create a default editor role, for users who need to be able to edit
+  // content, but do not need to access advanced admin features.
+  $editor_role = new stdClass();
+  $editor_role->name = 'editor';
+  $editor_role->label = st('Editor');
+  $editor_role->weight = 2;
+  user_role_save($editor_role);
+
+  $editor_permissions = array(
+    'view own unpublished content',
+    'view any unpublished content',
+    'view revisions',
+    'revert revisions',
+    'delete revisions',
+    'create page content',
+    'edit own page content',
+    'edit any page content',
+    'delete own page content',
+    'delete any page content',
+    'create post content',
+    'edit own post content',
+    'edit any post content',
+    'delete own post content',
+    'delete any post content',
+    'access dashboard',
+    'view the administration theme',
+    'access administration bar',
+    'access content overview',
+    'access administration pages',
+    'access site in maintenance mode',
+    'flush caches',
+    'edit terms in tags',
+    'delete terms in tags',
+    'administer taxonomy',
+    'search content',
+    'use advanced search',
+    $filtered_html_permission,
+  );
+  user_role_grant_permissions('editor', $editor_permissions);
+
+  // Create a default role for site administrators, with all available
+  // permissions assigned.
+  $admin_role = new stdClass();
+  $admin_role->name = 'administrator';
+  $admin_role->label = st('Administrator');
+  $admin_role->weight = 3;
+  $admin_role->permissions = array_keys(module_invoke_all('permission'));
+  user_role_save($admin_role);
+  // Set this as the administrator role.
+  config_set('system.core', 'user_admin_role', $admin_role->name);
+
+  // Assign user 1 the "administrator" role.
+  db_insert('users_roles')
+    ->fields(array('uid' => 1, 'role' => $admin_role->name))
+    ->execute();
+}

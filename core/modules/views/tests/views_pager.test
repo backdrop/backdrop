@@ -10,10 +10,6 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests the pluggable pager system.
  */
 class ViewsPagerTest extends ViewsSqlTest {
-  public function setUp() {
-    parent::setUp('views', 'views_ui', 'views_test');
-  }
-
   /**
    * Pagers was sometimes not stored.
    *
@@ -119,7 +115,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     $view = $this->viewsPagerNoLimit();
     $view->set_display('default');
     $this->executeView($view);
-    $this->assertEqual(count($view->result), 11, 'Make sure that every item is returned in the result');
+    $this->assertEqual(count($view->result), 9, 'Make sure that every item is returned in the result');
 
     $view->destroy();
 
@@ -136,7 +132,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     $view->display_handler->set_option('pager', $pager);
     $this->executeView($view);
 
-    $this->assertEqual(count($view->result), 8, 'Make sure that every item beside the first three is returned in the result');
+    $this->assertEqual(count($view->result), 6, 'Make sure that every item beside the first three is returned in the result');
 
     // Check some public functions.
     $this->assertFalse($view->query->pager->use_pager());
@@ -174,7 +170,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     $view->set_display('default');
     $this->executeView($view);
 
-    $this->assertEqual($view->total_rows, 25, "'total_rows' is calculated when pager type is 'none' and 'get_total_rows' is TRUE.");
+    $this->assertEqual($view->total_rows, 23, "'total_rows' is calculated when pager type is 'none' and 'get_total_rows' is TRUE.");
   }
 
   public function createNodes($count) {
@@ -213,7 +209,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     );
     $view->display_handler->set_option('pager', $pager);
     $this->executeView($view);
-    $this->assertEqual(count($view->result), 3, 'Make sure that only a certain count of items is returned');
+    $this->assertEqual(count($view->result), 1, 'Make sure that only a certain count of items is returned');
 
     // Check some public functions.
     $this->assertFalse($view->query->pager->use_pager());
@@ -272,14 +268,14 @@ class ViewsPagerTest extends ViewsSqlTest {
     );
     $view->display_handler->set_option('pager', $pager);
     $this->executeView($view);
-    $this->assertEqual(count($view->result), 3, 'Make sure that only a certain count of items is returned');
+    $this->assertEqual(count($view->result), 1, 'Make sure that only a certain count of items is returned');
 
     // Test items per page = 0
     $view = $this->viewPagerFullZeroItemsPerPage();
     $view->set_display('default');
     $this->executeView($view);
 
-    $this->assertEqual(count($view->result), 11, 'All items are return');
+    $this->assertEqual(count($view->result), 9, 'All items are return');
 
     // TODO test number of pages.
 
@@ -301,7 +297,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     $view->display_handler->set_option('pager', $pager);
     $this->executeView($view);
     $this->assertEqual($view->query->pager->get_items_per_page(), 0);
-    $this->assertEqual(count($view->result), 11);
+    $this->assertEqual(count($view->result), 9);
   }
 
   function viewPagerFullZeroItemsPerPage() {
