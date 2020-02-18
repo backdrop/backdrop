@@ -456,7 +456,7 @@ function field_test_field_attach_delete_bundle($entity_type, $bundle, $instances
 
   foreach ($instances as $field_name => $instance) {
     $field = field_info_field($field_name);
-    if ($field['storage']['type'] == 'field_test_storage') {
+    if (isset($field['storage']['type']) && $field['storage']['type'] == 'field_test_storage') {
       $field_data = &$data[$field['field_name']];
       foreach (array('current', 'revisions') as $sub_table) {
         foreach ($field_data[$sub_table] as &$row) {

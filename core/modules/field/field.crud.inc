@@ -644,7 +644,7 @@ function _field_write_instance($instance, $update = FALSE) {
   }
   // Check widget module.
   $widget_type = field_info_widget_types($instance['widget']['type']);
-  $instance['widget']['module'] = $widget_type['module'];
+  $instance['widget']['module'] = isset($widget_type['module']) ? $widget_type['module'] : '';
   $instance['widget']['settings'] += field_info_widget_settings($instance['widget']['type']);
 
   // Make sure there are at least display settings for the 'default' display
@@ -661,7 +661,7 @@ function _field_write_instance($instance, $update = FALSE) {
     );
     if ($display['type'] != 'hidden') {
       $formatter_type = field_info_formatter_types($display['type']);
-      $display['module'] = $formatter_type['module'];
+      $display['module'] = isset($formatter_type['module']) ? $formatter_type['module'] : '';
       $display['settings'] += field_info_formatter_settings($display['type']);
     }
     // If no weight specified, make sure the field sinks at the bottom.

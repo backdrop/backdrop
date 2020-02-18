@@ -453,7 +453,7 @@ function _batch_finished() {
 
   // Clean-up the session. Not needed for CLI updates.
   if (isset($_SESSION)) {
-    unset($_SESSION['batches'][$batch['id']]);
+    unset($_SESSION['batches'][$_batch['id']]);
     if (empty($_SESSION['batches'])) {
       unset($_SESSION['batches']);
     }
