@@ -12,7 +12,11 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  */
 class ViewsAnalyzeTest extends ViewsSqlTest {
   public function setUp() {
-    parent::setUp();
+    parent::setUp('views_ui');
+    module_enable(array('views_ui'));
+    // @TODO Figure out why it's required to clear the cache here.
+    views_get_all_views(TRUE);
+    menu_rebuild();
 
     // Add an admin user will full rights;
     $this->admin = $this->backdropCreateUser(array('administer views'));
@@ -23,8 +27,11 @@ class ViewsAnalyzeTest extends ViewsSqlTest {
    */
   function testAnalyzeBasic() {
     $this->backdropLogin($this->admin);
+    // Enable the taxonomy_term view and click the analyse button.
+    $view = views_get_view('taxonomy_term');
+    $view->save();
 
-    $this->backdropGet('admin/structure/views/view/test_exposed_admin_ui/configure');
+    $this->backdropGet('admin/structure/views/view/taxonomy_term/configure');
     $this->assertLink(t('analyze view'));
 
     // This redirects the user to the form.

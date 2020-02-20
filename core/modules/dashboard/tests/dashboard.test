@@ -8,6 +8,7 @@
  * Tests that the dashboard functions correctly.
  */
 class DashboardTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
   protected $admin_user;
 
   function setUp() {
@@ -93,7 +94,7 @@ class DashboardTest extends BackdropWebTestCase {
     $content_list_items = $this->xpath('//*[contains(@class,:block)]//li', array(
       ':block' => 'block-dashboard-overview-content',
     ));
-    $this->assertEqual(count($content_list_items), 4, 'The content overview list was found.');
+    $this->assertEqual(count($content_list_items), 2, 'The content overview list was found.');
     $this->assertRaw('2 &lt;XSS&gt;Test Content Type 1&lt;/XSS&gt; items', 'The content1 item was found.');
     $this->assertText('1 Test Content Type 2 item', 'The content2 item was found.');
     // The manage content link is present.
@@ -103,7 +104,7 @@ class DashboardTest extends BackdropWebTestCase {
     $user_list_items = $this->xpath('//*[contains(@class,:block)]//li', array(
       ':block' => 'block-dashboard-overview-user',
     ));
-    $this->assertEqual(count($user_list_items), 4, 'The user overview list was found, with 3 items.');
+    $this->assertEqual(count($user_list_items), 3, 'The user overview list was found, with 3 items.');
     $this->assertText('2 total user accounts', 'Two total user accounts found.');
     $this->assertText('1 active user account', 'One active account was found.');
     $this->assertText('0 blocked user account', 'Zero blocked user was found.');
@@ -127,7 +128,7 @@ class DashboardTest extends BackdropWebTestCase {
     $content_type_admin_block = $this->xpath('//*[contains(@class,:block)]//tbody/tr', array(
       ':block' => 'block-dashboard-node-types',
     ));
-    $this->assertEqual(count($content_type_admin_block), 4, 'The content type admin list was found.');
+    $this->assertEqual(count($content_type_admin_block), 2, 'The content type admin list was found.');
     // The manage content types link is present.
     $this->assertLink('Manage content types', 0, 'The Manage content types link was found.');
 
@@ -163,7 +164,7 @@ class DashboardTest extends BackdropWebTestCase {
     $content_type_admin_block = $this->xpath('//*[contains(@class,:block)]//tbody/tr', array(
       ':block' => 'block-dashboard-node-types',
     ));
-    $this->assertEqual(count($content_type_admin_block), 6, 'Four content types found in the admin list.');
+    $this->assertEqual(count($content_type_admin_block), 4, 'Four content types found in the admin list.');
 
     // There should be no foo items.
     $this->assertText('0 Foo items', 'No Foo items found.');

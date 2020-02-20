@@ -929,7 +929,6 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       $modules = $modules[0];
     }
     $modules[] = 'menu_test';
-    $modules[] = 'taxonomy';
     parent::setUp($modules);
     $perms = array_keys(module_invoke_all('permission'));
     $this->admin_user = $this->backdropCreateUser($perms);

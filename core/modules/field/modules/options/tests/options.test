@@ -10,7 +10,7 @@ require_once BACKDROP_ROOT . '/core/modules/field/modules/list/tests/list.test';
 
 class OptionsWidgetsTestCase extends FieldTestCase {
   function setUp() {
-    parent::setUp('comment', 'list', 'field_ui', 'taxonomy', 'field_test', 'list_test');
+    parent::setUp('field_test', 'list_test');
 
     // Field with cardinality 1.
     $this->card_1 = array(

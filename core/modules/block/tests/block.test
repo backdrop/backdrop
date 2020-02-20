@@ -9,7 +9,7 @@ class BlockTestCase extends BackdropWebTestCase {
   protected $admin_user;
 
   function setUp() {
-    parent::setUp('block', 'block_test');
+    parent::setUp('block_test');
 
     // Create and log in an administrative user having access to the Full HTML
     // text format.

@@ -469,9 +469,6 @@ class ImageToolkitGdTestCase extends BackdropWebTestCase {
  * Tests the file move function for managed files.
  */
 class ImageFileMoveTest extends ImageToolkitTestCase {
-  public function setUp() {
-    parent::setUp('image');
-  }
   /**
    * Tests moving a randomly generated image.
    */

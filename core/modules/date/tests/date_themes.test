@@ -11,13 +11,6 @@
 class DateThemeTestCase extends BackdropWebTestCase {
 
   /**
-   * {@inheritdoc}
-   */
-  protected function setUp() {
-    parent::setUp('date');
-  }
-
-  /**
    * Test date_display_single theme function.
    */
   public function testDateDisplaySingle() {

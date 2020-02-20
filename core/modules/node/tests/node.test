@@ -942,8 +942,6 @@ class NodeTitleXSSTestCase extends BackdropWebTestCase {
  * Tests the availability of the syndicate block.
  */
 class NodeBlockTestCase extends BackdropWebTestCase {
-  protected $profile = 'standard';
-
   function setUp() {
     parent::setUp('node_test');
 
@@ -1299,7 +1297,7 @@ class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
  */
 class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
   public function setUp() {
-    parent::setUp('taxonomy', 'node_access_test');
+    parent::setUp('node_access_test');
     node_access_rebuild();
     state_set('node_access_test_private', TRUE);
 
@@ -2247,7 +2245,6 @@ class NodeFrontPageCallback extends BackdropWebTestCase {
  * Functional tests for the node module blocks.
  */
 class NodeBlockFunctionalTest extends BackdropWebTestCase {
-  protected $profile = 'standard';
 
   function setUp() {
     parent::setUp('node', 'block');

@@ -933,7 +933,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *
    * @var string
    */
-  protected $profile = 'testing';
+  protected $profile = 'standard';
 
   /**
    * The URL currently loaded in the internal browser.

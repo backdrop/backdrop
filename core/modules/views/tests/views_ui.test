@@ -10,11 +10,7 @@
 class ViewsUIWizardHelper extends BackdropWebTestCase {
   function setUp() {
     // Enable views_ui.
-    $modules = func_get_args();
-    if (isset($modules[0]) && is_array($modules[0])) {
-      $modules = $modules[0];
-    }
-    parent::setUp(array_merge($modules, array('block', 'config', 'views', 'views_ui', 'taxonomy')));
+    parent::setUp('views_ui');
 
     // Create and log in a user with administer views permission.
     $views_admin = $this->backdropCreateUser(array('administer views', 'administer blocks', 'bypass node access', 'access user profiles', 'view revisions', 'synchronize configuration'));
@@ -582,7 +578,7 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
 class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
 
   function setup() {
-    parent::setup('comment');
+    parent::setup();
 
     // Make sure we're using UTC
     date_default_timezone_set('UTC');

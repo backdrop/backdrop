@@ -79,7 +79,7 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
    * {@inheritdoc}
    */
   public function setUp() {
-    parent::setUp('list', 'taxonomy');
+    parent::setUp();
 
     // Create boolean field.
     $this->fields[0] = array(
@@ -109,31 +109,6 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
       ),
     );
     $this->fields[1] = field_create_field($this->fields[1]);
-
-    // Assign vocabulary 'tags' to user entity.
-    $description = t('Use tags to group posts on similar topics into categories.');
-    $vocabulary = new TaxonomyVocabulary(array(
-      'name' => t('Tags'),
-      'description' => $description,
-      'machine_name' => 'tags',
-    ));
-    taxonomy_vocabulary_save($vocabulary);
-
-    $field = array(
-      'field_name' => 'field_' . $vocabulary->machine_name,
-      'type' => 'taxonomy_term_reference',
-      // Set cardinality to unlimited for tagging.
-      'cardinality' => FIELD_CARDINALITY_UNLIMITED,
-      'settings' => array(
-        'allowed_values' => array(
-          array(
-            'vocabulary' => $vocabulary->machine_name,
-            'parent' => 0,
-          ),
-        ),
-      ),
-    );
-    field_create_field($field);
 
     // Create boolean field instance for post nodes.
     $instance = array(

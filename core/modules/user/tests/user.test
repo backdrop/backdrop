@@ -572,13 +572,6 @@ class UserLoginTestCase extends UserLoginTestBase {
  */
 class UserCancelTestCase extends BackdropWebTestCase {
   /**
-   * {@inheritdoc}
-   */
-  protected function setUp() {
-    parent::setUp('comment');
-  }
-
-  /**
    * Attempt to cancel account without permission.
    */
   function testUserCancelWithoutPermission() {
@@ -1380,13 +1373,6 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
 }
 
 class UserAdminTestCase extends BackdropWebTestCase {
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp() {
-    parent::setUp('taxonomy');
-  }
-
   /**
    * Registers a user and deletes it.
    */

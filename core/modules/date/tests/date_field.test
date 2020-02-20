@@ -9,7 +9,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
   protected $profile = 'testing';
 
   protected function setUp($modules = array()) {
-    parent::setUp(array_merge($modules, array('field', 'field_ui', 'date', 'translation')));
+    parent::setUp(array_merge($modules, array('field', 'field_ui', 'date')));
 
     // Create and log in our privileged user.
     $this->privileged_user = $this->backdropCreateUser(

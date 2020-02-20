@@ -9,7 +9,7 @@
  */
 class ConfigurationTest extends BackdropWebTestCase {
   protected function setUp() {
-    parent::setUp(array('config', 'config_test'));
+    parent::setUp(array('config_test'));
   }
 
   /**
@@ -96,7 +96,7 @@ class ConfigurationTest extends BackdropWebTestCase {
  */
 class ConfigurationHooksTest extends BackdropWebTestCase {
   protected function setUp() {
-    parent::setUp(array('config', 'config_test', 'config_test_hooks'));
+    parent::setUp(array('config_test', 'config_test_hooks'));
   }
 
   /**
@@ -161,7 +161,7 @@ class ConfigurationHooksTest extends BackdropWebTestCase {
  */
 class ConfigurationUITest extends BackdropWebTestCase {
   function setUp() {
-    parent::setUp(array('config', 'config_test'));
+    parent::setUp(array('config_test'));
 
     $this->webUser = $this->backdropCreateUser(array('synchronize configuration'));
     $this->backdropLogin($this->webUser);

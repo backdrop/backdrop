@@ -860,7 +860,7 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
   protected $admin_user;
 
   function setUp() {
-    parent::setUp('block');
+    parent::setUp();
 
     // Create an administrative user.
     $this->admin_user = $this->backdropCreateUser(array('access administration pages', 'administer site configuration', 'administer blocks'));
@@ -954,7 +954,7 @@ class PageNotFoundTestCase extends BackdropWebTestCase {
    * Implement setUp().
    */
   function setUp() {
-    parent::setUp('path');
+    parent::setUp();
 
     // Create an administrative user.
     $this->admin_user = $this->backdropCreateUser(array('administer site configuration'));
@@ -2286,7 +2286,7 @@ class RetrieveFileTestCase extends BackdropWebTestCase {
  */
 class ShutdownFunctionsTest extends BackdropWebTestCase {
   function setUp() {
-    parent::setUp('dblog', 'system_test');
+    parent::setUp('system_test');
   }
 
   /**

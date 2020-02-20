@@ -125,11 +125,7 @@ abstract class ViewsTestCase extends BackdropWebTestCase {
 
 abstract class ViewsSqlTest extends ViewsTestCase {
   protected function setUp() {
-    $modules = func_get_args();
-    if (isset($modules[0]) && is_array($modules[0])) {
-      $modules = $modules[0];
-    }
-    parent::setUp(array_unique(array_merge($modules, array('views', 'views_ui'))));
+    parent::setUp('views', 'views_ui');
 
     // Define the schema and views data variable before enabling the test module.
     state_set('views_test_schema', $this->schemaDefinition());

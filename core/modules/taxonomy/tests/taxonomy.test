@@ -9,14 +9,6 @@
  */
 class TaxonomyWebTestCase extends BackdropWebTestCase {
 
-  protected function setUp() {
-    $modules = func_get_args();
-    if (isset($modules[0]) && is_array($modules[0])) {
-      $modules = $modules[0];
-    }
-    parent::setUp(array_merge($modules, array('taxonomy')));
-  }
-
   /**
    * Returns a new vocabulary with random properties.
    */
@@ -465,10 +457,8 @@ class TaxonomyTermUnitTest extends TaxonomyWebTestCase {
  * Test for legacy node bug.
  */
 class TaxonomyLegacyTestCase extends TaxonomyWebTestCase {
-  protected $profile = 'standard';
-
   function setUp() {
-    parent::setUp();
+    parent::setUp('taxonomy');
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'administer nodes', 'bypass node access'));
     $this->backdropLogin($this->admin_user);
   }
@@ -922,7 +912,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
  */
 class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
   function setUp() {
-    parent::setUp('field_ui');
+    parent::setUp('taxonomy');
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access', 'administer content types', 'administer fields', 'administer view modes'));
     $this->backdropLogin($this->admin_user);
     $this->vocabulary = $this->createVocabulary();
