@@ -179,13 +179,14 @@ Backdrop.evaluatePasswordStrength = function (password, data, config) {
     }
     // Consider admin password constraint settings if active.
     if (config.constraints_active === "1") {
+      if (password.length < config.pass_minlength) {
+        // Do not show "not allowed" as people might still be typing.
+        strength = 3;
+      }
       if (config.pass_not_username === 1 && password === username) {
         strength = -1;
       }
       if (config.pass_not_email === 1 && password === email) {
-        strength = -1;
-      }
-      if (password.length < config.pass_minlength) {
         strength = -1;
       }
     }
