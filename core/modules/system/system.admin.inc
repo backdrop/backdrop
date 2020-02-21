@@ -1298,18 +1298,25 @@ function system_site_information_settings($form, &$form_state) {
   );
   $form['front_page']['site_frontpage'] = array(
     '#type' => 'textfield',
-    '#title' => t('Default home page'),
-    '#default_value' => ($site_config->get('site_frontpage') != 'user' ? backdrop_get_path_alias($site_config->get('site_frontpage')) : ''),
+    '#title' => t('Default front page'),
+    '#default_value' => ($site_config->get('site_frontpage') != 'node' ? backdrop_get_path_alias($site_config->get('site_frontpage')) : ''),
     '#size' => 40,
-    '#description' => t('Optionally, specify a relative URL to display as the home page. Leave this blank to display the default content feed.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
+    '#description' => t('Optionally, specify a relative URL to display as the front page. If left blank the URL will default to home. The front page will use whichever layout is currently associated with this path.'),
+    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($site_config->get('clean_url') ? '' : '?q='),
   );
   $form['front_page']['default_nodes_main'] = array(
-    '#type' => 'select', '#title' => t('Number of posts on home page'),
+    '#type' => 'select',
+    '#title' => t('Number of posts on front page'),
     '#default_value' => $site_config->get('default_nodes_main'),
     '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30)),
-    '#description' => t('The maximum number of posts displayed on overview pages such as the home page.'),
-    '#access' => (config_get('system.core', 'site_frontpage') == 'node'),
+    '#description' => t('The maximum number of posts displayed on overview pages such as the front page.'),
+    '#states' => array(
+      // Show the number of posts setting when the frontpage is 'node' (e.g.
+      // empty)).
+      'visible' => array(
+        'input[name="site_frontpage"]' => array('value' => ''),
+      ),
+    ),
   );
   $form['error_page'] = array(
     '#type' => 'fieldset',
@@ -1321,7 +1328,7 @@ function system_site_information_settings($form, &$form_state) {
     '#default_value' => ($site_config->get('site_403') != '' ? backdrop_get_path_alias($site_config->get('site_403')) : ''),
     '#size' => 40,
     '#description' => t('This page is displayed when the requested document is denied to the current user. Leave blank to display a generic "access denied" page.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=')
+    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($site_config->get('clean_url') ? '' : '?q=')
   );
   $form['error_page']['site_404'] = array(
     '#type' => 'textfield',
@@ -1329,7 +1336,7 @@ function system_site_information_settings($form, &$form_state) {
     '#default_value' => ($site_config->get('site_404') != '' ? backdrop_get_path_alias($site_config->get('site_404')) : ''),
     '#size' => 40,
     '#description' => t('This page is displayed when no other content matches the requested document. Leave blank to display a generic "page not found" page.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=')
+    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($site_config->get('clean_url') ? '' : '?q=')
   );
 
   $form['#validate'][] = 'system_site_information_settings_validate';
@@ -1351,7 +1358,7 @@ function system_site_information_settings($form, &$form_state) {
 
       // Prepare local file path for description.
       if ($original_path && isset($friendly_path)) {
-        $local_file = strtr($original_path, array('public:/' => config_get('system.core', 'file_public_path')));
+        $local_file = strtr($original_path, array('public:/' => $site_config->get('file_public_path')));
       }
       else {
         $local_file = path_to_theme() . '/' . $default;
@@ -1420,8 +1427,8 @@ function system_site_information_settings_validate($form, &$form_state) {
 
   // Check for empty home page path.
   if (empty($form_state['values']['site_frontpage'])) {
-    // Set to default "user".
-    form_set_value($form['front_page']['site_frontpage'], 'user', $form_state);
+    // Set to default "node".
+    form_set_value($form['front_page']['site_frontpage'], 'node', $form_state);
   }
   else {
     // Get the normal path of the home page.
