@@ -582,6 +582,42 @@ function color_save_configuration($theme_name, $theme_info, $palette) {
 }
 
 /**
+ * Implements hook_admin_bar_cache_info().
+ */
+function color_admin_bar_cache_info() {
+  global $theme;
+  $cache = array();
+  $theme_config_name = $theme . '.settings';
+  $theme_config = config($theme_config_name);
+  if ($theme_config && $color = $theme_config->get('color')) {
+    $cache['color'] = array(
+      'title' => 'Color scheme',
+      'callback' => '_color_rebuild_settings',
+    );
+  }
+  return $cache;
+}
+
+/**
+ * Rebuild color scheme info.
+ */
+function _color_rebuild_settings() {
+  global $theme;
+  $theme_config_name = $theme . '.settings';
+  $theme_config = config($theme_config_name);
+  if ($theme_config && $new_color_config = $theme_config->get('color')) {
+    $color_info = color_get_info($theme);
+    if ($color_info) {
+      $palette = isset($new_color_config['palette']) ? $new_color_config['palette'] : NULL;
+      $new_color_info = color_save_configuration($theme, $color_info, $palette);
+      $theme_config->set('color', $new_color_info);
+      $theme_config->save();
+      cache_clear_all();
+    }
+  }
+}
+
+/**
  * Rewrites the stylesheet to match the colors in the palette.
  */
 function _color_rewrite_stylesheet($theme, &$info, &$paths, $palette, $style) {
