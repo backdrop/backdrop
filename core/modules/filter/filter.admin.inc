@@ -441,18 +441,46 @@ function filter_admin_format_form($form, &$form_state, $format) {
 function filter_admin_format_configure_ajax($form, &$form_state) {
   $trigger = $form_state['triggering_element'];
   $name = $trigger['#name'];
+  $format = $form_state['format'];
 
-  $selector = '.filter-container.filter-' . $name . '-configure-container';
+  $configure_form = backdrop_get_form('_filter_build_configure_form', $name, $format);
+  $title = t('Select from Image Library');
+  $options = array(
+    'dialogClass' => 'file-browser-container',
+    'width' => '90%',
+  );
+
+  $html = '';
+  $html .= theme('status_messages');
+  $html .= '<div data-filter-dialog="' . $name . '" class="filter-configure-dialog">';
+  $html .= backdrop_render($configure_form);
+  $html .= '</div>';
 
   $commands = array();
-  $commands[] = ajax_command_invoke($selector, 'toggleClass', array('filter-container-visible'));
+  $commands[] = ajax_command_open_modal_dialog($title, $html, $options);
+
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+function filter_admin_format_configure_ajax_submit($form, &$form_state) {
+  $commands = array();
+  form_state_values_clean($form_state);
+
+  $filter_name = $form_state['values']['filter'];
+  unset($form_state['values']['filter']);
+
+  $settings['filter_settings'][$filter_name] = $form_state['values'];
+
+  $commands[] = ajax_command_settings($settings, TRUE);
+  $commands[] = ajax_command_close_modal_dialog();
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
 /**
  * Returns the configuration form for configurable filters.
  */
-function _filter_build_configure_form($form, $form_state, $filter, $format) {
+function _filter_build_configure_form($form, &$form_state, $filter, $format) {
+  form_load_include($form_state, 'inc', 'filter', 'filter.admin');
   $all_filter_info = filter_get_filters();
   if(isset($all_filter_info[$filter]['settings callback'])) {
     // $format->filters isn't always built yet.
@@ -465,6 +493,38 @@ function _filter_build_configure_form($form, $form_state, $filter, $format) {
       }
       $filter = $filters[$filter];
       $settings_form = $function($form, $form_state, $filter, $format);
+      $settings_form['#tree'] = FALSE;
+          
+      $settings_form['filter'] = array(
+        '#type' => 'value',
+        '#value' => $filter->name,
+      );
+      $settings_form['actions']['#type'] = 'actions';
+      $settings_form['actions']['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Insert'),
+        '#validate' => array(),
+        '#submit' => array(),
+        '#ajax' => array(
+          'callback' => 'filter_admin_format_configure_ajax_submit',
+          'progress' => array(
+            'type' => 'throbber',
+            'message' => NULL,
+          ),
+        ),
+      );
+
+      $settings_form['actions']['cancel'] = array(
+        '#type' => 'link',
+        '#title' => t('Cancel'),
+        '#href' => '',
+        '#attributes' => array(
+          // Adding button classes puts the link in the button area of the dialog,
+          // while the special "dialog-cancel" class closes the dialog.
+          'class' => array('button', 'button-secondary', 'form-submit', 'dialog-cancel'),
+        ),
+      );
+
       return $settings_form;
     }
   }

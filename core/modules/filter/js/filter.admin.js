@@ -12,9 +12,9 @@ Backdrop.behaviors.filterStatus = {
       return;
     }
 
-  $('.filter-container', context).each(function() {
-    $(this).addClass('filter-container-initial');
-  });
+    $('.filter-container', context).each(function() {
+      $(this).addClass('filter-container-initial');
+    });
 
     // A custom message for the filters page specifically.
     Backdrop.theme.tableDragChangedWarning = function () {
@@ -26,6 +26,58 @@ Backdrop.behaviors.filterStatus = {
         var isChecked = !$(this).prop('checked');
         $(this).closest('tr').toggleClass('disabled-row', isChecked);
     });
+
+    // Respond to dialogs that are being opened, and pull values from saved
+    // settings to populate dialog form values.
+    $(window).on('dialog:beforecreate', function (e, dialog, $element, settings) {
+      if (Backdrop.settings.filter_settings) {
+        filter_name = $('#backdrop-modal').find('.filter-configure-dialog').attr('data-filter-dialog');
+        filter_values = Backdrop.settings.filter_settings[filter_name];
+        $.each(filter_values, function( index, value ) {
+          $item = $('input[name="' + index + '"]');
+          setInputValue($item, value);
+        });
+      }
+    });
+
+    // Respond to dialogs that are closed, updating the underlying form values.
+    $(window).on('dialog:dialogsave', function (e, dialog, $element) {
+      $.each(Backdrop.settings.filter_settings, function( index, value ) {
+        row = 'filter-' + index + '-configure-container';
+        $.each(value, function( index_too, value_too ) {
+          item = '#filterorder .' + row + ' input[name="' + index_too + '"]';
+          setInputValue($(item), value_too);
+        });
+      });
+    });
+
+    // Sets form field input values.
+    // https://www.sitepoint.com/jquery-set-type-input-dynamically/
+    function setInputValue ($item, value) {
+      itemType = $item.attr('type');
+      switch (itemType) {
+        case "checkbox":
+          $item.attr({
+              checked: value
+          });
+          break;
+        case "radio":
+          $item.each(function (i) {
+            if ($(this).val() == value) $(this).attr({
+              checked: true
+            })
+          });
+          break;
+        case undefined:
+          $(this).append('');
+          break;
+        default:
+          $item.val(value);
+          break;
+      }
+
+    }
+
   }
 };
 
