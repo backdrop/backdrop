@@ -14,7 +14,7 @@
 if (Backdrop.filterConfiguration) {
   Backdrop.filterConfiguration.liveSettingParsers.filter_html = {
     getRules: function () {
-      var currentValue = $('#edit-filters-filter-html-filter-configure-container-configure-allowed-html').val();
+      var currentValue = $('#edit-allowed-html').val();
       var rules = [];
       var rule;
 
@@ -56,7 +56,7 @@ Backdrop.behaviors.filterFilterHtmlUpdating = {
 
   attach: function (context, settings) {
     var that = this;
-    $(context).find('[name="filters[filter_html][settings][allowed_html]"]').once('filter-filter_html-updating').each(function () {
+    $(context).find('[name="allowed_html"]').once('filter-filter_html-updating').each(function () {
       that.$allowedHTMLFormItem = $(this);
       that.$allowedHTMLDescription = that.$allowedHTMLFormItem.closest('.form-item').find('.description');
       that.userTags = that._parseSetting(this.value);
