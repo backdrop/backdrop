@@ -32,6 +32,10 @@ input[type=color] {
 }
 
 /* Color inputs */
+#system-theme-settings .form-type-color label {
+  max-width: 80%;
+}
+
 #system-theme-settings input[type=color] {
   border-radius: 100%;
   height: 35px;
