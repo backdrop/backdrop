@@ -32,7 +32,16 @@ input[type=color] {
 }
 
 /* Color inputs */
+#system-theme-settings .form-type-color {
+  /**
+    * Prevent color input labels from being crumbed up together, when there are
+    * some that wrap in multiple lines.
+    */
+  display: table;
+}
+
 #system-theme-settings .form-type-color label {
+  /* Properly align color labels with the color input, when they are long. */
   max-width: 80%;
 }
 
