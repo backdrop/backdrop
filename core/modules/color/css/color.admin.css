@@ -28,7 +28,6 @@ input[type=color] {
   margin-top: .5em;
   margin-bottom: .5em;
   clear: both;
-  vertical-align: middle;
 }
 
 /* Color inputs */
@@ -43,7 +42,8 @@ input[type=color] {
 
 /* Properly align color labels with the color input, when they are long. */
 #system-theme-settings .form-type-color label {
-  max-width: 80%;
+  display: table-cell;
+  vertical-align: middle;
 }
 
 #system-theme-settings input[type=color] {
@@ -52,6 +52,8 @@ input[type=color] {
   width: 35px;
   padding: 0px;
   cursor: pointer;
+  display: table-cell;
+  vertical-align: middle;
 }
 
 /* Styles to control the color inputs in Firefox. */
