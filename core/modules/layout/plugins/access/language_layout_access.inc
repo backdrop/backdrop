@@ -30,7 +30,7 @@ class LanguageLayoutAccess extends LayoutAccess {
     if (empty($names)) {
       return t('Site language is any language');
     }
-    return format_plural(count($names), 'Site language is "@languages"', 'Site language is one of "@languages"', array('@languages' => implode(', ', $names)));
+    return format_plural(count($names), 'Site language is %languages', 'Site language is any of: %languages', array('%languages' => implode(', ', $names)));
   }
 
   /**

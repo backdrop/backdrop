@@ -21,10 +21,10 @@ class PathLayoutAccess extends LayoutAccess {
   function summary() {
     $paths = explode("\n", $this->settings['paths']);
     if ($this->settings['visibility_setting']) {
-      return format_plural(count($paths), 'Current path is "@paths"', 'Current path is one of "@paths"', array('@paths' => implode(', ', $paths)));
+      return format_plural(count($paths), 'Current path is %paths', 'Current path is any of: %paths', array('%paths' => implode(', ', $paths)));
     }
     else {
-      return format_plural(count($paths), 'Current path is not "@paths"', 'Current path is not one of "@paths"', array('@paths' => implode(', ', $paths)));
+      return format_plural(count($paths), 'Current path is not %paths', 'Current path is not any of: %paths', array('%paths' => implode(', ', $paths)));
     }
   }
 
