@@ -372,17 +372,6 @@ function filter_admin_format_form($form, &$form_state, $format) {
       ),
     );
     $form['filters'][$name]['filter']['configure_container']['configure'] = $configure_form;
-    $form['filters'][$name]['filter']['configure_container']['configure']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Update'),
-      '#name' => $name,
-      '#op' => 'update',
-      '#submit' => array(),
-      '#ajax' => array(
-        'callback' => 'filter_admin_format_configure_ajax',
-        'effect' => 'fade',
-      ),
-    );
 
     $form['filters'][$name]['weight'] = array(
       '#type' => 'weight',
@@ -416,9 +405,9 @@ function filter_admin_format_configure_ajax($form, &$form_state) {
   $format = $form_state['format'];
 
   $configure_form = backdrop_get_form('_filter_build_configure_form', $name, $format);
-  $title = t('Select from Image Library');
+  $title = t('Configure filter');
   $options = array(
-    'dialogClass' => 'file-browser-container',
+    'dialogClass' => 'filter-configure-container',
     'width' => '90%',
   );
 
@@ -441,7 +430,7 @@ function filter_admin_format_configure_ajax_submit($form, &$form_state) {
   $filter_name = $form_state['values']['filter'];
   unset($form_state['values']['filter']);
 
-  $settings['filter_settings'][$filter_name] = $form_state['values'];
+  $settings['filterSettings'][$filter_name] = $form_state['values'];
 
   $commands[] = ajax_command_settings($settings, TRUE);
   $commands[] = ajax_command_close_modal_dialog();
@@ -465,7 +454,6 @@ function _filter_build_configure_form($form, &$form_state, $filter, $format) {
       }
       $filter = $filters[$filter];
       $settings_form = $function($form, $form_state, $filter, $format);
-      $settings_form['#tree'] = FALSE;
           
       $settings_form['filter'] = array(
         '#type' => 'value',
@@ -474,7 +462,7 @@ function _filter_build_configure_form($form, &$form_state, $filter, $format) {
       $settings_form['actions']['#type'] = 'actions';
       $settings_form['actions']['submit'] = array(
         '#type' => 'submit',
-        '#value' => t('Insert'),
+        '#value' => t('Submit'),
         '#validate' => array(),
         '#submit' => array(),
         '#ajax' => array(

@@ -30,25 +30,27 @@ Backdrop.behaviors.filterStatus = {
     // Respond to dialogs that are being opened, and pull values from saved
     // settings to populate dialog form values.
     $(window).on('dialog:beforecreate', function (e, dialog, $element, settings) {
-      if (Backdrop.settings.filter_settings) {
+      if (Backdrop.settings.filterSettings) {
         filter_name = $('#backdrop-modal').find('.filter-configure-dialog').attr('data-filter-dialog');
-        filter_values = Backdrop.settings.filter_settings[filter_name];
+        filter_values = Backdrop.settings.filterSettings[filter_name];
         $.each(filter_values, function( index, value ) {
-          $item = $('input[name="' + index + '"]');
+          $item = $('input[name="filters[filter_html][filter][configure_container][configure][' + index + ']"]');
           setInputValue($item, value);
         });
       }
     });
 
     // Respond to dialogs that are closed, updating the underlying form values.
-    $(window).on('dialog:dialogsave', function (e, dialog, $element) {
-      $.each(Backdrop.settings.filter_settings, function( index, value ) {
-        row = 'filter-' + index + '-configure-container';
-        $.each(value, function( index_too, value_too ) {
-          item = '#filterorder .' + row + ' input[name="' + index_too + '"]';
-          setInputValue($(item), value_too);
-        });
-      });
+    $(".filter-configure-container .button-primary").click(function (e) {
+        setTimeout(function() {
+          $.each(Backdrop.settings.filterSettings, function( index, value ) {
+            row = 'filter-' + index + '-configure-container';
+            $.each(value, function( index_too, value_too ) {
+              item = '#filterorder .' + row + ' input[name="filters[filter_html][filter][configure_container][configure][' + index_too + ']"]';
+              setInputValue($(item), value_too);
+            });
+          });
+        }, 500);
     });
 
     // Sets form field input values.
