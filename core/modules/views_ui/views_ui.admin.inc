@@ -2301,10 +2301,27 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
 
 /**
  * Regenerate the current tab for AJAX updates.
+ *
+ * @param view $view
+ *   The view object to work on.
+ * @param array $output
+ *   The output array.
+ * @param string $display_id
+ *   The ID of the display in the $view that is being viewed.
  */
 function views_ui_regenerate_tab(&$view, &$output, $display_id) {
   if (!$view->set_display('default')) {
     return;
+  }
+
+  // Make sure $output is an array.
+  if (!is_array($output)) {
+    if ($output === NULL || $output === '') {
+      $output = array();
+    }
+    else {
+      $output = array($output);
+    }
   }
 
   // Regenerate the main display area.
@@ -2877,10 +2894,8 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
     $object = NULL;
     if (!empty($view->stack)) {
       $backdrop_add_js = $backdrop_add_js_original;
-      $stack = $view->stack;
-      $top = array_shift($stack);
-      $top[0] = $js;
-      $form_state = call_user_func_array('views_ui_build_form_state', $top);
+      $args = array_shift($view->stack);
+      $form_state = views_ui_build_form_state($js, $args[1], $args[2], $args[3], $args[4]);
       $form_state['input'] = array();
       $form_state['path'] = views_ui_build_form_path($form_state);
       if (!$js) {
