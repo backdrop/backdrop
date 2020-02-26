@@ -18,7 +18,7 @@ Backdrop.behaviors.passwordStrength = {
       // Check the password strength.
       var passwordCheck = function () {
         // Evaluate the password strength.
-        var result = Backdrop.evaluatePasswordStrength($passwordInput.val(), passwordStrengthSettings.data, passwordStrengthSettings.config);
+        var result = Backdrop.evaluatePasswordStrength($passwordInput.val(), passwordStrengthSettings);
 
         // Adjust the length of the strength indicator.
         $indicatorBar.css('width', result.strength + '%');
@@ -143,9 +143,11 @@ Backdrop.behaviors.passwordConfirm = {
  *
  * Returns the estimated strength and the relevant output message.
  */
-Backdrop.evaluatePasswordStrength = function (password, data, config) {
+Backdrop.evaluatePasswordStrength = function (password, settings) {
   var strength = 0;
   var level = 'empty';
+  var data = settings.data;
+  var config = settings.config;
   var username = data.username;
   var email = data.email;
   var hasLowercase = /[a-z]+/.test(password);
@@ -153,7 +155,7 @@ Backdrop.evaluatePasswordStrength = function (password, data, config) {
   var hasNumbers = /[0-9]+/.test(password);
   var hasPunctuation = /[^a-zA-Z0-9]+/.test(password);
 
-  // If there's a username or email edit box on the page,
+  // If there is a username or email edit box on the page,
   // compare password to that, otherwise use value from the database.
   var usernameBox = $('input.username');
   if (usernameBox.length > 0) {
@@ -179,13 +181,13 @@ Backdrop.evaluatePasswordStrength = function (password, data, config) {
     }
     // Consider admin password constraint settings if active.
     if (config.constraints_active === "1") {
-      if (password.length < config.pass_minlength) {
+      if (password.length < config.minlength) {
         strength = -1;
       }
-      if (config.pass_not_username === 1 && password === username) {
+      if (config.not_username === 1 && password === username) {
         strength = -1;
       }
-      if (config.pass_not_email === 1 && password === email) {
+      if (config.not_email === 1 && password === email) {
         strength = -1;
       }
     }
@@ -205,7 +207,7 @@ Backdrop.evaluatePasswordStrength = function (password, data, config) {
     level = 'weak';
   }
   else if (strength < 0) {
-    level = 'tooWeak';
+    level = 'tooweak';
   }
 
   // Cap at 100 and round to the nearest integer.

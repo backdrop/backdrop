@@ -752,7 +752,7 @@ function user_account_form(&$form, &$form_state) {
   $admin_roles = user_access('assign roles');
 
   $form['#validate'][] = 'user_account_form_validate';
-  $constraints_active = config_get('system.core', 'pass_constraints.constraints_active');
+  $constraints_active = config_get('system.core', 'password_constraints.constraints_active');
   if ($constraints_active) {
     $form['#validate'][] = 'user_password_constraints_validate';
   }
@@ -1068,13 +1068,11 @@ function user_password_constraints_validate($form, &$form_state) {
     return;
   }
   $password = trim($form_state['values']['pass']);
-  if ($form['#form_id'] == 'user_profile_form') {
-    if (strlen($password) == 0) {
-      // On profile form and no new password has been set.
-      return;
-    }
+  if ($form['#form_id'] == 'user_profile_form' && strlen($password) == 0) {
+    // On profile form and no new password has been set.
+    return;
   }
-  $constraints = config_get('system.core', 'pass_constraints');
+  $constraints = config_get('system.core', 'password_constraints');
   $messages = array();
   if ($form['#form_id'] == 'user_pass_reset_form') {
     $account = $form['#account'];
@@ -1085,16 +1083,16 @@ function user_password_constraints_validate($form, &$form_state) {
     $username = $form_state['values']['name'];
     $email = $form_state['values']['mail'];
   }
-  if (strlen($password) < $constraints['pass_minlength']) {
-    $min = $constraints['pass_minlength'];
+  if (strlen($password) < $constraints['minlength']) {
+    $min = $constraints['minlength'];
     $messages[] = t('The password is too short. At least :min characters required.', array(':min' => $min));
   }
-  if ($constraints['pass_not_username']) {
+  if ($constraints['not_username']) {
     if ($password == $username) {
       $messages[] = t('The username cannot be used as password.');
     }
   }
-  if ($constraints['pass_not_email']) {
+  if ($constraints['not_email']) {
     if ($password == $email) {
       $messages[] = t('The e-mail cannot be used as password.');
     }
@@ -1981,14 +1979,14 @@ function user_cancel_url($account) {
  * Generates help text for core password constraints on forms.
  */
 function _user_password_constraints_help() {
-  $constraints = config_get('system.core', 'pass_constraints');
-  $min = $constraints['pass_minlength'];
+  $constraints = config_get('system.core', 'password_constraints');
+  $min = $constraints['minlength'];
   $help = array();
   $help[] = t('The password must be at least :min characters long.', array(':min' => $min));
-  if ($constraints['pass_not_username']) {
+  if ($constraints['not_username']) {
     $help[] = t('The password cannot be the same as the username.');
   }
-  if ($constraints['pass_not_email']) {
+  if ($constraints['not_email']) {
     $help[] = t('The password cannot be the same as the e-mail.');
   }
   $variables = array(
@@ -2875,7 +2873,7 @@ function user_form_process_password($element, $form_state) {
     $strength_settings = array(
       'labels' => array(
         'strengthTitle' => t('Password strength: '),
-        'tooWeak' => t('too weak'),
+        'tooweak' => t('too weak'),
         'weak' => t('poor'),
         'fair' => t('fair'),
         'good' => t('good'),
@@ -2885,7 +2883,7 @@ function user_form_process_password($element, $form_state) {
         'username' => $username,
         'email' => $email,
       ),
-      'config' => config_get('system.core', 'pass_constraints'),
+      'config' => config_get('system.core', 'password_constraints'),
     );
 
     $element['#attributes']['data-password-strength'] = backdrop_json_encode($strength_settings, FALSE);

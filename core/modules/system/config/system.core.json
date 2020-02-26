@@ -90,10 +90,10 @@
     "user_picture_guidelines": "",
     "watchdog_enabled_severity_levels": [0, 1, 2, 3, 4, 5, 6],
     "x_frame_options": "SAMEORIGIN",
-    "pass_constraints": {
+    "password_constraints": {
         "constraints_active": "1",
-        "pass_minlength": "8",
-        "pass_not_username": 1,
-        "pass_not_email": 1
+        "minlength": "8",
+        "not_username": 1,
+        "not_email": 1
     }
 }

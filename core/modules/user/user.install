@@ -1210,11 +1210,11 @@ function user_update_1016() {
 function user_update_1016() {
   $constraints = array(
     'constraints_active' => FALSE,
-    'pass_minlength' => 8,
-    'pass_not_username' => TRUE,
-    'pass_not_email' => TRUE,
+    'minlength' => 8,
+    'not_username' => TRUE,
+    'not_email' => TRUE,
   );
-  config_set('system.core', 'pass_constraints', $constraints);
+  config_set('system.core', 'password_constraints', $constraints);
 }
 
 /**

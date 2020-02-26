@@ -108,7 +108,7 @@
 .password-strength.weak .indicator {
   background-color: #ff0000;
 }
-.password-strength.tooWeak .password-strength-text,
+.password-strength.tooweak .password-strength-text,
 .password-strength.weak .password-strength-text {
   color: #ff0000;
 }
