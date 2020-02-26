@@ -180,8 +180,7 @@ Backdrop.evaluatePasswordStrength = function (password, data, config) {
     // Consider admin password constraint settings if active.
     if (config.constraints_active === "1") {
       if (password.length < config.pass_minlength) {
-        // Do not show "not allowed" as people might still be typing.
-        strength = 3;
+        strength = -1;
       }
       if (config.pass_not_username === 1 && password === username) {
         strength = -1;
@@ -206,7 +205,7 @@ Backdrop.evaluatePasswordStrength = function (password, data, config) {
     level = 'weak';
   }
   else if (strength < 0) {
-    level = 'notAllowed';
+    level = 'tooWeak';
   }
 
   // Cap at 100 and round to the nearest integer.

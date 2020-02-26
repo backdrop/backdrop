@@ -2875,7 +2875,7 @@ function user_form_process_password($element, $form_state) {
     $strength_settings = array(
       'labels' => array(
         'strengthTitle' => t('Password strength: '),
-        'notAllowed' => t('not allowed'),
+        'tooWeak' => t('too weak'),
         'weak' => t('poor'),
         'fair' => t('fair'),
         'good' => t('good'),
