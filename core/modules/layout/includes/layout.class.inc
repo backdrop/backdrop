@@ -177,8 +177,9 @@ class Layout {
    * @var LayoutContext[]
    */
   private $contexts;
+
   /**
-   * An array of removed Blocks, keyed by their UUID.
+   * An array of removed blocks, keyed by their UUID.
    *
    * @var array
    */
