@@ -389,17 +389,9 @@ function filter_admin_format_form($form, &$form_state, $format) {
     $form['filters'][$name]['filter']['details'] = array(
       '#markup' => isset($format_tips[$name]['tip']) ? $format_tips[$name]['tip'] : '',
     );
-    $form['filters'][$name]['filter']['configure_container'] = array(
-      '#type' => 'container',
-      '#id' => 'filter-configure-container',
-      '#attributes' => array(
-        'class' => array(
-          'filter-container',
-          'filter-' . $name . '-configure-container',
-        ),
-      ),
-    );
-    $form['filters'][$name]['filter']['configure_container']['configure'] = $configure_form;
+    $form['filters'][$name]['filter']['settings'] = $configure_form;
+    $form['filters'][$name]['filter']['settings']['#prefix'] = '<div class="filter-container">';
+    $form['filters'][$name]['filter']['settings']['#suffix'] = '</div">';
 
     $form['filters'][$name]['weight'] = array(
       '#type' => 'weight',
@@ -435,13 +427,13 @@ function filter_admin_format_configure_ajax($form, &$form_state) {
   $configure_form = backdrop_get_form('_filter_build_configure_form', $name, $format);
   $title = t('Configure filter');
   $options = array(
-    'dialogClass' => 'filter-configure-container',
+    'dialogClass' => 'filter-dialog',
     'width' => '90%',
   );
 
   $html = '';
   $html .= theme('status_messages');
-  $html .= '<div data-filter-dialog="' . $name . '" class="filter-configure-dialog">';
+  $html .= '<div data-filter-name="' . $name . '" class="filter-dialog-settings">';
   $html .= backdrop_render($configure_form);
   $html .= '</div>';
 
@@ -586,8 +578,8 @@ function filter_admin_format_form_submit($form, &$form_state) {
   // Add settings to $form_state.
   foreach ($form_state['values']['filters'] as $key => $value) {
     if(isset($value['filter'])) {
-      if(!empty($value['filter']['configure_container']['configure'])) {
-        $form_state['values']['filters'][$key]['settings'] = $value['filter']['configure_container']['configure'];
+      if(!empty($value['filter']['settings'])) {
+        $form_state['values']['filters'][$key]['settings'] = $value['filter']['settings'];
       }
       unset($form_state['values']['filters'][$key]['filter']);
     }
