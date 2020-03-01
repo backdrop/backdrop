@@ -29,12 +29,12 @@ Backdrop.behaviors.filterStatus = {
 
     // Respond to dialogs that are being opened, and pull values from saved
     // settings to populate dialog form values.
-    $(window).on('dialog:beforecreate', function (e, dialog, $element, settings) {
+    $(window).on('dialog:aftercreate', function (e, dialog, $element, settings) {
       if (Backdrop.settings.filterSettings) {
-        filter_name = $('#backdrop-modal').find('.filter-configure-dialog').attr('data-filter-dialog');
+        filter_name = $('#backdrop-modal').find('.filter-configure-dialog').once('filter-editor-status').attr('data-filter-dialog');
         filter_values = Backdrop.settings.filterSettings[filter_name];
         $.each(filter_values, function( index, value ) {
-          $item = $('input[name="filters['+filter_name+'][filter][configure_container][configure][' + index + ']"]');
+          $item = $('input[name="' + index + '"]');
           setInputValue($item, value);
         });
       }
@@ -74,7 +74,7 @@ Backdrop.behaviors.filterStatus = {
           $(this).append('');
           break;
         default:
-          $item.val(value);
+         $item.val(value);
           break;
       }
 
