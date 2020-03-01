@@ -307,10 +307,10 @@ class FilterAdminTestCase extends BackdropWebTestCase {
 
     // Add an additional tag.
     $edit = array();
-    $edit['filters[filter_html][filter][configure_container][configure][allowed_html]'] = '<a> <em> <strong> <cite> <code> <ul> <ol> <li> <dl> <dt> <dd> <quote>';
+    $edit['filters[filter_html][filter][settings][allowed_html]'] = '<a> <em> <strong> <cite> <code> <ul> <ol> <li> <dl> <dt> <dd> <quote>';
     $this->backdropPost('admin/config/content/formats/' . $filtered, $edit, t('Save configuration'));
     $this->backdropGet('admin/config/content/formats/' . $filtered);
-    $this->assertFieldByName('filters[filter_html][filter][configure_container][configure][allowed_html]', $edit['filters[filter_html][filter][configure_container][configure][allowed_html]'], 'Allowed HTML tag added.');
+    $this->assertFieldByName('filters[filter_html][filter][settings][allowed_html]', $edit['filters[filter_html][filter][settings][allowed_html]'], 'Allowed HTML tag added.');
 
     $result = db_query('SELECT * FROM {cache_filter}')->fetchObject();
     $this->assertFalse($result, 'Cache cleared.');
@@ -393,10 +393,10 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     // Clean up.
     // Allowed tags.
     $edit = array();
-    $edit['filters[filter_html][filter][configure_container][configure][allowed_html]'] = '<a> <em> <strong> <cite> <code> <ul> <ol> <li> <dl> <dt> <dd>';
+    $edit['filters[filter_html][filter][settings][allowed_html]'] = '<a> <em> <strong> <cite> <code> <ul> <ol> <li> <dl> <dt> <dd>';
     $this->backdropPost('admin/config/content/formats/' . $filtered, $edit, t('Save configuration'));
     $this->backdropGet('admin/config/content/formats/' . $filtered);
-    $this->assertFieldByName('filters[filter_html][filter][configure_container][configure][allowed_html]', $edit['filters[filter_html][filter][configure_container][configure][allowed_html]'], 'Changes reverted.');
+    $this->assertFieldByName('filters[filter_html][filter][settings][allowed_html]', $edit['filters[filter_html][filter][settings][allowed_html]'], 'Changes reverted.');
 
     // Full HTML.
     $edit = array();
@@ -459,7 +459,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
   function testUrlFilterAdmin() {
     // The form does not save with an invalid filter URL length.
     $edit = array(
-      'filters[filter_url][filter][configure_container][configure][filter_url_length]' => $this->randomName(4),
+      'filters[filter_url][filter][settings][filter_url_length]' => $this->randomName(4),
     );
     $this->backdropPost('admin/config/content/formats/filtered_html', $edit, t('Save configuration'));
     $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Filtered HTML')));
