@@ -34,23 +34,23 @@ Backdrop.behaviors.filterStatus = {
         filter_name = $('#backdrop-modal').find('.filter-configure-dialog').attr('data-filter-dialog');
         filter_values = Backdrop.settings.filterSettings[filter_name];
         $.each(filter_values, function( index, value ) {
-          $item = $('input[name="filters[filter_html][filter][configure_container][configure][' + index + ']"]');
+          $item = $('input[name="filters['+filter_name+'][filter][configure_container][configure][' + index + ']"]');
           setInputValue($item, value);
         });
       }
     });
 
     // Respond to dialogs that are closed, updating the underlying form values.
-    $(".filter-configure-container .button-primary").click(function (e) {
-        setTimeout(function() {
+    $(".filter-configure-container .ui-dialog-buttonpane .button-primary").click(function (e) {
+        $(document).ajaxComplete(function() {
           $.each(Backdrop.settings.filterSettings, function( index, value ) {
             row = 'filter-' + index + '-configure-container';
             $.each(value, function( index_too, value_too ) {
-              item = '#filterorder .' + row + ' input[name="filters[filter_html][filter][configure_container][configure][' + index_too + ']"]';
+              item = '#filterorder .' + row + ' input[name="filters['+index+'][filter][configure_container][configure][' + index_too + ']"]';
               setInputValue($(item), value_too);
             });
           });
-        }, 500);
+        });
     });
 
     // Sets form field input values.
