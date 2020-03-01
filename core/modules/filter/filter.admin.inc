@@ -483,35 +483,37 @@ function _filter_build_configure_form($form, &$form_state, $filter, $format) {
       $filter = $filters[$filter];
       $settings_form = $function($form, $form_state, $filter, $format);
           
-      $settings_form['filter'] = array(
-        '#type' => 'value',
-        '#value' => $filter->name,
-      );
-      $settings_form['actions']['#type'] = 'actions';
-      $settings_form['actions']['submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('Submit'),
-        '#validate' => array(),
-        '#submit' => array(),
-        '#ajax' => array(
-          'callback' => 'filter_admin_format_configure_ajax_submit',
-          'progress' => array(
-            'type' => 'throbber',
-            'message' => NULL,
+      if (backdrop_is_ajax()) {
+        $settings_form['filter'] = array(
+          '#type' => 'value',
+          '#value' => $filter->name,
+        );
+        $settings_form['actions']['#type'] = 'actions';
+        $settings_form['actions']['submit'] = array(
+          '#type' => 'submit',
+          '#value' => t('Submit'),
+          '#validate' => array(),
+          '#submit' => array(),
+          '#ajax' => array(
+            'callback' => 'filter_admin_format_configure_ajax_submit',
+            'progress' => array(
+              'type' => 'throbber',
+              'message' => NULL,
+            ),
           ),
-        ),
-      );
+        );
 
-      $settings_form['actions']['cancel'] = array(
-        '#type' => 'link',
-        '#title' => t('Cancel'),
-        '#href' => '',
-        '#attributes' => array(
-          // Adding button classes puts the link in the button area of the dialog,
-          // while the special "dialog-cancel" class closes the dialog.
-          'class' => array('button', 'button-secondary', 'form-submit', 'dialog-cancel'),
-        ),
-      );
+        $settings_form['actions']['cancel'] = array(
+          '#type' => 'link',
+          '#title' => t('Cancel'),
+          '#href' => '',
+          '#attributes' => array(
+            // Adding button classes puts the link in the button area of the dialog,
+            // while the special "dialog-cancel" class closes the dialog.
+            'class' => array('button', 'button-secondary', 'form-submit', 'dialog-cancel'),
+          ),
+        );
+      }
 
       return $settings_form;
     }
