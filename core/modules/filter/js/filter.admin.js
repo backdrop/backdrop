@@ -31,7 +31,7 @@ Backdrop.behaviors.filterStatus = {
     // settings to populate dialog form values.
     $(window).on('dialog:aftercreate', function (e, dialog, $element, settings) {
       if (Backdrop.settings.filterSettings) {
-        filter_name = $('#backdrop-modal').find('.filter-configure-dialog').once('filter-editor-status').attr('data-filter-dialog');
+        filter_name = $('#backdrop-modal').find('.filter-dialog-settings').once('filter-editor-status').attr('data-filter-name');
         filter_values = Backdrop.settings.filterSettings[filter_name];
         $.each(filter_values, function( index, value ) {
           $item = $('input[name="' + index + '"]');
@@ -41,12 +41,11 @@ Backdrop.behaviors.filterStatus = {
     });
 
     // Respond to dialogs that are closed, updating the underlying form values.
-    $(".filter-configure-container .ui-dialog-buttonpane .button-primary").click(function (e) {
+    $(".filter-dialog .ui-dialog-buttonpane .button-primary").click(function (e) {
         $(document).ajaxComplete(function() {
           $.each(Backdrop.settings.filterSettings, function( index, value ) {
-            row = 'filter-' + index + '-configure-container';
             $.each(value, function( index_too, value_too ) {
-              item = '#filterorder .' + row + ' input[name="filters['+index+'][filter][configure_container][configure][' + index_too + ']"]';
+              item = '#filterorder input[name="filters['+index+'][filter][settings][' + index_too + ']"]';
               setInputValue($(item), value_too);
             });
           });
