@@ -257,7 +257,7 @@ function views_ui_theme() {
 }
 
 /**
- * Impements hook_custom_theme()
+ * Implements hook_custom_theme()
  */
 function views_ui_custom_theme() {
   $theme = config_get('views_ui.settings', 'custom_theme');

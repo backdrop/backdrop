@@ -444,6 +444,25 @@ function system_element_info() {
     '#theme' => 'date',
     '#theme_wrappers' => array('form_element'),
   );
+  $types['html_date'] = array(
+    '#input' => TRUE,
+    '#element_validate' => array('html_date_validate'),
+    '#theme' => 'html_date',
+    '#theme_wrappers' => array('form_element'),
+  );
+  $types['html_time'] = array(
+    '#input' => TRUE,
+    '#element_validate' => array('html_time_validate'),
+    '#theme' => 'html_time',
+    '#theme_wrappers' => array('form_element'),
+  );
+  $types['html_datetime'] = array(
+    '#input' => TRUE,
+    '#element_validate' => array('html_datetime_validate'),
+    '#process' => array('form_process_html_datetime'),
+    '#theme' => 'html_datetime',
+    '#theme_wrappers' => array('form_element'),
+  );
   $types['file'] = array(
     '#input' => TRUE,
     '#size' => 60,
@@ -1385,9 +1404,10 @@ function system_library_info() {
       ),
     ),
     'js' => array(
-      // Backdrop includes a "combined" file that bundles together both the
-      // main library and the keyboard support file.
-      'core/misc/smartmenus/jquery.smartmenus.combined.js' => array(
+      'core/misc/smartmenus/jquery.smartmenus.js' => array(
+        'group' => JS_LIBRARY,
+      ),
+      'core/misc/smartmenus/addons/keyboard/jquery.smartmenus.keyboard.js' => array(
         'group' => JS_LIBRARY,
       ),
     ),
@@ -3578,12 +3598,7 @@ function system_cron() {
     if ($file = file_load($row->fid)) {
       $references = file_usage_list($file);
       if (empty($references)) {
-        if (file_exists($file->uri)) {
-          $file->delete();
-        }
-        else {
-          watchdog('file system', 'Could not delete temporary file "%path" during garbage collection', array('%path' => $file->uri), WATCHDOG_ERROR);
-        }
+        $file->delete();
       }
       else {
         watchdog('file system', 'Did not delete temporary file "%path" during garbage collection because it is in use by the following modules: %modules.', array('%path' => $file->uri, '%modules' => implode(', ', array_keys($references))), WATCHDOG_INFO);

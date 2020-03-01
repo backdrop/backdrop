@@ -136,7 +136,9 @@ abbr.ajax-changed {
 }
 .form-item input.error,
 .form-item textarea.error,
-.form-item select.error {
+.form-item select.error,
+.form-error input.form-date,
+.form-error input.form-time {
   border: 2px solid red;
 }
 .form-type-checkboxes.form-error,
@@ -424,7 +426,6 @@ ul.secondary li {
 }
 [dir="rtl"] ul.secondary li {
   border-right: none;
-  display: inline;
   padding: 0 1em;
 }
 ul.secondary a {

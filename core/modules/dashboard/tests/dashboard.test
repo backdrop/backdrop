@@ -80,7 +80,7 @@ class DashboardTest extends BackdropWebTestCase {
     $this->backdropGet('admin/dashboard');
 
     // The welcome to Backdrop block was found.
-    $this->assertText('Welcome to Backdrop!', 'Welcome to Backdrop block found.');
+    $this->assertText('Welcome to Backdrop CMS!', 'Welcome to Backdrop block found.');
 
     // The create content block exists with two links.
     $page_link = $this->xpath('//*[contains(@class,:block)]//li/a', array(
@@ -110,6 +110,10 @@ class DashboardTest extends BackdropWebTestCase {
     $this->assertText('0 blocked user account', 'Zero blocked user was found.');
     // The manage user accounts link is present.
     $this->assertLink('Manage user accounts', 0, 'The Manage user accounts link was found.');
+
+    // The backdrop-news block was found.
+    $this->assertText('Backdrop News', 'Backdrop News block found.');
+    $this->assertText('No news at this time.');
 
     // The menu admin block was found.
     $menu_admin_block = $this->xpath('//*[contains(@class,:block)]//tbody/tr/td[contains(text(),:menu)]', array(
