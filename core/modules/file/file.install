@@ -291,7 +291,6 @@ function file_update_1000() {
     'disabled' => FALSE,
     'base_table' => 'file_managed',
     'human_name' => 'Administer files',
-    'core' => '1.6',
     'display' => array(
       'default' => array(
         'display_title' => 'Master',
