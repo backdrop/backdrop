@@ -187,6 +187,21 @@ function views_update_1006() {
 }
 
 /**
+ * Remove the unused "core" key from active config files.
+ */
+function views_update_1007() {
+  $configs = config_get_names_with_prefix('views.view.');
+
+  foreach ($configs as $config_file) {
+    $core_key_in_config = config_get($config_file, 'core');
+    if ($core_key_in_config !== NULL) {
+      config_clear($config_file, 'core');
+    }
+  }
+
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
