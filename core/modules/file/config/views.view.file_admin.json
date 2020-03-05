@@ -8,7 +8,6 @@
     "disabled": false,
     "base_table": "file_managed",
     "human_name": "Administer files",
-    "core": "1.6",
     "display": {
         "default": {
             "display_title": "Master",

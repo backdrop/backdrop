@@ -7,7 +7,6 @@
     "disabled": true,
     "base_table": "comment",
     "human_name": "Recent comments",
-    "core": 0,
     "display": {
         "default": {
             "display_title": "Master",

@@ -6,7 +6,6 @@
     "disabled": false,
     "base_table": "node",
     "human_name": "Multiple Filters Test",
-    "core": "1.13.x-dev",
     "display": {
         "default": {
             "display_title": "Master",

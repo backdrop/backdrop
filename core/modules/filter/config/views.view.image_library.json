@@ -8,7 +8,6 @@
     "disabled": false,
     "base_table": "file_managed",
     "human_name": "Image Library",
-    "core": "1.7",
     "display": {
         "default": {
             "display_title": "Master",
