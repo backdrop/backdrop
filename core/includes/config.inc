@@ -454,7 +454,9 @@ class Config {
 
     $this->name = $name;
     $this->storage = $storage;
-    $this->overrides = isset($config[$name]) ? $config[$name] : NULL;
+    // If $config is not an array, then some library or module may have
+    // interacted with the $config in a preboot situation.
+    $this->overrides = (is_array($config) && isset($config[$name])) ? $config[$name] : NULL;
   }
 
   /**
