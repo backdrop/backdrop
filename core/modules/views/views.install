@@ -193,12 +193,12 @@ function views_update_1007() {
   $configs = config_get_names_with_prefix('views.view.');
 
   foreach ($configs as $config_file) {
-    $core_key_in_config = config_get($config_file, 'core');
+    $config = config($config_file);
+    $core_key_in_config = $config->get('core');
     if ($core_key_in_config !== NULL) {
-      config_clear($config_file, 'core');
+      $config->clear('core');
     }
   }
-
 }
 
 /**
