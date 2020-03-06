@@ -5,15 +5,15 @@
  */
 
 /**
- * @defgroup views_objects Objects that represent a View, or part of a view
+ * @defgroup views_objects Objects that represent a View or part of a view
  * @{
- * These objects are the core of Views, do the bulk of the direction and
+ * These objects are the core of Views do the bulk of the direction and
  * storing of data. All database activity is in these objects.
  */
 
 /**
  * An object to contain all of the data to generate a view, plus the member
- * functions to build the view query, execute the query, and render the output.
+ * functions to build the view query, execute the query and render the output.
  */
 class view {
   var $base_table = 'node';
@@ -35,8 +35,7 @@ class view {
 
   /**
    * The "tags" of a view.
-   *
-   * The tags are stored as a single string, though it is used as multiple tags;
+   * The tags are stored as a single string, though it is used as multiple tags
    * for example in the views overview.
    *
    * @var string
@@ -98,7 +97,7 @@ class view {
    */
   var $storage;
 
-  // State variables.
+  // State variables
   var $built = FALSE;
   var $executed = FALSE;
   var $editing = FALSE;
@@ -123,11 +122,11 @@ class view {
   var $offset = NULL;
   var $total_rows = NULL;
 
-  // Places to put attached renderings.
+  // Places to put attached renderings:
   var $attachment_before = '';
   var $attachment_after = '';
 
-  // Exposed widget input.
+  // Exposed widget input
   var $exposed_data = array();
   var $exposed_input = array();
   // Exposed widget input directly from the $form_state['values'].
@@ -142,9 +141,9 @@ class view {
   // Is the current stored view runned as an attachment to another view.
   var $is_attachment = NULL;
 
-  // Stores the next steps of form items to handle. It's an array of stack
-  // items, which contain the form id, the type of form, the view, the display,
-  // and some additional arguments.
+  // Stores the next steps of form items to handle.
+  // It's an array of stack items, which contain the form id, the type of form,
+  // the view, the display and some additional arguments.
   // @see views_ui_add_form_to_stack()
   // var $stack;
 
@@ -156,7 +155,7 @@ class view {
   var $current_display;
 
   /**
-   * Where the $query object will reside.
+   * Where the $query object will reside:
    *
    * @var views_plugin_query
    */
@@ -206,7 +205,7 @@ class view {
   var $override_url = NULL;
 
   /**
-   * Allow to override the path used for generated URLs.
+   * Allow to override the path used for generated urls.
    *
    * @var string
    */
@@ -264,14 +263,13 @@ class view {
   var $footer;
 
   /**
-   * Stores the area handlers for the empty text which are initialized on this
-   * view.
+   * Stores the area handlers for the empty text which are initialized on this view.
    * @var array[views_handler_area]
    */
   var $empty;
 
   /**
-   * Constructor.
+   * Constructor
    */
   function __construct($view_data = NULL) {
     $this->display = array();
@@ -306,12 +304,12 @@ class view {
   /**
    * Perform automatic updates when loading or importing a view.
    *
-   * Over time, some things about Views or Backdrop data has changed. This
-   * attempts to do some automatic updates, that must happen to ensure older
-   * views will at least try to work.
+   * Over time, some things about Views or Backdrop data has changed.
+   * this attempts to do some automatic updates that must happen
+   * to ensure older views will at least try to work.
    */
   function update() {
-    // When views are converted automatically, the base_table should be renamed,
+    // When views are converted automatically the base_table should be renamed
     // to have a working query.
     $this->base_table = views_move_table($this->base_table);
   }
@@ -326,8 +324,8 @@ class view {
   }
 
   /**
-   * Set the arguments that come to this view. Usually from the URL, but
-   * possibly from elsewhere.
+   * Set the arguments that come to this view. Usually from the URL
+   * but possibly from elsewhere.
    */
   function set_arguments($args) {
     $this->args = $args;
@@ -422,17 +420,17 @@ class view {
   }
 
   /**
-   * Whether or not AJAX should be used. If AJAX is used, paging, tablesorting,
-   * and exposed filters will be fetched via an AJAX call, rather than a page
-   * refresh.
+   * Whether or not AJAX should be used. If AJAX is used, paging,
+   * tablesorting and exposed filters will be fetched via an AJAX call
+   * rather than a page refresh.
    */
   function set_use_ajax($use_ajax) {
     $this->use_ajax = $use_ajax;
   }
 
   /**
-   * Set the exposed filters input to an array. If unset they will be taken from
-   * $_GET when the time comes.
+   * Set the exposed filters input to an array. If unset they will be taken
+   * from $_GET when the time comes.
    */
   function set_exposed_input($filters) {
     $this->exposed_input = $filters;
@@ -478,13 +476,14 @@ class view {
       return TRUE;
     }
 
-    // Instantiate all displays.
+    // Instantiate all displays
     foreach (array_keys($this->display) as $id) {
-      // Correct for shallow cloning: Often we'll have a cloned view, so that we
-      // don't mess up each other's displays; but the clone is pretty shallow,
-      // and doesn't necessarily clone the displays. We can tell this by
-      // checking whether a handler has already been set; if it has, but
-      // $this->current_display is not set, then something is dreadfully wrong.
+      // Correct for shallow cloning
+      // Often we'll have a cloned view so we don't mess up each other's
+      // displays, but the clone is pretty shallow and doesn't necessarily
+      // clone the displays. We can tell this by looking to see if a handler
+      // has already been set; if it has, but $this->current_display is not
+      // set, then something is dreadfully wrong.
       if (!empty($this->display[$id]->handler)) {
         $this->display[$id] = clone $this->display[$id];
         unset($this->display[$id]->handler);
@@ -494,9 +493,9 @@ class view {
         // Initialize the new display handler with data.
         $this->display[$id]->handler->init($this, $this->display[$id]);
         // If this is NOT the default display handler, let it know which is
-        // since it may well utilize some data from the default. This assumes
-        // that the 'default' handler is always first. It always is. Make sure
-        // of it.
+        // since it may well utilize some data from the default.
+        // This assumes that the 'default' handler is always first. It always
+        // is. Make sure of it.
         if ($id != 'default') {
           $this->display[$id]->handler->default_display = &$this->display['default']->handler;
         }
@@ -513,7 +512,7 @@ class view {
    * Get the first display that is accessible to the user.
    *
    * @param $displays
-   *   Either a single display ID or an array of display IDs.
+   *   Either a single display id or an array of display ids.
    */
   function choose_display($displays) {
     if (!is_array($displays)) {
@@ -535,15 +534,15 @@ class view {
    * Set the display as current.
    *
    * @param $display_id
-   *   The ID of the display to mark as current.
+   *   The id of the display to mark as current.
    */
   function set_display($display_id = NULL) {
     // If we have not already initialized the display, do so. But be careful.
     if (empty($this->current_display)) {
       $this->init_display();
 
-      // If handlers were not initialized, and no argument was sent, set up to
-      // the default display.
+      // If handlers were not initialized, and no argument was sent, set up
+      // to the default display.
       if (empty($display_id)) {
         $display_id = 'default';
       }
@@ -551,7 +550,7 @@ class view {
 
     $display_id = $this->choose_display($display_id);
 
-    // If no display ID sent in, and one wasn't chosen above, we're finished.
+    // If no display id sent in and one wasn't chosen above, we're finished.
     if (empty($display_id)) {
       return FALSE;
     }
@@ -573,7 +572,7 @@ class view {
       return FALSE;
     }
 
-    // Set a shortcut.
+    // Set a shortcut
     $this->display_handler = &$this->display[$display_id]->handler;
 
     return TRUE;
@@ -582,8 +581,8 @@ class view {
   /**
    * Find and initialize the style plugin.
    *
-   * Note that arguments may have changed which style plugin we use, so check
-   * the view object first, then ask the display handler.
+   * Note that arguments may have changed which style plugin we use, so
+   * check the view object first, then ask the display handler.
    */
   function init_style() {
     if (isset($this->style_plugin)) {
@@ -609,8 +608,8 @@ class view {
   /**
    * Attempt to discover if the view has handlers missing relationships.
    *
-   * This will try to add relationships automatically if it can, and will remove
-   * the handlers if it cannot.
+   * This will try to add relationships automatically if it can, and will
+   * remove the handlers if it cannot.
    */
   function fix_missing_relationships() {
     if (isset($this->relationships_fixed)) {
@@ -619,9 +618,9 @@ class view {
 
     $this->relationships_fixed = TRUE;
 
-    // Go through all of our handler types, and test them to see if they are
-    // missing relationships. Missing relationships can cause fatally broken
-    // Views.
+    // Go through all of our handler types and test them to see if they
+    // are missing relationships. Missing relationships can cause fatally
+    // broken Views.
     $base_tables = array(
       $this->base_table => TRUE,
       '#global' => TRUE,
@@ -709,8 +708,8 @@ class view {
   /**
    * Initialize the pager
    *
-   * Like style initialization, pager initialization is held until late, to
-   * allow for overrides.
+   * Like style initialization, pager initialization is held until late
+   * to allow for overrides.
    */
   function init_pager() {
     if (empty($this->query->pager)) {
@@ -720,7 +719,8 @@ class view {
         $this->query->pager->set_current_page($this->current_page);
       }
 
-      // These overrides may have been set earlier via $view->set_* functions.
+      // These overrides may have been set earlier via $view->set_*
+      // functions.
       if (isset($this->items_per_page)) {
         $this->query->pager->set_items_per_page($this->items_per_page);
       }
@@ -732,8 +732,8 @@ class view {
   }
 
   /**
-   * Create a list of base tables eligible for this view. Used primarily for the
-   * UI. Display must be already initialized.
+   * Create a list of base tables eligible for this view. Used primarily
+   * for the UI. Display must be already initialized.
    */
   function get_base_tables() {
     $base_tables = array(
@@ -778,7 +778,7 @@ class view {
    * Attach all of the handlers for each type.
    *
    * @param $key
-   *   One of 'argument', 'field', 'sort', 'filter', 'relationship'.
+   *   One of 'argument', 'field', 'sort', 'filter', 'relationship'
    * @param $info
    *   The $info from views_object_types for this object.
    */
@@ -801,13 +801,13 @@ class view {
    * Build all the arguments.
    */
   function _build_arguments() {
-    // Initially, we want to build sorts and fields. This can change, though, if
-    // we get a summary view.
+    // Initially, we want to build sorts and fields. This can change, though,
+    // if we get a summary view.
     if (empty($this->argument)) {
       return TRUE;
     }
 
-    // Build arguments.
+    // build arguments.
     $position = -1;
 
     // Create a title for use in the breadcrumb trail.
@@ -836,16 +836,15 @@ class view {
       if (isset($arg) || $argument->has_default_argument()) {
         if (!isset($arg)) {
           $arg = $argument->get_default_argument();
-          // Make sure default args get put back.
+          // make sure default args get put back.
           if (isset($arg)) {
             $this->args[$position] = $arg;
           }
-          // Remember that this argument was computed, not passed on the URL.
+          // remember that this argument was computed, not passed on the URL.
           $argument->is_default = TRUE;
         }
 
-        // Set the argument, which will also validate that the argument can be
-        // set.
+        // Set the argument, which will also validate that the argument can be set.
         if (!$argument->set_argument($arg)) {
           $status = $argument->validate_fail($arg);
           break;
@@ -859,7 +858,7 @@ class view {
           $argument->query($this->display_handler->use_group_by());
         }
 
-        // Add this argument's substitution.
+        // Add this argument's substitution
         $substitutions['%' . ($position + 1)] = $arg_title;
         $substitutions['!' . ($position + 1)] = strip_tags(decode_entities($arg));
 
@@ -881,7 +880,7 @@ class view {
         // Allow the argument to muck with this breadcrumb.
         $argument->set_breadcrumb($this->build_info['breadcrumb']);
 
-        // Test to see if we should use this argument's title.
+        // Test to see if we should use this argument's title
         if (!empty($argument->options['title_enable']) && !empty($argument->options['title'])) {
           $title = $argument->options['title'];
         }
@@ -889,16 +888,16 @@ class view {
         $breadcrumb_args[] = $arg;
       }
       else {
-        // Determine default condition and handle.
+        // determine default condition and handle.
         $status = $argument->default_action();
         break;
       }
 
-      // Be safe with references and loops.
+      // Be safe with references and loops:
       unset($argument);
     }
 
-    // Set the title in the build info.
+    // set the title in the build info.
     if (!empty($title)) {
       $this->build_info['title'] = $title;
     }
@@ -916,7 +915,7 @@ class view {
     if (!empty($this->query)) {
       $class = get_class($this->query);
       if ($class && $class != 'stdClass') {
-        // If query is already initialized, return.
+        // return if query is already initialized.
         return TRUE;
       }
     }
@@ -967,7 +966,7 @@ class view {
     // @todo Load a build_info from cache.
 
     $start = microtime(TRUE);
-    // If that fails, let's build.
+    // If that fails, let's build!
     $this->build_info = array(
       'query' => '',
       'count_query' => '',
@@ -976,14 +975,15 @@ class view {
 
     $this->init_query();
 
-    // Call a module hook, and see if it wants to present us with a pre-built
-    // query, or instruct us not to build the query for some reason.
+    // Call a module hook and see if it wants to present us with a
+    // pre-built query or instruct us not to build the query for
+    // some reason.
     // @todo: Implement this. Use the same mechanism Panels uses.
 
-    // Run through our handlers, and ensure they have necessary information.
+    // Run through our handlers and ensure they have necessary information.
     $this->init_handlers();
 
-    // Let the handlers interact with each other, if they really want.
+    // Let the handlers interact with each other if they really want.
     $this->_pre_query();
 
     if ($this->display_handler->uses_exposed()) {
@@ -994,13 +994,12 @@ class view {
       // (2) Record the errors after rendering the exposed form widgets.
       $errors_after = form_set_error();
       // Find out if the validation of any of the elements in the exposed form
-      // has failed, by comparing (1) and (2) above. Don't mess with the view
+      // has failed by comparing (1) and (2) above. Don't mess with the view
       // otherwise.
       $exposed_errors = count($errors_after) > count($errors_before);
       if ($exposed_errors || !empty($this->build_info['abort'])) {
         $this->built = TRUE;
-        // Don't execute the query, but rendering will still be executed,
-        // to display the empty text.
+        // Don't execute the query, but rendering will still be executed to display the empty text.
         $this->executed = TRUE;
         return empty($this->build_info['fail']);
       }
@@ -1032,9 +1031,9 @@ class view {
       return $this->built;
     }
 
-    // Initialize the style; arguments may have changed which style we use, so
-    // waiting as long as possible is important. But we need to know about the
-    // style when we go to build fields.
+    // Initialize the style; arguments may have changed which style we use,
+    // so waiting as long as possible is important. But we need to know
+    // about the style when we go to build fields.
     if (!$this->init_style()) {
       $this->build_info['fail'] = TRUE;
       return FALSE;
@@ -1044,13 +1043,13 @@ class view {
       $this->_build('field');
     }
 
-    // Build our sort criteria, if we were instructed to do so.
+    // Build our sort criteria if we were instructed to do so.
     if (!empty($this->build_sort)) {
       // Allow the style handler to deal with sorting.
       if ($this->style_plugin->build_sort()) {
         $this->_build('sort');
       }
-      // Allow the plugin to build second sorts as well.
+      // allow the plugin to build second sorts as well.
       $this->style_plugin->build_sort_post();
     }
 
@@ -1086,7 +1085,7 @@ class view {
     $this->built = TRUE;
     $this->build_time = microtime(TRUE) - $start;
 
-    // Attach displays.
+    // Attach displays
     $this->attach_displays();
 
     // Let modules modify the view just after building it.
@@ -1102,8 +1101,8 @@ class view {
    * Internal method to build an individual set of handlers.
    *
    * @param string $key
-   *   The type of handlers (filter etc.) which should be iterated over to build
-   *   the relationship and query information.
+   *    The type of handlers (filter etc.) which should be iterated over to
+   *    build the relationship and query information.
    */
   function _build($key) {
     $handlers = &$this->$key;
@@ -1145,7 +1144,7 @@ class view {
    *   The machine name of the display, which should be executed.
    *
    * @return bool
-   *   Return whether the executing was successful; for example an argument
+   *   Return whether the executing was successful, for example an argument
    *   could stop the process.
    */
   function execute($display_id = NULL) {
@@ -1159,8 +1158,7 @@ class view {
       return TRUE;
     }
 
-    // Don't allow to use deactivated displays, but display them on the live
-    // preview.
+    // Don't allow to use deactivated displays, but display them on the live preview.
     if (!$this->display[$this->current_display]->handler->get_option('enabled') && empty($this->live_preview)) {
       $this->build_info['fail'] = TRUE;
       return FALSE;
@@ -1215,8 +1213,7 @@ class view {
    *   The machine name of the display, which should be rendered.
    *
    * @return (string|NULL)
-   *   Return the output of the rendered view or NULL if something failed in the
-   *   process.
+   *   Return the output of the rendered view or NULL if something failed in the process.
    */
   function render($display_id = NULL) {
     $this->execute($display_id);
@@ -1261,7 +1258,7 @@ class view {
       // Initialize the style plugin.
       $this->init_style();
 
-      // Give field handlers the opportunity to perform additional queries,
+      // Give field handlers the opportunity to perform additional queries
       // using the entire resultset prior to rendering.
       if ($this->style_plugin->uses_fields()) {
         foreach ($this->field as $id => $handler) {
@@ -1332,11 +1329,11 @@ class view {
   /**
    * Render a specific field via the field ID and the row #
    *
-   * Note: You might want to use views_plugin_style::render_fields as it caches
-   * the output for you.
+   * Note: You might want to use views_plugin_style::render_fields as it
+   * caches the output for you.
    *
    * @param string $field
-   *   The ID of the field to be rendered.
+   *   The id of the field to be rendered.
    *
    * @param int $row
    *   The row number in the $view->result which is used for the rendering.
@@ -1352,14 +1349,13 @@ class view {
 
   /**
    * Execute the given display, with the given arguments.
+   * To be called externally by whatever mechanism invokes the view,
+   * such as a page callback, hook_block, etc.
    *
-   * To be called externally by whatever mechanism invokes the view, such as a
-   * page callback, hook_block, etc.
-   *
-   * This function should NOT be used by anything external, as this returns data
-   * in the format specified by the display. It can also have other side effects
-   * that are only intended for the 'proper' use of the display, such as setting
-   * page titles and breadcrumbs.
+   * This function should NOT be used by anything external as this
+   * returns data in the format specified by the display. It can also
+   * have other side effects that are only intended for the 'proper'
+   * use of the display, such as setting page titles and breadcrumbs.
    *
    * If you only want to view the display, use view::preview() instead.
    */
@@ -1382,9 +1378,9 @@ class view {
   /**
    * Preview the given display, with the given arguments.
    *
-   * To be called externally, probably by an AJAX handler of some flavor. Can
-   * also be called when views are embedded, as this guarantees normalized
-   * output.
+   * To be called externally, probably by an AJAX handler of some flavor.
+   * Can also be called when views are embedded, as this guarantees
+   * normalized output.
    */
   function preview($display_id = NULL, $args = array()) {
     if (empty($this->current_display) || ((!empty($display_id)) && $this->current_display != $display_id)) {
@@ -1403,16 +1399,16 @@ class view {
   }
 
   /**
-   * Run attachments and let the display do what it needs to do prior to
-   * running.
+   * Run attachments and let the display do what it needs to do prior
+   * to running.
    */
   function pre_execute($args = array()) {
     $this->old_view[] = views_get_current_view();
     views_set_current_view($this);
     $display_id = $this->current_display;
 
-    // Prepare the view with the information we have, but only if we were passed
-    // arguments, as they may have been set previously.
+    // Prepare the view with the information we have, but only if we were
+    // passed arguments, as they may have been set previously.
     if ($args) {
       $this->set_arguments($args);
     }
@@ -1426,7 +1422,7 @@ class view {
     // Allow hook_views_pre_view() to set the dom_id, then ensure it is set.
     $this->dom_id = !empty($this->dom_id) ? $this->dom_id : md5($this->name . REQUEST_TIME . rand());
 
-    // Allow the display handler to set up for execution.
+    // Allow the display handler to set up for execution
     $this->display_handler->pre_execute();
   }
 
@@ -1434,8 +1430,8 @@ class view {
    * Unset the current view, mostly.
    */
   function post_execute() {
-    // Unset current view, so we can be properly destructed later on. Return the
-    // previous value in case we're an attachment.
+    // unset current view so we can be properly destructed later on.
+    // Return the previous value in case we're an attachment.
 
     if ($this->old_view) {
       $old_view = array_pop($this->old_view);
@@ -1467,11 +1463,10 @@ class view {
   }
 
   /**
-   * Called to get hook_menu() information from the view and the named display
-   * handler.
+   * Called to get hook_menu() information from the view and the named display handler.
    *
    * @param $display_id
-   *   A display ID.
+   *   A display id.
    * @param $callbacks
    *   A menu callback array passed from views_menu_alter().
    */
@@ -1483,15 +1478,15 @@ class view {
       return FALSE;
     }
 
-    // Execute the view.
+    // Execute the view
     if (isset($this->display_handler)) {
       return $this->display_handler->execute_hook_menu($callbacks);
     }
   }
 
   /**
-   * Called to get hook_block information from the view and the named display
-   * handler.
+   * Called to get hook_block information from the view and the
+   * named display handler.
    */
   function execute_hook_block_list($display_id = NULL) {
     // Prepare the view with the information we have.
@@ -1501,18 +1496,18 @@ class view {
       return FALSE;
     }
 
-    // Execute the view.
+    // Execute the view
     if (isset($this->display_handler)) {
       return $this->display_handler->execute_hook_block_list();
     }
   }
 
   /**
-   * Determine if the given user has access to the view. Note that this sets the
-   * display handler, if it hasn't been set.
+   * Determine if the given user has access to the view. Note that
+   * this sets the display handler if it hasn't been.
    */
   function access($displays = NULL, $account = NULL) {
-    // Nobody should have access to disabled views.
+    // Noone should have access to disabled views.
     if (!empty($this->disabled)) {
       return FALSE;
     }
@@ -1525,7 +1520,8 @@ class view {
       $account = $GLOBALS['user'];
     }
 
-    // We can't use choose_display() here, because that function calls this one.
+    // We can't use choose_display() here because that function
+    // calls this one.
     $displays = (array)$displays;
     foreach ($displays as $display_id) {
       if (!empty($this->display[$display_id]->handler)) {
@@ -1539,8 +1535,8 @@ class view {
   }
 
   /**
-   * Get the view's current title. This can change depending upon how it was
-   * built.
+   * Get the view's current title. This can change depending upon how it
+   * was built.
    */
   function get_title() {
     if (empty($this->display_handler)) {
@@ -1577,8 +1573,7 @@ class view {
   /**
    * Return the human readable name for a view.
    *
-   * When a certain view doesn't have a human readable name, return the machine
-   * readable name.
+   * When a certain view doesn't have a human readable name return the machine readable name.
    */
   function get_human_name() {
     if (!empty($this->human_name)) {
@@ -1632,7 +1627,7 @@ class view {
         }
       }
     }
-    // Don't bother working if there's nothing to do.
+    // Don't bother working if there's nothing to do:
     if (empty($path) || (empty($args) && strpos($path, '%') === FALSE)) {
       return $path;
     }
@@ -1651,8 +1646,7 @@ class view {
             $pieces[] = $this->argument[$id]->options['exception']['value'];
           }
           else {
-            // Gotta put something, if there just isn't one.
-            $pieces[] = '*';
+            $pieces[] = '*'; // gotta put something if there just isn't one.
           }
 
         }
@@ -1701,8 +1695,8 @@ class view {
 
     if (!empty($this->build_info['breadcrumb'])) {
       foreach ($this->build_info['breadcrumb'] as $path => $title) {
-        // Check to see if the frontpage is in the breadcrumb trail; if it is,
-        // we'll remove that from the actual breadcrumb later.
+        // Check to see if the frontpage is in the breadcrumb trail; if it
+        // is, we'll remove that from the actual breadcrumb later.
         if ($path == config_get('system.core', 'site_frontpage')) {
           $base = FALSE;
           $title = t('Home');
@@ -1732,10 +1726,11 @@ class view {
   /**
    * Set up query capturing.
    *
-   * db_query() stores the queries that it runs in global $queries, but only if
-   * dev_query is set to true. In this case, we want to temporarily override
-   * that setting if it's not, and we can do that without forcing a db rewrite,
-   * by just manipulating $conf. This is kind of evil but it works.
+   * db_query() stores the queries that it runs in global $queries,
+   * bit only if dev_query is set to true. In this case, we want
+   * to temporarily override that setting if it's not and we
+   * can do that without forcing a db rewrite by just manipulating
+   * $conf. This is kind of evil but it works.
    */
   function start_query_capture() {
     global $conf, $queries;
@@ -1744,8 +1739,8 @@ class view {
       $conf['dev_query'] = TRUE;
     }
 
-    // Record the last query key used; anything already run isn't a query that
-    // we are interested in.
+    // Record the last query key used; anything already run isn't
+    // a query that we are interested in.
     $this->last_query_key = NULL;
 
     if (!empty($queries)) {
@@ -1765,11 +1760,11 @@ class view {
       $conf['dev_query'] = FALSE;
     }
 
-    // Make a copy of the array, so we can manipulate it with array_splice.
+    // make a copy of the array so we can manipulate it with array_splice.
     $temp = $queries;
 
-    // Scroll through the queries until we get to our last query key. Unset
-    // anything in our temp array.
+    // Scroll through the queries until we get to our last query key.
+    // Unset anything in our temp array.
     if (isset($this->last_query_key)) {
       foreach ($queries as $id => $query) {
         if ($id == $this->last_query_key) {
@@ -1852,15 +1847,16 @@ class view {
   /**
    * Safely clone a view.
    *
-   * Because views are complicated objects within objects, and PHP loves to do
-   * references to everything, if a View is not properly and safely cloned, it
-   * will still have references to the original view, and can actually cause the
-   * original view to point to objects in the cloned view. This gets ugly fast.
+   * Because views are complicated objects within objects, and PHP loves to
+   * do references to everything, if a View is not properly and safely
+   * cloned it will still have references to the original view, and can
+   * actually cause the original view to point to objects in the cloned
+   * view. This gets ugly fast.
    *
    * This will completely wipe a view clean so it can be considered fresh.
    *
    * @return view
-   *   The cloned view.
+   *    The cloned view.
    */
   function clone_view() {
     $clone = clone($this);
@@ -1877,8 +1873,8 @@ class view {
     $clone->attachment_after = '';
     $clone->result = array();
 
-    // Shallow cloning means that all the display objects *were not cloned*. We
-    // must clone them ourselves.
+    // shallow cloning means that all the display objects
+    // *were not cloned*. We must clone them ourselves.
     $displays = array();
     foreach ($clone->display as $id => $display) {
       $displays[$id] = clone $display;
@@ -1892,7 +1888,8 @@ class view {
   }
 
   /**
-   * Unset references, so that a $view object may be properly garbage collected.
+   * Unset references so that a $view object may be properly garbage
+   * collected.
    */
   function destroy() {
     foreach (array_keys($this->display) as $display_id) {
@@ -1988,23 +1985,23 @@ class view {
    * Determine whether a view supports admin string translation.
    */
   function is_translatable() {
-    // If the view is normal or overridden, use admin string translation. A
-    // newly created view won't have a type. Accept this.
+    // If the view is normal or overridden, use admin string translation.
+    // A newly created view won't have a type. Accept this.
     return (!isset($this->type) || in_array($this->type, array(t('Normal'), t('Overridden')))) ? TRUE : FALSE;
   }
 
   /**
-   * Add a new display handler to the view, automatically creating an ID.
+   * Add a new display handler to the view, automatically creating an id.
    *
    * @param $type
    *   The plugin type from the views plugin data. Defaults to 'page'.
    * @param $title
    *   The title of the display; optional, may be filled in from default.
    * @param $id
-   *   The ID to use.
+   *   The id to use.
    * @return
-   *   The key to the display in $view->display, so that the new display can be
-   *   located.
+   *   The key to the display in $view->display, so that the new display
+   *   can be located.
    */
   function add_display($type = 'page', $title = NULL, $id = NULL) {
     if (empty($type)) {
@@ -2037,7 +2034,7 @@ class view {
       }
     }
 
-    // Create the new display object.
+    // Create the new display object
     $display = new views_display($type, $id, $title);
 
     // Add the new display object to the view.
@@ -2046,14 +2043,14 @@ class view {
   }
 
   /**
-   * Generate a display ID of a certain plugin type.
+   * Generate a display id of a certain plugin type.
    *
    * @param $type
-   *   Which plugin should be used for the new display ID.
+   *   Which plugin should be used for the new display id.
    */
   function generate_display_id($type) {
-    // 'default' is singular, and is unique; so just go with 'default' for it.
-    // For all others, start counting.
+    // 'default' is singular and is unique, so just go with 'default'
+    // for it. For all others, start counting.
     if ($type == 'default') {
       return 'default';
     }
@@ -2061,8 +2058,8 @@ class view {
     $id = $type . '_1';
     $count = 1;
 
-    // Loop through IDs based upon our style plugin name until we find one that
-    // is unused.
+    // Loop through IDs based upon our style plugin name until
+    // we find one that is unused.
     while (!empty($this->display[$id])) {
       $id = $type . '_' . ++$count;
     }
@@ -2095,7 +2092,7 @@ class view {
   }
 
   /**
-   * Create a new display, and a display handler for it.
+   * Create a new display and a display handler for it.
    * @param $type
    *   The plugin type from the views plugin data. Defaults to 'page'.
    * @param $title
@@ -2108,10 +2105,10 @@ class view {
   function &new_display($type = 'page', $title = NULL, $id = NULL) {
     $id = $this->add_display($type, $title, $id);
 
-    // Create a handler.
+    // Create a handler
     $this->display[$id]->handler = views_get_plugin('display', $this->display[$id]->display_plugin);
     if (empty($this->display[$id]->handler)) {
-      // Provide a 'default' handler as an emergency. This won't work well, but
+      // provide a 'default' handler as an emergency. This won't work well but
       // it will keep things from crashing.
       $this->display[$id]->handler = views_get_plugin('display', 'default');
     }
@@ -2119,7 +2116,7 @@ class view {
     if (!empty($this->display[$id]->handler)) {
       // Initialize the new display handler with data.
       $this->display[$id]->handler->init($this, $this->display[$id]);
-      // If this is NOT the default display handler, let it know which is.
+      // If this is NOT the default display handler, let it know which is
       if ($id != 'default') {
         $this->display[$id]->handler->default_display = &$this->display['default']->handler;
       }
@@ -2174,7 +2171,7 @@ class view {
       $display_id = $this->current_display;
     }
 
-    // Get info about the types, so we can get the right data.
+    // Get info about the types so we can get the right data.
     $types = views_object_types();
     return $this->display[$display_id]->handler->get_option($types[$type]['plural']);
   }
@@ -2184,12 +2181,12 @@ class view {
    * display.
    */
   function get_item($display_id, $type, $id) {
-    // Get info about the types, so we can get the right data.
+    // Get info about the types so we can get the right data.
     $types = views_object_types();
-    // Initialize the display.
+    // Initialize the display
     $this->set_display($display_id);
 
-    // Get the existing configuration.
+    // Get the existing configuration
     $fields = $this->display[$display_id]->handler->get_option($types[$type]['plural']);
 
     return isset($fields[$id]) ? $fields[$id] : NULL;
@@ -2199,15 +2196,15 @@ class view {
    * Set the configuration of an item (field/sort/filter/etc) on a given
    * display.
    *
-   * Pass in NULL for the $item, to remove an item.
+   * Pass in NULL for the $item to remove an item.
    */
   function set_item($display_id, $type, $id, $item) {
-    // Get info about the types, so we can get the right data.
+    // Get info about the types so we can get the right data.
     $types = views_object_types();
-    // Initialize the display.
+    // Initialize the display
     $this->set_display($display_id);
 
-    // Get the existing configuration.
+    // Get the existing configuration
     $fields = $this->display[$display_id]->handler->get_option($types[$type]['plural']);
     if (isset($item)) {
       $fields[$id] = $item;
@@ -2223,8 +2220,9 @@ class view {
   /**
    * Set an option on an item.
    *
-   * Use this only if you have just 1 or 2 options to set; if you have many,
-   * consider getting the item, adding the options, and doing set_item yourself.
+   * Use this only if you have just 1 or 2 options to set; if you have
+   * many, consider getting the item, adding the options and doing
+   * set_item yourself.
    */
   function set_item_option($display_id, $type, $id, $option, $value) {
     $item = $this->get_item($display_id, $type, $id);
