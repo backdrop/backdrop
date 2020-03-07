@@ -181,6 +181,13 @@ function filter_admin_format_page($format = NULL) {
  * @ingroup forms
  */
 function filter_admin_format_form($form, &$form_state, $format) {
+  // Use a format stored in tempstore if available.
+  if ($stored_format = filter_get_format_tempstore($format->format)) {
+    $format = $stored_format;
+  }
+  else {
+    filter_set_format_tempstore($format);
+  }
   $is_fallback = ($format->format == filter_fallback_format());
   $editors = filter_get_editors();
   if (isset($form_state['editor_info'])) {
@@ -357,7 +364,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#value' => $filters,
   );
   foreach ($all_filter_info as $name => $filter_info) {
-    $configure_form = _filter_build_configure_form($form, $form_state, $name, $format);
+    $configure_form = _filter_build_configure_form($form, $form_state, $format, $name);
     
     $form['filters'][$name]['status'] = array(
       '#type' => 'checkbox',
@@ -369,7 +376,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
         '#type' => 'submit',
         '#name' => $name,
         '#op' => 'configure',
-        '#submit' => array(),
+        '#submit' => array('filter_admin_format_filter_settings_form_redirect'),
         '#ajax' => array(
           'callback' => 'filter_admin_format_configure_ajax',
           'effect' => 'fade',
@@ -389,9 +396,6 @@ function filter_admin_format_form($form, &$form_state, $format) {
     $form['filters'][$name]['filter']['details'] = array(
       '#markup' => isset($format_tips[$name]['tip']) ? $format_tips[$name]['tip'] : '',
     );
-    $form['filters'][$name]['filter']['settings'] = $configure_form;
-    $form['filters'][$name]['filter']['settings']['#prefix'] = '<div class="filter-container">';
-    $form['filters'][$name]['filter']['settings']['#suffix'] = '</div">';
 
     $form['filters'][$name]['weight'] = array(
       '#type' => 'weight',
@@ -417,6 +421,15 @@ function filter_admin_format_form($form, &$form_state, $format) {
 }
 
 /**
+ * Submit handler for layout_settings_form() that lets the user add a condition.
+ */
+function filter_admin_format_filter_settings_form_redirect($form, &$form_state) {
+  $trigger = $form_state['triggering_element'];
+  $name = $trigger['#name'];
+  $form_state['redirect'] = 'admin/config/content/formats/' . $form_state['format']->format . '/filter-settings/' . $name;
+}
+
+/**
  * Ajax handler: Handles multistep buttons in field_ui_display_overview_form().
  */
 function filter_admin_format_configure_ajax($form, &$form_state) {
@@ -424,7 +437,7 @@ function filter_admin_format_configure_ajax($form, &$form_state) {
   $name = $trigger['#name'];
   $format = $form_state['format'];
 
-  $configure_form = backdrop_get_form('_filter_build_configure_form', $name, $format);
+  $configure_form = backdrop_get_form('_filter_build_configure_form', $format, $name);
   $title = t('Configure filter');
   $options = array(
     'dialogClass' => 'filter-dialog',
@@ -445,14 +458,6 @@ function filter_admin_format_configure_ajax($form, &$form_state) {
 
 function filter_admin_format_configure_ajax_submit($form, &$form_state) {
   $commands = array();
-  form_state_values_clean($form_state);
-
-  $filter_name = $form_state['values']['filter'];
-  unset($form_state['values']['filter']);
-
-  $settings['filterSettings'][$filter_name] = $form_state['values'];
-
-  $commands[] = ajax_command_settings($settings, TRUE);
   $commands[] = ajax_command_close_modal_dialog();
   return array('#type' => 'ajax', '#commands' => $commands);
 }
@@ -460,8 +465,20 @@ function filter_admin_format_configure_ajax_submit($form, &$form_state) {
 /**
  * Returns the configuration form for configurable filters.
  */
-function _filter_build_configure_form($form, &$form_state, $filter, $format) {
+// todo: get rid of this and just use _filter_build_configure_form() directly.
+function filter_admin_format_filter_settings_form($format, $filter) {
+  $configure_form = backdrop_get_form('_filter_build_configure_form', $format, $filter);
+  return $configure_form;
+}
+
+/**
+ * Returns the configuration form for configurable filters.
+ */
+function _filter_build_configure_form($form, &$form_state, $format, $filter) {
   form_load_include($form_state, 'inc', 'filter', 'filter.admin');
+  $form_state['format'] = $format;
+  $form_state['filter'] = $filter;
+  $format = filter_get_format_tempstore($format->format);
   $all_filter_info = filter_get_filters();
   if(isset($all_filter_info[$filter]['settings callback'])) {
     // $format->filters isn't always built yet.
@@ -475,7 +492,6 @@ function _filter_build_configure_form($form, &$form_state, $filter, $format) {
       $filter = $filters[$filter];
       $settings_form = $function($form, $form_state, $filter, $format);
           
-      if (backdrop_is_ajax()) {
         $settings_form['filter'] = array(
           '#type' => 'value',
           '#value' => $filter->name,
@@ -485,7 +501,7 @@ function _filter_build_configure_form($form, &$form_state, $filter, $format) {
           '#type' => 'submit',
           '#value' => t('Submit'),
           '#validate' => array(),
-          '#submit' => array(),
+          '#submit' => array('filter_admin_format_filter_settings_update'),
           '#ajax' => array(
             'callback' => 'filter_admin_format_configure_ajax_submit',
             'progress' => array(
@@ -505,12 +521,28 @@ function _filter_build_configure_form($form, &$form_state, $filter, $format) {
             'class' => array('button', 'button-secondary', 'form-submit', 'dialog-cancel'),
           ),
         );
-      }
 
       return $settings_form;
     }
   }
   return array();
+}
+
+/**
+ * Form submit handler for _filter_build_configure_form().
+ *
+ * @see filter_admin_format_form()
+ */
+function filter_admin_format_filter_settings_update($form, &$form_state) {
+  form_state_values_clean($form_state);
+  unset($form_state['values']['filter']);
+  $filter = $form_state['filter'];
+  $format = $form_state['format'];
+  
+  $form_state['format']->filters[$filter]->settings = $form_state['values'];
+  filter_set_format_tempstore($form_state['format']);
+
+  $form_state['redirect'] = 'admin/config/content/formats/' . $form_state['format']->format;
 }
 
 /**
@@ -575,15 +607,8 @@ function filter_admin_format_form_submit($form, &$form_state) {
   unset($form_state['values']['actions']);
   unset($form_state['values']['filters']['filters']);
 
-  // Add settings to $form_state.
-  foreach ($form_state['values']['filters'] as $key => $value) {
-    if(isset($value['filter'])) {
-      if(!empty($value['filter']['settings'])) {
-        $form_state['values']['filters'][$key]['settings'] = $value['filter']['settings'];
-      }
-      unset($form_state['values']['filters'][$key]['filter']);
-    }
-  }
+  $form_state['format'] = filter_get_format_tempstore($form_state['format']->format);
+  $form_state['values']['filters'] = $form_state['format']->filters;
 
   // Add the submitted form values to the text format, and save it.
   $format = $form_state['format'];
@@ -615,6 +640,7 @@ function filter_admin_format_form_submit($form, &$form_state) {
       break;
   }
 
+  filter_clear_format_tempstore($format->format);
   $form_state['redirect'] = 'admin/config/content/formats';
 }
 
