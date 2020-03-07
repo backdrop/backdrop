@@ -7,7 +7,7 @@
 /**
  * @defgroup views_objects Objects that represent a View, or part of a view
  * @{
- * These objects are the core of Views, do the bulk of the direction and
+ * These objects are the core of Views; they do the bulk of the direction and
  * storing of data. All database activity is in these objects.
  */
 
@@ -50,10 +50,10 @@ class view {
    */
   var $human_name;
 
-  /**	
-   * The core version the view was created for.	
-   * @var int	
-   */	
+  /**
+   * The core version the view was created for.
+   * @var int
+   */
   var $core;
 
   /**
@@ -317,8 +317,8 @@ class view {
    * views will at least try to work.
    */
   function update() {
-    // When views are converted automatically, the base_table should be renamed,
-    // to have a working query.
+    // To have a working query when views are converted automatically, the
+    // base_table should be renamed.
     $this->base_table = views_move_table($this->base_table);
   }
 
