@@ -1382,7 +1382,7 @@ function system_library_info() {
   $libraries['html5shiv'] = array(
     'title' => 'html5shiv',
     'website' => 'http://code.google.com/p/html5shiv/',
-    'version' => '3.7.2',
+    'version' => '3.7.3',
     'js' => array(
       'core/misc/html5.js' => array(
         'group' => JS_LIBRARY,
