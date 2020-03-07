@@ -75,7 +75,7 @@
   background: -ms-linear-gradient(#9f9f9f 0%, #808080 100%); /* IE10+ */
   background: linear-gradient(#9f9f9f 0%, #808080 100%); /* W3C */
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#9f9f9f', endColorstr='#808080',GradientType=0); /* IE6-9 */
-  background-color: #9F9F9F;
+  background-color: #9f9f9f;
 }
 
 /* Home link */
@@ -204,10 +204,10 @@
 #admin-bar #admin-bar-menu > li > .dropdown > li > a.expanded-trail,
 #admin-bar #admin-bar-extra > li > .dropdown > li > a:hover,
 #admin-bar #admin-bar-icon li.admin-bar-icon > a:hover {
-  background-color: #45454A;
+  background-color: #45454a;
 }
 #admin-bar #admin-bar-menu > li > .dropdown > li > a.active-trail {
-  background-color: #9F9F9F;
+  background-color: #9f9f9f;
 }
 
 #admin-bar li {
@@ -254,7 +254,7 @@
 
 #admin-bar a.expanded-trail,
 #admin-bar span.expanded-trail {
-  background-color: #45454A;
+  background-color: #45454a;
 }
 
 #admin-bar .dropdown .admin-bar-tab a {

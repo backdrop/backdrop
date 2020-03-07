@@ -67,7 +67,7 @@ function theme_admin_bar_links($variables) {
         $elements[$path]['#attributes']['class'] = $elements[$path]['#attributes']['class'];
 
         // Only add additional classes to top-level links.
-        if (substr_count($path, '/') <= 1 ) {
+        if (substr_count($path, '/') <= 1) {
           $class = backdrop_clean_css_identifier($path);
           $elements[$path]['#options']['attributes']['class'][] = $class;
         }
