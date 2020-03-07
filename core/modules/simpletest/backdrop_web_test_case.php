@@ -1737,10 +1737,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Reset/rebuild all data structures after enabling the modules.
     $this->resetAll();
 
-    // Run cron once in that environment, as install.php does at the end of
-    // the installation process.
-    backdrop_cron_run();
-
     // Ensure that the session is not written to the new environment and replace
     // the global $user session with uid 1 from the new test site.
     backdrop_save_session(FALSE);
@@ -1760,6 +1756,17 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Use the test mail class instead of the default mail handler class.
     config_set('system.mail', 'default-system', 'TestingMailSystem');
+
+    // Disable news checking against BackdropCMS.org.
+    $dashboard_config = config('dashboard.settings');
+    if (!$dashboard_config->isNew()) {
+      $dashboard_config->set('news_feed_url', FALSE);
+      $dashboard_config->save();
+    }
+
+    // Run cron once in that environment, as install.php does at the end of
+    // the installation process.
+    backdrop_cron_run();
 
     backdrop_set_time_limit($this->timeLimit);
     $this->setup = TRUE;
@@ -2096,14 +2103,12 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function parse() {
     if (!$this->elements) {
-      // DOM can load HTML soup. But, HTML soup can throw warnings, suppress
-      // them.
       $htmlDom = new DOMDocument();
+      // DOM can load HTML soup, which can throw warnings. Suppress them here.
       @$htmlDom->loadHTML('<?xml encoding="UTF-8">' . $this->backdropGetContent());
       if ($htmlDom) {
         $this->pass(t('Valid HTML found on "@path"', array('@path' => $this->getUrl())), t('Browser'));
-        // It's much easier to work with simplexml than DOM, luckily enough
-        // we can just simply import our DOM tree.
+        // Import our DOM tree.
         $this->elements = simplexml_import_dom($htmlDom);
       }
     }
@@ -2620,6 +2625,8 @@ class BackdropWebTestCase extends BackdropTestCase {
           case 'range':
           case 'text':
           case 'tel':
+          case 'date':
+          case 'time':
           case 'textarea':
           case 'url':
           case 'password':
@@ -3176,7 +3183,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     if (!$message) {
       $message = t('Raw "@raw" found', array('@raw' => $raw));
     }
-    return $this->assert(strpos($this->backdropGetContent(), $raw) !== FALSE, $message, $group);
+    return $this->assert(strpos($this->backdropGetContent(), (string) $raw) !== FALSE, $message, $group);
   }
 
   /**
@@ -3196,7 +3203,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     if (!$message) {
       $message = t('Raw "@raw" not found', array('@raw' => $raw));
     }
-    return $this->assert(strpos($this->backdropGetContent(), $raw) === FALSE, $message, $group);
+    return $this->assert(strpos($this->backdropGetContent(), (string) $raw) === FALSE, $message, $group);
   }
 
   /**

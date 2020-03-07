@@ -135,13 +135,20 @@
 }
 @media (min-width: 500px) {
   .screenshot {
-    float: left;
+    float: left; /* LTR */
     width: 133px;
     height: 100px;
     margin: 0;
   }
+  [dir="rtl"] .screenshot {
+    float: right;
+  }
   .has-image .project-information {
-    margin-left: 148px;
+    margin-left: 148px; /* LTR */
+  }
+  [dir="rtl"] .has-image .project-information {
+    margin-right: 148px;
+    margin-left: 0;
   }
 }
 

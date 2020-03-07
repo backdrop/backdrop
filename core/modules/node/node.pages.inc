@@ -15,7 +15,7 @@
  */
 function node_page_edit(Node $node) {
   $type_name = node_type_get_name($node);
-  backdrop_set_title(t('<em>Edit @type</em> @title', array('@type' => $type_name, '@title' => $node->title)), PASS_THROUGH);
+  backdrop_set_title(t('Edit @type %title', array('@type' => $type_name, '%title' => $node->title)), PASS_THROUGH);
   return backdrop_get_form($node->type . '_node_form', $node);
 }
 
@@ -35,7 +35,7 @@ function node_add_page() {
       $content[$node_type->type] = array(
         'title' => t($node_type->name),
         'href'=>'node/add/' . $href_url_friendly,
-        'localized_options' => array('html' => TRUE),
+        'localized_options' => array('html' => FALSE),
         'description' => t($node_type->description),
       );
     }
@@ -122,6 +122,28 @@ function node_form($form, &$form_state, Node $node) {
     $node = $form_state['node'];
   }
   $node_type = node_type_get_type($node->type);
+
+  $status = $node->nid ? $node->status : $node_type->settings['status_default'];
+  $node_preview = $node_type->settings['node_preview'];
+
+  // Check if we can retrieve a node from the tempstore.
+  $node_tempstore_id = isset($form_state['node_tempstore_id']) ? $form_state['node_tempstore_id'] : node_build_tempstore_id();
+  $form_state['node_tempstore_id'] = $node_tempstore_id;
+  if ($data = node_tempstore_load($node_tempstore_id)) {
+    $node = $data;
+    $form_state['entity'] = $node;
+    $status = $node->status;
+
+    // Restore the destination if we previewed the node.
+    if (isset($node->destination)) {
+      $form['node_destination'] = array(
+        '#type' => 'value',
+        '#value' => $node->destination,
+      );
+    }
+
+    node_clear_node_tempstore($node_tempstore_id);
+  }
 
   // Override the default CSS class name, since the user-defined node type name
   // in 'TYPE-node-form' potentially clashes with third-party class names.
@@ -258,14 +280,29 @@ function node_form($form, &$form_state, Node $node) {
     '#autocomplete_path' => 'user/autocomplete',
     '#default_value' => !empty($node->name) ? $node->name : '',
     '#weight' => -1,
-    '#description' => t('Leave blank for %anonymous.', array('%anonymous' => $config->get('anonymous'))),
+    '#description' => t('Leave blank for %anonymous.', array('%anonymous' => $config->getTranslated('anonymous'))),
   );
   $form['author']['date'] = array(
-    '#type' => module_exists('date') ? 'date_popup' : 'textfield',
+    '#type' => 'html_datetime',
     '#title' => t('Authored on'),
-    // Note #date_format only applies if date module is enabled.
-    '#date_format' => 'Y-m-d g:i a',
-    '#default_value' => !empty($node->date) ? $node->date : NULL,
+    '#default_value' => array(
+      'date' => format_date($node->created, 'custom', DATE_FORMAT_DATE),
+      'time' => format_date($node->created, 'custom', DATE_FORMAT_TIME),
+    ),
+    '#attributes' => array(
+      'date' => array(
+        'min' => '1970-01-01',
+        'max' => '2037-12-31',
+        'placeholder' => t('e.g. @date', array(
+          '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_DATE)
+        )),
+      ),
+      'time' => array(
+        'placeholder' => t('e.g. @date', array(
+          '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_TIME)
+        )),
+      ),
+    ),
     '#description' => t('Leave blank to use the current time.'),
   );
 
@@ -286,7 +323,6 @@ function node_form($form, &$form_state, Node $node) {
     '#weight' => -10,
   );
 
-  $status = $node->nid ? $node->status : $node_type->settings['status_default'];
   if ($node->scheduled && $node_type->settings['scheduling_enabled']) {
     $status = NODE_SCHEDULED;
   }
@@ -304,21 +340,30 @@ function node_form($form, &$form_state, Node $node) {
   // Adjustments to the status radios if scheduling is enabled/disabled.
   if ($node_type->settings['scheduling_enabled']) {
     $form['options']['status']['#description'] .= ' ' . t('Content set to "Schedule for later" will be saved as draft when the content is created, but will be automatically published on the date and time selected.');
-  }
-  else {
-    $form['options']['status'][NODE_SCHEDULED]['#access'] = FALSE;
-  }
 
-  if ($node_type->settings['scheduling_enabled'] && user_access('administer nodes')) {
     // Default the scheduled time to the current time + 1 day.
     $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME + 86400;
     $form['options']['scheduled'] = array(
-      '#type' => module_exists('date') ? 'date_popup' : 'textfield',
+      '#type' => 'html_datetime',
       '#title' => t('Publish on'),
-      // Note #date_ properties only apply if date module is enabled.
-      '#date_format' => 'Y-m-d g:i a',
-      '#date_increment' => 10,
-      '#default_value' => format_date($scheduled_date, 'custom', 'Y-m-d g:i a'),
+      '#default_value' => array(
+        'date' => format_date($scheduled_date, 'custom', DATE_FORMAT_DATE),
+        'time' => format_date($scheduled_date, 'custom', DATE_FORMAT_TIME),
+      ),
+      '#attributes' => array(
+        'date' => array(
+          'min' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_DATE),
+          'max' => '2037-12-31',
+          'placeholder' => t('e.g. @date', array(
+            '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_DATE)
+          )),
+        ),
+        'time' => array(
+          'placeholder' => t('e.g. @date', array(
+            '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_TIME)
+          )),
+        ),
+      ),
       '#states' => array(
         'visible' => array(
          ':input[name="status"]' => array('value' => NODE_SCHEDULED),
@@ -326,9 +371,8 @@ function node_form($form, &$form_state, Node $node) {
       ),
     );
   }
-  // If the user doesn't have access to scheduling, default to published.
-  elseif ($form['options']['status']['#default_value'] == NODE_SCHEDULED) {
-    $form['options']['status']['#default_value'] = NODE_PUBLISHED;
+  else {
+    $form['options']['status'][NODE_SCHEDULED]['#access'] = FALSE;
   }
 
 
@@ -351,6 +395,16 @@ function node_form($form, &$form_state, Node $node) {
   }
   elseif (isset($_SERVER['HTTP_REFERER'])) {
     $path = $_SERVER['HTTP_REFERER'];
+    // When coming from preview, the $path is set to the preview page.
+    if (strpos($path, 'node/preview')) {
+      if (isset($node->nid)) {
+        $path = 'node/' . $node->nid;
+      }
+      else {
+        // @todo store old $_SERVER['HTTP_REFERER'] so we can redirect to that.
+        $path = '<front>';
+      }
+    }
   }
   elseif (isset($node->nid)) {
     $path = 'node/' . $node->nid;
@@ -369,6 +423,13 @@ function node_form($form, &$form_state, Node $node) {
     '#value' => t('Save'),
     '#weight' => 5,
     '#submit' => array('node_form_submit'),
+  );
+  $form['actions']['preview'] = array(
+    '#type' => 'submit',
+    '#access' => (!form_get_errors() && $node_preview != BACKDROP_DISABLED),
+    '#value' => t('Preview'),
+    '#weight' => 6,
+    '#submit' => array('node_form_preview'),
   );
   if (!empty($node->nid) && node_access('delete', $node)) {
     // Use a link for the delete button so the form doesn't need to validate.
@@ -404,6 +465,27 @@ function node_form($form, &$form_state, Node $node) {
 
   field_attach_form('node', $node, $form, $form_state, $node->langcode);
   return $form;
+}
+
+/**
+ * Form submission handler that redirects to the node preview().
+ *
+ * @see node_form_validate()
+ * @see node_form_submit_build_node()
+ *
+ * @since 1.11.0
+ */
+function node_form_preview($form, &$form_state) {
+  $node_tempstore_id = $form_state['node_tempstore_id'];
+  $old_status = $form_state['values']['status'];
+  $node = node_form_submit_build_node($form, $form_state);
+  $node->old_status = $old_status;
+
+  node_set_node_tempstore($node, $node_tempstore_id);
+  $form_state['redirect'] = 'node/preview/' . str_replace('_', '-', $node->type) . '/' . $node_tempstore_id;
+  if (isset($_GET['destination'])) {
+    $_GET['destination'] = $form_state['redirect'];
+  }
 }
 
 /**
@@ -444,7 +526,20 @@ function node_form_submit($form, &$form_state) {
   if ($node->nid) {
     $form_state['values']['nid'] = $node->nid;
     $form_state['nid'] = $node->nid;
-    $form_state['redirect'] = node_access('view', $node) ? 'node/' . $node->nid : '<front>';
+
+    // Determine whether to redirect user to full page display.
+    $form_state['redirect'] = '<front>';
+    if (node_access('view', $node)) {
+      $form_state['redirect'] = 'node/' . $node->nid;
+
+      // If node type set to prevent direct viewing of full page URL
+      // stay on edit page if user is not permitted.
+      $type = node_type_get_type($node);
+      $bypass_hidden_path = user_access('view hidden paths');
+      if ($type->settings['hidden_path'] && !$bypass_hidden_path) {
+        $form_state['redirect'] = 'node/' . $node->nid . '/edit';
+      }
+    }
   }
   else {
     // In the unlikely case something went wrong on save, the node will be
@@ -452,6 +547,230 @@ function node_form_submit($form, &$form_state) {
     backdrop_set_message(t('The post could not be saved.'), 'error');
     $form_state['rebuild'] = TRUE;
   }
+}
+
+/**
+ * Generates a node preview.
+ *
+ * @param $node_tempstore_id
+ *   The tempstore ID of the node being previewed.
+ * @param $node_type
+ *   The node type of the node being previewed.
+ *
+ * @return
+ *   An HTML-formatted string of a node preview.
+ *
+ * @see node_form_build_preview()
+ *
+ * @since 1.11.0
+ */
+function node_preview($node_tempstore_id, $node_type) {
+  // The tempstore object may have expired or an invalid ID submitted. Use the
+  // node object if available, otherwise return to the node edit page.
+  if (!$node = node_get_node_tempstore($node_tempstore_id)) {
+    backdrop_set_message(t('The preview ID is invalid or the stored preview has expired.'), 'error');
+    backdrop_goto('node/add/' . $node_type);
+  }
+
+  // Set status to true so we don't get the 'unpublished' CSS.
+  $node->status = TRUE;
+
+  _field_invoke_multiple('load', 'node', array($node->nid => $node));
+  // Load the author's name when needed.
+  if (isset($node->name)) {
+    // The use of isset() is mandatory in the context of user IDs, because
+    // user ID 0 denotes the anonymous user.
+    if ($user = user_load_by_name($node->name)) {
+      $node->uid = $user->uid;
+     }
+    else {
+      $node->uid = 0;
+     }
+   }
+  elseif ($node->uid) {
+    $user = user_load($node->uid);
+    $node->name = $user->name;
+  }
+
+  $node->changed = REQUEST_TIME;
+
+  // Get the view mode to render the preview in.
+  $view_mode = empty($_GET['view_mode']) ? 'full' : $_GET['view_mode'];
+
+  // Property so we can manipulate $page in template_preprocess_node.
+  if ($view_mode == 'full' || $view_mode == 'default') {
+    backdrop_set_title($node->title);
+    $node->in_preview = TRUE;
+  }
+
+  $build = array();
+  $build['#attached']['js'][] = backdrop_get_path('module', 'node') . '/js/node.preview.js';
+  $build['#attached']['css'][] = backdrop_get_path('module', 'node') . '/css/node.preview.css';
+  $build['preview_form_select'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('node-preview-container', 'container-inline')
+    ),
+  );
+
+  $form = backdrop_get_form('node_preview_banner_form', $node, $node_tempstore_id);
+  $build['preview_form_select']['view-mode'] = $form;
+  $build['preview'] = node_view($node, $view_mode);
+  return $build;
+}
+
+/**
+ * Get the preview form selection box.
+ *
+ * @param $node
+ *   A node entity.
+ * @param $node_tempstore_id
+ *   The tempstore ID of the node being previewed.
+ *
+ * @return array $form
+ *   The form which provides access to node preview operations.
+ *
+ * @since 1.11.0
+ */
+function node_preview_banner_form(array $form, array $form_state, Node $node, $node_tempstore_id) {
+  // Always add the 'default' view mode.
+  $view_mode_options = array();
+
+  // Get view mode options.
+  $entity_info = entity_get_info('node');
+  $view_modes = $entity_info['view modes'];
+  if (is_array($view_modes)) {
+    backdrop_sort($view_modes, array('label' => SORT_STRING));
+  }
+
+  foreach ($view_modes as $key => $info) {
+    if (!in_array($key, array('rss', 'search_index', 'search_result'))) {
+      $view_mode_options[$key] = $info['label'];
+    }
+
+    // In case this is the 'full' view mode, rename default.
+    if ($key == 'full') {
+      $view_mode_options[$key] = t('Default');
+    }
+  }
+
+  $path = 'node/add/' . str_replace('_', '-', $node->bundle());
+  if (!empty($node->nid)) {
+    $path = 'node/' . $node->nid . '/edit';
+  }
+  $query = array('node_tempstore_id' => $node_tempstore_id);
+  $url = url($path, array('query' => $query, 'absolute' => TRUE));
+
+  // Get the view mode to render the preview in.
+  $view_mode = empty($_GET['view_mode']) ? 'full' : $_GET['view_mode'];
+
+  // We render this message here instead of in node_form_preview() in order to
+  // make it persistent across page refreshes while still in preview mode, and
+  // also while switching to different display modes.
+  backdrop_set_message(t('This is a preview. Links within the page are disabled.'), 'warning', FALSE);
+  backdrop_set_message(t('<strong>Changes are stored temporarily</strong>. Click <em>Save</em> to make your changes permanent, or click <em>Back to content editing</em> to make additional changes.'), 'warning', FALSE);
+
+  $form['node'] = array(
+    '#type' => 'value',
+    '#value' => $node,
+  );
+
+  $form['node_tempstore_id'] = array(
+    '#type' => 'value',
+    '#value' => $node_tempstore_id,
+  );
+
+  $form['backlink'] = array(
+    '#type' => 'link',
+    '#title' => t('Back to content editing'),
+    '#href' => $url,
+    '#attributes' => array('class' => array('node-preview-backlink')),
+  );
+
+  $form['view_mode'] = array(
+    '#type' => 'select',
+    '#title' => t('Select a display mode'),
+    '#options' => $view_mode_options,
+    '#default_value' => $view_mode,
+    '#attributes' => array(
+      'onChange' => 'this.form.submit()',
+      'class' => array('node-preview-display-mode', 'preview-button'),
+    )
+  );
+  // This must be the first submit function so the 'onChange' event calls it
+  // before any other submit.
+  $form['view_mode_submit'] = array(
+    '#type' => 'submit',
+    '#name' => 'op',
+    '#submit' => array('node_preview_banner_form_view_mode_submit'),
+    '#value' => t('Switch'),
+    '#attributes' => array(
+      'class' => array('node-preview-switch-button', 'preview-button', 'js-hide')
+    )
+  );
+  $form['preview_node_submit'] = array(
+    '#type' => 'submit',
+    '#submit' => array('node_preview_banner_form_node_submit'),
+    '#value' => t('Save'),
+    '#attributes' => array(
+      'class' => array('node-preview-save-button', 'preview-button'),
+    )
+  );
+  $form['#theme'] = 'node_preview_banner_form';
+
+  return $form;
+}
+
+/**
+ * Submit handler for the node preview banner form.
+ *
+ * @see node_preview_banner_form()
+ *
+ * @since 1.11.0
+ */
+function node_preview_banner_form_node_submit(array $form, array &$form_state) {
+  form_load_include($form_state, 'inc', 'node', 'node.pages');
+  $node = $form_state['values']['node'];
+  node_object_prepare($node);
+  $type = $node->type;
+  $build = array();
+  $build['node'] = $node;
+  $build['values']['status'] = $node->old_status;
+  $build['values']['scheduled'] = $node->scheduled;
+  $build['values']['op'] = t('Save');
+  backdrop_form_submit($type . '_node_form', $build, $node);
+  $errors = form_get_errors();
+  if (!empty($errors)) {
+    foreach ($errors as $field_name => $message) {
+      watchdog('node', '%field: %message', array('%message'=> $message, '%field' => $field_name));
+    }
+  }
+  else {
+    // Determine whether to redirect user to full page display.
+    $destination = '<front>';
+    if (node_access('view', $node)) {
+      $destination = 'node/' . $node->nid;
+      // If node type set to prevent direct viewing of full page URL
+      // stay on edit page if user is not permitted.
+      $type = node_type_get_type($node);
+      $bypass_hidden_path = user_access('view hidden paths');
+      if ($type->settings['hidden_path'] && !$bypass_hidden_path) {
+        $destination = 'node/' . $node->nid . '/edit';
+      }
+    }
+    backdrop_goto($destination);
+  }
+}
+
+/**
+ * Submit handler for the node preview view mode selection form.
+ *
+ * @see node_preview_banner_form()
+ */
+function node_preview_banner_form_view_mode_submit(array $form, array &$form_state) {
+  $node = $form_state['values']['node'];
+  $node_tempstore_id = $form_state['values']['node_tempstore_id'];
+  $form_state['redirect'] = array('node/preview/' . str_replace('_', '-', $node->type) . '/' . $node_tempstore_id, array('query' => array('view_mode' => $form_state['values']['view_mode'])));
 }
 
 /**
@@ -480,6 +799,9 @@ function node_form_submit_build_node($form, &$form_state) {
   // Convert the scheduled date into a timestamp.
   $form_state['values']['status'] = (int) $form_state['values']['status'];
   if ($form_state['values']['status'] === NODE_SCHEDULED) {
+    if (is_array($form_state['values']['scheduled'])) {
+      $form_state['values']['scheduled'] = $form_state['values']['scheduled']['date'] . ' ' . $form_state['values']['scheduled']['time'];
+    }
     $schedule_date = new BackdropDateTime($form_state['values']['scheduled']);
     $form_state['values']['scheduled'] = $schedule_date->format('U');
     $form_state['values']['status'] = NODE_NOT_PUBLISHED;

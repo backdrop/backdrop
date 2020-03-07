@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Test module for system functions.
+ */
 
 /**
  * Implements hook_menu().
@@ -519,7 +523,7 @@ function system_test_request_destination() {
 }
 
 /**
- * Access callback used to simply check access based on a variable.
+ * Access callback used to check access based on a variable.
  */
 function system_test_access_callback() {
   return state_get('system_test_access', TRUE);

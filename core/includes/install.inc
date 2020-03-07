@@ -305,6 +305,10 @@ abstract class DatabaseTasks {
       'arguments'   => array(),
     ),
     array(
+      'function'    => 'checkUtf8mb4',
+      'arguments'   => array(),
+    ),
+    array(
       'arguments'   => array(
         'CREATE TABLE {backdrop_install_test} (id int NULL)',
         'Backdrop can use CREATE TABLE database commands.',
@@ -473,7 +477,7 @@ abstract class DatabaseTasks {
             'required' => TRUE,
           );
           $settings['database_prefix'] = array(
-            'value' => $db_settings['prefix'],
+            'value' => $db_settings['prefix']['default'],
           );
           backdrop_rewrite_settings($settings);
         }

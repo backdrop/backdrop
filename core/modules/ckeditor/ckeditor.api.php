@@ -17,14 +17,14 @@
  * file location so that CKEditor may add the plugin. Available properties for
  * each plugin include:
  *
- * - location: Required for all external plugins. String path to the plugin
+ * - path: Required for all external plugins. String path to the plugin
  *   directory relative to the Backdrop installation root. Do not include a
  *   trailing slash.
  * - file: Required for all external plugins. String file name of the plugin in
- *   the "location" directory.
+ *   the "path" directory.
  * - internal: Boolean value indicating if the plugin is part of the compressed
  *   CKEditor library package and already loaded on all instances. If TRUE,
- *   the "location" and "file" properties are not needed.
+ *   the "path" and "file" properties are not needed.
  * - css: An array of CSS files that should be added by CKEditor. These files
  *   are used only when CKEditor is using an iframe wrapper around its content.
  *   If a plugin needs to include CSS for inline and iframe versions, it should

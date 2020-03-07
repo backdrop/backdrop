@@ -65,6 +65,16 @@ function theme_image_style_list($variables) {
       'title' => t('Configure'),
       'href' => 'admin/config/media/image-styles/configure/' . $style['name'],
     );
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Image styles',
+          'name' => 'image.style.' . $style['name'],
+        ),
+      );
+    }
 
     if ($style['storage'] == IMAGE_STORAGE_NORMAL) {
       $row[] = t('Custom');

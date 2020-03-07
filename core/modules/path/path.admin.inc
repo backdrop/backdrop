@@ -98,10 +98,11 @@ function path_admin_overview($keys = NULL) {
  */
 function path_admin_edit($path = array()) {
   if ($path) {
-    backdrop_set_title($path['alias']);
+    backdrop_set_title(t('Edit URL alias %alias', array('%alias' => $path['alias'])), PASS_THROUGH);
     $output = backdrop_get_form('path_admin_form', $path);
   }
   else {
+    backdrop_set_title(t('Add URL alias'));
     $output = backdrop_get_form('path_admin_form');
   }
 
@@ -657,7 +658,7 @@ function path_bulk_update_form($form, &$form_state) {
     }
   }
 
-  // Build the 'Update options' form.
+  // Build the 'Operations' form.
   $form['operations'] = array(
     '#type' => 'fieldset',
     '#title' => t('Operations'),
@@ -669,7 +670,8 @@ function path_bulk_update_form($form, &$form_state) {
   );
   $form['operations']['operation'] = array(
     '#type' => 'select',
-    '#title' => '',
+    '#title' => 'Operations',
+    '#title_display' => 'invisible',
     '#options' => array(
       'generate' => t('Generate URL aliases'),
       'update' => t('Update existing URL aliases'),

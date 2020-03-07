@@ -63,7 +63,7 @@
   border-left-color: #dee2ea;
   -webkit-transform: rotate(-45deg) translate(0, -0.75em);
   transform: rotate(-45deg) translate(0, -0.75em);
-  background: #fff;
+  background: #ffffff;
   pointer-events: none;
   z-index: 0;
 }

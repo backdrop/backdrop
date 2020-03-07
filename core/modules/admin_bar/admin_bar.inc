@@ -37,17 +37,14 @@ function admin_bar_output($complete = FALSE) {
     $content['#components'] = $components;
     $content['#complete'] = $complete;
 
-    // Add site name as CSS class for development/staging theming purposes. We
-    // leverage the cookie domain instead of HTTP_HOST to account for many (but
-    // not all) multi-domain setups (e.g. language-based sub-domains).
+    // Add site name as CSS class for development/staging purposes. We leverage
+    // the cookie domain instead of HTTP_HOST to account for many (but not all)
+    // multi-domain setups (e.g. language-based sub-domains).
     $classes = 'admin-bar-site' . backdrop_strtolower(preg_replace('/[^a-zA-Z0-9-]/', '-', $GLOBALS['cookie_domain']));
 
     // @todo Always output container to harden JS-less support.
     $content['#prefix'] = '<div id="admin-bar" class="' . $classes . '"><div id="admin-bar-wrapper">';
     $content['#suffix'] = '</div></div>';
-
-    // Load menu builder functions.
-    module_load_include('inc', 'admin_bar');
 
     // Add administration bar.
     if (in_array('admin_bar.menu', $components) || $complete) {
@@ -92,7 +89,7 @@ function admin_bar_output($complete = FALSE) {
 
     if ($content['extra']['extra']) {
       $content['extra']['#theme'] = 'admin_bar_links';
-      $content['extra']['extra']['#title'] = t('More admin tasks');
+      $content['extra']['extra']['#title'] = t('More tasks');
       $content['extra']['#wrapper_attributes'] = array(
         'id' => 'admin-bar-extra',
       );

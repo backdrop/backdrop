@@ -165,7 +165,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
   function testFormatAdmin() {
     // Add text format.
     $this->backdropGet('admin/config/content/formats');
-    $this->clickLink('Add text editor');
+    $this->clickLink('Add text format');
     $format_id = backdrop_strtolower($this->randomName());
     $name = $this->randomName();
     $edit = array(
@@ -281,6 +281,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->assertTrue(!empty($elements), 'Reorder confirmed in admin interface.');
 
     $config_filters = config_get('filter.format.' . $filtered, 'filters');
+    backdrop_sort($config_filters, array('weight'));
     $filters = array();
     foreach ($config_filters as $filter_name => $filter) {
       if ($filter_name == $second_filter || $filter_name == $first_filter) {
@@ -538,7 +539,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
     $this->assertResponse(200);
     $this->backdropGet('filter/tips/invalid-format');
     $this->assertResponse(404);
-    
+
     // Check admin user access to the filter tips pages.
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('filter/tips/' . $this->allowed_format->format);
@@ -810,6 +811,10 @@ class FilterSecurityTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/content/formats/' . $format_id, $edit, t('Save configuration'));
 
+    // Remove the entity cache entry for the node so that field_attach_load can
+    // run again and the filters can be re-applied.
+    cache('entity_node')->delete($node->nid);
+
     // Verify that filter_test_replace filter replaced the content.
     $this->backdropGet('node/' . $node->nid);
     $this->assertNoText($body_raw, 'Node body not found.');
@@ -817,6 +822,10 @@ class FilterSecurityTestCase extends BackdropWebTestCase {
 
     // Disable the text format entirely.
     $this->backdropPost('admin/config/content/formats/' . $format_id . '/disable', array(), t('Disable'));
+
+    // Remove the entity cache entry for the node so that field_attach_load can
+    // run again and the filters can be re-applied.
+    cache('entity_node')->delete($node->nid);
 
     // Verify that the content is empty, because the text format does not exist.
     $this->backdropGet('node/' . $node->nid);

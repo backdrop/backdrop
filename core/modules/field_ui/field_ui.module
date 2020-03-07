@@ -149,8 +149,6 @@ function field_ui_menu() {
           // Display modes, and use an access callback to determine which ones
           // are actually visible for a given bundle.
           $items["$path/display/%"] = array(
-            'title callback' => 'field_ui_manage_display_title',
-            'title arguments' => array($entity_type, $view_mode_position),
             'page callback' => 'backdrop_get_form',
             'page arguments' => array('field_ui_display_form', $entity_type, $bundle_arg, $view_mode_position),
             // The access callback needs to check both the current 'custom

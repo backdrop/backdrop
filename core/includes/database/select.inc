@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @addtogroup database
  * @{
@@ -208,8 +207,8 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * majority of cases that is not a problem, as the alias will be the field
    * name. However, if you do need to know the alias you can call getFields()
    * and examine the result to determine what alias was created. Alternatively,
-   * simply use addField() for the few fields you care about and this method for
-   * the rest.
+   * use addField() for the few fields you care about and this method for the
+   * rest.
    *
    * @param $table_alias
    *   The name of the table from which the field comes, as an alias. Generally
@@ -1428,7 +1427,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
    * @return NULL|DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch|stdClass[]
    */
   public function execute() {
-    // If validation fails, simply return NULL.
+    // If validation fails return NULL.
     // Note that validation routines in preExecute() may throw exceptions instead.
     if (!$this->preExecute()) {
       return NULL;

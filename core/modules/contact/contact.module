@@ -1,10 +1,8 @@
 <?php
-
 /**
  * @file
  * Enables the use of personal and site-wide contact forms.
  */
-
 
 /**
  * Implements hook_theme().
@@ -14,6 +12,10 @@ function contact_theme() {
     'contact_category_list_table' => array(
       'render element' => 'element',
       'file' => 'contact.theme.inc',
+    ),
+    'contact_form_permissions' => array(
+      'render element' => 'form',
+      'function' => 'theme_user_admin_permissions',
     ),
   );
 }
@@ -25,6 +27,7 @@ function contact_permission() {
   return array(
     'administer contact forms' => array(
       'title' => t('Administer contact forms and contact form settings'),
+      'restrict access' => TRUE
     ),
     'access site-wide contact form' => array(
       'title' => t('Use the site-wide contact form'),
@@ -82,12 +85,8 @@ function contact_menu() {
     'file' => 'contact.admin.inc',
   );
   $items['admin/structure/contact/list'] = array(
-    'title' => 'Categories',
-    'page callback' => 'contact_category_list',
-    'access arguments' => array('administer contact forms'),
+    'title' => 'List categories',
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => 1,
-    'file' => 'contact.admin.inc',
   );
   $items['admin/structure/contact/settings'] = array(
     'title' => 'Settings',
@@ -247,7 +246,7 @@ function contact_show_personal_copy_checkbox() {
 function contact_mail($key, &$message, $params) {
   $language = $message['language'];
   $variables = array(
-    '!site-name' => config_get('system.core', 'site_name'),
+    '!site-name' => config_get_translated('system.core', 'site_name', array(), array('langcode' => $language->langcode)),
     '!subject' => $params['subject'],
     '!category' => isset($params['category']['category']) ? $params['category']['category'] : '',
     '!form-url' => url($_GET['q'], array('absolute' => TRUE, 'language' => $language)),
@@ -343,4 +342,35 @@ function contact_form_user_admin_settings_alter(&$form, &$form_state) {
     '#description' => t('Changing this setting will not affect existing users.'),
     '#default_value' => $config->get('contact_default_status'),
   );
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function contact_block_info() {
+  $blocks['sitewide'] = array(
+    'info' => t('Contact form'),
+    'description' => t('Site-wide contact form.'),
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function contact_block_view($delta = '', $settings = array(), $contexts = array()) {
+  $block = array();
+
+  switch ($delta) {
+    case 'sitewide':
+      if (user_access('access site-wide contact form')) {
+        module_load_include('inc', 'contact', 'contact.pages');
+        $block['subject'] = t('Contact Us');
+        $block['content'] = backdrop_get_form('contact_site_form');
+      }
+      break;
+  }
+
+  return $block;
 }

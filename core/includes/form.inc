@@ -556,10 +556,16 @@ function form_get_cache($form_build_id, &$form_state) {
 
 /**
  * Stores a form in the cache.
+ *
+ * The default cache_form expiration is 6 hours. On busy sites, the cache_form
+ * table can become very large. A shorter cache lifetime can help to keep the
+ * table's size under control.
  */
 function form_set_cache($form_build_id, $form, $form_state) {
-  // 6 hours cache life time for forms should be plenty.
-  $expire = 21600;
+  // Try to read the 'form_cache_expiration' setting from settings.php. If not
+  // set in settings.php, then default to the value set in 'system.core' config
+  // (via system_update_1067 - setting not exposed in the admin UI currently).
+  $expire = settings_get('form_cache_expiration', config_get('system.core', 'form_cache_expiration'));
 
   // Ensure that the form build_id embedded in the form structure is the same as
   // the one passed in as a parameter. This is an additional safety measure to
@@ -795,7 +801,7 @@ function backdrop_retrieve_form($form_id, &$form_state) {
   $args = $form_state['build_info']['args'];
 
   // We first check to see if there's a function named after the $form_id.
-  // If there is, we simply pass the arguments on to it to get the form.
+  // If there is, we pass the arguments on to it to get the form.
   if (!function_exists($form_id)) {
     // In cases where many form_ids need to share a central constructor function,
     // such as the node editing form, modules can implement hook_forms(). It
@@ -1011,7 +1017,7 @@ function backdrop_process_form($form_id, &$form, &$form_state) {
  *
  * @param $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  * @param $form
  *   An associative array containing the structure of the form.
  * @param $form_state
@@ -1162,7 +1168,7 @@ function _backdrop_invalid_token_set_form_error() {
  *
  * @param $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  * @param $form
  *   An associative array containing the structure of the form, which is passed
  *   by reference. Form validation handlers are able to alter the form structure
@@ -1356,7 +1362,7 @@ function backdrop_redirect_form($form_state) {
  *   not be repeated in the submission step.
  * @param $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  */
 function _form_validate(&$elements, &$form_state, $form_id = NULL) {
   // Also used in the installer, pre-database setup.
@@ -1389,8 +1395,8 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
           $value = in_array($elements['#type'], array('checkboxes', 'tableselect')) ? array_keys($elements['#value']) : $elements['#value'];
           foreach ($value as $v) {
             if (!isset($options[$v])) {
-              form_error($elements, $t('An illegal choice has been detected. Please contact the site administrator.'));
-              watchdog('form', 'Illegal choice %choice in !name element.', array('%choice' => $v, '!name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']), WATCHDOG_ERROR);
+              form_error($elements, $t('Invalid option %choice in %name element.', array('%choice' => $v, '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title'])));
+              watchdog('form', 'Invalid option %choice in %name element.', array('%choice' => $v, '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']), WATCHDOG_ERROR);
             }
           }
         }
@@ -1408,8 +1414,8 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
           form_set_value($elements, NULL, $form_state);
         }
         elseif (!isset($options[$elements['#value']])) {
-          form_error($elements, $t('An illegal choice has been detected. Please contact the site administrator.'));
-          watchdog('form', 'Illegal choice %choice in %name element.', array('%choice' => $elements['#value'], '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']), WATCHDOG_ERROR);
+          form_error($elements, $t('Invalid option %choice in %name element.', array('%choice' => $elements['#value'], '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title'])));
+          watchdog('form', 'Invalid option %choice in %name element.', array('%choice' => $elements['#value'], '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']), WATCHDOG_ERROR);
         }
       }
     }
@@ -1454,10 +1460,11 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
       // length if it's a string, and the item count if it's an array.
       // An unchecked checkbox has a #value of integer 0, different than string
       // '0', which could be a valid value.
-      $is_empty_multiple = (is_array($elements['#value']) || $elements['#value'] instanceof Countable) && count($elements['#value']) === 0;
-      $is_empty_null = $elements['#value'] === NULL;
+      $is_countable = is_array($elements['#value']) || $elements['#value'] instanceof Countable;
+      $is_empty_multiple = $is_countable && count($elements['#value']) == 0;
       $is_empty_string = (is_string($elements['#value']) && backdrop_strlen(trim($elements['#value'])) == 0);
       $is_empty_value = ($elements['#value'] === 0);
+      $is_empty_null = is_null($elements['#value']);
       if ($is_empty_multiple || $is_empty_string || $is_empty_value || $is_empty_null) {
         // Although discouraged, a #title is not mandatory for form elements. In
         // case there is no #title, we cannot set a form error message.
@@ -1820,7 +1827,7 @@ function form_error(&$element, $message = '') {
  *
  * @param string $form_id
  *   A unique string identifying the form for validation, submission,
- *   theming, and hook_form_alter functions.
+ *   theme overrides, and hook_form_alter functions.
  * @param array $element
  *   An associative array containing the structure of the current element.
  * @param array $form_state
@@ -2474,8 +2481,8 @@ function form_type_radios_value(&$element, $input = FALSE) {
     return $input;
   }
   else {
-    // For default value handling, simply return #default_value. Additionally,
-    // for a NULL default value, set #has_garbage_value to prevent
+    // For default value handling, return #default_value. Additionally, for a
+    // NULL default value, set #has_garbage_value to prevent
     // _form_builder_handle_input_element() converting the NULL to an empty
     // string, so that code can distinguish between nothing selected and the
     // selection of a radio button whose value is an empty string.
@@ -3162,6 +3169,175 @@ function map_month($month) {
 }
 
 /**
+ * Returns html5 markup for a date input form element.
+ */
+function theme_html_date($variables) {
+  $element = $variables['element'];
+  $attributes = array();
+  if (isset($element['#attributes'])) {
+    $attributes = $element['#attributes'];
+  }
+  if (isset($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  $attributes['class'][] = 'form-date';
+  $attributes['type'] = 'date';
+  $attributes['value'] = $element['#value'];
+  $attributes['name'] = $element['#name'];
+
+  $output = '<input ' . backdrop_attributes($attributes) . ' />';
+  return $output;
+}
+
+/**
+ * Returns html5 markup for a time input form element.
+ */
+function theme_html_time($variables) {
+  $element = $variables['element'];
+  $attributes = array();
+  if (isset($element['#attributes'])) {
+    $attributes = $element['#attributes'];
+  }
+  if (isset($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  $attributes['class'][] = 'form-time';
+  $attributes['type'] = 'time';
+  $attributes['value'] = $element['#value'];
+  $attributes['name'] = $element['#name'];
+  $attributes['step'] = 1;
+  if (isset($element['#attributes']['step'])) {
+    // Allow to set cardinality to "minute".
+    if ($element['#attributes']['step'] == 60) {
+      $attributes['step'] = 60;
+    }
+  }
+
+  $output = '<input ' . backdrop_attributes($attributes) . ' />';
+  return $output;
+}
+
+/**
+ * Returns html5 markup for a combined date and time form element.
+ */
+function theme_html_datetime($variables) {
+  $element = $variables['element'];
+  $attributes = array();
+  if (isset($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  if (!empty($element['#attributes']['class'])) {
+    $attributes['class'] = (array) $element['#attributes']['class'];
+  }
+  $attributes['class'][] = 'container-inline';
+  return '<div' . backdrop_attributes($attributes) . '>' . backdrop_render_children($element) . '</div>';
+}
+
+/**
+ * Combine html_date and html_time form elements.
+ */
+function form_process_html_datetime($element) {
+  $value = $element['#value'];
+  // Conversion to a timestamp has happened, possibly in a preview.
+  // Get it back into an array for the form.
+  if (is_numeric($value) && (int) $value == $value) {
+    $value = array(
+      'date' => format_date($value, 'custom', DATE_FORMAT_DATE),
+      'time' => format_date($value, 'custom', DATE_FORMAT_TIME),
+    );
+  }
+  // Catch possible problems.
+  if (!is_array($value) || !isset($value['date']) || !isset($value['time'])) {
+    $value = array(
+      'date' => '',
+      'time' => '',
+    );
+  }
+  $element['#tree'] = TRUE;
+  $element['date'] = array(
+    '#type' => 'html_date',
+    '#default_value' => $value['date'],
+  );
+  $attributes = $element['#attributes'];
+  if (isset($attributes['date'])) {
+    $element['date']['#attributes'] = $attributes['date'];
+  }
+
+  $element['time'] = array(
+    '#type' => 'html_time',
+    '#default_value' => $value['time'],
+  );
+  if (isset($attributes['time'])) {
+    $element['time']['#attributes'] = $attributes['time'];
+  }
+
+  return $element;
+}
+
+/**
+ * Validate a date string.
+ */
+function html_date_validate($element, &$form_state) {
+  $date = $element['#value'];
+  if (!empty($date)) {
+    $valid_date = FALSE;
+    $created_date = DateTime::createFromFormat(DATE_FORMAT_DATE, $date);
+    if (is_object($created_date)) {
+      // DateTime::createFromFormat alone is too permissive.
+      if ($created_date->format(DATE_FORMAT_DATE) == $date) {
+        $valid_date = TRUE;
+      }
+    }
+    if (!$valid_date) {
+      form_error($element, t('%date is not a valid date.', array('%date' => $date)));
+    }
+  }
+}
+
+/**
+ * Validate a time string.
+ */
+function html_time_validate($element, &$form_state) {
+  $time = $element['#value'];
+  if (!empty($time)) {
+    // Pad time if seconds were omitted because of the step attribute,
+    // or a browser skipped it. Our date pattern contains seconds.
+    if (preg_match('/^\d{2}:\d{2}$/', $time)) {
+      $time .= ':00';
+    }
+    $valid_time = FALSE;
+    $created_time = DateTime::createFromFormat(DATE_FORMAT_TIME, $time);
+    if (is_object($created_time)) {
+      // DateTime::createFromFormat alone is too permissive.
+      if ($created_time->format(DATE_FORMAT_TIME) == $time) {
+        $valid_time = TRUE;
+      }
+    }
+    if (!$valid_time) {
+      form_error($element, t('%time is not a valid time.', array('%time' => $time)));
+    }
+  }
+}
+
+/**
+ * Validate a combined date and time array.
+ */
+function html_datetime_validate($element, &$form_state) {
+  // Validation of parts actually happens in child fields.
+  if (is_array($element['#value'])) {
+    // If either is set, both are needed.
+    if (!empty($element['#value']['date']) || !empty($element['#value']['time'])) {
+      if (empty($element['#value']['date'])) {
+        $element['#value']['date'] = format_date(REQUEST_TIME, DATE_FORMAT_DATE);
+      }
+      elseif (empty($element['#value']['time'])) {
+        $element['#value']['time'] = '00:00:00';
+      }
+    }
+  }
+}
+
+/**
  * Sets the value for a weight element, with zero as a default.
  */
 function weight_value(&$form) {
@@ -3234,7 +3410,8 @@ function theme_checkbox($variables) {
 }
 
 /**
- * Adds form element theming to an element if its title or description is set.
+ * Adds additional customization to a form element when its title or description
+ * is set.
  *
  * This is used as a pre render function for checkboxes and radios.
  */
@@ -3359,7 +3536,7 @@ function form_process_actions($element, &$form_state) {
   $primary_set = FALSE;
   foreach (element_children($element, TRUE) as $key) {
     // Don't add automatic classes to non-buttons.
-    if (!in_array($element[$key]['#type'], array('button', 'submit'))) {
+    if (!isset($element[$key]['#type']) || !in_array($element[$key]['#type'], array('button', 'submit'))) {
       continue;
     }
 
@@ -3382,6 +3559,25 @@ function form_process_actions($element, &$form_state) {
     $element[$first_button]['#attributes']['class'] = array_diff($element[$first_button]['#attributes']['class'], array('button-secondary'));
   }
 
+  return $element;
+}
+
+/**
+ * Processes a form button element.
+ *
+ * @param $element
+ *   An associative array containing the properties and children of the
+ *   form button.
+ * @param $form_state
+ *   The $form_state array for the form this element belongs to.
+ *
+ * @return
+ *   The processed element.
+ */
+function form_process_button($element, &$form_state) {
+  // We normally want to add backdrop.form so that the double submit protection
+  // can be added to the site.
+  $element['#attached']['library'][] = array('system', 'backdrop.form');
   return $element;
 }
 
@@ -3835,11 +4031,11 @@ function form_pre_render_fieldset($element) {
     // If this element belongs to a group, but the group-holding element does
     // not exist, we need to render it (at its original location).
     if (!isset($element['#groups'][$group]['#group_exists'])) {
-      // Intentionally empty to clarify the flow; we simply return $element.
+      // Intentionally empty to clarify the flow. Return $element.
     }
     // If we injected this element into the group, then we want to render it.
     elseif (!empty($element['#group_fieldset'])) {
-      // Intentionally empty to clarify the flow; we simply return $element.
+      // Intentionally empty to clarify the flow. Return $element.
     }
     // Otherwise, this element belongs to a group and the group exists, so we do
     // not render it.
@@ -4821,7 +5017,7 @@ function _form_set_class(&$element, $class = array()) {
  *   are optional except as noted):
  *   - operations: (required) Array of operations to be performed, where each
  *     item is an array consisting of the name of an implementation of
- *     callback_batch_operation() and an array of parameter.
+ *     callback_batch_operation() and an array of parameters.
  *     Example:
  *     @code
  *     array(
@@ -4892,7 +5088,7 @@ function batch_set($batch_definition) {
 
     // Add the set to the batch.
     if (empty($batch['id'])) {
-      // The batch is not running yet. Simply add the new set.
+      // The batch is not running yet. Add the new set.
       $batch['sets'][] = $batch_set;
     }
     else {

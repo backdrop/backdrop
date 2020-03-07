@@ -83,6 +83,7 @@ class MenuTestCase extends BackdropWebTestCase {
     $this->resetMenuLink($item, $old_title);
 
     // Test for the correct behavior of user menu titles.
+    config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
     $this->addMenuLink(0, 'user/register', 'user-menu');
     $this->backdropLogout();
     $this->backdropGet('user/register');
@@ -663,8 +664,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
 
-    // Change default parent item to Main menu, so we can assert more
-    // easily.
+    // Change default parent item to Main menu, so we can assert more easily.
     $edit = array(
       'menu_parent' => 'main-menu:0',
     );
@@ -681,6 +681,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     $edit = array(
       "title" => $node_title,
       "body[$language][0][value]" => $this->randomString(),
+      "menu[enabled]" => 0,
     );
     $this->backdropPost('node/add/page', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($node_title);

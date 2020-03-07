@@ -15,11 +15,10 @@ require_once __DIR__ . '/query.inc';
  * more tables and their related keys and indexes. A schema is defined by
  * hook_schema(), which usually lives in a modulename.install file.
  *
- * By implementing hook_schema() and specifying the tables your module
- * declares, you can easily create and drop these tables on all
- * supported database engines. You don't have to deal with the
- * different SQL dialects for table creation and alteration of the
- * supported database engines.
+ * By implementing hook_schema() and specifying the tables your module declares,
+ * you can create and drop these tables on all supported database engines. You
+ * don't have to deal with the different SQL dialects for table creation and
+ * alteration of the supported database engines.
  *
  * hook_schema() should return an array with a key for each table that
  * the module defines.

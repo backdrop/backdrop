@@ -9,7 +9,7 @@
     "update_max_attempts": 2,
     "update_timeout": 30,
     "update_emails": [],
-    "update_threshold": 0,
+    "update_threshold": "all",
     "update_requirement_type": 0,
     "update_status": [],
     "update_projects": []

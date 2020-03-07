@@ -290,12 +290,12 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'name':
-          $site_name = config_get('system.core', 'site_name');
+          $site_name = config_get_translated('system.core', 'site_name');
           $replacements[$original] = $sanitize ? check_plain($site_name) : $site_name;
           break;
 
         case 'slogan':
-          $slogan = config_get('system.core', 'site_slogan');
+          $slogan = config_get_translated('system.core', 'site_slogan');
           $replacements[$original] = $sanitize ? check_plain($slogan) : $slogan;
           break;
 

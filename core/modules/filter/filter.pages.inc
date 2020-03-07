@@ -32,7 +32,7 @@ function filter_tips_long($format = NULL) {
 /**
  * Autocomplete callback for link textfield.
  */
-function _filter_link_autocomplete($string) {
+function _filter_link_autocomplete($string = '') {
   $matches = array();
   $match_count = 0;
   if ($string) {
@@ -171,8 +171,11 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   }
 
   // Set the dialog title and submit button label.
-  if (!empty($values['src'])) {
-    backdrop_set_title(t('Edit image'));
+  if (!empty($values['src']) || !empty($form_state['storage']['editing_image'])) {
+    // Remember this is editing, not inserting. In the event the image is
+    // removed and re-uploaded.
+    $form_state['storage']['editing_image'] = TRUE;
+    backdrop_set_title(t('Edit image details'));
     $submit_button_label = t('Update');
   }
   else {
@@ -190,27 +193,29 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     'directory' => 'inline-images',
   );
 
-  if (!empty($upload_settings['max_dimensions']['width']) && !empty($upload_settings['max_dimensions']['height'])) {
+  if (!empty($upload_settings['max_dimensions']['width']) || !empty($upload_settings['max_dimensions']['height'])) {
     $max_dimensions = $upload_settings['max_dimensions']['width'] . 'x' . $upload_settings['max_dimensions']['height'];
   }
   else {
     $max_dimensions = 0;
   }
   $max_filesize = !empty($upload_settings['max_size']) ? min(parse_size($upload_settings['max_size']), file_upload_max_size()) : file_upload_max_size();
+  $orientation = !empty($upload_settings['orientate']) ? $upload_settings['orientate'] : 0;
   $existing_file = !empty($values['data-file-id']) ? file_load($values['data-file-id']) : NULL;
   $fid = $existing_file ? $existing_file->fid : NULL;
   $form['image']['fid'] = array(
-    '#title' => t('Image upload'),
+    '#title' => t('Upload an image'),
     '#type' => 'managed_file',
     '#upload_location' => $upload_settings['scheme'] . '://' . $upload_settings['directory'],
     '#default_value' => $fid ? $fid : NULL,
     '#upload_validators' => array(
       'file_validate_extensions' => array('gif png jpg jpeg'),
+      'file_validate_image_orientation' => array($orientation),
       'file_validate_size' => array($max_filesize),
       'file_validate_image_resolution' => array($max_dimensions),
     ),
     '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Image Upload'),
+      'data-editor-image-toggle' => t('Upload an image'),
     ),
     '#parents' => array('fid'),
     '#weight' => -10,
@@ -219,27 +224,23 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
 
   // Use a "textfield" rather than "url" to allow relative paths.
   $form['image']['src'] = array(
-    '#title' => t('Image URL'),
+    '#title' => t('Select from library'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => '/example/image.jpg',
     '#default_value' => isset($values['src']) ? $values['src'] : NULL,
     '#parents' => array('attributes', 'src'),
     '#wrapper_attributes' => array(
-      'data-editor-image-toggle' => t('Image URL'),
+      'data-editor-image-toggle' => t('Select from library'),
     ),
-    '#weight' => -2,
+    '#weight' => -8,
+    '#maxlength' => 256,
   );
 
   // If no current value or an existing file exists, default to showing
   // the uploading interface.
   if ($fid || empty($form['image']['src']['#default_value'])) {
-    $form['image']['fid']['#weight'] = -10;
     $form['image']['src']['#default_value'] = '';
-  }
-  // Otherwise if editing an unmanaged file, show the raw URL field.
-  else {
-    $form['image']['src']['#weight'] = -10;
   }
 
   $form['alt'] = array(
@@ -257,8 +258,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#title' => t('Width'),
     '#title_display' => 'attribute',
     '#type' => 'number',
-    '#default_value' => isset($values['width']) ? $values['width'] : NULL,
-    '#min' => 1,
+    '#default_value' => !empty($values['width']) ? $values['width'] : '',
     '#max' => 99999,
     '#attributes' => array('placeholder' => t('width')),
     '#parents' => array('attributes', 'width'),
@@ -268,8 +268,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#title' => t('Height'),
     '#title_display' => 'attribute',
     '#type' => 'number',
-    '#default_value' => isset($values['height']) ? $values['height'] : NULL,
-    '#min' => 1,
+    '#default_value' => !empty($values['height']) ? $values['height'] : '',
     '#max' => 99999,
     '#attributes' => array('placeholder' => t('height')),
     '#parents' => array('attributes', 'height'),
@@ -297,6 +296,20 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#access' => !empty($format->filters['filter_image_caption']->status),
   );
 
+  // Incorporate the Library View in the editor dialog form.
+  $view_name = 'image_library';
+  $view = views_embed_view($view_name);
+  if (empty($view)) {
+    $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
+    if (user_access('administer views')) {
+      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
+    }
+  }
+
+  $form['library_view'] = array(
+    '#markup' => '<div class="library-view" data-editor-library-view="true">' . $view . '</div>',
+  );
+
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -314,12 +327,6 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
  * Submit handler for filter_format_editor_image_form().
  */
 function filter_format_editor_image_form_submit($form, &$form_state) {
-  // Image source overrides file uploads, as the values are emptied out when
-  // hidden by JavaScript.
-  if (!empty($form_state['values']['attributes']['src'])) {
-    $form_state['values']['fid'] = NULL;
-    $form_state['values']['attributes']['data-file-id'] = NULL;
-  }
   // Convert any uploaded files from the FID values to the src attribute.
   if (!empty($form_state['values']['fid'])) {
     $fid = $form_state['values']['fid'];
@@ -365,7 +372,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
 
   // Use a "textfield" rather than "url" to allow relative paths.
   $form['href'] = array(
-    '#title' => t('Link value'),
+    '#title' => t('Link destination'),
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => ' ',
@@ -375,8 +382,9 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
       'data-editor-image-toggle' => t('Link to existing content'),
     ),
     '#weight' => -10,
+    '#maxlength' => 256,
     '#autocomplete_path' => 'filter-link/autocomplete',
-    '#description' => t('Enter a known path, or start typing to get suggestions'),
+    '#description' => t('Start typing to see a list of suggestions, enter the relative path to another page, or enter an external URL.<br>Examples: <em>About Us</em>, <em>/about</em>, or <em>http://backdropcms.org</em>'),
   );
 
 
@@ -388,6 +396,8 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     'file_extensions' => 'txt',
     'directory' => 'inline-files',
     'data-file-id' => NULL,
+    'status' => 0,
+    'scheme' => 'public',
   );
 
   $max_filesize = !empty($upload_settings['max_size']) ? min(parse_size($upload_settings['max_size']), file_upload_max_size()) : file_upload_max_size();
@@ -433,13 +443,54 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'text'),
   );
 
-  $form['target'] = array(
-    '#title' => t('Open in new window'),
+  $form['more'] = array(
+    '#title' => t('More link options'),
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['more']['target'] = array(
+    '#title' => t('Open the link destination in a new window'),
     '#type' => 'checkbox',
     '#return_value' => '_blank',
     '#default_value' => isset($values['target']) ? $values['target'] : FALSE,
     '#parents' => array('attributes', 'target'),
   );
+
+  $form['more']['class'] = array(
+    '#title' => t('CSS classes'),
+    '#description' => t('Separate multiple CSS classes with spaces.'),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['class']) ? $values['class'] : '',
+    '#parents' => array('attributes', 'class'),
+  );
+
+  $fragment_info_link = l(t('fragment'), 'https://en.wikipedia.org/wiki/Fragment_identifier', array('attributes' => array('target' => '_blank')));
+  $form['more']['id'] = array(
+    '#title' => t('Unique Identifier'),
+    '#description' => t('Setting an ID allows linking to this part of the page using a URL !fragment.', array('!fragment' => $fragment_info_link)),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['id']) ? $values['id'] : '',
+    '#parents' => array('attributes', 'id'),
+  );
+
+  $form['more']['title'] = array(
+    '#title' => t('Link title'),
+    '#description' => t('The title attribute of the link. Usually shown as a small tooltip on hover.'),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['title']) ? $values['title'] : '',
+    '#parents' => array('attributes', 'title'),
+  );
+
+  $form['more']['rel'] = array(
+    '#title' => t('Relationship (rel)'),
+    '#description' => t('Specifies the relationship between the current page and the linked page.'),
+    '#type' => 'textfield',
+    '#default_value' => isset($values['rel']) ? $values['rel'] : '',
+    '#parents' => array('attributes', 'rel'),
+  );
+
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -451,6 +502,20 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
   );
 
   return $form;
+}
+
+/**
+ * Validate handler for filter_format_editor_link_form().
+ */
+function filter_format_editor_link_form_validate($form, &$form_state) {
+  if (isset($form_state['values']['attributes']['class'])) {
+    $classes = explode(' ', $form_state['values']['attributes']['class']);
+    $clean_classes = array();
+    foreach ($classes as $class_name) {
+      $clean_classes[] = backdrop_clean_css_identifier($class_name, array());
+    }
+    $form_state['values']['attributes']['class'] = implode(' ', $clean_classes);
+  }
 }
 
 /**
@@ -494,6 +559,20 @@ function filter_format_editor_link_form_submit($form, &$form_state) {
     // Remove any reference to a data file.
     unset($form_state['values']['fid']);
     $form_state['values']['attributes']['data-file-id'] = NULL;
+  }
+
+  // Clean up optional attributes, if not specified, remove.
+  $more = array('class', 'target', 'id', 'title', 'rel', 'data-file-id');
+  foreach ($more as $attribute) {
+    if (isset($form_state['values']['attributes'][$attribute])) {
+      $value = trim($form_state['values']['attributes'][$attribute]);
+      if (strlen($value) === 0 || ($attribute === 'target' && empty($value))) {
+        unset($form_state['values']['attributes'][$attribute]);
+      }
+      else {
+        $form_state['values']['attributes'][$attribute] = $value;
+      }
+    }
   }
 }
 
@@ -541,6 +620,7 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
   // adding http:// or a prefixing slash if needed.
   if (module_exists('link') && $type = link_validate_url($value)) {
     $value = link_cleanup_url($value);
+    $form_state['values']['type'] = $type;
     if ($type === LINK_INTERNAL && strpos($value, '/') !== 0) {
       $value = '/' . $value;
     }
@@ -556,22 +636,31 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
 
 /**
  * Find a managed file ID from a url.
- *
  */
 function _filter_get_file_id($href) {
+  $result = 0;
+
+  // Check URI for valid file scheme.
+  if (!file_valid_uri($href)){
+    return $result;
+  }
+
   // Extract file name and directory from $href.
   $pos = strrpos($href, "/");
   $filename = substr($href,$pos + 1);
-  // Now find this file name in uri field to get fid.
-  $results = db_select('file_managed')
-    ->fields('file_managed', array('fid', 'uri'))
-    ->condition('uri', '%' . $filename, 'LIKE')
-    ->orderBy('fid', 'DESC')
-    ->execute();
 
-  $result = 0;
-  foreach ($results as $found) {
-    $result = $found->fid;
+  // Now find this file name in uri field to get fid.
+  if (!empty($filename)) {
+    $results = db_select('file_managed')
+      ->fields('file_managed', array('fid', 'uri'))
+      ->condition('uri', '%' . $filename, 'LIKE')
+      ->orderBy('fid', 'DESC')
+      ->execute();
+
+    foreach ($results as $found) {
+      $result = $found->fid;
+    }
   }
+
   return $result;
 }

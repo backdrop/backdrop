@@ -158,6 +158,20 @@ class Layout {
   var $renderer_name = 'standard';
 
   /**
+   * An array of orphaned blocks when changing templates.
+   *
+   * @var array
+   */
+  var $orphaned_blocks = array();
+
+  /**
+   * The region where orphaned blocks are placed in new template.
+   *
+   * @var string
+   */
+  var $refuge_region;
+
+  /**
    * An array of LayoutContext instances used by this menu item.
    *
    * @var LayoutContext[]
@@ -291,7 +305,7 @@ class Layout {
     }
     $files = file_load_multiple($fids);
     foreach ($files as $fid => $file) {
-      if ($file && $file->status !== FILE_STATUS_PERMANENT) {
+      if ((int) ($file && $file->status) !== FILE_STATUS_PERMANENT) {
         // This makes the file "self-referencing", so it will never be deleted.
         // File usages are not removed for text blocks currently.
         // See https://github.com/backdrop/backdrop-issues/issues/2137.
@@ -661,7 +675,12 @@ class Layout {
 
     $old_layout_info = layout_get_layout_template_info($this->layout_template);
     $new_layout_info = layout_get_layout_template_info($layout_name);
+    // Set up the array with region names for the new layout.
     $new_positions = array();
+    $new_regions = array_keys($new_layout_info['regions']);
+    foreach ($new_regions as $new_region_name) {
+      $new_positions[$new_region_name] = array();
+    }
 
     // Do the mapping in the order provided (if any).
     if ($region_mapping) {
@@ -681,9 +700,6 @@ class Layout {
       else {
         $new_region_name = FALSE;
       }
-      if ($new_region_name && !array_key_exists($new_region_name, $new_positions)) {
-        $new_positions[$new_region_name] = array();
-      }
 
       if (isset($this->positions[$old_region_name])) {
         foreach ($this->positions[$old_region_name] as $uuid) {
@@ -691,9 +707,19 @@ class Layout {
             $new_positions[$new_region_name][] = $uuid;
           }
           else {
-            unset($this->content[$uuid]);
+            $this->orphaned_blocks[] = $uuid;
           }
         }
+      }
+    }
+
+    // Assign orphan blocks to the default or last region, if the former doesn't
+    // exist.
+    if (!empty($this->orphaned_blocks)) {
+      end($new_positions);
+      $this->refuge_region = !empty($new_layout_info['default region']) ? $new_layout_info['default region'] : key($new_positions);
+      foreach ($this->orphaned_blocks as $uuid) {
+        $new_positions[$this->refuge_region][] = $uuid;
       }
     }
 

@@ -105,8 +105,8 @@ function text_field_instance_settings_form($field, $instance) {
  */
 function text_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
   foreach ($items as $delta => $item) {
-    // @todo Length is counted separately for summary and value, so the maximum
-    //   length can be exceeded very easily.
+    // @todo The maximum length can be exceeded because length is counted
+    // separately for summary and value.
     foreach (array('value', 'summary') as $column) {
       if (!empty($item[$column])) {
         if (!empty($field['settings']['max_length']) && backdrop_strlen($item[$column]) > $field['settings']['max_length']) {
@@ -158,7 +158,16 @@ function text_field_load($entity_type, $entities, $field, $instances, $langcode,
  */
 function text_field_is_empty($item, $field) {
   if (!isset($item['value']) || $item['value'] === '') {
-    return !isset($item['summary']) || $item['summary'] === '';
+    if (isset($item['format']) && $item['format'] !== '') {
+      // If this text field has a text format setting,
+      // save it regardless of empty value to keep the format.
+      return FALSE;
+    }
+    elseif (!isset($item['summary']) || $item['summary'] === '') {
+      // Neither value nor summary nor format are set,
+      // no need to save to database.
+      return TRUE;
+    }
   }
   return FALSE;
 }

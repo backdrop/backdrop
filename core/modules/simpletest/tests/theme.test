@@ -95,10 +95,9 @@ class ThemeUnitTest extends BackdropWebTestCase {
     $this->backdropGet('theme-test/suggestion');
     $this->assertNoText('modules/system/css/system.css', "The theme's .info file is able to override a module CSS file from being added to the page.");
 
-    // Also test with aggregation enabled, simply ensuring no PHP errors are
-    // triggered during backdrop_build_css_cache() when a source file doesn't
-    // exist. Then allow remaining tests to continue with aggregation disabled
-    // by default.
+    // Also test with aggregation enabled, ensuring no PHP errors are triggered
+    // during backdrop_build_css_cache() when a source file doesn't exist. Then
+    // allow remaining tests to continue with aggregation disabled by default.
     config_set('system.core', 'preprocess_css', 1);
     $this->backdropGet('theme-test/suggestion');
     config_set('system.core', 'preprocess_css', 0);
