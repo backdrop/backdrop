@@ -194,8 +194,7 @@ function views_update_1007() {
 
   foreach ($configs as $config_file) {
     $config = config($config_file);
-    $core_key_in_config = $config->get('core');
-    if ($core_key_in_config !== NULL) {
+    if ($config->get('core') !== NULL) {
       $config->clear('core');
     }
   }
