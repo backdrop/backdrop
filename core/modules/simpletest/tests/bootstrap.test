@@ -123,6 +123,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $test_path = 'system-test/hello-world';
     $this->backdropGet($test_path);
 
+    sleep(1);
     $this->backdropHead($test_path);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $etag = $this->backdropGetHeader('ETag');
@@ -174,6 +175,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('Connection'), 'close', 'Connection header set to closed when hitting an uncached page.');
 
     // Check cache.
+    sleep(1); // Delay to ensure caches are set.
     $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')), $headers);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Vary'), 'Cookie,Accept-Encoding', 'Vary: Cookie header was sent.');
@@ -192,6 +194,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->backdropHead('system-test/hello-world', array('query' => array('cache' => 'test')));
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Cache miss on first request via HTTP HEAD request.');
 
+    sleep(1); // Delay to ensure caches are set.
     $this->backdropGet('system-test/hello-world', array('query' => array('cache' => 'test')));
 
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Cache hit on second request via HTTP GET request.');
@@ -207,6 +210,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'MISS', 'Initial page request was miss.');
     $this->assertTrue($total < 5, 'Initial page requests returned before shutdown functions are executed.');
 
+    sleep(1); // Delay to ensure caches are set.
     $start = microtime(TRUE);
     $this->backdropGet('system-test/sleep/shutdown/5', array(), $headers);
     $total = microtime(TRUE) - $start;
@@ -331,6 +335,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertRaw('</html>', 'Page was gzip compressed.');
 
     // Verify that cached output is compressed.
+    sleep(1); // Delay to ensure caches are set.
     $this->backdropGet($test_path, array(), array('Accept-Encoding: gzip,deflate'));
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Content-Encoding'), 'gzip', 'A Content-Encoding header was sent.');
@@ -417,6 +422,9 @@ class HookBootExitTestCase extends BackdropWebTestCase {
 
     $this->backdropGet('');
 
+    // Sleep to allow time for hook_exit() after the page has been delivered.
+    sleep(1);
+
     $calls = 1;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with disabled cache.'));
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, t('hook_exit called with disabled cache.'));
@@ -428,6 +436,9 @@ class HookBootExitTestCase extends BackdropWebTestCase {
 
     $this->backdropGet('');
 
+    // Sleep to allow time for hook_exit() after the page has been delivered.
+    sleep(1);
+
     $calls++;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with normal cache.'));
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_exit'))->fetchField(), $calls, t('hook_exit called with normal cache.'));
@@ -435,6 +446,9 @@ class HookBootExitTestCase extends BackdropWebTestCase {
     // Test with page cache cleared, boot and exit should be called.
     $this->assertTrue(db_delete('cache_page')->execute(), t('Page cache cleared.'));
     $this->backdropGet('');
+
+    // Sleep to allow time for hook_exit() after the page has been delivered.
+    sleep(1);
 
     $calls++;
     $this->assertEqual(db_query('SELECT COUNT(*) FROM {watchdog} WHERE type = :type AND message = :message', array(':type' => 'system_test', ':message' => 'hook_boot'))->fetchField(), $calls, t('hook_boot called with aggressive cache and no cached page.'));
