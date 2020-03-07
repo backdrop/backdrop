@@ -796,40 +796,6 @@ function admin_bar_admin_bar_cache_info() {
 }
 
 /**
- * Implements hook_admin_bar_cache_info().
- */
-function system_admin_bar_cache_info() {
-  $caches = array(
-    'assets' => t('CSS and JavaScript'),
-    'cache' => t('Page and else'),
-    'layout' => t('Layout'),
-    'menu' => t('Menu'),
-    'theme' => t('Theme registry'),
-    'token' => t('Token registry'),
-  );
-  foreach ($caches as $name => $cache) {
-    $caches[$name] = array(
-      'title' => $cache,
-      'callback' => '_admin_bar_flush_cache',
-    );
-  }
-  return $caches;
-}
-
-/**
- * Implements hook_admin_bar_cache_info().
- *
- * On behalf of the Update module.
- */
-function update_admin_bar_cache_info() {
-  $caches['update'] = array(
-    'title' => t('Update data'),
-    'callback' => '_update_cache_clear',
-  );
-  return $caches;
-}
-
-/**
  * Flush all caches or a specific one.
  *
  * @param string $name
