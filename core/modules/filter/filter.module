@@ -152,8 +152,8 @@ function filter_menu() {
   $items['admin/config/content/formats/%filter_format/filter-settings/%'] = array(
     'title callback' => 'filter_admin_format_title',
     'title arguments' => array(4),
-    'page callback' => 'filter_admin_format_filter_settings_form',
-    'page arguments' => array(4, 6),
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('filter_admin_format_filter_settings_form', 4, 6),
     'access arguments' => array('administer filters'),
     'file' => 'filter.admin.inc',
   );
@@ -1887,10 +1887,6 @@ function filter_set_format_tempstore($item) {
     return;
   }
 
-  $item->locked = array(
-    'uid' => $GLOBALS['user']->uid,
-    'updated' => REQUEST_TIME,
-  );
   tempstore_set('filter_store', $item->format, $item, 604800);
 }
 

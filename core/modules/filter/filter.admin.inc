@@ -364,14 +364,12 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#value' => $filters,
   );
   foreach ($all_filter_info as $name => $filter_info) {
-    $configure_form = _filter_build_configure_form($form, $form_state, $format, $name);
-    
     $form['filters'][$name]['status'] = array(
       '#type' => 'checkbox',
       '#default_value' => $filters[$name]->status,
       '#attributes' => array('class' => array('filter-status')),
     );
-    if (!empty($configure_form) && empty($form_state['show_settings'][$name])) {
+    if (isset($filter_info['settings callback'])) {
       $form['filters'][$name]['configure_button'] = array(
         '#type' => 'submit',
         '#name' => $name,
@@ -437,7 +435,7 @@ function filter_admin_format_configure_ajax($form, &$form_state) {
   $name = $trigger['#name'];
   $format = $form_state['format'];
 
-  $configure_form = backdrop_get_form('_filter_build_configure_form', $format, $name);
+  $configure_form = backdrop_get_form('filter_admin_format_filter_settings_form', $format, $name);
   $title = t('Configure filter');
   $options = array(
     'dialogClass' => 'filter-dialog',
@@ -465,16 +463,7 @@ function filter_admin_format_configure_ajax_submit($form, &$form_state) {
 /**
  * Returns the configuration form for configurable filters.
  */
-// todo: get rid of this and just use _filter_build_configure_form() directly.
-function filter_admin_format_filter_settings_form($format, $filter) {
-  $configure_form = backdrop_get_form('_filter_build_configure_form', $format, $filter);
-  return $configure_form;
-}
-
-/**
- * Returns the configuration form for configurable filters.
- */
-function _filter_build_configure_form($form, &$form_state, $format, $filter) {
+function filter_admin_format_filter_settings_form($form, &$form_state, $format, $filter) {
   form_load_include($form_state, 'inc', 'filter', 'filter.admin');
   $form_state['format'] = $format;
   $form_state['filter'] = $filter;
@@ -529,7 +518,7 @@ function _filter_build_configure_form($form, &$form_state, $format, $filter) {
 }
 
 /**
- * Form submit handler for _filter_build_configure_form().
+ * Form submit handler for filter_admin_format_filter_settings_form().
  *
  * @see filter_admin_format_form()
  */
