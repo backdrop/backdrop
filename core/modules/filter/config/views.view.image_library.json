@@ -342,7 +342,22 @@
                         }
                     }
                 },
-                "sorts": [],
+                "sorts": {
+                    "timestamp": {
+                        "id": "timestamp",
+                        "table": "file_managed",
+                        "field": "timestamp",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "order": "DESC",
+                        "exposed": false,
+                        "expose": {
+                            "label": ""
+                        },
+                        "granularity": "second"
+                    }
+                },
                 "style_options": {
                     "grouping": [],
                     "row_class": "image-library-choose-file",

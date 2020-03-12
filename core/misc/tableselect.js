@@ -39,7 +39,7 @@ Backdrop.tableSelect = function () {
   });
 
   // For each of the checkboxes within the table that are not disabled.
-  checkboxes = $('td input[data-tableselect-id]:enabled');
+  checkboxes = $('td input[data-tableselect-id]:enabled', table);
   $(table).on('click', checkboxes, function (e) {
     // Either add or remove the selected class based on the state of the check all checkbox.
     $(this).closest('tr').toggleClass('selected', this.checked);
