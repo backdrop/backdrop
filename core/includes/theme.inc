@@ -1510,12 +1510,12 @@ function theme_has_settings($theme) {
  * @return bool
  *   TRUE if the theme supports Color module, FALSE otherwise.
  *
- * @since 1.15.0
+ * @since 1.16.0
  */
 function theme_has_color_support($theme) {
   $themes = list_themes();
   $theme_info = $themes[$theme];
-  if ($theme_info->info['settings']['color'] && file_exists(drupal_get_path('theme', $theme_info->name) . '/color/color.inc')) {
+  if ($theme_info->info['settings']['color'] && file_exists(backdrop_get_path('theme', $theme_info->name) . '/color/color.inc')) {
     return TRUE;
   }
   if (isset($theme_info->info['base theme'])) {
