@@ -33,9 +33,9 @@ input[type=color] {
 /* Color inputs */
 
 /**
-  * Prevent color input labels from being crumbed up together, when there are
-  * some that wrap in multiple lines.
-  */
+ * Prevent color input labels from being crumbed up together, when there are
+ * some that wrap into multiple lines.
+ */
 #system-theme-settings .form-type-color {
   display: table;
 }
