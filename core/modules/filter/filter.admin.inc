@@ -185,7 +185,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
   if ($stored_format = filter_get_format_tempstore($format->format)) {
     $format = $stored_format;
   }
-  else {
+  elseif (isset($format->format)) {
     filter_set_format_tempstore($format);
   }
   $is_fallback = ($format->format == filter_fallback_format());
@@ -374,6 +374,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
         '#type' => 'submit',
         '#name' => $name,
         '#op' => 'configure',
+        '#validate' => array('filter_admin_format_filter_settings_form_redirect_validate'),
         '#submit' => array('filter_admin_format_filter_settings_form_redirect'),
         '#ajax' => array(
           'callback' => 'filter_admin_format_configure_ajax',
@@ -419,11 +420,28 @@ function filter_admin_format_form($form, &$form_state, $format) {
 }
 
 /**
- * Submit handler for layout_settings_form() that lets the user add a condition.
+ * Validation handler for the settings configuration buttons on the
+ * filter_admin_format_form().
+ */
+function filter_admin_format_filter_settings_form_redirect_validate($form, &$form_state) {
+  // Throw a form error if there is no machine name yet, as we need this to set
+  // up the URLs for settings forms.
+  if (empty($form_state['values']['format'])) {
+    form_set_error('format', t('Please enter a format name before configuring settings'));
+  }
+}
+
+/**
+ * Submit handler for the settings configuration buttons on the
+ * filter_admin_format_form().
  */
 function filter_admin_format_filter_settings_form_redirect($form, &$form_state) {
   $trigger = $form_state['triggering_element'];
   $name = $trigger['#name'];
+  if (empty($form_state['format']->format)) {
+    $form_state['format']->format = $form_state['values']['format'];
+    filter_set_format_tempstore($form_state['format']);
+  }
   $form_state['redirect'] = 'admin/config/content/formats/' . $form_state['format']->format . '/filter-settings/' . $name;
 }
 
@@ -596,7 +614,13 @@ function filter_admin_format_form_submit($form, &$form_state) {
   unset($form_state['values']['actions']);
   unset($form_state['values']['filters']['filters']);
 
-  $form_state['format'] = filter_get_format_tempstore($form_state['format']->format);
+  // If we never changed filter settings, then tempstore was never triggered, so
+  // use only form values.
+  if (!empty($form_state['format']->format)) {
+    $tempstore = filter_get_format_tempstore($form_state['format']->format);
+    $form_state['format']->filters = $tempstore->filters;
+  }
+
   $form_state['values']['filters'] = $form_state['format']->filters;
 
   // Add the submitted form values to the text format, and save it.
