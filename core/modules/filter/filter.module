@@ -153,6 +153,7 @@ function filter_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'filter.pages.inc',
   );
+
   return $items;
 }
 
