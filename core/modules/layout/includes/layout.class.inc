@@ -181,7 +181,16 @@ class Layout {
   /**
    * An array of removed blocks, keyed by their UUID.
    *
+   * This is being used in removeBlock() to keep track of blocks being removed
+   * from the layout being edited. If the layout edits are saved, this is used
+   * in layout_layout_presave() in order to give block modules a chance to react
+   * on block removals. If the layout edits are canceled, there is no need to
+   * clear this as that task is already being handled in
+   * layout_settings_form_reset().
+   *
    * @var array
+   * @see removeBlock()
+   * @see layout_layout_presave()
    */
   var $removed_blocks = array();
 
@@ -520,7 +529,8 @@ class Layout {
    *   The UUID of the block being removed.
    */
   function removeBlock($block_uuid) {
-    // Keep info about removed blocks.
+    // Keep track of removed blocks so that block modules can react to their
+    // removal (if layout edits are saved).
     $this->removed_blocks[$block_uuid] = $this->content[$block_uuid];
 
     unset($this->content[$block_uuid]);

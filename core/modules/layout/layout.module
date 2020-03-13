@@ -2061,6 +2061,7 @@ function layout_layout_info() {
 function layout_layout_presave($layout) {
   if (!empty($layout->removed_blocks)) {
     foreach ($layout->removed_blocks as $uuid => $block) {
+      // @todo: Follow-up for other block types with files/images.
       if (is_a($block, 'BlockHero')) {
         if (!empty($block->settings['image'])) {
           $image = file_load($block->settings['image']);
