@@ -31,15 +31,14 @@ class DashboardNewsBlock extends Block {
    * {@inheritdoc}
    */
   public function getContent() {
-    $feed = backdrop_http_request('https://backdropcms.org/api/notifications');
+    $news = $this->getNews();
     $links = array();
-    if ($feed->code === '200') {
-      $news = json_decode($feed->data);
-      foreach ($news->notifications as $key => $notifications) {
+    if ($news) {
+      foreach ($news as $key => $notifications) {
         $links[] = '<p>' . l(
-            $notifications->notification->title,
-            $notifications->notification->url
-          ) . ' - ' . filter_xss($notifications->notification->summary) . '</p>';
+            $notifications['title'],
+            $notifications['url']
+          ) . ' - ' . filter_xss($notifications['summary']) . '</p>';
       }
     }
 
@@ -72,5 +71,54 @@ class DashboardNewsBlock extends Block {
         'This block provides a news feed from BackdropCMS.org. Its contents can not be edited.'
       ),
     );
+  }
+
+  /**
+   * Return the current list of news items.
+   *
+   * This response is cached. If there is no recent cache, a new one will be
+   * generated on-the-fly. If the first request fails, the cache will persist
+   * with FALSE as the saved value until the next time the cache is cleared or
+   * cron updates the news list.
+   *
+   * @return FALSE|array
+   */
+  public static function getNews() {
+    $cache = cache()->get('dashboard_news_feed');
+    // If no cache is set at all, fetch results immediately.
+    if ($cache === FALSE) {
+      $news = DashboardNewsBlock::refreshNewsFeed();
+    }
+    else {
+      $news = $cache->data;
+    }
+    return $news;
+  }
+
+  /**
+   * Fetch news from the news source and set the cache for future responses.
+   *
+   * @return FALSE|array
+   */
+  public static function refreshNewsFeed() {
+    $news = FALSE;
+    $feed_url = config_get('dashboard.settings', 'news_feed_url');
+
+    // A short timeout means that we won't delay loading the dashboard if the
+    // cache is cleared and no network is available.
+    if ($feed_url) {
+      $feed = backdrop_http_request($feed_url, array(
+        'timeout' => 2,
+      ));
+      if ($feed->code === '200') {
+        $news = json_decode($feed->data, TRUE);
+      }
+    }
+
+    // Cache for one week, though the feed will be updated more frequently by
+    // dashboard_cron().
+    cache()->set('dashboard_news_feed', $news, REQUEST_TIME + 604800);
+
+    return $news;
   }
 }

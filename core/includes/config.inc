@@ -76,6 +76,26 @@ function config_clear($config_file, $option) {
 }
 
 /**
+ * A shortcut function to check if a value is overridden within a config file.
+ *
+ * @param string $config_file
+ *   The name of the configuration object to check. The name corresponds to
+ *   an JSON configuration file. For @code config(book.admin) @endcode, the
+ *   config object returned will contain the contents of book.admin.json.
+ * @param string $option
+ *   The name of the config option within the file to check. The config option
+ *   may contain periods to indicate levels within the config file.
+ *
+ * @return bool
+ *   TRUE if the config option is overridden. FALSE otherwise.
+ *
+ * @see Config::isOverridden()
+ */
+function config_is_overridden($config_file, $option) {
+  return config($config_file)->isOverridden($option);
+}
+
+/**
  * A shortcut function to load and retrieve a single value from a config file.
  *
  * @param string $config_file
@@ -385,6 +405,13 @@ class Config {
   protected $data;
 
   /**
+   * Any overrides specified for this configuration object.
+   *
+   * @var array
+   */
+  protected $overrides;
+
+  /**
    * The state of validation on this object.
    *
    * This value is set to TRUE by Config::validate() and is reset to FALSE after
@@ -423,8 +450,11 @@ class Config {
    *   configuration data.
    */
   public function __construct($name, ConfigStorageInterface $storage) {
+    global $config;
+
     $this->name = $name;
     $this->storage = $storage;
+    $this->overrides = isset($config[$name]) ? $config[$name] : NULL;
   }
 
   /**
@@ -544,6 +574,19 @@ class Config {
   }
 
   /**
+   * Check if a particular config key is overridden.
+   *
+   * @param $key
+   *   A string that maps to a key within the configuration data.
+   *
+   * @return bool
+   *   TRUE if the $key is overridden. FALSE otherwise.
+   */
+  public function isOverridden($key) {
+    return $this->getOverride($key) !== NULL;
+  }
+
+  /**
    * Gets data from this configuration object.
    *
    * @param string $key
@@ -564,6 +607,32 @@ class Config {
    *   The data that was requested.
    */
   public function get($key = '') {
+    $value = $this->getOverride($key);
+    if (!isset($value)) {
+      $value = $this->getOriginal($key);
+    }
+    return $value;
+  }
+
+  /**
+   * Gets the current config value as specified in the written config storage.
+   *
+   * In most cases, Config::get() should be used to pull the config value and
+   * also include any overrides to apply. This method should be used only when
+   * explicitly wanting the currently saved value (as stored in a config file)
+   * rather than what may be specified in an override (as provided in
+   * settings.php).
+   *
+   * @param string $key
+   *   The string that maps to a key with the configuration data. See
+   *   Config::get() for full examples.
+   *
+   * @return mixed
+   *   The data that was requested.
+   *
+   * @see Config::get()
+   */
+  public function getOriginal($key = '') {
     if (!$this->isLoaded) {
       $this->load();
     }
@@ -591,6 +660,67 @@ class Config {
         return $key_exists ? $value : NULL;
       }
     }
+  }
+
+  /**
+   * Checks if a config value has an override specified.
+   *
+   * @param string $key
+   *   The string that maps to a key with the configuration data.
+   *
+   *   A key may be overridden at any level, for example if
+   *   $key === 'foo.bar.key1', the matched value could be provided by an override
+   *   from 'foo.bar.key1', 'foo.bar', or 'foo'. In settings.php any of the
+   *   following would provide an overridden value for 'foo.bar.key1'.
+   *
+   *   @code
+   *   // Exact match.
+   *   $config['example.settings']['foo.bar.key1'] = 'value1';
+   *
+   *   // One level up.
+   *   $config['example.settings']['foo.bar'] = array(
+   *     'key1' => 'value1',
+   *   );
+   *
+   *   // A root level override.
+   *   $config['example.settings']['foo'] = array(
+   *     'bar' => array(
+   *       'key1' => 'value1',
+   *       'key2' => 'value2',
+   *     ),
+   *     'baz' => 'other value',
+   *   );
+   *   @endcode
+   *
+   * @see Config::get()
+   * @see settings.php
+   */
+  public function getOverride($key) {
+    $value = NULL;
+    $parts = explode('.', $key);
+    $popped_parts = array();
+    while ($parts) {
+      $assembled_key = implode('.', $parts);
+      if (isset($this->overrides[$assembled_key])) {
+        // An override is matched at some level.
+        $value = $this->overrides[$assembled_key];
+        // Drill down back into the override value to get the requested key.
+        foreach ($popped_parts as $popped_part) {
+          if (isset($value[$popped_part])) {
+            $value = $value[$popped_part];
+          }
+          else {
+            $value = NULL;
+            $popped_parts = array();
+          }
+        }
+      }
+      // If an override was not found at this key, go up a level in the key
+      // and continue until there are no more $parts left.
+      array_unshift($popped_parts, array_pop($parts));
+    }
+
+    return $value;
   }
 
   /**
@@ -697,11 +827,24 @@ class Config {
    *   Identifier to store value in configuration.
    * @param mixed $value
    *   Value to associate with identifier.
+   * @param bool $include_overridden_value
+   *   Set to TRUE to write the config value even if this key has been
+   *   overridden (usually through settings.php). Overridden keys are ignored
+   *   by default to prevent accidentally writing values that may be
+   *   environment-specific or contain sensitive information that should not
+   *   be written to config.
    *
    * @return Config
    *   The configuration object.
    */
-  public function set($key, $value) {
+  public function set($key, $value, $include_overridden_value = FALSE) {
+    // If setting a value that matches an override-provided one, don't actually
+    // write it to config.
+    $override_value = $this->getOverride($key);
+    if (isset($override_value) && ($override_value === $value) && !$include_overridden_value) {
+      return $this;
+    }
+
     if (!$this->isLoaded) {
       $this->load();
     }
@@ -742,6 +885,18 @@ class Config {
       $this->set($key, $value);
     }
     return $this;
+  }
+
+  /**
+   * Sets overrides for this configuration object.
+   *
+   * @param array $overrides
+   *   A list of overrides keyed by strings.
+   *
+   * @see Config::getOverride()
+   */
+  public function setOverrides($overrides) {
+    $this->overrides = $overrides;
   }
 
   /**
