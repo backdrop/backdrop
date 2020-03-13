@@ -2836,9 +2836,8 @@ function _system_rebuild_module_data() {
   // Find modules
   $modules = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.module$/', 'modules', 'name', 0);
 
-  // Include the installation profile(s) in modules that are loaded.
-  // This will include the current profile, then loop through any base profiles
-  // as well.
+  // Include the installation profile(s) in modules that are loaded. This will
+  // include the current profile, then loop through any base profiles as well.
   $profile = backdrop_get_profile();
   $weight = 1000;
   do {

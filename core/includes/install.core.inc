@@ -165,8 +165,8 @@ function install_state_defaults() {
     'profile_info' => array(),
     // An array of available installation profiles.
     'profiles' => array(),
-    // An array of base profiles of the chosen installation profile
-    // (e.g. chosen profile > base_profiles[0] > base_profiles[1] > etc.)
+    // An array of base profiles of the chosen installation profile (e.g.,
+    // chosen profile > base_profiles[0] > base_profiles[1] > etc.).
     'base_profiles' => array(),
     // An array of server variables that will be substituted into the global
     // $_SERVER array via backdrop_override_server_variables(). Used by
@@ -1577,8 +1577,8 @@ function install_profile_modules(&$install_state) {
   $required = array();
   $non_required = array();
   // Although profile module(s) are marked as required, they need to go after
-  // every dependency, including non-required ones. So clear their required
-  // flag for now to allow them to install late.
+  // every dependency, including non-required ones. So clear their required flag
+  // for now to allow them to install late.
   $files[$install_state['parameters']['profile']]->info['required'] = FALSE;
   if (!empty($install_state['base_profiles'])) {
     foreach ($install_state['base_profiles'] as $base_name => $base_profile) {
