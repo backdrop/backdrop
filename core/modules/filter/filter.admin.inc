@@ -652,7 +652,7 @@ function filter_admin_format_form_submit($form, &$form_state) {
     $format->editor_settings = array();
   }
 
-  //$status = filter_format_save($format);
+  $status = filter_format_save($format);
 
   // Save user permissions.
   if ($permission = filter_permission_name($format)) {
@@ -672,7 +672,7 @@ function filter_admin_format_form_submit($form, &$form_state) {
   }
 
   filter_clear_format_tempstore($format->format);
-  //$form_state['redirect'] = 'admin/config/content/formats';
+  $form_state['redirect'] = 'admin/config/content/formats';
 }
 
 /**
