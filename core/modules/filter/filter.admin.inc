@@ -174,11 +174,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
   $form['#validate'] = array();
   $form['#submit'] = array();
   $form['#tree'] = TRUE;
-  $form['#attached']['library'][] = array('filter', 'filter.admin');
-  // Todo: fix library to avoid loading all these separately.
-  $form['#attached']['js'][] = backdrop_get_path('module', 'filter') . '/js/filter.admin.js';
-  $form['#attached']['js'][] = backdrop_get_path('module', 'filter') . '/js/filter.filtered_html.admin.js';
-  $form['#attached']['css'][] = backdrop_get_path('module', 'filter') . '/css/filter.css';
+  $form['#attached']['library'][] = array('filter', 'filter.admin', 'filtered_html.admin');
   $form['#attached']['library'][] = array('system', 'backdrop.dialog');
 
   $form['name'] = array(

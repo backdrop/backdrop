@@ -60,18 +60,19 @@ Backdrop.behaviors.filterFilterHtmlUpdating = {
     $(".filter-dialog .ui-dialog-buttonpane .button-primary").click(function (e) {
       $(document).ajaxComplete(function() {
         var copyAllowedVals = $('#allowed-html').data('copyAllowedVals');
-        console.log('work dammit');
-        $('#allowed-html').val(copyAllowedVals);
+        if (copyAllowedVals) {
+          $('#allowed-html').val(copyAllowedVals);
 
-        // Update userTags.
-        var tagList = that._parseSetting(copyAllowedVals);
-        var userTags = [];
-        for (var n in tagList) {
-          if ($.inArray(tagList[n], that.autoTags) === -1) {
-            userTags.push(tagList[n]);
+          // Update userTags.
+          var tagList = that._parseSetting(copyAllowedVals);
+          var userTags = [];
+          for (var n in tagList) {
+            if ($.inArray(tagList[n], that.autoTags) === -1) {
+              userTags.push(tagList[n]);
+            }
           }
+          that.userTags = userTags;
         }
-        that.userTags = userTags;
       });
     });
 
