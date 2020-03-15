@@ -14,7 +14,7 @@
 if (Backdrop.filterConfiguration) {
   Backdrop.filterConfiguration.liveSettingParsers.filter_html = {
     getRules: function () {
-      var currentValue = $('#edit-filters-filter-html-filter-settings-allowed-html').val();
+      var currentValue = $('#allowed-html').val();
       var rules = [];
       var rule;
 
@@ -56,7 +56,26 @@ Backdrop.behaviors.filterFilterHtmlUpdating = {
 
   attach: function (context, settings) {
     var that = this;
-    $(context).find('[name="filters[filter_html][filter][configure_container][configure][allowed_html]"]').once('filter-filter_html-updating').each(function () {
+    // Respond to dialogs that are closed, updating the underlying form values.
+    $(".filter-dialog .ui-dialog-buttonpane .button-primary").click(function (e) {
+      $(document).ajaxComplete(function() {
+        var copyAllowedVals = $('#allowed-html').data('copyAllowedVals');
+        console.log('work dammit');
+        $('#allowed-html').val(copyAllowedVals);
+
+        // Update userTags.
+        var tagList = that._parseSetting(copyAllowedVals);
+        var userTags = [];
+        for (var n in tagList) {
+          if ($.inArray(tagList[n], that.autoTags) === -1) {
+            userTags.push(tagList[n]);
+          }
+        }
+        that.userTags = userTags;
+      });
+    });
+
+    $(context).find('#allowed-html').once('filter-filter_html-updating').each(function () {
       that.$allowedHTMLFormItem = $(this);
       that.$allowedHTMLDescription = that.$allowedHTMLFormItem.closest('.form-item').find('.description');
       that.userTags = that._parseSetting(this.value);
@@ -80,17 +99,6 @@ Backdrop.behaviors.filterFilterHtmlUpdating = {
             }
           });
 
-      // When the allowed tags list is manually changed, update userTags.
-      that.$allowedHTMLFormItem.on('change.updateUserTags', function () {
-        var tagList = that._parseSetting(this.value);
-        var userTags = [];
-        for (var n in tagList) {
-          if ($.inArray(tagList[n], that.autoTags) === -1) {
-            userTags.push(tagList[n]);
-          }
-        }
-        that.userTags = userTags;
-      });
     });
   },
 
