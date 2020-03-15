@@ -203,7 +203,9 @@ function filter_admin_format_form($form, &$form_state, $format) {
   $form['#submit'] = array();
   $form['#tree'] = TRUE;
   $form['#attached']['library'][] = array('filter', 'filter.admin');
+  // Todo: fix library to avoid loading all these separately.
   $form['#attached']['js'][] = backdrop_get_path('module', 'filter') . '/js/filter.admin.js';
+  $form['#attached']['js'][] = backdrop_get_path('module', 'filter') . '/js/filter.filtered_html.admin.js';
   $form['#attached']['css'][] = backdrop_get_path('module', 'filter') . '/css/filter.css';
   $form['#attached']['library'][] = array('system', 'backdrop.dialog');
 
@@ -407,6 +409,15 @@ function filter_admin_format_form($form, &$form_state, $format) {
     $form['filters'][$name]['#weight'] = $filters[$name]->weight;
   }
 
+  // Allowed HTML filter value influences editor button configuration.
+  $filter_html = $filters['filter_html'];
+  $form['allowed_html'] = array(
+    '#type' => 'textfield',
+    '#maxlength' => 1024,
+    '#attributes' => array('id' => array('allowed-html')),
+    '#default_value' => $filter_html->settings['allowed_html'],
+  );
+
   $form['#validate'][] = 'filter_admin_format_form_validate';
   $form['#submit'][] = 'filter_admin_format_form_submit';
 
@@ -452,6 +463,11 @@ function filter_admin_format_configure_ajax($form, &$form_state) {
   $trigger = $form_state['triggering_element'];
   $name = $trigger['#name'];
   $format = $form_state['format'];
+  $format = filter_get_format_tempstore($format->format);
+
+  // Transfer alllowed tags from the hidden textfield to the format object in 
+  // case there were button changes which affected allowed tags.
+  $format->filters['filter_html']->settings['allowed_html'] = $form_state['values']['allowed_html'];
 
   $configure_form = backdrop_get_form('filter_admin_format_filter_settings_form', $format, $name);
   $title = t('Configure filter');
@@ -474,6 +490,9 @@ function filter_admin_format_configure_ajax($form, &$form_state) {
 
 function filter_admin_format_configure_ajax_submit($form, &$form_state) {
   $commands = array();
+  if (isset($form_state['values']['allowed_html'])) {
+    $commands[] = ajax_command_data('#allowed-html', 'copyAllowedVals', $form_state['values']['allowed_html']);
+  }
   $commands[] = ajax_command_close_modal_dialog();
   return array('#type' => 'ajax', '#commands' => $commands);
 }
@@ -485,7 +504,7 @@ function filter_admin_format_filter_settings_form($form, &$form_state, $format, 
   form_load_include($form_state, 'inc', 'filter', 'filter.admin');
   $form_state['format'] = $format;
   $form_state['filter'] = $filter;
-  $format = filter_get_format_tempstore($format->format);
+
   $all_filter_info = filter_get_filters();
   if(isset($all_filter_info[$filter]['settings callback'])) {
     // $format->filters isn't always built yet.
@@ -622,6 +641,9 @@ function filter_admin_format_form_submit($form, &$form_state) {
   }
 
   $form_state['values']['filters'] = $form_state['format']->filters;
+  // Save allowed HTML tags from the hidden textfield to allow JS to modify them.
+  $form_state['values']['filters']['filter_html']->settings['allowed_html'] = $form_state['values']['allowed_html'];
+  unset($form_state['values']['allowed_html']);
 
   // Add the submitted form values to the text format, and save it.
   $format = $form_state['format'];
@@ -634,7 +656,7 @@ function filter_admin_format_form_submit($form, &$form_state) {
     $format->editor_settings = array();
   }
 
-  $status = filter_format_save($format);
+  //$status = filter_format_save($format);
 
   // Save user permissions.
   if ($permission = filter_permission_name($format)) {
@@ -654,7 +676,7 @@ function filter_admin_format_form_submit($form, &$form_state) {
   }
 
   filter_clear_format_tempstore($format->format);
-  $form_state['redirect'] = 'admin/config/content/formats';
+  //$form_state['redirect'] = 'admin/config/content/formats';
 }
 
 /**

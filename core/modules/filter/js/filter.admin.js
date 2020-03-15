@@ -27,58 +27,13 @@ Backdrop.behaviors.filterStatus = {
         $(this).closest('tr').toggleClass('disabled-row', isChecked);
     });
 
-    // Respond to dialogs that are being opened, and pull values from saved
-    // settings to populate dialog form values.
-    $(window).on('dialog:aftercreate', function (e, dialog, $element, settings) {
-      if (Backdrop.settings.filterSettings) {
-        filter_name = $('#backdrop-modal').find('.filter-dialog-settings').once('filter-editor-status').attr('data-filter-name');
-        filter_values = Backdrop.settings.filterSettings[filter_name];
-        $.each(filter_values, function( index, value ) {
-          $item = $('input[name="' + index + '"]');
-          setInputValue($item, value);
-        });
-      }
-    });
-
     // Respond to dialogs that are closed, updating the underlying form values.
     $(".filter-dialog .ui-dialog-buttonpane .button-primary").click(function (e) {
-        $(document).ajaxComplete(function() {
-          $.each(Backdrop.settings.filterSettings, function( index, value ) {
-            $.each(value, function( index_too, value_too ) {
-              item = '#filterorder input[name="filters['+index+'][filter][settings][' + index_too + ']"]';
-              setInputValue($(item), value_too);
-            });
-          });
-        });
+      $(document).ajaxComplete(function() {
+        copyAllowedVals = $('#allowed-html').data('copyAllowedVals');
+        $('#allowed-html').val(copyAllowedVals);
+      });
     });
-
-    // Sets form field input values.
-    // https://www.sitepoint.com/jquery-set-type-input-dynamically/
-    function setInputValue ($item, value) {
-      itemType = $item.attr('type');
-      switch (itemType) {
-        case "checkbox":
-          $item.attr({
-              checked: value
-          });
-          break;
-        case "radio":
-          $item.each(function (i) {
-            if ($(this).val() == value) $(this).attr({
-              checked: true
-            })
-          });
-          break;
-        case undefined:
-          $(this).append('');
-          break;
-        default:
-         $item.val(value);
-          break;
-      }
-
-    }
-
   }
 };
 
@@ -549,7 +504,7 @@ Backdrop.behaviors.initializeFilterConfiguration = {
   attach: function (context, settings) {
     var $context = $(context);
 
-    $context.find('#filters-status-wrapper input.form-checkbox').once('filter-editor-status').each(function () {
+    $context.find('#filterorder input.form-checkbox').once('filter-editor-status').each(function () {
       var $checkbox = $(this);
       var nameAttribute = $checkbox.attr('name');
 
