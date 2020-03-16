@@ -638,13 +638,12 @@ function filter_admin_format_form_submit($form, &$form_state) {
   }
 
   foreach ($tempstore_filters as $key => $filter) {
-    $tempstore_filters[$key]->weight = $form_state['values']['filters'][$key]['weight'];
-    $tempstore_filters[$key]->status = $form_state['values']['filters'][$key]['status'];
+    $tempstore_filters[$key] = (array) $filter;
   }
-  $form_state['values']['filters'] = $tempstore_filters;
+  $form_state['values']['filters'] = array_replace_recursive($tempstore_filters, $form_state['values']['filters']);
 
   // Save allowed HTML tags from the hidden textfield to allow JS to modify them.
-  $form_state['values']['filters']['filter_html']->settings['allowed_html'] = $form_state['values']['allowed_html'];
+  $form_state['values']['filters']['filter_html']['settings']['allowed_html'] = $form_state['values']['allowed_html'];
   unset($form_state['values']['allowed_html']);
 
   // Add the submitted form values to the text format, and save it.
