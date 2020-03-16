@@ -629,14 +629,20 @@ function filter_admin_format_form_submit($form, &$form_state) {
   unset($form_state['values']['actions']);
   unset($form_state['values']['filters']['filters']);
 
+  $tempstore_filters = array();
   // If we never changed filter settings, then tempstore was never triggered, so
   // use only form values.
   if (!empty($form_state['format']->format)) {
     $tempstore = filter_get_format_tempstore($form_state['format']->format);
-    $form_state['format']->filters = $tempstore->filters;
+    $tempstore_filters = $tempstore->filters;
   }
 
-  $form_state['values']['filters'] = $form_state['format']->filters;
+  foreach ($tempstore_filters as $key => $filter) {
+    $tempstore_filters[$key]->weight = $form_state['values']['filters'][$key]['weight'];
+    $tempstore_filters[$key]->status = $form_state['values']['filters'][$key]['status'];
+  }
+  $form_state['values']['filters'] = $tempstore_filters;
+
   // Save allowed HTML tags from the hidden textfield to allow JS to modify them.
   $form_state['values']['filters']['filter_html']->settings['allowed_html'] = $form_state['values']['allowed_html'];
   unset($form_state['values']['allowed_html']);
