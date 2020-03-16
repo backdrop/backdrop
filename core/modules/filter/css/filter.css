@@ -221,12 +221,6 @@ input#edit-filters-filter-html-settings-allowed-html {
 tr.disabled-row, tr.disabled-row div.description {
   color: #ccc;
 }
-.filter-container-initial {
-  display: none;
-}
-.filter-container-visible {
-  display: initial;
-}
-.filter-container-hidden {
+#allowed-html {
   display: none;
 }
