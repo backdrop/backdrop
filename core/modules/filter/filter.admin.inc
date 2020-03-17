@@ -183,6 +183,7 @@ function filter_admin_format_page($format = NULL) {
 function filter_admin_format_form($form, &$form_state, $format) {
   // Use a format stored in tempstore if available.
   if ($stored_format = filter_get_format_tempstore($format->format)) {
+    filter_admin_set_message($stored_format);
     $format = $stored_format;
   }
   elseif (isset($format->format)) {
@@ -196,6 +197,15 @@ function filter_admin_format_form($form, &$form_state, $format) {
   else {
     $editor_info = ($format->editor && isset($editors[$format->editor])) ? $editors[$format->editor] : NULL;
   }
+
+  $form['messages'] = array(
+    '#theme' => 'status_messages',
+    '#messages' => '',
+    '#weight' => -100,
+    // Prefix/suffix used to identify in AJAX requests.
+    '#prefix' => '<div id="filter-messages">',
+    '#suffix' => '</div>',
+  );
 
   $form_state['format'] = $format;
   $form_state['editor_info'] = $editor_info;
@@ -428,8 +438,27 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#type' => 'submit',
     '#value' => t('Save configuration'),
   );
+  $form['actions']['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#validate' => array(),
+    '#submit' => array('filter_admin_format_form_cancel'),
+  );
 
   return $form;
+}
+
+/**
+ * Submit handler for filter_admin_format_form() that cancels in-progress
+ * actions.
+ */
+function filter_admin_format_form_cancel($form, &$form_state) {
+  $format = $form_state['format'];
+
+  if (isset($format->format)) {
+    filter_clear_format_tempstore($format->format);
+  }
+  $form_state['redirect'] = 'admin/config/content/formats';
 }
 
 /**
@@ -498,6 +527,7 @@ function filter_admin_format_configure_ajax_submit($form, &$form_state) {
     $replacement = check_plain('Allowed HTML tags: ' . $form_state['values']['allowed_html']);
     $commands[] = ajax_command_html($selector, $replacement);
   }
+  $commands[] = ajax_command_html('#filter-messages', theme('status_messages'));
   $commands[] = ajax_command_close_modal_dialog();
   return array('#type' => 'ajax', '#commands' => $commands);
 }
@@ -571,7 +601,10 @@ function filter_admin_format_filter_settings_update($form, &$form_state) {
   $format = $form_state['format'];
   
   $form_state['format']->filters[$filter]->settings = $form_state['values'];
+  $form_state['format']->updated = TRUE;
   filter_set_format_tempstore($form_state['format']);
+
+  filter_admin_set_message($form_state['format']);
 
   $form_state['redirect'] = 'admin/config/content/formats/' . $form_state['format']->format;
 }
@@ -973,4 +1006,14 @@ function filter_editor_file_upload_settings_form($format) {
   );
 
   return $form;
+}
+
+/**
+ * Sets a page message for changed filter tempstore values.
+ */
+function filter_admin_set_message($format) {
+  if ($format->updated) {
+    $message = t('This form has unsaved changes. Click "Save configuration" to make changes permanent or "Cancel" to discard changes.');
+    backdrop_set_message($message, 'warning');
+  }
 }
