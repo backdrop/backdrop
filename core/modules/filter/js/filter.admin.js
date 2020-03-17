@@ -26,14 +26,6 @@ Backdrop.behaviors.filterStatus = {
         var isChecked = !$(this).prop('checked');
         $(this).closest('tr').toggleClass('disabled-row', isChecked);
     });
-
-    // Respond to dialogs that are closed, updating the underlying form values.
-    $(".filter-dialog .ui-dialog-buttonpane .button-primary").click(function (e) {
-      $(document).ajaxComplete(function() {
-        copyAllowedVals = $('#allowed-html').data('copyAllowedVals');
-        $('#allowed-html').val(copyAllowedVals);
-      });
-    });
   }
 };
 
