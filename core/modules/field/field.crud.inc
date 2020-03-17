@@ -279,7 +279,7 @@ function field_validate_field($field, $update = FALSE) {
     // collisions with existing entity properties, but some is better
     // than none.
     foreach (entity_get_info() as $type => $info) {
-      if (in_array($field['field_name'], $info['entity keys'])) {
+      if (in_array($field['field_name'], $info['entity keys'], TRUE)) {
         throw new FieldException(t('Cannot create a field with the name "@name", which is reserved by entity type @type.', array('@name' => $field['field_name'], '@type' => $type)));
       }
     }
