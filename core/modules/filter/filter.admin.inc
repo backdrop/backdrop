@@ -325,12 +325,18 @@ function filter_admin_format_form($form, &$form_state, $format) {
 
   // Get filter tips.
   $format_tips = array();
-  global $user;
-  $formats = filter_formats($user);
-  // This is not always set during rebuild.
-  if(!empty($format->format) && !empty($formats[$format->format])) {
-    $tips = _filter_tips($format->format);
-    $format_tips = reset($tips);
+
+  // Copy the format to get tips without an editor assigned.
+  $clone_format = clone($format);
+  $clone_format->editor = FALSE;
+
+  foreach ($clone_format->filters as $name => $filter) {
+    if ($filter->status && isset($all_filter_info[$name]['tips callback'])) {
+      $tip = $all_filter_info[$name]['tips callback']($filter, $clone_format);
+      if (isset($tip)) {
+        $format_tips[$name] = $tip;
+      }
+    }
   }
 
   // Prepare filters for form sections.
@@ -391,7 +397,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
       '#markup' => $filter_info['title'],
     );
     $form['filters'][$name]['filter']['details'] = array(
-      '#markup' => isset($format_tips[$name]['tip']) ? $format_tips[$name]['tip'] : '',
+      '#markup' => isset($format_tips[$name]) ? $format_tips[$name] : '',
     );
 
     $form['filters'][$name]['weight'] = array(
@@ -488,6 +494,9 @@ function filter_admin_format_configure_ajax_submit($form, &$form_state) {
   $commands = array();
   if (isset($form_state['values']['allowed_html'])) {
     $commands[] = ajax_command_data('#allowed-html', 'copyAllowedVals', $form_state['values']['allowed_html']);
+    $selector = '#edit-filters-' . str_replace('_', '-', $form_state['filter']) . '-filter .filter-details.description';
+    $replacement = check_plain('Allowed HTML tags: ' . $form_state['values']['allowed_html']);
+    $commands[] = ajax_command_html($selector, $replacement);
   }
   $commands[] = ajax_command_close_modal_dialog();
   return array('#type' => 'ajax', '#commands' => $commands);
