@@ -343,8 +343,6 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#title' => t('Filter settings'),
     '#theme' => 'filter_admin_format_filter_order',
   );
-  $form['filters']['#prefix'] = '<div id="filter-admin-format-configure-wrapper">';
-  $form['filters']['#suffix'] = '</div>';
   $form['filters']['filters'] = array(
     '#type' => 'value',
     '#value' => $filters,
@@ -359,7 +357,6 @@ function filter_admin_format_form($form, &$form_state, $format) {
       $form['filters'][$name]['configure_button'] = array(
         '#type' => 'submit',
         '#name' => $name,
-        '#op' => 'configure',
         '#validate' => array('filter_admin_format_filter_settings_form_redirect_validate'),
         '#submit' => array('filter_admin_format_filter_settings_form_redirect'),
         '#ajax' => array(
@@ -393,7 +390,9 @@ function filter_admin_format_form($form, &$form_state, $format) {
     $form['filters'][$name]['#weight'] = $filters[$name]->weight;
   }
 
-  // Allowed HTML filter value influences editor button configuration.
+  // This textfield will be hidden by CSS and used to store allowed HTML tags
+  // for the filter_html filter. This is necessary to allow JS to respond to
+  // changes in CKEditor buttons, changing allowed tags in response.
   $filter_html = $filters['filter_html'];
   $form['allowed_html'] = array(
     '#type' => 'textfield',
@@ -491,6 +490,9 @@ function filter_admin_format_configure_ajax($form, &$form_state) {
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
+/**
+ * Ajax handler for buttons in filter_admin_format_filter_settings_form().
+ */
 function filter_admin_format_configure_ajax_submit($form, &$form_state) {
   $commands = array();
   if (isset($form_state['values']['allowed_html'])) {
@@ -563,15 +565,13 @@ function filter_admin_format_filter_settings_form($form, &$form_state, $format, 
 
 /**
  * Form submit handler for filter_admin_format_filter_settings_form().
- *
- * @see filter_admin_format_form()
  */
 function filter_admin_format_filter_settings_update($form, &$form_state) {
   form_state_values_clean($form_state);
   unset($form_state['values']['filter']);
   $filter = $form_state['filter'];
   $format = $form_state['format'];
-  
+
   $form_state['format']->filters[$filter]->settings = $form_state['values'];
   $form_state['format']->updated = TRUE;
   filter_set_format_tempstore($form_state['format']);
