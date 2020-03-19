@@ -260,8 +260,8 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     // that same connection.
     $this->assertIdentical($this->backdropGetHeader('Connection'), 'close', 'Connection closed after serving stale page to allow background processes to run.');
 
-    // Wait 1 more second, after which the new cache entry should be saved.
-    sleep(1);
+    // Wait 2 more seconds, after which the new cache entry should be saved.
+    sleep(2);
     $this->backdropGet('system-test/sleep/0', array(), $headers);
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time3 = (string) $start_element[0];
@@ -335,7 +335,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->assertRaw('</html>', 'Page was gzip compressed.');
 
     // Verify that cached output is compressed.
-    sleep(1); // Delay to ensure caches are set.
+    sleep(5); // Delay to ensure caches are set.
     $this->backdropGet($test_path, array(), array('Accept-Encoding: gzip,deflate'));
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertEqual($this->backdropGetHeader('Content-Encoding'), 'gzip', 'A Content-Encoding header was sent.');
