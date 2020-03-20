@@ -53,6 +53,8 @@ function entity_flush_caches() {
       $bins[] = 'cache_entity_' . $type;
     }
   }
+
+  return $bins;
 }
 
 /**
