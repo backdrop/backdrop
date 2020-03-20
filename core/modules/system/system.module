@@ -444,6 +444,25 @@ function system_element_info() {
     '#theme' => 'date',
     '#theme_wrappers' => array('form_element'),
   );
+  $types['html_date'] = array(
+    '#input' => TRUE,
+    '#element_validate' => array('html_date_validate'),
+    '#theme' => 'html_date',
+    '#theme_wrappers' => array('form_element'),
+  );
+  $types['html_time'] = array(
+    '#input' => TRUE,
+    '#element_validate' => array('html_time_validate'),
+    '#theme' => 'html_time',
+    '#theme_wrappers' => array('form_element'),
+  );
+  $types['html_datetime'] = array(
+    '#input' => TRUE,
+    '#element_validate' => array('html_datetime_validate'),
+    '#process' => array('form_process_html_datetime'),
+    '#theme' => 'html_datetime',
+    '#theme_wrappers' => array('form_element'),
+  );
   $types['file'] = array(
     '#input' => TRUE,
     '#size' => 60,
@@ -572,6 +591,13 @@ function system_menu() {
     'title' => 'Access denied',
     'page callback' => 'system_403',
     'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['path-autocomplete'] = array(
+    'title' => 'Path autocomplete',
+    'page callback' => 'path_autocomplete',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
 
@@ -1385,9 +1411,10 @@ function system_library_info() {
       ),
     ),
     'js' => array(
-      // Backdrop includes a "combined" file that bundles together both the
-      // main library and the keyboard support file.
-      'core/misc/smartmenus/jquery.smartmenus.combined.js' => array(
+      'core/misc/smartmenus/jquery.smartmenus.js' => array(
+        'group' => JS_LIBRARY,
+      ),
+      'core/misc/smartmenus/addons/keyboard/jquery.smartmenus.keyboard.js' => array(
         'group' => JS_LIBRARY,
       ),
     ),
@@ -3578,12 +3605,7 @@ function system_cron() {
     if ($file = file_load($row->fid)) {
       $references = file_usage_list($file);
       if (empty($references)) {
-        if (file_exists($file->uri)) {
-          $file->delete();
-        }
-        else {
-          watchdog('file system', 'Could not delete temporary file "%path" during garbage collection', array('%path' => $file->uri), WATCHDOG_ERROR);
-        }
+        $file->delete();
       }
       else {
         watchdog('file system', 'Did not delete temporary file "%path" during garbage collection because it is in use by the following modules: %modules.', array('%path' => $file->uri, '%modules' => implode(', ', array_keys($references))), WATCHDOG_INFO);
@@ -4011,6 +4033,194 @@ function system_404() {
  */
 function system_403() {
   return t('You are not authorized to access this page.');
+}
+
+/**
+ * Menu callback; Autocomplete callback for paths.
+ *
+ * @param string $string
+ *   The string to find matches for.
+ */
+function path_autocomplete($string = '') {
+  $matches = array();
+  $match_count = 0;
+  $range = 10;
+
+  if ($string) {
+    // Get node matches.
+    $results = db_select('node')
+      ->fields('node', array('nid', 'type', 'title', 'status'))
+      ->condition('title', db_like($string) . '%', 'LIKE')
+      ->condition('status', 1)
+      ->addTag('node_access')
+      ->orderBy('nid', 'DESC')
+      ->range(0, $range)
+      ->execute();
+    foreach ($results as $result) {
+      $path = backdrop_get_path_alias('node/' . $result->nid);
+      $matches[$path] = t('@title (Content: %type)', array(
+        '@title' => $result->title,
+        '%type' => node_type_get_name($result->type),
+      ));
+      $match_count++;
+    }
+
+    // Get file matches.
+    if (user_access('manage files') && $match_count < $range) {
+      $results = db_select('file_managed')
+        ->fields('file_managed', array('fid', 'filename', 'uri', 'filemime', 'status', 'type'))
+        ->condition('filename', db_like($string) . '%', 'LIKE')
+        ->condition('status', 1)
+        ->condition('filemime', 'image%', 'NOT LIKE')
+        ->orderBy('fid', 'DESC')
+        ->range(0, $range - $match_count)
+        ->execute();
+      foreach ($results as $result) {
+        // If possible, try to make a local path for better portability.
+        $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
+        $url = file_create_url($result->uri);
+        $path = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
+        $matches[$path] = t('@filename (File: %type)', array(
+          '@filename' => $result->filename,
+          '%type' => file_type_get_name($result->type),
+        ));
+        $match_count++;
+      }
+    }
+
+    // Get user matches.
+    if (user_access('access user profiles') && $match_count < $range) {
+      $results = db_select('users')
+        ->fields('users', array('uid', 'name'))
+        ->condition('name', db_like($string) . '%', 'LIKE')
+        ->range(0, $range - $match_count)
+        ->orderBy('uid', 'DESC')
+        ->execute();
+      // We need to load the User object to use user_format_name().
+      $uids = array();
+      foreach ($results as $result) {
+        $uids[] = $result->uid;
+      }
+      if (!empty($uids)) {
+        $users = user_load_multiple($uids);
+        foreach ($users as $user) {
+          $path = backdrop_get_path_alias('user/' . $user->uid);
+          $matches[$path] = t('@name (User account)', array(
+            '@name' => user_format_name($user),
+          ));
+          $match_count++;
+        }
+      }
+    }
+
+    // Get taxonomy term matches.
+    if ($match_count < $range) {
+      $results = db_select('taxonomy_term_data')
+        ->fields('taxonomy_term_data', array('tid', 'vocabulary', 'name'))
+        ->condition('name', db_like($string) . '%', 'LIKE')
+        ->addTag('taxonomy_term_access')
+        ->range(0, $range - $match_count)
+        ->orderBy('tid', 'DESC')
+        ->execute();
+      foreach ($results as $result) {
+        $path = backdrop_get_path_alias('taxonomy/term/' . $result->tid);
+        $matches[$path] = t('@name (Taxonomy term: %vocabulary)', array(
+          '@name' => $result->name,
+          '%vocabulary' => taxonomy_vocabulary_load($result->vocabulary)->name,
+        ));
+        $match_count++;
+      }
+    }
+
+    // Get Views page matches.
+    if ($match_count < $range) {
+      $views = views_get_enabled_views();
+      foreach ($views as $view) {
+        foreach ($view->display as $display_id => $display) {
+          if ($view->access($display_id) && $display->display_plugin == 'page' && !empty($display->display_options['path'])) {
+            $path = backdrop_get_path_alias($display->display_options['path']);
+            if (!path_is_admin($path)) {
+              $found_match = FALSE;
+              // Display title.
+              if (!empty($display->display_options['title']) && stripos($display->display_options['title'], $string) !== FALSE) {
+                $found_match = TRUE;
+                $view_title = $display->display_options['title'];
+              }
+              // Master title.
+              elseif (!empty($view->display['default']->display_options['title']) && stripos($view->display['default']->display_options['title'], $string) !== FALSE) {
+                $found_match = TRUE;
+                $view_title = $view->display['default']->display_options['title'];
+              }
+              // View name.
+              elseif (stripos($view->human_name, $string) !== FALSE) {
+                $found_match = TRUE;
+                $view_title = $view->human_name;
+              }
+              if ($found_match) {
+                $matches[$path] = t('@title (View: %display)', array(
+                  '@title' => $view_title,
+                  '%display' => $view->human_name . ' - ' . $display->display_title,
+                ));
+                $match_count++;
+              }
+            }
+          }
+          if ($match_count == $range) {
+            break 2;
+          }
+        }
+      }
+    }
+
+    // Get layout path matches.
+    if ($match_count < $range) {
+      $menu_items = layout_get_all_configs('menu_item');
+      foreach ($menu_items as $menu_item) {
+        if ($match_count < $range) {
+          $found_match = FALSE;
+          if (!empty($menu_item['menu']['title']) && stripos($menu_item['menu']['title'], $string) !== FALSE) {
+            $found_match = TRUE;
+            $layout_title = $menu_item['menu']['title'];
+          }
+          elseif (stripos($menu_item['name'], $string) !== FALSE) {
+            $found_match = TRUE;
+            $layout_title = $menu_item['name'];
+          }
+          if ($found_match) {
+            $matches[$menu_item['path']] = t('@title (Layout: %display)', array(
+              '@title' => $layout_title,
+              '%display' => $menu_item['name'],
+            ));
+            $match_count++;
+          }
+        }
+      }
+    }
+
+    // Get menu item matches.
+    if ($match_count < $range) {
+      $results = db_select('menu_links')
+        ->fields('menu_links', array('link_title', 'link_path'))
+        ->condition('link_title', db_like($string) . '%', 'LIKE')
+        ->condition('link_path', '%' . db_like('%') . '%', 'NOT LIKE')
+        ->range(0, $range)
+        ->execute();
+      foreach ($results as $result) {
+        $path = backdrop_get_path_alias($result->link_path);
+        if (!isset($matches[$path]) && !path_is_admin($path)) {
+          $matches[$path] = t('@title (Menu item: %path)', array(
+            '@title' => $result->link_title,
+            '%path' => $path,
+          ));
+          $match_count++;
+        }
+      }
+    }
+  }
+
+  // Allow modules to alter the matches.
+  backdrop_alter('path_autocomplete', $matches, $string);
+  backdrop_json_output($matches);
 }
 
 /**

@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.14.x-dev');
+define('BACKDROP_VERSION', '1.16.x-dev');
 
 /**
  * Core API compatibility.
@@ -611,6 +611,7 @@ function find_conf_path($http_host, $script_name, $require_settings = TRUE) {
 
   if ($sites) {
     $uri = explode('/', $script_name);
+    $uri[0] = ($uri[0] == '.') ? '' : $uri[0];
     $server = explode('.', implode('.', array_reverse(explode(':', rtrim($http_host, '.')))));
     for ($i = count($uri) - 1; $i > 0; $i--) {
       for ($j = count($server); $j > 0; $j--) {
@@ -821,7 +822,7 @@ function backdrop_settings_initialize() {
   global $base_url, $base_path, $base_root;
 
   // Export these settings.php variables to the global namespace.
-  global $databases, $cookie_domain, $conf, $settings, $installed_profile, $is_https, $base_secure_url, $base_insecure_url, $config_directories;
+  global $databases, $cookie_domain, $conf, $settings, $installed_profile, $is_https, $base_secure_url, $base_insecure_url, $config_directories, $config;
   $conf = array();
   $settings = array();
 

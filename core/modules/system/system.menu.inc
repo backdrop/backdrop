@@ -20,6 +20,7 @@ function system_menu_block_defaults($menu_name) {
     'menu_name' => $menu_name,
     'style' => NULL,
     'expand_all' => FALSE,
+    'clickdown' => FALSE,
   );
   if ($menu_name == 'main-menu') {
     $defaults['depth'] = 1;
@@ -114,6 +115,17 @@ function system_menu_block_form($config) {
       ),
     ),
   );
+  $form['clickdown'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use a click to open, instead of a hover'),
+    '#default_value' => $config['clickdown'],
+    '#description' => t('Menus that don\'t appear or disappear on hover can be better for usability in some cases.'),
+    '#states' => array(
+      'visible' => array(
+        'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
+      ),
+    ),
+  );
   $form['toggle'] = array(
     '#type' => 'checkbox',
     '#title' => t('Display menu toggle button on small screens'),
@@ -182,6 +194,7 @@ function system_menu_block_build(array $config) {
     if (!empty($config['style'])) {
       $data['content']['#wrapper_attributes']['class'][] = 'menu-' . str_replace('_', '-', $config['style']);
       $data['content']['#wrapper_attributes']['data-menu-style'] = $config['style'];
+      $data['content']['#wrapper_attributes']['data-clickdown'] = $config['clickdown'];
       $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
       if ($config['style'] === 'dropdown') {
         $data['content']['#attached']['library'][] = array('system', 'smartmenus');

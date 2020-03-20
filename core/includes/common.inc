@@ -1761,7 +1761,8 @@ function filter_xss_admin($string) {
  *   The string with raw HTML in it. It will be stripped of everything that can
  *   cause an XSS attack.
  * @param $allowed_tags
- *   An array of allowed tags.
+ *   An array of allowed tags. Defaults to the array returned by
+ *   _filter_xss_allowed_tags().
  *
  * @return
  *   An XSS safe version of $string, or an empty string if $string is not
@@ -1769,7 +1770,10 @@ function filter_xss_admin($string) {
  *
  * @see backdrop_validate_utf8()
  */
-function filter_xss($string, $allowed_tags = array('a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd')) {
+function filter_xss($string, $allowed_tags = NULL) {
+  if ($allowed_tags === NULL) {
+    $allowed_tags = _filter_xss_allowed_tags();
+  }
   // Only operate on valid UTF-8 strings. This is necessary to prevent cross
   // site scripting issues on Internet Explorer 6.
   if (!backdrop_validate_utf8($string)) {
@@ -1802,6 +1806,21 @@ function filter_xss($string, $allowed_tags = array('a', 'em', 'strong', 'cite', 
     |                 # or
     >                 # just a >
     )%x', '_filter_xss_split', $string);
+}
+
+/**
+ * List of the default tags allowed by filter_xss().
+ */
+function _filter_xss_allowed_tags() {
+  return array('a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd');
+}
+
+/**
+ * Human-readable list of the default tags allowed by filter_xss(), for display
+ * in help texts.
+ */
+function _filter_xss_display_allowed_tags() {
+  return '<' . implode('> <', _filter_xss_allowed_tags()) . '>';
 }
 
 /**
@@ -1923,9 +1942,9 @@ function _filter_xss_attributes($attr) {
       case 2:
         // Attribute value, a URL after href= for instance.
         if (preg_match('/^"([^"]*)"(\s+|$)/', $attr, $match)) {
-          // Do not strip protocol information out from data attributes,
-          // which may be mangled if they contain JSON.
-          if (strpos($attrname, 'data-') === 0) {
+          // Prevent filtering for some attribute values, where performing
+          // the filtering would cause valid and safe data to be mangled.
+          if (strpos($attrname, 'data-') === 0 || $attrname == 'alt' || $attrname == 'title') {
             $thisval = $match[1];
           }
           // Strip bad protocols from all other attributes, e.g. href, src.
@@ -7093,101 +7112,72 @@ function element_info_property($type, $property_name, $default = NULL) {
  * @since 1.9.0 The $dir parameter was added.
  */
 function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT_ASC) {
+  // Don't sort empty arrays.
+  if (empty($array)) {
+    return;
+  }
+
+  // Prefix array keys to prevent numeric keys being re-indexed (and un-prefix
+  // them again after sorting).
+  foreach ($array as $key => $value) {
+    $prefixed['#' . $key] = $value;
+  }
+  $array = $prefixed;
+  unset($prefixed);
+
   // Ensure all keys have a sort value.
   $new_keys = array();
-  foreach ($keys as $index => $sort) {
-    if (is_string($sort) && is_int($index)) {
-      $new_keys[$sort] = SORT_NUMERIC;
+  foreach ($keys as $key => $key_sort) {
+    if (is_string($key_sort) && is_int($key)) {
+      $new_keys[$key_sort] = SORT_NUMERIC;
     }
     else {
-      if ($sort === SORT_NUMERIC || $sort === SORT_STRING) {
-        $new_keys[$index] = $sort;
+      if ($key_sort === SORT_NUMERIC || $key_sort === SORT_STRING) {
+        $new_keys[$key] = $key_sort;
       }
       else {
         // Fallback behavior for unexpected values. Untranslated to allow this
         // function to be used anywhere within Backdrop.
-        $new_keys[$index] = SORT_NUMERIC;
+        $new_keys[$key] = SORT_NUMERIC;
         trigger_error('backdrop_sort() expects the second parameter to be an array keyed by strings and each value of the array to be either SORT_NUMERIC or SORT_STRING.', E_USER_WARNING);
       }
     }
   }
   $keys = $new_keys;
 
-  // If sorting on a single value, optimize the sorting to sort only on that
-  // specific key without the overhead of recursive handling.
-  if (count($keys) === 1) {
-    $key = key($keys);
-    $key_sort = reset($keys);
-
-    if ($key_sort === SORT_STRING) {
-      uasort($array, function($a, $b) use ($key, $dir) {
-        if (!is_array($a) || !is_array($b)) {
-          return 0;
-        }
-        if (!isset($a[$key])) {
-          $a[$key] = '';
-        }
-        if (!isset($b[$key])) {
-          $b[$key] = '';
-        }
-        $cmp = strnatcasecmp($a[$key], $b[$key]);
-        return ($dir == SORT_DESC) ? -$cmp : $cmp;
-      });
-    }
-    else {
-      uasort($array, function($a, $b) use ($key, $dir) {
-        if (!is_array($a) || !is_array($b)) {
-          return 0;
-        }
-        if (!isset($a[$key])) {
-          $a[$key] = 0;
-        }
-        if (!isset($b[$key])) {
-          $b[$key] = 0;
-        }
-        if ($a[$key] != $b[$key]) {
-          $cmp = $a[$key] < $b[$key] ? -1 : 1;
-          return ($dir == SORT_DESC) ? -$cmp : $cmp;
-        }
-        // Equal values, return 0.
-        return 0;
-      });
-    }
-  }
-  // If doing a multiple-key comparison, use a recursive callback.
-  else {
-    $keys_map = array_keys($keys);
-    $recursive_callback = function ($a, $b, $key_index = 0) use ($keys, $keys_map, $dir, &$recursive_callback) {
-      $key = $keys_map[$key_index];
-      if (!is_array($a) || !is_array($b)) {
-        return 0;
-      }
-      if (!isset($a[$key])) {
-        $a[$key] = 0;
-      }
-      if (!isset($b[$key])) {
-        $b[$key] = 0;
-      }
-      if ($a[$key] == $b[$key]) {
-        // Sort on the next key if one exists.
-        if (isset($keys_map[$key_index + 1])) {
-          return $recursive_callback($a, $b, $key_index + 1);
-        }
+  // Create an array to use for sorting by each key.
+  $sort = array();
+  foreach ($array as $k => $v) {
+    $v = (array) $v;
+    foreach ($keys as $key => $key_sort) {
+      if (isset($v[$key])) {
+        $sort[$key][$k] = ($key_sort === SORT_STRING) ? backdrop_strtolower($v[$key]) : $v[$key];
       }
       else {
-        $cmp = 0;
-        if ($keys[$key] === SORT_STRING) {
-          $cmp = strnatcasecmp($a[$key], $b[$key]);
-        }
-        else {
-          $cmp = ($a[$key] < $b[$key]) ? -1 : 1;
-        }
-        return ($dir == SORT_DESC) ? -$cmp : $cmp;
+        $sort[$key][$k] = ($key_sort === SORT_STRING) ? '' : 0;
       }
-      return 0;
-    };
-    uasort($array, $recursive_callback);
+    }
   }
+
+  // Prepare an array of parameters for use with array_multisort().
+  $param = array();
+  foreach ($keys as $key => $key_sort) {
+    $param[] = $sort[$key];
+    $param[] = $dir;
+    $param[] = $key_sort;
+  }
+  // Add the array we want to actually sort at the end (by reference).
+  $param[] = &$array;
+
+  // Perform the sort.
+  call_user_func_array('array_multisort', $param);
+
+  // Un-prefix array keys.
+  foreach ($array as $key => $value) {
+    $unprefixed[substr($key, 1)] = $value;
+  }
+  $array = $unprefixed;
+  unset($unprefixed);
 }
 
 /**
@@ -7766,6 +7756,15 @@ function backdrop_common_theme() {
       'render element' => 'element',
     ),
     'date' => array(
+      'render element' => 'element',
+    ),
+    'html_date' => array(
+      'render element' => 'element',
+    ),
+    'html_time' => array(
+      'render element' => 'element',
+    ),
+    'html_datetime' => array(
       'render element' => 'element',
     ),
     'exposed_filters' => array(

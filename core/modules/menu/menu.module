@@ -394,8 +394,8 @@ function _menu_get_options($menus, $available_menus, $item) {
   foreach ($menus as $menu_name => $title) {
     if (isset($available_menus[$menu_name])) {
       $tree = menu_tree_all_data($menu_name, NULL);
-      $options[$menu_name . ':0'] = '<' . $title . '>';
-      _menu_parents_recurse($tree, $menu_name, '--', $options, $item['mlid'], $limit);
+      $options[$menu_name . ':0'] = $title;
+      _menu_parents_recurse($tree, $menu_name, '· ', $options, $item['mlid'], $limit);
     }
   }
   return $options;
@@ -417,7 +417,7 @@ function _menu_parents_recurse($tree, $menu_name, $indent, &$options, $exclude, 
       }
       $options[$menu_name . ':' . $data['link']['mlid']] = $title;
       if ($data['below']) {
-        _menu_parents_recurse($data['below'], $menu_name, $indent . '--', $options, $exclude, $depth_limit);
+        _menu_parents_recurse($data['below'], $menu_name, $indent . '· ', $options, $exclude, $depth_limit);
       }
     }
   }
@@ -676,7 +676,7 @@ function menu_form_node_form_alter(&$form, $form_state) {
   $form['menu']['enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Provide a menu link'),
-    '#default_value' => (int) (bool) $link['mlid'],
+    '#default_value' => empty($form['#node']->nid) ? $node_type->settings['menu_default'] : (int) (bool) $link['mlid'],
   );
   $form['menu']['link'] = array(
     '#type' => 'container',
@@ -697,7 +697,7 @@ function menu_form_node_form_alter(&$form, $form_state) {
     '#type' => 'textfield',
     '#title' => t('Menu link title'),
     '#maxlength' => 255,
-    '#default_value' => $link['link_title'],
+    '#default_value' => $link['mlid'] ? $link['link_title'] : '',
   );
 
   $form['menu']['link']['description'] = array(
@@ -765,12 +765,16 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
     '#group' => 'additional_settings',
     '#weight' => 15,
   );
+  $form['menu']['menu_default'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Add a link into the menu for new content of this type'),
+    '#default_value' => $node_type->settings['menu_default'],
+  );
   $form['menu']['menu_options'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Available menus'),
+    '#title' => t('Menus where this content may be placed'),
     '#default_value' => $node_type->settings['menu_options'],
     '#options' => $menu_options,
-    '#description' => t('The menus available to place links in for this content type.'),
   );
   // To avoid an 'illegal option' error after saving the form we have to load
   // all available menu items.
@@ -782,7 +786,7 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
     '#title' => t('Default parent item'),
     '#default_value' => $node_type->settings['menu_parent'],
     '#options' => $options,
-    '#description' => t('Choose the menu item to be the default parent for a new link in the content authoring form.'),
+    '#description' => t('Links to content will be placed below this item in the menu.'),
     '#attributes' => array('class' => array('menu-title-select')),
   );
 
@@ -800,6 +804,7 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
 function menu_node_type_load(&$types) {
   foreach ($types as $type_name => $type) {
     $types[$type_name]->settings += array(
+      'menu_default' => FALSE,
       'menu_options' => array(),
       'menu_parent' => 'main-menu:0',
     );
