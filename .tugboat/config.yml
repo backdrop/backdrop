@@ -12,6 +12,9 @@ services:
         # - apt-get install -y mysql-client
         # - docker-php-ext-install opcache zip
         # - a2enmod rewrite expires headers
+
+        # Enable Apache's 'rewrite' module for clean URLs.
+        - a2enmod rewrite
         # Link the document root to the expected path.
         - ln -snf $TUGBOAT_ROOT $DOCROOT
       update:
@@ -40,6 +43,5 @@ services:
     image: tugboatqa/mariadb:latest
     commands:
       init:
-        # Configure database for UTF8-MB4: https://api.backdropcms.org/database-configuration
-        # - printf "[mysqld]\ninnodb_large_prefix=true\ninnodb_file_format=barracuda\ninnodb_file_per_table=true\n" >> /etc/mysql/conf.d/utf8mb.conf
-        # - mysql -e "CREATE DATABASE backdrop; GRANT ALL PRIVILEGES ON backdrop.* TO 'tugboat'@'%';"
+        # Configure database for UTF-8: https://api.backdropcms.org/database-configuration#utf8mb4
+        - echo "[mysqld]\ninnodb_large_prefix=true\ninnodb_file_format=barracuda\ninnodb_file_per_table=true" >> /etc/mysql/conf.d/utf8mb.conf
