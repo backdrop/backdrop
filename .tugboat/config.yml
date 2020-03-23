@@ -18,13 +18,13 @@ services:
         # Use the Tugboat-specific Backdrop settings.
         - cp $TUGBOAT_ROOT/.tugboat/settings.local.php $TUGBOAT_ROOT/settings.local.php
         # Generate a unique hash_salt to secure the site.
-        - echo \$settings['hash_salt'] = '$(openssl rand -hex 32)'; >> $TUGBOAT_ROOT/settings.local.php
+        - echo "\$settings['hash_salt'] = '$(openssl rand -hex 32)';" >> $TUGBOAT_ROOT/settings.local.php
         # Create and set the config directories.
         - mkdir $TUGBOAT_ROOT/files/config_$TUGBOAT_PREVIEW_ID
         - mkdir $TUGBOAT_ROOT/files/config_$TUGBOAT_PREVIEW_ID/active
         - mkdir $TUGBOAT_ROOT/files/config_$TUGBOAT_PREVIEW_ID/staging
-        - echo \$config_directories['active'] = 'files/config_$TUGBOAT_PREVIEW_ID/active'; >> $TUGBOAT_ROOT/settings.local.php
-        - echo \$config_directories['staging'] = 'files/config_$TUGBOAT_PREVIEW_ID/staging'; >> $TUGBOAT_ROOT/settings.local.php
+        - echo "\$config_directories['active'] = 'files/config_$TUGBOAT_PREVIEW_ID/active';" >> $TUGBOAT_ROOT/settings.local.php
+        - echo "\$config_directories['staging'] = 'files/config_$TUGBOAT_PREVIEW_ID/staging';" >> $TUGBOAT_ROOT/settings.local.php
         # Set appropriate file permissions/ownership.
         - chown -R www-data:www-data $TUGBOAT_ROOT
         - find $TUGBOAT_ROOT/files $TUGBOAT_ROOT/layouts $TUGBOAT_ROOT/modules $TUGBOAT_ROOT/themes -type d -exec chmod 2775 {} \;
