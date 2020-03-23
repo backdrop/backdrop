@@ -30,7 +30,7 @@ services:
         - find "${DOCROOT}" -type d -exec chmod 2775 {} \;
         - find "${DOCROOT}" -type f -exec chmod 0664 {} \;
         # Install Backdrop.
-        - cd ${DOCROOT} && ./core/scripts/install.sh --db-url=mysql://tugboat:tugboat@mysql/tugboat --account-pass=password
+        - cd ${DOCROOT} && ./core/scripts/install.sh --db-url=mysql://tugboat:tugboat@mariadb/tugboat --account-pass=password
       build:
         # - cd ${DOCROOT} && ./.tugboat/auto-login.sh
   mariadb:
@@ -39,3 +39,4 @@ services:
       init:
         # Configure database for UTF8-MB4: https://api.backdropcms.org/database-configuration
         # - printf "[mysqld]\ninnodb_large_prefix=true\ninnodb_file_format=barracuda\ninnodb_file_per_table=true\n" >> /etc/mysql/conf.d/utf8mb.conf
+        # - mysql -e "CREATE DATABASE backdrop; GRANT ALL PRIVILEGES ON backdrop.* TO 'tugboat'@'%';"
