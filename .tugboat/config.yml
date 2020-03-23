@@ -6,33 +6,36 @@ services:
     commands:
       init:
         # Add in extra PHP settings. Note the file renaming.
-        # - cp "${TUGBOAT_ROOT}/.tugboat/php.ini"  /usr/local/etc/php/conf.d/backdrop-php.ini
+        # - cp "$TUGBOAT_ROOT/.tugboat/php.ini"  /usr/local/etc/php/conf.d/backdrop-php.ini
         # Install prerequisite packages.
         # - apt-get update
         # - apt-get install -y mysql-client
         # - docker-php-ext-install opcache zip
         # - a2enmod rewrite expires headers
         # Link the document root to the expected path.
-        - ln -snf "${TUGBOAT_ROOT}" "${DOCROOT}"
+        - ln -snf $TUGBOAT_ROOT $DOCROOT
       update:
         # Use the Tugboat-specific Backdrop settings.
-        - cp "${TUGBOAT_ROOT}/.tugboat/settings.local.php" "${DOCROOT}/settings.local.php"
+        - cp $TUGBOAT_ROOT/.tugboat/settings.local.php $TUGBOAT_ROOT/settings.local.php
         # Generate a unique hash_salt to secure the site.
-        - echo "\$settings['hash_salt'] = '$(openssl rand -hex 32)';" >> "${DOCROOT}/settings.local.php"
-        # Create and set the config directory.
-        - mkdir "${DOCROOT}/files/config_$TUGBOAT_PREVIEW_ID"
-        - mkdir "${DOCROOT}/files/config_$TUGBOAT_PREVIEW_ID/active"
-        - mkdir "${DOCROOT}/files/config_$TUGBOAT_PREVIEW_ID/staging"
-        - echo "\$config_directories['active'] = 'files/config_$TUGBOAT_PREVIEW_ID/active';" >> "${DOCROOT}/settings.local.php"
-        - echo "\$config_directories['staging'] = 'files/config_$TUGBOAT_PREVIEW_ID/staging';" >> "${DOCROOT}/settings.local.php"
+        - echo \$settings['hash_salt'] = '$(openssl rand -hex 32)'; >> $TUGBOAT_ROOT/settings.local.php
+        # Create and set the config directories.
+        - mkdir $TUGBOAT_ROOT/files/config_$TUGBOAT_PREVIEW_ID
+        - mkdir $TUGBOAT_ROOT/files/config_$TUGBOAT_PREVIEW_ID/active
+        - mkdir $TUGBOAT_ROOT/files/config_$TUGBOAT_PREVIEW_ID/staging
+        - echo \$config_directories['active'] = 'files/config_$TUGBOAT_PREVIEW_ID/active'; >> $TUGBOAT_ROOT/settings.local.php
+        - echo \$config_directories['staging'] = 'files/config_$TUGBOAT_PREVIEW_ID/staging'; >> $TUGBOAT_ROOT/settings.local.php
         # Set appropriate file permissions/ownership.
-        - chown -R www-data:www-data "${TUGBOAT_ROOT}"
-        - find "${DOCROOT}" -type d -exec chmod 2775 {} \;
-        - find "${DOCROOT}" -type f -exec chmod 0664 {} \;
+        - chown -R www-data:www-data $TUGBOAT_ROOT
+        - find $TUGBOAT_ROOT/files $TUGBOAT_ROOT/layouts $TUGBOAT_ROOT/modules $TUGBOAT_ROOT/themes -type d -exec chmod 2775 {} \;
+        - find $TUGBOAT_ROOT/files $TUGBOAT_ROOT/layouts $TUGBOAT_ROOT/modules $TUGBOAT_ROOT/themes -type f -exec chmod 0664 {} \;
         # Install Backdrop.
-        - cd ${DOCROOT} && ./core/scripts/install.sh --db-url=mysql://tugboat:tugboat@mariadb/tugboat --account-pass=password
+        - cd $TUGBOAT_ROOT && ./core/scripts/install.sh --db-url=mysql://tugboat:tugboat@mariadb/tugboat --account-pass=password
+        # Fix config permissions after install.
+        - chown -R www-data:www-data $TUGBOAT_ROOT/files/config_$TUGBOAT_PREVIEW_ID/active
+        - find $TUGBOAT_ROOT/files/config_$TUGBOAT_PREVIEW_ID/active -type f -exec chmod 0664 {} \;
       build:
-        # - cd ${DOCROOT} && ./.tugboat/auto-login.sh
+        # - cd $TUGBOAT_ROOT && ./.tugboat/auto-login.sh
   mariadb:
     image: tugboatqa/mariadb:latest
     commands:
