@@ -5,14 +5,8 @@ services:
     depends: mariadb
     commands:
       init:
-        # Add in extra PHP settings. Note the file renaming.
-        # - cp "$TUGBOAT_ROOT/.tugboat/php.ini"  /usr/local/etc/php/conf.d/backdrop-php.ini
-        # Install prerequisite packages.
-        # - apt-get update
-        # - apt-get install -y mysql-client
-        # - docker-php-ext-install opcache zip
-        # - a2enmod rewrite expires headers
-
+        # Install ZIP extension for PHP to allow installing Backdrop modules.
+        - docker-php-ext-install zip
         # Enable Apache's 'rewrite' module for clean URLs.
         - a2enmod rewrite
         # Link the document root to the expected path.
