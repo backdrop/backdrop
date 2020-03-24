@@ -31,8 +31,8 @@ services:
         # Fix config permissions after install.
         - chown -R www-data:www-data $TUGBOAT_ROOT/files/config_$TUGBOAT_PREVIEW_ID/active
         - find $TUGBOAT_ROOT/files/config_$TUGBOAT_PREVIEW_ID/active -type f -exec chmod 0664 {} \;
-      build:
-        # - cd $TUGBOAT_ROOT && ./.tugboat/auto-login.sh
+        # Post a comment to the PR.
+        - cd $TUGBOAT_ROOT && ./.tugboat/post-comment.sh
   mariadb:
     image: tugboatqa/mariadb:latest
     commands:
