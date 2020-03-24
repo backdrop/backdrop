@@ -5,9 +5,9 @@ services:
     depends: mariadb
     commands:
       init:
-        # Install ZIP extension for PHP to allow installing Backdrop modules.
+        # Install PHP 'zip' extension to allow installing Backdrop modules.
         - docker-php-ext-install zip
-        # Enable Apache's 'rewrite' module for clean URLs.
+        # Enable Apache 'rewrite' module for clean URLs.
         - a2enmod rewrite
         # Link the document root to the expected path.
         - ln -snf $TUGBOAT_ROOT $DOCROOT
