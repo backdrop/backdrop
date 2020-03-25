@@ -26,7 +26,7 @@ services:
         - find $TUGBOAT_ROOT/files $TUGBOAT_ROOT/layouts $TUGBOAT_ROOT/modules $TUGBOAT_ROOT/themes -type f -exec chmod 0664 {} \;
       build:
         # Clear out active config (needed when rebuilding/reinstalling).
-        - find $TUGBOAT_ROOT/files/config/active/ -mindepth 1 -delete
+        - find $TUGBOAT_ROOT/files/config/active -mindepth 1 -delete
         # Install Backdrop.
         - cd $TUGBOAT_ROOT && ./core/scripts/install.sh --db-url=mysql://tugboat:tugboat@mariadb/tugboat --account-pass=password
         # Fix config permissions after install.
