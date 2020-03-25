@@ -25,6 +25,8 @@ services:
         - find $TUGBOAT_ROOT/files $TUGBOAT_ROOT/layouts $TUGBOAT_ROOT/modules $TUGBOAT_ROOT/themes -type d -exec chmod 2775 {} \;
         - find $TUGBOAT_ROOT/files $TUGBOAT_ROOT/layouts $TUGBOAT_ROOT/modules $TUGBOAT_ROOT/themes -type f -exec chmod 0664 {} \;
       build:
+        # Delete previous comments in the PR.
+        - cd $TUGBOAT_ROOT && ./.tugboat/delete-comments.sh
         # Clear out active config (needed when rebuilding/reinstalling).
         - find $TUGBOAT_ROOT/files/config/active -mindepth 1 -delete
         # Install Backdrop.
@@ -32,7 +34,7 @@ services:
         # Fix config permissions after install.
         - chown -R www-data:www-data $TUGBOAT_ROOT/files/config/active
         - find $TUGBOAT_ROOT/files/config/active -type f -exec chmod 0664 {} \;
-        # Post a comment to the PR.
+        # Post a comment in the PR.
         - cd $TUGBOAT_ROOT && ./.tugboat/post-comment.sh
   mariadb:
     image: tugboatqa/mariadb:latest
