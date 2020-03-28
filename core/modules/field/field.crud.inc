@@ -212,7 +212,9 @@ function field_update_field($field) {
   // Tell the storage engine to update the field. Do this before
   // saving the new definition since it still might fail.
   $storage_type = field_info_storage_types($field['storage']['type']);
-  module_invoke($storage_type['module'], 'field_storage_update_field', $field, $prior_field, $has_data);
+  if (!empty($storage_type)) {
+    module_invoke($storage_type['module'], 'field_storage_update_field', $field, $prior_field, $has_data);
+  }
 
   // Clear caches
   field_cache_clear();
@@ -508,6 +510,10 @@ function field_create_instance($instance) {
 
   // Populate the instance default settings.
   $field = field_read_field($instance['field_name']);
+  if (empty($field)) {
+    $message = t('Attempted to create an instance of field @field_name, but that field does not exist.', array('@field_name' => $instance['field_name']));
+    throw new FieldException($message);
+  }
   $instance['settings'] += field_info_instance_settings($field['type']);
 
   // Validate the fully populated instance.

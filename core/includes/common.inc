@@ -471,7 +471,7 @@ function backdrop_add_feed($url = NULL, $title = '') {
  */
 function backdrop_get_feeds($delimiter = "\n") {
   $feeds = backdrop_add_feed();
-  return implode($feeds, $delimiter);
+  return implode($delimiter, $feeds);
 }
 
 /**

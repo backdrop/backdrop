@@ -1193,7 +1193,7 @@ function search_excerpt($keys, $text) {
       }
       else {
         $info = search_simplify_excerpt_match($key, $text, $included[$key], $boundary);
-        if ($info['where']) {
+        if (!empty($info) && $info['where']) {
           $p = $info['where'];
           if ($info['keyword']) {
             $foundkeys[] = $info['keyword'];

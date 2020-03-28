@@ -78,7 +78,6 @@ class DateThemeTestCase extends BackdropWebTestCase {
         ),
       ),
       'display' => array(
-        'default' => array(
           'label' => 'above',
           'type' => 'date_default',
           'settings' => array(
@@ -91,7 +90,6 @@ class DateThemeTestCase extends BackdropWebTestCase {
           ),
           'module' => 'date',
           'weight' => 0 ,
-        ),
       ),
 
       'show_remaining_days' => '',
