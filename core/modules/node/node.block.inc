@@ -8,14 +8,52 @@ class NodeBlock extends Block {
    *  Sets title text on draggable block panel in Layout builder.
    */
   function getAdminTitle() {
-    return t('Existing content');
+    // Fallback for when the block title is set to "none".
+    $admin_title = t('Existing content');
+
+    if ($this->settings['title_display'] === LAYOUT_TITLE_CUSTOM && $this->settings['title']) {
+      $admin_title = check_plain($this->settings['title']);
+    }
+    elseif ($this->settings['title_display'] === LAYOUT_TITLE_DEFAULT && $this->settings['nid']) {
+      $node = node_load($this->settings['nid']);
+      $admin_title = $node->title;
+    }
+
+    return  $admin_title;
   }
 
   /**
    * Returns a preview for this block.
    */
   function getAdminPreview() {
-    return t('Displays content of node ID: @nid', array('@nid' => $this->settings['nid']));
+    $node = node_load($this->settings['nid']);
+    $node_type = node_type_get_type($node)->type;
+    $node_type_name = backdrop_strtolower(node_type_get_name($node));
+    $node_path = url($node->path['alias']);
+    $description = t('<strong>Displays content of the %content_title @content_type</strong></br> (node ID: @nid, path: <a href="@path_link"><code>/@path</code></a>)',
+      array('%content_title' => $node->title, '@content_type' => $node_type_name, '@nid' => $node->nid, '@path_link' => $node_path, '@path' => $node->path['alias'])
+    );
+
+    $settings = array();
+    if ($this->settings['title_display'] === LAYOUT_TITLE_NONE) {
+      $settings[] = t('Block title: hidden');
+    }
+
+    $view_mode = $this->settings['view_mode'];
+    $view_mode_text = entity_get_info('node')['view modes'][$view_mode]['label'];
+    $view_mode_path = 'admin/structure/types/manage/' . $node_type . '/display/' . $view_mode;
+    $settings[] = t('Display mode:') . ' ' . l($view_mode_text, $view_mode_path, array('query' => backdrop_get_destination()));
+
+    if ($this->settings['display_submitted']) {
+      $settings[] = t('Show author and date information');
+    }
+    if ($this->settings['links']) {
+      $settings[] = t('Include the links "add comment", "read more" etc.');
+    }
+
+    $description .= theme('item_list', array('items' => $settings));
+
+    return $description;
   }
 
   /**
