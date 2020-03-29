@@ -159,6 +159,20 @@ function simpletest_schema() {
         'default' => '',
         'description' => 'The database prefix used during testing. Multiple prefixes may be used at the same time if using the run-scripts.sh script with concurrency.',
       ),
+      'profile' => array(
+        'type' => 'varchar',
+        'length' => 60,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => 'The profile used to create the prefix.',
+      ),
+      'in_use' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => FALSE,
+        'default' => 0,
+        'description' => 'Whether the prefix is in use or not.',
+      ),
     ),
     'indexes' => array(
       'test_id' => array('test_id'),
@@ -238,6 +252,30 @@ function simpletest_update_1001() {
   update_variable_del('simpletest_httpauth_password');
   update_variable_del('simpletest_httpauth_username');
   update_variable_del('simpletest_verbose');
+}
+
+/**
+ * Adds two new columns to allow reuse of simpletest prefixes.
+ */
+function simpletest_update_1002() {
+  if (!db_field_exists('simpletest_prefix', 'profile')) {
+    db_add_field('simpletest_prefix', 'profile', array(
+      'type' => 'varchar',
+      'length' => 60,
+      'not null' => FALSE,
+      'default' => '',
+      'description' => 'The profile used to create the prefix.',
+    ));
+  }
+  if (!db_field_exists('simpletest_prefix', 'in_use')) {
+    db_add_field('simpletest_prefix', 'in_use', array(
+      'type' => 'int',
+      'size' => 'tiny',
+      'not null' => FALSE,
+      'default' => 0,
+      'description' => 'Whether the prefix is in use or not.',
+    ));
+  }
 }
 
 /**

@@ -363,6 +363,7 @@ function simpletest_test_get_all() {
     }
     else {
       $files = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.tests\.info$/', 'modules', 'name', 0);
+      $files = array_merge(backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.tests\.info$/', 'profiles', 'name', 0), $files);
       $groups = array();
       foreach ($files as $file) {
         $classes = backdrop_parse_info_file($file->uri, TRUE);
