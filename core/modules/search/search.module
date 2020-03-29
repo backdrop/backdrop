@@ -1381,6 +1381,7 @@ function search_forms() {
 function search_autoload_info() {
   return array(
     'SearchQuery' => 'search.extender.inc',
+    'viewsSearchQuery' => 'search.extender.inc',
 
     // Views handlers.
     'views_handler_argument_search' => 'views/views_handler_argument_search.inc',

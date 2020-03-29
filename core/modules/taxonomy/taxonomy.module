@@ -1271,7 +1271,7 @@ function taxonomy_get_children($tid, $vid = 0) {
 /**
  * Legacy wrapper to try to map a string to an existing term.
  *
- * Do not call this function, use taxonomy_get_term_by_name() instead.
+ * Do not call this function, use taxonomy_term_load_multiple_by_name() instead.
  *
  * @deprecated since 1.0.0
  * @see taxonomy_term_load_multiple_by_name()

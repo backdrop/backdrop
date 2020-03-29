@@ -39,10 +39,14 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
   /**
    * Prepare cache tables and config directories.
    */
-  public function prepareCache() {
+  public function prepareCache($skip_myisam = FALSE) {
     $this->setUp();
-    // Speed up test speed by converting tables to MyISAM.
-    $this->alterToMyISAM();
+
+    if (!$skip_myisam) {
+      // Speed up test speed by converting tables to MyISAM.
+      $this->alterToMyISAM();
+    }
+
     $this->tearDown();
   }
 

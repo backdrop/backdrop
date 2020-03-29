@@ -1303,6 +1303,7 @@ function system_site_information_settings($form, &$form_state) {
     '#size' => 40,
     '#description' => t('Optionally, specify a relative URL to display as the home page. Leave this blank to display the default content feed.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
+    '#autocomplete_path' => 'path-autocomplete',
   );
   $form['front_page']['default_nodes_main'] = array(
     '#type' => 'select', '#title' => t('Number of posts on home page'),
@@ -1321,7 +1322,8 @@ function system_site_information_settings($form, &$form_state) {
     '#default_value' => ($site_config->get('site_403') != '' ? backdrop_get_path_alias($site_config->get('site_403')) : ''),
     '#size' => 40,
     '#description' => t('This page is displayed when the requested document is denied to the current user. Leave blank to display a generic "access denied" page.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=')
+    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
+    '#autocomplete_path' => 'path-autocomplete',
   );
   $form['error_page']['site_404'] = array(
     '#type' => 'textfield',
@@ -1329,7 +1331,8 @@ function system_site_information_settings($form, &$form_state) {
     '#default_value' => ($site_config->get('site_404') != '' ? backdrop_get_path_alias($site_config->get('site_404')) : ''),
     '#size' => 40,
     '#description' => t('This page is displayed when no other content matches the requested document. Leave blank to display a generic "page not found" page.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=')
+    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
+    '#autocomplete_path' => 'path-autocomplete',
   );
 
   $form['#validate'][] = 'system_site_information_settings_validate';

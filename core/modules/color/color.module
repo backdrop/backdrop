@@ -235,7 +235,7 @@ function color_menu() {
     'page callback' => 'color_save_preview_settings',
     'page arguments' => array(2),
     'type' => MENU_CALLBACK,
-    'access arguments' => array('administer theme settings'),
+    'access arguments' => array('administer themes'),
     'delivery callback' => 'backdrop_json_deliver',
   );
 

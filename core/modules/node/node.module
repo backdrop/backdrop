@@ -614,7 +614,7 @@ function node_field_extra_fields() {
     // Add also the 'language' select if Language module is enabled and the
     // bundle has multilingual support.
     if ($module_language_enabled && $type->settings['language']) {
-      $extra['node'][$type->type]['form']['language'] = array(
+      $extra['node'][$type->type]['form']['langcode'] = array(
         'label' => t('Language'),
         'description' => $description,
         'weight' => 0,
