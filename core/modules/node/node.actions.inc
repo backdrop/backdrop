@@ -19,8 +19,6 @@ function node_publish_action(Node $node, &$context) {
     $node->save();
   }
 
-
-
 /**
  * Sets the status of a node to 0 (unpublished).
  *
