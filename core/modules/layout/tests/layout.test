@@ -2540,6 +2540,7 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
       'access administration pages',
       'administer site configuration',
       'administer layouts',
+      'administer flexible templates',
     ));
     $this->backdropLogin($this->admin_user);
   }
@@ -2879,6 +2880,29 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     ));
     $last_row_attr = (string) $last_row_attr[0][0];
     $this->assertEqual($last_row_attr, $data_row_id, 'The last row is the new row.');
+
+    // Test that a user without permissions cannot create flexible templates
+    // But can still use them.
+    $this->no_flex_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'administer site configuration',
+      'administer layouts',
+    ));
+    $this->backdropLogin($this->no_flex_user);
+
+    $this->backdropGet('admin/structure/layouts/settings');
+    $this->assertNoLink(t('Add flexible layout template'));
+    $this->assertNoLink(t('Configure regions'));
+
+    // Attempt to go to the template editor of the flexible template, and
+    // confirm no access.
+    $flexible_layout_configure_link = 'admin/structure/layouts/settings/flexible-template/' . $template_machine_name1 . '/configure';
+    $this->backdropGet($flexible_layout_configure_link);
+    $this->assertResponse(403, 'Access not allowed to flexible layout configuration pages without permission.');
+
+    // Go to the layout created with this template and confirm still has access.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $this->backdropPost(NULL, array(), t('Save layout'));
   }
 
 }
