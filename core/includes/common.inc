@@ -8407,6 +8407,10 @@ function backdrop_implode_tags($tags) {
  * invokes a hook so that other modules' cache data can be cleared as well.
  */
 function backdrop_flush_all_caches() {
+  // Rebuild all color palettes.
+  if (module_exists('color')) {
+    color_rebuild_settings();
+  }
   // Change query-strings on css/js files to enforce reload for all users.
   _backdrop_flush_css_js();
 
