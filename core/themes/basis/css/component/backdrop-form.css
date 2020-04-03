@@ -185,6 +185,8 @@ button.form-submit,
 input.form-autocomplete,
 input.form-text,
 input.form-tel,
+input.form-date,
+input.form-time,
 input.form-email,
 input.form-url,
 input.form-color,
@@ -203,6 +205,8 @@ textarea.form-textarea {
 }
 
 input.form-text,
+input.form-date,
+input.form-time,
 input.form-email,
 input.form-url,
 input.form-search,
@@ -231,6 +235,8 @@ select.filter-list {
 
 input.form-text:focus,
 input.form-tel:focus,
+input.form-date:focus,
+input.form-time:focus,
 input.form-email:focus,
 input.form-url:focus,
 input.form-color:focus,

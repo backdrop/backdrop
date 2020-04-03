@@ -52,7 +52,7 @@ class DashboardWelcomeBlock extends Block {
     $default_theme = config_get('system.core', 'theme_default');
     if (theme_has_settings($default_theme)) {
       $themes = list_themes();
-      $color_support = $themes[$default_theme]->info['settings']['color'];
+      $color_support = isset($themes[$default_theme]->info['settings']['color']);
       if (module_exists('color') && $color_support) {
         $theme_link_label = t('Change colors for the current theme');
       }

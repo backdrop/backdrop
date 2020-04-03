@@ -111,6 +111,10 @@ class DashboardTest extends BackdropWebTestCase {
     // The manage user accounts link is present.
     $this->assertLink('Manage user accounts', 0, 'The Manage user accounts link was found.');
 
+    // The backdrop-news block was found.
+    $this->assertText('Backdrop News', 'Backdrop News block found.');
+    $this->assertText('No news at this time.');
+
     // The menu admin block was found.
     $menu_admin_block = $this->xpath('//*[contains(@class,:block)]//tbody/tr/td[contains(text(),:menu)]', array(
       ':block' => 'block-dashboard-menu',

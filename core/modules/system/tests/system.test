@@ -2079,8 +2079,8 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     $user1 = user_load(1);
     $user1->pass_raw = user_password();
     require_once BACKDROP_ROOT . '/' . settings_get('password_inc', 'core/includes/password.inc');
-    $user1->pass = user_hash_password(trim($user1->pass_raw));
-    db_query("UPDATE {users} SET pass = :pass WHERE uid = :uid", array(':pass' => $user1->pass, ':uid' => $user1->uid));
+    $user1->pass = $user1->pass_raw;
+    user_save($user1);
     $this->backdropLogin($user1);
     $this->backdropGet($this->update_url, array('external' => TRUE));
     $this->assertResponse(200);

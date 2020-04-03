@@ -111,7 +111,7 @@ class views_handler_filter_combine extends views_handler_filter_string {
     foreach ($matches as $match) {
       $phrase = FALSE;
       // Strip off phrase quotes.
-      if ($match[2]{0} == '"') {
+      if ($match[2][0] == '"') {
         $match[2] = substr($match[2], 1, -1);
         $phrase = TRUE;
       }

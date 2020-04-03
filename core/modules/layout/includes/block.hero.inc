@@ -95,21 +95,36 @@ class BlockHero extends BlockText {
     parent::formSubmit($form, $form_state);
 
     // Save the things not handled by BlockText.
-    if (isset($form_state['values']['image']) && $form_state['values']['image'] != 0) {
-      // Record that the layout module is using this file. Also marks permanent.
+    if (!empty($form_state['values']['image'])) {
       $file = file_load($form_state['values']['image']);
-      file_usage_add($file, 'layout', 'block', $file->fid);
-
+      if ($form_state['values']['image'] != $form['image']['#default_value']) {
+        // Record that the layout module is using this file. Also marks permanent.
+        // But only if the value has changed.
+        file_usage_add($file, 'layout', 'block', $file->fid);
+        if (!empty($form['image']['#default_value'])) {
+          // Decrement usage for replaced file.
+          $old_file = file_load($form['image']['#default_value']);
+          if ($old_file) {
+            file_usage_delete($old_file, 'layout', 'block', $old_file->fid);
+          }
+        }
+      }
       // Store the filepath separately for use as inline background image.
       $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
       $fileurl = file_create_url($file->uri);
       $filepath = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $fileurl);
       $form_state['values']['image_path'] = $filepath;
-
       $this->settings['image'] = $form_state['values']['image'];
       $this->settings['image_path'] = $form_state['values']['image_path'];
     }
     else {
+      // No new file but an old one existed, decrement usage.
+      if (!empty($form['image']['#default_value'])) {
+        $old_file = file_load($form['image']['#default_value']);
+        if ($old_file) {
+          file_usage_delete($old_file, 'layout', 'block', $old_file->fid);
+        }
+      }
       $this->settings['image'] = NULL;
       $this->settings['image_path'] = NULL;
     }

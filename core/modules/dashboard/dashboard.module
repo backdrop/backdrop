@@ -17,7 +17,7 @@ function dashboard_menu() {
     $items['admin/dashboard/overview'] = array(
       'title' => 'Overview',
       'type' => MENU_DEFAULT_LOCAL_TASK,
-      'weight' => -100
+      'weight' => -100,
     );
     $items['admin/dashboard/settings'] = array(
       'title' => 'Settings',
@@ -101,6 +101,12 @@ function dashboard_block_info() {
     'class' => 'DashboardContentTypesBlock',
     'required contexts' => array('dashboard'),
   );
+  $blocks['news'] = array(
+    'info' => t('Backdrop News'),
+    'description' => t('Displays a news feed from BackdropCMS.org.'),
+    'class' => 'DashboardNewsBlock',
+    'required contexts' => array('dashboard'),
+  );
   $blocks['overview_content'] = array(
     'info' => t('Dashboard - Content'),
     'description' => t('Displays a summary of content statistics'),
@@ -146,6 +152,7 @@ function dashboard_autoload_info() {
     'DashboardTaxonomyBlock' => 'includes/block.taxonomy.inc',
     'DashboardUpdateBlock' => 'includes/block.update.inc',
     'DashboardLayoutContext' => 'includes/dashboard_layout_context.inc',
+    'DashboardNewsBlock' => 'includes/block.news.inc',
   );
 }
 
@@ -234,7 +241,7 @@ function dashboard_preprocess_block(&$variables) {
 }
 
 /**
- * Implements hook_theme()
+ * Implements hook_theme().
  */
 function dashboard_theme() {
   return array(
@@ -243,6 +250,18 @@ function dashboard_theme() {
       'template' => 'templates/dashboard-panel',
     ),
   );
+}
+
+/**
+ * Implements hook_cron().
+ */
+function dashboard_cron() {
+  $last_news_fetch = state_get('dashboard_news_timestamp');
+  $fetch_interval = 21600; // 6 hours.
+  if (REQUEST_TIME - $last_news_fetch > $fetch_interval) {
+    DashboardNewsBlock::refreshNewsFeed();
+    state_set('dashboard_news_timestamp', REQUEST_TIME);
+  }
 }
 
 /**

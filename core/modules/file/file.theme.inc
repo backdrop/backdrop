@@ -282,19 +282,7 @@ function theme_file_upload_help($variables) {
     $max = $upload_validators['file_validate_image_resolution'][0];
     $min = $upload_validators['file_validate_image_resolution'][1];
     // Check for cases where only one dimension is specified.
-    if ($max) {
-      list($width, $height) = explode('x', $max);
-      if (empty($height)) {
-        $descriptions[] = t('Images wider than !width pixels will be scaled down.', array('!width' => '<strong>' . $width . '</strong>'));
-      }
-      elseif (empty($width)) {
-        $descriptions[] = t('Images taller than !height pixels will be scaled down.', array('!height' => '<strong>' . $height . '</strong>'));
-      }
-      else {
-        $descriptions[] = t('Images larger than !size pixels will be scaled down.', array('!size' => '<strong>' . $max . '</strong>'));
-      }
-    }
-    if ($min && ($min != $max)) {
+    if ($min) {
       list($width, $height) = explode('x', $min);
       if (empty($height)) {
         $descriptions[] = t('Images must be at least !width pixels wide.', array('!width' => '<strong>' . $width . '</strong>'));
@@ -306,8 +294,17 @@ function theme_file_upload_help($variables) {
         $descriptions[] = t('Images must be at least !min pixels.', array('!min' => '<strong>' . $min . '</strong>'));
       }
     }
-    elseif ($min != $max) {
-      $descriptions[] = t('Images must be at least !min pixels.', array('!min' => '<strong>' . $min . '</strong>'));
+    if ($max) {
+      list($width, $height) = explode('x', $max);
+      if (empty($height)) {
+        $descriptions[] = t('Images wider than !width pixels will be scaled down.', array('!width' => '<strong>' . $width . '</strong>'));
+      }
+      elseif (empty($width)) {
+        $descriptions[] = t('Images taller than !height pixels will be scaled down.', array('!height' => '<strong>' . $height . '</strong>'));
+      }
+      else {
+        $descriptions[] = t('Images larger than !size pixels will be scaled down.', array('!size' => '<strong>' . $max . '</strong>'));
+      }
     }
   }
   if (isset($upload_validators['file_validate_image_orientation'])) {
@@ -344,7 +341,7 @@ function theme_file_formatter_table($variables) {
  * Specifically, this returns HTML for a file type name and description.
  */
 function theme_file_type_overview($variables) {
-  return check_plain($variables['name']) . '<div class="description">' . $variables['description'] . '</div>';
+  return check_plain($variables['name']) . '<div class="description">' . filter_xss_admin($variables['description']) . '</div>';
 }
 
 /**

@@ -838,6 +838,8 @@ div.teaser-checkbox .form-item,
 .form-disabled input.form-autocomplete,
 .form-disabled input.form-text,
 .form-disabled input.form-tel,
+.form-disabled input.form-date,
+.form-disabled input.form-time,
 .form-disabled input.form-email,
 .form-disabled input.form-url,
 .form-disabled input.form-color,
@@ -1030,6 +1032,8 @@ input.form-disabled:focus {
 input.form-autocomplete,
 input.form-text,
 input.form-tel,
+input.form-date,
+input.form-time,
 input.form-email,
 input.form-url,
 input.form-color,
@@ -1091,6 +1095,8 @@ select.filter-list {
 }
 input.form-text:focus,
 input.form-tel:focus,
+input.form-date:focus,
+input.form-time:focus,
 input.form-email:focus,
 input.form-url:focus,
 input.form-color:focus,
@@ -1232,6 +1238,9 @@ div.filter-options select {
 }
 .block-dashboard-updates .block-title {
   background-image: url('../images/info-circle--black--64.png');
+}
+.block-dashboard-news .block-title {
+  background-image: url('../images/bell--black--64.png');
 }
 
 /* admin/appearance */
