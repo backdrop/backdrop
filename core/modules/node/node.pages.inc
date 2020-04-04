@@ -231,12 +231,8 @@ function node_form($form, &$form_state, Node $node) {
     '#access' => $node->nid && $node_type->settings['revision_enabled'] && ($node->revision || user_access('administer nodes')),
   );
 
-  $clone_default = FALSE;
-  if ($node->isDefaultRevision() && arg(4) == 'edit') {
-    $clone_default = TRUE;
-  }
-  // Enforce a new revision if editing an old revision.
-  if (isset($node->default_revision) && ($node->default_revision <= $node->vid) && !$clone_default) {
+  dpm($node);
+  if ($node->isDefaultRevision()) {
     $form['revision_information']['revision'] = array(
       '#type' => 'checkbox',
       '#title' => t('Create new revision'),
@@ -254,16 +250,10 @@ function node_form($form, &$form_state, Node $node) {
       );
     }
   }
-  elseif ($clone_default) {
-    $node->revision = TRUE;
-    $form['revision_information']['mandatory_revision_message'] = array(
-      '#markup' => t('A new revision of the default will be saved.'),
-    );
-  }
   else {
     $node->revision = TRUE;
     $form['revision_information']['mandatory_revision_message'] = array(
-      '#markup' => t('A new revision is required when editing past revisions.'),
+      '#markup' => t('A new revision will be saved.'),
     );
   }
   $form['revision_information']['log'] = array(
@@ -962,7 +952,7 @@ function node_revision_overview($node) {
     else {
       $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'default' => $is_default_revision));
       if ($edit_permission) {
-        $update_link = ($revision->vid < $node->default_revision) ? t('Clone') : t('Edit');
+        $update_link = t('Clone');
         $links['clone'] = array(
           'title' => $update_link,
           'href' => "node/$node->nid/revisions/$revision->vid/edit",
