@@ -231,7 +231,6 @@ function node_form($form, &$form_state, Node $node) {
     '#access' => $node->nid && $node_type->settings['revision_enabled'] && ($node->revision || user_access('administer nodes')),
   );
 
-  dpm($node);
   if ($node->isDefaultRevision()) {
     $form['revision_information']['revision'] = array(
       '#type' => 'checkbox',
@@ -262,11 +261,6 @@ function node_form($form, &$form_state, Node $node) {
     '#rows' => 4,
     '#default_value' => !empty($node->log) ? $node->log : '',
     '#description' => t('Briefly describe the changes you have made.'),
-  );
-
-  $form['revision_information']['is_default_revision'] = array(
-    '#type' => 'value',
-    '#value' => $node->is_default_revision,
   );
 
   // Node author information for administrators
@@ -325,8 +319,13 @@ function node_form($form, &$form_state, Node $node) {
   );
 
   // Node options for administrators
-  $form['options'] = array(
-    '#type' => 'fieldset',
+  $form['
+  
+  
+  
+  '] = array(
+    '#type' => '
+    .',
     '#access' => user_access('administer nodes') && $node->isDefaultRevision(),
     '#title' => t('Publishing options'),
     '#collapsible' => TRUE,
@@ -491,6 +490,7 @@ function node_form($form, &$form_state, Node $node) {
   }
   $form += array('#submit' => array());
 
+  dpm($form);
   field_attach_form('node', $node, $form, $form_state, $node->langcode);
   return $form;
 }

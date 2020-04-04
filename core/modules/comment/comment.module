@@ -1225,7 +1225,7 @@ function comment_form_node_form_alter(&$form, $form_state) {
   $node = $form['#node'];
   $form['comment_settings'] = array(
     '#type' => 'fieldset',
-    '#access' => user_access('administer comments'),
+    '#access' => user_access('administer comments') && $node->isDefaultRevision(),
     '#title' => t('Comment settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,

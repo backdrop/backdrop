@@ -646,8 +646,9 @@ function _menu_parent_depth_limit($item) {
 function menu_form_node_form_alter(&$form, $form_state) {
   // Generate a list of possible parents (not including this link or descendants).
   // @todo This must be handled in a #process handler.
-  $link = $form['#node']->menu;
-  $type = $form['#node']->type;
+  $node = $form['#node'];
+  $link = $node->menu;
+  $type = $node->type;
   $node_type = node_type_load($type);
 
   // menu_parent_options() is goofy and can actually handle either a menu link
@@ -662,7 +663,7 @@ function menu_form_node_form_alter(&$form, $form_state) {
   $form['menu'] = array(
     '#type' => 'fieldset',
     '#title' => t('Menu settings'),
-    '#access' => user_access('administer menu'),
+    '#access' => user_access('administer menu') && $node->isDefaultRevision(),
     '#collapsible' => TRUE,
     '#collapsed' => !$link['link_title'],
     '#group' => 'additional_settings',
@@ -676,7 +677,7 @@ function menu_form_node_form_alter(&$form, $form_state) {
   $form['menu']['enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Provide a menu link'),
-    '#default_value' => empty($form['#node']->nid) ? $node_type->settings['menu_default'] : (int) (bool) $link['mlid'],
+    '#default_value' => empty($node->nid) ? $node_type->settings['menu_default'] : (int) (bool) $link['mlid'],
   );
   $form['menu']['link'] = array(
     '#type' => 'container',
