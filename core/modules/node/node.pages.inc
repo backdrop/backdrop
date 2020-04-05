@@ -219,6 +219,7 @@ function node_form($form, &$form_state, Node $node) {
     '#title' => t('Revision information'),
     '#collapsible' => TRUE,
     // Collapsed by default when "Create new revision" is unchecked
+    // Todo: this is unnecessary with the draft button.
     '#collapsed' => !$node->revision,
     '#group' => 'additional_settings',
     '#attributes' => array(
@@ -231,27 +232,8 @@ function node_form($form, &$form_state, Node $node) {
     '#access' => $node->nid && $node_type->settings['revision_enabled'] && ($node->revision || user_access('administer nodes')),
   );
 
-  if ($node->isDefaultRevision()) {
-    $form['revision_information']['revision'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Create new revision'),
-      '#default_value' => $node->revision,
-      '#access' => user_access('administer nodes'),
-    );
-    // Check the revision log checkbox when the log textarea is filled in.
-    // This must not happen if "Create new revision" is enabled by default, since
-    // the state would auto-disable the checkbox otherwise.
-    if (!$node->revision) {
-      $form['revision_information']['revision']['#states'] = array(
-        'checked' => array(
-          'textarea[name="log"]' => array('empty' => FALSE),
-        ),
-      );
-    }
-  }
-  else {
-    $node->revision = TRUE;
-    $form['revision_information']['mandatory_revision_message'] = array(
+  if (!$node->isDefaultRevision()) {
+    $form['revision_information']['revision_message'] = array(
       '#markup' => t('A new revision will be saved.'),
     );
   }
@@ -436,10 +418,19 @@ function node_form($form, &$form_state, Node $node) {
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
+    '#name' => 'node_form_submit_button',
     '#access' => (!form_get_errors()),
-    '#value' => t('Save'),
-    '#weight' => 5,
+    '#value' => $node->isDefaultRevision() ? t('Save') : t('Save and approve'),
+    '#weight' => $node->isDefaultRevision() ? 4 : 5,
     '#submit' => array('node_form_submit'),
+  );
+  $form['actions']['save_draft'] = array(
+    '#type' => 'submit',
+    '#name' => 'save_draft_button',
+    '#access' => (!form_get_errors()),
+    '#value' => t('Save draft'),
+    '#weight' => $node->isDefaultRevision() ? 5 : 4,
+    '#submit' => array('node_form_submit_draft'),
   );
   $form['actions']['preview'] = array(
     '#type' => 'submit',
@@ -490,7 +481,6 @@ function node_form($form, &$form_state, Node $node) {
   }
   $form += array('#submit' => array());
 
-  dpm($form);
   field_attach_form('node', $node, $form, $form_state, $node->langcode);
   return $form;
 }
@@ -525,6 +515,15 @@ function node_form_preview($form, &$form_state) {
 function node_form_submit($form, &$form_state) {
   $original_status = $form_state['node']->status && $form_state['node']->nid;
   $node = node_form_submit_build_node($form, $form_state);
+  $trigger = $form_state['triggering_element']['#name'];
+  if ($trigger == 'save_draft_button') {
+    $form_state['node']->revision = TRUE;
+    $form_state['node']->is_default_revision = FALSE;
+  }
+  elseif (!$node->isDefaultRevision() && $trigger == 'node_form_submit_button') {
+    $form_state['node']->revision = TRUE;
+    $form_state['node']->is_default_revision = TRUE;
+  }
   $insert = empty($node->nid);
   $node->save();
   $node_link = l(t('view'), 'node/' . $node->nid);
