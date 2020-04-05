@@ -301,13 +301,8 @@ function node_form($form, &$form_state, Node $node) {
   );
 
   // Node options for administrators
-  $form['
-  
-  
-  
-  '] = array(
-    '#type' => '
-    .',
+  $form['options'] = array(
+    '#type' => 'fieldset',
     '#access' => user_access('administer nodes') && $node->isDefaultRevision(),
     '#title' => t('Publishing options'),
     '#collapsible' => TRUE,
