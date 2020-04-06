@@ -218,8 +218,6 @@ function node_form($form, &$form_state, Node $node) {
     '#type' => 'fieldset',
     '#title' => t('Revision information'),
     '#collapsible' => TRUE,
-    // Collapsed by default when "Create new revision" is unchecked
-    // Todo: this is unnecessary with the draft button.
     '#collapsed' => !$node->revision,
     '#group' => 'additional_settings',
     '#attributes' => array(

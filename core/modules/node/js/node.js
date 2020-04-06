@@ -10,11 +10,11 @@ Backdrop.behaviors.nodeFieldsetSummaries = {
       // or if the checkbox doesn't exist, but the revision log does. For users
       // without the "Administer content" permission the checkbox won't appear,
       // but the revision log will if the content type is set to auto-revision.
-      if (revisionCheckbox.is(':checked') || (!revisionCheckbox.length && $('.form-item-log textarea', context).length)) {
-        return Backdrop.t('New revision');
+      if ($('.form-item-log textarea', context).val()) {
+        return Backdrop.t('New log message');
       }
 
-      return Backdrop.t('No revision');
+      return Backdrop.t('No log message');
     });
 
     $('fieldset.node-form-author', context).backdropSetSummary(function (context) {
