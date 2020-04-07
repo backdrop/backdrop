@@ -7,6 +7,18 @@
 /**
  * Prepares variables for page templates.
  *
+ * Many themes provide their own copy of page.tpl.php. The default is located at
+ * "core/modules/system/templates/page.tpl.php". The full list of variables is 
+ * documented in that file.
+ *
+ * @param $variables
+ *   An array containing (but not limited to) the following:
+ *   - css: The array of CSS files to be used for this page.
+ *   - page: The rendered page content, as output from Layout module.
+ *   - page_bottom: Final closing markup from any modules that have altered the
+ *   page. This variable should always be output last, after all other dynamic
+ *   content.
+ * 
  * @see page.tpl.php
  */
 function basis_preprocess_page(&$variables) {
@@ -30,6 +42,18 @@ function basis_preprocess_page(&$variables) {
 /**
  * Prepares variables for maintenance page templates.
  *
+ * Many themes provide their own copy of maintenance-page.tpl.php. The default is located at
+ * "core/modules/system/templates/maintenance-page.tpl.php". The full list of variables is 
+ * documented in that file or files that it references.
+ *
+ * @param $variables
+ *   An array containing (but not limited to) the following:
+ *   - css: The array of CSS files to be used for this page.
+ *   - page: The rendered page content, as output from Layout module.
+ *   - page_bottom: Final closing markup from any modules that have altered the
+ *   page. This variable should always be output last, after all other dynamic
+ *   content.
+ * 
  * @see maintenance-page.tpl.php
  */
 function basis_preprocess_maintenance_page(&$variables) {
@@ -40,6 +64,16 @@ function basis_preprocess_maintenance_page(&$variables) {
 /**
  * Prepares variables for layout templates.
  *
+ * This is the theme specific layout method for single column layouts. 
+ * The default is located at "core/modules/layout/templates/layout.tpl.php". 
+ * The full list of variables is documented in that file.
+ *
+ * @param $variables
+ *   An array containing (but not limited to) the following:
+ *   - title: The page title, for use in the actual HTML content.
+ *   - classes: Array of classes to be added to the layout wrapper.
+ *   - content: An array of content, each item in the array is keyed to one
+ * 
  * @see layout.tpl.php
  */
 function basis_preprocess_layout(&$variables) {
@@ -56,6 +90,17 @@ function basis_preprocess_layout(&$variables) {
 /**
  * Prepares variables for node templates.
  *
+ * Some themes provide their own copy of node.tpl.php. The default is located at
+ * "core/modules/node/templates/node.tpl.php". The full list of variables is 
+ * documented in that file.
+ *
+ * @param $variables
+ *   An array containing (but not limited to) the following:
+ *   - title: the (sanitized) title of the node.
+ *   - content: An array of node items. 
+ *   - classes: Array of classes that can be used to style contextually through
+ *   CSS. 
+ * 
  * @see node.tpl.php
  */
 function basis_preprocess_node(&$variables) {
@@ -71,6 +116,16 @@ function basis_preprocess_node(&$variables) {
 /**
  * Prepares variables for header templates.
  *
+ * Some themes provide their own copy of header.tpl.php. The default is located at
+ * "core/modules/system/templates/header.tpl.php". The full list of variables is 
+ * documented in that file.
+ *
+ * @param $variables
+ *   An array containing (but not limited to) the following:
+ *   - front_page: The URL of the front page. Use this instead of $base_path, when
+ *   linking to the front page. This includes the language domain or prefix.
+ *   - site_name: The name of the site, empty when display has been disabled.
+ * 
  * @see header.tpl.php
  */
 function basis_preprocess_header(&$variables) {
