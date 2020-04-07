@@ -420,7 +420,7 @@ function node_form($form, &$form_state, Node $node) {
   $form['actions']['save_draft'] = array(
     '#type' => 'submit',
     '#name' => 'save_draft_button',
-    '#access' => (!form_get_errors()),
+    '#access' => (!form_get_errors() && $node_type->settings['revision_enabled']),
     '#value' => t('Save draft'),
     '#weight' => $node->isDefaultRevision() ? 5 : 4,
     '#submit' => array('node_form_submit_draft'),
@@ -935,7 +935,7 @@ function node_revision_overview($node) {
         );
       }
       if ($edit_permission) {
-        $links['clone'] = array(
+        $links['copy'] = array(
           'title' => t('Clone'),
           'href' => "node/$node->nid/revisions/$revision->vid/edit",
         );
@@ -944,8 +944,8 @@ function node_revision_overview($node) {
     else {
       $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'default' => $is_default_revision));
       if ($edit_permission) {
-        $update_link = t('Clone');
-        $links['clone'] = array(
+        $update_link = t('Copy and edit');
+        $links['copy'] = array(
           'title' => $update_link,
           'href' => "node/$node->nid/revisions/$revision->vid/edit",
         );

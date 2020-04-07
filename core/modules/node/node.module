@@ -1890,7 +1890,7 @@ function node_menu() {
     'weight' => -10,
   );
   $items['node/%node/revisions/%/edit'] = array(
-    'title' => 'Edit draft',
+    'title' => 'Copy and edit',
     'load arguments' => array(3),
     'page callback' => 'node_page_edit',
     'page arguments' => array(1),
