@@ -423,7 +423,7 @@ function node_form($form, &$form_state, Node $node) {
     '#access' => (!form_get_errors() && $node_type->settings['revision_enabled']),
     '#value' => t('Save draft'),
     '#weight' => $node->isDefaultRevision() ? 5 : 4,
-    '#submit' => array('node_form_submit_draft'),
+    '#submit' => array('node_form_submit'),
   );
   $form['actions']['preview'] = array(
     '#type' => 'submit',
