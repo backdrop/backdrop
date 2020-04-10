@@ -173,6 +173,30 @@ abstract class LayoutContext {
   function isA($plugin) {
     return $plugin === $this->plugin || in_array($plugin, $this->aliases);
   }
+
+  /**
+   * Settings form for configuring this context item.
+   */
+  function form(&$form, &$form_state) {
+  }
+
+  /**
+   * Validate handler for the settings form for this context item.
+   */
+  function formValidate($form, &$form_state) {
+
+  }
+
+  /**
+   * Submit handler for the settings form for this context item.
+   */
+  function formSubmit($form, &$form_state) {
+    $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context'));
+    $settings = array_diff_key($form_state['values'], $excluded);
+    $this->settings = array_merge($this->settings, $settings);
+dpm($this);
+  }
+
 }
 
 /**

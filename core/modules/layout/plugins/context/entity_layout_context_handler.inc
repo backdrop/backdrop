@@ -42,4 +42,58 @@ class EntityLayoutContext extends LayoutContext {
       return parent::label();
     }
   }
+
+  function form(&$form, &$form_state) {
+    parent::form($form, $form_state);
+    // $conf = &$form_state['conf'];
+
+
+    $form['entity'] = array(
+      '#title' => t('Enter the title or ID of a @entity entity', array('@entity' => $this->plugin)),
+      '#type' => 'textfield',
+      '#maxlength' => 512,
+      // '#autocomplete_path' => 'ctools/autocomplete/' . $plugin['keyword'],
+      '#weight' => -10,
+    );
+
+/*     if (!empty($conf['entity_id'])) {
+      $info = entity_load($plugin['keyword'], array($conf['entity_id']));
+      $info = $info[$conf['entity_id']];
+      if ($info) {
+        $entity = entity_get_info($plugin['keyword']);
+        $uri = entity_uri($plugin['keyword'], $info);
+        if (is_array($uri) && $entity['entity keys']['label']) {
+          $link = l(t("'%title' [%type id %id]", array('%title' => $info->{$entity['entity keys']['label']}, '%type' => $plugin['keyword'], '%id' => $conf['entity_id'])), $uri['path'], array('attributes' => array('target' => '_blank', 'title' => t('Open in new window')), 'html' => TRUE));
+        }
+        elseif (is_array($uri)) {
+          $link = l(t("[%type id %id]", array('%type' => $plugin['keyword'], '%id' => $conf['entity_id'])), $uri['path'], array('attributes' => array('target' => '_blank', 'title' => t('Open in new window')), 'html' => TRUE));
+        }
+        elseif ($entity['entity keys']['label']) {
+          $link = l(t("'%title' [%type id %id]", array('%title' => $info->{$entity['entity keys']['label']}, '%type' => $plugin['keyword'], '%id' => $conf['entity_id'])), file_create_url($uri), array('attributes' => array('target' => '_blank', 'title' => t('Open in new window')), 'html' => TRUE));
+        }
+        else {
+          $link = t("[%type id %id]", array('%type' => $plugin['keyword'], '%id' => $conf['entity_id']));
+        }
+        $form['entity']['#description'] = t('Currently set to !link', array('!link' => $link));
+      }
+    }
+
+    $form['entity_id'] = array(
+      '#type' => 'value',
+      '#value' => $conf['entity_id'],
+    );
+
+    $form['entity_type'] = array(
+      '#type' => 'value',
+      '#value' => $plugin['keyword'],
+    );
+
+    $form['set_identifier'] = array(
+      '#type' => 'checkbox',
+      '#default_value' => FALSE,
+      '#title' => t('Reset identifier to entity label'),
+      '#description' => t('If checked, the identifier will be reset to the entity label of the selected entity.'),
+    );
+ */
+  }
 }
