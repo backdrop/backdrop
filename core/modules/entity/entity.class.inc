@@ -317,9 +317,9 @@ abstract class Entity extends stdClass implements EntityInterface {
    * Implements Backdrop\entity\EntityInterface::isApprovedRevision().
    */
   public function isApprovedRevision($new_value = NULL) {
-    $return = $this->is_default_revision;
+    $return = $this->is_approved_revision;
     if (isset($new_value)) {
-      $this->is_default_revision = (bool) $new_value;
+      $this->is_approved_revision = (bool) $new_value;
     }
     return $return;
   }

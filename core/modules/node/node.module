@@ -77,7 +77,7 @@ define('NODE_ACCESS_IGNORE', NULL);
 
 /**
  * Return status for saving which involved an update to an existing node which
- * was not the default revision.
+ * was not the approved revision.
  */
 define('SAVED_REVISION', 4);
 
