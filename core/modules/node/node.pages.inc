@@ -517,6 +517,10 @@ function node_form_submit($form, &$form_state) {
     $form_state['node']->revision = TRUE;
     $form_state['node']->is_approved_revision = TRUE;
   }
+  if (!empty($form_state['node']->revision) && $form_state['node']->log == '') {
+    $form_state['node']->log = t('Copy of the revision from %date.', array('%date' => format_date($form_state['node']->revision_timestamp)));
+  }
+
   $insert = empty($node->nid);
   $node->save();
   $node_link = l(t('view'), 'node/' . $node->nid);
