@@ -46,16 +46,16 @@ function theme_node_preview_banner_form($variables) {
  */
 function theme_node_revision_info($variables) {
   $revision = $variables['revision'];
-  $default = $variables['default'];
+  $approved = $variables['approved'];
 
-  $revision_link = $default ? "node/$revision->nid" : "node/$revision->nid/revisions/$revision->vid/view";
+  $revision_link = $approved ? "node/$revision->nid" : "node/$revision->nid/revisions/$revision->vid/view";
   $output = '<div class="node-revision-wrapper">';
   $output .= '<div class="node-revision-detail">';
   $output .= t('!date by !username', array('!date' => l('<strong>#' . $revision->vid . ':</strong> ' . format_date($revision->timestamp, 'short'), $revision_link, array('html' => TRUE)), '!username' => theme('username', array('account' => $revision))));
   $output .= '</div>';
-  if ($default) {
-    $output .= '<div class="node-revision-default">';
-    $output .=  t('Default revision');
+  if ($approved) {
+    $output .= '<div class="node-revision-approved">';
+    $output .=  t('Approved revision');
     $output .= '</div>';
   }
   if ($revision->log != '') {

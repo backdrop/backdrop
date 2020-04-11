@@ -7,6 +7,6 @@
 /**
  * Revisions overview screen.
  */
-table tr.revision-default {
+table tr.revision-approved {
   background: #ffc;
 }

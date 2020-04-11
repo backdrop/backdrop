@@ -16,7 +16,7 @@
 function node_page_edit(Node $node) {
   $type_name = node_type_get_name($node);
   backdrop_set_title(t('Edit @type %title', array('@type' => $type_name, '%title' => $node->title)), PASS_THROUGH);
-  if (!$node->isDefaultRevision()) {
+  if (!$node->isApprovedRevision()) {
     backdrop_set_title(t('Revision of %title from %date', array('%title' => $node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
   }
   return backdrop_get_form($node->type . '_node_form', $node);
@@ -230,7 +230,7 @@ function node_form($form, &$form_state, Node $node) {
     '#access' => $node->nid && $node_type->settings['revision_enabled'] && ($node->revision || user_access('administer nodes')),
   );
 
-  if (!$node->isDefaultRevision()) {
+  if (!$node->isApprovedRevision()) {
     $form['revision_information']['revision_message'] = array(
       '#markup' => t('A new revision will be saved.'),
     );
@@ -301,7 +301,7 @@ function node_form($form, &$form_state, Node $node) {
   // Node options for administrators
   $form['options'] = array(
     '#type' => 'fieldset',
-    '#access' => user_access('administer nodes') && $node->isDefaultRevision(),
+    '#access' => user_access('administer nodes') && $node->isApprovedRevision(),
     '#title' => t('Publishing options'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
@@ -413,8 +413,8 @@ function node_form($form, &$form_state, Node $node) {
     '#type' => 'submit',
     '#name' => 'node_form_submit_button',
     '#access' => (!form_get_errors()),
-    '#value' => $node->isDefaultRevision() ? t('Save') : t('Save and approve'),
-    '#weight' => $node->isDefaultRevision() ? 4 : 5,
+    '#value' => $node->isApprovedRevision() ? t('Save') : t('Save and approve'),
+    '#weight' => $node->isApprovedRevision() ? 4 : 5,
     '#submit' => array('node_form_submit'),
   );
   $form['actions']['save_draft'] = array(
@@ -422,7 +422,7 @@ function node_form($form, &$form_state, Node $node) {
     '#name' => 'save_draft_button',
     '#access' => (!form_get_errors() && $node_type->settings['revision_enabled']),
     '#value' => t('Save draft'),
-    '#weight' => $node->isDefaultRevision() ? 5 : 4,
+    '#weight' => $node->isApprovedRevision() ? 5 : 4,
     '#submit' => array('node_form_submit'),
   );
   $form['actions']['preview'] = array(
@@ -434,10 +434,10 @@ function node_form($form, &$form_state, Node $node) {
   );
   if (!empty($node->nid)) {
     // If editing a revision, go to the revision view.
-    if ($node->isDefaultRevision() && node_access('delete', $node)) {
+    if ($node->isApprovedRevision() && node_access('delete', $node)) {
       $delete_href = "node/{$node->nid}/delete";
     }
-    elseif (!$node->isDefaultRevision() && _node_revision_access($node, 'delete')) {
+    elseif (!$node->isApprovedRevision() && _node_revision_access($node, 'delete')) {
       $delete_href = 'node/' . $node->nid . '/revisions/' . $node->vid . '/delete';
     }
 
@@ -511,11 +511,11 @@ function node_form_submit($form, &$form_state) {
   $trigger = $form_state['triggering_element']['#name'];
   if ($trigger == 'save_draft_button') {
     $form_state['node']->revision = TRUE;
-    $form_state['node']->is_default_revision = FALSE;
+    $form_state['node']->is_approved_revision = FALSE;
   }
-  elseif (!$node->isDefaultRevision() && $trigger == 'node_form_submit_button') {
+  elseif (!$node->isApprovedRevision() && $trigger == 'node_form_submit_button') {
     $form_state['node']->revision = TRUE;
-    $form_state['node']->is_default_revision = TRUE;
+    $form_state['node']->is_approved_revision = TRUE;
   }
   $insert = empty($node->nid);
   $node->save();
@@ -553,7 +553,7 @@ function node_form_submit($form, &$form_state) {
       $form_state['redirect'] = 'node/' . $node->nid;
 
       // If editing a revision, go to the revision view.
-      if (!$node->isDefaultRevision() && _node_revision_access($node)) {
+      if (!$node->isApprovedRevision() && _node_revision_access($node)) {
         $form_state['redirect'] = 'node/' . $node->nid . '/revisions/' . $node->vid . '/view';
       }
 
@@ -777,7 +777,7 @@ function node_preview_banner_form_node_submit(array $form, array &$form_state) {
       $destination = 'node/' . $node->nid;
 
       // If editing a revision, go to the revision view.
-      if (!$node->isDefaultRevision() && _node_revision_access($node)) {
+      if (!$node->isApprovedRevision() && _node_revision_access($node)) {
         $destination = 'node/' . $node->nid . '/revisions/' . $node->vid . '/view';
       }
 
@@ -920,12 +920,12 @@ function node_revision_overview($node) {
   }
   foreach ($revisions as $revision) {
     $row = array();
-    $is_default_revision = ($revision->vid == $node->default_revision);
+    $is_approved_revision = ($revision->vid == $node->approved_revision);
     $links = array();
     $row_class = '';
-    if ($is_default_revision) {
-      $row_class = 'revision-default';
-      $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'default' => $is_default_revision));
+    if ($is_approved_revision) {
+      $row_class = 'revision-approved';
+      $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'approved' => $is_approved_revision));
       $publish_action = ($revision->status == NODE_PUBLISHED) ? 'unpublish' : 'pubish';
       // @todo: Add proper permissions check.
       if (node_access('update', $node)) {
@@ -942,7 +942,7 @@ function node_revision_overview($node) {
       }
     }
     else {
-      $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'default' => $is_default_revision));
+      $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'approved' => $is_approved_revision));
       if ($edit_permission) {
         $update_link = t('Copy and edit');
         $links['copy'] = array(
@@ -952,7 +952,7 @@ function node_revision_overview($node) {
       }
       if ($revert_permission) {
         $links['revert'] = array(
-          'title' => t('Set as default'),
+          'title' => t('Set as approved'),
           'href' => "node/$node->nid/revisions/$revision->vid/revert",
         );
       }
@@ -1000,7 +1000,7 @@ function node_revision_overview($node) {
  */
 function node_revision_revert_confirm($form, $form_state, $node_revision) {
   $form['#node_revision'] = $node_revision;
-  return confirm_form($form, t('Are you sure you want to make the revision from %revision-date the default revision?', array('%revision-date' => format_date($node_revision->revision_timestamp))), 'node/' . $node_revision->nid . '/revisions', '', t('Make default'), t('Cancel'));
+  return confirm_form($form, t('Are you sure you want to make the revision from %revision-date the approved revision?', array('%revision-date' => format_date($node_revision->revision_timestamp))), 'node/' . $node_revision->nid . '/revisions', '', t('Make approved'), t('Cancel'));
 }
 
 /**
@@ -1008,8 +1008,8 @@ function node_revision_revert_confirm($form, $form_state, $node_revision) {
  */
 function node_revision_revert_confirm_submit($form, &$form_state) {
   $node_revision = $form['#node_revision'];
-  // Make this the new default revision for the node.
-  $node_revision->is_default_revision = TRUE;
+  // Make this the new approved revision for the node.
+  $node_revision->is_approved_revision = TRUE;
 
   // The revision timestamp will be updated when the revision is saved. Keep the
   // original one for the confirmation message.
@@ -1019,8 +1019,8 @@ function node_revision_revert_confirm_submit($form, &$form_state) {
 
   $node_revision->save();
 
-  watchdog('content', '@type: revision %revision for node title %title set as default.', array('@type' => $node_revision->type, '%title' => $node_revision->title, '%revision' => $node_revision->vid));
-  backdrop_set_message(t('The revision from %revision-date for @type %title has been set as the default revision.', array('@type' => node_type_get_name($node_revision), '%title' => $node_revision->title, '%revision-date' => format_date($original_revision_timestamp))));
+  watchdog('content', '@type: revision %revision for node title %title set as approved.', array('@type' => $node_revision->type, '%title' => $node_revision->title, '%revision' => $node_revision->vid));
+  backdrop_set_message(t('The revision from %revision-date for @type %title has been set as the approved revision.', array('@type' => node_type_get_name($node_revision), '%title' => $node_revision->title, '%revision-date' => format_date($original_revision_timestamp))));
   $form_state['redirect'] = 'node/' . $node_revision->nid . '/revisions';
 }
 
