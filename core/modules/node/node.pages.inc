@@ -322,11 +322,11 @@ function node_form($form, &$form_state, Node $node) {
     '#type' => 'radios',
     '#options' => array(
       NODE_PUBLISHED => $node->nid ? t('Published') : t('Publish now'),
-      NODE_NOT_PUBLISHED => t('Draft'),
+      NODE_NOT_PUBLISHED => t('Offline'),
       NODE_SCHEDULED => t('Schedule for later'),
     ),
     '#default_value' => $status,
-    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators.'),
+    '#description' => t('Content saved as offline is only accessible to the content creator or site administrators.'),
   );
 
   // Adjustments to the status radios if scheduling is enabled/disabled.
