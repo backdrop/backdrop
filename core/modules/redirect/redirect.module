@@ -1334,7 +1334,7 @@ function redirect_field_attach_form($entity_type, $entity, &$form, &$form_state,
     '#title' => t('URL redirects'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-    '#access' => user_access('administer redirects') && $entity->isDefaultRevision(),
+    '#access' => user_access('administer redirects') && $entity->isApprovedRevision(),
     '#weight' => 31,
     '#attributes' => array('class' => array('redirect-list')),
   );

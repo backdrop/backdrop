@@ -237,7 +237,7 @@ function path_action_info() {
 function path_form_node_form_alter(&$form, $form_state) {
   $node = $form['#node'];
   $form['path'] = path_form_element($node);
-  $form['path']['#access'] = $node->isDefaultRevision();
+  $form['path']['#access'] = $node->isApprovedRevision();
   $form['path']['alias']['#description'] = t('The alternative URL for this content. Use a relative path without a trailing slash. For example, enter <code>about</code> for the about page.');
 }
 
