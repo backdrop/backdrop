@@ -298,7 +298,6 @@ function node_form($form, &$form_state, Node $node) {
     '#description' => t('Leave blank to use the current time.'),
   );
 
-dpm($node->isApprovedRevision());
   // Node options for administrators
   $form['options'] = array(
     '#type' => 'fieldset',
