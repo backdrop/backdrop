@@ -17,7 +17,7 @@ function node_page_edit(Node $node) {
   $type_name = node_type_get_name($node);
   backdrop_set_title(t('Edit @type %title', array('@type' => $type_name, '%title' => $node->title)), PASS_THROUGH);
   if (!$node->isApprovedRevision()) {
-    backdrop_set_title(t('Revision of %title from %date', array('%title' => $node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
+    backdrop_set_title(t('Draft of %title from %date', array('%title' => $node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
   }
   return backdrop_get_form($node->type . '_node_form', $node);
 }
@@ -628,7 +628,12 @@ function node_preview($node_tempstore_id, $node_type) {
 
   // Property so we can manipulate $page in template_preprocess_node.
   if ($view_mode == 'full' || $view_mode == 'default') {
-    backdrop_set_title($node->title);
+    if (!$node->isApprovedRevision()) {
+      backdrop_set_title(t('Draft of %title from %date', array('%title' => $node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
+    }
+    else {
+      backdrop_set_title($node->title);
+    }
     $node->in_preview = TRUE;
   }
 
@@ -685,7 +690,12 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
 
   $path = 'node/add/' . str_replace('_', '-', $node->bundle());
   if (!empty($node->nid)) {
-    $path = 'node/' . $node->nid . '/edit';
+    if ($node->isApprovedRevision()) {
+      $path = 'node/' . $node->nid . '/edit';
+    }
+    else {
+      $path = 'node/' . $node->nid . '/revisions/' . $node->vid . '/edit';
+    }
   }
   $query = array('node_tempstore_id' => $node_tempstore_id);
   $url = url($path, array('query' => $query, 'absolute' => TRUE));
@@ -740,7 +750,7 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
   $form['preview_node_submit'] = array(
     '#type' => 'submit',
     '#submit' => array('node_preview_banner_form_node_submit'),
-    '#value' => t('Save'),
+    '#value' => $node->isApprovedRevision() ? t('Save') : t('Save draft'),
     '#attributes' => array(
       'class' => array('node-preview-save-button', 'preview-button'),
     )
@@ -766,7 +776,12 @@ function node_preview_banner_form_node_submit(array $form, array &$form_state) {
   $build['node'] = $node;
   $build['values']['status'] = $node->old_status;
   $build['values']['scheduled'] = $node->scheduled;
-  $build['values']['op'] = t('Save');
+  if ($node->isApprovedRevision()) {
+    $build['values']['node_form_submit_button'] = t('Save');
+  }
+  else {
+    $build['values']['save_draft_button'] = t('Save draft');
+  }
   backdrop_form_submit($type . '_node_form', $build, $node);
   $errors = form_get_errors();
   if (!empty($errors)) {
