@@ -184,10 +184,10 @@ Backdrop.evaluatePasswordStrength = function (password, settings) {
       if (password.length < config.minlength) {
         strength = -1;
       }
-      if (config.not_username === 1 && password === username) {
+      else if (config.not_username === 1 && password === username) {
         strength = -1;
       }
-      if (config.not_email === 1 && password === email) {
+      else if (config.not_email === 1 && password === email) {
         strength = -1;
       }
     }

@@ -1058,8 +1058,8 @@ function user_account_form_validate($form, &$form_state) {
 /**
  * Validation callback for password constraints.
  *
- * @see user_account_form().
- * @see user_pass_reset_form().
+ * @see user_account_form()
+ * @see user_pass_reset_form()
  */
 function user_password_constraints_validate($form, &$form_state) {
   if (!array_key_exists('pass', $form_state['values'])) {
@@ -1085,7 +1085,7 @@ function user_password_constraints_validate($form, &$form_state) {
   }
   if (strlen($password) < $constraints['minlength']) {
     $min = $constraints['minlength'];
-    $messages[] = t('The password is too short. At least :min characters required.', array(':min' => $min));
+    $messages[] = t('The password is too short. At least @min characters required.', array('@min' => $min));
   }
   if ($constraints['not_username']) {
     if ($password == $username) {
@@ -1982,7 +1982,7 @@ function _user_password_constraints_help() {
   $constraints = config_get('system.core', 'password_constraints');
   $min = $constraints['minlength'];
   $help = array();
-  $help[] = t('The password must be at least :min characters long.', array(':min' => $min));
+  $help[] = t('The password must be at least @min characters long.', array('@min' => $min));
   if ($constraints['not_username']) {
     $help[] = t('The password cannot be the same as the username.');
   }
@@ -2853,9 +2853,13 @@ function _user_mail_notify($op, $account, $language = NULL) {
 
 /**
  * Form element process handler for client-side password hide/show and strength.
- * @param $element
+ *
+ * @param array $element
+ *   The form element to process.
+ * @param array $form_state
+ *   The $form_state array of the form this element belongs to.
  */
-function user_form_process_password($element, $form_state) {
+function user_form_process_password($element, $form_state = array()) {
   global $user;
 
   if ($element['#password_strength']) {
