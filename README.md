@@ -83,7 +83,7 @@ As such, we are committed to providing a friendly, safe and welcoming
 environment for all, regardless of ability, ethnicity, gender, sexual
 orientation, sexual preferences, socioeconomic status, geographic location, or
 religion (or lack thereof).
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -|
+
 Our
 [code of conduct](https://github.com/backdrop-ops/conduct/blob/master/code_of_conduct.md)
 outlines our expectations for all those who participate in our community, as
