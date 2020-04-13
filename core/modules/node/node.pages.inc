@@ -423,7 +423,7 @@ function node_form($form, &$form_state, Node $node) {
     '#access' => (!form_get_errors() && $can_create_approved),
     '#value' => $is_approved_revision ? t('Save') : t('Save and approve'),
     '#weight' => $is_approved_revision ? 4 : 5,
-    '#submit' => array('node_form_submit'),
+    '#submit' => $is_approved_revision ? array('node_form_submit') : array('node_form_submit_confirm'),
   );
   // This button creates a new draft version.
   $form['actions']['save_draft'] = array(
@@ -509,6 +509,63 @@ function node_form_preview($form, &$form_state) {
 }
 
 /**
+ * Form submission handler that redirects to the confirm form to approve a
+ * revision.
+ */
+function node_form_submit_confirm($form, &$form_state) {
+  // Get a new tempstore ID so we don't conflict with previews by other users.
+  $node_tempstore_id = node_build_tempstore_id();
+  $node = node_form_submit_build_node($form, $form_state);
+  node_set_node_tempstore($node, $node_tempstore_id);
+  $form_state['redirect'] = 'node/' . $node->nid . '/revisions/' . $node->vid . '/submit/' . $node_tempstore_id . '/confirm';
+}
+
+/**
+ * Asks for confirmation when setting a node as approved from the node form.
+ *
+ * @param int $node_revision
+ *   The node revision ID.
+ * @param int $node_tempstore_id
+ *   The unique ID of the in-progress node in tempstore.
+ *
+ * @return array
+ *   An array as expected by backdrop_render().
+ *
+ * @see node_menu()
+ * @see node_form_submit_confirm()
+ * @see node_form_submit_confirm_form_submit()
+ *
+ * @ingroup forms
+ */
+function node_form_submit_confirm_form($form, $form_state, $node_revision, $node_tempstore_id) {
+  // The tempstore object may have expired or an invalid ID submitted. Use the
+  // node object if available, otherwise return to the node edit page.
+  if (!$node_revision = node_get_node_tempstore($node_tempstore_id)) {
+    backdrop_set_message(t('The preview ID is invalid or the stored preview has expired.'), 'error');
+    backdrop_goto('node/' . $node_revision->nid . '/revisions/' . $node_revision->vid . '/view');
+  }
+
+  $node_revision->revision = TRUE;
+  $node_revision->is_approved_revision = TRUE;
+  $form['#node_revision'] = $node_revision;
+  $form['#node_tempstore_id'] = $node_tempstore_id;
+
+  $path = 'node/' . $node_revision->nid . '/revisions/' . $node_revision->vid . '/edit';
+  $query = array('node_tempstore_id' => $node_tempstore_id);
+  $url = url($path, array('query' => $query, 'absolute' => TRUE));
+
+  return confirm_form($form, t('Are you sure you want to make the revision from %revision-date the approved revision?', array('%revision-date' => format_date($node_revision->revision_timestamp))), $url, '', t('Make approved'), t('Cancel'));
+}
+
+/**
+ * Form submission handler for node_form_submit_confirm_form().
+ */
+function node_form_submit_confirm_form_submit($form, &$form_state) {
+  node_clear_node_tempstore($form['#node_tempstore_id']);
+  node_revision_revert_confirm_submit($form, $form_state);
+}
+
+/**
  * Form submission handler that saves the node for node_form().
  *
  * @see node_form_validate()
@@ -525,10 +582,6 @@ function node_form_submit($form, &$form_state) {
   if ($trigger == 'save_draft_button') {
     $form_state['node']->revision = TRUE;
     $form_state['node']->is_approved_revision = FALSE;
-  }
-  elseif (!$node->isApprovedRevision() && $trigger == 'node_form_submit_button') {
-    $form_state['node']->revision = TRUE;
-    $form_state['node']->is_approved_revision = TRUE;
   }
   if (!empty($form_state['node']->revision) && $form_state['node']->log == '') {
     $form_state['node']->log = t('Copy of the revision from %date.', array('%date' => format_date($form_state['node']->revision_timestamp)));
