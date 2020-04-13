@@ -1889,6 +1889,16 @@ function node_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
+  $items['node/%node/revisions/%/revisions'] = array(
+    'title' => 'Revisions',
+    'page callback' => 'node_revision_overview',
+    'page arguments' => array(1),
+    'access callback' => '_node_revision_access',
+    'access arguments' => array(1),
+    'weight' => 3,
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'node.pages.inc',
+  );
   $items['node/%node/revisions/%/edit'] = array(
     'title' => 'Copy and edit',
     'load arguments' => array(3),
