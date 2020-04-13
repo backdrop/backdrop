@@ -138,14 +138,14 @@ function field_group_permission() {
  */
 function field_group_menu_load($group_name, $entity_type, $bundle_name, $bundle_pos, $map) {
 
+  $args = func_get_args();
+  $args_pop = array_pop($args);
+  $mode = array_pop($args_pop);
+
   if ($bundle_pos > 0) {
     $bundle = $map[$bundle_pos];
     $bundle_name = field_extract_bundle($entity_type, $bundle);
   }
-
-  $args = func_get_args();
-  $args_pop = array_pop($args);
-  $mode = array_pop($args_pop);
 
   $group = field_group_load_field_group($group_name, $entity_type, $bundle_name, $mode);
   return empty($group) ? FALSE : $group;
