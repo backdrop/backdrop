@@ -1319,7 +1319,7 @@ function node_permission() {
       'title' => t('View content revisions'),
     ),
     'revert revisions' => array(
-      'title' => t('Revert content revisions'),
+      'title' => t('Approve content revisions'),
     ),
     'delete revisions' => array(
       'title' => t('Delete content revisions'),
@@ -1640,14 +1640,14 @@ function _node_revision_access(Node $node, $op = 'view', $account = NULL) {
     }
 
     $node_current_revision = node_load($node->nid);
-    $is_current_revision = $node->isApprovedRevision();
+    $is_approved_revision = $node->isApprovedRevision();
 
     // There should be at least two revisions. If the vid of the given node
     // and the vid of the approved revision differ, then we already have two
     // different revisions so there is no need for a separate database check.
     // Also, if you try to revert to or delete the approved revision, that's
     // not good.
-    if ($is_current_revision && (db_query('SELECT COUNT(vid) FROM {node_revision} WHERE nid = :nid', array(':nid' => $node->nid))->fetchField() == 1 || $op == 'update' || $op == 'delete')) {
+    if ($is_approved_revision && (db_query('SELECT COUNT(vid) FROM {node_revision} WHERE nid = :nid', array(':nid' => $node->nid))->fetchField() == 1 || $op == 'update' || $op == 'delete')) {
       $access[$cid] = FALSE;
     }
     elseif (user_access('administer nodes', $account)) {
@@ -1656,7 +1656,7 @@ function _node_revision_access(Node $node, $op = 'view', $account = NULL) {
     else {
       // First check the access to the approved revision and finally, if the
       // node passed in is not the approved revision then access to that, too.
-      $access[$cid] = node_access($op, $node_current_revision, $account) && ($is_current_revision || node_access($op, $node, $account));
+      $access[$cid] = node_access($op, $node_current_revision, $account) && ($is_approved_revision || node_access($op, $node, $account));
     }
   }
 
@@ -1902,7 +1902,7 @@ function node_menu() {
     'file' => 'node.pages.inc',
   );
   $items['node/%node/revisions/%/revert'] = array(
-    'title' => 'Revert to earlier revision',
+    'title' => 'Approve revision',
     'load arguments' => array(3),
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('node_revision_revert_confirm', 1),

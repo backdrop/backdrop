@@ -619,8 +619,8 @@ function node_views_data() {
 
   $data['node_revision']['revert_revision'] = array(
     'field' => array(
-      'title' => t('Revert link'),
-      'help' => t('Provide a simple link to revert to the revision.'),
+      'title' => t('Approve link'),
+      'help' => t('Provide a simple link to approve a revision.'),
       'handler' => 'views_handler_field_node_revision_link_revert',
     ),
   );

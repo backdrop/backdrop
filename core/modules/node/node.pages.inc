@@ -113,7 +113,7 @@ function node_form_validate($form, &$form_state) {
  */
 function node_form($form, &$form_state, Node $node) {
   $config = config('system.core');
-
+  $is_approved_revision = $node->isApprovedRevision();
   // During initial form build, add the node entity to the form state for use
   // during form building and processing. During a rebuild, use what is in the
   // form state.
@@ -230,7 +230,7 @@ function node_form($form, &$form_state, Node $node) {
     '#access' => $node->nid && $node_type->settings['revision_enabled'] && ($node->revision || user_access('administer nodes')),
   );
 
-  if (!$node->isApprovedRevision()) {
+  if (!$is_approved_revision) {
     $form['revision_information']['revision_message'] = array(
       '#markup' => t('A new revision will be saved.'),
     );
@@ -301,7 +301,7 @@ function node_form($form, &$form_state, Node $node) {
   // Node options for administrators
   $form['options'] = array(
     '#type' => 'fieldset',
-    '#access' => user_access('administer nodes') && $node->isApprovedRevision(),
+    '#access' => user_access('administer nodes') && $is_approved_revision,
     '#title' => t('Publishing options'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
@@ -409,20 +409,29 @@ function node_form($form, &$form_state, Node $node) {
 
   // Add the buttons.
   $form['actions'] = array('#type' => 'actions');
+  // @todo may be best to have these buttons call separate submit functions
+  // which in turn call node_form_submit() since other modules may call
+  // node_form_submit() and not have to worry about button clicks.
+
+  // This button creates a new approved version. This is the default button
+  // when revisions are off. When revisions are on hide this button if the user
+  // should only be able to create drafts.
+  $can_create_approved = (user_access('revert revisions') && $node_type->settings['revision_enabled']) || !$node_type->settings['revision_enabled'];
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#name' => 'node_form_submit_button',
-    '#access' => (!form_get_errors()),
-    '#value' => $node->isApprovedRevision() ? t('Save') : t('Save and approve'),
-    '#weight' => $node->isApprovedRevision() ? 4 : 5,
+    '#access' => (!form_get_errors() && $can_create_approved),
+    '#value' => $is_approved_revision ? t('Save') : t('Save and approve'),
+    '#weight' => $is_approved_revision ? 4 : 5,
     '#submit' => array('node_form_submit'),
   );
+  // This button creates a new draft version.
   $form['actions']['save_draft'] = array(
     '#type' => 'submit',
     '#name' => 'save_draft_button',
     '#access' => (!form_get_errors() && $node_type->settings['revision_enabled']),
     '#value' => t('Save draft'),
-    '#weight' => $node->isApprovedRevision() ? 5 : 4,
+    '#weight' => $is_approved_revision ? 5 : 4,
     '#submit' => array('node_form_submit'),
   );
   $form['actions']['preview'] = array(
@@ -434,10 +443,10 @@ function node_form($form, &$form_state, Node $node) {
   );
   if (!empty($node->nid)) {
     // If editing a revision, go to the revision view.
-    if ($node->isApprovedRevision() && node_access('delete', $node)) {
+    if ($is_approved_revision && node_access('delete', $node)) {
       $delete_href = "node/{$node->nid}/delete";
     }
-    elseif (!$node->isApprovedRevision() && _node_revision_access($node, 'delete')) {
+    elseif (!$is_approved_revision && _node_revision_access($node, 'delete')) {
       $delete_href = 'node/' . $node->nid . '/revisions/' . $node->vid . '/delete';
     }
 
@@ -508,6 +517,10 @@ function node_form_preview($form, &$form_state) {
 function node_form_submit($form, &$form_state) {
   $original_status = $form_state['node']->status && $form_state['node']->nid;
   $node = node_form_submit_build_node($form, $form_state);
+
+  // @todo may be best to have these buttons call separate submit functions
+  // which in turn call node_form_submit() since other modules may call
+  // node_form_submit() and not have to worry about button clicks.
   $trigger = $form_state['triggering_element']['#name'];
   if ($trigger == 'save_draft_button') {
     $form_state['node']->revision = TRUE;
@@ -946,7 +959,7 @@ function node_revision_overview($node) {
       $row_class = 'revision-approved';
       $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'approved' => $is_approved_revision));
       $publish_action = ($revision->status == NODE_PUBLISHED) ? 'unpublish' : 'pubish';
-      // @todo: Add proper permissions check.
+
       if (node_access('update', $node)) {
         $links['edit'] = array(
           'title' => t('Edit'),

@@ -18,7 +18,7 @@ file = node.test
 
 [NodeRevisionsTestCase]
 name = Node revisions
-description = Create a node with revisions and test viewing, saving, reverting, and deleting revisions.
+description = Create a node with revisions and test viewing, saving, approving, and deleting revisions.
 group = Node
 file = node.test
 

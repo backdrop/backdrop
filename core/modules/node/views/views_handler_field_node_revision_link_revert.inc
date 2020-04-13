@@ -6,7 +6,7 @@
  */
 
 /**
- * Field handler to present a link to revert a node to a revision.
+ * Field handler to present a link to approve a revision.
  *
  * @ingroup views_field_handlers
  */
