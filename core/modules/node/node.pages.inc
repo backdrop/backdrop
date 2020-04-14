@@ -516,6 +516,8 @@ function node_form_submit_confirm($form, &$form_state) {
   // Get a new tempstore ID so we don't conflict with previews by other users.
   $node_tempstore_id = node_build_tempstore_id();
   $node = node_form_submit_build_node($form, $form_state);
+  $node->old_status = $node->status;
+
   node_set_node_tempstore($node, $node_tempstore_id);
   $form_state['redirect'] = 'node/' . $node->nid . '/revisions/' . $node->vid . '/submit/' . $node_tempstore_id . '/confirm';
 }
@@ -547,7 +549,10 @@ function node_form_submit_confirm_form($form, $form_state, $node_revision, $node
 
   $node_revision->revision = TRUE;
   $node_revision->is_approved_revision = TRUE;
-  $form['#node_revision'] = $node_revision;
+  $form['node'] = array(
+    '#type' => 'value',
+    '#value' => $node_revision,
+  );
   $form['#node_tempstore_id'] = $node_tempstore_id;
 
   $path = 'node/' . $node_revision->nid . '/revisions/' . $node_revision->vid . '/edit';
@@ -561,8 +566,7 @@ function node_form_submit_confirm_form($form, $form_state, $node_revision, $node
  * Form submission handler for node_form_submit_confirm_form().
  */
 function node_form_submit_confirm_form_submit($form, &$form_state) {
-  node_clear_node_tempstore($form['#node_tempstore_id']);
-  node_revision_revert_confirm_submit($form, $form_state);
+  node_submit_confirm_save_submit($form, $form_state);
 }
 
 /**
@@ -813,28 +817,73 @@ function node_preview_banner_form(array $form, array $form_state, Node $node, $n
       'class' => array('node-preview-switch-button', 'preview-button', 'js-hide')
     )
   );
+
+  // This button creates a new approved version. This is the default button
+  // when revisions are off. When revisions are on hide this button if the user
+  // should only be able to create drafts.
+  $is_approved_revision = $node->isApprovedRevision();
+  $node_type = node_type_get_type($node->type);
+  $can_create_approved = (user_access('revert revisions') && $node_type->settings['revision_enabled']) || !$node_type->settings['revision_enabled'];
   $form['preview_node_submit'] = array(
     '#type' => 'submit',
-    '#submit' => array('node_preview_banner_form_node_submit'),
-    '#value' => $node->isApprovedRevision() ? t('Save') : t('Save draft'),
-    '#attributes' => array(
-      'class' => array('node-preview-save-button', 'preview-button'),
-    )
+    '#name' => 'node_form_submit_button',
+    '#access' => (!form_get_errors() && $can_create_approved),
+    '#value' => $is_approved_revision ? t('Save') : t('Save and approve'),
+    '#weight' => $is_approved_revision ? 4 : 5,
+    '#submit' => $is_approved_revision ? array('node_preview_banner_form_node_submit') : array('node_form_banner_submit_confirm'),
   );
+  // This button creates a new draft version.
+  $form['save_draft'] = array(
+    '#type' => 'submit',
+    '#name' => 'save_draft_button',
+    '#access' => (!form_get_errors() && $node_type->settings['revision_enabled']),
+    '#value' => t('Save draft'),
+    '#weight' => $is_approved_revision ? 5 : 4,
+    '#submit' => array('node_preview_banner_form_node_submit'),
+    '#attributes' => array('class' => array('button', 'button-secondary', 'form-submit')),
+  );
+
   $form['#theme'] = 'node_preview_banner_form';
 
   return $form;
 }
 
 /**
+ * Form submission handler that redirects to the confirm form to approve a
+ * revision.
+ */
+function node_form_banner_submit_confirm($form, &$form_state) {
+  $node_tempstore_id = $form_state['values']['node_tempstore_id'];
+  $node = $form_state['values']['node'];
+
+  $form_state['redirect'] = 'node/' . $node->nid . '/revisions/' . $node->vid . '/submit/' . $node_tempstore_id . '/confirm';
+}
+
+/**
  * Submit handler for the node preview banner form.
  *
  * @see node_preview_banner_form()
+ * @see node_submit_confirm_save_submit()
  *
  * @since 1.11.0
  */
 function node_preview_banner_form_node_submit(array $form, array &$form_state) {
+  node_submit_confirm_save_submit($form, $form_state);
+}
+
+/**
+ * Submits a node from tempstore to the node type submit handler for final save.
+ *
+ * @see node_form_submit_confirm_form_submit()
+ * @see node_preview_banner_form()
+ *
+ * @since 1.16.0
+ */
+function node_submit_confirm_save_submit(array $form, array &$form_state) {
   form_load_include($form_state, 'inc', 'node', 'node.pages');
+
+  node_clear_node_tempstore($form['#node_tempstore_id']);
+
   $node = $form_state['values']['node'];
   node_object_prepare($node);
   $type = $node->type;
