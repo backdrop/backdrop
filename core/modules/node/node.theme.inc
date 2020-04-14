@@ -51,8 +51,11 @@ function theme_node_revision_info($variables) {
 
   $revision_link = $approved ? "node/$revision->nid" : "node/$revision->nid/revisions/$revision->vid/view";
   $output = '<div class="node-revision-wrapper">';
+  $output .= '<div class="node-revision-title">';
+  $output .= l('<strong>' . $revision->title . '</strong>', $revision_link, array('html' => TRUE));
+  $output .= '</div>';
   $output .= '<div class="node-revision-detail">';
-  $output .= t('!date by !username', array('!date' => l('<strong>#' . $revision->vid . ':</strong> ' . format_date($revision->timestamp, 'short'), $revision_link, array('html' => TRUE)), '!username' => theme('username', array('account' => $revision))));
+  $output .= t('!date by !username', array('!date' => l('#' . $revision->vid . ': ' . format_date($revision->timestamp, 'short'), $revision_link, array('html' => TRUE)), '!username' => theme('username', array('account' => $revision))));
   $output .= '</div>';
   if ($approved) {
     $output .= '<div class="node-revision-approved">';
