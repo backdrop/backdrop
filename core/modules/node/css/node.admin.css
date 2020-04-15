@@ -11,5 +11,5 @@ table tr.revision-approved {
   background: #edf1d1;
 }
 .node-revision-approved {
-  background: #edf1d1;
+  font-weight: bold;
 }
