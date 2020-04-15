@@ -106,6 +106,9 @@ function node_theme() {
     'node_revision_info' => array(
       'variables' => array('revision' => NULL, 'default' => FALSE),
     ) + $base,
+    'node_revision_detail_info' => array(
+      'variables' => array('revision' => NULL, 'default' => FALSE),
+    ) + $base,
     'node_admin_overview' => array(
       'variables' => array('name' => NULL, 'type' => NULL),
     ) + $base,

@@ -1035,8 +1035,11 @@ function node_delete_confirm_submit($form, &$form_state) {
 function node_revision_overview($node) {
   backdrop_set_title(t('Revisions for %title', array('%title' => $node->title)), PASS_THROUGH);
 
-  $header = array(t('Revision'), t('Operations'));
-
+  $header = array(
+    'revision' => t('Revision'),
+    'revision_details' => array('data' => t('Revision details'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    'operations' => t('Operations'),
+  );
   $revisions = node_revision_list($node);
 
   $rows = array();
@@ -1060,6 +1063,7 @@ function node_revision_overview($node) {
     if ($is_approved_revision) {
       $row_class = 'revision-approved';
       $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'approved' => $is_approved_revision));
+      $row['revision_detail'] = theme('node_revision_detail_info', array('revision' => $revision, 'approved' => $is_approved_revision));
       $publish_action = ($revision->status == NODE_PUBLISHED) ? 'unpublish' : 'pubish';
 
       if (node_access('update', $node)) {
@@ -1077,6 +1081,7 @@ function node_revision_overview($node) {
     }
     else {
       $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'approved' => $is_approved_revision));
+      $row['revision_detail'] = theme('node_revision_detail_info', array('revision' => $revision, 'approved' => $is_approved_revision));
       if ($edit_permission) {
         $update_link = t('Copy and edit');
         $links['copy'] = array(

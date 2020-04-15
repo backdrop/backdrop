@@ -8,5 +8,8 @@
  * Revisions overview screen.
  */
 table tr.revision-approved {
-  background: #ffc;
+  background: #edf1d1;
+}
+.node-revision-approved {
+  background: #edf1d1;
 }
