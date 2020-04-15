@@ -1261,7 +1261,7 @@ function node_show(Node $node, $message = FALSE) {
     if (!$node->isApprovedRevision()) {
       $title_node = node_load($node->nid);
     }
-    backdrop_set_title(t('Draft of %title from %date', array('%title' => $title_node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
+    backdrop_set_message(t('This is a draft of %title from %date', array('%title' => $title_node->title, '%date' => format_date($node->revision_timestamp))), 'info');
   }
 
   // For markup consistency with other pages, use node_view_multiple() rather than node_view().
