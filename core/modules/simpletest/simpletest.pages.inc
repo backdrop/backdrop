@@ -368,6 +368,7 @@ function simpletest_settings_form_submit($form, &$form_state) {
   config('simpletest.settings')
     ->set('simpletest_clear_results', $form_state['values']['simpletest_clear_results'])
     ->set('simpletest_verbose', $form_state['values']['simpletest_verbose'])
+    ->set('simpletest_cache', $form_state['values']['simpletest_cache'])
     ->set('simpletest_method', $form_state['values']['simpletest_httpauth_method'])
     ->set('simpletest_username', $form_state['values']['simpletest_httpauth_username'])
     ->set('simpletest_password', $form_state['values']['simpletest_httpauth_password'])
