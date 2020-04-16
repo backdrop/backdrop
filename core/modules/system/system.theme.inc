@@ -569,29 +569,37 @@ function theme_token_tree_link($variables) {
     $variables['options']['attributes']['class'][] = 'use-ajax token-browser-link';
   }
 
-  $info = system_theme();
-  $tree_variables = array_intersect_key($variables, $info['token_tree']['variables']);
-  $tree_variables = backdrop_array_diff_assoc_recursive($tree_variables, $info['token_tree']['variables']);
-  if (!isset($variables['options']['query']['options'])) {
-    $variables['options']['query']['options'] = array();
+  if (empty($variables['options']['query'])) {
+    $variables['options']['query'] = array();
   }
-  $variables['options']['query']['options'] += $tree_variables;
 
-  // We should never pass the dialog option to theme_token_tree(). It is only
-  // used for this function.
-  unset($variables['options']['query']['options']['dialog']);
+  // Add an ID if none is specified so that this link can be identified by
+  // token.js to set field focus.
+  if (!isset($variables['options']['attributes']['id'])) {
+    $variables['options']['attributes']['id'] = 'token-browser-link--' . backdrop_random_key(6);
+  }
+
+  // Variables to pass to the theme_token_tree() in system_token_output().
+  $tree_variables = array(
+    'token_types' => $variables['token_types'],
+    'global_types' => $variables['global_types'],
+    'click_insert' => $variables['click_insert'],
+    'show_restricted' => $variables['show_restricted'],
+    'recursion_limit' => $variables['recursion_limit'],
+    'link_id' => $variables['options']['attributes']['id'],
+  );
 
   // Add a security token so that the tree page should only work when used
   // when the dialog link is output with theme('token_tree_link').
-  $variables['options']['query']['token'] = backdrop_get_token('token-tree:' . serialize($variables['options']['query']['options']));
+  $variables['options']['query']['token'] = backdrop_get_token('token-tree:' . serialize($tree_variables));
 
   // Because PHP converts query strings with arrays into a different syntax on
   // the next request, the options have to be encoded with JSON in the query
   // string so that we can reliably decode it for token comparison.
-  $variables['options']['query']['options'] = backdrop_json_encode($variables['options']['query']['options']);
+  $variables['options']['query']['options'] = backdrop_json_encode($tree_variables);
 
   // Set the token tree to open in a separate window.
-  $variables['options']['attributes'] + array('target' => '_blank');
+  $variables['options']['attributes'] += array('target' => '_blank');
 
   return l($variables['text'], 'token/tree', $variables['options']);
 }
@@ -682,11 +690,15 @@ function theme_token_tree($variables) {
     'rows' => $rows,
     'attributes' => array('class' => array('token-tree')),
     'empty' => t('No tokens available'),
+    'sticky' => FALSE,
   );
 
   if ($variables['click_insert']) {
     $table_variables['caption'] = t('Select a token to insert it into the current field.');
     $table_variables['attributes']['class'][] = 'token-click-insert';
+    if ($variables['link_id']) {
+      $table_variables['attributes']['data-token-link-id'] = $variables['link_id'];
+    }
   }
 
   backdrop_add_library('system', 'token');

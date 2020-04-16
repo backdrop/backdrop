@@ -398,12 +398,11 @@ function path_pattern_settings_form($settings) {
     '#default_value' => $settings['default'],
     '#description' => $settings['description'],
   );
-  $form['path']['path_tokens'] = array(
-    '#theme' => 'token_tree_link',
-    '#token_types' => $settings['token_types'],
-    '#global_types' => FALSE,
-    '#click_insert' => TRUE,
-  );
+  $form['path']['path_pattern']['#description'] .= '<br />' . theme('token_tree_link', array(
+    'token_types' => $settings['token_types'],
+    'global_types' => FALSE,
+    'click_insert' => TRUE,
+  ));
 
   return $form;
 }
