@@ -8,7 +8,7 @@
  * stored directly within configuration. Instead contexts are determined based
  * on the Layout's path
  */
-abstract class LayoutContext {
+abstract class LayoutContext extends LayoutHandler {
   /**
    * The name of the plugin that provides this context.
    *
@@ -194,7 +194,6 @@ abstract class LayoutContext {
     $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context'));
     $settings = array_diff_key($form_state['values'], $excluded);
     $this->settings = array_merge($this->settings, $settings);
-dpm($this);
   }
 
 }

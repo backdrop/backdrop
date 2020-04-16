@@ -52,7 +52,7 @@ class EntityLayoutContext extends LayoutContext {
       '#title' => t('Enter the title or ID of a @entity entity', array('@entity' => $this->plugin)),
       '#type' => 'textfield',
       '#maxlength' => 512,
-      // '#autocomplete_path' => 'ctools/autocomplete/' . $plugin['keyword'],
+      '#autocomplete_path' => 'path-autocomplete',
       '#weight' => -10,
     );
 

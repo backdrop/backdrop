@@ -176,7 +176,7 @@ class Layout {
    *
    * @var LayoutContext[]
    */
-  private $contexts;
+  var $contexts;
 
   /**
    * An array of removed blocks, keyed by their UUID.
@@ -239,7 +239,7 @@ class Layout {
       // Items are key => handler_type.
       'content' => 'block',
       'conditions' => 'layout_access',
-      // 'contexts' => 'layout_context',
+      'contexts' => 'layout_context',
     );
     foreach ($handlers as $property_key => $plugin_type) {
       foreach ($this->{$property_key} as $plugin_type_key => $plugin_data) {
@@ -288,7 +288,7 @@ class Layout {
     $sub_parts = array(
       'content',
       'conditions',
-      // 'contexts',
+      'contexts',
       // 'relationships',
     );
     foreach ($sub_parts as $config_type) {
@@ -754,17 +754,17 @@ class Layout {
    * return LayoutContext[]
    */
   function getContexts() {
-    if (is_null($this->contexts)) {
+    // if (is_null($this->contexts)) {
       if ($this->menu_item) {
-        $this->contexts = $this->menu_item->getContexts();
+        $this->contexts = $this->menu_item->getContexts() + $this->contexts;
       }
       elseif ($this->path) {
-        $this->contexts = layout_context_required_by_path($this->path);
+        $this->contexts += layout_context_required_by_path($this->path) + $this->contexts;
       }
-      else {
-        $this->contexts = array();
-      }
-    }
+      // else {
+        // $this->contexts = array();
+      // }
+    // }
 
     // Add on the current user context, which is always available.
     if (!isset($this->contexts['current_user'])) {
@@ -785,6 +785,13 @@ class Layout {
     }
 
     return $this->contexts;
+  }
+
+  /**
+   * Set the internally stored contexts.
+   */
+  function setContexts($context) {
+    $this->contexts[] = $context;
   }
 
   /**

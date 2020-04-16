@@ -208,8 +208,13 @@ function theme_layout_settings_context_table($variables) {
     $argument_parts = $parts;
     $row = array();
     if (is_numeric($key)) {
-      $argument_parts[$key] = '<strong>' . $argument_parts[$key] . '</strong>';
-      $row[] = t('Position @index:', array('@index' => $key + 1)) . ' ' . implode('/', $argument_parts);
+      if (isset($element[$key]['settings']['#value']['entity'])) {
+        $row[] = t('Special context: @id', array('@id' => $element[$key]['settings']['#value']['entity']));
+      }
+      else {
+        $argument_parts[$key] = '<strong>' . $argument_parts[$key] . '</strong>';
+        $row[] = t('Position @index:', array('@index' => $key + 1)) . ' ' . implode('/', $argument_parts);
+      }
     }
     else {
       $row[] = t('Special context: @key', array('@key' => $key));

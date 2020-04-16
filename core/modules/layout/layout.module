@@ -1690,7 +1690,7 @@ function layout_set_layout_tempstore($item, $type = 'layout') {
 
   // Layout contexts should not be stored in the tempstore, they're generated on
   // the fly when needed after loading.
-  $item->resetContexts();
+  // $item->resetContexts();
   $item->locked = array(
     'uid' => $GLOBALS['user']->uid,
     'updated' => REQUEST_TIME,
