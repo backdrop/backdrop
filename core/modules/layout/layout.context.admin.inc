@@ -236,8 +236,27 @@ function layout_context_add_form_submit($form, &$form_state) {
   else {
     $form_state['ajax_rebuild_form'] = 'layout_settings_form';
     $form_state['ajax_rebuild_args'] = array($layout);
-    $form_state['ajax_update'] = array('contexts');
+    $form_state['ajax_update'] = array('context_wrapper');
     $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/configure';
   }
+}
+
+/**
+ * Submit handler for layout_settings_form() that edits a context.
+ */
+function layout_settings_form_context_edit($form, &$form_state) {
+  $edit_context = $form_state['clicked_button']['#array_parents'][2];
+  $form_state['redirect'] = 'admin/structure/layouts/manage/' . $form_state['layout']->name . '/context/edit/layout/' . $edit_context;
+}
+
+/**
+ * Submit handler for layout_settings_form() that removes a context.
+ */
+function layout_settings_form_context_remove($form, &$form_state) {
+  $removed_context = $form_state['clicked_button']['#array_parents'][3];
+  unset($form_state['layout']->contexts[$removed_context]);
+  layout_set_layout_tempstore($form_state['layout']);
+
+  $form_state['ajax_update'] = array('context_wrapper');
 }
 

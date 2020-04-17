@@ -754,12 +754,12 @@ class Layout {
    * return LayoutContext[]
    */
   function getContexts() {
-    // if (is_null($this->contexts)) {
+    $this->contexts = is_null($this->contexts) ? array() : $this->contexts;
       if ($this->menu_item) {
         $this->contexts = $this->menu_item->getContexts() + $this->contexts;
       }
       elseif ($this->path) {
-        $this->contexts += layout_context_required_by_path($this->path) + $this->contexts;
+        $this->contexts = $this->contexts + layout_context_required_by_path($this->path);
       }
       // else {
         // $this->contexts = array();

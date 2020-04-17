@@ -305,12 +305,19 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
 
   $contexts = $layout->getContexts();
   $built_in_contexts = isset($contexts['overrides_path']) ? 2 : 1;
+  $form['context_wrapper'] = array(
+    '#title' => t('Contexts'),
+    '#type' => 'item',
+    '#id' => 'context-wrapper',
+    '#description' => t('Contexts define what blocks are available within this layout. Most wildcards in the path will be associated with a context automatically.'),
+    // Current user context is always present.
+  );
   $form['context_wrapper']['#access'] = !$layout->isDefault();
   $form['context_wrapper']['#prefix'] = '<div id="layout-contexts">';
   $form['context_wrapper']['#suffix'] = '</div>';
   $form['context_wrapper']['context'] = array(
     '#title' => t('Contexts'),
-    '#type' => 'item',
+    '#type' => 'container',
     '#description' => t('Contexts define what blocks are available within this layout. Most wildcards in the path will be associated with a context automatically.'),
     '#parents' => array('context'),
     // Current user context is always present.
@@ -358,7 +365,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
         );
       }
       elseif ($layout_context->position && $layout_context->required) {
-        $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
+        $form['context_wrapper']['context']['required'][$context_key]['label'] = array(
           '#type' => 'select',
           '#options' => $context_options,
           '#default_value' => $layout_context->plugin,
@@ -369,12 +376,47 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
           '#type' => 'value',
           '#value' => $layout_context->plugin,
         );
-        $form['context_wrapper']['context']['required'][$context_key]['settings'] = array(
+        $form['context_wrapper']['context']['required'][$context_key]['context'] = array(
           '#type' => 'value',
-          '#value' => $layout_context->settings,
+          '#value' => $layout_context,
         );
         $form['context_wrapper']['context']['required'][$context_key]['label'] = array(
           '#markup' => check_plain($all_context_info[$layout_context->plugin]['title']),
+        );
+      }
+      if (!$layout_context->required) {
+        $form['context_wrapper']['context']['required'][$context_key]['operations'] = array(
+          '#type' => 'container',
+          '#attributes' => array('class' => array('layout-operations')),
+        );
+        $form['context_wrapper']['context']['required'][$context_key]['operations']['remove'] = array(
+          '#type' => 'submit',
+          '#value' => t('Remove'),
+          '#attributes' => array('class' => array('layout-link-button', 'layout-context-remove')),
+          '#validate' => array(),
+          '#submit' => array(
+            'layout_settings_form_context_remove',
+            'layout_settings_form_update_layout',
+          ),
+          '#ajax' => array(
+            'callback' => 'layout_ajax_form_update',
+          ),
+          '#name' => 'conditions_' . $context_key . '_remove',
+        );
+        $form['context_wrapper']['context']['required'][$context_key]['operations']['configure'] = array(
+          '#type' => 'submit',
+          '#value' => t('Configure'),
+          '#attributes' => array('class' => array('layout-link-button', 'layout-context-configure')),
+          '#validate' => array(
+            'layout_settings_form_validate',
+          ),
+          '#submit' => array(
+            'layout_settings_form_context_edit',
+          ),
+          '#ajax' => array(
+            'callback' => 'layout_ajax_form_open_dialog',
+          ),
+          '#name' => 'conditions_' . $context_key . '_configure',
         );
       }
     }
@@ -644,7 +686,7 @@ function layout_settings_form_update_layout($form, &$form_state) {
     $arguments = array();
 
     foreach ($layout->getContexts() as $position => $layout_context) {
-      if (isset($form_state['values']['context']['required'][$position])) {
+      if (isset($form_state['values']['context']['required'][$position]['plugin'])) {
         $argument_config = $form_state['values']['context']['required'][$position];
         $plugin = $argument_config['plugin'];
       }

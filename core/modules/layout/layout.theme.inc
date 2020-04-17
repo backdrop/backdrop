@@ -202,14 +202,15 @@ function theme_layout_settings_context_table($variables) {
   $header = array(
     t('Context'),
     t('Type'),
+    t('Operations'),
   );
   $rows = array();
   foreach (element_children($element) as $key) {
     $argument_parts = $parts;
     $row = array();
     if (is_numeric($key)) {
-      if (isset($element[$key]['settings']['#value']['entity'])) {
-        $row[] = t('Special context: @id', array('@id' => $element[$key]['settings']['#value']['entity']));
+      if (isset($element[$key]['context']['#value']->settings['entity'])) {
+        $row[] = t('Special context: @id', array('@id' => $element[$key]['context']['#value']->settings['entity']));
       }
       else {
         $argument_parts[$key] = '<strong>' . $argument_parts[$key] . '</strong>';
@@ -219,7 +220,14 @@ function theme_layout_settings_context_table($variables) {
     else {
       $row[] = t('Special context: @key', array('@key' => $key));
     }
-    $row[] = backdrop_render($element[$key]);
+    $row[] = backdrop_render($element[$key]['label']);
+    if (isset($element[$key]['context']) && ($element[$key]['context']['#value']->required == FALSE)) {
+      $row[] = backdrop_render($element[$key]['operations']);
+    }
+    else {
+      $row[] = array();
+    }
+      
     $rows[] = $row;
   }
   return theme('table', array(
