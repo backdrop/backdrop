@@ -98,16 +98,13 @@ function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $co
     '#type' => 'submit',
     '#value' => t('Cancel'),
     '#limit_validation_errors' => array(),
-    '#submit' => array(
-      'layout_context_add_form_cancel',
-    ),
+    '#submit' => array(),
     '#ajax' => array(
       'callback' => 'layout_ajax_context_cancel_dialog',
     ),
   );
   return $form;
 }
-
 
 /**
  * AJAX callback to update the context settings.
@@ -216,5 +213,18 @@ function layout_settings_form_context_remove($form, &$form_state) {
   layout_set_layout_tempstore($form_state['layout']);
 
   $form_state['ajax_update'] = array('context_wrapper');
+}
+
+/**
+ * AJAX handler that cancels the context edit dialog.
+ */
+function layout_ajax_context_cancel_dialog($form, $form_state) {
+  $commands = array();
+  $commands[] = ajax_command_close_modal_dialog();
+
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
 }
 
