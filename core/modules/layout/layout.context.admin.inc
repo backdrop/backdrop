@@ -209,7 +209,8 @@ function layout_context_add_form_submit($form, &$form_state) {
       $block->conditions[] = $handler;
     }
     else {
-      $layout->contexts[] = $handler;
+      dpm($handler);
+      $layout->contexts[$handler->name] = $handler;
     }
   }
   if ($menu_item) {

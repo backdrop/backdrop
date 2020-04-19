@@ -108,6 +108,7 @@ abstract class LayoutContext extends LayoutHandler {
    * Constructor for LayoutContext objects.
    */
   function __construct($plugin_name, $config = array()) {
+    parent::__construct($plugin_name, $config);
     $this->plugin = $plugin_name;
     $properties = array(
       'required',

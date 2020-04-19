@@ -176,7 +176,7 @@ class Layout {
    *
    * @var LayoutContext[]
    */
-  var $contexts;
+  var $contexts = array();
 
   /**
    * An array of removed blocks, keyed by their UUID.
@@ -246,6 +246,7 @@ class Layout {
         $this->{$property_key}[$plugin_type_key] = layout_create_handler($plugin_type, $plugin_data['plugin'], $plugin_data['data']);
       }
     }
+    dpm($this);
   }
 
   /**
@@ -754,17 +755,29 @@ class Layout {
    * return LayoutContext[]
    */
   function getContexts() {
-    $this->contexts = is_null($this->contexts) ? array() : $this->contexts;
+    // Load objects for stored contexts.
+    foreach ($this->contexts as $key => $context) {
+      if (!is_object($context->data) && !is_numeric($key)) {
+      $context_info = layout_get_context_info($context->plugin);
+        if (isset($context_info['load callback'])) {
+          $function = $context_info['load callback'];
+          $context_data = $function($context->settings['entity']);
+          $context->setData($context_data);
+        }
+      }
+    }
+
+    if (empty($this->context_loaded)) {
+      // Load contexts from paths and menu items.
       if ($this->menu_item) {
-        $this->contexts = $this->menu_item->getContexts() + $this->contexts;
+        $this->contexts += $this->menu_item->getContexts();
       }
       elseif ($this->path) {
-        $this->contexts = $this->contexts + layout_context_required_by_path($this->path);
+        $this->contexts += layout_context_required_by_path($this->path);
       }
-      // else {
-        // $this->contexts = array();
-      // }
-    // }
+      $this->context_loaded = TRUE;
+    }
+    dpm($this->contexts, 'iuiui');
 
     // Add on the current user context, which is always available.
     if (!isset($this->contexts['current_user'])) {

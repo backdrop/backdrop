@@ -96,4 +96,15 @@ class EntityLayoutContext extends LayoutContext {
     );
  */
   }
+
+  /**
+   * Submit handler for the settings form for this context item.
+   */
+  function formSubmit($form, &$form_state) {
+    $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context'));
+    $settings = array_diff_key($form_state['values'], $excluded);
+    $this->name = $this->plugin . $settings['entity'];
+    // @todo deal with name changes.
+    $this->settings = array_merge($this->settings, $settings);
+  }
 }

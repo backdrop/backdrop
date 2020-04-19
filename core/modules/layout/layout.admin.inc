@@ -350,7 +350,8 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $form['context_wrapper']['context']['required'] = array(
     '#theme' => 'layout_settings_context_table',
     '#layout_path' => $layout->getPath(),
-    '#access' => count($contexts) > $built_in_contexts,
+    // @todo: fix
+    // '#access' => count($contexts) > $built_in_contexts,
   );
 
   foreach ($contexts as $context_key => $layout_context) {
