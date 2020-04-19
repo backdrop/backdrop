@@ -246,7 +246,6 @@ class Layout {
         $this->{$property_key}[$plugin_type_key] = layout_create_handler($plugin_type, $plugin_data['plugin'], $plugin_data['data']);
       }
     }
-    dpm($this);
   }
 
   /**
@@ -777,7 +776,6 @@ class Layout {
       }
       $this->context_loaded = TRUE;
     }
-    dpm($this->contexts, 'iuiui');
 
     // Add on the current user context, which is always available.
     if (!isset($this->contexts['current_user'])) {

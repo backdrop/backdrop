@@ -335,7 +335,7 @@ function layout_menu() {
     'title' => 'Configure context',
     'load arguments' => array(4),
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('layout_context_add_form', 4, NULL, NULL, 8),
+    'page arguments' => array('layout_context_add_form', 4, 8),
     'type' => MENU_CALLBACK,
     'file' => 'layout.admin.inc',
   ) + $base;
@@ -980,9 +980,6 @@ function layout_load_multiple_by_path($path, $skip_menu_items = NULL) {
     }
 
     $layouts = layout_load_multiple($layout_names, $skip_menu_items);
-    foreach ($layouts as $layout) {
-      $layout->resetContexts();
-    }
     cache('layout_path')->set($path, $layouts);
   }
   return $layouts;
@@ -1688,9 +1685,6 @@ function layout_set_layout_tempstore($item, $type = 'layout') {
     return;
   }
 
-  // Layout contexts should not be stored in the tempstore, they're generated on
-  // the fly when needed after loading.
-  // $item->resetContexts();
   $item->locked = array(
     'uid' => $GLOBALS['user']->uid,
     'updated' => REQUEST_TIME,
