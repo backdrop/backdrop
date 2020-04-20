@@ -209,6 +209,7 @@ function theme_layout_settings_context_table($variables) {
     $argument_parts = $parts;
     $row = array();
     if (is_numeric($key)) {
+  dpm($element[$key]);
       $argument_parts[$key] = '<strong>' . $argument_parts[$key] . '</strong>';
       $row[] = t('Position @index:', array('@index' => $key + 1)) . ' ' . implode('/', $argument_parts);
     }

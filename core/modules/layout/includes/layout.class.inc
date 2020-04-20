@@ -653,7 +653,7 @@ class Layout {
     // On any path change, reset contexts.
     if ($this->path !== $path) {
       $this->path = $path;
-      $this->resetContexts();
+      // $this->resetContexts();
     }
   }
 
@@ -755,8 +755,12 @@ class Layout {
    */
   function getContexts() {
     // Load objects for stored contexts.
+    // @todo: move this to resetContexts() and restore deleted calls?
     foreach ($this->contexts as $key => $context) {
-      if (!is_object($context->data) && !is_numeric($key)) {
+      if (is_numeric($key)) {
+        unset($this->contexts[$key]);
+      }
+      elseif (!is_object($context->data) && !in_array($key, array('string', 'overrides_path', 'current_user'))) {
       $context_info = layout_get_context_info($context->plugin);
         if (isset($context_info['load callback'])) {
           $function = $context_info['load callback'];
@@ -766,16 +770,19 @@ class Layout {
       }
     }
 
-    if (empty($this->context_loaded)) {
+    // if (empty($this->context_loaded)) {
       // Load contexts from paths and menu items.
       if ($this->menu_item) {
+        dpm($this->contexts);
         $this->contexts += $this->menu_item->getContexts();
+        dpm($this->contexts);
       }
       elseif ($this->path) {
+        dpm('two');
         $this->contexts += layout_context_required_by_path($this->path);
       }
-      $this->context_loaded = TRUE;
-    }
+      // $this->context_loaded = TRUE;
+    // }
 
     // Add on the current user context, which is always available.
     if (!isset($this->contexts['current_user'])) {
