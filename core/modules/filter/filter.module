@@ -123,9 +123,19 @@ function filter_menu() {
   $items['admin/config/content/formats/%filter_format'] = array(
     'title callback' => 'filter_admin_format_title',
     'title arguments' => array(4),
+    'load arguments' => array(TRUE),
     'page callback' => 'filter_admin_format_page',
     'page arguments' => array(4),
     'access arguments' => array('administer filters'),
+    'file' => 'filter.admin.inc',
+  );
+  $items['admin/config/content/formats/%filter_format/enable'] = array(
+    'title' => 'Enable text format',
+    'load arguments' => array(TRUE),
+    'page callback' => 'filter_admin_enable',
+    'page arguments' => array(4),
+    'access arguments' => array('administer filters'),
+    'type' => MENU_CALLBACK,
     'file' => 'filter.admin.inc',
   );
   $items['admin/config/content/formats/%filter_format/disable'] = array(
@@ -230,16 +240,16 @@ function filter_config_data_validate(Config $config, array $config_info) {
  *
  * @param $format_id
  *   The format ID.
+ * @param boolean $load_if_disabled
+ *   If TRUE the format will be loaded when disabled.
  *
- * @return stdClass
- *   A fully-populated text format object, if the requested format exists and
- *   is enabled. If the format does not exist, or exists in the database but
- *   has been marked as disabled, FALSE is returned.
+ * @return stdClass|FALSE
+ *   A fully-populated text format object or FALSE if the format is not found.
  *
  * @see filter_format_exists()
  */
-function filter_format_load($format_id) {
-  $formats = filter_formats();
+function filter_format_load($format_id, $load_if_disabled = FALSE) {
+  $formats = filter_formats(NULL, $load_if_disabled);
   return isset($formats[$format_id]) ? $formats[$format_id] : FALSE;
 }
 
@@ -686,6 +696,8 @@ function filter_modules_disabled($modules) {
  *   (optional) If provided, only those formats that are allowed for this user
  *   account will be returned. All formats will be returned otherwise. Defaults
  *   to NULL.
+ * @param Boolean $include_disabled
+ *   (optional) If TRUE, will return all formats, including disabled formats.
  *
  * @return stdClass[]
  *   An array of text format objects, keyed by the format ID and ordered by
@@ -693,7 +705,7 @@ function filter_modules_disabled($modules) {
  *
  * @see filter_formats_reset()
  */
-function filter_formats($account = NULL) {
+function filter_formats($account = NULL, $include_disabled = FALSE) {
   global $language;
   $formats = &backdrop_static(__FUNCTION__, array());
 
@@ -718,11 +730,6 @@ function filter_formats($account = NULL) {
           'editor_settings' => array(),
         );
         $filter_format = (object) $filter_format;
-
-        // We don't include disabled formats.
-        if (!$filter_format->status) {
-          continue;
-        }
 
         // Sort the filters by weight.
         backdrop_sort($filter_format->filters);
@@ -752,17 +759,37 @@ function filter_formats($account = NULL) {
     }
   }
 
+  // Build a list of enabled formats based on the full list.
+  if (!isset($formats['enabled'])) {
+    foreach ($formats['all'] as $format) {
+      if ($format->status) {
+        $formats['enabled'][$format->format] = $format;
+      }
+    }
+  }
+
   // Build a list of user-specific formats.
   if (isset($account) && !isset($formats['user'][$account->uid])) {
     $formats['user'][$account->uid] = array();
     foreach ($formats['all'] as $format) {
       if (filter_access($format, $account)) {
-        $formats['user'][$account->uid][$format->format] = $format;
+        // Assemble a list of all formats (even disabled ones) for this user.
+        $formats['user'][$account->uid]['all'][$format->format] = $format;
+        // As well as a specific list of only enabled formats.
+        if ($format->status) {
+          $formats['user'][$account->uid]['enabled'][$format->format] = $format;
+        }
       }
     }
   }
 
-  return isset($account) ? $formats['user'][$account->uid] : $formats['all'];
+  $enabled_or_all = $include_disabled ? 'all' : 'enabled';
+  if (isset($account)) {
+    return $formats['user'][$account->uid][$enabled_or_all];
+  }
+  else {
+    return $formats[$enabled_or_all];
+  }
 }
 
 /**

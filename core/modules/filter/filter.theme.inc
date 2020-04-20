@@ -79,6 +79,7 @@ function theme_filter_admin_overview($variables) {
   $form = $variables['form'];
 
   $rows = array();
+  $first_disabled_row = TRUE;
   foreach (element_children($form['formats']) as $id) {
     $form['formats'][$id]['weight']['#attributes']['class'] = array('text-format-order-weight');
     $row = array(
@@ -89,12 +90,32 @@ function theme_filter_admin_overview($variables) {
         backdrop_render($form['formats'][$id]['weight']),
         backdrop_render($form['formats'][$id]['operations']),
       ),
-      'class' => array('draggable'),
     );
+    if ($form['formats'][$id]['#status']) {
+      $row['class'] = array('draggable', 'enabled');
+    }
+    else {
+      // Add a heading above the first disabled row.
+      if ($first_disabled_row) {
+        $first_disabled_row = FALSE;
+        // Create a row that spans all columns.
+        $rows[] = array(
+          'data' => array(
+            array(
+              'data' => t('Disabled'),
+              'colspan' => 5,
+              'header' => TRUE,
+            ),
+          ),
+        );
+      }
+      $row['class'] = array('disabled');
+    }
     $rows[] = $row;
   }
   $header = array(t('Name'), t('Editor'), t('Roles'), t('Weight'), t('Operations'));
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'text-format-order')));
+  $output = backdrop_render($form['help']);
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'text-format-order')));
   $output .= backdrop_render_children($form);
 
   backdrop_add_tabledrag('text-format-order', 'order', 'sibling', 'text-format-order-weight');

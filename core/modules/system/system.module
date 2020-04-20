@@ -176,9 +176,6 @@ function system_permission() {
     'access site reports' => array(
       'title' => t('View site reports'),
     ),
-    'block IP addresses' => array(
-      'title' => t('Block IP addresses'),
-    ),
     'flush caches' => array(
       'title' => t('Flush caches'),
       'description' => t('Provides access to manually flush caches.'),
