@@ -355,7 +355,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     // '#access' => count($contexts) > $built_in_contexts,
   );
 
-dpm($contexts);
   foreach ($contexts as $context_key => $layout_context) {
     if (!in_array($context_key, array('current_user', 'overrides_path'))) {
       if ($layout_context->position && $layout_context->locked) {

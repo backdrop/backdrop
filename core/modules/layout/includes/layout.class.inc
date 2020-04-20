@@ -773,12 +773,9 @@ class Layout {
     // if (empty($this->context_loaded)) {
       // Load contexts from paths and menu items.
       if ($this->menu_item) {
-        dpm($this->contexts);
         $this->contexts += $this->menu_item->getContexts();
-        dpm($this->contexts);
       }
       elseif ($this->path) {
-        dpm('two');
         $this->contexts += layout_context_required_by_path($this->path);
       }
       // $this->context_loaded = TRUE;
