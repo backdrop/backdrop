@@ -383,6 +383,7 @@ function user_login_settings($form, &$form_state) {
  * @see theme_user_admin_permissions()
  */
 function user_admin_permissions($form, $form_state, $role_name = NULL) {
+  $admin_role = config_get('system.core', 'user_admin_role');
 
   // Retrieve role names for columns.
   $roles = user_roles(FALSE, NULL, TRUE);
@@ -394,11 +395,13 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     '#value' => $roles,
   );
 
+  backdrop_set_message(t('The %admin_role role has been configured to be able to perform all actions on this site. You can change this setting in the <a href="@url">Roles configuration page</a>.', array('%admin_role' => $roles[$admin_role]->label, '@url' => url('admin/config/people/roles'))), 'info');
+
   // Render role/permission overview:
   $options = array();
   $module_info = system_get_info('module');
 
-  // Get a list of all the modules implementing a hook_permission() and sort by
+  // Get a list of all the modules implementing a hook_permission(), and sort by
   // display name.
   $modules = array();
   foreach (module_implements('permission') as $module) {
@@ -426,7 +429,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
           '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
         );
         foreach ($roles as $role_name => $role) {
-          // Builds arrays for checked boxes for each role
+          // Build the arrays for checked boxes for each role.
           if (in_array($perm, $role->permissions)) {
             $status[$role_name][] = $perm;
           }
@@ -435,7 +438,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     }
   }
 
-  // Have to build checkboxes here after checkbox arrays are built
+  // Have to build checkboxes here after checkbox arrays are built.
   foreach ($roles as $role_name => $role) {
     $form['checkboxes'][$role_name] = array(
       '#type' => 'checkboxes',
@@ -443,6 +446,12 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
       '#default_value' => isset($status[$role_name]) ? $status[$role_name] : array(),
       '#attributes' => array('class' => array('role-' . $role_name)),
     );
+    // If the role has been specified as Administrator (under
+    // admin/config/people/roles), then we need to set all its permission
+    // checboxes to disabled (locked).
+    if ($role_name == $admin_role) {
+      $form['checkboxes'][$role_name]['#attributes']['disabled'] = 'disabled';
+    }
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
       '#tree' => TRUE,
