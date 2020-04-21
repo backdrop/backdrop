@@ -491,13 +491,12 @@ function user_admin_roles($form, $form_state) {
   $roles = user_roles();
   unset($roles[BACKDROP_ANONYMOUS_ROLE]);
   unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
-  $roles[0] = t('disabled');
+  $roles[0] = t('none');
   $form['admin_role']['user_admin_role'] = array(
     '#type' => 'select',
-    '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
     '#default_value' => $system_config->get('user_admin_role'),
     '#options' => $roles,
-    '#description' => t('Changing this setting will not affect existing permissions.'),
+    '#description' => t('This role will have permission to perform all actions on this site. Select "none" to disable this feature.'),
   );
 
   // Settings for anonymous users.
