@@ -394,7 +394,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
   );
 
   $admin_role = config_get('system.core', 'user_admin_role');
-  if ($admin_role) {
+  if ($admin_role && isset($roles[$admin_role])) {
     $message = t('The %admin_role role has been configured to be able to perform all actions on this site.', array('%admin_role' => $roles[$admin_role]->label));
   }
   else {
