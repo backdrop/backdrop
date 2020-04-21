@@ -148,7 +148,7 @@ function layout_context_return_form($form, &$form_state) {
     $handler->is_new = TRUE;
   }
 
-  $form['#title'] = layout_context_edit_title($layout, $block, $menu_item, $handler_id);
+  $form['#title'] = layout_condition_edit_title($layout, $block, $menu_item, $handler_id);
   $form_state['layout'] = $layout;
   $form_state['handler'] = $handler;
   $handler->form($form, $form_state);
