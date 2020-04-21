@@ -460,13 +460,16 @@ function user_role_permissions($role_names = array()) {
  */
 function user_access($permission_name, $account = NULL) {
   global $user;
+  $admin_role = config_get('system.core', 'user_admin_role');
 
   if (!isset($account)) {
     $account = $user;
   }
 
-  // User #1 has all privileges:
-  if ($account->uid == 1) {
+  // User #1 has all privileges. If the user has whichever role has been
+  // specified as Administrator (under admin/config/people/roles), then treat it
+  // the same as user #1.
+  if ($account->uid == 1 || in_array($admin_role, $account->roles)) {
     return TRUE;
   }
 
