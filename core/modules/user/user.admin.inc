@@ -383,8 +383,6 @@ function user_login_settings($form, &$form_state) {
  * @see theme_user_admin_permissions()
  */
 function user_admin_permissions($form, $form_state, $role_name = NULL) {
-  $admin_role = config_get('system.core', 'user_admin_role');
-
   // Retrieve role names for columns.
   $roles = user_roles(FALSE, NULL, TRUE);
   if (isset($roles[$role_name])) {
@@ -395,7 +393,15 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     '#value' => $roles,
   );
 
-  backdrop_set_message(t('The %admin_role role has been configured to be able to perform all actions on this site. You can change this setting in the <a href="@url">Roles configuration page</a>.', array('%admin_role' => $roles[$admin_role]->label, '@url' => url('admin/config/people/roles'))), 'info');
+  $admin_role = config_get('system.core', 'user_admin_role');
+  if ($admin_role) {
+    $message = t('The %admin_role role has been configured to be able to perform all actions on this site.', array('%admin_role' => $roles[$admin_role]->label));
+  }
+  else {
+    $message = t('No user role has been configured to be able to perform all actions on this site.');
+  }
+  $message .= ' ' . t('You can change this setting in the <a href="@url">Roles configuration page</a>.', array('@url' => url('admin/config/people/roles')));
+  backdrop_set_message($message, 'info');
 
   // Render role/permission overview:
   $options = array();
