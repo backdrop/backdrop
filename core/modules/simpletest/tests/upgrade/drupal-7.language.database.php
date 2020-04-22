@@ -699,7 +699,7 @@ db_insert('field_data_body')->fields(array(
   'delta' => '0',
   'body_value' => 'Node body',
   'body_summary' => 'Node body',
-  'body_format' => 'filtered_html',
+  'body_format' => 'basic',
 ))
 ->execute();
 
@@ -726,7 +726,7 @@ db_insert('field_revision_body')->fields(array(
   'delta' => '0',
   'body_value' => 'Node body',
   'body_summary' => 'Node body',
-  'body_format' => 'filtered_html',
+  'body_format' => 'basic',
 ))
 ->execute();
 
@@ -802,7 +802,7 @@ db_insert('field_data_comment_body')->fields(array(
   'language' => 'und',
   'delta' => '0',
   'comment_body_value' => 'Comment body',
-  'comment_body_format' => 'filtered_html',
+  'comment_body_format' => 'basic',
 ))
 ->values(array(
   'entity_type' => 'comment',
@@ -813,7 +813,7 @@ db_insert('field_data_comment_body')->fields(array(
   'language' => 'und',
   'delta' => '0',
   'comment_body_value' => 'Second comment body',
-  'comment_body_format' => 'filtered_html',
+  'comment_body_format' => 'basic',
 ))
 ->execute();
 
@@ -838,7 +838,7 @@ db_insert('field_revision_comment_body')->fields(array(
   'language' => 'und',
   'delta' => '0',
   'comment_body_value' => 'Comment body',
-  'comment_body_format' => 'filtered_html',
+  'comment_body_format' => 'basic',
 ))
 ->values(array(
   'entity_type' => 'comment',
@@ -849,7 +849,7 @@ db_insert('field_revision_comment_body')->fields(array(
   'language' => 'und',
   'delta' => '0',
   'comment_body_value' => 'Second comment body',
-  'comment_body_format' => 'filtered_html',
+  'comment_body_format' => 'basic',
 ))
 ->execute();
 

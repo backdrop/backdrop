@@ -85,7 +85,7 @@
                         "label": "",
                         "empty": true,
                         "content": "<p>No content has been promoted yet.</p>\n",
-                        "format": "filtered_html",
+                        "format": "basic",
                         "tokenize": 0
                     }
                 },

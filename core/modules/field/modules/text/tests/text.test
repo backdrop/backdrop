@@ -358,7 +358,7 @@ class TextSummaryTestCase extends BackdropWebTestCase {
     // Test text_summary() for different sizes.
     for ($i = 0; $i <= 37; $i++) {
       $this->assertTextSummary($text, $expected[$i],    NULL, $i);
-      $this->assertTextSummary($text, $expected_lb[$i], 'filtered_html', $i);
+      $this->assertTextSummary($text, $expected_lb[$i], 'basic', $i);
     }
   }
 
@@ -470,8 +470,8 @@ class TextTranslationTestCase extends BackdropWebTestCase {
     $node = $this->backdropGetNodeByTitle($title);
 
     // Populate the body field: the first item gets the "Full HTML" input
-    // format, the second one "Filtered HTML".
-    $formats = array('full_html', 'filtered_html');
+    // format, the second one "".
+    $formats = array('full_html', 'basic');
     $langcode = LANGUAGE_NONE;
     foreach ($body as $delta => $value) {
       $edit = array(

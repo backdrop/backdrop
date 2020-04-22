@@ -29,9 +29,9 @@ class CommentHelperCase extends BackdropWebTestCase {
     ));
 
     // Add text formats.
-    $filtered_html_format = array(
-      'format' => 'filtered_html',
-      'name' => 'Filtered HTML',
+    $basic_format = array(
+      'format' => 'basic',
+      'name' => '',
       'weight' => 0,
       'editor' => 'ckeditor',
       'filters' => array(
@@ -57,13 +57,13 @@ class CommentHelperCase extends BackdropWebTestCase {
         ),
       ),
     );
-    $filtered_html_format = (object) $filtered_html_format;
-    filter_format_save($filtered_html_format);
-    $filtered_html_permission = filter_permission_name($filtered_html_format);
+    $basic_format = (object) $basic_format;
+    filter_format_save($basic_format);
+    $basic_permission = filter_permission_name($basic_format);
 
     // Grant basic permissions for comments to anonymous and authenticated roles.
-    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access content', 'access comments', $filtered_html_permission));
-    user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('access content', 'access comments', 'post comments', 'skip comment approval', $filtered_html_permission));
+    user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access content', 'access comments', $basic_permission));
+    user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('access content', 'access comments', 'post comments', 'skip comment approval', $basic_permission));
 
     // Create users and test node.
     $this->admin_user = $this->backdropCreateUser(array('administer site configuration', 'administer content types', 'create post content', 'edit any post content', 'delete any post content', 'administer comments', 'administer layouts', 'administer fields'));
@@ -1039,7 +1039,7 @@ class CommentPreviewTest extends CommentHelperCase {
       ->save();
     $test_signature = $this->randomName();
     $edit['signature[value]'] = '<a href="http://example.com/">' . $test_signature. '</a>';
-    $edit['signature[format]'] = 'filtered_html';
+    $edit['signature[format]'] = 'basic';
     $image = current($this->backdropGetTestFiles('image'));
     $edit['files[picture_upload]'] = backdrop_realpath($image->uri);
     $this->backdropPost('user/' . $this->web_user->uid . '/edit', $edit, t('Save'));

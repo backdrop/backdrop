@@ -1935,7 +1935,7 @@ class UserSignatureTestCase extends BackdropWebTestCase {
 
     // Prefetch text formats.
     $this->full_html_format = filter_format_load('full_html');
-    $this->filtered_html_format = filter_format_load('filtered_html');
+    $this->basic_format = filter_format_load('basic');
 
     // Create regular and administrative users.
     $this->web_user = $this->backdropCreateUser(array());
@@ -1999,7 +1999,7 @@ class UserSignatureTestCase extends BackdropWebTestCase {
     // Assert that the signature did not make it through unfiltered.
     $this->backdropGet('node/' . $node->nid);
     $this->assertNoRaw($signature_text, 'Unfiltered signature text not found.');
-    $this->assertRaw(check_markup($signature_text, $this->filtered_html_format->format), 'Filtered signature text found.');
+    $this->assertRaw(check_markup($signature_text, $this->basic_format->format), 'Filtered signature text found.');
   }
 }
 
