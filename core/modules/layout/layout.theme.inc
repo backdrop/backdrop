@@ -208,18 +208,9 @@ function theme_layout_settings_context_table($variables) {
   foreach (element_children($element) as $key) {
     $argument_parts = $parts;
     $row = array();
-    if (is_numeric($key)) {
-      $argument_parts[$key] = '<strong>' . $argument_parts[$key] . '</strong>';
-      $row[] = t('Position @index:', array('@index' => $key + 1)) . ' ' . implode('/', $argument_parts);
-    }
-    elseif (isset($element[$key]['context']['#value']->settings['entity'])) {
-      $row[] = t('Special context: @id', array('@id' => $element[$key]['context']['#value']->settings['entity']));
-    }
-    else {
-      $row[] = t('Special context: @key', array('@key' => $key));
-    }
+    $row[] = backdrop_render($element[$key]['plugin']);
     $row[] = backdrop_render($element[$key]['label']);
-    if (isset($element[$key]['context']) && ($element[$key]['context']['#value']->required == FALSE)) {
+    if (isset($element[$key]['operations'])) {
       $row[] = backdrop_render($element[$key]['operations']);
     }
     else {

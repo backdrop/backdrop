@@ -103,7 +103,7 @@ class LayoutMenuItem {
    *
    * @var LayoutContext[]
    */
-  private $contexts;
+  private $contexts = array();
 
   /**
    * Constructor for LayoutMenuItems.
@@ -229,7 +229,12 @@ class LayoutMenuItem {
    * return LayoutContext[]
    */
   function getContexts() {
-    if (is_null($this->contexts)) {
+    foreach ($this->contexts as $key => $context) {
+      if (is_numeric($key)) {
+        unset($this->contexts[$key]);
+      }
+    }
+    // if (is_null($this->contexts)) {
       // Required contexts are generated on-demand.
       $contexts = layout_context_required_by_path($this->path);
       $path_parts = explode('/', $this->path);
@@ -250,8 +255,8 @@ class LayoutMenuItem {
       ));
       $contexts['current_user']->setData($GLOBALS['user']);
 
-      $this->contexts = $contexts;
-    }
+      $this->contexts += $contexts;
+    //}
     return $this->contexts;
   }
 

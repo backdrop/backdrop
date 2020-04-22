@@ -818,7 +818,7 @@ class Layout {
   function resetContexts() {
     $this->contexts = NULL;
     if ($this->menu_item) {
-      $this->menu_item->resetContexts();
+      // $this->menu_item->resetContexts();
     }
   }
 

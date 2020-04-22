@@ -357,30 +357,26 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
 
   foreach ($contexts as $context_key => $layout_context) {
     if (!in_array($context_key, array('current_user', 'overrides_path'))) {
-      if ($layout_context->position && $layout_context->locked) {
+      if ($layout_context->position && $layout_context->required) {
         $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
-          '#type' => 'value',
-          '#value' => $layout_context->plugin,
+          '#markup' => $layout_context->getAdminSummary($layout->getPath()),
         );
-        $form['context_wrapper']['context']['required'][$context_key]['label'] = array(
-          '#markup' => check_plain($all_context_info[$layout_context->plugin]['title']),
-        );
-      }
-      elseif ($layout_context->position && $layout_context->required) {
-        $form['context_wrapper']['context']['required'][$context_key]['label'] = array(
-          '#type' => 'select',
-          '#options' => $context_options,
-          '#default_value' => $layout_context->plugin,
-        );
+        if ($layout_context->locked) {
+          $form['context_wrapper']['context']['required'][$context_key]['label'] = array(
+            '#markup' => check_plain($all_context_info[$layout_context->plugin]['title']),
+          );
+        }
+        else{
+          $form['context_wrapper']['context']['required'][$context_key]['label'] = array(
+            '#type' => 'select',
+            '#options' => $context_options,
+            '#default_value' => $layout_context->plugin,
+          );
+        }
       }
       else {
         $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
-          '#type' => 'value',
-          '#value' => $layout_context->plugin,
-        );
-        $form['context_wrapper']['context']['required'][$context_key]['context'] = array(
-          '#type' => 'value',
-          '#value' => $layout_context,
+          '#markup' => $layout_context->getAdminSummary($layout->getPath()),
         );
         $form['context_wrapper']['context']['required'][$context_key]['label'] = array(
           '#markup' => check_plain($all_context_info[$layout_context->plugin]['title']),

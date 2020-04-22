@@ -107,4 +107,19 @@ class EntityLayoutContext extends LayoutContext {
     // @todo deal with name changes.
     $this->settings = array_merge($this->settings, $settings);
   }
+
+  /**
+   * Return a summary for this context.
+   */
+  function getAdminSummary($path = NULL) {
+    if ($this->position && $this->locked) {
+      $argument_parts = explode('/', $path);
+      $argument_parts[$this->position] = '<strong>' . $argument_parts[$this->position] . '</strong>';
+
+      return t('Position @index:', array('@index' => $this->position + 1)) . ' ' . implode('/', $argument_parts);
+    }
+    else {
+      return t('Special context: @id', array('@id' => $this->settings['entity']));
+    }
+  }
 }

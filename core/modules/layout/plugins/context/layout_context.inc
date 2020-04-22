@@ -197,6 +197,10 @@ abstract class LayoutContext extends LayoutHandler {
     $this->settings = array_merge($this->settings, $settings);
   }
 
+  /**
+   * Return a summary for this context.
+   */
+  function getAdminSummary() {}
 }
 
 /**
@@ -232,5 +236,14 @@ class LayoutStringContext extends LayoutContext {
   }
   function label() {
     return t('String pass-through');
+  }
+  /**
+   * Return a summary for this context.
+   */
+  function getAdminSummary($path = NULL) {
+      $argument_parts = explode('/', $path);
+      $argument_parts[$this->position] = '<strong>' . $argument_parts[$this->position] . '</strong>';
+
+      return t('Position @index:', array('@index' => $this->position + 1)) . ' ' . implode('/', $argument_parts);
   }
 }
