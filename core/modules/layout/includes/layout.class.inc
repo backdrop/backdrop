@@ -770,16 +770,13 @@ class Layout {
       }
     }
 
-    // if (empty($this->context_loaded)) {
-      // Load contexts from paths and menu items.
-      if ($this->menu_item) {
-        $this->contexts += $this->menu_item->getContexts();
-      }
-      elseif ($this->path) {
-        $this->contexts += layout_context_required_by_path($this->path);
-      }
-      // $this->context_loaded = TRUE;
-    // }
+    // Load contexts from paths and menu items.
+    if ($this->menu_item) {
+      $this->contexts += $this->menu_item->getContexts();
+    }
+    elseif ($this->path) {
+      $this->contexts += layout_context_required_by_path($this->path);
+    }
 
     // Add on the current user context, which is always available.
     if (!isset($this->contexts['current_user'])) {

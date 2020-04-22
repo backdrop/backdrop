@@ -234,29 +234,28 @@ class LayoutMenuItem {
         unset($this->contexts[$key]);
       }
     }
-    // if (is_null($this->contexts)) {
-      // Required contexts are generated on-demand.
-      $contexts = layout_context_required_by_path($this->path);
-      $path_parts = explode('/', $this->path);
+    // Required contexts are generated on-demand.
+    $contexts = layout_context_required_by_path($this->path);
+    $path_parts = explode('/', $this->path);
 
-      // Add in configured arguments.
-      foreach ($this->arguments as $position => $argument_config) {
-        if (isset($path_parts[$position]) && $path_parts[$position] === '%') {
-          $context_config = $argument_config + array('required' => TRUE);
-          $contexts[$position] = layout_create_context($argument_config['plugin'], $context_config);
-        }
+    // Add in configured arguments.
+    foreach ($this->arguments as $position => $argument_config) {
+      if (isset($path_parts[$position]) && $path_parts[$position] === '%') {
+        $context_config = $argument_config + array('required' => TRUE);
+        $contexts[$position] = layout_create_context($argument_config['plugin'], $context_config);
       }
+    }
 
-      // Add on the current user context, which is always available.
-      $contexts['current_user'] = layout_create_context('user', array(
-        'name' => 'current_user',
-        'label' => t('Current user'),
-        'locked' => TRUE,
-      ));
-      $contexts['current_user']->setData($GLOBALS['user']);
+    // Add on the current user context, which is always available.
+    $contexts['current_user'] = layout_create_context('user', array(
+      'name' => 'current_user',
+      'label' => t('Current user'),
+      'locked' => TRUE,
+    ));
+    $contexts['current_user']->setData($GLOBALS['user']);
 
-      $this->contexts += $contexts;
-    //}
+    $this->contexts += $contexts;
+
     return $this->contexts;
   }
 
