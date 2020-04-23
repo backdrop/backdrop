@@ -3020,6 +3020,7 @@ class NodeRevisionPermissionsTestCase extends BackdropWebTestCase {
       $revision = clone $node;
       $revision->revision = 1;
       $revision->log = $this->randomName(32);
+      $revision->is_default_revision = FALSE;
       node_save($revision);
       $this->node_revisions[] = $revision;
     }
