@@ -7,8 +7,17 @@
  * Editor settings callback; Provide options for CKEditor module.
  */
 function ckeditor_settings_form(&$form, $form_state, $format) {
+  // Build the toolbar based on the current values from $form_state. This
+  // maintains the toolbar button changes when a form validation error occurs.
+  $format_copy = clone $format;
+  if (isset($form_state['input']['editor_settings']['toolbar'])) {
+    if ($toolbar = @json_decode($form_state['input']['editor_settings']['toolbar'], TRUE)) {
+      $format_copy->editor_settings['toolbar'] = $toolbar;
+    }
+  }
+
   $plugins = ckeditor_plugins();
-  $toolbar_element = theme('ckeditor_settings_toolbar', array('format' => $format, 'plugins' => $plugins));
+  $toolbar_element = theme('ckeditor_settings_toolbar', array('format' => $format_copy, 'plugins' => $plugins));
   $elements = array(
     '#attached' => array(
       'library' => array(
@@ -64,9 +73,9 @@ function ckeditor_settings_form(&$form, $form_state, $format) {
   }
   $elements['plugins']['style']['style_list'] = array(
     '#type' => 'textarea',
-    '#rows' => 4,
+    '#rows' => max(4, count(explode("\n", $style_list))),
     '#default_value' => $style_list,
-    '#description' => t('A list of classes that will be provided in the "Styles" dropdown. Enter one class on each line in the format: element.class|Label. Example: h1.title|Title.') . '<br />' . t('Each style should be in your theme\'s main CSS as well as in your theme\'s ckeditor-iframe.css file.'),
+    '#description' => t('A list of tags that will be provided in the "Styles" dropdown. Enter one tag on each line in the format: "element[.class]|Label" (where the class is optional).') . '<br />' . t('Example: "code|Code" or "h1.title|Title".') . '<br />' . t('All tags entered here will be automatically added to the "Allowed HTML tags" list below (if the "Limit allowed HTML tags" filter is enabled). Each tag should be in your theme\'s main CSS as well as in your theme\'s ckeditor-iframe.css file.'),
   );
 
   array_unshift($form['#validate'], 'ckeditor_settings_form_validate');
@@ -87,8 +96,8 @@ function ckeditor_settings_form_validate($form, &$form_state) {
 
   $styles = _ckeditor_settings_parse_style_list($settings['plugins']['style']['style_list']);
   foreach ($styles as $style) {
-    if (empty($style['name']) || empty($style['element']) || empty($style['attributes']['class'])) {
-      form_error($form['editor_settings']['plugins']['style']['style_list'], t('The CKEditor list of styles is not formatted properly. Be sure to include one style per line, with the format "element.class|Label".'));
+    if (empty($style['name']) || empty($style['element'])) {
+      form_error($form['editor_settings']['plugins']['style']['style_list'], t('The CKEditor list of styles is not formatted properly. Be sure to include one style per line, with the format "element[.class]|Label" (where the class is optional). Example: "code|Code" or "h1.title|Title".'));
     }
   }
 }
@@ -125,11 +134,14 @@ function _ckeditor_settings_parse_style_list($style_list_string) {
     if ($style) {
       @list($element, $label) = explode('|', $style, 2);
       @list($element, $class) = explode('.', $element, 2);
-      $styles[] = array(
+      $style = array(
         'name' => $label,
         'element' => $element,
-        'attributes' => array('class' => $class),
       );
+      if ($class) {
+        $style['attributes']['class'] = $class;
+      }
+      $styles[] = $style;
     }
   }
   return $styles;
@@ -148,7 +160,8 @@ function _ckeditor_settings_stringify_style_list(array $style_list = NULL) {
   $string = '';
   if ($style_list) {
     foreach ($style_list as $style) {
-      $string .= $style['element'] . '.' . $style['attributes']['class'] . '|' . $style['name'] . "\n";
+      $class = !empty($style['attributes']['class']) ? '.' . $style['attributes']['class'] : '';
+      $string .= $style['element'] . $class . '|' . $style['name'] . "\n";
     }
   }
   return $string;

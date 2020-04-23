@@ -181,6 +181,9 @@ function filter_admin_format_page($format = NULL) {
  * @ingroup forms
  */
 function filter_admin_format_form($form, &$form_state, $format) {
+  // Make this form rebuild on every validation.
+  $form['#rebuild'] = TRUE;
+
   $is_fallback = ($format->format == filter_fallback_format());
   $editors = filter_get_editors();
   if (isset($form_state['editor_info'])) {
