@@ -873,7 +873,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
       '%length' => $test_size,
     )));
 
-    // Check that an image minimum size cant be larger than its maximum size.
+    // Check that image minimum size is not larger than maximum size.
     $edit = array(
       'instance[settings][max_dimensions][x]' => 100,
       'instance[settings][min_dimensions][x]' => 200,
