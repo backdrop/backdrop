@@ -16,6 +16,9 @@
 function node_page_edit(Node $node) {
   $type_name = node_type_get_name($node);
   backdrop_set_title(t('Edit @type %title', array('@type' => $type_name, '%title' => $node->title)), PASS_THROUGH);
+  if (!$node->isActiveRevision()) {
+    backdrop_set_title(t('Revision of %title from %date', array('%title' => $node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
+  }
   return backdrop_get_form($node->type . '_node_form', $node);
 }
 
@@ -431,18 +434,28 @@ function node_form($form, &$form_state, Node $node) {
     '#weight' => 6,
     '#submit' => array('node_form_preview'),
   );
-  if (!empty($node->nid) && node_access('delete', $node)) {
-    // Use a link for the delete button so the form doesn't need to validate.
-    $form['actions']['delete'] = array(
-      '#type' => 'link',
-      '#title' => t('Delete'),
-      '#href' => "node/{$node->nid}/delete",
-      '#options' => array(
-        'query' => isset($_GET['destination']) ? backdrop_get_destination() : array(),
-        'attributes' => array('class' => array('button', 'button-secondary', 'form-delete'))
-      ),
-      '#weight' => 15,
-    );
+  if (!empty($node->nid)) {
+    // If editing a revision, go to the revision view.
+    if ($node->isActiveRevision() && node_access('delete', $node)) {
+      $delete_href = "node/{$node->nid}/delete";
+    }
+    elseif (!$node->isActiveRevision() && _node_revision_access($node, 'delete')) {
+      $delete_href = 'node/' . $node->nid . '/revisions/' . $node->vid . '/delete';
+    }
+
+    if (!empty($delete_href)) {
+      // Use a link for the delete button so the form doesn't need to validate.
+      $form['actions']['delete'] = array(
+        '#type' => 'link',
+        '#title' => t('Delete'),
+        '#href' => $delete_href,
+        '#options' => array(
+          'query' => isset($_GET['destination']) ? backdrop_get_destination() : array(),
+          'attributes' => array('class' => array('button', 'button-secondary', 'form-delete'))
+        ),
+        '#weight' => 15,
+      );
+    }
   }
   $form['actions']['cancel'] = array(
     '#type' => 'link',
@@ -531,6 +544,11 @@ function node_form_submit($form, &$form_state) {
     $form_state['redirect'] = '<front>';
     if (node_access('view', $node)) {
       $form_state['redirect'] = 'node/' . $node->nid;
+
+      // If editing a revision, go to the revision view.
+      if (!$node->isActiveRevision() && _node_revision_access($node)) {
+        $form_state['redirect'] = 'node/' . $node->nid . '/revisions/' . $node->vid . '/view';
+      }
 
       // If node type set to prevent direct viewing of full page URL
       // stay on edit page if user is not permitted.
@@ -750,6 +768,12 @@ function node_preview_banner_form_node_submit(array $form, array &$form_state) {
     $destination = '<front>';
     if (node_access('view', $node)) {
       $destination = 'node/' . $node->nid;
+
+      // If editing a revision, go to the revision view.
+      if (!$node->isActiveRevision() && _node_revision_access($node)) {
+        $destination = 'node/' . $node->nid . '/revisions/' . $node->vid . '/view';
+      }
+
       // If node type set to prevent direct viewing of full page URL
       // stay on edit page if user is not permitted.
       $type = node_type_get_type($node);
@@ -883,17 +907,36 @@ function node_revision_overview($node) {
   if ((user_access('delete revisions') || user_access('administer nodes')) && node_access('delete', $node)) {
     $delete_permission = TRUE;
   }
+  $edit_permission = FALSE;
+  if ((user_access('update revisions') || user_access('administer nodes')) && node_access('update', $node)) {
+    $edit_permission = TRUE;
+  }
   foreach ($revisions as $revision) {
     $row = array();
-    if ($revision->current_vid > 0) {
-      $row[] = array('data' => t('!date by !username', array('!date' => l(format_date($revision->timestamp, 'short'), "node/$node->nid"), '!username' => theme('username', array('account' => $revision))))
-                               . (($revision->log != '') ? '<p class="revision-log">' . filter_xss($revision->log) . '</p>' : ''),
-                     'class' => array('revision-current'));
-      $row[] = array('data' => backdrop_placeholder(t('current revision')), 'class' => array('revision-current'));
+    $is_active_revision = ($revision->vid == $node->active_revision);
+    $links = array();
+    $row_class = '';
+    if ($is_active_revision) {
+      // @todo remove the revision-current class in 2.x
+      $row_class = 'revision-active revision-current';
+      $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'active' => $is_active_revision));
+      $publish_action = ($revision->status == NODE_PUBLISHED) ? 'unpublish' : 'pubish';
+      // @todo: Add proper permissions check.
+      if (node_access('update', $node)) {
+        $links['edit'] = array(
+          'title' => t('Edit'),
+          'href' => "node/$node->nid/edit",
+        );
+      }
     }
     else {
-      $row[] = t('!date by !username', array('!date' => l(format_date($revision->timestamp, 'short'), "node/$node->nid/revisions/$revision->vid/view"), '!username' => theme('username', array('account' => $revision))))
-               . (($revision->log != '') ? '<p class="revision-log">' . filter_xss($revision->log) . '</p>' : '');
+      $row['revision'] = theme('node_revision_info', array('revision' => $revision, 'active' => $is_active_revision));
+      if ($is_active_revision && $edit_permission) {
+        $links['edit'] = array(
+          'title' => t('Edit'),
+          'href' => "node/$node->nid/revisions/$revision->vid/edit",
+        );
+      }
       if ($revert_permission) {
         $links['revert'] = array(
           'title' => t('Revert'),
@@ -906,14 +949,14 @@ function node_revision_overview($node) {
           'href' => "node/$node->nid/revisions/$revision->vid/delete",
         );
       }
-      $row[] = array(
-        'data' => array(
-          '#type' => 'operations',
-          '#links' => $links,
-        ),
-      );
     }
-    $rows[] = $row;
+    $row[] = array(
+      'data' => array(
+        '#type' => 'operations',
+        '#links' => $links,
+      ),
+    );
+    $rows[] = array('data' => $row, 'class' => array($row_class));
   }
 
   $build['node_revisions_table'] = array(
@@ -953,6 +996,9 @@ function node_revision_revert_confirm($form, $form_state, $node_revision) {
 function node_revision_revert_confirm_submit($form, &$form_state) {
   $node_revision = $form['#node_revision'];
   $node_revision->revision = 1;
+  // Make this the new active revision for the node.
+  $node_revision->is_active_revision = TRUE;
+
   // The revision timestamp will be updated when the revision is saved. Keep the
   // original one for the confirmation message.
   $original_revision_timestamp = $node_revision->revision_timestamp;

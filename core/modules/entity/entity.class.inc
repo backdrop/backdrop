@@ -177,12 +177,39 @@ interface EntityInterface {
    * @since 1.13.0 Method added.
    */
   public function getFieldValues($field_name, $value_key = 'value', $langcode = NULL);
+
+  /**
+   * Returns the revision identifier of the entity.
+   *
+   * @return
+   *   The revision identifier of the entity, or NULL if the entity does not
+   *   have a revision identifier.
+   */
+  public function getRevisionId();
+
+  /**
+   * Checks if this entity is the active revision.
+   *
+   * @param bool $new_value
+   *   (optional) A Boolean to (re)set the is_active_revision flag.
+   *
+   * @return bool
+   *   TRUE if the entity is the active revision, FALSE otherwise.
+   */
+  public function isActiveRevision($new_value = NULL);
 }
 
 /**
  * Defines a base entity class.
  */
 abstract class Entity extends stdClass implements EntityInterface {
+
+  /**
+   * Indicates whether this is the active revision.
+   *
+   * @var bool
+   */
+  public $is_active_revision = TRUE;
 
   /**
    * Constructs a new entity object.
@@ -277,6 +304,24 @@ abstract class Entity extends stdClass implements EntityInterface {
       }
     }
     return $values;
+  }
+
+  /**
+   * Implements Backdrop\entity\EntityInterface::getRevisionId().
+   */
+  public function getRevisionId() {
+    return NULL;
+  }
+
+  /**
+   * Implements Backdrop\entity\EntityInterface::isActiveRevision().
+   */
+  public function isActiveRevision($new_value = NULL) {
+    $return = $this->is_active_revision;
+    if (isset($new_value)) {
+      $this->is_active_revision = (bool) $new_value;
+    }
+    return $return;
   }
 }
 

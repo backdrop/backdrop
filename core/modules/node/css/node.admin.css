@@ -6,7 +6,9 @@
 
 /**
  * Revisions overview screen.
+ *   @todo remove revision-current class in 2.x
  */
-.revision-current {
+table tr.revision-current,
+table tr.revision-active {
   background: #ffc;
 }

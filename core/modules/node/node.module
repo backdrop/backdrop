@@ -97,6 +97,9 @@ function node_theme() {
     'node_add_list' => array(
       'variables' => array('content' => NULL),
     ) + $base,
+    'node_revision_info' => array(
+      'variables' => array('revision' => NULL, 'active' => FALSE),
+    ) + $base,
     'node_admin_overview' => array(
       'variables' => array('name' => NULL, 'type' => NULL),
     ) + $base,
@@ -1078,9 +1081,9 @@ function node_delete_multiple($nids) {
  */
 function node_revision_delete($revision_id) {
   if ($revision = node_load(NULL, $revision_id)) {
-    // Prevent deleting the current revision.
+    // Prevent deleting the active revision.
     $node = node_load($revision->nid);
-    if ($revision_id == $node->vid) {
+    if ($revision->isActiveRevision()) {
       return FALSE;
     }
 
@@ -1244,7 +1247,11 @@ function node_build_content(Node $node, $view_mode = 'full', $langcode = NULL) {
  */
 function node_show(Node $node, $message = FALSE) {
   if ($message) {
-    backdrop_set_title(t('Revision of %title from %date', array('%title' => $node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
+    $title_node = $node;
+    if (!$node->isActiveRevision()) {
+      $title_node = node_load($node->nid);
+    }
+    backdrop_set_title(t('Revision of %title from %date', array('%title' => $title_node->title, '%date' => format_date($node->revision_timestamp))), PASS_THROUGH);
   }
 
   // For markup consistency with other pages, use node_view_multiple() rather than node_view().
@@ -1527,7 +1534,7 @@ function node_ranking() {
 function node_user_cancel($edit, $account, $method) {
   switch ($method) {
     case 'user_cancel_block_unpublish':
-      // Unpublish nodes (current revisions).
+      // Unpublish nodes (active revisions).
       module_load_include('inc', 'node', 'node.admin');
       $nodes = db_select('node', 'n')
         ->fields('n', array('nid'))
@@ -1538,7 +1545,7 @@ function node_user_cancel($edit, $account, $method) {
       break;
 
     case 'user_cancel_reassign':
-      // Anonymize nodes (current revisions).
+      // Anonymize nodes (active revisions).
       module_load_include('inc', 'node', 'node.admin');
       $nodes = db_select('node', 'n')
         ->fields('n', array('nid'))
@@ -1563,7 +1570,7 @@ function node_user_cancel($edit, $account, $method) {
  * Implements hook_user_predelete().
  */
 function node_user_predelete($account) {
-  // Delete nodes (current revisions).
+  // Delete nodes (active revisions).
   // @todo Introduce node_mass_delete() or make node_mass_update() more flexible.
   $nodes = db_select('node', 'n')
     ->fields('n', array('nid'))
@@ -1627,12 +1634,12 @@ function _node_revision_access(Node $node, $op = 'view', $account = NULL) {
     }
 
     $node_current_revision = node_load($node->nid);
-    $is_current_revision = $node_current_revision->vid == $node->vid;
+    $is_current_revision = $node->isActiveRevision();
 
     // There should be at least two revisions. If the vid of the given node
-    // and the vid of the current revision differ, then we already have two
+    // and the vid of the active revision differ, then we already have two
     // different revisions so there is no need for a separate database check.
-    // Also, if you try to revert to or delete the current revision, that's
+    // Also, if you try to revert to or delete the active revision, that's
     // not good.
     if ($is_current_revision && (db_query('SELECT COUNT(vid) FROM {node_revision} WHERE nid = :nid', array(':nid' => $node->nid))->fetchField() == 1 || $op == 'update' || $op == 'delete')) {
       $access[$cid] = FALSE;
@@ -1641,8 +1648,8 @@ function _node_revision_access(Node $node, $op = 'view', $account = NULL) {
       $access[$cid] = TRUE;
     }
     else {
-      // First check the access to the current revision and finally, if the
-      // node passed in is not the current revision then access to that, too.
+      // First check the access to the active revision and finally, if the
+      // node passed in is not the active revision then access to that, too.
       $access[$cid] = node_access($op, $node_current_revision, $account) && ($is_current_revision || node_access($op, $node, $account));
     }
   }
@@ -1992,7 +1999,7 @@ function node_last_changed($nid) {
  */
 function node_revision_list(Node $node) {
   $revisions = array();
-  $result = db_query('SELECT r.vid, r.title, r.log, r.uid, n.vid AS current_vid, r.timestamp, u.name FROM {node_revision} r LEFT JOIN {node} n ON n.vid = r.vid INNER JOIN {users} u ON u.uid = r.uid WHERE r.nid = :nid ORDER BY r.vid DESC', array(':nid' => $node->nid));
+  $result = db_query('SELECT r.vid, r.title, r.log, r.uid, r.status, r.nid, n.vid AS current_vid, r.timestamp, u.name FROM {node_revision} r LEFT JOIN {node} n ON n.vid = r.vid INNER JOIN {users} u ON u.uid = r.uid WHERE r.nid = :nid ORDER BY r.vid DESC', array(':nid' => $node->nid));
   foreach ($result as $revision) {
     $revisions[$revision->vid] = $revision;
   }
