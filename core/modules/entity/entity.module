@@ -288,6 +288,7 @@ function entity_get_info($entity_type = NULL) {
           if (!isset($entity_info[$name]['view modes']['token'])) {
             $entity_info[$name]['view modes']['token'] = array(
               'label' => t('Tokens'),
+              'custom settings' => FALSE,
             );
           }
         }
