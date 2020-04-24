@@ -204,7 +204,7 @@ function image_field_instance_settings_form($field, $instance) {
 }
 
 /**
- * #element_validate handler for image_field_instance_settings_form().
+ * Element validate handler for image_field_instance_settings_form().
  */
 function image_field_instance_settings_form_validate($element, &$form_state, $complete_form) {
   $min_dimensions = explode('x', $form_state['values']['instance']['settings']['min_dimensions']) + array('', '');
