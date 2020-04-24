@@ -320,6 +320,8 @@ function user_save($account) {
 }
 
 /**
+ * Element validate handler for the password field.
+ *
  * Set a default value if one-time login link goes out,
  * set a form error if not and password value is empty.
  */
