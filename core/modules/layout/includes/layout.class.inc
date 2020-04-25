@@ -257,6 +257,13 @@ class Layout {
     }
     $is_new = !empty($this->is_new);
 
+    // Don't save path based contexts as these are generated on the fly.
+    foreach ($this->contexts as $key => $context) {
+      if (isset($context->position)  || in_array($key, array('string', 'overrides_path', 'current_user'))) {
+        unset($this->contexts[$key]);
+      }
+    }
+
     // Allow modules to act on layout data before saving.
     foreach (module_implements('layout_presave') as $module) {
       $function = $module . '_layout_presave';
@@ -276,6 +283,7 @@ class Layout {
       'disabled' => $this->disabled,
       'settings' => $this->settings,
       'positions' => $this->positions,
+      'contexts' => $this->contexts,
     );
 
     // Basic validation to prevent data corruption.
@@ -757,11 +765,8 @@ class Layout {
     // Load objects for stored contexts.
     // @todo: move this to resetContexts() and restore deleted calls?
     foreach ($this->contexts as $key => $context) {
-      if (is_numeric($key)) {
-        unset($this->contexts[$key]);
-      }
-      elseif (!is_object($context->data) && !in_array($key, array('string', 'overrides_path', 'current_user'))) {
-      $context_info = layout_get_context_info($context->plugin);
+      if (!is_numeric($key) && !is_object($context->data) && !in_array($key, array('string', 'overrides_path', 'current_user'))) {
+        $context_info = layout_get_context_info($context->plugin);
         if (isset($context_info['load callback'])) {
           $function = $context_info['load callback'];
           $context_data = $function($context->settings['entity']);
