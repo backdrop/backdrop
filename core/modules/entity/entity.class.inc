@@ -190,13 +190,20 @@ interface EntityInterface {
   /**
    * Checks if this entity is the active revision.
    *
-   * @param bool $new_value
-   *   (optional) A Boolean to (re)set the is_active_revision flag.
-   *
    * @return bool
    *   TRUE if the entity is the active revision, FALSE otherwise.
    */
-  public function isActiveRevision($new_value = NULL);
+  public function isActiveRevision();
+
+  /**
+   * Gets active revision for this entity.
+   */
+  public function getActiveRevision();
+
+  /**
+   * Sets this revision as the active revision.
+   */
+  public function setActiveRevision();
 }
 
 /**
@@ -210,6 +217,13 @@ abstract class Entity extends stdClass implements EntityInterface {
    * @var bool
    */
   public $is_active_revision = TRUE;
+
+  /**
+   * The active revision for this entity.
+   *
+   * @var int
+   */
+  public $active_revision;
 
   /**
    * Constructs a new entity object.
@@ -316,12 +330,22 @@ abstract class Entity extends stdClass implements EntityInterface {
   /**
    * Implements Backdrop\entity\EntityInterface::isActiveRevision().
    */
-  public function isActiveRevision($new_value = NULL) {
-    $return = $this->is_active_revision;
-    if (isset($new_value)) {
-      $this->is_active_revision = (bool) $new_value;
-    }
-    return $return;
+  public function isActiveRevision() {
+    return $this->is_active_revision;
+  }
+
+  /**
+   * Implements Backdrop\entity\EntityInterface::getActiveRevision().
+   */
+  public function getActiveRevision() {
+    return $this->active_revision;
+  }
+
+  /**
+   * Implements Backdrop\entity\EntityInterface::setActiveRevision().
+   */
+  public function setActiveRevision() {
+    $this->is_active_revision = TRUE;
   }
 }
 
