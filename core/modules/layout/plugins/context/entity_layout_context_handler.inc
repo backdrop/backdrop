@@ -70,7 +70,7 @@ class EntityLayoutContext extends LayoutContext {
    * Return a summary for this context.
    */
   function getAdminSummary($path = NULL) {
-    if ($this->position && $this->locked) {
+    if ($this->position) {
       $argument_parts = explode('/', $path);
       $argument_parts[$this->position] = '<strong>' . $argument_parts[$this->position] . '</strong>';
 

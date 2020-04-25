@@ -358,16 +358,16 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   foreach ($contexts as $context_key => $layout_context) {
     if (!in_array($context_key, array('current_user', 'overrides_path'))) {
       if ($layout_context->position && $layout_context->required) {
-        $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
+        $form['context_wrapper']['context']['required'][$context_key]['summary'] = array(
           '#markup' => $layout_context->getAdminSummary($layout->getPath()),
         );
         if ($layout_context->locked) {
-          $form['context_wrapper']['context']['required'][$context_key]['label'] = array(
+          $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
             '#markup' => check_plain($all_context_info[$layout_context->plugin]['title']),
           );
         }
         else{
-          $form['context_wrapper']['context']['required'][$context_key]['label'] = array(
+          $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
             '#type' => 'select',
             '#options' => $context_options,
             '#default_value' => $layout_context->plugin,
@@ -375,10 +375,10 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
         }
       }
       else {
-        $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
+        $form['context_wrapper']['context']['required'][$context_key]['summary'] = array(
           '#markup' => $layout_context->getAdminSummary($layout->getPath()),
         );
-        $form['context_wrapper']['context']['required'][$context_key]['label'] = array(
+        $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
           '#markup' => check_plain($all_context_info[$layout_context->plugin]['title']),
         );
       }

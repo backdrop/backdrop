@@ -208,8 +208,8 @@ function theme_layout_settings_context_table($variables) {
   foreach (element_children($element) as $key) {
     $argument_parts = $parts;
     $row = array();
+    $row[] = backdrop_render($element[$key]['summary']);
     $row[] = backdrop_render($element[$key]['plugin']);
-    $row[] = backdrop_render($element[$key]['label']);
     if (isset($element[$key]['operations'])) {
       $row[] = backdrop_render($element[$key]['operations']);
     }

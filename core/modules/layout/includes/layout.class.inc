@@ -661,7 +661,7 @@ class Layout {
     // On any path change, reset contexts.
     if ($this->path !== $path) {
       $this->path = $path;
-      // $this->resetContexts();
+      $this->resetContexts();
     }
   }
 
@@ -818,7 +818,11 @@ class Layout {
    * such as when actively changing the layout's path.
    */
   function resetContexts() {
-    $this->contexts = NULL;
+    foreach ($this->contexts as $key => $context) {
+      if (isset($context->position)) {
+        unset($this->contexts[$key]);
+      }
+    }
     if ($this->menu_item) {
       // $this->menu_item->resetContexts();
     }
