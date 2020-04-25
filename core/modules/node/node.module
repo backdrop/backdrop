@@ -1086,7 +1086,7 @@ function node_revision_delete($revision_id) {
   if ($revision = node_load(NULL, $revision_id)) {
     // Prevent deleting the default revision.
     $node = node_load($revision->nid);
-    if ($revision->isDefaultRevision()) {
+    if ($revision->isActiveRevision()) {
       return FALSE;
     }
 
@@ -1633,7 +1633,7 @@ function _node_revision_access(Node $node, $op = 'view', $account = NULL) {
     }
 
     $node_current_revision = node_load($node->nid);
-    $is_current_revision = $node->isDefaultRevision();
+    $is_current_revision = $node->isActiveRevision();
 
     // There should be at least two revisions. If the vid of the given node
     // and the vid of the default revision differ, then we already have two
