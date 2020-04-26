@@ -232,7 +232,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     }
  
     // Confirm that this is the default revision.
-    $this->assertTrue($node->isDefaultRevision(), 'Third node revision is the current one.');
+    $this->assertTrue($node->isActiveRevision(), 'Third node revision is the current one.');
 
     // Confirm that revisions revert properly.
     $this->backdropPost("node/$node->nid/revisions/{$nodes[1]->vid}/revert", array(), t('Revert'));
@@ -246,7 +246,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
  
     // Confirm that this is not the current version.
     $node = node_load($node->nid, $node->vid);
-    $this->assertFalse($node->isDefaultRevision(), 'Third node revision is not the current one.');
+    $this->assertFalse($node->isActiveRevision(), 'Third node revision is not the current one.');
 
     // Confirm revisions delete properly.
     $this->backdropPost("node/$node->nid/revisions/{$nodes[1]->vid}/delete", array(), t('Delete'));
@@ -3020,7 +3020,7 @@ class NodeRevisionPermissionsTestCase extends BackdropWebTestCase {
       $revision = clone $node;
       $revision->revision = 1;
       $revision->log = $this->randomName(32);
-      $revision->is_default_revision = FALSE;
+      $revision->is_active_revision = FALSE;
       node_save($revision);
       $this->node_revisions[] = $revision;
     }
