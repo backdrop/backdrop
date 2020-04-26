@@ -311,7 +311,6 @@ function comment_node_type_load(&$types) {
       'comment_mode' => COMMENT_MODE_THREADED,
       'comment_anonymous' => COMMENT_ANONYMOUS_MAYNOT_CONTACT,
       'comment_subject_field' => FALSE,
-      'comment_submitted_format' => t('[comment:created:medium] by [comment:author]'),
       'comment_user_picture' => TRUE,
       'comment_form_location' => COMMENT_FORM_BELOW,
       'comment_preview' => BACKDROP_OPTIONAL,
@@ -1173,18 +1172,6 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#type' => 'checkbox',
       '#title' => t('Allow comment title'),
       '#default_value' => $node_type->settings['comment_subject_field'],
-    );
-    $form['comment']['comment_submitted_format'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Comment author/date format'),
-      '#default_value' => $node_type->settings['comment_submitted_format'],
-      '#description' => t('The format to use for the comment author username and publish date. Example: "Submitted by [comment:author] on [comment:created:medium]"'),
-    );
-    $form['comment']['comment_submitted_tokens'] = array(
-      '#theme' => 'token_tree_link',
-      '#token_types' => array('comment'),
-      '#global_types' => TRUE,
-      '#click_insert' => TRUE,
     );
     if (config_get('system.core', 'user_pictures')) {
       $form['comment']['comment_user_picture'] = array(

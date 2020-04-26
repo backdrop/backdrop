@@ -107,7 +107,7 @@ function template_preprocess_comment(&$variables) {
 
   $variables['title'] = l($comment->subject, $uri['path'], $uri['options']);
   $variables['permalink'] = l(t('Permalink'), $uri['path'], $uri['options']);
-  $variables['submitted'] = token_replace($node_type->settings['comment_submitted_format'], array('comment' => $comment));
+  $variables['submitted'] = t('!datetime by !username', array('!datetime' => $variables['created'], '!username' => $variables['author']));
 
   // Preprocess fields.
   field_attach_preprocess('comment', $comment, $variables['elements'], $variables);
