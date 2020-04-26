@@ -819,7 +819,7 @@ class Layout {
    */
   function resetContexts() {
     foreach ($this->contexts as $key => $context) {
-      if (isset($context->position)) {
+      if (isset($context->position) || in_array($key, array('string', 'overrides_path', 'current_user'))) {
         unset($this->contexts[$key]);
       }
     }
