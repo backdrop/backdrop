@@ -412,7 +412,6 @@ class DefaultEntityController implements EntityControllerInterface {
       // Compare revision id of the base and revision table, if equal then this
       // is the active revision.
       $query->addExpression('base.' . $this->revisionKey . ' = revision.' . $this->revisionKey, 'is_active_revision');
-      $query->addField('base', $this->revisionKey, 'active_revision');
     }
 
     $query->fields('base', $entity_fields);

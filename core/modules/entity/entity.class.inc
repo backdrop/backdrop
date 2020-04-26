@@ -184,6 +184,8 @@ interface EntityInterface {
    * @return
    *   The revision identifier of the entity, or NULL if the entity does not
    *   have a revision identifier.
+   *
+   * @since 1.16.0 Method added.
    */
   public function getRevisionId();
 
@@ -192,18 +194,17 @@ interface EntityInterface {
    *
    * @return bool
    *   TRUE if the entity is the active revision, FALSE otherwise.
+   *
+   * @since 1.16.0 Method added.
    */
   public function isActiveRevision();
 
   /**
-   * Gets active revision for this entity.
-   */
-  public function getActiveRevision();
-
-  /**
    * Sets this revision as the active revision.
+   *
+   * @since 1.16.0 Method added.
    */
-  public function setActiveRevision();
+  public function setIsActiveRevision();
 }
 
 /**
@@ -217,13 +218,6 @@ abstract class Entity extends stdClass implements EntityInterface {
    * @var bool
    */
   public $is_active_revision = TRUE;
-
-  /**
-   * The active revision for this entity.
-   *
-   * @var int
-   */
-  public $active_revision;
 
   /**
    * Constructs a new entity object.
@@ -335,16 +329,9 @@ abstract class Entity extends stdClass implements EntityInterface {
   }
 
   /**
-   * Implements Backdrop\entity\EntityInterface::getActiveRevision().
-   */
-  public function getActiveRevision() {
-    return $this->active_revision;
-  }
-
-  /**
    * Implements Backdrop\entity\EntityInterface::setActiveRevision().
    */
-  public function setActiveRevision() {
+  public function setIsActiveRevision() {
     $this->is_active_revision = TRUE;
   }
 }
