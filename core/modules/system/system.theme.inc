@@ -506,6 +506,42 @@ function theme_admin_block_content($variables) {
 }
 
 /**
+ * Returns HTML for the display of label with both Human and Machine names.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - label: The human-readable name or label.
+ *   - machine: The machine-safe name or label.
+ *   - description: (optional) The description of the item.
+ *   - inline: TRUE if the machine name should be on the same line. Defaults to TRUE.
+ *
+ * @ingroup themeable
+ */
+function theme_admin_info($variables) {
+  $classes = array('admin-label');
+  if ($variables['inline']) {
+    $classes[] = 'inline';
+  }
+
+  $output  = '<div class="' . implode(' ', $classes) . '">';
+  $output .=   '<strong>' . check_plain($variables['label']) . '</strong>';
+  if (!empty($variables['machine'])) {
+    $machine_name = t('Machine name: @machine', array('@machine' => $variables['machine']));
+    if ($variables['inline']) {
+      $output .= '&nbsp;';
+    }
+    $output .=   '<small>(' . $machine_name . ')</small>';
+  }
+  $output .= '</div>';
+
+  if (isset($variables['description'])) {
+    $output .= '<div class="description">' . filter_xss_admin($variables['description']) . '</div>';
+  }
+
+  return $output;
+}
+
+/**
  * Returns HTML for the output of the dashboard page.
  *
  * @param $variables

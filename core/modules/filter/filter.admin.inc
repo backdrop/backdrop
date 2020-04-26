@@ -79,7 +79,9 @@ function filter_admin_overview($form) {
           'weight' => -10,
         );
       }
-      $form['formats'][$id]['name'] = array('#markup' => check_plain($format->name));
+      $machine_name_label_variables = array('label' => $format->name, 'machine' => $id);
+      $label = theme('machine_name_label__filter', $machine_name_label_variables);
+      $form['formats'][$id]['name'] = array('#markup' => $label);
       $roles = array();
       foreach (filter_get_roles_by_format($format) as $role_name) {
         $role = user_role_load($role_name);

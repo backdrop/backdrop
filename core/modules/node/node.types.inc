@@ -22,7 +22,13 @@ function node_overview_types() {
   foreach ($names as $key => $name) {
     $type = $types[$key];
     $type_url_str = str_replace('_', '-', $type->type);
-    $row = array(theme('node_admin_overview', array('name' => $name, 'type' => $type)));
+    $label_variables = array(
+      'label' => $name,
+      'machine' => $type->type,
+      'description' => $type->description,
+    );
+    $label = theme('machine_name_label__node_type', $label_variables);
+    $row = array($label);
     $links = array();
     $links['configure'] = array(
       'title' => t('Configure'),

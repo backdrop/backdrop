@@ -86,6 +86,9 @@ function system_theme() {
     'status_report' => array(
       'render element' => 'requirements',
     ) + $base,
+    'machine_name_label' => array(
+      'variables' => array('label' => NULL, 'machine' => NULL, 'description' => NULL, 'inline' => TRUE),
+    ) + $base,
     'admin_page' => array(
       'variables' => array('blocks' => NULL),
     ) + $base,

@@ -57,12 +57,19 @@ function theme_layout_info($variables) {
   // Create a link to the settings page
   $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/configure');
 
-  $output = '';
-  $output .= '<div class="layout-info">';
+  $label_variables = array(
+    'label' => $layout->title,
+    'machine' => $layout->name,
+  );
+  $label = theme('machine_name_label__layout', $label_variables);
+
+  $output  = '<div class="layout-info">';
   $output .= $preview;
   $output .= '<div class="layout-detail">';
-  $output .= '  <div class="layout-title">' . check_plain($layout->title) . '</div>';
-  $output .= '  <div class="layout-template description">' . t('<span class="priority-low">Template: </span>!title', array('!title' => $template)) . '</div>';
+  $output .= '  <div class="layout-title">' . $label . '</div>';
+  $output .= '  <div class="layout-template description">';
+  $output .= t('<span class="priority-low">Template: </span>!title', array('!title' => $template));
+  $output .= '  </div>';
   $output .= '</div></div>';
 
   return $output;

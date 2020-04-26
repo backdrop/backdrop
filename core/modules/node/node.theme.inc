@@ -161,6 +161,8 @@ function theme_node_add_list($variables) {
  *   - type: An object containing the 'type' (machine name) and 'description' of
  *     the content type.
  *
+ * @deprecated as of 1.16.0
+ *
  * @ingroup themeable
  */
 function theme_node_admin_overview($variables) {

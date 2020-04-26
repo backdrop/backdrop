@@ -14,7 +14,12 @@ function menu_overview_page() {
   $rows = array();
   foreach ($menus as $menu) {
     $row = array();
-    $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
+    $label_variables = array(
+      'label' => $menu['title'],
+      'machine' => $menu['menu_name'],
+      'description' => $menu['description'],
+    );
+    $row[] = theme('machine_name_label__menu', $label_variables);
     $links = array();
     $links['list'] = array(
       'title' => t('Manage links'),

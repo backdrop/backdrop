@@ -2342,7 +2342,6 @@ function system_date_delete_format_form_submit($form, &$form_state) {
 function system_date_time_formats() {
   $header = array(
     array('data' => t('Label')),
-    array('data' => t('Machine name')),
     array('data' => t('Pattern')),
     array('data' => t('Operations'))
   );
@@ -2353,9 +2352,13 @@ function system_date_time_formats() {
     foreach ($formats as $date_format_name => $format_info) {
       // Do not display date formats that are hidden.
       if (empty($format_info['hidden'])) {
+        $label_variables = array(
+          'label' => $format_info['label'],
+          'machine' => $date_format_name,
+        );
+
         $row = array();
-        $row[] = array('data' => check_plain($format_info['label']));
-        $row[] = array('data' => $date_format_name);
+        $row[] = array('data' => theme('machine_name_label__date_format', $label_variables));
         $row[] = array('data' => format_date(REQUEST_TIME, 'custom', $format_info['pattern']));
 
         // Prepare Operational links.

@@ -16,9 +16,17 @@ function taxonomy_overview_vocabularies($form) {
   $form['#tree'] = TRUE;
   $term_counts = db_query("SELECT vocabulary, count(tid) FROM {taxonomy_term_data} GROUP BY vocabulary")->fetchAllKeyed();
   foreach ($vocabularies as $vocabulary) {
+    $label_variables = array(
+      'label' => $vocabulary->name,
+      'machine' => $vocabulary->machine_name,
+      'description' => $vocabulary->description,
+    );
+    $label = theme('machine_name_label__vocabulary', $label_variables);
+
     $terms_count = array_key_exists($vocabulary->machine_name, $term_counts) ? $term_counts[$vocabulary->machine_name] : 0;
+
     $form[$vocabulary->machine_name]['#vocabulary'] = $vocabulary;
-    $form[$vocabulary->machine_name]['name'] = array('#markup' => check_plain($vocabulary->name));
+    $form[$vocabulary->machine_name]['name'] = array('#markup' => $label);
     $form[$vocabulary->machine_name]['items'] = array('#markup' => $terms_count);
     $form[$vocabulary->machine_name]['weight'] = array(
       '#type' => 'weight',

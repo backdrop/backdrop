@@ -26,9 +26,10 @@ function file_list_types_page() {
     $weight++;
     $row = array(
       array(
-        'data' => theme('file_type_overview',
+        'data' => theme('machine_name_label__file',
           array(
-            'name' => $type->name,
+            'label' => $type->name,
+            'machine' => $type->type,
             'description' => $type->description,
           )
         ),
