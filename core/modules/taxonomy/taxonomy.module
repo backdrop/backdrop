@@ -80,7 +80,7 @@ function taxonomy_vocabulary_list_permissions($vocabulary) {
  * Implements hook_entity_info().
  */
 function taxonomy_entity_info() {
-  $return = array(
+  $entity_info = array(
     'taxonomy_term' => array(
       'label' => t('Taxonomy term'),
       'bundle label' => t('Vocabulary'),
@@ -107,8 +107,15 @@ function taxonomy_entity_info() {
       ),
     ),
   );
+
+  // If the cache table has been created, then enable entity caching.
+  if (db_table_exists('cache_entity_taxonomy_term')) {
+    $entity_info['taxonomy_term']['entity cache'] = TRUE;
+    $entity_info['taxonomy_term']['field cache'] = FALSE;
+  }
+
   foreach (taxonomy_vocabulary_load_multiple(FALSE) as $machine_name => $vocabulary) {
-    $return['taxonomy_term']['bundles'][$machine_name] = array(
+    $entity_info['taxonomy_term']['bundles'][$machine_name] = array(
       'label' => $vocabulary->name,
       'admin' => array(
         'path' => 'admin/structure/taxonomy/%taxonomy_vocabulary',
@@ -119,7 +126,7 @@ function taxonomy_entity_info() {
     );
   }
 
-  return $return;
+  return $entity_info;
 }
 
 /**
@@ -1120,7 +1127,7 @@ function taxonomy_term_load_multiple($tids = array(), $conditions = array()) {
  *
  * @see entity_load()
  *
- * @param $vocabulary_names
+ * @param $machine_names
  *  An array of taxonomy vocabulary machine names, or FALSE to load all
  *  vocabularies.
  *
@@ -1264,7 +1271,7 @@ function taxonomy_get_children($tid, $vid = 0) {
 /**
  * Legacy wrapper to try to map a string to an existing term.
  *
- * Do not call this function, use taxonomy_get_term_by_name() instead.
+ * Do not call this function, use taxonomy_term_load_multiple_by_name() instead.
  *
  * @deprecated since 1.0.0
  * @see taxonomy_term_load_multiple_by_name()
@@ -2003,12 +2010,14 @@ function taxonomy_build_node_index(Node $node) {
     if (!empty($tid_all)) {
       $query = db_insert('taxonomy_index')->fields(array('nid', 'tid', 'sticky', 'created'));
       foreach ($tid_all as $tid) {
-        $query->values(array(
-          'nid' => $node->nid,
-          'tid' => $tid,
-          'sticky' => $sticky,
-          'created' => $node->created,
-        ));
+        if (!empty($tid)) {
+          $query->values(array(
+            'nid' => $node->nid,
+            'tid' => $tid,
+            'sticky' => $sticky,
+            'created' => $node->created,
+          ));
+        }
       }
       $query->execute();
     }

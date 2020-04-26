@@ -14,6 +14,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   protected $web_user;
   protected $test_node1;
   protected $test_node2;
+  protected $orphaned_blocks = FALSE;
 
   function setUp() {
     parent::setUp('layout_test');
@@ -61,7 +62,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'templates[simmons]' => TRUE,
     );
     $this->backdropPost(NULL, $edit, t('Save configuration'));
-    $this->assertText(t('The "Boxton" layout template is currently in use and may not be excluded.'));
+    $this->assertText(t('The "Boxton" layout template is currently in use and may not be disabled.'));
 
     // Check to see that the Simmons layout is an existing option.
     $this->backdropGet('admin/structure/layouts/manage/default/configure');
@@ -1133,14 +1134,29 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Save layout'));
 
-    $deleted_uuids = $default_layout->positions['sidebar'];
+    $orphaned_uuids = $default_layout->positions['sidebar'];
+    $this->orphaned_blocks = !empty($orphaned_uuids);
     layout_reset_caches();
     $layout = layout_load($layout_name);
     $this->assertBlocksMatch($layout, $default_layout);
-    $this->assertFalse(isset($layout->positions['sidebar']), 'Sidebar region blocks removed from layout when changing layout to single column.');
+    $this->assertFalse(isset($layout->positions['sidebar']), 'Sidebar region blocks moved out when changing layout to single column.');
 
-    $intersection = array_intersect(array_keys($layout->content), $deleted_uuids);
+    $intersection = array_intersect(array_keys($layout->content), $orphaned_uuids);
     $this->assertEqual($intersection, array(), 'The sidebar blocks have been removed from the layout content array.');
+    // Check that the sidebar and content region blocks in the old layout are
+    // the same number of blocks in the content region of the new layout.
+    $default_layout_sidebar_content_regions_count = count($default_layout->positions['sidebar']) + count($default_layout->positions['content']);
+    $new_content_region_count = count($layout->positions['content']);
+    // Count the system main block separately since it doesn't exist in the
+    // new layout.
+    if ($default_layout->positions['content'][0] == 'default') {
+      $new_content_region_count++;
+    }
+    $this->assertTrue($default_layout_sidebar_content_regions_count == $new_content_region_count, 'The blocks from the Sidebar and Default regions in the old layout all exist in the Default region of the new layout.');
+    // Make sure the moved block is part of the module we expect.
+    $moved_block_uuid = $layout->positions['content'][1];
+    $moved_block = $layout->content[$moved_block_uuid];
+    $this->assertTrue($moved_block->module == 'layout_test', 'The moved block is from the layout_test module.');
   }
 
   /**
@@ -1211,8 +1227,16 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Check that all the blocks in $layout match those in $copied_from_layout.
    */
-  protected function assertBlocksMatch($layout, $copied_from_layout) {
+  protected function assertBlocksMatch($layout, $copied_from_layout, $orphaned_uuids = array()) {
+    $layout_info = layout_get_layout_template_info($layout->layout_template);
+    $default_region = $layout_info['default region'];
     foreach ($layout->positions as $region_name => $blocks) {
+      // Don't compare if it's the default region since orphaned blocks might
+      // get reassigned here, which throws off the numbers.
+      if ($this->orphaned_blocks && $region_name == $default_region) {
+        $this->orphaned_blocks = FALSE;
+        continue;
+      }
       if (isset($copied_from_layout->positions[$region_name])) {
         $blocks_match = TRUE;
         $content_block_offset = 0;
@@ -2499,4 +2523,362 @@ class LayoutRendererTest extends BackdropWebTestCase {
     $this->backdropGet($layout_url);
     $this->assertText('This layout uses the Test renderer');
   }
+}
+
+/**
+ * Tests the interface for flexible layouts.
+ */
+class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $admin_user;
+
+  function setUp() {
+    parent::setUp('layout', 'layout_test');
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'administer site configuration',
+      'administer layouts',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Test that layout templates may be enabled and disabled.
+   */
+  function testLayoutFlexibleTemplates() {
+    $this->backdropGet('admin/structure/layouts/settings');
+    $this->clickLink(t('Add flexible layout template'));
+
+    // Test creating a new flexible layout.
+    $template_name1 = $this->randomName();
+    $template_machine_name1 = strtolower($template_name1);
+    $template_description1 = $this->randomName();
+
+    $edit = array(
+      'name' => $template_name1,
+      'machine_name' => $template_machine_name1,
+      'description' => $template_description1,
+    );
+    $this->backdropPost(NULL, $edit, t('Save and configure'));
+    $this->assertText(t('Layout template "@title" saved.', array('@title' => $template_name1)));
+
+    // Check that the new template is found in the cached list of templates.
+    $all_templates = layout_get_layout_template_info();
+    $this->assertTrue(isset($all_templates[$template_machine_name1]), 'The flexible template is found in the cache of templates.');
+
+    // Check that its in the list of templates.
+    $this->backdropGet('admin/structure/layouts/settings');
+    $title = $this->xpath("//td//div[text()=:name]", array(':name' => $template_name1));
+    $this->assertTrue($title, 'The flexible template is found in the UI list of templates.');
+
+    // Add another, edit it, then delete it.
+    $this->clickLink(t('Add flexible layout template'));
+    $template_name2 = $this->randomName();
+    $template_machine_name2 = strtolower($template_name2);
+    $template_description2 = $this->randomName();
+
+    $edit = array(
+      'name' => $template_name2,
+      'machine_name' => $template_machine_name2,
+      'description' => $template_description2,
+    );
+    $this->backdropPost(NULL, $edit, t('Save and configure'));
+    $this->assertText(t('Layout template "@title" saved.', array('@title' => $template_name2)));
+    $this->backdropGet('admin/structure/layouts/settings');
+    $flexible_layout_edit_link = 'admin/structure/layouts/settings/flexible-template/' . $template_machine_name2 . '/edit';
+    $edit = array(
+      'name' => 'To be deleted',
+      'description' => $template_description2,
+    );
+    $this->backdropPost($flexible_layout_edit_link, $edit, t('Save and configure'));
+    $this->backdropGet('admin/structure/layouts/settings');
+    $title = $this->xpath("//td//div[text()=:name]", array(':name' => 'To be deleted'));
+    $this->assertTrue($title, 'The flexible template is found in the UI list of templates with the new name.');
+    $flexible_layout_delete_link = 'admin/structure/layouts/settings/flexible-template/' . $template_machine_name2 . '/delete';
+    $edit = array();
+    $this->backdropPost($flexible_layout_delete_link, $edit, t('Delete template'));
+    $this->backdropGet('admin/structure/layouts/settings');
+    $title = $this->xpath("//td//div[text()=:name]", array(':name' => 'To be deleted'));
+    $this->assertFalse($title, 'The flexible template is not found in the UI list of templates with the new name.');
+
+    $this->backdropGet('admin/structure/layouts');
+    $this->clickLink(t('Add layout'));
+
+    // Create a new layout at a new path using the new template.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_url = 'layout-test-path';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => $template_machine_name1,
+      'path' => $layout_url,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+
+    // We should be taken to the layout content page next.
+    $this->assertText(t('Layout created. Blocks may now be added to this layout.'));
+
+    // Add a block to the first row.
+    $this->clickLink(t('Add block'), 0);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 30,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Add a block to the second row.
+    $this->clickLink(t('Add block'), 1);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 15,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Add a block to the third row.
+    $this->clickLink(t('Add block'), 2);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 5,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Check that the layout is in the listing of layouts.
+    $this->backdropGet('admin/structure/layouts');
+    $this->assertText(check_plain($layout_title));
+
+    // Go to the the layout path and confirm the blocks exist, have the right
+    // setting, and are in the right place.
+    $this->backdropGet($layout_url);
+    $layout_template = layout_flexible_template_load($template_machine_name1);
+    $layout_region_names = array_keys($layout_template->rows);
+    $region_block_settings = array(
+      $layout_region_names[0] => 30,
+      $layout_region_names[1] => 15,
+      $layout_region_names[2] => 5,
+    );
+    foreach ($region_block_settings as $region_name => $setting) {
+      $string = format_string('The setting of count is @setting.', array('@setting' => $setting));
+      $elements = $this->xpath('//*[contains(@class,:region)]//*[contains(text(),:string)]', array(
+        ':region' => 'l-' . $region_name,
+        ':string' => $string,
+      ));
+      $this->assertEqual(count($elements), 1, "The sample block was found in the $region_name region.");
+    }
+
+    // Configure the first template.
+    $flexible_layout_configure_link = 'admin/structure/layouts/settings/flexible-template/' . $template_machine_name1 . '/configure';
+    $this->backdropGet($flexible_layout_configure_link);
+    // Check for the default three rows.
+    $rows = $this->xpath("//*[@id=:id]//*[contains(@id, :row_id)]", array(':id' => 'layout-flexible-content', ':row_id' => 'flexible-row'));
+    $this->assertEqual(count($rows), 3, 'Three rows are found in the template');
+
+    // Edit the header row and check that the changes are reflected on the
+    // template editor page and the layout path.
+    $this->clickLink(t('Configure row'), 0);
+    $edit = array(
+      'region_names[region_name_0]' => 'New header',
+      'row_classes' => 'new-class another-class',
+      'element' => 'main',
+      'container' => 'no_container',
+    );
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
+
+    $header_row = $this->xpath("//main[contains(@id, :row_id)]//h2[text()=:row_title]", array(':row_id' => 'flexible-row--' . $layout_region_names[0], ':row_title' => 'New header'));
+    $this->assertEqual(count($header_row), 1, 'The header row has been renamed in the template editor.');
+
+    $this->backdropPost(NULL, array(), t('Save layout template'));
+
+    // Go to the block add page and check that the header region was renamed.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $header_row = $this->xpath("//main[contains(@class, :row_class)]//h2[text()=:row_title]", array(':row_class' => 'l-' . $layout_region_names[0], ':row_title' => 'New header'));
+    $this->assertEqual(count($header_row), 1, 'The header row has been renamed in the block add page.');
+
+    // Go to the layout path and check that the header region was renamed and
+    // the block is still in the header region.
+    $this->backdropGet($layout_url);
+
+    $string = format_string('The setting of count is @setting.', array('@setting' => 30));
+    $elements = $this->xpath('//main[contains(@class,:region)]/div[contains(@class, :container_class)]//*[contains(text(),:string)]', array(
+      ':region' => 'l-' . $layout_region_names[0],
+      ':container_class' => 'no-container',
+      ':string' => $string,
+    ));
+    $this->assertEqual(count($elements), 1, "The header element has been changed to 'main'");
+
+    // Go to the template editor and add a new row.
+    $flexible_layout_configure_link = 'admin/structure/layouts/settings/flexible-template/' . $template_machine_name1 . '/configure';
+    $this->backdropGet($flexible_layout_configure_link);
+    $this->backdropPost(NULL, array(), t('Add row'));
+    $edit = array(
+      'region_count' => 3,
+    );
+    $this->backdropPost(NULL, $edit, t('Choose region widths'));
+    $edit = array(
+      'region_style' => 'region_4_4_4',
+    );
+    $this->backdropPost(NULL, $edit, t('Continue'));
+    // Rename just the first region.
+    $edit = array(
+      'region_names[region_name_0]' => 'First region',
+    );
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropPost(NULL, array(), t('Save layout template'));
+
+    $row_count = $this->xpath("//*[@id=:id]//*[contains(@id, :row_id)]", array(':id' => 'layout-flexible-content', ':row_id' => 'flexible-row'));
+    $this->assertEqual(count($row_count), 4, 'Four rows are found in the template');
+
+    // Get the id of the last (new) row.
+    $last_row_attr = $this->xpath('//div[contains(@class, :class)]/*[4]/@data-row-id', array(
+      ':class' => 'layout-flexible-content',
+    ));
+    $data_row_id = (string) $last_row_attr[0][0];
+    $last_row_id = 'flexible-row--' . $last_row_attr[0][0];
+
+    // The last row has 3 regions.
+    $row_count = $this->xpath('//div[contains(@id, :id)]//div[contains(@class, :class)]/div', array(
+      ':id' => $last_row_id,
+      ':class' => 'l-flexible-row row',
+    ));
+    $this->assertEqual(count($row_count), 3, 'The last row has 3 regions.');
+
+    // Check that the first region has the expected title.
+    $fourth_row_first_region_title = $this->xpath('//div[contains(@id, :id)]//div[contains(@class, :class)]/div[1]//h2[text()=:region_title]', array(
+      ':id' => $last_row_id,
+      ':class' => 'l-flexible-row row',
+      ':region_title' => 'First region',
+    ));
+    $this->assertTrue($fourth_row_first_region_title, 'The region has the correct title.');
+
+    // Go to the block add page and check that the new row shows correctly.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+
+    // The last row has 3 regions.
+    $row_count = $this->xpath('//div[contains(@data-row-id, :id)]//div[contains(@class, :class)]/div', array(
+      ':id' => $data_row_id,
+      ':class' => 'l-flexible-row row',
+    ));
+    $this->assertEqual(count($row_count), 3, 'The last row has 3 regions.');
+
+    // Check that the first region has the expected title.
+    $fourth_row_first_region_title = $this->xpath('//div[contains(@data-row-id, :id)]//div[contains(@class, :class)]/div[1]//h2[text()=:region_title]', array(
+      ':id' => $data_row_id,
+      ':class' => 'l-flexible-row row',
+      ':region_title' => 'First region',
+    ));
+    $this->assertTrue($fourth_row_first_region_title, 'The region has the correct title.');
+
+    // Add a block to the new row first region.
+    $this->clickLink(t('Add block'), 3);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 19,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Add a block to the new row first region.
+    $this->clickLink(t('Add block'), 4);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 18,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Add a block to the new row first region.
+    $this->clickLink(t('Add block'), 5);
+    $this->assertText(t('A testing block for layouts.'));
+    $this->clickLink(t('Layout foo block'));
+    $edit = array(
+      'block_settings[count]' => 17,
+    );
+    $this->backdropPost(NULL, $edit, t('Add block'));
+
+    // Save the layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Go to the the layout path and confirm the blocks exist, have the right
+    // setting, and are in the right place.
+    $this->backdropGet($layout_url);
+    $region_block_settings = array('19', '18', '17');
+    foreach ($region_block_settings as $index => $setting) {
+      $string = format_string('The setting of count is @setting.', array('@setting' => $setting));
+      $elements = $this->xpath('//*[contains(@data-row-id,:id)]//div[contains(@class,:row)]/div[:index]//div[normalize-space(text())=:string]', array(
+        ':id' => $data_row_id,
+        ':row' => 'l-flexible-row row',
+        ':index' => $index + 1,
+        ':string' => $string,
+      ));
+      $this->assertEqual(count($elements), 1, "The sample block was found in the correct region.");
+    }
+
+    // Configure the template and move the footer row to the bottom.
+    $this->backdropGet($flexible_layout_configure_link);
+    $edit = array(
+      'row_positions' => "{$layout_region_names[0]},{$layout_region_names[1]},$data_row_id,{$layout_region_names[2]}",
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout template'));
+    $last_row_attr = $this->xpath('//div[contains(@class, :class)]/*[4]/@data-row-id', array(
+      ':class' => 'layout-flexible-content',
+    ));
+    $last_row_attr = (string) $last_row_attr[0][0];
+    $this->assertEqual($last_row_attr, $layout_region_names[2], 'The last row is footer.');
+
+    // Go to the block add page and check.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $last_row_attr = $this->xpath('//div[contains(@class, :class)]/*[4]/@data-row-id', array(
+      ':class' => 'layout-flexible-content',
+    ));
+    $last_row_attr = (string) $last_row_attr[0][0];
+    $this->assertEqual($last_row_attr, $layout_region_names[2], 'The last row is footer.');
+
+    // Go to the the layout path and check.
+    $this->backdropGet($layout_url);
+    $last_row_attr = $this->xpath('//div[contains(@class, :class)]/*[4]/@data-row-id', array(
+      ':class' => 'layout-flexible-content',
+    ));
+    $last_row_attr = (string) $last_row_attr[0][0];
+    $this->assertEqual($last_row_attr, $layout_region_names[2], 'The last row is footer.');
+
+    // Configure the template and delete the footer row.
+    $this->backdropGet($flexible_layout_configure_link);
+    $this->clickLink(t('Delete row'), 3);
+    $this->backdropPost(NULL, array(), t('Save layout template'));
+
+    // Check for the default three rows.
+    $rows = $this->xpath("//*[@id=:id]//*[contains(@id, :row_id)]", array(':id' => 'layout-flexible-content', ':row_id' => 'flexible-row'));
+    $this->assertEqual(count($rows), 3, 'Three rows are found in the template');
+
+    $last_row_attr = $this->xpath('//div[contains(@class, :class)]/*[last()]/@data-row-id', array(
+      ':class' => 'layout-flexible-content',
+    ));
+    $last_row_attr = (string) $last_row_attr[0][0];
+    $this->assertEqual($last_row_attr, $data_row_id, 'The last row is the new row.');
+
+    // Go to the block add page and check.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    $last_row_attr = $this->xpath('//div[contains(@class, :class)]/*[last()]/@data-row-id', array(
+      ':class' => 'layout-flexible-content',
+    ));
+    $last_row_attr = (string) $last_row_attr[0][0];
+    $this->assertEqual($last_row_attr, $data_row_id, 'The last row is the new row.');
+
+    // Go to the the layout path and check.
+    $this->backdropGet($layout_url);
+    $last_row_attr = $this->xpath('//div[contains(@class, :class)]/*[last()]/@data-row-id', array(
+      ':class' => 'layout-flexible-content',
+    ));
+    $last_row_attr = (string) $last_row_attr[0][0];
+    $this->assertEqual($last_row_attr, $data_row_id, 'The last row is the new row.');
+  }
+
 }

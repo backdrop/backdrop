@@ -115,6 +115,59 @@ function theme_layout_template_option($variables) {
 }
 
 /**
+ * Outputs information about a layout template . Used in the layout template
+ * listing page.
+ *
+ * @param $variables
+ *   An array with a single value: "template_info", which contains information
+ *   about the layout template.
+ *
+ * @return string
+ */
+function theme_layout_template_info($variables) {
+  $template_info = $variables['template_info'];
+
+  // Build template thumbnail preview
+  $preview_path = $template_info['path'] . '/' . $template_info['preview'];
+  $preview_img = theme('image', array('path' => $preview_path));
+
+  $output = '';
+  $output .= '<div class="layout-info">';
+  $output .= $preview_img;
+  $output .= '<div class="layout-detail">';
+  $output .= '  <div class="layout-title">' . check_plain($template_info['title']) . '</div>';
+  $output .= '  <div class="layout-template description">' . t('<span class="priority-low">Machine name: </span>!title', array('!title' => $template_info['name'])) . '</div>';
+  $output .= '</div></div>';
+
+  return $output;
+}
+
+/**
+ * Outputs a representation of the column widths of a flexible layout template
+ * row.
+ */
+function theme_layout_flexible_template_style_option($variables) {
+  $row_style = $variables['row_style'];
+  if ($row_style['region_count'] == 1) {
+    $regions = array('12');
+    $percent = array('100');
+  }
+  else {
+    $regions = explode(':', $row_style['bootstrap']);
+    $percent = explode(':', $row_style['split']);
+  }
+  $output = '';
+  $output .= '<div class="flexible-icon container">';
+  $output .= '<div class="flexible-icon-row row">';
+  foreach ($regions as $index => $region) {
+    $output .= '<div class="flexible-icon-region col-md-' . $region . '">' . $percent[$index] . '%</div>';
+  }
+  $output .= '</div>';
+  $output .= '</div>';
+  return $output;
+}
+
+/**
  * Output the arguments table for layout_menu_item_arguments_form().
  */
 function theme_layout_menu_item_arguments_table($variables) {
@@ -238,7 +291,7 @@ function layout_preprocess_layout(&$variables) {
     }
   }
   else {
-    $variables['title'] = $variables['content']['title'];
+    $variables['title'] = isset($variables['content']['title']) ? $variables['content']['title'] : '';
   }
 
   if (!$variables['admin']) {
@@ -246,8 +299,67 @@ function layout_preprocess_layout(&$variables) {
       $variables['action_links'] = menu_local_actions();
     }
     if (!$block_exists['tabs']) {
-      $variables['tabs'] =  menu_local_tabs();
+      $variables['tabs'] = menu_local_tabs();
     }
+  }
+
+  // Build HTML for displaying flexible templates.
+  if ($variables['layout_info']['template'] == 'layout--flexible') {
+    if (!empty($variables['renderer']->flexible)) {
+      $variables['flexible_editor'] = TRUE;
+      $flexible_layout = layout_flexible_tempstore_load($variables['layout_info']['name']);
+    }
+    else {
+      $variables['flexible_editor'] = FALSE;
+      $flexible_layout = layout_flexible_template_load($variables['layout_info']['name']);
+    }
+    $variables['region_buttons'] = array();
+    if (isset($variables['renderer']->region_buttons)) {
+      $variables['region_buttons'] = $variables['renderer']->region_buttons;
+    }
+
+    $variables['column_data'] = layout_flexible_row_styles();
+
+    $variables['rows'] = $flexible_layout->rows;
+    $variables['row_data'] = array();
+    foreach ($variables['rows'] as $name => $row) {
+      $container = ($row['container'] == 'container') ? 'container container-fluid' : (($row['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
+      $row['row_class'] = $container . ' flexible-row--' . $name . ' ' . $row['contains'] . ' ' . $row['classes'];
+      $row['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row--' . $name . '"' : '';
+      $row['element'] = !empty($row['element']) ? $row['element'] : 'div';
+      if ($row['contains'] == 'region_12') {
+        if (!empty($row['region_names']['region_name_0'])) {
+          $region_name = $row['region_names']['region_name_0'];
+        }
+        else {
+          $region_name = $name;
+        }
+        $row['regions'][0]['region_md'] = '12';
+        $row['regions'][0]['region_name'] = $region_name;
+        $row['regions'][0]['content_key'] = $variables['flexible_editor'] ? $name : $name . '--0';
+      }
+      else {
+        $col_info = $variables['column_data'][$row['contains']];
+        $split = explode(':', $col_info['bootstrap']);
+        $i = 0;
+        foreach ($split as $col) {
+          if (!empty($row['region_names']['region_name_' . $i])) {
+            $region_name = $row['region_names']['region_name_' . $i];
+          }
+          else {
+            $region_name = $name . ' ' . $i;
+          }
+          $row['regions'][] = array(
+            'region_md' => $col,
+            'region_name' => $region_name,
+            'content_key' => $variables['flexible_editor'] ? $name : $name . '--' . $i,
+          );
+          $i++;
+        }
+      }
+      $variables['row_data'][$name] = $row;
+    }
+
   }
 }
 

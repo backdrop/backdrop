@@ -175,7 +175,7 @@ function image_field_instance_settings_form($field, $instance) {
   );
   // Add a second line of description.
   $form['orientate']['#description'] .= '<br />' . t('Note that as with resizing, rotating images on upload will cause the loss of EXIF data in the image.');
-  
+
   // Add the default image to the instance.
   $form['default_image'] = array(
     '#element_validate' => array('_image_field_default_image_validate'),
@@ -347,6 +347,7 @@ function image_field_widget_info() {
       'label' => t('Image'),
       'field types' => array('image'),
       'settings' => array(
+        'browser_view' => 'image_library',
         'progress_indicator' => 'throbber',
         'preview_image_style' => 'thumbnail',
       ),
@@ -367,6 +368,15 @@ function image_field_widget_settings_form($field, $instance) {
 
   // Use the file widget settings form.
   $form = file_field_widget_settings_form($field, $instance);
+
+  $form['browser_view'] = array(
+    '#title' => t('Enable image browser'),
+    '#type' => 'checkbox',
+    '#return_value' => 'image_library',
+    '#default_value' => $settings['browser_view'],
+    '#description' => t('Enable the image browser as an alternative to the normal upload.'),
+    '#weight' => -3,
+  );
 
   $form['preview_image_style'] = array(
     '#title' => t('Preview image style'),
@@ -407,6 +417,11 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     $extensions = isset($elements[$delta]['#upload_validators']['file_validate_extensions'][0]) ? $elements[$delta]['#upload_validators']['file_validate_extensions'][0] : implode(' ', $supported_extensions);
     $extensions = array_intersect(explode(' ', $extensions), $supported_extensions);
     $elements[$delta]['#upload_validators']['file_validate_extensions'][0] = implode(' ', $extensions);
+
+    // Set any view used as a browser.
+    if (!empty($instance['widget']['settings']['browser_view'])) {
+      $elements[$delta]['#browser_view'] = $instance['widget']['settings']['browser_view'];
+    }
 
     // Add all extra functionality provided by the image widget.
     $elements[$delta]['#process'][] = 'image_field_widget_process';
@@ -518,6 +533,10 @@ function image_field_formatter_info() {
         'image_style' => '',
         'image_link' => '',
         'image_float' => '',
+      ),
+	  'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
+	  'file formatter' => array(
+        'mime types' => array('image/*'),
       ),
     ),
   );

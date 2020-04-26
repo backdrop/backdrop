@@ -1028,7 +1028,7 @@ class PathPatternTokenTestCase extends PathPatternFunctionalTestHelper {
     );
 
     $tokens = array(
-      'join-path' => 'test-first-arg/array-value',
+      'join-path' => 'test-first-arg/the-array-value',
     );
     $data['array'] = $array;
     $replacements = $this->assertTokens('array', $data, $tokens);
@@ -1037,7 +1037,7 @@ class PathPatternTokenTestCase extends PathPatternFunctionalTestHelper {
     // this token value.
     module_load_include('inc', 'path');
     path_clean_token_values($replacements, $data, array());
-    $this->assertEqual($replacements['[array:join-path]'], 'test-first-arg/array-value');
+    $this->assertEqual($replacements['[array:join-path]'], 'test-first-arg/the-array-value');
   }
 
   /**

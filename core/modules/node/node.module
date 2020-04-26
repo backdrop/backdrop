@@ -141,7 +141,7 @@ function node_cron() {
  * Implements hook_entity_info().
  */
 function node_entity_info() {
-  $return = array(
+  $entity_info = array(
     'node' => array(
       'label' => t('Node'),
       'bundle label' => t('Type'),
@@ -177,10 +177,16 @@ function node_entity_info() {
     ),
   );
 
+  // If the cache table has been created, then enable entity caching on nodes.
+  if (db_table_exists('cache_entity_node')) {
+    $entity_info['node']['entity cache'] = TRUE;
+    $entity_info['node']['field cache'] = FALSE;
+  }
+
   // Search integration is provided by node.module, so search-related
   // display modes for nodes are defined here and not in search.module.
   if (module_exists('search')) {
-    $return['node']['view modes'] += array(
+    $entity_info['node']['view modes'] += array(
       'search_index' => array(
         'label' => t('Search index'),
         'custom settings' => FALSE,
@@ -196,7 +202,7 @@ function node_entity_info() {
   // messages, and the path to attach Field admin pages to.
   node_type_cache_reset();
   foreach (node_type_get_names() as $type => $name) {
-    $return['node']['bundles'][$type] = array(
+    $entity_info['node']['bundles'][$type] = array(
       'label' => $name,
       'admin' => array(
         'path' => 'admin/structure/types/manage/%node_type',
@@ -207,7 +213,7 @@ function node_entity_info() {
     );
   }
 
-  return $return;
+  return $entity_info;
 }
 
 /**
@@ -608,7 +614,7 @@ function node_field_extra_fields() {
     // Add also the 'language' select if Language module is enabled and the
     // bundle has multilingual support.
     if ($module_language_enabled && $type->settings['language']) {
-      $extra['node'][$type->type]['form']['language'] = array(
+      $extra['node'][$type->type]['form']['langcode'] = array(
         'label' => t('Language'),
         'description' => $description,
         'weight' => 0,
@@ -947,19 +953,29 @@ function node_validate($node, $form, &$form_state) {
   }
 
   // Validate the "Authored on" field.
-  if (!empty($node->date) && is_string($node->date) && strtotime($node->date) === FALSE) {
-    form_set_error('date', t('You have to specify a valid date.'));
+  if (!empty($node->date)) {
+    $node_date = $node->date;
+    if (is_array($node->date)) {
+      $node_date = implode(' ', $node->date);
+    }
+    if (strtotime($node_date) === FALSE) {
+      form_set_error('date', t('You have to specify a valid date.'));
+    }
   }
 
   // Validate the "Publish on" date.
-  if ($node->status == NODE_SCHEDULED && !empty($node->scheduled) && is_string($node->scheduled)) {
+  if ($node->status == NODE_SCHEDULED && !empty($node->scheduled)) {
+    $node_scheduled = $node->scheduled;
+    if (is_array($node->scheduled)) {
+      $node_scheduled = implode(' ', $node->scheduled);
+    }
     // Validate the entire string is valid.
-    if (strtotime($node->scheduled) === FALSE) {
+    if (strtotime($node_scheduled) === FALSE) {
       form_set_error('scheduled', t('You have to specify a valid date.'));
     }
     // Validate the date/time is not in the past.
     else {
-      $scheduled_date = new DateTime($node->scheduled, date_default_timezone_object());
+      $scheduled_date = new DateTime($node_scheduled, date_default_timezone_object());
       if ($scheduled_date && $scheduled_date->format('U') < REQUEST_TIME) {
         form_set_error('scheduled', t('Scheduled publish time cannot be in the past.'));
       }
@@ -2449,7 +2465,12 @@ function node_form_search_form_alter(&$form, $form_state) {
     );
 
     // Node types:
-    $types = array_map('check_plain', node_type_get_names());
+    $types = array();
+    foreach (node_type_get_types() as $type => $detail) {
+      if (!$detail->settings['hidden_path'] || user_access('view hidden paths') ) {
+        $types[$type] = $detail->name;
+      }
+    }
     $form['advanced']['type'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Only of the type(s)'),
@@ -2537,6 +2558,15 @@ function node_form_system_themes_admin_form_alter(&$form, &$form_state, $form_id
     '#type' => 'checkbox',
     '#title' => t('Use the administration theme when editing or creating content'),
     '#default_value' => config_get('system.core', 'node_admin_theme'),
+    '#states' => array(
+      'visible' => array(
+        array(
+          // Hide this checkbox if "Default theme" has been selected from the
+          // "Administration theme" dropdown menu.
+          ':input[name="admin_theme"]' => array('!value' => 0),
+        ),
+      ),
+    ),
   );
   $form['#submit'][] = 'node_form_system_themes_admin_form_submit';
 }
@@ -2846,6 +2876,9 @@ function node_access_view_all_nodes($account = NULL) {
  */
 function node_query_node_access_alter(QueryAlterableInterface $query) {
   _node_query_node_access_alter($query, 'node');
+  if (module_exists('search')) {
+    _node_search_query_alter($query);
+  }
 }
 
 /**
@@ -3049,6 +3082,43 @@ function _node_query_node_access_alter($query, $type) {
     $query->condition($or);
   }
 
+}
+
+/**
+ * Exclude nodes from the search query where the node has a hidden path
+ * and the current user doesn't have permission to bypass the restriction.
+ */
+function _node_search_query_alter(QueryAlterableInterface $query) {
+  global $user;
+
+  if (in_array('view hidden paths', user_role_permissions($user->roles))) {
+    return;
+  }
+
+  $search = FALSE;
+  $node = FALSE;
+
+  foreach ($query->getTables() as $alias => $table) {
+    if ($table['table'] == 'search_index') {
+      $search = $alias;
+    }
+    elseif ($table['table'] == 'node') {
+      $node = $alias;
+    }
+  }
+
+  if ($node && $search) {
+    $excluded_content_types = array();
+    foreach (node_type_get_types() as $type => $detail) {
+      if ($detail->settings['hidden_path']) {
+        $excluded_content_types[] = $type;
+      }
+    }
+
+    if (!empty($excluded_content_types)) {
+      $query->condition($node . '.type', array($excluded_content_types), 'NOT IN');
+    }
+  }
 }
 
 /**
@@ -3357,157 +3427,46 @@ function node_action_info() {
     'node_publish_action' => array(
       'type' => 'node',
       'label' => t('Publish content'),
-      'callback' => 'node_publish_action'
+      'callback' => 'node_publish_action',
+      'file' => 'node.actions.inc'
     ),
     'node_unpublish_action' => array(
       'type' => 'node',
       'label' => t('Unpublish content'),
-      'callback' => 'node_unpublish_action'
+      'callback' => 'node_unpublish_action',
+      'file' => 'node.actions.inc',
     ),
     'node_make_sticky_action' => array(
       'type' => 'node',
       'label' => t('Make content sticky'),
       'callback' => 'node_make_sticky_action',
+      'file' => 'node.actions.inc',
     ),
     'node_make_unsticky_action' => array(
       'type' => 'node',
       'label' => t('Make content unsticky'),
       'callback' => 'node_make_unsticky_action',
+      'file' => 'node.actions.inc',
     ),
     'node_promote_action' => array(
       'type' => 'node',
       'label' => t('Promote content'),
       'callback' => 'node_promote_action',
+      'file' => 'node.actions.inc',
     ),
     'node_unpromote_action' => array(
       'type' => 'node',
       'label' => t('Remove promotion'),
       'callback' => 'node_unpromote_action',
+      'file' => 'node.actions.inc',
     ),
     'node_delete_action' => array(
       'type' => 'node',
       'label' => t('Delete content'),
       'callback' => 'node_delete_action',
+      'file' => 'node.actions.inc',
     ),
   );
-}
-
-/**
- * Sets the status of a node to 1 (published).
- *
- * @param Node $node
- *   A node entity.
- * @param $context
- *   Contextual information about the triggered action.
- *
- * @ingroup actions
- */
-function node_publish_action(Node $node, &$context) {
-  $node->status = NODE_PUBLISHED;
-  $node->save();
-}
-
-/**
- * Sets the status of a node to 0 (unpublished).
- *
- * @param Node $node
- *   A node entity.
- * @param $context
- *   Contextual information about the triggered action..
- *
- * @ingroup actions
- */
-function node_unpublish_action(Node $node, &$context) {
-  $node->status = NODE_NOT_PUBLISHED;
-  $node->save();
-}
-
-/**
- * Sets the sticky-at-top-of-list property of a node to 1.
- *
- * @param Node $node
- *   A node entity.
- * @param $context
- *   Contextual information about the triggered action.
- *
- * @ingroup actions
- */
-function node_make_sticky_action(Node $node, &$context) {
-  $node->sticky = NODE_STICKY;
-  $node->save();
-}
-
-/**
- * Sets the sticky-at-top-of-list property of a node to 0.
- *
- * @param Node $node
- *   A node entity.
- * @param $context
- *   Contextual information about the triggered action.
- *
- * @ingroup actions
- */
-function node_make_unsticky_action(Node $node, &$context) {
-  $node->sticky = NODE_NOT_STICKY;
-  $node->save();
-}
-
-/**
- * Sets the promote property of a node to 1.
- *
- * @param Node $node
- *   A node entity.
- * @param $context
- *   Contextual information about the triggered action.
- *
- * @ingroup actions
- */
-function node_promote_action(Node $node, &$context) {
-  $node->promote = NODE_PROMOTED;
-  $node->save();
-}
-
-/**
- * Sets the promote property of a node to 0.
- *
- * @param Node $node
- *   A node entity.
- * @param $context
- *   Contextual information about the triggered action.
- *
- * @ingroup actions
- */
-function node_unpromote_action(Node $node, &$context) {
-  $node->promote = NODE_NOT_PROMOTED;
-  $node->save();
-}
-
-/**
- * Queues a node for deletion.
- *
- * @param Node $node
- *   A node entity.
- * @param $context
- *   Contextual information about the triggered action.
- *
- * @ingroup actions
- */
-function node_delete_action(Node $node, &$context) {
-  // Save the list of nodes to be deleted in the session. Append to the existing
-  // list if within the last minute, otherwise start a new list of nodes.
-  $last_action_time = 0;
-  if (isset($_SESSION['node_delete_action'])) {
-    $last_action_time = $_SESSION['node_delete_action']['timestamp'];
-  }
-  if (REQUEST_TIME - $last_action_time > 60) {
-    $_SESSION['node_delete_action'] = array(
-      'timestamp' => REQUEST_TIME,
-      'nids' => array(),
-    );
-  }
-
-  $_SESSION['node_delete_action']['nids'][] = $node->nid;
-  $context['redirect'] = 'admin/content/node/delete';
 }
 
 /**

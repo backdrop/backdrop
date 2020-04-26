@@ -302,6 +302,10 @@ function comment_schema() {
     ),
   );
 
+  $cache_schema = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_comment'] = $cache_schema;
+  $schema['cache_entity_comment']['description'] = "Cache table used to store Comment entity records.";
+
   return $schema;
 }
 
@@ -431,6 +435,15 @@ function comment_update_1005() {
     $config->set('module', 'comment');
     $config->save();
   }
+}
+
+/**
+ * Creates the table to enable caching of Comment entities.
+ */
+function comment_update_1006() {
+  $table = backdrop_get_schema_unprocessed('system', 'cache');
+  $table['description'] = "Cache table used to store Comment entity records.";
+  db_create_table('cache_entity_comment', $table);
 }
 
 /**
