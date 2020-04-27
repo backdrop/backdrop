@@ -820,6 +820,7 @@ function path_form_element(Entity $entity) {
   $pattern = path_get_pattern_by_entity_type($entity_type, $bundle, $langcode);
   if ($pattern) {
     if (!isset($entity->path['auto'])) {
+      $entity->path['auto'] = FALSE;
       if (!$entity->isNew()) {
         module_load_include('inc', 'path');
         $uri = $entity->uri();

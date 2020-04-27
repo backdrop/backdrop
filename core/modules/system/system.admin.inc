@@ -1499,11 +1499,12 @@ function system_site_information_settings_submit($form, &$form_state) {
   }
 
   if ($form_state['values']['site_logo_path']) {
+    $form_state['values']['site_logo_attributes'] = array();
     $dimensions = @getimagesize($form_state['values']['site_logo_path']);
-    $form_state['values']['site_logo_attributes'] = array(
-      'width' => $dimensions[0],
-      'height' => $dimensions[1],
-    );
+    if (!empty($dimensions)) {
+      $form_state['values']['site_logo_attributes']['width'] = $dimensions[0];
+      $form_state['values']['site_logo_attributes']['height'] = $dimensions[0];
+    }
   }
   else {
     $form_state['values']['site_logo_attributes'] = array(

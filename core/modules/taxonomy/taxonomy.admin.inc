@@ -310,7 +310,9 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
   }
 
   $vocabulary = $form_state['vocabulary'];
-  entity_form_submit_build_entity('taxonomy_vocabulary', $vocabulary, $form, $form_state);
+  foreach ($form_state['values'] as $key => $value) {
+    $vocabulary->$key = $value;
+  }
 
   // Prevent leading and trailing spaces in vocabulary names.
   $vocabulary->name = trim($vocabulary->name);
