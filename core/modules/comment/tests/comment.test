@@ -1135,7 +1135,7 @@ class CommentPreviewTest extends CommentHelperCase {
  * Tests anonymous commenting.
  */
 class CommentAnonymous extends CommentHelperCase {
-  function setUp() {
+  function setUp($modules = array()) {
     parent::setUp();
     config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
   }
@@ -1540,7 +1540,7 @@ class CommentPagerTest extends CommentHelperCase {
  * Tests comments with node access.
  */
 class CommentNodeAccessTest extends CommentHelperCase {
-  function setUp() {
+  function setUp($modules = array()) {
     parent::setUp('search', 'node_access_test');
 
     $web_user_role = $this->web_user->roles[count($this->web_user->roles) - 1];
@@ -1712,7 +1712,7 @@ class CommentApprovalTest extends CommentHelperCase {
  * Tests the Comment module blocks.
  */
 class CommentBlockFunctionalTest extends CommentHelperCase {
-  function setUp() {
+  function setUp($modules = array()) {
     parent::setUp(array('block'));
 
     $admin_user_role = $this->admin_user->roles[count($this->admin_user->roles) - 1];
@@ -2001,7 +2001,7 @@ class CommentActionsTestCase extends CommentHelperCase {
  * Tests fields on comments.
  */
 class CommentFieldsTest extends CommentHelperCase {
-  function setUp() {
+  function setUp($modules = array()) {
     parent::setUp(array('field_ui'));
   }
 

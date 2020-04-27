@@ -724,6 +724,9 @@ function system_install() {
 
   // Set the public files path to the directory with the settings.php file.
   config_set('system.core', 'file_public_path', str_replace('./', '', conf_path() . '/files'));
+  
+  // Sets the path of system-appropriate temporary directory.
+  config_set('system.core', 'file_temporary_path', file_directory_temp());
 
   // Clear out module list and hook implementation statics before calling
   // system_rebuild_theme_data().
@@ -3085,6 +3088,17 @@ function system_update_1068() {
  */
 function system_update_1069() {
   state_del('backdrop_utf8mb4_tables');
+}
+
+/**
+ * Set file_temporary_path on existing sites, if not already set.
+ */
+function system_update_1070() {
+  $config = config('system.core');
+  if ($config->get('file_temporary_path') == NULL) {
+    $config->set('file_temporary_path', file_directory_temp());
+    $config->save();
+  }
 }
 
 /**

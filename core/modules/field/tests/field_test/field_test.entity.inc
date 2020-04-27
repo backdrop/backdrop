@@ -27,7 +27,8 @@ function field_test_entity_info() {
       'field cache' => FALSE,
       'base table' => 'test_entity',
       'revision table' => 'test_entity_revision',
-      'class' => 'TestEntity',
+      'entity class' => 'TestEntity',
+      'controller class' => 'EntityDatabaseStorageController',
       'entity keys' => array(
         'id' => 'ftid',
         'revision' => 'ftvid',
@@ -208,8 +209,8 @@ function field_test_delete_bundle($bundle) {
 /**
  * Creates a basic test_entity entity.
  */
-function field_test_create_stub_entity($id = 1, $vid = 1, $bundle = 'test_bundle', $label = '') {
-  $entity = new stdClass();
+function field_test_create_entity($id = 1, $vid = 1, $bundle = 'test_bundle', $label = '') {
+  $entity = entity_create('test_entity', array());
   // Only set id and vid properties if they don't come as NULL (creation form).
   if (isset($id)) {
     $entity->ftid = $id;

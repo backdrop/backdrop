@@ -35,7 +35,7 @@ function node_add_page() {
       $content[$node_type->type] = array(
         'title' => t($node_type->name),
         'href'=>'node/add/' . $href_url_friendly,
-        'localized_options' => array('html' => TRUE),
+        'localized_options' => array('html' => FALSE),
         'description' => t($node_type->description),
       );
     }
@@ -283,11 +283,26 @@ function node_form($form, &$form_state, Node $node) {
     '#description' => t('Leave blank for %anonymous.', array('%anonymous' => $config->getTranslated('anonymous'))),
   );
   $form['author']['date'] = array(
-    '#type' => module_exists('date') ? 'date_popup' : 'textfield',
+    '#type' => 'html_datetime',
     '#title' => t('Authored on'),
-    // Note #date_format only applies if date module is enabled.
-    '#date_format' => 'Y-m-d g:i a',
-    '#default_value' => !empty($node->date) ? $node->date : NULL,
+    '#default_value' => array(
+      'date' => format_date($node->created, 'custom', DATE_FORMAT_DATE),
+      'time' => format_date($node->created, 'custom', DATE_FORMAT_TIME),
+    ),
+    '#attributes' => array(
+      'date' => array(
+        'min' => '1970-01-01',
+        'max' => '2037-12-31',
+        'placeholder' => t('e.g. @date', array(
+          '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_DATE)
+        )),
+      ),
+      'time' => array(
+        'placeholder' => t('e.g. @date', array(
+          '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_TIME)
+        )),
+      ),
+    ),
     '#description' => t('Leave blank to use the current time.'),
   );
 
@@ -329,12 +344,26 @@ function node_form($form, &$form_state, Node $node) {
     // Default the scheduled time to the current time + 1 day.
     $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME + 86400;
     $form['options']['scheduled'] = array(
-      '#type' => module_exists('date') ? 'date_popup' : 'textfield',
+      '#type' => 'html_datetime',
       '#title' => t('Publish on'),
-      // Note #date_ properties only apply if date module is enabled.
-      '#date_format' => 'Y-m-d g:i a',
-      '#date_increment' => 10,
-      '#default_value' => format_date($scheduled_date, 'custom', 'Y-m-d g:i a'),
+      '#default_value' => array(
+        'date' => format_date($scheduled_date, 'custom', DATE_FORMAT_DATE),
+        'time' => format_date($scheduled_date, 'custom', DATE_FORMAT_TIME),
+      ),
+      '#attributes' => array(
+        'date' => array(
+          'min' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_DATE),
+          'max' => '2037-12-31',
+          'placeholder' => t('e.g. @date', array(
+            '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_DATE)
+          )),
+        ),
+        'time' => array(
+          'placeholder' => t('e.g. @date', array(
+            '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_TIME)
+          )),
+        ),
+      ),
       '#states' => array(
         'visible' => array(
          ':input[name="status"]' => array('value' => NODE_SCHEDULED),

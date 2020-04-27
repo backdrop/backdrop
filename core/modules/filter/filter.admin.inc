@@ -14,9 +14,14 @@
  */
 function filter_admin_overview($form) {
   // Overview of all formats.
-  $formats = filter_formats();
+  $formats = filter_formats(NULL, TRUE);
   $fallback_format = filter_fallback_format();
   $editors = filter_get_editors();
+
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('The order of the text formats below determines the order in which they will appear in the <em>Editor</em> selector when creating content (depending on permissions for the text formats).'),
+  );
 
   $form['#tree'] = TRUE;
   foreach ($formats as $id => $format) {
@@ -24,6 +29,7 @@ function filter_admin_overview($form) {
     $links['configure'] = array(
       'title' => t('Configure'),
       'href' => "admin/config/content/formats/$id",
+      'weight' => 0,
     );
     if (user_access('synchronize configuration')) {
       $links['export'] = array(
@@ -33,8 +39,12 @@ function filter_admin_overview($form) {
           'group' => 'Text formats',
           'name' => 'filter.format.' . $id,
         ),
+        'weight' => 5,
       );
     }
+
+    // Add status so we can sort by enabled/disabled.
+    $form['formats'][$id]['#status'] = $format->status;
     // Check whether this is the fallback text format. This format is available
     // to all roles and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
@@ -43,6 +53,26 @@ function filter_admin_overview($form) {
       $roles_markup = t('Fallback format. Used if a role has access to no other formats.');
     }
     else {
+      if ($form['formats'][$id]['#status']) {
+        $links['disable'] = array(
+          'title' => t('Disable'),
+          'href' => 'admin/config/content/formats/' . $id . '/disable',
+          'query' => array(
+            'token' => backdrop_get_token('format-' . $format->format)
+          ),
+          'weight' => 10,
+        );
+      }
+      else {
+        $links['enable'] = array(
+          'title' => t('Enable'),
+          'href' => 'admin/config/content/formats/' . $id . '/enable',
+          'query' => array(
+            'token' => backdrop_get_token('format-' . $format->format)
+          ),
+          'weight' => -10,
+        );
+      }
       $form['formats'][$id]['name'] = array('#markup' => check_plain($format->name));
       $roles = array();
       foreach (filter_get_roles_by_format($format) as $role_name) {
@@ -50,10 +80,6 @@ function filter_admin_overview($form) {
         $roles[] = check_plain($role->label);
       }
       $roles_markup = $roles ? implode(', ', $roles) : t('No roles may use this format');
-      $links['disable'] = array(
-        'title' => t('Disable'),
-        'href' => "admin/config/content/formats/$id/disable",
-      );
     }
     $form['formats'][$id]['editor'] = array(
       '#markup' => isset($editors[$format->editor]) ? check_plain($editors[$format->editor]['label']) : t('None'),
@@ -61,6 +87,7 @@ function filter_admin_overview($form) {
     $form['formats'][$id]['roles'] = array(
       '#markup' => $roles_markup,
     );
+    backdrop_sort($links, array('weight'));
     $form['formats'][$id]['operations'] = array(
       '#type' => 'operations',
       '#links' => $links,
@@ -72,6 +99,7 @@ function filter_admin_overview($form) {
       '#default_value' => $format->weight,
     );
   }
+  backdrop_sort($form['formats'], array('#status'), SORT_DESC);
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save changes'));
   return $form;
@@ -90,7 +118,7 @@ function filter_admin_overview_submit($form, &$form_state) {
     }
   }
   filter_formats_reset();
-  backdrop_set_message(t('The text format ordering has been saved.'));
+  backdrop_set_message(t('The text format order has been saved.'));
 }
 
 /**
@@ -475,6 +503,23 @@ function filter_admin_format_form_submit($form, &$form_state) {
 }
 
 /**
+ * Page callback: Enable a text format.
+ */
+function filter_admin_enable($format = NULL) {
+  if (!isset($_GET['token']) || !backdrop_valid_token($_GET['token'], 'format-' . $format->format)) {
+    return MENU_ACCESS_DENIED;
+  }
+  if (isset($format)) {
+    filter_format_enable($format);
+    backdrop_set_message(t('Enabled text format %format.', array('%format' => $format->name)));
+  }
+  else {
+    backdrop_set_message(t('No text format provided.'), 'error');
+  }
+  backdrop_goto('admin/config/content/formats');
+}
+
+/**
  * Form constructor for the text format deletion confirmation form.
  *
  * @param $format
@@ -490,7 +535,7 @@ function filter_admin_disable($form, &$form_state, $format) {
   return confirm_form($form,
     t('Are you sure you want to disable the text format %format?', array('%format' => $format->name)),
     'admin/config/content/formats',
-    t('Disabled text formats are completely removed from the administrative interface, and any content stored with that format will not be displayed. This action cannot be undone.'),
+    t('Any content stored with that format may not be rendered properly.'),
     t('Disable')
   );
 }

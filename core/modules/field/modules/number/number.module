@@ -116,7 +116,7 @@ function number_field_instance_settings_form_validate($element, &$form_state, $f
   $max = $element['max'];
   $min = $element['min'];
 
-  if ($max['#value'] < $min['#value']) {
+  if (!empty($max['#value']) && $max['#value'] < $min['#value']) {
     form_error($max, t('%max must be greater than, or equal to, %min.', array(
       '%max' => $max['#title'],
       '%min' => $min['#title'],
