@@ -229,11 +229,7 @@ class LayoutMenuItem {
    * return LayoutContext[]
    */
   function getContexts() {
-    foreach ($this->contexts as $key => $context) {
-      if (is_numeric($key)) {
-        unset($this->contexts[$key]);
-      }
-    }
+    $this->resetContexts();
     // Required contexts are generated on-demand.
     $contexts = layout_context_required_by_path($this->path);
     $path_parts = explode('/', $this->path);
@@ -266,7 +262,11 @@ class LayoutMenuItem {
    * such as when actively changing the layout's path.
    */
   function resetContexts() {
-    $this->contexts = NULL;
+    foreach ($this->contexts as $key => $context) {
+      if (isset($context->position) || in_array($key, array('string', 'overrides_path', 'current_user'))) {
+        unset($this->contexts[$key]);
+      }
+    }
   }
 
   /**

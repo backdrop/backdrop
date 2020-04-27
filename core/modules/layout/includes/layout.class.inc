@@ -824,7 +824,7 @@ class Layout {
       }
     }
     if ($this->menu_item) {
-      // $this->menu_item->resetContexts();
+      $this->menu_item->resetContexts();
     }
   }
 
