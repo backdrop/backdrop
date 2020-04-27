@@ -259,6 +259,8 @@ class Layout {
 
     // Don't save path based contexts as these are generated on the fly.
     foreach ($this->contexts as $key => $context) {
+      // @todo: Add a "storage" property to the context class, and just exclude
+      // those not stored in config?
       if (isset($context->position)  || in_array($key, array('string', 'overrides_path', 'current_user'))) {
         unset($this->contexts[$key]);
       }
@@ -762,16 +764,15 @@ class Layout {
    * return LayoutContext[]
    */
   function getContexts() {
+    $this->resetContexts();
+
     // Load objects for stored contexts.
-    // @todo: move this to resetContexts() and restore deleted calls?
     foreach ($this->contexts as $key => $context) {
-      if (!is_numeric($key) && !is_object($context->data) && !in_array($key, array('string', 'overrides_path', 'current_user'))) {
-        $context_info = layout_get_context_info($context->plugin);
-        if (isset($context_info['load callback'])) {
-          $function = $context_info['load callback'];
-          $context_data = $function($context->settings['entity']);
-          $context->setData($context_data);
-        }
+      $context_info = layout_get_context_info($context->plugin);
+      if (isset($context_info['load callback'])) {
+        $function = $context_info['load callback'];
+        $context_data = $function($context->settings['entity']);
+        $context->setData($context_data);
       }
     }
 
