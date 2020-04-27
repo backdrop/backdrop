@@ -88,8 +88,8 @@ function node_theme() {
       'render element' => 'elements',
       'template' => 'templates/node',
     ) + $base,
-    'node_search_admin' => array(
-      'render element' => 'form',
+    'node_search_factors' => array(
+      'render element' => 'element',
     ) + $base,
     'node_preview_banner_form' => array(
       'render element' => 'form',
@@ -1389,8 +1389,9 @@ function node_search_reset() {
  * Implements hook_search_status().
  */
 function node_search_status() {
+  $types = _node_search_get_types();
   $total = db_query('SELECT COUNT(*) FROM {node}')->fetchField();
-  $remaining = db_query("SELECT COUNT(*) FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE d.sid IS NULL OR d.reindex <> 0")->fetchField();
+  $remaining = db_query("SELECT COUNT(*) FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE (d.sid IS NULL OR d.reindex <> 0) AND n.type IN (:types)", array(':types' => $types))->fetchField();
   return array('remaining' => $remaining, 'total' => $total);
 }
 
@@ -1401,19 +1402,35 @@ function node_search_admin() {
   $config = config('search.settings');
 
   // Output form for defining rank factor weights.
-  $form['content_ranking'] = array(
+  $form['node_settings'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Content ranking'),
+    '#title' => t('Content settings'),
+    '#states' => array(
+      'visible' => array(
+        '[name*="search_active_modules[node]"]' => array('checked' => TRUE)
+      ),
+    ),
+    '#element_validate' => array('node_search_admin_validate'),
   );
-  $form['content_ranking']['#theme'] = 'node_search_admin';
-  $form['content_ranking']['info'] = array(
-    '#value' => '<em>' . t('Influence is a numeric multiplier used in ordering search results. A higher number means the corresponding factor has more influence on search results; zero means the factor is ignored. Changing these numbers does not require the search index to be rebuilt. Changes take effect immediately.') . '</em>'
+  $form['node_settings']['node_types'] = array(
+    '#title' => t('Enabled types'),
+    '#type' => 'checkboxes',
+    '#default_value' => _node_search_get_types(),
+    '#options' => node_type_get_names(),
+    '#description' => t('Only content of selected types will be available in results. Disabled types will not be indexed in the future.'),
+  );
+
+  $form['node_settings']['factors'] = array(
+    '#type' => 'item',
+    '#title' => t('Content rankings'),
+    '#theme' => 'node_search_factors',
+    '#help' => '<em>' . t('Influence is a numeric multiplier used in ordering search results. A higher number means the corresponding factor has more influence on search results; zero means the factor is ignored. Changing these numbers does not require the search index to be rebuilt. Changes take effect immediately.') . '</em>',
   );
 
   // Note: reversed to reflect that higher number = higher ranking.
   $options = backdrop_map_assoc(range(0, 10));
   foreach (module_invoke_all('ranking') as $var => $values) {
-    $form['content_ranking']['factors']['node_rank_' . $var] = array(
+    $form['node_settings']['factors']['node_rank_' . $var] = array(
       '#title' => $values['title'],
       '#type' => 'select',
       '#options' => $options,
@@ -1422,8 +1439,25 @@ function node_search_admin() {
   }
 
   // Sort factors by rank, highest first.
-  backdrop_sort($form['content_ranking']['factors'], array('#default_value' => SORT_NUMERIC), SORT_DESC);
+  backdrop_sort($form['node_settings']['factors'], array('#default_value' => SORT_NUMERIC), SORT_DESC);
   return $form;
+}
+
+/**
+ * Element validation callback for the search admin form.
+ */
+function node_search_admin_validate($element, &$form_state) {
+  // Turn the saved value into an unindexed array.
+  $form_state['values']['node_types'] = array_keys(array_filter($form_state['values']['node_types']));
+
+  // Ensure at least one value was checked.
+  if (empty($form_state['values']['node_types'])) {
+    form_set_error('node_types', t('Select at least one content type to search or complete disable searching content.'));
+  }
+  // If all types are checked, save an empty array indicating all types are enabled.
+  elseif (count($form_state['values']['node_types']) === count(node_type_get_names())) {
+    $form_state['values']['node_types'] = array();
+  }
 }
 
 /**
@@ -2384,9 +2418,11 @@ function node_page_view(Node $node) {
  * Implements hook_update_index().
  */
 function node_update_index() {
-  $limit = (int)config_get('search.settings', 'search_cron_limit');
+  $limit = (int) config_get('search.settings', 'search_cron_limit');
 
-  $result = db_query_range("SELECT n.nid FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE d.sid IS NULL OR d.reindex <> 0 ORDER BY d.reindex ASC, n.nid ASC", 0, $limit, array(), array('target' => 'slave'));
+  // Index selected content types.
+  $enabled_types = _node_search_get_types();
+  $result = db_query_range("SELECT n.nid FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE (d.sid IS NULL OR d.reindex <> 0) AND n.type IN (:enabled_types) ORDER BY d.reindex ASC, n.nid ASC", 0, $limit, array(':enabled_types' => $enabled_types), array('target' => 'slave'));
   $nids = $result->fetchCol();
   if (!$nids) {
     return;
@@ -2424,6 +2460,21 @@ function _node_index_node(Node $node) {
 
   // Update index
   search_index($node->nid, 'node', $text);
+}
+
+/**
+ * Get the list of node types that are enabled for indexing.
+ *
+ * @return array
+ *   An unindexed array of node type machine names.
+ */
+function _node_search_get_types() {
+  $node_types = config_get('search.settings', 'node_types');
+  // If no types are in the config file, it means all types are enabled.
+  if (empty($node_types)) {
+    $node_types = array_keys(node_type_get_names());
+  }
+  return $node_types;
 }
 
 /**
@@ -2466,9 +2517,12 @@ function node_form_search_form_alter(&$form, $form_state) {
 
     // Node types:
     $types = array();
+    $search_content_types = _node_search_get_types();
     foreach (node_type_get_types() as $type => $detail) {
-      if (!$detail->settings['hidden_path'] || user_access('view hidden paths') ) {
-        $types[$type] = $detail->name;
+      if (in_array($type, $search_content_types)) {
+        if (!$detail->settings['hidden_path'] || user_access('view hidden paths') ) {
+          $types[$type] = $detail->name;
+        }
       }
     }
     $form['advanced']['type'] = array(
@@ -3085,38 +3139,41 @@ function _node_query_node_access_alter($query, $type) {
 }
 
 /**
- * Exclude nodes from the search query where the node has a hidden path
- * and the current user doesn't have permission to bypass the restriction.
+ * Exclude nodes from the search query in the special situations.
+ *
+ * - The node type is disabled in the search settings.
+ * - The node type has hidden paths and the current user doesn't have permission to bypass the restriction.
  */
 function _node_search_query_alter(QueryAlterableInterface $query) {
-  global $user;
-
-  if (in_array('view hidden paths', user_role_permissions($user->roles))) {
-    return;
-  }
-
-  $search = FALSE;
-  $node = FALSE;
+  $search_table = FALSE;
+  $node_type = FALSE;
 
   foreach ($query->getTables() as $alias => $table) {
     if ($table['table'] == 'search_index') {
-      $search = $alias;
+      $search_table = $alias;
     }
     elseif ($table['table'] == 'node') {
-      $node = $alias;
+      $node_type = $alias;
     }
   }
 
-  if ($node && $search) {
+  if ($node_type && $search_table) {
+    $enabled_types = _node_search_get_types();
+    $all_types = node_type_get_types();
+    $access_hidden_paths = user_access('view hidden paths');
+
     $excluded_content_types = array();
-    foreach (node_type_get_types() as $type => $detail) {
-      if ($detail->settings['hidden_path']) {
+    foreach ($all_types as $type => $detail) {
+      if (!$access_hidden_paths && $detail->settings['hidden_path']) {
+        $excluded_content_types[] = $type;
+      }
+      elseif (!in_array($type, $enabled_types)) {
         $excluded_content_types[] = $type;
       }
     }
 
     if (!empty($excluded_content_types)) {
-      $query->condition($node . '.type', array($excluded_content_types), 'NOT IN');
+      $query->condition($node_type . '.type', array($excluded_content_types), 'NOT IN');
     }
   }
 }
@@ -3778,4 +3835,3 @@ function node_build_tempstore_id() {
   }
   return $node_tempstore_id;
 }
-
