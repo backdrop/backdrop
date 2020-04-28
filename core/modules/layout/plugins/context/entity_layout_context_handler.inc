@@ -44,10 +44,12 @@ class EntityLayoutContext extends LayoutContext {
     parent::form($form, $form_state);
 
     $form['entity'] = array(
-      '#title' => t('Enter the title or ID of a @entity entity', array('@entity' => $this->plugin)),
+      '#title' => t('Enter the ID of a @entity entity', array('@entity' => $this->plugin)),
       '#type' => 'textfield',
       '#maxlength' => 512,
-      '#autocomplete_path' => 'path-autocomplete',
+      // @todo: this would show all types of content and even views. We'd need
+      // to write a custom autocomplete function. Consider this later.
+      // '#autocomplete_path' => 'path-autocomplete',
       '#weight' => -10,
     );
   }
