@@ -310,7 +310,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#title' => t('Contexts'),
     '#type' => 'item',
     '#id' => 'context-wrapper',
-    '#description' => t('Contexts define what blocks are available within this layout. Most wildcards in the path will be associated with a context automatically.'),
+    '#description' => t('(Optional) Contexts define what blocks are available within this layout. Most wildcards in the path will be associated with a context automatically.'),
     // Current user context is always present.
   );
   $form['context_wrapper']['#access'] = !$layout->isDefault();
@@ -319,9 +319,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $form['context_wrapper']['context'] = array(
     '#title' => t('Contexts'),
     '#type' => 'container',
-    '#description' => t('Contexts define what blocks are available within this layout. Most wildcards in the path will be associated with a context automatically.'),
     '#parents' => array('context'),
-    // Current user context is always present.
   );
 
   $form['context_wrapper']['context']['add'] = array(
@@ -351,8 +349,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $form['context_wrapper']['context']['required'] = array(
     '#theme' => 'layout_settings_context_table',
     '#layout_path' => $layout->getPath(),
-    // @todo: fix
-    // '#access' => count($contexts) > $built_in_contexts,
+    '#access' => count($contexts) > $built_in_contexts,
   );
 
   foreach ($contexts as $context_key => $layout_context) {
