@@ -58,8 +58,11 @@ function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $co
       'callback' => 'layout_context_ajax_style',
     ),
   );
-  foreach ($all_context_info as $context_info) {
-    $form['context']['#options'][$context_info['name']] = $context_info['title'];
+  foreach ($all_context_info as $key => $context_info) {
+    // @todo: add a "configurable" key to hook_context_info () instead?
+    if (!in_array($key, array('string', 'overrides_path'))) {
+      $form['context']['#options'][$context_info['name']] = $context_info['title'];
+    }
   }
 
   $form['context_settings'] = array(
