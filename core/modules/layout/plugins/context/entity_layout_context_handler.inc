@@ -43,15 +43,28 @@ class EntityLayoutContext extends LayoutContext {
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
 
+    $info = entity_get_info($this->entity_type);
     $form['entity'] = array(
-      '#title' => t('Enter the ID of a @entity entity', array('@entity' => $this->plugin)),
-      '#type' => 'textfield',
-      '#maxlength' => 512,
+      '#title' => t('Enter the ID of a @entity', array('@entity' => $info['label'])),
+      '#type' => 'number',
+      '#default_value' => $this->settings['entity'],
+      '#step' => 1,
+      '#min' => 1,
       // @todo: this would show all types of content and even views. We'd need
       // to write a custom autocomplete function. Consider this later.
       // '#autocomplete_path' => 'path-autocomplete',
       '#weight' => -10,
     );
+  }
+
+  /**
+   * Validate handler for the settings form for this context item.
+   */
+  function formValidate($form, &$form_state) {
+    if (empty($form_state['values']['entity'])) {
+      form_set_error('entity', t('An ID is required.'));
+    }
+    // @todo: Allow nodes that dont exist yet? Or validate node_load()?
   }
 
   /**
