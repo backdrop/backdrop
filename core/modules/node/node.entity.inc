@@ -24,6 +24,16 @@ class Node extends Entity {
   public $vid;
 
   /**
+   * Indicates whether this is the active node revision.
+   *
+   * The active revision of a node is the one loaded when no specific revision
+   * has been specified. Only active revisions are saved to the node table.
+   *
+   * @var boolean
+   */
+  public $is_active_revision = TRUE;
+
+  /**
    * The node content type (bundle).
    *
    * @var string
@@ -382,6 +392,12 @@ class Node extends Entity {
     return $duplicate;
   }
 
+  /**
+   * Overrides Backdrop\entity\Entity::getRevisionId().
+   */
+  public function getRevisionId() {
+    return $this->vid;
+  }
 }
 
 
@@ -462,7 +478,14 @@ class NodeStorageController extends EntityDatabaseStorageController {
       }
       else {
         $op = 'update';
-        $return = backdrop_write_record($this->entityInfo['base table'], $entity, $this->idKey);
+        // Update the base node table, but only if this revision is marked as
+        // the active revision.
+        if ($entity->isActiveRevision()) {
+          $return = backdrop_write_record($this->entityInfo['base table'], $entity, $this->idKey);
+        }
+        else {
+          $return = SAVED_UPDATED;
+        }
       }
 
       if ($this->revisionKey) {
@@ -501,10 +524,14 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
     if (empty($entity->{$this->revisionKey}) || !empty($entity->revision)) {
       backdrop_write_record($this->revisionTable, $record);
-      db_update($this->entityInfo['base table'])
-        ->fields(array($this->revisionKey => $record->{$this->revisionKey}))
-        ->condition($this->idKey, $entity->{$this->idKey})
-        ->execute();
+      // Only update the base node table if this revision is the active
+      // revision.
+      if ($entity->isActiveRevision()) {
+        db_update($this->entityInfo['base table'])
+          ->fields(array($this->revisionKey => $record->{$this->revisionKey}))
+          ->condition($this->idKey, $entity->{$this->idKey})
+          ->execute();
+      }
     }
     else {
       backdrop_write_record($this->revisionTable, $record, $this->revisionKey);
@@ -636,7 +663,12 @@ class NodeStorageController extends EntityDatabaseStorageController {
    *   The node object that has just been saved.
    */
   function postSave(EntityInterface $node, $update) {
-    node_access_acquire_grants($node, $update);
+    // Update the node access table for this node, but only if it is the
+    // active revision. There's no need to delete existing records if the node
+    // is new.
+    if ($node->isActiveRevision()) {
+      node_access_acquire_grants($node, $update);
+    }
   }
 
   /**
