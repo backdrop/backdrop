@@ -764,15 +764,15 @@ class Layout {
    * return LayoutContext[]
    */
   function getContexts() {
-    $this->resetContexts();
-
     // Load objects for stored contexts.
     foreach ($this->contexts as $key => $context) {
-      $context_info = layout_get_context_info($context->plugin);
-      if (isset($context_info['load callback'])) {
-        $function = $context_info['load callback'];
-        $context_data = $function($context->settings['entity']);
-        $context->setData($context_data);
+      if (!isset($context->position) && !is_object($context->data)) {
+        $context_info = layout_get_context_info($context->plugin);
+        if (isset($context_info['load callback'])) {
+          $function = $context_info['load callback'];
+          $context_data = $function($context->settings['entity']);
+          $context->setData($context_data);
+        }
       }
     }
 
