@@ -116,7 +116,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // Create a new layout at a new path.
     $layout_title = $this->randomName();
     $layout_name = strtolower($layout_title);
-    $layout_url = 'layout-test-path';
+    $layout_url = 'a-menu-item-path';
     $edit = array(
       'title' => $layout_title,
       'name' => $layout_name,
