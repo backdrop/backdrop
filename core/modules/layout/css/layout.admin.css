@@ -374,3 +374,19 @@
   margin-right: 2em;
   display: inline;
 }
+
+.edit-layout-top {
+  padding: 0.5em 0.5em;
+  background: #e9e8e8;
+  -webkit-border-radius: 4px 4px 0 0;
+  -moz-border-radius: 4px 4px 0;
+  border-radius: 4px 4px 0 0;
+  margin: 1em 0;
+}
+.edit-layout-top .dropbutton-wrapper {
+  float: right; /* LTR */
+  width: 140px;
+}
+[dir="rtl"] .edit-layout-top .dropbutton-wrapper {
+  float: left;
+}

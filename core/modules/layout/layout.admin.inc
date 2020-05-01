@@ -812,6 +812,25 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
     '#suffix' => '</div>',
   );
 
+  // Add a link to view the page.
+  if ($path) {
+    $form['top']['#theme_wrappers'] = array('container');
+    $form['top']['#attributes']['class'] = array('edit-layout-top', 'clearfix');
+
+    $form['top']['button'] = array(
+      '#type' => 'dropbutton',
+    );
+    $form['top']['button']['#links'] = array(
+     array(
+        'title' => t('Preview page'),
+        'href' => url($layout->menu_item->path),
+        'attributes' => array(
+          'target' => '_blank',
+        ),
+      )
+    );
+  }
+
   $form['content'] = array('#tree' => TRUE);
   $form['content']['block'] = array('#tree' => TRUE);
 
