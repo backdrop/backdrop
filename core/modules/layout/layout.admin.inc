@@ -813,14 +813,8 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
   );
 
   // Add a link to preview the page.
-  $link_path = '';
-  if ($path) {
-    $link_path = $layout->menu_item->path;
-  }
-  elseif (isset($layout->path)) {
-    $link_path = $layout->path;
-  }
-  if (!empty($link_path) && backdrop_valid_path($link_path)) {
+  $link_path = $layout->getPath();
+  if (backdrop_valid_path($link_path)) {
     $form['top']['#theme_wrappers'] = array('container');
     $form['top']['#attributes']['class'] = array('edit-layout-top', 'clearfix');
 
