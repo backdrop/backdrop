@@ -134,15 +134,12 @@ function theme_filter_admin_overview($variables) {
  */
 function theme_filter_admin_format_filter_order($variables) {
   $element = $variables['element'];
-  $filters = $element['filters']['#value'];
-  unset($element['filters']);
 
   // Filter order (tabledrag).
   $rows = array();
-  $disabled = array();
   foreach (element_children($element, TRUE) as $name) {
     $element[$name]['weight']['#attributes']['class'][] = 'filter-order-weight';
-    $row_class =  $filters[$name]->status ? 'draggable' : 'draggable disabled-row';
+    $row_class =  $element[$name]['status']['#default_value'] ? 'draggable' : 'draggable disabled-row';
 
     $rows[] = array(
       'data' => array(

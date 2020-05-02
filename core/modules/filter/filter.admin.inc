@@ -356,10 +356,6 @@ function filter_admin_format_form($form, &$form_state, $format) {
     '#title' => t('Filter settings'),
     '#theme' => 'filter_admin_format_filter_order',
   );
-  $form['filters']['filters'] = array(
-    '#type' => 'value',
-    '#value' => $format->filters,
-  );
   foreach ($all_filter_info as $name => $filter_info) {
     $filter_config = $format->filters[$name];
     $form['filters'][$name]['status'] = array(
@@ -374,7 +370,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
         '#validate' => array('filter_admin_format_filter_settings_form_redirect_validate'),
         '#submit' => array('filter_admin_format_filter_settings_form_redirect'),
         '#ajax' => array(
-          'callback' => 'filter_admin_format_configure_ajax',
+          'callback' => 'filter_admin_format_filter_settings_form_ajax',
           'effect' => 'fade',
         ),
         '#value' => t('Configure'),
@@ -431,8 +427,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
 }
 
 /**
- * Submit handler for filter_admin_format_form() that cancels in-progress
- * actions.
+ * Submit handler for filter_admin_format_form() that cancels in-progress work.
  */
 function filter_admin_format_form_cancel($form, &$form_state) {
   $format = $form_state['format'];
@@ -444,14 +439,13 @@ function filter_admin_format_form_cancel($form, &$form_state) {
 }
 
 /**
- * Validation handler for the settings configuration buttons on the
- * filter_admin_format_form().
+ * Validation for filter "Configure" buttons in filter_admin_format_form().
  */
 function filter_admin_format_filter_settings_form_redirect_validate($form, &$form_state) {
   // Throw a form error if there is no machine name yet, as we need this to set
   // up the URLs for settings forms.
   if (empty($form_state['values']['format'])) {
-    form_set_error('format', t('Please enter a format name before configuring settings'));
+    form_set_error('format', t('Please enter a format name before configuring filter settings.'));
   }
 }
 
@@ -478,9 +472,9 @@ function filter_admin_format_filter_settings_form_redirect($form, &$form_state) 
 }
 
 /**
- * Ajax handler: Handles multistep buttons in field_ui_display_overview_form().
+ * Ajax handler: Opens the dialog to configure a text format filter.
  */
-function filter_admin_format_configure_ajax($form, &$form_state) {
+function filter_admin_format_filter_settings_form_ajax($form, &$form_state) {
   // If there are form errors, show them and scroll to the top of the page.
   if (form_get_errors()) {
     $commands[] = ajax_command_html('#filter-messages', theme('status_messages'));
@@ -667,22 +661,8 @@ function filter_admin_format_form_submit($form, &$form_state) {
   form_state_values_clean($form_state);
   unset($form_state['values']['filter_settings']);
   unset($form_state['values']['actions']);
-  unset($form_state['values']['filters']['filters']);
 
-  $tempstore_filters = array();
-  // If we never changed filter settings, then tempstore was never triggered, so
-  // use only form values.
-  if (!empty($form_state['format']->format)) {
-    $tempstore = filter_get_format_tempstore($form_state['format']->format);
-    $tempstore_filters = $tempstore->filters;
-  }
-
-  foreach ($tempstore_filters as $key => $filter) {
-    $tempstore_filters[$key] = (array) $filter;
-  }
-  $form_state['values']['filters'] = array_replace_recursive($tempstore_filters, $form_state['values']['filters']);
-
-  // Save allowed HTML tags from the hidden textfield to allow JS to modify them.
+  // Save allowed HTML tags from the hidden field in the event JS modified them.
   $form_state['values']['filters']['filter_html']['settings']['allowed_html'] = $form_state['values']['allowed_html'];
   unset($form_state['values']['allowed_html']);
 
