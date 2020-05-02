@@ -74,38 +74,4 @@ class views_plugin_localization_core extends views_plugin_localization {
     return FALSE;
   }
 
-  /**
-   * Collect strings to be exported to code.
-   *
-   * String identifiers are not supported so strings are anonymously in an
-   * array.
-   *
-   * @param array $source
-   *   Full data for the string to be translated.
-   */
-  public function export($source) {
-    if (!empty($source['value'])) {
-      $this->export_strings[] = $source['value'];
-    }
-  }
-
-  /**
-   * Render any collected exported strings to code.
-   *
-   * @param string $indent
-   *   An optional indentation for prettifying nested code.
-   */
-  public function export_render($indent = '  ') {
-    $output = '';
-    if (!empty($this->export_strings)) {
-      $this->export_strings = array_unique($this->export_strings);
-      $output = $indent . '$translatables[\'' . $this->view->name . '\'] = array(' . "\n";
-      foreach ($this->export_strings as $string) {
-        $output .= $indent . "  t('" . str_replace("'", "\'", $string) . "'),\n";
-      }
-      $output .= $indent . ");\n";
-    }
-    return $output;
-  }
-
 }

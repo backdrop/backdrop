@@ -2037,21 +2037,12 @@ class view {
   }
 
   /**
-   * Export localized strings.
-   */
-  public function export_locale_strings() {
-    $this->process_locale_strings('export');
-  }
-
-  /**
-   * Process strings for localization, deletion or export to code.
+   * Process strings for localization or deletion.
    */
   public function process_locale_strings($op) {
     // Ensure this view supports translation, we have a display, and we
     // have a localization plugin.
-    // @todo Export does not init every handler.
-    // @todo Export to json.
-    if (($this->is_translatable() || $op == 'export') && $this->init_display() && $this->init_localization()) {
+    if ($this->is_translatable() && $this->init_display() && $this->init_localization()) {
       $this->localization_plugin->process_locale_strings($op);
     }
   }

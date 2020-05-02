@@ -19,11 +19,6 @@
 class views_plugin_localization extends views_plugin {
 
   /**
-   * Store for exported strings.
-   */
-  public $export_strings = array();
-
-  /**
    *
    */
   public $translate = TRUE;
@@ -110,24 +105,6 @@ class views_plugin_localization extends views_plugin {
   }
 
   /**
-   * Collect strings to be exported to code.
-   *
-   * @param string $source
-   *   Full data for the string to be translated.
-   */
-  public function export($source) {
-  }
-
-  /**
-   * Render any collected exported strings to code.
-   *
-   * @param string $indent
-   *   An optional indentation for prettifying nested code.
-   */
-  public function export_render($indent = '  ') {
-  }
-
-  /**
    * Invoke hook_translation_pre_process() or hook_translation_post_process().
    *
    * Like node_invoke_nodeapi(), this function is needed to enable both passing
@@ -173,9 +150,6 @@ class views_plugin_localization extends views_plugin {
             $this->delete($data);
             break;
 
-          case 'export':
-            $this->export($data);
-            break;
         }
       }
     }
