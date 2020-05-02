@@ -313,18 +313,34 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->settings['node_submitted'],
     '#description' => t('Author username and publish date will be displayed.'),
   );
+  $node_submitted_state = array(
+    'visible' => array(
+      'input[name="node_submitted"]' => array('checked' => TRUE),
+    ),
+  );
+  $form['display']['node_submitted_format'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Author/date format'),
+    '#default_value' => $type->settings['node_submitted_format'],
+    '#description' => t('The format to use for the author username and publish date. Example: "Submitted by [node:author] on [node:created:medium]"'),
+    '#states' => $node_submitted_state,
+  );
+  $form['display']['node_submitted_tokens'] = array(
+    '#type' => 'item', // Needed for states to work.
+    '#theme' => 'token_tree_link',
+    '#token_types' => array('node'),
+    '#global_types' => TRUE,
+    '#click_insert' => TRUE,
+    '#states' => $node_submitted_state,
+  );
   if (config_get('system.core', 'user_pictures')) {
     $form['display']['node_user_picture'] = array(
       '#type' => 'checkbox',
       '#title' => t('Display the author picture'),
       '#default_value' => $type->settings['node_user_picture'],
       '#description' => t('Author picture will be included along with username and publish date, if provided.'),
-      '#states' => array(
-        // Hide the picture settings when submitted info is disabled.
-        'visible' => array(
-          'input[name="node_submitted"]' => array('checked' => TRUE),
-        ),
-      ),
+      // Hide the picture settings when submitted info is disabled.
+      '#states' => $node_submitted_state,
     );
   }
   $form['display']['hidden_path'] = array(
@@ -592,6 +608,7 @@ function node_node_type_load(&$types) {
 
       // Submitted information.
       'node_submitted' => TRUE,
+      'node_submitted_format' => t('[node:created:medium] by [node:author]'),
       'node_user_picture' => TRUE,
 
       // Setting to prevent page from being accessed directly.
