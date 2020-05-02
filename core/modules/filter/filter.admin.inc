@@ -531,7 +531,7 @@ function filter_admin_format_filter_settings_form($form, &$form_state, $format, 
   $settings_form['actions']['#type'] = 'actions';
   $settings_form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Submit'),
+    '#value' => t('Update'),
     '#validate' => array(),
     '#submit' => array('filter_admin_format_filter_settings_update'),
     '#ajax' => array(

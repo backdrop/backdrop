@@ -308,7 +308,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     // Add an additional tag.
     $edit = array();
     $edit['allowed_html'] = '<a> <em> <strong> <cite> <code> <ul> <ol> <li> <dl> <dt> <dd> <quote>';
-    $this->backdropPost('admin/config/content/formats/' . $filtered . '/filter-settings/filter_html', $edit, t('Submit'));
+    $this->backdropPost('admin/config/content/formats/' . $filtered . '/filter-settings/filter_html', $edit, t('Update'));
     $this->backdropPost(NULL, array(), t('Save configuration'));
     $this->backdropGet('admin/config/content/formats/' . $filtered);
     $this->assertFieldByName('allowed_html', $edit['allowed_html'], 'Allowed HTML tag added.');
@@ -395,7 +395,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     // Allowed tags.
     $edit = array();
     $edit['allowed_html'] = '<a> <em> <strong> <cite> <code> <ul> <ol> <li> <dl> <dt> <dd>';
-    $this->backdropPost('admin/config/content/formats/' . $filtered . '/filter-settings/filter_html', $edit, t('Submit'));
+    $this->backdropPost('admin/config/content/formats/' . $filtered . '/filter-settings/filter_html', $edit, t('Update'));
     $this->backdropPost(NULL, array(), t('Save configuration'));
     $this->backdropGet('admin/config/content/formats/' . $filtered);
     $this->assertFieldByName('allowed_html', $edit['allowed_html'], 'Allowed HTML tag added.');
@@ -463,7 +463,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $edit = array(
       'filter_url_length' => $this->randomName(4),
     );
-    $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit, t('Submit'));
+    $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit, t('Update'));
     $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Filtered HTML')));
   }
 }
