@@ -124,7 +124,10 @@ class views_plugin_localization extends views_plugin {
   }
 
   /**
+   * Process strings.
    *
+   * @param string $op
+   *   Operation name, "save" or "delete".
    */
   public function process_locale_strings($op) {
     $this->view->init_display();
