@@ -1208,6 +1208,29 @@ function views_get_plugin($type, $plugin, $reset = FALSE) {
   }
 }
 
+/**
+ * Load the current enabled localization plugin.
+ *
+ * @return string
+ *   The name of the localization plugin.
+ */
+function views_get_localization_plugin() {
+  //$plugin = variable_get('views_localization_plugin', '');
+  // @todo CMI.
+  $plugin = '';
+  // Provide sane default values for the localization plugin.
+  if (empty($plugin)) {
+    if (module_exists('locale')) {
+      $plugin = 'core';
+    }
+    else {
+      $plugin = 'none';
+    }
+  }
+
+  return $plugin;
+}
+
 // -----------------------------------------------------------------------
 // Views database functions
 
@@ -2170,6 +2193,9 @@ function views_autoload_info() {
     'views_plugin_exposed_form_basic' => 'plugins/views_plugin_exposed_form_basic.inc',
     'views_plugin_exposed_form' => 'plugins/views_plugin_exposed_form.inc',
     'views_plugin_exposed_form_input_required' => 'plugins/views_plugin_exposed_form_input_required.inc',
+    'views_plugin_localization_core' => 'plugins/views_plugin_localization_core.inc',
+    'views_plugin_localization' => 'plugins/views_plugin_localization.inc',
+    'views_plugin_localization_none' => 'plugins/views_plugin_localization_none.inc',
     'views_plugin_pager' => 'plugins/views_plugin_pager.inc',
     'views_plugin_pager_full' => 'plugins/views_plugin_pager_full.inc',
     'views_plugin_pager_mini' => 'plugins/views_plugin_pager_mini.inc',
