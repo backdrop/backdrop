@@ -44,7 +44,7 @@ class views_plugin_localization_core extends views_plugin_localization {
     // If the current language is 'en', we need to reset the language
     // in order to trigger an update.
     // @todo add test for number of languages.
-    if ($language->language == 'en') {
+    if ($language->langcode == 'en') {
       $changed = TRUE;
       $languages = language_list();
       $cached_language = $language;

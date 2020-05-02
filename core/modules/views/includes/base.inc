@@ -92,7 +92,7 @@ class views_object {
    * Unpack options over our existing defaults, drilling down into arrays
    * so that defaults don't get totally blown away.
    */
-  function unpack_options(&$storage, $options, $definition = NULL, $all = TRUE, $check = TRUE) {
+  function unpack_options(&$storage, $options, $definition = NULL, $all = TRUE, $check = TRUE, $localization_keys = array()) {
     if ($check && !is_array($options)) {
       return;
     }
@@ -137,12 +137,37 @@ class views_object {
           continue;
         }
 
-        $this->unpack_options($storage[$key], $value, isset($definition[$key]['contains']) ? $definition[$key]['contains'] : array(), $all, FALSE);
+        $this->unpack_options($storage[$key], $value, isset($definition[$key]['contains']) ? $definition[$key]['contains'] : array(), $all, FALSE, array_merge($localization_keys, array($key)));
+      }
+      // Don't localize strings during editing. When editing, we need to work
+      // with the original data, not the translated version.
+      elseif (empty($this->view->editing) && !empty($definition[$key]['translatable']) && !empty($value) || !empty($definition['contains'][$key]['translatable']) && !empty($value)) {
+        if (!empty($this->view) && $this->view->is_translatable()) {
+          // Allow other modules to make changes to the string before it's
+          // sent for translation.
+          // The $keys array is built from the view name, any localization keys
+          // sent in, and the name of the property being processed.
+          $format = NULL;
+          if (isset($definition[$key]['format_key']) && isset($options[$definition[$key]['format_key']])) {
+            $format = $options[$definition[$key]['format_key']];
+          }
+          $translation_data = array(
+            'value' => $value,
+            'format' => $format,
+            'keys' => array_merge(array($this->view->name), $localization_keys, array($key)),
+          );
+          $storage[$key] = $this->view->localization_plugin->translate($translation_data);
+        }
+        // Otherwise, this is a code-based string, so we can use t().
+        else {
+          $storage[$key] = t($value);
+        }
       }
       elseif ($all || !empty($definition[$key])) {
         $storage[$key] = $value;
       }
     }
+
   }
 
   /**
