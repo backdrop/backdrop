@@ -1413,11 +1413,11 @@ function node_search_admin() {
     '#element_validate' => array('node_search_admin_validate'),
   );
   $form['node_settings']['node_types'] = array(
-    '#title' => t('Enabled types'),
+    '#title' => t('Enabled content types'),
     '#type' => 'checkboxes',
     '#default_value' => _node_search_get_types(),
     '#options' => node_type_get_names(),
-    '#description' => t('Only content of selected types will be available in results. Disabled types will not be indexed in the future.'),
+    '#description' => t('Only enabled content types will be available in search results. Disabled content types will not be indexed in the future.'),
   );
 
   $form['node_settings']['factors'] = array(
