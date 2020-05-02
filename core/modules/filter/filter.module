@@ -37,9 +37,6 @@ function filter_theme() {
     'filter_format_editor_image_form' => array(
         'render element' => 'form',
     ) + $base,
-    'filter_admin_format_filter_display' => array(
-      'render element' => 'element',
-    ) + $base,
   );
 }
 
@@ -701,7 +698,7 @@ function filter_library_info() {
       $module_path . '/js/filter.admin.js' => array('group' => JS_THEME, 'aggregate' => FALSE,),
     ),
     'css' => array(
-      $module_path . '/css/filter.css' => array(),
+      $module_path . '/css/filter.admin.css' => array('group' => CSS_THEME, 'aggregate' => FALSE),
     ),
   );
   $libraries['filter.filtered_html.admin'] = array(
@@ -1965,7 +1962,6 @@ function filter_filter_info() {
  * Filter settings callback for the HTML content filter.
  */
 function _filter_html_settings($form, &$form_state, $filter, $format) {
-  $settings['#attached']['library'][] = array('filter', 'filter.filtered_html.admin');
   $settings['allowed_html'] = array(
     '#type' => 'textfield',
     '#title' => t('Allowed HTML tags'),

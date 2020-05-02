@@ -8,7 +8,7 @@
 Backdrop.behaviors.filterStatus = {
   attach: function (context, settings) {
     // TableDrag is required and we should be on the filters admin page.
-    if (typeof Backdrop.tableDrag == 'undefined' || typeof Backdrop.tableDrag.filterorder == 'undefined') {
+    if (typeof Backdrop.tableDrag == 'undefined' || typeof Backdrop.tableDrag['filter-order'] == 'undefined') {
       return;
     }
 
@@ -16,15 +16,19 @@ Backdrop.behaviors.filterStatus = {
       $(this).addClass('filter-container-initial');
     });
 
-    // A custom message for the filters page specifically.
+    // Suppress tabledrag messages.
     Backdrop.theme.tableDragChangedWarning = function () {
-      return '<div class="messages warning">' + Backdrop.theme('tableDragChangedMarker') + ' ' + Backdrop.t('The changes to these filters will not be saved until the <em>Save configuration</em> button is clicked.') + '</div>';
+      return '';
     };
+    Backdrop.theme.tableDragChangedMarker = function () {
+      return '';
+    }
 
     // Toggle class on row if checkbox changed.
-    $('#filterorder input.filter-status:checkbox', context).change(function (event) {
-        var isChecked = !$(this).prop('checked');
-        $(this).closest('tr').toggleClass('disabled-row', isChecked);
+    $('#filter-order input.filter-status:checkbox', context).change(function (event) {
+      var isChecked = !$(this).prop('checked');
+      $(this).closest('tr').toggleClass('disabled-row', isChecked);
+      Backdrop.filterConfiguration.update();
     });
   }
 };
@@ -496,7 +500,7 @@ Backdrop.behaviors.initializeFilterConfiguration = {
   attach: function (context, settings) {
     var $context = $(context);
 
-    $context.find('#filterorder input.form-checkbox').once('filter-editor-status').each(function () {
+    $context.find('#filter-order input.form-checkbox').once('filter-editor-status').each(function () {
       var $checkbox = $(this);
       var nameAttribute = $checkbox.attr('name');
 

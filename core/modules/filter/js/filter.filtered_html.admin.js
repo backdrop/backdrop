@@ -56,29 +56,9 @@ Backdrop.behaviors.filterFilterHtmlUpdating = {
 
   attach: function (context, settings) {
     var that = this;
-    // Respond to dialogs that are closed, updating the underlying form values.
-    $(".filter-dialog .ui-dialog-buttonpane .button-primary").click(function (e) {
-      $(document).ajaxComplete(function() {
-        var copyAllowedVals = $('#allowed-html').data('copyAllowedVals');
-        if (copyAllowedVals) {
-          $('#allowed-html').val(copyAllowedVals);
-
-          // Update userTags.
-          var tagList = that._parseSetting(copyAllowedVals);
-          var userTags = [];
-          for (var n in tagList) {
-            if ($.inArray(tagList[n], that.autoTags) === -1) {
-              userTags.push(tagList[n]);
-            }
-          }
-          that.userTags = userTags;
-        }
-      });
-    });
-
     $(context).find('#allowed-html').once('filter-filter_html-updating').each(function () {
       that.$allowedHTMLFormItem = $(this);
-      that.$allowedHTMLDescription = that.$allowedHTMLFormItem.closest('.form-item').find('.description');
+      that.$allowedHTMLDescription = $('[data-filter-name="filter_html"]').find('.description');
       that.userTags = that._parseSetting(this.value);
 
       // Update the new allowed tags based on added text editor features.
@@ -99,6 +79,11 @@ Backdrop.behaviors.filterFilterHtmlUpdating = {
               that._updateAllowedTags();
             }
           });
+
+      // Update the user tags when the allowed-html field is manually changed.
+      that.$allowedHTMLFormItem.on('change.filter-update', function() {
+        that.userTags = that._parseSetting(this.value);
+      });
 
     });
   },

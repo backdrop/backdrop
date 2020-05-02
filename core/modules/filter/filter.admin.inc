@@ -186,9 +186,11 @@ function filter_admin_format_form($form, &$form_state, $format) {
     filter_admin_set_message($stored_format);
     $format = $stored_format;
   }
+  // If editing an already-existing format.
   elseif (isset($format->format)) {
     filter_set_format_tempstore($format);
   }
+
   $is_fallback = ($format->format == filter_fallback_format());
   $editors = filter_get_editors();
   if (isset($form_state['editor_info'])) {
@@ -209,10 +211,12 @@ function filter_admin_format_form($form, &$form_state, $format) {
 
   $form_state['format'] = $format;
   $form_state['editor_info'] = $editor_info;
+
   $form['#validate'] = array();
   $form['#submit'] = array();
   $form['#tree'] = TRUE;
-  $form['#attached']['library'][] = array('filter', 'filter.admin', 'filtered_html.admin');
+  $form['#attached']['library'][] = array('filter', 'filter.admin');
+  $form['#attached']['library'][] = array('filter', 'filter.filtered_html.admin');
   $form['#attached']['library'][] = array('system', 'backdrop.dialog');
 
   $form['name'] = array(
@@ -331,29 +335,11 @@ function filter_admin_format_form($form, &$form_state, $format) {
   // Retrieve available filters and load all configured filters for existing
   // text formats.
   $all_filter_info = filter_get_filters();
-  $filters = $format->filters;
 
-  // Get filter tips.
-  $format_tips = array();
-
-  // Copy the format to get tips without an editor assigned.
-  $clone_format = clone($format);
-  $clone_format->editor = FALSE;
-
-  foreach ($clone_format->filters as $name => $filter) {
-    if ($filter->status && isset($all_filter_info[$name]['tips callback'])) {
-      $tip = $all_filter_info[$name]['tips callback']($filter, $clone_format);
-      if (isset($tip)) {
-        $format_tips[$name] = $tip;
-      }
-    }
-  }
-
-  // Prepare filters for form sections.
+  // Create an empty filter object for new/unconfigured filters.
   foreach ($all_filter_info as $name => $filter_info) {
-    // Create an empty filter object for new/unconfigured filters.
-    if (!isset($filters[$name])) {
-      $filters[$name] = (object) array(
+    if (!isset($format->filters[$name])) {
+      $format->filters[$name] = (object) array(
         'format' => $format->format,
         'module' => $filter_info['module'],
         'name' => $name,
@@ -363,7 +349,6 @@ function filter_admin_format_form($form, &$form_state, $format) {
       );
     }
   }
-  $form['#filters'] = $filters;
 
   // Filter order (tabledrag).
   $form['filters'] = array(
@@ -373,12 +358,13 @@ function filter_admin_format_form($form, &$form_state, $format) {
   );
   $form['filters']['filters'] = array(
     '#type' => 'value',
-    '#value' => $filters,
+    '#value' => $format->filters,
   );
   foreach ($all_filter_info as $name => $filter_info) {
+    $filter_config = $format->filters[$name];
     $form['filters'][$name]['status'] = array(
       '#type' => 'checkbox',
-      '#default_value' => $filters[$name]->status,
+      '#default_value' => $filter_config->status,
       '#attributes' => array('class' => array('filter-status')),
     );
     if (isset($filter_info['settings callback'])) {
@@ -395,16 +381,13 @@ function filter_admin_format_form($form, &$form_state, $format) {
       );
     }
     $form['filters'][$name]['filter'] = array(
-      '#theme' => 'filter_admin_format_filter_display',
       '#type' => 'item',
-      '#prefix' => '<div class="filter-td">',
-      '#suffix' => '</div>',
-    );
-    $form['filters'][$name]['filter']['title'] = array(
-      '#markup' => $filter_info['title'],
-    );
-    $form['filters'][$name]['filter']['details'] = array(
-      '#markup' => isset($format_tips[$name]) ? $format_tips[$name] : '',
+      '#title' => $filter_info['title'],
+      '#description' => _filter_admin_format_get_tips($format, $name),
+      '#wrapper_attributes' => array(
+        'class' => array('filter-info'),
+        'data-filter-name' => $name,
+      ),
     );
 
     $form['filters'][$name]['weight'] = array(
@@ -412,18 +395,18 @@ function filter_admin_format_form($form, &$form_state, $format) {
       '#title' => t('Weight for @title', array('@title' => $filter_info['title'])),
       '#title_display' => 'invisible',
       '#delta' => 50,
-      '#default_value' => $filters[$name]->weight,
+      '#default_value' => $filter_config->weight,
       '#parents' => array('filters', $name, 'weight'),
     );
-    $form['filters'][$name]['#weight'] = $filters[$name]->weight;
+    $form['filters'][$name]['#weight'] = $filter_config->weight;
   }
 
-  // This textfield will be hidden by CSS and used to store allowed HTML tags
-  // for the filter_html filter. This is necessary to allow JS to respond to
-  // changes in CKEditor buttons, changing allowed tags in response.
-  $filter_html = $filters['filter_html'];
+  // This hidden field is used to store allowed HTML tags for the filter_html
+  // filter. This is necessary to allow JS to respond to changes in editor
+  // buttons, changing allowed tags in response.
+  $filter_html = $format->filters['filter_html'];
   $form['allowed_html'] = array(
-    '#type' => 'textfield',
+    '#type' => 'hidden',
     '#maxlength' => 1024,
     '#attributes' => array('id' => array('allowed-html')),
     '#default_value' => $filter_html->settings['allowed_html'],
@@ -473,16 +456,24 @@ function filter_admin_format_filter_settings_form_redirect_validate($form, &$for
 }
 
 /**
- * Submit handler for the settings configuration buttons on the
- * filter_admin_format_form().
+ * Submit handler for filter "Configure" buttons in filter_admin_format_form().
  */
 function filter_admin_format_filter_settings_form_redirect($form, &$form_state) {
   $trigger = $form_state['triggering_element'];
   $name = $trigger['#name'];
+
+  // Save any changes to the allowed HTML values made by the front-end.
+  if (isset($form_state['format']->filters['filter_html'])) {
+    $form_state['format']->filters['filter_html']->settings['allowed_html'] = $form_state['values']['allowed_html'];
+  }
+
+  // Populate a format name if creating a new format.
   if (empty($form_state['format']->format)) {
     $form_state['format']->format = $form_state['values']['format'];
-    filter_set_format_tempstore($form_state['format']);
   }
+
+  filter_set_format_tempstore($form_state['format']);
+
   $form_state['redirect'] = 'admin/config/content/formats/' . $form_state['format']->format . '/filter-settings/' . $name;
 }
 
@@ -490,105 +481,86 @@ function filter_admin_format_filter_settings_form_redirect($form, &$form_state) 
  * Ajax handler: Handles multistep buttons in field_ui_display_overview_form().
  */
 function filter_admin_format_configure_ajax($form, &$form_state) {
-  $trigger = $form_state['triggering_element'];
-  $name = $trigger['#name'];
-  $format = $form_state['format'];
-  $format = filter_get_format_tempstore($format->format);
-
-  // Transfer alllowed tags from the hidden textfield to the format object in 
-  // case there were button changes which affected allowed tags.
-  $format->filters['filter_html']->settings['allowed_html'] = $form_state['values']['allowed_html'];
-
-  $configure_form = backdrop_get_form('filter_admin_format_filter_settings_form', $format, $name);
-  $title = t('Configure filter');
-  $options = array(
-    'dialogClass' => 'filter-dialog',
-    'width' => '90%',
-  );
-
-  $html = '';
-  $html .= theme('status_messages');
-  $html .= '<div data-filter-name="' . $name . '" class="filter-dialog-settings">';
-  $html .= backdrop_render($configure_form);
-  $html .= '</div>';
-
-  $commands = array();
-  $commands[] = ajax_command_open_modal_dialog($title, $html, $options);
-
-  return array('#type' => 'ajax', '#commands' => $commands);
-}
-
-/**
- * Ajax handler for buttons in filter_admin_format_filter_settings_form().
- */
-function filter_admin_format_configure_ajax_submit($form, &$form_state) {
-  $commands = array();
-  if (isset($form_state['values']['allowed_html'])) {
-    $commands[] = ajax_command_data('#allowed-html', 'copyAllowedVals', $form_state['values']['allowed_html']);
-    $selector = '#edit-filters-' . str_replace('_', '-', $form_state['filter']) . '-filter .filter-details.description';
-    $replacement = check_plain('Allowed HTML tags: ' . $form_state['values']['allowed_html']);
-    $commands[] = ajax_command_html($selector, $replacement);
+  // If there are form errors, show them and scroll to the top of the page.
+  if (form_get_errors()) {
+    $commands[] = ajax_command_html('#filter-messages', theme('status_messages'));
+    $commands[] = ajax_command_redirect('#filter-messages');
   }
-  $commands[] = ajax_command_html('#filter-messages', theme('status_messages'));
-  $commands[] = ajax_command_close_modal_dialog();
+  // If no form errors, open the configure dialog.
+  else {
+    $trigger = $form_state['triggering_element'];
+    $name = $trigger['#name'];
+    $format = $form_state['format'];
+
+    $configure_form = backdrop_get_form('filter_admin_format_filter_settings_form', $format, $name);
+    $title = t('Configure filter');
+    $options = array(
+      'dialogClass' => 'filter-dialog',
+      'width' => '90%',
+    );
+
+    $html = '';
+    $html .= theme('status_messages');
+    $html .= '<div data-filter-name="' . $name . '" class="filter-dialog-settings">';
+    $html .= backdrop_render($configure_form);
+    $html .= '</div>';
+
+    $commands = array();
+    $commands[] = ajax_command_html('#filter-messages', '');
+    $commands[] = ajax_command_open_modal_dialog($title, $html, $options);
+  }
+
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
 /**
- * Returns the configuration form for configurable filters.
+ * Returns the configuration form for an individual configurable filter.
  */
-function filter_admin_format_filter_settings_form($form, &$form_state, $format, $filter) {
+function filter_admin_format_filter_settings_form($form, &$form_state, $format, $filter_name) {
   form_load_include($form_state, 'inc', 'filter', 'filter.admin');
   $form_state['format'] = $format;
-  $form_state['filter'] = $filter;
+  $form_state['filter_name'] = $filter_name;
 
   $all_filter_info = filter_get_filters();
-  if(isset($all_filter_info[$filter]['settings callback'])) {
-    // $format->filters isn't always built yet.
-    if(!empty($format->filters)) {
-      $filters = $format->filters;
-      $function = $all_filter_info[$filter]['settings callback'];
-      // This is not always set during rebuild.
-      if(empty($filters[$filter])) {
-        return array();
-      }
-      $filter = $filters[$filter];
-      $settings_form = $function($form, $form_state, $filter, $format);
-          
-        $settings_form['filter'] = array(
-          '#type' => 'value',
-          '#value' => $filter->name,
-        );
-        $settings_form['actions']['#type'] = 'actions';
-        $settings_form['actions']['submit'] = array(
-          '#type' => 'submit',
-          '#value' => t('Submit'),
-          '#validate' => array(),
-          '#submit' => array('filter_admin_format_filter_settings_update'),
-          '#ajax' => array(
-            'callback' => 'filter_admin_format_configure_ajax_submit',
-            'progress' => array(
-              'type' => 'throbber',
-              'message' => NULL,
-            ),
-          ),
-        );
+  $filter_info = $all_filter_info[$filter_name];
+  $filter = $format->filters[$filter_name];
 
-        $settings_form['actions']['cancel'] = array(
-          '#type' => 'link',
-          '#title' => t('Cancel'),
-          '#href' => '',
-          '#attributes' => array(
-            // Adding button classes puts the link in the button area of the dialog,
-            // while the special "dialog-cancel" class closes the dialog.
-            'class' => array('button', 'button-secondary', 'form-submit', 'dialog-cancel'),
-          ),
-        );
-
-      return $settings_form;
-    }
+  if (isset($filter_info['settings callback'])) {
+    $function = $filter_info['settings callback'];
+    $settings_form = $function($form, $form_state, $filter, $format);
   }
-  return array();
+
+  $settings_form['filter'] = array(
+    '#type' => 'value',
+    '#value' => $filter->name,
+  );
+  $settings_form['actions']['#type'] = 'actions';
+  $settings_form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+    '#validate' => array(),
+    '#submit' => array('filter_admin_format_filter_settings_update'),
+    '#ajax' => array(
+      'callback' => 'filter_admin_format_filter_settings_ajax',
+      'progress' => array(
+        'type' => 'throbber',
+        'message' => NULL,
+      ),
+    ),
+  );
+
+  $settings_form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => '',
+    '#attributes' => array(
+      // Adding button classes puts the link in the button area of the dialog,
+      // while the special "dialog-cancel" class closes the dialog.
+      'class' => array('button', 'button-secondary', 'form-submit', 'dialog-cancel'),
+    ),
+  );
+
+  return $settings_form;
 }
 
 /**
@@ -597,16 +569,42 @@ function filter_admin_format_filter_settings_form($form, &$form_state, $format, 
 function filter_admin_format_filter_settings_update($form, &$form_state) {
   form_state_values_clean($form_state);
   unset($form_state['values']['filter']);
-  $filter = $form_state['filter'];
+  $filter_name = $form_state['filter_name'];
   $format = $form_state['format'];
 
-  $form_state['format']->filters[$filter]->settings = $form_state['values'];
-  $form_state['format']->updated = TRUE;
-  filter_set_format_tempstore($form_state['format']);
+  $format->filters[$filter_name]->settings = $form_state['values'];
+  $format->updated = TRUE;
+  filter_set_format_tempstore($format);
+  filter_admin_set_message($format);
 
-  filter_admin_set_message($form_state['format']);
+  $form_state['redirect'] = 'admin/config/content/formats/' . $format->format;
+}
 
-  $form_state['redirect'] = 'admin/config/content/formats/' . $form_state['format']->format;
+/**
+ * Ajax handler for buttons in filter_admin_format_filter_settings_form().
+ */
+function filter_admin_format_filter_settings_ajax($form, &$form_state) {
+  $filter_name = $form_state['filter_name'];
+  $format = $form_state['format'];
+
+  $commands = array();
+
+  // Update the filter tips for the configured filter.
+  $cloned_format = clone($format);
+  $cloned_format->editor = FALSE;
+  $tips = _filter_admin_format_get_tips($format, $filter_name);
+  if (isset($tips)) {
+    $commands[] = ajax_command_html('.filter-info[data-filter-name="' . $filter_name . '"] .description', $tips);
+  }
+
+  if (isset($form_state['values']['allowed_html'])) {
+    // Update the tag list stored in the main form hidden element.
+    $commands[] = ajax_command_invoke('#allowed-html', 'val', array($form_state['values']['allowed_html']));
+    $commands[] = ajax_command_invoke('#allowed-html', 'trigger', array('change.filter-update'));
+  }
+  $commands[] = ajax_command_html('#filter-messages', theme('status_messages'));
+  $commands[] = ajax_command_close_modal_dialog();
+  return array('#type' => 'ajax', '#commands' => $commands);
 }
 
 /**
@@ -1012,8 +1010,35 @@ function filter_editor_file_upload_settings_form($format) {
  * Sets a page message for changed filter tempstore values.
  */
 function filter_admin_set_message($format) {
-  if ($format->updated) {
+  if (!empty($format->updated)) {
     $message = t('This form has unsaved changes. Click "Save configuration" to make changes permanent or "Cancel" to discard changes.');
-    backdrop_set_message($message, 'warning');
+    backdrop_set_message($message, 'warning', FALSE);
   }
+}
+
+/**
+ * Get filter tips for an individual filter within a text format.
+ *
+ * This will return tips as though any editor were disabled.
+ *
+ * @param stdClass $format
+ *   The format from which to pull filter tips.
+ * @param string $filter_name
+ *   The machine name of the filter from which to get tips.
+ */
+function _filter_admin_format_get_tips($format, $filter_name) {
+  // Temporarily disable editor setting.
+  $editor_settings = $format->editor;
+  $format->editor = FALSE;
+
+  $filter_info = filter_get_filters();
+
+  if (isset($filter_info[$filter_name]['tips callback'])) {
+    $tips = $filter_info[$filter_name]['tips callback']($format->filters[$filter_name], $format, FALSE);
+  }
+
+  // Restore editor settings.
+  $format->editor = $editor_settings;
+
+  return isset($tips) ? $tips : NULL;
 }

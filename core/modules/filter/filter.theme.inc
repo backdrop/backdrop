@@ -156,18 +156,9 @@ function theme_filter_admin_format_filter_order($variables) {
   }
   $output = backdrop_render_children($element);
   $header = array(t('Filter'), t('Enabled'), t('Configure'), '');
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'filterorder')));
-  backdrop_add_tabledrag('filterorder', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'filter-order')));
+  backdrop_add_tabledrag('filter-order', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
 
-  return $output;
-}
-
-function theme_filter_admin_format_filter_display($variables) {
-  $element = $variables['element'];
-  $output = '<div class="filter-title">' . backdrop_render($element['title']) . '</div>';
-  $output .= '<div class="filter-details description">' . backdrop_render($element['details']) . '</div>';
-  $output .= '<div class="filter-configure">' . backdrop_render($element['configure']) . '</div>';
-  $output .= backdrop_render_children($element);
   return $output;
 }
 
