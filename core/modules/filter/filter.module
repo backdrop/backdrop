@@ -328,7 +328,7 @@ function filter_format_build_format($format) {
 }
 
 /**
- * Saves a text format object to the database.
+ * Saves a text format object to configuration.
  *
  * @param $format
  *   A format object having the properties:
