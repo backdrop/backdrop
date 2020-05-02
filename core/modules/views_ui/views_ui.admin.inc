@@ -4605,6 +4605,19 @@ function views_ui_admin_settings_advanced() {
     '#default_value' => $config->get('devel_output'),
   );
 
+  $form['locale'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Localization'),
+  );
+
+  $form['locale']['views_localization_plugin'] = array(
+    '#type' => 'radios',
+    '#title' => t('Translation method'),
+    '#options' => views_fetch_plugin_names('localization', NULL, array()),
+    '#default_value' => views_get_localization_plugin(),
+    '#description' => t('Select a translation method to use for Views data like header, footer, and empty text.'),
+  );
+
   $regions = array();
   $regions['watchdog'] = t('Watchdog');
 

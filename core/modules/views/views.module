@@ -1215,9 +1215,7 @@ function views_get_plugin($type, $plugin, $reset = FALSE) {
  *   The name of the localization plugin.
  */
 function views_get_localization_plugin() {
-  //$plugin = variable_get('views_localization_plugin', '');
-  // @todo CMI.
-  $plugin = '';
+  $plugin = config_get('views.settings', 'views_localization_plugin');
   // Provide sane default values for the localization plugin.
   if (empty($plugin)) {
     if (module_exists('locale')) {
@@ -1227,7 +1225,6 @@ function views_get_localization_plugin() {
       $plugin = 'none';
     }
   }
-
   return $plugin;
 }
 
