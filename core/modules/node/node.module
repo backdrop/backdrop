@@ -1452,7 +1452,7 @@ function node_search_admin_validate($element, &$form_state) {
 
   // Ensure at least one value was checked.
   if (empty($form_state['values']['node_types'])) {
-    form_set_error('node_types', t('Select at least one content type to search or complete disable searching content.'));
+    form_set_error('node_types', t('Please select at least one content type to search, or completely disable searching content.'));
   }
   // If all types are checked, save an empty array indicating all types are enabled.
   elseif (count($form_state['values']['node_types']) === count(node_type_get_names())) {
