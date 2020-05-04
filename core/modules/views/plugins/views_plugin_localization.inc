@@ -73,8 +73,11 @@ class views_plugin_localization extends views_plugin {
   /**
    * Save string source for translation.
    *
-   * @param string $source
+   * @param array $source
    *   Full data for the string to be translated.
+   *   - value: string for translation
+   *   - keys: array of keys
+   *   - format: optional text format
    */
   public function save($source) {
     // Allow other modules to make changes to the string before saving.

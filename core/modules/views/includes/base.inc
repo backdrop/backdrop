@@ -232,7 +232,38 @@ class views_object {
         return;
       }
     }
-    if (!empty($definition['translatable']) && !empty($options)) {
+    // Add the current option to the parents tree.
+    $parents[] = $option;
+
+    // If it has child items, unpack those separately.
+    if (isset($definition['contains'])) {
+      foreach ($definition['contains'] as $sub_option => $sub_definition) {
+        $translation_keys = array_merge($keys, array($sub_option));
+        $this->unpack_translatable($translatable, $storage[$option], $sub_option, $sub_definition, $parents, $translation_keys);
+      }
+    }
+    $options = $storage[$option];
+    if (is_array($options)) {
+      foreach ($options as $key => $value) {
+        $translation_keys = array_merge($keys, array($key));
+        if (is_array($value)) {
+          $this->unpack_translatable($translatable, $options, $key, $definition, $parents, $translation_keys);
+        }
+        elseif (!empty($definition[$key]['translatable']) && !empty($value)) {
+          // Build source data and add to the array.
+          $format = NULL;
+          if (isset($definition['format_key']) && isset($options[$definition['format_key']])) {
+            $format = $options[$definition['format_key']];
+          }
+          $translatable[] = array(
+            'value' => $value,
+            'keys' => $translation_keys,
+            'format' => $format,
+          );
+        }
+      }
+    }
+    elseif (!empty($definition['translatable']) && !empty($options)) {
       $value = $options;
       // Build source data and add to the array.
       $format = NULL;
