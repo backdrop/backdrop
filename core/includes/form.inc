@@ -4855,10 +4855,8 @@ function theme_form_element_label($variables) {
   $output = ' <label' . backdrop_attributes($attributes) . '>' . $t('!title !required', array('!title' => $title, '!required' => $required)) . "</label>\n";
 
   // Help text displayed before the field.
-  if (!empty($element['#description'])) {
-    if (isset($element['#description_display']) && $element['#description_display'] == 1) {
-      $output .= '<div class="description">' . $element['#description'] . "</div>\n";
-    }
+  if (!empty($element['#description']) && !empty($element['#description_before'])) {
+    $output .= '<div class="description">' . $element['#description'] . "</div>\n";
   }
 
   return $output;
