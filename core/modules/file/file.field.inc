@@ -645,6 +645,7 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     'fid' => 0,
     'display' => !empty($field['settings']['display_default']),
     'description' => '',
+    'description_before' => 0,
   );
 
   // Load the items for form rebuilds from the field state as they might not be
@@ -792,6 +793,7 @@ function file_field_widget_value($element, $input = FALSE, $form_state) {
     'fid' => 0,
     'display' => 1,
     'description' => '',
+    'description_before' => 0,
   );
 
   return $return;

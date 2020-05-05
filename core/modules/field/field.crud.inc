@@ -821,6 +821,7 @@ function field_defaults_instance() {
     'bundle' => NULL,
     'label' => '',
     'description' => '',
+    'description_before' => 0,
     'required' => 0,
     'deleted' => 0,
     'default_value' => NULL,

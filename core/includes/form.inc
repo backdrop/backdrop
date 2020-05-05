@@ -4707,8 +4707,8 @@ function theme_file($variables) {
  * @param $variables
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
- *     Properties used: #title, #title_display, #description, #id, #required,
- *     #children, #type, #name.
+ *     Properties used: #title, #title_display, #description, #description_before,
+ *     #id, #required, #children, #type, #name.
  *
  * @ingroup themeable
  */
@@ -4770,7 +4770,8 @@ function theme_form_element($variables) {
       break;
   }
 
-  if (!empty($element['#description'])) {
+  // Test for whether help text should be displayed after the field.
+  if (!empty($element['#description']) && empty($element['#description_before'])){
     $output .= '<div class="description">' . $element['#description'] . "</div>\n";
   }
 
@@ -4851,7 +4852,16 @@ function theme_form_element_label($variables) {
   }
 
   // The leading whitespace helps visually separate fields from inline labels.
-  return ' <label' . backdrop_attributes($attributes) . '>' . $t('!title !required', array('!title' => $title, '!required' => $required)) . "</label>\n";
+  $output = ' <label' . backdrop_attributes($attributes) . '>' . $t('!title !required', array('!title' => $title, '!required' => $required)) . "</label>\n";
+
+  // Help text displayed before the field.
+  if (!empty($element['#description'])) {
+    if (isset($element['#description_display']) && $element['#description_display'] == 1) {
+      $output .= '<div class="description">' . $element['#description'] . "</div>\n";
+    }
+  }
+
+  return $output;
 }
 
 /**

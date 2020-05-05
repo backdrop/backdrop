@@ -1921,6 +1921,16 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
     '#token_types' => array(),
   );
 
+  if ($instance['widget']['type'] != 'image_image') {
+    $form['instance']['description_before'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Place help text immediately after the field label and before the field'),
+      '#default_value' => !empty($instance['description_before']) ? $instance['description_before'] : 0,
+      '#description' => t('By default, help text is rendered after the input field. Use this option to move it between the field label and the input field.'),
+      '#weight' => -8,
+    );
+  }
+
   $form['instance']['required'] = array(
     '#type' => 'checkbox',
     '#title' => t('Required field'),

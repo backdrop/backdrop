@@ -1352,7 +1352,11 @@ function filter_process_format($element) {
       }
     }
   }
-
+  // Place description immediately after field label and before field if required.
+  if (!empty($element['#description']) && !empty($element['#description_before'])) {
+    $element['value']['#description'] = $element['#description'];
+    unset($element['#description']);
+  }
   return $element;
 }
 
