@@ -39,26 +39,17 @@ class views_plugin_localization_core extends views_plugin_localization {
    *   The input format of the string. This is optional.
    */
   public function save_string($string, $keys = array(), $format = '') {
-    global $language;
-
-    // If the current language is 'en', we need to reset the language
-    // in order to trigger an update.
-    // @todo add test for number of languages.
-    if ($language->langcode == 'en') {
-      $changed = TRUE;
-      $languages = language_list();
-      $cached_language = $language;
-      unset($languages['en']);
-      if (!empty($languages)) {
-        $language = current($languages);
-      }
+    // Find a language that is not "en" (if available) to trigger an entry
+    // in module locale's db tables, even if current language is "en".
+    $langcode = 'en';
+    $languages = language_list();
+    unset($languages['en']);
+    if (!empty($languages)) {
+      $other_language = reset($languages);
+      $langcode = $other_language->langcode;
     }
+    t($string, array(), array('langcode' => $langcode));
 
-    t($string);
-
-    if (isset($cached_language)) {
-      $language = $cached_language;
-    }
     return TRUE;
   }
 
