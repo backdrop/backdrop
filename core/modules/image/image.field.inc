@@ -372,7 +372,7 @@ function image_field_widget_settings_form($field, $instance) {
   $form['description_before'] = array(
     '#type' => 'checkbox',
     '#title' => t('Place help text immediately after the field label and before the field'),
-    '#default_value' => $settings['description_before'],
+    '#default_value' => !empty($settings['description_before']) ? $settings['description_before'] : 0,
     '#description' => t('By default, help text is rendered after the input field. Use this option to move it between the field label and the input field.'),
     '#weight' => -6,
   );
