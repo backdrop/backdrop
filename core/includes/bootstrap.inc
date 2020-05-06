@@ -736,16 +736,19 @@ function backdrop_environment_initialize() {
 
   // Don't escape quotes when reading files from the database, disk, etc.
   ini_set('magic_quotes_runtime', '0');
-  // Use session cookies, not transparent sessions that puts the session id in
-  // the query string.
-  ini_set('session.use_cookies', '1');
-  ini_set('session.use_only_cookies', '1');
-  ini_set('session.use_trans_sid', '0');
-  // Don't send HTTP headers using PHP's session handler.
-  // An empty string is used here to disable the cache limiter.
-  ini_set('session.cache_limiter', '');
-  // Use httponly session cookies.
-  ini_set('session.cookie_httponly', '1');
+
+  if (!backdrop_is_cli()) {
+    // Use session cookies, not transparent sessions that puts the session id in
+    // the query string.
+    ini_set('session.use_cookies', '1');
+    ini_set('session.use_only_cookies', '1');
+    ini_set('session.use_trans_sid', '0');
+    // Don't send HTTP headers using PHP's session handler.
+    // An empty string is used here to disable the cache limiter.
+    ini_set('session.cache_limiter', '');
+    // Use httponly session cookies.
+    ini_set('session.cookie_httponly', '1');
+  }
 
   // Set sane locale settings, to ensure consistent string, dates, times and
   // numbers handling.
@@ -961,17 +964,20 @@ function backdrop_settings_initialize() {
   if (count(explode('.', $cookie_domain)) > 2 && !is_numeric(str_replace('.', '', $cookie_domain))) {
     ini_set('session.cookie_domain', $cookie_domain);
   }
-  // To prevent session cookies from being hijacked, a user can configure the
-  // SSL version of their website to only transfer session cookies via SSL by
-  // using PHP's session.cookie_secure setting. The browser will then use two
-  // separate session cookies for the HTTPS and HTTP versions of the site. So we
-  // must use different session identifiers for HTTPS and HTTP to prevent a
-  // cookie collision.
-  if ($is_https) {
-    ini_set('session.cookie_secure', TRUE);
+
+  if (!backdrop_is_cli()) {
+    // To prevent session cookies from being hijacked, a user can configure the
+    // SSL version of their website to only transfer session cookies via SSL by
+    // using PHP's session.cookie_secure setting. The browser will then use two
+    // separate session cookies for the HTTPS and HTTP versions of the site. So we
+    // must use different session identifiers for HTTPS and HTTP to prevent a
+    // cookie collision.
+    if ($is_https) {
+      ini_set('session.cookie_secure', TRUE);
+    }
+    $prefix = ini_get('session.cookie_secure') ? 'SSESS' : 'SESS';
+    session_name($prefix . substr(hash('sha256', $session_name), 0, 32));
   }
-  $prefix = ini_get('session.cookie_secure') ? 'SSESS' : 'SESS';
-  session_name($prefix . substr(hash('sha256', $session_name), 0, 32));
 }
 
 /**
