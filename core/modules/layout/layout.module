@@ -938,7 +938,7 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
  * @return Layout[]
  *   An array of load Layout object instances.
  */
-function layout_load_multiple_by_path($path, $skip_menu_items = NULL) {
+function layout_load_multiple_by_path($path, $skip_menu_items = NULL, $all_paths = FALSE) {
   if ($cache = cache('layout_path')->get($path)) {
     $layouts = $cache->data;
 
@@ -948,7 +948,16 @@ function layout_load_multiple_by_path($path, $skip_menu_items = NULL) {
     $static_cache = array_merge($layouts, $static_cache);
   }
   else {
-    $layout_names = layout_get_path_layout_names($path);
+    $layout_names = array();
+    if ($all_paths) {
+      $path_options = layout_get_all_paths($path);
+      foreach ($path_options as $path_option) {
+        $layout_names = array_merge($layout_names, layout_get_path_layout_names($path_option));
+      }
+    }
+    else{
+      $layout_names = layout_get_path_layout_names($path);
+    }
     if (empty($layout_names)) {
       // Skip loading menu items for the default layouts.
       if (is_null($skip_menu_items)) {
@@ -1214,11 +1223,7 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
       $layouts = layout_load_multiple_by_path($router_item['path']);
     }
     else {
-      $path_options = layout_get_all_paths($router_item['path']);
-      $layouts = array();
-      foreach ($path_options as $path_option) {
-        $layouts = array_merge($layouts, layout_load_multiple_by_path($path_option, TRUE));
-     }
+      $layouts = layout_load_multiple_by_path($router_item['path'], TRUE, TRUE);
     }
     $selected_layout = NULL;
     foreach ($layouts as $layout) {
