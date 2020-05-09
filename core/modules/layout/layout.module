@@ -1338,12 +1338,12 @@ function layout_get_all_paths($path) {
 
     $results[] = $path;
   }
-  for ($j = 2; $j < $count - 1; $j++) {
+  for ($j = $count - 1; $j > 0; $j--) {
     $chunk = str_repeat('/%', $j);
     $results[] = $array[0] . $chunk;
   }
 
-  return $results;
+  return array_reverse(array_unique($results));
 }
 
 /**
