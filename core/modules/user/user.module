@@ -131,6 +131,10 @@ function user_entity_info() {
           'label' => t('User account'),
           'custom settings' => FALSE,
         ),
+        'token' => array(
+          'label' => t('Tokens'),
+          'custom settings' => FALSE,
+        ),
       ),
     ),
   );
