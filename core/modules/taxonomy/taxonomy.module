@@ -104,6 +104,10 @@ function taxonomy_entity_info() {
           'label' => t('Taxonomy term page'),
           'custom settings' => FALSE,
         ),
+        'token' => array(
+          'label' => t('Tokens'),
+          'custom settings' => FALSE,
+        ),
       ),
     ),
   );

@@ -89,6 +89,10 @@ function comment_entity_info() {
           'label' => t('Full comment'),
           'custom settings' => FALSE,
         ),
+        'token' => array(
+          'label' => t('Tokens'),
+          'custom settings' => FALSE,
+        ),
       ),
       'static cache' => FALSE,
     ),

@@ -173,6 +173,10 @@ function node_entity_info() {
           'label' => t('RSS'),
           'custom settings' => FALSE,
         ),
+        'token' => array(
+          'label' => t('Tokens'),
+          'custom settings' => FALSE,
+        ),
       ),
     ),
   );
