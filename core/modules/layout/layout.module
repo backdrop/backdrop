@@ -951,6 +951,7 @@ function layout_load_multiple_by_path($path, $skip_menu_items = NULL, $all_paths
     $layout_names = array();
     if ($all_paths) {
       $path_options = layout_get_all_paths($path);
+      debug($path_options);
       foreach ($path_options as $path_option) {
         $layout_names = array_merge($layout_names, layout_get_path_layout_names($path_option));
       }
@@ -1157,7 +1158,14 @@ function layout_provides_path($path) {
     return FALSE;
   }
 
+  
   $result = db_query('SELECT * FROM {menu_router} WHERE path = :path', array(':path' => $path));
+  
+  if (empty($result)) {
+    $path_array = explode('/%', $path);
+    $path = $path[0];
+    $result = db_query('SELECT * FROM {menu_router} WHERE path = :path', array(':path' => $path));
+  }
   $return = NULL;
 
   // If any page callback exists at this path, allow it to trump custom layouts.
@@ -1217,10 +1225,6 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
     }
     if ($data && $node_layouts = layout_load_multiple_by_path('node/%', TRUE)) {
       $layouts = $node_layouts;
-    }
-    // Skip path expansion for context load paths or short paths.
-    elseif (in_array($router_item['path'], layout_get_context_load_paths()) || $router_item_count < 3) {
-      $layouts = layout_load_multiple_by_path($router_item['path']);
     }
     else {
       $layouts = layout_load_multiple_by_path($router_item['path'], TRUE, TRUE);

@@ -1809,47 +1809,6 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     $this->backdropLogin($this->admin_user);
   }
 
-  /**
-   * Tests the correct layout is used on 404 and 403 pages.
-   */
-  function testPages() {
-    // Check that a known page is using the admin (one-column) layout.
-    $this->backdropGet('admin/config/content/formats/plain_text');
-    $this->assertIsAdminLayout();
-
-    // Check that node/add uses the admin layout for the admin user.
-    $this->backdropGet('node/add/' . $this->content_type->type);
-    $this->assertIsAdminLayout();
-
-    // Check that a 403 page uses the admin layout.
-    $this->backdropGet('admin/appearance');
-    $this->assertIsAdminLayout();
-
-    // Check that a 404 page uses the admin layout.
-    $this->backdropGet('admin/config/content/formats/fake-format');
-    $this->assertIsAdminLayout();
-
-    // Check that the front-end is using the default layout.
-    $this->backdropGet('node');
-    $this->assertIsDefaultLayout();
-
-    // Check that anonymous users get the Default layout for admin paths.
-    $this->backdropLogout();
-
-    // Anonymous 403.
-    $this->backdropGet('admin/config/content/formats/plain_text');
-    $this->assertIsDefaultLayout();
-
-    // Anonymous 404.
-    $this->backdropGet('admin/config/content/formats/fake-format');
-    $this->assertIsDefaultLayout();
-
-    // Check that a logged in user that can access an admin page but not the
-    // admin theme uses the default layout.
-    $this->backdropLogin($this->web_user);
-    $this->backdropGet('node/add/' . $this->content_type->type);
-    $this->assertIsDefaultLayout();
-  }
 
   /**
    * Test role-based selection of layouts.
@@ -1857,59 +1816,41 @@ class LayoutSelectionTest extends BackdropWebTestCase {
   function testRoleSelection() {
     // Create and login admin user.
     $admin_user = $this->backdropCreateUser(array(
+      'access content',
       'access administration pages',
+      'view the administration theme',
       'administer site configuration',
-      'administer modules',
       'administer layouts',
-      'administer nodes',
+      'administer filters',
     ));
     $this->backdropLogin($admin_user);
 
-    // Create a web user.
-    $web_user = $this->backdropCreateUser(array('access user profiles', 'access content'));
+    $paths = array(
+      'admin/config/content/formats/plain_text',
+      'admin/config/content/formats',
+      'admin/config/content',
+      'admin/config',
+      );
 
-    // Create a layout at a custom path.
-    $layout_name = strtolower($this->randomName());
-    $layout_path = $layout_name;
+    foreach ($paths as $path) {
+      $this->backdropGet($path);
+      $this->assertIsAdminLayout();
+    }
+
+    // Create a new layout using the UI.
     $edit = array(
-      'name' => $layout_name,
-      'title' => $layout_name,
-      'path' => $layout_path,
+      'title' => 'Test layout 1',
+      'name' => 'test_layout_1',
       'layout_template' => 'moscone_flipped',
+      'path' => 'admin/%',
     );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
-    // Note that this adds a condition, not saving the layout yet.
-    $this->backdropPost('admin/structure/layouts/add', $edit, t('Add visibility condition'));
+    foreach ($paths as $path) {
+      $this->backdropGet($path);
+      $this->assertIsDefaultLayout();
+    }
 
-    // Select the condition to add.
-    $edit = array(
-      'condition' => 'user_role',
-    );
-    $this->backdropPost(NULL, $edit, t('Load condition'));
-
-    // Allow authenticated users to see the layout only.
-    $edit = array(
-      'roles[authenticated]' => TRUE,
-    );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-
-    // Save the layout.
-    $this->backdropPost(NULL, array(), t('Create layout'));
-
-    // View as an administrator.
-    $this->backdropGet($layout_path);
-    $this->assertResponse(200);
-    $this->backdropLogout();
-
-    // View as a basic user.
-    $this->backdropLogin($web_user);
-    $this->backdropGet($layout_path);
-    $this->assertResponse(200);
-    $this->backdropLogout();
-
-    // View as anonymous, where they should get a 404.
-    $this->backdropGet($layout_path);
-    $this->assertResponse(404);
   }
 
   private function assertIsDefaultLayout($message = '') {
