@@ -543,11 +543,11 @@ img.align-right {
 }
 
 /**
- * Clear text areas in case of floated contents.
- *
- * @see https://meiert.com/en/blog/no-clearfix/
+ * Clearfix text areas in case of floated contents
  */
-.field-type-text-long,
-.field-type-text-with-summary {
-  overflow: auto;
+.field-type-text-long:after,
+.field-type-text-with-summary:after {
+  content: '';
+  display: table;
+  clear: both;
 }
