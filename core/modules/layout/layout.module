@@ -951,7 +951,6 @@ function layout_load_multiple_by_path($path, $skip_menu_items = NULL, $all_paths
     $layout_names = array();
     if ($all_paths) {
       $path_options = layout_get_all_paths($path);
-      debug($path_options);
       foreach ($path_options as $path_option) {
         $layout_names = array_merge($layout_names, layout_get_path_layout_names($path_option));
       }
@@ -1161,9 +1160,9 @@ function layout_provides_path($path) {
   
   $result = db_query('SELECT * FROM {menu_router} WHERE path = :path', array(':path' => $path));
   
-  if (empty($result)) {
+  if (!$result->rowCount()) {
     $path_array = explode('/%', $path);
-    $path = $path[0];
+    $path = $path_array[0];
     $result = db_query('SELECT * FROM {menu_router} WHERE path = :path', array(':path' => $path));
   }
   $return = NULL;
@@ -1347,7 +1346,7 @@ function layout_get_all_paths($path) {
     $results[] = $array[0] . $chunk;
   }
 
-  return array_reverse(array_unique($results));
+  return array_unique($results);
 }
 
 /**

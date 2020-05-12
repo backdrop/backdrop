@@ -1817,6 +1817,8 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     // Create and login admin user.
     $admin_user = $this->backdropCreateUser(array(
       'access content',
+      'create ' . $this->content_type->type . ' content',
+      'edit any ' . $this->content_type->type . ' content',
       'access administration pages',
       'view the administration theme',
       'administer site configuration',
@@ -1824,18 +1826,16 @@ class LayoutSelectionTest extends BackdropWebTestCase {
       'administer filters',
     ));
     $this->backdropLogin($admin_user);
+    $node1 = $this->backdropCreateNode(array('type' => $this->content_type->type, 'promote' => 1));
 
     $paths = array(
-      'admin/config/content/formats/plain_text',
-      'admin/config/content/formats',
-      'admin/config/content',
-      'admin/config',
+      'boxton' => 'admin/config/content/formats/plain_text',
+      'boxton' => 'admin/config/content/formats',
+      'boxton' => 'admin/config/content',
+      'boxton' => 'admin/config',
+      'boxton' => 'admin',
       );
-
-    foreach ($paths as $path) {
-      $this->backdropGet($path);
-      $this->assertIsAdminLayout();
-    }
+    $this->assertIsCorrectLayout($paths);
 
     // Create a new layout using the UI.
     $edit = array(
@@ -1846,11 +1846,72 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
-    foreach ($paths as $path) {
-      $this->backdropGet($path);
-      $this->assertIsDefaultLayout();
-    }
+    $paths = array(
+      'moscone_flipped' => 'admin/config/content/formats/plain_text',
+      'moscone_flipped' => 'admin/config/content/formats',
+      'moscone_flipped' => 'admin/config/content',
+      'moscone_flipped' => 'admin/config',
+      'boxton' => 'admin',
+      );
+    $this->assertIsCorrectLayout($paths);
 
+    // Create a new layout using the UI.
+    $edit = array(
+      'title' => 'Test layout 2',
+      'name' => 'test_layout_2',
+      'layout_template' => 'rolph',
+      'path' => 'admin/config/content/%',
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    $paths = array(
+      'rolph' => 'admin/config/content/formats/plain_text',
+      'rolph' => 'admin/config/content/formats',
+      'moscone_flipped' => 'admin/config/content',
+      'moscone_flipped' => 'admin/config',
+      'boxton' => 'admin',
+      );
+    $this->assertIsCorrectLayout($paths);
+
+    // Create a new layout using the UI.
+    $edit = array(
+      'title' => 'Test layout 3',
+      'name' => 'test_layout_3',
+      'layout_template' => 'taylor',
+      'path' => 'node/%/%',
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    $paths = array(
+      'taylor' => 'node/1/edit',
+      'moscone_flipped' => 'node/1',
+      'moscone_flipped' => 'node',
+      );
+    $this->assertIsCorrectLayout($paths);
+
+    // Create a new layout using the UI.
+    $edit = array(
+      'title' => 'Test layout 4',
+      'name' => 'test_layout_4',
+      'layout_template' => 'simmons',
+      'path' => 'non-existent-path/%',
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    $paths = array(
+      'simmons' => 'non-existent-path/blank',
+      );
+    $this->assertIsCorrectLayout($paths);
+
+  }
+
+  private function assertIsCorrectLayout($paths) {
+    foreach ($paths as $layout_template => $path) {
+      $this->backdropGet($path);
+      $class = 'layout--' . str_replace('_', '-', $layout_template);
+      $result = $this->xpath('//div[contains(@class, :class)]', array(':class' => $class));
+      $this->assertEqual(count($result), 1, format_string('@layout used at @path', array('@path' => $this->getUrl(), '@layout' => $layout_template)));
+    }
   }
 
   private function assertIsDefaultLayout($message = '') {
