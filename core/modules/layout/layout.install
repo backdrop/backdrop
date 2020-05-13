@@ -35,6 +35,17 @@ function layout_install() {
   db_query("UPDATE {system} SET weight = 60 WHERE name = 'layout' AND type = 'module'");
 }
 
+/**
+ * Grant the "administer flexible templates" permission to all user roles that
+ * already have the "administer layouts" permission.
+ */
+function layout_update_1000() {
+  $roles = user_roles(FALSE, 'administer layouts');
+  foreach ($roles as $role_name => $role) {
+    user_role_grant_permissions($role_name, array('administer flexible templates'));
+  }
+}
+
 // IMPORTANT NOTE: hook_update_X() functions added to this file will not be
 // called when upgrading from Drupal 7 to Backdrop. As such, most updates
 // dealing with layouts should be added to system.install instead.
