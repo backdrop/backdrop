@@ -358,7 +358,7 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
       }
       else {
         $def['left_query'] = $this->left_query($this->options);
-        cache('cache_views_data')->set($cid, $def['left_query']);
+        cache('views_data')->set($cid, $def['left_query']);
       }
     }
 

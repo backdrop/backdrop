@@ -1348,7 +1348,7 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
     parent::setUp('search', 'search_extra_type');
 
     // Login as a user that can create and search content.
-    $this->search_user = $this->backdropCreateUser(array('search content', 'administer search', 'administer nodes', 'bypass node access', 'access user profiles', 'administer users', 'administer blocks', 'access site reports'));
+    $this->search_user = $this->backdropCreateUser(array('search content', 'use advanced search', 'administer search', 'administer nodes', 'bypass node access', 'access user profiles', 'administer users', 'administer blocks', 'access site reports'));
     $this->backdropLogin($this->search_user);
 
     // Delete the two default nodes.
@@ -1505,6 +1505,78 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
       }
     }
   }
+
+  /**
+   * Verify enabling/disabling of certain node types.
+   */
+  function testSearchNodeTypes() {
+    $new_type1 = $this->backdropCreateContentType();
+    $new_type2 = $this->backdropCreateContentType();
+    $new_type3 = $this->backdropCreateContentType();
+
+    // Create 2 nodes that should both be indexed.
+    $node1 = $this->backdropCreateNode(array(
+      'title' => 'Rabbits',
+      'body' => array(LANGUAGE_NONE => array(array('value' => "The bunny's ears were fuzzy."))),
+      'type' => $new_type1->type,
+    ));
+    $node2 = $this->backdropCreateNode(array(
+      'title' => 'Llamas',
+      'body' => array(LANGUAGE_NONE => array(array('value' => "Llamas are fuzzy all over."))),
+      'type' => $new_type2->type,
+    ));
+
+    // Update the search index.
+    module_invoke_all('update_index');
+    search_update_totals();
+
+    // Disable types 2 and 3.
+    $edit['node_types[page]'] = TRUE;
+    $edit['node_types[post]'] = TRUE;
+    $edit['node_types[' . $new_type1->type . ']'] = TRUE;
+    $edit['node_types[' . $new_type2->type . ']'] = FALSE;
+    $edit['node_types[' . $new_type3->type . ']'] = FALSE;
+    $this->backdropPost('admin/config/search/settings', $edit, t('Save configuration'));
+
+    // Create a node of the third type that should not be indexed at all.
+    $node3 = $this->backdropCreateNode(array(
+      'title' => 'Fish',
+      'body' => array(LANGUAGE_NONE => array(array('value' => "These creatures are scaly but beautiful. Not fuzzy."))),
+      'type' => $new_type3->type,
+    ));
+
+    // Update the search index.
+    module_invoke_all('update_index');
+    search_update_totals();
+
+    // Check that the names of the node types are not found on the search page,
+    // as they should not be visible in the advanced search.
+    $this->backdropGet('search/node/fuzzy');
+    $this->assertText($node1->type, 'Enabled first node type found on advanced search form.');
+    $this->assertNoText($node2->type, 'Disabled second node type not found on advanced search form.');
+    $this->assertNoText($node3->type, 'Disabled third node type not found on advanced search form.');
+
+    // Test searching all 3.
+    $this->backdropGet('search/node/fuzzy');
+    $this->assertText($node1->title, 'Fuzzy bunny ears found in search. Node type is enabled.');
+    $this->assertNoText($node2->title, 'Fuzzy llamas not found in search. Node type is disabled.');
+    $this->assertNoText($node3->title, 'Scaly fish not found in search. Node type is disabled.');
+
+    // Check that node 2 is still in the index even after it was disabled.
+    $result = db_select('search_index', 'i')
+      ->extend('SearchQuery')
+      ->searchexpression($node2->title, 'node')
+      ->execute();
+    $this->assertEqual($result->rowCount(), 1, 'Node correctly still indexed after disabling its type.');
+
+    // Check that node 3 is not in the index, as it was disabled before create.
+    $result = db_select('search_index', 'i')
+      ->extend('SearchQuery')
+      ->searchexpression($node3->title, 'node')
+      ->execute();
+    $this->assertEqual($result->rowCount(), 0, 'New nodes of disabled type are not added to search index.');
+  }
+
 }
 
 /**

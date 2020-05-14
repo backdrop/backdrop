@@ -313,18 +313,34 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#default_value' => $type->settings['node_submitted'],
     '#description' => t('Author username and publish date will be displayed.'),
   );
+  $node_submitted_state = array(
+    'visible' => array(
+      'input[name="node_submitted"]' => array('checked' => TRUE),
+    ),
+  );
+  $form['display']['node_submitted_format'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Author/date format'),
+    '#default_value' => $type->settings['node_submitted_format'],
+    '#description' => t('The format to use for the author username and publish date. Example: "Submitted by [node:author] on [node:created:medium]"'),
+    '#states' => $node_submitted_state,
+  );
+  $form['display']['node_submitted_tokens'] = array(
+    '#type' => 'item', // Needed for states to work.
+    '#theme' => 'token_tree_link',
+    '#token_types' => array('node'),
+    '#global_types' => TRUE,
+    '#click_insert' => TRUE,
+    '#states' => $node_submitted_state,
+  );
   if (config_get('system.core', 'user_pictures')) {
     $form['display']['node_user_picture'] = array(
       '#type' => 'checkbox',
       '#title' => t('Display the author picture'),
       '#default_value' => $type->settings['node_user_picture'],
       '#description' => t('Author picture will be included along with username and publish date, if provided.'),
-      '#states' => array(
-        // Hide the picture settings when submitted info is disabled.
-        'visible' => array(
-          'input[name="node_submitted"]' => array('checked' => TRUE),
-        ),
-      ),
+      // Hide the picture settings when submitted info is disabled.
+      '#states' => $node_submitted_state,
     );
   }
   $form['display']['hidden_path'] = array(
@@ -471,6 +487,17 @@ function node_type_form_submit($form, &$form_state) {
     watchdog('node', 'Added content type %name.', array('%name' => $type->name), WATCHDOG_NOTICE, l(t('view'), 'admin/structure/types'));
   }
 
+  // Make the new content type indexable by default if Search module is enabled.
+  if (module_exists('search')) {
+    $search_content_types = config_get('search.settings', 'content_types');
+    // If no types are specified, then all types are enabled and there's no need to make any changes.
+    if ($search_content_types) {
+      $search_content_types[] = $type->type;
+      natsort($search_content_types);
+      config_set('search.settings', 'content_types', $search_content_types);
+    }
+  }
+
   $form_state['redirect'] = 'admin/structure/types';
   return;
 }
@@ -592,6 +619,7 @@ function node_node_type_load(&$types) {
 
       // Submitted information.
       'node_submitted' => TRUE,
+      'node_submitted_format' => t('[node:created:medium] by [node:author]'),
       'node_user_picture' => TRUE,
 
       // Setting to prevent page from being accessed directly.
