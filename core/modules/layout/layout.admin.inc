@@ -823,7 +823,7 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
       '#type' => 'dropbutton',
     );
     $form['top']['button']['#links'] = array(
-     array(
+      array(
         'title' => t('View page'),
         'href' => url($link_path),
         'attributes' => array(
