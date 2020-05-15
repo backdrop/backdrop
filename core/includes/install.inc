@@ -109,6 +109,9 @@ function backdrop_get_schema_versions($module) {
       $updates[$loaded_module] = array();
     }
 
+    // Ensure the .install file is loaded for the module.
+    module_load_include('install', $module);
+
     // Prepare regular expression to match all possible defined hook_update_N().
     $regexp = '/^(?P<module>.+)_update_(?P<version>\d+)$/';
     $functions = get_defined_functions();

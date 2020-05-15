@@ -349,10 +349,13 @@ function update_module_enable(array $modules) {
     }
     // Change the schema version from SCHEMA_UNINSTALLED to 0, so any module
     // updates since the module's inception are executed in a core upgrade.
+    $schema_versions = backdrop_get_schema_versions($module);
+    $schema_version = $schema_versions ? end($schema_versions) : 0;
+
     db_update('system')
       ->condition('type', 'module')
       ->condition('name', $module)
-      ->fields(array('schema_version' => 0, 'status' => 1))
+      ->fields(array('schema_version' => $schema_version, 'status' => 1))
       ->execute();
 
     // system_list_reset() is in module.inc but that would only be available
