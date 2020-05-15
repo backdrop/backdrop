@@ -185,8 +185,10 @@ foreach ($additional_form_options as $key => $value) {
 define('BACKDROP_ROOT', getcwd());
 define('MAINTENANCE_MODE', 'install');
 
+require_once './core/includes/bootstrap.inc';
 require_once './core/includes/install.core.inc';
 try {
+  backdrop_bootstrap(BACKDROP_BOOTSTRAP_CONFIGURATION);
   print "Installing Backdrop. This may take a moment...\n";
   install_backdrop($settings);
   config_set('system.core', 'site_mail', $options['site-mail']);
