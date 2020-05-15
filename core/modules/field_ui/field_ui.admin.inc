@@ -1087,7 +1087,7 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
 
     $instance['display'][$view_mode]['type'] = $formatter_type;
     $formatter = field_info_formatter_types($formatter_type);
-    $instance['display'][$view_mode]['module'] = $formatter['module'];
+    $instance['display'][$view_mode]['module'] = !empty($formatter) ? $formatter['module'] : '';
     $instance['display'][$view_mode]['settings'] = $settings;
 
     // Base button element for the various formatter settings actions.
@@ -1158,7 +1158,10 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
     }
     else {
       // Display a summary of the current formatter settings.
-      $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $instance, $view_mode);
+      $summary = '';
+      if (!empty($formatter)) {
+        $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $instance, $view_mode);
+      }
 
       // Allow other modules to alter the formatter summary.
       $context = array(
