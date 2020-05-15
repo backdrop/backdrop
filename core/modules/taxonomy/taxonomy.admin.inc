@@ -310,6 +310,7 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
   }
 
   $vocabulary = $form_state['vocabulary'];
+  form_state_values_clean($form_state);
   foreach ($form_state['values'] as $key => $value) {
     $vocabulary->$key = $value;
   }

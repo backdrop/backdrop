@@ -3261,9 +3261,6 @@ function _backdrop_bootstrap_sanitize_request() {
     if (isset($_GET['destination'])) {
       $destination_parts = backdrop_parse_url($_GET['destination']);
     }
-    else if (isset($_REQUEST['destination'])) {
-      $destination_parts = backdrop_parse_url($_REQUEST['destination']);
-    }
 
     if (!empty($destination_parts['query'])) {
       $sanitized_keys = _backdrop_bootstrap_sanitize_input($destination_parts['query'], $whitelist);

@@ -1503,7 +1503,7 @@ function system_site_information_settings_submit($form, &$form_state) {
     $dimensions = @getimagesize($form_state['values']['site_logo_path']);
     if (!empty($dimensions)) {
       $form_state['values']['site_logo_attributes']['width'] = $dimensions[0];
-      $form_state['values']['site_logo_attributes']['height'] = $dimensions[0];
+      $form_state['values']['site_logo_attributes']['height'] = $dimensions[1];
     }
   }
   else {

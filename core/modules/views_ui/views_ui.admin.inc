@@ -2978,7 +2978,7 @@ function views_ui_reorder_displays_form($form, &$form_state) {
       'weight' => array(
         '#type' => 'weight',
         '#value' => $display->position,
-        '#delta' => (empty($last_display->position)) ? 1 : 0,
+        '#delta' => count($view->display),
         '#title' => t('Weight for @display', array('@display' => $display->display_title)),
         '#title_display' => 'invisible',
       ),

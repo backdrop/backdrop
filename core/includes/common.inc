@@ -3999,7 +3999,7 @@ function _backdrop_build_css_path($matches, $base = NULL) {
     $path = $_base . $matches[1];
   }
   else {
-    $path = $_base . $matches;
+    $path = $_base;
   }
   $last = '';
   while ($path != $last) {
