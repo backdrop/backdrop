@@ -3102,6 +3102,21 @@ function system_update_1070() {
 }
 
 /**
+ * Grant the "administer flexible templates" permission to all user roles that
+ * already have the "administer layouts" permission.
+ *
+ * This update hook would normally go into the layout.install file, but adding
+ * update hooks to new modules that did not exist in D7 is problematic.
+ * See: https://github.com/backdrop/backdrop-issues/issues/1759
+ */
+function system_update_1071() {
+  $roles = user_roles(FALSE, 'administer layouts');
+  foreach ($roles as $role_name => $role) {
+    user_role_grant_permissions($role_name, array('administer flexible templates'));
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
