@@ -284,7 +284,11 @@ function field_test_query_store_global_test_query_alter($query) {
  * Implements hook_field_formatter_settings_form_alter().
  */
 function field_test_field_formatter_settings_form_alter(&$element, &$form_state, $context) {
-  $settings = $context['instance']['display'][$context['view_mode']]['settings'];
+  $settings = array();
+  if (!empty($context)) {
+    $settings = $context['instance']['display'][$context['view_mode']]['settings'];
+  }
+
   $element['field_test_formatter_settings_form_alter'] = array(
     '#type' => 'textfield',
     '#title' => t('Formatter settings form alter'),

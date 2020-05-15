@@ -441,7 +441,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     };
     $keys = array();
     foreach ($array as $key => $value) {
-      if ($key[0] !== '#') {
+      if (substr($key, 0, 1) !== '#') {
         $keys[] = $key;
       }
     }
@@ -477,7 +477,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     // [array:value:*] dynamic tokens.
     if ($value_tokens = token_find_with_prefix($tokens, 'value')) {
       foreach ($value_tokens as $key => $original) {
-        if ($key[0] !== '#' && isset($array[$key])) {
+        if (substr($key, 0, 1) !== '#' && isset($array[$key])) {
           $replacements[$original] = token_render_array_value($array[$key], $options);
         }
       }

@@ -3929,7 +3929,7 @@ function system_archiver_info() {
     'class' => 'ArchiverTar',
     'extensions' => array('tar', 'tgz', 'tar.gz', 'tar.bz2'),
   );
-  if (function_exists('zip_open')) {
+  if (class_exists('ZipArchive')) {
     $archivers['zip'] = array(
       'class' => 'ArchiverZip',
       'extensions' => array('zip'),

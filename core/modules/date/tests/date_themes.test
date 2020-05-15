@@ -77,6 +77,21 @@ class DateThemeTestCase extends BackdropWebTestCase {
           'granularity' => array('year', 'month', 'day', 'hour', 'minute'),
         ),
       ),
+      'display' => array(
+          'label' => 'above',
+          'type' => 'date_default',
+          'settings' => array(
+            'format_type' => 'long',
+            'show_repeat_rule' => 'show',
+            'multiple_number' => '',
+            'multiple_from' => '',
+            'multiple_to' => '',
+            'fromto' => 'both',
+          ),
+          'module' => 'date',
+          'weight' => 0 ,
+      ),
+
       'show_remaining_days' => '',
     );
     $expected = '<span class="date-display-single">2019-03-20 <span class="date-display-range">';
