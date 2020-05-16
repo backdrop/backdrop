@@ -2337,6 +2337,7 @@ class UserRolesAssignmentTestCase extends BackdropWebTestCase {
       'name' => $this->randomName(),
       'mail' => $this->randomName() . '@example.com',
       'pass' => $pass = $this->randomString(),
+      'notify' => FALSE,
       "roles[$role_name]" => $role_name,
     );
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));

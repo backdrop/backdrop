@@ -823,6 +823,10 @@ function _admin_bar_flush_cache($name = NULL) {
       break;
 
     case 'assets':
+      // Rebuild all color palettes.
+      if (module_exists('color')) {
+        color_rebuild_settings();
+      }
       // Change query-strings on css/js files to enforce reload for all users.
       _backdrop_flush_css_js();
 

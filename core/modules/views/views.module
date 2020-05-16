@@ -859,8 +859,21 @@ function views_access() {
  * permissions. If the $account argument is omitted, the current user
  * is used.
  */
-function views_check_perm($perm, $account = NULL) {
-  return user_access($perm, $account) || user_access('access all views', $account);
+function views_check_perm($perms, $account = NULL) {
+  // Backward compatibility to ensure also a single permission string is
+  // properly processed.
+  $perms = is_array($perms) ? $perms : array($perms);
+  if (user_access('access all views', $account)) {
+    return TRUE;
+  }
+  // Perms are handled as OR; as soon one permission allows access, TRUE is
+  // returned.
+  foreach ($perms as $perm) {
+    if (user_access($perm, $account)) {
+      return TRUE;
+    }
+  }
+  return FALSE;
 }
 
 /**
@@ -1150,7 +1163,7 @@ function views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) {
  *   Either 'display', 'style' or 'row'
  * @param $key
  *   For style plugins, this is an optional type to restrict to. May be 'normal',
- *   'summary', 'feed' or others based on the neds of the display.
+ *   'summary', 'feed' or others based on the needs of the display.
  * @param $base
  *   An array of possible base tables.
  *

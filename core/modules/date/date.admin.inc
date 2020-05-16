@@ -416,9 +416,9 @@ function _date_field_widget_settings_form($field, $instance) {
     '#title' => t('Position of date part labels'),
     '#description' => $description,
   );
-  $form['advanced']['text_parts'] = array(
-    '#theme' => $widget['type'] == 'date_select' ? 'date_text_parts' : '',
-  );
+  if ($widget['type'] == 'date_select') {
+    $form['advanced']['text_parts']['#theme'] = 'date_text_parts';
+  }
   $text_parts = (array) $settings['text_parts'];
   foreach (date_granularity_names() as $key => $value) {
     if ($widget['type'] == 'date_select') {

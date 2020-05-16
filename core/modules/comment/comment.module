@@ -71,7 +71,7 @@ define('COMMENT_NODE_OPEN', 2);
  * Implements hook_entity_info().
  */
 function comment_entity_info() {
-  $return = array(
+  $entity_info = array(
     'comment' => array(
       'label' => t('Comment'),
       'bundle label' => t('Node type'),
@@ -89,13 +89,23 @@ function comment_entity_info() {
           'label' => t('Full comment'),
           'custom settings' => FALSE,
         ),
+        'token' => array(
+          'label' => t('Tokens'),
+          'custom settings' => FALSE,
+        ),
       ),
       'static cache' => FALSE,
     ),
   );
 
+  // If the cache table has been created, then enable entity caching.
+  if (db_table_exists('cache_entity_comment')) {
+    $entity_info['comment']['entity cache'] = TRUE;
+    $entity_info['comment']['field cache'] = FALSE;
+  }
+
   foreach (node_type_get_names() as $type => $name) {
-    $return['comment']['bundles']['comment_node_' . $type] = array(
+    $entity_info['comment']['bundles']['comment_node_' . $type] = array(
       'label' => t('@node_type comment', array('@node_type' => $name)),
       // Provide the node type/bundle name for other modules, so it does not
       // have to be extracted manually from the bundle name.
@@ -115,7 +125,7 @@ function comment_entity_info() {
     );
   }
 
-  return $return;
+  return $entity_info;
 }
 
 /**
@@ -300,7 +310,7 @@ function comment_node_type_load(&$types) {
   foreach ($types as $type_name => $type) {
     $types[$type_name]->settings += array(
       'comment_enabled' => FALSE,
-      'comment_default' => COMMENT_NODE_OPEN,
+      'comment_default' => COMMENT_NODE_CLOSED,
       'comment_per_page' => 50,
       'comment_mode' => COMMENT_MODE_THREADED,
       'comment_anonymous' => COMMENT_ANONYMOUS_MAYNOT_CONTACT,
@@ -1149,7 +1159,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#type' => 'checkbox',
       '#title' => t('Show comment replies in a threaded list'),
       '#default_value' => $node_type->settings['comment_mode'],
-      '#description' => t('A threaded list differs from chronologocal in that each comment follows it\'s parent, and is usually indented.'),
+      '#description' => t('A threaded list differs from a chronological list in that each comment follows its parent, and is usually indented.'),
     );
     $form['comment']['comment_anonymous'] = array(
       '#type' => 'select',

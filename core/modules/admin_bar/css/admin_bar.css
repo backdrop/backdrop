@@ -304,7 +304,6 @@
 }
 [dir="rtl"] #admin-bar .dropdown li ul {
   left: auto;
-  right: -999em;
 }
 
 /* Third-and-above-level lists */
