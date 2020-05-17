@@ -28,7 +28,8 @@ Backdrop.behaviors.viewsUiEditView = {
 Backdrop.behaviors.viewsUiAddView = {
   attach: function (context) {
     var $context = $(context);
-    var replace = '-';
+    var replace_dash = '-';
+    var replace_underscore = '_';
     var suffix;
 
     // The page title, block title, and menu link fields can all be prepopulated
@@ -40,10 +41,11 @@ Backdrop.behaviors.viewsUiAddView = {
       }
       else {
         // After an AJAX response, this.fieldsFiller will still have event
-        // handlers bound to the old version of the form fields (which don't exist
-        // anymore). The event handlers need to be unbound and then rebound to the
-        // new markup. Note that jQuery.live is difficult to make work in this
-        // case because the IDs of the form fields change on every AJAX response.
+        // handlers bound to the old version of the form fields (which don't
+        // exist anymore). The event handlers need to be unbound and then
+        // rebound to the new markup. Note that jQuery.live is difficult to make
+        // work in this case because the IDs of the form fields change on every
+        // AJAX response.
         this.fieldsFiller.rebind($fields);
       }
     }
@@ -51,7 +53,7 @@ Backdrop.behaviors.viewsUiAddView = {
     var $pathField = $context.find('[id^="edit-page-path"]');
     if ($pathField.length) {
       if (!this.pathFiller) {
-        this.pathFiller = new Backdrop.viewsUi.FormFieldFiller($pathField, replace);
+        this.pathFiller = new Backdrop.viewsUi.FormFieldFiller($pathField, replace_dash);
       }
       else {
         this.pathFiller.rebind($pathField);
@@ -63,10 +65,19 @@ Backdrop.behaviors.viewsUiAddView = {
     if ($feedField.length) {
       if (!this.feedFiller) {
         suffix = '.xml';
-        this.feedFiller = new Backdrop.viewsUi.FormFieldFiller($feedField, replace, suffix);
+        this.feedFiller = new Backdrop.viewsUi.FormFieldFiller($feedField, replace_dash, suffix);
       }
       else {
         this.feedFiller.rebind($feedField);
+      }
+    }
+    var $machineNameField = $context.find('[id^="edit-name"]');
+    if ($machineNameField.length) {
+      if (!this.machineNameFiller) {
+        this.machineNameFiller = new Backdrop.viewsUi.FormFieldFiller($machineNameField, replace_underscore);
+      }
+      else {
+        this.machineNameFiller.rebind($machineNameField);
       }
     }
   }
@@ -166,7 +177,8 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
   },
 
   /**
-   * Bind event handlers to the new form fields, after they're replaced via AJAX.
+   * Bind event handlers to the new form fields, after they're replaced via
+   * AJAX.
    */
   rebind: function ($fields) {
     this.target = $fields;
@@ -205,7 +217,8 @@ Backdrop.viewsUi.AddItemForm.prototype.handleCheck = function (event) {
   }
   else {
     var position = $.inArray(label, this.checkedItems);
-    // Delete the item from the list and take sure that the list doesn't have undefined items left.
+    // Delete the item from the list and take sure that the list doesn't have
+    // undefined items left.
     for (var i = 0; i < this.checkedItems.length; i++) {
       if (i == position) {
         this.checkedItems.splice(i, 1);
@@ -247,8 +260,8 @@ Backdrop.behaviors.viewsUiRenderAddViewButton = {
     var $displayButtons = $menu.nextAll('input.add-display').detach();
     $displayButtons.appendTo($addDisplayDropdown.find('.action-list')).wrap('<li>')
       .parent().first().addClass('first').end().last().addClass('last');
-    // Remove the 'Add ' prefix from the button labels since they're being palced
-    // in an 'Add' dropdown.
+    // Remove the 'Add ' prefix from the button labels since they're being
+    // placed in an 'Add' dropdown.
     // @todo This assumes English, but so does $addDisplayDropdown above. Add
     //   support for translation.
     $displayButtons.each(function () {
@@ -533,8 +546,8 @@ $.extend(Backdrop.viewsUi.RearrangeFilterHandler.prototype, {
   insertAddRemoveFilterGroupLinks: function () {
     // Insert a link for adding a new group at the top of the page, and make it
     // match the action links styling used in a typical page.tpl.php. Note that
-    // Backdrop does not provide a theme function for this markup, so this is the
-    // best we can do.
+    // Backdrop does not provide a theme function for this markup, so this is
+    // the best we can do.
     $('<ul class="action-links"><li><a id="views-add-group-link" href="#">' + this.addGroupButton.val() + '</a></li></ul>')
       .prependTo(this.table.parent())
       // When the link is clicked, dynamically click the hidden form button for
@@ -596,7 +609,8 @@ $.extend(Backdrop.viewsUi.RearrangeFilterHandler.prototype, {
     this.operator.find('label').add('div.description').addClass('element-invisible');
     this.operator.find('select').addClass('form-select');
 
-    // Keep a list of the operator dropdowns, so we can sync their behavior later.
+    // Keep a list of the operator dropdowns, so we can sync their behavior
+    // later.
     $dropdowns = this.operator;
 
     // Move the operator to a new row just above the second group.
@@ -654,8 +668,8 @@ $.extend(Backdrop.viewsUi.RearrangeFilterHandler.prototype, {
      * When a row is dragged to another place in the table, several things need
      * to occur.
      * - The row needs to be moved so that it's within one of the filter groups.
-     * - The operator cells that span multiple rows need their rowspan attributes
-     *   updated to reflect the number of rows in each group.
+     * - The operator cells that span multiple rows need their rowspan
+     *   attributes updated to reflect the number of rows in each group.
      * - The operator labels that are displayed next to each filter need to be
      *   redrawn, to account for the row's new location.
      */
@@ -685,20 +699,20 @@ $.extend(Backdrop.viewsUi.RearrangeFilterHandler.prototype, {
      */
     tableDrag.onDrop = function () {
       // If the tabledrag change marker (i.e., the "*") has been inserted inside
-      // a row after the operator label (i.e., "And" or "Or") rearrange the items
-      // so the operator label continues to appear last.
+      // a row after the operator label (i.e., "And" or "Or") rearrange the
+      // items so the operator label continues to appear last.
       var changeMarker = $(this.oldRowElement).find('.tabledrag-changed');
       if (changeMarker.length) {
-        // Search for occurrences of the operator label before the change marker,
-        // and reverse them.
+        // Search for occurrences of the operator label before the change
+        // marker, and reverse them.
         var operatorLabel = changeMarker.prevAll('.views-operator-label');
         if (operatorLabel.length) {
           operatorLabel.insertAfter(changeMarker);
         }
       }
-      // Make sure the "group" dropdown is properly updated when rows are dragged
-      // into an empty filter group. This is borrowed heavily from the block.js
-      // implementation of tableDrag.onDrop().
+      // Make sure the "group" dropdown is properly updated when rows are
+      // dragged into an empty filter group. This is borrowed heavily from the
+      // block.js implementation of tableDrag.onDrop().
       var groupRow = $(this.rowObject.element).prevAll('tr.group-message').get(0);
       var groupName = groupRow.className.replace(/([^ ]+[ ]+)*group-([^ ]+)-message([ ]+[^ ]+)*/, '$2');
       var groupField = $('select.views-group-select', this.rowObject.element);
@@ -715,25 +729,26 @@ $.extend(Backdrop.viewsUi.RearrangeFilterHandler.prototype, {
    */
   redrawOperatorLabels: function () {
     for (var i = 0; i < this.draggableRows.length; i++) {
-      // Within the row, the operator labels are displayed inside the first table
-      // cell (next to the filter name).
+      // Within the row, the operator labels are displayed inside the first
+      // table cell (next to the filter name).
       var $draggableRow = $(this.draggableRows[i]);
       var $firstCell = $draggableRow.find('td:first');
       if ($firstCell.length) {
         // The value of the operator label ("And" or "Or") is taken from the
-        // first operator dropdown we encounter, going backwards from the current
-        // row. This dropdown is the one associated with the current row's filter
-        // group.
+        // first operator dropdown we encounter, going backwards from the
+        // current row. This dropdown is the one associated with the current
+        // row's filter group.
         var operatorValue = $draggableRow.prevAll('.views-group-title').find('option:selected').html();
         var operatorLabel = '<span class="views-operator-label">' + operatorValue + '</span>';
         // If the next visible row after this one is a draggable filter row,
         // display the operator label next to the current row. (Checking for
-        // visibility is necessary here since the "Remove" links hide the removed
-        // row but don't actually remove it from the document).
+        // visibility is necessary here since the "Remove" links hide the
+        // removed row but don't actually remove it from the document).
         var $nextRow = $draggableRow.nextAll(':visible').eq(0);
         var $existingOperatorLabel = $firstCell.find('.views-operator-label');
         if ($nextRow.hasClass('draggable')) {
-          // If an operator label was already there, replace it with the new one.
+          // If an operator label was already there, replace it with the new
+          // one.
           if ($existingOperatorLabel.length) {
             $existingOperatorLabel.replaceWith(operatorLabel);
           }
@@ -775,7 +790,8 @@ $.extend(Backdrop.viewsUi.RearrangeFilterHandler.prototype, {
         $operatorCell.attr('rowspan', 2);
       }
       else if ($row.hasClass('draggable') && $row.is(':visible')) {
-        // We've found a visible filter row, so we now know the group isn't empty.
+        // We've found a visible filter row, so we now know the group isn't
+        // empty.
         draggableCount++;
         $currentEmptyRow.removeClass('group-empty').addClass('group-populated');
         // The operator cell should span all draggable rows, plus the title.
@@ -813,7 +829,8 @@ Backdrop.behaviors.viewsFilterConfigSelectAll = {
 };
 
 /**
- * Ensure the desired default button is used when a form is implicitly submitted via an ENTER press on textfields, radios, and checkboxes.
+ * Ensure the desired default button is used when a form is implicitly submitted
+ * via an ENTER press on textfields, radios, and checkboxes.
  *
  * @see http://www.w3.org/TR/html5/association-of-controls-and-forms.html#implicit-submission
  */
