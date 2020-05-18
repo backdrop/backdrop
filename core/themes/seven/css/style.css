@@ -661,7 +661,10 @@ fieldset .fieldset-legend {
   background-color: #fff;
 }
 fieldset:not(.collapsible) .fieldset-legend {
-  padding: .3em .3em .3em 1em;
+  padding: .3em .3em .3em 1em; /* LTR */
+}
+[dir="rtl"] fieldset:not(.collapsible) .fieldset-legend {
+  padding: .3em 1em .3em .3em;
 }
 fieldset:not(.collapsible) .fieldset-legend,
 fieldset.collapsible:not(.collapsed) .fieldset-legend {
@@ -723,7 +726,7 @@ fieldset .fieldset-wrapper {
 }
 .js[dir="rtl"] fieldset.collapsible .fieldset-legend a:before {
   left: auto;
-  right: .5em;
+  right: .8em;
 }
 .fieldset-legend span.summary {
   position: absolute;
@@ -757,7 +760,7 @@ fieldset .fieldset-wrapper {
 }
 .js[dir="rtl"] fieldset.collapsed .fieldset-legend a:before {
   left: auto;
-  right: .5em;
+  right: 1em;
   border-left-color: transparent;
   border-right-color: black;
 }
