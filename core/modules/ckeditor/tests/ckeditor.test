@@ -100,7 +100,7 @@ class CKEditorTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/content/formats/ckeditor', array(
       'editor_settings[toolbar]' => json_encode($toolbar),
-      'filters[filter_html][settings][allowed_html]' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <img> <figure> <figcaption> <table> <thead> <tbody> <tr> <td> <th>',
+      'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <img> <figure> <figcaption> <table> <thead> <tbody> <tr> <td> <th>',
     ), t('Save configuration'));
     $this->backdropGet('node/add/article');
     $settings = $this->backdropGetSettings();

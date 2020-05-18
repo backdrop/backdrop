@@ -290,12 +290,12 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'name':
-          $site_name = config_get('system.core', 'site_name');
+          $site_name = config_get_translated('system.core', 'site_name');
           $replacements[$original] = $sanitize ? check_plain($site_name) : $site_name;
           break;
 
         case 'slogan':
-          $slogan = config_get('system.core', 'site_slogan');
+          $slogan = config_get_translated('system.core', 'site_slogan');
           $replacements[$original] = $sanitize ? check_plain($slogan) : $slogan;
           break;
 
@@ -441,7 +441,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     };
     $keys = array();
     foreach ($array as $key => $value) {
-      if ($key[0] !== '#') {
+      if (substr($key, 0, 1) !== '#') {
         $keys[] = $key;
       }
     }
@@ -477,7 +477,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     // [array:value:*] dynamic tokens.
     if ($value_tokens = token_find_with_prefix($tokens, 'value')) {
       foreach ($value_tokens as $key => $original) {
-        if ($key[0] !== '#' && isset($array[$key])) {
+        if (substr($key, 0, 1) !== '#' && isset($array[$key])) {
           $replacements[$original] = token_render_array_value($array[$key], $options);
         }
       }

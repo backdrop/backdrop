@@ -1,6 +1,12 @@
 {
     "_config_name": "system.performance",
     "_config_static": true,
+    "_config_translatables": [
+        "anonymous",
+        "site_name",
+        "site_slogan",
+        "maintenance_mode_message"
+    ],
     "action_recursion_limit": 35,
     "active_menus_default": [],
     "admin_theme": "",
@@ -33,6 +39,7 @@
     "language_count": 1,
     "language_default": "en",
     "log_row_limit": 1000,
+    "log_date_format": "Y-M-d H:i:s",
     "log_identity": "backdrop",
     "log_facility": "",
     "log_format": "!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message",

@@ -833,6 +833,7 @@ function link_field_process($element, $form_state, $complete_form) {
     '#title' => t('URL'),
     '#required' => ($element['#delta'] == 0 && $settings['url'] !== 'optional') ? $element['#required'] : FALSE,
     '#default_value' => isset($element['#value']['url']) ? $element['#value']['url'] : NULL,
+    '#autocomplete_path' => 'path-autocomplete',
   );
   if ($settings['title'] !== 'none' && $settings['title'] !== 'value') {
     // Figure out the label of the title field.
@@ -999,7 +1000,9 @@ function link_field_formatter_view($entity_type, $entity, $field, $instance, $la
       '#theme' => 'link_formatter_' . $display['type'],
       '#element' => $item,
       '#field' => $instance,
-      '#display' => $display,
+      '#display' => array(
+        'settings' => $display['settings']
+      ),
     );
   }
   return $elements;

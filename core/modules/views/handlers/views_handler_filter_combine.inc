@@ -54,6 +54,11 @@ class views_handler_filter_combine extends views_handler_filter_string {
     $fields = array();
     // Only add the fields if they have a proper field and table alias.
     foreach ($this->options['fields'] as $id) {
+      // Field access checks may have removed this handler.
+      if (!isset($this->view->field[$id])) {
+        continue;
+      }
+
       $field = $this->view->field[$id];
       // Always add the table of the selected fields to be sure a table alias
       // exists.
@@ -106,7 +111,7 @@ class views_handler_filter_combine extends views_handler_filter_string {
     foreach ($matches as $match) {
       $phrase = FALSE;
       // Strip off phrase quotes.
-      if ($match[2]{0} == '"') {
+      if ($match[2][0] == '"') {
         $match[2] = substr($match[2], 1, -1);
         $phrase = TRUE;
       }

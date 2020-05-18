@@ -7,6 +7,7 @@
  * inform the user that the module supports color schemes if the Color module
  * is enabled.
  */
+
 if (module_exists('color')) {
   $form['header'] = array(
     '#type' => 'fieldset',
@@ -19,9 +20,10 @@ if (module_exists('color')) {
     'slogan',
     'titleslogan',
     'hovermenu',
+    'menutoggle',
   );
   foreach ($fields as $field) {
-    $form['header'][$field] = color_get_color_element('basis', $field, $form);
+    $form['header'][$field] = color_get_color_element($form['theme']['#value'], $field, $form);
   }
 
   $form['general'] = array(
@@ -33,19 +35,38 @@ if (module_exists('color')) {
     'bg',
     'text',
     'link',
-    'primarytabs',
     'borders',
     'formfocusborder',
+  );
+  foreach ($fields as $field) {
+    $form['general'][$field] = color_get_color_element($form['theme']['#value'], $field, $form);
+  }
+
+  $form['primary_tabs'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Tabs and Breadcrumb'),
+    '#collapsible' => TRUE,
+  );
+  $fields = array(
+    'primarytabs',
+    'primarytabstext',
     'buttons',
   );
   foreach ($fields as $field) {
-    $form['general'][$field] = color_get_color_element('basis', $field, $form);
+    $form['primary_tabs'][$field] = color_get_color_element($form['theme']['#value'], $field, $form);
   }
 
   $form['footer'] = array(
     '#type' => 'fieldset',
     '#title' => t('Footer Settings'),
     '#collapsible' => TRUE,
-    'color_footer' => color_get_color_element('basis', 'footer', $form),
   );
+  $fields = array(
+    'footerborder',
+    'footer',
+    'footertext',
+  );
+  foreach ($fields as $field) {
+    $form['footer'][$field] = color_get_color_element($form['theme']['#value'], $field, $form);
+  }
 }

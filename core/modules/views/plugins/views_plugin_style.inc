@@ -188,9 +188,9 @@ class views_plugin_style extends views_plugin {
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    // Only fields-based views can handle grouping.  Style plugins can also exclude
-    // themselves from being groupable by setting their "use grouping" definiton
-    // key to FALSE.
+    // Only fields-based views can handle grouping. Style plugins can also
+    // exclude themselves from being groupable by setting their "use grouping"
+    // definition key to FALSE.
     // @TODO: Document "uses grouping" in docs.php when docs.php is written.
     if ($this->uses_fields() && $this->definition['uses grouping']) {
       $options = array('' => t('- None -'));
@@ -198,7 +198,8 @@ class views_plugin_style extends views_plugin {
       $options += $field_labels;
       // If there are no fields, we can't group on them.
       if (count($options) > 1) {
-        // This is for backward compability, when there was just a single select form.
+        // This is for backward compatibility, when there was just a single
+        // select form.
         if (is_string($this->options['grouping'])) {
           $grouping = $this->options['grouping'];
           $this->options['grouping'] = array();
@@ -430,8 +431,8 @@ class views_plugin_style extends views_plugin {
    *   @endcode
    */
   function render_grouping($records, $groupings = array(), $group_rendered = NULL) {
-    // This is for backward compability, when $groupings was a string containing
-    // the ID of a single field.
+    // This is for backward compatibility, when $groupings was a string
+    // containing the ID of a single field.
     if (is_string($groupings)) {
       $rendered = $group_rendered === NULL ? TRUE : $group_rendered;
       $groupings = array(array('field' => $groupings, 'rendered' => $rendered));
@@ -443,8 +444,8 @@ class views_plugin_style extends views_plugin {
     if ($groupings) {
       foreach ($records as $index => $row) {
         // Iterate through configured grouping fields to determine the
-        // hierarchically positioned set where the current row belongs to.
-        // While iterating, parent groups, that do not exist yet, are added.
+        // hierarchically positioned set where the current row belongs to. While
+        // iterating, parent groups that do not exist yet, are added.
         $set = &$sets;
         foreach ($groupings as $info) {
           $field = $info['field'];
@@ -452,7 +453,7 @@ class views_plugin_style extends views_plugin {
           $rendered_strip = isset($info['rendered_strip']) ? $info['rendered_strip'] : FALSE;
           $grouping = '';
           $group_content = '';
-          // Group on the rendered version of the field, not the raw.  That way,
+          // Group on the rendered version of the field, not the raw. That way,
           // we can control any special formatting of the grouping field through
           // the admin or theme layer or anywhere else we'd like.
           if (isset($this->view->field[$field])) {
@@ -497,9 +498,9 @@ class views_plugin_style extends views_plugin {
       );
     }
 
-    // If this parameter isn't explicitely set modify the output to be fully
+    // If this parameter isn't explicitly set, modify the output to be fully
     // backward compatible to code before Views 7.x-3.0-rc2.
-    // @TODO Remove this as soon as possible e.g. October 2020
+    // @TODO Remove this as soon as possible (e.g. October 2020).
     if ($group_rendered === NULL) {
       $old_style_sets = array();
       foreach ($sets as $group) {
@@ -515,7 +516,7 @@ class views_plugin_style extends views_plugin {
    * Render all of the fields for a given style and store them on the object.
    *
    * @param $result
-   *   The result array from $view->result
+   *   The result array from $view->result.
    */
   function render_fields($result) {
     if (!$this->uses_fields()) {
@@ -527,7 +528,7 @@ class views_plugin_style extends views_plugin {
       $this->view->row_index = 0;
       $keys = array_keys($this->view->field);
 
-      // If all fields have a field::access FALSE there might be no fields, so
+      // If all fields have a field::access FALSE, there might be no fields; so
       // there is no reason to execute this code.
       if (!empty($keys)) {
         foreach ($result as $count => $row) {

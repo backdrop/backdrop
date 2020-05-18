@@ -474,6 +474,8 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
       backdrop_get_schema(NULL, TRUE);
       // Update the theme registry to include it.
       backdrop_theme_rebuild();
+      // Refresh Entity info static cache.
+      entity_info_cache_clear();
 
       // Allow modules to react prior to the installation of a module.
       module_invoke_all('modules_preinstall', array($module));
@@ -575,6 +577,9 @@ function module_disable($module_list, $disable_dependents = TRUE) {
     asort($module_list);
     $module_list = array_keys($module_list);
   }
+
+  // Refresh Entity info static cache.
+  entity_info_cache_clear();
 
   $invoke_modules = array();
 
@@ -986,7 +991,8 @@ function backdrop_merged_modules() {
     'transliteration', // Backdrop 1.3.0.
     'project_browser', // Backdrop 1.4.0.
     'entity_view_mode', // Backdrop 1.6.0.
-    'options_element' // Backdrop 1.12.0.
+    'options_element', // Backdrop 1.12.0.
+    'field_formatter_settings', // Backdrop 1.13.0.
   );
 }
 

@@ -17,7 +17,7 @@ function menu_overview_page() {
     $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
     $links = array();
     $links['list'] = array(
-      'title' => t('Edit links'),
+      'title' => t('Manage links'),
       'href' => 'admin/structure/menu/manage/' . $menu['menu_name'],
     );
     $links['add'] = array(
@@ -341,6 +341,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       '#default_value' => (!empty($path)) ? $path_alias : $path,
       '#description' => t('The path for this menu link. This can be an internal site path such as %add-node or an external URL such as %external. Enter %front to link to the front page.', array('%front' => '<front>', '%add-node' => 'node/add', '%external' => 'http://example.com')),
       '#required' => TRUE,
+      '#autocomplete_path' => 'path-autocomplete',
     );
     $form['actions']['delete'] = array(
       '#type' => 'submit',

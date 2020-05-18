@@ -1595,6 +1595,10 @@ class FileDeleteTest extends FileHookTestCase {
       ))
       ->condition('fid', $file->fid)
       ->execute();
+    // Remove the entity cache entry for this file so that hook_file_load will
+    // be called again.
+    cache('entity_file')->delete($file->fid);
+
     backdrop_cron_run();
 
     // system_cron() loads
@@ -1959,6 +1963,10 @@ class FileLoadTest extends FileHookTestCase {
     $by_path_file = reset($by_path_files);
     $this->assertTrue($by_path_file->file_test['loaded'], 'file_test_file_load() was able to modify the file during load.');
     $this->assertEqual($by_path_file->fid, $file->fid, "Loading by filepath got the correct fid.", 'File');
+
+    // Remove the entity cache entry for this file so that hook_file_load will
+    // be called again.
+    cache('entity_file')->delete($file->fid);
 
     // Load by fid.
     file_test_reset();

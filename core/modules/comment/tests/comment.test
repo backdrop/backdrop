@@ -1135,7 +1135,7 @@ class CommentPreviewTest extends CommentHelperCase {
  * Tests anonymous commenting.
  */
 class CommentAnonymous extends CommentHelperCase {
-  function setUp() {
+  function setUp($modules = array()) {
     parent::setUp();
     config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
   }
@@ -1540,7 +1540,7 @@ class CommentPagerTest extends CommentHelperCase {
  * Tests comments with node access.
  */
 class CommentNodeAccessTest extends CommentHelperCase {
-  function setUp() {
+  function setUp($modules = array()) {
     parent::setUp('search', 'node_access_test');
 
     $web_user_role = $this->web_user->roles[count($this->web_user->roles) - 1];
@@ -1712,7 +1712,7 @@ class CommentApprovalTest extends CommentHelperCase {
  * Tests the Comment module blocks.
  */
 class CommentBlockFunctionalTest extends CommentHelperCase {
-  function setUp() {
+  function setUp($modules = array()) {
     parent::setUp(array('block'));
 
     $admin_user_role = $this->admin_user->roles[count($this->admin_user->roles) - 1];
@@ -1909,9 +1909,9 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
     $tests['[comment:parent:title]'] = check_plain($parent_comment->subject);
     $tests['[comment:node:nid]'] = $comment->nid;
     $tests['[comment:node:title]'] = check_plain($node->title);
-    $tests['[comment:author]'] = check_plain(format_username($this->admin_user));
+    $tests['[comment:author]'] = check_plain(user_format_name($this->admin_user));
     $tests['[comment:author:uid]'] = $comment->uid;
-    $tests['[comment:author:name]'] = check_plain(format_username($this->admin_user));
+    $tests['[comment:author:name]'] = check_plain(user_format_name($this->admin_user));
 
     // Test to make sure that we generated something for each token.
     $this->assertFalse(in_array(0, array_map('strlen', $tests)), 'No empty tokens generated.');
@@ -1930,8 +1930,8 @@ class CommentTokenReplaceTestCase extends CommentHelperCase {
     $tests['[comment:body]'] = $comment->comment_body[LANGUAGE_NONE][0]['value'];
     $tests['[comment:parent:title]'] = $parent_comment->subject;
     $tests['[comment:node:title]'] = $node->title;
-    $tests['[comment:author]'] = format_username($this->admin_user);
-    $tests['[comment:author:name]'] = format_username($this->admin_user);
+    $tests['[comment:author]'] = user_format_name($this->admin_user);
+    $tests['[comment:author:name]'] = user_format_name($this->admin_user);
 
     foreach ($tests as $input => $expected) {
       $output = token_replace($input, array('comment' => $comment), array('language' => $language, 'sanitize' => FALSE));
@@ -2001,7 +2001,7 @@ class CommentActionsTestCase extends CommentHelperCase {
  * Tests fields on comments.
  */
 class CommentFieldsTest extends CommentHelperCase {
-  function setUp() {
+  function setUp($modules = array()) {
     parent::setUp(array('field_ui'));
   }
 
