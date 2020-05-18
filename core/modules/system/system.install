@@ -724,7 +724,7 @@ function system_install() {
 
   // Set the public files path to the directory with the settings.php file.
   config_set('system.core', 'file_public_path', str_replace('./', '', conf_path() . '/files'));
-  
+
   // Sets the path of system-appropriate temporary directory.
   config_set('system.core', 'file_temporary_path', file_directory_temp());
 
@@ -3114,6 +3114,13 @@ function system_update_1071() {
   foreach ($roles as $role_name => $role) {
     user_role_grant_permissions($role_name, array('administer flexible templates'));
   }
+}
+
+/**
+ * Add 'jquery-html-prefilter-3.5.0.js' to the 'jquery' library.
+ */
+function system_update_1072() {
+  // Empty update to force a rebuild of hook_library() and JS aggregates.
 }
 
 /**
