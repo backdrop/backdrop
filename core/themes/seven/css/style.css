@@ -653,18 +653,21 @@ fieldset {
   min-width: 0;
 }
 fieldset .fieldset-legend {
-  width: 100%;
-  padding-left: 1em; /* LTR */
+  display: block;
   text-transform: uppercase;
   box-sizing: border-box;
   border-radius: 4px;
   border: 2px solid #EAEAEA;
   background-color: #fff;
 }
-[dir="rtl"] fieldset .fieldset-legend {
-  padding-right: 1em;
-  padding-left: 0;
+fieldset:not(.collapsible) .fieldset-legend {
+  padding: .3em .3em .3em 1em;
 }
+fieldset:not(.collapsible) .fieldset-legend,
+fieldset.collapsible:not(.collapsed) .fieldset-legend {
+  border-bottom: none;
+}
+
 legend {
   font-size: 120%;
   font-weight: normal;
@@ -684,7 +687,7 @@ fieldset fieldset fieldset {
  */
 fieldset .fieldset-wrapper {
   padding: 15px 13px 13px 15px; /* LTR */
-  border-radius: 4px;
+  border-radius: 0 0 4px 4px;
   border: 2px solid #EAEAEA;
   border-top: none;
   margin-top: -2px;
@@ -696,11 +699,7 @@ fieldset .fieldset-wrapper {
   position: relative;
   z-index: 1;
   display: block;
-  width: 94%; /* IE8 fallback */
-  width: calc(100% - 2em);
   padding: .3em .3em .3em 1.8em;
-  margin: 0 -.5em;
-  border-radius: 4px;
   background: transparent;
 }
 .js[dir="rtl"] fieldset.collapsible .fieldset-title {
@@ -708,13 +707,14 @@ fieldset .fieldset-wrapper {
   padding: .3em 1.8em .3em .3em;
 }
 .js fieldset.collapsible .fieldset-legend {
+  border-radius: 4px 4px 0 0;
   font-size: 1em;
 }
 .js fieldset.collapsible .fieldset-legend a:before {
   content: "";
   position: absolute;
-  left: .6em;
-  top: .8em;
+  left: .8em;
+  top: .9em;
   width: 0;
   height: 0;
   border: .32em solid transparent;
@@ -723,7 +723,7 @@ fieldset .fieldset-wrapper {
 }
 .js[dir="rtl"] fieldset.collapsible .fieldset-legend a:before {
   left: auto;
-  right: .6em;
+  right: .5em;
 }
 .fieldset-legend span.summary {
   position: absolute;
@@ -746,15 +746,18 @@ fieldset .fieldset-wrapper {
 .js fieldset.collapsed {
   padding: 0;
 }
+.js fieldset.collapsed .fieldset-legend {
+  border-radius: 4px;
+}
 .js fieldset.collapsed .fieldset-legend a:before {
-  left: .8em;
+  left: 1em;
   top: .75em;
   border: .32em solid transparent;
   border-left-color: black;
 }
 .js[dir="rtl"] fieldset.collapsed .fieldset-legend a:before {
   left: auto;
-  right: .8em;
+  right: .5em;
   border-left-color: transparent;
   border-right-color: black;
 }
