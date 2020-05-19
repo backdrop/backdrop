@@ -476,6 +476,13 @@ function filter_admin_format_filter_settings_form_ajax($form, &$form_state) {
   else {
     $trigger = $form_state['triggering_element'];
     $name = $trigger['#name'];
+    // Load previously added settings from tempstore, if any.
+    if ($stored_format = filter_get_format_tempstore($form_state['format']->format)) {
+      $format = $stored_format;
+    }
+    else {
+      $format = $form_state['format'];
+    }
 
     $configure_form = backdrop_get_form('filter_admin_format_filter_settings_form', $format, $name);
     $title = t('Configure filter');
@@ -503,13 +510,7 @@ function filter_admin_format_filter_settings_form_ajax($form, &$form_state) {
  */
 function filter_admin_format_filter_settings_form($form, &$form_state, $format, $filter_name) {
   form_load_include($form_state, 'inc', 'filter', 'filter.admin');
-  // Load previously added settings from tempstore, if any.
-  if ($stored_format = filter_get_format_tempstore($format->format)) {
-    $form_state['format'] = $stored_format;
-  }
-  else {
-    $form_state['format'] = $format;
-  }
+  $form_state['format'] = $format;
   $form_state['filter_name'] = $filter_name;
 
   $all_filter_info = filter_get_filters();
