@@ -181,16 +181,6 @@ function filter_admin_format_page($format = NULL) {
  * @ingroup forms
  */
 function filter_admin_format_form($form, &$form_state, $format) {
-  // Use a format stored in tempstore if available.
-  if ($stored_format = filter_get_format_tempstore($format->format)) {
-    filter_admin_set_message($stored_format);
-    $format = $stored_format;
-  }
-  // If editing an already-existing format.
-  elseif (isset($format->format)) {
-    filter_set_format_tempstore($format);
-  }
-
   $is_fallback = ($format->format == filter_fallback_format());
   $editors = filter_get_editors();
   if (isset($form_state['editor_info'])) {
@@ -465,9 +455,6 @@ function filter_admin_format_filter_settings_form_redirect($form, &$form_state) 
   if (empty($form_state['format']->format)) {
     $form_state['format']->format = $form_state['values']['format'];
   }
-
-  filter_set_format_tempstore($form_state['format']);
-
   $form_state['redirect'] = 'admin/config/content/formats/' . $form_state['format']->format . '/filter-settings/' . $name;
 }
 
@@ -484,7 +471,13 @@ function filter_admin_format_filter_settings_form_ajax($form, &$form_state) {
   else {
     $trigger = $form_state['triggering_element'];
     $name = $trigger['#name'];
-    $format = $form_state['format'];
+    // Load previously added settings from tempstore, if any.
+    if ($stored_format = filter_get_format_tempstore($form_state['format']->format)) {
+      $format = $stored_format;
+    }
+    else {
+      $format = $form_state['format'];
+    }
 
     $configure_form = backdrop_get_form('filter_admin_format_filter_settings_form', $format, $name);
     $title = t('Configure filter');
