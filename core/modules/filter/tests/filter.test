@@ -465,6 +465,16 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit, t('Update'));
     $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Filtered HTML')));
+
+    // The form does save permitted value and it appears in the config json.
+    $length = 88;
+    $edit_setting = array(
+      'filter_url_length' => $length,
+    );
+    $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit_setting, t('Update'));
+    $this->backdropPost('admin/config/content/formats/filtered_html', array(), t('Save configuration'));
+    $saved_length = config_get('filter.format.filtered_html', 'filters.filter_url.settings.filter_url_length');
+    $this->assertEqual($saved_length, $length, 'Filter url length saved to config file.');
   }
 }
 
