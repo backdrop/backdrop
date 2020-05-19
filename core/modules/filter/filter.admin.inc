@@ -181,6 +181,11 @@ function filter_admin_format_page($format = NULL) {
  * @ingroup forms
  */
 function filter_admin_format_form($form, &$form_state, $format) {
+  // Use a format stored in tempstore if available.
+  if ($stored_format = filter_get_format_tempstore($format->format)) {
+    filter_admin_set_message($stored_format);
+    $format = $stored_format;
+  }
   $is_fallback = ($format->format == filter_fallback_format());
   $editors = filter_get_editors();
   if (isset($form_state['editor_info'])) {
