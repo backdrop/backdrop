@@ -662,15 +662,23 @@ function filter_admin_format_form_submit($form, &$form_state) {
   unset($form_state['values']['filter_settings']);
   unset($form_state['values']['actions']);
 
-  // Save allowed HTML tags from the hidden field in the event JS modified them.
-  $form_state['values']['filters']['filter_html']['settings']['allowed_html'] = $form_state['values']['allowed_html'];
-  unset($form_state['values']['allowed_html']);
-
   // Add the submitted form values to the text format, and save it.
   $format = $form_state['format'];
+  // Save allowed HTML tags from the hidden field in the event JS modified them.
+  $allowed_html = $form_state['values']['allowed_html'];
+  unset($form_state['values']['allowed_html']);
+
   foreach ($form_state['values'] as $key => $value) {
     $format->$key = $value;
   }
+  // Get values from filter settings forms back from tempstore.
+  if ($stored_format = filter_get_format_tempstore($format->format)) {
+    foreach ($stored_format->filters as $name => $filter) {
+      $format->filters[$name]['settings'] = $filter->settings;
+    }
+  }
+  // Set allowed html, parked in a variable previously.
+  $format->filters['filter_html']['settings']['allowed_html'] = $allowed_html;
 
   // If not saving an editor, do not save any settings.
   if (!$format->editor) {
