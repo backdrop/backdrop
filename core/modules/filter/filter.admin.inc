@@ -513,6 +513,12 @@ function filter_admin_format_filter_settings_form($form, &$form_state, $format, 
   $form_state['format'] = $format;
   $form_state['filter_name'] = $filter_name;
 
+  // Use a format stored in tempstore if available.
+  // Has to get loaded again here in case we did not come here via ajax.
+  if ($stored_format = filter_get_format_tempstore($format->format)) {
+    $form_state['format'] = $stored_format;
+    $format = $stored_format;
+  }
   $all_filter_info = filter_get_filters();
   $filter_info = $all_filter_info[$filter_name];
   $filter = $format->filters[$filter_name];
