@@ -22,7 +22,8 @@ function color_theme() {
 function color_form_system_theme_settings_alter(&$form, &$form_state) {
   if (isset($form_state['build_info']['args'][0])
       && ($theme_name = $form_state['build_info']['args'][0])
-      && ($theme_info = color_get_info($theme_name))) {
+      && ($theme_info = color_get_info($theme_name))
+      && isset($theme_info['fields'])) {
     $form['color'] = array(
       '#type' => 'fieldset',
       '#title' => t('Color scheme'),
