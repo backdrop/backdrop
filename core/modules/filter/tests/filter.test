@@ -475,6 +475,23 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/config/content/formats/filtered_html', array(), t('Save configuration'));
     $saved_length = config_get('filter.format.filtered_html', 'filters.filter_url.settings.filter_url_length');
     $this->assertEqual($saved_length, $length, 'Filter url length saved to config file.');
+
+    // Make sure consecutive settings form submits do not discard
+    // previously added settings.
+    $length = 102;
+    $edit_url = array(
+      'filter_url_length' => $length,
+    );
+    $edit_html = array(
+      'filter_html_nofollow' => TRUE,
+    );
+    $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit_url, t('Update'));
+    $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_html', $edit_html, t('Update'));
+    $this->backdropPost('admin/config/content/formats/filtered_html', array(), t('Save configuration'));
+    $url_length = config_get('filter.format.filtered_html', 'filters.filter_url.settings.filter_url_length');
+    $this->assertEqual($url_length, $length, 'Filter url not overridden by consecutive form post.');
+    $nofollow = config_get('filter.format.filtered_html', 'filters.filter_html.settings.filter_html_nofollow');
+    $this->assertTrue($nofollow, 'Consecutive settings form post saved correctly');
   }
 }
 
