@@ -1552,6 +1552,12 @@ function user_admin_paths() {
     'user/*/edit' => TRUE,
     'user/*/edit/*' => TRUE,
   );
+  if (config_get('system.core', 'login_admin_theme')) {
+    $paths['user/login'] = TRUE;
+    $paths['user/register'] = TRUE;
+    $paths['user/password'] = TRUE;
+  }
+  dpm($paths);
   return $paths;
 }
 
@@ -2923,6 +2929,40 @@ function user_action_info() {
   }
 
   return $actions;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Alters the theme form to use the admin theme on node editing.
+ *
+ * @see node_form_system_themes_admin_form_submit()
+ */
+function user_form_system_themes_admin_form_alter(&$form, &$form_state, $form_id) {
+  $form['admin_theme']['login_admin_theme'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use the administration theme on the log in page, password reset page, and account creation page'),
+    '#default_value' => config_get('system.core', 'login_admin_theme'),
+    '#states' => array(
+      'visible' => array(
+        array(
+          // Hide this checkbox if "Default theme" has been selected from the
+          // "Administration theme" dropdown menu.
+          ':input[name="admin_theme"]' => array('!value' => 0),
+        ),
+      ),
+    ),
+  );
+  $form['#submit'][] = 'user_form_system_themes_admin_form_submit';
+}
+
+/**
+ * Form submission handler for system_themes_admin_form().
+ *
+ * @see user_form_system_themes_admin_form_alter()
+ */
+function user_form_system_themes_admin_form_submit(&$form, &$form_state) {
+  config_set('system.core', 'login_admin_theme', $form_state['values']['login_admin_theme']);
 }
 
 /**
