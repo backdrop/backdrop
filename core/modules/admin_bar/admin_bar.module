@@ -481,6 +481,11 @@ function admin_bar_admin_bar_output_build(&$content) {
       }
     }
   }
+  // Move file/add under the "Content" item.
+  if (isset($content['menu']['menu']['file/add']) && isset($content['menu']['menu']['admin/content'])) {
+    $content['menu']['menu']['admin/content']['file/add'] = $content['menu']['menu']['file/add'];
+    unset($content['menu']['menu']['file/add']);
+  }
 }
 
 /**

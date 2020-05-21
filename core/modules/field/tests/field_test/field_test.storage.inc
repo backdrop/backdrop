@@ -324,7 +324,7 @@ function field_test_field_storage_query($field_name, $conditions, $count, &$curs
           $id = ($load_current || empty($entity_type['entity keys']['revision'])) ? $row->entity_id : $row->revision_id;
 
           if (!isset($return[$row->type][$id])) {
-            $return[$row->type][$id] = entity_create_stub_entity($row->type, array($row->entity_id, $row->revision_id, $row->bundle));
+            $return[$row->type][$id] = (object) array('entity_id' => $row->entity_id, 'revision_id' => $row->revision_id, 'bundle' => $row->bundle);
             $entity_count++;
           }
         }
@@ -456,7 +456,7 @@ function field_test_field_attach_delete_bundle($entity_type, $bundle, $instances
 
   foreach ($instances as $field_name => $instance) {
     $field = field_info_field($field_name);
-    if ($field['storage']['type'] == 'field_test_storage') {
+    if (isset($field['storage']['type']) && $field['storage']['type'] == 'field_test_storage') {
       $field_data = &$data[$field['field_name']];
       foreach (array('current', 'revisions') as $sub_table) {
         foreach ($field_data[$sub_table] as &$row) {

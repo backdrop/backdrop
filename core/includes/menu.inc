@@ -1129,7 +1129,7 @@ function menu_tree_output($tree, $_current_depth = 0) {
     // Add the active class to the wrapper itself if necessary as the l()
     // function would.
     if (($data['link']['href'] == $_GET['q'] || ($data['link']['href'] == '<front>' && backdrop_is_front_page())) &&
-      (empty($data['link']['language']) || $data['link']['language']->langcode == $language_url->langcode)) {
+      (empty($data['link']['langcode']) || $data['link']['langcode'] == $language_url->langcode)) {
       $class[] = 'active';
     }
     $class[] = 'menu-mlid-' . $data['link']['mlid'];

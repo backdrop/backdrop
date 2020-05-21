@@ -183,4 +183,46 @@ class NumberFieldTestCase extends BackdropWebTestCase {
     }
   }
 
+  /**
+   * Test empty value submission.
+   */
+  function testNumberFieldEmpty() {
+    // Add a content type.
+    $this->backdropGet('admin/structure/types/add');
+    $name = $this->randomName();
+    $bundle = backdrop_strtolower($name);
+    $edit = array('name' => $name, 'type' => $bundle);
+    $this->backdropPost(NULL, $edit, t('Save and add fields'));
+
+    // Add a decimal field to the newly created type.
+    $label = $this->randomName();
+    $field_name = backdrop_strtolower($label);
+    $edit = array(
+      'fields[_add_new_field][label]' => $label,
+      'fields[_add_new_field][field_name]' => $field_name,
+      'fields[_add_new_field][type]' => 'number_decimal',
+      'fields[_add_new_field][widget_type]' => 'number',
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    // Set an empty default value for that type via UI.
+    $path = "admin/structure/types/manage/$bundle/fields/field_{$field_name}";
+    $this->backdropGet($path);
+    $langcode = LANGUAGE_NONE;
+    $edit = array(
+      "field_{$field_name}[$langcode][0][value]" => '',
+    );
+    $this->backdropPost(NULL, $edit, t('Save settings'));
+    // Default value should still be NULL.
+    $config = config("field.instance.node.{$bundle}.field_{$field_name}");
+    $this->assertEqual($config->get('default_value'), NULL, 'Default value of number field is NULL');
+    $node_user = $this->backdropCreateUser(array('bypass node access'));
+    $this->backdropLogin($node_user);
+    // Save the same empty value in a node entity (node needs a title).
+    $edit['title'] = $this->randomName();
+    $this->backdropGet("node/add/{$bundle}");
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->assertResponse(200, 'Post to create new node with empty number value returned 200 OK');
+  }
+
 }
