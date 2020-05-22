@@ -1206,5 +1206,19 @@ function user_update_1016() {
 }
 
 /**
+ * Add admin mail text for pending approval.
+ */
+function user_update_1017() {
+  $config = config('user.mail');
+  $translatables = $config->get('_config_translatables');
+  $translatables[] = 'register_pending_approval_admin_body';
+  $translatables[] = 'register_pending_approval_admin_subject';
+  $config->set('_config_translatables', $translatables);
+  $config->set('register_pending_approval_admin_body', "[user:name] has applied for an account.\n\n[user:edit-url]");
+  $config->set('register_pending_approval_admin_subject', 'Account details for [user:name] at [site:name] (pending admin approval)');
+  $config->save();
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */
