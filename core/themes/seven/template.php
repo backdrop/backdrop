@@ -10,6 +10,10 @@
 function seven_preprocess_page(&$variables) {
   // Add the OpenSans font from core on every page of the site.
   backdrop_add_library('system', 'opensans', TRUE);
+
+  if (user_login_admin_theme()) {
+    $variables['classes'][] = 'login-page';
+  }
 }
 
 /**
@@ -17,6 +21,9 @@ function seven_preprocess_page(&$variables) {
  */
 function seven_preprocess_layout(&$variables) {
   // Don't modify layouts that are being edited.
+  if (user_login_admin_theme()) {
+    $variables['tabs'] = '';
+  }
   if (!$variables['admin']) {
     // Move the page title and tabs into the "header" area, to fit with Seven's
     // markup requirements.
@@ -33,6 +40,7 @@ function seven_preprocess_layout(&$variables) {
       }
     }
   }
+
 }
 
 /**

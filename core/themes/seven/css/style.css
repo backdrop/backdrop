@@ -1650,6 +1650,21 @@ div.add-or-remove-shortcuts {
   top: 4px;
 }
 
+/* Log in form */
+.login-page .l-header {
+  padding-bottom: 20px;
+  margin-bottom: 40px;
+}
+.login-page .l-messages,
+.login-page .l-page-title,
+.login-page .l-content {
+  max-width: 450px;
+  margin: 0 auto;
+}
+.login-page .page-title {
+  text-align: center;
+}
+
 /* Dropbutton */
 .js .dropbutton-widget {
   border: 1px solid #E9E8E8;
