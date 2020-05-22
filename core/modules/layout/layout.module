@@ -568,15 +568,16 @@ function layout_route_handler($router_item) {
   // Safety check that we don't show an admin layout to a user who cannot view
   // the admin theme. This may happen because the cached layout list does not
   // include a permissions check on the admin theme.
-  if ($selected_layout->name === 'admin_default' && !user_access('view the administration theme')) {
+  $acess_admin_theme = user_access('view the administration theme');
+  if ($selected_layout->name === 'admin_default' && !$acess_admin_theme && !user_login_admin_theme()) {
     $selected_layout = layout_load('default');
   }
 
-  // Special handling for 404 and 403 pages to render in admin theme. The
+  // Special handling for 404 and 403 pages to render in admin layout. The
   // current path will be the 404/403 system path, and we need to check the
   // original path, which is stored in "destination" by
   // backdrop_deliver_html_page().
-  if (in_array(backdrop_get_http_header('Status'), array('404 Not Found', '403 Forbidden')) && user_access('view the administration theme')) {
+  if (in_array(backdrop_get_http_header('Status'), array('404 Not Found', '403 Forbidden'))) {
     if (isset($_GET['destination']) && path_is_admin($_GET['destination'])) {
       $selected_layout = layout_load('admin_default');
     }
