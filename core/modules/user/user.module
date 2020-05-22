@@ -1557,8 +1557,36 @@ function user_admin_paths() {
     $paths['user/register'] = TRUE;
     $paths['user/password'] = TRUE;
   }
-  dpm($paths);
   return $paths;
+}
+
+/**
+ * Implements hook_custom_theme().
+ */
+function user_custom_theme() {
+  if (user_login_admin_theme()) {
+    return config_get('system.core', 'admin_theme');
+  }
+}
+
+/**
+ * Determines if the page is a login page, with the login admin theme setting.
+ *
+ * @return
+ *   A boolean indicating whether the admin theme should be used.
+ */
+function user_login_admin_theme() {
+  // @todo should this be a global so contrib can add paths?
+  $login_paths = array(
+    'user/register',
+    'user/login',
+    'user/password',
+  );
+  $path = current_path();
+  if (path_is_admin($path) && in_array($path, $login_paths)) {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 /**

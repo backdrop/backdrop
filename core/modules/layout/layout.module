@@ -1259,7 +1259,9 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
 
     // If no layout matches at the path, use the default layout.
     if (!$selected_layout) {
-      if (path_is_admin($router_item['path']) && user_access('view the administration theme')) {
+      $is_admin_path = path_is_admin($router_item['path']);
+      $acess_admin_theme = user_access('view the administration theme');
+      if (($is_admin_path && $acess_admin_theme) || user_login_admin_theme()) {
         $selected_layout = layout_load('admin_default');
       }
       else {
