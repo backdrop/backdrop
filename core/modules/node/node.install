@@ -533,7 +533,6 @@ function node_update_1008() {
     'disabled' => FALSE,
     'base_table' => 'node',
     'human_name' => 'Admin Content',
-    'core' => '1.0',
     'display' => array(
       'default' => array(
         'display_title' => 'Master',
@@ -1207,7 +1206,6 @@ function node_update_1018() {
     'disabled' => false,
     'base_table' => 'node',
     'human_name' => 'Administer content',
-    'core' => '1.0',
     'display' =>
     array (
       'default' =>

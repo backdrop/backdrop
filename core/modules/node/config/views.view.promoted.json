@@ -8,7 +8,6 @@
     "disabled": false,
     "base_table": "node",
     "human_name": "Promoted content",
-    "core": 0,
     "display": {
         "default": {
             "display_title": "Master",

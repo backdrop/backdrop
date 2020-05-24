@@ -7,7 +7,6 @@
     "disabled": false,
     "base_table": "node",
     "human_name": "Dropbutton test",
-    "core": "8.0-dev",
     "display": {
         "default": {
             "display_title": "Master",

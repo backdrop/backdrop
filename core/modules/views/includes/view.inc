@@ -50,12 +50,6 @@ class view {
   var $human_name;
 
   /**
-   * The core version the view was created for.
-   * @var int
-   */
-  var $core;
-
-  /**
    * The views-api version this view was created by.
    *
    * Some examples of the variable are 3.0 or 3.0-alpha1
@@ -1803,7 +1797,6 @@ class view {
       'disabled' => (boolean) $this->disabled,
       'base_table' => $this->base_table,
       'human_name' => $this->human_name,
-      'core' => $this->core,
       'display' => array(),
     );
     foreach ($this->display as $display) {

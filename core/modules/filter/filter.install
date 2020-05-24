@@ -97,7 +97,6 @@ function filter_update_1002() {
     'disabled' => FALSE,
     'base_table' => 'file_managed',
     'human_name' => 'Image Library',
-    'core' => '1.7',
     'display' => array(
       'default' => array(
         'display_title' => 'Master',
