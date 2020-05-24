@@ -1215,7 +1215,7 @@ function user_update_1017() {
   $translatables[] = 'register_pending_approval_admin_subject';
   $config->set('_config_translatables', $translatables);
   $config->set('register_pending_approval_admin_body', "[user:name] has applied for an account.\n\n[user:edit-url]");
-  $config->set('register_pending_approval_admin_subject', 'Account details for [user:name] at [site:name] (pending admin approval)');
+  $config->set('register_pending_approval_admin_subject', 'New account of [user:name] at [site:name] (pending approval)');
   $config->save();
 }
 
