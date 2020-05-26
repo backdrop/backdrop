@@ -417,7 +417,7 @@ function theme_file_download_link($variables) {
   $variables['text'] = token_replace($variables['text'], array('file' => $file), array('clear' => TRUE, 'sanitize' => !empty($uri['options']['html'])));
 
   $output = '<span class="file">' . $icon . ' ' . l($variables['text'], $uri['path'], $uri['options']);
-  $output .= ' ' . '<span class="file-size">(' . format_size($file->filesize) . ')</span>';
+  $output .= ' <span class="file-size">(' . format_size($file->filesize) . ')</span>';
   $output .= '</span>';
 
   return $output;
