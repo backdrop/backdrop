@@ -1053,7 +1053,7 @@ function user_login_block($form) {
   $form['#submit'][] = 'user_login_submit';
   $form['name'] = array(
     '#type' => 'textfield',
-    '#title' => $credentials === USER_LOGIN_EMAIL_ONLY ? t('Email address') : ($credentials === USER_LOGIN_USERNAME_OR_EMAIL ? t('Username or email') : t('Username')),
+    '#title' => $credentials === USER_LOGIN_EMAIL_ONLY ? t('Email address') : ($credentials === USER_LOGIN_USERNAME_OR_EMAIL ? t('Username or email address') : t('Username')),
     '#maxlength' => $credentials === USER_LOGIN_USERNAME_ONLY ? USERNAME_MAX_LENGTH : EMAIL_MAX_LENGTH,
     '#size' => 15,
     '#required' => TRUE,
@@ -1656,7 +1656,7 @@ function user_login($form, &$form_state) {
   // Display login form:
   $credentials = config_get('system.core', 'user_login_method');
   $form['name'] = array('#type' => 'textfield',
-    '#title' => $credentials === USER_LOGIN_EMAIL_ONLY ? t('Email address') : ($credentials === USER_LOGIN_USERNAME_OR_EMAIL ? t('Username or email') : t('Username')),
+    '#title' => $credentials === USER_LOGIN_EMAIL_ONLY ? t('Email address') : ($credentials === USER_LOGIN_USERNAME_OR_EMAIL ? t('Username or email address') : t('Username')),
     '#maxlength' => $credentials === USER_LOGIN_USERNAME_ONLY ? USERNAME_MAX_LENGTH : EMAIL_MAX_LENGTH,
     '#size' => 60,
     '#required' => TRUE,

@@ -29,7 +29,7 @@ function seven_preprocess_page(&$variables) {
 function seven_preprocess_layout(&$variables) {
   // Don't modify layouts that are being edited.
   if (user_login_admin_theme()) {
-    //$variables['tabs'] = '';
+    $variables['tabs'] = '';
   }
   if (!$variables['admin']) {
     // Move the page title and tabs into the "header" area, to fit with Seven's
