@@ -1399,11 +1399,13 @@ function file_managed_file_process($element, &$form_state, $form) {
     $extension_string = implode(',', $extension_array);
     $element['upload']['#attributes']['data-file-extensions'] = $extension_string;
 
-    // Add support for mobile camera uploads if jpg is a valid extension.
+    // If jpg is among the accepted extensions for the field, add support for
+    // uploads via the camera on mobile devices (.jpg is the default extension
+    // used by cameras in iOS and Android devices).
     // Browser support for HTML5 extension validation is still weak at this
-    // point, add more extensive extension support in the future.
+    // point. More extensive extension support may be added in the future.
     if (in_array('jpg', $extension_array)) {
-      $element['upload']['#attributes']['accept'] = '*/*,capture=camera';
+      $element['upload']['#attributes']['accept'] = 'image/*,capture=camera';
     }
   }
 
