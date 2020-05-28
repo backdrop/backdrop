@@ -2734,7 +2734,11 @@ function menu_get_active_breadcrumb() {
     // itself, we always remove the last link in the trail, if the current
     // router item links to its parent.
     if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
-      array_pop($active_trail);
+      // The user/login page is specail because we need the parent "Home" link
+      // to appear on the login page.
+      if ($item['path'] != 'user/login') {
+        array_pop($active_trail);
+      }
     }
 
     foreach ($active_trail as $parent) {

@@ -1658,11 +1658,19 @@ div.add-or-remove-shortcuts {
 .login-page .l-messages,
 .login-page .l-page-title,
 .login-page .l-content {
-  max-width: 450px;
+  max-width: 500px;
   margin: 0 auto;
 }
 .login-page .page-title {
   text-align: center;
+}
+
+a.login-link {
+  display: inline-block;
+  margin: 0 15px 0 0; /* LTR */
+}
+[dir="rtl"] a.login-link {
+  margin: 0 0 0 15px; /* LTR */
 }
 
 /* Dropbutton */
