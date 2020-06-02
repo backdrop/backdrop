@@ -733,10 +733,28 @@ function comment_node_page_additions(Node $node) {
     $comments_per_page = $node_type->settings['comment_per_page'];
     if ($cids = comment_get_thread($node, $mode, $comments_per_page)) {
       $comments = comment_load_multiple($cids);
-      comment_prepare_thread($comments);
-      $build = comment_view_multiple($comments, $node);
-      $build['pager']['#theme'] = 'pager';
-      $additions['comments'] = $build;
+      // In rare cases $comments is an empty array,
+      // for instance if the only comment entity attached to this node
+      // is broken for some reason.
+      if (!empty($comments)) {
+        comment_prepare_thread($comments);
+        $build = comment_view_multiple($comments, $node);
+        $build['pager']['#theme'] = 'pager';
+        $additions['comments'] = $build;
+      }
+      elseif ($node->comment_count > 0) {
+        // Comment count has got out of line, update it.
+        db_update('node_comment_statistics')
+          ->fields(array(
+            'cid' => 0,
+            'comment_count' => 0,
+            'last_comment_timestamp' => $node->created,
+            'last_comment_name' => '',
+            'last_comment_uid' => $node->uid,
+          ))
+          ->condition('nid', $node->nid)
+          ->execute();
+      }
     }
   }
 
