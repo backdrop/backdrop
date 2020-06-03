@@ -672,7 +672,8 @@ function comment_node_view(Node $node, $view_mode) {
       // Node in other display modes: add an "Add comment" link if the user is
       // allowed to post comments and if this node is allowing new comments.
       // But we don't want this link if we're building the node for search
-      // indexing, or constructing a search result excerpt or are ona comment form page.
+      // indexing, or constructing a search result excerpt, or posting a 
+      // reply not on a node page, but a separate comment form page.
       if ($node->comment == COMMENT_NODE_OPEN) {
         $comment_form_location = $node_type->settings['comment_form_location'];
         if (Comment::createAccess()) {
