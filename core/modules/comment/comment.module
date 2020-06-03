@@ -1444,9 +1444,11 @@ function comment_node_update_index(Node $node) {
     $comments_per_page = $node_type->settings['comment_per_page'];
     if ($node->comment && $cids = comment_get_thread($node, $mode, $comments_per_page)) {
       $comments = comment_load_multiple($cids);
-      comment_prepare_thread($comments);
-      $build = comment_view_multiple($comments, $node);
-      return backdrop_render($build);
+      if ($comments) {
+        comment_prepare_thread($comments);
+        $build = comment_view_multiple($comments, $node);
+        return backdrop_render($build);
+      }
     }
   }
   return '';
