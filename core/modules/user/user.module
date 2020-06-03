@@ -1,4 +1,4 @@
-<?php
+ <?php
 /**
  * @file
  * Enables the user registration and login system.
@@ -2757,12 +2757,9 @@ function _user_mail_notify($op, $account, $language = NULL) {
     $mail = backdrop_mail('user', $op, $account->mail, $language, $params);
     if ($op == 'register_pending_approval') {
       // If a user registered requiring admin approval, notify the admin, too.
+      $approval_email = user_get_approval_email();
       // We use the site default language for this.
-      $site_mail = $config->get('site_mail');
-      if (empty($site_mail)) {
-        $site_mail = ini_get('sendmail_from');
-      }
-      backdrop_mail('user', 'register_pending_approval_admin', $site_mail, language_default(), $params);
+      backdrop_mail('user', 'register_pending_approval_admin', $approval_email, language_default(), $params);
 
     }
   }

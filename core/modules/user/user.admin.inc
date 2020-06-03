@@ -138,6 +138,17 @@ function user_admin_settings($form, &$form_state) {
       USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL => t('Visitors, but administrator approval is required'),
     )
   );
+  $notify_email = user_get_approval_email();
+  $form['registration_cancellation']['user_approval_email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email address to notify'),
+    '#default_value' => $notify_email,
+    '#states' => array(
+      'visible' => array(
+        'input[name="user_register"]' => array('value' => USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL),
+      ),
+    ),
+  );
   $form['registration_cancellation']['user_email_verification'] = array(
     '#type' => 'checkbox',
     '#title' => t('Require email verification when a visitor creates an account.'),
@@ -1017,4 +1028,17 @@ function user_settings_email_submit($form, &$form_state) {
   $config->save();
 
   backdrop_set_message(t('The configuration options have been saved.'));
+}
+
+/**
+ * Gets the email address for administrator approval.
+ *
+ * @return [type] [description]
+ */
+function user_get_approval_email() {
+  $email = config_get('system.core', 'user_approval_email');
+  if (empty($email)) {
+    $email = db_query("SELECT mail FROM {users} WHERE uid = 1 AND status = 1")->fetchField();
+  }
+  return $email;
 }
