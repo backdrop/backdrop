@@ -3668,3 +3668,142 @@ class FieldGetValueTestCase extends FieldTestCase {
 
   }
 }
+
+/**
+ * Test fields with token display mode.
+ */
+class FieldTokenTestCase extends FieldTestCase {
+  protected $profile = 'testing';
+  protected $test_field_name;
+  protected $test_date_field_name;
+  protected $admin_user;
+  protected $node;
+
+  function setUp() {
+    parent::setUp(array('node', 'field', 'field_ui', 'field_test', 'date', 'path'));
+
+    // Create test user.
+    $this->admin_user = $this->backdropCreateUser(array('access content', 'bypass node access', 'administer content types', 'administer nodes', 'administer fields', 'administer view modes'));
+    $this->backdropLogin($this->admin_user);
+
+    $this->content_type = $this->backdropCreateContentType(array(
+      'type' => 'post',
+      'name' => 'Post',
+    ));
+
+    $this->backdropGet('admin/structure/types/manage/post/display');
+    list($enable_link) = $this->xpath('//tr[contains(@class, "view-mode--token")]//a');
+    $enable_href_parts = backdrop_parse_url($enable_link['href']);
+    $this->backdropGet($enable_href_parts['path'], $enable_href_parts);
+
+    // Create a text field.
+    $this->test_field_name = backdrop_strtolower($this->randomName() . '_field_name');
+    $field = array(
+      'field_name' => $this->test_field_name,
+      'type' => 'text',
+      'cardinality' => 1
+    );
+    $instance = array(
+      'label' => $this->randomName(),
+      'field_name' => $this->test_field_name,
+      'entity_type' => 'node',
+      'bundle' => 'post',
+    );
+    $instance['display'] = array(
+      'default' => array(
+        'label' => 'above',
+        'type' => 'text_default',
+        'settings' => array(
+        ),
+        'module' => 'text',
+        'weight' => 0 ,
+      ),
+      'token' => array(
+        'label' => 'hidden',
+        'type' => 'text_default',
+        'weight' => 0,
+        'settings' => array(
+        ),
+        'module' => 'text',
+      ),
+    );
+
+    field_create_field($field);
+    field_create_instance($instance);
+
+    // Create a 'date' field.
+    $this->test_date_field_name = backdrop_strtolower($this->randomName() . '_field_name');
+    $field = array(
+      'field_name' => $this->test_date_field_name,
+      'type' => 'date',
+      'cardinality' => 1,
+      'settings' => array(
+      ),
+    );
+    $instance = array(
+      'entity_type' => 'node',
+      'field_name' => $this->test_date_field_name,
+      'label' => 'Test',
+      'bundle' => 'post',
+      'weight' => -5,
+      'widget' => array(
+        'type' => 'date_text',
+        'settings' => array(
+        ),
+        'weight' => -5,
+      ),
+      'settings' => array(
+        'default_value' => 'now',
+      ),
+    );
+
+    $instance['display'] = array(
+      'default' => array(
+        'label' => 'above',
+        'type' => 'date_default',
+        'settings' => array(
+          'format_type' => 'long',
+        ),
+        'module' => 'date',
+        'weight' => 0 ,
+      ),
+      'token' => array(
+        'label' => 'hidden',
+        'type' => 'date_default',
+        'weight' => 0,
+        'settings' => array(
+          'format_type' => 'html_year',
+        ),
+        'module' => 'date',
+      ),
+    );
+
+    field_create_field($field);
+    field_create_instance($instance);
+    config('path.settings')
+      ->set('node_post_pattern', 'posts/[node:' . $this->test_date_field_name . ']/[node:' . $this->test_field_name . ']/[node:title]')
+      ->save();
+  }
+
+  /**
+   * Test fields in token display mode.
+   */
+  function testFieldToken() {
+    $edit = array();
+    $edit['title'] = $this->randomName(8);
+    $edit[$this->test_field_name . '[und][0][value]'] = 'foo';
+    $edit[$this->test_date_field_name . '[und][0][value][date]'] = '10/07/2010 - 10:30am';
+
+    // Create a dummy node.
+    $this->backdropPost('node/add/post', $edit, t('Save'));
+    $this->node = $this->backdropGetNodeByTitle($edit['title']);
+
+    $this->backdropGet('node/' . $this->node->nid);
+
+    $uri = entity_uri('node', $this->node);
+    backdrop_clear_path_cache($uri['path']);
+    $alias = backdrop_get_path_alias($uri['path'], LANGUAGE_NONE);
+    $expected_alias = 'posts/2010/' . $edit[$this->test_field_name . '[und][0][value]'] . '/' . backdrop_strtolower($this->node->title);
+    $this->assertIdentical($alias, $expected_alias, format_string("Alias for %source was %actual, expected %expected.", array('%source' => $uri['path'], '%actual' => $alias, '%expected' => $expected_alias)));
+  }
+}
