@@ -109,7 +109,7 @@ function filter_admin_overview($form) {
  * Form submission handler for filter_admin_overview().
  */
 function filter_admin_overview_submit($form, &$form_state) {
-  $formats = filter_formats();
+  $formats = filter_formats(NULL, TRUE);
   foreach ($form_state['values']['formats'] as $id => $data) {
     if (is_array($data) && isset($data['weight']) && $data['weight'] != $formats[$id]->weight) {
       // Update the weight of this filter.
