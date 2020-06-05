@@ -201,7 +201,7 @@ function system_requirements($phase) {
           // This will be the jQuery UI item...
           'data' => $jquery_ui_version,
           // ...and this will hold all the jQuery UI plugins and effects,
-          // nested uner the jQuery UI item.
+          // nested under the jQuery UI item.
           'children' => array(),
         ),
       ),
