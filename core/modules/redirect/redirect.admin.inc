@@ -381,6 +381,7 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#required' => TRUE,
     '#field_prefix' => $GLOBALS['base_url'] . '/' . (config_get('system.core', 'clean_url') ? '' : '?q='),
     '#element_validate' => array('redirect_element_validate_source'),
+    '#autocomplete_path' => 'path-autocomplete',
   );
   $form['source_options'] = array(
     '#type' => 'value',
@@ -395,6 +396,7 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#required' => TRUE,
     '#description' => t('Enter an internal Backdrop path, path alias, or complete external URL (like http://example.com/) to which the user will be sent. Use %front to redirect to the front page.', array('%front' => '<front>')),
     '#element_validate' => array('redirect_element_validate_redirect'),
+    '#autocomplete_path' => 'path-autocomplete',
   );
   $form['redirect_options'] = array(
     '#type' => 'value',

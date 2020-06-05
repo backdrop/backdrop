@@ -91,7 +91,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
 
     // Create entities which have a 'bundle key' defined.
     for ($i = 1; $i < 7; $i++) {
-      $entity = new stdClass();
+      $entity = entity_create('test_entity', array());
       $entity->ftid = $i;
       $entity->fttype = ($i < 5) ? 'bundle1' : 'bundle2';
 
@@ -100,7 +100,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
       field_attach_insert('test_entity_bundle_key', $entity);
     }
 
-    $entity = new stdClass();
+    $entity = entity_create('test_entity', array());
     $entity->ftid = 5;
     $entity->fttype = 'test_entity_bundle';
     $entity->{$this->field_names[1]}[LANGUAGE_NONE][0]['shape'] = 'square';
@@ -118,7 +118,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
 
     // Create entities with support for revisions.
     for ($i = 1; $i < 5; $i++) {
-      $entity = new stdClass();
+      $entity = entity_create('test_entity', array());
       $entity->ftid = $i;
       $entity->ftvid = $i;
       $entity->fttype = 'test_bundle';
@@ -131,7 +131,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
 
     // Add two revisions to an entity.
     for ($i = 100; $i < 102; $i++) {
-      $entity = new stdClass();
+      $entity = entity_create('test_entity', array());
       $entity->ftid = 4;
       $entity->ftvid = $i;
       $entity->fttype = 'test_bundle';
@@ -969,7 +969,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
     ), 'Test offset on a field.', TRUE);
 
     for ($i = 6; $i < 10; $i++) {
-      $entity = new stdClass();
+      $entity = entity_create('test_entity', array());
       $entity->ftid = $i;
       $entity->fttype = 'test_entity_bundle';
       $entity->{$this->field_names[0]}[LANGUAGE_NONE][0]['value'] = $i - 5;
@@ -1051,7 +1051,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
     field_test_entity_info_translatable('test_entity', TRUE);
 
     // Create more items with different languages.
-    $entity = new stdClass();
+    $entity = entity_create('test_entity', array());
     $entity->ftid = 1;
     $entity->ftvid = 1;
     $entity->fttype = 'test_bundle';
@@ -1088,7 +1088,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
     field_test_entity_info_translatable('test_entity', TRUE);
 
     // Create more items with different languages.
-    $entity = new stdClass();
+    $entity = entity_create('test_entity', array());
     $entity->ftid = 1;
     $entity->ftvid = 1;
     $entity->fttype = 'test_bundle';

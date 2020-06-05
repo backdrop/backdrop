@@ -843,7 +843,7 @@ function install_system_module(&$install_state) {
   // database to utf8mb4.
   $connection = Database::getConnection();
   if ($connection->utf8mb4IsActive()) {
-    state_set('backdrop_utf8mb4_tables', TRUE);
+    state_set('database_utf8mb4_active', TRUE);
   }
 }
 
@@ -1304,7 +1304,7 @@ function install_find_translation_files($langcode = NULL) {
   $directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
   // @todo: Remove the "drupal" check in 2.x (assuming we have a localization
   //   server by then).
-  $files = file_scan_directory($directory, '!(install|drupal-\d+\.\d+|backdrop(cms)?-\d+\.\d+\.\d+)\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
+  $files = file_scan_directory($directory, '!(install|drupal|backdrop(cms)?)(-[\d\.]+)?\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
   return $files;
 }
 
