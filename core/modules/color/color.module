@@ -789,10 +789,12 @@ function _color_get_theme_from_file($filename, $theme_name) {
   $themes = list_themes();
   $theme = $themes[$theme_name];
 
+  $basename = backdrop_basename($filename);
+
   if (isset($theme->stylesheets)) {
     foreach ($theme->stylesheets as $group_name => $group) {
       foreach ($group as $file) {
-        if (backdrop_basename($filename) === backdrop_basename($file)) {
+        if ($basename === backdrop_basename($file)) {
           return $theme_name;
         }
       }
