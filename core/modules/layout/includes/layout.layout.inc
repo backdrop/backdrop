@@ -56,7 +56,7 @@ function layout_layout_context_info() {
       'file/%file',
       'file/%file/view',
     ),
-    'path placeholder' => 'file',
+    'path placeholder' => '%file',
     'load callback' => 'file_load',
   );
   $info['overrides_path'] = array(

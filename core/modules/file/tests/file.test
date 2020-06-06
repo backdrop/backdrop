@@ -121,6 +121,16 @@ class FileTestHelper extends BackdropWebTestCase {
     }
 
     file_type_save($type);
+
+    file_display_save($type->type, 'default', array(
+      'formatter' => 'file_field_file_download_link',
+      'settings' => array(
+        'file_field_file_download_link' => array(
+          'text' => 'Download [file:name]',
+        ),
+      ),
+    ));
+
     return $type;
   }
 

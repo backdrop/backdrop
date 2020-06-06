@@ -471,7 +471,7 @@ function backdrop_add_feed($url = NULL, $title = '') {
  */
 function backdrop_get_feeds($delimiter = "\n") {
   $feeds = backdrop_add_feed();
-  return implode($feeds, $delimiter);
+  return implode($delimiter, $feeds);
 }
 
 /**
@@ -834,7 +834,10 @@ function backdrop_goto($path = '', array $options = array(), $http_response_code
   // We do not allow absolute URLs to be passed via $_GET, as this can be an attack vector.
   if (isset($_GET['destination']) && !url_is_external($_GET['destination'])) {
     $destination = backdrop_parse_url($_GET['destination']);
-    $path = $destination['path'];
+    // Double check the path derived by backdrop_parse_url() is not external.
+    if (!url_is_external($destination['path'])) {
+      $path = $destination['path'];
+    }
     $options['query'] = $destination['query'];
     $options['fragment'] = $destination['fragment'];
   }
@@ -2398,7 +2401,9 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
   // If we have a non-custom date format use the provided date format pattern.
   if ($date_format_name != 'custom') {
     $date_format = system_date_format_load($date_format_name);
-    $pattern = isset($date_format['locales'][$langcode]) ? $date_format['locales'][$langcode] : $date_format['pattern'];
+    if (!empty($date_format)) {
+      $pattern = isset($date_format['locales'][$langcode]) ? $date_format['locales'][$langcode] : $date_format['pattern'];
+    }
   }
 
   // Fall back to medium if a format was not found.
@@ -2554,7 +2559,7 @@ function url($path = NULL, array $options = array()) {
   // path is always treated as internal by default (to prevent external link
   // injection vulnerabilities).
   if (!isset($options['external'])) {
-    $options['external'] = ($path === $_GET['q']) ? FALSE : url_is_external($path);
+    $options['external'] = (isset($_GET['q']) && $path === $_GET['q']) ? FALSE : url_is_external($path);
   }
 
   // Preserve the original path before altering or aliasing.
@@ -3993,7 +3998,12 @@ function _backdrop_build_css_path($matches, $base = NULL) {
   }
 
   // Prefix with base and remove '../' segments where possible.
-  $path = $_base . $matches[1];
+  if (is_array($matches)) {
+    $path = $_base . $matches[1];
+  }
+  else {
+    $path = $_base;
+  }
   $last = '';
   while ($path != $last) {
     $last = $path;
@@ -7184,7 +7194,7 @@ function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT
  * Checks if the key is a property.
  */
 function element_property($key) {
-  return $key[0] == '#';
+  return substr($key, 0, 1) == '#';
 }
 
 /**
@@ -7198,7 +7208,7 @@ function element_properties($element) {
  * Checks if the key is a child.
  */
 function element_child($key) {
-  return !isset($key[0]) || $key[0] != '#';
+  return empty($key) || substr($key, 0, 1) != '#';
 }
 
 /**
@@ -7223,7 +7233,7 @@ function element_children(&$elements, $sort = FALSE) {
   $children = array();
   $sortable = FALSE;
   foreach ($elements as $key => $value) {
-    if ($key === '' || $key[0] !== '#') {
+    if ($key === '' || substr($key, 0, 1) !== '#') {
       if (is_array($value)) {
         $children[$key] = $value;
         if (isset($value['#weight'])) {

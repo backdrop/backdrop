@@ -104,6 +104,10 @@ function taxonomy_entity_info() {
           'label' => t('Taxonomy term page'),
           'custom settings' => FALSE,
         ),
+        'token' => array(
+          'label' => t('Tokens'),
+          'custom settings' => FALSE,
+        ),
       ),
     ),
   );
@@ -326,7 +330,7 @@ function taxonomy_menu() {
     'title' => 'Taxonomy term',
     'title callback' => 'taxonomy_term_title',
     'title arguments' => array(2),
-    // The page callback also invokes drupal_set_title() in case the menu
+    // The page callback also invokes backdrop_set_title() in case the menu
     // router's title is overridden by a menu link.
     'page callback' => 'taxonomy_term_page',
     'page arguments' => array(2),
@@ -1979,7 +1983,7 @@ function taxonomy_build_node_index(Node $node) {
     }
   }
   // We only maintain the taxonomy index for published nodes.
-  if ($status) {
+  if ($status && $node->isActiveRevision()) {
     // Collect a unique list of all the term IDs from all node fields.
     $tid_all = array();
     foreach (field_info_instances('node', $node->type) as $instance) {

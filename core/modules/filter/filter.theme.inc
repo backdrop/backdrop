@@ -139,16 +139,21 @@ function theme_filter_admin_format_filter_order($variables) {
   $rows = array();
   foreach (element_children($element, TRUE) as $name) {
     $element[$name]['weight']['#attributes']['class'][] = 'filter-order-weight';
+    $row_class =  $element[$name]['status']['#default_value'] ? 'draggable' : 'draggable disabled-row';
+
     $rows[] = array(
       'data' => array(
         backdrop_render($element[$name]['filter']),
+        backdrop_render($element[$name]['status']),
+        backdrop_render($element[$name]['configure_button']),
         backdrop_render($element[$name]['weight']),
       ),
-      'class' => array('draggable'),
+      'class' => array($row_class),
     );
   }
   $output = backdrop_render_children($element);
-  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'filter-order')));
+  $header = array(t('Filter'), t('Enabled'), t('Configure'), '');
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'filter-order')));
   backdrop_add_tabledrag('filter-order', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
 
   return $output;

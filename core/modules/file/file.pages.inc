@@ -357,6 +357,11 @@ function file_add_form_submit($form, &$form_state) {
       entity_form_submit_build_entity('file', $file, $form, $form_state);
 
       file_save($file);
+      // Record that the module (in this case, the File module) is using the
+      // file. Without the call to file_usage_add, file_managed_file_validate()
+      // produces an error upon saving the form, saying that the uploaded file
+      // may not be referenced.
+      file_usage_add($file, 'file', 'file', $file->fid);
       $form_state['file'] = $file;
       backdrop_set_message(t('@type %name was uploaded.', array('@type' => file_type_get_name($file), '%name' => $file->filename)));
     }

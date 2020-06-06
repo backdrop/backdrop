@@ -22,7 +22,8 @@ function color_theme() {
 function color_form_system_theme_settings_alter(&$form, &$form_state) {
   if (isset($form_state['build_info']['args'][0])
       && ($theme_name = $form_state['build_info']['args'][0])
-      && ($theme_info = color_get_info($theme_name))) {
+      && ($theme_info = color_get_info($theme_name))
+      && isset($theme_info['fields'])) {
     $form['color'] = array(
       '#type' => 'fieldset',
       '#title' => t('Color scheme'),
@@ -522,6 +523,45 @@ function color_scheme_form_submit($form, &$form_state) {
 
   // Save all the values into form state for saving to config.
   $form_state['values']['color'] = color_save_configuration($theme, $info, $palette);
+}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function color_flush_caches() {
+  // Rebuild all color palettes.
+  color_rebuild_settings();
+}
+
+/**
+ * Rebuild color scheme info.
+ */
+function color_rebuild_settings($theme_name = NULL) {
+  $themes = array();
+  if ($theme_name) {
+    $themes = array($theme_name);
+  }
+  else {
+    foreach (list_themes() as $key => $data) {
+      if ($data->status) {
+        $themes[] = $key;
+      }
+    }
+  }
+
+  foreach ($themes as $theme) {
+    $theme_config_name = $theme . '.settings';
+    $theme_config = config($theme_config_name);
+    if ($theme_config && $new_color_config = $theme_config->get('color')) {
+      $color_info = color_get_info($theme);
+      if ($color_info) {
+        $palette = isset($new_color_config['palette']) ? $new_color_config['palette'] : NULL;
+        $new_color_info = color_save_configuration($theme, $color_info, $palette);
+        $theme_config->set('color', $new_color_info);
+        $theme_config->save();
+      }
+    }
+  }
 }
 
 /**

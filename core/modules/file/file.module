@@ -3390,7 +3390,6 @@ function file_view_file($file, $display = 'full', $langcode = NULL) {
   }
 
   $formatter = $display['formatter'];
-  $settings = $display['settings'][$formatter];
 
   // Attempt to display the file with the specified display.
   // See file_display() for details.
