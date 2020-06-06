@@ -107,9 +107,9 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   }
 
   /**
-   * Test the path preview link.
+   * Test the path view page link.
    */
-  function testPreviewLink() {
+  function testViewPageLink() {
     $this->backdropGet('admin/structure/layouts');
     $this->clickLink(t('Add layout'));
 
@@ -127,11 +127,11 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
     layout_reset_caches();
 
-    // Check that the preview link is present.
-    $this->assertLinkByHref($layout_url, 0, 'Preview link found.');
-    $this->assertLink('Preview page', 0, 'Preview link text found.');
-    $this->clickLink(t('Preview page'));
-    $this->assertResponse(200, 'Preview link goes to path.');
+    // Check that the view page link is present.
+    $this->assertLinkByHref($layout_url, 0, 'View page link found.');
+    $this->assertLink('View page', 0, 'View page link text found.');
+    $this->clickLink(t('View page'));
+    $this->assertResponse(200, 'View page link goes to path.');
 
     // Create a new layout overriding node/%.
     $layout_title = $this->randomName();
@@ -145,9 +145,9 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
-    // Check that the preview link is not present.
-    $this->assertNoLinkByHref($layout_url, 0, 'Preview link found.');
-    $this->assertNoLink('Preview page', 1, 'Preview link text found.');
+    // Check that the view page link is not present.
+    $this->assertNoLinkByHref($layout_url, 0, 'View page link found.');
+    $this->assertNoLink('View page', 1, 'View page link text found.');
   }
 
   /**
