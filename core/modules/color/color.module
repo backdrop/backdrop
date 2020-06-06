@@ -172,7 +172,6 @@ function color_get_color_element($theme_name, $color_name, &$form) {
  */
 function color_css_alter(&$css) {
   global $theme_key;
-  $themes = list_themes();
   $preview_theme = _color_preview_theme();
   if ($preview_theme) {
     // Convert stylesheets for the preview.
@@ -214,9 +213,11 @@ function color_css_alter(&$css) {
     if (!empty($color_paths)) {
       $info = color_get_info($theme_key);
 
-      // Get the original paths of the  files we are replacing
+      // Get the original paths of the  files we are replacing.
       $old_paths = array();
       foreach ($info['css'] as $file) {
+        // The files are already passed through backdrop_basename() in
+        // color_get_info, so we don't need to do that here.
         $old_paths[$file] = _color_get_file_path($file, $theme_key);
       }
 
@@ -224,8 +225,9 @@ function color_css_alter(&$css) {
       foreach($color_paths as $color_path) {
         $basename = backdrop_basename($color_path);
         if (array_key_exists($basename, $old_paths)) {
-          $old_path = $old_paths[$basename];
-          $css[$old_path]['data'] = $color_path;
+          // Replace the path to the new css file.
+          // This keeps the order of the stylesheets intact.
+          $css[$old_paths[$basename]]['data'] = $color_path;
         }
       }
     }
@@ -657,7 +659,6 @@ function color_save_configuration($theme_name, $theme_info, $palette) {
  * Rewrites the stylesheet to match the colors in the palette.
  */
 function _color_rewrite_stylesheet($theme, &$info, &$paths, $palette, $style) {
-  $themes = list_themes();
   // Prepare color conversion table.
   $conversion = $palette;
   foreach ($conversion as $k => $v) {
@@ -778,7 +779,7 @@ function _color_get_file_path($filename, $theme_name) {
  *
  * @param $filename
  *   The file name that we are searching for.
- * @param $theme
+ * @param $theme_name
  *   The name of the theme that is being modified.
  *
  * @return string
@@ -789,7 +790,6 @@ function _color_get_theme_from_file($filename, $theme_name) {
   $theme = $themes[$theme_name];
 
   if (isset($theme->stylesheets)) {
-    $theme_path = backdrop_get_path('theme', $theme_name);
     foreach ($theme->stylesheets as $group_name => $group) {
       foreach ($group as $file) {
         if (backdrop_basename($filename) === backdrop_basename($file)) {
