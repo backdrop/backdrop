@@ -826,9 +826,6 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
       array(
         'title' => t('View page'),
         'href' => url($link_path),
-        'attributes' => array(
-          'target' => '_blank',
-        ),
       )
     );
   }
