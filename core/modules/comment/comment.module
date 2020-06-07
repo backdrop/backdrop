@@ -1150,10 +1150,13 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       ),
     );
     $form['comment']['comment_per_page'] = array(
-      '#type' => 'select',
+      '#type' => 'number',
       '#title' => t('Comments per page'),
       '#default_value' => $node_type->settings['comment_per_page'],
-      '#options' => _comment_per_page(),
+      '#required' => TRUE,
+      '#min' => 10,
+      '#max' => 1000,
+      '#step' => 10,
     );
     $form['comment']['comment_mode'] = array(
       '#type' => 'checkbox',
@@ -2266,13 +2269,6 @@ function _comment_get_modes() {
     COMMENT_MODE_FLAT => t('Flat list'),
     COMMENT_MODE_THREADED => t('Threaded list')
   );
-}
-
-/**
- * Returns an array of "comments per page" values that users can select from.
- */
-function _comment_per_page() {
-  return backdrop_map_assoc(array(10, 30, 50, 70, 90, 150, 200, 250, 300));
 }
 
 /**
