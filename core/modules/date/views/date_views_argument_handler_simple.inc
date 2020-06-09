@@ -41,14 +41,14 @@ class date_views_argument_handler_simple extends views_handler_argument_date {
   var $original_table;
 
   /**
-   * @var DateTime
+   * @var BackdropDateTime
    */
-  protected $min_date;
+  public $min_date;
 
   /**
-   * @var DateTime
+   * @var BackdropDateTime
    */
-  protected $max_date;
+  public $max_date;
 
   /**
    * Get granularity.
