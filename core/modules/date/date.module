@@ -634,6 +634,11 @@ function date_config_info() {
     'label' => t('Date settings'),
     'group' => t('Configuration'),
   );
+  $prefixes['date_views.settings'] = array(
+    'label' => t('Date views settings'),
+    'group' => t('Configuration'),
+  );
+
   return $prefixes;
 }
 
