@@ -481,7 +481,9 @@ function template_preprocess_date_views_filter_form(&$variables) {
 }
 
 /**
- * Jump in and move the pager.
+ * Implements template_preprocess_views_view().
+ *
+ * Display the pager above view content, below or both.
  */
 function date_preprocess_views_view(&$variables) {
   $view = $variables['view'];

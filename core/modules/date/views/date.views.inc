@@ -36,9 +36,8 @@ function date_views_plugins() {
   module_load_include('inc', 'date', 'date.theme');
 
   return array(
-    // This just tells our themes are elsewhere.
     'module' => 'date',
-	'pager' => array(
+    'pager' => array(
       'date_views_pager' => array(
         'title' => t('Page by date'),
         'help' => t('Page using the value of a date field.'),
@@ -215,7 +214,8 @@ function date_views_base_tables() {
       }
     }
 
-    // Then we let other modules tell us about other entity tables that hold date fields.
+    // Then we let other modules tell us about other entity tables
+    // that hold date fields.
     $base_tables += module_invoke_all('date_views_extra_tables');
   }
 
@@ -223,9 +223,15 @@ function date_views_base_tables() {
 }
 
 /**
- * The instanceof function makes this work for any handler that was derived from 'views_handler_filter_date' or 'views_handler_argument_date', which includes core date fields like the node updated field.
+ * Custom helper function.
  *
- * The test for $handler->min_date tells us that this is an argument that not only is derived from the views date handler but also has been processed by the Date Views filter or argument code.
+ * The instanceof function makes this work for any handler that was derived
+ * from 'views_handler_filter_date' or 'views_handler_argument_date',
+ * which includes core date fields like the node updated field.
+ *
+ * The test for $handler->min_date tells us that this is an argument that
+ * not only is derived from the views date handler but also has been processed
+ * by the Date Views filter or argument code.
  */
 function date_views_handler_is_date($handler, $type = 'argument') {
   switch ($type) {
@@ -239,11 +245,12 @@ function date_views_handler_is_date($handler, $type = 'argument') {
 }
 
 /**
- * A version of date_real_url that formats links correctly for the new Date pager.
+ * Format links correctly for the new Date pager.
  */
 function date_pager_url($view, $date_type = NULL, $date_arg = NULL, $force_view_url = FALSE, $absolute = TRUE) {
 
-  // If someone adds a pager without a matching argument, there is not date information to work with.
+  // If someone adds a pager without a matching argument,
+  // there is no date information to work with.
   if (empty($view->date_info) || !isset($view->date_info->date_arg_pos)) {
     return '';
   }
