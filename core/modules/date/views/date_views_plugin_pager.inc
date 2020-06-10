@@ -1,7 +1,9 @@
 <?php
+
 /**
  * @file
- * Date pager.
+ * Date views pager plugin.
+ *
  * Works with a Date argument, the argument filters the view and the pager
  * provides back/next navigation.
  *
@@ -53,33 +55,39 @@
  * pick up the new information.
  */
 
+/**
+ * Date views pager plugin.
+ */
 class date_views_plugin_pager extends views_plugin_pager {
 
   /**
    * This kind of pager does not need to count the number of records.
    */
-  function use_count_query() {
+  public function use_count_query() {
     return FALSE;
   }
 
   /**
-   * Because we don't know how many pages there are, we never believe there are more records.
+   * Set a default value.
+   *
+   * Because we don't know how many pages there are, we never believe
+   * there are more records.
    */
-  function has_more_records() {
+  public function has_more_records() {
     return FALSE;
   }
 
-  /*
+  /**
    * Tell Views what this pager's setting is.
    */
-  function summary_title() {
+  public function summary_title() {
     return t("Position: @position, format: @format.", array('@position' => $this->options['pager_position'], '@format' => $this->options['link_format']));
   }
 
   /**
    * Tell Views what options this plugin can store.
    */
-  function option_definition() {
+  public function option_definition() {
     $options = parent::option_definition();
     $options['date_id'] = array('default' => 'date');
     $options['pager_position'] = array('default' => 'top');
@@ -90,10 +98,10 @@ class date_views_plugin_pager extends views_plugin_pager {
     return $options;
   }
 
-  /*
+  /**
    * Provide the form for setting options.
    */
-  function options_form(&$form, &$form_state) {
+  public function options_form(&$form, &$form_state) {
     $form['markup']['#markup'] = t('This pager works together with a Date or Content date field contextual filter. If a Date filter has been added to the view, this pager will provide back/next paging to match the granularity of that filter (i.e. paging by year, month, week, or day). The filter must also be configured to use a DATE default value. If there is no Date contextual filter on this view, or if it has not been set to use a default date, the pager will not appear.');
     $form['date_id'] = array(
       '#title' => t('Date identifier'),
@@ -105,7 +113,11 @@ class date_views_plugin_pager extends views_plugin_pager {
     $form['pager_position'] = array(
       '#title' => t('Pager position'),
       '#type' => 'select',
-      '#options' => array('bottom' => t('Bottom'), 'top' => t('Top'), 'both' => t('Both')),
+      '#options' => array(
+        'bottom' => t('Bottom'),
+        'top' => t('Top'),
+        'both' => t('Both'),
+      ),
       '#description' => t('Where to place the date pager, on the top, bottom, or both top and bottom of the content.'),
       '#default_value' => $this->options['pager_position'],
       '#required' => TRUE,
@@ -131,10 +143,12 @@ class date_views_plugin_pager extends views_plugin_pager {
   }
 
   /**
-   * Transfer date information from the argument to the view so the pager theme can use it
-   * and update the date argument value to whatever is set by the pager.
+   * Transfer date information from the argument to the view.
+   *
+   * The pager theme can use it and update the date argument value
+   * to whatever is set by the pager.
    */
-  function query() {
+  public function query() {
 
     // By fetching our data from the exposed input, it is possible to
     // feed pager data through some method other than $_GET.
@@ -155,9 +169,10 @@ class date_views_plugin_pager extends views_plugin_pager {
           continue;
         }
 
-        // Storing this information in the pager so it's available for summary info.
-        // The view argument information is not otherwise accessible to the pager.
-        // Not working right yet, tho.
+        // Storing this information in the pager so it's available
+        // for summary info.
+        // The view argument information is not otherwise accessible
+        // to the pager. Not working right yet, tho.
         $date_handler = $argument->date_handler;
         $this->options['date_argument'] = $id;
         $this->options['granularity'] = $argument->date_handler->granularity;
@@ -287,7 +302,10 @@ class date_views_plugin_pager extends views_plugin_pager {
     }
   }
 
-  function set_argument_value($argument, $value) {
+  /**
+   * Set the view's argument value.
+   */
+  public function set_argument_value($argument, $value) {
     $argument->argument = $value;
     $argument->date_range = $argument->date_handler->arg_range($value);
     $argument->min_date = $argument->date_range[0];
@@ -297,15 +315,18 @@ class date_views_plugin_pager extends views_plugin_pager {
     $argument->is_default = FALSE;
   }
 
-  function set_argument_placeholders($placeholders, $mindate, $maxdate, $query, $format) {
+  /**
+   * Set the view's argument placeholders.
+   */
+  public function set_argument_placeholders($placeholders, $mindate, $maxdate, $query, $format) {
     $count = count($placeholders);
     foreach ($query->where as $group => $data) {
       foreach ($data['conditions'] as $delta => $condition) {
         if (array_key_exists('value', $condition) && is_array($condition['value'])) {
           foreach ($condition['value'] as $placeholder => $placeholder_value) {
             if (array_key_exists($placeholder, $placeholders)) {
-              // If we didn't get a match, this is a > $min < $max query that uses the view
-              // min and max dates as placeholders.
+              // If we didn't get a match, this is a > $min < $max query
+              // that uses the view min and max dates as placeholders.
               $date = ($count == 2) ? $mindate : $maxdate;
               $next_placeholder = array_shift($placeholders);
               $query->where[$group]['conditions'][$delta]['value'][$placeholder] = $date->format($format);
@@ -318,9 +339,12 @@ class date_views_plugin_pager extends views_plugin_pager {
   }
 
   /**
-   * Add a callback to determine if we have moved outside the valid date range for this argument.
+   * Custom callback evaluating the date range.
+   *
+   * Add a callback to determine if we have moved outside the valid date range
+   * for this views argument.
    */
-  function date_forbid($argument) {
+  public function date_forbid($argument) {
     // See if we're outside the allowed date range for our argument.
     $limit = date_range_years($argument->options['year_range']);
     if (date_format($argument->min_date, 'Y') < $limit[0] || date_format($argument->max_date, 'Y') > $limit[1]) {
@@ -329,10 +353,14 @@ class date_views_plugin_pager extends views_plugin_pager {
     return FALSE;
   }
 
-
-  function render($input) {
-    // This adds all of our template suggestions based upon the view name and display id.
+  /**
+   * Render the pager.
+   */
+  public function render($input) {
+    // This adds all of our template suggestions based upon the view name
+    // and display id.
     $pager_theme = views_theme_functions('date_views_pager', $this->view, $this->display);
     return theme($pager_theme, array('plugin' => $this, 'input' => $input));
   }
+
 }
