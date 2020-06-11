@@ -632,9 +632,9 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
       // Check for the override flag and prevent the cached variable
       // preprocessors from being used. This allows themes or theme engines to
       // remove variable preprocessors set earlier in the registry build.
-      if (!empty($info['override ' . 'preprocess functions'])) {
+      if (!empty($info['override preprocess functions'])) {
         // Flag not needed inside the registry.
-        unset($result[$hook]['override ' . 'preprocess functions']);
+        unset($result[$hook]['override preprocess functions']);
       }
       elseif (isset($cache[$hook]['preprocess functions']) && is_array($cache[$hook]['preprocess functions'])) {
         $info['preprocess functions'] = array_merge($cache[$hook]['preprocess functions'], $info['preprocess functions']);

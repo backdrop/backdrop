@@ -1046,7 +1046,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
       // Relative path to an arbitrary file.
       'core/misc/feed.png' => array(
         'form' => 'core/misc/feed.png',
-        'src' => $GLOBALS['base_url'] . '/' . 'core/misc/feed.png',
+        'src' => $GLOBALS['base_url'] . '/core/misc/feed.png',
       ),
       // Relative path to a file in a theme.
       $default_theme_path . '/screenshot.png' => array(
@@ -1585,7 +1585,7 @@ class SystemBlockTestCase extends BackdropWebTestCase {
     // Set a logo.
     $edit = array(
       'site_logo_theme' => FALSE,
-      'site_logo_path' => $GLOBALS['base_url'] . '/' . 'core/misc/feed.png',
+      'site_logo_path' => $GLOBALS['base_url'] . '/core/misc/feed.png',
     );
     $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
 
