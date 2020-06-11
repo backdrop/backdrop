@@ -1145,6 +1145,24 @@ function system_library_info() {
     ),
   );
 
+  // Backdrop's autocomplete widget.
+  $libraries['backdrop.autocomplete'] = array(
+    'title' => 'Backdrop autocomplete',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/autocomplete.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
+  // Autosubmit for forms.
+  $libraries['backdrop.autosubmit'] = array(
+    'title' => 'Backdrop autosubmit',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/autosubmit.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
   // Backdrop's batch API.
   $libraries['backdrop.batch'] = array(
     'title' => 'Backdrop batch API',
@@ -1157,21 +1175,16 @@ function system_library_info() {
     ),
   );
 
-  // Backdrop's progress indicator.
-  $libraries['backdrop.progress'] = array(
-    'title' => 'Backdrop progress indicator',
+  // Backdrop's collapsible fieldset.
+  $libraries['backdrop.collapse'] = array(
+    'title' => 'Backdrop collapsible fieldset',
     'version' => BACKDROP_VERSION,
     'js' => array(
-      'core/misc/progress.js' => array('group' => JS_DEFAULT),
+      'core/misc/collapse.js' => array('group' => JS_DEFAULT),
     ),
-  );
-
-  // Backdrop's form library.
-  $libraries['backdrop.form'] = array(
-    'title' => 'Backdrop form library',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/form.js' => array('group' => JS_LIBRARY, 'weight' => 1),
+    'dependencies' => array(
+      // collapse.js relies on backdropGetSummary in form.js
+      array('system', 'backdrop.form'),
     ),
   );
 
@@ -1205,6 +1218,64 @@ function system_library_info() {
     ),
   );
 
+  // Dropbutton.
+  $libraries['backdrop.dropbutton'] = array(
+    'title' => 'Dropbutton',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/dropbutton.js' => array(),
+    ),
+    'css' => array(
+      'core/misc/dropbutton.css' => array(),
+      'core/misc/dropbutton.theme.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.once'),
+    ),
+  );
+
+  // Backdrop's form library.
+  $libraries['backdrop.form'] = array(
+    'title' => 'Backdrop form library',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/form.js' => array('group' => JS_LIBRARY, 'weight' => 1),
+    ),
+  );
+
+  $libraries['backdrop.menus'] = array(
+    'title' => 'Backdrop menu styles',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/menus.js' => array('group' => JS_DEFAULT),
+    ),
+    'css' => array(
+      backdrop_get_path('module', 'system') . '/css/menu-dropdown.theme.css' => array('group' => CSS_DEFAULT),
+    ),
+  );
+
+  $libraries['backdrop.modules'] = array(
+    'title' => 'Backdrop modules filter',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/modules.js' => array('group' => JS_DEFAULT),
+      'core/misc/jquery.js' => array('group' => JS_LIBRARY, 'weight' => -20),
+      // These include security fixes, so assign a weight that makes them load
+      // as soon after jquery.js is loaded as possible.
+      'core/misc/jquery-extend-3.4.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
+      'core/misc/jquery-html-prefilter-3.5.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
+    ),
+  );
+
+  // Backdrop's progress indicator.
+  $libraries['backdrop.progress'] = array(
+    'title' => 'Backdrop progress indicator',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/progress.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
   // Backdrop's states library.
   $libraries['backdrop.states'] = array(
     'title' => 'Backdrop states',
@@ -1226,19 +1297,6 @@ function system_library_info() {
     ),
   );
 
-  // Backdrop's collapsible fieldset.
-  $libraries['backdrop.collapse'] = array(
-    'title' => 'Backdrop collapsible fieldset',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/collapse.js' => array('group' => JS_DEFAULT),
-    ),
-    'dependencies' => array(
-      // collapse.js relies on backdropGetSummary in form.js
-      array('system', 'backdrop.form'),
-    ),
-  );
-
   // Backdrop's resizable textarea.
   $libraries['backdrop.textarea'] = array(
     'title' => 'Backdrop resizable textarea',
@@ -1248,106 +1306,9 @@ function system_library_info() {
     ),
   );
 
-  // Backdrop's autocomplete widget.
-  $libraries['backdrop.autocomplete'] = array(
-    'title' => 'Backdrop autocomplete',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/autocomplete.js' => array('group' => JS_DEFAULT),
-    ),
-  );
-
-  // Autosubmit for forms.
-  $libraries['backdrop.autosubmit'] = array(
-    'title' => 'Backdrop autosubmit',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/autosubmit.js' => array('group' => JS_DEFAULT),
-    ),
-  );
-
-  $libraries['backdrop.modules'] = array(
-    'title' => 'Modules Filter',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      backdrop_get_path('module', 'system') . '/js/modules.js' => array('group' => JS_DEFAULT),
-    ),
-  );
-
-  $libraries['backdrop.menus'] = array(
-    'title' => 'Backdrop menu styles',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      backdrop_get_path('module', 'system') . '/js/menus.js' => array('group' => JS_DEFAULT),
-    ),
-    'css' => array(
-      backdrop_get_path('module', 'system') . '/css/menu-dropdown.theme.css' => array('group' => CSS_DEFAULT),
-    ),
-  );
-
-  // jQuery.
-  $libraries['jquery'] = array(
-    'title' => 'jQuery',
-    'website' => 'http://jquery.com',
-    'version' => '1.12.4',
-    'js' => array(
-      'core/misc/jquery.js' => array('group' => JS_LIBRARY, 'weight' => -20),
-      // These include security fixes, so assign a weight that makes them load
-      // as soon after jquery.js is loaded as possible.
-      'core/misc/jquery-extend-3.4.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
-      'core/misc/jquery-html-prefilter-3.5.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
-    ),
-  );
-
-  // jQuery Once.
-  $libraries['jquery.once'] = array(
-    'title' => 'jQuery Once',
-    'website' => 'http://plugins.jquery.com/project/once',
-    'version' => '1.2',
-    'js' => array(
-      'core/misc/jquery.once.js' => array('group' => JS_LIBRARY, 'weight' => -19),
-    ),
-  );
-
-  // jQuery Form Plugin.
-  $libraries['jquery.form'] = array(
-    'title' => 'jQuery Form Plugin',
-    'website' => 'https://github.com/jquery-form/form',
-    'version' => '4.2.1',
-    'js' => array(
-      'core/misc/jquery.form.js' => array(),
-    ),
-  );
-
-  // jQuery TimeEntry
-  $libraries['jquery.timeentry'] = array(
-    'title' => 'jQuery Time Entry Plugin',
-    'website' => 'http://keith-wood.name/timeEntry.html',
-    'version' => '1.5.2',
-    'js' => array(
-      'core/misc/jquery.timeentry.js' => array(),
-    ),
-  );
-
-  // Dropbutton.
-  $libraries['backdrop.dropbutton'] = array(
-    'title' => 'Dropbutton',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/dropbutton.js' => array(),
-    ),
-    'css' => array(
-      'core/misc/dropbutton.css' => array(),
-      'core/misc/dropbutton.theme.css' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'jquery.once'),
-    ),
-  );
-
   // Vertical Tabs.
   $libraries['backdrop.vertical-tabs'] = array(
-    'title' => 'Vertical Tabs',
+    'title' => 'Backdrop vertical tabs',
     'version' => BACKDROP_VERSION,
     'js' => array(
       'core/misc/vertical-tabs.js' => array(),
@@ -1361,19 +1322,10 @@ function system_library_info() {
     ),
   );
 
-  // Jump menu.
-  $libraries['jump-menu'] = array(
-    'title' => 'Jump Menu',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      backdrop_get_path('module', 'system') . '/js/system.jump-menu.js' => array('group' => JS_DEFAULT),
-    ),
-  );
-
   // Farbtastic.
   $libraries['farbtastic'] = array(
     'title' => 'Farbtastic',
-    'website' => 'http://code.google.com/p/farbtastic/',
+    'website' => 'https://acko.net/blog/farbtastic-jquery-color-picker-plug-in',
     'version' => '1.2',
     'js' => array(
       'core/misc/farbtastic/farbtastic.js' => array(),
@@ -1386,13 +1338,35 @@ function system_library_info() {
   // HTML5 Shiv.
   $libraries['html5shiv'] = array(
     'title' => 'html5shiv',
-    'website' => 'http://code.google.com/p/html5shiv/',
+    'website' => 'https://github.com/afarkas/html5shiv',
     'version' => '3.7.2',
     'js' => array(
       'core/misc/html5.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -21,
         'browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE),
+      ),
+    ),
+  );
+
+  // Jump menu.
+  $libraries['jump-menu'] = array(
+    'title' => 'Jump Menu',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/system.jump-menu.js' => array('group' => JS_DEFAULT),
+    ),
+  );
+
+  // OpenSans.
+  $libraries['opensans'] = array(
+    'title' => 'OpenSans',
+    'website' => 'https://fonts.google.com/specimen/Open+Sans',
+    'version' => '1.0',
+    'css' => array(
+      'core/misc/opensans/opensans.css' => array(
+        'group' => CSS_THEME,
+        'media' => 'screen',
       ),
     ),
   );
@@ -1418,32 +1392,92 @@ function system_library_info() {
     ),
   );
 
-  // OpenSans.
-  $libraries['opensans'] = array(
-    'title' => 'OpenSans',
-    'website' => 'https://fonts.google.com/specimen/Open+Sans',
+  // Tokens.
+  $libraries['token'] = array(
+    'title' => 'Token behaviors',
     'version' => '1.0',
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/token.js' => array(),
+    ),
     'css' => array(
-      'core/misc/opensans/opensans.css' => array(
-        'group' => CSS_THEME,
-        'media' => 'screen',
-      ),
+      backdrop_get_path('module', 'system') . '/css/token.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.treetable'),
+      array('system', 'backdrop.ajax'),
+    ),
+  );
+
+  // jQuery.
+  $libraries['jquery'] = array(
+    'title' => 'jQuery',
+    'website' => 'http://jquery.com',
+    'version' => '1.12.4',
+    'js' => array(
+      'core/misc/jquery.js' => array('group' => JS_LIBRARY, 'weight' => -20),
+      // This includes a security fix, so assign a weight that makes this load
+      // as soon after jquery.js is loaded as possible.
+      'core/misc/jquery-extend-3.4.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
     ),
   );
 
   // Cookie.
   $libraries['jquery.cookie'] = array(
-    'title' => 'Cookie',
-    'website' => 'http://plugins.jquery.com/project/cookie',
+    'title' => 'jQuery Cookie',
+    'website' => 'https://plugins.jquery.com/cookie',
     'version' => '1.0',
     'js' => array(
       'core/misc/jquery.cookie.js' => array(),
     ),
   );
 
+  // jQuery Form Plugin.
+  $libraries['jquery.form'] = array(
+    'title' => 'jQuery Form Plugin',
+    'website' => 'https://github.com/jquery-form/form',
+    'version' => '4.2.1',
+    'js' => array(
+      'core/misc/jquery.form.js' => array(),
+    ),
+  );
+
+  // jQuery Once.
+  $libraries['jquery.once'] = array(
+    'title' => 'jQuery Once',
+    'website' => 'https://plugins.jquery.com/once',
+    'version' => '1.2.0',
+    'js' => array(
+      'core/misc/jquery.once.js' => array('group' => JS_LIBRARY, 'weight' => -19),
+    ),
+  );
+
+  // jQuery TimeEntry
+  $libraries['jquery.timeentry'] = array(
+    'title' => 'jQuery Time Entry Plugin',
+    'website' => 'http://keith-wood.name/timeEntry.html',
+    'version' => '1.5.2',
+    'js' => array(
+      'core/misc/jquery.timeentry.js' => array(),
+    ),
+  );
+
+  // jQuery treeTable plugin.
+  $libraries['jquery.treetable'] = array(
+    'title' => 'jQuery treetable',
+    'website' => 'https://plugins.jquery.com/treetable',
+    'version' => '3.2.0',
+    'js' => array(
+      backdrop_get_path('module', 'system') . '/js/jquery.treetable.js' => array(),
+    ),
+    'css' => array(
+      backdrop_get_path('module', 'system') . '/css/jquery.treetable.css' => array(),
+      backdrop_get_path('module', 'system') . '/css/jquery.treetable.theme.default.css' => array(),
+    ),
+  );
+
   // jQuery UI.
   $libraries['ui'] = array(
-    'title' => 'jQuery UI: Core',
+    'title' => 'jQuery UI',
     'website' => 'http://jqueryui.com',
     'version' => '1.12.1',
     'js' => array(
@@ -1472,7 +1506,7 @@ function system_library_info() {
   );
   $libraries['ui.accordion'] = array(
     'title' => 'jQuery UI: Accordion',
-    'website' => 'http://jqueryui.com/accordion/',
+    'website' => 'http://jqueryui.com/accordion',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.accordion.min.js' => array(),
@@ -1486,7 +1520,7 @@ function system_library_info() {
   );
   $libraries['ui.autocomplete'] = array(
     'title' => 'jQuery UI: Autocomplete',
-    'website' => 'http://jqueryui.com/autocomplete/',
+    'website' => 'http://jqueryui.com/autocomplete',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.autocomplete.min.js' => array(),
@@ -1502,7 +1536,7 @@ function system_library_info() {
   );
   $libraries['ui.button'] = array(
     'title' => 'jQuery UI: Button',
-    'website' => 'http://jqueryui.com/button/',
+    'website' => 'http://jqueryui.com/button',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.button.min.js' => array(),
@@ -1516,7 +1550,7 @@ function system_library_info() {
   );
   $libraries['ui.checkboxradio'] = array(
     'title' => 'jQuery UI: Checkbox Radio',
-    'website' => 'http://jqueryui.com/checkboxradio/',
+    'website' => 'http://jqueryui.com/checkboxradio',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.checkboxradio.min.js' => array(),
@@ -1530,7 +1564,7 @@ function system_library_info() {
   );
   $libraries['ui.controlgroup'] = array(
     'title' => 'jQuery UI: Control Group',
-    'website' => 'http://jqueryui.com/controlgroup/',
+    'website' => 'http://jqueryui.com/controlgroup',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.controlgroup.min.js' => array(),
@@ -1544,7 +1578,7 @@ function system_library_info() {
   );
   $libraries['ui.datepicker'] = array(
     'title' => 'jQuery UI: Date Picker',
-    'website' => 'http://jqueryui.com/datepicker/',
+    'website' => 'http://jqueryui.com/datepicker',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.datepicker.min.js' => array(),
@@ -1553,12 +1587,12 @@ function system_library_info() {
       'core/misc/ui/jquery.ui.datepicker.css' => array(),
     ),
     'dependencies' => array(
-      array('system', 'ui'),
+      array('system', 'jquery.ui'),
     ),
   );
   $libraries['ui.dialog'] = array(
     'title' => 'jQuery UI: Dialog',
-    'website' => 'http://jqueryui.com/dialog/',
+    'website' => 'http://jqueryui.com/dialog',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.dialog.min.js' => array(),
@@ -1577,7 +1611,7 @@ function system_library_info() {
   );
   $libraries['ui.draggable'] = array(
     'title' => 'jQuery UI: Draggable',
-    'website' => 'http://jqueryui.com/draggable/',
+    'website' => 'http://jqueryui.com/draggable',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.draggable.min.js' => array(),
@@ -1593,7 +1627,7 @@ function system_library_info() {
   );
   $libraries['ui.droppable'] = array(
     'title' => 'jQuery UI: Droppable',
-    'website' => 'http://jqueryui.com/droppable/',
+    'website' => 'http://jqueryui.com/droppable',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.droppable.min.js' => array(),
@@ -1605,8 +1639,8 @@ function system_library_info() {
     ),
   );
   $libraries['ui.menu'] = array(
-    'title' => 'jQuery UI: Mouse',
-    'website' => 'http://jqueryui.com/menu/',
+    'title' => 'jQuery UI: Menu',
+    'website' => 'http://jqueryui.com/menu',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.menu.min.js' => array(),
@@ -1621,7 +1655,7 @@ function system_library_info() {
   );
   $libraries['ui.mouse'] = array(
     'title' => 'jQuery UI: Mouse',
-    'website' => 'http://jqueryui.com/mouse/',
+    'website' => 'http://jqueryui.com/mouse',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.mouse.min.js' => array(),
@@ -1632,7 +1666,7 @@ function system_library_info() {
   );
   $libraries['ui.position'] = array(
     'title' => 'jQuery UI: Position',
-    'website' => 'http://jqueryui.com/position/',
+    'website' => 'http://jqueryui.com/position',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.position.min.js' => array(),
@@ -1640,7 +1674,7 @@ function system_library_info() {
   );
   $libraries['ui.progressbar'] = array(
     'title' => 'jQuery UI: Progress Bar',
-    'website' => 'http://jqueryui.com/progressbar/',
+    'website' => 'http://jqueryui.com/progressbar',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.progressbar.min.js' => array(),
@@ -1654,7 +1688,7 @@ function system_library_info() {
   );
   $libraries['ui.resizable'] = array(
     'title' => 'jQuery UI: Resizable',
-    'website' => 'http://jqueryui.com/resizable/',
+    'website' => 'http://jqueryui.com/resizable',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.resizable.min.js' => array(),
@@ -1669,7 +1703,7 @@ function system_library_info() {
   );
   $libraries['ui.selectable'] = array(
     'title' => 'jQuery UI: Selectable',
-    'website' => 'http://jqueryui.com/selectable/',
+    'website' => 'http://jqueryui.com/selectable',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.selectable.min.js' => array(),
@@ -1685,7 +1719,7 @@ function system_library_info() {
 
   $libraries['ui.selectmenu'] = array(
     'title' => 'jQuery UI: Select Menu',
-    'website' => 'http://jqueryui.com/selectmenu/',
+    'website' => 'http://jqueryui.com/selectmenu',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.selectmenu.min.js' => array(),
@@ -1701,7 +1735,7 @@ function system_library_info() {
   );
   $libraries['ui.slider'] = array(
     'title' => 'jQuery UI: Slider',
-    'website' => 'http://jqueryui.com/slider/',
+    'website' => 'http://jqueryui.com/slider',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.slider.min.js' => array(),
@@ -1716,7 +1750,7 @@ function system_library_info() {
   );
   $libraries['ui.sortable'] = array(
     'title' => 'jQuery UI: Sortable',
-    'website' => 'http://jqueryui.com/sortable/',
+    'website' => 'http://jqueryui.com/sortable',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.sortable.min.js' => array(),
@@ -1731,7 +1765,7 @@ function system_library_info() {
   );
   $libraries['ui.spinner'] = array(
     'title' => 'jQuery UI: Spinner',
-    'website' => 'http://jqueryui.com/spinner/',
+    'website' => 'http://jqueryui.com/spinner',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.spinner.min.js' => array(),
@@ -1746,7 +1780,7 @@ function system_library_info() {
   );
   $libraries['ui.tabs'] = array(
     'title' => 'jQuery UI: Tabs',
-    'website' => 'http://jqueryui.com/tabs/',
+    'website' => 'http://jqueryui.com/tabs',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.tabs.min.js' => array(),
@@ -1760,7 +1794,7 @@ function system_library_info() {
   );
   $libraries['ui.tooltip'] = array(
     'title' => 'jQuery UI: Tooltip',
-    'website' => 'http://jqueryui.com/tooltip/',
+    'website' => 'http://jqueryui.com/tooltip',
     'version' => $libraries['ui']['version'],
     'js' => array(
       'core/misc/ui/jquery.ui.tooltip.min.js' => array(),
@@ -1773,195 +1807,11 @@ function system_library_info() {
       array('system', 'ui.position'),
     ),
   );
-  $libraries['ui.widget'] = array(
-    'title' => 'jQuery UI: Widget',
-    'website' => 'http://jqueryui.com/widget/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.widget.min.js' => array('group' => JS_LIBRARY, 'weight' => -10),
-    ),
-    'dependencies' => array(
-      array('system', 'ui'),
-    ),
-  );
-  $libraries['effects'] = array(
-    'title' => 'jQuery UI: Effects',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect.min.js' => array('group' => JS_LIBRARY, 'weight' => -9),
-    ),
-  );
-  $libraries['effects.blind'] = array(
-    'title' => 'jQuery UI: Effects Blind',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect-blind.min.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'effects'),
-    ),
-  );
-  $libraries['effects.bounce'] = array(
-    'title' => 'jQuery UI: Effects Bounce',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect-bounce.min.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'effects'),
-    ),
-  );
-  $libraries['effects.clip'] = array(
-    'title' => 'jQuery UI: Effects Clip',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect-clip.min.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'effects'),
-    ),
-  );
-  $libraries['effects.drop'] = array(
-    'title' => 'jQuery UI: Effects Drop',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect-drop.min.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'effects'),
-    ),
-  );
-  $libraries['effects.explode'] = array(
-    'title' => 'jQuery UI: Effects Explode',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect-explode.min.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'effects'),
-    ),
-  );
-  $libraries['effects.fade'] = array(
-    'title' => 'jQuery UI: Effects Fade',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect-fade.min.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'effects'),
-    ),
-  );
-  $libraries['effects.fold'] = array(
-    'title' => 'jQuery UI: Effects Fold',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect-fold.min.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'effects'),
-    ),
-  );
-  $libraries['effects.highlight'] = array(
-    'title' => 'jQuery UI: Effects Highlight',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect-highlight.min.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'effects'),
-    ),
-  );
-  $libraries['effects.puff'] = array(
-    'title' => 'jQuery UI: Effects Puff',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect-puff.min.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'effects'),
-    ),
-  );
-  $libraries['effects.pulsate'] = array(
-    'title' => 'jQuery UI: Effects Pulsate',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect-pulsate.min.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'effects'),
-    ),
-  );
-  $libraries['effects.scale'] = array(
-    'title' => 'jQuery UI: Effects Scale',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect-scale.min.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'effects'),
-    ),
-  );
-  $libraries['effects.shake'] = array(
-    'title' => 'jQuery UI: Effects Shake',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect-shake.min.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'effects'),
-    ),
-  );
-  $libraries['effects.scale'] = array(
-    'title' => 'jQuery UI: Effects Scale',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect-scale.min.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'effects'),
-    ),
-  );
-  $libraries['effects.slide'] = array(
-    'title' => 'jQuery UI: Effects Slide',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect-slide.min.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'effects'),
-    ),
-  );
-  $libraries['effects.transfer'] = array(
-    'title' => 'jQuery UI: Effects Transfer',
-    'website' => 'http://jqueryui.com/effect/',
-    'version' => $libraries['ui']['version'],
-    'js' => array(
-      'core/misc/ui/jquery.ui.effect-transfer.min.js' => array(),
-    ),
-    'dependencies' => array(
-      array('system', 'effects'),
-    ),
-  );
 
   // Touch Punch for jQuery UI touch support.
   $libraries['ui.touch-punch'] = array(
     'title' => 'jQuery UI Touch Punch',
-    'website' => 'http://touchpunch.furf.com/',
+    'website' => 'http://touchpunch.furf.com',
     'version' => '0.2.3',
     'js' => array(
       'core/misc/jquery.ui.touch-punch.js' => array(),
@@ -1972,33 +1822,177 @@ function system_library_info() {
     ),
   );
 
-  // Tokens.
-  $libraries['token'] = array(
-    'title' => 'Token behaviors',
-    'version' => '1.0',
+  $libraries['ui.widget'] = array(
+    'title' => 'jQuery UI: Widget',
+    'website' => 'http://jqueryui.com/widget',
+    'version' => $libraries['ui']['version'],
     'js' => array(
-      backdrop_get_path('module', 'system') . '/js/token.js' => array(),
-    ),
-    'css' => array(
-      backdrop_get_path('module', 'system') . '/css/token.css' => array(),
+      'core/misc/ui/jquery.ui.widget.min.js' => array('group' => JS_LIBRARY, 'weight' => -10),
     ),
     'dependencies' => array(
-      array('system', 'jquery.treetable'),
-      array('system', 'backdrop.ajax'),
+      array('system', 'ui'),
     ),
   );
-
-  // jQuery treeTable plugin.
-  $libraries['jquery.treetable'] = array(
-    'title' => 'jQuery treetable',
-    'website' => 'http://plugins.jquery.com/project/treetable',
-    'version' => '3.2.0',
+  $libraries['effects'] = array(
+    'title' => 'jQuery UI Effects',
+    'website' => 'https://api.jqueryui.com/category/effects',
+    'version' => $libraries['ui']['version'],
     'js' => array(
-      backdrop_get_path('module', 'system') . '/js/jquery.treetable.js' => array(),
+      'core/misc/ui/jquery.ui.effect.min.js' => array('group' => JS_LIBRARY, 'weight' => -9),
     ),
-    'css' => array(
-      backdrop_get_path('module', 'system') . '/css/jquery.treetable.css' => array(),
-      backdrop_get_path('module', 'system') . '/css/jquery.treetable.theme.default.css' => array(),
+  );
+  $libraries['effects.blind'] = array(
+    'title' => 'jQuery UI Effects: Blind',
+    'website' => 'https://api.jqueryui.com/blind-effect',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-blind.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
+  $libraries['effects.bounce'] = array(
+    'title' => 'jQuery UI Effects: Bounce',
+    'website' => 'https://api.jqueryui.com/blind-effect',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-bounce.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
+  $libraries['effects.clip'] = array(
+    'title' => 'jQuery UI Effects: Clip',
+    'website' => 'https://api.jqueryui.com/clip-effect',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-clip.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
+  $libraries['effects.drop'] = array(
+    'title' => 'jQuery UI Effects: Drop',
+    'website' => 'https://api.jqueryui.com/drop-effect',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-drop.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
+  $libraries['effects.explode'] = array(
+    'title' => 'jQuery UI Effects: Explode',
+    'website' => 'https://api.jqueryui.com/explode-effect',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-explode.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
+  $libraries['effects.fade'] = array(
+    'title' => 'jQuery UI Effects: Fade',
+    'website' => 'https://api.jqueryui.com/fade-effect',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-fade.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
+  $libraries['effects.fold'] = array(
+    'title' => 'jQuery UI Effects: Fold',
+    'website' => 'https://api.jqueryui.com/fold-effect',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-fold.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
+  $libraries['effects.highlight'] = array(
+    'title' => 'jQuery UI Effects: Highlight',
+    'website' => 'https://api.jqueryui.com/highlight-effect',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-highlight.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
+  $libraries['effects.puff'] = array(
+    'title' => 'jQuery UI Effects: Puff',
+    'website' => 'https://api.jqueryui.com/puff-effect',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-puff.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
+  $libraries['effects.pulsate'] = array(
+    'title' => 'jQuery UI Effects: Pulsate',
+    'website' => 'https://api.jqueryui.com/pulsate-effect',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-pulsate.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
+  $libraries['effects.scale'] = array(
+    'title' => 'jQuery UI Effects: Scale',
+    'website' => 'https://api.jqueryui.com/scale-effect',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-scale.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
+  $libraries['effects.shake'] = array(
+    'title' => 'jQuery UI Effects: Shake',
+    'website' => 'https://api.jqueryui.com/shake-effect',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-shake.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
+  $libraries['effects.slide'] = array(
+    'title' => 'jQuery UI Effects: Slide',
+    'website' => 'https://api.jqueryui.com/slide-effect',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-slide.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
+    ),
+  );
+  $libraries['effects.transfer'] = array(
+    'title' => 'jQuery UI Effects: Transfer',
+    'website' => 'https://api.jqueryui.com/transfer-effect',
+    'version' => $libraries['ui']['version'],
+    'js' => array(
+      'core/misc/ui/jquery.ui.effect-transfer.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'effects'),
     ),
   );
 
