@@ -13,20 +13,38 @@ function ckeditor_requirements($phase) {
 
   // Check if CKEditor is not enabled on any formats.
   if ($phase == 'runtime') {
-    $ckeditor_found = FALSE;
+    $ckeditor_formats = array();
     $formats = filter_formats();
     foreach ($formats as $format) {
       if (isset($format->editor) && $format->editor === 'ckeditor') {
-        $ckeditor_found = TRUE;
+        $ckeditor_formats[] = $format->name;
       }
     }
-    if (!$ckeditor_found) {
-      $requirements['ckeditor_not_enabled'] = array(
-        'title' => $t('CKEditor'),
-        'value' => $t('CKEditor is installed but not enabled on any formats. Visit the <a href="!url">text editors and formats configuration</a> to enable CKEditor on one or more formats.', array('!url' => url('admin/config/content/formats'))),
-        'severity' => REQUIREMENT_WARNING
-      );
+
+    if (empty($ckeditor_formats)) {
+      $severity = REQUIREMENT_WARNING;
+      $description = $t('CKEditor is installed but not enabled for any text format.');
     }
+    else {
+      $severity = REQUIREMENT_INFO;
+      $description = $t('CKEditor is installed and enabled for the following text formats:');
+      $description .= theme('item_list', array('items' => $ckeditor_formats));
+    }
+    if (user_access('administer filters')) {
+      $description .= ' ' . $t('To configure text formats, visit the <a href="!url">Text editors and formats</a> configuration page.', array('!url' => url('admin/config/content/formats')));
+    }
+    else {
+      $filter_admins = user_roles(TRUE, 'administer filters');
+      $description .= ' ' . $t('To be able to use CKEditor, you will need to ask a person with one of the following roles to configure the text formats you are allowed to use:');
+      $description .= theme('item_list', array('items' => $filter_admins));
+    }
+
+    $requirements['ckeditor'] = array(
+      'title' => $t('CKEditor'),
+      'severity' => $severity,
+      'value' => CKEDITOR_VERSION,
+      'description' => $description,
+    );
   }
 
   return $requirements;

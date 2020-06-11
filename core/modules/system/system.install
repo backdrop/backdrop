@@ -187,15 +187,6 @@ function system_requirements($phase) {
     $requirements['database_charset'] = $charset_requirements;
   }
 
-  // Report CKEditor version.
-  if ($phase == 'runtime' && module_exists('ckeditor')) {
-    $requirements['ckeditor'] = array(
-      'title' => $t('CKEditor'),
-      'severity' => REQUIREMENT_INFO,
-      'value' => CKEDITOR_VERSION,
-    );
-  }
-
   // Report jQuery, jQuery UI, and other jQuery library versions.
   if ($phase == 'runtime') {
 
