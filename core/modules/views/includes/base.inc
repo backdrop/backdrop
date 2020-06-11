@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides the basic object definitions used by plugins and handlers.
@@ -49,8 +48,8 @@ class views_object {
   function option_definition() { return array(); }
 
   /**
-   * Views handlers use a special construct function so that we can more
-   * easily construct them with variable arguments.
+   * Views handlers use a special construct function so that we can more easily
+   * construct them with variable arguments.
    */
   function construct() { $this->set_default_options(); }
 

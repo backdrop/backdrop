@@ -135,7 +135,7 @@ class Block extends LayoutHandler {
     if (empty($title)) {
       // Last effort, use the title from hook_block_info().
       $info = $this->getBlockInfo();
-      $title = $info['info'];
+      $title = check_plain($info['info']);
     }
     return $title;
   }
@@ -156,7 +156,7 @@ class Block extends LayoutHandler {
     $info = $this->getBlockInfo();
     $preview = '';
     if (isset($info['description'])) {
-      $preview .= '<p>' . $info['description'] . '</p>';
+      $preview .= '<p>' . filter_xss($info['description']) . '</p>';
     }
     $preview .= $this->getAdminConditionsPreview();
 

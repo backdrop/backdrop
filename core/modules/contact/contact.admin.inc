@@ -272,6 +272,10 @@ function contact_category_list_submit($form, &$form_state) {
  * @ingroup forms
  */
 function contact_category_edit_form($form, &$form_state, array $category = array()) {
+  if (empty($category)) {
+    backdrop_set_title(t('Add contact form category'));
+  }
+
   // If this is a new category, add the default values.
   $category += array(
     'category' => '',

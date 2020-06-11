@@ -69,7 +69,7 @@ function views_api_minimum_version() {
 }
 
 /**
- * Implement hook_theme(). Register views theming functions.
+ * Implement hook_theme(). Register views theme functions.
  */
 function views_theme($existing, $type, $theme, $path) {
   $path = backdrop_get_path('module', 'views');
@@ -563,11 +563,6 @@ function views_preprocess_layout(&$variables) {
     if (is_subclass_of($view, 'views_plugin_display')) {
       $view = $view->view;
     }
-
-    // Since views exposed filters do not have a current display, test first.
-    if (property_exists($view, 'current_display') && isset($view->current_display)) {
-      views_add_contextual_links($variables['content'], 'page', $view, $view->current_display);
-    }
   }
 }
 
@@ -864,8 +859,21 @@ function views_access() {
  * permissions. If the $account argument is omitted, the current user
  * is used.
  */
-function views_check_perm($perm, $account = NULL) {
-  return user_access($perm, $account) || user_access('access all views', $account);
+function views_check_perm($perms, $account = NULL) {
+  // Backward compatibility to ensure also a single permission string is
+  // properly processed.
+  $perms = is_array($perms) ? $perms : array($perms);
+  if (user_access('access all views', $account)) {
+    return TRUE;
+  }
+  // Perms are handled as OR; as soon one permission allows access, TRUE is
+  // returned.
+  foreach ($perms as $perm) {
+    if (user_access($perm, $account)) {
+      return TRUE;
+    }
+  }
+  return FALSE;
 }
 
 /**
@@ -1155,7 +1163,7 @@ function views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) {
  *   Either 'display', 'style' or 'row'
  * @param $key
  *   For style plugins, this is an optional type to restrict to. May be 'normal',
- *   'summary', 'feed' or others based on the neds of the display.
+ *   'summary', 'feed' or others based on the needs of the display.
  * @param $base
  *   An array of possible base tables.
  *
@@ -2187,4 +2195,38 @@ function views_autoload_info() {
     'ViewsBlock' => 'includes/views.block.inc',
     'ViewsSpecialBlock' => 'includes/views.special_block.inc',
   );
+}
+
+/**
+ * Cleans a CSS identifier, taking into account views tokenization.
+ *
+ * @param sring $class
+ *   A single CSS class, as entered into the Views user interface.
+ * @param object $plugin
+ *   The complete view plugin object for tokenization.
+ * @param string $row_index
+ *   The index indicating the row of the view.
+ *
+ * @return string $class
+ *   A sanitized clean css identifier with tokens replaced.
+ */
+function _views_tokenized_clean_css_identifier($class, $plugin, $row_index) {
+  if (!empty($class)) {
+    // To support a class that is part hand-typed and part token, split out tokens.
+    $subclasses = preg_split('/(\[[^\]]*])/i', $class, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+    foreach ($subclasses as &$subclass) {
+      $tokenized = $plugin->tokenize_value($subclass, $row_index);
+      if ($tokenized == $subclass) {
+        // No token replacement, all valid CSS characters allowed.
+        $subclass = backdrop_clean_css_identifier($tokenized, array());
+      }
+      else {
+        // Tokens that are replaced should be additionally sanitized, such
+        // as replacing underscores with hyphens.
+        $subclass = backdrop_clean_css_identifier($tokenized);
+      }
+      $class = implode('', $subclasses);
+    }
+    return $class;
+  }
 }

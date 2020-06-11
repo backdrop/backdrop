@@ -119,6 +119,13 @@ class ViewsBlock extends Block {
             $args[] = isset($arguments[$id]['wildcard']) ? $arguments[$id]['wildcard'] : '*';
             break;
 
+          case 'url':
+            if (isset($argument['position'])) {
+              $arg = (int)$argument['position'];
+              $args[] = arg($arg);
+            }
+            break;
+
           case 'none':
           default:
             // Let Views handle a NULL (or missing) argument.
@@ -139,7 +146,7 @@ class ViewsBlock extends Block {
       if ($allow['path_override'] && !empty($this->settings['path'])) {
         $view->override_path = $this->settings['path'];
       }
-      else if ($path = $view->display_handler->get_option('inherit_path')) {
+      elseif ($path = $view->display_handler->get_option('inherit_path')) {
         $view->override_path = $_GET['q'];
       }
 

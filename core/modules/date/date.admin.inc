@@ -416,9 +416,9 @@ function _date_field_widget_settings_form($field, $instance) {
     '#title' => t('Position of date part labels'),
     '#description' => $description,
   );
-  $form['advanced']['text_parts'] = array(
-    '#theme' => $widget['type'] == 'date_select' ? 'date_text_parts' : '',
-  );
+  if ($widget['type'] == 'date_select') {
+    $form['advanced']['text_parts']['#theme'] = 'date_text_parts';
+  }
   $text_parts = (array) $settings['text_parts'];
   foreach (date_granularity_names() as $key => $value) {
     if ($widget['type'] == 'date_select') {
@@ -492,9 +492,9 @@ function _date_field_settings_form($field, $instance, $has_data) {
   }
   $tz_handling = $settings['tz_handling'];
 
-  $description = t('Select the date attributes to collect and store.');
+  $description = '';
   if ($has_data) {
-    $description .= ' ' . t('Changes to date attributes only effects new or updated content.');
+    $description = t('Changing date granularity will affect only new or updated content.');
   }
   $options = date_granularity_names();
   $checkbox_year = array(
@@ -507,7 +507,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
   unset($options['year']);
   $form['granularity'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Date attributes to collect'),
+    '#title' => t('Date granularity'),
     '#default_value' => $granularity,
     '#options' => $options,
     '#attributes' => array(

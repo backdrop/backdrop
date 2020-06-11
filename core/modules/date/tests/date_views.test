@@ -12,7 +12,7 @@ class DateViewsTestCase extends DateFieldBasic {
   /**
    * Test setup actions.
    */
-  public function setUp() {
+  public function setUp($modules = array()) {
     parent::setUp(array('views', 'views_ui'));
 
     // Create a date field.

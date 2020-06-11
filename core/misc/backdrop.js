@@ -2,8 +2,8 @@
  * Main JavaScript file for Backdrop CMS.
  *
  * This file provides central functionality to Backdrop, including attaching
- * behaviors (the main way of interacting with JS in Backdrop), theming
- * wrappers, and localization functions.
+ * behaviors (the main way of interacting with JS in Backdrop), theme wrappers,
+ * and localization functions.
  */
 (function ($, undefined) {
 
@@ -102,10 +102,10 @@ Backdrop.attachBehaviors = function (context, settings) {
  *     during a tabledrag row swap). After the move is completed,
  *     Backdrop.attachBehaviors() is called, so that the behavior can undo
  *     whatever it did in response to the move. Many behaviors won't need to
- *     do anything simply in response to the element being moved, but because
- *     IFRAME elements reload their "src" when being moved within the DOM,
- *     behaviors bound to IFRAME elements (like WYSIWYG editors) may need to
- *     take some action.
+ *     do anything in response to the element being moved, but because IFRAME
+ *     elements reload their "src" when being moved within the DOM, behaviors
+ *     bound to IFRAME elements (like WYSIWYG editors) may need to take some
+ *     action.
  *   - serialize: When an Ajax form is submitted, this is called with the
  *     form as the context. This provides every behavior within the form an
  *     opportunity to ensure that the field elements have correct content

@@ -421,7 +421,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
       'name' => $style_name,
       'label' => $style_label,
     );
-    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Create new style'));
+    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Save and add effects'));
     $this->assertRaw(t('Style %name was created.', array('%name' => $style_label)), 'Image style successfully created.');
     $options = image_style_options();
     $this->assertTrue(array_key_exists($style_name, $options), format_string('Array key %key exists.', array('%key' => $style_name)));
@@ -470,7 +470,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
       'name' => $style_name,
       'label' => $style_label,
     );
-    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Create new style'));
+    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Save and add effects'));
     $this->assertRaw(t('Style %name was created.', array('%name' => $style_label)), 'Image style successfully created.');
 
     // Add effect form.
@@ -872,6 +872,32 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
       '%max' => $schema['fields'][$field_name .'_title']['length'],
       '%length' => $test_size,
     )));
+
+    // Check that image minimum size is not larger than maximum size.
+    $edit = array(
+      'instance[settings][max_dimensions][x]' => 100,
+      'instance[settings][min_dimensions][x]' => 200,
+    );
+    $this->backdropPost('admin/structure/types/manage/post/fields/' . $field_name, $edit, t('Save settings'));
+    $this->assertText(t('The minimum image dimensions cannot be bigger than its maximum dimensions.'));
+    // Try again with unacceptable image heights instead.
+    $edit = array(
+      'instance[settings][max_dimensions][x]' => '',
+      'instance[settings][min_dimensions][x]' => '',
+      'instance[settings][max_dimensions][y]' => 100,
+      'instance[settings][min_dimensions][y]' => 200,
+    );
+    $this->backdropPost('admin/structure/types/manage/post/fields/' . $field_name, $edit, t('Save settings'));
+    $this->assertText(t('The minimum image dimensions cannot be bigger than its maximum dimensions.'));
+    // Try again with acceptable values.
+    $edit = array(
+      'instance[settings][max_dimensions][x]' => '',
+      'instance[settings][min_dimensions][x]' => '',
+      'instance[settings][max_dimensions][y]' => 300,
+      'instance[settings][min_dimensions][y]' => 200,
+    );
+    $this->backdropPost('admin/structure/types/manage/post/fields/' . $field_name, $edit, t('Save settings'));
+    $this->assertRaw(t('Saved %field_name configuration.', array('%field_name' => $field_name)));
   }
 
   /**
@@ -1682,7 +1708,7 @@ class ImageStyleFlushTest extends ImageFieldTestCase {
       'name' => $style_name,
       'label' => $style_label,
     );
-    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Create new style'));
+    $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Save and add effects'));
     // Add each sample effect to the style.
     foreach ($effect_edits as $effect => $edit) {
       // Add the effect.
@@ -1855,8 +1881,10 @@ class ImageStyleFloodProtection extends BackdropWebTestCase {
 
     // Close the handles
     for ($n = 0; $n < $count; $n++) {
-      curl_close(${'handle' . $n});
-      curl_multi_remove_handle($multi_handle, ${'handle' . $n});
+      if (gettype(${'handle' . $n}) === 'resource') {
+        curl_multi_remove_handle($multi_handle, ${'handle' . $n});
+        curl_close(${'handle' . $n});
+      }
     }
     curl_multi_close($multi_handle);
   }

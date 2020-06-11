@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Admin page callbacks for the block module.
@@ -22,7 +21,7 @@ function block_admin_list() {
     $block = block_custom_block_load($delta);
     $row = array();
     $row[] = check_plain($block_info['info']);
-    $row[] = check_plain($block_info['description']);
+    $row[] = filter_xss($block_info['description']);
     $links = array();
     $links['configure'] = array(
       'title' => t('Configure'),
@@ -36,6 +35,16 @@ function block_admin_list() {
       $links['translate'] = array(
         'title' => t('Translate'),
         'href' => 'admin/structure/block/manage/' . $delta . '/translation',
+      );
+    }
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Custom Blocks',
+          'name' => 'block.custom.' . $delta,
+        ),
       );
     }
     $operations = array(
@@ -128,6 +137,14 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
     '#type' => 'submit',
     '#value' => t('Save block'),
   );
+  if ($delta) {
+    $form['actions']['delete'] = array(
+      '#type' => 'link',
+      '#title' => t('Delete'),
+      '#href' => 'admin/structure/block/manage/' . $delta . '/delete',
+      '#attributes' => array('class' => array('button', 'button-secondary', 'form-delete')),
+    );
+  }
   $form['actions']['cancel'] = array(
     '#type' => 'link',
     '#title' => t('Cancel'),

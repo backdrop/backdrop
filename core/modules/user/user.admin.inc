@@ -532,16 +532,26 @@ function user_admin_roles($form, $form_state) {
       '#attributes' => array('class' => array('role-weight')),
     );
     $links = array();
-    $links['edit'] = array(
-      'title' => t('Edit role'),
+    $links['configure'] = array(
+      'title' => t('Configure role'),
       'href' => 'admin/config/people/roles/edit/' . $role_name,
       'weight' => 0,
     );
     $links['permissions'] = array(
-      'title' => t('Edit permissions'),
+      'title' => t('Set permissions'),
       'href' => 'admin/config/people/permissions/' . $role_name,
       'weight' => 5,
     );
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export role'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'User roles',
+          'name' => 'user.role.' . $role_name,
+        ),
+      );
+    }
     if ($role_name !== BACKDROP_ANONYMOUS_ROLE && $role_name !== BACKDROP_AUTHENTICATED_ROLE) {
       $links['delete'] = array(
         'title' => t('Delete role'),

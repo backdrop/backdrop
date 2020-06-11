@@ -319,7 +319,7 @@ function installer_browser_installation_select_versions_form($form, &$form_state
     backdrop_goto('admin/installer/install/enable');
   }
 
-  backdrop_set_message(t('It is recommended that you back up your database and site before you continue. !link.', array('!link' => l(t('Learn how'), 'http://drupal.org/node/22281'))), 'warning');
+  backdrop_set_message(t('It is recommended that you back up your database and site before you continue. !link.', array('!link' => l(t('Learn how'), 'https://backdropcms.org/backups'))), 'warning');
 
   $form['maintenance_mode'] = array(
     '#type' => 'checkbox',
@@ -925,7 +925,7 @@ function installer_browser_get_sort_widget($sort_options, $current_order, $curre
  */
 function installer_browser_get_sort_options($full = FALSE) {
   $sort_options = array(
-    'score' => array('method' => 'score', 'label' => t('Relevancy'), 'default_sort' => 'desc'),
+    'score' => array('method' => 'score', 'label' => t('Relevance'), 'default_sort' => 'desc'),
     'usage' => array('method' => 'usage', 'label' => t('Most installed'), 'default_sort' => 'desc'),
     'title' => array('method' => 'title', 'label' => t('Title'), 'default_sort' => 'asc'),
     'latest_release' => array('method' => 'latest_release', 'label' => t('Latest release'), 'default_sort' => 'desc'),

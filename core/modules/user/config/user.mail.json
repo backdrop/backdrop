@@ -1,5 +1,23 @@
 {
     "_config_name": "user.mail",
+    "_config_translatables": [
+        "cancel_confirm_body",
+        "cancel_confirm_subject",
+        "password_reset_body",
+        "password_reset_subject",
+        "register_admin_created_body",
+        "register_admin_created_subject",
+        "register_no_approval_required_body",
+        "register_no_approval_required_subject",
+        "register_pending_approval_body",
+        "register_pending_approval_subject",
+        "status_activated_body",
+        "status_activated_subject",
+        "status_blocked_body",
+        "status_blocked_subject",
+        "status_canceled_body",
+        "status_canceled_subject"
+    ],
     "cancel_confirm_body": "[user:name],\n\nA request to cancel your account has been made at [site:name].\n\nYou may now cancel your account on [site:url:brief] by clicking this link or copying and pasting it into your browser:\n\n[user:cancel-url]\n\nNOTE: The cancellation of your account is not reversible.\n\nThis link expires in one day and nothing will happen if it is not used.\n\n--  [site:name] team",
     "cancel_confirm_subject": "Account cancellation request for [user:name] at [site:name]",
     "password_reset_body": "[user:name],\n\nA request to reset the password for your account has been made at [site:name].\n\nYou may now reset your password by clicking this link or copying and pasting it to your browser:\n\n[user:one-time-login-url]\n\nThis link can only be used once and will lead you to a page where you can set your password. It expires after one day and nothing will happen if it is not used.\n\n--  [site:name] team",

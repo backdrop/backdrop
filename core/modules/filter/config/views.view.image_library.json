@@ -2,6 +2,7 @@
     "_config_name": "views.view.image_library",
     "name": "image_library",
     "description": "Displays recently uploaded images for selection when creating content.",
+    "module": "filter",
     "storage": 4,
     "tag": "default",
     "disabled": false,
@@ -341,7 +342,22 @@
                         }
                     }
                 },
-                "sorts": [],
+                "sorts": {
+                    "timestamp": {
+                        "id": "timestamp",
+                        "table": "file_managed",
+                        "field": "timestamp",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "order": "DESC",
+                        "exposed": false,
+                        "expose": {
+                            "label": ""
+                        },
+                        "granularity": "second"
+                    }
+                },
                 "style_options": {
                     "grouping": [],
                     "row_class": "image-library-choose-file",
