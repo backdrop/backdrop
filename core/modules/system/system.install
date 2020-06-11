@@ -302,7 +302,7 @@ function system_requirements($phase) {
     // Cron error threshold defaults to two weeks.
     $threshold_error = $config->get('cron_threshold_error');
     // Cron configuration help text.
-    $help = $t('For more information, see the online handbook entry for <a href="@cron-handbook" target="_blank">configuring cron jobs</a>.', array('@cron-handbook' => 'http://drupal.org/cron'));
+    $help = $t('For more information, see the online handbook entry for <a href="@cron-handbook" target="_blank">configuring cron jobs</a>.', array('@cron-handbook' => 'https://backdropcms.org/cron'));
 
     // Determine when cron last ran.
     $cron_last = state_get('cron_last');
