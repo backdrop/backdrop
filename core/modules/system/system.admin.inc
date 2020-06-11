@@ -1554,17 +1554,16 @@ function system_cron_settings($form, &$form_state) {
   global $base_url;
   $form['#config'] = 'system.core';
   $form['description'] = array(
-    '#markup' => '<p>' . t('Cron takes care of running periodic tasks like checking for updates and indexing content for search.') . '</p>',
+    '#type' => 'help',
+    '#markup' => t('Cron takes care of running periodic tasks like checking for updates and indexing content for search.'),
   );
+
   $form['run'] = array(
     '#type' => 'submit',
     '#value' => t('Run cron'),
     '#submit' => array('system_run_cron_submit'),
-  );
-
-  $status = '<p>' . t('Last run: %cron-last ago.', array('%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)) . '</p>';
-  $form['status'] = array(
-    '#markup' => $status,
+    '#attributes' => array('class' => array('button', 'button-secondary')),
+    '#prefix' => '<span class="cron-last-run">' . t('Last run: %cron-last ago', array('%cron-last' => format_interval(REQUEST_TIME - state_get('cron_last')),)) . '</span>',
   );
 
   $form['cron_url'] = array(
@@ -1575,15 +1574,45 @@ function system_cron_settings($form, &$form_state) {
     '#title' => t('Cron configuration'),
     '#type' => 'fieldset',
   );
+  // Add a special label for 0 seconds.
+  $cron_safe_threshold_options = array(0 => t('Never'));
+  // Add the rest of the options, with automatically formatted labels.
+  $cron_safe_threshold_options += backdrop_map_assoc(array(600, 1800, 3600, 10800, 21600, 43200, 86400, 604800), 'format_interval');
+  // Check if $settings['cron_safe_threshold'] is set in settings.php. 
+  $threshold_locked = is_numeric(settings_get('cron_safe_threshold'));
+  if ($threshold_locked && !in_array(settings_get('cron_safe_threshold'), $cron_safe_threshold_options)) {
+    // If the threshold value set in settings.php is not already included in the
+    // drop-down menu options, add it.
+    $cron_safe_threshold_options = array(settings_get('cron_safe_threshold') => format_interval(settings_get('cron_safe_threshold')));
+  }
   $form['cron']['cron_safe_threshold'] = array(
     '#type' => 'select',
     '#title' => t('Run cron every'),
+    // If $settings['cron_safe_threshold'] is set in settings.php, lock the
+    // setting in the admin UI...
+    '#disabled' => $threshold_locked,
+    // ...and let the users know why the threshold drop-down menu is disabled.
+    '#prefix' => $threshold_locked ? "<strong>" . t('This setting has been locked in settings.php') . "</strong>" : '',
     '#description' => t('More information about setting up scheduled tasks can be found by <a href="@url">reading the cron tutorial on drupal.org</a>.', array('@url' => url('http://drupal.org/cron'))),
-    '#default_value' => config('system.core')->get('cron_safe_threshold'),
-    '#options' => array(0 => t('Never')) + backdrop_map_assoc(array(600, 1800, 3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
+    '#options' => $cron_safe_threshold_options,
+    // Get the threshold from settings.php, if it has been set there; otherwise
+    // fall back to reading the value from config.
+    '#default_value' => $threshold_locked ? settings_get('cron_safe_threshold') : config('system.core')->get('cron_safe_threshold'),
   );
 
   return system_settings_form($form);
+}
+
+/*
+ * Implementation of hook_form_alter()
+ */
+function system_form_alter(&$form, &$form_state, $form_id){
+  // Hide the form submit button if $settings['cron_safe_threshold'] is set in
+  // settings.php.
+  if($form_id == "system_cron_settings" && $form['cron']['cron_safe_threshold']['#disabled'] == TRUE){
+    unset($form['actions']);
+    unset($form['#submit']);
+  }
 }
 
 /**

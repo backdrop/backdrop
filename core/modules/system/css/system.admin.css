@@ -238,6 +238,15 @@ span.admin-missing {
   color: #EC351C;
 }
 
+/**
+ * Cron form.
+ */
+.cron-last-run {
+  margin-right: 1em; /* LTR */
+}
+[dir="rtl"] .cron-last-run {
+  margin-left: 1em;
+}
 
 /**
  * Theme settings.

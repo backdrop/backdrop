@@ -272,6 +272,17 @@ ini_set('session.cookie_lifetime', 2000000);
 // $settings['omit_vary_cookie'] = TRUE;
 
 /**
+ * Cron threshold:
+ *
+ * In Backdrop, the cron run threshold is set in configuration. Use this setting
+ * here if you want to lock the threshold setting in the admin UI. The default
+ * is 10800 seconds (3 hours). Set to 0 to disable cron.
+ *
+ * @see system_cron_settings()
+ */
+// $settings['cron_safe_threshold'] = 10800;
+
+/**
  * Expiration of cache_form entries:
  *
  * Backdrop's Form API stores details of forms in cache_form and these entries
