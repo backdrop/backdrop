@@ -3727,7 +3727,7 @@ function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_t
  * Implements hook_image_toolkits().
  */
 function system_image_toolkits() {
-  include_once BACKDROP_ROOT . '/' . backdrop_get_path('module', 'system') . '/' . 'image.gd.inc';
+  include_once BACKDROP_ROOT . '/' . backdrop_get_path('module', 'system') . '/image.gd.inc';
   return array(
     'gd' => array(
       'title' => t('GD2 image manipulation toolkit'),
