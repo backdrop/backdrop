@@ -180,12 +180,13 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
  */
 function user_pass_reset_form($form, &$form_state, $account) {
   $form['#account'] = $account;
-  $form['message'] = array(
-    '#markup' => t('<p>Please enter a new password to access your account.</p>'),
-  );
   $form['pass'] = array(
-    '#type' => 'password_confirm',
+    '#type' => 'password',
+    '#title' => t('New password'),
+    '#description' => t('Please enter a new password to access your account.'),
     '#required' => TRUE,
+    '#password_toggle' => TRUE,
+    '#password_strength' => TRUE,
   );
   $form['actions'] = array(
     '#type' => 'actions',
