@@ -1206,5 +1206,31 @@ function user_update_1016() {
 }
 
 /**
+ * Set default assignable roles, exclude admin role.
+ */
+function user_update_1017() {
+  // Get all available roles except for 'anonymous' and 'authenticated'.
+  $roles = user_roles();
+  unset($roles[BACKDROP_ANONYMOUS_ROLE]);
+  unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
+
+  if ($roles) {
+    $config = config('system.core');
+    $admin_role = $config->get('user_admin_role');
+    $assignable = array();
+    foreach ($roles as $name => $label) {
+      if ($name != $admin_role) {
+        $assignable[$name] = TRUE;
+      }
+      else {
+        $assignable[$name] = FALSE;
+      }
+    }
+
+    $config->set('user_assignable_roles', $assignable);
+    $config->save();
+  }
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */
