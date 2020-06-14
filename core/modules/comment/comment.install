@@ -78,9 +78,6 @@ function comment_uninstall() {
  * Implements hook_enable().
  */
 function comment_enable() {
-  // Remove orphaned comments of users that do not exist anymore.
-  $user_uids = db_select('users', 'u')->fields('u', array('uid'));
-  db_delete('comment')->condition('uid', $user_uids, 'NOT IN')->execute();
   // Insert records into the node_comment_statistics for nodes that are missing.
   $query = db_select('node', 'n');
   $query->leftJoin('node_comment_statistics', 'ncs', 'ncs.nid = n.nid');
