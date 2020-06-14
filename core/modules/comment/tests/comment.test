@@ -2334,6 +2334,7 @@ class CommentAuthorDeletionTestCase extends CommentHelperCase {
     // it).
     module_disable(array('comment'));
     user_delete($this->admin_user->uid);
+    cache('entity_comment')->flush();
     module_enable(array('comment'));
     $this->backdropGet('node/' . $this->node->nid);
     $this->assertResponse(200, t('Node page is accessible after the comment author is deleted.'));
