@@ -55,7 +55,7 @@ function backdrop_lookup_path($action, $path = '', $langcode = NULL) {
     $cache = array(
       'map' => array(),
       'no_source' => array(),
-      'whitelist' => NULL,
+      'allowlist' => NULL,
       'system_paths' => array(),
       'no_aliases' => array(),
       'first_call' => TRUE,

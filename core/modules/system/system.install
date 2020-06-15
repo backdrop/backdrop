@@ -3248,6 +3248,13 @@ function system_update_1078() {
   }
 }
 
+/*
+ * Clear the cache to reset allowlist settings.
+ */
+function system_update_1079() {
+  backdrop_flush_all_caches();
+}
+
 /**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
