@@ -187,45 +187,14 @@ function system_requirements($phase) {
     $requirements['database_charset'] = $charset_requirements;
   }
 
-  // Report jQuery, jQuery UI, and other jQuery library versions.
+  // Report jQuery and jQuery UI versions.
   if ($phase == 'runtime') {
-
-    $system_libraries = backdrop_get_library('system');
-    $jquery_version = $system_libraries['jquery']['title'] . ' ' . $system_libraries['jquery']['version'];
-    $jquery_ui_version = l($system_libraries['ui']['title'], $system_libraries['ui']['website'], array('attributes' => array('target'=>'_blank'))) . ' ' . $system_libraries['ui']['version'];
-
-    $jquery_libraries = array(
-      // This will hold all jQuery libraries.
-      'items' => array(
-        'ui' => array(
-          // This will be the jQuery UI item...
-          'data' => $jquery_ui_version,
-          // ...and this will hold all the jQuery UI plugins and effects,
-          // nested under the jQuery UI item.
-          'children' => array(),
-        ),
-      ),
-    );
-
-    foreach ($system_libraries as $key => $system_library) {
-      if (strpos($key, 'jquery.') !== FALSE) {
-        $jquery_libraries['items'][$key] = l($system_library['title'], $system_library['website'], array('attributes' => array('target'=>'_blank'))) . ' ' . $system_library['version'];
-      }
-      if (strpos($key, 'ui.') !== FALSE || strpos($key, 'effects') !== FALSE) {
-        // Add the plugin version only if different to the jQuery UI version.
-        $library_version = $system_library['version'] != $system_libraries['ui']['version'] ? ' ' . $system_library['version'] : '';
-        $jquery_libraries['items']['ui']['children'][] = l($system_library['title'], $system_library['website'], array('attributes' => array('target'=>'_blank'))) . $library_version;
-      }
-    }
-
-    // Move the jQuery UI item to the bottom of the list (better readability).
-    $jquery_libraries['items']['ui'] = array_shift($jquery_libraries['items']);
-
+    $jquery = backdrop_get_library('system', 'jquery');
+    $jquery_ui = backdrop_get_library('system', 'ui');
     $requirements['jquery'] = array(
       'title' => $t('jQuery'),
-      'severity' => REQUIREMENT_INFO,
-      'value' => $jquery_version,
-      'description' => theme('item_list', $jquery_libraries),
+      'severity' => REQUIREMENT_OK,
+      'value' => $t('jQuery version !jqv / jQuery UI version !jquiv', array('!jqv' => $jquery['version'], '!jquiv' => $jquery_ui['version'])),
     );
   }
 
