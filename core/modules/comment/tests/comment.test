@@ -2006,6 +2006,48 @@ class CommentFieldsTest extends CommentHelperCase {
   }
 
   /**
+   * Tests trying to save a comment with an empty, NON-required body.
+   *
+   * Trying to save should succeed and not generate a warning.
+   */
+  public function testCommentEmptyNonRequiredBody() {
+    // Set the requirement-indicator of the comment_body field.
+    $this->backdropLogin($this->admin_user);
+    $edit = array('instance[required]' => FALSE);
+    $this->backdropPost('admin/structure/types/manage/post/comment/fields/comment_body', $edit, t('Save settings'));
+
+    // Preview an empty comment, and check if an error is shown.
+    $this->backdropPost('node/' . $this->node->nid, array(), t('Preview'));
+    $this->assertNoText('Comment field is required.', 'Can preview comment with empty required body.');
+
+    // Post an empty comment, and check if an error is shown.
+    $this->backdropPost('node/' . $this->node->nid, array(), t('Save'));
+    $this->assertNoText('Comment field is required.', 'Can save comment with empty required body.');
+    $this->assertText('Your comment has been posted.', 'Can save comment with empty required body.');
+  }
+
+  /**
+   * Tests that the comment_body field is not required.
+   *
+   * It should be possible to preview and save a comment without the
+   * default "comment_body" field and without generating warnings.
+   */
+  public function testCommentDeletedBody() {
+    // Delete the comment_body field.
+    $this->backdropLogin($this->admin_user);
+    $this->backdropPost('admin/structure/types/manage/post/comment/fields/comment_body/delete', array(), t('Delete'));
+
+    // Preview an empty comment.
+    $this->backdropPost('node/' . $this->node->nid, array(), t('Preview'));
+
+    // Post an empty comment.
+    $this->backdropPost('node/' . $this->node->nid, array(), t('Save'));
+
+    // View the comment administration overview page.
+    $this->backdropGet('admin/content/comment');
+  }
+
+  /**
    * Tests that the default 'comment_body' field is correctly added.
    */
   function testCommentDefaultFields() {

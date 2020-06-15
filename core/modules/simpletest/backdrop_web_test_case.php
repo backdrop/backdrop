@@ -3466,9 +3466,9 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function assertThemeOutput($callback, array $variables = array(), $expected, $message = '', $group = 'Other') {
     $output = theme($callback, $variables);
-    $this->verbose('Variables:' . '<pre>' .  check_plain(var_export($variables, TRUE)) . '</pre>'
-      . '<hr />' . 'Result:' . '<pre>' .  check_plain(var_export($output, TRUE)) . '</pre>'
-      . '<hr />' . 'Expected:' . '<pre>' .  check_plain(var_export($expected, TRUE)) . '</pre>'
+    $this->verbose('Variables:<pre>' .  check_plain(var_export($variables, TRUE)) . '</pre>'
+      . '<hr />Result:<pre>' .  check_plain(var_export($output, TRUE)) . '</pre>'
+      . '<hr />Expected:<pre>' .  check_plain(var_export($expected, TRUE)) . '</pre>'
       . '<hr />' . $output
     );
     if (!$message) {

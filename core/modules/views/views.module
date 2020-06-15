@@ -196,7 +196,7 @@ function views_theme($existing, $type, $theme, $path) {
  */
 function _views_find_module_templates($cache, $path) {
   $templates = array();
-  $regex = '/' . '\.tpl\.php' . '$' . '/';
+  $regex = '/\.tpl\.php$/';
 
   // Because backdrop_system_listing works the way it does, we check for real
   // templates separately from checking for patterns.
