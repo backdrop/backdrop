@@ -55,11 +55,16 @@ function backdrop_lookup_path($action, $path = '', $langcode = NULL) {
     $cache = array(
       'map' => array(),
       'no_source' => array(),
-      'whitelist' => NULL,
+      'allowlist' => NULL,
       'system_paths' => array(),
       'no_aliases' => array(),
       'first_call' => TRUE,
     );
+    // Backwards-compatible removal of `whitelist`. Remove in Backdrop 2.0.
+    if (isset($cache['whitelist'])) {
+      $cache['allowlist'] = $cache['whitelist'];
+      unset($cache['whitelist']);
+    }
   }
 
   // If no language is explicitly specified we default to the current URL

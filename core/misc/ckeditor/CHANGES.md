@@ -1036,7 +1036,7 @@ Other Changes:
 * Toolbar configurators:
   * [#13147](https://dev.ckeditor.com/ticket/13147): Added buttons to the sticky toolbar.
   * [#13207](https://dev.ckeditor.com/ticket/13207): Used modal window to display toolbar configurator help.
-* [#13316](https://dev.ckeditor.com/ticket/13316): Made [`CKEDITOR.env.isCompatible`](https://ckeditor.com/docs/ckeditor4/latest/api/CKEDITOR_env.html#property-isCompatible) a blacklist rather than a whitelist. More about the change in the [Browser Compatibility](https://ckeditor.com/docs/ckeditor4/latest/guide/dev_browsers.html) guide.
+* [#13316](https://dev.ckeditor.com/ticket/13316): Made [`CKEDITOR.env.isCompatible`](https://ckeditor.com/docs/ckeditor4/latest/api/CKEDITOR_env.html#property-isCompatible) a blocklist rather than an allowlist. More about the change in the [Browser Compatibility](https://ckeditor.com/docs/ckeditor4/latest/guide/dev_browsers.html) guide.
 * [#13398](https://dev.ckeditor.com/ticket/13398): Renamed `CKEDITOR.fileTools.UploadsRepository` to [`CKEDITOR.fileTools.UploadRepository`](https://ckeditor.com/docs/ckeditor4/latest/api/CKEDITOR.fileTools.uploadRepository.html) and changed all related properties.
 * [#13279](https://dev.ckeditor.com/ticket/13279): Reviewed CSS vendor prefixes.
 * [#13454](https://dev.ckeditor.com/ticket/13454): Removed unused `lang.image.alertUrl` token from the [Image](https://ckeditor.com/cke4/addon/image) plugin.
@@ -1390,7 +1390,7 @@ New Features:
   * Default image caption can be translated (customized) with the `editor.lang.image2.captionPlaceholder` string.
 * [#11341](https://dev.ckeditor.com/ticket/11341): [Enhanced Image](https://ckeditor.com/cke4/addon/image2) plugin: It is now possible to add a link to any image type.
 * [#10202](https://dev.ckeditor.com/ticket/10202): Introduced wildcard support in the [Allowed Content Rules](https://ckeditor.com/docs/ckeditor4/latest/guide/dev_allowed_content_rules.html) format.
-* [#10276](https://dev.ckeditor.com/ticket/10276): Introduced blacklisting in the [Allowed Content Filter](https://ckeditor.com/docs/ckeditor4/latest/guide/dev_advanced_content_filter.html).
+* [#10276](https://dev.ckeditor.com/ticket/10276): Introduced blocking in the [Allowed Content Filter](https://ckeditor.com/docs/ckeditor4/latest/guide/dev_advanced_content_filter.html).
 * [#10480](https://dev.ckeditor.com/ticket/10480): Introduced code snippets with code highlighting. There are two versions available so far &mdash; the default [Code Snippet](https://ckeditor.com/cke4/addon/codesnippet) which uses the [highlight.js](http://highlightjs.org) library and the [Code Snippet GeSHi](https://ckeditor.com/cke4/addon/codesnippetgeshi) which uses the [GeSHi](http://qbnz.com/highlighter/) library.
 * [#11737](https://dev.ckeditor.com/ticket/11737): Introduced an option to prevent [filtering](https://ckeditor.com/docs/ckeditor4/latest/guide/dev_advanced_content_filter.html) of an element that matches custom criteria (see [`filter.addElementCallback()`](https://ckeditor.com/docs/ckeditor4/latest/api/CKEDITOR_filter.html#method-addElementCallback)).
 * [#11532](https://dev.ckeditor.com/ticket/11532): Introduced the [`editor.addContentsCss()`](https://ckeditor.com/docs/ckeditor4/latest/api/CKEDITOR_editor.html#method-addContentsCss) method that can be used for [adding custom CSS files](https://ckeditor.com/docs/ckeditor4/latest/guide/plugin_sdk_styles.html).

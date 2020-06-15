@@ -2208,11 +2208,21 @@ function drupal_match_path($path, $patterns) {
 }
 
 /**
- * Rebuild the path alias white list.
+ * Rebuild the path alias allowlist.
  *
  * @deprecated since 1.0.0
  */
 function drupal_path_alias_whitelist_rebuild($source = NULL) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
+  return array();
+}
+
+/**
+ * Rebuild the path alias allowlist.
+ *
+ * @deprecated since 1.16.2
+ */
+function drupal_path_alias_allowlist_rebuild($source = NULL) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return array();
 }
