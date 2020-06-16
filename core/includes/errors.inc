@@ -267,9 +267,9 @@ function _backdrop_log_error($error, $fatal = FALSE) {
 function _backdrop_get_last_caller($backtrace) {
   // Errors that occur inside PHP internal functions do not generate
   // information about file and line. Ignore disallowed functions.
-  $blocklist = array('debug', '_backdrop_error_handler', '_backdrop_exception_handler');
+  $denylist = array('debug', '_backdrop_error_handler', '_backdrop_exception_handler');
   while (($backtrace && !isset($backtrace[0]['line'])) ||
-         (isset($backtrace[1]['function']) && in_array($backtrace[1]['function'], $blocklist))) {
+         (isset($backtrace[1]['function']) && in_array($backtrace[1]['function'], $denylist))) {
     array_shift($backtrace);
   }
 

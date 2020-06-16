@@ -575,9 +575,9 @@ function filter_format_allowed_html($format) {
   }
 
   // Simplification: if we have both a (intersected) allowlist and a (unioned)
-  // blocklist, then remove any tags from the allowlist that also exist in the
-  // blocklist. Now the allowlist alone expresses all tag-level restrictions,
-  // and we can delete the blocklist.
+  // denylist, then remove any tags from the allowlist that also exist in the
+  // denylist. Now the allowlist alone expresses all tag-level restrictions,
+  // and we can delete the denylist.
   if (isset($restrictions['allowed']) && isset($restrictions['forbidden'])) {
     foreach ($restrictions['forbidden'] as $tag) {
       if (isset($restrictions['allowed'][$tag])) {
@@ -1251,7 +1251,7 @@ function filter_process_format($element) {
 
   // Ensure that children appear as subkeys of this element.
   $element['#tree'] = TRUE;
-  $blocklist = array(
+  $denylist = array(
     // Make form_builder() regenerate child properties.
     '#parents',
     '#id',
@@ -1273,7 +1273,7 @@ function filter_process_format($element) {
   // Move this element into sub-element 'value'.
   unset($element['value']);
   foreach (element_properties($element) as $key) {
-    if (!in_array($key, $blocklist)) {
+    if (!in_array($key, $denylist)) {
       $element['value'][$key] = $element[$key];
     }
   }
