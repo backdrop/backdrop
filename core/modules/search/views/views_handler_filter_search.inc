@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains a search filter handler.
@@ -145,7 +144,7 @@ class views_handler_filter_search extends views_handler_filter {
       $search_condition = db_and();
 
       if (!$this->options['remove_score']) {
-        // Create a new join to relate the 'serach_total' table to our current 'search_index' table.
+        // Create a new join to relate the 'search_total' table to our current 'search_index' table.
         $join = new views_join;
         $join->construct('search_total', $search_index, 'word', 'word');
         $search_total = $this->query->add_relationship('search_total', $join, $search_index);
@@ -160,21 +159,25 @@ class views_handler_filter_search extends views_handler_filter {
         $base_table = $this->query->relationships[$this->relationship]['base'];
       }
       $search_condition->condition("$search_index.type", $base_table);
-      if (!$this->search_query->simple()) {
-        $search_dataset = $this->query->add_table('search_dataset');
-        $conditions = $this->search_query->conditions();
-        $condition_conditions =& $conditions->conditions();
-        foreach ($condition_conditions  as $key => &$condition) {
-          // Take sure we just look at real conditions.
-          if (is_numeric($key)) {
-            // Replace the conditions with the table alias of views.
-            $this->search_query->condition_replace_string('d.', "$search_dataset.", $condition);
-          }
+
+      // Add in the dataset table to match on queried words.
+      $search_dataset = $this->query->add_table('search_dataset');
+      $conditions = $this->search_query->conditions();
+      $condition_conditions =& $conditions->conditions();
+      foreach ($condition_conditions  as $key => &$condition) {
+        // Take sure we just look at real conditions.
+        if (is_numeric($key)) {
+          // Replace the conditions with the table alias of views.
+          $this->search_query->condition_replace_string('d.', "$search_dataset.", $condition);
         }
-        $search_conditions =& $search_condition->conditions();
-        $search_conditions = array_merge($search_conditions, $condition_conditions);
       }
-      else {
+
+      // Update conditions by reference as DatabaseCondition::conditions is
+      // a protected property and there is no setConditions() method.
+      $search_conditions =& $search_condition->conditions();
+      $search_conditions = array_merge($search_conditions, $condition_conditions);
+
+      if (!empty($words)) {
         // Stores each condition, so and/or on the filter level will still work.
         $or = db_or();
         foreach ($words as $word) {

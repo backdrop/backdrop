@@ -1205,8 +1205,8 @@ class views_plugin_query_default extends views_plugin_query {
 
         $this->has_aggregate = TRUE;
       }
-      // This is a formula, using no tables.
-      elseif (empty($field['table'])) {
+      // This is a formula, using no tables and not specifically aggregated.
+      elseif (empty($field['table']) && empty($field['aggregate'])) {
         $non_aggregates[] = $fieldname;
         $placeholders = !empty($field['placeholders']) ? $field['placeholders'] : array();
         $query->addExpression($string, $fieldname, $placeholders);
