@@ -219,17 +219,17 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
 
     // Check when background fetch is disabled that a delay takes place when
     // generating a new cache entry.
-    config_set('system.core', 'page_cache_maximum_age', 1);
+    config_set('system.core', 'page_cache_maximum_age', 5);
     config_set('system.core', 'page_cache_background_fetch', 0);
 
     // Create a new cache entry.
     $this->backdropGet('system-test/sleep/0', array(), $headers);
-    $this->assertIdentical($this->backdropGetHeader('Cache-Control'), 'public, max-age=1');
+    $this->assertIdentical($this->backdropGetHeader('Cache-Control'), 'public, max-age=5');
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time1 = (string) $start_element[0];
 
-    // Wait 3 seconds to wait past the maximum age (1). Fresh copy expected.
-    sleep(3);
+    // Wait 5 seconds to wait past the maximum age (6). Fresh copy expected.
+    sleep(5);
     $this->backdropGet('system-test/sleep/6', array('query' => array('cache' => $this->randomName())));
 
     $this->backdropGet('system-test/sleep/0', array(), $headers);
@@ -247,8 +247,8 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time1 = (string) $start_element[0];
 
-    // Wait 3 seconds to wait past the maximum age (1). Stale copy expected.
-    sleep(3);
+    // Wait 6 seconds to wait past the maximum age (5). Stale copy expected.
+    sleep(6);
     $this->backdropGet('system-test/sleep/0', array(), $headers);
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time2 = (string) $start_element[0];
@@ -287,8 +287,8 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     // Disable access.
     state_set('system_test_access', FALSE);
 
-    // Wait 2 seconds to wait past the maximum age (1). Stale copy expected.
-    sleep(2);
+    // Wait 6 seconds to wait past the maximum age (5). Stale copy expected.
+    sleep(6);
     $this->backdropGet('system-test/access');
     $this->assertResponse(200, 'Background fetch copy served after blocking access.');
     $this->assertText(t('Access granted'), 'Access granted page title shown.');
@@ -302,8 +302,8 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     // Enable access.
     state_set('system_test_access', TRUE);
 
-    // Wait 3 seconds to wait past the maximum age (1). Stale copy expected.
-    sleep(3);
+    // Wait 6 seconds to wait past the maximum age (5). Stale copy expected.
+    sleep(6);
     $this->backdropGet('system-test/access');
     $this->assertResponse(403, 'Background fetch copy served after granting access.');
     $this->assertText(t('Access denied'), 'Access denied page title shown.');
