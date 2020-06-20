@@ -1,6 +1,5 @@
 {
     "_config_name": "views.settings",
-    "no_javascript": false,
     "exposed_filter_any_label": false,
     "show_additional_queries": false,
     "sql_signature": false,
