@@ -24,12 +24,12 @@ class EntityLayoutContext extends LayoutContext {
 
   function label() {
     $info = entity_get_info($this->entity_type);
-    if (isset($this->settings['entity'])) {
-      if ($entity = entity_load($this->entity_type, $this->settings['entity'])) {
+    if (isset($this->settings['id'])) {
+      if ($entity = entity_load($this->entity_type, $this->settings['id'])) {
         return t('@type: @id (@title)', array('@type' => $info['label'], '@id' => $entity->id(), '@title' => $entity->label()));
       }
       else {
-        return t('Unknown @type: @id', array('@type' => $info['label'], '@id' =>$this->settings['entity']));
+        return t('Unknown @type: @id', array('@type' => $info['label'], '@id' =>$this->settings['id']));
       }
     }
     if ($this->entity_type === 'user' && isset($this->name) && $this->name === 'current_user') {
@@ -44,10 +44,10 @@ class EntityLayoutContext extends LayoutContext {
     parent::form($form, $form_state);
 
     $info = entity_get_info($this->entity_type);
-    $form['entity'] = array(
+    $form['id'] = array(
       '#title' => t('Enter the ID of a @entity', array('@entity' => $info['label'])),
       '#type' => 'number',
-      '#default_value' => $this->settings['entity'],
+      '#default_value' => $this->settings['id'],
       '#step' => 1,
       '#min' => 1,
       // @todo: this would show all types of content and even views. We'd need
@@ -61,8 +61,8 @@ class EntityLayoutContext extends LayoutContext {
    * Validate handler for the settings form for this context item.
    */
   function formValidate($form, &$form_state) {
-    if (empty($form_state['values']['entity'])) {
-      form_set_error('entity', t('An ID is required.'));
+    if (empty($form_state['values']['id'])) {
+      form_set_error('id', t('An ID is required.'));
     }
     // @todo: Allow nodes that dont exist yet? Or validate node_load()?
   }
@@ -73,7 +73,7 @@ class EntityLayoutContext extends LayoutContext {
   function formSubmit($form, &$form_state) {
     $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context'));
     $settings = array_diff_key($form_state['values'], $excluded);
-    $this->name = $this->plugin . $settings['entity'];
+    $this->name = $this->plugin . $settings['id'];
     // @todo deal with name changes.
     $this->settings = array_merge($this->settings, $settings);
   }
@@ -89,7 +89,7 @@ class EntityLayoutContext extends LayoutContext {
       return t('Position @index:', array('@index' => $this->position + 1)) . ' ' . implode('/', $argument_parts);
     }
     else {
-      return t('Special context: @id', array('@id' => $this->settings['entity']));
+      return t('Special context: @id', array('@id' => $this->settings['id']));
     }
   }
 }
