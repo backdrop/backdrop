@@ -123,9 +123,19 @@ function filter_menu() {
   $items['admin/config/content/formats/%filter_format'] = array(
     'title callback' => 'filter_admin_format_title',
     'title arguments' => array(4),
+    'load arguments' => array(TRUE),
     'page callback' => 'filter_admin_format_page',
     'page arguments' => array(4),
     'access arguments' => array('administer filters'),
+    'file' => 'filter.admin.inc',
+  );
+  $items['admin/config/content/formats/%filter_format/enable'] = array(
+    'title' => 'Enable text format',
+    'load arguments' => array(TRUE),
+    'page callback' => 'filter_admin_enable',
+    'page arguments' => array(4),
+    'access arguments' => array('administer filters'),
+    'type' => MENU_CALLBACK,
     'file' => 'filter.admin.inc',
   );
   $items['admin/config/content/formats/%filter_format/disable'] = array(
@@ -134,6 +144,14 @@ function filter_menu() {
     'page arguments' => array('filter_admin_disable', 4),
     'access callback' => '_filter_disable_format_access',
     'access arguments' => array(4),
+    'file' => 'filter.admin.inc',
+  );
+  $items['admin/config/content/formats/%filter_format/filter-settings/%'] = array(
+    'title callback' => 'filter_admin_format_title',
+    'title arguments' => array(4),
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('filter_admin_format_filter_settings_form', 4, 6),
+    'access arguments' => array('administer filters'),
     'file' => 'filter.admin.inc',
   );
   return $items;
@@ -230,21 +248,21 @@ function filter_config_data_validate(Config $config, array $config_info) {
  *
  * @param $format_id
  *   The format ID.
+ * @param boolean $load_if_disabled
+ *   If TRUE the format will be loaded when disabled.
  *
- * @return stdClass
- *   A fully-populated text format object, if the requested format exists and
- *   is enabled. If the format does not exist, or exists in the database but
- *   has been marked as disabled, FALSE is returned.
+ * @return stdClass|FALSE
+ *   A fully-populated text format object or FALSE if the format is not found.
  *
  * @see filter_format_exists()
  */
-function filter_format_load($format_id) {
-  $formats = filter_formats();
+function filter_format_load($format_id, $load_if_disabled = FALSE) {
+  $formats = filter_formats(NULL, $load_if_disabled);
   return isset($formats[$format_id]) ? $formats[$format_id] : FALSE;
 }
 
 /**
- * Saves a text format object to the database.
+ * Builds a text format object from initial values.
  *
  * @param $format
  *   A format object having the properties:
@@ -268,10 +286,10 @@ function filter_format_load($format_id) {
  *     - settings: (optional) An array of configured settings for the filter.
  *       See hook_filter_info() for details.
  *
- * @return
- *   SAVED_NEW or SAVED_UPDATED.
+ * @return $format
+ *   A text format object suitable for saving to configuration.
  */
-function filter_format_save($format) {
+function filter_format_build_format($format) {
   $format->name = trim($format->name);
   $format->cache = _filter_format_is_cacheable($format);
   if (!isset($format->status)) {
@@ -305,6 +323,40 @@ function filter_format_save($format) {
     $filter->settings = isset($filter->settings) ? $filter->settings : array();
     $format->filters[$name] = $filter;
   }
+
+  return $format;
+}
+
+/**
+ * Saves a text format object to configuration.
+ *
+ * @param $format
+ *   A format object having the properties:
+ *   - format: A machine-readable name representing the ID of the text format
+ *     to save. If this corresponds to an existing text format, that format
+ *     will be updated; otherwise, a new format will be created.
+ *   - name: The title of the text format.
+ *   - status: (optional) An integer indicating whether the text format is
+ *     enabled (1) or not (0). Defaults to 1.
+ *   - weight: (optional) The weight of the text format, which controls its
+ *     placement in text format lists. If omitted, the weight is set to 0.
+ *   - filters: (optional) An associative, multi-dimensional array of filters
+ *     assigned to the text format, keyed by the name of each filter and using
+ *     the properties:
+ *     - weight: (optional) The weight of the filter in the text format. If
+ *       omitted, either the currently stored weight is retained (if there is
+ *       one), or the filter is assigned a weight of 10, which will usually
+ *       put it at the bottom of the list.
+ *     - status: (optional) A boolean indicating whether the filter is
+ *       enabled in the text format. If omitted, the filter will be disabled.
+ *     - settings: (optional) An array of configured settings for the filter.
+ *       See hook_filter_info() for details.
+ *
+ * @return
+ *   SAVED_NEW or SAVED_UPDATED.
+ */
+function filter_format_save($format) {
+  $format = filter_format_build_format($format);
 
   // Save the filter format.
   $config = config('filter.format.' . $format->format);
@@ -646,7 +698,7 @@ function filter_library_info() {
       $module_path . '/js/filter.admin.js' => array('group' => JS_THEME, 'aggregate' => FALSE,),
     ),
     'css' => array(
-      $module_path . '/css/filter.css' => array(),
+      $module_path . '/css/filter.admin.css' => array('group' => CSS_THEME, 'aggregate' => FALSE),
     ),
   );
   $libraries['filter.filtered_html.admin'] = array(
@@ -686,6 +738,8 @@ function filter_modules_disabled($modules) {
  *   (optional) If provided, only those formats that are allowed for this user
  *   account will be returned. All formats will be returned otherwise. Defaults
  *   to NULL.
+ * @param Boolean $include_disabled
+ *   (optional) If TRUE, will return all formats, including disabled formats.
  *
  * @return stdClass[]
  *   An array of text format objects, keyed by the format ID and ordered by
@@ -693,7 +747,7 @@ function filter_modules_disabled($modules) {
  *
  * @see filter_formats_reset()
  */
-function filter_formats($account = NULL) {
+function filter_formats($account = NULL, $include_disabled = FALSE) {
   global $language;
   $formats = &backdrop_static(__FUNCTION__, array());
 
@@ -718,11 +772,6 @@ function filter_formats($account = NULL) {
           'editor_settings' => array(),
         );
         $filter_format = (object) $filter_format;
-
-        // We don't include disabled formats.
-        if (!$filter_format->status) {
-          continue;
-        }
 
         // Sort the filters by weight.
         backdrop_sort($filter_format->filters);
@@ -752,17 +801,37 @@ function filter_formats($account = NULL) {
     }
   }
 
+  // Build a list of enabled formats based on the full list.
+  if (!isset($formats['enabled'])) {
+    foreach ($formats['all'] as $format) {
+      if ($format->status) {
+        $formats['enabled'][$format->format] = $format;
+      }
+    }
+  }
+
   // Build a list of user-specific formats.
   if (isset($account) && !isset($formats['user'][$account->uid])) {
     $formats['user'][$account->uid] = array();
     foreach ($formats['all'] as $format) {
       if (filter_access($format, $account)) {
-        $formats['user'][$account->uid][$format->format] = $format;
+        // Assemble a list of all formats (even disabled ones) for this user.
+        $formats['user'][$account->uid]['all'][$format->format] = $format;
+        // As well as a specific list of only enabled formats.
+        if ($format->status) {
+          $formats['user'][$account->uid]['enabled'][$format->format] = $format;
+        }
       }
     }
   }
 
-  return isset($account) ? $formats['user'][$account->uid] : $formats['all'];
+  $enabled_or_all = $include_disabled ? 'all' : 'enabled';
+  if (isset($account)) {
+    return $formats['user'][$account->uid][$enabled_or_all];
+  }
+  else {
+    return $formats[$enabled_or_all];
+  }
 }
 
 /**
@@ -1786,6 +1855,45 @@ function filter_parse_file_fids($text) {
   return $fids;
 }
 
+
+/**
+ * Get a format currently being edited from the tempstore.
+ *
+ * @param string $name
+ *   The machine name of the format item.
+ */
+function filter_get_format_tempstore($name) {
+  $caches = &backdrop_static(__FUNCTION__, array());
+  if (!isset($caches[$name])) {
+    // Try loading from tempstore first.
+    $item = tempstore_get('filter_store', $name);
+    $caches[$name] = $item;
+  }
+
+  return $caches[$name];
+}
+
+/**
+ * Store changes to a format in the temporary store.
+ *
+ * @param $item
+ *   The format item to save into tempstore.
+ */
+function filter_set_format_tempstore($item) {
+  if (empty($item->format)) {
+    return;
+  }
+
+  tempstore_set('filter_store', $item->format, $item, 604800);
+}
+
+/**
+ * Remove an item from the object cache.
+ */
+function filter_clear_format_tempstore($name) {
+  tempstore_clear('filter_store', $name);
+}
+
 /**
  * @defgroup standard_filters Standard filters
  * @{
@@ -1854,7 +1962,6 @@ function filter_filter_info() {
  * Filter settings callback for the HTML content filter.
  */
 function _filter_html_settings($form, &$form_state, $filter, $format) {
-  $settings['#attached']['library'][] = array('filter', 'filter.filtered_html.admin');
   $settings['allowed_html'] = array(
     '#type' => 'textfield',
     '#title' => t('Allowed HTML tags'),

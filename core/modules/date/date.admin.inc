@@ -400,7 +400,7 @@ function _date_field_widget_settings_form($field, $instance) {
       'within' => t('Within'),
       'none' => t('None'),
     );
-    $description = t("The location of date part labels, like 'Year', 'Month', or 'Day' . 'Above' displays the label as titles above each date part. 'Within' inserts the label as the first option in the select list and in blank textfields. 'None' doesn't visually label any of the date parts.");
+    $description = t("The location of date part labels, like 'Year', 'Month', or 'Day'. 'Above' displays the label as titles above each date part. 'Within' inserts the label as the first option in the select list and in blank textfields. 'None' doesn't visually label any of the date parts.");
   }
   else {
     $options = array(
@@ -416,9 +416,9 @@ function _date_field_widget_settings_form($field, $instance) {
     '#title' => t('Position of date part labels'),
     '#description' => $description,
   );
-  $form['advanced']['text_parts'] = array(
-    '#theme' => $widget['type'] == 'date_select' ? 'date_text_parts' : '',
-  );
+  if ($widget['type'] == 'date_select') {
+    $form['advanced']['text_parts']['#theme'] = 'date_text_parts';
+  }
   $text_parts = (array) $settings['text_parts'];
   foreach (date_granularity_names() as $key => $value) {
     if ($widget['type'] == 'date_select') {

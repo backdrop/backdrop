@@ -662,7 +662,7 @@ function system_modules($form, $form_state = array()) {
     // Generate link for module's configuration page, if provided.
     if ($module->status && isset($module->info['configure'])) {
       $configure_link = menu_get_item($module->info['configure']);
-      if ($configure_link['access']) {
+      if (is_array($configure_link) && $configure_link['access']) {
         $extra['links']['configure'] = array(
           'title' => t('Configure'),
           'href' => $configure_link['href'],
@@ -1499,11 +1499,12 @@ function system_site_information_settings_submit($form, &$form_state) {
   }
 
   if ($form_state['values']['site_logo_path']) {
+    $form_state['values']['site_logo_attributes'] = array();
     $dimensions = @getimagesize($form_state['values']['site_logo_path']);
-    $form_state['values']['site_logo_attributes'] = array(
-      'width' => $dimensions[0],
-      'height' => $dimensions[1],
-    );
+    if (!empty($dimensions)) {
+      $form_state['values']['site_logo_attributes']['width'] = $dimensions[0];
+      $form_state['values']['site_logo_attributes']['height'] = $dimensions[1];
+    }
   }
   else {
     $form_state['values']['site_logo_attributes'] = array(
@@ -1577,7 +1578,7 @@ function system_cron_settings($form, &$form_state) {
   $form['cron']['cron_safe_threshold'] = array(
     '#type' => 'select',
     '#title' => t('Run cron every'),
-    '#description' => t('More information about setting up scheduled tasks can be found by <a href="@url">reading the cron tutorial on drupal.org</a>.', array('@url' => url('http://drupal.org/cron'))),
+    '#description' => t('More information about setting up scheduled tasks can be found by <a href="@url">reading the cron tutorial</a>.', array('@url' => url('https://backdropcms.org/cron'))),
     '#default_value' => config('system.core')->get('cron_safe_threshold'),
     '#options' => array(0 => t('Never')) + backdrop_map_assoc(array(600, 1800, 3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
   );
@@ -2425,7 +2426,7 @@ function system_configure_date_formats_form($form, &$form_state, $format = NULL)
     '#title' => t('Machine-readable name'),
     '#description' => t('A unique machine-readable name. Can only contain lowercase letters, numbers, and underscores.'),
     '#disabled' => !empty($format),
-    '#default_value' => $format['name'],
+    '#default_value' => !empty($format) ? $format['name'] : '',
     '#machine_name' => array(
       'exists' => 'system_date_format_load',
       'source' => array('label'),

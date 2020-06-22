@@ -728,16 +728,19 @@ class Layout {
         $new_region_name = $old_region_name;
       }
       else {
-        $new_region_name = FALSE;
+        $new_region_name = '';
       }
 
       if (isset($this->positions[$old_region_name])) {
         foreach ($this->positions[$old_region_name] as $uuid) {
-          if ($new_region_name) {
+          if (!empty($new_region_name)) {
             $new_positions[$new_region_name][] = $uuid;
           }
-          else {
+          elseif ($new_region_name === '') {
             $this->orphaned_blocks[] = $uuid;
+          }
+          else {
+            unset($this->content[$uuid]);
           }
         }
       }

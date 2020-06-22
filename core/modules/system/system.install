@@ -271,7 +271,7 @@ function system_requirements($phase) {
     // Cron error threshold defaults to two weeks.
     $threshold_error = $config->get('cron_threshold_error');
     // Cron configuration help text.
-    $help = $t('For more information, see the online handbook entry for <a href="@cron-handbook" target="_blank">configuring cron jobs</a>.', array('@cron-handbook' => 'http://drupal.org/cron'));
+    $help = $t('For more information, see the online handbook entry for <a href="@cron-handbook" target="_blank">configuring cron jobs</a>.', array('@cron-handbook' => 'https://backdropcms.org/cron'));
 
     // Determine when cron last ran.
     $cron_last = state_get('cron_last');
@@ -724,7 +724,7 @@ function system_install() {
 
   // Set the public files path to the directory with the settings.php file.
   config_set('system.core', 'file_public_path', str_replace('./', '', conf_path() . '/files'));
-  
+
   // Sets the path of system-appropriate temporary directory.
   config_set('system.core', 'file_temporary_path', file_directory_temp());
 
@@ -3099,6 +3099,28 @@ function system_update_1070() {
     $config->set('file_temporary_path', file_directory_temp());
     $config->save();
   }
+}
+
+/**
+ * Grant the "administer flexible templates" permission to all user roles that
+ * already have the "administer layouts" permission.
+ *
+ * This update hook would normally go into the layout.install file, but adding
+ * update hooks to new modules that did not exist in D7 is problematic.
+ * See: https://github.com/backdrop/backdrop-issues/issues/1759
+ */
+function system_update_1071() {
+  $roles = user_roles(FALSE, 'administer layouts');
+  foreach ($roles as $role_name => $role) {
+    user_role_grant_permissions($role_name, array('administer flexible templates'));
+  }
+}
+
+/**
+ * Add 'jquery-html-prefilter-3.5.0.js' to the 'jquery' library.
+ */
+function system_update_1072() {
+  // Empty update to force a rebuild of hook_library() and JS aggregates.
 }
 
 /**
