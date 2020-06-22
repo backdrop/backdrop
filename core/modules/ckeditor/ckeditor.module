@@ -343,6 +343,23 @@ function ckeditor_ckeditor_plugins() {
     ),
   );
 
+  // The backdropbreaks plugin embeds a teaser break into the body.
+  $plugins['backdropbreaks'] = array(
+    'path' => backdrop_get_path('module', 'ckeditor') . '/js/plugins/backdropbreaks',
+    'file' => 'plugin.js',
+    'buttons' => array(
+      'BackdropBreak' => array(
+        'label' => t('Insert Teaser Break'),
+        'image' => $image_prefix . '/backdropbreak.png',
+      ),
+      'BackdropPageBreak' => array(
+        'label' => t('Insert Page Break'),
+        'image' => $image_prefix . '/backdroppagebreak.png',
+      ),
+
+    ),
+  );
+
   return $plugins;
 }
 
