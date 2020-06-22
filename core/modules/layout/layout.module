@@ -468,7 +468,7 @@ function layout_path_load($arg_value, $menu_item_name, $path_parts, $arg_positio
   $contexts = $menu_item->getContexts();
   $context_info = layout_get_context_info($contexts[$arg_position]->plugin);
   if (isset($context_info['load callback']) && function_exists($context_info['load callback'])) {
-    return $context_info['load callback']($arg_value);
+    return $context_info['load callback'](array('id' => $arg_value));
   }
 
   // Pass-through the string argument if no load callback specified.
@@ -1245,7 +1245,7 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
             $context_info = layout_get_context_info($context->plugin);
             if (isset($context_info['load callback'])) {
               $function = $context_info['load callback'];
-              $context_data = $function($router_item['original_map'][$context->position]);
+              $context_data = $function(array('id' => $router_item['original_map'][$context->position]));
               $context->setData($context_data);
             }
           }

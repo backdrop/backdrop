@@ -770,7 +770,7 @@ class Layout {
         $context_info = layout_get_context_info($context->plugin);
         if (isset($context_info['load callback'])) {
           $function = $context_info['load callback'];
-          $context_data = $function($context->settings['id']);
+          $context_data = $function($context->settings);
           $context->setData($context_data);
         }
       }
