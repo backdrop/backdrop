@@ -353,7 +353,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   );
 
   foreach ($contexts as $context_key => $layout_context) {
-    if (!in_array($context_key, array('current_user', 'overrides_path'))) {
+    if (!in_array($context_key, array('current_user', 'overrides_path', 'dashboard'))) {
       if ($layout_context->position && $layout_context->required) {
         $form['context_wrapper']['context']['required'][$context_key]['summary'] = array(
           '#markup' => $layout_context->getAdminSummary($layout->getPath()),
