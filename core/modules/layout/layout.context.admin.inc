@@ -42,8 +42,9 @@ function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $co
     '#markup' => 'Contexts provide additional information to blocks in the layout to display. For example, information from node 5, or the user "administrator" could be made available.',
   );
 
-  if (isset($layout->contexts[$context_id])) {
-    $handler = $layout->contexts[$context_id];
+  $contexts = $layout->getContexts();
+  if (isset($contexts[$context_id])) {
+    $handler = $contexts[$context_id];
     $form_state['handler'] = $handler;
   }
   else {
@@ -193,7 +194,7 @@ function layout_context_add_form_submit($form, &$form_state) {
   $handler->formSubmit($form, $form_state);
   if (!empty($handler->is_new)) {
     $handler->is_new = FALSE;
-    $layout->contexts[$handler->name] = $handler;
+    $layout->setContexts($handler->name, $handler);
   }
   layout_set_layout_tempstore($layout);
 
@@ -216,7 +217,7 @@ function layout_settings_form_context_edit($form, &$form_state) {
  */
 function layout_settings_form_context_remove($form, &$form_state) {
   $removed_context = $form_state['clicked_button']['#array_parents'][3];
-  unset($form_state['layout']->contexts[$removed_context]);
+  $form_state['layout']->clearContexts($removed_context);
   layout_set_layout_tempstore($form_state['layout']);
 
   $form_state['ajax_update'] = array('context_wrapper');

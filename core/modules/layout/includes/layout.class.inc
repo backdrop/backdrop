@@ -176,7 +176,7 @@ class Layout {
    *
    * @var LayoutContext[]
    */
-  var $contexts = array();
+  private $contexts;
 
   /**
    * An array of removed blocks, keyed by their UUID.
@@ -811,8 +811,15 @@ class Layout {
   /**
    * Set the internally stored contexts.
    */
-  function setContexts($context) {
-    $this->contexts[] = $context;
+  function setContexts($key, $context) {
+    $this->contexts[$key] = $context;
+  }
+
+  /**
+   * Clear a stored context.
+   */
+  function clearContexts($key) {
+    unset($this->contexts[$key]);
   }
 
   /**
