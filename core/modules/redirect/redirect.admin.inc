@@ -37,10 +37,10 @@ function redirect_list_form($form, &$form_state) {
   $keys = implode('/', $keys);
   $form['redirect_list_filter_form'] = redirect_list_filter_form($keys);
 
-  // Build the 'Update options' form.
+  // Build the 'Operations' form.
   $form['operations'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Update options'),
+    '#title' => t('Operations'),
     '#prefix' => '<div class="container-inline">',
     '#suffix' => '</div>',
     '#attributes' => array(
@@ -53,12 +53,14 @@ function redirect_list_form($form, &$form_state) {
   }
   $form['operations']['operation'] = array(
     '#type' => 'select',
+    '#title' => 'Operations',
+    '#title_display' => 'invisible',
     '#options' => $operations,
-    '#default_value' => 'delete',
+    '#empty_option' => '- ' . t('Choose an action') . ' -',
   );
   $form['operations']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Update'),
+    '#value' => t('Execute'),
     '#validate' => array('redirect_list_form_operations_validate'),
     '#submit' => array('redirect_list_form_operations_submit'),
   );
@@ -379,6 +381,7 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#required' => TRUE,
     '#field_prefix' => $GLOBALS['base_url'] . '/' . (config_get('system.core', 'clean_url') ? '' : '?q='),
     '#element_validate' => array('redirect_element_validate_source'),
+    '#autocomplete_path' => 'path-autocomplete',
   );
   $form['source_options'] = array(
     '#type' => 'value',
@@ -393,6 +396,7 @@ function redirect_edit_form($form, &$form_state, $redirect = NULL) {
     '#required' => TRUE,
     '#description' => t('Enter an internal Backdrop path, path alias, or complete external URL (like http://example.com/) to which the user will be sent. Use %front to redirect to the front page.', array('%front' => '<front>')),
     '#element_validate' => array('redirect_element_validate_redirect'),
+    '#autocomplete_path' => 'path-autocomplete',
   );
   $form['redirect_options'] = array(
     '#type' => 'value',

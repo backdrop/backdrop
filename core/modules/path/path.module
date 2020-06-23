@@ -688,18 +688,20 @@ function path_load_multiple_by_entities(array $entities) {
   // Each entity may have a different language, so group them by langcode.
   foreach ($entities as $entity) {
     $uri = $entity->uri();
-    $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
-    $sources[$langcode][] = $uri['path'];
-    $map[$langcode][$uri['path']] = $entity->id();
+    if (!empty($uri)) {
+      $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
+      $sources[$langcode][] = $uri['path'];
+      $map[$langcode][$uri['path']] = $entity->id();
 
-    // Provide a default path in the event no path is found.
-    $entity->path = array(
-      'pid' => NULL,
-      'source' => $uri['path'],
-      'alias' => NULL,
-      'langcode' => $langcode,
-      'auto' => FALSE,
-    );
+      // Provide a default path in the event no path is found.
+      $entity->path = array(
+        'pid' => NULL,
+        'source' => $uri['path'],
+        'alias' => NULL,
+        'langcode' => $langcode,
+        'auto' => FALSE,
+      );
+    }
   }
 
   // Load each set of paths by langcode, and update each entity's path property.
@@ -818,6 +820,7 @@ function path_form_element(Entity $entity) {
   $pattern = path_get_pattern_by_entity_type($entity_type, $bundle, $langcode);
   if ($pattern) {
     if (!isset($entity->path['auto'])) {
+      $entity->path['auto'] = FALSE;
       if (!$entity->isNew()) {
         module_load_include('inc', 'path');
         $uri = $entity->uri();

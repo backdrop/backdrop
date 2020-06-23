@@ -85,12 +85,8 @@ function contact_menu() {
     'file' => 'contact.admin.inc',
   );
   $items['admin/structure/contact/list'] = array(
-    'title' => 'Categories',
-    'page callback' => 'contact_category_list',
-    'access arguments' => array('administer contact forms'),
+    'title' => 'List categories',
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => 1,
-    'file' => 'contact.admin.inc',
   );
   $items['admin/structure/contact/settings'] = array(
     'title' => 'Settings',
@@ -250,7 +246,7 @@ function contact_show_personal_copy_checkbox() {
 function contact_mail($key, &$message, $params) {
   $language = $message['language'];
   $variables = array(
-    '!site-name' => config_get('system.core', 'site_name'),
+    '!site-name' => config_get_translated('system.core', 'site_name', array(), array('langcode' => $language->langcode)),
     '!subject' => $params['subject'],
     '!category' => isset($params['category']['category']) ? $params['category']['category'] : '',
     '!form-url' => url($_GET['q'], array('absolute' => TRUE, 'language' => $language)),

@@ -546,12 +546,12 @@ Backdrop.tableDrag.prototype.dragRow = function (event, self) {
     if (self.indentEnabled) {
       var xDiff = self.currentPointerCoords.x - self.dragObject.indentPointerPos.x;
       // Set the number of indentations the pointer has been moved left or right.
-      var indentDiff = Math.round(xDiff / self.indentAmount * self.rtl);
+      var indentDiff = Math.round(xDiff / self.indentAmount);
       // Indent the row with our estimated diff, which may be further
       // restricted according to the rows around this row.
       var indentChange = self.rowObject.indent(indentDiff);
       // Update table and pointer indentations.
-      self.dragObject.indentPointerPos.x += self.indentAmount * indentChange * self.rtl;
+      self.dragObject.indentPointerPos.x += self.indentAmount * indentChange;
       self.indentCount = Math.max(self.indentCount, self.rowObject.indents);
     }
 

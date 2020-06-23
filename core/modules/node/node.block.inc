@@ -79,13 +79,11 @@ class NodeBlock extends Block {
       $content['links']['#access'] = FALSE;
     }
 
-    // Add 'submitted by' settings.
-    if (!empty($this->settings['display_submitted'])) {
-      $content['#display_submitted'] = TRUE;
-    }
+    // Add author and date information settings.
+    $content['#display_submitted'] = !empty($this->settings['display_submitted']);
 
     // Add theme hook suggestion.
-    $content['#theme'] = 'node__block-' . $this->settings['nid'];
+    $content['#theme'] = 'node__block_' . $this->settings['nid'];
 
     return $content;
   }

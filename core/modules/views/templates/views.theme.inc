@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Preprocessors and helper functions to make theming easier.
+ * Preprocessors and helper functions to make theme development easier.
  */
 
 /**
@@ -56,7 +56,7 @@ function template_preprocess_views_view(&$variables) {
 
   $variables['classes'] = array();
   $variables['classes'][] = 'view';
-  $variables['classes'][] = 'view-' . backdrop_clean_css_identifier($variables['name']);
+  $variables['classes'][] = 'view-' . $variables['css_name'];
   $variables['classes'][] = 'view-id-' . $variables['name'];
   $variables['classes'][] = 'view-display-id-' . $variables['display_id'];
 
@@ -929,14 +929,18 @@ function template_preprocess_views_view_unformatted(&$variables) {
 function template_preprocess_views_view_list(&$variables) {
   $handler  = $variables['view']->style_plugin;
 
-  $class = explode(' ', $handler->options['class']);
-  $class = array_map('backdrop_clean_css_identifier', $class, array(array()));
+  $classes = explode(' ', $handler->options['class']);
+  foreach ($classes as $key => $class) {
+    $classes[$key] = backdrop_clean_css_identifier($class, array());
+  }
 
-  $wrapper_class = explode(' ', $handler->options['wrapper_class']);
-  $wrapper_class = array_map('backdrop_clean_css_identifier', $wrapper_class, array(array()));
+  $wrapper_classes = explode(' ', $handler->options['wrapper_class']);
+  foreach ($wrapper_classes as $key => $class) {
+    $wrapper_classes[$key] = backdrop_clean_css_identifier($class, array());
+  }
 
-  $variables['class'] = implode(' ', $class);
-  $variables['wrapper_class'] = implode(' ', $wrapper_class);
+  $variables['class'] = implode(' ', $classes);
+  $variables['wrapper_class'] = implode(' ', $wrapper_classes);
   $variables['wrapper_prefix'] = '';
   $variables['wrapper_suffix'] = '';
   $variables['list_type_prefix'] = '<' . $handler->options['type'] . '>';
@@ -973,7 +977,7 @@ function template_preprocess_views_view_rss(&$variables) {
   if ($view->display_handler->get_option('sitename_title')) {
     $site_config = config('system.core');
     $title = $site_config->get('site_name');
-    if ($slogan = $site_config->get('site_slogan')) {
+    if ($slogan = $site_config->getTranslated('site_slogan')) {
       $title .= ' - ' . $slogan;
     }
   }

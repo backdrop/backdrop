@@ -106,6 +106,13 @@ fieldset .fieldset-wrapper {
   display: none;
 }
 
+.fieldset-legend span.summary:not(:empty):before {
+  content: '(';
+}
+.fieldset-legend span.summary:not(:empty):after {
+  content: ')';
+}
+
 @media (min-width: 34em) {
   .fieldset-legend span.summary {
     display: block;

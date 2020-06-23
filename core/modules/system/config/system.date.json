@@ -17,7 +17,7 @@
             "pattern": "D, m/d/Y - g:ia",
             "module": "system"
         },
-        "short":{
+        "short": {
             "label": "Short Date",
             "pattern": "m/d/Y - g:ia",
             "module": "system"

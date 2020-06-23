@@ -70,6 +70,14 @@ small .admin-link:after {
 /**
  * Modules page.
  */
+#system-modules .form-item-search {
+  display: inline-block;
+}
+#system-modules .search-reset {
+  line-height: 42px;
+  position: relative;
+  top: 1px;
+}
 #system-modules .table-filter {
   margin: 1em 0;
   padding: 7px 13px;
@@ -82,6 +90,15 @@ small .admin-link:after {
 }
 #system-modules td.checkbox {
   width: 20px;
+}
+#system-modules .modules-error:before {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 15px;
+  background: #EE3D23 url(../../../misc/icon-error.png) no-repeat center center;
+  background-size: 60%;
 }
 #system-modules td.module {
   width: 110px;

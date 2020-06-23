@@ -6,8 +6,7 @@
 .dblog-filter-form .form-item-severity {
   float: left; /* LTR */
   margin: .1em .9em .1em .1em; /* LTR */
-  padding-right: .8em; /* LTR */
-  margin: 0.1em;
+  padding: 0 .8em .8em 0; /* LTR */
   /**
    * In Opera 9, DOM elements with the property of "overflow: auto"
    * will partially hide its contents with unnecessary scrollbars when
@@ -19,8 +18,7 @@
 [dir="rtl"] .dblog-filter-form .form-item-severity {
   float: right;
   margin: .1em .1em .1em .9em;
-  padding-left: .8em;
-  padding-right: 0;
+  padding: 0 0 .8em .8em;
 }
 .dblog-filter-form .form-type-select select {
   width: 100%;
@@ -56,16 +54,16 @@
   background-size: 25px;
 }
 
-.admin-dblog .dblog-error.odd {
+.admin-dblog .dblog-error.odd:not(:hover) {
   background-color: #FFE0E0;
 }
-.admin-dblog .dblog-error.odd .active {
+.admin-dblog .dblog-error.odd:not(:hover) .active {
   background-color: #F3CECE;
 }
-.admin-dblog .dblog-error.even {
+.admin-dblog .dblog-error.even:not(:hover) {
   background: #ffc9c9;
 }
-.admin-dblog .dblog-error.even .active {
+.admin-dblog .dblog-error.even:not(:hover) .active {
   background: #eeb9b9;
 }
 .admin-dblog .dblog-error .icon:before,

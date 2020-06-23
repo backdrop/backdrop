@@ -319,7 +319,7 @@ function installer_browser_installation_select_versions_form($form, &$form_state
     backdrop_goto('admin/installer/install/enable');
   }
 
-  backdrop_set_message(t('It is recommended that you back up your database and site before you continue. !link.', array('!link' => l(t('Learn how'), 'http://drupal.org/node/22281'))), 'warning');
+  backdrop_set_message(t('It is recommended that you back up your database and site before you continue. !link.', array('!link' => l(t('Learn how'), 'https://backdropcms.org/backups'))), 'warning');
 
   $form['maintenance_mode'] = array(
     '#type' => 'checkbox',

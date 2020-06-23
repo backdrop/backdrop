@@ -393,7 +393,8 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
         result = categoryText + ': ' + result;
       }
 
-      var $result = $('<li><a href="' + $element.attr('href') + '">' + result + '</a></li>');
+      var $result = $('<li><a href="' + $element.attr('href') + '"> </a></li>');
+      $result.children().text(result);
       $result.data('original-link', $(this.element).parent());
       $html.append($result);
     });

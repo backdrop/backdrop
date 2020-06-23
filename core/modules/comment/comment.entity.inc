@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity controller and class for comments.
@@ -117,6 +116,81 @@ class Comment extends Entity {
       'options' => array('fragment' => 'comment-' . $this->cid),
     );
   }
+
+  /**
+   * Overrides Entity::createAccess().
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    return user_access('post comments', $account);
+  }
+
+  /**
+   * Overrides Entity::access().
+   *
+   * @param string $op
+   *   The operation to be performed on the node. Possible values are:
+   *   - view
+   *   - update
+   *   - approve
+   *   - delete
+   * @param User|AnonymousUser|object $account
+   *   (optional) The user to check for. Leave it to NULL to check for the
+   *   global user.
+   *
+   * @return bool
+   *   TRUE if access is granted, FALSE otherwise.
+   */
+  public function access($op, $account = NULL) {
+    // Casting class with private property causes errors due to added prefix.
+    // e.g. "\0" . 'Comment' . "\0". So use static array instead.
+    $rights = &backdrop_static(__METHOD__, array());
+
+    if ($op == 'create') {
+      return self::createAccess(NULL, $account);
+    }
+    elseif (!in_array($op, array('view', 'update', 'approve', 'delete'), TRUE)) {
+      // If the $op was not one of the supported ones, we return access denied.
+      return FALSE;
+    }
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    $cid = $this->id();
+
+    // If we've already checked access for this node, user and op, return from
+    // cache.
+    if (isset($rights[$account->uid][$cid][$op])) {
+      return $rights[$account->uid][$cid][$op];
+    }
+
+    if ($op == 'view') {
+      $rights[$account->uid][$cid][$op] = user_access('access comments', $account);
+      return $rights[$account->uid][$cid][$op];
+    }
+    elseif ($op == 'update') {
+      $rights[$account->uid][$cid][$op] = ($account->uid && $account->uid == $this->uid && $this->status == COMMENT_PUBLISHED && user_access('edit own comments', $account)) || user_access('administer comments', $account);
+      return $rights[$account->uid][$cid][$op];
+    }
+    elseif ($op == 'approve') {
+      $rights[$account->uid][$cid][$op] = user_access('administer comments', $account);
+      return $rights[$account->uid][$cid][$op];
+    }
+    elseif ($op == 'delete') {
+      $rights[$account->uid][$cid][$op] = user_access('administer comments', $account);
+      return $rights[$account->uid][$cid][$op];
+    }
+
+    $rights[$account->uid][$cid][$op] = FALSE;
+    return $rights[$account->uid][$cid][$op];
+  }
+
 }
 
 /**
@@ -126,6 +200,18 @@ class Comment extends Entity {
  * special handling for comment entities.
  */
 class CommentStorageController extends EntityDatabaseStorageController {
+
+  /**
+   * Overrides DefaultEntityController::load().
+   */
+  public function load($ids = array(), $conditions = array()) {
+    $comments = parent::load($ids, $conditions);
+
+    foreach ($comments as $key => $comment) {
+      $comment->new = node_mark($comment->nid, $comment->changed);
+    }
+    return $comments;
+  }
 
   /**
    * Overrides EntityDatabaseStorageController::buildQuery().
@@ -148,7 +234,6 @@ class CommentStorageController extends EntityDatabaseStorageController {
     // Set up standard comment properties.
     foreach ($comments as $key => $comment) {
       $comment->name = $comment->uid ? $comment->registered_name : $comment->name;
-      $comment->new = node_mark($comment->nid, $comment->changed);
       $comment->node_type = 'comment_node_' . $comment->node_type;
       $comments[$key] = $comment;
     }
@@ -246,6 +331,12 @@ class CommentStorageController extends EntityDatabaseStorageController {
     if ($comment->status == COMMENT_PUBLISHED) {
       module_invoke_all('comment_publish', $comment);
     }
+
+    // If entity caching is enabled on nodes, clear the cache for the node.
+    $node_info = entity_get_info('node');
+    if (isset($node_info['entity cache']) && $node_info['entity cache']) {
+      cache('entity_node')->delete($comment->nid);
+    }
   }
 
   /**
@@ -261,7 +352,18 @@ class CommentStorageController extends EntityDatabaseStorageController {
 
     foreach ($comments as $comment) {
       $this->updateNodeStatistics($comment->nid);
+      $nodes[] = $comment->nid;
     }
+
+    // If entity caching is enabled on nodes, clear the cache for the nodes that
+    // the deleted comments were on.
+    $node_info = entity_get_info('node');
+    if (isset($node_info['entity cache']) && $node_info['entity cache']) {
+      foreach (array_unique($nodes) as $nid) {
+        cache('entity_node')->delete($nid);
+      }
+    }
+
   }
 
   /**

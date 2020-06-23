@@ -227,7 +227,7 @@ function theme_system_modules_incompatible($variables) {
 function theme_system_modules_uninstall($variables) {
   $form = $variables['form'];
 
-  // No theming for the confirm form.
+  // No special theme override for the confirm form.
   if (isset($form['confirm'])) {
     return backdrop_render($form);
   }

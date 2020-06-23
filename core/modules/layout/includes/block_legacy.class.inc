@@ -56,7 +56,7 @@ class BlockLegacy extends Block {
    */
   function getAdminTitle() {
     $info = $this->getBlockInfo();
-    return $info['info'];
+    return check_plain($info['info']);
   }
 
   /**

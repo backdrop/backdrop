@@ -50,7 +50,7 @@ class FilterCRUDTestCase extends BackdropWebTestCase {
     $this->verifyTextFormat($format);
     $this->verifyFilters($format);
 
-    // Add a uncacheable filter and save again.
+    // Add an uncacheable filter and save again.
     $format->filters['filter_test_uncacheable'] = (object) array(
       'status' => 1,
     );
@@ -66,7 +66,7 @@ class FilterCRUDTestCase extends BackdropWebTestCase {
     $formats = filter_formats();
     $this->assertTrue(!isset($formats[$format->format]), 'filter_formats: Disabled text format no longer exists.');
 
-    // Add a new format to check for Xss in format name.
+    // Add a new format to check for XSS in format name.
     $format = new stdClass();
     $format->format = 'xss_format';
     $format->name = '<script>alert(123)</script>';
@@ -160,6 +160,43 @@ class FilterAdminTestCase extends BackdropWebTestCase {
   }
 
   /**
+     * Click a link to perform an operation on a text format.
+     *
+     * In general, we expect lots of links titled "Enable" or "Disable" on the
+     * text formats listing page, and the links might have tokens in them. So we
+     * need special code to find the correct link to click.
+     *
+     * @param $label
+     *   Text between the anchor tags of the desired link.
+     * @param $unique_href_part
+     *   A unique string that is expected to occur within the href of the desired
+     *   link. For example, if the link URL is expected to look like
+     *   "admin/config/content/formats/full_html/...", then "/full_html/" could be
+     *   passed as the expected unique string.
+     *
+     * @return
+     *   The page content that results from clicking on the link, or FALSE on
+     *   failure. Failure also results in a failed assertion.
+     */
+    function clickTextFormatOperationLink($label, $unique_href_part) {
+      $links = $this->xpath('//a[normalize-space(text())=:label]', array(':label' => $label));
+      foreach ($links as $link_index => $link) {
+        $position = strpos($link['href'], $unique_href_part);
+        if ($position !== FALSE) {
+          $index = $link_index;
+          break;
+        }
+      }
+      $this->assertTrue(isset($index), t('Link to "@label" containing @part found.', array('@label' => $label, '@part' => $unique_href_part)));
+      if (isset($index)) {
+        return $this->clickLink($label, $index);
+      }
+      else {
+        return FALSE;
+      }
+    }
+
+  /**
    * Tests the format administration functionality.
    */
   function testFormatAdmin() {
@@ -206,17 +243,36 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/config/content/formats');
     $this->assertFieldByName("formats[$format_id][weight]", 5, 'Text format weight was retained.');
 
+    // Verify that the disabled section is not shown.
+    $this->assertNoRaw(t('Enable'), 'A disabled text format is NOT shown.');
+
     // Disable text format.
     $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
     $this->backdropGet('admin/config/content/formats/' . $format_id . '/disable');
     $this->backdropPost(NULL, array(), t('Disable'));
+    $this->assertRaw(t('Disabled text format %name.', array('%name' => $name)), 'Text format has been disabled.');
+    $this->assertRaw(t('Enable'), 'A disabled text format is shown.');
 
-    // Verify that disabled text format no longer exists.
-    $this->backdropGet('admin/config/content/formats/' . $format_id);
-    $this->assertResponse(404, 'Disabled text format no longer exists.');
+    // Verify that the text format has been disabled. Links exist for it to be
+    // enabled/configured...
+    $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/enable');
+    $this->assertLinkByHref('admin/config/content/formats/' . $format_id);
+    // ...but no link for it to be disabled.
+    $this->assertNoLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
+
+    // Enable the text format.
+    $this->clickTextFormatOperationLink(t('Enable'), 'admin/config/content/formats/' . $format_id . '/enable');
+    $this->assertRaw(t('Enabled text format %name.', array('%name' => $name)), 'Text format has been enabled.');
+
+    // Verify that the text format has been enabled. Links exist for it to be
+    // disabled/configured...
+    $this->assertLinkByHref('admin/config/content/formats/' . $format_id);
+    $this->assertLinkByHref('admin/config/content/formats/' . $format_id . '/disable');
+    // ...but no link for it to be enabled.
+    $this->assertNoLinkByHref('admin/config/content/formats/' . $format_id . '/enable');
 
     // Attempt to create a format of the same machine name as the disabled
-    // format but with a different human readable name.
+    // format, but with a different human readable na
     $edit = array(
       'format' => $format_id,
       'name' => 'New format',
@@ -251,10 +307,11 @@ class FilterAdminTestCase extends BackdropWebTestCase {
 
     // Add an additional tag.
     $edit = array();
-    $edit['filters[filter_html][settings][allowed_html]'] = '<a> <em> <strong> <cite> <code> <ul> <ol> <li> <dl> <dt> <dd> <quote>';
-    $this->backdropPost('admin/config/content/formats/' . $filtered, $edit, t('Save configuration'));
+    $edit['allowed_html'] = '<a> <em> <strong> <cite> <code> <ul> <ol> <li> <dl> <dt> <dd> <quote>';
+    $this->backdropPost('admin/config/content/formats/' . $filtered . '/filter-settings/filter_html', $edit, t('Update'));
+    $this->backdropPost(NULL, array(), t('Save configuration'));
     $this->backdropGet('admin/config/content/formats/' . $filtered);
-    $this->assertFieldByName('filters[filter_html][settings][allowed_html]', $edit['filters[filter_html][settings][allowed_html]'], 'Allowed HTML tag added.');
+    $this->assertFieldByName('allowed_html', $edit['allowed_html'], 'Allowed HTML tag added.');
 
     $result = db_query('SELECT * FROM {cache_filter}')->fetchObject();
     $this->assertFalse($result, 'Cache cleared.');
@@ -281,6 +338,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->assertTrue(!empty($elements), 'Reorder confirmed in admin interface.');
 
     $config_filters = config_get('filter.format.' . $filtered, 'filters');
+    backdrop_sort($config_filters, array('weight'));
     $filters = array();
     foreach ($config_filters as $filter_name => $filter) {
       if ($filter_name == $second_filter || $filter_name == $first_filter) {
@@ -336,10 +394,11 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     // Clean up.
     // Allowed tags.
     $edit = array();
-    $edit['filters[filter_html][settings][allowed_html]'] = '<a> <em> <strong> <cite> <code> <ul> <ol> <li> <dl> <dt> <dd>';
-    $this->backdropPost('admin/config/content/formats/' . $filtered, $edit, t('Save configuration'));
+    $edit['allowed_html'] = '<a> <em> <strong> <cite> <code> <ul> <ol> <li> <dl> <dt> <dd>';
+    $this->backdropPost('admin/config/content/formats/' . $filtered . '/filter-settings/filter_html', $edit, t('Update'));
+    $this->backdropPost(NULL, array(), t('Save configuration'));
     $this->backdropGet('admin/config/content/formats/' . $filtered);
-    $this->assertFieldByName('filters[filter_html][settings][allowed_html]', $edit['filters[filter_html][settings][allowed_html]'], 'Changes reverted.');
+    $this->assertFieldByName('allowed_html', $edit['allowed_html'], 'Allowed HTML tag added.');
 
     // Full HTML.
     $edit = array();
@@ -402,10 +461,37 @@ class FilterAdminTestCase extends BackdropWebTestCase {
   function testUrlFilterAdmin() {
     // The form does not save with an invalid filter URL length.
     $edit = array(
-      'filters[filter_url][settings][filter_url_length]' => $this->randomName(4),
+      'filter_url_length' => $this->randomName(4),
     );
-    $this->backdropPost('admin/config/content/formats/filtered_html', $edit, t('Save configuration'));
+    $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit, t('Update'));
     $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Filtered HTML')));
+
+    // The form does save permitted value and it appears in the config json.
+    $length = 88;
+    $edit_setting = array(
+      'filter_url_length' => $length,
+    );
+    $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit_setting, t('Update'));
+    $this->backdropPost('admin/config/content/formats/filtered_html', array(), t('Save configuration'));
+    $saved_length = config_get('filter.format.filtered_html', 'filters.filter_url.settings.filter_url_length');
+    $this->assertEqual($saved_length, $length, 'Filter url length saved to config file.');
+
+    // Make sure consecutive settings form submits do not discard
+    // previously added settings.
+    $length = 102;
+    $edit_url = array(
+      'filter_url_length' => $length,
+    );
+    $edit_html = array(
+      'filter_html_nofollow' => TRUE,
+    );
+    $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit_url, t('Update'));
+    $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_html', $edit_html, t('Update'));
+    $this->backdropPost('admin/config/content/formats/filtered_html', array(), t('Save configuration'));
+    $url_length = config_get('filter.format.filtered_html', 'filters.filter_url.settings.filter_url_length');
+    $this->assertEqual($url_length, $length, 'Filter url not overridden by consecutive form post.');
+    $nofollow = config_get('filter.format.filtered_html', 'filters.filter_html.settings.filter_html_nofollow');
+    $this->assertTrue($nofollow, 'Consecutive settings form post saved correctly');
   }
 }
 
@@ -538,7 +624,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
     $this->assertResponse(200);
     $this->backdropGet('filter/tips/invalid-format');
     $this->assertResponse(404);
-    
+
     // Check admin user access to the filter tips pages.
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('filter/tips/' . $this->allowed_format->format);
@@ -694,6 +780,27 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Tests loading of disabled formats.
+   */
+  function testFormatDisabledAccess() {
+    // Check filter_formats() in sequence loading both enabled and all formats.
+    filter_format_disable($this->disallowed_format);
+    $this->resetFilterCaches();
+
+    $enabled_formats = filter_formats();
+    $this->assertEqual(count($enabled_formats), 5);
+
+    $all_formats = filter_formats(NULL, TRUE);
+    $this->assertEqual(count($all_formats), 6);
+
+    $user_enabled_formats = filter_formats($this->admin_user);
+    $this->assertEqual(count($user_enabled_formats), 3);
+
+    $user_all_formats = filter_formats($this->admin_user, TRUE);
+    $this->assertEqual(count($user_all_formats), 4);
+  }
+
+  /**
    * Rebuilds text format and permission caches in the thread running the tests.
    */
   protected function resetFilterCaches() {
@@ -810,6 +917,10 @@ class FilterSecurityTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/content/formats/' . $format_id, $edit, t('Save configuration'));
 
+    // Remove the entity cache entry for the node so that field_attach_load can
+    // run again and the filters can be re-applied.
+    cache('entity_node')->delete($node->nid);
+
     // Verify that filter_test_replace filter replaced the content.
     $this->backdropGet('node/' . $node->nid);
     $this->assertNoText($body_raw, 'Node body not found.');
@@ -817,6 +928,10 @@ class FilterSecurityTestCase extends BackdropWebTestCase {
 
     // Disable the text format entirely.
     $this->backdropPost('admin/config/content/formats/' . $format_id . '/disable', array(), t('Disable'));
+
+    // Remove the entity cache entry for the node so that field_attach_load can
+    // run again and the filters can be re-applied.
+    cache('entity_node')->delete($node->nid);
 
     // Verify that the content is empty, because the text format does not exist.
     $this->backdropGet('node/' . $node->nid);
@@ -1537,7 +1652,7 @@ www.example.com with a newline in comments -->
         }
         if (!$success) {
           $this->verbose('Source:<pre>' . check_plain(var_export($source, TRUE)) . '</pre>'
-            . '<hr />' . 'Result:<pre>' . check_plain(var_export($result, TRUE)) . '</pre>'
+            . '<hr />Result:<pre>' . check_plain(var_export($result, TRUE)) . '</pre>'
             . '<hr />' . ($is_expected ? 'Expected:' : 'Not expected:')
             . '<pre>' . check_plain(var_export($value, TRUE)) . '</pre>'
           );

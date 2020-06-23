@@ -185,6 +185,12 @@ function form_test_menu() {
     'page arguments' => array('form_test_email'),
     'access callback' => TRUE,
   );
+  $items['form-test/h5datetime'] = array(
+    'title' => 'HTML5 datetime fields',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('form_test_h5datetime'),
+    'access callback' => TRUE,
+  );
   $items['form-test/url'] = array(
     'title' => t('URL'),
     'page callback' => 'backdrop_get_form',
@@ -1595,6 +1601,43 @@ function form_test_email($form, &$form_state) {
  * Form submission handler for form_test_email().
  */
 function form_test_email_submit($form, &$form_state) {
+  backdrop_json_output($form_state['values']);
+  exit();
+}
+
+/**
+ * Form constructor for #type html_date, html_time and html_datetime elements.
+ *
+ * @see form_test_h5datetime_submit()
+ * @ingroup forms
+ */
+function form_test_h5datetime($form, &$form_state) {
+  $form['h5date'] = array(
+    '#type' => 'html_date',
+    '#title' => 'Date',
+    '#description' => 'A date.',
+  );
+  $form['h5time'] = array(
+    '#type' => 'html_time',
+    '#title' => 'Time',
+    '#description' => 'A time.',
+  );
+  $form['h5datetime'] = array(
+    '#type' => 'html_datetime',
+    '#title' => 'Datetime',
+    '#description' => 'A date and time combo.',
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+  return $form;
+}
+
+/**
+ * Form submission handler for form_test_h5datetime().
+ */
+function form_test_h5datetime_submit($form, &$form_state) {
   backdrop_json_output($form_state['values']);
   exit();
 }

@@ -135,6 +135,12 @@ ul.menu li.expanded {
 .breadcrumb li a,
 .breadcrumb li span {
   vertical-align: middle;
+  float: left; /* LTR */
+}
+[dir="rtl"] .breadcrumb li,
+[dir="rtl"] .breadcrumb li a,
+[dir="rtl"] .breadcrumb li span {
+  float: right;
 }
 .breadcrumb li:after {
   content: '';
@@ -143,10 +149,14 @@ ul.menu li.expanded {
   height: 1em;
   vertical-align: middle;
   padding: 0 3px;
-  background: url(../images/chevron-right--gray--32.png) no-repeat center center;
+  background-image: url(../images/chevron-right--gray--32.png); /* LTR */
+  background-repeat: no-repeat;
+  background-position: center;
   background-size: 8px;
 }
-
+[dir="rtl"] .breadcrumb li:after {
+  background-image: url(../images/chevron-left--gray--32.png);
+}
 .breadcrumb li.last:after {
   display: none;
 }
@@ -440,12 +450,10 @@ ul.admin-list li {
 .admin-list li:first-child {
   border-top: none;
 }
-.admin-panel .item-list ul,
 .admin-list {
   margin: 0;
   padding: 0;
 }
-.admin-panel .item-list ul,
 .admin-list.compact {
   margin: 8px 0;
 }
@@ -501,6 +509,9 @@ table {
   border-collapse: collapse;
   border-spacing: 0;
   border: 0;
+}
+tbody {
+  border-bottom: 1px solid #f7f7f7;
 }
 tr.even,
 tr.odd {
@@ -579,6 +590,9 @@ td {
   border: 0;
   min-height: 14px;
 }
+tr.disabled td {
+  color: #999;
+}
 td.active {
   background: #e9e8e8;
 }
@@ -647,7 +661,7 @@ fieldset .fieldset-legend {
   width: 100%;
   margin-top: .25em;
   padding-left: 1em; /* LTR */
-  text-transform: uppercase;
+  box-sizing: border-box;
 }
 [dir="rtl"] fieldset .fieldset-legend {
   right: 0;
@@ -656,7 +670,6 @@ fieldset .fieldset-legend {
 }
 legend {
   font-size: 120%;
-  font-weight: normal;
 }
 .fieldset-description {
   margin-bottom: 1em;
@@ -717,6 +730,12 @@ fieldset .fieldset-wrapper {
   top: .4em;
   right: 2em;
   display: none;
+}
+.fieldset-legend span.summary:not(:empty):before {
+  content: '(';
+}
+.fieldset-legend span.summary:not(:empty):after {
+  content: ')';
 }
 @media (min-width: 450px) {
   .fieldset-legend span.summary {
@@ -801,9 +820,6 @@ div.teaser-checkbox .form-item,
 .form-item label {
   margin: 0 0 10px;
 }
-fieldset label {
-  font-weight: normal;
-}
 .field-label label {
   margin: 0;
   padding: 0;
@@ -820,6 +836,8 @@ fieldset label {
 .form-disabled input.form-autocomplete,
 .form-disabled input.form-text,
 .form-disabled input.form-tel,
+.form-disabled input.form-date,
+.form-disabled input.form-time,
 .form-disabled input.form-email,
 .form-disabled input.form-url,
 .form-disabled input.form-color,
@@ -1012,6 +1030,8 @@ input.form-disabled:focus {
 input.form-autocomplete,
 input.form-text,
 input.form-tel,
+input.form-date,
+input.form-time,
 input.form-email,
 input.form-url,
 input.form-color,
@@ -1073,6 +1093,8 @@ select.filter-list {
 }
 input.form-text:focus,
 input.form-tel:focus,
+input.form-date:focus,
+input.form-time:focus,
 input.form-email:focus,
 input.form-url:focus,
 input.form-color:focus,
@@ -1131,13 +1153,16 @@ div.filter-options select {
 }
 .admin-panel {
   margin: 0 0 20px;
-  padding: 9px;
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+.admin-panel .block-content {
+  padding: 0 9px 9px;
+}
+.admin-panel .block-title,
 .admin-panel h3 {
-  margin: 4px 0 4px 4px; /* LTR */
+  margin: 9px 9px 0;
   padding: 6px 0 6px 35px; /* LTR */
   font-size: 0.923em;
   text-transform: uppercase;
@@ -1145,16 +1170,27 @@ div.filter-options select {
   background: url('../images/chevron-circle-right--black--64.png') no-repeat left center; /* LTR */
   background-size: 23px;
 }
+[dir="rtl"] .admin-panel .block-title,
 [dir="rtl"] .admin-panel h3 {
   margin-left: 0;
-  margin-right: 4px;
-  padding-left: 0;
-  padding-right: 35px;
+  margin-right: 9px;
+  padding: 6px 35px 6px 0;
   background: url('../images/chevron-circle-left--black--64.png') no-repeat right center; /* LTR */
   background-size: 23px;
 }
+@media (min-width: 34em) { /* 544px @ 16px font size -- SM */
+  .admin-panel .block-content {
+    padding: 0 15px 15px;
+  }
+  .admin-panel .block-title,
+  .admin-panel h3 {
+    margin: 15px;
+  }
+}
+
+/* Add special icons for admin/config */
 .admin-panel-people h3 {
-  background-image: url('../images/user--black--64.png');
+  background-image: url('../images/users--black--64.png');
 }
 .admin-panel-content h3 {
   background-image: url('../images/pencil-square-o--black--64.png');
@@ -1182,6 +1218,27 @@ div.filter-options select {
 }
 .admin-panel-services h3 {
   background-image: url('../images/rss--black--64.png');
+}
+
+/* Add special icons for admin/dashboard */
+
+.block-dashboard-welcome .block-title {
+  background-image: url('../images/hand-spock--black--64.png');
+}
+.block-dashboard-create .block-title {
+  background-image: url('../images/pencil-square-o--black--64.png');
+}
+.block-dashboard-overview-content .block-title {
+  background-image: url('../images/pencil-alt--black--64.png');
+}
+.block-dashboard-overview-user .block-title {
+  background-image: url('../images/users--black--64.png');
+}
+.block-dashboard-updates .block-title {
+  background-image: url('../images/info-circle--black--64.png');
+}
+.block-dashboard-news .block-title {
+  background-image: url('../images/bell--black--64.png');
 }
 
 /* admin/appearance */
@@ -1225,9 +1282,19 @@ div.filter-options select {
 }
 
 /**
+ * Flexible layout template configuration.
+ */
+#layout-flexible-content {
+  padding: 20px 0;
+  border-radius: 4px;
+  background-color: #f7f7f7;
+  border: 2px solid #EAEAEA;
+}
+
+/**
  * Pretty block radios, `:not(#foo) >` rules out browsers that can't support this
  */
-:not(#foo) > .layout-settings-form .layout-options .form-type-radio input {
+:not(#foo) > .layout-settings-form .layout-options .form-type-radio input, .form-item-region-style .form-type-radio input {
   /* Hide radios from visuals but not screen-readers */
   position: absolute;
   width: 1px;
@@ -1238,6 +1305,7 @@ div.filter-options select {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+.form-item-region-style .form-type-radio label,
 .layout-settings-page .layout-options .form-type-checkbox label,
 .layout-settings-form .layout-options .form-type-radio label {
   position: relative;
@@ -1254,10 +1322,15 @@ div.filter-options select {
   transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
   will-change: border-color, background-color;
 }
+.form-item-region-style .form-type-radio label {
+  min-height: inherit;
+}
 .layout-settings-page .layout-options.no-flexbox .form-type-checkbox label,
 .layout-settings-form .layout-options.no-flexbox .form-type-radio label {
   min-height: 150px;
 }
+.form-item-region-style .form-type-radio:active label,
+.form-item-region-style .form-type-radio input:checked + label,
 .layout-settings-page .layout-options .form-type-checkbox:active label,
 .layout-settings-page .layout-options .form-type-checkbox input:checked + label,
 .layout-settings-form .layout-options .form-type-radio:active label,
@@ -1265,6 +1338,9 @@ div.filter-options select {
   background-color: #ffffff;
   border-color: #d0d0d0;
 }
+.form-item-region-style .form-type-radio input:focus + label,
+.form-item-region-style .form-type-radio input:hover + label,
+.form-item-region-style .form-type-radio:hover input:checked + label,
 .layout-settings-page .layout-options .form-type-checkbox input:focus + label,
 .layout-settings-page .layout-options .form-type-checkbox input:hover + label,
 .layout-settings-page .layout-options .form-type-checkbox:hover input:checked + label,
@@ -1281,6 +1357,27 @@ div.filter-options select {
   padding: 4px;
   border-radius: 4px;
   background: #ffffff;
+}
+
+/* Layout conditions */
+.layout-access-list ul {
+  font-size: 0.923em;
+}
+.layout-access-list ul li {
+  background: #f7f7f7;
+  border: 1px solid #f7f7f7;
+  border-top: 0;
+  border-bottom: 0;
+}
+.layout-access-list ul li:nth-child(odd) {
+  background: #fff;
+}
+.layout-access-list ul li:hover {
+  background: #ffff99;
+}
+.layout-access-list .layout-condition {
+  min-height: 14px;
+  padding: 10px 20px;
 }
 
 /* Update options. */
@@ -1330,7 +1427,7 @@ table.update {
   border-radius: 4px;
 }
 
-/* Maintenance theming */
+/* Maintenance page styles */
 body.maintenance-page {
   background: #E8E6E5;
   padding: 1em;
@@ -1495,7 +1592,7 @@ ol.task-list .done:before {
   display: none;
 }
 
-/* Shortcut theming */
+/* Shortcut styles */
 div.add-or-remove-shortcuts {
   float: left; /* LTR */
   padding-top: 6px;
