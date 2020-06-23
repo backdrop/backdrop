@@ -1221,7 +1221,7 @@ function user_update_1017() {
 /**
  * Add admin mail text for pending approval.
  */
-function user_update_1017() {
+function user_update_1018() {
   $config = config('user.mail');
   $translatables = $config->get('_config_translatables');
   $translatables[] = 'register_pending_approval_admin_body';
