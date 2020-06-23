@@ -87,6 +87,7 @@ class EntityLayoutContext extends LayoutContext {
    * Return a summary for this context.
    */
   function getAdminSummary($path = NULL) {
+    $info = entity_get_info($this->entity_type);
     if ($this->position) {
       $argument_parts = explode('/', $path);
       $argument_parts[$this->position] = '<strong>' . $argument_parts[$this->position] . '</strong>';
@@ -94,7 +95,7 @@ class EntityLayoutContext extends LayoutContext {
       return t('Position @index:', array('@index' => $this->position + 1)) . ' ' . implode('/', $argument_parts);
     }
     else {
-      return t('Special context: @id', array('@id' => $this->settings['id']));
+      return t('@entity ID: @id', array('@id' => $this->settings['id'], '@entity' => $info['label']));
     }
   }
 }
