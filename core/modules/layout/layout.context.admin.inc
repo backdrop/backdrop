@@ -39,19 +39,25 @@ function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $co
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => 'help',
+    '#markup' => 'Contexts provide additional information to blocks in the layout to display. For example, information from node 5, or the user "administrator" could be made available.',
   );
 
-  $handler = isset($layout->contexts[$context_id]) ? $layout->contexts[$context_id] : NULL;
+  if (isset($layout->contexts[$context_id])) {
+    $handler = $layout->contexts[$context_id];
+    $form_state['handler'] = $handler;
+  }
+  else {
+    $handler = NULL;
+  }
 
   $all_context_info = _layout_get_all_info('layout_context');
   backdrop_sort($all_context_info, array('title'));
   $form['context'] = array(
     '#type' => 'select',
-    '#title' => t('Contexts'),
+    '#title' => t('Available contexts'),
     '#options' => array(),
     '#required' => TRUE,
-    '#default_value' => isset($handler->plugin) ? $handler->plugin : NULL,
+    // '#default_value' => isset($handler->plugin) ? $handler->plugin : NULL,
     '#parents' => array('context'),
     '#ajax' => array(
       'wrapper' => 'context_settings',
@@ -62,6 +68,7 @@ function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $co
     // @todo: add a "configurable" key to hook_context_info () instead?
     if (!in_array($key, array('string', 'overrides_path'))) {
       $form['context']['#options'][$context_info['name']] = $context_info['title'];
+      $form['context']['#default_value'] = isset($handler->plugin) ? $handler->plugin : NULL;
     }
   }
 
@@ -133,25 +140,22 @@ function layout_context_add_load_context_nojs($form, &$form_state) {
 function layout_context_return_form($form, &$form_state) {
   /* @var Layout $layout */
   $layout = $form_state['layout'];
-  $context_id = $form_state['context_id'];
-
+  //$handler = $form_state['handler'];
+  
   // If no context has yet been selected, there is no sub-form to display.
-  if (!isset($form_state['values']['context'])) {
+  if (!isset($form_state['values']['context']) && !isset($form_state['handler'])) {
     return array();
   }
-  else {
-    $handler_id = $form_state['values']['context'];
-  }
 
-  if (isset($context_id)) {
-      $handler = layout_create_context($context_id);
-  }
-  else {
-    $handler = layout_create_context($handler_id);
+  if (isset($form_state['values']['context'])) {
+    $handler = layout_create_context($form_state['values']['context']);
     $handler->is_new = TRUE;
   }
+  else {
+    $handler = $form_state['handler'];
+  }
 
-  $form['#title'] = layout_condition_edit_title($layout, $block, $menu_item, $handler_id);
+  $form['#title'] = layout_condition_edit_title($layout, $block, $menu_item, $handler->plugin);
   $form_state['layout'] = $layout;
   $form_state['handler'] = $handler;
   $handler->form($form, $form_state);
@@ -203,7 +207,7 @@ function layout_context_add_form_submit($form, &$form_state) {
  * Submit handler for layout_settings_form() that edits a context.
  */
 function layout_settings_form_context_edit($form, &$form_state) {
-  $edit_context = $form_state['clicked_button']['#array_parents'][2];
+  $edit_context = $form_state['clicked_button']['#array_parents'][3];
   $form_state['redirect'] = 'admin/structure/layouts/manage/' . $form_state['layout']->name . '/context/edit/layout/' . $edit_context;
 }
 

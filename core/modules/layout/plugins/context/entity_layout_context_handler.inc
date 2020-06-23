@@ -44,15 +44,17 @@ class EntityLayoutContext extends LayoutContext {
     parent::form($form, $form_state);
 
     $info = entity_get_info($this->entity_type);
+    $input = isset($form_state['handler']->settings['id']) ? $form_state['handler']->settings['id'] : NULL;
+    $form_state['input']['id'] = $input;
     $form['id'] = array(
       '#title' => t('Enter the ID of a @entity', array('@entity' => $info['label'])),
       '#type' => 'number',
-      '#default_value' => $this->settings['id'],
+      '#default_value' => $input,
       '#step' => 1,
       '#min' => 1,
       // @todo: this would show all types of content and even views. We'd need
       // to write a custom autocomplete function. Consider this later.
-      // '#autocomplete_path' => 'path-autocomplete',
+      // '#autocomplete_path' => 'node/autocomplete',
       '#weight' => -10,
     );
   }
