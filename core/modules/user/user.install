@@ -1206,22 +1206,9 @@ function user_update_1016() {
 }
 
 /**
- * Set default values for core password constraints.
- */
-function user_update_1017() {
-  $constraints = array(
-    'constraints_active' => FALSE,
-    'minlength' => 8,
-    'not_username' => TRUE,
-    'not_email' => TRUE,
-  );
-  config_set('system.core', 'password_constraints', $constraints);
-}
-
-/**
  * Add admin mail text for pending approval.
  */
-function user_update_1018() {
+function user_update_1017() {
   $config = config('user.mail');
   $translatables = $config->get('_config_translatables');
   $translatables[] = 'register_pending_approval_admin_body';
@@ -1230,6 +1217,19 @@ function user_update_1018() {
   $config->set('register_pending_approval_admin_body', "[user:name] has applied for an account.\n\n[user:edit-url]");
   $config->set('register_pending_approval_admin_subject', 'New account of [user:name] at [site:name] (pending approval)');
   $config->save();
+}
+
+/**
+ * Set default values for core password constraints.
+ */
+function user_update_1018() {
+  $constraints = array(
+    'constraints_active' => FALSE,
+    'minlength' => 8,
+    'not_username' => TRUE,
+    'not_email' => TRUE,
+  );
+  config_set('system.core', 'password_constraints', $constraints);
 }
 
 /**
