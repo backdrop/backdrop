@@ -209,6 +209,12 @@ function user_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('password_constraints.not_email'),
     '#states' => $settings_state,
   );
+  $form['password_constraints']['no_case'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Case insensitive comparison'),
+    '#default_value' => $config->get('password_constraints.no_case'),
+    '#states' => $settings_state,
+  );
 
   // Account settings.
   $form['personalization'] = array(

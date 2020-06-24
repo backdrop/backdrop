@@ -1091,10 +1091,20 @@ function user_password_constraints_validate($form, &$form_state) {
     if ($password == $username) {
       $messages[] = t('The username cannot be used as password.');
     }
+    elseif ($constraints['no_case']) {
+      if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
+        $messages[] = t('The password cannot be similar to the username');
+      }
+    }
   }
   if ($constraints['not_email']) {
     if ($password == $email) {
       $messages[] = t('The e-mail cannot be used as password.');
+    }
+    elseif ($constraints['no_case']) {
+      if (backdrop_strtolower($password) == backdrop_strtolower($email)) {
+        $messages[] = t('The password cannot be similar to the email');
+      }
     }
   }
   if (!empty($messages)) {

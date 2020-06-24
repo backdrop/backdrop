@@ -94,6 +94,7 @@
         "constraints_active": "1",
         "minlength": "8",
         "not_username": 1,
-        "not_email": 1
+        "not_email": 1,
+        "no_case": 0
     }
 }
