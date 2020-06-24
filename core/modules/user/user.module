@@ -752,7 +752,7 @@ function user_account_form(&$form, &$form_state) {
   $admin_roles = user_access('assign roles');
 
   $form['#validate'][] = 'user_account_form_validate';
-  $constraints_active = config_get('system.core', 'password_constraints.constraints_active');
+  $constraints_active = config_get('system.core', 'user_password_constraints.constraints_active');
   if ($constraints_active) {
     $form['#validate'][] = 'user_password_constraints_validate';
   }
@@ -1072,7 +1072,7 @@ function user_password_constraints_validate($form, &$form_state) {
     // On profile form and no new password has been set.
     return;
   }
-  $constraints = config_get('system.core', 'password_constraints');
+  $constraints = config_get('system.core', 'user_password_constraints');
   $messages = array();
   if ($form['#form_id'] == 'user_pass_reset_form') {
     $account = $form['#account'];
@@ -1989,7 +1989,7 @@ function user_cancel_url($account) {
  * Generates help text for core password constraints on forms.
  */
 function _user_password_constraints_help() {
-  $constraints = config_get('system.core', 'password_constraints');
+  $constraints = config_get('system.core', 'user_password_constraints');
   $min = $constraints['minlength'];
   $help = array();
   $help[] = t('The password must be at least @min characters long.', array('@min' => $min));
@@ -2897,7 +2897,7 @@ function user_form_process_password($element, $form_state = array()) {
         'username' => $username,
         'email' => $email,
       ),
-      'config' => config_get('system.core', 'password_constraints'),
+      'config' => config_get('system.core', 'user_password_constraints'),
     );
 
     $element['#attributes']['data-password-strength'] = backdrop_json_encode($strength_settings, FALSE);

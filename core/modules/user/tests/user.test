@@ -1790,7 +1790,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
 
     // Test that the password '0' is considered a password.
     // We have to disable password constraints for that.
-    config_set('system.core', 'password_constraints.constraints_active', '0');
+    config_set('system.core', 'user_password_constraints.constraints_active', '0');
     $name = $this->randomName();
     $edit = array(
       'name' => $name,
@@ -1873,7 +1873,7 @@ class UserEditTestCase extends BackdropWebTestCase {
     // Create a regular user.
     $user1 = $this->backdropCreateUser(array());
     // Disable password constraints for that.
-    config_set('system.core', 'password_constraints.constraints_active', '0');
+    config_set('system.core', 'user_password_constraints.constraints_active', '0');
 
     $edit = array('pass' => '0');
     $this->backdropPost("user/" . $user1->uid . "/edit", $edit, t('Save'));

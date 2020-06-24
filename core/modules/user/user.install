@@ -1230,7 +1230,7 @@ function user_update_1018() {
     'not_email' => TRUE,
     'no_case' => FALSE,
   );
-  config_set('system.core', 'password_constraints', $constraints);
+  config_set('system.core', 'user_password_constraints', $constraints);
 }
 
 /**
