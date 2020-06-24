@@ -786,10 +786,15 @@ function user_account_form(&$form, &$form_state) {
   // Display password field only for existing users or when user is allowed to
   // assign a password during registration.
   if (!$register) {
+    $description = t('Current password must be entered to set a new password.');
+    $constraints_active = config_get('system.core', 'user_password_constraints.constraints_active');
+    if ($constraints_active) {
+      $description .= _user_password_constraints_help();
+    }
     $form['account']['pass'] = array(
       '#title' => t('New password'),
       '#type' => 'password',
-      '#description' => t('Current password must be entered to set a new password.'),
+      '#description' => $description,
       '#password_toggle' => TRUE,
       '#password_strength' => TRUE,
     );
