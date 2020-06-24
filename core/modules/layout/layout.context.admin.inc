@@ -109,12 +109,19 @@ function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $co
     '#type' => 'submit',
     '#value' => t('Cancel'),
     '#limit_validation_errors' => array(),
-    '#submit' => array(),
+    '#submit' => array('layout_context_add_form_cancel'),
     '#ajax' => array(
       'callback' => 'layout_ajax_context_cancel_dialog',
     ),
   );
   return $form;
+}
+
+/**
+ * Submit handler for the cancel button on layout_context_add_form().
+ */
+function layout_context_add_form_cancel($form, &$form_state) {
+  $form_state['redirect'] = 'admin/structure/layouts/manage/' . $form_state['layout']->name . '/configure';
 }
 
 /**
@@ -156,7 +163,6 @@ function layout_context_return_form($form, &$form_state) {
     $handler = $form_state['handler'];
   }
 
-  $form['#title'] = layout_condition_edit_title($layout, $block, $menu_item, $handler->plugin);
   $form_state['layout'] = $layout;
   $form_state['handler'] = $handler;
   $handler->form($form, $form_state);
