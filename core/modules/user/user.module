@@ -831,14 +831,14 @@ function user_account_form(&$form, &$form_state) {
     }
   }
   else {
+    // Provide different help text if password constraints are active.
+    if ($constraints_active) {
+      $description = _user_password_constraints_help();
+    }
+    else {
+      $description = t('Provide a password for the new account.');
+    }
     if (!config_get('system.core', 'user_email_verification') && !$admin_users) {
-      // Someone registers a new account and may set a password directly.
-      if ($constraints_active) {
-        $description = _user_password_constraints_help();
-      }
-      else {
-        $description = t('Provide a password for the new account.');
-      }
       $form['account']['pass'] = array(
         '#type' => 'password',
         '#title' => t('Password'),
@@ -859,7 +859,7 @@ function user_account_form(&$form, &$form_state) {
       $form['account']['pass'] = array(
         '#type' => 'password',
         '#title' => t('Password'),
-        '#description' => t('Provide a password for the new account.'),
+        '#description' => $description,
         '#password_toggle' => TRUE,
         '#password_strength' => TRUE,
         '#required' => FALSE,
