@@ -126,6 +126,7 @@ abstract class LayoutContext extends LayoutHandler {
       'position',
       'name',
       'label',
+      'storage',
     );
     foreach ($properties as $property) {
       if (isset($config[$property])) {

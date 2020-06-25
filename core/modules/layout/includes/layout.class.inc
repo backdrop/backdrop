@@ -243,6 +243,10 @@ class Layout {
     );
     foreach ($handlers as $property_key => $plugin_type) {
       foreach ($this->{$property_key} as $plugin_type_key => $plugin_data) {
+        // Set the storage property for contexts stored in config.
+        if ($property_key == 'contexts') {
+          $plugin_data['data']['storage'] = TRUE;
+        }
         $this->{$property_key}[$plugin_type_key] = layout_create_handler($plugin_type, $plugin_data['plugin'], $plugin_data['data']);
       }
     }
