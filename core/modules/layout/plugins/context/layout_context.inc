@@ -3,10 +3,6 @@
 /**
  * @file
  * Class that holds information relating to a layouts context.
- *
- * This class does not extend the LayoutHandler class because contexts are not
- * stored directly within configuration. Instead contexts are determined based
- * on the Layout's path
  */
 abstract class LayoutContext extends LayoutHandler {
   /**
@@ -210,6 +206,8 @@ abstract class LayoutContext extends LayoutHandler {
 
   /**
    * Return a summary for this context.
+   *
+   * The summary is displayed in the context table on Layout settings pages.
    */
   function getAdminSummary() {}
 }

@@ -216,7 +216,7 @@ function theme_layout_settings_context_table($variables) {
     else {
       $row[] = array();
     }
-      
+
     $rows[] = $row;
   }
   return theme('table', array(

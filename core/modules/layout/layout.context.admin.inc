@@ -58,7 +58,6 @@ function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $co
     '#title' => t('Available contexts'),
     '#options' => array(),
     '#required' => TRUE,
-    // '#default_value' => isset($handler->plugin) ? $handler->plugin : NULL,
     '#parents' => array('context'),
     '#ajax' => array(
       'wrapper' => 'context_settings',
@@ -141,14 +140,9 @@ function layout_context_add_load_context_nojs($form, &$form_state) {
 
 /**
  * Helper function to return a partial context settings form.
- *
- * This can be used to add a context to either a layout, block, or menu item,
- * based on the values in the $form_state parameter.
  */
 function layout_context_return_form($form, &$form_state) {
-  /* @var Layout $layout */
   $layout = $form_state['layout'];
-  //$handler = $form_state['handler'];
   
   // If no context has yet been selected, there is no sub-form to display.
   if (!isset($form_state['values']['context']) && !isset($form_state['handler'])) {
@@ -176,7 +170,6 @@ function layout_context_return_form($form, &$form_state) {
  */
 function layout_context_add_form_validate($form, &$form_state) {
   if (isset($form_state['handler'])) {
-    /* @var LayoutAccess $handler */
     $handler = $form_state['handler'];
     $handler->formValidate($form, $form_state);
   }
@@ -185,7 +178,7 @@ function layout_context_add_form_validate($form, &$form_state) {
 /**
  * Submit handler for layout_context_add_form().
  *
- * Saves a context into the layout, block, or menu item.
+ * Saves a context into the layout.
  */
 function layout_context_add_form_submit($form, &$form_state) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');

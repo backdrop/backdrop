@@ -304,7 +304,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   );
 
   $contexts = $layout->getContexts();
-  // dprint_r($contexts);
   $built_in_contexts = isset($contexts['overrides_path']) ? 2 : 1;
   $form['context_wrapper'] = array(
     '#title' => t('Contexts'),

@@ -52,8 +52,10 @@ class EntityLayoutContext extends LayoutContext {
       '#default_value' => $input,
       '#step' => 1,
       '#min' => 1,
-      // @todo: this would show all types of content and even views. We'd need
-      // to write a custom autocomplete function. Consider this later.
+      // @todo: Backdrop doesnt yet have a comprehensive entity autocomplete
+      // function. We'd need to write a custom autocomplete function that 
+      // handles all entity types. This would be best as a core function
+      // rather than just for this code.
       // '#autocomplete_path' => 'node/autocomplete',
       '#weight' => -10,
     );
@@ -78,8 +80,9 @@ class EntityLayoutContext extends LayoutContext {
   function formSubmit($form, &$form_state) {
     $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context'));
     $settings = array_diff_key($form_state['values'], $excluded);
+    // This produces config keys for contexts in the format "node1" or "user3".
     $this->name = $this->plugin . $settings['id'];
-    // @todo deal with name changes.
+
     $this->settings = array_merge($this->settings, $settings);
   }
 
