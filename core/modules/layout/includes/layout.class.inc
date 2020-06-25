@@ -259,9 +259,7 @@ class Layout {
 
     // Don't save path based contexts as these are generated on the fly.
     foreach ($this->contexts as $key => $context) {
-      // @todo: Add a "storage" property to the context class, and just exclude
-      // those not stored in config?
-      if (isset($context->position) || in_array($key, array('string', 'overrides_path', 'current_user'))) {
+      if (!$context->storage) {
         unset($this->contexts[$key]);
       }
     }
@@ -830,7 +828,7 @@ class Layout {
    */
   function resetContexts() {
     foreach ($this->contexts as $key => $context) {
-      if (isset($context->position) || in_array($key, array('string', 'overrides_path', 'current_user'))) {
+      if (!$context->storage) {
         unset($this->contexts[$key]);
       }
     }

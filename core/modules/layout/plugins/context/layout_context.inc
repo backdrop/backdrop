@@ -105,6 +105,16 @@ abstract class LayoutContext extends LayoutHandler {
   var $restrictions = array();
 
   /**
+   * The storage state of the context.
+   *
+   * This represents whether this context is stored in configuration (TRUE) or
+   * if its generated on the fly (FALSE).
+   *
+   * @var bool
+   */
+  var $storage = FALSE;
+
+  /**
    * Constructor for LayoutContext objects.
    */
   function __construct($plugin_name, $config = array()) {

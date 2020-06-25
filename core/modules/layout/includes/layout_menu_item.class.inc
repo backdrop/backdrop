@@ -263,7 +263,7 @@ class LayoutMenuItem {
    */
   function resetContexts() {
     foreach ($this->contexts as $key => $context) {
-      if (isset($context->position) || in_array($key, array('string', 'overrides_path', 'current_user'))) {
+      if (!$context->storage) {
         unset($this->contexts[$key]);
       }
     }

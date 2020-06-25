@@ -200,6 +200,7 @@ function layout_context_add_form_submit($form, &$form_state) {
   $handler->formSubmit($form, $form_state);
   if (!empty($handler->is_new)) {
     $handler->is_new = FALSE;
+    $handler->storage = TRUE;
     $layout->setContexts($handler->name, $handler);
   }
   layout_set_layout_tempstore($layout);
