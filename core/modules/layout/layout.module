@@ -899,7 +899,7 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
   }
 
   if ($layouts_to_load) {
-    $menu_items = layout_menu_item_load_multiple($layout_names);
+    $menu_items = layout_get_layout_menu_items($layout_names);
 
     // Cache the raw config files once read.
     $configs = layout_get_all_configs('layout');
@@ -914,13 +914,16 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
         if (isset($layout_data['path']) && !$skip_menu_items) {
           // Most of the time, layouts will be loaded as a group, including the
           // layout that owns the menu item.
-          if (isset($menu_items[$layout_data['path']])) {
-            $loaded_layouts[$layout_name]->menu_item = $menu_items[$layout_data['path']];
-          }
-          // In the situation that a layout is loaded separately of its menu
-          // item owner, load the menu item by path.
-          elseif ($menu_item = layout_menu_item_load_multiple_by_path($layout_data['path'])) {
-            $loaded_layouts[$layout_name]->menu_item = $menu_item;
+          $layout_paths = is_array($layout_data['path']) ? $layout_data['path'] : array($layout_data['path']);
+          foreach ($layout_paths as $layout_path) {
+            if (isset($menu_items[$layout_path])) {
+              $loaded_layouts[$layout_name]->menu_item[] = $menu_items[$layout_path];
+            }
+            // In the situation that a layout is loaded separately of its menu
+            // item owner, load the menu item by path.
+            elseif ($menu_item = layout_menu_item_load_multiple_by_path($layout_path)) {
+              $loaded_layouts[$layout_name]->menu_item[] = $menu_item;
+            }
           }
         }
       }
@@ -1018,6 +1021,24 @@ function layout_menu_item_load($menu_item_name) {
 }
 
 /**
+ * Return an array of menu items from layout configs.
+ *
+ * @return array
+ *   An array of menu item configs.
+ */
+function layout_get_layout_menu_items($layout_names) {
+  $menu_items = layout_menu_item_load_all();
+
+  $layout_menu_items = array();
+  foreach ($menu_items as $menu_item) {
+    if (in_array($menu_item->layout, $layout_names)) {
+      $layout_menu_items[$menu_item->name] = $menu_item;
+    }
+  }
+  return $layout_menu_items;
+}
+
+/**
  * Load menu items by name.
  *
  * @param array $menu_item_names
@@ -1112,10 +1133,13 @@ function layout_get_all_configs($type) {
     }
 
     // Sort the configs by path and weight.
-    backdrop_sort($configs, array(
-      'path' => SORT_STRING,
-      'weight' => SORT_NUMERIC,
-    ));
+    // todo fix this for layout configs.
+    if ($type != 'layout') {
+      backdrop_sort($configs, array(
+        'path' => SORT_STRING,
+        'weight' => SORT_NUMERIC,
+      ));
+    }
 
     // Put default layouts at the bottom.
     if ($type === 'layout') {
@@ -1142,7 +1166,14 @@ function layout_get_path_layout_names($path) {
   $configs = layout_get_all_configs('layout');
   foreach ($configs as $layout_name => $config) {
     if (isset($config['path'])) {
-      $path_map[$config['path']][] = $layout_name;
+      if (is_array($config['path'])) {
+        foreach ($config['path'] as $config_path) {
+          $path_map[$config_path][] = $layout_name;
+        }
+      }
+      else {
+        $path_map[$config['path']][] = $layout_name;
+      }
     }
   }
 

@@ -21,6 +21,13 @@ class LayoutMenuItem {
   var $name = '';
 
   /**
+   * The layout this menu item is attached to.
+   *
+   * @var string
+   */
+  var $layout = '';
+
+  /**
    * The title of this menu item.
    *
    * @var string
@@ -113,6 +120,8 @@ class LayoutMenuItem {
       $this->$key = $value;
     }
 
+    $this->name = $this->getMachineName($this->path, $this->layout);
+
     // Ensure defaults for menu settings.
     if (empty($this->menu)) {
       $this->menu = array();
@@ -148,6 +157,7 @@ class LayoutMenuItem {
       'name' => $this->name,
       'title' => $this->title,
       'path' => $this->path,
+      'layout' => $this->layout,
       'menu' => $this->menu,
       'conditions' => array(),
       'arguments' => $this->arguments,
@@ -306,5 +316,17 @@ class LayoutMenuItem {
       }
     }
     return TRUE;
+  }
+
+    /**
+   * Generate a machine name unique to this menu item's layout.
+   */
+  function getMachineName($path, $layout) {
+    $machine_name = preg_replace('@[^a-z0-9-]+@','-', strtolower($path));
+    $config_data = config('layout.menu_item.' . $layout)->get();
+    if (isset($config_data->menu_item[$machine_name])) {
+      return $this->getMachineName($machine_name . mt_rand(1,9), $layout);
+    }
+    return $machine_name;
   }
 }

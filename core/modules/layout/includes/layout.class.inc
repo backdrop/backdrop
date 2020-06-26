@@ -329,34 +329,39 @@ class Layout {
       }
     }
 
-    // If this layout overrides an existing module path, reassign or delete
-    // the layout menu item.
-    if ((layout_provides_path($this->path) === FALSE) && menu_get_item($this->path)) {
-      if ($this->menu_item) {
-        $this->menu_item->delete();
+    $paths = is_array($this->path) ? $this->path : array($this->path);
+    $existing_items = array();
+    if (!empty($this->menu_item)) {
+      foreach ($this->menu_item as $name => $item) {
+        $existing_items[$item->path] = $name;
       }
-    }
-    // If not overriding an existing module path, ensure that the layout always
-    // has a layout menu item at the same path.
-    else {
-      if ($this->menu_item) {
-        // If an existing menu item exists but this layout's path has changed,
-        // reassign/delete the existing menu item, then create a new one.
-        if ($this->menu_item->path !== $this->path) {
-          $new_menu_item = clone($this->menu_item);
-          $new_menu_item->path = $this->path;
-          $new_menu_item->name = $this->name;
-          $new_menu_item->is_new = TRUE;
-          $this->menu_item->reassign();
-          $this->menu_item = $new_menu_item;
-          $this->menu_item->save();
-        }
-        else {
-          if (isset($this->original_name) && $this->original_name !== $this->name && $this->menu_item->name === $this->original_name) {
-            config('layout.menu_item.' . $this->original_name)->delete();
+      foreach ($paths as $path) {
+        // If this layout overrides an existing module path, reassign or delete
+        // the layout menu item.
+        if ((layout_provides_path($path) === FALSE) && menu_get_item($path)) {
+          if (isset($existing_items[$path])) {
+            $this->menu_item[$existing_items[$path]]->delete();
           }
-          $this->menu_item->save();
         }
+        elseif ($this->menu_item) {
+          // If not overriding an existing module path, ensure that the layout always
+          // has a layout menu item at the same path.
+          // todo wrong check
+          if (!isset($existing_items[$path])) {
+            $menu_item_settings = array(
+              'path' => $path,
+              'layout' => $this->name,
+            );
+            $new_item = new LayoutMenuItem($menu_item_settings);
+            $new_item->save();
+          }
+        }
+      }
+      foreach ($this->menu_item as $item) {
+        if (isset($this->original_name) && $this->original_name !== $this->name && $item->name === $this->original_name) {
+          $item->delete();
+        }
+        $item->save();
       }
     }
     layout_reset_caches();
@@ -623,37 +628,32 @@ class Layout {
   /**
    * Set a layout path.
    */
-  function setPath($path) {
-    if (empty($this->menu_item) || $this->menu_item->path !== $path) {
-      // Use an existing menu item if one exists at this path.
-      if ($existing_item = layout_menu_item_load_multiple_by_path($path)) {
-        $this->menu_item = $existing_item;
-      }
-      // If this layout doesn't have a menu item, make one. If the path is
-      // provided by another module, no menu item is necessary.
-      elseif (layout_provides_path($path) === NULL) {
-        if (empty($this->menu_item)) {
+  function setPath($paths) {
+    $paths = is_array($paths) ? $paths : array($paths);
+    // todo currently not checking for changed paths
+    // if (empty($this->menu_item) || $this->menu_item->path !== $paths) {
+    if (empty($this->menu_item)) {
+      foreach ($paths as $path) {
+        // Use an existing menu item if one exists at this path.
+        if ($existing_item = layout_menu_item_load_multiple_by_path($path)) {
+          $this->menu_item[$existing_item->name] = $existing_item;
+        }
+        // If this layout doesn't have a menu item, make one. If the path is
+        // provided by another module, no menu item is necessary.
+        elseif (layout_provides_path($path) === NULL) {
           $menu_item_settings = array(
             'path' => $path,
-            'name' => $this->name,
+            'layout' => $this->name,
           );
-          $this->menu_item = new LayoutMenuItem($menu_item_settings);
+          $new_item = new LayoutMenuItem($menu_item_settings);
+          $this->menu_item[$new_item->name] = $new_item;
         }
-        else {
-          $this->menu_item->path = $path;
-        }
-      }
-      else {
-        if ($this->menu_item) {
-          $this->menu_item->delete();
-        }
-        $this->menu_item = NULL;
       }
     }
     // On any path change, reset contexts.
-    if ($this->path !== $path) {
-      $this->path = $path;
-      $this->resetContexts();
+    if ($this->path !== $paths) {
+      $this->path = $paths;
+      // $this->resetContexts();
     }
   }
 
@@ -663,12 +663,15 @@ class Layout {
    * @return string
    */
   function getPath() {
+    // todo: this is probably nonsense.
+    $paths = is_array($this->path) ? $this->path : array($this->path);
     if ($this->menu_item) {
-      return $this->menu_item->path;
+      foreach ($this->menu_item as $item) {
+        $layout_paths[] = $item->path;
+      }
+      return array_unique(array_merge($layout_paths, $paths));
     }
-    else {
-      return $this->path;
-    }
+    return $paths;
   }
 
   /**
@@ -759,10 +762,18 @@ class Layout {
   function getContexts() {
     if (is_null($this->contexts)) {
       if ($this->menu_item) {
-        $this->contexts = $this->menu_item->getContexts();
+        $this->contexts = array();
+        foreach ($this->menu_item as $item) {
+          // todo: array_merge ok??
+          $this->contexts = array_merge($item->getContexts(), $this->contexts);
+        }
       }
       elseif ($this->path) {
-        $this->contexts = layout_context_required_by_path($this->path);
+        $paths = is_array($this->path) ? $this->path : array($this->path);
+        $this->contexts = array();
+        foreach ($paths as $path) {
+          $this->contexts = array_merge(layout_context_required_by_path($path), $this->contexts);
+        }
       }
       else {
         $this->contexts = array();
@@ -799,7 +810,9 @@ class Layout {
   function resetContexts() {
     $this->contexts = NULL;
     if ($this->menu_item) {
-      $this->menu_item->resetContexts();
+      foreach ($this->menu_item as $item) {
+        $item->resetContexts();
+      }
     }
   }
 
