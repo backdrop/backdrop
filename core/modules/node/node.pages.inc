@@ -196,11 +196,20 @@ function node_form($form, &$form_state, Node $node) {
     );
   }
   else {
+    // If there is only one language, set node langcode to default language,
+    // otherwise set to language neutral.
+    $language_count = $config->get('language_count');
+    if ($language_count == 1) {
+      $default_langcode = $config->get('language_default');
+    }
+    else {
+      $default_langcode = LANGUAGE_NONE;
+    }
     $form['langcode'] = array(
       '#type' => 'value',
-      // New nodes without multilingual support have undefined language, old
-      // nodes keep their language if language.module is not available.
-      '#value' => !isset($form['#node']->nid) ? LANGUAGE_NONE : $node->langcode,
+      // New nodes without multilingual support have default langcode,
+      // old nodes keep their language if language.module is not available.
+      '#value' => !isset($form['#node']->nid) ? $default_langcode : $node->langcode,
     );
   }
 
