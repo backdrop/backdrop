@@ -1621,6 +1621,8 @@ function system_logging_settings($form, &$form_state) {
       ERROR_REPORTING_DISPLAY_ALL => t('All messages'),
     ),
     '#description' => t('It is recommended that sites running on production environments do not display any errors.'),
+    '#config_variable' => 'system.core.error_level',
+    '#pre_render' => array('form_override_config_warning'),
   );
   $form['watchdog_enabled_severity_levels'] = array(
     '#type' => 'checkboxes',
@@ -1685,6 +1687,8 @@ function system_performance_settings($form, &$form_state) {
     '#title' => t('Cache pages for anonymous users'),
     '#default_value' => $config->get('cache'),
     '#weight' => -2,
+    '#config_variable' => 'system.core.cache',
+    '#pre_render' => array('form_override_config_warning'),
   );
   $form['caching']['page_cache_background_fetch'] = array(
     '#type' => 'checkbox',
@@ -1746,12 +1750,16 @@ function system_performance_settings($form, &$form_state) {
     '#title' => t('Aggregate and compress CSS files.'),
     '#default_value' => $config->get('preprocess_css'),
     '#disabled' => $disabled,
+    '#config_variable' => 'system.core.preprocess_css',
+    '#pre_render' => array('form_override_config_warning'),
   );
   $form['bandwidth_optimization']['preprocess_js'] = array(
     '#type' => 'checkbox',
     '#title' => t('Aggregate JavaScript files.'),
     '#default_value' => $config->get('preprocess_js'),
     '#disabled' => $disabled,
+    '#config_variable' => 'system.core.preprocess_js',
+    '#pre_render' => array('form_override_config_warning'),
   );
 
   $form['#submit'][] = 'backdrop_clear_css_cache';
