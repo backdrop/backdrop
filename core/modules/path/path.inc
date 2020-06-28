@@ -184,6 +184,12 @@ function path_clean_string($string, array $options = array()) {
   elseif (!empty($options['langcode'])) {
     $langcode = $options['langcode'];
   }
+  if ($langcode == LANGUAGE_NONE) {
+    // Paths for language neutral content get transliterated according to
+    // current language.
+    global $language;
+    $langcode = $language->langcode;
+  }
 
   // Check if the string has already been processed, and if so return the
   // cached result.
