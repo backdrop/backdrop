@@ -364,7 +364,6 @@ function system_theme_disable_confirm_submit($form, &$form_state) {
  * Menu callback; Set the default theme.
  */
 function system_theme_default() {
-  $config = config('system.core');
   if (isset($_REQUEST['theme']) && isset($_REQUEST['token']) && backdrop_valid_token($_REQUEST['token'], 'system-theme-operation-link')) {
     $theme = $_REQUEST['theme'];
     // Get current list of themes.
@@ -377,6 +376,7 @@ function system_theme_default() {
         theme_enable(array($theme));
       }
       // Set the theme to be the default theme.
+      $config = config('system.core');
       $config->set('theme_default', $theme);
       $config->save();
 
