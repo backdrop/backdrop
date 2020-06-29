@@ -1469,7 +1469,7 @@ function node_search_admin_validate($element, &$form_state) {
  */
 function node_search_execute($keys = NULL, $conditions = NULL) {
   // Build matching conditions
-  $query = db_select('search_index', 'i', array('target' => 'slave'))->extend('SearchQuery')->extend('PagerDefault');
+  $query = db_select('search_index', 'i', array('target' => 'replica'))->extend('SearchQuery')->extend('PagerDefault');
   $query->join('node', 'n', 'n.nid = i.sid');
   $query
     ->condition('n.status', 1)
@@ -2426,7 +2426,7 @@ function node_update_index() {
 
   // Index selected content types.
   $enabled_types = _node_search_get_types();
-  $result = db_query_range("SELECT n.nid FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE (d.sid IS NULL OR d.reindex <> 0) AND n.type IN (:enabled_types) ORDER BY d.reindex ASC, n.nid ASC", 0, $limit, array(':enabled_types' => $enabled_types), array('target' => 'slave'));
+  $result = db_query_range("SELECT n.nid FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE (d.sid IS NULL OR d.reindex <> 0) AND n.type IN (:enabled_types) ORDER BY d.reindex ASC, n.nid ASC", 0, $limit, array(':enabled_types' => $enabled_types), array('target' => 'replica'));
   $nids = $result->fetchCol();
   if (!$nids) {
     return;

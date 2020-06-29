@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Search query extender and helper functions.
@@ -526,7 +525,7 @@ class SearchQuery extends SelectQueryExtender {
     $expressions = array();
 
     // Add the sid as the only field and count them as a subquery.
-    $count = db_select($inner->fields('i', array('sid')), NULL, array('target' => 'slave'));
+    $count = db_select($inner->fields('i', array('sid')), NULL, array('target' => 'replica'));
 
     // Add the COUNT() expression.
     $count->addExpression('COUNT(*)');

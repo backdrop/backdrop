@@ -2281,26 +2281,33 @@ function system_init() {
   backdrop_add_css($path . '/css/system.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
   backdrop_add_css($path . '/css/messages.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
 
-  // Ignore slave database servers for this request.
+  // Ignore replica database servers for this request.
   //
   // In Backdrop's distributed database structure, new data is written to the
-  // master and then propagated to the slave servers.  This means there is a
-  // lag between when data is written to the master and when it is available on
-  // the slave. At these times, we will want to avoid using a slave server
+  // primary and then propagated to the replica servers.  This means there is a
+  // lag between when data is written to the primary and when it is available on
+  // the replica. At these times, we will want to avoid using a replica server
   // temporarily. For example, if a user posts a new node then we want to
-  // disable the slave server for that user temporarily to allow the slave
+  // disable the replica server for that user temporarily to allow the replica
   // server to catch up. That way, that user will see their changes immediately
-  // while for other users we still get the benefits of having a slave server,
-  // just with slightly stale data.  Code that wants to disable the slave
-  // server should use the db_ignore_slave() function to set
-  // $_SESSION['ignore_slave_server'] to the timestamp after which the slave
+  // while for other users we still get the benefits of having a replica server,
+  // just with slightly stale data.  Code that wants to disable the replica
+  // server should use the db_ignore_replica() function to set
+  // $_SESSION['ignore_replica_server'] to the timestamp after which the replica
   // can be re-enabled.
+
+  // @todo remove this backwards-compatible session variable wrapper in 2.0.
   if (isset($_SESSION['ignore_slave_server'])) {
-    if ($_SESSION['ignore_slave_server'] >= REQUEST_TIME) {
-      Database::ignoreTarget('default', 'slave');
+    $_SESSION['ignore_replica_server'] = $_SESSION['ignore_slave_server'];
+    unset($_SESSION['ignore_slave_server']);
+  }
+
+  if (isset($_SESSION['ignore_replica_server'])) {
+    if ($_SESSION['ignore_replica_server'] >= REQUEST_TIME) {
+      Database::ignoreTarget('default', 'replica');
     }
     else {
-      unset($_SESSION['ignore_slave_server']);
+      unset($_SESSION['ignore_replica_server']);
     }
   }
 
@@ -3077,7 +3084,7 @@ function _system_rebuild_theme_data() {
     }
   }
 
-  // Now that we've established all our master themes, go back and fill in data
+  // Now that we've established all our base themes, go back and fill in data
   // for subthemes.
   foreach ($sub_themes as $key) {
     $themes[$key]->base_themes = backdrop_find_base_themes($themes, $key);
@@ -4144,7 +4151,7 @@ function path_autocomplete($string = '') {
                 $found_match = TRUE;
                 $view_title = $display->display_options['title'];
               }
-              // Master title.
+              // Default title.
               elseif (!empty($view->display['default']->display_options['title']) && stripos($view->display['default']->display_options['title'], $string) !== FALSE) {
                 $found_match = TRUE;
                 $view_title = $view->display['default']->display_options['title'];
