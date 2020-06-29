@@ -364,6 +364,7 @@ function system_theme_disable_confirm_submit($form, &$form_state) {
  * Menu callback; Set the default theme.
  */
 function system_theme_default() {
+  $config = config('system.core');
   if (isset($_REQUEST['theme']) && isset($_REQUEST['token']) && backdrop_valid_token($_REQUEST['token'], 'system-theme-operation-link')) {
     $theme = $_REQUEST['theme'];
     // Get current list of themes.
@@ -375,8 +376,9 @@ function system_theme_default() {
       if (empty($themes[$theme]->status)) {
         theme_enable(array($theme));
       }
-      // Set the default theme.
-      config_set('system.core', 'theme_default', $theme);
+      // Set the theme to be the default theme.
+      $config->set('theme_default', $theme);
+      $config->save();
 
       // Rebuild the menu. This duplicates the menu_rebuild() in theme_enable().
       // However, modules must know the current default theme in order to use
@@ -385,13 +387,14 @@ function system_theme_default() {
       // race condition where the theme is default but not enabled.
       menu_rebuild();
 
-      // The status message depends on whether an admin theme is currently in
-      // use: a value of 0 means the admin theme is set to be the default theme.
-      $admin_theme = config_get('system.core', 'admin_theme');
+      $admin_theme = $config->get('admin_theme');
+      // The status message depends on whether the admin theme was set to be the
+      // same as the default theme.
+      $admin_theme_same_as_default = $config->get('admin_theme_same_as_default');
 
       // If the admin theme is set to a different theme than the one the user
       // has just switched to, show an info message to explain why.
-      if ($admin_theme && $admin_theme != $theme) {
+      if ($admin_theme_same_as_default == FALSE && $admin_theme != $theme) {
         backdrop_set_message(t('%theme is now the default theme for all non-administrative pages.', array('%theme' => $themes[$theme]->info['name'])));
         backdrop_set_message(t('The <a href="@admin_theme_setting">administration theme</a> is still set to the %admin_theme theme.', array(
           '%admin_theme' => $themes[$admin_theme]->info['name'],
