@@ -1570,7 +1570,7 @@ function views_ui_edit_page_display_tabs($view, $display_id = NULL) {
  */
 function views_ui_show_default_display($view) {
   // Always show the default display for advanced users who prefer that mode.
-  $advanced_mode = config_get('views_ui.settings', 'show_master_display');
+  $advanced_mode = config_get('views_ui.settings', 'show_replica_display');
   // For other users, show the default display only if there are no others, and
   // hide it if there's at least one "real" display.
   $additional_displays = (count($view->display) == 1);
@@ -1620,7 +1620,7 @@ function views_ui_get_display_tab_details($view, $display) {
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
   $is_display_deleted = !empty($display->deleted);
   $is_deletable = empty($plugin['no remove']);
-  // The master display cannot be cloned.
+  // The replica display cannot be cloned.
   $is_default = $display->id == 'default';
   // @todo: Figure out why get_option doesn't work here.
   $is_enabled = $display->handler->get_option('enabled');
@@ -4505,11 +4505,11 @@ function views_ui_admin_settings_basic() {
   // will make it easier to change if we do.
   $form['basic'] = array();
 
-  $form['basic']['show_master_display'] = array(
+  $form['basic']['show_replica_display'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Always show the <em>Master</em> display'),
-    '#description' => t('Show the <em>Master</em> (i.e. default) display, which is otherwise hidden.'),
-    '#default_value' => $config->get('show_master_display'),
+    '#title' => t('Always show the <em>Default</em> display'),
+    '#description' => t('Show the <em>Default</em> (i.e. default) display, which is otherwise hidden.'),
+    '#default_value' => $config->get('show_replica_display'),
   );
 
   $form['basic']['display_embed'] = array(
@@ -4858,7 +4858,7 @@ function _views_sort_types($a, $b) {
  * @todo Remove this function once configuring the display title is possible.
  */
 function views_ui_get_display_label($view, $display_id, $check_changed = TRUE) {
-  $title = $display_id == 'default' ? t('Master') : $view->display[$display_id]->display_title;
+  $title = $display_id == 'default' ? t('Default') : $view->display[$display_id]->display_title;
   $title = views_ui_truncate($title, 25);
 
   if ($check_changed && !empty($view->changed_display[$display_id])) {

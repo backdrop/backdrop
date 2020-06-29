@@ -1,6 +1,4 @@
 <?php
-
-
 /**
  * @addtogroup updates-7.x-to-1.x
  * @{
@@ -11,7 +9,7 @@
  */
 function views_ui_update_1000() {
   $update_variables = array(
-    'views_ui_show_master_display' => FALSE,
+    'views_ui_show_default_display' => FALSE,
     'views_ui_show_sql_query' => FALSE,
     'views_ui_show_preview_information' => FALSE,
     'views_ui_show_sql_query_where' => 'above',
@@ -36,6 +34,17 @@ function views_ui_update_1000() {
   db_delete('variable')
     ->condition('name', $delete_variables, 'IN')
     ->execute();
+}
+
+/**
+ * Rename the 'always show master' display setting to 'always show default'.
+ */
+function views_ui_update_1001() {
+  $config = config('views_ui.settings');
+  $value = $config->get('views_ui_show_master_display');
+  $config->set('views_ui_show_default_display', $value);
+  $config->clear('views_ui_show_master_display');
+  $config->save();
 }
 
 /**

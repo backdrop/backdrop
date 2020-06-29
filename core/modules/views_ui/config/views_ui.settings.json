@@ -1,6 +1,6 @@
 {
     "_config_name": "views_ui.settings",
-    "show_master_display": false,
+    "show_default_display": false,
     "show_sql_query": false,
     "show_preview_information": false,
     "show_sql_query_where": "above",
