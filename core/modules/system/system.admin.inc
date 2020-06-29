@@ -394,7 +394,7 @@ function system_theme_default() {
 
       // If the admin theme is set to a different theme than the one the user
       // has just switched to, show an info message to explain why.
-      if ($admin_theme_same_as_default == FALSE && $admin_theme != $theme) {
+      if ($admin_theme_same_as_default == FALSE && $admin_theme && $admin_theme != $theme) {
         backdrop_set_message(t('%theme is now the default theme for all non-administrative pages.', array('%theme' => $themes[$theme]->info['name'])));
         backdrop_set_message(t('The <a href="@admin_theme_setting">administration theme</a> is still set to the %admin_theme theme.', array(
           '%admin_theme' => $themes[$admin_theme]->info['name'],
