@@ -10,6 +10,7 @@
     "action_recursion_limit": 35,
     "active_menus_default": [],
     "admin_theme": "",
+    "admin_theme_same_as_default": 0,
     "anonymous": "Anonymous",
     "cache": 0,
     "canonical_secure": 0,

@@ -234,14 +234,27 @@ function system_themes_admin_form($form, &$form_state, $theme_options) {
   // Administration theme settings.
   $form['admin_theme'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Administration theme'),
+    '#title' => t('Administration theme settings'),
+  );
+  $form['admin_theme']['admin_theme_same_as_default'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Always use the default theme as the administration theme'),
+    '#default_value' => config_get('system.core', 'admin_theme_same_as_default'),
   );
   $form['admin_theme']['admin_theme'] = array(
     '#type' => 'select',
-    '#options' => array(0 => t('Default theme')) + $theme_options,
     '#title' => t('Administration theme'),
-    '#description' => t('Choose "Default theme" to always use the same theme as the rest of the site.'),
+    '#options' => $theme_options,
     '#default_value' => config_get('system.core', 'admin_theme'),
+    '#states' => array(
+      'visible' => array(
+        array(
+          // Hide this checkbox if the "Always use the default theme..." option
+          // has been selected.
+          ':input[name="admin_theme_same_as_default"]' => array('checked' => FALSE),
+        ),
+      ),
+    ),
   );
   $form['admin_theme']['actions'] = array('#type' => 'actions');
   $form['admin_theme']['actions']['submit'] = array(
@@ -261,18 +274,21 @@ function system_themes_admin_form_submit($form, &$form_state) {
   $config = config('system.core');
   $current_default_theme = $config->get('theme_default');
   $current_admin_theme = $config->get('admin_theme');
+  $current_admin_theme_same_as_default = $config->get('admin_theme_same_as_default');
   $new_admin_theme = $form_state['values']['admin_theme'];
+  $admin_theme_same_as_default = $form_state['values']['admin_theme_same_as_default'];
 
-  if (!$new_admin_theme) {
+  if ($admin_theme_same_as_default) {
     $current_default_theme_name = $themes[$current_default_theme]->info['name'];
-    backdrop_set_message(t('The administration theme will be the same as the rest of the site (currently %default_theme).', array('%default_theme' => $current_default_theme_name)));
+    backdrop_set_message(t('The administration theme is set to be the same as the rest of the site (currently %default_theme).', array('%default_theme' => $current_default_theme_name)));
   }
-  elseif ($current_admin_theme != $new_admin_theme) {
+  elseif ($current_admin_theme != $new_admin_theme || $admin_theme_same_as_default != $current_admin_theme_same_as_default) {
     $new_admin_theme_name = $themes[$new_admin_theme]->info['name'];
     backdrop_set_message(t('The administration theme has been changed to %admin_theme.', array('%admin_theme' => $new_admin_theme_name)));
   }
 
   $config->set('admin_theme', $new_admin_theme);
+  $config->set('admin_theme_same_as_default', $admin_theme_same_as_default);
   $config->save();
 }
 

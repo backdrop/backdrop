@@ -99,13 +99,6 @@ function standard_install() {
   $full_html_format = (object) $full_html_format;
   filter_format_save($full_html_format);
 
-  // Enable Basis theme and set it as default theme instead of Stark.
-  // @see system_install()
-  $default_theme = 'basis';
-  config_set('system.core', 'theme_default', $default_theme);
-  theme_enable(array($default_theme));
-  theme_disable(array('stark'));
-
   // Set front page to "home".
   config_set('system.core', 'site_frontpage', 'home');
   backdrop_flush_all_caches();
@@ -169,7 +162,8 @@ function standard_install() {
     ->set('node_post_pattern', 'posts/[node:title]')
     ->save();
 
-  // Enable user picture support and set the default to a square thumbnail option.
+  // Enable user picture support and set the default to a square thumbnail
+  // option.
   config('system.core')
     ->set('user_pictures', '1')
     ->set('user_picture_dimensions', '1024x1024')
@@ -223,7 +217,8 @@ function standard_install() {
   );
   menu_link_save($item);
 
-  // Create a default vocabulary named "Tags", enabled for the 'post' content type.
+  // Create a default vocabulary named "Tags", enabled for the 'post' content
+  // type.
   $description = st('Use tags to group posts on similar topics into categories.');
   $vocabulary = new TaxonomyVocabulary(array(
     'name' => st('Tags'),
@@ -272,9 +267,9 @@ function standard_install() {
   );
   field_create_instance($instance);
 
-
-  // Create an image field named "Image", enabled for the 'post' content type.
-  // Many of the following values will be defaulted, they're included here as an illustrative examples.
+  // Create an image field named "Image", enabled for the "Post" content type.
+  // Many of the following values will be defaulted; they're included here as an
+  // illustrative example.
   // See https://api.backdropcms.org/api/function/field_create_field/1
 
   $field = array(
@@ -293,7 +288,6 @@ function standard_install() {
     ),
   );
   field_create_field($field);
-
 
   // Many of the following values will be defaulted, they're included here as an illustrative examples.
   // See https://api.backdropcms.org/api/function/field_create_instance/1
@@ -440,17 +434,25 @@ function standard_install() {
   // Update the menu router information.
   menu_rebuild();
 
-  // Enable the admin theme.
-  db_update('system')
-    ->fields(array('status' => 1))
-    ->condition('type', 'theme')
-    ->condition('name', 'seven')
-    ->execute();
-  config_set('system.core', 'admin_theme', 'seven');
-  config_set('system.core', 'node_admin_theme', '1');
+  $default_theme = 'basis';
+  $admin_theme = 'seven';
+  // Enable the Basis and Seven themes, and disable the Stark theme.
+  theme_enable(array($default_theme, $admin_theme));
+  theme_disable(array('stark'));
+  config('system.core')
+    // Set the Basis theme as default theme.
+    // @see system_install()
+    ->set('theme_default', $default_theme)
+    // Set the Seven theme as the admin theme.
+    ->set('admin_theme', $admin_theme)
+    ->set('admin_theme_same_as_default', 0)
+    ->set('node_admin_theme', 1)
+    ->save();
 
   // Enable the page cache and aggregation.
-  config_set('system.core', 'preprocess_css', '1');
-  config_set('system.core', 'preprocess_js', '1');
-  config_set('system.core', 'cache', '1');
+  config('system.core')
+    ->set('preprocess_css', 1)
+    ->set('preprocess_js', 1)
+    ->set('cache', 1)
+    ->save();
 }

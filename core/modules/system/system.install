@@ -3124,6 +3124,25 @@ function system_update_1072() {
 }
 
 /**
+ * Set admin_theme_same_as_default on existing sites, if not already set.
+ */
+function system_update_1073() {
+  $config = config('system.core');
+  // Only set a value if not already set.
+  if ($config->get('admin_theme_same_as_default' == NULL) {
+    // If admin_theme is set to either the numeric 0 or the string "0".
+    if ($config->get('admin_theme') == FALSE) {
+      $config->set('admin_theme_same_as_default', 1);
+    }
+    else {
+      $config->set('admin_theme_same_as_default', 0);
+    }
+
+  }
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

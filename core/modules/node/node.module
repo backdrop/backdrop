@@ -2619,9 +2619,9 @@ function node_form_system_themes_admin_form_alter(&$form, &$form_state, $form_id
     '#states' => array(
       'visible' => array(
         array(
-          // Hide this checkbox if "Default theme" has been selected from the
-          // "Administration theme" dropdown menu.
-          ':input[name="admin_theme"]' => array('!value' => 0),
+          // Hide this checkbox if the "Always use the default theme..." option
+          // has been selected.
+          ':input[name="admin_theme_same_as_default"]' => array('checked' => FALSE),
         ),
       ),
     ),

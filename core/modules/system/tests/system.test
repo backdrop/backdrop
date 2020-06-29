@@ -1709,6 +1709,7 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     config_set('system.core', 'theme_default', 'stark');
     // Enable an administration theme and show it on the node admin pages.
     $edit = array(
+      'admin_theme_same_as_default' => FALSE,
       'admin_theme' => 'seven',
       'node_admin_theme' => TRUE,
     );
@@ -1741,7 +1742,7 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
     // Reset to the default theme settings.
     config_set('system.core', 'theme_default', 'basis');
     $edit = array(
-      'admin_theme' => '0',
+      'admin_theme_same_as_default' => TRUE,
       'node_admin_theme' => FALSE,
     );
     $this->backdropPost('admin/appearance', $edit, t('Save configuration'));
