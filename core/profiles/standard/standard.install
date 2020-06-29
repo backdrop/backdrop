@@ -440,7 +440,7 @@ function standard_install() {
   theme_enable(array($default_theme, $admin_theme));
   theme_disable(array('stark'));
   config('system.core')
-    // Set the Basis theme as default theme.
+    // Set the Basis theme as the default theme.
     // @see system_install()
     ->set('theme_default', $default_theme)
     // Set the Seven theme as the admin theme.

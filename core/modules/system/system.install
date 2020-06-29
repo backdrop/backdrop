@@ -3129,7 +3129,7 @@ function system_update_1072() {
 function system_update_1073() {
   $config = config('system.core');
   // Only set a value if not already set.
-  if ($config->get('admin_theme_same_as_default' == NULL) {
+  if ($config->get('admin_theme_same_as_default' == NULL)) {
     // If admin_theme is set to either the numeric 0 or the string "0".
     if ($config->get('admin_theme') == FALSE) {
       $config->set('admin_theme_same_as_default', 1);
