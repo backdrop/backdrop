@@ -110,16 +110,20 @@
 .layout-dialog {
   max-width: 600px;
 }
-.layout-block-list {
+.dialog-open .layout-block-list {
   max-height: 300px;
   overflow: auto;
   padding-right: 5px; /* LTR */
 }
-[dir="rtl"] .layout-block-list {
+[dir="rtl"] .dialog-open .layout-block-list {
   padding-right: 0;
   padding-left: 5px;
 }
-.layout-block-add-row.form-item {
+.dialog-open .layout-block-list-wrapper {
+  border: 1px solid #CCC;
+  border-bottom: none;
+}
+.dialog-open .layout-block-add-row.form-item {
   padding: 5px;
   border-bottom: 1px solid #CCC;
   margin: 0;
@@ -127,9 +131,14 @@
 .layout-block-add-row.odd {
   background-color: #F3F4EE;
 }
-.layout-block-list-wrapper {
-  border: 1px solid #CCC;
-  border-bottom: none;
+.layout-block-add-row {
+  color: #666666;
+}
+.layout-block-add-row .description {
+  color: #999999;
+}
+.layout-block-add-row.missing-required-contexts .requirement-prefix {
+  color: #800800;
 }
 
 /* Layout columns */
@@ -160,8 +169,8 @@
 }
 [dir="rtl"] .layout-editor-region-title .label {
   float: right;
-  padding-right: 4px;
   padding-left: 12px;
+  padding-right: 4px;
 }
 .layout-editor-region-content {
   min-height: 40px;

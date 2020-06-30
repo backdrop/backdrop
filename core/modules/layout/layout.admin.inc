@@ -1032,6 +1032,7 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
 
   foreach ($block_list as $key => $block_info) {
     $required_contexts = isset($block_info['required contexts']) ? $block_info['required contexts'] : array();
+    $description = isset($block_info['description']) ? $block_info['description'] : NULL;
     if ($layout->hasContexts($required_contexts)) {
       $link = l(
         $block_info['info'],
@@ -1044,7 +1045,7 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
           )
         )
       );
-      $description = isset($block_info['description']) ? $block_info['description'] : NULL;
+      $requirements_class = 'has-required-contexts';
     }
     else {
       // Remove the main page content block since it's special.
@@ -1053,31 +1054,25 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
       }
 
       $link = $block_info['info'];
-      $description = isset($block_info['description']) ? $block_info['description'] . ' ': '';
+      $requirements_class = 'missing-required-contexts';
 
       if (count($required_contexts) == 1) {
         $required_context = reset($required_contexts);
-        switch($required_context) {
-          case 'node':
-            $requirements_info = t('<strong>Requires:</strong> A layout with a <em>node</em> context available, for example: on the path node/%.');
-            break;
-          case 'term':
-            $requirements_info = t('<strong>Requires:</strong> A layout with a <em>user</em> context available, for example: on the path user/%.');
-            break;
-          case 'term':
-            $requirements_info = t('<strong>Requires:</strong> A layout with a <em>term</em> context available, for example: on the path taxonomy/term/%.');
-            break;
-            // Unknown path, not safe to use as an example.
-          default:
-            $requirements_info = t('<strong>Requires:</strong> A layout with a <em>!context</em> context available.', array('!context' => $required_context));;
-            break;
+        $context_info = layout_get_context_info($required_context);
+        // Grab the first value in the menu paths, to use as an example.
+        $example_path = $context_info['menu paths'][0];
+
+        if (isset($example_path)) {
+          $required_contexts[$required_context] .= ' (' . t('for example: on the path <code>@example_path</code>', array('@example_path' => $example_path)) . ')';
         }
       }
       else {
         // Multiple contexts required.
-        $context_string = implode(', ', array_keys($block_info['required contexts']));
-        $requirements_info = t('<strong>Requires:</strong> A layout with the contexts: !contexts available', array('!contexts' => $context_string));;
+        $required_contexts = array_keys($block_info['required contexts']);
       }
+      $requirements_info = '<span class="requirement-prefix">' . t('Requires') . ':</span>';
+      $requirements_info .= ' ' . t('A layout with the following contexts available:');
+      $requirements_info .= theme('item_list', array('items' => $required_contexts));
       $description .= '<div class="requirement">' . $requirements_info . '</div>';
     }
 
@@ -1085,9 +1080,13 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
       '#type' => 'item',
       '#markup' => $link,
       '#description' => $description,
-      '#wrapper_attributes' => array('class' => array('layout-block-add-row'))
+      '#wrapper_attributes' => array('class' => array('layout-block-add-row', $requirements_class))
     );
   }
+
+  // Ensure that layout-specific styles are loaded when there is no JavaScript
+  // available.
+  $output['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
 
   return $output;
 }
