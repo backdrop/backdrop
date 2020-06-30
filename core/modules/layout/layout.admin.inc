@@ -1060,9 +1060,9 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
         $required_context = reset($required_contexts);
         $context_info = layout_get_context_info($required_context);
         // Grab the first value in the menu paths, to use as an example.
-        $example_path = $context_info['menu paths'][0];
+        $example_path = isset($context_info['menu paths']) ? $context_info['menu paths'][0] : FALSE;
 
-        if (isset($example_path)) {
+        if ($example_path) {
           $required_contexts[$required_context] .= ' (' . t('for example: on the path <code>@example_path</code>', array('@example_path' => $example_path)) . ')';
         }
       }
