@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.16.x-dev');
+define('BACKDROP_VERSION', '1.17.x-dev');
 
 /**
  * Core API compatibility.
@@ -2014,7 +2014,7 @@ function t($string, array $args = array(), array $options = array()) {
 function format_string($string, array $args = array()) {
   // Transform arguments before inserting them.
   foreach ($args as $key => $value) {
-    switch ($key[0]) {
+    switch (substr($key, 0, 1)) {
       case '@':
         // Escaped only.
         $args[$key] = check_plain($value);
@@ -3258,7 +3258,10 @@ function _backdrop_bootstrap_sanitize_request() {
     }
 
     // If there is a query string, check its query parameters.
-    $destination_parts = backdrop_parse_url($_GET['destination']);
+    if (isset($_GET['destination'])) {
+      $destination_parts = backdrop_parse_url($_GET['destination']);
+    }
+
     if (!empty($destination_parts['query'])) {
       $sanitized_keys = _backdrop_bootstrap_sanitize_input($destination_parts['query'], $whitelist);
     }
@@ -3289,7 +3292,7 @@ function _backdrop_bootstrap_sanitize_input(&$input, $whitelist = array()) {
 
   if (is_array($input)) {
     foreach ($input as $key => $value) {
-      if ($key !== '' && $key[0] === '#' && !in_array($key, $whitelist, TRUE)) {
+      if ($key !== '' && substr($key, 0, 1) === '#' && !in_array($key, $whitelist, TRUE)) {
         unset($input[$key]);
         $sanitized_keys[] = $key;
       }

@@ -121,6 +121,16 @@ class FileTestHelper extends BackdropWebTestCase {
     }
 
     file_type_save($type);
+
+    file_display_save($type->type, 'default', array(
+      'formatter' => 'file_field_file_download_link',
+      'settings' => array(
+        'file_field_file_download_link' => array(
+          'text' => 'Download [file:name]',
+        ),
+      ),
+    ));
+
     return $type;
   }
 
@@ -501,7 +511,7 @@ class FileManagedFileElementTestCase extends FileTestHelper {
           'form_token' => 'invalid token',
         );
         $this->backdropPost($path, $edit, t('Save'));
-        $this->assertText('The form has become outdated. Copy any unsaved work in the form below');
+        $this->assertText('The form has become outdated.');
         $last_fid = $this->getLastFileId();
         $this->assertEqual($last_fid_prior, $last_fid, 'File was not saved when uploaded with an invalid form token.');
 
@@ -581,7 +591,7 @@ class FileManagedFileElementTestCase extends FileTestHelper {
         $edit = array('files[' . $input_base_name . ']' => backdrop_realpath($test_file->uri));
 
         // Get the Ajax settings bound to the triggering element.
-        $xpath = '//*[@name="' . $input_base_name . '_upload_button' . '"]';
+        $xpath = '//*[@name="' . $input_base_name . '_upload_button"]';
         $element = $this->xpath($xpath);
         $element_id = (string) $element[0]['id'];
         $ajax_settings = $this->backdropSettings['ajax'][$element_id];

@@ -22,7 +22,8 @@ function color_theme() {
 function color_form_system_theme_settings_alter(&$form, &$form_state) {
   if (isset($form_state['build_info']['args'][0])
       && ($theme_name = $form_state['build_info']['args'][0])
-      && ($theme_info = color_get_info($theme_name))) {
+      && ($theme_info = color_get_info($theme_name))
+      && isset($theme_info['fields'])) {
     $form['color'] = array(
       '#type' => 'fieldset',
       '#title' => t('Color scheme'),
@@ -171,7 +172,6 @@ function color_get_color_element($theme_name, $color_name, &$form) {
  */
 function color_css_alter(&$css) {
   global $theme_key;
-  $themes = list_themes();
   $preview_theme = _color_preview_theme();
   if ($preview_theme) {
     // Convert stylesheets for the preview.
@@ -181,7 +181,7 @@ function color_css_alter(&$css) {
       if (isset($_SESSION['color'][$theme_key])) {
         $preview_data = $_SESSION['color'][$theme_key];
         $paths = array(
-          'source' => backdrop_get_path('theme', $preview_theme) . '/',
+          'source' => $theme_path . '/',
           'map' => array(),
         );
         foreach ($theme_info['css'] as $file) {
@@ -212,17 +212,22 @@ function color_css_alter(&$css) {
 
     if (!empty($color_paths)) {
       $info = color_get_info($theme_key);
-      foreach($color_paths as $color_path) {
 
-        foreach ($info['css'] as $file) {
-          $old_path = _color_get_file_path($file, $theme_key);
-          // Color module currently requires unique file names to be used,
-          // which allows us to compare different file paths.
-          if (backdrop_basename($old_path) == backdrop_basename($color_path)) {
-            // Replace the path to the new css file.
-            // This keeps the order of the stylesheets intact.
-            $css[$old_path]['data'] = $color_path;
-          }
+      // Get the original paths of the  files we are replacing.
+      $old_paths = array();
+      foreach ($info['css'] as $file) {
+        // The files are already passed through backdrop_basename() in
+        // color_get_info, so we don't need to do that here.
+        $old_paths[$file] = _color_get_file_path($file, $theme_key);
+      }
+
+      // Replace the stylesheets if there are matching files.
+      foreach($color_paths as $color_path) {
+        $basename = backdrop_basename($color_path);
+        if (array_key_exists($basename, $old_paths)) {
+          // Replace the path to the new css file.
+          // This keeps the order of the stylesheets intact.
+          $css[$old_paths[$basename]]['data'] = $color_path;
         }
       }
     }
@@ -525,6 +530,45 @@ function color_scheme_form_submit($form, &$form_state) {
 }
 
 /**
+ * Implements hook_flush_caches().
+ */
+function color_flush_caches() {
+  // Rebuild all color palettes.
+  color_rebuild_settings();
+}
+
+/**
+ * Rebuild color scheme info.
+ */
+function color_rebuild_settings($theme_name = NULL) {
+  $themes = array();
+  if ($theme_name) {
+    $themes = array($theme_name);
+  }
+  else {
+    foreach (list_themes() as $key => $data) {
+      if ($data->status) {
+        $themes[] = $key;
+      }
+    }
+  }
+
+  foreach ($themes as $theme) {
+    $theme_config_name = $theme . '.settings';
+    $theme_config = config($theme_config_name);
+    if ($theme_config && $new_color_config = $theme_config->get('color')) {
+      $color_info = color_get_info($theme);
+      if ($color_info) {
+        $palette = isset($new_color_config['palette']) ? $new_color_config['palette'] : NULL;
+        $new_color_info = color_save_configuration($theme, $color_info, $palette);
+        $theme_config->set('color', $new_color_info);
+        $theme_config->save();
+      }
+    }
+  }
+}
+
+/**
  * Generates the necessary CSS and images based on a color palette.
  *
  * @param $theme_name
@@ -615,7 +659,6 @@ function color_save_configuration($theme_name, $theme_info, $palette) {
  * Rewrites the stylesheet to match the colors in the palette.
  */
 function _color_rewrite_stylesheet($theme, &$info, &$paths, $palette, $style) {
-  $themes = list_themes();
   // Prepare color conversion table.
   $conversion = $palette;
   foreach ($conversion as $k => $v) {
@@ -699,21 +742,27 @@ function _color_save_stylesheet($file, $style, &$paths) {
  *
  * @param $filename
  *   The file name that we are searching for.
- * @param $theme
+ * @param $theme_name
  *   The name of the theme that is being modified.
  *
  * @return string
  *   Returns the original file path of the CSS file.
  */
 function _color_get_file_path($filename, $theme_name) {
+  static $basenames = array();
+
   $themes = list_themes();
   $theme = $themes[$theme_name];
 
-  $theme_path = backdrop_get_path('theme', $theme_name);
+  $basename = backdrop_basename($filename);
+
   if (isset($theme->stylesheets)) {
     foreach ($theme->stylesheets as $group_name => $group) {
       foreach ($group as $file) {
-        if (backdrop_basename($filename) === backdrop_basename($file)) {
+        if (!isset($basenames[$theme_name][$group_name][$file])) {
+          $basenames[$theme_name][$group_name][$file] = backdrop_basename($file);
+        }
+        if ($basename === $basenames[$theme_name][$group_name][$file]) {
           return $file;
         }
       }
@@ -730,7 +779,7 @@ function _color_get_file_path($filename, $theme_name) {
  *
  * @param $filename
  *   The file name that we are searching for.
- * @param $theme
+ * @param $theme_name
  *   The name of the theme that is being modified.
  *
  * @return string
@@ -740,11 +789,12 @@ function _color_get_theme_from_file($filename, $theme_name) {
   $themes = list_themes();
   $theme = $themes[$theme_name];
 
+  $basename = backdrop_basename($filename);
+
   if (isset($theme->stylesheets)) {
-    $theme_path = backdrop_get_path('theme', $theme_name);
     foreach ($theme->stylesheets as $group_name => $group) {
       foreach ($group as $file) {
-        if (backdrop_basename($filename) === backdrop_basename($file)) {
+        if ($basename === backdrop_basename($file)) {
           return $theme_name;
         }
       }

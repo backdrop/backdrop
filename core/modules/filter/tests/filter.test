@@ -465,6 +465,33 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit, t('Update'));
     $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Filtered HTML')));
+
+    // The form does save permitted value and it appears in the config json.
+    $length = 88;
+    $edit_setting = array(
+      'filter_url_length' => $length,
+    );
+    $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit_setting, t('Update'));
+    $this->backdropPost('admin/config/content/formats/filtered_html', array(), t('Save configuration'));
+    $saved_length = config_get('filter.format.filtered_html', 'filters.filter_url.settings.filter_url_length');
+    $this->assertEqual($saved_length, $length, 'Filter url length saved to config file.');
+
+    // Make sure consecutive settings form submits do not discard
+    // previously added settings.
+    $length = 102;
+    $edit_url = array(
+      'filter_url_length' => $length,
+    );
+    $edit_html = array(
+      'filter_html_nofollow' => TRUE,
+    );
+    $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit_url, t('Update'));
+    $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_html', $edit_html, t('Update'));
+    $this->backdropPost('admin/config/content/formats/filtered_html', array(), t('Save configuration'));
+    $url_length = config_get('filter.format.filtered_html', 'filters.filter_url.settings.filter_url_length');
+    $this->assertEqual($url_length, $length, 'Filter url not overridden by consecutive form post.');
+    $nofollow = config_get('filter.format.filtered_html', 'filters.filter_html.settings.filter_html_nofollow');
+    $this->assertTrue($nofollow, 'Consecutive settings form post saved correctly');
   }
 }
 
@@ -1625,7 +1652,7 @@ www.example.com with a newline in comments -->
         }
         if (!$success) {
           $this->verbose('Source:<pre>' . check_plain(var_export($source, TRUE)) . '</pre>'
-            . '<hr />' . 'Result:<pre>' . check_plain(var_export($result, TRUE)) . '</pre>'
+            . '<hr />Result:<pre>' . check_plain(var_export($result, TRUE)) . '</pre>'
             . '<hr />' . ($is_expected ? 'Expected:' : 'Not expected:')
             . '<pre>' . check_plain(var_export($value, TRUE)) . '</pre>'
           );
