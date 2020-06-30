@@ -106,6 +106,7 @@ class views_handler_field_bulk_form extends views_handler_field {
         '#title_display' => 'invisible',
         '#return_value' => $row->{$this->field_alias},
         '#default_value' => !empty($form_state['values'][$this->options['id']][$row_index]) ? 1 : NULL,
+        '#attributes' => array('data-tableselect-id' => $this->options['id'])
       );
     }
 
@@ -117,13 +118,11 @@ class views_handler_field_bulk_form extends views_handler_field {
     // Build the bulk operations action widget for the header.
     // Allow themes to apply .container-inline on this separate container.
     $form['header'][$this->options['id']] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Operations'),
+      '#type' => 'container',
       '#attributes' => array('class' => array('views-bulk-form')),
-      '#id' => NULL,
     );
     $form['header'][$this->options['id']]['action'] = array(
-      '#title' => t('Operation'),
+      '#title' => t('Action'),
       '#title_display' => 'none',
       '#type' => 'select',
       '#options' => $this->get_bulk_options(),
@@ -168,6 +167,9 @@ class views_handler_field_bulk_form extends views_handler_field {
         if (isset($context['redirect'])) {
           actions_redirect($context['redirect']);
         }
+      }
+      else {
+        backdrop_set_message(t('No items selected.'), 'error');
       }
 
       if ($count) {

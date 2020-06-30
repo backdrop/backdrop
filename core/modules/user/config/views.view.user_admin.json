@@ -7,7 +7,7 @@
     "tag": "default",
     "disabled": false,
     "base_table": "users",
-    "human_name": "Administer users",
+    "human_name": "Administer user accounts",
     "core": "1.0-dev",
     "display": {
         "default": {
@@ -690,11 +690,11 @@
                         "exposed": true,
                         "expose": {
                             "operator_id": "name_op",
-                            "label": "Name",
+                            "label": "Username",
                             "description": "",
                             "use_operator": 0,
                             "operator": "name_op",
-                            "identifier": "name",
+                            "identifier": "username",
                             "required": 0,
                             "remember": 0,
                             "multiple": false,

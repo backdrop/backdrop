@@ -3,7 +3,7 @@
  * Stylesheet for the Field UI module.
  */
 
-/* 'Manage fields' and 'Manage display' overviews */
+/* 'Manage fields' and 'Manage displays' overviews */
 .field-ui-overview tr.add-new .label-input {
   float: left; /* LTR */
 }
@@ -41,7 +41,7 @@
   white-space: nowrap;
 }
 
-/* 'Manage display' overview */
+/* 'Manage displays' overview */
 .field-ui-overview .field-formatter-summary-cell {
   line-height: 1em;
 }
@@ -70,7 +70,7 @@
   font-weight: bold;
 }
 
-/* 'View modes' overview */
+/* 'Display modes' overview */
 .field-ui-view-modes tr.header td {
   background-color: #e9e8e8;
   font-weight: bold;

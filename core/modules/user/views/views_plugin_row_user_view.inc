@@ -31,7 +31,7 @@ class views_plugin_row_user_view extends views_plugin_row {
     $form['view_mode'] = array(
       '#type' => 'select',
       '#options' => $options,
-      '#title' => t('View mode'),
+      '#title' => t('Display mode'),
       '#default_value' => $this->options['view_mode'],
      );
     $form['help']['#type'] = 'help';

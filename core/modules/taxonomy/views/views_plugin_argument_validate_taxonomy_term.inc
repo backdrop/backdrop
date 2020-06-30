@@ -177,7 +177,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
         }
         $term = $query->execute()->fetchObject();
 
-        if ($term && (empty($vocabularies) || !empty($vocabularies[$term->machine_name]))) {
+        if ($term && (empty($vocabularies) || !empty($vocabularies[$term->vocabulary]))) {
           if ($type == 'convert') {
             $this->argument->argument = $term->tid;
           }
@@ -199,7 +199,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
 
       $query = db_select('taxonomy_term_data', 'td');
       $query->addTag('taxonomy_term_access');
-      $query->condition('tid', $args);
+      $query->condition('td.tid', $args);
       $query->addField('td', 'tid', 'tid');
       if (!empty($vocabularies)) {
         $query->condition('td.vocabulary', $vocabularies);

@@ -8,9 +8,9 @@
  * @defgroup drupal_compatibility Drupal compatibility layer.
  * @{
  * These functions and classes are wrappers around Backdrop functions that allow
- * for Drupal 7 modules to work with Backdrop easily. All of these functions
- * are made available if the "backdrop_drupal_compatibility" option is enabled
- * in your site's settings.php file.
+ * for Drupal 7 modules to work with Backdrop. All of these functions are made
+ * available if the "backdrop_drupal_compatibility" option is enabled in your
+ * site's settings.php file.
  */
 
 /**
@@ -2376,7 +2376,7 @@ function drupal_find_theme_functions($cache, $prefixes) {
 }
 
 /**
- * Allows themes and/or theme engines to easily discover overridden templates.
+ * Allows themes and/or theme engines to discover overridden templates.
  *
  * @deprecated since 1.0.0
  * @see backdrop_find_theme_templates()
@@ -2536,6 +2536,17 @@ function system_get_date_types($type = NULL) {
   }
 
   return $formats;
+}
+
+/**
+ * Drupal-compatible wrapper for creating safe CSS identifiers.
+ *
+ * @deprecated since 1.0.0
+ * @since 1.13.1 Function added.
+ */
+function views_clean_css_identifier($identifier, $filter = array(' ' => '-', '/' => '-', '[' => '-', ']' => '')) {
+  watchdog_deprecated_function('drupal', __FUNCTION__);
+  backdrop_clean_css_identifier($identifier, $filter);
 }
 
 /**

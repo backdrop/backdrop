@@ -42,7 +42,7 @@ function layout_page_callback() {
   }
 
   // Use the selected layout and render it.
-  $renderer = layout_create_renderer('standard', $layout);
+  $renderer = layout_create_renderer($layout->renderer_name, $layout);
   return $renderer->render();
 }
 

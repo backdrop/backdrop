@@ -125,7 +125,13 @@ function _update_build_layout_data() {
  * @see update_get_projects()
  */
 function _update_process_info_list(&$projects, $list, $project_type, $status) {
+  $admin_theme = config_get('system.core', 'admin_theme');
   foreach ($list as $file) {
+    // The admin theme is a special case. It should always be considered enabled
+    // for the purposes of update checking.
+    if ($file->name === $admin_theme) {
+      $file->status = TRUE;
+    }
     // A disabled base theme of an enabled sub-theme still has all of its code
     // run by the sub-theme, so we include it in our "enabled" projects list.
     if ($status && !$file->status && !empty($file->sub_themes)) {

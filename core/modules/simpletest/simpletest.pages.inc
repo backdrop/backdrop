@@ -167,7 +167,7 @@ function simpletest_result_form($form, &$form_state, $test_id) {
 
   $form['action']['filter'] = array(
     '#type' => 'select',
-    '#title' => 'Filter',
+    '#title' => t('Filter'),
     '#options' => array(
       'all' => t('All (@count)', array('@count' => count($filter['pass']) + count($filter['fail']))),
       'pass' => t('Pass (@count)', array('@count' => count($filter['pass']))),
@@ -271,10 +271,10 @@ function simpletest_result_status_image($status) {
 
   if (!isset($map)) {
     $map = array(
-      'pass' => theme('image', array('uri' => 'core/misc/watchdog-ok.png', 'width' => 18, 'height' => 18, 'alt' => t('Pass'))),
-      'fail' => theme('image', array('uri' => 'core/misc/watchdog-error.png', 'width' => 18, 'height' => 18, 'alt' => t('Fail'))),
-      'exception' => theme('image', array('uri' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('Exception'))),
-      'debug' => theme('image', array('uri' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('Debug'))),
+      'pass' => theme('image', array('path' => 'core/misc/watchdog-ok.png', 'width' => 18, 'height' => 18, 'alt' => t('Pass'))),
+      'fail' => theme('image', array('path' => 'core/misc/watchdog-error.png', 'width' => 18, 'height' => 18, 'alt' => t('Fail'))),
+      'exception' => theme('image', array('path' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('Exception'))),
+      'debug' => theme('image', array('path' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('Debug'))),
     );
   }
   if (isset($map[$status])) {
@@ -307,6 +307,12 @@ function simpletest_settings_form($form, &$form_state) {
     '#title' => t('Provide verbose information when running tests'),
     '#description' => t('The verbose data will be printed along with the standard assertions and is useful for debugging. The verbose data will be erased between each test suite run. The verbose data output is very detailed and should only be used when debugging.'),
     '#default_value' => $config->get('simpletest_verbose'),
+  );
+  $form['general']['simpletest_cache'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Cache installation profiles'),
+    '#description' => t('Instead of multiple installations of Backdrop once for each test, each installation profile is installed only once, and its initial state (database tables and config files) is cached and reused. If you are making database changes, you will need to clean the test environment for the changes to show up in the tests.'),
+    '#default_value' => $config->get('simpletest_cache'),
   );
 
   $form['httpauth'] = array(
@@ -362,6 +368,7 @@ function simpletest_settings_form_submit($form, &$form_state) {
   config('simpletest.settings')
     ->set('simpletest_clear_results', $form_state['values']['simpletest_clear_results'])
     ->set('simpletest_verbose', $form_state['values']['simpletest_verbose'])
+    ->set('simpletest_cache', $form_state['values']['simpletest_cache'])
     ->set('simpletest_method', $form_state['values']['simpletest_httpauth_method'])
     ->set('simpletest_username', $form_state['values']['simpletest_httpauth_username'])
     ->set('simpletest_password', $form_state['values']['simpletest_httpauth_password'])

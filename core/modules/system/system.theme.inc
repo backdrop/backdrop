@@ -112,7 +112,7 @@ function theme_system_themes_page($variables) {
 
       // Make sure to provide feedback on compatibility.
       if (!empty($theme->incompatible_core)) {
-        $output .= '<div class="incompatible">' . t('This version is not compatible with Backdrop CMS !core_version and should be replaced.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . '</div>';
+        $output .= '<div class="incompatible">' . t('This version is not compatible with Backdrop CMS !core_version.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . '</div>';
       }
       elseif (!empty($theme->incompatible_php)) {
         if (substr_count($theme->info['php'], '.') < 2) {
@@ -171,19 +171,18 @@ function theme_system_modules_fieldset($variables) {
     // Add the third column: module version number.
     $row[] = array('class' => array('version'), 'data' => backdrop_render($module['version']));
 
-    if ($requires || $required_by) {
-      $requirements .= ' <div class="requirements">';
-      if ($requires) {
-        $requirements .= '<div class="admin-requirements">' . t('Requires: !module-list', array('!module-list' => implode(', ', $module['#requires']))) . '</div>';
-      }
-      if ($required_by) {
-        $requirements .= '<div class="admin-requirements">' . t('Required by: !module-list', array('!module-list' => implode(', ', $module['#required_by']))) . '</div>';
-      }
-      $requirements .= '</div>';
-
-      // Build a requirements toggle.
-      $toggle .= ' <a class="requirements-toggle" href="#">' . t('more') . '</a>';
+    $requirements .= '<div class="requirements">';
+    if ($requires) {
+      $requirements .= '<div class="admin-requirements">' . t('Requires:') . ' ' . implode(', ', $module['#requires']) . '</div>';
     }
+    if ($required_by) {
+      $requirements .= '<div class="admin-requirements">' . t('Required by:') . ' ' . implode(', ', $module['#required_by']) . '</div>';
+    }
+    $requirements .= '<div class="admin-requirements table-filter-text-source">' . t('Tags:') . ' ' . backdrop_render($module['tags']) . '</div>';
+    $requirements .= '</div>';
+
+    // Build a requirements toggle.
+    $toggle .= ' <a class="requirements-toggle" href="#">' . t('more') . '<span class="arrow"></span></a>';
 
     // Add the description, along with any modules it requires.
     $details = '<div class="text table-filter-text-source"> ' . backdrop_render($module['description']) . $toggle . '</div>' . $requirements;
@@ -228,7 +227,7 @@ function theme_system_modules_incompatible($variables) {
 function theme_system_modules_uninstall($variables) {
   $form = $variables['form'];
 
-  // No theming for the confirm form.
+  // No special theme override for the confirm form.
   if (isset($form['confirm'])) {
     return backdrop_render($form);
   }
@@ -268,9 +267,21 @@ function theme_system_modules_uninstall($variables) {
 /**
  * Returns HTML for the status report.
  *
+ * This theme function is dependent on install.inc being loaded, because
+ * that's where the constants are defined.
+ *
  * @param $variables
  *   An associative array containing:
- *   - requirements: An array of requirements.
+ *   - requirements: An array of requirements/status items. Each requirement
+ *     is an associative array containing the following elements:
+ *     - title: The name of the requirement.
+ *     - value: (optional) The current value (version, time, level, etc).
+ *     - description: (optional) The description of the requirement.
+ *     - severity: (optional) The requirement's result/severity level, one of:
+ *       - REQUIREMENT_INFO: Status information.
+ *       - REQUIREMENT_OK: The requirement is satisfied.
+ *       - REQUIREMENT_WARNING: The requirement failed with a warning.
+ *       - REQUIREMENT_ERROR: The requirement failed with an error.
  *
  * @ingroup themeable
  */
@@ -284,9 +295,6 @@ function theme_status_report($variables) {
   $infos = array();
   $okays = array();
   foreach ($requirements as $requirement) {
-    if ($requirement['title'] == 'hash') {
-      dpm($requirement);
-    }
     if (!isset($requirement['severity'])) {
       $requirement['severity'] = REQUIREMENT_OK;
     }
@@ -341,6 +349,9 @@ function theme_status_report($variables) {
   foreach ($requirements as $requirement) {
     $severity = $severities[isset($requirement['severity']) ? (int) $requirement['severity'] : REQUIREMENT_OK];
     $severity['icon'] = '<div title="' . $severity['title'] . '"><span class="element-invisible">' . $severity['title'] . '</span></div>';
+
+    // The requirement's 'value' key is optional, provide a default value.
+    $requirement['value'] = isset($requirement['value']) ? $requirement['value'] : '';
 
     $title = $requirement['title'] . '<br/>';
     $title .= '<span class="status-summary-mobile">' . $requirement['value'] . '</span>';
@@ -404,14 +415,18 @@ function theme_admin_page($variables) {
     }
   }
 
-  $output = '<div class="admin clearfix">';
-
-  foreach ($container as $id => $data) {
-    $output .= '<div class="' . $id . ' clearfix">';
-    $output .= $data;
+  if (!empty($container)) {
+    $output = '<div class="admin clearfix">';
+      foreach ($container as $id => $data) {
+        $output .= '<div class="' . $id . ' clearfix">';
+        $output .= $data;
+        $output .= '</div>';
+      }
     $output .= '</div>';
   }
-  $output .= '</div>';
+  else {
+    $output = t('You do not have any administrative items.');
+  }
   return $output;
 }
 
@@ -431,14 +446,21 @@ function theme_admin_page($variables) {
  */
 function theme_admin_block($variables) {
   $block = $variables['block'];
-  $output = '';
+  $classes = array('admin-panel');
+  // Construct a more specific class.
+  if (isset($variables['block']['path'])) {
+    $path_parts = explode('/', $variables['block']['path']);
+    $class_suffix = end($path_parts);
+    $classes[] = ' ' . backdrop_clean_css_identifier('admin-panel-' . $class_suffix);
+  }
 
+  $output = '';
   // Don't display the block if it has no content to display.
   if (empty($block['show'])) {
     return $output;
   }
 
-  $output .= '<div class="admin-panel">';
+  $output .= '<div class="' . implode(' ', $classes) . '">';
   if (!empty($block['title'])) {
     $output .= '<h3>' . $block['title'] . '</h3>';
   }
@@ -683,8 +705,8 @@ function _token_token_tree_format_row($token, array $token_info, $is_group = FAL
     'id' => '',
     'class' => array(),
     'data' => array(
-      'name' => '',
-      'token' => '',
+      'name' => array(),
+      'token' => array(),
       'value' => '',
     ),
   );
@@ -766,7 +788,7 @@ function system_preprocess_page_components(&$variables) {
   if ($child_delta == 'action_links' || $child_delta == 'title_combo') {
     $variables['action_links'] = menu_local_actions();
   }
-  
+
   if ($child_delta == 'messages' || $child_delta == 'title_combo') {
     $variables['messages'] = theme('status_messages');
   }

@@ -155,6 +155,10 @@ function user_schema() {
     ),
   );
 
+  $cache_schema = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_user'] = $cache_schema;
+  $schema['cache_entity_user']['description'] = "Cache table used to store Users entity records.";
+
   return $schema;
 }
 
@@ -491,7 +495,7 @@ function user_update_1009() {
     'tag' => 'default',
     'disabled' => FALSE,
     'base_table' => 'users',
-    'human_name' => 'Administer users',
+    'human_name' => 'Administer user accounts',
     'core' => '1.0-dev',
     'display' => array(
       'default' => array(
@@ -1150,6 +1154,69 @@ function user_update_1013() {
       $config->save();
     }
   }
+}
+
+/**
+ * Fixes system email linebreaks.
+ */
+function user_update_1014() {
+  $emails = array(
+    'register_admin_created_body',
+    'register_pending_approval_body',
+    'register_no_approval_required_body',
+    'register_no_approval_required_body',
+    'password_reset_body',
+    'status_activated_body',
+    'status_blocked_body',
+    'cancel_confirm_body',
+    'status_canceled_body',
+  );
+  $config = config('user.mail');
+  foreach ($emails as $name) {
+    $mail = $config->get($name);
+    if (strstr($mail, '\n')) {
+      $fixed_mail = str_replace('\n', "\n", $mail);
+      $config->set($name, $fixed_mail);
+    }
+  }
+  $config->save();
+}
+
+/**
+ * Change label 'Name' to 'Username' for clarity on user admin view.
+ */
+function user_update_1015() {
+  $config = config('views.view.user_admin');
+  if ($config->get('display.default.display_options.filters.name.expose.label') == 'Name') {
+    $config->set('display.default.display_options.filters.name.expose.label', 'Username');
+  }
+  if ($config->get('display.default.display_options.filters.name.expose.identifier') == 'name') {
+    $config->set('display.default.display_options.filters.name.expose.identifier', 'username');
+  }
+  $config->save();
+}
+
+/**
+ * Creates the table to enable caching of User entities.
+ */
+function user_update_1016() {
+  $table = backdrop_get_schema_unprocessed('system', 'cache');
+  $table['description'] = "Cache table used to store User entity records.";
+  db_create_table('cache_entity_user', $table);
+}
+
+/**
+ * Add admin mail text for pending approval.
+ */
+function user_update_1017() {
+  $config = config('user.mail');
+  $translatables = $config->get('_config_translatables');
+  $translatables[] = 'register_pending_approval_admin_body';
+  $translatables[] = 'register_pending_approval_admin_subject';
+  $config->set('_config_translatables', $translatables);
+  $config->set('register_pending_approval_admin_body', "[user:name] has applied for an account.\n\n[user:edit-url]");
+  $config->set('register_pending_approval_admin_subject', 'New account of [user:name] at [site:name] (pending approval)');
+  $config->save();
 }
 
 /**

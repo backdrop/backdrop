@@ -441,7 +441,7 @@ function views_taxonomy_set_breadcrumb(&$breadcrumb, &$argument) {
   }
 
   $args = $argument->view->args;
-  $parents = taxonomy_get_parents_all($argument->argument);
+  $parents = taxonomy_term_load_parents_all($argument->argument);
   foreach (array_reverse($parents) as $parent) {
     // Unfortunately parents includes the current argument. Skip.
     if ($parent->tid == $argument->argument) {

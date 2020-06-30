@@ -19,6 +19,8 @@ function system_menu_block_defaults($menu_name) {
     'level' => 1,
     'menu_name' => $menu_name,
     'style' => NULL,
+    'expand_all' => FALSE,
+    'clickdown' => FALSE,
   );
   if ($menu_name == 'main-menu') {
     $defaults['depth'] = 1;
@@ -55,7 +57,6 @@ function system_menu_block_form($config) {
       'tree' => t('Hierarchical tree'),
     ),
     '#default_value' => empty($config['style']) ? 'tree' : $config['style'],
-    '#description' => t('The menu style may adjust how a menu is displayed, such as a tree of links or a dropdown.'),
   );
 
   $form['level'] = array(
@@ -73,7 +74,7 @@ function system_menu_block_form($config) {
       '8' => t('8th level'),
       '9' => t('9th level'),
     ),
-    '#description' => t('Blocks that start with the 1st level will always be visible. Blocks that start with the 2nd level or deeper will only be visible when the trail to the active menu item passes though the block’s starting level.'),
+    '#description' => t('The block will be visible only if the current page has its menu item at or below the level set here.'),
     '#states' => array(
       'visible' => array(
         'select[name="block_settings[style]"]' => array('value' => 'tree'),
@@ -103,11 +104,33 @@ function system_menu_block_form($config) {
       ),
     ),
   );
+  $form['expand_all'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show all menu links'),
+    '#default_value' => $config['expand_all'],
+    '#description' => t('When unchecked, only expanded or active trail menu links will be displayed.'),
+    '#states' => array(
+      'visible' => array(
+        'select[name="block_settings[style]"]' => array('value' => 'tree'),
+      ),
+    ),
+  );
+  $form['clickdown'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use a click to open, instead of a hover'),
+    '#default_value' => $config['clickdown'],
+    '#description' => t('Menus that don\'t appear or disappear on hover can be better for usability in some cases.'),
+    '#states' => array(
+      'visible' => array(
+        'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
+      ),
+    ),
+  );
   $form['toggle'] = array(
     '#type' => 'checkbox',
-    '#title' => 'Display menu toggle button on small screens',
+    '#title' => t('Display menu toggle button on small screens'),
     '#default_value' => $config['toggle'],
-    '#description' => t('A menu toggle button, commonly known as a hamburger icon, allows the menu to be hidden initially on devices with small screens, but then easily expanded.'),
+    '#description' => t('On devices with small screens, this option reduces the menu to a toggle button, commonly known as <a href="https://en.wikipedia.org/wiki/Hamburger_button" target="_blank"><em>hamburger button</em></a>. Clicking the icon reveals or hides the menu, saving screen space.'),
   );
 
   return $form;
@@ -142,15 +165,19 @@ function system_menu_block_build(array $config) {
   }
 
   // Set defaults.
-  $config += array(
-    'style' => 'tree',
-    'level' => 1,
-    'depth' => 3,
-  );
+  $menu_name = str_replace('_', '-', $config['menu_name']);
+  $config += system_menu_block_defaults($menu_name);
+  if (empty($config['style'])) {
+    $config['style'] = 'tree';
+  }
+
+  // Always expand dropdown style output.
+  if ($config['style'] === 'dropdown') {
+    $config['expand_all'] = TRUE;
+  }
 
   // Get the default block name.
   backdrop_static_reset('menu_block_set_title');
-  $menu_name = str_replace('_', '-', $config['menu_name']);
   system_menu_block_set_title($menu_names[$menu_name]);
 
   // Get the raw menu tree data.
@@ -167,6 +194,7 @@ function system_menu_block_build(array $config) {
     if (!empty($config['style'])) {
       $data['content']['#wrapper_attributes']['class'][] = 'menu-' . str_replace('_', '-', $config['style']);
       $data['content']['#wrapper_attributes']['data-menu-style'] = $config['style'];
+      $data['content']['#wrapper_attributes']['data-clickdown'] = $config['clickdown'];
       $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
       if ($config['style'] === 'dropdown') {
         $data['content']['#attached']['library'][] = array('system', 'smartmenus');

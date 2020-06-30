@@ -248,6 +248,7 @@ function install_begin_request(&$install_state) {
   include_once BACKDROP_ROOT . '/core/includes/module.inc';
   include_once BACKDROP_ROOT . '/core/includes/session.inc';
   require_once BACKDROP_ROOT . '/core/includes/theme.inc';
+  require_once BACKDROP_ROOT . '/core/includes/tablesort.inc';
 
   require_once BACKDROP_ROOT . '/core/includes/ajax.inc';
   $module_list['system']['filename'] = 'core/modules/system/system.module';
@@ -595,8 +596,8 @@ function install_tasks($install_state) {
   if (!empty($install_state['parameters']['profile'])) {
     // Load the profile install file, because it is not always loaded when
     // hook_install_tasks() is invoked (e.g. batch processing).
-    $profile_install_file = BACKDROP_ROOT . '/profiles/' . $install_state['parameters']['profile'] . '/' . $install_state['parameters']['profile'] . '.install';
-    if (file_exists($profile_install_file)) {
+    $profile_install_file = _install_find_profile_file($install_state['parameters']['profile'], 'install');
+    if ($profile_install_file) {
       include_once $profile_install_file;
     }
     $function = $install_state['parameters']['profile'] . '_install_tasks';
@@ -622,8 +623,8 @@ function install_tasks($install_state) {
 
   // Allow the installation profile to modify the full list of tasks.
   if (!empty($install_state['parameters']['profile'])) {
-    $profile_file = BACKDROP_ROOT . '/profiles/' . $install_state['parameters']['profile'] . '/' . $install_state['parameters']['profile'] . '.profile';
-    if (file_exists($profile_file)) {
+    $profile_file = _install_find_profile_file($install_state['parameters']['profile']);
+    if ($profile_file) {
       include_once $profile_file;
       $function = $install_state['parameters']['profile'] . '_install_tasks_alter';
       if (function_exists($function)) {
@@ -707,8 +708,8 @@ function install_full_redirect_url($install_state) {
  * Displays themed installer output and ends the page request.
  *
  * Installation tasks should use backdrop_set_title() to set the desired page
- * title, but otherwise this function takes care of theming the overall page
- * output during every step of the installation.
+ * title, but otherwise this function takes care of generating the page output
+ * during every step of the installation.
  *
  * @param $output
  *   The content to display on the main part of the page.
@@ -736,7 +737,7 @@ function install_display_output($output, $install_state) {
   // request has ended before tasks have even been started, so there is nothing
   // meaningful to show.
   if (isset($install_state['active_task'])) {
-    // Let the theming function know when every step of the installation has
+    // Let the theme function know when every step of the installation has
     // been completed.
     $active_task = $install_state['installation_finished'] ? NULL : $install_state['active_task'];
     $task_list = theme('task_list', array('items' => install_tasks_to_display($install_state), 'active' => $active_task));
@@ -842,7 +843,7 @@ function install_system_module(&$install_state) {
   // database to utf8mb4.
   $connection = Database::getConnection();
   if ($connection->utf8mb4IsActive()) {
-    state_set('backdrop_utf8mb4_tables', TRUE);
+    state_set('database_utf8mb4_active', TRUE);
   }
 }
 
@@ -981,17 +982,16 @@ function install_settings_form($form, &$form_state, &$install_state) {
 
   // Add driver specific configuration options.
   $form['driver']['#options']['mysql'] = $driver->name();
-
   $form['settings']['mysql'] = $driver->getFormOptions($database);
   $form['settings']['mysql']['#prefix'] = '<h2 class="js-hide">' . st('@driver_name settings', array('@driver_name' => $driver->name())) . '</h2>';
   $form['settings']['mysql']['#type'] = 'container';
   $form['settings']['mysql']['#tree'] = TRUE;
   $form['settings']['mysql']['advanced_options']['#parents'] = array('mysql');
-  $form['settings']['mysql']['#states'] = array(
-    'visible' => array(
-      ':input[name=driver]' => array('value' => 'mysql'),
-    )
-  );
+  // For this exceptional situation, maintain the database password even on
+  // form validation errors.
+  if (isset($form_state['input']['mysql']['password'])) {
+    $form['settings']['mysql']['password']['#attributes']['value'] = $form_state['input']['mysql']['password'];
+  }
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['save'] = array(
@@ -1074,16 +1074,17 @@ function install_settings_form_submit($form, &$form_state) {
   // Update global settings array and save.
   $db_settings = $form_state['storage']['database'];
   $settings['database'] = array(
-    'value' => $db_settings['driver'] . '://' . $db_settings['username'] . ':' . $db_settings['password'] . '@' . $db_settings['host'] . ($db_settings['port'] ? (':' . $db_settings['port']) : '') . '/' . $db_settings['database'],
+    'value' => $db_settings['driver'] . '://' . rawurlencode($db_settings['username']) . ':' . rawurlencode($db_settings['password']) . '@' . $db_settings['host'] . ($db_settings['port'] ? (':' . $db_settings['port']) : '') . '/' . rawurlencode($db_settings['database']),
     'required' => TRUE,
   );
   $settings['database_prefix'] = array(
-    'value' => $db_settings['db_prefix'],
+    'value' => $db_settings['prefix'],
   );
   backdrop_rewrite_settings($settings);
 
   // Check if UTF-8 MB4 support exists in the database and add to settings.php.
   if (install_verify_database_utf8mb4()) {
+    $settings = array();
     $settings['database_charset'] = array(
       'value' => 'utf8mb4',
       'required' => TRUE,
@@ -1103,7 +1104,9 @@ function install_settings_form_submit($form, &$form_state) {
  * Finds all .profile files.
  */
 function install_find_profiles() {
-  return file_scan_directory('./profiles', '/\.profile$/', array('key' => 'name'));
+  $core_profiles = file_scan_directory('./core/profiles', '/\.profile$/', array('key' => 'name'));
+  $root_profiles = file_scan_directory('./profiles', '/\.profile$/', array('key' => 'name'));
+  return array_merge($core_profiles, $root_profiles);
 }
 
 /**
@@ -1180,7 +1183,7 @@ function _install_select_profile($profiles) {
         $available_profiles[] = $profile->name;
       }
       // Check for a profile marked as "exclusive".
-      elseif (!empty($profile_info['exclusive'])) {
+      if (!empty($profile_info['exclusive'])) {
         $exclusive_profiles[] = $profile->name;
       }
     }
@@ -1301,7 +1304,7 @@ function install_find_translation_files($langcode = NULL) {
   $directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
   // @todo: Remove the "drupal" check in 2.x (assuming we have a localization
   //   server by then).
-  $files = file_scan_directory($directory, '!(install|drupal-\d+\.\d+)\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
+  $files = file_scan_directory($directory, '!(install|drupal|backdrop(cms)?)(-[\d\.]+)?\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
   return $files;
 }
 
@@ -1349,10 +1352,10 @@ function install_select_language(&$install_state) {
         if (!empty($install_state['parameters']['translate'])) {
           $output = '<p>Follow these steps to translate Backdrop into your language:</p>';
           $output .= '<ol>';
-          $output .= '<li>Download a translation from the <a href="http://localize.drupal.org/download" target="_blank">translation server</a>.</li>';
+          $output .= '<li>Download a translation from the <a href="https://localize.backdropcms.org/translate/languages" target="_blank">translation server</a>.</li>';
           $output .= '<li>Place it into the following directory:<pre>' . $directory . '</pre></li>';
           $output .= '</ol>';
-          $output .= '<p>For more information on installing Backdrop in different languages, visit the <a href="http://drupal.org/localize" target="_blank">drupal.org handbook page</a>.</p>';
+          $output .= '<p>For more information on installing Backdrop in different languages, visit the <a href="https://backdropcms.org/installing-in-other-languages" target="_blank">Backdrop user guide page</a>.</p>';
           $output .= '<p>How should the installation continue?</p>';
           $output .= '<ul>';
           $output .= '<li><a href="' . check_url(backdrop_current_script_url(array('translate' => NULL))) . '">Reload the language selection page after adding translations</a></li>';
@@ -1432,7 +1435,6 @@ function install_select_language_form($form, &$form_state, $files) {
     '#options' => $select_options,
     // Use the browser detected language as default or English if nothing found.
     '#default_value' => !empty($browser_langcode) ? $browser_langcode : 'en',
-    '#size' => min(count($select_options), 10),
   );
 
   if (count($files) == 1) {
@@ -1464,7 +1466,20 @@ function install_already_done_error() {
   global $base_url;
 
   backdrop_set_title(st('Backdrop already installed'));
-  return st('<ul><li>To start over, you must empty your existing database.</li><li>To install to a different database, edit the appropriate <em>settings.php</em> file in the <em>sites</em> folder.</li><li>To upgrade an existing installation, proceed to the <a href="@base-url/core/update.php">update script</a>.</li><li>View your <a href="@base-url">existing site</a>.</li></ul>', array('@base-url' => $base_url));
+
+  $items = array();
+  $items[] = st('To start over, you must empty your existing database.');
+
+  $settings_php = st('To install to a different database, edit the <em>settings.php</em> file located in the root folder of this site.');
+  if (conf_path() !== '.') {
+    $settings_php = st('To install to a different database, edit the <em>settings.php</em> file corresponding to this site within the <em>sites</em> directory.');
+  }
+  $items[] = $settings_php;
+
+  $items[] = st('To upgrade an existing installation, proceed to the <a href="@base-url/core/update.php">update script</a>.', array('@base-url' => $base_url));
+  $items[] = st('View your <a href="@base-url">existing site</a>.', array('@base-url' => $base_url));
+
+  return theme('item_list', array('items' => $items));
 }
 
 /**
@@ -1478,8 +1493,8 @@ function install_already_done_error() {
  * @throws Exception
  */
 function install_load_profile(&$install_state) {
-  $profile_file = BACKDROP_ROOT . '/profiles/' . $install_state['parameters']['profile'] . '/' . $install_state['parameters']['profile'] . '.profile';
-  if (file_exists($profile_file)) {
+  $profile_file = _install_find_profile_file($install_state['parameters']['profile']);
+  if ($profile_file) {
     include_once $profile_file;
     $install_state['profile_info'] = install_profile_info($install_state['parameters']['profile'], $install_state['parameters']['langcode']);
   }
@@ -1685,6 +1700,12 @@ function install_finished(&$install_state) {
   // visiting of install.php.
   state_set('install_task', 'done');
 
+  // Record if UTF8MB4 support was enabled during the installation.
+  $connection = Database::getConnection();
+  if ($connection->utf8mb4IsActive()) {
+    state_set('database_utf8mb4_active', TRUE);
+  }
+
   // Run cron to populate update status tables (if available) so that users
   // will be warned if they've installed an out of date Backdrop version.
   // Will also trigger indexing of profile-supplied content or feeds.
@@ -1838,9 +1859,12 @@ function _install_configure_form($form, &$form_state, &$install_state) {
     '#weight' => -5,
   );
   $form['admin_account']['account']['pass'] = array(
-    '#type' => 'password_confirm',
+    '#title' => st('Password'),
+    '#type' => 'password',
     '#required' => TRUE,
     '#weight' => 0,
+    '#password_toggle' => TRUE,
+    '#password_strength' => TRUE,
   );
 
   $form['server_settings'] = array(

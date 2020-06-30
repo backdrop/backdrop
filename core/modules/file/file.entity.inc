@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity controller and class for files.
@@ -16,6 +15,13 @@ class File extends Entity {
    * @var integer
    */
   public $fid;
+
+  /**
+   * The file type (bundle).
+   *
+   * @var string
+   */
+  public $type;
 
   /**
    * The file language code.
@@ -112,6 +118,13 @@ class File extends Entity {
   }
 
   /**
+   * Implements EntityInterface::bundle().
+   */
+  public function bundle() {
+    return $this->type;
+  }
+
+  /**
    * Implements EntityInterface::label().
    */
   public function label() {
@@ -127,6 +140,50 @@ class File extends Entity {
       'options' => array(),
     );
   }
+
+  /**
+   * Overrides Entity::access().
+   *
+   * The "view" operation is not supported on the File Entity itself because it
+   * has no page callback (yet), but there is separately file_download_access()
+   * to check if a file is downloadable.
+   *
+   * @param string $op
+   *   The operation to be performed on the file. Possible values are:
+   *   - create
+   *   - update
+   *   - delete
+   * @param User|AnonymousUser|object $account
+   *   (optional) The user to check for. Leave it to NULL to check for the
+   *   global user.
+   *
+   * @return bool
+   *   TRUE if access is granted, FALSE otherwise.
+   */
+  public function access($op, $account = NULL) {
+    if ($op == 'create') {
+      return self::createAccess(NULL, $account);
+    }
+    elseif (!in_array($op, array('update', 'delete'), TRUE)) {
+      // If the $op was not one of the supported ones, we return access denied.
+      return FALSE;
+    }
+
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    if ($op == 'update') {
+      return user_access('manage files', $account);
+    }
+    elseif ($op == 'delete') {
+      return user_access('delete files', $account);
+    }
+
+    return FALSE;
+  }
+
 }
 
 /**
@@ -146,6 +203,22 @@ class FileStorageController extends EntityDatabaseStorageController {
       // Default the file's language code to none, because files are language
       // neutral more often than language dependent.
       $entity->langcode = LANGUAGE_NONE;
+    }
+
+    // The file type is used as a bundle key, and therefore, must not be NULL.
+    // It defaults to FILE_TYPE_NONE when loaded via file_load(), but in case
+    // file_save() is called on a new file object, default it here too.
+    if (!isset($entity->type)) {
+      $entity->type = FILE_TYPE_NONE;
+    }
+
+    // If the file isn't already assigned a real type, determine what type should
+    // be assigned to it.
+    if ($entity->type === FILE_TYPE_NONE) {
+      $type = file_get_type($entity);
+      if (isset($type)) {
+        $entity->type = $type;
+      }
     }
   }
 

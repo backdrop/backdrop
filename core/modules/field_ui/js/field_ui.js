@@ -269,7 +269,7 @@ Backdrop.fieldUIOverview = {
 
 
 /**
- * Row handlers for the 'Manage display' screen.
+ * Row handlers for the 'Manage displays' screen.
  */
 Backdrop.fieldUIDisplayOverview = {};
 

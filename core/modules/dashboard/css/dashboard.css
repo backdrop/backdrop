@@ -1,0 +1,26 @@
+/**
+ * @file
+ * Styles for Dashboard layouts and blocks.
+ */
+
+/* Shrink and align the manage links to the right */
+.dashboard-more-link {
+  text-align: right;
+  font-size: 0.923em;
+}
+
+/**
+ * External link indicators.
+ */
+span.dashboard-external {
+  display: inline-block;
+  margin-left: .33em; /* LTR */
+  width: 1em;
+  height: 1em;
+  background: transparent url(../../../misc/external-link-blue-32.png) bottom left;
+  background-size: 1em;
+}
+[dir="rtl"] span.dashboard-external {
+  margin-left: 0;
+  margin-right: .33em;
+}

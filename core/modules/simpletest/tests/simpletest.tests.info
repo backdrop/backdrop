@@ -49,14 +49,20 @@ file = simpletest.test
 [SimpleTestInstallationProfileModuleTestsTestCase]
 name = Installation profile module tests
 description = Verifies that tests bundled with installation profile modules are found.
-group = SimpleTest
+group = Installation profiles
 file = simpletest.test
 
 [SimpleTestOtherInstallationProfileModuleTestsTestCase]
 name = Other Installation profiles
 description = Verifies that tests in other installation profiles are not found.
-group = SimpleTest
+group = Installation profiles
 file = simpletest.test
+
+[StandardInstallTestCase]
+name = Standard Installation Tests
+description = Verifies configuration added by the Standard install profile.
+group = Installation profiles
+file = standard.test
 
 [ActionLoopTestCase]
 name = Actions executing in a potentially infinite loop
@@ -239,7 +245,7 @@ group = Common
 file = common.test
 
 [CommonURLUnitTestCase]
-name = URL checking tests
+name = URL checking unit tests
 description = Confirm URL parsing functions work correctly with various input.
 group = Common
 file = common.test
@@ -358,6 +364,12 @@ description = Test the format_date() function.
 group = Common
 file = common.test
 
+[CommonBackdropFormatXmlElementsUnitTestCase]
+name = Format XML Elements
+description = Tests the format_xml_elements() functionality.
+group = Common
+file = common.test
+
 [CommonBackdropAttributesUnitTestCase]
 name = HTML Attributes
 description = Tests the backdrop_attributes() functionality.
@@ -379,6 +391,12 @@ file = common.test
 [CommonBackdropAddFeedTestCase]
 name = backdrop_add_feed() tests
 description = Make sure that backdrop_add_feed() works correctly with various constructs.
+group = Common
+file = common.test
+
+[CommonBackdropSortUnitTest]
+name = backdrop_sort() tests
+description = Test that backdrop_sort() works correctly.
 group = Common
 file = common.test
 
@@ -940,6 +958,12 @@ description = Tests the form API email element.
 group = Form API
 file = form.test
 
+[FormH5datetimeTestCase]
+name = Form API html5 datetime
+description = Tests the form API html5 date and time elements.
+group = Form API
+file = form.test
+
 [HTMLIdTestCase]
 name = Unique HTML IDs
 description = Tests functionality of backdrop_html_id().
@@ -949,6 +973,12 @@ file = form.test
 [FormUrlTestCase]
 name = Form API url
 description = Tests the form API url element.
+group = Form API
+file = form.test
+
+[FormTextareaTestCase]
+name = Form textarea
+description = Tests form textarea related functions.
 group = Form API
 file = form.test
 

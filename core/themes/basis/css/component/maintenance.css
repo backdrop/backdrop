@@ -1,0 +1,24 @@
+/**
+ * @file
+ * Maintenance page component styling.
+ */
+
+.maintenance-page {
+  background: #bbb;
+  text-align: center;
+  padding: 5rem 2.5rem;
+}
+.maintenance-page .l-container {
+  background: #fff;
+  max-width: 43rem; /* 688px at 16px font size */
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+@media (min-width: 34em) { /* 544px at 16px font size */
+  .maintenance-page {
+    padding: 8rem;
+  }
+  .maintenance-page .l-container {
+    padding: 4rem;
+  }
+}

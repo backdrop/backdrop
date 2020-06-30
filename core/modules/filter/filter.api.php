@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the Filter module.
@@ -40,9 +39,9 @@
  * For performance reasons content is only filtered once; the result is stored
  * in the cache table and retrieved from the cache the next time the same piece
  * of content is displayed. If a filter's output is dynamic, it can override the
- * cache mechanism, but obviously this should be used with caution: having one
- * filter that does not support caching in a particular text format disables
- * caching for the entire format, not just for one filter.
+ * cache mechanism, but this should be used with caution: having one filter that
+ * does not support caching in a particular text format disables caching for the
+ * entire format, not just for one filter.
  *
  * Beware of the filter cache when developing your module: it is advised to set
  * your filter to 'cache' => FALSE while developing, but be sure to remove that
@@ -440,7 +439,7 @@ function callback_filter_allowed_html($filter, $format) {
  */
 function callback_filter_tips($filter, $format, $long) {
  if ($long) {
-    return t('Lines and paragraphs are automatically recognized. The &lt;br /&gt; line break, &lt;p&gt; paragraph and &lt;/p&gt; close paragraph tags are inserted automatically. If paragraphs are not recognized simply add a couple blank lines.');
+    return t('Lines and paragraphs are automatically recognized. The &lt;br /&gt; line break, &lt;p&gt; paragraph and &lt;/p&gt; close paragraph tags are inserted automatically. If paragraphs are not recognized, add a couple blank lines.');
   }
   else {
     return t('Lines and paragraphs break automatically.');

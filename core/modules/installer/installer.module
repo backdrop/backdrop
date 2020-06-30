@@ -220,19 +220,6 @@ function installer_theme($existing, $type, $theme, $path) {
 function installer_verify_update_archive($project, $archive_file, $directory) {
   $errors = array();
 
-  // Make sure this isn't a tarball of Backdrop core.
-  if (
-    file_exists("$directory/$project/index.php")
-    && file_exists("$directory/$project/core/update.php")
-    && file_exists("$directory/$project/core/includes/bootstrap.inc")
-    && file_exists("$directory/$project/core/modules/node/node.module")
-    && file_exists("$directory/$project/core/modules/system/system.module")
-  ) {
-    return array(
-      'no-core' => t('Automatic updating of Backdrop CMS core is not supported. See the <a href="@upgrade-guide">upgrade guide</a> for information on how to update Backdrop CMS core manually.', array('@upgrade-guide' => 'https://backdropcms.org/guide/upgrade')),
-    );
-  }
-
   // Parse all the .info files and make sure at least one is compatible with
   // this version of Backdrop core. If one is compatible, then the project as a
   // whole is considered compatible (since, for example, the project may ship
@@ -390,3 +377,20 @@ function installer_config_info() {
   );
   return $prefixes;
 }
+
+/**
+ * Implements hook_modules_enabled().
+ */
+function installer_modules_enabled($modules) {
+  module_load_include('inc', 'installer', 'installer.browser');
+  installer_browser_installed_projects_remove($modules);
+}
+
+/**
+ * Implements hook_themes_enabled().
+ */
+function installer_themes_enabled($theme_list) {
+  module_load_include('inc', 'installer', 'installer.browser');
+  installer_browser_installed_projects_remove($theme_list);
+}
+

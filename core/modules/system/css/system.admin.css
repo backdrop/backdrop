@@ -7,18 +7,18 @@
 /**
  * Administration blocks.
  */
-div.admin-panel {
+.admin-panel {
   margin: 0;
   padding: 5px 5px 15px 5px;
 }
-div.admin-panel .description {
+.admin-panel .description {
   margin: 0 0 3px;
   padding: 2px 0 3px 0;
 }
-div.admin-panel .body {
+.admin-panel .body {
   padding: 0 4px 2px 8px; /* LTR */
 }
-[dir="rtl"] div.admin-panel .body {
+[dir="rtl"] .admin-panel .body {
   padding: 0 8px 2px 4px;
 }
 div.admin {
@@ -70,11 +70,35 @@ small .admin-link:after {
 /**
  * Modules page.
  */
+#system-modules .form-item-search {
+  display: inline-block;
+}
+#system-modules .search-reset {
+  line-height: 42px;
+  position: relative;
+  top: 1px;
+}
+#system-modules .table-filter {
+  margin: 1em 0;
+  padding: 7px 13px;
+  border-radius: 4px;
+  background-color: #fff;
+  border: 2px solid #EAEAEA;
+}
 #system-modules div.incompatible {
   font-weight: bold;
 }
 #system-modules td.checkbox {
   width: 20px;
+}
+#system-modules .modules-error:before {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 15px;
+  background: #EE3D23 url(../../../misc/icon-error.png) no-repeat center center;
+  background-size: 60%;
 }
 #system-modules td.module {
   width: 110px;
@@ -86,9 +110,31 @@ small .admin-link:after {
 }
 #system-modules td.version {
   width: 70px;
+  white-space: nowrap;
 }
 #system-modules td.operations {
-  width: 105px;
+  width: 120px;
+}
+.requirements-toggle {
+  white-space: nowrap;
+}
+.requirements-toggle .arrow {
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-style: solid;
+  border-width: 0.3333em 0.3333em 0;
+  display: inline-block;
+  height: 0;
+  line-height: 0;
+  width: 0;
+  overflow: hidden;
+  margin: 0.15em 0.3333em;
+}
+.requirements-toggle .arrow.close {
+  border-top-color: transparent;
+  border-bottom-color: #0074bd;
+  border-width: 0 0.3333em 0.3333em;
 }
 div.admin-requirements,
 div.admin-required {
@@ -96,10 +142,10 @@ div.admin-required {
   color: #444;
 }
 span.admin-disabled {
-  color: #800;
+  color: #C61214;
 }
 span.admin-enabled {
-  color: #080;
+  color: #00BE58;
 }
 span.admin-missing {
   color: #f00;

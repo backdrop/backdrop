@@ -11,6 +11,7 @@ stylesheets[all][] = css/component/small-text-components.css
 stylesheets[all][] = css/component/header.css
 stylesheets[all][] = css/component/footer.css
 stylesheets[all][] = css/component/menu-dropdown.css
+stylesheets[all][] = css/component/menu-toggle.css
 stylesheets[all][] = css/component/backdrop-form.css
 stylesheets[all][] = css/component/tabledrag.css
 stylesheets[all][] = css/component/vertical-tabs.css
@@ -23,12 +24,21 @@ stylesheets[all][] = css/component/pager.css
 stylesheets[all][] = css/component/hero.css
 stylesheets[all][] = css/component/teasers.css
 stylesheets[all][] = css/component/comment.css
+stylesheets[all][] = css/component/caption.css
 stylesheets[all][] = css/skin.css
 
 stylesheets[print][] = css/print.css
+
+; Include a style sheet in the rich-text editor.
+ckeditor_stylesheets[] = css/base.css
+ckeditor_stylesheets[] = css/component/caption.css
 
 ; Remove unwanted core CSS
 stylesheets[all][] = system.theme.css
 stylesheets[all][] = menu-dropdown.theme.css
 
 scripts[] = js/script.js
+
+; We need at least one setting for the theme settings page to appear in the
+; menu. Color module provides our defaults, so we just register a dummy setting.
+settings[color] = true

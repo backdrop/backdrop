@@ -79,11 +79,11 @@ function taxonomy_term_page(TaxonomyTerm $term) {
  */
 function taxonomy_term_feed(TaxonomyTerm $term) {
   $channel['link'] = url('taxonomy/term/' . $term->tid, array('absolute' => TRUE));
-  $channel['title'] = config_get('system.core', 'site_name') . ' - ' . $term->name;
+  $channel['title'] = config_get_translated('system.core', 'site_name') . ' - ' . $term->name;
   // Only display the description if we have a single term, to avoid clutter and confusion.
   // HTML will be removed from feed description.
   $channel['description'] = check_markup($term->description, $term->format, '', TRUE);
-  $nids = taxonomy_select_nodes($term->tid, FALSE, config_get('system.rss', 'rss_limit'));
+  $nids = taxonomy_select_nodes($term->tid, FALSE, config_get('system.core', 'rss_limit'));
 
   node_feed($nids, $channel);
 }

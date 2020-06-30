@@ -333,7 +333,7 @@ Backdrop.ACDB.prototype.search = function (searchString) {
         }
       },
       error: function (xmlhttp) {
-        alert(Backdrop.ajaxError(xmlhttp, db.uri));
+        Backdrop.displayAjaxError(Backdrop.ajaxError(xmlhttp, db.uri));
       }
     });
   }, this.delay);

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions for error handling.
@@ -64,7 +63,7 @@ function _backdrop_error_handler_real($error_level, $message, $filename, $line, 
     _backdrop_log_error(array(
       '%type' => isset($types[$error_level]) ? $severity_msg : 'Unknown error',
       // The standard PHP error handler considers that the error messages
-      // are HTML. We mimick this behavior here.
+      // are HTML. We mimic this behavior here.
       '!message' => filter_xss_admin($message),
       '%function' => $caller['function'],
       '%file' => $caller['file'],
@@ -113,7 +112,7 @@ function _backdrop_decode_exception($exception) {
   return array(
     '%type' => get_class($exception),
     // The standard PHP exception handler considers that the exception message
-    // is plain-text. We mimick this behavior here.
+    // is plain-text. We mimic this behavior here.
     '!message' => check_plain($message),
     '%function' => $caller['function'],
     '%file' => $caller['file'],
@@ -206,7 +205,9 @@ function _backdrop_log_error($error, $fatal = FALSE) {
     $number++;
   }
 
-  watchdog('php', '%type: !message in %function (line %line of %file).', $error, $error['severity_level']);
+  // Suppress errors here in the event that the database is not accessible,
+  // preventing cascading errors.
+  @watchdog('php', '%type: !message in %function (line %line of %file).', $error, $error['severity_level']);
 
   if ($fatal) {
     backdrop_add_http_header('Status', '500 Service unavailable (with message)');
@@ -214,7 +215,7 @@ function _backdrop_log_error($error, $fatal = FALSE) {
 
   if (backdrop_is_cli()) {
     if ($fatal) {
-      // When called from CLI, simply output a plain text message.
+      // When called from CLI, output a plain text message.
       print html_entity_decode(strip_tags(t('%type: !message in %function (line %line of %file).', $error))). "\n";
       exit;
     }
@@ -222,14 +223,14 @@ function _backdrop_log_error($error, $fatal = FALSE) {
 
   if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' && $fatal) {
     if (error_displayable($error)) {
-      // When called from JavaScript, simply output the error message.
+      // When called from JavaScript, output the error message.
       print t('%type: !message in %function (line %line of %file).', $error);
     }
     exit;
   }
   else {
     // Display the message if the current error reporting level allows this type
-    // of message to be displayed, and unconditionnaly in update.php.
+    // of message to be displayed, and unconditionally in update.php.
     if (error_displayable($error)) {
       $class = 'error';
 
@@ -246,8 +247,9 @@ function _backdrop_log_error($error, $fatal = FALSE) {
     if ($fatal) {
       backdrop_set_title(t('Error'));
       // We fallback to a maintenance page at this point, because the page generation
-      // itself can generate errors.
-      print theme('maintenance_page', array('content' => t('The website encountered an unexpected error. Please try again later.')));
+      // itself can generate errors. Provide the error message to the end-user
+      // but exclude PHP error information.
+      print theme('maintenance_page', array('content' => $error['!message']));
       exit;
     }
   }

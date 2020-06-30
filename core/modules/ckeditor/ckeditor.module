@@ -4,7 +4,7 @@
  * Provides integration with the CKEditor WYSIWYG editor.
  */
 
-define('CKEDITOR_VERSION', '4.5.9');
+define('CKEDITOR_VERSION', '4.14.0');
 
 /**
  * Implements hook_menu().
@@ -333,7 +333,7 @@ function ckeditor_ckeditor_plugins() {
         'image' => $image_prefix . '/link.png',
       ),
       'BackdropUnlink' => array(
-        'label' => t('Link'),
+        'label' => t('Unlink'),
         'required_html' => array(array(
           'tags' => array('a'),
           'attributes' => array('href'),

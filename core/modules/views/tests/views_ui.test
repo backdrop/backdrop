@@ -25,7 +25,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
   function testViewsWizardAndListing() {
     // Check if we can access the main views admin page.
     $this->backdropGet('admin/structure/views');
-    $this->assertLinkByHref(url('admin/config/development/configuration/single/export/Views/views.view.node_admin_content'));
+    $this->assertLinkByHref(url('admin/config/development/configuration/single/export'));
 
     $this->assertText(t('Add view'));
 
@@ -42,7 +42,7 @@ class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
     foreach (array('/delete', '/clone', '') as $operation) {
       $this->assertLinkByHref(url('admin/structure/views/view/' . $view1['name'] . $operation));
     }
-    $this->assertLinkByHref(url('admin/config/development/configuration/single/export/Views/views.view.' . $view1['name']));
+    $this->assertLinkByHref(url('admin/config/development/configuration/single/export'));
 
     // This view should not have a block.
     $this->backdropGet('admin/structure/block');

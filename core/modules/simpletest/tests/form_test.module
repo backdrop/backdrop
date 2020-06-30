@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Helper module for the form API tests.
@@ -34,6 +33,13 @@ function form_test_menu() {
     'title' => 'Form #required validation without #title',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('form_test_validate_required_form_no_title'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['form-test/validate-no-token'] = array(
+    'title' => 'Form validation without a CSRF token',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('form_test_validate_no_token'),
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
@@ -177,6 +183,12 @@ function form_test_menu() {
     'title' => 'E-Mail fields',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('form_test_email'),
+    'access callback' => TRUE,
+  );
+  $items['form-test/h5datetime'] = array(
+    'title' => 'HTML5 datetime fields',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('form_test_h5datetime'),
     'access callback' => TRUE,
   );
   $items['form-test/url'] = array(
@@ -492,6 +504,27 @@ function form_test_validate_required_form_no_title_submit($form, &$form_state) {
 }
 
 /**
+ * Form builder for testing submission of a form without a CSRF token.
+ */
+function form_test_validate_no_token($form, &$form_state) {
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save',
+  );
+
+  $form['#token'] = FALSE;
+
+  return $form;
+}
+
+/**
+ * Form submission handler for form_test_validate_no_token().
+ */
+function form_test_validate_no_token_submit($form, &$form_state) {
+  backdrop_set_message('The form_test_validate_no_token form has been submitted successfully.');
+}
+
+/**
  * Builds a simple form with a button triggering partial validation.
  */
 function form_test_limit_validation_errors_form($form, &$form_state) {
@@ -626,11 +659,17 @@ function _form_test_tableselect_form_builder($form, $form_state, $element_proper
   $form['tableselect'] = $element_properties;
 
   $form['tableselect'] += array(
+    '#prefix' => '<div id="tableselect-wrapper">',
+    '#suffix' => '</div>',
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $options,
     '#multiple' => FALSE,
     '#empty' => t('Empty text.'),
+    '#ajax' => array(
+      'callback' => '_form_test_tableselect_ajax_callback',
+      'wrapper' => 'tableselect-wrapper',
+    ),
   );
 
   $form['submit'] = array(
@@ -732,6 +771,13 @@ function _form_test_vertical_tabs_form($form, &$form_state) {
     '#type' => 'textfield',
   );
   return $form;
+}
+
+/**
+* Ajax callback that returns the form element.
+*/
+function _form_test_tableselect_ajax_callback($form, &$form_state) {
+  return $form['tableselect'];
 }
 
 /**
@@ -916,6 +962,24 @@ function form_test_storage_page_cache_old_build_id($form) {
  */
 function form_test_storage_page_cache_rebuild($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * A simple form for testing form caching.
+ */
+function form_test_cache_form($form, &$form_state) {
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Title',
+    '#required' => TRUE,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save',
+  );
+
+  return $form;
 }
 
 /**
@@ -1537,6 +1601,43 @@ function form_test_email($form, &$form_state) {
  * Form submission handler for form_test_email().
  */
 function form_test_email_submit($form, &$form_state) {
+  backdrop_json_output($form_state['values']);
+  exit();
+}
+
+/**
+ * Form constructor for #type html_date, html_time and html_datetime elements.
+ *
+ * @see form_test_h5datetime_submit()
+ * @ingroup forms
+ */
+function form_test_h5datetime($form, &$form_state) {
+  $form['h5date'] = array(
+    '#type' => 'html_date',
+    '#title' => 'Date',
+    '#description' => 'A date.',
+  );
+  $form['h5time'] = array(
+    '#type' => 'html_time',
+    '#title' => 'Time',
+    '#description' => 'A time.',
+  );
+  $form['h5datetime'] = array(
+    '#type' => 'html_datetime',
+    '#title' => 'Datetime',
+    '#description' => 'A date and time combo.',
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+  return $form;
+}
+
+/**
+ * Form submission handler for form_test_h5datetime().
+ */
+function form_test_h5datetime_submit($form, &$form_state) {
   backdrop_json_output($form_state['values']);
   exit();
 }

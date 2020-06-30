@@ -119,16 +119,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $edit = array();
     $edit['name'] = $name = $this->randomName();
     $edit['mail'] = $mail = $edit['name'] . '@example.com';
-
-    // Try entering a mismatching password.
-    $edit['pass[pass1]'] = '99999.0';
-    $edit['pass[pass2]'] = '99999';
-    $this->backdropPost('user/register', $edit, t('Create new account'));
-    $this->assertText(t('The specified passwords do not match.'), 'Typing mismatched passwords displays an error message.');
-
-    // Enter a correct password.
-    $edit['pass[pass1]'] = $new_pass = $this->randomName();
-    $edit['pass[pass2]'] = $new_pass;
+    $edit['pass'] = $new_pass = $this->randomName();
     $this->backdropPost('user/register', $edit, t('Create new account'));
     $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
     $new_user = reset($accounts);
@@ -140,8 +131,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $edit = array();
     $edit['name'] = $name = $this->randomName();
     $edit['mail'] = $mail = $edit['name'] . '@example.com';
-    $edit['pass[pass1]'] = $pass = $this->randomName();
-    $edit['pass[pass2]'] = $pass;
+    $edit['pass'] = $pass = $this->randomName();
     $this->backdropPost('user/register', $edit, t('Create new account'));
     $this->assertText(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.'), 'Users are notified of pending approval');
 
@@ -219,8 +209,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $edit = array();
     $edit['name'] = $name = $this->randomName();
     $edit['mail'] = $mail = $edit['name'] . '@example.com';
-    $edit['pass[pass1]'] = $new_pass = $this->randomName();
-    $edit['pass[pass2]'] = $new_pass;
+    $edit['pass'] = $new_pass = $this->randomName();
     $this->backdropPost(NULL, $edit, t('Create new account'));
 
     // Check user fields.
@@ -242,6 +231,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
    */
   function testRegistrationWithUserFields() {
     module_enable(array('field', 'field_test'));
+    $config_user_settings = config('system.core');
 
     // Create a field, and an instance on 'user' entity type.
     $field = array(
@@ -261,6 +251,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     field_create_instance($instance);
 
     // Check that the field does not appear on the registration form.
+    $config_user_settings->set('user_register', USER_REGISTER_VISITORS)->save();
     $this->backdropGet('user/register');
     $this->assertNoText($instance['label'], 'The field does not appear on user registration form');
 
@@ -342,7 +333,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $edit = array();
     $edit['mail'] = $mail;
     $edit['name'] = $different;
-    $edit['pass[pass1]'] = $edit['pass[pass2]'] = $this->randomName();
+    $edit['pass'] = $this->randomName();
 
     // Attempt to create an account using an email that doesn't match the name.
     $this->backdropPost('user/register', $edit, t('Create new account'));
@@ -376,7 +367,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $edit = array();
     $edit['mail'] = $mail;
     $edit['name'] = $different;
-    $edit['pass[pass1]'] = $edit['pass[pass2]'] = $this->randomName();
+    $edit['pass'] = $this->randomName();
 
     // Attempt to create an account using an email that doesn't match the name.
     // This should be OK, as 'user_email_match' is disabled.
@@ -1388,6 +1379,8 @@ class UserAdminTestCase extends BackdropWebTestCase {
   function testUserAdmin() {
     // Create admin user to delete registered user.
     $admin_user = $this->backdropCreateUser(array('administer users', 'access user profiles'));
+    $admin_user->created -= 2;
+    $admin_user->save();
 
     $user_a = $this->backdropCreateUser(array());
     $user_b = $this->backdropCreateUser(array('administer taxonomy'));
@@ -1480,12 +1473,12 @@ class UserAdminSettingsEmailFormTest extends SystemConfigFormCase {
     $this->form_id = 'user_settings_email';
     $this->values = array(
       'user_mail_cancel_confirm_body' => array(
-        '#value' => $this->randomString(),
+        '#value' => $this->randomName(),
         '#config_name' => 'user.mail',
         '#config_key' => 'cancel_confirm_body',
       ),
       'user_mail_cancel_confirm_subject' => array(
-        '#value' => $this->randomString(20),
+        '#value' => $this->randomName(20),
         '#config_name' => 'user.mail',
         '#config_key' => 'cancel_confirm_subject',
       ),
@@ -1517,11 +1510,11 @@ class UserTimeZoneFunctionalTest extends BackdropWebTestCase {
     $this->backdropLogin($web_user);
 
     // Create some nodes with different authored-on dates.
-    // Two dates in PST (winter time):
+    // One date in PST (winter time):
     $date1 = '2007-03-09 21:00:00 -0800';
-    $date2 = '2007-03-11 01:00:00 -0800';
-    // One date in PDT (summer time):
-    $date3 = '2007-03-20 21:00:00 -0700';
+    // Two dates in PDT (summer time):
+    $date2 = '2007-03-12 01:00:00 -0700';
+    $date3 = '2007-03-25 21:00:00 -0700';
     $node1 = $this->backdropCreateNode(array('created' => strtotime($date1), 'type' => 'post'));
     $node2 = $this->backdropCreateNode(array('created' => strtotime($date2), 'type' => 'post'));
     $node3 = $this->backdropCreateNode(array('created' => strtotime($date3), 'type' => 'post'));
@@ -1530,24 +1523,24 @@ class UserTimeZoneFunctionalTest extends BackdropWebTestCase {
     $this->backdropGet("node/$node1->nid");
     $this->assertText('2007-03-09 21:00 PST', 'Date should be PST.');
     $this->backdropGet("node/$node2->nid");
-    $this->assertText('2007-03-11 01:00 PST', 'Date should be PST.');
+    $this->assertText('2007-03-12 01:00 PDT', 'Date should be PDT.');
     $this->backdropGet("node/$node3->nid");
-    $this->assertText('2007-03-20 21:00 PDT', 'Date should be PDT.');
+    $this->assertText('2007-03-25 21:00 PDT', 'Date should be PDT.');
 
     // Change user time zone to Santiago time.
     $edit = array();
     $edit['mail'] = $web_user->mail;
-    $edit['timezone'] = 'America/Santiago';
+    $edit['timezone'] = 'Europe/Paris';
     $this->backdropPost("user/$web_user->uid/edit", $edit, t('Save'));
-    $this->assertText(t('The changes have been saved.'), 'Time zone changed to Santiago time.');
+    $this->assertText(t('The changes have been saved.'), 'Time zone changed to Central Europe time.');
 
     // Confirm date format and time zone.
     $this->backdropGet("node/$node1->nid");
-    $this->assertText('2007-03-10 02:00 CLST', 'Date should be Chile summer time; five hours ahead of PST.');
+    $this->assertText('2007-03-10 06:00 CET', 'Date should be Central European Time; nine hours ahead of PST.');
     $this->backdropGet("node/$node2->nid");
-    $this->assertText('2007-03-11 05:00 CLT', 'Date should be Chile time; four hours ahead of PST');
+    $this->assertText('2007-03-12 09:00 CET', 'Date should be Central European Time; eight hours ahead of PDT');
     $this->backdropGet("node/$node3->nid");
-    $this->assertText('2007-03-21 00:00 CLT', 'Date should be Chile time; three hours ahead of PDT.');
+    $this->assertText('2007-03-26 06:00 CEST', 'Date should be Central European Summer Time; nine hours ahead of PDT.');
   }
 }
 
@@ -1775,8 +1768,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
       $edit = array(
         'name' => $name,
         'mail' => $this->randomName() . '@example.com',
-        'pass[pass1]' => $pass = $this->randomString(),
-        'pass[pass2]' => $pass,
+        'pass' => $pass = $this->randomString(),
         'notify' => $notify,
       );
       $this->backdropPost('admin/people/create', $edit, t('Create new account'));
@@ -1795,6 +1787,18 @@ class UserCreateTestCase extends BackdropWebTestCase {
       $user = user_load_by_name($name);
       $this->assertEqual($user->status == 1, 'User is not blocked');
     }
+
+    // Test that the password '0' is considered a password.
+    $name = $this->randomName();
+    $edit = array(
+      'name' => $name,
+      'mail' => $name . '@example.com',
+      'pass' => 0,
+      'notify' => FALSE,
+    );
+    $this->backdropPost('admin/people/create', $edit, t('Create new account'));
+    $this->assertText(t('Created a new user account for @name. No e-mail has been sent.', array('@name' => $edit['name'])), 'User created with password 0');
+    $this->assertNoText('Password field is required');
   }
 }
 
@@ -1826,18 +1830,6 @@ class UserEditTestCase extends BackdropWebTestCase {
     $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
     $this->assertRaw(t('The name %name is already taken.', array('%name' => $edit['name'])));
 
-    // Check that filling out a single password field does not validate.
-    $edit = array();
-    $edit['pass[pass1]'] = '';
-    $edit['pass[pass2]'] = $this->randomName();
-    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
-    $this->assertText(t("The specified passwords do not match."), 'Typing mismatched passwords displays an error message.');
-
-    $edit['pass[pass1]'] = $this->randomName();
-    $edit['pass[pass2]'] = '';
-    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
-    $this->assertText(t("The specified passwords do not match."), 'Typing mismatched passwords displays an error message.');
-
     // Test that the error message appears when attempting to change the mail or
     // pass without the current password.
     $edit = array();
@@ -1851,8 +1843,7 @@ class UserEditTestCase extends BackdropWebTestCase {
 
     // Test that the user must enter current password before changing passwords.
     $edit = array();
-    $edit['pass[pass1]'] = $new_pass = $this->randomName();
-    $edit['pass[pass2]'] = $new_pass;
+    $edit['pass'] = $new_pass = $this->randomName();
     $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
     $this->assertRaw(t("Your current password is missing or incorrect; it's required to change the %name.", array('%name' => t('Password'))));
 
@@ -1866,6 +1857,69 @@ class UserEditTestCase extends BackdropWebTestCase {
     $user1->pass_raw = $new_pass;
     $this->backdropLogin($user1);
     $this->backdropLogout();
+  }
+
+  /**
+   * Tests setting the password to "0".
+   *
+   * At one point it was found that logging in with a password that is literally
+   * "0" was not possible. This test prevents regression of this behavior.
+   */
+  public function testUserWith0Password() {
+    $admin = $this->backdropCreateUser(array('administer users'));
+    $this->backdropLogin($admin);
+    // Create a regular user.
+    $user1 = $this->backdropCreateUser(array());
+
+    $edit = array('pass' => '0');
+    $this->backdropPost("user/" . $user1->uid . "/edit", $edit, t('Save'));
+    $this->assertRaw(t("The changes have been saved."));
+
+    $this->backdropLogout();
+    $user1->pass_raw = '0';
+    $this->backdropLogin($user1);
+    $this->backdropLogout();
+  }
+}
+
+/**
+ * Tests editing a user account with and without a form rebuild.
+ */
+class UserEditRebuildTestCase extends BackdropWebTestCase {
+
+  function setUp() {
+    parent::setUp('user_form_test');
+  }
+
+  /**
+   * Test user edit page when the form is set to rebuild.
+   */
+  function testUserEditFormRebuild() {
+    $user1 = $this->backdropCreateUser(array('change own username'));
+    $this->backdropLogin($user1);
+
+    $roles = array_keys($user1->roles);
+    // Save the user form twice.
+    $edit = array();
+    $edit['current_pass'] = $user1->pass_raw;
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->assertRaw(t("The changes have been saved."));
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->assertRaw(t("The changes have been saved."));
+    $saved_user1 = entity_load_unchanged('user', $user1->uid);
+    $this->assertEqual(count($roles), count($saved_user1->roles), 'Count of user roles in database matches original count.');
+    $diff = array_diff(array_keys($saved_user1->roles), $roles);
+    $this->assertTrue(empty($diff), format_string('User roles in database match original: @roles', array('@roles' => implode(', ', $saved_user1->roles))));
+    // Set variable that causes the form to be rebuilt in user_form_test.module.
+    state_set('user_form_test_user_profile_form_rebuild', TRUE);
+    $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
+    $this->assertRaw(t("The changes have been saved."));
+    $this->backdropPost(NULL, $edit, t('Save'));
+    $this->assertRaw(t("The changes have been saved."));
+    $saved_user1 = entity_load_unchanged('user', $user1->uid);
+    $this->assertEqual(count($roles), count($saved_user1->roles), 'Count of user roles in database matches original count.');
+    $diff = array_diff(array_keys($saved_user1->roles), $roles);
+    $this->assertTrue(empty($diff), format_string('User roles in database match original: @roles', array('@roles' => implode(', ', $saved_user1->roles))));
   }
 }
 
@@ -2179,9 +2233,9 @@ class UserUserSearchTestCase extends BackdropWebTestCase {
     // for users by email address. Additionally, ensure that the username has a
     // plus sign to ensure searching works with that.
     $user1 = $this->backdropCreateUser(array('access user profiles', 'search content', 'use advanced search'));
-    $edit['name'] = 'foo+bar';
-    $edit['mail'] = $edit['name'] . '@example.com';
-    user_save($user1, $edit);
+    $user1->name = $edit['name'] = 'foo+bar';
+    $user1->mail = $edit['mail'] = $edit['name'] . '@example.com';
+    user_save($user1);
     $this->backdropLogin($user1);
     $keys = $user1->mail;
     $edit = array('keys' => $keys);
@@ -2282,8 +2336,8 @@ class UserRolesAssignmentTestCase extends BackdropWebTestCase {
     $edit = array(
       'name' => $this->randomName(),
       'mail' => $this->randomName() . '@example.com',
-      'pass[pass1]' => $pass = $this->randomString(),
-      'pass[pass2]' => $pass,
+      'pass' => $pass = $this->randomString(),
+      'notify' => FALSE,
       "roles[$role_name]" => $role_name,
     );
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
@@ -2350,10 +2404,24 @@ class UserValidateCurrentPassCustomForm extends BackdropWebTestCase {
   function testUserValidateCurrentPassCustomForm() {
     $this->backdropLogin($this->adminUser);
 
+    // Check that filling out a single password field does not validate.
+    $edit = array();
+    $edit['password_confirm[pass1]'] = '';
+    $edit['password_confirm[pass2]'] = $this->randomName();
+    $this->backdropPost('user_form_test_current_password/' . $this->accessUser->uid, $edit, t('Test'));
+    $this->assertText(t("The specified passwords do not match."), 'Typing mismatched passwords displays an error message.');
+
+    $edit['password_confirm[pass1]'] = $new_pass = $this->randomName();
+    $edit['password_confirm[pass2]'] = '';
+    $this->backdropPost('user_form_test_current_password/' . $this->accessUser->uid, $edit, t('Test'));
+    $this->assertText(t("The specified passwords do not match."), 'Typing mismatched passwords displays an error message.');
+
     // Submit the custom form with the admin user using the access user's password.
     $edit = array();
     $edit['user_form_test_field'] = $this->accessUser->name;
     $edit['current_pass'] = $this->accessUser->pass_raw;
+    $edit['password_confirm[pass1]'] = $new_pass;
+    $edit['password_confirm[pass2]'] = $new_pass;
     $this->backdropPost('user_form_test_current_password/' . $this->accessUser->uid, $edit, t('Test'));
     $this->assertText(t('The password has been validated and the form submitted successfully.'));
   }

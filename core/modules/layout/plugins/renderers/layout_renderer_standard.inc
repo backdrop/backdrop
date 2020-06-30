@@ -235,6 +235,9 @@ class LayoutRendererStandard {
         }
       }
 
+      // Let the block prepare any data before rendering.
+      $block->prepare();
+
       $block_info = layout_get_block_info($block->module, $block->delta);
 
       // If this block wants to render last, add it to the $last array. We allow
@@ -246,7 +249,7 @@ class LayoutRendererStandard {
       // If it wants to render first, add it to the $first array. This is used
       // by blocks that need to do some processing before other blocks are
       // rendered.
-      else if (!empty($block_info['render first'])) {
+      elseif (!empty($block_info['render first'])) {
         $first[$uuid] = $block;
       }
       // Otherwise, render it in the normal order.
@@ -520,10 +523,18 @@ class LayoutRendererStandard {
         $title = $block->getTitle();
       }
 
-      // Assemble a structured content array.
-      $content = (object) array(
+      $data = array(
         'title' => $title,
         'content' => $content,
+      );
+
+      // Allow altering of the title and content by other modules.
+      backdrop_alter(array('block_view', 'block_view_' . $block->module . '_' . str_replace('-', '_', $block->delta)), $data, $block);
+
+      // Assemble a structured content array.
+      $content = (object) array(
+        'title' => $data['title'],
+        'content' => $data['content'],
       );
 
       if (isset($style) && isset($style['block theme'])) {
@@ -584,7 +595,11 @@ class LayoutRendererStandard {
     $tag = isset($style_settings['element']) ? $style_settings['element'] : '';
     $classes = array();
     if (isset($style_settings['classes'])) {
-      $classes =  explode(' ', $style_settings['classes']);
+      $classes = explode(' ', $style_settings['classes']);
+      foreach ($classes as $n => $class) {
+        $classes[$n] = backdrop_clean_css_identifier($class, array());
+      }
+      $classes = array_filter($classes);
     }
 
     return theme('layout_region_inner', array('blocks' => $blocks, 'tag' => $tag, 'classes' => $classes));

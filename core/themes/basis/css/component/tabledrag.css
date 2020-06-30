@@ -63,7 +63,7 @@ tr.draggable .handle {
   padding: 0;
   -webkit-transform: translate(-50%, -50%) scale(0.5, 0.5);
   transform: translate(-50%, -50%) scale(0.5, 0.5);
-  background: #333;
+  background: #333333;
   text-decoration: none;
 }
 tr.draggable .handle:before,
@@ -80,7 +80,7 @@ tr.draggable .handle:before {
   -webkit-transform: translate(-0.25em, -0.375em);
   transform: translate(-0.25em, -0.375em);
   border: 0.375em solid transparent;
-  border-bottom-color: #333;
+  border-bottom-color: #333333;
   border-top: 0;
 }
 tr.draggable .handle:after {
@@ -89,7 +89,7 @@ tr.draggable .handle:after {
   -webkit-transform: translate(-0.25em, 0.375em);
   transform: translate(-0.25em, 0.375em);
   border: 0.375em solid transparent;
-  border-top-color: #333;
+  border-top-color: #333333;
   border-bottom: 0;
 }
 tr.draggable .handle .handle-inner {
@@ -101,7 +101,7 @@ tr.draggable .handle .handle-inner {
   height: 0.25em;
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
-  background: #333;
+  background: #333333;
 }
 tr.draggable .handle .handle-inner:before {
   top: 0;
@@ -109,7 +109,7 @@ tr.draggable .handle .handle-inner:before {
   -webkit-transform: translate(0.375em, -0.25em);
   transform: translate(0.375em, -0.25em);
   border: 0.375em solid transparent;
-  border-left-color: #333;
+  border-left-color: #333333;
   border-right: 0;
 }
 
@@ -119,7 +119,7 @@ tr.draggable .handle .handle-inner:after {
   -webkit-transform: translate(-0.375em, -0.25em);
           transform: translate(-0.375em, -0.25em);
   border: 0.375em solid transparent;
-  border-right-color: #333;
+  border-right-color: #333333;
   border-left: 0;
 }
 
@@ -132,7 +132,7 @@ abbr.tabledrag-changed {
   height: 100%;
   text-indent: -9999em;
   z-index: 0;
-  background: #FCE400;
+  background: #fce400;
 }
 
 .tabledrag-changed[title] {

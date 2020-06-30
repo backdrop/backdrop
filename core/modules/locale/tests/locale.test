@@ -4,7 +4,6 @@
  * Tests for locale.module.
  */
 
-
 /**
  * Functional tests for language configuration's effect on negotiation setup.
  */
@@ -270,6 +269,16 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/translate/translate', $search, t('Filter'));
     // The indicator should not be here.
     $this->assertNoRaw($language_indicator, 'String is translated.');
+
+    // Verify that a translation set which has an empty target string can be
+    // updated without any database error.
+    db_update('locales_target')
+      ->fields(array('translation' => ''))
+      ->condition('language', $langcode, '=')
+      ->condition('lid', $lid, '=')
+      ->execute();
+    $this->backdropPost('admin/config/regional/translate/edit/' . $lid, $edit, t('Save translations'));
+    $this->assertText(t('The string has been saved.'), 'The string has been saved.');
 
     // Try to edit a non-existent string and ensure we're redirected correctly.
     // Assuming we don't have 999,999 strings already.
@@ -647,7 +656,7 @@ class LocalePluralFormatTest extends BackdropWebTestCase {
    *   Additional options to pass to the translation import form.
    */
   function importPoFile($contents, array $options = array()) {
-    $name = tempnam('temporary://', "po_") . '.po';
+    $name = backdrop_tempnam('temporary://', "po_") . '.po';
     file_put_contents($name, $contents);
     $options['files[file]'] = $name;
     $options['mode'] = LOCALE_IMPORT_OVERWRITE;
@@ -940,7 +949,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
    *   Additional options to pass to the translation import form.
    */
   function importPoFile($contents, array $options = array()) {
-    $name = tempnam('temporary://', "po_") . '.po';
+    $name = backdrop_tempnam('temporary://', "po_") . '.po';
     file_put_contents($name, $contents);
     $options['files[file]'] = $name;
     $this->backdropPost('admin/config/regional/translate/import', $options, t('Import'));
@@ -1122,7 +1131,7 @@ class LocaleExportFunctionalTest extends BackdropWebTestCase {
   function testExportTranslation() {
     // First import some known translations.
     // This will also automatically enable the 'fr' language.
-    $name = tempnam('temporary://', "po_") . '.po';
+    $name = backdrop_tempnam('temporary://', "po_") . '.po';
     file_put_contents($name, $this->getPoFile());
     $this->backdropPost('admin/config/regional/translate/import', array(
       'langcode' => 'fr',
@@ -1627,8 +1636,7 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
     $edit = array(
       'name' => $username,
       'mail' => $this->randomName(4) . '@example.com',
-      'pass[pass1]' => $username,
-      'pass[pass2]' => $username,
+      'pass' => $username,
     );
 
     $this->backdropPost($langcode . '/admin/people/create', $edit, t('Create new account'));
@@ -1664,8 +1672,7 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
     // Set pass_raw so we can login the new user.
     $user->pass_raw = $this->randomName(10);
     $edit = array(
-      'pass[pass1]' => $user->pass_raw,
-      'pass[pass2]' => $user->pass_raw,
+      'pass' => $user->pass_raw,
     );
 
     $this->backdropPost($user_edit, $edit, t('Save'));
@@ -2184,7 +2191,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
       // Default domain, browser preference should have no influence.
       array(
         'language_negotiation' => array(LANGUAGE_NEGOTIATION_URL, LANGUAGE_NEGOTIATION_DEFAULT),
-        'locale_language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
+        'language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
         'path' => 'admin/config',
         'expect' => $default_string,
         'expected_provider' => LANGUAGE_NEGOTIATION_DEFAULT,
@@ -2195,7 +2202,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
       // locale_test.module hook_boot() to simulate this.
       array(
         'language_negotiation' => array(LANGUAGE_NEGOTIATION_URL, LANGUAGE_NEGOTIATION_DEFAULT),
-        'locale_language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
+        'language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
         'locale_test_domain' => $language_domain . ':88',
         'path' => 'admin/config',
         'expect' => $language_string,
@@ -2214,8 +2221,8 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
     if (!empty($test['language_negotiation'])) {
       language_negotiation_set(LANGUAGE_TYPE_INTERFACE, $test['language_negotiation']);
     }
-    if (!empty($test['locale_language_negotiation_url_part'])) {
-      config_set('locale.settings', 'language_negotiation_url_part', $test['locale_language_negotiation_url_part']);
+    if (!empty($test['language_negotiation_url_part'])) {
+      config_set('locale.settings', 'language_negotiation_url_part', $test['language_negotiation_url_part']);
     }
     if (!empty($test['locale_test_domain'])) {
       state_set('locale_test_domain', $test['locale_test_domain']);
@@ -2299,7 +2306,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
 
     // Change the domain for the Italian language.
     $edit = array(
-      'locale_language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
+      'language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
       'domain[it]' => 'it.example.com',
     );
     $this->backdropPost('admin/config/regional/language/detection/url', $edit, t('Save configuration'));
@@ -2385,9 +2392,9 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
   /**
    * Check URL rewriting for the given language.
    *
-   * The test is performed with a fixed URL (the default front page) to simply
-   * check that language prefixes are not added to it and that the prefixed URL
-   * is actually not working.
+   * The test is performed with a fixed URL (the default front page) to check
+   * that language prefixes are not added to it, and that the prefixed URL is
+   * actually not working.
    *
    * @param string $language
    *   The language prefix, e.g. 'es'.
@@ -2414,6 +2421,62 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
 
     $this->backdropGet("$prefix/$path");
     $this->assertResponse(404, $message2);
+  }
+
+  /**
+   * Check URL rewriting when using a domain name and a non-standard port.
+   */
+  function testDomainNameNegotiationPort() {
+    $edit = array(
+      // Enable domain configuration.
+      'language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
+      'prefix[fr]' => '',
+      'domain[fr]' => 'example.fr',
+    );
+    $this->backdropPost('admin/config/regional/language/detection/url', $edit, t('Save configuration'));
+
+    // Reset static caching.
+    backdrop_static_reset('language_list');
+    backdrop_static_reset('language_url_outbound_alter');
+    backdrop_static_reset('language_url_rewrite_url');
+
+    // In case index.php is part of the URLs, we need to adapt the asserted
+    // URLs as well.
+    $index_php = strpos(url('', array('absolute' => TRUE)), 'index.php') !== FALSE;
+
+    // Remember current HTTP_HOST.
+    $http_host = $_SERVER['HTTP_HOST'];
+
+    // Fake a different port.
+    $_SERVER['HTTP_HOST'] .= ':88';
+
+    // Create an absolute French link.
+    $languages = language_list();
+    $language = $languages['fr'];
+    $url = url('', array(
+      'absolute' => TRUE,
+      'language' => $language
+    ));
+
+    $expected = 'http://example.fr:88/';
+    $expected .= $index_php ? 'index.php/' : '';
+
+    $this->assertEqual($url, $expected, 'The right port is used.');
+
+    // If we set the port explicitly in url(), it should not be overriden.
+    $url = url('', array(
+      'absolute' => TRUE,
+      'language' => $language,
+      'base_url' => $GLOBALS['base_url'] . ':90',
+    ));
+
+    $expected = 'http://example.fr:90/';
+    $expected .= $index_php ? 'index.php/' : '';
+
+    $this->assertEqual($url, $expected, 'A given port is not overriden.');
+
+    // Restore HTTP_HOST.
+    $_SERVER['HTTP_HOST'] = $http_host;
   }
 }
 
@@ -2484,7 +2547,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
       'langcode' => 'it',
     );
     $this->backdropPost(NULL, $edit, t('Save'));
-    $node = $this->backdropGetNodeByTitle($edit[$title_key]);
+    $node = $this->backdropGetNodeByTitle($edit[$title_key], TRUE);
     $this->assertTrue($node, 'Node found in database.');
 
     $assert = isset($node->body['it']) && !isset($node->body['en']) && $node->body['it'][0]['value'] == $body_value;
