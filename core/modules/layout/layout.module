@@ -1172,12 +1172,6 @@ function layout_provides_path($path) {
 
   
   $result = db_query('SELECT * FROM {menu_router} WHERE path = :path', array(':path' => $path));
-  
-  if (!$result->rowCount()) {
-    $path_array = explode('/%', $path);
-    $path = $path_array[0];
-    $result = db_query('SELECT * FROM {menu_router} WHERE path = :path', array(':path' => $path));
-  }
   $return = NULL;
 
   // If any page callback exists at this path, allow it to trump custom layouts.
