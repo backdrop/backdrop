@@ -871,7 +871,7 @@ class FileUploadTransliterationTest extends FileTestCase {
     // Check that characters were transliterated and the file exists.
     debug($first_file);
     $this->assertIdentical($first_file->filename, $original_filename, 'File name not transliterated or modified to lowercase.');
-    $this->assertIdentical($first_file->uri, 'temporary://uFail_A_fau.txt', 'File name has been transliterated upon upload.');
+    $this->assertIdentical($first_file->uri, 'temporary://ufail_a_fau.txt', 'File name has been transliterated upon upload.');
     $this->assertTrue(file_exists($first_file->uri), 'Transliterated file exists at expected path.');
 
     // Delete the file to prevent conflicts.
