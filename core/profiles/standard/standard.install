@@ -157,19 +157,19 @@ function standard_install() {
   }
 
   // Add default alias for page content types.
-  config('path.settings')
-    ->set('node_page_pattern', '[node:title]')
-    ->set('node_post_pattern', 'posts/[node:title]')
-    ->save();
+  $config = config('path.settings');
+  $config->set('node_page_pattern', '[node:title]');
+  $config->set('node_post_pattern', 'posts/[node:title]');
+  $config->save();
 
   // Enable user picture support and set the default to a square thumbnail
   // option.
-  config('system.core')
-    ->set('user_pictures', '1')
-    ->set('user_picture_dimensions', '1024x1024')
-    ->set('user_picture_file_size', '800')
-    ->set('user_picture_style', 'thumbnail')
-    ->save();
+  $config = config('system.core');
+  $config->set('user_pictures', 1);
+  $config->set('user_picture_dimensions', '1024x1024');
+  $config->set('user_picture_file_size', '800');
+  $config->set('user_picture_style', 'thumbnail');
+  $config->save();
 
   // Create an initial post to welcome users on install.
   $post = new Node(
@@ -439,20 +439,19 @@ function standard_install() {
   // Enable the Basis and Seven themes, and disable the Stark theme.
   theme_enable(array($default_theme, $admin_theme));
   theme_disable(array('stark'));
-  config('system.core')
-    // Set the Basis theme as the default theme.
-    // @see system_install()
-    ->set('theme_default', $default_theme)
-    // Set the Seven theme as the admin theme.
-    ->set('admin_theme', $admin_theme)
-    ->set('admin_theme_same_as_default', 0)
-    ->set('node_admin_theme', 1)
-    ->save();
+
+  $config = config('system.core');
+  // Set the Basis theme as the default theme.
+  // @see system_install()
+  $config->set('theme_default', $default_theme);
+  // Set the Seven theme as the admin theme.
+  $config->set('admin_theme', $admin_theme);
+  $config->set('admin_theme_same_as_default', 0);
+  $config->set('node_admin_theme', 1);
 
   // Enable the page cache and aggregation.
-  config('system.core')
-    ->set('preprocess_css', 1)
-    ->set('preprocess_js', 1)
-    ->set('cache', 1)
-    ->save();
+  $config->set('preprocess_css', 1);
+  $config->set('preprocess_js', 1);
+  $config->set('cache', 1);
+  $config->save();
 }

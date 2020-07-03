@@ -129,11 +129,11 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     // Make the tests below more robust by explicitly setting the default theme
     // and administrative theme that they expect.
     theme_enable(array('bartik'));
-    config('system.core')
-      ->set('admin_theme_same_as_default', 0)
-      ->set('theme_default', 'bartik')
-      ->set('admin_theme', 'seven')
-      ->save();
+    $config = config('system.core');
+    $config->set('admin_theme_same_as_default', 0);
+    $config->set('theme_default', 'bartik');
+    $config->set('admin_theme', 'seven');
+    $config->save();
   }
 
   /**

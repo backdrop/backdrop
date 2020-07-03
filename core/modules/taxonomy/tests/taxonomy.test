@@ -1782,11 +1782,11 @@ class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
 
     // Make sure we are using distinct default and administrative themes for
     // the duration of these tests.
-    config('system.core')
-      ->set('admin_theme_same_as_default', 0)
-      ->set('theme_default', 'bartik')
-      ->set('admin_theme', 'seven')
-      ->save();
+    $config = config('system.core');
+    $config->set('admin_theme_same_as_default', 0);
+    $config->set('theme_default', 'bartik');
+    $config->set('admin_theme', 'seven');
+    $config->save();
 
     // Create and log in as a user who has permission to add and edit taxonomy
     // terms and view the administrative theme.

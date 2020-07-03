@@ -238,7 +238,7 @@ function system_themes_admin_form($form, &$form_state, $theme_options) {
   );
   $form['admin_theme']['admin_theme_same_as_default'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Always use the default theme as the administration theme'),
+    '#title' => t('Use the default theme as the administration theme'),
     '#default_value' => config_get('system.core', 'admin_theme_same_as_default'),
   );
   $form['admin_theme']['admin_theme'] = array(
