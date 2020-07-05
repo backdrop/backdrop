@@ -556,7 +556,8 @@ class MenuTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test administrative users other than user 1 can access the menu parents AJAX callback.
+   * Test administrative users other than user 1 can access the menu parents
+   * AJAX callback.
    */
   public function testMenuParentsJsAccess() {
     $admin = $this->backdropCreateUser(array('administer menu'));
@@ -658,20 +659,21 @@ class MenuNodeTestCase extends BackdropWebTestCase {
    * Test creating, editing, deleting menu links via node form widget.
    */
   function testMenuNodeFormWidget() {
-    // Enable Main menu as available menu.
+    // Enable the "Primary navigation" as an available menu.
     $edit = array(
       'menu_options[main-menu]' => 1,
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
 
-    // Change default parent item to Main menu, so we can assert more easily.
+    // Change default parent item to the "Primary navigation" menu, so we can
+    // assert more easily.
     $edit = array(
       'menu_parent' => 'main-menu:0',
     );
     $this->backdropPost('admin/structure/types/manage/page', $edit, t('Save content type'));
 
-    // Verify that the menu link title on the node add form has the correct
-    // maxlength.
+    // Verify that the "Menu link title" field on the node add form has the
+    // correct maxlength.
     $this->backdropGet('node/add/page');
     $this->assertPattern('/<input .* id="edit-menu-link-title" .* maxlength="255" .* \/>/', 'Menu link title field has correct maxlength in node add form.');
 
@@ -685,8 +687,9 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('node/add/page', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($node_title);
-    // Assert that there is no link for the node.
-    $this->backdropGet('user');
+    // Assert that no link has been created for the node in the list of links
+    // for the "Primary navigation" menu.
+    $this->backdropGet('admin/structure/menu/manage/main-menu');
     $this->assertNoLink($node_title);
 
     // Edit the node, enable the menu link setting, but skip the link title.
@@ -694,8 +697,9 @@ class MenuNodeTestCase extends BackdropWebTestCase {
       'menu[enabled]' => 1,
     );
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
-    // Assert that there is no link for the node.
-    $this->backdropGet('user');
+    // Assert that no link has been created for the node in the list of links
+    // for the "Primary navigation" menu.
+    $this->backdropGet('admin/structure/menu/manage/main-menu');
     $this->assertNoLink($node_title);
 
     // Edit the node and create a menu link.
@@ -704,7 +708,8 @@ class MenuNodeTestCase extends BackdropWebTestCase {
       'menu[link_title]' => $node_title,
     );
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
-    // Assert that the link exists.
+    // Assert that a link has been created for the node in the list of links
+    // for the "Primary navigation" menu.
     $this->backdropGet('admin/structure/menu/manage/main-menu');
     $this->assertLink($node_title);
 
@@ -719,8 +724,9 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertFieldByName('menu[weight]', 17, 'Menu weight correct in edit form');
 
-    // Disable Main menu as available menu to ensure the link stays when saving
-    // the node while menu options are not on the node form.
+    // Remove the "Primary navigation" menu from available menus, to ensure the
+    // link stays when saving the node while menu options are not on the node
+    // form.
     $edit = array(
       'menu_options[main-menu]' => 0,
     );
@@ -731,7 +737,8 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     $this->backdropGet('user');
     $this->assertLink($node_title);
 
-    // Re-enable Main menu as available menu, then remove the link.
+    // Re-enable the "Primary navigation" menu as available menu, then remove
+    // the link.
     $edit = array(
       'menu_options[main-menu]' => 1,
     );
@@ -759,7 +766,8 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     );
     menu_link_save($item);
 
-    // Assert that disabled Administration menu is not shown on the node/$nid/edit page.
+    // Assert that disabled Administration menu is not shown on the
+    // node/$nid/edit page.
     $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertText('Provide a menu link', 'Link in not allowed menu not shown in node edit form');
     // Assert that the link is still in the Administration menu after save.
@@ -781,7 +789,8 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     menu_link_save($child_item);
     // Edit the first node.
     $this->backdropGet('node/'. $node->nid .'/edit');
-    // Assert that it is not possible to set the parent of the first node to itself or the second node.
+    // Assert that it is not possible to set the parent of the first node to
+    // itself or the second node.
     $this->assertNoOption('edit-menu-parent', 'main-menu:'. $item['mlid']);
     $this->assertNoOption('edit-menu-parent', 'main-menu:'. $child_item['mlid']);
     // Assert that unallowed Management menu is not available in options.
