@@ -715,7 +715,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     $edit = array(
       $menu_link_weight => 17,
     );
-    $this->backdropPost('nadmin/structure/menu/manage/main-menu', $edit, t('Save configuration'));
+    $this->backdropPost('admin/structure/menu/manage/main-menu', $edit, t('Save configuration'));
     $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertFieldByName('menu[weight]', 17, 'Menu weight correct in edit form');
 
