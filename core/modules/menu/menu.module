@@ -725,11 +725,8 @@ function menu_form_node_form_alter(&$form, $form_state) {
     '#attributes' => array('class' => array('menu-parent-select')),
   );
   $form['menu']['link']['weight'] = array(
-    '#type' => 'weight',
-    '#title' => t('Weight'),
-    '#delta' => 50,
-    '#default_value' => $link['weight'],
-    '#description' => t('Menu links with smaller weights are displayed before links with larger weights.'),
+    '#type' => 'hidden',
+    '#value' => $link['weight'],
   );
 }
 
