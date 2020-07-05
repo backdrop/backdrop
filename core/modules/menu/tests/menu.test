@@ -710,7 +710,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     $this->assertLink($node_title);
 
     $this->backdropGet('node/' . $node->nid . '/edit');
-    $this->assertOptionSelected('edit-menu-weight', 17, 'Menu weight correct in edit form');
+    $this->assertFieldByName('menu[weight]', 17, 'Menu weight correct in edit form');
 
     // Disable Main menu as available menu to ensure the link stays when saving
     // the node while menu options are not on the node form.
