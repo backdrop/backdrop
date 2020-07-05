@@ -702,13 +702,20 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     $edit = array(
       'menu[enabled]' => 1,
       'menu[link_title]' => $node_title,
-      'menu[weight]' => 17,
     );
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     // Assert that the link exists.
-    $this->backdropGet('user');
+    $this->backdropGet('admin/structure/menu/manage/main-menu');
     $this->assertLink($node_title);
 
+    // Change the menu item weight, via the "Edit links" management page.
+    $node_path = 'node/' . $node->nid;
+    $mlid = db_query("SELECT mlid FROM {menu_links} WHERE link_path = :path", array(':path' => $node_path))->fetchField();
+    $menu_link_weight = 'mlid:' . $mlid . '[weight]';
+    $edit = array(
+      $menu_link_weight => 17,
+    );
+    $this->backdropPost('nadmin/structure/menu/manage/main-menu', $edit, t('Save configuration'));
     $this->backdropGet('node/' . $node->nid . '/edit');
     $this->assertFieldByName('menu[weight]', 17, 'Menu weight correct in edit form');
 
