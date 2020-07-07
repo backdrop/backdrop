@@ -74,6 +74,12 @@ function installer_manager_update_form($form, $form_state, $context) {
       break;
   }
 
+  $form['update_status'] = array(
+    '#prefix' => '<p><em>',
+    '#markup' => t('For version information and update status for all installed modules, see the <a href="@status_url">available updates</a> report.', array('@status_url' => url('admin/reports/updates'))),
+    '#suffix' => '</em></p>',
+  );
+
   if (!_installer_manager_check_backends($form, 'update')) {
     return $form;
   }
