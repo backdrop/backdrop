@@ -1,16 +1,4 @@
 ﻿/**
- * This is a Backdrop-optimized build of CKEditor.
- *
- * You may re-use it at any time at http://ckeditor.com/builder to build 
- * CKEditor again. Alternatively, use the "build.sh" script to build it locally.
- * If you do so, be sure to pass it the "-s" flag. So: "sh build.sh -s".
- *
- * NOTE:
- *    This file is not used by CKEditor, you may remove it. Changing this file
- *    will not change your CKEditor configuration.
- */
-
-/**
  * @license Copyright (c) 2003-2020, CKSource - Frederico Knabben. All rights reserved.
  * For licensing, see LICENSE.md or https://ckeditor.com/license
  */
@@ -25,10 +13,10 @@
  * (1) https://ckeditor.com/cke4/builder
  *     Visit online builder to build CKEditor from scratch.
  *
- * (2) https://ckeditor.com/cke4/builder/52db0501b506570ee02f9e8a95a9d2a3
+ * (2) https://ckeditor.com/cke4/builder/dc9255f5d25ef4e2b5bcf0139d784681
  *     Visit online builder to build CKEditor, starting with the same setup as before.
  *
- * (3) https://ckeditor.com/cke4/builder/download/52db0501b506570ee02f9e8a95a9d2a3
+ * (3) https://ckeditor.com/cke4/builder/download/dc9255f5d25ef4e2b5bcf0139d784681
  *     Straight download link to the latest version of CKEditor (Optimized) with the same setup as before.
  *
  * NOTE:
@@ -63,19 +51,10 @@ var CKBUILDER_CONFIG = {
 		'package.json',
 		'tests'
 	],
-  // So that they are not shipped with Backdrop, after using this config file
-  // for rebuilding, the following are removed manually, because adding them
-  // to the ignore array does not cause them to be ignored:
-  // 'README.md',
-  // 'adapters',
-  // 'config.js',
-  // 'contents.css',
-  // 'samples',
-  // 'skins/moono-lisa/readme.md',
-  // 'styles.js',
 	plugins : {
 		'a11yhelp' : 1,
 		'about' : 1,
+		'autogrow' : 1,
 		'basicstyles' : 1,
 		'blockquote' : 1,
 		'clipboard' : 1,
@@ -83,6 +62,7 @@ var CKBUILDER_CONFIG = {
 		'elementspath' : 1,
 		'enterkey' : 1,
 		'entities' : 1,
+		'fakeobjects' : 1,
 		'filebrowser' : 1,
 		'floatingspace' : 1,
 		'format' : 1,
