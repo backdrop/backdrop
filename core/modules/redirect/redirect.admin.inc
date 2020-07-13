@@ -695,6 +695,109 @@ function redirect_settings_form($form, &$form_state) {
 }
 
 /**
+ * Form builder for redirection settings.
+ *
+ * @see system_settings_form()
+ *
+ * @ingroup forms
+ */
+function redirect_error_settings_form($form, &$form_state) {
+  $config = config('system.core');
+  $form['#config'] = 'system.core';
+
+  $form['site_403'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display a generic 403 "access denied" page'),
+    '#default_value' => $config->get('site_403'),
+    '#description' => t('Displayed when the requested page is denied to the current user.'),
+  );
+  $form['site_403_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Custom 403 "access denied" page'),
+    '#default_value' => ($config->get('site_403_path') != '' ? backdrop_get_path_alias($config->get('site_403_path')) : ''),
+    '#size' => 40,
+    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
+    '#autocomplete_path' => 'path-autocomplete',
+    '#states' => array(
+      // Hide when using the generic 403 page.
+      'invisible' => array(
+        'input[name="site_403"]' => array('checked' => TRUE),
+      ),
+      // Workaround in order to make the field render as required, with a red
+      // asterisk (when one clicks the "edit" link). Actual form validation
+      // happens in redirect_error_settings_form_validate() below.
+      // See https://github.com/backdrop/backdrop-issues/issues/2732
+      'required' => array(
+        'input[name="site_403"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+  $form['site_404'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display a generic 404 "not found" page'),
+    '#default_value' => $config->get('site_404'),
+    '#description' => t('Displayed when there is no existing content matching the requested page.'),
+  );
+  $form['site_404_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Custom 404 "not found" page'),
+    '#default_value' => ($config->get('site_404_path') != '' ? backdrop_get_path_alias($config->get('site_404_path')) : ''),
+    '#size' => 40,
+    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($config->get('clean_url') ? '' : '?q='),
+    '#autocomplete_path' => 'path-autocomplete',
+    '#states' => array(
+      // Hide when using the generic 404 page.
+      'invisible' => array(
+        'input[name="site_404"]' => array('checked' => TRUE),
+      ),
+      // Workaround in order to make the field render as required, with a red
+      // asterisk (when one clicks the "edit" link). Actual form validation
+      // happens in redirect_error_settings_form_validate() below.
+      // See https://github.com/backdrop/backdrop-issues/issues/2732
+      'required' => array(
+        'input[name="site_404"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Validates the submitted 404/403 settings form.
+ */
+function redirect_error_settings_form_validate($form, &$form_state) {
+  // Ensure that the respective path aliases are being used instead of the
+  // internal paths (like "node/NID").
+  if (!empty($form_state['values']['site_403_path'])) {
+    form_set_value($form['site_403_path'], backdrop_get_normal_path($form_state['values']['site_403_path']), $form_state);
+  }
+  if (!empty($form_state['values']['site_404_path'])) {
+    form_set_value($form['site_404_path'], backdrop_get_normal_path($form_state['values']['site_404_path']), $form_state);
+  }
+
+  
+  // If using a custom 403 page, then validate site_403_path.
+  if (!$form_state['values']['site_403']) {
+    if (empty($form_state['values']['site_403_path'])) {
+      form_set_error('site_403_path', t("Either specify a custom 403 page, or select to use the generic one."));
+    }
+    elseif (!backdrop_valid_path($form_state['values']['site_403_path'])) {
+      form_set_error('site_403_path', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_403_path'])));
+    }
+  }
+  // If using a custom 404 page, then validate site_404_path.
+  if (!$form_state['values']['site_404']) {
+    if (empty($form_state['values']['site_404_path'])) {
+      form_set_error('site_404_path', t("Either specify a custom 404 page, or select to use the generic one."));
+    }
+    elseif (!backdrop_valid_path($form_state['values']['site_404_path'])) {
+      form_set_error('site_404_path', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_404_path'])));
+    }
+  }
+}
+
+/**
  * Form callback; Display a list of all recent 404 pages.
  *
  * This callback is only used if the dblog.module is enabled, from which it

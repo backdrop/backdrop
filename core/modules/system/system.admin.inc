@@ -1312,28 +1312,6 @@ function system_site_information_settings($form, &$form_state) {
     '#description' => t('The maximum number of posts displayed on overview pages such as the home page.'),
     '#access' => (config_get('system.core', 'site_frontpage') == 'node'),
   );
-  $form['error_page'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Error pages'),
-  );
-  $form['error_page']['site_403'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Default 403 (access denied) page'),
-    '#default_value' => ($site_config->get('site_403') != '' ? backdrop_get_path_alias($site_config->get('site_403')) : ''),
-    '#size' => 40,
-    '#description' => t('This page is displayed when the requested document is denied to the current user. Leave blank to display a generic "access denied" page.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
-    '#autocomplete_path' => 'path-autocomplete',
-  );
-  $form['error_page']['site_404'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Default 404 (not found) page'),
-    '#default_value' => ($site_config->get('site_404') != '' ? backdrop_get_path_alias($site_config->get('site_404')) : ''),
-    '#size' => 40,
-    '#description' => t('This page is displayed when no other content matches the requested document. Leave blank to display a generic "page not found" page.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
-    '#autocomplete_path' => 'path-autocomplete',
-  );
 
   $form['#validate'][] = 'system_site_information_settings_validate';
   $form['#submit'][] = 'system_site_information_settings_submit';
@@ -1433,21 +1411,6 @@ function system_site_information_settings_validate($form, &$form_state) {
   // Validate home page path.
   if (!backdrop_valid_path($form_state['values']['site_frontpage'])) {
     form_set_error('site_frontpage', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_frontpage'])));
-  }
-  // Get the normal paths of both error pages.
-  if (!empty($form_state['values']['site_403'])) {
-    form_set_value($form['error_page']['site_403'], backdrop_get_normal_path($form_state['values']['site_403']), $form_state);
-  }
-  if (!empty($form_state['values']['site_404'])) {
-    form_set_value($form['error_page']['site_404'], backdrop_get_normal_path($form_state['values']['site_404']), $form_state);
-  }
-  // Validate 403 error path.
-  if (!empty($form_state['values']['site_403']) && !backdrop_valid_path($form_state['values']['site_403'])) {
-    form_set_error('site_403', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_403'])));
-  }
-  // Validate 404 error path.
-  if (!empty($form_state['values']['site_404']) && !backdrop_valid_path($form_state['values']['site_404'])) {
-    form_set_error('site_404', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_404'])));
   }
 }
 

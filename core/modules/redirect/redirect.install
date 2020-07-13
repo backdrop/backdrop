@@ -172,3 +172,20 @@ function redirect_update_1003() {
 
   db_query("UPDATE {redirect} SET status_code = :default_status WHERE status_code = 0", array(':default_status' => $default_status));
 }
+
+/**
+ * Move "site_40x" settings to the respective "site_40x_path" settings.
+ */
+function redirect_update_1004() {
+  $config = config('system.core');
+
+  $site_403_path = $config->get('site_403');
+  $config->set('site_403_path', $site_403_path);
+  $config->set('site_403', $site_403_path == "" ? 0 : 1);
+
+  $site_404_path = $config->get('site_404');
+  $config->set('site_404_path', $site_404_path);
+  $config->set('site_404', $site_404_path == "" ? 0 : 1);
+
+  $config->save();
+}
