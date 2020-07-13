@@ -3020,9 +3020,9 @@ function backdrop_deliver_html_page($page_callback_result) {
         }
 
         $site_404 = $site_config->get('site_404');
-        $404_path = $site_config->get('site_404_path');
-        if (!$site_404 && !empty($404_path)) {
-          $path = backdrop_get_normal_path($404_path);
+        $site_404_path = $site_config->get('site_404_path');
+        if (!$site_404 && !empty($site_404_path)) {
+          $path = backdrop_get_normal_path($site_404_path);
         }
         else {
           $path = 'system/404';
@@ -3046,9 +3046,9 @@ function backdrop_deliver_html_page($page_callback_result) {
         }
 
         $site_403 = $site_config->get('site_403');
-        $403_path = $site_config->get('site_403_path');
-        if (!$site_403 && !empty($403_path)) {
-          $path = backdrop_get_normal_path($403_path);
+        $site_403_path = $site_config->get('site_403_path');
+        if (!$site_403 && !empty($site_403_path)) {
+          $path = backdrop_get_normal_path($site_403_path);
         }
         else {
           $path = 'system/403';
