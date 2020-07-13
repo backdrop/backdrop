@@ -723,8 +723,9 @@ function redirect_error_settings_form($form, &$form_state) {
         'input[name="site_403"]' => array('checked' => TRUE),
       ),
       // Workaround in order to make the field render as required, with a red
-      // asterisk (when one clicks the "edit" link). Actual form validation
-      // happens in redirect_error_settings_form_validate() below.
+      // asterisk (when one unticks the "Display a generic 403 page" checkbox).
+      // Actual form validation happens in
+      // redirect_error_settings_form_validate() below.
       // See https://github.com/backdrop/backdrop-issues/issues/2732
       'required' => array(
         'input[name="site_403"]' => array('checked' => FALSE),
@@ -756,8 +757,9 @@ function redirect_error_settings_form($form, &$form_state) {
         'input[name="site_404"]' => array('checked' => TRUE),
       ),
       // Workaround in order to make the field render as required, with a red
-      // asterisk (when one clicks the "edit" link). Actual form validation
-      // happens in redirect_error_settings_form_validate() below.
+      // asterisk (when one unticks the "Display a generic 404 page" checkbox).
+      // Actual form validation happens in
+      // redirect_error_settings_form_validate() below.
       // See https://github.com/backdrop/backdrop-issues/issues/2732
       'required' => array(
         'input[name="site_404"]' => array('checked' => FALSE),
