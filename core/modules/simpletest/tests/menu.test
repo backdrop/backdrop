@@ -1504,8 +1504,10 @@ class MenuTrailTestCase extends MenuWebTestCase {
   function testCustom403And404Pages() {
     // Set the custom 403 and 404 pages we will use.
     config('system.core')
-      ->set('site_403', 'menu-test/custom-403-page')
-      ->set('site_404', 'menu-test/custom-404-page')
+      ->set('site_403', 0)
+      ->set('site_403_path', 'menu-test/custom-403-page')
+      ->set('site_404', 0)
+      ->set('site_404_path', 'menu-test/custom-404-page')
       ->save();
 
     // Define the paths we'll visit to trigger 403 and 404 responses during
