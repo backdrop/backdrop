@@ -695,7 +695,7 @@ function redirect_settings_form($form, &$form_state) {
 }
 
 /**
- * Form builder for redirection settings.
+ * Form builder for 404/403 page settings.
  *
  * @see system_settings_form()
  *
