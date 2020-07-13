@@ -882,8 +882,11 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
     );
     $node = $this->backdropCreateNode($edit);
 
-    // Use a custom 403 page.
-    $this->backdropPost('admin/config/system/site-information', array('site_403' => 'node/' . $node->nid), t('Save configuration'));
+    $edit = array(
+      'site_403' => FALSE,
+      'site_403_path' => 'node/' . $node->nid,
+    );
+    $this->backdropPost('admin/config/urls/redirect/error_settings', $edit, t('Save configuration'));
 
     $this->backdropLogout();
     $this->backdropGet('admin');
@@ -898,7 +901,10 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
 
     // Log back in and remove the custom 403 page.
     $this->backdropLogin($this->admin_user);
-    $this->backdropPost('admin/config/system/site-information', array('site_403' => ''), t('Save configuration'));
+    $edit = array(
+      'site_403' => TRUE,
+    );
+    $this->backdropPost('admin/config/urls/redirect/error_settings', $edit, t('Save configuration'));
 
     // Logout and check that the user login block is shown on default 403 pages.
     $this->backdropLogout();
@@ -910,7 +916,8 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
 
     // Log back in, set the custom 403 page to /user and remove the block
     $this->backdropLogin($this->admin_user);
-    config_set('system.core', 'site_403', 'user/login');
+    config_set('system.core', 'site_403', 0);
+    config_set('system.core', 'site_403_path', 'user/login');
 
     // Check that we can log in from the 403 page.
     $this->backdropLogout();
@@ -935,14 +942,18 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
     );
     $node = $this->backdropCreateNode($edit);
     // Use a custom 403 page.
-    $this->backdropPost('admin/config/system/site-information', array('site_403' => $node->path['alias']), t('Save configuration'));
-    $this->backdropGet('admin/config/system/site-information');
+    $edit = array(
+      'site_403' => FALSE,
+      'site_403_path' => $node->path['alias'],
+    );
+    $this->backdropPost('admin/config/urls/redirect/error_settings', $edit, t('Save configuration'));
+    $this->backdropGet('admin/config/urls/redirect/error_settings');
     $this->assertRaw($node->path['alias'], t("Found the alias for the custom 403 page path."));
 
     // Now set a new alias on the node and make sure the new alias is on the 403 field.
     $node->title = $this->randomName(7);
     node_save($node);
-    $this->backdropGet('admin/config/system/site-information');
+    $this->backdropGet('admin/config/urls/redirect/error_settings');
     $this->assertRaw($node->path['alias'], t("Found the alias for the custom 403 page path after it has been changed."));
   }
 }
@@ -972,7 +983,11 @@ class PageNotFoundTestCase extends BackdropWebTestCase {
     $node = $this->backdropCreateNode($edit);
 
     // Use a custom 404 page.
-    $this->backdropPost('admin/config/system/site-information', array('site_404' => 'node/' . $node->nid), t('Save configuration'));
+    $edit = array(
+      'site_404' => FALSE,
+      'site_404_path' => 'node/' . $node->nid,
+    );
+    $this->backdropPost('admin/config/urls/redirect/error_settings', $edit, t('Save configuration'));
 
     $this->backdropGet($this->randomName(10));
     $this->assertText($node->title, 'Found the custom 404 page');
@@ -989,14 +1004,18 @@ class PageNotFoundTestCase extends BackdropWebTestCase {
     );
     $node = $this->backdropCreateNode($edit);
     // Use a custom 404 page.
-    $this->backdropPost('admin/config/system/site-information', array('site_404' => $node->path['alias']), t('Save configuration'));
-    $this->backdropGet('admin/config/system/site-information');
+    $edit = array(
+      'site_404' => FALSE,
+      'site_404_path' => $node->path['alias'],
+    );
+    $this->backdropPost('admin/config/urls/redirect/error_settings', $edit, t('Save configuration'));
+    $this->backdropGet('admin/config/urls/redirect/error_settings');
     $this->assertRaw($node->path['alias'], t("Found the alias for the custom 404 page path."));
 
     // Now set a new alias on the node and make sure the new alias is on the 404 field.
     $node->title = $this->randomName(7);
     node_save($node);
-    $this->backdropGet('admin/config/system/site-information');
+    $this->backdropGet('admin/config/urls/redirect/error_settings');
     $this->assertRaw($node->path['alias'], t("Found the alias for the custom 404 page path after it has been changed."));
   }
 }
