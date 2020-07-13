@@ -863,7 +863,7 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
     parent::setUp();
 
     // Create an administrative user.
-    $this->admin_user = $this->backdropCreateUser(array('access administration pages', 'administer site configuration', 'administer blocks'));
+    $this->admin_user = $this->backdropCreateUser(array('access administration pages', 'administer site configuration', 'administer blocks', 'administer redirects'));
 
     // Disable caching.
     config_set('system.core', 'cache', '0');
@@ -882,6 +882,7 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
     );
     $node = $this->backdropCreateNode($edit);
 
+    // Use a custom 403 page.
     $edit = array(
       'site_403' => FALSE,
       'site_403_path' => 'node/' . $node->nid,
