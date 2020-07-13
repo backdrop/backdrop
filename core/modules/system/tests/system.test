@@ -969,7 +969,7 @@ class PageNotFoundTestCase extends BackdropWebTestCase {
     parent::setUp();
 
     // Create an administrative user.
-    $this->admin_user = $this->backdropCreateUser(array('administer site configuration'));
+    $this->admin_user = $this->backdropCreateUser(array('administer redirects'));
     $this->backdropLogin($this->admin_user);
   }
 
