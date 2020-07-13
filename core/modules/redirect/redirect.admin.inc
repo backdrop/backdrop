@@ -709,7 +709,6 @@ function redirect_error_settings_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Display a generic 403 "access denied" page'),
     '#default_value' => $config->get('site_403'),
-    '#description' => t('Displayed when the requested page is denied to the current user.'),
   );
   $form['site_403_path'] = array(
     '#type' => 'textfield',
@@ -732,11 +731,17 @@ function redirect_error_settings_form($form, &$form_state) {
       ),
     ),
   );
+  // Use a separate help field, to show the help below the checkbox when ticked,
+  // and bellow the 403 path autocomplete when not.
+  $form['site_403_help'] = array(
+    '#type' => 'help',
+    '#markup' => t('Displayed when the requested page is denied to the current user.'),
+  );
+
   $form['site_404'] = array(
     '#type' => 'checkbox',
     '#title' => t('Display a generic 404 "not found" page'),
     '#default_value' => $config->get('site_404'),
-    '#description' => t('Displayed when there is no existing content matching the requested page.'),
   );
   $form['site_404_path'] = array(
     '#type' => 'textfield',
@@ -759,6 +764,12 @@ function redirect_error_settings_form($form, &$form_state) {
       ),
     ),
   );
+  // Use a separate help field, to show the help below the checkbox when ticked,
+  // and bellow the 404 path autocomplete when not.
+  $form['site_404_help'] = array(
+    '#type' => 'help',
+    '#markup' => t('Displayed when there is no existing content matching the requested page.'),
+  );
 
   return system_settings_form($form);
 }
@@ -776,7 +787,6 @@ function redirect_error_settings_form_validate($form, &$form_state) {
     form_set_value($form['site_404_path'], backdrop_get_normal_path($form_state['values']['site_404_path']), $form_state);
   }
 
-  
   // If using a custom 403 page, then validate site_403_path.
   if (!$form_state['values']['site_403']) {
     if (empty($form_state['values']['site_403_path'])) {
