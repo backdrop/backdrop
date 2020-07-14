@@ -4048,7 +4048,7 @@ function path_autocomplete($string = '') {
     // Get node matches.
     $results = db_select('node')
       ->fields('node', array('nid', 'type', 'title', 'status'))
-      ->condition('title', db_like($string) . '%', 'LIKE')
+      ->condition('title', '%' . db_like($string) . '%', 'LIKE')
       ->condition('status', 1)
       ->addTag('node_access')
       ->orderBy('nid', 'DESC')
@@ -4067,7 +4067,7 @@ function path_autocomplete($string = '') {
     if (user_access('manage files') && $match_count < $range) {
       $results = db_select('file_managed')
         ->fields('file_managed', array('fid', 'filename', 'uri', 'filemime', 'status', 'type'))
-        ->condition('filename', db_like($string) . '%', 'LIKE')
+        ->condition('filename', '%' . db_like($string) . '%', 'LIKE')
         ->condition('status', 1)
         ->condition('filemime', 'image%', 'NOT LIKE')
         ->orderBy('fid', 'DESC')
@@ -4090,7 +4090,7 @@ function path_autocomplete($string = '') {
     if (user_access('access user profiles') && $match_count < $range) {
       $results = db_select('users')
         ->fields('users', array('uid', 'name'))
-        ->condition('name', db_like($string) . '%', 'LIKE')
+        ->condition('name', '%' . db_like($string) . '%', 'LIKE')
         ->range(0, $range - $match_count)
         ->orderBy('uid', 'DESC')
         ->execute();
@@ -4115,7 +4115,7 @@ function path_autocomplete($string = '') {
     if ($match_count < $range) {
       $results = db_select('taxonomy_term_data')
         ->fields('taxonomy_term_data', array('tid', 'vocabulary', 'name'))
-        ->condition('name', db_like($string) . '%', 'LIKE')
+        ->condition('name', '%' . db_like($string) . '%', 'LIKE')
         ->addTag('taxonomy_term_access')
         ->range(0, $range - $match_count)
         ->orderBy('tid', 'DESC')
@@ -4199,7 +4199,7 @@ function path_autocomplete($string = '') {
     if ($match_count < $range) {
       $results = db_select('menu_links')
         ->fields('menu_links', array('link_title', 'link_path'))
-        ->condition('link_title', db_like($string) . '%', 'LIKE')
+        ->condition('link_title', '%' . db_like($string) . '%', 'LIKE')
         ->condition('link_path', '%' . db_like('%') . '%', 'NOT LIKE')
         ->range(0, $range)
         ->execute();
