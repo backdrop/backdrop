@@ -803,7 +803,13 @@ form.views-exposed-form {
 #autocomplete li {
   padding: 0 5px;
 }
-
+#autocomplete li .suggestion {
+  /*font-weight: bold;*/
+}
+#autocomplete li .description {
+  color: #999;
+  font-size: 80%;
+}
 
 /**
  * Form elements.
