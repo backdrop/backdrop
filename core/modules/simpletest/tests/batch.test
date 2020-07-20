@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for the Batch API.
@@ -289,8 +288,8 @@ class BatchPageTestCase extends BackdropWebTestCase {
     // is using a different theme than would normally be used by the batch API.
     config_set('system.core', 'theme_default', 'bartik');
     config_set('system.core', 'admin_theme', 'seven');
-    // Log in as an administrator who can see the administrative theme.
-    $admin_user = $this->backdropCreateUser(array('view the administration theme'));
+    // Log in as an administrator who can see administrative pages.
+    $admin_user = $this->backdropCreateUser(array('access administration pages'));
     $this->backdropLogin($admin_user);
     // Visit an administrative page that runs a test batch, and check that the
     // theme that was used during batch execution (which the batch callback

@@ -169,10 +169,6 @@ function system_permission() {
     'access site in maintenance mode' => array(
       'title' => t('Use the site in maintenance mode'),
     ),
-    'view the administration theme' => array(
-      'title' => t('View the administration theme'),
-      'description' => config_get('system.core', 'admin_theme') ? '' : t('This is only used when the site is configured to use a separate administration theme on the <a href="@appearance-url">Appearance</a> page.', array('@appearance-url' => url('admin/appearance'))),
-    ),
     'access site reports' => array(
       'title' => t('View site reports'),
     ),
@@ -2352,7 +2348,7 @@ function system_add_module_assets() {
  * Implements hook_custom_theme().
  */
 function system_custom_theme() {
-  if (user_access('view the administration theme') && path_is_admin(current_path())) {
+  if (user_access('access administration pages') && path_is_admin(current_path())) {
     return config_get('system.core', 'admin_theme');
   }
 }

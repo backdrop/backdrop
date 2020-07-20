@@ -565,18 +565,18 @@ function layout_route_handler($router_item) {
 
   $selected_layout = layout_get_layout_by_path(NULL, $router_item);
 
-  // Safety check that we don't show an admin layout to a user who cannot view
-  // the admin theme. This may happen because the cached layout list does not
-  // include a permissions check on the admin theme.
-  if ($selected_layout->name === 'admin_default' && !user_access('view the administration theme')) {
+  // Safety check that we don't show an admin layout to anyone who cannot access
+  // administrative pages. This may happen because the cached layout list does
+  // not include a permissions check.
+  if ($selected_layout->name === 'admin_default' && !user_access('access administration pages')) {
     $selected_layout = layout_load('default');
   }
 
-  // Special handling for 404 and 403 pages to render in admin theme. The
-  // current path will be the 404/403 system path, and we need to check the
-  // original path, which is stored in "destination" by
+  // Special handling for when 404 and 403 pages should render in the admin
+  // theme. The current path will be the 404/403 system path, and we need to
+  // check the original path, which is stored in "destination" by
   // backdrop_deliver_html_page().
-  if (in_array(backdrop_get_http_header('Status'), array('404 Not Found', '403 Forbidden')) && user_access('view the administration theme')) {
+  if (in_array(backdrop_get_http_header('Status'), array('404 Not Found', '403 Forbidden')) && user_access('access administration pages')) {
     if (isset($_GET['destination']) && path_is_admin($_GET['destination'])) {
       $selected_layout = layout_load('admin_default');
     }
@@ -1259,7 +1259,7 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
 
     // If no layout matches at the path, use the default layout.
     if (!$selected_layout) {
-      if (path_is_admin($router_item['path']) && user_access('view the administration theme')) {
+      if (path_is_admin($router_item['path']) && user_access('access administration pages')) {
         $selected_layout = layout_load('admin_default');
       }
       else {

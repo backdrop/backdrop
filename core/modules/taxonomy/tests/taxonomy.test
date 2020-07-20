@@ -1786,8 +1786,8 @@ class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
     config_set('system.core', 'admin_theme', 'seven');
 
     // Create and log in as a user who has permission to add and edit taxonomy
-    // terms and view the administrative theme.
-    $admin_user = $this->backdropCreateUser(array('administer taxonomy', 'view the administration theme'));
+    // terms.
+    $admin_user = $this->backdropCreateUser(array('administer taxonomy', 'access administration pages'));
     $this->backdropLogin($admin_user);
   }
 
@@ -1839,7 +1839,7 @@ class TaxonomyEFQTestCase extends TaxonomyWebTestCase {
     $result = $result['taxonomy_term'];
     asort($result);
     $this->assertEqual(array_keys($terms), array_keys($result), 'Taxonomy terms were retrieved by EntityFieldQuery.');
- 
+
     $first_result = reset($result);
     $term = _field_create_entity_from_ids($first_result);
     $this->assertEqual($term->tid, $first_result->entity_id, 'Taxonomy term can be created based on the IDs');

@@ -1392,11 +1392,13 @@ class LayoutBlockTest extends BackdropWebTestCase {
 
       // Create and login admin user.
       $this->admin_user = $this->backdropCreateUser(array(
-        'access administration pages',
         'administer layouts',
         'access user profiles',
-        'edit any page content',
         'administer nodes',
+        'edit any page content',
+        // We do not add the 'access administration pages' permission here,
+        // because tests below were written to test the `default` layout, not
+        // the admin_default.
       ));
       $this->backdropLogin($this->admin_user);
     }
@@ -1765,12 +1767,12 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $page_title = $this->xpath('(//div[contains(@class, "l-page-title")])//h1["Your first post!"]');
     $this->assertEqual(count($page_title), 0, 'The page title was not found.');
     $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//div[contains(@class, "tabs")]');
-    $this->assertEqual(count($tabs), 0, 'The tabs DIV was not found.');
+    $this->assertEqual(count($tabs), 0, 'The default tabs DIV was not found.');
 
     // Edit the node to get a system mesage.
     $this->backdropPost("node/1/edit", array(), t('Save'));
     $messages = $this->xpath('(//div[contains(@class, "l-wrapper")])//div[contains(@class, "l-messages")]');
-    $this->assertEqual(count($messages), 0, 'The messages DIV was not found.');
+    $this->assertEqual(count($messages), 0, 'The default messages DIV was not found.');
 
     // Check that the Combo block elements show.
     $combo_page_title = $this->xpath('(//div[contains(@class, "block-system-title-combo")])//h1[contains(@class, "title")]');
@@ -1805,17 +1807,17 @@ class LayoutBlockTest extends BackdropWebTestCase {
     // Check that the system message DIV no longer shows but the messages block
     // does.
     $messages = $this->xpath('(//div[contains(@class, "l-wrapper")])//div[contains(@class, "l-messages")]');
-    $this->assertEqual(count($messages), 0, 'The messages DIV was not found.');
+    $this->assertEqual(count($messages), 0, 'The default messages DIV was not found.');
     $block_messages = $this->xpath('(//div[contains(@class, "block-system-messages")])//div[contains(@class, "l-messages")]');
-    $this->assertEqual(count($block_messages), 1, 'The Page messages block was found.');
+    $this->assertEqual(count($block_messages), 1, 'The messages block was found.');
 
     // Go to the layouts list and check that the Local actions DIV no longer
     // shows but the block does.
     $this->backdropGet('admin/structure/layouts');
     $actions = $this->xpath('(//div[contains(@class, "l-wrapper")])//div[contains(@class, "l-action-links")]');
-    $this->assertEqual(count($actions), 0, 'The messages DIV was not found.');
+    $this->assertEqual(count($actions), 0, 'The default local actions DIV was not found.');
     $block_actions = $this->xpath('(//div[contains(@class, "block-system-action-links")])//ul[contains(@class, "action-links")]');
-    $this->assertEqual(count($block_actions), 1, 'The Page messages block was found.');
+    $this->assertEqual(count($block_actions), 1, 'The local actions block was found.');
   }
 }
 
@@ -1847,7 +1849,6 @@ class LayoutSelectionTest extends BackdropWebTestCase {
       'create ' . $this->content_type->type . ' content',
       'access administration pages',
       'administer content types',
-      'view the administration theme',
       'administer filters',
     ));
     $this->backdropLogin($this->admin_user);
@@ -1981,7 +1982,6 @@ class LayoutBlockTextTest extends BackdropWebTestCase {
       'access content',
       'access administration pages',
       'administer layouts',
-      'view the administration theme',
     ));
     $this->backdropLogin($this->admin_user);
   }
@@ -2063,7 +2063,6 @@ class LayoutCloneTest extends BackdropWebTestCase {
       'access content',
       'access administration pages',
       'administer layouts',
-      'view the administration theme',
     ));
     $this->backdropLogin($this->admin_user);
   }
