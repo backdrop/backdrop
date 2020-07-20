@@ -4176,7 +4176,12 @@ function path_autocomplete($string = '') {
       foreach ($menu_items as $menu_item) {
         if ($match_count < $range) {
           $found_match = FALSE;
-          if (!empty($menu_item['menu']['title']) && stripos($menu_item['menu']['title'], $string) !== FALSE) {
+          $layout = layout_load($menu_item['name'], TRUE);
+          if ($layout && $layout->title) {
+            $found_match = TRUE;
+            $layout_title = $layout->title;
+          }
+          elseif (!empty($menu_item['menu']['title']) && stripos($menu_item['menu']['title'], $string) !== FALSE) {
             $found_match = TRUE;
             $layout_title = $menu_item['menu']['title'];
           }
