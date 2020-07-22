@@ -3019,8 +3019,12 @@ function backdrop_deliver_html_page($page_callback_result) {
           }
         }
 
-        $path = backdrop_get_normal_path($site_config->get('site_404'));
-        if (empty($path)) {
+        $site_404 = $site_config->get('site_404');
+        $site_404_path = $site_config->get('site_404_path');
+        if ($site_404 && $site_404_path != "") {
+          $path = backdrop_get_normal_path($site_404_path);
+        }
+        else {
           $path = 'system/404';
         }
         menu_set_active_item($path);
@@ -3041,8 +3045,12 @@ function backdrop_deliver_html_page($page_callback_result) {
           }
         }
 
-        $path = backdrop_get_normal_path($site_config->get('site_403'));
-        if (empty($path)) {
+        $site_403 = $site_config->get('site_403');
+        $site_403_path = $site_config->get('site_403_path');
+        if ($site_403 && $site_403_path != "") {
+          $path = backdrop_get_normal_path($site_403_path);
+        }
+        else {
           $path = 'system/403';
         }
         // Custom 403 handler. Set the active item in case there are tabs to

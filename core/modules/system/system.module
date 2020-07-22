@@ -820,9 +820,16 @@ function system_menu() {
     'file' => 'system.admin.inc',
     'weight' => -20,
   );
+  // @deprecated: Remove backwards-compatibility redirect in 2.0.
   $items['admin/config/development/logging'] = array(
-    'title' => 'Logging and errors',
-    'description' => "Settings for logging and alerts modules. Various modules can route Backdrop's system events to different destinations, such as syslog, database, email, etc.",
+    'page callback' => 'backdrop_goto_deprecated',
+    'page arguments' => array('admin/config/development/errors'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/config/development/errors'] = array(
+    'title' => 'Error handling',
+    'description' => "Error handling, logging, and alert settings. Various modules can route Backdrop's system events to different destinations, such as syslog, database, email, etc.",
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_logging_settings'),
     'access arguments' => array('administer site configuration'),
@@ -928,7 +935,7 @@ function system_menu() {
   );
   $items['admin/config/system/site-information'] = array(
     'title' => 'Site information',
-    'description' => 'Change site name, logo, favicon, slogan, e-mail address, default front page, and number of posts per page, error pages.',
+    'description' => 'Change site name and slogan, from e-mail address, logo, favicon, and default home page.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_site_information_settings'),
     'access arguments' => array('administer site configuration'),
