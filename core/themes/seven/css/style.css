@@ -810,6 +810,9 @@ form.views-exposed-form {
 #autocomplete li.selected .autocomplete-description {
   color: #ddd;
 }
+[dir="rtl"] .autocomplete-suggestion {
+  float: right; 
+}
 
 /**
  * Form elements.
