@@ -807,6 +807,9 @@ form.views-exposed-form {
   color: #666;
   font-size: 80%;
 }
+#autocomplete li.selected .autocomplete-description {
+  color: #ddd;
+}
 
 /**
  * Form elements.
