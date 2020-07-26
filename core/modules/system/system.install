@@ -3124,6 +3124,25 @@ function system_update_1072() {
 }
 
 /**
+ * Explicitly set the admin theme to an actual theme, instead of the special
+ * 'Default theme' option.
+ */
+function system_update_1073() {
+  $config = config('system.core');
+  $admin_theme = $config->get('admin_theme');
+  $default_theme = $config->get('theme_default');
+
+  // Check whether the admin theme is currently set to the special 'Default
+  // theme' option, or if empty.
+  if ($admin_theme == '0' || $admin_theme == '') {
+    // Explicitly set the admin theme to whichever actual theme is selected as
+    // the default.
+    $config->set('admin_theme', $default_theme);
+    $config->save();
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
