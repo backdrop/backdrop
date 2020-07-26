@@ -63,42 +63,6 @@ function standard_install() {
   $filtered_html_format = (object) $filtered_html_format;
   filter_format_save($filtered_html_format);
 
-  $full_html_format = array(
-    'format' => 'full_html',
-    'name' => 'Full HTML',
-    'weight' => 1,
-    'editor' => NULL,
-    'filters' => array(
-      // URL filter.
-      'filter_url' => array(
-        'weight' => 0,
-        'status' => 1,
-      ),
-      // Line break filter.
-      'filter_autop' => array(
-        'weight' => 1,
-        'status' => 1,
-      ),
-      // Image captions.
-      'filter_image_caption' => array(
-        'weight' => 4,
-        'status' => 1,
-      ),
-      // Image alignment.
-      'filter_image_align' => array(
-        'weight' => 4,
-        'status' => 1,
-      ),
-      // HTML corrector filter.
-      'filter_htmlcorrector' => array(
-        'weight' => 10,
-        'status' => 1,
-      ),
-    ),
-  );
-  $full_html_format = (object) $full_html_format;
-  filter_format_save($full_html_format);
-
   // Enable Basis theme and set it as default theme instead of Stark.
   // @see system_install()
   $default_theme = 'basis';
