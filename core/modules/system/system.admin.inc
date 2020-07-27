@@ -1611,13 +1611,10 @@ function system_logging_settings($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Error pages'),
   );
-  $form['error_pages']['site_403_help'] = array(
-    '#type' => 'help',
-    '#markup' => t('A 403 "access denied" error page is displayed when the viewer does not have permission to view the requested page.'),
-  );
   $form['error_pages']['site_403_enabled'] = array(
     '#type' => 'radios',
-    '#title' => t('403 "access denied" error page'),
+    '#title' => t('Access denied 403 error page'),
+    '#description' => t('An <em>access denied</em> 403 error page is displayed when the viewer does not have permission to view the requested page.'),
     '#default_value' => $config->get('site_403_enabled'),
     '#options' => array(
       0 => t('Display the system-generated "access denied" page'),
@@ -1651,13 +1648,10 @@ function system_logging_settings($form, &$form_state) {
       ),
     ),
   );
-  $form['error_pages']['site_404_help'] = array(
-    '#type' => 'help',
-    '#markup' => t('A 404 "page not found" error page is displayed when no there is no page that matches the requested URL.'),
-  );
   $form['error_pages']['site_404_enabled'] = array(
     '#type' => 'radios',
-    '#title' => t('404 "page not found" error page'),
+    '#title' => t('Page not found 404 error page'),
+    '#description' => t('A <em>page not found</em> 404 error page is displayed when no there is no page that matches the requested URL.'),
     '#options' => array(
       0 => t('Display the system-generated "page not found" page'),
       1 => t('Display a custom "page not found" page'),
