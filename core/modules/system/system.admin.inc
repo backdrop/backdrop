@@ -1312,28 +1312,6 @@ function system_site_information_settings($form, &$form_state) {
     '#description' => t('The maximum number of posts displayed on overview pages such as the home page.'),
     '#access' => (config_get('system.core', 'site_frontpage') == 'node'),
   );
-  $form['error_page'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Error pages'),
-  );
-  $form['error_page']['site_403'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Default 403 (access denied) page'),
-    '#default_value' => ($site_config->get('site_403') != '' ? backdrop_get_path_alias($site_config->get('site_403')) : ''),
-    '#size' => 40,
-    '#description' => t('This page is displayed when the requested document is denied to the current user. Leave blank to display a generic "access denied" page.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
-    '#autocomplete_path' => 'path-autocomplete',
-  );
-  $form['error_page']['site_404'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Default 404 (not found) page'),
-    '#default_value' => ($site_config->get('site_404') != '' ? backdrop_get_path_alias($site_config->get('site_404')) : ''),
-    '#size' => 40,
-    '#description' => t('This page is displayed when no other content matches the requested document. Leave blank to display a generic "page not found" page.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
-    '#autocomplete_path' => 'path-autocomplete',
-  );
 
   $form['#validate'][] = 'system_site_information_settings_validate';
   $form['#submit'][] = 'system_site_information_settings_submit';
@@ -1435,19 +1413,19 @@ function system_site_information_settings_validate($form, &$form_state) {
     form_set_error('site_frontpage', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_frontpage'])));
   }
   // Get the normal paths of both error pages.
-  if (!empty($form_state['values']['site_403'])) {
-    form_set_value($form['error_page']['site_403'], backdrop_get_normal_path($form_state['values']['site_403']), $form_state);
+  if (!empty($form_state['values']['site_403_enabled'])) {
+    form_set_value($form['error_page']['site_403_enabled'], backdrop_get_normal_path($form_state['values']['site_403_enabled']), $form_state);
   }
-  if (!empty($form_state['values']['site_404'])) {
-    form_set_value($form['error_page']['site_404'], backdrop_get_normal_path($form_state['values']['site_404']), $form_state);
+  if (!empty($form_state['values']['site_404_enabled'])) {
+    form_set_value($form['error_page']['site_404_enabled'], backdrop_get_normal_path($form_state['values']['site_404_enabled']), $form_state);
   }
   // Validate 403 error path.
-  if (!empty($form_state['values']['site_403']) && !backdrop_valid_path($form_state['values']['site_403'])) {
-    form_set_error('site_403', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_403'])));
+  if (!empty($form_state['values']['site_403_enabled']) && !backdrop_valid_path($form_state['values']['site_403_enabled'])) {
+    form_set_error('site_403_enabled', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_403_enabled'])));
   }
   // Validate 404 error path.
-  if (!empty($form_state['values']['site_404']) && !backdrop_valid_path($form_state['values']['site_404'])) {
-    form_set_error('site_404', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_404'])));
+  if (!empty($form_state['values']['site_404_enabled']) && !backdrop_valid_path($form_state['values']['site_404_enabled'])) {
+    form_set_error('site_404_enabled', t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state['values']['site_404_enabled'])));
   }
 }
 
@@ -1604,25 +1582,125 @@ function system_run_cron_submit($form, &$form_state) {
 }
 
 /**
- * Form builder; Configure error reporting settings.
+ * Backwards compatible wrapper function.
+ * @todo Remove in Backdrop 2.x.
+ */
+function system_logging_settings($form, &$form_state) {
+  watchdog_deprecated_function('system', __FUNCTION__);
+  return system_error_settings($form, $form_state);
+}
+
+/**
+ * Form builder; Configure error handling settings.
  *
  * @ingroup forms
  * @see system_logging_settings_validate()
  */
-function system_logging_settings($form, &$form_state) {
+function system_error_settings($form, &$form_state) {
+  $config = config('system.core');
   $form['#config'] = 'system.core';
-  $form['error_level'] = array(
+
+  $form['error_display'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('PHP errors'),
+  );
+  $form['error_display']['error_level'] = array(
     '#type' => 'radios',
     '#title' => t('Error messages to display'),
-    '#default_value' => config_get('system.core', 'error_level'),
+    '#default_value' => $config->get('error_level'),
     '#options' => array(
       ERROR_REPORTING_HIDE => t('None'),
       ERROR_REPORTING_DISPLAY_SOME => t('Errors and warnings'),
       ERROR_REPORTING_DISPLAY_ALL => t('All messages'),
     ),
-    '#description' => t('It is recommended that sites running on production environments do not display any errors.'),
+    '#description' => t('It is recommended that sites running on production environments do not display any PHP errors.'),
   );
-  $form['watchdog_enabled_severity_levels'] = array(
+
+  $form['error_pages'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Error pages'),
+  );
+  $form['error_pages']['site_403_enabled'] = array(
+    '#type' => 'radios',
+    '#title' => t('Access denied 403 error page'),
+    '#description' => t('An <em>access denied</em> 403 error page is displayed when the viewer does not have permission to view the requested page.'),
+    '#default_value' => $config->get('site_403_enabled'),
+    '#options' => array(
+      0 => t('Display the system-generated "access denied" page'),
+      1 => t('Display a custom "access denied" page'),
+    ),
+    '#states' => array(
+      // Workaround in order to make the field render as required, with a red
+      // asterisk (when the checkbox is ticked). There is a bug in #states that
+      // prevents "required" to work as expected, so this is only cosmetic; the
+      // actual form validation happens in system_error_settings_validate()
+      // below.
+      // See https://github.com/backdrop/backdrop-issues/issues/2732
+      'required' => array(
+        'input[name="site_403"]' => array('value' => TRUE),
+      ),
+    ),
+  );
+  $form['error_pages']['site_403'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path to replacement access denied page'),
+    '#autocomplete_path' => 'path-autocomplete',
+    // The internal node/* path is what is saved in config, but when displaying
+    // the field value, the alias is used instead.
+    '#default_value' => $config->get('site_403') != '' ? backdrop_get_path_alias($config->get('site_403')) : '',
+    '#size' => 40,
+    '#field_prefix' => $field_prefix,
+    '#states' => array(
+      // Hide when using the generic 403 page provided by core.
+      'invisible' => array(
+        'input[name="site_403_enabled"]' => array('value' => 0),
+      ),
+    ),
+  );
+  $form['error_pages']['site_404_enabled'] = array(
+    '#type' => 'radios',
+    '#title' => t('Page not found 404 error page'),
+    '#description' => t('A <em>page not found</em> 404 error page is displayed when no there is no page that matches the requested URL.'),
+    '#options' => array(
+      0 => t('Display the system-generated "page not found" page'),
+      1 => t('Display a custom "page not found" page'),
+    ),
+    '#default_value' => $config->get('site_404_enabled'),
+    '#states' => array(
+      // Workaround in order to make the field render as required, with a red
+      // asterisk (when the checkbox is ticked). There is a bug in #states that
+      // prevents "required" to work as expected, so this is only cosmetic; the
+      // actual form validation happens in system_error_settings_validate()
+      // below.
+      // See https://github.com/backdrop/backdrop-issues/issues/2732
+      'required' => array(
+        'input[name="site_404"]' => array('value' => 1),
+      ),
+    ),
+  );
+
+  $form['error_pages']['site_404'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path to replacement page not found page'),
+    '#autocomplete_path' => 'path-autocomplete',
+    // The internal node/* path is what is saved in config, but when displaying
+    // the field value, the alias is used instead.
+    '#default_value' => $config->get('site_404') != '' ? backdrop_get_path_alias($config->get('site_404')) : '',
+    '#size' => 40,
+    '#field_prefix' => $field_prefix,
+    '#states' => array(
+      // Hide when using the generic 404 page provided by core.
+      'invisible' => array(
+        'input[name="site_404_enabled"]' => array('value' => 0),
+      ),
+    ),
+  );
+
+  $form['error_logging'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Error logging'),
+  );
+  $form['error_logging']['watchdog_enabled_severity_levels'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Severity of messages to log'),
     '#options' => array(
@@ -1636,20 +1714,63 @@ function system_logging_settings($form, &$form_state) {
       WATCHDOG_DEBUG => t('Debug'),
       WATCHDOG_DEPRECATED => t('Deprecated'),
     ),
-    '#default_value' => config_get('system.core', 'watchdog_enabled_severity_levels'),
+    '#default_value' => $config->get('watchdog_enabled_severity_levels'),
     '#description' => t('The <em>debug</em> and <em>deprecated</em> severity levels are recommended for developer environments, but not on production sites.'),
   );
+
+  $field_prefix = url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=');
 
   return system_settings_form($form);
 }
 
 /**
- * Validates the submitted logging form.
+ * Backwards compatible wrapper function.
+ * @todo Remove in Backdrop 2.x.
  */
 function system_logging_settings_validate($form, &$form_state) {
+  watchdog_deprecated_function('system', __FUNCTION__);
+  system_error_settings_validate($form, $form_state);
+}
+
+/**
+ * Validates the submitted error handling form.
+ * @see  system_error_settings().
+ */
+function system_error_settings_validate($form, &$form_state) {
   // Cleanup enabled severity levels. Form API sets the value of unselected
   // checkboxes to 0.
   $form_state['values']['watchdog_enabled_severity_levels'] = array_keys(array_filter($form_state['values']['watchdog_enabled_severity_levels'], function($v){return $v !== 0;}));
+
+  // Ensure that the respective internal paths is what is being saved in config,
+  // (instead of the path aliases from the path autocomplete fields). When the
+  // form is being rendered, backdrop_get_path_alias() is used to revert those
+  // into path aliases, for display purposes.
+  if (!empty($form_state['values']['site_403'])) {
+    form_set_value($form['error_pages']['site_403'], backdrop_get_normal_path($form_state['values']['site_403']), $form_state);
+  }
+  if (!empty($form_state['values']['site_404'])) {
+    form_set_value($form['error_pages']['site_404'], backdrop_get_normal_path($form_state['values']['site_404']), $form_state);
+  }
+
+  // If using a custom 403 page, then validate site_403_path.
+  if ($form_state['values']['site_403_enabled']) {
+    if (empty($form_state['values']['site_403'])) {
+      form_set_error('site_403', t('Custom 403 page not specified.'));
+    }
+    elseif (!backdrop_valid_path($form_state['values']['site_403'])) {
+      form_set_error('site_403', t('The path %path specified for the custom 403 page is either invalid or you do not have access to it.', array('%path' => $form_state['values']['site_403'])));
+    }
+  }
+  // If using a custom 404 page, then validate site_404_path.
+  if ($form_state['values']['site_404_enabled']) {
+    if (empty($form_state['values']['site_404'])) {
+      form_set_error('site_404', t('Custom 404 page not specified.'));
+    }
+    elseif (!backdrop_valid_path($form_state['values']['site_404'])) {
+      form_set_error('site_404', t('The path %path specified for the custom 404 page is either invalid or you do not have access to it.', array('%path' => $form_state['values']['site_404'])));
+    }
+  }
+
 }
 
 /**

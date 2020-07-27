@@ -3124,6 +3124,31 @@ function system_update_1072() {
 }
 
 /**
+ * Add values for 403/404 enabled settings.
+ */
+function system_update_1073() {
+  $config = config('system.core');
+
+  $site_403 = $config->get('site_403');
+  if ($site_403 != '') {
+    $config->set('site_403_enabled', 1);
+  }
+  else {
+    $config->set('site_403_enabled', 0);
+  }
+
+  $site_404 = $config->get('site_404');
+  if ($site_404 != '') {
+    $config->set('site_404_enabled', 1);
+  }
+  else {
+    $config->set('site_404_enabled', 0);
+  }
+
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

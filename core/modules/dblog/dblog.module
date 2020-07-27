@@ -148,10 +148,14 @@ function dblog_watchdog(array $log_entry) {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter() for system_logging_settings().
+ * Implements hook_form_FORM_ID_alter() for system_error_settings().
  */
-function dblog_form_system_logging_settings_alter(&$form, $form_state) {
-  $form['dblog_row_limit'] = array(
+function dblog_form_system_error_settings_alter(&$form, $form_state) {
+  $form['error_logging']['database'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Database logging'),
+  );
+  $form['error_logging']['database']['dblog_row_limit'] = array(
     '#type' => 'select',
     '#title' => t('Database log messages to keep'),
     '#default_value' => config_get('system.core', 'log_row_limit'),
@@ -163,7 +167,7 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
   $pattern = isset($form_state['values']['dblog_date_format']) ? $form_state['values']['dblog_date_format'] : $format;
   $preview = !empty($pattern) ? t('Displayed as %date', array('%date' => format_date(REQUEST_TIME, 'custom', $pattern))) : '';
 
-  $form['dblog_date_format'] = array(
+  $form['error_logging']['database']['dblog_date_format'] = array(
     '#type' => 'textfield',
     '#title' => t('Date format for log messages'),
     '#maxlength' => 100,
@@ -181,15 +185,24 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
       'id' => 'date-format-pattern',
     ),
   );
-  $form['#submit'][] = 'dblog_logging_settings_submit';
+  $form['#submit'][] = 'dblog_error_settings_submit';
 }
 
 /**
- * Form submission handler for system_logging_settings().
- *
- * @see dblog_form_system_logging_settings_alter()
+ * Backwards-compatible wrapper function.
+ * @todo Remove in Backdrop 2.x.
  */
 function dblog_logging_settings_submit($form, &$form_state) {
+  watchdog_deprecated_function('dblog', __FUNCTION__);
+  dblog_error_settings_submit($form, $form_state);
+}
+
+/**
+ * Form submission handler for system_error_settings().
+ *
+ * @see dblog_form_system_error_settings_alter()
+ */
+function dblog_error_settings_submit($form, &$form_state) {
   config_set('system.core', 'log_row_limit', $form_state['values']['dblog_row_limit']);
   config_set('system.core', 'log_date_format', $form_state['values']['dblog_date_format']);
 }
