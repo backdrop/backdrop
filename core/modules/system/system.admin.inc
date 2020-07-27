@@ -1593,7 +1593,7 @@ function system_logging_settings($form, &$form_state) {
 
   $form['error_display'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Errors displayed'),
+    '#title' => t('PHP errors'),
   );
   $form['error_display']['error_level'] = array(
     '#type' => 'radios',
@@ -1604,36 +1604,12 @@ function system_logging_settings($form, &$form_state) {
       ERROR_REPORTING_DISPLAY_SOME => t('Errors and warnings'),
       ERROR_REPORTING_DISPLAY_ALL => t('All messages'),
     ),
-    '#description' => t('It is recommended that sites running on production environments do not display any errors.'),
+    '#description' => t('It is recommended that sites running on production environments do not display any PHP errors.'),
   );
-
-  $form['error_logging'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('All error logging'),
-  );
-  $form['error_logging']['watchdog_enabled_severity_levels'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Severity of messages to log'),
-    '#options' => array(
-      WATCHDOG_EMERGENCY => t('Emergency'),
-      WATCHDOG_ALERT => t('Alert'),
-      WATCHDOG_CRITICAL => t('Critial'),
-      WATCHDOG_ERROR => t('Error'),
-      WATCHDOG_WARNING => t('Warning'),
-      WATCHDOG_NOTICE => t('Notice'),
-      WATCHDOG_INFO => t('Info'),
-      WATCHDOG_DEBUG => t('Debug'),
-      WATCHDOG_DEPRECATED => t('Deprecated'),
-    ),
-    '#default_value' => $config->get('watchdog_enabled_severity_levels'),
-    '#description' => t('The <em>debug</em> and <em>deprecated</em> severity levels are recommended for developer environments, but not on production sites.'),
-  );
-
-  $field_prefix = url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=');
 
   $form['error_pages'] = array(
     '#type' => 'fieldset',
-    '#title' => t('403 / 404 error pages'),
+    '#title' => t('Error pages'),
   );
   $form['error_pages']['site_403_help'] = array(
     '#type' => 'help',
@@ -1716,6 +1692,30 @@ function system_logging_settings($form, &$form_state) {
       ),
     ),
   );
+
+  $form['error_logging'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Error logging'),
+  );
+  $form['error_logging']['watchdog_enabled_severity_levels'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Severity of messages to log'),
+    '#options' => array(
+      WATCHDOG_EMERGENCY => t('Emergency'),
+      WATCHDOG_ALERT => t('Alert'),
+      WATCHDOG_CRITICAL => t('Critial'),
+      WATCHDOG_ERROR => t('Error'),
+      WATCHDOG_WARNING => t('Warning'),
+      WATCHDOG_NOTICE => t('Notice'),
+      WATCHDOG_INFO => t('Info'),
+      WATCHDOG_DEBUG => t('Debug'),
+      WATCHDOG_DEPRECATED => t('Deprecated'),
+    ),
+    '#default_value' => $config->get('watchdog_enabled_severity_levels'),
+    '#description' => t('The <em>debug</em> and <em>deprecated</em> severity levels are recommended for developer environments, but not on production sites.'),
+  );
+
+  $field_prefix = url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=');
 
   return system_settings_form($form);
 }
