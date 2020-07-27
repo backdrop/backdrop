@@ -1609,7 +1609,7 @@ function system_logging_settings($form, &$form_state) {
 
   $form['error_logging'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Error logging'),
+    '#title' => t('All error logging'),
   );
   $form['error_logging']['watchdog_enabled_severity_levels'] = array(
     '#type' => 'checkboxes',
@@ -1633,17 +1633,20 @@ function system_logging_settings($form, &$form_state) {
 
   $form['error_pages'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Error pages'),
+    '#title' => t('403 / 404 error pages'),
   );
   $form['error_pages']['site_403_help'] = array(
     '#type' => 'help',
-    '#markup' => t('A 403 "access denied" error page is displayed when the requested document is denied to the current viewer.'),
+    '#markup' => t('A 403 "access denied" error page is displayed when the viewer does not have permission to view the requested page.'),
   );
   $form['error_pages']['site_403_enabled'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Custom 403 "access denied" error page.'),
-    '#description' => t('When unchecked a generic "access denied" page will be displayed.'),
+    '#type' => 'radios',
+    '#title' => t('403 "access denied" error page'),
     '#default_value' => $config->get('site_403_enabled'),
+    '#options' => array(
+      0 => t('Display the system-generated "access denied" page'),
+      1 => t('Display a custom "access denied" page'),
+    ),
     '#states' => array(
       // Workaround in order to make the field render as required, with a red
       // asterisk (when the checkbox is ticked). There is a bug in #states that
@@ -1652,7 +1655,7 @@ function system_logging_settings($form, &$form_state) {
       // below.
       // See https://github.com/backdrop/backdrop-issues/issues/2732
       'required' => array(
-        'input[name="site_403"]' => array('checked' => TRUE),
+        'input[name="site_403"]' => array('value' => TRUE),
       ),
     ),
   );
@@ -1668,7 +1671,7 @@ function system_logging_settings($form, &$form_state) {
     '#states' => array(
       // Hide when using the generic 403 page provided by core.
       'invisible' => array(
-        'input[name="site_403_enabled"]' => array('checked' => FALSE),
+        'input[name="site_403_enabled"]' => array('value' => 0),
       ),
     ),
   );
@@ -1677,9 +1680,12 @@ function system_logging_settings($form, &$form_state) {
     '#markup' => t('A 404 "page not found" error page is displayed when no there is no page that matches the requested URL.'),
   );
   $form['error_pages']['site_404_enabled'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Custom 404 "page not found" error page.'),
-    '#description' => t('When unchecked a generic "page not found" page will be displayed.'),
+    '#type' => 'radios',
+    '#title' => t('404 "page not found" error page'),
+    '#options' => array(
+      0 => t('Display the system-generated "page not found" page'),
+      1 => t('Display a custom "page not found" page'),
+    ),
     '#default_value' => $config->get('site_404_enabled'),
     '#states' => array(
       // Workaround in order to make the field render as required, with a red
@@ -1689,7 +1695,7 @@ function system_logging_settings($form, &$form_state) {
       // below.
       // See https://github.com/backdrop/backdrop-issues/issues/2732
       'required' => array(
-        'input[name="site_404"]' => array('checked' => TRUE),
+        'input[name="site_404"]' => array('value' => 1),
       ),
     ),
   );
@@ -1706,7 +1712,7 @@ function system_logging_settings($form, &$form_state) {
     '#states' => array(
       // Hide when using the generic 404 page provided by core.
       'invisible' => array(
-        'input[name="site_404_enabled"]' => array('checked' => FALSE),
+        'input[name="site_404_enabled"]' => array('value' => 0),
       ),
     ),
   );
