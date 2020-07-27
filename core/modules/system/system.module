@@ -831,7 +831,7 @@ function system_menu() {
     'title' => 'Error handling',
     'description' => "Error handling, logging, and alert settings. Various modules can route Backdrop's system events to different destinations, such as syslog, database, email, etc.",
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_logging_settings'),
+    'page arguments' => array('system_error_settings'),
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
     'weight' => -15,

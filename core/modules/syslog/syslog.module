@@ -22,9 +22,9 @@ else {
 }
 
 /**
- * Implements hook_form_FORM_ID_alter().
+ * Implements hook_form_FORM_ID_alter() for system_error_settings().
  */
-function syslog_form_system_logging_settings_alter(&$form, &$form_state) {
+function syslog_form_system_error_settings_alter(&$form, &$form_state) {
   $config = config('system.core');
   $form['error_logging']['system'] = array(
     '#type' => 'fieldset',
@@ -56,11 +56,20 @@ function syslog_form_system_logging_settings_alter(&$form, &$form_state) {
 }
 
 /**
- * Form submission handler for system_logging_settings().
- *
- * @see syslog_form_system_logging_settings_alter()
+ * Backwards-compatible wrapper function.
+ * @todo Remove in Backdrop 2.x.
  */
 function syslog_logging_settings_submit($form, &$form_state) {
+  watchdog_deprecated_function('syslog', __FUNCTION__);
+  syslog_error_settings_submit($form, $form_state);
+}
+
+/**
+ * Form submission handler for system_error_settings().
+ *
+ * @see syslog_form_system_error_settings_alter()
+ */
+function syslog_error_settings_submit($form, &$form_state) {
   config('system.core')
     ->set('log_identity', $form_state['values']['syslog_identity'])
     ->set('log_facility', $form_state['values']['syslog_facility'])

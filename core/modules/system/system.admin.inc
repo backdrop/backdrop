@@ -1582,12 +1582,21 @@ function system_run_cron_submit($form, &$form_state) {
 }
 
 /**
+ * Backwards compatible wrapper function.
+ * @todo Remove in Backdrop 2.x.
+ */
+function system_logging_settings($form, &$form_state) {
+  watchdog_deprecated_function('system', __FUNCTION__);
+  return system_error_settings($form, $form_state);
+}
+
+/**
  * Form builder; Configure error handling settings.
  *
  * @ingroup forms
  * @see system_logging_settings_validate()
  */
-function system_logging_settings($form, &$form_state) {
+function system_error_settings($form, &$form_state) {
   $config = config('system.core');
   $form['#config'] = 'system.core';
 
@@ -1624,7 +1633,7 @@ function system_logging_settings($form, &$form_state) {
       // Workaround in order to make the field render as required, with a red
       // asterisk (when the checkbox is ticked). There is a bug in #states that
       // prevents "required" to work as expected, so this is only cosmetic; the
-      // actual form validation happens in system_logging_settings_validate()
+      // actual form validation happens in system_error_settings_validate()
       // below.
       // See https://github.com/backdrop/backdrop-issues/issues/2732
       'required' => array(
@@ -1661,7 +1670,7 @@ function system_logging_settings($form, &$form_state) {
       // Workaround in order to make the field render as required, with a red
       // asterisk (when the checkbox is ticked). There is a bug in #states that
       // prevents "required" to work as expected, so this is only cosmetic; the
-      // actual form validation happens in system_logging_settings_validate()
+      // actual form validation happens in system_error_settings_validate()
       // below.
       // See https://github.com/backdrop/backdrop-issues/issues/2732
       'required' => array(
@@ -1715,9 +1724,19 @@ function system_logging_settings($form, &$form_state) {
 }
 
 /**
- * Validates the submitted error handling form.
+ * Backwards compatible wrapper function.
+ * @todo Remove in Backdrop 2.x.
  */
 function system_logging_settings_validate($form, &$form_state) {
+  watchdog_deprecated_function('system', __FUNCTION__);
+  system_error_settings_validate($form, $form_state);
+}
+
+/**
+ * Validates the submitted error handling form.
+ * @see  system_error_settings().
+ */
+function system_error_settings_validate($form, &$form_state) {
   // Cleanup enabled severity levels. Form API sets the value of unselected
   // checkboxes to 0.
   $form_state['values']['watchdog_enabled_severity_levels'] = array_keys(array_filter($form_state['values']['watchdog_enabled_severity_levels'], function($v){return $v !== 0;}));
