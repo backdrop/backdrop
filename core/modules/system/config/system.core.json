@@ -27,7 +27,7 @@
     "file_private_path": "",
     "file_public_path": "files",
     "file_temporary_path": "",
-    "file_transliterate_lowercase": 0,
+    "file_transliterate_lowercase": 1,
     "file_transliterate_uploads": 1,
     "file_transliterate_uploads_display_name": 0,
     "filter_fallback_format": "plain_text",

@@ -107,6 +107,50 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   }
 
   /**
+   * Test the path view page link.
+   */
+  function testViewPageLink() {
+    $this->backdropGet('admin/structure/layouts');
+    $this->clickLink(t('Add layout'));
+
+    // Create a new layout at a new path.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_url = 'a-menu-item-path';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_url,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
+    layout_reset_caches();
+
+    // Check that the view page link is present.
+    $this->assertLinkByHref($layout_url, 0, 'View page link found.');
+    $this->assertLink('View page', 0, 'View page link text found.');
+    $this->clickLink(t('View page'));
+    $this->assertResponse(200, 'View page link goes to path.');
+
+    // Create a new layout overriding node/%.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_url = 'node/%';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_url,
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Check that the view page link is not present.
+    $this->assertNoLinkByHref($layout_url, 0, 'View page link found.');
+    $this->assertNoLink('View page', 1, 'View page link text found.');
+  }
+
+  /**
    * Add and remove blocks from a custom layout path.
    */
   function testBlockBasics() {
