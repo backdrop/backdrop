@@ -81,8 +81,8 @@
     "user_register": "admin_only",
     "user_signatures": 0,
     "user_password_constraints": {
-        "constraints_active": "1",
-        "min_length": "8",
+        "constraints_active": 1,
+        "min_length": 8,
         "not_same_as_username": 1,
         "not_same_as_email": 1,
         "case_insensitive_comparison": 0
