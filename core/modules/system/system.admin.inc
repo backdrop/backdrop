@@ -485,7 +485,8 @@ function system_modules($form, $form_state = array()) {
 
   // JS-only table filters.
   $form['filter'] = array(
-    '#type' => 'container',
+    '#type' => 'fieldset',
+    '#title' => t('Filter module list'),
     '#attributes' => array(
       'class' => array('table-filter', 'js-show'),
     ),
@@ -496,6 +497,7 @@ function system_modules($form, $form_state = array()) {
   $form['filter']['search'] = array(
     '#type' => 'textfield',
     '#title' => t('Filter module list'),
+    '#title_display' => 'invisible',
     '#size' => 30,
     '#placeholder' => t('Start typing to filter...'),
     '#attributes' => array(
@@ -635,17 +637,17 @@ function system_modules($form, $form_state = array()) {
   // Add basic information to the fieldsets.
   foreach (element_children($form['modules']) as $package) {
     $form['modules'] += array(
-      '#type' => 'fieldset',
-      '#title' => t('All modules'),
+      //'#type' => 'fieldset',
+      //'#title' => t('All modules'),
       // @todo: Instead of not specifying any title at all, we should use
       // #title_display and set it to invisible. That way the title is still
       // available to screen readers. Unfortunately, this does not seem to work.
       // Should be fixed in https://github.com/backdrop/backdrop-issues/issues/3619
-      '#title_display' => 'invisible',
+      //'#title_display' => 'invisible',
       '#theme' => 'system_modules_fieldset',
       '#header' => array(
-        array('class' => array('checkbox')),
-        t('Name'),
+        array('data' => '', 'class' => array('checkbox')),
+        array('data' => t('Name')),
         array('data' => t('Version'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
         array('data' => t('Description'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
         array('data' => t('Operations')),
