@@ -182,7 +182,8 @@ function user_admin_settings($form, &$form_state) {
   );
   $form['user_password_constraints']['constraints_active'] = array(
     '#type' => 'radios',
-    '#title' => '',
+    '#title' => t('Password constraints behavior'),
+    '#title_display' => 'invisible',
     '#options' => array(
       0 => t('Only indicate poor password strength'),
       1 => t('Enforce constraints on user passwords'),

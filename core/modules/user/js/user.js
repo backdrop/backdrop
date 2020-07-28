@@ -155,8 +155,8 @@ Backdrop.evaluatePasswordStrength = function (password, settings) {
   var hasNumbers = /[0-9]+/.test(password);
   var hasPunctuation = /[^a-zA-Z0-9]+/.test(password);
 
-  // If there is a username or email edit box on the page,
-  // compare password to that, otherwise use value from the database.
+  // If there is a username or email field on the page, compare the password to
+  // that; otherwise use the value from the database.
   var usernameBox = $('input.username');
   if (usernameBox.length > 0) {
     username = usernameBox.val();

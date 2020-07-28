@@ -1068,8 +1068,8 @@ function user_account_form_validate($form, &$form_state) {
  */
 function user_password_constraints_validate($form, &$form_state) {
   if (!array_key_exists('pass', $form_state['values'])) {
-    // User registration forms don't have a password field,
-    // if mail verification is required.
+    // If mail verification is required, user registration forms don't have a
+    // password field.
     return;
   }
   $password = trim($form_state['values']['pass']);
@@ -1088,8 +1088,8 @@ function user_password_constraints_validate($form, &$form_state) {
     $username = $form_state['values']['name'];
     $email = $form_state['values']['mail'];
   }
-  if (strlen($password) < $constraints['minlength']) {
-    $min = $constraints['minlength'];
+  $min = $constraints['minlength'];
+  if (strlen($password) < $min) {
     $messages[] = t('The password is too short. At least @min characters required.', array('@min' => $min));
   }
   if ($constraints['not_username']) {
@@ -2884,8 +2884,8 @@ function user_form_process_password($element, $form_state = array()) {
       $email = $form_state['user']->mail;
     }
     else {
-      // AnonymousUser object has no mail property, name is NULL,
-      // User object has both set.
+      // The AnonymousUser object has no mail property, and name is NULL.
+      // The User object has both mail and name set.
       $username = (isset($user->name) ? $user->name : '');
       $email = (isset($user->mail) ? $user->mail : '');
     }
