@@ -844,6 +844,7 @@ function user_account_form(&$form, &$form_state) {
       $description = t('Provide a password for the new account.');
     }
     if (!config_get('system.core', 'user_email_verification') && !$admin_users) {
+      // Someone registers a new account and may set a password directly.
       $form['account']['pass'] = array(
         '#type' => 'password',
         '#title' => t('Password'),
