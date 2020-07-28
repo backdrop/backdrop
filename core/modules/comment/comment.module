@@ -733,10 +733,28 @@ function comment_node_page_additions(Node $node) {
     $comments_per_page = $node_type->settings['comment_per_page'];
     if ($cids = comment_get_thread($node, $mode, $comments_per_page)) {
       $comments = comment_load_multiple($cids);
-      comment_prepare_thread($comments);
-      $build = comment_view_multiple($comments, $node);
-      $build['pager']['#theme'] = 'pager';
-      $additions['comments'] = $build;
+      // In rare cases $comments is an empty array,
+      // for instance if the only comment entity attached to this node
+      // is broken for some reason.
+      if (!empty($comments)) {
+        comment_prepare_thread($comments);
+        $build = comment_view_multiple($comments, $node);
+        $build['pager']['#theme'] = 'pager';
+        $additions['comments'] = $build;
+      }
+      elseif ($node->comment_count > 0) {
+        // Comment count has got out of line, update it.
+        db_update('node_comment_statistics')
+          ->fields(array(
+            'cid' => 0,
+            'comment_count' => 0,
+            'last_comment_timestamp' => $node->created,
+            'last_comment_name' => '',
+            'last_comment_uid' => $node->uid,
+          ))
+          ->condition('nid', $node->nid)
+          ->execute();
+      }
     }
   }
 
@@ -1150,10 +1168,13 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       ),
     );
     $form['comment']['comment_per_page'] = array(
-      '#type' => 'select',
+      '#type' => 'number',
       '#title' => t('Comments per page'),
       '#default_value' => $node_type->settings['comment_per_page'],
-      '#options' => _comment_per_page(),
+      '#required' => TRUE,
+      '#min' => 10,
+      '#max' => 1000,
+      '#step' => 10,
     );
     $form['comment']['comment_mode'] = array(
       '#type' => 'checkbox',
@@ -1426,9 +1447,11 @@ function comment_node_update_index(Node $node) {
     $comments_per_page = $node_type->settings['comment_per_page'];
     if ($node->comment && $cids = comment_get_thread($node, $mode, $comments_per_page)) {
       $comments = comment_load_multiple($cids);
-      comment_prepare_thread($comments);
-      $build = comment_view_multiple($comments, $node);
-      return backdrop_render($build);
+      if ($comments) {
+        comment_prepare_thread($comments);
+        $build = comment_view_multiple($comments, $node);
+        return backdrop_render($build);
+      }
     }
   }
   return '';
@@ -2272,13 +2295,6 @@ function _comment_get_modes() {
     COMMENT_MODE_FLAT => t('Flat list'),
     COMMENT_MODE_THREADED => t('Threaded list')
   );
-}
-
-/**
- * Returns an array of "comments per page" values that users can select from.
- */
-function _comment_per_page() {
-  return backdrop_map_assoc(array(10, 30, 50, 70, 90, 150, 200, 250, 300));
 }
 
 /**
