@@ -1224,11 +1224,11 @@ function user_update_1017() {
  */
 function user_update_1018() {
   $constraints = array(
-    'constraints_active' => FALSE,
+    'constraints_active' => 0,
     'min_length' => 8,
-    'not_same_as_username' => TRUE,
-    'not_same_as_email' => TRUE,
-    'case_insensitive_comparison' => FALSE,
+    'not_same_as_username' => 1,
+    'not_same_as_email' => 1,
+    'case_insensitive_comparison' => 1,
   );
   config_set('system.core', 'user_password_constraints', $constraints);
 }
