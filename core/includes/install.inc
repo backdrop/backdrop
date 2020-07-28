@@ -305,6 +305,10 @@ abstract class DatabaseTasks {
       'arguments'   => array(),
     ),
     array(
+      'function'    => 'checkUtf8mb4',
+      'arguments'   => array(),
+    ),
+    array(
       'arguments'   => array(
         'CREATE TABLE {backdrop_install_test} (id int NULL)',
         'Backdrop can use CREATE TABLE database commands.',
@@ -1294,7 +1298,7 @@ function st($string, array $args = array(), array $options = array()) {
 
   // Transform arguments before inserting them
   foreach ($args as $key => $value) {
-    switch ($key[0]) {
+    switch (substr($key, 0, 1)) {
       // Escaped only
       case '@':
         $args[$key] = check_plain($value);

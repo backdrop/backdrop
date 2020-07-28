@@ -185,6 +185,7 @@ function user_pass_reset_form($form, &$form_state, $account) {
   );
   $form['pass'] = array(
     '#type' => 'password_confirm',
+    '#required' => TRUE,
   );
   $form['actions'] = array(
     '#type' => 'actions',
@@ -222,6 +223,11 @@ function user_logout() {
   watchdog('user', 'Session closed for %name.', array('%name' => $user->name));
 
   module_invoke_all('user_logout', $user);
+
+  $entity_info = entity_get_info('user');
+  if (isset($entity_info['entity cache']) && $entity_info['entity cache']) {
+    cache('entity_user')->delete($user->uid);
+  }
 
   // Destroy the current session, and reset $user to the anonymous user.
   session_destroy();

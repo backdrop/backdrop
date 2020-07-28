@@ -15,7 +15,7 @@
  * - $term_name: Name of the current term.
  * - $classes: Array of classes that can be used to style contextually through
  *   CSS. The default values can be one or more of the following:
- *   - taxonomy-term: The current template type, i.e., "theming hook".
+ *   - taxonomy-term: The current template type, i.e., "theme hook".
  *   - vocabulary-[vocabulary-name]: The vocabulary to which the term belongs to.
  *     For example, if the term is a "Tag" it would result in "vocabulary-tag".
  *

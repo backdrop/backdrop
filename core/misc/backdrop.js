@@ -2,8 +2,8 @@
  * Main JavaScript file for Backdrop CMS.
  *
  * This file provides central functionality to Backdrop, including attaching
- * behaviors (the main way of interacting with JS in Backdrop), theming
- * wrappers, and localization functions.
+ * behaviors (the main way of interacting with JS in Backdrop), theme wrappers,
+ * and localization functions.
  */
 (function ($, undefined) {
 

@@ -1,0 +1,25 @@
+{
+    "_config_name": "file_display.image",
+    "_module": "file",
+    "type": "image",
+    "default": {
+        "formatter": "file_field_image",
+        "settings": {
+            "file_field_image": {
+                "image_style": "",
+                "image_link": "",
+                "image_float": ""
+            }
+        }
+    },
+    "preview": {
+        "formatter": "file_field_image",
+        "settings": {
+            "file_field_image": {
+                "image_style": "thumbnail",
+                "image_link": "",
+                "image_float": ""
+            }
+        }
+    }
+}

@@ -738,7 +738,7 @@ class FormValidationTestCase extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, 'Save');
     $this->assertNoFieldByName('name', '#value changed by #validate', 'Form element #value was not altered.');
     $this->assertNoText('Name value: value changed by form_set_value() in #validate', 'Form element value in $form_state was not altered.');
-    $this->assertText('The form has become outdated. Copy any unsaved work in the form below');
+    $this->assertText('The form has become outdated.');
   }
 
   /**
@@ -882,9 +882,9 @@ class FormsElementsLabelsTestCase extends BackdropWebTestCase {
 
     // Check title attribute for radios and checkboxes.
     $elements = $this->xpath('//div[@id="edit-form-checkboxes-title-attribute"]');
-    $this->assertEqual($elements[0]['title'], 'Checkboxes test' . ' (' . t('Required') . ')', 'Title attribute found.');
+    $this->assertEqual($elements[0]['title'], 'Checkboxes test (' . t('Required') . ')', 'Title attribute found.');
     $elements = $this->xpath('//div[@id="edit-form-radios-title-attribute"]');
-    $this->assertEqual($elements[0]['title'], 'Radios test' . ' (' . t('Required') . ')', 'Title attribute found.');
+    $this->assertEqual($elements[0]['title'], 'Radios test (' . t('Required') . ')', 'Title attribute found.');
   }
 }
 
@@ -2142,6 +2142,42 @@ class FormEmailTestCase extends BackdropWebTestCase {
     $values = backdrop_json_decode($this->backdropPost('form-test/email', $edit, 'Submit'));
     $this->assertEqual($values['email'], 'foo@example.com');
     $this->assertEqual($values['email_required'], 'example@backdropcms.org');
+  }
+}
+
+/**
+ * Tests html5 date and time elements.
+ */
+class FormH5datetimeTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  function setUp() {
+    parent::setUp('form_test');
+  }
+
+  /**
+   * Tests for #type 'html_date', 'html_time' and 'html_datetime' validation.
+   */
+  function testFormH5datetime() {
+    $edit = array();
+    // Valid input.
+    $edit['h5date'] = '2002-02-01';
+    $edit['h5time'] = '10:33:00';
+    $edit['h5datetime[date]'] = '1990-03-22';
+    $edit['h5datetime[time]'] = '10:30:20';
+    $values = backdrop_json_decode($this->backdropPost('form-test/h5datetime', $edit, 'Submit'));
+    $this->assertEqual($values['h5date'], '2002-02-01', 'Correct h5date input validates');
+    $this->assertEqual($values['h5time'], '10:33:00', 'Correct h5time input validates');
+    $message = 'Correct h5 date and time combined input validates';
+    $this->assertEqual($values['h5datetime'], array('date' => '1990-03-22', 'time' => '10:30:20'), $message);
+
+    // Invalid input.
+    $edit = array();
+    $edit['h5date'] = '2002-02-40';
+    $edit['h5time'] = '10:66:00';
+    $this->backdropPost('form-test/h5datetime', $edit, 'Submit');
+    $this->assertRaw(t('%date is not a valid date.', array('%date' => '2002-02-40')), 'Invalid date doesn\'t validate');
+    $this->assertRaw(t('%time is not a valid time.', array('%time' => '10:66:00')), 'Invalid time doesn\'t validate');
   }
 }
 
