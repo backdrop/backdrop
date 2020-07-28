@@ -186,13 +186,13 @@ Backdrop.evaluatePasswordStrength = function (password, settings) {
         username = username.toLowerCase();
         email = email.toLowerCase();
       }
-      if (password.length < config.minlength) {
+      if (password.length < config.min_length) {
         strength = -1;
       }
-      else if (config.not_username === 1 && password === username) {
+      else if (config.not_same_as_username === 1 && password === username) {
         strength = -1;
       }
-      else if (config.not_email === 1 && password === email) {
+      else if (config.not_same_as_email === 1 && password === email) {
         strength = -1;
       }
     }

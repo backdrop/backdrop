@@ -1225,10 +1225,10 @@ function user_update_1017() {
 function user_update_1018() {
   $constraints = array(
     'constraints_active' => FALSE,
-    'minlength' => 8,
-    'not_username' => TRUE,
-    'not_email' => TRUE,
-    'no_case' => FALSE,
+    'min_length' => 8,
+    'not_same_as_username' => TRUE,
+    'not_same_as_email' => TRUE,
+    'case_insensitive_comparison' => FALSE,
   );
   config_set('system.core', 'user_password_constraints', $constraints);
 }

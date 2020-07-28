@@ -190,30 +190,30 @@ function user_admin_settings($form, &$form_state) {
     ),
     '#default_value' => $config->get('user_password_constraints.constraints_active'),
   );
-  $form['user_password_constraints']['minlength'] = array(
+  $form['user_password_constraints']['min_length'] = array(
     '#type' => 'number',
     '#title' => t('Minimum length'),
     '#min' => 1,
     '#max' => 32,
-    '#default_value' => $config->get('user_password_constraints.minlength'),
+    '#default_value' => $config->get('user_password_constraints.min_length'),
     '#states' => $settings_state,
   );
-  $form['user_password_constraints']['not_username'] = array(
+  $form['user_password_constraints']['not_same_as_username'] = array(
     '#type' => 'checkbox',
     '#title' => t('Not same as username'),
-    '#default_value' => $config->get('user_password_constraints.not_username'),
+    '#default_value' => $config->get('user_password_constraints.not_same_as_username'),
     '#states' => $settings_state,
   );
-  $form['user_password_constraints']['not_email'] = array(
+  $form['user_password_constraints']['not_same_as_email'] = array(
     '#type' => 'checkbox',
     '#title' => t('Not same as account e-mail'),
-    '#default_value' => $config->get('user_password_constraints.not_email'),
+    '#default_value' => $config->get('user_password_constraints.not_same_as_email'),
     '#states' => $settings_state,
   );
-  $form['user_password_constraints']['no_case'] = array(
+  $form['user_password_constraints']['case_insensitive_comparison'] = array(
     '#type' => 'checkbox',
     '#title' => t('Case insensitive comparison'),
-    '#default_value' => $config->get('user_password_constraints.no_case'),
+    '#default_value' => $config->get('user_password_constraints.case_insensitive_comparison'),
     '#states' => $settings_state,
   );
 

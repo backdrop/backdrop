@@ -1088,11 +1088,11 @@ function user_password_constraints_validate($form, &$form_state) {
     $username = $form_state['values']['name'];
     $email = $form_state['values']['mail'];
   }
-  $min = $constraints['minlength'];
+  $min = $constraints['min_length'];
   if (strlen($password) < $min) {
     $messages[] = t('The password is too short. At least @min characters required.', array('@min' => $min));
   }
-  if ($constraints['not_username']) {
+  if ($constraints['not_same_as_username']) {
     if ($password == $username) {
       $messages[] = t('The username cannot be used as password.');
     }
@@ -1102,11 +1102,11 @@ function user_password_constraints_validate($form, &$form_state) {
       }
     }
   }
-  if ($constraints['not_email']) {
+  if ($constraints['not_same_as_email']) {
     if ($password == $email) {
       $messages[] = t('The e-mail cannot be used as password.');
     }
-    elseif ($constraints['no_case']) {
+    elseif ($constraints['case_insensitive_comparison']) {
       if (backdrop_strtolower($password) == backdrop_strtolower($email)) {
         $messages[] = t('The password cannot be similar to the email');
       }
@@ -1995,13 +1995,13 @@ function user_cancel_url($account) {
  */
 function _user_password_constraints_help() {
   $constraints = config_get('system.core', 'user_password_constraints');
-  $min = $constraints['minlength'];
+  $min = $constraints['min_length'];
   $help = array();
   $help[] = t('The password must be at least @min characters long.', array('@min' => $min));
-  if ($constraints['not_username']) {
+  if ($constraints['not_same_as_username']) {
     $help[] = t('The password cannot be the same as the username.');
   }
-  if ($constraints['not_email']) {
+  if ($constraints['not_same_as_email']) {
     $help[] = t('The password cannot be the same as the e-mail.');
   }
   $variables = array(
