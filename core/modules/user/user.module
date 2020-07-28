@@ -1097,7 +1097,7 @@ function user_password_constraints_validate($form, &$form_state) {
     if ($password == $username) {
       $messages[] = t('The username cannot be used as password.');
     }
-    elseif ($constraints['no_case']) {
+    elseif ($constraints['case_insensitive_comparison']) {
       if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
         $messages[] = t('The password cannot be similar to the username');
       }

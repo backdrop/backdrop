@@ -186,7 +186,7 @@ function user_admin_settings($form, &$form_state) {
     '#title_display' => 'invisible',
     '#options' => array(
       0 => t('Only indicate poor password strength'),
-      1 => t('Enforce constraints on user passwords'),
+      1 => t('Enforce strong passwords'),
     ),
     '#default_value' => $config->get('user_password_constraints.constraints_active'),
   );
@@ -194,7 +194,7 @@ function user_admin_settings($form, &$form_state) {
     '#type' => 'number',
     '#title' => t('Minimum length'),
     '#min' => 1,
-    '#max' => 32,
+    '#max' => 64,
     '#default_value' => $config->get('user_password_constraints.min_length'),
     '#states' => $settings_state,
   );
