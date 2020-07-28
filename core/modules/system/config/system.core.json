@@ -85,7 +85,7 @@
         "min_length": 8,
         "not_same_as_username": 1,
         "not_same_as_email": 1,
-        "case_insensitive_comparison": 0
+        "case_insensitive_comparison": 1
     },
     "user_password_reset_timeout": 86400,
     "user_pictures": 1,
