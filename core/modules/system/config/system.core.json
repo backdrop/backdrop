@@ -82,6 +82,7 @@
     "user_signatures": 0,
     "user_password_constraints": {
         "constraints_active": 1,
+        "min_length_active": 1,
         "min_length": 8,
         "not_same_as_username": 1,
         "not_same_as_email": 1,
