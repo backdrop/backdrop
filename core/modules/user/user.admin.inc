@@ -481,11 +481,11 @@ function user_admin_roles($form, $form_state) {
 
   $form['roles_help_before'] = array(
     '#type' => 'help',
-    '#markup' => t('Roles provide a way to organize people into groups that have roughly the same duties. Each user account can be given one or more roles, and <a href="@permissions">permissions</a> can be granted to those roles (instead of directly to user accounts).', array('@permissions' => url('admin/config/people/permissions'))),
+    '#markup' => t('Roles provide a way to organize people into groups that have roughly the same duties. Each user account can be given one or more roles, and <a href="@permissions">permissions</a> can be granted to those roles (instead of individually to each user account).', array('@permissions' => url('admin/config/people/permissions'))),
   );
   $form['roles_help_after'] = array(
     '#type' => 'help',
-    '#markup' => t('In this section, you can add or delete roles, define the role names, and change the order. To make the permissions page easier to navigate, we recommended ordering roles from the least permissive (Anonymous) to the most permissive (usually Administrator).'),
+    '#markup' => t('To make the permissions page easier to navigate, we recommended ordering roles from the least permissive (Anonymous) to the most permissive (usually Administrator).'),
   );
 
   // Administrative role option.
@@ -616,7 +616,7 @@ function user_admin_roles($form, $form_state) {
  * Form submit function. Update the role weights.
  */
 function user_admin_roles_order_submit($form, &$form_state) {
-  // Save admin role and anon name.
+  // Save admin role and anonymous name.
   $config = config('system.core');
   $config->set('anonymous', $form_state['values']['anonymous']);
   $config->set('user_admin_role', $form_state['values']['user_admin_role']);
