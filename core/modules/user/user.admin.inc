@@ -527,17 +527,18 @@ function user_admin_roles($form, $form_state) {
   $form['roles'] = array(
     '#tree' => TRUE,
   );
-  $order = 0;
+
   $roles = user_roles(FALSE, NULL, TRUE);
+
   foreach ($roles as $role_name => $role) {
     $form['roles'][$role_name]['#role'] = $role;
-    $form['roles'][$role_name]['#weight'] = $order;
+    $form['roles'][$role_name]['#weight'] = $roles[$role_name]->weight;
     $form['roles'][$role_name]['weight'] = array(
       '#type' => 'textfield',
       '#title' => t('Weight for @title', array('@title' => check_plain($role->label))),
       '#title_display' => 'invisible',
       '#size' => 4,
-      '#default_value' => $order,
+      '#default_value' => $roles[$role_name]->weight,
       '#attributes' => array('class' => array('role-weight')),
     );
     $links = array();
@@ -573,7 +574,6 @@ function user_admin_roles($form, $form_state) {
       '#type' => 'operations',
       '#links' => $links,
     );
-    $order++;
   }
 
   $form['label'] = array(
@@ -638,6 +638,8 @@ function user_admin_roles_add_submit($form, &$form_state) {
   $role = (object) array(
     'name' => $form_state['values']['name'],
     'label' => $form_state['values']['label'],
+    // Add new roles directly after the authenticated role.
+    'weight' => $form_state['values']['roles'][BACKDROP_AUTHENTICATED_ROLE]['weight'] + 1,
   );
   user_role_save($role);
   backdrop_set_message(t('The %role role has been added.', array('%role' => $role->label)));
