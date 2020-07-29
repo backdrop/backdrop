@@ -527,18 +527,17 @@ function user_admin_roles($form, $form_state) {
   $form['roles'] = array(
     '#tree' => TRUE,
   );
-
+  $order = 0;
   $roles = user_roles(FALSE, NULL, TRUE);
-
   foreach ($roles as $role_name => $role) {
     $form['roles'][$role_name]['#role'] = $role;
-    $form['roles'][$role_name]['#weight'] = $roles[$role_name]->weight;
+    $form['roles'][$role_name]['#weight'] = $order;
     $form['roles'][$role_name]['weight'] = array(
       '#type' => 'textfield',
       '#title' => t('Weight for @title', array('@title' => check_plain($role->label))),
       '#title_display' => 'invisible',
       '#size' => 4,
-      '#default_value' => $roles[$role_name]->weight,
+      '#default_value' => $order,
       '#attributes' => array('class' => array('role-weight')),
     );
     $links = array();
@@ -561,6 +560,7 @@ function user_admin_roles($form, $form_state) {
           'name' => 'user.role.' . $role_name,
         ),
       );
+      $order++;
     }
     // System-provided roles cannot be deleted.
     if (!in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
@@ -616,7 +616,7 @@ function user_admin_roles($form, $form_state) {
  * Form submit function. Update the role weights.
  */
 function user_admin_roles_order_submit($form, &$form_state) {
-  // Save admin role and anonymous name.
+  // Save the administrator role and the anonymous name.
   $config = config('system.core');
   $config->set('anonymous', $form_state['values']['anonymous']);
   $config->set('user_admin_role', $form_state['values']['user_admin_role']);
@@ -638,8 +638,6 @@ function user_admin_roles_add_submit($form, &$form_state) {
   $role = (object) array(
     'name' => $form_state['values']['name'],
     'label' => $form_state['values']['label'],
-    // Add new roles directly after the authenticated role.
-    'weight' => $form_state['values']['roles'][BACKDROP_AUTHENTICATED_ROLE]['weight'] + 1,
   );
   user_role_save($role);
   backdrop_set_message(t('The %role role has been added.', array('%role' => $role->label)));
