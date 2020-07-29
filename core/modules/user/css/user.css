@@ -14,26 +14,17 @@
 #permissions tr.even .form-item {
   white-space: normal;
 }
+
 #user-admin-settings fieldset .fieldset-description {
   font-size: 0.85em;
   padding-bottom: .5em;
 }
 
-/**
- * Override default textfield float to put the "Add role" button next to
- * the input textfield.
- */
-#user-admin-roles td.edit-name {
-  clear: both;
+#user-roles .system-role {
+  color: #666;
 }
-#user-admin-roles .form-item-name {
-  float: left; /* LTR */
-  margin-right: 1em; /* LTR */
-}
-[dir="rtl"] #user-admin-roles .form-item-name {
-  float: right;
-  margin-left: 1em;
-  margin-right: 0;
+#user-roles .description {
+  margin-left: 2em;
 }
 
 /**

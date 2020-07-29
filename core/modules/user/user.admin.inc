@@ -479,6 +479,11 @@ function user_admin_permissions_submit($form, &$form_state) {
 function user_admin_roles($form, $form_state) {
   $system_config = config('system.core');
 
+  $form['roles_help'] = array(
+    '#type' => 'help',
+    '#markup' => t('Roles provide a way to group users, to allow fine-tuning the security and administration of your site. Each user can be assigned one or several roles, and you can then use the <a href="@permissions">Permissions page</a> to grant permissions to roles (instead of directly to users). This allows updating permissions for entire groups of users, without having to define permissions individually for each user. In this section, you can add or delete roles, define the role names, and change their order. <strong>It is recommended to order your roles from the least permissive (Anonymous) to the most permissive (Administrator)</strong>.', array('@permissions' => url('admin/config/people/permissions'))),
+  );
+
   // Administrative role option.
   $form['admin_role'] = array(
     '#type' => 'fieldset',
@@ -552,7 +557,8 @@ function user_admin_roles($form, $form_state) {
         ),
       );
     }
-    if ($role_name !== BACKDROP_ANONYMOUS_ROLE && $role_name !== BACKDROP_AUTHENTICATED_ROLE) {
+    // System-provided roles cannot be deleted.
+    if (!in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
       $links['delete'] = array(
         'title' => t('Delete role'),
         'href' => 'admin/config/people/roles/delete/' . $role_name,
