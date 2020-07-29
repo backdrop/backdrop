@@ -479,9 +479,13 @@ function user_admin_permissions_submit($form, &$form_state) {
 function user_admin_roles($form, $form_state) {
   $system_config = config('system.core');
 
-  $form['roles_help'] = array(
+  $form['roles_help_before'] = array(
     '#type' => 'help',
-    '#markup' => t('Roles provide a way to group users, to allow fine-tuning the security and administration of your site. Each user can be assigned one or several roles, and you can then use the <a href="@permissions">Permissions page</a> to grant permissions to roles (instead of directly to users). This allows updating permissions for entire groups of users, without having to define permissions individually for each user. In this section, you can add or delete roles, define the role names, and change their order. <strong>It is recommended to order your roles from the least permissive (Anonymous) to the most permissive (Administrator)</strong>.', array('@permissions' => url('admin/config/people/permissions'))),
+    '#markup' => t('Roles provide a way to organize people into groups that have roughly the same duties. Each user account can be given one or more roles, and <a href="@permissions">permissions</a> can be granted to those roles (instead of directly to user accounts).', array('@permissions' => url('admin/config/people/permissions'))),
+  );
+  $form['roles_help_after'] = array(
+    '#type' => 'help',
+    '#markup' => t('In this section, you can add or delete roles, define the role names, and change the order. To make the permissions page easier to navigate, we recommended ordering roles from the least permissive (Anonymous) to the most permissive (usually Administrator).'),
   );
 
   // Administrative role option.

@@ -204,8 +204,9 @@ function theme_user_admin_roles($variables) {
 
   backdrop_add_tabledrag('user-roles', 'order', 'sibling', 'role-weight');
 
-  $output = backdrop_render($form['roles_help']);
+  $output = backdrop_render($form['roles_help_before']);
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'user-roles')));
+  $output .= backdrop_render($form['roles_help_after']);
   $output .= backdrop_render_children($form);
 
   return $output;
