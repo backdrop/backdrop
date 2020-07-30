@@ -786,7 +786,8 @@ function image_style_deliver($style, $scheme) {
     $extension = pathinfo($derivative_uri, PATHINFO_EXTENSION);
     if($extension == 'webp') {
       file_transfer($derivative_uri, array('Content-Type' => 'image/webp', 'Content-Length' => filesize($derivative_uri)));
-    } else {
+    }
+    else {
       $image = image_load($derivative_uri);
       file_transfer($image->source, array('Content-Type' => $image->info['mime_type'], 'Content-Length' => $image->info['file_size']));
     }
