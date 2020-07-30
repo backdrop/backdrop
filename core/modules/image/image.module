@@ -743,6 +743,8 @@ function image_style_deliver($style, $scheme) {
       backdrop_exit();
     }
   }
+  
+  backdrop_alter('image_style_deliver', $style, $image_uri, $derivative_uri);
 
   // Confirm that the original source image exists before trying to process it.
   if (!is_file($image_uri)) {
@@ -781,8 +783,13 @@ function image_style_deliver($style, $scheme) {
   if ($success) {
     image_style_remove_allowed_uri($derivative_uri);
 
-    $image = image_load($derivative_uri);
-    file_transfer($image->source, array('Content-Type' => $image->info['mime_type'], 'Content-Length' => $image->info['file_size']));
+    $extension = pathinfo($derivative_uri, PATHINFO_EXTENSION);
+    if($extension == 'webp') {
+      file_transfer($derivative_uri, array('Content-Type' => 'image/webp', 'Content-Length' => filesize($derivative_uri)));
+    } else {
+      $image = image_load($derivative_uri);
+      file_transfer($image->source, array('Content-Type' => $image->info['mime_type'], 'Content-Length' => $image->info['file_size']));
+    }
   }
   else {
     watchdog('image', 'Unable to generate the derived image located at %path.', array('%path' => $derivative_uri));
@@ -935,7 +942,9 @@ function image_style_url($style_name, $uri) {
     return url($directory_path . '/' . file_uri_target($uri), array('absolute' => TRUE));
   }
 
-  return file_create_url($uri);
+  $file_url = file_create_url($uri);
+  backdrop_alter('image_style_url', $style_name, $original_uri, $file_url);
+  
 }
 
 /**
