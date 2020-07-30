@@ -177,14 +177,14 @@ function theme_user_admin_roles($variables) {
     $label = $form['roles'][$role_name]['#role']->label;
     $row = array();
     if (in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
-      $role_info = t('@name <em class="system-role">(system role - cannot be deleted)</em>', array('@name' => $label));
+      $role_info = $label . ' <span class="required-role">(' . t('required') . ')</span>';
       if ($role_name === BACKDROP_ANONYMOUS_ROLE) {
         $role_description = t("Automatically assigned to site visitors that don't have a user account, or that are not authenticated.");
       }
       if ($role_name === BACKDROP_AUTHENTICATED_ROLE) {
         $role_description = t('Automatically assigned to all logged-in users.');
       }
-      $role_info .= '<div class="description">' . $role_description . '</div>';
+      $role_info .= '<span class="description">' . $role_description . '</span>';
     }
     else {
       $role_info = check_plain($label);

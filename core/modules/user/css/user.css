@@ -20,11 +20,17 @@
   padding-bottom: .5em;
 }
 
-#user-roles .system-role {
+#user-roles .required-role,
+#user-roles span.description {
   color: #666;
 }
-#user-roles .description {
-  margin-left: 2em;
+/**
+ * Ensure that the role description is vertically aligned with the role name
+ * when toggling between row weights and drag handles.
+ */
+#user-roles span.description {
+  display: block;
+  position: relative;
 }
 
 /**
