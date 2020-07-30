@@ -486,6 +486,7 @@ function user_admin_roles($form, $form_state) {
   $form['roles_help_after'] = array(
     '#type' => 'help',
     '#markup' => t('To make the permissions page easier to navigate, we recommended ordering roles from the least permissive (Anonymous) to the most permissive (usually Administrator).'),
+    '#weight' => -30,
   );
 
   // Administrative role option.
