@@ -944,7 +944,7 @@ function image_style_url($style_name, $uri) {
 
   $file_url = file_create_url($uri);
   backdrop_alter('image_style_url', $style_name, $original_uri, $file_url);
-  
+  return $file_url;
 }
 
 /**
