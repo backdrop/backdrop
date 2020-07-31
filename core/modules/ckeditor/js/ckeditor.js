@@ -28,6 +28,17 @@
       // Hide the resizable grippie while CKEditor is active.
       $(element).siblings('.grippie').hide();
 
+      // Minor adjustment to the default width of inserted tables.
+      CKEDITOR.on('dialogDefinition', function( ev ) {
+        var dialogName = ev.data.name;
+        var dialogDefinition = ev.data.definition;
+
+        if (dialogName == 'table') {
+          var info = dialogDefinition.getContents('info');
+          info.get('txtWidth')[ 'default' ] = '100%';
+        }
+      });
+
       return !!CKEDITOR.replace(element, format.editorSettings);
     },
 

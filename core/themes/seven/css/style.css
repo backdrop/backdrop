@@ -1701,6 +1701,12 @@ div.add-or-remove-shortcuts {
   border-radius: 4px 4px 0 0;
 }
 
+/* CKEditor */
+.cke_dialog_contents tr,
+.cke_dialog_contents tr:hover {
+  background-color: #ffffff;
+}
+
 /* Views UI */
 .views-ui-display-tab-actions .dropbutton-wrapper input.form-submit {
   background-color: #ffffff;

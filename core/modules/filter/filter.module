@@ -1989,12 +1989,23 @@ function _filter_html_allowed_html($filter, $format) {
   // This example is pulled from "filter_html" filter provided by core.
   $restrictions = array('allowed' => array());
   $tags = preg_split('/\s+|<|>/', $filter->settings['allowed_html'], -1, PREG_SPLIT_NO_EMPTY);
+
   // List the allowed HTML tags.
   foreach ($tags as $tag) {
     $restrictions['allowed'][$tag] = TRUE;
   }
-  // The 'style' and 'on*' ('onClick' etc.) attributes are always forbidden.
-  $restrictions['allowed']['*'] = array('style' => FALSE, 'on*' => FALSE);
+
+  // The 'on*' ('onClick' etc.) attributes are always forbidden.
+  $restrictions['allowed']['*'] = array('on*' => FALSE);
+
+  // Allow only the following style attributes.
+  $allowed_style_properties = array(
+    'width' => TRUE,
+    'height' => TRUE,
+  );
+
+  $restrictions['allowed']['*']['style'] = $allowed_style_properties;
+
   return $restrictions;
 }
 
