@@ -181,7 +181,7 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
 function user_pass_reset_form($form, &$form_state, $account) {
   $form['#account'] = $account;
   $description = '';
-  $constraints_active = config_get('system.core', 'user_password_constraints.constraints_active');
+  $enforce_strong = config_get('system.core', 'user_password_enforce_strong');
   if ($constraints_active) {
     $form['#validate'][] = 'user_password_constraints_validate';
     $description = _user_password_constraints_help();
