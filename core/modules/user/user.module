@@ -752,8 +752,8 @@ function user_account_form(&$form, &$form_state) {
   $admin_roles = user_access('assign roles');
 
   $form['#validate'][] = 'user_account_form_validate';
-  $constraints_active = config_get('system.core', 'user_password_constraints.constraints_active');
-  if ($constraints_active) {
+  $enforce_strong_passwords = config_get('system.core', 'user_password_enforce_strong');
+  if ($enforce_strong_passwords) {
     $form['#validate'][] = 'user_password_constraints_validate';
   }
 
@@ -787,8 +787,7 @@ function user_account_form(&$form, &$form_state) {
   // assign a password during registration.
   if (!$register) {
     $description = t('Current password must be entered to set a new password.');
-    $constraints_active = config_get('system.core', 'user_password_constraints.constraints_active');
-    if ($constraints_active) {
+    if ($enforce_strong_passwords) {
       $description .= _user_password_constraints_help();
     }
     $form['account']['pass'] = array(
@@ -837,7 +836,7 @@ function user_account_form(&$form, &$form_state) {
   }
   else {
     // Provide different help text if password constraints are active.
-    if ($constraints_active) {
+    if ($enforce_strong_passwords) {
       $description = _user_password_constraints_help();
     }
     else {
@@ -1078,7 +1077,8 @@ function user_password_constraints_validate($form, &$form_state) {
     // On profile form and no new password has been set.
     return;
   }
-  $constraints = config_get('system.core', 'user_password_constraints');
+  $config = config('system.core');
+  $constraints = $config->get('user_password_constraints');
   $messages = array();
   if ($form['#form_id'] == 'user_pass_reset_form') {
     $account = $form['#account'];
@@ -1089,8 +1089,8 @@ function user_password_constraints_validate($form, &$form_state) {
     $username = $form_state['values']['name'];
     $email = $form_state['values']['mail'];
   }
-  $min = $constraints['min_length'];
-  if ($constraints['min_length_active'] && strlen($password) < $min) {
+  $min = $config->get('user_password_min_length');
+  if ($constraints['min_length_enforce'] && strlen($password) < $min) {
     $messages[] = t('The password is too short. At least @min characters required.', array('@min' => $min));
   }
   if ($constraints['not_same_as_username']) {
@@ -1995,11 +1995,12 @@ function user_cancel_url($account) {
  * Generates help text for core password constraints on forms.
  */
 function _user_password_constraints_help() {
-  $constraints = config_get('system.core', 'user_password_constraints');
-  $min = $constraints['min_length'];
+  $config = config('system.core');
+  $constraints = $config->get('user_password_constraints');
+  $min = $config->get('user_password_min_length');
   $help = array();
-  if ($constraints['min_length_active']) {
-    $help[] = t('The password must be at least @min characters long.', array('@min' => $constraints['min_length']));
+  if ($constraints['min_length_enforce']) {
+    $help[] = t('The password must be at least @min characters long.', array('@min' => $min));
   }
   if ($constraints['not_same_as_username']) {
     $help[] = t('The password cannot be the same as the username.');
@@ -2879,6 +2880,7 @@ function _user_mail_notify($op, $account, $language = NULL) {
  */
 function user_form_process_password($element, $form_state = array()) {
   global $user;
+  $config = config('system.core');
 
   if ($element['#password_strength']) {
     if (isset($form_state['user']) && is_a($form_state['user'], 'User')) {
@@ -2905,7 +2907,10 @@ function user_form_process_password($element, $form_state = array()) {
         'username' => $username,
         'email' => $email,
       ),
-      'config' => config_get('system.core', 'user_password_constraints'),
+      'config' => array(
+        'user_password_min_length' => $config->get('user_password_min_length'),
+        'constraints' => $config->get('user_password_constraints'),
+      ),
     );
 
     $element['#attributes']['data-password-strength'] = backdrop_json_encode($strength_settings, FALSE);
