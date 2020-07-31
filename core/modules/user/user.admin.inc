@@ -481,7 +481,7 @@ function user_admin_roles($form, $form_state) {
 
   $form['roles_help_before'] = array(
     '#type' => 'help',
-    '#markup' => t('Roles provide a way to organize people into groups that have roughly the same duties. Each user account can be given one or more roles, and <a href="@permissions">permissions</a> can be granted to those roles (instead of individually to each user account).', array('@permissions' => url('admin/config/people/permissions'))),
+    '#markup' => t('Roles provide a way to organize people into groups that have similar duties. Each user account can be given one or more roles, and <a href="@permissions">permissions</a> can be granted to those roles (instead of individually to each user account).', array('@permissions' => url('admin/config/people/permissions'))),
   );
   $form['roles_help_after'] = array(
     '#type' => 'help',
