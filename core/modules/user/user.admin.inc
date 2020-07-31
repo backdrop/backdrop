@@ -169,58 +169,46 @@ function user_admin_settings($form, &$form_state) {
   }
 
   // Password settings.
-  $form['user_password_constraints'] = array(
+  $form['password_constraints'] = array(
     '#type' => 'fieldset',
     '#title' => t('Password constraints'),
     '#weight' => -1,
-    '#tree' => TRUE,
   );
-  $form['user_password_constraints']['constraints_active'] = array(
+  $form['password_constraints']['user_password_enforce_strong'] = array(
     '#type' => 'radios',
     '#title' => t('Password constraints behavior'),
     '#options' => array(
       0 => t('Only indicate password strength'),
       1 => t('Enforce strong passwords'),
     ),
-    '#default_value' => $config->get('user_password_constraints.constraints_active'),
+    '#default_value' => $config->get('user_password_enforce_strong'),
   );
-  $form['user_password_constraints']['constraints'] = array(
-    '#markup' => t('Set constraints'),
+  $constraint_defaults = $config->get('user_password_constraints');
+  $form['password_constraints']['user_password_constraints'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Set constraints'),
+    '#options' => array(
+      'not_same_as_username' => t('Password not same as username'),
+      'not_same_as_email' => t('Password not same as account e-mail'),
+      'case_insensitive_comparison' => t('Ignore case when comparing'),
+      'min_length_enforce' => t('Set a minimum password length'),
+    ),
+    '#default_value' => $constraint_defaults,
   );
-  $form['user_password_constraints']['min_length_active'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Set a minimum password length'),
-    '#default_value' => $config->get('user_password_constraints.min_length_active'),
-  );
-  $form['user_password_constraints']['min_length'] = array(
+  $form['password_constraints']['user_password_min_length'] = array(
     '#type' => 'number',
     '#title' => t('Minimum length'),
     '#min' => 1,
     '#max' => 64,
-    '#default_value' => $config->get('user_password_constraints.min_length'),
+    '#default_value' => $config->get('user_password_min_length'),
     '#states' => array(
       'visible' => array(
-        ':input[name="user_password_constraints[min_length_active]"]' => array('checked' => TRUE),
+        ':input[name="user_password_constraints[min_length_enforce]"]' => array('checked' => TRUE),
       ),
       'required' => array(
-        ':input[name="user_password_constraints[min_length_active]"]' => array('checked' => TRUE),
+        ':input[name="user_password_constraints[min_length_enforce]"]' => array('checked' => TRUE),
       ),
     ),
-  );
-  $form['user_password_constraints']['not_same_as_username'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Password not same as username'),
-    '#default_value' => $config->get('user_password_constraints.not_same_as_username'),
-  );
-  $form['user_password_constraints']['not_same_as_email'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Password not same as account e-mail'),
-    '#default_value' => $config->get('user_password_constraints.not_same_as_email'),
-  );
-  $form['user_password_constraints']['case_insensitive_comparison'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Ignore case when comparing'),
-    '#default_value' => $config->get('user_password_constraints.case_insensitive_comparison'),
   );
 
   // Account settings.
