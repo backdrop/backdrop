@@ -1476,7 +1476,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $this->assertText(t('Admin label is required when making a block reusable.'));
     $edit['label'] = 'My custom block label';
     $this->backdropPost(NULL, $edit, t('Update block'));
-    $this->assertText(t('An internal name is required when making a block reusable.'));
+    $this->assertText(t('A machine name is required when making a block reusable.'));
     $edit['delta'] = 'my_custom_block';
     $this->backdropPost(NULL, $edit, t('Update block'));
 

@@ -76,7 +76,7 @@ class BlockText extends Block {
       $form['convert']['reusable'] = array(
         '#type' => 'checkbox',
         '#title' => t('Make this block reusable'),
-        '#description' => t('If enabled, this block will be made reusable across different layouts and be listed in on the !block_link page.', array('!block_link' => l(t('Custom blocks'), 'admin/structure/block'))),
+        '#description' => t('Once a block is made reusable, all copies of it can be configured from a single place, in the !link listing. <strong>A reusable block can never be converted back into a stand-alone block</strong>.', array('!link' => l(t('Custom blocks'), 'admin/structure/block'))),
         '#weight' => 1,
       );
       // Add a notice for translation.
@@ -88,36 +88,58 @@ class BlockText extends Block {
         '#title' => t('Admin label'),
         '#maxlength' => 64,
         '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
+        '#attributes' => array('class' => array('reusable-block-admin-label')),
         '#weight' => 2,
         '#states' => array(
           'visible' => array(
             ':input[name="reusable"]' => array('checked' => TRUE),
           ),
+          // Workaround in order to make the field render as required, with a
+          // red asterisk. Actual form validation happens in formValidate()
+          // below.
+          // See https://github.com/backdrop/backdrop-issues/issues/2732
+          'required' => array(
+            'input[name="reusable"]' => array('checked' => TRUE),
+          ),
         ),
+      );
+      $form['convert']['delta'] = array(
+        '#type' => 'machine_name',
+        '#title' => t('Machine name'),
+        '#maxlength' => 64,
+        '#machine_name' => array(
+          'source' => array('convert', 'label'),
+          'exists' => 'block_custom_block_load',
+        ),
+        '#description' => t('A unique machine-readable name, containing letters, numbers, and underscores.'),
+        '#attributes' => array('class' => array('reusable-block-machine-name')),
+        '#weight' => 3,
+        '#states' => array(
+          // Workaround in order to make the field render as required, with a
+          // red asterisk (when one clicks the "edit" link). Actual form
+          // validation happens in formValidate() below.
+          // See https://github.com/backdrop/backdrop-issues/issues/2732
+          'required' => array(
+            'input[name="reusable"]' => array('checked' => TRUE),
+          ),
+        ),
+        // This line is still required in order to not throw form validation
+        // errors when the 'Make this block reusable' checkbox is not checked.
+        // Also see https://github.com/backdrop/backdrop-issues/issues/2732
+        '#required' => FALSE,
       );
       $form['convert']['description'] = array(
        '#type' => 'textfield',
        '#title' => t('Admin description'),
        '#maxlength' => 128,
        '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
+       '#attributes' => array('class' => array('reusable-block-admin-description')),
        '#weight' => 4,
         '#states' => array(
           'visible' => array(
             ':input[name="reusable"]' => array('checked' => TRUE),
           ),
         ),
-      );
-      $form['convert']['delta'] = array(
-        '#type' => 'machine_name',
-        '#title' => t('Internal name'),
-        '#maxlength' => 64,
-        '#machine_name' => array(
-          'source' => array('convert', 'label'),
-          'exists' => 'block_custom_block_load',
-        ),
-        '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
-        '#weight' => 3,
-        '#required' => FALSE,
       );
     }
   }
@@ -129,14 +151,14 @@ class BlockText extends Block {
     parent::formValidate($form, $form_state);
 
     if (module_exists('block')) {
-      $label = trim($form_state['values']['label']);
+      $reusable_admin_label = trim($form_state['values']['label']);
       $delta = trim($form_state['values']['delta']);
       if ($form_state['values']['reusable']) {
-        if (empty($label)) {
+        if (empty($reusable_admin_label)) {
           form_error($form['convert']['label'], t('Admin label is required when making a block reusable.'));
         }
         elseif (empty($delta)) {
-          form_error($form['convert']['delta'], t('An internal name is required when making a block reusable.'));
+          form_error($form['convert']['delta'], t('A machine name is required when making a block reusable.'));
         }
       }
     }

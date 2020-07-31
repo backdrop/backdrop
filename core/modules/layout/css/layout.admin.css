@@ -337,6 +337,17 @@
   }
 }
 
+.layout-block-configure-form .form-item-label,
+.layout-block-configure-form .form-item-delta,
+.layout-block-configure-form .form-item-description {
+  padding-left: 20px; /* LTR */
+}
+[dir="rtl"] .layout-block-configure-form .form-item-label,
+[dir="rtl"] .layout-block-configure-form .form-item-delta,
+[dir="rtl"] .layout-block-configure-form .form-item-description {
+  padding-right: 20px;
+}
+
 .layout-flexible-region-buttons {
   padding-bottom: 5px;
 }
