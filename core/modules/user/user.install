@@ -1223,15 +1223,17 @@ function user_update_1017() {
  * Set default values for core password constraints.
  */
 function user_update_1018() {
+  $config = config('system.core');
   $constraints = array(
-    'constraints_active' => 0,
-    'min_length_active' => 0,
-    'min_length' => 8,
     'not_same_as_username' => 0,
     'not_same_as_email' => 0,
-    'case_insensitive_comparison' => 1,
+    'case_insensitive_comparison' => 'case_insensitive_comparison',
+    'min_length_enforce' => 0,
   );
-  config_set('system.core', 'user_password_constraints', $constraints);
+  $config->set('user_password_enforce_strong', 0);
+  $config->set('user_password_constraints', $constraints);
+  $config->set('user_password_min_length', 8);
+  $config->save();
 }
 
 /**
