@@ -22,6 +22,11 @@
             "pattern": "m/d/Y - g:ia",
             "module": "system"
         },
+        "dblog_date_format": {
+            "label": "Database log messages date",
+            "pattern": "Y-M-d H:i:s",
+            "module": "dblog"
+        },
         "html_datetime": {
             "label": "HTML Datetime",
             "pattern": "Y-m-d\\TH:i:sO",
