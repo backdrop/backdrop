@@ -205,9 +205,6 @@ function user_admin_settings($form, &$form_state) {
       'visible' => array(
         ':input[name="user_password_constraints[min_length_enforce]"]' => array('checked' => TRUE),
       ),
-      'required' => array(
-        ':input[name="user_password_constraints[min_length_enforce]"]' => array('checked' => TRUE),
-      ),
     ),
   );
 
