@@ -80,14 +80,14 @@
     "user_mail_status_canceled_notify": 0,
     "user_register": "admin_only",
     "user_signatures": 0,
-    "user_password_enforce_strong": "0",
+    "user_password_enforce_strong": 0,
     "user_password_constraints": {
         "not_same_as_username": "not_same_as_username",
         "not_same_as_email": "not_same_as_email",
         "case_insensitive_comparison": "case_insensitive_comparison",
         "min_length_enforce": "min_length_enforce"
     },
-    "user_password_min_length": "8",
+    "user_password_min_length": 8,
     "user_password_reset_timeout": 86400,
     "user_pictures": 1,
     "user_picture_path": "pictures",
