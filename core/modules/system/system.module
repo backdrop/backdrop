@@ -3001,7 +3001,7 @@ function _system_update_bootstrap_status() {
  *   An associative array of themes information.
  */
 function _system_rebuild_theme_data() {
-  // Find themes
+  // Find themes.
   $themes = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'themes');
   // Allow modules to add further themes.
   if ($module_themes = module_invoke_all('system_theme_info')) {
@@ -3015,7 +3015,7 @@ function _system_rebuild_theme_data() {
     }
   }
 
-  // Find theme engines
+  // Find theme engines.
   $engines = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.engine$/', 'themes/engines');
 
   // Set defaults for theme info.
@@ -3029,10 +3029,21 @@ function _system_rebuild_theme_data() {
   );
 
   $sub_themes = array();
-  // Read info files for each theme
+  // Read info files for each theme.
   foreach ($themes as $key => $theme) {
     $themes[$key]->filename = $theme->uri;
     $themes[$key]->info = backdrop_parse_info_file($theme->uri) + $defaults;
+
+    // Detect any core themes that have been copied outside the core folder (for
+    // subthemeing purposes).
+    if ($themes[$key]->info['project'] == 'backdrop') {
+      $uri_parts = explode('/', $theme->uri);
+      $theme_root_folder = $uri_parts[0];
+      if ($theme_root_folder != 'core') {
+        end($uri_parts);
+        $themes[$key]->info['project'] = prev($uri_parts);
+      }
+    }
 
     // The "name" key is required, but to avoid a fatal error in the menu system
     // we set a reasonable default if it is not provided.
