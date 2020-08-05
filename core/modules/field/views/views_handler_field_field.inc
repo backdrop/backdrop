@@ -253,7 +253,7 @@ class views_handler_field_field extends views_handler_field {
         global $language_content;
         $default_language = language_default();
         $language = str_replace(array('***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'),
-                                array($language_content->language, $default_language),
+                                array($language_content->langcode, $default_language->langcode),
                                 $this->view->display_handler->options['field_language']);
         $placeholder = $this->placeholder();
         $language_fallback_candidates = array($language);
@@ -767,6 +767,10 @@ class views_handler_field_field extends views_handler_field {
   }
 
   function get_value($values, $field = NULL) {
+    if (!isset($values->_field_data[$this->field_alias]['entity']) || !is_object($values->_field_data[$this->field_alias]['entity'])) {
+      return array();
+    }
+
     // Go ahead and render and store in $this->items.
     $entity = clone $values->_field_data[$this->field_alias]['entity'];
 
