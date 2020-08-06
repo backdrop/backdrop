@@ -1131,8 +1131,7 @@ function _user_password_constraints_help() {
   if ($min_length_constraint) {
     $help[] = t('The password must be at least @min_length characters long.', array('@min_length' => $min_length));
   }
-  $help[] = t('The password cannot be the same as the username.');
-  $help[] = t('The password cannot be the same as the e-mail.');
+  $help[] = t('The password cannot be the same as the username or e-mail address.');
   $variables = array(
     'items' => $help,
     'title' => '',
