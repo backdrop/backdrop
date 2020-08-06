@@ -740,6 +740,7 @@ function user_user_view($account) {
  * @see user_validate_current_pass()
  * @see user_validate_picture()
  * @see user_validate_mail()
+ * @see user_password_constraints_validate()
  */
 function user_account_form(&$form, &$form_state) {
   global $user;
@@ -751,6 +752,10 @@ function user_account_form(&$form, &$form_state) {
   $admin_roles = user_access('assign roles');
 
   $form['#validate'][] = 'user_account_form_validate';
+  $reject_weak_passwords = config_get('system.core', 'user_password_reject_weak');
+  if ($reject_weak_passwords) {
+    $form['#validate'][] = 'user_password_constraints_validate';
+  }
 
   // Account information.
   $form['account'] = array(
@@ -785,10 +790,14 @@ function user_account_form(&$form, &$form_state) {
   // Display password field only for existing users or when user is allowed to
   // assign a password during registration.
   if (!$register) {
+    $description = t('Current password must be entered to set a new password.');
+    if ($reject_weak_passwords) {
+      $description .= _user_password_constraints_help();
+    }
     $form['account']['pass'] = array(
       '#title' => t('New password'),
       '#type' => 'password',
-      '#description' => t('Current password must be entered to set a new password.'),
+      '#description' => $description,
       '#password_toggle' => TRUE,
       '#password_strength' => TRUE,
     );
@@ -830,12 +839,19 @@ function user_account_form(&$form, &$form_state) {
     }
   }
   else {
+    // Provide different help text if password constraints are active.
+    if ($reject_weak_passwords) {
+      $description = _user_password_constraints_help();
+    }
+    else {
+      $description = t('Provide a password for the new account.');
+    }
     if (!config_get('system.core', 'user_email_verification') && !$admin_users) {
       // Someone registers a new account and may set a password directly.
       $form['account']['pass'] = array(
         '#type' => 'password',
         '#title' => t('Password'),
-        '#description' => t('Provide a password for the new account.'),
+        '#description' => $description,
         '#password_toggle' => TRUE,
         '#password_strength' => TRUE,
         '#required' => TRUE,
@@ -852,7 +868,7 @@ function user_account_form(&$form, &$form_state) {
       $form['account']['pass'] = array(
         '#type' => 'password',
         '#title' => t('Password'),
-        '#description' => t('Provide a password for the new account.'),
+        '#description' => $description,
         '#password_toggle' => TRUE,
         '#password_strength' => TRUE,
         '#required' => FALSE,
@@ -1046,6 +1062,112 @@ function user_account_form_validate($form, &$form_state) {
       form_set_error('signature', t('The signature is too long: it must be %max characters or less.', array('%max' => $user_schema['fields']['signature']['length'])));
     }
   }
+}
+
+/**
+ * Validation callback for password constraints.
+ *
+ * @see user_account_form()
+ * @see user_pass_reset_form()
+ */
+function user_password_constraints_validate($form, &$form_state) {
+  $strength = 0;
+  if (!array_key_exists('pass', $form_state['values'])) {
+    // If mail verification is required, user registration forms don't have a
+    // password field.
+    return;
+  }
+  $password = trim($form_state['values']['pass']);
+
+  if ($form['#form_id'] == 'user_profile_form' && strlen($password) == 0) {
+    // On profile form and no new password has been set.
+    return;
+  }
+  $config = config('system.core');
+  $messages = array();
+  if ($form['#form_id'] == 'user_pass_reset_form') {
+    $account = $form['#account'];
+    $username = $account->name;
+    $email = $account->mail;
+  }
+  else {
+    $username = $form_state['values']['name'];
+    $email = $form_state['values']['mail'];
+  }
+
+  $strength = _user_estimate_password_entropy($password);
+  if ($strength <= 50) {
+    form_set_error('entropy_pass', t('The password is too weak. Please consider making your password more complex.'));
+  }
+
+  $min_length_constraint = $config->get('user_password_min_length_enabled');
+  $min_length = $config->get('user_password_min_length');
+  // We need to match the JS string length method which uses UTF-16.
+  if ($min_length_constraint && (backdrop_strlen($password) < $min_length)) {
+    $strength = 5;
+    form_set_error('min_length_pass', t('The password is too short. At least @min_length_length characters required.', array('@min_length' => $min_length)));
+  }
+  if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
+    $strength = 5;
+    form_set_error('username_pass', t('The password cannot be the same as the username'));
+  }
+  if (backdrop_strtolower($password) == backdrop_strtolower($email)) {
+    $strength = 5;
+    form_set_error('email_pass', t('The password cannot be the same as the email'));
+  }
+}
+
+/**
+ * Generates help text for core password constraints on forms.
+ *
+ * @see user_account_form()
+ */
+function _user_password_constraints_help() {
+  $config = config('system.core');
+  $min_length_constraint = $config->get('user_password_min_length_enabled');
+  $min_length = $config->get('user_password_min_length');
+  $help = array();
+  if ($min_length_constraint) {
+    $help[] = t('The password must be at least @min_length characters long.', array('@min_length' => $min_length));
+  }
+  $help[] = t('The password cannot be the same as the username or e-mail address.');
+  $variables = array(
+    'items' => $help,
+    'title' => '',
+    'type' => 'ul',
+    'attributes' => array(),
+  );
+  return theme_item_list($variables);
+}
+
+/**
+ * Estimate password entropy
+ * Adapted from https://github.com/dropbox/zxcvbn.
+ *
+ * @see Backdrop.evaluatePasswordStrength
+ *
+ * @param string $password
+ *
+ * @return int
+ *   An integer representing password strength.
+ */
+function _user_estimate_password_entropy($password) {
+  $strength = 0;
+
+  $has_lowercase = preg_match('/[a-z]+/', $password);
+  $has_uppercase = preg_match('/[A-Z]+/', $password);
+  $has_numbers = preg_match('/[0-9]+/', $password);
+  $has_punctuation = preg_match('/[^a-zA-Z0-9]+/', $password);
+
+  // Calculate the number of unique character sets within a string.
+  $cardinality = ($has_lowercase * 26) + ($has_uppercase * 26) + ($has_numbers * 10) + ($has_punctuation * 33);
+
+  // Assign strength based on the level of entropy within the password, times
+  // its length.
+  $length = mb_strlen($password);
+  $strength = (log($cardinality) / log(2)) * $length + 1;
+
+  return $strength;
 }
 
 function user_login_block($form) {
@@ -2781,19 +2903,44 @@ function _user_mail_notify($op, $account, $language = NULL) {
 
 /**
  * Form element process handler for client-side password hide/show and strength.
- * @param $element
+ *
+ * @param array $element
+ *   The form element to process.
+ * @param array $form_state
+ *   The $form_state array of the form this element belongs to.
  */
-function user_form_process_password($element) {
+function user_form_process_password($element, $form_state = array()) {
   global $user;
+  $config = config('system.core');
 
   if ($element['#password_strength']) {
+    if (isset($form_state['user']) && is_a($form_state['user'], 'User')) {
+      // Existing account, not the current user if an admin edits an account.
+      $username = $form_state['user']->name;
+      $email = $form_state['user']->mail;
+    }
+    else {
+      // The AnonymousUser object has no mail property, and name is NULL.
+      // The User object has both mail and name set.
+      $username = (isset($user->name) ? $user->name : '');
+      $email = (isset($user->mail) ? $user->mail : '');
+    }
     $strength_settings = array(
-      'strengthTitle' => t('Password strength: '),
-      'weak' => t('poor'),
-      'fair' => t('fair'),
-      'good' => t('good'),
-      'strong' => t('excellent'),
-      'username' => (isset($user->name) ? $user->name : ''),
+      'labels' => array(
+        'strengthTitle' => t('Password strength'),
+        'weak' => t('weak'),
+        'fair' => t('fair'),
+        'good' => t('good'),
+        'strong' => t('excellent'),
+      ),
+      'data' => array(
+        'username' => $username,
+        'email' => $email,
+      ),
+      'config' => array(
+        'user_password_min_length' => $config->get('user_password_min_length'),
+        'user_password_min_length_enabled' => $config->get('user_password_min_length_enabled'),
+      ),
     );
 
     $element['#attributes']['data-password-strength'] = backdrop_json_encode($strength_settings, FALSE);

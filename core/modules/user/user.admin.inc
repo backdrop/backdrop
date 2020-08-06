@@ -168,6 +168,45 @@ function user_admin_settings($form, &$form_state) {
     }
   }
 
+  // Password settings.
+  $form['password_policy'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Password policy'),
+    '#weight' => -1,
+  );
+  $output = '';
+  $output .= '<p>' . t('The default criteria for a strong password include checking that it is:') . '</p>';
+  $output .= '<ul><li>' . t('not the same as the username') . '</li>';
+  $output .= '<li>' . t('not the same as the e-mail address') . '</li>';
+  $output .= '<li>' . t('sufficiently complex: containing a number of lower- and uppercase letters, digits and symbols') . '</li>';
+  $output .= '<li>' . t('at least as many characters as the minimum number set below') . '</li></ul>';
+  $form['password_policy']['user_password_criteria'] = array(
+    '#markup' => $output,
+  );
+  $form['password_policy']['user_password_min_length_enabled'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Set a minimum password length'),
+    '#default_value' => $config->get('user_password_min_length_enabled'),
+  );
+  $form['password_policy']['user_password_min_length'] = array(
+    '#type' => 'number',
+    '#title' => t('Minimum length'),
+    '#min' => 1,
+    '#max' => 64,
+    '#default_value' => $config->get('user_password_min_length'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="user_password_min_length_enabled"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['password_policy']['user_password_reject_weak'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Reject weak passwords'),
+    '#description' => t('Users will not be able to save passwords if the password strength indicator shows they are weak.'),
+    '#default_value' => $config->get('user_password_reject_weak'),
+  );
+
   // Account settings.
   $form['personalization'] = array(
     '#type' => 'fieldset',
