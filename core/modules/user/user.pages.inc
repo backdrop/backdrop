@@ -183,12 +183,19 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
  */
 function user_pass_reset_form($form, &$form_state, $account) {
   $form['#account'] = $account;
+  $description = '';
+  $reject_weak_password = config_get('system.core', 'user_password_reject_weak');
+  if ($reject_weak_password) {
+    $form['#validate'][] = 'user_password_constraints_validate';
+    $description = _user_password_constraints_help();
+  }
   $form['message'] = array(
     '#markup' => t('<p>Please enter a new password to access your account.</p>'),
   );
   $form['pass'] = array(
     '#type' => 'password_confirm',
     '#required' => TRUE,
+    '#description' => $description,
   );
   $form['actions'] = array(
     '#type' => 'actions',
