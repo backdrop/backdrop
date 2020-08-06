@@ -704,6 +704,7 @@ function system_modules($form, $form_state = array()) {
       ),
     );
   }
+  ksort($form['modules']);
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
