@@ -1790,7 +1790,15 @@ class UserCreateTestCase extends BackdropWebTestCase {
 
     // Test that '0' is considered a password. We have to disable password
     // constraints for that.
-    config_set('system.core', 'user_password_enforce_strong', 0);
+    $config = config('system.core');
+    $constraints = array(
+      'not_same_as_username' => 0,
+      'not_same_as_email' => 0,
+    );
+    $config->set('user_password_constraints', $constraints);
+    $config->set('user_password_min_length_enforce', 0);
+    $config->save();
+
     $name = $this->randomName();
     $edit = array(
       'name' => $name,
@@ -1870,11 +1878,22 @@ class UserEditTestCase extends BackdropWebTestCase {
   public function testUserWith0Password() {
     $admin = $this->backdropCreateUser(array('administer users'));
     $this->backdropLogin($admin);
+
     // Create a regular user.
     $user1 = $this->backdropCreateUser(array());
-    // Disable password constraints for that.
-    config_set('system.core', 'user_password_enforce_strong', 0);
 
+    // To be able to set the password to "0", we must disable password
+    // constraints.
+    $config = config('system.core');
+    $constraints = array(
+      'not_same_as_username' => 0,
+      'not_same_as_email' => 0,
+    );
+    $config->set('user_password_constraints', $constraints);
+    $config->set('user_password_min_length_enforce', 0);
+    $config->save();
+
+    // Set the user password to "0".
     $edit = array('pass' => '0');
     $this->backdropPost("user/" . $user1->uid . "/edit", $edit, t('Save'));
     $this->assertRaw(t("The changes have been saved."));

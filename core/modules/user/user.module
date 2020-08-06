@@ -734,7 +734,8 @@ function user_user_view($account) {
 }
 
 /**
- * Helper function to add default user account fields to user registration and edit form.
+ * Helper function to add default user account fields to user registration and
+ * edit form.
  *
  * @see user_account_form_validate()
  * @see user_validate_current_pass()
@@ -744,6 +745,7 @@ function user_user_view($account) {
  */
 function user_account_form(&$form, &$form_state) {
   global $user;
+  $config = config('system.core');
 
   $account = $form['#user'];
   $register = ($form['#user']->uid > 0 ? FALSE : TRUE);
@@ -752,7 +754,7 @@ function user_account_form(&$form, &$form_state) {
   $admin_roles = user_access('assign roles');
 
   $form['#validate'][] = 'user_account_form_validate';
-  $enforce_strong_passwords = config_get('system.core', 'user_password_enforce_strong');
+  $enforce_strong_passwords = $config->get('user_password_min_length_enforce') || !empty(array_filter($config->get('user_password_constraints')));
   if ($enforce_strong_passwords) {
     $form['#validate'][] = 'user_password_constraints_validate';
   }
@@ -762,7 +764,6 @@ function user_account_form(&$form, &$form_state) {
     '#type'   => 'container',
     '#weight' => -10,
   );
-  // Only show name field on registration form or user can change own username.
   $form['account']['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Username'),
@@ -771,6 +772,8 @@ function user_account_form(&$form, &$form_state) {
     '#required' => TRUE,
     '#attributes' => array('class' => array('username')),
     '#default_value' => (!$register ? $account->name : ''),
+    // Only show name field on registration form, or if user has permission to
+    // change own username.
     '#access' => ($register || ($user->uid == $account->uid && user_access('change own username')) || $admin_users),
     '#weight' => -10,
   );
@@ -783,7 +786,7 @@ function user_account_form(&$form, &$form_state) {
     '#default_value' => (!$register ? $account->mail : ''),
   );
 
-  // Display password field only for existing users or when user is allowed to
+  // Display password field only for existing users, or when user is allowed to
   // assign a password during registration.
   if (!$register) {
     $description = t('Current password must be entered to set a new password.');
@@ -798,7 +801,7 @@ function user_account_form(&$form, &$form_state) {
       '#password_strength' => TRUE,
     );
     // To skip the current password field, the user must have logged in via a
-    // one-time link and have the token in the URL. Store this in $form_state
+    // one-time link, and have the token in the URL. Store this in $form_state,
     // so it persists even on subsequent Ajax requests.
     if (!isset($form_state['user_pass_reset'])) {
       $form_state['user_pass_reset'] = isset($_SESSION['pass_reset_' . $account->uid]) && isset($_GET['pass-reset-token']) && ($_GET['pass-reset-token'] == $_SESSION['pass_reset_' . $account->uid]);
@@ -806,7 +809,7 @@ function user_account_form(&$form, &$form_state) {
     $protected_values = array();
     $current_pass_description = '';
     // The user may only change their own password without their current
-    // password if they logged in via a one-time login link.
+    // password, if they logged in via a one-time login link.
     if (!$form_state['user_pass_reset']) {
       $protected_values['mail'] = $form['account']['mail']['#title'];
       $protected_values['pass'] = t('Password');
@@ -835,14 +838,14 @@ function user_account_form(&$form, &$form_state) {
     }
   }
   else {
-    // Provide different help text if password constraints are active.
+    // If password constraints are active, provide different help text.
     if ($enforce_strong_passwords) {
       $description = _user_password_constraints_help();
     }
     else {
       $description = t('Provide a password for the new account.');
     }
-    if (!config_get('system.core', 'user_email_verification') && !$admin_users) {
+    if (!$config->get('user_email_verification') && !$admin_users) {
       // Someone registers a new account and may set a password directly.
       $form['account']['pass'] = array(
         '#type' => 'password',
@@ -894,7 +897,7 @@ function user_account_form(&$form, &$form_state) {
     $status = isset($account->status) ? $account->status : 1;
   }
   else {
-    $status = $register ? config_get('system.core', 'user_register') == USER_REGISTER_VISITORS : $account->status;
+    $status = $register ? $config->get('user_register') == USER_REGISTER_VISITORS : $account->status;
   }
   $form['account_settings']['status'] = array(
     '#type' => 'radios',
@@ -922,7 +925,7 @@ function user_account_form(&$form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Signature settings'),
     '#weight' => 2,
-    '#access' => (!$register && config_get('system.core', 'user_signatures')),
+    '#access' => (!$register && $config->get('user_signatures')),
   );
 
   $form['signature_settings']['signature'] = array(
@@ -938,7 +941,7 @@ function user_account_form(&$form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Picture'),
     '#weight' => 2,
-    '#access' => (!$register && config_get('system.core', 'user_pictures')),
+    '#access' => (!$register && $config->get('user_pictures')),
   );
   $form['picture']['picture'] = array(
     '#type' => 'value',
@@ -957,7 +960,7 @@ function user_account_form(&$form, &$form_state) {
     '#type' => 'file',
     '#title' => t('Upload picture'),
     '#size' => 48,
-    '#description' => t('Your virtual face or picture. Pictures larger than @dimensions pixels will be scaled down.', array('@dimensions' => config_get('system.core', 'user_picture_dimensions'))) . ' ' . filter_xss_admin(config_get('system.core', 'user_picture_guidelines')),
+    '#description' => t('Your virtual face or picture. Pictures larger than @dimensions pixels will be scaled down.', array('@dimensions' => $config->get('user_picture_dimensions'))) . ' ' . filter_xss_admin($config->get('user_picture_guidelines')),
   );
   $form['#validate'][] = 'user_validate_picture';
 }
@@ -1078,6 +1081,7 @@ function user_password_constraints_validate($form, &$form_state) {
     return;
   }
   $config = config('system.core');
+  $case_insensitive_comparison = $config->get('user_password_case_insensitive_comparison');
   $constraints = $config->get('user_password_constraints');
   $messages = array();
   if ($form['#form_id'] == 'user_pass_reset_form') {
@@ -1089,17 +1093,18 @@ function user_password_constraints_validate($form, &$form_state) {
     $username = $form_state['values']['name'];
     $email = $form_state['values']['mail'];
   }
-  $min = $config->get('user_password_min_length');
-  if ($constraints['min_length_enforce'] && strlen($password) < $min) {
-    $messages[] = t('The password is too short. At least @min characters required.', array('@min' => $min));
+  $min_length_enforce = $config->get('user_password_min_length_enforce');
+  $min_length = $config->get('user_password_min_length');
+  if ($min_length_enforce && strlen($password) < $min_length) {
+    $messages[] = t('The password is too short. At least @min characters required.', array('@min' => $min_length));
   }
   if ($constraints['not_same_as_username']) {
     if ($password == $username) {
       $messages[] = t('The username cannot be used as password.');
     }
-    elseif ($constraints['case_insensitive_comparison']) {
+    elseif ($case_insensitive_comparison) {
       if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
-        $messages[] = t('The password cannot be similar to the username');
+        $messages[] = t('The password cannot be similar to the username.');
       }
     }
   }
@@ -1107,9 +1112,9 @@ function user_password_constraints_validate($form, &$form_state) {
     if ($password == $email) {
       $messages[] = t('The e-mail cannot be used as password.');
     }
-    elseif ($constraints['case_insensitive_comparison']) {
+    elseif ($case_insensitive_comparison) {
       if (backdrop_strtolower($password) == backdrop_strtolower($email)) {
-        $messages[] = t('The password cannot be similar to the email');
+        $messages[] = t('The password cannot be similar to the email.');
       }
     }
   }
@@ -1996,17 +2001,19 @@ function user_cancel_url($account) {
  */
 function _user_password_constraints_help() {
   $config = config('system.core');
+  $case_insensitive_comparison = $config->get('user_password_case_insensitive_comparison');
   $constraints = $config->get('user_password_constraints');
-  $min = $config->get('user_password_min_length');
+  $min_length_enforce = $config->get('user_password_min_length_enforce');
+  $min_length = $config->get('user_password_min_length');
   $help = array();
-  if ($constraints['min_length_enforce']) {
-    $help[] = t('The password must be at least @min characters long.', array('@min' => $min));
+  if ($min_length_enforce) {
+    $help[] = t('The password must be at least @min characters long.', array('@min' => $min_length));
   }
   if ($constraints['not_same_as_username']) {
-    $help[] = t('The password cannot be the same as the username.');
+    $help[] = $case_insensitive_comparison ? t('The password cannot be similar to the username.') : t('The password cannot be the same as the username.');
   }
   if ($constraints['not_same_as_email']) {
-    $help[] = t('The password cannot be the same as the e-mail.');
+    $help[] = $case_insensitive_comparison ? t('The password cannot be similar to the email.') : t('The password cannot be the same as the e-mail.');
   }
   $variables = array(
     'items' => $help,

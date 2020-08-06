@@ -1227,11 +1227,10 @@ function user_update_1018() {
   $constraints = array(
     'not_same_as_username' => 0,
     'not_same_as_email' => 0,
-    'case_insensitive_comparison' => 'case_insensitive_comparison',
-    'min_length_enforce' => 0,
   );
-  $config->set('user_password_enforce_strong', 0);
+  $config->set('user_password_case_insensitive_comparison', 1);
   $config->set('user_password_constraints', $constraints);
+  $config->set('user_password_min_length_enforce', 0);
   $config->set('user_password_min_length', 8);
   $config->save();
 }

@@ -168,42 +168,50 @@ function user_admin_settings($form, &$form_state) {
     }
   }
 
-  // Password settings.
+  // Password constraints.
   $form['password_constraints'] = array(
     '#type' => 'fieldset',
     '#title' => t('Password constraints'),
     '#weight' => -1,
   );
-  $form['password_constraints']['user_password_enforce_strong'] = array(
-    '#type' => 'radios',
-    '#title' => t('Password constraints behavior'),
-    '#options' => array(
-      0 => t('Only indicate password strength'),
-      1 => t('Enforce strong passwords'),
-    ),
-    '#default_value' => $config->get('user_password_enforce_strong'),
+
+  $form['password_constraints']['user_password_case_insensitive_comparison'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Ignore letter case when comparing the password to the username/e-mail'),
+    '#default_value' => $config->get('user_password_case_insensitive_comparison'),
   );
   $constraint_defaults = $config->get('user_password_constraints');
   $form['password_constraints']['user_password_constraints'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Set constraints'),
+    '#title' => t('Reject passwords if any of the following conditions applies'),
     '#options' => array(
-      'not_same_as_username' => t('Password not same as username'),
-      'not_same_as_email' => t('Password not same as account e-mail'),
-      'case_insensitive_comparison' => t('Ignore case when comparing'),
-      'min_length_enforce' => t('Set a minimum password length'),
+      'not_same_as_username' => t('Password is the same as the username'),
+      'not_same_as_email' => t('Password is the same as the account e-mail'),
     ),
     '#default_value' => $constraint_defaults,
   );
-  $form['password_constraints']['user_password_min_length'] = array(
+  $form['password_constraints']['wrapper'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('container-inline min-length-wrapper')),
+  );
+  $form['password_constraints']['wrapper']['user_password_min_length_enforce'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Password is less than a specific number of characters'),
+    '#title_display' => 'invisible',
+    '#default_value' => $config->get('user_password_min_length_enforce'),
+  );
+  $form['password_constraints']['wrapper']['user_password_min_length'] = array(
     '#type' => 'number',
-    '#title' => t('Minimum length'),
+    '#title' => t('Minimum password length'),
+    '#title_display' => 'invisible',
     '#min' => 1,
     '#max' => 64,
+    '#prefix' => t('Password is less than'),
+    '#suffix' => t('characters long'),
     '#default_value' => $config->get('user_password_min_length'),
     '#states' => array(
-      'visible' => array(
-        ':input[name="user_password_constraints[min_length_enforce]"]' => array('checked' => TRUE),
+      'disabled' => array(
+        ':input[name="user_password_min_length_enforce"]' => array('checked' => FALSE),
       ),
     ),
   );

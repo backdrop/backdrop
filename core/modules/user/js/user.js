@@ -176,7 +176,7 @@ Backdrop.evaluatePasswordStrength = function (password, settings) {
 
   // Check if password is the same as the username or email.
   if (password !== '') {
-    if (config.constraints.case_insensitive_comparison) {
+    if (config.user_password_case_insensitive_comparison) {
       password = password.toLowerCase();
       username = username.toLowerCase();
       email = email.toLowerCase();
@@ -185,7 +185,7 @@ Backdrop.evaluatePasswordStrength = function (password, settings) {
       strength = 5;
     }
     // Consider admin password constraint settings if active.
-    if (config.constraints.min_length_enforce && password.length < config.user_password_min_length) {
+    if (config.user_password_min_length_enforce && password.length < config.user_password_min_length) {
       strength = -1;
     }
     if (config.constraints.not_same_as_username && password === username) {
