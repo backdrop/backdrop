@@ -459,6 +459,11 @@ function template_preprocess_block(&$variables) {
     }
   }
 
+  // Add a NID class to node blocks.
+  if ($block->plugin == 'node:content') {
+    $variables['classes'][] = 'block-node-content-' . $block->settings['nid'];
+  }
+
   // Set up some placeholders for constructing template file names.
   $base = 'block';
   $delimiter = '__';
