@@ -2016,7 +2016,8 @@ function _filter_html_allowed_html($filter, $format) {
  */
 function _filter_html($text, $filter) {
   $allowed_tags = preg_split('/\s+|<|>/', $filter->settings['allowed_html'], -1, PREG_SPLIT_NO_EMPTY);
-  $text = filter_xss($text, $allowed_tags);
+  $allowed_css_properties = array('width', 'height');
+  $text = filter_xss($text, $allowed_tags, $allowed_css_properties);
 
   if ($filter->settings['filter_html_nofollow']) {
     $html_dom = filter_dom_load($text);
