@@ -1065,6 +1065,7 @@ function user_login_block($form) {
     '#size' => 15,
     '#required' => TRUE,
     '#weight' => 2,
+    '#password_toggle' => TRUE,
   );
   $form['actions'] = array(
     '#type' => 'actions',
@@ -1628,9 +1629,11 @@ function user_login($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  $form['pass'] = array('#type' => 'password',
+  $form['pass'] = array(
+    '#type' => 'password',
     '#title' => t('Password'),
     '#required' => TRUE,
+    '#password_toggle' => TRUE,
   );
   $form['#validate'] = user_login_default_validators();
   $form['actions'] = array('#type' => 'actions');
