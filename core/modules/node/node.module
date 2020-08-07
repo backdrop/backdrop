@@ -3456,6 +3456,26 @@ function node_content_form(Node $node, $form_state) {
         'autofocus' => TRUE,
       ),
     );
+    $form['url'] = array(
+      '#type' => 'machine_name',
+      '#title' => t('URL'),
+      '#default_value' => $node->url,
+      '#maxlength' => 255,
+      '#weight' => -5,
+      '#field_prefix' => '/node/[nid]',
+      '#disabled' => TRUE,
+      '#machine_name' => array(
+        'source' => array('title'),
+        'label' => t('URL'),
+      ),
+    );
+    if (module_exists('path')) {
+      $form['url']['#title'] = t('URL alias');
+      $form['url']['#machine_name']['label'] = t('URL alias');
+      $form['url']['#field_prefix'] = url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=');
+      $form['url']['#disabled'] = FALSE;
+      $form['url']['#description'] = t('The alternative URL for this content.');
+    }
   }
 
   return $form;

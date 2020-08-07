@@ -165,6 +165,13 @@ class Node extends Entity {
    */
   public $in_preview;
 
+  /**
+   * The node URL/path.
+   *
+   * @var string
+   */
+  public $url;
+
 
   /**
    * Create a new Node instance.
