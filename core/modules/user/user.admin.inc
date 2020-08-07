@@ -183,20 +183,28 @@ function user_admin_settings($form, &$form_state) {
   $form['password_policy']['user_password_criteria'] = array(
     '#markup' => $output,
   );
-  $form['password_policy']['user_password_min_length_enabled'] = array(
+  $form['password_policy']['min_length'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('container-inline min-length-wrapper')),
+  );
+  $form['password_policy']['min_length']['user_password_min_length_enabled'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Set a minimum password length'),
+    '#title' => t('Password must have a minimum number of characters'),
+    '#title_display' => 'invisible',
     '#default_value' => $config->get('user_password_min_length_enabled'),
   );
-  $form['password_policy']['user_password_min_length'] = array(
+  $form['password_policy']['min_length']['user_password_min_length'] = array(
     '#type' => 'number',
-    '#title' => t('Minimum length'),
+    '#title' => t('Minimum password length'),
+    '#title_display' => 'invisible',
     '#min' => 1,
     '#max' => 64,
+    '#prefix' => t('Password must be at least'),
+    '#suffix' => t('characters long'),
     '#default_value' => $config->get('user_password_min_length'),
     '#states' => array(
-      'visible' => array(
-        ':input[name="user_password_min_length_enabled"]' => array('checked' => TRUE),
+      'disabled' => array(
+        ':input[name="user_password_min_length_enabled"]' => array('checked' => FALSE),
       ),
     ),
   );
