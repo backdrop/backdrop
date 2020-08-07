@@ -1098,7 +1098,6 @@ function user_password_constraints_validate($form, &$form_state) {
 
   $min_length_constraint = $config->get('user_password_min_length_enabled');
   $min_length = $config->get('user_password_min_length');
-  // We need to match the JS string length method which uses UTF-16.
   if ($min_length_constraint && (backdrop_strlen($password) < $min_length)) {
     $strength = 5;
     form_set_error('min_length_pass', t('The password is too short. At least @min_length characters required.', array('@min_length' => $min_length)));
