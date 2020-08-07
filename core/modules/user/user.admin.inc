@@ -175,12 +175,16 @@ function user_admin_settings($form, &$form_state) {
     '#weight' => -1,
   );
   $output = '';
-  $output .= '<p>' . t('The default criteria for a strong password include checking that it is:') . '</p>';
-  $output .= '<ul><li>' . t('not the same as the username') . '</li>';
-  $output .= '<li>' . t('not the same as the e-mail address') . '</li>';
-  $output .= '<li>' . t('sufficiently complex: containing a number of lower- and uppercase letters, digits and symbols') . '</li>';
-  $output .= '<li>' . t('at least as many characters as the minimum number set below') . '</li></ul>';
+  $criteria = array();
+  $criteria[] = t('not the same as the username');
+  $criteria[] = t('not the same as the e-mail address');
+  $criteria[] = t('sufficiently complex: containing a number of lower- and uppercase letters, digits and symbols');
+  $criteria[] = t('at least as many characters as the minimum number set below');
+
+  $output .= t('The default criteria for a strong password include checking that it is:');
+  $output .= theme('item_list', array('items' => $criteria));
   $form['password_policy']['user_password_criteria'] = array(
+    '#type' => 'help',
     '#markup' => $output,
   );
   $form['password_policy']['min_length'] = array(
