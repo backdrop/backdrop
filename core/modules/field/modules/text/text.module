@@ -112,11 +112,19 @@ function text_field_validate($entity_type, $entity, $field, $instance, $langcode
         if (!empty($field['settings']['max_length']) && backdrop_strlen($item[$column]) > $field['settings']['max_length']) {
           switch ($column) {
             case 'value':
-              $message = t('%name: the text may not be longer than %max characters.', array('%name' => $instance['label'], '%max' => $field['settings']['max_length']));
+              $message = t('%name: the text may not be longer than %max characters. It is currently %current characters long.', array(
+                '%name' => $instance['label'],
+                '%max' => $field['settings']['max_length'],
+                '%current' => backdrop_strlen($item[$column]),
+              ));
               break;
 
             case 'summary':
-              $message = t('%name: the summary may not be longer than %max characters.', array('%name' => $instance['label'], '%max' => $field['settings']['max_length']));
+              $message = t('%name: the summary may not be longer than %max characters. It is currently %current characters long.', array(
+                '%name' => $instance['label'],
+                '%max' => $field['settings']['max_length'],
+                '%current' => backdrop_strlen($item[$column]),
+              ));
               break;
           }
           $errors[$field['field_name']][$langcode][$delta][] = array(
