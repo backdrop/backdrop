@@ -193,8 +193,7 @@ function user_admin_settings($form, &$form_state) {
   );
   $form['password_policy']['min_length']['user_password_min_length_enabled'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Password must have a minimum number of characters'),
-    '#title_display' => 'invisible',
+    '#title' => t('Password must be at least'),
     '#default_value' => $config->get('user_password_min_length_enabled'),
   );
   $form['password_policy']['min_length']['user_password_min_length'] = array(
@@ -203,7 +202,6 @@ function user_admin_settings($form, &$form_state) {
     '#title_display' => 'invisible',
     '#min' => 1,
     '#max' => 64,
-    '#prefix' => t('Password must be at least'),
     '#suffix' => t('characters long'),
     '#default_value' => $config->get('user_password_min_length'),
     '#states' => array(
