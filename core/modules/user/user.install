@@ -1225,7 +1225,7 @@ function user_update_1017() {
 function user_update_1018() {
   $config = config('system.core');
   $config->set('user_password_reject_weak', 0);
-  $config->set('user_password_min_length_constraint', 0);
+  $config->set('user_password_min_length_enabled', 0);
   $config->set('user_password_min_length', 10);
   $config->save();
 }

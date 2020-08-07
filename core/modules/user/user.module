@@ -1093,28 +1093,23 @@ function user_password_constraints_validate($form, &$form_state) {
 
   $strength = _user_estimate_password_entropy($password);
   if ($strength <= 50) {
-    $messages[] = t('The password is too weak. Please consider making your password more complex.');
+    form_set_error('entropy_pass', t('The password is too weak. Please consider making your password more complex.'));
   }
 
-  $min_length_constraint = $config->get('user_password_min_length_constraint');
+  $min_length_constraint = $config->get('user_password_min_length_enabled');
   $min_length = $config->get('user_password_min_length');
   // We need to match the JS string length method which uses UTF-16.
-  if ($min_length_constraint && (mb_strlen($password, 'UTF-16') < $min_length)) {
+  if ($min_length_constraint && (backdrop_strlen($password) < $min_length)) {
     $strength = 5;
-    $messages[] = t('The password is too short. At least @min_length_length characters required.', array('@min_length' => $min_length));
+    form_set_error('min_length_pass', t('The password is too short. At least @min_length_length characters required.', array('@min_length' => $min_length)));
   }
   if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
     $strength = 5;
-    $messages[] = t('The password cannot be the same as the username');
+    form_set_error('username_pass', t('The password cannot be the same as the username'));
   }
   if (backdrop_strtolower($password) == backdrop_strtolower($email)) {
     $strength = 5;
-    $messages[] = t('The password cannot be the same as the email');
-  }
-
-  if ($strength <= 50) {
-    $form_error = implode('<br>', $messages);
-    form_set_error('pass', $form_error);
+    form_set_error('email_pass', t('The password cannot be the same as the email'));
   }
 }
 
@@ -1125,7 +1120,7 @@ function user_password_constraints_validate($form, &$form_state) {
  */
 function _user_password_constraints_help() {
   $config = config('system.core');
-  $min_length_constraint = $config->get('user_password_min_length_constraint');
+  $min_length_constraint = $config->get('user_password_min_length_enabled');
   $min_length = $config->get('user_password_min_length');
   $help = array();
   if ($min_length_constraint) {
@@ -2922,7 +2917,7 @@ function user_form_process_password($element, $form_state = array()) {
     }
     $strength_settings = array(
       'labels' => array(
-        'strengthTitle' => t('Password strength: '),
+        'strengthTitle' => t('Password strength'),
         'weak' => t('weak'),
         'fair' => t('fair'),
         'good' => t('good'),
@@ -2934,7 +2929,7 @@ function user_form_process_password($element, $form_state = array()) {
       ),
       'config' => array(
         'user_password_min_length' => $config->get('user_password_min_length'),
-        'user_password_min_length_constraint' => $config->get('user_password_min_length_constraint'),
+        'user_password_min_length_enabled' => $config->get('user_password_min_length_enabled'),
       ),
     );
 

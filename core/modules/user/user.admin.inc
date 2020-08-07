@@ -174,13 +174,19 @@ function user_admin_settings($form, &$form_state) {
     '#title' => t('Password policy'),
     '#weight' => -1,
   );
+  $output = '';
+  $output .= '<p>' . t('The default criteria for a strong password include checking that it is:') . '</p>';
+  $output .= '<ul><li>' . t('not the same as the username') . '</li>';
+  $output .= '<li>' . t('not the same as the e-mail address') . '</li>';
+  $output .= '<li>' . t('sufficiently complex: containing a number of lower- and uppercase letters, digits and symbols') . '</li>';
+  $output .= '<li>' . t('at least as many characters as the minimum number set below') . '</li></ul>';
   $form['password_policy']['user_password_criteria'] = array(
-    '#markup' => t('The default criteria for a strong password include: checking that it is not the same as the <em>username</em> or the <em>e-mail address</em>; and checking that it is <em>sufficiently complex</em> with a number of lower- and uppercase letters, digits and symbols. It will also check that it meets a <em>minimum password length</em>, if set below.'),
+    '#markup' => $output,
   );
-  $form['password_policy']['user_password_min_length_constraint'] = array(
+  $form['password_policy']['user_password_min_length_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Set a minimum password length'),
-    '#default_value' => $config->get('user_password_min_length_constraint'),
+    '#default_value' => $config->get('user_password_min_length_enabled'),
   );
   $form['password_policy']['user_password_min_length'] = array(
     '#type' => 'number',
@@ -190,7 +196,7 @@ function user_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('user_password_min_length'),
     '#states' => array(
       'visible' => array(
-        ':input[name="user_password_min_length_constraint"]' => array('checked' => TRUE),
+        ':input[name="user_password_min_length_enabled"]' => array('checked' => TRUE),
       ),
     ),
   );
