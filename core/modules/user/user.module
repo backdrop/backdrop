@@ -1627,6 +1627,9 @@ function user_login($form, &$form_state) {
     '#maxlength' => $credentials === USER_LOGIN_USERNAME_ONLY ? USERNAME_MAX_LENGTH : EMAIL_MAX_LENGTH,
     '#size' => 60,
     '#required' => TRUE,
+    '#attributes' => array(
+      'autofocus' => 'autofocus',
+    ),
   );
 
   $form['pass'] = array(
