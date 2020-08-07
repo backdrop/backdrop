@@ -1789,8 +1789,8 @@ class UserCreateTestCase extends BackdropWebTestCase {
     }
 
     // Test that '0' is considered a password. We have to disable password
-    // constraints for that.
-    config_set('system.core', 'user_password_reject_weak', 0);
+    // required score for that.
+    config_set('system.core', 'user_password_reject_weak', FALSE);
     $name = $this->randomName();
     $edit = array(
       'name' => $name,
@@ -1801,6 +1801,77 @@ class UserCreateTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
     $this->assertText(t('Created a new user account for @name. No e-mail has been sent.', array('@name' => $edit['name'])), 'User created with password 0');
     $this->assertNoText('Password field is required');
+  }
+
+  /**
+   * Tests setting a weak password.
+   *
+   * A user should not be able to set a weak password if required.
+   */
+  public function testUserWithWeakPassword() {
+    $admin = $this->backdropCreateUser(array('administer users'));
+    $this->backdropLogin($admin);
+
+    // Set required strong password.
+    $config = config('system.core');
+    $config->set('user_password_reject_weak', TRUE);
+    $config->save();
+
+    $name = $this->randomName();
+    $email = $this->randomName() . '@example.com';
+    $edit = array(
+      'name' => $name,
+      'mail' => $email,
+      'pass' => $name,
+      'notify' => FALSE,
+    );
+
+    $this->backdropPost('admin/people/create', $edit, t('Create new account'));
+    $this->assertRaw(t("The password cannot be the same as the username."));
+
+    $edit['pass'] = $email;
+    $this->backdropPost('admin/people/create', $edit, t('Create new account'));
+    $this->assertRaw(t("The password cannot be the same as the e-mail."));
+
+    $edit['pass'] = '123abcdef';
+    $this->backdropPost('admin/people/create', $edit, t('Create new account'));
+    $this->assertRaw(t("The password is too weak. Please consider making your password longer and more complex"));
+
+    $config->set('user_password_min_length_enabled', 1);
+    $config->set('user_password_min_length', 10);
+    $config->save();
+    $this->backdropPost('admin/people/create', $edit, t('Create new account'));
+    $this->assertRaw(t("The password is too short. At least 10 characters required."));
+
+    $edit['pass'] = '123abcdefg';
+    $this->backdropPost('admin/people/create', $edit, t('Create new account'));
+    $this->assertRaw(t("Created a new user account"));
+
+    // Require a "strong" password, not just the default "fair".
+    $config->set('user_password_strength_threshold', 90);
+    $config->set('user_password_min_length_enabled', 0);
+    $config->save();
+
+    $edit['name'] = $this->randomName();
+    $edit['mail'] = $this->randomName() . '@example.com';
+    $this->backdropPost('admin/people/create', $edit, t('Create new account'));
+    $this->assertRaw(t("The password is too weak. Please consider making your password longer and more complex"));
+
+    $edit['pass'] = '123abcdefghijklmnop';
+    $this->backdropPost('admin/people/create', $edit, t('Create new account'));
+    $this->assertRaw(t("Created a new user account"));
+
+    // Allow weak passwords.
+    $config->set('user_password_reject_weak', FALSE);
+    $config->save();
+
+    $edit['name'] = $this->randomName();
+    $edit['mail'] = $this->randomName() . '@example.com';
+    $edit['pass'] = '123';
+    $this->backdropPost('admin/people/create', $edit, t('Create new account'));
+    $this->assertRaw(t("Created a new user account"));
+
+
   }
 }
 
@@ -1872,8 +1943,8 @@ class UserEditTestCase extends BackdropWebTestCase {
     $this->backdropLogin($admin);
     // Create a regular user.
     $user1 = $this->backdropCreateUser(array());
-    // Disable password constraints for that.
-    config_set('system.core', 'user_password_reject_weak', 0);
+    // Disable strong password required.
+    config_set('system.core', 'user_password_reject_weak', FALSE);
 
     $edit = array('pass' => '0');
     $this->backdropPost("user/" . $user1->uid . "/edit", $edit, t('Save'));
