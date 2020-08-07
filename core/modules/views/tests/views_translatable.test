@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of ViewsTranslatableTest.
@@ -113,7 +112,7 @@ class ViewsTranslatableTest extends ViewsSqlTest {
     $view->editing = TRUE;
     $view->init_display();
 
-    // Don't run translation. We just want to get the right keys.
+    // Don't run translation. We only want to get the right keys.
     foreach ($view->display as $display_id => $display) {
       $translatables = array();
       $display->handler->unpack_translatables($translatables);

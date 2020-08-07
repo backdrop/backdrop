@@ -171,7 +171,7 @@ class views_handler extends views_object {
    *
    * This should be overridden for handlers with formulae or other
    * non-standard fields. Because this takes an argument, fields
-   * overriding this can just call return parent::get_field($formula)
+   * overriding this can call return parent::get_field($formula)
    */
   function get_field($field = NULL) {
     if (!isset($field)) {
@@ -494,7 +494,7 @@ class views_handler extends views_object {
   }
 
   /**
-   * Called just prior to query(), this lets a handler set up any relationship
+   * Called immediately prior to query(), this lets a handler set up any relationship
    * it needs.
    */
   function set_relationship() {
@@ -630,7 +630,7 @@ class views_handler extends views_object {
  *
  * @todo This requires extensive documentation on how this class is to
  * be used. For now, look at the arguments and filters that use it. Lots
- * of stuff is just pass-through but there are definitely some interesting
+ * of stuff is pass-through but there are definitely some interesting
  * areas where they interact.
  *
  * Any handler that uses this can have the following possibly additional
@@ -1187,8 +1187,7 @@ class views_join_subquery extends views_join {
     $arguments = array();
 
     // Tack on the extra.
-    // This is just copied verbatim from the parent class, which itself has a
-    // bug.
+    // This is copied verbatim from the parent class, which itself has a bug.
     // @see http://drupal.org/node/1118100
     if (isset($this->extra)) {
       // If extra has been provided as string instead of an array, convert it
@@ -1215,7 +1214,7 @@ class views_join_subquery extends views_join {
 
           if (is_array($info['value'])) {
             $operator = !empty($info['operator']) ? $info['operator'] : 'IN';
-            // Transform from IN() notation to = notation if just one value.
+            // Transform from IN() notation to = notation if only one value.
             if (count($info['value']) == 1) {
               $info['value'] = array_shift($info['value']);
               $operator = $operator == 'NOT IN' ? '!=' : '=';

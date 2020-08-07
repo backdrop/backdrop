@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the base row style plugin.
@@ -17,8 +16,8 @@
  */
 
 /**
- * Default plugin to view a single row of a table. This is really just a wrapper around
- * a theme function.
+ * Default plugin to view a single row of a table. This is a wrapper around a
+ * theme function.
  */
 class views_plugin_row extends views_plugin {
   /**

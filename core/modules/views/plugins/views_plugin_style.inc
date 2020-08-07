@@ -198,7 +198,7 @@ class views_plugin_style extends views_plugin {
       $options += $field_labels;
       // If there are no fields, we can't group on them.
       if (count($options) > 1) {
-        // This is for backward compatibility, when there was just a single
+        // This is for backward compatibility, when there was only a single
         // select form.
         if (is_string($this->options['grouping'])) {
           $grouping = $this->options['grouping'];
@@ -483,10 +483,10 @@ class views_plugin_style extends views_plugin {
             $set[$grouping]['rows'] = array();
           }
 
-          // Move the set reference into the row set of the group we just determined.
+          // Move the set reference into the row set of the group we determined.
           $set = &$set[$grouping]['rows'];
         }
-        // Add the row to the hierarchically positioned row set we just determined.
+        // Add the row to the hierarchically positioned row set we determined.
         $set[$index] = $row;
       }
     }

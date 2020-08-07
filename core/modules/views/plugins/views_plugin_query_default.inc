@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines the default query object.
@@ -108,7 +107,7 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Defines the distinct type.
    * - FALSE if it's distinct by base field.
-   * - TRUE if it just adds the sql distinct keyword.
+   * - TRUE if it adds the sql distinct keyword.
    *
    * @var bool
    */
@@ -582,17 +581,15 @@ class views_plugin_query_default extends views_plugin_query {
     $join = $this->adjust_join($join, $relationship);
 
     if ($this->ensure_path($table, $relationship, $join)) {
-      // Attempt to eliminate redundant joins.  If this table's
-      // relationship and join exactly matches an existing table's
-      // relationship and join, we do not have to join to it again;
-      // just return the existing table's alias.  See
-      // http://groups.drupal.org/node/11288 for details.
-      //
-      // This can be done safely here but not lower down in
-      // queue_table(), because queue_table() is also used by
-      // add_table() which requires the ability to intentionally add
-      // the same table with the same join multiple times.  For
-      // example, a view that filters on 3 taxonomy terms using AND
+      // Attempt to eliminate redundant joins.  If this table's relationship
+      // and join exactly matches an existing table's relationship and join,
+      // we do not have to join to it again; return the existing table's alias.
+      // See http://groups.drupal.org/node/11288 for details.
+
+      // This can be done safely here but not lower down in queue_table(),
+      // because queue_table() is also used by add_table() which requires the
+      // ability to intentionally add the same table with the same join multiple
+      // times. For example, a view that filters on 3 taxonomy terms using AND
       // needs to join taxonomy_term_data 3 times with the same join.
 
       // scan through the table queue to see if a matching join and
@@ -699,7 +696,7 @@ class views_plugin_query_default extends views_plugin_query {
         $this->ensure_table($join->left_table, $relationship);
       }
 
-      // First, if this is our link point/anchor table, just use the relationship
+      // First, if this is our link point/anchor table, use the relationship
       if ($join->left_table == $this->relationships[$relationship]['table']) {
         $join->left_table = $relationship;
       }
@@ -1028,7 +1025,7 @@ class views_plugin_query_default extends views_plugin_query {
    */
   function add_orderby($table, $field = NULL, $order = 'ASC', $alias = '', $params = array()) {
     // Only ensure the table if it's not the special random key.
-    // @todo: Maybe it would make sense to just add a add_orderby_rand or something similar.
+    // @todo: Maybe it would make sense to add a add_orderby_rand or something similar.
     if ($table && $table != 'rand') {
       $this->ensure_table($table);
     }
@@ -1256,7 +1253,7 @@ class views_plugin_query_default extends views_plugin_query {
     }
 
     /**
-     * An optimized count query includes just the base field instead of all the fields.
+     * An optimized count query includes only the base field instead of all the fields.
      * Determine of this query qualifies by checking for a groupby or distinct.
      */
     $fields_array = $this->fields;
@@ -1387,7 +1384,7 @@ class views_plugin_query_default extends views_plugin_query {
   }
 
   /**
-   * Let modules modify the query just prior to finalizing it.
+   * Let modules modify the query prior to finalizing it.
    */
   function alter(&$view) {
     foreach (module_implements('views_query_alter') as $module) {

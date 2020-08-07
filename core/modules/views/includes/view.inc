@@ -963,7 +963,7 @@ class view {
       }
     }
 
-    // Let modules modify the view just prior to building it.
+    // Let modules modify the view immediately prior to building it.
     foreach (module_implements('views_pre_build') as $module) {
       $function = $module . '_views_pre_build';
       $function($this);
@@ -1080,7 +1080,7 @@ class view {
       $this->query->add_signature($this);
     }
 
-    // Let modules modify the query just prior to finalizing it.
+    // Let modules modify the query immediately prior to finalizing it.
     $this->query->alter($this);
 
     // Only build the query if we weren't interrupted.
@@ -1095,7 +1095,7 @@ class view {
     // Attach displays
     $this->attach_displays();
 
-    // Let modules modify the view just after building it.
+    // Let modules modify the view immediately after building it.
     foreach (module_implements('views_post_build') as $module) {
       $function = $module . '_views_post_build';
       $function($this);
@@ -1171,7 +1171,7 @@ class view {
       return FALSE;
     }
 
-    // Let modules modify the view just prior to executing it.
+    // Let modules modify the view immediately prior to executing it.
     foreach (module_implements('views_pre_execute') as $module) {
       $function = $module . '_views_pre_execute';
       $function($this);
@@ -1201,7 +1201,7 @@ class view {
       }
     }
 
-    // Let modules modify the view just after executing it.
+    // Let modules modify the view immediately after executing it.
     foreach (module_implements('views_post_execute') as $module) {
       $function = $module . '_views_post_execute';
       $function($this);
@@ -1213,7 +1213,7 @@ class view {
   /**
    * Render this view for a certain display.
    *
-   * Note: You should better use just the preview function if you want to
+   * Note: You should use the preview function if you want to
    * render a view.
    *
    * @param string $display_id
@@ -1277,7 +1277,7 @@ class view {
 
       $this->style_plugin->pre_render($this->result);
 
-      // Let modules modify the view just prior to rendering it.
+      // Let modules modify the view immediately prior to rendering it.
       foreach (module_implements('views_pre_render') as $module) {
         $function = $module . '_views_pre_render';
         $function($this);
@@ -1420,7 +1420,7 @@ class view {
       $this->set_arguments($args);
     }
 
-    // Let modules modify the view just prior to executing it.
+    // Let modules modify the view immediately prior to executing it.
     foreach (module_implements('views_pre_view') as $module) {
       $function = $module . '_views_pre_view';
       $function($this, $display_id, $this->args);
@@ -1653,7 +1653,7 @@ class view {
             $pieces[] = $this->argument[$id]->options['exception']['value'];
           }
           else {
-            $pieces[] = '*'; // gotta put something if there just isn't one.
+            $pieces[] = '*'; // gotta put something if there isn't anything.
           }
 
         }
@@ -1736,7 +1736,7 @@ class view {
    * db_query() stores the queries that it runs in global $queries,
    * bit only if dev_query is set to true. In this case, we want
    * to temporarily override that setting if it's not and we
-   * can do that without forcing a db rewrite by just manipulating
+   * can do that without forcing a db rewrite by manipulating
    * $conf. This is kind of evil but it works.
    */
   function start_query_capture() {
@@ -1944,7 +1944,7 @@ class view {
     }
 
     // These keys are checked by the next init, so instead of unsetting them,
-    // just set the default values.
+    // set the default values.
     $keys = array('items_per_page', 'offset', 'current_page');
     foreach ($keys as $key) {
       if (isset($this->$key)) {
@@ -2107,7 +2107,7 @@ class view {
    *   Which plugin should be used for the new display id.
    */
   function generate_display_id($type) {
-    // 'default' is singular and is unique, so just go with 'default'
+    // 'default' is singular and is unique, so go with 'default'
     // for it. For all others, start counting.
     if ($type == 'default') {
       return 'default';
@@ -2278,7 +2278,7 @@ class view {
   /**
    * Set an option on an item.
    *
-   * Use this only if you have just 1 or 2 options to set; if you have
+   * Use this only if you have only 1 or 2 options to set; if you have
    * many, consider getting the item, adding the options and doing
    * set_item yourself.
    */

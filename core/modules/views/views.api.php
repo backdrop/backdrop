@@ -72,8 +72,8 @@
  * - handler->render()
  *   - This does the actual work of rendering the field.
  *
- * Most handlers are just extensions of existing classes with a few tweaks that
- * are specific to the field in question. For example,
+ * Most handlers are extensions of existing classes with a few tweaks that are
+ * specific to the field in question. For example,
  * views_handler_filter_in_operator provides a simple mechanism to set a
  * multiple-value list for setting filter values. Below,
  * views_handler_filter_node_type overrides the list options, but inherits
@@ -109,8 +109,8 @@
  * The best place to learn more about handlers and how they work is to explore
  * @link views_handlers Views' handlers @endlink and use existing handlers as a
  * guide and a model. Understanding how views_handler and its child classes work
- * is handy but you can do a lot just following these models. You can also
- * explore the views module directory, particularly node.views.inc.
+ * is handy but you can do a lot by following these models. You can also explore
+ * the views module directory, particularly node.views.inc.
  *
  * Please note that while all handler names in views are prefixed with views_,
  * you should use your own module's name to prefix your handler names in order
@@ -298,10 +298,10 @@ function hook_views_data() {
   //
   // CREATE TABLE example_table (
   //   nid INT(11) NOT NULL         COMMENT 'Primary key; refers to {node}.nid.',
-  //   plain_text_field VARCHAR(32) COMMENT 'Just a plain text field.',
-  //   numeric_field INT(11)        COMMENT 'Just a numeric field.',
-  //   boolean_field INT(1)         COMMENT 'Just an on/off field.',
-  //   timestamp_field INT(8)       COMMENT 'Just a timestamp field.',
+  //   plain_text_field VARCHAR(32) COMMENT 'A plain text field.',
+  //   numeric_field INT(11)        COMMENT 'A numeric field.',
+  //   boolean_field INT(1)         COMMENT 'An on/off field.',
+  //   timestamp_field INT(8)       COMMENT 'A timestamp field.',
   //   PRIMARY KEY(nid)
   // );
 
@@ -314,7 +314,7 @@ function hook_views_data() {
   $data['example_table']['table']['group'] = t('Example table');
 
   // Define this as a base table – a table that can be described in itself by
-  // views (and not just being brought in as a relationship). In reality this
+  // views (and not only being brought in as a relationship). In reality this
   // is not very useful for this table, as it isn't really a distinct object of
   // its own, but it makes a good example.
   $data['example_table']['table']['base'] = array(
@@ -375,7 +375,7 @@ function hook_views_data() {
   // Example plain text field.
   $data['example_table']['plain_text_field'] = array(
     'title' => t('Plain text field'),
-    'help' => t('Just a plain text field.'),
+    'help' => t('A plain text field.'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE, // This is use by the table display plugin.
@@ -394,7 +394,7 @@ function hook_views_data() {
   // Example numeric text field.
   $data['example_table']['numeric_field'] = array(
     'title' => t('Numeric field'),
-    'help' => t('Just a numeric field.'),
+    'help' => t('A numeric field.'),
     'field' => array(
       'handler' => 'views_handler_field_numeric',
       'click sortable' => TRUE,
@@ -410,7 +410,7 @@ function hook_views_data() {
   // Example boolean field.
   $data['example_table']['boolean_field'] = array(
     'title' => t('Boolean field'),
-    'help' => t('Just an on/off field.'),
+    'help' => t('An on/off field.'),
     'field' => array(
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
@@ -432,7 +432,7 @@ function hook_views_data() {
   // Example timestamp field.
   $data['example_table']['timestamp_field'] = array(
     'title' => t('Timestamp field'),
-    'help' => t('Just a timestamp field.'),
+    'help' => t('A timestamp field.'),
     'field' => array(
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
@@ -600,7 +600,7 @@ function hook_views_plugins() {
   );
 
   return array(
-    'module' => 'views', // This just tells our themes are elsewhere.
+    'module' => 'views', // This tells our themes are elsewhere.
     'argument validator' => array(
       'taxonomy_term' => array(
         'title' => t('Taxonomy term'),

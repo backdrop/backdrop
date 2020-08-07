@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide structure for the administrative interface to Views.
@@ -765,8 +764,7 @@ function views_ui_views_wizard_defaults() {
     // The children may, for example, be a different variant for each node type.
     'get children' => NULL,
     'get child' => NULL,
-    // title and base table must be populated.  They are empty here just
-    // so they are documented.
+    // title and base table must be populated. They are here to document.
     'title' => '',
     'base_table' => NULL,
     // This is a callback that takes the wizard as argument and returns

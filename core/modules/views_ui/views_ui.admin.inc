@@ -822,7 +822,7 @@ function views_ui_add_form_store_edit_submit($form, &$form_state) {
     backdrop_set_message($e->getMessage(), 'error');
     $form_state['redirect'] = 'admin/structure/views';
   }
-  // Just cache it temporarily to configure it.
+  // Cache it temporarily to configure it.
   views_ui_cache_set($view);
 
   // If there is a destination query, ensure we still redirect the user to the
@@ -2472,7 +2472,7 @@ function views_ui_standard_submit($form, &$form_state) {
   // Based on the user's choice in the display dropdown, determine which display
   // these changes apply to.
   if ($revert) {
-    // If it's revert just change the override and return.
+    // If it's revert, change the override and return.
     $display = &$form_state['view']->display[$form_state['display_id']];
     $display->handler->options_override($form, $form_state);
 
@@ -2894,7 +2894,7 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
       $output = views_ajax_form_wrapper($form_state['form_id'], $form_state);
     }
     elseif (!$js) {
-      // if nothing on the stack, non-js forms just go back to the main view editor.
+      // If nothing on the stack, non-js forms go back to the main view editor.
       return backdrop_goto("admin/structure/views/view/$view->name/configure");
     }
     else {
@@ -3146,7 +3146,7 @@ function views_ui_edit_display_form($form, &$form_state) {
   $display->handler->options_form($form['options'], $form_state);
 
   // The handler options form sets $form['#title'], which we need on the entire
-  // $form instead of just the ['options'] section.
+  // $form instead of only the ['options'] section.
   $form['#title'] = $form['options']['#title'];
   unset($form['options']['#title']);
 
@@ -3628,7 +3628,7 @@ function views_ui_rearrange_filter_form_submit($form, &$form_state) {
             }
           }
           else {
-            // If this is the last one, just unset it.
+            // If this is the last one, unset it.
             unset($groups['groups'][$group_id]);
           }
         }
@@ -4698,7 +4698,7 @@ function views_ui_config_item_form_rescan($form, &$form_state) {
  * Override handler for views_ui_edit_display_form
  */
 function views_ui_edit_display_form_change_theme($form, &$form_state) {
-  // This is just a temporary variable.
+  // This is a temporary variable.
   $form_state['view']->theme = $form_state['values']['theme'];
 
   views_ui_cache_set($form_state['view']);
