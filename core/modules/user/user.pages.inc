@@ -39,6 +39,9 @@ function user_pass() {
     '#maxlength' => max(USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH),
     '#required' => TRUE,
     '#default_value' => isset($_GET['name']) ? $_GET['name'] : '',
+    '#attributes' => array(
+      'autofocus' => 'autofocus',
+    ),
   );
   // Allow logged in users to request this also.
   if ($user->uid > 0) {
