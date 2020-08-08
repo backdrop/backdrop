@@ -769,6 +769,10 @@ function user_account_form(&$form, &$form_state) {
     '#access' => ($register || ($user->uid == $account->uid && user_access('change own username')) || $admin_users),
     '#weight' => -10,
   );
+  // Autofocus the username field (on the registration form only).
+  if ($register) {
+    $form['account']['name']['#attributes']['autofocus'] = 'autofocus';
+  }
 
   $form['account']['mail'] = array(
     '#type' => 'email',
