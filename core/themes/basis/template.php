@@ -25,6 +25,12 @@ function basis_preprocess_page(&$variables) {
   if ($view) {
     $variables['classes'][] = 'view-name-' . $view->name;
   }
+
+  // Checking to see if we need to add supplemental css styles for basis
+  $supplemental_styles = theme_get_setting('basis_supplemental_css');
+  if ($supplemental_styles==1){
+    basis_supplemental_css();
+  }
 }
 
 /**
@@ -106,4 +112,9 @@ function basis_breadcrumb($variables) {
     $output .= '</nav>';
   }
   return $output;
+}
+
+function basis_supplemental_css() {
+  $basis_path = backdrop_get_path('theme', 'basis');
+  backdrop_add_css($basis_path . '/css/supplemental.css');
 }

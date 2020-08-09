@@ -4,6 +4,9 @@ description = The default front-end theme for Backdrop CMS, which can make a gre
 backdrop = 1.x
 version = BACKDROP_VERSION
 
+; Default config settings
+settings[basis_supplemental_css] = 1
+
 ; Add theme CSS files
 stylesheets[all][] = css/base.css
 stylesheets[all][] = css/layout.css

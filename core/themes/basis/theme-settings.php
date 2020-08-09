@@ -75,3 +75,18 @@ else {
     '#markup' => '<p>' . t('This theme supports custom color palettes if the Color module is enabled on the <a href="!url">modules page</a>. Enable the Color module to customize this theme.', array('!url' => url('admin/modules'))) . '</p>',
   );
 }
+
+function basis_form_system_theme_settings_alter(&$form, &$form_state) {
+  $form['supplemental'] = array(
+    '#type'      => 'fieldset',
+    '#title'     => t('CSS Updates'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['supplemental']['basis_supplemental_css'] = [
+    '#type'          => 'checkbox',
+    '#title'         => t('Use CSS updates for Basis'),
+    '#default_value' => theme_get_setting('basis_supplemental_css', 'basis'),
+    '#description'   => 'Checking this box includes css improvements that may break sites build prior to 1.17.0'
+  ];
+}
