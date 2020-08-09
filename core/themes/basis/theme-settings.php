@@ -83,10 +83,10 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
-  $form['supplemental']['basis_supplemental_css'] = [
+  $form['supplemental']['basis_supplemental_css'] = array(
     '#type'          => 'checkbox',
     '#title'         => t('Use CSS updates for Basis'),
     '#default_value' => theme_get_setting('basis_supplemental_css', 'basis'),
     '#description'   => 'Checking this box includes css improvements that may break sites build prior to 1.17.0'
-  ];
+  );
 }
