@@ -1316,6 +1316,9 @@ function file_managed_file_process($element, &$form_state, $form) {
   );
 
   // Add a button that will be used to select existing files if enabled.
+  // Attaching the assets from filter module makes sure, the browser works
+  // even if no field on that page has a filter set.
+  $filter_path = backdrop_get_path('module', 'filter');
   $element['browse_button'] = array(
     '#name' => implode('_', $element['#parents']) . '_browse_button',
     '#type' => 'submit',
@@ -1335,6 +1338,10 @@ function file_managed_file_process($element, &$form_state, $form) {
     '#prefix' => '<span class="file-browse-text js-show"> ' . t('or') . ' ',
     '#suffix' => '</span>',
     '#access' => !empty($element['#browser_view']),
+    '#attached' => array(
+      'css' => array($filter_path . '/css/filter.css'),
+      'js' => array($filter_path . '/js/filter.js'),
+    ),
   );
 
   $element['fid'] = array(
