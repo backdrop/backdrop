@@ -1355,7 +1355,7 @@ function user_menu() {
     'file' => 'user.admin.inc',
   );
 
-  // Permissions forms.
+  // Permissions & roles forms.
   $items['admin/config/people/permissions'] = array(
     'title' => 'Permissions',
     'description' => 'Determine access to features by selecting permissions for roles.',
@@ -1364,22 +1364,26 @@ function user_menu() {
     'access arguments' => array('administer permissions'),
     'file' => 'user.admin.inc',
   );
-
-  // Role forms.
-  $items['admin/config/people/roles'] = array(
+  $items['admin/config/people/permissions/configure'] = array(
+    'title' => 'Permissions',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['admin/config/people/permissions/roles'] = array(
     'title' => 'Roles',
     'description' => 'List, edit, or add levels of access, or <em>user roles</em>.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_roles'),
     'access arguments' => array('administer permissions'),
     'file' => 'user.admin.inc',
+    'type' => MENU_LOCAL_TASK,
   );
-  $items['admin/config/people/roles/edit/%user_role'] = array(
+  $items['admin/config/people/permissions/roles/edit/%user_role'] = array(
     'title' => 'Edit role',
     'page arguments' => array('user_admin_role', 5),
     'access arguments' => array('administer permissions'),
   );
-  $items['admin/config/people/roles/delete/%user_role'] = array(
+  $items['admin/config/people/permissions/roles/delete/%user_role'] = array(
     'title' => 'Delete role',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_admin_role_delete_confirm', 5),
