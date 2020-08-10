@@ -1264,6 +1264,7 @@ function file_admin_paths() {
  */
 function file_managed_file_process($element, &$form_state, $form) {
   $fid = isset($element['#value']['fid']) ? $element['#value']['fid'] : 0;
+  $filter_path = backdrop_get_path('module', 'filter');
 
   // Set some default element properties.
   $element['#progress_indicator'] = empty($element['#progress_indicator']) ? 'none' : $element['#progress_indicator'];
@@ -1316,9 +1317,6 @@ function file_managed_file_process($element, &$form_state, $form) {
   );
 
   // Add a button that will be used to select existing files if enabled.
-  // Attaching the assets from filter module makes sure, the browser works
-  // even if no field on that page has a filter set.
-  $filter_path = backdrop_get_path('module', 'filter');
   $element['browse_button'] = array(
     '#name' => implode('_', $element['#parents']) . '_browse_button',
     '#type' => 'submit',
@@ -1338,6 +1336,8 @@ function file_managed_file_process($element, &$form_state, $form) {
     '#prefix' => '<span class="file-browse-text js-show"> ' . t('or') . ' ',
     '#suffix' => '</span>',
     '#access' => !empty($element['#browser_view']),
+    // Attaching the assets from the Filter module makes sure that the image
+    // browser works, even if no field on that form has a filter set.
     '#attached' => array(
       'css' => array($filter_path . '/css/filter.css'),
       'js' => array($filter_path . '/js/filter.js'),
