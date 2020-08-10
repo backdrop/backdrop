@@ -1,0 +1,77 @@
+deploy:
+  branch:
+    server: qa.backdropcms.org
+    username: qa
+    dir: '{home}/github/{repo_owner}/{repo_name}/branch/{branch}'
+    env_vars:
+      domain: '{branch}.{repo_name}.{repo_owner}.qa.backdropcms.org'
+      site_name: 'branch {branch} {repo_owner}/{repo_name} testing site'
+      site_mail: 'testing@{branch}.{repo_name}.{repo_owner}.qa.backdropcms.org'
+      account_name: admin
+      account_mail: 'testing@{branch}.{repo_name}.{repo_owner}.qa.backdropcms.org'
+    scripts:
+      init: '/home/qa/tools/scripts/init_deploy.sh'
+    webhooks:
+      init: https://backdropcms.org/webhook/init
+      remove: https://backdropcms.org/webhook/remove
+  pull_request:
+    server: qa.backdropcms.org
+    username: qa
+    dir: '{home}/github/{repo_owner}/{repo_name}/pr/{pr_number}'
+    env_vars:
+      domain: '{pr_number}.{repo_name}.{repo_owner}.qa.backdropcms.org'
+      site_name: 'PR {pr_number} {repo_owner}/{repo_name} testing site'
+      site_mail: 'testing@{pr_number}.{repo_name}.{repo_owner}.qa.backdropcms.org'
+      account_name: admin
+      account_mail: 'testing@{pr_number}.{repo_name}.{repo_owner}.qa.backdropcms.org'
+    scripts:
+      init: '/home/qa/tools/scripts/init_deploy.sh'
+    webhooks:
+      init: https://backdropcms.org/webhook/init
+      remove: https://backdropcms.org/webhook/remove
+test:
+  php53:
+    branch:
+      box: 'backdrop-php53'
+      dir: '{home}/github/branch/{branch}'
+      scripts:
+        init: '{deploy_dir}/core/misc/zen-ci/init_test.sh'
+      tests:
+        - '{deploy_dir}/core/misc/zen-ci/run_tests.php'
+    pull_request:
+      box: 'backdrop-php53'
+      dir: '{home}/github/pr/{pr_number}'
+      scripts:
+        init: '{deploy_dir}/core/misc/zen-ci/init_test.sh'
+      tests:
+        - '{deploy_dir}/core/misc/zen-ci/run_tests.php'
+  php70:
+    branch:
+      box: 'backdrop-php70'
+      dir: '{home}/github/branch/{branch}'
+      scripts:
+        init: '{deploy_dir}/core/misc/zen-ci/init_test.sh'
+      tests:
+        - '{deploy_dir}/core/misc/zen-ci/run_tests.php'
+    pull_request:
+      box: 'backdrop-php70'
+      dir: '{home}/github/pr/{pr_number}'
+      scripts:
+        init: '{deploy_dir}/core/misc/zen-ci/init_test.sh'
+      tests:
+        - '{deploy_dir}/core/misc/zen-ci/run_tests.php'
+  phpcs:
+    branch:
+      box: 'backdrop-phpcs'
+      dir: '{home}/github/branch/{branch}'
+      scripts:
+        init: '{deploy_dir}/core/misc/zen-ci/init_test.sh'
+      tests:
+        - '{deploy_dir}/core/misc/zen-ci/run_phpcs.sh'
+    pull_request:
+      box: 'backdrop-php70'
+      dir: '{home}/github/pr/{pr_number}'
+      scripts:
+        init: '{deploy_dir}/core/misc/zen-ci/init_test.sh'
+      tests:
+        - '{deploy_dir}/core/misc/zen-ci/run_phpcs.sh'
