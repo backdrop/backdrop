@@ -388,24 +388,6 @@ div.form-item-options-value-all {
 
 /* @end */
 
-
-
-/* @group Javascript dependent styling */
-
-.js-only {
-  display: none;
-}
-
-html.js .js-only {
-  display: inherit;
-}
-
-html.js span.js-only {
-  display: inline;
-}
-
-/* @end */
-
 /* @group AJAX throbber */
 
 /* Base Page */
