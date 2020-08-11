@@ -3437,9 +3437,10 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
     '#attributes' => array(
       'class' => array('warning-on-change'),
     ),
-    '#title' => t('Operator to use on all groups'),
+    '#title' => t('Operator (all groups)'),
     '#description' => t('Either "group 0 AND group 1 AND group 2" or "group 0 OR group 1 OR group 2", etc'),
     '#access' => $grouping,
+    '#title_display' => 'after',
   );
 
   $form['remove_groups']['#tree'] = TRUE;
@@ -3456,6 +3457,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
       '#attributes' => array(
         'class' => array('warning-on-change'),
       ),
+      '#title_display' => 'after',
     );
 
     $form['remove_groups'][$id] = array(); // to prevent a notice
