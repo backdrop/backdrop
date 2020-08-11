@@ -738,7 +738,7 @@ class FormValidationTestCase extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, 'Save');
     $this->assertNoFieldByName('name', '#value changed by #validate', 'Form element #value was not altered.');
     $this->assertNoText('Name value: value changed by form_set_value() in #validate', 'Form element value in $form_state was not altered.');
-    $this->assertText('The form has become outdated. Copy any unsaved work in the form below');
+    $this->assertText('The form has become outdated.');
   }
 
   /**
@@ -882,9 +882,9 @@ class FormsElementsLabelsTestCase extends BackdropWebTestCase {
 
     // Check title attribute for radios and checkboxes.
     $elements = $this->xpath('//div[@id="edit-form-checkboxes-title-attribute"]');
-    $this->assertEqual($elements[0]['title'], 'Checkboxes test' . ' (' . t('Required') . ')', 'Title attribute found.');
+    $this->assertEqual($elements[0]['title'], 'Checkboxes test (' . t('Required') . ')', 'Title attribute found.');
     $elements = $this->xpath('//div[@id="edit-form-radios-title-attribute"]');
-    $this->assertEqual($elements[0]['title'], 'Radios test' . ' (' . t('Required') . ')', 'Title attribute found.');
+    $this->assertEqual($elements[0]['title'], 'Radios test (' . t('Required') . ')', 'Title attribute found.');
   }
 }
 

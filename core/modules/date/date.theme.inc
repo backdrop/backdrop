@@ -258,7 +258,7 @@ function theme_date_display_combination($variables) {
     // use complex math to calculate it. It also takes into account leap years.
     $remaining_days = date_diff($date, date_now())->days;
     // Show remaining days only for future events.
-    if ($remaining_days >= 0) {
+    if ($date->format('U') > REQUEST_TIME) {
       $show_remaining_days = theme('date_display_remaining', array(
         'remaining_days' => $remaining_days,
       ));

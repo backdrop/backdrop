@@ -704,6 +704,7 @@ function system_modules($form, $form_state = array()) {
       ),
     );
   }
+  ksort($form['modules']);
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -1578,7 +1579,7 @@ function system_cron_settings($form, &$form_state) {
   $form['cron']['cron_safe_threshold'] = array(
     '#type' => 'select',
     '#title' => t('Run cron every'),
-    '#description' => t('More information about setting up scheduled tasks can be found by <a href="@url">reading the cron tutorial on drupal.org</a>.', array('@url' => url('http://drupal.org/cron'))),
+    '#description' => t('More information about setting up scheduled tasks can be found by <a href="@url">reading the cron tutorial</a>.', array('@url' => url('https://backdropcms.org/cron'))),
     '#default_value' => config('system.core')->get('cron_safe_threshold'),
     '#options' => array(0 => t('Never')) + backdrop_map_assoc(array(600, 1800, 3600, 10800, 21600, 43200, 86400, 604800), 'format_interval'),
   );
@@ -1859,7 +1860,7 @@ function system_file_system_settings() {
     '#type' => 'checkbox',
     '#title' => t('Lowercase transliterated file names'),
     '#default_value' => config_get('system.core', 'file_transliterate_lowercase'),
-    '#description' => t('This is a recommended setting to prevent issues with case-insensitive file systems. It has no effect if transliteration has been disabled.'),
+    '#description' => t('Enable to convert file names to lowercase. This is recommended to prevent issues with case-insensitive file systems.'),
     '#states' => array(
       'invisible' => array(
         'input[name="file_transliterate_uploads"]' => array('checked' => FALSE),
