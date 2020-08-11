@@ -58,8 +58,8 @@ function language_admin_overview_form($form, &$form_state) {
       ),
     );
     $links = array();
-    $links['edit'] = array(
-      'title' => t('Edit'),
+    $links['configure'] = array(
+      'title' => t('Configure'),
       'href' => 'admin/config/regional/language/edit/' . $langcode,
     );
     if ($langcode != $default->langcode) {
@@ -155,7 +155,7 @@ function language_admin_add_form($form, &$form_state) {
 }
 
 /**
- * Editing screen for a particular language.
+ * Configuration screen for a particular language.
  *
  * @param $langcode
  *   Language code of the language to edit.

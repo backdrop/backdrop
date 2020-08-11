@@ -2,6 +2,8 @@ name = Standard
 description = Install with commonly used features pre-configured.
 version = BACKDROP_VERSION
 backdrop = 1.x
+type = profile
+
 dependencies[] = node
 dependencies[] = admin_bar
 dependencies[] = block
@@ -11,6 +13,7 @@ dependencies[] = comment
 dependencies[] = config
 dependencies[] = contextual
 dependencies[] = date
+dependencies[] = dashboard
 dependencies[] = email
 dependencies[] = image
 dependencies[] = installer

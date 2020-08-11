@@ -1129,7 +1129,7 @@ function menu_tree_output($tree, $_current_depth = 0) {
     // Add the active class to the wrapper itself if necessary as the l()
     // function would.
     if (($data['link']['href'] == $_GET['q'] || ($data['link']['href'] == '<front>' && backdrop_is_front_page())) &&
-      (empty($data['link']['language']) || $data['link']['language']->langcode == $language_url->langcode)) {
+      (empty($data['link']['langcode']) || $data['link']['langcode'] == $language_url->langcode)) {
       $class[] = 'active';
     }
     $class[] = 'menu-mlid-' . $data['link']['mlid'];
@@ -1292,8 +1292,8 @@ function menu_tree_get_path($menu_name) {
  *
  * @return
  *   An array of menu links, in the order they should be rendered. The array
- *   is a list of associative arrays -- these have two keys, link and below.
- *   link is a menu item, ready for theming as a link. Below represents the
+ *   is a list of associative arrays -- these have two keys, 'link' and 'below'.
+ *   'link' is a menu item, ready for rendering as a link. 'below' represents the
  *   submenu below the link if there is one, and it is a subtree that has the
  *   same structure described for the top-level array.
  */
@@ -4034,8 +4034,12 @@ function _menu_site_status($path = NULL, $display_messages = FALSE) {
     if (user_access('access site in maintenance mode')) {
       // Ensure that the maintenance mode message is displayed only once
       // (allowing for page redirects) and specifically suppress its display on
-      // the batch and maintenance mode settings pages.
-      if ($display_messages && !in_array(current_path(), array('batch', 'admin/config/development/maintenance'))) {
+      // the batch and maintenance mode settings pages. 'admin_bar/flush-cache'
+      // has been added to the list of excluded paths in order to suppress the
+      // warning on the maintenance mode settings page when clearing caches (see
+      // https://github.com/backdrop/backdrop-issues/issues/3313).
+      $excluded_paths = array('batch', 'admin/config/development/maintenance', 'admin_bar/flush-cache');
+      if ($display_messages && !in_array(current_path(), $excluded_paths)) {
         $message = t('The site is currently in maintenance mode.');
         if (user_access('administer site configuration')) {
           $message .= ' ' . l(t('Go online.'), 'admin/config/development/maintenance', array('query' => backdrop_get_destination()));

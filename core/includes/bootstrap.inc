@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.12.x-dev');
+define('BACKDROP_VERSION', '1.17.x-dev');
 
 /**
  * Core API compatibility.
@@ -611,6 +611,7 @@ function find_conf_path($http_host, $script_name, $require_settings = TRUE) {
 
   if ($sites) {
     $uri = explode('/', $script_name);
+    $uri[0] = ($uri[0] == '.') ? '' : $uri[0];
     $server = explode('.', implode('.', array_reverse(explode(':', rtrim($http_host, '.')))));
     for ($i = count($uri) - 1; $i > 0; $i--) {
       for ($j = count($server); $j > 0; $j--) {
@@ -749,13 +750,23 @@ function backdrop_environment_initialize() {
   // Set sane locale settings, to ensure consistent string, dates, times and
   // numbers handling.
   setlocale(LC_ALL, 'C');
+
+  // PHP's built-in phar:// stream wrapper is not sufficiently secure. Remove it
+  // from use unless running through CLI, for tools such as drush or other
+  // shell scripts.
+  if (!backdrop_is_cli() && in_array('phar', stream_get_wrappers())) {
+    stream_wrapper_unregister('phar');
+  }
 }
 
 /**
  * Validates that a hostname (for example $_SERVER['HTTP_HOST']) is safe.
  *
- * @return
- *  TRUE if only containing valid characters, or FALSE otherwise.
+ * @param string $host
+ *   The host name to validate.
+ *
+ * @return bool
+ *   TRUE only if containing valid characters; FALSE otherwise.
  */
 function backdrop_valid_http_host($host) {
   // Limit the length of the host name to 1000 bytes to prevent DoS attacks with
@@ -811,7 +822,7 @@ function backdrop_settings_initialize() {
   global $base_url, $base_path, $base_root;
 
   // Export these settings.php variables to the global namespace.
-  global $databases, $cookie_domain, $conf, $settings, $installed_profile, $is_https, $base_secure_url, $base_insecure_url, $config_directories;
+  global $databases, $cookie_domain, $conf, $settings, $installed_profile, $is_https, $base_secure_url, $base_insecure_url, $config_directories, $config;
   $conf = array();
   $settings = array();
 
@@ -1721,8 +1732,10 @@ function backdrop_serve_page_from_cache(stdClass $cache) {
   $max_age = !isset($_COOKIE[session_name()]) || isset($hook_boot_headers['vary']) ? config_get('system.core', 'page_cache_maximum_age') : 0;
   $default_headers['Cache-Control'] = 'public, max-age=' . $max_age;
 
-  // Entity tag should change if the output changes.
-  $etag = $cache->created . ($return_compressed ? '-gzip' : '');
+  // Entity tag should change if the output changes. Quotes are required per
+  // header specification:
+  // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/ETag
+  $etag = '"' . $cache->created . ($return_compressed ? '-gzip' : '') . '"';
   header('Etag: ' . $etag);
 
   // See if the client has provided the required HTTP headers.
@@ -2001,7 +2014,7 @@ function t($string, array $args = array(), array $options = array()) {
 function format_string($string, array $args = array()) {
   // Transform arguments before inserting them.
   foreach ($args as $key => $value) {
-    switch ($key[0]) {
+    switch (substr($key, 0, 1)) {
       case '@':
         // Escaped only.
         $args[$key] = check_plain($value);
@@ -2332,11 +2345,23 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
  *   consistency with other messages, it should begin with a capital letter and
  *   end with a period.
  * @param string $type
- *   (optional) The message's type. Defaults to 'status'. These values are
+ *   (optional) The type of the message. Defaults to 'status'. These values are
  *   supported:
- *   - 'status'
- *   - 'warning'
- *   - 'error'
+ *   - 'status': Success messages that need to be displayed as a direct result
+ *     of a user action. Shown once, on the page where the user action finishes.
+ *     Usually shown with a green ✓ (check) icon.
+ *   - 'info': Messages used for displaying generic information, or help text
+ *     that may persist across various pages. Can be the result of a user action
+ *     on another section of the site (like enabling a module or a certain
+ *     setting for example). This type is to be used when the message is not an
+ *     error, a warning, or a success message. Usually shown with a blue or gray
+ *     "i" (info) icon.
+ *   - 'warning': Cautionary advice messages, used to inform of a possible
+ *     problem, or other unexpected behavior. Usually shown with a yellow or
+ *     orange exclamation mark icon.
+ *   - 'error': The opposite of success messages. Used to inform of problems
+ *     that have been found, or have been caused as a direct result of a user
+ *     action. Usually shown with a red "x" icon.
  * @param bool $repeat
  *   (optional) If this is FALSE and the message is already set, then the
  *   message won't be repeated. Defaults to TRUE.
@@ -2700,6 +2725,7 @@ function backdrop_array_merge_deep_array($arrays) {
 function backdrop_anonymous_user() {
   // Because this is called early in the bootstrap (starting the session) it
   // must not use the autoloader, so it's pulled in manually.
+  require_once BACKDROP_ROOT . '/core/includes/userinterface.inc';
   require_once BACKDROP_ROOT . '/core/includes/anonymous.inc';
   $user = new AnonymousUser(array(
     'hostname' => ip_address(),
@@ -2942,7 +2968,7 @@ function _backdrop_exception_handler($exception) {
     // make any FATAL errors return 500 responses instead of 200, and also
     // account for cases where an exception was thrown before the 500 status
     // could be set (e.g. while loading a maintenance theme from cache).
-    drupal_add_http_header('Status', '500 Internal Server Error');
+    backdrop_add_http_header('Status', '500 Internal Server Error');
 
     // Another uncaught exception was thrown while handling the first one. If we
     // are displaying errors, then do so with no possibility of a further
@@ -2980,6 +3006,11 @@ function _backdrop_bootstrap_configuration() {
   if (empty($GLOBALS['databases']) && !backdrop_installation_attempted()) {
     include_once BACKDROP_ROOT . '/core/includes/install.inc';
     install_goto('core/install.php');
+  }
+
+  // Untrusted host names, throw an exception for the end-user.
+  if (!defined('MAINTENANCE_MODE') && !backdrop_check_trusted_hosts($_SERVER['HTTP_HOST'])) {
+    throw new Exception(format_string('The HTTP Host "@hostname" is not white-listed for this site. Check the trusted_host_patterns setting in settings.php.', array('@hostname' => $_SERVER['HTTP_HOST'])));
   }
 
   // Check that the config directory is not empty.
@@ -3227,7 +3258,10 @@ function _backdrop_bootstrap_sanitize_request() {
     }
 
     // If there is a query string, check its query parameters.
-    $destination_parts = backdrop_parse_url($_GET['destination']);
+    if (isset($_GET['destination'])) {
+      $destination_parts = backdrop_parse_url($_GET['destination']);
+    }
+
     if (!empty($destination_parts['query'])) {
       $sanitized_keys = _backdrop_bootstrap_sanitize_input($destination_parts['query'], $whitelist);
     }
@@ -3258,7 +3292,7 @@ function _backdrop_bootstrap_sanitize_input(&$input, $whitelist = array()) {
 
   if (is_array($input)) {
     foreach ($input as $key => $value) {
-      if ($key !== '' && $key[0] === '#' && !in_array($key, $whitelist, TRUE)) {
+      if ($key !== '' && substr($key, 0, 1) === '#' && !in_array($key, $whitelist, TRUE)) {
         unset($input[$key]);
         $sanitized_keys[] = $key;
       }
@@ -4336,7 +4370,9 @@ function backdrop_clear_opcode_cache($filepath) {
 
   // Zend OPcache.
   if (function_exists('opcache_invalidate')) {
-    opcache_invalidate($filepath, TRUE);
+    // Suppress any warnings in PHP 7.2+ caused by "Zend OPcache API is
+    // restricted by "restrict_api" configuration directive".
+    @opcache_invalidate($filepath, TRUE);
   }
   // APC.
   if (function_exists('apc_delete_file')) {
@@ -4345,4 +4381,39 @@ function backdrop_clear_opcode_cache($filepath) {
     // @see http://php.net/apc-delete-file
     @apc_delete_file($filepath);
   }
+}
+
+/**
+ * Checks if a host matches the trusted host patterns in settings.php.
+ *
+ * @param string $host
+ *   The host to check against the patterns specified in settings.php.
+ *
+ * @return
+ *   TRUE if the host can be trusted; FALSE otherwise.
+ *
+ * @since Backdrop 1.14.0
+ */
+function backdrop_check_trusted_hosts($host) {
+  $trusted_hosts = &backdrop_static(__FUNCTION__, array());
+  $trusted_host_patterns = settings_get('trusted_host_patterns', array());
+
+  if (PHP_SAPI !== 'cli' && !empty($trusted_host_patterns)) {
+
+    if (in_array($host, $trusted_hosts)) {
+      return $host;
+    }
+
+    foreach ($trusted_host_patterns as $pattern) {
+      $pattern = sprintf('{%s}i', str_replace('}', '\\}', $pattern));
+      if (preg_match($pattern, $host)) {
+        $trusted_hosts[] = $host;
+        return TRUE;
+      }
+    }
+
+    return FALSE;
+  }
+
+  return TRUE;
 }

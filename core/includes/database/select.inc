@@ -1446,7 +1446,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   }
 
   /**
-   * Implements SelectQueryInterface::addField().di
+   * Implements SelectQueryInterface::addField().
    */
   public function addField($table_alias, $field, $alias = NULL) {
     // If no alias is specified, first try the field name itself.

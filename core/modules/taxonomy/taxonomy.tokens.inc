@@ -36,6 +36,10 @@ function taxonomy_token_info() {
     'name' => t('Node count'),
     'description' => t('The number of nodes tagged with the taxonomy term.'),
   );
+  $term['langcode'] = array(
+    'name' => t('Language code'),
+    'description' => t('The language code of the language the term is written in.'),
+  );
   $term['url'] = array(
     'name' => t('URL'),
     'description' => t('The URL of the taxonomy term.'),
@@ -112,6 +116,13 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
   $replacements = array();
   $sanitize = !empty($options['sanitize']);
   $url_options = array('absolute' => TRUE);
+  if (isset($options['language'])) {
+    $url_options['language'] = $options['language'];
+    $language_code = $options['language']->langcode;
+  }
+  else {
+    $language_code = NULL;
+  }
 
   if ($type == 'term' && !empty($data['term'])) {
     $term = $data['term'];
@@ -128,6 +139,10 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
 
         case 'description':
           $replacements[$original] = $sanitize ? check_markup($term->description, $term->format, '', TRUE) : $term->description;
+          break;
+
+        case 'langcode':
+          $replacements[$original] = $sanitize ? check_plain($term->langcode) : $term->langcode;
           break;
 
         case 'url':
@@ -172,6 +187,7 @@ function taxonomy_tokens($type, $tokens, array $data = array(), array $options =
             $replacements[$original] = $sanitize ? check_plain($root_term->name) : $root_term->name;
           }
           break;
+
       }
     }
 

@@ -43,12 +43,15 @@ class views_handler_field_file_uri extends views_handler_field_file {
     if (!empty($this->options['file_download_path']) && $data !== NULL && $data !== '') {
       $data = file_create_url($data);
       if (!empty($this->options['image_style'])) {
-      // $data contains url of image.
-      // Find insertion position of '/files'.
-        $insert_at = strpos($data, '/files');
-      // Text to insert in order to modify url.
+        // $data contains url of image.
+        // Get public file system path and its length.
+        $file_public_path = '/' . config_get('system.core', 'file_public_path');
+        $file_public_path_strlen = strlen($file_public_path);
+        // Find insertion position of public file system path.
+        $insert_at = strpos($data, $file_public_path);
+        // Text to insert in order to modify url.
         $add_to_url = '/styles/' . $this->options['image_style'] . '/public';
-        $data = substr_replace($data, $add_to_url, $insert_at + 6, 0);
+        $data = substr_replace($data, $add_to_url, $insert_at + $file_public_path_strlen, 0);
       }
     }
     return $this->render_link($data, $values);
