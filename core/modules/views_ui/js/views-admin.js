@@ -593,8 +593,7 @@ $.extend(Backdrop.viewsUi.RearrangeFilterHandler.prototype, {
 
     // Get rid of the explanatory text around the operator; its placement is
     // explanatory enough.
-    this.operator.find('label').add('div.description');
-    this.operator.find('div.description').addClass('element-invisible');
+    this.operator.find('label').add('div.description').addClass('element-invisible');
     this.operator.find('select').addClass('form-select');
 
     // Keep a list of the operator dropdowns, so we can sync their behavior later.
