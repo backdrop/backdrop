@@ -20,6 +20,7 @@ class views_plugin_display_block extends views_plugin_display {
   function option_definition() {
     $options = parent::option_definition();
 
+    $options['block_label_type'] = array('default' => 'view_name');
     $options['block_description'] = array('default' => '', 'translatable' => TRUE);
     $options['block_caching'] = array('default' => BACKDROP_NO_CACHE);
 
@@ -70,16 +71,23 @@ class views_plugin_display_block extends views_plugin_display {
    */
   function execute_hook_block_list($delta = 0, $edit = array()) {
     $delta = $this->view->name . '-' . $this->display->id;
-    $info = $this->get_option('block_description');
 
-    if (empty($info)) {
-      if ($this->display->display_title == $this->definition['title']) {
-        $info = t('View: @view', array('@view' => t($this->view->get_human_name())));
-      }
-      else {
-        $info = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
-      }
+    switch ($this->get_option('block_label_type')) {
+      case 'block_title':
+        $info = check_plain($this->get_option('title'));
+        break;
+      case 'custom':
+        $info = check_plain($this->get_option('block_description'));
+        break;
+      default:
+        if ($this->display->display_title == $this->definition['title']) {
+          $info = t('View: @view', array('@view' => t($this->view->get_human_name())));
+        }
+        else {
+          $info = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+        }
     }
+
     return array(
       $delta => array(
         'info' => $info,
@@ -124,11 +132,16 @@ class views_plugin_display_block extends views_plugin_display {
       ),
     );
 
-    $block_description = strip_tags($this->get_option('block_description'));
-    if (empty($block_description)) {
-      $block_description = t('None');
+    switch ($this->get_option('block_label_type')) {
+      case 'block_title':
+        $block_description = check_plain($this->get_option('title'));
+        break;
+      case 'custom':
+        $block_description = check_plain($this->get_option('block_description'));
+        break;
+      default:
+        $block_description = check_plain($this->view->human_name . ': ' . $this->display->display_title);
     }
-
     $options['block_description'] = array(
       'category' => 'block',
       'title' => t('Block admin label'),
@@ -207,10 +220,29 @@ class views_plugin_display_block extends views_plugin_display {
     switch ($form_state['section']) {
       case 'block_description':
         $form['#title'] .= t('Block admin label');
+        $form['help'] = array(
+          '#type' => 'help',
+          '#markup' => t('This label is used only in administrative interfaces. It will not be shown to site visitors.'),
+        );
+        $form['block_label_type'] = array(
+          '#type' => 'select',
+          '#title' => t('Label type'),
+          '#options' => array(
+            'view_name' => t("Use view name/display ('@view: @display')", array('@view' => $this->view->human_name, '@display' => $this->display->display_title)),
+            'block_title' => t("Use block title ('@block_title')", array('@block_title' => $this->options['title'])),
+            'custom' => t("Custom"),
+          ),
+          '#default_value' => $this->get_option('block_label_type'),
+        );
         $form['block_description'] = array(
           '#type' => 'textfield',
-          '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
+          '#title' => t('Custom label'),
           '#default_value' => $this->get_option('block_description'),
+          '#states' => array(
+            'visible' => array(
+              ':input[name="block_label_type"]' => array('value' => 'custom'),
+            ),
+          ),
         );
         break;
 
@@ -398,6 +430,7 @@ class views_plugin_display_block extends views_plugin_display {
     // It is very important to call the parent function here:
     parent::options_submit($form, $form_state);
     switch ($form_state['section']) {
+      case 'block_label_type':
       case 'block_description':
       case 'allow':
       case 'argument_input':
