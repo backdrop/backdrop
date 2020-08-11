@@ -864,26 +864,25 @@ class HWLDFWordAccumulator {
     $this->line = '';
   }
 
-  /**
-   * @param $words
-   * @param $tag string
-   */
   public function addWords($words, $tag = '') {
-    if ($tag != $this->tag) {
-      $this->flushGroup($tag);
+    if ($tag != $this->_tag) {
+      $this->_flushGroup($tag);
     }
 
     foreach ($words as $word) {
       // new-line should only come as first char of word.
-      if ($word == '') {
+      if ($word === "") {
         continue;
       }
+
       if ($word[0] == "\n") {
-        $this->flushLine($tag);
+        $this->_group .= " ";
+        $this->_flushLine($tag);
         $word = substr($word, 1);
       }
-      assert('!strstr( $word, "\n" )');
-      $this->group .= $word;
+
+      assert(!strstr($word, "\n"));
+      $this->_group .= $word;
     }
   }
 
