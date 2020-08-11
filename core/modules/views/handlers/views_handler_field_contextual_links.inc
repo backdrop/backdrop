@@ -16,6 +16,7 @@ class views_handler_field_contextual_links extends views_handler_field_links {
 
     // Hide fields that do not apply to contextual links.
     $form['custom_label']['#access'] = FALSE;
+    $form['label']['#default_value'] = '';
     $form['label']['#access'] = FALSE;
     $form['element_label_colon']['#access'] = FALSE;
     $form['empty_field_behavior']['#access'] = FALSE;

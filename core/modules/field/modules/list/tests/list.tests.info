@@ -15,3 +15,9 @@ name = List field UI
 description = Test the List field UI functionality.
 group = Field types
 file = list.test
+
+[ListFieldDisplayTestCase]
+name = List field Display
+description = Test the List field Display formatting.
+group = Field types
+file = list.test

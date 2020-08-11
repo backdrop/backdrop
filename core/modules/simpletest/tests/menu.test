@@ -189,7 +189,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     $this->backdropLogout();
 
     // Make sure the maintenance mode can be bypassed using hook_menu_site_status_alter().
-    $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.core', 'site_name')));
+    $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get_translated('system.core', 'site_name')));
     $this->backdropGet('node');
     $this->assertText($offline_message);
     $this->backdropGet('menu_login_callback');

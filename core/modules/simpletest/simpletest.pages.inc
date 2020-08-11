@@ -308,6 +308,12 @@ function simpletest_settings_form($form, &$form_state) {
     '#description' => t('The verbose data will be printed along with the standard assertions and is useful for debugging. The verbose data will be erased between each test suite run. The verbose data output is very detailed and should only be used when debugging.'),
     '#default_value' => $config->get('simpletest_verbose'),
   );
+  $form['general']['simpletest_cache'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Cache installation profiles'),
+    '#description' => t('Instead of multiple installations of Backdrop once for each test, each installation profile is installed only once, and its initial state (database tables and config files) is cached and reused. If you are making database changes, you will need to clean the test environment for the changes to show up in the tests.'),
+    '#default_value' => $config->get('simpletest_cache'),
+  );
 
   $form['httpauth'] = array(
     '#type' => 'fieldset',
@@ -342,6 +348,7 @@ function simpletest_settings_form($form, &$form_state) {
   $form['httpauth']['simpletest_httpauth_password'] = array(
     '#type' => 'password',
     '#title' => t('Password'),
+    '#password_toggle' => TRUE,
   );
   if ($password) {
     $form['httpauth']['simpletest_httpauth_password']['#description'] = t('To change the password, enter the new password here.');
@@ -362,6 +369,7 @@ function simpletest_settings_form_submit($form, &$form_state) {
   config('simpletest.settings')
     ->set('simpletest_clear_results', $form_state['values']['simpletest_clear_results'])
     ->set('simpletest_verbose', $form_state['values']['simpletest_verbose'])
+    ->set('simpletest_cache', $form_state['values']['simpletest_cache'])
     ->set('simpletest_method', $form_state['values']['simpletest_httpauth_method'])
     ->set('simpletest_username', $form_state['values']['simpletest_httpauth_username'])
     ->set('simpletest_password', $form_state['values']['simpletest_httpauth_password'])

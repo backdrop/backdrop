@@ -665,7 +665,7 @@ function _locale_import_parse_arithmetic($string) {
   foreach ($tokens as $token) {
     $current_token = $token;
 
-    // Numbers and the $n variable are simply pushed into $element_stack
+    // Numbers and the $n variable are pushed into $element_stack.
     if (is_numeric($token)) {
       $element_stack[] = $current_token;
     }

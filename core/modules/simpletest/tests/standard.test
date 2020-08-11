@@ -1,0 +1,37 @@
+<?php
+/**
+ * @file
+ * Tests for the Standard Installation Profile.
+ */
+
+
+/**
+ * Verifies settings created in the Standard profile are correct.
+ */
+class StandardInstallTestCase extends BackdropWebTestCase {
+  protected $profile = 'standard';
+
+  /**
+   * Tests existence of test case located in an installation profile module.
+   */
+  function testRolesExist() {
+    $user_1 = user_load(1);
+    $this->assertTrue(user_has_role('administrator', $user_1), 'User ID 1 is an administrator');
+
+    // Create a user assigned to the editor role.
+    $edit = array();
+    $edit['name'] = $this->randomName();
+    $edit['mail'] = $edit['name'] . '@example.com';
+    $edit['pass'] = user_password();
+    $edit['status'] = 1;
+    $edit['roles'] = array('editor');
+
+    $editor_account = entity_create('user', $edit);
+    $editor_account->save();
+    $editor_account->pass_raw = $edit['pass'];
+
+    // Just check that the role exists and that the user can see the dashboard.
+    $this->backdropLogin($editor_account);
+    $this->assertUrl('admin/dashboard');
+  }
+}

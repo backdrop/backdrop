@@ -1,0 +1,23 @@
+{
+    "_config_name": "file.type.document",
+    "_module": "file",
+    "type": "document",
+    "name": "Document",
+    "description": "A document file is written information.",
+    "mimetypes": [
+        "text/plain",
+        "application/msword",
+        "application/vnd.ms-excel",
+        "application/pdf",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.oasis.opendocument.text",
+        "application/vnd.oasis.opendocument.spreadsheet",
+        "application/vnd.oasis.opendocument.presentation",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ],
+    "disabled": false,
+    "storage": 4,
+    "module": "file"
+}

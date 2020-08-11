@@ -20,6 +20,7 @@ key=value...                              Any additional settings you wish to pa
 
 Options:
 --root                                    Set the working directory for the script to the specified path. Required if running this script from a directory other than the Backdrop root.
+--url                                     Set the URL of the site to install, as defined in sites.php. Required for multisite installations.
 --account-mail                            UID 1 email. Defaults to admin@example.com
 --account-name                            UID 1 name. Defaults to admin
 --account-pass                            UID 1 pass. Defaults to a randomly generated password.
@@ -60,6 +61,7 @@ $options = array(
   'site-mail' => 'admin@example.com',
   'site-name' => 'Backdrop',
   'root' => '',
+  'url' => '',
 );
 
 // Parse provided options.
@@ -97,6 +99,24 @@ if ($options['root'] && is_dir($options['root'])) {
   chdir($options['root']);
 }
 unset($options['root']);
+
+// Set the site URL.
+if ($options['url']) {
+  $url_parts = parse_url($options['url']);
+  if (!empty($url_parts['host'])) {
+    // E.g.: 'http://example.com/'
+    $_SERVER['HTTP_HOST'] = $url_parts['host'];
+  }
+  elseif (!empty($url_parts['path'])) {
+    // E.g.: 'example.com'
+    $_SERVER['HTTP_HOST'] = $url_parts['path'];
+  }
+  else {
+    print "--url option is invalid. Specify the URL of your site as --url=http://example.com/ or --url=example.com.\n";
+    exit;
+  }
+}
+unset($options['url']);
 
 // Parse the database URL.
 if (empty($options['db-url'])) {

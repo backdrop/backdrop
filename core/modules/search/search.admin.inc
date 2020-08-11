@@ -55,7 +55,6 @@ function _search_get_module_names() {
 function search_admin_settings($form, &$form_state) {
   $config = config('search.settings');
 
-
   $form['active'] = array(
     '#type' => 'fieldset',
     '#title' => t('Search items')
@@ -77,8 +76,9 @@ function search_admin_settings($form, &$form_state) {
     '#type' => 'radios',
     '#default_value' => $config->get('search_default_module'),
     '#options' => $module_options,
-    '#description' => t('Only one type of item will be searched by default. This selection will determine what appears at http://www.example.com/search.')
+    '#description' => t('Only one type of item will be searched by default. This selection will determine what appears at <a href="@search">@search</a>.', array('@search' => url('search', array('absolute' => TRUE)))),
   );
+
   $form['logging'] = array(
     '#type' => 'fieldset',
     '#title' => t('Logging')
@@ -111,7 +111,6 @@ function search_admin_settings($form, &$form_state) {
     '#title' => t('Indexing'),
     '#description' => t('<p><em>The search index is not cleared immediately when invalidated, instead it will be systematically updated during cron runs. Searching will continue to work but new content won\'t be indexed until all existing content has been re-indexed.</em></p>'),
   );
-
 
   // Collect some stats
   $remaining = 0;
@@ -226,6 +225,7 @@ function search_admin_settings_submit($form, &$form_state) {
   }
 
   $config->save();
+  backdrop_set_message(t('The configuration options have been saved.'));
 }
 
 /**

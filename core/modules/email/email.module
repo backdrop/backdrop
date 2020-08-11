@@ -14,7 +14,6 @@ function email_field_info() {
       'description' => t('This field stores and renders email addresses.'),
       'default_widget' => 'email_textfield',
       'default_formatter' => 'email_default',
-      'property_type' => 'text',
     ),
   );
 }

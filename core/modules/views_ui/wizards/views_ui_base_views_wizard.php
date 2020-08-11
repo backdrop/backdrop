@@ -686,26 +686,23 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $filters = array();
 
     if (!empty($form_state['values']['show']['type']) && $form_state['values']['show']['type'] != 'all') {
-      $bundle_key = $this->entity_info['bundle keys']['bundle'];
-      // Figure out the table where $bundle_key lives. It may not be the same as
-      // the base table for the view; the taxonomy vocabulary machine_name, for
-      // example, is stored in taxonomy_vocabulary, not taxonomy_term_data.
+      $entity_key = $this->entity_info['entity keys']['bundle'];
       $fields = views_fetch_fields($this->base_table, 'filter');
-      if (isset($fields[$this->base_table . '.' . $bundle_key])) {
+      if (isset($fields[$this->base_table . '.' . $entity_key])) {
         $table = $this->base_table;
       }
       else {
         foreach ($fields as $field_name => $value) {
-          if ($pos = strpos($field_name, '.' . $bundle_key)) {
+          if ($pos = strpos($field_name, '.' . $entity_key)) {
             $table = substr($field_name, 0, $pos);
             break;
           }
         }
       }
       $table_data = views_fetch_data($table);
-      // Check whether the bundle key filter handler is or an child of it views_handler_filter_in_operator
+      // Check whether the entity key filter handler is or an child of it views_handler_filter_in_operator
       // If it's not just use a single value instead of an array.
-      $handler = $table_data[$bundle_key]['filter']['handler'];
+      $handler = $table_data[$entity_key]['filter']['handler'];
       if ($handler == 'views_handler_filter_in_operator' || is_subclass_of($handler, 'views_handler_filter_in_operator')) {
         $value = backdrop_map_assoc(array($form_state['values']['show']['type']));
       }
@@ -713,10 +710,10 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
         $value = $form_state['values']['show']['type'];
       }
 
-      $filters[$bundle_key] = array(
-        'id' => $bundle_key,
+      $filters[$entity_key] = array(
+        'id' => $entity_key,
         'table' => $table,
-        'field' => $bundle_key,
+        'field' => $entity_key,
         'value' => $value,
       );
     }

@@ -1,6 +1,12 @@
 {
     "_config_name": "system.performance",
     "_config_static": true,
+    "_config_translatables": [
+        "anonymous",
+        "site_name",
+        "site_slogan",
+        "maintenance_mode_message"
+    ],
     "action_recursion_limit": 35,
     "active_menus_default": [],
     "admin_theme": "",
@@ -21,10 +27,11 @@
     "file_private_path": "",
     "file_public_path": "files",
     "file_temporary_path": "",
-    "file_transliterate_lowercase": 0,
+    "file_transliterate_lowercase": 1,
     "file_transliterate_uploads": 1,
     "file_transliterate_uploads_display_name": 0,
     "filter_fallback_format": "plain_text",
+    "form_cache_expiration": 21600,
     "image_toolkit": "gd",
     "image_jpeg_quality": "75",
     "image_style_flood_limit": 5,
@@ -32,6 +39,7 @@
     "language_count": 1,
     "language_default": "en",
     "log_row_limit": 1000,
+    "log_date_format": "dblog_date_format",
     "log_identity": "backdrop",
     "log_facility": "",
     "log_format": "!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message",

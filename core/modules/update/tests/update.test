@@ -277,6 +277,27 @@ class UpdateCoreTestCase extends UpdateTestHelper {
   }
 
   /**
+   * Test that getUpdaterFromDirectory() gets the right class for core updates.
+   */
+  function testGetUpdaterFromDirectory() {
+    module_load_include('inc', 'installer', 'installer.manager');
+    // Extract our stub sample backdop zip archive to temporary.
+    $extract_directory = _installer_manager_extract_directory();
+    $file = backdrop_get_path('module', 'update') . '/tests/backdrop-sample.zip';
+    $archive = installer_manager_archive_extract($file, $extract_directory);
+    $realpath = backdrop_realpath($extract_directory . '/backdrop');
+    // Create an Updater and check for the responsible class.
+    // If the check for core failed, either a wrong class is returned,
+    // or an UpdaterException is thrown.
+    $updater = Updater::factory($realpath);
+    $updater_class = $updater->getUpdaterFromDirectory($realpath);
+    $success = $this->assertEqual($updater_class, 'CoreUpdater', 'Determine "CoreUpdater" as updater class for core.');
+    if (!$success) {
+      $this->verbose("Failed to determine correct class, <em>$updater_class</em> was picked instead.");
+    }
+  }
+
+  /**
    * Sets the version to 1.0 when no project-specific mapping is defined.
    */
   protected function setSystemInfo1_0() {

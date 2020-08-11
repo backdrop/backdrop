@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Logging classes for the database layer.
@@ -82,8 +81,8 @@ class DatabaseLog {
   /**
    * Empty the query log for the specified logging key.
    *
-   * This method does not stop logging, it simply clears the log. To stop
-   * logging, use the end() method.
+   * This method does not stop logging, it only clears the log. To stop logging,
+   * use the end() method.
    *
    * @param $logging_key
    *   The logging key to empty.

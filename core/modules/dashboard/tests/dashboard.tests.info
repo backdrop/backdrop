@@ -1,0 +1,5 @@
+[DashboardTest]
+name = Dashboard tests
+description = Tests the Dashboard functions correctly.
+group = Dashboard
+file = dashboard.test

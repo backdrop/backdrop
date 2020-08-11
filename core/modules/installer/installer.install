@@ -1,0 +1,14 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the installer module.
+ */
+
+/**
+ * Set a default value for the core update functionality via the browser.
+ */
+function installer_update_1000() {
+  $config = config('installer.settings');
+  $config->set('core_update', FALSE);
+  $config->save();
+}

@@ -1,0 +1,5 @@
+{
+    "_config_name": "dashboard.settings",
+    "dashboard_login_redirect": true,
+    "news_feed_url": "https://backdropcms.org/api/notifications"
+}

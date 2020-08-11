@@ -1,0 +1,20 @@
+/**
+ * Styles used when configuring a text format.
+ */
+#filter-order .filter-info {
+  padding: 0 0 0 3em;
+  white-space: normal;
+}
+[dir="rtl"] #filter-order .filter-info {
+  padding: 0 3em 0 0;
+}
+#filter-order .disabled-row,
+#filter-order .disabled-row .description {
+  color: #ccc;
+}
+#filter-order .form-submit {
+  margin: 0;
+}
+input[name="allowed_html"] {
+  width: 100%;
+}

@@ -179,6 +179,20 @@ function node_views_data() {
     ),
   );
 
+  // hidden path
+  $data['node']['hidden_path'] = array(
+    'title' => t('Hidden path'),
+    'help' => t('Whether or not the content has a hidden path.'),
+    'filter' => array(
+      'handler' => 'views_handler_filter_node_hidden_path',
+      'label' => t('Paths are hidden'),
+      'type' => 'yes-no',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
   // published status + extra
   $data['node']['status_extra'] = array(
     'title' => t('Published or admin'),

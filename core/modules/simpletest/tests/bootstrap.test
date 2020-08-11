@@ -228,8 +228,8 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time1 = (string) $start_element[0];
 
-    // Wait 6 seconds to wait past the maximum age (5). Fresh copy expected.
-    sleep(6);
+    // Wait 5 seconds to wait past the maximum age (6). Fresh copy expected.
+    sleep(5);
     $this->backdropGet('system-test/sleep/6', array('query' => array('cache' => $this->randomName())));
 
     $this->backdropGet('system-test/sleep/0', array(), $headers);
@@ -346,7 +346,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->backdropGet($test_path);
     $this->assertEqual($this->backdropGetHeader('X-Backdrop-Cache'), 'HIT', 'Page was cached.');
     $this->assertFalse($this->backdropGetHeader('Content-Encoding'), 'A Content-Encoding header was not sent.');
-    $this->assertTitle(t('Hello world! | @site-name', array('@site-name' => config_get('system.core', 'site_name'))), 'Site title matches.');
+    $this->assertTitle(t('Hello world! | @site-name', array('@site-name' => config_get_translated('system.core', 'site_name'))), 'Site title matches.');
     $this->assertRaw('</html>', 'Page was not compressed.');
 
     // Disable compression mode.
@@ -627,16 +627,12 @@ class BootstrapOverrideServerVariablesTestCase extends BackdropUnitTestCase {
    * Tests that the backdrop_check_memory_limit() function works as expected.
    */
   function testCheckMemoryLimit() {
-    $memory_limit = ini_get('memory_limit');
     // Test that a very reasonable amount of memory is available.
     $this->assertTrue(backdrop_check_memory_limit('30MB'), '30MB of memory tested available.');
 
-    // Get the available memory and multiply it by two to make it unreasonably
-    // high.
-    $twice_avail_memory = ($memory_limit * 2) . 'MB';
-
+    // Test an unlimited memory limit.
     // The function should always return true if the memory limit is set to -1.
-    $this->assertTrue(backdrop_check_memory_limit($twice_avail_memory, -1), 'backdrop_check_memory_limit() returns TRUE when a limit of -1 (none) is supplied');
+    $this->assertTrue(backdrop_check_memory_limit('9999999999YB', -1), 'backdrop_check_memory_limit() returns TRUE when a limit of -1 (none) is supplied');
 
     // Test that even though we have 30MB of memory available - the function
     // returns FALSE when given an upper limit for how much memory can be used.

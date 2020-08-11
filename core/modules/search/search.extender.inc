@@ -208,7 +208,7 @@ class SearchQuery extends SelectQueryExtender {
       }
       $phrase = FALSE;
       // Strip off phrase quotes.
-      if ($match[2]{0} == '"') {
+      if ($match[2][0] == '"') {
         $match[2] = substr($match[2], 1, -1);
         $phrase = TRUE;
         $this->simple = FALSE;
@@ -532,5 +532,43 @@ class SearchQuery extends SelectQueryExtender {
     $count->addExpression('COUNT(*)');
 
     return $count;
+  }
+}
+
+/**
+ * Extends the core SearchQuery.
+ */
+class viewsSearchQuery extends SearchQuery {
+  public function &conditions() {
+    return $this->conditions;
+  }
+  public function words() {
+    return $this->words;
+  }
+
+  public function simple() {
+    return $this->simple;
+  }
+
+  public function matches() {
+    return $this->matches;
+  }
+
+  public function publicParseSearchExpression() {
+    return $this->parseSearchExpression();
+  }
+
+  function condition_replace_string($search, $replace, &$condition) {
+    if ($condition['field'] instanceof DatabaseCondition) {
+      $conditions =& $condition['field']->conditions();
+      foreach ($conditions as $key => &$subcondition) {
+        if (is_numeric($key)) {
+          $this->condition_replace_string($search, $replace, $subcondition);
+        }
+      }
+    }
+    else {
+      $condition['field'] = str_replace($search, $replace, $condition['field']);
+    }
   }
 }

@@ -79,7 +79,7 @@ function theme_update_report($variables) {
 
   foreach ($data as $project) {
     // Don't show a link to the "Update modules" page for core.
-    $update_link = ($project['name'] != 'backdrop');
+    $update_link = ($project['name'] != 'backdrop' || config_get('installer.settings', 'core_update'));
     switch ($project['status']) {
       case UPDATE_NOT_SECURE:
       case UPDATE_REVOKED:
@@ -121,6 +121,7 @@ function theme_update_report($variables) {
           $updatepath = 'admin/layouts/update';
           break;
 
+        case 'core':
         case 'module':
         default:
           $updatepath = 'admin/modules/update';
@@ -204,7 +205,8 @@ function theme_update_report($variables) {
     }
 
     $info_section = '';
-    // Render the .info div only if there is something to be rendered in it.
+    // Render the .project-info div only if there is something to be rendered in
+    // it.
     if (!empty($project['extra']) || count($project['includes']) > 1 || !empty($project['base_themes']) || !empty($project['sub_themes'])) {
       $extra_section = $includes_section = $base_section = $sub_section ='';
 
@@ -271,7 +273,7 @@ function theme_update_report($variables) {
         $sub_section .= "</div>\n";  // .subthemes div
       }
 
-      $info_section = '<div class="info">' . $extra_section . $includes_section . $base_section . $sub_section . '</div>';
+      $info_section = '<div class="project-info">' . $extra_section . $includes_section . $base_section . $sub_section . '</div>';
     }
 
     $row = '';

@@ -474,6 +474,8 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
       backdrop_get_schema(NULL, TRUE);
       // Update the theme registry to include it.
       backdrop_theme_rebuild();
+      // Refresh Entity info static cache.
+      entity_info_cache_clear();
 
       // Allow modules to react prior to the installation of a module.
       module_invoke_all('modules_preinstall', array($module));
@@ -576,6 +578,9 @@ function module_disable($module_list, $disable_dependents = TRUE) {
     $module_list = array_keys($module_list);
   }
 
+  // Refresh Entity info static cache.
+  entity_info_cache_clear();
+
   $invoke_modules = array();
 
   foreach ($module_list as $module) {
@@ -613,12 +618,12 @@ function module_disable($module_list, $disable_dependents = TRUE) {
  * @{
  * Allow modules to interact with the Backdrop core.
  *
- * Backdrop's module system is based on the concept of "hooks". A hook is a PHP
- * function that is named foo_bar(), where "foo" is the name of the module
+ * Backdrop's module system is based on the concept of "hooks". A hook is simply
+ * a PHP function that is named foo_bar(), where "foo" is the name of the module
  * (whose filename is thus foo.module) and "bar" is the name of the hook. Each
  * hook has a defined set of parameters and a specified result type.
  *
- * To extend Backdrop, a module need simply implement a hook. When Backdrop wishes
+ * To extend Backdrop, a module needs to implement a hook. When Backdrop wishes
  * to allow intervention from modules, it determines which modules implement a
  * hook and calls that hook in all enabled modules that implement it.
  *
@@ -985,7 +990,9 @@ function backdrop_merged_modules() {
     'pathauto', // Backdrop 1.1.0.
     'transliteration', // Backdrop 1.3.0.
     'project_browser', // Backdrop 1.4.0.
-    'entity_view_mode' // Backdrop 1.6.0.
+    'entity_view_mode', // Backdrop 1.6.0.
+    'options_element', // Backdrop 1.12.0.
+    'field_formatter_settings', // Backdrop 1.13.0.
   );
 }
 

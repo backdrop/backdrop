@@ -39,9 +39,9 @@ class views_handler_field_file_link_edit extends views_handler_field_entity {
   /**
    * Renders the link.
    */
-  function render_link($file, $values) {
-    // Ensure user has access to delete this file.
-    if (!user_access('manage files')) {
+  function render_link(File $file, $values) {
+    // Ensure user has access to edit this file.
+    if (!$file->access('update')) {
       return;
     }
 

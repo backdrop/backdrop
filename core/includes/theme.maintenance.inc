@@ -1,12 +1,11 @@
 <?php
-
 /**
  * @file
- * Theming for maintenance pages.
+ * Theme the maintenance pages.
  */
 
 /**
- * Sets up the theming system for maintenance page.
+ * Sets up the theme system for the maintenance page.
  *
  * Used for site installs, updates and when the site is in maintenance mode.
  * It also applies when the database is unavailable or bootstrap was not
@@ -30,7 +29,7 @@ function _backdrop_maintenance_theme() {
   require_once BACKDROP_ROOT . '/core/includes/module.inc';
   unicode_check();
 
-  // Install and update pages are treated differently to prevent theming overrides.
+  // Install and update pages are treated differently to prevent theme overrides.
   if (defined('MAINTENANCE_MODE') && (MAINTENANCE_MODE == 'install' || MAINTENANCE_MODE == 'update')) {
     $custom_theme = settings_get('maintenance_theme', 'seven');
   }

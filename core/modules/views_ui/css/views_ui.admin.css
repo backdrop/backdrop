@@ -20,14 +20,6 @@
 
 /* @end */
 
-/* @group Views listing page */
-
-#views-list tr.disabled td {
-  color: #999;
-}
-
-/* @end */
-
 /* @group Columns */
 
 @media (min-width:768px) {
@@ -352,6 +344,7 @@
 .views-ui-dialog .views-messages {
   max-height: 200px;
   overflow: auto;
+  padding: 10px 15px 0 15px;
 }
 
 .views-ui-dialog input,

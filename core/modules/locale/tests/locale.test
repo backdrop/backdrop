@@ -2392,9 +2392,9 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
   /**
    * Check URL rewriting for the given language.
    *
-   * The test is performed with a fixed URL (the default front page) to simply
-   * check that language prefixes are not added to it and that the prefixed URL
-   * is actually not working.
+   * The test is performed with a fixed URL (the default front page) to check
+   * that language prefixes are not added to it, and that the prefixed URL is
+   * actually not working.
    *
    * @param string $language
    *   The language prefix, e.g. 'es'.
@@ -2547,7 +2547,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
       'langcode' => 'it',
     );
     $this->backdropPost(NULL, $edit, t('Save'));
-    $node = $this->backdropGetNodeByTitle($edit[$title_key]);
+    $node = $this->backdropGetNodeByTitle($edit[$title_key], TRUE);
     $this->assertTrue($node, 'Node found in database.');
 
     $assert = isset($node->body['it']) && !isset($node->body['en']) && $node->body['it'][0]['value'] == $body_value;

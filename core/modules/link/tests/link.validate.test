@@ -112,7 +112,7 @@ class LinkValidateTest extends LinkBaseTestClass {
     $this->assertNoText(t('The value %value provided for %field is not a valid URL.', array('%field' => $this->field_name, '%value' => trim($url))));
 
     $nid = db_query("SELECT MAX(nid) FROM {node}")->fetchField();
-    $node = node_load($nid, NULL, TRUE);
+    $node = node_load($nid);
     $this->assertEqual($url, $node->{$this->field_name}['und'][0]['url']);
 
     $this->backdropGet('node/' . $node->nid);

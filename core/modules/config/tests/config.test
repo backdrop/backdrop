@@ -89,6 +89,75 @@ class ConfigurationTest extends BackdropWebTestCase {
     );
     $this->assertEqual($config->get(), $expected_config, 'The configuration file contained the expected configuration.');
   }
+
+  /**
+   * Tests that a config setting can be overidden.
+   */
+  public function testOverrideConfig() {
+    $original_data = array(
+      'foo' => array(
+        'key1' => 'value1',
+        'key2' => 'value2',
+        'key3' => 'value3',
+      ),
+      'bar' => array(
+        'keyA' => 'valueA',
+        'keyB' => 'valueB',
+      ),
+    );
+
+    // Set variable the regular method.
+    $config_data = config('config.test');
+    $config_data->setData($original_data);
+    $config_data->save();
+
+    $this->assertEqual('value1', config('config.test')->get('foo.key1'), 'Sample config retrieved from written config data using Config classes.');
+    $this->assertEqual('valueB', config('config.test')->get('bar.keyB'), 'Sample config retrieved from written config data using Config classes.');
+
+    // Simulate overriding in settings file.
+    $GLOBALS['config']['config.test']['foo.key1'] = 'chocolate';
+    $config_data = config('config.test');
+    $this->assertEqual('chocolate', $config_data->get('foo.key1'), 'Config variable overridden in global configuration override.');
+    $this->assertTrue(config_is_overridden('config.test', 'foo.key1'), 'Nested config variable is overridden.');
+    $this->assertFalse(config_is_overridden('config.test', 'foo'), 'Root config variable not considered overridden.');
+    $this->assertEqual($original_data['foo']['key2'], $config_data->get('foo.key2'), 'Sibling key not affected by override.');
+    $this->assertEqual($original_data['bar'], $config_data->get('bar'), 'Uncle key not affected by override.');
+
+    // Simulate overriding a collection of values.
+    $override_data = array(
+      'key1' => 'chocolate',
+      'key2' => 'vanilla',
+    );
+    unset($GLOBALS['config']['config.test']['foo.key1']);
+    $GLOBALS['config']['config.test']['foo'] = $override_data;
+
+    $config_data = config('config.test');
+    $this->assertEqual('chocolate', $config_data->get('foo.key1'), 'Config variable overridden in global configuration override.');
+    $this->assertEqual('vanilla', $config_data->get('foo.key2'), 'Config variable overridden in global configuration override.');
+    $this->assertEqual($override_data, $config_data->get('foo'), 'Entire set of nested data overridden. Discarding 3rd undefined key.');
+    $this->assertTrue(config_is_overridden('config.test', 'foo.key1'), 'Nested config variable is overridden when overriding parent.');
+    $this->assertTrue(config_is_overridden('config.test', 'foo'), 'Root config variable is considered overridden when overriding parent.');
+
+    // Try overwriting the overridden config, which won't actually write.
+    $config_data->set('foo.key1', 'chocolate');
+    $config_data->save();
+
+    $config_data = config('config.test');
+    $this->assertEqual('chocolate', config('config.test')->get('foo.key1'), 'Config variable still overridden and cannot be set regular way.');
+    $this->assertEqual($config_data->getOriginal('foo.key1'), 'value1', 'Config original value still in place.');
+    $this->assertEqual($config_data->getOverride('foo.key1'), 'chocolate', 'Overridden value retrieved correctly.');
+
+    // Actually overwrite the config with the overridden value.
+    $config_data->set('foo.key1', 'chocolate', TRUE);
+    $config_data->save();
+
+    // Reload the config to read from disk again, the overridden value should
+    // now be on disk.
+    unset($GLOBALS['config']['config.test']['foo']);
+    $config_data = config('config.test');
+    $this->assertEqual(FALSE, $config_data->isOverridden('foo.key1'), 'Original value no longer overridden.');
+    $this->assertEqual($config_data->get('foo.key1'), 'chocolate', 'Original value has been updated to include overridden value.');
+  }
 }
 
 /**

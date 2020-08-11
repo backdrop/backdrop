@@ -34,7 +34,7 @@
  *   CSS.
  *
  * @see template_preprocess()
- * @see template_preprocess_html()
+ * @see template_preprocess_page()
  *
  * @ingroup themeable
  */

@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Database tests.
+ */
 
 /**
  * Dummy class for fetching into a class.
@@ -1565,12 +1569,12 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
    * random queries (which is very difficult to do without an unacceptable risk
    * of the test failing by accident).
    *
-   * Therefore, in this test we simply run the same query twice and assert that
-   * the two results are reordered versions of each other (as well as of the
-   * same query without the random ordering). It is reasonable to assume that
-   * if we run the same select query twice and the results are in a different
-   * order each time, the only way this could happen is if we have successfully
-   * triggered the database's random ordering functionality.
+   * Therefore, in this test we run the same query twice and assert that the two
+   * results are reordered versions of each other (as well as of the same query
+   * without the random ordering). It is reasonable to assume that if we run the
+   * same select query twice and the results are in a different order each time,
+   * the only way this could happen is if we have successfully triggered the
+   * database's random ordering functionality.
    */
   function testRandomOrder() {
     // Use 52 items, so the chance that this test fails by accident will be the
@@ -3184,7 +3188,7 @@ class DatabaseInvalidDataTestCase extends DatabaseTestCase {
  */
 class DatabaseQueryTestCase extends DatabaseTestCase {
   /**
-   * Test that we can specify an array of values in the query by simply passing in an array.
+   * Test that we can specify an array of values in the query by passing in an array.
    */
   function testArraySubstitution() {
     $names = db_query('SELECT name FROM {test} WHERE age IN (:ages) ORDER BY age', array(':ages' => array(25, 26, 27)))->fetchAll();

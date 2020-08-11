@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions implementing Field API multilingual support.
@@ -193,8 +192,8 @@ function field_is_translatable($entity_type, $field) {
 /**
  * Checks if a module is registered as a translation handler for a given entity.
  *
- * If no handler is passed, simply check if there is any translation handler
- * enabled for the given entity type.
+ * If no handler is passed, check if there is any translation handler enabled
+ * for the given entity type.
  *
  * @param $entity_type
  *   The type of the entity whose fields are to be translated.

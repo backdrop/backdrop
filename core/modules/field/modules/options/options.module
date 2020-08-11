@@ -13,7 +13,31 @@ function options_theme() {
       'variables' => array('instance' => NULL, 'option' => NULL),
       'file' => 'options.theme.inc',
     ),
+    'options' => array(
+      'render element' => 'element',
+      'file' => 'options.theme.inc',
+    ),
   );
+}
+
+/**
+ * Implements hook_library_info().
+ */
+function options_library_info() {
+  $path = backdrop_get_path('module', 'options');
+  $libraries['options'] = array(
+    'title' => 'Options',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      $path . '/js/options.js' => array(),
+      'core/misc/tabledrag.js' => array('group' => JS_LIBRARY, 'weight' => 5),
+      'core/misc/jquery.cookie.js' => array('group' => JS_LIBRARY),
+    ),
+    'css' => array(
+     $path . '/css/options.css' => array(),
+    ),
+  );
+  return $libraries;
 }
 
 /**
@@ -382,3 +406,210 @@ function options_field_widget_error($element, $error, $form, &$form_state) {
   form_error($element, $error['message']);
 }
 
+/**
+ * Implements hook_element_info().
+ *
+ * Defines the #type = 'options' form element type.
+ *
+ * The 'options' form element type is useful when collecting a series of
+ * values in a list. The values within the list may optionally have unique
+ * keys, such as that in an array structure. In addition, a default choice
+ * (or several default choices) may be selected by the user.
+ *
+ * @code
+ * $element['options'] = array(
+ *   '#type' => 'options',
+ *   '#limit' => 20,
+ *   '#optgroups' => FALSE,
+ *   '#multiple' => FALSE,
+ *   '#options' => array(
+ *     'foo' => 'foo',
+ *     'bar' => 'bar',
+ *     'baz' => 'baz',
+ *   ),
+ *   '#default_value' => 'foo'
+ *   '#key_type' => 'associative',
+ * );
+ * @endcode
+ *
+ * Properties for the 'options' element include:
+ * - limit: The maximum number of options that can be added to a list. Defaults
+ *   to 100.
+ * - optgroups: If nesting of options is supported, up to one level. This is
+ *   used when building a select HTML element that uses optgroups. Defaults to
+ *   FALSE.
+ * - multiple: Affects the number of default values that may be selected.
+ * - default_value: The key(s) for the options that are currently selected. If
+ *   #multiple is TRUE then, the default value is an array, otherwise it is a
+ *   string.
+ * - options: An array of options currently within the list.
+ * - key_type: The method by which keys are determined for each value in the
+ *   option list. Available options include:
+ *   - mixed: Each value is not given any ID automatically, but any manually
+ *     specified keys will be retained. This most emulates the existing
+ *     conventions within Drupal, where keys are optional but allowed.
+ *   - numeric: Each value is automatically given a unique numeric ID. This can
+ *     be useful when wanting duplicate values in a list and not have to bother
+ *     the end-user for keys.
+ *   - associative: Keys are automatically mapped from the user-entered values.
+ *     This is equivalent to making key|value pairs, but both the key and value
+ *     are the same. Each key must be unique.
+ *   - custom: Keys are manually entered by the end user. A second set of
+ *     textfields are presented to let the user provide keys as well as values.
+ *   - none: No keys are specified at all. This effectively creates numeric keys
+ *     but unlike numeric keys, the keys are renumbered if the options in the
+ *     list are rearranged.
+ * - key_type_toggle: If specified, a checkbox will be added that allows the
+ *   user to toggle between the current key type and the "custom" key type,
+ *   letting them customize the keys as desired. This option has no effect with
+ *   the "none" key type.
+ * - key_type_toggled: Determine if the toggle checkbox is set or not by
+ *   default.
+ * - default_value_allowed: Indicates whether the end user should be able to
+ *   modify the default value when editing the options list. Defaults to TRUE.
+ * - default_value_pattern: If allowing dynamic default value keys, such as a
+ *   token, specify a regular expression pattern that will also be allowed as
+ *   a default value. Include pattern delimiters. Defaults to an empty string.
+ *
+ *   @code
+ *   $element['options'] = array(
+ *     '#type' => 'options',
+ *     '#key_type' => 'associative',
+ *     '#key_type_toggle' => t('Custom keys'),
+ *     '#key_type_toggled' => TRUE,
+ *   );
+ *   @endcode
+ */
+function options_element_info() {
+  $type = array();
+
+  $type['options'] = array(
+    '#input' => TRUE,
+    '#process' => array('form_options_expand'),
+    '#limit' => NULL,
+    '#optgroups' => TRUE,
+    '#multiple' => FALSE,
+    '#options' => array(),
+    '#options_readonly' => FALSE,
+    '#key_type' => 'mixed',
+    '#key_type_toggle' => NULL,
+    '#key_type_toggled' => FALSE,
+    '#default_value_allowed' => TRUE,
+    '#default_value_pattern' => '',
+    '#element_validate' => array('form_options_validate'),
+    '#theme_wrappers' => array('form_element'),
+    '#attached' => array(
+      'library' => array(
+        array('options', 'options'),
+      ),
+    ),
+  );
+
+  return $type;
+}
+
+/**
+ * Expand the "options" form element type.
+ *
+ * The "options" type is simply an enhanced textarea that makes it easier to
+ * create key|value pairs and put items into optgroups.
+ */
+function form_options_expand($element) {
+  module_load_include('inc', 'options', 'options.element');
+  return _form_options_expand($element);
+}
+
+/**
+ * Validate the "options" form element type.
+ */
+function form_options_validate($element, &$form_state) {
+  module_load_include('inc', 'options', 'options.element');
+  _form_options_validate($element, $form_state);
+}
+
+/**
+ * This function adjusts the value of the element from a text value to an array.
+ */
+function form_type_options_value(&$element, $edit = FALSE) {
+  module_load_include('inc', 'options', 'options.element');
+  return _form_type_options_value($element, $edit);
+}
+
+/**
+ * Create a textual representation of options from an array.
+ *
+ * @param $options
+ *   An array of options used in a select list.
+ * @param $key_type
+ *   How key/value pairs should be interpreted. Available options:
+ *   - mixed
+ *   - numeric
+ *   - associative
+ *   - custom
+ *   - none
+ */
+function form_options_to_text($options, $key_type) {
+  module_load_include('inc', 'options', 'options.element');
+  return _form_options_to_text($options, $key_type);
+}
+
+/**
+ * Create an array representation of text option values.
+ *
+ * If the Key of the option is within < >, treat as an optgroup
+ *
+ * <Group 1>
+ *   creates an optgroup with the label "Group 1"
+ *
+ * <>
+ *   Exits the current group, allowing items to be inserted at the root element.
+ */
+function form_options_from_text($text, $key_type, $flat = FALSE, &$duplicates = array()) {
+  module_load_include('inc', 'options', 'options.element');
+  return _form_options_from_text($text, $key_type, $flat, $duplicates);
+}
+
+/**
+ * Element #after_build callback for the options list in Field UI.
+ */
+function options_field_settings_after_build($element, &$form_state) {
+  // Add original data for validating.
+  $element['options_field'] = array_merge($element['options_field'], $element['#original']);
+  // Standard validate.
+  $element['options_field']['#element_validate'][] = 'list_allowed_values_setting_validate';
+  return $element;
+}
+
+/**
+ * Form #validate callback for Field UI forms that use an options element.
+ */
+function options_field_settings_validate($form, &$form_state) {
+  if (!form_get_errors()) {
+    // Set allowed values.
+    form_set_value(
+      $form['field']['settings']['allowed_values'],
+      $form['field']['settings']['allowed_values']['#value']['options'],
+      $form_state
+    );
+  }
+}
+
+/**
+ * Form #validate callback for field_ui_field_edit_form().
+ */
+function options_field_instance_settings_validate($form, &$form_state) {
+  $field = $form['#field'];
+
+  if (!form_get_errors()) {
+    // Set default values.
+    $default_field_value_key = $form['instance']['default_value_widget'][$field['field_name']][LANGUAGE_NONE]['#value_key'];
+    // Create transposed array for field storage.
+    $default_values = options_array_transpose(array($default_field_value_key => (array)$form['field']['settings']['allowed_values']['#value']['default_value']));
+
+    form_set_value(
+      $form['instance']['default_value_widget'][$field['field_name']][LANGUAGE_NONE],
+      $default_values,
+      $form_state
+    );
+  }
+}

@@ -1,8 +1,9 @@
+type = module
 name = Text
 description = Defines simple text field types.
 package = Fields
+tags[] = Content
 version = BACKDROP_VERSION
-type = module
 backdrop = 1.x
 dependencies[] = field
 required = TRUE

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_field_search_score.
@@ -50,9 +49,8 @@ class views_handler_field_search_score extends views_handler_field_numeric {
 
   function query() {
     // Check to see if the search filter added 'score' to the table.
-    // Our filter stores it as $handler->search_score -- and we also
-    // need to check its relationship to make sure that we're using the same
-    // one or obviously this won't work.
+    // Our filter stores it as $handler->search_score -- and we also need to
+    // check its relationship to make sure that we're using the same one.
     foreach ($this->view->filter as $handler) {
       if (isset($handler->search_score) && $handler->relationship == $this->relationship) {
         $this->field_alias = $handler->search_score;

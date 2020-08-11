@@ -1,5 +1,5 @@
 /*!
- * SmartMenus jQuery Plugin Keyboard Addon - v0.3.0 - January 27, 2016
+ * SmartMenus jQuery Plugin Keyboard Addon - v0.4.0 - September 17, 2017
  * http://www.smartmenus.org/
  *
  * Copyright Vasil Dinkov, Vadikom Web Ltd.
@@ -11,7 +11,7 @@
 (function(factory) {
 	if (typeof define === 'function' && define.amd) {
 		// AMD
-		define(['jquery', 'jquery.smartmenus'], factory);
+		define(['jquery', 'smartmenus'], factory);
 	} else if (typeof module === 'object' && typeof module.exports === 'object') {
 		// CommonJS
 		module.exports = factory(require('jquery'));
@@ -182,12 +182,12 @@
 	});
 
 	// hook it
-	$(document).delegate('ul.sm, ul.navbar-nav:not([data-sm-skip])', 'keydown.smartmenus', $.SmartMenus.Keyboard.docKeydown);
+	$(document).on('keydown.smartmenus', 'ul.sm, ul.navbar-nav:not([data-sm-skip])', $.SmartMenus.Keyboard.docKeydown);
 
 	$.extend($.SmartMenus.prototype, {
 		keyboardSetHotkey: function(keyCode, modifiers) {
 			var self = this;
-			$(document).bind('keydown.smartmenus' + this.rootId, function(e) {
+			$(document).on('keydown.smartmenus' + this.rootId, function(e) {
 				if (keyCode == e.keyCode) {
 					var procede = true;
 					if (modifiers) {

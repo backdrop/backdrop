@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity query API.
@@ -24,13 +23,13 @@ class EntityFieldQueryException extends Exception {}
  * nodes written by users created in the last hour, as this would require
  * querying both node->status and user->created.
  *
- * Normally we would not want to have public properties on the object, as that
- * allows the object's state to become inconsistent too easily. However, this
- * class's standard use case involves primarily code that does need to have
- * direct access to the collected properties in order to handle alternate
- * execution routines. We therefore use public properties for simplicity. Note
- * that code that is simply creating and running a field query should still use
- * the appropriate methods to add conditions on the query.
+ * Normally we would not want public properties on the object, as that could
+ * allow the object's state to become inconsistent. However, this class's
+ * standard use case involves primarily code that does need to have direct
+ * access to the collected properties in order to handle alternate execution
+ * routines. We therefore use public properties for simplicity. Note that code
+ * that is creating and running a field query should still use the appropriate
+ * methods to add conditions on the query.
  *
  * Storage engines are not required to support every type of query. By default,
  * an EntityFieldQueryException will be raised if an unsupported condition is
@@ -249,7 +248,7 @@ class EntityFieldQuery {
 
   /**
    * Adds a condition on field values.
-   * 
+   *
    * Note that entities with empty field values will be excluded from the
    * EntityFieldQuery results when using this method.
    *
@@ -735,20 +734,21 @@ class EntityFieldQuery {
    * Executes the query.
    *
    * After executing the query, $this->orderedResults will contain a list of
-   * the same stub entities in the order returned by the query. This is only
+   * the same entity ids in the order returned by the query. This is only
    * relevant if there are multiple entity types in the returned value and
    * a field ordering was requested. In every other case, the returned value
    * contains everything necessary for processing.
    *
    * @return
    *   Either a number if count() was called or an array of associative arrays
-   *   of stub entities. The outer array keys are entity types, and the inner
+   *   of the entity ids. The outer array keys are entity types, and the inner
    *   array keys are the relevant ID. (In most cases this will be the entity
    *   ID. The only exception is when age=FIELD_LOAD_REVISION is used and field
    *   conditions or sorts are present -- in this case, the key will be the
    *   revision ID.) The entity type will only exist in the outer array if
-   *   results were found. The inner array values are always stub entities, as
-   *   returned by entity_create_stub_entity(). To traverse the returned array:
+   *   results were found. The inner array values consist of an object with the
+   *   entity_id, revision_id and bundle properties. To traverse the returned
+   *   array:
    *   @code
    *     foreach ($query->execute() as $entity_type => $entities) {
    *       foreach ($entities as $entity_id => $entity) {
@@ -948,11 +948,12 @@ class EntityFieldQuery {
     }
     $return = array();
     $this->orderedResults = array();
-    foreach ($select_query->execute() as $partial_entity) {
-      $bundle = isset($partial_entity->bundle) ? $partial_entity->bundle : NULL;
-      $entity = entity_create_stub_entity($partial_entity->entity_type, array($partial_entity->entity_id, $partial_entity->revision_id, $bundle));
-      $return[$partial_entity->entity_type][$partial_entity->$id_key] = $entity;
-      $this->orderedResults[] = $partial_entity;
+    foreach ($select_query->execute() as $ids) {
+      if (!isset($ids->bundle)) {
+        $ids->bundle = NULL;
+      }
+      $return[$ids->entity_type][$ids->$id_key] = $ids;
+      $this->ordered_results[] = $ids;
     }
     return $return;
   }

@@ -6,7 +6,7 @@
  */
 
 /**
- * Provides a comment approve link.
+ * Field handler to present a link to approve a comment.
  *
  * @ingroup views_field_handlers
  */

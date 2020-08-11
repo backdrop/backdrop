@@ -25,6 +25,7 @@ function image_field_info() {
         'max_dimensions' => '',
         'min_dimensions' => '',
         'default_image' => '',
+        'orientate' => 0,
       ),
       'default_widget' => 'image_image',
       'default_formatter' => 'image',
@@ -84,8 +85,13 @@ function image_field_instance_settings_form($field, $instance) {
   // Use the file field instance settings form as a basis.
   $form = file_field_instance_settings_form($field, $instance);
 
+  $form['#element_validate'] = isset($form['#element_validate']) ? $form['#element_validate'] : array();
+  $form['#element_validate'][] = 'image_field_instance_settings_form_validate';
+
   // Add maximum and minimum resolution settings.
   $max_dimensions = explode('x', $settings['max_dimensions']) + array('', '');
+  $max_dimensions[0] = empty($max_dimensions[0]) ? NULL : $max_dimensions[0];
+  $max_dimensions[1] = empty($max_dimensions[1]) ? NULL : $max_dimensions[1];
   $form['max_dimensions'] = array(
     '#type' => 'item',
     '#title' => t('Maximum image dimensions'),
@@ -93,14 +99,14 @@ function image_field_instance_settings_form($field, $instance) {
     '#weight' => 4.1,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The maximum allowed image dimensions expressed as WIDTHxHEIGHT. Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
+    '#description' => t('The maximum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
   );
   $form['max_dimensions']['x'] = array(
     '#type' => 'number',
     '#title' => t('Maximum width'),
     '#title_display' => 'invisible',
     '#default_value' => $max_dimensions[0],
-    '#min' => 1,
+    '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' x ',
   );
@@ -109,12 +115,14 @@ function image_field_instance_settings_form($field, $instance) {
     '#title' => t('Maximum height'),
     '#title_display' => 'invisible',
     '#default_value' => $max_dimensions[1],
-    '#min' => 1,
+    '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
   );
 
   $min_dimensions = explode('x', $settings['min_dimensions']) + array('', '');
+  $min_dimensions[0] = empty($min_dimensions[0]) ? NULL : $min_dimensions[0];
+  $min_dimensions[1] = empty($min_dimensions[1]) ? NULL : $min_dimensions[1];
   $form['min_dimensions'] = array(
     '#type' => 'item',
     '#title' => t('Minimum image dimensions'),
@@ -122,14 +130,14 @@ function image_field_instance_settings_form($field, $instance) {
     '#weight' => 4.2,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The minimum allowed image dimensions expressed as WIDTHxHEIGHT. Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
+    '#description' => t('The minimum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
   );
   $form['min_dimensions']['x'] = array(
     '#type' => 'number',
     '#title' => t('Minimum width'),
     '#title_display' => 'invisible',
     '#default_value' => $min_dimensions[0],
-    '#min' => 1,
+    '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' x ',
   );
@@ -138,7 +146,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#title' => t('Minimum height'),
     '#title_display' => 'invisible',
     '#default_value' => $min_dimensions[1],
-    '#min' => 1,
+    '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
   );
@@ -161,6 +169,15 @@ function image_field_instance_settings_form($field, $instance) {
     '#description' => t('The title attribute is used as a tooltip when the mouse hovers over the image.'),
     '#weight' => 11,
   );
+  $form['orientate'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable image re-orientation'),
+    '#default_value' => $settings['orientate'],
+    '#weight' => 12,
+    '#description' => t('If EXIF data indicates the need, the image will be rotated appropriately before being saved.'),
+  );
+  // Add a second line of description.
+  $form['orientate']['#description'] .= '<br />' . t('Note that as with resizing, rotating images on upload will cause the loss of EXIF data in the image.');
 
   // Add the default image to the instance.
   $form['default_image'] = array(
@@ -187,16 +204,36 @@ function image_field_instance_settings_form($field, $instance) {
 }
 
 /**
+ * Element validate handler for image_field_instance_settings_form().
+ */
+function image_field_instance_settings_form_validate($element, &$form_state, $complete_form) {
+  $min_dimensions = explode('x', $form_state['values']['instance']['settings']['min_dimensions']) + array('', '');
+  $max_dimensions = explode('x', $form_state['values']['instance']['settings']['max_dimensions']) + array('', '');
+
+  $min_dimensions_x = (int) $min_dimensions[0];
+  $min_dimensions_y = (int) $min_dimensions[1];
+  $max_dimensions_x = (int) $max_dimensions[0];
+  $max_dimensions_y = (int) $max_dimensions[1];
+
+  // Ensure that min dimensions are not set to be bigger than max dimensions,
+  // but only if max dimensions have been specified. This allows to set min
+  // dimensions, without having to restrict max dimensions.
+  if ((!empty($max_dimensions_x) && $min_dimensions_x > $max_dimensions_x) || (!empty($max_dimensions_y) && $min_dimensions_y > $max_dimensions_y)) {
+    form_set_error('instance][settings][min_dimensions', t('The minimum image dimensions cannot be bigger than its maximum dimensions.'));
+  }
+}
+
+/**
  * Element validate function for resolution fields.
  */
 function _image_field_resolution_validate($element, &$form_state) {
+  if (empty($element['x']['#value'])) {
+    $element['x']['#value'] = 0;
+  }
+  if (empty($element['y']['#value'])) {
+    $element['y']['#value'] = 0;
+  }
   if (!empty($element['x']['#value']) || !empty($element['y']['#value'])) {
-    foreach (array('x', 'y') as $dimension) {
-      if (!$element[$dimension]['#value']) {
-        form_error($element[$dimension], t('Both a height and width value must be specified in the !name field.', array('!name' => $element['#title'])));
-        return;
-      }
-    }
     form_set_value($element, $element['x']['#value'] . 'x' . $element['y']['#value'], $form_state);
   }
   else {
@@ -333,6 +370,7 @@ function image_field_widget_info() {
       'label' => t('Image'),
       'field types' => array('image'),
       'settings' => array(
+        'browser_view' => 'image_library',
         'progress_indicator' => 'throbber',
         'preview_image_style' => 'thumbnail',
       ),
@@ -353,6 +391,15 @@ function image_field_widget_settings_form($field, $instance) {
 
   // Use the file widget settings form.
   $form = file_field_widget_settings_form($field, $instance);
+
+  $form['browser_view'] = array(
+    '#title' => t('Enable image browser'),
+    '#type' => 'checkbox',
+    '#return_value' => 'image_library',
+    '#default_value' => $settings['browser_view'],
+    '#description' => t('Enable the image browser as an alternative to the normal upload.'),
+    '#weight' => -3,
+  );
 
   $form['preview_image_style'] = array(
     '#title' => t('Preview image style'),
@@ -379,6 +426,10 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
   $settings = $instance['settings'];
 
   foreach (element_children($elements) as $delta) {
+    // Add adjustment of orientation before resizing because EXIF data is needed.
+    if ($settings['orientate']) {
+      $elements[$delta]['#upload_validators']['file_validate_image_orientation'] = array($settings['orientate']);
+    }
     // Add upload resolution validation.
     if ($settings['max_dimensions'] || $settings['min_dimensions']) {
       $elements[$delta]['#upload_validators']['file_validate_image_resolution'] = array($settings['max_dimensions'], $settings['min_dimensions']);
@@ -389,6 +440,11 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     $extensions = isset($elements[$delta]['#upload_validators']['file_validate_extensions'][0]) ? $elements[$delta]['#upload_validators']['file_validate_extensions'][0] : implode(' ', $supported_extensions);
     $extensions = array_intersect(explode(' ', $extensions), $supported_extensions);
     $elements[$delta]['#upload_validators']['file_validate_extensions'][0] = implode(' ', $extensions);
+
+    // Set any view used as a browser.
+    if (!empty($instance['widget']['settings']['browser_view'])) {
+      $elements[$delta]['#browser_view'] = $instance['widget']['settings']['browser_view'];
+    }
 
     // Add all extra functionality provided by the image widget.
     $elements[$delta]['#process'][] = 'image_field_widget_process';
@@ -500,6 +556,10 @@ function image_field_formatter_info() {
         'image_style' => '',
         'image_link' => '',
         'image_float' => '',
+      ),
+	  'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
+	  'file formatter' => array(
+        'mime types' => array('image/*'),
       ),
     ),
   );

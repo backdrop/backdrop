@@ -85,6 +85,12 @@ function field_default_validate($entity_type, $entity, $field, $instance, $langc
   }
 }
 
+/**
+ * Default field 'submit' operation.
+ *
+ * Filter out empty values and sort the remainder in preparation for insert,
+ * below.
+ */
 function field_default_submit($entity_type, $entity, $field, $instance, $langcode, &$items, $form, &$form_state) {
   // Filter out empty values.
   $items = _field_filter_items($field, $items);

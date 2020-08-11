@@ -98,10 +98,11 @@ function path_admin_overview($keys = NULL) {
  */
 function path_admin_edit($path = array()) {
   if ($path) {
-    backdrop_set_title($path['alias']);
+    backdrop_set_title(t('Edit URL alias %alias', array('%alias' => $path['alias'])), PASS_THROUGH);
     $output = backdrop_get_form('path_admin_form', $path);
   }
   else {
+    backdrop_set_title(t('Add URL alias'));
     $output = backdrop_get_form('path_admin_form');
   }
 
@@ -129,6 +130,7 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
     '#description' => t('Specify the existing path you wish to alias. For example: <code>node/28</code> or <code>taxonomy/term/1</code>.'),
     '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
     '#required' => TRUE,
+    '#autocomplete_path' => 'path-autocomplete',
   );
   $form['alias'] = array(
     '#type' => 'textfield',
@@ -458,7 +460,7 @@ function path_patterns_settings_form($form) {
   $config = config('path.settings');
 
   $form['#config'] = 'path.settings';
-  
+
   $form['verbose'] = array(
     '#type' => 'checkbox',
     '#title' => t('Verbose'),
@@ -657,7 +659,7 @@ function path_bulk_update_form($form, &$form_state) {
     }
   }
 
-  // Build the 'Update options' form.
+  // Build the 'Operations' form.
   $form['operations'] = array(
     '#type' => 'fieldset',
     '#title' => t('Operations'),
@@ -669,7 +671,8 @@ function path_bulk_update_form($form, &$form_state) {
   );
   $form['operations']['operation'] = array(
     '#type' => 'select',
-    '#title' => '',
+    '#title' => 'Operations',
+    '#title_display' => 'invisible',
     '#options' => array(
       'generate' => t('Generate URL aliases'),
       'update' => t('Update existing URL aliases'),

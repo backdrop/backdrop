@@ -1,4 +1,5 @@
-Themes are skins for your site that allow you to change the look, feel, and general appearance. You can use themes contributed by others or create your own.
+Themes are skins for your site that allow you to change the look, feel, and
+general appearance. You can use themes contributed by others or create your own.
 
 What to place in this directory?
 --------------------------------
@@ -16,15 +17,16 @@ https://www.backdropcms.org/themes
 Organizing themes in this directory
 ------------------------------------
 
-It is safe to organize themes into subdirectories to ensure easy maintenance
-and upgrades. Is highly recommended to use Backdrop's sub-theme functionality to keep the code for related themes separated.
+It is safe to organize themes into subdirectories to ensure easy maintenance and
+upgrades. Is highly recommended to use Backdrop's sub-theme functionality to
+keep the code for related themes separated.
 
 Multisite configuration
 -----------------------
 
-In multisite configuration, themes found in this directory are available to
-all sites. Alternatively, the sites/your_site_name/themes directory pattern may
-be used to restrict themes to a specific site instance.
+In multisite configuration, themes found in this directory are available to all
+sites. Alternatively, the sites/your_site_name/themes directory pattern may be
+used to restrict themes to a specific site instance.
 
 MORE INFORMATION
 -----------------

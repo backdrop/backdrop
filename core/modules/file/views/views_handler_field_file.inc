@@ -18,12 +18,14 @@ class views_handler_field_file extends views_handler_field {
     parent::init($view, $options);
     if (!empty($options['link_to_file'])) {
       $this->additional_fields['uri'] = 'uri';
+      $this->additional_fields['fid'] = 'fid';
     }
   }
 
   function option_definition() {
     $options = parent::option_definition();
     $options['link_to_file'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['link_to_file_options'] = array('default' => 'download');
     return $options;
   }
 
@@ -32,10 +34,24 @@ class views_handler_field_file extends views_handler_field {
    */
   function options_form(&$form, &$form_state) {
     $form['link_to_file'] = array(
-      '#title' => t('Link this field to download the file'),
+      '#title' => t('Link this field to the file'),
       '#description' => t("Enable to override this field's links."),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['link_to_file']),
+    );
+    $form['link_to_file_options'] = array(
+      '#title' => t('Link type'),
+      '#type' => 'radios',
+      '#options' => array(
+        'download' => 'Download link',
+        'page' => t('Link to the file page'),
+      ),
+      '#default_value' => !empty($this->options['link_to_file_options']) ? $this->options['link_to_file_options'] : 'download',
+      '#states' => array(
+        'visible' => array(
+         ':input[name="options[link_to_file]"]' => array('checked' => TRUE),
+        ),
+      ),
     );
     parent::options_form($form, $form_state);
   }
@@ -48,7 +64,12 @@ class views_handler_field_file extends views_handler_field {
   function render_link($data, $values) {
     if (!empty($this->options['link_to_file']) && $data !== NULL && $data !== '') {
       $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = file_create_url($this->get_value($values, 'uri'));
+      if ($this->options['link_to_file_options'] == 'download') {
+        $this->options['alter']['path'] = file_create_url($this->get_value($values, 'uri'));
+      }
+      else {
+        $this->options['alter']['path'] = 'file/' . $this->get_value($values, 'fid');
+      }
     }
 
     return $data;

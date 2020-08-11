@@ -29,7 +29,7 @@
     <thead>
       <tr>
         <?php foreach ($header as $field => $label): ?>
-          <th <?php if ($header_classes[$field]) { print 'class="'. implode(' ', $header_classes[$field]) . '" '; } ?>>
+          <th <?php if ($header_classes[$field]) { print 'class="'. implode(' ', $header_classes[$field]) . '" '; } ?> scope="col">
             <?php print $label; ?>
           </th>
         <?php endforeach; ?>

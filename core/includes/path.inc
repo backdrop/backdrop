@@ -337,7 +337,9 @@ function backdrop_match_path($path, $patterns) {
  * @see request_path()
  */
 function current_path() {
-  return $_GET['q'];
+  if (isset($_GET['q'])) {
+    return $_GET['q'];
+  }
 }
 
 /**

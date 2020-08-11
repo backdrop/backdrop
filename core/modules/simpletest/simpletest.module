@@ -97,6 +97,7 @@ function simpletest_autoload_info() {
     'BackdropTestCase' => 'backdrop_web_test_case.php',
     'BackdropUnitTestCase' => 'backdrop_web_test_case.php',
     'BackdropWebTestCase' => 'backdrop_web_test_case.php',
+    'BackdropWebTestCaseCache' => 'backdrop_web_test_case_cache.php',
   );
 }
 
@@ -119,10 +120,16 @@ function _simpletest_format_summary_line($summary) {
     '@exception' => format_plural(isset($summary['#exception']) ? $summary['#exception'] : 0, '1 exception', '@count exceptions'),
   );
   if (!$summary['#debug']) {
-    return t('@pass, @fail, and @exception', $args);
+    $message = t('@pass, @fail, and @exception.', $args);
   }
-  $args['@debug'] = format_plural(isset($summary['#debug']) ? $summary['#debug'] : 0, '1 debug message', '@count debug messages');
-  return t('@pass, @fail, @exception, and @debug', $args);
+  else {
+    $args['@debug'] = format_plural(isset($summary['#debug']) ? $summary['#debug'] : 0, '1 debug message', '@count debug messages');
+    $message = t('@pass, @fail, @exception, and @debug.', $args);
+  }
+  if (isset($summary['#duration'])) {
+    $message .= ' [' . $summary['#duration'] . 's]';
+  }
+  return $message;
 }
 
 /**
@@ -138,7 +145,26 @@ function simpletest_run_tests($test_list, $reporter = 'backdrop') {
   $test_id = db_query("SELECT MAX(test_id) FROM {simpletest_prefix}")->fetchField() + 1;
 
   // Clear out the previous verbose files.
-  file_unmanaged_delete_recursive('public://simpletest/verbose');
+  if (file_exists('public://simpletest/verbose')) {
+    file_unmanaged_delete_recursive('public://simpletest/verbose');
+  }
+
+  $cache = config_get('simpletest.settings', 'simpletest_cache');
+  if ($cache) {
+    $profiles = simpletest_get_profiles();
+    foreach ($profiles as $profile) {
+      try {
+        $test_cache = new BackdropWebTestCaseCache();
+        $test_cache->setProfile($profile->name);
+        if (!$test_cache->isCached()) {
+          $test_cache->prepareCache(TRUE);
+        }
+      }
+      catch (Exception $e) {
+        watchdog_exception('simpletest', $e, $e->getMessage());
+      }
+    }
+  }
 
   // Get the info for the first test being run.
   $first_test = array_shift($test_list);
@@ -174,7 +200,7 @@ function _simpletest_batch_operation($test_list_init, $test_id, &$context) {
     // First iteration: initialize working values.
     $test_list = $test_list_init;
     $context['sandbox']['max'] = count($test_list);
-    $test_results = array('#pass' => 0, '#fail' => 0, '#exception' => 0, '#debug' => 0);
+    $test_results = array('#pass' => 0, '#fail' => 0, '#exception' => 0, '#debug' => 0, '#duration' => 0);
   }
   else {
     // Nth iteration: get the current values where we last stored them.
@@ -406,27 +432,43 @@ function simpletest_registry_files_alter(&$files, $modules) {
 }
 
 /**
+ * Gets a list of the installation profiles that are available.
+ *
+ * @return array
+ *   A list of the available installation profiles.
+ */
+function simpletest_get_profiles() {
+  include_once BACKDROP_ROOT . '/core/includes/install.core.inc';
+  return install_find_profiles();
+}
+
+/**
  * Generate test file.
  */
 function simpletest_generate_file($filename, $width, $lines, $type = 'binary-text') {
   $text = '';
+  $line = '';
+
   for ($i = 0; $i < $lines; $i++) {
     // Generate $width - 1 characters to leave space for the "\n" character.
-    for ($j = 0; $j < $width - 1; $j++) {
-      switch ($type) {
-        case 'text':
-          $text .= chr(rand(32, 126));
-          break;
-        case 'binary':
-          $text .= chr(rand(0, 31));
-          break;
-        case 'binary-text':
-        default:
-          $text .= rand(0, 1);
-          break;
+    if (empty($line)) {
+      for ($j = 0; $j < $width - 1; $j++) {
+        switch ($type) {
+          case 'text':
+            $line .= chr(rand(32, 126));
+            break;
+          case 'binary':
+            $line .= chr(rand(0, 31));
+            break;
+          case 'binary-text':
+          default:
+            $line .= rand(0, 1);
+            break;
+        }
       }
+      $line .= "\n";
     }
-    $text .= "\n";
+    $text .= $line;
   }
 
   // Create filename.
@@ -440,6 +482,8 @@ function simpletest_generate_file($filename, $width, $lines, $type = 'binary-tex
 function simpletest_clean_environment() {
   simpletest_clean_database();
   simpletest_clean_temporary_directories();
+  simpletest_clean_profile_cache_tables();
+  simpletest_clean_profile_cache_folders();
   if (config_get('simpletest.settings', 'simpletest_clear_results')) {
     $count = simpletest_clean_results_table();
     backdrop_set_message(format_plural($count, 'Removed 1 test result.', 'Removed @count test results.'));
@@ -537,6 +581,40 @@ function simpletest_clean_results_table($test_id = NULL) {
     return $count;
   }
   return 0;
+}
+
+
+/**
+ * Removes cached profile tables from the database.
+ */
+function simpletest_clean_profile_cache_tables() {
+  $tables = db_find_tables(Database::getConnection()->prefixTables('{simpletest_cache_}') . '%');
+  $count = count($tables);
+  foreach ($tables as $table) {
+    db_drop_table($table);
+  }
+
+  if ($count > 0) {
+    backdrop_set_message(format_plural($count, 'Removed 1 profile cache table.', 'Removed @count profile cache tables.'));
+  }
+  else {
+    backdrop_set_message(t('No profile cache tables to remove.'));
+  }
+}
+
+/**
+ * Removes cached profile folders from the files directory.
+ */
+function simpletest_clean_profile_cache_folders() {
+  $profiles = simpletest_get_profiles();
+
+  $file_public_path = config_get('system.core', 'file_public_path', 'files');
+
+  foreach ($profiles as $profile) {
+    // Delete temporary files directory.
+    file_unmanaged_delete_recursive($file_public_path . '/simpletest/simpletest_cache_' . $profile->name);
+    backdrop_set_message(t('Cleared cache folder for profile !profile.', array('!profile' => $profile->name)));
+  }
 }
 
 /**

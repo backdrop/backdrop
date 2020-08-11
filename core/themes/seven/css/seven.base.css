@@ -22,11 +22,6 @@ hr {
   height: 1px;
   background: #cccccc;
 }
-summary,
-legend {
-  font-weight: bold;
-  text-transform: uppercase;
-}
 h1,
 h2,
 h3,

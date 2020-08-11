@@ -54,6 +54,9 @@
 .js .js-show {
   display: block;
 }
+.js span.js-show {
+  display: inline;
+}
 
 /**
  * Collapsible fieldsets.

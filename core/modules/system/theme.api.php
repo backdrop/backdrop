@@ -50,7 +50,7 @@
  * These implementations will be used instead of the default implementation. If
  * using a pure .theme without an engine, the .theme is required to implement
  * its own version of hook_theme() to tell Backdrop what it is implementing;
- * themes utilizing an engine will have their well-named theming functions
+ * themes utilizing an engine will have their well-named theme functions
  * automatically registered for them. While this can vary based upon the theme
  * engine, the standard set by phptemplate is that theme functions should be
  * named THEMENAME_HOOK. For example, for Backdrop's default theme (Bartik) to

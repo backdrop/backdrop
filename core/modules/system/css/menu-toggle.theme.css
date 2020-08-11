@@ -41,22 +41,29 @@
 .menu-toggle-button-icon:after {
   position: absolute;
   top: 50%;
-  left: 2px;
+  left: 2px; /* LTR */
   height: 2px;
   width: 24px;
   background: #bbb;
   -webkit-transition: all 0.25s;
   transition: all 0.25s;
 }
+[dir="rtl"] .menu-toggle-button-icon {
+  right: 2px;
+}
 .menu-toggle-button-icon:before {
   content: '';
   top: -7px;
-  left: 0;
+  left: 0; /* LTR */
 }
 .menu-toggle-button-icon:after {
   content: '';
   top: 7px;
-  left: 0
+  left: 0; /* LTR */
+}
+[dir="rtl"] .menu-toggle-button-icon:before,
+[dir="rtl"] .menu-toggle-button-icon:after {
+  right: 0;
 }
 
 /**

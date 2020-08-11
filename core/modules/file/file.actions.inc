@@ -15,7 +15,7 @@
  * @ingroup actions
  */
 function file_delete_action(File $file, &$context) {
-  if (!user_access('delete files')) {
+  if (!$file->access('delete')) {
     return;
   }
 

@@ -203,15 +203,19 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    */
   protected function getBlockLinks($block) {
     $links = array();
-    $links['configure'] = array(
-      'title' => t('Configure'),
-      'href' => $this->getUrl('configure-block', $block->uuid),
-      'attributes' => array(
-        'class' => array('use-ajax'),
-        'data-dialog' => TRUE,
-        'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-      ),
-    );
+
+    // Only render the "Configure" link if the block is not broken.
+    if (!is_a($block, 'BlockBroken')) {
+      $links['configure'] = array(
+        'title' => t('Configure'),
+        'href' => $this->getUrl('configure-block', $block->uuid),
+        'attributes' => array(
+          'class' => array('use-ajax'),
+          'data-dialog' => TRUE,
+          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
+        ),
+      );
+    }
 
     if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta =='title_combo')) {
       $links['title'] = array(

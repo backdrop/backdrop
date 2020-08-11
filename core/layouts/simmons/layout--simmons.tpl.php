@@ -129,7 +129,7 @@
   </div><!-- /.l-wrapper -->
 
   <?php if ($content['footer']): ?>
-    <footer class="l-footer"  role="footer">
+    <footer class="l-footer">
       <div class="l-footer-inner container container-fluid">
         <?php print $content['footer']; ?>
       </div>

@@ -281,7 +281,7 @@ All arguments are long options.
   --file      Run tests identified by specific file names, instead of class names.
               Specify the path and the extension
               (i.e. 'core/modules/user/user.test').
-              
+
   --directory <path>
 
               Run all tests found within the specified file directory.
@@ -772,22 +772,22 @@ function simpletest_script_write_summary($summary_file) {
         $summary .= "\n$test_group: $test_name ($test_class)\n";
         $test_class = $result->test_class;
       }
-      
+
       if($count < 10 ){
         $summary .= " - `" . $result->status . "` " . trim(strip_tags($result->message)) . ' **' . basename($result->file) . '**:' . $result->line . "\n";
       }
       $count++;
     }
   }
-  
+
   if($count > 10 ){
     $summary .= "\nResult limited to first 10 items. More details are available from the full log.\n";
   }
-  
+
   $total_count = db_query("SELECT COUNT(*) FROM {simpletest} WHERE test_id = :test_id AND status IN ('fail', 'pass')", array(':test_id' => $test_id))->fetchField();
   if(!empty($summary)){
     $summary = format_plural($count, '1 of !total_count tests failed', '@count of !total_count tests failed.', array('!total_count' => $total_count)) . "\n" . $summary;
-  } 
+  }
   else{
     $summary = format_plural($total_count, '1 test passed', '@count tests passed.');
   }
@@ -1031,10 +1031,9 @@ function simpletest_script_print_alternatives($string, $array, $degree = 4) {
  */
 function simpletest_script_clean_profile_cache_tables(){
   $tables = db_find_tables(Database::getConnection()->prefixTables('{simpletest_cache_}') . '%');
-  $count = 0;
+  $count = count($tables);
   foreach ($tables as $table) {
     db_drop_table($table);
-    $count++;
   }
 
   if ($count > 0) {
