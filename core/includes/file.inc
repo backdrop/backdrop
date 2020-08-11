@@ -532,7 +532,7 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
  * @return
  *   A string representing the desired contents of the .htaccess file.
  *
- * @see file_create_htaccess()
+ * @see file_save_htaccess()
  */
 function file_htaccess_lines($private = TRUE) {
   $lines = <<<EOF
