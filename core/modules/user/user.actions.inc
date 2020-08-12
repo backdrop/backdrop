@@ -17,11 +17,11 @@ function user_block_user_action(User $account, &$context) {
 
   // Don't block User 1, or the user performing the action.
   if ($account->uid === '1') {
-    backdrop_set_message(t("User 1 cannot be blocked."), 'warning');
+    backdrop_set_message(t('The user account %admin_name (user with ID 1) cannot be blocked.', array('%admin_name' => $account->name)), 'warning');
     return FALSE;
   }
   elseif ($account->uid == $user->uid) {
-    backdrop_set_message(t("You cannot block your own user account."), 'warning');
+    backdrop_set_message(t('You cannot block your own user account.'), 'warning');
     return FALSE;
   }
 
