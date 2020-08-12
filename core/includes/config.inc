@@ -63,7 +63,7 @@ function config($config_file, $type = 'active') {
  * @param string $option
  *   The name of the config option within the file to delete. The config option
  *   may contain periods to indicate levels within the config file.
- * 
+ *
  * @see config_set()
  * @see config_get()
  *
@@ -1248,8 +1248,8 @@ class ConfigFileStorage implements ConfigStorageInterface {
    */
   public function initializeStorage() {
     if (!file_prepare_directory($this->directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-      throw new ConfigStorageException(format_string("The directory '%directory' could not be created or could not be made writable.", array(
-        '%directory' => $this->directory,
+      throw new ConfigStorageException(format_string('The directory <code>@directory</code> could not be created or could not be made writable.', array(
+        '@directory' => $this->directory,
       )));
     }
   }
