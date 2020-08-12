@@ -5,7 +5,7 @@ backdrop = 1.x
 version = BACKDROP_VERSION
 
 ; Default config settings
-settings[basis_supplemental_css] = 1
+settings[basis_supplemental_css] = 0
 
 ; Add theme CSS files
 stylesheets[all][] = css/base.css
