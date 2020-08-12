@@ -107,7 +107,7 @@ function standard_install() {
   theme_disable(array('stark'));
 
   // Enable supplementary CSS stylesheets for Basis
-  $supplementary_css = 1
+  $supplementary_css = 1;
   config_set('basis.settings', 'basis_supplemental_css', $supplementary_css);
 
   // Set front page to "home".

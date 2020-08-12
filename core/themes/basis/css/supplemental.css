@@ -1,4 +1,10 @@
-/* Temporary CSS to make clear that this CSS stylesheet is being loaded. Testing only. Do not commit. */
+/* This stylesheet contains CSS changes that might break older sites.
+   These are cosmetic changes that are not required on older sites.
+   If you have a sub-theme of Basis, you may choose to copy these changes
+   into your sub-theme. */
+
+/* Temporary CSS to make clear that this CSS stylesheet is being loaded.
+   Testing only. Do not commit. */
 
 .l-header::after {
   display:block;
