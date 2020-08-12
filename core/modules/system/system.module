@@ -4153,7 +4153,7 @@ function path_autocomplete($string = '') {
               }
               if ($found_match) {
                 $match = '<span class="autocomplete-suggestion">' . $view_title . '</span>';
-                $match_description = t('View: %display', array('%display' => $view->human_name . ' - ' . $display->display_title));
+                $match_description = t('View: %human - %display', array('%human' => $view->human_name, '%display' => $display->display_title));
                 $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
                 $match_count++;
               }
