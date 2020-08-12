@@ -4058,7 +4058,7 @@ function path_autocomplete($string = '') {
       $path = backdrop_get_path_alias('node/' . $result->nid);
       $match = '<span class="autocomplete-suggestion">' . $result->title . '</span>';
       $match_description = t('Content: %type', array('%type' => node_type_get_name($result->type)));
-      $matches[$path] = $match . " " . '<span class="autocomplete-description">(' . $match_description . ')</span>';
+      $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
       $match_count++;
     }
 
@@ -4079,7 +4079,7 @@ function path_autocomplete($string = '') {
         $path = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
         $match = '<span class="autocomplete-suggestion">' . $result->filename . '</span>';
         $match_description = t('File: %type', array('%type' => file_type_get_name($result->type)));
-        $matches[$path] = $match . " " . '<span class="autocomplete-description">(' . $match_description . ')</span>';
+        $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
         $match_count++;
       }
     }
@@ -4103,7 +4103,7 @@ function path_autocomplete($string = '') {
           $path = backdrop_get_path_alias('user/' . $user->uid);
           $match = '<span class="autocomplete-suggestion">' . user_format_name($user) . '</span>';
           $match_description = t('User account');
-          $matches[$path] = $match . " " . '<span class="autocomplete-description">(' . $match_description . ')</span>';
+          $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
           $match_count++;
         }
       }
@@ -4122,7 +4122,7 @@ function path_autocomplete($string = '') {
         $path = backdrop_get_path_alias('taxonomy/term/' . $result->tid);
         $match = '<span class="autocomplete-suggestion">' . $result->name . '</span>';
         $match_description = t('Taxonomy term: %vocabulary', array('%vocabulary' => taxonomy_vocabulary_load($result->vocabulary)->name));
-        $matches[$path] = $match . " " . '<span class="autocomplete-description">(' . $match_description . ')</span>';
+        $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
         $match_count++;
       }
     }
@@ -4154,7 +4154,7 @@ function path_autocomplete($string = '') {
               if ($found_match) {
                 $match = '<span class="autocomplete-suggestion">' . $view_title . '</span>';
                 $match_description = t('View: %display', array('%display' => $view->human_name . ' - ' . $display->display_title));
-                $matches[$path] = $match . " " . '<span class="autocomplete-description">(' . $match_description . ')</span>';
+                $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
                 $match_count++;
               }
             }
@@ -4183,7 +4183,7 @@ function path_autocomplete($string = '') {
           if ($found_match) {
             $match = '<span class="autocomplete-suggestion">' . $layout_title . '</span>';
             $match_description = t('Layout: %display', array('%display' => $menu_item['name']));
-            $matches[$menu_item['path']] = $match . " " . '<span class="autocomplete-description">(' . $match_description . ')</span>';
+            $matches[$menu_item['path']] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
             $match_count++;
           }
         }
@@ -4203,7 +4203,7 @@ function path_autocomplete($string = '') {
         if (!isset($matches[$path]) && !path_is_admin($path)) {
           $match = '<span class="autocomplete-suggestion">' . $result->link_title . '</span>';
           $match_description = t('Menu item: %path', array('%path' => $path));
-          $matches[$path] = $match . " " . '<span class="autocomplete-description">(' . $match_description . ')</span>';
+          $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
           $match_count++;
         }
       }
