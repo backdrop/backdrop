@@ -16,7 +16,7 @@ function user_block_user_action(User $account, &$context) {
   global $user;
 
   // Don't block User 1, or the user performing the action.
-  if ($account->uid === 1) {
+  if ($account->uid === '1') {
     backdrop_set_message(t("User 1 cannot be blocked."), 'warning');
     return FALSE;
   }
