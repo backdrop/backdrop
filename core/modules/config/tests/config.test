@@ -163,12 +163,10 @@ class ConfigurationTest extends BackdropWebTestCase {
    * Tests that config directories are protected by .htaccess files.
    */
   public function testConfigHtaccess() {
-    $dir = config_get_config_directory();
-
     // Remove .htaccess file to then test that it gets re-created.
     @backdrop_unlink(config_get_config_directory() . '/.htaccess');
     $this->assertFalse(is_file(config_get_config_directory() . '/.htaccess'), "Successfully removed the .htaccess file in the 'active' config directory.");
-    file_save_htaccess($dir);
+    file_save_htaccess(config_get_config_directory());
     $this->assertTrue(is_file(config_get_config_directory() . '/.htaccess'), "Successfully re-created the .htaccess file in the 'active' config directory.");
 
     // Verify contents of .htaccess file.
