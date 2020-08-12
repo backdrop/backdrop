@@ -158,6 +158,23 @@ class ConfigurationTest extends BackdropWebTestCase {
     $this->assertEqual(FALSE, $config_data->isOverridden('foo.key1'), 'Original value no longer overridden.');
     $this->assertEqual($config_data->get('foo.key1'), 'chocolate', 'Original value has been updated to include overridden value.');
   }
+
+  /**
+   * Tests that config directories are protected by .htaccess files.
+   */
+  public function testConfigHtaccess() {
+    $dir = config_get_config_directory();
+
+    // Remove .htaccess file to then test that it gets re-created.
+    @backdrop_unlink(config_get_config_directory() . '/.htaccess');
+    $this->assertFalse(is_file(config_get_config_directory() . '/.htaccess'), "Successfully removed the .htaccess file in the 'active' config directory.");
+    file_save_htaccess($dir);
+    $this->assertTrue(is_file(config_get_config_directory() . '/.htaccess'), "Successfully re-created the .htaccess file in the 'active' config directory.");
+
+    // Verify contents of .htaccess file.
+    $file = file_get_contents(config_get_config_directory() . '/.htaccess');
+    $this->assertEqual($file, file_htaccess_lines(FALSE), 'The .htaccess file contains the proper content.');
+  }
 }
 
 /**

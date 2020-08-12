@@ -235,6 +235,17 @@ function system_requirements($phase) {
     // Try to write the .htaccess files first, to prevent false alarms in case
     // (for example) the /tmp directory was wiped.
     file_ensure_htaccess();
+
+    foreach (array('active', 'staging') as $type) {
+      $dir = config_get_config_directory($type);
+      file_save_htaccess($dir);
+
+      $htaccess_files[$dir . '/.htaccess'] = array(
+        'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
+        'directory' => $dir,
+      );
+    }
+
     $htaccess_files['public://.htaccess'] = array(
       'title' => $t('Public files directory'),
       'directory' => config_get('system.core', 'file_public_path'),
@@ -249,6 +260,7 @@ function system_requirements($phase) {
       'title' => $t('Temporary files directory'),
       'directory' => file_directory_temp(),
     );
+
     foreach ($htaccess_files as $htaccess_file => $info) {
       // Check for the string which was added to the recommended .htaccess file
       // in the latest security update.
