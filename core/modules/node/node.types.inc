@@ -205,10 +205,10 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'checkboxes',
     '#title' => t('Sticky'),
     '#options' => array(
-      'sticky_enabled' => t('Show option to make posts sticky'),
-      'sticky_default' => t('Make posts sticky by default'),
+      'sticky_enabled' => t('Show option to make sticky'),
+      'sticky_default' => t('Make sticky by default'),
     ),
-    '#description' => t('Sticky posts may be shown at the top of listings.'),
+    '#description' => t('Sticky content may be shown at the top of listings.'),
   );
   $form['workflow']['sticky']['sticky_enabled'] = array(
     '#default_value' => $type->settings['sticky_enabled'],
@@ -224,10 +224,10 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'checkboxes',
     '#title' => t('Promote'),
     '#options' => array(
-      'promote_enabled' => t('Show option to promote posts'),
-      'promote_default' => t('Promote posts by default'),
+      'promote_enabled' => t('Show option to promote'),
+      'promote_default' => t('Promote by default'),
     ),
-    '#description' => t('Promoted posts will often be shown on the main homepage or blog.'),
+    '#description' => t('Promoted content will often be shown on the main homepage or blog.'),
   );
   $form['workflow']['promote']['promote_enabled'] = array(
     '#default_value' => $type->settings['promote_enabled'],
@@ -253,7 +253,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
       '#type' => 'checkbox',
       '#title' => t('Multilingual support'),
       '#default_value' => $type->settings['language'],
-      '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new posts are saved with no defined language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
+      '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new content is saved with no defined language. Existing content will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
     );
   }
 
@@ -651,7 +651,7 @@ function node_node_type_update($info) {
     $update_count = node_type_update_nodes($info->old_type, $info->type);
 
     if ($update_count) {
-      backdrop_set_message(format_plural($update_count, 'Changed the content type of 1 post from %old-type to %type.', 'Changed the content type of @count posts from %old-type to %type.', array('%old-type' => $info->old_type, '%type' => $info->type)));
+      backdrop_set_message(format_plural($update_count, 'Changed the content type of 1 piece of content from %old-type to %type.', 'Changed the content type of @count pieces of content from %old-type to %type.', array('%old-type' => $info->old_type, '%type' => $info->type)));
     }
   }
 }
