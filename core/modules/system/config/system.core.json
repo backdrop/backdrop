@@ -36,6 +36,7 @@
     "image_jpeg_quality": "75",
     "image_style_flood_limit": 5,
     "install_profile": "",
+    "initial_version": "",
     "language_count": 1,
     "language_default": "en",
     "log_row_limit": 1000,
