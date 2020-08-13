@@ -209,12 +209,14 @@ function user_admin_settings($form, &$form_state) {
       ),
     ),
   );
-  $form['password_policy']['user_password_reject_weak'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Reject weak passwords'),
-    '#description' => t('Users will not be able to save passwords if the password strength indicator shows they are weak.'),
-    '#default_value' => $config->get('user_password_reject_weak'),
+  $form['password_policy']['user_password_required_score'] = array(
+    '#type' => 'select',
+    '#title' => t('Minimum required password strength'),
+    '#description' => t('The minimum strength required for user account passwords. Users will not be able to save passwords if they do not meet this level.'),
+    '#default_value' => $config->get('user_password_required_score'),
+    '#options' => user_password_score_labels_list(),
   );
+  $form['password_policy']['user_password_required_score']['#options'][0] = t('disabled');
 
   // Account settings.
   $form['personalization'] = array(

@@ -147,6 +147,7 @@ Backdrop.evaluatePasswordStrength = function (password, settings) {
   var strength = 0;
   var level = 'empty';
   var data = settings.data;
+  var scores = settings.scores;
   var config = settings.config;
   var username = data.username;
   var email = data.email;
@@ -191,16 +192,16 @@ Backdrop.evaluatePasswordStrength = function (password, settings) {
   }
 
   // Based on the strength, work out what text should be shown by the password strength meter.
-  if (strength >= 90) {
+  if (strength >= scores.strong) {
     level = 'strong';
   }
-  else if (strength > 70) {
+  else if (strength > scores.good) {
     level = 'good';
   }
-  else if (strength > 50) {
+  else if (strength > scores.fair) {
     level = 'fair';
   }
-  else if (strength > 0) {
+  else if (strength > scores.weak) {
     level = 'weak';
   }
 
