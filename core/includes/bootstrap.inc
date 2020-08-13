@@ -1968,7 +1968,20 @@ function t($string, array $args = array(), array $options = array()) {
     $string = locale($string, $options['context'], $options['langcode']);
   }
 
-  return format_string($string, $args);
+  // If the string contains asterisks or back-ticks, run it through the
+  // markdown formatter.
+  // @todo: possibly support more Markdown in the future.
+  if (preg_match('/[*`]/', $string)) {
+    $string = format_string_markdown($string);
+  }
+
+  if (!empty($args)) {
+    return format_string($string, $args);
+  }
+  else {
+    return $string;
+  }
+
 }
 
 /**
@@ -2026,9 +2039,6 @@ function format_string($string, array $args = array()) {
         // Pass-through.
     }
   }
-
-  $string = format_string_markdown($string);
-
   return strtr($string, $args);
 }
 
