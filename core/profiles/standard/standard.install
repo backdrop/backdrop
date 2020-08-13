@@ -415,9 +415,9 @@ function standard_install() {
   config_set('system.core', 'user_admin_role', $admin_role->name);
 
   // Assign user 1 the "administrator" role.
-  db_insert('users_roles')
-    ->fields(array('uid' => 1, 'role' => $admin_role->name))
-    ->execute();
+  $admin_user = user_load(1);
+  $admin_user->roles[] = $admin_role->name;
+  user_save($admin_user);
 
   // Create a Home link in the main menu.
   $item = array(
