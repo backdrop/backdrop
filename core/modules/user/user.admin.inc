@@ -216,7 +216,7 @@ function user_admin_settings($form, &$form_state) {
     '#default_value' => $config->get('user_password_required_score'),
     '#options' => user_password_score_labels_list(),
   );
-  $form['password_policy']['user_password_required_score']['#options'][0] = t('disabled');
+  $form['password_policy']['user_password_required_score']['#options']['weak'] = t('disabled');
 
   // Account settings.
   $form['personalization'] = array(

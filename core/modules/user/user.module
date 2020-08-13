@@ -761,7 +761,7 @@ function user_account_form(&$form, &$form_state) {
 
   $form['#validate'][] = 'user_account_form_validate';
   $minimum_required_score = config_get('system.core', 'user_password_required_score');
-  if ($minimum_required_score) {
+  if ($minimum_required_score != USER_PASSWORD_SCORE_WEAK) {
     $form['#validate'][] = 'user_password_policy_validate';
   }
 
@@ -795,7 +795,7 @@ function user_account_form(&$form, &$form_state) {
   // assign a password during registration.
   if (!$register) {
     $description = t('Current password must be entered to set a new password.');
-    if ($minimum_required_score) {
+    if ($minimum_required_score != USER_PASSWORD_SCORE_WEAK) {
       $description .= _user_password_policy_help();
     }
     $form['account']['pass'] = array(
@@ -844,7 +844,7 @@ function user_account_form(&$form, &$form_state) {
   }
   else {
     // Provide different help text if password constraints are active.
-    if ($minimum_required_score) {
+    if ($minimum_required_score != USER_PASSWORD_SCORE_WEAK) {
       $description = _user_password_policy_help();
     }
     else {

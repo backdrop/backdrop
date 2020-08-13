@@ -182,7 +182,7 @@ function user_pass_reset_form($form, &$form_state, $account) {
   $form['#account'] = $account;
   $description = '';
   $minimum_required_score = config_get('system.core', 'user_password_required_score');
-  if ($minimum_required_score) {
+  if ($minimum_required_score != USER_PASSWORD_SCORE_WEAK) {
     $form['#validate'][] = 'user_password_policy_validate';
     $description = _user_password_policy_help();
   }
