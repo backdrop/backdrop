@@ -1975,11 +1975,11 @@ function t($string, array $args = array(), array $options = array()) {
     $string = format_string_markdown($string);
   }
 
-  if (!empty($args)) {
-    return format_string($string, $args);
+  if (empty($args)) {
+    return $string;
   }
   else {
-    return $string;
+    return format_string($string, $args);
   }
 
 }
