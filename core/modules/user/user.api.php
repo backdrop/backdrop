@@ -428,5 +428,28 @@ function hook_user_role_delete($role) {
 }
 
 /**
+ * Alter the required score for validating passwords.
+ *
+ * Called by user_password_required_score() to allow modules to alter
+ * the score that's for validating passwords. Can be used to set a weaker
+ * or stronger level depending on role. For instance, administrators
+ * may be required to set stronger passwords.
+ *
+ * @param $score
+ *   The string that is defined by USER_PASSWORD_SCORE_* constants.
+ *
+ * @param $account
+ *   The account object passed from user_password_required_score().
+ *
+ * @see user_password_required_score()
+ */
+function hook_user_password_required_score_alter(&$score, $account) {
+  // Display the user's uid instead of name.
+  if (in_array('administrator', $account->roles)) {
+    $score = USER_PASSWORD_SCORE_STRONG;
+  }
+}
+
+/**
  * @} End of "addtogroup hooks".
  */
