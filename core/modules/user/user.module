@@ -1091,17 +1091,16 @@ function user_password_policy_validate($form, &$form_state) {
   $messages = array();
   if ($form['#form_id'] == 'user_pass_reset_form') {
     $account = $form['#account'];
-    $username = $account->name;
-    $email = $account->mail;
   }
   else {
-    $username = $form_state['values']['name'];
-    $email = $form_state['values']['mail'];
+    $account = user_load($form_state['values']['name']);
   }
+  $username = $account->name;
+  $email = $account->mail;
 
-  $strength = _user_password_evaluate_strength($password, $username, $email);
+  $strength = _user_password_evaluate_strength($password, $account);
 
-  $required_score = user_password_required_score($username);
+  $required_score = user_password_required_score($account);
   if ($strength < $required_score) {
     form_set_error('entropy_pass', t('The password is too weak. Please consider making your password more complex.'));
   }
@@ -1154,14 +1153,13 @@ function user_password_score_list() {
 /**
  * Get the password strength score required for an account.
  *
- * @param object $username
- *   Backdrop username.
+ * @param User $account
+ *   A user account.
  *
  * @return int
  *   Minimum password score required.
  */
-function user_password_required_score($username) {
-  $account = user_load($username);
+function user_password_required_score($account) {
   // Determine what is the default minimum score for account.
   $score = config_get('system.core', 'user_password_required_score');
 
@@ -1202,13 +1200,12 @@ function _user_password_policy_help() {
  * @see Backdrop.evaluatePasswordStrength
  *
  * @param string $password
- * @param string $username
- * @param string $email
+ * @param User $account
  *
  * @return int
  *   An integer representing password strength.
  */
-function _user_password_evaluate_strength($password, $username, $email) {
+function _user_password_evaluate_strength($password, $account) {
   $strength = 0;
 
   $has_lowercase = preg_match('/[a-z]+/', $password);
@@ -1230,10 +1227,10 @@ function _user_password_evaluate_strength($password, $username, $email) {
   if ($min_length_enabled && (backdrop_strlen($password) < $min_length)) {
     $strength = 5;
   }
-  if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
+  if (backdrop_strtolower($password) == backdrop_strtolower($account->name)) {
     $strength = 5;
   }
-  if (backdrop_strtolower($password) == backdrop_strtolower($email)) {
+  if (backdrop_strtolower($password) == backdrop_strtolower($account->mail)) {
     $strength = 5;
   }
 
@@ -2980,15 +2977,13 @@ function user_form_process_password($element, $form_state = array()) {
   if ($element['#password_strength']) {
     if (isset($form_state['user']) && is_a($form_state['user'], 'User')) {
       // Existing account, not the current user if an admin edits an account.
-      $username = $form_state['user']->name;
-      $email = $form_state['user']->mail;
+      $user = $form_state['user'];
     }
-    else {
-      // The AnonymousUser object has no mail property, and name is NULL.
-      // The User object has both mail and name set.
-      $username = (isset($user->name) ? $user->name : '');
-      $email = (isset($user->mail) ? $user->mail : '');
-    }
+    // The AnonymousUser object has no mail property, and name is NULL.
+    // The User object has both mail and name set.
+    $username = (isset($user->name) ? $user->name : '');
+    $email = (isset($user->mail) ? $user->mail : '');
+
     $strength_settings = array(
       'scores' => user_password_score_list(),
       'labels' => user_password_score_labels_list(),
