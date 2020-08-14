@@ -93,7 +93,7 @@ function user_add_role_action($account, &$context) {
  * Removes a role from a user account.
  *
  * @param User $account
- *   The user entity whose account will be updated.
+ *   The user entity from which the role will be removed.
  *
  * @ingroup actions
  */
