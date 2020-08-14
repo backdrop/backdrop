@@ -77,7 +77,7 @@ function user_cancel_user_action($account, &$context) {
  * Adds a role to a user account.
  *
  * @param User $account
- *   The user entity whose account will be updated.
+ *   The user entity to which the role will be added.
  *
  * @ingroup actions
  */
