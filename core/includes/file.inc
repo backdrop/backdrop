@@ -1849,7 +1849,10 @@ function file_validate_is_image(File $file) {
   $errors = array();
 
   $info = image_get_info($file->uri);
-  if (!$info || empty($info['extension'])) {
+  if (!$info) {
+    $errors[] = t('The uploaded file is either corrupt or not an image.');
+  }
+  elseif (empty($info['extension'])) {
     $errors[] = t('Only JPEG, PNG and GIF images are allowed.');
   }
 
