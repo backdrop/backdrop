@@ -310,7 +310,7 @@ function node_form($form, &$form_state, Node $node) {
   $form['options'] = array(
     '#type' => 'fieldset',
     '#access' => user_access('administer nodes'),
-    '#title' => t('Publishing options'),
+    '#title' => $node->nid ? t('Publishing options') : t('Publishing actions'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
@@ -328,18 +328,21 @@ function node_form($form, &$form_state, Node $node) {
   }
   $form['options']['status'] = array(
     '#type' => 'radios',
+    '#title' => $node->nid ? t('Published state') : t('Publish action'),
     '#options' => array(
       NODE_PUBLISHED => $node->nid ? t('Published') : t('Publish now'),
-      NODE_NOT_PUBLISHED => t('Draft'),
-      NODE_SCHEDULED => t('Schedule for later'),
+      NODE_NOT_PUBLISHED => $node->nid ? t('Draft') : t('Save as draft'),
+      NODE_SCHEDULED => $node->nid ? t('Scheduled for later') : t('Schedule for later'),
     ),
     '#default_value' => $status,
-    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators.'),
   );
+  $form['options']['status'][NODE_PUBLISHED]['#description'] = t('All site visitors will be able to access this content.');
+  $form['options']['status'][NODE_NOT_PUBLISHED]['#description'] = t('Only the content creator or site administrators will be able to access this content.');
+  $form['options']['status'][NODE_SCHEDULED]['#description'] = t('The content is saved as draft, and will be automatically published on the date and time selected.');
+
 
   // Adjustments to the status radios if scheduling is enabled/disabled.
   if ($node_type->settings['scheduling_enabled']) {
-    $form['options']['status']['#description'] .= ' ' . t('Content set to "Schedule for later" will be saved as draft when the content is created, but will be automatically published on the date and time selected.');
 
     // Default the scheduled time to the current time + 1 day.
     $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME + 86400;
@@ -375,16 +378,21 @@ function node_form($form, &$form_state, Node $node) {
     $form['options']['status'][NODE_SCHEDULED]['#access'] = FALSE;
   }
 
-
-  $form['options']['promote'] = array(
+  $form['options']['additional'] = array(
+    '#type' => 'fieldset',
+    '#title' => $node->nid ? t('Additional options') : t('Additional actions'),
+    '#collapsible' => FALSE,
+    '#access' => $node_type->settings['promote_enabled'] || $node_type->settings['sticky_enabled'],
+  );
+  $form['options']['additional']['promote'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Promoted'),
+    '#title' => $node->nid ? t('Promoted') : t('Promote'),
     '#default_value' => $node->promote,
     '#access' => $node_type->settings['promote_enabled'],
   );
-  $form['options']['sticky'] = array(
+  $form['options']['additional']['sticky'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Sticky at top of lists'),
+    '#title' => $node->nid ? t('Sticky at top of lists') : t('Make sticky at top of lists'),
     '#default_value' => $node->sticky,
     '#access' => $node_type->settings['sticky_enabled'],
   );
@@ -544,7 +552,7 @@ function node_form_submit($form, &$form_state) {
   else {
     // In the unlikely case something went wrong on save, the node will be
     // rebuilt and node form redisplayed.
-    backdrop_set_message(t('The post could not be saved.'), 'error');
+    backdrop_set_message(t('The content could not be saved.'), 'error');
     $form_state['rebuild'] = TRUE;
   }
 }
