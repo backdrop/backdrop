@@ -334,7 +334,9 @@ function truncate_utf8($string, $max_length, $wordsafe = FALSE, $add_ellipsis = 
   }
 
   if ($add_ellipsis) {
-    // Truncate ellipsis in case $max_length is small.
+    // Truncate ellipsis in case $max_length is small. The ellipsis character is
+    // wrapped in t(), since intentional omissions may be indicated using
+    // different character(s) in different languages.
     $ellipsis = backdrop_substr(t('…'), 0, $max_length);
     $max_length -= backdrop_strlen($ellipsis);
     $max_length = max($max_length, 0);
