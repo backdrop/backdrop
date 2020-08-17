@@ -37,7 +37,6 @@
   display: none;
 }
 .field-ui-overview tr.add-new td {
-  vertical-align: top;
   white-space: nowrap;
 }
 
