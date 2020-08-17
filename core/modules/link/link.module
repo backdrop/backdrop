@@ -1022,21 +1022,21 @@ function link_field_formatter_view($entity_type, $entity, $field, $instance, $la
  * @return string
  *   The URL with the protocol prepended if needed.
  */
-function link_cleanup_url($url, $protocol = 'http') {
+function link_cleanup_url($url) {//, $protocol = 'http') {
   $url = trim($url);
-  $type = link_validate_url($url);
+  // $type = link_validate_url($url);
 
-  if ($type === LINK_EXTERNAL) {
-    // Check if there is no protocol specified.
-    $protocol_match = preg_match('/^([a-z0-9][a-z0-9\.\-_]*:\/\/)/i', $url);
-    if (empty($protocol_match)) {
-      // But should there be? Add an automatic http:// if it starts with a domain name.
-      $domain_match = preg_match('/^(([a-z0-9]([a-z0-9\-_]*\.){1,63})([a-z]{2,63}))/i', $url);
-      if (!empty($domain_match)) {
-        $url = $protocol . "://" . $url;
-      }
-    }
-  }
+  // if ($type === LINK_EXTERNAL) {
+  //   // Check if there is no protocol specified.
+  //   $protocol_match = preg_match('/^([a-z0-9][a-z0-9\.\-_]*:\/\/)/i', $url);
+  //   if (empty($protocol_match)) {
+  //     // But should there be? Add an automatic http:// if it starts with a domain name.
+  //     $domain_match = preg_match('/^(([a-z0-9]([a-z0-9\-_]*\.){1,63})([a-z]{2,63}))/i', $url);
+  //     if (!empty($domain_match)) {
+  //       $url = $protocol . "://" . $url;
+  //     }
+  //   }
+  // }
 
   return $url;
 }
