@@ -411,12 +411,11 @@ function text_summary($text, $format_id = NULL, $size = 600) {
   }
   $break_points[] = $line_breaks;
 
-  // Typing a number after the ؟ character causes text to be reversed mid-line.
-  // Using this variable here as a workaround, to stop that from happening. See
-  // https://github.com/backdrop/backdrop-issues/issues/4546
-  $arabic_questionmark_offset = 1;
-  // If the first paragraph is too long, split at the end of a sentence.
-  $break_points[] = array('. ' => 1, '! ' => 1, '? ' => 1, '。' => 0, '؟ ' => $arabic_questionmark_offset);
+  // Typing a number after the ؟ character (Arabic question mark) causes text to
+  // be reversed mid-line. That's the reason why the last element in this array
+  // may seem odd. It actually produces valid code.
+  // See https://github.com/backdrop/backdrop-issues/issues/4546
+  $break_points[] = array('. ' => 1, '! ' => 1, '? ' => 1, '。' => 0, '؟ ' => 1);
 
   // Iterate over the groups of break points until a break point is found.
   foreach ($break_points as $points) {
