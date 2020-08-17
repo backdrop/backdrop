@@ -492,7 +492,7 @@ function path_generate_entity_alias(Entity $entity, $source = NULL, $langcode = 
 }
 
 /**
- * Update the URL aliases for an individual taxonomy term.
+ * Update the URL aliases for an individual entity.
  *
  * @param Entity $entity
  *   An entity (node/user/term/etc.) object.
