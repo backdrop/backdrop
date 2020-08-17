@@ -2006,8 +2006,29 @@ function template_preprocess_image(&$variables) {
  *
  * @since 1.8.0 Added support for $variables['path']. All variables are now
  *   populated into $variables['attributes'] in template_preprocess_image().
+ * @since 1.17.0 If $variables['attributes']['loading'] has not been explicitly
+ *   set, and if lazy-loading is enabled (under Configuration -> Development ->
+ *   Performance), then the output will default to loading="lazy" for all images
+ *   rendered via theme_image(). To disable lazy-loading for an image, set its
+ *   "loading" attribute to "eager":
+ *   @code
+ *     $image_attributes = array(
+ *       'title' => 'My photo',
+ *       'class' => 'my_class',
+ *       'loading' => 'eager',
+ *     );
+ *     $image_variables = array(
+ *       'path' => $image_path,
+ *       'attributes' => $image_attributes,
+ *     );
+ *     $output = theme('image', $image_variables);
+ *   @endcode
  */
 function theme_image($variables) {
+  $lazy_load = config_get('system.core', 'lazy_load_images');
+  if ($lazy_load && !isset($variables['attributes']['loading'])) {
+    $variables['attributes']['loading'] = 'lazy';
+  }
   return '<img' . backdrop_attributes($variables['attributes']) . ' />';
 }
 

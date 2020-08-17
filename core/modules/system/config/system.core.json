@@ -38,6 +38,7 @@
     "install_profile": "",
     "language_count": 1,
     "language_default": "en",
+    "lazy_load_images": 1,
     "log_row_limit": 1000,
     "log_date_format": "dblog_date_format",
     "log_identity": "backdrop",

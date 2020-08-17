@@ -1754,6 +1754,12 @@ function system_performance_settings($form, &$form_state) {
     '#default_value' => $config->get('preprocess_js'),
     '#disabled' => $disabled,
   );
+  $form['bandwidth_optimization']['lazy_load_images'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Lazy-load images'),
+    '#default_value' => $config->get('lazy_load_images'),
+    '#description' => t('Images wait to load until they are about to scroll into view.')
+  );
 
   $form['#submit'][] = 'backdrop_clear_css_cache';
   $form['#submit'][] = 'backdrop_clear_js_cache';
