@@ -365,13 +365,6 @@ function text_summary($text, $format_id = NULL, $size = 600) {
 
   $format = filter_format_load($format_id);
 
-  // We check for the presence of the PHP evaluator filter in the current
-  // format. If the body contains PHP code, we do not split it up to prevent
-  // parse errors.
-  if (isset($format->filters['php_code']) && $format->filters['php_code']->status && strpos($text, '<?') !== FALSE) {
-    return $text;
-  }
-
   // If we have a short body, the entire body is the summary.
   if (backdrop_strlen($text) <= $size) {
     return $text;
