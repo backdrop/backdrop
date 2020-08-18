@@ -1170,9 +1170,11 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
       ),
     );
 
+    $lazy_load = config_get('system.core', 'lazy_load_images') ? 'loading="lazy" ' : '';
+
     image_effect_save('test', $effect);
     $img_tag = theme('image_style', $variables);
-    $this->assertEqual($img_tag, '<img src="' . check_plain($url) . '" width="120" height="60" alt="" />', 'Expected img tag was found.');
+    $this->assertEqual($img_tag, '<img src="' . check_plain($url) . '" width="120" height="60" alt="" ' . $lazy_load . '/>', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
     $this->assertResponse(200, 'Image was generated at the URL.');
@@ -1192,7 +1194,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
 
     image_effect_save('test', $effect);
     $img_tag = theme('image_style', $variables);
-    $this->assertEqual($img_tag, '<img src="' . check_plain($url) . '" width="60" height="120" alt="" />', 'Expected img tag was found.');
+    $this->assertEqual($img_tag, '<img src="' . check_plain($url) . '" width="60" height="120" alt="" ' . $lazy_load . '/>', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
     $this->assertResponse(200, 'Image was generated at the URL.');
@@ -1213,7 +1215,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
 
     image_effect_save('test', $effect);
     $img_tag = theme('image_style', $variables);
-    $this->assertEqual($img_tag, '<img src="' . check_plain($url) . '" width="45" height="90" alt="" />', 'Expected img tag was found.');
+    $this->assertEqual($img_tag, '<img src="' . check_plain($url) . '" width="45" height="90" alt="" ' . $lazy_load . '/>', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
     $this->assertResponse(200, 'Image was generated at the URL.');
@@ -1234,7 +1236,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
 
     image_effect_save('test', $effect);
     $img_tag = theme('image_style', $variables);
-    $this->assertEqual($img_tag, '<img src="' . check_plain($url) . '" width="45" height="90" alt="" />', 'Expected img tag was found.');
+    $this->assertEqual($img_tag, '<img src="' . check_plain($url) . '" width="45" height="90" alt="" ' . $lazy_load . '/>', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
     $this->assertResponse(200, 'Image was generated at the URL.');
@@ -1251,7 +1253,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
 
     image_effect_save('test', $effect);
     $img_tag = theme('image_style', $variables);
-    $this->assertEqual($img_tag, '<img src="' . $url . '" width="45" height="90" alt="" />', 'Expected img tag was found.');
+    $this->assertEqual($img_tag, '<img src="' . $url . '" width="45" height="90" alt="" ' . $lazy_load . '/>', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
     $this->assertResponse(200, 'Image was generated at the URL.');
@@ -1271,7 +1273,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
 
     image_effect_save('test', $effect);
     $img_tag = theme('image_style', $variables);
-    $this->assertEqual($img_tag, '<img src="' . check_plain($url) . '" alt="" />', 'Expected img tag was found.');
+    $this->assertEqual($img_tag, '<img src="' . check_plain($url) . '" alt="" ' . $lazy_load . '/>', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
     $this->assertResponse(200, 'Image was generated at the URL.');
@@ -1290,7 +1292,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
 
     image_effect_save('test', $effect);
     $img_tag = theme('image_style', $variables);
-    $this->assertEqual($img_tag, '<img src="' . $url . '" width="30" height="30" alt="" />', 'Expected img tag was found.');
+    $this->assertEqual($img_tag, '<img src="' . $url . '" width="30" height="30" alt="" ' . $lazy_load . '/>', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
     $this->assertResponse(200, 'Image was generated at the URL.');
@@ -1310,7 +1312,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
 
     $effect = image_effect_save('test', $effect);
     $img_tag = theme('image_style', $variables);
-    $this->assertEqual($img_tag, '<img src="' . $url . '" alt="" />', 'Expected img tag was found.');
+    $this->assertEqual($img_tag, '<img src="' . $url . '" alt="" ' . $lazy_load . '/>', 'Expected img tag was found.');
     $this->assertFalse(file_exists($generated_uri), 'Generated file does not exist.');
     $this->backdropGet($url);
     $this->assertResponse(200, 'Image was generated at the URL.');
@@ -1327,7 +1329,7 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
 
     image_effect_save('test', $effect);
     $img_tag = theme('image_style', $variables);
-    $this->assertEqual($img_tag, '<img src="' . $url . '" alt="" />', 'Expected img tag was found.');
+    $this->assertEqual($img_tag, '<img src="' . $url . '" alt="" ' . $lazy_load . '/>', 'Expected img tag was found.');
   }
 }
 
@@ -1926,7 +1928,8 @@ class ImageThemeFunctionWebTestCase extends BackdropWebTestCase {
       ),
     );
     $rendered_element = render($element);
-    $expected_result = '<a href="' . url($path) . '"><img src="' . $url . '" alt="" /></a>';
+    $lazy_load = config_get('system.core', 'lazy_load_images') ? 'loading="lazy" ' : '';
+    $expected_result = '<a href="' . url($path) . '"><img src="' . $url . '" alt="" ' . $lazy_load . '/></a>';
     $this->assertEqual($expected_result, $rendered_element, 'theme_image_formatter() correctly renders without title, alt, or path options.');
 
     // Link the image to a fragment on the page, and not a full URL.
