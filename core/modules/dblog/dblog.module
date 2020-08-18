@@ -162,7 +162,7 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
   $form['dblog_date_format'] = array(
     '#type' => 'select',
     '#title' => t('Date format for log messages'),
-    '#description' => t('To add or edit options, visit <a href="@date-time-page">Date and time settings</a>.', array('@date-time-page' => url('admin/config/regional/date-time'))),
+    '#description' => t('To add or edit options, visit <a href="@date-time-page" target="_blank">Date and time settings</a>.', array('@date-time-page' => url('admin/config/regional/date-time'))),
     '#options' => date_format_type_options(),
     '#default_value' => config_get('system.core', 'log_date_format'),
     '#required' => TRUE,
