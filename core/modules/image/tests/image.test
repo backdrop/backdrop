@@ -1940,7 +1940,7 @@ class ImageThemeFunctionWebTestCase extends BackdropWebTestCase {
       'fragment' => $fragment,
     );
     $rendered_element = render($element);
-    $expected_result = '<a href="#' . $fragment . '"><img src="' . $url . '" alt="" /></a>';
+    $expected_result = '<a href="#' . $fragment . '"><img src="' . $url . '" alt="" ' . $lazy_load . '/></a>';
     $this->assertEqual($expected_result, $rendered_element, 'theme_image_formatter() correctly renders a link fragment.');
   }
 
