@@ -992,7 +992,7 @@ class UserPictureTestCase extends BackdropWebTestCase {
     // Try to upload a file that is not an image for the user picture.
     $not_an_image = current($this->backdropGetTestFiles('html'));
     $this->saveUserPicture($not_an_image);
-    $this->assertRaw(t('Only JPEG, PNG and GIF images are allowed.'), 'Non-image files are not accepted.');
+    $this->assertRaw(t('The uploaded file is either corrupt or not an image.'), 'Non-image files are not accepted.');
   }
 
   /**
