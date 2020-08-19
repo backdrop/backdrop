@@ -317,6 +317,10 @@ function user_load_by_name($name) {
 /**
  * Save a new or updated user.
  *
+ * This function has been removed in Drupal 8 (https://drupal.org/node/1361228).
+ * In Backdrop, the User entity is also a classed object, but we have kept
+ * user_save() as a wrapper around $user->save().
+ *
  * @param $account
  *   The user object to modify or add. If you want to modify an existing user
  *   account, you need to ensure that (a) $account is an object, and (b) you
@@ -324,10 +328,24 @@ function user_load_by_name($name) {
  *   to modify. If you want to create a new user account, you can set
  *   $account->is_new to TRUE or omit the $account->uid field.
  *
+ * @param $edit
+ *   Removed in Backdrop. See https://api.backdropcms.org/change-records/user-entity-now-classed-object
+ * @param $category
+ *   Removed in Backdrop. See https://api.backdropcms.org/change-records/user-entity-now-classed-object
+ *
  * @return int
  *   Either SAVED_NEW or SAVED_UPDATED depending on the operation performed.
  */
-function user_save($account) {
+function user_save($account, $edit = array(), $category = '') {
+  if (!empty($edit) || !empty($category)) {
+    $message = 'Deprecated parameters <code>$edit</code> or <code>$category</code> have been passed into <code>user_save()</code> function @function().';
+    $variables = array(
+      // Needs work. See watchdog_deprecated_function().
+    );
+    $link = l(t('Change record'), 'https://api.backdropcms.org/change-records/user-entity-now-classed-object', array('attributes' => array('target' => '_blank')));
+    watchdog('drupal', $message, $variables, WATCHDOG_DEPRECATED, $link);
+  }
+
   return $account->save();
 }
 
