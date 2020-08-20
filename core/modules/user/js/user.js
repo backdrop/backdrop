@@ -57,7 +57,7 @@ Backdrop.behaviors.passwordToggle = {
       }
 
       $passwordWrapper.addClass('password-hidden');
-      $passwordInput.before($passwordToggle);
+      $passwordInput.after($passwordToggle);
 
       var passwordToggle = function (e) {
         var showPassword = $passwordWrapper.is('.password-hidden');
