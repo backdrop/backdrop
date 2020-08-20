@@ -2441,7 +2441,7 @@ function system_configure_date_formats_form($form, &$form_state, $format = NULL)
     '#type' => 'textfield',
     '#title' => t('Format string'),
     '#maxlength' => 100,
-    '#description' => t('A date format using PHP date and time codes. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')),
+    '#description' => t('A date format using PHP date and time codes. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
     '#placeholder' => t('e.g. F j Y'),
     '#default_value' => $pattern,
     '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',
