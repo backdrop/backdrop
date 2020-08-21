@@ -106,7 +106,7 @@ function theme_admin_bar_links($variables) {
     $output .= '</li>';
   }
   if ($output) {
-    $elements['#wrapper_attributes']['class'][] = 'dropdown';
+    $elements['#wrapper_attributes']['class'][] = 'dropdown sm';
     $attributes = backdrop_attributes($elements['#wrapper_attributes']);
     $output = '<ul' . $attributes . '>' . $output . '</ul>';
   }
