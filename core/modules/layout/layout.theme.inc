@@ -407,9 +407,6 @@ function template_preprocess_block(&$variables) {
     if (isset($block->settings['image_path'])) {
       $variables['attributes']['style'] = 'background-image:url(' . $block->settings['image_path'] . ');';
       $variables['classes'][] = 'block-hero-image';
-      if (config_get('system.core', 'lazy_load_images')) {
-        $variables['attributes']['loading'] = 'lazy';
-      }
     }
     else {
       $variables['classes'][] = 'block-hero-no-image';
