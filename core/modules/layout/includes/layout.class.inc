@@ -176,7 +176,7 @@ class Layout {
    *
    * @var LayoutContext[]
    */
-  private $contexts;
+  private $contexts = array();
 
   /**
    * An array of removed blocks, keyed by their UUID.
@@ -239,10 +239,14 @@ class Layout {
       // Items are key => handler_type.
       'content' => 'block',
       'conditions' => 'layout_access',
-      // 'contexts' => 'layout_context',
+      'contexts' => 'layout_context',
     );
     foreach ($handlers as $property_key => $plugin_type) {
       foreach ($this->{$property_key} as $plugin_type_key => $plugin_data) {
+        // Set the storage property for contexts stored in config.
+        if ($property_key == 'contexts') {
+          $plugin_data['data']['storage'] = TRUE;
+        }
         $this->{$property_key}[$plugin_type_key] = layout_create_handler($plugin_type, $plugin_data['plugin'], $plugin_data['data']);
       }
     }
@@ -256,6 +260,13 @@ class Layout {
       $this->storage = LAYOUT_STORAGE_OVERRIDE;
     }
     $is_new = !empty($this->is_new);
+
+    // Don't save path based contexts as these are generated on the fly.
+    foreach ($this->contexts as $key => $context) {
+      if (!$context->storage) {
+        unset($this->contexts[$key]);
+      }
+    }
 
     // Allow modules to act on layout data before saving.
     foreach (module_implements('layout_presave') as $module) {
@@ -276,6 +287,7 @@ class Layout {
       'disabled' => $this->disabled,
       'settings' => $this->settings,
       'positions' => $this->positions,
+      'contexts' => $this->contexts,
     );
 
     // Basic validation to prevent data corruption.
@@ -288,7 +300,7 @@ class Layout {
     $sub_parts = array(
       'content',
       'conditions',
-      // 'contexts',
+      'contexts',
       // 'relationships',
     );
     foreach ($sub_parts as $config_type) {
@@ -757,16 +769,24 @@ class Layout {
    * return LayoutContext[]
    */
   function getContexts() {
-    if (is_null($this->contexts)) {
-      if ($this->menu_item) {
-        $this->contexts = $this->menu_item->getContexts();
+    // Load objects for stored contexts.
+    foreach ($this->contexts as $key => $context) {
+      if (!isset($context->position) && !is_object($context->data)) {
+        $context_info = layout_get_context_info($context->plugin);
+        if (isset($context_info['load callback'])) {
+          $function = $context_info['load callback'];
+          $context_data = $function($context->settings);
+          $context->setData($context_data);
+        }
       }
-      elseif ($this->path) {
-        $this->contexts = layout_context_required_by_path($this->path);
-      }
-      else {
-        $this->contexts = array();
-      }
+    }
+
+    // Load contexts from paths and menu items.
+    if ($this->menu_item) {
+      $this->contexts += $this->menu_item->getContexts();
+    }
+    elseif ($this->path) {
+      $this->contexts += layout_context_required_by_path($this->path);
     }
 
     // Add on the current user context, which is always available.
@@ -791,13 +811,31 @@ class Layout {
   }
 
   /**
+   * Set the internally stored contexts.
+   */
+  function setContexts($key, $context) {
+    $this->contexts[$key] = $context;
+  }
+
+  /**
+   * Clear a stored context.
+   */
+  function clearContexts($key) {
+    unset($this->contexts[$key]);
+  }
+
+  /**
    * Reset the internally stored contexts.
    *
    * This is used before storing a layout, or when fresh contexts are important,
    * such as when actively changing the layout's path.
    */
   function resetContexts() {
-    $this->contexts = NULL;
+    foreach ($this->contexts as $key => $context) {
+      if (!$context->storage) {
+        unset($this->contexts[$key]);
+      }
+    }
     if ($this->menu_item) {
       $this->menu_item->resetContexts();
     }

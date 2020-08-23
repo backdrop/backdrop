@@ -97,11 +97,15 @@
 
 /* Buttons that are displayed as links. */
 .layout-access-remove,
-.layout-access-configure {
+.layout-access-configure,
+.layout-context-remove,
+.layout-context-configure {
   padding-left: 10px; /* LTR */
 }
 [dir="rtl"] .layout-access-remove,
-[dir="rtl"] .layout-access-configure {
+[dir="rtl"] .layout-access-configure,
+[dir="rtl"] .layout-context-remove,
+[dir="rtl"] .layout-context-configure {
   padding-left: 0;
   padding-right: 10px;
 }

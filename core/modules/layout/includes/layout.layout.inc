@@ -27,7 +27,7 @@ function layout_layout_context_info() {
 
     // Given an argument, the callback that will be responsible for loading the
     // main context data.
-    'load callback' => 'node_load',
+    'load callback' => 'layout_context_node_load',
   );
   $info['user'] = array(
     'title' => t('User'),
@@ -37,7 +37,7 @@ function layout_layout_context_info() {
       'user/%user/view',
     ),
     'path placeholder' => '%user',
-    'load callback' => 'user_load',
+    'load callback' => 'layout_context_user_load',
   );
   $info['taxonomy_term'] = array(
     'title' => t('Term'),
@@ -47,7 +47,7 @@ function layout_layout_context_info() {
       'taxonomy/term/%term/view',
     ),
     'path placeholder' => '%term',
-    'load callback' => 'taxonomy_term_load',
+    'load callback' => 'layout_context_taxonomy_term_load',
   );
   $info['file'] = array(
     'title' => t('File'),
@@ -57,7 +57,7 @@ function layout_layout_context_info() {
       'file/%file/view',
     ),
     'path placeholder' => '%file',
-    'load callback' => 'file_load',
+    'load callback' => 'layout_context_file_load',
   );
   $info['overrides_path'] = array(
     'title' => t('Overrides path'),
@@ -196,4 +196,32 @@ function layout_layout_style_info() {
     'file' => 'layout.theme.inc',
   );
   return $info;
+}
+
+/**
+ * Callback function to load node context.
+ */
+function layout_context_node_load(array $settings) {
+  return node_load($settings['id']);
+}
+
+/**
+ * Callback function to load user context.
+ */
+function layout_context_user_load(array $settings) {
+  return user_load($settings['id']);
+}
+
+/**
+ * Callback function to load taxonomy_term context.
+ */
+function layout_context_taxonomy_term_load(array $settings) {
+  return taxonomy_term_load($settings['id']);
+}
+
+/**
+ * Callback function to load file context.
+ */
+function layout_context_file_load(array $settings) {
+  return file_load($settings['id']);
 }
