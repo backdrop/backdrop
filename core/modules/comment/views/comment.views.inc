@@ -136,7 +136,7 @@ function comment_views_data() {
   // mail
   $data['comment']['mail'] = array(
     'title' => t('Mail'),
-    'help' => t('Email of user that posted the comment. Will be empty if the author is a registered user.'),
+    'help' => t('Email of user that added the comment. Will be empty if the author is a registered user.'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,
@@ -152,10 +152,10 @@ function comment_views_data() {
     ),
   );
 
-  // created (when comment was posted)
+  // Comment creation date.
   $data['comment']['created'] = array(
-    'title' => t('Post date'),
-    'help' => t('Date and time of when the comment was created.'),
+    'title' => t('Created date'),
+    'help' => t('Date and time of when the comment was added.'),
     'field' => array(
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
@@ -169,7 +169,7 @@ function comment_views_data() {
   );
 
   $data['comment']['changed_fulldata'] = array(
-    'title' => t('Post date'),
+    'title' => t('Created date'),
     'help' => t('Date in the form of CCYYMMDD.'),
     'argument' => array(
       'field' => 'changed',

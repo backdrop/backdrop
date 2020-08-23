@@ -152,7 +152,7 @@ class ViewsViewTest extends ViewsSqlTest {
     $handler->display->display_options['fields']['path']['id'] = 'path';
     $handler->display->display_options['fields']['path']['table'] = 'node';
     $handler->display->display_options['fields']['path']['field'] = 'path';
-    /* Field: Content: Post date */
+    /* Field: Content: Created date */
     $handler->display->display_options['fields']['created']['id'] = 'created';
     $handler->display->display_options['fields']['created']['table'] = 'node';
     $handler->display->display_options['fields']['created']['field'] = 'created';
@@ -235,7 +235,7 @@ class ViewsViewTest extends ViewsSqlTest {
       t('User'),
       t('Nid'),
       t('Path'),
-      t('Post date'),
+      t('Created date'),
       t('All'),
       t('Page'),
       t('Attachment'),

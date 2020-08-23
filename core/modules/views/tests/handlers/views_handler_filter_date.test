@@ -202,7 +202,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
     $handler->display->display_options['fields']['nid']['id'] = 'nid';
     $handler->display->display_options['fields']['nid']['table'] = 'node';
     $handler->display->display_options['fields']['nid']['field'] = 'nid';
-    /* Filter criterion: Content: Post date */
+    /* Filter criterion: Content: Created date */
     $handler->display->display_options['filters']['created']['id'] = 'created';
     $handler->display->display_options['filters']['created']['table'] = 'node';
     $handler->display->display_options['filters']['created']['field'] = 'created';
