@@ -242,6 +242,22 @@ class Block extends LayoutHandler {
       ),
       '#maxlength' => 255,
     );
+    $actions_weight = $form['actions']['#weight'];
+    $form['admin_title'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Administrative title'),
+      '#tree' => FALSE,
+      '#collapsed' => empty($this->settings['admin_title']),
+      '#collapsible' => TRUE,
+      '#weight' => $actions_weight - 1,
+    );
+    $form['admin_title']['admin_title'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $this->settings['admin_title'],
+      '#title' => t('Administrative title'),
+      '#description' => t('Defaults to block title if left blank.'),
+      '#maxlength' => 255,
+    );
   }
 
   /**
@@ -257,6 +273,7 @@ class Block extends LayoutHandler {
   function formSubmit($form, &$form_state) {
     $this->settings['title_display'] = $form_state['values']['title_display'];
     $this->settings['title'] = $form_state['values']['title'];
+    $this->settings['admin_title'] = $form_state['values']['admin_title'];
     $this->settings['style'] = $form_state['values']['style'];
     if (isset($form_state['values']['contexts'])) {
       $this->settings['contexts'] = $form_state['values']['contexts'];

@@ -1232,6 +1232,7 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
     $form['region']['#default_value'] = $layout->in_progress['region_name'];
   }
 
+  $form['actions']['#weight'] = 999;
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
