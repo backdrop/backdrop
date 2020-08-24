@@ -85,12 +85,8 @@ function contact_menu() {
     'file' => 'contact.admin.inc',
   );
   $items['admin/structure/contact/list'] = array(
-    'title' => 'Categories',
-    'page callback' => 'contact_category_list',
-    'access arguments' => array('administer contact forms'),
+    'title' => 'List categories',
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => 1,
-    'file' => 'contact.admin.inc',
   );
   $items['admin/structure/contact/settings'] = array(
     'title' => 'Settings',

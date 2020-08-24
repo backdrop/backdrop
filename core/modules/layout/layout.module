@@ -83,7 +83,7 @@ function layout_menu() {
   ) + $base;
 
   $items['admin/structure/layouts/settings'] = array(
-    'title' => 'Settings',
+    'title' => 'Templates',
     'description' => 'Manage layout templates.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_settings_page'),
@@ -95,6 +95,7 @@ function layout_menu() {
   $items['admin/structure/layouts/settings/flexible-template/add'] = array(
     'title' => 'Add flexible layout template',
     'page callback' => 'layout_flexible_template_settings_add_form',
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_LOCAL_ACTION,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -104,6 +105,7 @@ function layout_menu() {
     'title' => 'Configure flexible layout template',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_settings_edit_form', 5),
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -113,6 +115,7 @@ function layout_menu() {
     'title' => 'Configure flexible layout template',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_configure_form', 5),
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -122,6 +125,7 @@ function layout_menu() {
     'title' => 'Delete flexible layout template',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_delete_form', 5),
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -131,6 +135,7 @@ function layout_menu() {
     'title' => 'Delete row',
     'page callback' => 'layout_flexible_template_delete_row',
     'page arguments' => array(5,7),
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_CALLBACK,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -140,6 +145,7 @@ function layout_menu() {
     'title' => 'Choose region widths',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_region_style_select', 5, 7),
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_CALLBACK,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -149,6 +155,7 @@ function layout_menu() {
     'title' => 'Add row',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_edit_row_form', 5, 7),
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_CALLBACK,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -158,6 +165,7 @@ function layout_menu() {
     'title' => 'Add row',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_flexible_template_edit_row_form', 5, 7, 9),
+    'access arguments' => array('administer flexible templates'),
     'type' => MENU_CALLBACK,
     'weight' => -10,
     'file' => 'layout.flexible.inc',
@@ -693,6 +701,11 @@ function layout_permission() {
       'description' => t('Add and modify layouts on pages.'),
       'restrict access' => TRUE,
     ),
+    'administer flexible templates' => array(
+      'title' => t('Administer Flexible Templates'),
+      'description' => t('Create, configure and delete flexible layout templates.'),
+      'restrict access' => TRUE,
+    ),
   );
 }
 
@@ -1192,7 +1205,7 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
     // If the path is a node preview path, check if a custom layout exists for
     // nodes and use that instead.
     // @ todo: This adds very specific code for node previews which too closely
-    // couples Node and Layout modules. This needs to be reverted in a future 
+    // couples Node and Layout modules. This needs to be reverted in a future
     // commit.
     $data = NULL;
     $node_types = node_type_get_types();
@@ -1219,7 +1232,7 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL) {
 
           // Check for an object loaded by the menu router. Use a preview from
           // Tempstore if on a node preview page.
-          // @ todo: This is also specific code for node previews which needs 
+          // @ todo: This is also specific code for node previews which needs
           // to be reverted in a future commit.
           if (isset($router_item['map'][$context->position])) {
             $data = isset($data) ? $data : $router_item['map'][$context->position];
@@ -1340,14 +1353,14 @@ function _layout_get_all_info($data_type, $init = array()) {
  *   Optionally specify a name of a single layout template, e.g. "boxton" or
  *   "simmons". If no layout template name is specified, information for all
  *   layout templates will be returned.
- * 
+ *
  * @param boolean $rebuild
  *   Whether or not the list of layout template info needs to be rebuilt (see
  *   https://github.com/backdrop/backdrop-issues/issues/984). The rebuild is
  *   required only on specific cases, so this defaults to FALSE. That way, the
  *   rest of the times the layout cache is used (when available) for performance
  *   reasons.
- * 
+ *
  * @return array|boolean
  *   The layout template information, as returned by either a stand-alone
  *   template .info file, or through a module's hook_layout_info().
@@ -2053,6 +2066,25 @@ function layout_layout_info() {
   }
 
   return $layouts;
+}
+
+/**
+ * Implements hook_layout_presave().
+ */
+function layout_layout_presave($layout) {
+  if (!empty($layout->removed_blocks)) {
+    foreach ($layout->removed_blocks as $uuid => $block) {
+      // @todo: Follow-up for other block types with files/images.
+      if (is_a($block, 'BlockHero')) {
+        if (!empty($block->settings['image'])) {
+          $image = file_load($block->settings['image']);
+          if ($image) {
+            file_usage_delete($image, 'layout', 'block', $image->fid);
+          }
+        }
+      }
+    }
+  }
 }
 
 /**

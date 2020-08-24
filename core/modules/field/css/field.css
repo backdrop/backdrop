@@ -3,14 +3,6 @@
 .field .field-label {
   font-weight: bold;
 }
-/**
- * Clear fields with inline labels, as the label and field items are floated.
- *
- * @see https://meiert.com/en/blog/no-clearfix/
- */
-.field-label-inline {
-  overflow: auto;
-}
 .field-label-inline .field-label,
 .field-label-inline .field-items {
   float:left; /*LTR*/

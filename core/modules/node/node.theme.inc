@@ -37,27 +37,27 @@ function theme_node_preview_banner_form($variables) {
  *
  * @param $variables
  *   An associative array containing:
- *   - form: A render element representing the form.
+ *   - element: A render element representing the content rankings portion of the form.
  *
  * @see node_search_admin()
  * @ingroup themeable
  */
-function theme_node_search_admin($variables) {
-  $form = $variables['form'];
+function theme_node_search_factors($variables) {
+  $element = $variables['element'];
 
-  $output = backdrop_render($form['info']);
-
+  $rows = array();
   $header = array(t('Factor'), t('Influence'));
-  foreach (element_children($form['factors']) as $key) {
+  foreach (element_children($element) as $key) {
     $row = array();
-    $row[] = $form['factors'][$key]['#title'];
-    $form['factors'][$key]['#title_display'] = 'invisible';
-    $row[] = backdrop_render($form['factors'][$key]);
+    $row[] = $element[$key]['#title'];
+    $element[$key]['#title_display'] = 'invisible';
+    $row[] = backdrop_render($element[$key]);
     $rows[] = $row;
   }
+  $output = '';
+  $output .= theme('help', array('markup' => $element['#help']));
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
-
-  $output .= backdrop_render_children($form);
+  $output .= backdrop_render_children($element);
   return $output;
 }
 
@@ -233,7 +233,7 @@ function template_preprocess_node(&$variables) {
   if ($node_type->settings['node_submitted']) {
     if (!isset($variables['elements']['#display_submitted']) || $variables['elements']['#display_submitted'] == TRUE) {
       $variables['display_submitted'] = TRUE;
-      $variables['submitted'] = t('!datetime by !username', array('!datetime' => $variables['date'], '!username' => $variables['name']));
+      $variables['submitted'] = token_replace($node_type->settings['node_submitted_format'], array('node' => $node));
       $variables['user_picture'] = '';
       if ($node_type->settings['node_user_picture']) {
         $variables['user_picture'] = theme('user_picture', array('account' => $node));

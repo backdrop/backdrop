@@ -228,8 +228,8 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $start_element = $this->xpath('//div[@id="start"]');
     $start_time1 = (string) $start_element[0];
 
-    // Wait 6 seconds to wait past the maximum age (5). Fresh copy expected.
-    sleep(6);
+    // Wait 5 seconds to wait past the maximum age (6). Fresh copy expected.
+    sleep(5);
     $this->backdropGet('system-test/sleep/6', array('query' => array('cache' => $this->randomName())));
 
     $this->backdropGet('system-test/sleep/0', array(), $headers);

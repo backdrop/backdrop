@@ -22,7 +22,8 @@ function color_theme() {
 function color_form_system_theme_settings_alter(&$form, &$form_state) {
   if (isset($form_state['build_info']['args'][0])
       && ($theme_name = $form_state['build_info']['args'][0])
-      && ($theme_info = color_get_info($theme_name))) {
+      && ($theme_info = color_get_info($theme_name))
+      && isset($theme_info['fields'])) {
     $form['color'] = array(
       '#type' => 'fieldset',
       '#title' => t('Color scheme'),
@@ -171,8 +172,6 @@ function color_get_color_element($theme_name, $color_name, &$form) {
  */
 function color_css_alter(&$css) {
   global $theme_key;
-  $themes = list_themes();
-
   $preview_theme = _color_preview_theme();
   if ($preview_theme) {
     // Convert stylesheets for the preview.
@@ -182,17 +181,21 @@ function color_css_alter(&$css) {
       if (isset($_SESSION['color'][$theme_key])) {
         $preview_data = $_SESSION['color'][$theme_key];
         $paths = array(
-          'source' => backdrop_get_path('theme', $preview_theme) . '/',
+          'source' => $theme_path . '/',
           'map' => array(),
         );
         foreach ($theme_info['css'] as $file) {
-          $stylesheet = file_get_contents($theme_path . '/' . $file);
-          _backdrop_build_css_path(NULL, base_path() . dirname($paths['source'] . $file) . '/');
-          $stylesheet = preg_replace_callback('/url\([\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\)/i', '_backdrop_build_css_path', $stylesheet);
+          $filename = _color_get_file_path($file, $preview_theme);
+          $stylesheet = file_get_contents($filename);
+          $paths['source'] = backdrop_get_path('theme', _color_get_theme_from_file($file, $preview_theme));
+          $base = base_path() . dirname($filename) . '/';
+          _backdrop_build_css_path(NULL, $base);
 
+          $stylesheet = preg_replace_callback('/url\([\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\)/i', '_backdrop_build_css_path', $stylesheet);
           $stylesheet = _color_rewrite_stylesheet($preview_theme, $theme_info, $paths, $preview_data['palette'], $stylesheet);
+
           foreach ($css as $path => $data) {
-            if (backdrop_basename($path) == backdrop_basename($file)) {
+            if ($path == $filename) {
               $css[$path]['type'] = 'inline';
               $css[$path]['preprocess'] = 'false';
               $css[$path]['data'] = $stylesheet;
@@ -208,17 +211,23 @@ function color_css_alter(&$css) {
     $color_paths = theme_get_setting('color.stylesheets');
 
     if (!empty($color_paths)) {
-      foreach ($themes[$theme_key]->stylesheets['all'] as $base_filename => $old_path) {
-        // Loop over the path array with recolored CSS files to find matching
-        // paths which could replace the non-recolored paths.
-        foreach ($color_paths as $color_path) {
-          // Color module currently requires unique file names to be used,
-          // which allows us to compare different file paths.
-          if (backdrop_basename($old_path) == backdrop_basename($color_path)) {
-            // Replace the path to the new css file.
-            // This keeps the order of the stylesheets intact.
-            $css[$old_path]['data'] = $color_path;
-          }
+      $info = color_get_info($theme_key);
+
+      // Get the original paths of the  files we are replacing.
+      $old_paths = array();
+      foreach ($info['css'] as $file) {
+        // The files are already passed through backdrop_basename() in
+        // color_get_info, so we don't need to do that here.
+        $old_paths[$file] = _color_get_file_path($file, $theme_key);
+      }
+
+      // Replace the stylesheets if there are matching files.
+      foreach($color_paths as $color_path) {
+        $basename = backdrop_basename($color_path);
+        if (array_key_exists($basename, $old_paths)) {
+          // Replace the path to the new css file.
+          // This keeps the order of the stylesheets intact.
+          $css[$old_paths[$basename]]['data'] = $color_path;
         }
       }
     }
@@ -235,7 +244,7 @@ function color_menu() {
     'page callback' => 'color_save_preview_settings',
     'page arguments' => array(2),
     'type' => MENU_CALLBACK,
-    'access arguments' => array('administer theme settings'),
+    'access arguments' => array('administer themes'),
     'delivery callback' => 'backdrop_json_deliver',
   );
 
@@ -356,22 +365,43 @@ function _color_config_save(Config $staging_config) {
  * Retrieves the Color module information for a particular theme.
  */
 function color_get_info($theme) {
-  static $theme_info = array();
+  static $color_info = array();
 
-  if (!isset($theme_info[$theme])) {
-    $info = NULL; // The variable to be populated by the theme color.inc file.
+  if (!isset($color_info[$theme])) {
+    $info = array(); // The variable to be populated by the theme color.inc file.
     $path = backdrop_get_path('theme', $theme);
     $file = BACKDROP_ROOT . '/' . $path . '/color/color.inc';
     if ($path && file_exists($file)) {
       include $file;
-      $theme_info[$theme] = $info;
     }
-    else {
-      $theme_info[$theme] = array();
+
+    $themes = list_themes();
+    $theme_info = $themes[$theme];
+
+    if (empty($info) || !isset($info['css'])) {
+      $info['css'] = array();
+      if (isset($theme_info->stylesheets)) {
+        foreach ($theme_info->stylesheets as $group) {
+          $info['css'] = array_merge($info['css'], array_keys($group));
+        }
+      }
     }
+
+    foreach ($info['css'] as $key => $file) {
+      $info['css'][$key] = backdrop_basename($file);
+    }
+
+    if (isset($theme_info->base_theme) && !empty($theme_info->base_theme)) {
+      $base_info = color_get_info($theme_info->base_theme);
+      $info = backdrop_array_merge_deep($info, $base_info);
+    }
+
+    $info['css'] = array_unique($info['css']);
+
+    $color_info[$theme] = $info;
   }
 
-  return $theme_info[$theme];
+  return $color_info[$theme];
 }
 
 /**
@@ -500,6 +530,45 @@ function color_scheme_form_submit($form, &$form_state) {
 }
 
 /**
+ * Implements hook_flush_caches().
+ */
+function color_flush_caches() {
+  // Rebuild all color palettes.
+  color_rebuild_settings();
+}
+
+/**
+ * Rebuild color scheme info.
+ */
+function color_rebuild_settings($theme_name = NULL) {
+  $themes = array();
+  if ($theme_name) {
+    $themes = array($theme_name);
+  }
+  else {
+    foreach (list_themes() as $key => $data) {
+      if ($data->status) {
+        $themes[] = $key;
+      }
+    }
+  }
+
+  foreach ($themes as $theme) {
+    $theme_config_name = $theme . '.settings';
+    $theme_config = config($theme_config_name);
+    if ($theme_config && $new_color_config = $theme_config->get('color')) {
+      $color_info = color_get_info($theme);
+      if ($color_info) {
+        $palette = isset($new_color_config['palette']) ? $new_color_config['palette'] : NULL;
+        $new_color_info = color_save_configuration($theme, $color_info, $palette);
+        $theme_config->set('color', $new_color_info);
+        $theme_config->save();
+      }
+    }
+  }
+}
+
+/**
  * Generates the necessary CSS and images based on a color palette.
  *
  * @param $theme_name
@@ -548,7 +617,8 @@ function color_save_configuration($theme_name, $theme_info, $palette) {
   foreach ($theme_info['css'] as $stylesheet) {
     // Build a temporary array with CSS files.
     $files = array();
-    if (file_exists($paths['source'] . $stylesheet)) {
+    $filename = _color_get_file_path($stylesheet, $theme_name);
+    if (file_exists($filename)) {
       $files[] = $stylesheet;
     }
 
@@ -556,11 +626,15 @@ function color_save_configuration($theme_name, $theme_info, $palette) {
       // Aggregate @imports recursively for each configured top level CSS file
       // without optimization. Aggregation and optimization will be
       // handled by backdrop_build_css_cache() only.
-      $style = backdrop_load_stylesheet($paths['source'] . $file, FALSE);
+      $filename = _color_get_file_path($file, $theme_name);
+      $theme = _color_get_theme_from_file($file, $theme_name);
+      $paths['source'] = backdrop_get_path('theme', $theme) . '/';
+
+      $style = backdrop_load_stylesheet($filename, FALSE);
 
       // Return the path to where this CSS file originated from, stripping
       // off the name of the file at the end of the path.
-      $base = base_path() . dirname($paths['source'] . $file) . '/';
+      $base = base_path() . dirname($filename) . '/';
       _backdrop_build_css_path(NULL, $base);
 
       // Prefix all paths within this CSS file, ignoring absolute paths.
@@ -585,7 +659,6 @@ function color_save_configuration($theme_name, $theme_info, $palette) {
  * Rewrites the stylesheet to match the colors in the palette.
  */
 function _color_rewrite_stylesheet($theme, &$info, &$paths, $palette, $style) {
-  $themes = list_themes();
   // Prepare color conversion table.
   $conversion = $palette;
   foreach ($conversion as $k => $v) {
@@ -614,7 +687,9 @@ function _color_rewrite_stylesheet($theme, &$info, &$paths, $palette, $style) {
       }
       // Not a pre-set color. Extrapolate from the base.
       else {
-        $chunk = _color_shift($palette[$base], $default[$base], $chunk, $info['blend_target']);
+        if (isset($info['blend_target'])) {
+          $chunk = _color_shift($palette[$base], $default[$base], $chunk, $info['blend_target']);
+        }
       }
     }
     else {
@@ -660,6 +735,75 @@ function _color_save_stylesheet($file, $style, &$paths) {
 
   // Set standard file permissions for webserver-generated files.
   backdrop_chmod($file);
+}
+
+/**
+ * Finds the original file path of a CSS file from the color configuration.
+ *
+ * @param $filename
+ *   The file name that we are searching for.
+ * @param $theme_name
+ *   The name of the theme that is being modified.
+ *
+ * @return string
+ *   Returns the original file path of the CSS file.
+ */
+function _color_get_file_path($filename, $theme_name) {
+  static $basenames = array();
+
+  $themes = list_themes();
+  $theme = $themes[$theme_name];
+
+  $basename = backdrop_basename($filename);
+
+  if (isset($theme->stylesheets)) {
+    foreach ($theme->stylesheets as $group_name => $group) {
+      foreach ($group as $file) {
+        if (!isset($basenames[$theme_name][$group_name][$file])) {
+          $basenames[$theme_name][$group_name][$file] = backdrop_basename($file);
+        }
+        if ($basename === $basenames[$theme_name][$group_name][$file]) {
+          return $file;
+        }
+      }
+    }
+  }
+
+  if (isset($theme->base_theme)) {
+    return _color_get_file_path($filename, $theme->base_theme);
+  }
+}
+
+/**
+ * Finds which theme a CSS file came from.
+ *
+ * @param $filename
+ *   The file name that we are searching for.
+ * @param $theme_name
+ *   The name of the theme that is being modified.
+ *
+ * @return string
+ *   Returns the name of the theme that the CSS file came from.
+ */
+function _color_get_theme_from_file($filename, $theme_name) {
+  $themes = list_themes();
+  $theme = $themes[$theme_name];
+
+  $basename = backdrop_basename($filename);
+
+  if (isset($theme->stylesheets)) {
+    foreach ($theme->stylesheets as $group_name => $group) {
+      foreach ($group as $file) {
+        if ($basename === backdrop_basename($file)) {
+          return $theme_name;
+        }
+      }
+    }
+  }
+
+  if (isset($theme->base_theme)) {
+    return _color_get_theme_from_file($filename, $theme->base_theme);
+  }
 }
 
 /**
@@ -725,8 +869,9 @@ function _color_shift($given, $ref1, $ref2, $target) {
  * Converts a hex color into an RGB triplet.
  */
 function _color_unpack($hex, $normalize = FALSE) {
-  if (strlen($hex) == 4) {
-    $hex = $hex[1] . $hex[1] . $hex[2] . $hex[2] . $hex[3] . $hex[3];
+  $hex = substr($hex, 1);
+  if (strlen($hex) == 3) {
+    $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
   }
   $c = hexdec($hex);
   for ($i = 16; $i >= 0; $i -= 8) {

@@ -471,6 +471,25 @@ function views_views_plugins() {
         'parent' => 'full',
       ),
     ),
+    'localization' => array(
+      'parent' => array(
+        'no ui' => TRUE,
+        'handler' => 'views_plugin_localization',
+        'parent' => '',
+      ),
+      'none' => array(
+        'title' => t('None'),
+        'help' => t('Do not pass admin strings for translation.'),
+        'handler' => 'views_plugin_localization_none',
+        'help topic' => 'localization-none',
+      ),
+      'core' => array(
+        'title' => t('Core'),
+        'help' => t("Use Backdrop core t() function. It doesn't support updates to existing strings."),
+        'handler' => 'views_plugin_localization_core',
+        'help topic' => 'localization-core',
+      ),
+    ),
   );
 
   $plugins['style']['jump_menu_summary'] = array(

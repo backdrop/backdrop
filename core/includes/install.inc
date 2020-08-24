@@ -606,6 +606,7 @@ abstract class DatabaseTasks {
       '#default_value' => empty($database['password']) ? '' : $database['password'],
       '#required' => FALSE,
       '#size' => 45,
+      '#password_toggle' => TRUE,
     );
 
     $form['advanced_options'] = array(
@@ -1298,7 +1299,7 @@ function st($string, array $args = array(), array $options = array()) {
 
   // Transform arguments before inserting them
   foreach ($args as $key => $value) {
-    switch ($key[0]) {
+    switch (substr($key, 0, 1)) {
       // Escaped only
       case '@':
         $args[$key] = check_plain($value);
