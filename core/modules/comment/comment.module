@@ -1195,7 +1195,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
     );
     $form['comment']['comment_subject_field'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Allow comment title'),
+      '#title' => t('Allow custom comment title'),
       '#default_value' => $node_type->settings['comment_subject_field'],
     );
     if (config_get('system.core', 'user_pictures')) {
