@@ -33,8 +33,8 @@ class CommentViewsHandlerArgumentUserUidTest extends ViewsSqlTest {
   function setUp() {
     parent::setUp();
 
-    // Add two users, create a node with the user1 as author and another node with user2 as author.
-    // For the second node add a comment from user1.
+    // Add two users, create a node with the user1 as author and another node
+    // with user2 as author. For the second node add a comment from user1.
     $this->account = $this->backdropCreateUser();
     $this->account2 = $this->backdropCreateUser();
     $this->backdropLogin($this->account);

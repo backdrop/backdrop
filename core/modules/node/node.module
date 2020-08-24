@@ -1550,7 +1550,7 @@ function node_ranking() {
   // Add relevance based on creation or changed date.
   if ($node_cron_last = state_get('node_cron_last', 0)) {
     $ranking['recent'] = array(
-      'title' => t('Recently posted'),
+      'title' => t('Recently created'),
       // Exponential decay with half-life of 6 months, starting at last indexed node
       'score' => 'POW(2.0, (GREATEST(n.created, n.changed) - :node_cron_last) * 6.43e-8)',
       'arguments' => array(':node_cron_last' => $node_cron_last),

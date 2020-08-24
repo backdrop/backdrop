@@ -75,7 +75,7 @@ function comment_admin_overview($form, &$form_state, $arg) {
   $header = array(
     'subject' => array('data' => t('Title'), 'field' => 'subject'),
     'author' => array('data' => t('Author'), 'field' => 'name', 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
-    'posted_in' => array('data' => t('Posted in'), 'field' => 'node_title', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    'posted_in' => array('data' => t('Added in'), 'field' => 'node_title', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
     'changed' => array('data' => t('Updated'), 'field' => 'c.changed', 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
     'operations' => t('Operations'),
   );

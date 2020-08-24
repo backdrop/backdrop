@@ -138,9 +138,9 @@ class CommentHelperCase extends BackdropWebTestCase {
     // Get comment.
     if ($contact !== TRUE) { // If true then attempting to find error message.
       if ($subject && $subject_mode) {
-        $this->assertText($subject, 'Comment subject posted.');
+        $this->assertText($subject, 'Comment subject added.');
       }
-      $this->assertText($comment, 'Comment body posted.');
+      $this->assertText($comment, 'Comment body added.');
       $this->assertTrue((!empty($match) && !empty($match[1])), 'Comment id found.');
     }
 
@@ -423,7 +423,7 @@ class CommentInterfaceTest extends CommentHelperCase {
     $this->backdropGet('node');
     $this->assertRaw('4 comments', 'Link to the 4 comments exist.');
 
-    // Confirm a new comment is posted to the correct page.
+    // Confirm a new comment is added to the correct page.
     $this->setCommentsPerPage(2);
     $comment_new_page = $this->postComment($this->node, $this->randomName(), $this->randomName(), TRUE);
     $this->assertTrue($this->commentExists($comment_new_page), 'Page one exists. %s');
@@ -687,7 +687,7 @@ class CommentInterfaceTest extends CommentHelperCase {
       'post comments' => TRUE,
       'skip comment approval' => FALSE,
     ));
-    // Ensure that the poster can leave some contact info.
+    // Ensure that the comment author can leave some contact info.
     $this->setCommentAnonymous('1');
     $this->backdropLogout();
 
@@ -1105,7 +1105,7 @@ class CommentPreviewTest extends CommentHelperCase {
 
     // Check that saving a comment produces a success message.
     $this->backdropPost('comment/' . $comment->id . '/edit', $edit, t('Save'));
-    $this->assertText(t('Your comment has been posted.'), 'Comment posted.');
+    $this->assertText(t('Your comment has been added.'), 'Comment added.');
 
     // Check that the comment fields are correct after loading the saved comment.
     $this->backdropGet('comment/' . $comment->id . '/edit');
@@ -2024,7 +2024,7 @@ class CommentFieldsTest extends CommentHelperCase {
     // Post an empty comment, and check if an error is shown.
     $this->backdropPost('node/' . $this->node->nid, array(), t('Save'));
     $this->assertNoText('Comment field is required.', 'Can save comment with empty required body.');
-    $this->assertText('Your comment has been posted.', 'Can save comment with empty required body.');
+    $this->assertText('Your comment has been added.', 'Can save comment with empty required body.');
   }
 
   /**
@@ -2114,9 +2114,9 @@ class CommentFieldsTest extends CommentHelperCase {
 
     $this->backdropLogout();
 
-    // Try to post a comment on each node. A failure will be triggered if the
-    // comment body is missing on one of these forms, due to postComment()
-    // asserting that the body is actually posted correctly.
+    // Try to add a comment on each piece of content. A failure will be
+    // triggered if the comment body is missing on one of these forms, due
+    // to postComment() asserting that the body is actually added correctly.
     $this->web_user = $this->backdropCreateUser(array('access content', 'access comments', 'post comments', 'skip comment approval'));
     $this->backdropLogin($this->web_user);
     $this->postComment($book_node, $this->randomName(), '');

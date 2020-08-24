@@ -241,7 +241,7 @@ function comment_schema() {
   );
 
   $schema['node_comment_statistics'] = array(
-    'description' => 'Maintains statistics of node and comments posts to show "new" and "updated" flags.',
+    'description' => 'Maintains statistics of content and comments to show "new" and "updated" flags.',
     'fields' => array(
       'nid' => array(
         'type' => 'int',
@@ -260,26 +260,26 @@ function comment_schema() {
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
-        'description' => 'The Unix timestamp of the last comment that was posted within this node, from {comment}.changed.',
+        'description' => 'The Unix timestamp of the last comment that was added within this piece of content, from {comment}.changed.',
       ),
       'last_comment_name' => array(
         'type' => 'varchar',
         'length' => 60,
         'not null' => FALSE,
-        'description' => 'The name of the latest author to post a comment on this node, from {comment}.name.',
+        'description' => 'The name of the latest author to add a comment on this piece of content, from {comment}.name.',
       ),
       'last_comment_uid' => array(
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
-        'description' => 'The user ID of the latest author to post a comment on this node, from {comment}.uid.',
+        'description' => 'The user ID of the latest author to add a comment on this piece of content, from {comment}.uid.',
       ),
       'comment_count' => array(
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
-        'description' => 'The total number of comments on this node.',
+        'description' => 'The total number of comments on this piece of content.',
       ),
     ),
     'primary key' => array('nid'),

@@ -841,7 +841,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
 
     $this->backdropPost('comment/reply/' . $node->nid, $edit, t('Preview'));
     $this->backdropPost(NULL, array(), t('Save'));
-    $this->assertText(t('Your comment has been posted.'));
+    $this->assertText(t('Your comment has been added.'));
     $comments = comment_load_multiple(FALSE, array('subject' => $edit['subject']));
     $comment = reset($comments);
     $this->assertTrue($comment->cid, 'Comment found.');

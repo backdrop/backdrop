@@ -93,7 +93,7 @@ function node_views_data() {
   // Created date.
   $data['node']['created'] = array(
     'title' => t('Created date'), // The item it appears as on the UI,
-    'help' => t('The date the content was posted.'), // The help that appears on the UI,
+    'help' => t('The date the content was created.'), // The help that appears on the UI,
     'field' => array(
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,

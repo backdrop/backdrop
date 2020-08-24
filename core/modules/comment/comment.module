@@ -28,17 +28,17 @@ define('COMMENT_MODE_FLAT', 0);
 define('COMMENT_MODE_THREADED', 1);
 
 /**
- * Anonymous posters cannot enter their contact information.
+ * Anonymous comment authors cannot enter their contact information.
  */
 define('COMMENT_ANONYMOUS_MAYNOT_CONTACT', 0);
 
 /**
- * Anonymous posters may leave their contact information.
+ * Anonymous comment authors may leave their contact information.
  */
 define('COMMENT_ANONYMOUS_MAY_CONTACT', 1);
 
 /**
- * Anonymous posters are required to leave their contact information.
+ * Anonymous comment authors are required to leave their contact information.
  */
 define('COMMENT_ANONYMOUS_MUST_CONTACT', 2);
 
@@ -433,7 +433,7 @@ function comment_views_api() {
 function comment_block_info() {
   $blocks['recent'] = array(
     'info' => t('Recent comments'),
-    'description' => t('A list of recent comments posted to the site.'),
+    'description' => t('A list of recent comments added to the site.'),
   );
 
   return $blocks;
@@ -528,7 +528,7 @@ function comment_get_recent($number = 10) {
     ->condition('n.status', NODE_PUBLISHED)
     ->orderBy('c.created', 'DESC')
     // Additionally order by cid to ensure that comments with the same timestamp
-    // are returned in the exact order posted.
+    // are returned in the exact order they were added.
     ->orderBy('c.cid', 'DESC')
     ->range(0, $number)
     ->execute()
@@ -622,9 +622,9 @@ function comment_node_view(Node $node, $view_mode) {
       );
     }
     elseif ($view_mode == 'teaser') {
-      // Teaser view: display the number of comments that have been posted,
-      // or a link to add new comments if the user has permission, the node
-      // is open to new comments, and there currently are none.
+      // Teaser view: display the number of comments that have been added, or a
+      // link to add new comments if the user has permission, the content is
+      // open to new comments, and there currently are none.
       if (user_access('access comments')) {
         if (!empty($node->comment_count)) {
           $links['comment-comments'] = array(
@@ -1187,9 +1187,9 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#title' => t('Anonymous commenting'),
       '#default_value' => $node_type->settings['comment_anonymous'],
       '#options' => array(
-        COMMENT_ANONYMOUS_MAYNOT_CONTACT => t('Anonymous posters may not enter their contact information'),
-        COMMENT_ANONYMOUS_MAY_CONTACT => t('Anonymous posters may leave their contact information'),
-        COMMENT_ANONYMOUS_MUST_CONTACT => t('Anonymous posters must leave their contact information'),
+        COMMENT_ANONYMOUS_MAYNOT_CONTACT => t('Anonymous comment authors may not enter their contact information'),
+        COMMENT_ANONYMOUS_MAY_CONTACT => t('Anonymous comment authors may leave their contact information'),
+        COMMENT_ANONYMOUS_MUST_CONTACT => t('Anonymous comment authors must leave their contact information'),
       ),
       '#access' => user_access('post comments', backdrop_anonymous_user()),
     );
@@ -2141,18 +2141,19 @@ function comment_submit($comment) {
   $comment->created = strtotime($comment->date);
   $comment->changed = REQUEST_TIME;
 
-  // If the comment was posted by a registered user, assign the author's ID.
+  // If the comment was added by a registered user, assign the author's ID.
   // @todo Too fragile. Should be prepared and stored in comment_form() already.
   if (!$comment->is_anonymous && !empty($comment->name) && ($account = user_load_by_name($comment->name))) {
     $comment->uid = $account->uid;
   }
-  // If the comment was posted by an anonymous user and no author name was
+  // If the comment was added by an anonymous user and no author name was
   // required, use "Anonymous" by default.
   if ($comment->is_anonymous && (!isset($comment->name) || $comment->name === '')) {
     $comment->name = config_get('system.core', 'anonymous');
   }
 
-  // Validate the comment's subject. If not specified, extract from comment body.
+  // Validate the comment's subject. If not specified, extract from comment
+  // body.
   if (trim($comment->subject) == '') {
     // The body may be in any format, so:
     // 1) Filter it into HTML
@@ -2217,7 +2218,7 @@ function comment_form_submit($form, &$form_state) {
     $form_state['values']['cid'] = $comment->cid;
 
     // Add an entry to the watchdog log.
-    watchdog('content', 'Comment posted: %subject.', array('%subject' => $comment->subject), WATCHDOG_NOTICE, l(t('view'), 'comment/' . $comment->cid, array('fragment' => 'comment-' . $comment->cid)));
+    watchdog('content', 'Comment added: %subject.', array('%subject' => $comment->subject), WATCHDOG_NOTICE, l(t('view'), 'comment/' . $comment->cid, array('fragment' => 'comment-' . $comment->cid)));
 
     // Explain the approval queue if necessary.
     if ($comment->status == COMMENT_NOT_PUBLISHED) {
@@ -2226,7 +2227,7 @@ function comment_form_submit($form, &$form_state) {
       }
     }
     else {
-      backdrop_set_message(t('Your comment has been posted.'));
+      backdrop_set_message(t('Your comment has been added.'));
     }
     $query = array();
     // Find the current display page for this comment.
@@ -2234,7 +2235,7 @@ function comment_form_submit($form, &$form_state) {
     if ($page > 0) {
       $query['page'] = $page;
     }
-    // Redirect to the newly posted comment.
+    // Redirect to the newly-added comment.
     $redirect = array('node/' . $node->nid, array('query' => $query, 'fragment' => 'comment-' . $comment->cid));
   }
   else {

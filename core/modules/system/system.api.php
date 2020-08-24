@@ -3737,26 +3737,26 @@ function hook_token_info() {
   // Core tokens for nodes.
   $node['nid'] = array(
     'name' => t('Node ID'),
-    'description' => t('The unique ID of the node.'),
+    'description' => t('The unique ID of the content.'),
   );
   $node['title'] = array(
     'name' => t('Title'),
-    'description' => t('The title of the node.'),
+    'description' => t('The title of the content.'),
   );
   $node['edit-url'] = array(
     'name' => t('Edit URL'),
-    'description' => t("The URL of the node's edit page."),
+    'description' => t("The URL of the edit page of the content."),
   );
 
   // Chained tokens for nodes.
   $node['created'] = array(
     'name' => t('Date created'),
-    'description' => t('The date the node was posted.'),
+    'description' => t('The date the content was created.'),
     'type' => 'date',
   );
   $node['author'] = array(
     'name' => t('Author'),
-    'description' => t('The author of the node.'),
+    'description' => t('The author of the content.'),
     'type' => 'user',
   );
 
@@ -3778,17 +3778,17 @@ function hook_token_info_alter(&$data) {
   // Modify description of node tokens for our site.
   $data['tokens']['node']['nid'] = array(
     'name' => t("Node ID"),
-    'description' => t("The unique ID of the post."),
+    'description' => t("The unique ID of the content."),
   );
   $data['tokens']['node']['title'] = array(
     'name' => t("Title"),
-    'description' => t("The title of the post."),
+    'description' => t("The title of the content."),
   );
 
-  // Chained tokens for nodes.
+  // Chained tokens for content.
   $data['tokens']['node']['created'] = array(
     'name' => t("Date created"),
-    'description' => t("The date the post was posted."),
+    'description' => t("The date the content was created."),
     'type' => 'date',
   );
 }
