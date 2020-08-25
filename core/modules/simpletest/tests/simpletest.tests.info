@@ -958,6 +958,12 @@ description = Tests the form API email element.
 group = Form API
 file = form.test
 
+[FormH5datetimeTestCase]
+name = Form API html5 datetime
+description = Tests the form API html5 date and time elements.
+group = Form API
+file = form.test
+
 [HTMLIdTestCase]
 name = Unique HTML IDs
 description = Tests functionality of backdrop_html_id().

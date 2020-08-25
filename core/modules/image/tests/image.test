@@ -872,6 +872,32 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
       '%max' => $schema['fields'][$field_name .'_title']['length'],
       '%length' => $test_size,
     )));
+
+    // Check that image minimum size is not larger than maximum size.
+    $edit = array(
+      'instance[settings][max_dimensions][x]' => 100,
+      'instance[settings][min_dimensions][x]' => 200,
+    );
+    $this->backdropPost('admin/structure/types/manage/post/fields/' . $field_name, $edit, t('Save settings'));
+    $this->assertText(t('The minimum image dimensions cannot be bigger than its maximum dimensions.'));
+    // Try again with unacceptable image heights instead.
+    $edit = array(
+      'instance[settings][max_dimensions][x]' => '',
+      'instance[settings][min_dimensions][x]' => '',
+      'instance[settings][max_dimensions][y]' => 100,
+      'instance[settings][min_dimensions][y]' => 200,
+    );
+    $this->backdropPost('admin/structure/types/manage/post/fields/' . $field_name, $edit, t('Save settings'));
+    $this->assertText(t('The minimum image dimensions cannot be bigger than its maximum dimensions.'));
+    // Try again with acceptable values.
+    $edit = array(
+      'instance[settings][max_dimensions][x]' => '',
+      'instance[settings][min_dimensions][x]' => '',
+      'instance[settings][max_dimensions][y]' => 300,
+      'instance[settings][min_dimensions][y]' => 200,
+    );
+    $this->backdropPost('admin/structure/types/manage/post/fields/' . $field_name, $edit, t('Save settings'));
+    $this->assertRaw(t('Saved %field_name configuration.', array('%field_name' => $field_name)));
   }
 
   /**
@@ -1031,7 +1057,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $this->assertTrue($g < 5, 'Green color component is close to 0.');
     $this->assertTrue($b < 5, 'Blue color component is close to 0.');
   }
-  
+
   /**
    * Test single width resolution setting.
    */
@@ -1040,8 +1066,8 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $min_dimensions = 50;
     $max_dimensions = 100;
     $instance_settings = array(
-      'max_dimensions' => $max_dimensions . 'x' . '',
-      'min_dimensions' => $min_dimensions . 'x' . '',
+      'max_dimensions' => $max_dimensions . 'x',
+      'min_dimensions' => $min_dimensions . 'x',
     );
     $this->createImageField($field_name, 'post', array(), $instance_settings);
 
@@ -1075,8 +1101,8 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $min_dimensions = 50;
     $max_dimensions = 100;
     $instance_settings = array(
-      'max_dimensions' => '' . 'x' . $max_dimensions,
-      'min_dimensions' => '' . 'x' . $min_dimensions,
+      'max_dimensions' => 'x' . $max_dimensions,
+      'min_dimensions' => 'x' . $min_dimensions,
     );
     $this->createImageField($field_name, 'post', array(), $instance_settings);
 
@@ -1855,8 +1881,10 @@ class ImageStyleFloodProtection extends BackdropWebTestCase {
 
     // Close the handles
     for ($n = 0; $n < $count; $n++) {
-      curl_close(${'handle' . $n});
-      curl_multi_remove_handle($multi_handle, ${'handle' . $n});
+      if (gettype(${'handle' . $n}) === 'resource') {
+        curl_multi_remove_handle($multi_handle, ${'handle' . $n});
+        curl_close(${'handle' . $n});
+      }
     }
     curl_multi_close($multi_handle);
   }

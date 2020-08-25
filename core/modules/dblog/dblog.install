@@ -107,3 +107,33 @@ function dblog_update_1001() {
   $short = system_date_format_load('short');
   config_set('system.core', 'log_date_format', $short['pattern']);
 }
+
+/**
+ * Convert the format for dates in the database log.
+ */
+function dblog_update_1002() {
+  $t = get_t();
+  $config = config('system.core');
+  $log_format = $config->get('log_date_format');
+
+  // Look for a matching date format to use.
+  foreach (system_get_date_formats() as $date_format) {
+    if ($log_format == $date_format['pattern']) {
+      $config->set('log_date_format', $date_format['name']);
+      $config->save();
+      break;
+    }
+  }
+
+  // No matching date format found, so create a custom one.
+  if ($config->get('log_date_format') == $log_format) {
+    system_date_format_save(array(
+      'name' => 'dblog_date_format',
+      'label' => $t('Database log messages date'),
+      'pattern' => $log_format,
+      'module' => 'dblog',
+    ));
+    $config->set('log_date_format', 'dblog_date_format');
+    $config->save();
+  }
+}

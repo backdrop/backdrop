@@ -85,6 +85,9 @@ function image_field_instance_settings_form($field, $instance) {
   // Use the file field instance settings form as a basis.
   $form = file_field_instance_settings_form($field, $instance);
 
+  $form['#element_validate'] = isset($form['#element_validate']) ? $form['#element_validate'] : array();
+  $form['#element_validate'][] = 'image_field_instance_settings_form_validate';
+
   // Add maximum and minimum resolution settings.
   $max_dimensions = explode('x', $settings['max_dimensions']) + array('', '');
   $max_dimensions[0] = empty($max_dimensions[0]) ? NULL : $max_dimensions[0];
@@ -96,7 +99,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#weight' => 4.1,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The maximum allowed image dimensions expressed as WIDTHxHEIGHT. Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
+    '#description' => t('The maximum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
   );
   $form['max_dimensions']['x'] = array(
     '#type' => 'number',
@@ -127,7 +130,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#weight' => 4.2,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The minimum allowed image dimensions expressed as WIDTHxHEIGHT. Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
+    '#description' => t('The minimum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
   );
   $form['min_dimensions']['x'] = array(
     '#type' => 'number',
@@ -175,7 +178,7 @@ function image_field_instance_settings_form($field, $instance) {
   );
   // Add a second line of description.
   $form['orientate']['#description'] .= '<br />' . t('Note that as with resizing, rotating images on upload will cause the loss of EXIF data in the image.');
-  
+
   // Add the default image to the instance.
   $form['default_image'] = array(
     '#element_validate' => array('_image_field_default_image_validate'),
@@ -198,6 +201,26 @@ function image_field_instance_settings_form($field, $instance) {
   }
 
   return $form;
+}
+
+/**
+ * Element validate handler for image_field_instance_settings_form().
+ */
+function image_field_instance_settings_form_validate($element, &$form_state, $complete_form) {
+  $min_dimensions = explode('x', $form_state['values']['instance']['settings']['min_dimensions']) + array('', '');
+  $max_dimensions = explode('x', $form_state['values']['instance']['settings']['max_dimensions']) + array('', '');
+
+  $min_dimensions_x = (int) $min_dimensions[0];
+  $min_dimensions_y = (int) $min_dimensions[1];
+  $max_dimensions_x = (int) $max_dimensions[0];
+  $max_dimensions_y = (int) $max_dimensions[1];
+
+  // Ensure that min dimensions are not set to be bigger than max dimensions,
+  // but only if max dimensions have been specified. This allows to set min
+  // dimensions, without having to restrict max dimensions.
+  if ((!empty($max_dimensions_x) && $min_dimensions_x > $max_dimensions_x) || (!empty($max_dimensions_y) && $min_dimensions_y > $max_dimensions_y)) {
+    form_set_error('instance][settings][min_dimensions', t('The minimum image dimensions cannot be bigger than its maximum dimensions.'));
+  }
 }
 
 /**
@@ -347,6 +370,7 @@ function image_field_widget_info() {
       'label' => t('Image'),
       'field types' => array('image'),
       'settings' => array(
+        'browser_view' => 'image_library',
         'progress_indicator' => 'throbber',
         'preview_image_style' => 'thumbnail',
       ),
@@ -367,6 +391,15 @@ function image_field_widget_settings_form($field, $instance) {
 
   // Use the file widget settings form.
   $form = file_field_widget_settings_form($field, $instance);
+
+  $form['browser_view'] = array(
+    '#title' => t('Enable image browser'),
+    '#type' => 'checkbox',
+    '#return_value' => 'image_library',
+    '#default_value' => $settings['browser_view'],
+    '#description' => t('Enable the image browser as an alternative to the normal upload.'),
+    '#weight' => -3,
+  );
 
   $form['preview_image_style'] = array(
     '#title' => t('Preview image style'),
@@ -407,6 +440,11 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     $extensions = isset($elements[$delta]['#upload_validators']['file_validate_extensions'][0]) ? $elements[$delta]['#upload_validators']['file_validate_extensions'][0] : implode(' ', $supported_extensions);
     $extensions = array_intersect(explode(' ', $extensions), $supported_extensions);
     $elements[$delta]['#upload_validators']['file_validate_extensions'][0] = implode(' ', $extensions);
+
+    // Set any view used as a browser.
+    if (!empty($instance['widget']['settings']['browser_view'])) {
+      $elements[$delta]['#browser_view'] = $instance['widget']['settings']['browser_view'];
+    }
 
     // Add all extra functionality provided by the image widget.
     $elements[$delta]['#process'][] = 'image_field_widget_process';

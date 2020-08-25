@@ -511,14 +511,21 @@ table {
   border: 0;
 }
 tbody {
-  border-bottom: 1px solid #f7f7f7;
+  -webkit-box-shadow: inset 0 1px 0 0 #eee;
+  box-shadow: inset 0 1px 0 0 #eee;
 }
 tr.even,
 tr.odd {
-  border: 1px solid #f7f7f7;
-  border-top: 0;
-  border-bottom: 0;
+  border: 0;
   background: #f7f7f7;
+  -webkit-box-shadow:
+    inset -1px 0 0 #eee,
+    inset 0 -1px 0 0 #eee,
+    inset 1px 0 0 #eee;
+  box-shadow:
+    inset -1px 0 0 #eee,
+    inset 0 -1px 0 0 #eee,
+    inset 1px 0 0 #eee;
 }
 tr.odd {
   background: #fff;
@@ -661,7 +668,6 @@ fieldset .fieldset-legend {
   width: 100%;
   margin-top: .25em;
   padding-left: 1em; /* LTR */
-  text-transform: uppercase;
   box-sizing: border-box;
 }
 [dir="rtl"] fieldset .fieldset-legend {
@@ -671,7 +677,6 @@ fieldset .fieldset-legend {
 }
 legend {
   font-size: 120%;
-  font-weight: normal;
 }
 .fieldset-description {
   margin-bottom: 1em;
@@ -822,9 +827,6 @@ div.teaser-checkbox .form-item,
 .form-item label {
   margin: 0 0 10px;
 }
-fieldset label {
-  font-weight: normal;
-}
 .field-label label {
   margin: 0;
   padding: 0;
@@ -841,6 +843,8 @@ fieldset label {
 .form-disabled input.form-autocomplete,
 .form-disabled input.form-text,
 .form-disabled input.form-tel,
+.form-disabled input.form-date,
+.form-disabled input.form-time,
 .form-disabled input.form-email,
 .form-disabled input.form-url,
 .form-disabled input.form-color,
@@ -1033,6 +1037,8 @@ input.form-disabled:focus {
 input.form-autocomplete,
 input.form-text,
 input.form-tel,
+input.form-date,
+input.form-time,
 input.form-email,
 input.form-url,
 input.form-color,
@@ -1094,6 +1100,8 @@ select.filter-list {
 }
 input.form-text:focus,
 input.form-tel:focus,
+input.form-date:focus,
+input.form-time:focus,
 input.form-email:focus,
 input.form-url:focus,
 input.form-color:focus,
@@ -1235,6 +1243,9 @@ div.filter-options select {
 }
 .block-dashboard-updates .block-title {
   background-image: url('../images/info-circle--black--64.png');
+}
+.block-dashboard-news .block-title {
+  background-image: url('../images/bell--black--64.png');
 }
 
 /* admin/appearance */
@@ -1855,8 +1866,4 @@ div.add-or-remove-shortcuts {
 }
 @keyframes animate-stripes {
   0% { background-position: 0 0; } 100% { background-position: 50px 50px; }
-}
-
-.layout-flexible-template-edit-row-form fieldset label {
-  font-weight: bold;
 }

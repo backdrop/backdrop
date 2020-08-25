@@ -105,7 +105,7 @@ function user_theme() {
  * Implements hook_entity_info().
  */
 function user_entity_info() {
-  return array(
+  $entity_info = array(
     'user' => array(
       'label' => t('User account'),
       'bundle label' => t('Type'),
@@ -131,9 +131,21 @@ function user_entity_info() {
           'label' => t('User account'),
           'custom settings' => FALSE,
         ),
+        'token' => array(
+          'label' => t('Tokens'),
+          'custom settings' => FALSE,
+        ),
       ),
     ),
   );
+
+  // If the cache table has been created, then enable entity caching on nodes.
+  if (db_table_exists('cache_entity_user')) {
+    $entity_info['user']['entity cache'] = TRUE;
+    $entity_info['user']['field cache'] = FALSE;
+  }
+
+  return $entity_info;
 }
 
 /**
@@ -317,6 +329,25 @@ function user_load_by_name($name) {
  */
 function user_save($account) {
   return $account->save();
+}
+
+/**
+ * Element validate handler for the password field.
+ *
+ * Set a default value if one-time login link goes out,
+ * set a form error if not and password value is empty.
+ */
+function user_pass_required_validate($element, &$form_state, $form) {
+  $values = $form_state['values'];
+  if ($values['notify'] == 1) {
+    $form_state['values']['pass'] = user_password(22);
+  }
+  else {
+    if (empty($values['pass']) && $values['pass'] !== '0') {
+      $message = t('!name field is required.', array('!name' => $element['#title']));
+      form_set_error('pass', $message);
+    }
+  }
 }
 
 /**
@@ -738,6 +769,10 @@ function user_account_form(&$form, &$form_state) {
     '#access' => ($register || ($user->uid == $account->uid && user_access('change own username')) || $admin_users),
     '#weight' => -10,
   );
+  // Autofocus the username field (on the registration form only).
+  if ($register) {
+    $form['account']['name']['#attributes']['autofocus'] = 'autofocus';
+  }
 
   $form['account']['mail'] = array(
     '#type' => 'email',
@@ -794,15 +829,44 @@ function user_account_form(&$form, &$form_state) {
       $form['#validate'][] = 'user_validate_current_pass';
     }
   }
-  elseif (!config_get('system.core', 'user_email_verification') || $admin_users) {
-    $form['account']['pass'] = array(
-      '#type' => 'password',
-      '#title' => t('Password'),
-      '#description' => t('Provide a password for the new account.'),
-      '#password_toggle' => TRUE,
-      '#password_strength' => TRUE,
-      '#required' => TRUE,
-    );
+  else {
+    if (!config_get('system.core', 'user_email_verification') && !$admin_users) {
+      // Someone registers a new account and may set a password directly.
+      $form['account']['pass'] = array(
+        '#type' => 'password',
+        '#title' => t('Password'),
+        '#description' => t('Provide a password for the new account.'),
+        '#password_toggle' => TRUE,
+        '#password_strength' => TRUE,
+        '#required' => TRUE,
+      );
+    }
+    if ($admin_users) {
+      // An admin creates an account.
+      $form['account']['notify'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Notify user of new account'),
+        '#default_value' => 1,
+        '#description' => t('The user will receive an email with a one-time login link which leads to a page where they can set their password.'),
+      );
+      $form['account']['pass'] = array(
+        '#type' => 'password',
+        '#title' => t('Password'),
+        '#description' => t('Provide a password for the new account.'),
+        '#password_toggle' => TRUE,
+        '#password_strength' => TRUE,
+        '#required' => FALSE,
+        '#element_validate' => array('user_pass_required_validate'),
+        '#states' => array(
+          'visible' => array(
+            ':input[name="notify"]' => array('checked' => FALSE),
+          ),
+          'required' => array(
+            ':input[name="notify"]' => array('checked' => FALSE),
+          ),
+        ),
+      );
+    }
   }
 
   $form['account_settings'] = array(
@@ -839,12 +903,6 @@ function user_account_form(&$form, &$form_state) {
   $form['account_settings']['roles'][BACKDROP_AUTHENTICATED_ROLE] = array(
     '#disabled' => TRUE,
     '#value' => 'authenticated',
-  );
-
-  $form['account_settings']['notify'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Notify user of new account'),
-    '#access' => $register && $admin_users,
   );
 
   // Signature.
@@ -1011,6 +1069,7 @@ function user_login_block($form) {
     '#size' => 15,
     '#required' => TRUE,
     '#weight' => 2,
+    '#password_toggle' => TRUE,
   );
   $form['actions'] = array(
     '#type' => 'actions',
@@ -1572,11 +1631,16 @@ function user_login($form, &$form_state) {
     '#maxlength' => $credentials === USER_LOGIN_USERNAME_ONLY ? USERNAME_MAX_LENGTH : EMAIL_MAX_LENGTH,
     '#size' => 60,
     '#required' => TRUE,
+    '#attributes' => array(
+      'autofocus' => 'autofocus',
+    ),
   );
 
-  $form['pass'] = array('#type' => 'password',
+  $form['pass'] = array(
+    '#type' => 'password',
     '#title' => t('Password'),
     '#required' => TRUE,
+    '#password_toggle' => TRUE,
   );
   $form['#validate'] = user_login_default_validators();
   $form['actions'] = array('#type' => 'actions');
@@ -1799,6 +1863,12 @@ function user_login_finalize(&$edit = array()) {
   // This is called before hook_user in case one of those functions fails
   // or incorrectly does a redirect which would leave the old session in place.
   backdrop_session_regenerate();
+
+  // If entity caching is enabled, clear the cache entry for the user.
+  $entity_info = entity_get_info('user');
+  if (isset($entity_info['entity cache']) && $entity_info['entity cache']) {
+    cache('entity_user')->delete($user->uid);
+  }
 
   user_module_invoke('login', $edit, $user);
 }
@@ -2925,7 +2995,7 @@ function user_form_field_ui_field_edit_form_submit($form, &$form_state) {
 function user_register_form($form, &$form_state) {
   global $user;
   // We need to set the page title bc this menu entry is a local task.
-  backdrop_set_title('Create new account');
+  backdrop_set_title(t('Create new account'));
 
   $admin = user_access('administer users');
 
