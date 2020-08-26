@@ -257,7 +257,7 @@ class Block extends LayoutHandler {
     );
     $form['admin_title']['admin_title'] = array(
       '#type' => 'textfield',
-      '#default_value' => $this->settings['admin_title'],
+      '#default_value' => isset($this->settings['admin_title']) ? $this->settings['admin_title'] : '',
       '#title' => t('Administrative title'),
       '#description' => t('Defaults to block title if left blank.'),
       '#maxlength' => 255,
