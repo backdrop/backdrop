@@ -461,7 +461,7 @@ function file_entity_info() {
     );
   }
 
-  return array(
+  $entity_info = array(
     'file' => array(
       'label' => t('File'),
       'bundle label' => t('Type'),
@@ -493,6 +493,14 @@ function file_entity_info() {
       'static cache' => FALSE,
     ),
   );
+
+  // If the cache table has been created, then enable entity caching.
+  if (db_table_exists('cache_entity_file')) {
+    $entity_info['file']['entity cache'] = TRUE;
+    $entity_info['file']['field cache'] = FALSE;
+  }
+
+  return $entity_info;
 }
 
 /**
@@ -522,6 +530,7 @@ function file_element_info() {
     '#progress_message' => NULL,
     '#upload_validators' => array(),
     '#upload_location' => NULL,
+    '#browser_view' => FALSE,
     '#size' => 22,
     '#extended' => FALSE,
     '#attached' => array(
@@ -1306,6 +1315,28 @@ function file_managed_file_process($element, &$form_state, $form) {
     '#attributes' => array('class' => array('file-remove-button')),
   );
 
+  // Add a button that will be used to select existing files if enabled.
+  $element['browse_button'] = array(
+    '#name' => implode('_', $element['#parents']) . '_browse_button',
+    '#type' => 'submit',
+    '#value' => t('Select existing file'),
+    '#validate' => array(),
+    '#submit' => array(),
+    '#limit_validation_errors' => array($element['#parents']),
+    '#ajax' => array(
+      'callback' => 'file_managed_file_browser_open',
+      'progress' => array(
+        'type' => 'throbber',
+        'message' => NULL,
+      ),
+    ),
+    '#weight' => -5,
+    '#attributes' => array('class' => array('file-browse-button')),
+    '#prefix' => '<span class="file-browse-text js-show"> ' . t('or') . ' ',
+    '#suffix' => '</span>',
+    '#access' => !empty($element['#browser_view']),
+  );
+
   $element['fid'] = array(
     '#type' => 'hidden',
     '#value' => $fid,
@@ -1613,12 +1644,126 @@ function file_managed_file_pre_render($element) {
   if (!empty($element['#value']['fid'])) {
     $element['upload']['#access'] = FALSE;
     $element['upload_button']['#access'] = FALSE;
+    $element['browse_button']['#access'] = FALSE;
   }
   // If we don't already have a file, there is nothing to remove.
   else {
     $element['remove_button']['#access'] = FALSE;
   }
   return $element;
+}
+
+/**
+ * AJAX callback for managed_file elements to open a browser modal dialog.
+ *
+ * @see file_managed_file_process()
+ */
+function file_managed_file_browser_open($form, $form_state) {
+  // Get the parent "managed_file" element.
+  $parents = $form_state['triggering_element']['#array_parents'];
+  array_pop($parents);
+  $element = backdrop_array_get_nested_value($form, $parents);
+
+  // Pull the view to open off of the managed_file #browser_view property.
+  $view_name = $element['#browser_view'];
+  $view = views_embed_view($view_name);
+  if (empty($view)) {
+    $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
+    if (user_access('administer views')) {
+      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
+    }
+  }
+
+  $submit_form = backdrop_get_form('file_managed_file_browser_form');
+
+  $title = t('Select from Image Library');
+  $options = array(
+    'dialogClass' => 'file-browser-container',
+    'width' => '90%',
+  );
+  $html = '';
+  $html .= theme('status_messages');
+  $html .= '<div class="file-browser">';
+  $html .= '<div class="file-browser-view">';
+  $html .= $view;
+  $html .= '</div>';
+  $html .= backdrop_render($submit_form);
+  $html .= '</div>';
+
+  $settings = array(
+    'file' => array(
+      'browser' => array(
+        'selectedFid' => NULL,
+        'currentFidElement' => '[name="' . $element['fid']['#name'] . '"]',
+      ),
+    ),
+  );
+
+  $commands = array();
+  $commands[] = ajax_command_settings($settings, TRUE);
+  $commands[] = ajax_command_open_modal_dialog($title, $html, $options);
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Form to submit a file selected in the file browser.
+ */
+function file_managed_file_browser_form($form, &$form_state) {
+  // FID is set via JavaScript on the client-side. As such, this is a "hidden"
+  // element, rather than "value". And we use #default_value, not #value, to
+  // allow client-side changes.
+  $form['fid'] = array(
+    '#type' => 'hidden',
+    '#default_value' => '',
+  );
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Insert'),
+    '#validate' => array(),
+    '#submit' => array(),
+    '#ajax' => array(
+      'callback' => 'file_managed_file_browser_submit',
+      'progress' => array(
+        'type' => 'throbber',
+        'message' => NULL,
+      ),
+    ),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => '',
+    '#attributes' => array(
+      // Adding button classes puts the link in the button area of the dialog,
+      // while the special "dialog-cancel" class closes the dialog.
+      'class' => array('button', 'button-secondary', 'form-submit', 'dialog-cancel'),
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * AJAX callback handler for file browser selection.
+ *
+ * This form is only ever submitted via AJAX. This is not a normal "submit"
+ * callback, only one that returns AJAX commands.
+ */
+function file_managed_file_browser_submit($form, &$form_state) {
+  $commands = array();
+  if (!empty($form_state['values']['fid'])) {
+    $settings = array(
+      'file' => array(
+        'browser' => array(
+          'selectedFid' => (int) $form_state['values']['fid'],
+        ),
+      ),
+    );
+    $commands[] = ajax_command_settings($settings, TRUE);
+  }
+  $commands[] = ajax_command_close_modal_dialog();
+  return array('#type' => 'ajax', '#commands' => $commands);
 }
 
 /**
@@ -3245,7 +3390,6 @@ function file_view_file($file, $display = 'full', $langcode = NULL) {
   }
 
   $formatter = $display['formatter'];
-  $settings = $display['settings'][$formatter];
 
   // Attempt to display the file with the specified display.
   // See file_display() for details.

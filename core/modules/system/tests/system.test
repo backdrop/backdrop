@@ -1046,7 +1046,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
       // Relative path to an arbitrary file.
       'core/misc/feed.png' => array(
         'form' => 'core/misc/feed.png',
-        'src' => $GLOBALS['base_url'] . '/' . 'core/misc/feed.png',
+        'src' => $GLOBALS['base_url'] . '/core/misc/feed.png',
       ),
       // Relative path to a file in a theme.
       $default_theme_path . '/screenshot.png' => array(
@@ -1268,7 +1268,12 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
     $path = substr($mails[0]['body'], $start, 66 + strlen($this->user->uid));
 
     // Log in with temporary login link.
-    $this->backdropPost($path, array(), 'Save password & log in');
+    $pass = user_password();
+    $pass_edit = array(
+      'pass[pass1]' => $pass,
+      'pass[pass2]' => $pass,
+    );
+    $this->backdropPost($path, $pass_edit, 'Save password & log in');
     $this->assertText($user_message);
     $this->backdropLogout();
 
@@ -1580,7 +1585,7 @@ class SystemBlockTestCase extends BackdropWebTestCase {
     // Set a logo.
     $edit = array(
       'site_logo_theme' => FALSE,
-      'site_logo_path' => $GLOBALS['base_url'] . '/' . 'core/misc/feed.png',
+      'site_logo_path' => $GLOBALS['base_url'] . '/core/misc/feed.png',
     );
     $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
 
@@ -2079,8 +2084,8 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     $user1 = user_load(1);
     $user1->pass_raw = user_password();
     require_once BACKDROP_ROOT . '/' . settings_get('password_inc', 'core/includes/password.inc');
-    $user1->pass = user_hash_password(trim($user1->pass_raw));
-    db_query("UPDATE {users} SET pass = :pass WHERE uid = :uid", array(':pass' => $user1->pass, ':uid' => $user1->uid));
+    $user1->pass = $user1->pass_raw;
+    user_save($user1);
     $this->backdropLogin($user1);
     $this->backdropGet($this->update_url, array('external' => TRUE));
     $this->assertResponse(200);

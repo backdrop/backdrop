@@ -784,6 +784,31 @@ function user_settings_email($form, &$form_state) {
     '#token_types' => array('user'),
   );
 
+  $form['email_pending_approval_admin'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Admin (awaiting approval)'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#description' => t('Edit the email message sent to admin upon registering, when administrative approval is required.') . ' ' . $email_token_link,
+    '#group' => 'email',
+  );
+  $form['email_pending_approval_admin']['user_mail_register_pending_approval_admin_subject'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Subject'),
+    '#default_value' => $mail_config->get('register_pending_approval_admin_subject'),
+    '#maxlength' => 180,
+    '#element_validate' => array('token_element_validate'),
+    '#token_types' => array('user'),
+  );
+  $form['email_pending_approval_admin']['user_mail_register_pending_approval_admin_body'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Body'),
+    '#default_value' => $mail_config->get('register_pending_approval_admin_body'),
+    '#rows' => 8,
+    '#element_validate' => array('token_element_validate'),
+    '#token_types' => array('user'),
+  );
+
   $form['email_no_approval_required'] = array(
     '#type' => 'fieldset',
     '#title' => t('Welcome (no approval required)'),
@@ -1008,6 +1033,8 @@ function user_settings_email_submit($form, &$form_state) {
   $config->set('register_no_approval_required_subject', $values['user_mail_register_no_approval_required_subject']);
   $config->set('register_pending_approval_body', $values['user_mail_register_pending_approval_body']);
   $config->set('register_pending_approval_subject', $values['user_mail_register_pending_approval_subject']);
+  $config->set('register_pending_approval_admin_body', $values['user_mail_register_pending_approval_admin_body']);
+  $config->set('register_pending_approval_admin_subject', $values['user_mail_register_pending_approval_admin_subject']);
   $config->set('status_activated_body', $values['user_mail_status_activated_body']);
   $config->set('status_activated_subject', $values['user_mail_status_activated_subject']);
   $config->set('status_blocked_body', $values['user_mail_status_blocked_body']);

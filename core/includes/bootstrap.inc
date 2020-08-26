@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.14.x-dev');
+define('BACKDROP_VERSION', '1.17.x-dev');
 
 /**
  * Core API compatibility.
@@ -611,6 +611,7 @@ function find_conf_path($http_host, $script_name, $require_settings = TRUE) {
 
   if ($sites) {
     $uri = explode('/', $script_name);
+    $uri[0] = ($uri[0] == '.') ? '' : $uri[0];
     $server = explode('.', implode('.', array_reverse(explode(':', rtrim($http_host, '.')))));
     for ($i = count($uri) - 1; $i > 0; $i--) {
       for ($j = count($server); $j > 0; $j--) {
@@ -821,7 +822,7 @@ function backdrop_settings_initialize() {
   global $base_url, $base_path, $base_root;
 
   // Export these settings.php variables to the global namespace.
-  global $databases, $cookie_domain, $conf, $settings, $installed_profile, $is_https, $base_secure_url, $base_insecure_url, $config_directories;
+  global $databases, $cookie_domain, $conf, $settings, $installed_profile, $is_https, $base_secure_url, $base_insecure_url, $config_directories, $config;
   $conf = array();
   $settings = array();
 
@@ -2013,7 +2014,7 @@ function t($string, array $args = array(), array $options = array()) {
 function format_string($string, array $args = array()) {
   // Transform arguments before inserting them.
   foreach ($args as $key => $value) {
-    switch ($key[0]) {
+    switch (substr($key, 0, 1)) {
       case '@':
         // Escaped only.
         $args[$key] = check_plain($value);
@@ -3257,7 +3258,10 @@ function _backdrop_bootstrap_sanitize_request() {
     }
 
     // If there is a query string, check its query parameters.
-    $destination_parts = backdrop_parse_url($_GET['destination']);
+    if (isset($_GET['destination'])) {
+      $destination_parts = backdrop_parse_url($_GET['destination']);
+    }
+
     if (!empty($destination_parts['query'])) {
       $sanitized_keys = _backdrop_bootstrap_sanitize_input($destination_parts['query'], $whitelist);
     }
@@ -3288,7 +3292,7 @@ function _backdrop_bootstrap_sanitize_input(&$input, $whitelist = array()) {
 
   if (is_array($input)) {
     foreach ($input as $key => $value) {
-      if ($key !== '' && $key[0] === '#' && !in_array($key, $whitelist, TRUE)) {
+      if ($key !== '' && substr($key, 0, 1) === '#' && !in_array($key, $whitelist, TRUE)) {
         unset($input[$key]);
         $sanitized_keys[] = $key;
       }

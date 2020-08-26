@@ -4,13 +4,13 @@
  * @file
  * Test date UI.
  */
- 
+
 require_once BACKDROP_ROOT . '/core/modules/date/tests/date_field.test';
 
 class DateUITestCase extends DateFieldBasic {
 
-   public function setUp() {
-    parent::setUp();
+  public function setUp($modules = array()) {
+    parent::setUp($modules);
 
     $format = system_date_format_load('long');
     $format['pattern'] = 'D, m/d/Y - H:i';

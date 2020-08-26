@@ -589,9 +589,18 @@ function layout_settings_form_update_layout($form, &$form_state) {
     $layout->name = $form_state['values']['name'];
   }
   if (isset($form_state['values']['layout_template'])) {
-    $new = $form_state['values']['layout_template'];
-    $region_mapping = layout_get_legacy_region_mapping($layout->layout_template, $new);
-    $layout->setLayoutTemplate($form_state['values']['layout_template'], $region_mapping);
+    $old_template = $layout->layout_template;
+    $new_template = $form_state['values']['layout_template'];
+    if ($old_template != $new_template) {
+      $region_mapping = layout_get_legacy_region_mapping($old_template, $new_template);
+      // If there is no theme cache entry for this template, rebuild theme cache
+      // to ensure that the new template is loaded.
+      $theme_entries = theme_get_registry(FALSE);
+      if (empty($theme_entries['layout__' . $new_template])) {
+        backdrop_theme_rebuild();
+      }
+      $layout->setLayoutTemplate($new_template, $region_mapping);
+    }
     if (!empty($layout->orphaned_blocks)) {
       $orphaned_blocks_titles = array();
       $layout_template_info = layout_get_layout_template_info($form_state['values']['layout_template']);
@@ -811,6 +820,24 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
     '#prefix' => '<div id="layout-messages">',
     '#suffix' => '</div>',
   );
+
+  // Add a link to preview the page.
+  $link_path = $layout->getPath();
+  // A null path returns the site root. See https://github.com/backdrop/backdrop-issues/issues/4383
+  if (!is_null($link_path) && backdrop_valid_path($link_path)) {
+    $form['top']['#theme_wrappers'] = array('container');
+    $form['top']['#attributes']['class'] = array('edit-layout-top', 'clearfix');
+
+    $form['top']['button'] = array(
+      '#type' => 'dropbutton',
+    );
+    $form['top']['button']['#links'] = array(
+      array(
+        'title' => t('View page'),
+        'href' => url($link_path),
+      )
+    );
+  }
 
   $form['content'] = array('#tree' => TRUE);
   $form['content']['block'] = array('#tree' => TRUE);
@@ -1034,7 +1061,7 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
           )
         )
       ),
-      '#description' => isset($block_info['description']) ? check_plain($block_info['description']) : NULL,
+      '#description' => isset($block_info['description']) ? filter_xss($block_info['description']) : NULL,
       '#wrapper_attributes' => array('class' => array('layout-block-add-row'))
     );
   }
@@ -2066,10 +2093,10 @@ function layout_locked_message($item, $type = 'layout') {
 
   // The path varies based on the item type.
   $path_type = 'manage';
-  $button_title = 'Save layout';
+  $button_title = t('Save layout');
   if ($type === 'menu_item') {
     $path_type = 'menu';
-    $button_title = 'Save menu settings';
+    $button_title = t('Save menu settings');
   }
 
   $message = '';
@@ -2814,18 +2841,32 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
   $links = array();
 
   if (!empty($template_info['flexible'])) {
-    $links['configure'] = array(
-      'title' => t('Configure regions'),
-      'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/configure',
-    );
-    $links['edit'] = array(
-      'title' => t('Configure name'),
-      'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/edit',
-    );
-    $links['delete'] = array(
-      'title' => t('Delete'),
-      'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/delete',
-    );
+    if (user_access('administer flexible templates')) {
+      $links['configure'] = array(
+        'title' => t('Configure regions'),
+        'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/configure',
+      );
+      $links['edit'] = array(
+        'title' => t('Configure name'),
+        'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/edit',
+      );
+    }
+    if (user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Flexible layout templates',
+          'name' => 'layout.flexible.' . $template_info['name'],
+        ),
+      );
+    }
+    if (user_access('administer flexible templates')) {
+      $links['delete'] = array(
+        'title' => t('Delete'),
+        'href' => 'admin/structure/layouts/settings/flexible-template/' . $template_info['name'] . '/delete',
+      );
+    }
   }
   if ($is_default) {
     $links['disable'] = array(

@@ -19,6 +19,10 @@
 .cke_widget_wrapper.align-center {
   text-align: center;
 }
+.cke_widget_wrapper.align-center .caption {
+  margin-left: auto;
+  margin-right: auto;
+}
 .caption > * {
   display: block;
   max-width: 100%;

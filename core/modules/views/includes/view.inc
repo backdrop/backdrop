@@ -496,6 +496,7 @@ class view {
       }
       $this->display[$id]->handler = views_get_plugin('display', $this->display[$id]->display_plugin);
       if (!empty($this->display[$id]->handler)) {
+        $this->display[$id]->handler->localization_keys = array($id);
         // Initialize the new display handler with data.
         $this->display[$id]->handler->init($this, $this->display[$id]);
         // If this is NOT the default display handler, let it know which is
@@ -1819,6 +1820,7 @@ class view {
       unset($this->locked);
     }
     config('views.view.' . $this->name)->setData($config_data)->save();
+    $this->save_locale_strings();
 
     // Clear caches.
     views_invalidate_cache();
@@ -1989,12 +1991,61 @@ class view {
   }
 
   /**
+   * Find and initialize the localization plugin.
+   */
+  public function init_localization() {
+    // If the translate attribute isn't set, init the localization plugin.
+    if (!isset($this->localization_plugin->translate)) {
+      $this->localization_plugin = views_get_plugin('localization', views_get_localization_plugin());
+
+      // If the plugin is still not set, turn off all localization by using the
+      // views_plugin_localization_none plugin. This plugin has the translate
+      // property set to FALSE, signifying localization should not occur.
+      if (empty($this->localization_plugin)) {
+        $this->localization_plugin = views_get_plugin('localization', 'none');
+      }
+
+      // Init the plugin.
+      $this->localization_plugin->init($this);
+    }
+
+    // Return the value of the translate property. This is set to FALSE if
+    // localization is off.
+    return $this->localization_plugin->translate;
+  }
+
+  /**
    * Determine whether a view supports admin string translation.
    */
   function is_translatable() {
     // If the view is normal or overridden, use admin string translation.
     // A newly created view won't have a type. Accept this.
     return (!isset($this->type) || in_array($this->type, array(t('Normal'), t('Overridden')))) ? TRUE : FALSE;
+  }
+
+  /**
+   * Send strings for localization.
+   */
+  public function save_locale_strings() {
+    $this->process_locale_strings('save');
+  }
+
+  /**
+   * Delete localized strings.
+   */
+  public function delete_locale_strings() {
+    $this->process_locale_strings('delete');
+  }
+
+  /**
+   * Process strings for localization or deletion.
+   */
+  public function process_locale_strings($op) {
+    // Ensure this view supports translation, we have a display, and we
+    // have a localization plugin.
+    if ($this->is_translatable() && $this->init_display() && $this->init_localization()) {
+      $this->localization_plugin->process_locale_strings($op);
+    }
   }
 
   /**

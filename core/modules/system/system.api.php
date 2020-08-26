@@ -2520,7 +2520,7 @@ function hook_requirements($phase) {
     }
     else {
       $requirements['cron'] = array(
-        'description' => $t('Cron has not run. It appears cron jobs have not been setup on your system. Check the help pages for <a href="@url">configuring cron jobs</a>.', array('@url' => 'http://drupal.org/cron')),
+        'description' => $t('Cron has not run. It appears cron jobs have not been setup on your system. Check the help pages for <a href="@url">configuring cron jobs</a>.', array('@url' => 'https://backdropcms.org/cron')),
         'severity' => REQUIREMENT_ERROR,
         'value' => $t('Never run'),
       );

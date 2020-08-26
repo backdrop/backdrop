@@ -74,6 +74,7 @@ abstract class BackdropTestCase {
     '#fail' => 0,
     '#exception' => 0,
     '#debug' => 0,
+    '#duration' => 0,
   );
 
   /**
@@ -567,6 +568,9 @@ abstract class BackdropTestCase {
    *   methods during debugging.
    */
   public function run(array $methods = array()) {
+    // Get start time so that we can see how long tests are taking.
+    $start = microtime(TRUE);
+
     $config = config('simpletest.settings');
     // Initialize verbose debugging.
     simpletest_verbose(NULL, config_get('system.core', 'file_public_path'), get_class($this));
@@ -629,6 +633,10 @@ abstract class BackdropTestCase {
     // Clear out the error messages and restore error handler.
     backdrop_get_messages();
     restore_error_handler();
+
+    // Get the stop time and put it in the results to display later.
+    $end = microtime(TRUE);
+    $this->results['#duration'] = round($end - $start, 3);
   }
 
   /**
@@ -1052,7 +1060,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Whether the files were copied to the test files directory.
    */
-  protected $generatedTestFiles = FALSE;
+  protected $generatedTestFiles = array();
 
   /**
    * The maximum number of redirects to follow when handling responses.
@@ -1217,34 +1225,44 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   List of files that match filter.
    */
   protected function backdropGetTestFiles($type, $size = NULL) {
-    if (empty($this->generatedTestFiles)) {
-      // Generate binary test files.
-      $lines = array(64, 1024);
-      $count = 0;
-      foreach ($lines as $line) {
-        simpletest_generate_file('binary-' . $count++, 64, $line, 'binary');
-      }
-
-      // Generate text test files.
-      $lines = array(16, 256, 1024, 2048, 20480);
-      $count = 0;
-      foreach ($lines as $line) {
-        simpletest_generate_file('text-' . $count++, 64, $line, 'text');
-      }
-
-      // Copy other test files from simpletest.
-      $original = backdrop_get_path('module', 'simpletest') . '/files';
-      $files = file_scan_directory($original, '/(html|image|javascript|php|sql)-.*/');
-      foreach ($files as $file) {
-        file_unmanaged_copy($file->uri, config_get('system.core', 'file_public_path'));
-      }
-
-      $this->generatedTestFiles = TRUE;
-    }
-
     $files = array();
     // Make sure type is valid.
     if (in_array($type, array('binary', 'html', 'image', 'javascript', 'php', 'sql', 'text'))) {
+
+      if (!in_array($type, $this->generatedTestFiles)) {
+        switch ($type) {
+          case 'binary':
+            // Generate binary test files.
+            $lines = array(64, 1024);
+            $count = 0;
+            foreach ($lines as $line) {
+              simpletest_generate_file('binary-' . $count++, 64, $line, 'binary');
+            }
+            $this->generatedTestFiles[] = 'binary';
+            break;
+
+          case 'text':
+            // Generate text test files.
+            $lines = array(16, 256, 1024, 2048, 20480);
+            $count = 0;
+            foreach ($lines as $line) {
+              simpletest_generate_file('text-' . $count++, 64, $line, 'text');
+            }
+            $this->generatedTestFiles[] = 'text';
+            break;
+
+          default:
+            // Copy other test files from simpletest.
+            $original = backdrop_get_path('module', 'simpletest') . '/files';
+            $files = file_scan_directory($original, '/' . $type . '-.*/');
+            foreach ($files as $file) {
+              file_unmanaged_copy($file->uri, config_get('system.core', 'file_public_path'));
+            }
+            $this->generatedTestFiles[] = $type;
+            break;
+        }
+      }
+
       $files = file_scan_directory('public://', '/' . $type . '\-.*/');
 
       // If size is set then remove any files that are not of that size.
@@ -1550,7 +1568,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     file_prepare_directory($this->public_files_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     file_prepare_directory($this->private_files_directory, FILE_CREATE_DIRECTORY);
     file_prepare_directory($this->temp_files_directory, FILE_CREATE_DIRECTORY);
-    $this->generatedTestFiles = FALSE;
+    $this->generatedTestFiles = array();
 
     // Set the new config directories. During test execution, these values are
     // manually set directly in config_get_config_directory().
@@ -1737,10 +1755,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Reset/rebuild all data structures after enabling the modules.
     $this->resetAll();
 
-    // Run cron once in that environment, as install.php does at the end of
-    // the installation process.
-    backdrop_cron_run();
-
     // Ensure that the session is not written to the new environment and replace
     // the global $user session with uid 1 from the new test site.
     backdrop_save_session(FALSE);
@@ -1760,6 +1774,17 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Use the test mail class instead of the default mail handler class.
     config_set('system.mail', 'default-system', 'TestingMailSystem');
+
+    // Disable news checking against BackdropCMS.org.
+    $dashboard_config = config('dashboard.settings');
+    if (!$dashboard_config->isNew()) {
+      $dashboard_config->set('news_feed_url', FALSE);
+      $dashboard_config->save();
+    }
+
+    // Run cron once in that environment, as install.php does at the end of
+    // the installation process.
+    backdrop_cron_run();
 
     backdrop_set_time_limit($this->timeLimit);
     $this->setup = TRUE;
@@ -2618,6 +2643,8 @@ class BackdropWebTestCase extends BackdropTestCase {
           case 'range':
           case 'text':
           case 'tel':
+          case 'date':
+          case 'time':
           case 'textarea':
           case 'url':
           case 'password':
@@ -3439,9 +3466,9 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function assertThemeOutput($callback, array $variables = array(), $expected, $message = '', $group = 'Other') {
     $output = theme($callback, $variables);
-    $this->verbose('Variables:' . '<pre>' .  check_plain(var_export($variables, TRUE)) . '</pre>'
-      . '<hr />' . 'Result:' . '<pre>' .  check_plain(var_export($output, TRUE)) . '</pre>'
-      . '<hr />' . 'Expected:' . '<pre>' .  check_plain(var_export($expected, TRUE)) . '</pre>'
+    $this->verbose('Variables:<pre>' .  check_plain(var_export($variables, TRUE)) . '</pre>'
+      . '<hr />Result:<pre>' .  check_plain(var_export($output, TRUE)) . '</pre>'
+      . '<hr />Expected:<pre>' .  check_plain(var_export($expected, TRUE)) . '</pre>'
       . '<hr />' . $output
     );
     if (!$message) {

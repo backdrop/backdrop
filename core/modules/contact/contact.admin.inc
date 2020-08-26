@@ -166,7 +166,7 @@ function contact_form_permissions() {
 function contact_category_list($form, $form_state) {
   $form['help'] = array(
     '#type' => 'markup',
-    '#markup' => t('Configure the categories shown in the <a href="!url">site-wide contact form</a> here. All categories are shown in a select list on the contact form, which will send to different addresses when selected.', array('!url' => url('contact'))),
+    '#markup' => t('Configure the categories shown in the site-wide contact form available at <a href="!url">!url</a>. All categories are shown in a select list on the contact form, which will send to different addresses when selected.', array('!url' => url('contact'))),
     '#weight' => -20,
   );
 
