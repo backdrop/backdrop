@@ -77,24 +77,34 @@ function theme_node_recent_block($variables) {
   $l_options = array('query' => backdrop_get_destination());
   foreach ($variables['nodes'] as $node) {
     $row = array();
-    $row[] = array(
+    $row['content'] = array(
       'data' => theme('node_recent_content', array('node' => $node)),
       'class' => 'title-author',
     );
     if (node_access('update', $node)) {
-      $row[] = array(
+      $row['edit'] = array(
         'data' => l(t('edit'), 'node/' . $node->nid . '/edit', $l_options),
         'class' => 'edit',
       );
     }
     if (node_access('delete', $node)) {
-      $row[] = array(
+      $row['delete'] = array(
         'data' => l(t('delete'), 'node/' . $node->nid . '/delete', $l_options),
         'class' => 'delete',
       );
     }
+
+    // If no edit or delete link, increase the colspan of the title/author cell
+    // accordingly. 
+    if (count($row) != 3) {
+      $row['content']['colspan'] = 3 - count($row);
+    }
+
     $rows[] = $row;
   }
+
+
+
 
   if ($rows) {
     $output = theme('table', array('rows' => $rows));
