@@ -22,6 +22,10 @@ class BlockText extends Block {
    *  Sets title text on draggable block panel in Layout builder.
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_title'])) {
+      return check_plain($this->settings['admin_title']);
+    }
+
     return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Custom block');
   }
 

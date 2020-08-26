@@ -28,6 +28,10 @@ class DashboardTaxonomyBlock extends Block {
    * {@inheritdoc}
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_title'])) {
+      return check_plain($this->settings['admin_title']);
+    }
+
     return t('Manage taxonomy');
   }
 

@@ -33,6 +33,10 @@ class PageComponents extends Block {
    * {@inheritdoc}
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_title'])) {
+      return check_plain($this->settings['admin_title']);
+    }
+
     $children = $this->getChildren();
     $title = $children[$this->childDelta]['info'];
     return strlen($this->settings['title']) ? check_plain($this->settings['title']) : $title;

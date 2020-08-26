@@ -131,6 +131,10 @@ class Block extends LayoutHandler {
    * Return an administrative title that will always have a value.
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_title'])) {
+      return check_plain($this->settings['admin_title']);
+    }
+
     $title = $this->getTitle();
     if (empty($title)) {
       // Last effort, use the title from hook_block_info().
