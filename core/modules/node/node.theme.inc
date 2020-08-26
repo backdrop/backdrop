@@ -71,28 +71,74 @@ function theme_node_search_factors($variables) {
  * @ingroup themeable
  */
 function theme_node_recent_block($variables) {
+  $show_submitted_by = $variables['show_submitted_by'];
+  $show_operations = $variables['show_operations'];
+
   $rows = array();
   $output = '';
 
+  if ($show_submitted_by) {
+    // Get the "submitted by" format for each content type.
+    $node_types = node_type_get_types();
+    $submitted_formats = array();
+    foreach ($node_types as $node_type => $info) {
+      $submitted_formats[$node_type] = $info->settings['node_submitted_format'];
+    }
+  }
+
   $l_options = array('query' => backdrop_get_destination());
   foreach ($variables['nodes'] as $node) {
+    if ($show_submitted_by) {
+      // Include the "submitted by" info in the node object, so that we don't have
+      // to retrieve it repeatedly in theme_node_recent_content() for each node.
+      $node->node_submitted_by = token_replace($submitted_formats[$node->type], array('node' => $node));
+    }
+
     $row = array();
-    $row[] = array(
-      'data' => theme('node_recent_content', array('node' => $node)),
-      'class' => 'title-author',
+    $links = array();
+
+    // Render the cell with the content tile and author.
+    $row['content'] = array(
+      'data' => theme('node_recent_content', array('node' => $node, 'show_submitted_by' => $show_submitted_by)),
+      'class' => 'recent-content',
     );
-    if (node_access('update', $node)) {
-      $row[] = array(
-        'data' => l(t('edit'), 'node/' . $node->nid . '/edit', $l_options),
-        'class' => 'edit',
-      );
+
+    if ($show_operations) {
+      // Generate the operations links, taking into account whether the
+      // currently-logged-in user has permission to perform the operation on the
+      // current piece of content.
+      if (node_access('update', $node)) {
+        $links['update'] = array(
+          'title' => t('Edit'),
+          'href' => 'node/' . $node->nid . '/edit',
+          'attributes' => array('class' => array('recent-content-operation', 'recent-content-operation-update'), 'title' => t('Edit recent content')),
+        );
+      }
+      if (node_access('delete', $node)) {
+        $links['delete'] = array(
+          'title' => t('Delete'),
+          'href' => 'node/' . $node->nid . '/delete',
+          'attributes' => array('class' => array('recent-content-operation', 'recent-content-operation-delete'), 'title' => t('Delete recent content')),
+        );
+      }
+
+      // Render the cell with the operations dropbutton.
+      if (!empty($links)) {
+        $row['operations'] = array(
+          'data' => array(
+            '#type' => 'dropbutton',
+            '#links' => $links,
+          ),
+          'class' => 'operations',
+        );
+      }
+      // If there is no opperations dropbutton to be rendered, then increase the
+      // colspan of the title/author cell, to also occupy the operations column.
+      else {
+        $row['content']['colspan'] = 2;
+      }
     }
-    if (node_access('delete', $node)) {
-      $row[] = array(
-        'data' => l(t('delete'), 'node/' . $node->nid . '/delete', $l_options),
-        'class' => 'delete',
-      );
-    }
+
     $rows[] = $row;
   }
 
@@ -128,13 +174,16 @@ function theme_node_recent_block($variables) {
  */
 function theme_node_recent_content($variables) {
   $node = $variables['node'];
+  $show_submitted_by = $variables['show_submitted_by'];
 
   $output = '<div class="node-title">';
   $output .= l($node->title, 'node/' . $node->nid);
   $output .= theme('mark', array('type' => node_mark($node->nid, $node->changed)));
-  $output .= '</div><div class="node-author">';
-  $output .= theme('username', array('account' => user_load($node->uid)));
-  $output .= '</div>';
+  if ($show_submitted_by) {
+    $output .= '</div><div class="node-submitted-by">';
+    $output .= $node->node_submitted_by;
+    $output .= '</div>';
+  }
 
   return $output;
 }

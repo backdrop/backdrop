@@ -101,7 +101,7 @@ function node_theme() {
       'variables' => array('name' => NULL, 'type' => NULL),
     ) + $base,
     'node_recent_block' => array(
-      'variables' => array('nodes' => NULL),
+      'variables' => array('nodes' => NULL, 'show_submitted_by' => 1, 'show_operations' => 1),
     ) + $base,
     'node_recent_content' => array(
       'variables' => array('node' => NULL),
@@ -2088,9 +2088,9 @@ function node_block_view($delta = '', $settings = array()) {
 
         $settings += array(
           'node_count' => 10,
-        );
-        $settings += array(
           'node_types' => $node_types,
+          'show_submitted_by' => $settings['show_submitted_by'],
+          'show_operations' => $settings['show_operations'],
         );
         $block['subject'] = t('Recent content');
 
@@ -2098,6 +2098,8 @@ function node_block_view($delta = '', $settings = array()) {
           $block['content'] = array(
             '#theme' => 'node_recent_block',
             '#nodes' => $nodes,
+            '#show_submitted_by' => $settings['show_submitted_by'],
+            '#show_operations' => $settings['show_operations'],
           );
         }
         else {
@@ -2120,15 +2122,25 @@ function node_block_configure($delta = '', $settings = array()) {
     $node_types = node_type_get_names();
     $settings += array(
       'node_count' => 10,
-    );
-    $settings += array(
       'node_types' => array_keys($node_types),
+      'show_submitted_by' => 1,
+      'show_operations' => 1,
     );
     $form['node_count'] = array(
       '#type' => 'number',
       '#title' => t('Number of recent content items to display'),
       '#default_value' => $settings['node_count'],
       '#min' => 1,
+    );
+    $form['show_submitted_by'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Show the "submitted by" information for each recent content item'),
+      '#default_value' => $settings['show_submitted_by'],
+    );
+    $form['show_operations'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Show edit/delete buttons (if the user has permission to update/delete content.)'),
+      '#default_value' => $settings['show_operations'],
     );
     $form['node_types'] = array(
       '#type' => 'checkboxes',
