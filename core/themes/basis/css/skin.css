@@ -972,6 +972,25 @@ ul.secondary li a:active {
 }
 
 /**
+ * Dropbutton styles.
+ */
+.js .dropbutton-widget {
+  border: 1px solid #E9E8E8;
+}
+.js .dropbutton-wrapper.open .dropbutton-widget {
+  border-color: #0d68a6;
+}
+.js .dropbutton a {
+  text-decoration: none;
+}
+.js .dropbutton a {
+  text-align: left;
+}
+[dir="rtl"].js .dropbutton a {
+  text-align: right;
+}
+
+/**
  * Unpublished indicator.
  */
 .unpublished-indicator {
