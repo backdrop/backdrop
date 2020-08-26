@@ -398,6 +398,10 @@ function path_pattern_settings_form($settings) {
     '#default_value' => $settings['default'],
     '#description' => $settings['description'],
     '#maxlength' => 1280,
+    '#element_validate' => array('token_element_validate'),
+    '#after_build' => array('token_element_validate'),
+    '#token_types' => $settings['token_types'],
+    '#min_tokens' => 1,
   );
   $form['path']['path_tokens'] = array(
     '#theme' => 'token_tree_link',
