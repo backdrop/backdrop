@@ -2088,8 +2088,6 @@ function node_block_view($delta = '', $settings = array()) {
 
         $settings += array(
           'node_count' => 10,
-        );
-        $settings += array(
           'node_types' => $node_types,
         );
         $block['subject'] = t('Recent content');
@@ -2120,8 +2118,6 @@ function node_block_configure($delta = '', $settings = array()) {
     $node_types = node_type_get_names();
     $settings += array(
       'node_count' => 10,
-    );
-    $settings += array(
       'node_types' => array_keys($node_types),
     );
     $form['node_count'] = array(
