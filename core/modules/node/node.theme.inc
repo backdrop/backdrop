@@ -103,9 +103,6 @@ function theme_node_recent_block($variables) {
     $rows[] = $row;
   }
 
-
-
-
   if ($rows) {
     $output = theme('table', array('rows' => $rows));
     if (user_access('access content overview')) {
