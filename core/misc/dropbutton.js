@@ -22,6 +22,36 @@ Backdrop.behaviors.dropButton = {
   }
 };
 
+Backdrop.behaviors.dropButtonWidths = {
+  attach: function(context, settings) {
+    function adjustDropButtonWidths() {
+      var $dropbutton = $(this);
+
+      // Get widest item width.
+      var widestItem = 0, $item;
+      $dropbutton.find('li:hidden').each(function() {
+        // Use a clone element to avoid altering element CSS properties.
+        $item = $(this).clone().insertAfter($(this)).show().css('visibility','hidden');
+        widestItem = Math.max($item.outerWidth(), widestItem);
+        $item.remove();
+      });
+
+      // Set dropbutton list (<ul>) as wide as it's widest child.
+      $dropbutton.find('.dropbutton').css('min-width', widestItem + 'px');
+
+      // Set parent element min-width, like <td class="operations"> to prevent
+      // overflow issue (See https://github.com/backdrop/backdrop-issues/issues/2806).
+      $dropbutton.parent().css('min-width', $dropbutton.find('.dropbutton-widget').outerWidth() + 'px');
+    }
+
+    // Calculate dropbutton elements width once the font is loaded.
+    Backdrop.isFontLoaded('Open Sans', function() {
+      $(context).find('.dropbutton-wrapper').once('dropbutton-width', adjustDropButtonWidths);
+    });
+
+  }
+};
+
 /**
  * Delegated callback for opening and closing dropbutton secondary actions.
  */
