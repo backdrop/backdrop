@@ -77,27 +77,30 @@ function theme_node_recent_block($variables) {
   $l_options = array('query' => backdrop_get_destination());
   foreach ($variables['nodes'] as $node) {
     $row = array();
+
     $row['content'] = array(
       'data' => theme('node_recent_content', array('node' => $node)),
       'class' => 'title-author',
+      // Assume no "edit" or "delete" link for the current row, so make this
+      // cell span another 2 columns (in case other rows do have any of those
+      // links).
+      'colspan' => 3,
     );
     if (node_access('update', $node)) {
       $row['edit'] = array(
         'data' => l(t('edit'), 'node/' . $node->nid . '/edit', $l_options),
         'class' => 'edit',
       );
+      // If there's an "edit" link, reduce the title/author cell colspan by 1.
+      $row['content']['colspan']--;
     }
     if (node_access('delete', $node)) {
       $row['delete'] = array(
         'data' => l(t('delete'), 'node/' . $node->nid . '/delete', $l_options),
         'class' => 'delete',
       );
-    }
-
-    // If no edit or delete link, increase the colspan of the title/author cell
-    // accordingly. 
-    if (count($row) != 3) {
-      $row['content']['colspan'] = 3 - count($row);
+      // If there's a "delete" link, reduce the title/author cell colspan by 1.
+      $row['content']['colspan']--;
     }
 
     $rows[] = $row;
