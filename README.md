@@ -64,7 +64,7 @@ project:
 - [JetBrains](https://www.jetbrains.com/phpstorm) for use of the PHPStorm IDE
   for development. *(Contact info@backdropcms.org for a license.)*
 - [GitHub](https://github.com) for collaboration and code management tools.
-- [Tugboat](https://tugboat.qa) for powering our [demo site sandboxes](https://backdropcms.org/demo/create).
+- [Tugboat](https://www.tugboat.qa) for powering our [demo site sandboxes](https://backdropcms.org/demo).
 - [ZenCI](https://zen.ci) for continuous automated testing and sandbox testing.
 
 User Guide
