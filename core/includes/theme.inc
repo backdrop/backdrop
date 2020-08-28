@@ -1967,6 +1967,12 @@ function template_preprocess_image(&$variables) {
   $path_or_uri = $variables['uri'] ? $variables['uri'] : $variables['path'];
   $variables['attributes']['src'] = file_create_url($path_or_uri);
 
+  // Set lazy-loading if enabled.
+  $lazy_load = config_get('system.core', 'lazy_load_images');
+  if ($lazy_load && !isset($variables['attributes']['loading'])) {
+    $variables['attributes']['loading'] = 'lazy';
+  }
+
   // Convert all other variables into the attributes array.
   foreach (array('width', 'height', 'alt', 'title') as $key) {
     if (isset($variables[$key])) {
@@ -2025,10 +2031,6 @@ function template_preprocess_image(&$variables) {
  *   @endcode
  */
 function theme_image($variables) {
-  $lazy_load = config_get('system.core', 'lazy_load_images');
-  if ($lazy_load && !isset($variables['attributes']['loading'])) {
-    $variables['attributes']['loading'] = 'lazy';
-  }
   return '<img' . backdrop_attributes($variables['attributes']) . ' />';
 }
 
