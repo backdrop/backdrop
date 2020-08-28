@@ -237,12 +237,12 @@ function system_requirements($phase) {
     file_ensure_htaccess();
 
     foreach (array('active', 'staging') as $type) {
-      $dir = config_get_config_directory($type);
-      file_save_htaccess($dir);
+      $config_directory = config_get_config_directory($type);
+      file_save_htaccess($config_directory);
 
-      $htaccess_files[$dir . '/.htaccess'] = array(
+      $htaccess_files[$config_directory . '/.htaccess'] = array(
         'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
-        'directory' => $dir,
+        'directory' => $config_directory,
       );
     }
 
