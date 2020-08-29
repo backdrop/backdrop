@@ -353,6 +353,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
 
   foreach ($contexts as $context_key => $layout_context) {
     if (!in_array($context_key, array('current_user', 'overrides_path', 'dashboard'))) {
+      // Contexts that are locked to a particular position (such as node/%).
       if ($layout_context->position && $layout_context->required) {
         $form['context_wrapper']['context']['required'][$context_key]['summary'] = array(
           '#markup' => $layout_context->getAdminSummary($layout->getPath()),
@@ -370,6 +371,8 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
           );
         }
       }
+      // Custom contexts and required contexts that do not need position (such
+      // as admin/dashboard).
       else {
         $form['context_wrapper']['context']['required'][$context_key]['summary'] = array(
           '#markup' => $layout_context->getAdminSummary($layout->getPath()),
