@@ -1638,6 +1638,9 @@ div.add-or-remove-shortcuts {
 #field-display-overview .field-formatter-settings-edit-form .form-item {
   margin: 10px 0;
 }
+#field-display-overview .field-formatter-settings-edit-form .form-item .form-item {
+  margin: 0;
+}
 #field-display-overview .field-formatter-settings-edit-form .form-submit {
   margin-bottom: 0;
 }
