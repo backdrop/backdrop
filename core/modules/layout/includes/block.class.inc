@@ -262,6 +262,12 @@ class Block extends LayoutHandler {
       '#description' => t('Defaults to block title if left blank.'),
       '#maxlength' => 255,
     );
+    $form['admin_title']['admin_description'] = array(
+     '#type' => 'textfield',
+     '#title' => t('Admin description'),
+     '#maxlength' => 128,
+     '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
+    );
   }
 
   /**
@@ -278,6 +284,7 @@ class Block extends LayoutHandler {
     $this->settings['title_display'] = $form_state['values']['title_display'];
     $this->settings['title'] = $form_state['values']['title'];
     $this->settings['admin_title'] = $form_state['values']['admin_title'];
+    $this->settings['admin_description'] = $form_state['values']['admin_description'];
     $this->settings['style'] = $form_state['values']['style'];
     if (isset($form_state['values']['contexts'])) {
       $this->settings['contexts'] = $form_state['values']['contexts'];
