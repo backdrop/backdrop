@@ -1836,7 +1836,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
 
     $edit['pass'] = '123abcdef';
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
-    $this->assertRaw(t("The password is too weak. Please consider making your password more complex."));
+    $this->assertRaw(t("The password is too weak. Please consider making your password more complex"));
 
     $config->set('user_password_min_length_enabled', 1);
     $config->set('user_password_min_length', 10);
@@ -1851,7 +1851,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
     $config->set('user_password_required_score', USER_PASSWORD_SCORE_STRONG);
     $config->save();
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
-    $this->assertRaw(t("The password is too weak. Please consider making your password more complex."));
+    $this->assertRaw(t("The password is too weak. Please consider making your password more complex"));
 
     $edit = array(
       'name' => $this->randomName(),

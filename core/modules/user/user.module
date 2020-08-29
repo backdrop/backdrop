@@ -1103,7 +1103,7 @@ function user_password_policy_validate($form, &$form_state) {
 
   $required_score = user_password_required_score($username);
   if ($strength < $required_score) {
-    form_set_error('entropy_pass', t('The password is too weak. A longer password will help make it stronger. A variety of lowercase and uppercase letters, numbers, and punctuation will also help make your password stronger.'));
+    form_set_error('entropy_pass', t('The password is too weak. Please consider making your password more complex: that it contains a number of lower- and uppercase letters, digits and punctuation.'));
   }
 
   $min_length_enabled = $config->get('user_password_min_length_enabled');
