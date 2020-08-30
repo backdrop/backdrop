@@ -121,11 +121,12 @@ class BlockText extends Block {
       '#required' => FALSE,
     );
     $form['admin_label']['admin_description'] = array(
-     '#type' => 'textfield',
-     '#title' => t('Admin description'),
-     '#maxlength' => 128,
-     '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
-     '#weight' => 4,
+      '#type' => 'textfield',
+      '#title' => t('Admin description'),
+      '#maxlength' => 128,
+      '#default_value' => isset($this->settings['admin_description']) ? $this->settings['admin_description'] : '',
+      '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
+      '#weight' => 4,
     );
   }
 

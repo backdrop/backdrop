@@ -258,6 +258,7 @@ class Block extends LayoutHandler {
       '#collapsed' => empty($this->settings['admin_label']),
       '#collapsible' => TRUE,
       '#weight' => $actions_weight - 1,
+      '#access' => $this->module != 'block',
     );
     $form['admin_label']['admin_label'] = array(
       '#type' => 'textfield',
@@ -267,10 +268,11 @@ class Block extends LayoutHandler {
       '#maxlength' => 255,
     );
     $form['admin_label']['admin_description'] = array(
-     '#type' => 'textfield',
-     '#title' => t('Admin description'),
-     '#maxlength' => 128,
-     '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
+      '#type' => 'textfield',
+      '#title' => t('Admin description'),
+      '#default_value' => isset($this->settings['admin_description']) ? $this->settings['admin_description'] : '',
+      '#maxlength' => 128,
+      '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
     );
   }
 
