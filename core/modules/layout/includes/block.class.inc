@@ -131,8 +131,8 @@ class Block extends LayoutHandler {
    * Return an administrative title that will always have a value.
    */
   function getAdminTitle() {
-    if (!empty($this->settings['admin_title'])) {
-      return check_plain($this->settings['admin_title']);
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
     }
 
     $title = $this->getTitle();
@@ -251,22 +251,22 @@ class Block extends LayoutHandler {
       '#maxlength' => 255,
     );
     $actions_weight = $form['actions']['#weight'];
-    $form['admin_title'] = array(
+    $form['admin_label'] = array(
       '#type' => 'fieldset',
       '#title' => t('Administrative title'),
       '#tree' => FALSE,
-      '#collapsed' => empty($this->settings['admin_title']),
+      '#collapsed' => empty($this->settings['admin_label']),
       '#collapsible' => TRUE,
       '#weight' => $actions_weight - 1,
     );
-    $form['admin_title']['admin_title'] = array(
+    $form['admin_label']['admin_label'] = array(
       '#type' => 'textfield',
-      '#default_value' => isset($this->settings['admin_title']) ? $this->settings['admin_title'] : '',
+      '#default_value' => isset($this->settings['admin_label']) ? $this->settings['admin_label'] : '',
       '#title' => t('Administrative title'),
       '#description' => t('Defaults to block title if left blank.'),
       '#maxlength' => 255,
     );
-    $form['admin_title']['admin_description'] = array(
+    $form['admin_label']['admin_description'] = array(
      '#type' => 'textfield',
      '#title' => t('Admin description'),
      '#maxlength' => 128,
@@ -287,7 +287,7 @@ class Block extends LayoutHandler {
   function formSubmit($form, &$form_state) {
     $this->settings['title_display'] = $form_state['values']['title_display'];
     $this->settings['title'] = $form_state['values']['title'];
-    $this->settings['admin_title'] = $form_state['values']['admin_title'];
+    $this->settings['admin_label'] = $form_state['values']['admin_label'];
     $this->settings['admin_description'] = $form_state['values']['admin_description'];
     $this->settings['style'] = $form_state['values']['style'];
     if (isset($form_state['values']['contexts'])) {

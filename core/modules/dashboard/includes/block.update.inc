@@ -33,8 +33,8 @@ class DashboardUpdateBlock extends Block {
    * {@inheritdoc}
    */
   function getAdminTitle() {
-    if (!empty($this->settings['admin_title'])) {
-      return check_plain($this->settings['admin_title']);
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
     }
 
     return t('Available updates');

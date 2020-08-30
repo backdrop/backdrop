@@ -22,8 +22,8 @@ class BlockText extends Block {
    *  Sets title text on draggable block panel in Layout builder.
    */
   function getAdminTitle() {
-    if (!empty($this->settings['admin_title'])) {
-      return check_plain($this->settings['admin_title']);
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
     }
 
     return !empty($this->settings['title']) ? check_plain($this->settings['title']) : t('Custom block');
@@ -88,11 +88,11 @@ class BlockText extends Block {
         $form['convert']['reusable']['#description'] .= ' ' . t('Reusable blocks may also be translated.');
       }
     }
-    $form['admin_title'] = array(
+    $form['admin_label'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Administrative title'),
+      '#title' => t('Administrative label'),
       '#tree' => FALSE,
-      '#collapsed' => empty($this->settings['admin_title']),
+      '#collapsed' => empty($this->settings['admin_label']),
         '#states' => array(
           'collapsed' => array(
             ':input[name="reusable"]' => array('checked' => FALSE),
@@ -101,26 +101,26 @@ class BlockText extends Block {
       '#collapsible' => TRUE,
       '#weight' => 4,
     );
-    $form['admin_title']['admin_title'] = array(
+    $form['admin_label']['admin_label'] = array(
       '#type' => 'textfield',
-      '#default_value' => isset($this->settings['admin_title']) ? $this->settings['admin_title'] : '',
-      '#title' => t('Administrative title'),
+      '#default_value' => isset($this->settings['admin_label']) ? $this->settings['admin_label'] : '',
+      '#title' => t('Administrative label'),
       '#description' => t('Defaults to block title if left blank.'),
       '#maxlength' => 255,
     );
-    $form['admin_title']['delta'] = array(
+    $form['admin_label']['delta'] = array(
       '#type' => 'machine_name',
       '#title' => t('Internal name'),
       '#maxlength' => 64,
       '#machine_name' => array(
-        'source' => array('admin_title', 'admin_title'),
+        'source' => array('admin_label', 'admin_label'),
         'exists' => 'block_custom_block_load',
       ),
       '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
       '#weight' => 3,
       '#required' => FALSE,
     );
-    $form['admin_title']['admin_description'] = array(
+    $form['admin_label']['admin_description'] = array(
      '#type' => 'textfield',
      '#title' => t('Admin description'),
      '#maxlength' => 128,
@@ -136,11 +136,11 @@ class BlockText extends Block {
     parent::formValidate($form, $form_state);
 
     if (module_exists('block')) {
-      $admin_title = trim($form_state['values']['admin_title']);
+      $admin_label = trim($form_state['values']['admin_label']);
       $delta = trim($form_state['values']['delta']);
       if ($form_state['values']['reusable']) {
-        if (empty($admin_title)) {
-          form_error($form['convert']['admin_title'], t('Admin label is required when making a block reusable.'));
+        if (empty($admin_label)) {
+          form_error($form['convert']['admin_label'], t('Admin label is required when making a block reusable.'));
         }
         elseif (empty($delta)) {
           form_error($form['convert']['delta'], t('An internal name is required when making a block reusable.'));
@@ -161,7 +161,7 @@ class BlockText extends Block {
       $this->plugin = 'block:' . $delta;
 
       $edit = array(
-        'info' => $form_state['values']['admin_title'],
+        'info' => $form_state['values']['admin_label'],
         'title' => $form_state['values']['title'],
         'description' => $form_state['values']['admin_description'],
         'body' => $form_state['values']['content'],

@@ -22,8 +22,8 @@ class FieldBlock extends Block {
    *  Sets title text on draggable block panel in Layout builder.
    */
   function getAdminTitle() {
-    if (!empty($this->settings['admin_title'])) {
-      return check_plain($this->settings['admin_title']);
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
     }
 
     list($entity_type, $field_name) = explode('-', $this->childDelta, 2);
