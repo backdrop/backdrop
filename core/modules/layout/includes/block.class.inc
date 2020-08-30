@@ -157,6 +157,10 @@ class Block extends LayoutHandler {
    * Return a preview for this block.
    */
   function getAdminPreview() {
+    if (!empty($this->settings['admin_description'])) {
+      return filter_xss($this->settings['admin_description']);
+    }
+
     $info = $this->getBlockInfo();
     $preview = '';
     if (isset($info['description'])) {

@@ -40,6 +40,10 @@ class DashboardMenuBlock extends Block {
    * {@inheritdoc}
    */
   function getAdminPreview() {
+    if (!empty($this->settings['admin_description'])) {
+      return filter_xss($this->settings['admin_description']);
+    }
+
     return t('Links to manage menus.');
   }
 
