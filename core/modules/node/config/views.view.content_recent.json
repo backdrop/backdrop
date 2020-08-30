@@ -394,6 +394,49 @@
                             "default_group_multiple": [],
                             "group_items": []
                         }
+                    },
+                    "type": {
+                        "id": "type",
+                        "table": "node",
+                        "field": "type",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "operator": "in",
+                        "value": [],
+                        "group": "1",
+                        "exposed": true,
+                        "expose": {
+                            "operator_id": "type_op",
+                            "label": "Content types",
+                            "description": "",
+                            "use_operator": 0,
+                            "operator": "type_op",
+                            "identifier": "type",
+                            "required": 0,
+                            "remember": 0,
+                            "multiple": 1,
+                            "remember_roles": {
+                                "authenticated": "authenticated",
+                                "anonymous": 0,
+                                "editor": 0,
+                                "administrator": 0
+                            },
+                            "reduce": 0
+                        },
+                        "is_grouped": false,
+                        "group_info": {
+                            "label": "",
+                            "description": "",
+                            "identifier": "",
+                            "optional": true,
+                            "widget": "select",
+                            "multiple": false,
+                            "remember": 0,
+                            "default_group": "All",
+                            "default_group_multiple": [],
+                            "group_items": []
+                        }
                     }
                 },
                 "sorts": {
@@ -504,12 +547,12 @@
                 },
                 "allow": {
                     "items_per_page": "items_per_page",
+                    "exposed_form": "exposed_form",
                     "use_pager": 0,
                     "offset": 0,
                     "link_to_view": 0,
                     "more_link": 0,
                     "path_override": 0,
-                    "exposed_form": 0,
                     "fields_override": 0
                 }
             }
