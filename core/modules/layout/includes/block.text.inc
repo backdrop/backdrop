@@ -93,11 +93,11 @@ class BlockText extends Block {
       '#title' => t('Admin label'),
       '#tree' => FALSE,
       '#collapsed' => empty($this->settings['admin_label']),
-        '#states' => array(
-          'collapsed' => array(
-            ':input[name="reusable"]' => array('checked' => FALSE),
-          ),
+      '#states' => array(
+        'collapsed' => array(
+          ':input[name="reusable"]' => array('checked' => FALSE),
         ),
+      ),
       '#collapsible' => TRUE,
       '#weight' => 4,
     );
@@ -115,6 +115,11 @@ class BlockText extends Block {
       '#machine_name' => array(
         'source' => array('admin_label', 'admin_label'),
         'exists' => 'block_custom_block_load',
+      ),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="reusable"]' => array('checked' => TRUE),
+        ),
       ),
       '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
       '#weight' => 3,

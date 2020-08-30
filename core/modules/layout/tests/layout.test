@@ -1386,7 +1386,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     protected $admin_user;
 
     function setUp() {
-      parent::setUp(array('file'));
+      parent::setUp(array('file', 'block'));
       // Create content types for testing.
       $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
 
@@ -1474,7 +1474,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid, $edit, t('Update block'));
     $this->assertText(t('Admin label is required when making a block reusable.'));
-    $edit['label'] = 'My custom block label';
+    $edit['admin_label'] = 'My custom block label';
     $this->backdropPost(NULL, $edit, t('Update block'));
     $this->assertText(t('An internal name is required when making a block reusable.'));
     $edit['delta'] = 'my_custom_block';
