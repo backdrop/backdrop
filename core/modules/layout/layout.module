@@ -83,7 +83,7 @@ function layout_menu() {
   ) + $base;
 
   $items['admin/structure/layouts/settings'] = array(
-    'title' => 'Templates',
+    'title' => 'Layout templates',
     'description' => 'Manage layout templates.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_settings_page'),

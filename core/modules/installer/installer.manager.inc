@@ -67,7 +67,7 @@ function installer_manager_update_form($form, $form_state, $context) {
       backdrop_set_title('Update themes');
       break;
     case 'layout':
-      backdrop_set_title('Update layouts');
+      backdrop_set_title('Update layout projects');
       break;
     case 'report':
       backdrop_set_title('Update projects');

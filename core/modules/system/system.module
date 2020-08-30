@@ -2211,7 +2211,7 @@ function system_updater_info() {
     ),
     'layout' => array(
       'class' => 'LayoutUpdater',
-      'name' => t('Update layouts'),
+      'name' => t('Update layout projects'),
       'weight' => 0,
     ),
   );
