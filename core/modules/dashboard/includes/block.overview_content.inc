@@ -98,7 +98,7 @@ class DashboardOverviewContentBlock extends Block {
       '#theme' => 'item_list',
       '#items' => $items,
     );
-    if (user_access('administer nodes')) {
+    if (user_access('administer nodes') || user_access('access content overview')) {
       $panel['link'] = array(
         '#theme' => 'link',
         '#path' => 'admin/content',

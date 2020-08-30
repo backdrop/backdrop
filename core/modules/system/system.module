@@ -1292,9 +1292,10 @@ function system_library_info() {
     'version' => '1.12.4',
     'js' => array(
       'core/misc/jquery.js' => array('group' => JS_LIBRARY, 'weight' => -20),
-      // This includes a security fix, so assign a weight that makes this load
+      // These include security fixes, so assign a weight that makes them load
       // as soon after jquery.js is loaded as possible.
       'core/misc/jquery-extend-3.4.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
+      'core/misc/jquery-html-prefilter-3.5.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
     ),
   );
 
@@ -3732,7 +3733,7 @@ function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_t
  * Implements hook_image_toolkits().
  */
 function system_image_toolkits() {
-  include_once BACKDROP_ROOT . '/' . backdrop_get_path('module', 'system') . '/' . 'image.gd.inc';
+  include_once BACKDROP_ROOT . '/' . backdrop_get_path('module', 'system') . '/image.gd.inc';
   return array(
     'gd' => array(
       'title' => t('GD2 image manipulation toolkit'),
@@ -4047,7 +4048,7 @@ function path_autocomplete($string = '') {
     // Get node matches.
     $results = db_select('node')
       ->fields('node', array('nid', 'type', 'title', 'status'))
-      ->condition('title', db_like($string) . '%', 'LIKE')
+      ->condition('title', '%' . db_like($string) . '%', 'LIKE')
       ->condition('status', 1)
       ->addTag('node_access')
       ->orderBy('nid', 'DESC')
@@ -4066,7 +4067,7 @@ function path_autocomplete($string = '') {
     if (user_access('manage files') && $match_count < $range) {
       $results = db_select('file_managed')
         ->fields('file_managed', array('fid', 'filename', 'uri', 'filemime', 'status', 'type'))
-        ->condition('filename', db_like($string) . '%', 'LIKE')
+        ->condition('filename', '%' . db_like($string) . '%', 'LIKE')
         ->condition('status', 1)
         ->condition('filemime', 'image%', 'NOT LIKE')
         ->orderBy('fid', 'DESC')
@@ -4089,7 +4090,7 @@ function path_autocomplete($string = '') {
     if (user_access('access user profiles') && $match_count < $range) {
       $results = db_select('users')
         ->fields('users', array('uid', 'name'))
-        ->condition('name', db_like($string) . '%', 'LIKE')
+        ->condition('name', '%' . db_like($string) . '%', 'LIKE')
         ->range(0, $range - $match_count)
         ->orderBy('uid', 'DESC')
         ->execute();
@@ -4114,7 +4115,7 @@ function path_autocomplete($string = '') {
     if ($match_count < $range) {
       $results = db_select('taxonomy_term_data')
         ->fields('taxonomy_term_data', array('tid', 'vocabulary', 'name'))
-        ->condition('name', db_like($string) . '%', 'LIKE')
+        ->condition('name', '%' . db_like($string) . '%', 'LIKE')
         ->addTag('taxonomy_term_access')
         ->range(0, $range - $match_count)
         ->orderBy('tid', 'DESC')
@@ -4198,7 +4199,7 @@ function path_autocomplete($string = '') {
     if ($match_count < $range) {
       $results = db_select('menu_links')
         ->fields('menu_links', array('link_title', 'link_path'))
-        ->condition('link_title', db_like($string) . '%', 'LIKE')
+        ->condition('link_title', '%' . db_like($string) . '%', 'LIKE')
         ->condition('link_path', '%' . db_like('%') . '%', 'NOT LIKE')
         ->range(0, $range)
         ->execute();

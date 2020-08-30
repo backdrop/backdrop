@@ -304,7 +304,7 @@ function layout_preprocess_layout(&$variables) {
   }
 
   // Build HTML for displaying flexible templates.
-  if ($variables['layout_info']['template'] == 'layout--flexible') {
+  if (isset($variables['layout_info']['template']) && ($variables['layout_info']['template'] == 'layout--flexible')) {
     if (!empty($variables['renderer']->flexible)) {
       $variables['flexible_editor'] = TRUE;
       $flexible_layout = layout_flexible_tempstore_load($variables['layout_info']['name']);
@@ -457,6 +457,11 @@ function template_preprocess_block(&$variables) {
       $variables['classes'][] = 'contextual-links-region';
       $variables['title_prefix'] = backdrop_render($build);
     }
+  }
+
+  // Add a NID class to node blocks.
+  if ($block->plugin == 'node:content') {
+    $variables['classes'][] = 'block-node-content-' . $block->settings['nid'];
   }
 
   // Set up some placeholders for constructing template file names.

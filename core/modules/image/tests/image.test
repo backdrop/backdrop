@@ -1057,7 +1057,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $this->assertTrue($g < 5, 'Green color component is close to 0.');
     $this->assertTrue($b < 5, 'Blue color component is close to 0.');
   }
-  
+
   /**
    * Test single width resolution setting.
    */
@@ -1066,8 +1066,8 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $min_dimensions = 50;
     $max_dimensions = 100;
     $instance_settings = array(
-      'max_dimensions' => $max_dimensions . 'x' . '',
-      'min_dimensions' => $min_dimensions . 'x' . '',
+      'max_dimensions' => $max_dimensions . 'x',
+      'min_dimensions' => $min_dimensions . 'x',
     );
     $this->createImageField($field_name, 'post', array(), $instance_settings);
 
@@ -1101,8 +1101,8 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $min_dimensions = 50;
     $max_dimensions = 100;
     $instance_settings = array(
-      'max_dimensions' => '' . 'x' . $max_dimensions,
-      'min_dimensions' => '' . 'x' . $min_dimensions,
+      'max_dimensions' => 'x' . $max_dimensions,
+      'min_dimensions' => 'x' . $min_dimensions,
     );
     $this->createImageField($field_name, 'post', array(), $instance_settings);
 

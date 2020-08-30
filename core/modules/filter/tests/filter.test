@@ -367,9 +367,34 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->assertFieldByName('filters[' . $second_filter . '][status]', '', 'Line break filter found.');
     $this->assertFieldByName('filters[' . $first_filter . '][status]', '', 'Url filter found.');
 
-    // Disable new filter.
+    // Order the new text format and check its position in the markup.
+    $edit_weight = array();
+    $edit_weight['formats[' . $format->format . '][weight]'] = -10;
+    $edit_weight['formats[filtered_html][weight]'] = -9;
+    $edit_weight['formats[full_html][weight]'] = -8;
+    $edit_weight['formats[plain_text][weight]'] = 0;
+    $this->backdropPost('admin/config/content/formats', $edit_weight, t('Save changes'));
+
+    $elements = $this->xpath('//select[@name=:first]/following::select[@name=:second]/following::select[@name=:third]/following::select[@name=:fourth]', array(
+      ':first' => 'formats[' . $format->format . '][weight]',
+      ':second' => 'formats[filtered_html][weight]',
+      ':third' => 'formats[full_html][weight]',
+      ':fourth' => 'formats[plain_text][weight]',
+    ));
+    $this->assertTrue(!empty($elements), 'Text format order confirmed in admin interface with new format at top.');
+
+    // Disable the new text format.
     $this->backdropPost('admin/config/content/formats/' . $format->format . '/disable', array(), t('Disable'));
     $this->assertRaw(t('Disabled text format %format.', array('%format' => $edit['name'])), 'Format successfully disabled.');
+
+    // Check that the disabled text format is at the bottom of the list.
+    $elements = $this->xpath('//select[@name=:first]/following::select[@name=:second]/following::select[@name=:third]/following::select[@name=:fourth]', array(
+      ':first' => 'formats[filtered_html][weight]',
+      ':second' => 'formats[full_html][weight]',
+      ':third' => 'formats[plain_text][weight]',
+      ':fourth' => 'formats[' . $format->format . '][weight]',
+    ));
+    $this->assertTrue(!empty($elements), 'Text format order confirmed in admin interface with disabled format at bottom.');
 
     // Allow authenticated users on full HTML.
     $format = filter_format_load($full);
@@ -465,6 +490,33 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit, t('Update'));
     $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Filtered HTML')));
+
+    // The form does save permitted value and it appears in the config json.
+    $length = 88;
+    $edit_setting = array(
+      'filter_url_length' => $length,
+    );
+    $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit_setting, t('Update'));
+    $this->backdropPost('admin/config/content/formats/filtered_html', array(), t('Save configuration'));
+    $saved_length = config_get('filter.format.filtered_html', 'filters.filter_url.settings.filter_url_length');
+    $this->assertEqual($saved_length, $length, 'Filter url length saved to config file.');
+
+    // Make sure consecutive settings form submits do not discard
+    // previously added settings.
+    $length = 102;
+    $edit_url = array(
+      'filter_url_length' => $length,
+    );
+    $edit_html = array(
+      'filter_html_nofollow' => TRUE,
+    );
+    $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit_url, t('Update'));
+    $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_html', $edit_html, t('Update'));
+    $this->backdropPost('admin/config/content/formats/filtered_html', array(), t('Save configuration'));
+    $url_length = config_get('filter.format.filtered_html', 'filters.filter_url.settings.filter_url_length');
+    $this->assertEqual($url_length, $length, 'Filter url not overridden by consecutive form post.');
+    $nofollow = config_get('filter.format.filtered_html', 'filters.filter_html.settings.filter_html_nofollow');
+    $this->assertTrue($nofollow, 'Consecutive settings form post saved correctly');
   }
 }
 
@@ -1625,7 +1677,7 @@ www.example.com with a newline in comments -->
         }
         if (!$success) {
           $this->verbose('Source:<pre>' . check_plain(var_export($source, TRUE)) . '</pre>'
-            . '<hr />' . 'Result:<pre>' . check_plain(var_export($result, TRUE)) . '</pre>'
+            . '<hr />Result:<pre>' . check_plain(var_export($result, TRUE)) . '</pre>'
             . '<hr />' . ($is_expected ? 'Expected:' : 'Not expected:')
             . '<pre>' . check_plain(var_export($value, TRUE)) . '</pre>'
           );
