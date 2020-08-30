@@ -253,7 +253,7 @@ class Block extends LayoutHandler {
     $actions_weight = $form['actions']['#weight'];
     $form['admin_label'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Administrative title'),
+      '#title' => t('Admin label'),
       '#tree' => FALSE,
       '#collapsed' => empty($this->settings['admin_label']),
       '#collapsible' => TRUE,
@@ -262,8 +262,8 @@ class Block extends LayoutHandler {
     $form['admin_label']['admin_label'] = array(
       '#type' => 'textfield',
       '#default_value' => isset($this->settings['admin_label']) ? $this->settings['admin_label'] : '',
-      '#title' => t('Administrative title'),
-      '#description' => t('Defaults to block title if left blank.'),
+      '#title' => t('Admin label'),
+      '#description' => t('Used to identify the block on layout pages.'),
       '#maxlength' => 255,
     );
     $form['admin_label']['admin_description'] = array(
