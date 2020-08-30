@@ -864,45 +864,20 @@ function field_ui_field_overview_form_submit($form, &$form_state) {
  * @ingroup forms
  */
 function field_ui_display_overview($entity_type, $bundle) {
-  if (is_object($bundle) && property_exists($bundle, 'name')) {
-    $bundle_label = check_plain($bundle->name);
-  }
-  $bundle = field_extract_bundle($entity_type, $bundle);
-  $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
+  $bundle_name = field_extract_bundle($entity_type, $bundle);
 
-  $entity_info = entity_get_info($entity_type);
+  if (is_object($bundle) && property_exists($bundle, 'name')) {
+    $bundle_label = check_plain($bundle_info->name);
+  }
   if (!isset($bundle_label)) {
     $bundle_label = check_plain($entity_info['label']);
   }
-  $view_mode_settings = field_view_mode_settings($entity_type, $bundle);
-  $custom_view_modes = config_get('entity.view_modes', 'view_modes');
-  $view_modes = $entity_info['view modes'];
-  if (is_array($view_modes)) {
-    backdrop_sort($view_modes, array('label' => SORT_STRING));
-  }
 
-  $custom = array();
-  $default = array();
-  // Sort display modes into active/default, and merge in display mode settings.
-  foreach ($view_modes as $view_mode_name => $mode) {
-    $custom_settings = isset($view_mode_settings[$view_mode_name]['custom_settings']) ? (bool) $view_mode_settings[$view_mode_name]['custom_settings'] : (bool) $mode['custom settings'];
-
-    $custom[$view_mode_name] = array(
-      'label' => $mode['label'],
-      'custom settings' => $custom_settings,
-      'storage' => !empty($custom_view_modes[$entity_type][$view_mode_name]) ? 'Custom' : 'Default (module-provided)',
-      'status' => $custom_settings ? 'Customized' : 'Using the <em>Default display</em>',
-    );
-
-    if (!($custom_settings)) {
-      $default[$view_mode_name] = $custom[$view_mode_name];
-      unset($custom[$view_mode_name]);
-    }
-  }
+  $view_mode_info = field_ui_get_view_mode_data($entity_type, $bundle_name);
 
   $build = array(
     '#entity_type' => $entity_type,
-    '#bundle' => $bundle,
+    '#bundle' => $bundle_name,
     '#attached' => array(
       'css' => array(backdrop_get_path('module', 'field_ui') . '/css/field_ui.css'),
     ),
@@ -914,13 +889,118 @@ function field_ui_display_overview($entity_type, $bundle) {
   $build['view_modes'] = array(
     '#theme' => 'field_ui_view_modes',
     '#tree' => TRUE,
-    '#view_modes' => $custom + $default,
+    '#view_modes' => $view_mode_info['active'] + $view_mode_info['default'],
     '#entity_type' => $entity_type,
     '#bundle' => $bundle_label,
-    '#admin_path' => $admin_path,
+    '#admin_path' => _field_ui_bundle_admin_path($entity_type, $bundle_name),
   );
 
   return $build;
+}
+
+/**
+ * Retrieve all display mode data for an entity / bundle combo.
+ *
+ * @param (string) $entity
+ *   Machine name for the entity type.
+ * @param (string) $bundle
+ *   Machine name for the bundle.
+ * @param (bool) $active_only
+ *   Specifies if only active display modes should be returned.
+ *
+ * @return (array)
+ *   All display modes, keyed by active / default status as follows:
+ *   $modes = array(
+ *     'active' => array(
+ *       'label' => Foo,
+ *       'custom settings' => TRUE,
+ *       'status' => 'Customized',
+ *       'storage' => 'Custom',
+ *     ),
+ *     'default' => array(
+ *       'label' => BAR,
+ *       'custom settings' => FLASE,
+ *       'status' => 'Using the <em>Default display</em>'
+ *       'storage' => 'Default (module-provided)'
+ *     ),
+ *   );
+ */
+function field_ui_get_view_mode_data($entity, $bundle, $active_only = FALSE, $include_default = TRUE) {
+  $entity_info = entity_get_info($entity);
+
+  // Get module-provided display mode names / labels.
+  $entity_view_modes = $entity_info['view modes'];
+  if (is_array($entity_view_modes)) {
+    backdrop_sort($entity_view_modes, array('label' => SORT_STRING));
+  }
+
+  // Get custom display mode names / labels.
+  $all_view_mode_config = config_get('entity.view_modes', 'view_modes');
+  $view_mode_config = $all_view_mode_config[$entity];
+
+  // Get all display mode field settings.
+  $view_mode_settings = field_view_mode_settings($entity, $bundle);
+
+  // Sort display modes into active/default, and merge in settings.
+  $all_view_modes = array(
+    'active' => array(),
+    'default' => array(),
+  );
+
+  // Include the default view mode.
+  if ($include_default) {
+    $all_view_modes['active']['default'] = array(
+      'label' => 'Default',
+      'custom settings' => TRUE,
+      'status' => '',
+      'storage' => 'Default (module-provided)',
+    );
+  }
+
+  foreach ($entity_view_modes as $machine => $view_mode_info) {
+    $is_active = _field_ui_display_mode_get_status($machine, $view_mode_settings, $view_mode_info);
+
+    $all_view_modes['active'][$machine] = array(
+      'label' => $view_mode_info['label'],
+      'custom settings' => $is_active,
+      'status' => $is_active ? 'Customized' : 'Using the <em>Default display</em>',
+      'storage' => !empty($view_mode_config[$machine]) ? 'Custom' : 'Default (module-provided)',
+    );
+
+    if (!($is_active)) {
+      $all_view_modes['default'][$machine] = $all_view_modes['active'][$machine];
+      unset($all_view_modes['active'][$machine]);
+    }
+  }
+
+  if ($active_only) {
+    return $all_view_modes['active'];
+  }
+
+  return $all_view_modes;
+}
+
+/**
+ * Determined whether a display mode is active for an entity / bundle combo.
+ *
+ * @param (string) $entity
+ *   Machine name of entity type.
+ * @param (array) $settings
+ *   Settings for the display mode, as returned by field_view_mode_settings().
+ * @param (array) $view_mode_info
+ *   Module-provided information about the display mode, as returned by
+ *   entity_get_info($entity);
+ *
+ * @return (bool)
+ *   Whether or noot the display mode is active.
+ */
+function _field_ui_display_mode_get_status($entity, $settings, $view_mode_info) {
+  if (isset($settings[$entity]['custom_settings'])) {
+    return (bool) $settings[$entity]['custom_settings'];
+  }
+  else {
+    return (bool) $view_mode_info['custom settings'];
+  }
 }
 
 /**
@@ -1441,7 +1521,7 @@ function field_ui_display_overview_multistep_js($form, &$form_state) {
  * @param $entity_type
  *   The bundle's entity type.
  * @param $bundle
- *   The bundle whose display mode is being customized.
+ *   The machine name of the bundle whose display mode is being customized.
  * @param $view_mode
  *   The display mode that the administrator has set to use custom settings.
  * @param $settings
@@ -2386,6 +2466,10 @@ function field_ui_view_mode_delete_form_submit($form, &$form_state) {
   )));
 
   $form_state['redirect'] = $form['#path'];
+
+  // Rebuild the admin menu cache.
+  cache('admin_bar')->flush();
+  menu_cache_clear();
 }
 
 /**
@@ -2396,7 +2480,15 @@ function field_ui_view_mode_enable_access() {
   if (isset($_GET['token']))  {
     $token_check = backdrop_valid_token($_GET['token'], 'view_mode_enable');
   }
-  return user_access('administer view modes') && $token_check;
+
+  if ($token_check && user_access('administer view modes')) {
+    // Rebuild the admin menu cache.
+    cache('admin_bar')->flush();
+    menu_cache_clear();
+    return TRUE;
+  }
+
+  return FALSE;
 }
 
 /**
@@ -2429,6 +2521,7 @@ function field_ui_view_mode_enable($entity_type, $bundle, $view_mode_name, $redi
   backdrop_set_message($message);
 
   // Clear the menu cache to add display mode to administration menu.
+  cache('admin_bar')->flush();
   menu_cache_clear();
 
   if ($redirect) {

@@ -143,6 +143,7 @@ function field_ui_admin_bar_map() {
         $map["$path/fields/%field_ui_menu"]['arguments'][] = $field_arguments;
       }
 
+      // Add manage displays landing for each entity type.
       if (!isset($map["$path/display"])) {
         $map["$path/display"] = array(
           'parent' => $path,
@@ -151,15 +152,13 @@ function field_ui_admin_bar_map() {
       }
       $map["$path/display"]['arguments'][] = $arguments;
 
-      // Add manage display for each customized view mode.
-      $modes = array('default');
-      foreach ($entity_info['view modes'] as $machine => $mode) {
-        if ($mode['custom settings']) {
-          $modes[] = $machine;
-        }
-      }
+      // Get active view modes.
+      module_load_include('inc', 'field_ui', 'field_ui.admin');
+      $active_modes = field_ui_get_view_mode_data($entity_type, $bundle, TRUE);
+
+      // Add manage display for each customized display mode.
       $display_arguments = $arguments;
-      $display_arguments['%'] = $modes;
+      $display_arguments['%'] = array_keys($active_modes);
       if (!isset($map["$path/display/%"])) {
         $map["$path/display/%"] = array(
           'parent' => "$path/display",
