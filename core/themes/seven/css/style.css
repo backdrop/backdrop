@@ -661,7 +661,6 @@ fieldset {
 }
 fieldset .fieldset-legend {
   display: block;
-  text-transform: uppercase;
   box-sizing: border-box;
   border: 2px solid #EAEAEA;
   border-radius: 4px;
