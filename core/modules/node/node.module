@@ -100,12 +100,6 @@ function node_theme() {
     'node_admin_overview' => array(
       'variables' => array('name' => NULL, 'type' => NULL),
     ) + $base,
-    'node_recent_block' => array(
-      'variables' => array('nodes' => NULL),
-    ) + $base,
-    'node_recent_content' => array(
-      'variables' => array('node' => NULL),
-    ) + $base,
     'node_type_form_permissions' => array(
       'render element' => 'form',
       'function' => 'theme_user_admin_permissions',
@@ -2046,10 +2040,6 @@ function node_block_info() {
     'info' => t('Syndicate'),
     'description' => t('An RSS icon linking to available feeds.'),
   );
-  $blocks['recent'] = array(
-    'info' => t('Recent content'),
-    'description' => t('A list of recently published content.'),
-  );
   $blocks['content'] = array(
     'info' => t('Existing content'),
     'description' => t('Embed existing node content as a block onto other pages'),
@@ -2073,25 +2063,6 @@ function node_block_view($delta = '', $settings = array()) {
         $block['content'] = node_syndicate_content($settings);
       }
       break;
-
-    case 'recent':
-      if (user_access('access content')) {
-        $settings += array(
-          'node_count' => 10,
-        );
-        $block['subject'] = t('Recent content');
-        if ($nodes = node_get_recent($settings['node_count'])) {
-          $block['content'] = array(
-            '#theme' => 'node_recent_block',
-            '#nodes' => $nodes,
-          );
-        }
-        else {
-          $block['content'] = t('No content available.');
-        }
-      }
-      break;
-
   }
 
   return $block;
@@ -2102,17 +2073,6 @@ function node_block_view($delta = '', $settings = array()) {
  */
 function node_block_configure($delta = '', $settings = array()) {
   $form = array();
-  if ($delta == 'recent') {
-    $settings += array(
-      'node_count' => 10,
-    );
-    $form['node_count'] = array(
-      '#type' => 'select',
-      '#title' => t('Number of recent content items to display'),
-      '#default_value' => $settings['node_count'],
-      '#options' => backdrop_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30)),
-    );
-  }
   if ($delta == 'syndicate') {
     $form['syndicate_settings'] = array(
       '#type' => 'radios',
@@ -2143,51 +2103,6 @@ function node_syndicate_content($settings) {
     '#url' => 'rss.xml',
     '#title' => t('Subscribe to promoted content'),
   );
-}
-
-/**
- * Finds the most recently changed nodes that are available to the current user.
- *
- * @param $number
- *   (optional) The maximum number of nodes to find. Defaults to 10.
- *
- * @return
- *   An array of node entities or an empty array if there are no recent nodes
- *   visible to the current user.
- */
-function node_get_recent($number = 10) {
-  $query = db_select('node', 'n');
-
-  if (!user_access('bypass node access') && !user_access('view any unpublished content')) {
-    // If the user is able to view unpublished nodes, allow them to see these
-    // in addition to published nodes. Check that they actually have some
-    // unpublished nodes to view before adding the condition.
-    // Note: this query still ignores unpublished by type permissions.
-    // See: https://github.com/backdrop/backdrop-issues/issues/146.
-    $own_unpublished = db_query('SELECT nid FROM {node} WHERE uid = :uid AND status = :status',
-     array(':uid' => $GLOBALS['user']->uid, ':status' => NODE_NOT_PUBLISHED))->fetchCol();
-    if (user_access('view own unpublished content') && $own_unpublished) {
-      $query->condition(db_or()
-        ->condition('n.status', NODE_PUBLISHED)
-        ->condition('n.nid', $own_unpublished, 'IN')
-      );
-    }
-    else {
-      // If not, restrict the query to published nodes.
-      $query->condition('n.status', NODE_PUBLISHED);
-    }
-  }
-  $nids = $query
-    ->fields('n', array('nid'))
-    ->orderBy('n.changed', 'DESC')
-    ->range(0, $number)
-    ->addTag('node_access')
-    ->execute()
-    ->fetchCol();
-
-  $nodes = node_load_multiple($nids);
-
-  return $nodes ? $nodes : array();
 }
 
 /**

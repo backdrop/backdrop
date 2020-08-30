@@ -230,7 +230,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     foreach ($logs as $log) {
       $this->assertText($log, t('Log message found.'));
     }
- 
+
     // Confirm that this is the active revision.
     $this->assertTrue($node->isActiveRevision(), 'Third node revision is the current one.');
 
@@ -243,7 +243,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     )), 'Revision reverted.');
     $reverted_node = node_load($node->nid);
     $this->assertTrue(($nodes[1]->body[LANGUAGE_NONE][0]['value'] == $reverted_node->body[LANGUAGE_NONE][0]['value']), 'Node reverted correctly.');
- 
+
     // Confirm that this is not the current version.
     $node = node_load($node->nid, $node->vid);
     $this->assertFalse($node->isActiveRevision(), 'Third node revision is not the current one.');
@@ -723,7 +723,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
 
     $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');
 
-    // Test that a user with permissions to create, but not edit, can still 
+    // Test that a user with permissions to create, but not edit, can still
     // access preview.
     $no_edit_user = $this->backdropCreateUser(array(
       'create page content',
@@ -740,7 +740,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->backdropPost('node/add/page', $edit, t('Preview'));
     $this->assertText($edit[$title_key], 'Title displayed.');
 
-    // Test that a user with permissions to edit, but not create, can still 
+    // Test that a user with permissions to edit, but not create, can still
     // access preview.
     $no_create_user = $this->backdropCreateUser(array(
       'edit any page content',
@@ -2300,7 +2300,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
   }
 
   /**
-   * Tests the recent comments block.
+   * Tests the recent content block.
    */
   function testRecentNodeBlock() {
     $this->backdropLogin($this->admin_user);
@@ -2312,14 +2312,14 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
 
     // Set the block to a region to confirm block is available.
     $layout = layout_load('home');
-    $block = $layout->addBlock('node', 'recent', 'content');
+    $block = $layout->addBlock('views', 'content_recent-block', 'sidebar');
 
     // Set block title and variables.
     $block_title = $this->randomName();
     $block->settings['title'] = $block_title;
     $block->settings['title_display'] = LAYOUT_TITLE_CUSTOM;
     $block->settings['block_settings'] = array(
-      'node_count' => 2,
+      'items_per_page' => 2,
     );
     $layout->save();
 
@@ -2361,14 +2361,13 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->assertText($node3->title, t('Node found in block.'));
 
     // Check to make sure nodes are in the right order.
-    $this->assertTrue($this->xpath('//*[contains(@class,"block-node-recent")]/div/table/tbody/tr[position() = 1]/td/div/a[text() = "' . $node3->title . '"]'), t('Nodes were ordered correctly in block.'));
+    $this->assertTrue($this->xpath('//*[contains(@class,"block-views-content-recent-block")]/div/div/div/table/tbody/tr[position() = 1]/td/div/a[text() = "' . $node3->title . '"]'), t('Nodes were ordered correctly in block.'));
 
     // Set the number of recent nodes to show to 10.
     $this->backdropLogout();
     $this->backdropLogin($this->admin_user);
-
     $block->settings['block_settings'] = array(
-      'node_count' => 10,
+      'items_per_page' => 10,
     );
     $layout->save();
 

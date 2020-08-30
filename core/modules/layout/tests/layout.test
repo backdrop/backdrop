@@ -2175,7 +2175,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
     ));
     $this->backdropGet('node/' . $article_node->nid);
     $article_blocks = $blocks;
-    $article_blocks['sidebar-second'][] = 'block-node-recent';
+    $article_blocks['sidebar-second'][] = 'block-views-content-recent-block';
     $this->assertBlocks($article_blocks);
 
     // Check that the blocks are NOT available on page content.
@@ -2188,7 +2188,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
     $this->assertBlocks($blocks);
     $this->assertNoBlocks(array(
       'l-sidebar-section' => array(
-        'block-node-recent'
+        'block-views-content-recent-block'
       ),
     ));
 
