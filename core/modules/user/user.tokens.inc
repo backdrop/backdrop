@@ -40,6 +40,10 @@ function user_token_info() {
     'description' => t('The user roles associated with the user account.'),
     'type' => 'array',
   );
+  $user['link'] = array(
+    'name' => t("Profile link"),
+    'description' => t("Link to account profile page based on 'View user profiles' permission."),
+  );
 
   if (config_get('system.core', 'user_pictures')) {
     $user['picture'] = array(
@@ -152,6 +156,10 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
 
         case 'edit-url':
           $replacements[$original] = !empty($account->uid) ? url("user/$account->uid/edit", $url_options) : t('not yet assigned');
+          break;
+
+        case 'link':
+          $replacements[$original] = theme('username', array('account' => $account));
           break;
 
       }
