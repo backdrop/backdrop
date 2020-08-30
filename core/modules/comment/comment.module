@@ -1193,11 +1193,11 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       ),
       '#access' => user_access('post comments', backdrop_anonymous_user()),
     );
-    // The default is to automatically add the first x characters of the comment as its title.
     $form['comment']['comment_subject_field'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Allow custom comment title'),
+      '#title' => t('Allow custom title for each comment'),
       '#default_value' => $node_type->settings['comment_subject_field'],
+      '#description' => t('The default is to use the first several words as the comment title.'),
     );
     if (config_get('system.core', 'user_pictures')) {
       $form['comment']['comment_user_picture'] = array(
