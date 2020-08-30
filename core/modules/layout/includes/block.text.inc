@@ -105,7 +105,7 @@ class BlockText extends Block {
       '#type' => 'textfield',
       '#default_value' => isset($this->settings['admin_label']) ? $this->settings['admin_label'] : '',
       '#title' => t('Admin label'),
-      '#description' => t('Used to identify the block on layout pages.'),
+      '#description' => t('Used to identify the block on layout pages. Required for reusable blocks.'),
       '#maxlength' => 255,
     );
     $form['admin_label']['delta'] = array(
@@ -140,10 +140,10 @@ class BlockText extends Block {
       $delta = trim($form_state['values']['delta']);
       if ($form_state['values']['reusable']) {
         if (empty($admin_label)) {
-          form_error($form['convert']['admin_label'], t('Admin label is required when making a block reusable.'));
+          form_error($form['admin_label']['admin_label'], t('Admin label is required when making a block reusable.'));
         }
         elseif (empty($delta)) {
-          form_error($form['convert']['delta'], t('An internal name is required when making a block reusable.'));
+          form_error($form['admin_label']['delta'], t('An internal name is required when making a block reusable.'));
         }
       }
     }
