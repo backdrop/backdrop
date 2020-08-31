@@ -585,13 +585,19 @@ class views_plugin_display extends views_plugin {
       // and therefore need special handling.
       'access' => array(
         'contains' => array(
-          'type' => array('default' => 'none'),
-         ),
+          'type' => array(
+            'default' => 'none',
+            'unpack_translatable' => 'unpack_plugin',
+          ),
+        ),
       ),
       'cache' => array(
         'contains' => array(
-          'type' => array('default' => 'none'),
-         ),
+          'type' => array(
+            'default' => 'none',
+            'unpack_translatable' => 'unpack_plugin',
+          ),
+        ),
       ),
       'query' => array(
         'contains' => array(
@@ -607,15 +613,21 @@ class views_plugin_display extends views_plugin {
       // should be copied.
       'exposed_form' => array(
         'contains' => array(
-          'type' => array('default' => 'basic'),
+          'type' => array(
+            'default' => 'basic',
+            'unpack_translatable' => 'unpack_plugin',
+          ),
           'options' => array('default' => array()),
-         ),
+        ),
       ),
       'pager' => array(
         'contains' => array(
-          'type' => array('default' => 'full'),
+          'type' => array(
+            'default' => 'full',
+            'unpack_translatable' => 'unpack_plugin',
+          ),
           'options' => array('default' => array()),
-         ),
+        ),
       ),
 
       // Note that the styles have their options completely independent.
@@ -623,12 +635,14 @@ class views_plugin_display extends views_plugin {
       // should not be repeated.
       'style_plugin' => array(
         'default' => 'default',
+        'unpack_translatable' => 'unpack_style',
       ),
       'style_options' => array(
         'default' => array(),
       ),
       'row_plugin' => array(
         'default' => 'fields',
+        'unpack_translatable' => 'unpack_style',
       ),
       'row_options' => array(
         'default' => array(),
@@ -638,26 +652,33 @@ class views_plugin_display extends views_plugin {
       ),
       'header' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
       'footer' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
       'empty' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
 
       // These are the 5 handler types.
       'relationships' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
       'fields' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
       'sorts' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
       'arguments' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
       'filter_groups' => array(
         'contains' => array(
@@ -667,6 +688,7 @@ class views_plugin_display extends views_plugin {
       ),
       'filters' => array(
         'default' => array(),
+        'unpack_translatable' => 'unpack_handler',
       ),
     );
 
@@ -1951,6 +1973,9 @@ class views_plugin_display extends views_plugin {
           '#type' => 'submit',
           '#value' => t('Change theme'),
           '#submit' => array('views_ui_edit_display_form_change_theme'),
+          '#attributes' => array(
+            'class' => array('use-ajax-submit'),
+          ),
         );
 
         $form['analysis'] = array(
@@ -1965,6 +1990,9 @@ class views_plugin_display extends views_plugin {
           '#type' => 'submit',
           '#value' => t('Rescan template files'),
           '#submit' => array('views_ui_config_item_form_rescan'),
+          '#attributes' => array(
+            'class' => array('use-ajax-submit'),
+          ),
         );
         $form['rescan_button']['markup'] = array(
           '#markup' => '<div class="description">' . t("<strong>Important!</strong> When adding, removing, or renaming template files, it is necessary to make Backdrop aware of the changes by making it rescan the files on your system. By clicking this button you clear Backdrop's theme registry and thereby trigger this rescanning process. The highlighted templates above will then reflect the new state of your system.") . '</div>',
@@ -2811,6 +2839,86 @@ class views_plugin_display extends views_plugin {
         );
       }
     }
+  }
+
+  /**
+   * Extract translatables from views styles.
+   */
+  public function unpack_style($indent, $prefix, $storage, $option, $definition, $parents) {
+    $output = '';
+    $style_plugin = $this->get_plugin();
+    if ($option == 'style_plugin') {
+      $type = 'style';
+      $options_field = 'style_options';
+      $plugin = $style_plugin;
+    }
+    else {
+      if (!$style_plugin || !$style_plugin->uses_row_plugin()) {
+        return;
+      }
+
+      $type = 'row';
+      $options_field = 'row_options';
+      $plugin = $this->get_plugin('row');
+      // If the style plugin doesn't use row plugins, don't even bother.
+    }
+
+    if ($plugin) {
+      return $plugin->unpack_translatables($translatable, $parents);
+    }
+  }
+
+  /**
+   * Special handling for plugins when extracting translatables.
+   */
+  public function unpack_plugin(&$translatable, $storage, $option, $definition, $parents) {
+    $plugin_type = end($parents);
+    $plugin = $this->get_plugin($plugin_type);
+    if ($plugin) {
+      // Write which plugin to use.
+      return $plugin->unpack_translatables($translatable, $parents);
+    }
+  }
+
+  /**
+   * Special method to unpack items that have handlers.
+   *
+   * This method was specified in the option_definition() as the method to
+   * utilize to export fields, filters, sort criteria, relationships and
+   * arguments. This passes the export off to the individual handlers so that
+   * they can export themselves properly.
+   */
+  public function unpack_handler(&$translatable, $storage, $option, $definition, $parents) {
+    $output = '';
+
+    // Cut the 's' off because the data is stored as the plural form but we need
+    // the singular form.
+    if ($option != 'header' && $option != 'footer' && $option != 'empty') {
+      $type = substr($option, 0, -1);
+    }
+    else {
+      $type = $option;
+    }
+    $types = views_object_types();
+    foreach ($storage[$option] as $id => $info) {
+      if (!empty($types[$type]['type'])) {
+        $handler_type = $types[$type]['type'];
+      }
+      else {
+        $handler_type = $type;
+      }
+      $handler = views_get_handler($info['table'], $info['field'], $handler_type);
+      if ($handler) {
+        $handler->init($this->view, $info);
+        $items = array_merge($parents, array($type, $info['table'], $info['id']));
+        $handler->unpack_translatables($translatable, $items);
+      }
+
+      // Prevent reference problems.
+      unset($handler);
+    }
+
+    return $output;
   }
 
   /**

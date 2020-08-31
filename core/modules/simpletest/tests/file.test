@@ -697,7 +697,7 @@ class FileSaveUploadTest extends FileHookTestCase {
 
     $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, 'Received a 200 response for posted test file.');
-    $message = t('For security reasons, your upload has been renamed to') . ' <em class="placeholder">' . $this->phpfile->filename . '.txt' . '</em>';
+    $message = t('For security reasons, your upload has been renamed to') . ' <em class="placeholder">' . $this->phpfile->filename . '.txt</em>';
     $this->assertRaw($message, 'Dangerous file was renamed.');
     $this->assertRaw(t('File MIME type is text/plain.'), "Dangerous file's MIME type was changed.");
     $this->assertRaw(t('You WIN!'), 'Found the success message.');
@@ -871,7 +871,7 @@ class FileUploadTransliterationTest extends FileTestCase {
     // Check that characters were transliterated and the file exists.
     debug($first_file);
     $this->assertIdentical($first_file->filename, $original_filename, 'File name not transliterated or modified to lowercase.');
-    $this->assertIdentical($first_file->uri, 'temporary://uFail_A_fau.txt', 'File name has been transliterated upon upload.');
+    $this->assertIdentical($first_file->uri, 'temporary://ufail_a_fau.txt', 'File name has been transliterated upon upload.');
     $this->assertTrue(file_exists($first_file->uri), 'Transliterated file exists at expected path.');
 
     // Delete the file to prevent conflicts.

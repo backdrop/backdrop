@@ -43,8 +43,14 @@ function filter_admin_overview($form) {
       );
     }
 
-    // Add status so we can sort by enabled/disabled.
+    // Add status so we can group by enabled/disabled. If disabled, add 100
+    // to weight to push it down to the bottom of the list.
     $form['formats'][$id]['#status'] = $format->status;
+    $form['formats'][$id]['#weight'] = $format->weight;
+    if (!$format->status) {
+      $form['formats'][$id]['#weight'] += 100;
+    }
+
     // Check whether this is the fallback text format. This format is available
     // to all roles and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
@@ -99,7 +105,8 @@ function filter_admin_overview($form) {
       '#default_value' => $format->weight,
     );
   }
-  backdrop_sort($form['formats'], array('#status'), SORT_DESC);
+  backdrop_sort($form['formats'], array('#weight'));
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save changes'));
   return $form;
