@@ -789,6 +789,7 @@ function user_account_form(&$form, &$form_state) {
   if (!$register) {
     $description = t('Current password must be entered to set a new password.');
     if ($reject_weak) {
+      $description .= ' ' . t('Weak passwords will be rejected.');
       $description .= _user_password_policy_help();
     }
     $form['account']['pass'] = array(
@@ -836,12 +837,11 @@ function user_account_form(&$form, &$form_state) {
     }
   }
   else {
-    // Provide different help text if password constraints are active.
+    $description = t('Provide a password for the new account.');
+    // Provide different help text if weak passwords are rejected.
     if ($reject_weak) {
-      $description = _user_password_policy_help();
-    }
-    else {
-      $description = t('Provide a password for the new account.');
+      $description .= ' ' . t('Weak passwords will be rejected.');
+      $description .= _user_password_policy_help();
     }
     if (!config_get('system.core', 'user_email_verification') && !$admin_users) {
       // Someone registers a new account and may set a password directly.
