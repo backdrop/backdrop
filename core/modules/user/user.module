@@ -1096,13 +1096,13 @@ function user_password_policy_validate($form, &$form_state) {
   $strength = _user_password_evaluate_strength($password, $username, $email);
 
   if ($strength < $config->get('user_password_strength_threshold')) {
-    form_set_error('pass', t('The password is too weak. Please consider making your password more complex: that it contains a number of lower- and uppercase letters, digits and punctuation.'));
+    form_set_error('complex_pass', t('The password is too weak. Please consider making your password longer and more complex: that it contains a number of lower- and uppercase letters, digits and punctuation.'));
   }
 
   $min_length_enabled = $config->get('user_password_min_length_enabled');
   $min_length = $config->get('user_password_min_length');
   if ($min_length_enabled && (backdrop_strlen($password) < $min_length)) {
-    form_set_error('complex_pass', t('The password is too short. At least @min_length characters required.', array('@min_length' => $min_length)));
+    form_set_error('length_pass', t('The password is too short. At least @min_length characters required.', array('@min_length' => $min_length)));
   }
   if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
     form_set_error('username_pass', t('The password cannot be the same as the username.'));

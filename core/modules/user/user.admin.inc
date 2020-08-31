@@ -178,7 +178,7 @@ function user_admin_settings($form, &$form_state) {
   $criteria = array();
   $criteria[] = t('not the same as the username');
   $criteria[] = t('not the same as the e-mail address');
-  $criteria[] = t('sufficiently complex: containing a number of lower- and uppercase letters, digits and punctuation');
+  $criteria[] = t('sufficiently long and complex: containing a number of lower- and uppercase letters, digits and punctuation');
 
   $output .= t('The default criteria for a strong password include checking that it is:');
   $output .= theme('item_list', array('items' => $criteria));
