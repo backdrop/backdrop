@@ -1197,7 +1197,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#type' => 'checkbox',
       '#title' => t('Allow custom title for each comment'),
       '#default_value' => $node_type->settings['comment_subject_field'],
-      '#description' => t('The default is to use the first several words as the comment title.'),
+      '#description' => t('When disabled, the comment title will be automatically generated from the comment text.'),
     );
     if (config_get('system.core', 'user_pictures')) {
       $form['comment']['comment_user_picture'] = array(
