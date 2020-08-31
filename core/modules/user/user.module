@@ -1102,13 +1102,13 @@ function user_password_policy_validate($form, &$form_state) {
   $min_length_enabled = $config->get('user_password_min_length_enabled');
   $min_length = $config->get('user_password_min_length');
   if ($min_length_enabled && (backdrop_strlen($password) < $min_length)) {
-    form_set_error('pass', t('The password is too short. At least @min_length characters required.', array('@min_length' => $min_length)));
+    form_set_error('complex_pass', t('The password is too short. At least @min_length characters required.', array('@min_length' => $min_length)));
   }
   if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
-    form_set_error('pass', t('The password cannot be the same as the username.'));
+    form_set_error('username_pass', t('The password cannot be the same as the username.'));
   }
   if (backdrop_strtolower($password) == backdrop_strtolower($email)) {
-    form_set_error('pass', t('The password cannot be the same as the e-mail.'));
+    form_set_error('email_pass', t('The password cannot be the same as the e-mail.'));
   }
 }
 
