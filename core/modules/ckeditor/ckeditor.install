@@ -22,14 +22,13 @@ function ckeditor_requirements($phase) {
     }
 
     if (empty($ckeditor_formats)) {
-      $severity = REQUIREMENT_WARNING;
       $description = $t('CKEditor is installed but not enabled for any text format.');
     }
     else {
-      $severity = REQUIREMENT_INFO;
       $description = $t('CKEditor is installed and enabled for the following text formats:');
       $description .= theme('item_list', array('items' => $ckeditor_formats));
     }
+
     if (user_access('administer filters')) {
       $description .= ' ' . $t('To configure text formats, visit the <a href="!url">Text editors and formats</a> configuration page.', array('!url' => url('admin/config/content/formats')));
     }
@@ -41,7 +40,7 @@ function ckeditor_requirements($phase) {
 
     $requirements['ckeditor'] = array(
       'title' => $t('CKEditor'),
-      'severity' => $severity,
+      'severity' => REQUIREMENT_INFO,
       'value' => CKEDITOR_VERSION,
       'description' => $description,
     );
