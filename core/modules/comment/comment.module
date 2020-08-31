@@ -1195,7 +1195,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
     );
     $form['comment']['comment_subject_field'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Allow custom title for each comment'),
+      '#title' => t('Allow a custom title to be set for each comment'),
       '#default_value' => $node_type->settings['comment_subject_field'],
       '#description' => t('When disabled, the comment title will be automatically generated from the comment text.'),
     );
