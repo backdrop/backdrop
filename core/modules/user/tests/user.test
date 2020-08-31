@@ -1814,7 +1814,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
 
     // Set required strong password.
     $config = config('system.core');
-    $config->set('user_password_reject_weak', FALSE);
+    $config->set('user_password_reject_weak', TRUE);
     $config->save();
 
     $name = $this->randomName();

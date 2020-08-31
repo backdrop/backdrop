@@ -753,7 +753,7 @@ function user_account_form(&$form, &$form_state) {
 
   $form['#validate'][] = 'user_account_form_validate';
   module_load_include('password.inc', 'user', 'user');
-  $reject_weak = user_password_reject_weak($username);
+  $reject_weak = user_password_reject_weak($user->name);
   if ($reject_weak) {
     $form['#validate'][] = 'user_password_policy_validate';
   }
