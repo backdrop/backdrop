@@ -41,14 +41,6 @@ define('USER_REGISTER_VISITORS', 'visitors');
 define('USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL', 'visitors_admin_approval');
 
 /**
- * Password strength levels.
- */
-define('USER_PASSWORD_SCORE_WEAK', 'weak');
-define('USER_PASSWORD_SCORE_FAIR', 'fair');
-define('USER_PASSWORD_SCORE_GOOD', 'good');
-define('USER_PASSWORD_SCORE_STRONG', 'strong');
-
-/**
  * Invokes a user hook in every module.
  *
  * We cannot use module_invoke() for this, because the arguments need to
@@ -760,8 +752,9 @@ function user_account_form(&$form, &$form_state) {
   $admin_roles = user_access('assign roles');
 
   $form['#validate'][] = 'user_account_form_validate';
-  $minimum_required_score = config_get('system.core', 'user_password_required_score');
-  if ($minimum_required_score != USER_PASSWORD_SCORE_WEAK) {
+  module_load_include('password.inc', 'user', 'user');
+  $reject_weak = user_password_reject_weak($username);
+  if ($reject_weak) {
     $form['#validate'][] = 'user_password_policy_validate';
   }
 
@@ -795,7 +788,7 @@ function user_account_form(&$form, &$form_state) {
   // assign a password during registration.
   if (!$register) {
     $description = t('Current password must be entered to set a new password.');
-    if ($minimum_required_score != USER_PASSWORD_SCORE_WEAK) {
+    if ($reject_weak) {
       $description .= _user_password_policy_help();
     }
     $form['account']['pass'] = array(
@@ -844,7 +837,7 @@ function user_account_form(&$form, &$form_state) {
   }
   else {
     // Provide different help text if password constraints are active.
-    if ($minimum_required_score != USER_PASSWORD_SCORE_WEAK) {
+    if ($reject_weak) {
       $description = _user_password_policy_help();
     }
     else {
@@ -1098,146 +1091,25 @@ function user_password_policy_validate($form, &$form_state) {
     $username = $form_state['values']['name'];
     $email = $form_state['values']['mail'];
   }
-
+  module_load_include('password.inc', 'user', 'user');
+  // @todo add a hook so modules can override the strength.
   $strength = _user_password_evaluate_strength($password, $username, $email);
 
-  $required_score = user_password_required_score($username);
-  if ($strength < $required_score) {
-    form_set_error('entropy_pass', t('The password is too weak. Please consider making your password more complex: that it contains a number of lower- and uppercase letters, digits and punctuation.'));
+  if ($strength < $config->get('user_password_strength_threshold')) {
+    form_set_error('pass', t('The password is too weak. Please consider making your password more complex: that it contains a number of lower- and uppercase letters, digits and punctuation.'));
   }
 
   $min_length_enabled = $config->get('user_password_min_length_enabled');
   $min_length = $config->get('user_password_min_length');
   if ($min_length_enabled && (backdrop_strlen($password) < $min_length)) {
-    form_set_error('min_length_pass', t('The password is too short. At least @min_length characters required.', array('@min_length' => $min_length)));
+    form_set_error('pass', t('The password is too short. At least @min_length characters required.', array('@min_length' => $min_length)));
   }
   if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
-    form_set_error('username_pass', t('The password cannot be the same as the username.'));
+    form_set_error('pass', t('The password cannot be the same as the username.'));
   }
   if (backdrop_strtolower($password) == backdrop_strtolower($email)) {
-    form_set_error('email_pass', t('The password cannot be the same as the e-mail.'));
+    form_set_error('pass', t('The password cannot be the same as the e-mail.'));
   }
-}
-
-/**
- * Returns a human readable list of score levels.
- *
- * @return array
- *   A list of human readable score levels.
- *
- */
-function user_password_score_labels_list() {
-  return array(
-    USER_PASSWORD_SCORE_WEAK => t('weak'),
-    USER_PASSWORD_SCORE_FAIR => t('fair'),
-    USER_PASSWORD_SCORE_GOOD => t('good'),
-    USER_PASSWORD_SCORE_STRONG => t('excellent'),
-  );
-}
-
-/**
- * Returns a list of score levels.
- *
- * @return array
- *   A list of score levels.
- *
- */
-function user_password_score_list() {
-  return array(
-    USER_PASSWORD_SCORE_WEAK => 0,
-    USER_PASSWORD_SCORE_FAIR => 50,
-    USER_PASSWORD_SCORE_GOOD => 70,
-    USER_PASSWORD_SCORE_STRONG => 90,
-  );
-}
-
-/**
- * Get the password strength score required for an account.
- *
- * @param object $username
- *   Backdrop username.
- *
- * @return int
- *   Minimum password score required.
- */
-function user_password_required_score($username) {
-  $account = user_load_by_name($username);
-  // Determine what is the default minimum score for account.
-  $score = config_get('system.core', 'user_password_required_score');
-
-  // Allow other modules to alter this value (e.g. based on role).
-  backdrop_alter('user_password_required_score', $score, $account);
-
-  $score_list = user_password_score_list();
-  return $score_list[$score];
-}
-
-/**
- * Generates help text for core password constraints on forms.
- *
- * @see user_account_form()
- */
-function _user_password_policy_help() {
-  $config = config('system.core');
-  $min_length_enabled = $config->get('user_password_min_length_enabled');
-  $min_length = $config->get('user_password_min_length');
-  $help = array();
-  if ($min_length_enabled) {
-    $help[] = t('The password must be at least @min_length characters long.', array('@min_length' => $min_length));
-  }
-  $help[] = t('The password cannot be the same as the username or e-mail address.');
-  $variables = array(
-    'items' => $help,
-    'title' => '',
-    'type' => 'ul',
-    'attributes' => array(),
-  );
-  return theme_item_list($variables);
-}
-
-/**
- * Evaluate password strength
- * Adapted from https://github.com/dropbox/zxcvbn.
- *
- * @see Backdrop.evaluatePasswordStrength
- *
- * @param string $password
- * @param string $username
- * @param string $email
- *
- * @return int
- *   An integer representing password strength.
- */
-function _user_password_evaluate_strength($password, $username, $email) {
-  $strength = 0;
-
-  $has_lowercase = preg_match('/[a-z]+/', $password);
-  $has_uppercase = preg_match('/[A-Z]+/', $password);
-  $has_numbers = preg_match('/[0-9]+/', $password);
-  $has_punctuation = preg_match('/[^a-zA-Z0-9]+/', $password);
-
-  // Calculate the number of unique character sets within a string.
-  $cardinality = ($has_lowercase * 26) + ($has_uppercase * 26) + ($has_numbers * 10) + ($has_punctuation * 33);
-
-  // Assign strength based on the level of entropy within the password, times
-  // its length.
-  $length = backdrop_strlen($password);
-  $strength = (log($cardinality) / log(2)) * $length + 1;
-
-  $config = config('system.core');
-  $min_length_enabled = $config->get('user_password_min_length_enabled');
-  $min_length = $config->get('user_password_min_length');
-  if ($min_length_enabled && (backdrop_strlen($password) < $min_length)) {
-    $strength = 5;
-  }
-  if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
-    $strength = 5;
-  }
-  if (backdrop_strtolower($password) == backdrop_strtolower($email)) {
-    $strength = 5;
-  }
-
-  return $strength;
 }
 
 function user_login_block($form) {
@@ -2990,8 +2862,19 @@ function user_form_process_password($element, $form_state = array()) {
       $email = (isset($user->mail) ? $user->mail : '');
     }
     $strength_settings = array(
-      'scores' => user_password_score_list(),
-      'labels' => user_password_score_labels_list(),
+      'scores' => array(
+        'weak' => 0,
+        'fair' => 50,
+        'good' => 70,
+        'strong' => 90,
+      ),
+      'labels' => array(
+        'strengthTitle' => t('Password strength: '),
+        'weak' => t('weak'),
+        'fair' => t('fair'),
+        'good' => t('good'),
+        'strong' => t('excellent'),
+      ),
       'data' => array(
         'username' => $username,
         'email' => $email,
@@ -3001,7 +2884,6 @@ function user_form_process_password($element, $form_state = array()) {
         'user_password_min_length_enabled' => $config->get('user_password_min_length_enabled'),
       ),
     );
-    $strength_settings['labels']['strengthTitle'] = t('Password strength');
 
     $element['#attributes']['data-password-strength'] = backdrop_json_encode($strength_settings, FALSE);
   }

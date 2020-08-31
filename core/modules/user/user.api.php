@@ -428,25 +428,24 @@ function hook_user_role_delete($role) {
 }
 
 /**
- * Alter the required score for validating passwords.
+ * Alter the requirement for rejecting weak passwords.
  *
- * Called by user_password_required_score() to allow modules to alter
- * the score that's for validating passwords. Can be used to set a weaker
- * or stronger level depending on role. For instance, administrators
- * may be required to set stronger passwords.
+ * Called by user_password_reject_weak() to allow modules to alter
+ * wheather to reject weak passwords. Can be used to only reject
+ * passwords for certain roles. For instance, administrators
+ * may be required to set strong passwords.
  *
- * @param $score
- *   The string that is defined by USER_PASSWORD_SCORE_* constants.
+ * @param bool $reject_weak
+ *   Reject or allow weak passwords.
  *
  * @param $account
- *   The account object passed from user_password_required_score().
+ *   The account object passed from user_password_reject_password().
  *
- * @see user_password_required_score()
+ * @see user_password_reject_password()
  */
-function hook_user_password_required_score_alter(&$score, $account) {
-  // Display the user's uid instead of name.
+function hook_user_password_reject_weak_alter(&$reject_weak, $account) {
   if (in_array('administrator', $account->roles)) {
-    $score = USER_PASSWORD_SCORE_STRONG;
+    $reject_weak = TRUE;
   }
 }
 

@@ -1790,7 +1790,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
 
     // Test that '0' is considered a password. We have to disable password
     // required score for that.
-    config_set('system.core', 'user_password_required_score', USER_PASSWORD_SCORE_WEAK);
+    config_set('system.core', 'user_password_reject_weak', FALSE);
     $name = $this->randomName();
     $edit = array(
       'name' => $name,
@@ -1806,16 +1806,15 @@ class UserCreateTestCase extends BackdropWebTestCase {
   /**
    * Tests setting a weak password.
    *
-   * A user should not be able to set a password weaker than the minimum
-   * required score for password strength.
+   * A user should not be able to set a weak password if required.
    */
   public function testUserWithWeakPassword() {
     $admin = $this->backdropCreateUser(array('administer users'));
     $this->backdropLogin($admin);
 
-    // Set required score.
+    // Set required strong password.
     $config = config('system.core');
-    $config->set('user_password_required_score', USER_PASSWORD_SCORE_FAIR);
+    $config->set('user_password_reject_weak', FALSE);
     $config->save();
 
     $name = $this->randomName();
@@ -1845,20 +1844,6 @@ class UserCreateTestCase extends BackdropWebTestCase {
     $this->assertRaw(t("The password is too short. At least 10 characters required."));
 
     $edit['pass'] = '123abcdefg';
-    $this->backdropPost('admin/people/create', $edit, t('Create new account'));
-    $this->assertRaw(t("Created a new user account"));
-
-    $config->set('user_password_required_score', USER_PASSWORD_SCORE_STRONG);
-    $config->save();
-    $this->backdropPost('admin/people/create', $edit, t('Create new account'));
-    $this->assertRaw(t("The password is too weak. Please consider making your password more complex"));
-
-    $edit = array(
-      'name' => $this->randomName(),
-      'mail' => $this->randomName() . '@example.com',
-      'pass' => '123abcdefghijklmnop',
-      'notify' => FALSE,
-    );
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
     $this->assertRaw(t("Created a new user account"));
   }
@@ -1932,8 +1917,8 @@ class UserEditTestCase extends BackdropWebTestCase {
     $this->backdropLogin($admin);
     // Create a regular user.
     $user1 = $this->backdropCreateUser(array());
-    // Disable password required score.
-    config_set('system.core', 'user_password_required_score', USER_PASSWORD_SCORE_WEAK);
+    // Disable strong password required.
+    config_set('system.core', 'user_password_reject_weak', FALSE);
 
     $edit = array('pass' => '0');
     $this->backdropPost("user/" . $user1->uid . "/edit", $edit, t('Save'));
