@@ -131,7 +131,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
     }
 
     // Disable the machine name field on text blocks if reusable is checked.
-    if ($("#edit-reusable").prop('checked')) {
+    if ($('input[name="reusable"]').prop('checked')) {
       $('span.field-suffix').show();
     } else {
       $('span.field-suffix').hide();
