@@ -771,8 +771,25 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $this->backdropGet('node/' . $nid);
     $this->assertRaw($default_output, t('Image linked to content formatter displaying correctly on full node view.'));
 
-    // Test the image style 'thumbnail' formatter.
+    // Test the lazy loading attribute.
     $instance['display']['default']['settings']['image_link'] = '';
+    $instance['display']['default']['settings']['image_load'] = 'lazy';
+    field_update_instance($instance);
+    $image_info['attributes']['loading'] = 'lazy';
+    $default_output = theme('image', $image_info);
+    $this->backdropGet('node/' . $nid);
+    $this->assertRaw($default_output, t('Image loaded lazily displaying correctly on full node view.'));
+
+    // Test the lazy loading attribute.
+    $instance['display']['default']['settings']['image_load'] = 'eager';
+    field_update_instance($instance);
+    $image_info['attributes']['loading'] = 'eager';
+    $default_output = theme('image', $image_info);
+    $this->backdropGet('node/' . $nid);
+    $this->assertRaw($default_output, t('Image loaded eagerly displaying correctly on full node view.'));
+
+    // Test the image style 'thumbnail' formatter.
+    $instance['display']['default']['settings']['image_load'] = 'auto';
     $instance['display']['default']['settings']['image_style'] = 'thumbnail';
     field_update_instance($instance);
     // Ensure the derivative image is generated so we do not have to deal with
@@ -781,6 +798,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     $image_info['uri'] = image_style_path('thumbnail', $image_uri);
     $image_info['width'] = 100;
     $image_info['height'] = 50;
+    unset($image_info['attributes']['loading']);
     $default_output = theme('image', $image_info);
     $this->backdropGet('node/' . $nid);
     $this->assertRaw($default_output, 'Image style thumbnail formatter displaying correctly on full node view.');
