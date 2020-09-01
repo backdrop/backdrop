@@ -1270,8 +1270,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
     // Log in with temporary login link.
     $pass = user_password();
     $pass_edit = array(
-      'pass[pass1]' => $pass,
-      'pass[pass2]' => $pass,
+      'pass' => $pass,
     );
     $this->backdropPost($path, $pass_edit, 'Save password & log in');
     $this->assertText($user_message);
