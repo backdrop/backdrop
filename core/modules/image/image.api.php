@@ -158,10 +158,8 @@ function hook_image_styles_alter(&$styles) {
  * @see image_field_widget_form()
  */
 function hook_image_supported_extensions_alter(&$supported_extensions) {
-  if (defined('IMAGETYPE_WBMP')) {
-    // Add Wireless Bitmap Image File to the list.
-    $supported_extensions[] = 'wbmp';
-  }
+  // Add Wireless Bitmap Image File to the list.
+  $supported_extensions[] = 'wbmp';
 }
 
 /**
