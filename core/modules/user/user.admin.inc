@@ -199,7 +199,7 @@ function user_admin_settings($form, &$form_state) {
     '#type' => 'number',
     '#title' => t('Minimum password length'),
     '#title_display' => 'invisible',
-    '#min' => 1,
+    '#min' => 8,
     '#max' => 64,
     '#suffix' => t('characters long'),
     '#default_value' => $config->get('user_password_min_length'),
