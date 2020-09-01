@@ -57,6 +57,8 @@ class BlockText extends Block {
     // from which they would inherit, so it's either a custom title or no title.
     $form['title_display']['title_display']['#access'] = FALSE;
 
+    $form['#attached']['js'][] = backdrop_get_path('module', 'layout') . '/js/layout.admin.js';
+
     $form['title_display']['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Display title'),
@@ -115,11 +117,6 @@ class BlockText extends Block {
       '#machine_name' => array(
         'source' => array('admin_label', 'admin_label'),
         'exists' => 'block_custom_block_load',
-      ),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="reusable"]' => array('checked' => TRUE),
-        ),
       ),
       '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
       '#weight' => 3,
