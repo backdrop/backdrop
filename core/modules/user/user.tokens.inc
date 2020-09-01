@@ -42,7 +42,7 @@ function user_token_info() {
   );
   $user['link'] = array(
     'name' => t("Profile link"),
-    'description' => t("Link to account profile page based on 'View user profiles' permission."),
+    'description' => t("Link to account profile page based on the <em>View user profiles</em> permission."),
   );
 
   if (config_get('system.core', 'user_pictures')) {
