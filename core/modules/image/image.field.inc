@@ -441,6 +441,7 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
       // The current php/gd version supports webp.
       $supported_extensions[] = 'webp';
     }
+    backdrop_alter('image_supported_extensions', $supported_extensions);
     $extensions = isset($elements[$delta]['#upload_validators']['file_validate_extensions'][0]) ? $elements[$delta]['#upload_validators']['file_validate_extensions'][0] : implode(' ', $supported_extensions);
     $extensions = array_intersect(explode(' ', $extensions), $supported_extensions);
     $elements[$delta]['#upload_validators']['file_validate_extensions'][0] = implode(' ', $extensions);
