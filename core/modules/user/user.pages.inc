@@ -190,6 +190,10 @@ function user_pass_reset_form($form, &$form_state, $account) {
     $form['#validate'][] = 'user_password_policy_validate';
     $description = _user_password_policy_help();
   }
+  $min_length_enabled = config_get('system.core', 'user_password_min_length_enabled');
+  if ($min_length_enabled) {
+    $form['#validate'][] = 'user_password_length_validate';
+  }
   $form['message'] = array(
     '#markup' => t('<p>Please enter a new password to access your account.</p>'),
   );

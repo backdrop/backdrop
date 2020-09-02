@@ -741,6 +741,7 @@ function user_user_view($account) {
  * @see user_validate_picture()
  * @see user_validate_mail()
  * @see user_password_policy_validate()
+ * @see user_password_length_validate()
  */
 function user_account_form(&$form, &$form_state) {
   global $user;
@@ -756,6 +757,10 @@ function user_account_form(&$form, &$form_state) {
   $reject_weak = user_password_reject_weak($user->name);
   if ($reject_weak) {
     $form['#validate'][] = 'user_password_policy_validate';
+  }
+  $min_length_enabled = config_get('system.core', 'user_password_min_length_enabled');
+  if ($min_length_enabled) {
+    $form['#validate'][] = 'user_password_length_validate';
   }
 
   // Account information.
@@ -1066,6 +1071,31 @@ function user_account_form_validate($form, &$form_state) {
 }
 
 /**
+ * Validation callback for password length.
+ *
+ * @see user_account_form()
+ * @see user_pass_reset_form()
+ */
+function user_password_length_validate($form, &$form_state) {
+  if (!array_key_exists('pass', $form_state['values'])) {
+    // If mail verification is required, user registration forms don't have a
+    // password field.
+    return;
+  }
+  $password = trim($form_state['values']['pass']);
+
+  if ($form['#form_id'] == 'user_profile_form' && strlen($password) == 0) {
+    // On profile form and no new password has been set.
+    return;
+  }
+
+  $min_length = config_get('system.core', 'user_password_min_length');
+  if (backdrop_strlen($password) < $min_length) {
+    form_set_error('length_pass', t('The password is too short. At least @min_length characters required.', array('@min_length' => $min_length)));
+  }
+}
+
+/**
  * Validation callback for password constraints.
  *
  * @see user_account_form()
@@ -1103,11 +1133,6 @@ function user_password_policy_validate($form, &$form_state) {
     form_set_error('complex_pass', t('The password is too weak. Please consider making your password longer and more complex: that it contains a number of lower- and uppercase letters, digits and punctuation.'));
   }
 
-  $min_length_enabled = $config->get('user_password_min_length_enabled');
-  $min_length = $config->get('user_password_min_length');
-  if ($min_length_enabled && (backdrop_strlen($password) < $min_length)) {
-    form_set_error('length_pass', t('The password is too short. At least @min_length characters required.', array('@min_length' => $min_length)));
-  }
   if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
     form_set_error('username_pass', t('The password cannot be the same as the username.'));
   }
