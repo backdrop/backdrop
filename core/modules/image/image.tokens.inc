@@ -65,9 +65,6 @@ function image_tokens($type, $tokens, array $data = array(), array $options = ar
       $fields = field_info_field_map();
 
       // Check to see which fields are supported.
-      $supported_fields = _image_get_image_fields();
-      $supported_fields = array_filter($supported_fields);
-
       foreach ($fields as $field_name => $field) {
         $field['field_name'] = $field_name;
         if ($field['type'] == 'image') {
@@ -126,9 +123,11 @@ function image_tokens($type, $tokens, array $data = array(), array $options = ar
               $output[] = image_style_url($type, $data['image-field'][$index]['uri']);
             }
 
-            // Generate image if does not exist.
+            // Generate image if does not exist. Because other attributes like
+            // width and height are dependent on the image existing, we must
+            // generate the image so that subsequent tokens can be populated.
             $styled_uri = image_style_path($type, $data['image-field'][$index]['uri']);
-            _image_generate_image($styled_uri, $type, $data['image-field'][$index]['uri']);
+            _image_token_generate_image($styled_uri, $type, $data['image-field'][$index]['uri']);
           }
 
           $replacements[$original] = implode('', $output);
@@ -140,7 +139,7 @@ function image_tokens($type, $tokens, array $data = array(), array $options = ar
             if (isset($attribute) && !empty($attribute)) {
               // Generate image if does not exist.
               $styled_uri = image_style_path($type, $field['uri']);
-              _image_generate_image($styled_uri, $type, $field['uri']);
+              _image_token_generate_image($styled_uri, $type, $field['uri']);
 
               switch ($attribute) {
                 case 'render':
@@ -251,7 +250,7 @@ function _image_style_token_image_attributes() {
  * @param string $field_uri
  *   URI of field to be styled.
  */
-function _image_generate_image($styled_uri, $type, $field_uri) {
+function _image_token_generate_image($styled_uri, $type, $field_uri) {
   // Only generate the image if it doesn't already exist.
   if (!file_exists($styled_uri)) {
     $style = image_style_load($type);
@@ -268,7 +267,7 @@ function _image_generate_image($styled_uri, $type, $field_uri) {
  *   made up of field_type:field_name:entity_type:bundle. Values are the
  *   human-readable name of the field.
  */
-function _image_get_image_fields() {
+function _image_token_get_image_fields() {
   $image_fields = array();
 
   $fields = field_info_fields();
@@ -295,18 +294,18 @@ function image_token_info_alter(&$data) {
   $entity_info = entity_get_info();
 
   // Check to see which fields are supported.
-  $supported_fields = _image_get_image_fields();
+  $supported_fields = _image_token_get_image_fields();
   $supported_fields = array_filter($supported_fields);
 
   foreach ($fields as $field_name => $field) {
     $field['field_name'] = $field_name;
-    if ($field['type'] == 'image' || $field['type'] == 'file' || $field['type'] == 'media') {
+    if ($field['type'] == 'image' || $field['type'] == 'file') {
       foreach ($field['bundles'] as $entity_type => $bundles) {
         foreach ($bundles as $bundle) {
-          // For 'file' and 'media' field types, it's possible that some fields
-          // won't actually contain images. In these scenarios, the fields must
-          // be enabled on the settings page.
-          if ($field['type'] == 'file' || $field['type'] == 'media') {
+          // For 'file' field types, it's possible that some fields won't
+          // actually contain images. In these scenarios, the fields must be
+          // enabled on the settings page.
+          if ($field['type'] == 'file') {
             $key = $field['type'] . ':' . $field['field_name'] . ':' . $entity_type . ':' . $bundle;
             if (empty($supported_fields[$key])) {
               continue;

@@ -993,6 +993,7 @@ function backdrop_merged_modules() {
     'entity_view_mode', // Backdrop 1.6.0.
     'options_element', // Backdrop 1.12.0.
     'field_formatter_settings', // Backdrop 1.13.0.
+    'imagecache_token', // Backdrop 1.17.0.
   );
 }
 

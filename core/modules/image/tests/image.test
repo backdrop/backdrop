@@ -423,6 +423,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     );
     $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Save and add effects'));
     $this->assertRaw(t('Style %label was created.', array('%label' => $style_label)), 'Image style successfully created.');
+    backdrop_static_reset('image_styles');
     $options = image_style_options();
     $this->assertTrue(array_key_exists($style_name, $options), format_string('Array key %key exists.', array('%key' => $style_name)));
   }
@@ -1737,6 +1738,7 @@ class ImageStyleFlushTest extends ImageFieldTestCase {
     }
 
     // Load the saved image style.
+    backdrop_static_reset('image_styles');
     $style = image_style_load($style_name);
 
     // Create an image for the 'public' wrapper.
