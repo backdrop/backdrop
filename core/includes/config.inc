@@ -1253,10 +1253,9 @@ class ConfigFileStorage implements ConfigStorageInterface {
       )));
     }
     // No need to create htaccess files if not running Apache.
-    if (!backdrop_is_apache()) {
-      return;
+    if (backdrop_is_apache()) {
+      file_save_htaccess($this->directory);
     }
-    file_save_htaccess($this->directory);
   }
 
   /**
