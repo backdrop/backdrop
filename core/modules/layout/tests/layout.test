@@ -199,7 +199,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       ':title' => t('Layout foo block'),
     ));
     $this->assertEqual(count($elements), 1, 'The sample block label was found.');
-    $elements = $this->xpath('//*[contains(@id,:id)]//*[contains(@class,:class) and contains(text(), :description)]', array(
+    $elements = $this->xpath('//*[contains(@id,:id)]//*[contains(@class,:class)]//*[normalize-space()=:description]', array(
       ':id' => 'layout-editor-block-' .$block_uuid,
       ':class' => 'layout-editor-block-content',
       ':description' => t('A testing block for layouts.'),
