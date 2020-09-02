@@ -31,15 +31,9 @@ function user_password_reject_weak($username) {
  * @see user_account_form()
  */
 function _user_password_policy_help() {
-  $config = config('system.core');
-  $min_length_enabled = $config->get('user_password_min_length_enabled');
-  $min_length = $config->get('user_password_min_length');
   $help = array();
-  if ($min_length_enabled) {
-    $help[] = t('The password must be at least @min_length characters long.', array('@min_length' => $min_length));
-  }
   $help[] = t('The password cannot be the same as the username or e-mail address.');
-  $help[] = t('The password must be sufficiently long and complex: containing a number of lower- and uppercase letters, digits and punctuation.');
+  $help[] = t('The password must be sufficiently long or complex: containing a number of lower- and uppercase letters, digits and punctuation.');
   $variables = array(
     'items' => $help,
     'title' => '',

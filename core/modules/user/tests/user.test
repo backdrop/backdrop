@@ -1815,6 +1815,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
     // Set required strong password.
     $config = config('system.core');
     $config->set('user_password_reject_weak', TRUE);
+    $config->set('user_password_strength_threshold', 50);
     $config->save();
 
     $name = $this->randomName();
@@ -1835,17 +1836,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
 
     $edit['pass'] = '123abcdef';
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
-    $this->assertRaw(t("The password is too weak. Please consider making your password longer and more complex"));
-
-    $config->set('user_password_min_length_enabled', 1);
-    $config->set('user_password_min_length', 10);
-    $config->save();
-    $this->backdropPost('admin/people/create', $edit, t('Create new account'));
-    $this->assertRaw(t("The password is too short. At least 10 characters required."));
-
-    $edit['pass'] = '123abcdefg';
-    $this->backdropPost('admin/people/create', $edit, t('Create new account'));
-    $this->assertRaw(t("Created a new user account"));
+    $this->assertRaw(t("The password is too weak. Please consider making your password longer or more complex"));
 
     // Require a "strong" password, not just the default "fair".
     $config->set('user_password_strength_threshold', 90);
@@ -1855,7 +1846,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
     $edit['name'] = $this->randomName();
     $edit['mail'] = $this->randomName() . '@example.com';
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
-    $this->assertRaw(t("The password is too weak. Please consider making your password longer and more complex"));
+    $this->assertRaw(t("The password is too weak. Please consider making your password longer or more complex"));
 
     $edit['pass'] = '123abcdefghijklmnop';
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
@@ -1870,8 +1861,6 @@ class UserCreateTestCase extends BackdropWebTestCase {
     $edit['pass'] = '123';
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
     $this->assertRaw(t("Created a new user account"));
-
-
   }
 }
 

@@ -174,45 +174,18 @@ function user_admin_settings($form, &$form_state) {
     '#title' => t('Password policy'),
     '#weight' => -1,
   );
-  $output = '';
-  $criteria = array();
-  $criteria[] = t('not the same as the username');
-  $criteria[] = t('not the same as the e-mail address');
-  $criteria[] = t('sufficiently long and complex: containing a number of lower- and uppercase letters, digits and punctuation');
 
-  $output .= t('The default criteria for a strong password include checking that it is:');
-  $output .= theme('item_list', array('items' => $criteria));
-  $form['password_policy']['user_password_criteria'] = array(
-    '#type' => 'help',
-    '#markup' => $output,
-  );
-  $form['password_policy']['min_length'] = array(
-    '#type' => 'container',
-    '#attributes' => array('class' => array('container-inline min-length-wrapper')),
-  );
-  $form['password_policy']['min_length']['user_password_min_length_enabled'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Password is at least'),
-    '#default_value' => $config->get('user_password_min_length_enabled'),
-  );
-  $form['password_policy']['min_length']['user_password_min_length'] = array(
-    '#type' => 'number',
-    '#title' => t('Minimum password length'),
-    '#title_display' => 'invisible',
-    '#min' => 8,
-    '#max' => 64,
-    '#suffix' => t('characters long'),
-    '#default_value' => $config->get('user_password_min_length'),
-    '#states' => array(
-      'disabled' => array(
-        ':input[name="user_password_min_length_enabled"]' => array('checked' => FALSE),
-      ),
-    ),
-  );
+  module_load_include('password.inc', 'user', 'user');
+  $criteria = _user_password_policy_help();
+
+  $description = t('Passwords will be rejected when the password strength indicator shows they are weak.');
+  $description .= '<p>' . t('These are the criteria used to determine if a password is weak:') . '</p>';
+  $description .= $criteria;
+
   $form['password_policy']['user_password_reject_weak'] = array(
     '#type' => 'checkbox',
     '#title' => t('Reject weak passwords'),
-    '#description' => t('Users will not be able to save passwords if the password strength indicator shows they are weak.'),
+    '#description' => $description,
     '#default_value' => (bool) $config->get('user_password_reject_weak'),
   );
 
