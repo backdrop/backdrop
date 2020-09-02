@@ -315,6 +315,7 @@ function comment_node_type_load(&$types) {
       'comment_mode' => COMMENT_MODE_THREADED,
       'comment_anonymous' => COMMENT_ANONYMOUS_MAYNOT_CONTACT,
       'comment_subject_field' => FALSE,
+      'comment_subject_hide' => FALSE,
       'comment_user_picture' => TRUE,
       'comment_form_location' => COMMENT_FORM_BELOW,
       'comment_preview' => BACKDROP_OPTIONAL,
@@ -1199,6 +1200,12 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#default_value' => $node_type->settings['comment_subject_field'],
       '#description' => t('When disabled, the comment title will be automatically generated from the comment text.'),
     );
+    $form['comment']['comment_subject_hide'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Hide comment title'),
+      '#default_value' => $node_type->settings['comment_subject_hide'],
+      '#description' => t('When enabled, the comments will be displayed without titles.'),
+    );
     if (config_get('system.core', 'user_pictures')) {
       $form['comment']['comment_user_picture'] = array(
         '#type' => 'checkbox',
@@ -1942,6 +1949,7 @@ function comment_form($form, &$form_state, $comment) {
     '#default_value' => $comment->subject,
     '#access' => $node_type->settings['comment_subject_field'],
     '#weight' => -1,
+    '#description' => $node_type->settings['comment_subject_hide'] ? t('The title will not be displayed, because the comment titles are hidden by the content editors.') : '',
   );
 
   // Used for conditional validation of author fields.
