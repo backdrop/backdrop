@@ -422,7 +422,8 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
       'label' => $style_label,
     );
     $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Save and add effects'));
-    $this->assertRaw(t('Style %name was created.', array('%name' => $style_label)), 'Image style successfully created.');
+    $this->assertRaw(t('Style %label was created.', array('%label' => $style_label)), 'Image style successfully created.');
+    backdrop_static_reset('image_styles');
     $options = image_style_options();
     $this->assertTrue(array_key_exists($style_name, $options), format_string('Array key %key exists.', array('%key' => $style_name)));
   }
@@ -471,7 +472,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
       'label' => $style_label,
     );
     $this->backdropPost('admin/config/media/image-styles/add', $edit, t('Save and add effects'));
-    $this->assertRaw(t('Style %name was created.', array('%name' => $style_label)), 'Image style successfully created.');
+    $this->assertRaw(t('Style %label was created.', array('%label' => $style_label)), 'Image style successfully created.');
 
     // Add effect form.
 
@@ -567,7 +568,7 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
     // Test effect deletion form.
     $effect = array_pop($style['effects']);
     $this->backdropPost($style_path . '/effects/' . $effect['ieid'] . '/delete', array(), t('Delete'));
-    $this->assertRaw(t('The image effect %name has been deleted.', array('%name' => $effect['label'])), 'Image effect deleted.');
+    $this->assertRaw(t('The image effect %label has been deleted.', array('%label' => $effect['label'])), 'Image effect deleted.');
 
     // Style deletion form.
 
@@ -690,8 +691,8 @@ class ImageAdminStylesUnitTest extends ImageFieldTestCase {
       'replacement' => 'thumbnail',
     );
     $this->backdropPost('admin/config/media/image-styles/delete/' . $new_style_name, $edit, t('Delete'));
-    $message = t('Style %name was deleted.', array('%name' => $new_style_label));
-    $this->assertRaw($message, format_string('Style %name was deleted.', array('%name' => $new_style_label)));
+    $message = t('Style %label was deleted.', array('%label' => $new_style_label));
+    $this->assertRaw($message, format_string('Style %label was deleted.', array('%label' => $new_style_label)));
 
     $this->backdropGet('node/' . $nid);
     $this->assertRaw(check_plain(image_style_url('thumbnail', $node->{$field_name}[LANGUAGE_NONE][0]['uri'])), format_string('Image displayed using style replacement style.'));
@@ -1737,6 +1738,7 @@ class ImageStyleFlushTest extends ImageFieldTestCase {
     }
 
     // Load the saved image style.
+    backdrop_static_reset('image_styles');
     $style = image_style_load($style_name);
 
     // Create an image for the 'public' wrapper.
