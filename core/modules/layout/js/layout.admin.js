@@ -129,7 +129,18 @@ Backdrop.behaviors.layoutDisplayEditor = {
         positions.value += ',' + $(context).data('blockId');
       }
     }
+
+    // Disable the machine name field on text blocks if reusable is checked.
+    if ($('input[name="reusable"]').prop('checked')) {
+      $('span.field-suffix').show();
+    } else {
+      $('span.field-suffix').hide();
+    }
+    $('input[name="reusable"]').change(function() {
+      $('span.field-suffix').toggle();
+    });
   },
+
   /**
    * jQuery UI sortable update callback.
    */

@@ -22,6 +22,10 @@ class FieldBlock extends Block {
    *  Sets title text on draggable block panel in Layout builder.
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
+    }
+
     list($entity_type, $field_name) = explode('-', $this->childDelta, 2);
     return t('Field %field', array('%field' => $field_name));
   }
@@ -30,6 +34,10 @@ class FieldBlock extends Block {
    *  Sets description text on draggable block in Layout builder.
    */
   function getAdminPreview() {
+    if (!empty($this->settings['admin_description'])) {
+      return filter_xss($this->settings['admin_description']);
+    }
+
     list($entity_type, $field_name) = explode('-', $this->childDelta, 2);
     $field = field_info_field($field_name);
     $formatter = field_info_formatter_types($this->settings['formatter']);
