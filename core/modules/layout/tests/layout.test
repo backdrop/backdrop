@@ -192,6 +192,43 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $block_uuid = (string) $last_block[0]['data-block-id'];
     $block_edit_url = 'admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid;
 
+    // Check the admin label and description.
+    $elements = $this->xpath('//*[contains(@id,:id)]//*[contains(@class,:class)]//span[normalize-space()=:title]', array(
+      ':id' => 'layout-editor-block-' .$block_uuid,
+      ':class' => 'layout-editor-block-title',
+      ':title' => t('Layout foo block'),
+    ));
+    $this->assertEqual(count($elements), 1, 'The sample block label was found.');
+    $elements = $this->xpath('//*[contains(@id,:id)]//*[contains(@class,:class) and contains(text(), :description)]', array(
+      ':id' => 'layout-editor-block-' .$block_uuid,
+      ':class' => 'layout-editor-block-content',
+      ':description' => t('A testing block for layouts.'),
+    ));
+    $this->assertEqual(count($elements), 1, 'The sample block description was found.');
+
+    // Change the label and description.
+    $block_new_label = $this->randomName();
+    $block_new_description = $this->randomName();
+    $edit = array(
+      'admin_label' => $block_new_label,
+      'admin_description' => $block_new_description,
+    );
+    $this->backdropPost($block_edit_url, $edit, t('Update block'));
+
+    // Check the new admin label and description.
+    $elements = $this->xpath('//*[contains(@id,:id)]//*[contains(@class,:class)]//span[normalize-space()=:title]', array(
+      ':id' => 'layout-editor-block-' .$block_uuid,
+      ':class' => 'layout-editor-block-title',
+      ':title' => $block_new_label,
+    ));
+    $this->assertEqual(count($elements), 1, 'The sample block label was found.');
+    $elements = $this->xpath('//*[contains(@id,:id)]//*[contains(@class,:class) and contains(text(), :description)]', array(
+      ':id' => 'layout-editor-block-' .$block_uuid,
+      ':class' => 'layout-editor-block-content',
+      ':description' => $block_new_description,
+    ));
+    $this->assertEqual(count($elements), 1, 'The sample block description was changed.');
+
     // Save the layout.
     $this->backdropPost(NULL, array(), t('Save layout'));
 
