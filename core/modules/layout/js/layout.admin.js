@@ -136,7 +136,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
     } else {
       $('span.field-suffix').hide();
     }
-    $("#edit-reusable").change(function() {
+    $('input[name="reusable"]').change(function() {
       $('span.field-suffix').toggle();
     });
   },
