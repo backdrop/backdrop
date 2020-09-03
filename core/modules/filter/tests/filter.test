@@ -367,9 +367,34 @@ class FilterAdminTestCase extends BackdropWebTestCase {
     $this->assertFieldByName('filters[' . $second_filter . '][status]', '', 'Line break filter found.');
     $this->assertFieldByName('filters[' . $first_filter . '][status]', '', 'Url filter found.');
 
-    // Disable new filter.
+    // Order the new text format and check its position in the markup.
+    $edit_weight = array();
+    $edit_weight['formats[' . $format->format . '][weight]'] = -10;
+    $edit_weight['formats[filtered_html][weight]'] = -9;
+    $edit_weight['formats[full_html][weight]'] = -8;
+    $edit_weight['formats[plain_text][weight]'] = 0;
+    $this->backdropPost('admin/config/content/formats', $edit_weight, t('Save changes'));
+
+    $elements = $this->xpath('//select[@name=:first]/following::select[@name=:second]/following::select[@name=:third]/following::select[@name=:fourth]', array(
+      ':first' => 'formats[' . $format->format . '][weight]',
+      ':second' => 'formats[filtered_html][weight]',
+      ':third' => 'formats[full_html][weight]',
+      ':fourth' => 'formats[plain_text][weight]',
+    ));
+    $this->assertTrue(!empty($elements), 'Text format order confirmed in admin interface with new format at top.');
+
+    // Disable the new text format.
     $this->backdropPost('admin/config/content/formats/' . $format->format . '/disable', array(), t('Disable'));
     $this->assertRaw(t('Disabled text format %format.', array('%format' => $edit['name'])), 'Format successfully disabled.');
+
+    // Check that the disabled text format is at the bottom of the list.
+    $elements = $this->xpath('//select[@name=:first]/following::select[@name=:second]/following::select[@name=:third]/following::select[@name=:fourth]', array(
+      ':first' => 'formats[filtered_html][weight]',
+      ':second' => 'formats[full_html][weight]',
+      ':third' => 'formats[plain_text][weight]',
+      ':fourth' => 'formats[' . $format->format . '][weight]',
+    ));
+    $this->assertTrue(!empty($elements), 'Text format order confirmed in admin interface with disabled format at bottom.');
 
     // Allow authenticated users on full HTML.
     $format = filter_format_load($full);

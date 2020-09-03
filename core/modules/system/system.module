@@ -4048,7 +4048,7 @@ function path_autocomplete($string = '') {
     // Get node matches.
     $results = db_select('node')
       ->fields('node', array('nid', 'type', 'title', 'status'))
-      ->condition('title', db_like($string) . '%', 'LIKE')
+      ->condition('title', '%' . db_like($string) . '%', 'LIKE')
       ->condition('status', 1)
       ->addTag('node_access')
       ->orderBy('nid', 'DESC')
@@ -4056,10 +4056,9 @@ function path_autocomplete($string = '') {
       ->execute();
     foreach ($results as $result) {
       $path = backdrop_get_path_alias('node/' . $result->nid);
-      $matches[$path] = t('@title (Content: %type)', array(
-        '@title' => $result->title,
-        '%type' => node_type_get_name($result->type),
-      ));
+      $match = '<span class="autocomplete-suggestion">' . $result->title . '</span>';
+      $match_description = t('Content: %type', array('%type' => node_type_get_name($result->type)));
+      $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
       $match_count++;
     }
 
@@ -4067,7 +4066,7 @@ function path_autocomplete($string = '') {
     if (user_access('manage files') && $match_count < $range) {
       $results = db_select('file_managed')
         ->fields('file_managed', array('fid', 'filename', 'uri', 'filemime', 'status', 'type'))
-        ->condition('filename', db_like($string) . '%', 'LIKE')
+        ->condition('filename', '%' . db_like($string) . '%', 'LIKE')
         ->condition('status', 1)
         ->condition('filemime', 'image%', 'NOT LIKE')
         ->orderBy('fid', 'DESC')
@@ -4078,10 +4077,9 @@ function path_autocomplete($string = '') {
         $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
         $url = file_create_url($result->uri);
         $path = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
-        $matches[$path] = t('@filename (File: %type)', array(
-          '@filename' => $result->filename,
-          '%type' => file_type_get_name($result->type),
-        ));
+        $match = '<span class="autocomplete-suggestion">' . $result->filename . '</span>';
+        $match_description = t('File: %type', array('%type' => file_type_get_name($result->type)));
+        $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
         $match_count++;
       }
     }
@@ -4090,7 +4088,7 @@ function path_autocomplete($string = '') {
     if (user_access('access user profiles') && $match_count < $range) {
       $results = db_select('users')
         ->fields('users', array('uid', 'name'))
-        ->condition('name', db_like($string) . '%', 'LIKE')
+        ->condition('name', '%' . db_like($string) . '%', 'LIKE')
         ->range(0, $range - $match_count)
         ->orderBy('uid', 'DESC')
         ->execute();
@@ -4103,9 +4101,9 @@ function path_autocomplete($string = '') {
         $users = user_load_multiple($uids);
         foreach ($users as $user) {
           $path = backdrop_get_path_alias('user/' . $user->uid);
-          $matches[$path] = t('@name (User account)', array(
-            '@name' => user_format_name($user),
-          ));
+          $match = '<span class="autocomplete-suggestion">' . user_format_name($user) . '</span>';
+          $match_description = t('User account');
+          $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
           $match_count++;
         }
       }
@@ -4115,17 +4113,16 @@ function path_autocomplete($string = '') {
     if ($match_count < $range) {
       $results = db_select('taxonomy_term_data')
         ->fields('taxonomy_term_data', array('tid', 'vocabulary', 'name'))
-        ->condition('name', db_like($string) . '%', 'LIKE')
+        ->condition('name', '%' . db_like($string) . '%', 'LIKE')
         ->addTag('taxonomy_term_access')
         ->range(0, $range - $match_count)
         ->orderBy('tid', 'DESC')
         ->execute();
       foreach ($results as $result) {
         $path = backdrop_get_path_alias('taxonomy/term/' . $result->tid);
-        $matches[$path] = t('@name (Taxonomy term: %vocabulary)', array(
-          '@name' => $result->name,
-          '%vocabulary' => taxonomy_vocabulary_load($result->vocabulary)->name,
-        ));
+        $match = '<span class="autocomplete-suggestion">' . $result->name . '</span>';
+        $match_description = t('Taxonomy term: %vocabulary', array('%vocabulary' => taxonomy_vocabulary_load($result->vocabulary)->name));
+        $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
         $match_count++;
       }
     }
@@ -4155,10 +4152,9 @@ function path_autocomplete($string = '') {
                 $view_title = $view->human_name;
               }
               if ($found_match) {
-                $matches[$path] = t('@title (View: %display)', array(
-                  '@title' => $view_title,
-                  '%display' => $view->human_name . ' - ' . $display->display_title,
-                ));
+                $match = '<span class="autocomplete-suggestion">' . $view_title . '</span>';
+                $match_description = t('View: %human - %display', array('%human' => $view->human_name, '%display' => $display->display_title));
+                $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
                 $match_count++;
               }
             }
@@ -4185,10 +4181,9 @@ function path_autocomplete($string = '') {
             $layout_title = $menu_item['name'];
           }
           if ($found_match) {
-            $matches[$menu_item['path']] = t('@title (Layout: %display)', array(
-              '@title' => $layout_title,
-              '%display' => $menu_item['name'],
-            ));
+            $match = '<span class="autocomplete-suggestion">' . $layout_title . '</span>';
+            $match_description = t('Layout: %display', array('%display' => $menu_item['name']));
+            $matches[$menu_item['path']] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
             $match_count++;
           }
         }
@@ -4199,17 +4194,16 @@ function path_autocomplete($string = '') {
     if ($match_count < $range) {
       $results = db_select('menu_links')
         ->fields('menu_links', array('link_title', 'link_path'))
-        ->condition('link_title', db_like($string) . '%', 'LIKE')
+        ->condition('link_title', '%' . db_like($string) . '%', 'LIKE')
         ->condition('link_path', '%' . db_like('%') . '%', 'NOT LIKE')
         ->range(0, $range)
         ->execute();
       foreach ($results as $result) {
         $path = backdrop_get_path_alias($result->link_path);
         if (!isset($matches[$path]) && !path_is_admin($path)) {
-          $matches[$path] = t('@title (Menu item: %path)', array(
-            '@title' => $result->link_title,
-            '%path' => $path,
-          ));
+          $match = '<span class="autocomplete-suggestion">' . $result->link_title . '</span>';
+          $match_description = t('Menu item: %path', array('%path' => $path));
+          $matches[$path] = $match . ' <span class="autocomplete-description">(' . $match_description . ')</span>';
           $match_count++;
         }
       }

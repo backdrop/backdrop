@@ -158,6 +158,33 @@ class ConfigurationTest extends BackdropWebTestCase {
     $this->assertEqual(FALSE, $config_data->isOverridden('foo.key1'), 'Original value no longer overridden.');
     $this->assertEqual($config_data->get('foo.key1'), 'chocolate', 'Original value has been updated to include overridden value.');
   }
+
+  /**
+   * Tests that config directories are protected by .htaccess files.
+   */
+  public function testConfigHtaccess() {
+    // Check that the .htaccess file is present in config location.
+    $active_dir = config_get_config_directory();
+    $this->assertTrue(is_file($active_dir . '/.htaccess'), "Located the .htaccess file in the 'active' config directory.");
+
+    // Visit the status report to confirm the file is re-created automatically.
+    $admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'access site reports',
+    ));
+    $this->backdropLogin($admin_user);
+
+    // Remove .htaccess file so we can test that it gets re-created.
+    @backdrop_unlink($active_dir . '/.htaccess');
+    $this->assertFalse(is_file($active_dir . '/.htaccess'), "Removed the .htaccess file in the 'active' config directory.");
+
+    $this->backdropGet('admin/reports/status');
+    $this->assertTrue(is_file($active_dir . '/.htaccess'), "Re-created the .htaccess file in the 'active' config directory.");
+
+    // Verify contents of .htaccess file.
+    $file = file_get_contents($active_dir . '/.htaccess');
+    $this->assertEqual($file, file_htaccess_lines(), 'The .htaccess file contains the proper content.');
+  }
 }
 
 /**

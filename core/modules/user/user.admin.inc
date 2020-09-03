@@ -168,6 +168,27 @@ function user_admin_settings($form, &$form_state) {
     }
   }
 
+  // Password settings.
+  $form['password_policy'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Password policy'),
+    '#weight' => -1,
+  );
+
+  module_load_include('password.inc', 'user', 'user');
+  $criteria = _user_password_policy_help();
+
+  $description = t('Passwords will be rejected when the password strength indicator shows they are weak.');
+  $description .= '<p>' . t('These are the criteria used to determine if a password is weak:') . '</p>';
+  $description .= $criteria;
+
+  $form['password_policy']['user_password_reject_weak'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Reject weak passwords'),
+    '#description' => $description,
+    '#default_value' => (bool) $config->get('user_password_reject_weak'),
+  );
+
   // Account settings.
   $form['personalization'] = array(
     '#type' => 'fieldset',

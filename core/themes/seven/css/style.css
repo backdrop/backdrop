@@ -803,7 +803,16 @@ form.views-exposed-form {
 #autocomplete li {
   padding: 0 5px;
 }
-
+.autocomplete-description {
+  color: #666;
+  font-size: 80%;
+}
+#autocomplete li.selected .autocomplete-description {
+  color: #ddd;
+}
+[dir="rtl"] .autocomplete-suggestion {
+  float: right;
+}
 
 /**
  * Form elements.
@@ -1628,6 +1637,9 @@ div.add-or-remove-shortcuts {
 }
 #field-display-overview .field-formatter-settings-edit-form .form-item {
   margin: 10px 0;
+}
+#field-display-overview .field-formatter-settings-edit-form .form-item .form-item {
+  margin: 0;
 }
 #field-display-overview .field-formatter-settings-edit-form .form-submit {
   margin-bottom: 0;

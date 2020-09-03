@@ -45,6 +45,71 @@ function date_input_date($field, $instance, $element, $input) {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function date_menu() {
+  $items['admin/config/regional/date-views'] = array(
+    'title' => 'Date views',
+    'description' => 'Configure settings for date views.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('date_views_settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/**
+ * Form callback for date views pager title format settings.
+ */
+function date_views_settings($form, &$form_state) {
+  $form['#config'] = 'date_views.settings';
+  $form['date_views_month_format_with_year'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date views month format with year'),
+    '#size' => 10,
+    '#default_value' => config_get('date_views.settings', 'date_views_month_format_with_year'),
+    '#description' => t('Date views month format with year, default value : F Y'),
+  );
+  $form['date_views_month_format_without_year'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date views month format without year'),
+    '#size' => 10,
+    '#default_value' => config_get('date_views.settings', 'date_views_month_format_without_year'),
+    '#description' => t('Date views month format without year, default value : F'),
+  );
+  $form['date_views_day_format_with_year'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date views day format with year'),
+    '#size' => 10,
+    '#default_value' => config_get('date_views.settings', 'date_views_day_format_with_year'),
+    '#description' => t('Date views day format with year, default value : l, F j, Y'),
+  );
+  $form['date_views_day_format_without_year'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date views day format without year'),
+    '#size' => 10,
+    '#default_value' => config_get('date_views.settings', 'date_views_day_format_without_year'),
+    '#description' => t('Date views day format without year, default value : l, F j'),
+  );
+  $form['date_views_week_format_with_year'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date views week format with year'),
+    '#size' => 10,
+    '#default_value' => config_get('date_views.settings', 'date_views_week_format_with_year'),
+    '#description' => t('Date views week format with year, default value : F j, Y'),
+  );
+  $form['date_views_week_format_without_year'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Date views week format without year'),
+    '#size' => 10,
+    '#default_value' => config_get('date_views.settings', 'date_views_week_format_without_year'),
+    '#description' => t('Date views week format without year, default value : F j'),
+  );
+  return system_settings_form($form);
+}
+
+/**
  * Implements hook_theme().
  */
 function date_theme($existing, $type, $theme, $path) {
@@ -144,9 +209,26 @@ function date_theme($existing, $type, $theme, $path) {
         'attributes' => array(),
       ),
     ) + $base,
+    'date_nav_title' =>  array(
+      'variables' => array(
+        'granularity' => NULL,
+        'view' => NULL,
+        'link' => NULL,
+        'format' => NULL,
+      ),
+    ) + $base,
     'date_views_filter_form' => array(
       'template' => 'templates/date-views-filter-form',
       'render element' => 'form',
+    ) + $base,
+    'date_views_pager' => array(
+      'variables' => array(
+        'plugin' => NULL,
+        'input' => NULL,
+      ),
+      // Register a pattern so that it can work like all views templates.
+      'pattern' => 'date_views_pager__',
+      'template' => 'templates/date-views-pager',
     ) + $base,
   );
 
@@ -552,6 +634,11 @@ function date_config_info() {
     'label' => t('Date settings'),
     'group' => t('Configuration'),
   );
+  $prefixes['date_views.settings'] = array(
+    'label' => t('Date views settings'),
+    'group' => t('Configuration'),
+  );
+
   return $prefixes;
 }
 
@@ -575,6 +662,7 @@ function date_autoload_info() {
     'date_views_argument_handler_simple' => 'views/date_views_argument_handler_simple.inc',
     'date_views_filter_handler' => 'views/date_views_filter_handler.inc',
     'date_views_filter_handler_simple' => 'views/date_views_filter_handler_simple.inc',
+    'date_views_plugin_pager' => 'views/date_views_plugin_pager.inc',
   );
 }
 

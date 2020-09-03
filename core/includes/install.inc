@@ -606,6 +606,7 @@ abstract class DatabaseTasks {
       '#default_value' => empty($database['password']) ? '' : $database['password'],
       '#required' => FALSE,
       '#size' => 45,
+      '#password_toggle' => TRUE,
     );
 
     $form['advanced_options'] = array(
