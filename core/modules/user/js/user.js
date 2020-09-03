@@ -183,11 +183,6 @@ Backdrop.evaluatePasswordStrength = function (password, settings) {
     if (password === username || password === email) {
       strength = 5;
     }
-    // Consider admin password constraint settings if active.
-    // Use Array.from() so doesn't count unicode characters twice.
-    if (config.user_password_min_length_enabled && Array.from(password).length < config.user_password_min_length) {
-      strength = 5;
-    }
   }
 
   // Based on the strength, work out what text should be shown by the password strength meter.
