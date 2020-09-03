@@ -16,7 +16,7 @@
  * @see color_form_system_theme_settings_alter().
  * @deprecated since 1.3.0
  */
-function bartik_form_system_theme_settings_alter(&$form, &$form_state) {
+function bartik_legacy_form_system_theme_settings_alter(&$form, &$form_state) {
   if (theme_get_setting('color_legacy', 'bartik')) {
     $form['color']['scheme']['#default_value'] = 'blue_lagoon';
     $palette = $form['color']['info']['#value']['schemes']['blue_lagoon']['colors'];
@@ -26,7 +26,7 @@ function bartik_form_system_theme_settings_alter(&$form, &$form_state) {
   }
 
   // Add a new submit handler.
-  array_unshift($form['#submit'], 'bartik_form_system_theme_settings_alter_submit');
+  array_unshift($form['#submit'], 'bartik_legacy_form_system_theme_settings_alter_submit');
 }
 
 /**
@@ -34,7 +34,7 @@ function bartik_form_system_theme_settings_alter(&$form, &$form_state) {
  *
  * @deprecated since 1.3.0
  */
-function bartik_form_system_theme_settings_alter_submit($form, &$form_state) {
+function bartik_legacy_form_system_theme_settings_alter_submit($form, &$form_state) {
   // If still using the legacy palette, don't save a custom color scheme.
   $legacy_palette = $form['color']['info']['#value']['schemes']['blue_lagoon']['colors'];
   if ($legacy_palette == $form_state['values']['palette']) {
