@@ -250,29 +250,30 @@ class Block extends LayoutHandler {
       ),
       '#maxlength' => 255,
     );
-    $actions_weight = $form['actions']['#weight'];
+
+    // Add the block admin interface controls.
     $form['admin_label'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Admin label'),
+      '#title' => t('Administrative interface'),
+      '#description' => t('This text will only be used to identify the block when configuring layouts.'),
       '#tree' => FALSE,
       '#collapsed' => empty($this->settings['admin_label']),
       '#collapsible' => TRUE,
-      '#weight' => $actions_weight - 1,
+      '#weight' => $form['actions']['#weight'] - 1,
       '#access' => $this->module != 'block',
     );
     $form['admin_label']['admin_label'] = array(
       '#type' => 'textfield',
       '#default_value' => isset($this->settings['admin_label']) ? $this->settings['admin_label'] : '',
-      '#title' => t('Admin label'),
-      '#description' => t('Used to identify the block on layout pages.'),
+      '#title' => t('Administrative label'),
       '#maxlength' => 255,
     );
     $form['admin_label']['admin_description'] = array(
       '#type' => 'textfield',
-      '#title' => t('Admin description'),
+      '#title' => t('Administrative description'),
       '#default_value' => isset($this->settings['admin_description']) ? $this->settings['admin_description'] : '',
       '#maxlength' => 128,
-      '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
+      '#description' => t('Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
     );
   }
 
