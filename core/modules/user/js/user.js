@@ -172,7 +172,7 @@ Backdrop.evaluatePasswordStrength = function (password, settings) {
 
   // Assign strength based on the level of entropy within the password, times
   // its length. Again, adapted from zxcvbn.
-  strength = (Math.log(cardinality) / Math.log(2)) * password.length + 1;
+  strength = (Math.log(cardinality) / Math.log(2)) * password.length - password.length;
 
   // Check if password is the same as the username or email.
   if (password !== '') {
@@ -183,21 +183,16 @@ Backdrop.evaluatePasswordStrength = function (password, settings) {
     if (password === username || password === email) {
       strength = 5;
     }
-    // Consider admin password constraint settings if active.
-    // Use Array.from() so doesn't count unicode characters twice.
-    if (config.user_password_min_length_enabled && Array.from(password).length < config.user_password_min_length) {
-      strength = 5;
-    }
   }
 
   // Based on the strength, work out what text should be shown by the password strength meter.
-  if (strength >= 90) {
+  if (strength >= 95) {
     level = 'strong';
   }
-  else if (strength > 70) {
+  else if (strength > 80) {
     level = 'good';
   }
-  else if (strength > 50) {
+  else if (strength > 60) {
     level = 'fair';
   }
   else if (strength > 0) {
