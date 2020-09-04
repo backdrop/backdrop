@@ -1848,7 +1848,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
     $this->assertRaw(t("The password is too weak. Please consider making your password longer or more complex"));
 
-    $edit['pass'] = '123abcdefghijklmnop';
+    $edit['pass'] = '123abcdefghijklmnopqrst';
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
     $this->assertRaw(t("Created a new user account"));
 
