@@ -70,7 +70,7 @@ function _user_password_evaluate_strength($password, $username, $email) {
   // Assign strength based on the level of entropy within the password, times
   // its length.
   $length = backdrop_strlen($password);
-  $strength = (log($cardinality) / log(2)) * $length + 1;
+  $strength = (log($cardinality) / log(2)) * $length - $length;
 
   $config = config('system.core');
   $min_length_enabled = $config->get('user_password_min_length_enabled');
