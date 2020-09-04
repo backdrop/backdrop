@@ -1,5 +1,5 @@
 {
-    "_config_name": "system.performance",
+    "_config_name": "system.core",
     "_config_static": true,
     "_config_translatables": [
         "anonymous",
