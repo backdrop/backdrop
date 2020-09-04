@@ -72,12 +72,6 @@ function _user_password_evaluate_strength($password, $username, $email) {
   $length = backdrop_strlen($password);
   $strength = (log($cardinality) / log(2)) * $length + 1;
 
-  $config = config('system.core');
-  $min_length_enabled = $config->get('user_password_min_length_enabled');
-  $min_length = $config->get('user_password_min_length');
-  if ($min_length_enabled && (backdrop_strlen($password) < $min_length)) {
-    $strength = 5;
-  }
   if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
     $strength = 5;
   }
