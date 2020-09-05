@@ -511,31 +511,6 @@ function installer_browser_installation_install_dependencies_page() {
 function installer_browser_installation_enable_page($type = 'enable') {
   module_load_include('inc', 'installer', 'installer.browser');
   $installed_projects = installer_browser_get_installed_projects();
-  $modules = system_rebuild_module_data();
-
-  // Go through each of the installed projects...
-  foreach ($installed_projects as $project) {
-    // ...and if the project is a module and it is among the list of available
-    // modules...
-    if ($project['type'] == 'module' && isset($modules[$project['name']])) {
-      // ...then go through each of the available modules...
-      foreach ($modules as $module) {
-        // ...and find the ones that belong to the same project/package as the
-        // installed project currenlty being checked (but exclude the main
-        // module itself)...
-        if ($modules[$project['name']]->info['project'] == $module->info['project'] && $modules[$project['name']]->name != $module->name) {
-          // ...then add it to the array of installed projects (we only need
-          // type, machine name and project title for the checks later in
-          // installer_browser_installation_enable_form()).
-          $installed_projects[$module->name] = array(
-            'type' => $module->info['type'],
-            'title' => $module->info['name'],
-            'name' => $module->name,
-          );
-        }
-      }
-    }
-  }
 
   if (count($installed_projects) > 0) {
     return backdrop_get_form('installer_browser_installation_' . $type . '_form', $installed_projects);
@@ -670,6 +645,22 @@ function installer_browser_installation_theme_set($form, &$form_state) {
 function installer_browser_installation_enable_form($form, &$form_state, $projects) {
   $modules = system_rebuild_module_data();
 
+  // Go through each of the installed projects and add any contained submodules
+  // that are not hidden to the list of projects.
+  foreach ($projects as $project) {
+    if ($project['type'] == 'module' && isset($modules[$project['name']])) {
+      foreach ($modules as $module) {
+        if ($modules[$project['name']]->info['project'] == $module->info['project'] && $modules[$project['name']]->name != $module->name && !$module->info['hidden']) {
+          $projects[$module->name] = array(
+            'type' => $module->info['type'],
+            'title' => $module->info['name'],
+            'name' => $module->name,
+          );
+        }
+      }
+    }
+  }
+
   $options = array();
   $missing = array();
 
@@ -728,6 +719,12 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
       '#type' => 'item',
       '#markup' => t('You may enable modules using the form below or on the main !link page.', array('!link' => l(t('Modules'), 'admin/modules'))),
     );
+    $form['actions'] = array('#type' => 'actions');
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#submit' => array('installer_browser_installation_enable_form_submit'),
+      '#value' => t('Enable modules'),
+    );
     if (!empty($options)) {
       $form['modules'] = array(
         '#type' => 'tableselect',
@@ -741,12 +738,6 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         '#weight' => 1,
       );
 
-      $form['actions'] = array('#type' => 'actions');
-      $form['actions']['submit'] = array(
-        '#type' => 'submit',
-        '#submit' => array('installer_browser_installation_enable_form_submit'),
-        '#value' => t('Enable modules'),
-      );
       $form['actions']['cancel'] = array(
         '#type' => 'link',
         '#name' => 'cancel',
@@ -757,7 +748,6 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
     }
 
     if (!empty($missing)) {
-      $form['actions'] = array('#type' => 'actions');
       $form['actions']['cancel'] = array(
         '#type' => 'link',
         '#name' => 'cancel',
