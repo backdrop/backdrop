@@ -70,9 +70,14 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state) {
       $form['footer'][$field] = color_get_color_element($form['theme']['#value'], $field, $form);
     }
   }
-  else {
+  elseif (user_access('administer modules')) {
     $form['color'] = array(
       '#markup' => '<p>' . t('This theme supports custom color palettes if the Color module is enabled on the <a href="!url">modules page</a>. Enable the Color module to customize this theme.', array('!url' => url('admin/modules'))) . '</p>',
+    );
+  }
+  else {
+    $form['color'] = array(
+      '#markup' => '<p>' . t('This theme supports custom color palettes if the Color module is enabled. Contact your website administrator to enable the Color module to customize this theme.') . '</p>',
     );
   }
 }
