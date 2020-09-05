@@ -5,6 +5,8 @@
 
 * {
   box-sizing: border-box;
+  color: red;
+  font-weight: bold;
 }
 
 body {
