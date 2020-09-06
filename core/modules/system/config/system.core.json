@@ -1,5 +1,5 @@
 {
-    "_config_name": "system.performance",
+    "_config_name": "system.core",
     "_config_static": true,
     "_config_translatables": [
         "anonymous",
@@ -27,7 +27,7 @@
     "file_private_path": "",
     "file_public_path": "files",
     "file_temporary_path": "",
-    "file_transliterate_lowercase": 0,
+    "file_transliterate_lowercase": 1,
     "file_transliterate_uploads": 1,
     "file_transliterate_uploads_display_name": 0,
     "filter_fallback_format": "plain_text",
@@ -39,7 +39,7 @@
     "language_count": 1,
     "language_default": "en",
     "log_row_limit": 1000,
-    "log_date_format": "Y-M-d H:i:s",
+    "log_date_format": "dblog_date_format",
     "log_identity": "backdrop",
     "log_facility": "",
     "log_format": "!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message",
@@ -80,6 +80,8 @@
     "user_mail_status_canceled_notify": 0,
     "user_register": "admin_only",
     "user_signatures": 0,
+    "user_password_reject_weak": false,
+    "user_password_strength_threshold": 50,
     "user_password_reset_timeout": 86400,
     "user_pictures": 1,
     "user_picture_path": "pictures",

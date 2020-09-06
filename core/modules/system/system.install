@@ -232,9 +232,22 @@ function system_requirements($phase) {
 
   // Test the contents of the .htaccess files.
   if ($phase == 'runtime' && backdrop_is_apache()) {
+
+    // Check/create .htaccess files for active and staging config directories.
+    foreach (array('active', 'staging') as $type) {
+      $config_directory = config_get_config_directory($type);
+      file_save_htaccess($config_directory);
+
+      $htaccess_files[$config_directory . '/.htaccess'] = array(
+        'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
+        'directory' => $config_directory,
+      );
+    }
+
     // Try to write the .htaccess files first, to prevent false alarms in case
     // (for example) the /tmp directory was wiped.
     file_ensure_htaccess();
+
     $htaccess_files['public://.htaccess'] = array(
       'title' => $t('Public files directory'),
       'directory' => config_get('system.core', 'file_public_path'),
@@ -249,6 +262,7 @@ function system_requirements($phase) {
       'title' => $t('Temporary files directory'),
       'directory' => file_directory_temp(),
     );
+
     foreach ($htaccess_files as $htaccess_file => $info) {
       // Check for the string which was added to the recommended .htaccess file
       // in the latest security update.
@@ -388,7 +402,7 @@ function system_requirements($phase) {
         $latest_schema = end($updates);
         if ($current_schema < $latest_schema) {
           $requirements['update']['severity'] = REQUIREMENT_ERROR;
-          $requirements['update']['value'] = $t('Out of date') . ' (' . l(t('Run database updates'), base_path() . 'core/update.php'). ')';
+          $requirements['update']['value'] = $t('Out of date') . ' (' . l(t('Run database updates'), 'core/update.php'). ')';
           $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">database update script</a> immediately.', array('@update' => base_path() . 'core/update.php'));
           break;
         }

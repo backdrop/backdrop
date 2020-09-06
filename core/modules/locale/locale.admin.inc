@@ -331,7 +331,7 @@ function locale_date_format_form($form, &$form_state, $format) {
   $form['#tree'] = TRUE;
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => t('Each language may format dates and times differently. Languages without a specific format will fallback to the default. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')),
+    '#markup' => t('Each language may format dates and times differently. Languages without a specific format will fallback to the default. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
   );
 
   $form['locales']['default'] = array(

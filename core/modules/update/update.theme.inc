@@ -288,6 +288,8 @@ function theme_update_report($variables) {
       $rows[$project['project_type']] = array();
     }
     $row_key = isset($project['title']) ? backdrop_strtolower($project['title']) : backdrop_strtolower($project['name']);
+    // Insert project status ID in front of key for sorting purposes.
+    $row_key = $project['status'] . $row_key;
     $rows[$project['project_type']][$row_key] = array(
       'class' => array($class),
       'data' => array(

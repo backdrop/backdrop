@@ -704,6 +704,7 @@ function system_modules($form, $form_state = array()) {
       ),
     );
   }
+  ksort($form['modules']);
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -1859,7 +1860,7 @@ function system_file_system_settings() {
     '#type' => 'checkbox',
     '#title' => t('Lowercase transliterated file names'),
     '#default_value' => config_get('system.core', 'file_transliterate_lowercase'),
-    '#description' => t('This is a recommended setting to prevent issues with case-insensitive file systems. It has no effect if transliteration has been disabled.'),
+    '#description' => t('Enable to convert file names to lowercase. This is recommended to prevent issues with case-insensitive file systems.'),
     '#states' => array(
       'invisible' => array(
         'input[name="file_transliterate_uploads"]' => array('checked' => FALSE),
@@ -2440,7 +2441,7 @@ function system_configure_date_formats_form($form, &$form_state, $format = NULL)
     '#type' => 'textfield',
     '#title' => t('Format string'),
     '#maxlength' => 100,
-    '#description' => t('A date format using PHP date and time codes. See the <a href="@url">PHP manual</a> for available options.', array('@url' => 'http://php.net/manual/function.date.php')),
+    '#description' => t('A date format using PHP date and time codes. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
     '#placeholder' => t('e.g. F j Y'),
     '#default_value' => $pattern,
     '#field_suffix' => '<small class="pattern-preview">' . $preview . '</small>',
