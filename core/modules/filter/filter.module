@@ -1351,11 +1351,9 @@ function filter_process_format($element) {
       '#default_value' => $element['#format'],
       '#attributes' => array(
         'class' => array('filter-list'),
-        // This hidden input element contains only the machine name of the text
-        // format (as its value). We need the human-readable name of the text
-        // format, to be shown as a tooltip/summary in the "Formating options"
-        // fieldset; so we pass that as a data-* attribute.
-        'data-available-editor' => array($options[$element['#format']]),
+        // Add the human-readable name of the text format, so it can be used as
+        // the fieldset summary.
+        'data-text-format-name' => array($options[$element['#format']]),
       ),
       '#parents' => array_merge($element['#parents'], array('format')),
     );

@@ -105,31 +105,24 @@ Backdrop.filterEditorDetach = function(field, format, trigger) {
 };
 
 /**
- * Provides summary text for the "Editor details" fieldset, under each CKEditor
- * instance.
+ * Provides summary text for the "Formatting options" fieldset, under each
+ * textarea field with a text editor.
  */
 Backdrop.behaviors.filterFieldsetSummaries = {
   attach: function (context) {
     $(context).find('fieldset.filter-wrapper').backdropSetSummary(function (element) {
-      var $element = $(element);
       var $summary = '';
-      // When multiple text formats are available to the current user, these are
-      // being rendered as a select list. In that case, we grab the
-      // human-readable name of the currently selected format from the
-      // respective option in the select element.
-      var $selected_editor_name = $element.find('select.filterEditors-processed :selected').text();
-      // When the current user has access to only a single text format, there is
-      // no select element being rendered from which to get the human name of
-      // the text format. In that case, we grab the human name from the
-      // data-available-editor HTML attribute, which has been added to the
-      // respective hidden input element instead.
-      var $single_avaliable_editor_name = $element.find('input.filterEditors-processed').attr('data-available-editor');
+      // Look for a select list of text formats.
+      var $select_list = $element.find('select.filterEditors-processed :selected');
+      // Otherwise look for a hidden input element (when the current user has
+      // access to only a single text format).
+      var $input_element = $element.find('input.filterEditors-processed');
 
-      if ($selected_editor_name.length !== 0) {
-        $summary = $selected_editor_name;
+      if ($select_list.length) {
+        $summary = $select_list.text();
       }
-      else if ($single_avaliable_editor_name !== 0) {
-        $summary = $single_avaliable_editor_name;
+      else if ($input_element.length) {
+        $summary = $input_element.attr('data-format-name');
       }
 
       return $summary;
