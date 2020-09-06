@@ -397,6 +397,7 @@ function standard_install() {
     'edit terms in tags',
     'delete terms in tags',
     'administer taxonomy',
+    'administer nodes',
     'search content',
     'use advanced search',
     $filtered_html_permission,

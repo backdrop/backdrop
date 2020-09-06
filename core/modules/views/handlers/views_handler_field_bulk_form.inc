@@ -159,8 +159,9 @@ class views_handler_field_bulk_form extends views_handler_field {
         $entities = entity_load($entity_type, $selected);
         $context = array();
         foreach ($entities as $entity) {
-          actions_execute($action_name, $entity, $context);
-          $count++;
+          if (actions_execute($action_name, $entity, $context) !== FALSE) {
+            $count++;
+          }
         }
 
         // Redirect the user the same as we would for $form_state['redirect'].
