@@ -122,7 +122,7 @@ Backdrop.behaviors.filterFieldsetSummaries = {
         $summary = $select_list.text();
       }
       else if ($input_element.length) {
-        $summary = $input_element.attr('data-format-name');
+        $summary = $input_element.attr('data-text-format-name');
       }
 
       return $summary;
