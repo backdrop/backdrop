@@ -1237,8 +1237,10 @@ function user_update_1019() {
     $user_path_pattern = config_get('path.settings', 'user_pattern');
     if ($user_path_pattern) {
       $admin_user = user_load(1);
-      $admin_user->path['auto'] = TRUE;
-      user_save($admin_user);
+      if ($admin_user->path['auto'] == FALSE) {
+        $admin_user->path['auto'] = TRUE;
+        user_save($admin_user);
+      }
     }
   }
 }
