@@ -111,13 +111,12 @@ Backdrop.filterEditorDetach = function(field, format, trigger) {
 Backdrop.behaviors.filterFieldsetSummaries = {
   attach: function (context) {
     $(context).find('fieldset.filter-wrapper').backdropSetSummary(function (element) {
-      var $element = $(element);
       var $summary = '';
       // Look for a select list of text formats.
-      var $select_list = $element.find('select.filterEditors-processed :selected');
+      var $select_list = $(element).find('select.filterEditors-processed :selected');
       // Otherwise look for a hidden input element (when the current user has
       // access to only a single text format).
-      var $input_element = $element.find('input.filterEditors-processed');
+      var $input_element = $(element).find('input.filterEditors-processed');
 
       if ($select_list.length) {
         $summary = $select_list.text();
