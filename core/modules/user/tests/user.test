@@ -1840,7 +1840,6 @@ class UserCreateTestCase extends BackdropWebTestCase {
 
     // Require a "strong" password, not just the default "fair".
     $config->set('user_password_strength_threshold', 90);
-    $config->set('user_password_min_length_enabled', 0);
     $config->save();
 
     $edit['name'] = $this->randomName();
