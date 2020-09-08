@@ -4,11 +4,12 @@
  * Post a comment in the PR with login details.
  */
 
+$password = file_get_contents(getenv('TUGBOAT_ROOT') . '/.tugboat/password');
 $comment = 'Tugboat has finished building a preview for this pull request!
 
 Website: ' . getenv('TUGBOAT_DEFAULT_SERVICE_URL') . '
 Username: admin
-Password: password';
+Password: ' . $password;
 
 // Post comment to GitHub.
 $ch = curl_init('https://api.github.com/repos/' . getenv('TUGBOAT_GITHUB_OWNER') . '/' . getenv('TUGBOAT_GITHUB_REPO') . '/issues/' . getenv('TUGBOAT_GITHUB_PR') . '/comments');
