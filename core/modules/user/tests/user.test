@@ -1854,13 +1854,13 @@ class UserCreateTestCase extends BackdropWebTestCase {
 
     $edit['name'] = $this->randomName();
     $edit['mail'] = $this->randomName() . '@example.com';
-    $edit['pass'] = 'abcdefghijklmnopqrstuvwxyzab';
+    $edit['pass'] = 'abcdefghijklmnopqrstuvw';
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
     $this->assertRaw(t("Created a new user account"));
 
     // Require a "strong" password, not just the default "fair".
     $config->set('user_password_strength_threshold', 90);
-    $config->set('user_password_strength_modifier', 0.8);
+    $config->set('user_password_strength_modifier', 0.7);
     $config->save();
 
     $edit['name'] = $this->randomName();
