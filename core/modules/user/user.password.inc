@@ -74,7 +74,7 @@ function _user_password_evaluate_strength($password, $username, $email) {
 
   // Adjust the strength so that we hit our desired password length for each
   // threshold. As computers improve, the recommended minimum length increases.
-  $strength = $strength * config_get('system.core', 'user_password_strength_modifier');
+  $strength = $strength * USER_PASSWORD_STRENGTH_MODIFIER;
 
   if (backdrop_strtolower($password) == backdrop_strtolower($username)) {
     $strength = 5;

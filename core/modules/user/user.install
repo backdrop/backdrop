@@ -1230,15 +1230,5 @@ function user_update_1018() {
 }
 
 /**
- * Allow the password strength to be adjusted so that the minimum
- * length can be increased as needed.
- */
-function user_update_1019() {
-  $config = config('system.core');
-  $config->set('user_password_strength_modifier', 0.7);
-  $config->save();
-}
-
-/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  */
