@@ -1225,7 +1225,17 @@ function user_update_1017() {
 function user_update_1018() {
   $config = config('system.core');
   $config->set('user_password_reject_weak', FALSE);
-  $config->set('user_password_strength_threshold', 60);
+  $config->set('user_password_strength_threshold', 50);
+  $config->save();
+}
+
+/**
+ * Allow the password strength to be adjusted so that the minimum
+ * length can be increased as needed.
+ */
+function user_update_1019() {
+  $config = config('system.core');
+  $config->set('user_password_strength_modifier', 0.8);
   $config->save();
 }
 

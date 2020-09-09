@@ -2884,6 +2884,9 @@ function user_form_process_password($element, $form_state = array()) {
         'username' => $username,
         'email' => $email,
       ),
+      'config' => array(
+        'strengthModifier' => $config->get('user_password_strength_modifier'),
+      ),
     );
 
     $element['#attributes']['data-password-strength'] = backdrop_json_encode($strength_settings, FALSE);

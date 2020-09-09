@@ -174,6 +174,10 @@ Backdrop.evaluatePasswordStrength = function (password, settings) {
   // its length. Again, adapted from zxcvbn.
   strength = (Math.log(cardinality) / Math.log(2)) * password.length - password.length;
 
+  // Adjust the strength so that we hit our desired password length for each
+  // threshold. As computers improve, the recommended minimum length increases.
+  strength = strength * config.strengthModifier;
+
   // Check if password is the same as the username or email.
   if (password !== '') {
     password = password.toLowerCase();
@@ -186,13 +190,13 @@ Backdrop.evaluatePasswordStrength = function (password, settings) {
   }
 
   // Based on the strength, work out what text should be shown by the password strength meter.
-  if (strength >= 95) {
+  if (strength >= 90) {
     level = 'strong';
   }
-  else if (strength > 80) {
+  else if (strength > 70) {
     level = 'good';
   }
-  else if (strength > 60) {
+  else if (strength > 50) {
     level = 'fair';
   }
   else if (strength > 0) {
