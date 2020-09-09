@@ -82,7 +82,7 @@
     "user_signatures": 0,
     "user_password_reject_weak": false,
     "user_password_strength_threshold": 50,
-    "user_password_strength_modifier": 0.8,
+    "user_password_strength_modifier": 0.7,
     "user_password_reset_timeout": 86400,
     "user_pictures": 1,
     "user_picture_path": "pictures",

@@ -172,7 +172,7 @@ Backdrop.evaluatePasswordStrength = function (password, settings) {
 
   // Assign strength based on the level of entropy within the password, times
   // its length. Again, adapted from zxcvbn.
-  strength = (Math.log(cardinality) / Math.log(2)) * password.length - password.length;
+  strength = (Math.log(cardinality) / Math.log(2)) * password.length + 1;
 
   // Adjust the strength so that we hit our desired password length for each
   // threshold. As computers improve, the recommended minimum length increases.

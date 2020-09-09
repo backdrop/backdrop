@@ -1235,7 +1235,7 @@ function user_update_1018() {
  */
 function user_update_1019() {
   $config = config('system.core');
-  $config->set('user_password_strength_modifier', 0.8);
+  $config->set('user_password_strength_modifier', 0.7);
   $config->save();
 }
 
