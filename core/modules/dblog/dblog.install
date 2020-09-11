@@ -128,12 +128,12 @@ function dblog_update_1002() {
   // No matching date format found, so create a custom one.
   if ($config->get('log_date_format') == $log_format) {
     system_date_format_save(array(
-      'name' => 'dblog_date_format',
+      'name' => 'dblog',
       'label' => $t('Database log messages date'),
       'pattern' => $log_format,
       'module' => 'dblog',
     ));
-    $config->set('log_date_format', 'dblog_date_format');
+    $config->set('log_date_format', 'dblog');
     $config->save();
   }
 }

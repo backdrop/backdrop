@@ -47,7 +47,7 @@ class DBLogTestCase extends BackdropWebTestCase {
     $row_limit = 1000;
     $this->verifyRowLimit($row_limit);
     // Remove seconds from date so this test is more likely to always pass.
-    $date_format = 'dblog_date_format';
+    $date_format = 'dblog';
     $this->verifyDateFormat($date_format);
     $this->verifyCron($row_limit);
     $this->verifyEvents();
@@ -263,13 +263,13 @@ class DBLogTestCase extends BackdropWebTestCase {
     // Default display includes name and email address; if too long, the email
     // address is replaced by three periods.
     $this->assertLogMessage(t('New user: %name (%email).', array('%name' => $name, '%email' => $user->mail)), 'DBLog event was recorded: [add user]');
-    $this->assertText(format_date($new_user_time, 'dblog_date_format'));
+    $this->assertText(format_date($new_user_time, 'dblog'));
     // Login user.
     $this->assertLogMessage(t('Session opened for %name.', array('%name' => $name)), 'DBLog event was recorded: [login user]');
-    $this->assertText(format_date($login_time, 'dblog_date_format'));
+    $this->assertText(format_date($login_time, 'dblog'));
     // Logout user.
     $this->assertLogMessage(t('Session closed for %name.', array('%name' => $name)), 'DBLog event was recorded: [logout user]');
-    $this->assertText(format_date($logout_time, 'dblog_date_format'));
+    $this->assertText(format_date($logout_time, 'dblog'));
     // Delete user.
     $message = t('Deleted user: %name %email.', array('%name' => $name, '%email' => '<' . $user->mail . '>'));
     $message_text = truncate_utf8(filter_xss($message, array()), 56, TRUE, TRUE);

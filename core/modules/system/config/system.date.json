@@ -22,7 +22,7 @@
             "pattern": "m/d/Y - g:ia",
             "module": "system"
         },
-        "dblog_date_format": {
+        "dblog": {
             "label": "Database log messages date",
             "pattern": "Y-M-d H:i:s",
             "module": "dblog"
