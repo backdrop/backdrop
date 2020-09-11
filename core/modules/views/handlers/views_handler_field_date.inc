@@ -26,11 +26,9 @@ class views_handler_field_date extends views_handler_field {
 
   function options_form(&$form, &$form_state) {
 
-    $date_formats = array();
-    $date_types = system_get_date_formats();
-    foreach ($date_types as $machine_name => $date_type) {
-      $date_formats[$machine_name] = $date_type['label'] . ': ' . format_date(REQUEST_TIME, $machine_name);
-    }
+    require_once(BACKDROP_ROOT . '/core/includes/date.inc');
+    $date_formats = date_format_type_options(FALSE);
+    dpm($date_formats);
 
     $form['date_format'] = array(
       '#type' => 'select',

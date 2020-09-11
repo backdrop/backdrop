@@ -4,6 +4,8 @@
  * Date administration code.
  */
 
+require_once(BACKDROP_ROOT . '/core/includes/date.inc');
+
 /**
  * Settings for the default formatter.
  */

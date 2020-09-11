@@ -151,12 +151,7 @@ function dblog_watchdog(array $log_entry) {
  * Implements hook_form_FORM_ID_alter() for system_logging_settings().
  */
 function dblog_form_system_logging_settings_alter(&$form, $form_state) {
-  // Make sure the Date module file is available so we can call
-  // date_format_type_options().
-  if (!module_exists('date')) {
-    form_load_include($form_state, 'module', 'date');
-  }
-
+  require_once(BACKDROP_ROOT . '/core/includes/date.inc');
   $form['dblog_row_limit'] = array(
     '#type' => 'select',
     '#title' => t('Database log messages to keep'),
@@ -168,7 +163,7 @@ function dblog_form_system_logging_settings_alter(&$form, $form_state) {
     '#type' => 'select',
     '#title' => t('Date format for log messages'),
     '#description' => t('To add or edit options, visit <a href="@date-time-page">Date and time settings</a>.', array('@date-time-page' => url('admin/config/regional/date-time'))),
-    '#options' => date_format_type_options(),
+    '#options' => date_format_type_options(FALSE),
     '#default_value' => config_get('system.core', 'log_date_format'),
     '#required' => TRUE,
     '#wrapper_attributes' => array(

@@ -451,6 +451,44 @@ function date_format_patterns($strict = FALSE) {
 }
 
 /**
+ * Creates an array of date format types for use as an options list.
+ *
+ * @param bool $html
+ *   Whether to include HTML date options or not.
+ *
+ * @return array
+ *   All date format options, keyed by machine name.
+ */
+function date_format_type_options($html = TRUE) {
+  $options = array();
+  $format_types = system_get_date_formats();
+  if (!empty($format_types)) {
+    foreach ($format_types as $type => $type_info) {
+      if (isset($type_info['label'])) {
+        // If html dates are not requested, don't include them.
+        if (!$html && substr($type, 0, 5) == 'html_') {
+          continue;
+        }
+        $options[$type] = $type_info['label'] . ' (' . date_format_date(date_example_date(), $type) . ')';
+      }
+    }
+  }
+  return $options;
+}
+
+/**
+ * Creates an example date that shows a clear difference between month and day,
+ * and between 12 and 24 hours.
+ *
+ * @return Date
+ *   An example date object.
+ */
+function date_example_date() {
+  // use a fixed unambiguous date and time.
+  return new BackdropDateTime('2099-12-31 23:59:00');
+}
+
+/**
  * Constructs an array of granularity options and their labels.
  *
  * @return array
