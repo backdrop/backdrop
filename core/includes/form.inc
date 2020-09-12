@@ -2957,7 +2957,7 @@ function theme_fieldset($variables) {
   $output = '<fieldset' . backdrop_attributes($element['#attributes']) . '>';
   if (!empty($element['#title'])) {
     $legend_attributes['class'] = array('fieldset-legend');
-    if ($element['#title_display'] == 'invisible') {
+    if (isset($element['#title_display']) && $element['#title_display'] == 'invisible') {
       // Show label only to screen readers to avoid disruption in visual flows.
       $legend_attributes['class'][] = 'element-invisible';
     }
