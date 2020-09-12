@@ -26,28 +26,58 @@ else {
  */
 function syslog_form_system_logging_settings_alter(&$form, &$form_state) {
   $config = config('system.core');
-  $help = module_exists('help') ? ' ' . l(t('More information'), 'admin/help/syslog') . '.' : NULL;
   $form['syslog_identity'] = array(
-    '#type'          => 'textfield',
-    '#title'         => t('Syslog identity'),
+    '#type' => 'textfield',
+    '#title' => t('Syslog identity'),
     '#default_value' => $config->get('log_identity'),
-    '#description'   => t('A string that will be prepended to every message logged to Syslog. If you have multiple sites logging to the same Syslog log file, a unique identity per site makes it easy to tell the log entries apart.') . $help,
+    '#description' => t('A string that will be prepended to every message logged to Syslog. If you have multiple sites logging to the same Syslog log file, a unique identity per site makes it easy to tell the log entries apart.'),
   );
   if (defined('LOG_LOCAL0')) {
     $form['syslog_facility'] = array(
-      '#type'          => 'select',
-      '#title'         => t('Syslog facility'),
+      '#type' => 'select',
+      '#title' => t('Syslog facility'),
       '#default_value' => $config->get('log_facility'),
-      '#options'       => syslog_facility_list(),
-      '#description'   => t('Depending on the system configuration, Syslog and other logging tools use this code to identify or filter messages from within the entire system log.') . $help,
+      '#options' => syslog_facility_list(),
+      '#description' => t('Depending on the system configuration, Syslog and other logging tools use this code to identify or filter messages from within the entire system log.'),
      );
   }
-  $form['syslog_format'] = array(
-    '#type'          => 'textarea',
-    '#title'         => t('Syslog format'),
-    '#default_value' => $config->get('log_format'),
-    '#description'   => t('Specify the format of the syslog entry. Available variables are: <dl><dt><code>!base_url</code></dt><dd>Base URL of the site.</dd><dt><code>!timestamp</code></dt><dd>Unix timestamp of the log entry.</dd><dt><code>!type</code></dt><dd>The category to which this message belongs.</dd><dt><code>!ip</code></dt><dd>IP address of the user triggering the message.</dd><dt><code>!request_uri</code></dt><dd>The requested URI.</dd><dt><code>!referer</code></dt><dd>HTTP Referer if available.</dd><dt><code>!uid</code></dt><dd>User ID.</dd><dt><code>!link</code></dt><dd>A link to associate with the message.</dd><dt><code>!message</code></dt><dd>The message to store in the log.</dd></dl>'),
+
+  $syslog_format_variables = array(
+    '!base_url' => t('Base URL of the site.'),
+    '!timestamp' => t('Unix timestamp of the log entry.'),
+    '!type' => t('The category to which this message belongs.'),
+    '!ip' => t('The IP address of the user triggering the message.'),
+    '!uid' => t('The ID of the user triggering the message.'),
+    '!request_uri' => t('The requested URI.'),
+    '!referer' => t('The HTTP referer, if available.'),
+    '!link' => t('A link to associate with the message.'),
+    '!message' => t('The message to store in the log.'),
   );
+
+  foreach($syslog_format_variables as $variable => $variable_description) {
+    $syslog_format_variables_list[] =  '<strong><code>' . $variable . '</code></strong> == ' . $variable_description;
+  }
+
+  $form['syslog_entries'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Syslog entries'),
+    '#title_display' => 'invisible',
+    '#collapsible' => FALSE,
+  );
+  $form['syslog_entries']['syslog_format'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Syslog entry format'),
+    '#default_value' => $config->get('log_format'),
+    '#description' => t('For supported variables, refer to the "Available varaibles" fieldset below.'),
+  );
+  $form['syslog_entries']['variables_legend'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Available variables'),
+    '#description' => theme('item_list', array('items' => $syslog_format_variables_list)),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
   $form['#submit'][] = 'syslog_logging_settings_submit';
 }
 
@@ -102,15 +132,15 @@ function syslog_watchdog(array $log_entry) {
   }
 
   $message = strtr($config->get('log_format'), array(
-    '!base_url'    => $base_url,
-    '!timestamp'   => $log_entry['timestamp'],
-    '!type'        => $log_entry['type'],
-    '!ip'          => $log_entry['ip'],
+    '!base_url' => $base_url,
+    '!timestamp' => $log_entry['timestamp'],
+    '!type' => $log_entry['type'],
+    '!ip' => $log_entry['ip'],
     '!request_uri' => $log_entry['request_uri'],
-    '!referer'     => $log_entry['referer'],
-    '!uid'         => $log_entry['uid'],
-    '!link'        => strip_tags($log_entry['link']),
-    '!message'     => strip_tags(!isset($log_entry['variables']) ? $log_entry['message'] : strtr($log_entry['message'], $log_entry['variables'])),
+    '!referer' => $log_entry['referer'],
+    '!uid' => $log_entry['uid'],
+    '!link' => strip_tags($log_entry['link']),
+    '!message' => strip_tags(!isset($log_entry['variables']) ? $log_entry['message'] : strtr($log_entry['message'], $log_entry['variables'])),
   ));
 
   syslog($log_entry['severity'], $message);
