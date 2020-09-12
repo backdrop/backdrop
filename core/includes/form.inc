@@ -2956,8 +2956,13 @@ function theme_fieldset($variables) {
 
   $output = '<fieldset' . backdrop_attributes($element['#attributes']) . '>';
   if (!empty($element['#title'])) {
+    $legend_attributes['class'] = array('fieldset-legend');
+    if ($element['#title_display'] == 'invisible') {
+      // Show label only to screen readers to avoid disruption in visual flows.
+      $legend_attributes['class'][] = 'element-invisible';
+    }
     // Always wrap fieldset legends in a SPAN for CSS positioning.
-    $output .= '<legend><span class="fieldset-legend">' . $element['#title'] . '</span></legend>';
+    $output .= '<legend><span' . backdrop_attributes($legend_attributes) . '>' . $element['#title'] . '</span></legend>';
   }
   $output .= '<div class="fieldset-wrapper">';
   if (!empty($element['#description'])) {
@@ -3983,13 +3988,19 @@ function form_process_fieldset(&$element, &$form_state) {
     $element['#attributes']['class'] = array();
   }
 
-  // Collapsible fieldsets
+  // Collapsible fieldsets.
   if (!empty($element['#collapsible'])) {
     $element['#attached']['library'][] = array('system', 'backdrop.collapse');
     $element['#attributes']['class'][] = 'collapsible';
     if (!empty($element['#collapsed'])) {
       $element['#attributes']['class'][] = 'collapsed';
     }
+  }
+
+  // If the #title_display property has been set, add a class to the fieldset
+  // based on it.
+  if (!empty($element['#title']) && !empty($element['#title_display'])) {
+    $element['#attributes']['class'][] = 'legend-' . $element['#title_display'];
   }
 
   return $element;
