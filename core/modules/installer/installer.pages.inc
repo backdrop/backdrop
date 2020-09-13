@@ -20,7 +20,7 @@ function installer_browser_page($type) {
   // select to view available releases. Install blocked on select versions page.
   installer_browser_check_zip_loaded();
 
-  // Show link to enable page if recently installed modules were not yet 
+  // Show link to enable page if recently installed modules were not yet
   // enabled.
   $recent_projects = installer_browser_get_installed_projects();
   foreach ($recent_projects as $project) {
@@ -31,7 +31,7 @@ function installer_browser_page($type) {
 
   switch($type) {
     case 'layout':
-      backdrop_set_title(t('Install layouts'));
+      backdrop_set_title(t('Install layout projects'));
       break;
     case 'module':
       backdrop_set_title(t('Install modules'));
@@ -592,7 +592,7 @@ function installer_browser_installation_theme_form($form, &$form_state, $project
       '#submit' => array('installer_browser_installation_theme_finish'),
     );
   }
-  
+
   return $form;
 }
 
@@ -997,7 +997,7 @@ function installer_browser_install_queue_callback($method, $op, $project_name) {
       break;
 
     default:
-      return MENU_NOT_FOUND;    
+      return MENU_NOT_FOUND;
   }
 
   if ($method === 'ajax') {
