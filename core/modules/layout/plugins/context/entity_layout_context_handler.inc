@@ -65,6 +65,8 @@ class EntityLayoutContext extends LayoutContext {
    * Validate handler for the settings form for this context item.
    */
   function formValidate($form, &$form_state) {
+    $form_action = $form_state['clicked_button']['#value'];
+    backdrop_set_title($form_action);
     if (empty($form_state['values']['id'])) {
       form_set_error('id', t('An ID is required.'));
     }
