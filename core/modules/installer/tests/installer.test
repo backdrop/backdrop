@@ -130,22 +130,22 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
 
     // Check that dependencies install page loaded with the recommended
     // dependency selected.
-    $dependencies_page = $this->xpath('//h1[contains(@class, "page-title") and normalize-space(text()) = "Install Dependencies"]');
-    $this->assertTrue($dependencies_page, 'The Install Dependencies page was loaded');
-    $this->assertText($module_two . ' ' . $module_two_data['recommended']);
+    $dependencies_page = $this->xpath('//h1[contains(@class, "page-title") and normalize-space(text()) = "Install dependencies"]');
+    $this->assertTrue($dependencies_page, 'The "Install dependencies" page was loaded.');
+    $this->assertText($module_two_data['title'] . ' ' . $module_two_data['recommended']);
 
     // Test that the test module was really downloaded.
-    $this->assertTrue(file_exists('modules/' . $module_one), $module_one_data['title'] . ' exists in the modules directory');
+    $this->assertTrue(file_exists('modules/' . $module_one), $module_one_data['title'] . ' exists in the modules directory.');
 
     // Test that project two installs.
     $this->backdropPost(NULL, $edit, t('Install'));
 
     // Check that enable page loaded.
     $dependencies_page = $this->xpath('//h1[contains(@class, "page-title") and normalize-space(text()) = "Enable modules"]');
-    $this->assertTrue($dependencies_page, 'The Enable modules page was loaded');
+    $this->assertTrue($dependencies_page, 'The Enable modules page was loaded.');
 
     // Test that the test module was really downloaded.
-    $this->assertTrue(file_exists('modules/' . $module_two), $module_two_data['title'] . ' exists in the modules directory');
+    $this->assertTrue(file_exists('modules/' . $module_two), $module_two_data['title'] . ' exists in the modules directory.');
 
     // Enable both modules.
     $edit = array(
