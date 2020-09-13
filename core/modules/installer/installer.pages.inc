@@ -171,19 +171,19 @@ function installer_browser_installation_page($op) {
 
   switch ($op) {
     case 'select_versions':
-      backdrop_set_title(t("Select versions"));
+      backdrop_set_title(t('Select versions'));
       $content = installer_browser_installation_select_versions_page();
       break;
     case 'install_dependencies':
-      backdrop_set_title(t("Install dependencies"));
+      backdrop_set_title(t('Install dependencies'));
       $content = installer_browser_installation_install_dependencies_page();
       break;
     case 'theme':
-      backdrop_set_title(t("Set themes"));
+      backdrop_set_title(t('Set themes'));
       $content = installer_browser_installation_enable_page('theme');
       break;
     case 'enable':
-      backdrop_set_title(t("Enable modules"));
+      backdrop_set_title(t('Enable modules'));
       $content = installer_browser_installation_enable_page();
       break;
     default:
@@ -244,7 +244,7 @@ function installer_browser_installation_select_versions_form($form, &$form_state
     }
 
     if (!isset($project['title'])) {
-      $project['title'] = $release_data['title'];
+      $project['title'] = isset($release_data['title']) ? $release_data['title'] : $project['name'];
     }
 
     // We use the update module to calculate the recommended version.
