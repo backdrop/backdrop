@@ -175,7 +175,7 @@ function installer_browser_installation_page($op) {
       $content = installer_browser_installation_select_versions_page();
       break;
     case 'install_dependencies':
-      backdrop_set_title(t("Install Dependencies"));
+      backdrop_set_title(t("Install dependencies"));
       $content = installer_browser_installation_install_dependencies_page();
       break;
     case 'theme':
@@ -193,7 +193,7 @@ function installer_browser_installation_page($op) {
 }
 
 /**
- * Menu callback; Task page for the select versions installation task.
+ * Menu callback; Task page for the "Select versions" installation task.
  *
  * Shows a form where the user can select which versions to install for each
  * project.
@@ -241,6 +241,10 @@ function installer_browser_installation_select_versions_form($form, &$form_state
       watchdog('installer', 'Could not fetch releases for project %project.', array('%project' => $project['title']), WATCHDOG_ERROR);
       installer_browser_install_queue_remove($project['name']);
       continue;
+    }
+
+    if (!isset($project['title'])) {
+      $project['title'] = $release_data['title'];
     }
 
     // We use the update module to calculate the recommended version.
@@ -479,7 +483,6 @@ function installer_browser_installation_install_dependencies_page() {
         $missing_projects[$dependency_shortname] = array(
           'name' => $dependency_shortname,
           'type' => 'module',
-          'title' => $dependency_shortname,
           'includes' => array(),
         );
         // Make an assumption that the dependencies will have the same update
