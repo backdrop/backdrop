@@ -169,6 +169,17 @@ function layout_context_return_form($form, &$form_state) {
  * Validation handler for layout_context_add_form().
  */
 function layout_context_add_form_validate($form, &$form_state) {
+  // Make sure the dialog title is set.
+  if (isset($form_state['clicked_button'])) {
+    $form_action = $form_state['clicked_button']['#value'];
+    if ($form_action == t('Save context')) {
+      backdrop_set_title(t('Configure context'));
+    }
+    elseif ($form_action == t('Add context')) {
+      backdrop_set_title(t('Add context'));
+    }
+  }
+
   if (isset($form_state['handler'])) {
     $handler = $form_state['handler'];
     $handler->formValidate($form, $form_state);
