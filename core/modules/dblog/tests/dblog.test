@@ -83,13 +83,13 @@ class DBLogTestCase extends BackdropWebTestCase {
    *   The date format to display in the log.
    */
   private function verifyDateFormat($date_format) {
-    // Change the database log row limit.
+    // Change the log date format.
     $edit = array();
     $edit['dblog_date_format'] = $date_format;
     $this->backdropPost('admin/config/development/logging', $edit, t('Save configuration'));
     $this->assertResponse(200);
 
-    // Check row limit variable.
+    // Check date format config value.
     $current_format = config_get('system.core', 'log_date_format');
     $this->assertTrue($current_format == $date_format, format_string('[Cache] Date format of @current matches date format of @format', array('@current' => $current_format, '@format' => $date_format)));
   }
