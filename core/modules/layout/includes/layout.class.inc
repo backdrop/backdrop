@@ -250,6 +250,11 @@ class Layout {
         $this->{$property_key}[$plugin_type_key] = layout_create_handler($plugin_type, $plugin_data['plugin'], $plugin_data['data']);
       }
     }
+
+    // Ensure contexts is always set to an array.
+    if (is_null($this->contexts)) {
+      $this->contexts = array();
+    }
   }
 
   /**
@@ -769,6 +774,10 @@ class Layout {
    * return LayoutContext[]
    */
   function getContexts() {
+    if (is_null($this->contexts)) {
+      $this->contexts = array();
+    }
+
     // Load objects for stored contexts.
     foreach ($this->contexts as $key => $context) {
       if (!isset($context->position) && !is_object($context->data)) {
@@ -893,4 +902,3 @@ class Layout {
     return TRUE;
   }
 }
-
