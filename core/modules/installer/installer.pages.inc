@@ -645,6 +645,22 @@ function installer_browser_installation_theme_set($form, &$form_state) {
 function installer_browser_installation_enable_form($form, &$form_state, $projects) {
   $modules = system_rebuild_module_data();
 
+  // Go through each of the installed projects and add any contained submodules
+  // that are not hidden to the list of projects.
+  foreach ($projects as $project) {
+    if ($project['type'] == 'module' && isset($modules[$project['name']])) {
+      foreach ($modules as $module) {
+        if (isset($module->info['project']) && isset($modules[$project['name']]->info['project']) && $modules[$project['name']]->info['project'] == $module->info['project'] && $modules[$project['name']]->name != $module->name && !$module->info['hidden']) {
+          $projects[$module->name] = array(
+            'type' => $module->info['type'],
+            'title' => $module->info['name'],
+            'name' => $module->name,
+          );
+        }
+      }
+    }
+  }
+
   $options = array();
   $missing = array();
 
