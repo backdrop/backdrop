@@ -34,19 +34,29 @@ class FieldBlock extends Block {
    *  Sets description text on draggable block in Layout builder.
    */
   function getAdminPreview() {
-    if (!empty($this->settings['admin_description'])) {
-      return filter_xss($this->settings['admin_description']);
+    list($entity_type, $field_name) = explode('-', $this->childDelta);
+    $entity = $this->contexts[$entity_type]->data;
+
+    // Do not render if the entity is not found on this layout.
+    if (empty($entity)) {
+      watchdog('field', 'Attempted to display a field block from a missing entity.', array(), WATCHDOG_WARNING);
+      $preview .= t('The %entity_type which provides this field is missing. Please re-configure the layout contexts or delete this block.', array('%entity_type' => $entity_type));
+      $preview = '<p class="error">' . $preview . '</p>';
     }
+    else {
+      if (!empty($this->settings['admin_description'])) {
+        return filter_xss($this->settings['admin_description']);
+      }
 
-    list($entity_type, $field_name) = explode('-', $this->childDelta, 2);
-    $field = field_info_field($field_name);
-    $formatter = field_info_formatter_types($this->settings['formatter']);
-    $pseudo_instance = $this->createPseudoInstance($this->settings['formatter'], $this->settings['formatter_settings']);
-    $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $pseudo_instance, '_custom');
+      $field = field_info_field($field_name);
+      $formatter = field_info_formatter_types($this->settings['formatter']);
+      $pseudo_instance = $this->createPseudoInstance($this->settings['formatter'], $this->settings['formatter_settings']);
+      $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $pseudo_instance, '_custom');
 
-    $preview = '<p>' . t('Displays values of "%field" field.', array('%field' => $field_name)) . '</p>';
-    $preview .= '<div class="field-formatter-summary">' . $summary . '</div>';
-    $preview .= $this->getAdminConditionsPreview();
+      $preview = '<p>' . t('Displays values of "%field" field.', array('%field' => $field_name)) . '</p>';
+      $preview .= '<div class="field-formatter-summary">' . $summary . '</div>';
+      $preview .= $this->getAdminConditionsPreview();
+    }
     return $preview;
   }
 
@@ -75,6 +85,12 @@ class FieldBlock extends Block {
     // Get a shortcut to the entity.
     list($entity_type, $field_name) = explode('-', $this->childDelta);
     $entity = $this->contexts[$entity_type]->data;
+
+    // Do not render if the entity is not found on this layout.
+    if (empty($entity)) {
+      watchdog('field', 'Attempted to display a field block from a missing entity.', array(), WATCHDOG_WARNING);
+      return NULL;
+    }
 
     // Load the entity type's information for this field.
     $field = field_info_instance($entity_type, $field_name, $entity->bundle());
