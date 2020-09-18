@@ -104,6 +104,23 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  protected function setPrefix($prefix) {
+    // Replace the {} brackets with prefixes for all tables as normal.
+    parent::setPrefix($prefix);
+
+    // Then escape keywords such as "system" with backticks.
+    foreach ($this->prefixSearch as $index => $prefix_search) {
+      if (strpos($prefix_search, '{') !== FALSE) {
+        $this->prefixReplace[$index] = '`' . $this->prefixReplace[$index];
+      }
+      elseif (strpos($prefix_search, '}') !== FALSE) {
+        $this->prefixReplace[$index] = $this->prefixReplace[$index] . '`';
+      }
+    }
+  }
 
   /**
    * {@inheritdoc}
