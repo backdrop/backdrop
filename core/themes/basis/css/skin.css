@@ -421,17 +421,6 @@ fieldset .fieldset-legend {
   text-decoration: underline;
 }
 
-.drop-lounging {
-  /* To make Drop larger/smaller, adjust the width below. */
-  width: 7em;
-}
-
-.drop-lounging:before {
-  /* Uncomment below to remove Drop, or remove markup from block--system--powered-by.tpl.php */
-  /* display: none; */
-  background-image: url("../images/drop-lounging.png");
-}
-
 /**
  * Breadcrumb
  */
