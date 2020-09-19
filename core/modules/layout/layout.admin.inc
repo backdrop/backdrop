@@ -201,7 +201,7 @@ function layout_add_page() {
     );
     $layout = new Layout($config);
   }
-  backdrop_set_title(t('Add layout'));
+  backdrop_set_title(t('Add new layout'));
   return backdrop_get_form('layout_settings_form', $layout);
 }
 
