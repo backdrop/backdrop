@@ -1824,18 +1824,19 @@ function layout_current_user_context() {
     'locked' => TRUE,
   ));
 
-  // Get a complete user entity
+  // Get a complete user entity.
+
   $context_info = layout_get_context_info('user');
+
+  // Check if a load function has been set by some other module. If not, default to user_load().
   if (isset($context_info['load callback']) && function_exists($context_info['load callback'])) {
-    // in case this has been set by other modules
     $load_function = $context_info['load callback'];
   }
   else {
-    // fall back to default
     $load_function = 'user_load';
   }
-  $current_user = $load_function($user->uid);
 
+  $current_user = $load_function($user->uid);
   $current_user_context->setData($current_user);
 
   return $current_user_context;
