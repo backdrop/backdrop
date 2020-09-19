@@ -107,19 +107,13 @@ class DatabaseConnection_mysql extends DatabaseConnection {
   /**
    * {@inheritdoc}
    */
-  protected function setPrefix($prefix) {
-    // Replace the {} brackets with prefixes for all tables as normal.
-    parent::setPrefix($prefix);
-
-    // Then escape keywords such as "system" with backticks.
-    foreach ($this->prefixSearch as $index => $prefix_search) {
-      if (strpos($prefix_search, '{') !== FALSE) {
-        $this->prefixReplace[$index] = '`' . $this->prefixReplace[$index];
-      }
-      elseif (strpos($prefix_search, '}') !== FALSE) {
-        $this->prefixReplace[$index] = $this->prefixReplace[$index] . '`';
-      }
-    }
+  public function prepareQuery($query) {
+    // DatabaseConnection::prepareQuery() is responsible for applying database
+    // table prefixes where curly brackets are around tables. Use this as an
+    // opportunity to apply backticks around table names.
+    $query = str_replace('{', '`{', $query);
+    $query = str_replace('}', '}`', $query);
+    return parent::prepareQuery($query);
   }
 
   /**
