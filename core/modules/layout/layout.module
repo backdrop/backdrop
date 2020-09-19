@@ -1837,7 +1837,6 @@ function layout_current_user_context() {
   }
 
   $current_user = $load_function($user->uid);
-
   $current_user_context->setData($current_user);
 
   return $current_user_context;
