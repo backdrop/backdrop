@@ -865,8 +865,8 @@ class HWLDFWordAccumulator {
   }
 
   public function addWords($words, $tag = '') {
-    if ($tag != $this->_tag) {
-      $this->_flushGroup($tag);
+    if ($tag != $this->tag) {
+      $this->flushGroup($tag);
     }
 
     foreach ($words as $word) {
@@ -876,13 +876,13 @@ class HWLDFWordAccumulator {
       }
 
       if ($word[0] == "\n") {
-        $this->_group .= " ";
-        $this->_flushLine($tag);
+        $this->group .= " ";
+        $this->flushLine($tag);
         $word = substr($word, 1);
       }
 
       assert(!strstr($word, "\n"));
-      $this->_group .= $word;
+      $this->group .= $word;
     }
   }
 
