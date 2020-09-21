@@ -545,6 +545,12 @@ function date_format_type_format($format_type, $langcode = NULL) {
   if (!isset($static[$langcode][$format_type])) {
     $date_format = system_date_format_load($format_type);
 
+    // Fallback to (undeletable) medium format if the requested one does not
+    // exist anymore.
+    if (!$date_format) {
+      $date_format = system_date_format_load('medium');
+    }
+
     // If no langcode has been provided or only LANGUAGE_NONE, use the current
     // language to determine the correct localized format.
     if (!isset($langcode) || $langcode == LANGUAGE_NONE) {
