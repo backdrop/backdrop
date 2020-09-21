@@ -864,6 +864,10 @@ class HWLDFWordAccumulator {
     $this->line = '';
   }
 
+  /**
+   * @param $words
+   * @param $tag string
+   */
   public function addWords($words, $tag = '') {
     if ($tag != $this->tag) {
       $this->flushGroup($tag);
